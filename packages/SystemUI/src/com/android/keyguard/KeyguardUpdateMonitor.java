@@ -1738,6 +1738,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         mFailedAttempts.delete(sCurrentUser);
     }
 
+    public ServiceState getServiceState(int subId) {
+        return mServiceStates.get(subId);
+    }
+
     public int getFailedUnlockAttempts(int userId) {
         return mFailedAttempts.get(userId, 0);
     }
