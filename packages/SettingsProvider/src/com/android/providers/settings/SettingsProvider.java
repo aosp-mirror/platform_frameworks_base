@@ -18,6 +18,7 @@ package com.android.providers.settings;
 
 import android.Manifest;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.AppGlobals;
 import android.app.backup.BackupManager;
@@ -657,7 +658,6 @@ public class SettingsProvider extends ContentProvider {
 
         synchronized (mLock) {
             SettingsProtoDumpUtil.dumpProtoLocked(mSettingsRegistry, proto);
-
         }
 
         proto.flush();
@@ -2284,6 +2284,7 @@ public class SettingsProvider extends ContentProvider {
             return users;
         }
 
+        @Nullable
         public SettingsState getSettingsLocked(int type, int userId) {
             final int key = makeKey(type, userId);
             return peekSettingsStateLocked(key);
@@ -2578,6 +2579,7 @@ public class SettingsProvider extends ContentProvider {
             ssaidSettings.deleteSettingLocked(Integer.toString(uid));
         }
 
+        @Nullable
         private SettingsState peekSettingsStateLocked(int key) {
             SettingsState settingsState = mSettingsStates.get(key);
             if (settingsState != null) {
