@@ -413,7 +413,7 @@ interface IActivityManager {
     String getTagForIntentSender(in IIntentSender sender, in String prefix);
     boolean startUserInBackground(int userid);
     void startLockTaskModeByToken(in IBinder token);
-    void stopLockTaskMode();
+    void stopLockTaskModeByToken(in IBinder token);
     boolean isInLockTaskMode();
     void setTaskDescription(in IBinder token, in ActivityManager.TaskDescription values);
     int startVoiceActivity(in String callingPackage, int callingPid, int callingUid,

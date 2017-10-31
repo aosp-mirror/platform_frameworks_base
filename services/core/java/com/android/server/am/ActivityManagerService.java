@@ -10843,7 +10843,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    private void startLockTaskModeLocked(@Nullable TaskRecord task, boolean isAppPinning) {
+    private void startLockTaskModeLocked(@Nullable TaskRecord task, boolean isSystemCaller) {
         if (DEBUG_LOCKTASK) Slog.w(TAG_LOCKTASK, "startLockTaskModeLocked: " + task);
         if (task == null || task.mLockTaskAuth == LOCK_TASK_AUTH_DONT_LOCK) {
             return;
@@ -10857,13 +10857,16 @@ public class ActivityManagerService extends IActivityManager.Stub
         // When a task is locked, dismiss the pinned stack if it exists
         mStackSupervisor.removeStacksInWindowingModes(WINDOWING_MODE_PINNED);
 
-        // isAppPinning is used to distinguish between locked and pinned mode, as pinned mode
-        // is initiated by system after the pinning request was shown and locked mode is initiated
-        // by an authorized app directly
+        // {@code isSystemCaller} is used to distinguish whether this request is initiated by the
+        // system or a specific app.
+        // * System-initiated requests will only start the pinned mode (screen pinning)
+        // * App-initiated requests
+        //   - will put the device in fully locked mode (LockTask), if the app is whitelisted
+        //   - will start the pinned mode, otherwise
         final int callingUid = Binder.getCallingUid();
         long ident = Binder.clearCallingIdentity();
         try {
-            mLockTaskController.startLockTaskMode(task, isAppPinning, callingUid);
+            mLockTaskController.startLockTaskMode(task, isSystemCaller, callingUid);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
@@ -10876,7 +10879,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (r == null) {
                 return;
             }
-            startLockTaskModeLocked(r.getTask(), false /* not system initiated */);
+            startLockTaskModeLocked(r.getTask(), false /* isSystemCaller */);
         }
     }
 
@@ -10888,7 +10891,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         try {
             synchronized (this) {
                 startLockTaskModeLocked(mStackSupervisor.anyTaskForIdLocked(taskId),
-                        true /* system initiated */);
+                        true /* isSystemCaller */);
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -10896,8 +10899,14 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public void stopLockTaskMode() {
-        stopLockTaskModeInternal(false /* not system initiated */);
+    public void stopLockTaskModeByToken(IBinder token) {
+        synchronized (this) {
+            final ActivityRecord r = ActivityRecord.forTokenLocked(token);
+            if (r == null) {
+                return;
+            }
+            stopLockTaskModeInternal(r.getTask(), false /* isSystemCaller */);
+        }
     }
 
     /**
@@ -10907,15 +10916,15 @@ public class ActivityManagerService extends IActivityManager.Stub
     @Override
     public void stopSystemLockTaskMode() throws RemoteException {
         enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "stopSystemLockTaskMode");
-        stopLockTaskModeInternal(true /* system initiated */);
+        stopLockTaskModeInternal(null, true /* isSystemCaller */);
     }
 
-    private void stopLockTaskModeInternal(boolean isSystemRequest) {
+    private void stopLockTaskModeInternal(@Nullable TaskRecord task, boolean isSystemCaller) {
         final int callingUid = Binder.getCallingUid();
         long ident = Binder.clearCallingIdentity();
         try {
             synchronized (this) {
-                mLockTaskController.stopLockTaskMode(isSystemRequest, callingUid);
+                mLockTaskController.stopLockTaskMode(task, isSystemCaller, callingUid);
             }
             // Launch in-call UI if a call is ongoing. This is necessary to allow stopping the lock
             // task and jumping straight into a call in the case of emergency call back.
