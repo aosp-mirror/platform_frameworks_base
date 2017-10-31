@@ -568,6 +568,35 @@ static jint android_content_AssetManager_addOverlayPath(JNIEnv* env, jobject cla
     return (res) ? (jint)cookie : 0;
 }
 
+static jint android_content_AssetManager_addAssetFd(JNIEnv* env, jobject clazz,
+                                                    jobject fileDescriptor, jstring debugPathName,
+                                                    jboolean appAsLib)
+{
+    ScopedUtfChars debugPathName8(env, debugPathName);
+
+    int fd = jniGetFDFromFileDescriptor(env, fileDescriptor);
+    if (fd < 0) {
+        jniThrowException(env, "java/lang/IllegalArgumentException", "Bad FileDescriptor");
+        return 0;
+    }
+
+    AssetManager* am = assetManagerForJavaObject(env, clazz);
+    if (am == NULL) {
+        return 0;
+    }
+
+    int dupfd = ::dup(fd);
+    if (dupfd < 0) {
+        jniThrowIOException(env, errno);
+        return 0;
+    }
+
+    int32_t cookie;
+    bool res = am->addAssetFd(dupfd, String8(debugPathName8.c_str()), &cookie, appAsLib);
+
+    return (res) ? static_cast<jint>(cookie) : 0;
+}
+
 static jboolean android_content_AssetManager_isUpToDate(JNIEnv* env, jobject clazz)
 {
     AssetManager* am = assetManagerForJavaObject(env, clazz);
@@ -1673,6 +1702,8 @@ static const JNINativeMethod gAssetManagerMethods[] = {
         (void*) android_content_AssetManager_getAssetRemainingLength },
     { "addAssetPathNative", "(Ljava/lang/String;Z)I",
         (void*) android_content_AssetManager_addAssetPath },
+    { "addAssetFdNative", "(Ljava/io/FileDescriptor;Ljava/lang/String;Z)I",
+        (void*) android_content_AssetManager_addAssetFd },
     { "addOverlayPathNative",   "(Ljava/lang/String;)I",
         (void*) android_content_AssetManager_addOverlayPath },
     { "isUpToDate",     "()Z",

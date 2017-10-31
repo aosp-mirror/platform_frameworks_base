@@ -373,7 +373,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             if (mProfileFile != null || mAgent != null) {
                 ParcelFileDescriptor fd = null;
                 if (mProfileFile != null) {
-                    fd = openOutputFileForSystem(mProfileFile);
+                    fd = openFileForSystem(mProfileFile, "w");
                     if (fd == null) {
                         return 1;
                     }
@@ -668,7 +668,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
 
         File file = new File(filename);
         file.delete();
-        ParcelFileDescriptor fd = openOutputFileForSystem(filename);
+        ParcelFileDescriptor fd = openFileForSystem(filename, "w");
         if (fd == null) {
             return -1;
         }
@@ -756,7 +756,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
 
         if (start) {
             profileFile = getNextArgRequired();
-            fd = openOutputFileForSystem(profileFile);
+            fd = openFileForSystem(profileFile, "w");
             if (fd == null) {
                 return -1;
             }
@@ -820,7 +820,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
 
         File file = new File(heapFile);
         file.delete();
-        ParcelFileDescriptor fd = openOutputFileForSystem(heapFile);
+        ParcelFileDescriptor fd = openFileForSystem(heapFile, "w");
         if (fd == null) {
             return -1;
         }

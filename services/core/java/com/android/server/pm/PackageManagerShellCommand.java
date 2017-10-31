@@ -54,6 +54,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.IUserManager;
+import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -78,7 +79,6 @@ import dalvik.system.DexFile;
 import libcore.io.IoUtils;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -102,8 +102,6 @@ import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATIO
 class PackageManagerShellCommand extends ShellCommand {
     /** Path for streaming APK content */
     private static final String STDIN_PATH = "-";
-    /** Whether or not APK content must be streamed from stdin */
-    private static final boolean FORCE_STREAM_INSTALL = true;
 
     final IPackageManager mInterface;
     final private WeakHashMap<String, Resources> mResourceCache =
@@ -255,30 +253,27 @@ class PackageManagerShellCommand extends ShellCommand {
     }
 
     private void setParamsSize(InstallParams params, String inPath) {
-        // If we're forced to stream the package, the params size
-        // must be set via command-line argument. There's nothing
-        // to do here.
-        if (FORCE_STREAM_INSTALL) {
-            return;
-        }
-        final PrintWriter pw = getOutPrintWriter();
         if (params.sessionParams.sizeBytes == -1 && !STDIN_PATH.equals(inPath)) {
-            File file = new File(inPath);
-            if (file.isFile()) {
+            final ParcelFileDescriptor fd = openFileForSystem(inPath, "r");
+            if (fd == null) {
+                getErrPrintWriter().println("Error: Can't open file: " + inPath);
+                throw new IllegalArgumentException("Error: Can't open file: " + inPath);
+            }
+            try {
+                ApkLite baseApk = PackageParser.parseApkLite(fd.getFileDescriptor(), inPath, 0);
+                PackageLite pkgLite = new PackageLite(null, baseApk, null, null, null, null,
+                        null, null);
+                params.sessionParams.setSize(PackageHelper.calculateInstalledSize(
+                        pkgLite, params.sessionParams.abiOverride));
+            } catch (PackageParserException | IOException e) {
+                getErrPrintWriter().println("Error: Failed to parse APK file: " + inPath);
+                throw new IllegalArgumentException(
+                        "Error: Failed to parse APK file: " + inPath, e);
+            } finally {
                 try {
-                    ApkLite baseApk = PackageParser.parseApkLite(file, 0);
-                    PackageLite pkgLite = new PackageLite(null, baseApk, null, null, null, null,
-                            null, null);
-                    params.sessionParams.setSize(PackageHelper.calculateInstalledSize(
-                            pkgLite, params.sessionParams.abiOverride));
-                } catch (PackageParserException | IOException e) {
-                    pw.println("Error: Failed to parse APK file: " + file);
-                    throw new IllegalArgumentException(
-                            "Error: Failed to parse APK file: " + file, e);
+                    fd.close();
+                } catch (IOException e) {
                 }
-            } else {
-                pw.println("Error: Can't open non-file: " + inPath);
-                throw new IllegalArgumentException("Error: Can't open non-file: " + inPath);
             }
         }
     }
@@ -1914,6 +1909,12 @@ class PackageManagerShellCommand extends ShellCommand {
                         throw new IllegalArgumentException("Missing inherit package name");
                     }
                     break;
+                case "--pkg":
+                    sessionParams.appPackageName = getNextArg();
+                    if (sessionParams.appPackageName == null) {
+                        throw new IllegalArgumentException("Missing package name");
+                    }
+                    break;
                 case "-S":
                     final long sizeBytes = Long.parseLong(getNextArg());
                     if (sizeBytes <= 0) {
@@ -1925,6 +1926,7 @@ class PackageManagerShellCommand extends ShellCommand {
                     sessionParams.abiOverride = checkAbiArgument(getNextArg());
                     break;
                 case "--ephemeral":
+                case "--instant":
                 case "--instantapp":
                     sessionParams.setInstallAsInstantApp(true /*isInstantApp*/);
                     break;
@@ -2092,20 +2094,24 @@ class PackageManagerShellCommand extends ShellCommand {
     private int doWriteSplit(int sessionId, String inPath, long sizeBytes, String splitName,
             boolean logSuccess) throws RemoteException {
         final PrintWriter pw = getOutPrintWriter();
-        if (FORCE_STREAM_INSTALL && inPath != null && !STDIN_PATH.equals(inPath)) {
-            pw.println("Error: APK content must be streamed");
-            return 1;
-        }
+        final ParcelFileDescriptor fd;
         if (STDIN_PATH.equals(inPath)) {
-            inPath = null;
+            fd = null;
         } else if (inPath != null) {
-            final File file = new File(inPath);
-            if (file.isFile()) {
-                sizeBytes = file.length();
+            fd = openFileForSystem(inPath, "r");
+            if (fd == null) {
+                return -1;
             }
+            sizeBytes = fd.getStatSize();
+            if (sizeBytes < 0) {
+                getErrPrintWriter().println("Unable to get size of: " + inPath);
+                return -1;
+            }
+        } else {
+            fd = null;
         }
         if (sizeBytes <= 0) {
-            pw.println("Error: must specify a APK size");
+            getErrPrintWriter().println("Error: must specify a APK size");
             return 1;
         }
 
@@ -2118,8 +2124,8 @@ class PackageManagerShellCommand extends ShellCommand {
             session = new PackageInstaller.Session(
                     mInterface.getPackageInstaller().openSession(sessionId));
 
-            if (inPath != null) {
-                in = new FileInputStream(inPath);
+            if (fd != null) {
+                in = new ParcelFileDescriptor.AutoCloseInputStream(fd);
             } else {
                 in = new SizedInputStream(getRawInputStream(), sizeBytes);
             }
@@ -2144,7 +2150,7 @@ class PackageManagerShellCommand extends ShellCommand {
             }
             return 0;
         } catch (IOException e) {
-            pw.println("Error: failed to write; " + e.getMessage());
+            getErrPrintWriter().println("Error: failed to write; " + e.getMessage());
             return 1;
         } finally {
             IoUtils.closeQuietly(out);

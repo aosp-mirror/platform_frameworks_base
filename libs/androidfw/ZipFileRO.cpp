@@ -55,7 +55,9 @@ private:
 
 ZipFileRO::~ZipFileRO() {
     CloseArchive(mHandle);
-    free(mFileName);
+    if (mFileName != NULL) {
+        free(mFileName);
+    }
 }
 
 /*
@@ -75,6 +77,20 @@ ZipFileRO::~ZipFileRO() {
     return new ZipFileRO(handle, strdup(zipFileName));
 }
 
+
+/* static */ ZipFileRO* ZipFileRO::openFd(int fd, const char* debugFileName,
+        bool assume_ownership)
+{
+    ZipArchiveHandle handle;
+    const int32_t error = OpenArchiveFd(fd, debugFileName, &handle, assume_ownership);
+    if (error) {
+        ALOGW("Error opening archive fd %d %s: %s", fd, debugFileName, ErrorCodeString(error));
+        CloseArchive(handle);
+        return NULL;
+    }
+
+    return new ZipFileRO(handle, strdup(debugFileName));
+}
 
 ZipEntryRO ZipFileRO::findEntryByName(const char* entryName) const
 {
@@ -139,7 +155,8 @@ bool ZipFileRO::startIteration(void** cookie, const char* prefix, const char* su
                                    prefix ? &pe : NULL,
                                    suffix ? &se : NULL);
     if (error) {
-        ALOGW("Could not start iteration over %s: %s", mFileName, ErrorCodeString(error));
+        ALOGW("Could not start iteration over %s: %s", mFileName != NULL ? mFileName : "<null>",
+                ErrorCodeString(error));
         delete ze;
         return false;
     }
@@ -154,7 +171,8 @@ ZipEntryRO ZipFileRO::nextEntry(void* cookie)
     int32_t error = Next(ze->cookie, &(ze->entry), &(ze->name));
     if (error) {
         if (error != -1) {
-            ALOGW("Error iteration over %s: %s", mFileName, ErrorCodeString(error));
+            ALOGW("Error iteration over %s: %s", mFileName != NULL ? mFileName : "<null>",
+                    ErrorCodeString(error));
         }
         return NULL;
     }
