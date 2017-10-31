@@ -136,7 +136,16 @@ public class LocaleHelper {
      * @return the localized country name.
      */
     public static String getDisplayCountry(Locale locale, Locale displayLocale) {
-        return ULocale.getDisplayCountry(locale.toLanguageTag(), ULocale.forLocale(displayLocale));
+        final String languageTag = locale.toLanguageTag();
+        final ULocale uDisplayLocale = ULocale.forLocale(displayLocale);
+        final String country = ULocale.getDisplayCountry(languageTag, uDisplayLocale);
+        final String numberingSystem = locale.getUnicodeLocaleType("nu");
+        if (numberingSystem != null) {
+            return String.format("%s (%s)", country,
+                    ULocale.getDisplayKeywordValue(languageTag, "numbers", uDisplayLocale));
+        } else {
+            return country;
+        }
     }
 
     /**

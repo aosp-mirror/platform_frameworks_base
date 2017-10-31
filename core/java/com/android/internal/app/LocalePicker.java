@@ -93,23 +93,12 @@ public class LocalePicker extends ListFragment {
         return context.getResources().getStringArray(R.array.supported_locales);
     }
 
-    public static String[] getPseudoLocales() {
-        return pseudoLocales;
-    }
-
     public static List<LocaleInfo> getAllAssetLocales(Context context, boolean isInDeveloperMode) {
         final Resources resources = context.getResources();
 
         final String[] locales = getSystemAssetLocales();
         List<String> localeList = new ArrayList<String>(locales.length);
         Collections.addAll(localeList, locales);
-
-        // Don't show the pseudolocales unless we're in developer mode. http://b/17190407.
-        if (!isInDeveloperMode) {
-            for (String locale : pseudoLocales) {
-                localeList.remove(locale);
-            }
-        }
 
         Collections.sort(localeList);
         final String[] specialLocaleCodes = resources.getStringArray(R.array.special_locale_codes);
@@ -120,6 +109,10 @@ public class LocalePicker extends ListFragment {
             final Locale l = Locale.forLanguageTag(locale.replace('_', '-'));
             if (l == null || "und".equals(l.getLanguage())
                     || l.getLanguage().isEmpty() || l.getCountry().isEmpty()) {
+                continue;
+            }
+            // Don't show the pseudolocales unless we're in developer mode. http://b/17190407.
+            if (!isInDeveloperMode && LocaleList.isPseudoLocale(l)) {
                 continue;
             }
 
