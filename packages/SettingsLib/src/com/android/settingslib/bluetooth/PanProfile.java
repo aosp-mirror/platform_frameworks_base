@@ -32,7 +32,7 @@ import java.util.List;
 /**
  * PanProfile handles Bluetooth PAN profile (NAP and PANU).
  */
-public final class PanProfile implements LocalBluetoothProfile {
+public class PanProfile implements LocalBluetoothProfile {
     private static final String TAG = "PanProfile";
     private static boolean V = true;
 
