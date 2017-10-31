@@ -91,7 +91,13 @@ public abstract class ShellCommand {
         mCmd = cmd;
         mResultReceiver = resultReceiver;
 
-        if (DEBUG) Slog.d(TAG, "Starting command " + mCmd + " on " + mTarget);
+        if (DEBUG) {
+            RuntimeException here = new RuntimeException("here");
+            here.fillInStackTrace();
+            Slog.d(TAG, "Starting command " + mCmd + " on " + mTarget, here);
+            Slog.d(TAG, "Calling uid=" + Binder.getCallingUid()
+                    + " pid=" + Binder.getCallingPid() + " ShellCallback=" + getShellCallback());
+        }
         int res = -1;
         try {
             res = onCommand(mCmd);
@@ -227,15 +233,19 @@ public abstract class ShellCommand {
      * @hide
      */
     public ParcelFileDescriptor openFileForSystem(String path, String mode) {
+        if (DEBUG) Slog.d(TAG, "openFileForSystem: " + path + " mode=" + mode);
         try {
             ParcelFileDescriptor pfd = getShellCallback().openFile(path,
                     "u:r:system_server:s0", mode);
             if (pfd != null) {
+                if (DEBUG) Slog.d(TAG, "Got file: " + pfd);
                 return pfd;
             }
         } catch (RuntimeException e) {
+            if (DEBUG) Slog.d(TAG, "Failure opening file: " + e.getMessage());
             getErrPrintWriter().println("Failure opening file: " + e.getMessage());
         }
+        if (DEBUG) Slog.d(TAG, "Error: Unable to open file: " + path);
         getErrPrintWriter().println("Error: Unable to open file: " + path);
         getErrPrintWriter().println("Consider using a file under /data/local/tmp/");
         return null;

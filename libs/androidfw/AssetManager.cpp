@@ -148,11 +148,15 @@ AssetManager::~AssetManager() {
     int count = android_atomic_dec(&gCount);
     if (kIsDebug) {
         ALOGI("Destroying AssetManager in %p #%d\n", this, count);
+    } else {
+        ALOGV("Destroying AssetManager in %p #%d\n", this, count);
     }
 
     // Manually close any fd paths for which we have not yet opened their zip (which
     // will take ownership of the fd and close it when done).
     for (size_t i=0; i<mAssetPaths.size(); i++) {
+        ALOGV("Cleaning path #%d: fd=%d, zip=%p", (int)i, mAssetPaths[i].rawFd,
+                mAssetPaths[i].zip.get());
         if (mAssetPaths[i].rawFd >= 0 && mAssetPaths[i].zip == NULL) {
             close(mAssetPaths[i].rawFd);
         }
@@ -202,7 +206,7 @@ bool AssetManager::addAssetPath(
          ap.type == kFileTypeDirectory ? "dir" : "zip", ap.path.string());
 
     ap.isSystemAsset = isSystemAsset;
-    mAssetPaths.add(ap);
+    ssize_t apPos = mAssetPaths.add(ap);
 
     // new paths are always added at the end
     if (cookie) {
@@ -219,7 +223,7 @@ bool AssetManager::addAssetPath(
 #endif
 
     if (mResources != NULL) {
-        appendPathToResTable(ap, appAsLib);
+        appendPathToResTable(mAssetPaths.editItemAt(apPos), appAsLib);
     }
 
     return true;
@@ -304,7 +308,7 @@ bool AssetManager::addAssetFd(
 
     ALOGV("In %p Asset fd %d name: %s", this, fd, ap.path.string());
 
-    mAssetPaths.add(ap);
+    ssize_t apPos = mAssetPaths.add(ap);
 
     // new paths are always added at the end
     if (cookie) {
@@ -312,7 +316,7 @@ bool AssetManager::addAssetFd(
     }
 
     if (mResources != NULL) {
-        appendPathToResTable(ap, appAsLib);
+        appendPathToResTable(mAssetPaths.editItemAt(apPos), appAsLib);
     }
 
     return true;
@@ -442,7 +446,8 @@ Asset* AssetManager::open(const char* fileName, AccessMode mode)
         i--;
         ALOGV("Looking for asset '%s' in '%s'\n",
                 assetName.string(), mAssetPaths.itemAt(i).path.string());
-        Asset* pAsset = openNonAssetInPathLocked(assetName.string(), mode, mAssetPaths.itemAt(i));
+        Asset* pAsset = openNonAssetInPathLocked(assetName.string(), mode,
+                mAssetPaths.editItemAt(i));
         if (pAsset != NULL) {
             return pAsset != kExcludedAsset ? pAsset : NULL;
         }
@@ -471,7 +476,7 @@ Asset* AssetManager::openNonAsset(const char* fileName, AccessMode mode, int32_t
         i--;
         ALOGV("Looking for non-asset '%s' in '%s'\n", fileName, mAssetPaths.itemAt(i).path.string());
         Asset* pAsset = openNonAssetInPathLocked(
-            fileName, mode, mAssetPaths.itemAt(i));
+            fileName, mode, mAssetPaths.editItemAt(i));
         if (pAsset != NULL) {
             if (outCookie != NULL) *outCookie = static_cast<int32_t>(i + 1);
             return pAsset != kExcludedAsset ? pAsset : NULL;
@@ -493,7 +498,7 @@ Asset* AssetManager::openNonAsset(const int32_t cookie, const char* fileName, Ac
         ALOGV("Looking for non-asset '%s' in '%s'\n", fileName,
                 mAssetPaths.itemAt(which).path.string());
         Asset* pAsset = openNonAssetInPathLocked(
-            fileName, mode, mAssetPaths.itemAt(which));
+            fileName, mode, mAssetPaths.editItemAt(which));
         if (pAsset != NULL) {
             return pAsset != kExcludedAsset ? pAsset : NULL;
         }
@@ -527,7 +532,7 @@ FileType AssetManager::getFileType(const char* fileName)
     }
 }
 
-bool AssetManager::appendPathToResTable(const asset_path& ap, bool appAsLib) const {
+bool AssetManager::appendPathToResTable(asset_path& ap, bool appAsLib) const {
     // skip those ap's that correspond to system overlays
     if (ap.isSystemOverlay) {
         return true;
@@ -645,7 +650,8 @@ const ResTable* AssetManager::getResTable(bool required) const
     bool onlyEmptyResources = true;
     const size_t N = mAssetPaths.size();
     for (size_t i=0; i<N; i++) {
-        bool empty = appendPathToResTable(mAssetPaths.itemAt(i));
+        bool empty = appendPathToResTable(
+                const_cast<AssetManager*>(this)->mAssetPaths.editItemAt(i));
         onlyEmptyResources = onlyEmptyResources && empty;
     }
 
@@ -770,7 +776,7 @@ void AssetManager::getLocales(Vector<String8>* locales, bool includeSystemLocale
  * be used.
  */
 Asset* AssetManager::openNonAssetInPathLocked(const char* fileName, AccessMode mode,
-    const asset_path& ap)
+    asset_path& ap)
 {
     Asset* pAsset = NULL;
 
@@ -851,17 +857,19 @@ String8 AssetManager::createPathNameLocked(const asset_path& ap, const char* roo
  * Return a pointer to one of our open Zip archives.  Returns NULL if no
  * matching Zip file exists.
  */
-ZipFileRO* AssetManager::getZipFileLocked(const asset_path& ap)
+ZipFileRO* AssetManager::getZipFileLocked(asset_path& ap)
 {
-    ALOGV("getZipFileLocked() in %p\n", this);
+    ALOGV("getZipFileLocked() in %p: ap=%p zip=%p", this, &ap, ap.zip.get());
 
     if (ap.zip != NULL) {
         return ap.zip->getZip();
     }
 
     if (ap.rawFd < 0) {
+        ALOGV("getZipFileLocked: Creating new zip from path %s", ap.path.string());
         ap.zip = mZipSet.getSharedZip(ap.path);
     } else {
+        ALOGV("getZipFileLocked: Creating new zip from fd %d", ap.rawFd);
         ap.zip = SharedZip::create(ap.rawFd, ap.path);
 
     }
