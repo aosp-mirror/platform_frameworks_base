@@ -671,6 +671,7 @@ java_library {
         "libphonenumber-platform",
         "nist-sip",
         "tagsoup",
+        "rappor",
     ],
     dxflags: ["--core-library"],
 }
