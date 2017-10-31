@@ -17078,22 +17078,39 @@ public class ActivityManagerService extends IActivityManager.Stub
         return stringifySize(size * 1024, 1024);
     }
 
-    // Update this version number in case you change the 'compact' format
+    // Update this version number if you change the 'compact' format.
     private static final int MEMINFO_COMPACT_VERSION = 1;
+
+    private static class MemoryUsageDumpOptions {
+        boolean dumpDetails;
+        boolean dumpFullDetails;
+        boolean dumpDalvik;
+        boolean dumpSummaryOnly;
+        boolean dumpUnreachable;
+        boolean oomOnly;
+        boolean isCompact;
+        boolean localOnly;
+        boolean packages;
+        boolean isCheckinRequest;
+        boolean dumpSwapPss;
+        boolean dumpProto;
+    }
 
     final void dumpApplicationMemoryUsage(FileDescriptor fd,
             PrintWriter pw, String prefix, String[] args, boolean brief, PrintWriter categoryPw) {
-        boolean dumpDetails = false;
-        boolean dumpFullDetails = false;
-        boolean dumpDalvik = false;
-        boolean dumpSummaryOnly = false;
-        boolean dumpUnreachable = false;
-        boolean oomOnly = false;
-        boolean isCompact = false;
-        boolean localOnly = false;
-        boolean packages = false;
-        boolean isCheckinRequest = false;
-        boolean dumpSwapPss = false;
+        MemoryUsageDumpOptions opts = new MemoryUsageDumpOptions();
+        opts.dumpDetails = false;
+        opts.dumpFullDetails = false;
+        opts.dumpDalvik = false;
+        opts.dumpSummaryOnly = false;
+        opts.dumpUnreachable = false;
+        opts.oomOnly = false;
+        opts.isCompact = false;
+        opts.localOnly = false;
+        opts.packages = false;
+        opts.isCheckinRequest = false;
+        opts.dumpSwapPss = false;
+        opts.dumpProto = false;
 
         int opti = 0;
         while (opti < args.length) {
@@ -17103,29 +17120,31 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             opti++;
             if ("-a".equals(opt)) {
-                dumpDetails = true;
-                dumpFullDetails = true;
-                dumpDalvik = true;
-                dumpSwapPss = true;
+                opts.dumpDetails = true;
+                opts.dumpFullDetails = true;
+                opts.dumpDalvik = true;
+                opts.dumpSwapPss = true;
             } else if ("-d".equals(opt)) {
-                dumpDalvik = true;
+                opts.dumpDalvik = true;
             } else if ("-c".equals(opt)) {
-                isCompact = true;
+                opts.isCompact = true;
             } else if ("-s".equals(opt)) {
-                dumpDetails = true;
-                dumpSummaryOnly = true;
+                opts.dumpDetails = true;
+                opts.dumpSummaryOnly = true;
             } else if ("-S".equals(opt)) {
-                dumpSwapPss = true;
+                opts.dumpSwapPss = true;
             } else if ("--unreachable".equals(opt)) {
-                dumpUnreachable = true;
+                opts.dumpUnreachable = true;
             } else if ("--oom".equals(opt)) {
-                oomOnly = true;
+                opts.oomOnly = true;
             } else if ("--local".equals(opt)) {
-                localOnly = true;
+                opts.localOnly = true;
             } else if ("--package".equals(opt)) {
-                packages = true;
+                opts.packages = true;
             } else if ("--checkin".equals(opt)) {
-                isCheckinRequest = true;
+                opts.isCheckinRequest = true;
+            } else if ("--proto".equals(opt)) {
+                opts.dumpProto = true;
 
             } else if ("-h".equals(opt)) {
                 pw.println("meminfo dump options: [-a] [-d] [-c] [-s] [--oom] [process]");
@@ -17139,6 +17158,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 pw.println("  --package: interpret process arg as package, dumping all");
                 pw.println("             processes that have loaded that package.");
                 pw.println("  --checkin: dump data for a checkin");
+                pw.println("  --proto: dump data to proto");
                 pw.println("If [process] is specified it can be the name or ");
                 pw.println("pid of a specific process to dump.");
                 return;
@@ -17147,21 +17167,33 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
 
+        String[] innerArgs = new String[args.length-opti];
+        System.arraycopy(args, opti, innerArgs, 0, args.length-opti);
+
+        ArrayList<ProcessRecord> procs = collectProcesses(pw, opti, opts.packages, args);
+        if (opts.dumpProto) {
+            dumpApplicationMemoryUsage(fd, pw, opts, innerArgs, brief, procs);
+        } else {
+            dumpApplicationMemoryUsage(fd, pw, prefix, opts, innerArgs, brief, procs, categoryPw);
+        }
+    }
+
+    final void dumpApplicationMemoryUsage(FileDescriptor fd, PrintWriter pw, String prefix,
+            MemoryUsageDumpOptions opts, String[] innerArgs, boolean brief,
+            ArrayList<ProcessRecord> procs, PrintWriter categoryPw) {
         long uptime = SystemClock.uptimeMillis();
         long realtime = SystemClock.elapsedRealtime();
         final long[] tmpLong = new long[1];
 
-        ArrayList<ProcessRecord> procs = collectProcesses(pw, opti, packages, args);
         if (procs == null) {
             // No Java processes.  Maybe they want to print a native process.
-            if (args != null && args.length > opti
-                    && args[opti].charAt(0) != '-') {
+            if (innerArgs.length > 0 && innerArgs[0].charAt(0) != '-') {
                 ArrayList<ProcessCpuTracker.Stats> nativeProcs
                         = new ArrayList<ProcessCpuTracker.Stats>();
                 updateCpuStatsNow();
                 int findPid = -1;
                 try {
-                    findPid = Integer.parseInt(args[opti]);
+                    findPid = Integer.parseInt(innerArgs[0]);
                 } catch (NumberFormatException e) {
                 }
                 synchronized (mProcessCpuTracker) {
@@ -17169,51 +17201,48 @@ public class ActivityManagerService extends IActivityManager.Stub
                     for (int i=0; i<N; i++) {
                         ProcessCpuTracker.Stats st = mProcessCpuTracker.getStats(i);
                         if (st.pid == findPid || (st.baseName != null
-                                && st.baseName.equals(args[opti]))) {
+                                && st.baseName.equals(innerArgs[0]))) {
                             nativeProcs.add(st);
                         }
                     }
                 }
                 if (nativeProcs.size() > 0) {
-                    dumpApplicationMemoryUsageHeader(pw, uptime, realtime, isCheckinRequest,
-                            isCompact);
+                    dumpApplicationMemoryUsageHeader(pw, uptime, realtime, opts.isCheckinRequest,
+                            opts.isCompact);
                     Debug.MemoryInfo mi = null;
                     for (int i = nativeProcs.size() - 1 ; i >= 0 ; i--) {
                         final ProcessCpuTracker.Stats r = nativeProcs.get(i);
                         final int pid = r.pid;
-                        if (!isCheckinRequest && dumpDetails) {
+                        if (!opts.isCheckinRequest && opts.dumpDetails) {
                             pw.println("\n** MEMINFO in pid " + pid + " [" + r.baseName + "] **");
                         }
                         if (mi == null) {
                             mi = new Debug.MemoryInfo();
                         }
-                        if (dumpDetails || (!brief && !oomOnly)) {
+                        if (opts.dumpDetails || (!brief && !opts.oomOnly)) {
                             Debug.getMemoryInfo(pid, mi);
                         } else {
                             mi.dalvikPss = (int)Debug.getPss(pid, tmpLong, null);
                             mi.dalvikPrivateDirty = (int)tmpLong[0];
                         }
-                        ActivityThread.dumpMemInfoTable(pw, mi, isCheckinRequest, dumpFullDetails,
-                                dumpDalvik, dumpSummaryOnly, pid, r.baseName, 0, 0, 0, 0, 0, 0);
-                        if (isCheckinRequest) {
+                        ActivityThread.dumpMemInfoTable(pw, mi, opts.isCheckinRequest, opts.dumpFullDetails,
+                                opts.dumpDalvik, opts.dumpSummaryOnly, pid, r.baseName, 0, 0, 0, 0, 0, 0);
+                        if (opts.isCheckinRequest) {
                             pw.println();
                         }
                     }
                     return;
                 }
             }
-            pw.println("No process found for: " + args[opti]);
+            pw.println("No process found for: " + innerArgs[0]);
             return;
         }
 
-        if (!brief && !oomOnly && (procs.size() == 1 || isCheckinRequest || packages)) {
-            dumpDetails = true;
+        if (!brief && !opts.oomOnly && (procs.size() == 1 || opts.isCheckinRequest || opts.packages)) {
+            opts.dumpDetails = true;
         }
 
-        dumpApplicationMemoryUsageHeader(pw, uptime, realtime, isCheckinRequest, isCompact);
-
-        String[] innerArgs = new String[args.length-opti];
-        System.arraycopy(args, opti, innerArgs, 0, args.length-opti);
+        dumpApplicationMemoryUsageHeader(pw, uptime, realtime, opts.isCheckinRequest, opts.isCompact);
 
         ArrayList<MemItem> procMems = new ArrayList<MemItem>();
         final SparseArray<MemItem> procMemsMap = new SparseArray<MemItem>();
@@ -17221,9 +17250,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         long nativeSwapPss = 0;
         long dalvikPss = 0;
         long dalvikSwapPss = 0;
-        long[] dalvikSubitemPss = dumpDalvik ? new long[Debug.MemoryInfo.NUM_DVK_STATS] :
+        long[] dalvikSubitemPss = opts.dumpDalvik ? new long[Debug.MemoryInfo.NUM_DVK_STATS] :
                 EmptyArray.LONG;
-        long[] dalvikSubitemSwapPss = dumpDalvik ? new long[Debug.MemoryInfo.NUM_DVK_STATS] :
+        long[] dalvikSubitemSwapPss = opts.dumpDalvik ? new long[Debug.MemoryInfo.NUM_DVK_STATS] :
                 EmptyArray.LONG;
         long otherPss = 0;
         long otherSwapPss = 0;
@@ -17255,24 +17284,24 @@ public class ActivityManagerService extends IActivityManager.Stub
                 hasActivities = r.activities.size() > 0;
             }
             if (thread != null) {
-                if (!isCheckinRequest && dumpDetails) {
+                if (!opts.isCheckinRequest && opts.dumpDetails) {
                     pw.println("\n** MEMINFO in pid " + pid + " [" + r.processName + "] **");
                 }
                 if (mi == null) {
                     mi = new Debug.MemoryInfo();
                 }
-                if (dumpDetails || (!brief && !oomOnly)) {
+                if (opts.dumpDetails || (!brief && !opts.oomOnly)) {
                     Debug.getMemoryInfo(pid, mi);
                     hasSwapPss = mi.hasSwappedOutPss;
                 } else {
                     mi.dalvikPss = (int)Debug.getPss(pid, tmpLong, null);
                     mi.dalvikPrivateDirty = (int)tmpLong[0];
                 }
-                if (dumpDetails) {
-                    if (localOnly) {
-                        ActivityThread.dumpMemInfoTable(pw, mi, isCheckinRequest, dumpFullDetails,
-                                dumpDalvik, dumpSummaryOnly, pid, r.processName, 0, 0, 0, 0, 0, 0);
-                        if (isCheckinRequest) {
+                if (opts.dumpDetails) {
+                    if (opts.localOnly) {
+                        ActivityThread.dumpMemInfoTable(pw, mi, opts.isCheckinRequest, opts.dumpFullDetails,
+                                opts.dumpDalvik, opts.dumpSummaryOnly, pid, r.processName, 0, 0, 0, 0, 0, 0);
+                        if (opts.isCheckinRequest) {
                             pw.println();
                         }
                     } else {
@@ -17281,19 +17310,19 @@ public class ActivityManagerService extends IActivityManager.Stub
                             TransferPipe tp = new TransferPipe();
                             try {
                                 thread.dumpMemInfo(tp.getWriteFd(),
-                                        mi, isCheckinRequest, dumpFullDetails,
-                                        dumpDalvik, dumpSummaryOnly, dumpUnreachable, innerArgs);
+                                        mi, opts.isCheckinRequest, opts.dumpFullDetails,
+                                        opts.dumpDalvik, opts.dumpSummaryOnly, opts.dumpUnreachable, innerArgs);
                                 tp.go(fd);
                             } finally {
                                 tp.kill();
                             }
                         } catch (IOException e) {
-                            if (!isCheckinRequest) {
+                            if (!opts.isCheckinRequest) {
                                 pw.println("Got IoException! " + e);
                                 pw.flush();
                             }
                         } catch (RemoteException e) {
-                            if (!isCheckinRequest) {
+                            if (!opts.isCheckinRequest) {
                                 pw.println("Got RemoteException! " + e);
                                 pw.flush();
                             }
@@ -17312,7 +17341,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                 }
 
-                if (!isCheckinRequest && mi != null) {
+                if (!opts.isCheckinRequest && mi != null) {
                     totalPss += myTotalPss;
                     totalSwapPss += myTotalSwapPss;
                     MemItem pssItem = new MemItem(r.processName + " (pid " + pid +
@@ -17365,7 +17394,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         long nativeProcTotalPss = 0;
 
-        if (!isCheckinRequest && procs.size() > 1 && !packages) {
+        if (!opts.isCheckinRequest && procs.size() > 1 && !opts.packages) {
             // If we are showing aggregations, also look for native processes to
             // include so that our aggregations are more accurate.
             updateCpuStatsNow();
@@ -17378,7 +17407,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         if (mi == null) {
                             mi = new Debug.MemoryInfo();
                         }
-                        if (!brief && !oomOnly) {
+                        if (!brief && !opts.oomOnly) {
                             Debug.getMemoryInfo(st.pid, mi);
                         } else {
                             mi.nativePss = (int)Debug.getPss(st.pid, tmpLong, null);
@@ -17465,7 +17494,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             ArrayList<MemItem> oomMems = new ArrayList<MemItem>();
             for (int j=0; j<oomPss.length; j++) {
                 if (oomPss[j] != 0) {
-                    String label = isCompact ? DUMP_MEM_OOM_COMPACT_LABEL[j]
+                    String label = opts.isCompact ? DUMP_MEM_OOM_COMPACT_LABEL[j]
                             : DUMP_MEM_OOM_LABEL[j];
                     MemItem item = new MemItem(label, label, oomPss[j], oomSwapPss[j],
                             DUMP_MEM_OOM_ADJ[j]);
@@ -17474,26 +17503,26 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             }
 
-            dumpSwapPss = dumpSwapPss && hasSwapPss && totalSwapPss != 0;
-            if (!brief && !oomOnly && !isCompact) {
+            opts.dumpSwapPss = opts.dumpSwapPss && hasSwapPss && totalSwapPss != 0;
+            if (!brief && !opts.oomOnly && !opts.isCompact) {
                 pw.println();
                 pw.println("Total PSS by process:");
-                dumpMemItems(pw, "  ", "proc", procMems, true, isCompact, dumpSwapPss);
+                dumpMemItems(pw, "  ", "proc", procMems, true, opts.isCompact, opts.dumpSwapPss);
                 pw.println();
             }
-            if (!isCompact) {
+            if (!opts.isCompact) {
                 pw.println("Total PSS by OOM adjustment:");
             }
-            dumpMemItems(pw, "  ", "oom", oomMems, false, isCompact, dumpSwapPss);
-            if (!brief && !oomOnly) {
+            dumpMemItems(pw, "  ", "oom", oomMems, false, opts.isCompact, opts.dumpSwapPss);
+            if (!brief && !opts.oomOnly) {
                 PrintWriter out = categoryPw != null ? categoryPw : pw;
-                if (!isCompact) {
+                if (!opts.isCompact) {
                     out.println();
                     out.println("Total PSS by category:");
                 }
-                dumpMemItems(out, "  ", "cat", catMems, true, isCompact, dumpSwapPss);
+                dumpMemItems(out, "  ", "cat", catMems, true, opts.isCompact, opts.dumpSwapPss);
             }
-            if (!isCompact) {
+            if (!opts.isCompact) {
                 pw.println();
             }
             MemInfoReader memInfo = new MemInfoReader();
@@ -17511,7 +17540,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             }
             if (!brief) {
-                if (!isCompact) {
+                if (!opts.isCompact) {
                     pw.print("Total RAM: "); pw.print(stringifyKBSize(memInfo.getTotalSizeKb()));
                     pw.print(" (status ");
                     switch (mLastMemoryLevel) {
@@ -17552,7 +17581,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             long lostRAM = memInfo.getTotalSizeKb() - (totalPss - totalSwapPss)
                     - memInfo.getFreeSizeKb() - memInfo.getCachedSizeKb()
                     - memInfo.getKernelUsedSizeKb() - memInfo.getZramTotalSizeKb();
-            if (!isCompact) {
+            if (!opts.isCompact) {
                 pw.print(" Used RAM: "); pw.print(stringifyKBSize(totalPss - cachedPss
                         + memInfo.getKernelUsedSizeKb())); pw.print(" (");
                 pw.print(stringifyKBSize(totalPss - cachedPss)); pw.print(" used pss + ");
@@ -17563,7 +17592,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             if (!brief) {
                 if (memInfo.getZramTotalSizeKb() != 0) {
-                    if (!isCompact) {
+                    if (!opts.isCompact) {
                         pw.print("     ZRAM: ");
                         pw.print(stringifyKBSize(memInfo.getZramTotalSizeKb()));
                                 pw.print(" physical used for ");
@@ -17579,7 +17608,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                 }
                 final long[] ksm = getKsmInfo();
-                if (!isCompact) {
+                if (!opts.isCompact) {
                     if (ksm[KSM_SHARING] != 0 || ksm[KSM_SHARED] != 0 || ksm[KSM_UNSHARED] != 0
                             || ksm[KSM_VOLATILE] != 0) {
                         pw.print("      KSM: "); pw.print(stringifyKBSize(ksm[KSM_SHARING]));
@@ -17626,6 +17655,17 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             }
         }
+    }
+
+    final void dumpApplicationMemoryUsage(FileDescriptor fd, PrintWriter pw,
+            MemoryUsageDumpOptions opts, String[] innerArgs, boolean brief,
+            ArrayList<ProcessRecord> procs) {
+        ProtoOutputStream proto = new ProtoOutputStream(fd);
+
+        // TODO: implement
+        pw.println("Not yet implemented. Have a cookie instead! :]");
+
+        proto.flush();
     }
 
     private void appendBasicMemEntry(StringBuilder sb, int oomAdj, int procState, long pss,
