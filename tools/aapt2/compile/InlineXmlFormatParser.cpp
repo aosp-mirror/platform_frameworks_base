@@ -146,6 +146,10 @@ bool InlineXmlFormatParser::Consume(IAaptContext* context, xml::XmlResource* doc
       } else {
         new_doc->root.reset(static_cast<xml::Element*>(child.release()));
         new_doc->root->parent = nullptr;
+        // Copy down the namespace declarations
+        new_doc->root->namespace_decls = doc->root->namespace_decls;
+        // Recurse for nested inlines
+        Consume(context, new_doc.get());
       }
     }
 
