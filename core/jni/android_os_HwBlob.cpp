@@ -60,12 +60,12 @@ sp<JHwBlob> JHwBlob::SetNativeContext(
         JNIEnv *env, jobject thiz, const sp<JHwBlob> &context) {
     sp<JHwBlob> old = (JHwBlob *)env->GetLongField(thiz, gFields.contextID);
 
-    if (context != NULL) {
-        context->incStrong(NULL /* id */);
+    if (context != nullptr) {
+        context->incStrong(nullptr /* id */);
     }
 
-    if (old != NULL) {
-        old->decStrong(NULL /* id */);
+    if (old != nullptr) {
+        old->decStrong(nullptr /* id */);
     }
 
     env->SetLongField(thiz, gFields.contextID, (long)context.get());
@@ -147,6 +147,10 @@ status_t JHwBlob::getString(size_t offset, const hidl_string **s) const {
 }
 
 const void *JHwBlob::data() const {
+    return mBuffer;
+}
+
+void *JHwBlob::data() {
     return mBuffer;
 }
 
@@ -242,8 +246,8 @@ using namespace android;
 static void releaseNativeContext(void *nativeContext) {
     sp<JHwBlob> parcel = (JHwBlob *)nativeContext;
 
-    if (parcel != NULL) {
-        parcel->decStrong(NULL /* id */);
+    if (parcel != nullptr) {
+        parcel->decStrong(nullptr /* id */);
     }
 }
 
@@ -313,6 +317,82 @@ static jstring JHwBlob_native_getString(
     return env->NewStringUTF(s->c_str());
 }
 
+#define DEFINE_BLOB_ARRAY_COPIER(Suffix,Type,NewType)                          \
+static void JHwBlob_native_copyTo ## Suffix ## Array(                          \
+        JNIEnv *env,                                                           \
+        jobject thiz,                                                          \
+        jlong offset,                                                          \
+        Type ## Array array,                                                   \
+        jint size) {                                                           \
+    if (array == nullptr) {                                                    \
+        jniThrowException(env, "java/lang/NullPointerException", nullptr);     \
+        return;                                                                \
+    }                                                                          \
+                                                                               \
+    if (env->GetArrayLength(array) < size) {                                   \
+        signalExceptionForError(env, BAD_VALUE);                               \
+        return;                                                                \
+    }                                                                          \
+                                                                               \
+    sp<JHwBlob> blob = JHwBlob::GetNativeContext(env, thiz);                   \
+                                                                               \
+    if ((offset + size * sizeof(Type)) > blob->size()) {                       \
+        signalExceptionForError(env, -ERANGE);                                 \
+        return;                                                                \
+    }                                                                          \
+                                                                               \
+    env->Set ## NewType ## ArrayRegion(                                        \
+            array,                                                             \
+            0 /* start */,                                                     \
+            size,                                                              \
+            reinterpret_cast<const Type *>(                                    \
+                static_cast<const uint8_t *>(blob->data()) + offset));         \
+}
+
+static void JHwBlob_native_copyToBoolArray(
+        JNIEnv *env,
+        jobject thiz,
+        jlong offset,
+        jbooleanArray array,
+        jint size) {
+    if (array == nullptr) {
+        jniThrowException(env, "java/lang/NullPointerException", nullptr);
+        return;
+    }
+
+    if (env->GetArrayLength(array) < size) {
+        signalExceptionForError(env, BAD_VALUE);
+        return;
+    }
+
+    sp<JHwBlob> blob = JHwBlob::GetNativeContext(env, thiz);
+
+    if ((offset + size * sizeof(bool)) > blob->size()) {
+        signalExceptionForError(env, -ERANGE);
+        return;
+    }
+
+    const bool *src =
+        reinterpret_cast<const bool *>(
+                static_cast<const uint8_t *>(blob->data()) + offset);
+
+    jboolean *dst = env->GetBooleanArrayElements(array, nullptr /* isCopy */);
+
+    for (jint i = 0; i < size; ++i) {
+        dst[i] = src[i];
+    }
+
+    env->ReleaseBooleanArrayElements(array, dst, 0 /* mode */);
+    dst = nullptr;
+}
+
+DEFINE_BLOB_ARRAY_COPIER(Int8,jbyte,Byte)
+DEFINE_BLOB_ARRAY_COPIER(Int16,jshort,Short)
+DEFINE_BLOB_ARRAY_COPIER(Int32,jint,Int)
+DEFINE_BLOB_ARRAY_COPIER(Int64,jlong,Long)
+DEFINE_BLOB_ARRAY_COPIER(Float,jfloat,Float)
+DEFINE_BLOB_ARRAY_COPIER(Double,jdouble,Double)
+
 #define DEFINE_BLOB_PUTTER(Suffix,Type)                                        \
 static void JHwBlob_native_put ## Suffix(                                      \
         JNIEnv *env, jobject thiz, jlong offset, Type x) {                     \
@@ -375,6 +455,72 @@ static void JHwBlob_native_putString(
     blob->putBlob(offset + hidl_string::kOffsetOfBuffer, subBlob);
 }
 
+#define DEFINE_BLOB_ARRAY_PUTTER(Suffix,Type,NewType)                          \
+static void JHwBlob_native_put ## Suffix ## Array(                             \
+        JNIEnv *env, jobject thiz, jlong offset, Type ## Array array) {        \
+                                                                               \
+    if (array == nullptr) {                                                    \
+        jniThrowException(env, "java/lang/NullPointerException", nullptr);     \
+        return;                                                                \
+    }                                                                          \
+                                                                               \
+    sp<JHwBlob> blob = JHwBlob::GetNativeContext(env, thiz);                   \
+                                                                               \
+    jsize len = env->GetArrayLength(array);                                    \
+                                                                               \
+    Type *src =                                                                \
+        env->Get ## NewType ## ArrayElements(array, nullptr /* isCopy */);     \
+                                                                               \
+    status_t err = blob->write(offset, src, len * sizeof(Type));               \
+                                                                               \
+    env->Release ## NewType ## ArrayElements(array, src, 0 /* mode */);        \
+    src = nullptr;                                                             \
+                                                                               \
+    if (err != OK) {                                                           \
+        signalExceptionForError(env, err);                                     \
+    }                                                                          \
+}
+
+DEFINE_BLOB_ARRAY_PUTTER(Int8,jbyte,Byte)
+DEFINE_BLOB_ARRAY_PUTTER(Int16,jshort,Short)
+DEFINE_BLOB_ARRAY_PUTTER(Int32,jint,Int)
+DEFINE_BLOB_ARRAY_PUTTER(Int64,jlong,Long)
+DEFINE_BLOB_ARRAY_PUTTER(Float,jfloat,Float)
+DEFINE_BLOB_ARRAY_PUTTER(Double,jdouble,Double)
+
+static void JHwBlob_native_putBoolArray(
+        JNIEnv *env, jobject thiz, jlong offset, jbooleanArray array) {
+
+    if (array == nullptr) {
+        jniThrowException(env, "java/lang/NullPointerException", nullptr);
+        return;
+    }
+
+    sp<JHwBlob> blob = JHwBlob::GetNativeContext(env, thiz);
+
+    jsize len = env->GetArrayLength(array);
+
+    if ((offset + len * sizeof(bool)) > blob->size()) {
+        signalExceptionForError(env, -ERANGE);
+        return;
+    }
+
+    const jboolean *src =
+        env->GetBooleanArrayElements(array, nullptr /* isCopy */);
+
+    bool *dst = reinterpret_cast<bool *>(
+            static_cast<uint8_t *>(blob->data()) + offset);
+
+    for (jsize i = 0; i < len; ++i) {
+        dst[i] = src[i];
+    }
+
+    env->ReleaseBooleanArrayElements(
+            array, const_cast<jboolean *>(src), 0 /* mode */);
+
+    src = nullptr;
+}
+
 static void JHwBlob_native_putBlob(
         JNIEnv *env, jobject thiz, jlong offset, jobject blobObj) {
     if (blobObj == nullptr) {
@@ -413,6 +559,14 @@ static JNINativeMethod gMethods[] = {
     { "getDouble", "(J)D", (void *)JHwBlob_native_getDouble },
     { "getString", "(J)Ljava/lang/String;", (void *)JHwBlob_native_getString },
 
+    { "copyToBoolArray", "(J[ZI)V", (void *)JHwBlob_native_copyToBoolArray },
+    { "copyToInt8Array", "(J[BI)V", (void *)JHwBlob_native_copyToInt8Array },
+    { "copyToInt16Array", "(J[SI)V", (void *)JHwBlob_native_copyToInt16Array },
+    { "copyToInt32Array", "(J[II)V", (void *)JHwBlob_native_copyToInt32Array },
+    { "copyToInt64Array", "(J[JI)V", (void *)JHwBlob_native_copyToInt64Array },
+    { "copyToFloatArray", "(J[FI)V", (void *)JHwBlob_native_copyToFloatArray },
+    { "copyToDoubleArray", "(J[DI)V", (void *)JHwBlob_native_copyToDoubleArray },
+
     { "putBool", "(JZ)V", (void *)JHwBlob_native_putBool },
     { "putInt8", "(JB)V", (void *)JHwBlob_native_putInt8 },
     { "putInt16", "(JS)V", (void *)JHwBlob_native_putInt16 },
@@ -421,6 +575,14 @@ static JNINativeMethod gMethods[] = {
     { "putFloat", "(JF)V", (void *)JHwBlob_native_putFloat },
     { "putDouble", "(JD)V", (void *)JHwBlob_native_putDouble },
     { "putString", "(JLjava/lang/String;)V", (void *)JHwBlob_native_putString },
+
+    { "putBoolArray", "(J[Z)V", (void *)JHwBlob_native_putBoolArray },
+    { "putInt8Array", "(J[B)V", (void *)JHwBlob_native_putInt8Array },
+    { "putInt16Array", "(J[S)V", (void *)JHwBlob_native_putInt16Array },
+    { "putInt32Array", "(J[I)V", (void *)JHwBlob_native_putInt32Array },
+    { "putInt64Array", "(J[J)V", (void *)JHwBlob_native_putInt64Array },
+    { "putFloatArray", "(J[F)V", (void *)JHwBlob_native_putFloatArray },
+    { "putDoubleArray", "(J[D)V", (void *)JHwBlob_native_putDoubleArray },
 
     { "putBlob", "(JL" PACKAGE_PATH "/HwBlob;)V",
         (void *)JHwBlob_native_putBlob },
