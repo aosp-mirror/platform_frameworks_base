@@ -821,7 +821,7 @@ public class Location implements Parcelable {
      * considered 1 standard deviation.
      *
      * <p>For example, if {@link #getAltitude()} returns 150, and
-     * {@link #getVerticalAccuracyMeters()} ()} returns 20 then there is a 68% probability
+     * {@link #getVerticalAccuracyMeters()} returns 20 then there is a 68% probability
      * of the true altitude being between 130 and 170 meters.
      *
      * <p>If this location does not have a vertical accuracy, then 0.0 is returned.
@@ -933,7 +933,7 @@ public class Location implements Parcelable {
      * considered 1 standard deviation.
      *
      * <p>For example, if {@link #getBearing()} returns 60, and
-     * {@link #getBearingAccuracyDegrees()} ()} returns 10, then there is a 68% probability of the
+     * {@link #getBearingAccuracyDegrees()} returns 10, then there is a 68% probability of the
      * true bearing being between 50 and 70 degrees.
      *
      * <p>If this location does not have a bearing accuracy, then 0.0 is returned.
