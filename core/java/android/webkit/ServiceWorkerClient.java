@@ -29,9 +29,9 @@ public class ServiceWorkerClient {
      * application to return the data. If the return value is {@code null}, the
      * Service Worker will continue to load the resource as usual.
      * Otherwise, the return response and data will be used.
-     * NOTE: This method is called on a thread other than the UI thread
-     * so clients should exercise caution when accessing private data
-     * or the view system.
+     *
+     * <p class="note"><b>Note:</b> This method is called on a thread other than the UI thread so
+     * clients should exercise caution when accessing private data or the view system.
      *
      * @param request Object containing the details of the request.
      * @return A {@link android.webkit.WebResourceResponse} containing the

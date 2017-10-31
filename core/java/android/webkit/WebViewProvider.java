@@ -316,7 +316,7 @@ public interface WebViewProvider {
     /**
      * Provides mechanism for the name-sake methods declared in View and ViewGroup to be delegated
      * into the WebViewProvider instance.
-     * NOTE For many of these methods, the WebView will provide a super.Foo() call before or after
+     * NOTE: For many of these methods, the WebView will provide a super.Foo() call before or after
      * making the call into the provider instance. This is done for convenience in the common case
      * of maintaining backward compatibility. For remaining super class calls (e.g. where the
      * provider may need to only conditionally make the call based on some internal state) see the
