@@ -142,6 +142,9 @@ static StatsdConfig build_fake_config() {
     int KERNEL_WAKELOCK_TAG_ID = 1004;
     int KERNEL_WAKELOCK_NAME_KEY = 4;
 
+    int DEVICE_TEMPERATURE_TAG_ID = 33;
+    int DEVICE_TEMPERATURE_KEY = 1;
+
     // Count Screen ON events.
     CountMetric* metric = config.add_count_metric();
     metric->set_metric_id(1);
@@ -227,7 +230,7 @@ static StatsdConfig build_fake_config() {
     // Duration of screen on time.
     durationMetric = config.add_duration_metric();
     durationMetric->set_metric_id(8);
-    durationMetric->mutable_bucket()->set_bucket_size_millis(30 * 1000L);
+    durationMetric->mutable_bucket()->set_bucket_size_millis(10 * 1000L);
     durationMetric->set_type(DurationMetric_AggregationType_DURATION_SUM);
     durationMetric->set_what("SCREEN_IS_ON");
 
@@ -247,7 +250,19 @@ static StatsdConfig build_fake_config() {
     eventMetric->set_metric_id(9);
     eventMetric->set_what("SCREEN_TURNED_ON");
 
+    // Add an GaugeMetric.
+    GaugeMetric* gaugeMetric = config.add_gauge_metric();
+    gaugeMetric->set_metric_id(10);
+    gaugeMetric->set_what("DEVICE_TEMPERATURE");
+    gaugeMetric->set_gauge_field(DEVICE_TEMPERATURE_KEY);
+    gaugeMetric->mutable_bucket()->set_bucket_size_millis(60 * 1000L);
+
     // Event matchers............
+    LogEntryMatcher* temperatureEntryMatcher = config.add_log_entry_matcher();
+    temperatureEntryMatcher->set_name("DEVICE_TEMPERATURE");
+    temperatureEntryMatcher->mutable_simple_log_entry_matcher()->set_tag(
+        DEVICE_TEMPERATURE_TAG_ID);
+
     LogEntryMatcher* eventMatcher = config.add_log_entry_matcher();
     eventMatcher->set_name("SCREEN_TURNED_ON");
     SimpleLogEntryMatcher* simpleLogEntryMatcher = eventMatcher->mutable_simple_log_entry_matcher();

@@ -61,6 +61,7 @@ message StatsEvent {
         UidProcessStateChanged uid_process_state_changed = 27;
         ProcessLifeCycleStateChanged process_life_cycle_state_changed = 28;
         ScreenStateChanged screen_state_changed = 29;
+        DeviceTemperatureReported device_temperature_reported = 33;
         // TODO: Reorder the numbering so that the most frequent occur events occur in the first 15.
     }
 }
@@ -99,6 +100,17 @@ message WorkSource {
  *   - If there is a UID, it goes first. Think in an object-oriented fashion.
  * *****************************************************************************
  */
+
+/**
+ * Logs the temperature of the device, in tenths of a degree Celsius.
+ *
+ * Logged from:
+ *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+message DeviceTemperatureReported {
+    // Temperature in tenths of a degree C.
+    optional int32 temperature = 1;
+}
 
 /**
  * Logs when the screen state changes.
