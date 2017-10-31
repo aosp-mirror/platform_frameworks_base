@@ -134,7 +134,7 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
                 if (lastDevice != null) {
                     int batteryLevel = lastDevice.getBatteryLevel();
                     if (batteryLevel != BluetoothDevice.BATTERY_LEVEL_UNKNOWN) {
-                        state.icon = new BluetoothBatteryTileIcon(batteryLevel,
+                        state.icon = new BluetoothBatteryTileIcon(lastDevice,
                                 mContext.getResources().getFraction(
                                         R.fraction.bt_battery_scale_fraction, 1, 1));
                     }
@@ -213,18 +213,19 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
     }
 
     private class BluetoothBatteryTileIcon extends Icon {
-        private int mLevel;
         private float mIconScale;
+        private CachedBluetoothDevice mDevice;
 
-        BluetoothBatteryTileIcon(int level, float iconScale) {
-            mLevel = level;
+        BluetoothBatteryTileIcon(CachedBluetoothDevice device, float iconScale) {
             mIconScale = iconScale;
+            mDevice = device;
         }
 
         @Override
         public Drawable getDrawable(Context context) {
-            return createLayerDrawable(context,
-                    R.drawable.ic_qs_bluetooth_connected, mLevel, mIconScale);
+            // This method returns Pair<Drawable, String> while first value is the drawable
+            return com.android.settingslib.bluetooth.Utils.getBtClassDrawableWithDescription(
+                    context, mDevice, mIconScale).first;
         }
     }
 
@@ -306,7 +307,7 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
                         item.iconResId = R.drawable.ic_qs_bluetooth_connected;
                         int batteryLevel = device.getBatteryLevel();
                         if (batteryLevel != BluetoothDevice.BATTERY_LEVEL_UNKNOWN) {
-                            item.icon = new BluetoothBatteryTileIcon(batteryLevel,
+                            item.icon = new BluetoothBatteryTileIcon(device,
                                     1 /* iconScale */);
                             item.line2 = mContext.getString(
                                     R.string.quick_settings_connected_battery_level,
