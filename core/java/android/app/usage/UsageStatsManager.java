@@ -261,7 +261,10 @@ public final class UsageStatsManager {
 
     /**
      * @hide
+     * Changes the app standby state to the provided bucket.
      */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.CHANGE_APP_IDLE_STATE)
     public void setAppStandbyBucket(String packageName, @StandbyBuckets int bucket) {
         try {
             mService.setAppStandbyBucket(packageName, bucket, mContext.getUserId());
