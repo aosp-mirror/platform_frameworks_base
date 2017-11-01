@@ -4666,6 +4666,11 @@ message MetricsEvent {
     // Tag FIELD_PERMISSION: Name of the permission revoked
     ACTION_PERMISSION_REVOKED = 1245;
 
+    // OPEN: Settings > System > About Phone > Sim status
+    // CATEGORY: SETTINGS
+    // OS: P
+    DIALOG_SIM_STATUS = 1246;
+
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
   }
