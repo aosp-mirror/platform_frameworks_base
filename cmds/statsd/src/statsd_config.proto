@@ -210,14 +210,7 @@ message ValueMetric {
   repeated EventConditionLink links = 8;
 
   enum Operation {
-    SUM_DIFF = 1;
-    MIN_DIFF = 2;
-    MAX_DIFF = 3;
-    SUM = 4;
-    MIN = 5;
-    MAX = 6;
-    FIRST = 7;
-    LAST = 8;
+    SUM = 1;
   }
   optional Operation operation = 9 [default = SUM];
 }

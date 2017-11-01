@@ -144,15 +144,16 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     public final static class AppUpdateReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Slog.i(TAG, "StatsCompanionService noticed an app was updated.");
             /**
              * App updates actually consist of REMOVE, ADD, and then REPLACE broadcasts. To avoid
              * waste, we ignore the REMOVE and ADD broadcasts that contain the replacing flag.
+             * If we can't find the value for EXTRA_REPLACING, we default to false.
              */
-            if (!intent.getAction().equals(Intent.ACTION_PACKAGE_REPLACED) &&
-                    intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
+            if (!intent.getAction().equals(Intent.ACTION_PACKAGE_REPLACED)
+                    && intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
                 return; // Keep only replacing or normal add and remove.
             }
+            Slog.i(TAG, "StatsCompanionService noticed an app was updated.");
             synchronized (sStatsdLock) {
                 if (sStatsd == null) {
                     Slog.w(TAG, "Could not access statsd to inform it of anomaly alarm firing");

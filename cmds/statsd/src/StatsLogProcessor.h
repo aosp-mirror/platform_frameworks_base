@@ -42,7 +42,7 @@ public:
     void OnConfigRemoved(const ConfigKey& key);
 
     // TODO: Once we have the ProtoOutputStream in c++, we can just return byte array.
-    std::vector<StatsLogReport> onDumpReport(const ConfigKey& key);
+    ConfigMetricsReport onDumpReport(const ConfigKey& key);
 
     /* Request a flush through a binder call. */
     void flush();
