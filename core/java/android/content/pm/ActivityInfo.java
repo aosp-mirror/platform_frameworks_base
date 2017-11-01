@@ -455,7 +455,6 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      */
     public static final int FLAG_TURN_SCREEN_ON = 0x1000000;
 
-
     /**
      * @hide Bit in {@link #flags}: If set, this component will only be seen
      * by the system user.  Only works with broadcast receivers.  Set from the
@@ -1001,17 +1000,9 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      * Returns true if the activity's orientation is fixed.
      * @hide
      */
-    public boolean isFixedOrientation() {
+    boolean isFixedOrientation() {
         return isFixedOrientationLandscape() || isFixedOrientationPortrait()
                 || screenOrientation == SCREEN_ORIENTATION_LOCKED;
-    }
-
-    /**
-     * Returns true if the specified orientation is considered fixed.
-     * @hide
-     */
-    static public boolean isFixedOrientation(int orientation) {
-        return isFixedOrientationLandscape(orientation) || isFixedOrientationPortrait(orientation);
     }
 
     /**
