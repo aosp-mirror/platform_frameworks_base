@@ -553,7 +553,7 @@ public class ZygoteInit {
             try {
                 dexoptNeeded = DexFile.getDexOptNeeded(
                     classPathElement, instructionSet, systemServerFilter,
-                    false /* newProfile */, false /* downgrade */);
+                    null /* classLoaderContext */, false /* newProfile */, false /* downgrade */);
             } catch (FileNotFoundException ignored) {
                 // Do not add to the classpath.
                 Log.w(TAG, "Missing classpath element for system server: " + classPathElement);
