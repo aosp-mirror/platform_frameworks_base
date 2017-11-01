@@ -66,6 +66,7 @@ import static android.view.WindowManager.LayoutParams.MATCH_PARENT;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_ACQUIRES_SLEEP_TOKEN;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DRAW_STATUS_BAR_BACKGROUND;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_STATUS_BAR_VISIBLE_TRANSPARENT;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IS_SCREEN_DECOR;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_SYSTEM_ERROR;
@@ -197,6 +198,7 @@ import android.service.dreams.IDreamManager;
 import android.service.vr.IPersistentVrStateCallbacks;
 import android.speech.RecognizerIntent;
 import android.telecom.TelecomManager;
+import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
@@ -455,6 +457,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private AccessibilityShortcutController mAccessibilityShortcutController;
 
     boolean mSafeMode;
+    private final ArraySet<WindowState> mScreenDecorWindows = new ArraySet<>();
     WindowState mStatusBar = null;
     int mStatusBarHeight;
     WindowState mNavigationBar = null;
@@ -2612,7 +2615,19 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     @Override
-    public void adjustWindowParamsLw(WindowManager.LayoutParams attrs) {
+    public void adjustWindowParamsLw(WindowState win, WindowManager.LayoutParams attrs,
+            boolean hasStatusBarServicePermission) {
+
+        final boolean isScreenDecor = (attrs.privateFlags & PRIVATE_FLAG_IS_SCREEN_DECOR) != 0;
+        if (mScreenDecorWindows.contains(win)) {
+            if (!isScreenDecor) {
+                // No longer has the flag set, so remove from the set.
+                mScreenDecorWindows.remove(win);
+            }
+        } else if (isScreenDecor && hasStatusBarServicePermission) {
+            mScreenDecorWindows.add(win);
+        }
+
         switch (attrs.type) {
             case TYPE_SYSTEM_OVERLAY:
             case TYPE_SECURE_SYSTEM_OVERLAY:
@@ -3073,6 +3088,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      */
     @Override
     public int prepareAddWindowLw(WindowState win, WindowManager.LayoutParams attrs) {
+
+        if ((attrs.privateFlags & PRIVATE_FLAG_IS_SCREEN_DECOR) != 0) {
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.STATUS_BAR_SERVICE,
+                    "PhoneWindowManager");
+            mScreenDecorWindows.add(win);
+        }
+
         switch (attrs.type) {
             case TYPE_STATUS_BAR:
                 mContext.enforceCallingOrSelfPermission(
@@ -3124,6 +3147,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mNavigationBar = null;
             mNavigationBarController.setWindow(null);
         }
+        mScreenDecorWindows.remove(win);
     }
 
     static final boolean PRINT_ANIM = false;
@@ -4394,8 +4418,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     /** {@inheritDoc} */
     @Override
-    public void beginLayoutLw(boolean isDefaultDisplay, int displayWidth, int displayHeight,
-                              int displayRotation, int uiMode) {
+    public void beginLayoutLw(int displayId, int displayWidth, int displayHeight,
+            int displayRotation, int uiMode) {
+        final boolean isDefaultDisplay = displayId == DEFAULT_DISPLAY;
         mDisplayRotation = displayRotation;
         final int overscanLeft, overscanTop, overscanRight, overscanBottom;
         if (isDefaultDisplay) {
@@ -4523,6 +4548,71 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 updateSystemUiVisibilityLw();
             }
         }
+        layoutScreenDecorWindows(displayId, displayWidth, displayHeight, pf, df, dcf);
+    }
+
+    private void layoutScreenDecorWindows(int displayId, int displayWidth, int displayHeight,
+            Rect pf, Rect df, Rect dcf) {
+        if (mScreenDecorWindows.isEmpty()) {
+            return;
+        }
+
+        for (int i = mScreenDecorWindows.size() - 1; i >= 0; --i) {
+            final WindowState w = mScreenDecorWindows.valueAt(i);
+            if (w.getDisplayId() != displayId || !w.isVisibleLw()) {
+                // Skip if not on the same display or not visible.
+                continue;
+            }
+
+            w.computeFrameLw(pf /* parentFrame */, df /* displayFrame */, df /* overlayFrame */,
+                    df /* contentFrame */, df /* visibleFrame */, dcf /* decorFrame */,
+                    df /* stableFrame */, df /* outsetFrame */);
+            final Rect frame = w.getFrameLw();
+
+            if (frame.left <= 0 && frame.top <= 0) {
+                // Docked at left or top.
+                if (frame.bottom >= displayHeight) {
+                    // Docked left.
+                    mDockLeft = Math.max(frame.right, mDockLeft);
+                } else if (frame.right >= displayWidth ) {
+                    // Docked top.
+                    mDockTop = Math.max(frame.bottom, mDockTop);
+                } else {
+                    Slog.w(TAG, "layoutScreenDecorWindows: Ignoring decor win=" + w
+                            + " not docked on left or top of display. frame=" + frame
+                            + " displayWidth=" + displayWidth + " displayHeight=" + displayHeight);
+                }
+            } else if (frame.right >= displayWidth && frame.bottom >= displayHeight) {
+                // Docked at right or bottom.
+                if (frame.top <= 0) {
+                    // Docked right.
+                    mDockRight = Math.min(frame.left, mDockRight);
+                } else if (frame.left <= 0) {
+                    // Docked bottom.
+                    mDockBottom = Math.min(frame.top, mDockBottom);
+                } else {
+                    Slog.w(TAG, "layoutScreenDecorWindows: Ignoring decor win=" + w
+                            + " not docked on right or bottom" + " of display. frame=" + frame
+                            + " displayWidth=" + displayWidth + " displayHeight=" + displayHeight);
+                }
+            } else {
+                // Screen decor windows are required to be docked on one of the sides of the screen.
+                Slog.w(TAG, "layoutScreenDecorWindows: Ignoring decor win=" + w
+                        + " not docked on one of the sides of the display. frame=" + frame
+                        + " displayWidth=" + displayWidth + " displayHeight=" + displayHeight);
+            }
+        }
+
+        mContentTop = mSystemTop = mVoiceContentTop = mCurTop = mRestrictedScreenTop = mDockTop;
+        mContentLeft = mSystemLeft = mVoiceContentLeft = mCurLeft = mRestrictedScreenLeft
+                = mRestrictedOverscanScreenLeft = mDockLeft;
+        mContentBottom = mSystemBottom = mVoiceContentBottom = mCurBottom = mDockBottom;
+        mContentRight = mSystemRight = mVoiceContentRight = mCurRight = mDockRight;
+
+        mRestrictedScreenWidth = mDockRight - mRestrictedScreenLeft;
+        mRestrictedScreenHeight = mDockBottom - mRestrictedScreenTop;
+        mRestrictedOverscanScreenWidth = mDockRight - mRestrictedOverscanScreenLeft;
+        mRestrictedOverscanScreenHeight = mDockBottom - mRestrictedOverscanScreenTop;
     }
 
     private boolean layoutStatusBar(Rect pf, Rect df, Rect of, Rect vf, Rect dcf, int sysui,
@@ -4822,9 +4912,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     /** {@inheritDoc} */
     @Override
     public void layoutWindowLw(WindowState win, WindowState attached) {
-        // We've already done the navigation bar and status bar. If the status bar can receive
-        // input, we need to layout it again to accomodate for the IME window.
-        if ((win == mStatusBar && !canReceiveInput(win)) || win == mNavigationBar) {
+        // We've already done the navigation bar, status bar, and all screen decor windows. If the
+        // status bar can receive input, we need to layout it again to accommodate for the IME
+        // window.
+        if ((win == mStatusBar && !canReceiveInput(win)) || win == mNavigationBar
+                || mScreenDecorWindows.contains(win)) {
             return;
         }
         final WindowManager.LayoutParams attrs = win.getAttrs();
@@ -4863,6 +4955,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         if (!isDefaultDisplay) {
+            // TODO: Need to fix this and above to take into account decor windows.
             if (attached != null) {
                 // If this window is attached to another, our display
                 // frame is the same as the one we are attached to.
