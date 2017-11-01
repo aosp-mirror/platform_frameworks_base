@@ -678,7 +678,7 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
                 mChildren.get(i).forceWindowsScaleableInTransaction(force);
             }
         } finally {
-            mService.closeSurfaceTransaction();
+            mService.closeSurfaceTransaction("forceWindowsScaleable");
         }
     }
 

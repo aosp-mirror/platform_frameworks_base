@@ -119,7 +119,7 @@ public class DimLayer {
         } catch (Exception e) {
             Slog.e(TAG_WM, "Exception creating Dim surface", e);
         } finally {
-            service.closeSurfaceTransaction();
+            service.closeSurfaceTransaction("DimLayer.constructSurface");
         }
     }
 
@@ -235,7 +235,7 @@ public class DimLayer {
             } catch (RuntimeException e) {
                 Slog.w(TAG, "Failure setting size", e);
             } finally {
-                mService.closeSurfaceTransaction();
+                mService.closeSurfaceTransaction("DimLayer.setBounds");
             }
         }
     }

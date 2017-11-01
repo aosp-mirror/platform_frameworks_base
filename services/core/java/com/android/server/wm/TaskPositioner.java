@@ -637,7 +637,7 @@ class TaskPositioner implements DimLayer.DimLayerUser {
         } else {
             showDimLayer();
         }
-        mService.closeSurfaceTransaction();
+        mService.closeSurfaceTransaction("updateDimLayerVisibility");
     }
 
     /**

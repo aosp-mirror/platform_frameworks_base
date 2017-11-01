@@ -543,7 +543,7 @@ public class DockedStackDividerController implements DimLayerUser {
                         mDimLayer.setBounds(mTmpRect);
                         mDimLayer.show(getResizeDimLayer(), alpha, 0 /* duration */);
                     } finally {
-                        mService.closeSurfaceTransaction();
+                        mService.closeSurfaceTransaction("setResizeDimLayer");
                     }
                 }
                 mLastDimLayerRect.set(mTmpRect);
@@ -558,7 +558,7 @@ public class DockedStackDividerController implements DimLayerUser {
                     mService.openSurfaceTransaction();
                     mDimLayer.hide();
                 } finally {
-                    mService.closeSurfaceTransaction();
+                    mService.closeSurfaceTransaction("setResizeDimLayer");
                 }
             }
             mLastDimLayerAlpha = 0f;
