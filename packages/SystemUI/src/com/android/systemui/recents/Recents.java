@@ -63,6 +63,7 @@ import com.android.systemui.recents.events.component.ShowUserToastEvent;
 import com.android.systemui.recents.events.ui.RecentsDrawnEvent;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.shared.recents.model.RecentsTaskLoader;
+import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.CommandQueue;
 
@@ -246,7 +247,7 @@ public class Recents extends SystemUI
             return;
         }
 
-        sSystemServicesProxy.sendCloseSystemWindows(SYSTEM_DIALOG_REASON_RECENT_APPS);
+        ActivityManagerWrapper.getInstance().closeSystemWindows(SYSTEM_DIALOG_REASON_RECENT_APPS);
         int recentsGrowTarget = getComponent(Divider.class).getView().growsRecents();
         int currentUser = sSystemServicesProxy.getCurrentUser();
         if (sSystemServicesProxy.isSystemUser(currentUser)) {

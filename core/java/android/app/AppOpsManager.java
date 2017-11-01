@@ -254,8 +254,10 @@ public class AppOpsManager {
     public static final int OP_ANSWER_PHONE_CALLS = 69;
     /** @hide Run jobs when in background */
     public static final int OP_RUN_ANY_IN_BACKGROUND = 70;
+    /** @hide Change Wi-Fi connectivity state */
+    public static final int OP_CHANGE_WIFI_STATE = 71;
     /** @hide */
-    public static final int _NUM_OP = 71;
+    public static final int _NUM_OP = 72;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION = "android:coarse_location";
@@ -496,6 +498,7 @@ public class AppOpsManager {
             OP_INSTANT_APP_START_FOREGROUND,
             OP_ANSWER_PHONE_CALLS,
             OP_RUN_ANY_IN_BACKGROUND,
+            OP_CHANGE_WIFI_STATE,
     };
 
     /**
@@ -574,6 +577,7 @@ public class AppOpsManager {
             OPSTR_INSTANT_APP_START_FOREGROUND,
             OPSTR_ANSWER_PHONE_CALLS,
             null, // OP_RUN_ANY_IN_BACKGROUND
+            null, // OP_CHANGE_WIFI_STATE
     };
 
     /**
@@ -652,6 +656,7 @@ public class AppOpsManager {
             "INSTANT_APP_START_FOREGROUND",
             "ANSWER_PHONE_CALLS",
             "RUN_ANY_IN_BACKGROUND",
+            "CHANGE_WIFI_STATE",
     };
 
     /**
@@ -730,6 +735,7 @@ public class AppOpsManager {
             Manifest.permission.INSTANT_APP_FOREGROUND_SERVICE,
             Manifest.permission.ANSWER_PHONE_CALLS,
             null, // no permission for OP_RUN_ANY_IN_BACKGROUND
+            Manifest.permission.CHANGE_WIFI_STATE,
     };
 
     /**
@@ -809,6 +815,7 @@ public class AppOpsManager {
             null, // INSTANT_APP_START_FOREGROUND
             null, // ANSWER_PHONE_CALLS
             null, // OP_RUN_ANY_IN_BACKGROUND
+            null, // OP_CHANGE_WIFI_STATE
     };
 
     /**
@@ -887,6 +894,7 @@ public class AppOpsManager {
             false, // INSTANT_APP_START_FOREGROUND
             false, // ANSWER_PHONE_CALLS
             false, // OP_RUN_ANY_IN_BACKGROUND
+            false, // OP_CHANGE_WIFI_STATE
     };
 
     /**
@@ -964,6 +972,7 @@ public class AppOpsManager {
             AppOpsManager.MODE_DEFAULT,  // OP_INSTANT_APP_START_FOREGROUND
             AppOpsManager.MODE_ALLOWED, // ANSWER_PHONE_CALLS
             AppOpsManager.MODE_ALLOWED,  // OP_RUN_ANY_IN_BACKGROUND
+            AppOpsManager.MODE_ALLOWED,  // OP_CHANGE_WIFI_STATE
     };
 
     /**
@@ -1045,6 +1054,7 @@ public class AppOpsManager {
             false,
             false, // ANSWER_PHONE_CALLS
             false, // OP_RUN_ANY_IN_BACKGROUND
+            false, // OP_CHANGE_WIFI_STATE
     };
 
     /**

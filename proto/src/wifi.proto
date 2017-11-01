@@ -673,6 +673,10 @@ message StaEvent {
     // Framework initiated disconnect. Sometimes generated to give an extra reason for a disconnect
     // Should typically be followed by a NETWORK_DISCONNECTION_EVENT with a local_gen = true
     TYPE_FRAMEWORK_DISCONNECT = 15;
+
+    // The NetworkAgent score for wifi has changed in a way that may impact
+    // connectivity
+    TYPE_SCORE_BREACH = 16;
   }
 
   enum FrameworkDisconnectReason {
@@ -784,6 +788,9 @@ message StaEvent {
 
   // Authentication failure reason, as reported by WifiManager (calculated from state & deauth code)
   optional AuthFailureReason auth_failure_reason = 13 [default = AUTH_FAILURE_UNKNOWN];
+
+  // NetworkAgent score of connected wifi
+  optional int32 last_score = 14 [default = -1];
 }
 
 // Wi-Fi Aware metrics

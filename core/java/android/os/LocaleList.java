@@ -295,7 +295,11 @@ public final class LocaleList implements Parcelable {
         return STRING_EN_XA.equals(locale) || STRING_AR_XB.equals(locale);
     }
 
-    private static boolean isPseudoLocale(Locale locale) {
+    /**
+     * Returns true if locale is a pseudo-locale, false otherwise.
+     * {@hide}
+     */
+    public static boolean isPseudoLocale(Locale locale) {
         return LOCALE_EN_XA.equals(locale) || LOCALE_AR_XB.equals(locale);
     }
 

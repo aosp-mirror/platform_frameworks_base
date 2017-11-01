@@ -102,6 +102,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -1708,13 +1709,33 @@ public class PackageParser {
      */
     public static ApkLite parseApkLite(File apkFile, int flags)
             throws PackageParserException {
-        final String apkPath = apkFile.getAbsolutePath();
+        return parseApkLiteInner(apkFile, null, null, flags);
+    }
+
+    /**
+     * Utility method that retrieves lightweight details about a single APK
+     * file, including package name, split name, and install location.
+     *
+     * @param fd already open file descriptor of an apk file
+     * @param debugPathName arbitrary text name for this file, for debug output
+     * @param flags optional parse flags, such as
+     *            {@link #PARSE_COLLECT_CERTIFICATES}
+     */
+    public static ApkLite parseApkLite(FileDescriptor fd, String debugPathName, int flags)
+            throws PackageParserException {
+        return parseApkLiteInner(null, fd, debugPathName, flags);
+    }
+
+    private static ApkLite parseApkLiteInner(File apkFile, FileDescriptor fd, String debugPathName,
+            int flags) throws PackageParserException {
+        final String apkPath = fd != null ? debugPathName : apkFile.getAbsolutePath();
 
         AssetManager assets = null;
         XmlResourceParser parser = null;
         try {
             assets = newConfiguredAssetManager();
-            int cookie = assets.addAssetPath(apkPath);
+            int cookie = fd != null
+                    ? assets.addAssetFd(fd, debugPathName) : assets.addAssetPath(apkPath);
             if (cookie == 0) {
                 throw new PackageParserException(INSTALL_PARSE_FAILED_NOT_APK,
                         "Failed to parse " + apkPath);

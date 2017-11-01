@@ -2361,7 +2361,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                             // also reset drag resizing state, because the owner can't do it
                             // anymore.
                             final TaskStack stack =
-                                    dc.getSplitScreenPrimaryStackStackIgnoringVisibility();
+                                    dc.getSplitScreenPrimaryStackIgnoringVisibility();
                             if (stack != null) {
                                 stack.resetDockedStackToMiddle();
                             }

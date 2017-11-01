@@ -25,6 +25,7 @@ import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.SystemProperties;
 import android.provider.Settings.Secure;
 import android.provider.Settings.System;
 import android.util.Slog;
@@ -99,6 +100,12 @@ public final class NightDisplayController {
      * @see #setColorMode(int)
      */
     public static final int COLOR_MODE_SATURATED = 2;
+
+    /**
+     * See com.android.server.display.DisplayTransformManager.
+     */
+    private static final String PERSISTENT_PROPERTY_SATURATION = "persist.sys.sf.color_saturation";
+    private static final String PERSISTENT_PROPERTY_NATIVE_MODE = "persist.sys.sf.native_mode";
 
     private final Context mContext;
     private final int mUserId;
@@ -334,9 +341,15 @@ public final class NightDisplayController {
      */
     public int getColorMode() {
         final int colorMode = System.getIntForUser(mContext.getContentResolver(),
-            System.DISPLAY_COLOR_MODE, COLOR_MODE_BOOSTED, mUserId);
+            System.DISPLAY_COLOR_MODE, -1, mUserId);
         if (colorMode < COLOR_MODE_NATURAL || colorMode > COLOR_MODE_SATURATED) {
-            return COLOR_MODE_BOOSTED;
+            // There still might be a legacy system property controlling color mode that we need to
+            // respect.
+            if ("1".equals(SystemProperties.get(PERSISTENT_PROPERTY_NATIVE_MODE))) {
+                return COLOR_MODE_SATURATED;
+            }
+            return "1.0".equals(SystemProperties.get(PERSISTENT_PROPERTY_SATURATION))
+                    ? COLOR_MODE_NATURAL : COLOR_MODE_BOOSTED;
         }
         return colorMode;
     }

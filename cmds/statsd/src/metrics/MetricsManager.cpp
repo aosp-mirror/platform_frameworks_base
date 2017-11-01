@@ -150,6 +150,15 @@ void MetricsManager::onLogEvent(const LogEvent& event) {
     }
 }
 
+// Returns the total byte size of all metrics managed by a single config source.
+size_t MetricsManager::byteSize() {
+    size_t totalSize = 0;
+    for (auto metricProducer : mAllMetricProducers) {
+        totalSize += metricProducer->byteSize();
+    }
+    return totalSize;
+}
+
 }  // namespace statsd
 }  // namespace os
 }  // namespace android

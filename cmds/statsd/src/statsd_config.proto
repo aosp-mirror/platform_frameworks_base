@@ -168,7 +168,28 @@ message DurationMetric {
 
   optional Bucket bucket = 8;
 
-  repeated EventConditionLink links = 9;
+  repeated Alert alerts = 9;
+
+  repeated EventConditionLink links = 10;
+
+}
+
+message GaugeMetric {
+  optional int64 metric_id = 1;
+
+  optional string what = 2;
+
+  optional int32 gauge_field = 3;
+
+  optional string condition = 4;
+
+  repeated KeyMatcher dimension = 5;
+
+  optional Bucket bucket = 6;
+
+  repeated Alert alerts = 7;
+
+  repeated EventConditionLink links = 8;
 }
 
 message ValueMetric {
@@ -184,6 +205,10 @@ message ValueMetric {
 
   optional Bucket bucket = 6;
 
+  repeated Alert alerts = 7;
+
+  repeated EventConditionLink links = 8;
+
   enum Operation {
     SUM_DIFF = 1;
     MIN_DIFF = 2;
@@ -194,14 +219,14 @@ message ValueMetric {
     FIRST = 7;
     LAST = 8;
   }
-  optional Operation operation = 7;
+  optional Operation operation = 9 [default = SUM];
 }
 
 message EventConditionLink {
-    optional string condition = 1;
+  optional string condition = 1;
 
-    repeated KeyMatcher key_in_main = 2;
-    repeated KeyMatcher key_in_condition = 3;
+  repeated KeyMatcher key_in_main = 2;
+  repeated KeyMatcher key_in_condition = 3;
 };
 
 message StatsdConfig {

@@ -76,8 +76,8 @@ import com.android.internal.telephony.IccCardConstants.State;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.systemui.recents.misc.SysUiTaskStackChangeListener;
 import com.android.systemui.recents.misc.SystemServicesProxy;
-import com.android.systemui.recents.misc.TaskStackChangeListener;
 
 import com.google.android.collect.Lists;
 
@@ -1738,6 +1738,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         mFailedAttempts.delete(sCurrentUser);
     }
 
+    public ServiceState getServiceState(int subId) {
+        return mServiceStates.get(subId);
+    }
+
     public int getFailedUnlockAttempts(int userId) {
         return mFailedAttempts.get(userId, 0);
     }
@@ -1772,7 +1776,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         }
     }
 
-    private final TaskStackChangeListener mTaskStackListener = new TaskStackChangeListener() {
+    private final SysUiTaskStackChangeListener
+            mTaskStackListener = new SysUiTaskStackChangeListener() {
         @Override
         public void onTaskStackChangedBackground() {
             try {

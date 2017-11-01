@@ -16,6 +16,7 @@
 
 package com.android.server.media;
 
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.INotificationManager;
 import android.app.KeyguardManager;
@@ -31,7 +32,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.database.ContentObserver;
 import android.media.AudioManager;
-import android.media.AudioManagerInternal;
+import android.media.AudioPlaybackConfiguration;
 import android.media.AudioSystem;
 import android.media.IAudioService;
 import android.media.IRemoteVolumeController;
@@ -68,7 +69,6 @@ import android.view.KeyEvent;
 import android.view.ViewConfiguration;
 
 import com.android.internal.util.DumpUtils;
-import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.Watchdog;
 import com.android.server.Watchdog.Monitor;
@@ -104,7 +104,6 @@ public class MediaSessionService extends SystemService implements Monitor {
 
     private KeyguardManager mKeyguardManager;
     private IAudioService mAudioService;
-    private AudioManagerInternal mAudioManagerInternal;
     private ContentResolver mContentResolver;
     private SettingsObserver mSettingsObserver;
     private INotificationManager mNotificationManager;
@@ -114,7 +113,7 @@ public class MediaSessionService extends SystemService implements Monitor {
     // It's always not null after the MediaSessionService is started.
     private FullUserRecord mCurrentFullUserRecord;
     private MediaSessionRecord mGlobalPrioritySession;
-    private AudioPlaybackMonitor mAudioPlaybackMonitor;
+    private AudioPlayerStateMonitor mAudioPlayerStateMonitor;
 
     // Used to notify system UI when remote volume was changed. TODO find a
     // better way to handle this.
@@ -137,11 +136,16 @@ public class MediaSessionService extends SystemService implements Monitor {
         mKeyguardManager =
                 (KeyguardManager) getContext().getSystemService(Context.KEYGUARD_SERVICE);
         mAudioService = getAudioService();
-        mAudioPlaybackMonitor = AudioPlaybackMonitor.getInstance(getContext(), mAudioService);
-        mAudioPlaybackMonitor.registerOnAudioPlaybackStartedListener(
-                new AudioPlaybackMonitor.OnAudioPlaybackStartedListener() {
+        mAudioPlayerStateMonitor = AudioPlayerStateMonitor.getInstance();
+        mAudioPlayerStateMonitor.registerListener(
+                new AudioPlayerStateMonitor.OnAudioPlayerStateChangedListener() {
             @Override
-            public void onAudioPlaybackStarted(int uid) {
+            public void onAudioPlayerStateChanged(
+                    int uid, int prevState, @Nullable AudioPlaybackConfiguration config) {
+                if (config == null || !config.isActive() || config.getPlayerType()
+                        == AudioPlaybackConfiguration.PLAYER_TYPE_JAM_SOUNDPOOL) {
+                    return;
+                }
                 synchronized (mLock) {
                     FullUserRecord user =
                             getFullUserRecordLocked(UserHandle.getUserId(uid));
@@ -150,8 +154,8 @@ public class MediaSessionService extends SystemService implements Monitor {
                     }
                 }
             }
-        });
-        mAudioManagerInternal = LocalServices.getService(AudioManagerInternal.class);
+        }, null /* handler */);
+        mAudioPlayerStateMonitor.registerSelfIntoAudioServiceIfNeeded(mAudioService);
         mContentResolver = getContext().getContentResolver();
         mSettingsObserver = new SettingsObserver();
         mSettingsObserver.observe();
@@ -650,7 +654,7 @@ public class MediaSessionService extends SystemService implements Monitor {
 
         public FullUserRecord(int fullUserId) {
             mFullUserId = fullUserId;
-            mPriorityStack = new MediaSessionStack(mAudioPlaybackMonitor, this);
+            mPriorityStack = new MediaSessionStack(mAudioPlayerStateMonitor, this);
             // Restore the remembered media button receiver before the boot.
             String mediaButtonReceiver = Settings.Secure.getStringForUser(mContentResolver,
                     Settings.System.MEDIA_BUTTON_RECEIVER, mFullUserId);
@@ -1309,7 +1313,7 @@ public class MediaSessionService extends SystemService implements Monitor {
                 for (int i = 0; i < count; i++) {
                     mUserRecords.valueAt(i).dumpLocked(pw, "");
                 }
-                mAudioPlaybackMonitor.dump(pw, "");
+                mAudioPlayerStateMonitor.dump(getContext(), pw, "");
             }
         }
 

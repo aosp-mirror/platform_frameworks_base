@@ -385,7 +385,7 @@ interface IWindowManager
     /**
      * Create an input consumer by name.
      */
-    void createInputConsumer(String name, out InputChannel inputChannel);
+    void createInputConsumer(IBinder token, String name, out InputChannel inputChannel);
 
     /**
      * Destroy an input consumer by name.  This method will also dispose the input channels

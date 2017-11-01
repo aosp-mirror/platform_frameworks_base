@@ -22,10 +22,12 @@
 
 #include <set>
 #include <vector>
+#include <map>
 
 namespace android {
 namespace stats_log_api_gen {
 
+using std::map;
 using std::set;
 using std::string;
 using std::vector;
@@ -44,6 +46,7 @@ typedef enum {
     JAVA_TYPE_FLOAT = 5,
     JAVA_TYPE_DOUBLE = 6,
     JAVA_TYPE_STRING = 7,
+    JAVA_TYPE_ENUM = 8,
 
     JAVA_TYPE_OBJECT = -1,
     JAVA_TYPE_BYTE_ARRAY = -2,
@@ -57,8 +60,13 @@ struct AtomField {
     string name;
     java_type_t javaType;
 
+    // If the field is of type enum, the following map contains the list of enum values.
+    map<int /* numeric value */, string /* value name */> enumValues;
+
     inline AtomField() :name(), javaType(JAVA_TYPE_UNKNOWN) {}
-    inline AtomField(const AtomField& that) :name(that.name), javaType(that.javaType) {}
+    inline AtomField(const AtomField& that) :name(that.name),
+                                             javaType(that.javaType),
+                                             enumValues(that.enumValues) {}
     inline AtomField(string n, java_type_t jt) :name(n), javaType(jt) {}
     inline ~AtomField() {}
 };

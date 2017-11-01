@@ -148,7 +148,7 @@ public class LockTaskControllerTest {
         // THEN the lock task mode state should be LOCKED
         assertEquals(LOCK_TASK_MODE_LOCKED, mLockTaskController.getLockTaskModeState());
         // THEN the task should be locked
-        assertTrue(mLockTaskController.checkLockedTask(tr));
+        assertTrue(mLockTaskController.isTaskLocked(tr));
 
         // THEN lock task mode should be started
         verifyLockTaskStarted(STATUS_BAR_MASK_LOCKED, DISABLE2_MASK);
@@ -167,8 +167,8 @@ public class LockTaskControllerTest {
         // THEN the lock task mode state should be LOCKED
         assertEquals(LOCK_TASK_MODE_LOCKED, mLockTaskController.getLockTaskModeState());
         // THEN neither of the tasks should be able to move to back of stack
-        assertTrue(mLockTaskController.checkLockedTask(tr1));
-        assertTrue(mLockTaskController.checkLockedTask(tr2));
+        assertTrue(mLockTaskController.isTaskLocked(tr1));
+        assertTrue(mLockTaskController.isTaskLocked(tr2));
 
         // THEN lock task mode should be started
         verifyLockTaskStarted(STATUS_BAR_MASK_LOCKED, DISABLE2_MASK);
@@ -197,7 +197,7 @@ public class LockTaskControllerTest {
         // THEN the lock task mode state should be PINNED
         assertEquals(LOCK_TASK_MODE_PINNED, mLockTaskController.getLockTaskModeState());
         // THEN the task should be locked
-        assertTrue(mLockTaskController.checkLockedTask(tr));
+        assertTrue(mLockTaskController.isTaskLocked(tr));
 
         // THEN lock task mode should be started
         verifyLockTaskStarted(STATUS_BAR_MASK_PINNED, DISABLE2_NONE);
@@ -238,36 +238,36 @@ public class LockTaskControllerTest {
         mLockTaskController.startLockTaskMode(tr, false, TEST_UID);
 
         // WHEN the same caller calls stopLockTaskMode
-        mLockTaskController.stopLockTaskMode(false, TEST_UID);
+        mLockTaskController.stopLockTaskMode(tr, false, TEST_UID);
 
         // THEN the lock task mode should be NONE
         assertEquals(LOCK_TASK_MODE_NONE, mLockTaskController.getLockTaskModeState());
         // THEN the task should no longer be locked
-        assertFalse(mLockTaskController.checkLockedTask(tr));
+        assertFalse(mLockTaskController.isTaskLocked(tr));
         // THEN lock task mode should have been finished
         verifyLockTaskStopped(times(1));
     }
 
     @Test(expected = SecurityException.class)
-    public void testStopLockTaskMode_DifferentCaller() throws Exception {
+    public void testStopLockTaskMode_differentCaller() throws Exception {
         // GIVEN one task record with whitelisted auth that is in lock task mode
         TaskRecord tr = getTaskRecord(TaskRecord.LOCK_TASK_AUTH_WHITELISTED);
         mLockTaskController.startLockTaskMode(tr, false, TEST_UID);
 
         // WHEN a different caller calls stopLockTaskMode
-        mLockTaskController.stopLockTaskMode(false, TEST_UID + 1);
+        mLockTaskController.stopLockTaskMode(tr, false, TEST_UID + 1);
 
         // THEN security exception should be thrown, because different caller tried to unlock
     }
 
     @Test
-    public void testStopLockTaskMode_SystemCaller() throws Exception {
+    public void testStopLockTaskMode_systemCaller() throws Exception {
         // GIVEN one task record with whitelisted auth that is in lock task mode
         TaskRecord tr = getTaskRecord(TaskRecord.LOCK_TASK_AUTH_WHITELISTED);
         mLockTaskController.startLockTaskMode(tr, false, TEST_UID);
 
         // WHEN system calls stopLockTaskMode
-        mLockTaskController.stopLockTaskMode(true, SYSTEM_UID);
+        mLockTaskController.stopLockTaskMode(tr, true, SYSTEM_UID);
 
         // THEN lock task mode should still be active
         assertEquals(LOCK_TASK_MODE_LOCKED, mLockTaskController.getLockTaskModeState());
@@ -282,16 +282,37 @@ public class LockTaskControllerTest {
         mLockTaskController.startLockTaskMode(tr2, false, TEST_UID);
 
         // WHEN calling stopLockTaskMode
-        mLockTaskController.stopLockTaskMode(false, TEST_UID);
+        mLockTaskController.stopLockTaskMode(tr2, false, TEST_UID);
 
         // THEN the lock task mode should still be active
         assertEquals(LOCK_TASK_MODE_LOCKED, mLockTaskController.getLockTaskModeState());
         // THEN the first task should still be locked
-        assertTrue(mLockTaskController.checkLockedTask(tr1));
+        assertTrue(mLockTaskController.isTaskLocked(tr1));
         // THEN the top task should no longer be locked
-        assertFalse(mLockTaskController.checkLockedTask(tr2));
+        assertFalse(mLockTaskController.isTaskLocked(tr2));
         // THEN lock task mode should not have been finished
         verifyLockTaskStopped(never());
+    }
+
+    @Test
+    public void testStopLockTaskMode_rootTask() throws Exception {
+        // GIVEN two task records with whitelisted auth that is in lock task mode
+        TaskRecord tr1 = getTaskRecord(TaskRecord.LOCK_TASK_AUTH_WHITELISTED);
+        TaskRecord tr2 = getTaskRecord(TaskRecord.LOCK_TASK_AUTH_WHITELISTED);
+        mLockTaskController.startLockTaskMode(tr1, false, TEST_UID);
+        mLockTaskController.startLockTaskMode(tr2, false, TEST_UID);
+
+        // WHEN calling stopLockTaskMode on the root task
+        mLockTaskController.stopLockTaskMode(tr1, false, TEST_UID);
+
+        // THEN the lock task mode should be inactive
+        assertEquals(LOCK_TASK_MODE_NONE, mLockTaskController.getLockTaskModeState());
+        // THEN the first task should no longer be locked
+        assertFalse(mLockTaskController.isTaskLocked(tr1));
+        // THEN the top task should no longer be locked
+        assertFalse(mLockTaskController.isTaskLocked(tr2));
+        // THEN lock task mode should be finished
+        verifyLockTaskStopped(times(1));
     }
 
     @Test
@@ -307,18 +328,39 @@ public class LockTaskControllerTest {
         reset(mStatusBarService);
 
         // WHEN calling stopLockTask
-        mLockTaskController.stopLockTaskMode(true, SYSTEM_UID);
+        mLockTaskController.stopLockTaskMode(null, true, SYSTEM_UID);
 
         // THEN the lock task mode should no longer be active
         assertEquals(LOCK_TASK_MODE_NONE, mLockTaskController.getLockTaskModeState());
         // THEN the task should no longer be locked
-        assertFalse(mLockTaskController.checkLockedTask(tr));
+        assertFalse(mLockTaskController.isTaskLocked(tr));
         // THEN lock task mode should have been finished
         verifyLockTaskStopped(times(1));
         // THEN the keyguard should be shown
         verify(mLockPatternUtils).requireCredentialEntry(UserHandle.USER_ALL);
         // THEN screen pinning toast should be shown
         verify(mLockTaskNotify).showPinningExitToast();
+    }
+
+    @Test
+    public void testClearLockedTasks() throws Exception {
+        // GIVEN two task records with whitelisted auth that is in lock task mode
+        TaskRecord tr1 = getTaskRecord(TaskRecord.LOCK_TASK_AUTH_WHITELISTED);
+        TaskRecord tr2 = getTaskRecord(TaskRecord.LOCK_TASK_AUTH_WHITELISTED);
+        mLockTaskController.startLockTaskMode(tr1, false, TEST_UID);
+        mLockTaskController.startLockTaskMode(tr2, false, TEST_UID);
+
+        // WHEN calling stopLockTaskMode on the root task
+        mLockTaskController.clearLockedTasks("testClearLockedTasks");
+
+        // THEN the lock task mode should be inactive
+        assertEquals(LOCK_TASK_MODE_NONE, mLockTaskController.getLockTaskModeState());
+        // THEN the first task should no longer be locked
+        assertFalse(mLockTaskController.isTaskLocked(tr1));
+        // THEN the top task should no longer be locked
+        assertFalse(mLockTaskController.isTaskLocked(tr2));
+        // THEN lock task mode should be finished
+        verifyLockTaskStopped(times(1));
     }
 
     @Test
@@ -367,8 +409,8 @@ public class LockTaskControllerTest {
         mLockTaskController.startLockTaskMode(tr1, false, TEST_UID);
         mLockTaskController.startLockTaskMode(tr2, false, TEST_UID);
         assertEquals(LOCK_TASK_MODE_LOCKED, mLockTaskController.getLockTaskModeState());
-        assertTrue(mLockTaskController.checkLockedTask(tr1));
-        assertTrue(mLockTaskController.checkLockedTask(tr2));
+        assertTrue(mLockTaskController.isTaskLocked(tr1));
+        assertTrue(mLockTaskController.isTaskLocked(tr2));
         verifyLockTaskStarted(STATUS_BAR_MASK_LOCKED, DISABLE2_MASK);
 
         // WHEN removing one package from whitelist
@@ -377,10 +419,10 @@ public class LockTaskControllerTest {
 
         // THEN the task running that package should be stopped
         verify(tr2).performClearTaskLocked();
-        assertFalse(mLockTaskController.checkLockedTask(tr2));
+        assertFalse(mLockTaskController.isTaskLocked(tr2));
         // THEN the other task should remain locked
         assertEquals(LOCK_TASK_MODE_LOCKED, mLockTaskController.getLockTaskModeState());
-        assertTrue(mLockTaskController.checkLockedTask(tr1));
+        assertTrue(mLockTaskController.isTaskLocked(tr1));
         verifyLockTaskStarted(STATUS_BAR_MASK_LOCKED, DISABLE2_MASK);
 
         // WHEN removing the last package from whitelist
@@ -389,7 +431,7 @@ public class LockTaskControllerTest {
 
         // THEN the last task should be cleared, and the system should quit LockTask mode
         verify(tr1).performClearTaskLocked();
-        assertFalse(mLockTaskController.checkLockedTask(tr1));
+        assertFalse(mLockTaskController.isTaskLocked(tr1));
         assertEquals(LOCK_TASK_MODE_NONE, mLockTaskController.getLockTaskModeState());
         verifyLockTaskStopped(times(1));
     }

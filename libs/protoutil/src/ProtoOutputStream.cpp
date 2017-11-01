@@ -234,6 +234,10 @@ ProtoOutputStream::write(uint64_t fieldId, const char* val, size_t size)
         case TYPE_BYTES:
             writeUtf8StringImpl(id, val, size);
             return true;
+        case TYPE_MESSAGE:
+            // can directly write valid format of message bytes into ProtoOutputStream without calling start/end
+            writeMessageBytesImpl(id, val, size);
+            return true;
         default:
             ALOGW("Field type %d is not supported when writing char[] val.",
                     (int)((fieldId & FIELD_TYPE_MASK) >> FIELD_TYPE_SHIFT));
@@ -675,6 +679,16 @@ ProtoOutputStream::writeUtf8StringImpl(uint32_t id, const char* val, size_t size
     writeLengthDelimitedHeader(id, size);
     for (size_t i=0; i<size; i++) {
         mBuffer.writeRawByte((uint8_t)val[i]);
+    }
+}
+
+inline void
+ProtoOutputStream::writeMessageBytesImpl(uint32_t id, const char* val, size_t size)
+{
+    if (val == NULL) return;
+    writeLengthDelimitedHeader(id, size);
+    for (size_t i=0; i<size; i++) {
+        mBuffer.writeRawByte(val[i]);
     }
 }
 

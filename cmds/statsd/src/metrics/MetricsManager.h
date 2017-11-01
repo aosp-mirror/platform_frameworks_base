@@ -46,6 +46,8 @@ public:
     // Config source owner can call onDumpReport() to get all the metrics collected.
     std::vector<StatsLogReport> onDumpReport();
 
+    size_t byteSize();
+
 private:
     // All event tags that are interesting to my metrics.
     std::set<int> mTagIds;

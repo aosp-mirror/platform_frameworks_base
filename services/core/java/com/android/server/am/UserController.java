@@ -872,9 +872,7 @@ class UserController implements Handler.Callback {
             }
 
             if (foreground) {
-                // TODO: I don't think this does what the caller think it does. Seems to only
-                // remove one locked task and won't work if multiple locked tasks are present.
-                mInjector.clearLockTaskMode("startUser");
+                mInjector.clearAllLockedTasks("startUser");
             }
 
             final UserInfo userInfo = getUserInfo(userId);
@@ -2053,9 +2051,9 @@ class UserController implements Handler.Callback {
             }
         }
 
-        protected void clearLockTaskMode(String reason) {
+        protected void clearAllLockedTasks(String reason) {
             synchronized (mService) {
-                mService.mLockTaskController.clearLockTaskMode(reason);
+                mService.mLockTaskController.clearLockedTasks(reason);
             }
         }
     }

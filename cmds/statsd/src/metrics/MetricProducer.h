@@ -64,6 +64,8 @@ public:
         return mConditionSliced;
     };
 
+    virtual size_t byteSize() = 0;
+
 protected:
     const uint64_t mStartTimeNs;
 

@@ -127,6 +127,10 @@ void EventMetricProducer::onMatchedLogEventInternal(
     mProto->end(wrapperToken);
 }
 
+size_t EventMetricProducer::byteSize() {
+  return mProto->size();
+}
+
 }  // namespace statsd
 }  // namespace os
 }  // namespace android

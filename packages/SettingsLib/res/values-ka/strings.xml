@@ -210,7 +210,7 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"აირჩიეთ Bluetooth აუდიოს LDAC კოდეკის\nდაკვრის ხარისხი"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"სტრიმინგი: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="dns_tls" msgid="6773814174391131955">"DNS-ის TLS-ის მეშვეობით გადაცემა"</string>
-    <string name="dns_tls_summary" msgid="3692494150251071380">"ჩართვის შემთხვევაში, ცადეთ DNS-ის TLS-ის მეშვეობით გადაცემა პორტზე 853."</string>
+    <string name="dns_tls_summary" msgid="3692494150251071380">"ჩართვის შემთხვევაში, DNS-ის TLS-ის მეშვეობით გადაცემის ცდა, პორტზე 853."</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"უსადენო ეკრანის სერტიფიცირების ვარიანტების ჩვენება"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wi‑Fi-ს აღრიცხვის დონის გაზრდა, Wi‑Fi ამომრჩეველში ყოველ SSID RSSI-ზე ჩვენება"</string>
     <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"ჩართვის შემთხვევაში, Wi‑Fi უფრო აქტიურად შეეცდება მობილურ ინტერნეტზე გადართვას, როცა Wi‑Fi სიგნალი სუსტია"</string>

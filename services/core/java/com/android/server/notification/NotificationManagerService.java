@@ -460,7 +460,7 @@ public class NotificationManagerService extends SystemService {
                 mRankingHelper.readXml(parser, forRestore);
             }
             // No non-system managed services are allowed on low ram devices
-            if (!ActivityManager.isLowRamDeviceStatic()) {
+            if (canUseManagedServices()) {
                 if (mListeners.getConfig().xmlTag.equals(parser.getName())) {
                     mListeners.readXml(parser);
                     migratedManagedServices = true;
@@ -546,12 +546,6 @@ public class NotificationManagerService extends SystemService {
         mConditionProviders.writeXml(out, forBackup);
         out.endTag(null, TAG_NOTIFICATION_POLICY);
         out.endDocument();
-    }
-
-    /** Use this to check if a package can post a notification or toast. */
-    private boolean checkNotificationOp(String pkg, int uid) {
-        return mAppOps.checkOp(AppOpsManager.OP_POST_NOTIFICATION, uid, pkg)
-                == AppOpsManager.MODE_ALLOWED && !isPackageSuspendedForUser(pkg, uid);
     }
 
     private static final class ToastRecord
@@ -1225,7 +1219,6 @@ public class NotificationManagerService extends SystemService {
     void setAccessibilityManager(AccessibilityManager am) {
         mAccessibilityManager = am;
     }
-
 
     // TODO: All tests should use this init instead of the one-off setters above.
     @VisibleForTesting
@@ -2818,19 +2811,25 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void setNotificationPolicyAccessGranted(String pkg, boolean granted)
                 throws RemoteException {
+            setNotificationPolicyAccessGrantedForUser(
+                    pkg, getCallingUserHandle().getIdentifier(), granted);
+        }
+
+        @Override
+        public void setNotificationPolicyAccessGrantedForUser(
+                String pkg, int userId, boolean granted) {
             checkCallerIsSystemOrShell();
             final long identity = Binder.clearCallingIdentity();
             try {
-                if (!mActivityManager.isLowRamDevice()) {
+                if (canUseManagedServices()) {
                     mConditionProviders.setPackageOrComponentEnabled(
-                            pkg, getCallingUserHandle().getIdentifier(), true, granted);
+                            pkg, userId, true, granted);
 
                     getContext().sendBroadcastAsUser(new Intent(
                             NotificationManager.ACTION_NOTIFICATION_POLICY_ACCESS_GRANTED_CHANGED)
                                     .setPackage(pkg)
                                     .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY),
-                            getCallingUserHandle(), null);
-
+                            UserHandle.of(userId), null);
                     savePolicyFile();
                 }
             } finally {
@@ -2918,18 +2917,17 @@ public class NotificationManagerService extends SystemService {
             checkCallerIsSystemOrShell();
             final long identity = Binder.clearCallingIdentity();
             try {
-                if (!mActivityManager.isLowRamDevice()) {
+                if (canUseManagedServices()) {
                     mConditionProviders.setPackageOrComponentEnabled(listener.flattenToString(),
                             userId, false, granted);
                     mListeners.setPackageOrComponentEnabled(listener.flattenToString(),
                             userId, true, granted);
 
                     getContext().sendBroadcastAsUser(new Intent(
-                                    NotificationManager.ACTION_NOTIFICATION_POLICY_ACCESS_GRANTED_CHANGED)
-
+                            NotificationManager.ACTION_NOTIFICATION_POLICY_ACCESS_GRANTED_CHANGED)
                                     .setPackage(listener.getPackageName())
                                     .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY),
-                            getCallingUserHandle(), null);
+                            UserHandle.of(userId), null);
 
                     savePolicyFile();
                 }
@@ -2945,7 +2943,7 @@ public class NotificationManagerService extends SystemService {
             checkCallerIsSystemOrShell();
             final long identity = Binder.clearCallingIdentity();
             try {
-                if (!mActivityManager.isLowRamDevice()) {
+                if (canUseManagedServices()) {
                     mConditionProviders.setPackageOrComponentEnabled(assistant.flattenToString(),
                             userId, false, granted);
                     mAssistants.setPackageOrComponentEnabled(assistant.flattenToString(),
@@ -2955,7 +2953,7 @@ public class NotificationManagerService extends SystemService {
                             NotificationManager.ACTION_NOTIFICATION_POLICY_ACCESS_GRANTED_CHANGED)
                                     .setPackage(assistant.getPackageName())
                                     .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY),
-                            getCallingUserHandle(), null);
+                            UserHandle.of(userId), null);
 
                     savePolicyFile();
                 }
@@ -5432,6 +5430,11 @@ public class NotificationManagerService extends SystemService {
             // Package not found.
             return false;
         }
+    }
+
+    private boolean canUseManagedServices() {
+        return !mActivityManager.isLowRamDevice()
+                || mPackageManagerClient.hasSystemFeature(PackageManager.FEATURE_WATCH);
     }
 
     private class TrimCache {

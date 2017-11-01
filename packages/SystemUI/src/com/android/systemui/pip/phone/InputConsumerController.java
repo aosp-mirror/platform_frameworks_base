@@ -18,6 +18,8 @@ package com.android.systemui.pip.phone;
 
 import static android.view.WindowManager.INPUT_CONSUMER_PIP;
 
+import android.os.Binder;
+import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.util.Log;
@@ -77,7 +79,8 @@ public class InputConsumerController {
         }
     }
 
-    private IWindowManager mWindowManager;
+    private final IWindowManager mWindowManager;
+    private final IBinder mToken;
 
     private PipInputEventReceiver mInputEventReceiver;
     private TouchListener mListener;
@@ -85,6 +88,7 @@ public class InputConsumerController {
 
     public InputConsumerController(IWindowManager windowManager) {
         mWindowManager = windowManager;
+        mToken = new Binder();
         registerInputConsumer();
     }
 
@@ -122,7 +126,7 @@ public class InputConsumerController {
             final InputChannel inputChannel = new InputChannel();
             try {
                 mWindowManager.destroyInputConsumer(INPUT_CONSUMER_PIP);
-                mWindowManager.createInputConsumer(INPUT_CONSUMER_PIP, inputChannel);
+                mWindowManager.createInputConsumer(mToken, INPUT_CONSUMER_PIP, inputChannel);
             } catch (RemoteException e) {
                 Log.e(TAG, "Failed to create PIP input consumer", e);
             }

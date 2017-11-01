@@ -80,7 +80,6 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_APP_TRANSITIO
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_BOOT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_CONFIGURATION;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_DISPLAY;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_DRAG;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS_LIGHT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_INPUT_METHOD;
@@ -202,7 +201,6 @@ import android.view.IWindowSession;
 import android.view.IWindowSessionCallback;
 import android.view.InputChannel;
 import android.view.InputDevice;
-import android.view.InputEvent;
 import android.view.InputEventReceiver;
 import android.view.KeyEvent;
 import android.view.MagnificationSpec;
@@ -3286,7 +3284,7 @@ public class WindowManagerService extends IWindowManager.Stub
             // Notify whether the docked stack exists for the current user
             final DisplayContent displayContent = getDefaultDisplayContentLocked();
             final TaskStack stack =
-                    displayContent.getSplitScreenPrimaryStackStackIgnoringVisibility();
+                    displayContent.getSplitScreenPrimaryStackIgnoringVisibility();
             displayContent.mDividerControllerLocked.notifyDockedStackExistsChanged(
                     stack != null && stack.hasTaskForUser(newUserId));
 
@@ -6137,9 +6135,10 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-    public void createInputConsumer(String name, InputChannel inputChannel) {
+    public void createInputConsumer(IBinder token, String name, InputChannel inputChannel) {
         synchronized (mWindowMap) {
-            mInputMonitor.createInputConsumer(name, inputChannel);
+            mInputMonitor.createInputConsumer(token, name, inputChannel, Binder.getCallingPid(),
+                    Binder.getCallingUserHandle());
         }
     }
 
@@ -6908,7 +6907,7 @@ public class WindowManagerService extends IWindowManager.Stub
     public int getDockedStackSide() {
         synchronized (mWindowMap) {
             final TaskStack dockedStack = getDefaultDisplayContentLocked()
-                    .getSplitScreenPrimaryStackStackIgnoringVisibility();
+                    .getSplitScreenPrimaryStackIgnoringVisibility();
             return dockedStack == null ? DOCKED_INVALID : dockedStack.getDockSide();
         }
     }

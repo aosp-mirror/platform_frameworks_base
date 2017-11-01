@@ -40,8 +40,9 @@ import android.view.WindowManagerGlobal;
 import com.android.systemui.pip.BasePipManager;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.component.ExpandPipEvent;
+import com.android.systemui.recents.misc.SysUiTaskStackChangeListener;
 import com.android.systemui.recents.misc.SystemServicesProxy;
-import com.android.systemui.recents.misc.TaskStackChangeListener;
+import com.android.systemui.shared.system.ActivityManagerWrapper;
 
 import java.io.PrintWriter;
 
@@ -69,7 +70,7 @@ public class PipManager implements BasePipManager {
     /**
      * Handler for system task stack changes.
      */
-    TaskStackChangeListener mTaskStackListener = new TaskStackChangeListener() {
+    SysUiTaskStackChangeListener mTaskStackListener = new SysUiTaskStackChangeListener() {
         @Override
         public void onActivityPinned(String packageName, int userId, int taskId, int stackId) {
             mTouchHandler.onActivityPinned();
@@ -202,9 +203,9 @@ public class PipManager implements BasePipManager {
                 StackInfo stackInfo = mActivityManager.getStackInfo(
                         WINDOWING_MODE_PINNED, ACTIVITY_TYPE_UNDEFINED);
                 if (stackInfo != null && stackInfo.taskIds != null) {
-                    SystemServicesProxy ssp = SystemServicesProxy.getInstance(mContext);
+                    ActivityManagerWrapper am = ActivityManagerWrapper.getInstance();
                     for (int taskId : stackInfo.taskIds) {
-                        ssp.cancelThumbnailTransition(taskId);
+                        am.cancelThumbnailTransition(taskId);
                     }
                 }
             } catch (RemoteException e) {

@@ -1452,17 +1452,17 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     /**
      * @return The primary split-screen stack, but only if it is visible, and {@code null} otherwise.
      */
-    TaskStack getSplitScreenPrimaryStackStack() {
-        TaskStack stack = mTaskStackContainers.getSplitScreenPrimaryStackStack();
+    TaskStack getSplitScreenPrimaryStack() {
+        TaskStack stack = mTaskStackContainers.getSplitScreenPrimaryStack();
         return (stack != null && stack.isVisible()) ? stack : null;
     }
 
     /**
-     * Like {@link #getSplitScreenPrimaryStackStack}, but also returns the stack if it's currently
+     * Like {@link #getSplitScreenPrimaryStack}, but also returns the stack if it's currently
      * not visible.
      */
-    TaskStack getSplitScreenPrimaryStackStackIgnoringVisibility() {
-        return mTaskStackContainers.getSplitScreenPrimaryStackStack();
+    TaskStack getSplitScreenPrimaryStackIgnoringVisibility() {
+        return mTaskStackContainers.getSplitScreenPrimaryStack();
     }
 
     TaskStack getPinnedStack() {
@@ -1877,7 +1877,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             mTouchExcludeRegion.op(mTmpRegion, Region.Op.UNION);
         }
         // TODO(multi-display): Support docked stacks on secondary displays.
-        if (mDisplayId == DEFAULT_DISPLAY && getSplitScreenPrimaryStackStack() != null) {
+        if (mDisplayId == DEFAULT_DISPLAY && getSplitScreenPrimaryStack() != null) {
             mDividerControllerLocked.getTouchRegion(mTmpRect);
             mTmpRegion.set(mTmpRect);
             mTouchExcludeRegion.op(mTmpRegion, Op.UNION);
@@ -2232,7 +2232,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         if (pinnedStack != null) {
             pw.println(prefix + "pinnedStack=" + pinnedStack.getName());
         }
-        final TaskStack splitScreenPrimaryStack = getSplitScreenPrimaryStackStack();
+        final TaskStack splitScreenPrimaryStack = getSplitScreenPrimaryStack();
         if (splitScreenPrimaryStack != null) {
             pw.println(prefix + "splitScreenPrimaryStack=" + splitScreenPrimaryStack.getName());
         }
@@ -3401,7 +3401,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             return mPinnedStack;
         }
 
-        TaskStack getSplitScreenPrimaryStackStack() {
+        TaskStack getSplitScreenPrimaryStack() {
             return mSplitScreenPrimaryStack;
         }
 

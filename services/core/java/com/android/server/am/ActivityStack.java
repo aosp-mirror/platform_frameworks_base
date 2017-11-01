@@ -3474,7 +3474,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 }
 
                 if (endTask) {
-                    mService.mLockTaskController.removeLockedTask(task);
+                    mService.mLockTaskController.clearLockedTask(task);
                 }
             } else if (r.state != ActivityState.PAUSING) {
                 // If the activity is PAUSING, we will complete the finish once
@@ -4334,8 +4334,9 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         }
         Slog.i(TAG, "moveTaskToBack: " + tr);
 
-        // If the task is locked, then show the lock task toast
-        if (mService.mLockTaskController.checkLockedTask(tr)) {
+        // In LockTask mode, moving a locked task to the back of the stack may expose unlocked
+        // ones. Therefore we need to check if this operation is allowed.
+        if (!mService.mLockTaskController.canMoveTaskToBack(tr)) {
             return false;
         }
 

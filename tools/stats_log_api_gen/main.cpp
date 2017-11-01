@@ -56,6 +56,7 @@ cpp_type_name(java_type_t type)
         case JAVA_TYPE_BOOLEAN:
             return "bool";
         case JAVA_TYPE_INT:
+        case JAVA_TYPE_ENUM:
             return "int32_t";
         case JAVA_TYPE_LONG:
             return "int64_t";
@@ -77,6 +78,7 @@ java_type_name(java_type_t type)
         case JAVA_TYPE_BOOLEAN:
             return "boolean";
         case JAVA_TYPE_INT:
+        case JAVA_TYPE_ENUM:
             return "int";
         case JAVA_TYPE_LONG:
             return "long";
@@ -173,7 +175,7 @@ write_stats_log_header(FILE* out, const Atoms& atoms)
     fprintf(out, " */\n");
     fprintf(out, "\n");
     fprintf(out, "/**\n");
-    fprintf(out, " * Constants for event codes.\n");
+    fprintf(out, " * Constants for atom codes.\n");
     fprintf(out, " */\n");
     fprintf(out, "enum {\n");
 
@@ -240,9 +242,9 @@ write_stats_log_java(FILE* out, const Atoms& atoms)
     fprintf(out, " * @hide\n");
     fprintf(out, " */\n");
     fprintf(out, "public final class StatsLog {\n");
-    fprintf(out, "    // Constants for event codes.\n");
+    fprintf(out, "    // Constants for atom codes.\n");
 
-    // Print constants
+    // Print constants for the atom codes.
     for (set<AtomDecl>::const_iterator atom = atoms.decls.begin();
             atom != atoms.decls.end(); atom++) {
         string constant = make_constant_name(atom->name);
@@ -259,6 +261,27 @@ write_stats_log_java(FILE* out, const Atoms& atoms)
         fprintf(out, "    public static final int %s = %d;\n", constant.c_str(), atom->code);
     }
     fprintf(out, "\n");
+
+    // Print constants for the enum values.
+    fprintf(out, "    // Constants for enum values.\n\n");
+    for (set<AtomDecl>::const_iterator atom = atoms.decls.begin();
+            atom != atoms.decls.end(); atom++) {
+        for (vector<AtomField>::const_iterator field = atom->fields.begin();
+                field != atom->fields.end(); field++) {
+          if (field->javaType == JAVA_TYPE_ENUM) {
+            fprintf(out, "    // Values for %s.%s\n", atom->message.c_str(), field->name.c_str());
+            for (map<int, string>::const_iterator value = field->enumValues.begin();
+                 value != field->enumValues.end(); value++) {
+              fprintf(out, "    public static final int %s__%s__%s = %d;\n",
+                      make_constant_name(atom->message).c_str(),
+                      make_constant_name(field->name).c_str(),
+                      make_constant_name(value->second).c_str(),
+                      value->first);
+            }
+            fprintf(out, "\n");
+          }
+        }
+    }
 
     // Print write methods
     fprintf(out, "    // Write methods\n");
@@ -286,6 +309,7 @@ jni_type_name(java_type_t type)
         case JAVA_TYPE_BOOLEAN:
             return "jboolean";
         case JAVA_TYPE_INT:
+        case JAVA_TYPE_ENUM:
             return "jint";
         case JAVA_TYPE_LONG:
             return "jlong";
@@ -311,6 +335,7 @@ jni_function_name(const vector<java_type_t>& signature)
                 result += "_boolean";
                 break;
             case JAVA_TYPE_INT:
+            case JAVA_TYPE_ENUM:
                 result += "_int";
                 break;
             case JAVA_TYPE_LONG:
@@ -340,6 +365,7 @@ java_type_signature(java_type_t type)
         case JAVA_TYPE_BOOLEAN:
             return "Z";
         case JAVA_TYPE_INT:
+        case JAVA_TYPE_ENUM:
             return "I";
         case JAVA_TYPE_LONG:
             return "J";

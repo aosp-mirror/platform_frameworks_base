@@ -79,6 +79,7 @@ import com.android.systemui.UiOffloadThread;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsImpl;
 import com.android.systemui.shared.recents.model.Task;
+import com.android.systemui.shared.system.TaskStackChangeListeners;
 import com.android.systemui.statusbar.policy.UserInfoController;
 
 import java.util.List;
@@ -364,32 +365,6 @@ public class SystemServicesProxy {
         return insets.right > 0;
     }
 
-    /**
-     * Cancels the current window transtion to/from Recents for the given task id.
-     */
-    public void cancelWindowTransition(int taskId) {
-        if (mIam == null) return;
-
-        try {
-            mIam.cancelTaskWindowTransition(taskId);
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * Cancels the current thumbnail transtion to/from Recents for the given task id.
-     */
-    public void cancelThumbnailTransition(int taskId) {
-        if (mIam == null) return;
-
-        try {
-            mIam.cancelTaskThumbnailTransition(taskId);
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        }
-    }
-
     /** Set the task's windowing mode. */
     public void setTaskWindowingMode(int taskId, int windowingMode) {
         if (mIam == null) return;
@@ -411,18 +386,6 @@ public class SystemServicesProxy {
                 mIam.removeTask(taskId);
             } catch (RemoteException e) {
                 e.printStackTrace();
-            }
-        });
-    }
-
-    /**
-     * Sends a message to close other system windows.
-     */
-    public void sendCloseSystemWindows(String reason) {
-        mUiOffloadThread.submit(() -> {
-            try {
-                mIam.closeSystemDialogs(reason);
-            } catch (RemoteException e) {
             }
         });
     }
@@ -623,7 +586,7 @@ public class SystemServicesProxy {
      * Registers a task stack listener with the system.
      * This should be called on the main thread.
      */
-    public void registerTaskStackListener(TaskStackChangeListener listener) {
+    public void registerTaskStackListener(SysUiTaskStackChangeListener listener) {
         if (mIam == null) return;
 
         synchronized (mTaskStackChangeListeners) {

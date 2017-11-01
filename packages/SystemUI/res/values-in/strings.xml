@@ -233,8 +233,8 @@
     <string name="accessibility_quick_settings_work_mode_on" msgid="7650588553988014341">"Mode kerja aktif."</string>
     <string name="accessibility_quick_settings_work_mode_changed_off" msgid="5605534876107300711">"Mode kerja dinonaktifkan."</string>
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="249840330756998612">"Mode kerja diaktifkan."</string>
-    <string name="accessibility_quick_settings_data_saver_changed_off" msgid="650231949881093289">"Penghemat Data nonaktif."</string>
-    <string name="accessibility_quick_settings_data_saver_changed_on" msgid="4218725402373934151">"Penghemat Data diaktifkan."</string>
+    <string name="accessibility_quick_settings_data_saver_changed_off" msgid="650231949881093289">"Penghemat Kuota Internet nonaktif."</string>
+    <string name="accessibility_quick_settings_data_saver_changed_on" msgid="4218725402373934151">"Penghemat Kuota Internet diaktifkan."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"Kecerahan tampilan"</string>
     <string name="accessibility_ambient_display_charging" msgid="9084521679384069087">"Mengisi daya"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"Data 2G-3G dijeda"</string>
@@ -636,9 +636,9 @@
     <string name="headset" msgid="4534219457597457353">"Headset"</string>
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"Headphone terhubung"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"Headset terhubung"</string>
-    <string name="data_saver" msgid="5037565123367048522">"Penghemat Data"</string>
-    <string name="accessibility_data_saver_on" msgid="8454111686783887148">"Penghemat Data aktif"</string>
-    <string name="accessibility_data_saver_off" msgid="8841582529453005337">"Penghemat Data nonaktif"</string>
+    <string name="data_saver" msgid="5037565123367048522">"Penghemat Kuota Internet"</string>
+    <string name="accessibility_data_saver_on" msgid="8454111686783887148">"Penghemat Kuota Internet aktif"</string>
+    <string name="accessibility_data_saver_off" msgid="8841582529453005337">"Penghemat Kuota Internet nonaktif"</string>
     <string name="switch_bar_on" msgid="1142437840752794229">"Aktif"</string>
     <string name="switch_bar_off" msgid="8803270596930432874">"Nonaktif"</string>
     <string name="nav_bar" msgid="1993221402773877607">"Bilah navigasi"</string>

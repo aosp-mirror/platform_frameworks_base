@@ -145,7 +145,8 @@ public class GeofenceManager implements LocationListener, PendingIntent.OnFinish
      */
     private void updateMinInterval() {
         mEffectiveMinIntervalMs = Settings.Global.getLong(mResolver,
-                Settings.Global.LOCATION_BACKGROUND_THROTTLE_INTERVAL_MS, DEFAULT_MIN_INTERVAL_MS);
+                Settings.Global.LOCATION_BACKGROUND_THROTTLE_PROXIMITY_ALERT_INTERVAL_MS,
+                DEFAULT_MIN_INTERVAL_MS);
     }
 
     public void addFence(LocationRequest request, Geofence geofence, PendingIntent intent,

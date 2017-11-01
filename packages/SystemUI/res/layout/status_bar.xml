@@ -48,6 +48,11 @@
         android:paddingEnd="8dp"
         android:orientation="horizontal"
         >
+        <ViewStub
+            android:id="@+id/operator_name"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout="@layout/operator_name" />
 
         <!-- The alpha of this area is controlled from both PhoneStatusBarTransitions and
              PhoneStatusBar (DISABLE_NOTIFICATION_ICONS). -->

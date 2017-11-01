@@ -98,7 +98,8 @@ public class Am extends BaseCommand {
     static final class MyShellCallback extends ShellCallback {
         boolean mActive = true;
 
-        @Override public ParcelFileDescriptor onOpenOutputFile(String path, String seLinuxContext) {
+        @Override public ParcelFileDescriptor onOpenFile(String path, String seLinuxContext,
+                String mode) {
             if (!mActive) {
                 System.err.println("Open attempt after active for: " + path);
                 return null;

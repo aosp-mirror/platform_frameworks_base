@@ -45,8 +45,8 @@ import com.android.systemui.classifier.FalsingLog;
 import com.android.systemui.classifier.FalsingManager;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.recents.Recents;
+import com.android.systemui.recents.misc.SysUiTaskStackChangeListener;
 import com.android.systemui.recents.misc.SystemServicesProxy;
-import com.android.systemui.recents.misc.TaskStackChangeListener;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.StatusBarState;
@@ -305,10 +305,10 @@ public class CarStatusBar extends StatusBar implements
     }
 
     /**
-     * An implementation of TaskStackChangeListener, that listens for changes in the system task
+     * An implementation of SysUiTaskStackChangeListener, that listens for changes in the system task
      * stack and notifies the navigation bar.
      */
-    private class TaskStackListenerImpl extends TaskStackChangeListener {
+    private class TaskStackListenerImpl extends SysUiTaskStackChangeListener {
         @Override
         public void onTaskStackChanged() {
             SystemServicesProxy ssp = Recents.getSystemServices();

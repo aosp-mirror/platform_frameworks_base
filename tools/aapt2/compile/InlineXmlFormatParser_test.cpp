@@ -141,4 +141,47 @@ TEST(InlineXmlFormatParserTest, ExtractTwoXmlResources) {
   EXPECT_THAT(extracted_doc_drawable->root->name, StrEq("vector"));
 }
 
+TEST(InlineXmlFormatParserTest, ExtractNestedXmlResources) {
+  std::unique_ptr<IAaptContext> context = test::ContextBuilder().Build();
+  std::unique_ptr<xml::XmlResource> doc = test::BuildXmlDom(R"(
+      <base_root xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:aapt="http://schemas.android.com/aapt">
+          <aapt:attr name="inline_xml">
+              <inline_root>
+                  <aapt:attr name="nested_inline_xml">
+                      <nested_inline_root/>
+                  </aapt:attr>
+                  <aapt:attr name="another_nested_inline_xml">
+                      <root/>
+                  </aapt:attr>
+              </inline_root>
+          </aapt:attr>
+          <aapt:attr name="turtles">
+              <root1>
+                  <aapt:attr name="all">
+                      <root2>
+                          <aapt:attr name="the">
+                              <root3>
+                                  <aapt:attr name="way">
+                                      <root4>
+                                          <aapt:attr name="down">
+                                              <root5/>
+                                          </aapt:attr>
+                                      </root4>
+                                  </aapt:attr>
+                              </root3>
+                          </aapt:attr>
+                      </root2>
+                  </aapt:attr>
+              </root1>
+          </aapt:attr>
+      </base_root>)");
+
+  doc->file.name = test::ParseNameOrDie("layout/main");
+
+  InlineXmlFormatParser parser;
+  ASSERT_TRUE(parser.Consume(context.get(), doc.get()));
+  // Confirm that all of the nested inline xmls are parsed out.
+  ASSERT_THAT(parser.GetExtractedInlineXmlDocuments(), SizeIs(8u));
+}
 }  // namespace aapt
