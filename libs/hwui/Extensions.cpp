@@ -59,6 +59,7 @@ Extensions::Extensions() {
     mHas1BitStencil = extensions.has("GL_OES_stencil1");
     mHas4BitStencil = extensions.has("GL_OES_stencil4");
     mHasUnpackSubImage = extensions.has("GL_EXT_unpack_subimage");
+    mHasRenderableFloatTexture = extensions.has("GL_OES_texture_half_float");
 
     mHasSRGB = mVersionMajor >= 3 || extensions.has("GL_EXT_sRGB");
     mHasSRGBWriteControl = extensions.has("GL_EXT_sRGB_write_control");
