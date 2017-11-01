@@ -994,7 +994,6 @@ public final class MediaDrm {
      * {@link #PROPERTY_VENDOR}, {@link #PROPERTY_VERSION},
      * {@link #PROPERTY_DESCRIPTION}, {@link #PROPERTY_ALGORITHMS}
      */
-    /* FIXME this throws IllegalStateException for invalid property names */
     @NonNull
     public native String getPropertyString(@NonNull @StringProperty String propertyName);
 
@@ -1002,7 +1001,6 @@ public final class MediaDrm {
      * Byte array property name: the device unique identifier is established during
      * device provisioning and provides a means of uniquely identifying each device.
      */
-    /* FIXME this throws IllegalStateException for invalid property names */
     public static final String PROPERTY_DEVICE_UNIQUE_ID = "deviceUniqueId";
 
     /** @hide */
