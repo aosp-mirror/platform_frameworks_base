@@ -1361,24 +1361,26 @@ public class GnssLocationProvider implements LocationProviderInterface {
     public boolean sendExtraCommand(String command, Bundle extras) {
 
         long identity = Binder.clearCallingIdentity();
-        boolean result = false;
+        try {
+            boolean result = false;
 
-        if ("delete_aiding_data".equals(command)) {
-            result = deleteAidingData(extras);
-        } else if ("force_time_injection".equals(command)) {
-            requestUtcTime();
-            result = true;
-        } else if ("force_xtra_injection".equals(command)) {
-            if (mSupportsXtra) {
-                xtraDownloadRequest();
+            if ("delete_aiding_data".equals(command)) {
+                result = deleteAidingData(extras);
+            } else if ("force_time_injection".equals(command)) {
+                requestUtcTime();
                 result = true;
+            } else if ("force_xtra_injection".equals(command)) {
+                if (mSupportsXtra) {
+                    xtraDownloadRequest();
+                    result = true;
+                }
+            } else {
+                Log.w(TAG, "sendExtraCommand: unknown command " + command);
             }
-        } else {
-            Log.w(TAG, "sendExtraCommand: unknown command " + command);
+            return result;
+        } finally {
+            Binder.restoreCallingIdentity(identity);
         }
-
-        Binder.restoreCallingIdentity(identity);
-        return result;
     }
 
     private IGpsGeofenceHardware mGpsGeofenceBinder = new IGpsGeofenceHardware.Stub() {
