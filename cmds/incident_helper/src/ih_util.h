@@ -21,6 +21,10 @@
 #include <vector>
 #include <sstream>
 
+#include <android/util/ProtoOutputStream.h>
+
+using namespace android::util;
+
 typedef std::vector<std::string> header_t;
 typedef std::vector<std::string> record_t;
 typedef std::string (*trans_func) (const std::string&);
@@ -52,6 +56,12 @@ record_t parseRecord(const std::string& line, const std::string& delimiters = DE
 bool hasPrefix(std::string* line, const char* key);
 
 /**
+ * Converts string to the desired type
+ */
+int toInt(const std::string& s);
+long long toLongLong(const std::string& s);
+
+/**
  * Reader class reads data from given fd in streaming fashion.
  * The buffer size is controlled by capacity parameter.
  */
@@ -76,6 +86,24 @@ private:
     std::string mStatus;
     // end of read
     inline bool EOR() { return mFd == -1 && mBufSize == 0; };
+};
+
+/**
+ * The class contains a mapping between table headers to its field ids.
+ * And allow users to insert the field values to proto based on its header name.
+ */
+class Table
+{
+public:
+    Table(const char* names[], const uint64_t ids[], const int count);
+    ~Table();
+
+    bool insertField(ProtoOutputStream& proto, const std::string& name, const std::string& value);
+
+private:
+    const char** mFieldNames;
+    const uint64_t* mFieldIds;
+    const int mFieldCount;
 };
 
 #endif  // INCIDENT_HELPER_UTIL_H

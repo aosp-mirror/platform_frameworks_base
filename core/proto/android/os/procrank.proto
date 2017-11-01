@@ -18,6 +18,8 @@ syntax = "proto2";
 option java_multiple_files = true;
 option java_outer_classname = "ProcrankProto";
 
+import "frameworks/base/tools/streaming_proto/stream.proto";
+
 package android.os;
 
 //Memory usage of running processes
@@ -31,6 +33,8 @@ message Procrank {
 
 // Next Tag: 11
 message ProcessProto {
+    option (stream_proto.stream).enable_fields_mapping = true;
+
     // ID of the process
     optional int32 pid = 1;
 

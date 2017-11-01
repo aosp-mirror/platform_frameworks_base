@@ -25,6 +25,25 @@ cc_defaults {
     ],
 }
 
+cc_library {
+    name: "streamingflags",
+    host_supported: true,
+    proto: {
+        export_proto_headers: true,
+        include_dirs: ["external/protobuf/src"],
+    },
+
+    target: {
+        host: {
+            proto: {
+                type: "full",
+            },
+            srcs: [
+                "stream.proto",
+            ],
+        },
+    },
+}
 
 cc_binary_host {
     name: "protoc-gen-javastream",
@@ -44,4 +63,5 @@ cc_binary_host {
 
     defaults: ["protoc-gen-stream-defaults"],
     shared_libs: ["libprotoc"],
+    static_libs: ["streamingflags"],
 }
