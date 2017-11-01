@@ -26,41 +26,20 @@ namespace android {
 namespace uirenderer {
 namespace renderthread {
 
+class Frame;
 class RenderThread;
-class EglManager;
-
-class Frame {
-public:
-    EGLint width() const { return mWidth; }
-    EGLint height() const { return mHeight; }
-
-    // See: https://www.khronos.org/registry/egl/extensions/EXT/EGL_EXT_buffer_age.txt
-    // for what this means
-    EGLint bufferAge() const { return mBufferAge; }
-
-private:
-    friend class EglManager;
-
-    EGLSurface mSurface;
-    EGLint mWidth;
-    EGLint mHeight;
-    EGLint mBufferAge;
-
-    // Maps from 0,0 in top-left to 0,0 in bottom-left
-    // If out is not an EGLint[4] you're going to have a bad time
-    void map(const SkRect& in, EGLint* out) const;
-};
 
 // This class contains the shared global EGL objects, such as EGLDisplay
 // and EGLConfig, which are re-used by CanvasContext
 class EglManager {
 public:
+    static const char* eglErrorString();
     // Returns true on success, false on failure
     void initialize();
 
     bool hasEglContext();
 
-    EGLSurface createSurface(EGLNativeWindowType window);
+    EGLSurface createSurface(EGLNativeWindowType window, bool wideColorGamut);
     void destroySurface(EGLSurface surface);
 
     void destroy();
@@ -79,36 +58,29 @@ public:
     // Returns true iff the surface is now preserving buffers.
     bool setPreserveBuffer(EGLSurface surface, bool preserve);
 
-    void setTextureAtlas(const sp<GraphicBuffer>& buffer, int64_t* map, size_t mapSize);
-
     void fence();
 
 private:
     friend class RenderThread;
-
     explicit EglManager(RenderThread& thread);
     // EglContext is never destroyed, method is purposely not implemented
     ~EglManager();
 
     void initExtensions();
     void createPBufferSurface();
-    void loadConfig();
+    void loadConfigs();
     void createContext();
-    void initAtlas();
     EGLint queryBufferAge(EGLSurface surface);
 
     RenderThread& mRenderThread;
 
     EGLDisplay mEglDisplay;
     EGLConfig mEglConfig;
+    EGLConfig mEglConfigWideGamut;
     EGLContext mEglContext;
     EGLSurface mPBufferSurface;
 
     EGLSurface mCurrentSurface;
-
-    sp<GraphicBuffer> mAtlasBuffer;
-    int64_t* mAtlasMap;
-    size_t mAtlasMapSize;
 
     enum class SwapBehavior {
         Discard,

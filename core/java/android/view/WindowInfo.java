@@ -46,6 +46,7 @@ public class WindowInfo implements Parcelable {
     public List<IBinder> childTokens;
     public CharSequence title;
     public int accessibilityIdOfAnchor = View.NO_ID;
+    public boolean inPictureInPicture;
 
     private WindowInfo() {
         /* do nothing - hide constructor */
@@ -69,6 +70,7 @@ public class WindowInfo implements Parcelable {
         window.boundsInScreen.set(other.boundsInScreen);
         window.title = other.title;
         window.accessibilityIdOfAnchor = other.accessibilityIdOfAnchor;
+        window.inPictureInPicture = other.inPictureInPicture;
 
         if (other.childTokens != null && !other.childTokens.isEmpty()) {
             if (window.childTokens == null) {
@@ -101,6 +103,7 @@ public class WindowInfo implements Parcelable {
         boundsInScreen.writeToParcel(parcel, flags);
         parcel.writeCharSequence(title);
         parcel.writeInt(accessibilityIdOfAnchor);
+        parcel.writeInt(inPictureInPicture ? 1 : 0);
 
         if (childTokens != null && !childTokens.isEmpty()) {
             parcel.writeInt(1);
@@ -136,6 +139,7 @@ public class WindowInfo implements Parcelable {
         boundsInScreen.readFromParcel(parcel);
         title = parcel.readCharSequence();
         accessibilityIdOfAnchor = parcel.readInt();
+        inPictureInPicture = (parcel.readInt() == 1);
 
         final boolean hasChildren = (parcel.readInt() == 1);
         if (hasChildren) {
@@ -156,6 +160,7 @@ public class WindowInfo implements Parcelable {
         if (childTokens != null) {
             childTokens.clear();
         }
+        inPictureInPicture = false;
     }
 
     public static final Parcelable.Creator<WindowInfo> CREATOR =

@@ -21,7 +21,7 @@ import com.android.internal.textservice.ISpellCheckerSession;
 import android.view.textservice.SpellCheckerInfo;
 
 /**
- * Interface to the text service session.
+ * (Per-session) IPC channels from TextServicesManagerService to spell checker client applications.
  * @hide
  */
 interface ITextServicesSessionListener {

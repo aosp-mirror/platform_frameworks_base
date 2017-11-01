@@ -15,6 +15,8 @@
  */
 package android.content.pm;
 
+import android.content.Intent;
+import android.content.IntentSender;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ShortcutInfo;
 
@@ -41,6 +43,11 @@ interface IShortcutService {
 
     boolean updateShortcuts(String packageName, in ParceledListSlice shortcuts, int userId);
 
+    boolean requestPinShortcut(String packageName, in ShortcutInfo shortcut,
+            in IntentSender resultIntent, int userId);
+
+    Intent createShortcutResultIntent(String packageName, in ShortcutInfo shortcut, int userId);
+
     void disableShortcuts(String packageName, in List shortcutIds, CharSequence disabledMessage,
             int disabledMessageResId, int userId);
 
@@ -63,4 +70,6 @@ interface IShortcutService {
     byte[] getBackupPayload(int user);
 
     void applyRestore(in byte[] payload, int user);
+
+    boolean isRequestPinItemSupported(int user, int requestType);
 }

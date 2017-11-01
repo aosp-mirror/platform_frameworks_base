@@ -22,8 +22,8 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 
 public class StatusBarIconList {
-    private ArrayList<String> mSlots = new ArrayList<>();
-    private ArrayList<StatusBarIcon> mIcons = new ArrayList<>();
+    protected ArrayList<String> mSlots = new ArrayList<>();
+    protected ArrayList<StatusBarIcon> mIcons = new ArrayList<>();
 
     public StatusBarIconList(String[] slots) {
         final int N = slots.length;

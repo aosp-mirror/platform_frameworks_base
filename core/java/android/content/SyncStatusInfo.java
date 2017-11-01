@@ -24,7 +24,11 @@ import java.util.ArrayList;
 
 /** @hide */
 public class SyncStatusInfo implements Parcelable {
-    static final int VERSION = 2;
+    private static final String TAG = "Sync";
+
+    static final int VERSION = 4;
+
+    private static final int MAX_EVENT_COUNT = 10;
 
     public final int authorityId;
     public long totalElapsedTime;
@@ -47,7 +51,8 @@ public class SyncStatusInfo implements Parcelable {
   // no race conditions when accessing this list
   private ArrayList<Long> periodicSyncTimes;
 
-    private static final String TAG = "Sync";
+    private final ArrayList<Long> mLastEventTimes = new ArrayList<>();
+    private final ArrayList<String> mLastEvents = new ArrayList<>();
 
     public SyncStatusInfo(int authorityId) {
         this.authorityId = authorityId;
@@ -92,6 +97,12 @@ public class SyncStatusInfo implements Parcelable {
         } else {
             parcel.writeInt(-1);
         }
+        parcel.writeInt(mLastEventTimes.size());
+        for (int i = 0; i < mLastEventTimes.size(); i++) {
+            parcel.writeLong(mLastEventTimes.get(i));
+            parcel.writeString(mLastEvents.get(i));
+        }
+        parcel.writeInt(numSourcePeriodic);
     }
 
     public SyncStatusInfo(Parcel parcel) {
@@ -117,15 +128,34 @@ public class SyncStatusInfo implements Parcelable {
         if (version == 1) {
             periodicSyncTimes = null;
         } else {
-            int N = parcel.readInt();
-            if (N < 0) {
+            final int count = parcel.readInt();
+            if (count < 0) {
                 periodicSyncTimes = null;
             } else {
                 periodicSyncTimes = new ArrayList<Long>();
-                for (int i=0; i<N; i++) {
+                for (int i = 0; i < count; i++) {
                     periodicSyncTimes.add(parcel.readLong());
                 }
             }
+            if (version >= 3) {
+                mLastEventTimes.clear();
+                mLastEvents.clear();
+                final int nEvents = parcel.readInt();
+                for (int i = 0; i < nEvents; i++) {
+                    mLastEventTimes.add(parcel.readLong());
+                    mLastEvents.add(parcel.readString());
+                }
+            }
+        }
+        if (version < 4) {
+            // Before version 4, numSourcePeriodic wasn't persisted.
+            numSourcePeriodic = numSyncs - numSourceLocal - numSourcePoll - numSourceServer
+                    - numSourceUser;
+            if (numSourcePeriodic < 0) { // Sanity check.
+                numSourcePeriodic = 0;
+            }
+        } else {
+            numSourcePeriodic = parcel.readInt();
         }
     }
 
@@ -149,6 +179,8 @@ public class SyncStatusInfo implements Parcelable {
         if (other.periodicSyncTimes != null) {
             periodicSyncTimes = new ArrayList<Long>(other.periodicSyncTimes);
         }
+        mLastEventTimes.addAll(other.mLastEventTimes);
+        mLastEvents.addAll(other.mLastEvents);
     }
 
     public void setPeriodicSyncTime(int index, long when) {
@@ -170,6 +202,31 @@ public class SyncStatusInfo implements Parcelable {
         if (periodicSyncTimes != null && index < periodicSyncTimes.size()) {
             periodicSyncTimes.remove(index);
         }
+    }
+
+    /** */
+    public void addEvent(String message) {
+        if (mLastEventTimes.size() >= MAX_EVENT_COUNT) {
+            mLastEventTimes.remove(MAX_EVENT_COUNT - 1);
+            mLastEvents.remove(MAX_EVENT_COUNT - 1);
+        }
+        mLastEventTimes.add(0, System.currentTimeMillis());
+        mLastEvents.add(0, message);
+    }
+
+    /** */
+    public int getEventCount() {
+        return mLastEventTimes.size();
+    }
+
+    /** */
+    public long getEventTime(int i) {
+        return mLastEventTimes.get(i);
+    }
+
+    /** */
+    public String getEvent(int i) {
+        return mLastEvents.get(i);
     }
 
     public static final Creator<SyncStatusInfo> CREATOR = new Creator<SyncStatusInfo>() {

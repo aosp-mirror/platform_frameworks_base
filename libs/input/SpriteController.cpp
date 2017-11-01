@@ -30,7 +30,6 @@
 #include <SkCanvas.h>
 #include <SkColor.h>
 #include <SkPaint.h>
-#include <SkXfermode.h>
 #pragma GCC diagnostic pop
 
 #include <android/native_window.h>
@@ -216,18 +215,18 @@ void SpriteController::doUpdateSprites() {
                 SkCanvas surfaceCanvas(surfaceBitmap);
 
                 SkPaint paint;
-                paint.setXfermodeMode(SkXfermode::kSrc_Mode);
+                paint.setBlendMode(SkBlendMode::kSrc);
                 surfaceCanvas.drawBitmap(update.state.icon.bitmap, 0, 0, &paint);
 
                 if (outBuffer.width > update.state.icon.bitmap.width()) {
                     paint.setColor(0); // transparent fill color
-                    surfaceCanvas.drawRectCoords(update.state.icon.bitmap.width(), 0,
-                            outBuffer.width, update.state.icon.bitmap.height(), paint);
+                    surfaceCanvas.drawRect(SkRect::MakeLTRB(update.state.icon.bitmap.width(), 0,
+                            outBuffer.width, update.state.icon.bitmap.height()), paint);
                 }
                 if (outBuffer.height > update.state.icon.bitmap.height()) {
                     paint.setColor(0); // transparent fill color
-                    surfaceCanvas.drawRectCoords(0, update.state.icon.bitmap.height(),
-                            outBuffer.width, outBuffer.height, paint);
+                    surfaceCanvas.drawRect(SkRect::MakeLTRB(0, update.state.icon.bitmap.height(),
+                            outBuffer.width, outBuffer.height), paint);
                 }
 
                 status = surface->unlockAndPost();
@@ -406,7 +405,11 @@ void SpriteController::SpriteImpl::setIcon(const SpriteIcon& icon) {
 
     uint32_t dirty;
     if (icon.isValid()) {
-        icon.bitmap.copyTo(&mLocked.state.icon.bitmap, kN32_SkColorType);
+        SkBitmap* bitmapCopy = &mLocked.state.icon.bitmap;
+        if (bitmapCopy->tryAllocPixels(icon.bitmap.info().makeColorType(kN32_SkColorType))) {
+            icon.bitmap.readPixels(bitmapCopy->info(), bitmapCopy->getPixels(),
+                    bitmapCopy->rowBytes(), 0, 0);
+        }
 
         if (!mLocked.state.icon.isValid()
                 || mLocked.state.icon.hotSpotX != icon.hotSpotX

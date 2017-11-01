@@ -21,11 +21,14 @@ import android.annotation.ArrayRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StringRes;
+import android.content.pm.ActivityInfo;
 import android.content.res.Configuration.NativeConfig;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
 import android.util.SparseArray;
 import android.util.TypedValue;
+
+import dalvik.annotation.optimization.FastNative;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -181,6 +184,11 @@ public final class AssetManager implements AutoCloseable {
             if (block < 0) {
                 return null;
             }
+
+            // Convert the changing configurations flags populated by native code.
+            outValue.changingConfigurations = ActivityInfo.activityInfoConfigNativeToJava(
+                    outValue.changingConfigurations);
+
             if (outValue.type == TypedValue.TYPE_STRING) {
                 return mStringBlocks[block].get(outValue.data);
             }
@@ -214,14 +222,21 @@ public final class AssetManager implements AutoCloseable {
      */
     final boolean getResourceValue(@AnyRes int resId, int densityDpi, @NonNull TypedValue outValue,
             boolean resolveRefs) {
-        final int block = loadResourceValue(resId, (short) densityDpi, outValue, resolveRefs);
-        if (block < 0) {
-            return false;
+        synchronized (this) {
+            final int block = loadResourceValue(resId, (short) densityDpi, outValue, resolveRefs);
+            if (block < 0) {
+                return false;
+            }
+
+            // Convert the changing configurations flags populated by native code.
+            outValue.changingConfigurations = ActivityInfo.activityInfoConfigNativeToJava(
+                    outValue.changingConfigurations);
+
+            if (outValue.type == TypedValue.TYPE_STRING) {
+                outValue.string = mStringBlocks[block].get(outValue.data);
+            }
+            return true;
         }
-        if (outValue.type == TypedValue.TYPE_STRING) {
-            outValue.string = mStringBlocks[block].get(outValue.data);
-        }
-        return true;
     }
 
     /**
@@ -230,19 +245,24 @@ public final class AssetManager implements AutoCloseable {
      *
      * @param resId the resource id of the string array
      */
-    final CharSequence[] getResourceTextArray(@ArrayRes int resId) {
-        final int[] rawInfoArray = getArrayStringInfo(resId);
-        final int rawInfoArrayLen = rawInfoArray.length;
-        final int infoArrayLen = rawInfoArrayLen / 2;
-        int block;
-        int index;
-        final CharSequence[] retArray = new CharSequence[infoArrayLen];
-        for (int i = 0, j = 0; i < rawInfoArrayLen; i = i + 2, j++) {
-            block = rawInfoArray[i];
-            index = rawInfoArray[i + 1];
-            retArray[j] = index >= 0 ? mStringBlocks[block].get(index) : null;
+    final @Nullable CharSequence[] getResourceTextArray(@ArrayRes int resId) {
+        synchronized (this) {
+            final int[] rawInfoArray = getArrayStringInfo(resId);
+            if (rawInfoArray == null) {
+                return null;
+            }
+            final int rawInfoArrayLen = rawInfoArray.length;
+            final int infoArrayLen = rawInfoArrayLen / 2;
+            int block;
+            int index;
+            final CharSequence[] retArray = new CharSequence[infoArrayLen];
+            for (int i = 0, j = 0; i < rawInfoArrayLen; i = i + 2, j++) {
+                block = rawInfoArray[i];
+                index = rawInfoArray[i + 1];
+                retArray[j] = index >= 0 ? mStringBlocks[block].get(index) : null;
+            }
+            return retArray;
         }
-        return retArray;
     }
 
     /**
@@ -264,6 +284,11 @@ public final class AssetManager implements AutoCloseable {
         if (block < 0) {
             return false;
         }
+
+        // Convert the changing configurations flags populated by native code.
+        outValue.changingConfigurations = ActivityInfo.activityInfoConfigNativeToJava(
+                outValue.changingConfigurations);
+
         if (outValue.type == TypedValue.TYPE_STRING) {
             final StringBlock[] blocks = ensureStringBlocks();
             outValue.string = blocks[block].get(outValue.data);
@@ -302,8 +327,10 @@ public final class AssetManager implements AutoCloseable {
     }
 
     /*package*/ final CharSequence getPooledStringForCookie(int cookie, int id) {
-        // Cookies map to string blocks starting at 1.
-        return mStringBlocks[cookie - 1].get(id);
+        synchronized (this) {
+            // Cookies map to string blocks starting at 1.
+            return mStringBlocks[cookie - 1].get(id);
+        }
     }
 
     /**
@@ -756,13 +783,13 @@ public final class AssetManager implements AutoCloseable {
             int orientation, int touchscreen, int density, int keyboard,
             int keyboardHidden, int navigation, int screenWidth, int screenHeight,
             int smallestScreenWidthDp, int screenWidthDp, int screenHeightDp,
-            int screenLayout, int uiMode, int majorVersion);
+            int screenLayout, int uiMode, int colorMode, int majorVersion);
 
     /**
      * Retrieve the resource identifier for the given resource name.
      */
-    /*package*/ native final int getResourceIdentifier(String type,
-                                                       String name,
+    /*package*/ native final int getResourceIdentifier(String name,
+                                                       String defType,
                                                        String defPackage);
 
     /*package*/ native final String getResourceName(int resid);
@@ -802,9 +829,9 @@ public final class AssetManager implements AutoCloseable {
     static final int STYLE_CHANGING_CONFIGURATIONS = 4;
 
     /*package*/ static final int STYLE_DENSITY = 5;
-    /*package*/ native static final boolean applyStyle(long theme,
+    /*package*/ native static final void applyStyle(long theme,
             int defStyleAttr, int defStyleRes, long xmlParser,
-            int[] inAttrs, int[] outValues, int[] outIndices);
+            int[] inAttrs, int length, long outValuesAddress, long outIndicesAddress);
     /*package*/ native static final boolean resolveAttrs(long theme,
             int defStyleAttr, int defStyleRes, int[] inValues,
             int[] inAttrs, int[] outValues, int[] outIndices);

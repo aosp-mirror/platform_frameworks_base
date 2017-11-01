@@ -16,6 +16,7 @@
 
 package android.print.mockservice;
 
+import android.support.annotation.NonNull;
 import android.os.CancellationSignal;
 import android.print.PrinterId;
 import android.printservice.CustomPrinterIconCallback;
@@ -42,7 +43,7 @@ public class StubbablePrinterDiscoverySession extends PrinterDiscoverySession {
     }
 
     @Override
-    public void onStartPrinterDiscovery(List<PrinterId> priorityList) {
+    public void onStartPrinterDiscovery(@NonNull List<PrinterId> priorityList) {
         if (mCallbacks != null) {
             mCallbacks.onStartPrinterDiscovery(priorityList);
         }
@@ -56,29 +57,30 @@ public class StubbablePrinterDiscoverySession extends PrinterDiscoverySession {
     }
 
     @Override
-    public void onValidatePrinters(List<PrinterId> printerIds) {
+    public void onValidatePrinters(@NonNull List<PrinterId> printerIds) {
         if (mCallbacks != null) {
             mCallbacks.onValidatePrinters(printerIds);
         }
     }
 
     @Override
-    public void onStartPrinterStateTracking(PrinterId printerId) {
+    public void onStartPrinterStateTracking(@NonNull PrinterId printerId) {
         if (mCallbacks != null) {
             mCallbacks.onStartPrinterStateTracking(printerId);
         }
     }
 
     @Override
-    public void onRequestCustomPrinterIcon(PrinterId printerId,
-            CancellationSignal cancellationSignal, CustomPrinterIconCallback callback) {
+    public void onRequestCustomPrinterIcon(@NonNull PrinterId printerId,
+            @NonNull CancellationSignal cancellationSignal,
+            @NonNull CustomPrinterIconCallback callback) {
         if (mCallbacks != null) {
             mCallbacks.onRequestCustomPrinterIcon(printerId, cancellationSignal, callback);
         }
     }
 
     @Override
-    public void onStopPrinterStateTracking(PrinterId printerId) {
+    public void onStopPrinterStateTracking(@NonNull PrinterId printerId) {
         if (mCallbacks != null) {
             mCallbacks.onStopPrinterStateTracking(printerId);
         }

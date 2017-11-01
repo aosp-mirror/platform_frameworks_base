@@ -268,6 +268,10 @@ public class DisplayMetrics {
     }
     
     public void setTo(DisplayMetrics o) {
+        if (this == o) {
+            return;
+        }
+
         widthPixels = o.widthPixels;
         heightPixels = o.heightPixels;
         density = o.density;

@@ -21,15 +21,10 @@
 
 package android.graphics;
 
-@Deprecated
+/**
+ * @removed feature is not supported by hw-accerlerated or PDF backends
+ */
 public class Rasterizer {
 
-    protected void finalize() throws Throwable {
-        finalizer(native_instance);
-        native_instance = 0;
-    }
-
-    private static native void finalizer(long native_instance);
-
-    long native_instance;
+    protected void finalize() throws Throwable { }
 }

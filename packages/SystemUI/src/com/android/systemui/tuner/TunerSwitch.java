@@ -7,6 +7,7 @@ import android.support.v14.preference.SwitchPreference;
 import android.util.AttributeSet;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.tuner.TunerService.Tunable;
 
@@ -26,12 +27,12 @@ public class TunerSwitch extends SwitchPreference implements Tunable {
     @Override
     public void onAttached() {
         super.onAttached();
-        TunerService.get(getContext()).addTunable(this, getKey().split(","));
+        Dependency.get(TunerService.class).addTunable(this, getKey().split(","));
     }
 
     @Override
     public void onDetached() {
-        TunerService.get(getContext()).removeTunable(this);
+        Dependency.get(TunerService.class).removeTunable(this);
         super.onDetached();
     }
 

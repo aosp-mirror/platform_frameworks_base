@@ -19,6 +19,6 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="car_lockscreen_disclaimer_title" msgid="7997539137376896441">"Güvenli bir şekilde sürün"</string>
-    <string name="car_lockscreen_disclaimer_text" msgid="3061224684092952864">"Sürüş koşullarına karşı dikkatli olun ve geçerli yasalara her zaman uyun. Yol tarifi yanlış, eksik, tehlikeli, uygunsuz, yasak olabilir veya idari bölgelerden geçişleri içerebilir. İşletme bilgileri de yanlış veya eksik olabilir. Veriler gerçek zamanlı değildir ve konum doğruluğu garanti edilemez. Sürüş sırasında mobil cihazınızı veya Android Auto için geliştirilmemiş uygulamaları kullanmayın."</string>
+    <string name="unknown_user_label" msgid="4323896111737677955">"Bilinmiyor"</string>
+    <string name="start_driving" msgid="864023351402918991">"Sürmeye Başla"</string>
 </resources>

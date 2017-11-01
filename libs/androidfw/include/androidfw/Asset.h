@@ -24,12 +24,15 @@
 #include <stdio.h>
 #include <sys/types.h>
 
+#include <memory>
+
 #include <utils/Compat.h>
 #include <utils/Errors.h>
-#include <utils/FileMap.h>
 #include <utils/String8.h>
 
 namespace android {
+
+class FileMap;
 
 /*
  * Instances of this class provide read-only operations on a byte stream.
@@ -44,7 +47,7 @@ namespace android {
  */
 class Asset {
 public:
-    virtual ~Asset(void);
+    virtual ~Asset(void) = default;
 
     static int32_t getGlobalCount();
     static String8 getAssetAllocations();
@@ -119,6 +122,19 @@ public:
     const char* getAssetSource(void) const { return mAssetSource.string(); }
 
 protected:
+    /*
+     * Adds this Asset to the global Asset list for debugging and
+     * accounting.
+     * Concrete subclasses must call this in their constructor.
+     */
+    static void registerAsset(Asset* asset);
+
+    /*
+     * Removes this Asset from the global Asset list.
+     * Concrete subclasses must call this in their destructor.
+     */
+    static void unregisterAsset(Asset* asset);
+
     Asset(void);        // constructor; only invoked indirectly
 
     /* handle common seek() housekeeping */
@@ -136,6 +152,7 @@ private:
 
     /* AssetManager needs access to our "create" functions */
     friend class AssetManager;
+    friend class ApkAssets;
 
     /*
      * Create the asset from a named file on disk.
@@ -180,6 +197,9 @@ private:
      */
     static Asset* createFromUncompressedMap(FileMap* dataMap, AccessMode mode);
 
+    static std::unique_ptr<Asset> createFromUncompressedMap(std::unique_ptr<FileMap> dataMap,
+        AccessMode mode);
+
     /*
      * Create the asset from a memory-mapped file segment with compressed
      * data.
@@ -187,6 +207,9 @@ private:
      * The asset takes ownership of the FileMap.
      */
     static Asset* createFromCompressedMap(FileMap* dataMap,
+        size_t uncompressedLen, AccessMode mode);
+
+    static std::unique_ptr<Asset> createFromCompressedMap(std::unique_ptr<FileMap> dataMap,
         size_t uncompressedLen, AccessMode mode);
 
 

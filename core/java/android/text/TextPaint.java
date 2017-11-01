@@ -17,6 +17,7 @@
 package android.text;
 
 import android.annotation.ColorInt;
+import android.annotation.NonNull;
 import android.graphics.Paint;
 
 /**
@@ -40,7 +41,7 @@ public class TextPaint extends Paint {
     @ColorInt
     public int underlineColor = 0;
     /**
-     * Defined as a multiplier of the default underline thickness. Use 1.0f for default thickness.
+     * Thickness of the underline, in pixels.
      * @hide
      */
     public float underlineThickness;
@@ -74,6 +75,24 @@ public class TextPaint extends Paint {
     }
 
     /**
+     * Returns true if all attributes, including the attributes inherited from Paint, are equal.
+     *
+     * The caller is expected to have checked the trivial cases, like the pointers being equal,
+     * the objects having different classes, or the parameter being null.
+     * @hide
+     */
+    public boolean hasEqualAttributes(@NonNull TextPaint other) {
+        return bgColor == other.bgColor
+                && baselineShift == other.baselineShift
+                && linkColor == other.linkColor
+                && drawableState == other.drawableState
+                && density == other.density
+                && underlineColor == other.underlineColor
+                && underlineThickness == other.underlineThickness
+                && super.hasEqualAttributes((Paint) other);
+    }
+
+    /**
      * Defines a custom underline for this Paint.
      * @param color underline solid color
      * @param thickness underline thickness
@@ -82,5 +101,17 @@ public class TextPaint extends Paint {
     public void setUnderlineText(int color, float thickness) {
         underlineColor = color;
         underlineThickness = thickness;
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public float getUnderlineThickness() {
+        if (underlineColor != 0) { // Return custom thickness only if underline color is set.
+            return underlineThickness;
+        } else {
+            return super.getUnderlineThickness();
+        }
     }
 }

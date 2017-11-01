@@ -107,7 +107,7 @@ public class AssistVisualizer extends View {
 
     public void logTree() {
         if (mAssistStructure != null) {
-            mAssistStructure.dump();
+            mAssistStructure.dump(true);
         }
     }
 

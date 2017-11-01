@@ -17,8 +17,9 @@
 package android.view;
 
 import android.animation.Animator;
-import android.animation.ValueAnimator;
 import android.animation.TimeInterpolator;
+import android.animation.ValueAnimator;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
@@ -42,7 +43,7 @@ import java.util.Set;
  * <p>This class is not constructed by the caller, but rather by the View whose properties
  * it will animate. Calls to {@link android.view.View#animate()} will return a reference
  * to the appropriate ViewPropertyAnimator object for that View.</p>
- * 
+ *
  */
 public class ViewPropertyAnimator {
 
@@ -332,7 +333,7 @@ public class ViewPropertyAnimator {
      * Sets the interpolator for the underlying animator that animates the requested properties.
      * By default, the animator uses the default interpolator for ValueAnimator. Calling this method
      * will cause the declared object to be used instead.
-     * 
+     *
      * @param interpolator The TimeInterpolator to be used for ensuing property animations. A value
      * of <code>null</code> will result in linear interpolation.
      * @return This object, allowing calls to methods in this class to be chained.

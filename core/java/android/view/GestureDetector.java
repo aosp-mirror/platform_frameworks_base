@@ -502,6 +502,8 @@ public class GestureDetector {
         final boolean pointerUp =
                 (action & MotionEvent.ACTION_MASK) == MotionEvent.ACTION_POINTER_UP;
         final int skipIndex = pointerUp ? ev.getActionIndex() : -1;
+        final boolean isGeneratedGesture =
+                (ev.getFlags() & MotionEvent.FLAG_IS_GENERATED_GESTURE) != 0;
 
         // Determine focal point
         float sumX = 0, sumY = 0;
@@ -583,10 +585,11 @@ public class GestureDetector {
 
             if (mIsLongpressEnabled) {
                 mHandler.removeMessages(LONG_PRESS);
-                mHandler.sendEmptyMessageAtTime(LONG_PRESS, mCurrentDownEvent.getDownTime()
-                        + TAP_TIMEOUT + LONGPRESS_TIMEOUT);
+                mHandler.sendEmptyMessageAtTime(LONG_PRESS,
+                        mCurrentDownEvent.getDownTime() + LONGPRESS_TIMEOUT);
             }
-            mHandler.sendEmptyMessageAtTime(SHOW_PRESS, mCurrentDownEvent.getDownTime() + TAP_TIMEOUT);
+            mHandler.sendEmptyMessageAtTime(SHOW_PRESS,
+                    mCurrentDownEvent.getDownTime() + TAP_TIMEOUT);
             handled |= mListener.onDown(ev);
             break;
 
@@ -603,7 +606,8 @@ public class GestureDetector {
                 final int deltaX = (int) (focusX - mDownFocusX);
                 final int deltaY = (int) (focusY - mDownFocusY);
                 int distance = (deltaX * deltaX) + (deltaY * deltaY);
-                if (distance > mTouchSlopSquare) {
+                int slopSquare = isGeneratedGesture ? 0 : mTouchSlopSquare;
+                if (distance > slopSquare) {
                     handled = mListener.onScroll(mCurrentDownEvent, ev, scrollX, scrollY);
                     mLastFocusX = focusX;
                     mLastFocusY = focusY;
@@ -612,7 +616,8 @@ public class GestureDetector {
                     mHandler.removeMessages(SHOW_PRESS);
                     mHandler.removeMessages(LONG_PRESS);
                 }
-                if (distance > mDoubleTapTouchSlopSquare) {
+                int doubleTapSlopSquare = isGeneratedGesture ? 0 : mDoubleTapTouchSlopSquare;
+                if (distance > doubleTapSlopSquare) {
                     mAlwaysInBiggerTapRegion = false;
                 }
             } else if ((Math.abs(scrollX) >= 1) || (Math.abs(scrollY) >= 1)) {
@@ -760,7 +765,10 @@ public class GestureDetector {
 
         int deltaX = (int) firstDown.getX() - (int) secondDown.getX();
         int deltaY = (int) firstDown.getY() - (int) secondDown.getY();
-        return (deltaX * deltaX + deltaY * deltaY < mDoubleTapSlopSquare);
+        final boolean isGeneratedGesture =
+                (firstDown.getFlags() & MotionEvent.FLAG_IS_GENERATED_GESTURE) != 0;
+        int slopSquare = isGeneratedGesture ? 0 : mDoubleTapSlopSquare;
+        return (deltaX * deltaX + deltaY * deltaY < slopSquare);
     }
 
     private void dispatchLongPress() {

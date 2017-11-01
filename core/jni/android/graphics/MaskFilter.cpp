@@ -23,7 +23,7 @@ public:
 
     static jlong createBlur(JNIEnv* env, jobject, jfloat radius, jint blurStyle) {
         SkScalar sigma = SkBlurMask::ConvertRadiusToSigma(radius);
-        SkMaskFilter* filter = SkBlurMaskFilter::Create((SkBlurStyle)blurStyle, sigma);
+        SkMaskFilter* filter = SkBlurMaskFilter::Make((SkBlurStyle)blurStyle, sigma).release();
         ThrowIAE_IfNull(env, filter);
         return reinterpret_cast<jlong>(filter);
     }
@@ -38,8 +38,8 @@ public:
         }
 
         SkScalar sigma = SkBlurMask::ConvertRadiusToSigma(radius);
-        SkMaskFilter* filter =  SkBlurMaskFilter::CreateEmboss(sigma,
-                direction, ambient, specular);
+        SkMaskFilter* filter =  SkBlurMaskFilter::MakeEmboss(sigma,
+                direction, ambient, specular).release();
         ThrowIAE_IfNull(env, filter);
         return reinterpret_cast<jlong>(filter);
     }

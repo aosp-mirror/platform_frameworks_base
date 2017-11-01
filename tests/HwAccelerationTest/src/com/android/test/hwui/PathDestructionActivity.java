@@ -25,6 +25,8 @@ import android.os.Bundle;
 import android.util.MathUtils;
 import android.view.View;
 
+import java.util.Random;
+
 /**
  * The point of this test is to ensure that we can cause many paths to be created, drawn,
  * and destroyed without causing hangs or crashes. This tests the native reference counting
@@ -57,10 +59,11 @@ public class PathDestructionActivity extends Activity {
 
         private Path getRandomPath() {
             float left, top, right, bottom;
-            left = MathUtils.random(getWidth() - MIN_SIZE);
-            top = MathUtils.random(getHeight() - MIN_SIZE);
-            right = left + MathUtils.random(getWidth() - left);
-            bottom = top + MathUtils.random(getHeight() - top);
+            Random r = new Random();
+            left = r.nextFloat() * (getWidth() - MIN_SIZE);
+            top = r.nextFloat() * (getHeight() - MIN_SIZE);
+            right = left + r.nextFloat() * (getWidth() - left);
+            bottom = top + r.nextFloat() * (getHeight() - top);
             Path path = new Path();
             path.moveTo(left, top);
             path.lineTo(right, top);
@@ -71,9 +74,10 @@ public class PathDestructionActivity extends Activity {
         }
 
         private int getRandomColor() {
-            int red = MathUtils.random(255);
-            int green = MathUtils.random(255);
-            int blue = MathUtils.random(255);
+            Random r = new Random();
+            int red = r.nextInt(255);
+            int green = r.nextInt(255);
+            int blue = r.nextInt(255);
             return 0xff000000 | red << 16 | green << 8 | blue;
         }
 

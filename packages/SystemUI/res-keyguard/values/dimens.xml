@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/* //device/apps/common/assets/res/any/dimens.xml
+**
+** Copyright 2006, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+-->
+<resources>
+
+    <!-- Size of the generic status lines keyguard's status view  -->
+    <dimen name="kg_status_line_font_size">14sp</dimen>
+
+    <!-- Width of the sliding KeyguardSecurityContainer (includes 2x keyguard_security_view_margin) -->
+    <dimen name="keyguard_security_width">320dp</dimen>
+
+    <!-- Height of the sliding KeyguardSecurityContainer (includes 2x keyguard_security_view_margin) -->
+    <dimen name="keyguard_security_height">400dp</dimen>
+
+    <!-- Max Height of the sliding KeyguardSecurityContainer (includes 2x keyguard_security_view_margin) -->
+    <dimen name="keyguard_security_max_height">450dp</dimen>
+
+    <!-- Margin around the various security views -->
+    <dimen name="keyguard_security_view_margin">8dp</dimen>
+
+    <!-- EmergencyCarrierArea overlap - amount to overlap the emergency button and carrier text.
+         Should be 0 on devices with plenty of room (e.g. tablets) -->
+    <dimen name="eca_overlap">-10dip</dimen>
+
+    <!-- Default clock parameters -->
+    <dimen name="bottom_text_spacing_digital">-1dp</dimen>
+    <dimen name="widget_label_font_size">14sp</dimen>
+    <dimen name="widget_big_font_size">72dp</dimen>
+
+    <!-- The y translation to apply at the start in appear animations. -->
+    <dimen name="appear_y_translation_start">32dp</dimen>
+
+    <!-- The size of the dots in the PIN unlock method. -->
+    <dimen name="password_dot_size">9dp</dimen>
+    <!-- The size of PIN text in the PIN unlock method. -->
+    <integer name="scaled_password_text_size">40</integer>
+
+    <!-- The padding between chars of the password view. -->
+    <dimen name="password_char_padding">8dp</dimen>
+
+    <!-- The vertical margin between the date and the owner info. -->
+    <dimen name="date_owner_info_margin">6dp</dimen>
+
+    <!-- The translation for disappearing security views after having solved them. -->
+    <dimen name="disappear_y_translation">-32dp</dimen>
+</resources>

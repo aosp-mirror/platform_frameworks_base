@@ -20,27 +20,26 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
+import android.annotation.SystemService;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkRequest;
+import android.net.NetworkSpecifier;
 import android.net.wifi.RttManager;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Process;
 import android.os.RemoteException;
-import android.util.Base64;
 import android.util.Log;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 
 import libcore.util.HexEncoding;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -51,9 +50,7 @@ import java.util.List;
 
 /**
  * This class provides the primary API for managing Wi-Fi Aware operations:
- * discovery and peer-to-peer data connections. Get an instance of this class by calling
- * {@link android.content.Context#getSystemService(String)
- * Context.getSystemService(Context.WIFI_AWARE_SERVICE)}.
+ * discovery and peer-to-peer data connections.
  * <p>
  * The class provides access to:
  * <ul>
@@ -65,8 +62,10 @@ import java.util.List;
  * <li>Create a Aware network specifier to be used with
  * {@link ConnectivityManager#requestNetwork(NetworkRequest, ConnectivityManager.NetworkCallback)}
  * to set-up a Aware connection with a peer. Refer to
- * {@link DiscoverySession#createNetworkSpecifier(PeerHandle, byte[])} and
- * {@link WifiAwareSession#createNetworkSpecifier(int, byte[], byte[])}.
+ * {@link DiscoverySession#createNetworkSpecifierOpen(PeerHandle)},
+ * {@link DiscoverySession#createNetworkSpecifierPassphrase(PeerHandle, String)},
+ * {@link WifiAwareSession#createNetworkSpecifierOpen(int, byte[])}, and
+ * {@link WifiAwareSession#createNetworkSpecifierPassphrase(int, byte[], String)}.
  * </ul>
  * <p>
  *     Aware may not be usable when Wi-Fi is disabled (and other conditions). To validate that
@@ -83,7 +82,7 @@ import java.util.List;
  *     discovery or connection setup only after receiving confirmation that Aware attach
  *     succeeded - {@link AttachCallback#onAttached(WifiAwareSession)}. When an
  *     application is finished using Aware it <b>must</b> use the
- *     {@link WifiAwareSession#destroy()} API to indicate to the Aware service that the device
+ *     {@link WifiAwareSession#close()} API to indicate to the Aware service that the device
  *     may detach from the Aware cluster. The device will actually disable Aware once the last
  *     application detaches.
  * <p>
@@ -105,7 +104,7 @@ import java.util.List;
  *     also be used to send messages using the
  *     {@link DiscoverySession#sendMessage(PeerHandle, int, byte[])} APIs. When an
  *     application is finished with a discovery session it <b>must</b> terminate it using the
- *     {@link DiscoverySession#destroy()} API.
+ *     {@link DiscoverySession#close()} API.
  * <p>
  *    Creating connections between Aware devices is managed by the standard
  *    {@link ConnectivityManager#requestNetwork(NetworkRequest,
@@ -115,91 +114,17 @@ import java.util.List;
  *        <li>{@link NetworkRequest.Builder#addTransportType(int)} of
  *        {@link android.net.NetworkCapabilities#TRANSPORT_WIFI_AWARE}.
  *        <li>{@link NetworkRequest.Builder#setNetworkSpecifier(String)} using
- *        {@link WifiAwareSession#createNetworkSpecifier(int, byte[], byte[])} or
- *        {@link DiscoverySession#createNetworkSpecifier(PeerHandle, byte[])}.
+ *        {@link WifiAwareSession#createNetworkSpecifierOpen(int, byte[])},
+ *        {@link WifiAwareSession#createNetworkSpecifierPassphrase(int, byte[], String)},
+ *        {@link DiscoverySession#createNetworkSpecifierOpen(PeerHandle)}, or
+ *        {@link DiscoverySession#createNetworkSpecifierPassphrase(PeerHandle, String)}.
  *    </ul>
  */
+@SystemService(Context.WIFI_AWARE_SERVICE)
 public class WifiAwareManager {
     private static final String TAG = "WifiAwareManager";
     private static final boolean DBG = false;
     private static final boolean VDBG = false; // STOPSHIP if true
-
-    /**
-     * Keys used to generate a Network Specifier for the Aware network request. The network
-     * specifier is formatted as a JSON string.
-     */
-
-    /**
-     * TYPE_1A: role, client_id, session_id, peer_id, token
-     * @hide
-     */
-    public static final int NETWORK_SPECIFIER_TYPE_1A = 0;
-
-    /**
-     * TYPE_1B: role, client_id, session_id, peer_id [only permitted for RESPONDER]
-     * @hide
-     */
-    public static final int NETWORK_SPECIFIER_TYPE_1B = 1;
-
-    /**
-     * TYPE_1C: role, client_id, session_id, token [only permitted for RESPONDER]
-     * @hide
-     */
-    public static final int NETWORK_SPECIFIER_TYPE_1C = 2;
-
-    /**
-     * TYPE_1C: role, client_id, session_id [only permitted for RESPONDER]
-     * @hide
-     */
-    public static final int NETWORK_SPECIFIER_TYPE_1D = 3;
-
-    /**
-     * TYPE_2A: role, client_id, peer_mac, token
-     * @hide
-     */
-    public static final int NETWORK_SPECIFIER_TYPE_2A = 4;
-
-    /**
-     * TYPE_2B: role, client_id, peer_mac [only permitted for RESPONDER]
-     * @hide
-     */
-    public static final int NETWORK_SPECIFIER_TYPE_2B = 5;
-
-    /**
-     * TYPE_2C: role, client_id, token [only permitted for RESPONDER]
-     * @hide
-     */
-    public static final int NETWORK_SPECIFIER_TYPE_2C = 6;
-
-    /**
-     * TYPE_2D: role, client_id [only permitted for RESPONDER]
-     * @hide
-     */
-    public static final int NETWORK_SPECIFIER_TYPE_2D = 7;
-
-    /** @hide */
-    public static final int NETWORK_SPECIFIER_TYPE_MAX_VALID = NETWORK_SPECIFIER_TYPE_2D;
-
-    /** @hide */
-    public static final String NETWORK_SPECIFIER_KEY_TYPE = "type";
-
-    /** @hide */
-    public static final String NETWORK_SPECIFIER_KEY_ROLE = "role";
-
-    /** @hide */
-    public static final String NETWORK_SPECIFIER_KEY_CLIENT_ID = "client_id";
-
-    /** @hide */
-    public static final String NETWORK_SPECIFIER_KEY_SESSION_ID = "session_id";
-
-    /** @hide */
-    public static final String NETWORK_SPECIFIER_KEY_PEER_ID = "peer_id";
-
-    /** @hide */
-    public static final String NETWORK_SPECIFIER_KEY_PEER_MAC = "peer_mac";
-
-    /** @hide */
-    public static final String NETWORK_SPECIFIER_KEY_TOKEN = "token";
 
     /**
      * Broadcast intent action to indicate that the state of Wi-Fi Aware availability has changed.
@@ -224,8 +149,10 @@ public class WifiAwareManager {
      * Connection creation role is that of INITIATOR. Used to create a network specifier string
      * when requesting a Aware network.
      *
-     * @see DiscoverySession#createNetworkSpecifier(PeerHandle, byte[])
-     * @see WifiAwareSession#createNetworkSpecifier(int, byte[], byte[])
+     * @see DiscoverySession#createNetworkSpecifierOpen(PeerHandle)
+     * @see DiscoverySession#createNetworkSpecifierPassphrase(PeerHandle, String)
+     * @see WifiAwareSession#createNetworkSpecifierOpen(int, byte[])
+     * @see WifiAwareSession#createNetworkSpecifierPassphrase(int, byte[], String)
      */
     public static final int WIFI_AWARE_DATA_PATH_ROLE_INITIATOR = 0;
 
@@ -233,8 +160,10 @@ public class WifiAwareManager {
      * Connection creation role is that of RESPONDER. Used to create a network specifier string
      * when requesting a Aware network.
      *
-     * @see DiscoverySession#createNetworkSpecifier(PeerHandle, byte[])
-     * @see WifiAwareSession#createNetworkSpecifier(int, byte[], byte[])
+     * @see DiscoverySession#createNetworkSpecifierOpen(PeerHandle)
+     * @see DiscoverySession#createNetworkSpecifierPassphrase(PeerHandle, String)
+     * @see WifiAwareSession#createNetworkSpecifierOpen(int, byte[])
+     * @see WifiAwareSession#createNetworkSpecifierPassphrase(int, byte[], String)
      */
     public static final int WIFI_AWARE_DATA_PATH_ROLE_RESPONDER = 1;
 
@@ -250,36 +179,6 @@ public class WifiAwareManager {
     public WifiAwareManager(Context context, IWifiAwareManager service) {
         mContext = context;
         mService = service;
-    }
-
-    /**
-     * Enable the usage of the Aware API. Doesn't actually turn on Aware cluster formation - that
-     * only happens when an attach is attempted. {@link #ACTION_WIFI_AWARE_STATE_CHANGED} broadcast
-     * will be triggered.
-     *
-     * @hide
-     */
-    public void enableUsage() {
-        try {
-            mService.enableUsage();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Disable the usage of the Aware API. All attempts to attach() will be rejected. All open
-     * connections and sessions will be terminated. {@link #ACTION_WIFI_AWARE_STATE_CHANGED}
-     * broadcast will be triggered.
-     *
-     * @hide
-     */
-    public void disableUsage() {
-        try {
-            mService.disableUsage();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
     }
 
     /**
@@ -317,7 +216,7 @@ public class WifiAwareManager {
      * create connections to peers. The device will attach to an existing cluster if it can find
      * one or create a new cluster (if it is the first to enable Aware in its vicinity). Results
      * (e.g. successful attach to a cluster) are provided to the {@code attachCallback} object.
-     * An application <b>must</b> call {@link WifiAwareSession#destroy()} when done with the
+     * An application <b>must</b> call {@link WifiAwareSession#close()} when done with the
      * Wi-Fi Aware object.
      * <p>
      * Note: a Aware cluster is a shared resource - if the device is already attached to a cluster
@@ -339,7 +238,7 @@ public class WifiAwareManager {
      * create connections to peers. The device will attach to an existing cluster if it can find
      * one or create a new cluster (if it is the first to enable Aware in its vicinity). Results
      * (e.g. successful attach to a cluster) are provided to the {@code attachCallback} object.
-     * An application <b>must</b> call {@link WifiAwareSession#destroy()} when done with the
+     * An application <b>must</b> call {@link WifiAwareSession#close()} when done with the
      * Wi-Fi Aware object.
      * <p>
      * Note: a Aware cluster is a shared resource - if the device is already attached to a cluster
@@ -523,23 +422,13 @@ public class WifiAwareManager {
     }
 
     /** @hide */
-    public String createNetworkSpecifier(int clientId, int role, int sessionId,
-            PeerHandle peerHandle, byte[] token) {
+    public NetworkSpecifier createNetworkSpecifier(int clientId, int role, int sessionId,
+            PeerHandle peerHandle, @Nullable byte[] pmk, @Nullable String passphrase) {
         if (VDBG) {
             Log.v(TAG, "createNetworkSpecifier: role=" + role + ", sessionId=" + sessionId
                     + ", peerHandle=" + ((peerHandle == null) ? peerHandle : peerHandle.peerId)
-                    + ", token=" + token);
-        }
-
-        int type;
-        if (token != null && peerHandle != null) {
-            type = NETWORK_SPECIFIER_TYPE_1A;
-        } else if (token == null && peerHandle != null) {
-            type = NETWORK_SPECIFIER_TYPE_1B;
-        } else if (token != null && peerHandle == null) {
-            type = NETWORK_SPECIFIER_TYPE_1C;
-        } else {
-            type = NETWORK_SPECIFIER_TYPE_1D;
+                    + ", pmk=" + ((pmk == null) ? "null" : "non-null")
+                    + ", passphrase=" + ((passphrase == null) ? "null" : "non-null"));
         }
 
         if (role != WIFI_AWARE_DATA_PATH_ROLE_INITIATOR
@@ -549,10 +438,6 @@ public class WifiAwareManager {
                             + "specifier");
         }
         if (role == WIFI_AWARE_DATA_PATH_ROLE_INITIATOR) {
-            if (token == null) {
-                throw new IllegalArgumentException(
-                        "createNetworkSpecifier: Invalid null token - not permitted on INITIATOR");
-            }
             if (peerHandle == null) {
                 throw new IllegalArgumentException(
                         "createNetworkSpecifier: Invalid peer handle (value of null) - not "
@@ -560,43 +445,26 @@ public class WifiAwareManager {
             }
         }
 
-        JSONObject json;
-        try {
-            json = new JSONObject();
-            json.put(NETWORK_SPECIFIER_KEY_TYPE, type);
-            json.put(NETWORK_SPECIFIER_KEY_ROLE, role);
-            json.put(NETWORK_SPECIFIER_KEY_CLIENT_ID, clientId);
-            json.put(NETWORK_SPECIFIER_KEY_SESSION_ID, sessionId);
-            if (peerHandle != null) {
-                json.put(NETWORK_SPECIFIER_KEY_PEER_ID, peerHandle.peerId);
-            }
-            if (token != null) {
-                json.put(NETWORK_SPECIFIER_KEY_TOKEN,
-                        Base64.encodeToString(token, 0, token.length, Base64.DEFAULT));
-            }
-        } catch (JSONException e) {
-            return "";
-        }
-
-        return json.toString();
+        return new WifiAwareNetworkSpecifier(
+                (peerHandle == null) ? WifiAwareNetworkSpecifier.NETWORK_SPECIFIER_TYPE_IB_ANY_PEER
+                        : WifiAwareNetworkSpecifier.NETWORK_SPECIFIER_TYPE_IB,
+                role,
+                clientId,
+                sessionId,
+                peerHandle != null ? peerHandle.peerId : 0, // 0 is an invalid peer ID
+                null, // peerMac (not used in this method)
+                pmk,
+                passphrase,
+                Process.myUid());
     }
 
     /** @hide */
-    public String createNetworkSpecifier(int clientId, @DataPathRole int role,
-            @Nullable byte[] peer, @Nullable byte[] token) {
+    public NetworkSpecifier createNetworkSpecifier(int clientId, @DataPathRole int role,
+            @Nullable byte[] peer, @Nullable byte[] pmk, @Nullable String passphrase) {
         if (VDBG) {
-            Log.v(TAG, "createNetworkSpecifier: role=" + role + ", token=" + token);
-        }
-
-        int type;
-        if (token != null && peer != null) {
-            type = NETWORK_SPECIFIER_TYPE_2A;
-        } else if (token == null && peer != null) {
-            type = NETWORK_SPECIFIER_TYPE_2B;
-        } else if (token != null && peer == null) {
-            type = NETWORK_SPECIFIER_TYPE_2C;
-        } else { // both are null
-            type = NETWORK_SPECIFIER_TYPE_2D;
+            Log.v(TAG, "createNetworkSpecifier: role=" + role
+                    + ", pmk=" + ((pmk == null) ? "null" : "non-null")
+                    + ", passphrase=" + ((passphrase == null) ? "null" : "non-null"));
         }
 
         if (role != WIFI_AWARE_DATA_PATH_ROLE_INITIATOR
@@ -606,39 +474,26 @@ public class WifiAwareManager {
                             + "specifier");
         }
         if (role == WIFI_AWARE_DATA_PATH_ROLE_INITIATOR) {
-            if (peer == null || peer.length != 6) {
-                throw new IllegalArgumentException(
-                        "createNetworkSpecifier: Invalid peer MAC address");
-            }
-            if (token == null) {
-                throw new IllegalArgumentException(
-                        "createNetworkSpecifier: Invalid null token - not permitted on INITIATOR");
-            }
-        } else {
-            if (peer != null && peer.length != 6) {
-                throw new IllegalArgumentException(
-                        "createNetworkSpecifier: Invalid peer MAC address");
+            if (peer == null) {
+                throw new IllegalArgumentException("createNetworkSpecifier: Invalid peer MAC "
+                        + "address - null not permitted on INITIATOR");
             }
         }
-
-        JSONObject json;
-        try {
-            json = new JSONObject();
-            json.put(NETWORK_SPECIFIER_KEY_TYPE, type);
-            json.put(NETWORK_SPECIFIER_KEY_ROLE, role);
-            json.put(NETWORK_SPECIFIER_KEY_CLIENT_ID, clientId);
-            if (peer != null) {
-                json.put(NETWORK_SPECIFIER_KEY_PEER_MAC, new String(HexEncoding.encode(peer)));
-            }
-            if (token != null) {
-                json.put(NETWORK_SPECIFIER_KEY_TOKEN,
-                        Base64.encodeToString(token, 0, token.length, Base64.DEFAULT));
-            }
-        } catch (JSONException e) {
-            return "";
+        if (peer != null && peer.length != 6) {
+            throw new IllegalArgumentException("createNetworkSpecifier: Invalid peer MAC address");
         }
 
-        return json.toString();
+        return new WifiAwareNetworkSpecifier(
+                (peer == null) ? WifiAwareNetworkSpecifier.NETWORK_SPECIFIER_TYPE_OOB_ANY_PEER
+                        : WifiAwareNetworkSpecifier.NETWORK_SPECIFIER_TYPE_OOB,
+                role,
+                clientId,
+                0, // 0 is an invalid session ID
+                0, // 0 is an invalid peer ID
+                peer,
+                pmk,
+                passphrase,
+                Process.myUid());
     }
 
     private static class WifiAwareEventCallbackProxy extends IWifiAwareEventCallback.Stub {
@@ -706,7 +561,11 @@ public class WifiAwareManager {
                             attachCallback.onAttachFailed();
                             break;
                         case CALLBACK_IDENTITY_CHANGED:
-                            identityChangedListener.onIdentityChanged((byte[]) msg.obj);
+                            if (identityChangedListener == null) {
+                                Log.e(TAG, "CALLBACK_IDENTITY_CHANGED: null listener.");
+                            } else {
+                                identityChangedListener.onIdentityChanged((byte[]) msg.obj);
+                            }
                             break;
                         case CALLBACK_RANGING_SUCCESS: {
                             RttManager.RttListener listener = getAndRemoveRangingListener(msg.arg1);

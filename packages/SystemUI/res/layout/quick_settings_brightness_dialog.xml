@@ -31,7 +31,7 @@
         android:contentDescription="@null"
         android:visibility="gone" />
 
-    <com.android.systemui.settings.ToggleSlider
+    <com.android.systemui.settings.ToggleSliderView
         android:id="@+id/brightness_slider"
         android:layout_width="0dp"
         android:layout_height="wrap_content"

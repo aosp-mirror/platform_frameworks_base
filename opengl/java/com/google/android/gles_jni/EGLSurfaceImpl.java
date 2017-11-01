@@ -20,14 +20,11 @@ import javax.microedition.khronos.egl.*;
 
 public class EGLSurfaceImpl extends EGLSurface {
     long mEGLSurface;
-    private long mNativePixelRef;
     public EGLSurfaceImpl() {
         mEGLSurface = 0;
-        mNativePixelRef = 0;
     }
     public EGLSurfaceImpl(long surface) {
         mEGLSurface = surface;
-        mNativePixelRef = 0;
     }
 
     @Override

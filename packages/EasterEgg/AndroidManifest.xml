@@ -19,12 +19,25 @@ Copyright (C) 2016 The Android Open Source Project
           android:versionCode="1"
           android:versionName="1.0">
 
-    <uses-sdk android:minSdkVersion="24" />
+    <uses-sdk android:minSdkVersion="26" />
 
     <uses-permission android:name="android.permission.SUBSTITUTE_NOTIFICATION_APP_NAME" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application android:label="@string/app_name" android:icon="@drawable/icon">
+
+        <activity android:name=".octo.Ocquarium"
+            android:theme="@android:style/Theme.DeviceDefault.NoActionBar.Fullscreen"
+            android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="com.android.internal.category.PLATLOGO" />
+            </intent-filter>
+        </activity>
+
+        <!-- Android N lives on inside Android O... -->
+
         <!-- Long press the QS tile to get here -->
         <activity android:name=".neko.NekoLand"
                   android:theme="@android:style/Theme.Material.NoActionBar"
@@ -57,7 +70,6 @@ Copyright (C) 2016 The Android Open Source Project
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="com.android.internal.category.PLATLOGO" />
             </intent-filter>
         </activity>
 

@@ -16,6 +16,9 @@
 
 package android.service.notification;
 
+import android.app.NotificationChannel;
+import android.app.NotificationChannelGroup;
+import android.os.UserHandle;
 import android.service.notification.IStatusBarNotificationHolder;
 import android.service.notification.StatusBarNotification;
 import android.service.notification.NotificationRankingUpdate;
@@ -28,15 +31,16 @@ oneway interface INotificationListener
     void onNotificationPosted(in IStatusBarNotificationHolder notificationHolder,
             in NotificationRankingUpdate update);
     void onNotificationRemoved(in IStatusBarNotificationHolder notificationHolder,
-            in NotificationRankingUpdate update);
+            in NotificationRankingUpdate update, int reason);
     void onNotificationRankingUpdate(in NotificationRankingUpdate update);
     void onListenerHintsChanged(int hints);
     void onInterruptionFilterChanged(int interruptionFilter);
 
+    // companion device managers only
+    void onNotificationChannelModification(String pkgName, in UserHandle user, in NotificationChannel channel, int modificationType);
+    void onNotificationChannelGroupModification(String pkgName, in UserHandle user, in NotificationChannelGroup group, int modificationType);
+
     // rankers only
-    void onNotificationEnqueued(in IStatusBarNotificationHolder notificationHolder, int importance, boolean user);
-    void onNotificationVisibilityChanged(String key, long time, boolean visible);
-    void onNotificationClick(String key, long time);
-    void onNotificationActionClick(String key, long time, int actionIndex);
-    void onNotificationRemovedReason(String key, long time, int reason);
+    void onNotificationEnqueued(in IStatusBarNotificationHolder notificationHolder);
+    void onNotificationSnoozedUntilContext(in IStatusBarNotificationHolder notificationHolder, String snoozeCriterionId);
 }

@@ -57,22 +57,34 @@
     <string name="wifi_disabled_generic">Disabled</string>
     <!-- Status for networked disabled from a DNS or DHCP failure -->
     <string name="wifi_disabled_network_failure">IP Configuration Failure</string>
+    <!-- Status for networks disabled by the network recommendation provider -->
+    <string name="wifi_disabled_by_recommendation_provider">Not connected due to low quality network</string>
     <!-- Status for networked disabled from a wifi association failure -->
     <string name="wifi_disabled_wifi_failure">WiFi Connection Failure</string>
     <!-- Status for networks disabled from authentication failure (wrong password
          or certificate). -->
     <string name="wifi_disabled_password_failure">Authentication problem</string>
+
+    <!-- Status detail for a network that can't be connected to for some reason -->
+    <string name="wifi_cant_connect">Can\'t connect</string>
+    <!-- Status for a named network that can't be connected to for some reason-->
+    <string name="wifi_cant_connect_to_ap">Can\'t connect to \'<xliff:g id="ap_name">%1$s</xliff:g>\'</string>
+    <!-- Message shown when the user likely entered an incorrect password for a wifi network -->
+    <string name="wifi_check_password_try_again">Check password and try again</string>
+
     <!-- Summary for the remembered network but currently not in range. -->
     <string name="wifi_not_in_range">Not in range</string>
     <!-- Summary for the network but no internet connection was detected. -->
-    <string name="wifi_no_internet_no_reconnect">No Internet Access Detected, won\'t automatically reconnect.</string>
+    <string name="wifi_no_internet_no_reconnect">Won\'t automatically connect</string>
     <!-- Summary for the remembered network but no internet connection was detected. -->
-    <string name="wifi_no_internet">No Internet Access.</string>
+    <string name="wifi_no_internet">No Internet access</string>
     <!-- Summary for saved networks -->
     <string name="saved_network">Saved by <xliff:g id="name">%1$s</xliff:g></string>
 
-    <!-- Status message of Wi-Fi when it is connected by a Wi-Fi assistant application. [CHAR LIMIT=NONE] -->
-    <string name="connected_via_wfa">Connected via Wi\u2011Fi assistant</string>
+    <!-- Status message of Wi-Fi when it is automatically connected by a network recommendation provider. [CHAR LIMIT=NONE] -->
+    <string name="connected_via_network_scorer">Automatically connected via %1$s</string>
+    <!-- Status message of Wi-Fi when it is automatically connected by a default network recommendation provider. [CHAR LIMIT=NONE] -->
+    <string name="connected_via_network_scorer_default">Automatically connected via network rating provider</string>
     <!-- Status message of Wi-Fi when it is connected by Passpoint configuration. [CHAR LIMIT=NONE] -->
     <string name="connected_via_passpoint">Connected via %1$s</string>
     <!-- Status message of Wi-Fi when network has matching passpoint credentials. [CHAR LIMIT=NONE] -->
@@ -84,6 +96,19 @@
 
     <!-- Summary for Connected wifi network without internet -->
     <string name="wifi_connected_no_internet">Connected, no Internet</string>
+
+    <!-- Speed label for very slow network speed -->
+    <string name="speed_label_very_slow">Very Slow</string>
+    <!-- Speed label for slow network speed -->
+    <string name="speed_label_slow">Slow</string>
+    <!-- Speed label for okay network speed -->
+    <string name="speed_label_okay">OK</string>
+    <!-- Speed label for medium network speed -->
+    <string name="speed_label_medium">Medium</string>
+    <!-- Speed label for fast network speed -->
+    <string name="speed_label_fast">Fast</string>
+    <!-- Speed label for very fast network speed -->
+    <string name="speed_label_very_fast">Very Fast</string>
 
     <!-- Bluetooth settings.  Message when a device is disconnected -->
     <string name="bluetooth_disconnected">Disconnected</string>
@@ -105,10 +130,19 @@
     <!-- Bluetooth settings.  Message when connected to a device, except for phone/media audio. [CHAR LIMIT=40] -->
     <string name="bluetooth_connected_no_headset_no_a2dp">Connected (no phone or media)</string>
 
+    <!-- Bluetooth settings.  Message when connected to a device, showing remote device battery level. [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_connected_battery_level">Connected, battery <xliff:g id="battery_level_as_percentage">%1$s</xliff:g></string>
+    <!-- Bluetooth settings.  Message when connected to a device, except for phone audio, showing remote device battery level. [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_connected_no_headset_battery_level">Connected (no phone), battery <xliff:g id="battery_level_as_percentage">%1$s</xliff:g></string>
+    <!-- Bluetooth settings.  Message when connected to a device, except for media audio, showing remote device battery level. [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_connected_no_a2dp_battery_level">Connected (no media), battery <xliff:g id="battery_level_as_percentage">%1$s</xliff:g></string>
+    <!-- Bluetooth settings.  Message when connected to a device, except for phone/media audio, showing remote device battery level. [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_connected_no_headset_no_a2dp_battery_level">Connected (no phone or media), battery <xliff:g id="battery_level_as_percentage">%1$s</xliff:g></string>
+
     <!-- Bluetooth settings.  The user-visible string that is used whenever referring to the A2DP profile. -->
     <string name="bluetooth_profile_a2dp">Media audio</string>
     <!-- Bluetooth settings.  The user-visible string that is used whenever referring to the headset or handsfree profile. -->
-    <string name="bluetooth_profile_headset">Phone audio</string>
+    <string name="bluetooth_profile_headset">Phone calls</string>
     <!-- Bluetooth settings.  The user-visible string that is used whenever referring to the OPP profile. -->
     <string name="bluetooth_profile_opp">File transfer</string>
     <!-- Bluetooth settings. The user-visible string that is used whenever referring to the HID profile. -->
@@ -122,9 +156,15 @@
     <!-- Bluetooth settings. The user-visible string that is used whenever referring to the PAN profile (sharing this device's Internet connection). [CHAR LIMIT=40] -->
     <string name="bluetooth_profile_pan_nap">Internet connection sharing</string>
     <!-- Bluetooth settings. The user-visible string that is used whenever referring to the map profile. -->
-    <string name="bluetooth_profile_map">Message Access</string>
+    <string name="bluetooth_profile_map">Text Messages</string>
     <!-- Bluetooth settings. The user-visible string that is used whenever referring to the SAP profile (sharing SIM card). -->
     <string name="bluetooth_profile_sap">SIM Access</string>
+
+    <!-- Bluetooth settings. The user-visible string for the setting controlling whether to use a high-quality codec if the device supports it, along with the name of the codec (eg AAC, LDAC, aptX) -->
+    <string name="bluetooth_profile_a2dp_high_quality">HD audio: <xliff:g id="codec_name">%1$s</xliff:g></string>
+
+    <!-- Bluetooth settings. Similar to bluetooth_profile_a2dp_high_quality, but used when the device supports high quality audio but we don't know which codec that will be used. -->
+    <string name="bluetooth_profile_a2dp_high_quality_unknown_codec">HD audio</string>
 
     <!-- Bluetooth settings.  Connection options screen.  The summary for the A2DP checkbox preference when A2DP is connected. -->
     <string name="bluetooth_a2dp_profile_summary_connected">Connected to media audio</string>
@@ -352,7 +392,7 @@
     </string-array>
 
    <!-- Title for profile selection dialog [CHAR LIMIT=30] -->
-   <string name="choose_profile">Choose Profile</string>
+   <string name="choose_profile">Choose profile</string>
 
     <!-- Header for items under the personal user [CHAR LIMIT=30] -->
     <string name="category_personal">Personal</string>
@@ -419,46 +459,64 @@
     <string name="wifi_display_certification">Wireless display certification</string>
     <!-- Setting Checkbox title whether to enable WiFi Verbose Logging. [CHAR LIMIT=40] -->
     <string name="wifi_verbose_logging">Enable Wi\u2011Fi Verbose Logging</string>
-    <!-- Setting Checkbox title whether to enable WiFi Aggressive Handover. [CHAR LIMIT=40] -->
-    <string name="wifi_aggressive_handover">Aggressive Wi\u2011Fi to Cellular handover</string>
+    <!-- Setting Checkbox title whether to enable WiFi Aggressive Handover (more actively switch from wifi to mobile data). [CHAR LIMIT=40] -->
+    <string name="wifi_aggressive_handover">Aggressive Wi\u2011Fi to mobile handover</string>
     <!-- Setting Checkbox title whether to enable WiFi Scanning in the presence of traffic. [CHAR LIMIT=80] -->
     <string name="wifi_allow_scan_with_traffic">Always allow Wi\u2011Fi Roam Scans</string>
-    <!-- Setting Checkbox title whether to always keep cellular data active. [CHAR LIMIT=80] -->
-    <string name="mobile_data_always_on">Cellular data always active</string>
+    <!-- Setting Checkbox title whether to always keep mobile data active. [CHAR LIMIT=80] -->
+    <string name="mobile_data_always_on">Mobile data always active</string>
+    <!-- Setting Checkbox title whether to enable hardware acceleration for tethering. [CHAR LIMIT=80] -->
+    <string name="tethering_hardware_offload">Tethering hardware acceleration</string>
     <!-- Setting Checkbox title for disabling Bluetooth absolute volume -->
     <string name="bluetooth_disable_absolute_volume">Disable absolute volume</string>
+    <!-- Setting Checkbox title for enabling Bluetooth inband ringing -->
+    <string name="bluetooth_enable_inband_ringing">Enable in-band ringing</string>
+
+    <!-- UI debug setting: Select Bluetooth AVRCP Version -->
+    <string name="bluetooth_select_avrcp_version_string">Bluetooth AVRCP Version</string>
+    <!-- UI debug setting: Select Bluetooth AVRCP Version -->
+    <string name="bluetooth_select_avrcp_version_dialog_title">Select Bluetooth AVRCP Version</string>
 
     <!-- UI debug setting: Select Bluetooth Audio Codec -->
     <string name="bluetooth_select_a2dp_codec_type">Bluetooth Audio Codec</string>
-    <!-- UI debug setting: Select Preferred Bluetooth A2DP Codec -->
-    <string name="bluetooth_select_a2dp_codec_type_dialog_title">Select Preferred Bluetooth A2DP Codec</string>
+    <!-- UI debug setting: Select Bluetooth Audio Codec -->
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title">Select Bluetooth Audio Codec</string>
 
     <!-- UI debug setting: Select Bluetooth Audio Sample Rate -->
     <string name="bluetooth_select_a2dp_codec_sample_rate">Bluetooth Audio Sample Rate</string>
-    <!-- UI debug setting: Select Preferred Bluetooth A2DP Codec Sample Rate -->
-    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title">Select Preferred Bluetooth A2DP Codec Sample Rate</string>
+    <!-- UI debug setting: Select Bluetooth Audio Codec: Sample Rate -->
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title">Select Bluetooth Audio Codec:\u000ASample Rate</string>
 
     <!-- UI debug setting: Select Bluetooth Audio Bits Per Sample -->
     <string name="bluetooth_select_a2dp_codec_bits_per_sample">Bluetooth Audio Bits Per Sample</string>
-    <!-- UI debug setting: Select Preferred Bluetooth A2DP Codec Bits Per Sample -->
-    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title">Select Preferred Bluetooth A2DP Codec Bits Per Sample</string>
+    <!-- UI debug setting: Select Bluetooth Audio Codec: Bits Per Sample -->
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title">Select Bluetooth Audio Codec:\u000ABits Per Sample</string>
 
     <!-- UI debug setting: Select Bluetooth Audio Channel Mode -->
     <string name="bluetooth_select_a2dp_codec_channel_mode">Bluetooth Audio Channel Mode</string>
-    <!-- UI debug setting: Select Preferred Bluetooth A2DP Codec Channel Mode -->
-    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title">Select Preferred Bluetooth A2DP Codec Channel Mode</string>
+    <!-- UI debug setting: Select Bluetooth Audio Codec: Channel Mode -->
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title">Select Bluetooth Audio Codec:\u000AChannel Mode</string>
 
     <!-- UI debug setting: Select Bluetooth Audio LDAC Playback Quality -->
-    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality">Bluetooth Audio LDAC Playback Quality</string>
-    <!-- UI debug setting: Select Preferred Bluetooth A2DP Codec LDAC Playback Quality -->
-    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title">Select Preferred Bluetooth A2DP Codec LDAC Playback Quality</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality">Bluetooth Audio LDAC Codec: Playback Quality</string>
+    <!-- UI debug setting: Select Bluetooth Audio LDAC Codec: LDAC Playback Quality -->
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title">Select Bluetooth Audio LDAC Codec:\u000APlayback Quality</string>
+
+    <!-- [CHAR LIMIT=NONE] Label for displaying Bluetooth Audio Codec Parameters while streaming -->
+    <string name="bluetooth_select_a2dp_codec_streaming_label">Streaming: <xliff:g id="streaming_parameter">%1$s</xliff:g></string>
+
+    <!-- Title of the developer option for DNS over TLS. -->
+    <string name="dns_tls">DNS over TLS</string>
+    <!-- Summary to explain the developer option for DNS over TLS.  This allows the user to
+    request that the system attempt TLS with all DNS servers, or none. -->
+    <string name="dns_tls_summary">If enabled, attempt DNS over TLS on port 853.</string>
 
     <!-- setting Checkbox summary whether to show options for wireless display certification  -->
     <string name="wifi_display_certification_summary">Show options for wireless display certification</string>
     <!-- Setting Checkbox summary whether to enable Wifi verbose Logging [CHAR LIMIT=80] -->
     <string name="wifi_verbose_logging_summary">Increase Wi\u2011Fi logging level, show per SSID RSSI in Wi\u2011Fi Picker</string>
     <!-- Setting Checkbox summary whether to enable Wifi aggressive handover [CHAR LIMIT=130] -->
-    <string name="wifi_aggressive_handover_summary">When enabled, Wi\u2011Fi will be more aggressive in handing over the data connection to Cellular, when Wi\u2011Fi signal is low</string>
+    <string name="wifi_aggressive_handover_summary">When enabled, Wi\u2011Fi will be more aggressive in handing over the data connection to mobile, when Wi\u2011Fi signal is low</string>
     <!-- Setting Checkbox summary whether to always allow WiFi Roam Scans [CHAR LIMIT=130] -->
     <string name="wifi_allow_scan_with_traffic_summary">Allow/Disallow Wi\u2011Fi Roam Scans based on the amount of data traffic present at the interface</string>
     <!-- UI debug setting: limit size of Android logger buffers -->
@@ -484,6 +542,7 @@
     <!-- Setting Checkbox title whether to enable view attribute inspection -->
     <string name="debug_view_attributes">Enable view attribute inspection</string>
     <string name="mobile_data_always_on_summary">Always keep mobile data active, even when Wi\u2011Fi is active (for fast network switching).</string>
+    <string name="tethering_hardware_offload_summary">Use tethering hardware acceleration if available</string>
     <!-- Title of warning dialog about the implications of enabling USB debugging -->
     <string name="adb_warning_title">Allow USB debugging?</string>
     <!-- Warning text to user about the implications of enabling USB debugging -->
@@ -500,6 +559,9 @@
     <string name="verify_apps_over_usb_summary">Check apps installed via ADB/ADT for harmful behavior.</string>
     <!-- Summary of checkbox for disabling Bluetooth absolute volume -->
     <string name="bluetooth_disable_absolute_volume_summary">Disables the Bluetooth absolute volume feature in case of volume issues with remote devices such as unacceptably loud volume or lack of control.</string>
+    <!-- Summary of checkbox for enabling Bluetooth inband ringing -->
+    <string name="bluetooth_enable_inband_ringing_summary">Allow ringtones on the phone to be played on Bluetooth headsets</string>
+
 
     <!-- Title of checkbox setting that enables the terminal app. [CHAR LIMIT=32] -->
     <string name="enable_terminal_title">Local terminal</string>
@@ -531,6 +593,11 @@
     <!-- UI debug setting: wait for debugger to attach to debugging process summary [CHAR LIMIT=500] -->
     <string name="wait_for_debugger_summary">Debugged application waits for debugger to
         attach before executing</string>
+
+    <!-- UI debug setting: title for Telephonymonitor switch [CHAR LIMIT=50] -->
+    <string name="telephony_monitor_switch">Telephony Monitor</string>
+    <!-- UI debug setting: summary for switch of Telephonymonitor [CHAR LIMIT=500] -->
+    <string name="telephony_monitor_switch_summary">TelephonyMonitor will collect logs when it detects a problem with telephony/modem functionality and prompt notification to user to file a bug</string>
 
     <!-- Preference category for input debugging development settings. [CHAR LIMIT=25] -->
     <string name="debug_input_category">Input</string>
@@ -580,6 +647,9 @@
 
     <!-- UI debug setting: show the amount of overdraw in apps using the GPU [CHAR LIMIT=25] -->
     <string name="debug_hw_overdraw">Debug GPU overdraw</string>
+
+    <!-- UI debug setting: select the renderer to use by RenderThread [CHAR LIMIT=25] -->
+    <string name="debug_hw_renderer">Set GPU Renderer</string>
 
     <!-- UI debug setting: disable use of overlays? [CHAR LIMIT=25] -->
     <string name="disable_overlays">Disable HW overlays</string>
@@ -653,6 +723,12 @@
     <string name="show_all_anrs_summary">Show App Not Responding dialog
         for background apps</string>
 
+    <!-- UI debug setting: show all ANRs? [CHAR LIMIT=25] -->
+    <string name="show_notification_channel_warnings">Show notification channel warnings</string>
+    <!-- UI debug setting: show all ANRs summary [CHAR LIMIT=50] -->
+    <string name="show_notification_channel_warnings_summary">Displays on-screen warning when an app posts a notification without a valid channel</string>
+
+
     <!-- UI debug setting: force allow apps on external storage [CHAR LIMIT=50] -->
     <string name="force_allow_on_external">Force allow apps on external</string>
     <!-- UI debug setting: force allow on external summary [CHAR LIMIT=150] -->
@@ -708,11 +784,6 @@
     <!-- Services settings screen, setting option summary for the user to go to the screen to view running services  -->
     <string name="runningservices_settings_summary">View and control currently running services</string>
 
-    <!-- Developer settings: enable WebView multiprocess name [CHAR LIMIT=50] -->
-    <string name="enable_webview_multiprocess">Multiprocess WebView</string>
-    <!-- Developer settings: enable WebView multiprocess summary [CHAR LIMIT=60] -->
-    <string name="enable_webview_multiprocess_desc">Run WebView renderers separately</string>
-
     <!-- Developer settings: select WebView provider title [CHAR LIMIT=30] -->
     <string name="select_webview_provider_title">WebView implementation</string>
     <!-- Developer settings: select WebView provider dialog title [CHAR LIMIT=30] -->
@@ -761,64 +832,39 @@
     <!-- Summary shown for color space correction preference when its value is overridden by another preference [CHAR LIMIT=35] -->
     <string name="daltonizer_type_overridden">Overridden by <xliff:g id="title" example="Simulate color space">%1$s</xliff:g></string>
 
-    <!-- [CHAR_LIMIT=40] Label for estimated remaining duration of battery charging/discharging -->
-    <string name="power_remaining_duration_only">Approx. <xliff:g id="time">%1$s</xliff:g> left</string>
+    <!-- [CHAR_LIMIT=40] Label for estimated remaining duration of battery discharging -->
+    <string name="power_remaining_duration_only">About <xliff:g id="time">^1</xliff:g> left</string>
+    <!-- [CHAR_LIMIT=60] Label for estimated remaining duration of battery discharging -->
+    <string name="power_remaining_duration_only_enhanced">About <xliff:g id="time">^1</xliff:g> left based on your usage</string>
+    <!-- [CHAR_LIMIT=40] Label for estimated remaining duration of battery charging -->
+    <string name="power_remaining_charging_duration_only"><xliff:g id="time">^1</xliff:g> left until fully charged</string>
 
     <!-- [CHAR_LIMIT=40] Short label for estimated remaining duration of battery charging/discharging -->
-    <string name="power_remaining_duration_only_short"><xliff:g id="time">%1$s</xliff:g> left</string>
+    <string name="power_remaining_duration_only_short"><xliff:g id="time">^1</xliff:g> left</string>
+    <!-- [CHAR_LIMIT=60] Short label for estimated remaining duration of battery charging/discharging -->
+    <string name="power_remaining_duration_only_short_enhanced"><xliff:g id="time">^1</xliff:g> left based on your usage</string>
 
     <!-- [CHAR_LIMIT=40] Label for battery level chart when discharging with duration -->
-    <string name="power_discharging_duration"><xliff:g id="level">%1$s</xliff:g>
-        - approx. <xliff:g id="time">%2$s</xliff:g> left</string>
+    <string name="power_discharging_duration"><xliff:g id="level">^1</xliff:g> - about <xliff:g id="time">^2</xliff:g> left</string>
+    <!-- [CHAR_LIMIT=60] Label for battery level chart when discharging with duration and using enhanced estimate -->
+    <string name="power_discharging_duration_enhanced"><xliff:g id="level">^1</xliff:g> - about <xliff:g id="time">^2</xliff:g> left based on your usage</string>
 
     <!-- [CHAR_LIMIT=40] Label for battery level chart when discharging with duration -->
-    <string name="power_discharging_duration_short"><xliff:g id="level">%1$s</xliff:g>
-        - <xliff:g id="time">%2$s</xliff:g> left</string>
+    <string name="power_discharging_duration_short"><xliff:g id="level">^1</xliff:g> - <xliff:g id="time">^2</xliff:g> left</string>
 
     <!-- [CHAR_LIMIT=40] Label for battery level chart when charging -->
-    <string name="power_charging"><xliff:g id="level">%1$s</xliff:g> -
-            <xliff:g id="state">%2$s</xliff:g></string>
+    <string name="power_charging"><xliff:g id="level">%1$s</xliff:g> - <xliff:g id="state">%2$s</xliff:g></string>
     <!-- [CHAR_LIMIT=40] Label for battery level chart when charging with duration -->
-    <string name="power_charging_duration"><xliff:g id="level">%1$s</xliff:g> -
-            <xliff:g id="time">%2$s</xliff:g> until full</string>
+    <string name="power_charging_duration"><xliff:g id="level">^1</xliff:g> - <xliff:g id="time">^2</xliff:g> until fully charged</string>
     <!-- [CHAR_LIMIT=40] Short label for battery level chart when charging with duration -->
-    <string name="power_charging_duration_short"><xliff:g id="level">%1$s</xliff:g> -
-        <xliff:g id="time">%2$s</xliff:g></string>
-    <!-- [CHAR_LIMIT=40] Label for battery level chart when charging with duration -->
-    <string name="power_charging_duration_ac"><xliff:g id="level">%1$s</xliff:g> -
-            <xliff:g id="time">%2$s</xliff:g> until full on AC</string>
-    <!-- [CHAR_LIMIT=40] Short label for battery level chart when charging with duration -->
-    <string name="power_charging_duration_ac_short"><xliff:g id="level">%1$s</xliff:g> -
-        <xliff:g id="time">%2$s</xliff:g></string>
-    <!-- [CHAR_LIMIT=40] Label for battery level chart when charging with duration -->
-    <string name="power_charging_duration_usb"><xliff:g id="level">%1$s</xliff:g> -
-            <xliff:g id="time">%2$s</xliff:g> until full over USB</string>
-    <!-- [CHAR_LIMIT=40] Short label for battery level chart when charging with duration -->
-    <string name="power_charging_duration_usb_short"><xliff:g id="level">%1$s</xliff:g> -
-        <xliff:g id="time">%2$s</xliff:g></string>
-    <!-- [CHAR_LIMIT=40] Label for battery level chart when charging with duration -->
-    <string name="power_charging_duration_wireless"><xliff:g id="level">%1$s</xliff:g> -
-            <xliff:g id="time">%2$s</xliff:g> until full from wireless</string>
-    <!-- [CHAR_LIMIT=40] Label for battery level chart when charging with duration -->
-    <string name="power_charging_duration_wireless_short"><xliff:g id="level">%1$s</xliff:g> -
-        <xliff:g id="time">%2$s</xliff:g></string>
+    <string name="power_charging_duration_short"><xliff:g id="level">^1</xliff:g> - <xliff:g id="time">^2</xliff:g></string>
 
     <!-- Battery Info screen. Value for a status item.  Used for diagnostic info screens, precise translation isn't needed -->
     <string name="battery_info_status_unknown">Unknown</string>
     <!-- [CHAR_LIMIT=20] Battery use screen.  Battery status shown in chart label when charging from an unknown source.  -->
     <string name="battery_info_status_charging">Charging</string>
-    <!-- [CHAR_LIMIT=20] Battery use screen.  Battery status shown in chart label when charging on AC.  -->
-    <string name="battery_info_status_charging_ac">Charging on AC</string>
-    <!-- [CHAR_LIMIT=20] Battery short status label when charing on AC -->
-    <string name="battery_info_status_charging_ac_short">Charging</string>
-    <!-- [CHAR_LIMIT=20] Battery use screen.  Battery status shown in chart label when charging over USB.  -->
-    <string name="battery_info_status_charging_usb">Charging over USB</string>
-    <!-- [CHAR_LIMIT=20] Battery short status label when charging over USB. -->
-    <string name="battery_info_status_charging_usb_short">Charging</string>
-    <!-- [CHAR_LIMIT=20] Battery use screen.  Battery status shown in chart label when charging over a wireless connection.  -->
-    <string name="battery_info_status_charging_wireless">Charging wirelessly</string>
-    <!-- [CHAR_LIMIT=20] Battery short status label when charging wirelessly. -->
-    <string name="battery_info_status_charging_wireless_short">Charging</string>
+    <!-- [CHAR_LIMIT=20] Battery use screen with lower case.  Battery status shown in chart label when charging from an unknown source.  -->
+    <string name="battery_info_status_charging_lower">charging</string>
     <!-- Battery Info screen. Value for a status item.  Used for diagnostic info screens, precise translation isn't needed -->
     <string name="battery_info_status_discharging">Not charging</string>
     <!-- Battery Info screen. Value for a status item.  Used for diagnostic info screens, precise translation isn't needed -->
@@ -830,9 +876,19 @@
     <string name="disabled_by_admin_summary_text">Controlled by admin</string>
 
     <!-- Summary for switch preference to denote it is switched on [CHAR LIMIT=50] -->
-    <string name="enabled_by_admin">Enabled by administrator</string>
+    <string name="enabled_by_admin">Enabled by admin</string>
     <!-- Summary for switch preference to denote it is switched off [CHAR LIMIT=50] -->
-    <string name="disabled_by_admin">Disabled by administrator</string>
+    <string name="disabled_by_admin">Disabled by admin</string>
+
+    <!-- [CHAR LIMIT=25] Manage applications, text telling using an application is disabled. -->
+    <string name="disabled">Disabled</string>
+    <!-- Summary of app trusted to install apps [CHAR LIMIT=45] -->
+    <string name="external_source_trusted">Allowed</string>
+    <!-- Summary of app not trusted to install apps [CHAR LIMIT=45] -->
+    <string name="external_source_untrusted">Not allowed</string>
+
+    <!-- Title for settings screen for controlling apps that can install other apps on device [CHAR LIMIT=50] -->
+    <string name="install_other_apps">Install unknown apps</string>
 
     <!-- Option in navigation drawer that leads to Settings main screen [CHAR LIMIT=30] -->
     <string name="home">Settings Home</string>
@@ -887,5 +943,39 @@
 
     <!-- Content description for drawer menu button [CHAR_LIMIT=30]-->
     <string name="content_description_menu_button">Menu</string>
+
+    <!-- Label for Greenwich mean time, used in a string like GMT+05:00. [CHAR LIMIT=NONE] -->
+    <string name="time_zone_gmt">GMT</string>
+
+    <!-- Label for carrier demo mode factory reset confirmation dialog. [CHAR LIMIT=NONE] -->
+    <string name="retail_demo_reset_message">Enter password to perform factory reset in demo mode</string>
+    <!-- Label for positive button on carrier demo  mode factory reset confirmation dialog [CHAR LIMIT=40] -->
+    <string name="retail_demo_reset_next">Next</string>
+    <!-- Title for carrier demo mode factory reset confirmation dialog. [CHAR LIMIT=40] -->
+    <string name="retail_demo_reset_title">Password required</string>
+
+    <!-- Glyph to be overlaid atop the battery when the level is extremely low. Do not translate. -->
+    <string name="battery_meter_very_low_overlay_symbol">!</string>
+
+    <!-- Title for settings of active input methods in each IME [CHAR LIMIT=35] -->
+    <string name="active_input_method_subtypes">Active input methods</string>
+    <!-- Title for settings whether or not the framework will select input methods in an IME based
+         on the current system locales. (The user can select multiple system locales)
+         [CHAR LIMIT=35] -->
+    <string name="use_system_language_to_select_input_method_subtypes">Use system languages</string>
+
+    <!-- Toast that settings for an application is failed to open. -->
+    <string name="failed_to_open_app_settings_toast">Failed to open settings for <xliff:g id="spell_application_name">%1$s</xliff:g></string>
+
+    <!-- Warning message about security implications of enabling an input method, displayed as a dialog
+         message when the user selects to enable an IME. -->
+    <string name="ime_security_warning">This input method may be able to collect
+        all the text you type, including personal data like passwords and credit
+        card numbers.  It comes from the app
+        <xliff:g id="ime_application_name">%1$s</xliff:g>.
+        Use this input method?</string>
+
+    <!-- [CHAR LIMIT=NONE] Dialog body explaining that the app just selected by the user will not work after a reboot until until after the user enters their credentials, such as a PIN or password. -->
+    <string name="direct_boot_unaware_dialog_message">Note: After a reboot, this app can\'t start until you unlock your phone</string>
 
 </resources>

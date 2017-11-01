@@ -54,9 +54,8 @@ public abstract class GnssMeasurementsProvider
     }
 
     public void onGpsEnabledChanged() {
-        if (tryUpdateRegistrationWithService()) {
-            updateResult();
-        }
+        tryUpdateRegistrationWithService();
+        updateResult();
     }
 
     @Override

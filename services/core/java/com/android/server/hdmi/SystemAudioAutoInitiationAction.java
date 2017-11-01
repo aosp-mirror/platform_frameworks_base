@@ -16,6 +16,7 @@
 
 package com.android.server.hdmi;
 
+import android.hardware.tv.cec.V1_0.SendMessageResult;
 import com.android.server.hdmi.HdmiControlService.SendMessageCallback;
 
 /**
@@ -48,8 +49,8 @@ final class SystemAudioAutoInitiationAction extends HdmiCecFeatureAction {
                 mAvrAddress), new SendMessageCallback() {
             @Override
             public void onSendCompleted(int error) {
-                if (error != Constants.SEND_RESULT_SUCCESS) {
-                    tv().setSystemAudioMode(false, true);
+                if (error != SendMessageResult.SUCCESS) {
+                    tv().setSystemAudioMode(false);
                     finish();
                 }
             }
@@ -70,18 +71,24 @@ final class SystemAudioAutoInitiationAction extends HdmiCecFeatureAction {
         return false;
     }
 
-    private void handleSystemAudioModeStatusMessage(boolean isSystemAudioModeOn) {
+    private void handleSystemAudioModeStatusMessage(boolean currentSystemAudioMode) {
         if (!canChangeSystemAudio()) {
             HdmiLogger.debug("Cannot change system audio mode in auto initiation action.");
             finish();
             return;
         }
 
-        boolean systemAudioModeSetting = tv().getSystemAudioModeSetting();
-        if (systemAudioModeSetting && !isSystemAudioModeOn) {
-            addAndStartAction(new SystemAudioActionFromTv(tv(), mAvrAddress, systemAudioModeSetting, null));
+        // If System Audio Control feature is enabled, turn on system audio mode when new AVR is
+        // detected. Otherwise, turn off system audio mode.
+        boolean targetSystemAudioMode = tv().isSystemAudioControlFeatureEnabled();
+        if (currentSystemAudioMode != targetSystemAudioMode) {
+            // Start System Audio Control feature actions only if necessary.
+            addAndStartAction(
+                    new SystemAudioActionFromTv(tv(), mAvrAddress, targetSystemAudioMode, null));
         } else {
-            tv().setSystemAudioMode(isSystemAudioModeOn, true);
+            // If AVR already has correct system audio mode, update target system audio mode
+            // immediately rather than starting feature action.
+            tv().setSystemAudioMode(targetSystemAudioMode);
         }
         finish();
     }
@@ -100,13 +107,15 @@ final class SystemAudioAutoInitiationAction extends HdmiCecFeatureAction {
     }
 
     private void handleSystemAudioModeStatusTimeout() {
-        if (tv().getSystemAudioModeSetting()) {
-            if (canChangeSystemAudio()) {
-                addAndStartAction(new SystemAudioActionFromTv(tv(), mAvrAddress, true, null));
-            }
-        } else {
-            tv().setSystemAudioMode(false, true);
+        if (!canChangeSystemAudio()) {
+            HdmiLogger.debug("Cannot change system audio mode in auto initiation action.");
+            finish();
+            return;
         }
+        // If we can't get the current system audio mode status, just try to turn on/off system
+        // audio mode according to the system audio control setting.
+        addAndStartAction(new SystemAudioActionFromTv(tv(), mAvrAddress,
+                tv().isSystemAudioControlFeatureEnabled(), null));
         finish();
     }
 

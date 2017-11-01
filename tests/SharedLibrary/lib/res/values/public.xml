@@ -15,5 +15,5 @@
 
     <public type="drawable" name="size_48x48" id="0x00030000" />
 
-    <public type="array" name="animals"     id="0x02050000" />
+    <public type="array" name="animals"     id="0x00050000" />
 </resources>

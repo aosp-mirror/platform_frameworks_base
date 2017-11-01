@@ -29,11 +29,15 @@ public abstract class CompatListActivity extends AppCompatActivity {
 
         FragmentManager fm = getSupportFragmentManager();
         if (fm.findFragmentById(android.R.id.content) == null) {
-            ListFragment listFragment = new ListFragment();
+            ListFragment listFragment = createListFragment();
             listFragment.setListAdapter(createListAdapter());
             fm.beginTransaction().add(android.R.id.content, listFragment).commit();
         }
     }
 
     protected abstract ListAdapter createListAdapter();
+
+    protected ListFragment createListFragment() {
+        return new ListFragment();
+    }
 }

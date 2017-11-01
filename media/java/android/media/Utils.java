@@ -16,12 +16,21 @@
 
 package android.media;
 
+import android.content.Context;
+import android.content.ContentResolver;
+import android.database.Cursor;
+import android.net.Uri;
+import android.os.Environment;
+import android.os.FileUtils;
+import android.provider.OpenableColumns;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Range;
 import android.util.Rational;
 import android.util.Size;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Vector;
@@ -306,5 +315,67 @@ class Utils {
         }
         Log.w(TAG, "could not parse size range '" + o + "'");
         return null;
+    }
+
+    /**
+     * Creates a unique file in the specified external storage with the desired name. If the name is
+     * taken, the new file's name will have '(%d)' to avoid overwriting files.
+     *
+     * @param context {@link Context} to query the file name from.
+     * @param subdirectory One of the directories specified in {@link android.os.Environment}
+     * @param fileName desired name for the file.
+     * @param mimeType MIME type of the file to create.
+     * @return the File object in the storage, or null if an error occurs.
+     */
+    public static File getUniqueExternalFile(Context context, String subdirectory, String fileName,
+            String mimeType) {
+        File externalStorage = Environment.getExternalStoragePublicDirectory(subdirectory);
+        // Make sure the storage subdirectory exists
+        externalStorage.mkdirs();
+
+        File outFile = null;
+        try {
+            // Ensure the file has a unique name, as to not override any existing file
+            outFile = FileUtils.buildUniqueFile(externalStorage, mimeType, fileName);
+        } catch (FileNotFoundException e) {
+            // This might also be reached if the number of repeated files gets too high
+            Log.e(TAG, "Unable to get a unique file name: " + e);
+            return null;
+        }
+        return outFile;
+    }
+
+    /**
+     * Returns a file's display name from its {@link android.content.ContentResolver.SCHEME_FILE}
+     * or {@link android.content.ContentResolver.SCHEME_CONTENT} Uri. The display name of a file
+     * includes its extension.
+     *
+     * @param context Context trying to resolve the file's display name.
+     * @param uri Uri of the file.
+     * @return the file's display name, or the uri's string if something fails or the uri isn't in
+     *            the schemes specified above.
+     */
+    static String getFileDisplayNameFromUri(Context context, Uri uri) {
+        String scheme = uri.getScheme();
+
+        if (ContentResolver.SCHEME_FILE.equals(scheme)) {
+            return uri.getLastPathSegment();
+        } else if (ContentResolver.SCHEME_CONTENT.equals(scheme)) {
+            // We need to query the ContentResolver to get the actual file name as the Uri masks it.
+            // This means we want the name used for display purposes only.
+            String[] proj = {
+                    OpenableColumns.DISPLAY_NAME
+            };
+            try (Cursor cursor = context.getContentResolver().query(uri, proj, null, null, null)) {
+                if (cursor != null && cursor.getCount() != 0) {
+                    cursor.moveToFirst();
+                    return cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
+                }
+            }
+        }
+
+        // This will only happen if the Uri isn't either SCHEME_CONTENT or SCHEME_FILE, so we assume
+        // it already represents the file's name.
+        return uri.toString();
     }
 }

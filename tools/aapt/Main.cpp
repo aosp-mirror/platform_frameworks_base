@@ -20,6 +20,23 @@ using namespace android;
 
 static const char* gProgName = "aapt";
 
+#ifndef AAPT_VERSION
+    #define AAPT_VERSION ""
+#endif
+
+/*
+ * Show version info.  All the cool kids do it.
+ */
+int doVersion(Bundle* bundle)
+{
+    if (bundle->getFileSpecCount() != 0) {
+        printf("(ignoring extra arguments)\n");
+    }
+    printf("Android Asset Packaging Tool, v0.2-" AAPT_VERSION "\n");
+
+    return 0;
+}
+
 /*
  * When running under Cygwin on Windows, this will convert slash-based
  * paths into back-slash-based ones. Otherwise the ApptAssets file comparisons
@@ -223,6 +240,8 @@ void usage(void)
         "       localization\n"
         "   --no-version-vectors\n"
         "       Do not automatically generate versioned copies of vector XML resources.\n"
+        "   --no-version-transitions\n"
+        "       Do not automatically generate versioned copies of transition XML resources.\n"
         "   --private-symbols\n"
         "       Java package name to use when generating R.java for private resources.\n",
         gDefaultIgnoreAssets);
@@ -704,6 +723,8 @@ int main(int argc, char* const argv[])
                     bundle.setPseudolocalize(PSEUDO_ACCENTED | PSEUDO_BIDI);
                 } else if (strcmp(cp, "-no-version-vectors") == 0) {
                     bundle.setNoVersionVectors(true);
+                } else if (strcmp(cp, "-no-version-transitions") == 0) {
+                    bundle.setNoVersionTransitions(true);
                 } else if (strcmp(cp, "-private-symbols") == 0) {
                     argc--;
                     argv++;

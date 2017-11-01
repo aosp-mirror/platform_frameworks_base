@@ -37,6 +37,7 @@ public class XmlConfigSource implements ConfigSource {
     private final int mResourceId;
     private final boolean mDebugBuild;
     private final int mTargetSdkVersion;
+    private final int mTargetSandboxVesrsion;
 
     private boolean mInitialized;
     private NetworkSecurityConfig mDefaultConfig;
@@ -53,12 +54,19 @@ public class XmlConfigSource implements ConfigSource {
         this(context, resourceId, debugBuild, Build.VERSION_CODES.CUR_DEVELOPMENT);
     }
 
+    @VisibleForTesting
     public XmlConfigSource(Context context, int resourceId, boolean debugBuild,
             int targetSdkVersion) {
+        this(context, resourceId, debugBuild, targetSdkVersion, 1 /*targetSandboxVersion*/);
+    }
+
+    public XmlConfigSource(Context context, int resourceId, boolean debugBuild,
+            int targetSdkVersion, int targetSandboxVesrsion) {
         mResourceId = resourceId;
         mContext = context;
         mDebugBuild = debugBuild;
         mTargetSdkVersion = targetSdkVersion;
+        mTargetSandboxVesrsion = targetSandboxVesrsion;
     }
 
     public Set<Pair<Domain, NetworkSecurityConfig>> getPerDomainConfigs() {
@@ -357,7 +365,7 @@ public class XmlConfigSource implements ConfigSource {
         // Use the platform default as the parent of the base config for any values not provided
         // there. If there is no base config use the platform default.
         NetworkSecurityConfig.Builder platformDefaultBuilder =
-                NetworkSecurityConfig.getDefaultBuilder(mTargetSdkVersion);
+                NetworkSecurityConfig.getDefaultBuilder(mTargetSdkVersion, mTargetSandboxVesrsion);
         addDebugAnchorsIfNeeded(debugConfigBuilder, platformDefaultBuilder);
         if (baseConfigBuilder != null) {
             baseConfigBuilder.setParent(platformDefaultBuilder);

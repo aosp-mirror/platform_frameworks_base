@@ -17,15 +17,12 @@
 package android.view;
 
 import android.annotation.NonNull;
-import android.util.Log;
 import android.os.Looper;
 import android.os.MessageQueue;
 
 import com.android.internal.util.VirtualRefBasePtr;
 
-import java.lang.NullPointerException;
 import java.lang.ref.WeakReference;
-import java.lang.SuppressWarnings;
 
 /**
  * Provides streaming access to frame stats information from the rendering

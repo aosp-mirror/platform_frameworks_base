@@ -16,41 +16,44 @@
 
 package android.graphics.drawable.shapes;
 
+import android.annotation.NonNull;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
 
 /**
  * Creates geometric paths, utilizing the {@link android.graphics.Path} class.
+ * <p>
  * The path can be drawn to a Canvas with its own draw() method,
  * but more graphical control is available if you instead pass
  * the PathShape to a {@link android.graphics.drawable.ShapeDrawable}.
  */
 public class PathShape extends Shape {
-    private Path    mPath;
-    private float   mStdWidth;
-    private float   mStdHeight;
-    
-    private float   mScaleX;    // cached from onResize
-    private float   mScaleY;    // cached from onResize
-    
+    private final float mStdWidth;
+    private final float mStdHeight;
+
+    private Path mPath;
+
+    private float mScaleX; // cached from onResize
+    private float mScaleY; // cached from onResize
+
     /**
      * PathShape constructor.
-     * 
-     * @param path       a Path that defines the geometric paths for this shape
-     * @param stdWidth   the standard width for the shape. Any changes to the 
-     *                   width with resize() will result in a width scaled based
-     *                   on the new width divided by this width.
-     * @param stdHeight  the standard height for the shape. Any changes to the 
-     *                   height with resize() will result in a height scaled based
-     *                   on the new height divided by this height.
+     *
+     * @param path a Path that defines the geometric paths for this shape
+     * @param stdWidth the standard width for the shape. Any changes to the
+     *                 width with resize() will result in a width scaled based
+     *                 on the new width divided by this width.
+     * @param stdHeight the standard height for the shape. Any changes to the
+     *                  height with resize() will result in a height scaled based
+     *                  on the new height divided by this height.
      */
-    public PathShape(Path path, float stdWidth, float stdHeight) {
+    public PathShape(@NonNull Path path, float stdWidth, float stdHeight) {
         mPath = path;
         mStdWidth = stdWidth;
         mStdHeight = stdHeight;
     }
-    
+
     @Override
     public void draw(Canvas canvas, Paint paint) {
         canvas.save();
@@ -58,7 +61,7 @@ public class PathShape extends Shape {
         canvas.drawPath(mPath, paint);
         canvas.restore();
     }
-    
+
     @Override
     protected void onResize(float width, float height) {
         mScaleX = width / mStdWidth;
@@ -67,7 +70,7 @@ public class PathShape extends Shape {
 
     @Override
     public PathShape clone() throws CloneNotSupportedException {
-        PathShape shape = (PathShape) super.clone();
+        final PathShape shape = (PathShape) super.clone();
         shape.mPath = new Path(mPath);
         return shape;
     }

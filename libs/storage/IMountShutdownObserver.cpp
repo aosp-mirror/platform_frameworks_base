@@ -23,6 +23,16 @@ enum {
     TRANSACTION_onShutDownComplete = IBinder::FIRST_CALL_TRANSACTION,
 };
 
+class BpMountShutdownObserver: public BpInterface<IMountShutdownObserver> {
+public:
+    explicit BpMountShutdownObserver(const sp<IBinder>& impl)
+            : BpInterface<IMountShutdownObserver>(impl) { }
+
+    virtual void onShutDownComplete(const int32_t /* statusCode */) {}
+};
+
+IMPLEMENT_META_INTERFACE(MountShutdownObserver, "android.os.storage.IStorageShutdownObserver")
+
 status_t BnMountShutdownObserver::onTransact(
     uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags)
 {

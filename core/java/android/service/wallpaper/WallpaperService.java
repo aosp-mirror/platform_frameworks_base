@@ -16,25 +16,20 @@
 
 package android.service.wallpaper;
 
-import android.content.res.TypedArray;
-import android.graphics.Canvas;
-import android.view.WindowInsets;
-
-import com.android.internal.R;
-import com.android.internal.os.HandlerCaller;
-import com.android.internal.util.ScreenShapeHelper;
-import com.android.internal.view.BaseIWindow;
-import com.android.internal.view.BaseSurfaceHolder;
-
+import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.app.Service;
+import android.app.WallpaperColors;
 import android.app.WallpaperManager;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Configuration;
+import android.content.res.TypedArray;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManager.DisplayListener;
 import android.os.Bundle;
@@ -43,6 +38,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.util.Log;
+import android.util.MergedConfiguration;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.IWindowSession;
@@ -54,9 +50,13 @@ import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowInsets;
 import android.view.WindowManager;
-import android.view.WindowManager.LayoutParams;
 import android.view.WindowManagerGlobal;
+
+import com.android.internal.os.HandlerCaller;
+import com.android.internal.view.BaseIWindow;
+import com.android.internal.view.BaseSurfaceHolder;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -105,6 +105,7 @@ public abstract class WallpaperService extends Service {
     private static final int MSG_WINDOW_RESIZED = 10030;
     private static final int MSG_WINDOW_MOVED = 10035;
     private static final int MSG_TOUCH_EVENT = 10040;
+    private static final int MSG_REQUEST_WALLPAPER_COLORS = 10050;
     
     private final ArrayList<Engine> mActiveEngines
             = new ArrayList<Engine>();
@@ -169,7 +170,7 @@ public abstract class WallpaperService extends Service {
         final Rect mFinalSystemInsets = new Rect();
         final Rect mFinalStableInsets = new Rect();
         final Rect mBackdropFrame = new Rect();
-        final Configuration mConfiguration = new Configuration();
+        final MergedConfiguration mMergedConfiguration = new MergedConfiguration();
 
         final WindowManager.LayoutParams mLayout
                 = new WindowManager.LayoutParams();
@@ -232,8 +233,7 @@ public abstract class WallpaperService extends Service {
                         "Wallpapers do not support keep screen on");
             }
 
-            @Override
-            public Canvas lockCanvas() {
+            private void prepareToDraw() {
                 if (mDisplayState == Display.STATE_DOZE
                         || mDisplayState == Display.STATE_DOZE_SUSPEND) {
                     try {
@@ -242,7 +242,24 @@ public abstract class WallpaperService extends Service {
                         // System server died, can be ignored.
                     }
                 }
+            }
+
+            @Override
+            public Canvas lockCanvas() {
+                prepareToDraw();
                 return super.lockCanvas();
+            }
+
+            @Override
+            public Canvas lockCanvas(Rect dirty) {
+                prepareToDraw();
+                return super.lockCanvas(dirty);
+            }
+
+            @Override
+            public Canvas lockHardwareCanvas() {
+                prepareToDraw();
+                return super.lockHardwareCanvas();
             }
         };
 
@@ -252,7 +269,7 @@ public abstract class WallpaperService extends Service {
             }
 
             @Override
-            public void onInputEvent(InputEvent event) {
+            public void onInputEvent(InputEvent event, int displayId) {
                 boolean handled = false;
                 try {
                     if (event instanceof MotionEvent
@@ -272,8 +289,8 @@ public abstract class WallpaperService extends Service {
             @Override
             public void resized(Rect frame, Rect overscanInsets, Rect contentInsets,
                     Rect visibleInsets, Rect stableInsets, Rect outsets, boolean reportDraw,
-                    Configuration newConfig, Rect backDropRect, boolean forceLayout,
-                    boolean alwaysConsumeNavBar) {
+                    MergedConfiguration mergedConfiguration, Rect backDropRect, boolean forceLayout,
+                    boolean alwaysConsumeNavBar, int displayId) {
                 Message msg = mCaller.obtainMessageIO(MSG_WINDOW_RESIZED,
                         reportDraw ? 1 : 0, outsets);
                 mCaller.sendMessage(msg);
@@ -528,7 +545,38 @@ public abstract class WallpaperService extends Service {
          */
         public void onSurfaceDestroyed(SurfaceHolder holder) {
         }
-        
+
+        /**
+         * Notifies the engine that wallpaper colors changed significantly.
+         * This will trigger a {@link #onComputeWallpaperColors()} call.
+         * @hide
+         */
+        public void invalidateColors() {
+            try {
+                mConnection.onWallpaperColorsChanged(onComputeWallpaperColors());
+            } catch (RemoteException e) {
+                Log.w(TAG, "Can't invalidate wallpaper colors because " +
+                        "wallpaper connection was lost", e);
+            }
+        }
+
+        /**
+         * Notifies the system about what colors the wallpaper is using.
+         * You might return null if no color information is available at the moment. In that case
+         * you might want to call {@link #invalidateColors()} in a near future.
+         * <p>
+         * The simplest way of creating A {@link android.app.WallpaperColors} object is by using
+         * {@link android.app.WallpaperColors#fromBitmap(Bitmap)} or
+         * {@link android.app.WallpaperColors#fromDrawable(Drawable)}, but you can also specify
+         * your main colors and dark text support explicitly using one of the constructors.
+         *
+         * @return Wallpaper colors.
+         * @hide
+         */
+        public @Nullable WallpaperColors onComputeWallpaperColors() {
+            return null;
+        }
+
         protected void dump(String prefix, FileDescriptor fd, PrintWriter out, String[] args) {
             out.print(prefix); out.print("mInitializing="); out.print(mInitializing);
                     out.print(" mDestroyed="); out.println(mDestroyed);
@@ -552,7 +600,8 @@ public abstract class WallpaperService extends Service {
                     out.print(mVisibleInsets.toShortString());
                     out.print(" mWinFrame="); out.print(mWinFrame.toShortString());
                     out.print(" mContentInsets="); out.println(mContentInsets.toShortString());
-            out.print(prefix); out.print("mConfiguration="); out.println(mConfiguration);
+            out.print(prefix); out.print("mConfiguration=");
+                    out.println(mMergedConfiguration.getMergedConfiguration());
             out.print(prefix); out.print("mLayout="); out.println(mLayout);
             synchronized (mLock) {
                 out.print(prefix); out.print("mPendingXOffset="); out.print(mPendingXOffset);
@@ -679,7 +728,7 @@ public abstract class WallpaperService extends Service {
                         mWindow, mWindow.mSeq, mLayout, mWidth, mHeight,
                             View.VISIBLE, 0, mWinFrame, mOverscanInsets, mContentInsets,
                             mVisibleInsets, mStableInsets, mOutsets, mBackdropFrame,
-                            mConfiguration, mSurfaceHolder.mSurface);
+                            mMergedConfiguration, mSurfaceHolder.mSurface);
 
                     if (DEBUG) Log.v(TAG, "New surface: " + mSurfaceHolder.mSurface
                             + ", frame=" + mWinFrame);
@@ -1146,6 +1195,11 @@ public abstract class WallpaperService extends Service {
             }
         }
 
+        public void requestWallpaperColors() {
+            Message msg = mCaller.obtainMessage(MSG_REQUEST_WALLPAPER_COLORS);
+            mCaller.sendMessage(msg);
+        }
+
         public void destroy() {
             Message msg = mCaller.obtainMessage(DO_DETACH);
             mCaller.sendMessage(msg);
@@ -1220,6 +1274,16 @@ public abstract class WallpaperService extends Service {
                         mEngine.onTouchEvent(ev);
                     }
                     ev.recycle();
+                } break;
+                case MSG_REQUEST_WALLPAPER_COLORS: {
+                    if (mConnection == null) {
+                        break;
+                    }
+                    try {
+                        mConnection.onWallpaperColorsChanged(mEngine.onComputeWallpaperColors());
+                    } catch (RemoteException e) {
+                        // Connection went away, nothing to do in here.
+                    }
                 } break;
                 default :
                     Log.w(TAG, "Unknown message type " + message.what);

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="5247871339820894594">"CarrierDefaultApp"</string>
+    <string name="android_system_label" msgid="2797790869522345065">"Operadora de celular"</string>
+    <string name="portal_notification_id" msgid="5155057562457079297">"Os dados móveis se esgotaram"</string>
+    <string name="no_data_notification_id" msgid="668400731803969521">"Os dados móveis foram desativados"</string>
+    <string name="portal_notification_detail" msgid="2295729385924660881">"Toque para visitar o website %s"</string>
+    <string name="no_data_notification_detail" msgid="3112125343857014825">"Entre em contato com seu provedor de serviços %s"</string>
+    <string name="no_mobile_data_connection_title" msgid="7449525772416200578">"Sem conexão de dados móveis"</string>
+    <string name="no_mobile_data_connection" msgid="544980465184147010">"Adicionar plano de roaming ou dados por meio de %s"</string>
+    <string name="mobile_data_status_notification_channel_name" msgid="833999690121305708">"Status dos dados móveis"</string>
+    <string name="action_bar_label" msgid="4290345990334377177">"Fazer login na rede móvel"</string>
+    <string name="ssl_error_warning" msgid="3127935140338254180">"A rede à qual você está tentando se conectar tem problemas de segurança."</string>
+    <string name="ssl_error_example" msgid="6188711843183058764">"Por exemplo, a página de login pode não pertencer à organização mostrada."</string>
+    <string name="ssl_error_continue" msgid="1138548463994095584">"Continuar mesmo assim pelo navegador"</string>
+</resources>

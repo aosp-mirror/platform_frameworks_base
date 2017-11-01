@@ -16,7 +16,12 @@
 
 package android.net.wifi;
 
+
+import android.content.pm.ParceledListSlice;
+
+import android.net.wifi.hotspot2.OsuProvider;
 import android.net.wifi.hotspot2.PasspointConfiguration;
+
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.ScanSettings;
@@ -51,11 +56,13 @@ interface IWifiManager
      */
     oneway void requestActivityInfo(in ResultReceiver result);
 
-    List<WifiConfiguration> getConfiguredNetworks();
+    ParceledListSlice getConfiguredNetworks();
 
-    List<WifiConfiguration> getPrivilegedConfiguredNetworks();
+    ParceledListSlice getPrivilegedConfiguredNetworks();
 
     WifiConfiguration getMatchingWifiConfig(in ScanResult scanResult);
+
+    List<OsuProvider> getMatchingOsuProviders(in ScanResult scanResult);
 
     int addOrUpdateNetwork(in WifiConfiguration config);
 
@@ -77,9 +84,7 @@ interface IWifiManager
 
     boolean disableNetwork(int netId);
 
-    boolean pingSupplicant();
-
-    void startScan(in ScanSettings requested, in WorkSource ws);
+    void startScan(in ScanSettings requested, in WorkSource ws, in String packageName);
 
     List<ScanResult> getScanResults(String callingPackage);
 
@@ -123,6 +128,20 @@ interface IWifiManager
 
     void setWifiApEnabled(in WifiConfiguration wifiConfig, boolean enable);
 
+    void updateInterfaceIpState(String ifaceName, int mode);
+
+    boolean startSoftAp(in WifiConfiguration wifiConfig);
+
+    boolean stopSoftAp();
+
+    int startLocalOnlyHotspot(in Messenger messenger, in IBinder binder, in String packageName);
+
+    void stopLocalOnlyHotspot();
+
+    void startWatchLocalOnlyHotspot(in Messenger messenger, in IBinder binder);
+
+    void stopWatchLocalOnlyHotspot();
+
     int getWifiApEnabledState();
 
     WifiConfiguration getWifiApConfiguration();
@@ -135,7 +154,7 @@ interface IWifiManager
 
     void enableTdlsWithMacAddress(String remoteMacAddress, boolean enable);
 
-    String getWpsNfcConfigurationToken(int netId);
+    String getCurrentNetworkWpsNfcConfigurationToken();
 
     void enableVerboseLogging(int verbose);
 

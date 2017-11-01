@@ -17,7 +17,7 @@
 */
 -->
 
-<!-- Layout for {@link com.android.systemui.tv.pip.PipControlButtonView}. -->
+<!-- Layout for {@link com.android.systemui.pip.tv.PipControlButtonView}. -->
 <merge xmlns:android="http://schemas.android.com/apk/res/android">
 
     <ImageView android:id="@+id/button"

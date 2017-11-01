@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="5247871339820894594">"CarrierDefaultApp"</string>
+    <string name="android_system_label" msgid="2797790869522345065">"Operatori celular"</string>
+    <string name="portal_notification_id" msgid="5155057562457079297">"Të dhënat celulare kanë përfunduar"</string>
+    <string name="no_data_notification_id" msgid="668400731803969521">"Të dhënat celulare janë çaktivizuar"</string>
+    <string name="portal_notification_detail" msgid="2295729385924660881">"Trokit për të vizituar sajtin e uebit të %s"</string>
+    <string name="no_data_notification_detail" msgid="3112125343857014825">"Kontakto me ofruesin e shërbimit %s"</string>
+    <string name="no_mobile_data_connection_title" msgid="7449525772416200578">"Nuk ka lidhje të të dhënave celulare"</string>
+    <string name="no_mobile_data_connection" msgid="544980465184147010">"Shto plan të dhënash ose plan roaming përmes %s"</string>
+    <string name="mobile_data_status_notification_channel_name" msgid="833999690121305708">"Statusi i të dhënave celulare"</string>
+    <string name="action_bar_label" msgid="4290345990334377177">"Identifikohu në rrjetin celular"</string>
+    <string name="ssl_error_warning" msgid="3127935140338254180">"Rrjeti në të cilin po përpiqesh të bashkohesh ka probleme sigurie."</string>
+    <string name="ssl_error_example" msgid="6188711843183058764">"për shembull, faqja e identifikimit mund të mos i përkasë organizatës së shfaqur."</string>
+    <string name="ssl_error_continue" msgid="1138548463994095584">"Vazhdo gjithsesi nëpërmjet shfletuesit"</string>
+</resources>

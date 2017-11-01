@@ -21,9 +21,9 @@
 #include "unicode/brkiter.h"
 #include "utils/misc.h"
 #include "utils/Log.h"
-#include "ScopedStringChars.h"
-#include "ScopedPrimitiveArray.h"
-#include "JNIHelp.h"
+#include <nativehelper/ScopedStringChars.h>
+#include <nativehelper/ScopedPrimitiveArray.h>
+#include <nativehelper/JNIHelp.h>
 #include "core_jni_helpers.h"
 #include <cstdint>
 #include <vector>
@@ -54,8 +54,9 @@ static JLineBreaksID gLineBreaks_fieldID;
 // hyphenFrequency)
 static void nSetupParagraph(JNIEnv* env, jclass, jlong nativePtr, jcharArray text, jint length,
         jfloat firstWidth, jint firstWidthLineLimit, jfloat restWidth,
-        jintArray variableTabStops, jint defaultTabStop, jint strategy, jint hyphenFrequency) {
-    LineBreaker* b = reinterpret_cast<LineBreaker*>(nativePtr);
+        jintArray variableTabStops, jint defaultTabStop, jint strategy, jint hyphenFrequency,
+        jboolean isJustified) {
+    minikin::LineBreaker* b = reinterpret_cast<minikin::LineBreaker*>(nativePtr);
     b->resize(length);
     env->GetCharArrayRegion(text, 0, length, b->buffer());
     b->setText();
@@ -66,8 +67,9 @@ static void nSetupParagraph(JNIEnv* env, jclass, jlong nativePtr, jcharArray tex
         ScopedIntArrayRO stops(env, variableTabStops);
         b->setTabStops(stops.get(), stops.size(), defaultTabStop);
     }
-    b->setStrategy(static_cast<BreakStrategy>(strategy));
-    b->setHyphenationFrequency(static_cast<HyphenationFrequency>(hyphenFrequency));
+    b->setStrategy(static_cast<minikin::BreakStrategy>(strategy));
+    b->setHyphenationFrequency(static_cast<minikin::HyphenationFrequency>(hyphenFrequency));
+    b->setJustified(isJustified);
 }
 
 static void recycleCopy(JNIEnv* env, jobject recycle, jintArray recycleBreaks,
@@ -94,7 +96,7 @@ static jint nComputeLineBreaks(JNIEnv* env, jclass, jlong nativePtr,
                                jobject recycle, jintArray recycleBreaks,
                                jfloatArray recycleWidths, jintArray recycleFlags,
                                jint recycleLength) {
-    LineBreaker* b = reinterpret_cast<LineBreaker*>(nativePtr);
+    minikin::LineBreaker* b = reinterpret_cast<minikin::LineBreaker*>(nativePtr);
 
     size_t nBreaks = b->computeBreaks();
 
@@ -107,19 +109,20 @@ static jint nComputeLineBreaks(JNIEnv* env, jclass, jlong nativePtr,
 }
 
 static jlong nNewBuilder(JNIEnv*, jclass) {
-    return reinterpret_cast<jlong>(new LineBreaker);
+    return reinterpret_cast<jlong>(new minikin::LineBreaker);
 }
 
 static void nFreeBuilder(JNIEnv*, jclass, jlong nativePtr) {
-    delete reinterpret_cast<LineBreaker*>(nativePtr);
+    delete reinterpret_cast<minikin::LineBreaker*>(nativePtr);
 }
 
 static void nFinishBuilder(JNIEnv*, jclass, jlong nativePtr) {
-    LineBreaker* b = reinterpret_cast<LineBreaker*>(nativePtr);
+    minikin::LineBreaker* b = reinterpret_cast<minikin::LineBreaker*>(nativePtr);
     b->finish();
 }
 
-static jlong nLoadHyphenator(JNIEnv* env, jclass, jobject buffer, jint offset) {
+static jlong nLoadHyphenator(JNIEnv* env, jclass, jobject buffer, jint offset,
+        jint minPrefix, jint minSuffix) {
     const uint8_t* bytebuf = nullptr;
     if (buffer != nullptr) {
         void* rawbuf = env->GetDirectBufferAddress(buffer);
@@ -129,15 +132,16 @@ static jlong nLoadHyphenator(JNIEnv* env, jclass, jobject buffer, jint offset) {
             ALOGE("failed to get direct buffer address");
         }
     }
-    Hyphenator* hyphenator = Hyphenator::loadBinary(bytebuf);
+    minikin::Hyphenator* hyphenator = minikin::Hyphenator::loadBinary(
+            bytebuf, minPrefix, minSuffix);
     return reinterpret_cast<jlong>(hyphenator);
 }
 
 static void nSetLocale(JNIEnv* env, jclass, jlong nativePtr, jstring javaLocaleName,
         jlong nativeHyphenator) {
     ScopedIcuLocale icuLocale(env, javaLocaleName);
-    LineBreaker* b = reinterpret_cast<LineBreaker*>(nativePtr);
-    Hyphenator* hyphenator = reinterpret_cast<Hyphenator*>(nativeHyphenator);
+    minikin::LineBreaker* b = reinterpret_cast<minikin::LineBreaker*>(nativePtr);
+    minikin::Hyphenator* hyphenator = reinterpret_cast<minikin::Hyphenator*>(nativeHyphenator);
 
     if (icuLocale.valid()) {
         b->setLocale(icuLocale.locale(), hyphenator);
@@ -147,38 +151,40 @@ static void nSetLocale(JNIEnv* env, jclass, jlong nativePtr, jstring javaLocaleN
 static void nSetIndents(JNIEnv* env, jclass, jlong nativePtr, jintArray indents) {
     ScopedIntArrayRO indentArr(env, indents);
     std::vector<float> indentVec(indentArr.get(), indentArr.get() + indentArr.size());
-    LineBreaker* b = reinterpret_cast<LineBreaker*>(nativePtr);
+    minikin::LineBreaker* b = reinterpret_cast<minikin::LineBreaker*>(nativePtr);
     b->setIndents(indentVec);
 }
 
 // Basically similar to Paint.getTextRunAdvances but with C++ interface
 static jfloat nAddStyleRun(JNIEnv* env, jclass, jlong nativePtr,
         jlong nativePaint, jlong nativeTypeface, jint start, jint end, jboolean isRtl) {
-    LineBreaker* b = reinterpret_cast<LineBreaker*>(nativePtr);
+    minikin::LineBreaker* b = reinterpret_cast<minikin::LineBreaker*>(nativePtr);
     Paint* paint = reinterpret_cast<Paint*>(nativePaint);
     Typeface* typeface = reinterpret_cast<Typeface*>(nativeTypeface);
-    FontCollection *font;
-    MinikinPaint minikinPaint;
-    FontStyle style = MinikinUtils::prepareMinikinPaint(&minikinPaint, &font, paint, typeface);
-    return b->addStyleRun(&minikinPaint, font, style, start, end, isRtl);
+    minikin::MinikinPaint minikinPaint;
+    Typeface* resolvedTypeface = Typeface::resolveDefault(typeface);
+    minikin::FontStyle style = MinikinUtils::prepareMinikinPaint(&minikinPaint, paint,
+            typeface);
+    return b->addStyleRun(&minikinPaint, resolvedTypeface->fFontCollection, style, start, end,
+            isRtl);
 }
 
 // Accept width measurements for the run, passed in from Java
 static void nAddMeasuredRun(JNIEnv* env, jclass, jlong nativePtr,
         jint start, jint end, jfloatArray widths) {
-    LineBreaker* b = reinterpret_cast<LineBreaker*>(nativePtr);
+    minikin::LineBreaker* b = reinterpret_cast<minikin::LineBreaker*>(nativePtr);
     env->GetFloatArrayRegion(widths, start, end - start, b->charWidths() + start);
-    b->addStyleRun(nullptr, nullptr, FontStyle{}, start, end, false);
+    b->addStyleRun(nullptr, nullptr, minikin::FontStyle{}, start, end, false);
 }
 
 static void nAddReplacementRun(JNIEnv* env, jclass, jlong nativePtr,
         jint start, jint end, jfloat width) {
-    LineBreaker* b = reinterpret_cast<LineBreaker*>(nativePtr);
+    minikin::LineBreaker* b = reinterpret_cast<minikin::LineBreaker*>(nativePtr);
     b->addReplacement(start, end, width);
 }
 
 static void nGetWidths(JNIEnv* env, jclass, jlong nativePtr, jfloatArray widths) {
-    LineBreaker* b = reinterpret_cast<LineBreaker*>(nativePtr);
+    minikin::LineBreaker* b = reinterpret_cast<minikin::LineBreaker*>(nativePtr);
     env->SetFloatArrayRegion(widths, 0, b->size(), b->charWidths());
 }
 
@@ -187,9 +193,9 @@ static const JNINativeMethod gMethods[] = {
     {"nNewBuilder", "()J", (void*) nNewBuilder},
     {"nFreeBuilder", "(J)V", (void*) nFreeBuilder},
     {"nFinishBuilder", "(J)V", (void*) nFinishBuilder},
-    {"nLoadHyphenator", "(Ljava/nio/ByteBuffer;I)J", (void*) nLoadHyphenator},
+    {"nLoadHyphenator", "(Ljava/nio/ByteBuffer;III)J", (void*) nLoadHyphenator},
     {"nSetLocale", "(JLjava/lang/String;J)V", (void*) nSetLocale},
-    {"nSetupParagraph", "(J[CIFIF[IIII)V", (void*) nSetupParagraph},
+    {"nSetupParagraph", "(J[CIFIF[IIIIZ)V", (void*) nSetupParagraph},
     {"nSetIndents", "(J[I)V", (void*) nSetIndents},
     {"nAddStyleRun", "(JJJIIZ)F", (void*) nAddStyleRun},
     {"nAddMeasuredRun", "(JII[F)V", (void*) nAddMeasuredRun},

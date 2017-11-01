@@ -54,12 +54,6 @@ public interface Keyframes extends Cloneable {
     Object getValue(float fraction);
 
     /**
-     * If subclass has variables that it calculates based on the Keyframes, it should reset them
-     * when this method is called because Keyframe contents might have changed.
-     */
-    void invalidateCache();
-
-    /**
      * @return A list of all Keyframes contained by this. This may return null if this is
      * not made up of Keyframes.
      */

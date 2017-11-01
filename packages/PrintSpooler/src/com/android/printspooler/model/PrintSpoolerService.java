@@ -89,6 +89,8 @@ public final class PrintSpoolerService extends Service {
 
     private static final boolean PERSISTENCE_MANAGER_ENABLED = true;
 
+    private static final String PRINT_JOB_STATE_HISTO = "print_job_state";
+
     private static final long CHECK_ALL_PRINTJOBS_HANDLED_DELAY = 5000;
 
     private static final String PRINT_JOB_FILE_PREFIX = "print_job_";
@@ -532,7 +534,7 @@ public final class PrintSpoolerService extends Service {
                     Slog.i(LOG_TAG, "[STATE CHANGED] " + printJob);
                 }
 
-                MetricsLogger.histogram(this, "print_job_state", state);
+                MetricsLogger.histogram(this, PRINT_JOB_STATE_HISTO, state);
                 switch (state) {
                     case PrintJobInfo.STATE_COMPLETED:
                     case PrintJobInfo.STATE_CANCELED:
@@ -912,7 +914,7 @@ public final class PrintSpoolerService extends Service {
                             printJob.isCancelling()));
 
                     float progress = printJob.getProgress();
-                    if (progress != Float.NaN) {
+                    if (!Float.isNaN(progress)) {
                         serializer.attribute(null, ATTR_PROGRESS, String.valueOf(progress));
                     }
 

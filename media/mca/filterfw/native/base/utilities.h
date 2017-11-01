@@ -23,18 +23,6 @@
 namespace android {
 namespace filterfw {
 
-// Convenience Macro to make copy constructor and assignment operator private
-// (thereby disallowing copying and assigning).
-#define DISALLOW_COPY_AND_ASSIGN(TypeName) \
-  TypeName(const TypeName&);               \
-  void operator=(const TypeName&)
-
-// A macro to disallow all the implicit constructors, namely the
-// default constructor, copy constructor and operator= functions.
-#define DISALLOW_IMPLICIT_CONSTRUCTORS(TypeName) \
-  TypeName();                                    \
-  DISALLOW_COPY_AND_ASSIGN(TypeName)
-
 // STLDeleteContainerPointers()
 //  For a range within a container of pointers, calls delete
 //  (non-array version) on these pointers.

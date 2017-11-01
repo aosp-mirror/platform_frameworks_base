@@ -21,7 +21,7 @@
 #include <androidfw/ObbFile.h>
 
 #include "jni.h"
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 #include "utils/misc.h"
 #include "android_runtime/AndroidRuntime.h"
 

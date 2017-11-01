@@ -347,51 +347,6 @@ TEST(VectorDrawableUtils, interpolatePathData) {
     }
 }
 
-TEST(VectorDrawable, matrixScale) {
-    struct MatrixAndScale {
-        float buffer[9];
-        float matrixScale;
-    };
-
-    const MatrixAndScale sMatrixAndScales[] {
-        {
-            {1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f},
-            1.0
-        },
-        {
-            {1.0f, 0.0f, 240.0f, 0.0f, 1.0f, 240.0f, 0.0f, 0.0f, 1.0f},
-            1.0f,
-        },
-        {
-            {1.5f, 0.0f, 24.0f, 0.0f, 1.5f, 24.0f, 0.0f, 0.0f, 1.0f},
-            1.5f,
-        },
-        {
-            {0.99999994f, 0.0f, 300.0f, 0.0f, 0.99999994f, 158.57864f, 0.0f, 0.0f, 1.0f},
-            0.99999994f,
-        },
-        {
-            {0.7071067f, 0.7071067f, 402.5305f, -0.7071067f, 0.7071067f, 169.18524f, 0.0f, 0.0f, 1.0f},
-            0.99999994f,
-        },
-        {
-            {0.0f, 0.9999999f, 482.5305f, -0.9999999f, 0.0f, 104.18525f, 0.0f, 0.0f, 1.0f},
-            0.9999999f,
-        },
-        {
-            {-0.35810637f, -0.93368083f, 76.55821f, 0.93368083f, -0.35810637f, 89.538506f, 0.0f, 0.0f, 1.0f},
-            1.0000001f,
-        },
-    };
-
-    for (MatrixAndScale matrixAndScale : sMatrixAndScales) {
-        SkMatrix matrix;
-        matrix.set9(matrixAndScale.buffer);
-        float actualMatrixScale = VectorDrawable::Path::getMatrixScale(matrix);
-        EXPECT_EQ(matrixAndScale.matrixScale, actualMatrixScale);
-    }
-}
-
 TEST(VectorDrawable, groupProperties) {
     //TODO: Also need to test property sync and dirty flag when properties change.
     VectorDrawable::Group group;
@@ -427,47 +382,24 @@ TEST(VectorDrawable, groupProperties) {
 
 }
 
-static SkShader* createShader(bool* isDestroyed) {
-    class TestShader : public SkShader {
-    public:
-        TestShader(bool* isDestroyed) : SkShader(), mDestroyed(isDestroyed) {
-        }
-        ~TestShader() {
-            *mDestroyed = true;
-        }
-
-        Factory getFactory() const override { return nullptr; }
-    private:
-        bool* mDestroyed;
-    };
-    return new TestShader(isDestroyed);
-}
-
 TEST(VectorDrawable, drawPathWithoutIncrementingShaderRefCount) {
     VectorDrawable::FullPath path("m1 1", 4);
     SkBitmap bitmap;
-    SkImageInfo info = SkImageInfo::Make(5, 5, kN32_SkColorType, kPremul_SkAlphaType);
-    bitmap.setInfo(info);
-    bitmap.allocPixels(info);
+    bitmap.allocN32Pixels(5, 5, false);
     SkCanvas canvas(bitmap);
 
-    bool shaderIsDestroyed = false;
-
+    sk_sp<SkShader> shader = SkShader::MakeColorShader(SK_ColorBLACK);
     // Initial ref count is 1
-    SkShader* shader = createShader(&shaderIsDestroyed);
+    EXPECT_TRUE(shader->unique());
 
     // Setting the fill gradient increments the ref count of the shader by 1
-    path.mutateStagingProperties()->setFillGradient(shader);
-    path.draw(&canvas, SkMatrix::I(), 1.0f, 1.0f, true);
+    path.mutateStagingProperties()->setFillGradient(shader.get());
+    EXPECT_FALSE(shader->unique());
+    path.draw(&canvas, true);
     // Resetting the fill gradient decrements the ref count of the shader by 1
     path.mutateStagingProperties()->setFillGradient(nullptr);
 
-    // Expect ref count to be 1 again, i.e. nothing else to have a ref to the shader now. Unref()
-    // again should bring the ref count to zero and consequently trigger detor.
-    shader->unref();
-
-    // Verify that detor is called.
-    EXPECT_TRUE(shaderIsDestroyed);
+    EXPECT_TRUE(shader->unique());
 }
 
 }; // namespace uirenderer

@@ -16,7 +16,7 @@
 
 package com.android.providers.settings;
 
-import android.app.ActivityManagerNative;
+import android.app.ActivityManager;
 import android.app.IActivityManager;
 import android.app.backup.IBackupManager;
 import android.content.ContentResolver;
@@ -37,10 +37,12 @@ import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.ArraySet;
+import android.util.Slog;
 
 import java.util.Locale;
 
 public class SettingsHelper {
+    private static final String TAG = "SettingsHelper";
     private static final String SILENT_RINGTONE = "_silent";
     private Context mContext;
     private AudioManager mAudioManager;
@@ -62,11 +64,12 @@ public class SettingsHelper {
      */
     private static final ArraySet<String> sBroadcastOnRestore;
     static {
-        sBroadcastOnRestore = new ArraySet<String>(4);
+        sBroadcastOnRestore = new ArraySet<String>(5);
         sBroadcastOnRestore.add(Settings.Secure.ENABLED_NOTIFICATION_LISTENERS);
         sBroadcastOnRestore.add(Settings.Secure.ENABLED_VR_LISTENERS);
         sBroadcastOnRestore.add(Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES);
         sBroadcastOnRestore.add(Settings.Secure.ENABLED_INPUT_METHODS);
+        sBroadcastOnRestore.add(Settings.Global.BLUETOOTH_ON);
     }
 
     private interface SettingsLookup {
@@ -109,7 +112,7 @@ public class SettingsHelper {
      * and in some cases the property value needs to be modified before setting.
      */
     public void restoreValue(Context context, ContentResolver cr, ContentValues contentValues,
-            Uri destination, String name, String value) {
+            Uri destination, String name, String value, int restoredFromSdkInt) {
         // Will we need a post-restore broadcast for this element?
         String oldValue = null;
         boolean sendBroadcast = false;
@@ -166,7 +169,8 @@ public class SettingsHelper {
                         .setPackage("android").addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY)
                         .putExtra(Intent.EXTRA_SETTING_NAME, name)
                         .putExtra(Intent.EXTRA_SETTING_NEW_VALUE, value)
-                        .putExtra(Intent.EXTRA_SETTING_PREVIOUS_VALUE, oldValue);
+                        .putExtra(Intent.EXTRA_SETTING_PREVIOUS_VALUE, oldValue)
+                        .putExtra(Intent.EXTRA_SETTING_RESTORED_FROM_SDK_INT, restoredFromSdkInt);
                 context.sendBroadcastAsUser(intent, UserHandle.SYSTEM, null);
             }
         }
@@ -238,7 +242,6 @@ public class SettingsHelper {
         // these features working after the restore.
         switch (name) {
             case Settings.Secure.ACCESSIBILITY_ENABLED:
-            case Settings.Secure.ACCESSIBILITY_SCRIPT_INJECTION:
             case Settings.Secure.ACCESSIBILITY_SPEAK_PASSWORD:
             case Settings.Secure.TOUCH_EXPLORATION_ENABLED:
             case Settings.Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED:
@@ -324,11 +327,17 @@ public class SettingsHelper {
      */
     void setLocaleData(byte[] data, int size) {
         // Check if locale was set by the user:
-        Configuration conf = mContext.getResources().getConfiguration();
-        // TODO: The following is not working as intended because the network is forcing a locale
-        // change after registering. Need to find some other way to detect if the user manually
-        // changed the locale
-        if (conf.userSetLocale) return; // Don't change if user set it in the SetupWizard
+        final ContentResolver cr = mContext.getContentResolver();
+        final boolean userSetLocale = mContext.getResources().getConfiguration().userSetLocale;
+        final boolean provisioned = Settings.Global.getInt(cr,
+                Settings.Global.DEVICE_PROVISIONED, 0) != 0;
+        if (userSetLocale || provisioned) {
+            // Don't change if user set it in the SetupWizard, or if this is a post-setup
+            // deferred restore operation
+            Slog.i(TAG, "Not applying restored locale; "
+                    + (userSetLocale ? "user already specified" : "device already provisioned"));
+            return;
+        }
 
         final String[] availableLocales = mContext.getAssets().getLocales();
         // Replace "_" with "-" to deal with older backups.
@@ -343,7 +352,7 @@ public class SettingsHelper {
         if (loc == null) return; // Couldn't find the saved locale in this version of the software
 
         try {
-            IActivityManager am = ActivityManagerNative.getDefault();
+            IActivityManager am = ActivityManager.getService();
             Configuration config = am.getConfiguration();
             config.locale = loc;
             // indicate this isn't some passing default - the user wants this remembered

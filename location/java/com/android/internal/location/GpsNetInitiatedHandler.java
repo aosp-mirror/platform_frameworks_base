@@ -36,6 +36,7 @@ import android.os.UserHandle;
 import android.os.SystemProperties;
 import android.util.Log;
 
+import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.R;
 import com.android.internal.telephony.GsmAlphabet;
 import com.android.internal.telephony.TelephonyProperties;
@@ -131,14 +132,11 @@ public class GpsNetInitiatedHandler {
         public String text;
         public int requestorIdEncoding;
         public int textEncoding;
-        public Bundle extras;
     };
 
     public static class GpsNiResponse {
         /* User response, one of the values in GpsUserResponseType */
         int userResponse;
-        /* Optional extra data to pass with the user response */
-        Bundle extras;
     };
 
     private final BroadcastReceiver mBroadcastReciever = new BroadcastReceiver() {
@@ -245,8 +243,7 @@ public class GpsNetInitiatedHandler {
     }
 
     public boolean getInEmergency() {
-        boolean isInEmergencyCallback = Boolean.parseBoolean(
-                SystemProperties.get(TelephonyProperties.PROPERTY_INECM_MODE));
+        boolean isInEmergencyCallback = mTelephonyManager.getEmergencyCallbackMode();
         return mIsInEmergency || isInEmergencyCallback;
     }
 
@@ -368,7 +365,8 @@ public class GpsNetInitiatedHandler {
 
         // Construct Notification
         if (mNiNotificationBuilder == null) {
-            mNiNotificationBuilder = new Notification.Builder(mContext)
+            mNiNotificationBuilder = new Notification.Builder(mContext,
+                SystemNotificationChannels.NETWORK_ALERTS)
                     .setSmallIcon(com.android.internal.R.drawable.stat_sys_gps_on)
                     .setWhen(0)
                     .setOngoing(true)

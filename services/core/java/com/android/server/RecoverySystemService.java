@@ -285,8 +285,9 @@ public final class RecoverySystemService extends SystemService {
 
                 // Send the BCB commands if it's to setup BCB.
                 if (isSetup) {
-                    dos.writeInt(command.length());
-                    dos.writeBytes(command);
+                    byte[] cmdUtf8 = command.getBytes("UTF-8");
+                    dos.writeInt(cmdUtf8.length);
+                    dos.write(cmdUtf8, 0, cmdUtf8.length);
                     dos.flush();
                 }
 

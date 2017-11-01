@@ -1,0 +1,147 @@
+/*
+ * Copyright (C) 2017 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
+ * except in compliance with the License. You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the specific language governing
+ * permissions and limitations under the License.
+ */
+
+package com.android.systemui;
+
+import static com.android.systemui.tuner.TunablePadding.FLAG_END;
+import static com.android.systemui.tuner.TunablePadding.FLAG_START;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import android.app.Fragment;
+import android.support.test.filters.SmallTest;
+import android.testing.AndroidTestingRunner;
+import android.view.Display;
+import android.view.View;
+import android.view.WindowManager;
+
+import com.android.systemui.R.dimen;
+import com.android.systemui.RoundedCorners.TunablePaddingTagListener;
+import com.android.systemui.fragments.FragmentHostManager;
+import com.android.systemui.fragments.FragmentService;
+import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.statusbar.phone.StatusBarWindowView;
+import com.android.systemui.tuner.TunablePadding;
+import com.android.systemui.tuner.TunablePadding.TunablePaddingService;
+import com.android.systemui.tuner.TunerService;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+@RunWith(AndroidTestingRunner.class)
+@SmallTest
+public class RoundedCornersTest extends SysuiTestCase {
+
+    private RoundedCorners mRoundedCorners;
+    private StatusBar mStatusBar;
+    private WindowManager mWindowManager;
+    private FragmentService mFragmentService;
+    private FragmentHostManager mFragmentHostManager;
+    private TunerService mTunerService;
+    private StatusBarWindowView mView;
+    private TunablePaddingService mTunablePaddingService;
+
+    @Before
+    public void setup() {
+        mStatusBar = mock(StatusBar.class);
+        mWindowManager = mock(WindowManager.class);
+        mView = spy(new StatusBarWindowView(mContext, null));
+        when(mStatusBar.getStatusBarWindow()).thenReturn(mView);
+        when(mStatusBar.getNavigationBarWindow()).thenReturn(mView);
+        mContext.putComponent(StatusBar.class, mStatusBar);
+
+        Display display = mContext.getSystemService(WindowManager.class).getDefaultDisplay();
+        when(mWindowManager.getDefaultDisplay()).thenReturn(display);
+        mContext.addMockSystemService(WindowManager.class, mWindowManager);
+
+        mFragmentService = mDependency.injectMockDependency(FragmentService.class);
+        mFragmentHostManager = mock(FragmentHostManager.class);
+        when(mFragmentService.getFragmentHostManager(any())).thenReturn(mFragmentHostManager);
+
+        mTunerService = mDependency.injectMockDependency(TunerService.class);
+
+        mRoundedCorners = new RoundedCorners();
+        mRoundedCorners.mContext = mContext;
+        mRoundedCorners.mComponents = mContext.getComponents();
+
+        mTunablePaddingService = mDependency.injectMockDependency(TunablePaddingService.class);
+    }
+
+    @Test
+    public void testNoRounding() {
+        mContext.getOrCreateTestableResources().addOverride(dimen.rounded_corner_radius, 0);
+        mContext.getOrCreateTestableResources()
+                .addOverride(dimen.rounded_corner_content_padding, 0);
+
+        mRoundedCorners.start();
+        // No views added.
+        verify(mWindowManager, never()).addView(any(), any());
+        // No Fragments watched.
+        verify(mFragmentHostManager, never()).addTagListener(any(), any());
+        // No Tuners tuned.
+        verify(mTunerService, never()).addTunable(any(), any());
+    }
+
+    @Test
+    public void testRounding() {
+        mContext.getOrCreateTestableResources().addOverride(dimen.rounded_corner_radius, 20);
+        mContext.getOrCreateTestableResources()
+                .addOverride(dimen.rounded_corner_content_padding, 20);
+
+        mRoundedCorners.start();
+        // Add 2 windows for rounded corners (top and bottom).
+        verify(mWindowManager, times(2)).addView(any(), any());
+
+        // Add 2 tag listeners for each of the fragments that are needed.
+        verify(mFragmentHostManager, times(2)).addTagListener(any(), any());
+        // One tunable.
+        verify(mTunerService, times(1)).addTunable(any(), any());
+        // One TunablePadding.
+        verify(mTunablePaddingService, times(1)).add(any(), anyString(), anyInt(), anyInt());
+    }
+
+    @Test
+    public void testPaddingTagListener() {
+        TunablePaddingTagListener tagListener = new TunablePaddingTagListener(14, 5);
+        View v = mock(View.class);
+        View child = mock(View.class);
+        Fragment f = mock(Fragment.class);
+        TunablePadding padding = mock(TunablePadding.class);
+
+        when(mTunablePaddingService.add(any(), anyString(), anyInt(), anyInt()))
+                .thenReturn(padding);
+        when(f.getView()).thenReturn(v);
+        when(v.findViewById(5)).thenReturn(child);
+
+        // Trigger callback and verify we get a TunablePadding created.
+        tagListener.onFragmentViewCreated(null, f);
+        verify(mTunablePaddingService).add(eq(child), eq(RoundedCorners.PADDING), eq(14),
+                eq(FLAG_START | FLAG_END));
+
+        // Call again and verify destroy is called.
+        tagListener.onFragmentViewCreated(null, f);
+        verify(padding).destroy();
+    }
+
+}

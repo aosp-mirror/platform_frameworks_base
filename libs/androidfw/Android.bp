@@ -24,15 +24,22 @@ cc_library {
         "-Wunreachable-code",
     ],
     srcs: [
+        "ApkAssets.cpp",
         "Asset.cpp",
         "AssetDir.cpp",
         "AssetManager.cpp",
+        "AssetManager2.cpp",
+        "AttributeResolution.cpp",
+        "ChunkIterator.cpp",
+        "LoadedArsc.cpp",
         "LocaleData.cpp",
         "misc.cpp",
         "ObbFile.cpp",
         "ResourceTypes.cpp",
+        "ResourceUtils.cpp",
         "StreamingZipInflater.cpp",
         "TypeWrappers.cpp",
+        "Util.cpp",
         "ZipFileRO.cpp",
         "ZipUtils.cpp",
     ],
@@ -64,10 +71,22 @@ cc_library {
             shared: {
                 enabled: false,
             },
-            shared_libs: ["libz-host"],
+            static_libs: [
+                "libziparchive",
+                "libbase",
+                "liblog",
+                "libcutils",
+                "libutils",
+            ],
+            shared_libs: [
+                "libz",
+            ],
         },
         windows: {
             enabled: true,
+            cppflags: ["-Wno-missing-field-initializers"],  // The Windows compiler warns
+                                                            // incorrectly for value
+                                                            // initialization with {}.
         },
     },
 }

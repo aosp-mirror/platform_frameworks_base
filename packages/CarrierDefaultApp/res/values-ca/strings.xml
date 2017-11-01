@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="5247871339820894594">"CarrierDefaultApp"</string>
+    <string name="android_system_label" msgid="2797790869522345065">"Operador de telefonia mòbil"</string>
+    <string name="portal_notification_id" msgid="5155057562457079297">"S\'han esgotat les dades mòbils"</string>
+    <string name="no_data_notification_id" msgid="668400731803969521">"S\'han desactivat les dades mòbils"</string>
+    <string name="portal_notification_detail" msgid="2295729385924660881">"Toca per visitar el lloc web de: %s"</string>
+    <string name="no_data_notification_detail" msgid="3112125343857014825">"Contacta amb el teu proveïdor de serveis: %s"</string>
+    <string name="no_mobile_data_connection_title" msgid="7449525772416200578">"No hi ha connexió de dades mòbils"</string>
+    <string name="no_mobile_data_connection" msgid="544980465184147010">"Afegeix un pla de dades o d\'itinerància amb %s"</string>
+    <string name="mobile_data_status_notification_channel_name" msgid="833999690121305708">"Estat de les dades mòbils"</string>
+    <string name="action_bar_label" msgid="4290345990334377177">"Inicia la sessió a la xarxa mòbil"</string>
+    <string name="ssl_error_warning" msgid="3127935140338254180">"La xarxa a què et vols connectar té problemes de seguretat."</string>
+    <string name="ssl_error_example" msgid="6188711843183058764">"Per exemple, la pàgina d\'inici de sessió podria no pertànyer a l\'organització que es mostra."</string>
+    <string name="ssl_error_continue" msgid="1138548463994095584">"Continua igualment mitjançant el navegador"</string>
+</resources>

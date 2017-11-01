@@ -178,27 +178,41 @@ public class Camera {
     private static final int NO_ERROR = 0;
 
     /**
-     * @deprecated This broadcast is no longer delivered by the system; use
-     * {@link android.app.job.JobInfo.Builder JobInfo.Builder}.{@link android.app.job.JobInfo.Builder#addTriggerContentUri}
-     * instead.
      * Broadcast Action:  A new picture is taken by the camera, and the entry of
      * the picture has been added to the media store.
      * {@link android.content.Intent#getData} is URI of the picture.
+     *
+     * <p>In {@link android.os.Build.VERSION_CODES#N Android N} this broadcast was removed, and
+     * applications are recommended to use
+     * {@link android.app.job.JobInfo.Builder JobInfo.Builder}.{@link android.app.job.JobInfo.Builder#addTriggerContentUri}
+     * instead.</p>
+     *
+     * <p>In {@link android.os.Build.VERSION_CODES#O Android O} this broadcast has been brought
+     * back, but only for <em>registered</em> receivers.  Apps that are actively running can
+     * again listen to the broadcast if they want an immediate clear signal about a picture
+     * being taken, however anything doing heavy work (or needing to be launched) as a result of
+     * this should still use JobScheduler.</p>
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    @Deprecated
     public static final String ACTION_NEW_PICTURE = "android.hardware.action.NEW_PICTURE";
 
     /**
-     * @deprecated This broadcast is no longer delivered by the system; use
-     * {@link android.app.job.JobInfo.Builder JobInfo.Builder}.{@link android.app.job.JobInfo.Builder#addTriggerContentUri}
-     * instead.
      * Broadcast Action:  A new video is recorded by the camera, and the entry
      * of the video has been added to the media store.
      * {@link android.content.Intent#getData} is URI of the video.
+     *
+     * <p>In {@link android.os.Build.VERSION_CODES#N Android N} this broadcast was removed, and
+     * applications are recommended to use
+     * {@link android.app.job.JobInfo.Builder JobInfo.Builder}.{@link android.app.job.JobInfo.Builder#addTriggerContentUri}
+     * instead.</p>
+     *
+     * <p>In {@link android.os.Build.VERSION_CODES#O Android O} this broadcast has been brought
+     * back, but only for <em>registered</em> receivers.  Apps that are actively running can
+     * again listen to the broadcast if they want an immediate clear signal about a video
+     * being taken, however anything doing heavy work (or needing to be launched) as a result of
+     * this should still use JobScheduler.</p>
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    @Deprecated
     public static final String ACTION_NEW_VIDEO = "android.hardware.action.NEW_VIDEO";
 
     /**

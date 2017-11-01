@@ -27,10 +27,12 @@ import android.view.View;
 import android.view.ViewConfiguration;
 
 import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.MetricsProto.MetricsEvent;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.policy.DividerSnapAlgorithm.SnapTarget;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.RecentsComponent;
+import com.android.systemui.plugins.statusbar.phone.NavGesture.GestureHelper;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.tuner.TunerService;
 
@@ -42,7 +44,7 @@ import static android.view.WindowManager.DOCKED_TOP;
  * Class to detect gestures on the navigation bar.
  */
 public class NavigationBarGestureHelper extends GestureDetector.SimpleOnGestureListener
-        implements TunerService.Tunable {
+        implements TunerService.Tunable, GestureHelper {
 
     private static final String KEY_DOCK_WINDOW_GESTURE = "overview_nav_bar_gesture";
     /**
@@ -86,7 +88,11 @@ public class NavigationBarGestureHelper extends GestureDetector.SimpleOnGestureL
         mScrollTouchSlop = r.getDimensionPixelSize(R.dimen.navigation_bar_min_swipe_distance);
         mMinFlingVelocity = configuration.getScaledMinimumFlingVelocity();
         mTaskSwitcherDetector = new GestureDetector(context, this);
-        TunerService.get(context).addTunable(this, KEY_DOCK_WINDOW_GESTURE);
+        Dependency.get(TunerService.class).addTunable(this, KEY_DOCK_WINDOW_GESTURE);
+    }
+
+    public void destroy() {
+        Dependency.get(TunerService.class).removeTunable(this);
     }
 
     public void setComponents(RecentsComponent recentsComponent, Divider divider,

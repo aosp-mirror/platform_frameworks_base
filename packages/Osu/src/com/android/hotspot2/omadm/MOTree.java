@@ -65,7 +65,7 @@ public class MOTree {
             case OMAConstants.DevInfoURN:
             case OMAConstants.DevDetailURN:
             case OMAConstants.DevDetailXURN:
-                realRoot = new OMAConstructed(null, MgmtTreeTag, urn, "xmlns", OMAConstants.SyncML);
+                realRoot = new MgmtTreeRoot(OMAConstants.OMAVersion);
                 realRoot.addChild(root);
                 return new MOTree(urn, rev, realRoot);
             default:

@@ -16,12 +16,12 @@
 
 package android.view;
 
-import dalvik.system.CloseGuard;
-
 import android.os.Looper;
 import android.os.MessageQueue;
 import android.util.Log;
 import android.util.SparseIntArray;
+
+import dalvik.system.CloseGuard;
 
 import java.lang.ref.WeakReference;
 
@@ -111,9 +111,10 @@ public abstract class InputEventReceiver {
      * to indicate whether the event was handled.  No new input events will be received
      * until {@link #finishInputEvent} is called.
      *
+     * @param displayId The display id on which input event triggered.
      * @param event The input event that was received.
      */
-    public void onInputEvent(InputEvent event) {
+    public void onInputEvent(InputEvent event, int displayId) {
         finishInputEvent(event, false);
     }
 
@@ -180,9 +181,9 @@ public abstract class InputEventReceiver {
 
     // Called from native code.
     @SuppressWarnings("unused")
-    private void dispatchInputEvent(int seq, InputEvent event) {
+    private void dispatchInputEvent(int seq, InputEvent event, int displayId) {
         mSeqMap.put(event.getSequenceNumber(), seq);
-        onInputEvent(event);
+        onInputEvent(event, displayId);
     }
 
     // Called from native code.

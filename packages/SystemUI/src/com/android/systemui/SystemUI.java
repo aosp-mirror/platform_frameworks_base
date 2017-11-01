@@ -25,7 +25,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Map;
 
-public abstract class SystemUI {
+public abstract class SystemUI implements SysUiServiceProvider {
     public Context mContext;
     public Map<Class<?>, Object> mComponents;
 

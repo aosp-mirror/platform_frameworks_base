@@ -17,10 +17,10 @@
 package android.hardware.display;
 
 import android.content.Context;
-import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.hardware.display.DisplayManager.DisplayListener;
-import android.media.projection.MediaProjection;
 import android.media.projection.IMediaProjection;
+import android.media.projection.MediaProjection;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -30,8 +30,8 @@ import android.os.ServiceManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
-import android.view.DisplayAdjustments;
 import android.view.Display;
+import android.view.DisplayAdjustments;
 import android.view.DisplayInfo;
 import android.view.Surface;
 
@@ -178,6 +178,24 @@ public final class DisplayManagerGlobal {
             return null;
         }
         return new Display(this, displayId, displayInfo, daj);
+    }
+
+    /**
+     * Gets information about a logical display.
+     *
+     * The display metrics may be adjusted to provide compatibility
+     * for legacy applications or limited screen areas.
+     *
+     * @param displayId The logical display id.
+     * @param resources Resources providing compatibility info.
+     * @return The display object, or null if there is no display with the given id.
+     */
+    public Display getCompatibleDisplay(int displayId, Resources resources) {
+        DisplayInfo displayInfo = getDisplayInfo(displayId);
+        if (displayInfo == null) {
+            return null;
+        }
+        return new Display(this, displayId, displayInfo, resources);
     }
 
     /**
@@ -364,7 +382,7 @@ public final class DisplayManagerGlobal {
 
     public VirtualDisplay createVirtualDisplay(Context context, MediaProjection projection,
             String name, int width, int height, int densityDpi, Surface surface, int flags,
-            VirtualDisplay.Callback callback, Handler handler) {
+            VirtualDisplay.Callback callback, Handler handler, String uniqueId) {
         if (TextUtils.isEmpty(name)) {
             throw new IllegalArgumentException("name must be non-null and non-empty");
         }
@@ -378,7 +396,8 @@ public final class DisplayManagerGlobal {
         int displayId;
         try {
             displayId = mDm.createVirtualDisplay(callbackWrapper, projectionToken,
-                    context.getPackageName(), name, width, height, densityDpi, surface, flags);
+                    context.getPackageName(), name, width, height, densityDpi, surface, flags,
+                    uniqueId);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }

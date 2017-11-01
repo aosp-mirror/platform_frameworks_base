@@ -28,7 +28,7 @@
 #include <vector>
 
 #include "jni.h"
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 #include "android_os_Parcel.h"
 #include "core_jni_helpers.h"
 #include "android_runtime/android_hardware_camera2_CameraMetadata.h"
@@ -36,6 +36,7 @@
 #include <android/hardware/ICameraService.h>
 #include <binder/IServiceManager.h>
 #include <camera/CameraMetadata.h>
+#include <camera_metadata_hidden.h>
 #include <camera/VendorTagDescriptor.h>
 #include <nativehelper/ScopedUtfChars.h>
 #include <nativehelper/ScopedPrimitiveArray.h>
@@ -161,10 +162,11 @@ struct Helpers {
 
 extern "C" {
 
-static void CameraMetadata_classInit(JNIEnv *env, jobject thiz);
 static jobject CameraMetadata_getAllVendorKeys(JNIEnv* env, jobject thiz, jclass keyType);
-static jint CameraMetadata_getTagFromKey(JNIEnv *env, jobject thiz, jstring keyName);
-static jint CameraMetadata_getTypeFromTag(JNIEnv *env, jobject thiz, jint tag);
+static jint CameraMetadata_getTagFromKey(JNIEnv *env, jobject thiz, jstring keyName, jlong vendorId);
+static jint CameraMetadata_getTagFromKeyLocal(JNIEnv *env, jobject thiz, jstring keyName);
+static jint CameraMetadata_getTypeFromTag(JNIEnv *env, jobject thiz, jint tag, jlong vendorId);
+static jint CameraMetadata_getTypeFromTagLocal(JNIEnv *env, jobject thiz, jint tag);
 static jint CameraMetadata_setupGlobalVendorTagDescriptor(JNIEnv *env, jobject thiz);
 
 // Less safe access to native pointer. Does NOT throw any Java exceptions if NULL.
@@ -287,7 +289,9 @@ static jbyteArray CameraMetadata_readValues(JNIEnv *env, jobject thiz, jint tag)
     CameraMetadata* metadata = CameraMetadata_getPointerThrow(env, thiz);
     if (metadata == NULL) return NULL;
 
-    int tagType = get_camera_metadata_tag_type(tag);
+    const camera_metadata_t *metaBuffer = metadata->getAndLock();
+    int tagType = get_local_camera_metadata_tag_type(tag, metaBuffer);
+    metadata->unlock(metaBuffer);
     if (tagType == -1) {
         jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException",
                              "Tag (%d) did not have a type", tag);
@@ -324,7 +328,9 @@ static void CameraMetadata_writeValues(JNIEnv *env, jobject thiz, jint tag, jbyt
     CameraMetadata* metadata = CameraMetadata_getPointerThrow(env, thiz);
     if (metadata == NULL) return;
 
-    int tagType = get_camera_metadata_tag_type(tag);
+    const camera_metadata_t *metaBuffer = metadata->getAndLock();
+    int tagType = get_local_camera_metadata_tag_type(tag, metaBuffer);
+    metadata->unlock(metaBuffer);
     if (tagType == -1) {
         jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException",
                              "Tag (%d) did not have a type", tag);
@@ -436,10 +442,12 @@ static void CameraMetadata_dump(JNIEnv *env, jobject thiz) {
 
         if (threadRet != 0) {
             close(writeFd);
+            close(readFd);
 
             jniThrowExceptionFmt(env, "java/io/IOException",
                     "Failed to create thread for writing (errno = %#x, message = '%s')",
                     threadRet, strerror(threadRet));
+            return;
         }
     }
 
@@ -470,6 +478,8 @@ static void CameraMetadata_dump(JNIEnv *env, jobject thiz) {
         } else if (!logLine.isEmpty()) {
             ALOGD("%s", logLine.string());
         }
+
+        close(readFd);
     }
 
     int res;
@@ -529,17 +539,11 @@ static void CameraMetadata_writeToParcel(JNIEnv *env, jobject thiz, jobject parc
 
 static const JNINativeMethod gCameraMetadataMethods[] = {
 // static methods
-  { "nativeClassInit",
-    "()V",
-    (void *)CameraMetadata_classInit },
-  { "nativeGetAllVendorKeys",
-    "(Ljava/lang/Class;)Ljava/util/ArrayList;",
-    (void *)CameraMetadata_getAllVendorKeys},
   { "nativeGetTagFromKey",
-    "(Ljava/lang/String;)I",
+    "(Ljava/lang/String;J)I",
     (void *)CameraMetadata_getTagFromKey },
   { "nativeGetTypeFromTag",
-    "(I)I",
+    "(IJ)I",
     (void *)CameraMetadata_getTypeFromTag },
   { "nativeSetupGlobalVendorTagDescriptor",
     "()I",
@@ -563,6 +567,12 @@ static const JNINativeMethod gCameraMetadataMethods[] = {
   { "nativeSwap",
     "(L" CAMERA_METADATA_CLASS_NAME ";)V",
     (void *)CameraMetadata_swap },
+  { "nativeGetTagFromKeyLocal",
+    "(Ljava/lang/String;)I",
+    (void *)CameraMetadata_getTagFromKeyLocal },
+  { "nativeGetTypeFromTagLocal",
+    "(I)I",
+    (void *)CameraMetadata_getTypeFromTagLocal },
   { "nativeReadValues",
     "(I)[B",
     (void *)CameraMetadata_readValues },
@@ -572,6 +582,9 @@ static const JNINativeMethod gCameraMetadataMethods[] = {
   { "nativeDump",
     "()V",
     (void *)CameraMetadata_dump },
+  { "nativeGetAllVendorKeys",
+    "(Ljava/lang/Class;)Ljava/util/ArrayList;",
+    (void *)CameraMetadata_getAllVendorKeys},
 // Parcelable interface
   { "nativeReadFromParcel",
     "(Landroid/os/Parcel;)V",
@@ -580,35 +593,6 @@ static const JNINativeMethod gCameraMetadataMethods[] = {
     "(Landroid/os/Parcel;)V",
     (void *)CameraMetadata_writeToParcel },
 };
-
-struct field {
-    const char *class_name;
-    const char *field_name;
-    const char *field_type;
-    jfieldID   *jfield;
-};
-
-static int find_fields(JNIEnv *env, field *fields, int count)
-{
-    for (int i = 0; i < count; i++) {
-        field *f = &fields[i];
-        jclass clazz = env->FindClass(f->class_name);
-        if (clazz == NULL) {
-            ALOGE("Can't find %s", f->class_name);
-            return -1;
-        }
-
-        jfieldID field = env->GetFieldID(clazz, f->field_name, f->field_type);
-        if (field == NULL) {
-            ALOGE("Can't find %s.%s", f->class_name, f->field_name);
-            return -1;
-        }
-
-        *(f->jfield) = field;
-    }
-
-    return 0;
-}
 
 // Get all the required offsets in java class and register native functions
 int register_android_hardware_camera2_CameraMetadata(JNIEnv *env)
@@ -623,11 +607,11 @@ int register_android_hardware_camera2_CameraMetadata(JNIEnv *env)
     gMetadataOffsets.mResultKey = MakeGlobalRefOrDie(env, resultKeyClazz);
     gMetadataOffsets.mCharacteristicsConstr = GetMethodIDOrDie(env,
             gMetadataOffsets.mCharacteristicsKey, "<init>",
-            "(Ljava/lang/String;Ljava/lang/Class;)V");
+            "(Ljava/lang/String;Ljava/lang/Class;J)V");
     gMetadataOffsets.mRequestConstr = GetMethodIDOrDie(env,
-            gMetadataOffsets.mRequestKey, "<init>", "(Ljava/lang/String;Ljava/lang/Class;)V");
+            gMetadataOffsets.mRequestKey, "<init>", "(Ljava/lang/String;Ljava/lang/Class;J)V");
     gMetadataOffsets.mResultConstr = GetMethodIDOrDie(env,
-            gMetadataOffsets.mResultKey, "<init>", "(Ljava/lang/String;Ljava/lang/Class;)V");
+            gMetadataOffsets.mResultKey, "<init>", "(Ljava/lang/String;Ljava/lang/Class;J)V");
 
     // Store global references for primitive array types used by Keys
     jclass byteClazz = FindClassOrDie(env, "[B");
@@ -651,6 +635,9 @@ int register_android_hardware_camera2_CameraMetadata(JNIEnv *env)
     gMetadataOffsets.mArrayListAdd = GetMethodIDOrDie(env, gMetadataOffsets.mArrayList,
             "add", "(Ljava/lang/Object;)Z");
 
+    jclass cameraMetadataClazz = FindClassOrDie(env, CAMERA_METADATA_CLASS_NAME);
+    fields.metadata_ptr = GetFieldIDOrDie(env, cameraMetadataClazz, "mMetadataPtr", "J");
+
     // Register native functions
     return RegisterMethodsOrDie(env,
             CAMERA_METADATA_CLASS_NAME,
@@ -660,29 +647,76 @@ int register_android_hardware_camera2_CameraMetadata(JNIEnv *env)
 
 extern "C" {
 
-static void CameraMetadata_classInit(JNIEnv *env, jobject thiz) {
-    // XX: Why do this separately instead of doing it in the register function?
-    ALOGV("%s", __FUNCTION__);
+static jint CameraMetadata_getTypeFromTagLocal(JNIEnv *env, jobject thiz, jint tag) {
+    CameraMetadata* metadata = CameraMetadata_getPointerNoThrow(env, thiz);
+    metadata_vendor_id_t vendorId = CAMERA_METADATA_INVALID_VENDOR_ID;
+    if (metadata) {
+        const camera_metadata_t *metaBuffer = metadata->getAndLock();
+        vendorId = get_camera_metadata_vendor_id(metaBuffer);
+        metadata->unlock(metaBuffer);
+    }
 
-    field fields_to_find[] = {
-        { CAMERA_METADATA_CLASS_NAME, "mMetadataPtr", "J", &fields.metadata_ptr },
-    };
+    int tagType = get_local_camera_metadata_tag_type_vendor_id(tag, vendorId);
+    if (tagType == -1) {
+        jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException",
+                             "Tag (%d) did not have a type", tag);
+        return -1;
+    }
 
-    // Do this here instead of in register_native_methods,
-    // since otherwise it will fail to find the fields.
-    if (find_fields(env, fields_to_find, NELEM(fields_to_find)) < 0)
-        return;
+    return tagType;
+}
 
-    env->FindClass(CAMERA_METADATA_CLASS_NAME);
+static jint CameraMetadata_getTagFromKeyLocal(JNIEnv *env, jobject thiz, jstring keyName) {
+    ScopedUtfChars keyScoped(env, keyName);
+    const char *key = keyScoped.c_str();
+    if (key == NULL) {
+        // exception thrown by ScopedUtfChars
+        return 0;
+    }
+    ALOGV("%s (key = '%s')", __FUNCTION__, key);
+
+    uint32_t tag = 0;
+    sp<VendorTagDescriptor> vTags;
+    CameraMetadata* metadata = CameraMetadata_getPointerNoThrow(env, thiz);
+    if (metadata) {
+        sp<VendorTagDescriptorCache> cache = VendorTagDescriptorCache::getGlobalVendorTagCache();
+        if (cache.get()) {
+            const camera_metadata_t *metaBuffer = metadata->getAndLock();
+            metadata_vendor_id_t vendorId = get_camera_metadata_vendor_id(metaBuffer);
+            metadata->unlock(metaBuffer);
+            cache->getVendorTagDescriptor(vendorId, &vTags);
+        }
+    }
+
+    status_t res = CameraMetadata::getTagFromName(key, vTags.get(), &tag);
+    if (res != OK) {
+        jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException",
+                             "Could not find tag for key '%s')", key);
+    }
+    return tag;
 }
 
 static jobject CameraMetadata_getAllVendorKeys(JNIEnv* env, jobject thiz, jclass keyType) {
-
+    metadata_vendor_id_t vendorId = CAMERA_METADATA_INVALID_VENDOR_ID;
     // Get all vendor tags
     sp<VendorTagDescriptor> vTags = VendorTagDescriptor::getGlobalVendorTagDescriptor();
     if (vTags.get() == nullptr) {
-        // No vendor tags.
-        return NULL;
+        sp<VendorTagDescriptorCache> cache = VendorTagDescriptorCache::getGlobalVendorTagCache();
+        if (cache.get() == nullptr) {
+            // No vendor tags.
+            return nullptr;
+        }
+
+        CameraMetadata* metadata = CameraMetadata_getPointerThrow(env, thiz);
+        if (metadata == NULL) return NULL;
+
+        const camera_metadata_t *metaBuffer = metadata->getAndLock();
+        vendorId = get_camera_metadata_vendor_id(metaBuffer);
+        cache->getVendorTagDescriptor(vendorId, &vTags);
+        metadata->unlock(metaBuffer);
+        if (vTags.get() == nullptr) {
+            return nullptr;
+        }
     }
 
     int count = vTags->getTagCount();
@@ -760,7 +794,7 @@ static jobject CameraMetadata_getAllVendorKeys(JNIEnv* env, jobject thiz, jclass
                 return NULL;
         }
 
-        jobject key = env->NewObject(keyClazz, keyConstr, name, valueClazz);
+        jobject key = env->NewObject(keyClazz, keyConstr, name, valueClazz, vendorId);
         if (env->ExceptionCheck()) {
             return NULL;
         }
@@ -777,8 +811,8 @@ static jobject CameraMetadata_getAllVendorKeys(JNIEnv* env, jobject thiz, jclass
     return arrayList;
 }
 
-static jint CameraMetadata_getTagFromKey(JNIEnv *env, jobject thiz, jstring keyName) {
-
+static jint CameraMetadata_getTagFromKey(JNIEnv *env, jobject thiz, jstring keyName,
+        jlong vendorId) {
     ScopedUtfChars keyScoped(env, keyName);
     const char *key = keyScoped.c_str();
     if (key == NULL) {
@@ -790,6 +824,13 @@ static jint CameraMetadata_getTagFromKey(JNIEnv *env, jobject thiz, jstring keyN
     uint32_t tag = 0;
     sp<VendorTagDescriptor> vTags =
             VendorTagDescriptor::getGlobalVendorTagDescriptor();
+    if (vTags.get() == nullptr) {
+        sp<VendorTagDescriptorCache> cache = VendorTagDescriptorCache::getGlobalVendorTagCache();
+        if (cache.get() != nullptr) {
+            cache->getVendorTagDescriptor(vendorId, &vTags);
+        }
+    }
+
     status_t res = CameraMetadata::getTagFromName(key, vTags.get(), &tag);
     if (res != OK) {
         jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException",
@@ -798,8 +839,8 @@ static jint CameraMetadata_getTagFromKey(JNIEnv *env, jobject thiz, jstring keyN
     return tag;
 }
 
-static jint CameraMetadata_getTypeFromTag(JNIEnv *env, jobject thiz, jint tag) {
-    int tagType = get_camera_metadata_tag_type(tag);
+static jint CameraMetadata_getTypeFromTag(JNIEnv *env, jobject thiz, jint tag, jlong vendorId) {
+    int tagType = get_local_camera_metadata_tag_type_vendor_id(tag, vendorId);
     if (tagType == -1) {
         jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException",
                              "Tag (%d) did not have a type", tag);
@@ -833,8 +874,24 @@ static jint CameraMetadata_setupGlobalVendorTagDescriptor(JNIEnv *env, jobject t
                 __FUNCTION__, res.toString8().string());
         return res.serviceSpecificErrorCode();
     }
+    if (0 < desc->getTagCount()) {
+        err = VendorTagDescriptor::setAsGlobalVendorTagDescriptor(desc);
+    } else {
+        sp<VendorTagDescriptorCache> cache = new VendorTagDescriptorCache();
+        binder::Status res = cameraService->getCameraVendorTagCache(/*out*/cache.get());
+        if (res.serviceSpecificErrorCode() == hardware::ICameraService::ERROR_DISCONNECTED) {
+            // No camera module available, not an error on devices with no cameras
+            VendorTagDescriptorCache::clearGlobalVendorTagCache();
+            return OK;
+        } else if (!res.isOk()) {
+            VendorTagDescriptorCache::clearGlobalVendorTagCache();
+            ALOGE("%s: Failed to setup vendor tag cache: %s",
+                    __FUNCTION__, res.toString8().string());
+            return res.serviceSpecificErrorCode();
+        }
 
-    err = VendorTagDescriptor::setAsGlobalVendorTagDescriptor(desc);
+        err = VendorTagDescriptorCache::setAsGlobalVendorTagCache(cache);
+    }
 
     if (err != OK) {
         return hardware::ICameraService::ERROR_INVALID_OPERATION;

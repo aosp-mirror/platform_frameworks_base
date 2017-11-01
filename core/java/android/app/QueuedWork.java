@@ -16,86 +16,267 @@
 
 package android.app;
 
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Looper;
+import android.os.Message;
+import android.os.Process;
+import android.os.StrictMode;
+import android.util.Log;
+
+import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.ExponentiallyBucketedHistogram;
+
+import java.util.LinkedList;
 
 /**
- * Internal utility class to keep track of process-global work that's
- * outstanding and hasn't been finished yet.
+ * Internal utility class to keep track of process-global work that's outstanding and hasn't been
+ * finished yet.
  *
- * This was created for writing SharedPreference edits out
- * asynchronously so we'd have a mechanism to wait for the writes in
- * Activity.onPause and similar places, but we may use this mechanism
- * for other things in the future.
+ * New work will be {@link #queue queued}.
+ *
+ * It is possible to add 'finisher'-runnables that are {@link #waitToFinish guaranteed to be run}.
+ * This is used to make sure the work has been finished.
+ *
+ * This was created for writing SharedPreference edits out asynchronously so we'd have a mechanism
+ * to wait for the writes in Activity.onPause and similar places, but we may use this mechanism for
+ * other things in the future.
+ *
+ * The queued asynchronous work is performed on a separate, dedicated thread.
  *
  * @hide
  */
 public class QueuedWork {
+    private static final String LOG_TAG = QueuedWork.class.getSimpleName();
+    private static final boolean DEBUG = false;
 
-    // The set of Runnables that will finish or wait on any async
-    // activities started by the application.
-    private static final ConcurrentLinkedQueue<Runnable> sPendingWorkFinishers =
-            new ConcurrentLinkedQueue<Runnable>();
+    /** Delay for delayed runnables, as big as possible but low enough to be barely perceivable */
+    private static final long DELAY = 100;
 
-    private static ExecutorService sSingleThreadExecutor = null; // lazy, guarded by class
+    /** If a {@link #waitToFinish()} takes more than {@value #MAX_WAIT_TIME_MILLIS} ms, warn */
+    private static final long MAX_WAIT_TIME_MILLIS = 512;
+
+    /** Lock for this class */
+    private static final Object sLock = new Object();
 
     /**
-     * Returns a single-thread Executor shared by the entire process,
-     * creating it if necessary.
+     * Used to make sure that only one thread is processing work items at a time. This means that
+     * they are processed in the order added.
+     *
+     * This is separate from {@link #sLock} as this is held the whole time while work is processed
+     * and we do not want to stall the whole class.
      */
-    public static ExecutorService singleThreadExecutor() {
-        synchronized (QueuedWork.class) {
-            if (sSingleThreadExecutor == null) {
-                // TODO: can we give this single thread a thread name?
-                sSingleThreadExecutor = Executors.newSingleThreadExecutor();
+    private static Object sProcessingWork = new Object();
+
+    /** Finishers {@link #addFinisher added} and not yet {@link #removeFinisher removed} */
+    @GuardedBy("sLock")
+    private static final LinkedList<Runnable> sFinishers = new LinkedList<>();
+
+    /** {@link #getHandler() Lazily} created handler */
+    @GuardedBy("sLock")
+    private static Handler sHandler = null;
+
+    /** Work queued via {@link #queue} */
+    @GuardedBy("sLock")
+    private static final LinkedList<Runnable> sWork = new LinkedList<>();
+
+    /** If new work can be delayed or not */
+    @GuardedBy("sLock")
+    private static boolean sCanDelay = true;
+
+    /** Time (and number of instances) waited for work to get processed */
+    @GuardedBy("sLock")
+    private final static ExponentiallyBucketedHistogram
+            mWaitTimes = new ExponentiallyBucketedHistogram(
+            16);
+    private static int mNumWaits = 0;
+
+    /**
+     * Lazily create a handler on a separate thread.
+     *
+     * @return the handler
+     */
+    private static Handler getHandler() {
+        synchronized (sLock) {
+            if (sHandler == null) {
+                HandlerThread handlerThread = new HandlerThread("queued-work-looper",
+                        Process.THREAD_PRIORITY_FOREGROUND);
+                handlerThread.start();
+
+                sHandler = new QueuedWorkHandler(handlerThread.getLooper());
             }
-            return sSingleThreadExecutor;
+            return sHandler;
         }
     }
 
     /**
-     * Add a runnable to finish (or wait for) a deferred operation
-     * started in this context earlier.  Typically finished by e.g.
-     * an Activity#onPause.  Used by SharedPreferences$Editor#startCommit().
+     * Add a finisher-runnable to wait for {@link #queue asynchronously processed work}.
      *
-     * Note that this doesn't actually start it running.  This is just
-     * a scratch set for callers doing async work to keep updated with
-     * what's in-flight.  In the common case, caller code
-     * (e.g. SharedPreferences) will pretty quickly call remove()
-     * after an add().  The only time these Runnables are run is from
-     * waitToFinish(), below.
+     * Used by SharedPreferences$Editor#startCommit().
+     *
+     * Note that this doesn't actually start it running.  This is just a scratch set for callers
+     * doing async work to keep updated with what's in-flight. In the common case, caller code
+     * (e.g. SharedPreferences) will pretty quickly call remove() after an add(). The only time
+     * these Runnables are run is from {@link #waitToFinish}.
+     *
+     * @param finisher The runnable to add as finisher
      */
-    public static void add(Runnable finisher) {
-        sPendingWorkFinishers.add(finisher);
-    }
-
-    public static void remove(Runnable finisher) {
-        sPendingWorkFinishers.remove(finisher);
+    public static void addFinisher(Runnable finisher) {
+        synchronized (sLock) {
+            sFinishers.add(finisher);
+        }
     }
 
     /**
-     * Finishes or waits for async operations to complete.
-     * (e.g. SharedPreferences$Editor#startCommit writes)
+     * Remove a previously {@link #addFinisher added} finisher-runnable.
      *
-     * Is called from the Activity base class's onPause(), after
-     * BroadcastReceiver's onReceive, after Service command handling,
-     * etc.  (so async work is never lost)
+     * @param finisher The runnable to remove.
+     */
+    public static void removeFinisher(Runnable finisher) {
+        synchronized (sLock) {
+            sFinishers.remove(finisher);
+        }
+    }
+
+    /**
+     * Trigger queued work to be processed immediately. The queued work is processed on a separate
+     * thread asynchronous. While doing that run and process all finishers on this thread. The
+     * finishers can be implemented in a way to check weather the queued work is finished.
+     *
+     * Is called from the Activity base class's onPause(), after BroadcastReceiver's onReceive,
+     * after Service command handling, etc. (so async work is never lost)
      */
     public static void waitToFinish() {
-        Runnable toFinish;
-        while ((toFinish = sPendingWorkFinishers.poll()) != null) {
-            toFinish.run();
+        long startTime = System.currentTimeMillis();
+        boolean hadMessages = false;
+
+        Handler handler = getHandler();
+
+        synchronized (sLock) {
+            if (handler.hasMessages(QueuedWorkHandler.MSG_RUN)) {
+                // Delayed work will be processed at processPendingWork() below
+                handler.removeMessages(QueuedWorkHandler.MSG_RUN);
+
+                if (DEBUG) {
+                    hadMessages = true;
+                    Log.d(LOG_TAG, "waiting");
+                }
+            }
+
+            // We should not delay any work as this might delay the finishers
+            sCanDelay = false;
+        }
+
+        StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskWrites();
+        try {
+            processPendingWork();
+        } finally {
+            StrictMode.setThreadPolicy(oldPolicy);
+        }
+
+        try {
+            while (true) {
+                Runnable finisher;
+
+                synchronized (sLock) {
+                    finisher = sFinishers.poll();
+                }
+
+                if (finisher == null) {
+                    break;
+                }
+
+                finisher.run();
+            }
+        } finally {
+            sCanDelay = true;
+        }
+
+        synchronized (sLock) {
+            long waitTime = System.currentTimeMillis() - startTime;
+
+            if (waitTime > 0 || hadMessages) {
+                mWaitTimes.add(Long.valueOf(waitTime).intValue());
+                mNumWaits++;
+
+                if (DEBUG || mNumWaits % 1024 == 0 || waitTime > MAX_WAIT_TIME_MILLIS) {
+                    mWaitTimes.log(LOG_TAG, "waited: ");
+                }
+            }
         }
     }
-    
+
     /**
-     * Returns true if there is pending work to be done.  Note that the
-     * result is out of data as soon as you receive it, so be careful how you
-     * use it.
+     * Queue a work-runnable for processing asynchronously.
+     *
+     * @param work The new runnable to process
+     * @param shouldDelay If the message should be delayed
+     */
+    public static void queue(Runnable work, boolean shouldDelay) {
+        Handler handler = getHandler();
+
+        synchronized (sLock) {
+            sWork.add(work);
+
+            if (shouldDelay && sCanDelay) {
+                handler.sendEmptyMessageDelayed(QueuedWorkHandler.MSG_RUN, DELAY);
+            } else {
+                handler.sendEmptyMessage(QueuedWorkHandler.MSG_RUN);
+            }
+        }
+    }
+
+    /**
+     * @return True iff there is any {@link #queue async work queued}.
      */
     public static boolean hasPendingWork() {
-        return !sPendingWorkFinishers.isEmpty();
+        synchronized (sLock) {
+            return !sWork.isEmpty();
+        }
     }
-    
+
+    private static void processPendingWork() {
+        long startTime = 0;
+
+        if (DEBUG) {
+            startTime = System.currentTimeMillis();
+        }
+
+        synchronized (sProcessingWork) {
+            LinkedList<Runnable> work;
+
+            synchronized (sLock) {
+                work = (LinkedList<Runnable>) sWork.clone();
+                sWork.clear();
+
+                // Remove all msg-s as all work will be processed now
+                getHandler().removeMessages(QueuedWorkHandler.MSG_RUN);
+            }
+
+            if (work.size() > 0) {
+                for (Runnable w : work) {
+                    w.run();
+                }
+
+                if (DEBUG) {
+                    Log.d(LOG_TAG, "processing " + work.size() + " items took " +
+                            +(System.currentTimeMillis() - startTime) + " ms");
+                }
+            }
+        }
+    }
+
+    private static class QueuedWorkHandler extends Handler {
+        static final int MSG_RUN = 1;
+
+        QueuedWorkHandler(Looper looper) {
+            super(looper);
+        }
+
+        public void handleMessage(Message msg) {
+            if (msg.what == MSG_RUN) {
+                processPendingWork();
+            }
+        }
+    }
 }

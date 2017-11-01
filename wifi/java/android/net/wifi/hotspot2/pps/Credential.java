@@ -23,13 +23,16 @@ import android.os.Parcel;
 import android.text.TextUtils;
 import android.util.Log;
 
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -40,10 +43,6 @@ import java.util.Set;
  *
  * In addition to the fields in the Credential subtree, this will also maintain necessary
  * information for the private key and certificates associated with this credential.
- *
- * Currently we only support the nodes that are used by Hotspot 2.0 Release 1.
- *
- * @hide
  */
 public final class Credential implements Parcelable {
     private static final String TAG = "Credential";
@@ -52,14 +51,87 @@ public final class Credential implements Parcelable {
      * Max string length for realm.  Refer to Credential/Realm node in Hotspot 2.0 Release 2
      * Technical Specification Section 9.1 for more info.
      */
-    private static final int MAX_REALM_LENGTH = 253;
+    private static final int MAX_REALM_BYTES = 253;
+
+    /**
+     * The time this credential is created. It is in the format of number
+     * of milliseconds since January 1, 1970, 00:00:00 GMT.
+     * Using Long.MIN_VALUE to indicate unset value.
+     */
+    private long mCreationTimeInMillis = Long.MIN_VALUE;
+    /**
+     * @hide
+     */
+    public void setCreationTimeInMillis(long creationTimeInMillis) {
+        mCreationTimeInMillis = creationTimeInMillis;
+    }
+    /**
+     * @hide
+     */
+    public long getCreationTimeInMillis() {
+        return mCreationTimeInMillis;
+    }
+
+    /**
+     * The time this credential will expire. It is in the format of number
+     * of milliseconds since January 1, 1970, 00:00:00 GMT.
+    * Using Long.MIN_VALUE to indicate unset value.
+     */
+    private long mExpirationTimeInMillis = Long.MIN_VALUE;
+    /**
+     * @hide
+     */
+    public void setExpirationTimeInMillis(long expirationTimeInMillis) {
+        mExpirationTimeInMillis = expirationTimeInMillis;
+    }
+    /**
+     * @hide
+     */
+    public long getExpirationTimeInMillis() {
+        return mExpirationTimeInMillis;
+    }
 
     /**
      * The realm associated with this credential.  It will be used to determine
      * if this credential can be used to authenticate with a given hotspot by
      * comparing the realm specified in that hotspot's ANQP element.
      */
-    public String realm = null;
+    private String mRealm = null;
+    /**
+     * Set the realm associated with this credential.
+     *
+     * @param realm The realm to set to
+     */
+    public void setRealm(String realm) {
+        mRealm = realm;
+    }
+    /**
+     * Get the realm associated with this credential.
+     *
+     * @return the realm associated with this credential
+     */
+    public String getRealm() {
+        return mRealm;
+    }
+
+    /**
+     * When set to true, the device should check AAA (Authentication, Authorization,
+     * and Accounting) server's certificate during EAP (Extensible Authentication
+     * Protocol) authentication.
+     */
+    private boolean mCheckAaaServerCertStatus = false;
+    /**
+     * @hide
+     */
+    public void setCheckAaaServerCertStatus(boolean checkAaaServerCertStatus) {
+        mCheckAaaServerCertStatus = checkAaaServerCertStatus;
+    }
+    /**
+     * @hide
+     */
+    public boolean getCheckAaaServerCertStatus() {
+        return mCheckAaaServerCertStatus;
+    }
 
     /**
      * Username-password based credential.
@@ -70,44 +142,175 @@ public final class Credential implements Parcelable {
          * Maximum string length for username.  Refer to Credential/UsernamePassword/Username
          * node in Hotspot 2.0 Release 2 Technical Specification Section 9.1 for more info.
          */
-        private static final int MAX_USERNAME_LENGTH = 63;
+        private static final int MAX_USERNAME_BYTES = 63;
 
         /**
          * Maximum string length for password.  Refer to Credential/UsernamePassword/Password
          * in Hotspot 2.0 Release 2 Technical Specification Section 9.1 for more info.
          */
-        private static final int MAX_PASSWORD_LENGTH = 255;
+        private static final int MAX_PASSWORD_BYTES = 255;
+
+        /**
+         * Supported authentication methods.
+         * @hide
+         */
+        public static final String AUTH_METHOD_PAP = "PAP";
+        /** @hide */
+        public static final String AUTH_METHOD_MSCHAP = "MS-CHAP";
+        /** @hide */
+        public static final String AUTH_METHOD_MSCHAPV2 = "MS-CHAP-V2";
 
         /**
          * Supported Non-EAP inner methods.  Refer to
          * Credential/UsernamePassword/EAPMethod/InnerEAPType in Hotspot 2.0 Release 2 Technical
          * Specification Section 9.1 for more info.
          */
-        private static final Set<String> SUPPORTED_AUTH =
-                new HashSet<String>(Arrays.asList("PAP", "CHAP", "MS-CHAP", "MS-CHAP-V2"));
+        private static final Set<String> SUPPORTED_AUTH = new HashSet<String>(
+                Arrays.asList(AUTH_METHOD_PAP, AUTH_METHOD_MSCHAP, AUTH_METHOD_MSCHAPV2));
 
         /**
          * Username of the credential.
          */
-        public String username = null;
+        private String mUsername = null;
+        /**
+         * Set the username associated with this user credential.
+         *
+         * @param username The username to set to
+         */
+        public void setUsername(String username) {
+            mUsername = username;
+        }
+        /**
+         * Get the username associated with this user credential.
+         *
+         * @return the username associated with this user credential
+         */
+        public String getUsername() {
+            return mUsername;
+        }
 
         /**
          * Base64-encoded password.
          */
-        public String password = null;
+        private String mPassword = null;
+        /**
+         * Set the Base64-encoded password associated with this user credential.
+         *
+         * @param password The password to set to
+         */
+        public void setPassword(String password) {
+            mPassword = password;
+        }
+        /**
+         * Get the Base64-encoded password associated with this user credential.
+         *
+         * @return the Base64-encoded password associated with this user credential
+         */
+        public String getPassword() {
+            return mPassword;
+        }
+
+        /**
+         * Flag indicating if the password is machine managed.
+         */
+        private boolean mMachineManaged = false;
+        /**
+         * @hide
+         */
+        public void setMachineManaged(boolean machineManaged) {
+            mMachineManaged = machineManaged;
+        }
+        /**
+         * @hide
+         */
+        public boolean getMachineManaged() {
+            return mMachineManaged;
+        }
+
+        /**
+         * The name of the application used to generate the password.
+         */
+        private String mSoftTokenApp = null;
+        /**
+         * @hide
+         */
+        public void setSoftTokenApp(String softTokenApp) {
+            mSoftTokenApp = softTokenApp;
+        }
+        /**
+         * @hide
+         */
+        public String getSoftTokenApp() {
+            return mSoftTokenApp;
+        }
+
+        /**
+         * Flag indicating if this credential is usable on other mobile devices as well.
+         */
+        private boolean mAbleToShare = false;
+        /**
+         * @hide
+         */
+        public void setAbleToShare(boolean ableToShare) {
+            mAbleToShare = ableToShare;
+        }
+        /**
+         * @hide
+         */
+        public boolean getAbleToShare() {
+            return mAbleToShare;
+        }
 
         /**
          * EAP (Extensible Authentication Protocol) method type.
-         * Refer to http://www.iana.org/assignments/eap-numbers/eap-numbers.xml#eap-numbers-4
-         * for valid values.
+         * Refer to
+         * <a href="http://www.iana.org/assignments/eap-numbers/eap-numbers.xml#eap-numbers-4">
+         * EAP Numbers</a> for valid values.
          * Using Integer.MIN_VALUE to indicate unset value.
          */
-        public int eapType = Integer.MIN_VALUE;
+        private int mEapType = Integer.MIN_VALUE;
+        /**
+         * Set the EAP (Extensible Authentication Protocol) method type associated with this
+         * user credential.
+         * Refer to
+         * <a href="http://www.iana.org/assignments/eap-numbers/eap-numbers.xml#eap-numbers-4">
+         * EAP Numbers</a> for valid values.
+         *
+         * @param eapType The EAP method type associated with this user credential
+         */
+        public void setEapType(int eapType) {
+            mEapType = eapType;
+        }
+        /**
+         * Get the EAP (Extensible Authentication Protocol) method type associated with this
+         * user credential.
+         *
+         * @return EAP method type
+         */
+        public int getEapType() {
+            return mEapType;
+        }
 
         /**
          * Non-EAP inner authentication method.
          */
-        public String nonEapInnerMethod = null;
+        private String mNonEapInnerMethod = null;
+        /**
+         * Set the inner non-EAP method associated with this user credential.
+         *
+         * @param nonEapInnerMethod The non-EAP inner method to set to
+         */
+        public void setNonEapInnerMethod(String nonEapInnerMethod) {
+            mNonEapInnerMethod = nonEapInnerMethod;
+        }
+        /**
+         * Get the inner non-EAP method associated with this user credential.
+         *
+         * @return Non-EAP inner method associated with this user credential
+         */
+        public String getNonEapInnerMethod() {
+            return mNonEapInnerMethod;
+        }
 
         /**
          * Constructor for creating UserCredential with default values.
@@ -121,10 +324,13 @@ public final class Credential implements Parcelable {
          */
         public UserCredential(UserCredential source) {
             if (source != null) {
-                username = source.username;
-                password = source.password;
-                eapType = source.eapType;
-                nonEapInnerMethod = source.nonEapInnerMethod;
+                mUsername = source.mUsername;
+                mPassword = source.mPassword;
+                mMachineManaged = source.mMachineManaged;
+                mSoftTokenApp = source.mSoftTokenApp;
+                mAbleToShare = source.mAbleToShare;
+                mEapType = source.mEapType;
+                mNonEapInnerMethod = source.mNonEapInnerMethod;
             }
         }
 
@@ -135,10 +341,13 @@ public final class Credential implements Parcelable {
 
         @Override
         public void writeToParcel(Parcel dest, int flags) {
-            dest.writeString(username);
-            dest.writeString(password);
-            dest.writeInt(eapType);
-            dest.writeString(nonEapInnerMethod);
+            dest.writeString(mUsername);
+            dest.writeString(mPassword);
+            dest.writeInt(mMachineManaged ? 1 : 0);
+            dest.writeString(mSoftTokenApp);
+            dest.writeInt(mAbleToShare ? 1 : 0);
+            dest.writeInt(mEapType);
+            dest.writeString(mNonEapInnerMethod);
         }
 
         @Override
@@ -151,45 +360,69 @@ public final class Credential implements Parcelable {
             }
 
             UserCredential that = (UserCredential) thatObject;
-            return TextUtils.equals(username, that.username) &&
-                    TextUtils.equals(password, that.password) &&
-                    eapType == that.eapType &&
-                    TextUtils.equals(nonEapInnerMethod, that.nonEapInnerMethod);
+            return TextUtils.equals(mUsername, that.mUsername)
+                    && TextUtils.equals(mPassword, that.mPassword)
+                    && mMachineManaged == that.mMachineManaged
+                    && TextUtils.equals(mSoftTokenApp, that.mSoftTokenApp)
+                    && mAbleToShare == that.mAbleToShare
+                    && mEapType == that.mEapType
+                    && TextUtils.equals(mNonEapInnerMethod, that.mNonEapInnerMethod);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(mUsername, mPassword, mMachineManaged, mSoftTokenApp,
+                    mAbleToShare, mEapType, mNonEapInnerMethod);
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder builder = new StringBuilder();
+            builder.append("Username: ").append(mUsername).append("\n");
+            builder.append("MachineManaged: ").append(mMachineManaged).append("\n");
+            builder.append("SoftTokenApp: ").append(mSoftTokenApp).append("\n");
+            builder.append("AbleToShare: ").append(mAbleToShare).append("\n");
+            builder.append("EAPType: ").append(mEapType).append("\n");
+            builder.append("AuthMethod: ").append(mNonEapInnerMethod).append("\n");
+            return builder.toString();
         }
 
         /**
          * Validate the configuration data.
          *
          * @return true on success or false on failure
+         * @hide
          */
         public boolean validate() {
-            if (TextUtils.isEmpty(username)) {
+            if (TextUtils.isEmpty(mUsername)) {
                 Log.d(TAG, "Missing username");
                 return false;
             }
-            if (username.length() > MAX_USERNAME_LENGTH) {
-                Log.d(TAG, "username exceeding maximum length: " + username.length());
+            if (mUsername.getBytes(StandardCharsets.UTF_8).length > MAX_USERNAME_BYTES) {
+                Log.d(TAG, "username exceeding maximum length: "
+                        + mUsername.getBytes(StandardCharsets.UTF_8).length);
                 return false;
             }
 
-            if (TextUtils.isEmpty(password)) {
+            if (TextUtils.isEmpty(mPassword)) {
                 Log.d(TAG, "Missing password");
                 return false;
             }
-            if (password.length() > MAX_PASSWORD_LENGTH) {
-                Log.d(TAG, "password exceeding maximum length: " + password.length());
+            if (mPassword.getBytes(StandardCharsets.UTF_8).length > MAX_PASSWORD_BYTES) {
+                Log.d(TAG, "password exceeding maximum length: "
+                        + mPassword.getBytes(StandardCharsets.UTF_8).length);
                 return false;
             }
 
             // Only supports EAP-TTLS for user credential.
-            if (eapType != EAPConstants.EAP_TTLS) {
-                Log.d(TAG, "Invalid EAP Type for user credential: " + eapType);
+            if (mEapType != EAPConstants.EAP_TTLS) {
+                Log.d(TAG, "Invalid EAP Type for user credential: " + mEapType);
                 return false;
             }
 
             // Verify Non-EAP inner method for EAP-TTLS.
-            if (!SUPPORTED_AUTH.contains(nonEapInnerMethod)) {
-                Log.d(TAG, "Invalid non-EAP inner method for EAP-TTLS: " + nonEapInnerMethod);
+            if (!SUPPORTED_AUTH.contains(mNonEapInnerMethod)) {
+                Log.d(TAG, "Invalid non-EAP inner method for EAP-TTLS: " + mNonEapInnerMethod);
                 return false;
             }
             return true;
@@ -200,10 +433,13 @@ public final class Credential implements Parcelable {
                 @Override
                 public UserCredential createFromParcel(Parcel in) {
                     UserCredential userCredential = new UserCredential();
-                    userCredential.username = in.readString();
-                    userCredential.password = in.readString();
-                    userCredential.eapType = in.readInt();
-                    userCredential.nonEapInnerMethod = in.readString();
+                    userCredential.setUsername(in.readString());
+                    userCredential.setPassword(in.readString());
+                    userCredential.setMachineManaged(in.readInt() != 0);
+                    userCredential.setSoftTokenApp(in.readString());
+                    userCredential.setAbleToShare(in.readInt() != 0);
+                    userCredential.setEapType(in.readInt());
+                    userCredential.setNonEapInnerMethod(in.readString());
                     return userCredential;
                 }
 
@@ -213,7 +449,23 @@ public final class Credential implements Parcelable {
                 }
             };
     }
-    public UserCredential userCredential = null;
+    private UserCredential mUserCredential = null;
+    /**
+     * Set the user credential information.
+     *
+     * @param userCredential The user credential to set to
+     */
+    public void setUserCredential(UserCredential userCredential) {
+        mUserCredential = userCredential;
+    }
+    /**
+     * Get the user credential information.
+     *
+     * @return user credential information
+     */
+    public UserCredential getUserCredential() {
+        return mUserCredential;
+    }
 
     /**
      * Certificate based credential.  This is used for EAP-TLS.
@@ -222,8 +474,9 @@ public final class Credential implements Parcelable {
     public static final class CertificateCredential implements Parcelable {
         /**
          * Supported certificate types.
+         * @hide
          */
-        private static final String CERT_TYPE_X509V3 = "x509v3";
+        public static final String CERT_TYPE_X509V3 = "x509v3";
 
         /**
          * Certificate SHA-256 fingerprint length.
@@ -233,12 +486,44 @@ public final class Credential implements Parcelable {
         /**
          * Certificate type.
          */
-        public String certType = null;
+        private String mCertType = null;
+        /**
+         * Set the certificate type associated with this certificate credential.
+         *
+         * @param certType The certificate type to set to
+         */
+        public void setCertType(String certType) {
+            mCertType = certType;
+        }
+        /**
+         * Get the certificate type associated with this certificate credential.
+         *
+         * @return certificate type
+         */
+        public String getCertType() {
+            return mCertType;
+        }
 
         /**
          * The SHA-256 fingerprint of the certificate.
          */
-        public byte[] certSha256FingerPrint = null;
+        private byte[] mCertSha256Fingerprint = null;
+        /**
+         * Set the certificate SHA-256 fingerprint associated with this certificate credential.
+         *
+         * @param certSha256Fingerprint The certificate fingerprint to set to
+         */
+        public void setCertSha256Fingerprint(byte[] certSha256Fingerprint) {
+            mCertSha256Fingerprint = certSha256Fingerprint;
+        }
+        /**
+         * Get the certificate SHA-256 fingerprint associated with this certificate credential.
+         *
+         * @return certificate SHA-256 fingerprint
+         */
+        public byte[] getCertSha256Fingerprint() {
+            return mCertSha256Fingerprint;
+        }
 
         /**
          * Constructor for creating CertificateCredential with default values.
@@ -252,10 +537,10 @@ public final class Credential implements Parcelable {
          */
         public CertificateCredential(CertificateCredential source) {
             if (source != null) {
-                certType = source.certType;
-                if (source.certSha256FingerPrint != null) {
-                    certSha256FingerPrint = Arrays.copyOf(source.certSha256FingerPrint,
-                                                          source.certSha256FingerPrint.length);
+                mCertType = source.mCertType;
+                if (source.mCertSha256Fingerprint != null) {
+                    mCertSha256Fingerprint = Arrays.copyOf(source.mCertSha256Fingerprint,
+                                                          source.mCertSha256Fingerprint.length);
                 }
             }
         }
@@ -267,8 +552,8 @@ public final class Credential implements Parcelable {
 
         @Override
         public void writeToParcel(Parcel dest, int flags) {
-            dest.writeString(certType);
-            dest.writeByteArray(certSha256FingerPrint);
+            dest.writeString(mCertType);
+            dest.writeByteArray(mCertSha256Fingerprint);
         }
 
         @Override
@@ -281,22 +566,33 @@ public final class Credential implements Parcelable {
             }
 
             CertificateCredential that = (CertificateCredential) thatObject;
-            return TextUtils.equals(certType, that.certType) &&
-                    Arrays.equals(certSha256FingerPrint, that.certSha256FingerPrint);
+            return TextUtils.equals(mCertType, that.mCertType)
+                    && Arrays.equals(mCertSha256Fingerprint, that.mCertSha256Fingerprint);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(mCertType, mCertSha256Fingerprint);
+        }
+
+        @Override
+        public String toString() {
+            return "CertificateType: " + mCertType + "\n";
         }
 
         /**
          * Validate the configuration data.
          *
          * @return true on success or false on failure
+         * @hide
          */
         public boolean validate() {
-            if (!TextUtils.equals(CERT_TYPE_X509V3, certType)) {
-                Log.d(TAG, "Unsupported certificate type: " + certType);
+            if (!TextUtils.equals(CERT_TYPE_X509V3, mCertType)) {
+                Log.d(TAG, "Unsupported certificate type: " + mCertType);
                 return false;
             }
-            if (certSha256FingerPrint == null ||
-                    certSha256FingerPrint.length != CERT_SHA256_FINGER_PRINT_LENGTH) {
+            if (mCertSha256Fingerprint == null
+                    || mCertSha256Fingerprint.length != CERT_SHA256_FINGER_PRINT_LENGTH) {
                 Log.d(TAG, "Invalid SHA-256 fingerprint");
                 return false;
             }
@@ -308,8 +604,8 @@ public final class Credential implements Parcelable {
                 @Override
                 public CertificateCredential createFromParcel(Parcel in) {
                     CertificateCredential certCredential = new CertificateCredential();
-                    certCredential.certType = in.readString();
-                    certCredential.certSha256FingerPrint = in.createByteArray();
+                    certCredential.setCertType(in.readString());
+                    certCredential.setCertSha256Fingerprint(in.createByteArray());
                     return certCredential;
                 }
 
@@ -319,7 +615,23 @@ public final class Credential implements Parcelable {
                 }
             };
     }
-    public CertificateCredential certCredential = null;
+    private CertificateCredential mCertCredential = null;
+    /**
+     * Set the certificate credential information.
+     *
+     * @param certCredential The certificate credential to set to
+     */
+    public void setCertCredential(CertificateCredential certCredential) {
+        mCertCredential = certCredential;
+    }
+    /**
+     * Get the certificate credential information.
+     *
+     * @return certificate credential information
+     */
+    public CertificateCredential getCertCredential() {
+        return mCertCredential;
+    }
 
     /**
      * SIM (Subscriber Identify Module) based credential.
@@ -329,14 +641,32 @@ public final class Credential implements Parcelable {
         /**
          * Maximum string length for IMSI.
          */
-        public static final int MAX_IMSI_LENGTH = 15;
+        private static final int MAX_IMSI_LENGTH = 15;
 
         /**
          * International Mobile Subscriber Identity, is used to identify the user
          * of a cellular network and is a unique identification associated with all
          * cellular networks
          */
-        public String imsi = null;
+        private String mImsi = null;
+        /**
+         * Set the IMSI (International Mobile Subscriber Identity) associated with this SIM
+         * credential.
+         *
+         * @param imsi The IMSI to set to
+         */
+        public void setImsi(String imsi) {
+            mImsi = imsi;
+        }
+        /**
+         * Get the IMSI (International Mobile Subscriber Identity) associated with this SIM
+         * credential.
+         *
+         * @return IMSI associated with this SIM credential
+         */
+        public String getImsi() {
+            return mImsi;
+        }
 
         /**
          * EAP (Extensible Authentication Protocol) method type for using SIM credential.
@@ -344,7 +674,25 @@ public final class Credential implements Parcelable {
          * for valid values.
          * Using Integer.MIN_VALUE to indicate unset value.
          */
-        public int eapType = Integer.MIN_VALUE;
+        private int mEapType = Integer.MIN_VALUE;
+        /**
+         * Set the EAP (Extensible Authentication Protocol) method type associated with this
+         * SIM credential.
+         *
+         * @param eapType The EAP method type to set to
+         */
+        public void setEapType(int eapType) {
+            mEapType = eapType;
+        }
+        /**
+         * Get the EAP (Extensible Authentication Protocol) method type associated with this
+         * SIM credential.
+         *
+         * @return EAP method type associated with this SIM credential
+         */
+        public int getEapType() {
+            return mEapType;
+        }
 
         /**
          * Constructor for creating SimCredential with default values.
@@ -358,8 +706,8 @@ public final class Credential implements Parcelable {
          */
         public SimCredential(SimCredential source) {
             if (source != null) {
-                imsi = source.imsi;
-                eapType = source.eapType;
+                mImsi = source.mImsi;
+                mEapType = source.mEapType;
             }
         }
 
@@ -378,20 +726,34 @@ public final class Credential implements Parcelable {
             }
 
             SimCredential that = (SimCredential) thatObject;
-            return TextUtils.equals(imsi, that.imsi) &&
-                    eapType == that.eapType;
+            return TextUtils.equals(mImsi, that.mImsi)
+                    && mEapType == that.mEapType;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(mImsi, mEapType);
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder builder = new StringBuilder();
+            builder.append("IMSI: ").append(mImsi).append("\n");
+            builder.append("EAPType: ").append(mEapType).append("\n");
+            return builder.toString();
         }
 
         @Override
         public void writeToParcel(Parcel dest, int flags) {
-            dest.writeString(imsi);
-            dest.writeInt(eapType);
+            dest.writeString(mImsi);
+            dest.writeInt(mEapType);
         }
 
         /**
          * Validate the configuration data.
          *
          * @return true on success or false on failure
+         * @hide
          */
         public boolean validate() {
             // Note: this only validate the format of IMSI string itself.  Additional verification
@@ -400,9 +762,9 @@ public final class Credential implements Parcelable {
             if (!verifyImsi()) {
                 return false;
             }
-            if (eapType != EAPConstants.EAP_SIM && eapType != EAPConstants.EAP_AKA &&
-                    eapType != EAPConstants.EAP_AKA_PRIME) {
-                Log.d(TAG, "Invalid EAP Type for SIM credential: " + eapType);
+            if (mEapType != EAPConstants.EAP_SIM && mEapType != EAPConstants.EAP_AKA
+                    && mEapType != EAPConstants.EAP_AKA_PRIME) {
+                Log.d(TAG, "Invalid EAP Type for SIM credential: " + mEapType);
                 return false;
             }
             return true;
@@ -413,8 +775,8 @@ public final class Credential implements Parcelable {
                 @Override
                 public SimCredential createFromParcel(Parcel in) {
                     SimCredential simCredential = new SimCredential();
-                    simCredential.imsi = in.readString();
-                    simCredential.eapType = in.readInt();
+                    simCredential.setImsi(in.readString());
+                    simCredential.setEapType(in.readInt());
                     return simCredential;
                 }
 
@@ -432,51 +794,115 @@ public final class Credential implements Parcelable {
          * @return true if IMSI is valid, false otherwise.
          */
         private boolean verifyImsi() {
-            if (TextUtils.isEmpty(imsi)) {
+            if (TextUtils.isEmpty(mImsi)) {
                 Log.d(TAG, "Missing IMSI");
                 return false;
             }
-            if (imsi.length() > MAX_IMSI_LENGTH) {
-                Log.d(TAG, "IMSI exceeding maximum length: " + imsi.length());
+            if (mImsi.length() > MAX_IMSI_LENGTH) {
+                Log.d(TAG, "IMSI exceeding maximum length: " + mImsi.length());
                 return false;
             }
 
             // Locate the first non-digit character.
             int nonDigit;
             char stopChar = '\0';
-            for (nonDigit = 0; nonDigit < imsi.length(); nonDigit++) {
-                stopChar = imsi.charAt(nonDigit);
+            for (nonDigit = 0; nonDigit < mImsi.length(); nonDigit++) {
+                stopChar = mImsi.charAt(nonDigit);
                 if (stopChar < '0' || stopChar > '9') {
                     break;
                 }
             }
 
-            if (nonDigit == imsi.length()) {
+            if (nonDigit == mImsi.length()) {
                 return true;
             }
-            else if (nonDigit == imsi.length()-1 && stopChar == '*') {
+            else if (nonDigit == mImsi.length()-1 && stopChar == '*') {
                 // Prefix matching.
                 return true;
             }
             return false;
         }
     }
-    public SimCredential simCredential = null;
+    private SimCredential mSimCredential = null;
+    /**
+     * Set the SIM credential information.
+     *
+     * @param simCredential The SIM credential to set to
+     */
+    public void setSimCredential(SimCredential simCredential) {
+        mSimCredential = simCredential;
+    }
+    /**
+     * Get the SIM credential information.
+     *
+     * @return SIM credential information
+     */
+    public SimCredential getSimCredential() {
+        return mSimCredential;
+    }
 
     /**
      * CA (Certificate Authority) X509 certificate.
      */
-    public X509Certificate caCertificate = null;
+    private X509Certificate mCaCertificate = null;
+    /**
+     * Set the CA (Certification Authority) certificate associated with this credential.
+     *
+     * @param caCertificate The CA certificate to set to
+     */
+    public void setCaCertificate(X509Certificate caCertificate) {
+        mCaCertificate = caCertificate;
+    }
+    /**
+     * Get the CA (Certification Authority) certificate associated with this credential.
+     *
+     * @return CA certificate associated with this credential
+     */
+    public X509Certificate getCaCertificate() {
+        return mCaCertificate;
+    }
 
     /**
      * Client side X509 certificate chain.
      */
-    public X509Certificate[] clientCertificateChain = null;
+    private X509Certificate[] mClientCertificateChain = null;
+    /**
+     * Set the client certificate chain associated with this credential.
+     *
+     * @param certificateChain The client certificate chain to set to
+     */
+    public void setClientCertificateChain(X509Certificate[] certificateChain) {
+        mClientCertificateChain = certificateChain;
+    }
+    /**
+     * Get the client certificate chain associated with this credential.
+     *
+     * @return client certificate chain associated with this credential
+     */
+    public X509Certificate[] getClientCertificateChain() {
+        return mClientCertificateChain;
+    }
 
     /**
      * Client side private key.
      */
-    public PrivateKey clientPrivateKey = null;
+    private PrivateKey mClientPrivateKey = null;
+    /**
+     * Set the client private key associated with this credential.
+     *
+     * @param clientPrivateKey the client private key to set to
+     */
+    public void setClientPrivateKey(PrivateKey clientPrivateKey) {
+        mClientPrivateKey = clientPrivateKey;
+    }
+    /**
+     * Get the client private key associated with this credential.
+     *
+     * @return client private key associated with this credential.
+     */
+    public PrivateKey getClientPrivateKey() {
+        return mClientPrivateKey;
+    }
 
     /**
      * Constructor for creating Credential with default values.
@@ -490,22 +916,25 @@ public final class Credential implements Parcelable {
      */
     public Credential(Credential source) {
         if (source != null) {
-            realm = source.realm;
-            if (source.userCredential != null) {
-                userCredential = new UserCredential(source.userCredential);
+            mCreationTimeInMillis = source.mCreationTimeInMillis;
+            mExpirationTimeInMillis = source.mExpirationTimeInMillis;
+            mRealm = source.mRealm;
+            mCheckAaaServerCertStatus = source.mCheckAaaServerCertStatus;
+            if (source.mUserCredential != null) {
+                mUserCredential = new UserCredential(source.mUserCredential);
             }
-            if (source.certCredential != null) {
-                certCredential = new CertificateCredential(source.certCredential);
+            if (source.mCertCredential != null) {
+                mCertCredential = new CertificateCredential(source.mCertCredential);
             }
-            if (source.simCredential != null) {
-                simCredential = new SimCredential(source.simCredential);
+            if (source.mSimCredential != null) {
+                mSimCredential = new SimCredential(source.mSimCredential);
             }
-            if (source.clientCertificateChain != null) {
-                clientCertificateChain = Arrays.copyOf(source.clientCertificateChain,
-                                                       source.clientCertificateChain.length);
+            if (source.mClientCertificateChain != null) {
+                mClientCertificateChain = Arrays.copyOf(source.mClientCertificateChain,
+                                                        source.mClientCertificateChain.length);
             }
-            caCertificate = source.caCertificate;
-            clientPrivateKey = source.clientPrivateKey;
+            mCaCertificate = source.mCaCertificate;
+            mClientPrivateKey = source.mClientPrivateKey;
         }
     }
 
@@ -516,13 +945,16 @@ public final class Credential implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(realm);
-        dest.writeParcelable(userCredential, flags);
-        dest.writeParcelable(certCredential, flags);
-        dest.writeParcelable(simCredential, flags);
-        ParcelUtil.writeCertificate(dest, caCertificate);
-        ParcelUtil.writeCertificates(dest, clientCertificateChain);
-        ParcelUtil.writePrivateKey(dest, clientPrivateKey);
+        dest.writeLong(mCreationTimeInMillis);
+        dest.writeLong(mExpirationTimeInMillis);
+        dest.writeString(mRealm);
+        dest.writeInt(mCheckAaaServerCertStatus ? 1 : 0);
+        dest.writeParcelable(mUserCredential, flags);
+        dest.writeParcelable(mCertCredential, flags);
+        dest.writeParcelable(mSimCredential, flags);
+        ParcelUtil.writeCertificate(dest, mCaCertificate);
+        ParcelUtil.writeCertificates(dest, mClientCertificateChain);
+        ParcelUtil.writePrivateKey(dest, mClientPrivateKey);
     }
 
     @Override
@@ -535,43 +967,82 @@ public final class Credential implements Parcelable {
         }
 
         Credential that = (Credential) thatObject;
-        return TextUtils.equals(realm, that.realm) &&
-                (userCredential == null ? that.userCredential == null :
-                    userCredential.equals(that.userCredential)) &&
-                (certCredential == null ? that.certCredential == null :
-                    certCredential.equals(that.certCredential)) &&
-                (simCredential == null ? that.simCredential == null :
-                    simCredential.equals(that.simCredential)) &&
-                isX509CertificateEquals(caCertificate, that.caCertificate) &&
-                isX509CertificatesEquals(clientCertificateChain, that.clientCertificateChain) &&
-                isPrivateKeyEquals(clientPrivateKey, that.clientPrivateKey);
+        return TextUtils.equals(mRealm, that.mRealm)
+                && mCreationTimeInMillis == that.mCreationTimeInMillis
+                && mExpirationTimeInMillis == that.mExpirationTimeInMillis
+                && mCheckAaaServerCertStatus == that.mCheckAaaServerCertStatus
+                && (mUserCredential == null ? that.mUserCredential == null
+                    : mUserCredential.equals(that.mUserCredential))
+                && (mCertCredential == null ? that.mCertCredential == null
+                    : mCertCredential.equals(that.mCertCredential))
+                && (mSimCredential == null ? that.mSimCredential == null
+                    : mSimCredential.equals(that.mSimCredential))
+                && isX509CertificateEquals(mCaCertificate, that.mCaCertificate)
+                && isX509CertificatesEquals(mClientCertificateChain, that.mClientCertificateChain)
+                && isPrivateKeyEquals(mClientPrivateKey, that.mClientPrivateKey);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mRealm, mCreationTimeInMillis, mExpirationTimeInMillis,
+                mCheckAaaServerCertStatus, mUserCredential, mCertCredential, mSimCredential,
+                mCaCertificate, mClientCertificateChain, mClientPrivateKey);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("Realm: ").append(mRealm).append("\n");
+        builder.append("CreationTime: ").append(mCreationTimeInMillis != Long.MIN_VALUE
+                ? new Date(mCreationTimeInMillis) : "Not specified").append("\n");
+        builder.append("ExpirationTime: ").append(mExpirationTimeInMillis != Long.MIN_VALUE
+                ? new Date(mExpirationTimeInMillis) : "Not specified").append("\n");
+        builder.append("CheckAAAServerStatus: ").append(mCheckAaaServerCertStatus).append("\n");
+        if (mUserCredential != null) {
+            builder.append("UserCredential Begin ---\n");
+            builder.append(mUserCredential);
+            builder.append("UserCredential End ---\n");
+        }
+        if (mCertCredential != null) {
+            builder.append("CertificateCredential Begin ---\n");
+            builder.append(mCertCredential);
+            builder.append("CertificateCredential End ---\n");
+        }
+        if (mSimCredential != null) {
+            builder.append("SIMCredential Begin ---\n");
+            builder.append(mSimCredential);
+            builder.append("SIMCredential End ---\n");
+        }
+        return builder.toString();
     }
 
     /**
      * Validate the configuration data.
      *
      * @return true on success or false on failure
+     * @hide
      */
     public boolean validate() {
-        if (TextUtils.isEmpty(realm)) {
+        if (TextUtils.isEmpty(mRealm)) {
             Log.d(TAG, "Missing realm");
             return false;
         }
-        if (realm.length() > MAX_REALM_LENGTH) {
-            Log.d(TAG, "realm exceeding maximum length: " + realm.length());
+        if (mRealm.getBytes(StandardCharsets.UTF_8).length > MAX_REALM_BYTES) {
+            Log.d(TAG, "realm exceeding maximum length: "
+                    + mRealm.getBytes(StandardCharsets.UTF_8).length);
             return false;
         }
 
         // Verify the credential.
-        if (userCredential != null) {
+        if (mUserCredential != null) {
             if (!verifyUserCredential()) {
                 return false;
             }
-        } else if (certCredential != null) {
+        } else if (mCertCredential != null) {
             if (!verifyCertCredential()) {
                 return false;
             }
-        } else if (simCredential != null) {
+        } else if (mSimCredential != null) {
             if (!verifySimCredential()) {
                 return false;
             }
@@ -588,13 +1059,16 @@ public final class Credential implements Parcelable {
             @Override
             public Credential createFromParcel(Parcel in) {
                 Credential credential = new Credential();
-                credential.realm = in.readString();
-                credential.userCredential = in.readParcelable(null);
-                credential.certCredential = in.readParcelable(null);
-                credential.simCredential = in.readParcelable(null);
-                credential.caCertificate = ParcelUtil.readCertificate(in);
-                credential.clientCertificateChain = ParcelUtil.readCertificates(in);
-                credential.clientPrivateKey = ParcelUtil.readPrivateKey(in);
+                credential.setCreationTimeInMillis(in.readLong());
+                credential.setExpirationTimeInMillis(in.readLong());
+                credential.setRealm(in.readString());
+                credential.setCheckAaaServerCertStatus(in.readInt() != 0);
+                credential.setUserCredential(in.readParcelable(null));
+                credential.setCertCredential(in.readParcelable(null));
+                credential.setSimCredential(in.readParcelable(null));
+                credential.setCaCertificate(ParcelUtil.readCertificate(in));
+                credential.setClientCertificateChain(ParcelUtil.readCertificates(in));
+                credential.setClientPrivateKey(ParcelUtil.readPrivateKey(in));
                 return credential;
             }
 
@@ -610,18 +1084,18 @@ public final class Credential implements Parcelable {
      * @return true if user credential is valid, false otherwise.
      */
     private boolean verifyUserCredential() {
-        if (userCredential == null) {
+        if (mUserCredential == null) {
             Log.d(TAG, "Missing user credential");
             return false;
         }
-        if (certCredential != null || simCredential != null) {
+        if (mCertCredential != null || mSimCredential != null) {
             Log.d(TAG, "Contained more than one type of credential");
             return false;
         }
-        if (!userCredential.validate()) {
+        if (!mUserCredential.validate()) {
             return false;
         }
-        if (caCertificate == null) {
+        if (mCaCertificate == null) {
             Log.d(TAG, "Missing CA Certificate for user credential");
             return false;
         }
@@ -635,32 +1109,32 @@ public final class Credential implements Parcelable {
      * @return true if certificate credential is valid, false otherwise.
      */
     private boolean verifyCertCredential() {
-        if (certCredential == null) {
+        if (mCertCredential == null) {
             Log.d(TAG, "Missing certificate credential");
             return false;
         }
-        if (userCredential != null || simCredential != null) {
+        if (mUserCredential != null || mSimCredential != null) {
             Log.d(TAG, "Contained more than one type of credential");
             return false;
         }
 
-        if (!certCredential.validate()) {
+        if (!mCertCredential.validate()) {
             return false;
         }
 
         // Verify required key and certificates for certificate credential.
-        if (caCertificate == null) {
+        if (mCaCertificate == null) {
             Log.d(TAG, "Missing CA Certificate for certificate credential");
             return false;
         }
-        if (clientPrivateKey == null) {
+        if (mClientPrivateKey == null) {
             Log.d(TAG, "Missing client private key for certificate credential");
             return false;
         }
         try {
             // Verify SHA-256 fingerprint for client certificate.
-            if (!verifySha256Fingerprint(clientCertificateChain,
-                    certCredential.certSha256FingerPrint)) {
+            if (!verifySha256Fingerprint(mClientCertificateChain,
+                    mCertCredential.getCertSha256Fingerprint())) {
                 Log.d(TAG, "SHA-256 fingerprint mismatch");
                 return false;
             }
@@ -678,15 +1152,15 @@ public final class Credential implements Parcelable {
      * @return true if SIM credential is valid, false otherwise.
      */
     private boolean verifySimCredential() {
-        if (simCredential == null) {
+        if (mSimCredential == null) {
             Log.d(TAG, "Missing SIM credential");
             return false;
         }
-        if (userCredential != null || certCredential != null) {
+        if (mUserCredential != null || mCertCredential != null) {
             Log.d(TAG, "Contained more than one type of credential");
             return false;
         }
-        return simCredential.validate();
+        return mSimCredential.validate();
     }
 
     private static boolean isPrivateKeyEquals(PrivateKey key1, PrivateKey key2) {

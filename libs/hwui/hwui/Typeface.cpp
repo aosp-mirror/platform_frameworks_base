@@ -23,147 +23,185 @@
 #include "Typeface.h"
 
 #include <pthread.h>
+#include <fcntl.h>  // For tests.
+#include <sys/stat.h>  // For tests.
+#include <sys/mman.h>  // For tests.
 
 #include "MinikinSkia.h"
 #include "SkTypeface.h"
 #include "SkPaint.h"
+#include "SkStream.h"  // Fot tests.
 
 #include <minikin/FontCollection.h>
 #include <minikin/FontFamily.h>
 #include <minikin/Layout.h>
 #include <utils/Log.h>
+#include <utils/MathUtils.h>
 
 namespace android {
 
-// Resolve the 1..9 weight based on base weight and bold flag
-static void resolveStyle(Typeface* typeface) {
-    int weight = typeface->fBaseWeight / 100;
-    if (typeface->fSkiaStyle & SkTypeface::kBold) {
-        weight += 3;
+static SkTypeface::Style computeSkiaStyle(int weight, bool italic) {
+    // This bold detection comes from SkTypeface.h
+    if (weight >= SkFontStyle::kSemiBold_Weight) {
+        return italic ? SkTypeface::kBoldItalic : SkTypeface::kBold;
+    } else {
+        return italic ? SkTypeface::kItalic : SkTypeface::kNormal;
     }
-    if (weight > 9) {
-        weight = 9;
+}
+
+static minikin::FontStyle computeMinikinStyle(int weight, bool italic) {
+    // TODO: Better to use raw base weight value for font selection instead of dividing by 100.
+    const int minikinWeight = uirenderer::MathUtils::clamp((weight + 50) / 100, 1, 10);
+    return minikin::FontStyle(minikinWeight, italic);
+}
+
+// Resolve the relative weight from the baseWeight and target style.
+static minikin::FontStyle computeRelativeStyle(int baseWeight, SkTypeface::Style relativeStyle) {
+    int weight = baseWeight;
+    if ((relativeStyle & SkTypeface::kBold) != 0) {
+        weight += 300;
     }
-    bool italic = (typeface->fSkiaStyle & SkTypeface::kItalic) != 0;
-    typeface->fStyle = FontStyle(weight, italic);
+    bool italic = (relativeStyle & SkTypeface::kItalic) != 0;
+    return computeMinikinStyle(weight, italic);
 }
 
 Typeface* gDefaultTypeface = NULL;
-pthread_once_t gDefaultTypefaceOnce = PTHREAD_ONCE_INIT;
-
-// This installs a default typeface (from a hardcoded path) that allows
-// layouts to work (not crash on null pointer) before the default
-// typeface is set.
-// TODO: investigate why layouts are being created before Typeface.java
-// class initialization.
-static FontCollection *makeFontCollection() {
-    std::vector<FontFamily *>typefaces;
-    const char *fns[] = {
-        "/system/fonts/Roboto-Regular.ttf",
-    };
-
-    FontFamily *family = new FontFamily();
-    for (size_t i = 0; i < sizeof(fns)/sizeof(fns[0]); i++) {
-        const char *fn = fns[i];
-        ALOGD("makeFontCollection adding %s", fn);
-        SkTypeface *skFace = SkTypeface::CreateFromFile(fn);
-        if (skFace != NULL) {
-            // TODO: might be a nice optimization to get access to the underlying font
-            // data, but would require us opening the file ourselves and passing that
-            // to the appropriate Create method of SkTypeface.
-            MinikinFont *font = new MinikinFontSkia(skFace, NULL, 0, 0);
-            family->addFont(font);
-            font->Unref();
-        } else {
-            ALOGE("failed to create font %s", fn);
-        }
-    }
-    typefaces.push_back(family);
-
-    FontCollection *result = new FontCollection(typefaces);
-    family->Unref();
-    return result;
-}
-
-static void getDefaultTypefaceOnce() {
-    Layout::init();
-    if (gDefaultTypeface == NULL) {
-        // We expect the client to set a default typeface, but provide a
-        // default so we can make progress before that happens.
-        gDefaultTypeface = new Typeface;
-        gDefaultTypeface->fFontCollection = makeFontCollection();
-        gDefaultTypeface->fSkiaStyle = SkTypeface::kNormal;
-        gDefaultTypeface->fBaseWeight = 400;
-        resolveStyle(gDefaultTypeface);
-    }
-}
 
 Typeface* Typeface::resolveDefault(Typeface* src) {
-    if (src == NULL) {
-        pthread_once(&gDefaultTypefaceOnce, getDefaultTypefaceOnce);
-        return gDefaultTypeface;
-    } else {
-        return src;
-    }
+    LOG_ALWAYS_FATAL_IF(gDefaultTypeface == nullptr);
+    return src == nullptr ? gDefaultTypeface : src;
 }
 
-Typeface* Typeface::createFromTypeface(Typeface* src, SkTypeface::Style style) {
+Typeface* Typeface::createRelative(Typeface* src, SkTypeface::Style style) {
     Typeface* resolvedFace = Typeface::resolveDefault(src);
     Typeface* result = new Typeface;
-    if (result != 0) {
+    if (result != nullptr) {
         result->fFontCollection = resolvedFace->fFontCollection;
-        result->fFontCollection->Ref();
-        result->fSkiaStyle = style;
         result->fBaseWeight = resolvedFace->fBaseWeight;
-        resolveStyle(result);
+        result->fSkiaStyle = style;
+        result->fStyle = computeRelativeStyle(result->fBaseWeight, style);
     }
     return result;
 }
 
-Typeface* Typeface::createWeightAlias(Typeface* src, int weight) {
+Typeface* Typeface::createAbsolute(Typeface* base, int weight, bool italic) {
+    Typeface* resolvedFace = Typeface::resolveDefault(base);
+    Typeface* result = new Typeface();
+    if (result != nullptr) {
+        result->fFontCollection = resolvedFace->fFontCollection;
+        result->fBaseWeight = resolvedFace->fBaseWeight;
+        result->fSkiaStyle = computeSkiaStyle(weight, italic);
+        result->fStyle = computeMinikinStyle(weight, italic);
+    }
+    return result;
+}
+
+Typeface* Typeface::createFromTypefaceWithVariation(Typeface* src,
+        const std::vector<minikin::FontVariation>& variations) {
+    Typeface* resolvedFace = Typeface::resolveDefault(src);
+    Typeface* result = new Typeface();
+    if (result != nullptr) {
+        result->fFontCollection =
+                resolvedFace->fFontCollection->createCollectionWithVariation(variations);
+        if (result->fFontCollection == nullptr) {
+            // None of passed axes are supported by this collection.
+            // So we will reuse the same collection with incrementing reference count.
+            result->fFontCollection = resolvedFace->fFontCollection;
+        }
+        // Do not update styles.
+        // TODO: We may want to update base weight if the 'wght' is specified.
+        result->fBaseWeight = resolvedFace->fBaseWeight;
+        result->fSkiaStyle = resolvedFace->fSkiaStyle;
+        result->fStyle = resolvedFace->fStyle;
+    }
+    return result;
+}
+
+Typeface* Typeface::createWithDifferentBaseWeight(Typeface* src, int weight) {
     Typeface* resolvedFace = Typeface::resolveDefault(src);
     Typeface* result = new Typeface;
-    if (result != 0) {
+    if (result != nullptr) {
         result->fFontCollection = resolvedFace->fFontCollection;
-        result->fFontCollection->Ref();
-        result->fSkiaStyle = resolvedFace->fSkiaStyle;
         result->fBaseWeight = weight;
-        resolveStyle(result);
+        result->fSkiaStyle = resolvedFace->fSkiaStyle;
+        result->fStyle = computeRelativeStyle(weight, result->fSkiaStyle);
     }
     return result;
 }
 
-Typeface* Typeface::createFromFamilies(const std::vector<FontFamily*>& families) {
+Typeface* Typeface::createFromFamilies(
+        std::vector<std::shared_ptr<minikin::FontFamily>>&& families,
+        int weight, int italic) {
     Typeface* result = new Typeface;
-    result->fFontCollection = new FontCollection(families);
-    if (families.empty()) {
-        ALOGW("createFromFamilies creating empty collection");
-        result->fSkiaStyle = SkTypeface::kNormal;
-    } else {
-        const FontStyle defaultStyle;
-        FontFamily* firstFamily = reinterpret_cast<FontFamily*>(families[0]);
-        MinikinFont* mf = firstFamily->getClosestMatch(defaultStyle).font;
-        if (mf != NULL) {
-            SkTypeface* skTypeface = reinterpret_cast<MinikinFontSkia*>(mf)->GetSkTypeface();
-            // TODO: probably better to query more precise style from family, will be important
-            // when we open up API to access 100..900 weights
-            result->fSkiaStyle = skTypeface->style();
+    result->fFontCollection.reset(new minikin::FontCollection(families));
+
+    if (weight == RESOLVE_BY_FONT_TABLE || italic == RESOLVE_BY_FONT_TABLE) {
+        int weightFromFont;
+        bool italicFromFont;
+
+        const minikin::FontStyle defaultStyle;
+        const minikin::MinikinFont* mf =
+                families.empty() ?  nullptr : families[0]->getClosestMatch(defaultStyle).font;
+        if (mf != nullptr) {
+            SkTypeface* skTypeface = reinterpret_cast<const MinikinFontSkia*>(mf)->GetSkTypeface();
+            const SkFontStyle& style = skTypeface->fontStyle();
+            weightFromFont = style.weight();
+            italicFromFont = style.slant() != SkFontStyle::kUpright_Slant;
         } else {
-            result->fSkiaStyle = SkTypeface::kNormal;
+            // We can't obtain any information from fonts. Just use default values.
+            weightFromFont = SkFontStyle::kNormal_Weight;
+            italicFromFont = false;
+        }
+
+        if (weight == RESOLVE_BY_FONT_TABLE) {
+            weight = weightFromFont;
+        }
+        if (italic == RESOLVE_BY_FONT_TABLE) {
+            italic = italicFromFont? 1 : 0;
         }
     }
-    result->fBaseWeight = 400;
-    resolveStyle(result);
-    return result;
-}
 
-void Typeface::unref() {
-    fFontCollection->Unref();
-    delete this;
+    // Sanitize the invalid value passed from public API.
+    if (weight < 0) {
+        weight = SkFontStyle::kNormal_Weight;
+    }
+
+    result->fBaseWeight = weight;
+    result->fSkiaStyle = computeSkiaStyle(weight, italic);
+    result->fStyle = computeMinikinStyle(weight, italic);
+    return result;
 }
 
 void Typeface::setDefault(Typeface* face) {
     gDefaultTypeface = face;
+}
+
+void Typeface::setRobotoTypefaceForTest() {
+    const char* kRobotoFont = "/system/fonts/Roboto-Regular.ttf";
+
+    int fd = open(kRobotoFont, O_RDONLY);
+    LOG_ALWAYS_FATAL_IF(fd == -1, "Failed to open file %s", kRobotoFont);
+    struct stat st = {};
+    LOG_ALWAYS_FATAL_IF(fstat(fd, &st) == -1, "Failed to stat file %s", kRobotoFont);
+    void* data = mmap(nullptr, st.st_size, PROT_READ, MAP_SHARED, fd, 0);
+    std::unique_ptr<SkMemoryStream> fontData(new SkMemoryStream(data, st.st_size));
+    sk_sp<SkTypeface> typeface = SkTypeface::MakeFromStream(fontData.release());
+    LOG_ALWAYS_FATAL_IF(typeface == nullptr, "Failed to make typeface from %s", kRobotoFont);
+
+    std::shared_ptr<minikin::MinikinFont> font = std::make_shared<MinikinFontSkia>(
+            std::move(typeface), data, st.st_size, 0, std::vector<minikin::FontVariation>());
+    std::shared_ptr<minikin::FontFamily> family = std::make_shared<minikin::FontFamily>(
+            std::vector<minikin::Font>({ minikin::Font(std::move(font), minikin::FontStyle()) }));
+    std::shared_ptr<minikin::FontCollection> collection =
+            std::make_shared<minikin::FontCollection>(std::move(family));
+
+    Typeface* hwTypeface = new Typeface();
+    hwTypeface->fFontCollection = collection;
+    hwTypeface->fSkiaStyle = SkTypeface::kNormal;
+    hwTypeface->fBaseWeight = SkFontStyle::kNormal_Weight;
+    hwTypeface->fStyle = minikin::FontStyle(4 /* weight */, false /* italic */);
+
+    Typeface::setDefault(hwTypeface);
 }
 
 }

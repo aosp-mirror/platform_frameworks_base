@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<font-family xmlns:android="http://schemas.android.com/apk/res/android"
+        android:fontProviderAuthority="com.example.test.fontprovider"
+        android:fontProviderQuery="MyRequestedFont"
+        android:fontProviderPackage="com.example.test.fontprovider.package"
+        android:fontProviderCerts="@array/certarray">
+</font-family>

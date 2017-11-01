@@ -130,9 +130,11 @@ public class KeyphraseEnrollmentInfo {
                     continue;
                 }
 
-                mKeyphrasePackageMap.put(
-                        getKeyphraseMetadataFromApplicationInfo(pm, ai, parseErrors),
-                        ai.packageName);
+                KeyphraseMetadata metadata =
+                        getKeyphraseMetadataFromApplicationInfo(pm, ai, parseErrors);
+                if (metadata != null) {
+                    mKeyphrasePackageMap.put(metadata, ai.packageName);
+                }
             } catch (PackageManager.NameNotFoundException e) {
                 String error = "error parsing voice enrollment meta-data for "
                         + ri.activityInfo.packageName;
@@ -339,7 +341,8 @@ public class KeyphraseEnrollmentInfo {
               }
           }
         }
-        Slog.w(TAG, "No Enrollment application supports the given keyphrase/locale");
+        Slog.w(TAG, "No enrollment application supports the given keyphrase/locale: '"
+                + keyphrase + "'/" + locale);
         return null;
     }
 

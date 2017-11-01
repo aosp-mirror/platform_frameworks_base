@@ -27,6 +27,7 @@
 #include <fcntl.h>
 #include <grp.h>
 #include <inttypes.h>
+#include <malloc.h>
 #include <mntent.h>
 #include <paths.h>
 #include <signal.h>
@@ -53,10 +54,10 @@
 #include <processgroup/processgroup.h>
 
 #include "core_jni_helpers.h"
-#include "JNIHelp.h"
-#include "ScopedLocalRef.h"
-#include "ScopedPrimitiveArray.h"
-#include "ScopedUtfChars.h"
+#include <nativehelper/JNIHelp.h>
+#include <nativehelper/ScopedLocalRef.h>
+#include <nativehelper/ScopedPrimitiveArray.h>
+#include <nativehelper/ScopedUtfChars.h>
 #include "fd_utils.h"
 
 #include "nativebridge/native_bridge.h"
@@ -107,13 +108,9 @@ static void SigChldHandler(int /*signal_number*/) {
      // changes its locking strategy or its use of syscalls within the
      // lazy-init critical section, its use here may become unsafe.
     if (WIFEXITED(status)) {
-      if (WEXITSTATUS(status)) {
-        ALOGI("Process %d exited cleanly (%d)", pid, WEXITSTATUS(status));
-      }
+      ALOGI("Process %d exited cleanly (%d)", pid, WEXITSTATUS(status));
     } else if (WIFSIGNALED(status)) {
-      if (WTERMSIG(status) != SIGKILL) {
-        ALOGI("Process %d exited due to signal (%d)", pid, WTERMSIG(status));
-      }
+      ALOGI("Process %d exited due to signal (%d)", pid, WTERMSIG(status));
       if (WCOREDUMP(status)) {
         ALOGI("Process %d dumped core.", pid);
       }
@@ -152,24 +149,6 @@ static void SetSigChldHandler() {
   int err = sigaction(SIGCHLD, &sa, NULL);
   if (err < 0) {
     ALOGW("Error setting SIGCHLD handler: %s", strerror(errno));
-  }
-}
-
-// Resets nice priority for zygote process. Zygote priority can be set
-// to high value during boot phase to speed it up. We want to ensure
-// zygote is running at normal priority before childs are forked from it.
-//
-// This ends up being called repeatedly before each fork(), but there's
-// no real harm in that.
-static void ResetNicePriority(JNIEnv* env) {
-  errno = 0;
-  int prio = getpriority(PRIO_PROCESS, 0);
-  if (prio == -1 && errno != 0) {
-    ALOGW("getpriority failed: %s\n", strerror(errno));
-  }
-  if (prio != 0 && setpriority(PRIO_PROCESS, 0, 0) != 0) {
-    ALOGE("setpriority(%d, 0, 0) failed: %s", PRIO_PROCESS, strerror(errno));
-    RuntimeAbort(env, __LINE__, "setpriority failed");
   }
 }
 
@@ -238,6 +217,14 @@ static void SetRLimits(JNIEnv* env, jobjectArray javaRlimits) {
 // The debug malloc library needs to know whether it's the zygote or a child.
 extern "C" int gMallocLeakZygoteChild;
 
+static void PreApplicationInit() {
+  // The child process sets this to indicate it's not the zygote.
+  gMallocLeakZygoteChild = 1;
+
+  // Set the jemalloc decay time to 1.
+  mallopt(M_DECAY_TIME, 1);
+}
+
 static void EnableKeepCapabilities(JNIEnv* env) {
   int rc = prctl(PR_SET_KEEPCAPS, 1, 0, 0, 0);
   if (rc == -1) {
@@ -253,13 +240,36 @@ static void DropCapabilitiesBoundingSet(JNIEnv* env) {
         ALOGE("prctl(PR_CAPBSET_DROP) failed with EINVAL. Please verify "
               "your kernel is compiled with file capabilities support");
       } else {
+        ALOGE("prctl(PR_CAPBSET_DROP, %d) failed: %s", i, strerror(errno));
         RuntimeAbort(env, __LINE__, "prctl(PR_CAPBSET_DROP) failed");
       }
     }
   }
 }
 
-static void SetCapabilities(JNIEnv* env, int64_t permitted, int64_t effective) {
+static void SetInheritable(JNIEnv* env, uint64_t inheritable) {
+  __user_cap_header_struct capheader;
+  memset(&capheader, 0, sizeof(capheader));
+  capheader.version = _LINUX_CAPABILITY_VERSION_3;
+  capheader.pid = 0;
+
+  __user_cap_data_struct capdata[2];
+  if (capget(&capheader, &capdata[0]) == -1) {
+    ALOGE("capget failed: %s", strerror(errno));
+    RuntimeAbort(env, __LINE__, "capget failed");
+  }
+
+  capdata[0].inheritable = inheritable;
+  capdata[1].inheritable = inheritable >> 32;
+
+  if (capset(&capheader, &capdata[0]) == -1) {
+    ALOGE("capset(inh=%" PRIx64 ") failed: %s", inheritable, strerror(errno));
+    RuntimeAbort(env, __LINE__, "capset failed");
+  }
+}
+
+static void SetCapabilities(JNIEnv* env, uint64_t permitted, uint64_t effective,
+                            uint64_t inheritable) {
   __user_cap_header_struct capheader;
   memset(&capheader, 0, sizeof(capheader));
   capheader.version = _LINUX_CAPABILITY_VERSION_3;
@@ -271,9 +281,12 @@ static void SetCapabilities(JNIEnv* env, int64_t permitted, int64_t effective) {
   capdata[1].effective = effective >> 32;
   capdata[0].permitted = permitted;
   capdata[1].permitted = permitted >> 32;
+  capdata[0].inheritable = inheritable;
+  capdata[1].inheritable = inheritable >> 32;
 
   if (capset(&capheader, &capdata[0]) == -1) {
-    ALOGE("capset(%" PRId64 ", %" PRId64 ") failed", permitted, effective);
+    ALOGE("capset(perm=%" PRIx64 ", eff=%" PRIx64 ", inh=%" PRIx64 ") failed: %s", permitted,
+          effective, inheritable, strerror(errno));
     RuntimeAbort(env, __LINE__, "capset failed");
   }
 }
@@ -336,6 +349,11 @@ static bool MountEmulatedStorage(uid_t uid, jint mount_mode,
     if (unshare(CLONE_NEWNS) == -1) {
         ALOGW("Failed to unshare(): %s", strerror(errno));
         return false;
+    }
+
+    // Handle force_mount_namespace with MOUNT_EXTERNAL_NONE.
+    if (mount_mode == MOUNT_EXTERNAL_NONE) {
+        return true;
     }
 
     if (TEMP_FAILURE_RETRY(mount(storageSource.string(), "/storage",
@@ -459,7 +477,7 @@ static void FillFileDescriptorVector(JNIEnv* env,
 
 // Utility routine to fork zygote and specialize the child process.
 static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray javaGids,
-                                     jint debug_flags, jobjectArray javaRlimits,
+                                     jint runtime_flags, jobjectArray javaRlimits,
                                      jlong permittedCapabilities, jlong effectiveCapabilities,
                                      jint mount_external,
                                      jstring java_se_info, jstring java_se_name,
@@ -467,6 +485,20 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
                                      jintArray fdsToIgnore,
                                      jstring instructionSet, jstring dataDir) {
   SetSigChldHandler();
+
+  sigset_t sigchld;
+  sigemptyset(&sigchld);
+  sigaddset(&sigchld, SIGCHLD);
+
+  // Temporarily block SIGCHLD during forks. The SIGCHLD handler might
+  // log, which would result in the logging FDs we close being reopened.
+  // This would cause failures because the FDs are not whitelisted.
+  //
+  // Note that the zygote process is single threaded at this point.
+  if (sigprocmask(SIG_BLOCK, &sigchld, nullptr) == -1) {
+    ALOGE("sigprocmask(SIG_SETMASK, { SIGCHLD }) failed: %s", strerror(errno));
+    RuntimeAbort(env, __LINE__, "Call to sigprocmask(SIG_BLOCK, { SIGCHLD }) failed.");
+  }
 
   // Close any logging related FDs before we start evaluating the list of
   // file descriptors.
@@ -486,13 +518,10 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
     RuntimeAbort(env, __LINE__, "Unable to restat file descriptor table.");
   }
 
-  ResetNicePriority(env);
-
   pid_t pid = fork();
 
   if (pid == 0) {
-    // The child process.
-    gMallocLeakZygoteChild = 1;
+    PreApplicationInit();
 
     // Clean up any descriptors which must be closed immediately
     DetachDescriptors(env, fdsToClose);
@@ -503,11 +532,17 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
       RuntimeAbort(env, __LINE__, "Unable to reopen whitelisted descriptors.");
     }
 
+    if (sigprocmask(SIG_UNBLOCK, &sigchld, nullptr) == -1) {
+      ALOGE("sigprocmask(SIG_SETMASK, { SIGCHLD }) failed: %s", strerror(errno));
+      RuntimeAbort(env, __LINE__, "Call to sigprocmask(SIG_UNBLOCK, { SIGCHLD }) failed.");
+    }
+
     // Keep capabilities across UID change, unless we're staying root.
     if (uid != 0) {
       EnableKeepCapabilities(env);
     }
 
+    SetInheritable(env, permittedCapabilities);
     DropCapabilitiesBoundingSet(env);
 
     bool use_native_bridge = !is_system_server && (instructionSet != NULL)
@@ -580,7 +615,7 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
         }
     }
 
-    SetCapabilities(env, permittedCapabilities, effectiveCapabilities);
+    SetCapabilities(env, permittedCapabilities, effectiveCapabilities, permittedCapabilities);
 
     SetSchedulerPolicy(env);
 
@@ -623,23 +658,49 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
 
     UnsetSigChldHandler();
 
-    env->CallStaticVoidMethod(gZygoteClass, gCallPostForkChildHooks, debug_flags,
+    env->CallStaticVoidMethod(gZygoteClass, gCallPostForkChildHooks, runtime_flags,
                               is_system_server, instructionSet);
     if (env->ExceptionCheck()) {
       RuntimeAbort(env, __LINE__, "Error calling post fork hooks.");
     }
   } else if (pid > 0) {
     // the parent process
+
+    // We blocked SIGCHLD prior to a fork, we unblock it here.
+    if (sigprocmask(SIG_UNBLOCK, &sigchld, nullptr) == -1) {
+      ALOGE("sigprocmask(SIG_SETMASK, { SIGCHLD }) failed: %s", strerror(errno));
+      RuntimeAbort(env, __LINE__, "Call to sigprocmask(SIG_UNBLOCK, { SIGCHLD }) failed.");
+    }
   }
   return pid;
+}
+
+static uint64_t GetEffectiveCapabilityMask(JNIEnv* env) {
+    __user_cap_header_struct capheader;
+    memset(&capheader, 0, sizeof(capheader));
+    capheader.version = _LINUX_CAPABILITY_VERSION_3;
+    capheader.pid = 0;
+
+    __user_cap_data_struct capdata[2];
+    if (capget(&capheader, &capdata[0]) == -1) {
+        ALOGE("capget failed: %s", strerror(errno));
+        RuntimeAbort(env, __LINE__, "capget failed");
+    }
+
+    return capdata[0].effective |
+           (static_cast<uint64_t>(capdata[1].effective) << 32);
 }
 }  // anonymous namespace
 
 namespace android {
 
+static void com_android_internal_os_Zygote_nativePreApplicationInit(JNIEnv*, jclass) {
+  PreApplicationInit();
+}
+
 static jint com_android_internal_os_Zygote_nativeForkAndSpecialize(
         JNIEnv* env, jclass, jint uid, jint gid, jintArray gids,
-        jint debug_flags, jobjectArray rlimits,
+        jint runtime_flags, jobjectArray rlimits,
         jint mount_external, jstring se_info, jstring se_name,
         jintArray fdsToClose,
         jintArray fdsToIgnore,
@@ -648,11 +709,14 @@ static jint com_android_internal_os_Zygote_nativeForkAndSpecialize(
 
     // Grant CAP_WAKE_ALARM to the Bluetooth process.
     // Additionally, allow bluetooth to open packet sockets so it can start the DHCP client.
+    // Grant CAP_SYS_NICE to allow Bluetooth to set RT priority for
+    // audio-related threads.
     // TODO: consider making such functionality an RPC to netd.
     if (multiuser_get_app_id(uid) == AID_BLUETOOTH) {
       capabilities |= (1LL << CAP_WAKE_ALARM);
       capabilities |= (1LL << CAP_NET_RAW);
       capabilities |= (1LL << CAP_NET_BIND_SERVICE);
+      capabilities |= (1LL << CAP_SYS_NICE);
     }
 
     // Grant CAP_BLOCK_SUSPEND to processes that belong to GID "wakelock"
@@ -676,17 +740,21 @@ static jint com_android_internal_os_Zygote_nativeForkAndSpecialize(
       capabilities |= (1LL << CAP_BLOCK_SUSPEND);
     }
 
-    return ForkAndSpecializeCommon(env, uid, gid, gids, debug_flags,
+    // Containers run without some capabilities, so drop any caps that are not
+    // available.
+    capabilities &= GetEffectiveCapabilityMask(env);
+
+    return ForkAndSpecializeCommon(env, uid, gid, gids, runtime_flags,
             rlimits, capabilities, capabilities, mount_external, se_info,
             se_name, false, fdsToClose, fdsToIgnore, instructionSet, appDataDir);
 }
 
 static jint com_android_internal_os_Zygote_nativeForkSystemServer(
         JNIEnv* env, jclass, uid_t uid, gid_t gid, jintArray gids,
-        jint debug_flags, jobjectArray rlimits, jlong permittedCapabilities,
+        jint runtime_flags, jobjectArray rlimits, jlong permittedCapabilities,
         jlong effectiveCapabilities) {
   pid_t pid = ForkAndSpecializeCommon(env, uid, gid, gids,
-                                      debug_flags, rlimits,
+                                      runtime_flags, rlimits,
                                       permittedCapabilities, effectiveCapabilities,
                                       MOUNT_EXTERNAL_DEFAULT, NULL, NULL, true, NULL,
                                       NULL, NULL, NULL);
@@ -763,7 +831,9 @@ static const JNINativeMethod gMethods[] = {
     { "nativeAllowFileAcrossFork", "(Ljava/lang/String;)V",
       (void *) com_android_internal_os_Zygote_nativeAllowFileAcrossFork },
     { "nativeUnmountStorageOnInit", "()V",
-      (void *) com_android_internal_os_Zygote_nativeUnmountStorageOnInit }
+      (void *) com_android_internal_os_Zygote_nativeUnmountStorageOnInit },
+    { "nativePreApplicationInit", "()V",
+      (void *) com_android_internal_os_Zygote_nativePreApplicationInit }
 };
 
 int register_com_android_internal_os_Zygote(JNIEnv* env) {

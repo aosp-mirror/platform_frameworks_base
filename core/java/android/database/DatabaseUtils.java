@@ -728,13 +728,10 @@ public class DatabaseUtils {
      * @param values the {@link ContentValues} to put the row into.
      */
     public static void cursorRowToContentValues(Cursor cursor, ContentValues values) {
-        AbstractWindowedCursor awc =
-                (cursor instanceof AbstractWindowedCursor) ? (AbstractWindowedCursor) cursor : null;
-
         String[] columns = cursor.getColumnNames();
         int length = columns.length;
         for (int i = 0; i < length; i++) {
-            if (awc != null && awc.isBlob(i)) {
+            if (cursor.getType(i) == Cursor.FIELD_TYPE_BLOB) {
                 values.put(columns[i], cursor.getBlob(i));
             } else {
                 values.put(columns[i], cursor.getString(i));

@@ -16,7 +16,9 @@
 
 package android.service.vr;
 
+import android.app.Vr2dDisplayProperties;
 import android.service.vr.IVrStateCallbacks;
+import android.service.vr.IPersistentVrStateCallbacks;
 
 /** @hide */
 interface IVrManager {
@@ -36,11 +38,53 @@ interface IVrManager {
     void unregisterListener(in IVrStateCallbacks cb);
 
     /**
+     * Add a callback to be notified when persistent VR mode state changes.
+     *
+     * @param cb the callback instance to add.
+     */
+    void registerPersistentVrStateListener(in IPersistentVrStateCallbacks cb);
+
+    /**
+     * Remove the callack from the current set of registered callbacks.
+     *
+     * @param cb the callback to remove.
+     */
+    void unregisterPersistentVrStateListener(in IPersistentVrStateCallbacks cb);
+
+    /**
      * Return current VR mode state.
      *
      * @return {@code true} if VR mode is enabled.
      */
     boolean getVrModeState();
 
+    /**
+     * Sets the persistent VR mode state of a device. When a device is in persistent VR mode it will
+     * remain in VR mode even if the foreground does not specify VR mode being enabled. Mainly used
+     * by VR viewers to indicate that a device is placed in a VR viewer.
+     *
+     * @param enabled true if the device should be placed in persistent VR mode.
+     */
+    void setPersistentVrModeEnabled(in boolean enabled);
+
+    /**
+     * Sets the resolution and DPI of the vr2d virtual display used to display
+     * 2D applications in VR mode.
+     *
+     * <p>Requires {@link android.Manifest.permission#ACCESS_VR_MANAGER} permission.</p>
+     *
+     * @param vr2dDisplayProperties Vr2d display properties to be set for
+     * the VR virtual display
+     */
+    void setVr2dDisplayProperties(
+            in Vr2dDisplayProperties vr2dDisplayProperties);
+
+    /**
+     * Return current virtual display id.
+     *
+     * @return {@link android.view.Display.INVALID_DISPLAY} if there is no virtual display
+     * currently, else return the display id of the virtual display
+     */
+    int getVr2dDisplayId();
 }
 

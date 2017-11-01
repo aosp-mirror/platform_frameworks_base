@@ -20,8 +20,7 @@
 #include <cutils/properties.h>
 
 /**
- * This file contains the list of system properties used to configure
- * the OpenGLRenderer.
+ * This file contains the list of system properties used to configure libhwui.
  */
 
 namespace android {
@@ -153,6 +152,12 @@ enum DebugLevel {
 
 #define PROPERTY_FILTER_TEST_OVERHEAD "debug.hwui.filter_test_overhead"
 
+/**
+ * Allows to set rendering pipeline mode to OpenGL (default), Skia OpenGL
+ * or Vulkan.
+ */
+#define PROPERTY_RENDERER "debug.hwui.renderer"
+
 ///////////////////////////////////////////////////////////////////////////////
 // Runtime configuration properties
 ///////////////////////////////////////////////////////////////////////////////
@@ -161,7 +166,7 @@ enum DebugLevel {
  * Used to enable/disable scissor optimization. The accepted values are
  * "true" and "false". The default value is "false".
  *
- * When scissor optimization is enabled, OpenGLRenderer will attempt to
+ * When scissor optimization is enabled, libhwui will attempt to
  * minimize the use of scissor by selectively enabling and disabling the
  * GL scissor test.
  * When the optimization is disabled, OpenGLRenderer will keep the GL
@@ -198,7 +203,7 @@ enum DebugLevel {
 #define PROPERTY_TEXT_LARGE_CACHE_WIDTH "ro.hwui.text_large_cache_width"
 #define PROPERTY_TEXT_LARGE_CACHE_HEIGHT "ro.hwui.text_large_cache_height"
 
-// Gamma (>= 1.0, <= 10.0)
+// Gamma (>= 1.0, <= 3.0)
 #define PROPERTY_TEXT_GAMMA "hwui.text_gamma"
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -217,7 +222,7 @@ enum DebugLevel {
 
 #define DEFAULT_TEXTURE_CACHE_FLUSH_RATE 0.6f
 
-#define DEFAULT_TEXT_GAMMA 1.4f
+#define DEFAULT_TEXT_GAMMA 1.45f // Match design tools
 
 // cap to 256 to limite paths in the path cache
 #define DEFAULT_PATH_TEXTURE_CAP 256
@@ -246,6 +251,13 @@ enum class StencilClipDebug {
     Hide,
     ShowHighlight,
     ShowRegion
+};
+
+enum class RenderPipelineType {
+    OpenGL = 0,
+    SkiaGL,
+    SkiaVulkan,
+    NotInitialized = 128
 };
 
 /**
@@ -295,18 +307,32 @@ public:
     static int overrideSpotShadowStrength;
 
     static ProfileType getProfileType();
+    static RenderPipelineType getRenderPipelineType();
+    static bool isSkiaEnabled();
 
     // Should be used only by test apps
     static bool waitForGpuCompletion;
+    static bool forceDrawFrame;
 
     // Should only be set by automated tests to try and filter out
     // any overhead they add
     static bool filterOutTestOverhead;
 
+    // Workaround a device lockup in edge cases by switching to async mode
+    // instead of the default vsync (b/38372997). Only system_server should hit this.
+    // Any existing RenderProxy & Surface combination will be unaffected, only things
+    // created after changing this.
+    static bool disableVsync;
+
+    // Used for testing only to change the render pipeline.
+#ifdef HWUI_GLES_WRAP_ENABLED
+    static void overrideRenderPipelineType(RenderPipelineType);
+#endif
+
 private:
     static ProfileType sProfileType;
     static bool sDisableProfileBars;
-
+    static RenderPipelineType sRenderPipelineType;
 }; // class Caches
 
 }; // namespace uirenderer

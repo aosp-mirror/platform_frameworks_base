@@ -34,7 +34,7 @@ public:
                              const int32_t /* state */) { }
 };
 
-IMPLEMENT_META_INTERFACE(ObbActionListener, "IObbActionListener")
+IMPLEMENT_META_INTERFACE(ObbActionListener, "android.os.storage.IObbActionListener")
 
 // ----------------------------------------------------------------------
 

@@ -12,8 +12,93 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Build ext.jar
+// ============================================================
+java_library {
+    name: "ext",
+    no_framework_libs: true,
+    static_libs: [
+        "libphonenumber-platform",
+        "nist-sip",
+        "tagsoup",
+    ],
+    dxflags: ["--core-library"],
+}
+
+// ====  c++ proto device library  ==============================
+cc_library {
+    name: "libplatformprotos",
+    host_supported: true,
+    proto: {
+        export_proto_headers: true,
+        include_dirs: ["external/protobuf/src"],
+    },
+
+    cflags: [
+        "-Wall",
+        "-Werror",
+        "-Wno-unused-parameter",
+    ],
+    target: {
+        host: {
+            proto: {
+                type: "full",
+            },
+            srcs: [
+                "core/proto/**/*.proto",
+                "libs/incident/**/*.proto",
+            ],
+        },
+        android: {
+            proto: {
+                type: "lite",
+            },
+            // We only build the protos that are optimized for the lite
+            // runtime, as well as the only protos that are actually
+            // needed by the device.
+            srcs: [
+                "core/proto/android/service/graphicsstats.proto",
+            ],
+            shared: {
+                enabled: false,
+            },
+        },
+    },
+}
+
 subdirs = [
+    "cmds/*",
+    "core/*",
     "libs/*",
+    "media/*",
+    "proto",
+    "tools/*",
     "native/android",
     "native/graphics/jni",
 ]
+
+optional_subdirs = [
+    "core/tests/utiltests/jni",
+]
+
+java_library {
+    name: "hwbinder",
+    no_framework_libs: true,
+
+    srcs: [
+        "core/java/android/os/HidlSupport.java",
+        "core/java/android/annotation/NonNull.java",
+        "core/java/android/os/HwBinder.java",
+        "core/java/android/os/HwBlob.java",
+        "core/java/android/os/HwParcel.java",
+        "core/java/android/os/IHwBinder.java",
+        "core/java/android/os/IHwInterface.java",
+        "core/java/android/os/DeadObjectException.java",
+        "core/java/android/os/DeadSystemException.java",
+        "core/java/android/os/RemoteException.java",
+        "core/java/android/util/AndroidException.java",
+    ],
+
+    dxflags: ["--core-library"],
+    installable: false,
+}

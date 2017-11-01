@@ -43,10 +43,16 @@
 
     <!-- Component to be used as the status bar service.  Must implement the IStatusBar
      interface.  This name is in the ComponentName flattened format (package/class)  -->
-    <string name="config_statusBarComponent" translatable="false">com.android.systemui.statusbar.phone.PhoneStatusBar</string>
+    <string name="config_statusBarComponent" translatable="false">com.android.systemui.statusbar.phone.StatusBar</string>
 
     <!-- Whether or not we show the number in the bar. -->
     <bool name="config_statusBarShowNumber">false</bool>
+
+    <!-- Vibrator pattern for camera gesture launch. -->
+    <integer-array translatable="false" name="config_cameraLaunchGestureVibePattern">
+        <item>0</item>
+        <item>400</item>
+    </integer-array>
 
     <!-- How many icons may be shown at once in the system bar. Includes any
          slots that may be reused for things like IME control. -->
@@ -94,13 +100,14 @@
 
     <!-- The number of rows in the QuickSettings -->
     <integer name="quick_settings_num_rows">1</integer>
+    <integer name="quick_settings_num_rows_portrait">2</integer>
 
     <!-- The number of columns that the top level tiles span in the QuickSettings -->
     <integer name="quick_settings_user_time_settings_tile_span">1</integer>
 
     <!-- The default tiles to display in QuickSettings -->
     <string name="quick_settings_tiles_default" translatable="false">
-        wifi,cell,battery,dnd,flashlight,rotation,bt,airplane
+        wifi,bt,dnd,flashlight,rotation,battery,cell,airplane,cast
     </string>
 
     <!-- Tiles native to System UI. Order should match "quick_settings_tiles_default" -->
@@ -203,14 +210,14 @@
     <!-- Set to true to enable the user switcher on the keyguard. -->
     <bool name="config_keyguardUserSwitcher">false</bool>
 
-    <!-- Doze: does this device support STATE_DOZE and STATE_DOZE_SUSPEND?  -->
+    <!-- Doze: does this device support STATE_DOZE?  -->
     <bool name="doze_display_state_supported">false</bool>
+
+    <!-- Doze: does this device support STATE_DOZE_SUSPEND?  -->
+    <bool name="doze_suspend_display_state_supported">false</bool>
 
     <!-- Doze: should the significant motion sensor be used as a pulse signal? -->
     <bool name="doze_pulse_on_significant_motion">false</bool>
-
-    <!-- Doze: should the pickup sensor be used as a pulse signal? -->
-    <bool name="doze_pulse_on_pick_up">false</bool>
 
     <!-- Doze: check proximity sensor before pulsing? -->
     <bool name="doze_proximity_check_before_pulse">true</bool>
@@ -240,8 +247,10 @@
     -->
     <string name="doze_pickup_subtype_performs_proximity_check"></string>
 
-    <!-- Type of the double tap sensor. Empty if double tap is not supported. -->
-    <string name="doze_double_tap_sensor_type" translatable="false"></string>
+    <!-- Type of a sensor that provides a low-power estimate of the desired display
+         brightness, suitable to listen to while the device is asleep (e.g. during
+         always-on display) -->
+    <string name="doze_brightness_sensor_type" translatable="false"></string>
 
     <!-- Doze: pulse parameter - how long does it take to fade in? -->
     <integer name="doze_pulse_duration_in">900</integer>
@@ -257,6 +266,31 @@
 
     <!-- Doze: alpha to apply to small icons when dozing -->
     <integer name="doze_small_icon_alpha">222</integer><!-- 87% of 0xff -->
+
+    <!-- Doze: Table that translates sensor values from the doze_brightness_sensor_type sensor
+               to brightness values; -1 means keeping the current brightness. -->
+    <integer-array name="config_doze_brightness_sensor_to_brightness">
+        <item>-1</item> <!-- 0: OFF -->
+        <item>2</item> <!-- 1: NIGHT -->
+        <item>5</item> <!-- 2: LOW -->
+        <item>27</item> <!-- 3: HIGH -->
+        <item>28</item> <!-- 4: SUN -->
+    </integer-array>
+
+    <!-- Doze: Table that translates sensor values from the doze_brightness_sensor_type sensor
+               to an opacity value for a black scrim that is overlayed in AOD1.
+               Valid range is from 0 (transparent) to 255 (opaque).
+               -1 means keeping the current opacity. -->
+    <integer-array name="config_doze_brightness_sensor_to_scrim_opacity">
+        <item>-1</item> <!-- 0: OFF -->
+        <item>0</item> <!-- 1: NIGHT -->
+        <item>0</item> <!-- 2: LOW -->
+        <item>0</item> <!-- 3: HIGH -->
+        <item>0</item> <!-- 4: SUN -->
+    </integer-array>
+
+    <!-- Doze: whether the double tap sensor reports 2D touch coordinates -->
+    <bool name="doze_double_tap_reports_touch_coordinates">false</bool>
 
     <!-- Hotspot tile: number of days to show after feature is used. -->
     <integer name="days_to_show_hotspot_tile">30</integer>
@@ -286,8 +320,117 @@
     <string name="config_systemUIFactoryComponent" translatable="false">com.android.systemui.SystemUIFactory</string>
 
     <!-- Nav bar button default ordering/layout -->
-    <string name="config_navBarLayout" translatable="false">space,back;home;recent,menu_ime</string>
+    <string name="config_navBarLayout" translatable="false">left[.5W],back[1WC];home;recent[1WC],right[.5W]</string>
 
     <bool name="quick_settings_show_full_alarm">false</bool>
+
+    <!-- Whether to show a warning notification when the device reaches a certain temperature. -->
+    <integer name="config_showTemperatureWarning">0</integer>
+
+    <!-- Temp at which to show a warning notification if config_showTemperatureWarning is true.
+         If < 0, uses the value from
+         HardwarePropertiesManager#getDeviceTemperatures - config_warningTemperatureTolerance. -->
+    <integer name="config_warningTemperature">-1</integer>
+
+    <!-- Fudge factor for how much below the shutdown temp to show the warning. -->
+    <integer name="config_warningTemperatureTolerance">2</integer>
+
+    <!-- Accessibility actions -->
+    <item type="id" name="action_split_task_to_left" />
+    <item type="id" name="action_split_task_to_right" />
+    <item type="id" name="action_split_task_to_top" />
+
+    <!-- Whether or not the gear icon on notifications should be shown. The gear is shown when the
+         the notification is not swiped enough to dismiss it. -->
+    <bool name="config_showNotificationGear">true</bool>
+
+    <!-- Whether or not a background should be drawn behind a notification. -->
+    <bool name="config_drawNotificationBackground">true</bool>
+
+    <!-- Whether or not the edit icon on the quick settings header is shown. -->
+    <bool name="config_showQuickSettingsEditingIcon">true</bool>
+
+    <!-- Whether or not the multi-user switcher should be visible even if the quick settings are
+         not expanded. If there are not multiple users on the system, the switcher will still
+         hide itself. -->
+    <bool name="config_alwaysShowMultiUserSwitcher">false</bool>
+
+    <!-- Whether or not the expand indicator is visible for manually expanding the quick settings
+         panel. -->
+    <bool name="config_showQuickSettingsExpandIndicator">true</bool>
+
+    <!-- Whether or not to display the row of quick settings icons separate from the full quick
+         settings panel. -->
+    <bool name="config_showQuickSettingsRow">true</bool>
+
+    <!-- Whether or not the quick settings should be revealed on an overscroll of the
+         notifications panel. -->
+    <bool name="config_enableQuickSettingsOverscrollExpansion">true</bool>
+
+    <!-- Whether or the notifications can be shown and dismissed with a drag. -->
+    <bool name="config_enableNotificationShadeDrag">true</bool>
+
+    <!-- Whether to show activity indicators in the status bar -->
+    <bool name="config_showActivity">false</bool>
+
+    <!-- Whether or not the button to clear all notifications will be shown. -->
+    <bool name="config_enableNotificationsClearAll">true</bool>
+
+    <!-- Whether or not to show the notification shelf that houses the icons of notifications that
+     have been scrolled off-screen. -->
+    <bool name="config_showNotificationShelf">true</bool>
+
+    <!-- Whether or not the notifications should always fade as they are dismissed. -->
+    <bool name="config_fadeNotificationsOnDismiss">false</bool>
+
+    <!-- Whether or not the parent of the notification row itself is being translated when swiped or
+         its children views. If true, then the contents are translated and vice versa. -->
+    <bool name="config_translateNotificationContentsOnSwipe">true</bool>
+
+    <!-- Whether or not the fade on the notification is based on the amount that it has been swiped
+         off-screen. -->
+    <bool name="config_fadeDependingOnAmountSwiped">false</bool>
+
+    <!-- Whether or not to show the expand button at the end of the notification header. -->
+    <bool name="config_showNotificationExpandButtonAtEnd">false</bool>
+
+    <!-- Whether or the notifications should be clipped to be reduced in height if it has been
+         scrolled to the top of the screen. -->
+    <bool name="config_clipNotificationScrollToTop">true</bool>
+
+    <!-- Whether or not the notification contents should be clipped to any background that is
+         set on the notification container. For example, if this value is true and the background
+         has rounded corners, then the contents will be clipped to those corners. -->
+    <bool name="config_clipNotificationsToOutline">false</bool>
+
+    <!-- Whether or not notifications that can be expanded will always be in their expanded state.
+         This value only affects notifications that are not a group of notifications from the same
+         applications. If this value is false, then only the first notification will be expanded;
+         the other notifications need to be manually expanded by the user. -->
+    <bool name="config_alwaysExpandNonGroupedNotifications">false</bool>
+
+    <!-- Whether or not an expandable notification can be manually expanded or collapsed by the
+         user. Grouped notifications are still expandable even if this value is false. -->
+    <bool name="config_enableNonGroupedNotificationExpand">true</bool>
+
+    <!-- Whether or not there should be dividing lines between child notifications when the
+         group has been expanded. -->
+    <bool name="config_showDividersWhenGroupNotificationExpanded">false</bool>
+
+    <!-- Whether or not the dividing lines should be shown when the container is expanding and
+         collapsing. If this value is true, then the lines will only show when the container has
+         been completely expanded. -->
+    <bool name="config_hideDividersDuringExpand">false</bool>
+
+    <!-- Whether or not child notifications that are part of a group will have shadows. -->
+    <bool name="config_enableShadowOnChildNotifications">true</bool>
+
+    <!-- Whether or not a view containing child notifications will have a custom background when
+         it has been expanded to reveal its children. -->
+    <bool name="config_showGroupNotificationBgWhenExpanded">false</bool>
+
+    <!-- Whether to artificially interpret all signal strengths as
+         one bar higher than they actually are -->
+    <bool name="config_inflateSignalStrength">false</bool>
 
 </resources>

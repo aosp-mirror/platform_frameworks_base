@@ -17,24 +17,40 @@
 #ifndef AAPT_FLATTEN_TABLEFLATTENER_H
 #define AAPT_FLATTEN_TABLEFLATTENER_H
 
+#include "android-base/macros.h"
+
+#include "ResourceTable.h"
 #include "process/IResourceTableConsumer.h"
+#include "util/BigBuffer.h"
 
 namespace aapt {
 
-class BigBuffer;
-class ResourceTable;
+// The percentage of used entries for a type for which using a sparse encoding is
+// preferred.
+constexpr const size_t kSparseEncodingThreshold = 60;
 
-class TableFlattener : public IResourceTableConsumer {
-public:
-    TableFlattener(BigBuffer* buffer) : mBuffer(buffer) {
-    }
-
-    bool consume(IAaptContext* context, ResourceTable* table) override;
-
-private:
-    BigBuffer* mBuffer;
+struct TableFlattenerOptions {
+  // When true, types for configurations with a sparse set of entries are encoded
+  // as a sparse map of entry ID and offset to actual data.
+  // This is only available on platforms O+ and will only be respected when
+  // minSdk is O+.
+  bool use_sparse_entries = false;
 };
 
-} // namespace aapt
+class TableFlattener : public IResourceTableConsumer {
+ public:
+  explicit TableFlattener(const TableFlattenerOptions& options, BigBuffer* buffer)
+      : options_(options), buffer_(buffer) {}
+
+  bool Consume(IAaptContext* context, ResourceTable* table) override;
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(TableFlattener);
+
+  TableFlattenerOptions options_;
+  BigBuffer* buffer_;
+};
+
+}  // namespace aapt
 
 #endif /* AAPT_FLATTEN_TABLEFLATTENER_H */

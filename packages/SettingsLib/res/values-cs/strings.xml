@@ -25,16 +25,27 @@
     <string name="wifi_remembered" msgid="4955746899347821096">"Uloženo"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"Vypnuto"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"Selhání konfigurace protokolu IP"</string>
+    <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"Nejste připojeni, protože síť je příliš slabá"</string>
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"Selhání připojení Wi-Fi"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"Problém s ověřením"</string>
+    <string name="wifi_cant_connect" msgid="5410016875644565884">"Nelze se připojit"</string>
+    <string name="wifi_cant_connect_to_ap" msgid="1222553274052685331">"K síti <xliff:g id="AP_NAME">%1$s</xliff:g> se nelze připojit"</string>
+    <string name="wifi_check_password_try_again" msgid="516958988102584767">"Zkontrolujte heslo a zkuste to znovu"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"Mimo dosah"</string>
-    <string name="wifi_no_internet_no_reconnect" msgid="2211781637653149657">"Nebyl zjištěn žádný přístup k internetu, připojení nebude automaticky obnoveno."</string>
-    <string name="wifi_no_internet" msgid="5011955173375805204">"Není k dispozici přístup k internetu."</string>
+    <string name="wifi_no_internet_no_reconnect" msgid="5724903347310541706">"Připojení nebude automaticky navázáno"</string>
+    <string name="wifi_no_internet" msgid="3880396223819116454">"Nebyl zjištěn žádný přístup k internetu"</string>
     <string name="saved_network" msgid="4352716707126620811">"Uloženo uživatelem <xliff:g id="NAME">%1$s</xliff:g>"</string>
-    <string name="connected_via_wfa" msgid="3805736726317410714">"Připojeno pomocí asistenta připojení Wi-Fi"</string>
+    <string name="connected_via_network_scorer" msgid="5713793306870815341">"Automaticky připojeno přes poskytovatele %1$s"</string>
+    <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"Automaticky připojeno přes poskytovatele hodnocení sítí"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Připojeno prostřednictvím %1$s"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"Dostupné prostřednictvím %1$s"</string>
     <string name="wifi_connected_no_internet" msgid="3149853966840874992">"Připojeno, není k dispozici internet"</string>
+    <string name="speed_label_very_slow" msgid="1867055264243608530">"Velmi pomalá"</string>
+    <string name="speed_label_slow" msgid="813109590815810235">"Pomalá"</string>
+    <string name="speed_label_okay" msgid="2331665440671174858">"OK"</string>
+    <string name="speed_label_medium" msgid="3175763313268941953">"Střední"</string>
+    <string name="speed_label_fast" msgid="7715732164050975057">"Rychlá"</string>
+    <string name="speed_label_very_fast" msgid="2265363430784523409">"Velmi rychlá"</string>
     <string name="bluetooth_disconnected" msgid="6557104142667339895">"Odpojeno"</string>
     <string name="bluetooth_disconnecting" msgid="8913264760027764974">"Odpojování..."</string>
     <string name="bluetooth_connecting" msgid="8555009514614320497">"Připojování..."</string>
@@ -44,16 +55,22 @@
     <string name="bluetooth_connected_no_a2dp" msgid="4576188601581440337">"Připojeno (žádná média)"</string>
     <string name="bluetooth_connected_no_map" msgid="6504436917057479986">"Připojeno (bez přístupu ke zprávám)"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp" msgid="9195757766755553810">"Připojeno (žádný telefon nebo média)"</string>
+    <string name="bluetooth_connected_battery_level" msgid="7049181126136692368">"Připojeno, baterie: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset_battery_level" msgid="5504193961248406027">"Připojeno (žádný telefon), baterie: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_a2dp_battery_level" msgid="4751724026365870779">"Připojeno (žádná média), baterie: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1549265779323455261">"Připojeno (žádný telefon ani média), baterie: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"Zvuk médií"</string>
-    <string name="bluetooth_profile_headset" msgid="8658779596261212609">"Zvuk telefonu"</string>
+    <string name="bluetooth_profile_headset" msgid="7815495680863246034">"Telefonní hovory"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Přenos souborů"</string>
     <string name="bluetooth_profile_hid" msgid="3680729023366986480">"Vstupní zařízení"</string>
     <string name="bluetooth_profile_pan" msgid="3391606497945147673">"Přístup k internetu"</string>
     <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"Sdílení kontaktů"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"Použít ke sdílení kontaktů"</string>
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"Sdílení internetového připojení"</string>
-    <string name="bluetooth_profile_map" msgid="5465271250454324383">"Přístup ke zprávám"</string>
+    <string name="bluetooth_profile_map" msgid="1019763341565580450">"Textové zprávy"</string>
     <string name="bluetooth_profile_sap" msgid="5764222021851283125">"Přístup k SIM kartě"</string>
+    <string name="bluetooth_profile_a2dp_high_quality" msgid="5444517801472820055">"HD zvuk: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
+    <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="8510588052415438887">"HD zvuk"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"Připojeno ke zvukovému médiu"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"Připojeno k náhlavní soupravě"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"Připojeno k serveru pro přenos dat"</string>
@@ -137,7 +154,7 @@
     <item msgid="5194774745031751806">"Ultra rychlá"</item>
     <item msgid="9085102246155045744">"Nejrychlejší"</item>
   </string-array>
-    <string name="choose_profile" msgid="8229363046053568878">"Vyberte profil"</string>
+    <string name="choose_profile" msgid="6921016979430278661">"Vyberte profil"</string>
     <string name="category_personal" msgid="1299663247844969448">"Osobní"</string>
     <string name="category_work" msgid="8699184680584175622">"Pracovní"</string>
     <string name="development_settings_title" msgid="215179176067683667">"Pro vývojáře"</string>
@@ -166,13 +183,28 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Sítě"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Certifikace bezdrát. displeje"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Podrobné protokolování Wi‑Fi"</string>
-    <string name="wifi_aggressive_handover" msgid="9194078645887480917">"Agres. předání z Wi-Fi na mobilní síť"</string>
+    <string name="wifi_aggressive_handover" msgid="5309131983693661320">"Agresivní předání z Wi-Fi na mobilní síť"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Vždy povolit Wi-Fi roaming"</string>
-    <string name="mobile_data_always_on" msgid="7745605759775320362">"Mobilní data jsou vždy aktivní"</string>
+    <string name="mobile_data_always_on" msgid="8774857027458200434">"Mobilní data jsou vždy aktivní"</string>
+    <string name="tethering_hardware_offload" msgid="7470077827090325814">"Hardwarová akcelerace tetheringu"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Zakázat absolutní hlasitost"</string>
+    <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Povolit vyzvánění v hovorovém pásmu"</string>
+    <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Verze profilu Bluetooth AVRCP"</string>
+    <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Vyberte verzi profilu Bluetooth AVRCP"</string>
+    <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Bluetooth Audio – kodek"</string>
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="4558347981670553665">"Vyberte zvukový kodek Bluetooth"</string>
+    <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Bluetooth Audio – vzorkovací frekvence"</string>
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5628790207448471613">"Vyberte zvukový kodek Bluetooth:\nVzorkovací frekvence"</string>
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"Bluetooth Audio – počet bitů na vzorek"</string>
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4546131401358681321">"Vyberte zvukový kodek Bluetooth:\nPočet bitů na vzorek"</string>
+    <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"Bluetooth Audio – režim kanálu"</string>
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="9133545781346216071">"Vyberte zvukový kodek Bluetooth:\nRežim kanálu"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Kodek Bluetooth Audio LDAC: Kvalita přehrávání"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"Vyberte kodek Bluetooth Audio LDAC:\nKvalita přehrávání"</string>
+    <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Streamování: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Zobrazit možnosti certifikace bezdrátového displeje"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Zvýšit úroveň protokolování Wi‑Fi zobrazenou v SSID a RSSI při výběru sítě Wi‑Fi."</string>
-    <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"Pokud je tato možnost zapnuta, bude síť Wi-Fi agresivnější při předávání datového připojení mobilní síti při slabém signálu Wi-Fi."</string>
+    <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"Pokud je tato možnost zapnuta, bude síť Wi-Fi při předávání datového připojení mobilní síti při slabém signálu Wi-Fi agresivnější."</string>
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Povolí nebo zakáže Wi-Fi roaming na základě množství datového provozu na rozhraní."</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Vyrovnávací paměť protokol. nástroje"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Velikost vyrovnávací paměti protokol. nástroje"</string>
@@ -186,6 +218,7 @@
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Povolit simulované polohy"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Kontrola atributu zobrazení"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Mobilní data budou vždy ponechána aktivní, i když bude aktivní Wi-Fi (za účelem rychlého přepínání sítí)."</string>
+    <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"Pokud je k dispozici hardwarová akceleraci tetheringu, použít ji"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"Povolit ladění USB?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"Ladění prostřednictvím rozhraní USB je určeno pouze pro účely vývoje. Použijte je ke kopírování dat mezi počítačem a zařízením, instalaci aplikací do zařízení bez upozornění a čtení dat protokolů."</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"Zrušit přístup k ladění USB ze všech počítačů, které jste v minulosti autorizovali?"</string>
@@ -194,6 +227,7 @@
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Ověřit aplikace z USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Kontrolovat škodlivost aplikací nainstalovaných pomocí nástroje ADB/ADT"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Zakáže funkci absolutní hlasitosti Bluetooth. Zabrání tak problémům s hlasitostí vzdálených zařízení (jako je příliš vysoká hlasitost nebo nemožnost ovládání)."</string>
+    <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"Umožňuje přehrávat vyzváněcí tóny z telefonu v náhlavní soupravě Bluetooth"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Místní terminál"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Aktivovat terminálovou aplikaci pro místní přístup k prostředí shell"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"Kontrola HDCP"</string>
@@ -206,6 +240,8 @@
     <string name="no_application" msgid="2813387563129153880">"Nic"</string>
     <string name="wait_for_debugger" msgid="1202370874528893091">"Počkat na ladicí program"</string>
     <string name="wait_for_debugger_summary" msgid="1766918303462746804">"Aplikace čeká na připojení ladicího programu"</string>
+    <string name="telephony_monitor_switch" msgid="1764958220062121194">"Telephony Monitor"</string>
+    <string name="telephony_monitor_switch_summary" msgid="7695552966547975635">"Služba Telephony Monitor bude zaznamenávat protokoly problémů s funkcemi telefonu či modemu a zobrazí uživateli oznámení, že je třeba vyplnit hlášení o chybě"</string>
     <string name="debug_input_category" msgid="1811069939601180246">"Vstup"</string>
     <string name="debug_drawing_category" msgid="6755716469267367852">"Vykreslování"</string>
     <string name="debug_hw_drawing_category" msgid="6220174216912308658">"Hardwarově urychlené vykreslování"</string>
@@ -224,6 +260,7 @@
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"Zobrazit aktual. HW vrstev"</string>
     <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"Rozblikat zeleně hardwarové vrstvy při aktualizaci"</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"Ladit překreslování GPU"</string>
+    <string name="debug_hw_renderer" msgid="7568529019431785816">"Nastavit modul vykreslení"</string>
     <string name="disable_overlays" msgid="2074488440505934665">"Zakázat hardwarové vrstvy"</string>
     <string name="disable_overlays_summary" msgid="3578941133710758592">"Vždy použít GPU ke skládání obrazovky"</string>
     <string name="simulate_color_space" msgid="6745847141353345872">"Simulovat barevný prostor"</string>
@@ -250,6 +287,8 @@
     <string name="app_process_limit_title" msgid="4280600650253107163">"Omezení procesů na pozadí"</string>
     <string name="show_all_anrs" msgid="28462979638729082">"Zobrazit všechny ANR"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"Zobrazovat dialog „Aplikace neodpovídá“ pro aplikace na pozadí"</string>
+    <string name="show_notification_channel_warnings" msgid="1399948193466922683">"Zobrazovat upozornění ohledně kanálu oznámení"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"Když aplikace odešle oznámení bez platného kanálu, na obrazovce se zobrazí upozornění"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Vynutit povolení aplikací na externím úložišti"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Každou aplikaci bude možné zapsat do externího úložiště, bez ohledu na hodnoty manifestu"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Vynutit možnost změny velikosti aktivit"</string>
@@ -277,8 +316,6 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"Aktivní. Klepnutím možnost přepnete."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Spuštěné služby"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"Umožňuje zobrazit a ovládat aktuálně spuštěné služby"</string>
-    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"WebView ve více procesech"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"Spouštět moduly vykreslení WebView samostatně"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"Implementace WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Nastavte implementaci WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Tato volba již není platná. Zkuste to znovu."</string>
@@ -298,33 +335,30 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"Korekce barev"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Funkce je experimentální a může mít vliv na výkon."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"Přepsáno nastavením <xliff:g id="TITLE">%1$s</xliff:g>"</string>
-    <string name="power_remaining_duration_only" msgid="4400068916452346544">"Zbývající čas: <xliff:g id="TIME">%1$s</xliff:g> (přibližně)"</string>
-    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"Zbývající čas: <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_discharging_duration" msgid="1605929174734600590">"<xliff:g id="LEVEL">%1$s</xliff:g> – zbývá přibližně <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">%1$s</xliff:g> – zbývá <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="power_remaining_duration_only" msgid="845431008899029842">"Zbývá asi <xliff:g id="TIME">^1</xliff:g>"</string>
+    <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"Při vašem obvyklém využití zbývá asi <xliff:g id="TIME">^1</xliff:g>"</string>
+    <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"Plně se nabije za <xliff:g id="TIME">^1</xliff:g>"</string>
+    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"Zbývající čas: <xliff:g id="TIME">^1</xliff:g>"</string>
+    <string name="power_remaining_duration_only_short_enhanced" msgid="7450425624026394823">"Při vašem obvyklém využití zbývá <xliff:g id="TIME">^1</xliff:g>"</string>
+    <string name="power_discharging_duration" msgid="2843747179907396142">"<xliff:g id="LEVEL">^1</xliff:g> – zbývá přibližně <xliff:g id="TIME">^2</xliff:g>"</string>
+    <string name="power_discharging_duration_enhanced" msgid="4401782117770255046">"<xliff:g id="LEVEL">^1</xliff:g> – při vašem obvyklém využití zbývá asi <xliff:g id="TIME">^2</xliff:g>"</string>
+    <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">^1</xliff:g> – zbývá <xliff:g id="TIME">^2</xliff:g>"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_charging_duration" msgid="2853265177761520490">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> do úplného nabití"</string>
-    <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="power_charging_duration_ac" msgid="3969186192576594254">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> do úplného nabití ze zásuvky"</string>
-    <string name="power_charging_duration_ac_short" msgid="7895864687218765582">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="power_charging_duration_usb" msgid="182405645340976546">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> do úplného nabití přes USB"</string>
-    <string name="power_charging_duration_usb_short" msgid="941854728040426399">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="power_charging_duration_wireless" msgid="1829295708243159464">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> do úplného nabití bezdrátově"</string>
-    <string name="power_charging_duration_wireless_short" msgid="1642664799869599476">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">^1</xliff:g> – plně se nabije za <xliff:g id="TIME">^2</xliff:g>"</string>
+    <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">^1</xliff:g> – <xliff:g id="TIME">^2</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"Neznámé"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"Nabíjí se"</string>
-    <string name="battery_info_status_charging_ac" msgid="2909861890674399949">"Nabíjení z adaptéru"</string>
-    <string name="battery_info_status_charging_ac_short" msgid="7431401092096415502">"Nabíjení"</string>
-    <string name="battery_info_status_charging_usb" msgid="2207489369680923929">"Nabíjení přes USB"</string>
-    <string name="battery_info_status_charging_usb_short" msgid="6733371990319101366">"Nabíjení"</string>
-    <string name="battery_info_status_charging_wireless" msgid="3574032603735446573">"Bezdrátové nabíjení"</string>
-    <string name="battery_info_status_charging_wireless_short" msgid="752569941028903610">"Nabíjení"</string>
+    <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"nabíjení"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"Nenabíjí se"</string>
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"Nenabíjí se"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"Nabitá"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Spravováno administrátorem"</string>
-    <string name="enabled_by_admin" msgid="2386503803463071894">"Povoleno administrátorem"</string>
-    <string name="disabled_by_admin" msgid="3669999613095206948">"Zakázáno administrátorem"</string>
+    <string name="enabled_by_admin" msgid="5302986023578399263">"Zapnuto administrátorem"</string>
+    <string name="disabled_by_admin" msgid="8505398946020816620">"Zakázáno administrátorem"</string>
+    <string name="disabled" msgid="9206776641295849915">"Deaktivováno"</string>
+    <string name="external_source_trusted" msgid="2707996266575928037">"Povoleno"</string>
+    <string name="external_source_untrusted" msgid="2677442511837596726">"Není povoleno"</string>
+    <string name="install_other_apps" msgid="6986686991775883017">"Instalace neznámých aplikací"</string>
     <string name="home" msgid="3256884684164448244">"Domovská stránka Nastavení"</string>
   <string-array name="battery_labels">
     <item msgid="8494684293649631252">"0 %"</item>
@@ -341,4 +375,13 @@
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"Vlastní (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="help_feedback_label" msgid="6815040660801785649">"Nápověda a zpětná vazba"</string>
     <string name="content_description_menu_button" msgid="8182594799812351266">"Nabídka"</string>
+    <string name="time_zone_gmt" msgid="2587097992671450782">"GMT"</string>
+    <string name="retail_demo_reset_message" msgid="118771671364131297">"Chcete-li v ukázkovém režimu obnovit zařízení do továrního nastavení, zadejte heslo"</string>
+    <string name="retail_demo_reset_next" msgid="8356731459226304963">"Další"</string>
+    <string name="retail_demo_reset_title" msgid="696589204029930100">"Je třeba zadat heslo"</string>
+    <string name="active_input_method_subtypes" msgid="3596398805424733238">"Aktivní metody zadávání"</string>
+    <string name="use_system_language_to_select_input_method_subtypes" msgid="5747329075020379587">"Použít systémové jazyky"</string>
+    <string name="failed_to_open_app_settings_toast" msgid="1251067459298072462">"Nastavení aplikace <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g> se nepodařilo otevřít"</string>
+    <string name="ime_security_warning" msgid="4135828934735934248">"Prostřednictvím této vstupní metody zadávání dat lze shromažďovat zadaný text včetně osobních údajů, jako jsou hesla a čísla platebních karet. Metoda je poskytována aplikací <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>. Chcete tuto metodu zadávání dat použít?"</string>
+    <string name="direct_boot_unaware_dialog_message" msgid="7870273558547549125">"Poznámka: Po restartování se tato aplikace nespustí, dokud telefon neodemknete."</string>
 </resources>

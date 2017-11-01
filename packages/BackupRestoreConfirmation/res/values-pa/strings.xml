@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--  Copyright (C) 2011 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+  
+          http://www.apache.org/licenses/LICENSE-2.0
+  
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="backup_confirm_title" msgid="827563724209303345">"ਪੂਰਾ ਬੈਕਅੱਪ"</string>
+    <string name="restore_confirm_title" msgid="5469365809567486602">"ਪੂਰਾ ਰੀਸਟੋਰ"</string>
+    <string name="backup_confirm_text" msgid="1878021282758896593">"ਇੱਕ ਕਨੈਕਟ ਕੀਤੇ ਡੈਸਕਟਾਪ ਕੰਪਿਊਟਰ ਦੇ ਸਾਰੇ ਡਾਟਾ ਦੇ ਇੱਕ ਪੁੂਰੇ ਬੈਕਅੱਪ ਦੀ ਬੇਨਤੀ ਕੀਤੀ ਗਈ ਹੈ। ਕੀ ਤੁਸੀਂ ਅਜਿਹਾ ਹੋਣ ਦੀ ਆਗਿਆ ਦੇਣਾ ਚਾਹੁੰਦੇ ਹੋ?\n\nਜੇਕਰ ਤੁਸੀਂ ਖੁਦ ਬੈਕਅੱਪ ਦੀ ਬੇਨਤੀ ਨਹੀਂ ਕੀਤੀ ਸੀ, ਤਾਂ ਓਪਰੇਸ਼ਨ ਜਾਰੀ ਰੱਖਣ ਦੀ ਆਗਿਆ ਨਾ ਦਿਓ।"</string>
+    <string name="allow_backup_button_label" msgid="4217228747769644068">"ਮੇਰਾ ਡਾਟਾ ਬੈਕ ਅੱਪ ਲਓ"</string>
+    <string name="deny_backup_button_label" msgid="6009119115581097708">"ਬੈਕ ਅੱਪ ਨਾ ਕਰੋ"</string>
+    <string name="restore_confirm_text" msgid="7499866728030461776">"ਇੱਕ ਕਨੈਕਟ ਕੀਤੇ ਡੈਸਕਟਾਪ ਕੰਪਿਊਟਰ ਦੇ ਸਾਰੇ ਡਾਟਾ ਦੇ ਇੱਕ ਪੁੂਰੇ ਰੀਸਟੋਰ ਦੀ ਬੇਨਤੀ ਕੀਤੀ ਗਈ ਹੈ। ਕੀ ਤੁਸੀਂ ਅਜਿਹਾ ਹੋਣ ਦੀ ਆਗਿਆ ਦੇਣਾ ਚਾਹੁੰਦੇ ਹੋ?\n\nਜੇਕਰ ਤੁਸੀਂ ਖੁਦ ਰੀਸਟੋਰ ਦੀ ਬੇਨਤੀ ਨਹੀਂ ਕੀਤੀ ਸੀ, ਤਾਂ ਓਪਰੇਸ਼ਨ ਜਾਰੀ ਰੱਖਣ ਦੀ ਆਗਿਆ ਨਾ ਦਿਓ। ਇਹ ਡੀਵਾਈਸ \'ਤੇ ਇਸ ਵੇਲੇ ਮੌਜੂਦ ਕਿਸੇ ਵੀ ਡਾਟਾ ਨੂੰ ਬਦਲ ਦੇਵੇਗਾ!"</string>
+    <string name="allow_restore_button_label" msgid="3081286752277127827">"ਮੇਰਾ  ਡਾਟਾ  ਰੀਸਟੋਰ ਕਰੋ"</string>
+    <string name="deny_restore_button_label" msgid="1724367334453104378">"ਰੀਸਟੋਰ ਨਾ ਕਰੋ"</string>
+    <string name="current_password_text" msgid="8268189555578298067">"ਕਿਰਪਾ ਕਰਕੇ ਹੇਠਾਂ ਆਪਣਾ ਮੌਜੂਦਾ ਬੈਕਅੱਪ ਪਾਸਵਰਡ ਦਾਖਲ ਕਰੋ:"</string>
+    <string name="device_encryption_restore_text" msgid="1570864916855208992">"ਕਿਰਪਾ ਕਰਕੇ ਹੇਠਾਂ ਆਪਣਾ ਡੀਵਾਈਸ ਇਨਕ੍ਰਿਪਸ਼ਨ ਪਾਸਵਰਡ ਦਾਖਲ ਕਰੋ।"</string>
+    <string name="device_encryption_backup_text" msgid="5866590762672844664">"ਕਿਰਪਾ ਕਰਕੇ ਹੇਠਾਂ ਆਪਣਾ ਡੀਵਾਈਸ ਇਨਕ੍ਰਿਪਸ਼ਨ ਪਾਸਵਰਡ ਦਾਖਲ ਕਰੋ। ਇਹ ਬੈਕਅੱਪ ਪੁਰਾਲੇਖ ਇਨਕ੍ਰਿਪਟ ਕਰਨ ਲਈ ਵੀ ਵਰਤਿਆ ਜਾਏਗਾ।"</string>
+    <string name="backup_enc_password_text" msgid="4981585714795233099">"ਕਿਰਪਾ ਕਰਕੇ ਪੂਰਾ ਬੈਕਅੱਪ ਡਾਟਾ ਇਨਕ੍ਰਿਪਟ ਕਰਨ ਦੀ ਵਰਤੋਂ ਲਈ ਇੱਕ ਪਾਸਵਰਡ ਦਾਖਲ ਕਰੋ। ਜੇਕਰ ਇਸਨੂੰ ਖਾਲੀ ਛੱਡਿਆ ਜਾਂਦਾ ਹੈ, ਤਾਂ ਤੁਹਾਡਾ ਵਰਤਮਾਨ ਬੈਕਅੱਪ ਪਾਸਵਰਡ ਵਰਤਿਆ ਜਾਏਗਾ:"</string>
+    <string name="backup_enc_password_optional" msgid="1350137345907579306">"ਜੇਕਰ ਤੁਸੀਂ ਪੂਰਾ ਬੈਕਅੱਪ ਡਾਟਾ ਇਨਕ੍ਰਿਪਟ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ, ਤਾਂ ਹੇਠਾਂ ਇੱਕ ਪਾਸਵਰਡ ਦਾਖਲ ਕਰੋ:"</string>
+    <string name="backup_enc_password_required" msgid="7889652203371654149">"ਕਿਉਂਕਿ ਤੁਹਾਡਾ ਡੀਵਾਈਸ ਇਨਕ੍ਰਿਪਟਡ ਹੈ, ਇਸਲਈ ਤੁਹਾਡੇ ਤੋਂ ਆਪਣਾ ਬੈਕਅੱਪ ਇਨਕ੍ਰਿਪਟ ਕਰਨ ਦੀ ਮੰਗ ਕੀਤੀ ਜਾਂਦੀ ਹੈ। ਕਿਰਪਾ ਕਰਕੇ ਹੇਠਾਂ ਇੱਕ ਪਾਸਵਰਡ ਦਾਖਲ ਕਰੋ:"</string>
+    <string name="restore_enc_password_text" msgid="6140898525580710823">"ਜੇਕਰ ਰੀਸਟੋਰ ਡਾਟਾ ਇਨਕ੍ਰਿਪਟ ਕੀਤਾ ਗਿਆ ਹੈ, ਤਾਂ ਹੇਠਾਂ ਪਾਸਵਰਡ ਦਾਖਲ ਕਰੋ:"</string>
+    <string name="toast_backup_started" msgid="550354281452756121">"ਬੈਕਅੱਪ ਚਾਲੂ ਕਰ ਰਿਹਾ ਹੈ..."</string>
+    <string name="toast_backup_ended" msgid="3818080769548726424">"ਬੈਕਅੱਪ ਪੂਰਾ ਹੋਇਆ"</string>
+    <string name="toast_restore_started" msgid="7881679218971277385">"ਰੀਸਟੋਰ ਚਾਲੂ ਹੋ ਰਿਹਾ ਹੈ..."</string>
+    <string name="toast_restore_ended" msgid="1764041639199696132">"ਰੀਸਟੋਰ ਖ਼ਤਮ ਹੋਇਆ"</string>
+    <string name="toast_timeout" msgid="5276598587087626877">"ਓਪਰੇਸ਼ਨ ਦਾ ਸਮਾਂ ਸਮਾਪਤ"</string>
+</resources>

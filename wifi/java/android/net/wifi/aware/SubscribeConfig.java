@@ -61,27 +61,6 @@ public final class SubscribeConfig implements Parcelable {
     public static final int SUBSCRIBE_TYPE_ACTIVE = 1;
 
     /** @hide */
-    @IntDef({
-            MATCH_STYLE_FIRST_ONLY, MATCH_STYLE_ALL })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface MatchStyles {
-    }
-
-    /**
-     * Specifies that only the first match of a set of identical matches (same
-     * publish) will be reported to the subscriber. Configuration is done using
-     * {@link SubscribeConfig.Builder#setMatchStyle(int)}.
-     */
-    public static final int MATCH_STYLE_FIRST_ONLY = 0;
-
-    /**
-     * Specifies that all matches of a set of identical matches (same publish)
-     * will be reported to the subscriber. Configuration is done using
-     * {@link SubscribeConfig.Builder#setMatchStyle(int)}.
-     */
-    public static final int MATCH_STYLE_ALL = 1;
-
-    /** @hide */
     public final byte[] mServiceName;
 
     /** @hide */
@@ -94,40 +73,36 @@ public final class SubscribeConfig implements Parcelable {
     public final int mSubscribeType;
 
     /** @hide */
-    public final int mSubscribeCount;
-
-    /** @hide */
     public final int mTtlSec;
-
-    /** @hide */
-    public final int mMatchStyle;
 
     /** @hide */
     public final boolean mEnableTerminateNotification;
 
     /** @hide */
     public SubscribeConfig(byte[] serviceName, byte[] serviceSpecificInfo, byte[] matchFilter,
-            int subscribeType, int publichCount, int ttlSec, int matchStyle,
+            int subscribeType, int ttlSec,
             boolean enableTerminateNotification) {
         mServiceName = serviceName;
         mServiceSpecificInfo = serviceSpecificInfo;
         mMatchFilter = matchFilter;
         mSubscribeType = subscribeType;
-        mSubscribeCount = publichCount;
         mTtlSec = ttlSec;
-        mMatchStyle = matchStyle;
         mEnableTerminateNotification = enableTerminateNotification;
     }
 
     @Override
     public String toString() {
-        return "SubscribeConfig [mServiceName='" + mServiceName + ", mServiceSpecificInfo='" + (
-                (mServiceSpecificInfo == null) ? "null" : HexEncoding.encode(mServiceSpecificInfo))
-                + ", mMatchFilter=" + (new TlvBufferUtils.TlvIterable(0, 1,
-                mMatchFilter)).toString() + ", mSubscribeType=" + mSubscribeType
-                + ", mSubscribeCount=" + mSubscribeCount + ", mTtlSec=" + mTtlSec + ", mMatchType="
-                + mMatchStyle + ", mEnableTerminateNotification=" + mEnableTerminateNotification
-                + "]";
+        return "SubscribeConfig [mServiceName='" + (mServiceName == null ? "<null>"
+                : String.valueOf(HexEncoding.encode(mServiceName))) + ", mServiceName.length=" + (
+                mServiceName == null ? 0 : mServiceName.length) + ", mServiceSpecificInfo='" + (
+                (mServiceSpecificInfo == null) ? "<null>" : String.valueOf(
+                        HexEncoding.encode(mServiceSpecificInfo)))
+                + ", mServiceSpecificInfo.length=" + (mServiceSpecificInfo == null ? 0
+                : mServiceSpecificInfo.length) + ", mMatchFilter="
+                + (new TlvBufferUtils.TlvIterable(0, 1, mMatchFilter)).toString()
+                + ", mMatchFilter.length=" + (mMatchFilter == null ? 0 : mMatchFilter.length)
+                + ", mSubscribeType=" + mSubscribeType + ", mTtlSec=" + mTtlSec
+                + ", mEnableTerminateNotification=" + mEnableTerminateNotification + "]";
     }
 
     @Override
@@ -141,9 +116,7 @@ public final class SubscribeConfig implements Parcelable {
         dest.writeByteArray(mServiceSpecificInfo);
         dest.writeByteArray(mMatchFilter);
         dest.writeInt(mSubscribeType);
-        dest.writeInt(mSubscribeCount);
         dest.writeInt(mTtlSec);
-        dest.writeInt(mMatchStyle);
         dest.writeInt(mEnableTerminateNotification ? 1 : 0);
     }
 
@@ -159,13 +132,11 @@ public final class SubscribeConfig implements Parcelable {
             byte[] ssi = in.createByteArray();
             byte[] matchFilter = in.createByteArray();
             int subscribeType = in.readInt();
-            int subscribeCount = in.readInt();
             int ttlSec = in.readInt();
-            int matchStyle = in.readInt();
             boolean enableTerminateNotification = in.readInt() != 0;
 
-            return new SubscribeConfig(serviceName, ssi, matchFilter, subscribeType, subscribeCount,
-                    ttlSec, matchStyle, enableTerminateNotification);
+            return new SubscribeConfig(serviceName, ssi, matchFilter, subscribeType,
+                    ttlSec, enableTerminateNotification);
         }
     };
 
@@ -183,8 +154,8 @@ public final class SubscribeConfig implements Parcelable {
 
         return Arrays.equals(mServiceName, lhs.mServiceName) && Arrays.equals(mServiceSpecificInfo,
                 lhs.mServiceSpecificInfo) && Arrays.equals(mMatchFilter, lhs.mMatchFilter)
-                && mSubscribeType == lhs.mSubscribeType && mSubscribeCount == lhs.mSubscribeCount
-                && mTtlSec == lhs.mTtlSec && mMatchStyle == lhs.mMatchStyle
+                && mSubscribeType == lhs.mSubscribeType
+                && mTtlSec == lhs.mTtlSec
                 && mEnableTerminateNotification == lhs.mEnableTerminateNotification;
     }
 
@@ -196,9 +167,7 @@ public final class SubscribeConfig implements Parcelable {
         result = 31 * result + Arrays.hashCode(mServiceSpecificInfo);
         result = 31 * result + Arrays.hashCode(mMatchFilter);
         result = 31 * result + mSubscribeType;
-        result = 31 * result + mSubscribeCount;
         result = 31 * result + mTtlSec;
-        result = 31 * result + mMatchStyle;
         result = 31 * result + (mEnableTerminateNotification ? 1 : 0);
 
         return result;
@@ -221,15 +190,8 @@ public final class SubscribeConfig implements Parcelable {
         if (mSubscribeType < SUBSCRIBE_TYPE_PASSIVE || mSubscribeType > SUBSCRIBE_TYPE_ACTIVE) {
             throw new IllegalArgumentException("Invalid subscribeType - " + mSubscribeType);
         }
-        if (mSubscribeCount < 0) {
-            throw new IllegalArgumentException("Invalid subscribeCount - must be non-negative");
-        }
         if (mTtlSec < 0) {
             throw new IllegalArgumentException("Invalid ttlSec - must be non-negative");
-        }
-        if (mMatchStyle != MATCH_STYLE_FIRST_ONLY && mMatchStyle != MATCH_STYLE_ALL) {
-            throw new IllegalArgumentException(
-                    "Invalid matchType - must be MATCH_FIRST_ONLY or MATCH_ALL");
         }
 
         if (characteristics != null) {
@@ -261,9 +223,7 @@ public final class SubscribeConfig implements Parcelable {
         private byte[] mServiceSpecificInfo;
         private byte[] mMatchFilter;
         private int mSubscribeType = SUBSCRIBE_TYPE_PASSIVE;
-        private int mSubscribeCount = 0;
         private int mTtlSec = 0;
-        private int mMatchStyle = MATCH_STYLE_ALL;
         private boolean mEnableTerminateNotification = true;
 
         /**
@@ -350,29 +310,6 @@ public final class SubscribeConfig implements Parcelable {
         }
 
         /**
-         * Sets the number of times an active (
-         * {@link SubscribeConfig.Builder#setSubscribeType(int)}) subscribe session
-         * will broadcast. When the count is reached an event will be
-         * generated for {@link DiscoverySessionCallback#onSessionTerminated()}.
-         * <p>
-         *     Optional. 0 by default - indicating the session doesn't terminate on its own.
-         *     Session will be terminated when {@link DiscoverySession#destroy()} is
-         *     called.
-         *
-         * @param subscribeCount Number of subscribe packets to broadcast.
-         *
-         * @return The builder to facilitate chaining
-         *         {@code builder.setXXX(..).setXXX(..)}.
-         */
-        public Builder setSubscribeCount(int subscribeCount) {
-            if (subscribeCount < 0) {
-                throw new IllegalArgumentException("Invalid subscribeCount - must be non-negative");
-            }
-            mSubscribeCount = subscribeCount;
-            return this;
-        }
-
-        /**
          * Sets the time interval (in seconds) an active (
          * {@link SubscribeConfig.Builder#setSubscribeType(int)}) subscribe session
          * will be alive - i.e. broadcasting a packet. When the TTL is reached
@@ -380,7 +317,7 @@ public final class SubscribeConfig implements Parcelable {
          * {@link DiscoverySessionCallback#onSessionTerminated()}.
          * <p>
          *     Optional. 0 by default - indicating the session doesn't terminate on its own.
-         *     Session will be terminated when {@link DiscoverySession#destroy()} is
+         *     Session will be terminated when {@link DiscoverySession#close()} is
          *     called.
          *
          * @param ttlSec Lifetime of a subscribe session in seconds.
@@ -393,28 +330,6 @@ public final class SubscribeConfig implements Parcelable {
                 throw new IllegalArgumentException("Invalid ttlSec - must be non-negative");
             }
             mTtlSec = ttlSec;
-            return this;
-        }
-
-        /**
-         * Sets the match style of the subscription - how are matches from a
-         * single match session (corresponding to the same publish action on the
-         * peer) reported to the host (using the
-         * {@link DiscoverySessionCallback#onServiceDiscovered(PeerHandle, byte[],
-         * java.util.List)}). The options are: only report the first match and ignore the rest
-         * {@link SubscribeConfig#MATCH_STYLE_FIRST_ONLY} or report every single
-         * match {@link SubscribeConfig#MATCH_STYLE_ALL} (the default).
-         *
-         * @param matchStyle The reporting style for the discovery match.
-         * @return The builder to facilitate chaining
-         *         {@code builder.setXXX(..).setXXX(..)}.
-         */
-        public Builder setMatchStyle(@MatchStyles int matchStyle) {
-            if (matchStyle != MATCH_STYLE_FIRST_ONLY && matchStyle != MATCH_STYLE_ALL) {
-                throw new IllegalArgumentException(
-                        "Invalid matchType - must be MATCH_FIRST_ONLY or MATCH_ALL");
-            }
-            mMatchStyle = matchStyle;
             return this;
         }
 
@@ -440,7 +355,7 @@ public final class SubscribeConfig implements Parcelable {
          */
         public SubscribeConfig build() {
             return new SubscribeConfig(mServiceName, mServiceSpecificInfo, mMatchFilter,
-                    mSubscribeType, mSubscribeCount, mTtlSec, mMatchStyle,
+                    mSubscribeType, mTtlSec,
                     mEnableTerminateNotification);
         }
     }

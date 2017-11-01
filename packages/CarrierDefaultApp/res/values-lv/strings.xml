@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="5247871339820894594">"CarrierDefaultApp"</string>
+    <string name="android_system_label" msgid="2797790869522345065">"Mobilo sakaru operators"</string>
+    <string name="portal_notification_id" msgid="5155057562457079297">"Sasniegts mobilo datu ierobežojums."</string>
+    <string name="no_data_notification_id" msgid="668400731803969521">"Jūsu mobilie dati ir deaktivizēti"</string>
+    <string name="portal_notification_detail" msgid="2295729385924660881">"Pieskarieties, lai apmeklētu %s vietni"</string>
+    <string name="no_data_notification_detail" msgid="3112125343857014825">"Lūdzu, sazinieties ar pakalpojuma sniedzēju %s."</string>
+    <string name="no_mobile_data_connection_title" msgid="7449525772416200578">"Nav mobilo datu savienojuma"</string>
+    <string name="no_mobile_data_connection" msgid="544980465184147010">"Pievienojiet datus vai viesabonēšanas plānu, izmantojot %s"</string>
+    <string name="mobile_data_status_notification_channel_name" msgid="833999690121305708">"Mobilo datu statuss"</string>
+    <string name="action_bar_label" msgid="4290345990334377177">"Pierakstīties mobilajā tīklā"</string>
+    <string name="ssl_error_warning" msgid="3127935140338254180">"Tīklā, kuram mēģināt pievienoties, ir drošības problēmas."</string>
+    <string name="ssl_error_example" msgid="6188711843183058764">"Piemēram, pieteikšanās lapa, iespējams, nepieder norādītajai organizācijai."</string>
+    <string name="ssl_error_continue" msgid="1138548463994095584">"Tomēr turpināt, izmantojot pārlūkprogrammu"</string>
+</resources>

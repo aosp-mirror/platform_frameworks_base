@@ -22,6 +22,134 @@ package com_android_internal_logging;
 // Wrapper for System UI log events
 message MetricsEvent {
 
+  // Types of events
+  enum Type {
+    // Unknown
+    TYPE_UNKNOWN = 0;
+
+    // The view became visible to the user.
+    TYPE_OPEN = 1;
+
+    // The view became hidden.
+    TYPE_CLOSE = 2;
+
+    // The view switched to detail mode (most relevant for quick settings tiles)
+    TYPE_DETAIL = 3;
+
+    // The view or control was activated.
+    TYPE_ACTION = 4;
+
+    // The view or control was dismissed.
+    TYPE_DISMISS = 5;
+
+    // The view or control was updated.
+    TYPE_UPDATE = 6;
+
+    // Type for APP_TRANSITION event: The transition started a new
+    // activity for which it's process wasn't running.
+    TYPE_TRANSITION_COLD_LAUNCH = 7;
+
+    // Type for APP_TRANSITION event: The transition started a new
+    // activity for which it's process was already running.
+    TYPE_TRANSITION_WARM_LAUNCH = 8;
+
+    // Type for APP_TRANSITION event: The transition brought an
+    // already existing activity to the front.
+    TYPE_TRANSITION_HOT_LAUNCH = 9;
+
+    // The action was successful
+    TYPE_SUCCESS = 10;
+
+    // The action failed
+    TYPE_FAILURE = 11;
+  }
+
+  // Types of alerts, as bit field values
+  enum Alert {
+    // Vibrate the device.
+    ALERT_BUZZ = 1;
+
+    // Make sound through the speaker.
+    ALERT_BEEP = 2;
+
+    // Flash a notificaiton light.
+    ALERT_BLINK = 4;
+  }
+
+  // Reasons that a notification might be dismissed.
+  enum DismissReason {
+    // from android.service.notification.NotificationListenerService
+
+    // Notification was canceled by the status bar reporting a notification click
+    REASON_CLICK = 1;
+
+    // Notification was canceled by the status bar reporting a user dismissal.
+    REASON_CANCEL = 2;
+
+    // Notification was canceled by the status bar reporting a user dismiss all.
+    REASON_CANCEL_ALL = 3;
+
+    // Notification was canceled by the status bar reporting an inflation error.
+    REASON_ERROR = 4;
+
+    // Notification was canceled by the package manager modifying the package.
+    REASON_PACKAGE_CHANGED = 5;
+
+    // Notification was canceled by the owning user context being stopped.
+    REASON_USER_STOPPED = 6;
+
+    // Notification was canceled by the user banning the package.
+    REASON_PACKAGE_BANNED = 7;
+
+    // Notification was canceled by the app canceling this specific notification.
+    REASON_APP_CANCEL = 8;
+
+    //Notification was canceled by the app cancelling all its notifications.
+    REASON_APP_CANCEL_ALL = 9;
+
+    // Notification was canceled by a listener reporting a user dismissal.
+    REASON_LISTENER_CANCEL = 10;
+
+    //Notification was canceled by a listener reporting a user dismiss all.
+    REASON_LISTENER_CANCEL_ALL = 11;
+
+    // Notification was canceled because it was a member of a canceled group.
+    REASON_GROUP_SUMMARY_CANCELED = 12;
+
+    // Notification was canceled because it was an invisible member of a group.
+    REASON_GROUP_OPTIMIZATION = 13;
+
+    // Notification was canceled by the device administrator suspending the package.
+    REASON_PACKAGE_SUSPENDED = 14;
+
+    // Notification was canceled by the owning managed profile being turned off.
+    REASON_PROFILE_TURNED_OFF = 15;
+
+    // Autobundled summary notification was canceled because its group was unbundled.
+    REASON_UNAUTOBUNDLED = 16;
+
+    // Notification was canceled by the user banning the channel.
+    REASON_CHANNEL_BANNED = 17;
+
+    // Notification was snoozed.
+    REASON_SNOOZED = 18;
+
+    // Notification was canceled due to timeout.
+    REASON_TIMEOUT = 19;
+  }
+
+  // Subtypes of camera events for ACTION_CAMERA_EVENT
+  enum CameraEvent {
+    // A back-facing camera was used
+    CAMERA_BACK_USED = 0;
+
+    // A front-facing camera was used
+    CAMERA_FRONT_USED = 1;
+
+    // An external camera was used
+    CAMERA_EXTERNAL_USED = 2;
+  }
+
   // Known visual elements: views or controls.
   enum View {
     // Unknown view
@@ -55,7 +183,9 @@ message MetricsEvent {
     // OS: 6.0
     ACCESSIBILITY_TOGGLE_GLOBAL_GESTURE = 6;
 
-    // OPEN: Settings > Accessibility > Magnification gestures
+    // OPEN: Settings > Accessibility > Magnification gestures (Renamed in O)
+    // OPEN: Settings > Accessibility > Magnification > Magnify with triple-tap
+    // OPEN: Settings > Accessibility > Magnification > Magnify with button
     // CATEGORY: SETTINGS
     // OS: 6.0
     ACCESSIBILITY_TOGGLE_SCREEN_MAGNIFICATION = 7;
@@ -689,6 +819,7 @@ message MetricsEvent {
     ACTION_WIFI_ADD_NETWORK = 134;
 
     // ACTION: Settings > Wi-Fi > [Long press network] > Connect to network
+    //   SUBTYPE: true if connecting to a saved network, false if not
     // CATEGORY: SETTINGS
     // OS: 6.0
     ACTION_WIFI_CONNECT = 135;
@@ -704,6 +835,7 @@ message MetricsEvent {
     ACTION_WIFI_FORGET = 137;
 
     // ACTION: Settings > Wi-Fi > Toggle off
+    //   SUBTYPE: true if connected to network before toggle, false if not
     // CATEGORY: SETTINGS
     // OS: 6.0
     ACTION_WIFI_OFF = 138;
@@ -1142,7 +1274,7 @@ message MetricsEvent {
     // OS: 6.0
     BRIGHTNESS_DIALOG = 220;
 
-    // OPEN: Settings > Apps > Configure Apps > Draw over other apps
+    // OPEN: Settings > Apps > Configure Apps > Display over other apps
     // CATEGORY: SETTINGS
     // OS: 6.0
     SYSTEM_ALERT_WINDOW_APPS = 221;
@@ -1837,7 +1969,9 @@ message MetricsEvent {
     // OS: N
     SUW_ACCESSIBILITY = 367;
 
-    // OPEN: SUW Welcome Screen -> Vision Settings -> Magnification gesture
+    // OPEN: SUW Welcome Screen -> Vision Settings -> Magnification gestures (Renamed in O)
+    // OPEN: SUW Welcome Screen -> Vision Settings -> Magnification -> Magnify with triple-tap
+    // OPEN: SUW Welcome Screen -> Vision Settings -> Magnification -> Magnify with button
     // ACTION: New magnification gesture configuration is chosen
     //  SUBTYPE: 0 is off, 1 is on
     // CATEGORY: SETTINGS
@@ -2131,7 +2265,7 @@ message MetricsEvent {
 
     // ACTION: Settings -> Select summary tab.
     // CATEGORY: SETTINGS
-    ACTION_SELECT_SUMMARY=476;
+    ACTION_SELECT_SUMMARY = 476;
 
     // ACTION: Settings -> Select support tab.
     // CATEGORY: SETTINGS
@@ -2182,7 +2316,7 @@ message MetricsEvent {
     NIGHT_DISPLAY_SETTINGS = 488;
 
     // ACTION: Settings -> Storage -> Manage storage -> Click Storage Manager
-        //   SUBTYPE: false is off, true is on
+    //   SUBTYPE: false is off, true is on
     ACTION_TOGGLE_STORAGE_MANAGER = 489;
 
     // Settings launched from collapsed quick settings.
@@ -2207,11 +2341,1885 @@ message MetricsEvent {
     // CATEGORY: SETTINGS
     ACTION_AMBIENT_DISPLAY = 495;
 
+    // ---- End N-MR1 Constants, all N-MR1 constants go above this line ----
+
+    // ACTION: The lockscreen gets shown because the SIM card was removed
+    // SUBTYPE: false: device was previously unlocked, true: device was previously locked
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: N-MR2
+    ACTION_LOCK_BECAUSE_SIM_REMOVED = 496;
+
+    // ---- End N-MR2 Constants, all N-MR2 constants go above this line ----
+
+    // ------- Begin N Keyboard Shortcuts Helper -----
+    // Keyboard Shortcuts Helper is opened/closed.
+    KEYBOARD_SHORTCUTS_HELPER = 500;
+
+    // OPEN: Print Preview screen
+    // Package: Package of app where print job is from
+    PRINT_PREVIEW = 501;
+
+    // OPEN: User expands full print job options shade in print preview.
+    PRINT_JOB_OPTIONS = 502;
+
+    // OPEN: “All Printers” screen for selecting printer
+    // Subtype: # of printers listed
+    PRINT_ALL_PRINTERS = 503;
+
+    // OPEN: “Add Printers” screen for adding printers
+    // Subtype: # of enabled print service listed
+    PRINT_ADD_PRINTERS = 504;
+
+    // ACTION: Queue a print job (Usually: User presses Print FAB from Print Preview)
+    // Package: Package of print service.
+    ACTION_PRINT = 505;
+
+    // ACTION: User selects a printer from the dropdown in the print preview screen. This also
+    //         Count all ACTION_PRINTER_SELECT_ALL actions.
+    // Package: Package of print service tied to printer
+    ACTION_PRINTER_SELECT_DROPDOWN = 506;
+
+    // ACTION: User selects a printer from the “All printers” screen.
+    // Package: Package of print service tied to printer
+    ACTION_PRINTER_SELECT_ALL = 507;
+
+    // ACTION: User changes an option for the print job from print preview.
+    // Subtype:   1: Copies
+    //            2: Color mode
+    //            3: Duplex mode
+    //            4: Media (==Paper) size
+    //            5: Orientation
+    //            6: Page range
+    // Package: Package of print service tied to printer
+    ACTION_PRINT_JOB_OPTIONS = 508;
+
+    // ACTION: User searches for printer from All Printers
+    ACTION_PRINTER_SEARCH = 509;
+
+    // ACTION: User selects “Add print service” button from All Printers
+    ACTION_PRINT_SERVICE_ADD = 510;
+
+    // ACTION: User Enables/Disables Print Service via any means.
+    // Subtype:   0: Enabled
+    //            1: Disabled
+    ACTION_PRINT_SERVICE_TOGGLE = 511;
+
+    // ACTION: User installs print recommended print service
+    // Package: Package of print service
+    ACTION_PRINT_RECOMMENDED_SERVICE_INSTALL = 512;
+
     // ACTION: Settings -> [sub settings activity] -> Options menu -> Help & Support
     //   SUBTYPE: sub settings classname
-    ACTION_SETTING_HELP_AND_FEEDBACK = 496;
+    ACTION_SETTING_HELP_AND_FEEDBACK = 513;
 
-    // ---- End N-MR1 Constants, all N-MR1 constants go above this line ----
+    // OPEN: Settings > Language & input > Personal dictionary (single locale)
+    USER_DICTIONARY_SETTINGS = 514;
+
+    // OPEN: Settings > Date & time > Select time zone
+    ZONE_PICKER = 515;
+
+    // OPEN: Settings > Security > Device administrators
+    DEVICE_ADMIN_SETTINGS = 516;
+
+    // ACTION: Managed provisioning was launched to set this package as DPC app.
+    // PACKAGE: DPC's package name.
+    PROVISIONING_DPC_PACKAGE_NAME = 517;
+
+    // ACTION: Managed provisioning triggered DPC installation.
+    // PACKAGE: Package name of package which installed DPC.
+    PROVISIONING_DPC_INSTALLED_BY_PACKAGE = 518;
+
+    // ACTION: Logged when provisioning activity finishes.
+    // TIME: Indicates time taken by provisioning activity to finish in MS.
+    PROVISIONING_PROVISIONING_ACTIVITY_TIME_MS = 519;
+
+    // ACTION: Logged when preprovisioning activity finishes.
+    // TIME: Indicates time taken by preprovisioning activity to finish in MS.
+    PROVISIONING_PREPROVISIONING_ACTIVITY_TIME_MS = 520;
+
+    // ACTION: Logged when encrypt device activity finishes.
+    // TIME: Indicates time taken by encrypt device activity to finish in MS.
+    PROVISIONING_ENCRYPT_DEVICE_ACTIVITY_TIME_MS = 521;
+
+    // ACTION: Logged when web activity finishes.
+    // TIME: Indicates total time taken by web activity to finish in MS.
+    PROVISIONING_WEB_ACTIVITY_TIME_MS = 522;
+
+    // ACTION: Logged when trampoline activity finishes.
+    // TIME: Indicates total time taken by trampoline activity to finish in MS.
+    PROVISIONING_TRAMPOLINE_ACTIVITY_TIME_MS = 523;
+
+    // ACTION: Logged when encryption activity finishes.
+    // TIME: Indicates total time taken by post encryption activity to finish in MS.
+    PROVISIONING_POST_ENCRYPTION_ACTIVITY_TIME_MS = 524;
+
+    // ACTION: Logged when finalization activity finishes.
+    // TIME: Indicates time taken by finalization activity to finish in MS.
+    PROVISIONING_FINALIZATION_ACTIVITY_TIME_MS = 525;
+
+    // OPEN: Settings Support > Phone/Chat -> Disclaimer
+    DIALOG_SUPPORT_DISCLAIMER = 526;
+
+    // OPEN: Settings Support > Travel abroad
+    DIALOG_SUPPORT_PHONE = 527;
+
+    // OPEN: Settings > Security > Factory Reset Protection dialog
+    DIALOG_FRP = 528;
+
+    // OPEN: Settings > Custom list preference with confirmation message
+    DIALOG_CUSTOM_LIST_CONFIRMATION = 529;
+
+    // OPEN: Settings > APN Editor > Error dialog
+    DIALOG_APN_EDITOR_ERROR = 530;
+
+    // OPEN: Settings > Users > Edit owner info dialog
+    DIALOG_OWNER_INFO_SETTINGS = 531;
+
+    // OPEN: Settings > Security > Use one lock dialog
+    DIALOG_UNIFICATION_CONFIRMATION = 532;
+
+    // OPEN: Settings > Security > User Credential
+    DIALOG_USER_CREDENTIAL = 533;
+
+    // OPEN: Settings > Accounts > Remove account
+    DIALOG_REMOVE_USER = 534;
+
+    // OPEN: Settings > Accounts > Confirm auto sync dialog
+    DIALOG_CONFIRM_AUTO_SYNC_CHANGE = 535;
+
+    // OPEN: Settings > Apps > Dialog for running service details
+    DIALOG_RUNNIGN_SERVICE = 536;
+
+    // OPEN: Settings > Dialog for hiding home settings
+    DIALOG_NO_HOME = 537;
+
+    // OPEN: Settings > Bluetooth > Rename this device
+    DIALOG_BLUETOOTH_RENAME = 538;
+
+    // OPEN: Settings > Bluetooth > Paired device profile
+    DIALOG_BLUETOOTH_PAIRED_DEVICE_PROFILE = 539;
+
+    // OPEN: Settings > Battery optimization > details for app
+    DIALOG_HIGH_POWER_DETAILS = 540;
+
+    // OPEN: Settings > Keyboard > Show keyboard layout dialog
+    DIALOG_KEYBOARD_LAYOUT = 541;
+
+    // OPEN: Settings > Wifi > WPS Setup dialog
+    DIALOG_WPS_SETUP = 542;
+
+    // OPEN: Settings > WIFI Scan permission dialog
+    DIALOG_WIFI_SCAN_MODE = 543;
+
+    // OPEN: Settings > WIFI Setup > Skip Wifi dialog
+    DIALOG_WIFI_SKIP = 544;
+
+    // OPEN: Settings > Wireless > VPN > Config dialog
+    DIALOG_LEGACY_VPN_CONFIG = 545;
+
+    // OPEN: Settings > Wireless > VPN > Config dialog for app
+    DIALOG_VPN_APP_CONFIG = 546;
+
+    // OPEN: Settings > Wireless > VPN > Cannot connect dialog
+    DIALOG_VPN_CANNOT_CONNECT = 547;
+
+    // OPEN: Settings > Wireless > VPN > Replace existing VPN dialog
+    DIALOG_VPN_REPLACE_EXISTING = 548;
+
+    // OPEN: Settings > Billing cycle > Edit billing cycle dates dialog
+    DIALOG_BILLING_CYCLE = 549;
+
+    // OPEN: Settings > Billing cycle > Edit data limit/warning dialog
+    DIALOG_BILLING_BYTE_LIMIT = 550;
+
+    // OPEN: Settings > Billing cycle > turn on data limit dialog
+    DIALOG_BILLING_CONFIRM_LIMIT = 551;
+
+    // OPEN: Settings > Service > Turn off notification access dialog
+    DIALOG_DISABLE_NOTIFICATION_ACCESS = 552;
+
+    // OPEN: Settings > Sound > Use personal sound for work profile dialog
+    DIALOG_UNIFY_SOUND_SETTINGS = 553;
+
+    // OPEN: Settings > Zen mode > Dialog warning about the zen access privileges being granted.
+    DIALOG_ZEN_ACCESS_GRANT = 554;
+
+    // OPEN: Settings > Zen mode > Dialog warning about the zen access privileges being revoked.
+    DIALOG_ZEN_ACCESS_REVOKE = 555;
+
+    // OPEN: Settings > Zen mode > Dialog that picks time for zen mode.
+    DIALOG_ZEN_TIMEPICKER = 556;
+
+    // OPEN: Settings > Apps > Dialog that informs user to allow service access for app.
+    DIALOG_SERVICE_ACCESS_WARNING = 557;
+
+    // OPEN: Settings > Apps > Dialog for app actions (such as force stop/clear data)
+    DIALOG_APP_INFO_ACTION = 558;
+
+    // OPEN: Settings > Storage > Dialog for forgetting a storage device
+    DIALOG_VOLUME_FORGET = 559;
+
+    // OPEN: Settings > Storage > Dialog warning that a volume is slow
+    DIALOG_VOLUME_SLOW_WARNING = 560;
+
+    // OPEN: Settings > Storage > Dialog for initializing a volume
+    DIALOG_VOLUME_INIT = 561;
+
+    // OPEN: Settings > Storage > Dialog for unmounting a volume
+    DIALOG_VOLUME_UNMOUNT = 562;
+
+    // OPEN: Settings > Storage > Dialog for renaming a volume
+    DIALOG_VOLUME_RENAME = 563;
+
+    // OPEN: Settings > Storage > Dialog for clear cache
+    DIALOG_STORAGE_CLEAR_CACHE = 564;
+
+    // OPEN: Settings > Storage > Dialog for system info
+    DIALOG_STORAGE_SYSTEM_INFO = 565;
+
+    // OPEN: Settings > Storage > Dialog for other info
+    DIALOG_STORAGE_OTHER_INFO = 566;
+
+    // OPEN: Settings > Storage > Dialog for user info
+    DIALOG_STORAGE_USER_INFO = 567;
+
+    // OPEN: Settings > Add fingerprint > Dialog when user touches fingerprint icon.
+    DIALOG_FINGERPRINT_ICON_TOUCH = 568;
+
+    // OPEN: Settings > Add fingerprint > Error dialog
+    DIALOG_FINGERPINT_ERROR = 569;
+
+    // OPEN: Settings > Fingerprint > Rename or delete dialog
+    DIALOG_FINGERPINT_EDIT = 570;
+
+    // OPEN: Settings > Fingerprint > Dialog for deleting last fingerprint
+    DIALOG_FINGERPINT_DELETE_LAST = 571;
+
+    // OPEN: SUW > Fingerprint > Dialog to confirm cancel fingerprint setup.
+    DIALOG_FINGERPRINT_CANCEL_SETUP = 572;
+
+    // OPEN: SUW > Fingerprint > Dialog to confirm skip fingerprint setup entirely.
+    DIALOG_FINGERPRINT_SKIP_SETUP = 573;
+
+    // OPEN: Settings > Proxy Selector error dialog
+    DIALOG_PROXY_SELECTOR_ERROR = 574;
+
+    // OPEN: Settings > Wifi > P2P Settings > Disconnect dialog
+    DIALOG_WIFI_P2P_DISCONNECT = 575;
+
+    // OPEN: Settings > Wifi > P2P Settings > Cancel connection dialog
+    DIALOG_WIFI_P2P_CANCEL_CONNECT = 576;
+
+    // OPEN: Settings > Wifi > P2P Settings > Rename dialog
+    DIALOG_WIFI_P2P_RENAME = 577;
+
+    // OPEN: Settings > Wifi > P2P Settings > Forget group dialog
+    DIALOG_WIFI_P2P_DELETE_GROUP = 578;
+
+    // OPEN: Settings > APN > Restore default dialog
+    DIALOG_APN_RESTORE_DEFAULT = 579;
+
+    // OPEN: Settings > Dream > When to dream dialog
+    DIALOG_DREAM_START_DELAY = 580;
+
+    // OPEN: Settings > Encryption interstitial accessibility warning dialog
+    DIALOG_ENCRYPTION_INTERSTITIAL_ACCESSIBILITY = 581;
+
+    // OPEN: Settings > Tether > AP setting dialog
+    DIALOG_AP_SETTINGS = 582;
+
+    // OPEN: Settings > Acessibility > Enable accessiblity service dialog
+    DIALOG_ACCESSIBILITY_SERVICE_ENABLE = 583;
+
+    // OPEN: Settings > Acessibility > Disable accessiblity service dialog
+    DIALOG_ACCESSIBILITY_SERVICE_DISABLE = 584;
+
+    // OPEN: Settings > Account > Remove account dialog
+    DIALOG_ACCOUNT_SYNC_REMOVE = 585;
+
+    // OPEN: Settings > Account > Remove account failed dialog
+    DIALOG_ACCOUNT_SYNC_FAILED_REMOVAL = 586;
+
+    // OPEN: Settings > Account > Cannot do onetime sync dialog
+    DIALOG_ACCOUNT_SYNC_CANNOT_ONETIME_SYNC = 587;
+
+    // OPEN: Settings > Display > Night light > Set start time dialog
+    DIALOG_NIGHT_DISPLAY_SET_START_TIME = 588;
+
+    // OPEN: Settings > Display > Night light > Set end time dialog
+    DIALOG_NIGHT_DISPLAY_SET_END_TIME = 589;
+
+    // OPEN: Settings > User > Edit info dialog
+    DIALOG_USER_EDIT = 590;
+
+    // OPEN: Settings > User > Confirm remove dialog
+    DIALOG_USER_REMOVE = 591;
+
+    // OPEN: Settings > User > Enable calling dialog
+    DIALOG_USER_ENABLE_CALLING = 592;
+
+    // OPEN: Settings > User > Enable calling and sms dialog
+    DIALOG_USER_ENABLE_CALLING_AND_SMS = 593;
+
+    // OPEN: Settings > User > Cannot manage device message dialog
+    DIALOG_USER_CANNOT_MANAGE = 594;
+
+    // OPEN: Settings > User > Add user dialog
+    DIALOG_USER_ADD = 595;
+
+    // OPEN: Settings > User > Setup user dialog
+    DIALOG_USER_SETUP = 596;
+
+    // OPEN: Settings > User > Setup profile dialog
+    DIALOG_USER_SETUP_PROFILE = 597;
+
+    // OPEN: Settings > User > Choose user type dialog
+    DIALOG_USER_CHOOSE_TYPE = 598;
+
+    // OPEN: Settings > User > Need lockscreen dialog
+    DIALOG_USER_NEED_LOCKSCREEN = 599;
+
+    // OPEN: Settings > User > Confirm exit guest mode dialog
+    DIALOG_USER_CONFIRM_EXIT_GUEST = 600;
+
+    // OPEN: Settings > User > Edit user profile dialog
+    DIALOG_USER_EDIT_PROFILE = 601;
+
+    // OPEN: Settings > Wifi > Saved AP > Edit dialog
+    DIALOG_WIFI_SAVED_AP_EDIT = 602;
+
+    // OPEN: Settings > Wifi > Edit AP dialog
+    DIALOG_WIFI_AP_EDIT = 603;
+
+    // OPEN: Settings > Wifi > PBC Config dialog
+    DIALOG_WIFI_PBC = 604;
+
+    // OPEN: Settings > Wifi > Display pin dialog
+    DIALOG_WIFI_PIN = 605;
+
+    // OPEN: Settings > Wifi > Write config to NFC dialog
+    DIALOG_WIFI_WRITE_NFC = 606;
+    // OPEN: Settings > Date > Date picker dialog
+    DIALOG_DATE_PICKER = 607;
+
+    // OPEN: Settings > Date > Time picker dialog
+    DIALOG_TIME_PICKER = 608;
+
+    // OPEN: Settings > Wireless > Manage wireless plan dialog
+    DIALOG_MANAGE_MOBILE_PLAN = 609;
+
+    // ACTION: Logs network type of the device while provisioning
+    PROVISIONING_NETWORK_TYPE = 610;
+
+    // ACTION: Logs action which triggered provisioning.
+    PROVISIONING_ACTION = 611;
+
+    // ACTION: Logs extra passed by the dpc while provisioning.
+    PROVISIONING_EXTRA = 612;
+
+    // OPEN Settings > Bluetooth > Attempt to connect to device that shows dialog
+    BLUETOOTH_DIALOG_FRAGMENT = 613;
+
+    // ACTION: Logs provisioning started by zero touch.
+    PROVISIONING_ENTRY_POINT_ZERO_TOUCH = 614;
+
+    // ACTION: Logs provisioning started by NFC bump.
+    PROVISIONING_ENTRY_POINT_NFC = 615;
+
+    // ACTION: Logs provisioning started using QR code.
+    PROVISIONING_ENTRY_POINT_QR_CODE = 616;
+
+    // ACTION: Logs provisioning started using adb.
+    PROVISIONING_ENTRY_POINT_ADB = 617;
+
+    // ACTION: Logs provisioning started by trusted source.
+    PROVISIONING_ENTRY_POINT_TRUSTED_SOURCE = 618;
+
+    // ACTION: Logged when copy account task finishes.
+    // TIME: Indicates time taken by copy account task to finish in MS.
+    PROVISIONING_COPY_ACCOUNT_TASK_MS = 619;
+
+    // ACTION: Logged when create profile task finishes.
+    // TIME: Indicates time taken by create profile task to finish in MS.
+    PROVISIONING_CREATE_PROFILE_TASK_MS = 620;
+
+    // ACTION: Logged when start profile task finishes.
+    // TIME: Indicates time taken by start profile task to finish in MS.
+    PROVISIONING_START_PROFILE_TASK_MS = 621;
+
+    // ACTION: Logged when download package task finishes.
+    // TIME: Indicates time taken by download package task to finish in MS.
+    PROVISIONING_DOWNLOAD_PACKAGE_TASK_MS = 622;
+
+    // ACTION: Logged when install package task finishes.
+    // TIME: Indicates time taken by install package task to finish in MS.
+    PROVISIONING_INSTALL_PACKAGE_TASK_MS = 623;
+
+    // ACTION: User cancelled provisioning.
+    PROVISIONING_CANCELLED = 624;
+
+    // ACTION: Logged when provisioning throws an error.
+    PROVISIONING_ERROR = 625;
+
+    // ACTION: Logs the status of copying user account during provisioning.
+    PROVISIONING_COPY_ACCOUNT_STATUS = 626;
+
+    // ACTION: Logs the end to end time taken by all provisioning tasks.
+    PROVISIONING_TOTAL_TASK_TIME_MS = 627;
+
+    // OPEN: Settings > Privacy
+    // CATEGORY: SETTINGS
+    // OS: O
+    ENTERPRISE_PRIVACY_SETTINGS = 628;
+
+    // ACTION: Longpress on a TextView.
+    //  SUBTYPE: 1 is for START_SELECTION, 2 is for START_DRAG_AND_DROP, 0 is for OTHER.
+    // CATEGORY: TEXT_CONTROLS
+    // OS: O
+    TEXT_LONGPRESS = 629;
+
+    // ACTION: An app requested an unknown permission
+    // PACKAGE: The package name of the app requesting the permission
+    ACTION_PERMISSION_REQUEST_UNKNOWN = 630;
+
+    // ACTION: An app was granted an unknown permission
+    // PACKAGE: The package name of the app that was granted the permission
+    ACTION_PERMISSION_GRANT_UNKNOWN = 631;
+
+    // ACTION: An app requested an unknown permission and the request was denied
+    // PACKAGE: The package name of the app requesting the permission
+    ACTION_PERMISSION_DENIED_UNKNOWN = 632;
+
+    // ACTION: An unknown permission was revoked for an app
+    // PACKAGE: The package name of the app the permission was revoked for
+    ACTION_PERMISSION_REVOKE_UNKNOWN = 633;
+
+    // ACTION: An app requested the permission READ_CALENDAR
+    // PACKAGE: The package name of the app requesting the permission
+    ACTION_PERMISSION_REQUEST_READ_CALENDAR = 634;
+
+    // ACTION: An app was granted the permission READ_CALENDAR
+    // PACKAGE: The package name of the app that was granted the permission
+    ACTION_PERMISSION_GRANT_READ_CALENDAR = 635;
+
+    // ACTION: An app requested the permission READ_CALENDAR and the request was denied
+    // PACKAGE: The package name of the app requesting the permission
+    ACTION_PERMISSION_DENIED_READ_CALENDAR = 636;
+
+    // ACTION: The permission READ_CALENDAR was revoked for an app
+    // PACKAGE: The package name of the app the permission was revoked for
+    ACTION_PERMISSION_REVOKE_READ_CALENDAR = 637;
+
+    // ACTION: An app requested the permission WRITE_CALENDAR
+    // PACKAGE: The package name of the app requesting the permission
+    ACTION_PERMISSION_REQUEST_WRITE_CALENDAR = 638;
+
+    // ACTION: An app was granted the permission WRITE_CALENDAR
+    // PACKAGE: The package name of the app that was granted the permission
+    ACTION_PERMISSION_GRANT_WRITE_CALENDAR = 639;
+
+    // ACTION: An app requested the permission WRITE_CALENDAR and the request was denied
+    // PACKAGE: The package name of the app requesting the permission
+    ACTION_PERMISSION_DENIED_WRITE_CALENDAR = 640;
+
+    // ACTION: The permission WRITE_CALENDAR was revoked for an app
+    // PACKAGE: The package name of the app the permission was revoked for
+    ACTION_PERMISSION_REVOKE_WRITE_CALENDAR = 641;
+
+    // ACTION: An app requested the permission CAMERA
+    // PACKAGE: The package name of the app requesting the permission
+    ACTION_PERMISSION_REQUEST_CAMERA = 642;
+
+    // ACTION: An app was granted the permission CAMERA
+    // PACKAGE: The package name of the app that was granted the permission
+    ACTION_PERMISSION_GRANT_CAMERA = 643;
+
+    // ACTION: An app requested the permission CAMERA and the request was denied
+    // PACKAGE: The package name of the app requesting the permission
+    ACTION_PERMISSION_DENIED_CAMERA = 644;
+
+    // ACTION: The permission CAMERA was revoked for an app
+    // PACKAGE: The package name of the app the permission was revoked for
+    ACTION_PERMISSION_REVOKE_CAMERA = 645;
+
+    // ACTION: An app requested the permission READ_CONTACTS
+    // PACKAGE: The package name of the app requesting the permission
+    ACTION_PERMISSION_REQUEST_READ_CONTACTS = 646;
+
+    // ACTION: An app was granted the permission READ_CONTACTS
+    // PACKAGE: The package name of the app that was granted the permission
+    ACTION_PERMISSION_GRANT_READ_CONTACTS = 647;
+
+    // ACTION: An app requested the permission READ_CONTACTS and the request was denied
+    // PACKAGE: The package name of the app requesting the permission
+    ACTION_PERMISSION_DENIED_READ_CONTACTS = 648;
+
+    // ACTION: The permission READ_CONTACTS was revoked for an app
+    // PACKAGE: The package name of the app the permission was revoked for
+    ACTION_PERMISSION_REVOKE_READ_CONTACTS = 649;
+
+    // ACTION: An app requested the permission WRITE_CONTACTS
+    // PACKAGE: The package name of the app requesting the permission
+    ACTION_PERMISSION_REQUEST_WRITE_CONTACTS = 650;
+
+    // ACTION: An app was granted the permission WRITE_CONTACTS
+    // PACKAGE: The package name of the app that was granted the permission
+    ACTION_PERMISSION_GRANT_WRITE_CONTACTS = 651;
+
+    // ACTION: An app requested the permission WRITE_CONTACTS and the request was denied
+    // PACKAGE: The package name of the app requesting the permission
+    ACTION_PERMISSION_DENIED_WRITE_CONTACTS = 652;
+
+    // ACTION: The permission WRITE_CONTACTS was revoked for an app
+    // PACKAGE: The package name of the app the permission was revoked for
+    ACTION_PERMISSION_REVOKE_WRITE_CONTACTS = 653;
+
+    // ACTION: An app requested the permission GET_ACCOUNTS
+    // PACKAGE: The package name of the app requesting the permission
+    ACTION_PERMISSION_REQUEST_GET_ACCOUNTS = 654;
+
+    // ACTION: An app was granted the permission GET_ACCOUNTS
+    // PACKAGE: The package name of the app that was granted the permission
+    ACTION_PERMISSION_GRANT_GET_ACCOUNTS = 655;
+
+    // ACTION: An app requested the permission GET_ACCOUNTS and the request was denied
+    // PACKAGE: The package name of the app requesting the permission
+    ACTION_PERMISSION_DENIED_GET_ACCOUNTS = 656;
+
+    // ACTION: The permission GET_ACCOUNTS was revoked for an app
+    // PACKAGE: The package name of the app the permission was revoked for
+    ACTION_PERMISSION_REVOKE_GET_ACCOUNTS = 657;
+
+    // ACTION: An app requested the permission ACCESS_FINE_LOCATION
+    // PACKAGE: The package name of the app requesting the permission
+    ACTION_PERMISSION_REQUEST_ACCESS_FINE_LOCATION = 658;
+
+    // ACTION: An app was granted the permission ACCESS_FINE_LOCATION
+    // PACKAGE: The package name of the app that was granted the permission
+    ACTION_PERMISSION_GRANT_ACCESS_FINE_LOCATION = 659;
+
+    // ACTION: An app requested the permission ACCESS_FINE_LOCATION and the request was denied
+    // PACKAGE: The package name of the app requesting the permission
+    ACTION_PERMISSION_DENIED_ACCESS_FINE_LOCATION = 660;
+
+    // ACTION: The permission ACCESS_FINE_LOCATION was revoked for an app
+    // PACKAGE: The package name of the app the permission was revoked for
+    ACTION_PERMISSION_REVOKE_ACCESS_FINE_LOCATION = 661;
+
+    // ACTION: An app requested the permission ACCESS_COARSE_LOCATION
+    // PACKAGE: The package name of the app requesting the permission
+    ACTION_PERMISSION_REQUEST_ACCESS_COARSE_LOCATION = 662;
+
+    // ACTION: An app was granted the permission ACCESS_COARSE_LOCATION
+    // PACKAGE: The package name of the app that was granted the permission
+    ACTION_PERMISSION_GRANT_ACCESS_COARSE_LOCATION = 663;
+
+    // ACTION: An app requested the permission ACCESS_COARSE_LOCATION and the request was denied
+    // PACKAGE: The package name of the app requesting the permission
+    ACTION_PERMISSION_DENIED_ACCESS_COARSE_LOCATION = 664;
+
+    // ACTION: The permission ACCESS_COARSE_LOCATION was revoked for an app
+    // PACKAGE: The package name of the app the permission was revoked for
+    ACTION_PERMISSION_REVOKE_ACCESS_COARSE_LOCATION = 665;
+
+    // ACTION: An app requested the permission RECORD_AUDIO
+    // PACKAGE: The package name of the app requesting the permission
+    ACTION_PERMISSION_REQUEST_RECORD_AUDIO = 666;
+
+    // ACTION: An app was granted the permission RECORD_AUDIO
+    // PACKAGE: The package name of the app that was granted the permission
+    ACTION_PERMISSION_GRANT_RECORD_AUDIO = 667;
+
+    // ACTION: An app requested the permission RECORD_AUDIO and the request was denied
+    // PACKAGE: The package name of the app requesting the permission
+    ACTION_PERMISSION_DENIED_RECORD_AUDIO = 668;
+
+    // ACTION: The permission RECORD_AUDIO was revoked for an app
+    // PACKAGE: The package name of the app the permission was revoked for
+    ACTION_PERMISSION_REVOKE_RECORD_AUDIO = 669;
+
+    // ACTION: An app requested the permission READ_PHONE_STATE
+    // PACKAGE: The package name of the app requesting the permission
+    ACTION_PERMISSION_REQUEST_READ_PHONE_STATE = 670;
+
+    // ACTION: An app was granted the permission READ_PHONE_STATE
+    // PACKAGE: The package name of the app that was granted the permission
+    ACTION_PERMISSION_GRANT_READ_PHONE_STATE = 671;
+
+    // ACTION: An app requested the permission READ_PHONE_STATE and the request was denied
+    // PACKAGE: The package name of the app requesting the permission
+    ACTION_PERMISSION_DENIED_READ_PHONE_STATE = 672;
+
+    // ACTION: The permission READ_PHONE_STATE was revoked for an app
+    // PACKAGE: The package name of the app the permission was revoked for
+    ACTION_PERMISSION_REVOKE_READ_PHONE_STATE = 673;
+
+    // ACTION: An app requested the permission CALL_PHONE
+    // PACKAGE: The package name of the app requesting the permission
+    ACTION_PERMISSION_REQUEST_CALL_PHONE = 674;
+
+    // ACTION: An app was granted the permission CALL_PHONE
+    // PACKAGE: The package name of the app that was granted the permission
+    ACTION_PERMISSION_GRANT_CALL_PHONE = 675;
+
+    // ACTION: An app requested the permission CALL_PHONE and the request was denied
+    // PACKAGE: The package name of the app requesting the permission
+    ACTION_PERMISSION_DENIED_CALL_PHONE = 676;
+
+    // ACTION: The permission CALL_PHONE was revoked for an app
+    // PACKAGE: The package name of the app the permission was revoked for
+    ACTION_PERMISSION_REVOKE_CALL_PHONE = 677;
+
+    // ACTION: An app requested the permission READ_CALL_LOG
+    // PACKAGE: The package name of the app requesting the permission
+    ACTION_PERMISSION_REQUEST_READ_CALL_LOG = 678;
+
+    // ACTION: An app was granted the permission READ_CALL_LOG
+    // PACKAGE: The package name of the app that was granted the permission
+    ACTION_PERMISSION_GRANT_READ_CALL_LOG = 679;
+
+    // ACTION: An app requested the permission READ_CALL_LOG and the request was denied
+    // PACKAGE: The package name of the app requesting the permission
+    ACTION_PERMISSION_DENIED_READ_CALL_LOG = 680;
+
+    // ACTION: The permission READ_CALL_LOG was revoked for an app
+    // PACKAGE: The package name of the app the permission was revoked for
+    ACTION_PERMISSION_REVOKE_READ_CALL_LOG = 681;
+
+    // ACTION: An app requested the permission WRITE_CALL_LOG
+    // PACKAGE: The package name of the app requesting the permission
+    ACTION_PERMISSION_REQUEST_WRITE_CALL_LOG = 682;
+
+    // ACTION: An app was granted the permission WRITE_CALL_LOG
+    // PACKAGE: The package name of the app that was granted the permission
+    ACTION_PERMISSION_GRANT_WRITE_CALL_LOG = 683;
+
+    // ACTION: An app requested the permission WRITE_CALL_LOG and the request was denied
+    // PACKAGE: The package name of the app requesting the permission
+    ACTION_PERMISSION_DENIED_WRITE_CALL_LOG = 684;
+
+    // ACTION: The permission WRITE_CALL_LOG was revoked for an app
+    // PACKAGE: The package name of the app the permission was revoked for
+    ACTION_PERMISSION_REVOKE_WRITE_CALL_LOG = 685;
+
+    // ACTION: An app requested the permission ADD_VOICEMAIL
+    // PACKAGE: The package name of the app requesting the permission
+    ACTION_PERMISSION_REQUEST_ADD_VOICEMAIL = 686;
+
+    // ACTION: An app was granted the permission ADD_VOICEMAIL
+    // PACKAGE: The package name of the app that was granted the permission
+    ACTION_PERMISSION_GRANT_ADD_VOICEMAIL = 687;
+
+    // ACTION: An app requested the permission ADD_VOICEMAIL and the request was denied
+    // PACKAGE: The package name of the app requesting the permission
+    ACTION_PERMISSION_DENIED_ADD_VOICEMAIL = 688;
+
+    // ACTION: The permission ADD_VOICEMAIL was revoked for an app
+    // PACKAGE: The package name of the app the permission was revoked for
+    ACTION_PERMISSION_REVOKE_ADD_VOICEMAIL = 689;
+
+    // ACTION: An app requested the permission USE_SIP
+    // PACKAGE: The package name of the app requesting the permission
+    ACTION_PERMISSION_REQUEST_USE_SIP = 690;
+
+    // ACTION: An app was granted the permission USE_SIP
+    // PACKAGE: The package name of the app that was granted the permission
+    ACTION_PERMISSION_GRANT_USE_SIP = 691;
+
+    // ACTION: An app requested the permission USE_SIP and the request was denied
+    // PACKAGE: The package name of the app requesting the permission
+    ACTION_PERMISSION_DENIED_USE_SIP = 692;
+
+    // ACTION: The permission USE_SIP was revoked for an app
+    // PACKAGE: The package name of the app the permission was revoked for
+    ACTION_PERMISSION_REVOKE_USE_SIP = 693;
+
+    // ACTION: An app requested the permission PROCESS_OUTGOING_CALLS
+    // PACKAGE: The package name of the app requesting the permission
+    ACTION_PERMISSION_REQUEST_PROCESS_OUTGOING_CALLS = 694;
+
+    // ACTION: An app was granted the permission PROCESS_OUTGOING_CALLS
+    // PACKAGE: The package name of the app that was granted the permission
+    ACTION_PERMISSION_GRANT_PROCESS_OUTGOING_CALLS = 695;
+
+    // ACTION: An app requested the permission PROCESS_OUTGOING_CALLS and the request was denied
+    // PACKAGE: The package name of the app requesting the permission
+    ACTION_PERMISSION_DENIED_PROCESS_OUTGOING_CALLS = 696;
+
+    // ACTION: The permission PROCESS_OUTGOING_CALLS was revoked for an app
+    // PACKAGE: The package name of the app the permission was revoked for
+    ACTION_PERMISSION_REVOKE_PROCESS_OUTGOING_CALLS = 697;
+
+    // ACTION: An app requested the permission READ_CELL_BROADCASTS
+    // PACKAGE: The package name of the app requesting the permission
+    ACTION_PERMISSION_REQUEST_READ_CELL_BROADCASTS = 698;
+
+    // ACTION: An app was granted the permission READ_CELL_BROADCASTS
+    // PACKAGE: The package name of the app that was granted the permission
+    ACTION_PERMISSION_GRANT_READ_CELL_BROADCASTS = 699;
+
+    // ACTION: An app requested the permission READ_CELL_BROADCASTS and the request was denied
+    // PACKAGE: The package name of the app requesting the permission
+    ACTION_PERMISSION_DENIED_READ_CELL_BROADCASTS = 700;
+
+    // ACTION: The permission READ_CELL_BROADCASTS was revoked for an app
+    // PACKAGE: The package name of the app the permission was revoked for
+    ACTION_PERMISSION_REVOKE_READ_CELL_BROADCASTS = 701;
+
+    // ACTION: An app requested the permission BODY_SENSORS
+    // PACKAGE: The package name of the app requesting the permission
+    ACTION_PERMISSION_REQUEST_BODY_SENSORS = 702;
+
+    // ACTION: An app was granted the permission BODY_SENSORS
+    // PACKAGE: The package name of the app that was granted the permission
+    ACTION_PERMISSION_GRANT_BODY_SENSORS = 703;
+
+    // ACTION: An app requested the permission BODY_SENSORS and the request was denied
+    // PACKAGE: The package name of the app requesting the permission
+    ACTION_PERMISSION_DENIED_BODY_SENSORS = 704;
+
+    // ACTION: The permission BODY_SENSORS was revoked for an app
+    // PACKAGE: The package name of the app the permission was revoked for
+    ACTION_PERMISSION_REVOKE_BODY_SENSORS = 705;
+
+    // ACTION: An app requested the permission SEND_SMS
+    // PACKAGE: The package name of the app requesting the permission
+    ACTION_PERMISSION_REQUEST_SEND_SMS = 706;
+
+    // ACTION: An app was granted the permission SEND_SMS
+    // PACKAGE: The package name of the app that was granted the permission
+    ACTION_PERMISSION_GRANT_SEND_SMS = 707;
+
+    // ACTION: An app requested the permission SEND_SMS and the request was denied
+    // PACKAGE: The package name of the app requesting the permission
+    ACTION_PERMISSION_DENIED_SEND_SMS = 708;
+
+    // ACTION: The permission SEND_SMS was revoked for an app
+    // PACKAGE: The package name of the app the permission was revoked for
+    ACTION_PERMISSION_REVOKE_SEND_SMS = 709;
+
+    // ACTION: An app requested the permission RECEIVE_SMS
+    // PACKAGE: The package name of the app requesting the permission
+    ACTION_PERMISSION_REQUEST_RECEIVE_SMS = 710;
+
+    // ACTION: An app was granted the permission RECEIVE_SMS
+    // PACKAGE: The package name of the app that was granted the permission
+    ACTION_PERMISSION_GRANT_RECEIVE_SMS = 711;
+
+    // ACTION: An app requested the permission RECEIVE_SMS and the request was denied
+    // PACKAGE: The package name of the app requesting the permission
+    ACTION_PERMISSION_DENIED_RECEIVE_SMS = 712;
+
+    // ACTION: The permission RECEIVE_SMS was revoked for an app
+    // PACKAGE: The package name of the app the permission was revoked for
+    ACTION_PERMISSION_REVOKE_RECEIVE_SMS = 713;
+
+    // ACTION: An app requested the permission READ_SMS
+    // PACKAGE: The package name of the app requesting the permission
+    ACTION_PERMISSION_REQUEST_READ_SMS = 714;
+
+    // ACTION: An app was granted the permission READ_SMS
+    // PACKAGE: The package name of the app that was granted the permission
+    ACTION_PERMISSION_GRANT_READ_SMS = 715;
+
+    // ACTION: An app requested the permission READ_SMS and the request was denied
+    // PACKAGE: The package name of the app requesting the permission
+    ACTION_PERMISSION_DENIED_READ_SMS = 716;
+
+    // ACTION: The permission READ_SMS was revoked for an app
+    // PACKAGE: The package name of the app the permission was revoked for
+    ACTION_PERMISSION_REVOKE_READ_SMS = 717;
+
+    // ACTION: An app requested the permission RECEIVE_WAP_PUSH
+    // PACKAGE: The package name of the app requesting the permission
+    ACTION_PERMISSION_REQUEST_RECEIVE_WAP_PUSH = 718;
+
+    // ACTION: An app was granted the permission RECEIVE_WAP_PUSH
+    // PACKAGE: The package name of the app that was granted the permission
+    ACTION_PERMISSION_GRANT_RECEIVE_WAP_PUSH = 719;
+
+    // ACTION: An app requested the permission RECEIVE_WAP_PUSH and the request was denied
+    // PACKAGE: The package name of the app requesting the permission
+    ACTION_PERMISSION_DENIED_RECEIVE_WAP_PUSH = 720;
+
+    // ACTION: The permission RECEIVE_WAP_PUSH was revoked for an app
+    // PACKAGE: The package name of the app the permission was revoked for
+    ACTION_PERMISSION_REVOKE_RECEIVE_WAP_PUSH = 721;
+
+    // ACTION: An app requested the permission RECEIVE_MMS
+    // PACKAGE: The package name of the app requesting the permission
+    ACTION_PERMISSION_REQUEST_RECEIVE_MMS = 722;
+
+    // ACTION: An app was granted the permission RECEIVE_MMS
+    // PACKAGE: The package name of the app that was granted the permission
+    ACTION_PERMISSION_GRANT_RECEIVE_MMS = 723;
+
+    // ACTION: An app requested the permission RECEIVE_MMS and the request was denied
+    // PACKAGE: The package name of the app requesting the permission
+    ACTION_PERMISSION_DENIED_RECEIVE_MMS = 724;
+
+    // ACTION: The permission RECEIVE_MMS was revoked for an app
+    // PACKAGE: The package name of the app the permission was revoked for
+    ACTION_PERMISSION_REVOKE_RECEIVE_MMS = 725;
+
+    // ACTION: An app requested the permission READ_EXTERNAL_STORAGE
+    // PACKAGE: The package name of the app requesting the permission
+    ACTION_PERMISSION_REQUEST_READ_EXTERNAL_STORAGE = 726;
+
+    // ACTION: An app was granted the permission READ_EXTERNAL_STORAGE
+    // PACKAGE: The package name of the app that was granted the permission
+    ACTION_PERMISSION_GRANT_READ_EXTERNAL_STORAGE = 727;
+
+    // ACTION: An app requested the permission READ_EXTERNAL_STORAGE and the request was denied
+    // PACKAGE: The package name of the app requesting the permission
+    ACTION_PERMISSION_DENIED_READ_EXTERNAL_STORAGE = 728;
+
+    // ACTION: The permission READ_EXTERNAL_STORAGE was revoked for an app
+    // PACKAGE: The package name of the app the permission was revoked for
+    ACTION_PERMISSION_REVOKE_READ_EXTERNAL_STORAGE = 729;
+
+    // ACTION: An app requested the permission WRITE_EXTERNAL_STORAGE
+    // PACKAGE: The package name of the app requesting the permission
+    ACTION_PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE = 730;
+
+    // ACTION: An app was granted the permission WRITE_EXTERNAL_STORAGE
+    // PACKAGE: The package name of the app that was granted the permission
+    ACTION_PERMISSION_GRANT_WRITE_EXTERNAL_STORAGE = 731;
+
+    // ACTION: An app requested the permission WRITE_EXTERNAL_STORAGE and the request was denied
+    // PACKAGE: The package name of the app requesting the permission
+    ACTION_PERMISSION_DENIED_WRITE_EXTERNAL_STORAGE = 732;
+
+    // ACTION: The permission WRITE_EXTERNAL_STORAGE was revoked for an app
+    // PACKAGE: The package name of the app the permission was revoked for
+    ACTION_PERMISSION_REVOKE_WRITE_EXTERNAL_STORAGE = 733;
+
+    // ACTION: Logged when a provisioning session has started
+    PROVISIONING_SESSION_STARTED = 734;
+
+    // ACTION: Logged when a provisioning session has completed
+    PROVISIONING_SESSION_COMPLETED = 735;
+
+    // ACTION: An app requested the permission READ_PHONE_NUMBERS
+    // PACKAGE: The package name of the app requesting the permission
+    ACTION_PERMISSION_REQUEST_READ_PHONE_NUMBERS = 736;
+
+    // ACTION: An app was granted the permission READ_PHONE_NUMBERS
+    // PACKAGE: The package name of the app that was granted the permission
+    ACTION_PERMISSION_GRANT_READ_PHONE_NUMBERS = 737;
+
+    // ACTION: An app requested the permission READ_PHONE_NUMBERS and the request was denied
+    // PACKAGE: The package name of the app requesting the permission
+    ACTION_PERMISSION_DENIED_READ_PHONE_NUMBERS = 738;
+
+    // ACTION: The permission READ_PHONE_NUMBERS was revoked for an app
+    // PACKAGE: The package name of the app the permission was revoked for
+    ACTION_PERMISSION_REVOKE_READ_PHONE_NUMBERS = 739;
+
+    // ACTION: QS Brightness Slider (with auto brightness disabled, and VR enabled)
+    //   SUBTYPE: slider value
+    // CATEGORY: QUICK_SETTINGS
+    // OS: 6.0
+    ACTION_BRIGHTNESS_FOR_VR = 498;
+
+    // ACTION: A captive portal was detected during network validation
+    // CATEGORY: NOTIFICATION
+    // OS: N-MR2
+    NOTIFICATION_NETWORK_SIGN_IN = 740;
+
+    // ACTION: An unvalidated network without Internet was selected by the user
+    // CATEGORY: NOTIFICATION
+    // OS: N-MR2
+    NOTIFICATION_NETWORK_NO_INTERNET = 741;
+
+    // ACTION: A validated network failed revalidation and lost Internet access
+    // CATEGORY: NOTIFICATION
+    // OS: N-MR2
+    NOTIFICATION_NETWORK_LOST_INTERNET = 742;
+
+    // ACTION: The system default network switched to a different network
+    // CATEGORY: NOTIFICATION
+    // OS: N-MR2
+    NOTIFICATION_NETWORK_SWITCH = 743;
+
+    // OPEN: Settings > System
+    SETTINGS_SYSTEM_CATEGORY = 744;
+
+    // OPEN: Settings > Storage
+    SETTINGS_STORAGE_CATEGORY = 745;
+
+    // OPEN: Settings > Network & Internet
+    SETTINGS_NETWORK_CATEGORY = 746;
+
+    // OPEN: Settings > Connected Device
+    SETTINGS_CONNECTED_DEVICE_CATEGORY = 747;
+
+    // OPEN: Settings > App & Notification
+    SETTINGS_APP_NOTIF_CATEGORY = 748;
+
+    // OPEN: Settings > System > Input & Gesture
+    SETTINGS_INPUT_CATEGORY = 749;
+
+    // OPEN: Settings > System > Language & Region
+    SETTINGS_LANGUAGE_CATEGORY = 750;
+
+    // OPEN: Settings > System > Input & Gesture > Swipe to notification gesture
+    SETTINGS_GESTURE_SWIPE_TO_NOTIFICATION = 751;
+
+    // OPEN: Settings > System > Input & Gesture > Double tap power button gesture
+    SETTINGS_GESTURE_DOUBLE_TAP_POWER = 752;
+
+    // OPEN: Settings > System > Input & Gesture > Pick up gesture
+    SETTINGS_GESTURE_PICKUP = 753;
+
+    // OPEN: Settings > System > Input & Gesture > Double tap screen gesture
+    SETTINGS_GESTURE_DOUBLE_TAP_SCREEN = 754;
+
+    // OPEN: Settings > System > Input & Gesture > Double twist gesture
+    SETTINGS_GESTURE_DOUBLE_TWIST = 755;
+
+    // OPEN: Settings > Support > SupportDisclaimerDialog > SupportSystemInformationDialog
+    // CATEGORY: Settings
+    DIALOG_SUPPORT_SYSTEM_INFORMATION = 756;
+
+    // These values should never appear in log outputs - they are reserved for
+    // internal platform metrics use.
+    RESERVED_FOR_LOGBUILDER_CATEGORY = 757;
+    RESERVED_FOR_LOGBUILDER_TYPE = 758;
+    RESERVED_FOR_LOGBUILDER_SUBTYPE = 759;
+
+    // ACTION: "Do not show again" was enabled in the support disclaimer and the
+    // user accepted
+    ACTION_SKIP_DISCLAIMER_SELECTED = 760;
+
+    // Enclosing category for group of APP_TRANSITION_FOO events,
+    // logged when we execute an app transition.
+    APP_TRANSITION = 761;
+
+    // ACTION: User leaves Settings search UI without entering any query.
+    ACTION_LEAVE_SEARCH_RESULT_WITHOUT_QUERY = 762;
+
+    // ACTION: Clicking on any search result in Settings.
+    ACTION_CLICK_SETTINGS_SEARCH_RESULT = 763;
+
+    // ACTION: Allow Battery optimization for an app
+    APP_SPECIAL_PERMISSION_BATTERY_ALLOW = 764;
+
+    // ACTION: Deny Battery optimization for an app
+    APP_SPECIAL_PERMISSION_BATTERY_DENY = 765;
+
+    // ACTION: Enable Device Admin app
+    APP_SPECIAL_PERMISSION_ADMIN_ALLOW = 766;
+
+    // ACTION: Disable Device Admin app
+    APP_SPECIAL_PERMISSION_ADMIN_DENY = 767;
+
+    // ACTION: Allow "Do Not Disturb access" for an app
+    APP_SPECIAL_PERMISSION_DND_ALLOW = 768;
+
+    // ACTION: Deny "Do Not Disturb access" for an app
+    APP_SPECIAL_PERMISSION_DND_DENY = 769;
+
+    // ACTION: Allow "Draw over other apps" for an app
+    APP_SPECIAL_PERMISSION_APPDRAW_ALLOW = 770;
+
+    // ACTION: Deny "Display over other apps" for an app
+    APP_SPECIAL_PERMISSION_APPDRAW_DENY = 771;
+
+    // ACTION: Allow "VR helper services" for an app
+    APP_SPECIAL_PERMISSION_VRHELPER_ALLOW = 772;
+
+    // ACTION: Deny "VR helper services" for an app
+    APP_SPECIAL_PERMISSION_VRHELPER_DENY = 773;
+
+    // ACTION: Allow "Modify system settings" for an app
+    APP_SPECIAL_PERMISSION_SETTINGS_CHANGE_ALLOW = 774;
+
+    // ACTION: Deny "Modify system settings" for an app
+    APP_SPECIAL_PERMISSION_SETTINGS_CHANGE_DENY = 775;
+
+    // ACTION: Allow "Notification access" for an app
+    APP_SPECIAL_PERMISSION_NOTIVIEW_ALLOW = 776;
+
+    // ACTION: Deny "Notification access" for an app
+    APP_SPECIAL_PERMISSION_NOTIVIEW_DENY = 777;
+
+    // ACTION: "Premium SMS access" for an app - "ask user" option
+    APP_SPECIAL_PERMISSION_PREMIUM_SMS_ASK = 778;
+
+    // ACTION: "Premium SMS access" for an app - "never allow" option
+    APP_SPECIAL_PERMISSION_PREMIUM_SMS_DENY = 779;
+
+    // ACTION: "Premium SMS access" for an app - "always allow" option
+    APP_SPECIAL_PERMISSION_PREMIUM_SMS_ALWAYS_ALLOW = 780;
+
+    // ACTION: Allow "Unrestricted data access" for an app
+    APP_SPECIAL_PERMISSION_UNL_DATA_ALLOW = 781;
+
+    // ACTION: Deny "Unrestricted data access" for an app
+    APP_SPECIAL_PERMISSION_UNL_DATA_DENY = 782;
+
+    // ACTION: Allow "Usage access" for an app
+    APP_SPECIAL_PERMISSION_USAGE_VIEW_ALLOW = 783;
+
+    // ACTION: Deny "Usage access" for an app
+    APP_SPECIAL_PERMISSION_USAGE_VIEW_DENY = 784;
+
+    // OPEN: Settings > Apps > Default Apps > Default browser
+    DEFAULT_BROWSER_PICKER = 785;
+
+    // OPEN: Settings > Apps > Default Apps > Default emergency app
+    DEFAULT_EMERGENCY_APP_PICKER = 786;
+
+    // OPEN: Settings > Apps > Default Apps > Default home
+    DEFAULT_HOME_PICKER = 787;
+
+    // OPEN: Settings > Apps > Default Apps > Default phone
+    DEFAULT_PHONE_PICKER = 788;
+
+    // OPEN: Settings > Apps > Default Apps > Default sms
+    DEFAULT_SMS_PICKER = 789;
+
+    // OPEN: Settings > Apps > Default Apps > Default notification assistant
+    DEFAULT_NOTIFICATION_ASSISTANT = 790;
+
+    // OPEN: Settings > Apps > Default Apps > Warning dialog to confirm selection
+    DEFAULT_APP_PICKER_CONFIRMATION_DIALOG = 791;
+
+    // OPEN: Settings > Apps > Default Apps > Default autofill app
+    DEFAULT_AUTOFILL_PICKER = 792;
+
+    // These values should never appear in log outputs - they are reserved for
+    // internal platform metrics use.
+    NOTIFICATION_SINCE_CREATE_MILLIS = 793;
+    NOTIFICATION_SINCE_VISIBLE_MILLIS = 794;
+    NOTIFICATION_SINCE_UPDATE_MILLIS = 795;
+    NOTIFICATION_ID = 796;
+    NOTIFICATION_TAG = 797;
+    NOTIFICATION_SHADE_INDEX = 798;
+    RESERVED_FOR_LOGBUILDER_NAME = 799;
+
+    // OPEN: QS NFC tile shown
+    // ACTION: QS NFC tile tapped
+    // CATEGORY: QUICK_SETTINGS
+    QS_NFC = 800;
+
+    // These values should never appear in log outputs - they are reserved for
+    // internal platform metrics use.
+    RESERVED_FOR_LOGBUILDER_BUCKET = 801;
+    RESERVED_FOR_LOGBUILDER_VALUE = 802;
+    RESERVED_FOR_LOGBUILDER_COUNTER = 803;
+    RESERVED_FOR_LOGBUILDER_HISTOGRAM = 804;
+    RESERVED_FOR_LOGBUILDER_TIMESTAMP = 805;
+    RESERVED_FOR_LOGBUILDER_PACKAGENAME = 806;
+
+    // ACTION: "Force stop" action on an app
+    ACTION_APP_FORCE_STOP = 807;
+
+    // OPEN: Settings > Apps > Gear > Special Access > Install other apps
+    // CATEGORY: SETTINGS
+    // OS: 8.0
+    MANAGE_EXTERNAL_SOURCES = 808;
+
+    // ACTION: Logged when terms activity finishes.
+    // TIME: Indicates time taken by terms activity to finish in MS.
+    PROVISIONING_TERMS_ACTIVITY_TIME_MS = 809;
+
+    // Indicates number of terms displayed on the terms screen.
+    PROVISIONING_TERMS_COUNT = 810;
+
+    // Indicates number of terms read on the terms screen.
+    PROVISIONING_TERMS_READ = 811;
+
+    // Logs that the user has edited the picture-in-picture settings.
+    // CATEGORY: SETTINGS
+    SETTINGS_MANAGE_PICTURE_IN_PICTURE = 812;
+
+    // ACTION: Allow "Enable picture-in-picture" for an app
+    APP_PICTURE_IN_PICTURE_ALLOW = 813;
+
+    // ACTION: Deny "Enable picture-in-picture" for an app
+    APP_PICTURE_IN_PICTURE_DENY = 814;
+
+    // OPEN: Settings > Language & input > Text-to-speech output -> Speech rate & pitch
+    // CATEGORY: SETTINGS
+    // OS: 8.0
+    TTS_SLIDERS = 815;
+
+    // ACTION: Settings -> Display -> Theme
+    ACTION_THEME = 816;
+
+    // OPEN: SUW Welcome Screen -> Vision Settings -> Select to Speak
+    // ACTION: Select to Speak configuration is chosen
+    //  SUBTYPE: 0 is off, 1 is on
+    // CATEGORY: SETTINGS
+    // OS: N
+    SUW_ACCESSIBILITY_TOGGLE_SELECT_TO_SPEAK = 817;
+
+    // OPEN: Settings > System > Backup
+    // CATEGORY: SETTINGS
+    // OS: O
+    BACKUP_SETTINGS = 818;
+
+    // ACTION: Picture-in-picture was explicitly entered for an activity
+    // VALUE: true if it was entered while hiding as a result of moving to
+    // another task, false otherwise
+    ACTION_PICTURE_IN_PICTURE_ENTERED = 819;
+
+    // ACTION: The activity currently in picture-in-picture was expanded back to fullscreen
+    // PACKAGE: The package name of the activity that was expanded back to fullscreen
+    ACTION_PICTURE_IN_PICTURE_EXPANDED_TO_FULLSCREEN = 820;
+
+    // ACTION: The activity currently in picture-in-picture was minimized
+    // VALUE: True if the PiP was minimized, false otherwise
+    ACTION_PICTURE_IN_PICTURE_MINIMIZED = 821;
+
+    // ACTION: Picture-in-picture was dismissed via the dismiss button
+    // VALUE: 0 if dismissed by tap, 1 if dismissed by drag
+    ACTION_PICTURE_IN_PICTURE_DISMISSED = 822;
+
+    // ACTION: The visibility of the picture-in-picture meny
+    // VALUE: Whether or not the menu is visible
+    ACTION_PICTURE_IN_PICTURE_MENU = 823;
+
+    // Enclosing category for group of PICTURE_IN_PICTURE_ASPECT_RATIO_FOO events,
+    // logged when the aspect ratio changes
+    ACTION_PICTURE_IN_PICTURE_ASPECT_RATIO_CHANGED = 824;
+
+    // The current aspect ratio of the PiP, logged when it changes.
+    PICTURE_IN_PICTURE_ASPECT_RATIO = 825;
+
+    // FIELD - length in dp of ACTION_LS_* gestures, or zero if not applicable
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: O
+    FIELD_GESTURE_LENGTH = 826;
+
+    // FIELD - velocity in dp (per second?) of ACTION_LS_* gestures, or zero if not applicable
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: O
+    FIELD_GESTURE_VELOCITY = 827;
+
+    // OPEN: Carrier demo mode password dialog
+    CARRIER_DEMO_MODE_PASSWORD = 828;
+
+    // ACTION: Create a Settings shortcut item.
+    ACTION_SETTINGS_CREATE_SHORTCUT = 829;
+
+    // ACTION: A tile in Settings information architecture is clicked
+    ACTION_SETTINGS_TILE_CLICK = 830;
+
+    // OPEN: Notification unsnoozed. CLOSE: Notification snoozed. UPDATE: snoozed notification
+    // updated
+    // CATEGORY: NOTIFICATION
+    // OS: O
+    NOTIFICATION_SNOOZED = 831;
+
+    // Tagged data for NOTIFICATION_SNOOZED. TRUE: snoozed until context, FALSE: snoozed for time.
+    // OS: O
+    NOTIFICATION_SNOOZED_CRITERIA = 832;
+
+    // FIELD - The context (source) from which an action is performed
+    FIELD_CONTEXT = 833;
+
+    // ACTION: Settings advanced button is expanded
+    ACTION_SETTINGS_ADVANCED_BUTTON_EXPAND = 834;
+
+    // ACTION: Logs the number of times the saved network evaluator was used to
+    // recommend a wifi network
+    WIFI_NETWORK_RECOMMENDATION_SAVED_NETWORK_EVALUATOR = 835;
+
+    // ACTION: Logs the number of times the recommended network evaluator was
+    // used to recommend a wifi network
+    WIFI_NETWORK_RECOMMENDATION_RECOMMENDED_NETWORK_EVALUATOR = 836;
+
+    // ACTION: Logs the number of times a recommended network was resulted in a
+    // successful connection
+    // VALUE: true if the connection was successful, false if the connection failed
+    WIFI_NETWORK_RECOMMENDATION_CONNECTION_SUCCESS = 837;
+
+    // OPEN: Settings > Storage > Games
+    // CATEGORY: SETTINGS
+    // OS: O
+    APPLICATIONS_STORAGE_GAMES = 838;
+
+    // OPEN: Settings > Storage > Audio and Music
+    // CATEGORY: SETTINGS
+    // OS: O
+    APPLICATIONS_STORAGE_MUSIC = 839;
+
+    // ACTION: Settings > Storage > Free Up Space to launch Deletion Helper
+    // CATEGORY: SETTINGS
+    // OS: O
+    STORAGE_FREE_UP_SPACE_NOW = 840;
+
+    // ACTION: Settings > Storage > Files to open the File Manager
+    // CATEGORY: SETTINGS
+    // OS: O
+    STORAGE_FILES = 841;
+
+    // FIELD - Rank of the clicked Settings search result
+    FIELD_SETTINGS_SERACH_RESULT_RANK = 842;
+
+    // OPEN: Settings > Apps > Default Apps > Assist >  Default assist
+    DEFAULT_ASSIST_PICKER = 843;
+
+    // OPEN: Settings > Apps > Default Apps > Assist >  Default voice input
+    DEFAULT_VOICE_INPUT_PICKER = 844;
+
+    // OPEN: Settings > Storage > [Profile]
+    SETTINGS_STORAGE_PROFILE = 845;
+
+    // OPEN: Settings > Security & screen lock -> Encryption & crendentials
+    // CATEGORY: SETTINGS
+    // OS: O
+    ENCRYPTION_AND_CREDENTIAL = 846;
+
+    // ACTION: Settings > About device > Build number
+    ACTION_SETTINGS_BUILD_NUMBER_PREF = 847;
+
+    // FIELD: Whether developer mode has already been enabled when clicking build number preference
+    FIELD_SETTINGS_BUILD_NUMBER_DEVELOPER_MODE_ENABLED = 848;
+
+    // OPEN: Settings > Wi-Fi > Network Details (click on Access Point)
+    // CATEGORY: SETTINGS
+    // OS: O
+    WIFI_NETWORK_DETAILS = 849;
+
+    // ACTION: Settings > Battery > Menu > Usage Alerts
+    ACTION_SETTINGS_MENU_BATTERY_USAGE_ALERTS = 850;
+
+    // ACTION: Settings > Battery > Menu > Optimization
+    ACTION_SETTINGS_MENU_BATTERY_OPTIMIZATION = 851;
+
+    // ACTION: Settings > Battery > Menu > Apps Toggle
+    ACTION_SETTINGS_MENU_BATTERY_APPS_TOGGLE = 852;
+
+    // ACTION: Settings > Any preference is changed
+    ACTION_SETTINGS_PREFERENCE_CHANGE = 853;
+
+    // FIELD: The name of preference when it is changed in Settings
+    FIELD_SETTINGS_PREFERENCE_CHANGE_NAME = 854;
+
+    // FIELD: The new value of preference when it is changed in Settings
+    FIELD_SETTINGS_PREFERENCE_CHANGE_VALUE = 855;
+
+    // OPEN: Notification channel created. CLOSE: Notification channel deleted. UPDATE: notification
+    // channel updated
+    // PACKAGE: the package the channel belongs too
+    // CATEGORY: NOTIFICATION
+    // OS: O
+    ACTION_NOTIFICATION_CHANNEL = 856;
+
+    // Tagged data for notification channel. String.
+    FIELD_NOTIFICATION_CHANNEL_ID = 857;
+
+    // Tagged data for notification channel. int.
+    FIELD_NOTIFICATION_CHANNEL_IMPORTANCE = 858;
+
+    // OPEN: Notification channel group created.
+    // PACKAGE: the package the group belongs to
+    // CATEGORY: NOTIFICATION
+    // OS: O
+    ACTION_NOTIFICATION_CHANNEL_GROUP = 859;
+
+    // Tagged data for notification channel group. String.
+    FIELD_NOTIFICATION_CHANNEL_GROUP_ID = 860;
+
+    // OPEN: Settings > Wi-Fi > Wifi Preferences -> Advanced -> Network Scorer
+    // CATEGORY: SETTINGS
+    // OS: O
+    SETTINGS_NETWORK_SCORER = 861;
+
+    // OPEN: Settings > About device > Model > Hardware info dialog
+    DIALOG_SETTINGS_HARDWARE_INFO = 862;
+
+    // ACTION: Checks whether a contact's phone still exists
+    // Value 0: It doesn't exist anymore
+    // Value 1: It still exists
+    // Value 2: A SecurityException was thrown
+    // CATEGORY: SETTINGS
+    // OS: N
+    ACTION_PHONE_EXISTS = 863;
+
+    // ACTION: Retrieves a contact from CP2
+    // Value 0: Contact retrieved without issues
+    // Value 1: An IllegalArgumentException was thrown
+    // CATEGORY: SETTINGS
+    // OS: N
+    ACTION_GET_CONTACT = 864;
+
+    // This value should never appear in log outputs - it is reserved for
+    // internal platform metrics use.
+    RESERVED_FOR_LOGBUILDER_PID = 865;
+
+    // ACTION: Settings > Connected devices > Bluetooth -> Available devices
+    ACTION_SETTINGS_BLUETOOTH_PAIR = 866;
+
+    // ACTION: Settings > Connected devices > Bluetooth -> Paired devices
+    ACTION_SETTINGS_BLUETOOTH_CONNECT = 867;
+
+    // ACTION: Settings > Connected devices > Bluetooth -> Connected device
+    ACTION_SETTINGS_BLUETOOTH_DISCONNECT = 868;
+
+    // ACTION: Settings > Connected devices > Bluetooth -> Error dialog
+    ACTION_SETTINGS_BLUETOOTH_CONNECT_ERROR = 869;
+
+    // ACTION: Settings > Connected devices > Bluetooth master switch Toggle
+    ACTION_SETTINGS_MASTER_SWITCH_BLUETOOTH_TOGGLE = 870;
+
+    // The name of the activity being launched in an app transition event.
+    FIELD_CLASS_NAME = 871;
+
+    // ACTION: Settings > App detail > Uninstall
+    ACTION_SETTINGS_UNINSTALL_APP = 872;
+
+    // ACTION: Settings > App detail > Uninstall Device admin app
+    ACTION_SETTINGS_UNINSTALL_DEVICE_ADMIN = 873;
+
+    // ACTION: Settings > App detail > Disable app
+    ACTION_SETTINGS_DISABLE_APP = 874;
+
+    // ACTION: Settings > App detail > Enable app
+    ACTION_SETTINGS_ENABLE_APP = 875;
+
+    // ACTION: Settings > App detail > Clear data
+    ACTION_SETTINGS_CLEAR_APP_DATA = 876;
+
+    // ACTION: Settings > App detail > Clear cache
+    ACTION_SETTINGS_CLEAR_APP_CACHE = 877;
+
+    // ACTION: Clicking on any search result in Settings.
+    ACTION_CLICK_SETTINGS_SEARCH_INLINE_RESULT = 878;
+
+    // FIELD: Settings inline search result name
+    FIELD_SETTINGS_SEARCH_INLINE_RESULT_NAME = 879;
+
+    // FIELD: Settings inline search result value
+    FIELD_SETTINGS_SEARCH_INLINE_RESULT_VALUE = 880;
+
+    // ACTION: Settings > Search > Click saved queries
+    ACTION_CLICK_SETTINGS_SEARCH_SAVED_QUERY = 881;
+
+    // OPEN: Settings > Security & screen lock -> Lock screen preferences
+    // CATEGORY: SETTINGS
+    SETTINGS_LOCK_SCREEN_PREFERENCES = 882;
+
+    // ACTION: An app requested the app-op permission ACCESS_NOTIFICATIONS
+    // PACKAGE: The package name of the app requesting the permission
+    ACTION_APPOP_REQUEST_ACCESS_NOTIFICATIONS = 883;
+
+    // ACTION: An app was granted the app-op permission ACCESS_NOTIFICATIONS
+    // PACKAGE: The package name of the app that was granted the permission
+    ACTION_APPOP_GRANT_ACCESS_NOTIFICATIONS = 884;
+
+    // ACTION: An app requested the app-op permission ACCESS_NOTIFICATIONS and the request was denied
+    // PACKAGE: The package name of the app requesting the permission
+    ACTION_APPOP_DENIED_ACCESS_NOTIFICATIONS = 885;
+
+    // ACTION: The app-op permission ACCESS_NOTIFICATIONS was revoked for an app
+    // PACKAGE: The package name of the app the permission was revoked for
+    ACTION_APPOP_REVOKE_ACCESS_NOTIFICATIONS = 886;
+
+    // ACTION: An app requested the app-op permission SYSTEM_ALERT_WINDOW
+    // PACKAGE: The package name of the app requesting the permission
+    ACTION_APPOP_REQUEST_SYSTEM_ALERT_WINDOW = 887;
+
+    // ACTION: An app was granted the app-op permission SYSTEM_ALERT_WINDOW
+    // PACKAGE: The package name of the app that was granted the permission
+    ACTION_APPOP_GRANT_SYSTEM_ALERT_WINDOW = 888;
+
+    // ACTION: An app requested the app-op permission SYSTEM_ALERT_WINDOW and the request was denied
+    // PACKAGE: The package name of the app requesting the permission
+    ACTION_APPOP_DENIED_SYSTEM_ALERT_WINDOW = 889;
+
+    // ACTION: The app-op permission SYSTEM_ALERT_WINDOW was revoked for an app
+    // PACKAGE: The package name of the app the permission was revoked for
+    ACTION_APPOP_REVOKE_SYSTEM_ALERT_WINDOW = 890;
+
+    // ACTION: An app requested the app-op permission REQUEST_WRITE_SETTINGS
+    // PACKAGE: The package name of the app requesting the permission
+    ACTION_APPOP_REQUEST_WRITE_SETTINGS = 891;
+
+    // ACTION: An app was granted the app-op permission REQUEST_WRITE_SETTINGS
+    // PACKAGE: The package name of the app that was granted the permission
+    ACTION_APPOP_GRANT_WRITE_SETTINGS = 892;
+
+    // ACTION: An app requested the app-op permission REQUEST_WRITE_SETTINGS and the request was denied
+    // PACKAGE: The package name of the app requesting the permission
+    ACTION_APPOP_DENIED_WRITE_SETTINGS = 893;
+
+    // ACTION: The app-op permission REQUEST_WRITE_SETTINGS was revoked for an app
+    // PACKAGE: The package name of the app the permission was revoked for
+    ACTION_APPOP_REVOKE_WRITE_SETTINGS = 894;
+
+    // ACTION: An app requested the app-op permission REQUEST_INSTALL_PACKAGES
+    // PACKAGE: The package name of the app requesting the permission
+    ACTION_APPOP_REQUEST_REQUEST_INSTALL_PACKAGES = 895;
+
+    // ACTION: An app was granted the app-op permission REQUEST_INSTALL_PACKAGES
+    // PACKAGE: The package name of the app that was granted the permission
+    ACTION_APPOP_GRANT_REQUEST_INSTALL_PACKAGES = 896;
+
+    // ACTION: An app requested the app-op permission REQUEST_INSTALL_PACKAGES and the request was denied
+    // PACKAGE: The package name of the app requesting the permission
+    ACTION_APPOP_DENIED_REQUEST_INSTALL_PACKAGES = 897;
+
+    // ACTION: The app-op permission REQUEST_INSTALL_PACKAGES was revoked for an app
+    // PACKAGE: The package name of the app the permission was revoked for
+    ACTION_APPOP_REVOKE_REQUEST_INSTALL_PACKAGES = 898;
+
+    // ACTION: Phase 1 of instant application resolution occurred
+    // OS: O
+    ACTION_INSTANT_APP_RESOLUTION_PHASE_ONE = 899;
+
+    // ACTION: Phase 2 of instant application resolution occurred
+    // OS: O
+    ACTION_INSTANT_APP_RESOLUTION_PHASE_TWO = 900;
+
+    // FIELD: The amount of time for an ephemeral resolution phase; in milliseconds
+    // OS: O
+    FIELD_INSTANT_APP_RESOLUTION_DELAY_MS = 901;
+
+    // FIELD: The status of an ephemeral resolution phase
+    // Value 0: success
+    // Value 1: no full hash match
+    // OS: O
+    FIELD_INSTANT_APP_RESOLUTION_STATUS = 902;
+
+    // FIELD - A token to identify all events that are part of the same instant application launch
+    // OS: O
+    FIELD_INSTANT_APP_LAUNCH_TOKEN = 903;
+
+    // FIELD - The name of the package responsible for launching the activity
+    // OS: O
+    APP_TRANSITION_CALLING_PACKAGE_NAME = 904;
+
+    // FIELD - Whether or not the launched activity is part of an instant application
+    // OS: O
+    APP_TRANSITION_IS_EPHEMERAL = 905;
+
+    // An autofill session was started
+    // Package: Package of app that is autofilled
+    AUTOFILL_SESSION_STARTED = 906;
+
+    // An autofill request was processed by a service
+    // Type TYPE_SUCCESS: The request succeeded
+    // Type TYPE_FAILURE: The request failed
+    // Package: Package of app that is autofilled
+    // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
+    // Tag FIELD_AUTOFILL_NUM_DATASET: The number of datasets returned (only in success case)
+    AUTOFILL_REQUEST = 907;
+
+    // Tag of a field for a package of an autofill service
+    FIELD_AUTOFILL_SERVICE = 908;
+
+    // Tag of a field for the number of datasets
+    FIELD_AUTOFILL_NUM_DATASETS = 909;
+
+    // An autofill dataset selection UI was shown
+    // Type TYPE_DISMISS: UI was explicityly canceled by the user
+    // Type TYPE_CLOSE: UI was destroyed without influence of the user
+    // Type TYPE_ACTION: dataset was selected
+    // Type TYPE_DETAIL: authentication was selected
+    // Package: Package of app that was autofilled
+    // Tag FIELD_AUTOFILL_FILTERTEXT_LEN: The length of the filter text
+    // Tag FIELD_AUTOFILL_NUM_DATASETS: The number of datasets shown
+    AUTOFILL_FILL_UI = 910;
+
+    // Tag of a field for the length of the filter text
+    FIELD_AUTOFILL_FILTERTEXT_LEN = 911;
+
+    // An autofill authentification succeeded
+    // Package: Package of app that was autofilled
+    AUTOFILL_AUTHENTICATED = 912;
+
+    // An activity was autofilled and all values could be applied
+    // Package: Package of app that is autofilled
+    // Tag FIELD_AUTOFILL_NUM_VALUES: Number of values that were suggested to be autofilled
+    // Tag FIELD_AUTOFILL_NUM_VIEWS_FILLED: Number of views that could be filled
+    AUTOFILL_DATASET_APPLIED = 913;
+
+    // Tag of a field for the number values to be filled in
+    FIELD_AUTOFILL_NUM_VALUES = 914;
+
+    // Tag of a field for the number of views that were filled
+    FIELD_AUTOFILL_NUM_VIEWS_FILLED = 915;
+
+    // An autofill save UI was shown
+    // Type TYPE_DISMISS: UI was explicityly canceled by the user
+    // Type TYPE_CLOSE: UI was destroyed without influence of the user
+    // Type TYPE_ACTION: data was saved
+    // Package: Package of app that was autofilled
+    // Tag FIELD_AUTOFILL_NUM_ID: The number of ids that are saved
+    AUTOFILL_SAVE_UI = 916;
+
+    // Tag of a field for the number of saveable ids
+    FIELD_AUTOFILL_NUM_IDS = 917;
+
+    // ACTION: An autofill service was reqiested to save data
+    // Type TYPE_SUCCESS: The request succeeded
+    // Type TYPE_FAILURE: The request failed
+    // Package: Package of app that was autofilled
+    // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
+    AUTOFILL_DATA_SAVE_REQUEST = 918;
+
+    // An auto-fill session was finished
+    // Package: Package of app that was autofilled
+    AUTOFILL_SESSION_FINISHED = 919;
+
+    // meta-event: a reader has checkpointed the log here.
+    METRICS_CHECKPOINT = 920;
+
+    // OPEN: Settings -> Display -> When in VR Mode
+    VR_DISPLAY_PREFERENCE = 921;
+
+    // OPEN: Settings > Accessibility > Magnification
+    // CATEGORY: SETTINGS
+    // OS: O
+    ACCESSIBILITY_SCREEN_MAGNIFICATION_SETTINGS = 922;
+
+    // ACTION: Logs pressing the "Clear app" button in the app info settings page for an instant
+    // app.
+    // VALUE: The package name of the app
+    ACTION_SETTINGS_CLEAR_INSTANT_APP = 923;
+
+    // OPEN: Settings -> System -> Reset options
+    RESET_DASHBOARD = 924;
+
+    // ACTION: QS -> Tile clicked
+    ACTION_QS_CLICK = 925;
+
+    // ACTION: QS -> Secondary click
+    ACTION_QS_SECONDARY_CLICK = 926;
+
+    // FIELD: Position info in QS clicks
+    FIELD_QS_POSITION = 927;
+
+    // FIELD: The value of a QS tile when clicked (if applicable)
+    FIELD_QS_VALUE = 928;
+
+    // ACTION: QS -> Detail panel -> more settings
+    ACTION_QS_MORE_SETTINGS = 929;
+
+    // ACTION: QS -> Click date
+    ACTION_QS_DATE = 930;
+
+    // ACTION: Event on nav button
+    ACTION_NAV_BUTTON_EVENT = 931;
+
+    // FIELD: Flags for a nav button event
+    FIELD_FLAGS = 932;
+
+    // FIELD: Action for a nav button event
+    FIELD_NAV_ACTION = 933;
+
+    // OPEN: Settings > Security > Nexus Imprint > [Fingerprint] > Delete
+    // CATEGORY: SETTINGS
+    // OS: O
+    FINGERPRINT_REMOVE_SIDECAR = 934;
+
+    // OPEN: Settings > Storage > Movies & TV
+    // CATEGORY: SETTINGS
+    // OS: O
+    APPLICATIONS_STORAGE_MOVIES = 935;
+
+    // OPEN: Text selection "assist" menu item shown.
+    //  SUBTYPE: 1 is for EMAIL, 2 is for PHONE, 3 is for ADDRESS, 4 is for URL, 0 is for OTHER.
+    // CATEGORY: TEXT_CONTROLS
+    // OS: O
+    TEXT_SELECTION_MENU_ITEM_ASSIST = 936;
+
+    // ACTION: Text selection "assist" menu item clicked.
+    //  SUBTYPE: 1 is for EMAIL, 2 is for PHONE, 3 is for ADDRESS, 4 is for URL, 0 is for OTHER.
+    // CATEGORY: TEXT_CONTROLS
+    // OS: O
+    ACTION_TEXT_SELECTION_MENU_ITEM_ASSIST = 937;
+
+    // OPEN: Settings > Security > Managed Device Info > Apps installed
+    // CATEGORY: SETTINGS
+    // OS: O
+    ENTERPRISE_PRIVACY_INSTALLED_APPS = 938;
+
+    // OPEN: Settings > Security > Managed Device Info > nnn permissions
+    // CATEGORY: SETTINGS
+    // OS: O
+    ENTERPRISE_PRIVACY_PERMISSIONS = 939;
+
+    // OPEN: Settings > Security > Managed Device Info > Default apps
+    // CATEGORY: SETTINGS
+    // OS: O
+    ENTERPRISE_PRIVACY_DEFAULT_APPS = 940;
+
+    // OPEN: Settings > Notifications > An app > A channel > Importance
+    // CATEGORY: SETTINGS
+    // OS: O
+    NOTIFICATION_CHANNEL_IMPORTANCE = 941;
+
+    // OPEN: Settings > Notifications > An app > A channel > On the lock screen
+    // CATEGORY: SETTINGS
+    // OS: O
+    NOTIFICATION_CHANNEL_LOCK_SCREEN_VIS = 942;
+
+    // This value should never appear in log outputs - it is reserved for
+    // internal platform metrics use.
+    RESERVED_FOR_LOGBUILDER_UID = 943;
+
+    // OPEN: Running background apps notification > List of background apps
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: O
+    RUNNING_BACKGROUND_APPS_DIALOG = 944;
+
+    // FIELD - The delay from the start of the transition until we just call bindApplication on the
+    // client.
+    // OS: O
+    APP_TRANSITION_BIND_APPLICATION_DELAY_MS = 945;
+
+    // FIELD - The group ID of a notification.
+    // Type: string
+    // OS: O
+    FIELD_NOTIFICATION_GROUP_ID = 946;
+
+    // FIELD - If the notification is a group summary: 1.
+    // Type: int encoded boolean
+    // OS: O
+    FIELD_NOTIFICATION_GROUP_SUMMARY = 947;
+
+    // ---- End O Constants, all O constants go above this line ----
+
+    // OPEN: Settings > System > Languages & input > Advanced > Lift to open camera
+    SETTINGS_GESTURE_CAMERA_LIFT_TRIGGER = 986;
+
+    // OPEN: Settings > Battery > High Usage > Abnormal app page
+    // CATEGORY: SETTINGS
+    FUELGAUGE_ANOMALY_DETAIL = 987;
+
+    // OPEN: Settings > Battery > High Usage
+    DIALOG_HANDLE_ANOMALY = 988;
+
+    // ACTION: Camera lift gesture
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: O
+    ACTION_CAMERA_LIFT_TRIGGER = 989;
+
+    // OPEN: Choose screen lock dialog in Settings
+    // CATEGORY: SETTINGS
+    // OS: O DR
+    SETTINGS_CHOOSE_LOCK_DIALOG = 990;
+
+    // OPEN: Assist Gesture training intro in Settings
+    // CATEGORY: SETTINGS
+    // OS: O DR
+    SETTINGS_ASSIST_GESTURE_TRAINING_INTRO = 991;
+
+    // OPEN: Assist Gesture training enrolling in Settings
+    // CATEGORY: SETTINGS
+    // OS: O DR
+    SETTINGS_ASSIST_GESTURE_TRAINING_ENROLLING = 992;
+
+    // OPEN: Assist Gesture training finished in Settings
+    // CATEGORY: SETTINGS
+    // OS: O DR
+    SETTINGS_ASSIST_GESTURE_TRAINING_FINISHED = 993;
+
+    // FIELD: The numeric preference value (of type long) when it is changed in Settings
+    FIELD_SETTINGS_PREFERENCE_CHANGE_LONG_VALUE = 994;
+
+    // FIELD: The numeric preference value (of type float) when it is changed in Settings
+    FIELD_SETTINGS_PREFERENCE_CHANGE_FLOAT_VALUE = 995;
+
+    // OPEN: Settings > System > Languages & input > Assist gesture
+    // CATEGORY: SETTINGS
+    // OS: O DR
+    SETTINGS_ASSIST_GESTURE = 996;
+
+    // ACTION: Assist gesture released without triggering
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: O DR
+    ASSIST_GESTURE_RELEASED = 997;
+
+    // ACTION: Assist gesture primed
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: O DR
+    ASSIST_GESTURE_PRIMED = 998;
+
+    // ACTION: Assist gesture triggered
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: O DR
+    ASSIST_GESTURE_TRIGGERED = 999;
+
+    // ACTION: Update default app from Settings
+    ACTION_SETTINGS_UPDATE_DEFAULT_APP = 1000;
+
+    // FIELD - Query length when Settings search result is clicked
+    FIELD_SETTINGS_SERACH_QUERY_LENGTH = 1001;
+
+    // FIELD - Number of results when Settings search result is clicked
+    FIELD_SETTINGS_SERACH_RESULT_COUNT = 1002;
+
+    // OPEN: Settings > Display > Ambient Display
+    // CATEGORY: SETTINGS
+    // OS: O DR
+    AMBIENT_DISPLAY_SETTINGS = 1003;
+
+    // ACTION: CaptivePortalLoginActivity starts
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: O DR
+    ACTION_CAPTIVE_PORTAL_LOGIN_ACTIVITY = 1004;
+
+    // ACTION: CaptivePortalLoginActivity auto-closes
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: O DR
+    ACTION_CAPTIVE_PORTAL_LOGIN_RESULT_DISMISSED = 1005;
+
+    // ACTION: CaptivePortalLoginActivity > Menu > Do not use this network
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: O DR
+    ACTION_CAPTIVE_PORTAL_LOGIN_RESULT_UNWANTED = 1006;
+
+    // ACTION: CaptivePortalLoginActivity > Menu > Use this network
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: O DR
+    ACTION_CAPTIVE_PORTAL_LOGIN_RESULT_WANTED_AS_IS = 1007;
+
+    // ACTION: Settings > Wi-Fi > [Long press network] > Sign in to network
+    // CATEGORY: SETTINGS
+    // OS: O DR
+    ACTION_WIFI_SIGNIN = 1008;
+
+    // OPEN: Settings->Connected Devices->Bluetooth->(click on details link for a paired device)
+    // CATEGORY: SETTINGS
+    // OS: O DR
+    BLUETOOTH_DEVICE_DETAILS = 1009;
+
+    // OPEN: Settings > credential pages - prompt for key guard configuration confirmation
+    CONFIGURE_KEYGUARD_DIALOG = 1010;
+
+    // Open: Settings > Search > No Result View
+    SETTINGS_SEARCH_NO_RESULT = 1011;
+
+    // OPEN: Assist Gesture before training
+    // CATEGORY: SETTINGS
+    // OS: O DR
+    SETTINGS_ASSIST_GESTURE_FIRST_TIME = 1012;
+
+    // CaptivePortalLoginActivity displays SSL error page
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: O DR
+    CAPTIVE_PORTAL_LOGIN_ACTIVITY_SSL_ERROR = 1013;
+
+    // OPEN: Settings > Network > Tether > Wi-Fi hotspot
+    WIFI_TETHER_SETTINGS = 1014;
+
+    // OPEN: Settings->Connected Devices->Bluetooth->(click on details link for a paired device)
+    // -> Edit name button.
+    // CATEGORY: SETTINGS
+    // OS: O DR
+    DIALOG_BLUETOOTH_PAIRED_DEVICE_RENAME = 1015;
+
+    // ACTION: Settings > Notification Settings > Open application notification
+    // CATEGORY: SETTINGS
+    // OS: O DR
+    ACTION_OPEN_APP_NOTIFICATION_SETTING = 1016;
+
+    // ACTION: Settings > App Info > Open app settings
+    // CATEGORY: SETTINGS
+    // OS: O DR
+    ACTION_OPEN_APP_SETTING = 1017;
+
+    // OPEN: Settings > Connected devices > Bluetooth > Pair new device
+    // CATEGORY: SETTINGS
+    // OS: O DR
+    BLUETOOTH_PAIRING = 1018;
+
+    // ACTION: Collect PSD Signals
+    // CATEGORY: SETTINGS
+    // OS: O DR
+    ACTION_PSD_LOADER = 1019;
+
+    // ACTION: Background check action on an app
+    // CATEGORY: SETTINGS
+    // OS: O DR
+    ACTION_APP_BACKGROUND_CHECK = 1020;
+
+    // ACTION: Location check action on an app
+    // CATEGORY: SETTINGS
+    // OS: O DR
+    ACTION_APP_LOCATION_CHECK = 1021;
+
+    // Device headset status
+    // CATEGORY: OTHER
+    //  SUBTYPE: 1 is DON, 2 is DOFF
+    // OS: O DR
+    ACTION_HEADSET_STATUS = 1022;
+
+    // Device Headset Plug status
+    // CATEGORY: OTHER
+    //  SUBTYPE: 1 is AC power, 2 is USB power, 3 is Unplug
+    // OS: O DR
+    ACTION_HEADSET_PLUG = 1023;
+
+    // Device Headset battery level on Plug
+    // CATEGORY: OTHER
+    // FIELD - The battery percentage when the user decided to plug in
+    // Type: integer
+    // OS: O DR
+    FIELD_PLUG_BATTERY_PERCENTAGE = 1024;
+
+    // Device Headset battery level on Plug
+    // CATEGORY: OTHER
+    // FIELD - The battery percentage when the user decided to plug in
+    // Type: integer
+    // OS: O DR
+    FIELD_UNPLUG_BATTERY_PERCENTAGE = 1025;
+
+    // Device Headset Pose status
+    // CATEGORY: OTHER
+    //  SUBTYPE: 1 is 6DOF, 2 is 3DOF
+    // OS: O DR
+    ACTION_HEADSET_POSE_STATUS = 1026;
+
+    // Device Headset Usage session time
+    // CATEGORY: OTHER
+    // FIELD - The time the headset was used in a session
+    // OS: O DR
+    FIELD_SESSION_TIME_MS = 1027;
+
+    // Device Headset Idle time
+    // CATEGORY: OTHER
+    // FIELD - The time in between each session
+    // OS: O DR
+    FIELD_TIME_ELAPSED_BETWEEN_SESSION_MS = 1028;
+
+    // Device Headset charge session time
+    // CATEGORY: OTHER
+    // FIELD - The time taken for each charge
+    // OS: O DR
+    FIELD_TIME_OF_CHARGE_MS = 1029;
+
+    // Device Headset time between charge
+    // CATEGORY: OTHER
+    // FIELD - The time in between each charge
+    // OS: O DR
+    FIELD_TIME_ELAPSED_BETWEEN_CHARGE_MS = 1030;
+
+    // OPEN: Settings->Connected Devices->Bluetooth->(click on details link for a paired device)
+    // -> Forget button.
+    // CATEGORY: SETTINGS
+    // OS: O DR
+    DIALOG_BLUETOOTH_PAIRED_DEVICE_FORGET = 1031;
+
+    // An event from the camera service
+    // CATEGORY: OTHER
+    //  SUBTYPE: CameraEvent
+    // OS: O DR
+    ACTION_CAMERA_EVENT = 1032;
+
+    // OPEN: Settings > Trampoline Intent > Settings page
+    // CATEGORY: SETTINGS
+    // OS: O DR
+    TRAMPOLINE_SETTINGS_EVENT = 1033;
+
+    // ---- End O-DR1 Constants, all O-DR1 constants go above this line ----
 
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS

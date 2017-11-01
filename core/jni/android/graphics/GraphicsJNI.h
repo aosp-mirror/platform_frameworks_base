@@ -5,14 +5,15 @@
 #include "SkBitmap.h"
 #include "SkBRDAllocator.h"
 #include "SkCodec.h"
-#include "SkDevice.h"
 #include "SkPixelRef.h"
 #include "SkMallocPixelRef.h"
 #include "SkPoint.h"
 #include "SkRect.h"
-#include "SkImageDecoder.h"
+#include "SkColorSpace.h"
+#include "SkMatrix44.h"
 #include <jni.h>
 #include <hwui/Canvas.h>
+#include <hwui/Bitmap.h>
 
 class SkBitmapRegionDecoder;
 class SkCanvas;
@@ -24,10 +25,19 @@ struct Typeface;
 
 class GraphicsJNI {
 public:
-    enum BitmapCreateFlags {
-        kBitmapCreateFlag_None = 0x0,
-        kBitmapCreateFlag_Mutable = 0x1,
-        kBitmapCreateFlag_Premultiplied = 0x2,
+    // This enum must keep these int values, to match the int values
+    // in the java Bitmap.Config enum.
+    enum LegacyBitmapConfig {
+        kNo_LegacyBitmapConfig          = 0,
+        kA8_LegacyBitmapConfig          = 1,
+        kIndex8_LegacyBitmapConfig      = 2,
+        kRGB_565_LegacyBitmapConfig     = 3,
+        kARGB_4444_LegacyBitmapConfig   = 4,
+        kARGB_8888_LegacyBitmapConfig   = 5,
+        kRGBA_16F_LegacyBitmapConfig    = 6,
+        kHardware_LegacyBitmapConfig    = 7,
+
+        kLastEnum_LegacyBitmapConfig = kHardware_LegacyBitmapConfig
     };
 
     // returns true if an exception is set (and dumps it out to the Log)
@@ -52,14 +62,13 @@ public:
     static void point_to_jpointf(const SkPoint& point, JNIEnv*, jobject jpointf);
 
     static android::Canvas* getNativeCanvas(JNIEnv*, jobject canvas);
-    static android::Bitmap* getBitmap(JNIEnv*, jobject bitmap);
     static void getSkBitmap(JNIEnv*, jobject bitmap, SkBitmap* outBitmap);
     static SkPixelRef* refSkPixelRef(JNIEnv*, jobject bitmap);
     static SkRegion* getNativeRegion(JNIEnv*, jobject region);
 
     // Given the 'native' long held by the Rasterizer.java object, return a
     // ref to its SkRasterizer* (or NULL).
-    static SkRasterizer* refNativeRasterizer(jlong rasterizerHandle);
+    static sk_sp<SkRasterizer> refNativeRasterizer(jlong rasterizerHandle);
 
     /*
      *  LegacyBitmapConfig is the old enum in Skia that matched the enum int values
@@ -74,33 +83,14 @@ public:
     */
     static SkColorType getNativeBitmapColorType(JNIEnv*, jobject jconfig);
 
-    /*
-     * Create a java Bitmap object given the native bitmap
-     * bitmap's SkAlphaType must already be in sync with bitmapCreateFlags.
-    */
-    static jobject createBitmap(JNIEnv* env, android::Bitmap* bitmap,
-            int bitmapCreateFlags, jbyteArray ninePatchChunk = NULL,
-            jobject ninePatchInsets = NULL, int density = -1);
-
-    /** Reinitialize a bitmap. bitmap must already have its SkAlphaType set in
-        sync with isPremultiplied
-    */
-    static void reinitBitmap(JNIEnv* env, jobject javaBitmap, const SkImageInfo& info,
-            bool isPremultiplied);
-
-    static int getBitmapAllocationByteCount(JNIEnv* env, jobject javaBitmap);
+    static bool isHardwareConfig(JNIEnv* env, jobject jconfig);
+    static jint hardwareLegacyBitmapConfig();
 
     static jobject createRegion(JNIEnv* env, SkRegion* region);
 
     static jobject createBitmapRegionDecoder(JNIEnv* env, SkBitmapRegionDecoder* bitmap);
 
-    static android::Bitmap* allocateJavaPixelRef(JNIEnv* env, SkBitmap* bitmap,
-            SkColorTable* ctable);
-
-    static android::Bitmap* allocateAshmemPixelRef(JNIEnv* env, SkBitmap* bitmap,
-            SkColorTable* ctable);
-
-    static android::Bitmap* mapAshmemPixelRef(JNIEnv* env, SkBitmap* bitmap,
+    static android::Bitmap* mapAshmemBitmap(JNIEnv* env, SkBitmap* bitmap,
             SkColorTable* ctable, int fd, void* addr, size_t size, bool readOnly);
 
     /**
@@ -118,17 +108,24 @@ public:
     static bool SetPixels(JNIEnv* env, jintArray colors, int srcOffset,
             int srcStride, int x, int y, int width, int height,
             const SkBitmap& dstBitmap);
+
+    static sk_sp<SkColorSpace> defaultColorSpace();
+    static sk_sp<SkColorSpace> linearColorSpace();
+    static sk_sp<SkColorSpace> colorSpaceForType(SkColorType type);
+    static bool isColorSpaceSRGB(SkColorSpace* colorSpace);
+
+    static SkColorSpaceTransferFn getNativeTransferParameters(JNIEnv* env, jobject transferParams);
+    static SkMatrix44 getNativeXYZMatrix(JNIEnv* env, jfloatArray xyzD50);
+    static sk_sp<SkColorSpace> getNativeColorSpace(JNIEnv* env, jobject colorSpace);
+
+    static jobject getColorSpace(JNIEnv* env, sk_sp<SkColorSpace>& decodeColorSpace,
+            SkColorType decodeColorType);
 };
 
-/** Allocator which allocates the backing buffer in the Java heap.
- *  Instances can only be used to perform a single allocation, which helps
- *  ensure that the allocated buffer is properly accounted for with a
- *  reference in the heap (or a JNI global reference).
- */
-class JavaPixelAllocator : public SkBRDAllocator {
+class HeapAllocator : public SkBRDAllocator {
 public:
-    explicit JavaPixelAllocator(JNIEnv* env);
-    ~JavaPixelAllocator();
+   HeapAllocator() { };
+    ~HeapAllocator() { };
 
     virtual bool allocPixelRef(SkBitmap* bitmap, SkColorTable* ctable) override;
 
@@ -136,20 +133,12 @@ public:
      * Fetches the backing allocation object. Must be called!
      */
     android::Bitmap* getStorageObjAndReset() {
-        android::Bitmap* result = mStorage;
-        mStorage = NULL;
-        return result;
+        return mStorage.release();
     };
 
-    /**
-     *  Indicates that this allocator allocates zero initialized
-     *  memory.
-     */
     SkCodec::ZeroInitialized zeroInit() const override { return SkCodec::kYes_ZeroInitialized; }
-
 private:
-    JavaVM* mJavaVM;
-    android::Bitmap* mStorage = nullptr;
+    sk_sp<android::Bitmap> mStorage;
 };
 
 /**
@@ -216,17 +205,15 @@ private:
 class AshmemPixelAllocator : public SkBitmap::Allocator {
 public:
     explicit AshmemPixelAllocator(JNIEnv* env);
-    ~AshmemPixelAllocator();
+    ~AshmemPixelAllocator() { };
     virtual bool allocPixelRef(SkBitmap* bitmap, SkColorTable* ctable);
     android::Bitmap* getStorageObjAndReset() {
-        android::Bitmap* result = mStorage;
-        mStorage = NULL;
-        return result;
+        return mStorage.release();
     };
 
 private:
     JavaVM* mJavaVM;
-    android::Bitmap* mStorage = nullptr;
+    sk_sp<android::Bitmap> mStorage;
 };
 
 

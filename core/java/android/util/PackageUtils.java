@@ -30,7 +30,6 @@ import java.security.NoSuchAlgorithmException;
  * @hide
  */
 public final class PackageUtils {
-    private final static char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
 
     private PackageUtils() {
         /* hide constructor */
@@ -81,16 +80,6 @@ public final class PackageUtils {
 
         messageDigest.update(data);
 
-        final byte[] digest = messageDigest.digest();
-        final int digestLength = digest.length;
-        final int charCount = 2 * digestLength;
-
-        final char[] chars = new char[charCount];
-        for (int i = 0; i < digestLength; i++) {
-            final int byteHex = digest[i] & 0xFF;
-            chars[i * 2] = HEX_ARRAY[byteHex >>> 4];
-            chars[i * 2 + 1] = HEX_ARRAY[byteHex & 0x0F];
-        }
-        return new String(chars);
+        return ByteStringUtils.toHexString(messageDigest.digest());
     }
 }

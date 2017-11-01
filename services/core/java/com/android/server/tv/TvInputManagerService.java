@@ -23,15 +23,12 @@ import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
-import android.content.ContentProviderOperation;
-import android.content.ContentProviderResult;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.OperationApplicationException;
 import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
@@ -80,16 +77,14 @@ import android.view.Surface;
 
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.SomeArgs;
+import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.IoThread;
 import com.android.server.SystemService;
 
-import org.xmlpull.v1.XmlPullParserException;
-
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -107,10 +102,17 @@ import java.util.regex.Pattern;
 public final class TvInputManagerService extends SystemService {
     private static final boolean DEBUG = false;
     private static final String TAG = "TvInputManagerService";
+    private static final String DVB_DIRECTORY = "/dev/dvb";
 
-    // Pattern for selecting the DVB frontend devices from the list of files in the /dev directory.
+    // There are two different formats of DVB frontend devices. One is /dev/dvb%d.frontend%d,
+    // another one is /dev/dvb/adapter%d/frontend%d. Followings are the patterns for selecting the
+    // DVB frontend devices from the list of files in the /dev and /dev/dvb/adapter%d directory.
     private static final Pattern sFrontEndDevicePattern =
             Pattern.compile("^dvb([0-9]+)\\.frontend([0-9]+)$");
+    private static final Pattern sAdapterDirPattern =
+            Pattern.compile("^adapter([0-9]+)$");
+    private static final Pattern sFrontEndInAdapterDirPattern =
+            Pattern.compile("^frontend([0-9]+)$");
 
     private final Context mContext;
     private final TvInputHardwareManager mTvInputHardwareManager;
@@ -234,44 +236,6 @@ public final class TvInputManagerService extends SystemService {
                 // the update can be handled in {@link #onSomePackagesChanged}.
                 return true;
             }
-
-            @Override
-            public void onPackageRemoved(String packageName, int uid) {
-                synchronized (mLock) {
-                    UserState userState = getOrCreateUserStateLocked(getChangingUserId());
-                    if (!userState.packageSet.contains(packageName)) {
-                        // Not a TV input package.
-                        return;
-                    }
-                }
-
-                ArrayList<ContentProviderOperation> operations = new ArrayList<>();
-
-                String selection = TvContract.BaseTvColumns.COLUMN_PACKAGE_NAME + "=?";
-                String[] selectionArgs = { packageName };
-
-                operations.add(ContentProviderOperation.newDelete(TvContract.Channels.CONTENT_URI)
-                        .withSelection(selection, selectionArgs).build());
-                operations.add(ContentProviderOperation.newDelete(TvContract.Programs.CONTENT_URI)
-                        .withSelection(selection, selectionArgs).build());
-                operations.add(ContentProviderOperation
-                        .newDelete(TvContract.WatchedPrograms.CONTENT_URI)
-                        .withSelection(selection, selectionArgs).build());
-
-                ContentProviderResult[] results = null;
-                try {
-                    ContentResolver cr = getContentResolverForUser(getChangingUserId());
-                    results = cr.applyBatch(TvContract.AUTHORITY, operations);
-                } catch (RemoteException | OperationApplicationException e) {
-                    Slog.e(TAG, "error in applyBatch", e);
-                }
-
-                if (DEBUG) {
-                    Slog.d(TAG, "onPackageRemoved(packageName=" + packageName + ", uid=" + uid
-                            + ")");
-                    Slog.d(TAG, "results=" + results);
-                }
-            }
         };
         monitor.register(mContext, null, UserHandle.ALL, true);
 
@@ -325,7 +289,7 @@ public final class TvInputManagerService extends SystemService {
                     userState.serviceStateMap.put(component, serviceState);
                     updateServiceConnectionLocked(component, userId);
                 } else {
-                    inputList.addAll(serviceState.hardwareInputList);
+                    inputList.addAll(serviceState.hardwareInputMap.values());
                 }
             } else {
                 try {
@@ -915,7 +879,11 @@ public final class TvInputManagerService extends SystemService {
         public void updateTvInputInfo(TvInputInfo inputInfo, int userId) {
             String inputInfoPackageName = inputInfo.getServiceInfo().packageName;
             String callingPackageName = getCallingPackageName();
-            if (!TextUtils.equals(inputInfoPackageName, callingPackageName)) {
+            if (!TextUtils.equals(inputInfoPackageName, callingPackageName)
+                    && mContext.checkCallingPermission(
+                            android.Manifest.permission.WRITE_SECURE_SETTINGS)
+                                    != PackageManager.PERMISSION_GRANTED) {
+                // Only the app owning the input and system settings are allowed to update info.
                 throw new IllegalArgumentException("calling package " + callingPackageName
                         + " is not allowed to change TvInputInfo for " + inputInfoPackageName);
             }
@@ -968,6 +936,50 @@ public final class TvInputManagerService extends SystemService {
                     UserState userState = getOrCreateUserStateLocked(resolvedUserId);
                     return userState.contentRatingSystemList;
                 }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public void sendTvInputNotifyIntent(Intent intent, int userId) {
+            if (mContext.checkCallingPermission(android.Manifest.permission.NOTIFY_TV_INPUTS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                throw new SecurityException("The caller: " + getCallingPackageName()
+                        + " doesn't have permission: "
+                        + android.Manifest.permission.NOTIFY_TV_INPUTS);
+            }
+            if (TextUtils.isEmpty(intent.getPackage())) {
+                throw new IllegalArgumentException("Must specify package name to notify.");
+            }
+            switch (intent.getAction()) {
+                case TvContract.ACTION_PREVIEW_PROGRAM_BROWSABLE_DISABLED:
+                    if (intent.getLongExtra(TvContract.EXTRA_PREVIEW_PROGRAM_ID, -1) < 0) {
+                        throw new IllegalArgumentException("Invalid preview program ID.");
+                    }
+                    break;
+                case TvContract.ACTION_WATCH_NEXT_PROGRAM_BROWSABLE_DISABLED:
+                    if (intent.getLongExtra(TvContract.EXTRA_WATCH_NEXT_PROGRAM_ID, -1) < 0) {
+                        throw new IllegalArgumentException("Invalid watch next program ID.");
+                    }
+                    break;
+                case TvContract.ACTION_PREVIEW_PROGRAM_ADDED_TO_WATCH_NEXT:
+                    if (intent.getLongExtra(TvContract.EXTRA_PREVIEW_PROGRAM_ID, -1) < 0) {
+                        throw new IllegalArgumentException("Invalid preview program ID.");
+                    }
+                    if (intent.getLongExtra(TvContract.EXTRA_WATCH_NEXT_PROGRAM_ID, -1) < 0) {
+                        throw new IllegalArgumentException("Invalid watch next program ID.");
+                    }
+                    break;
+                default:
+                    throw new IllegalArgumentException("Invalid TV input notifying action: "
+                            + intent.getAction());
+            }
+            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(),
+                    Binder.getCallingUid(), userId, "sendTvInputNotifyIntent");
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                getContext().sendBroadcastAsUser(intent, new UserHandle(resolvedUserId));
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
@@ -1735,17 +1747,46 @@ public final class TvInputManagerService extends SystemService {
 
             final long identity = Binder.clearCallingIdentity();
             try {
-                ArrayList<DvbDeviceInfo> deviceInfos = new ArrayList<>();
+                // Pattern1: /dev/dvb%d.frontend%d
+                ArrayList<DvbDeviceInfo> deviceInfosFromPattern1 = new ArrayList<>();
                 File devDirectory = new File("/dev");
+                boolean dvbDirectoryFound = false;
                 for (String fileName : devDirectory.list()) {
                     Matcher matcher = sFrontEndDevicePattern.matcher(fileName);
                     if (matcher.find()) {
                         int adapterId = Integer.parseInt(matcher.group(1));
                         int deviceId = Integer.parseInt(matcher.group(2));
-                        deviceInfos.add(new DvbDeviceInfo(adapterId, deviceId));
+                        deviceInfosFromPattern1.add(new DvbDeviceInfo(adapterId, deviceId));
+                    }
+                    if (TextUtils.equals("dvb", fileName)) {
+                        dvbDirectoryFound = true;
                     }
                 }
-                return Collections.unmodifiableList(deviceInfos);
+                if (!dvbDirectoryFound) {
+                    return Collections.unmodifiableList(deviceInfosFromPattern1);
+                }
+                File dvbDirectory = new File(DVB_DIRECTORY);
+                // Pattern2: /dev/dvb/adapter%d/frontend%d
+                ArrayList<DvbDeviceInfo> deviceInfosFromPattern2 = new ArrayList<>();
+                for (String fileNameInDvb : dvbDirectory.list()) {
+                    Matcher adapterMatcher = sAdapterDirPattern.matcher(fileNameInDvb);
+                    if (adapterMatcher.find()) {
+                        int adapterId = Integer.parseInt(adapterMatcher.group(1));
+                        File adapterDirectory = new File(DVB_DIRECTORY + "/" + fileNameInDvb);
+                        for (String fileNameInAdapter : adapterDirectory.list()) {
+                            Matcher frontendMatcher = sFrontEndInAdapterDirPattern.matcher(
+                                    fileNameInAdapter);
+                            if (frontendMatcher.find()) {
+                                int deviceId = Integer.parseInt(frontendMatcher.group(1));
+                                deviceInfosFromPattern2.add(
+                                        new DvbDeviceInfo(adapterId, deviceId));
+                            }
+                        }
+                    }
+                }
+                return deviceInfosFromPattern2.isEmpty()
+                        ? Collections.unmodifiableList(deviceInfosFromPattern1)
+                        : Collections.unmodifiableList(deviceInfosFromPattern2);
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
@@ -1759,21 +1800,52 @@ public final class TvInputManagerService extends SystemService {
                 throw new SecurityException("Requires DVB_DEVICE permission");
             }
 
+            File devDirectory = new File("/dev");
+            boolean dvbDeviceFound = false;
+            for (String fileName : devDirectory.list()) {
+                if (TextUtils.equals("dvb", fileName)) {
+                    File dvbDirectory = new File(DVB_DIRECTORY);
+                    for (String fileNameInDvb : dvbDirectory.list()) {
+                        Matcher adapterMatcher = sAdapterDirPattern.matcher(fileNameInDvb);
+                        if (adapterMatcher.find()) {
+                            File adapterDirectory = new File(DVB_DIRECTORY + "/" + fileNameInDvb);
+                            for (String fileNameInAdapter : adapterDirectory.list()) {
+                                Matcher frontendMatcher = sFrontEndInAdapterDirPattern.matcher(
+                                        fileNameInAdapter);
+                                if (frontendMatcher.find()) {
+                                    dvbDeviceFound = true;
+                                    break;
+                                }
+                            }
+                        }
+                        if (dvbDeviceFound) {
+                            break;
+                        }
+                    }
+                }
+                if (dvbDeviceFound) {
+                    break;
+                }
+            }
+
             final long identity = Binder.clearCallingIdentity();
             try {
                 String deviceFileName;
                 switch (device) {
                     case TvInputManager.DVB_DEVICE_DEMUX:
-                        deviceFileName = String.format("/dev/dvb%d.demux%d", info.getAdapterId(),
-                                info.getDeviceId());
+                        deviceFileName = String.format(dvbDeviceFound
+                                ? "/dev/dvb/adapter%d/demux%d" : "/dev/dvb%d.demux%d",
+                                info.getAdapterId(), info.getDeviceId());
                         break;
                     case TvInputManager.DVB_DEVICE_DVR:
-                        deviceFileName = String.format("/dev/dvb%d.dvr%d", info.getAdapterId(),
-                                info.getDeviceId());
+                        deviceFileName = String.format(dvbDeviceFound
+                                ? "/dev/dvb/adapter%d/dvr%d" : "/dev/dvb%d.dvr%d",
+                                info.getAdapterId(), info.getDeviceId());
                         break;
                     case TvInputManager.DVB_DEVICE_FRONTEND:
-                        deviceFileName = String.format("/dev/dvb%d.frontend%d", info.getAdapterId(),
-                                info.getDeviceId());
+                        deviceFileName = String.format(dvbDeviceFound
+                                ? "/dev/dvb/adapter%d/frontend%d" : "/dev/dvb%d.frontend%d",
+                                info.getAdapterId(), info.getDeviceId());
                         break;
                     default:
                         throw new IllegalArgumentException("Invalid DVB device: " + device);
@@ -1882,15 +1954,37 @@ public final class TvInputManagerService extends SystemService {
         }
 
         @Override
+        public void requestChannelBrowsable(Uri channelUri, int userId)
+                throws RemoteException {
+            final String callingPackageName = getCallingPackageName();
+            final long identity = Binder.clearCallingIdentity();
+            final int callingUid = Binder.getCallingUid();
+            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
+                userId, "requestChannelBrowsable");
+            try {
+                Intent intent = new Intent(TvContract.ACTION_CHANNEL_BROWSABLE_REQUESTED);
+                List<ResolveInfo> list = getContext().getPackageManager()
+                    .queryBroadcastReceivers(intent, 0);
+                if (list != null) {
+                    for (ResolveInfo info : list) {
+                        String receiverPackageName = info.activityInfo.packageName;
+                        intent.putExtra(TvContract.EXTRA_CHANNEL_ID, ContentUris.parseId(
+                                channelUri));
+                        intent.putExtra(TvContract.EXTRA_PACKAGE_NAME, callingPackageName);
+                        intent.setPackage(receiverPackageName);
+                        getContext().sendBroadcastAsUser(intent, new UserHandle(resolvedUserId));
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
         @SuppressWarnings("resource")
         protected void dump(FileDescriptor fd, final PrintWriter writer, String[] args) {
             final IndentingPrintWriter pw = new IndentingPrintWriter(writer, "  ");
-            if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
-                    != PackageManager.PERMISSION_GRANTED) {
-                pw.println("Permission Denial: can't dump TvInputManager from pid="
-                        + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid());
-                return;
-            }
+            if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
 
             synchronized (mLock) {
                 pw.println("User Ids (Current user: " + mCurrentUserId + "):");
@@ -2078,7 +2172,7 @@ public final class TvInputManagerService extends SystemService {
         private final ServiceConnection connection;
         private final ComponentName component;
         private final boolean isHardware;
-        private final List<TvInputInfo> hardwareInputList = new ArrayList<>();
+        private final Map<String, TvInputInfo> hardwareInputMap = new HashMap<>();
 
         private ITvInputService service;
         private ServiceCallback callback;
@@ -2189,7 +2283,7 @@ public final class TvInputManagerService extends SystemService {
                 }
 
                 if (serviceState.isHardware) {
-                    serviceState.hardwareInputList.clear();
+                    serviceState.hardwareInputMap.clear();
                     for (TvInputHardwareInfo hardware : mTvInputHardwareManager.getHardwareList()) {
                         try {
                             serviceState.service.notifyHardwareAdded(hardware);
@@ -2256,7 +2350,7 @@ public final class TvInputManagerService extends SystemService {
 
         private void addHardwareInputLocked(TvInputInfo inputInfo) {
             ServiceState serviceState = getServiceStateLocked(mComponent, mUserId);
-            serviceState.hardwareInputList.add(inputInfo);
+            serviceState.hardwareInputMap.put(inputInfo.getId(), inputInfo);
             buildTvInputListLocked(mUserId, null);
         }
 
@@ -2282,15 +2376,7 @@ public final class TvInputManagerService extends SystemService {
             ensureHardwarePermission();
             synchronized (mLock) {
                 ServiceState serviceState = getServiceStateLocked(mComponent, mUserId);
-                boolean removed = false;
-                for (Iterator<TvInputInfo> it = serviceState.hardwareInputList.iterator();
-                        it.hasNext(); ) {
-                    if (it.next().getId().equals(inputId)) {
-                        it.remove();
-                        removed = true;
-                        break;
-                    }
-                }
+                boolean removed = serviceState.hardwareInputMap.remove(inputId) != null;
                 if (removed) {
                     buildTvInputListLocked(mUserId, null);
                     mTvInputHardwareManager.removeHardwareInput(inputId);

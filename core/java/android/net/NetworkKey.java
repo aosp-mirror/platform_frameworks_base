@@ -16,9 +16,15 @@
 
 package android.net;
 
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.net.wifi.ScanResult;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiSsid;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
+import android.util.Log;
 
 import java.util.Objects;
 
@@ -36,6 +42,8 @@ import java.util.Objects;
 // etc.) so that clients can pull out these details depending on the type of network.
 public class NetworkKey implements Parcelable {
 
+    private static final String TAG = "NetworkKey";
+
     /** A wifi network, for which {@link #wifiKey} will be populated. */
     public static final int TYPE_WIFI = 1;
 
@@ -50,6 +58,61 @@ public class NetworkKey implements Parcelable {
      * {@link #TYPE_WIFI}.
      */
     public final WifiKey wifiKey;
+
+    /**
+     * Constructs a new NetworkKey for the given wifi {@link ScanResult}.
+     *
+     * @return  A new {@link NetworkKey} instance or <code>null</code> if the given
+     *          {@link ScanResult} instance is malformed.
+     * @hide
+     */
+    @Nullable
+    public static NetworkKey createFromScanResult(@Nullable ScanResult result) {
+        if (result != null && result.wifiSsid != null) {
+            final String ssid = result.wifiSsid.toString();
+            final String bssid = result.BSSID;
+            if (!TextUtils.isEmpty(ssid) && !ssid.equals(WifiSsid.NONE)
+                    && !TextUtils.isEmpty(bssid)) {
+                WifiKey wifiKey;
+                try {
+                    wifiKey = new WifiKey(String.format("\"%s\"", ssid), bssid);
+                } catch (IllegalArgumentException e) {
+                    Log.e(TAG, "Unable to create WifiKey.", e);
+                    return null;
+                }
+                return new NetworkKey(wifiKey);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Constructs a new NetworkKey for the given {@link WifiInfo}.
+     *
+     * @param wifiInfo the {@link WifiInfo} to create a {@link NetworkKey} for.
+     * @return A new {@link NetworkKey} instance or <code>null</code> if the given {@link WifiInfo}
+     *         instance doesn't represent a connected WiFi network.
+     * @hide
+     */
+    @Nullable
+    public static NetworkKey createFromWifiInfo(@Nullable WifiInfo wifiInfo) {
+        if (wifiInfo != null) {
+            final String ssid = wifiInfo.getSSID();
+            final String bssid = wifiInfo.getBSSID();
+            if (!TextUtils.isEmpty(ssid) && !ssid.equals(WifiSsid.NONE)
+                    && !TextUtils.isEmpty(bssid)) {
+                WifiKey wifiKey;
+                try {
+                    wifiKey = new WifiKey(ssid, bssid);
+                } catch (IllegalArgumentException e) {
+                    Log.e(TAG, "Unable to create WifiKey.", e);
+                    return null;
+                }
+                return new NetworkKey(wifiKey);
+            }
+        }
+        return null;
+    }
 
     /**
      * Construct a new {@link NetworkKey} for a Wi-Fi network.

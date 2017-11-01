@@ -16,13 +16,11 @@
 
 package com.android.systemui.statusbar.phone;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.os.ServiceManager;
+import android.util.SparseArray;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.animation.AccelerateInterpolator;
 
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.R;
@@ -31,6 +29,7 @@ public final class NavigationBarTransitions extends BarTransitions {
 
     private final NavigationBarView mView;
     private final IStatusBarService mBarService;
+    private final LightBarTransitionsController mLightTransitionsController;
 
     private boolean mLightsOut;
 
@@ -39,11 +38,17 @@ public final class NavigationBarTransitions extends BarTransitions {
         mView = view;
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
+        mLightTransitionsController = new LightBarTransitionsController(view.getContext(),
+                this::applyDarkIntensity);
     }
 
     public void init() {
         applyModeBackground(-1, getMode(), false /*animate*/);
         applyMode(getMode(), false /*animate*/, true /*force*/);
+    }
+
+    public LightBarTransitionsController getLightTransitionsController() {
+        return mLightTransitionsController;
     }
 
     @Override
@@ -78,6 +83,18 @@ public final class NavigationBarTransitions extends BarTransitions {
                 .alpha(navButtonsAlpha)
                 .setDuration(duration)
                 .start();
+        }
+    }
+
+
+    public void reapplyDarkIntensity() {
+        applyDarkIntensity(mLightTransitionsController.getCurrentDarkIntensity());
+    }
+
+    public void applyDarkIntensity(float darkIntensity) {
+        SparseArray<ButtonDispatcher> buttonDispatchers = mView.getButtonDispatchers();
+        for (int i = buttonDispatchers.size() - 1; i >= 0; i--) {
+            buttonDispatchers.valueAt(i).setDarkIntensity(darkIntensity);
         }
     }
 

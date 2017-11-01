@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="5934709770924185752">"CaptivePortalLogin"</string>
+    <string name="action_use_network" msgid="6076184727448466030">"Ushbu tarmoqdan o‘z holicha foydalanilsin"</string>
+    <string name="action_do_not_use_network" msgid="4577366536956516683">"Ushbu tarmoqdan foydalanilmasin"</string>
+    <string name="action_bar_label" msgid="917235635415966620">"Tarmoqqa kirish"</string>
+    <string name="action_bar_title" msgid="5645564790486983117">"%1$s hisobiga kirish"</string>
+    <string name="ssl_error_warning" msgid="6653188881418638872">"Siz ulanmoqchi bo‘lgan tarmoqda xavfsizlik bilan bog‘liq muammolar mavjud."</string>
+    <string name="ssl_error_example" msgid="647898534624078900">"Masalan, tizimga kirish sahifasi ko‘rsatilgan tashkilotga tegishli bo‘lmasligi mumkin."</string>
+    <string name="ssl_error_continue" msgid="6492718244923937110">"E’tiborsiz qoldirilsin va brauzer ochilsin"</string>
+</resources>

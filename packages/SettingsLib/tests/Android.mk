@@ -1,4 +1,4 @@
-# Copyright (C) 2015 The Android Open Source Project
+# Copyright (C) 2016 The Android Open Source Project
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,16 +15,5 @@
 LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 
-LOCAL_MODULE_TAGS := tests
-
-LOCAL_SRC_FILES := $(call all-java-files-under, src)
-
-LOCAL_JAVA_LIBRARIES := android.test.runner telephony-common
-
-LOCAL_PACKAGE_NAME := SettingsLibTests
-
-LOCAL_STATIC_JAVA_LIBRARIES := mockito-target
-
-include frameworks/base/packages/SettingsLib/common.mk
-
-include $(BUILD_PACKAGE)
+# Include all makefiles in subdirectories
+include $(call all-makefiles-under,$(LOCAL_PATH))

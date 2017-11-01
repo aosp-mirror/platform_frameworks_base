@@ -17,36 +17,45 @@
 #ifndef AAPT_PROTO_PROTOHELPERS_H
 #define AAPT_PROTO_PROTOHELPERS_H
 
+#include "androidfw/ResourceTypes.h"
+
 #include "ConfigDescription.h"
 #include "ResourceTable.h"
 #include "Source.h"
 #include "StringPool.h"
-
-#include "proto/frameworks/base/tools/aapt2/Format.pb.h"
-
-#include <androidfw/ResourceTypes.h>
+#include "Format.pb.h"
 
 namespace aapt {
 
-void serializeStringPoolToPb(const StringPool& pool, pb::StringPool* outPbPool);
+void SerializeStringPoolToPb(const StringPool& pool,
+                             pb::StringPool* out_pb_pool);
 
-void serializeSourceToPb(const Source& source, StringPool* srcPool, pb::Source* outPbSource);
-void deserializeSourceFromPb(const pb::Source& pbSource, const android::ResStringPool& srcPool,
-                             Source* outSource);
+void SerializeSourceToPb(const Source& source, StringPool* src_pool,
+                         pb::Source* out_pb_source);
 
-pb::SymbolStatus_Visibility serializeVisibilityToPb(SymbolState state);
-SymbolState deserializeVisibilityFromPb(pb::SymbolStatus_Visibility pbVisibility);
+void DeserializeSourceFromPb(const pb::Source& pb_source,
+                             const android::ResStringPool& src_pool,
+                             Source* out_source);
 
-void serializeConfig(const ConfigDescription& config, pb::ConfigDescription* outPbConfig);
-bool deserializeConfigDescriptionFromPb(const pb::ConfigDescription& pbConfig,
-                                        ConfigDescription* outConfig);
+pb::SymbolStatus_Visibility SerializeVisibilityToPb(SymbolState state);
 
-pb::Reference_Type serializeReferenceTypeToPb(Reference::Type type);
-Reference::Type deserializeReferenceTypeFromPb(pb::Reference_Type pbType);
+SymbolState DeserializeVisibilityFromPb(
+    pb::SymbolStatus_Visibility pb_visibility);
 
-pb::Plural_Arity serializePluralEnumToPb(size_t pluralIdx);
-size_t deserializePluralEnumFromPb(pb::Plural_Arity arity);
+void SerializeConfig(const ConfigDescription& config,
+                     pb::ConfigDescription* out_pb_config);
 
-} // namespace aapt
+bool DeserializeConfigDescriptionFromPb(const pb::ConfigDescription& pb_config,
+                                        ConfigDescription* out_config);
+
+pb::Reference_Type SerializeReferenceTypeToPb(Reference::Type type);
+
+Reference::Type DeserializeReferenceTypeFromPb(pb::Reference_Type pb_type);
+
+pb::Plural_Arity SerializePluralEnumToPb(size_t plural_idx);
+
+size_t DeserializePluralEnumFromPb(pb::Plural_Arity arity);
+
+}  // namespace aapt
 
 #endif /* AAPT_PROTO_PROTOHELPERS_H */

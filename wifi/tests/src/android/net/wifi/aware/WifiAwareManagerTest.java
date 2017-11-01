@@ -18,11 +18,10 @@ package android.net.wifi.aware;
 
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.isNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -33,13 +32,12 @@ import android.net.wifi.RttManager;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Parcel;
+import android.os.RemoteException;
 import android.os.test.TestLooper;
 import android.test.suitebuilder.annotation.SmallTest;
-import android.util.Base64;
 
 import libcore.util.HexEncoding;
 
-import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -100,26 +98,6 @@ public class WifiAwareManagerTest {
      */
 
     /**
-     * Validate pass-through of enableUsage() API.
-     */
-    @Test
-    public void testEnableUsage() throws Exception {
-        mDut.enableUsage();
-
-        verify(mockAwareService).enableUsage();
-    }
-
-    /**
-     * Validate pass-through of disableUsage() API.
-     */
-    @Test
-    public void testDisableUsage() throws Exception {
-        mDut.disableUsage();
-
-        verify(mockAwareService).disableUsage();
-    }
-
-    /**
      * Validate pass-through of isUsageEnabled() API.
      */
     @Test
@@ -160,8 +138,8 @@ public class WifiAwareManagerTest {
 
         // (1) connect + success
         mDut.attach(mockCallback, mMockLooperHandler);
-        inOrder.verify(mockAwareService).connect(binder.capture(), anyString(),
-                clientProxyCallback.capture(), (ConfigRequest) isNull(), eq(false));
+        inOrder.verify(mockAwareService).connect(binder.capture(), any(),
+                clientProxyCallback.capture(), isNull(), eq(false));
         clientProxyCallback.getValue().onConnectSuccess(clientId);
         mMockLooper.dispatchAll();
         inOrder.verify(mockCallback).onAttached(sessionCaptor.capture());
@@ -170,11 +148,10 @@ public class WifiAwareManagerTest {
         // (2) publish - should succeed
         PublishConfig publishConfig = new PublishConfig.Builder().build();
         session.publish(publishConfig, mockSessionCallback, mMockLooperHandler);
-        inOrder.verify(mockAwareService).publish(eq(clientId), eq(publishConfig),
-                any(IWifiAwareDiscoverySessionCallback.class));
+        inOrder.verify(mockAwareService).publish(eq(clientId), eq(publishConfig), any());
 
         // (3) disconnect
-        session.destroy();
+        session.close();
         inOrder.verify(mockAwareService).disconnect(eq(clientId), eq(binder.getValue()));
 
         // (4) try publishing again - fails silently
@@ -183,8 +160,8 @@ public class WifiAwareManagerTest {
 
         // (5) connect
         mDut.attach(mockCallback, mMockLooperHandler);
-        inOrder.verify(mockAwareService).connect(binder.capture(), anyString(),
-                any(IWifiAwareEventCallback.class), (ConfigRequest) isNull(), eq(false));
+        inOrder.verify(mockAwareService).connect(binder.capture(), any(), any(), isNull(),
+                eq(false));
 
         verifyNoMoreInteractions(mockCallback, mockSessionCallback, mockAwareService);
     }
@@ -205,16 +182,16 @@ public class WifiAwareManagerTest {
 
         // (1) connect + failure
         mDut.attach(mockCallback, mMockLooperHandler);
-        inOrder.verify(mockAwareService).connect(any(IBinder.class), anyString(),
-                clientProxyCallback.capture(), (ConfigRequest) isNull(), eq(false));
+        inOrder.verify(mockAwareService).connect(any(), any(), clientProxyCallback.capture(),
+                isNull(), eq(false));
         clientProxyCallback.getValue().onConnectFail(reason);
         mMockLooper.dispatchAll();
         inOrder.verify(mockCallback).onAttachFailed();
 
         // (2) connect + success
         mDut.attach(mockCallback, mMockLooperHandler);
-        inOrder.verify(mockAwareService).connect(any(IBinder.class), anyString(),
-                clientProxyCallback.capture(), (ConfigRequest) isNull(), eq(false));
+        inOrder.verify(mockAwareService).connect(any(), any(), clientProxyCallback.capture(),
+                isNull(), eq(false));
         clientProxyCallback.getValue().onConnectSuccess(clientId);
         mMockLooper.dispatchAll();
         inOrder.verify(mockCallback).onAttached(sessionCaptor.capture());
@@ -223,8 +200,7 @@ public class WifiAwareManagerTest {
         // (4) subscribe: should succeed
         SubscribeConfig subscribeConfig = new SubscribeConfig.Builder().build();
         session.subscribe(subscribeConfig, mockSessionCallback, mMockLooperHandler);
-        inOrder.verify(mockAwareService).subscribe(eq(clientId), eq(subscribeConfig),
-                any(IWifiAwareDiscoverySessionCallback.class));
+        inOrder.verify(mockAwareService).subscribe(eq(clientId), eq(subscribeConfig), any());
 
         verifyNoMoreInteractions(mockCallback, mockSessionCallback, mockAwareService);
     }
@@ -243,19 +219,19 @@ public class WifiAwareManagerTest {
 
         // (1) connect + success
         mDut.attach(mockCallback, mMockLooperHandler);
-        inOrder.verify(mockAwareService).connect(any(IBinder.class), anyString(),
-                clientProxyCallback.capture(), (ConfigRequest) isNull(), eq(false));
+        inOrder.verify(mockAwareService).connect(any(), any(), clientProxyCallback.capture(),
+                isNull(), eq(false));
         clientProxyCallback.getValue().onConnectSuccess(clientId);
         mMockLooper.dispatchAll();
-        inOrder.verify(mockCallback).onAttached(any(WifiAwareSession.class));
+        inOrder.verify(mockCallback).onAttached(any());
 
         // (2) connect + success
         mDut.attach(mockCallback, mMockLooperHandler);
-        inOrder.verify(mockAwareService).connect(any(IBinder.class), anyString(),
-                clientProxyCallback.capture(), (ConfigRequest) isNull(), eq(false));
+        inOrder.verify(mockAwareService).connect(any(), any(), clientProxyCallback.capture(),
+                isNull(), eq(false));
         clientProxyCallback.getValue().onConnectSuccess(clientId + 1);
         mMockLooper.dispatchAll();
-        inOrder.verify(mockCallback).onAttached(any(WifiAwareSession.class));
+        inOrder.verify(mockCallback).onAttached(any());
 
         verifyNoMoreInteractions(mockCallback, mockSessionCallback, mockAwareService);
     }
@@ -298,8 +274,8 @@ public class WifiAwareManagerTest {
 
         // (0) connect + success
         mDut.attach(mMockLooperHandler, configRequest, mockCallback, null);
-        inOrder.verify(mockAwareService).connect(any(IBinder.class), anyString(),
-                clientProxyCallback.capture(), eq(configRequest), eq(false));
+        inOrder.verify(mockAwareService).connect(any(), any(), clientProxyCallback.capture(),
+                eq(configRequest), eq(false));
         clientProxyCallback.getValue().onConnectSuccess(clientId);
         mMockLooper.dispatchAll();
         inOrder.verify(mockCallback).onAttached(sessionCaptor.capture());
@@ -354,7 +330,7 @@ public class WifiAwareManagerTest {
         inOrder.verify(mockSessionCallback).onSessionConfigFailed();
 
         // (5) terminate
-        publishSession.getValue().destroy();
+        publishSession.getValue().close();
         mMockLooper.dispatchAll();
         inOrder.verify(mockAwareService).terminateSession(clientId, sessionId);
 
@@ -390,8 +366,8 @@ public class WifiAwareManagerTest {
 
         // (1) connect successfully
         mDut.attach(mMockLooperHandler, configRequest, mockCallback, null);
-        inOrder.verify(mockAwareService).connect(any(IBinder.class), anyString(),
-                clientProxyCallback.capture(), eq(configRequest), eq(false));
+        inOrder.verify(mockAwareService).connect(any(), any(), clientProxyCallback.capture(),
+                eq(configRequest), eq(false));
         clientProxyCallback.getValue().onConnectSuccess(clientId);
         mMockLooper.dispatchAll();
         inOrder.verify(mockCallback).onAttached(sessionCaptor.capture());
@@ -446,8 +422,8 @@ public class WifiAwareManagerTest {
 
         // (0) connect + success
         mDut.attach(mMockLooperHandler, configRequest, mockCallback, null);
-        inOrder.verify(mockAwareService).connect(any(IBinder.class), anyString(),
-                clientProxyCallback.capture(), eq(configRequest), eq(false));
+        inOrder.verify(mockAwareService).connect(any(), any(), clientProxyCallback.capture(),
+                eq(configRequest), eq(false));
         clientProxyCallback.getValue().onConnectSuccess(clientId);
         mMockLooper.dispatchAll();
         inOrder.verify(mockCallback).onAttached(sessionCaptor.capture());
@@ -491,7 +467,7 @@ public class WifiAwareManagerTest {
         inOrder.verify(mockSessionCallback).onSessionConfigFailed();
 
         // (5) terminate
-        subscribeSession.getValue().destroy();
+        subscribeSession.getValue().close();
         mMockLooper.dispatchAll();
         inOrder.verify(mockAwareService).terminateSession(clientId, sessionId);
 
@@ -527,8 +503,8 @@ public class WifiAwareManagerTest {
 
         // (1) connect successfully
         mDut.attach(mMockLooperHandler, configRequest, mockCallback, null);
-        inOrder.verify(mockAwareService).connect(any(IBinder.class), anyString(),
-                clientProxyCallback.capture(), eq(configRequest), eq(false));
+        inOrder.verify(mockAwareService).connect(any(), any(), clientProxyCallback.capture(),
+                eq(configRequest), eq(false));
         clientProxyCallback.getValue().onConnectSuccess(clientId);
         mMockLooper.dispatchAll();
         inOrder.verify(mockCallback).onAttached(sessionCaptor.capture());
@@ -566,6 +542,12 @@ public class WifiAwareManagerTest {
         collector.checkThat("mMasterPreference", 0,
                 equalTo(configRequest.mMasterPreference));
         collector.checkThat("mSupport5gBand", false, equalTo(configRequest.mSupport5gBand));
+        collector.checkThat("mDiscoveryWindowInterval.length", 2,
+                equalTo(configRequest.mDiscoveryWindowInterval.length));
+        collector.checkThat("mDiscoveryWindowInterval[2.4GHz]", ConfigRequest.DW_INTERVAL_NOT_INIT,
+                equalTo(configRequest.mDiscoveryWindowInterval[ConfigRequest.NAN_BAND_24GHZ]));
+        collector.checkThat("mDiscoveryWindowInterval[5Hz]", ConfigRequest.DW_INTERVAL_NOT_INIT,
+                equalTo(configRequest.mDiscoveryWindowInterval[ConfigRequest.NAN_BAND_5GHZ]));
     }
 
     @Test
@@ -574,10 +556,12 @@ public class WifiAwareManagerTest {
         final int clusterLow = 5;
         final int masterPreference = 55;
         final boolean supportBand5g = true;
+        final int dwWindow5GHz = 3;
 
         ConfigRequest configRequest = new ConfigRequest.Builder().setClusterHigh(clusterHigh)
                 .setClusterLow(clusterLow).setMasterPreference(masterPreference)
                 .setSupport5gBand(supportBand5g)
+                .setDiscoveryWindowInterval(ConfigRequest.NAN_BAND_5GHZ, dwWindow5GHz)
                 .build();
 
         collector.checkThat("mClusterHigh", clusterHigh, equalTo(configRequest.mClusterHigh));
@@ -585,6 +569,12 @@ public class WifiAwareManagerTest {
         collector.checkThat("mMasterPreference", masterPreference,
                 equalTo(configRequest.mMasterPreference));
         collector.checkThat("mSupport5gBand", supportBand5g, equalTo(configRequest.mSupport5gBand));
+        collector.checkThat("mDiscoveryWindowInterval.length", 2,
+                equalTo(configRequest.mDiscoveryWindowInterval.length));
+        collector.checkThat("mDiscoveryWindowInterval[2.4GHz]", ConfigRequest.DW_INTERVAL_NOT_INIT,
+                equalTo(configRequest.mDiscoveryWindowInterval[ConfigRequest.NAN_BAND_24GHZ]));
+        collector.checkThat("mDiscoveryWindowInterval[5GHz]", dwWindow5GHz,
+                equalTo(configRequest.mDiscoveryWindowInterval[ConfigRequest.NAN_BAND_5GHZ]));
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -633,16 +623,44 @@ public class WifiAwareManagerTest {
         new ConfigRequest.Builder().setClusterLow(100).setClusterHigh(5).build();
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void testConfigRequestBuilderDwIntervalInvalidBand() {
+        new ConfigRequest.Builder().setDiscoveryWindowInterval(5, 1).build();
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testConfigRequestBuilderDwIntervalInvalidValueZero() {
+        new ConfigRequest.Builder().setDiscoveryWindowInterval(ConfigRequest.NAN_BAND_24GHZ,
+                0).build();
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testConfigRequestBuilderDwIntervalInvalidValueLarge() {
+        new ConfigRequest.Builder().setDiscoveryWindowInterval(ConfigRequest.NAN_BAND_5GHZ,
+                6).build();
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testConfigRequestBuilderDwIntervalInvalidValueLargeValidate() {
+        ConfigRequest cr = new ConfigRequest.Builder().build();
+        cr.mDiscoveryWindowInterval[ConfigRequest.NAN_BAND_5GHZ] = 6;
+        cr.validate();
+    }
+
     @Test
     public void testConfigRequestParcel() {
         final int clusterHigh = 189;
         final int clusterLow = 25;
         final int masterPreference = 177;
         final boolean supportBand5g = true;
+        final int dwWindow24GHz = 1;
+        final int dwWindow5GHz = 5;
 
         ConfigRequest configRequest = new ConfigRequest.Builder().setClusterHigh(clusterHigh)
                 .setClusterLow(clusterLow).setMasterPreference(masterPreference)
                 .setSupport5gBand(supportBand5g)
+                .setDiscoveryWindowInterval(ConfigRequest.NAN_BAND_24GHZ, dwWindow24GHz)
+                .setDiscoveryWindowInterval(ConfigRequest.NAN_BAND_5GHZ, dwWindow5GHz)
                 .build();
 
         Parcel parcelW = Parcel.obtain();
@@ -669,10 +687,7 @@ public class WifiAwareManagerTest {
         collector.checkThat("mServiceName", subscribeConfig.mServiceName, equalTo(null));
         collector.checkThat("mSubscribeType", subscribeConfig.mSubscribeType,
                 equalTo(SubscribeConfig.SUBSCRIBE_TYPE_PASSIVE));
-        collector.checkThat("mSubscribeCount", subscribeConfig.mSubscribeCount, equalTo(0));
         collector.checkThat("mTtlSec", subscribeConfig.mTtlSec, equalTo(0));
-        collector.checkThat("mMatchStyle", subscribeConfig.mMatchStyle,
-                equalTo(SubscribeConfig.MATCH_STYLE_ALL));
         collector.checkThat("mEnableTerminateNotification",
                 subscribeConfig.mEnableTerminateNotification, equalTo(true));
     }
@@ -685,14 +700,13 @@ public class WifiAwareManagerTest {
         final int subscribeType = SubscribeConfig.SUBSCRIBE_TYPE_PASSIVE;
         final int subscribeCount = 10;
         final int subscribeTtl = 15;
-        final int matchStyle = SubscribeConfig.MATCH_STYLE_FIRST_ONLY;
         final boolean enableTerminateNotification = false;
 
         SubscribeConfig subscribeConfig = new SubscribeConfig.Builder().setServiceName(serviceName)
                 .setServiceSpecificInfo(serviceSpecificInfo.getBytes()).setMatchFilter(
                         new TlvBufferUtils.TlvIterable(0, 1, matchFilter).toList())
                 .setSubscribeType(subscribeType)
-                .setSubscribeCount(subscribeCount).setTtlSec(subscribeTtl).setMatchStyle(matchStyle)
+                .setTtlSec(subscribeTtl)
                 .setTerminateNotificationEnabled(enableTerminateNotification).build();
 
         collector.checkThat("mServiceName", serviceName.getBytes(),
@@ -702,10 +716,7 @@ public class WifiAwareManagerTest {
         collector.checkThat("mMatchFilter", matchFilter, equalTo(subscribeConfig.mMatchFilter));
         collector.checkThat("mSubscribeType", subscribeType,
                 equalTo(subscribeConfig.mSubscribeType));
-        collector.checkThat("mSubscribeCount", subscribeCount,
-                equalTo(subscribeConfig.mSubscribeCount));
         collector.checkThat("mTtlSec", subscribeTtl, equalTo(subscribeConfig.mTtlSec));
-        collector.checkThat("mMatchStyle", matchStyle, equalTo(subscribeConfig.mMatchStyle));
         collector.checkThat("mEnableTerminateNotification", enableTerminateNotification,
                 equalTo(subscribeConfig.mEnableTerminateNotification));
     }
@@ -716,16 +727,14 @@ public class WifiAwareManagerTest {
         final String serviceSpecificInfo = "long arbitrary string with some info";
         final byte[] matchFilter = { 1, 16, 1, 22 };
         final int subscribeType = SubscribeConfig.SUBSCRIBE_TYPE_PASSIVE;
-        final int subscribeCount = 10;
         final int subscribeTtl = 15;
-        final int matchStyle = SubscribeConfig.MATCH_STYLE_FIRST_ONLY;
         final boolean enableTerminateNotification = true;
 
         SubscribeConfig subscribeConfig = new SubscribeConfig.Builder().setServiceName(serviceName)
                 .setServiceSpecificInfo(serviceSpecificInfo.getBytes()).setMatchFilter(
                         new TlvBufferUtils.TlvIterable(0, 1, matchFilter).toList())
                 .setSubscribeType(subscribeType)
-                .setSubscribeCount(subscribeCount).setTtlSec(subscribeTtl).setMatchStyle(matchStyle)
+                .setTtlSec(subscribeTtl)
                 .setTerminateNotificationEnabled(enableTerminateNotification).build();
 
         Parcel parcelW = Parcel.obtain();
@@ -747,21 +756,8 @@ public class WifiAwareManagerTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testSubscribeConfigBuilderNegativeCount() {
-        new SubscribeConfig.Builder().setSubscribeCount(-1);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
     public void testSubscribeConfigBuilderNegativeTtl() {
         new SubscribeConfig.Builder().setTtlSec(-100);
-    }
-
-    /**
-     * Validate that a bad match style configuration throws an exception.
-     */
-    @Test(expected = IllegalArgumentException.class)
-    public void testSubscribeConfigBuilderBadMatchStyle() {
-        new SubscribeConfig.Builder().setMatchStyle(10);
     }
 
     /*
@@ -775,7 +771,6 @@ public class WifiAwareManagerTest {
         collector.checkThat("mServiceName", publishConfig.mServiceName, equalTo(null));
         collector.checkThat("mPublishType", publishConfig.mPublishType,
                 equalTo(PublishConfig.PUBLISH_TYPE_UNSOLICITED));
-        collector.checkThat("mPublishCount", publishConfig.mPublishCount, equalTo(0));
         collector.checkThat("mTtlSec", publishConfig.mTtlSec, equalTo(0));
         collector.checkThat("mEnableTerminateNotification",
                 publishConfig.mEnableTerminateNotification, equalTo(true));
@@ -795,7 +790,7 @@ public class WifiAwareManagerTest {
                 .setServiceSpecificInfo(serviceSpecificInfo.getBytes()).setMatchFilter(
                         new TlvBufferUtils.TlvIterable(0, 1, matchFilter).toList())
                 .setPublishType(publishType)
-                .setPublishCount(publishCount).setTtlSec(publishTtl)
+                .setTtlSec(publishTtl)
                 .setTerminateNotificationEnabled(enableTerminateNotification).build();
 
         collector.checkThat("mServiceName", serviceName.getBytes(),
@@ -804,7 +799,6 @@ public class WifiAwareManagerTest {
                 serviceSpecificInfo.getBytes(), equalTo(publishConfig.mServiceSpecificInfo));
         collector.checkThat("mMatchFilter", matchFilter, equalTo(publishConfig.mMatchFilter));
         collector.checkThat("mPublishType", publishType, equalTo(publishConfig.mPublishType));
-        collector.checkThat("mPublishCount", publishCount, equalTo(publishConfig.mPublishCount));
         collector.checkThat("mTtlSec", publishTtl, equalTo(publishConfig.mTtlSec));
         collector.checkThat("mEnableTerminateNotification", enableTerminateNotification,
                 equalTo(publishConfig.mEnableTerminateNotification));
@@ -824,7 +818,7 @@ public class WifiAwareManagerTest {
                 .setServiceSpecificInfo(serviceSpecificInfo.getBytes()).setMatchFilter(
                         new TlvBufferUtils.TlvIterable(0, 1, matchFilter).toList())
                 .setPublishType(publishType)
-                .setPublishCount(publishCount).setTtlSec(publishTtl)
+                .setTtlSec(publishTtl)
                 .setTerminateNotificationEnabled(enableTerminateNotification).build();
 
         Parcel parcelW = Parcel.obtain();
@@ -843,11 +837,6 @@ public class WifiAwareManagerTest {
     @Test(expected = IllegalArgumentException.class)
     public void testPublishConfigBuilderBadPublishType() {
         new PublishConfig.Builder().setPublishType(5);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testPublishConfigBuilderNegativeCount() {
-        new PublishConfig.Builder().setPublishCount(-4);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -877,8 +866,7 @@ public class WifiAwareManagerTest {
         final RttManager.RttResult rttResults = new RttManager.RttResult();
         rttResults.distance = 10;
 
-        when(mockAwareService.startRanging(anyInt(), anyInt(),
-                any(RttManager.ParcelableRttParams.class))).thenReturn(rangingId);
+        when(mockAwareService.startRanging(anyInt(), anyInt(), any())).thenReturn(rangingId);
 
         InOrder inOrder = inOrder(mockCallback, mockSessionCallback, mockAwareService,
                 mockPublishSession, mockRttListener);
@@ -897,8 +885,8 @@ public class WifiAwareManagerTest {
 
         // (1) connect successfully
         mDut.attach(mMockLooperHandler, configRequest, mockCallback, null);
-        inOrder.verify(mockAwareService).connect(any(IBinder.class), anyString(),
-                clientProxyCallback.capture(), eq(configRequest), eq(false));
+        inOrder.verify(mockAwareService).connect(any(), any(), clientProxyCallback.capture(),
+                eq(configRequest), eq(false));
         clientProxyCallback.getValue().onConnectSuccess(clientId);
         mMockLooper.dispatchAll();
         inOrder.verify(mockCallback).onAttached(sessionCaptor.capture());
@@ -951,11 +939,10 @@ public class WifiAwareManagerTest {
         final int sessionId = 123;
         final PeerHandle peerHandle = new PeerHandle(123412);
         final int role = WifiAwareManager.WIFI_AWARE_DATA_PATH_ROLE_RESPONDER;
-        final String token = "Some arbitrary token string - can really be anything";
+        final byte[] pmk = "01234567890123456789012345678901".getBytes();
+        final String passphrase = "A really bad password";
         final ConfigRequest configRequest = new ConfigRequest.Builder().build();
         final PublishConfig publishConfig = new PublishConfig.Builder().build();
-
-        String tokenB64 = Base64.encodeToString(token.getBytes(), Base64.DEFAULT);
 
         ArgumentCaptor<WifiAwareSession> sessionCaptor = ArgumentCaptor.forClass(
                 WifiAwareSession.class);
@@ -971,8 +958,8 @@ public class WifiAwareManagerTest {
 
         // (1) connect successfully
         mDut.attach(mMockLooperHandler, configRequest, mockCallback, null);
-        inOrder.verify(mockAwareService).connect(any(IBinder.class), anyString(),
-                clientProxyCallback.capture(), eq(configRequest), eq(false));
+        inOrder.verify(mockAwareService).connect(any(), any(), clientProxyCallback.capture(),
+                eq(configRequest), eq(false));
         clientProxyCallback.getValue().onConnectSuccess(clientId);
         mMockLooper.dispatchAll();
         inOrder.verify(mockCallback).onAttached(sessionCaptor.capture());
@@ -986,22 +973,38 @@ public class WifiAwareManagerTest {
         mMockLooper.dispatchAll();
         inOrder.verify(mockSessionCallback).onPublishStarted(publishSession.capture());
 
-        // (3) request a network specifier from the session
-        String networkSpecifier = publishSession.getValue().createNetworkSpecifier(peerHandle,
-                token.getBytes());
+        // (3) request an open (unencrypted) network specifier from the session
+        WifiAwareNetworkSpecifier ns =
+                (WifiAwareNetworkSpecifier) publishSession.getValue().createNetworkSpecifierOpen(
+                        peerHandle);
 
         // validate format
-        JSONObject jsonObject = new JSONObject(networkSpecifier);
-        collector.checkThat("role", role,
-                equalTo(jsonObject.getInt(WifiAwareManager.NETWORK_SPECIFIER_KEY_ROLE)));
-        collector.checkThat("client_id", clientId,
-                equalTo(jsonObject.getInt(WifiAwareManager.NETWORK_SPECIFIER_KEY_CLIENT_ID)));
-        collector.checkThat("session_id", sessionId,
-                equalTo(jsonObject.getInt(WifiAwareManager.NETWORK_SPECIFIER_KEY_SESSION_ID)));
-        collector.checkThat("peer_id", peerHandle.peerId,
-                equalTo(jsonObject.getInt(WifiAwareManager.NETWORK_SPECIFIER_KEY_PEER_ID)));
-        collector.checkThat("token", tokenB64,
-                equalTo(jsonObject.getString(WifiAwareManager.NETWORK_SPECIFIER_KEY_TOKEN)));
+        collector.checkThat("role", role, equalTo(ns.role));
+        collector.checkThat("client_id", clientId, equalTo(ns.clientId));
+        collector.checkThat("session_id", sessionId, equalTo(ns.sessionId));
+        collector.checkThat("peer_id", peerHandle.peerId, equalTo(ns.peerId));
+
+        // (4) request an encrypted (PMK) network specifier from the session
+        ns = (WifiAwareNetworkSpecifier) publishSession.getValue().createNetworkSpecifierPmk(
+                peerHandle, pmk);
+
+        // validate format
+        collector.checkThat("role", role, equalTo(ns.role));
+        collector.checkThat("client_id", clientId, equalTo(ns.clientId));
+        collector.checkThat("session_id", sessionId, equalTo(ns.sessionId));
+        collector.checkThat("peer_id", peerHandle.peerId, equalTo(ns.peerId));
+        collector.checkThat("pmk", pmk , equalTo(ns.pmk));
+
+        // (5) request an encrypted (Passphrase) network specifier from the session
+        ns = (WifiAwareNetworkSpecifier) publishSession.getValue().createNetworkSpecifierPassphrase(
+                peerHandle, passphrase);
+
+        // validate format
+        collector.checkThat("role", role, equalTo(ns.role));
+        collector.checkThat("client_id", clientId, equalTo(ns.clientId));
+        collector.checkThat("session_id", sessionId, equalTo(ns.sessionId));
+        collector.checkThat("peer_id", peerHandle.peerId, equalTo(ns.peerId));
+        collector.checkThat("passphrase", passphrase, equalTo(ns.passphrase));
 
         verifyNoMoreInteractions(mockCallback, mockSessionCallback, mockAwareService,
                 mockPublishSession, mockRttListener);
@@ -1017,9 +1020,8 @@ public class WifiAwareManagerTest {
         final ConfigRequest configRequest = new ConfigRequest.Builder().build();
         final byte[] someMac = HexEncoding.decode("000102030405".toCharArray(), false);
         final int role = WifiAwareManager.WIFI_AWARE_DATA_PATH_ROLE_INITIATOR;
-        final String token = "Some arbitrary token string - can really be anything";
-
-        String tokenB64 = Base64.encodeToString(token.getBytes(), Base64.DEFAULT);
+        final byte[] pmk = "01234567890123456789012345678901".getBytes();
+        final String passphrase = "A really bad password";
 
         ArgumentCaptor<WifiAwareSession> sessionCaptor = ArgumentCaptor.forClass(
                 WifiAwareSession.class);
@@ -1031,29 +1033,200 @@ public class WifiAwareManagerTest {
 
         // (1) connect successfully
         mDut.attach(mMockLooperHandler, configRequest, mockCallback, null);
-        inOrder.verify(mockAwareService).connect(any(IBinder.class), anyString(),
-                clientProxyCallback.capture(), eq(configRequest), eq(false));
+        inOrder.verify(mockAwareService).connect(any(), any(), clientProxyCallback.capture(),
+                eq(configRequest), eq(false));
         clientProxyCallback.getValue().onConnectSuccess(clientId);
         mMockLooper.dispatchAll();
         inOrder.verify(mockCallback).onAttached(sessionCaptor.capture());
         WifiAwareSession session = sessionCaptor.getValue();
 
-        /* (2) request a direct network specifier*/
-        String networkSpecifier = session.createNetworkSpecifier(role, someMac, token.getBytes());
+        // (2) request an open (unencrypted) direct network specifier
+        WifiAwareNetworkSpecifier ns =
+                (WifiAwareNetworkSpecifier) session.createNetworkSpecifierOpen(role, someMac);
 
-        /* validate format*/
-        JSONObject jsonObject = new JSONObject(networkSpecifier);
-        collector.checkThat("role", role,
-                equalTo(jsonObject.getInt(WifiAwareManager.NETWORK_SPECIFIER_KEY_ROLE)));
-        collector.checkThat("client_id", clientId,
-                equalTo(jsonObject.getInt(WifiAwareManager.NETWORK_SPECIFIER_KEY_CLIENT_ID)));
-        collector.checkThat("peer_mac", someMac, equalTo(HexEncoding.decode(
-                jsonObject.getString(WifiAwareManager.NETWORK_SPECIFIER_KEY_PEER_MAC).toCharArray(),
-                false)));
-        collector.checkThat("token", tokenB64,
-                equalTo(jsonObject.getString(WifiAwareManager.NETWORK_SPECIFIER_KEY_TOKEN)));
+        // validate format
+        collector.checkThat("role", role, equalTo(ns.role));
+        collector.checkThat("client_id", clientId, equalTo(ns.clientId));
+        collector.checkThat("peer_mac", someMac, equalTo(ns.peerMac));
+
+        // (3) request an encrypted (PMK) direct network specifier
+        ns = (WifiAwareNetworkSpecifier) session.createNetworkSpecifierPmk(role, someMac, pmk);
+
+        // validate format
+        collector.checkThat("role", role, equalTo(ns.role));
+        collector.checkThat("client_id", clientId, equalTo(ns.clientId));
+        collector.checkThat("peer_mac", someMac, equalTo(ns.peerMac));
+        collector.checkThat("pmk", pmk, equalTo(ns.pmk));
+
+        // (4) request an encrypted (Passphrase) direct network specifier
+        ns = (WifiAwareNetworkSpecifier) session.createNetworkSpecifierPassphrase(role, someMac,
+                passphrase);
+
+        // validate format
+        collector.checkThat("role", role, equalTo(ns.role));
+        collector.checkThat("client_id", clientId, equalTo(ns.clientId));
+        collector.checkThat("peer_mac", someMac, equalTo(ns.peerMac));
+        collector.checkThat("passphrase", passphrase, equalTo(ns.passphrase));
 
         verifyNoMoreInteractions(mockCallback, mockSessionCallback, mockAwareService,
                 mockPublishSession, mockRttListener);
+    }
+
+    /**
+     * Validate that a null PMK triggers an exception.
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testNetworkSpecifierWithClientNullPmk() throws Exception {
+        executeNetworkSpecifierWithClient(true, null, null);
+    }
+
+    /**
+     * Validate that a non-32-bytes PMK triggers an exception.
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testNetworkSpecifierWithClientIncorrectLengthPmk() throws Exception {
+        executeNetworkSpecifierWithClient(true, "012".getBytes(), null);
+    }
+
+    /**
+     * Validate that a null Passphrase triggers an exception.
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testNetworkSpecifierWithClientNullPassphrase() throws Exception {
+        executeNetworkSpecifierWithClient(false, null, null);
+    }
+
+    /**
+     * Validate that a too short Passphrase triggers an exception.
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testNetworkSpecifierWithClientShortPassphrase() throws Exception {
+        executeNetworkSpecifierWithClient(false, null, "012");
+    }
+
+    /**
+     * Validate that a too long Passphrase triggers an exception.
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testNetworkSpecifierWithClientLongPassphrase() throws Exception {
+        executeNetworkSpecifierWithClient(false, null,
+                "0123456789012345678901234567890123456789012345678901234567890123456789");
+    }
+
+    private void executeNetworkSpecifierWithClient(boolean doPmk, byte[] pmk, String passphrase)
+            throws Exception {
+        final int clientId = 4565;
+        final int sessionId = 123;
+        final PeerHandle peerHandle = new PeerHandle(123412);
+        final ConfigRequest configRequest = new ConfigRequest.Builder().build();
+        final PublishConfig publishConfig = new PublishConfig.Builder().build();
+
+        ArgumentCaptor<WifiAwareSession> sessionCaptor = ArgumentCaptor.forClass(
+                WifiAwareSession.class);
+        ArgumentCaptor<IWifiAwareEventCallback> clientProxyCallback = ArgumentCaptor
+                .forClass(IWifiAwareEventCallback.class);
+        ArgumentCaptor<IWifiAwareDiscoverySessionCallback> sessionProxyCallback = ArgumentCaptor
+                .forClass(IWifiAwareDiscoverySessionCallback.class);
+        ArgumentCaptor<PublishDiscoverySession> publishSession = ArgumentCaptor
+                .forClass(PublishDiscoverySession.class);
+
+        InOrder inOrder = inOrder(mockCallback, mockSessionCallback, mockAwareService,
+                mockPublishSession, mockRttListener);
+
+        // (1) connect successfully
+        mDut.attach(mMockLooperHandler, configRequest, mockCallback, null);
+        inOrder.verify(mockAwareService).connect(any(), any(), clientProxyCallback.capture(),
+                eq(configRequest), eq(false));
+        clientProxyCallback.getValue().onConnectSuccess(clientId);
+        mMockLooper.dispatchAll();
+        inOrder.verify(mockCallback).onAttached(sessionCaptor.capture());
+        WifiAwareSession session = sessionCaptor.getValue();
+
+        // (2) publish successfully
+        session.publish(publishConfig, mockSessionCallback, mMockLooperHandler);
+        inOrder.verify(mockAwareService).publish(eq(clientId), eq(publishConfig),
+                sessionProxyCallback.capture());
+        sessionProxyCallback.getValue().onSessionStarted(sessionId);
+        mMockLooper.dispatchAll();
+        inOrder.verify(mockSessionCallback).onPublishStarted(publishSession.capture());
+
+        // (3) create network specifier
+        if (doPmk) {
+            publishSession.getValue().createNetworkSpecifierPmk(peerHandle, pmk);
+        } else {
+            publishSession.getValue().createNetworkSpecifierPassphrase(peerHandle, passphrase);
+        }
+    }
+
+    /**
+     * Validate that a null PMK triggers an exception.
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testNetworkSpecifierDirectNullPmk() throws Exception {
+        executeNetworkSpecifierDirect(true, null, null);
+    }
+
+    /**
+     * Validate that a non-32-bytes PMK triggers an exception.
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testNetworkSpecifierDirectIncorrectLengthPmk() throws Exception {
+        executeNetworkSpecifierDirect(true, "012".getBytes(), null);
+    }
+
+    /**
+     * Validate that a null Passphrase triggers an exception.
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testNetworkSpecifierDirectNullPassphrase() throws Exception {
+        executeNetworkSpecifierDirect(false, null, null);
+    }
+
+    /**
+     * Validate that a too short Passphrase triggers an exception.
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testNetworkSpecifierDirectShortPassphrase() throws Exception {
+        executeNetworkSpecifierDirect(false, null, "012");
+    }
+
+    /**
+     * Validate that a too long Passphrase triggers an exception.
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testNetworkSpecifierDirectLongPassphrase() throws Exception {
+        executeNetworkSpecifierDirect(false, null,
+                "0123456789012345678901234567890123456789012345678901234567890123456789");
+    }
+
+    private void executeNetworkSpecifierDirect(boolean doPmk, byte[] pmk, String passphrase)
+            throws Exception {
+        final int clientId = 134;
+        final byte[] someMac = HexEncoding.decode("000102030405".toCharArray(), false);
+        final int role = WifiAwareManager.WIFI_AWARE_DATA_PATH_ROLE_INITIATOR;
+        final ConfigRequest configRequest = new ConfigRequest.Builder().build();
+
+        ArgumentCaptor<WifiAwareSession> sessionCaptor = ArgumentCaptor.forClass(
+                WifiAwareSession.class);
+        ArgumentCaptor<IWifiAwareEventCallback> clientProxyCallback = ArgumentCaptor
+                .forClass(IWifiAwareEventCallback.class);
+
+        InOrder inOrder = inOrder(mockCallback, mockSessionCallback, mockAwareService,
+                mockPublishSession, mockRttListener);
+
+        // (1) connect successfully
+        mDut.attach(mMockLooperHandler, configRequest, mockCallback, null);
+        inOrder.verify(mockAwareService).connect(any(), any(), clientProxyCallback.capture(),
+                eq(configRequest), eq(false));
+        clientProxyCallback.getValue().onConnectSuccess(clientId);
+        mMockLooper.dispatchAll();
+        inOrder.verify(mockCallback).onAttached(sessionCaptor.capture());
+
+        // (2) create network specifier
+        if (doPmk) {
+            sessionCaptor.getValue().createNetworkSpecifierPmk(role, someMac, pmk);
+        } else {
+            sessionCaptor.getValue().createNetworkSpecifierPassphrase(role, someMac, passphrase);
+        }
     }
 }

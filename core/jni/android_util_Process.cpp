@@ -30,7 +30,7 @@
 #include "core_jni_helpers.h"
 
 #include "android_util_Binder.h"
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 
 #include <dirent.h>
 #include <fcntl.h>
@@ -176,6 +176,22 @@ void android_os_Process_setThreadGroup(JNIEnv* env, jobject clazz, int tid, jint
     }
 }
 
+void android_os_Process_setThreadGroupAndCpuset(JNIEnv* env, jobject clazz, int tid, jint grp)
+{
+    ALOGV("%s tid=%d grp=%" PRId32, __func__, tid, grp);
+    SchedPolicy sp = (SchedPolicy) grp;
+    int res = set_sched_policy(tid, sp);
+
+    if (res != NO_ERROR) {
+        signalExceptionForGroupError(env, -res, tid);
+    }
+
+    res = set_cpuset_policy(tid, sp);
+    if (res != NO_ERROR) {
+        signalExceptionForGroupError(env, -res, tid);
+    }
+}
+
 void android_os_Process_setProcessGroup(JNIEnv* env, jobject clazz, int pid, jint grp)
 {
     ALOGV("%s pid=%d grp=%" PRId32, __func__, pid, grp);
@@ -202,7 +218,7 @@ void android_os_Process_setProcessGroup(JNIEnv* env, jobject clazz, int pid, jin
         strcpy(cmdline, "unknown");
 
         sprintf(proc_path, "/proc/%d/cmdline", pid);
-        fd = open(proc_path, O_RDONLY);
+        fd = open(proc_path, O_RDONLY | O_CLOEXEC);
         if (fd >= 0) {
             int rc = read(fd, cmdline, sizeof(cmdline)-1);
             cmdline[rc] = 0;
@@ -252,25 +268,26 @@ void android_os_Process_setProcessGroup(JNIEnv* env, jobject clazz, int pid, jin
             if (t_pri >= ANDROID_PRIORITY_BACKGROUND) {
                 // This task wants to stay at background
                 // update its cpuset so it doesn't only run on bg core(s)
-#ifdef ENABLE_CPUSETS
-                int err = set_cpuset_policy(t_pid, sp);
-                if (err != NO_ERROR) {
-                    signalExceptionForGroupError(env, -err, t_pid);
-                    break;
+                if (cpusets_enabled()) {
+                    int err = set_cpuset_policy(t_pid, sp);
+                    if (err != NO_ERROR) {
+                        signalExceptionForGroupError(env, -err, t_pid);
+                        break;
+                    }
                 }
-#endif
                 continue;
             }
         }
         int err;
-#ifdef ENABLE_CPUSETS
-        // set both cpuset and cgroup for general threads
-        err = set_cpuset_policy(t_pid, sp);
-        if (err != NO_ERROR) {
-            signalExceptionForGroupError(env, -err, t_pid);
-            break;
+
+        if (cpusets_enabled()) {
+            // set both cpuset and cgroup for general threads
+            err = set_cpuset_policy(t_pid, sp);
+            if (err != NO_ERROR) {
+                signalExceptionForGroupError(env, -err, t_pid);
+                break;
+            }
         }
-#endif
 
         err = set_sched_policy(t_pid, sp);
         if (err != NO_ERROR) {
@@ -291,7 +308,6 @@ jint android_os_Process_getProcessGroup(JNIEnv* env, jobject clazz, jint pid)
     return (int) sp;
 }
 
-#ifdef ENABLE_CPUSETS
 /** Sample CPUset list format:
  *  0-3,4,6-8
  */
@@ -340,6 +356,7 @@ static void get_cpuset_cores_for_policy(SchedPolicy policy, cpu_set_t *cpu_set)
         case SP_FOREGROUND:
         case SP_AUDIO_APP:
         case SP_AUDIO_SYS:
+        case SP_RT_APP:
             filename = "/dev/cpuset/foreground/cpus";
             break;
         case SP_TOP_APP:
@@ -367,7 +384,6 @@ static void get_cpuset_cores_for_policy(SchedPolicy policy, cpu_set_t *cpu_set)
     }
     return;
 }
-#endif
 
 
 /**
@@ -376,22 +392,21 @@ static void get_cpuset_cores_for_policy(SchedPolicy policy, cpu_set_t *cpu_set)
  * them in the passed in cpu_set_t
  */
 void get_exclusive_cpuset_cores(SchedPolicy policy, cpu_set_t *cpu_set) {
-#ifdef ENABLE_CPUSETS
-    int i;
-    cpu_set_t tmp_set;
-    get_cpuset_cores_for_policy(policy, cpu_set);
-    for (i = 0; i < SP_CNT; i++) {
-        if ((SchedPolicy) i == policy) continue;
-        get_cpuset_cores_for_policy((SchedPolicy)i, &tmp_set);
-        // First get cores exclusive to one set or the other
-        CPU_XOR(&tmp_set, cpu_set, &tmp_set);
-        // Then get the ones only in cpu_set
-        CPU_AND(cpu_set, cpu_set, &tmp_set);
+    if (cpusets_enabled()) {
+        int i;
+        cpu_set_t tmp_set;
+        get_cpuset_cores_for_policy(policy, cpu_set);
+        for (i = 0; i < SP_CNT; i++) {
+            if ((SchedPolicy) i == policy) continue;
+            get_cpuset_cores_for_policy((SchedPolicy)i, &tmp_set);
+            // First get cores exclusive to one set or the other
+            CPU_XOR(&tmp_set, cpu_set, &tmp_set);
+            // Then get the ones only in cpu_set
+            CPU_AND(cpu_set, cpu_set, &tmp_set);
+        }
+    } else {
+        CPU_ZERO(cpu_set);
     }
-#else
-    (void) policy;
-    CPU_ZERO(cpu_set);
-#endif
     return;
 }
 
@@ -539,7 +554,7 @@ jboolean android_os_Process_setSwappiness(JNIEnv *env, jobject clazz,
         return false;
     }
 
-    int fd = open(text, O_WRONLY);
+    int fd = open(text, O_WRONLY | O_CLOEXEC);
     if (fd >= 0) {
         sprintf(text, "%" PRId32, pid);
         write(fd, text, strlen(text));
@@ -587,7 +602,7 @@ static int pid_compare(const void* v1, const void* v2)
 
 static jlong getFreeMemoryImpl(const char* const sums[], const size_t sumsLen[], size_t num)
 {
-    int fd = open("/proc/meminfo", O_RDONLY);
+    int fd = open("/proc/meminfo", O_RDONLY | O_CLOEXEC);
 
     if (fd < 0) {
         ALOGW("Unable to open /proc/meminfo");
@@ -700,7 +715,7 @@ void android_os_Process_readProcLines(JNIEnv* env, jobject clazz, jstring fileSt
         sizesArray[i] = 0;
     }
 
-    int fd = open(file.string(), O_RDONLY);
+    int fd = open(file.string(), O_RDONLY | O_CLOEXEC);
 
     if (fd >= 0) {
         const size_t BUFFER_SIZE = 2048;
@@ -1007,7 +1022,7 @@ jboolean android_os_Process_readProcFile(JNIEnv* env, jobject clazz,
         jniThrowException(env, "java/lang/OutOfMemoryError", NULL);
         return JNI_FALSE;
     }
-    int fd = open(file8, O_RDONLY);
+    int fd = open(file8, O_RDONLY | O_CLOEXEC);
 
     if (fd < 0) {
         if (kDebugProc) {
@@ -1147,7 +1162,7 @@ jintArray android_os_Process_getPidsForCommands(JNIEnv* env, jobject clazz,
         char data[PATH_MAX];
         snprintf(path, sizeof(path), "/proc/%d/cmdline", pid);
 
-        int fd = open(path, O_RDONLY);
+        int fd = open(path, O_RDONLY | O_CLOEXEC);
         if (fd < 0) {
             continue;
         }
@@ -1209,6 +1224,7 @@ static const JNINativeMethod methods[] = {
     {"getThreadPriority",   "(I)I", (void*)android_os_Process_getThreadPriority},
     {"getThreadScheduler",   "(I)I", (void*)android_os_Process_getThreadScheduler},
     {"setThreadGroup",      "(II)V", (void*)android_os_Process_setThreadGroup},
+    {"setThreadGroupAndCpuset", "(II)V", (void*)android_os_Process_setThreadGroupAndCpuset},
     {"setProcessGroup",     "(II)V", (void*)android_os_Process_setProcessGroup},
     {"getProcessGroup",     "(I)I", (void*)android_os_Process_getProcessGroup},
     {"getExclusiveCores",   "()[I", (void*)android_os_Process_getExclusiveCores},

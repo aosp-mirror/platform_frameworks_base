@@ -19,8 +19,8 @@ package android.os;
 import android.annotation.TestApi;
 import android.system.Os;
 import android.system.OsConstants;
-import android.util.Log;
 import android.webkit.WebViewZygote;
+
 import dalvik.system.VMRuntime;
 
 /**
@@ -92,6 +92,12 @@ public class Process {
     public static final int VPN_UID = 1016;
 
     /**
+     * Defines the UID/GID for keystore.
+     * @hide
+     */
+    public static final int KEYSTORE_UID = 1017;
+
+    /**
      * Defines the UID/GID for the NFC service process.
      * @hide
      */
@@ -138,6 +144,12 @@ public class Process {
      * @hide
      */
     public static final int WEBVIEW_ZYGOTE_UID = 1051;
+
+    /**
+     * Defines the UID used for resource tracking for OTA updates.
+     * @hide
+     */
+    public static final int OTA_UPDATE_UID = 1061;
 
     /**
      * Defines the start of a range of UIDs (and GIDs), going from this
@@ -374,6 +386,12 @@ public class Process {
      **/
     public static final int THREAD_GROUP_TOP_APP = 5;
 
+    /**
+     * Thread group for RT app.
+     * @hide
+     **/
+    public static final int THREAD_GROUP_RT_APP = 6;
+
     public static final int SIGNAL_QUIT = 3;
     public static final int SIGNAL_KILL = 9;
     public static final int SIGNAL_USR1 = 10;
@@ -405,7 +423,7 @@ public class Process {
      * 
      * When invokeWith is not null, the process will be started as a fresh app
      * and not a zygote fork. Note that this is only allowed for uid 0 or when
-     * debugFlags contains DEBUG_ENABLE_DEBUGGER.
+     * runtimeFlags contains DEBUG_ENABLE_DEBUGGER.
      *
      * @param processClass The class to use as the process's main entry
      *                     point.
@@ -413,7 +431,7 @@ public class Process {
      * @param uid The user-id under which the process will run.
      * @param gid The group-id under which the process will run.
      * @param gids Additional group-ids associated with the process.
-     * @param debugFlags Additional flags.
+     * @param runtimeFlags Additional flags for the runtime.
      * @param targetSdkVersion The target SDK version for the app.
      * @param seInfo null-ok SELinux information for the new process.
      * @param abi non-null the ABI this app should be started with.
@@ -430,7 +448,7 @@ public class Process {
     public static final ProcessStartResult start(final String processClass,
                                   final String niceName,
                                   int uid, int gid, int[] gids,
-                                  int debugFlags, int mountExternal,
+                                  int runtimeFlags, int mountExternal,
                                   int targetSdkVersion,
                                   String seInfo,
                                   String abi,
@@ -439,7 +457,7 @@ public class Process {
                                   String invokeWith,
                                   String[] zygoteArgs) {
         return zygoteProcess.start(processClass, niceName, uid, gid, gids,
-                    debugFlags, mountExternal, targetSdkVersion, seInfo,
+                    runtimeFlags, mountExternal, targetSdkVersion, seInfo,
                     abi, instructionSet, appDataDir, invokeWith, zygoteArgs);
     }
 
@@ -447,7 +465,7 @@ public class Process {
     public static final ProcessStartResult startWebView(final String processClass,
                                   final String niceName,
                                   int uid, int gid, int[] gids,
-                                  int debugFlags, int mountExternal,
+                                  int runtimeFlags, int mountExternal,
                                   int targetSdkVersion,
                                   String seInfo,
                                   String abi,
@@ -456,7 +474,7 @@ public class Process {
                                   String invokeWith,
                                   String[] zygoteArgs) {
         return WebViewZygote.getProcess().start(processClass, niceName, uid, gid, gids,
-                    debugFlags, mountExternal, targetSdkVersion, seInfo,
+                    runtimeFlags, mountExternal, targetSdkVersion, seInfo,
                     abi, instructionSet, appDataDir, invokeWith, zygoteArgs);
     }
 
@@ -648,7 +666,7 @@ public class Process {
      * @hide
      * @param tid The identifier of the thread to change.
      * @param group The target group for this thread from THREAD_GROUP_*.
-     * 
+     *
      * @throws IllegalArgumentException Throws IllegalArgumentException if
      * <var>tid</var> does not exist.
      * @throws SecurityException Throws SecurityException if your process does
@@ -661,6 +679,21 @@ public class Process {
      * libcutils::set_sched_policy().
      */
     public static final native void setThreadGroup(int tid, int group)
+            throws IllegalArgumentException, SecurityException;
+
+    /**
+     * Sets the scheduling group and the corresponding cpuset group
+     * @hide
+     * @param tid The identifier of the thread to change.
+     * @param group The target group for this thread from THREAD_GROUP_*.
+     *
+     * @throws IllegalArgumentException Throws IllegalArgumentException if
+     * <var>tid</var> does not exist.
+     * @throws SecurityException Throws SecurityException if your process does
+     * not have permission to modify the given thread, or to use the given
+     * priority.
+     */
+    public static final native void setThreadGroupAndCpuset(int tid, int group)
             throws IllegalArgumentException, SecurityException;
 
     /**
@@ -740,7 +773,8 @@ public class Process {
     /**
      * Return the current priority of a thread, based on Linux priorities.
      * 
-     * @param tid The identifier of the thread/process to change.
+     * @param tid The identifier of the thread/process. If tid equals zero, the priority of the
+     * calling process/thread will be returned.
      * 
      * @return Returns the current priority, as a Linux priority level,
      * from -20 for highest scheduling priority to 19 for lowest scheduling

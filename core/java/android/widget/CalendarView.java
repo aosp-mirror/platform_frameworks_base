@@ -16,23 +16,25 @@
 
 package android.widget;
 
-import com.android.internal.R;
-
 import android.annotation.AttrRes;
 import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StyleRes;
+import android.annotation.TestApi;
 import android.annotation.Widget;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.icu.util.Calendar;
 import android.icu.util.TimeZone;
 import android.util.AttributeSet;
 import android.util.Log;
+
+import com.android.internal.R;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -545,6 +547,19 @@ public class CalendarView extends FrameLayout {
         mDelegate.setDate(date, animate, center);
     }
 
+    /**
+     * Retrieves the screen bounds for the specific date in the coordinate system of this
+     * view. If the passed date is being currently displayed, this method returns true and
+     * the caller can query the fields of the passed {@link Rect} object. Otherwise the
+     * method returns false and does not touch the passed {@link Rect} object.
+     *
+     * @hide
+     */
+    @TestApi
+    public boolean getBoundsForDate(long date, Rect outBounds) {
+        return mDelegate.getBoundsForDate(date, outBounds);
+    }
+
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
@@ -605,6 +620,8 @@ public class CalendarView extends FrameLayout {
         void setDate(long date);
         void setDate(long date, boolean animate, boolean center);
         long getDate();
+
+        boolean getBoundsForDate(long date, Rect outBounds);
 
         void setOnDateChangeListener(OnDateChangeListener listener);
 

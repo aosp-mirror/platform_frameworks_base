@@ -15,8 +15,6 @@
  */
 package android.transition;
 
-import com.android.internal.R;
-
 import android.animation.Animator;
 import android.animation.TimeInterpolator;
 import android.content.Context;
@@ -26,6 +24,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
+
+import com.android.internal.R;
 /**
  * This transition tracks changes to the visibility of target views in the
  * start and end scenes and moves views in or out from the edges of the

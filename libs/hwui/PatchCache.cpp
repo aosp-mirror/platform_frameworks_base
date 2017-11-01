@@ -36,26 +36,10 @@ PatchCache::PatchCache(RenderState& renderState)
         , mSize(0)
         , mCache(LruCache<PatchDescription, Patch*>::kUnlimitedCapacity)
         , mMeshBuffer(0)
-        , mFreeBlocks(nullptr)
-        , mGenerationId(0) {}
+        , mFreeBlocks(nullptr) {}
 
 PatchCache::~PatchCache() {
     clear();
-}
-
-void PatchCache::init() {
-    bool created = false;
-    if (!mMeshBuffer) {
-        glGenBuffers(1, &mMeshBuffer);
-        created = true;
-    }
-
-    mRenderState.meshState().bindMeshBuffer(mMeshBuffer);
-    mRenderState.meshState().resetVertexPointers();
-
-    if (created) {
-        createVertexBuffer();
-    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -80,8 +64,7 @@ void PatchCache::clear() {
     clearCache();
 
     if (mMeshBuffer) {
-        mRenderState.meshState().unbindMeshBuffer();
-        glDeleteBuffers(1, &mMeshBuffer);
+        mRenderState.meshState().deleteMeshBuffer(mMeshBuffer);
         mMeshBuffer = 0;
         mSize = 0;
     }
@@ -170,10 +153,10 @@ void PatchCache::clearGarbage() {
 }
 
 void PatchCache::createVertexBuffer() {
-    glBufferData(GL_ARRAY_BUFFER, mMaxSize, nullptr, GL_DYNAMIC_DRAW);
+    mRenderState.meshState().genOrUpdateMeshBuffer(&mMeshBuffer,
+        mMaxSize, nullptr, GL_DYNAMIC_DRAW);
     mSize = 0;
     mFreeBlocks = new BufferBlock(0, mMaxSize);
-    mGenerationId++;
 }
 
 /**
@@ -182,7 +165,9 @@ void PatchCache::createVertexBuffer() {
  */
 void PatchCache::setupMesh(Patch* newMesh) {
     // This call ensures the VBO exists and that it is bound
-    init();
+    if (!mMeshBuffer) {
+        createVertexBuffer();
+    }
 
     // If we're running out of space, let's clear the entire cache
     uint32_t size = newMesh->getSize();
@@ -215,7 +200,9 @@ void PatchCache::setupMesh(Patch* newMesh) {
     // Copy the 9patch mesh in the VBO
     newMesh->positionOffset = (GLintptr) (block->offset);
     newMesh->textureOffset = newMesh->positionOffset + kMeshTextureOffset;
-    glBufferSubData(GL_ARRAY_BUFFER, newMesh->positionOffset, size, newMesh->vertices.get());
+
+    mRenderState.meshState().updateMeshBufferSubData(mMeshBuffer, newMesh->positionOffset, size,
+            newMesh->vertices.get());
 
     // Remove the block since we've used it entirely
     if (block->size == size) {
@@ -236,17 +223,15 @@ void PatchCache::setupMesh(Patch* newMesh) {
 
 static const UvMapper sIdentity;
 
-const Patch* PatchCache::get(const AssetAtlas::Entry* entry,
-        const uint32_t bitmapWidth, const uint32_t bitmapHeight,
+const Patch* PatchCache::get( const uint32_t bitmapWidth, const uint32_t bitmapHeight,
         const float pixelWidth, const float pixelHeight, const Res_png_9patch* patch) {
 
     const PatchDescription description(bitmapWidth, bitmapHeight, pixelWidth, pixelHeight, patch);
     const Patch* mesh = mCache.get(description);
 
     if (!mesh) {
-        const UvMapper& mapper = entry ? entry->uvMapper : sIdentity;
         Patch* newMesh = new Patch(bitmapWidth, bitmapHeight,
-                pixelWidth, pixelHeight, mapper, patch);
+                pixelWidth, pixelHeight, sIdentity, patch);
 
         if (newMesh->vertices) {
             setupMesh(newMesh);

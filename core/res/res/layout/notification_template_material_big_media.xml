@@ -16,16 +16,24 @@
   -->
 
 <!-- Layout for the expanded media notification -->
-<com.android.internal.widget.MediaNotificationView xmlns:android="http://schemas.android.com/apk/res/android"
+<com.android.internal.widget.MediaNotificationView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/status_bar_latest_event_content"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="#00000000"
     android:tag="bigMediaNarrow"
     >
+    <!-- The size will actually be determined at runtime -->
+    <ImageView android:id="@+id/right_icon"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_gravity="top|end"
+        android:scaleType="centerCrop"
+    />
     <include layout="@layout/notification_template_header"
         android:layout_width="match_parent"
-        android:layout_height="53dp"
+        android:layout_height="@dimen/media_notification_header_height"
         android:layout_gravity="start"/>
     <LinearLayout
         android:layout_width="match_parent"
@@ -48,26 +56,10 @@
         </LinearLayout>
         <LinearLayout
             android:id="@+id/media_actions"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="-21dp"
-            android:paddingStart="8dp"
-            android:paddingBottom="12dp"
-            android:gravity="top"
             android:orientation="horizontal"
             android:layoutDirection="ltr"
-            >
+            style="@style/NotificationMediaActionContainer" >
             <!-- media buttons will be added here -->
         </LinearLayout>
     </LinearLayout>
-
-    <ImageView android:id="@+id/right_icon"
-        android:layout_width="@dimen/media_notification_expanded_image_max_size"
-        android:layout_height="@dimen/media_notification_expanded_image_max_size"
-        android:minWidth="40dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="20dp"
-        android:layout_gravity="bottom|end"
-        android:scaleType="centerCrop"
-        />
 </com.android.internal.widget.MediaNotificationView>

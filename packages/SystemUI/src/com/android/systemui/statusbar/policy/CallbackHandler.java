@@ -47,7 +47,7 @@ public class CallbackHandler extends Handler implements EmergencyListener, Signa
     private final ArrayList<SignalCallback> mSignalCallbacks = new ArrayList<>();
 
     public CallbackHandler() {
-        super();
+        super(Looper.getMainLooper());
     }
 
     @VisibleForTesting
@@ -109,13 +109,13 @@ public class CallbackHandler extends Handler implements EmergencyListener, Signa
     @Override
     public void setWifiIndicators(final boolean enabled, final IconState statusIcon,
             final IconState qsIcon, final boolean activityIn, final boolean activityOut,
-            final String description) {
+            final String description, boolean isTransient) {
         post(new Runnable() {
             @Override
             public void run() {
                 for (SignalCallback callback : mSignalCallbacks) {
                     callback.setWifiIndicators(enabled, statusIcon, qsIcon, activityIn, activityOut,
-                            description);
+                            description, isTransient);
                 }
             }
         });
@@ -125,14 +125,14 @@ public class CallbackHandler extends Handler implements EmergencyListener, Signa
     public void setMobileDataIndicators(final IconState statusIcon, final IconState qsIcon,
             final int statusType, final int qsType,final boolean activityIn,
             final boolean activityOut, final String typeContentDescription,
-            final String description, final boolean isWide, final int subId) {
+            final String description, final boolean isWide, final int subId, boolean roaming) {
         post(new Runnable() {
             @Override
             public void run() {
                 for (SignalCallback signalCluster : mSignalCallbacks) {
                     signalCluster.setMobileDataIndicators(statusIcon, qsIcon, statusType, qsType,
                             activityIn, activityOut, typeContentDescription, description, isWide,
-                            subId);
+                            subId, roaming);
                 }
             }
         });

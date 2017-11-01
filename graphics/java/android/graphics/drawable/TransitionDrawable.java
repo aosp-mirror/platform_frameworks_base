@@ -118,6 +118,18 @@ public class TransitionDrawable extends LayerDrawable implements Drawable.Callba
     }
 
     /**
+     * Show the second layer on top of the first layer immediately
+     *
+     * @hide
+     */
+    public void showSecondLayer() {
+        mAlpha = 255;
+        mReverse = false;
+        mTransitionState = TRANSITION_NONE;
+        invalidateSelf();
+    }
+
+    /**
      * Show only the first layer.
      */
     public void resetTransition() {

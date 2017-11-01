@@ -21,6 +21,8 @@ import android.graphics.Canvas;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.os.Build;
+import android.os.Build.VERSION_CODES;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.DisplayMetrics;
@@ -78,6 +80,11 @@ public class CompatibilityInfo implements Parcelable {
     private static final int NEEDS_SCREEN_COMPAT = 8;
 
     /**
+     * Set if the application needs to run in with compat resources.
+     */
+    private static final int NEEDS_COMPAT_RES = 16;
+
+    /**
      * The effective screen density we have selected for this application.
      */
     public final int applicationDensity;
@@ -96,6 +103,9 @@ public class CompatibilityInfo implements Parcelable {
             boolean forceCompat) {
         int compatFlags = 0;
 
+        if (appInfo.targetSdkVersion < VERSION_CODES.O) {
+            compatFlags |= NEEDS_COMPAT_RES;
+        }
         if (appInfo.requiresSmallestWidthDp != 0 || appInfo.compatibleWidthLimitDp != 0
                 || appInfo.largestWidthLimitDp != 0) {
             // New style screen requirements spec.
@@ -272,6 +282,10 @@ public class CompatibilityInfo implements Parcelable {
 
     public boolean alwaysSupportsScreen() {
         return (mCompatibilityFlags&NEVER_NEEDS_COMPAT) != 0;
+    }
+
+    public boolean needsCompatResources() {
+        return (mCompatibilityFlags&NEEDS_COMPAT_RES) != 0;
     }
 
     /**

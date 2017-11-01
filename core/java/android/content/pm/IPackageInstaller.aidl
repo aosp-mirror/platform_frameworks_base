@@ -21,6 +21,7 @@ import android.content.pm.IPackageInstallerCallback;
 import android.content.pm.IPackageInstallerSession;
 import android.content.pm.PackageInstaller;
 import android.content.pm.ParceledListSlice;
+import android.content.pm.VersionedPackage;
 import android.content.IntentSender;
 
 import android.graphics.Bitmap;
@@ -44,7 +45,7 @@ interface IPackageInstaller {
     void registerCallback(IPackageInstallerCallback callback, int userId);
     void unregisterCallback(IPackageInstallerCallback callback);
 
-    void uninstall(String packageName, String callerPackageName, int flags,
+    void uninstall(in VersionedPackage versionedPackage, String callerPackageName, int flags,
             in IntentSender statusReceiver, int userId);
 
     void setPermissionsResult(int sessionId, boolean accepted);

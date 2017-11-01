@@ -38,9 +38,11 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.LOCAL_MAC_ADDRESS" />
     <uses-permission android:name="android.permission.EXPAND_STATUS_BAR" />
     <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
     <uses-permission android:name="android.permission.MANAGE_NETWORK_POLICY" />
+    <uses-permission android:name="android.permission.MANAGE_USB" />
     <!-- System tool permissions granted to the shell. -->
     <uses-permission android:name="android.permission.REAL_GET_TASKS" />
     <uses-permission android:name="android.permission.CHANGE_CONFIGURATION" />
@@ -69,6 +71,7 @@
     <uses-permission android:name="android.permission.INSTALL_PACKAGES" />
     <uses-permission android:name="android.permission.MOVE_PACKAGE" />
     <uses-permission android:name="android.permission.CLEAR_APP_USER_DATA" />
+    <uses-permission android:name="android.permission.CLEAR_APP_CACHE" />
     <uses-permission android:name="android.permission.DELETE_CACHE_FILES" />
     <uses-permission android:name="android.permission.DELETE_PACKAGES" />
     <uses-permission android:name="android.permission.ACCESS_SURFACE_FLINGER" />
@@ -101,6 +104,7 @@
     <uses-permission android:name="android.permission.MODIFY_APPWIDGET_BIND_PERMISSIONS"/>
     <uses-permission android:name="android.permission.INSTALL_GRANT_RUNTIME_PERMISSIONS" />
     <uses-permission android:name="android.permission.CHANGE_APP_IDLE_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST" />
     <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS" />
     <uses-permission android:name="android.permission.MOUNT_FORMAT_FILESYSTEMS" />
     <uses-permission android:name="android.permission.MODIFY_PHONE_STATE" />
@@ -112,10 +116,15 @@
     <uses-permission android:name="android.permission.MANAGE_ACTIVITY_STACKS" />
     <uses-permission android:name="android.permission.CONNECTIVITY_INTERNAL" />
     <uses-permission android:name="android.permission.CHANGE_COMPONENT_ENABLED_STATE" />
+    <uses-permission android:name="android.permission.MANAGE_AUTO_FILL" />
     <!-- Permission needed to rename bugreport notifications (so they're not shown as Shell) -->
     <uses-permission android:name="android.permission.SUBSTITUTE_NOTIFICATION_APP_NAME" />
     <!-- Permission needed to hold a wakelock in dumpstate.cpp (drop_root_user()) -->
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <!-- Permission needed to enable/disable overlays -->
+    <uses-permission android:name="android.permission.CHANGE_OVERLAY_PACKAGES" />
+    <!-- Permission needed to access privileged VR APIs -->
+    <uses-permission android:name="android.permission.RESTRICTED_VR_ACCESS" />
 
     <application android:label="@string/app_label"
                  android:defaultToDeviceProtectedStorage="true"
@@ -153,8 +162,8 @@
             android:name=".BugreportReceiver"
             android:permission="android.permission.DUMP">
             <intent-filter>
-                <action android:name="android.intent.action.BUGREPORT_STARTED" />
-                <action android:name="android.intent.action.BUGREPORT_FINISHED" />
+                <action android:name="com.android.internal.intent.action.BUGREPORT_STARTED" />
+                <action android:name="com.android.internal.intent.action.BUGREPORT_FINISHED" />
             </intent-filter>
         </receiver>
 
@@ -162,7 +171,7 @@
             android:name=".RemoteBugreportReceiver"
             android:permission="android.permission.DUMP">
             <intent-filter>
-                <action android:name="android.intent.action.REMOTE_BUGREPORT_FINISHED" />
+                <action android:name="com.android.internal.intent.action.REMOTE_BUGREPORT_FINISHED" />
             </intent-filter>
         </receiver>
 

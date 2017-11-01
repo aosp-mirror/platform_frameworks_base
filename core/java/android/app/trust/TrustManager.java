@@ -18,6 +18,8 @@ package android.app.trust;
 
 import android.Manifest;
 import android.annotation.RequiresPermission;
+import android.annotation.SystemService;
+import android.content.Context;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -25,12 +27,11 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.util.ArrayMap;
 
-import com.android.internal.widget.LockPatternUtils;
-
 /**
  * See {@link com.android.server.trust.TrustManagerService}
  * @hide
  */
+@SystemService(Context.TRUST_SERVICE)
 public class TrustManager {
 
     private static final int MSG_TRUST_CHANGED = 1;
@@ -50,8 +51,6 @@ public class TrustManager {
     /**
      * Changes the lock status for the given user. This is only applicable to Managed Profiles,
      * other users should be handled by Keyguard.
-     *
-     * Requires the {@link android.Manifest.permission#ACCESS_KEYGUARD_SECURE_STORAGE} permission.
      *
      * @param userId The id for the user to be locked/unlocked.
      * @param locked The value for that user's locked state.
@@ -75,6 +74,26 @@ public class TrustManager {
     public void reportUnlockAttempt(boolean successful, int userId) {
         try {
             mService.reportUnlockAttempt(successful, userId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Reports that user {@param userId} has entered a temporary device lockout.
+     *
+     * This generally occurs when  the user has unsuccessfully tried to unlock the device too many
+     * times. The user will then be unable to unlock the device until a set amount of time has
+     * elapsed.
+     *
+     * @param timeout The amount of time that needs to elapse, in milliseconds, until the user may
+     *    attempt to unlock the device again.
+     *
+     * Requires the {@link android.Manifest.permission#ACCESS_KEYGUARD_SECURE_STORAGE} permission.
+     */
+    public void reportUnlockLockout(int timeoutMs, int userId) {
+        try {
+            mService.reportUnlockLockout(timeoutMs, userId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -161,6 +180,32 @@ public class TrustManager {
     public boolean isTrustUsuallyManaged(int userId) {
         try {
             return mService.isTrustUsuallyManaged(userId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Updates the trust state for the user due to the user unlocking via fingerprint.
+     * Should only be called if user authenticated via fingerprint and bouncer can be skipped.
+     * @param userId
+     */
+    @RequiresPermission(Manifest.permission.ACCESS_KEYGUARD_SECURE_STORAGE)
+    public void unlockedByFingerprintForUser(int userId) {
+        try {
+            mService.unlockedByFingerprintForUser(userId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Clears authenticated fingerprints for all users.
+     */
+    @RequiresPermission(Manifest.permission.ACCESS_KEYGUARD_SECURE_STORAGE)
+    public void clearAllFingerprints() {
+        try {
+            mService.clearAllFingerprints();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

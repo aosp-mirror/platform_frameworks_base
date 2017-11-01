@@ -20,9 +20,12 @@
 #include "RenderTask.h"
 
 #include "../JankTracker.h"
+#include "CacheManager.h"
 #include "TimeLord.h"
 
+#include <GrContext.h>
 #include <cutils/compiler.h>
+#include <SkBitmap.h>
 #include <ui/DisplayInfo.h>
 #include <utils/Looper.h>
 #include <utils/Thread.h>
@@ -32,10 +35,12 @@
 
 namespace android {
 
+class Bitmap;
 class DisplayEventReceiver;
 
 namespace uirenderer {
 
+class Readback;
 class RenderState;
 class TestUtils;
 
@@ -45,6 +50,7 @@ class CanvasContext;
 class DispatchFrameCallbacks;
 class EglManager;
 class RenderProxy;
+class VulkanManager;
 
 class TaskQueue {
 public:
@@ -71,6 +77,7 @@ protected:
 };
 
 class ANDROID_API RenderThread : public Thread {
+    PREVENT_COPY_AND_ASSIGN(RenderThread);
 public:
     // RenderThread takes complete ownership of tasks that are queued
     // and will delete them after they are run
@@ -88,11 +95,21 @@ public:
     void pushBackFrameCallback(IFrameCallback* callback);
 
     TimeLord& timeLord() { return mTimeLord; }
-    RenderState& renderState() { return *mRenderState; }
-    EglManager& eglManager() { return *mEglManager; }
+    RenderState& renderState() const { return *mRenderState; }
+    EglManager& eglManager() const { return *mEglManager; }
     JankTracker& jankTracker() { return *mJankTracker; }
+    Readback& readback();
 
     const DisplayInfo& mainDisplayInfo() { return mDisplayInfo; }
+
+    GrContext* getGrContext() const { return mGrContext.get(); }
+    void setGrContext(GrContext* cxt);
+
+    CacheManager& cacheManager() { return *mCacheManager; }
+    VulkanManager& vulkanManager() { return *mVkManager; }
+
+    sk_sp<Bitmap> allocateHardwareBitmap(SkBitmap& skBitmap);
+    void dumpGraphicsMemory(int fd);
 
 protected:
     virtual bool threadLoop() override;
@@ -144,6 +161,11 @@ private:
     EglManager* mEglManager;
 
     JankTracker* mJankTracker = nullptr;
+    Readback* mReadback = nullptr;
+
+    sk_sp<GrContext> mGrContext;
+    CacheManager* mCacheManager;
+    VulkanManager* mVkManager;
 };
 
 } /* namespace renderthread */

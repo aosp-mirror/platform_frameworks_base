@@ -227,7 +227,6 @@ public class Type extends BaseObj {
 
     Type(long id, RenderScript rs) {
         super(id, rs);
-        guard.open("destroy");
     }
 
     @Override

@@ -200,8 +200,7 @@ public class RenderNodeAnimator extends Animator {
         // in mTransformationInfo instead of in RenderNode, so we need to update
         // it with the final value here.
         if (mRenderProperty == RenderNodeAnimator.ALPHA) {
-            // Don't need null check because ViewPropertyAnimator's
-            // ctor calls ensureTransformationInfo()
+            mViewTarget.ensureTransformationInfo();
             mViewTarget.mTransformationInfo.mAlpha = mFinalValue;
         }
 

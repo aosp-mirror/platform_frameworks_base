@@ -16,9 +16,17 @@
 
 package android.view;
 
+import android.content.Context;
 import android.content.pm.ActivityInfo;
+import android.graphics.PixelFormat;
 import android.os.SystemClock;
 import android.test.ActivityInstrumentationTestCase2;
+import android.test.UiThreadTest;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.WindowManager;
+
+import com.android.frameworks.coretests.R;
 
 public class ViewAttachTest extends
         ActivityInstrumentationTestCase2<ViewAttachTestActivity> {
@@ -49,6 +57,40 @@ public class ViewAttachTest extends
             SystemClock.sleep(250);
             activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
             SystemClock.sleep(250);
+        }
+    }
+
+    /**
+     * Make sure that on any attached view, if the view is full-screen and hosted
+     * on a round device, the round scrollbars will be displayed even if the activity
+     * window is offset.
+     *
+     * @throws Throwable
+     */
+    @UiThreadTest
+    public void testRoundScrollbars() throws Throwable {
+        final ViewAttachTestActivity activity = getActivity();
+        final View rootView = activity.getWindow().getDecorView();
+        final WindowManager.LayoutParams params =
+            new WindowManager.LayoutParams(
+                rootView.getWidth(),
+                rootView.getHeight(),
+                50, /* xPosition */
+                0, /* yPosition */
+                WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY,
+                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
+                PixelFormat.TRANSLUCENT);
+
+        rootView.setLayoutParams(params);
+
+        View contentView = activity.findViewById(R.id.view_attach_view);
+        boolean shouldDrawRoundScrollbars = contentView.shouldDrawRoundScrollbar();
+
+        if (activity.getResources().getConfiguration().isScreenRound()) {
+            assertTrue(shouldDrawRoundScrollbars);
+        } else {
+            // Never draw round scrollbars on non-round devices.
+            assertFalse(shouldDrawRoundScrollbars);
         }
     }
 }

@@ -515,6 +515,23 @@ final class ConnectionServiceAdapter implements DeathRecipient {
     }
 
     /**
+     * Sets the audio route associated with a {@link Connection}.
+     *
+     * @param callId The unique ID of the call.
+     * @param audioRoute The new audio route (see {@code CallAudioState#ROUTE_*}).
+     */
+    void setAudioRoute(String callId, int audioRoute) {
+        Log.v(this, "setAudioRoute: %s %s", callId, CallAudioState.audioRouteToString(audioRoute));
+        for (IConnectionServiceAdapter adapter : mAdapters) {
+            try {
+                adapter.setAudioRoute(callId, audioRoute, Log.getExternalSession());
+            } catch (RemoteException ignored) {
+            }
+        }
+    }
+
+
+    /**
      * Informs Telecom of a connection level event.
      *
      * @param callId The unique ID of the call.
@@ -526,6 +543,84 @@ final class ConnectionServiceAdapter implements DeathRecipient {
         for (IConnectionServiceAdapter adapter : mAdapters) {
             try {
                 adapter.onConnectionEvent(callId, event, extras, Log.getExternalSession());
+            } catch (RemoteException ignored) {
+            }
+        }
+    }
+
+    /**
+     * Notifies Telecom that an RTT session was successfully established.
+     *
+     * @param callId The unique ID of the call.
+     */
+    void onRttInitiationSuccess(String callId) {
+        Log.v(this, "onRttInitiationSuccess: %s", callId);
+        for (IConnectionServiceAdapter adapter : mAdapters) {
+            try {
+                adapter.onRttInitiationSuccess(callId, Log.getExternalSession());
+            } catch (RemoteException ignored) {
+            }
+        }
+    }
+
+    /**
+     * Notifies Telecom that a requested RTT session failed to be established.
+     *
+     * @param callId The unique ID of the call.
+     */
+    void onRttInitiationFailure(String callId, int reason) {
+        Log.v(this, "onRttInitiationFailure: %s", callId);
+        for (IConnectionServiceAdapter adapter : mAdapters) {
+            try {
+                adapter.onRttInitiationFailure(callId, reason, Log.getExternalSession());
+            } catch (RemoteException ignored) {
+            }
+        }
+    }
+
+    /**
+     * Notifies Telecom that an established RTT session was terminated by the remote user on
+     * the call.
+     *
+     * @param callId The unique ID of the call.
+     */
+    void onRttSessionRemotelyTerminated(String callId) {
+        Log.v(this, "onRttSessionRemotelyTerminated: %s", callId);
+        for (IConnectionServiceAdapter adapter : mAdapters) {
+            try {
+                adapter.onRttSessionRemotelyTerminated(callId, Log.getExternalSession());
+            } catch (RemoteException ignored) {
+            }
+        }
+    }
+
+    /**
+     * Notifies Telecom that the remote user on the call has requested an upgrade to an RTT
+     * session for this call.
+     *
+     * @param callId The unique ID of the call.
+     */
+    void onRemoteRttRequest(String callId) {
+        Log.v(this, "onRemoteRttRequest: %s", callId);
+        for (IConnectionServiceAdapter adapter : mAdapters) {
+            try {
+                adapter.onRemoteRttRequest(callId, Log.getExternalSession());
+            } catch (RemoteException ignored) {
+            }
+        }
+    }
+
+    /**
+     * Notifies Telecom that a call's PhoneAccountHandle has changed.
+     *
+     * @param callId The unique ID of the call.
+     * @param pHandle The new PhoneAccountHandle associated with the call.
+     */
+    void onPhoneAccountChanged(String callId, PhoneAccountHandle pHandle) {
+        for (IConnectionServiceAdapter adapter : mAdapters) {
+            try {
+                Log.d(this, "onPhoneAccountChanged %s", callId);
+                adapter.onPhoneAccountChanged(callId, pHandle, Log.getExternalSession());
             } catch (RemoteException ignored) {
             }
         }

@@ -17,6 +17,8 @@
 #include <SkBitmap.h>
 #include <SkCanvas.h>
 #include <SkColor.h>
+#include <SkColorFilter.h>
+#include <SkMaskFilter.h>
 #include <SkPaint.h>
 #include <SkPath.h>
 #include <SkPathEffect.h>
@@ -121,34 +123,19 @@ bool PathDescription::operator==(const PathDescription& rhs) const {
 // Utilities
 ///////////////////////////////////////////////////////////////////////////////
 
-bool PathCache::canDrawAsConvexPath(SkPath* path, const SkPaint* paint) {
-    // NOTE: This should only be used after PathTessellator handles joins properly
-    return paint->getPathEffect() == nullptr && path->getConvexity() == SkPath::kConvex_Convexity;
-}
-
-void PathCache::computePathBounds(const SkPath* path, const SkPaint* paint,
-        float& left, float& top, float& offset, uint32_t& width, uint32_t& height) {
+static void computePathBounds(const SkPath* path, const SkPaint* paint, PathTexture* texture,
+        uint32_t& width, uint32_t& height) {
     const SkRect& bounds = path->getBounds();
-    PathCache::computeBounds(bounds, paint, left, top, offset, width, height);
-}
-
-void PathCache::computeBounds(const SkRect& bounds, const SkPaint* paint,
-        float& left, float& top, float& offset, uint32_t& width, uint32_t& height) {
     const float pathWidth = std::max(bounds.width(), 1.0f);
     const float pathHeight = std::max(bounds.height(), 1.0f);
 
-    left = bounds.fLeft;
-    top = bounds.fTop;
+    texture->left = floorf(bounds.fLeft);
+    texture->top = floorf(bounds.fTop);
 
-    offset = (int) floorf(std::max(paint->getStrokeWidth(), 1.0f) * 1.5f + 0.5f);
+    texture->offset = (int) floorf(std::max(paint->getStrokeWidth(), 1.0f) * 1.5f + 0.5f);
 
-    width = uint32_t(pathWidth + offset * 2.0 + 0.5);
-    height = uint32_t(pathHeight + offset * 2.0 + 0.5);
-}
-
-static void initBitmap(SkBitmap& bitmap, uint32_t width, uint32_t height) {
-    bitmap.allocPixels(SkImageInfo::MakeA8(width, height));
-    bitmap.eraseColor(0);
+    width = uint32_t(pathWidth + texture->offset * 2.0 + 0.5);
+    height = uint32_t(pathHeight + texture->offset * 2.0 + 0.5);
 }
 
 static void initPaint(SkPaint& paint) {
@@ -159,20 +146,30 @@ static void initPaint(SkPaint& paint) {
     paint.setColorFilter(nullptr);
     paint.setMaskFilter(nullptr);
     paint.setShader(nullptr);
-    SkXfermode* mode = SkXfermode::Create(SkXfermode::kSrc_Mode);
-    SkSafeUnref(paint.setXfermode(mode));
+    paint.setBlendMode(SkBlendMode::kSrc);
 }
 
-static void drawPath(const SkPath *path, const SkPaint* paint, SkBitmap& bitmap,
-        float left, float top, float offset, uint32_t width, uint32_t height) {
-    initBitmap(bitmap, width, height);
+static sk_sp<Bitmap> drawPath(const SkPath* path, const SkPaint* paint, PathTexture* texture,
+        uint32_t maxTextureSize) {
+    uint32_t width, height;
+    computePathBounds(path, paint, texture, width, height);
+    if (width > maxTextureSize || height > maxTextureSize) {
+        ALOGW("Shape too large to be rendered into a texture (%dx%d, max=%dx%d)",
+                width, height, maxTextureSize, maxTextureSize);
+        return nullptr;
+    }
 
+    sk_sp<Bitmap> bitmap = Bitmap::allocateHeapBitmap(SkImageInfo::MakeA8(width, height));
     SkPaint pathPaint(*paint);
     initPaint(pathPaint);
 
-    SkCanvas canvas(bitmap);
-    canvas.translate(-left + offset, -top + offset);
+    SkBitmap skBitmap;
+    bitmap->getSkBitmap(&skBitmap);
+    skBitmap.eraseColor(0);
+    SkCanvas canvas(skBitmap);
+    canvas.translate(-texture->left + texture->offset, -texture->top + texture->offset);
     canvas.drawPath(*path, pathPaint);
+    return bitmap;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -182,8 +179,7 @@ static void drawPath(const SkPath *path, const SkPaint* paint, SkBitmap& bitmap,
 PathCache::PathCache()
         : mCache(LruCache<PathDescription, PathTexture*>::kUnlimitedCapacity)
         , mSize(0)
-        , mMaxSize(Properties::pathCacheSize)
-        , mTexNum(0) {
+        , mMaxSize(Properties::pathCacheSize) {
     mCache.setOnEntryRemovedListener(this);
 
     GLint maxTextureSize;
@@ -227,7 +223,7 @@ void PathCache::removeTexture(PathTexture* texture) {
 
         // If there is a pending task we must wait for it to return
         // before attempting our cleanup
-        const sp<Task<SkBitmap*> >& task = texture->task();
+        const sp<PathTask>& task = texture->task();
         if (task != nullptr) {
             task->getResult();
             texture->clearTask();
@@ -239,7 +235,6 @@ void PathCache::removeTexture(PathTexture* texture) {
                         "the cache in an inconsistent state", size);
             }
             mSize -= size;
-            mTexNum--;
         }
 
         PATH_LOGD("PathCache::delete name, size, mSize = %d, %d, %d",
@@ -264,7 +259,14 @@ void PathCache::purgeCache(uint32_t width, uint32_t height) {
 }
 
 void PathCache::trim() {
-    while (mSize > mMaxSize || mTexNum > DEFAULT_PATH_TEXTURE_CAP) {
+    // 25 is just an arbitrary lower bound to ensure we aren't in weird edge cases
+    // of things like a cap of 0 or 1 as that's going to break things.
+    // It does not represent a reasonable minimum value
+    static_assert(DEFAULT_PATH_TEXTURE_CAP > 25, "Path cache texture cap is too small");
+
+    while (mSize > mMaxSize || mCache.size() > DEFAULT_PATH_TEXTURE_CAP) {
+        LOG_ALWAYS_FATAL_IF(!mCache.size(), "Inconsistent mSize! Ran out of items to remove!"
+                " mSize = %u, mMaxSize = %u", mSize, mMaxSize);
         mCache.removeOldest();
     }
 }
@@ -273,27 +275,21 @@ PathTexture* PathCache::addTexture(const PathDescription& entry, const SkPath *p
         const SkPaint* paint) {
     ATRACE_NAME("Generate Path Texture");
 
-    float left, top, offset;
-    uint32_t width, height;
-    computePathBounds(path, paint, left, top, offset, width, height);
+    PathTexture* texture = new PathTexture(Caches::getInstance(), path->getGenerationID());
+    sk_sp<Bitmap> bitmap(drawPath(path, paint, texture, mMaxTextureSize));
+    if (!bitmap) {
+        delete texture;
+        return nullptr;
+    }
 
-    if (!checkTextureSize(width, height)) return nullptr;
-
-    purgeCache(width, height);
-
-    SkBitmap bitmap;
-    drawPath(path, paint, bitmap, left, top, offset, width, height);
-
-    PathTexture* texture = new PathTexture(Caches::getInstance(),
-            left, top, offset, path->getGenerationID());
-    generateTexture(entry, &bitmap, texture);
-
+    purgeCache(bitmap->width(), bitmap->height());
+    generateTexture(entry, *bitmap, texture);
     return texture;
 }
 
-void PathCache::generateTexture(const PathDescription& entry, SkBitmap* bitmap,
+void PathCache::generateTexture(const PathDescription& entry, Bitmap& bitmap,
         PathTexture* texture, bool addToCache) {
-    generateTexture(*bitmap, texture);
+    generateTexture(bitmap, texture);
 
     // Note here that we upload to a texture even if it's bigger than mMaxSize.
     // Such an entry in mCache will only be temporary, since it will be evicted
@@ -314,11 +310,10 @@ void PathCache::clear() {
     mCache.clear();
 }
 
-void PathCache::generateTexture(SkBitmap& bitmap, Texture* texture) {
+void PathCache::generateTexture(Bitmap& bitmap, Texture* texture) {
     ATRACE_NAME("Upload Path Texture");
     texture->upload(bitmap);
     texture->setFilter(GL_LINEAR);
-    mTexNum++;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -326,29 +321,14 @@ void PathCache::generateTexture(SkBitmap& bitmap, Texture* texture) {
 ///////////////////////////////////////////////////////////////////////////////
 
 PathCache::PathProcessor::PathProcessor(Caches& caches):
-        TaskProcessor<SkBitmap*>(&caches.tasks), mMaxTextureSize(caches.maxTextureSize) {
+        TaskProcessor<sk_sp<Bitmap> >(&caches.tasks), mMaxTextureSize(caches.maxTextureSize) {
 }
 
-void PathCache::PathProcessor::onProcess(const sp<Task<SkBitmap*> >& task) {
+void PathCache::PathProcessor::onProcess(const sp<Task<sk_sp<Bitmap> > >& task) {
     PathTask* t = static_cast<PathTask*>(task.get());
     ATRACE_NAME("pathPrecache");
 
-    float left, top, offset;
-    uint32_t width, height;
-    PathCache::computePathBounds(&t->path, &t->paint, left, top, offset, width, height);
-
-    PathTexture* texture = t->texture;
-    texture->left = left;
-    texture->top = top;
-    texture->offset = offset;
-
-    if (width <= mMaxTextureSize && height <= mMaxTextureSize) {
-        SkBitmap* bitmap = new SkBitmap();
-        drawPath(&t->path, &t->paint, *bitmap, left, top, offset, width, height);
-        t->setResult(bitmap);
-    } else {
-        t->setResult(nullptr);
-    }
+    t->setResult(drawPath(&t->path, &t->paint, t->texture, mMaxTextureSize));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -393,16 +373,15 @@ PathTexture* PathCache::get(const SkPath* path, const SkPaint* paint) {
     } else {
         // A bitmap is attached to the texture, this means we need to
         // upload it as a GL texture
-        const sp<Task<SkBitmap*> >& task = texture->task();
+        const sp<PathTask>& task = texture->task();
         if (task != nullptr) {
             // But we must first wait for the worker thread to be done
             // producing the bitmap, so let's wait
-            SkBitmap* bitmap = task->getResult();
+            sk_sp<Bitmap> bitmap = task->getResult();
             if (bitmap) {
-                generateTexture(entry, bitmap, texture, false);
+                generateTexture(entry, *bitmap, texture, false);
                 texture->clearTask();
             } else {
-                ALOGW("Path too large to be rendered into a texture");
                 texture->clearTask();
                 texture = nullptr;
                 mCache.remove(entry);

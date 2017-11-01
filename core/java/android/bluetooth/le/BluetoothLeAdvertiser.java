@@ -17,20 +17,19 @@
 package android.bluetooth.le;
 
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothGatt;
+import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothUuid;
 import android.bluetooth.IBluetoothGatt;
 import android.bluetooth.IBluetoothManager;
-import android.bluetooth.le.IAdvertiserCallback;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.ParcelUuid;
 import android.os.RemoteException;
 import android.util.Log;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 /**
  * This class provides a way to perform Bluetooth LE advertise operations, such as starting and
@@ -49,19 +48,23 @@ public final class BluetoothLeAdvertiser {
 
     private static final String TAG = "BluetoothLeAdvertiser";
 
-    private static final int MAX_ADVERTISING_DATA_BYTES = 31;
+    private static final int MAX_ADVERTISING_DATA_BYTES = 1650;
+    private static final int MAX_LEGACY_ADVERTISING_DATA_BYTES = 31;
     // Each fields need one byte for field length and another byte for field type.
     private static final int OVERHEAD_BYTES_PER_FIELD = 2;
     // Flags field will be set by system.
     private static final int FLAGS_FIELD_BYTES = 3;
     private static final int MANUFACTURER_SPECIFIC_DATA_LENGTH = 2;
-    private static final int SERVICE_DATA_UUID_LENGTH = 2;
 
     private final IBluetoothManager mBluetoothManager;
     private final Handler mHandler;
     private BluetoothAdapter mBluetoothAdapter;
-    private final Map<AdvertiseCallback, AdvertiseCallbackWrapper>
-            mLeAdvertisers = new HashMap<AdvertiseCallback, AdvertiseCallbackWrapper>();
+    private final Map<AdvertiseCallback, AdvertisingSetCallback>
+            mLegacyAdvertisers = new HashMap<>();
+    private final Map<AdvertisingSetCallback, IAdvertisingSetCallback>
+            mCallbackWrappers = Collections.synchronizedMap(new HashMap<>());
+    private final Map<Integer, AdvertisingSet>
+            mAdvertisingSets = Collections.synchronizedMap(new HashMap<>());
 
     /**
      * Use BluetoothAdapter.getLeAdvertiser() instead.
@@ -106,34 +109,84 @@ public final class BluetoothLeAdvertiser {
     public void startAdvertising(AdvertiseSettings settings,
             AdvertiseData advertiseData, AdvertiseData scanResponse,
             final AdvertiseCallback callback) {
-        synchronized (mLeAdvertisers) {
+        synchronized (mLegacyAdvertisers) {
             BluetoothLeUtils.checkAdapterStateOn(mBluetoothAdapter);
             if (callback == null) {
                 throw new IllegalArgumentException("callback cannot be null");
             }
             boolean isConnectable = settings.isConnectable();
-            if (totalBytes(advertiseData, isConnectable) > MAX_ADVERTISING_DATA_BYTES ||
-                    totalBytes(scanResponse, false) > MAX_ADVERTISING_DATA_BYTES) {
+            if (totalBytes(advertiseData, isConnectable) > MAX_LEGACY_ADVERTISING_DATA_BYTES
+                    || totalBytes(scanResponse, false) > MAX_LEGACY_ADVERTISING_DATA_BYTES) {
                 postStartFailure(callback, AdvertiseCallback.ADVERTISE_FAILED_DATA_TOO_LARGE);
                 return;
             }
-            if (mLeAdvertisers.containsKey(callback)) {
+            if (mLegacyAdvertisers.containsKey(callback)) {
                 postStartFailure(callback, AdvertiseCallback.ADVERTISE_FAILED_ALREADY_STARTED);
                 return;
             }
 
-            IBluetoothGatt gatt;
-            try {
-                gatt = mBluetoothManager.getBluetoothGatt();
-            } catch (RemoteException e) {
-                Log.e(TAG, "Failed to get Bluetooth gatt - ", e);
-                postStartFailure(callback, AdvertiseCallback.ADVERTISE_FAILED_INTERNAL_ERROR);
-                return;
+            AdvertisingSetParameters.Builder parameters = new AdvertisingSetParameters.Builder();
+            parameters.setLegacyMode(true);
+            parameters.setConnectable(isConnectable);
+            parameters.setScannable(true); // legacy advertisements we support are always scannable
+            if (settings.getMode() == AdvertiseSettings.ADVERTISE_MODE_LOW_POWER) {
+                parameters.setInterval(1600); // 1s
+            } else if (settings.getMode() == AdvertiseSettings.ADVERTISE_MODE_BALANCED) {
+                parameters.setInterval(400); // 250ms
+            } else if (settings.getMode() == AdvertiseSettings.ADVERTISE_MODE_LOW_LATENCY) {
+                parameters.setInterval(160); // 100ms
             }
-            AdvertiseCallbackWrapper wrapper = new AdvertiseCallbackWrapper(callback, advertiseData,
-                    scanResponse, settings, gatt);
-            wrapper.startRegisteration();
+
+            if (settings.getTxPowerLevel() == AdvertiseSettings.ADVERTISE_TX_POWER_ULTRA_LOW) {
+                parameters.setTxPowerLevel(-21);
+            } else if (settings.getTxPowerLevel() == AdvertiseSettings.ADVERTISE_TX_POWER_LOW) {
+                parameters.setTxPowerLevel(-15);
+            } else if (settings.getTxPowerLevel() == AdvertiseSettings.ADVERTISE_TX_POWER_MEDIUM) {
+                parameters.setTxPowerLevel(-7);
+            } else if (settings.getTxPowerLevel() == AdvertiseSettings.ADVERTISE_TX_POWER_HIGH) {
+                parameters.setTxPowerLevel(1);
+            }
+
+            int duration = 0;
+            int timeoutMillis = settings.getTimeout();
+            if (timeoutMillis > 0) {
+                duration = (timeoutMillis < 10) ? 1 : timeoutMillis / 10;
+            }
+
+            AdvertisingSetCallback wrapped = wrapOldCallback(callback, settings);
+            mLegacyAdvertisers.put(callback, wrapped);
+            startAdvertisingSet(parameters.build(), advertiseData, scanResponse, null, null,
+                    duration, 0, wrapped);
         }
+    }
+
+    AdvertisingSetCallback wrapOldCallback(AdvertiseCallback callback, AdvertiseSettings settings) {
+        return new AdvertisingSetCallback() {
+            @Override
+            public void onAdvertisingSetStarted(AdvertisingSet advertisingSet, int txPower,
+                    int status) {
+                if (status != AdvertisingSetCallback.ADVERTISE_SUCCESS) {
+                    postStartFailure(callback, status);
+                    return;
+                }
+
+                postStartSuccess(callback, settings);
+            }
+
+            /* Legacy advertiser is disabled on timeout */
+            @Override
+            public void onAdvertisingEnabled(AdvertisingSet advertisingSet, boolean enabled,
+                    int status) {
+                if (enabled) {
+                    Log.e(TAG, "Legacy advertiser should be only disabled on timeout,"
+                            + " but was enabled!");
+                    return;
+                }
+
+                stopAdvertising(callback);
+            }
+
+        };
     }
 
     /**
@@ -145,13 +198,262 @@ public final class BluetoothLeAdvertiser {
      * @param callback {@link AdvertiseCallback} identifies the advertising instance to stop.
      */
     public void stopAdvertising(final AdvertiseCallback callback) {
-        synchronized (mLeAdvertisers) {
+        synchronized (mLegacyAdvertisers) {
             if (callback == null) {
                 throw new IllegalArgumentException("callback cannot be null");
             }
-            AdvertiseCallbackWrapper wrapper = mLeAdvertisers.get(callback);
+            AdvertisingSetCallback wrapper = mLegacyAdvertisers.get(callback);
             if (wrapper == null) return;
-            wrapper.stopAdvertising();
+
+            stopAdvertisingSet(wrapper);
+
+            mLegacyAdvertisers.remove(callback);
+        }
+    }
+
+    /**
+     * Creates a new advertising set. If operation succeed, device will start advertising. This
+     * method returns immediately, the operation status is delivered through
+     * {@code callback.onAdvertisingSetStarted()}.
+     * <p>
+     *
+     * @param parameters advertising set parameters.
+     * @param advertiseData Advertisement data to be broadcasted. Size must not exceed {@link
+     * BluetoothAdapter#getLeMaximumAdvertisingDataLength}. If the advertisement is connectable,
+     * three bytes will be added for flags.
+     * @param scanResponse Scan response associated with the advertisement data. Size must not
+     * exceed {@link BluetoothAdapter#getLeMaximumAdvertisingDataLength}.
+     * @param periodicParameters periodic advertisng parameters. If null, periodic advertising will
+     * not be started.
+     * @param periodicData Periodic advertising data. Size must not exceed {@link
+     * BluetoothAdapter#getLeMaximumAdvertisingDataLength}.
+     * @param callback Callback for advertising set.
+     * @throws IllegalArgumentException when any of the data parameter exceed the maximum allowable
+     * size, or unsupported advertising PHY is selected, or when attempt to use Periodic Advertising
+     * feature is made when it's not supported by the controller.
+     */
+    public void startAdvertisingSet(AdvertisingSetParameters parameters,
+            AdvertiseData advertiseData, AdvertiseData scanResponse,
+            PeriodicAdvertisingParameters periodicParameters,
+            AdvertiseData periodicData, AdvertisingSetCallback callback) {
+        startAdvertisingSet(parameters, advertiseData, scanResponse, periodicParameters,
+                periodicData, 0, 0, callback, new Handler(Looper.getMainLooper()));
+    }
+
+    /**
+     * Creates a new advertising set. If operation succeed, device will start advertising. This
+     * method returns immediately, the operation status is delivered through
+     * {@code callback.onAdvertisingSetStarted()}.
+     * <p>
+     *
+     * @param parameters advertising set parameters.
+     * @param advertiseData Advertisement data to be broadcasted. Size must not exceed {@link
+     * BluetoothAdapter#getLeMaximumAdvertisingDataLength}. If the advertisement is connectable,
+     * three bytes will be added for flags.
+     * @param scanResponse Scan response associated with the advertisement data. Size must not
+     * exceed {@link BluetoothAdapter#getLeMaximumAdvertisingDataLength}.
+     * @param periodicParameters periodic advertisng parameters. If null, periodic advertising will
+     * not be started.
+     * @param periodicData Periodic advertising data. Size must not exceed {@link
+     * BluetoothAdapter#getLeMaximumAdvertisingDataLength}.
+     * @param callback Callback for advertising set.
+     * @param handler thread upon which the callbacks will be invoked.
+     * @throws IllegalArgumentException when any of the data parameter exceed the maximum allowable
+     * size, or unsupported advertising PHY is selected, or when attempt to use Periodic Advertising
+     * feature is made when it's not supported by the controller.
+     */
+    public void startAdvertisingSet(AdvertisingSetParameters parameters,
+            AdvertiseData advertiseData, AdvertiseData scanResponse,
+            PeriodicAdvertisingParameters periodicParameters,
+            AdvertiseData periodicData, AdvertisingSetCallback callback,
+            Handler handler) {
+        startAdvertisingSet(parameters, advertiseData, scanResponse, periodicParameters,
+                periodicData, 0, 0, callback, handler);
+    }
+
+    /**
+     * Creates a new advertising set. If operation succeed, device will start advertising. This
+     * method returns immediately, the operation status is delivered through
+     * {@code callback.onAdvertisingSetStarted()}.
+     * <p>
+     *
+     * @param parameters advertising set parameters.
+     * @param advertiseData Advertisement data to be broadcasted. Size must not exceed {@link
+     * BluetoothAdapter#getLeMaximumAdvertisingDataLength}. If the advertisement is connectable,
+     * three bytes will be added for flags.
+     * @param scanResponse Scan response associated with the advertisement data. Size must not
+     * exceed {@link BluetoothAdapter#getLeMaximumAdvertisingDataLength}.
+     * @param periodicParameters periodic advertisng parameters. If null, periodic advertising will
+     * not be started.
+     * @param periodicData Periodic advertising data. Size must not exceed {@link
+     * BluetoothAdapter#getLeMaximumAdvertisingDataLength}.
+     * @param duration advertising duration, in 10ms unit. Valid range is from 1 (10ms) to 65535
+     * (655,350 ms). 0 means advertising should continue until stopped.
+     * @param maxExtendedAdvertisingEvents maximum number of extended advertising events the
+     * controller shall attempt to send prior to terminating the extended advertising, even if the
+     * duration has not expired. Valid range is from 1 to 255. 0 means no maximum.
+     * @param callback Callback for advertising set.
+     * @throws IllegalArgumentException when any of the data parameter exceed the maximum allowable
+     * size, or unsupported advertising PHY is selected, or when attempt to use Periodic Advertising
+     * feature is made when it's not supported by the controller.
+     */
+    public void startAdvertisingSet(AdvertisingSetParameters parameters,
+            AdvertiseData advertiseData, AdvertiseData scanResponse,
+            PeriodicAdvertisingParameters periodicParameters,
+            AdvertiseData periodicData, int duration,
+            int maxExtendedAdvertisingEvents,
+            AdvertisingSetCallback callback) {
+        startAdvertisingSet(parameters, advertiseData, scanResponse, periodicParameters,
+                periodicData, duration, maxExtendedAdvertisingEvents, callback,
+                new Handler(Looper.getMainLooper()));
+    }
+
+    /**
+     * Creates a new advertising set. If operation succeed, device will start advertising. This
+     * method returns immediately, the operation status is delivered through
+     * {@code callback.onAdvertisingSetStarted()}.
+     * <p>
+     *
+     * @param parameters Advertising set parameters.
+     * @param advertiseData Advertisement data to be broadcasted. Size must not exceed {@link
+     * BluetoothAdapter#getLeMaximumAdvertisingDataLength}. If the advertisement is connectable,
+     * three bytes will be added for flags.
+     * @param scanResponse Scan response associated with the advertisement data. Size must not
+     * exceed {@link BluetoothAdapter#getLeMaximumAdvertisingDataLength}
+     * @param periodicParameters Periodic advertisng parameters. If null, periodic advertising will
+     * not be started.
+     * @param periodicData Periodic advertising data. Size must not exceed {@link
+     * BluetoothAdapter#getLeMaximumAdvertisingDataLength}
+     * @param duration advertising duration, in 10ms unit. Valid range is from 1 (10ms) to 65535
+     * (655,350 ms). 0 means advertising should continue until stopped.
+     * @param maxExtendedAdvertisingEvents maximum number of extended advertising events the
+     * controller shall attempt to send prior to terminating the extended advertising, even if the
+     * duration has not expired. Valid range is from 1 to 255. 0 means no maximum.
+     * @param callback Callback for advertising set.
+     * @param handler Thread upon which the callbacks will be invoked.
+     * @throws IllegalArgumentException When any of the data parameter exceed the maximum allowable
+     * size, or unsupported advertising PHY is selected, or when attempt to use Periodic Advertising
+     * feature is made when it's not supported by the controller, or when
+     * maxExtendedAdvertisingEvents is used on a controller that doesn't support the LE Extended
+     * Advertising
+     */
+    public void startAdvertisingSet(AdvertisingSetParameters parameters,
+            AdvertiseData advertiseData, AdvertiseData scanResponse,
+            PeriodicAdvertisingParameters periodicParameters,
+            AdvertiseData periodicData, int duration,
+            int maxExtendedAdvertisingEvents, AdvertisingSetCallback callback,
+            Handler handler) {
+        BluetoothLeUtils.checkAdapterStateOn(mBluetoothAdapter);
+        if (callback == null) {
+            throw new IllegalArgumentException("callback cannot be null");
+        }
+
+        boolean isConnectable = parameters.isConnectable();
+        if (parameters.isLegacy()) {
+            if (totalBytes(advertiseData, isConnectable) > MAX_LEGACY_ADVERTISING_DATA_BYTES) {
+                throw new IllegalArgumentException("Legacy advertising data too big");
+            }
+
+            if (totalBytes(scanResponse, false) > MAX_LEGACY_ADVERTISING_DATA_BYTES) {
+                throw new IllegalArgumentException("Legacy scan response data too big");
+            }
+        } else {
+            boolean supportCodedPhy = mBluetoothAdapter.isLeCodedPhySupported();
+            boolean support2MPhy = mBluetoothAdapter.isLe2MPhySupported();
+            int pphy = parameters.getPrimaryPhy();
+            int sphy = parameters.getSecondaryPhy();
+            if (pphy == BluetoothDevice.PHY_LE_CODED && !supportCodedPhy) {
+                throw new IllegalArgumentException("Unsupported primary PHY selected");
+            }
+
+            if ((sphy == BluetoothDevice.PHY_LE_CODED && !supportCodedPhy)
+                    || (sphy == BluetoothDevice.PHY_LE_2M && !support2MPhy)) {
+                throw new IllegalArgumentException("Unsupported secondary PHY selected");
+            }
+
+            int maxData = mBluetoothAdapter.getLeMaximumAdvertisingDataLength();
+            if (totalBytes(advertiseData, isConnectable) > maxData) {
+                throw new IllegalArgumentException("Advertising data too big");
+            }
+
+            if (totalBytes(scanResponse, false) > maxData) {
+                throw new IllegalArgumentException("Scan response data too big");
+            }
+
+            if (totalBytes(periodicData, false) > maxData) {
+                throw new IllegalArgumentException("Periodic advertising data too big");
+            }
+
+            boolean supportPeriodic = mBluetoothAdapter.isLePeriodicAdvertisingSupported();
+            if (periodicParameters != null && !supportPeriodic) {
+                throw new IllegalArgumentException(
+                        "Controller does not support LE Periodic Advertising");
+            }
+        }
+
+        if (maxExtendedAdvertisingEvents < 0 || maxExtendedAdvertisingEvents > 255) {
+            throw new IllegalArgumentException(
+                    "maxExtendedAdvertisingEvents out of range: " + maxExtendedAdvertisingEvents);
+        }
+
+        if (maxExtendedAdvertisingEvents != 0
+                && !mBluetoothAdapter.isLePeriodicAdvertisingSupported()) {
+            throw new IllegalArgumentException(
+                    "Can't use maxExtendedAdvertisingEvents with controller that don't support "
+                            + "LE Extended Advertising");
+        }
+
+        if (duration < 0 || duration > 65535) {
+            throw new IllegalArgumentException("duration out of range: " + duration);
+        }
+
+        IBluetoothGatt gatt;
+        try {
+            gatt = mBluetoothManager.getBluetoothGatt();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to get Bluetooth gatt - ", e);
+            postStartSetFailure(handler, callback,
+                    AdvertiseCallback.ADVERTISE_FAILED_INTERNAL_ERROR);
+            return;
+        }
+
+        IAdvertisingSetCallback wrapped = wrap(callback, handler);
+        if (mCallbackWrappers.putIfAbsent(callback, wrapped) != null) {
+            throw new IllegalArgumentException(
+                    "callback instance already associated with advertising");
+        }
+
+        try {
+            gatt.startAdvertisingSet(parameters, advertiseData, scanResponse, periodicParameters,
+                    periodicData, duration, maxExtendedAdvertisingEvents, wrapped);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to start advertising set - ", e);
+            postStartSetFailure(handler, callback,
+                    AdvertiseCallback.ADVERTISE_FAILED_INTERNAL_ERROR);
+            return;
+        }
+    }
+
+    /**
+     * Used to dispose of a {@link AdvertisingSet} object, obtained with {@link
+     * BluetoothLeAdvertiser#startAdvertisingSet}.
+     */
+    public void stopAdvertisingSet(AdvertisingSetCallback callback) {
+        if (callback == null) {
+            throw new IllegalArgumentException("callback cannot be null");
+        }
+
+        IAdvertisingSetCallback wrapped = mCallbackWrappers.remove(callback);
+        if (wrapped == null) {
+            return;
+        }
+
+        IBluetoothGatt gatt;
+        try {
+            gatt = mBluetoothManager.getBluetoothGatt();
+            gatt.stopAdvertisingSet(wrapped);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to stop advertising - ", e);
         }
     }
 
@@ -161,7 +463,9 @@ public final class BluetoothLeAdvertiser {
      * @hide
      */
     public void cleanup() {
-        mLeAdvertisers.clear();
+        mLegacyAdvertisers.clear();
+        mCallbackWrappers.clear();
+        mAdvertisingSets.clear();
     }
 
     // Compute the size of advertisement data or scan resp
@@ -184,27 +488,26 @@ public final class BluetoothLeAdvertiser {
             }
             // 16 bit service uuids are grouped into one field when doing advertising.
             if (num16BitUuids != 0) {
-                size += OVERHEAD_BYTES_PER_FIELD +
-                        num16BitUuids * BluetoothUuid.UUID_BYTES_16_BIT;
+                size += OVERHEAD_BYTES_PER_FIELD + num16BitUuids * BluetoothUuid.UUID_BYTES_16_BIT;
             }
             // 32 bit service uuids are grouped into one field when doing advertising.
             if (num32BitUuids != 0) {
-                size += OVERHEAD_BYTES_PER_FIELD +
-                        num32BitUuids * BluetoothUuid.UUID_BYTES_32_BIT;
+                size += OVERHEAD_BYTES_PER_FIELD + num32BitUuids * BluetoothUuid.UUID_BYTES_32_BIT;
             }
             // 128 bit service uuids are grouped into one field when doing advertising.
             if (num128BitUuids != 0) {
-                size += OVERHEAD_BYTES_PER_FIELD +
-                        num128BitUuids * BluetoothUuid.UUID_BYTES_128_BIT;
+                size += OVERHEAD_BYTES_PER_FIELD
+                        + num128BitUuids * BluetoothUuid.UUID_BYTES_128_BIT;
             }
         }
         for (ParcelUuid uuid : data.getServiceData().keySet()) {
-            size += OVERHEAD_BYTES_PER_FIELD + SERVICE_DATA_UUID_LENGTH
+            int uuidLen = BluetoothUuid.uuidToBytes(uuid).length;
+            size += OVERHEAD_BYTES_PER_FIELD + uuidLen
                     + byteLength(data.getServiceData().get(uuid));
         }
         for (int i = 0; i < data.getManufacturerSpecificData().size(); ++i) {
-            size += OVERHEAD_BYTES_PER_FIELD + MANUFACTURER_SPECIFIC_DATA_LENGTH +
-                    byteLength(data.getManufacturerSpecificData().valueAt(i));
+            size += OVERHEAD_BYTES_PER_FIELD + MANUFACTURER_SPECIFIC_DATA_LENGTH
+                    + byteLength(data.getManufacturerSpecificData().valueAt(i));
         }
         if (data.getIncludeTxPowerLevel()) {
             size += OVERHEAD_BYTES_PER_FIELD + 1; // tx power level value is one byte.
@@ -219,142 +522,138 @@ public final class BluetoothLeAdvertiser {
         return array == null ? 0 : array.length;
     }
 
-    /**
-     * Bluetooth GATT interface callbacks for advertising.
-     */
-    private class AdvertiseCallbackWrapper extends IAdvertiserCallback.Stub {
-        private static final int LE_CALLBACK_TIMEOUT_MILLIS = 2000;
-        private final AdvertiseCallback mAdvertiseCallback;
-        private final AdvertiseData mAdvertisement;
-        private final AdvertiseData mScanResponse;
-        private final AdvertiseSettings mSettings;
-        private final IBluetoothGatt mBluetoothGatt;
-
-        // mAdvertiserId -1: not registered
-        // -2: advertise stopped or registration timeout
-        // >=0: registered and advertising started
-        private int mAdvertiserId;
-        private boolean mIsAdvertising = false;
-        private int registrationError = AdvertiseCallback.ADVERTISE_FAILED_INTERNAL_ERROR;
-
-        public AdvertiseCallbackWrapper(AdvertiseCallback advertiseCallback,
-                AdvertiseData advertiseData, AdvertiseData scanResponse,
-                AdvertiseSettings settings,
-                IBluetoothGatt bluetoothGatt) {
-            mAdvertiseCallback = advertiseCallback;
-            mAdvertisement = advertiseData;
-            mScanResponse = scanResponse;
-            mSettings = settings;
-            mBluetoothGatt = bluetoothGatt;
-            mAdvertiserId = -1;
-        }
-
-        public void startRegisteration() {
-            synchronized (this) {
-                if (mAdvertiserId == -2) return;
-
-                try {
-                    mBluetoothGatt.registerAdvertiser(this);
-                    wait(LE_CALLBACK_TIMEOUT_MILLIS);
-                } catch (InterruptedException | RemoteException e) {
-                    Log.e(TAG, "Failed to start registeration", e);
-                }
-                if (mAdvertiserId >= 0 && mIsAdvertising) {
-                    mLeAdvertisers.put(mAdvertiseCallback, this);
-                } else if (mAdvertiserId < 0) {
-
-                    // Registration timeout, reset mClientIf to -2 so no subsequent operations can
-                    // proceed.
-                    if (mAdvertiserId == -1) mAdvertiserId = -2;
-                    // Post internal error if registration failed.
-                    postStartFailure(mAdvertiseCallback, registrationError);
-                } else {
-                    // Unregister application if it's already registered but advertise failed.
-                    try {
-                        mBluetoothGatt.unregisterAdvertiser(mAdvertiserId);
-                        mAdvertiserId = -2;
-                    } catch (RemoteException e) {
-                        Log.e(TAG, "remote exception when unregistering", e);
-                    }
-                }
-            }
-        }
-
-        public void stopAdvertising() {
-            synchronized (this) {
-                try {
-                    mBluetoothGatt.stopMultiAdvertising(mAdvertiserId);
-                    wait(LE_CALLBACK_TIMEOUT_MILLIS);
-                } catch (InterruptedException | RemoteException e) {
-                    Log.e(TAG, "Failed to stop advertising", e);
-                }
-                // Advertise callback should have been removed from LeAdvertisers when
-                // onMultiAdvertiseCallback was called. In case onMultiAdvertiseCallback is never
-                // invoked and wait timeout expires, remove callback here.
-                if (mLeAdvertisers.containsKey(mAdvertiseCallback)) {
-                    mLeAdvertisers.remove(mAdvertiseCallback);
-                }
-            }
-        }
-
-        /**
-         * Advertiser interface registered - app is ready to go
-         */
-        @Override
-        public void onAdvertiserRegistered(int status, int advertiserId) {
-            Log.d(TAG, "onAdvertiserRegistered() - status=" + status + " advertiserId=" + advertiserId);
-            synchronized (this) {
-                if (status == BluetoothGatt.GATT_SUCCESS) {
-                    try {
-                        if (mAdvertiserId == -2) {
-                            // Registration succeeds after timeout, unregister advertiser.
-                            mBluetoothGatt.unregisterAdvertiser(advertiserId);
-                        } else {
-                            mAdvertiserId = advertiserId;
-                            mBluetoothGatt.startMultiAdvertising(mAdvertiserId, mAdvertisement,
-                                    mScanResponse, mSettings);
+    IAdvertisingSetCallback wrap(AdvertisingSetCallback callback, Handler handler) {
+        return new IAdvertisingSetCallback.Stub() {
+            @Override
+            public void onAdvertisingSetStarted(int advertiserId, int txPower, int status) {
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (status != AdvertisingSetCallback.ADVERTISE_SUCCESS) {
+                            callback.onAdvertisingSetStarted(null, 0, status);
+                            mCallbackWrappers.remove(callback);
+                            return;
                         }
-                        return;
-                    } catch (RemoteException e) {
-                        Log.e(TAG, "failed to start advertising", e);
-                    }
-                } else if (status == AdvertiseCallback.ADVERTISE_FAILED_TOO_MANY_ADVERTISERS) {
-                    registrationError = status;
-                }
-                // Registration failed.
-                mAdvertiserId = -2;
-                notifyAll();
-            }
-        }
 
-        @Override
-        public void onMultiAdvertiseCallback(int status, boolean isStart,
-                AdvertiseSettings settings) {
-            synchronized (this) {
-                if (isStart) {
-                    if (status == AdvertiseCallback.ADVERTISE_SUCCESS) {
-                        // Start success
-                        mIsAdvertising = true;
-                        postStartSuccess(mAdvertiseCallback, settings);
-                    } else {
-                        // Start failure.
-                        postStartFailure(mAdvertiseCallback, status);
+                        AdvertisingSet advertisingSet =
+                                new AdvertisingSet(advertiserId, mBluetoothManager);
+                        mAdvertisingSets.put(advertiserId, advertisingSet);
+                        callback.onAdvertisingSetStarted(advertisingSet, txPower, status);
                     }
-                } else {
-                    // unregister advertiser for stop.
-                    try {
-                        mBluetoothGatt.unregisterAdvertiser(mAdvertiserId);
-                        mAdvertiserId = -2;
-                        mIsAdvertising = false;
-                        mLeAdvertisers.remove(mAdvertiseCallback);
-                    } catch (RemoteException e) {
-                        Log.e(TAG, "remote exception when unregistering", e);
-                    }
-                }
-                notifyAll();
+                });
             }
 
-        }
+            @Override
+            public void onOwnAddressRead(int advertiserId, int addressType, String address) {
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        AdvertisingSet advertisingSet = mAdvertisingSets.get(advertiserId);
+                        callback.onOwnAddressRead(advertisingSet, addressType, address);
+                    }
+                });
+            }
+
+            @Override
+            public void onAdvertisingSetStopped(int advertiserId) {
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        AdvertisingSet advertisingSet = mAdvertisingSets.get(advertiserId);
+                        callback.onAdvertisingSetStopped(advertisingSet);
+                        mAdvertisingSets.remove(advertiserId);
+                        mCallbackWrappers.remove(callback);
+                    }
+                });
+            }
+
+            @Override
+            public void onAdvertisingEnabled(int advertiserId, boolean enabled, int status) {
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        AdvertisingSet advertisingSet = mAdvertisingSets.get(advertiserId);
+                        callback.onAdvertisingEnabled(advertisingSet, enabled, status);
+                    }
+                });
+            }
+
+            @Override
+            public void onAdvertisingDataSet(int advertiserId, int status) {
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        AdvertisingSet advertisingSet = mAdvertisingSets.get(advertiserId);
+                        callback.onAdvertisingDataSet(advertisingSet, status);
+                    }
+                });
+            }
+
+            @Override
+            public void onScanResponseDataSet(int advertiserId, int status) {
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        AdvertisingSet advertisingSet = mAdvertisingSets.get(advertiserId);
+                        callback.onScanResponseDataSet(advertisingSet, status);
+                    }
+                });
+            }
+
+            @Override
+            public void onAdvertisingParametersUpdated(int advertiserId, int txPower, int status) {
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        AdvertisingSet advertisingSet = mAdvertisingSets.get(advertiserId);
+                        callback.onAdvertisingParametersUpdated(advertisingSet, txPower, status);
+                    }
+                });
+            }
+
+            @Override
+            public void onPeriodicAdvertisingParametersUpdated(int advertiserId, int status) {
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        AdvertisingSet advertisingSet = mAdvertisingSets.get(advertiserId);
+                        callback.onPeriodicAdvertisingParametersUpdated(advertisingSet, status);
+                    }
+                });
+            }
+
+            @Override
+            public void onPeriodicAdvertisingDataSet(int advertiserId, int status) {
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        AdvertisingSet advertisingSet = mAdvertisingSets.get(advertiserId);
+                        callback.onPeriodicAdvertisingDataSet(advertisingSet, status);
+                    }
+                });
+            }
+
+            @Override
+            public void onPeriodicAdvertisingEnabled(int advertiserId, boolean enable, int status) {
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        AdvertisingSet advertisingSet = mAdvertisingSets.get(advertiserId);
+                        callback.onPeriodicAdvertisingEnabled(advertisingSet, enable, status);
+                    }
+                });
+            }
+        };
+    }
+
+    private void postStartSetFailure(Handler handler, final AdvertisingSetCallback callback,
+            final int error) {
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                callback.onAdvertisingSetStarted(null, 0, error);
+            }
+        });
     }
 
     private void postStartFailure(final AdvertiseCallback callback, final int error) {

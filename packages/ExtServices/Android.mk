@@ -34,7 +34,8 @@ LOCAL_PRIVILEGED_MODULE := true
 
 include $(BUILD_PACKAGE)
 
-
-
-
+# Use the following include to make our test apk.
+ifeq ($(strip $(LOCAL_PACKAGE_OVERRIDES)),)
+include $(call all-makefiles-under, $(LOCAL_PATH))
+endif
 

@@ -94,4 +94,12 @@ final class BasePermission {
                 == PermissionInfo.PROTECTION_SIGNATURE
                 && (protectionLevel & PermissionInfo.PROTECTION_FLAG_DEVELOPMENT) != 0;
     }
+
+    public boolean isInstant() {
+        return (protectionLevel & PermissionInfo.PROTECTION_FLAG_EPHEMERAL) != 0;
+    }
+
+    public boolean isRuntimeOnly() {
+        return (protectionLevel & PermissionInfo.PROTECTION_FLAG_RUNTIME_ONLY) != 0;
+    }
 }

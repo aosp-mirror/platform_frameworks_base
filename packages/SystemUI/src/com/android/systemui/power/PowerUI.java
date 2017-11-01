@@ -21,18 +21,27 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.os.BatteryManager;
 import android.os.Handler;
+import android.os.HardwarePropertiesManager;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.text.format.DateUtils;
 import android.util.Log;
 import android.util.Slog;
 
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.logging.MetricsLogger;
+import com.android.systemui.Dependency;
+import com.android.systemui.R;
 import com.android.systemui.SystemUI;
-import com.android.systemui.statusbar.phone.PhoneStatusBar;
+import com.android.systemui.statusbar.phone.StatusBar;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -41,12 +50,17 @@ import java.util.Arrays;
 public class PowerUI extends SystemUI {
     static final String TAG = "PowerUI";
     static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+    private static final long TEMPERATURE_INTERVAL = 30 * DateUtils.SECOND_IN_MILLIS;
+    private static final long TEMPERATURE_LOGGING_INTERVAL = DateUtils.HOUR_IN_MILLIS;
+    private static final int MAX_RECENT_TEMPS = 125; // TEMPERATURE_LOGGING_INTERVAL plus a buffer
 
     private final Handler mHandler = new Handler();
     private final Receiver mReceiver = new Receiver();
 
     private PowerManager mPowerManager;
+    private HardwarePropertiesManager mHardwarePropertiesManager;
     private WarningsUI mWarnings;
+    private final Configuration mLastConfiguration = new Configuration();
     private int mBatteryLevel = 100;
     private int mBatteryStatus = BatteryManager.BATTERY_STATUS_UNKNOWN;
     private int mPlugType = 0;
@@ -57,10 +71,23 @@ public class PowerUI extends SystemUI {
 
     private long mScreenOffTime = -1;
 
+    private float mThresholdTemp;
+    private float[] mRecentTemps = new float[MAX_RECENT_TEMPS];
+    private int mNumTemps;
+    private long mNextLogTime;
+
+    // We create a method reference here so that we are guaranteed that we can remove a callback
+    // by using the same instance (method references are not guaranteed to be the same object
+    // each time they are created).
+    private final Runnable mUpdateTempCallback = this::updateTemperatureWarning;
+
     public void start() {
         mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
+        mHardwarePropertiesManager = (HardwarePropertiesManager)
+                mContext.getSystemService(Context.HARDWARE_PROPERTIES_SERVICE);
         mScreenOffTime = mPowerManager.isScreenOn() ? -1 : SystemClock.elapsedRealtime();
-        mWarnings = new PowerNotificationWarnings(mContext, getComponent(PhoneStatusBar.class));
+        mWarnings = Dependency.get(WarningsUI.class);
+        mLastConfiguration.setTo(mContext.getResources().getConfiguration());
 
         ContentObserver obs = new ContentObserver(mHandler) {
             @Override
@@ -74,6 +101,22 @@ public class PowerUI extends SystemUI {
                 false, obs, UserHandle.USER_ALL);
         updateBatteryWarningLevels();
         mReceiver.init();
+
+        // Check to see if we need to let the user know that the phone previously shut down due
+        // to the temperature being too high.
+        showThermalShutdownDialog();
+
+        initTemperatureWarning();
+    }
+
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        final int mask = ActivityInfo.CONFIG_MCC | ActivityInfo.CONFIG_MNC;
+
+        // Safe to modify mLastConfiguration here as it's only updated by the main thread (here).
+        if ((mLastConfiguration.updateFrom(newConfig) & mask) != 0) {
+            mHandler.post(this::initTemperatureWarning);
+        }
     }
 
     void updateBatteryWarningLevels() {
@@ -134,8 +177,6 @@ public class PowerUI extends SystemUI {
             filter.addAction(Intent.ACTION_SCREEN_OFF);
             filter.addAction(Intent.ACTION_SCREEN_ON);
             filter.addAction(Intent.ACTION_USER_SWITCHED);
-            filter.addAction(PowerManager.ACTION_POWER_SAVE_MODE_CHANGING);
-            filter.addAction(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED);
             mContext.registerReceiver(this, filter, null, mHandler);
         }
 
@@ -209,6 +250,122 @@ public class PowerUI extends SystemUI {
         }
     };
 
+    private void initTemperatureWarning() {
+        ContentResolver resolver = mContext.getContentResolver();
+        Resources resources = mContext.getResources();
+        if (Settings.Global.getInt(resolver, Settings.Global.SHOW_TEMPERATURE_WARNING,
+                resources.getInteger(R.integer.config_showTemperatureWarning)) == 0) {
+            return;
+        }
+
+        mThresholdTemp = Settings.Global.getFloat(resolver, Settings.Global.WARNING_TEMPERATURE,
+                resources.getInteger(R.integer.config_warningTemperature));
+
+        if (mThresholdTemp < 0f) {
+            // Get the throttling temperature. No need to check if we're not throttling.
+            float[] throttlingTemps = mHardwarePropertiesManager.getDeviceTemperatures(
+                    HardwarePropertiesManager.DEVICE_TEMPERATURE_SKIN,
+                    HardwarePropertiesManager.TEMPERATURE_SHUTDOWN);
+            if (throttlingTemps == null
+                    || throttlingTemps.length == 0
+                    || throttlingTemps[0] == HardwarePropertiesManager.UNDEFINED_TEMPERATURE) {
+                return;
+            }
+            mThresholdTemp = throttlingTemps[0] -
+                    resources.getInteger(R.integer.config_warningTemperatureTolerance);
+        }
+
+        setNextLogTime();
+
+        // This initialization method may be called on a configuration change. Only one set of
+        // ongoing callbacks should be occurring, so remove any now. updateTemperatureWarning will
+        // schedule an ongoing callback.
+        mHandler.removeCallbacks(mUpdateTempCallback);
+
+        // We have passed all of the checks, start checking the temp
+        updateTemperatureWarning();
+    }
+
+    private void showThermalShutdownDialog() {
+        if (mPowerManager.getLastShutdownReason()
+                == PowerManager.SHUTDOWN_REASON_THERMAL_SHUTDOWN) {
+            mWarnings.showThermalShutdownWarning();
+        }
+    }
+
+    @VisibleForTesting
+    protected void updateTemperatureWarning() {
+        float[] temps = mHardwarePropertiesManager.getDeviceTemperatures(
+                HardwarePropertiesManager.DEVICE_TEMPERATURE_SKIN,
+                HardwarePropertiesManager.TEMPERATURE_CURRENT);
+        if (temps.length != 0) {
+            float temp = temps[0];
+            mRecentTemps[mNumTemps++] = temp;
+
+            StatusBar statusBar = getComponent(StatusBar.class);
+            if (statusBar != null && !statusBar.isDeviceInVrMode()
+                    && temp >= mThresholdTemp) {
+                logAtTemperatureThreshold(temp);
+                mWarnings.showHighTemperatureWarning();
+            } else {
+                mWarnings.dismissHighTemperatureWarning();
+            }
+        }
+
+        logTemperatureStats();
+
+        mHandler.postDelayed(mUpdateTempCallback, TEMPERATURE_INTERVAL);
+    }
+
+    private void logAtTemperatureThreshold(float temp) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("currentTemp=").append(temp)
+                .append(",thresholdTemp=").append(mThresholdTemp)
+                .append(",batteryStatus=").append(mBatteryStatus)
+                .append(",recentTemps=");
+        for (int i = 0; i < mNumTemps; i++) {
+            sb.append(mRecentTemps[i]).append(',');
+        }
+        Slog.i(TAG, sb.toString());
+    }
+
+    /**
+     * Calculates and logs min, max, and average
+     * {@link HardwarePropertiesManager#DEVICE_TEMPERATURE_SKIN} over the past
+     * {@link #TEMPERATURE_LOGGING_INTERVAL}.
+     */
+    private void logTemperatureStats() {
+        if (mNextLogTime > System.currentTimeMillis() && mNumTemps != MAX_RECENT_TEMPS) {
+            return;
+        }
+
+        if (mNumTemps > 0) {
+            float sum = mRecentTemps[0], min = mRecentTemps[0], max = mRecentTemps[0];
+            for (int i = 1; i < mNumTemps; i++) {
+                float temp = mRecentTemps[i];
+                sum += temp;
+                if (temp > max) {
+                    max = temp;
+                }
+                if (temp < min) {
+                    min = temp;
+                }
+            }
+
+            float avg = sum / mNumTemps;
+            Slog.i(TAG, "avg=" + avg + ",min=" + min + ",max=" + max);
+            MetricsLogger.histogram(mContext, "device_skin_temp_avg", (int) avg);
+            MetricsLogger.histogram(mContext, "device_skin_temp_min", (int) min);
+            MetricsLogger.histogram(mContext, "device_skin_temp_max", (int) max);
+        }
+        setNextLogTime();
+        mNumTemps = 0;
+    }
+
+    private void setNextLogTime() {
+        mNextLogTime = System.currentTimeMillis() + TEMPERATURE_LOGGING_INTERVAL;
+    }
+
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.print("mLowBatteryAlertCloseLevel=");
         pw.println(mLowBatteryAlertCloseLevel);
@@ -235,6 +392,10 @@ public class PowerUI extends SystemUI {
                 Settings.Global.LOW_BATTERY_SOUND_TIMEOUT, 0));
         pw.print("bucket: ");
         pw.println(Integer.toString(findBatteryLevelBucket(mBatteryLevel)));
+        pw.print("mThresholdTemp=");
+        pw.println(Float.toString(mThresholdTemp));
+        pw.print("mNextLogTime=");
+        pw.println(Long.toString(mNextLogTime));
         mWarnings.dump(pw);
     }
 
@@ -246,6 +407,9 @@ public class PowerUI extends SystemUI {
         void showInvalidChargerWarning();
         void updateLowBatteryWarning();
         boolean isInvalidChargerWarningShowing();
+        void dismissHighTemperatureWarning();
+        void showHighTemperatureWarning();
+        void showThermalShutdownWarning();
         void dump(PrintWriter pw);
         void userSwitched();
     }

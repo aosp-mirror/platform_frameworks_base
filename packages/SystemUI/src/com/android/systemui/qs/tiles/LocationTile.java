@@ -18,36 +18,35 @@ package com.android.systemui.qs.tiles;
 
 import android.content.Intent;
 import android.os.UserManager;
-
 import android.provider.Settings;
+import android.service.quicksettings.Tile;
 import android.widget.Switch;
 
-import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.MetricsProto.MetricsEvent;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
-import com.android.systemui.qs.QSTile;
+import com.android.systemui.R.drawable;
+import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.qs.QSHost;
+import com.android.systemui.plugins.qs.QSTile.BooleanState;
+import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
 import com.android.systemui.statusbar.policy.LocationController;
-import com.android.systemui.statusbar.policy.LocationController.LocationSettingsChangeCallback;
+import com.android.systemui.statusbar.policy.LocationController.LocationChangeCallback;
 
 /** Quick settings tile: Location **/
-public class LocationTile extends QSTile<QSTile.BooleanState> {
+public class LocationTile extends QSTileImpl<BooleanState> {
 
-    private final AnimationIcon mEnable =
-            new AnimationIcon(R.drawable.ic_signal_location_enable_animation,
-                    R.drawable.ic_signal_location_disable);
-    private final AnimationIcon mDisable =
-            new AnimationIcon(R.drawable.ic_signal_location_disable_animation,
-                    R.drawable.ic_signal_location_enable);
+    private final Icon mIcon = ResourceIcon.get(drawable.ic_signal_location);
 
     private final LocationController mController;
     private final KeyguardMonitor mKeyguard;
     private final Callback mCallback = new Callback();
 
-    public LocationTile(Host host) {
+    public LocationTile(QSHost host) {
         super(host);
-        mController = host.getLocationController();
-        mKeyguard = host.getKeyguardMonitor();
+        mController = Dependency.get(LocationController.class);
+        mKeyguard = Dependency.get(KeyguardMonitor.class);
     }
 
     @Override
@@ -58,10 +57,10 @@ public class LocationTile extends QSTile<QSTile.BooleanState> {
     @Override
     public void setListening(boolean listening) {
         if (listening) {
-            mController.addSettingsChangedCallback(mCallback);
+            mController.addCallback(mCallback);
             mKeyguard.addCallback(mCallback);
         } else {
-            mController.removeSettingsChangedCallback(mCallback);
+            mController.removeCallback(mCallback);
             mKeyguard.removeCallback(mCallback);
         }
     }
@@ -74,19 +73,14 @@ public class LocationTile extends QSTile<QSTile.BooleanState> {
     @Override
     protected void handleClick() {
         if (mKeyguard.isSecure() && mKeyguard.isShowing()) {
-            mHost.startRunnableDismissingKeyguard(new Runnable() {
-                @Override
-                public void run() {
-                    final boolean wasEnabled = (Boolean) mState.value;
-                    mHost.openPanels();
-                    MetricsLogger.action(mContext, getMetricsCategory(), !wasEnabled);
-                    mController.setLocationEnabled(!wasEnabled);
-                }
+            Dependency.get(ActivityStarter.class).postQSRunnableDismissingKeyguard(() -> {
+                final boolean wasEnabled = mState.value;
+                mHost.openPanels();
+                mController.setLocationEnabled(!wasEnabled);
             });
             return;
         }
-        final boolean wasEnabled = (Boolean) mState.value;
-        MetricsLogger.action(mContext, getMetricsCategory(), !wasEnabled);
+        final boolean wasEnabled = mState.value;
         mController.setLocationEnabled(!wasEnabled);
     }
 
@@ -97,6 +91,9 @@ public class LocationTile extends QSTile<QSTile.BooleanState> {
 
     @Override
     protected void handleUpdateState(BooleanState state, Object arg) {
+        if (state.slash == null) {
+            state.slash = new SlashState();
+        }
         final boolean locationEnabled =  mController.isLocationEnabled();
 
         // Work around for bug 15916487: don't show location tile on top of lock screen. After the
@@ -104,19 +101,19 @@ public class LocationTile extends QSTile<QSTile.BooleanState> {
         // state.visible = !(mKeyguard.isSecure() && mKeyguard.isShowing());
         state.value = locationEnabled;
         checkIfRestrictionEnforcedByAdminOnly(state, UserManager.DISALLOW_SHARE_LOCATION);
+        state.icon = mIcon;
+        state.slash.isSlashed = !state.value;
         if (locationEnabled) {
-            state.icon = mEnable;
             state.label = mContext.getString(R.string.quick_settings_location_label);
             state.contentDescription = mContext.getString(
                     R.string.accessibility_quick_settings_location_on);
         } else {
-            state.icon = mDisable;
             state.label = mContext.getString(R.string.quick_settings_location_label);
             state.contentDescription = mContext.getString(
                     R.string.accessibility_quick_settings_location_off);
         }
-        state.minimalAccessibilityClassName = state.expandedAccessibilityClassName
-                = Switch.class.getName();
+        state.state = state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
+        state.expandedAccessibilityClassName = Switch.class.getName();
     }
 
     @Override
@@ -133,7 +130,7 @@ public class LocationTile extends QSTile<QSTile.BooleanState> {
         }
     }
 
-    private final class Callback implements LocationSettingsChangeCallback,
+    private final class Callback implements LocationChangeCallback,
             KeyguardMonitor.Callback {
         @Override
         public void onLocationSettingsChanged(boolean enabled) {
@@ -141,7 +138,7 @@ public class LocationTile extends QSTile<QSTile.BooleanState> {
         }
 
         @Override
-        public void onKeyguardChanged() {
+        public void onKeyguardShowingChanged() {
             refreshState();
         }
     };

@@ -68,7 +68,7 @@ class NetworkStatsObservers {
     private final AtomicInteger mNextDataUsageRequestId = new AtomicInteger();
 
     // Lazily instantiated when an observer is registered.
-    private Handler mHandler;
+    private volatile Handler mHandler;
 
     /**
      * Creates a wrapper that contains the caller context and a normalized request.

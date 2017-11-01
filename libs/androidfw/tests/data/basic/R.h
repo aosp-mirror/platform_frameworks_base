@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 The Android Open Source Project
+ * Copyright (C) 2016 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,59 +14,69 @@
  * limitations under the License.
  */
 
-#ifndef __BASE_R_H
-#define __BASE_R_H
+#ifndef TESTS_DATA_BASIC_R_H_
+#define TESTS_DATA_BASIC_R_H_
 
-namespace base {
-namespace R {
+#include <cstdint>
 
-namespace attr {
-    enum {
-        attr1       = 0x7f010000, // default
-        attr2       = 0x7f010001, // default
+namespace com {
+namespace android {
+namespace basic {
+
+struct R {
+  struct attr {
+    enum : uint32_t {
+      attr1 = 0x7f010000,
+      attr2 = 0x7f010001,
     };
-}
+  };
 
-namespace layout {
-    enum {
-        main        = 0x7f020000,  // default, fr-sw600dp-v13
+  struct layout {
+    enum : uint32_t {
+      main = 0x7f020000,
     };
-}
+  };
 
-namespace string {
-    enum {
-        test1       = 0x7f030000,   // default
-        test2       = 0x7f030001,   // default
-        density     = 0x7f030002,   // default
+  struct string {
+    enum : uint32_t {
+      test1 = 0x7f030000,
+      test2 = 0x7f030001,
+      density = 0x7f030002,
 
-        test3       = 0x7f080000,   // default (in feature)
-        test4       = 0x7f080001,   // default (in feature)
+      // From feature
+      test3 = 0x80020000,
+      test4 = 0x80020001,
     };
-}
+  };
 
-namespace integer {
-    enum {
-        number1     = 0x7f040000,   // default, sv, vs
-        number2     = 0x7f040001,   // default
+  struct integer {
+    enum : uint32_t {
+      number1 = 0x7f040000,
+      number2 = 0x7f040001,
+      ref1 = 0x7f040002,
+      ref2 = 0x7f040003,
 
-        test3       = 0x7f090000,   // default (in feature)
+      // From feature
+      number3 = 0x80030000,
     };
-}
+  };
 
-namespace style {
-    enum {
-        Theme1      = 0x7f050000,   // default
-        Theme2      = 0x7f050001,   // default
+  struct style {
+    enum : uint32_t {
+      Theme1 = 0x7f050000,
+      Theme2 = 0x7f050001,
     };
-}
+  };
 
-namespace array {
-    enum {
-        integerArray1 = 0x7f060000,   // default
+  struct array {
+    enum : uint32_t {
+      integerArray1 = 0x7f060000,
     };
-}
+  };
+};
 
-} // namespace R
-} // namespace base
+}  // namespace basic
+}  // namespace android
+}  // namespace com
 
-#endif // __BASE_R_H
+#endif /* TESTS_DATA_BASIC_R_H_ */

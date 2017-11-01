@@ -10,6 +10,7 @@ LOCAL_PACKAGE_NAME := MemoryUsage
 
 LOCAL_CERTIFICATE := platform
 LOCAL_JAVA_LIBRARIES := android.test.runner
+LOCAL_STATIC_JAVA_LIBRARIES := junit legacy-android-test
 
 include $(BUILD_PACKAGE)
 

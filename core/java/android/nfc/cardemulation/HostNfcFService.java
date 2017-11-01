@@ -64,6 +64,7 @@ import android.util.Log;
  *           android:description="@string/servicedesc"&gt;
  *       &lt;system-code-filter android:name="4000"/&gt;
  *       &lt;nfcid2-filter android:name="02FE000000000000"/&gt;
+         &lt;t3tPmm-filter android:name="FFFFFFFFFFFFFFFF"/&gt;
  * &lt;/host-nfcf-service&gt;
  * </pre>
  *
@@ -76,6 +77,7 @@ import android.util.Log;
  * <ul>
  * <li>Exactly one {@link android.R.styleable#SystemCodeFilter &lt;system-code-filter&gt;} tag.</li>
  * <li>Exactly one {@link android.R.styleable#Nfcid2Filter &lt;nfcid2-filter&gt;} tag.</li>
+ * <li>Zero or one {@link android.R.styleable#T3tPmmFilter &lt;t3tPmm-filter&gt;} tag.</li>
  * </ul>
  * </p>
  *

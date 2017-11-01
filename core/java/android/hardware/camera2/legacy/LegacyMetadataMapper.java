@@ -646,7 +646,7 @@ public class LegacyMetadataMapper {
 
         // Special case where the only scene mode listed is AUTO => no scene mode
         if (sceneModes != null && sceneModes.size() == 1 &&
-                sceneModes.get(0) == Parameters.SCENE_MODE_AUTO) {
+                sceneModes.get(0).equals(Parameters.SCENE_MODE_AUTO)) {
             supportedSceneModes = null;
         }
 

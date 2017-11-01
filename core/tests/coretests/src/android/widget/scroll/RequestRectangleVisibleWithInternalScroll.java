@@ -53,11 +53,11 @@ public class RequestRectangleVisibleWithInternalScroll extends Activity {
 
         setContentView(R.layout.scroll_to_rect_with_internal_scroll);
 
-        mTextBlob = (TextView) findViewById(R.id.blob);
+        mTextBlob = findViewById(R.id.blob);
         mTextBlob.scrollBy(0, scrollYofBlob);
 
 
-        mScrollToBlob = (Button) findViewById(R.id.scrollToBlob);
+        mScrollToBlob = findViewById(R.id.scrollToBlob);
         mScrollToBlob.setOnClickListener(new View.OnClickListener() {
 
             public void onClick(View v) {

@@ -48,6 +48,7 @@ class ActivityManagerDebugConfig {
     static final boolean DEBUG_ADD_REMOVE = DEBUG_ALL_ACTIVITIES || false;
     static final boolean DEBUG_ANR = false;
     static final boolean DEBUG_APP = DEBUG_ALL_ACTIVITIES || false;
+    static final boolean DEBUG_BACKGROUND_CHECK = DEBUG_ALL || false;
     static final boolean DEBUG_BACKUP = DEBUG_ALL || false;
     static final boolean DEBUG_BROADCAST = DEBUG_ALL || false;
     static final boolean DEBUG_BROADCAST_BACKGROUND = DEBUG_BROADCAST || false;
@@ -62,7 +63,9 @@ class ActivityManagerDebugConfig {
     static final boolean DEBUG_LOCKTASK = DEBUG_ALL || false;
     static final boolean DEBUG_LRU = DEBUG_ALL || false;
     static final boolean DEBUG_MU = DEBUG_ALL || false;
+    static final boolean DEBUG_NETWORK = DEBUG_ALL || false;
     static final boolean DEBUG_OOM_ADJ = DEBUG_ALL || false;
+    static final boolean DEBUG_OOM_ADJ_REASON = DEBUG_ALL || false;
     static final boolean DEBUG_PAUSE = DEBUG_ALL || false;
     static final boolean DEBUG_POWER = DEBUG_ALL || false;
     static final boolean DEBUG_POWER_QUICK = DEBUG_POWER || false;
@@ -76,6 +79,7 @@ class ActivityManagerDebugConfig {
     static final boolean DEBUG_SAVED_STATE = DEBUG_ALL_ACTIVITIES || false;
     static final boolean DEBUG_SCREENSHOTS = DEBUG_ALL_ACTIVITIES || false;
     static final boolean DEBUG_SERVICE = DEBUG_ALL || false;
+    static final boolean DEBUG_FOREGROUND_SERVICE = DEBUG_ALL || false;
     static final boolean DEBUG_SERVICE_EXECUTING = DEBUG_ALL || false;
     static final boolean DEBUG_STACK = DEBUG_ALL || false;
     static final boolean DEBUG_STATES = DEBUG_ALL_ACTIVITIES || false;
@@ -106,6 +110,7 @@ class ActivityManagerDebugConfig {
     static final String POSTFIX_LOCKTASK = (APPEND_CATEGORY_NAME) ? "_LockTask" : "";
     static final String POSTFIX_LRU = (APPEND_CATEGORY_NAME) ? "_LRU" : "";
     static final String POSTFIX_MU = "_MU";
+    static final String POSTFIX_NETWORK = "_Network";
     static final String POSTFIX_OOM_ADJ = (APPEND_CATEGORY_NAME) ? "_OomAdj" : "";
     static final String POSTFIX_PAUSE = (APPEND_CATEGORY_NAME) ? "_Pause" : "";
     static final String POSTFIX_POWER = (APPEND_CATEGORY_NAME) ? "_Power" : "";

@@ -15,24 +15,46 @@
 -->
 
 <resources>
+    <public type="attr" name="attr1" id="0x7f010000" />
     <attr name="attr1" format="reference|integer" />
+
+    <public type="attr" name="attr2" id="0x7f010001" />
     <attr name="attr2" format="reference|integer" />
 
+    <public type="layout" name="main" id="0x7f020000" />
+
+    <public type="string" name="test1" id="0x7f030000" />
     <string name="test1">test1</string>
+
+    <public type="string" name="test2" id="0x7f030001" />
     <string name="test2">test2</string>
 
+    <public type="string" name="density" id="0x7f030002" />
+
+    <public type="integer" name="number1" id="0x7f040000" />
     <integer name="number1">200</integer>
+
+    <public type="integer" name="number2" id="0x7f040001" />
     <integer name="number2">@array/integerArray1</integer>
 
+    <public type="integer" name="ref1" id="0x7f040002" />
+    <integer name="ref1">@integer/ref2</integer>
+
+    <public type="integer" name="ref2" id="0x7f040003" />
+    <integer name="ref2">12000</integer>
+
+    <public type="style" name="Theme1" id="0x7f050000" />
     <style name="Theme1">
-        <item name="com.android.test.basic:attr1">100</item>
-        <item name="com.android.test.basic:attr2">@integer/number1</item>
+        <item name="com.android.basic:attr1">100</item>
+        <item name="com.android.basic:attr2">@integer/number1</item>
     </style>
 
-    <style name="Theme2" parent="@com.android.test.basic:style/Theme1">
-        <item name="com.android.test.basic:attr1">300</item>
+    <public type="style" name="Theme2" id="0x7f050001" />
+    <style name="Theme2" parent="@com.android.basic:style/Theme1">
+        <item name="com.android.basic:attr1">300</item>
     </style>
 
+    <public type="array" name="integerArray1" id="0x7f060000" />
     <integer-array name="integerArray1">
         <item>1</item>
         <item>2</item>

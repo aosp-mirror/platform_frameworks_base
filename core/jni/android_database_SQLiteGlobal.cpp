@@ -17,7 +17,7 @@
 #define LOG_TAG "SQLiteGlobal"
 
 #include <jni.h>
-#include <JNIHelp.h>
+#include <nativehelper/JNIHelp.h>
 #include "core_jni_helpers.h"
 
 #include <sqlite3.h>

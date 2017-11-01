@@ -19,11 +19,8 @@ package com.android.server.usage;
 import android.app.usage.ConfigurationStats;
 import android.app.usage.TimeSparseArray;
 import android.app.usage.UsageEvents;
-import android.app.usage.UsageEvents.Event;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.os.SystemClock;
 import android.content.Context;
@@ -183,6 +180,14 @@ class UserUsageStatsService {
         for (IntervalStats stats : mCurrentStats) {
             if (event.mEventType == UsageEvents.Event.CONFIGURATION_CHANGE) {
                 stats.updateConfigurationStats(newFullConfig, event.mTimeStamp);
+            } else if (event.mEventType == UsageEvents.Event.CHOOSER_ACTION) {
+                stats.updateChooserCounts(event.mPackage, event.mContentType, event.mAction);
+                String[] annotations = event.mContentAnnotations;
+                if (annotations != null) {
+                    for (String annotation : annotations) {
+                        stats.updateChooserCounts(event.mPackage, annotation, event.mAction);
+                    }
+                }
             } else {
                 stats.update(event.mPackage, event.mTimeStamp, event.mEventType);
             }
@@ -304,7 +309,8 @@ class UserUsageStatsService {
         return queryStats(bucketType, beginTime, endTime, sConfigStatsCombiner);
     }
 
-    UsageEvents queryEvents(final long beginTime, final long endTime) {
+    UsageEvents queryEvents(final long beginTime, final long endTime,
+            boolean obfuscateInstantApps) {
         final ArraySet<String> names = new ArraySet<>();
         List<UsageEvents.Event> results = queryStats(UsageStatsManager.INTERVAL_DAILY,
                 beginTime, endTime, new StatCombiner<UsageEvents.Event>() {
@@ -326,7 +332,10 @@ class UserUsageStatsService {
                                 return;
                             }
 
-                            final UsageEvents.Event event = stats.events.valueAt(i);
+                            UsageEvents.Event event = stats.events.valueAt(i);
+                            if (obfuscateInstantApps) {
+                                event = event.getObfuscatedIfInstantApp();
+                            }
                             names.add(event.mPackage);
                             if (event.mClass != null) {
                                 names.add(event.mClass);
@@ -520,6 +529,32 @@ class UserUsageStatsService {
         }
         pw.decreaseIndent();
 
+        pw.println();
+        pw.println("ChooserCounts");
+        pw.increaseIndent();
+        for (UsageStats usageStats : pkgStats.values()) {
+            pw.printPair("package", usageStats.mPackageName);
+            if (usageStats.mChooserCounts != null) {
+                final int chooserCountSize = usageStats.mChooserCounts.size();
+                for (int i = 0; i < chooserCountSize; i++) {
+                    final String action = usageStats.mChooserCounts.keyAt(i);
+                    final ArrayMap<String, Integer> counts = usageStats.mChooserCounts.valueAt(i);
+                    final int annotationSize = counts.size();
+                    for (int j = 0; j < annotationSize; j++) {
+                        final String key = counts.keyAt(j);
+                        final int count = counts.valueAt(j);
+                        if (count != 0) {
+                            pw.printPair("ChooserCounts", action + ":" + key + " is " +
+                                    Integer.toString(count));
+                            pw.println();
+                        }
+                    }
+                }
+            }
+            pw.println();
+        }
+        pw.decreaseIndent();
+
         pw.println("configurations");
         pw.increaseIndent();
         final ArrayMap<Configuration, ConfigurationStats> configStats = stats.configurations;
@@ -552,6 +587,7 @@ class UserUsageStatsService {
             if (event.mShortcutId != null) {
                 pw.printPair("shortcutId", event.mShortcutId);
             }
+            pw.printHexPair("flags", event.mFlags);
             pw.println();
         }
         pw.decreaseIndent();
@@ -593,6 +629,8 @@ class UserUsageStatsService {
                 return "USER_INTERACTION";
             case UsageEvents.Event.SHORTCUT_INVOCATION:
                 return "SHORTCUT_INVOCATION";
+            case UsageEvents.Event.CHOOSER_ACTION:
+                return "CHOOSER_ACTION";
             default:
                 return "UNKNOWN";
         }

@@ -15,13 +15,16 @@
  */
 package android.hardware.location;
 
+import android.annotation.RequiresPermission;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
+import android.annotation.SystemService;
 import android.content.Context;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.ServiceManager.ServiceNotFoundException;
 import android.util.Log;
 
 /**
@@ -33,12 +36,13 @@ import android.util.Log;
  * @hide
  */
 @SystemApi
+@SystemService(Context.CONTEXTHUB_SERVICE)
 public final class ContextHubManager {
 
     private static final String TAG = "ContextHubManager";
 
     private final Looper mMainLooper;
-    private IContextHubService mContextHubService;
+    private final IContextHubService mService;
     private Callback mCallback;
     private Handler mCallbackHandler;
 
@@ -91,14 +95,13 @@ public final class ContextHubManager {
      * Get a handle to all the context hubs in the system
      * @return array of context hub handles
      */
+    @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
     public int[] getContextHubHandles() {
-        int[] retVal = null;
         try {
-            retVal = getBinder().getContextHubHandles();
+            return mService.getContextHubHandles();
         } catch (RemoteException e) {
-            Log.w(TAG, "Could not fetch context hub handles : " + e);
+            throw e.rethrowFromSystemServer();
         }
-        return retVal;
     }
 
     /**
@@ -109,15 +112,13 @@ public final class ContextHubManager {
      *
      * @see ContextHubInfo
      */
+    @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
     public ContextHubInfo getContextHubInfo(int hubHandle) {
-        ContextHubInfo retVal = null;
         try {
-            retVal = getBinder().getContextHubInfo(hubHandle);
+            return mService.getContextHubInfo(hubHandle);
         } catch (RemoteException e) {
-            Log.w(TAG, "Could not fetch context hub info :" + e);
+            throw e.rethrowFromSystemServer();
         }
-
-        return retVal;
     }
 
     /**
@@ -139,20 +140,13 @@ public final class ContextHubManager {
      *
      * @see NanoApp
      */
+    @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
     public int loadNanoApp(int hubHandle, NanoApp app) {
-        int retVal = -1;
-
-        if (app == null) {
-            return retVal;
-        }
-
         try {
-            retVal = getBinder().loadNanoApp(hubHandle, app);
+            return mService.loadNanoApp(hubHandle, app);
         } catch (RemoteException e) {
-            Log.w(TAG, "Could not load nanoApp :" + e);
+            throw e.rethrowFromSystemServer();
         }
-
-        return retVal;
     }
 
     /**
@@ -170,16 +164,13 @@ public final class ContextHubManager {
      * @return 0 if the command for unloading was sent to the context hub;
      *         -1 otherwise
      */
+    @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
     public int unloadNanoApp(int nanoAppHandle) {
-        int retVal = -1;
-
         try {
-            retVal = getBinder().unloadNanoApp(nanoAppHandle);
+            return mService.unloadNanoApp(nanoAppHandle);
         } catch (RemoteException e) {
-            Log.w(TAG, "Could not fetch unload nanoApp :" + e);
+            throw e.rethrowFromSystemServer();
         }
-
-        return retVal;
     }
 
     /**
@@ -208,16 +199,13 @@ public final class ContextHubManager {
      *
      * @see NanoAppInstanceInfo
      */
+    @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
     public NanoAppInstanceInfo getNanoAppInstanceInfo(int nanoAppHandle) {
-        NanoAppInstanceInfo retVal = null;
-
         try {
-            retVal = getBinder().getNanoAppInstanceInfo(nanoAppHandle);
+            return mService.getNanoAppInstanceInfo(nanoAppHandle);
         } catch (RemoteException e) {
-            Log.w(TAG, "Could not fetch nanoApp info :" + e);
+            throw e.rethrowFromSystemServer();
         }
-
-        return retVal;
     }
 
     /**
@@ -230,14 +218,13 @@ public final class ContextHubManager {
      *
      * @return int[] Array of handles to any found nano apps
      */
+    @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
     public int[] findNanoAppOnHub(int hubHandle, NanoAppFilter filter) {
-        int[] retVal = null;
         try {
-            retVal = getBinder().findNanoAppOnHub(hubHandle, filter);
+            return mService.findNanoAppOnHub(hubHandle, filter);
         } catch (RemoteException e) {
-            Log.w(TAG, "Could not query nanoApp instance :" + e);
+            throw e.rethrowFromSystemServer();
         }
-        return retVal;
     }
 
     /**
@@ -259,20 +246,13 @@ public final class ContextHubManager {
      *
      * @return int 0 on success, -1 otherwise
      */
+    @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
     public int sendMessage(int hubHandle, int nanoAppHandle, ContextHubMessage message) {
-        int retVal = -1;
-
-        if (message == null || message.getData() == null) {
-            Log.w(TAG, "null ptr");
-            return retVal;
-        }
         try {
-            retVal = getBinder().sendMessage(hubHandle, nanoAppHandle, message);
+            return mService.sendMessage(hubHandle, nanoAppHandle, message);
         } catch (RemoteException e) {
-            Log.w(TAG, "Could not send message :" + e.toString());
+            throw e.rethrowFromSystemServer();
         }
-
-        return retVal;
     }
 
     /**
@@ -284,6 +264,7 @@ public final class ContextHubManager {
      *
      * @return int 0 on success, -1 otherwise
      */
+    @SuppressLint("Doclava125")
     public int registerCallback(Callback callback) {
         return registerCallback(callback, null);
     }
@@ -312,6 +293,7 @@ public final class ContextHubManager {
      *
      * @return int 0 on success, -1 otherwise
      */
+    @SuppressLint("Doclava125")
     public int registerCallback(Callback callback, Handler handler) {
         synchronized(this) {
             if (mCallback != null) {
@@ -333,6 +315,7 @@ public final class ContextHubManager {
      *
      * @return int 0 on success, -1 otherwise
      */
+    @SuppressLint("Doclava125")
     public int unregisterCallback(Callback callback) {
       synchronized(this) {
           if (callback != mCallback) {
@@ -350,6 +333,7 @@ public final class ContextHubManager {
      * @deprecated Use {@link #unregisterCallback(Callback)} instead.
      * @hide
      */
+    @Deprecated
     public synchronized int unregisterCallback(ICallback callback) {
         if (callback != mLocalCallback) {
             Log.w(TAG, "Cannot recognize local callback!");
@@ -359,7 +343,7 @@ public final class ContextHubManager {
         return 0;
     }
 
-    private IContextHubCallback.Stub mClientCallback = new IContextHubCallback.Stub() {
+    private final IContextHubCallback.Stub mClientCallback = new IContextHubCallback.Stub() {
         @Override
         public void onMessageReceipt(final int hubId, final int nanoAppId,
                 final ContextHubMessage message) {
@@ -387,29 +371,16 @@ public final class ContextHubManager {
         }
     };
 
-    /** @hide */
-    public ContextHubManager(Context context, Looper mainLooper) {
+    /** @throws ServiceNotFoundException
+     * @hide */
+    public ContextHubManager(Context context, Looper mainLooper) throws ServiceNotFoundException {
         mMainLooper = mainLooper;
-
-        IBinder b = ServiceManager.getService(Context.CONTEXTHUB_SERVICE);
-        if (b != null) {
-            mContextHubService = IContextHubService.Stub.asInterface(b);
-
-            try {
-                getBinder().registerCallback(mClientCallback);
-            } catch (RemoteException e) {
-                Log.w(TAG, "Could not register callback:" + e);
-            }
-
-        } else {
-            Log.w(TAG, "failed to getService");
+        mService = IContextHubService.Stub.asInterface(
+                ServiceManager.getServiceOrThrow(Context.CONTEXTHUB_SERVICE));
+        try {
+            mService.registerCallback(mClientCallback);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Could not register callback:" + e);
         }
-    }
-
-    private IContextHubService getBinder() throws RemoteException {
-        if (mContextHubService == null) {
-            throw new RemoteException("Service not connected.");
-        }
-        return mContextHubService;
     }
 }

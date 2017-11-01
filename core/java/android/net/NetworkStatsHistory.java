@@ -31,7 +31,10 @@ import static com.android.internal.util.ArrayUtils.total;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.service.NetworkStatsHistoryBucketProto;
+import android.service.NetworkStatsHistoryProto;
 import android.util.MathUtils;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.util.IndentingPrintWriter;
 
@@ -625,6 +628,33 @@ public class NetworkStatsHistory implements Parcelable {
             if (txPackets != null) { pw.print(txPackets[i]); } else { pw.print("*"); } pw.print(',');
             if (operations != null) { pw.print(operations[i]); } else { pw.print("*"); }
             pw.println();
+        }
+    }
+
+    public void writeToProto(ProtoOutputStream proto, long tag) {
+        final long start = proto.start(tag);
+
+        proto.write(NetworkStatsHistoryProto.BUCKET_DURATION_MS, bucketDuration);
+
+        for (int i = 0; i < bucketCount; i++) {
+            final long startBucket = proto.start(NetworkStatsHistoryProto.BUCKETS);
+
+            proto.write(NetworkStatsHistoryBucketProto.BUCKET_START_MS, bucketStart[i]);
+            writeToProto(proto, NetworkStatsHistoryBucketProto.RX_BYTES, rxBytes, i);
+            writeToProto(proto, NetworkStatsHistoryBucketProto.RX_PACKETS, rxPackets, i);
+            writeToProto(proto, NetworkStatsHistoryBucketProto.TX_BYTES, txBytes, i);
+            writeToProto(proto, NetworkStatsHistoryBucketProto.TX_PACKETS, txPackets, i);
+            writeToProto(proto, NetworkStatsHistoryBucketProto.OPERATIONS, operations, i);
+
+            proto.end(startBucket);
+        }
+
+        proto.end(start);
+    }
+
+    private static void writeToProto(ProtoOutputStream proto, long tag, long[] array, int index) {
+        if (array != null) {
+            proto.write(tag, array[index]);
         }
     }
 

@@ -25,19 +25,21 @@ import android.content.Context;
 import android.os.ParcelUuid;
 import android.util.Log;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.settingslib.R;
 
 /**
  * PBAPServer Profile
  */
-public final class PbapServerProfile implements LocalBluetoothProfile {
+public class PbapServerProfile implements LocalBluetoothProfile {
     private static final String TAG = "PbapServerProfile";
     private static boolean V = true;
 
     private BluetoothPbap mService;
     private boolean mIsProfileReady;
 
-    static final String NAME = "PBAP Server";
+    @VisibleForTesting
+    public static final String NAME = "PBAP Server";
 
     // Order of this profile in device profiles list
     private static final int ORDINAL = 6;

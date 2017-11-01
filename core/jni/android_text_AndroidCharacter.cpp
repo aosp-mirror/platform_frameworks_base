@@ -17,8 +17,8 @@
 
 #define LOG_TAG "AndroidUnicode"
 
-#include "JNIHelp.h"
-#include "ScopedPrimitiveArray.h"
+#include <nativehelper/JNIHelp.h>
+#include <nativehelper/ScopedPrimitiveArray.h>
 #include "core_jni_helpers.h"
 #include "utils/misc.h"
 #include "utils/Log.h"

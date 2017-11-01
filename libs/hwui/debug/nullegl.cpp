@@ -22,6 +22,7 @@
 #include <string.h>
 
 static EGLDisplay gDisplay = (EGLDisplay) 1;
+static EGLSyncKHR gFence = (EGLSyncKHR) 1;
 
 typedef struct {
     EGLSurface surface;
@@ -68,6 +69,9 @@ EGLBoolean eglTerminate(EGLDisplay dpy) {
 }
 
 const char * eglQueryString(EGLDisplay dpy, EGLint name) {
+    if (name == EGL_EXTENSIONS) {
+        return "EGL_KHR_swap_buffers_with_damage";
+    }
     return "";
 }
 
@@ -148,8 +152,24 @@ EGLBoolean eglSwapBuffers(EGLDisplay dpy, EGLSurface surface) {
     return EGL_TRUE;
 }
 
+EGLBoolean eglSwapBuffersWithDamageKHR(EGLDisplay dpy, EGLSurface surface, EGLint *rects, EGLint rectCount) {
+    return EGL_TRUE;
+}
+
 EGLImageKHR eglCreateImageKHR(EGLDisplay dpy, EGLContext ctx, EGLenum target, EGLClientBuffer buffer, const EGLint *attrib_list) {
     return (EGLImageKHR) malloc(sizeof(EGLImageKHR));
+}
+
+EGLSyncKHR eglCreateSyncKHR(EGLDisplay dpy, EGLenum type, const EGLint *attrib_list) {
+    return gFence;
+}
+
+EGLBoolean eglDestroySyncKHR(EGLDisplay dpy, EGLSyncKHR sync) {
+    return EGL_TRUE;
+}
+
+EGLint eglClientWaitSyncKHR(EGLDisplay dpy, EGLSyncKHR sync, EGLint flags, EGLTimeKHR timeout) {
+    return EGL_CONDITION_SATISFIED_KHR;
 }
 
 EGLBoolean eglDestroyImageKHR(EGLDisplay dpy, EGLImageKHR image) {

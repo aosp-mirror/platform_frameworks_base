@@ -20,7 +20,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="7164937344850004466">"ממשק משתמש של המערכת"</string>
-    <string name="status_bar_clear_all_button" msgid="7774721344716731603">"נקה"</string>
+    <string name="status_bar_clear_all_button" msgid="7774721344716731603">"ניקוי"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"הסר מהרשימה"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"פרטי אפליקציה"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"המסכים האחרונים מופיעים כאן"</string>
@@ -77,7 +77,7 @@
     <string name="screenshot_failed_title" msgid="705781116746922771">"לא ניתן לבצע צילום מסך."</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"התגלתה בעיה בשמירת צילום מסך."</string>
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"לא ניתן לשמור צילום מסך עקב שטח אחסון מוגבל."</string>
-    <string name="screenshot_failed_to_capture_text" msgid="7602391003979898374">"האפליקציה, או הארגון שלך, אינם מתירים לבצע צילומי מסך."</string>
+    <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"האפליקציה או הארגון שלך אינם מתירים ליצור צילומי מסך"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"‏אפשרויות העברת קבצים ב-USB"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"‏טען כנגן מדיה (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"‏טען כמצלמה (PTP)"</string>
@@ -85,13 +85,14 @@
     <string name="accessibility_back" msgid="567011538994429120">"הקודם"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"בית"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"תפריט"</string>
+    <string name="accessibility_accessibility_button" msgid="7601252764577607915">"נגישות"</string>
     <string name="accessibility_recent" msgid="5208608566793607626">"סקירה"</string>
-    <string name="accessibility_search_light" msgid="1103867596330271848">"חפש"</string>
+    <string name="accessibility_search_light" msgid="1103867596330271848">"חיפוש"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"מצלמה"</string>
     <string name="accessibility_phone_button" msgid="6738112589538563574">"טלפון"</string>
     <string name="accessibility_voice_assist_button" msgid="487611083884852965">"מסייע קולי"</string>
     <string name="accessibility_unlock_button" msgid="128158454631118828">"ביטול נעילה"</string>
-    <string name="accessibility_unlock_button_fingerprint" msgid="8214125623493923751">"לחצן ביטול נעילה, ממתין לטביעת אצבע"</string>
+    <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"ממתין לטביעת אצבע"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"בטל את הנעילה בלי להשתמש בטביעת האצבע"</string>
     <string name="unlock_label" msgid="8779712358041029439">"בטל את הנעילה"</string>
     <string name="phone_label" msgid="2320074140205331708">"פתח את הטלפון"</string>
@@ -129,7 +130,7 @@
     <string name="accessibility_ethernet_disconnected" msgid="5896059303377589469">"אתרנט מנותק."</string>
     <string name="accessibility_ethernet_connected" msgid="2692130313069182636">"אתרנט מחובר."</string>
     <string name="accessibility_no_signal" msgid="7064645320782585167">"אין אות."</string>
-    <string name="accessibility_not_connected" msgid="6395326276213402883">"לא מחובר."</string>
+    <string name="accessibility_not_connected" msgid="6395326276213402883">"אין חיבור."</string>
     <string name="accessibility_zero_bars" msgid="3806060224467027887">"אפס פסים."</string>
     <string name="accessibility_one_bar" msgid="1685730113192081895">"פס אחד."</string>
     <string name="accessibility_two_bars" msgid="6437363648385206679">"שני פסים."</string>
@@ -153,11 +154,12 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"קצה"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"‏אין כרטיס SIM."</string>
-    <string name="accessibility_cell_data" msgid="7080312242791850520">"נתונים סלולריים"</string>
-    <string name="accessibility_cell_data_on" msgid="4310018593519761767">"נתונים סלולריים פועלים"</string>
-    <string name="accessibility_cell_data_off" msgid="8000803571751407635">"הנתונים הסלולריים כבויים"</string>
+    <string name="accessibility_cell_data" msgid="5326139158682385073">"חבילת גלישה"</string>
+    <string name="accessibility_cell_data_on" msgid="5927098403452994422">"חבילת הגלישה פועלת"</string>
+    <string name="accessibility_cell_data_off" msgid="443267573897409704">"חבילת הגלישה כבויה"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"‏שיתוף אינטרנט דרך Bluetooth"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"מצב טיסה"</string>
+    <string name="accessibility_vpn_on" msgid="5993385083262856059">"‏VPN פועל."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"‏אין כרטיס SIM."</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"רשת ספק משתנה."</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"פתיחת פרטי סוללה"</string>
@@ -165,6 +167,7 @@
     <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"טעינת סוללה, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> אחוז."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"הגדרות מערכת"</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"התראות"</string>
+    <string name="accessibility_overflow_action" msgid="5681882033274783311">"הצגת כל ההודעות"</string>
     <string name="accessibility_remove_notification" msgid="3603099514902182350">"נקה התראה"</string>
     <string name="accessibility_gps_enabled" msgid="3511469499240123019">"‏GPS מופעל."</string>
     <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"‏השגת GPS."</string>
@@ -186,8 +189,8 @@
     <string name="accessibility_desc_lock_screen" msgid="5625143713611759164">"מסך נעילה."</string>
     <string name="accessibility_desc_settings" msgid="3417884241751434521">"הגדרות"</string>
     <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"סקירה."</string>
+    <string name="accessibility_desc_work_lock" msgid="4288774420752813383">"מסך נעילה בעבודה"</string>
     <string name="accessibility_desc_close" msgid="7479755364962766729">"סגור"</string>
-    <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"משתמש <xliff:g id="USER">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi" msgid="5518210213118181692">"<xliff:g id="SIGNAL">%1$s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi_changed_off" msgid="8716484460897819400">"‏Wifi כבוי."</string>
     <string name="accessibility_quick_settings_wifi_changed_on" msgid="6440117170789528622">"‏Wifi מופעל."</string>
@@ -236,11 +239,12 @@
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="650231949881093289">"‏חוסך הנתונים (Data Saver) כובה."</string>
     <string name="accessibility_quick_settings_data_saver_changed_on" msgid="4218725402373934151">"‏חוסך הנתונים (Data Saver) הופעל."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"בהירות תצוגה"</string>
+    <string name="accessibility_ambient_display_charging" msgid="9084521679384069087">"הסוללה נטענת"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"‏השימוש בנתוני 2G-3G מושהה"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"‏השימוש בנתוני 4G מושהה"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"השימוש בנתונים סלולריים מושהה"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="6801382439018099779">"חבילת הגלישה מושהה"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"השימוש בנתונים מושהה"</string>
-    <string name="data_usage_disabled_dialog" msgid="1841738975235283398">"הגעת למגבלת הנתונים שהגדרת. אתה כבר לא משתמש בנתונים סלולריים.\n\nאם תמשיך, ייתכנו חיובים לשימוש בנתונים."</string>
+    <string name="data_usage_disabled_dialog" msgid="4919541636934603816">"הגעת למגבלת הנתונים שהגדרת. אתה כבר לא משתמש בחבילת גלישה.\n\nאם תמשיך, ייתכנו חיובים על שימוש בנתונים."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"המשך"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"אין חיבור לאינטרנט"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"‏Wi-Fi מחובר"</string>
@@ -277,7 +281,7 @@
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"בהירות"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"סיבוב אוטומטי"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"סיבוב אוטומטי של המסך"</string>
-    <string name="accessibility_quick_settings_rotation_value" msgid="1428962304214992318">"מכוון למצב <xliff:g id="ID_1">%s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_rotation_value" msgid="8187398200140760213">"מצב <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"סיבוב נעול"</string>
     <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"לאורך"</string>
     <string name="quick_settings_rotation_locked_landscape_label" msgid="8553157770061178719">"לרוחב"</string>
@@ -293,7 +297,7 @@
     <string name="quick_settings_user_title" msgid="4467690427642392403">"משתמש"</string>
     <string name="quick_settings_user_new_user" msgid="9030521362023479778">"משתמש חדש"</string>
     <string name="quick_settings_wifi_label" msgid="9135344704899546041">"Wi-Fi"</string>
-    <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"לא מחובר"</string>
+    <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"אין חיבור"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"אין רשת"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"‏Wi-Fi כבוי"</string>
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"‏Wi-Fi פועל"</string>
@@ -305,17 +309,18 @@
     <string name="quick_settings_cast_detail_empty_text" msgid="311785821261640623">"אין מכשירים זמינים"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"בהירות"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"אוטומטי"</string>
-    <string name="quick_settings_inversion_label" msgid="8790919884718619648">"הפוך צבעים"</string>
+    <string name="quick_settings_inversion_label" msgid="8790919884718619648">"היפוך צבעים"</string>
     <string name="quick_settings_color_space_label" msgid="853443689745584770">"מצב תיקון צבע"</string>
     <string name="quick_settings_more_settings" msgid="326112621462813682">"הגדרות נוספות"</string>
     <string name="quick_settings_done" msgid="3402999958839153376">"בוצע"</string>
     <string name="quick_settings_connected" msgid="1722253542984847487">"מחובר"</string>
+    <string name="quick_settings_connected_battery_level" msgid="4136051440381328892">"מחובר, הסוללה ב-<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="quick_settings_connecting" msgid="47623027419264404">"מתחבר..."</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"שיתוף אינטרנט בין ניידים"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"נקודה לשיתוף אינטרנט"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"הודעות"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"פנס"</string>
-    <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"נתונים סלולריים"</string>
+    <string name="quick_settings_cellular_detail_title" msgid="3661194685666477347">"חבילת גלישה"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"שימוש בנתונים"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"מכסת נתונים נותרת"</string>
     <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"חריגה מההגבלה"</string>
@@ -324,21 +329,24 @@
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"אזהרה - <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="6244915274350490429">"מצב עבודה"</string>
     <string name="quick_settings_night_display_label" msgid="3577098011487644395">"תאורת לילה"</string>
-    <string name="quick_settings_night_display_summary_on" msgid="1814901757887526769">"תאורת לילה פועלת, הקש כדי לכבות"</string>
-    <string name="quick_settings_night_display_summary_off" msgid="7892102914128777905">"תאורת לילה כבויה, הקש כדי להפעיל"</string>
+    <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
+    <string name="quick_settings_nfc_off" msgid="6883274004315134333">"‏NFC מושבת"</string>
+    <string name="quick_settings_nfc_on" msgid="6680317193676884311">"‏NFC מופעל"</string>
     <string name="recents_empty_message" msgid="808480104164008572">"אין פריטים אחרונים"</string>
     <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"מחקת הכול"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"מידע על האפליקציה"</string>
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"הצמדת מסך"</string>
-    <string name="recents_search_bar_label" msgid="8074997400187836677">"חפש"</string>
+    <string name="recents_search_bar_label" msgid="8074997400187836677">"חיפוש"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"לא ניתן היה להפעיל את <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> מושבת במצב בטוח."</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"נקה הכל"</string>
-    <string name="recents_incompatible_app_message" msgid="5075812958564082451">"האפליקציה אינה תומכת במסך מפוצל"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"גרור לכאן כדי להשתמש במסך מפוצל"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"פיצול אופקי"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"פיצול אנכי"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"פיצול מותאם אישית"</string>
+    <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"פיצול מסך למעלה"</string>
+    <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"פיצול מסך לשמאל"</string>
+    <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"פיצול מסך לימין"</string>
   <string-array name="recents_blacklist_array">
   </string-array>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"טעון"</string>
@@ -349,14 +357,17 @@
     <string name="description_target_search" msgid="3091587249776033139">"חיפוש"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"הסט למעלה כדי להציג <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"הסט שמאלה כדי להציג <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="zen_priority_introduction" msgid="3070506961866919502">"צלילים ורטט לא יופעלו, פרט להתראות, תזכורות, אירועים ומתקשרים שתציין."</string>
-    <string name="zen_priority_customize_button" msgid="7948043278226955063">"התאם אישית"</string>
-    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"פעולה זו מבטלת את כל הצלילים והרטט, כולל צלילים ורטט שמקורם בהתראות, מוזיקה, סרטונים ומשחקים. תוכל עדיין להתקשר."</string>
+    <string name="zen_priority_introduction" msgid="7577965386868311310">"כדי לא להפריע לך, המכשיר לא ירטוט ולא ישמיע שום צליל, חוץ מהתראות, תזכורות, אירועים ושיחות ממתקשרים מסוימים לבחירתך. המצב הזה לא ישפיע על צלילים שהם חלק מתוכן שבחרת להפעיל, כמו מוזיקה, סרטונים ומשחקים."</string>
+    <string name="zen_alarms_introduction" msgid="7034415210361973827">"כדי לא להפריע לך, המכשיר לא ירטוט ולא ישמיע שום צליל, חוץ מהתראות. המצב הזה לא ישפיע על צלילים שהם חלק מתוכן שבחרת להפעיל, כמו מוזיקה, סרטונים ומשחקים."</string>
+    <string name="zen_priority_customize_button" msgid="7948043278226955063">"התאמה אישית"</string>
+    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"פעולה זו מבטלת את כל הצלילים והרטט, כולל צלילים ורטט שמקורם בהתראות, מוזיקה, סרטונים ומשחקים. בכל מקרה, עדיין אפשר להתקשר."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"פעולה זו מבטלת את כל הצלילים והרטט, כולל בהתראות, מוזיקה, סרטונים ומשחקים."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"הודעות בדחיפות נמוכה יותר בהמשך"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"הקש שוב כדי לפתוח"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"החלק מעלה כדי לבטל את הנעילה"</string>
+    <string name="do_disclosure_generic" msgid="5615898451805157556">"מכשיר זה מנוהל על ידי הארגון שלך"</string>
+    <string name="do_disclosure_with_name" msgid="5640615509915445501">"המכשיר הזה מנוהל על ידי <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="phone_hint" msgid="4872890986869209950">"החלק מהסמל כדי להפעיל את הטלפון"</string>
     <string name="voice_hint" msgid="8939888732119726665">"החלק מהסמל כדי להפעיל את המסייע הקולי"</string>
     <string name="camera_hint" msgid="7939688436797157483">"החלק מהסמל כדי להפעיל את המצלמה"</string>
@@ -374,17 +385,17 @@
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"החלף משתמש. המשתמש הנוכחי הוא <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"משתמש נוכחי <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"הצג פרופיל"</string>
-    <string name="user_add_user" msgid="5110251524486079492">"הוסף משתמש"</string>
+    <string name="user_add_user" msgid="5110251524486079492">"הוספת משתמש"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"משתמש חדש"</string>
     <string name="guest_nickname" msgid="8059989128963789678">"אורח"</string>
-    <string name="guest_new_guest" msgid="600537543078847803">"הוסף אורח"</string>
+    <string name="guest_new_guest" msgid="600537543078847803">"הוספת אורח"</string>
     <string name="guest_exit_guest" msgid="7187359342030096885">"הסר אורח"</string>
     <string name="guest_exit_guest_dialog_title" msgid="8480693520521766688">"להסיר אורח?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="4155503224769676625">"כל האפליקציות והנתונים בפעילות זו באתר יימחקו."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7402231963862520531">"הסר"</string>
     <string name="guest_wipe_session_title" msgid="6419439912885956132">"שמחים לראותך שוב!"</string>
     <string name="guest_wipe_session_message" msgid="8476238178270112811">"האם ברצונך להמשיך בפעילות באתר?"</string>
-    <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"התחל מחדש"</string>
+    <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"ברצוני להתחיל מחדש"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"כן, המשך"</string>
     <string name="guest_notification_title" msgid="1585278533840603063">"משתמש אורח"</string>
     <string name="guest_notification_text" msgid="335747957734796689">"הסר את המשתמש האורח כדי למחוק אפליקציות ונתונים"</string>
@@ -405,63 +416,96 @@
     <string name="clear_all_notifications_text" msgid="814192889771462828">"נקה הכל"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"התחל כעת"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"אין הודעות"</string>
-    <string name="device_owned_footer" msgid="3802752663326030053">"ייתכן שהמכשיר נמצא במעקב"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"ייתכן שהפרופיל נתון למעקב"</string>
     <string name="vpn_footer" msgid="2388611096129106812">"ייתכן שהרשת נמצאת במעקב"</string>
     <string name="branded_vpn_footer" msgid="2168111859226496230">"ייתכן שהרשת מנוטרת"</string>
-    <string name="monitoring_title_device_owned" msgid="7121079311903859610">"מעקב אחר מכשיר"</string>
+    <string name="quick_settings_disclosure_management_monitoring" msgid="6645176135063957394">"הארגון שלך מנהל מכשיר זה ועשוי לנטר את התנועה ברשת"</string>
+    <string name="quick_settings_disclosure_named_management_monitoring" msgid="370622174777570853">"הארגון <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> מנהל מכשיר זה ועשוי לנטר את התנועה ברשת"</string>
+    <string name="quick_settings_disclosure_management_named_vpn" msgid="1085137869053332307">"המכשיר מנוהל על ידי הארגון ומחובר לאפליקציה <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="6290456493852584017">"המכשיר מנוהל על ידי <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ומחובר לאפליקציה <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_management" msgid="3294967280853150271">"המכשיר מנוהל על ידי הארגון שלך"</string>
+    <string name="quick_settings_disclosure_named_management" msgid="1059403025094542908">"מכשיר זה מנוהל על ידי <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_management_vpns" msgid="3698767349925266482">"‏המכשיר מנוהל על ידי הארגון שלך ומחובר לאפליקציות VPN"</string>
+    <string name="quick_settings_disclosure_named_management_vpns" msgid="7777821385318891527">"‏המכשיר מנוהל על ידי <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ומחובר לאפליקציות VPN"</string>
+    <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="5125463987558278215">"הארגון שלך יכול לנטר את התנועה ברשת בפרופיל העבודה שלך"</string>
+    <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8973606847896650284">"הארגון <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> עשוי לנטר את התנועה ברשת בפרופיל העבודה שלך"</string>
+    <string name="quick_settings_disclosure_monitoring" msgid="679658227269205728">"ייתכן שהרשת מנוטרת"</string>
+    <string name="quick_settings_disclosure_vpns" msgid="8170318392053156330">"‏המכשיר מחובר לאפליקציות VPN"</string>
+    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="3494535754792751741">"פרופיל העבודה מחובר לאפליקציה <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="4467456202486569906">"הפרופיל האישי מחובר לאפליקציה <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_named_vpn" msgid="6943724064780847080">"המכשיר מחובר לאפליקציה <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="monitoring_title_device_owned" msgid="1652495295941959815">"ניהול מכשירים"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"מעקב אחר פרופיל"</string>
     <string name="monitoring_title" msgid="169206259253048106">"מעקב אחר פעילות ברשת"</string>
+    <string name="monitoring_subtitle_vpn" msgid="876537538087857300">"VPN"</string>
+    <string name="monitoring_subtitle_network_logging" msgid="3341264304793193386">"רישום התנועה ברשת"</string>
+    <string name="monitoring_subtitle_ca_certificate" msgid="3874151893894355988">"‏אישורי CA"</string>
     <string name="disable_vpn" msgid="4435534311510272506">"‏השבת VPN"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"‏נתק את ה-VPN"</string>
-    <string name="monitoring_description_device_owned" msgid="5780988291898461883">"המכשיר מנוהל על ידי <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nמנהל המערכת יכול לעקוב אחר הגדרות, גישה עסקית, אפליקציות, נתונים המשויכים למכשיר ומידע על מיקום המכשיר, ולנהל אותם. למידע נוסף, פנה אל מנהל המערכת."</string>
+    <string name="monitoring_button_view_policies" msgid="100913612638514424">"הצג מדיניות"</string>
+    <string name="monitoring_description_named_management" msgid="5281789135578986303">"המכשיר שלך מנוהל על ידי <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nמנהל המערכת יכול לנטר ולנהל הגדרות, גישה ארגונית, אפליקציות, נתונים המשויכים למכשיר ומידע על מיקום המכשיר.\n\nלמידע נוסף, פנה למנהל המערכת."</string>
+    <string name="monitoring_description_management" msgid="4573721970278370790">"המכשיר מנוהל על ידי הארגון שלך.\n\nמנהל המערכת יכול לנטר ולנהל הגדרות, גישה ארגונית, אפליקציות, נתונים המשויכים למכשיר ומידע על מיקום המכשיר.\n\nלמידע נוסף, פנה למנהל המערכת."</string>
+    <string name="monitoring_description_management_ca_certificate" msgid="5202023784131001751">"הארגון שלך התקין רשות אישורים במכשיר. ניתן לעקוב אחר התנועה ברשת המאובטחת או לשנות אותה."</string>
+    <string name="monitoring_description_managed_profile_ca_certificate" msgid="4683248196789897964">"הארגון שלך התקין רשות אישורים בפרופיל העבודה. ניתן לעקוב אחר התנועה ברשת המאובטחת או לשנות אותה."</string>
+    <string name="monitoring_description_ca_certificate" msgid="7886985418413598352">"במכשיר זה מותקנת רשות אישורים. ניתן לעקוב אחר התנועה ברשת המאובטחת או לשנות אותה."</string>
+    <string name="monitoring_description_management_network_logging" msgid="7184005419733060736">"מנהל המערכת הפעיל את התכונה \'רישום התנועה ברשת\', שמנטרת את תנועת הנתונים במכשיר."</string>
+    <string name="monitoring_description_named_vpn" msgid="7403457334088909254">"אתה מחובר לאפליקציה <xliff:g id="VPN_APP">%1$s</xliff:g>, שיכולה לעקוב אחר הפעילות שלך ברשת, כולל הודעות אימייל, אפליקציות ואתרים."</string>
+    <string name="monitoring_description_two_named_vpns" msgid="4198511413729213802">"אתה מחובר לאפליקציות <xliff:g id="VPN_APP_0">%1$s</xliff:g> ו-<xliff:g id="VPN_APP_1">%2$s</xliff:g>, שיכולות לעקוב אחר הפעילות שלך ברשת, כולל הודעות אימייל, אפליקציות ואתרים."</string>
+    <string name="monitoring_description_managed_profile_named_vpn" msgid="1427905889862420559">"פרופיל העבודה שלך מחובר לאפליקציה <xliff:g id="VPN_APP">%1$s</xliff:g>, שיכולה לעקוב אחר הפעילות שלך ברשת, כולל הודעות אימייל, אפליקציות ואתרים."</string>
+    <string name="monitoring_description_personal_profile_named_vpn" msgid="3133980926929069283">"הפרופיל האישי שלך מחובר לאפליקציה <xliff:g id="VPN_APP">%1$s</xliff:g>, שיכולה לעקוב אחר הפעילות שלך ברשת, כולל הודעות אימייל, אפליקציות ואתרים."</string>
+    <string name="monitoring_description_do_header_generic" msgid="96588491028288691">"המכשיר שלך מנוהל על ידי <xliff:g id="DEVICE_OWNER_APP">%1$s</xliff:g>."</string>
+    <string name="monitoring_description_do_header_with_name" msgid="5511133708978206460">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> משתמש באפליקציה <xliff:g id="DEVICE_OWNER_APP">%2$s</xliff:g> כדי לנהל את מכשירך."</string>
+    <string name="monitoring_description_do_body" msgid="3639594537660975895">"מנהל המערכת יכול לנטר ולנהל הגדרות, גישה ארגונית, אפליקציות, נתונים המשויכים למכשיר ומידע על מיקום המכשיר."</string>
+    <string name="monitoring_description_do_learn_more_separator" msgid="3785251953067436862">" "</string>
+    <string name="monitoring_description_do_learn_more" msgid="1849514470437907421">"למידע נוסף"</string>
+    <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"אתה מחובר לאפליקציה <xliff:g id="VPN_APP">%1$s</xliff:g>, שיכולה לעקוב אחר הפעילות שלך ברשת, כולל הודעות אימייל, אפליקציות ואתרים."</string>
+    <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
+    <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"‏פתח את הגדרות ה-VPN"</string>
+    <string name="monitoring_description_ca_cert_settings_separator" msgid="4987350385906393626">" "</string>
+    <string name="monitoring_description_ca_cert_settings" msgid="5489969458872997092">"פתח את פרטי הכניסה המהימנים"</string>
+    <string name="monitoring_description_network_logging" msgid="7223505523384076027">"מנהל המערכת הפעיל את תכונת רישום התנועה ברשת, שמנטרת את תנועת הנתונים במכשיר.\n\nלמידע נוסף, צור קשר עם מנהל המערכת."</string>
     <string name="monitoring_description_vpn" msgid="4445150119515393526">"‏נתת לאפליקציה כלשהי הרשאה להגדיר חיבור ‏VPN‏.\n\nהאפליקציה הזו יכולה לעקוב אחר הפעילות שלך ברשת ובמכשיר, כולל הודעות אימייל, אפליקציות ואתרים."</string>
-    <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"‏המכשיר מנוהל על ידי <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nמנהל המערכת יכול לעקוב אחר הגדרות, גישה עסקית, אפליקציות, נתונים המשויכים למכשיר ומידע על מיקום המכשיר, ולנהל אותם.\n\nאתה מחובר ל-VPN שיכול לעקוב אחר הפעילות שלך ברשת, כולל הודעות אימייל, אפליקציות ואתרים.\n\nלמידע נוסף, פנה למנהל המערכת."</string>
-    <string name="monitoring_description_vpn_profile_owned" msgid="2054949132145039290">"‏פרופיל העבודה שלך מנוהל על ידי <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nמנהל המערכת שלך יכול לעקוב אחר הפעילות שלך ברשת, כולל הודעות אימייל, אפליקציות ואתרים.\n\nלמידע נוסף, פנה למנהל המערכת שלך.\n\nאתה מחובר גם לרשת VPN, שיכולה לעקוב אחר הפעילות שלך ברשת."</string>
+    <string name="monitoring_description_vpn_profile_owned" msgid="2958019119161161530">"‏פרופיל העבודה שלך מנוהל על-ידי <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\n מנהל המערכת שלך יכול לעקוב אחרי הפעילות שלך ברשת, כולל פעילות באימייל, באפליקציות ובאתרים.\n\n למידע נוסף, צור קשר עם מנהל המערכת.\n\nבנוסף, אתה מחובר ל-VPN, שגם באמצעותו ניתן לעקוב אחרי הפעילות שלך ברשת."</string>
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
-    <string name="monitoring_description_app" msgid="6259179342284742878">"אתה מחובר לאפליקציה <xliff:g id="APPLICATION">%1$s</xliff:g>, שיכולה לעקוב אחר הפעילות שלך ברשת, כולל הודעות אימייל, אפליקציות ואתרים."</string>
+    <string name="monitoring_description_app" msgid="1828472472674709532">"אתה מחובר לאפליקציה <xliff:g id="APPLICATION">%1$s</xliff:g>, שיכולה לעקוב אחר הפעילות שלך ברשת, כולל הודעות אימייל, אפליקציות ואתרים."</string>
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"אתה מחובר לאפליקציה <xliff:g id="APPLICATION">%1$s</xliff:g>, שיכולה לעקוב אחר הפעילות שלך ברשת הפרטית, כולל הודעות אימייל, אפליקציות ואתרים."</string>
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"אתה מחובר לאפליקציה <xliff:g id="APPLICATION">%1$s</xliff:g>, שיכולה לעקוב אחר הפעילות שלך ברשת הפרטית, כולל הודעות אימייל, אפליקציות ואתרים."</string>
-    <string name="monitoring_description_app_work" msgid="1754325860918060897">"פרופיל העבודה שלך מנוהל על ידי <xliff:g id="ORGANIZATION">%1$s</xliff:g>. הוא מחובר לאפליקציה <xliff:g id="APPLICATION">%2$s</xliff:g>, שיכולה לעקוב אחר הפעילות שלך ברשת העסקית, כולל הודעות אימייל, אפליקציות ואתרים.\n\nלמידע נוסף, פנה למנהל המערכת שלך."</string>
-    <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"פרופיל העבודה שלך מנוהל על ידי <xliff:g id="ORGANIZATION">%1$s</xliff:g>. הוא מחובר לאפליקציה <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, שיכולה לעקוב אחר הפעילות שלך ברשת העסקית, כולל הודעות אימייל, אפליקציות ואתרים.\n\nאתה מחובר גם לאפליקציה <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, שיכולה לעקוב אחר הפעילות שלך ברשת הפרטית."</string>
-    <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"המכשיר שלך מנוהל על ידי <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nמנהל המערכת שלך יכול לעקוב אחר הגדרות, גישה עסקית, אפליקציות, נתונים המשויכים למכשיר שלך ומידע על מיקום המכשיר, ולנהל אותם.\n\nאתה מחובר לאפליקציה <xliff:g id="APPLICATION">%2$s</xliff:g>, שיכולה לעקוב אחר הפעילות שלך ברשת, כולל הודעות אימייל, אפליקציות ואתרים.\n\nלמידע נוסף, פנה למנהל המערכת שלך."</string>
+    <string name="monitoring_description_app_work" msgid="4612997849787922906">"פרופיל העבודה שלך מנוהל על ידי <xliff:g id="ORGANIZATION">%1$s</xliff:g>. הפרופיל מחובר לאפליקציה <xliff:g id="APPLICATION">%2$s</xliff:g>, שיכולה לעקוב אחר הפעילות שלך ברשת, כולל הודעות אימייל, אפליקציות ואתרים.\n\nלמידע נוסף, פנה למנהל המערכת."</string>
+    <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"פרופיל העבודה שלך מנוהל על ידי <xliff:g id="ORGANIZATION">%1$s</xliff:g>. הפרופיל מחובר לאפליקציה <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, שיכולה לעקוב אחר הפעילות שלך ברשת, כולל הודעות אימייל, אפליקציות ואתרים.\n\nהפרופיל מחובר גם לאפליקציה <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, שיכולה לעקוב אחר הפעילות שלך ברשת."</string>
+    <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"הנעילה בוטלה על ידי <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
+    <string name="keyguard_indication_trust_managed" msgid="8319646760022357585">"<xliff:g id="TRUST_AGENT">%1$s</xliff:g> פועל"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"המכשיר יישאר נעול עד שתבטל את נעילתו באופן ידני"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"קבל התראות מהר יותר"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"צפה בהן לפני שתבטל נעילה"</string>
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"לא, תודה"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"הגדר"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>‏. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
-    <string name="volume_zen_end_now" msgid="3179845345429841822">"סיים כעת"</string>
+    <string name="volume_zen_end_now" msgid="6930243045593601084">"כבה עכשיו"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"הרחב"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"כווץ"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"המסך מוצמד"</string>
-    <string name="screen_pinning_description" msgid="7238941806855968768">"שומר בתצוגה עד לביטול ההצמדה. גע והחזק בו-זמנית בלחצן \'הקודם\' כדי לבטל הצמדה."</string>
+    <string name="screen_pinning_description" msgid="8909878447196419623">"נשאר בתצוגה עד לביטול ההצמדה. גע בלחצנים \'הקודם\' ו\'סקירה\' והחזק כדי לבטל את ההצמדה."</string>
+    <string name="screen_pinning_description_accessible" msgid="426190689254018656">"נשאר בתצוגה עד לביטול ההצמדה. גע בלחצן \'סקירה\' והחזק כדי לבטל את ההצמדה."</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"הבנתי"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"לא, תודה"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"להסתיר<xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"יופיע מחדש בפעם הבאה שתפעיל את האפשרות בהגדרות."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"הסתר"</string>
-    <string name="volumeui_prompt_message" msgid="918680947433389110">"<xliff:g id="APP_NAME">%1$s</xliff:g> מנסה לפעול בתור תיבת הדו-שיח של עוצמת הקול."</string>
-    <string name="volumeui_prompt_allow" msgid="7954396902482228786">"התר"</string>
-    <string name="volumeui_prompt_deny" msgid="5720663643411696731">"דחה"</string>
-    <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> הוא תיבת הדו-שיח של עוצמת הקול"</string>
-    <string name="volumeui_notification_text" msgid="8819536904234337445">"הקש כדי לשחזר את המקור."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"אתה משתמש בפרופיל העבודה שלך"</string>
-  <string-array name="volume_stream_titles">
-    <item msgid="5841843895402729630">"שיחה"</item>
-    <item msgid="5997713001067658559">"מערכת"</item>
-    <item msgid="7858983209929864160">"השמע צלצול"</item>
-    <item msgid="1850038478268896762">"מדיה"</item>
-    <item msgid="8265110906352372092">"התראה"</item>
-    <item msgid="5339394737636839168"></item>
-    <item msgid="2951313578278086204">"Bluetooth"</item>
-    <item msgid="2919807739709798970"></item>
-    <item msgid="150349973435223405"></item>
-    <item msgid="6761963760295549099"></item>
-  </string-array>
+    <string name="stream_voice_call" msgid="4410002696470423714">"שיחה"</string>
+    <string name="stream_system" msgid="7493299064422163147">"מערכת"</string>
+    <string name="stream_ring" msgid="8213049469184048338">"צלצול"</string>
+    <string name="stream_music" msgid="9086982948697544342">"מדיה"</string>
+    <string name="stream_alarm" msgid="5209444229227197703">"שעון מעורר"</string>
+    <string name="stream_notification" msgid="2563720670905665031">"הודעה"</string>
+    <string name="stream_bluetooth_sco" msgid="2055645746402746292">"Bluetooth"</string>
+    <string name="stream_dtmf" msgid="2447177903892477915">"‏טון זוגי מרובה תדרים (DTMF)"</string>
+    <string name="stream_accessibility" msgid="301136219144385106">"נגישות"</string>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"‏%1$s. הקש כדי לבטל את ההשתקה."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"‏%1$s. הקש כדי להגדיר רטט. ייתכן ששירותי הנגישות מושתקים."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"‏%1$s. הקש כדי להשתיק. ייתכן ששירותי הנגישות מושתקים."</string>
+    <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"‏%1$s. הקש כדי להעביר למצב רטט."</string>
+    <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"‏%1$s. הקש כדי להשתיק."</string>
     <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"‏%s פקדי עוצמת הקול גלויים. החלק כלפי מעלה כדי לסגור."</string>
     <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"פקדי עוצמת הקול מוסתרים"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"System UI Tuner"</string>
@@ -470,7 +514,7 @@
     <string name="quick_settings" msgid="10042998191725428">"הגדרות מהירות"</string>
     <string name="status_bar" msgid="4877645476959324760">"שורת סטטוס"</string>
     <string name="overview" msgid="4018602013895926956">"סקירה"</string>
-    <string name="demo_mode" msgid="2389163018533514619">"מצב הדגמה"</string>
+    <string name="demo_mode" msgid="2532177350215638026">"מצב הדגמה בממשק המשתמש של המערכת"</string>
     <string name="enable_demo_mode" msgid="4844205668718636518">"הפעל מצב הדגמה"</string>
     <string name="show_demo_mode" msgid="2018336697782464029">"הצג מצב הדגמה"</string>
     <string name="status_bar_ethernet" msgid="5044290963549500128">"אתרנט"</string>
@@ -490,7 +534,7 @@
     <string name="tuner_warning" msgid="8730648121973575701">"‏System UI Tuner מספק לך דרכים נוספות להתאים אישית את ממשק המשתמש של Android. התכונות הניסיוניות האלה עשויות להשתנות, להתקלקל או להיעלם בגרסאות עתידיות. המשך בזהירות."</string>
     <string name="tuner_persistent_warning" msgid="8597333795565621795">"התכונות הניסיוניות האלה עשויות להשתנות, להתקלקל או להיעלם בגרסאות עתידיות. המשך בזהירות."</string>
     <string name="got_it" msgid="2239653834387972602">"הבנתי"</string>
-    <string name="tuner_toast" msgid="603429811084428439">"‏מזל טוב! System UI Tuner נוסף ל\'הגדרות\'"</string>
+    <string name="tuner_toast" msgid="603429811084428439">"‏מזל טוב! ה-System UI Tuner נוסף ל\'הגדרות\'"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"הסר מההגדרות"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"‏האם להסיר את System UI Tuner ולהפסיק להשתמש בכל התכונות שלו?"</string>
     <string name="activity_not_found" msgid="348423244327799974">"האפליקציה אינה מותקנת במכשיר"</string>
@@ -510,23 +554,48 @@
     <string name="tuner_full_importance_settings_on" msgid="7545060756610299966">"פועל"</string>
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"כבוי"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"בעזרת פקדים של הודעות הפעלה, תוכל להגדיר רמת חשיבות מ-0 עד 5 להודעות אפליקציה. \n\n"<b>"רמה 5"</b>" \n- הצג בראש רשימת ההודעות \n- אפשר הפרעה במסך מלא \n- תמיד אפשר הצצה \n\n"<b>"רמה 4"</b>" \n- מנע הפרעה במסך מלא \n- תמיד אפשר הצצה \n\n"<b>"רמה 3"</b>" \n- מנע הפרעה במסך מלא \n- אף פעם אל תאפשר הצצה \n\n"<b>"רמה 2"</b>" \n- מנע הפרעה במסך מלא \n- אף פעם אל תאפשר הצצה \n- אף פעם אל תאפשר קול ורטט \n\n"<b>"רמה 1"</b>" \n- מנע הפרעה במסך מלא \n- אף פעם אל תאפשר הצצה \n- אף פעם אל תאפשר קול ורטט \n- הסתר ממסך הנעילה ומשורת הסטטוס \n- הצג בתחתית רשימת ההודעות \n\n"<b>"רמה 0"</b>" \n- חסום את כל ההודעות מהאפליקציה"</string>
-    <string name="user_unspecified_importance" msgid="361613856933432117">"חשיבות: אוטומטית"</string>
-    <string name="blocked_importance" msgid="5035073235408414397">"חשיבות: רמה 0"</string>
-    <string name="min_importance" msgid="560779348928574878">"חשיבות: רמה 1"</string>
-    <string name="low_importance" msgid="7571498511534140">"חשיבות: רמה 2"</string>
-    <string name="default_importance" msgid="7609889614553354702">"חשיבות: רמה 3"</string>
-    <string name="high_importance" msgid="3441537905162782568">"חשיבות: רמה 4"</string>
-    <string name="max_importance" msgid="4880179829869865275">"חשיבות: רמה 5"</string>
-    <string name="notification_importance_user_unspecified" msgid="2868359605125272874">"האפליקציה קובעת חשיבות לכל הודעה."</string>
-    <string name="notification_importance_blocked" msgid="4237497046867398057">"לעולם אל תציג הודעות מהאפליקציה הזו."</string>
-    <string name="notification_importance_min" msgid="7844224511187027155">"ללא הפרעה, הצצה, קול או רטט במסך מלא. הסתר ממסך הנעילה ומשורת הסטטוס."</string>
-    <string name="notification_importance_low" msgid="7950291702044409847">"ללא הפרעה, הצצה, קול או רטט במסך מלא."</string>
-    <string name="notification_importance_default" msgid="5924405820269074915">"ללא הפרעה או הצצה במסך מלא."</string>
-    <string name="notification_importance_high" msgid="1729480727023990427">"תמיד אפשר הצצה. ללא הפרעה במסך מלא."</string>
-    <string name="notification_importance_max" msgid="2508384624461849111">"תמיד אפשר הצצה, ואפשר הפרעה במסך מלא."</string>
+    <string name="notification_header_default_channel" msgid="7506845022070889909">"הודעות"</string>
+    <string name="notification_channel_disabled" msgid="2139193533791840539">"לא תקבל את ההודעות האלה יותר"</string>
+    <string name="notification_num_channels" msgid="2048144408999179471">"<xliff:g id="NUMBER">%d</xliff:g> קטגוריות של התראות"</string>
+    <string name="notification_default_channel_desc" msgid="2506053815870808359">"האפליקציה הזו לא תומכת בקטגוריות של הודעות"</string>
+    <string name="notification_unblockable_desc" msgid="3561016061737896906">"לא ניתן לכבות התראות של האפליקציה הזאת"</string>
+    <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
+      <item quantity="two">קטגוריית הודעות אחת מתוך <xliff:g id="NUMBER_1">%d</xliff:g> מאפליקציה זו</item>
+      <item quantity="many">קטגוריית הודעות אחת מתוך <xliff:g id="NUMBER_1">%d</xliff:g> מאפליקציה זו</item>
+      <item quantity="other">קטגוריית הודעות אחת מתוך <xliff:g id="NUMBER_1">%d</xliff:g> מאפליקציה זו</item>
+      <item quantity="one">קטגוריית הודעות אחת מתוך <xliff:g id="NUMBER_0">%d</xliff:g> מאפליקציה זו</item>
+    </plurals>
+    <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
+    <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">
+      <item quantity="two"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>‏, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> ו-<xliff:g id="NUMBER_5">%3$d</xliff:g> אחרים</item>
+      <item quantity="many"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>‏, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> ו-,<xliff:g id="NUMBER_5">%3$d</xliff:g> אחרים</item>
+      <item quantity="other"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>‏, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> ו-<xliff:g id="NUMBER_5">%3$d</xliff:g> אחרים</item>
+      <item quantity="one"><xliff:g id="CHANNEL_NAME_1_0">%1$s</xliff:g>‏, <xliff:g id="CHANNEL_NAME_2_1">%2$s</xliff:g> ו-<xliff:g id="NUMBER_2">%3$d</xliff:g> אחר</item>
+    </plurals>
+    <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"פקדי ההודעות של <xliff:g id="APP_NAME">%1$s</xliff:g> נפתחו"</string>
+    <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"פקדי ההודעות של <xliff:g id="APP_NAME">%1$s</xliff:g> נסגרו"</string>
+    <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"התר הודעות מערוץ זה"</string>
+    <string name="notification_all_categories" msgid="5407190218055113282">"כל הקטגוריות"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"הגדרות נוספות"</string>
+    <string name="notification_app_settings" msgid="3743278649182392015">"התאמה אישית: <xliff:g id="SUB_CATEGORY">%1$s</xliff:g>"</string>
     <string name="notification_done" msgid="5279426047273930175">"סיום"</string>
-    <string name="notification_gear_accessibility" msgid="94429150213089611">"<xliff:g id="APP_NAME">%1$s</xliff:g> פקדי הודעות"</string>
+    <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
+    <string name="notification_menu_gear_description" msgid="2204480013726775108">"בקרת הודעות"</string>
+    <string name="notification_menu_snooze_description" msgid="3653669438131034525">"אפשרויות של דחיית הודעות לטיפול בהמשך"</string>
+    <string name="snooze_undo" msgid="6074877317002985129">"ביטול"</string>
+    <string name="snoozed_for_time" msgid="2390718332980204462">"נדחה לטיפול בעוד <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
+    <plurals name="snoozeHourOptions" formatted="false" msgid="2124335842674413030">
+      <item quantity="two">שעתיים</item>
+      <item quantity="many">‏%d שעות</item>
+      <item quantity="other">‏%d שעות</item>
+      <item quantity="one">שעה</item>
+    </plurals>
+    <plurals name="snoozeMinuteOptions" formatted="false" msgid="4127251700591510196">
+      <item quantity="two">‏%d דקות</item>
+      <item quantity="many">‏%d דקות</item>
+      <item quantity="other">‏%d דקות</item>
+      <item quantity="one">דקה</item>
+    </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"שימוש בסוללה"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"תכונת החיסכון בסוללה אינה זמינה בעת טעינת המכשיר"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"חיסכון בסוללה"</string>
@@ -559,7 +628,7 @@
     <string name="keyboard_key_numpad_template" msgid="8729216555174634026">"מקלדת נומרית <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_shortcut_group_system" msgid="6472647649616541064">"מערכת"</string>
     <string name="keyboard_shortcut_group_system_home" msgid="3054369431319891965">"דף הבית"</string>
-    <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"אחרונים"</string>
+    <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"מהזמן האחרון"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"הקודם"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="8366964080041773224">"הודעות"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4892255911160332762">"מקשי קיצור במקלדת"</string>
@@ -569,7 +638,7 @@
     <string name="keyboard_shortcut_group_applications_browser" msgid="6465985474000766533">"דפדפן"</string>
     <string name="keyboard_shortcut_group_applications_contacts" msgid="2064197111278436375">"אנשי קשר"</string>
     <string name="keyboard_shortcut_group_applications_email" msgid="6257036897441939004">"אימייל"</string>
-    <string name="keyboard_shortcut_group_applications_im" msgid="1892749399083161405">"שליחת הודעות מיידיות"</string>
+    <string name="keyboard_shortcut_group_applications_sms" msgid="638701213803242744">"SMS"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="4775559515850922780">"מוזיקה"</string>
     <string name="keyboard_shortcut_group_applications_youtube" msgid="6555453761294723317">"‏YouTube"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="9043614299194991263">"יומן"</string>
@@ -588,28 +657,35 @@
     <string name="switch_bar_on" msgid="1142437840752794229">"פועל"</string>
     <string name="switch_bar_off" msgid="8803270596930432874">"כבוי"</string>
     <string name="nav_bar" msgid="1993221402773877607">"סרגל ניווט"</string>
-    <string name="start" msgid="6873794757232879664">"התחלה"</string>
-    <string name="center" msgid="4327473927066010960">"מרכז"</string>
-    <string name="end" msgid="125797972524818282">"סיום"</string>
-    <string name="space" msgid="804232271282109749">"רווח"</string>
-    <string name="menu_ime" msgid="4943221416525250684">"מחליף תפריט / מקלדת"</string>
-    <string name="select_button" msgid="1597989540662710653">"בחירת לחצן להוספה"</string>
-    <string name="add_button" msgid="4134946063432258161">"הוסף לחצן"</string>
-    <string name="save" msgid="2311877285724540644">"שמור"</string>
+    <string name="nav_bar_layout" msgid="3664072994198772020">"פריסה"</string>
+    <string name="left_nav_bar_button_type" msgid="8555981238887546528">"סוג נוסף של לחצן שמאלי"</string>
+    <string name="right_nav_bar_button_type" msgid="2481056627065649656">"סוג נוסף של לחצן ימני"</string>
+    <string name="nav_bar_default" msgid="8587114043070993007">"(ברירת מחדל)"</string>
+  <string-array name="nav_bar_buttons">
+    <item msgid="1545641631806817203">"לוח"</item>
+    <item msgid="5742013440802239414">"קוד מפתח"</item>
+    <item msgid="8802889973626281575">"מחליף מקלדת"</item>
+    <item msgid="8175437057325747277">"ללא"</item>
+  </string-array>
+  <string-array name="nav_bar_layouts">
+    <item msgid="8077901629964902399">"רגילה"</item>
+    <item msgid="8256205964297588988">"קומפקטית"</item>
+    <item msgid="8719936228094005878">"נטייה שמאלה"</item>
+    <item msgid="586019486955594690">"נטייה ימינה"</item>
+  </string-array>
+    <string name="menu_ime" msgid="4998010205321292416">"מחליף מקלדת"</string>
+    <string name="save" msgid="2311877285724540644">"שמירה"</string>
     <string name="reset" msgid="2448168080964209908">"איפוס"</string>
-    <string name="no_home_title" msgid="1563808595146071549">"לחצן הבית לא נמצא"</string>
-    <string name="no_home_message" msgid="5408485011659260911">"לחצן הבית נדרש כדי לנווט במכשיר הזה. הוסף לחצן בית לפני השמירה."</string>
     <string name="adjust_button_width" msgid="6138616087197632947">"שינוי של רוחב לחצן"</string>
     <string name="clipboard" msgid="1313879395099896312">"לוח"</string>
-    <string name="clipboard_description" msgid="3819919243940546364">"בעזרת האפשרות \'לוח\', ניתן לגרור פריטים ישירות ללוח. ניתן גם לגרור פריטים ישירות מהלוח, כשהוא זמין."</string>
     <string name="accessibility_key" msgid="5701989859305675896">"לחצן לניווט מותאם אישית"</string>
-    <string name="keycode" msgid="7335281375728356499">"קוד מפתח"</string>
-    <string name="keycode_description" msgid="1403795192716828949">"לחצנים של קוד מפתח מאפשרים להוסיף מקשי מקלדת לסרגל הניווט. בעת הלחיצה הם מדמים את מקש המקלדת שנבחר. תחילה יש לבחור את המקש ללחצן, ולאחר מכן יש לבחור תמונה שתוצג בלחצן."</string>
-    <string name="select_keycode" msgid="7413765103381924584">"בחירת לחצן מקלדת"</string>
-    <string name="preview" msgid="9077832302472282938">"תצוגה מקדימה"</string>
-    <string name="drag_to_add_tiles" msgid="7058945779098711293">"גרור כדי להוסיף משבצות"</string>
+    <string name="left_keycode" msgid="2010948862498918135">"קוד מפתח שמאלי"</string>
+    <string name="right_keycode" msgid="708447961000848163">"קוד מפתח ימני"</string>
+    <string name="left_icon" msgid="3096287125959387541">"סמל שמאלי"</string>
+    <string name="right_icon" msgid="3952104823293824311">"סמל ימני"</string>
+    <string name="drag_to_add_tiles" msgid="7058945779098711293">"ניתן לגרור כדי להוסיף או להסיר משבצות"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"גרור לכאן כדי להסיר"</string>
-    <string name="qs_edit" msgid="2232596095725105230">"ערוך"</string>
+    <string name="qs_edit" msgid="2232596095725105230">"עריכה"</string>
     <string name="tuner_time" msgid="6572217313285536011">"שעה"</string>
   <string-array name="clock_options">
     <item msgid="5965318737560463480">"הצג שעות, דקות ושניות"</item>
@@ -645,6 +721,8 @@
     <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"הודעת <xliff:g id="ID_1">%1$s</xliff:g>: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"ייתכן שהיישום לא יפעל עם מסך מפוצל."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"האפליקציה אינה תומכת במסך מפוצל."</string>
+    <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"ייתכן שהאפליקציה לא תפעל במסך משני."</string>
+    <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"האפליקציה אינה תומכת בהפעלה במסכים משניים."</string>
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"פתיחת הגדרות."</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"פתיחה של \'הגדרות מהירות\'."</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"סגירה של \'הגדרות מהירות\'."</string>
@@ -655,5 +733,57 @@
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"פתיחת הגדרות של <xliff:g id="ID_1">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"עריכת סדר ההגדרות."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"דף <xliff:g id="ID_1">%1$d</xliff:g> מתוך <xliff:g id="ID_2">%2$d</xliff:g>"</string>
-    <string name="cant_silence_or_block" msgid="999689262131488625">"לא ניתן להשתיק או לחסום הודעות"</string>
+    <string name="tuner_lock_screen" msgid="5755818559638850294">"מסך נעילה"</string>
+    <string name="pip_phone_expand" msgid="5889780005575693909">"הרחב"</string>
+    <string name="pip_phone_minimize" msgid="1079119422589131792">"מזער"</string>
+    <string name="pip_phone_close" msgid="8416647892889710330">"סגור"</string>
+    <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"גרור למטה כדי לסגור"</string>
+    <string name="pip_menu_title" msgid="3328510504196964712">"תפריט \'תמונה בתוך תמונה\'"</string>
+    <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> במצב תמונה בתוך תמונה"</string>
+    <string name="pip_notification_message" msgid="4171698133469539591">"אם אינך רוצה שהתכונה הזו תשמש את <xliff:g id="NAME">%s</xliff:g>, הקש כדי לפתוח את ההגדרות ולכבות את התכונה."</string>
+    <string name="pip_play" msgid="1417176722760265888">"הפעל"</string>
+    <string name="pip_pause" msgid="8881063404466476571">"השהה"</string>
+    <string name="pip_skip_to_next" msgid="1948440006726306284">"ברצוני לדלג אל הבא"</string>
+    <string name="pip_skip_to_prev" msgid="1955311326688637914">"ברצוני לדלג אל הקודם"</string>
+    <string name="thermal_shutdown_title" msgid="4458304833443861111">"הטלפון כבה עקב התחממות"</string>
+    <string name="thermal_shutdown_message" msgid="9006456746902370523">"הטלפון פועל כרגיל עכשיו"</string>
+    <string name="thermal_shutdown_dialog_message" msgid="566347880005304139">"הטלפון שלך התחמם יותר מדי וכבה כדי להתקרר. הטלפון פועל כרגיל עכשיו.\n\nייתכן שהטלפון יתחמם יותר מדי אם:\n	• תשתמש באפליקציות עתירות משאבים (כגון משחקים, אפליקציות וידאו או אפליקציות ניווט)\n	• תוריד או תעלה קבצים גדולים\n	• תשתמש בטלפון בטמפרטורות גבוהות"</string>
+    <string name="high_temp_title" msgid="4589508026407318374">"הטלפון מתחמם"</string>
+    <string name="high_temp_notif_message" msgid="5642466103153429279">"חלק מהתכונות מוגבלות כל עוד הטלפון מתקרר"</string>
+    <string name="high_temp_dialog_message" msgid="6840700639374113553">"קירור הטלפון ייעשה באופן אוטומטי. תוכל עדיין להשתמש בטלפון, אבל ייתכן שהוא יפעל לאט יותר.\n\nהטלפון יחזור לפעול כרגיל לאחר שיתקרר."</string>
+    <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"קיצור דרך שמאלי"</string>
+    <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"קיצור דרך ימני"</string>
+    <string name="lockscreen_unlock_left" msgid="2043092136246951985">"קיצור דרך שמאלי גם מבטל נעילה"</string>
+    <string name="lockscreen_unlock_right" msgid="1529992940510318775">"קיצור דרך ימני גם מבטל נעילה"</string>
+    <string name="lockscreen_none" msgid="4783896034844841821">"ללא"</string>
+    <string name="tuner_launch_app" msgid="1527264114781925348">"הפעל את האפליקציה <xliff:g id="APP">%1$s</xliff:g>"</string>
+    <string name="tuner_other_apps" msgid="4726596850501162493">"אפליקציות אחרות"</string>
+    <string name="tuner_circle" msgid="2340998864056901350">"מעגל"</string>
+    <string name="tuner_plus" msgid="6792960658533229675">"פלוס"</string>
+    <string name="tuner_minus" msgid="4806116839519226809">"מינוס"</string>
+    <string name="tuner_left" msgid="8404287986475034806">"שמאלה"</string>
+    <string name="tuner_right" msgid="6222734772467850156">"ימינה"</string>
+    <string name="tuner_menu" msgid="191640047241552081">"תפריט"</string>
+    <string name="tuner_app" msgid="3507057938640108777">"האפליקציה <xliff:g id="APP">%1$s</xliff:g>"</string>
+    <string name="notification_channel_alerts" msgid="4496839309318519037">"התראות"</string>
+    <string name="notification_channel_screenshot" msgid="6314080179230000938">"צילומי מסך"</string>
+    <string name="notification_channel_general" msgid="4525309436693914482">"הודעות כלליות"</string>
+    <string name="notification_channel_storage" msgid="3077205683020695313">"אחסון"</string>
+    <string name="instant_apps" msgid="6647570248119804907">"אפליקציות אינסטנט"</string>
+    <string name="instant_apps_message" msgid="8116608994995104836">"אפליקציות אינסטנט לא דורשות התקנה."</string>
+    <string name="app_info" msgid="6856026610594615344">"פרטי אפליקציה"</string>
+    <string name="go_to_web" msgid="1106022723459948514">"התחבר לאינטרנט"</string>
+    <string name="mobile_data" msgid="7094582042819250762">"נתונים סלולריים"</string>
+    <string name="wifi_is_off" msgid="1838559392210456893">"‏Wi-Fi כבוי"</string>
+    <string name="bt_is_off" msgid="2640685272289706392">"‏Bluetooth כבוי"</string>
+    <string name="dnd_is_off" msgid="6167780215212497572">"מצב \'נא לא להפריע\' כבוי"</string>
+    <string name="qs_dnd_prompt_auto_rule" msgid="862559028345233052">"מצב \'נא לא להפריע\' הופעל על ידי כלל אוטומטי (<xliff:g id="ID_1">%s</xliff:g>)."</string>
+    <string name="qs_dnd_prompt_app" msgid="7978037419334156034">"מצב \'נא לא להפריע\' הופעל על ידי אפליקציה (<xliff:g id="ID_1">%s</xliff:g>)."</string>
+    <string name="qs_dnd_prompt_auto_rule_app" msgid="2599343675391111951">"מצב \'נא לא להפריע להפריע\' הופעל על ידי אפליקציה או על ידי כלל אוטומטי."</string>
+    <string name="qs_dnd_until" msgid="3469471136280079874">"עד <xliff:g id="ID_1">%s</xliff:g>"</string>
+    <string name="qs_dnd_keep" msgid="1825009164681928736">"שמירה"</string>
+    <string name="qs_dnd_replace" msgid="8019520786644276623">"החלף"</string>
+    <string name="running_foreground_services_title" msgid="381024150898615683">"אפליקציות שפועלות ברקע"</string>
+    <string name="running_foreground_services_msg" msgid="6326247670075574355">"הקש לקבלת פרטים על צריכה של נתונים וסוללה"</string>
+    <string name="data_usage_disable_mobile" msgid="5116269981510015864">"לכבות את חבילת הגלישה?"</string>
 </resources>

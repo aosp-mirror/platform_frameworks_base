@@ -262,7 +262,8 @@ public class VoiceInteractionService extends Service {
      * @param keyphrase The keyphrase that's being used, for example "Hello Android".
      * @param locale The locale for which the enrollment needs to be performed.
      * @param callback The callback to notify of detection events.
-     * @return An always-on hotword detector for the given keyphrase and locale.
+     * @return An always-on hotword detector for the given keyphrase and locale. Is null if the
+     * keyphrase and locale is not supported.
      */
     public final AlwaysOnHotwordDetector createAlwaysOnHotwordDetector(
             String keyphrase, Locale locale, AlwaysOnHotwordDetector.Callback callback) {
@@ -272,8 +273,10 @@ public class VoiceInteractionService extends Service {
         synchronized (mLock) {
             // Allow only one concurrent recognition via the APIs.
             safelyShutdownHotwordDetector();
-            mHotwordDetector = new AlwaysOnHotwordDetector(keyphrase, locale, callback,
-                    mKeyphraseEnrollmentInfo, mInterface, mSystemService);
+            if (isKeyphraseAndLocaleSupportedForHotword(keyphrase, locale)) {
+                mHotwordDetector = new AlwaysOnHotwordDetector(keyphrase, locale, callback,
+                        mKeyphraseEnrollmentInfo, mInterface, mSystemService);
+            }
         }
         return mHotwordDetector;
     }
@@ -285,6 +288,20 @@ public class VoiceInteractionService extends Service {
     @VisibleForTesting
     protected final KeyphraseEnrollmentInfo getKeyphraseEnrollmentInfo() {
         return mKeyphraseEnrollmentInfo;
+    }
+
+    /**
+      * Checks if a given keyphrase and locale are supported to create an
+      * {@link AlwaysOnHotwordDetector}.
+      *
+      * @return true if the keyphrase and locale combination is supported, false otherwise.
+      * @hide
+      */
+    public final boolean isKeyphraseAndLocaleSupportedForHotword(String keyphrase, Locale locale) {
+        if (mKeyphraseEnrollmentInfo == null) {
+            return false;
+        }
+        return mKeyphraseEnrollmentInfo.getKeyphraseMetadata(keyphrase, locale) != null;
     }
 
     private void safelyShutdownHotwordDetector() {

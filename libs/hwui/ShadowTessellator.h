@@ -80,8 +80,6 @@ public:
 
     static Vector2 centroid2d(const Vector2* poly, int polyLength);
 
-    static bool isClockwise(const Vector2* polygon, int len);
-
     static Vector2 calculateNormal(const Vector2& p1, const Vector2& p2);
 
     static int getExtraVertexNumber(const Vector2& vector1, const Vector2& vector2,

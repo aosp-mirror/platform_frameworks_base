@@ -23,9 +23,10 @@
     <uses-permission android:name="android.permission.CONNECTIVITY_INTERNAL" />
 
     <application android:label="VpnDialogs"
-            android:allowBackup="false" >
+                 android:allowBackup="false">
+
         <activity android:name=".ConfirmDialog"
-                android:theme="@android:style/Theme.Material.Light.Dialog.Alert">
+                  android:theme="@android:style/Theme.Material.Light.Dialog.Alert">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.DEFAULT"/>
@@ -33,12 +34,21 @@
         </activity>
 
         <activity android:name=".ManageDialog"
-                android:theme="@android:style/Theme.Material.Light.Dialog.Alert"
-                android:noHistory="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-            </intent-filter>
+                  android:theme="@android:style/Theme.Material.Light.Dialog.Alert"
+                  android:noHistory="true"
+                  android:excludeFromRecents="true"
+                  android:permission="android.permission.NETWORK_SETTINGS"
+                  android:exported="true">
         </activity>
+
+        <activity android:name=".AlwaysOnDisconnectedDialog"
+                  android:label="@string/always_on_disconnected_title"
+                  android:theme="@android:style/Theme.Material.Light.Dialog.Alert"
+                  android:noHistory="true"
+                  android:excludeFromRecents="true"
+                  android:permission="android.permission.NETWORK_SETTINGS"
+                  android:exported="true">
+        </activity>
+
     </application>
 </manifest>

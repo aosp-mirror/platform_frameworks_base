@@ -13,7 +13,7 @@
 # limitations under the License.
 
 # We have to use BUILD_PREBUILT instead of PRODUCT_COPY_FIES,
-# because SMALLER_FONT_FOOTPRINT is only available in Android.mks.
+# because MINIMAL_FONT_FOOTPRINT is only available in Android.mks.
 
 LOCAL_PATH := $(call my-dir)
 
@@ -59,21 +59,6 @@ include $(BUILD_PREBUILT)
 extra_font_files :=
 
 ################################
-# Include the DroidSansFallback subset on SMALLER_FONT_FOOTPRINT build
-ifeq ($(SMALLER_FONT_FOOTPRINT),true)
-
-include $(CLEAR_VARS)
-LOCAL_MODULE := DroidSansFallback.ttf
-LOCAL_SRC_FILES := $(LOCAL_MODULE)
-LOCAL_MODULE_CLASS := ETC
-LOCAL_MODULE_TAGS := optional
-LOCAL_MODULE_PATH := $(TARGET_OUT)/fonts
-include $(BUILD_PREBUILT)
-droidsans_fallback_src :=
-
-endif  # SMALLER_FONT_FOOTPRINT
-
-################################
 # Build the rest of font files as prebuilt.
 
 # $(1): The source file name in LOCAL_PATH.
@@ -96,12 +81,39 @@ $(foreach f, $(font_src_files), $(call build-one-font-module, $(f)))
 build-one-font-module :=
 font_src_files :=
 
+################################
+# Copies the font configuration file into system/etc for the product as fonts.xml.
+# In the case where $(ADDITIONAL_FONTS_FILE) is defined, the content of $(ADDITIONAL_FONTS_FILE)
+# is added to the $(AOSP_FONTS_FILE).
+include $(CLEAR_VARS)
+
+LOCAL_MODULE := fonts.xml
+LOCAL_MODULE_CLASS := ETC
+
+AOSP_FONTS_FILE := frameworks/base/data/fonts/fonts.xml
+
+ifdef ADDITIONAL_FONTS_FILE
+ADDITIONAL_FONTS_SCRIPT := frameworks/base/tools/fonts/add_additional_fonts.py
+ADD_ADDITIONAL_FONTS := $(local-generated-sources-dir)/fonts.xml
+
+$(ADD_ADDITIONAL_FONTS): PRIVATE_SCRIPT := $(ADDITIONAL_FONTS_SCRIPT)
+$(ADD_ADDITIONAL_FONTS): PRIVATE_ADDITIONAL_FONTS_FILE := $(ADDITIONAL_FONTS_FILE)
+$(ADD_ADDITIONAL_FONTS): $(ADDITIONAL_FONTS_SCRIPT) $(AOSP_FONTS_FILE) $(ADDITIONAL_FONTS_FILE)
+	rm -f $@
+	python $(PRIVATE_SCRIPT) $@ $(PRIVATE_ADDITIONAL_FONTS_FILE)
+else
+ADD_ADDITIONAL_FONTS := $(AOSP_FONTS_FILE)
+endif
+
+LOCAL_PREBUILT_MODULE_FILE := $(ADD_ADDITIONAL_FONTS)
+
+include $(BUILD_PREBUILT)
 
 # Run sanity tests on fonts on checkbuild
 checkbuild: fontchain_lint
 
 FONTCHAIN_LINTER := frameworks/base/tools/fonts/fontchain_lint.py
-ifeq ($(SMALLER_FONT_FOOTPRINT),true)
+ifeq ($(MINIMAL_FONT_FOOTPRINT),true)
 CHECK_EMOJI := false
 else
 CHECK_EMOJI := true

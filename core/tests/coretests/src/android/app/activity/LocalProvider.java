@@ -29,6 +29,19 @@ import android.util.Log;
 public class LocalProvider extends ContentProvider {
     private static final String TAG = "LocalProvider";
 
+    private static final String AUTHORITY = "com.android.frameworks.coretests.LocalProvider";
+    private static final String TABLE_DATA_NAME = "data";
+    public static final Uri TABLE_DATA_URI =
+            Uri.parse("content://" + AUTHORITY + "/" + TABLE_DATA_NAME);
+
+    public static final String COLUMN_TEXT_NAME = "text";
+    public static final String COLUMN_INTEGER_NAME = "integer";
+
+    public static final String TEXT1 = "first data";
+    public static final String TEXT2 = "second data";
+    public static final int INTEGER1 = 100;
+    public static final int INTEGER2 = 101;
+
     private SQLiteOpenHelper mOpenHelper;
 
     private static final int DATA = 1;
@@ -51,13 +64,20 @@ public class LocalProvider extends ContentProvider {
 
         @Override
         public void onCreate(SQLiteDatabase db) {
-            db.execSQL("CREATE TABLE data (" +
+            db.execSQL("CREATE TABLE " + TABLE_DATA_NAME + " (" +
                        "_id INTEGER PRIMARY KEY," +
-                       "text TEXT, " +
-                       "integer INTEGER);");
+                       COLUMN_TEXT_NAME + " TEXT, " +
+                       COLUMN_INTEGER_NAME + " INTEGER);");
 
             // insert alarms
-            db.execSQL("INSERT INTO data (text, integer) VALUES ('first data', 100);");
+            db.execSQL(getInsertCommand(TEXT1, INTEGER1));
+            db.execSQL(getInsertCommand(TEXT2, INTEGER2));
+        }
+
+        private String getInsertCommand(String textValue, int integerValue) {
+            return "INSERT INTO " + TABLE_DATA_NAME
+                    + " (" + COLUMN_TEXT_NAME + ", " + COLUMN_INTEGER_NAME + ") "
+                    + "VALUES ('" + textValue + "', " + integerValue + ");";
         }
 
         @Override
@@ -72,6 +92,10 @@ public class LocalProvider extends ContentProvider {
 
 
     public LocalProvider() {
+    }
+
+    static public Uri getTableDataUriForRow(int rowId) {
+        return Uri.parse("content://" + AUTHORITY + "/" + TABLE_DATA_NAME + "/" + rowId);
     }
 
     @Override

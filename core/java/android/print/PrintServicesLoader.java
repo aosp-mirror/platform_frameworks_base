@@ -22,6 +22,7 @@ import android.content.Loader;
 import android.os.Handler;
 import android.os.Message;
 import android.printservice.PrintServiceInfo;
+
 import com.android.internal.util.Preconditions;
 
 import java.util.List;
@@ -82,7 +83,7 @@ public class PrintServicesLoader extends Loader<List<PrintServiceInfo>> {
             }
         };
 
-        mPrintManager.addPrintServicesChangeListener(mListener);
+        mPrintManager.addPrintServicesChangeListener(mListener, null);
 
         // Immediately deliver a result
         deliverResult(mPrintManager.getPrintServices(mSelectionFlags));

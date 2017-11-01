@@ -28,8 +28,8 @@ static TestScene::Registrar _ShadowGrid(TestScene::Info{
 class ShadowGridAnimation : public TestScene {
 public:
     std::vector< sp<RenderNode> > cards;
-    void createContent(int width, int height, TestCanvas& canvas) override {
-        canvas.drawColor(0xFFFFFFFF, SkXfermode::kSrcOver_Mode);
+    void createContent(int width, int height, Canvas& canvas) override {
+        canvas.drawColor(0xFFFFFFFF, SkBlendMode::kSrcOver);
         canvas.insertReorderBarrier(true);
 
         for (int x = dp(16); x < (width - dp(116)); x += dp(116)) {
@@ -53,11 +53,11 @@ public:
 private:
     sp<RenderNode> createCard(int x, int y, int width, int height) {
         return TestUtils::createNode(x, y, x + width, y + height,
-                [width, height](RenderProperties& props, TestCanvas& canvas) {
+                [width, height](RenderProperties& props, Canvas& canvas) {
             props.setElevation(dp(16));
             props.mutableOutline().setRoundRect(0, 0, width, height, dp(6), 1);
             props.mutableOutline().setShouldClip(true);
-            canvas.drawColor(0xFFEEEEEE, SkXfermode::kSrcOver_Mode);
+            canvas.drawColor(0xFFEEEEEE, SkBlendMode::kSrcOver);
         });
     }
 };

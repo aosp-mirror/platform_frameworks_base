@@ -36,6 +36,7 @@ import android.content.res.Resources;
 import android.content.res.Resources.NotFoundException;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.FileUtils;
@@ -46,7 +47,7 @@ import android.os.ServiceManager;
 import android.os.StatFs;
 import android.os.SystemClock;
 import android.os.UserManager;
-import android.os.storage.IMountService;
+import android.os.storage.IStorageManager;
 import android.os.storage.StorageListener;
 import android.os.storage.StorageManager;
 import android.os.storage.StorageResultCode;
@@ -64,9 +65,14 @@ import android.util.Log;
 import com.android.frameworks.coretests.R;
 import com.android.internal.content.PackageHelper;
 
+import dalvik.system.VMRuntime;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -78,9 +84,9 @@ public class PackageManagerTests extends AndroidTestCase {
 
     public static final String TAG = "PackageManagerTests";
 
-    public final long MAX_WAIT_TIME = 25 * 1000;
+    public static final long MAX_WAIT_TIME = 25 * 1000;
 
-    public final long WAIT_TIME_INCR = 5 * 1000;
+    public static final long WAIT_TIME_INCR = 5 * 1000;
 
     private static final String SECURE_CONTAINERS_PREFIX = "/mnt/asec";
 
@@ -620,7 +626,7 @@ public class PackageManagerTests extends AndroidTestCase {
                 try {
                     pkgInfo = pm.getPackageInfo(pkg,
                             PackageManager.GET_PERMISSIONS
-                            | PackageManager.GET_UNINSTALLED_PACKAGES);
+                            | PackageManager.MATCH_UNINSTALLED_PACKAGES);
                 } catch (NameNotFoundException e) {
                     pkgInfo = null;
                 }
@@ -712,7 +718,7 @@ public class PackageManagerTests extends AndroidTestCase {
             // Make sure the package doesn't exist
             try {
                 ApplicationInfo appInfo = pm.getApplicationInfo(pkg.packageName,
-                        PackageManager.GET_UNINSTALLED_PACKAGES);
+                        PackageManager.MATCH_UNINSTALLED_PACKAGES);
                 GenericReceiver receiver = new DeleteReceiver(pkg.packageName);
                 invokeDeletePackage(pkg.packageName, 0, receiver);
             } catch (NameNotFoundException e) {
@@ -974,7 +980,7 @@ public class PackageManagerTests extends AndroidTestCase {
     public boolean invokeDeletePackage(final String pkgName, int flags, GenericReceiver receiver)
             throws Exception {
         ApplicationInfo info = getPm().getApplicationInfo(pkgName,
-                PackageManager.GET_UNINSTALLED_PACKAGES);
+                PackageManager.MATCH_UNINSTALLED_PACKAGES);
 
         mContext.registerReceiver(receiver, receiver.filter);
         try {
@@ -1019,7 +1025,7 @@ public class PackageManagerTests extends AndroidTestCase {
             Log.i(TAG, "okay4");
             try {
                 info = getPm().getApplicationInfo(ip.pkg.packageName,
-                        PackageManager.GET_UNINSTALLED_PACKAGES);
+                        PackageManager.MATCH_UNINSTALLED_PACKAGES);
             } catch (NameNotFoundException e) {
                 info = null;
             }
@@ -1149,12 +1155,12 @@ public class PackageManagerTests extends AndroidTestCase {
         }
     }
 
-    IMountService getMs() {
+    IStorageManager getSm() {
         IBinder service = ServiceManager.getService("mount");
         if (service != null) {
-            return IMountService.Stub.asInterface(service);
+            return IStorageManager.Stub.asInterface(service);
         } else {
-            Log.e(TAG, "Can't get mount service");
+            Log.e(TAG, "Can't get storagemanager service");
         }
         return null;
     }
@@ -1185,7 +1191,7 @@ public class PackageManagerTests extends AndroidTestCase {
         try {
             // Wait on observer
             synchronized (observer) {
-                int ret = getMs().mountVolume(path);
+                int ret = getSm().mountVolume(path);
                 if (ret != StorageResultCode.OperationSucceeded) {
                     throw new Exception("Could not mount the media");
                 }
@@ -1224,7 +1230,7 @@ public class PackageManagerTests extends AndroidTestCase {
         try {
             // Wait on observer
             synchronized (observer) {
-                getMs().unmountVolume(path, true, false);
+                getSm().unmountVolume(path, true, false);
                 long waitTime = 0;
                 while ((!observer.isDone()) && (waitTime < MAX_WAIT_TIME)) {
                     observer.wait(WAIT_TIME_INCR);
@@ -1317,24 +1323,8 @@ public class PackageManagerTests extends AndroidTestCase {
             return;
         }
         Runtime.getRuntime().gc();
-
-        final String packageName = ip.pkg.packageName;
-        Log.i(TAG, "Deleting package : " + packageName);
-
-        ApplicationInfo info = null;
         try {
-            info = getPm().getApplicationInfo(packageName, PackageManager.GET_UNINSTALLED_PACKAGES);
-        } catch (NameNotFoundException ignored) {
-        }
-
-        DeleteObserver observer = new DeleteObserver(packageName);
-        getPm().deletePackage(packageName, observer, PackageManager.DELETE_ALL_USERS);
-        observer.waitForCompletion(MAX_WAIT_TIME);
-
-        try {
-            if (info != null) {
-                assertUninstalled(info);
-            }
+            cleanUpInstall(ip.pkg.packageName);
         } finally {
             File outFile = new File(ip.pkg.codePath);
             if (outFile != null && outFile.exists()) {
@@ -1349,16 +1339,15 @@ public class PackageManagerTests extends AndroidTestCase {
         }
         Log.i(TAG, "Deleting package : " + pkgName);
         try {
-            ApplicationInfo info = getPm().getApplicationInfo(pkgName,
-                    PackageManager.GET_UNINSTALLED_PACKAGES);
-
+            final ApplicationInfo info = getPm().getApplicationInfo(pkgName,
+                    PackageManager.MATCH_UNINSTALLED_PACKAGES);
             if (info != null) {
                 DeleteObserver observer = new DeleteObserver(pkgName);
                 getPm().deletePackage(pkgName, observer, PackageManager.DELETE_ALL_USERS);
                 observer.waitForCompletion(MAX_WAIT_TIME);
                 assertUninstalled(info);
             }
-        } catch (NameNotFoundException e) {
+        } catch (IllegalArgumentException | NameNotFoundException e) {
         }
     }
 
@@ -2754,7 +2743,7 @@ public class PackageManagerTests extends AndroidTestCase {
         }
     }
 
-    /* This test creates a stale container via MountService and then installs
+    /* This test creates a stale container via StorageManagerService and then installs
      * a package and verifies that the stale container is cleaned up and install
      * is successful.
      * Please note that this test is very closely tied to the framework's
@@ -3756,7 +3745,7 @@ public class PackageManagerTests extends AndroidTestCase {
 
     public void testGetUnInstalledPackages() throws Exception {
         List<PackageInfo> packages = getPm().getInstalledPackages(
-                PackageManager.GET_UNINSTALLED_PACKAGES);
+                PackageManager.MATCH_UNINSTALLED_PACKAGES);
         assertNotNull("installed packages cannot be null", packages);
         assertTrue("installed packages cannot be empty", packages.size() > 0);
     }
@@ -3769,7 +3758,7 @@ public class PackageManagerTests extends AndroidTestCase {
                 | PackageManager.GET_CONFIGURATIONS | PackageManager.GET_INSTRUMENTATION
                 | PackageManager.GET_PERMISSIONS | PackageManager.GET_PROVIDERS
                 | PackageManager.GET_RECEIVERS | PackageManager.GET_SERVICES
-                | PackageManager.GET_SIGNATURES | PackageManager.GET_UNINSTALLED_PACKAGES;
+                | PackageManager.GET_SIGNATURES | PackageManager.MATCH_UNINSTALLED_PACKAGES;
 
         final InstallParams ip =
                 installFromRawResource("install.apk", R.raw.install_complete_package_info,
@@ -3809,12 +3798,12 @@ public class PackageManagerTests extends AndroidTestCase {
      * flags when the GET_UNINSTALLED_PACKAGES flag is set.
      */
     public void testGetUnInstalledPackagesAll() throws Exception {
-        final int flags = PackageManager.GET_UNINSTALLED_PACKAGES
+        final int flags = PackageManager.MATCH_UNINSTALLED_PACKAGES
                 | PackageManager.GET_ACTIVITIES | PackageManager.GET_GIDS
                 | PackageManager.GET_CONFIGURATIONS | PackageManager.GET_INSTRUMENTATION
                 | PackageManager.GET_PERMISSIONS | PackageManager.GET_PROVIDERS
                 | PackageManager.GET_RECEIVERS | PackageManager.GET_SERVICES
-                | PackageManager.GET_SIGNATURES | PackageManager.GET_UNINSTALLED_PACKAGES;
+                | PackageManager.GET_SIGNATURES;
 
         // first, install the package
         final InstallParams ip =
@@ -3859,6 +3848,117 @@ public class PackageManagerTests extends AndroidTestCase {
         int retCode = PackageManager.INSTALL_FAILED_DEXOPT;
         installFromRawResource("install.apk", R.raw.install_bad_dex, 0, true, true, retCode,
                 PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
+    }
+
+    private static class TestDexModuleRegisterCallback
+            extends PackageManager.DexModuleRegisterCallback {
+        private String mDexModulePath = null;
+        private boolean mSuccess = false;
+        private String mMessage = null;
+        CountDownLatch doneSignal = new CountDownLatch(1);
+
+        @Override
+        public void onDexModuleRegistered(String dexModulePath, boolean success, String message) {
+            mDexModulePath = dexModulePath;
+            mSuccess = success;
+            mMessage = message;
+            doneSignal.countDown();
+        }
+
+        boolean waitTillDone() {
+            long startTime = System.currentTimeMillis();
+            while (System.currentTimeMillis() - startTime < MAX_WAIT_TIME) {
+                try {
+                    return doneSignal.await(MAX_WAIT_TIME, TimeUnit.MILLISECONDS);
+                } catch (InterruptedException e) {
+                    Log.i(TAG, "Interrupted during sleep", e);
+                }
+            }
+            return false;
+        }
+
+    }
+
+    // Verify that the base code path cannot be registered.
+    public void testRegisterDexModuleBaseCode() throws Exception {
+        PackageManager pm = getPm();
+        ApplicationInfo info = getContext().getApplicationInfo();
+        TestDexModuleRegisterCallback callback = new TestDexModuleRegisterCallback();
+        pm.registerDexModule(info.getBaseCodePath(), callback);
+        assertTrue(callback.waitTillDone());
+        assertEquals(info.getBaseCodePath(), callback.mDexModulePath);
+        assertFalse("BaseCodePath should not be registered", callback.mSuccess);
+    }
+
+    // Verify thatmodules which are not own by the calling package are not registered.
+    public void testRegisterDexModuleNotOwningModule() throws Exception {
+        TestDexModuleRegisterCallback callback = new TestDexModuleRegisterCallback();
+        String moduleBelongingToOtherPackage = "/data/user/0/com.google.android.gms/module.apk";
+        getPm().registerDexModule(moduleBelongingToOtherPackage, callback);
+        assertTrue(callback.waitTillDone());
+        assertEquals(moduleBelongingToOtherPackage, callback.mDexModulePath);
+        assertTrue(callback.waitTillDone());
+        assertFalse("Only modules belonging to the calling package can be registered",
+                callback.mSuccess);
+    }
+
+    // Verify that modules owned by the package are successfully registered.
+    public void testRegisterDexModuleSuccessfully() throws Exception {
+        ApplicationInfo info = getContext().getApplicationInfo();
+        // Copy the main apk into the data folder and use it as a "module".
+        File dexModuleDir = new File(info.dataDir, "module-dir");
+        File dexModule = new File(dexModuleDir, "module.apk");
+        try {
+            assertNotNull(FileUtils.createDir(
+                    dexModuleDir.getParentFile(), dexModuleDir.getName()));
+            Files.copy(Paths.get(info.getBaseCodePath()), dexModule.toPath(),
+                    StandardCopyOption.REPLACE_EXISTING);
+            TestDexModuleRegisterCallback callback = new TestDexModuleRegisterCallback();
+            getPm().registerDexModule(dexModule.toString(), callback);
+            assertTrue(callback.waitTillDone());
+            assertEquals(dexModule.toString(), callback.mDexModulePath);
+            assertTrue(callback.waitTillDone());
+            assertTrue(callback.mMessage, callback.mSuccess);
+
+            // NOTE:
+            // This actually verifies internal behaviour which might change. It's not
+            // ideal but it's the best we can do since there's no other place we can currently
+            // write a better test.
+            for(String isa : getAppDexInstructionSets(info)) {
+                Files.exists(Paths.get(dexModuleDir.toString(), "oat", isa, "module.odex"));
+                Files.exists(Paths.get(dexModuleDir.toString(), "oat", isa, "module.vdex"));
+            }
+        } finally {
+            FileUtils.deleteContentsAndDir(dexModuleDir);
+        }
+    }
+
+    // If the module does not exist on disk we should get a failure.
+    public void testRegisterDexModuleNotExists() throws Exception {
+        ApplicationInfo info = getContext().getApplicationInfo();
+        String nonExistentApk = Paths.get(info.dataDir, "non-existent.apk").toString();
+        TestDexModuleRegisterCallback callback = new TestDexModuleRegisterCallback();
+        getPm().registerDexModule(nonExistentApk, callback);
+        assertTrue(callback.waitTillDone());
+        assertEquals(nonExistentApk, callback.mDexModulePath);
+        assertTrue(callback.waitTillDone());
+        assertFalse("DexModule registration should fail", callback.mSuccess);
+    }
+
+    // Copied from com.android.server.pm.InstructionSets because we don't have access to it here.
+    private static String[] getAppDexInstructionSets(ApplicationInfo info) {
+        if (info.primaryCpuAbi != null) {
+            if (info.secondaryCpuAbi != null) {
+                return new String[] {
+                        VMRuntime.getInstructionSet(info.primaryCpuAbi),
+                        VMRuntime.getInstructionSet(info.secondaryCpuAbi) };
+            } else {
+                return new String[] {
+                        VMRuntime.getInstructionSet(info.primaryCpuAbi) };
+            }
+        }
+
+        return new String[] { VMRuntime.getInstructionSet(Build.SUPPORTED_ABIS[0]) };
     }
 
     /*---------- Recommended install location tests ----*/

@@ -16,6 +16,8 @@
 
 package com.android.server;
 
+import android.Manifest;
+import android.app.ActivityManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -80,8 +82,9 @@ public class HardwarePropertiesManagerService extends IHardwarePropertiesManager
      *
      * @param callingPackage The calling package name.
      *
-     * @throws SecurityException if something other than the profile or device owner, or the
-     *        current VR service tries to retrieve information provided by this service.
+     * @throws SecurityException if something other than the device owner, the current VR service,
+     *         or a caller holding the {@link Manifest.permission#DEVICE_POWER} permission tries to
+     *         retrieve information provided by this service.
      */
     private void enforceHardwarePropertiesRetrievalAllowed(String callingPackage)
             throws SecurityException {
@@ -99,10 +102,12 @@ public class HardwarePropertiesManagerService extends IHardwarePropertiesManager
         final int userId = UserHandle.getUserId(uid);
         final VrManagerInternal vrService = LocalServices.getService(VrManagerInternal.class);
         final DevicePolicyManager dpm = mContext.getSystemService(DevicePolicyManager.class);
-        if (!dpm.isDeviceOwnerApp(callingPackage) && !dpm.isProfileOwnerApp(callingPackage)
-                && !vrService.isCurrentVrListener(callingPackage, userId)) {
-            throw new SecurityException("The caller is not a device or profile owner or bound "
-                + "VrListenerService.");
+        if (!dpm.isDeviceOwnerApp(callingPackage)
+                && !vrService.isCurrentVrListener(callingPackage, userId)
+                && mContext.checkCallingOrSelfPermission(Manifest.permission.DEVICE_POWER)
+                        != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("The caller is not a device owner, bound VrListenerService"
+                + ", or holding the DEVICE_POWER permission.");
         }
     }
 }

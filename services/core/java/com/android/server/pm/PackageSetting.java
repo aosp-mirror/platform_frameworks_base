@@ -19,6 +19,9 @@ package com.android.server.pm;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
+import android.content.pm.UserInfo;
+import android.service.pm.PackageProto;
+import android.util.proto.ProtoOutputStream;
 
 import java.io.File;
 import java.util.List;
@@ -29,16 +32,30 @@ import java.util.List;
 final class PackageSetting extends PackageSettingBase {
     int appId;
     PackageParser.Package pkg;
+    /**
+     * WARNING. The object reference is important. We perform integer equality and NOT
+     * object equality to check whether shared user settings are the same.
+     */
     SharedUserSetting sharedUser;
+    /**
+     * Temporary holding space for the shared user ID. While parsing package settings, the
+     * shared users tag may come after the packages. In this case, we must delay linking the
+     * shared user setting with the package setting. The shared user ID lets us link the
+     * two objects.
+     */
+    private int sharedUserId;
 
     PackageSetting(String name, String realName, File codePath, File resourcePath,
             String legacyNativeLibraryPathString, String primaryCpuAbiString,
             String secondaryCpuAbiString, String cpuAbiOverrideString,
             int pVersionCode, int pkgFlags, int privateFlags, String parentPackageName,
-            List<String> childPackageNames) {
+            List<String> childPackageNames, int sharedUserId, String[] usesStaticLibraries,
+            int[] usesStaticLibrariesVersions) {
         super(name, realName, codePath, resourcePath, legacyNativeLibraryPathString,
                 primaryCpuAbiString, secondaryCpuAbiString, cpuAbiOverrideString,
-                pVersionCode, pkgFlags, privateFlags, parentPackageName, childPackageNames);
+                pVersionCode, pkgFlags, privateFlags, parentPackageName, childPackageNames,
+                usesStaticLibraries, usesStaticLibrariesVersions);
+        this.sharedUserId = sharedUserId;
     }
 
     /**
@@ -46,11 +63,25 @@ final class PackageSetting extends PackageSettingBase {
      * Note that it keeps the same PackageParser.Package instance.
      */
     PackageSetting(PackageSetting orig) {
-        super(orig);
+        super(orig, orig.realName);
+        doCopy(orig);
+    }
 
-        appId = orig.appId;
-        pkg = orig.pkg;
-        sharedUser = orig.sharedUser;
+    /**
+     * New instance of PackageSetting replicating the original settings, but, allows specifying
+     * a real package name.
+     * Note that it keeps the same PackageParser.Package instance.
+     */
+    PackageSetting(PackageSetting orig, String realPkgName) {
+        super(orig, realPkgName);
+        doCopy(orig);
+    }
+
+    public int getSharedUserId() {
+        if (sharedUser != null) {
+            return sharedUser.userId;
+        }
+        return sharedUserId;
     }
 
     @Override
@@ -58,6 +89,18 @@ final class PackageSetting extends PackageSettingBase {
         return "PackageSetting{"
             + Integer.toHexString(System.identityHashCode(this))
             + " " + name + "/" + appId + "}";
+    }
+
+    public void copyFrom(PackageSetting orig) {
+        super.copyFrom(orig);
+        doCopy(orig);
+    }
+
+    private void doCopy(PackageSetting orig) {
+        appId = orig.appId;
+        pkg = orig.pkg;
+        sharedUser = orig.sharedUser;
+        sharedUserId = orig.sharedUserId;
     }
 
     public PermissionsState getPermissionsState() {
@@ -87,5 +130,33 @@ final class PackageSetting extends PackageSettingBase {
             return isSystem();
         }
         return true;
+    }
+
+    public void writeToProto(ProtoOutputStream proto, long fieldId, List<UserInfo> users) {
+        final long packageToken = proto.start(fieldId);
+        proto.write(PackageProto.NAME, (realName != null ? realName : name));
+        proto.write(PackageProto.UID, appId);
+        proto.write(PackageProto.VERSION_CODE, versionCode);
+        proto.write(PackageProto.VERSION_STRING, pkg.mVersionName);
+        proto.write(PackageProto.INSTALL_TIME_MS, firstInstallTime);
+        proto.write(PackageProto.UPDATE_TIME_MS, lastUpdateTime);
+        proto.write(PackageProto.INSTALLER_NAME, installerPackageName);
+
+        if (pkg != null) {
+            long splitToken = proto.start(PackageProto.SPLITS);
+            proto.write(PackageProto.SplitProto.NAME, "base");
+            proto.write(PackageProto.SplitProto.REVISION_CODE, pkg.baseRevisionCode);
+            proto.end(splitToken);
+            if (pkg.splitNames != null) {
+                for (int i = 0; i < pkg.splitNames.length; i++) {
+                    splitToken = proto.start(PackageProto.SPLITS);
+                    proto.write(PackageProto.SplitProto.NAME, pkg.splitNames[i]);
+                    proto.write(PackageProto.SplitProto.REVISION_CODE, pkg.splitRevisionCodes[i]);
+                    proto.end(splitToken);
+                }
+            }
+        }
+        writeUsersInfoToProto(proto, PackageProto.USERS);
+        proto.end(packageToken);
     }
 }

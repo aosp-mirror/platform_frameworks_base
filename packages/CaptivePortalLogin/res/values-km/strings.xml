@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="5934709770924185752">"CaptivePortalLogin"</string>
+    <string name="action_use_network" msgid="6076184727448466030">"ប្រើ​បណ្ដាញ​នេះ​ជា"</string>
+    <string name="action_do_not_use_network" msgid="4577366536956516683">"កុំ​ប្រើ​បណ្ដាញ​នេះ"</string>
+    <string name="action_bar_label" msgid="917235635415966620">"ចូលទៅបណ្ដាញ"</string>
+    <string name="action_bar_title" msgid="5645564790486983117">"ចូលទៅ %1$s"</string>
+    <string name="ssl_error_warning" msgid="6653188881418638872">"បណ្តាញដែលអ្នកកំពុងព្យាយាមចូលមានបញ្ហាសុវត្ថិភាព។"</string>
+    <string name="ssl_error_example" msgid="647898534624078900">"ឧបករណ៍៖ ទំព័រចូលនេះអាចនឹងមិនមែនជាកម្មសិទ្ធិរបស់ស្ថាប័នដែលបានបង្ហាញនេះទេ។"</string>
+    <string name="ssl_error_continue" msgid="6492718244923937110">"យ៉ាងណាក៏ដោយនៅតែបន្តតាមរយៈកម្មវិធីរុករក"</string>
+</resources>

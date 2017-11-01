@@ -20,31 +20,17 @@
 #include "Properties.h"
 #include "utils/StringUtils.h"
 
+#include <cutils/compiler.h>
+
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
+
 #include <utils/Log.h>
 
 namespace android {
 namespace uirenderer {
 
-// Debug
-#if DEBUG_EXTENSIONS
-    #define EXT_LOGD(...) ALOGD(__VA_ARGS__)
-#else
-    #define EXT_LOGD(...)
-#endif
-
-
 Extensions::Extensions() {
-    auto extensions = StringUtils::split((const char*) glGetString(GL_EXTENSIONS));
-    mHasNPot = extensions.has("GL_OES_texture_npot");
-    mHasFramebufferFetch = extensions.has("GL_NV_shader_framebuffer_fetch");
-    mHasDiscardFramebuffer = extensions.has("GL_EXT_discard_framebuffer");
-    mHasDebugMarker = extensions.has("GL_EXT_debug_marker");
-    mHas1BitStencil = extensions.has("GL_OES_stencil1");
-    mHas4BitStencil = extensions.has("GL_OES_stencil4");
-    mHasUnpackSubImage = extensions.has("GL_EXT_unpack_subimage");
-
     const char* version = (const char*) glGetString(GL_VERSION);
 
     // Section 6.1.5 of the OpenGL ES specification indicates the GL version
@@ -64,6 +50,29 @@ Extensions::Extensions() {
         mVersionMajor = 2;
         mVersionMinor = 0;
     }
+
+    auto extensions = StringUtils::split((const char*) glGetString(GL_EXTENSIONS));
+    mHasNPot = extensions.has("GL_OES_texture_npot");
+    mHasFramebufferFetch = extensions.has("GL_NV_shader_framebuffer_fetch");
+    mHasDiscardFramebuffer = extensions.has("GL_EXT_discard_framebuffer");
+    mHasDebugMarker = extensions.has("GL_EXT_debug_marker");
+    mHas1BitStencil = extensions.has("GL_OES_stencil1");
+    mHas4BitStencil = extensions.has("GL_OES_stencil4");
+    mHasUnpackSubImage = extensions.has("GL_EXT_unpack_subimage");
+
+    mHasSRGB = mVersionMajor >= 3 || extensions.has("GL_EXT_sRGB");
+    mHasSRGBWriteControl = extensions.has("GL_EXT_sRGB_write_control");
+
+#ifdef ANDROID_ENABLE_LINEAR_BLENDING
+    // If linear blending is enabled, the device must have (ES3.0 or EXT_sRGB)
+    // and EXT_sRGB_write_control
+    LOG_ALWAYS_FATAL_IF(!mHasSRGB, "Linear blending requires ES 3.0 or EXT_sRGB");
+    LOG_ALWAYS_FATAL_IF(!mHasSRGBWriteControl, "Linear blending requires EXT_sRGB_write_control");
+
+    mHasLinearBlending = true;
+#else
+    mHasLinearBlending = false;
+#endif
 }
 
 }; // namespace uirenderer

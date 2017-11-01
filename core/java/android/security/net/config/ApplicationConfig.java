@@ -148,14 +148,20 @@ public final class ApplicationConfig {
     }
 
     public void handleTrustStorageUpdate() {
-        ensureInitialized();
-        mDefaultConfig.handleTrustStorageUpdate();
-        if (mConfigs != null) {
-            Set<NetworkSecurityConfig> updatedConfigs =
-                    new HashSet<NetworkSecurityConfig>(mConfigs.size());
-            for (Pair<Domain, NetworkSecurityConfig> entry : mConfigs) {
-                if (updatedConfigs.add(entry.second)) {
-                    entry.second.handleTrustStorageUpdate();
+        synchronized(mLock) {
+            // If the config is uninitialized then there is no work to be done to handle an update,
+            // avoid needlessly parsing configs.
+            if (!mInitialized) {
+                return;
+            }
+            mDefaultConfig.handleTrustStorageUpdate();
+            if (mConfigs != null) {
+                Set<NetworkSecurityConfig> updatedConfigs =
+                        new HashSet<NetworkSecurityConfig>(mConfigs.size());
+                for (Pair<Domain, NetworkSecurityConfig> entry : mConfigs) {
+                    if (updatedConfigs.add(entry.second)) {
+                        entry.second.handleTrustStorageUpdate();
+                    }
                 }
             }
         }

@@ -39,7 +39,7 @@ public:
 struct JDrm : public BnDrmClient {
     static bool IsCryptoSchemeSupported(const uint8_t uuid[16], const String8 &mimeType);
 
-    JDrm(JNIEnv *env, jobject thiz, const uint8_t uuid[16]);
+    JDrm(JNIEnv *env, jobject thiz, const uint8_t uuid[16], const String8 &appPackageName);
 
     status_t initCheck() const;
     sp<IDrm> getDrm() { return mDrm; }
@@ -61,7 +61,7 @@ private:
     Mutex mLock;
 
     static sp<IDrm> MakeDrm();
-    static sp<IDrm> MakeDrm(const uint8_t uuid[16]);
+    static sp<IDrm> MakeDrm(const uint8_t uuid[16], const String8 &appPackageName);
 
     DISALLOW_EVIL_CONSTRUCTORS(JDrm);
 };

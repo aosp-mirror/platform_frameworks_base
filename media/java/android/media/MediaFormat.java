@@ -53,6 +53,7 @@ import java.util.Map;
  *         time-interval between key frames.
  *         Float support added in {@link android.os.Build.VERSION_CODES#N_MR1}</td></tr>
  * <tr><td>{@link #KEY_INTRA_REFRESH_PERIOD}</td><td>Integer</td><td><b>encoder-only</b>, optional</td></tr>
+ * <tr><td>{@link #KEY_LATENCY}</td><td>Integer</td><td><b>encoder-only</b>, optional</td></tr>
  * <tr><td>{@link #KEY_MAX_WIDTH}</td><td>Integer</td><td><b>decoder-only</b>, optional, max-resolution width</td></tr>
  * <tr><td>{@link #KEY_MAX_HEIGHT}</td><td>Integer</td><td><b>decoder-only</b>, optional, max-resolution height</td></tr>
  * <tr><td>{@link #KEY_REPEAT_PREVIOUS_FRAME_AFTER}</td><td>Long</td><td><b>encoder in surface-mode
@@ -105,6 +106,8 @@ public final class MediaFormat {
     public static final String MIMETYPE_VIDEO_H263 = "video/3gpp";
     public static final String MIMETYPE_VIDEO_MPEG2 = "video/mpeg2";
     public static final String MIMETYPE_VIDEO_RAW = "video/raw";
+    public static final String MIMETYPE_VIDEO_DOLBY_VISION = "video/dolby-vision";
+    public static final String MIMETYPE_VIDEO_SCRAMBLED = "video/scrambled";
 
     public static final String MIMETYPE_AUDIO_AMR_NB = "audio/3gpp";
     public static final String MIMETYPE_AUDIO_AMR_WB = "audio/amr-wb";
@@ -120,7 +123,7 @@ public final class MediaFormat {
     public static final String MIMETYPE_AUDIO_MSGSM = "audio/gsm";
     public static final String MIMETYPE_AUDIO_AC3 = "audio/ac3";
     public static final String MIMETYPE_AUDIO_EAC3 = "audio/eac3";
-    public static final String MIMETYPE_VIDEO_DOLBY_VISION = "video/dolby-vision";
+    public static final String MIMETYPE_AUDIO_SCRAMBLED = "audio/scrambled";
 
     /**
      * MIME type for WebVTT subtitle data.
@@ -575,6 +578,18 @@ public final class MediaFormat {
     public static final String KEY_LEVEL = "level";
 
     /**
+    * An optional key describing the desired encoder latency in frames. This is an optional
+    * parameter that applies only to video encoders. If encoder supports it, it should ouput
+    * at least one output frame after being queued the specified number of frames. This key
+    * is ignored if the video encoder does not support the latency feature. Use the output
+    * format to verify that this feature was enabled and the actual value used by the encoder.
+    * <p>
+    * If the key is not specified, the default latency will be implenmentation specific.
+    * The associated value is an integer.
+    */
+    public static final String KEY_LATENCY = "latency";
+
+    /**
      * A key describing the desired clockwise rotation on an output surface.
      * This key is only used when the codec is configured using an output surface.
      * The associated value is an integer, representing degrees. Supported values
@@ -751,6 +766,29 @@ public final class MediaFormat {
      * The associated value is an integer.
      */
     public static final String KEY_TRACK_ID = "track-id";
+
+    /**
+     * A key describing the system id of the conditional access system used to scramble
+     * a media track.
+     * <p>
+     * This key is set by {@link MediaExtractor} if the track is scrambled with a conditional
+     * access system.
+     * <p>
+     * The associated value is an integer.
+     * @hide
+     */
+    public static final String KEY_CA_SYSTEM_ID = "ca-system-id";
+
+    /**
+     * A key describing the {@link MediaCas.Session} object associated with a media track.
+     * <p>
+     * This key is set by {@link MediaExtractor} if the track is scrambled with a conditional
+     * access system.
+     * <p>
+     * The associated value is a ByteBuffer.
+     * @hide
+     */
+    public static final String KEY_CA_SESSION_ID = "ca-session-id";
 
     /* package private */ MediaFormat(Map<String, Object> map) {
         mMap = map;

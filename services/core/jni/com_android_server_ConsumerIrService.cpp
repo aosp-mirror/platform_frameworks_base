@@ -17,93 +17,76 @@
 #define LOG_TAG "ConsumerIrService"
 
 #include "jni.h"
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 #include "android_runtime/AndroidRuntime.h"
 
 #include <stdlib.h>
 #include <utils/misc.h>
 #include <utils/Log.h>
-#include <hardware/hardware.h>
-#include <hardware/consumerir.h>
-#include <ScopedPrimitiveArray.h>
+#include <android/hardware/ir/1.0/IConsumerIr.h>
+#include <nativehelper/ScopedPrimitiveArray.h>
+
+using ::android::hardware::ir::V1_0::IConsumerIr;
+using ::android::hardware::ir::V1_0::ConsumerIrFreqRange;
+using ::android::hardware::hidl_vec;
 
 namespace android {
 
-static jlong halOpen(JNIEnv* /* env */, jobject /* obj */) {
-    hw_module_t const* module;
-    consumerir_device_t *dev;
-    int err;
+static sp<IConsumerIr> mHal;
 
-    err = hw_get_module(CONSUMERIR_HARDWARE_MODULE_ID, &module);
-    if (err != 0) {
-        ALOGE("Can't open consumer IR HW Module, error: %d", err);
-        return 0;
-    }
-
-    err = module->methods->open(module, CONSUMERIR_TRANSMITTER,
-            (hw_device_t **) &dev);
-    if (err < 0) {
-        ALOGE("Can't open consumer IR transmitter, error: %d", err);
-        return 0;
-    }
-
-    return reinterpret_cast<jlong>(dev);
+static jboolean halOpen(JNIEnv* /* env */, jobject /* obj */) {
+    // TODO(b/31632518)
+    mHal = IConsumerIr::getService();
+    return mHal != nullptr;
 }
 
-static jint halTransmit(JNIEnv *env, jobject /* obj */, jlong halObject,
-   jint carrierFrequency, jintArray pattern) {
-    int ret;
-
-    consumerir_device_t *dev = reinterpret_cast<consumerir_device_t*>(halObject);
+static jint halTransmit(JNIEnv *env, jobject /* obj */, jint carrierFrequency,
+   jintArray pattern) {
     ScopedIntArrayRO cPattern(env, pattern);
     if (cPattern.get() == NULL) {
         return -EINVAL;
     }
-    jsize patternLength = cPattern.size();
+    hidl_vec<int32_t> patternVec;
+    patternVec.setToExternal(const_cast<int32_t*>(cPattern.get()), cPattern.size());
 
-    ret = dev->transmit(dev, carrierFrequency, cPattern.get(), patternLength);
-
-    return reinterpret_cast<jint>(ret);
+    bool success = mHal->transmit(carrierFrequency, patternVec);
+    return success ? 0 : -1;
 }
 
-static jintArray halGetCarrierFrequencies(JNIEnv *env, jobject /* obj */,
-    jlong halObject) {
-    consumerir_device_t *dev = reinterpret_cast<consumerir_device_t*>(halObject);
-    consumerir_freq_range_t *ranges;
+static jintArray halGetCarrierFrequencies(JNIEnv *env, jobject /* obj */) {
     int len;
+    hidl_vec<ConsumerIrFreqRange> ranges;
+    bool success;
 
-    len = dev->get_num_carrier_freqs(dev);
-    if (len <= 0)
-        return NULL;
+    auto cb = [&](bool s, hidl_vec<ConsumerIrFreqRange> vec) {
+            ranges = vec;
+            success = s;
+    };
+    mHal->getCarrierFreqs(cb);
 
-    ranges = new consumerir_freq_range_t[len];
-
-    len = dev->get_carrier_freqs(dev, len, ranges);
-    if (len <= 0) {
-        delete[] ranges;
+    if (!success) {
         return NULL;
     }
+    len = ranges.size();
 
     int i;
     ScopedIntArrayRW freqsOut(env, env->NewIntArray(len*2));
     jint *arr = freqsOut.get();
     if (arr == NULL) {
-        delete[] ranges;
         return NULL;
     }
     for (i = 0; i < len; i++) {
-        arr[i*2] = ranges[i].min;
-        arr[i*2+1] = ranges[i].max;
+        arr[i*2] = static_cast<jint>(ranges[i].min);
+        arr[i*2+1] = static_cast<jint>(ranges[i].max);
     }
 
-    delete[] ranges;
     return freqsOut.getJavaArray();
 }
 
 static const JNINativeMethod method_table[] = {
-    { "halOpen", "()J", (void *)halOpen },
-    { "halTransmit", "(JI[I)I", (void *)halTransmit },
-    { "halGetCarrierFrequencies", "(J)[I", (void *)halGetCarrierFrequencies},
+    { "halOpen", "()Z", (void *)halOpen },
+    { "halTransmit", "(I[I)I", (void *)halTransmit },
+    { "halGetCarrierFrequencies", "()[I", (void *)halGetCarrierFrequencies},
 };
 
 int register_android_server_ConsumerIrService(JNIEnv *env) {

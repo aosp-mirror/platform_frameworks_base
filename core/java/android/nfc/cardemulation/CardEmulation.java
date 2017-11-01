@@ -606,6 +606,8 @@ public final class CardEmulation {
      * <li>Consist of only hex characters
      * <li>Additionally, we allow an asterisk at the end, to indicate
      *     a prefix
+     * <li>Additinally we allow an (#) at symbol at the end, to indicate
+     *     a subset
      * </ul>
      *
      * @hide
@@ -614,20 +616,20 @@ public final class CardEmulation {
         if (aid == null)
             return false;
 
-        // If a prefix AID, the total length must be odd (even # of AID chars + '*')
-        if (aid.endsWith("*") && ((aid.length() % 2) == 0)) {
+        // If a prefix/subset AID, the total length must be odd (even # of AID chars + '*')
+        if ((aid.endsWith("*") || aid.endsWith("#")) && ((aid.length() % 2) == 0)) {
             Log.e(TAG, "AID " + aid + " is not a valid AID.");
             return false;
         }
 
-        // If not a prefix AID, the total length must be even (even # of AID chars)
-        if (!aid.endsWith("*") && ((aid.length() % 2) != 0)) {
+        // If not a prefix/subset AID, the total length must be even (even # of AID chars)
+        if ((!(aid.endsWith("*") || aid.endsWith("#"))) && ((aid.length() % 2) != 0)) {
             Log.e(TAG, "AID " + aid + " is not a valid AID.");
             return false;
         }
 
         // Verify hex characters
-        if (!aid.matches("[0-9A-Fa-f]{10,32}\\*?")) {
+        if (!aid.matches("[0-9A-Fa-f]{10,32}\\*?\\#?")) {
             Log.e(TAG, "AID " + aid + " is not a valid AID.");
             return false;
         }

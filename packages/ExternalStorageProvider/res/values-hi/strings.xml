@@ -17,6 +17,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="7123375275748530234">"बाहरी मेमोरी"</string>
+    <string name="storage_description" msgid="8541974407321172792">"स्थानीय जगह"</string>
     <string name="root_internal_storage" msgid="827844243068584127">"मोबाइल मेमोरी"</string>
     <string name="root_documents" msgid="4051252304075469250">"दस्तावेज़"</string>
 </resources>

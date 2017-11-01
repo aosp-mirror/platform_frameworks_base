@@ -67,7 +67,8 @@ GradientCache::GradientCache(Extensions& extensions)
         , mSize(0)
         , mMaxSize(Properties::gradientCacheSize)
         , mUseFloatTexture(extensions.hasFloatTextures())
-        , mHasNpot(extensions.hasNPot()){
+        , mHasNpot(extensions.hasNPot())
+        , mHasLinearBlending(extensions.hasLinearBlending()) {
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, &mMaxTextureSize);
 
     mCache.setOnEntryRemovedListener(this);
@@ -176,71 +177,62 @@ Texture* GradientCache::addLinearGradient(GradientCacheEntry& gradient,
 
 size_t GradientCache::bytesPerPixel() const {
     // We use 4 channels (RGBA)
+    return 4 * (mUseFloatTexture ? /* fp16 */ 2 : sizeof(uint8_t));
+}
+
+size_t GradientCache::sourceBytesPerPixel() const {
+    // We use 4 channels (RGBA) and upload from floats (not half floats)
     return 4 * (mUseFloatTexture ? sizeof(float) : sizeof(uint8_t));
 }
 
-void GradientCache::splitToBytes(uint32_t inColor, GradientColor& outColor) const {
-    outColor.r = (inColor >> 16) & 0xff;
-    outColor.g = (inColor >>  8) & 0xff;
-    outColor.b = (inColor >>  0) & 0xff;
-    outColor.a = (inColor >> 24) & 0xff;
-}
-
-void GradientCache::splitToFloats(uint32_t inColor, GradientColor& outColor) const {
-    outColor.r = ((inColor >> 16) & 0xff) / 255.0f;
-    outColor.g = ((inColor >>  8) & 0xff) / 255.0f;
-    outColor.b = ((inColor >>  0) & 0xff) / 255.0f;
-    outColor.a = ((inColor >> 24) & 0xff) / 255.0f;
-}
-
-void GradientCache::mixBytes(GradientColor& start, GradientColor& end, float amount,
-        uint8_t*& dst) const {
+void GradientCache::mixBytes(const FloatColor& start, const FloatColor& end,
+        float amount, uint8_t*& dst) const {
     float oppAmount = 1.0f - amount;
-    const float alpha = start.a * oppAmount + end.a * amount;
-    const float a = alpha / 255.0f;
-
-    *dst++ = uint8_t(a * (start.r * oppAmount + end.r * amount));
-    *dst++ = uint8_t(a * (start.g * oppAmount + end.g * amount));
-    *dst++ = uint8_t(a * (start.b * oppAmount + end.b * amount));
-    *dst++ = uint8_t(alpha);
+    float a = start.a * oppAmount + end.a * amount;
+    *dst++ = uint8_t(OECF(start.r * oppAmount + end.r * amount) * 255.0f);
+    *dst++ = uint8_t(OECF(start.g * oppAmount + end.g * amount) * 255.0f);
+    *dst++ = uint8_t(OECF(start.b * oppAmount + end.b * amount) * 255.0f);
+    *dst++ = uint8_t(a * 255.0f);
 }
 
-void GradientCache::mixFloats(GradientColor& start, GradientColor& end, float amount,
-        uint8_t*& dst) const {
+void GradientCache::mixFloats(const FloatColor& start, const FloatColor& end,
+        float amount, uint8_t*& dst) const {
     float oppAmount = 1.0f - amount;
-    const float a = start.a * oppAmount + end.a * amount;
-
+    float a = start.a * oppAmount + end.a * amount;
     float* d = (float*) dst;
-    *d++ = a * (start.r * oppAmount + end.r * amount);
-    *d++ = a * (start.g * oppAmount + end.g * amount);
-    *d++ = a * (start.b * oppAmount + end.b * amount);
+#ifdef ANDROID_ENABLE_LINEAR_BLENDING
+    // We want to stay linear
+    *d++ = (start.r * oppAmount + end.r * amount);
+    *d++ = (start.g * oppAmount + end.g * amount);
+    *d++ = (start.b * oppAmount + end.b * amount);
+#else
+    *d++ = OECF(start.r * oppAmount + end.r * amount);
+    *d++ = OECF(start.g * oppAmount + end.g * amount);
+    *d++ = OECF(start.b * oppAmount + end.b * amount);
+#endif
     *d++ = a;
-
     dst += 4 * sizeof(float);
 }
 
 void GradientCache::generateTexture(uint32_t* colors, float* positions,
         const uint32_t width, const uint32_t height, Texture* texture) {
-    const GLsizei rowBytes = width * bytesPerPixel();
+    const GLsizei rowBytes = width * sourceBytesPerPixel();
     uint8_t pixels[rowBytes * height];
 
-    static ChannelSplitter gSplitters[] = {
-            &android::uirenderer::GradientCache::splitToBytes,
-            &android::uirenderer::GradientCache::splitToFloats,
-    };
-    ChannelSplitter split = gSplitters[mUseFloatTexture];
-
     static ChannelMixer gMixers[] = {
+            // colors are stored gamma-encoded
             &android::uirenderer::GradientCache::mixBytes,
+            // colors are stored in linear (linear blending on)
+            // or gamma-encoded (linear blending off)
             &android::uirenderer::GradientCache::mixFloats,
     };
     ChannelMixer mix = gMixers[mUseFloatTexture];
 
-    GradientColor start;
-    (this->*split)(colors[0], start);
+    FloatColor start;
+    start.set(colors[0]);
 
-    GradientColor end;
-    (this->*split)(colors[1], end);
+    FloatColor end;
+    end.set(colors[1]);
 
     int currentPos = 1;
     float startPos = positions[0];
@@ -255,7 +247,7 @@ void GradientCache::generateTexture(uint32_t* colors, float* positions,
 
             currentPos++;
 
-            (this->*split)(colors[currentPos], end);
+            end.set(colors[currentPos]);
             distance = positions[currentPos] - startPos;
         }
 
@@ -266,10 +258,10 @@ void GradientCache::generateTexture(uint32_t* colors, float* positions,
     memcpy(pixels + rowBytes, pixels, rowBytes);
 
     if (mUseFloatTexture) {
-        // We have to use GL_RGBA16F because GL_RGBA32F does not support filtering
         texture->upload(GL_RGBA16F, width, height, GL_RGBA, GL_FLOAT, pixels);
     } else {
-        texture->upload(GL_RGBA, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+        GLint internalFormat = mHasLinearBlending ? GL_SRGB8_ALPHA8 : GL_RGBA;
+        texture->upload(internalFormat, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
     }
 
     texture->setFilter(GL_LINEAR);

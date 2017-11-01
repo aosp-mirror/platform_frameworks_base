@@ -14,45 +14,46 @@
  * limitations under the License.
  */
 
-#include "test/Test.h"
 #include "util/Files.h"
 
 #include <sstream>
+
+#include "test/Test.h"
 
 namespace aapt {
 namespace file {
 
 class FilesTest : public ::testing::Test {
-public:
-    void SetUp() override {
-        std::stringstream builder;
-        builder << "hello" << sDirSep << "there";
-        mExpectedPath = builder.str();
-    }
+ public:
+  void SetUp() override {
+    std::stringstream builder;
+    builder << "hello" << sDirSep << "there";
+    expected_path_ = builder.str();
+  }
 
-protected:
-    std::string mExpectedPath;
+ protected:
+  std::string expected_path_;
 };
 
-TEST_F(FilesTest, appendPath) {
-    std::string base = "hello";
-    appendPath(&base, "there");
-    EXPECT_EQ(mExpectedPath, base);
+TEST_F(FilesTest, AppendPath) {
+  std::string base = "hello";
+  AppendPath(&base, "there");
+  EXPECT_EQ(expected_path_, base);
 }
 
-TEST_F(FilesTest, appendPathWithLeadingOrTrailingSeparators) {
-    std::string base = "hello/";
-    appendPath(&base, "there");
-    EXPECT_EQ(mExpectedPath, base);
+TEST_F(FilesTest, AppendPathWithLeadingOrTrailingSeparators) {
+  std::string base = "hello/";
+  AppendPath(&base, "there");
+  EXPECT_EQ(expected_path_, base);
 
-    base = "hello";
-    appendPath(&base, "/there");
-    EXPECT_EQ(mExpectedPath, base);
+  base = "hello";
+  AppendPath(&base, "/there");
+  EXPECT_EQ(expected_path_, base);
 
-    base = "hello/";
-    appendPath(&base, "/there");
-    EXPECT_EQ(mExpectedPath, base);
+  base = "hello/";
+  AppendPath(&base, "/there");
+  EXPECT_EQ(expected_path_, base);
 }
 
-} // namespace files
-} // namespace aapt
+}  // namespace files
+}  // namespace aapt

@@ -31,7 +31,7 @@ import android.support.v7.preference.PreferenceScreen;
 import android.view.MenuItem;
 
 import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.MetricsProto.MetricsEvent;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.DemoMode;
 import com.android.systemui.R;
 
@@ -163,7 +163,7 @@ public class DemoModeFragment extends PreferenceFragment implements OnPreference
         intent.putExtra("sims", "1");
         intent.putExtra("nosim", "false");
         intent.putExtra("level", "4");
-        intent.putExtra("datatypel", "");
+        intent.putExtra("datatype", "lte");
         getContext().sendBroadcast(intent);
 
         // Need to send this after so that the sim controller already exists.

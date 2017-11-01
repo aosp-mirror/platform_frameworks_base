@@ -17,109 +17,50 @@
 #define BITMAP_H_
 
 #include <jni.h>
+#include <android/bitmap.h>
 #include <SkBitmap.h>
 #include <SkColorTable.h>
 #include <SkImageInfo.h>
-#include <utils/Mutex.h>
-#include <memory>
+#include <SkPixelRef.h>
 
 namespace android {
 
-enum class PixelStorageType {
-    Invalid,
-    External,
-    Java,
-    Ashmem,
+class Bitmap;
+
+namespace bitmap {
+
+enum BitmapCreateFlags {
+    kBitmapCreateFlag_None = 0x0,
+    kBitmapCreateFlag_Mutable = 0x1,
+    kBitmapCreateFlag_Premultiplied = 0x2,
 };
 
-class WrappedPixelRef;
+jobject createBitmap(JNIEnv* env, Bitmap* bitmap,
+            int bitmapCreateFlags, jbyteArray ninePatchChunk = NULL,
+            jobject ninePatchInsets = NULL, int density = -1);
 
-typedef void (*FreeFunc)(void* addr, void* context);
 
-/**
- * Glue-thingy that deals with managing the interaction between the Java
- * Bitmap object & SkBitmap along with trying to map a notion of strong/weak
- * lifecycles onto SkPixelRef which only has strong counts to avoid requiring
- * two GC passes to free the byte[] that backs a Bitmap.
- *
- * Since not all Bitmaps are byte[]-backed it also supports external allocations,
- * which currently is used by screenshots to wrap a gralloc buffer.
- */
-class Bitmap {
-public:
-    Bitmap(JNIEnv* env, jbyteArray storageObj, void* address,
-            const SkImageInfo& info, size_t rowBytes, SkColorTable* ctable);
-    Bitmap(void* address, void* context, FreeFunc freeFunc,
-            const SkImageInfo& info, size_t rowBytes, SkColorTable* ctable);
-    Bitmap(void* address, int fd, size_t mappedSize, const SkImageInfo& info,
-            size_t rowBytes, SkColorTable* ctable);
+void toSkBitmap(jlong bitmapHandle, SkBitmap* outBitmap);
 
-    const SkImageInfo& info() const;
+Bitmap& toBitmap(JNIEnv* env, jobject bitmap);
+Bitmap& toBitmap(JNIEnv* env, jlong bitmapHandle);
 
-    // Returns nullptr if it is not backed by a jbyteArray
-    jbyteArray javaByteArray() const {
-        return mPixelStorageType == PixelStorageType::Java
-                ? mPixelStorage.java.jstrongRef : nullptr;
-    }
+// NDK access
+void imageInfo(JNIEnv* env, jobject bitmap, AndroidBitmapInfo* info);
+// Returns a pointer to the pixels or nullptr if the bitmap is not valid
+void* lockPixels(JNIEnv* env, jobject bitmap);
+// Returns true if unlocked, false if the bitmap is no longer valid (destroyed)
+bool unlockPixels(JNIEnv* env, jobject bitmap);
 
-    int width() const { return info().width(); }
-    int height() const { return info().height(); }
-    size_t rowBytes() const;
-    SkPixelRef* peekAtPixelRef() const;
-    SkPixelRef* refPixelRef();
-    bool valid() const { return mPixelStorageType != PixelStorageType::Invalid; }
+/** Reinitialize a bitmap. bitmap must already have its SkAlphaType set in
+    sync with isPremultiplied
+*/
+void reinitBitmap(JNIEnv* env, jobject javaBitmap, const SkImageInfo& info,
+        bool isPremultiplied);
 
-    void reconfigure(const SkImageInfo& info, size_t rowBytes, SkColorTable* ctable);
-    void reconfigure(const SkImageInfo& info);
-    void setAlphaType(SkAlphaType alphaType);
+int getBitmapAllocationByteCount(JNIEnv* env, jobject javaBitmap);
 
-    void getSkBitmap(SkBitmap* outBitmap);
-    void detachFromJava();
-
-    void freePixels();
-
-    bool hasHardwareMipMap();
-    void setHasHardwareMipMap(bool hasMipMap);
-    int getAshmemFd() const;
-
-private:
-    friend class WrappedPixelRef;
-
-    ~Bitmap();
-    void doFreePixels();
-    void onStrongRefDestroyed();
-
-    void pinPixelsLocked();
-    void unpinPixelsLocked();
-    JNIEnv* jniEnv();
-    bool shouldDisposeSelfLocked();
-    void assertValid() const;
-    SkPixelRef* refPixelRefLocked();
-
-    android::Mutex mLock;
-    int mPinnedRefCount = 0;
-    std::unique_ptr<WrappedPixelRef> mPixelRef;
-    PixelStorageType mPixelStorageType;
-    bool mAttachedToJava = true;
-
-    union {
-        struct {
-            void* address;
-            void* context;
-            FreeFunc freeFunc;
-        } external;
-        struct {
-            void* address;
-            int fd;
-            size_t size;
-        } ashmem;
-        struct {
-            JavaVM* jvm;
-            jweak jweakRef;
-            jbyteArray jstrongRef;
-        } java;
-    } mPixelStorage;
-};
+} // namespace bitmap
 
 } // namespace android
 

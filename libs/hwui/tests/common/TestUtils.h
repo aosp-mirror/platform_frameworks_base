@@ -13,36 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef TEST_UTILS_H
-#define TEST_UTILS_H
+
+#pragma once
 
 #include <DeviceInfo.h>
 #include <DisplayList.h>
 #include <Matrix.h>
+#include <Properties.h>
 #include <Rect.h>
 #include <RenderNode.h>
+#include <hwui/Bitmap.h>
+#include <pipeline/skia/SkiaRecordingCanvas.h>
 #include <renderstate/RenderState.h>
 #include <renderthread/RenderThread.h>
 #include <Snapshot.h>
 
-#if HWUI_NEW_OPS
 #include <RecordedOp.h>
 #include <RecordingCanvas.h>
-#else
-#include <DisplayListOp.h>
-#include <DisplayListCanvas.h>
-#endif
 
 #include <memory>
 
 namespace android {
 namespace uirenderer {
-
-#if HWUI_NEW_OPS
-typedef RecordingCanvas TestCanvas;
-#else
-typedef DisplayListCanvas TestCanvas;
-#endif
 
 #define EXPECT_MATRIX_APPROX_EQ(a, b) \
     EXPECT_TRUE(TestUtils::matricesAreApproxEqual(a, b))
@@ -60,6 +52,31 @@ typedef DisplayListCanvas TestCanvas;
         } else { \
             ADD_FAILURE() << "ClipState not a rect"; \
         }
+
+#define INNER_PIPELINE_TEST(test_case_name, test_name, pipeline, functionCall) \
+    TEST(test_case_name, test_name##_##pipeline) { \
+        RenderPipelineType oldType = Properties::getRenderPipelineType(); \
+        Properties::overrideRenderPipelineType(RenderPipelineType::pipeline); \
+        functionCall; \
+        Properties::overrideRenderPipelineType(oldType); \
+    };
+
+/**
+ * Like gtests' TEST, but only runs with the OpenGL RenderPipelineType
+ */
+#define OPENGL_PIPELINE_TEST(test_case_name, test_name) \
+    class test_case_name##_##test_name##_HwuiTest { \
+    public: \
+        static void doTheThing(); \
+    }; \
+    INNER_PIPELINE_TEST(test_case_name, test_name, OpenGL, \
+            test_case_name##_##test_name##_HwuiTest::doTheThing()) \
+    void test_case_name##_##test_name##_HwuiTest::doTheThing()
+
+#define INNER_PIPELINE_RENDERTHREAD_TEST(test_case_name, test_name, pipeline) \
+    INNER_PIPELINE_TEST(test_case_name, test_name, pipeline, \
+            TestUtils::runOnRenderThread(test_case_name##_##test_name##_RenderThreadTest::doTheThing))
+
 /**
  * Like gtest's TEST, but runs on the RenderThread, and 'renderThread' is passed, in top level scope
  * (for e.g. accessing its RenderState)
@@ -69,9 +86,34 @@ typedef DisplayListCanvas TestCanvas;
     public: \
         static void doTheThing(renderthread::RenderThread& renderThread); \
     }; \
-    TEST(test_case_name, test_name) { \
-        TestUtils::runOnRenderThread(test_case_name##_##test_name##_RenderThreadTest::doTheThing); \
+    INNER_PIPELINE_RENDERTHREAD_TEST(test_case_name, test_name, OpenGL); \
+    INNER_PIPELINE_RENDERTHREAD_TEST(test_case_name, test_name, SkiaGL); \
+    /* Temporarily disabling Vulkan until we can figure out a way to stub out the driver */ \
+    /* INNER_PIPELINE_RENDERTHREAD_TEST(test_case_name, test_name, SkiaVulkan); */ \
+    void test_case_name##_##test_name##_RenderThreadTest::doTheThing(renderthread::RenderThread& renderThread)
+
+/**
+ * Like RENDERTHREAD_TEST, but only runs with the OpenGL RenderPipelineType
+ */
+#define RENDERTHREAD_OPENGL_PIPELINE_TEST(test_case_name, test_name) \
+    class test_case_name##_##test_name##_RenderThreadTest { \
+    public: \
+        static void doTheThing(renderthread::RenderThread& renderThread); \
     }; \
+    INNER_PIPELINE_RENDERTHREAD_TEST(test_case_name, test_name, OpenGL); \
+    void test_case_name##_##test_name##_RenderThreadTest::doTheThing(renderthread::RenderThread& renderThread)
+
+/**
+ * Like RENDERTHREAD_TEST, but only runs with the Skia RenderPipelineTypes
+ */
+#define RENDERTHREAD_SKIA_PIPELINE_TEST(test_case_name, test_name) \
+    class test_case_name##_##test_name##_RenderThreadTest { \
+    public: \
+        static void doTheThing(renderthread::RenderThread& renderThread); \
+    }; \
+    INNER_PIPELINE_RENDERTHREAD_TEST(test_case_name, test_name, SkiaGL); \
+    /* Temporarily disabling Vulkan until we can figure out a way to stub out the driver */ \
+    /* INNER_PIPELINE_RENDERTHREAD_TEST(test_case_name, test_name, SkiaVulkan); */ \
     void test_case_name##_##test_name##_RenderThreadTest::doTheThing(renderthread::RenderThread& renderThread)
 
 /**
@@ -116,6 +158,11 @@ public:
         int* mSignal;
     };
 
+    class MockTreeObserver : public TreeObserver {
+    public:
+        virtual void onMaybeRemovedFromTree(RenderNode* node) {}
+    };
+
     static bool matricesAreApproxEqual(const Matrix4& a, const Matrix4& b) {
         for (int i = 0; i < 16; i++) {
             if (!MathUtils::areEqual(a[i], b[i])) {
@@ -127,20 +174,26 @@ public:
 
     static std::unique_ptr<Snapshot> makeSnapshot(const Matrix4& transform, const Rect& clip) {
         std::unique_ptr<Snapshot> snapshot(new Snapshot());
-        snapshot->clip(clip, SkRegion::kReplace_Op); // store clip first, so it isn't transformed
+        // store clip first, so it isn't transformed
+        snapshot->setClip(clip.left, clip.top, clip.right, clip.bottom);
         *(snapshot->transform) = transform;
         return snapshot;
     }
 
-    static SkBitmap createSkBitmap(int width, int height,
+    static sk_sp<Bitmap> createBitmap(int width, int height,
             SkColorType colorType = kN32_SkColorType) {
-        SkBitmap bitmap;
-        SkImageInfo info = SkImageInfo::Make(width, height,
-                colorType, kPremul_SkAlphaType);
-        bitmap.setInfo(info);
-        bitmap.allocPixels(info);
-        return bitmap;
+        SkImageInfo info = SkImageInfo::Make(width, height, colorType, kPremul_SkAlphaType);
+        return Bitmap::allocateHeapBitmap(info);
     }
+
+    static sk_sp<Bitmap> createBitmap(int width, int height, SkBitmap* outBitmap) {
+        SkImageInfo info = SkImageInfo::Make(width, height, kN32_SkColorType, kPremul_SkAlphaType);
+        outBitmap->setInfo(info);
+        return Bitmap::allocateHeapBitmap(outBitmap, nullptr);
+    }
+
+    static sp<DeferredLayerUpdater> createTextureLayerUpdater(
+            renderthread::RenderThread& renderThread);
 
     static sp<DeferredLayerUpdater> createTextureLayerUpdater(
             renderthread::RenderThread& renderThread, uint32_t width, uint32_t height,
@@ -155,7 +208,7 @@ public:
     }
 
     static sp<RenderNode> createNode(int left, int top, int right, int bottom,
-            std::function<void(RenderProperties& props, TestCanvas& canvas)> setup) {
+            std::function<void(RenderProperties& props, Canvas& canvas)> setup) {
 #if HWUI_NULL_GPU
         // if RenderNodes are being sync'd/used, device info will be needed, since
         // DeviceInfo::maxTextureSize() affects layer property
@@ -166,20 +219,71 @@ public:
         RenderProperties& props = node->mutateStagingProperties();
         props.setLeftTopRightBottom(left, top, right, bottom);
         if (setup) {
-            TestCanvas canvas(props.getWidth(), props.getHeight());
+            std::unique_ptr<Canvas> canvas(Canvas::create_recording_canvas(props.getWidth(),
+                    props.getHeight()));
+            setup(props, *canvas.get());
+            node->setStagingDisplayList(canvas->finishRecording());
+        }
+        node->setPropertyFieldsDirty(0xFFFFFFFF);
+        return node;
+    }
+
+    template<class RecordingCanvasType>
+    static sp<RenderNode> createNode(int left, int top, int right, int bottom,
+            std::function<void(RenderProperties& props, RecordingCanvasType& canvas)> setup) {
+#if HWUI_NULL_GPU
+        // if RenderNodes are being sync'd/used, device info will be needed, since
+        // DeviceInfo::maxTextureSize() affects layer property
+        DeviceInfo::initialize();
+#endif
+
+        sp<RenderNode> node = new RenderNode();
+        RenderProperties& props = node->mutateStagingProperties();
+        props.setLeftTopRightBottom(left, top, right, bottom);
+        if (setup) {
+            RecordingCanvasType canvas(props.getWidth(), props.getHeight());
             setup(props, canvas);
-            node->setStagingDisplayList(canvas.finishRecording(), nullptr);
+            node->setStagingDisplayList(canvas.finishRecording());
         }
         node->setPropertyFieldsDirty(0xFFFFFFFF);
         return node;
     }
 
     static void recordNode(RenderNode& node,
-            std::function<void(TestCanvas&)> contentCallback) {
-       TestCanvas canvas(node.stagingProperties().getWidth(),
-               node.stagingProperties().getHeight());
-       contentCallback(canvas);
-       node.setStagingDisplayList(canvas.finishRecording(), nullptr);
+            std::function<void(Canvas&)> contentCallback) {
+       std::unique_ptr<Canvas> canvas(Canvas::create_recording_canvas(
+            node.stagingProperties().getWidth(), node.stagingProperties().getHeight()));
+       contentCallback(*canvas.get());
+       node.setStagingDisplayList(canvas->finishRecording());
+    }
+
+    static sp<RenderNode> createSkiaNode(int left, int top, int right, int bottom,
+            std::function<void(RenderProperties& props, skiapipeline::SkiaRecordingCanvas& canvas)> setup,
+            const char* name = nullptr, skiapipeline::SkiaDisplayList* displayList = nullptr) {
+    #if HWUI_NULL_GPU
+        // if RenderNodes are being sync'd/used, device info will be needed, since
+        // DeviceInfo::maxTextureSize() affects layer property
+        DeviceInfo::initialize();
+    #endif
+        sp<RenderNode> node = new RenderNode();
+        if (name) {
+            node->setName(name);
+        }
+        RenderProperties& props = node->mutateStagingProperties();
+        props.setLeftTopRightBottom(left, top, right, bottom);
+        if (displayList) {
+            node->setStagingDisplayList(displayList);
+        }
+        if (setup) {
+            std::unique_ptr<skiapipeline::SkiaRecordingCanvas> canvas(
+                new skiapipeline::SkiaRecordingCanvas(nullptr,
+                props.getWidth(), props.getHeight()));
+            setup(props, *canvas.get());
+            node->setStagingDisplayList(canvas->finishRecording());
+        }
+        node->setPropertyFieldsDirty(0xFFFFFFFF);
+        TestUtils::syncHierarchyPropertiesAndDisplayList(node);
+        return node;
     }
 
     /**
@@ -235,14 +339,41 @@ public:
 
     static std::unique_ptr<uint16_t[]> asciiToUtf16(const char* str);
 
+    class MockFunctor : public Functor {
+     public:
+         virtual status_t operator ()(int what, void* data) {
+             mLastMode = what;
+             return DrawGlInfo::kStatusDone;
+         }
+         int getLastMode() const { return mLastMode; }
+     private:
+         int mLastMode = -1;
+     };
+
+    static SkColor getColor(const sk_sp<SkSurface>& surface, int x, int y);
+
+    static SkRect getClipBounds(const SkCanvas* canvas);
+    static SkRect getLocalClipBounds(const SkCanvas* canvas);
+
 private:
     static void syncHierarchyPropertiesAndDisplayListImpl(RenderNode* node) {
+        MarkAndSweepRemoved observer(nullptr);
         node->syncProperties();
-        node->syncDisplayList(nullptr);
+        if (node->mNeedsDisplayListSync) {
+            node->mNeedsDisplayListSync = false;
+            node->syncDisplayList(observer, nullptr);
+        }
         auto displayList = node->getDisplayList();
         if (displayList) {
-            for (auto&& childOp : displayList->getChildren()) {
-                syncHierarchyPropertiesAndDisplayListImpl(childOp->renderNode);
+            if (displayList->isSkiaDL()) {
+                for (auto&& childDr : static_cast<skiapipeline::SkiaDisplayList*>(
+                        const_cast<DisplayList*>(displayList))->mChildNodes) {
+                    syncHierarchyPropertiesAndDisplayListImpl(childDr.getRenderNode());
+                }
+            } else {
+                for (auto&& childOp : displayList->getChildren()) {
+                    syncHierarchyPropertiesAndDisplayListImpl(childOp->renderNode);
+                }
             }
         }
     }
@@ -251,5 +382,3 @@ private:
 
 } /* namespace uirenderer */
 } /* namespace android */
-
-#endif /* TEST_UTILS_H */

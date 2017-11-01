@@ -19,6 +19,6 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="car_lockscreen_disclaimer_title" msgid="7997539137376896441">"Карайте внимателно"</string>
-    <string name="car_lockscreen_disclaimer_text" msgid="3061224684092952864">"Бъдете осведомени за условията при шофиране и винаги спазвайте приложимите закони. Упътванията може да са неточни, непълни, опасни, неподходящи, забранени или да включват преминаване през административни райони. Бизнес информацията може също да е неточна или непълна. Данните не са в реално време и точността на местоположението не може да се гарантира. Не работете с мобилното си устройство, нито използвайте приложения, които не са предназначени за Android Auto, докато шофирате."</string>
+    <string name="unknown_user_label" msgid="4323896111737677955">"Няма информация"</string>
+    <string name="start_driving" msgid="864023351402918991">"Започнете да шофирате"</string>
 </resources>

@@ -22,7 +22,8 @@ import android.graphics.Paint;
 import android.graphics.RectF;
 
 /**
- * Defines an oval shape. 
+ * Defines an oval shape.
+ * <p>
  * The oval can be drawn to a Canvas with its own draw() method,
  * but more graphical control is available if you instead pass
  * the OvalShape to a {@link android.graphics.drawable.ShapeDrawable}.
@@ -41,6 +42,11 @@ public class OvalShape extends RectShape {
         final RectF rect = rect();
         outline.setOval((int) Math.ceil(rect.left), (int) Math.ceil(rect.top),
                 (int) Math.floor(rect.right), (int) Math.floor(rect.bottom));
+    }
+
+    @Override
+    public OvalShape clone() throws CloneNotSupportedException {
+        return (OvalShape) super.clone();
     }
 }
 

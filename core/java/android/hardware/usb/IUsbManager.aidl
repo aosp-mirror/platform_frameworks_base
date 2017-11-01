@@ -17,6 +17,7 @@
 package android.hardware.usb;
 
 import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.hardware.usb.UsbAccessory;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbPort;
@@ -114,4 +115,7 @@ interface IUsbManager
 
     /* Sets the port's current role. */
     void setPortRoles(in String portId, int powerRole, int dataRole);
+
+   /* Sets USB device connection handler. */
+   void setUsbDeviceConnectionHandler(in ComponentName usbDeviceConnectionHandler);
 }

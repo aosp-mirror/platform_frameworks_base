@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Copyright 2017, The Android Open Source Project
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+
+<com.android.systemui.statusbar.NotificationSnooze
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:clickable="true"
+    android:background="@color/notification_guts_bg_color"
+    android:theme="@*android:style/Theme.DeviceDefault.Light">
+
+    <RelativeLayout
+        android:id="@+id/notification_snooze"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/snooze_snackbar_min_height">
+
+        <TextView
+            android:id="@+id/snooze_option_default"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:paddingStart="16dp"
+            android:textColor="#DD000000"
+            android:paddingEnd="4dp"/>
+
+        <ImageView
+            android:id="@+id/expand_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@+id/snooze_option_default"
+            android:layout_centerVertical="true"
+            android:paddingTop="1dp"
+            android:tint="#9E9E9E" />
+
+        <TextView
+            android:id="@+id/undo"
+            style="@style/TextAppearance.NotificationInfo.Button"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:layout_marginEnd="8dp"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:text="@string/snooze_undo" />
+    </RelativeLayout>
+
+    <View
+        android:id="@+id/divider"
+        android:layout_width="match_parent"
+        android:layout_height="0.5dp"
+        android:background="#9E9E9E" />
+
+    <LinearLayout
+        android:id="@+id/snooze_options"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingBottom="8dp"
+        android:orientation="vertical" />
+
+</com.android.systemui.statusbar.NotificationSnooze>

@@ -74,6 +74,22 @@ public interface WebViewFactoryProvider {
          * {@link android.webkit.WebChromeClient.FileChooserParams#parseResult(int, Intent)}
          */
         Uri[] parseFileChooserResult(int resultCode, Intent intent);
+
+        /**
+         * Implement the API method
+         * {@link android.webkit.WebView#initSafeBrowsing(Context , ValueCallback<Boolean>)}
+         * @hide
+         */
+        default void initSafeBrowsing(Context context, ValueCallback<Boolean> callback) {
+        }
+
+        /**
+         * Implement the API method
+         * {@link android.webkit.WebView#shutdownSafeBrowsing()}
+         * @hide
+         */
+        default void shutdownSafeBrowsing() {
+        }
     }
 
     Statics getStatics();

@@ -26,7 +26,7 @@
 #include <utils/String8.h>
 
 #include "jni.h"
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 #include "utils/misc.h"
 #include "core_jni_helpers.h"
 #include "android_util_Log.h"
@@ -58,16 +58,7 @@ static jboolean android_util_Log_isLoggable(JNIEnv* env, jobject clazz, jstring 
         return false;
     }
 
-    jboolean result = false;
-    if ((strlen(chars)+sizeof(LOG_NAMESPACE)) > PROPERTY_KEY_MAX) {
-        char buf2[200];
-        snprintf(buf2, sizeof(buf2), "Log tag \"%s\" exceeds limit of %zu characters\n",
-                chars, PROPERTY_KEY_MAX - sizeof(LOG_NAMESPACE));
-
-        jniThrowException(env, "java/lang/IllegalArgumentException", buf2);
-    } else {
-        result = isLoggable(chars, level);
-    }
+    jboolean result = isLoggable(chars, level);
 
     env->ReleaseStringUTFChars(tag, chars);
     return result;

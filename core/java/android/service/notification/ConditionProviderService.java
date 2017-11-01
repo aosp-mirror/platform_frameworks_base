@@ -27,6 +27,7 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Log;
 
@@ -126,6 +127,42 @@ public abstract class ConditionProviderService extends Service {
     }
 
     /**
+     * Request that the provider be rebound, after a previous call to (@link #requestUnbind).
+     *
+     * <p>This method will fail for providers that have not been granted the permission by the user.
+     */
+    public static final void requestRebind(ComponentName componentName) {
+        INotificationManager noMan = INotificationManager.Stub.asInterface(
+                ServiceManager.getService(Context.NOTIFICATION_SERVICE));
+        try {
+            noMan.requestBindProvider(componentName);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Request that the provider service be unbound.
+     *
+     * <p>This will no longer receive subscription updates and will not be able to update the
+     * state of conditions until {@link #requestRebind(ComponentName)} is called.
+     * The service will likely be killed by the system after this call.
+     *
+     * <p>The service should wait for the {@link #onConnected()} event before performing this
+     * operation.
+     */
+    public final void requestUnbind() {
+        INotificationManager noMan = getNotificationInterface();
+        try {
+            noMan.requestUnbindProvider(mProvider);
+            // Disable future messages.
+            mProvider = null;
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Informs the notification manager that the state of a Condition has changed. Use this method
      * to put the system into Do Not Disturb mode or request that it exits Do Not Disturb mode. This
      * call will be ignored unless there is an enabled {@link android.app.AutomaticZenRule} owned by
@@ -193,6 +230,9 @@ public abstract class ConditionProviderService extends Service {
         @Override
         public void handleMessage(Message msg) {
             String name = null;
+            if (!isBound()) {
+                return;
+            }
             try {
                 switch(msg.what) {
                     case ON_CONNECTED:

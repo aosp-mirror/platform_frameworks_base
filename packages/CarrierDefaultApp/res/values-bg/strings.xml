@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="5247871339820894594">"CarrierDefaultApp"</string>
+    <string name="android_system_label" msgid="2797790869522345065">"Мобилен оператор"</string>
+    <string name="portal_notification_id" msgid="5155057562457079297">"Мобилните данни са изразходвани"</string>
+    <string name="no_data_notification_id" msgid="668400731803969521">"Мобилните ви данни са деактивирани"</string>
+    <string name="portal_notification_detail" msgid="2295729385924660881">"Докоснете, за да посетите уебсайта на %s"</string>
+    <string name="no_data_notification_detail" msgid="3112125343857014825">"Моля, свържете се с доставчика си на услуги %s"</string>
+    <string name="no_mobile_data_connection_title" msgid="7449525772416200578">"Няма мобилна връзка за данни"</string>
+    <string name="no_mobile_data_connection" msgid="544980465184147010">"Добавете план за пренос на данни или за роуминг чрез %s"</string>
+    <string name="mobile_data_status_notification_channel_name" msgid="833999690121305708">"Състояние на мобилните данни"</string>
+    <string name="action_bar_label" msgid="4290345990334377177">"Вход в мобилна мрежа"</string>
+    <string name="ssl_error_warning" msgid="3127935140338254180">"Мрежата, към която опитвате да се присъедините, има проблеми със сигурността."</string>
+    <string name="ssl_error_example" msgid="6188711843183058764">"Например страницата за вход може да не принадлежи на показаната организация."</string>
+    <string name="ssl_error_continue" msgid="1138548463994095584">"Продължаване през браузър въпреки това"</string>
+</resources>

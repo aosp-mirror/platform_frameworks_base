@@ -20,19 +20,26 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageParser;
-import android.os.Environment;
+import android.os.FileUtils;
 import android.os.PowerManager;
+import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.WorkSource;
 import android.util.Log;
 import android.util.Slog;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.pm.Installer.InstallerException;
+import com.android.server.pm.dex.DexoptOptions;
+import com.android.server.pm.dex.DexoptUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import dalvik.system.DexFile;
 
@@ -40,25 +47,40 @@ import static com.android.server.pm.Installer.DEXOPT_BOOTCOMPLETE;
 import static com.android.server.pm.Installer.DEXOPT_DEBUGGABLE;
 import static com.android.server.pm.Installer.DEXOPT_PROFILE_GUIDED;
 import static com.android.server.pm.Installer.DEXOPT_PUBLIC;
-import static com.android.server.pm.Installer.DEXOPT_SAFEMODE;
+import static com.android.server.pm.Installer.DEXOPT_SECONDARY_DEX;
+import static com.android.server.pm.Installer.DEXOPT_FORCE;
+import static com.android.server.pm.Installer.DEXOPT_STORAGE_CE;
+import static com.android.server.pm.Installer.DEXOPT_STORAGE_DE;
 import static com.android.server.pm.InstructionSets.getAppDexInstructionSets;
 import static com.android.server.pm.InstructionSets.getDexCodeInstructionSets;
-import static com.android.server.pm.PackageManagerServiceCompilerMapping.getNonProfileGuidedCompilerFilter;
+
+import static com.android.server.pm.PackageManagerService.WATCHDOG_TIMEOUT;
+
+import static dalvik.system.DexFile.getNonProfileGuidedCompilerFilter;
+import static dalvik.system.DexFile.getSafeModeCompilerFilter;
+import static dalvik.system.DexFile.isProfileGuidedCompilerFilter;
 
 /**
  * Helper class for running dexopt command on packages.
  */
-class PackageDexOptimizer {
+public class PackageDexOptimizer {
     private static final String TAG = "PackageManager.DexOptimizer";
     static final String OAT_DIR_NAME = "oat";
     // TODO b/19550105 Remove error codes and use exceptions
-    static final int DEX_OPT_SKIPPED = 0;
-    static final int DEX_OPT_PERFORMED = 1;
-    static final int DEX_OPT_FAILED = -1;
+    public static final int DEX_OPT_SKIPPED = 0;
+    public static final int DEX_OPT_PERFORMED = 1;
+    public static final int DEX_OPT_FAILED = -1;
+    // One minute over PM WATCHDOG_TIMEOUT
+    private static final long WAKELOCK_TIMEOUT_MS = WATCHDOG_TIMEOUT + 1000 * 60;
 
+    /** Special library name that skips shared libraries check during compilation. */
+    public static final String SKIP_SHARED_LIBRARY_CHECK = "&";
+
+    @GuardedBy("mInstallLock")
     private final Installer mInstaller;
     private final Object mInstallLock;
 
+    @GuardedBy("mInstallLock")
     private final PowerManager.WakeLock mDexoptWakeLock;
     private volatile boolean mSystemReady;
 
@@ -79,7 +101,17 @@ class PackageDexOptimizer {
     }
 
     static boolean canOptimizePackage(PackageParser.Package pkg) {
-        return (pkg.applicationInfo.flags & ApplicationInfo.FLAG_HAS_CODE) != 0;
+        // We do not dexopt a package with no code.
+        if ((pkg.applicationInfo.flags & ApplicationInfo.FLAG_HAS_CODE) == 0) {
+            return false;
+        }
+
+        // We do not dexopt a priv-app package when pm.dexopt.priv-apps is false.
+        if (pkg.isPrivilegedApp()) {
+            return SystemProperties.getBoolean("pm.dexopt.priv-apps", true);
+        }
+
+        return true;
     }
 
     /**
@@ -90,22 +122,233 @@ class PackageDexOptimizer {
      * synchronized on {@link #mInstallLock}.
      */
     int performDexOpt(PackageParser.Package pkg, String[] sharedLibraries,
-            String[] instructionSets, boolean checkProfiles, String targetCompilationFilter,
-            CompilerStats.PackageStats packageStats) {
+            String[] instructionSets, CompilerStats.PackageStats packageStats,
+            boolean isUsedByOtherApps, DexoptOptions options) {
+        if (!canOptimizePackage(pkg)) {
+            return DEX_OPT_SKIPPED;
+        }
         synchronized (mInstallLock) {
-            final boolean useLock = mSystemReady;
-            if (useLock) {
-                mDexoptWakeLock.setWorkSource(new WorkSource(pkg.applicationInfo.uid));
-                mDexoptWakeLock.acquire();
-            }
+            final long acquireTime = acquireWakeLockLI(pkg.applicationInfo.uid);
             try {
-                return performDexOptLI(pkg, sharedLibraries, instructionSets, checkProfiles,
-                        targetCompilationFilter, packageStats);
+                return performDexOptLI(pkg, sharedLibraries, instructionSets,
+                        packageStats, isUsedByOtherApps, options);
             } finally {
-                if (useLock) {
-                    mDexoptWakeLock.release();
+                releaseWakeLockLI(acquireTime);
+            }
+        }
+    }
+
+    /**
+     * Performs dexopt on all code paths of the given package.
+     * It assumes the install lock is held.
+     */
+    @GuardedBy("mInstallLock")
+    private int performDexOptLI(PackageParser.Package pkg, String[] sharedLibraries,
+            String[] targetInstructionSets, CompilerStats.PackageStats packageStats,
+            boolean isUsedByOtherApps, DexoptOptions options) {
+        final String[] instructionSets = targetInstructionSets != null ?
+                targetInstructionSets : getAppDexInstructionSets(pkg.applicationInfo);
+        final String[] dexCodeInstructionSets = getDexCodeInstructionSets(instructionSets);
+        final List<String> paths = pkg.getAllCodePaths();
+        final int sharedGid = UserHandle.getSharedAppGid(pkg.applicationInfo.uid);
+
+        final String compilerFilter = getRealCompilerFilter(pkg.applicationInfo,
+                options.getCompilerFilter(), isUsedByOtherApps);
+        final boolean profileUpdated = options.isCheckForProfileUpdates() &&
+                isProfileUpdated(pkg, sharedGid, compilerFilter);
+
+        // Get the dexopt flags after getRealCompilerFilter to make sure we get the correct flags.
+        final int dexoptFlags = getDexFlags(pkg, compilerFilter, options.isBootComplete());
+
+        // Get the class loader context dependencies.
+        // For each code path in the package, this array contains the class loader context that
+        // needs to be passed to dexopt in order to ensure correct optimizations.
+        String[] classLoaderContexts = DexoptUtils.getClassLoaderContexts(
+                pkg.applicationInfo, sharedLibraries);
+
+        int result = DEX_OPT_SKIPPED;
+        for (int i = 0; i < paths.size(); i++) {
+            // Skip paths that have no code.
+            if ((i == 0 && (pkg.applicationInfo.flags & ApplicationInfo.FLAG_HAS_CODE) == 0) ||
+                    (i != 0 && (pkg.splitFlags[i - 1] & ApplicationInfo.FLAG_HAS_CODE) == 0)) {
+                continue;
+            }
+            // Append shared libraries with split dependencies for this split.
+            String path = paths.get(i);
+            if (options.getSplitName() != null) {
+                // We are asked to compile only a specific split. Check that the current path is
+                // what we are looking for.
+                if (!options.getSplitName().equals(new File(path).getName())) {
+                    continue;
                 }
             }
+
+            for (String dexCodeIsa : dexCodeInstructionSets) {
+                int newResult = dexOptPath(pkg, path, dexCodeIsa, compilerFilter,
+                        profileUpdated, classLoaderContexts[i], dexoptFlags, sharedGid,
+                        packageStats, options.isDowngrade());
+                // The end result is:
+                //  - FAILED if any path failed,
+                //  - PERFORMED if at least one path needed compilation,
+                //  - SKIPPED when all paths are up to date
+                if ((result != DEX_OPT_FAILED) && (newResult != DEX_OPT_SKIPPED)) {
+                    result = newResult;
+                }
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Performs dexopt on the {@code path} belonging to the package {@code pkg}.
+     *
+     * @return
+     *      DEX_OPT_FAILED if there was any exception during dexopt
+     *      DEX_OPT_PERFORMED if dexopt was performed successfully on the given path.
+     *      DEX_OPT_SKIPPED if the path does not need to be deopt-ed.
+     */
+    @GuardedBy("mInstallLock")
+    private int dexOptPath(PackageParser.Package pkg, String path, String isa,
+            String compilerFilter, boolean profileUpdated, String classLoaderContext,
+            int dexoptFlags, int uid, CompilerStats.PackageStats packageStats, boolean downgrade) {
+        int dexoptNeeded = getDexoptNeeded(path, isa, compilerFilter, classLoaderContext,
+                profileUpdated, downgrade);
+        if (Math.abs(dexoptNeeded) == DexFile.NO_DEXOPT_NEEDED) {
+            return DEX_OPT_SKIPPED;
+        }
+
+        // TODO(calin): there's no need to try to create the oat dir over and over again,
+        //              especially since it involve an extra installd call. We should create
+        //              if (if supported) on the fly during the dexopt call.
+        String oatDir = createOatDirIfSupported(pkg, isa);
+
+        Log.i(TAG, "Running dexopt (dexoptNeeded=" + dexoptNeeded + ") on: " + path
+                + " pkg=" + pkg.applicationInfo.packageName + " isa=" + isa
+                + " dexoptFlags=" + printDexoptFlags(dexoptFlags)
+                + " targetFilter=" + compilerFilter + " oatDir=" + oatDir
+                + " classLoaderContext=" + classLoaderContext);
+
+        try {
+            long startTime = System.currentTimeMillis();
+
+            // TODO: Consider adding 2 different APIs for primary and secondary dexopt.
+            // installd only uses downgrade flag for secondary dex files and ignores it for
+            // primary dex files.
+            mInstaller.dexopt(path, uid, pkg.packageName, isa, dexoptNeeded, oatDir, dexoptFlags,
+                    compilerFilter, pkg.volumeUuid, classLoaderContext, pkg.applicationInfo.seInfo,
+                    false /* downgrade*/);
+
+            if (packageStats != null) {
+                long endTime = System.currentTimeMillis();
+                packageStats.setCompileTime(path, (int)(endTime - startTime));
+            }
+            return DEX_OPT_PERFORMED;
+        } catch (InstallerException e) {
+            Slog.w(TAG, "Failed to dexopt", e);
+            return DEX_OPT_FAILED;
+        }
+    }
+
+    /**
+     * Performs dexopt on the secondary dex {@code path} belonging to the app {@code info}.
+     *
+     * @return
+     *      DEX_OPT_FAILED if there was any exception during dexopt
+     *      DEX_OPT_PERFORMED if dexopt was performed successfully on the given path.
+     * NOTE that DEX_OPT_PERFORMED for secondary dex files includes the case when the dex file
+     * didn't need an update. That's because at the moment we don't get more than success/failure
+     * from installd.
+     *
+     * TODO(calin): Consider adding return codes to installd dexopt invocation (rather than
+     * throwing exceptions). Or maybe make a separate call to installd to get DexOptNeeded, though
+     * that seems wasteful.
+     */
+    public int dexOptSecondaryDexPath(ApplicationInfo info, String path, Set<String> isas,
+            String compilerFilter, boolean isUsedByOtherApps, boolean downgrade) {
+        synchronized (mInstallLock) {
+            final long acquireTime = acquireWakeLockLI(info.uid);
+            try {
+                return dexOptSecondaryDexPathLI(info, path, isas, compilerFilter,
+                        isUsedByOtherApps, downgrade);
+            } finally {
+                releaseWakeLockLI(acquireTime);
+            }
+        }
+    }
+
+    @GuardedBy("mInstallLock")
+    private long acquireWakeLockLI(final int uid) {
+        // During boot the system doesn't need to instantiate and obtain a wake lock.
+        // PowerManager might not be ready, but that doesn't mean that we can't proceed with
+        // dexopt.
+        if (!mSystemReady) {
+            return -1;
+        }
+        mDexoptWakeLock.setWorkSource(new WorkSource(uid));
+        mDexoptWakeLock.acquire(WAKELOCK_TIMEOUT_MS);
+        return SystemClock.elapsedRealtime();
+    }
+
+    @GuardedBy("mInstallLock")
+    private void releaseWakeLockLI(final long acquireTime) {
+        if (acquireTime < 0) {
+            return;
+        }
+        try {
+            if (mDexoptWakeLock.isHeld()) {
+                mDexoptWakeLock.release();
+            }
+            final long duration = SystemClock.elapsedRealtime() - acquireTime;
+            if (duration >= WAKELOCK_TIMEOUT_MS) {
+                Slog.wtf(TAG, "WakeLock " + mDexoptWakeLock.getTag()
+                        + " time out. Operation took " + duration + " ms. Thread: "
+                        + Thread.currentThread().getName());
+            }
+        } catch (Exception e) {
+            Slog.wtf(TAG, "Error while releasing " + mDexoptWakeLock.getTag() + " lock", e);
+        }
+    }
+
+    @GuardedBy("mInstallLock")
+    private int dexOptSecondaryDexPathLI(ApplicationInfo info, String path, Set<String> isas,
+            String compilerFilter, boolean isUsedByOtherApps, boolean downgrade) {
+        compilerFilter = getRealCompilerFilter(info, compilerFilter, isUsedByOtherApps);
+        // Get the dexopt flags after getRealCompilerFilter to make sure we get the correct flags.
+        // Secondary dex files are currently not compiled at boot.
+        int dexoptFlags = getDexFlags(info, compilerFilter, /* bootComplete */ true)
+                | DEXOPT_SECONDARY_DEX;
+        // Check the app storage and add the appropriate flags.
+        if (info.deviceProtectedDataDir != null &&
+                FileUtils.contains(info.deviceProtectedDataDir, path)) {
+            dexoptFlags |= DEXOPT_STORAGE_DE;
+        } else if (info.credentialProtectedDataDir != null &&
+                FileUtils.contains(info.credentialProtectedDataDir, path)) {
+            dexoptFlags |= DEXOPT_STORAGE_CE;
+        } else {
+            Slog.e(TAG, "Could not infer CE/DE storage for package " + info.packageName);
+            return DEX_OPT_FAILED;
+        }
+        Log.d(TAG, "Running dexopt on: " + path
+                + " pkg=" + info.packageName + " isa=" + isas
+                + " dexoptFlags=" + printDexoptFlags(dexoptFlags)
+                + " target-filter=" + compilerFilter);
+
+        try {
+            for (String isa : isas) {
+                // Reuse the same dexopt path as for the primary apks. We don't need all the
+                // arguments as some (dexopNeeded and oatDir) will be computed by installd because
+                // system server cannot read untrusted app content.
+                // TODO(calin): maybe add a separate call.
+                mInstaller.dexopt(path, info.uid, info.packageName, isa, /*dexoptNeeded*/ 0,
+                        /*oatDir*/ null, dexoptFlags,
+                        compilerFilter, info.volumeUuid, SKIP_SHARED_LIBRARY_CHECK, info.seInfoUser,
+                        downgrade);
+            }
+
+            return DEX_OPT_PERFORMED;
+        } catch (InstallerException e) {
+            Slog.w(TAG, "Failed to dexopt", e);
+            return DEX_OPT_FAILED;
         }
     }
 
@@ -150,136 +393,93 @@ class PackageDexOptimizer {
         }
     }
 
-    private int performDexOptLI(PackageParser.Package pkg, String[] sharedLibraries,
-            String[] targetInstructionSets, boolean checkProfiles, String targetCompilerFilter,
-            CompilerStats.PackageStats packageStats) {
-        final String[] instructionSets = targetInstructionSets != null ?
-                targetInstructionSets : getAppDexInstructionSets(pkg.applicationInfo);
-
-        if (!canOptimizePackage(pkg)) {
-            return DEX_OPT_SKIPPED;
-        }
-
-        final List<String> paths = pkg.getAllCodePathsExcludingResourceOnly();
-        final int sharedGid = UserHandle.getSharedAppGid(pkg.applicationInfo.uid);
-
-        boolean isProfileGuidedFilter = DexFile.isProfileGuidedCompilerFilter(targetCompilerFilter);
-        // If any part of the app is used by other apps, we cannot use profile-guided
-        // compilation.
-        if (isProfileGuidedFilter && isUsedByOtherApps(pkg)) {
-            checkProfiles = false;
-
-            targetCompilerFilter = getNonProfileGuidedCompilerFilter(targetCompilerFilter);
-            if (DexFile.isProfileGuidedCompilerFilter(targetCompilerFilter)) {
-                throw new IllegalStateException(targetCompilerFilter);
-            }
-            isProfileGuidedFilter = false;
-        }
-
-        // Disable profile guided compilation for vmSafeMode.
-        final boolean vmSafeMode = (pkg.applicationInfo.flags & ApplicationInfo.FLAG_VM_SAFE_MODE)
-                != 0;
-        final boolean debuggable = (pkg.applicationInfo.flags & ApplicationInfo.FLAG_DEBUGGABLE)
-                != 0;
+    /**
+     * Returns the compiler filter that should be used to optimize the package code.
+     * The target filter will be updated if the package code is used by other apps
+     * or if it has the safe mode flag set.
+     */
+    private String getRealCompilerFilter(ApplicationInfo info, String targetCompilerFilter,
+            boolean isUsedByOtherApps) {
+        int flags = info.flags;
+        boolean vmSafeMode = (flags & ApplicationInfo.FLAG_VM_SAFE_MODE) != 0;
         if (vmSafeMode) {
-            targetCompilerFilter = getNonProfileGuidedCompilerFilter(targetCompilerFilter);
-            isProfileGuidedFilter = false;
+            return getSafeModeCompilerFilter(targetCompilerFilter);
         }
 
-        // If we're asked to take profile updates into account, check now.
-        boolean newProfile = false;
-        if (checkProfiles && isProfileGuidedFilter) {
-            // Merge profiles, see if we need to do anything.
-            try {
-                newProfile = mInstaller.mergeProfiles(sharedGid, pkg.packageName);
-            } catch (InstallerException e) {
-                Slog.w(TAG, "Failed to merge profiles", e);
-            }
+        if (isProfileGuidedCompilerFilter(targetCompilerFilter) && isUsedByOtherApps) {
+            // If the dex files is used by other apps, we cannot use profile-guided compilation.
+            return getNonProfileGuidedCompilerFilter(targetCompilerFilter);
         }
 
-        boolean performedDexOpt = false;
-        boolean successfulDexOpt = true;
-
-        final String[] dexCodeInstructionSets = getDexCodeInstructionSets(instructionSets);
-        for (String dexCodeInstructionSet : dexCodeInstructionSets) {
-            for (String path : paths) {
-                int dexoptNeeded;
-                try {
-                    dexoptNeeded = DexFile.getDexOptNeeded(path,
-                            dexCodeInstructionSet, targetCompilerFilter, newProfile);
-                } catch (IOException ioe) {
-                    Slog.w(TAG, "IOException reading apk: " + path, ioe);
-                    return DEX_OPT_FAILED;
-                }
-                dexoptNeeded = adjustDexoptNeeded(dexoptNeeded);
-                if (PackageManagerService.DEBUG_DEXOPT) {
-                    Log.i(TAG, "DexoptNeeded for " + path + "@" + targetCompilerFilter + " is " +
-                            dexoptNeeded);
-                }
-
-                if (dexoptNeeded == DexFile.NO_DEXOPT_NEEDED) {
-                    continue;
-                }
-
-                String oatDir = createOatDirIfSupported(pkg, dexCodeInstructionSet);
-                String sharedLibrariesPath = null;
-                if (sharedLibraries != null && sharedLibraries.length != 0) {
-                    StringBuilder sb = new StringBuilder();
-                    for (String lib : sharedLibraries) {
-                        if (sb.length() != 0) {
-                            sb.append(":");
-                        }
-                        sb.append(lib);
-                    }
-                    sharedLibrariesPath = sb.toString();
-                }
-                Log.i(TAG, "Running dexopt on: " + path + " pkg="
-                        + pkg.applicationInfo.packageName + " isa=" + dexCodeInstructionSet
-                        + " vmSafeMode=" + vmSafeMode + " debuggable=" + debuggable
-                        + " target-filter=" + targetCompilerFilter + " oatDir = " + oatDir
-                        + " sharedLibraries=" + sharedLibrariesPath);
-                // Profile guide compiled oat files should not be public.
-                final boolean isPublic = !pkg.isForwardLocked() && !isProfileGuidedFilter;
-                final int profileFlag = isProfileGuidedFilter ? DEXOPT_PROFILE_GUIDED : 0;
-                final int dexFlags = adjustDexoptFlags(
-                        ( isPublic ? DEXOPT_PUBLIC : 0)
-                        | (vmSafeMode ? DEXOPT_SAFEMODE : 0)
-                        | (debuggable ? DEXOPT_DEBUGGABLE : 0)
-                        | profileFlag
-                        | DEXOPT_BOOTCOMPLETE);
-
-                try {
-                    long startTime = System.currentTimeMillis();
-
-                    mInstaller.dexopt(path, sharedGid, pkg.packageName, dexCodeInstructionSet,
-                            dexoptNeeded, oatDir, dexFlags, targetCompilerFilter, pkg.volumeUuid,
-                            sharedLibrariesPath);
-                    performedDexOpt = true;
-
-                    if (packageStats != null) {
-                        long endTime = System.currentTimeMillis();
-                        packageStats.setCompileTime(path, (int)(endTime - startTime));
-                    }
-                } catch (InstallerException e) {
-                    Slog.w(TAG, "Failed to dexopt", e);
-                    successfulDexOpt = false;
-                }
-            }
-        }
-
-        if (successfulDexOpt) {
-            // If we've gotten here, we're sure that no error occurred. We've either
-            // dex-opted one or more paths or instruction sets or we've skipped
-            // all of them because they are up to date. In both cases this package
-            // doesn't need dexopt any longer.
-            return performedDexOpt ? DEX_OPT_PERFORMED : DEX_OPT_SKIPPED;
-        } else {
-            return DEX_OPT_FAILED;
-        }
+        return targetCompilerFilter;
     }
 
     /**
-     * Creates oat dir for the specified package. In certain cases oat directory
+     * Computes the dex flags that needs to be pass to installd for the given package and compiler
+     * filter.
+     */
+    private int getDexFlags(PackageParser.Package pkg, String compilerFilter,
+            boolean bootComplete) {
+        return getDexFlags(pkg.applicationInfo, compilerFilter, bootComplete);
+    }
+
+    private int getDexFlags(ApplicationInfo info, String compilerFilter, boolean bootComplete) {
+        int flags = info.flags;
+        boolean debuggable = (flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
+        // Profile guide compiled oat files should not be public.
+        boolean isProfileGuidedFilter = isProfileGuidedCompilerFilter(compilerFilter);
+        boolean isPublic = !info.isForwardLocked() && !isProfileGuidedFilter;
+        int profileFlag = isProfileGuidedFilter ? DEXOPT_PROFILE_GUIDED : 0;
+        int dexFlags =
+                (isPublic ? DEXOPT_PUBLIC : 0)
+                | (debuggable ? DEXOPT_DEBUGGABLE : 0)
+                | profileFlag
+                | (bootComplete ? DEXOPT_BOOTCOMPLETE : 0);
+        return adjustDexoptFlags(dexFlags);
+    }
+
+    /**
+     * Assesses if there's a need to perform dexopt on {@code path} for the given
+     * configuration (isa, compiler filter, profile).
+     */
+    private int getDexoptNeeded(String path, String isa, String compilerFilter,
+            String classLoaderContext, boolean newProfile, boolean downgrade) {
+        int dexoptNeeded;
+        try {
+            dexoptNeeded = DexFile.getDexOptNeeded(path, isa, compilerFilter, classLoaderContext,
+                    newProfile, downgrade);
+        } catch (IOException ioe) {
+            Slog.w(TAG, "IOException reading apk: " + path, ioe);
+            return DEX_OPT_FAILED;
+        }
+        return adjustDexoptNeeded(dexoptNeeded);
+    }
+
+    /**
+     * Checks if there is an update on the profile information of the {@code pkg}.
+     * If the compiler filter is not profile guided the method returns false.
+     *
+     * Note that this is a "destructive" operation with side effects. Under the hood the
+     * current profile and the reference profile will be merged and subsequent calls
+     * may return a different result.
+     */
+    private boolean isProfileUpdated(PackageParser.Package pkg, int uid, String compilerFilter) {
+        // Check if we are allowed to merge and if the compiler filter is profile guided.
+        if (!isProfileGuidedCompilerFilter(compilerFilter)) {
+            return false;
+        }
+        // Merge profiles. It returns whether or not there was an updated in the profile info.
+        try {
+            return mInstaller.mergeProfiles(uid, pkg.packageName);
+        } catch (InstallerException e) {
+            Slog.w(TAG, "Failed to merge profiles", e);
+        }
+        return false;
+    }
+
+    /**
+     * Creates oat dir for the specified package if needed and supported.
+     * In certain cases oat directory
      * <strong>cannot</strong> be created:
      * <ul>
      *      <li>{@code pkg} is a system app, which is not updated.</li>
@@ -296,6 +496,9 @@ class PackageDexOptimizer {
         }
         File codePath = new File(pkg.codePath);
         if (codePath.isDirectory()) {
+            // TODO(calin): why do we create this only if the codePath is a directory? (i.e for
+            //              cluster packages). It seems that the logic for the folder creation is
+            //              split between installd and here.
             File oatDir = getOatDir(codePath);
             try {
                 mInstaller.createOatDir(oatDir.getAbsolutePath(), dexInstructionSet);
@@ -316,38 +519,35 @@ class PackageDexOptimizer {
         mSystemReady = true;
     }
 
-    /**
-     * Returns true if the profiling data collected for the given app indicate
-     * that the apps's APK has been loaded by another app.
-     * Note that this returns false for all forward-locked apps and apps without
-     * any collected profiling data.
-     */
-    public static boolean isUsedByOtherApps(PackageParser.Package pkg) {
-        if (pkg.isForwardLocked()) {
-            // Skip the check for forward locked packages since they don't share their code.
-            return false;
+    private String printDexoptFlags(int flags) {
+        ArrayList<String> flagsList = new ArrayList<>();
+
+        if ((flags & DEXOPT_BOOTCOMPLETE) == DEXOPT_BOOTCOMPLETE) {
+            flagsList.add("boot_complete");
+        }
+        if ((flags & DEXOPT_DEBUGGABLE) == DEXOPT_DEBUGGABLE) {
+            flagsList.add("debuggable");
+        }
+        if ((flags & DEXOPT_PROFILE_GUIDED) == DEXOPT_PROFILE_GUIDED) {
+            flagsList.add("profile_guided");
+        }
+        if ((flags & DEXOPT_PUBLIC) == DEXOPT_PUBLIC) {
+            flagsList.add("public");
+        }
+        if ((flags & DEXOPT_SECONDARY_DEX) == DEXOPT_SECONDARY_DEX) {
+            flagsList.add("secondary");
+        }
+        if ((flags & DEXOPT_FORCE) == DEXOPT_FORCE) {
+            flagsList.add("force");
+        }
+        if ((flags & DEXOPT_STORAGE_CE) == DEXOPT_STORAGE_CE) {
+            flagsList.add("storage_ce");
+        }
+        if ((flags & DEXOPT_STORAGE_DE) == DEXOPT_STORAGE_DE) {
+            flagsList.add("storage_de");
         }
 
-        for (String apkPath : pkg.getAllCodePathsExcludingResourceOnly()) {
-            try {
-                apkPath = PackageManagerServiceUtils.realpath(new File(apkPath));
-            } catch (IOException e) {
-                // Log an error but continue without it.
-                Slog.w(TAG, "Failed to get canonical path", e);
-                continue;
-            }
-            String useMarker = apkPath.replace('/', '@');
-            final int[] currentUserIds = UserManagerService.getInstance().getUserIds();
-            for (int i = 0; i < currentUserIds.length; i++) {
-                File profileDir =
-                        Environment.getDataProfilesDeForeignDexDirectory(currentUserIds[i]);
-                File foreignUseMark = new File(profileDir, useMarker);
-                if (foreignUseMark.exists()) {
-                    return true;
-                }
-            }
-        }
-        return false;
+        return String.join(",", flagsList);
     }
 
     /**
@@ -367,9 +567,20 @@ class PackageDexOptimizer {
 
         @Override
         protected int adjustDexoptNeeded(int dexoptNeeded) {
-            // Ensure compilation, no matter the current state.
-            // TODO: The return value is wrong when patchoat is needed.
-            return DexFile.DEX2OAT_FROM_SCRATCH;
+            if (dexoptNeeded == DexFile.NO_DEXOPT_NEEDED) {
+                // Ensure compilation by pretending a compiler filter change on the
+                // apk/odex location (the reason for the '-'. A positive value means
+                // the 'oat' location).
+                return -DexFile.DEX2OAT_FOR_FILTER;
+            }
+            return dexoptNeeded;
+        }
+
+        @Override
+        protected int adjustDexoptFlags(int flags) {
+            // Add DEXOPT_FORCE flag to signal installd that it should force compilation
+            // and discard dexoptanalyzer result.
+            return flags | DEXOPT_FORCE;
         }
     }
 }

@@ -208,6 +208,11 @@ final class RemoteConnectionService {
         }
 
         @Override
+        public void onPhoneAccountChanged(String callId, PhoneAccountHandle pHandle,
+                Session.Info sessionInfo) {
+        }
+
+        @Override
         public void addConferenceCall(
                 final String callId, ParcelableConference parcel, Session.Info sessionInfo) {
             RemoteConference conference = new RemoteConference(callId,
@@ -219,18 +224,27 @@ final class RemoteConnectionService {
                     conference.addConnection(c);
                 }
             }
-
             if (conference.getConnections().size() == 0) {
                 // A conference was created, but none of its connections are ones that have been
                 // created by, and therefore being tracked by, this remote connection service. It
                 // is of no interest to us.
+                Log.d(this, "addConferenceCall - skipping");
                 return;
             }
 
             conference.setState(parcel.getState());
             conference.setConnectionCapabilities(parcel.getConnectionCapabilities());
             conference.setConnectionProperties(parcel.getConnectionProperties());
+            conference.putExtras(parcel.getExtras());
             mConferenceById.put(callId, conference);
+
+            // Stash the original connection ID as it exists in the source ConnectionService.
+            // Telecom will use this to avoid adding duplicates later.
+            // See comments on Connection.EXTRA_ORIGINAL_CONNECTION_ID for more information.
+            Bundle newExtras = new Bundle();
+            newExtras.putString(Connection.EXTRA_ORIGINAL_CONNECTION_ID, callId);
+            conference.putExtras(newExtras);
+
             conference.registerCallback(new RemoteConference.Callback() {
                 @Override
                 public void onDestroyed(RemoteConference c) {
@@ -274,9 +288,14 @@ final class RemoteConnectionService {
         @Override
         public void setVideoProvider(String callId, IVideoProvider videoProvider,
                 Session.Info sessionInfo) {
+
+            String callingPackage = mOurConnectionServiceImpl.getApplicationContext()
+                    .getOpPackageName();
+            int targetSdkVersion = mOurConnectionServiceImpl.getApplicationInfo().targetSdkVersion;
             RemoteConnection.VideoProvider remoteVideoProvider = null;
             if (videoProvider != null) {
-                remoteVideoProvider = new RemoteConnection.VideoProvider(videoProvider);
+                remoteVideoProvider = new RemoteConnection.VideoProvider(videoProvider,
+                        callingPackage, targetSdkVersion);
             }
             findConnectionForAction(callId, "setVideoProvider")
                     .setVideoProvider(remoteVideoProvider);
@@ -342,11 +361,22 @@ final class RemoteConnectionService {
         @Override
         public void addExistingConnection(String callId, ParcelableConnection connection,
                 Session.Info sessionInfo) {
-            // TODO: add contents of this method
-            RemoteConnection remoteConnction = new RemoteConnection(callId,
-                    mOutgoingConnectionServiceRpc, connection);
-
-            mOurConnectionServiceImpl.addRemoteExistingConnection(remoteConnction);
+            String callingPackage = mOurConnectionServiceImpl.getApplicationContext().
+                    getOpPackageName();
+            int callingTargetSdkVersion = mOurConnectionServiceImpl.getApplicationInfo()
+                    .targetSdkVersion;
+            RemoteConnection remoteConnection = new RemoteConnection(callId,
+                    mOutgoingConnectionServiceRpc, connection, callingPackage,
+                    callingTargetSdkVersion);
+            mConnectionById.put(callId, remoteConnection);
+            remoteConnection.registerCallback(new RemoteConnection.Callback() {
+                @Override
+                public void onDestroyed(RemoteConnection connection) {
+                    mConnectionById.remove(callId);
+                    maybeDisconnectAdapter();
+                }
+            });
+            mOurConnectionServiceImpl.addRemoteExistingConnection(remoteConnection);
         }
 
         @Override
@@ -368,11 +398,64 @@ final class RemoteConnectionService {
         }
 
         @Override
+        public void setAudioRoute(String callId, int audioRoute, Session.Info sessionInfo) {
+            if (hasConnection(callId)) {
+                // TODO(3pcalls): handle this for remote connections.
+                // Likely we don't want to do anything since it doesn't make sense for self-managed
+                // connections to go through a connection mgr.
+            }
+        }
+
+        @Override
         public void onConnectionEvent(String callId, String event, Bundle extras,
                 Session.Info sessionInfo) {
             if (mConnectionById.containsKey(callId)) {
                 findConnectionForAction(callId, "onConnectionEvent").onConnectionEvent(event,
                         extras);
+            }
+        }
+
+        @Override
+        public void onRttInitiationSuccess(String callId, Session.Info sessionInfo)
+                throws RemoteException {
+            if (hasConnection(callId)) {
+                findConnectionForAction(callId, "onRttInitiationSuccess")
+                        .onRttInitiationSuccess();
+            } else {
+                Log.w(this, "onRttInitiationSuccess called on a remote conference");
+            }
+        }
+
+        @Override
+        public void onRttInitiationFailure(String callId, int reason, Session.Info sessionInfo)
+                throws RemoteException {
+            if (hasConnection(callId)) {
+                findConnectionForAction(callId, "onRttInitiationFailure")
+                        .onRttInitiationFailure(reason);
+            } else {
+                Log.w(this, "onRttInitiationFailure called on a remote conference");
+            }
+        }
+
+        @Override
+        public void onRttSessionRemotelyTerminated(String callId, Session.Info sessionInfo)
+                throws RemoteException {
+            if (hasConnection(callId)) {
+                findConnectionForAction(callId, "onRttSessionRemotelyTerminated")
+                        .onRttSessionRemotelyTerminated();
+            } else {
+                Log.w(this, "onRttSessionRemotelyTerminated called on a remote conference");
+            }
+        }
+
+        @Override
+        public void onRemoteRttRequest(String callId, Session.Info sessionInfo)
+                throws RemoteException {
+            if (hasConnection(callId)) {
+                findConnectionForAction(callId, "onRemoteRttRequest")
+                        .onRemoteRttRequest();
+            } else {
+                Log.w(this, "onRemoteRttRequest called on a remote conference");
             }
         }
     };
@@ -420,11 +503,14 @@ final class RemoteConnectionService {
             ConnectionRequest request,
             boolean isIncoming) {
         final String id = UUID.randomUUID().toString();
-        final ConnectionRequest newRequest = new ConnectionRequest(
-                request.getAccountHandle(),
-                request.getAddress(),
-                request.getExtras(),
-                request.getVideoState());
+        final ConnectionRequest newRequest = new ConnectionRequest.Builder()
+                .setAccountHandle(request.getAccountHandle())
+                .setAddress(request.getAddress())
+                .setExtras(request.getExtras())
+                .setVideoState(request.getVideoState())
+                .setRttPipeFromInCall(request.getRttPipeFromInCall())
+                .setRttPipeToInCall(request.getRttPipeToInCall())
+                .build();
         try {
             if (mConnectionById.isEmpty()) {
                 mOutgoingConnectionServiceRpc.addConnectionServiceAdapter(mServant.getStub(),

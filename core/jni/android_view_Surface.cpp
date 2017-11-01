@@ -19,8 +19,9 @@
 #include <stdio.h>
 
 #include "jni.h"
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 #include "android_os_Parcel.h"
+#include "android/graphics/GraphicBuffer.h"
 #include "android/graphics/GraphicsJNI.h"
 
 #include "core_jni_helpers.h"
@@ -31,6 +32,7 @@
 #include <binder/Parcel.h>
 
 #include <gui/Surface.h>
+#include <gui/view/Surface.h>
 #include <gui/SurfaceControl.h>
 #include <gui/GLConsumer.h>
 
@@ -45,7 +47,7 @@
 #include <utils/misc.h>
 #include <utils/Log.h>
 
-#include <ScopedUtfChars.h>
+#include <nativehelper/ScopedUtfChars.h>
 
 #include <AnimationContext.h>
 #include <FrameInfo.h>
@@ -99,17 +101,7 @@ sp<Surface> android_view_Surface_getSurface(JNIEnv* env, jobject surfaceObj) {
     return sur;
 }
 
-jobject android_view_Surface_createFromIGraphicBufferProducer(JNIEnv* env,
-        const sp<IGraphicBufferProducer>& bufferProducer) {
-    if (bufferProducer == NULL) {
-        return NULL;
-    }
-
-    sp<Surface> surface(new Surface(bufferProducer, true));
-    if (surface == NULL) {
-        return NULL;
-    }
-
+jobject android_view_Surface_createFromSurface(JNIEnv* env, const sp<Surface>& surface) {
     jobject surfaceObj = env->NewObject(gSurfaceClassInfo.clazz,
             gSurfaceClassInfo.ctor, (jlong)surface.get());
     if (surfaceObj == NULL) {
@@ -124,6 +116,16 @@ jobject android_view_Surface_createFromIGraphicBufferProducer(JNIEnv* env,
     return surfaceObj;
 }
 
+jobject android_view_Surface_createFromIGraphicBufferProducer(JNIEnv* env,
+        const sp<IGraphicBufferProducer>& bufferProducer) {
+    if (bufferProducer == NULL) {
+        return NULL;
+    }
+
+    sp<Surface> surface(new Surface(bufferProducer, true));
+    return android_view_Surface_createFromSurface(env, surface);
+}
+
 int android_view_Surface_mapPublicFormatToHalFormat(PublicFormat f) {
 
     switch(f) {
@@ -133,6 +135,7 @@ int android_view_Surface_mapPublicFormatToHalFormat(PublicFormat f) {
         case PublicFormat::DEPTH16:
             return HAL_PIXEL_FORMAT_Y16;
         case PublicFormat::RAW_SENSOR:
+        case PublicFormat::RAW_DEPTH:
             return HAL_PIXEL_FORMAT_RAW16;
         default:
             // Most formats map 1:1
@@ -147,6 +150,7 @@ android_dataspace android_view_Surface_mapPublicFormatToHalDataspace(
             return HAL_DATASPACE_V0_JFIF;
         case PublicFormat::DEPTH_POINT_CLOUD:
         case PublicFormat::DEPTH16:
+        case PublicFormat::RAW_DEPTH:
             return HAL_DATASPACE_DEPTH;
         case PublicFormat::RAW_SENSOR:
         case PublicFormat::RAW_PRIVATE:
@@ -168,6 +172,8 @@ PublicFormat android_view_Surface_mapHalFormatDataspaceToPublicFormat(
     switch(format) {
         case HAL_PIXEL_FORMAT_RGBA_8888:
         case HAL_PIXEL_FORMAT_RGBX_8888:
+        case HAL_PIXEL_FORMAT_RGBA_FP16:
+        case HAL_PIXEL_FORMAT_RGBA_1010102:
         case HAL_PIXEL_FORMAT_RGB_888:
         case HAL_PIXEL_FORMAT_RGB_565:
         case HAL_PIXEL_FORMAT_Y8:
@@ -178,8 +184,12 @@ PublicFormat android_view_Surface_mapHalFormatDataspaceToPublicFormat(
             // Enums overlap in both name and value
             return static_cast<PublicFormat>(format);
         case HAL_PIXEL_FORMAT_RAW16:
-            // Name differs, though value is the same
-            return PublicFormat::RAW_SENSOR;
+            switch (dataSpace) {
+                case HAL_DATASPACE_DEPTH:
+                  return PublicFormat::RAW_DEPTH;
+                default:
+                  return PublicFormat::RAW_SENSOR;
+            }
         case HAL_PIXEL_FORMAT_RAW_OPAQUE:
             // Name differs, though value is the same
             return PublicFormat::RAW_PRIVATE;
@@ -283,6 +293,7 @@ static inline SkColorType convertPixelFormat(PixelFormat format) {
     switch (format) {
     case PIXEL_FORMAT_RGBX_8888:    return kN32_SkColorType;
     case PIXEL_FORMAT_RGBA_8888:    return kN32_SkColorType;
+    case PIXEL_FORMAT_RGBA_FP16:    return kRGBA_F16_SkColorType;
     case PIXEL_FORMAT_RGB_565:      return kRGB_565_SkColorType;
     default:                        return kUnknown_SkColorType;
     }
@@ -318,11 +329,11 @@ static jlong nativeLockCanvas(JNIEnv* env, jclass clazz,
         return 0;
     }
 
-
     SkImageInfo info = SkImageInfo::Make(outBuffer.width, outBuffer.height,
                                          convertPixelFormat(outBuffer.format),
-                                         outBuffer.format == PIXEL_FORMAT_RGBX_8888 ?
-                                         kOpaque_SkAlphaType : kPremul_SkAlphaType);
+                                         outBuffer.format == PIXEL_FORMAT_RGBX_8888
+                                                 ? kOpaque_SkAlphaType : kPremul_SkAlphaType,
+                                         GraphicsJNI::defaultColorSpace());
 
     SkBitmap bitmap;
     ssize_t bpr = outBuffer.stride * bytesPerPixel(outBuffer.format);
@@ -339,7 +350,7 @@ static jlong nativeLockCanvas(JNIEnv* env, jclass clazz,
 
     if (dirtyRectPtr) {
         nativeCanvas->clipRect(dirtyRect.left, dirtyRect.top,
-                dirtyRect.right, dirtyRect.bottom);
+                dirtyRect.right, dirtyRect.bottom, SkClipOp::kIntersect);
     }
 
     if (dirtyRectObj) {
@@ -388,6 +399,16 @@ static void nativeAllocateBuffers(JNIEnv* /* env */ , jclass /* clazz */,
 // ----------------------------------------------------------------------------
 
 static jlong nativeCreateFromSurfaceControl(JNIEnv* env, jclass clazz,
+        jlong surfaceControlNativeObj) {
+    sp<SurfaceControl> ctrl(reinterpret_cast<SurfaceControl *>(surfaceControlNativeObj));
+    sp<Surface> surface(ctrl->createSurface());
+    if (surface != NULL) {
+        surface->incStrong(&sRefBaseOwner);
+    }
+    return reinterpret_cast<jlong>(surface.get());
+}
+
+static jlong nativeGetFromSurfaceControl(JNIEnv* env, jclass clazz,
         jlong surfaceControlNativeObj) {
     /*
      * This is used by the WindowManagerService just after constructing
@@ -492,6 +513,30 @@ static jint nativeForceScopedDisconnect(JNIEnv *env, jclass clazz, jlong nativeO
     return surface->disconnect(-1, IGraphicBufferProducer::DisconnectMode::AllLocal);
 }
 
+static jint nativeAttachAndQueueBuffer(JNIEnv *env, jclass clazz, jlong nativeObject,
+        jobject graphicBuffer) {
+    Surface* surface = reinterpret_cast<Surface*>(nativeObject);
+    sp<GraphicBuffer> bp = graphicBufferForJavaObject(env, graphicBuffer);
+    if (bp == nullptr) {
+        return BAD_VALUE;
+    }
+    int err = ((ANativeWindow*)surface)->perform(surface, NATIVE_WINDOW_API_CONNECT,
+            NATIVE_WINDOW_API_CPU);
+    if (err != OK) {
+        return err;
+    }
+    err = surface->attachBuffer(bp->getNativeBuffer());
+    if (err != OK) {
+        return err;
+    }
+    err = ((ANativeWindow*)surface)->queueBuffer(surface, bp->getNativeBuffer(), -1);
+    if (err != OK) {
+        return err;
+    }
+    err = surface->disconnect(NATIVE_WINDOW_API_CPU);
+    return err;
+}
+
 namespace uirenderer {
 
 using namespace android::uirenderer::renderthread;
@@ -509,11 +554,11 @@ static jlong create(JNIEnv* env, jclass clazz, jlong rootNodePtr, jlong surfaceP
     ContextFactory factory;
     RenderProxy* proxy = new RenderProxy(false, rootNode, &factory);
     proxy->loadSystemProperties();
-    proxy->setSwapBehavior(kSwap_discardBuffer);
+    proxy->setSwapBehavior(SwapBehavior::kSwap_discardBuffer);
     proxy->initialize(surface);
     // Shadows can't be used via this interface, so just set the light source
-    // to all 0s. (and width & height are unused, TODO remove them)
-    proxy->setup(0, 0, 0, 0, 0);
+    // to all 0s.
+    proxy->setup(0, 0, 0);
     proxy->setLightCenter((Vector3){0, 0, 0});
     return (jlong) proxy;
 }
@@ -530,7 +575,7 @@ static void draw(JNIEnv* env, jclass clazz, jlong rendererPtr) {
     UiFrameInfoBuilder(proxy->frameInfo())
             .setVsync(vsync, vsync)
             .addFlag(FrameInfoFlags::SurfaceCanvas);
-    proxy->syncAndDrawFrame(nullptr);
+    proxy->syncAndDrawFrame();
 }
 
 static void destroy(JNIEnv* env, jclass clazz, jlong rendererPtr) {
@@ -561,6 +606,8 @@ static const JNINativeMethod gSurfaceMethods[] = {
             (void*)nativeAllocateBuffers },
     {"nativeCreateFromSurfaceControl", "(J)J",
             (void*)nativeCreateFromSurfaceControl },
+    {"nativeGetFromSurfaceControl", "(J)J",
+            (void*)nativeGetFromSurfaceControl },
     {"nativeReadFromParcel", "(JLandroid/os/Parcel;)J",
             (void*)nativeReadFromParcel },
     {"nativeWriteToParcel", "(JLandroid/os/Parcel;)V",
@@ -570,6 +617,7 @@ static const JNINativeMethod gSurfaceMethods[] = {
     {"nativeGetNextFrameNumber", "(J)J", (void*)nativeGetNextFrameNumber },
     {"nativeSetScalingMode", "(JI)I", (void*)nativeSetScalingMode },
     {"nativeForceScopedDisconnect", "(J)I", (void*)nativeForceScopedDisconnect},
+    {"nativeAttachAndQueueBuffer", "(JLandroid/graphics/GraphicBuffer;)I", (void*)nativeAttachAndQueueBuffer},
 
     // HWUI context
     {"nHwuiCreate", "(JJ)J", (void*) hwui::create },

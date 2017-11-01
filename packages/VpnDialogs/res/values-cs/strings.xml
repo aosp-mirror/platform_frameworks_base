@@ -19,11 +19,18 @@
     <string name="prompt" msgid="3183836924226407828">"Žádost o připojení"</string>
     <string name="warning" msgid="809658604548412033">"Aplikace <xliff:g id="APP">%s</xliff:g> žádá o nastavení připojení VPN, pomocí kterého bude moci sledovat síťový provoz. Povolte, jen pokud zdroji důvěřujete. &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; – když je síť VPN aktivní, v horní části obrazovky se zobrazuje tato ikona."</string>
     <string name="legacy_title" msgid="192936250066580964">"Síť VPN je připojena"</string>
-    <string name="configure" msgid="4905518375574791375">"Konfigurovat"</string>
-    <string name="disconnect" msgid="971412338304200056">"Odpojit"</string>
     <string name="session" msgid="6470628549473641030">"Relace:"</string>
     <string name="duration" msgid="3584782459928719435">"Doba trvání:"</string>
     <string name="data_transmitted" msgid="7988167672982199061">"Odesláno:"</string>
     <string name="data_received" msgid="4062776929376067820">"Přijato:"</string>
     <string name="data_value_format" msgid="2192466557826897580">"<xliff:g id="NUMBER_0">%1$s</xliff:g> bajtů / <xliff:g id="NUMBER_1">%2$s</xliff:g> paketů"</string>
+    <string name="always_on_disconnected_title" msgid="1906740176262776166">"Nelze se připojit k trvalé VPN"</string>
+    <string name="always_on_disconnected_message" msgid="555634519845992917">"Aplikace <xliff:g id="VPN_APP_0">%1$s</xliff:g> je nastavena k trvalému připojení, ale nyní se nemůže připojit. Než se telefon bude moci připojit pomocí aplikace <xliff:g id="VPN_APP_1">%1$s</xliff:g>, použije veřejnou síť."</string>
+    <string name="always_on_disconnected_message_lockdown" msgid="4232225539869452120">"Aplikace <xliff:g id="VPN_APP">%1$s</xliff:g> je nastavena k trvalému připojení, ale nyní se nemůže připojit. Než se budete moci připojit pomocí VPN, zůstanete offline."</string>
+    <string name="always_on_disconnected_message_separator" msgid="3310614409322581371">" "</string>
+    <string name="always_on_disconnected_message_settings_link" msgid="6172280302829992412">"Změnit nastavení VPN"</string>
+    <string name="configure" msgid="4905518375574791375">"Konfigurovat"</string>
+    <string name="disconnect" msgid="971412338304200056">"Odpojit"</string>
+    <string name="open_app" msgid="3717639178595958667">"Do aplikace"</string>
+    <string name="dismiss" msgid="6192859333764711227">"Zavřít"</string>
 </resources>

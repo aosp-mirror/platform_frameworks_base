@@ -4,9 +4,9 @@
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
      You may obtain a copy of the License at
-  
+
           http://www.apache.org/licenses/LICENSE-2.0
-  
+
      Unless required by applicable law or agreed to in writing, software
      distributed under the License is distributed on an "AS IS" BASIS,
      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,12 +17,15 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"Shell"</string>
+    <string name="bugreport_notification_channel" msgid="2574150205913861141">"Báo cáo lỗi"</string>
     <string name="bugreport_in_progress_title" msgid="4311705936714972757">"Báo cáo lỗi <xliff:g id="ID">#%d</xliff:g> đang được tạo"</string>
     <string name="bugreport_finished_title" msgid="4429132808670114081">"Đã chụp báo cáo lỗi <xliff:g id="ID">#%d</xliff:g>"</string>
     <string name="bugreport_updating_title" msgid="4423539949559634214">"Đang thêm thông tin chi tiết vào báo cáo lỗi"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"Vui lòng đợi…"</string>
     <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"Báo cáo lỗi sẽ xuất hiện ngay trên điện thoại"</string>
+    <string name="bugreport_finished_text" product="tv" msgid="5758325479058638893">"Chọn để chia sẻ báo cáo lỗi của bạn"</string>
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"Nhấn để chia sẻ báo cáo lỗi của bạn"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="tv" msgid="2343263822812016950">"Chọn để chia sẻ báo cáo lỗi mà không cần ảnh chụp màn hình hoặc đợi hoàn tất ảnh chụp màn hình"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"Bấm để chia sẻ báo cáo lỗi mà không cần ảnh chụp màn hình hoặc đợi hoàn tất ảnh chụp màn hình"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Bấm để chia sẻ báo cáo lỗi mà không cần ảnh chụp màn hình hoặc đợi hoàn tất ảnh chụp màn hình"</string>
     <string name="bugreport_confirm" msgid="5917407234515812495">"Các báo cáo lỗi chứa dữ liệu từ nhiều tệp nhật ký khác nhau của hệ thống, có thể bao gồm dữ liệu mà bạn coi là nhạy cảm (chẳng hạn như dữ liệu vị trí và dữ liệu sử dụng ứng dụng). Chỉ chia sẻ báo cáo lỗi với những người và ứng dụng mà bạn tin tưởng."</string>
@@ -40,4 +43,5 @@
     <string name="bugreport_info_title" msgid="2306030793918239804">"Tiêu đề lỗi"</string>
     <string name="bugreport_info_description" msgid="5072835127481627722">"Tóm tắt lỗi"</string>
     <string name="save" msgid="4781509040564835759">"Lưu"</string>
+    <string name="bugreport_intent_chooser_title" msgid="7605709494790894076">"Chia sẻ báo cáo lỗi"</string>
 </resources>

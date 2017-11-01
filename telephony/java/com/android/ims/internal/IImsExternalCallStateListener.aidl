@@ -23,7 +23,7 @@ import com.android.ims.ImsExternalCallState;
  *
  * {@hide}
  */
-interface IImsExternalCallStateListener {
+oneway interface IImsExternalCallStateListener {
 
     /**
      * Notifies client when Dialog Event Package update is received

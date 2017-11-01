@@ -131,6 +131,22 @@ bool parse(const String8& str, ConfigDescription* out) {
         part = parts[index].string();
     }
 
+    if (parseWideColorGamut(part, &config)) {
+        index++;
+        if (index == N) {
+            goto success;
+        }
+        part = parts[index].string();
+    }
+
+    if (parseHdr(part, &config)) {
+        index++;
+        if (index == N) {
+            goto success;
+        }
+        part = parts[index].string();
+    }
+
     if (parseOrientation(part, &config)) {
         index++;
         if (index == N) {
@@ -249,7 +265,12 @@ void applyVersionForCompatibility(ConfigDescription* config) {
     }
 
     uint16_t minSdk = 0;
-    if (config->screenLayout2 & ResTable_config::MASK_SCREENROUND) {
+    if ((config->uiMode & ResTable_config::MASK_UI_MODE_TYPE)
+                == ResTable_config::UI_MODE_TYPE_VR_HEADSET
+            || config->colorMode & ResTable_config::MASK_WIDE_COLOR_GAMUT
+            || config->colorMode & ResTable_config::MASK_HDR) {
+        minSdk = SDK_O;
+    } else if (config->screenLayout2 & ResTable_config::MASK_SCREENROUND) {
         minSdk = SDK_MNC;
     } else if (config->density == ResTable_config::DENSITY_ANY) {
         minSdk = SDK_LOLLIPOP;
@@ -428,6 +449,46 @@ bool parseScreenRound(const char* name, ResTable_config* out) {
     return false;
 }
 
+bool parseWideColorGamut(const char* name, ResTable_config* out) {
+    if (strcmp(name, kWildcardName) == 0) {
+        if (out) out->colorMode =
+                (out->colorMode&~ResTable_config::MASK_WIDE_COLOR_GAMUT)
+                | ResTable_config::WIDE_COLOR_GAMUT_ANY;
+        return true;
+    } else if (strcmp(name, "widecg") == 0) {
+        if (out) out->colorMode =
+                (out->colorMode&~ResTable_config::MASK_WIDE_COLOR_GAMUT)
+                | ResTable_config::WIDE_COLOR_GAMUT_YES;
+        return true;
+    } else if (strcmp(name, "nowidecg") == 0) {
+        if (out) out->colorMode =
+                (out->colorMode&~ResTable_config::MASK_WIDE_COLOR_GAMUT)
+                | ResTable_config::WIDE_COLOR_GAMUT_NO;
+        return true;
+    }
+    return false;
+}
+
+bool parseHdr(const char* name, ResTable_config* out) {
+    if (strcmp(name, kWildcardName) == 0) {
+        if (out) out->colorMode =
+                (out->colorMode&~ResTable_config::MASK_HDR)
+                | ResTable_config::HDR_ANY;
+        return true;
+    } else if (strcmp(name, "highdr") == 0) {
+        if (out) out->colorMode =
+                (out->colorMode&~ResTable_config::MASK_HDR)
+                | ResTable_config::HDR_YES;
+        return true;
+    } else if (strcmp(name, "lowdr") == 0) {
+        if (out) out->colorMode =
+                (out->colorMode&~ResTable_config::MASK_HDR)
+                | ResTable_config::HDR_NO;
+        return true;
+    }
+    return false;
+}
+
 bool parseOrientation(const char* name, ResTable_config* out) {
     if (strcmp(name, kWildcardName) == 0) {
         if (out) out->orientation = out->ORIENTATION_ANY;
@@ -476,6 +537,11 @@ bool parseUiModeType(const char* name, ResTable_config* out) {
       if (out) out->uiMode =
               (out->uiMode&~ResTable_config::MASK_UI_MODE_TYPE)
               | ResTable_config::UI_MODE_TYPE_WATCH;
+        return true;
+    } else if (strcmp(name, "vrheadset") == 0) {
+      if (out) out->uiMode =
+              (out->uiMode&~ResTable_config::MASK_UI_MODE_TYPE)
+              | ResTable_config::UI_MODE_TYPE_VR_HEADSET;
         return true;
     }
 

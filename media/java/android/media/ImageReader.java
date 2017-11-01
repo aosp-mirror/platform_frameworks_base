@@ -17,6 +17,8 @@
 package android.media;
 
 import android.graphics.ImageFormat;
+import android.graphics.PixelFormat;
+import android.hardware.HardwareBuffer;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -72,6 +74,12 @@ public class ImageReader implements AutoCloseable {
     private static final int ACQUIRE_MAX_IMAGES = 2;
 
     /**
+     * Invalid consumer buffer usage flag. This usage flag will be ignored
+     * by the {@code ImageReader} instance is constructed with this value.
+     */
+    private static final long BUFFER_USAGE_UNKNOWN = 0;
+
+    /**
      * <p>
      * Create a new reader for images of the desired size and format.
      * </p>
@@ -121,13 +129,104 @@ public class ImageReader implements AutoCloseable {
      * @see Image
      */
     public static ImageReader newInstance(int width, int height, int format, int maxImages) {
-        return new ImageReader(width, height, format, maxImages);
+        return new ImageReader(width, height, format, maxImages, BUFFER_USAGE_UNKNOWN);
+    }
+
+    /**
+     * <p>
+     * Create a new reader for images of the desired size, format and consumer usage flag.
+     * </p>
+     * <p>
+     * The {@code maxImages} parameter determines the maximum number of {@link Image} objects that
+     * can be be acquired from the {@code ImageReader} simultaneously. Requesting more buffers will
+     * use up more memory, so it is important to use only the minimum number necessary for the use
+     * case.
+     * </p>
+     * <p>
+     * The valid sizes and formats depend on the source of the image data.
+     * </p>
+     * <p>
+     * The format and usage flag combination describes how the buffer will be used by
+     * consumer end-points. For example, if the application intends to send the images to
+     * {@link android.media.MediaCodec} or {@link android.media.MediaRecorder} for hardware video
+     * encoding, the format and usage flag combination needs to be
+     * {@link ImageFormat#PRIVATE PRIVATE} and {@link HardwareBuffer#USAGE0_VIDEO_ENCODE}. When an
+     * {@link ImageReader} object is created with a valid size and such format/usage flag
+     * combination, the application can send the {@link Image images} to an {@link ImageWriter} that
+     * is created with the input {@link android.view.Surface} provided by the
+     * {@link android.media.MediaCodec} or {@link android.media.MediaRecorder}.
+     * </p>
+     * <p>
+     * If the {@code format} is {@link ImageFormat#PRIVATE PRIVATE}, the created {@link ImageReader}
+     * will produce images that are not directly accessible by the application. The application can
+     * still acquire images from this {@link ImageReader}, and send them to the
+     * {@link android.hardware.camera2.CameraDevice camera} for reprocessing, or to the
+     * {@link android.media.MediaCodec} / {@link android.media.MediaRecorder} for hardware video
+     * encoding via {@link ImageWriter} interface. However, the {@link Image#getPlanes()
+     * getPlanes()} will return an empty array for {@link ImageFormat#PRIVATE PRIVATE} format
+     * images. The application can check if an existing reader's format by calling
+     * {@link #getImageFormat()}.
+     * </p>
+     * <p>
+     * {@link ImageFormat#PRIVATE PRIVATE} format {@link ImageReader ImageReaders} are more
+     * efficient to use when application access to image data is not necessary, compared to
+     * ImageReaders using other format such as {@link ImageFormat#YUV_420_888 YUV_420_888}.
+     * </p>
+     * <p>
+     * Note that not all format and usage flag combination is supported by the
+     * {@link ImageReader}. Below are the supported combinations by the {@link ImageReader}
+     * (assuming the consumer end-points support the such image consumption, e.g., hardware video
+     * encoding).
+     * <table>
+     * <tr>
+     *   <th>Format</th>
+     *   <th>Compatible usage flags</th>
+     * </tr>
+     * <tr>
+     *   <td>non-{@link android.graphics.ImageFormat#PRIVATE PRIVATE} formats defined by
+     *   {@link android.graphics.ImageFormat ImageFormat} or
+     *   {@link android.graphics.PixelFormat PixelFormat}</td>
+     *   <td>{@link HardwareBuffer#USAGE0_CPU_READ} or
+     *   {@link HardwareBuffer#USAGE0_CPU_READ_OFTEN}</td>
+     * </tr>
+     * <tr>
+     *   <td>{@link android.graphics.ImageFormat#PRIVATE}</td>
+     *   <td>{@link HardwareBuffer#USAGE0_VIDEO_ENCODE} or
+     *   {@link HardwareBuffer#USAGE0_GPU_SAMPLED_IMAGE}, or combined</td>
+     * </tr>
+     * </table>
+     * Using other combinations may result in {@link IllegalArgumentException}.
+     * </p>
+     * @param width The default width in pixels of the Images that this reader will produce.
+     * @param height The default height in pixels of the Images that this reader will produce.
+     * @param format The format of the Image that this reader will produce. This must be one of the
+     *            {@link android.graphics.ImageFormat} or {@link android.graphics.PixelFormat}
+     *            constants. Note that not all formats are supported, like ImageFormat.NV21.
+     * @param maxImages The maximum number of images the user will want to access simultaneously.
+     *            This should be as small as possible to limit memory use. Once maxImages Images are
+     *            obtained by the user, one of them has to be released before a new Image will
+     *            become available for access through {@link #acquireLatestImage()} or
+     *            {@link #acquireNextImage()}. Must be greater than 0.
+     * @param usage The intended usage of the images produced by this ImageReader. It needs
+     *            to be one of the Usage0 defined by {@link HardwareBuffer}, or an
+     *            {@link IllegalArgumentException} will be thrown.
+     * @see Image
+     * @see HardwareBuffer
+     * @hide
+     */
+    public static ImageReader newInstance(int width, int height, int format, int maxImages,
+            long usage) {
+        if (!isFormatUsageCombinationAllowed(format, usage)) {
+            throw new IllegalArgumentException("Format usage combination is not supported:"
+                    + " format = " + format + ", usage = " + usage);
+        }
+        return new ImageReader(width, height, format, maxImages, usage);
     }
 
     /**
      * @hide
      */
-    protected ImageReader(int width, int height, int format, int maxImages) {
+    protected ImageReader(int width, int height, int format, int maxImages, long usage) {
         mWidth = width;
         mHeight = height;
         mFormat = format;
@@ -149,7 +248,7 @@ public class ImageReader implements AutoCloseable {
 
         mNumPlanes = ImageUtils.getNumPlanesForFormat(mFormat);
 
-        nativeInit(new WeakReference<ImageReader>(this), width, height, format, maxImages);
+        nativeInit(new WeakReference<>(this), width, height, format, maxImages, usage);
 
         mSurface = nativeGetSurface();
 
@@ -606,6 +705,8 @@ public class ImageReader implements AutoCloseable {
         }
 
         nativeDetachImage(image);
+        si.clearSurfacePlanes();
+        si.mPlanes = null;
         si.setDetached(true);
     }
 
@@ -615,6 +716,30 @@ public class ImageReader implements AutoCloseable {
         }
         SurfaceImage si = (SurfaceImage) image;
         return si.getReader() == this;
+    }
+
+    private static boolean isFormatUsageCombinationAllowed(int format, long usage) {
+        if (!ImageFormat.isPublicFormat(format) && !PixelFormat.isPublicFormat(format)) {
+            return false;
+        }
+
+        // Valid usage needs to be provided.
+        if (usage == BUFFER_USAGE_UNKNOWN) {
+            return false;
+        }
+
+        if (format == ImageFormat.PRIVATE) {
+            // Usage need to be either USAGE0_GPU_SAMPLED_IMAGE or USAGE0_VIDEO_ENCODE or combined.
+            boolean isAllowed = (usage == HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE);
+            isAllowed = isAllowed || (usage == HardwareBuffer.USAGE_VIDEO_ENCODE);
+            isAllowed = isAllowed || (usage ==
+                    (HardwareBuffer.USAGE_VIDEO_ENCODE | HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE));
+            return isAllowed;
+        } else {
+            // Usage need to make the buffer CPU readable for explicit format.
+            return ((usage == HardwareBuffer.USAGE_CPU_READ_RARELY) ||
+                    (usage == HardwareBuffer.USAGE_CPU_READ_OFTEN));
+        }
     }
 
     /**
@@ -655,7 +780,7 @@ public class ImageReader implements AutoCloseable {
     private ListenerHandler mListenerHandler;
     // Keep track of the successfully acquired Images. This need to be thread safe as the images
     // could be closed by different threads (e.g., application thread and GC thread).
-    private List<Image> mAcquiredImages = new CopyOnWriteArrayList<Image>();
+    private List<Image> mAcquiredImages = new CopyOnWriteArrayList<>();
 
     /**
      * This field is used by native code, do not access or modify.
@@ -896,7 +1021,7 @@ public class ImageReader implements AutoCloseable {
     }
 
     private synchronized native void nativeInit(Object weakSelf, int w, int h,
-                                                    int fmt, int maxImgs);
+                                                    int fmt, int maxImgs, long consumerUsage);
     private synchronized native void nativeClose();
     private synchronized native void nativeReleaseImage(Image i);
     private synchronized native Surface nativeGetSurface();

@@ -19,48 +19,50 @@
 
 #include <cutils/compiler.h>
 #include <minikin/MinikinFont.h>
+#include <SkRefCnt.h>
 
 class SkPaint;
 class SkTypeface;
 
 namespace android {
 
-class ANDROID_API MinikinFontSkia : public MinikinFont {
+class ANDROID_API MinikinFontSkia : public minikin::MinikinFont {
 public:
-    // Note: this takes ownership of the reference (will unref on dtor)
-    explicit MinikinFontSkia(SkTypeface *typeface, const void* fontData, size_t fontSize,
-        int ttcIndex);
-
-    ~MinikinFontSkia();
+    explicit MinikinFontSkia(sk_sp<SkTypeface> typeface, const void* fontData, size_t fontSize,
+        int ttcIndex, const std::vector<minikin::FontVariation>& axes);
 
     float GetHorizontalAdvance(uint32_t glyph_id,
-        const MinikinPaint &paint) const;
+        const minikin::MinikinPaint &paint) const;
 
-    void GetBounds(MinikinRect* bounds, uint32_t glyph_id,
-        const MinikinPaint &paint) const;
-
-    const void* GetTable(uint32_t tag, size_t* size, MinikinDestroyFunc* destroy);
+    void GetBounds(minikin::MinikinRect* bounds, uint32_t glyph_id,
+        const minikin::MinikinPaint &paint) const;
 
     SkTypeface* GetSkTypeface() const;
+    sk_sp<SkTypeface> RefSkTypeface() const;
 
     // Access to underlying raw font bytes
     const void* GetFontData() const;
     size_t GetFontSize() const;
     int GetFontIndex() const;
+    const std::vector<minikin::FontVariation>& GetAxes() const;
+    std::shared_ptr<minikin::MinikinFont> createFontWithVariation(
+            const std::vector<minikin::FontVariation>&) const;
 
     static uint32_t packPaintFlags(const SkPaint* paint);
     static void unpackPaintFlags(SkPaint* paint, uint32_t paintFlags);
 
     // set typeface and fake bold/italic parameters
-    static void populateSkPaint(SkPaint* paint, const MinikinFont* font, FontFakery fakery);
+    static void populateSkPaint(SkPaint* paint, const minikin::MinikinFont* font,
+            minikin::FontFakery fakery);
 private:
-    SkTypeface* mTypeface;
+    sk_sp<SkTypeface> mTypeface;
 
     // A raw pointer to the font data - it should be owned by some other object with
     // lifetime at least as long as this object.
     const void* mFontData;
     size_t mFontSize;
     int mTtcIndex;
+    std::vector<minikin::FontVariation> mAxes;
 };
 
 }  // namespace android

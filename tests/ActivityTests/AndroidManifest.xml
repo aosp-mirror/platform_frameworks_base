@@ -79,5 +79,21 @@
             android:singleUser="true" android:exported="true" />
         <receiver android:name="TrackTimeReceiver" />
         <receiver android:name="AlarmSpamReceiver" />
+        <activity android:name="DisableScreenshotsActivity"
+                android:label="DisableScreenshots"
+                android:theme="@style/DisableScreenshots">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name="CustomSplashscreenActivity"
+            android:label="CustomSplashscreen"
+            android:theme="@style/CustomSplashscreen">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
     </application>
 </manifest>

@@ -104,10 +104,14 @@ fail:
             }
         }
 
-        uint32_t cached_target_crc, cached_overlay_crc;
+        uint32_t version, cached_target_crc, cached_overlay_crc;
         String8 cached_target_path, cached_overlay_path;
-        if (!ResTable::getIdmapInfo(buf, N, NULL, &cached_target_crc, &cached_overlay_crc,
+        if (!ResTable::getIdmapInfo(buf, N, &version, &cached_target_crc, &cached_overlay_crc,
                     &cached_target_path, &cached_overlay_path)) {
+            return true;
+        }
+
+        if (version != ResTable::IDMAP_CURRENT_VERSION) {
             return true;
         }
 
@@ -220,4 +224,10 @@ int idmap_create_fd(const char *target_apk_path, const char *overlay_apk_path, i
 {
     return create_and_write_idmap(target_apk_path, overlay_apk_path, fd, true) == 0 ?
         EXIT_SUCCESS : EXIT_FAILURE;
+}
+
+int idmap_verify_fd(const char *target_apk_path, const char *overlay_apk_path, int fd)
+{
+    return !is_idmap_stale_fd(target_apk_path, overlay_apk_path, fd) ?
+            EXIT_SUCCESS : EXIT_FAILURE;
 }

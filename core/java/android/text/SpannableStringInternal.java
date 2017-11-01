@@ -65,7 +65,7 @@ import java.lang.reflect.Array;
             if (en > end)
                 en = end;
 
-            setSpan(spans[i], st - start, en - start, fl);
+            setSpan(spans[i], st - start, en - start, fl, false/*enforceParagraph*/);
         }
     }
 
@@ -149,28 +149,36 @@ import java.lang.reflect.Array;
     }
 
     /* package */ void setSpan(Object what, int start, int end, int flags) {
+        setSpan(what, start, end, flags, true/*enforceParagraph*/);
+    }
+
+    private boolean isIndexFollowsNextLine(int index) {
+        return index != 0 && index != length() && charAt(index - 1) != '\n';
+    }
+
+    private void setSpan(Object what, int start, int end, int flags, boolean enforceParagraph) {
         int nstart = start;
         int nend = end;
 
         checkRange("setSpan", start, end);
 
         if ((flags & Spannable.SPAN_PARAGRAPH) == Spannable.SPAN_PARAGRAPH) {
-            if (start != 0 && start != length()) {
-                char c = charAt(start - 1);
-
-                if (c != '\n')
-                    throw new RuntimeException(
-                            "PARAGRAPH span must start at paragraph boundary" +
-                            " (" + start + " follows " + c + ")");
+            if (isIndexFollowsNextLine(start)) {
+                if (!enforceParagraph) {
+                    // do not set the span
+                    return;
+                }
+                throw new RuntimeException("PARAGRAPH span must start at paragraph boundary"
+                        + " (" + start + " follows " + charAt(start - 1) + ")");
             }
 
-            if (end != 0 && end != length()) {
-                char c = charAt(end - 1);
-
-                if (c != '\n')
-                    throw new RuntimeException(
-                            "PARAGRAPH span must end at paragraph boundary" +
-                            " (" + end + " follows " + c + ")");
+            if (isIndexFollowsNextLine(end)) {
+                if (!enforceParagraph) {
+                    // do not set the span
+                    return;
+                }
+                throw new RuntimeException("PARAGRAPH span must end at paragraph boundary"
+                        + " (" + end + " follows " + charAt(end - 1) + ")");
             }
         }
 

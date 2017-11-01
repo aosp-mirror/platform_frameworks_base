@@ -18,7 +18,7 @@
 
 //#define LOG_NDEBUG 0
 
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 
 #include <android_runtime/AndroidRuntime.h>
 #include <utils/Log.h>
@@ -31,7 +31,7 @@
 #include "android_view_KeyEvent.h"
 #include "android_view_MotionEvent.h"
 
-#include <ScopedLocalRef.h>
+#include <nativehelper/ScopedLocalRef.h>
 
 #include "core_jni_helpers.h"
 
@@ -39,6 +39,8 @@ namespace android {
 
 // Log debug messages about the dispatch cycle.
 static const bool kDebugDispatchCycle = false;
+// Display id for default(primary) display.
+static const int32_t kDefaultDisplayId = 0;
 
 static struct {
     jclass clazz;
@@ -136,6 +138,7 @@ status_t NativeInputEventSender::sendMotionEvent(uint32_t seq, const MotionEvent
         publishedSeq = mNextPublishedSeq++;
         status_t status = mInputPublisher.publishMotionEvent(publishedSeq,
                 event->getDeviceId(), event->getSource(),
+                kDefaultDisplayId /* TODO(multi-display): propagate display id */,
                 event->getAction(), event->getActionButton(), event->getFlags(),
                 event->getEdgeFlags(), event->getMetaState(), event->getButtonState(),
                 event->getXOffset(), event->getYOffset(),

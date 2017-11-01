@@ -5,6 +5,7 @@
     <string name="action_use_network">Use this network as is</string>
     <string name="action_do_not_use_network">Do not use this network</string>
     <string name="action_bar_label">Sign in to network</string>
+    <string name="action_bar_title">Sign in to %1$s</string>
     <string name="ssl_error_warning">The network you&#8217;re trying to join has security issues.</string>
     <string name="ssl_error_example">For example, the login page may not belong to the organization shown.</string>
     <string name="ssl_error_continue">Continue anyway via browser</string>

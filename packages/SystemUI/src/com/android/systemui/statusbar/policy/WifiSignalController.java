@@ -20,6 +20,7 @@ import android.content.Intent;
 import android.net.NetworkCapabilities;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.os.Messenger;
 import android.util.Log;
@@ -27,10 +28,9 @@ import android.util.Log;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.AsyncChannel;
 import com.android.settingslib.wifi.WifiStatusTracker;
+import com.android.systemui.R;
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
 import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
-
-import com.android.systemui.R;
 
 import java.util.Objects;
 
@@ -49,7 +49,7 @@ public class WifiSignalController extends
         mWifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
         mWifiTracker = new WifiStatusTracker(mWifiManager);
         mHasMobileData = hasMobileData;
-        Handler handler = new WifiHandler();
+        Handler handler = new WifiHandler(Looper.getMainLooper());
         mWifiChannel = new AsyncChannel();
         Messenger wifiMessenger = mWifiManager.getWifiServiceMessenger();
         if (wifiMessenger != null) {
@@ -67,6 +67,7 @@ public class WifiSignalController extends
                 WifiIcons.QS_WIFI_NO_NETWORK,
                 AccessibilityContentDescriptions.WIFI_NO_CONNECTION
                 );
+
     }
 
     @Override
@@ -92,7 +93,7 @@ public class WifiSignalController extends
                 contentDescription);
         callback.setWifiIndicators(mCurrentState.enabled, statusIcon, qsIcon,
                 ssidPresent && mCurrentState.activityIn, ssidPresent && mCurrentState.activityOut,
-                wifiDesc);
+                wifiDesc, mCurrentState.isTransient);
     }
 
     /**
@@ -121,6 +122,10 @@ public class WifiSignalController extends
      * Handler to receive the data activity on wifi.
      */
     private class WifiHandler extends Handler {
+        WifiHandler(Looper looper) {
+            super(looper);
+        }
+
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
@@ -144,24 +149,28 @@ public class WifiSignalController extends
 
     static class WifiState extends SignalController.State {
         String ssid;
+        boolean isTransient;
 
         @Override
         public void copyFrom(State s) {
             super.copyFrom(s);
             WifiState state = (WifiState) s;
             ssid = state.ssid;
+            isTransient = state.isTransient;
         }
 
         @Override
         protected void toString(StringBuilder builder) {
             super.toString(builder);
             builder.append(',').append("ssid=").append(ssid);
+            builder.append(',').append("isTransient=").append(isTransient);
         }
 
         @Override
         public boolean equals(Object o) {
             return super.equals(o)
-                    && Objects.equals(((WifiState) o).ssid, ssid);
+                    && Objects.equals(((WifiState) o).ssid, ssid)
+                    && (((WifiState) o).isTransient == isTransient);
         }
     }
 }

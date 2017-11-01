@@ -16,6 +16,7 @@
 
 package com.android.server.trust;
 
+import android.annotation.TargetApi;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.admin.DevicePolicyManager;
@@ -27,6 +28,7 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -35,11 +37,11 @@ import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
-import android.util.Log;
-import android.util.Slog;
 import android.service.trust.ITrustAgentService;
 import android.service.trust.ITrustAgentServiceCallback;
-
+import android.service.trust.TrustAgentService;
+import android.util.Log;
+import android.util.Slog;
 import java.util.Collections;
 import java.util.List;
 
@@ -47,11 +49,12 @@ import java.util.List;
  * A wrapper around a TrustAgentService interface. Coordinates communication between
  * TrustManager and the actual TrustAgent.
  */
+@TargetApi(Build.VERSION_CODES.LOLLIPOP)
 public class TrustAgentWrapper {
     private static final String EXTRA_COMPONENT_NAME = "componentName";
     private static final String TRUST_EXPIRED_ACTION = "android.server.trust.TRUST_EXPIRED_ACTION";
     private static final String PERMISSION = android.Manifest.permission.PROVIDE_TRUST_AGENT;
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = TrustManagerService.DEBUG;
     private static final String TAG = "TrustAgentWrapper";
 
     private static final int MSG_GRANT_TRUST = 1;
@@ -60,6 +63,10 @@ public class TrustAgentWrapper {
     private static final int MSG_RESTART_TIMEOUT = 4;
     private static final int MSG_SET_TRUST_AGENT_FEATURES_COMPLETED = 5;
     private static final int MSG_MANAGING_TRUST = 6;
+    private static final int MSG_ADD_ESCROW_TOKEN = 7;
+    private static final int MSG_REMOVE_ESCROW_TOKEN = 8;
+    private static final int MSG_ESCROW_TOKEN_STATE = 9;
+    private static final int MSG_UNLOCK_USER = 10;
 
     /**
      * Time in uptime millis that we wait for the service connection, both when starting
@@ -71,6 +78,9 @@ public class TrustAgentWrapper {
      * Long extra for {@link #MSG_GRANT_TRUST}
      */
     private static final String DATA_DURATION = "duration";
+    private static final String DATA_ESCROW_TOKEN = "escrow_token";
+    private static final String DATA_HANDLE = "handle";
+    private static final String DATA_USER_ID = "user_id";
 
     private final TrustManagerService mTrustManagerService;
     private final int mUserId;
@@ -128,7 +138,7 @@ public class TrustAgentWrapper {
                             // DevicePolicyManager#KEYGUARD_DISABLE_TRUST_AGENTS.
                             duration = Math.min(durationMs, mMaximumTimeToLock);
                             if (DEBUG) {
-                                Log.v(TAG, "DPM lock timeout in effect. Timeout adjusted from "
+                                Slog.d(TAG, "DPM lock timeout in effect. Timeout adjusted from "
                                     + durationMs + " to " + duration);
                             }
                         } else {
@@ -146,7 +156,7 @@ public class TrustAgentWrapper {
                     mTrustManagerService.updateTrust(mUserId, flags);
                     break;
                 case MSG_TRUST_TIMEOUT:
-                    if (DEBUG) Slog.v(TAG, "Trust timed out : " + mName.flattenToShortString());
+                    if (DEBUG) Slog.d(TAG, "Trust timed out : " + mName.flattenToShortString());
                     mTrustManagerService.mArchive.logTrustTimeout(mUserId, mName);
                     onTrustTimeout();
                     // Fall through.
@@ -160,6 +170,8 @@ public class TrustAgentWrapper {
                     mTrustManagerService.updateTrust(mUserId, 0);
                     break;
                 case MSG_RESTART_TIMEOUT:
+                    Slog.w(TAG, "Connection attempt to agent " + mName.flattenToShortString()
+                            + " timed out, rebinding");
                     destroy();
                     mTrustManagerService.resetAgent(mName, mUserId);
                     break;
@@ -169,14 +181,14 @@ public class TrustAgentWrapper {
                     if (mSetTrustAgentFeaturesToken == token) {
                         mSetTrustAgentFeaturesToken = null;
                         if (mTrustDisabledByDpm && result) {
-                            if (DEBUG) Log.v(TAG, "Re-enabling agent because it acknowledged "
-                                    + "enabled features: " + mName);
+                            if (DEBUG) Slog.d(TAG, "Re-enabling agent because it acknowledged "
+                                    + "enabled features: " + mName.flattenToShortString());
                             mTrustDisabledByDpm = false;
                             mTrustManagerService.updateTrust(mUserId, 0);
                         }
                     } else {
-                        if (DEBUG) Log.w(TAG, "Ignoring MSG_SET_TRUST_AGENT_FEATURES_COMPLETED "
-                                + "with obsolete token: " + mName);
+                        if (DEBUG) Slog.w(TAG, "Ignoring MSG_SET_TRUST_AGENT_FEATURES_COMPLETED "
+                                + "with obsolete token: " + mName.flattenToShortString());
                     }
                     break;
                 case MSG_MANAGING_TRUST:
@@ -188,6 +200,61 @@ public class TrustAgentWrapper {
                     mTrustManagerService.mArchive.logManagingTrust(mUserId, mName, mManagingTrust);
                     mTrustManagerService.updateTrust(mUserId, 0);
                     break;
+                case MSG_ADD_ESCROW_TOKEN: {
+                    byte[] eToken = msg.getData().getByteArray(DATA_ESCROW_TOKEN);
+                    int userId = msg.getData().getInt(DATA_USER_ID);
+                    long handle = mTrustManagerService.addEscrowToken(eToken, userId);
+                    boolean resultDeliverred = false;
+                    try {
+                        if (mTrustAgentService != null) {
+                            mTrustAgentService.onEscrowTokenAdded(
+                                    eToken, handle, UserHandle.of(userId));
+                            resultDeliverred = true;
+                        }
+                    } catch (RemoteException e) {
+                        onError(e);
+                    }
+
+                    if (!resultDeliverred) {
+                        mTrustManagerService.removeEscrowToken(handle, userId);
+                    }
+                    break;
+                }
+                case MSG_ESCROW_TOKEN_STATE: {
+                    long handle = msg.getData().getLong(DATA_HANDLE);
+                    int userId = msg.getData().getInt(DATA_USER_ID);
+                    boolean active = mTrustManagerService.isEscrowTokenActive(handle, userId);
+                    try {
+                        if (mTrustAgentService != null) {
+                            mTrustAgentService.onTokenStateReceived(handle,
+                                    active ? TrustAgentService.TOKEN_STATE_ACTIVE
+                                            : TrustAgentService.TOKEN_STATE_INACTIVE);
+                        }
+                    } catch (RemoteException e) {
+                        onError(e);
+                    }
+                    break;
+                }
+                case MSG_REMOVE_ESCROW_TOKEN: {
+                    long handle = msg.getData().getLong(DATA_HANDLE);
+                    int userId = msg.getData().getInt(DATA_USER_ID);
+                    boolean success = mTrustManagerService.removeEscrowToken(handle, userId);
+                    try {
+                        if (mTrustAgentService != null) {
+                            mTrustAgentService.onEscrowTokenRemoved(handle, success);
+                        }
+                    } catch (RemoteException e) {
+                        onError(e);
+                    }
+                    break;
+                }
+                case MSG_UNLOCK_USER: {
+                    long handle = msg.getData().getLong(DATA_HANDLE);
+                    int userId = msg.getData().getInt(DATA_USER_ID);
+                    byte[] eToken = msg.getData().getByteArray(DATA_ESCROW_TOKEN);
+                    mTrustManagerService.unlockUserWithToken(handle, eToken, userId);
+                    break;
+                }
             }
         }
     };
@@ -196,7 +263,7 @@ public class TrustAgentWrapper {
 
         @Override
         public void grantTrust(CharSequence userMessage, long durationMs, int flags) {
-            if (DEBUG) Slog.v(TAG, "enableTrust(" + userMessage + ", durationMs = " + durationMs
+            if (DEBUG) Slog.d(TAG, "enableTrust(" + userMessage + ", durationMs = " + durationMs
                         + ", flags = " + flags + ")");
 
             Message msg = mHandler.obtainMessage(
@@ -207,28 +274,85 @@ public class TrustAgentWrapper {
 
         @Override
         public void revokeTrust() {
-            if (DEBUG) Slog.v(TAG, "revokeTrust()");
+            if (DEBUG) Slog.d(TAG, "revokeTrust()");
             mHandler.sendEmptyMessage(MSG_REVOKE_TRUST);
         }
 
         @Override
         public void setManagingTrust(boolean managingTrust) {
-            if (DEBUG) Slog.v(TAG, "managingTrust()");
+            if (DEBUG) Slog.d(TAG, "managingTrust()");
             mHandler.obtainMessage(MSG_MANAGING_TRUST, managingTrust ? 1 : 0, 0).sendToTarget();
         }
 
         @Override
         public void onConfigureCompleted(boolean result, IBinder token) {
-            if (DEBUG) Slog.v(TAG, "onSetTrustAgentFeaturesEnabledCompleted(result=" + result);
+            if (DEBUG) Slog.d(TAG, "onSetTrustAgentFeaturesEnabledCompleted(result=" + result);
             mHandler.obtainMessage(MSG_SET_TRUST_AGENT_FEATURES_COMPLETED,
                     result ? 1 : 0, 0, token).sendToTarget();
+        }
+
+        @Override
+        public void addEscrowToken(byte[] token, int userId) {
+            if (mContext.getResources()
+                    .getBoolean(com.android.internal.R.bool.config_allowEscrowTokenForTrustAgent)) {
+                throw  new SecurityException("Escrow token API is not allowed.");
+            }
+
+            if (DEBUG) Slog.d(TAG, "adding escrow token for user " + userId);
+            Message msg = mHandler.obtainMessage(MSG_ADD_ESCROW_TOKEN);
+            msg.getData().putByteArray(DATA_ESCROW_TOKEN, token);
+            msg.getData().putInt(DATA_USER_ID, userId);
+            msg.sendToTarget();
+        }
+
+        @Override
+        public void isEscrowTokenActive(long handle, int userId) {
+            if (mContext.getResources()
+                    .getBoolean(com.android.internal.R.bool.config_allowEscrowTokenForTrustAgent)) {
+                throw new SecurityException("Escrow token API is not allowed.");
+            }
+
+            if (DEBUG) Slog.d(TAG, "checking the state of escrow token on user " + userId);
+            Message msg = mHandler.obtainMessage(MSG_ESCROW_TOKEN_STATE);
+            msg.getData().putLong(DATA_HANDLE, handle);
+            msg.getData().putInt(DATA_USER_ID, userId);
+            msg.sendToTarget();
+        }
+
+        @Override
+        public void removeEscrowToken(long handle, int userId) {
+            if (mContext.getResources()
+                    .getBoolean(com.android.internal.R.bool.config_allowEscrowTokenForTrustAgent)) {
+                throw new SecurityException("Escrow token API is not allowed.");
+            }
+
+            if (DEBUG) Slog.d(TAG, "removing escrow token on user " + userId);
+            Message msg = mHandler.obtainMessage(MSG_REMOVE_ESCROW_TOKEN);
+            msg.getData().putLong(DATA_HANDLE, handle);
+            msg.getData().putInt(DATA_USER_ID, userId);
+            msg.sendToTarget();
+        }
+
+        @Override
+        public void unlockUserWithToken(long handle, byte[] token, int userId) {
+            if (mContext.getResources()
+                    .getBoolean(com.android.internal.R.bool.config_allowEscrowTokenForTrustAgent)) {
+                throw new SecurityException("Escrow token API is not allowed.");
+            }
+
+            if (DEBUG) Slog.d(TAG, "unlocking user " + userId);
+            Message msg = mHandler.obtainMessage(MSG_UNLOCK_USER);
+            msg.getData().putInt(DATA_USER_ID, userId);
+            msg.getData().putLong(DATA_HANDLE, handle);
+            msg.getData().putByteArray(DATA_ESCROW_TOKEN, token);
+            msg.sendToTarget();
         }
     };
 
     private final ServiceConnection mConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            if (DEBUG) Log.v(TAG, "TrustAgent started : " + name.flattenToString());
+            if (DEBUG) Slog.d(TAG, "TrustAgent started : " + name.flattenToString());
             mHandler.removeMessages(MSG_RESTART_TIMEOUT);
             mTrustAgentService = ITrustAgentService.Stub.asInterface(service);
             mTrustManagerService.mArchive.logAgentConnected(mUserId, name);
@@ -249,7 +373,7 @@ public class TrustAgentWrapper {
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-            if (DEBUG) Log.v(TAG, "TrustAgent disconnected : " + name.flattenToShortString());
+            if (DEBUG) Slog.d(TAG, "TrustAgent disconnected : " + name.flattenToShortString());
             mTrustAgentService = null;
             mManagingTrust = false;
             mSetTrustAgentFeaturesToken = null;
@@ -292,7 +416,7 @@ public class TrustAgentWrapper {
     }
 
     private void onError(Exception e) {
-        Slog.w(TAG , "Remote Exception", e);
+        Slog.w(TAG , "Exception ", e);
     }
 
     private void onTrustTimeout() {
@@ -312,6 +436,19 @@ public class TrustAgentWrapper {
                 mTrustAgentService.onUnlockAttempt(successful);
             } else {
                 mPendingSuccessfulUnlock = successful;
+            }
+        } catch (RemoteException e) {
+            onError(e);
+        }
+    }
+
+    /**
+     * @see android.service.trust.TrustAgentService#onUnlockLockout(int)
+     */
+    public void onUnlockLockout(int timeoutMs) {
+        try {
+            if (mTrustAgentService != null) {
+                mTrustAgentService.onUnlockLockout(timeoutMs);
             }
         } catch (RemoteException e) {
             onError(e);
@@ -352,7 +489,7 @@ public class TrustAgentWrapper {
 
     boolean updateDevicePolicyFeatures() {
         boolean trustDisabled = false;
-        if (DEBUG) Slog.v(TAG, "updateDevicePolicyFeatures(" + mName + ")");
+        if (DEBUG) Slog.d(TAG, "updateDevicePolicyFeatures(" + mName + ")");
         try {
             if (mTrustAgentService != null) {
                 DevicePolicyManager dpm =
@@ -363,10 +500,10 @@ public class TrustAgentWrapper {
                     List<PersistableBundle> config = dpm.getTrustAgentConfiguration(
                             null, mName, mUserId);
                     trustDisabled = true;
-                    if (DEBUG) Slog.v(TAG, "Detected trust agents disabled. Config = " + config);
+                    if (DEBUG) Slog.d(TAG, "Detected trust agents disabled. Config = " + config);
                     if (config != null && config.size() > 0) {
                         if (DEBUG) {
-                            Slog.v(TAG, "TrustAgent " + mName.flattenToShortString()
+                            Slog.d(TAG, "TrustAgent " + mName.flattenToShortString()
                                     + " disabled until it acknowledges "+ config);
                         }
                         mSetTrustAgentFeaturesToken = new Binder();
@@ -415,7 +552,7 @@ public class TrustAgentWrapper {
         if (!mBound) {
             return;
         }
-        if (DEBUG) Log.v(TAG, "TrustAgent unbound : " + mName.flattenToShortString());
+        if (DEBUG) Slog.d(TAG, "TrustAgent unbound : " + mName.flattenToShortString());
         mTrustManagerService.mArchive.logAgentStopped(mUserId, mName);
         mContext.unbindService(mConnection);
         mBound = false;

@@ -16,7 +16,7 @@
 
 #define LOG_TAG "PointerIcon-JNI"
 
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 
 #include "android_view_PointerIcon.h"
 
@@ -24,7 +24,7 @@
 #include <android_runtime/Log.h>
 #include <utils/Log.h>
 #include <android/graphics/GraphicsJNI.h>
-#include "ScopedLocalRef.h"
+#include <nativehelper/ScopedLocalRef.h>
 
 #include "core_jni_helpers.h"
 
@@ -78,6 +78,9 @@ status_t android_view_PointerIcon_load(JNIEnv* env, jobject pointerIconObj, jobj
 
 status_t android_view_PointerIcon_getLoadedIcon(JNIEnv* env, jobject pointerIconObj,
         PointerIcon* outPointerIcon) {
+    if (!pointerIconObj) {
+        return BAD_VALUE;
+    }
     outPointerIcon->style = env->GetIntField(pointerIconObj, gPointerIconClassInfo.mType);
     outPointerIcon->hotSpotX = env->GetFloatField(pointerIconObj, gPointerIconClassInfo.mHotSpotX);
     outPointerIcon->hotSpotY = env->GetFloatField(pointerIconObj, gPointerIconClassInfo.mHotSpotY);

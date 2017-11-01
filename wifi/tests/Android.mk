@@ -58,5 +58,6 @@ LOCAL_JAVA_LIBRARIES := \
 	android.test.runner \
 
 LOCAL_PACKAGE_NAME := FrameworksWifiApiTests
+LOCAL_COMPATIBILITY_SUITE := device-tests
 
 include $(BUILD_PACKAGE)

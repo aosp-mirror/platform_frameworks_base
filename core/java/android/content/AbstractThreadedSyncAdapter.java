@@ -17,11 +17,12 @@
 package android.content;
 
 import android.accounts.Account;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Process;
-import android.os.RemoteException;
 import android.os.Trace;
+import android.util.Log;
 
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -95,12 +96,16 @@ import java.util.concurrent.atomic.AtomicInteger;
  * </ul>
  */
 public abstract class AbstractThreadedSyncAdapter {
+    private static final String TAG = "SyncAdapter";
+
     /**
      * Kernel event log tag.  Also listed in data/etc/event-log-tags.
      * @deprecated Private constant.  May go away in the next release.
      */
     @Deprecated
     public static final int LOG_SYNC_DETAILS = 2743;
+
+    private static final boolean ENABLE_LOG = Build.IS_DEBUGGABLE && Log.isLoggable(TAG, Log.DEBUG);
 
     private final Context mContext;
     private final AtomicInteger mNumSyncStarts;
@@ -163,70 +168,103 @@ public abstract class AbstractThreadedSyncAdapter {
         @Override
         public void startSync(ISyncContext syncContext, String authority, Account account,
                 Bundle extras) {
-            final SyncContext syncContextClient = new SyncContext(syncContext);
-
-            boolean alreadyInProgress;
-            // synchronize to make sure that mSyncThreads doesn't change between when we
-            // check it and when we use it
-            final Account threadsKey = toSyncKey(account);
-            synchronized (mSyncThreadLock) {
-                if (!mSyncThreads.containsKey(threadsKey)) {
-                    if (mAutoInitialize
-                            && extras != null
-                            && extras.getBoolean(ContentResolver.SYNC_EXTRAS_INITIALIZE, false)) {
-                        try {
-                            if (ContentResolver.getIsSyncable(account, authority) < 0) {
-                                ContentResolver.setIsSyncable(account, authority, 1);
-                            }
-                        } finally {
-                            syncContextClient.onFinished(new SyncResult());
-                        }
-                        return;
-                    }
-                    SyncThread syncThread = new SyncThread(
-                            "SyncAdapterThread-" + mNumSyncStarts.incrementAndGet(),
-                            syncContextClient, authority, account, extras);
-                    mSyncThreads.put(threadsKey, syncThread);
-                    syncThread.start();
-                    alreadyInProgress = false;
-                } else {
-                    alreadyInProgress = true;
+            if (ENABLE_LOG) {
+                if (extras != null) {
+                    extras.size(); // Unparcel so its toString() will show the contents.
                 }
+                Log.d(TAG, "startSync() start " + authority + " " + account + " " + extras);
             }
+            try {
+                final SyncContext syncContextClient = new SyncContext(syncContext);
 
-            // do this outside since we don't want to call back into the syncContext while
-            // holding the synchronization lock
-            if (alreadyInProgress) {
-                syncContextClient.onFinished(SyncResult.ALREADY_IN_PROGRESS);
+                boolean alreadyInProgress;
+                // synchronize to make sure that mSyncThreads doesn't change between when we
+                // check it and when we use it
+                final Account threadsKey = toSyncKey(account);
+                synchronized (mSyncThreadLock) {
+                    if (!mSyncThreads.containsKey(threadsKey)) {
+                        if (mAutoInitialize
+                                && extras != null
+                                && extras.getBoolean(
+                                        ContentResolver.SYNC_EXTRAS_INITIALIZE, false)) {
+                            try {
+                                if (ContentResolver.getIsSyncable(account, authority) < 0) {
+                                    ContentResolver.setIsSyncable(account, authority, 1);
+                                }
+                            } finally {
+                                syncContextClient.onFinished(new SyncResult());
+                            }
+                            return;
+                        }
+                        SyncThread syncThread = new SyncThread(
+                                "SyncAdapterThread-" + mNumSyncStarts.incrementAndGet(),
+                                syncContextClient, authority, account, extras);
+                        mSyncThreads.put(threadsKey, syncThread);
+                        syncThread.start();
+                        alreadyInProgress = false;
+                    } else {
+                        if (ENABLE_LOG) {
+                            Log.d(TAG, "  alreadyInProgress");
+                        }
+                        alreadyInProgress = true;
+                    }
+                }
+
+                // do this outside since we don't want to call back into the syncContext while
+                // holding the synchronization lock
+                if (alreadyInProgress) {
+                    syncContextClient.onFinished(SyncResult.ALREADY_IN_PROGRESS);
+                }
+            } catch (RuntimeException | Error th) {
+                if (ENABLE_LOG) {
+                    Log.d(TAG, "startSync() caught exception", th);
+                }
+                throw th;
+            } finally {
+                if (ENABLE_LOG) {
+                    Log.d(TAG, "startSync() finishing");
+                }
             }
         }
 
         @Override
         public void cancelSync(ISyncContext syncContext) {
-            // synchronize to make sure that mSyncThreads doesn't change between when we
-            // check it and when we use it
-            SyncThread info = null;
-            synchronized (mSyncThreadLock) {
-                for (SyncThread current : mSyncThreads.values()) {
-                    if (current.mSyncContext.getSyncContextBinder() == syncContext.asBinder()) {
-                        info = current;
-                        break;
+            try {
+                // synchronize to make sure that mSyncThreads doesn't change between when we
+                // check it and when we use it
+                SyncThread info = null;
+                synchronized (mSyncThreadLock) {
+                    for (SyncThread current : mSyncThreads.values()) {
+                        if (current.mSyncContext.getSyncContextBinder() == syncContext.asBinder()) {
+                            info = current;
+                            break;
+                        }
                     }
                 }
-            }
-            if (info != null) {
-                if (mAllowParallelSyncs) {
-                    onSyncCanceled(info);
+                if (info != null) {
+                    if (ENABLE_LOG) {
+                        Log.d(TAG, "cancelSync() " + info.mAuthority + " " + info.mAccount);
+                    }
+                    if (mAllowParallelSyncs) {
+                        onSyncCanceled(info);
+                    } else {
+                        onSyncCanceled();
+                    }
                 } else {
-                    onSyncCanceled();
+                    if (ENABLE_LOG) {
+                        Log.w(TAG, "cancelSync() unknown context");
+                    }
+                }
+            } catch (RuntimeException | Error th) {
+                if (ENABLE_LOG) {
+                    Log.d(TAG, "cancelSync() caught exception", th);
+                }
+                throw th;
+            } finally {
+                if (ENABLE_LOG) {
+                    Log.d(TAG, "cancelSync() finishing");
                 }
             }
-        }
-
-        public void initialize(Account account, String authority) throws RemoteException {
-            Bundle extras = new Bundle();
-            extras.putBoolean(ContentResolver.SYNC_EXTRAS_INITIALIZE, true);
-            startSync(null, authority, account, extras);
         }
     }
 
@@ -256,6 +294,10 @@ public abstract class AbstractThreadedSyncAdapter {
         public void run() {
             Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
 
+            if (ENABLE_LOG) {
+                Log.d(TAG, "Thread started");
+            }
+
             // Trace this sync instance.  Note, conceptually this should be in
             // SyncStorageEngine.insertStartSyncEvent(), but the trace functions require unique
             // threads in order to track overlapping operations, so we'll do it here for now.
@@ -265,8 +307,15 @@ public abstract class AbstractThreadedSyncAdapter {
             ContentProviderClient provider = null;
             try {
                 if (isCanceled()) {
+                    if (ENABLE_LOG) {
+                        Log.d(TAG, "Already canceled");
+                    }
                     return;
                 }
+                if (ENABLE_LOG) {
+                    Log.d(TAG, "Calling onPerformSync...");
+                }
+
                 provider = mContext.getContentResolver().acquireContentProviderClient(mAuthority);
                 if (provider != null) {
                     AbstractThreadedSyncAdapter.this.onPerformSync(mAccount, mExtras,
@@ -274,10 +323,23 @@ public abstract class AbstractThreadedSyncAdapter {
                 } else {
                     syncResult.databaseError = true;
                 }
+
+                if (ENABLE_LOG) {
+                    Log.d(TAG, "onPerformSync done");
+                }
+
             } catch (SecurityException e) {
+                if (ENABLE_LOG) {
+                    Log.d(TAG, "SecurityException", e);
+                }
                 AbstractThreadedSyncAdapter.this.onSecurityException(mAccount, mExtras,
                         mAuthority, syncResult);
                 syncResult.databaseError = true;
+            } catch (RuntimeException | Error th) {
+                if (ENABLE_LOG) {
+                    Log.d(TAG, "caught exception", th);
+                }
+                throw th;
             } finally {
                 Trace.traceEnd(Trace.TRACE_TAG_SYNC_MANAGER);
 
@@ -291,6 +353,10 @@ public abstract class AbstractThreadedSyncAdapter {
                 // that also synchronize accesses to mSyncThreads
                 synchronized (mSyncThreadLock) {
                     mSyncThreads.remove(mThreadsKey);
+                }
+
+                if (ENABLE_LOG) {
+                    Log.d(TAG, "Thread finished");
                 }
             }
         }

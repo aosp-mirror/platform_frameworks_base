@@ -25,6 +25,7 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
 import android.content.DialogInterface.OnShowListener;
+import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.util.Log;
 import android.view.View;
@@ -132,15 +133,24 @@ public class VolumeDialogMotion {
                 .setDuration(scaledDuration(300))
                 .setInterpolator(new LogDecelerateInterpolator())
                 .setListener(null)
-                .setUpdateListener(new AnimatorUpdateListener() {
-                    @Override
-                    public void onAnimationUpdate(ValueAnimator animation) {
+                .setUpdateListener(animation -> {
+                    if (mChevronPositionAnimator != null) {
+                        final float v = (Float) mChevronPositionAnimator.getAnimatedValue();
                         if (mChevronPositionAnimator == null) return;
                         // reposition chevron
-                        final float v = (Float) mChevronPositionAnimator.getAnimatedValue();
                         final int posY = chevronPosY();
                         mChevron.setTranslationY(posY + v + -mDialogView.getTranslationY());
-                    }})
+                    }
+                })
+                .withEndAction(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (mChevronPositionAnimator == null) return;
+                        // reposition chevron
+                        final int posY = chevronPosY();
+                        mChevron.setTranslationY(posY + -mDialogView.getTranslationY());
+                    }
+                })
                 .start();
 
         mContentsPositionAnimator = ValueAnimator.ofFloat(-chevronDistance(), 0)
@@ -248,13 +258,13 @@ public class VolumeDialogMotion {
         return (int) (base * ANIMATION_SCALE);
     }
 
-    private static final class LogDecelerateInterpolator implements TimeInterpolator {
+    public static final class LogDecelerateInterpolator implements TimeInterpolator {
         private final float mBase;
         private final float mDrift;
         private final float mTimeScale;
         private final float mOutputScale;
 
-        private LogDecelerateInterpolator() {
+        public LogDecelerateInterpolator() {
             this(400f, 1.4f, 0);
         }
 
@@ -276,12 +286,12 @@ public class VolumeDialogMotion {
         }
     }
 
-    private static final class LogAccelerateInterpolator implements TimeInterpolator {
+    public static final class LogAccelerateInterpolator implements TimeInterpolator {
         private final int mBase;
         private final int mDrift;
         private final float mLogScale;
 
-        private LogAccelerateInterpolator() {
+        public LogAccelerateInterpolator() {
             this(100, 0);
         }
 

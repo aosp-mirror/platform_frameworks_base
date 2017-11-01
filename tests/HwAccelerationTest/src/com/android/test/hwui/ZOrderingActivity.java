@@ -12,7 +12,7 @@ public class ZOrderingActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.z_ordering);
 
-        ViewGroup grandParent = (ViewGroup) findViewById(R.id.parent);
+        ViewGroup grandParent = findViewById(R.id.parent);
         if (grandParent == null) throw new IllegalStateException();
         View.OnClickListener l = new View.OnClickListener() {
             @Override

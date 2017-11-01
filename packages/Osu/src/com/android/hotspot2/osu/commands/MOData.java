@@ -22,16 +22,6 @@ public class MOData implements OSUCommandData {
         mMOTree = root.getMOTree();
     }
 
-    public MOData(PasspointManagementObjectDefinition moDef) throws IOException, SAXException {
-        mBaseURI = ""; //moDef.getmBaseUri();
-        mURN = ""; // moDef.getmUrn();
-        /*
-        OMAParser omaParser = new OMAParser();
-        mMOTree = omaParser.parse(moDef.getmMoTree(), OMAConstants.PPS_URN);
-        */
-        mMOTree = null;
-    }
-
     public String getBaseURI() {
         return mBaseURI;
     }

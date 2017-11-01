@@ -167,6 +167,7 @@ public final class GeofenceHardware {
             mMonitorCallbacks = new HashMap<GeofenceHardwareMonitorCallback,
                     GeofenceHardwareMonitorCallbackWrapper>();
 
+    /** @hide */
     public GeofenceHardware(IGeofenceHardware service) {
         mService = service;
     }

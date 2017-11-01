@@ -262,10 +262,9 @@ final class HotplugDetectionAction extends HdmiCecFeatureAction {
             return;
         }
 
-        // Turn off system audio mode and update settings.
-        tv().setSystemAudioMode(false, true);
+        tv().setSystemAudioMode(false);
         if (tv().isArcEstablished()) {
-            tv().setAudioReturnChannel(false);
+            tv().enableAudioReturnChannel(false);
             addAndStartAction(new RequestArcTerminationAction(localDevice(), address));
         }
     }

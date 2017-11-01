@@ -16,6 +16,9 @@
 
 package android.os;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+
 /**
  * Handy class for starting a new thread that has a looper. The looper can then be 
  * used to create handler classes. Note that start() must still be called.
@@ -24,6 +27,7 @@ public class HandlerThread extends Thread {
     int mPriority;
     int mTid = -1;
     Looper mLooper;
+    private @Nullable Handler mHandler;
 
     public HandlerThread(String name) {
         super(name);
@@ -64,7 +68,7 @@ public class HandlerThread extends Thread {
     
     /**
      * This method returns the Looper associated with this thread. If this thread not been started
-     * or for any reason is isAlive() returns false, this method will return null. If this thread 
+     * or for any reason isAlive() returns false, this method will return null. If this thread
      * has been started, this method will block until the looper has been initialized.  
      * @return The looper.
      */
@@ -83,6 +87,18 @@ public class HandlerThread extends Thread {
             }
         }
         return mLooper;
+    }
+
+    /**
+     * @return a shared {@link Handler} associated with this thread
+     * @hide
+     */
+    @NonNull
+    public Handler getThreadHandler() {
+        if (mHandler == null) {
+            mHandler = new Handler(getLooper());
+        }
+        return mHandler;
     }
 
     /**

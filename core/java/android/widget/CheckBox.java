@@ -19,7 +19,6 @@ package android.widget;
 import android.content.Context;
 import android.util.AttributeSet;
 
-
 /**
  * <p>
  * A checkbox is a specific type of two-states button that can be either
@@ -44,12 +43,12 @@ import android.util.AttributeSet;
  *
  * <p>See the <a href="{@docRoot}guide/topics/ui/controls/checkbox.html">Checkboxes</a>
  * guide.</p>
- *  
- * <p><strong>XML attributes</strong></p> 
+ *
+ * <p><strong>XML attributes</strong></p>
  * <p>
- * See {@link android.R.styleable#CompoundButton CompoundButton Attributes}, 
- * {@link android.R.styleable#Button Button Attributes}, 
- * {@link android.R.styleable#TextView TextView Attributes}, 
+ * See {@link android.R.styleable#CompoundButton CompoundButton Attributes},
+ * {@link android.R.styleable#Button Button Attributes},
+ * {@link android.R.styleable#TextView TextView Attributes},
  * {@link android.R.styleable#View View Attributes}
  * </p>
  */
@@ -57,7 +56,7 @@ public class CheckBox extends CompoundButton {
     public CheckBox(Context context) {
         this(context, null);
     }
-    
+
     public CheckBox(Context context, AttributeSet attrs) {
         this(context, attrs, com.android.internal.R.attr.checkboxStyle);
     }

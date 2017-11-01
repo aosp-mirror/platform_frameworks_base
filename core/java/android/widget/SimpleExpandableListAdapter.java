@@ -17,9 +17,9 @@
 package android.widget;
 
 import android.content.Context;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.LayoutInflater;
 
 import java.util.List;
 import java.util.Map;
@@ -42,18 +42,18 @@ public class SimpleExpandableListAdapter extends BaseExpandableListAdapter {
     private int mCollapsedGroupLayout;
     private String[] mGroupFrom;
     private int[] mGroupTo;
-    
+
     private List<? extends List<? extends Map<String, ?>>> mChildData;
     private int mChildLayout;
     private int mLastChildLayout;
     private String[] mChildFrom;
     private int[] mChildTo;
-    
+
     private LayoutInflater mInflater;
-    
+
     /**
      * Constructor
-     * 
+     *
      * @param context The context where the {@link ExpandableListView}
      *            associated with this {@link SimpleExpandableListAdapter} is
      *            running
@@ -98,7 +98,7 @@ public class SimpleExpandableListAdapter extends BaseExpandableListAdapter {
 
     /**
      * Constructor
-     * 
+     *
      * @param context The context where the {@link ExpandableListView}
      *            associated with this {@link SimpleExpandableListAdapter} is
      *            running
@@ -147,7 +147,7 @@ public class SimpleExpandableListAdapter extends BaseExpandableListAdapter {
 
     /**
      * Constructor
-     * 
+     *
      * @param context The context where the {@link ExpandableListView}
      *            associated with this {@link SimpleExpandableListAdapter} is
      *            running
@@ -200,16 +200,16 @@ public class SimpleExpandableListAdapter extends BaseExpandableListAdapter {
         mCollapsedGroupLayout = collapsedGroupLayout;
         mGroupFrom = groupFrom;
         mGroupTo = groupTo;
-        
+
         mChildData = childData;
         mChildLayout = childLayout;
         mLastChildLayout = lastChildLayout;
         mChildFrom = childFrom;
         mChildTo = childTo;
-        
+
         mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
-    
+
     public Object getChild(int groupPosition, int childPosition) {
         return mChildData.get(groupPosition).get(childPosition);
     }
@@ -239,7 +239,7 @@ public class SimpleExpandableListAdapter extends BaseExpandableListAdapter {
     public View newChildView(boolean isLastChild, ViewGroup parent) {
         return mInflater.inflate((isLastChild) ? mLastChildLayout : mChildLayout, parent, false);
     }
-    
+
     private void bindView(View view, Map<String, ?> data, String[] from, int[] to) {
         int len = to.length;
 

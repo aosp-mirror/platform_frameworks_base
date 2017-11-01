@@ -20,7 +20,7 @@
 
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
-#include <SkXfermode.h>
+#include <SkBlendMode.h>
 #include <memory>
 
 namespace android {
@@ -36,7 +36,7 @@ public:
     };
     void syncEnabled();
 
-    static void getFactors(SkXfermode::Mode mode, ModeOrderSwap modeUsage,
+    static void getFactors(SkBlendMode mode, ModeOrderSwap modeUsage,
             GLenum* outSrc, GLenum* outDst);
     void setFactors(GLenum src, GLenum dst);
 

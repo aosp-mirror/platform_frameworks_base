@@ -39,9 +39,9 @@ const FrameBuilder::LightGeometry sLightGeometry = { {100, 100, 100}, 50};
 const BakedOpRenderer::LightInfo sLightInfo = { 128, 128 };
 
 static sp<RenderNode> createTestNode() {
-    auto node = TestUtils::createNode(0, 0, 200, 200,
+    auto node = TestUtils::createNode<RecordingCanvas>(0, 0, 200, 200,
             [](RenderProperties& props, RecordingCanvas& canvas) {
-        SkBitmap bitmap = TestUtils::createSkBitmap(10, 10);
+        sk_sp<Bitmap> bitmap(TestUtils::createBitmap(10, 10));
         SkPaint paint;
 
         // Alternate between drawing rects and bitmaps, with bitmaps overlapping rects.
@@ -50,7 +50,7 @@ static sp<RenderNode> createTestNode() {
         for (int i = 0; i < 30; i++) {
             canvas.translate(0, 10);
             canvas.drawRect(0, 0, 10, 10, paint);
-            canvas.drawBitmap(bitmap, 5, 0, nullptr);
+            canvas.drawBitmap(*bitmap, 5, 0, nullptr);
         }
         canvas.restore();
     });
@@ -83,7 +83,7 @@ void BM_FrameBuilder_deferAndRender(benchmark::State& state) {
                     sLightGeometry, caches);
             frameBuilder.deferRenderNode(*node);
 
-            BakedOpRenderer renderer(caches, renderState, true, sLightInfo);
+            BakedOpRenderer renderer(caches, renderState, true, false, sLightInfo);
             frameBuilder.replayBakedOps<BakedOpDispatcher>(renderer);
             benchmark::DoNotOptimize(&renderer);
         }
@@ -98,8 +98,8 @@ static sp<RenderNode> getSyncedSceneNode(const char* sceneName) {
     TestScene::Options opts;
     std::unique_ptr<TestScene> scene(TestScene::testMap()[sceneName].createScene(opts));
 
-    sp<RenderNode> rootNode = TestUtils::createNode(0, 0, gDisplay.w, gDisplay.h,
-                [&scene](RenderProperties& props, TestCanvas& canvas) {
+    sp<RenderNode> rootNode = TestUtils::createNode<RecordingCanvas>(0, 0, gDisplay.w, gDisplay.h,
+                [&scene](RenderProperties& props, RecordingCanvas& canvas) {
             scene->createContent(gDisplay.w, gDisplay.h, canvas);
     });
 
@@ -142,7 +142,7 @@ void BM_FrameBuilder_deferAndRender_scene(benchmark::State& state) {
                     sLightGeometry, Caches::getInstance());
             frameBuilder.deferRenderNode(*node);
 
-            BakedOpRenderer renderer(caches, renderState, true, sLightInfo);
+            BakedOpRenderer renderer(caches, renderState, true, false, sLightInfo);
             frameBuilder.replayBakedOps<BakedOpDispatcher>(renderer);
             benchmark::DoNotOptimize(&renderer);
         }

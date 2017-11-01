@@ -45,7 +45,7 @@ import android.test.MoreAsserts;
 import android.test.suitebuilder.annotation.SmallTest;
 
 import com.android.frameworks.servicestests.R;
-import com.android.server.pm.ShortcutService.ConfigConstants;
+import com.android.server.pm.ShortcutUser.PackageWithUser;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -931,6 +931,74 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         dumpUserFile(USER_10);
     }
 
+    public void testShortcutInfoSaveAndLoad_maskableBitmap() throws InterruptedException {
+        mRunningUsers.put(USER_10, true);
+
+        setCaller(CALLING_PACKAGE_1, USER_10);
+
+        final Icon bmp32x32 = Icon.createWithAdaptiveBitmap(BitmapFactory.decodeResource(
+            getTestContext().getResources(), R.drawable.black_32x32));
+
+        PersistableBundle pb = new PersistableBundle();
+        pb.putInt("k", 1);
+        ShortcutInfo sorig = new ShortcutInfo.Builder(mClientContext)
+            .setId("id")
+            .setActivity(new ComponentName(mClientContext, ShortcutActivity2.class))
+            .setIcon(bmp32x32)
+            .setTitle("title")
+            .setText("text")
+            .setDisabledMessage("dismes")
+            .setCategories(set(ShortcutInfo.SHORTCUT_CATEGORY_CONVERSATION, "xyz"))
+            .setIntent(makeIntent("action", ShortcutActivity.class, "key", "val"))
+            .setRank(123)
+            .setExtras(pb)
+            .build();
+        sorig.setTimestamp(mInjectedCurrentTimeMillis);
+
+        mManager.addDynamicShortcuts(list(sorig));
+
+        mInjectedCurrentTimeMillis += 1;
+        final long now = mInjectedCurrentTimeMillis;
+        mInjectedCurrentTimeMillis += 1;
+
+        dumpsysOnLogcat("before save");
+
+        // Save and load.
+        mService.saveDirtyInfo();
+        initService();
+        mService.handleUnlockUser(USER_10);
+
+        dumpUserFile(USER_10);
+        dumpsysOnLogcat("after load");
+
+        ShortcutInfo si;
+        si = mService.getPackageShortcutForTest(CALLING_PACKAGE_1, "id", USER_10);
+
+        assertEquals(USER_10, si.getUserId());
+        assertEquals(HANDLE_USER_10, si.getUserHandle());
+        assertEquals(CALLING_PACKAGE_1, si.getPackage());
+        assertEquals("id", si.getId());
+        assertEquals(ShortcutActivity2.class.getName(), si.getActivity().getClassName());
+        assertEquals(null, si.getIcon());
+        assertEquals("title", si.getTitle());
+        assertEquals("text", si.getText());
+        assertEquals("dismes", si.getDisabledMessage());
+        assertEquals(set(ShortcutInfo.SHORTCUT_CATEGORY_CONVERSATION, "xyz"), si.getCategories());
+        assertEquals("action", si.getIntent().getAction());
+        assertEquals("val", si.getIntent().getStringExtra("key"));
+        assertEquals(0, si.getRank());
+        assertEquals(1, si.getExtras().getInt("k"));
+
+        assertEquals(ShortcutInfo.FLAG_DYNAMIC | ShortcutInfo.FLAG_HAS_ICON_FILE
+            | ShortcutInfo.FLAG_STRINGS_RESOLVED | ShortcutInfo.FLAG_ADAPTIVE_BITMAP,
+            si.getFlags());
+        assertNotNull(si.getBitmapPath()); // Something should be set.
+        assertEquals(0, si.getIconResourceId());
+        assertTrue(si.getLastChangedTimestamp() < now);
+
+        dumpUserFile(USER_10);
+    }
+
     public void testShortcutInfoSaveAndLoad_resId() throws InterruptedException {
         mRunningUsers.put(USER_10, true);
 
@@ -1516,7 +1584,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
 
         // State changed, but not foreground, so no resetting.
         mService.mUidObserver.onUidStateChanged(
-                CALLING_UID_1, ActivityManager.PROCESS_STATE_TOP_SLEEPING);
+                CALLING_UID_1, ActivityManager.PROCESS_STATE_TOP_SLEEPING, 0);
         runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
             MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
         });
@@ -1540,7 +1608,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
 
         // State changed, package1 foreground, reset.
         mService.mUidObserver.onUidStateChanged(
-                CALLING_UID_1, ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE);
+                CALLING_UID_1, ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE, 0);
         runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
             assertEquals(3, mManager.getRemainingCallCount());
         });
@@ -1560,16 +1628,16 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
             MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
         });
         mService.mUidObserver.onUidStateChanged(
-                CALLING_UID_1, ActivityManager.PROCESS_STATE_TOP_SLEEPING);
+                CALLING_UID_1, ActivityManager.PROCESS_STATE_TOP_SLEEPING, 0);
 
         mInjectedCurrentTimeMillis++;
 
         // Different app comes to foreground briefly, and goes back to background.
         // Now, make sure package 2's counter is reset, even in this case.
         mService.mUidObserver.onUidStateChanged(
-                CALLING_UID_2, ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE);
+                CALLING_UID_2, ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE, 0);
         mService.mUidObserver.onUidStateChanged(
-                CALLING_UID_2, ActivityManager.PROCESS_STATE_TOP_SLEEPING);
+                CALLING_UID_2, ActivityManager.PROCESS_STATE_TOP_SLEEPING, 0);
 
         runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
             assertEquals(3, mManager.getRemainingCallCount());
@@ -1600,9 +1668,9 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         });
 
         mService.mUidObserver.onUidStateChanged(
-                CALLING_UID_2, ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE);
+                CALLING_UID_2, ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE, 0);
         mService.mUidObserver.onUidStateChanged(
-                CALLING_UID_2, ActivityManager.PROCESS_STATE_TOP_SLEEPING);
+                CALLING_UID_2, ActivityManager.PROCESS_STATE_TOP_SLEEPING, 0);
 
         runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
             assertEquals(3, mManager.getRemainingCallCount());
@@ -1629,7 +1697,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         // Now, also try calling some APIs and make sure foreground apps don't get throttled.
         mService.mUidObserver.onUidStateChanged(
                 UserHandle.getUid(USER_10, CALLING_UID_1),
-                ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE);
+                ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE, 0);
         runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
             assertEquals(3, mManager.getRemainingCallCount());
             assertFalse(mManager.isRateLimitingActive());
@@ -1958,28 +2026,17 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
                     makeShortcutWithIcon("bmp32x32", bmp32x32),
                     makeShortcutWithIcon("bmp64x64", bmp64x64))));
         });
+
         // We can't predict the compressed bitmap sizes, so get the real sizes here.
         final long bitmapTotal =
-                new File(getPackageShortcut(CALLING_PACKAGE_2, "bmp32x32", USER_0)
-                        .getBitmapPath()).length() +
-                new File(getPackageShortcut(CALLING_PACKAGE_2, "bmp64x64", USER_0)
-                        .getBitmapPath()).length();
+                new File(getBitmapAbsPath(USER_0, CALLING_PACKAGE_2, "bmp32x32")).length() +
+                new File(getBitmapAbsPath(USER_0, CALLING_PACKAGE_2, "bmp64x64")).length();
 
         // Read the expected output and inject the bitmap size.
         final String expected = readTestAsset("shortcut/dumpsys_expected.txt")
                 .replace("***BITMAP_SIZE***", String.valueOf(bitmapTotal));
 
         assertEquals(expected, dumpCheckin());
-    }
-
-    public void testDumpsysNoPermission() {
-        assertExpectException(SecurityException.class, "android.permission.DUMP",
-                () -> mService.dump(null, new PrintWriter(new StringWriter()), null));
-
-        // System can call it without the permission.
-        runWithSystemUid(() -> {
-            mService.dump(null, new PrintWriter(new StringWriter()), null);
-        });
     }
 
     /**
@@ -2033,8 +2090,36 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         assertFalse(mService.isUserUnlockedL(USER_10));
 
         // Directly call the stop lifecycle event.  Goes back to the initial state.
-        mService.handleCleanupUser(USER_0);
+        mService.handleStopUser(USER_0);
         assertFalse(mService.isUserUnlockedL(USER_0));
         assertFalse(mService.isUserUnlockedL(USER_10));
+    }
+
+    public void testEphemeralApp() {
+        mRunningUsers.put(USER_10, true); // this test needs user 10.
+
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            assertWith(mManager.getDynamicShortcuts()).isEmpty();
+        });
+        runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
+            assertWith(mManager.getDynamicShortcuts()).isEmpty();
+        });
+        runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
+            assertWith(mManager.getDynamicShortcuts()).isEmpty();
+        });
+        // Make package 1 ephemeral.
+        mEphemeralPackages.add(PackageWithUser.of(USER_0, CALLING_PACKAGE_1));
+
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            assertExpectException(IllegalStateException.class, "Ephemeral apps", () -> {
+                mManager.getDynamicShortcuts();
+            });
+        });
+        runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
+            assertWith(mManager.getDynamicShortcuts()).isEmpty();
+        });
+        runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
+            assertWith(mManager.getDynamicShortcuts()).isEmpty();
+        });
     }
 }

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="5247871339820894594">"CarrierDefaultApp"</string>
+    <string name="android_system_label" msgid="2797790869522345065">"Mobilszolgáltató"</string>
+    <string name="portal_notification_id" msgid="5155057562457079297">"Elérte a rendelkezésre álló mobiladat-mennyiséget"</string>
+    <string name="no_data_notification_id" msgid="668400731803969521">"A rendszer deaktiválta a mobiladat-forgalmat"</string>
+    <string name="portal_notification_detail" msgid="2295729385924660881">"Koppintson a(z) %s webhely meglátogatásához"</string>
+    <string name="no_data_notification_detail" msgid="3112125343857014825">"Vegye fel a kapcsolatot szolgáltatójával (%s)"</string>
+    <string name="no_mobile_data_connection_title" msgid="7449525772416200578">"Nincs mobiladat-kapcsolat"</string>
+    <string name="no_mobile_data_connection" msgid="544980465184147010">"Adjon hozzá előfizetést vagy barangolási csomagot a következőn keresztül: %s"</string>
+    <string name="mobile_data_status_notification_channel_name" msgid="833999690121305708">"Mobiladat-állapot"</string>
+    <string name="action_bar_label" msgid="4290345990334377177">"Bejelentkezés a mobilhálózatra"</string>
+    <string name="ssl_error_warning" msgid="3127935140338254180">"Biztonsági problémák vannak azzal a hálózattal, amelyhez csatlakozni szeretne."</string>
+    <string name="ssl_error_example" msgid="6188711843183058764">"Például lehetséges, hogy a bejelentkezési oldal nem a megjelenített szervezethez tartozik."</string>
+    <string name="ssl_error_continue" msgid="1138548463994095584">"Folytatás ennek ellenére böngészőn keresztül"</string>
+</resources>

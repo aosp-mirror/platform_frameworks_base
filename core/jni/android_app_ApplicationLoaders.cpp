@@ -32,7 +32,7 @@ static void setupVulkanLayerPath_native(JNIEnv* env, jobject clazz,
         loader_data.layer_path = layerPathChars.c_str();
         loader_data.app_namespace = ns;
     } else {
-        ALOGD("ignored Vulkan layer search path %s for namespace %p",
+        ALOGV("Vulkan layer search path already set, not clobbering with '%s' for namespace %p'",
                 layerPathChars.c_str(), ns);
     }
 }

@@ -16,7 +16,6 @@
 
 package android.os;
 
-import android.annotation.IntegerRes;
 import android.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -26,6 +25,12 @@ import android.util.Size;
 import android.util.SizeF;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
+import android.util.SparseIntArray;
+
+import dalvik.annotation.optimization.FastNative;
+import dalvik.system.VMRuntime;
+
+import libcore.util.SneakyThrow;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -45,8 +50,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import dalvik.system.VMRuntime;
 
 /**
  * Container for a message (data and object references) that can
@@ -128,7 +131,7 @@ import dalvik.system.VMRuntime;
  * caller of the read function must know what type to expect and pass in the
  * appropriate {@link Parcelable.Creator Parcelable.Creator} instead to
  * properly construct the new object and read its data.  (To more efficient
- * write and read a single Parceable object that is not null, you can directly
+ * write and read a single Parcelable object that is not null, you can directly
  * call {@link Parcelable#writeToParcel Parcelable.writeToParcel} and
  * {@link Parcelable.Creator#createFromParcel Parcelable.Creator.createFromParcel}
  * yourself.)</p>
@@ -201,13 +204,15 @@ public final class Parcel {
     private boolean mOwnsNativeParcelObject;
     private long mNativeSize;
 
+    private ArrayMap<Class, Object> mClassCookies;
+
     private RuntimeException mStack;
 
     private static final int POOL_SIZE = 6;
     private static final Parcel[] sOwnedPool = new Parcel[POOL_SIZE];
     private static final Parcel[] sHolderPool = new Parcel[POOL_SIZE];
 
-    // Keep in sync with frameworks/native/libs/binder/PersistableBundle.cpp.
+    // Keep in sync with frameworks/native/include/private/binder/ParcelValTypes.h.
     private static final int VAL_NULL = -1;
     private static final int VAL_STRING = 0;
     private static final int VAL_INTEGER = 1;
@@ -249,37 +254,56 @@ public final class Parcel {
     private static final int EX_NETWORK_MAIN_THREAD = -6;
     private static final int EX_UNSUPPORTED_OPERATION = -7;
     private static final int EX_SERVICE_SPECIFIC = -8;
+    private static final int EX_PARCELABLE = -9;
     private static final int EX_HAS_REPLY_HEADER = -128;  // special; see below
     // EX_TRANSACTION_FAILED is used exclusively in native code.
     // see libbinder's binder/Status.h
     private static final int EX_TRANSACTION_FAILED = -129;
 
+    @FastNative
     private static native int nativeDataSize(long nativePtr);
+    @FastNative
     private static native int nativeDataAvail(long nativePtr);
+    @FastNative
     private static native int nativeDataPosition(long nativePtr);
+    @FastNative
     private static native int nativeDataCapacity(long nativePtr);
+    @FastNative
     private static native long nativeSetDataSize(long nativePtr, int size);
+    @FastNative
     private static native void nativeSetDataPosition(long nativePtr, int pos);
+    @FastNative
     private static native void nativeSetDataCapacity(long nativePtr, int size);
 
+    @FastNative
     private static native boolean nativePushAllowFds(long nativePtr, boolean allowFds);
+    @FastNative
     private static native void nativeRestoreAllowFds(long nativePtr, boolean lastValue);
 
     private static native void nativeWriteByteArray(long nativePtr, byte[] b, int offset, int len);
     private static native void nativeWriteBlob(long nativePtr, byte[] b, int offset, int len);
+    @FastNative
     private static native void nativeWriteInt(long nativePtr, int val);
+    @FastNative
     private static native void nativeWriteLong(long nativePtr, long val);
+    @FastNative
     private static native void nativeWriteFloat(long nativePtr, float val);
+    @FastNative
     private static native void nativeWriteDouble(long nativePtr, double val);
     private static native void nativeWriteString(long nativePtr, String val);
     private static native void nativeWriteStrongBinder(long nativePtr, IBinder val);
     private static native long nativeWriteFileDescriptor(long nativePtr, FileDescriptor val);
 
     private static native byte[] nativeCreateByteArray(long nativePtr);
+    private static native boolean nativeReadByteArray(long nativePtr, byte[] dest, int destLen);
     private static native byte[] nativeReadBlob(long nativePtr);
+    @FastNative
     private static native int nativeReadInt(long nativePtr);
+    @FastNative
     private static native long nativeReadLong(long nativePtr);
+    @FastNative
     private static native float nativeReadFloat(long nativePtr);
+    @FastNative
     private static native double nativeReadDouble(long nativePtr);
     private static native String nativeReadString(long nativePtr);
     private static native IBinder nativeReadStrongBinder(long nativePtr);
@@ -292,8 +316,10 @@ public final class Parcel {
     private static native byte[] nativeMarshall(long nativePtr);
     private static native long nativeUnmarshall(
             long nativePtr, byte[] data, int offset, int length);
+    private static native int nativeCompareData(long thisNativePtr, long otherNativePtr);
     private static native long nativeAppendFrom(
             long thisNativePtr, long otherNativePtr, int offset, int length);
+    @FastNative
     private static native boolean nativeHasFileDescriptors(long nativePtr);
     private static native void nativeWriteInterfaceToken(long nativePtr, String interfaceName);
     private static native void nativeEnforceInterface(long nativePtr, String interfaceName);
@@ -463,6 +489,29 @@ public final class Parcel {
         updateNativeSize(nativeAppendFrom(mNativePtr, parcel.mNativePtr, offset, length));
     }
 
+    /** @hide */
+    public final int compareData(Parcel other) {
+        return nativeCompareData(mNativePtr, other.mNativePtr);
+    }
+
+    /** @hide */
+    public final void setClassCookie(Class clz, Object cookie) {
+        if (mClassCookies == null) {
+            mClassCookies = new ArrayMap<>();
+        }
+        mClassCookies.put(clz, cookie);
+    }
+
+    /** @hide */
+    public final Object getClassCookie(Class clz) {
+        return mClassCookies != null ? mClassCookies.get(clz) : null;
+    }
+
+    /** @hide */
+    public final void adoptClassCookies(Parcel from) {
+        mClassCookies = from.mClassCookies;
+    }
+
     /**
      * Report whether the parcel contains any marshalled file descriptors.
      */
@@ -575,6 +624,11 @@ public final class Parcel {
      */
     public final void writeString(String val) {
         nativeWriteString(mNativePtr, val);
+    }
+
+    /** @hide */
+    public final void writeBoolean(boolean val) {
+        writeInt(val ? 1 : 0);
     }
 
     /**
@@ -865,6 +919,24 @@ public final class Parcel {
         while (i < N) {
             writeInt(val.keyAt(i));
             writeByte((byte)(val.valueAt(i) ? 1 : 0));
+            i++;
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public final void writeSparseIntArray(SparseIntArray val) {
+        if (val == null) {
+            writeInt(-1);
+            return;
+        }
+        int N = val.size();
+        writeInt(N);
+        int i=0;
+        while (i < N) {
+            writeInt(val.keyAt(i));
+            writeInt(val.valueAt(i));
             i++;
         }
     }
@@ -1278,7 +1350,30 @@ public final class Parcel {
     }
 
     /**
-     * Flatten a heterogeneous array containing a particular object type into
+     * Flatten a {@code List} containing arbitrary {@code Parcelable} objects into this parcel
+     * at the current position. They can later be retrieved using
+     * {@link #readParcelableList(List, ClassLoader)} if required.
+     *
+     * @see #readParcelableList(List, ClassLoader)
+     * @hide
+     */
+    public final <T extends Parcelable> void writeParcelableList(List<T> val, int flags) {
+        if (val == null) {
+            writeInt(-1);
+            return;
+        }
+
+        int N = val.size();
+        int i=0;
+        writeInt(N);
+        while (i < N) {
+            writeParcelable(val.get(i), flags);
+            i++;
+        }
+    }
+
+    /**
+     * Flatten a homogeneous array containing a particular object type into
      * the parcel, at
      * the current dataPosition() and growing dataCapacity() if needed.  The
      * type of the objects in the array must be one that implements Parcelable.
@@ -1300,7 +1395,7 @@ public final class Parcel {
         if (val != null) {
             int N = val.length;
             writeInt(N);
-            for (int i=0; i<N; i++) {
+            for (int i = 0; i < N; i++) {
                 T item = val[i];
                 if (item != null) {
                     writeInt(1);
@@ -1312,6 +1407,146 @@ public final class Parcel {
         } else {
             writeInt(-1);
         }
+    }
+
+    /**
+     * Write a uniform (all items are null or the same class) array list of
+     * parcelables.
+     *
+     * @param list The list to write.
+     *
+     * @hide
+     */
+    public final <T extends Parcelable> void writeTypedArrayList(@Nullable ArrayList<T> list,
+            int parcelableFlags) {
+        if (list != null) {
+            int N = list.size();
+            writeInt(N);
+            boolean wroteCreator = false;
+            for (int i = 0; i < N; i++) {
+                T item = list.get(i);
+                if (item != null) {
+                    writeInt(1);
+                    if (!wroteCreator) {
+                        writeParcelableCreator(item);
+                        wroteCreator = true;
+                    }
+                    item.writeToParcel(this, parcelableFlags);
+                } else {
+                    writeInt(0);
+                }
+            }
+        } else {
+            writeInt(-1);
+        }
+    }
+
+    /**
+     * Reads a uniform (all items are null or the same class) array list of
+     * parcelables.
+     *
+     * @return The list or null.
+     *
+     * @hide
+     */
+    public final @Nullable <T> ArrayList<T> readTypedArrayList(@Nullable ClassLoader loader) {
+        int N = readInt();
+        if (N <= 0) {
+            return null;
+        }
+        Parcelable.Creator<?> creator = null;
+        ArrayList<T> result = new ArrayList<T>(N);
+        for (int i = 0; i < N; i++) {
+            if (readInt() != 0) {
+                if (creator == null) {
+                    creator = readParcelableCreator(loader);
+                    if (creator == null) {
+                        return null;
+                    }
+                }
+                final T parcelable;
+                if (creator instanceof Parcelable.ClassLoaderCreator<?>) {
+                    Parcelable.ClassLoaderCreator<?> classLoaderCreator =
+                            (Parcelable.ClassLoaderCreator<?>) creator;
+                    parcelable = (T) classLoaderCreator.createFromParcel(this, loader);
+                } else {
+                    parcelable = (T) creator.createFromParcel(this);
+                }
+                result.add(parcelable);
+            } else {
+                result.add(null);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Write a uniform (all items are null or the same class) array set of
+     * parcelables.
+     *
+     * @param set The set to write.
+     *
+     * @hide
+     */
+    public final <T extends Parcelable> void writeTypedArraySet(@Nullable ArraySet<T> set,
+            int parcelableFlags) {
+        if (set != null) {
+            int N = set.size();
+            writeInt(N);
+            boolean wroteCreator = false;
+            for (int i = 0; i < N; i++) {
+                T item = set.valueAt(i);
+                if (item != null) {
+                    writeInt(1);
+                    if (!wroteCreator) {
+                        writeParcelableCreator(item);
+                        wroteCreator = true;
+                    }
+                    item.writeToParcel(this, parcelableFlags);
+                } else {
+                    writeInt(0);
+                }
+            }
+        } else {
+            writeInt(-1);
+        }
+    }
+
+    /**
+     * Reads a uniform (all items are null or the same class) array set of
+     * parcelables.
+     *
+     * @return The set or null.
+     *
+     * @hide
+     */
+    public final @Nullable <T> ArraySet<T> readTypedArraySet(@Nullable ClassLoader loader) {
+        int N = readInt();
+        if (N <= 0) {
+            return null;
+        }
+        Parcelable.Creator<?> creator = null;
+        ArraySet<T> result = new ArraySet<T>(N);
+        for (int i = 0; i < N; i++) {
+            T parcelable = null;
+            if (readInt() != 0) {
+                if (creator == null) {
+                    creator = readParcelableCreator(loader);
+                    if (creator == null) {
+                        return null;
+                    }
+                }
+                if (creator instanceof Parcelable.ClassLoaderCreator<?>) {
+                    Parcelable.ClassLoaderCreator<?> classLoaderCreator =
+                            (Parcelable.ClassLoaderCreator<?>) creator;
+                    parcelable = (T) classLoaderCreator.createFromParcel(this, loader);
+                } else {
+                    parcelable = (T) creator.createFromParcel(this);
+                }
+            }
+            result.append(parcelable);
+        }
+        return result;
     }
 
     /**
@@ -1555,7 +1790,12 @@ public final class Parcel {
      */
     public final void writeException(Exception e) {
         int code = 0;
-        if (e instanceof SecurityException) {
+        if (e instanceof Parcelable
+                && (e.getClass().getClassLoader() == Parcelable.class.getClassLoader())) {
+            // We only send Parcelable exceptions that are in the
+            // BootClassLoader to ensure that the receiver can unpack them
+            code = EX_PARCELABLE;
+        } else if (e instanceof SecurityException) {
             code = EX_SECURITY;
         } else if (e instanceof BadParcelableException) {
             code = EX_BAD_PARCELABLE;
@@ -1581,8 +1821,20 @@ public final class Parcel {
             throw new RuntimeException(e);
         }
         writeString(e.getMessage());
-        if (e instanceof ServiceSpecificException) {
-            writeInt(((ServiceSpecificException)e).errorCode);
+        switch (code) {
+            case EX_SERVICE_SPECIFIC:
+                writeInt(((ServiceSpecificException) e).errorCode);
+                break;
+            case EX_PARCELABLE:
+                // Write parceled exception prefixed by length
+                final int sizePosition = dataPosition();
+                writeInt(0);
+                writeParcelable((Parcelable) e, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
+                final int payloadPosition = dataPosition();
+                setDataPosition(sizePosition);
+                writeInt(payloadPosition - sizePosition);
+                setDataPosition(payloadPosition);
+                break;
         }
     }
 
@@ -1680,6 +1932,13 @@ public final class Parcel {
      */
     public final void readException(int code, String msg) {
         switch (code) {
+            case EX_PARCELABLE:
+                if (readInt() > 0) {
+                    SneakyThrow.sneakyThrow(
+                            (Exception) readParcelable(Parcelable.class.getClassLoader()));
+                } else {
+                    throw new RuntimeException(msg + " [missing Parcelable]");
+                }
             case EX_SECURITY:
                 throw new SecurityException(msg);
             case EX_BAD_PARCELABLE:
@@ -1736,6 +1995,11 @@ public final class Parcel {
      */
     public final String readString() {
         return nativeReadString(mNativePtr);
+    }
+
+    /** @hide */
+    public final boolean readBoolean() {
+        return readInt() != 0;
     }
 
     /**
@@ -1800,14 +2064,20 @@ public final class Parcel {
         }
     }
 
+    /** @deprecated use {@link android.system.Os#open(String, int, int)} */
+    @Deprecated
+    static native FileDescriptor openFileDescriptor(String file, int mode)
+            throws FileNotFoundException;
 
-    /*package*/ static native FileDescriptor openFileDescriptor(String file,
-            int mode) throws FileNotFoundException;
-    /*package*/ static native FileDescriptor dupFileDescriptor(FileDescriptor orig)
-            throws IOException;
-    /*package*/ static native void closeFileDescriptor(FileDescriptor desc)
-            throws IOException;
-    /*package*/ static native void clearFileDescriptor(FileDescriptor desc);
+    /** @deprecated use {@link android.system.Os#dup(FileDescriptor)} */
+    @Deprecated
+    static native FileDescriptor dupFileDescriptor(FileDescriptor orig) throws IOException;
+
+    /** @deprecated use {@link android.system.Os#close(FileDescriptor)} */
+    @Deprecated
+    static native void closeFileDescriptor(FileDescriptor desc) throws IOException;
+
+    static native void clearFileDescriptor(FileDescriptor desc);
 
     /**
      * Read a byte value from the parcel at the current dataPosition().
@@ -1942,11 +2212,8 @@ public final class Parcel {
      * given byte array.
      */
     public final void readByteArray(byte[] val) {
-        // TODO: make this a native method to avoid the extra copy.
-        byte[] ba = createByteArray();
-        if (ba.length == val.length) {
-           System.arraycopy(ba, 0, val, 0, ba.length);
-        } else {
+        boolean valid = nativeReadByteArray(mNativePtr, val, (val != null) ? val.length : 0);
+        if (!valid) {
             throw new RuntimeException("bad array lengths");
         }
     }
@@ -2081,6 +2348,21 @@ public final class Parcel {
         }
         SparseBooleanArray sa = new SparseBooleanArray(N);
         readSparseBooleanArrayInternal(sa, N);
+        return sa;
+    }
+
+    /**
+     * Read and return a new SparseIntArray object from the parcel at the current
+     * dataPosition(). Returns null if the previously written array object was null.
+     * @hide
+     */
+    public final SparseIntArray readSparseIntArray() {
+        int N = readInt();
+        if (N < 0) {
+            return null;
+        }
+        SparseIntArray sa = new SparseIntArray(N);
+        readSparseIntArrayInternal(sa, N);
         return sa;
     }
 
@@ -2225,9 +2507,6 @@ public final class Parcel {
      * Read into the given List items IBinder objects that were written with
      * {@link #writeBinderList} at the current dataPosition().
      *
-     * @return A newly created ArrayList containing strings with the same data
-     *         as those that were previously written.
-     *
      * @see #writeBinderList
      */
     public final void readBinderList(List<IBinder> list) {
@@ -2243,6 +2522,35 @@ public final class Parcel {
         for (; i<M; i++) {
             list.remove(N);
         }
+    }
+
+    /**
+     * Read the list of {@code Parcelable} objects at the current data position into the
+     * given {@code list}. The contents of the {@code list} are replaced. If the serialized
+     * list was {@code null}, {@code list} is cleared.
+     *
+     * @see #writeParcelableList(List, int)
+     * @hide
+     */
+    public final <T extends Parcelable> List<T> readParcelableList(List<T> list, ClassLoader cl) {
+        final int N = readInt();
+        if (N == -1) {
+            list.clear();
+            return list;
+        }
+
+        final int M = list.size();
+        int i = 0;
+        for (; i < M && i < N; i++) {
+            list.set(i, (T) readParcelable(cl));
+        }
+        for (; i<N; i++) {
+            list.add((T) readParcelable(cl));
+        }
+        for (; i<M; i++) {
+            list.remove(N);
+        }
+        return list;
     }
 
     /**
@@ -2823,6 +3131,15 @@ public final class Parcel {
             int key = readInt();
             boolean value = this.readByte() == 1;
             //Log.i(TAG, "Unmarshalling key=" + key + " value=" + value);
+            outVal.append(key, value);
+            N--;
+        }
+    }
+
+    private void readSparseIntArrayInternal(SparseIntArray outVal, int N) {
+        while (N > 0) {
+            int key = readInt();
+            int value = readInt();
             outVal.append(key, value);
             N--;
         }

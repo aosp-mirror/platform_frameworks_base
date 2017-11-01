@@ -19,38 +19,51 @@ package com.android.systemui.statusbar;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
+import android.annotation.NonNull;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Paint;
+import android.graphics.Point;
 import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
+import android.support.v4.graphics.ColorUtils;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.view.Display;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.animation.Interpolator;
+
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.colorextraction.ColorExtractor;
+import com.android.internal.colorextraction.drawable.GradientDrawable;
+import com.android.systemui.Dependency;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 
 /**
  * A view which can draw a scrim
  */
-public class ScrimView extends View
-{
-    private final Paint mPaint = new Paint();
-    private int mScrimColor;
-    private boolean mIsEmpty = true;
+public class ScrimView extends View implements ConfigurationController.ConfigurationListener {
+    private static final String TAG = "ScrimView";
+    private final ColorExtractor.GradientColors mColors;
     private boolean mDrawAsSrc;
     private float mViewAlpha = 1.0f;
     private ValueAnimator mAlphaAnimator;
     private Rect mExcludedRect = new Rect();
-    private int mLeftInset = 0;
     private boolean mHasExcludedArea;
-    private ValueAnimator.AnimatorUpdateListener mAlphaUpdateListener
-            = new ValueAnimator.AnimatorUpdateListener() {
-        @Override
-        public void onAnimationUpdate(ValueAnimator animation) {
-            mViewAlpha = (float) animation.getAnimatedValue();
-            invalidate();
+    private Drawable mDrawable;
+    private PorterDuffColorFilter mColorFilter;
+    private int mTintColor;
+    private ValueAnimator.AnimatorUpdateListener mAlphaUpdateListener = animation -> {
+        if (mDrawable == null) {
+            Log.w(TAG, "Trying to animate null drawable");
+            return;
         }
+        mDrawable.setAlpha((int) (255 * (float) animation.getAnimatedValue()));
     };
     private AnimatorListenerAdapter mClearAnimatorListener = new AnimatorListenerAdapter() {
         @Override
@@ -74,65 +87,164 @@ public class ScrimView extends View
 
     public ScrimView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+
+        mDrawable = new GradientDrawable(context);
+        mDrawable.setCallback(this);
+        mColors = new ColorExtractor.GradientColors();
+        updateScreenSize();
+        updateColorWithTint(false);
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+
+        // We need to know about configuration changes to update the gradient size
+        // since it's independent from view bounds.
+        ConfigurationController config = Dependency.get(ConfigurationController.class);
+        config.addCallback(this);
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+
+        ConfigurationController config = Dependency.get(ConfigurationController.class);
+        config.removeCallback(this);
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
-        if (mDrawAsSrc || (!mIsEmpty && mViewAlpha > 0f)) {
-            PorterDuff.Mode mode = mDrawAsSrc ? PorterDuff.Mode.SRC : PorterDuff.Mode.SRC_OVER;
-            int color = getScrimColorWithAlpha();
+        if (mDrawAsSrc || mDrawable.getAlpha() > 0) {
             if (!mHasExcludedArea) {
-                canvas.drawColor(color, mode);
+                mDrawable.draw(canvas);
             } else {
-                mPaint.setColor(color);
                 if (mExcludedRect.top > 0) {
-                    canvas.drawRect(0, 0, getWidth(), mExcludedRect.top, mPaint);
+                    canvas.save();
+                    canvas.clipRect(0, 0, getWidth(), mExcludedRect.top);
+                    mDrawable.draw(canvas);
+                    canvas.restore();
                 }
-                if (mExcludedRect.left + mLeftInset > 0) {
-                    canvas.drawRect(0,  mExcludedRect.top, mExcludedRect.left + mLeftInset,
-                            mExcludedRect.bottom, mPaint);
+                if (mExcludedRect.left > 0) {
+                    canvas.save();
+                    canvas.clipRect(0, mExcludedRect.top, mExcludedRect.left,
+                            mExcludedRect.bottom);
+                    mDrawable.draw(canvas);
+                    canvas.restore();
                 }
-                if (mExcludedRect.right + mLeftInset < getWidth()) {
-                    canvas.drawRect(mExcludedRect.right + mLeftInset,
-                            mExcludedRect.top,
-                            getWidth(),
-                            mExcludedRect.bottom,
-                            mPaint);
+                if (mExcludedRect.right < getWidth()) {
+                    canvas.save();
+                    canvas.clipRect(mExcludedRect.right, mExcludedRect.top, getWidth(),
+                            mExcludedRect.bottom);
+                    mDrawable.draw(canvas);
+                    canvas.restore();
                 }
                 if (mExcludedRect.bottom < getHeight()) {
-                    canvas.drawRect(0,  mExcludedRect.bottom, getWidth(), getHeight(), mPaint);
+                    canvas.save();
+                    canvas.clipRect(0, mExcludedRect.bottom, getWidth(), getHeight());
+                    mDrawable.draw(canvas);
+                    canvas.restore();
                 }
             }
         }
     }
 
-    public int getScrimColorWithAlpha() {
-        int color = mScrimColor;
-        color = Color.argb((int) (Color.alpha(color) * mViewAlpha), Color.red(color),
-                Color.green(color), Color.blue(color));
-        return color;
+    public void setDrawable(Drawable drawable) {
+        mDrawable = drawable;
+        mDrawable.setCallback(this);
+        mDrawable.setBounds(getLeft(), getTop(), getRight(), getBottom());
+        mDrawable.setAlpha((int) (255 * mViewAlpha));
+        setDrawAsSrc(mDrawAsSrc);
+        updateScreenSize();
+        invalidate();
+    }
+
+    @Override
+    public void invalidateDrawable(@NonNull Drawable drawable) {
+        super.invalidateDrawable(drawable);
+        if (drawable == mDrawable) {
+            invalidate();
+        }
     }
 
     public void setDrawAsSrc(boolean asSrc) {
         mDrawAsSrc = asSrc;
-        mPaint.setXfermode(new PorterDuffXfermode(mDrawAsSrc ? PorterDuff.Mode.SRC
-                : PorterDuff.Mode.SRC_OVER));
-        invalidate();
+        PorterDuff.Mode mode = asSrc ? PorterDuff.Mode.SRC : PorterDuff.Mode.SRC_OVER;
+        mDrawable.setXfermode(new PorterDuffXfermode(mode));
     }
 
-    public void setScrimColor(int color) {
-        if (color != mScrimColor) {
-            mIsEmpty = Color.alpha(color) == 0;
-            mScrimColor = color;
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
+        if (changed) {
+            mDrawable.setBounds(left, top, right, bottom);
             invalidate();
-            if (mChangeRunnable != null) {
-                mChangeRunnable.run();
-            }
         }
     }
 
-    public int getScrimColor() {
-        return mScrimColor;
+    public void setColors(@NonNull ColorExtractor.GradientColors colors) {
+        setColors(colors, false);
+    }
+
+    public void setColors(@NonNull ColorExtractor.GradientColors colors, boolean animated) {
+        if (colors == null) {
+            throw new IllegalArgumentException("Colors cannot be null");
+        }
+        if (mColors.equals(colors)) {
+            return;
+        }
+        mColors.set(colors);
+        updateColorWithTint(animated);
+    }
+
+    @VisibleForTesting
+    Drawable getDrawable() {
+        return mDrawable;
+    }
+
+    public ColorExtractor.GradientColors getColors() {
+        return mColors;
+    }
+
+    public void setTint(int color) {
+        setTint(color, false);
+    }
+
+    public void setTint(int color, boolean animated) {
+        if (mTintColor == color) {
+            return;
+        }
+        mTintColor = color;
+        updateColorWithTint(animated);
+    }
+
+    private void updateColorWithTint(boolean animated) {
+        if (mDrawable instanceof GradientDrawable) {
+            // Optimization to blend colors and avoid a color filter
+            GradientDrawable drawable = (GradientDrawable) mDrawable;
+            float tintAmount = Color.alpha(mTintColor) / 255f;
+            int mainTinted = ColorUtils.blendARGB(mColors.getMainColor(), mTintColor,
+                    tintAmount);
+            int secondaryTinted = ColorUtils.blendARGB(mColors.getSecondaryColor(), mTintColor,
+                    tintAmount);
+            drawable.setColors(mainTinted, secondaryTinted, animated);
+        } else {
+            if (mColorFilter == null) {
+                mColorFilter = new PorterDuffColorFilter(mTintColor, PorterDuff.Mode.SRC_OVER);
+            } else {
+                mColorFilter.setColor(mTintColor);
+            }
+            mDrawable.setColorFilter(Color.alpha(mTintColor) == 0 ? null : mColorFilter);
+            mDrawable.invalidateSelf();
+        }
+
+        if (mChangeRunnable != null) {
+            mChangeRunnable.run();
+        }
+    }
+
+    public int getTint() {
+        return mTintColor;
     }
 
     @Override
@@ -141,23 +253,29 @@ public class ScrimView extends View
     }
 
     public void setViewAlpha(float alpha) {
-        if (mAlphaAnimator != null) {
-            mAlphaAnimator.cancel();
-        }
         if (alpha != mViewAlpha) {
             mViewAlpha = alpha;
-            invalidate();
+
+            if (mAlphaAnimator != null) {
+                mAlphaAnimator.cancel();
+            }
+
+            mDrawable.setAlpha((int) (255 * alpha));
             if (mChangeRunnable != null) {
                 mChangeRunnable.run();
             }
         }
     }
 
+    public float getViewAlpha() {
+        return mViewAlpha;
+    }
+
     public void animateViewAlpha(float alpha, long durationOut, Interpolator interpolator) {
         if (mAlphaAnimator != null) {
             mAlphaAnimator.cancel();
         }
-        mAlphaAnimator = ValueAnimator.ofFloat(mViewAlpha, alpha);
+        mAlphaAnimator = ValueAnimator.ofFloat(getViewAlpha(), alpha);
         mAlphaAnimator.addUpdateListener(mAlphaUpdateListener);
         mAlphaAnimator.addListener(mClearAnimatorListener);
         mAlphaAnimator.setInterpolator(interpolator);
@@ -185,12 +303,23 @@ public class ScrimView extends View
         mChangeRunnable = changeRunnable;
     }
 
-    public void setLeftInset(int leftInset) {
-        if (mLeftInset != leftInset) {
-            mLeftInset = leftInset;
+    @Override
+    public void onConfigChanged(Configuration newConfig) {
+        updateScreenSize();
+    }
 
-            if (mHasExcludedArea) {
-                invalidate();
+    private void updateScreenSize() {
+        if (mDrawable instanceof GradientDrawable) {
+            WindowManager wm = mContext.getSystemService(WindowManager.class);
+            if (wm == null) {
+                Log.w(TAG, "Can't resize gradient drawable to fit the screen");
+                return;
+            }
+            Display display = wm.getDefaultDisplay();
+            if (display != null) {
+                Point size = new Point();
+                display.getRealSize(size);
+                ((GradientDrawable) mDrawable).setScreenSize(size.x, size.y);
             }
         }
     }

@@ -47,7 +47,7 @@ public class ViewLayersActivity4 extends Activity {
     }
     
     private void setupList(int listId) {
-        final ListView list = (ListView) findViewById(listId);
+        final ListView list = findViewById(listId);
         list.setAdapter(new SimpleListAdapter(this));
         list.setLayerType(View.LAYER_TYPE_HARDWARE, null);
     }
@@ -80,7 +80,7 @@ public class ViewLayersActivity4 extends Activity {
             "Burkina Faso", "Burundi", "Cote d'Ivoire", "Cambodia", "Cameroon", "Canada", "Cape Verde",
             "Cayman Islands", "Central African Republic", "Chad", "Chile", "China",
             "Christmas Island", "Cocos (Keeling) Islands", "Colombia", "Comoros", "Congo",
-            "Cook Islands", "Costa Rica", "Croatia", "Cuba", "Cyprus", "Czech Republic",
+            "Cook Islands", "Costa Rica", "Croatia", "Cuba", "Cyprus", "Czechia",
             "Democratic Republic of the Congo", "Denmark", "Djibouti", "Dominica", "Dominican Republic",
             "East Timor", "Ecuador", "Egypt", "El Salvador", "Equatorial Guinea", "Eritrea",
             "Estonia", "Ethiopia", "Faeroe Islands", "Falkland Islands", "Fiji", "Finland",

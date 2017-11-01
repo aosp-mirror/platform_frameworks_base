@@ -15,6 +15,7 @@
  */
 package android.media;
 
+import android.util.IntArray;
 import com.android.server.LocalServices;
 
 /**
@@ -41,9 +42,9 @@ public abstract class AudioManagerInternal {
 
     public abstract void setRingerModeInternal(int ringerMode, String caller);
 
-    public abstract int getVolumeControllerUid();
-
     public abstract void updateRingerModeAffectedStreamsInternal();
+
+    public abstract void setAccessibilityServiceUids(IntArray uids);
 
     public interface RingerModeDelegate {
         /** Called when external ringer mode is evaluated, returns the new internal ringer mode */
@@ -58,4 +59,15 @@ public abstract class AudioManagerInternal {
 
         int getRingerModeAffectedStreams(int streams);
     }
+
+    /**
+     * Disable or restore the ability to play audio for a given UID.
+     * When a UID isn't meant to be tracked anymore (e.g. client died), re-enable audio for this UID
+     * to prevent disabling audio for future UIDs that would reuse the same value.
+     * This operation is asynchronous.
+     * @param disable when true, prevents playback of audio streams from the given uid. If false,
+     *         restores the ability to play, or no-op if playback hadn't been disabled before.
+     * @param uid the client UID whose ability to play will be affected.
+     */
+    public abstract void disableAudioForUid(boolean disable, int uid);
 }

@@ -18,13 +18,14 @@ package com.android.systemui.shortcut;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.app.ActivityManager;
-import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ServiceInfo;
 import android.content.res.Configuration;
 import android.os.RemoteException;
+import android.os.UserHandle;
+import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.IWindowManager;
@@ -33,12 +34,13 @@ import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityManager;
 import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.MetricsProto.MetricsEvent;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.policy.DividerSnapAlgorithm;
 import com.android.settingslib.accessibility.AccessibilityUtils;
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
 import com.android.systemui.recents.Recents;
+import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.stackdivider.DividerView;
 import com.android.systemui.statusbar.phone.NavigationBarGestureHelper;
@@ -56,7 +58,7 @@ public class ShortcutKeyDispatcher extends SystemUI
 
     private ShortcutKeyServiceProxy mShortcutKeyServiceProxy = new ShortcutKeyServiceProxy(this);
     private IWindowManager mWindowManagerService = WindowManagerGlobal.getWindowManagerService();
-    private IActivityManager mActivityManager = ActivityManagerNative.getDefault();
+    private IActivityManager mActivityManager = ActivityManager.getService();
 
     protected final long META_MASK = ((long) KeyEvent.META_META_ON) << Integer.SIZE;
     protected final long ALT_MASK = ((long) KeyEvent.META_ALT_ON) << Integer.SIZE;
@@ -102,8 +104,16 @@ public class ShortcutKeyDispatcher extends SystemUI
                 int dockMode = (shortcutCode == SC_DOCK_LEFT)
                         ? ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT
                         : ActivityManager.DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT;
-                recents.dockTopTask(NavigationBarGestureHelper.DRAG_MODE_NONE, dockMode, null,
-                        MetricsEvent.WINDOW_DOCK_SHORTCUTS);
+                List<ActivityManager.RecentTaskInfo> taskList =
+                        SystemServicesProxy.getInstance(mContext).getRecentTasks(1,
+                                UserHandle.USER_CURRENT, false, new ArraySet<>());
+                recents.showRecentApps(
+                        false /* triggeredFromAltTab */,
+                        false /* fromHome */);
+                if (!taskList.isEmpty()) {
+                    SystemServicesProxy.getInstance(mContext).startTaskInDockedMode(
+                            taskList.get(0).id, dockMode);
+                }
             } else {
                 // If there is already a docked window, we respond by resizing the docking pane.
                 DividerView dividerView = getComponent(Divider.class).getView();
@@ -111,11 +121,11 @@ public class ShortcutKeyDispatcher extends SystemUI
                 int dividerPosition = dividerView.getCurrentPosition();
                 DividerSnapAlgorithm.SnapTarget currentTarget =
                         snapAlgorithm.calculateNonDismissingSnapTarget(dividerPosition);
-                int increment = (shortcutCode == SC_DOCK_LEFT) ? -1 : 1;
-                DividerSnapAlgorithm.SnapTarget target = snapAlgorithm.cycleNonDismissTarget(
-                        currentTarget, increment);
+                DividerSnapAlgorithm.SnapTarget target = (shortcutCode == SC_DOCK_LEFT)
+                        ? snapAlgorithm.getPreviousTarget(currentTarget)
+                        : snapAlgorithm.getNextTarget(currentTarget);
                 dividerView.startDragging(true /* animate */, false /* touching */);
-                dividerView.stopDragging(target.position, 0f, true /* avoidDismissStart */,
+                dividerView.stopDragging(target.position, 0f, false /* avoidDismissStart */,
                         true /* logMetrics */);
             }
         } catch (RemoteException e) {

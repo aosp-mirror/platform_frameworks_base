@@ -19,7 +19,9 @@ package com.android.ims;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.PersistableBundle;
 import android.telecom.VideoProfile;
+import android.util.Log;
 
 import com.android.internal.telephony.PhoneConstants;
 
@@ -216,6 +218,29 @@ public class ImsCallProfile implements Parcelable {
     public int mServiceType;
     public int mCallType;
     public int mRestrictCause = CALL_RESTRICT_CAUSE_NONE;
+
+    /**
+     * Extras associated with this {@link ImsCallProfile}.
+     * <p>
+     * Valid data types include:
+     * <ul>
+     *     <li>{@link Integer} (and int)</li>
+     *     <li>{@link Long} (and long)</li>
+     *     <li>{@link Double} (and double)</li>
+     *     <li>{@link String}</li>
+     *     <li>{@code int[]}</li>
+     *     <li>{@code long[]}</li>
+     *     <li>{@code double[]}</li>
+     *     <li>{@code String[]}</li>
+     *     <li>{@link PersistableBundle}</li>
+     *     <li>{@link Boolean} (and boolean)</li>
+     *     <li>{@code boolean[]}</li>
+     *     <li>Other {@link Parcelable} classes in the {@code android.*} namespace.</li>
+     * </ul>
+     * <p>
+     * Invalid types will be removed when the {@link ImsCallProfile} is parceled for transmit across
+     * a {@link android.os.Binder}.
+     */
     public Bundle mCallExtras;
     public ImsStreamMediaProfile mMediaProfile;
 
@@ -315,16 +340,17 @@ public class ImsCallProfile implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel out, int flags) {
+        Bundle filteredExtras = maybeCleanseExtras(mCallExtras);
         out.writeInt(mServiceType);
         out.writeInt(mCallType);
-        out.writeParcelable(mCallExtras, 0);
+        out.writeBundle(filteredExtras);
         out.writeParcelable(mMediaProfile, 0);
     }
 
     private void readFromParcel(Parcel in) {
         mServiceType = in.readInt();
         mCallType = in.readInt();
-        mCallExtras = in.readParcelable(null);
+        mCallExtras = in.readBundle();
         mMediaProfile = in.readParcelable(null);
     }
 
@@ -462,6 +488,31 @@ public class ImsCallProfile implements Parcelable {
      */
     public boolean isVideoCall() {
         return VideoProfile.isVideo(getVideoStateFromCallType(mCallType));
+    }
+
+    /**
+     * Cleanses a {@link Bundle} to ensure that it contains only data of type:
+     * 1. Primitive data types (e.g. int, bool, and other values determined by
+     * {@link android.os.PersistableBundle#isValidType(Object)}).
+     * 2. Other Bundles.
+     * 3. {@link Parcelable} objects in the {@code android.*} namespace.
+     * @param extras the source {@link Bundle}
+     * @return where all elements are valid types the source {@link Bundle} is returned unmodified,
+     *      otherwise a copy of the {@link Bundle} with the invalid elements is returned.
+     */
+    private Bundle maybeCleanseExtras(Bundle extras) {
+        if (extras == null) {
+            return null;
+        }
+
+        int startSize = extras.size();
+        Bundle filtered = extras.filterValues();
+        int endSize = filtered.size();
+        if (startSize != endSize) {
+            Log.i(TAG, "maybeCleanseExtras: " + (startSize - endSize) + " extra values were "
+                    + "removed - only primitive types and system parcelables are permitted.");
+        }
+        return filtered;
     }
 
     /**

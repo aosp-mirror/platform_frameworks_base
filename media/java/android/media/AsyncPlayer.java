@@ -18,6 +18,7 @@ package android.media;
 
 import android.annotation.NonNull;
 import android.content.Context;
+import android.media.PlayerBase;
 import android.net.Uri;
 import android.os.PowerManager;
 import android.os.SystemClock;
@@ -163,6 +164,7 @@ public class AsyncPlayer {
      * @deprecated use {@link #play(Context, Uri, boolean, AudioAttributes)} instead
      */
     public void play(Context context, Uri uri, boolean looping, int stream) {
+        PlayerBase.deprecateStreamTypeForPlayback(stream, "AsyncPlayer", "play()");
         if (context == null || uri == null) {
             return;
         }

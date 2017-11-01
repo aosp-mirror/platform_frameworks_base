@@ -19,18 +19,20 @@ package com.android.systemui.statusbar.policy;
 import android.content.Context;
 import android.content.Intent;
 import android.telephony.SubscriptionInfo;
+
 import com.android.settingslib.net.DataUsageController;
 import com.android.settingslib.wifi.AccessPoint;
+import com.android.systemui.DemoMode;
+import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
 
 import java.util.List;
 
-public interface NetworkController {
+public interface NetworkController extends CallbackController<SignalCallback>, DemoMode {
 
     boolean hasMobileDataFeature();
-    void addSignalCallback(SignalCallback cb);
-    void removeSignalCallback(SignalCallback cb);
+    void addCallback(SignalCallback cb);
+    void removeCallback(SignalCallback cb);
     void setWifiEnabled(boolean enabled);
-    void onUserSwitched(int newUserId);
     AccessPointController getAccessPointController();
     DataUsageController getMobileDataController();
     DataSaverController getDataSaverController();
@@ -39,14 +41,16 @@ public interface NetworkController {
 
     void addEmergencyListener(EmergencyListener listener);
     void removeEmergencyListener(EmergencyListener listener);
+    boolean hasEmergencyCryptKeeperText();
+    boolean isRadioOn();
 
     public interface SignalCallback {
         default void setWifiIndicators(boolean enabled, IconState statusIcon, IconState qsIcon,
-                boolean activityIn, boolean activityOut, String description) {}
+                boolean activityIn, boolean activityOut, String description, boolean isTransient) {}
 
         default void setMobileDataIndicators(IconState statusIcon, IconState qsIcon, int statusType,
                 int qsType, boolean activityIn, boolean activityOut, String typeContentDescription,
-                String description, boolean isWide, int subId) {}
+                String description, boolean isWide, int subId, boolean roaming) {}
         default void setSubs(List<SubscriptionInfo> subs) {}
         default void setNoSims(boolean show) {}
 

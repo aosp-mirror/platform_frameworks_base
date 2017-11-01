@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.KeyguardManager;
 import android.hardware.fingerprint.FingerprintManager;
+import android.security.GateKeeper;
 
 import java.security.Key;
 import java.security.Signature;
@@ -225,6 +226,8 @@ public final class KeyProtection implements ProtectionParameter {
     private final int mUserAuthenticationValidityDurationSeconds;
     private final boolean mUserAuthenticationValidWhileOnBody;
     private final boolean mInvalidatedByBiometricEnrollment;
+    private final long mBoundToSecureUserId;
+    private final boolean mCriticalToDeviceEncryption;
 
     private KeyProtection(
             Date keyValidityStart,
@@ -239,7 +242,9 @@ public final class KeyProtection implements ProtectionParameter {
             boolean userAuthenticationRequired,
             int userAuthenticationValidityDurationSeconds,
             boolean userAuthenticationValidWhileOnBody,
-            boolean invalidatedByBiometricEnrollment) {
+            boolean invalidatedByBiometricEnrollment,
+            long boundToSecureUserId,
+            boolean criticalToDeviceEncryption) {
         mKeyValidityStart = Utils.cloneIfNotNull(keyValidityStart);
         mKeyValidityForOriginationEnd = Utils.cloneIfNotNull(keyValidityForOriginationEnd);
         mKeyValidityForConsumptionEnd = Utils.cloneIfNotNull(keyValidityForConsumptionEnd);
@@ -255,6 +260,8 @@ public final class KeyProtection implements ProtectionParameter {
         mUserAuthenticationValidityDurationSeconds = userAuthenticationValidityDurationSeconds;
         mUserAuthenticationValidWhileOnBody = userAuthenticationValidWhileOnBody;
         mInvalidatedByBiometricEnrollment = invalidatedByBiometricEnrollment;
+        mBoundToSecureUserId = boundToSecureUserId;
+        mCriticalToDeviceEncryption = criticalToDeviceEncryption;
     }
 
     /**
@@ -436,6 +443,34 @@ public final class KeyProtection implements ProtectionParameter {
     }
 
     /**
+     * Return the secure user id that this key should be bound to.
+     *
+     * Normally an authentication-bound key is tied to the secure user id of the current user
+     * (either the root SID from GateKeeper for auth-bound keys with a timeout, or the authenticator
+     * id of the current fingerprint set for keys requiring explicit fingerprint authorization).
+     * If this parameter is set (this method returning non-zero value), the key should be tied to
+     * the specified secure user id, overriding the logic above.
+     *
+     * This is only applicable when {@link #isUserAuthenticationRequired} is {@code true}
+     *
+     * @see KeymasterUtils#addUserAuthArgs
+     * @hide
+     */
+    public long getBoundToSpecificSecureUserId() {
+        return mBoundToSecureUserId;
+    }
+
+    /**
+     * Return whether this key is critical to the device encryption flow.
+     *
+     * @see android.security.KeyStore#FLAG_CRITICAL_TO_DEVICE_ENCRYPTION
+     * @hide
+     */
+    public boolean isCriticalToDeviceEncryption() {
+        return mCriticalToDeviceEncryption;
+    }
+
+    /**
      * Builder of {@link KeyProtection} instances.
      */
     public final static class Builder {
@@ -454,6 +489,8 @@ public final class KeyProtection implements ProtectionParameter {
         private boolean mUserAuthenticationValidWhileOnBody;
         private boolean mInvalidatedByBiometricEnrollment = true;
 
+        private long mBoundToSecureUserId = GateKeeper.INVALID_SECURE_USER_ID;
+        private boolean mCriticalToDeviceEncryption = false;
         /**
          * Creates a new instance of the {@code Builder}.
          *
@@ -774,6 +811,40 @@ public final class KeyProtection implements ProtectionParameter {
         }
 
         /**
+         * Set the secure user id that this key should be bound to.
+         *
+         * Normally an authentication-bound key is tied to the secure user id of the current user
+         * (either the root SID from GateKeeper for auth-bound keys with a timeout, or the
+         * authenticator id of the current fingerprint set for keys requiring explicit fingerprint
+         * authorization). If this parameter is set (this method returning non-zero value), the key
+         * should be tied to the specified secure user id, overriding the logic above.
+         *
+         * This is only applicable when {@link #setUserAuthenticationRequired} is set to
+         * {@code true}
+         *
+         * @see KeyProtection#getBoundToSpecificSecureUserId()
+         * @hide
+         */
+        public Builder setBoundToSpecificSecureUserId(long secureUserId) {
+            mBoundToSecureUserId = secureUserId;
+            return this;
+        }
+
+        /**
+         * Set whether this key is critical to the device encryption flow
+         *
+         * This is a special flag only available to system servers to indicate the current key
+         * is part of the device encryption flow.
+         *
+         * @see android.security.KeyStore#FLAG_CRITICAL_TO_DEVICE_ENCRYPTION
+         * @hide
+         */
+        public Builder setCriticalToDeviceEncryption(boolean critical) {
+            mCriticalToDeviceEncryption = critical;
+            return this;
+        }
+
+        /**
          * Builds an instance of {@link KeyProtection}.
          *
          * @throws IllegalArgumentException if a required field is missing
@@ -793,7 +864,9 @@ public final class KeyProtection implements ProtectionParameter {
                     mUserAuthenticationRequired,
                     mUserAuthenticationValidityDurationSeconds,
                     mUserAuthenticationValidWhileOnBody,
-                    mInvalidatedByBiometricEnrollment);
+                    mInvalidatedByBiometricEnrollment,
+                    mBoundToSecureUserId,
+                    mCriticalToDeviceEncryption);
         }
     }
 }

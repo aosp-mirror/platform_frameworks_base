@@ -16,7 +16,9 @@
 
 package com.android.internal.view;
 
+import android.annotation.NonNull;
 import android.content.Context;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.view.ActionMode;
 import android.view.Menu;
@@ -26,7 +28,7 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.ViewParent;
-import android.util.DisplayMetrics;
+import android.view.WindowManager;
 
 import com.android.internal.R;
 import com.android.internal.util.Preconditions;
@@ -35,45 +37,51 @@ import com.android.internal.widget.FloatingToolbar;
 
 import java.util.Arrays;
 
-public class FloatingActionMode extends ActionMode {
+public final class FloatingActionMode extends ActionMode {
 
     private static final int MAX_HIDE_DURATION = 3000;
     private static final int MOVING_HIDE_DELAY = 50;
 
-    private final Context mContext;
-    private final ActionMode.Callback2 mCallback;
-    private final MenuBuilder mMenu;
-    private final Rect mContentRect;
-    private final Rect mContentRectOnScreen;
-    private final Rect mPreviousContentRectOnScreen;
-    private final int[] mViewPositionOnScreen;
-    private final int[] mPreviousViewPositionOnScreen;
-    private final int[] mRootViewPositionOnScreen;
-    private final Rect mViewRectOnScreen;
-    private final Rect mPreviousViewRectOnScreen;
-    private final Rect mScreenRect;
-    private final View mOriginatingView;
+    @NonNull private final Context mContext;
+    @NonNull private final ActionMode.Callback2 mCallback;
+    @NonNull private final MenuBuilder mMenu;
+    @NonNull private final Rect mContentRect;
+    @NonNull private final Rect mContentRectOnScreen;
+    @NonNull private final Rect mPreviousContentRectOnScreen;
+    @NonNull private final int[] mViewPositionOnScreen;
+    @NonNull private final int[] mPreviousViewPositionOnScreen;
+    @NonNull private final int[] mRootViewPositionOnScreen;
+    @NonNull private final Rect mViewRectOnScreen;
+    @NonNull private final Rect mPreviousViewRectOnScreen;
+    @NonNull private final Rect mScreenRect;
+    @NonNull private final View mOriginatingView;
+    @NonNull private final Point mDisplaySize;
     private final int mBottomAllowance;
 
     private final Runnable mMovingOff = new Runnable() {
         public void run() {
-            mFloatingToolbarVisibilityHelper.setMoving(false);
-            mFloatingToolbarVisibilityHelper.updateToolbarVisibility();
+            if (isViewStillActive()) {
+                mFloatingToolbarVisibilityHelper.setMoving(false);
+                mFloatingToolbarVisibilityHelper.updateToolbarVisibility();
+            }
         }
     };
 
     private final Runnable mHideOff = new Runnable() {
         public void run() {
-            mFloatingToolbarVisibilityHelper.setHideRequested(false);
-            mFloatingToolbarVisibilityHelper.updateToolbarVisibility();
+            if (isViewStillActive()) {
+                mFloatingToolbarVisibilityHelper.setHideRequested(false);
+                mFloatingToolbarVisibilityHelper.updateToolbarVisibility();
+            }
         }
     };
 
-    private FloatingToolbar mFloatingToolbar;
-    private FloatingToolbarVisibilityHelper mFloatingToolbarVisibilityHelper;
+    @NonNull private FloatingToolbar mFloatingToolbar;
+    @NonNull private FloatingToolbarVisibilityHelper mFloatingToolbarVisibilityHelper;
 
     public FloatingActionMode(
-            Context context, ActionMode.Callback2 callback, View originatingView) {
+            Context context, ActionMode.Callback2 callback,
+            View originatingView, FloatingToolbar floatingToolbar) {
         mContext = Preconditions.checkNotNull(context);
         mCallback = Preconditions.checkNotNull(callback);
         mMenu = new MenuBuilder(context).setDefaultShowAsAction(
@@ -103,17 +111,14 @@ public class FloatingActionMode extends ActionMode {
         // bottom view bound if necessary.
         mBottomAllowance = context.getResources()
                 .getDimensionPixelSize(R.dimen.content_rect_bottom_clip_allowance);
+        mDisplaySize = new Point();
+        setFloatingToolbar(Preconditions.checkNotNull(floatingToolbar));
     }
 
-    public void setFloatingToolbar(FloatingToolbar floatingToolbar) {
+    private void setFloatingToolbar(FloatingToolbar floatingToolbar) {
         mFloatingToolbar = floatingToolbar
                 .setMenu(mMenu)
-                .setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-                        @Override
-                    public boolean onMenuItemClick(MenuItem item) {
-                        return mMenu.performItemAction(item, 0);
-                    }
-                });
+                .setOnMenuItemClickListener(item -> mMenu.performItemAction(item, 0));
         mFloatingToolbarVisibilityHelper = new FloatingToolbarVisibilityHelper(mFloatingToolbar);
         mFloatingToolbarVisibilityHelper.activate();
     }
@@ -135,21 +140,17 @@ public class FloatingActionMode extends ActionMode {
 
     @Override
     public void invalidate() {
-        checkToolbarInitialized();
         mCallback.onPrepareActionMode(this, mMenu);
         invalidateContentRect();  // Will re-layout and show the toolbar if necessary.
     }
 
     @Override
     public void invalidateContentRect() {
-        checkToolbarInitialized();
         mCallback.onGetContentRect(this, mOriginatingView, mContentRect);
         repositionToolbar();
     }
 
     public void updateViewLocationInWindow() {
-        checkToolbarInitialized();
-
         mOriginatingView.getLocationOnScreen(mViewPositionOnScreen);
         mOriginatingView.getRootView().getLocationOnScreen(mRootViewPositionOnScreen);
         mOriginatingView.getGlobalVisibleRect(mViewRectOnScreen);
@@ -165,8 +166,6 @@ public class FloatingActionMode extends ActionMode {
     }
 
     private void repositionToolbar() {
-        checkToolbarInitialized();
-
         mContentRectOnScreen.set(mContentRect);
 
         // Offset the content rect into screen coordinates, taking into account any transformations
@@ -210,9 +209,9 @@ public class FloatingActionMode extends ActionMode {
     }
 
     private boolean isContentRectWithinBounds() {
-        DisplayMetrics metrics = mContext.getApplicationContext()
-                .getResources().getDisplayMetrics();
-        mScreenRect.set(0, 0, metrics.widthPixels, metrics.heightPixels);
+        mContext.getSystemService(WindowManager.class)
+            .getDefaultDisplay().getRealSize(mDisplaySize);
+        mScreenRect.set(0, 0, mDisplaySize.x, mDisplaySize.y);
 
         return intersectsClosed(mContentRectOnScreen, mScreenRect)
             && intersectsClosed(mContentRectOnScreen, mViewRectOnScreen);
@@ -228,8 +227,6 @@ public class FloatingActionMode extends ActionMode {
 
     @Override
     public void hide(long duration) {
-        checkToolbarInitialized();
-
         if (duration == ActionMode.DEFAULT_HIDE_DURATION) {
             duration = ViewConfiguration.getDefaultActionModeHideDuration();
         }
@@ -246,14 +243,12 @@ public class FloatingActionMode extends ActionMode {
 
     @Override
     public void onWindowFocusChanged(boolean hasWindowFocus) {
-        checkToolbarInitialized();
         mFloatingToolbarVisibilityHelper.setWindowFocused(hasWindowFocus);
         mFloatingToolbarVisibilityHelper.updateToolbarVisibility();
     }
 
     @Override
     public void finish() {
-        checkToolbarInitialized();
         reset();
         mCallback.onDestroyActionMode(this);
     }
@@ -283,19 +278,16 @@ public class FloatingActionMode extends ActionMode {
         return new MenuInflater(mContext);
     }
 
-    /**
-     * @throws IllegalStateException
-     */
-    private void checkToolbarInitialized() {
-        Preconditions.checkState(mFloatingToolbar != null);
-        Preconditions.checkState(mFloatingToolbarVisibilityHelper != null);
-    }
-
     private void reset() {
         mFloatingToolbar.dismiss();
         mFloatingToolbarVisibilityHelper.deactivate();
         mOriginatingView.removeCallbacks(mMovingOff);
         mOriginatingView.removeCallbacks(mHideOff);
+    }
+
+    private boolean isViewStillActive() {
+        return mOriginatingView.getWindowVisibility() == View.VISIBLE
+                && mOriginatingView.isShown();
     }
 
     /**

@@ -39,7 +39,7 @@ public class ResourceLoadingTest extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.search_screen);
 
-        View container = (View) findViewById(R.id.container);
+        View container = findViewById(R.id.container);
         mSceneRoot = (ViewGroup) container.getParent();
 
         mCurrentScene = SEARCH_SCREEN;

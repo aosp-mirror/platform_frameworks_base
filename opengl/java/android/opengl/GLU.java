@@ -203,8 +203,8 @@ public class GLU {
      * @param view the current view, {x, y, width, height}
      * @param viewOffset the offset into the view array where the view vector
      *        data starts.
-     * @param obj the output vector {objX, objY, objZ}, that returns the
-     *        computed object coordinates.
+     * @param obj the output vector {objX, objY, objZ, objW}, that returns the
+     *        computed homogeneous object coordinates.
      * @param objOffset the offset into the obj array where the obj vector data
      *        starts.
      * @return A return value of GL10.GL_TRUE indicates success, a return value

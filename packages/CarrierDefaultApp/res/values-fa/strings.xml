@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="5247871339820894594">"CarrierDefaultApp"</string>
+    <string name="android_system_label" msgid="2797790869522345065">"شرکت مخابراتی دستگاه همراه"</string>
+    <string name="portal_notification_id" msgid="5155057562457079297">"داده تلفن همراه تمام شده است"</string>
+    <string name="no_data_notification_id" msgid="668400731803969521">"داده شبکه تلفن همراه شما غیرفعال شده است"</string>
+    <string name="portal_notification_detail" msgid="2295729385924660881">"‏برای رفتن به وب‌سایت %s، ضربه بزنید"</string>
+    <!-- String.format failed for translation -->
+    <!-- no translation found for no_data_notification_detail (3112125343857014825) -->
+    <skip />
+    <string name="no_mobile_data_connection_title" msgid="7449525772416200578">"بدون اتصال داده دستگاه همراه"</string>
+    <string name="no_mobile_data_connection" msgid="544980465184147010">"‏افزودن طرح داده یا رومینگ ازطریق %s"</string>
+    <string name="mobile_data_status_notification_channel_name" msgid="833999690121305708">"وضعیت داده تلفن همراه"</string>
+    <string name="action_bar_label" msgid="4290345990334377177">"ورود به سیستم شبکه تلفن همراه"</string>
+    <string name="ssl_error_warning" msgid="3127935140338254180">"شبکه‌ای که می‌خواهید به آن بپیوندید مشکلات امنیتی دارد."</string>
+    <string name="ssl_error_example" msgid="6188711843183058764">"به عنوان مثال، صفحه ورود به سیستم ممکن است متعلق به سازمان نشان داده شده نباشد."</string>
+    <string name="ssl_error_continue" msgid="1138548463994095584">"درهر صورت ازطریق مرورگر ادامه یابد"</string>
+</resources>

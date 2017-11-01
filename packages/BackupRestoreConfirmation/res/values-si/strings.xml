@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--  Copyright (C) 2011 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+  
+          http://www.apache.org/licenses/LICENSE-2.0
+  
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="backup_confirm_title" msgid="827563724209303345">"සම්පූර්ණ උපස්ථය"</string>
+    <string name="restore_confirm_title" msgid="5469365809567486602">"සම්පූර්ණයෙන් නැවත පිහිටුවන්න"</string>
+    <string name="backup_confirm_text" msgid="1878021282758896593">"ඩෙස්ක්ටොප් පරිගණකයකට සම්බන්ධිත සියලුම දත්ත වල සම්පූර්ණ උපස්ථයක් ඉල්ලා තිබේ. මෙම සිදු වෙනවාට අවසර දීමට ඔබට අවශ්‍යද?\n\nඔබ විසින් උපස්ථය කිරීමට ඉල්ලා නොතිබුණි නම්, මෙම මෙහෙයුම ඉදිරියට කරගෙන යාමට අවසර දෙන්න එපා. 1"</string>
+    <string name="allow_backup_button_label" msgid="4217228747769644068">"මගේ දත්ත උපස්ථ කරන්න"</string>
+    <string name="deny_backup_button_label" msgid="6009119115581097708">"උපස්ථ කරන්න එපා"</string>
+    <string name="restore_confirm_text" msgid="7499866728030461776">"සම්බන්ධිත ඩෙස්ක්ටොප් පරිගණකයකින් සියලු දත්ත වල සම්පූර්ණ ප්‍රතිස්ථාපනයක් ඉල්ලා ඇත. ඔබ මෙය සිදු වීමට අවසර දෙනවා ද?\n\nඔබ විසින් ප්‍රතිස්ථාපනය ඉල්ලා නොමැති නම්, ක්‍රියාවලියට ඉදිරියට යාමට ඉඩ නොදෙන්න. උපාංගයේ දැනට ඇති ඕනෑම දත්තයක් මෙමඟින් ප්‍රතිස්ථාපනය වෙයි!"</string>
+    <string name="allow_restore_button_label" msgid="3081286752277127827">"මගේ දත්ත නැවත පිහිටුවන්න"</string>
+    <string name="deny_restore_button_label" msgid="1724367334453104378">"නැවත පිහිටුවන්න එපා"</string>
+    <string name="current_password_text" msgid="8268189555578298067">"කරුණාකර ඔබගේ වර්තමාන උපස්ථ මුරපදය පහත ඇතුලත් කරන්න:"</string>
+    <string name="device_encryption_restore_text" msgid="1570864916855208992">"කරුණාකර ඔබගේ උපාංගයේ සංකේතන මුරපදය පහත ඇතුලත් කරන්න."</string>
+    <string name="device_encryption_backup_text" msgid="5866590762672844664">"කරුණාකර ඔබගේ උපාංගයේ සංකේතන මුරපදය පහත ඇතුලත් කරන්න. සංරක්ෂිත උපස්ථ සංකේතනය කිරීමට මෙය භාවිත කළ හැක."</string>
+    <string name="backup_enc_password_text" msgid="4981585714795233099">"කරුණාකර සියලු උපස්ථ දත්ත සංකේතනය කිරීම සඳහා භාවිතයට මුරපදයක් ඇතුළත් කරන්න. මෙය හිස්ව තැබුවොත්, ඔබගේ වර්තමාන උපස්ථ මුරපදය භාවිත වෙයි:"</string>
+    <string name="backup_enc_password_optional" msgid="1350137345907579306">"සියලු උපස්ථ දත්ත සංකේතනය කිරීමට ඔබ අදහස් කරන්නේ නම්, මුරපදය පහලින් ඇතුලත් කරන්න:"</string>
+    <string name="backup_enc_password_required" msgid="7889652203371654149">"ඔබගේ උපාංගය සංකේතනය කර තිබෙන නිසා, ඔබගේ උපස්ථය සංකේතනය ඔබට අවශ්‍ය වී තිබේ. මුරපදය පහළින් එක් කරන්න:"</string>
+    <string name="restore_enc_password_text" msgid="6140898525580710823">"යළි පිහිටුවන දත්ත සංකේතනය කරන ලද ඒවානම්, කරුණාකර මුරපදය පහලින් ඇතුල් කරන්න:"</string>
+    <string name="toast_backup_started" msgid="550354281452756121">"උපස්ථ කිරීම ආරම්භ කරමින්..."</string>
+    <string name="toast_backup_ended" msgid="3818080769548726424">"උපස්ථය අවසන්"</string>
+    <string name="toast_restore_started" msgid="7881679218971277385">"යළි පිහිටුවීම අරඹයි..."</string>
+    <string name="toast_restore_ended" msgid="1764041639199696132">"යළි පිහිටුවීම අවසන්"</string>
+    <string name="toast_timeout" msgid="5276598587087626877">"ක්‍රියාවලිය කල් ඉකුත් වී ඇත"</string>
+</resources>

@@ -17,8 +17,14 @@
 package android.app;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RawRes;
+import android.annotation.RequiresPermission;
+import android.annotation.SdkConstant;
+import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
+import android.annotation.SystemService;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -48,13 +54,13 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.ParcelFileDescriptor;
-import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.Pair;
 import android.view.WindowManagerGlobal;
 
 import libcore.io.IoUtils;
@@ -67,6 +73,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -74,13 +81,13 @@ import java.util.concurrent.TimeUnit;
 /**
  * Provides access to the system wallpaper. With WallpaperManager, you can
  * get the current wallpaper, get the desired dimensions for the wallpaper, set
- * the wallpaper, and more. Get an instance of WallpaperManager with
- * {@link #getInstance(android.content.Context) getInstance()}.
+ * the wallpaper, and more.
  *
  * <p> An app can check whether wallpapers are supported for the current user, by calling
  * {@link #isWallpaperSupported()}, and whether setting of wallpapers is allowed, by calling
  * {@link #isSetWallpaperAllowed()}.
  */
+@SystemService(Context.WALLPAPER_SERVICE)
 public class WallpaperManager {
     private static String TAG = "WallpaperManager";
     private static boolean DEBUG = false;
@@ -101,6 +108,7 @@ public class WallpaperManager {
      * <p>Output: RESULT_OK if user decided to crop/set the wallpaper, RESULT_CANCEL otherwise
      * Activities that support this intent should specify a MIME filter of "image/*"
      */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_CROP_AND_SET_WALLPAPER =
             "android.service.wallpaper.CROP_AND_SET_WALLPAPER";
 
@@ -266,15 +274,20 @@ public class WallpaperManager {
         }
     }
 
-    static class Globals extends IWallpaperManagerCallback.Stub {
+    private static class Globals extends IWallpaperManagerCallback.Stub {
         private final IWallpaperManager mService;
+        private boolean mColorCallbackRegistered;
+        private final ArrayList<Pair<OnColorsChangedListener, Handler>> mColorListeners =
+                new ArrayList<>();
         private Bitmap mCachedWallpaper;
         private int mCachedWallpaperUserId;
         private Bitmap mDefaultWallpaper;
+        private Handler mMainLooperHandler;
 
         Globals(Looper looper) {
             IBinder b = ServiceManager.getService(Context.WALLPAPER_SERVICE);
             mService = IWallpaperManager.Stub.asInterface(b);
+            mMainLooperHandler = new Handler(looper);
             forgetLoadedWallpaper();
         }
 
@@ -285,6 +298,90 @@ public class WallpaperManager {
              * fetch it.
              */
             forgetLoadedWallpaper();
+        }
+
+        /**
+         * Start listening to wallpaper color events.
+         * Will be called whenever someone changes their wallpaper or if a live wallpaper
+         * changes its colors.
+         * @param callback Listener
+         * @param handler Thread to call it from. Main thread if null.
+         * @param userId Owner of the wallpaper or UserHandle.USER_ALL
+         */
+        public void addOnColorsChangedListener(@NonNull OnColorsChangedListener callback,
+                @Nullable Handler handler, int userId) {
+            synchronized (this) {
+                if (!mColorCallbackRegistered) {
+                    try {
+                        mService.registerWallpaperColorsCallback(this, userId);
+                        mColorCallbackRegistered = true;
+                    } catch (RemoteException e) {
+                        // Failed, service is gone
+                        Log.w(TAG, "Can't register for color updates", e);
+                    }
+                }
+                mColorListeners.add(new Pair<>(callback, handler));
+            }
+        }
+
+        /**
+         * Stop listening to wallpaper color events.
+         *
+         * @param callback listener
+         * @param userId Owner of the wallpaper or UserHandle.USER_ALL
+         */
+        public void removeOnColorsChangedListener(@NonNull OnColorsChangedListener callback,
+                int userId) {
+            synchronized (this) {
+                mColorListeners.removeIf(pair -> pair.first == callback);
+
+                if (mColorListeners.size() == 0 && mColorCallbackRegistered) {
+                    mColorCallbackRegistered = false;
+                    try {
+                        mService.unregisterWallpaperColorsCallback(this, userId);
+                    } catch (RemoteException e) {
+                        // Failed, service is gone
+                        Log.w(TAG, "Can't unregister color updates", e);
+                    }
+                }
+            }
+        }
+
+        @Override
+        public void onWallpaperColorsChanged(WallpaperColors colors, int which, int userId) {
+            synchronized (this) {
+                for (Pair<OnColorsChangedListener, Handler> listener : mColorListeners) {
+                    Handler handler = listener.second;
+                    if (listener.second == null) {
+                        handler = mMainLooperHandler;
+                    }
+                    handler.post(() -> {
+                        // Dealing with race conditions between posting a callback and
+                        // removeOnColorsChangedListener being called.
+                        boolean stillExists;
+                        synchronized (sGlobals) {
+                            stillExists = mColorListeners.contains(listener);
+                        }
+                        if (stillExists) {
+                            listener.first.onColorsChanged(colors, which, userId);
+                        }
+                    });
+                }
+            }
+        }
+
+        WallpaperColors getWallpaperColors(int which, int userId) {
+            if (which != FLAG_LOCK && which != FLAG_SYSTEM) {
+                throw new IllegalArgumentException(
+                        "Must request colors for exactly one kind of wallpaper");
+            }
+
+            try {
+                return mService.getWallpaperColors(which, userId);
+            } catch (RemoteException e) {
+                // Can't get colors, connection lost.
+            }
+            return null;
         }
 
         public Bitmap peekWallpaperBitmap(Context context, boolean returnDefault,
@@ -739,6 +836,81 @@ public class WallpaperManager {
      */
     public ParcelFileDescriptor getWallpaperFile(@SetWallpaperFlags int which) {
         return getWallpaperFile(which, mContext.getUserId());
+    }
+
+    /**
+     * Registers a listener to get notified when the wallpaper colors change.
+     * Callback might be called from an arbitrary background thread.
+     *
+     * @param listener A listener to register
+     */
+    public void addOnColorsChangedListener(@NonNull OnColorsChangedListener listener) {
+        addOnColorsChangedListener(listener, null);
+    }
+
+    /**
+     * Registers a listener to get notified when the wallpaper colors change
+     * @param listener A listener to register
+     * @param handler Where to call it from. Will be called from the main thread
+     *                if null.
+     */
+    public void addOnColorsChangedListener(@NonNull OnColorsChangedListener listener,
+            @NonNull Handler handler) {
+        addOnColorsChangedListener(listener, handler, mContext.getUserId());
+    }
+
+    /**
+     * Registers a listener to get notified when the wallpaper colors change
+     * @param listener A listener to register
+     * @param handler Where to call it from. Will be called from the main thread
+     *                if null.
+     * @param userId Owner of the wallpaper or UserHandle.USER_ALL.
+     * @hide
+     */
+    public void addOnColorsChangedListener(@NonNull OnColorsChangedListener listener,
+            @NonNull Handler handler, int userId) {
+        sGlobals.addOnColorsChangedListener(listener, handler, userId);
+    }
+
+    /**
+     * Stop listening to color updates.
+     * @param callback A callback to unsubscribe.
+     */
+    public void removeOnColorsChangedListener(@NonNull OnColorsChangedListener callback) {
+        removeOnColorsChangedListener(callback, mContext.getUserId());
+    }
+
+    /**
+     * Stop listening to color updates.
+     * @param callback A callback to unsubscribe.
+     * @param userId Owner of the wallpaper or UserHandle.USER_ALL.
+     * @hide
+     */
+    public void removeOnColorsChangedListener(@NonNull OnColorsChangedListener callback,
+            int userId) {
+        sGlobals.removeOnColorsChangedListener(callback, userId);
+    }
+
+    /**
+     * Get the primary colors of a wallpaper
+     * @param which wallpaper type. Must be either {@link #FLAG_SYSTEM} or
+     *     {@link #FLAG_LOCK}
+     * @return {@link WallpaperColors} or null if colors are unknown.
+     */
+    public @Nullable WallpaperColors getWallpaperColors(int which) {
+        return getWallpaperColors(which, mContext.getUserId());
+    }
+
+    /**
+     * Get the primary colors of a wallpaper
+     * @param which wallpaper type. Must be either {@link #FLAG_SYSTEM} or
+     *     {@link #FLAG_LOCK}
+     * @param userId Owner of the wallpaper.
+     * @return {@link WallpaperColors} or null if colors are unknown.
+     * @hide
+     */
+    public @Nullable WallpaperColors getWallpaperColors(int which, int userId) {
+        return sGlobals.getWallpaperColors(which, userId);
     }
 
     /**
@@ -1352,6 +1524,7 @@ public class WallpaperManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.SET_WALLPAPER_HINTS)
     public void setDisplayPadding(Rect padding) {
         try {
             if (sGlobals.mService == null) {
@@ -1392,6 +1565,7 @@ public class WallpaperManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.SET_WALLPAPER)
     public void clearWallpaper() {
         clearWallpaper(FLAG_LOCK, mContext.getUserId());
         clearWallpaper(FLAG_SYSTEM, mContext.getUserId());
@@ -1404,6 +1578,7 @@ public class WallpaperManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.SET_WALLPAPER)
     public void clearWallpaper(@SetWallpaperFlags int which, int userId) {
         if (sGlobals.mService == null) {
             Log.w(TAG, "WallpaperService not running");
@@ -1419,12 +1594,10 @@ public class WallpaperManager {
     /**
      * Set the live wallpaper.
      *
-     * This can only be called by packages with android.permission.SET_WALLPAPER_COMPONENT
-     * permission.
-     *
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.SET_WALLPAPER_COMPONENT)
     public boolean setWallpaperComponent(ComponentName name) {
         return setWallpaperComponent(name, UserHandle.myUserId());
     }
@@ -1730,6 +1903,41 @@ public class WallpaperManager {
         @Override
         public void onWallpaperChanged() throws RemoteException {
             mLatch.countDown();
+        }
+
+        @Override
+        public void onWallpaperColorsChanged(WallpaperColors colors, int which, int userId)
+            throws RemoteException {
+            sGlobals.onWallpaperColorsChanged(colors, which, userId);
+        }
+    }
+
+    /**
+     * Interface definition for a callback to be invoked when colors change on a wallpaper.
+     */
+    public interface OnColorsChangedListener {
+        /**
+         * Called when colors change.
+         * A {@link android.app.WallpaperColors} object containing a simplified
+         * color histogram will be given.
+         *
+         * @param colors Wallpaper color info
+         * @param which A combination of {@link #FLAG_LOCK} and {@link #FLAG_SYSTEM}
+         */
+        void onColorsChanged(WallpaperColors colors, int which);
+
+        /**
+         * Called when colors change.
+         * A {@link android.app.WallpaperColors} object containing a simplified
+         * color histogram will be given.
+         *
+         * @param colors Wallpaper color info
+         * @param which A combination of {@link #FLAG_LOCK} and {@link #FLAG_SYSTEM}
+         * @param userId Owner of the wallpaper
+         * @hide
+         */
+        default void onColorsChanged(WallpaperColors colors, int which, int userId) {
+            onColorsChanged(colors, which);
         }
     }
 }

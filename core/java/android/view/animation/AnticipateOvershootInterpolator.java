@@ -16,6 +16,10 @@
 
 package android.view.animation;
 
+import static com.android.internal.R.styleable.AnticipateOvershootInterpolator;
+import static com.android.internal.R.styleable.AnticipateOvershootInterpolator_extraTension;
+import static com.android.internal.R.styleable.AnticipateOvershootInterpolator_tension;
+
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
@@ -25,10 +29,6 @@ import android.util.AttributeSet;
 import com.android.internal.view.animation.HasNativeInterpolator;
 import com.android.internal.view.animation.NativeInterpolatorFactory;
 import com.android.internal.view.animation.NativeInterpolatorFactoryHelper;
-
-import static com.android.internal.R.styleable.AnticipateOvershootInterpolator_extraTension;
-import static com.android.internal.R.styleable.AnticipateOvershootInterpolator_tension;
-import static com.android.internal.R.styleable.AnticipateOvershootInterpolator;
 
 /**
  * An interpolator where the change starts backward then flings forward and overshoots

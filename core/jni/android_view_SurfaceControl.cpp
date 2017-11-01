@@ -15,6 +15,7 @@
  */
 
 #define LOG_TAG "SurfaceControl"
+#define LOG_NDEBUG 0
 
 #include "android_os_Parcel.h"
 #include "android_util_Binder.h"
@@ -23,8 +24,9 @@
 #include "android/graphics/Region.h"
 #include "core_jni_helpers.h"
 
-#include <JNIHelp.h>
-#include <ScopedUtfChars.h>
+#include <android-base/chrono_utils.h>
+#include <nativehelper/JNIHelp.h>
+#include <nativehelper/ScopedUtfChars.h>
 #include <android_runtime/android_view_Surface.h>
 #include <android_runtime/android_view_SurfaceSession.h>
 #include <gui/Surface.h>
@@ -89,18 +91,26 @@ static struct {
     jmethodID ctor;
 } gHdrCapabilitiesClassInfo;
 
+static struct {
+    jclass clazz;
+    jmethodID builder;
+} gGraphicBufferClassInfo;
+
 // ----------------------------------------------------------------------------
 
 static jlong nativeCreate(JNIEnv* env, jclass clazz, jobject sessionObj,
-        jstring nameStr, jint w, jint h, jint format, jint flags) {
+        jstring nameStr, jint w, jint h, jint format, jint flags, jlong parentObject,
+        jint windowType, jint ownerUid) {
     ScopedUtfChars name(env, nameStr);
     sp<SurfaceComposerClient> client(android_view_SurfaceSession_getClient(env, sessionObj));
+    SurfaceControl *parent = reinterpret_cast<SurfaceControl*>(parentObject);
     sp<SurfaceControl> surface = client->createSurface(
-            String8(name.c_str()), w, h, format, flags);
+            String8(name.c_str()), w, h, format, flags, parent, windowType, ownerUid);
     if (surface == NULL) {
         jniThrowException(env, OutOfResourcesException, NULL);
         return 0;
     }
+
     surface->incStrong((void *)nativeCreate);
     return reinterpret_cast<jlong>(surface.get());
 }
@@ -123,6 +133,44 @@ static void nativeDisconnect(JNIEnv* env, jclass clazz, jlong nativeObject) {
     }
 }
 
+static Rect rectFromObj(JNIEnv* env, jobject rectObj) {
+    int left = env->GetIntField(rectObj, gRectClassInfo.left);
+    int top = env->GetIntField(rectObj, gRectClassInfo.top);
+    int right = env->GetIntField(rectObj, gRectClassInfo.right);
+    int bottom = env->GetIntField(rectObj, gRectClassInfo.bottom);
+    return Rect(left, top, right, bottom);
+}
+
+static jobject nativeScreenshotToBuffer(JNIEnv* env, jclass clazz,
+        jobject displayTokenObj, jobject sourceCropObj, jint width, jint height,
+        jint minLayer, jint maxLayer, bool allLayers, bool useIdentityTransform,
+        int rotation) {
+    sp<IBinder> displayToken = ibinderForJavaObject(env, displayTokenObj);
+    if (displayToken == NULL) {
+        return NULL;
+    }
+    Rect sourceCrop = rectFromObj(env, sourceCropObj);
+    if (allLayers) {
+        minLayer = INT32_MIN;
+        maxLayer = INT32_MAX;
+    }
+    sp<GraphicBuffer> buffer;
+    status_t res = ScreenshotClient::captureToBuffer(displayToken,
+            sourceCrop, width, height, minLayer, maxLayer, useIdentityTransform,
+            rotation, &buffer);
+    if (res != NO_ERROR) {
+        return NULL;
+    }
+
+    return env->CallStaticObjectMethod(gGraphicBufferClassInfo.clazz,
+            gGraphicBufferClassInfo.builder,
+            buffer->getWidth(),
+            buffer->getHeight(),
+            buffer->getPixelFormat(),
+            (jint)buffer->getUsage(),
+            (jlong)buffer.get());
+}
+
 static jobject nativeScreenshotBitmap(JNIEnv* env, jclass clazz,
         jobject displayTokenObj, jobject sourceCropObj, jint width, jint height,
         jint minLayer, jint maxLayer, bool allLayers, bool useIdentityTransform,
@@ -132,17 +180,13 @@ static jobject nativeScreenshotBitmap(JNIEnv* env, jclass clazz,
         return NULL;
     }
 
-    int left = env->GetIntField(sourceCropObj, gRectClassInfo.left);
-    int top = env->GetIntField(sourceCropObj, gRectClassInfo.top);
-    int right = env->GetIntField(sourceCropObj, gRectClassInfo.right);
-    int bottom = env->GetIntField(sourceCropObj, gRectClassInfo.bottom);
-    Rect sourceCrop(left, top, right, bottom);
+    Rect sourceCrop = rectFromObj(env, sourceCropObj);
 
     std::unique_ptr<ScreenshotClient> screenshot(new ScreenshotClient());
     status_t res;
     if (allLayers) {
-        minLayer = 0;
-        maxLayer = -1;
+        minLayer = INT32_MIN;
+        maxLayer = INT32_MAX;
     }
 
     res = screenshot->update(displayToken, sourceCrop, width, height,
@@ -164,6 +208,11 @@ static jobject nativeScreenshotBitmap(JNIEnv* env, jclass clazz,
             alphaType = kPremul_SkAlphaType;
             break;
         }
+        case PIXEL_FORMAT_RGBA_FP16: {
+            colorType = kRGBA_F16_SkColorType;
+            alphaType = kPremul_SkAlphaType;
+            break;
+        }
         case PIXEL_FORMAT_RGB_565: {
             colorType = kRGB_565_SkColorType;
             alphaType = kOpaque_SkAlphaType;
@@ -173,9 +222,20 @@ static jobject nativeScreenshotBitmap(JNIEnv* env, jclass clazz,
             return NULL;
         }
     }
+
+    sk_sp<SkColorSpace> colorSpace;
+    if (screenshot->getDataSpace() == HAL_DATASPACE_DISPLAY_P3) {
+        colorSpace = SkColorSpace::MakeRGB(
+                SkColorSpace::kSRGB_RenderTargetGamma, SkColorSpace::kDCIP3_D65_Gamut);
+    } else {
+        colorSpace = SkColorSpace::MakeSRGB();
+    }
+
     SkImageInfo screenshotInfo = SkImageInfo::Make(screenshot->getWidth(),
                                                    screenshot->getHeight(),
-                                                   colorType, alphaType);
+                                                   colorType,
+                                                   alphaType,
+                                                   colorSpace);
 
     const size_t rowBytes =
             screenshot->getStride() * android::bytesPerPixel(screenshot->getFormat());
@@ -184,14 +244,13 @@ static jobject nativeScreenshotBitmap(JNIEnv* env, jclass clazz,
         return NULL;
     }
 
-    Bitmap* bitmap = new Bitmap(
+    auto bitmap = new Bitmap(
             (void*) screenshot->getPixels(), (void*) screenshot.get(), DeleteScreenshot,
             screenshotInfo, rowBytes, nullptr);
     screenshot.release();
-    bitmap->peekAtPixelRef()->setImmutable();
-
-    return GraphicsJNI::createBitmap(env, bitmap,
-            GraphicsJNI::kBitmapCreateFlag_Premultiplied, NULL);
+    bitmap->setImmutable();
+    return bitmap::createBitmap(env, bitmap,
+            android::bitmap::kBitmapCreateFlag_Premultiplied, NULL);
 }
 
 static void nativeScreenshot(JNIEnv* env, jclass clazz, jobject displayTokenObj,
@@ -208,12 +267,12 @@ static void nativeScreenshot(JNIEnv* env, jclass clazz, jobject displayTokenObj,
             Rect sourceCrop(left, top, right, bottom);
 
             if (allLayers) {
-                minLayer = 0;
-                maxLayer = -1;
+                minLayer = INT32_MIN;
+                maxLayer = INT32_MAX;
             }
             ScreenshotClient::capture(displayToken,
                     consumer->getIGraphicBufferProducer(), sourceCrop,
-                    width, height, uint32_t(minLayer), uint32_t(maxLayer),
+                    width, height, minLayer, maxLayer,
                     useIdentityTransform);
         }
     }
@@ -238,6 +297,14 @@ static void nativeSetLayer(JNIEnv* env, jclass clazz, jlong nativeObject, jint z
     if (err < 0 && err != NO_INIT) {
         doThrowIAE(env);
     }
+}
+
+static void nativeSetRelativeLayer(JNIEnv* env, jclass clazz, jlong nativeObject,
+        jobject relativeTo, jint zorder) {
+    auto ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
+    sp<IBinder> handle = ibinderForJavaObject(env, relativeTo);
+
+    ctrl->setRelativeLayer(handle, zorder);
 }
 
 static void nativeSetPosition(JNIEnv* env, jclass clazz, jlong nativeObject, jfloat x, jfloat y) {
@@ -307,9 +374,9 @@ static void nativeSetAlpha(JNIEnv* env, jclass clazz, jlong nativeObject, jfloat
 }
 
 static void nativeSetMatrix(JNIEnv* env, jclass clazz, jlong nativeObject,
-        jfloat dsdx, jfloat dtdx, jfloat dsdy, jfloat dtdy) {
+        jfloat dsdx, jfloat dtdx, jfloat dtdy, jfloat dsdy) {
     SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
-    status_t err = ctrl->setMatrix(dsdx, dtdx, dsdy, dtdy);
+    status_t err = ctrl->setMatrix(dsdx, dtdx, dtdy, dsdy);
     if (err < 0 && err != NO_INIT) {
         doThrowIAE(env);
     }
@@ -495,8 +562,9 @@ static void nativeSetDisplayPowerMode(JNIEnv* env, jclass clazz, jobject tokenOb
     sp<IBinder> token(ibinderForJavaObject(env, tokenObj));
     if (token == NULL) return;
 
-    ALOGD_IF_SLOW(100, "Excessive delay in setPowerMode()");
+    android::base::Timer t;
     SurfaceComposerClient::setDisplayPowerMode(token, mode);
+    if (t.duration() > 100ms) ALOGD("Excessive delay in setPowerMode()");
 }
 
 static jboolean nativeClearContentFrameStats(JNIEnv* env, jclass clazz, jlong nativeObject) {
@@ -644,13 +712,33 @@ static jboolean nativeGetAnimationFrameStats(JNIEnv* env, jclass clazz, jobject 
     return JNI_TRUE;
 }
 
-
 static void nativeDeferTransactionUntil(JNIEnv* env, jclass clazz, jlong nativeObject,
         jobject handleObject, jlong frameNumber) {
     auto ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
     sp<IBinder> handle = ibinderForJavaObject(env, handleObject);
 
     ctrl->deferTransactionUntil(handle, frameNumber);
+}
+
+static void nativeDeferTransactionUntilSurface(JNIEnv* env, jclass clazz, jlong nativeObject,
+        jlong surfaceObject, jlong frameNumber) {
+    auto ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
+    sp<Surface> barrier = reinterpret_cast<Surface *>(surfaceObject);
+
+    ctrl->deferTransactionUntil(barrier, frameNumber);
+}
+
+static void nativeReparentChildren(JNIEnv* env, jclass clazz, jlong nativeObject,
+        jobject newParentObject) {
+    auto ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
+    sp<IBinder> handle = ibinderForJavaObject(env, newParentObject);
+
+    ctrl->reparentChildren(handle);
+}
+
+static void nativeSeverChildren(JNIEnv* env, jclass clazz, jlong nativeObject) {
+    auto ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
+    ctrl->detachChildren();
 }
 
 static void nativeSetOverrideScalingMode(JNIEnv* env, jclass clazz, jlong nativeObject,
@@ -664,16 +752,6 @@ static jobject nativeGetHandle(JNIEnv* env, jclass clazz, jlong nativeObject) {
     auto ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
 
     return javaObjectForIBinder(env, ctrl->getHandle());
-}
-
-static jboolean nativeGetTransformToDisplayInverse(JNIEnv* env, jclass clazz, jlong nativeObject) {
-    bool out = false;
-    auto ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
-    status_t status = ctrl->getTransformToDisplayInverse(&out);
-    if (status != NO_ERROR) {
-        return false;
-    }
-    return out;
 }
 
 static jobject nativeGetHdrCapabilities(JNIEnv* env, jclass clazz, jobject tokenObject) {
@@ -695,7 +773,7 @@ static jobject nativeGetHdrCapabilities(JNIEnv* env, jclass clazz, jobject token
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod sSurfaceControlMethods[] = {
-    {"nativeCreate", "(Landroid/view/SurfaceSession;Ljava/lang/String;IIII)J",
+    {"nativeCreate", "(Landroid/view/SurfaceSession;Ljava/lang/String;IIIIJII)J",
             (void*)nativeCreate },
     {"nativeRelease", "(J)V",
             (void*)nativeRelease },
@@ -715,6 +793,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetAnimationTransaction },
     {"nativeSetLayer", "(JI)V",
             (void*)nativeSetLayer },
+    {"nativeSetRelativeLayer", "(JLandroid/os/IBinder;I)V",
+            (void*)nativeSetRelativeLayer },
     {"nativeSetPosition", "(JFF)V",
             (void*)nativeSetPosition },
     {"nativeSetGeometryAppliesWithResize", "(J)V",
@@ -775,12 +855,19 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetDisplayPowerMode },
     {"nativeDeferTransactionUntil", "(JLandroid/os/IBinder;J)V",
             (void*)nativeDeferTransactionUntil },
+    {"nativeDeferTransactionUntilSurface", "(JJJ)V",
+            (void*)nativeDeferTransactionUntilSurface },
+    {"nativeReparentChildren", "(JLandroid/os/IBinder;)V",
+            (void*)nativeReparentChildren } ,
+    {"nativeSeverChildren", "(J)V",
+            (void*)nativeSeverChildren } ,
     {"nativeSetOverrideScalingMode", "(JI)V",
             (void*)nativeSetOverrideScalingMode },
     {"nativeGetHandle", "(J)Landroid/os/IBinder;",
             (void*)nativeGetHandle },
-    {"nativeGetTransformToDisplayInverse", "(J)Z",
-            (void*)nativeGetTransformToDisplayInverse },
+    {"nativeScreenshotToBuffer",
+     "(Landroid/os/IBinder;Landroid/graphics/Rect;IIIIZZI)Landroid/graphics/GraphicBuffer;",
+     (void*)nativeScreenshotToBuffer },
 };
 
 int register_android_view_SurfaceControl(JNIEnv* env)
@@ -829,6 +916,11 @@ int register_android_view_SurfaceControl(JNIEnv* env)
     gHdrCapabilitiesClassInfo.clazz = MakeGlobalRefOrDie(env, hdrCapabilitiesClazz);
     gHdrCapabilitiesClassInfo.ctor = GetMethodIDOrDie(env, hdrCapabilitiesClazz, "<init>",
             "([IFFF)V");
+
+    jclass graphicsBufferClazz = FindClassOrDie(env, "android/graphics/GraphicBuffer");
+    gGraphicBufferClassInfo.clazz = MakeGlobalRefOrDie(env, graphicsBufferClazz);
+    gGraphicBufferClassInfo.builder = GetStaticMethodIDOrDie(env, graphicsBufferClazz,
+            "createFromExisting", "(IIIIJ)Landroid/graphics/GraphicBuffer;");
 
     return err;
 }

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="5247871339820894594">"Domyślna aplikacja operatora"</string>
+    <string name="android_system_label" msgid="2797790869522345065">"Operator komórkowy"</string>
+    <string name="portal_notification_id" msgid="5155057562457079297">"Osiągnięto limit komórkowej transmisji danych"</string>
+    <string name="no_data_notification_id" msgid="668400731803969521">"Mobilna transmisja danych została wyłączona"</string>
+    <string name="portal_notification_detail" msgid="2295729385924660881">"Kliknij, by odwiedzić stronę: %s"</string>
+    <string name="no_data_notification_detail" msgid="3112125343857014825">"Skontaktuj się z operatorem %s"</string>
+    <string name="no_mobile_data_connection_title" msgid="7449525772416200578">"Brak połączenia mobilnej transmisji danych"</string>
+    <string name="no_mobile_data_connection" msgid="544980465184147010">"Dodaj abonament lub roaming w: %s"</string>
+    <string name="mobile_data_status_notification_channel_name" msgid="833999690121305708">"Stan danych mobilnych"</string>
+    <string name="action_bar_label" msgid="4290345990334377177">"Zaloguj się w sieci komórkowej"</string>
+    <string name="ssl_error_warning" msgid="3127935140338254180">"W sieci, z którą próbujesz się połączyć, występują problemy z zabezpieczeniami."</string>
+    <string name="ssl_error_example" msgid="6188711843183058764">"Na przykład strona logowania może nie należeć do wyświetlanej organizacji."</string>
+    <string name="ssl_error_continue" msgid="1138548463994095584">"Kontynuuj mimo to w przeglądarce"</string>
+</resources>

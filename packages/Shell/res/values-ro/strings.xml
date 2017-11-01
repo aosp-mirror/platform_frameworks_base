@@ -4,9 +4,9 @@
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
      You may obtain a copy of the License at
-  
+
           http://www.apache.org/licenses/LICENSE-2.0
-  
+
      Unless required by applicable law or agreed to in writing, software
      distributed under the License is distributed on an "AS IS" BASIS,
      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,12 +17,15 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"Shell"</string>
+    <string name="bugreport_notification_channel" msgid="2574150205913861141">"Rapoarte de erori"</string>
     <string name="bugreport_in_progress_title" msgid="4311705936714972757">"Raportul de eroare <xliff:g id="ID">#%d</xliff:g> se generează"</string>
     <string name="bugreport_finished_title" msgid="4429132808670114081">"Raportul de eroare <xliff:g id="ID">#%d</xliff:g> a fost creat"</string>
     <string name="bugreport_updating_title" msgid="4423539949559634214">"Se adaugă detaliile la raportul de eroare"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"Așteptați…"</string>
     <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"Raportul de eroare va apărea curând pe telefon"</string>
+    <string name="bugreport_finished_text" product="tv" msgid="5758325479058638893">"Selectați pentru a trimite raportul de eroare"</string>
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"Atingeți pentru a trimite raportul de eroare"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="tv" msgid="2343263822812016950">"Selectați pentru a trimite raportul de eroare fără captură de ecran sau așteptați finalizarea acesteia"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"Atingeți ca să trimiteți raportul de eroare fără captură de ecran sau așteptați finalizarea acesteia"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Atingeți ca să trimiteți raportul de eroare fără captură de ecran sau așteptați finalizarea acesteia"</string>
     <string name="bugreport_confirm" msgid="5917407234515812495">"Rapoartele despre erori conțin date din diferite fișiere de jurnal ale sistemului. Acestea pot include date pe care le puteți considera sensibile (cum ar fi utilizarea aplicației și date despre locație). Permiteți accesul la rapoartele despre erori numai aplicațiilor și persoanelor în care aveți încredere."</string>
@@ -40,4 +43,5 @@
     <string name="bugreport_info_title" msgid="2306030793918239804">"Titlul erorii"</string>
     <string name="bugreport_info_description" msgid="5072835127481627722">"Rezumat privind eroarea"</string>
     <string name="save" msgid="4781509040564835759">"Salvați"</string>
+    <string name="bugreport_intent_chooser_title" msgid="7605709494790894076">"Trimiteți raportul de eroare"</string>
 </resources>

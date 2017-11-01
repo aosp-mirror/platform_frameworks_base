@@ -63,10 +63,13 @@ int Properties::overrideSpotShadowStrength = -1;
 
 ProfileType Properties::sProfileType = ProfileType::None;
 bool Properties::sDisableProfileBars = false;
+RenderPipelineType Properties::sRenderPipelineType = RenderPipelineType::NotInitialized;
 
 bool Properties::waitForGpuCompletion = false;
+bool Properties::forceDrawFrame = false;
 
 bool Properties::filterOutTestOverhead = false;
+bool Properties::disableVsync = false;
 
 static int property_get_int(const char* key, int defaultValue) {
     char buf[PROPERTY_VALUE_MAX] = {'\0',};
@@ -202,6 +205,37 @@ ProfileType Properties::getProfileType() {
     if (CC_UNLIKELY(sDisableProfileBars && sProfileType == ProfileType::Bars))
         return ProfileType::None;
     return sProfileType;
+}
+
+RenderPipelineType Properties::getRenderPipelineType() {
+    if (RenderPipelineType::NotInitialized != sRenderPipelineType) {
+        return sRenderPipelineType;
+    }
+    char prop[PROPERTY_VALUE_MAX];
+    property_get(PROPERTY_RENDERER, prop, "opengl");
+    if (!strcmp(prop, "skiagl") ) {
+        ALOGD("Skia GL Pipeline");
+        sRenderPipelineType = RenderPipelineType::SkiaGL;
+    } else if (!strcmp(prop, "skiavk") ) {
+        ALOGD("Skia Vulkan Pipeline");
+        sRenderPipelineType = RenderPipelineType::SkiaVulkan;
+    } else { //"opengl"
+        ALOGD("HWUI GL Pipeline");
+        sRenderPipelineType = RenderPipelineType::OpenGL;
+    }
+    return sRenderPipelineType;
+}
+
+#ifdef HWUI_GLES_WRAP_ENABLED
+void Properties::overrideRenderPipelineType(RenderPipelineType type) {
+    sRenderPipelineType = type;
+}
+#endif
+
+bool Properties::isSkiaEnabled() {
+    auto renderType = getRenderPipelineType();
+    return RenderPipelineType::SkiaGL == renderType
+            || RenderPipelineType::SkiaVulkan == renderType;
 }
 
 }; // namespace uirenderer

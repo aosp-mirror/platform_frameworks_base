@@ -47,7 +47,7 @@ public class AutoCompleteTextViewSimple extends Activity
 
         // setup layout & views
         setContentView(R.layout.autocompletetextview_simple);
-        mTextView = (AutoCompleteTextView) findViewById(R.id.autocompletetextview1);
+        mTextView = findViewById(R.id.autocompletetextview1);
         
         // configure callbacks used for monitoring
         mTextView.setOnItemClickListener(this);

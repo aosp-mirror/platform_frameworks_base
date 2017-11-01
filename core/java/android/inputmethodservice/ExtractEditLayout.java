@@ -41,6 +41,6 @@ public class ExtractEditLayout extends LinearLayout {
     @Override
     public void onFinishInflate() {
         super.onFinishInflate();
-        mExtractActionButton = (Button) findViewById(com.android.internal.R.id.inputExtractAction);
+        mExtractActionButton = findViewById(com.android.internal.R.id.inputExtractAction);
     }
 }

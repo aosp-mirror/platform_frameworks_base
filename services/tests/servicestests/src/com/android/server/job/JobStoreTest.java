@@ -10,7 +10,6 @@ import android.os.SystemClock;
 import android.test.AndroidTestCase;
 import android.test.RenamingDelegatingContext;
 import android.util.Log;
-import android.util.ArraySet;
 
 import com.android.server.job.JobStore.JobSet;
 import com.android.server.job.controllers.JobStatus;
@@ -207,7 +206,8 @@ public class JobStoreTest extends AndroidTestCase {
                 invalidLateRuntimeElapsedMillis - TWO_HOURS;  // Early is (late - period).
         final JobStatus js = new JobStatus(b.build(), SOME_UID, "somePackage",
                 0 /* sourceUserId */, "someTag",
-                invalidEarlyRuntimeElapsedMillis, invalidLateRuntimeElapsedMillis);
+                invalidEarlyRuntimeElapsedMillis, invalidLateRuntimeElapsedMillis,
+                0 /* lastSuccessfulRunTime */, 0 /* lastFailedRunTime */);
 
         mTaskStoreUnderTest.add(js);
         Thread.sleep(IO_WAIT);
@@ -278,6 +278,8 @@ public class JobStoreTest extends AndroidTestCase {
 
         assertEquals("Invalid charging constraint.", first.isRequireCharging(),
                 second.isRequireCharging());
+        assertEquals("Invalid battery not low constraint.", first.isRequireBatteryNotLow(),
+                second.isRequireBatteryNotLow());
         assertEquals("Invalid idle constraint.", first.isRequireDeviceIdle(),
                 second.isRequireDeviceIdle());
         assertEquals("Invalid unmetered constraint.",
@@ -294,6 +296,8 @@ public class JobStoreTest extends AndroidTestCase {
                 second.hasEarlyConstraint());
         assertEquals("Extras don't match",
                 first.getExtras().toString(), second.getExtras().toString());
+        assertEquals("Transient xtras don't match",
+                first.getTransientExtras().toString(), second.getTransientExtras().toString());
     }
 
     /**

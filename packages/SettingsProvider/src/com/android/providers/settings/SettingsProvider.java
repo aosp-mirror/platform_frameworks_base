@@ -17,6 +17,7 @@
 package com.android.providers.settings;
 
 import android.Manifest;
+import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.AppGlobals;
 import android.app.backup.BackupManager;
@@ -31,7 +32,10 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.content.pm.ServiceInfo;
 import android.content.pm.UserInfo;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -42,7 +46,6 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Debug;
 import android.os.DropBoxManager;
 import android.os.Environment;
 import android.os.Handler;
@@ -53,14 +56,20 @@ import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SELinux;
+import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.UserManagerInternal;
 import android.provider.Settings;
+import android.service.notification.NotificationListenerService;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.ByteStringUtils;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SparseBooleanArray;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.content.PackageMonitor;
@@ -73,11 +82,27 @@ import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
+import java.nio.ByteBuffer;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+
+import static android.os.Process.ROOT_UID;
+import static android.os.Process.SHELL_UID;
+import static android.os.Process.SYSTEM_UID;
+
 
 /**
  * <p>
@@ -112,7 +137,7 @@ import java.util.regex.Pattern;
  */
 @SuppressWarnings("deprecation")
 public class SettingsProvider extends ContentProvider {
-    private static final boolean DEBUG = false;
+    static final boolean DEBUG = false;
 
     private static final boolean DROP_DATABASE_ON_MIGRATION = true;
 
@@ -142,6 +167,7 @@ public class SettingsProvider extends ContentProvider {
     private static final int MUTATION_OPERATION_INSERT = 1;
     private static final int MUTATION_OPERATION_DELETE = 2;
     private static final int MUTATION_OPERATION_UPDATE = 3;
+    private static final int MUTATION_OPERATION_RESET = 4;
 
     private static final String[] ALL_COLUMNS = new String[] {
             Settings.NameValueTable._ID,
@@ -152,12 +178,45 @@ public class SettingsProvider extends ContentProvider {
     public static final int SETTINGS_TYPE_GLOBAL = 0;
     public static final int SETTINGS_TYPE_SYSTEM = 1;
     public static final int SETTINGS_TYPE_SECURE = 2;
+    public static final int SETTINGS_TYPE_SSAID = 3;
 
     public static final int SETTINGS_TYPE_MASK = 0xF0000000;
     public static final int SETTINGS_TYPE_SHIFT = 28;
 
     private static final Bundle NULL_SETTING_BUNDLE = Bundle.forPair(
             Settings.NameValueTable.VALUE, null);
+
+    // Overlay specified settings whitelisted for Instant Apps
+    private static final Set<String> OVERLAY_ALLOWED_GLOBAL_INSTANT_APP_SETTINGS = new ArraySet<>();
+    private static final Set<String> OVERLAY_ALLOWED_SYSTEM_INSTANT_APP_SETTINGS = new ArraySet<>();
+    private static final Set<String> OVERLAY_ALLOWED_SECURE_INSTANT_APP_SETTINGS = new ArraySet<>();
+
+    static {
+        for (String name : Resources.getSystem().getStringArray(
+                com.android.internal.R.array.config_allowedGlobalInstantAppSettings)) {
+            OVERLAY_ALLOWED_GLOBAL_INSTANT_APP_SETTINGS.add(name);
+        }
+        for (String name : Resources.getSystem().getStringArray(
+                com.android.internal.R.array.config_allowedSystemInstantAppSettings)) {
+            OVERLAY_ALLOWED_SYSTEM_INSTANT_APP_SETTINGS.add(name);
+        }
+        for (String name : Resources.getSystem().getStringArray(
+                com.android.internal.R.array.config_allowedSecureInstantAppSettings)) {
+            OVERLAY_ALLOWED_SECURE_INSTANT_APP_SETTINGS.add(name);
+        }
+    }
+
+    // Changes to these global settings are synchronously persisted
+    private static final Set<String> CRITICAL_GLOBAL_SETTINGS = new ArraySet<>();
+    static {
+        CRITICAL_GLOBAL_SETTINGS.add(Settings.Global.DEVICE_PROVISIONED);
+    }
+
+    // Changes to these secure settings are synchronously persisted
+    private static final Set<String> CRITICAL_SECURE_SETTINGS = new ArraySet<>();
+    static {
+        CRITICAL_SECURE_SETTINGS.add(Settings.Secure.USER_SETUP_COMPLETE);
+    }
 
     // Per user secure settings that moved to the for all users global settings.
     static final Set<String> sSecureMovedToGlobalSettings = new ArraySet<>();
@@ -195,6 +254,13 @@ public class SettingsProvider extends ContentProvider {
         Settings.System.getCloneToManagedProfileSettings(sSystemCloneToManagedSettings);
     }
 
+    // Per user system settings that are cloned from the profile's parent when a dependency
+    // in {@link Settings.Secure} is set to "1".
+    public static final Map<String, String> sSystemCloneFromParentOnDependency = new ArrayMap<>();
+    static {
+        Settings.System.getCloneFromParentOnValueSettings(sSystemCloneFromParentOnDependency);
+    }
+
     private final Object mLock = new Object();
 
     @GuardedBy("mLock")
@@ -202,6 +268,9 @@ public class SettingsProvider extends ContentProvider {
 
     @GuardedBy("mLock")
     private HandlerThread mHandlerThread;
+
+    @GuardedBy("mLock")
+    private Handler mHandler;
 
     // We have to call in the user manager with no lock held,
     private volatile UserManager mUserManager;
@@ -232,6 +301,9 @@ public class SettingsProvider extends ContentProvider {
             case SETTINGS_TYPE_SYSTEM: {
                 return "SETTINGS_SYSTEM";
             }
+            case SETTINGS_TYPE_SSAID: {
+                return "SETTINGS_SSAID";
+            }
             default: {
                 return "UNKNOWN";
             }
@@ -245,16 +317,21 @@ public class SettingsProvider extends ContentProvider {
 
     @Override
     public boolean onCreate() {
+        Settings.setInSystemServer();
         synchronized (mLock) {
             mUserManager = UserManager.get(getContext());
             mPackageManager = AppGlobals.getPackageManager();
             mHandlerThread = new HandlerThread(LOG_TAG,
                     Process.THREAD_PRIORITY_BACKGROUND);
             mHandlerThread.start();
+            mHandler = new Handler(mHandlerThread.getLooper());
             mSettingsRegistry = new SettingsRegistry();
         }
-        registerBroadcastReceivers();
-        startWatchingUserRestrictionChanges();
+        mHandler.post(() -> {
+            registerBroadcastReceivers();
+            startWatchingUserRestrictionChanges();
+        });
+        ServiceManager.addService("settings", new SettingsService(this));
         return true;
     }
 
@@ -279,19 +356,37 @@ public class SettingsProvider extends ContentProvider {
 
             case Settings.CALL_METHOD_PUT_GLOBAL: {
                 String value = getSettingValue(args);
-                insertGlobalSetting(name, value, requestingUserId, false);
+                String tag = getSettingTag(args);
+                final boolean makeDefault = getSettingMakeDefault(args);
+                insertGlobalSetting(name, value, tag, makeDefault, requestingUserId, false);
                 break;
             }
 
             case Settings.CALL_METHOD_PUT_SECURE: {
                 String value = getSettingValue(args);
-                insertSecureSetting(name, value, requestingUserId, false);
+                String tag = getSettingTag(args);
+                final boolean makeDefault = getSettingMakeDefault(args);
+                insertSecureSetting(name, value, tag, makeDefault, requestingUserId, false);
                 break;
             }
 
             case Settings.CALL_METHOD_PUT_SYSTEM: {
                 String value = getSettingValue(args);
                 insertSystemSetting(name, value, requestingUserId);
+                break;
+            }
+
+            case Settings.CALL_METHOD_RESET_GLOBAL: {
+                final int mode = getResetModeEnforcingPermission(args);
+                String tag = getSettingTag(args);
+                resetGlobalSetting(requestingUserId, mode, tag);
+                break;
+            }
+
+            case Settings.CALL_METHOD_RESET_SECURE: {
+                final int mode = getResetModeEnforcingPermission(args);
+                String tag = getSettingTag(args);
+                resetSecureSetting(requestingUserId, mode, tag);
                 break;
             }
 
@@ -386,13 +481,15 @@ public class SettingsProvider extends ContentProvider {
 
         switch (table) {
             case TABLE_GLOBAL: {
-                if (insertGlobalSetting(name, value, UserHandle.getCallingUserId(), false)) {
+                if (insertGlobalSetting(name, value, null, false,
+                        UserHandle.getCallingUserId(), false)) {
                     return Uri.withAppendedPath(Settings.Global.CONTENT_URI, name);
                 }
             } break;
 
             case TABLE_SECURE: {
-                if (insertSecureSetting(name, value, UserHandle.getCallingUserId(), false)) {
+                if (insertSecureSetting(name, value, null, false,
+                        UserHandle.getCallingUserId(), false)) {
                     return Uri.withAppendedPath(Settings.Secure.CONTENT_URI, name);
                 }
             } break;
@@ -490,12 +587,14 @@ public class SettingsProvider extends ContentProvider {
         switch (args.table) {
             case TABLE_GLOBAL: {
                 final int userId = UserHandle.getCallingUserId();
-                return updateGlobalSetting(args.name, value, userId, false) ? 1 : 0;
+                return updateGlobalSetting(args.name, value, null, false,
+                        userId, false) ? 1 : 0;
             }
 
             case TABLE_SECURE: {
                 final int userId = UserHandle.getCallingUserId();
-                return updateSecureSetting(args.name, value, userId, false) ? 1 : 0;
+                return updateSecureSetting(args.name, value, null, false,
+                        userId, false) ? 1 : 0;
             }
 
             case TABLE_SYSTEM: {
@@ -511,20 +610,36 @@ public class SettingsProvider extends ContentProvider {
 
     @Override
     public ParcelFileDescriptor openFile(Uri uri, String mode) throws FileNotFoundException {
+        final int userId = getUserIdFromUri(uri, UserHandle.getCallingUserId());
+        if (userId != UserHandle.getCallingUserId()) {
+            getContext().enforceCallingPermission(Manifest.permission.INTERACT_ACROSS_USERS,
+                    "Access files from the settings of another user");
+        }
+        uri = ContentProvider.getUriWithoutUserId(uri);
+
+        final String cacheRingtoneSetting;
         final String cacheName;
         if (Settings.System.RINGTONE_CACHE_URI.equals(uri)) {
+            cacheRingtoneSetting = Settings.System.RINGTONE;
             cacheName = Settings.System.RINGTONE_CACHE;
         } else if (Settings.System.NOTIFICATION_SOUND_CACHE_URI.equals(uri)) {
+            cacheRingtoneSetting = Settings.System.NOTIFICATION_SOUND;
             cacheName = Settings.System.NOTIFICATION_SOUND_CACHE;
         } else if (Settings.System.ALARM_ALERT_CACHE_URI.equals(uri)) {
+            cacheRingtoneSetting = Settings.System.ALARM_ALERT;
             cacheName = Settings.System.ALARM_ALERT_CACHE;
         } else {
             throw new FileNotFoundException("Direct file access no longer supported; "
                     + "ringtone playback is available through android.media.Ringtone");
         }
 
-        final File cacheFile = new File(
-                getRingtoneCacheDir(UserHandle.getCallingUserId()), cacheName);
+        int actualCacheOwner;
+        // Redirect cache to parent if ringtone setting is owned by profile parent
+        synchronized (mLock) {
+            actualCacheOwner = resolveOwningUserIdForSystemSettingLocked(userId,
+                    cacheRingtoneSetting);
+        }
+        final File cacheFile = new File(getRingtoneCacheDir(actualCacheOwner), cacheName);
         return ParcelFileDescriptor.open(cacheFile, ParcelFileDescriptor.parseMode(mode));
     }
 
@@ -535,16 +650,30 @@ public class SettingsProvider extends ContentProvider {
         return cacheDir;
     }
 
-    @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    /**
+     * Dump all settings as a proto buf.
+     *
+     * @param fd The file to dump to
+     */
+    void dumpProto(@NonNull FileDescriptor fd) {
+        ProtoOutputStream proto = new ProtoOutputStream(fd);
+
+        synchronized (mLock) {
+            SettingsProtoDumpUtil.dumpProtoLocked(mSettingsRegistry, proto);
+
+        }
+
+        proto.flush();
+    }
+
+    public void dumpInternal(FileDescriptor fd, PrintWriter pw, String[] args) {
         synchronized (mLock) {
             final long identity = Binder.clearCallingIdentity();
             try {
-                List<UserInfo> users = mUserManager.getUsers(true);
+                SparseBooleanArray users = mSettingsRegistry.getKnownUsersLocked();
                 final int userCount = users.size();
                 for (int i = 0; i < userCount; i++) {
-                    UserInfo user = users.get(i);
-                    dumpForUserLocked(user.id, pw);
+                    dumpForUserLocked(users.keyAt(i), pw);
                 }
             } finally {
                 Binder.restoreCallingIdentity(identity);
@@ -555,49 +684,57 @@ public class SettingsProvider extends ContentProvider {
     private void dumpForUserLocked(int userId, PrintWriter pw) {
         if (userId == UserHandle.USER_SYSTEM) {
             pw.println("GLOBAL SETTINGS (user " + userId + ")");
-            Cursor globalCursor = getAllGlobalSettings(ALL_COLUMNS);
-            dumpSettings(globalCursor, pw);
-            pw.println();
-
             SettingsState globalSettings = mSettingsRegistry.getSettingsLocked(
                     SETTINGS_TYPE_GLOBAL, UserHandle.USER_SYSTEM);
-            globalSettings.dumpHistoricalOperations(pw);
+            if (globalSettings != null) {
+                dumpSettingsLocked(globalSettings, pw);
+                pw.println();
+                globalSettings.dumpHistoricalOperations(pw);
+            }
         }
 
         pw.println("SECURE SETTINGS (user " + userId + ")");
-        Cursor secureCursor = getAllSecureSettings(userId, ALL_COLUMNS);
-        dumpSettings(secureCursor, pw);
-        pw.println();
-
         SettingsState secureSettings = mSettingsRegistry.getSettingsLocked(
                 SETTINGS_TYPE_SECURE, userId);
-        secureSettings.dumpHistoricalOperations(pw);
-
-        pw.println("SYSTEM SETTINGS (user " + userId + ")");
-        Cursor systemCursor = getAllSystemSettings(userId, ALL_COLUMNS);
-        dumpSettings(systemCursor, pw);
-        pw.println();
-
-        SettingsState systemSettings = mSettingsRegistry.getSettingsLocked(
-                SETTINGS_TYPE_SYSTEM, userId);
-        systemSettings.dumpHistoricalOperations(pw);
-    }
-
-    private void dumpSettings(Cursor cursor, PrintWriter pw) {
-        if (cursor == null || !cursor.moveToFirst()) {
-            return;
+        if (secureSettings != null) {
+            dumpSettingsLocked(secureSettings, pw);
+            pw.println();
+            secureSettings.dumpHistoricalOperations(pw);
         }
 
-        final int idColumnIdx = cursor.getColumnIndex(Settings.NameValueTable._ID);
-        final int nameColumnIdx = cursor.getColumnIndex(Settings.NameValueTable.NAME);
-        final int valueColumnIdx = cursor.getColumnIndex(Settings.NameValueTable.VALUE);
-
-        do {
-            pw.append("_id:").append(toDumpString(cursor.getString(idColumnIdx)));
-            pw.append(" name:").append(toDumpString(cursor.getString(nameColumnIdx)));
-            pw.append(" value:").append(toDumpString(cursor.getString(valueColumnIdx)));
+        pw.println("SYSTEM SETTINGS (user " + userId + ")");
+        SettingsState systemSettings = mSettingsRegistry.getSettingsLocked(
+                SETTINGS_TYPE_SYSTEM, userId);
+        if (systemSettings != null) {
+            dumpSettingsLocked(systemSettings, pw);
             pw.println();
-        } while (cursor.moveToNext());
+            systemSettings.dumpHistoricalOperations(pw);
+        }
+    }
+
+    private void dumpSettingsLocked(SettingsState settingsState, PrintWriter pw) {
+        List<String> names = settingsState.getSettingNamesLocked();
+
+        final int nameCount = names.size();
+
+        for (int i = 0; i < nameCount; i++) {
+            String name = names.get(i);
+            Setting setting = settingsState.getSettingLocked(name);
+            pw.print("_id:"); pw.print(toDumpString(setting.getId()));
+            pw.print(" name:"); pw.print(toDumpString(name));
+            if (setting.getPackageName() != null) {
+                pw.print(" pkg:"); pw.print(setting.getPackageName());
+            }
+            pw.print(" value:"); pw.print(toDumpString(setting.getValue()));
+            if (setting.getDefaultValue() != null) {
+                pw.print(" default:"); pw.print(setting.getDefaultValue());
+                pw.print(" defaultSystemSet:"); pw.print(setting.isDefaultFromSystem());
+            }
+            if (setting.getTag() != null) {
+                pw.print(" tag:"); pw.print(setting.getTag());
+            }
+            pw.println();
+        }
     }
 
     private static String toDumpString(String s) {
@@ -642,6 +779,13 @@ public class SettingsProvider extends ContentProvider {
                             UserHandle.getUserId(uid));
                 }
             }
+
+            @Override
+            public void onUidRemoved(int uid) {
+                synchronized (mLock) {
+                    mSettingsRegistry.onUidRemovedLocked(uid);
+                }
+            }
         };
 
         // package changes
@@ -660,73 +804,79 @@ public class SettingsProvider extends ContentProvider {
             // value with a forced update to ensure that all cross profile dependencies
             // are taken into account. Also make sure the settings update to.. the same
             // value passes the security checks, so clear binder calling id.
-            if (newRestrictions.containsKey(UserManager.DISALLOW_SHARE_LOCATION)
-                    != prevRestrictions.containsKey(UserManager.DISALLOW_SHARE_LOCATION)) {
+            if (newRestrictions.getBoolean(UserManager.DISALLOW_SHARE_LOCATION)
+                    != prevRestrictions.getBoolean(UserManager.DISALLOW_SHARE_LOCATION)) {
                 final long identity = Binder.clearCallingIdentity();
                 try {
                     synchronized (mLock) {
                         Setting setting = getSecureSetting(
                                 Settings.Secure.LOCATION_PROVIDERS_ALLOWED, userId);
                         updateSecureSetting(Settings.Secure.LOCATION_PROVIDERS_ALLOWED,
-                                setting != null ? setting.getValue() : null, userId, true);
+                                setting != null ? setting.getValue() : null, null,
+                                true, userId, true);
                     }
                 } finally {
                     Binder.restoreCallingIdentity(identity);
                 }
             }
-            if (newRestrictions.containsKey(UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES)
-                    != prevRestrictions.containsKey(UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES)) {
+            if (newRestrictions.getBoolean(UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES)
+                    != prevRestrictions.getBoolean(UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES)) {
                 final long identity = Binder.clearCallingIdentity();
                 try {
                     synchronized (mLock) {
                         Setting setting = getGlobalSetting(Settings.Global.INSTALL_NON_MARKET_APPS);
+                        String value = setting != null ? setting.getValue() : null;
                         updateGlobalSetting(Settings.Global.INSTALL_NON_MARKET_APPS,
-                                setting != null ? setting.getValue() : null, userId, true);
+                                value, null, true, userId, true);
                     }
                 } finally {
                     Binder.restoreCallingIdentity(identity);
                 }
             }
-            if (newRestrictions.containsKey(UserManager.DISALLOW_DEBUGGING_FEATURES)
-                    != prevRestrictions.containsKey(UserManager.DISALLOW_DEBUGGING_FEATURES)) {
+            if (newRestrictions.getBoolean(UserManager.DISALLOW_DEBUGGING_FEATURES)
+                    != prevRestrictions.getBoolean(UserManager.DISALLOW_DEBUGGING_FEATURES)) {
                 final long identity = Binder.clearCallingIdentity();
                 try {
                     synchronized (mLock) {
                         Setting setting = getGlobalSetting(Settings.Global.ADB_ENABLED);
+                        String value = setting != null ? setting.getValue() : null;
                         updateGlobalSetting(Settings.Global.ADB_ENABLED,
-                                setting != null ? setting.getValue() : null, userId, true);
+                                value, null, true, userId, true);
                     }
                 } finally {
                     Binder.restoreCallingIdentity(identity);
                 }
             }
-            if (newRestrictions.containsKey(UserManager.ENSURE_VERIFY_APPS)
-                    != prevRestrictions.containsKey(UserManager.ENSURE_VERIFY_APPS)) {
+            if (newRestrictions.getBoolean(UserManager.ENSURE_VERIFY_APPS)
+                    != prevRestrictions.getBoolean(UserManager.ENSURE_VERIFY_APPS)) {
                 final long identity = Binder.clearCallingIdentity();
                 try {
                     synchronized (mLock) {
                         Setting enable = getGlobalSetting(
                                 Settings.Global.PACKAGE_VERIFIER_ENABLE);
+                        String enableValue = enable != null ? enable.getValue() : null;
                         updateGlobalSetting(Settings.Global.PACKAGE_VERIFIER_ENABLE,
-                                enable != null ? enable.getValue() : null, userId, true);
+                                enableValue, null, true, userId, true);
                         Setting include = getGlobalSetting(
                                 Settings.Global.PACKAGE_VERIFIER_INCLUDE_ADB);
+                        String includeValue = include != null ? include.getValue() : null;
                         updateGlobalSetting(Settings.Global.PACKAGE_VERIFIER_INCLUDE_ADB,
-                                include != null ? include.getValue() : null, userId, true);
+                                includeValue, null, true, userId, true);
                     }
                 } finally {
                     Binder.restoreCallingIdentity(identity);
                 }
             }
-            if (newRestrictions.containsKey(UserManager.DISALLOW_CONFIG_MOBILE_NETWORKS)
-                    != prevRestrictions.containsKey(UserManager.DISALLOW_CONFIG_MOBILE_NETWORKS)) {
+            if (newRestrictions.getBoolean(UserManager.DISALLOW_CONFIG_MOBILE_NETWORKS)
+                    != prevRestrictions.getBoolean(UserManager.DISALLOW_CONFIG_MOBILE_NETWORKS)) {
                 final long identity = Binder.clearCallingIdentity();
                 try {
                     synchronized (mLock) {
                         Setting setting = getGlobalSetting(
                                 Settings.Global.PREFERRED_NETWORK_MODE);
+                        String value = setting != null ? setting.getValue() : null;
                         updateGlobalSetting(Settings.Global.PREFERRED_NETWORK_MODE,
-                                setting != null ? setting.getValue() : null, userId, true);
+                                value, null, true, userId, true);
                     }
                 } finally {
                     Binder.restoreCallingIdentity(identity);
@@ -745,7 +895,8 @@ public class SettingsProvider extends ContentProvider {
             SettingsState settingsState = mSettingsRegistry.getSettingsLocked(
                     SETTINGS_TYPE_GLOBAL, UserHandle.USER_SYSTEM);
 
-            List<String> names = settingsState.getSettingNamesLocked();
+            List<String> names = getSettingsNamesLocked(SETTINGS_TYPE_GLOBAL,
+                    UserHandle.USER_SYSTEM);
 
             final int nameCount = names.size();
 
@@ -768,6 +919,9 @@ public class SettingsProvider extends ContentProvider {
             Slog.v(LOG_TAG, "getGlobalSetting(" + name + ")");
         }
 
+        // Ensure the caller can access the setting.
+        enforceSettingReadable(name, SETTINGS_TYPE_GLOBAL, UserHandle.getCallingUserId());
+
         // Get the value.
         synchronized (mLock) {
             return mSettingsRegistry.getSettingLocked(SETTINGS_TYPE_GLOBAL,
@@ -775,34 +929,49 @@ public class SettingsProvider extends ContentProvider {
         }
     }
 
-    private boolean updateGlobalSetting(String name, String value, int requestingUserId,
-            boolean forceNotify) {
+    private boolean updateGlobalSetting(String name, String value, String tag,
+            boolean makeDefault, int requestingUserId, boolean forceNotify) {
         if (DEBUG) {
-            Slog.v(LOG_TAG, "updateGlobalSetting(" + name + ", " + value + ")");
+            Slog.v(LOG_TAG, "updateGlobalSetting(" + name + ", " + value + ", "
+                    + ", " + tag + ", " + makeDefault + ", " + requestingUserId
+                    + ", " + forceNotify + ")");
         }
-        return mutateGlobalSetting(name, value, requestingUserId, MUTATION_OPERATION_UPDATE,
-                forceNotify);
+        return mutateGlobalSetting(name, value, tag, makeDefault, requestingUserId,
+                MUTATION_OPERATION_UPDATE, forceNotify, 0);
     }
 
-    private boolean insertGlobalSetting(String name, String value, int requestingUserId,
-            boolean forceNotify) {
+    private boolean insertGlobalSetting(String name, String value, String tag,
+            boolean makeDefault, int requestingUserId, boolean forceNotify) {
         if (DEBUG) {
-            Slog.v(LOG_TAG, "insertGlobalSetting(" + name + ", " + value + ")");
+            Slog.v(LOG_TAG, "insertGlobalSetting(" + name + ", " + value  + ", "
+                    + ", " + tag + ", " + makeDefault + ", " + requestingUserId
+                    + ", " + forceNotify + ")");
         }
-        return mutateGlobalSetting(name, value, requestingUserId, MUTATION_OPERATION_INSERT,
-                forceNotify);
+        return mutateGlobalSetting(name, value, tag, makeDefault, requestingUserId,
+                MUTATION_OPERATION_INSERT, forceNotify, 0);
     }
 
     private boolean deleteGlobalSetting(String name, int requestingUserId, boolean forceNotify) {
         if (DEBUG) {
-            Slog.v(LOG_TAG, "deleteGlobalSettingLocked(" + name + ")");
+            Slog.v(LOG_TAG, "deleteGlobalSetting(" + name + ", " + requestingUserId
+                    + ", " + forceNotify + ")");
         }
-        return mutateGlobalSetting(name, null, requestingUserId, MUTATION_OPERATION_DELETE,
-                forceNotify);
+        return mutateGlobalSetting(name, null, null, false, requestingUserId,
+                MUTATION_OPERATION_DELETE, forceNotify, 0);
     }
 
-    private boolean mutateGlobalSetting(String name, String value, int requestingUserId,
-            int operation, boolean forceNotify) {
+    private void resetGlobalSetting(int requestingUserId, int mode, String tag) {
+        if (DEBUG) {
+            Slog.v(LOG_TAG, "resetGlobalSetting(" + requestingUserId + ", "
+                    + mode + ", " + tag + ")");
+        }
+        mutateGlobalSetting(null, null, tag, false, requestingUserId,
+                MUTATION_OPERATION_RESET, false, mode);
+    }
+
+    private boolean mutateGlobalSetting(String name, String value, String tag,
+            boolean makeDefault, int requestingUserId, int operation, boolean forceNotify,
+            int mode) {
         // Make sure the caller can change the settings - treated as secure.
         enforceWritePermission(Manifest.permission.WRITE_SECURE_SETTINGS);
 
@@ -811,7 +980,7 @@ public class SettingsProvider extends ContentProvider {
 
         // If this is a setting that is currently restricted for this user, do not allow
         // unrestricting changes.
-        if (isGlobalOrSecureSettingRestrictedForUser(name, callingUserId, value,
+        if (name != null && isGlobalOrSecureSettingRestrictedForUser(name, callingUserId, value,
                 Binder.getCallingUid())) {
             return false;
         }
@@ -820,25 +989,39 @@ public class SettingsProvider extends ContentProvider {
         synchronized (mLock) {
             switch (operation) {
                 case MUTATION_OPERATION_INSERT: {
-                    return mSettingsRegistry
-                            .insertSettingLocked(SETTINGS_TYPE_GLOBAL, UserHandle.USER_SYSTEM,
-                                    name, value, getCallingPackage(), forceNotify);
+                    return mSettingsRegistry.insertSettingLocked(SETTINGS_TYPE_GLOBAL,
+                            UserHandle.USER_SYSTEM, name, value, tag, makeDefault,
+                            getCallingPackage(), forceNotify, CRITICAL_GLOBAL_SETTINGS);
                 }
 
                 case MUTATION_OPERATION_DELETE: {
                     return mSettingsRegistry.deleteSettingLocked(SETTINGS_TYPE_GLOBAL,
-                            UserHandle.USER_SYSTEM, name, forceNotify);
+                            UserHandle.USER_SYSTEM, name, forceNotify, CRITICAL_GLOBAL_SETTINGS);
                 }
 
                 case MUTATION_OPERATION_UPDATE: {
-                    return mSettingsRegistry
-                            .updateSettingLocked(SETTINGS_TYPE_GLOBAL, UserHandle.USER_SYSTEM,
-                                    name, value, getCallingPackage(), forceNotify);
+                    return mSettingsRegistry.updateSettingLocked(SETTINGS_TYPE_GLOBAL,
+                            UserHandle.USER_SYSTEM, name, value, tag, makeDefault,
+                            getCallingPackage(), forceNotify, CRITICAL_GLOBAL_SETTINGS);
                 }
+
+                case MUTATION_OPERATION_RESET: {
+                    mSettingsRegistry.resetSettingsLocked(SETTINGS_TYPE_GLOBAL,
+                            UserHandle.USER_SYSTEM, getCallingPackage(), mode, tag);
+                } return true;
             }
         }
 
         return false;
+    }
+
+    private PackageInfo getCallingPackageInfo(int userId) {
+        try {
+            return mPackageManager.getPackageInfo(getCallingPackage(),
+                    PackageManager.GET_SIGNATURES, userId);
+        } catch (RemoteException e) {
+            throw new IllegalStateException("Package " + getCallingPackage() + " doesn't exist");
+        }
     }
 
     private Cursor getAllSecureSettings(int userId, String[] projection) {
@@ -849,9 +1032,15 @@ public class SettingsProvider extends ContentProvider {
         // Resolve the userId on whose behalf the call is made.
         final int callingUserId = resolveCallingUserIdEnforcingPermissionsLocked(userId);
 
+        // The relevant "calling package" userId will be the owning userId for some
+        // profiles, and we can't do the lookup inside our [lock held] loop, so work out
+        // up front who the effective "new SSAID" user ID for that settings name will be.
+        final int ssaidUserId = resolveOwningUserIdForSecureSettingLocked(callingUserId,
+                Settings.Secure.ANDROID_ID);
+        final PackageInfo ssaidCallingPkg = getCallingPackageInfo(ssaidUserId);
+
         synchronized (mLock) {
-            List<String> names = mSettingsRegistry.getSettingsNamesLocked(
-                    SETTINGS_TYPE_SECURE, callingUserId);
+            List<String> names = getSettingsNamesLocked(SETTINGS_TYPE_SECURE, callingUserId);
 
             final int nameCount = names.size();
 
@@ -864,13 +1053,21 @@ public class SettingsProvider extends ContentProvider {
                 final int owningUserId = resolveOwningUserIdForSecureSettingLocked(callingUserId,
                         name);
 
-                // Special case for location (sigh).
-                if (isLocationProvidersAllowedRestricted(name, callingUserId, owningUserId)) {
+                if (!isSecureSettingAccessible(name, callingUserId, owningUserId)) {
+                    // This caller is not permitted to access this setting. Pretend the setting
+                    // doesn't exist.
                     continue;
                 }
 
-                Setting setting = mSettingsRegistry.getSettingLocked(
-                        SETTINGS_TYPE_SECURE, owningUserId, name);
+                // As of Android O, the SSAID is read from an app-specific entry in table
+                // SETTINGS_FILE_SSAID, unless accessed by a system process.
+                final Setting setting;
+                if (isNewSsaidSetting(name)) {
+                    setting = getSsaidSettingLocked(ssaidCallingPkg, owningUserId);
+                } else {
+                    setting = mSettingsRegistry.getSettingLocked(SETTINGS_TYPE_SECURE, owningUserId,
+                            name);
+                }
                 appendSettingToCursor(result, setting);
             }
 
@@ -886,55 +1083,162 @@ public class SettingsProvider extends ContentProvider {
         // Resolve the userId on whose behalf the call is made.
         final int callingUserId = resolveCallingUserIdEnforcingPermissionsLocked(requestingUserId);
 
+        // Ensure the caller can access the setting.
+        enforceSettingReadable(name, SETTINGS_TYPE_SECURE, UserHandle.getCallingUserId());
+
         // Determine the owning user as some profile settings are cloned from the parent.
         final int owningUserId = resolveOwningUserIdForSecureSettingLocked(callingUserId, name);
 
-        // Special case for location (sigh).
-        if (isLocationProvidersAllowedRestricted(name, callingUserId, owningUserId)) {
-            return mSettingsRegistry.getSettingsLocked(SETTINGS_TYPE_SECURE,
-                    owningUserId).getNullSetting();
+        if (!isSecureSettingAccessible(name, callingUserId, owningUserId)) {
+            // This caller is not permitted to access this setting. Pretend the setting doesn't
+            // exist.
+            SettingsState settings = mSettingsRegistry.getSettingsLocked(SETTINGS_TYPE_SECURE,
+                    owningUserId);
+            return settings != null ? settings.getNullSetting() : null;
         }
 
-        // Get the value.
+        // As of Android O, the SSAID is read from an app-specific entry in table
+        // SETTINGS_FILE_SSAID, unless accessed by a system process.
+        if (isNewSsaidSetting(name)) {
+            PackageInfo callingPkg = getCallingPackageInfo(owningUserId);
+            synchronized (mLock) {
+                return getSsaidSettingLocked(callingPkg, owningUserId);
+            }
+        }
+
+        // Not the SSAID; do a straight lookup
         synchronized (mLock) {
             return mSettingsRegistry.getSettingLocked(SETTINGS_TYPE_SECURE,
                     owningUserId, name);
         }
     }
 
-    private boolean insertSecureSetting(String name, String value, int requestingUserId,
-            boolean forceNotify) {
+    private boolean isNewSsaidSetting(String name) {
+        return Settings.Secure.ANDROID_ID.equals(name)
+                && UserHandle.getAppId(Binder.getCallingUid()) >= Process.FIRST_APPLICATION_UID;
+    }
+
+    private Setting getSsaidSettingLocked(PackageInfo callingPkg, int owningUserId) {
+        // Get uid of caller (key) used to store ssaid value
+        String name = Integer.toString(
+                UserHandle.getUid(owningUserId, UserHandle.getAppId(Binder.getCallingUid())));
+
         if (DEBUG) {
-            Slog.v(LOG_TAG, "insertSecureSetting(" + name + ", " + value + ", "
-                    + requestingUserId + ")");
+            Slog.v(LOG_TAG, "getSsaidSettingLocked(" + name + "," + owningUserId + ")");
         }
 
-        return mutateSecureSetting(name, value, requestingUserId, MUTATION_OPERATION_INSERT,
-                forceNotify);
+        // Retrieve the ssaid from the table if present.
+        final Setting ssaid = mSettingsRegistry.getSettingLocked(SETTINGS_TYPE_SSAID, owningUserId,
+                name);
+        // If the app is an Instant App use its stored SSAID instead of our own.
+        final String instantSsaid;
+        final long token = Binder.clearCallingIdentity();
+        try {
+            instantSsaid = mPackageManager.getInstantAppAndroidId(callingPkg.packageName,
+                    owningUserId);
+        } catch (RemoteException e) {
+            Slog.e(LOG_TAG, "Failed to get Instant App Android ID", e);
+            return null;
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+
+        final SettingsState ssaidSettings = mSettingsRegistry.getSettingsLocked(
+                SETTINGS_TYPE_SSAID, owningUserId);
+
+        if (instantSsaid != null) {
+            // Use the stored value if it is still valid.
+            if (ssaid != null && instantSsaid.equals(ssaid.getValue())) {
+                return mascaradeSsaidSetting(ssaidSettings, ssaid);
+            }
+            // The value has changed, update the stored value.
+            final boolean success = ssaidSettings.insertSettingLocked(name, instantSsaid, null,
+                    true, callingPkg.packageName);
+            if (!success) {
+                throw new IllegalStateException("Failed to update instant app android id");
+            }
+            Setting setting = mSettingsRegistry.getSettingLocked(SETTINGS_TYPE_SSAID,
+                    owningUserId, name);
+            return mascaradeSsaidSetting(ssaidSettings, setting);
+        }
+
+        // Lazy initialize ssaid if not yet present in ssaid table.
+        if (ssaid == null || ssaid.isNull() || ssaid.getValue() == null) {
+            Setting setting = mSettingsRegistry.generateSsaidLocked(callingPkg, owningUserId);
+            return mascaradeSsaidSetting(ssaidSettings, setting);
+        }
+
+        return mascaradeSsaidSetting(ssaidSettings, ssaid);
+    }
+
+    private Setting mascaradeSsaidSetting(SettingsState settingsState, Setting ssaidSetting) {
+        // SSAID settings are located in a dedicated table for internal bookkeeping
+        // but for the world they reside in the secure table, so adjust the key here.
+        // We have a special name when looking it up but want the world to see it as
+        // "android_id".
+        if (ssaidSetting != null) {
+            return settingsState.new Setting(ssaidSetting) {
+                @Override
+                public int getKey() {
+                    final int userId = getUserIdFromKey(super.getKey());
+                    return makeKey(SETTINGS_TYPE_SECURE, userId);
+                }
+
+                @Override
+                public String getName() {
+                    return Settings.Secure.ANDROID_ID;
+                }
+            };
+        }
+        return null;
+    }
+
+    private boolean insertSecureSetting(String name, String value, String tag,
+            boolean makeDefault, int requestingUserId, boolean forceNotify) {
+        if (DEBUG) {
+            Slog.v(LOG_TAG, "insertSecureSetting(" + name + ", " + value + ", "
+                    + ", " + tag  + ", " + makeDefault + ", "  + requestingUserId
+                    + ", " + forceNotify + ")");
+        }
+        return mutateSecureSetting(name, value, tag, makeDefault, requestingUserId,
+                MUTATION_OPERATION_INSERT, forceNotify, 0);
     }
 
     private boolean deleteSecureSetting(String name, int requestingUserId, boolean forceNotify) {
         if (DEBUG) {
-            Slog.v(LOG_TAG, "deleteSecureSetting(" + name + ", " + requestingUserId + ")");
+            Slog.v(LOG_TAG, "deleteSecureSetting(" + name + ", " + requestingUserId
+                    + ", " + forceNotify + ")");
         }
 
-        return mutateSecureSetting(name, null, requestingUserId, MUTATION_OPERATION_DELETE,
-                forceNotify);
+        return mutateSecureSetting(name, null, null, false, requestingUserId,
+                MUTATION_OPERATION_DELETE, forceNotify, 0);
     }
 
-    private boolean updateSecureSetting(String name, String value, int requestingUserId,
-            boolean forceNotify) {
+    private boolean updateSecureSetting(String name, String value, String tag,
+            boolean makeDefault, int requestingUserId, boolean forceNotify) {
         if (DEBUG) {
             Slog.v(LOG_TAG, "updateSecureSetting(" + name + ", " + value + ", "
-                    + requestingUserId + ")");
+                    + ", " + tag  + ", " + makeDefault + ", "  + requestingUserId
+                    + ", "  + forceNotify +")");
         }
 
-        return mutateSecureSetting(name, value, requestingUserId, MUTATION_OPERATION_UPDATE,
-                forceNotify);
+        return mutateSecureSetting(name, value, tag, makeDefault, requestingUserId,
+                MUTATION_OPERATION_UPDATE, forceNotify, 0);
     }
 
-    private boolean mutateSecureSetting(String name, String value, int requestingUserId,
-            int operation, boolean forceNotify) {
+    private void resetSecureSetting(int requestingUserId, int mode, String tag) {
+        if (DEBUG) {
+            Slog.v(LOG_TAG, "resetSecureSetting(" + requestingUserId + ", "
+                    + mode + ", " + tag + ")");
+        }
+
+        mutateSecureSetting(null, null, tag, false, requestingUserId,
+                MUTATION_OPERATION_RESET, false, mode);
+    }
+
+    private boolean mutateSecureSetting(String name, String value, String tag,
+            boolean makeDefault, int requestingUserId, int operation, boolean forceNotify,
+            int mode) {
         // Make sure the caller can change the settings.
         enforceWritePermission(Manifest.permission.WRITE_SECURE_SETTINGS);
 
@@ -943,7 +1247,7 @@ public class SettingsProvider extends ContentProvider {
 
         // If this is a setting that is currently restricted for this user, do not allow
         // unrestricting changes.
-        if (isGlobalOrSecureSettingRestrictedForUser(name, callingUserId, value,
+        if (name != null && isGlobalOrSecureSettingRestrictedForUser(name, callingUserId, value,
                 Binder.getCallingUid())) {
             return false;
         }
@@ -958,7 +1262,8 @@ public class SettingsProvider extends ContentProvider {
 
         // Special cases for location providers (sigh).
         if (Settings.Secure.LOCATION_PROVIDERS_ALLOWED.equals(name)) {
-            return updateLocationProvidersAllowedLocked(value, owningUserId, forceNotify);
+            return updateLocationProvidersAllowedLocked(value, tag, owningUserId, makeDefault,
+                    forceNotify);
         }
 
         // Mutate the value.
@@ -966,18 +1271,25 @@ public class SettingsProvider extends ContentProvider {
             switch (operation) {
                 case MUTATION_OPERATION_INSERT: {
                     return mSettingsRegistry.insertSettingLocked(SETTINGS_TYPE_SECURE,
-                            owningUserId, name, value, getCallingPackage(), forceNotify);
+                            owningUserId, name, value, tag, makeDefault,
+                            getCallingPackage(), forceNotify, CRITICAL_SECURE_SETTINGS);
                 }
 
                 case MUTATION_OPERATION_DELETE: {
                     return mSettingsRegistry.deleteSettingLocked(SETTINGS_TYPE_SECURE,
-                            owningUserId, name, forceNotify);
+                            owningUserId, name, forceNotify, CRITICAL_SECURE_SETTINGS);
                 }
 
                 case MUTATION_OPERATION_UPDATE: {
                     return mSettingsRegistry.updateSettingLocked(SETTINGS_TYPE_SECURE,
-                            owningUserId, name, value, getCallingPackage(), forceNotify);
+                            owningUserId, name, value, tag, makeDefault,
+                            getCallingPackage(), forceNotify, CRITICAL_SECURE_SETTINGS);
                 }
+
+                case MUTATION_OPERATION_RESET: {
+                    mSettingsRegistry.resetSettingsLocked(SETTINGS_TYPE_SECURE,
+                            UserHandle.USER_SYSTEM, getCallingPackage(), mode, tag);
+                } return true;
             }
         }
 
@@ -993,8 +1305,7 @@ public class SettingsProvider extends ContentProvider {
         final int callingUserId = resolveCallingUserIdEnforcingPermissionsLocked(userId);
 
         synchronized (mLock) {
-            List<String> names = mSettingsRegistry.getSettingsNamesLocked(
-                    SETTINGS_TYPE_SYSTEM, callingUserId);
+            List<String> names = getSettingsNamesLocked(SETTINGS_TYPE_SYSTEM, callingUserId);
 
             final int nameCount = names.size();
 
@@ -1024,6 +1335,9 @@ public class SettingsProvider extends ContentProvider {
 
         // Resolve the userId on whose behalf the call is made.
         final int callingUserId = resolveCallingUserIdEnforcingPermissionsLocked(requestingUserId);
+
+        // Ensure the caller can access the setting.
+        enforceSettingReadable(name, SETTINGS_TYPE_SYSTEM, UserHandle.getCallingUserId());
 
         // Determine the owning user as some profile settings are cloned from the parent.
         final int owningUserId = resolveOwningUserIdForSystemSettingLocked(callingUserId, name);
@@ -1096,7 +1410,7 @@ public class SettingsProvider extends ContentProvider {
         }
         if (cacheName != null) {
             final File cacheFile = new File(
-                    getRingtoneCacheDir(UserHandle.getCallingUserId()), cacheName);
+                    getRingtoneCacheDir(owningUserId), cacheName);
             cacheFile.delete();
         }
 
@@ -1106,18 +1420,20 @@ public class SettingsProvider extends ContentProvider {
                 case MUTATION_OPERATION_INSERT: {
                     validateSystemSettingValue(name, value);
                     return mSettingsRegistry.insertSettingLocked(SETTINGS_TYPE_SYSTEM,
-                            owningUserId, name, value, getCallingPackage(), false);
+                            owningUserId, name, value, null, false, getCallingPackage(),
+                            false, null);
                 }
 
                 case MUTATION_OPERATION_DELETE: {
                     return mSettingsRegistry.deleteSettingLocked(SETTINGS_TYPE_SYSTEM,
-                            owningUserId, name, false);
+                            owningUserId, name, false, null);
                 }
 
                 case MUTATION_OPERATION_UPDATE: {
                     validateSystemSettingValue(name, value);
                     return mSettingsRegistry.updateSettingLocked(SETTINGS_TYPE_SYSTEM,
-                            owningUserId, name, value, getCallingPackage(), false);
+                            owningUserId, name, value, null, false, getCallingPackage(),
+                            false, null);
                 }
             }
 
@@ -1140,6 +1456,34 @@ public class SettingsProvider extends ContentProvider {
         if (validator != null && !validator.validate(value)) {
             throw new IllegalArgumentException("Invalid value: " + value
                     + " for setting: " + name);
+        }
+    }
+
+    /**
+     * Returns {@code true} if the specified secure setting should be accessible to the caller.
+     */
+    private boolean isSecureSettingAccessible(String name, int callingUserId,
+            int owningUserId) {
+        // Special case for location (sigh).
+        // This check is not inside the name-based checks below because this method performs checks
+        // only if the calling user ID is not the same as the owning user ID.
+        if (isLocationProvidersAllowedRestricted(name, callingUserId, owningUserId)) {
+            return false;
+        }
+
+        switch (name) {
+            case "bluetooth_address":
+                // BluetoothManagerService for some reason stores the Android's Bluetooth MAC
+                // address in this secure setting. Secure settings can normally be read by any app,
+                // which thus enables them to bypass the recently introduced restrictions on access
+                // to device identifiers.
+                // To mitigate this we make this setting available only to callers privileged to see
+                // this device's MAC addresses, same as through public API
+                // BluetoothAdapter.getAddress() (see BluetoothManagerService for details).
+                return getContext().checkCallingOrSelfPermission(
+                        Manifest.permission.LOCAL_MAC_ADDRESS) == PackageManager.PERMISSION_GRANTED;
+            default:
+                return true;
         }
     }
 
@@ -1208,7 +1552,8 @@ public class SettingsProvider extends ContentProvider {
             case Settings.Secure.ALWAYS_ON_VPN_APP:
             case Settings.Secure.ALWAYS_ON_VPN_LOCKDOWN:
                 // Whitelist system uid (ConnectivityService) and root uid to change always-on vpn
-                if (callingUid == Process.SYSTEM_UID || callingUid == Process.ROOT_UID) {
+                final int appId = UserHandle.getAppId(callingUid);
+                if (appId == Process.SYSTEM_UID || appId == Process.ROOT_UID) {
                     return false;
                 }
                 restriction = UserManager.DISALLOW_CONFIG_VPN;
@@ -1236,6 +1581,23 @@ public class SettingsProvider extends ContentProvider {
     }
 
     private int resolveOwningUserIdForSystemSettingLocked(int userId, String setting) {
+        final int parentId;
+        // Resolves dependency if setting has a dependency and the calling user has a parent
+        if (sSystemCloneFromParentOnDependency.containsKey(setting)
+                && (parentId = getGroupParentLocked(userId)) != userId) {
+            // The setting has a dependency and the profile has a parent
+            String dependency = sSystemCloneFromParentOnDependency.get(setting);
+            // Lookup the dependency setting as ourselves, some callers may not have access to it.
+            final long token = Binder.clearCallingIdentity();
+            try {
+                Setting settingObj = getSecureSetting(dependency, userId);
+                if (settingObj != null && settingObj.getValue().equals("1")) {
+                    return parentId;
+                }
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
         return resolveOwningUserIdLocked(userId, sSystemCloneToManagedSettings, setting);
     }
 
@@ -1251,9 +1613,10 @@ public class SettingsProvider extends ContentProvider {
             String name, int userId) {
         // System/root/shell can mutate whatever secure settings they want.
         final int callingUid = Binder.getCallingUid();
-        if (callingUid == android.os.Process.SYSTEM_UID
-                || callingUid == Process.SHELL_UID
-                || callingUid == Process.ROOT_UID) {
+        final int appId = UserHandle.getAppId(callingUid);
+        if (appId == android.os.Process.SYSTEM_UID
+                || appId == Process.SHELL_UID
+                || appId == Process.ROOT_UID) {
             return;
         }
 
@@ -1298,6 +1661,81 @@ public class SettingsProvider extends ContentProvider {
                         packageInfo.applicationInfo.targetSdkVersion, name);
             } break;
         }
+    }
+
+    private Set<String> getInstantAppAccessibleSettings(int settingsType) {
+        switch (settingsType) {
+            case SETTINGS_TYPE_GLOBAL:
+                return Settings.Global.INSTANT_APP_SETTINGS;
+            case SETTINGS_TYPE_SECURE:
+                return Settings.Secure.INSTANT_APP_SETTINGS;
+            case SETTINGS_TYPE_SYSTEM:
+                return Settings.System.INSTANT_APP_SETTINGS;
+            default:
+                throw new IllegalArgumentException("Invalid settings type: " + settingsType);
+        }
+    }
+
+    private Set<String> getOverlayInstantAppAccessibleSettings(int settingsType) {
+        switch (settingsType) {
+            case SETTINGS_TYPE_GLOBAL:
+                return OVERLAY_ALLOWED_GLOBAL_INSTANT_APP_SETTINGS;
+            case SETTINGS_TYPE_SYSTEM:
+                return OVERLAY_ALLOWED_SYSTEM_INSTANT_APP_SETTINGS;
+            case SETTINGS_TYPE_SECURE:
+                return OVERLAY_ALLOWED_SECURE_INSTANT_APP_SETTINGS;
+            default:
+                throw new IllegalArgumentException("Invalid settings type: " + settingsType);
+        }
+    }
+
+    private List<String> getSettingsNamesLocked(int settingsType, int userId) {
+        boolean instantApp;
+        if (UserHandle.getAppId(Binder.getCallingUid()) < Process.FIRST_APPLICATION_UID) {
+            instantApp = false;
+        } else {
+            ApplicationInfo ai = getCallingApplicationInfoOrThrow();
+            instantApp = ai.isInstantApp();
+        }
+        if (instantApp) {
+            return new ArrayList<String>(getInstantAppAccessibleSettings(settingsType));
+        } else {
+            return mSettingsRegistry.getSettingsNamesLocked(settingsType, userId);
+        }
+    }
+
+    private void enforceSettingReadable(String settingName, int settingsType, int userId) {
+        if (UserHandle.getAppId(Binder.getCallingUid()) < Process.FIRST_APPLICATION_UID) {
+            return;
+        }
+        ApplicationInfo ai = getCallingApplicationInfoOrThrow();
+        if (!ai.isInstantApp()) {
+            return;
+        }
+        if (!getInstantAppAccessibleSettings(settingsType).contains(settingName)
+                && !getOverlayInstantAppAccessibleSettings(settingsType).contains(settingName)) {
+            throw new SecurityException("Setting " + settingName + " is not accessible from"
+                    + " ephemeral package " + getCallingPackage());
+        }
+    }
+
+    private ApplicationInfo getCallingApplicationInfoOrThrow() {
+        // We always use the callingUid for this lookup. This means that if hypothetically an
+        // app was installed in user A with cross user and in user B as an Instant App
+        // the app in A would be able to see all the settings in user B. However since cross
+        // user is a system permission and the app must be uninstalled in B and then installed as
+        // an Instant App that situation is not realistic or supported.
+        ApplicationInfo ai = null;
+        try {
+            ai = mPackageManager.getApplicationInfo(getCallingPackage(), 0
+                    , UserHandle.getCallingUserId());
+        } catch (RemoteException ignored) {
+        }
+        if (ai == null) {
+            throw new IllegalStateException("Failed to lookup info for package "
+                    + getCallingPackage());
+        }
+        return ai;
     }
 
     private PackageInfo getCallingPackageInfoOrThrow(int userId) {
@@ -1349,8 +1787,8 @@ public class SettingsProvider extends ContentProvider {
      *
      * @returns whether the enabled location providers changed.
      */
-    private boolean updateLocationProvidersAllowedLocked(String value, int owningUserId,
-            boolean forceNotify) {
+    private boolean updateLocationProvidersAllowedLocked(String value, String tag,
+            int owningUserId, boolean makeDefault, boolean forceNotify) {
         if (TextUtils.isEmpty(value)) {
             return false;
         }
@@ -1369,9 +1807,12 @@ public class SettingsProvider extends ContentProvider {
         value = value.substring(1);
 
         Setting settingValue = getSecureSetting(
-                Settings.Secure.LOCATION_PROVIDERS_ALLOWED, owningUserId);
+                    Settings.Secure.LOCATION_PROVIDERS_ALLOWED, owningUserId);
+        if (settingValue == null) {
+            return false;
+        }
 
-        String oldProviders = (settingValue != null) ? settingValue.getValue() : "";
+        String oldProviders = !settingValue.isNull() ? settingValue.getValue() : "";
 
         int index = oldProviders.indexOf(value);
         int end = index + value.length();
@@ -1420,7 +1861,7 @@ public class SettingsProvider extends ContentProvider {
 
         return mSettingsRegistry.insertSettingLocked(SETTINGS_TYPE_SECURE,
                 owningUserId, Settings.Secure.LOCATION_PROVIDERS_ALLOWED, newProviders,
-                getCallingPackage(), forceNotify);
+                tag, makeDefault, getCallingPackage(), forceNotify, CRITICAL_SECURE_SETTINGS);
     }
 
     private static void warnOrThrowForUndesiredSecureSettingsMutationForTargetSdk(
@@ -1456,7 +1897,7 @@ public class SettingsProvider extends ContentProvider {
     private Bundle packageValueForCallResult(Setting setting,
             boolean trackingGeneration) {
         if (!trackingGeneration) {
-            if (setting.isNull()) {
+            if (setting == null || setting.isNull()) {
                 return NULL_SETTING_BUNDLE;
             }
             return Bundle.forPair(Settings.NameValueTable.VALUE, setting.getValue());
@@ -1464,7 +1905,8 @@ public class SettingsProvider extends ContentProvider {
         Bundle result = new Bundle();
         result.putString(Settings.NameValueTable.VALUE,
                 !setting.isNull() ? setting.getValue() : null);
-        mSettingsRegistry.mGenerationRegistry.addGenerationData(result, setting.getkey());
+
+        mSettingsRegistry.mGenerationRegistry.addGenerationData(result, setting.getKey());
         return result;
     }
 
@@ -1480,6 +1922,51 @@ public class SettingsProvider extends ContentProvider {
 
     private static String getSettingValue(Bundle args) {
         return (args != null) ? args.getString(Settings.NameValueTable.VALUE) : null;
+    }
+
+    private static String getSettingTag(Bundle args) {
+        return (args != null) ? args.getString(Settings.CALL_METHOD_TAG_KEY) : null;
+    }
+
+    private static boolean getSettingMakeDefault(Bundle args) {
+        return (args != null) && args.getBoolean(Settings.CALL_METHOD_MAKE_DEFAULT_KEY);
+    }
+
+    private static int getResetModeEnforcingPermission(Bundle args) {
+        final int mode = (args != null) ? args.getInt(Settings.CALL_METHOD_RESET_MODE_KEY) : 0;
+        switch (mode) {
+            case Settings.RESET_MODE_UNTRUSTED_DEFAULTS: {
+                if (!isCallerSystemOrShellOrRootOnDebuggableBuild()) {
+                    throw new SecurityException("Only system, shell/root on a "
+                            + "debuggable build can reset to untrusted defaults");
+                }
+                return mode;
+            }
+            case Settings.RESET_MODE_UNTRUSTED_CHANGES: {
+                if (!isCallerSystemOrShellOrRootOnDebuggableBuild()) {
+                    throw new SecurityException("Only system, shell/root on a "
+                            + "debuggable build can reset untrusted changes");
+                }
+                return mode;
+            }
+            case Settings.RESET_MODE_TRUSTED_DEFAULTS: {
+                if (!isCallerSystemOrShellOrRootOnDebuggableBuild()) {
+                    throw new SecurityException("Only system, shell/root on a "
+                            + "debuggable build can reset to trusted defaults");
+                }
+                return mode;
+            }
+            case Settings.RESET_MODE_PACKAGE_DEFAULTS: {
+                return mode;
+            }
+        }
+        throw new IllegalArgumentException("Invalid reset mode: " + mode);
+    }
+
+    private static boolean isCallerSystemOrShellOrRootOnDebuggableBuild() {
+        final int appId = UserHandle.getAppId(Binder.getCallingUid());
+        return appId == SYSTEM_UID || (Build.IS_DEBUGGABLE
+                && (appId == SHELL_UID || appId == ROOT_UID));
     }
 
     private static String getValidTableOrThrow(Uri uri) {
@@ -1519,7 +2006,7 @@ public class SettingsProvider extends ContentProvider {
     }
 
     private static void appendSettingToCursor(MatrixCursor cursor, Setting setting) {
-        if (setting.isNull()) {
+        if (setting == null || setting.isNull()) {
             return;
         }
         final int columnCount = cursor.getColumnCount();
@@ -1646,6 +2133,9 @@ public class SettingsProvider extends ContentProvider {
         private static final String SETTINGS_FILE_GLOBAL = "settings_global.xml";
         private static final String SETTINGS_FILE_SYSTEM = "settings_system.xml";
         private static final String SETTINGS_FILE_SECURE = "settings_secure.xml";
+        private static final String SETTINGS_FILE_SSAID = "settings_ssaid.xml";
+
+        private static final String SSAID_USER_KEY = "userkey";
 
         private final SparseArray<SettingsState> mSettingsStates = new SparseArray<>();
 
@@ -1655,17 +2145,146 @@ public class SettingsProvider extends ContentProvider {
 
         private final BackupManager mBackupManager;
 
+        private String mSettingsCreationBuildId;
+
         public SettingsRegistry() {
             mHandler = new MyHandler(getContext().getMainLooper());
             mGenerationRegistry = new GenerationRegistry(mLock);
             mBackupManager = new BackupManager(getContext());
             migrateAllLegacySettingsIfNeeded();
+            syncSsaidTableOnStart();
+        }
+
+        private void generateUserKeyLocked(int userId) {
+            // Generate a random key for each user used for creating a new ssaid.
+            final byte[] keyBytes = new byte[32];
+            final SecureRandom rand = new SecureRandom();
+            rand.nextBytes(keyBytes);
+
+            // Convert to string for storage in settings table.
+            final String userKey = ByteStringUtils.toHexString(keyBytes);
+
+            // Store the key in the ssaid table.
+            final SettingsState ssaidSettings = getSettingsLocked(SETTINGS_TYPE_SSAID, userId);
+            final boolean success = ssaidSettings.insertSettingLocked(SSAID_USER_KEY, userKey, null,
+                    true, SettingsState.SYSTEM_PACKAGE_NAME);
+
+            if (!success) {
+                throw new IllegalStateException("Ssaid settings not accessible");
+            }
+        }
+
+        private byte[] getLengthPrefix(byte[] data) {
+            return ByteBuffer.allocate(4).putInt(data.length).array();
+        }
+
+        public Setting generateSsaidLocked(PackageInfo callingPkg, int userId) {
+            // Read the user's key from the ssaid table.
+            Setting userKeySetting = getSettingLocked(SETTINGS_TYPE_SSAID, userId, SSAID_USER_KEY);
+            if (userKeySetting == null || userKeySetting.isNull()
+                    || userKeySetting.getValue() == null) {
+                // Lazy initialize and store the user key.
+                generateUserKeyLocked(userId);
+                userKeySetting = getSettingLocked(SETTINGS_TYPE_SSAID, userId, SSAID_USER_KEY);
+                if (userKeySetting == null || userKeySetting.isNull()
+                        || userKeySetting.getValue() == null) {
+                    throw new IllegalStateException("User key not accessible");
+                }
+            }
+            final String userKey = userKeySetting.getValue();
+
+            // Convert the user's key back to a byte array.
+            final byte[] keyBytes = ByteStringUtils.fromHexToByteArray(userKey);
+
+            // Validate that the key is of expected length.
+            // Keys are currently 32 bytes, but were once 16 bytes during Android O development.
+            if (keyBytes == null || (keyBytes.length != 16 && keyBytes.length != 32)) {
+                throw new IllegalStateException("User key invalid");
+            }
+
+            final Mac m;
+            try {
+                m = Mac.getInstance("HmacSHA256");
+                m.init(new SecretKeySpec(keyBytes, m.getAlgorithm()));
+            } catch (NoSuchAlgorithmException e) {
+                throw new IllegalStateException("HmacSHA256 is not available", e);
+            } catch (InvalidKeyException e) {
+                throw new IllegalStateException("Key is corrupted", e);
+            }
+
+            // Mac each of the developer signatures.
+            for (int i = 0; i < callingPkg.signatures.length; i++) {
+                byte[] sig = callingPkg.signatures[i].toByteArray();
+                m.update(getLengthPrefix(sig), 0, 4);
+                m.update(sig);
+            }
+
+            // Convert result to a string for storage in settings table. Only want first 64 bits.
+            final String ssaid = ByteStringUtils.toHexString(m.doFinal()).substring(0, 16)
+                    .toLowerCase(Locale.US);
+
+            // Save the ssaid in the ssaid table.
+            final String uid = Integer.toString(callingPkg.applicationInfo.uid);
+            final SettingsState ssaidSettings = getSettingsLocked(SETTINGS_TYPE_SSAID, userId);
+            final boolean success = ssaidSettings.insertSettingLocked(uid, ssaid, null, true,
+                callingPkg.packageName);
+
+            if (!success) {
+                throw new IllegalStateException("Ssaid settings not accessible");
+            }
+
+            return getSettingLocked(SETTINGS_TYPE_SSAID, userId, uid);
+        }
+
+        public void syncSsaidTableOnStart() {
+            synchronized (mLock) {
+                // Verify that each user's packages and ssaid's are in sync.
+                for (UserInfo user : mUserManager.getUsers(true)) {
+                    // Get all uids for the user's packages.
+                    final List<PackageInfo> packages;
+                    try {
+                        packages = mPackageManager.getInstalledPackages(0, user.id).getList();
+                    } catch (RemoteException e) {
+                        throw new IllegalStateException("Package manager not available");
+                    }
+                    final Set<String> appUids = new HashSet<>();
+                    for (PackageInfo info : packages) {
+                        appUids.add(Integer.toString(info.applicationInfo.uid));
+                    }
+
+                    // Get all uids currently stored in the user's ssaid table.
+                    final Set<String> ssaidUids = new HashSet<>(
+                            getSettingsNamesLocked(SETTINGS_TYPE_SSAID, user.id));
+                    ssaidUids.remove(SSAID_USER_KEY);
+
+                    // Perform a set difference for the appUids and ssaidUids.
+                    ssaidUids.removeAll(appUids);
+
+                    // If there are ssaidUids left over they need to be removed from the table.
+                    final SettingsState ssaidSettings = getSettingsLocked(SETTINGS_TYPE_SSAID,
+                            user.id);
+                    for (String uid : ssaidUids) {
+                        ssaidSettings.deleteSettingLocked(uid);
+                    }
+                }
+            }
         }
 
         public List<String> getSettingsNamesLocked(int type, int userId) {
             final int key = makeKey(type, userId);
             SettingsState settingsState = peekSettingsStateLocked(key);
+            if (settingsState == null) {
+                return new ArrayList<String>();
+            }
             return settingsState.getSettingNamesLocked();
+        }
+
+        public SparseBooleanArray getKnownUsersLocked() {
+            SparseBooleanArray users = new SparseBooleanArray();
+            for (int i = mSettingsStates.size()-1; i >= 0; i--) {
+                users.put(getUserIdFromKey(mSettingsStates.keyAt(i)), true);
+            }
+            return users;
         }
 
         public SettingsState getSettingsLocked(int type, int userId) {
@@ -1673,7 +2292,13 @@ public class SettingsProvider extends ContentProvider {
             return peekSettingsStateLocked(key);
         }
 
-        public void ensureSettingsForUserLocked(int userId) {
+        public boolean ensureSettingsForUserLocked(int userId) {
+            // First make sure this user actually exists.
+            if (mUserManager.getUserInfo(userId) == null) {
+                Slog.wtf(LOG_TAG, "Requested user " + userId + " does not exist");
+                return false;
+            }
+
             // Migrate the setting for this user if needed.
             migrateLegacySettingsForUserIfNeededLocked(userId);
 
@@ -1695,16 +2320,21 @@ public class SettingsProvider extends ContentProvider {
             final int systemKey = makeKey(SETTINGS_TYPE_SYSTEM, userId);
             ensureSettingsStateLocked(systemKey);
 
+            // Ensure secure settings loaded.
+            final int ssaidKey = makeKey(SETTINGS_TYPE_SSAID, userId);
+            ensureSettingsStateLocked(ssaidKey);
+
             // Upgrade the settings to the latest version.
             UpgradeController upgrader = new UpgradeController(userId);
             upgrader.upgradeIfNeededLocked();
+            return true;
         }
 
         private void ensureSettingsStateLocked(int key) {
             if (mSettingsStates.get(key) == null) {
                 final int maxBytesPerPackage = getMaxBytesPerPackageForType(getTypeFromKey(key));
-                SettingsState settingsState = new SettingsState(mLock, getSettingsFile(key), key,
-                        maxBytesPerPackage, mHandlerThread.getLooper());
+                SettingsState settingsState = new SettingsState(getContext(), mLock,
+                        getSettingsFile(key), key, maxBytesPerPackage, mHandlerThread.getLooper());
                 mSettingsStates.put(key, settingsState);
             }
         }
@@ -1746,16 +2376,42 @@ public class SettingsProvider extends ContentProvider {
                 }
             }
 
+            // Nuke ssaid settings.
+            final int ssaidKey = makeKey(SETTINGS_TYPE_SSAID, userId);
+            final SettingsState ssaidSettingsState = mSettingsStates.get(ssaidKey);
+            if (ssaidSettingsState != null) {
+                if (permanently) {
+                    mSettingsStates.remove(ssaidKey);
+                    ssaidSettingsState.destroyLocked(null);
+                } else {
+                    ssaidSettingsState.destroyLocked(new Runnable() {
+                        @Override
+                        public void run() {
+                            mSettingsStates.remove(ssaidKey);
+                        }
+                    });
+                }
+            }
+
             // Nuke generation tracking data
             mGenerationRegistry.onUserRemoved(userId);
         }
 
         public boolean insertSettingLocked(int type, int userId, String name, String value,
-                String packageName, boolean forceNotify) {
+                String tag, boolean makeDefault, String packageName, boolean forceNotify,
+                Set<String> criticalSettings) {
             final int key = makeKey(type, userId);
 
+            boolean success = false;
             SettingsState settingsState = peekSettingsStateLocked(key);
-            final boolean success = settingsState.insertSettingLocked(name, value, packageName);
+            if (settingsState != null) {
+                success = settingsState.insertSettingLocked(name, value,
+                        tag, makeDefault, packageName);
+            }
+
+            if (success && criticalSettings != null && criticalSettings.contains(name)) {
+                settingsState.persistSyncLocked();
+            }
 
             if (forceNotify || success) {
                 notifyForSettingsChange(key, name);
@@ -1763,15 +2419,46 @@ public class SettingsProvider extends ContentProvider {
             return success;
         }
 
-        public boolean deleteSettingLocked(int type, int userId, String name, boolean forceNotify) {
+        public boolean deleteSettingLocked(int type, int userId, String name, boolean forceNotify,
+                Set<String> criticalSettings) {
             final int key = makeKey(type, userId);
 
+            boolean success = false;
             SettingsState settingsState = peekSettingsStateLocked(key);
-            final boolean success = settingsState.deleteSettingLocked(name);
+            if (settingsState != null) {
+                success = settingsState.deleteSettingLocked(name);
+            }
+
+            if (success && criticalSettings != null && criticalSettings.contains(name)) {
+                settingsState.persistSyncLocked();
+            }
 
             if (forceNotify || success) {
                 notifyForSettingsChange(key, name);
             }
+            return success;
+        }
+
+        public boolean updateSettingLocked(int type, int userId, String name, String value,
+                String tag, boolean makeDefault, String packageName, boolean forceNotify,
+                Set<String> criticalSettings) {
+            final int key = makeKey(type, userId);
+
+            boolean success = false;
+            SettingsState settingsState = peekSettingsStateLocked(key);
+            if (settingsState != null) {
+                success = settingsState.updateSettingLocked(name, value, tag,
+                        makeDefault, packageName);
+            }
+
+            if (success && criticalSettings != null && criticalSettings.contains(name)) {
+                settingsState.persistSyncLocked();
+            }
+
+            if (forceNotify || success) {
+                notifyForSettingsChange(key, name);
+            }
+
             return success;
         }
 
@@ -1779,21 +2466,100 @@ public class SettingsProvider extends ContentProvider {
             final int key = makeKey(type, userId);
 
             SettingsState settingsState = peekSettingsStateLocked(key);
+            if (settingsState == null) {
+                return null;
+            }
+
+            // getSettingLocked will return non-null result
             return settingsState.getSettingLocked(name);
         }
 
-        public boolean updateSettingLocked(int type, int userId, String name, String value,
-                String packageName, boolean forceNotify) {
+        public void resetSettingsLocked(int type, int userId, String packageName, int mode,
+                String tag) {
             final int key = makeKey(type, userId);
-
             SettingsState settingsState = peekSettingsStateLocked(key);
-            final boolean success = settingsState.updateSettingLocked(name, value, packageName);
-
-            if (forceNotify || success) {
-                notifyForSettingsChange(key, name);
+            if (settingsState == null) {
+                return;
             }
 
-            return success;
+            switch (mode) {
+                case Settings.RESET_MODE_PACKAGE_DEFAULTS: {
+                    for (String name : settingsState.getSettingNamesLocked()) {
+                        boolean someSettingChanged = false;
+                        Setting setting = settingsState.getSettingLocked(name);
+                        if (packageName.equals(setting.getPackageName())) {
+                            if (tag != null && !tag.equals(setting.getTag())) {
+                                continue;
+                            }
+                            if (settingsState.resetSettingLocked(name)) {
+                                someSettingChanged = true;
+                                notifyForSettingsChange(key, name);
+                            }
+                        }
+                        if (someSettingChanged) {
+                            settingsState.persistSyncLocked();
+                        }
+                    }
+                } break;
+
+                case Settings.RESET_MODE_UNTRUSTED_DEFAULTS: {
+                    for (String name : settingsState.getSettingNamesLocked()) {
+                        boolean someSettingChanged = false;
+                        Setting setting = settingsState.getSettingLocked(name);
+                        if (!SettingsState.isSystemPackage(getContext(),
+                                setting.getPackageName())) {
+                            if (settingsState.resetSettingLocked(name)) {
+                                someSettingChanged = true;
+                                notifyForSettingsChange(key, name);
+                            }
+                        }
+                        if (someSettingChanged) {
+                            settingsState.persistSyncLocked();
+                        }
+                    }
+                } break;
+
+                case Settings.RESET_MODE_UNTRUSTED_CHANGES: {
+                    for (String name : settingsState.getSettingNamesLocked()) {
+                        boolean someSettingChanged = false;
+                        Setting setting = settingsState.getSettingLocked(name);
+                        if (!SettingsState.isSystemPackage(getContext(),
+                                setting.getPackageName())) {
+                            if (setting.isDefaultFromSystem()) {
+                                if (settingsState.resetSettingLocked(name)) {
+                                    someSettingChanged = true;
+                                    notifyForSettingsChange(key, name);
+                                }
+                            } else if (settingsState.deleteSettingLocked(name)) {
+                                someSettingChanged = true;
+                                notifyForSettingsChange(key, name);
+                            }
+                        }
+                        if (someSettingChanged) {
+                            settingsState.persistSyncLocked();
+                        }
+                    }
+                } break;
+
+                case Settings.RESET_MODE_TRUSTED_DEFAULTS: {
+                    for (String name : settingsState.getSettingNamesLocked()) {
+                        Setting setting = settingsState.getSettingLocked(name);
+                        boolean someSettingChanged = false;
+                        if (setting.isDefaultFromSystem()) {
+                            if (settingsState.resetSettingLocked(name)) {
+                                someSettingChanged = true;
+                                notifyForSettingsChange(key, name);
+                            }
+                        } else if (settingsState.deleteSettingLocked(name)) {
+                            someSettingChanged = true;
+                            notifyForSettingsChange(key, name);
+                        }
+                        if (someSettingChanged) {
+                            settingsState.persistSyncLocked();
+                        }
+                    }
+                } break;
+            }
         }
 
         public void onPackageRemovedLocked(String packageName, int userId) {
@@ -1809,13 +2575,21 @@ public class SettingsProvider extends ContentProvider {
             }
         }
 
+        public void onUidRemovedLocked(int uid) {
+            final SettingsState ssaidSettings = getSettingsLocked(SETTINGS_TYPE_SSAID,
+                    UserHandle.getUserId(uid));
+            ssaidSettings.deleteSettingLocked(Integer.toString(uid));
+        }
+
         private SettingsState peekSettingsStateLocked(int key) {
             SettingsState settingsState = mSettingsStates.get(key);
             if (settingsState != null) {
                 return settingsState;
             }
 
-            ensureSettingsForUserLocked(getUserIdFromKey(key));
+            if (!ensureSettingsForUserLocked(getUserIdFromKey(key))) {
+                return null;
+            }
             return mSettingsStates.get(key);
         }
 
@@ -1823,9 +2597,11 @@ public class SettingsProvider extends ContentProvider {
             synchronized (mLock) {
                 final int key = makeKey(SETTINGS_TYPE_GLOBAL, UserHandle.USER_SYSTEM);
                 File globalFile = getSettingsFile(key);
-                if (globalFile.exists()) {
+                if (SettingsState.stateFileExists(globalFile)) {
                     return;
                 }
+
+                mSettingsCreationBuildId = Build.ID;
 
                 final long identity = Binder.clearCallingIdentity();
                 try {
@@ -1858,7 +2634,7 @@ public class SettingsProvider extends ContentProvider {
             // Every user has secure settings and if no file we need to migrate.
             final int secureKey = makeKey(SETTINGS_TYPE_SECURE, userId);
             File secureFile = getSettingsFile(secureKey);
-            if (secureFile.exists()) {
+            if (SettingsState.stateFileExists(secureFile)) {
                 return;
             }
 
@@ -1895,6 +2671,12 @@ public class SettingsProvider extends ContentProvider {
                 ensureSettingsStateLocked(globalKey);
                 SettingsState globalSettings = mSettingsStates.get(globalKey);
                 migrateLegacySettingsLocked(globalSettings, database, TABLE_GLOBAL);
+                // If this was just created
+                if (mSettingsCreationBuildId != null) {
+                    globalSettings.insertSettingLocked(Settings.Global.DATABASE_CREATION_BUILDID,
+                            mSettingsCreationBuildId, null, true,
+                            SettingsState.SYSTEM_PACKAGE_NAME);
+                }
                 globalSettings.persistSyncLocked();
             }
 
@@ -1931,7 +2713,7 @@ public class SettingsProvider extends ContentProvider {
                 while (!cursor.isAfterLast()) {
                     String name = cursor.getString(nameColumnIdx);
                     String value = cursor.getString(valueColumnIdx);
-                    settingsState.insertSettingLocked(name, value,
+                    settingsState.insertSettingLocked(name, value, null, true,
                             SettingsState.SYSTEM_PACKAGE_NAME);
                     cursor.moveToNext();
                 }
@@ -1963,7 +2745,7 @@ public class SettingsProvider extends ContentProvider {
 
             String androidId = Long.toHexString(new SecureRandom().nextLong());
             secureSettings.insertSettingLocked(Settings.Secure.ANDROID_ID, androidId,
-                    SettingsState.SYSTEM_PACKAGE_NAME);
+                    null, true, SettingsState.SYSTEM_PACKAGE_NAME);
 
             Slog.d(LOG_TAG, "Generated and saved new ANDROID_ID [" + androidId
                     + "] for user " + userId);
@@ -1991,6 +2773,8 @@ public class SettingsProvider extends ContentProvider {
             if (isSecureSettingsKey(key)) {
                 maybeNotifyProfiles(getTypeFromKey(key), userId, uri, name,
                         sSecureCloneToManagedSettings);
+                maybeNotifyProfiles(SETTINGS_TYPE_SYSTEM, userId, uri, name,
+                        sSystemCloneFromParentOnDependency.values());
             } else if (isSystemSettingsKey(key)) {
                 maybeNotifyProfiles(getTypeFromKey(key), userId, uri, name,
                         sSystemCloneToManagedSettings);
@@ -2000,7 +2784,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private void maybeNotifyProfiles(int type, int userId, Uri uri, String name,
-                Set<String> keysCloned) {
+                Collection<String> keysCloned) {
             if (keysCloned.contains(name)) {
                 for (int profileId : mUserManager.getProfileIdsWithDisabled(userId)) {
                     // the notification for userId has already been sent.
@@ -2028,6 +2812,10 @@ public class SettingsProvider extends ContentProvider {
             return getTypeFromKey(key) == SETTINGS_TYPE_SECURE;
         }
 
+        private boolean isSsaidSettingsKey(int key) {
+            return getTypeFromKey(key) == SETTINGS_TYPE_SSAID;
+        }
+
         private File getSettingsFile(int key) {
             if (isGlobalSettingsKey(key)) {
                 final int userId = getUserIdFromKey(key);
@@ -2041,6 +2829,10 @@ public class SettingsProvider extends ContentProvider {
                 final int userId = getUserIdFromKey(key);
                 return new File(Environment.getUserSystemDirectory(userId),
                         SETTINGS_FILE_SECURE);
+            } else if (isSsaidSettingsKey(key)) {
+                final int userId = getUserIdFromKey(key);
+                return new File(Environment.getUserSystemDirectory(userId),
+                        SETTINGS_FILE_SSAID);
             } else {
                 throw new IllegalArgumentException("Invalid settings key:" + key);
             }
@@ -2064,7 +2856,8 @@ public class SettingsProvider extends ContentProvider {
         private int getMaxBytesPerPackageForType(int type) {
             switch (type) {
                 case SETTINGS_TYPE_GLOBAL:
-                case SETTINGS_TYPE_SECURE: {
+                case SETTINGS_TYPE_SECURE:
+                case SETTINGS_TYPE_SSAID: {
                     return SettingsState.MAX_BYTES_PER_APP_PACKAGE_UNLIMITED;
                 }
 
@@ -2102,7 +2895,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 131;
+            private static final int SETTINGS_VERSION = 146;
 
             private final int mUserId;
 
@@ -2147,7 +2940,8 @@ public class SettingsProvider extends ContentProvider {
                     String reason = "Settings rebuilt! Current version: "
                             + curVersion + " while expected: " + newVersion;
                     getGlobalSettingsLocked().insertSettingLocked(
-                            Settings.Global.DATABASE_DOWNGRADE_REASON, reason, "android");
+                            Settings.Global.DATABASE_DOWNGRADE_REASON,
+                            reason, null, true, SettingsState.SYSTEM_PACKAGE_NAME);
                 }
 
                 // Set the global settings version if owner.
@@ -2172,6 +2966,10 @@ public class SettingsProvider extends ContentProvider {
 
             private SettingsState getSecureSettingsLocked(int userId) {
                 return getSettingsLocked(SETTINGS_TYPE_SECURE, userId);
+            }
+
+            private SettingsState getSsaidSettingsLocked(int userId) {
+                return getSettingsLocked(SETTINGS_TYPE_SSAID, userId);
             }
 
             private SettingsState getSystemSettingsLocked(int userId) {
@@ -2216,11 +3014,11 @@ public class SettingsProvider extends ContentProvider {
                     if (userId == UserHandle.USER_SYSTEM) {
                         final SettingsState globalSettings = getGlobalSettingsLocked();
                         globalSettings.updateSettingLocked(Settings.Global.ZEN_MODE,
-                                Integer.toString(Settings.Global.ZEN_MODE_OFF),
-                                SettingsState.SYSTEM_PACKAGE_NAME);
+                                Integer.toString(Settings.Global.ZEN_MODE_OFF), null,
+                                true, SettingsState.SYSTEM_PACKAGE_NAME);
                         globalSettings.updateSettingLocked(Settings.Global.MODE_RINGER,
-                                Integer.toString(AudioManager.RINGER_MODE_NORMAL),
-                                SettingsState.SYSTEM_PACKAGE_NAME);
+                                Integer.toString(AudioManager.RINGER_MODE_NORMAL), null,
+                                true, SettingsState.SYSTEM_PACKAGE_NAME);
                     }
                     currentVersion = 119;
                 }
@@ -2230,7 +3028,7 @@ public class SettingsProvider extends ContentProvider {
                     SettingsState secureSettings = getSecureSettingsLocked(userId);
                     secureSettings.insertSettingLocked(Settings.Secure.DOUBLE_TAP_TO_WAKE,
                             getContext().getResources().getBoolean(
-                                    R.bool.def_double_tap_to_wake) ? "1" : "0",
+                                    R.bool.def_double_tap_to_wake) ? "1" : "0", null, true,
                             SettingsState.SYSTEM_PACKAGE_NAME);
 
                     currentVersion = 120;
@@ -2255,8 +3053,7 @@ public class SettingsProvider extends ContentProvider {
                         currentSetting.isNull()) {
                         secureSettings.insertSettingLocked(
                                 Settings.Secure.NFC_PAYMENT_DEFAULT_COMPONENT,
-                                defaultComponent,
-                                SettingsState.SYSTEM_PACKAGE_NAME);
+                                defaultComponent, null, true, SettingsState.SYSTEM_PACKAGE_NAME);
                     }
                     currentVersion = 122;
                 }
@@ -2273,7 +3070,7 @@ public class SettingsProvider extends ContentProvider {
                                     Settings.Global.ADD_USERS_WHEN_LOCKED,
                                     getContext().getResources().getBoolean(
                                             R.bool.def_add_users_from_lockscreen) ? "1" : "0",
-                                    SettingsState.SYSTEM_PACKAGE_NAME);
+                                    null, true, SettingsState.SYSTEM_PACKAGE_NAME);
                         }
                     }
                     currentVersion = 123;
@@ -2284,7 +3081,7 @@ public class SettingsProvider extends ContentProvider {
                     String defaultDisabledProfiles = (getContext().getResources().getString(
                             R.string.def_bluetooth_disabled_profiles));
                     globalSettings.insertSettingLocked(Settings.Global.BLUETOOTH_DISABLED_PROFILES,
-                            defaultDisabledProfiles, SettingsState.SYSTEM_PACKAGE_NAME);
+                            defaultDisabledProfiles, null, true, SettingsState.SYSTEM_PACKAGE_NAME);
                     currentVersion = 124;
                 }
 
@@ -2299,7 +3096,7 @@ public class SettingsProvider extends ContentProvider {
                                 Settings.Secure.SHOW_IME_WITH_HARD_KEYBOARD,
                                 getContext().getResources().getBoolean(
                                         R.bool.def_show_ime_with_hard_keyboard) ? "1" : "0",
-                                SettingsState.SYSTEM_PACKAGE_NAME);
+                                null, true, SettingsState.SYSTEM_PACKAGE_NAME);
                     }
                     currentVersion = 125;
                 }
@@ -2326,7 +3123,7 @@ public class SettingsProvider extends ContentProvider {
                             }
                             secureSettings.insertSettingLocked(
                                     Settings.Secure.ENABLED_VR_LISTENERS, b.toString(),
-                                    SettingsState.SYSTEM_PACKAGE_NAME);
+                                    null, true, SettingsState.SYSTEM_PACKAGE_NAME);
                         }
 
                     }
@@ -2346,7 +3143,7 @@ public class SettingsProvider extends ContentProvider {
                             final SettingsState secureSettings = getSecureSettingsLocked(userId);
                             secureSettings.insertSettingLocked(
                                     Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS,
-                                    showNotifications.getValue(),
+                                    showNotifications.getValue(), null, true,
                                     SettingsState.SYSTEM_PACKAGE_NAME);
                         }
 
@@ -2356,7 +3153,7 @@ public class SettingsProvider extends ContentProvider {
                             final SettingsState secureSettings = getSecureSettingsLocked(userId);
                             secureSettings.insertSettingLocked(
                                     Settings.Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS,
-                                    allowPrivate.getValue(),
+                                    allowPrivate.getValue(), null, true,
                                     SettingsState.SYSTEM_PACKAGE_NAME);
                         }
                     }
@@ -2382,7 +3179,7 @@ public class SettingsProvider extends ContentProvider {
                         if (policyAccess.isNull()) {
                             systemSecureSettings.insertSettingLocked(
                                     Settings.Secure.ENABLED_NOTIFICATION_POLICY_ACCESS_PACKAGES,
-                                    defaultPolicyAccess,
+                                    defaultPolicyAccess, null, true,
                                     SettingsState.SYSTEM_PACKAGE_NAME);
                         } else {
                             StringBuilder currentSetting =
@@ -2391,7 +3188,7 @@ public class SettingsProvider extends ContentProvider {
                             currentSetting.append(defaultPolicyAccess);
                             systemSecureSettings.updateSettingLocked(
                                     Settings.Secure.ENABLED_NOTIFICATION_POLICY_ACCESS_PACKAGES,
-                                    currentSetting.toString(),
+                                    currentSetting.toString(), null, true,
                                     SettingsState.SYSTEM_PACKAGE_NAME);
                         }
                     }
@@ -2411,12 +3208,27 @@ public class SettingsProvider extends ContentProvider {
                                 Settings.Secure.LONG_PRESS_TIMEOUT,
                                 String.valueOf(getContext().getResources().getInteger(
                                         R.integer.def_long_press_timeout_millis)),
-                                SettingsState.SYSTEM_PACKAGE_NAME);
+                                null, true, SettingsState.SYSTEM_PACKAGE_NAME);
                     }
                     currentVersion = 130;
                 }
 
                 if (currentVersion == 130) {
+                    // Split Ambient settings
+                    final SettingsState secureSettings = getSecureSettingsLocked(userId);
+                    boolean dozeExplicitlyDisabled = "0".equals(secureSettings.
+                            getSettingLocked(Settings.Secure.DOZE_ENABLED).getValue());
+
+                    if (dozeExplicitlyDisabled) {
+                        secureSettings.insertSettingLocked(Settings.Secure.DOZE_PULSE_ON_PICK_UP,
+                                "0", null, true, SettingsState.SYSTEM_PACKAGE_NAME);
+                        secureSettings.insertSettingLocked(Settings.Secure.DOZE_PULSE_ON_DOUBLE_TAP,
+                                "0", null, true, SettingsState.SYSTEM_PACKAGE_NAME);
+                    }
+                    currentVersion = 131;
+                }
+
+                if (currentVersion == 131) {
                     // Initialize new multi-press timeout to default value
                     final SettingsState systemSecureSettings = getSecureSettingsLocked(userId);
                     final String oldValue = systemSecureSettings.getSettingLocked(
@@ -2426,25 +3238,337 @@ public class SettingsProvider extends ContentProvider {
                                 Settings.Secure.MULTI_PRESS_TIMEOUT,
                                 String.valueOf(getContext().getResources().getInteger(
                                         R.integer.def_multi_press_timeout_millis)),
-                                SettingsState.SYSTEM_PACKAGE_NAME);
+                                null, true, SettingsState.SYSTEM_PACKAGE_NAME);
                     }
 
-                    currentVersion = 131;
+                    currentVersion = 132;
                 }
+
+                if (currentVersion == 132) {
+                    // Version 132: Allow managed profile to optionally use the parent's ringtones
+                    final SettingsState systemSecureSettings = getSecureSettingsLocked(userId);
+                    String defaultSyncParentSounds = (getContext().getResources()
+                            .getBoolean(R.bool.def_sync_parent_sounds) ? "1" : "0");
+                    systemSecureSettings.insertSettingLocked(
+                            Settings.Secure.SYNC_PARENT_SOUNDS, defaultSyncParentSounds,
+                            null, true, SettingsState.SYSTEM_PACKAGE_NAME);
+                    currentVersion = 133;
+                }
+
+                if (currentVersion == 133) {
+                    // Version 133: Add default end button behavior
+                    final SettingsState systemSettings = getSystemSettingsLocked(userId);
+                    if (systemSettings.getSettingLocked(Settings.System.END_BUTTON_BEHAVIOR) ==
+                            null) {
+                        String defaultEndButtonBehavior = Integer.toString(getContext()
+                                .getResources().getInteger(R.integer.def_end_button_behavior));
+                        systemSettings.insertSettingLocked(Settings.System.END_BUTTON_BEHAVIOR,
+                                defaultEndButtonBehavior, null, true,
+                                SettingsState.SYSTEM_PACKAGE_NAME);
+                    }
+                    currentVersion = 134;
+                }
+
+                if (currentVersion == 134) {
+                    // Remove setting that specifies if magnification values should be preserved.
+                    // This setting defaulted to true and never has a UI.
+                    getSecureSettingsLocked(userId).deleteSettingLocked(
+                            Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_AUTO_UPDATE);
+                    currentVersion = 135;
+                }
+
+                if (currentVersion == 135) {
+                    // Version 135 no longer used.
+                    currentVersion = 136;
+                }
+
+                if (currentVersion == 136) {
+                    // Version 136: Store legacy SSAID for all apps currently installed on the
+                    // device as first step in migrating SSAID to be unique per application.
+
+                    final boolean isUpgrade;
+                    try {
+                        isUpgrade = mPackageManager.isUpgrade();
+                    } catch (RemoteException e) {
+                        throw new IllegalStateException("Package manager not available");
+                    }
+                    // Only retain legacy ssaid if the device is performing an OTA. After wiping
+                    // user data or first boot on a new device should use new ssaid generation.
+                    if (isUpgrade) {
+                        // Retrieve the legacy ssaid from the secure settings table.
+                        final Setting legacySsaidSetting = getSettingLocked(SETTINGS_TYPE_SECURE,
+                                userId, Settings.Secure.ANDROID_ID);
+                        if (legacySsaidSetting == null || legacySsaidSetting.isNull()
+                                || legacySsaidSetting.getValue() == null) {
+                            throw new IllegalStateException("Legacy ssaid not accessible");
+                        }
+                        final String legacySsaid = legacySsaidSetting.getValue();
+
+                        // Fill each uid with the legacy ssaid to be backwards compatible.
+                        final List<PackageInfo> packages;
+                        try {
+                            packages = mPackageManager.getInstalledPackages(0, userId).getList();
+                        } catch (RemoteException e) {
+                            throw new IllegalStateException("Package manager not available");
+                        }
+
+                        final SettingsState ssaidSettings = getSsaidSettingsLocked(userId);
+                        for (PackageInfo info : packages) {
+                            // Check if the UID already has an entry in the table.
+                            final String uid = Integer.toString(info.applicationInfo.uid);
+                            final Setting ssaid = ssaidSettings.getSettingLocked(uid);
+
+                            if (ssaid.isNull() || ssaid.getValue() == null) {
+                                // Android Id doesn't exist for this package so create it.
+                                ssaidSettings.insertSettingLocked(uid, legacySsaid, null, true,
+                                        info.packageName);
+                            }
+                        }
+                    }
+
+                    currentVersion = 137;
+                }
+                if (currentVersion == 137) {
+                    // Version 138: Settings.Secure#INSTALL_NON_MARKET_APPS is deprecated and its
+                    // default value set to 1. The user can no longer change the value of this
+                    // setting through the UI.
+                    final SettingsState secureSetting = getSecureSettingsLocked(userId);
+                    if (!mUserManager.hasUserRestriction(
+                            UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES, UserHandle.of(userId))
+                            && secureSetting.getSettingLocked(
+                            Settings.Secure.INSTALL_NON_MARKET_APPS).getValue().equals("0")) {
+
+                        secureSetting.insertSettingLocked(Settings.Secure.INSTALL_NON_MARKET_APPS,
+                                "1", null, true, SettingsState.SYSTEM_PACKAGE_NAME);
+                        // For managed profiles with profile owners, DevicePolicyManagerService
+                        // may want to set the user restriction in this case
+                        secureSetting.insertSettingLocked(
+                                Settings.Secure.UNKNOWN_SOURCES_DEFAULT_REVERSED, "1", null, true,
+                                SettingsState.SYSTEM_PACKAGE_NAME);
+                    }
+                    currentVersion = 138;
+                }
+
+                if (currentVersion == 138) {
+                    // Version 139: Removed.
+                    currentVersion = 139;
+                }
+
+                if (currentVersion == 139) {
+                    // Version 140: Settings.Secure#ACCESSIBILITY_SPEAK_PASSWORD is deprecated and
+                    // the user can no longer change the value of this setting through the UI.
+                    // Force to true.
+                    final SettingsState secureSettings = getSecureSettingsLocked(userId);
+                    secureSettings.updateSettingLocked(Settings.Secure.ACCESSIBILITY_SPEAK_PASSWORD,
+                            "1", null, true, SettingsState.SYSTEM_PACKAGE_NAME);
+                    currentVersion = 140;
+                }
+
+                if (currentVersion == 140) {
+                    // Version 141: One-time grant of notification listener privileges
+                    // to packages specified in overlay.
+                    String defaultListenerAccess = getContext().getResources().getString(
+                            com.android.internal.R.string.config_defaultListenerAccessPackages);
+                    if (defaultListenerAccess != null) {
+                        StringBuffer newListeners = new StringBuffer();
+                        for (String whitelistPkg : defaultListenerAccess.split(":")) {
+                            // Gather all notification listener components for candidate pkgs.
+                            Intent serviceIntent =
+                                    new Intent(NotificationListenerService.SERVICE_INTERFACE)
+                                            .setPackage(whitelistPkg);
+                            List<ResolveInfo> installedServices =
+                                    getContext().getPackageManager().queryIntentServicesAsUser(
+                                            serviceIntent,
+                                            PackageManager.GET_SERVICES
+                                                    | PackageManager.GET_META_DATA
+                                                    | PackageManager.MATCH_DIRECT_BOOT_AWARE
+                                                    | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
+                                            userId);
+
+                            for (int i = 0, count = installedServices.size(); i < count; i++) {
+                                ResolveInfo resolveInfo = installedServices.get(i);
+                                ServiceInfo info = resolveInfo.serviceInfo;
+                                if (!android.Manifest.permission.BIND_NOTIFICATION_LISTENER_SERVICE
+                                        .equals(info.permission)) {
+                                    continue;
+                                }
+                                newListeners.append(":")
+                                        .append(info.getComponentName().flattenToString());
+                            }
+                        }
+
+                        if (newListeners.length() > 0) {
+                            final SettingsState secureSetting = getSecureSettingsLocked(userId);
+                            final Setting existingSetting = secureSetting.getSettingLocked(
+                                    Settings.Secure.ENABLED_NOTIFICATION_LISTENERS);
+                            if (existingSetting.isNull()) {
+                                secureSetting.insertSettingLocked(
+                                        Settings.Secure.ENABLED_NOTIFICATION_LISTENERS,
+                                        newListeners.toString(), null, true,
+                                        SettingsState.SYSTEM_PACKAGE_NAME);
+                            } else {
+                                StringBuilder currentSetting =
+                                        new StringBuilder(existingSetting.getValue());
+                                currentSetting.append(newListeners.toString());
+                                secureSetting.updateSettingLocked(
+                                        Settings.Secure.ENABLED_NOTIFICATION_LISTENERS,
+                                        currentSetting.toString(), null, true,
+                                        SettingsState.SYSTEM_PACKAGE_NAME);
+                            }
+                        }
+                    }
+                    currentVersion = 141;
+                }
+
+                if (currentVersion == 141) {
+                    // This implementation was incorrectly setting the current value of
+                    // settings changed by non-system packages as the default which default
+                    // is set by the system. We add a new upgrade step at the end to properly
+                    // handle this case which would also fix incorrect changes made by the
+                    // old implementation of this step.
+                    currentVersion = 142;
+                }
+
+                if (currentVersion == 142) {
+                    // Version 143: Set a default value for Wi-Fi wakeup feature.
+                    if (userId == UserHandle.USER_SYSTEM) {
+                        final SettingsState globalSettings = getGlobalSettingsLocked();
+                        Setting currentSetting = globalSettings.getSettingLocked(
+                                Settings.Global.WIFI_WAKEUP_ENABLED);
+                        if (currentSetting.isNull()) {
+                            globalSettings.insertSettingLocked(
+                                    Settings.Global.WIFI_WAKEUP_ENABLED,
+                                    getContext().getResources().getBoolean(
+                                            R.bool.def_wifi_wakeup_enabled) ? "1" : "0",
+                                    null, true, SettingsState.SYSTEM_PACKAGE_NAME);
+                        }
+                    }
+
+                    currentVersion = 143;
+                }
+
+                if (currentVersion == 143) {
+                    // Version 144: Set a default value for Autofill service.
+                    final SettingsState secureSettings = getSecureSettingsLocked(userId);
+                    final Setting currentSetting = secureSettings
+                            .getSettingLocked(Settings.Secure.AUTOFILL_SERVICE);
+                    if (currentSetting.isNull()) {
+                        final String defaultValue = getContext().getResources().getString(
+                                com.android.internal.R.string.config_defaultAutofillService);
+                        if (defaultValue != null) {
+                            Slog.d(LOG_TAG, "Setting [" + defaultValue + "] as Autofill Service "
+                                    + "for user " + userId);
+                            secureSettings.insertSettingLocked(Settings.Secure.AUTOFILL_SERVICE,
+                                    defaultValue, null, true, SettingsState.SYSTEM_PACKAGE_NAME);
+                        }
+                    }
+
+                    currentVersion = 144;
+                }
+
+                if (currentVersion == 144) {
+                    // Version 145: Set the default value for WIFI_WAKEUP_AVAILABLE.
+                    if (userId == UserHandle.USER_SYSTEM) {
+                        final SettingsState globalSettings = getGlobalSettingsLocked();
+                        final Setting currentSetting = globalSettings.getSettingLocked(
+                                Settings.Global.WIFI_WAKEUP_AVAILABLE);
+                        if (currentSetting.isNull()) {
+                            final int defaultValue = getContext().getResources().getInteger(
+                                    com.android.internal.R.integer.config_wifi_wakeup_available);
+                            globalSettings.insertSettingLocked(
+                                    Settings.Global.WIFI_WAKEUP_AVAILABLE,
+                                    String.valueOf(defaultValue),
+                                    null, true, SettingsState.SYSTEM_PACKAGE_NAME);
+                        }
+                    }
+
+                    currentVersion = 145;
+                }
+
+                if (currentVersion == 145) {
+                    // Version 146: In step 142 we had a bug where incorrectly
+                    // some settings were considered system set and as a result
+                    // made the default and marked as the default being set by
+                    // the system. Here reevaluate the default and default system
+                    // set flags. This would both fix corruption by the old impl
+                    // of step 142 and also properly handle devices which never
+                    // run 142.
+                    if (userId == UserHandle.USER_SYSTEM) {
+                        SettingsState globalSettings = getGlobalSettingsLocked();
+                        ensureLegacyDefaultValueAndSystemSetUpdatedLocked(globalSettings, userId);
+                        globalSettings.persistSyncLocked();
+                    }
+
+                    SettingsState secureSettings = getSecureSettingsLocked(mUserId);
+                    ensureLegacyDefaultValueAndSystemSetUpdatedLocked(secureSettings, userId);
+                    secureSettings.persistSyncLocked();
+
+                    SettingsState systemSettings = getSystemSettingsLocked(mUserId);
+                    ensureLegacyDefaultValueAndSystemSetUpdatedLocked(systemSettings, userId);
+                    systemSettings.persistSyncLocked();
+
+                    currentVersion = 146;
+                }
+
+                // vXXX: Add new settings above this point.
 
                 if (currentVersion != newVersion) {
                     Slog.wtf("SettingsProvider", "warning: upgrading settings database to version "
                             + newVersion + " left it at "
-                            + currentVersion + " instead; this is probably a bug", new Throwable());
+                            + currentVersion +
+                            " instead; this is probably a bug. Did you update SETTINGS_VERSION?",
+                            new Throwable());
                     if (DEBUG) {
                         throw new RuntimeException("db upgrade error");
                     }
                 }
 
-                // vXXX: Add new settings above this point.
-
                 // Return the current version.
                 return currentVersion;
+            }
+        }
+
+        private void ensureLegacyDefaultValueAndSystemSetUpdatedLocked(SettingsState settings,
+                int userId) {
+            List<String> names = settings.getSettingNamesLocked();
+            final int nameCount = names.size();
+            for (int i = 0; i < nameCount; i++) {
+                String name = names.get(i);
+                Setting setting = settings.getSettingLocked(name);
+
+                // In the upgrade case we pretend the call is made from the app
+                // that made the last change to the setting to properly determine
+                // whether the call has been made by a system component.
+                int callingUid = -1;
+                try {
+                    callingUid = mPackageManager.getPackageUid(setting.getPackageName(), 0, userId);
+                } catch (RemoteException e) {
+                    /* ignore - handled below */
+                }
+                if (callingUid < 0) {
+                    Slog.e(LOG_TAG, "Unknown package: " + setting.getPackageName());
+                    continue;
+                }
+                try {
+                    final boolean systemSet = SettingsState.isSystemPackage(getContext(),
+                            setting.getPackageName(), callingUid);
+                    if (systemSet) {
+                        settings.insertSettingLocked(name, setting.getValue(),
+                                setting.getTag(), true, setting.getPackageName());
+                    } else if (setting.getDefaultValue() != null && setting.isDefaultFromSystem()) {
+                        // We had a bug where changes by non-system packages were marked
+                        // as system made and as a result set as the default. Therefore, if
+                        // the package changed the setting last is not a system one but the
+                        // setting is marked as its default coming from the system we clear
+                        // the default and clear the system set flag.
+                        settings.resetSettingDefaultValueLocked(name);
+                    }
+                } catch (IllegalStateException e) {
+                    // If the package goes over its quota during the upgrade, don't
+                    // crash but just log the error as the system does the upgrade.
+                    Slog.e(LOG_TAG, "Error upgrading setting: " + setting.getName(), e);
+
+                }
             }
         }
     }

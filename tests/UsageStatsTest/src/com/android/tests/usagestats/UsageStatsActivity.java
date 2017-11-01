@@ -16,12 +16,16 @@
 
 package com.android.tests.usagestats;
 
+import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.InputType;
+import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -30,6 +34,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -69,6 +74,9 @@ public class UsageStatsActivity extends ListActivity {
             case R.id.log:
                 startActivity(new Intent(this, UsageLogActivity.class));
                 return true;
+            case R.id.call_is_app_inactive:
+                callIsAppInactive();
+                return true;
 
             default:
                 return super.onOptionsItemSelected(item);
@@ -79,6 +87,41 @@ public class UsageStatsActivity extends ListActivity {
     protected void onResume() {
         super.onResume();
         updateAdapter();
+    }
+
+    private void callIsAppInactive() {
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Enter package name");
+        final EditText input = new EditText(this);
+        input.setInputType(InputType.TYPE_CLASS_TEXT);
+        input.setHint("com.android.tests.usagestats");
+        builder.setView(input);
+
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                final String packageName = input.getText().toString().trim();
+                if (!TextUtils.isEmpty(packageName)) {
+                    showInactive(packageName);
+                }
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        builder.show();
+    }
+
+    private void showInactive(String packageName) {
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(
+                "isAppInactive(\"" + packageName + "\") = "
+                        + (mUsageStatsManager.isAppInactive(packageName) ? "true" : "false"));
+        builder.show();
     }
 
     private void updateAdapter() {

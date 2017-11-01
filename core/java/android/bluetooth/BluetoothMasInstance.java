@@ -36,7 +36,7 @@ public final class BluetoothMasInstance implements Parcelable {
     @Override
     public boolean equals(Object o) {
         if (o instanceof BluetoothMasInstance) {
-            return mId == ((BluetoothMasInstance)o).mId;
+            return mId == ((BluetoothMasInstance) o).mId;
         }
         return false;
     }
@@ -48,25 +48,28 @@ public final class BluetoothMasInstance implements Parcelable {
 
     @Override
     public String toString() {
-        return Integer.toString(mId) + ":" + mName + ":" + mChannel + ":" +
-                Integer.toHexString(mMsgTypes);
+        return Integer.toString(mId) + ":" + mName + ":" + mChannel + ":"
+                + Integer.toHexString(mMsgTypes);
     }
 
+    @Override
     public int describeContents() {
         return 0;
     }
 
     public static final Parcelable.Creator<BluetoothMasInstance> CREATOR =
             new Parcelable.Creator<BluetoothMasInstance>() {
-        public BluetoothMasInstance createFromParcel(Parcel in) {
-            return new BluetoothMasInstance(in.readInt(), in.readString(),
-                    in.readInt(), in.readInt());
-        }
-        public BluetoothMasInstance[] newArray(int size) {
-            return new BluetoothMasInstance[size];
-        }
-    };
+                public BluetoothMasInstance createFromParcel(Parcel in) {
+                    return new BluetoothMasInstance(in.readInt(), in.readString(),
+                            in.readInt(), in.readInt());
+                }
 
+                public BluetoothMasInstance[] newArray(int size) {
+                    return new BluetoothMasInstance[size];
+                }
+            };
+
+    @Override
     public void writeToParcel(Parcel out, int flags) {
         out.writeInt(mId);
         out.writeString(mName);
@@ -75,10 +78,10 @@ public final class BluetoothMasInstance implements Parcelable {
     }
 
     public static final class MessageType {
-        public static final int EMAIL    = 0x01;
-        public static final int SMS_GSM  = 0x02;
+        public static final int EMAIL = 0x01;
+        public static final int SMS_GSM = 0x02;
         public static final int SMS_CDMA = 0x04;
-        public static final int MMS      = 0x08;
+        public static final int MMS = 0x08;
     }
 
     public int getId() {

@@ -44,6 +44,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Arrays;
 import java.util.Objects;
 
 /**
@@ -67,6 +68,8 @@ public final class Icon implements Parcelable {
     public static final int TYPE_DATA     = 3;
     /** @hide */
     public static final int TYPE_URI      = 4;
+    /** @hide */
+    public static final int TYPE_ADAPTIVE_BITMAP = 5;
 
     private static final int VERSION_STREAM_SERIALIZER = 1;
 
@@ -101,6 +104,7 @@ public final class Icon implements Parcelable {
      * {@link #TYPE_RESOURCE},
      * {@link #TYPE_DATA}, or
      * {@link #TYPE_URI}.
+     * {@link #TYPE_ADAPTIVE_BITMAP}
      * @hide
      */
     public int getType() {
@@ -112,7 +116,7 @@ public final class Icon implements Parcelable {
      * @hide
      */
     public Bitmap getBitmap() {
-        if (mType != TYPE_BITMAP) {
+        if (mType != TYPE_BITMAP && mType != TYPE_ADAPTIVE_BITMAP) {
             throw new IllegalStateException("called getBitmap() on " + this);
         }
         return (Bitmap) mObj1;
@@ -218,6 +222,7 @@ public final class Icon implements Parcelable {
     private static final String typeToString(int x) {
         switch (x) {
             case TYPE_BITMAP: return "BITMAP";
+            case TYPE_ADAPTIVE_BITMAP: return "BITMAP_MASKABLE";
             case TYPE_DATA: return "DATA";
             case TYPE_RESOURCE: return "RESOURCE";
             case TYPE_URI: return "URI";
@@ -285,6 +290,9 @@ public final class Icon implements Parcelable {
         switch (mType) {
             case TYPE_BITMAP:
                 return new BitmapDrawable(context.getResources(), getBitmap());
+            case TYPE_ADAPTIVE_BITMAP:
+                return new AdaptiveIconDrawable(null,
+                    new BitmapDrawable(context.getResources(), getBitmap()));
             case TYPE_RESOURCE:
                 if (getResources() == null) {
                     // figure out where to load resources from
@@ -299,7 +307,7 @@ public final class Icon implements Parcelable {
                         final PackageManager pm = context.getPackageManager();
                         try {
                             ApplicationInfo ai = pm.getApplicationInfo(
-                                    resPackage, PackageManager.GET_UNINSTALLED_PACKAGES);
+                                    resPackage, PackageManager.MATCH_UNINSTALLED_PACKAGES);
                             if (ai != null) {
                                 mObj1 = pm.getResourcesForApplication(ai);
                             } else {
@@ -388,7 +396,7 @@ public final class Icon implements Parcelable {
      * @hide
      */
     public void convertToAshmem() {
-        if (mType == TYPE_BITMAP &&
+        if ((mType == TYPE_BITMAP || mType == TYPE_ADAPTIVE_BITMAP) &&
             getBitmap().isMutable() &&
             getBitmap().getAllocationByteCount() >= MIN_ASHMEM_ICON_SIZE) {
             setBitmap(getBitmap().createAshmemBitmap());
@@ -409,6 +417,7 @@ public final class Icon implements Parcelable {
 
         switch (mType) {
             case TYPE_BITMAP:
+            case TYPE_ADAPTIVE_BITMAP:
                 getBitmap().compress(Bitmap.CompressFormat.PNG, 100, dataStream);
                 break;
             case TYPE_DATA:
@@ -444,6 +453,8 @@ public final class Icon implements Parcelable {
             switch (type) {
                 case TYPE_BITMAP:
                     return createWithBitmap(BitmapFactory.decodeStream(inputStream));
+                case TYPE_ADAPTIVE_BITMAP:
+                    return createWithAdaptiveBitmap(BitmapFactory.decodeStream(inputStream));
                 case TYPE_DATA:
                     final int length = inputStream.readInt();
                     final byte[] data = new byte[length];
@@ -478,11 +489,12 @@ public final class Icon implements Parcelable {
         }
         switch (mType) {
             case TYPE_BITMAP:
+            case TYPE_ADAPTIVE_BITMAP:
                 return getBitmap() == otherIcon.getBitmap();
             case TYPE_DATA:
                 return getDataLength() == otherIcon.getDataLength()
                         && getDataOffset() == otherIcon.getDataOffset()
-                        && getDataBytes() == otherIcon.getDataBytes();
+                        && Arrays.equals(getDataBytes(), otherIcon.getDataBytes());
             case TYPE_RESOURCE:
                 return getResId() == otherIcon.getResId()
                         && Objects.equals(getResPackage(), otherIcon.getResPackage());
@@ -546,6 +558,20 @@ public final class Icon implements Parcelable {
             throw new IllegalArgumentException("Bitmap must not be null.");
         }
         final Icon rep = new Icon(TYPE_BITMAP);
+        rep.setBitmap(bits);
+        return rep;
+    }
+
+    /**
+     * Create an Icon pointing to a bitmap in memory that follows the icon design guideline defined
+     * by {@link AdaptiveIconDrawable}.
+     * @param bits A valid {@link android.graphics.Bitmap} object
+     */
+    public static Icon createWithAdaptiveBitmap(Bitmap bits) {
+        if (bits == null) {
+            throw new IllegalArgumentException("Bitmap must not be null.");
+        }
+        final Icon rep = new Icon(TYPE_ADAPTIVE_BITMAP);
         rep.setBitmap(bits);
         return rep;
     }
@@ -654,6 +680,7 @@ public final class Icon implements Parcelable {
         final StringBuilder sb = new StringBuilder("Icon(typ=").append(typeToString(mType));
         switch (mType) {
             case TYPE_BITMAP:
+            case TYPE_ADAPTIVE_BITMAP:
                 sb.append(" size=")
                         .append(getBitmap().getWidth())
                         .append("x")
@@ -692,7 +719,7 @@ public final class Icon implements Parcelable {
      * Parcelable interface
      */
     public int describeContents() {
-        return (mType == TYPE_BITMAP || mType == TYPE_DATA)
+        return (mType == TYPE_BITMAP || mType == TYPE_ADAPTIVE_BITMAP || mType == TYPE_DATA)
                 ? Parcelable.CONTENTS_FILE_DESCRIPTOR : 0;
     }
 
@@ -702,6 +729,7 @@ public final class Icon implements Parcelable {
         this(in.readInt());
         switch (mType) {
             case TYPE_BITMAP:
+            case TYPE_ADAPTIVE_BITMAP:
                 final Bitmap bits = Bitmap.CREATOR.createFromParcel(in);
                 mObj1 = bits;
                 break;
@@ -740,6 +768,7 @@ public final class Icon implements Parcelable {
         dest.writeInt(mType);
         switch (mType) {
             case TYPE_BITMAP:
+            case TYPE_ADAPTIVE_BITMAP:
                 final Bitmap bits = getBitmap();
                 getBitmap().writeToParcel(dest, flags);
                 break;
@@ -774,6 +803,43 @@ public final class Icon implements Parcelable {
             return new Icon[size];
         }
     };
+
+    /**
+     * Scale down a bitmap to a given max width and max height. The scaling will be done in a uniform way
+     * @param bitmap the bitmap to scale down
+     * @param maxWidth the maximum width allowed
+     * @param maxHeight the maximum height allowed
+     *
+     * @return the scaled bitmap if necessary or the original bitmap if no scaling was needed
+     * @hide
+     */
+    public static Bitmap scaleDownIfNecessary(Bitmap bitmap, int maxWidth, int maxHeight) {
+        int bitmapWidth = bitmap.getWidth();
+        int bitmapHeight = bitmap.getHeight();
+        if (bitmapWidth > maxWidth || bitmapHeight > maxHeight) {
+            float scale = Math.min((float) maxWidth / bitmapWidth,
+                    (float) maxHeight / bitmapHeight);
+            bitmap = Bitmap.createScaledBitmap(bitmap, (int) (scale * bitmapWidth),
+                    (int) (scale * bitmapHeight), true /* filter */);
+        }
+        return bitmap;
+    }
+
+    /**
+     * Scale down this icon to a given max width and max height.
+     * The scaling will be done in a uniform way and currently only bitmaps are supported.
+     * @param maxWidth the maximum width allowed
+     * @param maxHeight the maximum height allowed
+     *
+     * @hide
+     */
+    public void scaleDownIfNecessary(int maxWidth, int maxHeight) {
+        if (mType != TYPE_BITMAP && mType != TYPE_ADAPTIVE_BITMAP) {
+            return;
+        }
+        Bitmap bitmap = getBitmap();
+        setBitmap(scaleDownIfNecessary(bitmap, maxWidth, maxHeight));
+    }
 
     /**
      * Implement this interface to receive a callback when

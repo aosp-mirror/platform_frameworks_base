@@ -17,14 +17,15 @@ Copyright (C) 2014 The Android Open Source Project
         android:width="48.0dp"
         android:height="48.0dp"
         android:viewportWidth="24.0"
-        android:viewportHeight="24.0">
+        android:viewportHeight="24.0"
+        android:tint="?android:attr/colorForeground">
     <group
             android:scaleX="1.2"
             android:scaleY="1.2"
             android:pivotX="12.0"
             android:pivotY="12.0">
         <path
-            android:fillColor="@color/qs_user_detail_icon_muted"
+            android:fillColor="#FFFFFFFF"
             android:pathData="M12.000000,2.000000C6.500000,2.000000 2.000000,6.500000 2.000000,12.000000s4.500000,10.000000 10.000000,10.000000c5.500000,0.000000 10.000000,-4.500000 10.000000,-10.000000S17.500000,2.000000 12.000000,2.000000zM17.000000,13.000000l-4.000000,0.000000l0.000000,4.000000l-2.000000,0.000000l0.000000,-4.000000L7.000000,13.000000l0.000000,-2.000000l4.000000,0.000000L11.000000,7.000000l2.000000,0.000000l0.000000,4.000000l4.000000,0.000000L17.000000,13.000000z"/>
     </group>
 </vector>

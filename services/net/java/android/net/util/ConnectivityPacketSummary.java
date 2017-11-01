@@ -285,7 +285,10 @@ public class ConnectivityPacketSummary {
             final int ndType = asUint(mPacket.get());
             final int ndLength = asUint(mPacket.get());
             final int ndBytes = ndLength * ICMPV6_ND_OPTION_LENGTH_SCALING_FACTOR - 2;
-            if (mPacket.remaining() < ndBytes) break;
+            if (ndBytes < 0 || ndBytes > mPacket.remaining()) {
+                sj.add("<malformed>");
+                break;
+            }
             final int position = mPacket.position();
 
             switch (ndType) {
@@ -365,9 +368,9 @@ public class ConnectivityPacketSummary {
 
         byte[] bytes = new byte[ETHER_ADDR_LEN];
         mac.get(bytes, 0, bytes.length);
-        Byte[] printableBytes = new Byte[bytes.length];
+        Object[] printableBytes = new Object[bytes.length];
         int i = 0;
-        for (byte b : bytes) printableBytes[i++] = b;
+        for (byte b : bytes) printableBytes[i++] = new Byte(b);
 
         final String MAC48_FORMAT = "%02x:%02x:%02x:%02x:%02x:%02x";
         return String.format(MAC48_FORMAT, printableBytes);

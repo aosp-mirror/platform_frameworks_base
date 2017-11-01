@@ -108,7 +108,25 @@
         android:layout_height="@dimen/screen_pinning_request_button_height"
         android:layout_weight="0"
         android:paddingStart="@dimen/screen_pinning_request_frame_padding"
-        android:paddingEnd="@dimen/screen_pinning_request_frame_padding" >
+        android:paddingEnd="@dimen/screen_pinning_request_frame_padding"
+        android:theme="@*android:style/ThemeOverlay.DeviceDefault.Accent">
+
+        <ImageView
+            android:id="@+id/screen_pinning_recents_bg_light"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="matrix"
+            android:src="@drawable/screen_pinning_light_bg_circ" />
+
+        <ImageView
+            android:id="@+id/screen_pinning_recents_bg"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingEnd="@dimen/screen_pinning_request_inner_padding"
+            android:paddingStart="@dimen/screen_pinning_request_inner_padding"
+            android:paddingTop="@dimen/screen_pinning_request_inner_padding"
+            android:scaleType="matrix"
+            android:src="@drawable/screen_pinning_bg_circ" />
 
         <ImageView
             android:layout_width="match_parent"

@@ -35,7 +35,7 @@ public class StackActivity extends Activity {
 
         setContentView(R.layout.stack);
 
-        StackView stack = (StackView) findViewById(R.id.stack_view);
+        StackView stack = findViewById(R.id.stack_view);
         stack.setAdapter(new ArrayAdapter<Drawable>(this, android.R.layout.simple_list_item_1,
                 android.R.id.text1, new Drawable[] {
             getResources().getDrawable(R.drawable.sunset1),

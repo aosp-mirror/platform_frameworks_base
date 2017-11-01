@@ -30,9 +30,9 @@ import android.provider.ContactsContract.Data;
 import android.provider.ContactsContract.PhoneLookup;
 import android.provider.ContactsContract.RawContacts;
 import android.telephony.PhoneNumberUtils;
+import android.telephony.Rlog;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
-import android.telephony.Rlog;
 import android.util.Log;
 
 import com.android.i18n.phonenumbers.geocoding.PhoneNumberOfflineGeocoder;
@@ -576,7 +576,7 @@ public class CallerInfo {
      * @return a geographical description string for the specified number.
      * @see com.android.i18n.phonenumbers.PhoneNumberOfflineGeocoder
      */
-    private static String getGeoDescription(Context context, String number) {
+    public static String getGeoDescription(Context context, String number) {
         if (VDBG) Rlog.v(TAG, "getGeoDescription('" + number + "')...");
 
         if (TextUtils.isEmpty(number)) {
@@ -595,7 +595,8 @@ public class CallerInfo {
             pn = util.parse(number, countryIso);
             if (VDBG) Rlog.v(TAG, "- parsed number: " + pn);
         } catch (NumberParseException e) {
-            Rlog.w(TAG, "getGeoDescription: NumberParseException for incoming number '" + number + "'");
+            Rlog.w(TAG, "getGeoDescription: NumberParseException for incoming number '"
+                    + Rlog.pii(TAG, number) + "'");
         }
 
         if (pn != null) {

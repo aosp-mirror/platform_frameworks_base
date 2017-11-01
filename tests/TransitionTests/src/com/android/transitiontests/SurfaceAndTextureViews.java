@@ -48,8 +48,8 @@ public class SurfaceAndTextureViews extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.surface_texture_views);
 
-        final ViewGroup container = (ViewGroup) findViewById(R.id.container);
-        Button toggleButton = (Button) findViewById(R.id.toggleButton);
+        final ViewGroup container = findViewById(R.id.container);
+        Button toggleButton = findViewById(R.id.toggleButton);
 
         mView = new SimpleView(this);
         mView.setId(0);

@@ -4,9 +4,9 @@
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
      You may obtain a copy of the License at
-  
+
           http://www.apache.org/licenses/LICENSE-2.0
-  
+
      Unless required by applicable law or agreed to in writing, software
      distributed under the License is distributed on an "AS IS" BASIS,
      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,12 +17,15 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"ቀፎ"</string>
+    <string name="bugreport_notification_channel" msgid="2574150205913861141">"የሳንካ ሪፖርቶች"</string>
     <string name="bugreport_in_progress_title" msgid="4311705936714972757">"የሳንካ ሪፖርት <xliff:g id="ID">#%d</xliff:g> እየተመነጨ ነው"</string>
     <string name="bugreport_finished_title" msgid="4429132808670114081">"የሳንካ ሪፖርት <xliff:g id="ID">#%d</xliff:g> ተወስዷል"</string>
     <string name="bugreport_updating_title" msgid="4423539949559634214">"ዝርዝሮችን ወደ የሳንካ ሪፖርቱ በማከል ላይ"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"እባክዎ ይጠብቁ…"</string>
     <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"የሳንካ ሪፖርቱ ከትንሽ ጊዜ በኋላ በስልኩ ላይ ይመጣል"</string>
+    <string name="bugreport_finished_text" product="tv" msgid="5758325479058638893">"የሳንካ ሪፖርትዎን ለማጋራት ይምረጡ"</string>
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"የሳንካ ሪፖርትዎን ለማጋራት መታ ያድርጉ"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="tv" msgid="2343263822812016950">"የእርስዎን የሳንካ ሪፖርት ያለ ቅጽበታዊ ማያ ገጽ ለማጋራት ይምረጡ ወይም ቅጽበታዊ ማያ ገጹ እስኪጨርስ ይጠብቁ"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"የእርስዎን የሳንካ ሪፖርት ያለ ቅጽበታዊ ማያ ገጽ ለማጋራት መታ ያድርጉ ወይም ቅጽበታዊ ማያ ገጹ እስኪጨርስ ይጠብቁ"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"የእርስዎን የሳንካ ሪፖርት ያለ ቅጽበታዊ ማያ ገጽ ለማጋራት መታ ያድርጉ ወይም ቅጽበታዊ ማያ ገጹ እስኪጨርስ ይጠብቁ"</string>
     <string name="bugreport_confirm" msgid="5917407234515812495">"የሳንካ ሪፖርቶች ከተለያዩ የስርዓቱ የምዝግብ ማስታወሻ ፋይሎች የመጣ ውሂብ ይዘዋል፣ እነዚህም እርስዎ ሚስጥራዊነት ያለው ብለው የሚቆጥሯቸው (እንደ የመተግበሪያ አጠቃቀም እና የአካባቢ ውሂብ ያለ) ሊያካትቱ ይችላሉ። የሳንካ ሪፖርቶች ለሚያምኗቸው ሰዎች እና መተግበሪያዎች ብቻ ያጋሩ።"</string>
@@ -40,4 +43,5 @@
     <string name="bugreport_info_title" msgid="2306030793918239804">"የሳንካ ርዕስ"</string>
     <string name="bugreport_info_description" msgid="5072835127481627722">"የሳንካ ማጠቃለያ"</string>
     <string name="save" msgid="4781509040564835759">"አስቀምጥ"</string>
+    <string name="bugreport_intent_chooser_title" msgid="7605709494790894076">"የሳንካ ሪፖርት አጋራ"</string>
 </resources>

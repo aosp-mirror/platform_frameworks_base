@@ -29,6 +29,7 @@ import com.android.systemui.EventLogTags;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.DockedTopTaskEvent;
 import com.android.systemui.recents.events.activity.RecentsActivityStartingEvent;
+import com.android.systemui.recents.events.component.SetWaitingForTransitionStartEvent;
 import com.android.systemui.recents.events.ui.RecentsDrawnEvent;
 import com.android.systemui.recents.misc.ForegroundThread;
 
@@ -104,5 +105,11 @@ public class RecentsSystemUser extends IRecentsSystemUserCallbacks.Stub {
     @Override
     public void sendLaunchRecentsEvent() throws RemoteException {
         EventBus.getDefault().post(new RecentsActivityStartingEvent());
+    }
+
+    @Override
+    public void setWaitingForTransitionStartEvent(boolean waitingForTransitionStart) {
+        EventBus.getDefault().post(new SetWaitingForTransitionStartEvent(
+                waitingForTransitionStart));
     }
 }

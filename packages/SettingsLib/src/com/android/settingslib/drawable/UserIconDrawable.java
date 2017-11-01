@@ -34,6 +34,7 @@ import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Shader;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 
 import com.android.settingslib.R;
@@ -271,6 +272,11 @@ public class UserIconDrawable extends Drawable implements Drawable.Callback {
     public void setTintMode(@NonNull PorterDuff.Mode mode) {
         mTintMode = mode;
         super.invalidateSelf();
+    }
+
+    @Override
+    public ConstantState getConstantState() {
+        return new BitmapDrawable(mBitmap).getConstantState();
     }
 
     /**

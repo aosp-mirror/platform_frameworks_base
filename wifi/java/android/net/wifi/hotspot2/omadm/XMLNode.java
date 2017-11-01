@@ -20,6 +20,7 @@ import android.text.TextUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * A class represent a node in an XML tree. Each node is an XML element.
@@ -99,5 +100,10 @@ public class XMLNode {
         return TextUtils.equals(mTag, that.mTag) &&
                 TextUtils.equals(mText, that.mText) &&
                 mChildren.equals(that.mChildren);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mTag, mText, mChildren);
     }
 }

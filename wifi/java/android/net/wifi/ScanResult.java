@@ -336,12 +336,12 @@ public class ScanResult implements Parcelable {
 
     /**
      * Indicates venue name (such as 'San Francisco Airport') published by access point; only
-     * available on passpoint network and if published by access point.
+     * available on Passpoint network and if published by access point.
      */
     public CharSequence venueName;
 
     /**
-     * Indicates passpoint operator name published by access point.
+     * Indicates Passpoint operator name published by access point.
      */
     public CharSequence operatorFriendlyName;
 

@@ -42,19 +42,29 @@ public class Installer extends SystemService {
      * **************************************************************************/
     /** Application should be visible to everyone */
     public static final int DEXOPT_PUBLIC         = 1 << 1;
-    /** Application wants to run in VM safe mode */
-    public static final int DEXOPT_SAFEMODE       = 1 << 2;
     /** Application wants to allow debugging of its code */
-    public static final int DEXOPT_DEBUGGABLE     = 1 << 3;
+    public static final int DEXOPT_DEBUGGABLE     = 1 << 2;
     /** The system boot has finished */
-    public static final int DEXOPT_BOOTCOMPLETE   = 1 << 4;
+    public static final int DEXOPT_BOOTCOMPLETE   = 1 << 3;
     /** Hint that the dexopt type is profile-guided. */
-    public static final int DEXOPT_PROFILE_GUIDED = 1 << 5;
+    public static final int DEXOPT_PROFILE_GUIDED = 1 << 4;
+    /** The compilation is for a secondary dex file. */
+    public static final int DEXOPT_SECONDARY_DEX  = 1 << 5;
+    /** Ignore the result of dexoptNeeded and force compilation. */
+    public static final int DEXOPT_FORCE          = 1 << 6;
+    /** Indicates that the dex file passed to dexopt in on CE storage. */
+    public static final int DEXOPT_STORAGE_CE     = 1 << 7;
+    /** Indicates that the dex file passed to dexopt in on DE storage. */
+    public static final int DEXOPT_STORAGE_DE     = 1 << 8;
 
     // NOTE: keep in sync with installd
     public static final int FLAG_CLEAR_CACHE_ONLY = 1 << 8;
     public static final int FLAG_CLEAR_CODE_CACHE_ONLY = 1 << 9;
     public static final int FLAG_USE_QUOTA = 1 << 12;
+    public static final int FLAG_FREE_CACHE_V2 = 1 << 13;
+    public static final int FLAG_FREE_CACHE_V2_DEFY_QUOTA = 1 << 14;
+    public static final int FLAG_FREE_CACHE_NOOP = 1 << 15;
+    public static final int FLAG_FORCE = 1 << 16;
 
     private final boolean mIsolated;
 
@@ -110,6 +120,10 @@ public class Installer extends SystemService {
 
         if (binder != null) {
             mInstalld = IInstalld.Stub.asInterface(binder);
+            try {
+                invalidateMounts();
+            } catch (InstallerException ignored) {
+            }
         } else {
             Slog.w(TAG, "installd not found; trying again");
             BackgroundThread.getHandler().postDelayed(() -> {
@@ -187,6 +201,15 @@ public class Installer extends SystemService {
         }
     }
 
+    public void fixupAppData(String uuid, int flags) throws InstallerException {
+        if (!checkBeforeRemote()) return;
+        try {
+            mInstalld.fixupAppData(uuid, flags);
+        } catch (Exception e) {
+            throw InstallerException.from(e);
+        }
+    }
+
     public void moveCompleteApp(String fromUuid, String toUuid, String packageName,
             String dataAppName, int appId, String seInfo, int targetSdkVersion)
             throws InstallerException {
@@ -233,10 +256,21 @@ public class Installer extends SystemService {
         }
     }
 
-    public long[] getExternalSize(String uuid, int userId, int flags) throws InstallerException {
-        if (!checkBeforeRemote()) return new long[4];
+    public long[] getExternalSize(String uuid, int userId, int flags, int[] appIds)
+            throws InstallerException {
+        if (!checkBeforeRemote()) return new long[6];
         try {
-            return mInstalld.getExternalSize(uuid, userId, flags);
+            return mInstalld.getExternalSize(uuid, userId, flags, appIds);
+        } catch (Exception e) {
+            throw InstallerException.from(e);
+        }
+    }
+
+    public void setAppQuota(String uuid, int userId, int appId, long cacheQuota)
+            throws InstallerException {
+        if (!checkBeforeRemote()) return;
+        try {
+            mInstalld.setAppQuota(uuid, userId, appId, cacheQuota);
         } catch (Exception e) {
             throw InstallerException.from(e);
         }
@@ -244,13 +278,14 @@ public class Installer extends SystemService {
 
     public void dexopt(String apkPath, int uid, @Nullable String pkgName, String instructionSet,
             int dexoptNeeded, @Nullable String outputPath, int dexFlags,
-            String compilerFilter, @Nullable String volumeUuid, @Nullable String sharedLibraries)
+            String compilerFilter, @Nullable String volumeUuid, @Nullable String sharedLibraries,
+            @Nullable String seInfo, boolean downgrade)
             throws InstallerException {
         assertValidInstructionSet(instructionSet);
         if (!checkBeforeRemote()) return;
         try {
             mInstalld.dexopt(apkPath, uid, pkgName, instructionSet, dexoptNeeded, outputPath,
-                    dexFlags, compilerFilter, volumeUuid, sharedLibraries);
+                    dexFlags, compilerFilter, volumeUuid, sharedLibraries, seInfo, downgrade);
         } catch (Exception e) {
             throw InstallerException.from(e);
         }
@@ -275,11 +310,30 @@ public class Installer extends SystemService {
         }
     }
 
+    public boolean copySystemProfile(String systemProfile, int uid, String packageName)
+            throws InstallerException {
+        if (!checkBeforeRemote()) return false;
+        try {
+            return mInstalld.copySystemProfile(systemProfile, uid, packageName);
+        } catch (Exception e) {
+            throw InstallerException.from(e);
+        }
+    }
+
     public void idmap(String targetApkPath, String overlayApkPath, int uid)
             throws InstallerException {
         if (!checkBeforeRemote()) return;
         try {
             mInstalld.idmap(targetApkPath, overlayApkPath, uid);
+        } catch (Exception e) {
+            throw InstallerException.from(e);
+        }
+    }
+
+    public void removeIdmap(String overlayApkPath) throws InstallerException {
+        if (!checkBeforeRemote()) return;
+        try {
+            mInstalld.removeIdmap(overlayApkPath);
         } catch (Exception e) {
             throw InstallerException.from(e);
         }
@@ -351,10 +405,11 @@ public class Installer extends SystemService {
         }
     }
 
-    public void freeCache(String uuid, long freeStorageSize) throws InstallerException {
+    public void freeCache(String uuid, long targetFreeBytes, long cacheReservedBytes, int flags)
+            throws InstallerException {
         if (!checkBeforeRemote()) return;
         try {
-            mInstalld.freeCache(uuid, freeStorageSize);
+            mInstalld.freeCache(uuid, targetFreeBytes, cacheReservedBytes, flags);
         } catch (Exception e) {
             throw InstallerException.from(e);
         }
@@ -410,6 +465,38 @@ public class Installer extends SystemService {
         if (!checkBeforeRemote()) return;
         try {
             mInstalld.deleteOdex(apkPath, instructionSet, outputPath);
+        } catch (Exception e) {
+            throw InstallerException.from(e);
+        }
+    }
+
+    public boolean reconcileSecondaryDexFile(String apkPath, String packageName, int uid,
+            String[] isas, @Nullable String volumeUuid, int flags) throws InstallerException {
+        for (int i = 0; i < isas.length; i++) {
+            assertValidInstructionSet(isas[i]);
+        }
+        if (!checkBeforeRemote()) return false;
+        try {
+            return mInstalld.reconcileSecondaryDexFile(apkPath, packageName, uid, isas,
+                    volumeUuid, flags);
+        } catch (Exception e) {
+            throw InstallerException.from(e);
+        }
+    }
+
+    public void invalidateMounts() throws InstallerException {
+        if (!checkBeforeRemote()) return;
+        try {
+            mInstalld.invalidateMounts();
+        } catch (Exception e) {
+            throw InstallerException.from(e);
+        }
+    }
+
+    public boolean isQuotaSupported(String volumeUuid) throws InstallerException {
+        if (!checkBeforeRemote()) return false;
+        try {
+            return mInstalld.isQuotaSupported(volumeUuid);
         } catch (Exception e) {
             throw InstallerException.from(e);
         }

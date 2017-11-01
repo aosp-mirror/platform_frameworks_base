@@ -20,4 +20,4 @@
     android:id="@+id/notification_more_divider"
     android:layout_width="match_parent"
     android:layout_height="@dimen/notification_divider_height"
-    android:background="#FF616161" />
+    android:background="@color/notification_divider_color" />

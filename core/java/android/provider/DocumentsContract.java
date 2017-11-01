@@ -18,12 +18,17 @@ package android.provider;
 
 import static android.net.TrafficStats.KB_IN_BYTES;
 import static android.system.OsConstants.SEEK_SET;
+import static com.android.internal.util.Preconditions.checkArgument;
+import static com.android.internal.util.Preconditions.checkCollectionElementsNotNull;
+import static com.android.internal.util.Preconditions.checkCollectionNotEmpty;
 
 import android.annotation.Nullable;
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentSender;
+import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
@@ -33,11 +38,15 @@ import android.graphics.Matrix;
 import android.graphics.Point;
 import android.media.ExifInterface;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.OperationCanceledException;
+import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.ParcelFileDescriptor.OnCloseListener;
+import android.os.Parcelable;
+import android.os.ParcelableException;
 import android.os.RemoteException;
 import android.os.storage.StorageVolume;
 import android.system.ErrnoException;
@@ -53,6 +62,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Defines the contract between a documents provider and the platform.
@@ -96,13 +106,26 @@ public final class DocumentsContract {
     public static final String EXTRA_SHOW_ADVANCED = "android.content.extra.SHOW_ADVANCED";
 
     /** {@hide} */
-    public static final String EXTRA_SHOW_FILESIZE = "android.content.extra.SHOW_FILESIZE";
-
-    /** {@hide} */
-    public static final String EXTRA_FANCY_FEATURES = "android.content.extra.FANCY";
-
-    /** {@hide} */
     public static final String EXTRA_TARGET_URI = "android.content.extra.TARGET_URI";
+
+    /**
+     * Sets the desired initial location visible to user when file chooser is shown.
+     *
+     * <p>Applicable to {@link Intent} with actions:
+     * <ul>
+     *      <li>{@link Intent#ACTION_OPEN_DOCUMENT}</li>
+     *      <li>{@link Intent#ACTION_CREATE_DOCUMENT}</li>
+     *      <li>{@link Intent#ACTION_OPEN_DOCUMENT_TREE}</li>
+     * </ul>
+     *
+     * <p>Location should specify a document URI or a tree URI with document ID. If
+     * this URI identifies a non-directory, document navigator will attempt to use the parent
+     * of the document as the initial location.
+     *
+     * <p>The initial location is system specific if this extra is missing or document navigator
+     * failed to locate the desired initial location.
+     */
+    public static final String EXTRA_INITIAL_URI = "android.provider.extra.INITIAL_URI";
 
     /**
      * Set this in a DocumentsUI intent to cause a package's own roots to be
@@ -123,11 +146,25 @@ public final class DocumentsContract {
      */
     public static final String EXTRA_PROMPT = "android.provider.extra.PROMPT";
 
-    /** {@hide} */
-    public static final String ACTION_MANAGE_DOCUMENT = "android.provider.action.MANAGE_DOCUMENT";
+    /**
+     * Action of intent issued by DocumentsUI when user wishes to open/configure/manage a particular
+     * document in the provider application.
+     *
+     * <p>When issued, the intent will include the URI of the document as the intent data.
+     *
+     * <p>A provider wishing to provide support for this action should do two things.
+     * <li>Add an {@code <intent-filter>} matching this action.
+     * <li>When supplying information in {@link DocumentsProvider#queryChildDocuments}, include
+     * {@link Document#FLAG_SUPPORTS_SETTINGS} in the flags for each document that supports
+     * settings.
+     *
+     * @see DocumentsContact#Document#FLAG_SUPPORTS_SETTINGS
+     */
+    public static final String
+            ACTION_DOCUMENT_SETTINGS = "android.provider.action.DOCUMENT_SETTINGS";
 
     /** {@hide} */
-    public static final String ACTION_BROWSE = "android.provider.action.BROWSE";
+    public static final String ACTION_MANAGE_DOCUMENT = "android.provider.action.MANAGE_DOCUMENT";
 
     /** {@hide} */
     public static final String
@@ -137,6 +174,10 @@ public final class DocumentsContract {
      * Buffer is large enough to rewind past any EXIF headers.
      */
     private static final int THUMBNAIL_BUFFER_SIZE = (int) (128 * KB_IN_BYTES);
+
+    /** {@hide} */
+    public static final String EXTERNAL_STORAGE_PROVIDER_AUTHORITY =
+            "com.android.externalstorage.documents";
 
     /** {@hide} */
     public static final String PACKAGE_DOCUMENTS_UI = "com.android.documentsui";
@@ -355,6 +396,9 @@ public final class DocumentsContract {
          * Flag indicating that a document is virtual, and doesn't have byte
          * representation in the MIME type specified as {@link #COLUMN_MIME_TYPE}.
          *
+         * <p><em>Virtual documents must have at least one alternative streamable
+         * format via {@link DocumentsProvider#openTypedDocument}</em>
+         *
          * @see #COLUMN_FLAGS
          * @see #COLUMN_MIME_TYPE
          * @see DocumentsProvider#openTypedDocument(String, String, Bundle,
@@ -373,17 +417,20 @@ public final class DocumentsContract {
         public static final int FLAG_SUPPORTS_REMOVE = 1 << 10;
 
         /**
-         * Flag indicating that a document is an archive, and it's contents can be
-         * obtained via {@link DocumentsProvider#queryChildDocuments}.
-         * <p>
-         * The <em>provider</em> support library offers utility classes to add common
-         * archive support.
+         * Flag indicating that a document has settings that can be configured by user.
          *
          * @see #COLUMN_FLAGS
-         * @see DocumentsProvider#queryChildDocuments(String, String[], String)
-         * @hide
+         * @see #ACTION_DOCUMENT_SETTINGS
          */
-        public static final int FLAG_ARCHIVE = 1 << 15;
+        public static final int FLAG_SUPPORTS_SETTINGS = 1 << 11;
+
+        /**
+         * Flag indicating that a Web link can be obtained for the document.
+         *
+         * @see #COLUMN_FLAGS
+         * @see DocumentsContract#createWebLinkIntent(PackageManager, Uri, Bundle)
+         */
+        public static final int FLAG_WEB_LINKABLE = 1 << 12;
 
         /**
          * Flag indicating that a document is not complete, likely its
@@ -493,7 +540,9 @@ public final class DocumentsContract {
          */
         public static final String COLUMN_MIME_TYPES = "mime_types";
 
-        /** {@hide} */
+        /**
+         * MIME type for a root.
+         */
         public static final String MIME_TYPE_ITEM = "vnd.android.document/root";
 
         /**
@@ -543,6 +592,15 @@ public final class DocumentsContract {
          * @see DocumentsProvider#isChildDocument(String, String)
          */
         public static final int FLAG_SUPPORTS_IS_CHILD = 1 << 4;
+
+        /**
+         * Flag indicating that this root can be ejected.
+         *
+         * @see #COLUMN_FLAGS
+         * @see DocumentsContract#ejectRoot(ContentResolver, Uri)
+         * @see DocumentsProvider#ejectRoot(String)
+         */
+        public static final int FLAG_SUPPORTS_EJECT = 1 << 5;
 
         /**
          * Flag indicating that this root is currently empty. This may be used
@@ -642,11 +700,23 @@ public final class DocumentsContract {
     public static final String METHOD_IS_CHILD_DOCUMENT = "android:isChildDocument";
     /** {@hide} */
     public static final String METHOD_REMOVE_DOCUMENT = "android:removeDocument";
+    /** {@hide} */
+    public static final String METHOD_EJECT_ROOT = "android:ejectRoot";
+    /** {@hide} */
+    public static final String METHOD_FIND_DOCUMENT_PATH = "android:findDocumentPath";
+    /** {@hide} */
+    public static final String METHOD_CREATE_WEB_LINK_INTENT = "android:createWebLinkIntent";
 
     /** {@hide} */
     public static final String EXTRA_PARENT_URI = "parentUri";
     /** {@hide} */
     public static final String EXTRA_URI = "uri";
+
+    /**
+     * @see #createWebLinkIntent(ContentResolver, Uri, Bundle)
+     * {@hide}
+     */
+    public static final String EXTRA_OPTIONS = "options";
 
     private static final String PATH_ROOT = "root";
     private static final String PATH_RECENT = "recent";
@@ -688,7 +758,7 @@ public final class DocumentsContract {
     public static Uri buildHomeUri() {
         // TODO: Avoid this type of interpackage copying. Added here to avoid
         // direct coupling, but not ideal.
-        return DocumentsContract.buildRootUri("com.android.externalstorage.documents", "home");
+        return DocumentsContract.buildRootUri(EXTERNAL_STORAGE_PROVIDER_AUTHORITY, "home");
     }
 
     /**
@@ -961,7 +1031,8 @@ public final class DocumentsContract {
      *      android.os.CancellationSignal)
      */
     public static Bitmap getDocumentThumbnail(
-            ContentResolver resolver, Uri documentUri, Point size, CancellationSignal signal) {
+            ContentResolver resolver, Uri documentUri, Point size, CancellationSignal signal)
+            throws FileNotFoundException {
         final ContentProviderClient client = resolver.acquireUnstableContentProviderClient(
                 documentUri.getAuthority());
         try {
@@ -970,6 +1041,7 @@ public final class DocumentsContract {
             if (!(e instanceof OperationCanceledException)) {
                 Log.w(TAG, "Failed to load thumbnail for " + documentUri + ": " + e);
             }
+            rethrowIfNecessary(resolver, e);
             return null;
         } finally {
             ContentProviderClient.releaseQuietly(client);
@@ -1051,20 +1123,20 @@ public final class DocumentsContract {
     /**
      * Create a new document with given MIME type and display name.
      *
-     * @param parentDocumentUri directory with
-     *            {@link Document#FLAG_DIR_SUPPORTS_CREATE}
+     * @param parentDocumentUri directory with {@link Document#FLAG_DIR_SUPPORTS_CREATE}
      * @param mimeType MIME type of new document
      * @param displayName name of new document
      * @return newly created document, or {@code null} if failed
      */
     public static Uri createDocument(ContentResolver resolver, Uri parentDocumentUri,
-            String mimeType, String displayName) {
+            String mimeType, String displayName) throws FileNotFoundException {
         final ContentProviderClient client = resolver.acquireUnstableContentProviderClient(
                 parentDocumentUri.getAuthority());
         try {
             return createDocument(client, parentDocumentUri, mimeType, displayName);
         } catch (Exception e) {
             Log.w(TAG, "Failed to create document", e);
+            rethrowIfNecessary(resolver, e);
             return null;
         } finally {
             ContentProviderClient.releaseQuietly(client);
@@ -1115,13 +1187,14 @@ public final class DocumentsContract {
      *         failed.
      */
     public static Uri renameDocument(ContentResolver resolver, Uri documentUri,
-            String displayName) {
+            String displayName) throws FileNotFoundException {
         final ContentProviderClient client = resolver.acquireUnstableContentProviderClient(
                 documentUri.getAuthority());
         try {
             return renameDocument(client, documentUri, displayName);
         } catch (Exception e) {
             Log.w(TAG, "Failed to rename document", e);
+            rethrowIfNecessary(resolver, e);
             return null;
         } finally {
             ContentProviderClient.releaseQuietly(client);
@@ -1146,7 +1219,8 @@ public final class DocumentsContract {
      * @param documentUri document with {@link Document#FLAG_SUPPORTS_DELETE}
      * @return if the document was deleted successfully.
      */
-    public static boolean deleteDocument(ContentResolver resolver, Uri documentUri) {
+    public static boolean deleteDocument(ContentResolver resolver, Uri documentUri)
+            throws FileNotFoundException {
         final ContentProviderClient client = resolver.acquireUnstableContentProviderClient(
                 documentUri.getAuthority());
         try {
@@ -1154,6 +1228,7 @@ public final class DocumentsContract {
             return true;
         } catch (Exception e) {
             Log.w(TAG, "Failed to delete document", e);
+            rethrowIfNecessary(resolver, e);
             return false;
         } finally {
             ContentProviderClient.releaseQuietly(client);
@@ -1178,13 +1253,14 @@ public final class DocumentsContract {
      * @return the copied document, or {@code null} if failed.
      */
     public static Uri copyDocument(ContentResolver resolver, Uri sourceDocumentUri,
-            Uri targetParentDocumentUri) {
+            Uri targetParentDocumentUri) throws FileNotFoundException {
         final ContentProviderClient client = resolver.acquireUnstableContentProviderClient(
                 sourceDocumentUri.getAuthority());
         try {
             return copyDocument(client, sourceDocumentUri, targetParentDocumentUri);
         } catch (Exception e) {
             Log.w(TAG, "Failed to copy document", e);
+            rethrowIfNecessary(resolver, e);
             return null;
         } finally {
             ContentProviderClient.releaseQuietly(client);
@@ -1212,7 +1288,7 @@ public final class DocumentsContract {
      * @return the moved document, or {@code null} if failed.
      */
     public static Uri moveDocument(ContentResolver resolver, Uri sourceDocumentUri,
-            Uri sourceParentDocumentUri, Uri targetParentDocumentUri) {
+            Uri sourceParentDocumentUri, Uri targetParentDocumentUri) throws FileNotFoundException {
         final ContentProviderClient client = resolver.acquireUnstableContentProviderClient(
                 sourceDocumentUri.getAuthority());
         try {
@@ -1220,6 +1296,7 @@ public final class DocumentsContract {
                     targetParentDocumentUri);
         } catch (Exception e) {
             Log.w(TAG, "Failed to move document", e);
+            rethrowIfNecessary(resolver, e);
             return null;
         } finally {
             ContentProviderClient.releaseQuietly(client);
@@ -1249,7 +1326,7 @@ public final class DocumentsContract {
      * @return true if the document was removed successfully.
      */
     public static boolean removeDocument(ContentResolver resolver, Uri documentUri,
-            Uri parentDocumentUri) {
+            Uri parentDocumentUri) throws FileNotFoundException {
         final ContentProviderClient client = resolver.acquireUnstableContentProviderClient(
                 documentUri.getAuthority());
         try {
@@ -1257,6 +1334,7 @@ public final class DocumentsContract {
             return true;
         } catch (Exception e) {
             Log.w(TAG, "Failed to remove document", e);
+            rethrowIfNecessary(resolver, e);
             return false;
         } finally {
             ContentProviderClient.releaseQuietly(client);
@@ -1271,6 +1349,174 @@ public final class DocumentsContract {
         in.putParcelable(DocumentsContract.EXTRA_PARENT_URI, parentDocumentUri);
 
         client.call(METHOD_REMOVE_DOCUMENT, null, in);
+    }
+
+    /**
+     * Ejects the given root. It throws {@link IllegalStateException} when ejection failed.
+     *
+     * @param rootUri root with {@link Root#FLAG_SUPPORTS_EJECT} to be ejected
+     */
+    public static void ejectRoot(ContentResolver resolver, Uri rootUri) {
+        final ContentProviderClient client = resolver.acquireUnstableContentProviderClient(
+                rootUri.getAuthority());
+        try {
+            ejectRoot(client, rootUri);
+        } catch (RemoteException e) {
+            e.rethrowAsRuntimeException();
+        } finally {
+            ContentProviderClient.releaseQuietly(client);
+        }
+    }
+
+    /** {@hide} */
+    public static void ejectRoot(ContentProviderClient client, Uri rootUri)
+            throws RemoteException {
+        final Bundle in = new Bundle();
+        in.putParcelable(DocumentsContract.EXTRA_URI, rootUri);
+
+        client.call(METHOD_EJECT_ROOT, null, in);
+    }
+
+    /**
+     * Finds the canonical path from the top of the document tree.
+     *
+     * The {@link Path#getPath()} of the return value contains the document ID
+     * of all documents along the path from the top the document tree to the
+     * requested document, both inclusive.
+     *
+     * The {@link Path#getRootId()} of the return value returns {@code null}.
+     *
+     * @param treeUri treeUri of the document which path is requested.
+     * @return the path of the document, or {@code null} if failed.
+     * @see DocumentsProvider#findDocumentPath(String, String)
+     */
+    public static Path findDocumentPath(ContentResolver resolver, Uri treeUri)
+            throws FileNotFoundException {
+        checkArgument(isTreeUri(treeUri), treeUri + " is not a tree uri.");
+
+        final ContentProviderClient client = resolver.acquireUnstableContentProviderClient(
+                treeUri.getAuthority());
+        try {
+            return findDocumentPath(client, treeUri);
+        } catch (Exception e) {
+            Log.w(TAG, "Failed to find path", e);
+            rethrowIfNecessary(resolver, e);
+            return null;
+        } finally {
+            ContentProviderClient.releaseQuietly(client);
+        }
+    }
+
+    /**
+     * Finds the canonical path. If uri is a document uri returns path from a root and
+     * its associated root id. If uri is a tree uri returns the path from the top of
+     * the tree. The {@link Path#getPath()} of the return value contains document ID
+     * starts from the top of the tree or the root document to the requested document,
+     * both inclusive.
+     *
+     * Callers can expect the root ID returned from multiple calls to this method is
+     * consistent.
+     *
+     * @param uri uri of the document which path is requested. It can be either a
+     *          plain document uri or a tree uri.
+     * @return the path of the document.
+     * @see DocumentsProvider#findDocumentPath(String, String)
+     *
+     * {@hide}
+     */
+    public static Path findDocumentPath(ContentProviderClient client, Uri uri)
+            throws RemoteException {
+
+        final Bundle in = new Bundle();
+        in.putParcelable(DocumentsContract.EXTRA_URI, uri);
+
+        final Bundle out = client.call(METHOD_FIND_DOCUMENT_PATH, null, in);
+
+        return out.getParcelable(DocumentsContract.EXTRA_RESULT);
+    }
+
+    /**
+     * Creates an intent for obtaining a web link for the specified document.
+     *
+     * <p>Note, that due to internal limitations, if there is already a web link
+     * intent created for the specified document but with different options,
+     * then it may be overriden.
+     *
+     * <p>Providers are required to show confirmation UI for all new permissions granted
+     * for the linked document.
+     *
+     * <p>If list of recipients is known, then it should be passed in options as
+     * {@link Intent#EXTRA_EMAIL} as a list of email addresses. Note, that
+     * this is just a hint for the provider, which can ignore the list. In either
+     * case the provider is required to show a UI for letting the user confirm
+     * any new permission grants.
+     *
+     * <p>Note, that the entire <code>options</code> bundle will be sent to the provider
+     * backing the passed <code>uri</code>. Make sure that you trust the provider
+     * before passing any sensitive information.
+     *
+     * <p>Since this API may show a UI, it cannot be called from background.
+     *
+     * <p>In order to obtain the Web Link use code like this:
+     * <pre><code>
+     * void onSomethingHappened() {
+     *   IntentSender sender = DocumentsContract.createWebLinkIntent(<i>...</i>);
+     *   if (sender != null) {
+     *     startIntentSenderForResult(
+     *         sender,
+     *         WEB_LINK_REQUEST_CODE,
+     *         null, 0, 0, 0, null);
+     *   }
+     * }
+     *
+     * <i>(...)</i>
+     *
+     * void onActivityResult(int requestCode, int resultCode, Intent data) {
+     *   if (requestCode == WEB_LINK_REQUEST_CODE && resultCode == RESULT_OK) {
+     *     Uri weblinkUri = data.getData();
+     *     <i>...</i>
+     *   }
+     * }
+     * </code></pre>
+     *
+     * @param uri uri for the document to create a link to.
+     * @param options Extra information for generating the link.
+     * @return an intent sender to obtain the web link, or null if the document
+     *      is not linkable, or creating the intent sender failed.
+     * @see DocumentsProvider#createWebLinkIntent(String, Bundle)
+     * @see Intent#EXTRA_EMAIL
+     */
+    public static IntentSender createWebLinkIntent(ContentResolver resolver, Uri uri,
+            Bundle options) throws FileNotFoundException {
+        final ContentProviderClient client = resolver.acquireUnstableContentProviderClient(
+                uri.getAuthority());
+        try {
+            return createWebLinkIntent(client, uri, options);
+        } catch (Exception e) {
+            Log.w(TAG, "Failed to create a web link intent", e);
+            rethrowIfNecessary(resolver, e);
+            return null;
+        } finally {
+            ContentProviderClient.releaseQuietly(client);
+        }
+    }
+
+    /**
+     * {@hide}
+     */
+    public static IntentSender createWebLinkIntent(ContentProviderClient client, Uri uri,
+            Bundle options) throws RemoteException {
+        final Bundle in = new Bundle();
+        in.putParcelable(DocumentsContract.EXTRA_URI, uri);
+
+        // Options may be provider specific, so put them in a separate bundle to
+        // avoid overriding the Uri.
+        if (options != null) {
+            in.putBundle(EXTRA_OPTIONS, options);
+        }
+
+        final Bundle out = client.call(METHOD_CREATE_WEB_LINK_INTENT, null, in);
+        return out.getParcelable(DocumentsContract.EXTRA_RESULT);
     }
 
     /**
@@ -1311,5 +1557,116 @@ public final class DocumentsContract {
         }
 
         return new AssetFileDescriptor(pfd, 0, AssetFileDescriptor.UNKNOWN_LENGTH, extras);
+    }
+
+    private static void rethrowIfNecessary(ContentResolver resolver, Exception e)
+            throws FileNotFoundException {
+        // We only want to throw applications targetting O and above
+        if (resolver.getTargetSdkVersion() >= Build.VERSION_CODES.O) {
+            if (e instanceof ParcelableException) {
+                ((ParcelableException) e).maybeRethrow(FileNotFoundException.class);
+            } else if (e instanceof RemoteException) {
+                ((RemoteException) e).rethrowAsRuntimeException();
+            } else if (e instanceof RuntimeException) {
+                throw (RuntimeException) e;
+            }
+        }
+    }
+
+    /**
+     * Holds a path from a document to a particular document under it. It
+     * may also contains the root ID where the path resides.
+     */
+    public static final class Path implements Parcelable {
+
+        private final @Nullable String mRootId;
+        private final List<String> mPath;
+
+        /**
+         * Creates a Path.
+         *
+         * @param rootId the ID of the root. May be null.
+         * @param path the list of document ID from the parent document at
+         *          position 0 to the child document.
+         */
+        public Path(@Nullable String rootId, List<String> path) {
+            checkCollectionNotEmpty(path, "path");
+            checkCollectionElementsNotNull(path, "path");
+
+            mRootId = rootId;
+            mPath = path;
+        }
+
+        /**
+         * Returns the root id or null if the calling package doesn't have
+         * permission to access root information.
+         */
+        public @Nullable String getRootId() {
+            return mRootId;
+        }
+
+        /**
+         * Returns the path. The path is trimmed to the top of tree if
+         * calling package doesn't have permission to access those
+         * documents.
+         */
+        public List<String> getPath() {
+            return mPath;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || !(o instanceof Path)) {
+                return false;
+            }
+            Path path = (Path) o;
+            return Objects.equals(mRootId, path.mRootId) &&
+                    Objects.equals(mPath, path.mPath);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(mRootId, mPath);
+        }
+
+        @Override
+        public String toString() {
+            return new StringBuilder()
+                    .append("DocumentsContract.Path{")
+                    .append("rootId=")
+                    .append(mRootId)
+                    .append(", path=")
+                    .append(mPath)
+                    .append("}")
+                    .toString();
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeString(mRootId);
+            dest.writeStringList(mPath);
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        public static final Creator<Path> CREATOR = new Creator<Path>() {
+            @Override
+            public Path createFromParcel(Parcel in) {
+                final String rootId = in.readString();
+                final List<String> path = in.createStringArrayList();
+                return new Path(rootId, path);
+            }
+
+            @Override
+            public Path[] newArray(int size) {
+                return new Path[size];
+            }
+        };
     }
 }

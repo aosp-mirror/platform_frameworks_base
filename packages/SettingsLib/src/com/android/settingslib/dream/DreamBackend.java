@@ -16,6 +16,7 @@
 
 package com.android.settingslib.dream;
 
+import android.annotation.IntDef;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -35,6 +36,8 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Xml;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -68,12 +71,30 @@ public class DreamBackend {
         }
     }
 
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({WHILE_CHARGING, WHILE_DOCKED, EITHER, NEVER})
+    public @interface WhenToDream{}
+
+    public static final int WHILE_CHARGING = 0;
+    public static final int WHILE_DOCKED = 1;
+    public static final int EITHER = 2;
+    public static final int NEVER = 3;
+
     private final Context mContext;
     private final IDreamManager mDreamManager;
     private final DreamInfoComparator mComparator;
     private final boolean mDreamsEnabledByDefault;
     private final boolean mDreamsActivatedOnSleepByDefault;
     private final boolean mDreamsActivatedOnDockByDefault;
+
+    private static DreamBackend sInstance;
+
+    public static DreamBackend getInstance(Context context) {
+        if (sInstance == null) {
+            sInstance = new DreamBackend(context);
+        }
+        return sInstance;
+    }
 
     public DreamBackend(Context context) {
         mContext = context;
@@ -136,6 +157,42 @@ public class DreamBackend {
             }
         }
         return null;
+    }
+
+    public @WhenToDream int getWhenToDreamSetting() {
+        if (!isEnabled()) {
+            return NEVER;
+        }
+        return isActivatedOnDock() && isActivatedOnSleep() ? EITHER
+                : isActivatedOnDock() ? WHILE_DOCKED
+                : isActivatedOnSleep() ? WHILE_CHARGING
+                : NEVER;
+    }
+
+    public void setWhenToDream(@WhenToDream int whenToDream) {
+        setEnabled(whenToDream != NEVER);
+
+        switch (whenToDream) {
+            case WHILE_CHARGING:
+                setActivatedOnDock(false);
+                setActivatedOnSleep(true);
+                break;
+
+            case WHILE_DOCKED:
+                setActivatedOnDock(true);
+                setActivatedOnSleep(false);
+                break;
+
+            case EITHER:
+                setActivatedOnDock(true);
+                setActivatedOnSleep(true);
+                break;
+
+            case NEVER:
+            default:
+                break;
+        }
+
     }
 
     public boolean isEnabled() {

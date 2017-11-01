@@ -34,9 +34,13 @@ import android.net.NetworkStatsHistory;
 import android.net.NetworkTemplate;
 import android.net.TrafficStats;
 import android.os.Binder;
+import android.service.NetworkStatsCollectionKeyProto;
+import android.service.NetworkStatsCollectionProto;
+import android.service.NetworkStatsCollectionStatsProto;
 import android.util.ArrayMap;
 import android.util.AtomicFile;
 import android.util.IntArray;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FileRotator;
@@ -532,12 +536,15 @@ public class NetworkStatsCollection implements FileRotator.Reader {
                 / mBucketDuration);
     }
 
-    public void dump(IndentingPrintWriter pw) {
+    private ArrayList<Key> getSortedKeys() {
         final ArrayList<Key> keys = Lists.newArrayList();
         keys.addAll(mStats.keySet());
         Collections.sort(keys);
+        return keys;
+    }
 
-        for (Key key : keys) {
+    public void dump(IndentingPrintWriter pw) {
+        for (Key key : getSortedKeys()) {
             pw.print("ident="); pw.print(key.ident.toString());
             pw.print(" uid="); pw.print(key.uid);
             pw.print(" set="); pw.print(NetworkStats.setToString(key.set));
@@ -548,6 +555,29 @@ public class NetworkStatsCollection implements FileRotator.Reader {
             history.dump(pw, true);
             pw.decreaseIndent();
         }
+    }
+
+    public void writeToProto(ProtoOutputStream proto, long tag) {
+        final long start = proto.start(tag);
+
+        for (Key key : getSortedKeys()) {
+            final long startStats = proto.start(NetworkStatsCollectionProto.STATS);
+
+            // Key
+            final long startKey = proto.start(NetworkStatsCollectionStatsProto.KEY);
+            key.ident.writeToProto(proto, NetworkStatsCollectionKeyProto.IDENTITY);
+            proto.write(NetworkStatsCollectionKeyProto.UID, key.uid);
+            proto.write(NetworkStatsCollectionKeyProto.SET, key.set);
+            proto.write(NetworkStatsCollectionKeyProto.TAG, key.tag);
+            proto.end(startKey);
+
+            // Value
+            final NetworkStatsHistory history = mStats.get(key);
+            history.writeToProto(proto, NetworkStatsCollectionStatsProto.HISTORY);
+            proto.end(startStats);
+        }
+
+        proto.end(start);
     }
 
     public void dumpCheckin(PrintWriter pw, long start, long end) {

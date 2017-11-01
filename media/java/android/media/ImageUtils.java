@@ -62,6 +62,7 @@ class ImageUtils {
             case ImageFormat.RAW12:
             case ImageFormat.DEPTH16:
             case ImageFormat.DEPTH_POINT_CLOUD:
+            case ImageFormat.RAW_DEPTH:
                 return 1;
             case ImageFormat.PRIVATE:
                 return 0;
@@ -102,6 +103,10 @@ class ImageUtils {
         if (src.getFormat() == ImageFormat.RAW_PRIVATE) {
             throw new IllegalArgumentException(
                     "Copy of RAW_OPAQUE format has not been implemented");
+        }
+        if (src.getFormat() == ImageFormat.RAW_DEPTH) {
+            throw new IllegalArgumentException(
+                    "Copy of RAW_DEPTH format has not been implemented");
         }
         if (!(dst.getOwner() instanceof ImageWriter)) {
             throw new IllegalArgumentException("Destination image is not from ImageWriter. Only"
@@ -206,6 +211,7 @@ class ImageUtils {
             case PixelFormat.RGB_565:
             case ImageFormat.YUY2:
             case ImageFormat.Y16:
+            case ImageFormat.RAW_DEPTH:
             case ImageFormat.RAW_SENSOR:
             case ImageFormat.RAW_PRIVATE: // round estimate, real size is unknown
             case ImageFormat.DEPTH16:
@@ -253,6 +259,7 @@ class ImageUtils {
             case ImageFormat.RAW_SENSOR:
             case ImageFormat.RAW10:
             case ImageFormat.RAW12:
+            case ImageFormat.RAW_DEPTH:
                 return new Size(image.getWidth(), image.getHeight());
             case ImageFormat.PRIVATE:
                 return new Size(0, 0);

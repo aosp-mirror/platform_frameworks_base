@@ -17,10 +17,11 @@
     android:height="24dp"
     android:viewportHeight="48.0"
     android:viewportWidth="48.0"
-    android:width="24dp" >
+    android:width="24dp"
+    android:tint="?android:attr/colorControlNormal" >
 
     <path
-        android:fillColor="@color/volume_icon_color"
+        android:fillColor="#FFFFFF"
         android:pathData="M2.0,36.0l0.0,6.0l6.0,0.0C8.0,38.7 5.3,36.0 2.0,36.0zM2.0,28.0l0.0,4.0c5.5,0.0 10.0,4.5 10.0,10.0l4.0,0.0C16.0,34.3 9.7,28.0 2.0,28.0zM38.0,14.0L10.0,14.0l0.0,3.3c7.9,2.6 14.2,8.8 16.7,16.7L38.0,34.0L38.0,14.0zM2.0,20.0l0.0,4.0c9.9,0.0 18.0,8.1 18.0,18.0l4.0,0.0C24.0,29.8 14.1,20.0 2.0,20.0zM42.0,6.0L6.0,6.0c-2.2,0.0 -4.0,1.8 -4.0,4.0l0.0,6.0l4.0,0.0l0.0,-6.0l36.0,0.0l0.0,28.0L28.0,38.0l0.0,4.0l14.0,0.0c2.2,0.0 4.0,-1.8 4.0,-4.0L46.0,10.0C46.0,7.8 44.2,6.0 42.0,6.0z" />
 
 </vector>

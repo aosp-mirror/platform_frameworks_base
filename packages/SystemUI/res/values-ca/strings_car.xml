@@ -19,6 +19,6 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="car_lockscreen_disclaimer_title" msgid="7997539137376896441">"Condueix amb precaució"</string>
-    <string name="car_lockscreen_disclaimer_text" msgid="3061224684092952864">"Estigues al cas de la conducció i respecta sempre les lleis aplicables. Les indicacions poden ser inexactes, perilloses, inadequades o incompletes, o bé poden comportar maniobres prohibides o que creuis circumscripcions territorials. La informació de les empreses també pot ser inexacta o incompleta. No s\'ofereixen dades en temps real i no es pot garantir la precisió de les ubicacions. Mentre condueixes, no utilitzis el dispositiu mòbil ni cap aplicació que no estigui destinada a Android Auto."</string>
+    <string name="unknown_user_label" msgid="4323896111737677955">"Desconegut"</string>
+    <string name="start_driving" msgid="864023351402918991">"Comença a conduir"</string>
 </resources>

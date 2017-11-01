@@ -268,4 +268,21 @@ public class ColorMatrix {
         m[5] = 1;   m[6] = -0.34414f;   m[7] = -0.71414f;
         m[10] = 1;  m[11] = 1.772f;     m[12] = 0;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        // if (obj == this) return true; -- NaN value would mean matrix != itself
+        if (!(obj instanceof ColorMatrix)) {
+            return false;
+        }
+
+        // we don't use Arrays.equals(), since that considers NaN == NaN
+        final float[] other = ((ColorMatrix) obj).mArray;
+        for (int i = 0; i < 20; i++) {
+            if (other[i] != mArray[i]) {
+                return false;
+            }
+        }
+        return true;
+    }
 }

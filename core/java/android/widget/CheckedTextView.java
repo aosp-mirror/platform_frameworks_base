@@ -16,11 +16,8 @@
 
 package android.widget;
 
-import android.annotation.NonNull;
-import android.view.ViewHierarchyEncoder;
-import com.android.internal.R;
-
 import android.annotation.DrawableRes;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.ColorStateList;
@@ -34,8 +31,11 @@ import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.RemotableViewMethod;
 import android.view.ViewDebug;
+import android.view.ViewHierarchyEncoder;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
+
+import com.android.internal.R;
 
 /**
  * An extension to {@link TextView} that supports the {@link Checkable}
@@ -394,7 +394,7 @@ public class CheckedTextView extends TextView implements Checkable {
                     y = (getHeight() - height) / 2;
                     break;
             }
-            
+
             final boolean checkMarkAtStart = isCheckMarkAtStart();
             final int width = getWidth();
             final int top = y;
@@ -417,7 +417,7 @@ public class CheckedTextView extends TextView implements Checkable {
             }
         }
     }
-    
+
     @Override
     protected int[] onCreateDrawableState(int extraSpace) {
         final int[] drawableState = super.onCreateDrawableState(extraSpace + 1);

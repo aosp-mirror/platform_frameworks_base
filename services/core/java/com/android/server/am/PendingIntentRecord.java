@@ -28,12 +28,15 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.TransactionTooLargeException;
 import android.os.UserHandle;
+import android.util.ArrayMap;
 import android.util.Slog;
 import android.util.TimeUtils;
 
+import com.android.internal.os.IResultReceiver;
 import com.android.server.am.ActivityStackSupervisor.ActivityContainer;
 
 import java.io.PrintWriter;
@@ -49,7 +52,8 @@ final class PendingIntentRecord extends IIntentSender.Stub {
     final WeakReference<PendingIntentRecord> ref;
     boolean sent = false;
     boolean canceled = false;
-    private long whitelistDuration = 0;
+    private ArrayMap<IBinder, Long> whitelistDuration;
+    private RemoteCallbackList<IResultReceiver> mCancelCallbacks;
 
     String stringName;
     String lastTagPrefix;
@@ -175,6 +179,8 @@ final class PendingIntentRecord extends IIntentSender.Stub {
                     return "broadcastIntent";
                 case ActivityManager.INTENT_SENDER_SERVICE:
                     return "startService";
+                case ActivityManager.INTENT_SENDER_FOREGROUND_SERVICE:
+                    return "startForegroundService";
                 case ActivityManager.INTENT_SENDER_ACTIVITY_RESULT:
                     return "activityResult";
             }
@@ -189,36 +195,60 @@ final class PendingIntentRecord extends IIntentSender.Stub {
         ref = new WeakReference<PendingIntentRecord>(this);
     }
 
-    void setWhitelistDuration(long duration) {
-        this.whitelistDuration = duration;
+    void setWhitelistDurationLocked(IBinder whitelistToken, long duration) {
+        if (duration > 0) {
+            if (whitelistDuration == null) {
+                whitelistDuration = new ArrayMap<>();
+            }
+            whitelistDuration.put(whitelistToken, duration);
+        } else if (whitelistDuration != null) {
+            whitelistDuration.remove(whitelistToken);
+            if (whitelistDuration.size() <= 0) {
+                whitelistDuration = null;
+            }
+
+        }
         this.stringName = null;
     }
 
-    public void send(int code, Intent intent, String resolvedType, IIntentReceiver finishedReceiver,
-            String requiredPermission, Bundle options) {
-        sendInner(code, intent, resolvedType, finishedReceiver,
-                requiredPermission, null, null, 0, 0, 0, options, null);
+    public void registerCancelListenerLocked(IResultReceiver receiver) {
+        if (mCancelCallbacks == null) {
+            mCancelCallbacks = new RemoteCallbackList<>();
+        }
+        mCancelCallbacks.register(receiver);
     }
 
-    public int sendWithResult(int code, Intent intent, String resolvedType,
+    public void unregisterCancelListenerLocked(IResultReceiver receiver) {
+        mCancelCallbacks.unregister(receiver);
+        if (mCancelCallbacks.getRegisteredCallbackCount() <= 0) {
+            mCancelCallbacks = null;
+        }
+    }
+
+    public RemoteCallbackList<IResultReceiver> detachCancelListenersLocked() {
+        RemoteCallbackList<IResultReceiver> listeners = mCancelCallbacks;
+        mCancelCallbacks = null;
+        return listeners;
+    }
+
+    public void send(int code, Intent intent, String resolvedType, IBinder whitelistToken,
             IIntentReceiver finishedReceiver, String requiredPermission, Bundle options) {
-        return sendInner(code, intent, resolvedType, finishedReceiver,
+        sendInner(code, intent, resolvedType, whitelistToken, finishedReceiver,
                 requiredPermission, null, null, 0, 0, 0, options, null);
     }
 
-    int sendInner(int code, Intent intent, String resolvedType, IIntentReceiver finishedReceiver,
+    public int sendWithResult(int code, Intent intent, String resolvedType, IBinder whitelistToken,
+            IIntentReceiver finishedReceiver, String requiredPermission, Bundle options) {
+        return sendInner(code, intent, resolvedType, whitelistToken, finishedReceiver,
+                requiredPermission, null, null, 0, 0, 0, options, null);
+    }
+
+    int sendInner(int code, Intent intent, String resolvedType, IBinder whitelistToken,
+            IIntentReceiver finishedReceiver,
             String requiredPermission, IBinder resultTo, String resultWho, int requestCode,
             int flagsMask, int flagsValues, Bundle options, IActivityContainer container) {
         if (intent != null) intent.setDefusable(true);
         if (options != null) options.setDefusable(true);
-
-        if (whitelistDuration > 0 && !canceled) {
-            // Must call before acquiring the lock. It's possible the method return before sending
-            // the intent due to some validations inside the lock, in which case the UID shouldn't
-            // be whitelisted, but since the whitelist is temporary, that would be ok.
-            owner.tempWhitelistAppForPowerSave(Binder.getCallingPid(), Binder.getCallingUid(), uid,
-                    whitelistDuration);
-        }
 
         synchronized (owner) {
             final ActivityContainer activityContainer = (ActivityContainer)container;
@@ -232,7 +262,6 @@ final class PendingIntentRecord extends IIntentSender.Stub {
                 sent = true;
                 if ((key.flags&PendingIntent.FLAG_ONE_SHOT) != 0) {
                     owner.cancelIntentSenderLocked(this, true);
-                    canceled = true;
                 }
 
                 Intent finalIntent = key.requestIntent != null
@@ -255,7 +284,35 @@ final class PendingIntentRecord extends IIntentSender.Stub {
                     resolvedType = key.requestResolvedType;
                 }
 
+                final int callingUid = Binder.getCallingUid();
+                final int callingPid = Binder.getCallingPid();
+
                 final long origId = Binder.clearCallingIdentity();
+
+                if (whitelistDuration != null) {
+                    Long duration = whitelistDuration.get(whitelistToken);
+                    if (duration != null) {
+                        int procState = owner.getUidState(callingUid);
+                        if (!ActivityManager.isProcStateBackground(procState)) {
+                            StringBuilder tag = new StringBuilder(64);
+                            tag.append("pendingintent:");
+                            UserHandle.formatUid(tag, callingUid);
+                            tag.append(":");
+                            if (finalIntent.getAction() != null) {
+                                tag.append(finalIntent.getAction());
+                            } else if (finalIntent.getComponent() != null) {
+                                finalIntent.getComponent().appendShortString(tag);
+                            } else if (finalIntent.getData() != null) {
+                                tag.append(finalIntent.getData());
+                            }
+                            owner.tempWhitelistForPendingIntentLocked(callingPid,
+                                    callingUid, uid, duration, tag.toString());
+                        } else {
+                            Slog.w(TAG, "Not doing whitelist " + this + ": caller state="
+                                    + procState);
+                        }
+                    }
+                }
 
                 boolean sendFinish = finishedReceiver != null;
                 int userId = key.userId;
@@ -289,16 +346,17 @@ final class PendingIntentRecord extends IIntentSender.Stub {
                             } else {
                                 owner.startActivityInPackage(uid, key.packageName, finalIntent,
                                         resolvedType, resultTo, resultWho, requestCode, 0,
-                                        options, userId, container, null);
+                                        options, userId, container, null, "PendingIntentRecord");
                             }
                         } catch (RuntimeException e) {
                             Slog.w(TAG, "Unable to send startActivity intent", e);
                         }
                         break;
                     case ActivityManager.INTENT_SENDER_ACTIVITY_RESULT:
-                        if (key.activity.task.stack != null) {
-                            key.activity.task.stack.sendActivityResultLocked(-1, key.activity,
-                                    key.who, key.requestCode, code, finalIntent);
+                        final ActivityStack stack = key.activity.getStack();
+                        if (stack != null) {
+                            stack.sendActivityResultLocked(-1, key.activity, key.who,
+                                    key.requestCode, code, finalIntent);
                         }
                         break;
                     case ActivityManager.INTENT_SENDER_BROADCAST:
@@ -317,9 +375,11 @@ final class PendingIntentRecord extends IIntentSender.Stub {
                         }
                         break;
                     case ActivityManager.INTENT_SENDER_SERVICE:
+                    case ActivityManager.INTENT_SENDER_FOREGROUND_SERVICE:
                         try {
-                            owner.startServiceInPackage(uid, finalIntent,
-                                    resolvedType, key.packageName, userId);
+                            owner.startServiceInPackage(uid, finalIntent, resolvedType,
+                                    key.type == ActivityManager.INTENT_SENDER_FOREGROUND_SERVICE,
+                                    key.packageName, userId);
                         } catch (RuntimeException e) {
                             Slog.w(TAG, "Unable to send startService intent", e);
                         } catch (TransactionTooLargeException e) {
@@ -387,11 +447,25 @@ final class PendingIntentRecord extends IIntentSender.Stub {
             pw.print(prefix); pw.print("sent="); pw.print(sent);
                     pw.print(" canceled="); pw.println(canceled);
         }
-        if (whitelistDuration != 0) {
+        if (whitelistDuration != null) {
             pw.print(prefix);
             pw.print("whitelistDuration=");
-            TimeUtils.formatDuration(whitelistDuration, pw);
+            for (int i = 0; i < whitelistDuration.size(); i++) {
+                if (i != 0) {
+                    pw.print(", ");
+                }
+                pw.print(Integer.toHexString(System.identityHashCode(whitelistDuration.keyAt(i))));
+                pw.print(":");
+                TimeUtils.formatDuration(whitelistDuration.valueAt(i), pw);
+            }
             pw.println();
+        }
+        if (mCancelCallbacks != null) {
+            pw.print(prefix); pw.println("mCancelCallbacks:");
+            for (int i = 0; i < mCancelCallbacks.getRegisteredCallbackCount(); i++) {
+                pw.print(prefix); pw.print("  #"); pw.print(i); pw.print(": ");
+                pw.println(mCancelCallbacks.getRegisteredCallbackItem(i));
+            }
         }
     }
 
@@ -406,9 +480,16 @@ final class PendingIntentRecord extends IIntentSender.Stub {
         sb.append(key.packageName);
         sb.append(' ');
         sb.append(key.typeName());
-        if (whitelistDuration > 0) {
+        if (whitelistDuration != null) {
             sb.append( " (whitelist: ");
-            TimeUtils.formatDuration(whitelistDuration, sb);
+            for (int i = 0; i < whitelistDuration.size(); i++) {
+                if (i != 0) {
+                    sb.append(",");
+                }
+                sb.append(Integer.toHexString(System.identityHashCode(whitelistDuration.keyAt(i))));
+                sb.append(":");
+                TimeUtils.formatDuration(whitelistDuration.valueAt(i), sb);
+            }
             sb.append(")");
         }
         sb.append('}');

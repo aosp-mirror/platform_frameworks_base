@@ -16,7 +16,10 @@
 
 package android.net.wifi;
 
+import android.annotation.RequiresPermission;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
+import android.annotation.SystemService;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
@@ -40,12 +43,10 @@ import java.util.List;
 
 /**
  * This class provides a way to scan the Wifi universe around the device
- * Get an instance of this class by calling
- * {@link android.content.Context#getSystemService(String) Context.getSystemService(Context
- * .WIFI_SCANNING_SERVICE)}.
  * @hide
  */
 @SystemApi
+@SystemService(Context.WIFI_SCANNING_SERVICE)
 public class WifiScanner {
 
     /** no band specified; use channel list instead */
@@ -732,6 +733,7 @@ public class WifiScanner {
      *                 key for this scan, and must also be specified to cancel the scan. Multiple
      *                 scans should also not share this object.
      */
+    @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
     public void startBackgroundScan(ScanSettings settings, ScanListener listener) {
         startBackgroundScan(settings, listener, null);
     }
@@ -744,6 +746,7 @@ public class WifiScanner {
      *                 key for this scan, and must also be specified to cancel the scan. Multiple
      *                 scans should also not share this object.
      */
+    @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
     public void startBackgroundScan(ScanSettings settings, ScanListener listener,
             WorkSource workSource) {
         Preconditions.checkNotNull(listener, "listener cannot be null");
@@ -761,6 +764,7 @@ public class WifiScanner {
      * @param listener specifies which scan to cancel; must be same object as passed in {@link
      *  #startBackgroundScan}
      */
+    @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
     public void stopBackgroundScan(ScanListener listener) {
         Preconditions.checkNotNull(listener, "listener cannot be null");
         int key = removeListener(listener);
@@ -772,6 +776,7 @@ public class WifiScanner {
      * reports currently available scan results on appropriate listeners
      * @return true if all scan results were reported correctly
      */
+    @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
     public boolean getScanResults() {
         validateChannel();
         Message reply = mAsyncChannel.sendMessageSynchronously(CMD_GET_SCAN_RESULTS, 0);
@@ -786,6 +791,7 @@ public class WifiScanner {
      *                 key for this scan, and must also be specified to cancel the scan. Multiple
      *                 scans should also not share this object.
      */
+    @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
     public void startScan(ScanSettings settings, ScanListener listener) {
         startScan(settings, listener, null);
     }
@@ -799,6 +805,7 @@ public class WifiScanner {
      *                 key for this scan, and must also be specified to cancel the scan. Multiple
      *                 scans should also not share this object.
      */
+    @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
     public void startScan(ScanSettings settings, ScanListener listener, WorkSource workSource) {
         Preconditions.checkNotNull(listener, "listener cannot be null");
         int key = addListener(listener);
@@ -815,6 +822,7 @@ public class WifiScanner {
      * hasn't been called on the listener, ignored otherwise
      * @param listener
      */
+    @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
     public void stopScan(ScanListener listener) {
         Preconditions.checkNotNull(listener, "listener cannot be null");
         int key = removeListener(listener);
@@ -906,6 +914,7 @@ public class WifiScanner {
     }
 
     /** specifies information about an access point of interest */
+    @Deprecated
     public static class BssidInfo {
         /** bssid of the access point; in XX:XX:XX:XX:XX:XX format */
         public String bssid;
@@ -919,6 +928,7 @@ public class WifiScanner {
 
     /** @hide */
     @SystemApi
+    @Deprecated
     public static class WifiChangeSettings implements Parcelable {
         public int rssiSampleSize;                          /* sample size for RSSI averaging */
         public int lostApSampleSize;                        /* samples to confirm AP's loss */
@@ -934,46 +944,13 @@ public class WifiScanner {
 
         /** Implement the Parcelable interface {@hide} */
         public void writeToParcel(Parcel dest, int flags) {
-            dest.writeInt(rssiSampleSize);
-            dest.writeInt(lostApSampleSize);
-            dest.writeInt(unchangedSampleSize);
-            dest.writeInt(minApsBreachingThreshold);
-            dest.writeInt(periodInMs);
-            if (bssidInfos != null) {
-                dest.writeInt(bssidInfos.length);
-                for (int i = 0; i < bssidInfos.length; i++) {
-                    BssidInfo info = bssidInfos[i];
-                    dest.writeString(info.bssid);
-                    dest.writeInt(info.low);
-                    dest.writeInt(info.high);
-                    dest.writeInt(info.frequencyHint);
-                }
-            } else {
-                dest.writeInt(0);
-            }
         }
 
         /** Implement the Parcelable interface {@hide} */
         public static final Creator<WifiChangeSettings> CREATOR =
                 new Creator<WifiChangeSettings>() {
                     public WifiChangeSettings createFromParcel(Parcel in) {
-                        WifiChangeSettings settings = new WifiChangeSettings();
-                        settings.rssiSampleSize = in.readInt();
-                        settings.lostApSampleSize = in.readInt();
-                        settings.unchangedSampleSize = in.readInt();
-                        settings.minApsBreachingThreshold = in.readInt();
-                        settings.periodInMs = in.readInt();
-                        int len = in.readInt();
-                        settings.bssidInfos = new BssidInfo[len];
-                        for (int i = 0; i < len; i++) {
-                            BssidInfo info = new BssidInfo();
-                            info.bssid = in.readString();
-                            info.low = in.readInt();
-                            info.high = in.readInt();
-                            info.frequencyHint = in.readInt();
-                            settings.bssidInfos[i] = info;
-                        }
-                        return settings;
+                        return new WifiChangeSettings();
                     }
 
                     public WifiChangeSettings[] newArray(int size) {
@@ -992,31 +969,24 @@ public class WifiScanner {
      * @param periodInMs indicates period of scan to find changes
      * @param bssidInfos access points to watch
      */
+    @Deprecated
+    @SuppressLint("Doclava125")
     public void configureWifiChange(
             int rssiSampleSize,                             /* sample size for RSSI averaging */
             int lostApSampleSize,                           /* samples to confirm AP's loss */
             int unchangedSampleSize,                        /* samples to confirm no change */
             int minApsBreachingThreshold,                   /* change threshold to trigger event */
             int periodInMs,                                 /* period of scan */
-            BssidInfo[] bssidInfos                          /* signal thresholds to crosss */
+            BssidInfo[] bssidInfos                          /* signal thresholds to cross */
             )
     {
-        validateChannel();
-
-        WifiChangeSettings settings = new WifiChangeSettings();
-        settings.rssiSampleSize = rssiSampleSize;
-        settings.lostApSampleSize = lostApSampleSize;
-        settings.unchangedSampleSize = unchangedSampleSize;
-        settings.minApsBreachingThreshold = minApsBreachingThreshold;
-        settings.periodInMs = periodInMs;
-        settings.bssidInfos = bssidInfos;
-
-        configureWifiChange(settings);
+        throw new UnsupportedOperationException();
     }
 
     /**
      * interface to get wifi change events on; use this on {@link #startTrackingWifiChange}
      */
+    @Deprecated
     public interface WifiChangeListener extends ActionListener {
         /** indicates that changes were detected in wifi environment
          * @param results indicate the access points that exhibited change
@@ -1033,12 +1003,10 @@ public class WifiScanner {
      * @param listener object to report events on; this object must be unique and must also be
      *                 provided on {@link #stopTrackingWifiChange}
      */
+    @Deprecated
+    @SuppressLint("Doclava125")
     public void startTrackingWifiChange(WifiChangeListener listener) {
-        Preconditions.checkNotNull(listener, "listener cannot be null");
-        int key = addListener(listener);
-        if (key == INVALID_KEY) return;
-        validateChannel();
-        mAsyncChannel.sendMessage(CMD_START_TRACKING_CHANGE, 0, key);
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -1046,21 +1014,22 @@ public class WifiScanner {
      * @param listener object that was provided to report events on {@link
      * #stopTrackingWifiChange}
      */
+    @Deprecated
+    @SuppressLint("Doclava125")
     public void stopTrackingWifiChange(WifiChangeListener listener) {
-        int key = removeListener(listener);
-        if (key == INVALID_KEY) return;
-        validateChannel();
-        mAsyncChannel.sendMessage(CMD_STOP_TRACKING_CHANGE, 0, key);
+        throw new UnsupportedOperationException();
     }
 
     /** @hide */
     @SystemApi
+    @Deprecated
+    @SuppressLint("Doclava125")
     public void configureWifiChange(WifiChangeSettings settings) {
-        validateChannel();
-        mAsyncChannel.sendMessage(CMD_CONFIGURE_WIFI_CHANGE, 0, 0, settings);
+        throw new UnsupportedOperationException();
     }
 
     /** interface to receive hotlist events on; use this on {@link #setHotlist} */
+    @Deprecated
     public static interface BssidListener extends ActionListener {
         /** indicates that access points were found by on going scans
          * @param results list of scan results, one for each access point visible currently
@@ -1074,6 +1043,7 @@ public class WifiScanner {
 
     /** @hide */
     @SystemApi
+    @Deprecated
     public static class HotlistSettings implements Parcelable {
         public BssidInfo[] bssidInfos;
         public int apLostThreshold;
@@ -1085,20 +1055,6 @@ public class WifiScanner {
 
         /** Implement the Parcelable interface {@hide} */
         public void writeToParcel(Parcel dest, int flags) {
-            dest.writeInt(apLostThreshold);
-
-            if (bssidInfos != null) {
-                dest.writeInt(bssidInfos.length);
-                for (int i = 0; i < bssidInfos.length; i++) {
-                    BssidInfo info = bssidInfos[i];
-                    dest.writeString(info.bssid);
-                    dest.writeInt(info.low);
-                    dest.writeInt(info.high);
-                    dest.writeInt(info.frequencyHint);
-                }
-            } else {
-                dest.writeInt(0);
-            }
         }
 
         /** Implement the Parcelable interface {@hide} */
@@ -1106,17 +1062,6 @@ public class WifiScanner {
                 new Creator<HotlistSettings>() {
                     public HotlistSettings createFromParcel(Parcel in) {
                         HotlistSettings settings = new HotlistSettings();
-                        settings.apLostThreshold = in.readInt();
-                        int n = in.readInt();
-                        settings.bssidInfos = new BssidInfo[n];
-                        for (int i = 0; i < n; i++) {
-                            BssidInfo info = new BssidInfo();
-                            info.bssid = in.readString();
-                            info.low = in.readInt();
-                            info.high = in.readInt();
-                            info.frequencyHint = in.readInt();
-                            settings.bssidInfos[i] = info;
-                        }
                         return settings;
                     }
 
@@ -1133,28 +1078,21 @@ public class WifiScanner {
      * @param listener object provided to report events on; this object must be unique and must
      *                 also be provided on {@link #stopTrackingBssids}
      */
+    @Deprecated
+    @SuppressLint("Doclava125")
     public void startTrackingBssids(BssidInfo[] bssidInfos,
                                     int apLostThreshold, BssidListener listener) {
-        Preconditions.checkNotNull(listener, "listener cannot be null");
-        int key = addListener(listener);
-        if (key == INVALID_KEY) return;
-        validateChannel();
-        HotlistSettings settings = new HotlistSettings();
-        settings.bssidInfos = bssidInfos;
-        settings.apLostThreshold = apLostThreshold;
-        mAsyncChannel.sendMessage(CMD_SET_HOTLIST, 0, key, settings);
+        throw new UnsupportedOperationException();
     }
 
     /**
      * remove tracking of interesting access points
      * @param listener same object provided in {@link #startTrackingBssids}
      */
+    @Deprecated
+    @SuppressLint("Doclava125")
     public void stopTrackingBssids(BssidListener listener) {
-        Preconditions.checkNotNull(listener, "listener cannot be null");
-        int key = removeListener(listener);
-        if (key == INVALID_KEY) return;
-        validateChannel();
-        mAsyncChannel.sendMessage(CMD_RESET_HOTLIST, 0, key);
+        throw new UnsupportedOperationException();
     }
 
 
@@ -1177,19 +1115,9 @@ public class WifiScanner {
     /** @hide */
     public static final int CMD_SCAN_RESULT                 = BASE + 5;
     /** @hide */
-    public static final int CMD_SET_HOTLIST                 = BASE + 6;
-    /** @hide */
-    public static final int CMD_RESET_HOTLIST               = BASE + 7;
-    /** @hide */
     public static final int CMD_AP_FOUND                    = BASE + 9;
     /** @hide */
     public static final int CMD_AP_LOST                     = BASE + 10;
-    /** @hide */
-    public static final int CMD_START_TRACKING_CHANGE       = BASE + 11;
-    /** @hide */
-    public static final int CMD_STOP_TRACKING_CHANGE        = BASE + 12;
-    /** @hide */
-    public static final int CMD_CONFIGURE_WIFI_CHANGE       = BASE + 13;
     /** @hide */
     public static final int CMD_WIFI_CHANGE_DETECTED        = BASE + 15;
     /** @hide */

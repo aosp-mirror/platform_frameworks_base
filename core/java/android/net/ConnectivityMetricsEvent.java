@@ -16,44 +16,44 @@
 
 package android.net;
 
-import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
+import com.android.internal.util.BitUtils;
 
-/** {@hide} */
-@SystemApi
+/**
+ * Represents a core networking event defined in package android.net.metrics.
+ * Logged by IpConnectivityLog and managed by ConnectivityMetrics service.
+ * {@hide}
+ * */
 public final class ConnectivityMetricsEvent implements Parcelable {
 
-    /**  The time when this event was collected, as returned by System.currentTimeMillis(). */
-    final public long timestamp;
-
-    /** The subsystem that generated the event. One of the COMPONENT_TAG_xxx constants. */
-    final public int componentTag;
-
-    /** The subsystem-specific event ID. */
-    final public int eventTag;
-
+    /** Time when this event was collected, as returned by System.currentTimeMillis(). */
+    public long timestamp;
+    /** Transports of the network associated with the event, as defined in NetworkCapabilities. */
+    public long transports;
+    /** Network id of the network associated with the event, or 0 if unspecified. */
+    public int netId;
+    /** Name of the network interface associated with the event, or null if unspecified. */
+    public String ifname;
     /** Opaque event-specific data. */
-    final public Parcelable data;
+    public Parcelable data;
 
-    public ConnectivityMetricsEvent(long timestamp, int componentTag,
-                                    int eventTag, Parcelable data) {
-        this.timestamp = timestamp;
-        this.componentTag = componentTag;
-        this.eventTag = eventTag;
-        this.data = data;
+    public ConnectivityMetricsEvent() {
+    }
+
+    private ConnectivityMetricsEvent(Parcel in) {
+        timestamp = in.readLong();
+        transports = in.readLong();
+        netId = in.readInt();
+        ifname = in.readString();
+        data = in.readParcelable(null);
     }
 
     /** Implement the Parcelable interface */
     public static final Parcelable.Creator<ConnectivityMetricsEvent> CREATOR
             = new Parcelable.Creator<ConnectivityMetricsEvent> (){
         public ConnectivityMetricsEvent createFromParcel(Parcel source) {
-            final long timestamp = source.readLong();
-            final int componentTag = source.readInt();
-            final int eventTag = source.readInt();
-            final Parcelable data = source.readParcelable(null);
-            return new ConnectivityMetricsEvent(timestamp, componentTag,
-                    eventTag, data);
+            return new ConnectivityMetricsEvent(source);
         }
 
         public ConnectivityMetricsEvent[] newArray(int size) {
@@ -61,70 +61,34 @@ public final class ConnectivityMetricsEvent implements Parcelable {
         }
     };
 
-    /** Implement the Parcelable interface */
     @Override
     public int describeContents() {
         return 0;
     }
 
-    /** Implement the Parcelable interface */
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeLong(timestamp);
-        dest.writeInt(componentTag);
-        dest.writeInt(eventTag);
+        dest.writeLong(transports);
+        dest.writeInt(netId);
+        dest.writeString(ifname);
         dest.writeParcelable(data, 0);
     }
 
+    @Override
     public String toString() {
-        return String.format("ConnectivityMetricsEvent(%tT.%tL, %d, %d): %s",
-                timestamp, timestamp, componentTag, eventTag, data);
-    }
-
-    /** {@hide} */
-    @SystemApi
-    public final static class Reference implements Parcelable {
-
-        private long mValue;
-
-        public Reference(long ref) {
-            this.mValue = ref;
+        StringBuilder buffer = new StringBuilder("ConnectivityMetricsEvent(");
+        buffer.append(String.format("%tT.%tL", timestamp, timestamp));
+        if (netId != 0) {
+            buffer.append(", ").append(netId);
         }
-
-        /** Implement the Parcelable interface */
-        public static final Parcelable.Creator<Reference> CREATOR
-                = new Parcelable.Creator<Reference> (){
-            public Reference createFromParcel(Parcel source) {
-                return new Reference(source.readLong());
-            }
-
-            public Reference[] newArray(int size) {
-                return new Reference[size];
-            }
-        };
-
-        /** Implement the Parcelable interface */
-        @Override
-        public int describeContents() {
-            return 0;
+        if (ifname != null) {
+            buffer.append(", ").append(ifname);
         }
-
-        /** Implement the Parcelable interface */
-        @Override
-        public void writeToParcel(Parcel dest, int flags) {
-            dest.writeLong(mValue);
+        for (int t : BitUtils.unpackBits(transports)) {
+            buffer.append(", ").append(NetworkCapabilities.transportNameOf(t));
         }
-
-        public void readFromParcel(Parcel in) {
-            mValue = in.readLong();
-        }
-
-        public long getValue() {
-            return mValue;
-        }
-
-        public void setValue(long val) {
-            mValue = val;
-        }
+        buffer.append("): ").append(data.toString());
+        return buffer.toString();
     }
 }

@@ -16,19 +16,19 @@
 
 package android.view.animation;
 
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-
 import android.annotation.AnimRes;
 import android.annotation.InterpolatorRes;
 import android.content.Context;
 import android.content.res.Resources;
+import android.content.res.Resources.NotFoundException;
 import android.content.res.Resources.Theme;
 import android.content.res.XmlResourceParser;
-import android.content.res.Resources.NotFoundException;
+import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.util.Xml;
-import android.os.SystemClock;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 

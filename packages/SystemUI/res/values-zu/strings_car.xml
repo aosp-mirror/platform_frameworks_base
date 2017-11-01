@@ -19,6 +19,6 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="car_lockscreen_disclaimer_title" msgid="7997539137376896441">"Shayela ngokuqophelela"</string>
-    <string name="car_lockscreen_disclaimer_text" msgid="3061224684092952864">"Hlala wazi ngokugcwele izimo zokushayela uphinde uthobele yonke imithetho esebenzayo. Izikhombisi-ndlela kungenzeka azilungile, aziphelele, ziyingozi, azifanelekile, zivinjiwe, noma zifaka ukweqa izindawo zokulawula. Ulwazi lwebhizinisi kungenzeka lungalungi noma lungapheleli. Idatha akuyona isikhathi sangempela, futhi ukunemba kwendawo akukwazi ukuqinisekiswa. Ungaphathi idivayisi yakho yeselula noma usebenzise izinhlelo zokusebenza ezihloselwe i-Android Auto ngenkathi ushayela."</string>
+    <string name="unknown_user_label" msgid="4323896111737677955">"Akwaziwa"</string>
+    <string name="start_driving" msgid="864023351402918991">"Qala ukushayela"</string>
 </resources>

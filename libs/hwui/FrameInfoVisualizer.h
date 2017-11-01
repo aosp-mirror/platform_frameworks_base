@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef DRAWPROFILER_H
-#define DRAWPROFILER_H
+
+#pragma once
 
 #include "FrameInfo.h"
 #include "Properties.h"
@@ -28,13 +28,7 @@
 namespace android {
 namespace uirenderer {
 
-#if HWUI_NEW_OPS
-class BakedOpRenderer;
-typedef BakedOpRenderer ContentRenderer;
-#else
-class OpenGLRenderer;
-typedef OpenGLRenderer ContentRenderer;
-#endif
+class IProfileRenderer;
 
 // TODO: This is a bit awkward as it needs to match the thing in CanvasContext
 // A better abstraction here would be nice but iterators are painful
@@ -52,7 +46,7 @@ public:
     void setDensity(float density);
 
     void unionDirty(SkRect* dirty);
-    void draw(ContentRenderer* renderer);
+    void draw(IProfileRenderer& renderer);
 
     void dumpData(int fd);
 
@@ -62,8 +56,8 @@ private:
 
     void initializeRects(const int baseline, const int width);
     void nextBarSegment(FrameInfoIndex start, FrameInfoIndex end);
-    void drawGraph(ContentRenderer* renderer);
-    void drawThreshold(ContentRenderer* renderer);
+    void drawGraph(IProfileRenderer& renderer);
+    void drawThreshold(IProfileRenderer& renderer);
 
     inline float durationMS(size_t index, FrameInfoIndex start, FrameInfoIndex end) {
         float duration = mFrameSource[index].duration(start, end) * 0.000001f;
@@ -93,5 +87,3 @@ private:
 
 } /* namespace uirenderer */
 } /* namespace android */
-
-#endif /* DRAWPROFILER_H */

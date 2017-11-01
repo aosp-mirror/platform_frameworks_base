@@ -18,7 +18,10 @@ package android.provider;
 
 import static android.provider.DocumentsContract.METHOD_COPY_DOCUMENT;
 import static android.provider.DocumentsContract.METHOD_CREATE_DOCUMENT;
+import static android.provider.DocumentsContract.METHOD_CREATE_WEB_LINK_INTENT;
 import static android.provider.DocumentsContract.METHOD_DELETE_DOCUMENT;
+import static android.provider.DocumentsContract.METHOD_EJECT_ROOT;
+import static android.provider.DocumentsContract.METHOD_FIND_DOCUMENT_PATH;
 import static android.provider.DocumentsContract.METHOD_IS_CHILD_DOCUMENT;
 import static android.provider.DocumentsContract.METHOD_MOVE_DOCUMENT;
 import static android.provider.DocumentsContract.METHOD_REMOVE_DOCUMENT;
@@ -32,13 +35,17 @@ import static android.provider.DocumentsContract.getSearchDocumentsQuery;
 import static android.provider.DocumentsContract.getTreeDocumentId;
 import static android.provider.DocumentsContract.isTreeUri;
 
+import android.Manifest;
 import android.annotation.CallSuper;
+import android.annotation.Nullable;
+import android.app.AuthenticationRequiredException;
 import android.content.ClipDescription;
 import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.UriMatcher;
 import android.content.pm.PackageManager;
 import android.content.pm.ProviderInfo;
@@ -48,15 +55,19 @@ import android.graphics.Point;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.CancellationSignal;
+import android.os.OperationCanceledException;
 import android.os.ParcelFileDescriptor;
 import android.os.ParcelFileDescriptor.OnCloseListener;
+import android.os.ParcelableException;
 import android.provider.DocumentsContract.Document;
+import android.provider.DocumentsContract.Path;
 import android.provider.DocumentsContract.Root;
 import android.util.Log;
 
 import libcore.io.IoUtils;
 
 import java.io.FileNotFoundException;
+import java.util.LinkedList;
 import java.util.Objects;
 
 /**
@@ -150,17 +161,7 @@ public abstract class DocumentsProvider extends ContentProvider {
      */
     @Override
     public void attachInfo(Context context, ProviderInfo info) {
-        mAuthority = info.authority;
-
-        mMatcher = new UriMatcher(UriMatcher.NO_MATCH);
-        mMatcher.addURI(mAuthority, "root", MATCH_ROOTS);
-        mMatcher.addURI(mAuthority, "root/*", MATCH_ROOT);
-        mMatcher.addURI(mAuthority, "root/*/recent", MATCH_RECENT);
-        mMatcher.addURI(mAuthority, "root/*/search", MATCH_SEARCH);
-        mMatcher.addURI(mAuthority, "document/*", MATCH_DOCUMENT);
-        mMatcher.addURI(mAuthority, "document/*/children", MATCH_CHILDREN);
-        mMatcher.addURI(mAuthority, "tree/*/document/*", MATCH_DOCUMENT_TREE);
-        mMatcher.addURI(mAuthority, "tree/*/document/*/children", MATCH_CHILDREN_TREE);
+        registerAuthority(info.authority);
 
         // Sanity check our setup
         if (!info.exported) {
@@ -175,6 +176,28 @@ public abstract class DocumentsProvider extends ContentProvider {
         }
 
         super.attachInfo(context, info);
+    }
+
+    /** {@hide} */
+    @Override
+    public void attachInfoForTesting(Context context, ProviderInfo info) {
+        registerAuthority(info.authority);
+
+        super.attachInfoForTesting(context, info);
+    }
+
+    private void registerAuthority(String authority) {
+        mAuthority = authority;
+
+        mMatcher = new UriMatcher(UriMatcher.NO_MATCH);
+        mMatcher.addURI(mAuthority, "root", MATCH_ROOTS);
+        mMatcher.addURI(mAuthority, "root/*", MATCH_ROOT);
+        mMatcher.addURI(mAuthority, "root/*/recent", MATCH_RECENT);
+        mMatcher.addURI(mAuthority, "root/*/search", MATCH_SEARCH);
+        mMatcher.addURI(mAuthority, "document/*", MATCH_DOCUMENT);
+        mMatcher.addURI(mAuthority, "document/*/children", MATCH_CHILDREN);
+        mMatcher.addURI(mAuthority, "tree/*/document/*", MATCH_DOCUMENT_TREE);
+        mMatcher.addURI(mAuthority, "tree/*/document/*/children", MATCH_CHILDREN_TREE);
     }
 
     /**
@@ -220,6 +243,10 @@ public abstract class DocumentsProvider extends ContentProvider {
      * @param displayName the display name of the new document. The provider may
      *            alter this name to meet any internal constraints, such as
      *            avoiding conflicting names.
+
+     * @throws AuthenticationRequiredException If authentication is required from the user (such as
+     *             login credentials), but it is not guaranteed that the client will handle this
+     *             properly.
      */
     @SuppressWarnings("unused")
     public String createDocument(String parentDocumentId, String mimeType, String displayName)
@@ -240,6 +267,9 @@ public abstract class DocumentsProvider extends ContentProvider {
      * @param displayName the updated display name of the document. The provider
      *            may alter this name to meet any internal constraints, such as
      *            avoiding conflicting names.
+     * @throws AuthenticationRequiredException If authentication is required from
+     *            the user (such as login credentials), but it is not guaranteed
+     *            that the client will handle this properly.
      */
     @SuppressWarnings("unused")
     public String renameDocument(String documentId, String displayName)
@@ -257,6 +287,9 @@ public abstract class DocumentsProvider extends ContentProvider {
      * {@link #revokeDocumentPermission(String)}.
      *
      * @param documentId the document to delete.
+     * @throws AuthenticationRequiredException If authentication is required from
+     *            the user (such as login credentials), but it is not guaranteed
+     *            that the client will handle this properly.
      */
     @SuppressWarnings("unused")
     public void deleteDocument(String documentId) throws FileNotFoundException {
@@ -273,6 +306,9 @@ public abstract class DocumentsProvider extends ContentProvider {
      *
      * @param sourceDocumentId the document to copy.
      * @param targetParentDocumentId the target document to be copied into as a child.
+     * @throws AuthenticationRequiredException If authentication is required from
+     *            the user (such as login credentials), but it is not guaranteed
+     *            that the client will handle this properly.
      */
     @SuppressWarnings("unused")
     public String copyDocument(String sourceDocumentId, String targetParentDocumentId)
@@ -295,6 +331,9 @@ public abstract class DocumentsProvider extends ContentProvider {
      * @param sourceParentDocumentId the parent of the document to move.
      * @param targetParentDocumentId the target document to be a new parent of the
      *     source document.
+     * @throws AuthenticationRequiredException If authentication is required from
+     *            the user (such as login credentials), but it is not guaranteed
+     *            that the client will handle this properly.
      */
     @SuppressWarnings("unused")
     public String moveDocument(String sourceDocumentId, String sourceParentDocumentId,
@@ -314,11 +353,73 @@ public abstract class DocumentsProvider extends ContentProvider {
      *
      * @param documentId the document to remove.
      * @param parentDocumentId the parent of the document to move.
+     * @throws AuthenticationRequiredException If authentication is required from
+     *            the user (such as login credentials), but it is not guaranteed
+     *            that the client will handle this properly.
      */
     @SuppressWarnings("unused")
     public void removeDocument(String documentId, String parentDocumentId)
             throws FileNotFoundException {
         throw new UnsupportedOperationException("Remove not supported");
+    }
+
+    /**
+     * Finds the canonical path for the requested document. The path must start
+     * from the parent document if parentDocumentId is not null or the root document
+     * if parentDocumentId is null. If there are more than one path to this document,
+     * return the most typical one. Include both the parent document or root document
+     * and the requested document in the returned path.
+     *
+     * <p>This API assumes that document ID has enough info to infer the root.
+     * Different roots should use different document ID to refer to the same
+     * document.
+     *
+     *
+     * @param parentDocumentId the document from which the path starts if not null,
+     *     or null to indicate a path from the root is requested.
+     * @param childDocumentId the document which path is requested.
+     * @return the path of the requested document. If parentDocumentId is null
+     *     returned root ID must not be null. If parentDocumentId is not null
+     *     returned root ID must be null.
+     * @throws AuthenticationRequiredException If authentication is required from
+     *            the user (such as login credentials), but it is not guaranteed
+     *            that the client will handle this properly.
+     */
+    public Path findDocumentPath(@Nullable String parentDocumentId, String childDocumentId)
+            throws FileNotFoundException {
+        throw new UnsupportedOperationException("findDocumentPath not supported.");
+    }
+
+    /**
+     * Creates an intent sender for a web link, if the document is web linkable.
+     * <p>
+     * {@link AuthenticationRequiredException} can be thrown if user does not have
+     * sufficient permission for the linked document. Before any new permissions
+     * are granted for the linked document, a visible UI must be shown, so the
+     * user can explicitly confirm whether the permission grants are expected.
+     * The user must be able to cancel the operation.
+     * <p>
+     * Options passed as an argument may include a list of recipients, such
+     * as email addresses. The provider should reflect these options if possible,
+     * but it's acceptable to ignore them. In either case, confirmation UI must
+     * be shown before any new permission grants are granted.
+     * <p>
+     * It is all right to generate a web link without granting new permissions,
+     * if opening the link would result in a page for requesting permission
+     * access. If it's impossible then the operation must fail by throwing an exception.
+     *
+     * @param documentId the document to create a web link intent for.
+     * @param options additional information, such as list of recipients. Optional.
+     * @throws AuthenticationRequiredException If authentication is required from
+     *            the user (such as login credentials), but it is not guaranteed
+     *            that the client will handle this properly.
+     *
+     * @see DocumentsContract.Document#FLAG_WEB_LINKABLE
+     * @see android.app.PendingIntent#getIntentSender
+     */
+    public IntentSender createWebLinkIntent(String documentId, @Nullable Bundle options)
+            throws FileNotFoundException {
+        throw new UnsupportedOperationException("createWebLink is not supported.");
     }
 
     /**
@@ -333,6 +434,7 @@ public abstract class DocumentsProvider extends ContentProvider {
      * If this set of roots changes, you must call {@link ContentResolver#notifyChange(Uri,
      * android.database.ContentObserver, boolean)} with
      * {@link DocumentsContract#buildRootsUri(String)} to notify the system.
+     * <p>
      *
      * @param projection list of {@link Root} columns to put into the cursor. If
      *            {@code null} all supported columns should be included.
@@ -367,6 +469,9 @@ public abstract class DocumentsProvider extends ContentProvider {
      * @param projection list of {@link Document} columns to put into the
      *            cursor. If {@code null} all supported columns should be
      *            included.
+     * @throws AuthenticationRequiredException If authentication is required from
+     *            the user (such as login credentials), but it is not guaranteed
+     *            that the client will handle this properly.
      */
     public abstract Cursor queryDocument(String documentId, String[] projection)
             throws FileNotFoundException;
@@ -375,6 +480,9 @@ public abstract class DocumentsProvider extends ContentProvider {
      * Return the children documents contained in the requested directory. This
      * must only return immediate descendants, as additional queries will be
      * issued to recursively explore the tree.
+     * <p>
+     * Apps targeting {@link android.os.Build.VERSION_CODES#O} or higher
+     * should override {@link #queryChildDocuments(String, String[], Bundle)}.
      * <p>
      * If your provider is cloud-based, and you have some data cached or pinned
      * locally, you may return the local data immediately, setting
@@ -402,6 +510,9 @@ public abstract class DocumentsProvider extends ContentProvider {
      *            may be unordered. This ordering is a hint that can be used to
      *            prioritize how data is fetched from the network, but UI may
      *            always enforce a specific ordering.
+     * @throws AuthenticationRequiredException If authentication is required from
+     *            the user (such as login credentials), but it is not guaranteed
+     *            that the client will handle this properly.
      * @see DocumentsContract#EXTRA_LOADING
      * @see DocumentsContract#EXTRA_INFO
      * @see DocumentsContract#EXTRA_ERROR
@@ -410,10 +521,56 @@ public abstract class DocumentsProvider extends ContentProvider {
             String parentDocumentId, String[] projection, String sortOrder)
             throws FileNotFoundException;
 
+    /**
+     * Override this method to return the children documents contained
+     * in the requested directory. This must return immediate descendants only.
+     *
+     * <p>If your provider is cloud-based, and you have data cached
+     * locally, you may return the local data immediately, setting
+     * {@link DocumentsContract#EXTRA_LOADING} on Cursor extras to indicate that
+     * you are still fetching additional data. Then, when the network data is
+     * available, you can send a change notification to trigger a requery and
+     * return the complete contents. To return a Cursor with extras, you need to
+     * extend and override {@link Cursor#getExtras()}.
+     *
+     * <p>To support change notifications, you must
+     * {@link Cursor#setNotificationUri(ContentResolver, Uri)} with a relevant
+     * Uri, such as
+     * {@link DocumentsContract#buildChildDocumentsUri(String, String)}. Then
+     * you can call {@link ContentResolver#notifyChange(Uri,
+     * android.database.ContentObserver, boolean)} with that Uri to send change
+     * notifications.
+     *
+     * @param parentDocumentId the directory to return children for.
+     * @param projection list of {@link Document} columns to put into the
+     *            cursor. If {@code null} all supported columns should be
+     *            included.
+     * @param queryArgs Bundle containing sorting information or other
+     *            argument useful to the provider. If no sorting
+     *            information is available, default sorting
+     *            will be used, which may be unordered. See
+     *            {@link ContentResolver#QUERY_ARG_SORT_COLUMNS} for
+     *            details.
+     * @throws AuthenticationRequiredException If authentication is required from
+     *            the user (such as login credentials), but it is not guaranteed
+     *            that the client will handle this properly.
+     *
+     * @see DocumentsContract#EXTRA_LOADING
+     * @see DocumentsContract#EXTRA_INFO
+     * @see DocumentsContract#EXTRA_ERROR
+     */
+    public Cursor queryChildDocuments(
+            String parentDocumentId, @Nullable String[] projection, @Nullable Bundle queryArgs)
+            throws FileNotFoundException {
+
+        return queryChildDocuments(
+                parentDocumentId, projection, getSortClause(queryArgs));
+    }
+
     /** {@hide} */
     @SuppressWarnings("unused")
     public Cursor queryChildDocumentsForManage(
-            String parentDocumentId, String[] projection, String sortOrder)
+            String parentDocumentId, @Nullable String[] projection, @Nullable String sortOrder)
             throws FileNotFoundException {
         throw new UnsupportedOperationException("Manage not supported");
     }
@@ -425,9 +582,6 @@ public abstract class DocumentsProvider extends ContentProvider {
      * implementation detail left to each provider, but it's suggested that at
      * least {@link Document#COLUMN_DISPLAY_NAME} be matched in a
      * case-insensitive fashion.
-     * <p>
-     * Only documents may be returned; directories are not supported in search
-     * results.
      * <p>
      * If your provider is cloud-based, and you have some data cached or pinned
      * locally, you may return the local data immediately, setting
@@ -448,6 +602,10 @@ public abstract class DocumentsProvider extends ContentProvider {
      * @param projection list of {@link Document} columns to put into the
      *            cursor. If {@code null} all supported columns should be
      *            included.
+     * @throws AuthenticationRequiredException If authentication is required from
+     *            the user (such as login credentials), but it is not guaranteed
+     *            that the client will handle this properly.
+     *
      * @see DocumentsContract#EXTRA_LOADING
      * @see DocumentsContract#EXTRA_INFO
      * @see DocumentsContract#EXTRA_ERROR
@@ -459,10 +617,25 @@ public abstract class DocumentsProvider extends ContentProvider {
     }
 
     /**
+     * Ejects the root. Throws {@link IllegalStateException} if ejection failed.
+     *
+     * @param rootId the root to be ejected.
+     * @see Root#FLAG_SUPPORTS_EJECT
+     */
+    @SuppressWarnings("unused")
+    public void ejectRoot(String rootId) {
+        throw new UnsupportedOperationException("Eject not supported");
+    }
+
+    /**
      * Return concrete MIME type of the requested document. Must match the value
      * of {@link Document#COLUMN_MIME_TYPE} for this document. The default
      * implementation queries {@link #queryDocument(String, String[])}, so
      * providers may choose to override this as an optimization.
+     * <p>
+     * @throws AuthenticationRequiredException If authentication is required from
+     *            the user (such as login credentials), but it is not guaranteed
+     *            that the client will handle this properly.
      */
     public String getDocumentType(String documentId) throws FileNotFoundException {
         final Cursor cursor = queryDocument(documentId, null);
@@ -482,8 +655,12 @@ public abstract class DocumentsProvider extends ContentProvider {
      * <p>
      * Your provider should return a reliable {@link ParcelFileDescriptor} to
      * detect when the remote caller has finished reading or writing the
-     * document. You may return a pipe or socket pair if the mode is exclusively
-     * "r" or "w", but complex modes like "rw" imply a normal file on disk that
+     * document.
+     * <p>
+     * Mode "r" should always be supported. Provider should throw
+     * {@link UnsupportedOperationException} if the passing mode is not supported.
+     * You may return a pipe or socket pair if the mode is exclusively "r" or
+     * "w", but complex modes like "rw" imply a normal file on disk that
      * supports seeking.
      * <p>
      * If you block while downloading content, you should periodically check
@@ -493,6 +670,9 @@ public abstract class DocumentsProvider extends ContentProvider {
      * @param mode the mode to open with, such as 'r', 'w', or 'rw'.
      * @param signal used by the caller to signal if the request should be
      *            cancelled. May be null.
+     * @throws AuthenticationRequiredException If authentication is required from
+     *            the user (such as login credentials), but it is not guaranteed
+     *            that the client will handle this properly.
      * @see ParcelFileDescriptor#open(java.io.File, int, android.os.Handler,
      *      OnCloseListener)
      * @see ParcelFileDescriptor#createReliablePipe()
@@ -517,6 +697,9 @@ public abstract class DocumentsProvider extends ContentProvider {
      * @param sizeHint hint of the optimal thumbnail dimensions.
      * @param signal used by the caller to signal if the request should be
      *            cancelled. May be null.
+     * @throws AuthenticationRequiredException If authentication is required from
+     *            the user (such as login credentials), but it is not guaranteed
+     *            that the client will handle this properly.
      * @see Document#FLAG_SUPPORTS_THUMBNAIL
      */
     @SuppressWarnings("unused")
@@ -532,6 +715,8 @@ public abstract class DocumentsProvider extends ContentProvider {
      * <p>
      * A provider may perform a conversion if the documents's MIME type is not
      * matching the specified MIME type filter.
+     * <p>
+     * Virtual documents must have at least one streamable format.
      *
      * @param documentId the document to return.
      * @param mimeTypeFilter the MIME type filter for the requested format. May
@@ -540,6 +725,9 @@ public abstract class DocumentsProvider extends ContentProvider {
      *            provider.
      * @param signal used by the caller to signal if the request should be
      *            cancelled. May be null.
+     * @throws AuthenticationRequiredException If authentication is required from
+     *            the user (such as login credentials), but it is not guaranteed
+     *            that the client will handle this properly.
      * @see #getDocumentStreamTypes(String, String)
      */
     @SuppressWarnings("unused")
@@ -547,6 +735,32 @@ public abstract class DocumentsProvider extends ContentProvider {
             String documentId, String mimeTypeFilter, Bundle opts, CancellationSignal signal)
             throws FileNotFoundException {
         throw new FileNotFoundException("The requested MIME type is not supported.");
+    }
+
+    @Override
+    public final Cursor query(Uri uri, String[] projection, String selection,
+            String[] selectionArgs, String sortOrder) {
+        // As of Android-O, ContentProvider#query (w/ bundle arg) is the primary
+        // transport method. We override that, and don't ever delegate to this method.
+        throw new UnsupportedOperationException("Pre-Android-O query format not supported.");
+    }
+
+    /**
+     * WARNING: Sub-classes should not override this method. This method is non-final
+     * solely for the purposes of backwards compatibility.
+     *
+     * @see #queryChildDocuments(String, String[], Bundle),
+     *      {@link #queryDocument(String, String[])},
+     *      {@link #queryRecentDocuments(String, String[])},
+     *      {@link #queryRoots(String[])}, and
+     *      {@link #querySearchDocuments(String, String, String[])}.
+     */
+    @Override
+    public Cursor query(Uri uri, String[] projection, String selection,
+            String[] selectionArgs, String sortOrder, CancellationSignal cancellationSignal) {
+        // As of Android-O, ContentProvider#query (w/ bundle arg) is the primary
+        // transport method. We override that, and don't ever delegate to this metohd.
+        throw new UnsupportedOperationException("Pre-Android-O query format not supported.");
     }
 
     /**
@@ -559,8 +773,8 @@ public abstract class DocumentsProvider extends ContentProvider {
      * @see #querySearchDocuments(String, String, String[])
      */
     @Override
-    public final Cursor query(Uri uri, String[] projection, String selection,
-            String[] selectionArgs, String sortOrder) {
+    public final Cursor query(
+            Uri uri, String[] projection, Bundle queryArgs, CancellationSignal cancellationSignal) {
         try {
             switch (mMatcher.match(uri)) {
                 case MATCH_ROOTS:
@@ -578,10 +792,13 @@ public abstract class DocumentsProvider extends ContentProvider {
                 case MATCH_CHILDREN_TREE:
                     enforceTree(uri);
                     if (DocumentsContract.isManageMode(uri)) {
+                        // TODO: Update "ForManage" variant to support query args.
                         return queryChildDocumentsForManage(
-                                getDocumentId(uri), projection, sortOrder);
+                                getDocumentId(uri),
+                                projection,
+                                getSortClause(queryArgs));
                     } else {
-                        return queryChildDocuments(getDocumentId(uri), projection, sortOrder);
+                        return queryChildDocuments(getDocumentId(uri), projection, queryArgs);
                     }
                 default:
                     throw new UnsupportedOperationException("Unsupported Uri " + uri);
@@ -590,6 +807,17 @@ public abstract class DocumentsProvider extends ContentProvider {
             Log.w(TAG, "Failed during query", e);
             return null;
         }
+    }
+
+    private static @Nullable String getSortClause(@Nullable Bundle queryArgs) {
+        queryArgs = queryArgs != null ? queryArgs : Bundle.EMPTY;
+        String sortClause = queryArgs.getString(ContentResolver.QUERY_ARG_SQL_SORT_ORDER);
+
+        if (sortClause == null && queryArgs.containsKey(ContentResolver.QUERY_ARG_SORT_COLUMNS)) {
+            sortClause = ContentResolver.createSqlSortClause(queryArgs);
+        }
+
+        return sortClause;
     }
 
     /**
@@ -715,7 +943,7 @@ public abstract class DocumentsProvider extends ContentProvider {
         try {
             return callUnchecked(method, arg, extras);
         } catch (FileNotFoundException e) {
-            throw new IllegalStateException("Failed call " + method, e);
+            throw new ParcelableException(e);
         }
     }
 
@@ -723,6 +951,21 @@ public abstract class DocumentsProvider extends ContentProvider {
             throws FileNotFoundException {
 
         final Context context = getContext();
+        final Bundle out = new Bundle();
+
+        if (METHOD_EJECT_ROOT.equals(method)) {
+            // Given that certain system apps can hold MOUNT_UNMOUNT permission, but only apps
+            // signed with platform signature can hold MANAGE_DOCUMENTS, we are going to check for
+            // MANAGE_DOCUMENTS or associated URI permission here instead
+            final Uri rootUri = extras.getParcelable(DocumentsContract.EXTRA_URI);
+            enforceWritePermissionInner(rootUri, getCallingPackage(), null);
+
+            final String rootId = DocumentsContract.getRootId(rootUri);
+            ejectRoot(rootId);
+
+            return out;
+        }
+
         final Uri documentUri = extras.getParcelable(DocumentsContract.EXTRA_URI);
         final String authority = documentUri.getAuthority();
         final String documentId = DocumentsContract.getDocumentId(documentUri);
@@ -731,8 +974,6 @@ public abstract class DocumentsProvider extends ContentProvider {
             throw new SecurityException(
                     "Requested authority " + authority + " doesn't match provider " + mAuthority);
         }
-
-        final Bundle out = new Bundle();
 
         // If the URI is a tree URI performs some validation.
         enforceTree(documentUri);
@@ -762,6 +1003,14 @@ public abstract class DocumentsProvider extends ContentProvider {
             final Uri newDocumentUri = buildDocumentUriMaybeUsingTree(documentUri,
                     newDocumentId);
             out.putParcelable(DocumentsContract.EXTRA_URI, newDocumentUri);
+
+        } else if (METHOD_CREATE_WEB_LINK_INTENT.equals(method)) {
+            enforceWritePermissionInner(documentUri, getCallingPackage(), null);
+
+            final Bundle options = extras.getBundle(DocumentsContract.EXTRA_OPTIONS);
+            final IntentSender intentSender = createWebLinkIntent(documentId, options);
+
+            out.putParcelable(DocumentsContract.EXTRA_RESULT, intentSender);
 
         } else if (METHOD_RENAME_DOCUMENT.equals(method)) {
             enforceWritePermissionInner(documentUri, getCallingPackage(), null);
@@ -851,7 +1100,42 @@ public abstract class DocumentsProvider extends ContentProvider {
 
             // It's responsibility of the provider to revoke any grants, as the document may be
             // still attached to another parents.
+        } else if (METHOD_FIND_DOCUMENT_PATH.equals(method)) {
+            final boolean isTreeUri = isTreeUri(documentUri);
 
+            if (isTreeUri) {
+                enforceReadPermissionInner(documentUri, getCallingPackage(), null);
+            } else {
+                getContext().enforceCallingPermission(Manifest.permission.MANAGE_DOCUMENTS, null);
+            }
+
+            final String parentDocumentId = isTreeUri
+                    ? DocumentsContract.getTreeDocumentId(documentUri)
+                    : null;
+
+            Path path = findDocumentPath(parentDocumentId, documentId);
+
+            // Ensure provider doesn't leak information to unprivileged callers.
+            if (isTreeUri) {
+                if (!Objects.equals(path.getPath().get(0), parentDocumentId)) {
+                    Log.wtf(TAG, "Provider doesn't return path from the tree root. Expected: "
+                            + parentDocumentId + " found: " + path.getPath().get(0));
+
+                    LinkedList<String> docs = new LinkedList<>(path.getPath());
+                    while (docs.size() > 1 && !Objects.equals(docs.getFirst(), parentDocumentId)) {
+                        docs.removeFirst();
+                    }
+                    path = new Path(null, docs);
+                }
+
+                if (path.getRootId() != null) {
+                    Log.wtf(TAG, "Provider returns root id :"
+                            + path.getRootId() + " unexpectedly. Erase root id.");
+                    path = new Path(null, path.getPath());
+                }
+            }
+
+            out.putParcelable(DocumentsContract.EXTRA_RESULT, path);
         } else {
             throw new UnsupportedOperationException("Method not supported " + method);
         }
@@ -956,6 +1240,8 @@ public abstract class DocumentsProvider extends ContentProvider {
      * <p>The default implementation returns a MIME type provided by
      * {@link #queryDocument(String, String[])} as long as it matches the filter and the document
      * does not have the {@link Document#FLAG_VIRTUAL_DOCUMENT} flag set.
+     *
+     * <p>Virtual documents must have at least one streamable format.
      *
      * @see #getStreamTypes(Uri, String)
      * @see #openTypedDocument(String, String, Bundle, CancellationSignal)

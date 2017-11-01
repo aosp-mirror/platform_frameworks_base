@@ -16,48 +16,28 @@
 
 package com.android.server.devicepolicy;
 
-import com.android.internal.widget.LockPatternUtils;
+import static org.mockito.Mockito.mock;
 
-import android.app.IActivityManager;
-import android.app.NotificationManager;
-import android.app.backup.IBackupManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.IPackageManager;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManagerInternal;
-import android.content.pm.UserInfo;
-import android.media.IAudioService;
-import android.net.wifi.WifiManager;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.PowerManager.WakeLock;
-import android.os.PowerManagerInternal;
 import android.os.UserHandle;
-import android.os.UserManager;
 import android.os.UserManagerInternal;
-import android.telephony.TelephonyManager;
-import android.test.mock.MockContentResolver;
 import android.test.mock.MockContext;
-import android.view.IWindowManager;
+import android.util.ArrayMap;
 
 import org.junit.Assert;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
+import java.util.Map;
 
 /**
  * Context used throughout DPMS tests.
@@ -93,9 +73,15 @@ public class DpmMockContext extends MockContext {
      */
     public static final int SYSTEM_PID = 11111;
 
+    public static final String ANOTHER_PACKAGE_NAME = "com.another.package.name";
+    public static final int ANOTHER_UID = UserHandle.getUid(UserHandle.USER_SYSTEM, 18434);
+
+    private final MockSystemServices mMockSystemServices;
+
     public static class MockBinder {
         public int callingUid = CALLER_UID;
         public int callingPid = CALLER_PID;
+        public final Map<Integer, List<String>> callingPermissions = new ArrayMap<>();
 
         public long clearCallingIdentity() {
             final long token = (((long) callingUid) << 32) | (callingPid);
@@ -126,112 +112,7 @@ public class DpmMockContext extends MockContext {
         }
     }
 
-    public static class EnvironmentForMock {
-        public File getUserSystemDirectory(int userId) {
-            return null;
-        }
-    }
-
-    public static class PowerManagerForMock {
-        public WakeLock newWakeLock(int levelAndFlags, String tag) {
-            return null;
-        }
-
-        public void goToSleep(long time, int reason, int flags) {
-        }
-
-        public void reboot(String reason) {
-        }
-    }
-
-    public static class SystemPropertiesForMock {
-        public boolean getBoolean(String key, boolean def) {
-            return false;
-        }
-
-        public long getLong(String key, long def) {
-            return 0;
-        }
-
-        public String get(String key, String def) {
-            return null;
-        }
-
-        public String get(String key) {
-            return null;
-        }
-
-        public void set(String key, String value) {
-        }
-    }
-
-    public static class UserManagerForMock {
-        public boolean isSplitSystemUser() {
-            return false;
-        }
-    }
-
-    public static class SettingsForMock {
-        public int settingsSecureGetIntForUser(String name, int def, int userHandle) {
-            return 0;
-        }
-
-        public void settingsSecurePutIntForUser(String name, int value, int userHandle) {
-        }
-
-        public void settingsSecurePutStringForUser(String name, String value, int userHandle) {
-        }
-
-        public void settingsGlobalPutStringForUser(String name, String value, int userHandle) {
-        }
-
-        public void settingsSecurePutInt(String name, int value) {
-        }
-
-        public void settingsGlobalPutInt(String name, int value) {
-        }
-
-        public void settingsSecurePutString(String name, String value) {
-        }
-
-        public void settingsGlobalPutString(String name, String value) {
-        }
-
-        public int settingsGlobalGetInt(String name, int value) {
-            return 0;
-        }
-
-        public void securityLogSetLoggingEnabledProperty(boolean enabled) {
-        }
-
-        public boolean securityLogGetLoggingEnabledProperty() {
-            return false;
-        }
-
-        public boolean securityLogIsLoggingEnabled() {
-            return false;
-        }
-    }
-
-    public static class StorageManagerForMock {
-        public boolean isFileBasedEncryptionEnabled() {
-            return false;
-        }
-
-        public boolean isNonDefaultBlockEncrypted() {
-            return false;
-        }
-
-        public boolean isEncrypted() {
-            return false;
-        }
-
-        public boolean isEncryptable() {
-            return false;
-        }
-    }
-
-    public final Context realTestContext;
+    private final Context realTestContext;
 
     /**
      * Use this instance to verify unimplemented methods such as {@link #sendBroadcast}.
@@ -240,184 +121,68 @@ public class DpmMockContext extends MockContext {
      */
     public final Context spiedContext;
 
-    public final File dataDir;
-    public final File systemUserDataDir;
-
     public final MockBinder binder;
-    public final EnvironmentForMock environment;
-    public final SystemPropertiesForMock systemProperties;
-    public final UserManager userManager;
-    public final UserManagerInternal userManagerInternal;
-    public final PackageManagerInternal packageManagerInternal;
-    public final UserManagerForMock userManagerForMock;
-    public final PowerManagerForMock powerManager;
-    public final PowerManagerInternal powerManagerInternal;
-    public final NotificationManager notificationManager;
-    public final IWindowManager iwindowManager;
-    public final IActivityManager iactivityManager;
-    public final IPackageManager ipackageManager;
-    public final IBackupManager ibackupManager;
-    public final IAudioService iaudioService;
-    public final LockPatternUtils lockPatternUtils;
-    public final StorageManagerForMock storageManager;
-    public final WifiManager wifiManager;
-    public final SettingsForMock settings;
-    public final MockContentResolver contentResolver;
-    public final TelephonyManager telephonyManager;
+    public final Resources resources;
 
-    /** Note this is a partial mock, not a real mock. */
-    public final PackageManager packageManager;
-
+    /** TODO: Migrate everything to use {@link #permissions} to avoid confusion. */
+    @Deprecated
     public final List<String> callerPermissions = new ArrayList<>();
 
-    private final ArrayList<UserInfo> mUserInfos = new ArrayList<>();
+    /** Less confusing alias for {@link #callerPermissions}. */
+    public final List<String> permissions = callerPermissions;
 
-    public DpmMockContext(Context context, File dataDir) {
+    public String packageName = null;
+
+    public ApplicationInfo applicationInfo = null;
+
+    public DpmMockContext(MockSystemServices mockSystemServices, Context context) {
+        mMockSystemServices = mockSystemServices;
         realTestContext = context;
 
-        this.dataDir = dataDir;
-        DpmTestUtils.clearDir(dataDir);
-
         binder = new MockBinder();
-        environment = mock(EnvironmentForMock.class);
-        systemProperties= mock(SystemPropertiesForMock.class);
-        userManager = mock(UserManager.class);
-        userManagerInternal = mock(UserManagerInternal.class);
-        userManagerForMock = mock(UserManagerForMock.class);
-        packageManagerInternal = mock(PackageManagerInternal.class);
-        powerManager = mock(PowerManagerForMock.class);
-        powerManagerInternal = mock(PowerManagerInternal.class);
-        notificationManager = mock(NotificationManager.class);
-        iwindowManager = mock(IWindowManager.class);
-        iactivityManager = mock(IActivityManager.class);
-        ipackageManager = mock(IPackageManager.class);
-        ibackupManager = mock(IBackupManager.class);
-        iaudioService = mock(IAudioService.class);
-        lockPatternUtils = mock(LockPatternUtils.class);
-        storageManager = mock(StorageManagerForMock.class);
-        wifiManager = mock(WifiManager.class);
-        settings = mock(SettingsForMock.class);
-        telephonyManager = mock(TelephonyManager.class);
-
-        // Package manager is huge, so we use a partial mock instead.
-        packageManager = spy(context.getPackageManager());
-
+        resources = mock(Resources.class);
         spiedContext = mock(Context.class);
-
-        contentResolver = new MockContentResolver();
-
-        // Add the system user
-        systemUserDataDir = addUser(UserHandle.USER_SYSTEM, UserInfo.FLAG_PRIMARY);
-
-        // System user is always running.
-        setUserRunning(UserHandle.USER_SYSTEM, true);
     }
 
-    public File addUser(int userId, int flags) {
-
-        // Set up (default) UserInfo for CALLER_USER_HANDLE.
-        final UserInfo uh = new UserInfo(userId, "user" + userId, flags);
-        when(userManager.getUserInfo(eq(userId))).thenReturn(uh);
-
-        mUserInfos.add(uh);
-        when(userManager.getUsers()).thenReturn(mUserInfos);
-        when(userManager.getUsers(anyBoolean())).thenReturn(mUserInfos);
-        when(userManager.isUserRunning(eq(new UserHandle(userId)))).thenReturn(true);
-        when(userManager.getUserInfo(anyInt())).thenAnswer(
-                new Answer<UserInfo>() {
-                    @Override
-                    public UserInfo answer(InvocationOnMock invocation) throws Throwable {
-                        final int userId = (int) invocation.getArguments()[0];
-                        for (UserInfo ui : mUserInfos) {
-                            if (ui.id == userId) {
-                                return ui;
-                            }
-                        }
-                        return null;
-                    }
-                }
-        );
-        when(userManager.getProfiles(anyInt())).thenAnswer(
-                new Answer<List<UserInfo>>() {
-                    @Override
-                    public List<UserInfo> answer(InvocationOnMock invocation) throws Throwable {
-                        final int userId = (int) invocation.getArguments()[0];
-                        return getProfiles(userId);
-                    }
-                }
-        );
-        when(userManager.getProfileIdsWithDisabled(anyInt())).thenAnswer(
-                new Answer<int[]>() {
-                    @Override
-                    public int[] answer(InvocationOnMock invocation) throws Throwable {
-                        final int userId = (int) invocation.getArguments()[0];
-                        List<UserInfo> profiles = getProfiles(userId);
-                        int[] results = new int[profiles.size()];
-                        for (int i = 0; i < results.length; i++) {
-                            results[i] = profiles.get(i).id;
-                        }
-                        return results;
-                    }
-                }
-        );
-
-
-        // Create a data directory.
-        final File dir = new File(dataDir, "user" + userId);
-        DpmTestUtils.clearDir(dir);
-
-        when(environment.getUserSystemDirectory(eq(userId))).thenReturn(dir);
-        return dir;
+    @Override
+    public Resources getResources() {
+        return resources;
     }
 
-    private List<UserInfo> getProfiles(int userId) {
-        final ArrayList<UserInfo> ret = new ArrayList<UserInfo>();
-        UserInfo parent = null;
-        for (UserInfo ui : mUserInfos) {
-            if (ui.id == userId) {
-                parent = ui;
-                break;
-            }
-        }
-        if (parent == null) {
-            return ret;
-        }
-        ret.add(parent);
-        for (UserInfo ui : mUserInfos) {
-            if (ui.id == userId) {
-                continue;
-            }
-            if (ui.profileGroupId != UserInfo.NO_PROFILE_GROUP_ID
-                    && ui.profileGroupId == parent.profileGroupId) {
-                ret.add(ui);
-            }
-        }
-        return ret;
+    @Override
+    public Resources.Theme getTheme() {
+        return spiedContext.getTheme();
     }
 
-    /**
-     * Add multiple users at once.  They'll all have flag 0.
-     */
-    public void addUsers(int... userIds) {
-        for (int userId : userIds) {
-            addUser(userId, 0);
+    @Override
+    public String getPackageName() {
+        if (packageName != null) {
+            return packageName;
         }
+        return super.getPackageName();
     }
 
-    public void setUserRunning(int userId, boolean isRunning) {
-        when(userManager.isUserRunning(MockUtils.checkUserHandle(userId)))
-                .thenReturn(isRunning);
+    @Override
+    public ApplicationInfo getApplicationInfo() {
+        if (applicationInfo != null) {
+            return applicationInfo;
+        }
+        return super.getApplicationInfo();
     }
 
     @Override
     public Object getSystemService(String name) {
         switch (name) {
+            case Context.ALARM_SERVICE:
+                return mMockSystemServices.alarmManager;
             case Context.USER_SERVICE:
-                return userManager;
+                return mMockSystemServices.userManager;
             case Context.POWER_SERVICE:
-                return powerManager;
+                return mMockSystemServices.powerManager;
             case Context.WIFI_SERVICE:
-                return wifiManager;
+                return mMockSystemServices.wifiManager;
+            case Context.ACCOUNT_SERVICE:
+                return mMockSystemServices.accountManager;
         }
         throw new UnsupportedOperationException();
     }
@@ -429,15 +194,27 @@ public class DpmMockContext extends MockContext {
 
     @Override
     public PackageManager getPackageManager() {
-        return packageManager;
+        return mMockSystemServices.packageManager;
+    }
+
+    public UserManagerInternal getUserManagerInternal() {
+        return mMockSystemServices.userManagerInternal;
     }
 
     @Override
     public void enforceCallingOrSelfPermission(String permission, String message) {
-        if (binder.getCallingUid() == SYSTEM_UID) {
+        if (UserHandle.isSameApp(binder.getCallingUid(), SYSTEM_UID)) {
             return; // Assume system has all permissions.
         }
-        if (!callerPermissions.contains(permission)) {
+        List<String> permissions = binder.callingPermissions.get(binder.getCallingUid());
+        if (permissions == null) {
+            // TODO: delete the following line. to do this without breaking any tests, first it's
+            //       necessary to remove all tests that set it directly.
+            permissions = callerPermissions;
+            //            throw new UnsupportedOperationException(
+            //                    "Caller UID " + binder.getCallingUid() + " doesn't exist");
+        }
+        if (!permissions.contains(permission)) {
             throw new SecurityException("Caller doesn't have " + permission + " : " + message);
         }
     }
@@ -584,29 +361,44 @@ public class DpmMockContext extends MockContext {
 
     @Override
     public Intent registerReceiver(BroadcastReceiver receiver, IntentFilter filter) {
+        mMockSystemServices.registerReceiver(receiver, filter, null);
         return spiedContext.registerReceiver(receiver, filter);
     }
 
     @Override
     public Intent registerReceiver(BroadcastReceiver receiver, IntentFilter filter,
             String broadcastPermission, Handler scheduler) {
+        mMockSystemServices.registerReceiver(receiver, filter, scheduler);
         return spiedContext.registerReceiver(receiver, filter, broadcastPermission, scheduler);
     }
 
     @Override
     public Intent registerReceiverAsUser(BroadcastReceiver receiver, UserHandle user,
             IntentFilter filter, String broadcastPermission, Handler scheduler) {
+        mMockSystemServices.registerReceiver(receiver, filter, scheduler);
         return spiedContext.registerReceiverAsUser(receiver, user, filter, broadcastPermission,
                 scheduler);
     }
 
     @Override
     public void unregisterReceiver(BroadcastReceiver receiver) {
+        mMockSystemServices.unregisterReceiver(receiver);
         spiedContext.unregisterReceiver(receiver);
     }
 
     @Override
+    public Context createPackageContextAsUser(String packageName, int flags, UserHandle user)
+            throws PackageManager.NameNotFoundException {
+        return mMockSystemServices.createPackageContextAsUser(packageName, flags, user);
+    }
+
+    @Override
     public ContentResolver getContentResolver() {
-        return contentResolver;
+        return mMockSystemServices.contentResolver;
+    }
+
+    @Override
+    public int getUserId() {
+        return UserHandle.getUserId(binder.getCallingUid());
     }
 }

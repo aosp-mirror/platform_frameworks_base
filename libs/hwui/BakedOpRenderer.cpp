@@ -32,7 +32,8 @@ namespace uirenderer {
 OffscreenBuffer* BakedOpRenderer::startTemporaryLayer(uint32_t width, uint32_t height) {
     LOG_ALWAYS_FATAL_IF(mRenderTarget.offscreenBuffer, "already has layer...");
 
-    OffscreenBuffer* buffer = mRenderState.layerPool().get(mRenderState, width, height);
+    OffscreenBuffer* buffer = mRenderState.layerPool().get(
+            mRenderState, width, height, mWideColorGamut);
     startRepaintLayer(buffer, Rect(width, height));
     return buffer;
 }
@@ -103,7 +104,8 @@ void BakedOpRenderer::endLayer() {
 OffscreenBuffer* BakedOpRenderer::copyToLayer(const Rect& area) {
     const uint32_t width = area.getWidth();
     const uint32_t height = area.getHeight();
-    OffscreenBuffer* buffer = mRenderState.layerPool().get(mRenderState, width, height);
+    OffscreenBuffer* buffer = mRenderState.layerPool().get(
+            mRenderState, width, height, mWideColorGamut);
     if (!area.isEmpty() && width != 0 && height != 0) {
         mCaches.textureState().activateTexture(0);
         mCaches.textureState().bindTexture(buffer->texture.id());
@@ -181,12 +183,8 @@ void BakedOpRenderer::clearColorBuffer(const Rect& rect) {
     if (!mRenderTarget.frameBufferId) mHasDrawn = true;
 }
 
-Texture* BakedOpRenderer::getTexture(const SkBitmap* bitmap) {
-    Texture* texture = mRenderState.assetAtlas().getEntryTexture(bitmap->pixelRef());
-    if (!texture) {
-        return mCaches.textureCache.get(bitmap);
-    }
-    return texture;
+Texture* BakedOpRenderer::getTexture(Bitmap* bitmap) {
+    return mCaches.textureCache.get(bitmap);
 }
 
 void BakedOpRenderer::drawRects(const float* rects, int count, const SkPaint* paint) {
@@ -367,6 +365,7 @@ void BakedOpRenderer::renderFunctor(const FunctorOp& op, const BakedOpState& sta
     state.computedState.transform.copyTo(&info.transform[0]);
 
     mRenderState.invokeFunctor(op.functor, DrawGlInfo::kModeDraw, &info);
+    if (!mRenderTarget.frameBufferId) mHasDrawn = true;
 }
 
 void BakedOpRenderer::dirtyRenderTarget(const Rect& uiDirty) {

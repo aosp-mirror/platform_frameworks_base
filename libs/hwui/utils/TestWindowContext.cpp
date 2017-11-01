@@ -16,7 +16,6 @@
 #include "TestWindowContext.h"
 
 #include "AnimationContext.h"
-#include "DisplayListCanvas.h"
 #include "IContextFactory.h"
 #include "RecordingCanvas.h"
 #include "RenderNode.h"
@@ -28,6 +27,7 @@
 #include "gui/Surface.h"
 #include "renderthread/RenderProxy.h"
 
+#include <cutils/memory.h>
 
 namespace {
 
@@ -57,7 +57,7 @@ class TestWindowContext::TestWindowData {
 
 public:
 
-    TestWindowData(SkISize size) : mSize(size) {
+    explicit TestWindowData(SkISize size) : mSize(size) {
         android::BufferQueue::createBufferQueue(&mProducer, &mConsumer);
         mCpuConsumer = new android::CpuConsumer(mConsumer, 1);
         mCpuConsumer->setName(android::String8("TestWindowContext"));
@@ -86,26 +86,20 @@ public:
         mProxy->initialize(mAndroidSurface.get());
         float lightX = mSize.width() / 2.0f;
         android::uirenderer::Vector3 lightVector { lightX, -200.0f, 800.0f };
-        mProxy->setup(mSize.width(), mSize.height(), 800.0f,
-                             255 * 0.075f, 255 * 0.15f);
+        mProxy->setup(800.0f, 255 * 0.075f, 255 * 0.15f);
         mProxy->setLightCenter(lightVector);
-#if HWUI_NEW_OPS
         mCanvas.reset(new android::uirenderer::RecordingCanvas(mSize.width(), mSize.height()));
-#else
-        mCanvas.reset(new android::uirenderer::DisplayListCanvas(mSize.width(), mSize.height()));
-#endif
     }
 
     SkCanvas* prepareToDraw() {
         //mCanvas->reset(mSize.width(), mSize.height());
-        mCanvas->clipRect(0, 0, mSize.width(), mSize.height(),
-                               SkRegion::Op::kReplace_Op);
+        mCanvas->clipRect(0, 0, mSize.width(), mSize.height(), SkClipOp::kReplace_deprecated);
         return mCanvas->asSkCanvas();
     }
 
     void finishDrawing() {
-        mRootNode->setStagingDisplayList(mCanvas->finishRecording(), nullptr);
-        mProxy->syncAndDrawFrame(nullptr);
+        mRootNode->setStagingDisplayList(mCanvas->finishRecording());
+        mProxy->syncAndDrawFrame();
         // Surprisingly, calling mProxy->fence() here appears to make no difference to
         // the timings we record.
     }
@@ -115,12 +109,13 @@ public:
     }
 
     bool capturePixels(SkBitmap* bmp) {
+        sk_sp<SkColorSpace> colorSpace = SkColorSpace::MakeSRGB();
         SkImageInfo destinationConfig =
             SkImageInfo::Make(mSize.width(), mSize.height(),
-                              kRGBA_8888_SkColorType, kPremul_SkAlphaType);
+                              kRGBA_8888_SkColorType, kPremul_SkAlphaType, colorSpace);
         bmp->allocPixels(destinationConfig);
-        sk_memset32((uint32_t*) bmp->getPixels(), SK_ColorRED,
-                    mSize.width() * mSize.height());
+        android_memset32((uint32_t*) bmp->getPixels(), SK_ColorRED,
+                         mSize.width() * mSize.height() * 4);
 
         android::CpuConsumer::LockedBuffer nativeBuffer;
         android::status_t retval = mCpuConsumer->lockNextBuffer(&nativeBuffer);
@@ -171,11 +166,7 @@ private:
 
     std::unique_ptr<android::uirenderer::RenderNode> mRootNode;
     std::unique_ptr<android::uirenderer::renderthread::RenderProxy> mProxy;
-#if HWUI_NEW_OPS
     std::unique_ptr<android::uirenderer::RecordingCanvas> mCanvas;
-#else
-    std::unique_ptr<android::uirenderer::DisplayListCanvas> mCanvas;
-#endif
     android::sp<android::IGraphicBufferProducer> mProducer;
     android::sp<android::IGraphicBufferConsumer> mConsumer;
     android::sp<android::CpuConsumer> mCpuConsumer;

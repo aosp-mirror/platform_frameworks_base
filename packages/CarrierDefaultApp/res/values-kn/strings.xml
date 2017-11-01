@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="5247871339820894594">"CarrierDefaultApp"</string>
+    <string name="android_system_label" msgid="2797790869522345065">"ಮೊಬೈಲ್ ವಾಹಕ"</string>
+    <string name="portal_notification_id" msgid="5155057562457079297">"ಮೊಬೈಲ್ ಡೇಟಾ ಮುಗಿದುಹೋಗಿದೆ"</string>
+    <string name="no_data_notification_id" msgid="668400731803969521">"ನಿಮ್ಮ ಮೊಬೈಲ್ ಡೇಟಾ ನಿಷ್ಕ್ರಿಯಗೊಂಡಿದೆ"</string>
+    <string name="portal_notification_detail" msgid="2295729385924660881">"%s ವೆಬ್‌ಸೈಟ್‌ಗೆ ಭೇಟಿ ನೀಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
+    <string name="no_data_notification_detail" msgid="3112125343857014825">"ನಿಮಗೆ ಸೇವೆ ಒದಗಿಸುವವರನ್ನು ದಯವಿಟ್ಟು ಸಂಪರ್ಕಿಸಿ %s"</string>
+    <string name="no_mobile_data_connection_title" msgid="7449525772416200578">"ಮೊಬೈಲ್ ಡೇಟಾ ಸಂಪರ್ಕವಿಲ್ಲ"</string>
+    <string name="no_mobile_data_connection" msgid="544980465184147010">"%s ಮೂಲಕ ಡೇಟಾ ಅಥವಾ ರೋಮಿಂಗ್ ಪ್ಲ್ಯಾನ್ ಸೇರಿಸಿ"</string>
+    <string name="mobile_data_status_notification_channel_name" msgid="833999690121305708">"ಮೊಬೈಲ್ ಡೇಟಾ ಸ್ಥಿತಿ"</string>
+    <string name="action_bar_label" msgid="4290345990334377177">"ಮೊಬೈಲ್ ನೆಟ್‌ವರ್ಕ್‌ಗೆ ಸೈನ್ ಇನ್ ಮಾಡಿ"</string>
+    <string name="ssl_error_warning" msgid="3127935140338254180">"ನೀವು ಸೇರಬೇಕೆಂದಿರುವ ನೆಟ್‌ವರ್ಕ್, ಭದ್ರತೆ ಸಮಸ್ಯೆಗಳನ್ನು ಹೊಂದಿದೆ."</string>
+    <string name="ssl_error_example" msgid="6188711843183058764">"ಉದಾಹರಣೆಗೆ, ಲಾಗಿನ್ ಪುಟವು ತೋರಿಸಲಾಗಿರುವ ಸಂಸ್ಥೆಗೆ ಸಂಬಂಧಿಸಿಲ್ಲದಿರಬಹುದು."</string>
+    <string name="ssl_error_continue" msgid="1138548463994095584">"ಪರವಾಗಿಲ್ಲ, ಬ್ರೌಸರ್ ಮೂಲಕ ಮುಂದುವರಿಸಿ"</string>
+</resources>

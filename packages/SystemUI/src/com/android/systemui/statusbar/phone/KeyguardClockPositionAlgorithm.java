@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static com.android.systemui.statusbar.notification.NotificationUtils.interpolate;
+
 import android.content.res.Resources;
 import android.graphics.Path;
 import android.view.animation.AccelerateInterpolator;
@@ -39,6 +41,10 @@ public class KeyguardClockPositionAlgorithm {
     private static final float CLOCK_ADJ_TOP_PADDING_MULTIPLIER_MIN = 1.4f;
     private static final float CLOCK_ADJ_TOP_PADDING_MULTIPLIER_MAX = 3.2f;
 
+    private static final long MILLIS_PER_MINUTES = 1000 * 60;
+    private static final float BURN_IN_PREVENTION_PERIOD_Y = 521;
+    private static final float BURN_IN_PREVENTION_PERIOD_X = 83;
+
     private int mClockNotificationsMarginMin;
     private int mClockNotificationsMarginMax;
     private float mClockYFractionMin;
@@ -51,6 +57,8 @@ public class KeyguardClockPositionAlgorithm {
     private int mKeyguardStatusHeight;
     private float mEmptyDragAmount;
     private float mDensity;
+    private int mBurnInPreventionOffsetX;
+    private int mBurnInPreventionOffsetY;
 
     /**
      * The number (fractional) of notifications the "more" card counts when calculating how many
@@ -68,6 +76,9 @@ public class KeyguardClockPositionAlgorithm {
     }
 
     private AccelerateInterpolator mAccelerateInterpolator = new AccelerateInterpolator();
+    private int mClockBottom;
+    private float mDarkAmount;
+    private int mDozingStackPadding;
 
     /**
      * Refreshes the dimension values.
@@ -80,13 +91,19 @@ public class KeyguardClockPositionAlgorithm {
         mClockYFractionMin = res.getFraction(R.fraction.keyguard_clock_y_fraction_min, 1, 1);
         mClockYFractionMax = res.getFraction(R.fraction.keyguard_clock_y_fraction_max, 1, 1);
         mMoreCardNotificationAmount =
-                (float) res.getDimensionPixelSize(R.dimen.notification_summary_height) /
+                (float) res.getDimensionPixelSize(R.dimen.notification_shelf_height) /
                         res.getDimensionPixelSize(R.dimen.notification_min_height);
         mDensity = res.getDisplayMetrics().density;
+        mBurnInPreventionOffsetX = res.getDimensionPixelSize(
+                R.dimen.burn_in_prevention_offset_x);
+        mBurnInPreventionOffsetY = res.getDimensionPixelSize(
+                R.dimen.burn_in_prevention_offset_y);
+        mDozingStackPadding = res.getDimensionPixelSize(R.dimen.dozing_stack_padding);
     }
 
     public void setup(int maxKeyguardNotifications, int maxPanelHeight, float expandedHeight,
-            int notificationCount, int height, int keyguardStatusHeight, float emptyDragAmount) {
+            int notificationCount, int height, int keyguardStatusHeight, float emptyDragAmount,
+            int clockBottom, float dark) {
         mMaxKeyguardNotifications = maxKeyguardNotifications;
         mMaxPanelHeight = maxPanelHeight;
         mExpandedHeight = expandedHeight;
@@ -94,6 +111,8 @@ public class KeyguardClockPositionAlgorithm {
         mHeight = height;
         mKeyguardStatusHeight = keyguardStatusHeight;
         mEmptyDragAmount = emptyDragAmount;
+        mClockBottom = clockBottom;
+        mDarkAmount = dark;
     }
 
     public float getMinStackScrollerPadding(int height, int keyguardStatusHeight) {
@@ -115,6 +134,13 @@ public class KeyguardClockPositionAlgorithm {
                 result.clockY,
                 y + getClockNotificationsPadding() + mKeyguardStatusHeight);
         result.clockAlpha = getClockAlpha(result.clockScale);
+
+        result.stackScrollerPadding = (int) interpolate(
+                result.stackScrollerPadding,
+                mClockBottom + y + mDozingStackPadding,
+                mDarkAmount);
+
+        result.clockX = (int) interpolate(0, burnInPreventionOffsetX(), mDarkAmount);
     }
 
     private float getClockScale(int notificationPadding, int clockY, int startPadding) {
@@ -141,7 +167,41 @@ public class KeyguardClockPositionAlgorithm {
     }
 
     private int getClockY() {
-        return (int) (getClockYFraction() * mHeight);
+        // Dark: Align the bottom edge of the clock at one third:
+        // clockBottomEdge = result - mKeyguardStatusHeight / 2 + mClockBottom
+        float clockYDark = (0.33f * mHeight + (float) mKeyguardStatusHeight / 2 - mClockBottom)
+                + burnInPreventionOffsetY();
+        float clockYRegular = getClockYFraction() * mHeight;
+        return (int) interpolate(clockYRegular, clockYDark, mDarkAmount);
+    }
+
+    private float burnInPreventionOffsetY() {
+        return zigzag(System.currentTimeMillis() / MILLIS_PER_MINUTES,
+                mBurnInPreventionOffsetY * 2,
+                BURN_IN_PREVENTION_PERIOD_Y)
+                - mBurnInPreventionOffsetY;
+    }
+
+    private float burnInPreventionOffsetX() {
+        return zigzag(System.currentTimeMillis() / MILLIS_PER_MINUTES,
+                mBurnInPreventionOffsetX * 2,
+                BURN_IN_PREVENTION_PERIOD_X)
+                - mBurnInPreventionOffsetX;
+    }
+
+    /**
+     * Implements a continuous, piecewise linear, periodic zig-zag function
+     *
+     * Can be thought of as a linear approximation of abs(sin(x)))
+     *
+     * @param period period of the function, ie. zigzag(x + period) == zigzag(x)
+     * @param amplitude maximum value of the function
+     * @return a value between 0 and amplitude
+     */
+    private float zigzag(float x, float amplitude, float period) {
+        float xprime = (x % period) / (period / 2);
+        float interpolationAmount = (xprime <= 1) ? xprime : (2 - xprime);
+        return interpolate(0, amplitude, interpolationAmount);
     }
 
     private float getClockYExpansionAdjustment() {
@@ -215,5 +275,8 @@ public class KeyguardClockPositionAlgorithm {
          * the padding, but not the overall panel size.
          */
         public int stackScrollerPaddingAdjustment;
+
+        /** The x translation of the clock. */
+        public int clockX;
     }
 }

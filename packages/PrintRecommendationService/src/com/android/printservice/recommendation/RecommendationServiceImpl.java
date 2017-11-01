@@ -17,20 +17,25 @@
 package com.android.printservice.recommendation;
 
 import android.content.res.Configuration;
+import android.printservice.PrintService;
 import android.printservice.recommendation.RecommendationInfo;
 import android.printservice.recommendation.RecommendationService;
-import android.printservice.PrintService;
 import android.util.Log;
+
+import com.android.printservice.recommendation.plugin.google.CloudPrintPlugin;
 import com.android.printservice.recommendation.plugin.hp.HPRecommendationPlugin;
 import com.android.printservice.recommendation.plugin.mdnsFilter.MDNSFilterPlugin;
 import com.android.printservice.recommendation.plugin.mdnsFilter.VendorConfig;
 import com.android.printservice.recommendation.plugin.mopria.MopriaRecommendationPlugin;
 import com.android.printservice.recommendation.plugin.samsung.SamsungRecommendationPlugin;
 import com.android.printservice.recommendation.plugin.xerox.XeroxPrintServiceRecommendationPlugin;
+
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Service that recommends {@link PrintService print services} that might be a good idea to install.
@@ -57,7 +62,15 @@ public class RecommendationServiceImpl extends RecommendationService
                 }
             }
         } catch (IOException | XmlPullParserException e) {
-            new RuntimeException("Could not parse vendorconfig", e);
+            throw new RuntimeException("Could not parse vendorconfig", e);
+        }
+
+        try {
+            mPlugins.add(new RemotePrintServicePlugin(new CloudPrintPlugin(this), this,
+                    true));
+        } catch (Exception e) {
+            Log.e(LOG_TAG, "Could not initiate "
+                            + getString(R.string.plugin_vendor_google_cloud_print) + " plugin", e);
         }
 
         try {
@@ -129,12 +142,11 @@ public class RecommendationServiceImpl extends RecommendationService
             RemotePrintServicePlugin plugin = mPlugins.get(i);
 
             try {
-                int numPrinters = plugin.getNumPrinters();
+                List<InetAddress> printers = plugin.getPrinters();
 
-                if (numPrinters > 0) {
+                if (!printers.isEmpty()) {
                     recommendations.add(new RecommendationInfo(plugin.packageName,
-                            getString(plugin.name), numPrinters,
-                            plugin.recommendsMultiVendorService));
+                            getString(plugin.name), printers, plugin.recommendsMultiVendorService));
                 }
             } catch (Exception e) {
                 Log.e(LOG_TAG, "Could not read state of plugin for " + plugin.packageName, e);

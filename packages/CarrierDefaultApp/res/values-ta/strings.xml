@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="5247871339820894594">"CarrierDefaultApp"</string>
+    <string name="android_system_label" msgid="2797790869522345065">"தொலைத்தொடர்பு நிறுவனம்"</string>
+    <string name="portal_notification_id" msgid="5155057562457079297">"மொபைல் டேட்டா தீர்ந்துவிட்டது"</string>
+    <string name="no_data_notification_id" msgid="668400731803969521">"மொபைல் டேட்டா முடக்கப்பட்டது"</string>
+    <string name="portal_notification_detail" msgid="2295729385924660881">"%s இணையதளத்திற்குச் செல்ல, தட்டவும்"</string>
+    <string name="no_data_notification_detail" msgid="3112125343857014825">"%s எனும் உங்கள் சேவை வழங்குநரைத் தொடர்புகொள்ளவும்"</string>
+    <string name="no_mobile_data_connection_title" msgid="7449525772416200578">"மொபைல் டேட்டா இணைப்பு இல்லை"</string>
+    <string name="no_mobile_data_connection" msgid="544980465184147010">"%s மூலம் தரவு அல்லது ரோமிங் திட்டத்தைச் சேர்க்கவும்"</string>
+    <string name="mobile_data_status_notification_channel_name" msgid="833999690121305708">"மொபைல் டேட்டாவின் நிலை"</string>
+    <string name="action_bar_label" msgid="4290345990334377177">"மொபைல் நெட்வொர்க்கில் உள்நுழையவும்"</string>
+    <string name="ssl_error_warning" msgid="3127935140338254180">"நீங்கள் சேர முயலும் நெட்வொர்க்கில் பாதுகாப்புச் சிக்கல்கள் உள்ளன."</string>
+    <string name="ssl_error_example" msgid="6188711843183058764">"எடுத்துக்காட்டாக, உள்நுழைவுப் பக்கமானது காட்டப்படும் அமைப்பிற்குச் சொந்தமானதாக இல்லாமல் இருக்கலாம்."</string>
+    <string name="ssl_error_continue" msgid="1138548463994095584">"பரவாயில்லை, உலாவி வழியாகத் தொடர்க"</string>
+</resources>

@@ -55,23 +55,23 @@ public class TransformsAndAnimationsActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.transforms_and_animations);
 
-        button1 = (Button) findViewById(R.id.button1);
-        button2 = (Button) findViewById(R.id.button2);
-        button3 = (Button) findViewById(R.id.button3);
-        button1a = (Button) findViewById(R.id.button1a);
-        button2a = (Button) findViewById(R.id.button2a);
-        button3a = (Button) findViewById(R.id.button3a);
-        button1b = (Button) findViewById(R.id.button1b);
-        button2b = (Button) findViewById(R.id.button2b);
-        button3b = (Button) findViewById(R.id.button3b);
-        button4 = (Button) findViewById(R.id.button4);
-        button5 = (Button) findViewById(R.id.button5);
-        button6 = (Button) findViewById(R.id.button6);
-        button7 = (Button) findViewById(R.id.button7);
-        button8 = (Button) findViewById(R.id.button8);
-        layersNoneCB = (CheckBox) findViewById(R.id.layersNoneCB);
-        layersHardwareCB = (CheckBox) findViewById(R.id.layersHwCB);
-        layersSoftwareCB = (CheckBox) findViewById(R.id.layersSwCB);
+        button1 = findViewById(R.id.button1);
+        button2 = findViewById(R.id.button2);
+        button3 = findViewById(R.id.button3);
+        button1a = findViewById(R.id.button1a);
+        button2a = findViewById(R.id.button2a);
+        button3a = findViewById(R.id.button3a);
+        button1b = findViewById(R.id.button1b);
+        button2b = findViewById(R.id.button2b);
+        button3b = findViewById(R.id.button3b);
+        button4 = findViewById(R.id.button4);
+        button5 = findViewById(R.id.button5);
+        button6 = findViewById(R.id.button6);
+        button7 = findViewById(R.id.button7);
+        button8 = findViewById(R.id.button8);
+        layersNoneCB = findViewById(R.id.layersNoneCB);
+        layersHardwareCB = findViewById(R.id.layersHwCB);
+        layersSoftwareCB = findViewById(R.id.layersSwCB);
 
         layersNoneCB.setOnCheckedChangeListener(new CheckBox.OnCheckedChangeListener() {
             @Override

@@ -68,7 +68,8 @@ import java.util.ArrayList;
  * Drag/drop state
  */
 class DragState {
-    private static final long ANIMATION_DURATION_MS = 500;
+    private static final long MIN_ANIMATION_DURATION_MS = 195;
+    private static final long MAX_ANIMATION_DURATION_MS = 375;
 
     private static final int DRAG_FLAGS_URI_ACCESS = View.DRAG_FLAG_GLOBAL_URI_READ |
             View.DRAG_FLAG_GLOBAL_URI_WRITE;
@@ -94,10 +95,7 @@ class DragState {
     float mOriginalX, mOriginalY;
     float mCurrentX, mCurrentY;
     float mThumbOffsetX, mThumbOffsetY;
-    InputChannel mServerChannel, mClientChannel;
-    DragInputEventReceiver mInputEventReceiver;
-    InputApplicationHandle mDragApplicationHandle;
-    InputWindowHandle mDragWindowHandle;
+    InputInterceptor mInputInterceptor;
     WindowState mTargetWindow;
     ArrayList<WindowState> mNotifiedWindows;
     boolean mDragInProgress;
@@ -106,6 +104,7 @@ class DragState {
     private Animation mAnimation;
     final Transformation mTransformation = new Transformation();
     private final Interpolator mCubicEaseOutInterpolator = new DecelerateInterpolator(1.5f);
+    private Point mDisplaySize = new Point();
 
     DragState(WindowManagerService service, IBinder token, SurfaceControl surface,
             int flags, IBinder localWin) {
@@ -130,16 +129,13 @@ class DragState {
         mNotifiedWindows = null;
     }
 
-    /**
-     * @param display The Display that the window being dragged is on.
-     */
-    void register(Display display) {
-        if (DEBUG_DRAG) Slog.d(TAG_WM, "registering drag input channel");
-        if (mClientChannel != null) {
-            Slog.e(TAG_WM, "Duplicate register of drag input channel");
-        } else {
-            mDisplayContent = mService.getDisplayContentLocked(display.getDisplayId());
+    class InputInterceptor {
+        InputChannel mServerChannel, mClientChannel;
+        DragInputEventReceiver mInputEventReceiver;
+        InputApplicationHandle mDragApplicationHandle;
+        InputWindowHandle mDragWindowHandle;
 
+        InputInterceptor(Display display) {
             InputChannel[] channels = InputChannel.openInputChannelPair("drag");
             mServerChannel = channels[0];
             mClientChannel = channels[1];
@@ -152,7 +148,7 @@ class DragState {
             mDragApplicationHandle.dispatchingTimeoutNanos =
                     WindowManagerService.DEFAULT_INPUT_DISPATCHING_TIMEOUT_NANOS;
 
-            mDragWindowHandle = new InputWindowHandle(mDragApplicationHandle, null,
+            mDragWindowHandle = new InputWindowHandle(mDragApplicationHandle, null, null,
                     display.getDisplayId());
             mDragWindowHandle.name = "drag";
             mDragWindowHandle.inputChannel = mServerChannel;
@@ -177,10 +173,8 @@ class DragState {
             // The drag window covers the entire display
             mDragWindowHandle.frameLeft = 0;
             mDragWindowHandle.frameTop = 0;
-            Point p = new Point();
-            display.getRealSize(p);
-            mDragWindowHandle.frameRight = p.x;
-            mDragWindowHandle.frameBottom = p.y;
+            mDragWindowHandle.frameRight = mDisplaySize.x;
+            mDragWindowHandle.frameBottom = mDisplaySize.y;
 
             // Pause rotations before a drag.
             if (DEBUG_ORIENTATION) {
@@ -188,13 +182,8 @@ class DragState {
             }
             mService.pauseRotationLocked();
         }
-    }
 
-    void unregister() {
-        if (DEBUG_DRAG) Slog.d(TAG_WM, "unregistering drag input channel");
-        if (mClientChannel == null) {
-            Slog.e(TAG_WM, "Unregister of nonexistent drag input channel");
-        } else {
+        void tearDown() {
             mService.mInputManager.unregisterInputChannel(mServerChannel);
             mInputEventReceiver.dispose();
             mInputEventReceiver = null;
@@ -214,8 +203,43 @@ class DragState {
         }
     }
 
+    InputChannel getInputChannel() {
+        return mInputInterceptor == null ? null : mInputInterceptor.mServerChannel;
+    }
+
+    InputWindowHandle getInputWindowHandle() {
+        return mInputInterceptor == null ? null : mInputInterceptor.mDragWindowHandle;
+    }
+
+    /**
+     * @param display The Display that the window being dragged is on.
+     */
+    void register(Display display) {
+        display.getRealSize(mDisplaySize);
+        if (DEBUG_DRAG) Slog.d(TAG_WM, "registering drag input channel");
+        if (mInputInterceptor != null) {
+            Slog.e(TAG_WM, "Duplicate register of drag input channel");
+        } else {
+            mInputInterceptor = new InputInterceptor(display);
+            mService.mInputMonitor.updateInputWindowsLw(true /*force*/);
+        }
+    }
+
+    void unregister() {
+        if (DEBUG_DRAG) Slog.d(TAG_WM, "unregistering drag input channel");
+        if (mInputInterceptor == null) {
+            Slog.e(TAG_WM, "Unregister of nonexistent drag input channel");
+        } else {
+            // Input channel should be disposed on the thread where the input is being handled.
+            mService.mH.obtainMessage(
+                    H.TEAR_DOWN_DRAG_AND_DROP_INPUT, mInputInterceptor).sendToTarget();
+            mInputInterceptor = null;
+            mService.mInputMonitor.updateInputWindowsLw(true /*force*/);
+        }
+    }
+
     int getDragLayerLw() {
-        return mService.mPolicy.windowTypeToLayerLw(WindowManager.LayoutParams.TYPE_DRAG)
+        return mService.mPolicy.getWindowLayerFromTypeLw(WindowManager.LayoutParams.TYPE_DRAG)
                 * WindowManagerService.TYPE_LAYER_MULTIPLIER
                 + WindowManagerService.TYPE_LAYER_OFFSET;
     }
@@ -248,11 +272,9 @@ class DragState {
             Slog.d(TAG_WM, "broadcasting DRAG_STARTED at (" + touchX + ", " + touchY + ")");
         }
 
-        final WindowList windows = mDisplayContent.getWindowList();
-        final int N = windows.size();
-        for (int i = 0; i < N; i++) {
-            sendDragStartedLw(windows.get(i), touchX, touchY, mDataDescription);
-        }
+        mDisplayContent.forAllWindows(w -> {
+            sendDragStartedLw(w, touchX, touchY, mDataDescription);
+        }, false /* traverseTopToBottom */ );
     }
 
     /* helper - send a ACTION_DRAG_STARTED event, if the
@@ -305,7 +327,7 @@ class DragState {
         // Global drags are limited to system windows, and windows for apps that are targeting N and
         // above.
         return targetWin.mAppToken == null
-                || targetWin.mAppToken.targetSdk >= Build.VERSION_CODES.N;
+                || targetWin.mAppToken.mTargetSdk >= Build.VERSION_CODES.N;
     }
 
     /* helper - send a ACTION_DRAG_STARTED event only if the window has not
@@ -397,8 +419,6 @@ class DragState {
         // free our resources and drop all the object references
         reset();
         mService.mDragState = null;
-
-        mService.mInputMonitor.updateInputWindowsLw(true /*force*/);
     }
 
     void notifyMoveLw(float x, float y) {
@@ -411,14 +431,14 @@ class DragState {
         // Move the surface to the given touch
         if (SHOW_LIGHT_TRANSACTIONS) Slog.i(
                 TAG_WM, ">>> OPEN TRANSACTION notifyMoveLw");
-        SurfaceControl.openTransaction();
+        mService.openSurfaceTransaction();
         try {
             mSurfaceControl.setPosition(x - mThumbOffsetX, y - mThumbOffsetY);
             if (SHOW_TRANSACTIONS) Slog.i(TAG_WM, "  DRAG "
                     + mSurfaceControl + ": pos=(" +
                     (int)(x - mThumbOffsetX) + "," + (int)(y - mThumbOffsetY) + ")");
         } finally {
-            SurfaceControl.closeTransaction();
+            mService.closeSurfaceTransaction();
             if (SHOW_LIGHT_TRANSACTIONS) Slog.i(
                     TAG_WM, "<<< CLOSE TRANSACTION notifyMoveLw");
         }
@@ -564,10 +584,17 @@ class DragState {
 
     private Animation createReturnAnimationLocked() {
         final AnimationSet set = new AnimationSet(false);
-        set.addAnimation(new TranslateAnimation(
-                0, mOriginalX - mCurrentX, 0, mOriginalY - mCurrentY));
+        final float translateX = mOriginalX - mCurrentX;
+        final float translateY = mOriginalY - mCurrentY;
+        set.addAnimation(new TranslateAnimation( 0, translateX, 0, translateY));
         set.addAnimation(new AlphaAnimation(mOriginalAlpha, mOriginalAlpha / 2));
-        set.setDuration(ANIMATION_DURATION_MS);
+        // Adjust the duration to the travel distance.
+        final double travelDistance = Math.sqrt(translateX * translateX + translateY * translateY);
+        final double displayDiagonal =
+                Math.sqrt(mDisplaySize.x * mDisplaySize.x + mDisplaySize.y * mDisplaySize.y);
+        final long duration = MIN_ANIMATION_DURATION_MS + (long) (travelDistance / displayDiagonal
+                * (MAX_ANIMATION_DURATION_MS - MIN_ANIMATION_DURATION_MS));
+        set.setDuration(duration);
         set.setInterpolator(mCubicEaseOutInterpolator);
         set.initialize(0, 0, 0, 0);
         set.start();  // Will start on the first call to getTransformation.
@@ -578,7 +605,7 @@ class DragState {
         final AnimationSet set = new AnimationSet(false);
         set.addAnimation(new ScaleAnimation(1, 0, 1, 0, mThumbOffsetX, mThumbOffsetY));
         set.addAnimation(new AlphaAnimation(mOriginalAlpha, 0));
-        set.setDuration(ANIMATION_DURATION_MS);
+        set.setDuration(MIN_ANIMATION_DURATION_MS);
         set.setInterpolator(mCubicEaseOutInterpolator);
         set.initialize(0, 0, 0, 0);
         set.start();  // Will start on the first call to getTransformation.

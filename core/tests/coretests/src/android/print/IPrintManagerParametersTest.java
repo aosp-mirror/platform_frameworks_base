@@ -38,17 +38,23 @@ import android.print.mockservice.PrintServiceCallbacks;
 import android.print.mockservice.PrinterDiscoverySessionCallbacks;
 import android.print.mockservice.StubbablePrinterDiscoverySession;
 
-import android.test.suitebuilder.annotation.LargeTest;
-import android.test.suitebuilder.annotation.MediumTest;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
+import android.support.test.filters.LargeTest;
+import android.support.test.filters.MediumTest;
+import android.support.test.runner.AndroidJUnit4;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 /**
  * tests feeding all possible parameters to the IPrintManager Binder.
  */
+@RunWith(AndroidJUnit4.class)
 public class IPrintManagerParametersTest extends BasePrintTest {
 
     private final int BAD_APP_ID = 0xffffffff;
@@ -58,9 +64,7 @@ public class IPrintManagerParametersTest extends BasePrintTest {
     private final PrintJobId mBadPrintJobId;
 
     private PrintJob mGoodPrintJob;
-    private PrinterId mBadPrinterId;
     private PrinterId mGoodPrinterId;
-    private ComponentName mGoodComponentName;
     private ComponentName mBadComponentName;
 
     private IPrintManager mIPrintManager;
@@ -93,6 +97,7 @@ public class IPrintManagerParametersTest extends BasePrintTest {
             public void onLayout(PrintAttributes oldAttributes, PrintAttributes newAttributes,
                     CancellationSignal cancellationSignal, LayoutResultCallback callback,
                     Bundle extras) {
+                callback.onLayoutFailed("not implemented");
             }
 
             @Override
@@ -109,54 +114,46 @@ public class IPrintManagerParametersTest extends BasePrintTest {
      */
     private PrintServiceCallbacks createMockCallbacks() {
         return createMockPrintServiceCallbacks(
-                new Answer<PrinterDiscoverySessionCallbacks>() {
-                    @Override
-                    public PrinterDiscoverySessionCallbacks answer(InvocationOnMock invocation) {
-                        return createMockPrinterDiscoverySessionCallbacks(new Answer<Void>() {
-                            @Override
-                            public Void answer(InvocationOnMock invocation) {
-                                // Get the session.
-                                StubbablePrinterDiscoverySession session =
-                                        ((PrinterDiscoverySessionCallbacks) invocation
-                                        .getMock()).getSession();
+                invocation -> createMockPrinterDiscoverySessionCallbacks(invocation1 -> {
+                    // Get the session.
+                    StubbablePrinterDiscoverySession session =
+                            ((PrinterDiscoverySessionCallbacks) invocation1
+                            .getMock()).getSession();
 
-                                if (session.getPrinters().isEmpty()) {
-                                    final String PRINTER_NAME = "good printer";
-                                    List<PrinterInfo> printers = new ArrayList<>();
+                    if (session.getPrinters().isEmpty()) {
+                        final String PRINTER_NAME = "good printer";
+                        List<PrinterInfo> printers = new ArrayList<>();
 
-                                    // Add the printer.
-                                    mGoodPrinterId = session.getService()
-                                            .generatePrinterId(PRINTER_NAME);
+                        // Add the printer.
+                        mGoodPrinterId = session.getService()
+                                .generatePrinterId(PRINTER_NAME);
 
-                                    PrinterCapabilitiesInfo capabilities =
-                                            new PrinterCapabilitiesInfo.Builder(mGoodPrinterId)
-                                                    .setMinMargins(
-                                                            new Margins(200, 200, 200, 200))
-                                                    .addMediaSize(MediaSize.ISO_A4, true)
-                                                    .addResolution(new Resolution("300x300",
-                                                            "300x300", 300, 300),
-                                                            true)
-                                                    .setColorModes(
-                                                            PrintAttributes.COLOR_MODE_COLOR,
-                                                            PrintAttributes.COLOR_MODE_COLOR)
-                                                    .build();
+                        PrinterCapabilitiesInfo capabilities =
+                                new PrinterCapabilitiesInfo.Builder(mGoodPrinterId)
+                                        .setMinMargins(
+                                                new Margins(200, 200, 200, 200))
+                                        .addMediaSize(MediaSize.ISO_A4, true)
+                                        .addResolution(new Resolution("300x300",
+                                                "300x300", 300, 300),
+                                                true)
+                                        .setColorModes(
+                                                PrintAttributes.COLOR_MODE_COLOR,
+                                                PrintAttributes.COLOR_MODE_COLOR)
+                                        .build();
 
-                                    PrinterInfo printer = new PrinterInfo.Builder(
-                                            mGoodPrinterId,
-                                            PRINTER_NAME,
-                                            PrinterInfo.STATUS_IDLE)
-                                                    .setCapabilities(capabilities)
-                                                    .build();
-                                    printers.add(printer);
+                        PrinterInfo printer = new PrinterInfo.Builder(
+                                mGoodPrinterId,
+                                PRINTER_NAME,
+                                PrinterInfo.STATUS_IDLE)
+                                        .setCapabilities(capabilities)
+                                        .build();
+                        printers.add(printer);
 
-                                    session.addPrinters(printers);
-                                }
-                                onPrinterDiscoverySessionStartCalled();
-                                return null;
-                            }
-                        }, null, null, null, null, null, null);
+                        session.addPrinters(printers);
                     }
-                },
+                    onPrinterDiscoverySessionStartCalled();
+                    return null;
+                }, null, null, null, null, null, null),
                 null, null);
     }
 
@@ -214,60 +211,28 @@ public class IPrintManagerParametersTest extends BasePrintTest {
         waitForPrinterDiscoverySessionStartCallbackCalled();
     }
 
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    /**
+     * Return a printer Id that is not from any print service
+     *
+     * @return The bad printer id.
+     */
+    private PrinterId getBadPrinterId() {
+        return new PrinterId(getActivity().getComponentName(), "dummy printer");
+    }
 
+    @Before
+    public void setUpMockService() throws Exception {
         MockPrintService.setCallbacks(createMockCallbacks());
-
-        mGoodComponentName = getActivity().getComponentName();
 
         mIPrintManager = IPrintManager.Stub
                 .asInterface(ServiceManager.getService(Context.PRINT_SERVICE));
-
-        // Generate dummy printerId which is a valid PrinterId object, but does not correspond to a
-        // printer
-        mBadPrinterId = new PrinterId(mGoodComponentName, "dummy printer");
-    }
-
-    /**
-     * {@link Runnable} that can throw and {@link Exception}
-     */
-    private interface Invokable {
-        /**
-         * Execute the invokable
-         *
-         * @throws Exception
-         */
-        void run() throws Exception;
-    }
-
-    /**
-     * Assert that the invokable throws an expectedException
-     *
-     * @param invokable The {@link Invokable} to run
-     * @param expectedClass The {@link Exception} that is supposed to be thrown
-     */
-    public void assertException(Invokable invokable, Class<? extends Exception> expectedClass)
-            throws Exception {
-        try {
-            invokable.run();
-        } catch (Exception e) {
-            if (e.getClass().isAssignableFrom(expectedClass)) {
-                return;
-            } else {
-                throw new AssertionError("Expected: " + expectedClass.getName() + ", got: "
-                                + e.getClass().getName());
-            }
-        }
-
-        throw new AssertionError("No exception thrown");
     }
 
     /**
      * test IPrintManager.getPrintJobInfo
      */
     @LargeTest
+    @Test
     public void testGetPrintJobInfo() throws Exception {
         startPrinting();
 
@@ -276,12 +241,9 @@ public class IPrintManagerParametersTest extends BasePrintTest {
         assertEquals(null, mIPrintManager.getPrintJobInfo(mBadPrintJobId, mAppId, mUserId));
         assertEquals(null, mIPrintManager.getPrintJobInfo(null, mAppId, mUserId));
 
-        assertException(new Invokable() {
-            @Override
-            public void run() throws Exception {
-                mIPrintManager.getPrintJobInfo(mGoodPrintJob.getId(), BAD_APP_ID, mUserId);
-            }
-        }, SecurityException.class);
+        assertException(
+                () -> mIPrintManager.getPrintJobInfo(mGoodPrintJob.getId(), BAD_APP_ID, mUserId),
+                SecurityException.class);
 
         // Cannot test bad user Id as these tests are allowed to call across users
     }
@@ -290,6 +252,7 @@ public class IPrintManagerParametersTest extends BasePrintTest {
      * test IPrintManager.getPrintJobInfos
      */
     @LargeTest
+    @Test
     public void testGetPrintJobInfos() throws Exception {
         startPrinting();
 
@@ -304,12 +267,8 @@ public class IPrintManagerParametersTest extends BasePrintTest {
         }
         assertTrue(foundPrintJob);
 
-        assertException(new Invokable() {
-            @Override
-            public void run() throws Exception {
-                mIPrintManager.getPrintJobInfos(BAD_APP_ID, mUserId);
-            }
-        }, SecurityException.class);
+        assertException(() -> mIPrintManager.getPrintJobInfos(BAD_APP_ID, mUserId),
+                SecurityException.class);
 
         // Cannot test bad user Id as these tests are allowed to call across users
     }
@@ -318,6 +277,7 @@ public class IPrintManagerParametersTest extends BasePrintTest {
      * test IPrintManager.print
      */
     @LargeTest
+    @Test
     public void testPrint() throws Exception {
         final String name = "dummy print job";
 
@@ -326,44 +286,23 @@ public class IPrintManagerParametersTest extends BasePrintTest {
 
         startPrinting();
 
-        assertException(new Invokable() {
-            @Override
-            public void run() throws Exception {
-                mIPrintManager.print(null, adapter, null, mGoodComponentName.getPackageName(),
-                        mAppId, mUserId);
-            }
-        }, IllegalArgumentException.class);
+        assertException(() -> mIPrintManager.print(null, adapter, null,
+                getActivity().getPackageName(), mAppId, mUserId),
+                IllegalArgumentException.class);
 
-        assertException(new Invokable() {
-            @Override
-            public void run() throws Exception {
-                mIPrintManager.print(name, null, null, mGoodComponentName.getPackageName(),
-                        mAppId, mUserId);
-            }
-        }, NullPointerException.class);
+        assertException(() -> mIPrintManager.print(name, null, null,
+                getActivity().getPackageName(), mAppId, mUserId),
+                NullPointerException.class);
 
-        assertException(new Invokable() {
-            @Override
-            public void run() throws Exception {
-                mIPrintManager.print(name, adapter, null, null, mAppId, mUserId);
-            }
-        }, IllegalArgumentException.class);
+        assertException(() -> mIPrintManager.print(name, adapter, null, null, mAppId, mUserId),
+                IllegalArgumentException.class);
 
-        assertException(new Invokable() {
-            @Override
-            public void run() throws Exception {
-                mIPrintManager.print(name, adapter, null, mBadComponentName.getPackageName(),
-                        mAppId, mUserId);
-            }
-        }, IllegalArgumentException.class);
+        assertException(() -> mIPrintManager.print(name, adapter, null,
+                mBadComponentName.getPackageName(), mAppId, mUserId),
+                IllegalArgumentException.class);
 
-        assertException(new Invokable() {
-            @Override
-            public void run() throws Exception {
-                mIPrintManager.print(name, adapter, null, mGoodComponentName.getPackageName(),
-                        BAD_APP_ID, mUserId);
-            }
-        }, SecurityException.class);
+        assertException(() -> mIPrintManager.print(name, adapter, null,
+                getActivity().getPackageName(), BAD_APP_ID, mUserId), SecurityException.class);
 
         // Cannot test bad user Id as these tests are allowed to call across users
     }
@@ -372,6 +311,7 @@ public class IPrintManagerParametersTest extends BasePrintTest {
      * test IPrintManager.cancelPrintJob
      */
     @LargeTest
+    @Test
     public void testCancelPrintJob() throws Exception {
         startPrinting();
 
@@ -379,12 +319,9 @@ public class IPrintManagerParametersTest extends BasePrintTest {
         mIPrintManager.cancelPrintJob(mBadPrintJobId, mAppId, mUserId);
         mIPrintManager.cancelPrintJob(null, mAppId, mUserId);
 
-        assertException(new Invokable() {
-            @Override
-            public void run() throws Exception {
-                mIPrintManager.cancelPrintJob(mGoodPrintJob.getId(), BAD_APP_ID, mUserId);
-            }
-        }, SecurityException.class);
+        assertException(
+                () -> mIPrintManager.cancelPrintJob(mGoodPrintJob.getId(), BAD_APP_ID, mUserId),
+                SecurityException.class);
 
         // Cannot test bad user Id as these tests are allowed to call across users
 
@@ -396,6 +333,7 @@ public class IPrintManagerParametersTest extends BasePrintTest {
      * test IPrintManager.restartPrintJob
      */
     @LargeTest
+    @Test
     public void testRestartPrintJob() throws Exception {
         startPrinting();
 
@@ -405,12 +343,9 @@ public class IPrintManagerParametersTest extends BasePrintTest {
         mIPrintManager.restartPrintJob(mBadPrintJobId, mAppId, mUserId);
         mIPrintManager.restartPrintJob(null, mAppId, mUserId);
 
-        assertException(new Invokable() {
-            @Override
-            public void run() throws Exception {
-                mIPrintManager.restartPrintJob(mGoodPrintJob.getId(), BAD_APP_ID, mUserId);
-            }
-        }, SecurityException.class);
+        assertException(
+                () -> mIPrintManager.restartPrintJob(mGoodPrintJob.getId(), BAD_APP_ID, mUserId),
+                SecurityException.class);
 
         // Cannot test bad user Id as these tests are allowed to call across users
     }
@@ -419,24 +354,18 @@ public class IPrintManagerParametersTest extends BasePrintTest {
      * test IPrintManager.addPrintJobStateChangeListener
      */
     @MediumTest
+    @Test
     public void testAddPrintJobStateChangeListener() throws Exception {
         final IPrintJobStateChangeListener listener = createMockIPrintJobStateChangeListener();
 
         mIPrintManager.addPrintJobStateChangeListener(listener, mAppId, mUserId);
 
-        assertException(new Invokable() {
-            @Override
-            public void run() throws Exception {
-                mIPrintManager.addPrintJobStateChangeListener(null, mAppId, mUserId);
-            }
-        }, NullPointerException.class);
+        assertException(() -> mIPrintManager.addPrintJobStateChangeListener(null, mAppId, mUserId),
+                NullPointerException.class);
 
-        assertException(new Invokable() {
-            @Override
-            public void run() throws Exception {
-                mIPrintManager.addPrintJobStateChangeListener(listener, BAD_APP_ID, mUserId);
-            }
-        }, SecurityException.class);
+        assertException(
+                () -> mIPrintManager.addPrintJobStateChangeListener(listener, BAD_APP_ID, mUserId),
+                SecurityException.class);
 
         // Cannot test bad user Id as these tests are allowed to call across users
     }
@@ -445,6 +374,7 @@ public class IPrintManagerParametersTest extends BasePrintTest {
      * test IPrintManager.removePrintJobStateChangeListener
      */
     @MediumTest
+    @Test
     public void testRemovePrintJobStateChangeListener() throws Exception {
         final IPrintJobStateChangeListener listener = createMockIPrintJobStateChangeListener();
 
@@ -455,12 +385,8 @@ public class IPrintManagerParametersTest extends BasePrintTest {
         mIPrintManager.removePrintJobStateChangeListener(listener, mUserId);
 
         mIPrintManager.addPrintJobStateChangeListener(listener, mAppId, mUserId);
-        assertException(new Invokable() {
-            @Override
-            public void run() throws Exception {
-                mIPrintManager.removePrintJobStateChangeListener(null, mUserId);
-            }
-        }, NullPointerException.class);
+        assertException(() -> mIPrintManager.removePrintJobStateChangeListener(null, mUserId),
+                NullPointerException.class);
 
         // Cannot test bad user Id as these tests are allowed to call across users
     }
@@ -469,17 +395,14 @@ public class IPrintManagerParametersTest extends BasePrintTest {
      * test IPrintManager.addPrintServicesChangeListener
      */
     @MediumTest
+    @Test
     public void testAddPrintServicesChangeListener() throws Exception {
         final IPrintServicesChangeListener listener = createMockIPrintServicesChangeListener();
 
         mIPrintManager.addPrintServicesChangeListener(listener, mUserId);
 
-        assertException(new Invokable() {
-            @Override
-            public void run() throws Exception {
-                mIPrintManager.addPrintServicesChangeListener(null, mUserId);
-            }
-        }, NullPointerException.class);
+        assertException(() -> mIPrintManager.addPrintServicesChangeListener(null, mUserId),
+                NullPointerException.class);
 
         // Cannot test bad user Id as these tests are allowed to call across users
     }
@@ -488,6 +411,7 @@ public class IPrintManagerParametersTest extends BasePrintTest {
      * test IPrintManager.removePrintServicesChangeListener
      */
     @MediumTest
+    @Test
     public void testRemovePrintServicesChangeListener() throws Exception {
         final IPrintServicesChangeListener listener = createMockIPrintServicesChangeListener();
 
@@ -498,12 +422,8 @@ public class IPrintManagerParametersTest extends BasePrintTest {
         mIPrintManager.removePrintServicesChangeListener(listener, mUserId);
 
         mIPrintManager.addPrintServicesChangeListener(listener, mUserId);
-        assertException(new Invokable() {
-            @Override
-            public void run() throws Exception {
-                mIPrintManager.removePrintServicesChangeListener(null, mUserId);
-            }
-        }, NullPointerException.class);
+        assertException(() -> mIPrintManager.removePrintServicesChangeListener(null, mUserId),
+                NullPointerException.class);
 
         // Cannot test bad user Id as these tests are allowed to call across users
     }
@@ -512,6 +432,7 @@ public class IPrintManagerParametersTest extends BasePrintTest {
      * test IPrintManager.getPrintServices
      */
     @MediumTest
+    @Test
     public void testGetPrintServices() throws Exception {
         List<PrintServiceInfo> printServices = mIPrintManager.getPrintServices(
                 PrintManager.ALL_SERVICES, mUserId);
@@ -520,12 +441,8 @@ public class IPrintManagerParametersTest extends BasePrintTest {
         printServices = mIPrintManager.getPrintServices(0, mUserId);
         assertEquals(printServices, null);
 
-        assertException(new Invokable() {
-            @Override
-            public void run() throws Exception {
-                mIPrintManager.getPrintServices(~PrintManager.ALL_SERVICES, mUserId);
-            }
-        }, IllegalArgumentException.class);
+        assertException(() -> mIPrintManager.getPrintServices(~PrintManager.ALL_SERVICES, mUserId),
+                IllegalArgumentException.class);
 
         // Cannot test bad user Id as these tests are allowed to call across users
     }
@@ -534,38 +451,23 @@ public class IPrintManagerParametersTest extends BasePrintTest {
      * test IPrintManager.setPrintServiceEnabled
      */
     @MediumTest
+    @Test
     public void testSetPrintServiceEnabled() throws Exception {
         final ComponentName printService = mIPrintManager.getPrintServices(
                 PrintManager.ALL_SERVICES, mUserId).get(0).getComponentName();
 
-        assertException(new Invokable() {
-            @Override
-            public void run() throws Exception {
-                mIPrintManager.setPrintServiceEnabled(printService, false, mUserId);
-            }
-        }, SecurityException.class);
+        assertException(() -> mIPrintManager.setPrintServiceEnabled(printService, false, mUserId),
+                SecurityException.class);
 
-        assertException(new Invokable() {
-            @Override
-            public void run() throws Exception {
-                mIPrintManager.setPrintServiceEnabled(printService, true, mUserId);
-            }
-        }, SecurityException.class);
+        assertException(() -> mIPrintManager.setPrintServiceEnabled(printService, true, mUserId),
+                SecurityException.class);
 
-        assertException(new Invokable() {
-            @Override
-            public void run() throws Exception {
-                mIPrintManager.setPrintServiceEnabled(new ComponentName("bad", "name"), true,
-                                mUserId);
-            }
-        }, SecurityException.class);
+        assertException(
+                () -> mIPrintManager.setPrintServiceEnabled(new ComponentName("bad", "name"), true,
+                                mUserId), SecurityException.class);
 
-        assertException(new Invokable() {
-            @Override
-            public void run() throws Exception {
-                mIPrintManager.setPrintServiceEnabled(null, true, mUserId);
-            }
-        }, SecurityException.class);
+        assertException(() -> mIPrintManager.setPrintServiceEnabled(null, true, mUserId),
+                SecurityException.class);
 
         // Cannot test bad user Id as these tests are allowed to call across users
     }
@@ -574,18 +476,16 @@ public class IPrintManagerParametersTest extends BasePrintTest {
      * test IPrintManager.addPrintServiceRecommendationsChangeListener
      */
     @MediumTest
+    @Test
     public void testAddPrintServiceRecommendationsChangeListener() throws Exception {
         final IRecommendationsChangeListener listener =
                 createMockIPrintServiceRecommendationsChangeListener();
 
         mIPrintManager.addPrintServiceRecommendationsChangeListener(listener, mUserId);
 
-        assertException(new Invokable() {
-            @Override
-            public void run() throws Exception {
-                mIPrintManager.addPrintServiceRecommendationsChangeListener(null, mUserId);
-            }
-        }, NullPointerException.class);
+        assertException(
+                () -> mIPrintManager.addPrintServiceRecommendationsChangeListener(null, mUserId),
+                NullPointerException.class);
 
         // Cannot test bad user Id as these tests are allowed to call across users
     }
@@ -594,6 +494,7 @@ public class IPrintManagerParametersTest extends BasePrintTest {
      * test IPrintManager.removePrintServicesChangeListener
      */
     @MediumTest
+    @Test
     public void testRemovePrintServiceRecommendationsChangeListener() throws Exception {
         final IRecommendationsChangeListener listener =
                 createMockIPrintServiceRecommendationsChangeListener();
@@ -605,12 +506,9 @@ public class IPrintManagerParametersTest extends BasePrintTest {
         mIPrintManager.removePrintServiceRecommendationsChangeListener(listener, mUserId);
 
         mIPrintManager.addPrintServiceRecommendationsChangeListener(listener, mUserId);
-        assertException(new Invokable() {
-            @Override
-            public void run() throws Exception {
-                mIPrintManager.removePrintServiceRecommendationsChangeListener(null, mUserId);
-            }
-        }, NullPointerException.class);
+        assertException(
+                () -> mIPrintManager.removePrintServiceRecommendationsChangeListener(null, mUserId),
+                NullPointerException.class);
 
         // Cannot test bad user Id as these tests are allowed to call across users
     }
@@ -619,6 +517,7 @@ public class IPrintManagerParametersTest extends BasePrintTest {
      * test IPrintManager.getPrintServiceRecommendations
      */
     @MediumTest
+    @Test
     public void testGetPrintServiceRecommendations() throws Exception {
         mIPrintManager.getPrintServiceRecommendations(mUserId);
 
@@ -629,18 +528,15 @@ public class IPrintManagerParametersTest extends BasePrintTest {
      * test IPrintManager.createPrinterDiscoverySession
      */
     @MediumTest
+    @Test
     public void testCreatePrinterDiscoverySession() throws Exception {
         final IPrinterDiscoveryObserver listener = createMockIPrinterDiscoveryObserver();
 
         mIPrintManager.createPrinterDiscoverySession(listener, mUserId);
 
         try {
-            assertException(new Invokable() {
-                @Override
-                public void run() throws Exception {
-                    mIPrintManager.createPrinterDiscoverySession(null, mUserId);
-                }
-            }, NullPointerException.class);
+            assertException(() -> mIPrintManager.createPrinterDiscoverySession(null, mUserId),
+                    NullPointerException.class);
 
             // Cannot test bad user Id as these tests are allowed to call across users
         } finally {
@@ -655,6 +551,7 @@ public class IPrintManagerParametersTest extends BasePrintTest {
      * test IPrintManager.startPrinterDiscovery
      */
     @LargeTest
+    @Test
     public void testStartPrinterDiscovery() throws Exception {
         startPrinting();
 
@@ -663,7 +560,7 @@ public class IPrintManagerParametersTest extends BasePrintTest {
         goodPrinters.add(mGoodPrinterId);
 
         final List<PrinterId> badPrinters = new ArrayList<>();
-        badPrinters.add(mBadPrinterId);
+        badPrinters.add(getBadPrinterId());
 
         final List<PrinterId> emptyPrinters = new ArrayList<>();
 
@@ -677,19 +574,11 @@ public class IPrintManagerParametersTest extends BasePrintTest {
         mIPrintManager.startPrinterDiscovery(listener, emptyPrinters, mUserId);
         mIPrintManager.startPrinterDiscovery(listener, null, mUserId);
 
-        assertException(new Invokable() {
-            @Override
-            public void run() throws Exception {
-                mIPrintManager.startPrinterDiscovery(listener, nullPrinters, mUserId);
-            }
-        }, NullPointerException.class);
+        assertException(() -> mIPrintManager.startPrinterDiscovery(listener, nullPrinters, mUserId),
+                NullPointerException.class);
 
-        assertException(new Invokable() {
-            @Override
-            public void run() throws Exception {
-                mIPrintManager.startPrinterDiscovery(null, goodPrinters, mUserId);
-            }
-        }, NullPointerException.class);
+        assertException(() -> mIPrintManager.startPrinterDiscovery(null, goodPrinters, mUserId),
+                NullPointerException.class);
 
         // Cannot test bad user Id as these tests are allowed to call across users
     }
@@ -698,6 +587,7 @@ public class IPrintManagerParametersTest extends BasePrintTest {
      * test IPrintManager.stopPrinterDiscovery
      */
     @MediumTest
+    @Test
     public void testStopPrinterDiscovery() throws Exception {
         final IPrinterDiscoveryObserver listener = createMockIPrinterDiscoveryObserver();
 
@@ -708,12 +598,8 @@ public class IPrintManagerParametersTest extends BasePrintTest {
         mIPrintManager.stopPrinterDiscovery(listener, mUserId);
 
         mIPrintManager.startPrinterDiscovery(listener, null, mUserId);
-        assertException(new Invokable() {
-            @Override
-            public void run() throws Exception {
-                mIPrintManager.stopPrinterDiscovery(null, mUserId);
-            }
-        }, NullPointerException.class);
+        assertException(() -> mIPrintManager.stopPrinterDiscovery(null, mUserId),
+                NullPointerException.class);
 
         // Cannot test bad user Id as these tests are allowed to call across users
     }
@@ -722,6 +608,7 @@ public class IPrintManagerParametersTest extends BasePrintTest {
      * test IPrintManager.validatePrinters
      */
     @LargeTest
+    @Test
     public void testValidatePrinters() throws Exception {
         startPrinting();
 
@@ -729,7 +616,7 @@ public class IPrintManagerParametersTest extends BasePrintTest {
         goodPrinters.add(mGoodPrinterId);
 
         final List<PrinterId> badPrinters = new ArrayList<>();
-        badPrinters.add(mBadPrinterId);
+        badPrinters.add(getBadPrinterId());
 
         final List<PrinterId> emptyPrinters = new ArrayList<>();
 
@@ -742,19 +629,11 @@ public class IPrintManagerParametersTest extends BasePrintTest {
         mIPrintManager.validatePrinters(badPrinters, mUserId);
         mIPrintManager.validatePrinters(emptyPrinters, mUserId);
 
-        assertException(new Invokable() {
-            @Override
-            public void run() throws Exception {
-                mIPrintManager.validatePrinters(null, mUserId);
-            }
-        }, NullPointerException.class);
+        assertException(() -> mIPrintManager.validatePrinters(null, mUserId),
+                NullPointerException.class);
 
-        assertException(new Invokable() {
-            @Override
-            public void run() throws Exception {
-                mIPrintManager.validatePrinters(nullPrinters, mUserId);
-            }
-        }, NullPointerException.class);
+        assertException(() -> mIPrintManager.validatePrinters(nullPrinters, mUserId),
+                NullPointerException.class);
 
         // Cannot test bad user Id as these tests are allowed to call across users
     }
@@ -763,20 +642,17 @@ public class IPrintManagerParametersTest extends BasePrintTest {
      * test IPrintManager.startPrinterStateTracking
      */
     @LargeTest
+    @Test
     public void testStartPrinterStateTracking() throws Exception {
         startPrinting();
 
         mIPrintManager.startPrinterStateTracking(mGoodPrinterId, mUserId);
 
         // Bad printers do no cause exceptions
-        mIPrintManager.startPrinterStateTracking(mBadPrinterId, mUserId);
+        mIPrintManager.startPrinterStateTracking(getBadPrinterId(), mUserId);
 
-        assertException(new Invokable() {
-            @Override
-            public void run() throws Exception {
-                mIPrintManager.startPrinterStateTracking(null, mUserId);
-            }
-        }, NullPointerException.class);
+        assertException(() -> mIPrintManager.startPrinterStateTracking(null, mUserId),
+                NullPointerException.class);
 
         // Cannot test bad user Id as these tests are allowed to call across users
     }
@@ -785,20 +661,17 @@ public class IPrintManagerParametersTest extends BasePrintTest {
      * test IPrintManager.getCustomPrinterIcon
      */
     @LargeTest
+    @Test
     public void testGetCustomPrinterIcon() throws Exception {
         startPrinting();
 
         mIPrintManager.getCustomPrinterIcon(mGoodPrinterId, mUserId);
 
         // Bad printers do no cause exceptions
-        mIPrintManager.getCustomPrinterIcon(mBadPrinterId, mUserId);
+        mIPrintManager.getCustomPrinterIcon(getBadPrinterId(), mUserId);
 
-        assertException(new Invokable() {
-            @Override
-            public void run() throws Exception {
-                mIPrintManager.getCustomPrinterIcon(null, mUserId);
-            }
-        }, NullPointerException.class);
+        assertException(() -> mIPrintManager.getCustomPrinterIcon(null, mUserId),
+                NullPointerException.class);
 
         // Cannot test bad user Id as these tests are allowed to call across users
     }
@@ -807,6 +680,7 @@ public class IPrintManagerParametersTest extends BasePrintTest {
      * test IPrintManager.stopPrinterStateTracking
      */
     @LargeTest
+    @Test
     public void testStopPrinterStateTracking() throws Exception {
         startPrinting();
 
@@ -817,15 +691,11 @@ public class IPrintManagerParametersTest extends BasePrintTest {
         mIPrintManager.stopPrinterStateTracking(mGoodPrinterId, mUserId);
 
         // Bad printers do no cause exceptions
-        mIPrintManager.startPrinterStateTracking(mBadPrinterId, mUserId);
-        mIPrintManager.stopPrinterStateTracking(mBadPrinterId, mUserId);
+        mIPrintManager.startPrinterStateTracking(getBadPrinterId(), mUserId);
+        mIPrintManager.stopPrinterStateTracking(getBadPrinterId(), mUserId);
 
-        assertException(new Invokable() {
-            @Override
-            public void run() throws Exception {
-                mIPrintManager.stopPrinterStateTracking(null, mUserId);
-            }
-        }, NullPointerException.class);
+        assertException(() -> mIPrintManager.stopPrinterStateTracking(null, mUserId),
+                NullPointerException.class);
 
         // Cannot test bad user Id as these tests are allowed to call across users
     }
@@ -834,6 +704,7 @@ public class IPrintManagerParametersTest extends BasePrintTest {
      * test IPrintManager.destroyPrinterDiscoverySession
      */
     @MediumTest
+    @Test
     public void testDestroyPrinterDiscoverySession() throws Exception {
         final IPrinterDiscoveryObserver listener = createMockIPrinterDiscoveryObserver();
 
@@ -843,12 +714,8 @@ public class IPrintManagerParametersTest extends BasePrintTest {
         // Destroying already destroyed session is a no-op
         mIPrintManager.destroyPrinterDiscoverySession(listener, mUserId);
 
-        assertException(new Invokable() {
-            @Override
-            public void run() throws Exception {
-                mIPrintManager.destroyPrinterDiscoverySession(null, mUserId);
-            }
-        }, NullPointerException.class);
+        assertException(() -> mIPrintManager.destroyPrinterDiscoverySession(null, mUserId),
+                NullPointerException.class);
 
         // Cannot test bad user Id as these tests are allowed to call across users
     }

@@ -15,25 +15,15 @@
 # limitations under the License.
 #
 
-PATH_TO_FRAMEWORK_RES=$(gettop)/prebuilts/sdk/current/android.jar
+set -e
 
-aapt package -M AndroidManifest.xml -S res -I $PATH_TO_FRAMEWORK_RES --split hdpi --split xhdpi --split xxhdpi --split fr,de -F bundle.apk -f && \
-unzip bundle.apk resources.arsc && \
-mv resources.arsc basic.arsc && \
-xxd -i basic.arsc > basic_arsc.h && \
-\
-unzip bundle_de_fr.apk resources.arsc && \
-mv resources.arsc split_de_fr.arsc && \
-xxd -i split_de_fr.arsc > split_de_fr_arsc.h && \
-\
-unzip bundle_hdpi-v4.apk resources.arsc && \
-mv resources.arsc split_hdpi_v4.arsc && \
-xxd -i split_hdpi_v4.arsc > split_hdpi_v4_arsc.h && \
-\
-unzip bundle_xhdpi-v4.apk resources.arsc && \
-mv resources.arsc split_xhdpi_v4.arsc && \
-xxd -i split_xhdpi_v4.arsc > split_xhdpi_v4_arsc.h && \
-\
-unzip bundle_xxhdpi-v4.apk resources.arsc && \
-mv resources.arsc split_xxhdpi_v4.arsc && \
-xxd -i split_xxhdpi_v4.arsc > split_xxhdpi_v4_arsc.h \
+PATH_TO_FRAMEWORK_RES=${ANDROID_BUILD_TOP}/prebuilts/sdk/current/android.jar
+
+aapt package \
+    -M AndroidManifest.xml \
+    -S res \
+    -A assets \
+    -I $PATH_TO_FRAMEWORK_RES \
+    --split hdpi --split xhdpi --split xxhdpi --split fr,de \
+    -F basic.apk \
+    -f

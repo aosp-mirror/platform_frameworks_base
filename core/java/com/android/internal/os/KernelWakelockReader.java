@@ -16,6 +16,7 @@
 package com.android.internal.os;
 
 import android.os.Process;
+import android.os.SystemClock;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -66,6 +67,7 @@ public class KernelWakelockReader {
         byte[] buffer = new byte[32*1024];
         int len;
         boolean wakeup_sources;
+        final long startTime = SystemClock.uptimeMillis();
 
         try {
             FileInputStream is;
@@ -88,6 +90,11 @@ public class KernelWakelockReader {
         } catch (java.io.IOException e) {
             Slog.wtf(TAG, "failed to read kernel wakelocks", e);
             return null;
+        }
+
+        final long readTime = SystemClock.uptimeMillis() - startTime;
+        if (readTime > 100) {
+            Slog.w(TAG, "Reading wakelock stats took " + readTime + "ms");
         }
 
         if (len > 0) {

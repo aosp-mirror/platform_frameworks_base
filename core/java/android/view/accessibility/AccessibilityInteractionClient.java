@@ -104,7 +104,7 @@ public final class AccessibilityInteractionClient
         new SparseArray<>();
 
     private static final AccessibilityCache sAccessibilityCache =
-        new AccessibilityCache();
+        new AccessibilityCache(new AccessibilityCache.AccessibilityNodeRefresher());
 
     /**
      * @return The client for the current thread.
@@ -158,8 +158,8 @@ public final class AccessibilityInteractionClient
      */
     public AccessibilityNodeInfo getRootInActiveWindow(int connectionId) {
         return findAccessibilityNodeInfoByAccessibilityId(connectionId,
-                AccessibilityNodeInfo.ACTIVE_WINDOW_ID, AccessibilityNodeInfo.ROOT_NODE_ID,
-                false, AccessibilityNodeInfo.FLAG_PREFETCH_DESCENDANTS);
+                AccessibilityWindowInfo.ACTIVE_WINDOW_ID, AccessibilityNodeInfo.ROOT_NODE_ID,
+                false, AccessibilityNodeInfo.FLAG_PREFETCH_DESCENDANTS, null);
     }
 
     /**
@@ -259,7 +259,7 @@ public final class AccessibilityInteractionClient
      */
     public AccessibilityNodeInfo findAccessibilityNodeInfoByAccessibilityId(int connectionId,
             int accessibilityWindowId, long accessibilityNodeId, boolean bypassCache,
-            int prefetchFlags) {
+            int prefetchFlags, Bundle arguments) {
         if ((prefetchFlags & AccessibilityNodeInfo.FLAG_PREFETCH_SIBLINGS) != 0
                 && (prefetchFlags & AccessibilityNodeInfo.FLAG_PREFETCH_PREDECESSORS) == 0) {
             throw new IllegalArgumentException("FLAG_PREFETCH_SIBLINGS"
@@ -285,14 +285,16 @@ public final class AccessibilityInteractionClient
                 final long identityToken = Binder.clearCallingIdentity();
                 final boolean success = connection.findAccessibilityNodeInfoByAccessibilityId(
                         accessibilityWindowId, accessibilityNodeId, interactionId, this,
-                        prefetchFlags, Thread.currentThread().getId());
+                        prefetchFlags, Thread.currentThread().getId(), arguments);
                 Binder.restoreCallingIdentity(identityToken);
-                // If the scale is zero the call has failed.
                 if (success) {
                     List<AccessibilityNodeInfo> infos = getFindAccessibilityNodeInfosResultAndClear(
                             interactionId);
                     finalizeAndCacheAccessibilityNodeInfos(infos, connectionId);
                     if (infos != null && !infos.isEmpty()) {
+                        for (int i = 1; i < infos.size(); i++) {
+                            infos.get(i).recycle();
+                        }
                         return infos.get(0);
                     }
                 }

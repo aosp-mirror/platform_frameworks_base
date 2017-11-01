@@ -311,6 +311,9 @@ public final class RemoteConference {
 
     /** @hide */
     void putExtras(final Bundle extras) {
+        if (extras == null) {
+            return;
+        }
         if (mExtras == null) {
             mExtras = new Bundle();
         }

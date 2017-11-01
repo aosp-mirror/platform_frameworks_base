@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--  Copyright (C) 2013 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_label" msgid="4469836075319831821">"Принтер буфери"</string>
+    <string name="more_options_button" msgid="2243228396432556771">"Дагы мүмкүнчүлүктөр"</string>
+    <string name="label_destination" msgid="9132510997381599275">"Көздөлгөн жай"</string>
+    <string name="label_copies" msgid="3634531042822968308">"Көчүрмөлөр"</string>
+    <string name="label_copies_summary" msgid="3861966063536529540">"Көчүрмөлөр:"</string>
+    <string name="label_paper_size" msgid="908654383827777759">"Барактын өлчөмү"</string>
+    <string name="label_paper_size_summary" msgid="5668204981332138168">"Барактын өлчөмү:"</string>
+    <string name="label_color" msgid="1108690305218188969">"Түс"</string>
+    <string name="label_duplex" msgid="5370037254347072243">"Эки тараптуу"</string>
+    <string name="label_orientation" msgid="2853142581990496477">"Багыттоо"</string>
+    <string name="label_pages" msgid="7768589729282182230">"Баракчалар"</string>
+    <string name="destination_default_text" msgid="5422708056807065710">"Принтер тандаңыз"</string>
+    <string name="template_all_pages" msgid="3322235982020148762">"Бардыгы <xliff:g id="PAGE_COUNT">%1$s</xliff:g>"</string>
+    <string name="template_page_range" msgid="428638530038286328">"<xliff:g id="PAGE_COUNT">%1$s</xliff:g> аралыгы"</string>
+    <string name="pages_range_example" msgid="8558694453556945172">"мис. 1—5,8,11—13"</string>
+    <string name="print_preview" msgid="8010217796057763343">"Алдын ала көрүү"</string>
+    <string name="install_for_print_preview" msgid="6366303997385509332">"Алдын ала көрүү үчүн PDF-серепчи орнотуңуз"</string>
+    <string name="printing_app_crashed" msgid="854477616686566398">"Басуу колдонмосу кыйрады"</string>
+    <string name="generating_print_job" msgid="3119608742651698916">"Басуу тапшырмасы түзүлүүдө"</string>
+    <string name="save_as_pdf" msgid="5718454119847596853">"PDF катары сактоо"</string>
+    <string name="all_printers" msgid="5018829726861876202">"Бардык принтерлер…"</string>
+    <string name="print_dialog" msgid="32628687461331979">"Басуу баарлашуусу"</string>
+    <string name="current_page_template" msgid="5145005201131935302">"<xliff:g id="CURRENT_PAGE">%1$d</xliff:g>/<xliff:g id="PAGE_COUNT">%2$d</xliff:g>"</string>
+    <string name="page_description_template" msgid="6831239682256197161">"<xliff:g id="PAGE_COUNT">%2$d</xliff:g> ичинен <xliff:g id="CURRENT_PAGE">%1$d</xliff:g>-бет"</string>
+    <string name="summary_template" msgid="8899734908625669193">"Корутунду, <xliff:g id="COPIES">%1$s</xliff:g> көчүрмө, барак өлчөмү <xliff:g id="PAPER_SIZE">%2$s</xliff:g>"</string>
+    <string name="expand_handle" msgid="7282974448109280522">"Тутканы жаюу"</string>
+    <string name="collapse_handle" msgid="6886637989442507451">"Тутканы жыйноо"</string>
+    <string name="print_button" msgid="645164566271246268">"Басуу"</string>
+    <string name="savetopdf_button" msgid="2976186791686924743">"PDF\'ке сактоо"</string>
+    <string name="print_options_expanded" msgid="6944679157471691859">"Басып чыгаруу параметрлери жайылды"</string>
+    <string name="print_options_collapsed" msgid="7455930445670414332">"Басып чыгаруу параметрлери жыйналды"</string>
+    <string name="search" msgid="5421724265322228497">"Издөө"</string>
+    <string name="all_printers_label" msgid="3178848870161526399">"Бардык принтерлер"</string>
+    <string name="add_print_service_label" msgid="5356702546188981940">"Кызматты кошуу"</string>
+    <string name="print_search_box_shown_utterance" msgid="7967404953901376090">"Издөө талаасы ачылды"</string>
+    <string name="print_search_box_hidden_utterance" msgid="5727755169343113351">"Издөө талаасы жашырылды"</string>
+    <string name="print_add_printer" msgid="1088656468360653455">"Принтер кошуу"</string>
+    <string name="print_select_printer" msgid="7388760939873368698">"Принтер тандоо"</string>
+    <string name="print_forget_printer" msgid="5035287497291910766">"Принтерди унутуу"</string>
+    <plurals name="print_search_result_count_utterance" formatted="false" msgid="6997663738361080868">
+      <item quantity="other"><xliff:g id="COUNT_1">%1$s</xliff:g> принтер табылды</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$s</xliff:g> принтер табылды</item>
+    </plurals>
+    <string name="printer_extended_description_template" msgid="1366699227703381874">"<xliff:g id="PRINT_SERVICE_LABEL">%1$s</xliff:g> - <xliff:g id="PRINTER_DESCRIPTION">%2$s</xliff:g>"</string>
+    <string name="printer_info_desc" msgid="7181988788991581654">"Бул принтер жөнүндө көбүрөөк маалымат"</string>
+    <string name="notification_channel_progress" msgid="872788690775721436">"Басып чыгаруу тапшырмалары аткарылууда"</string>
+    <string name="notification_channel_failure" msgid="9042250774797916414">"Басып чыгарылбай калган тапшырмалар"</string>
+    <string name="could_not_create_file" msgid="3425025039427448443">"Файл түзүлбөй койду"</string>
+    <string name="print_services_disabled_toast" msgid="9089060734685174685">"Басып чыгаруу кызматтарынын айрымы өчүрүлгөн"</string>
+    <string name="print_searching_for_printers" msgid="6550424555079932867">"Принтерлер изделүүдө"</string>
+    <string name="print_no_print_services" msgid="8561247706423327966">"Принтер кызматтары иштетилген эмес"</string>
+    <string name="print_no_printers" msgid="4869403323900054866">"Принтерлер табылган жок"</string>
+    <string name="cannot_add_printer" msgid="7840348733668023106">"Принтерлер кошулбай жатат"</string>
+    <string name="select_to_add_printers" msgid="3800709038689830974">"Принтер кошуу үчүн тандаңыз"</string>
+    <string name="enable_print_service" msgid="3482815747043533842">"Иштетүү үчүн тандаңыз"</string>
+    <string name="enabled_services_title" msgid="7036986099096582296">"Иштетилген кызматтар"</string>
+    <string name="recommended_services_title" msgid="3799434882937956924">"Сунушталган кызматтар"</string>
+    <string name="disabled_services_title" msgid="7313253167968363211">"Өчүрүлгөн кызматтар"</string>
+    <string name="all_services_title" msgid="5578662754874906455">"Бардык кызматтар"</string>
+    <plurals name="print_services_recommendation_subtitle" formatted="false" msgid="5678487708807185138">
+      <item quantity="other">Орнотсоңуз <xliff:g id="COUNT_1">%1$s</xliff:g> принтер таап аласыз</item>
+      <item quantity="one">Орнотсоңуз <xliff:g id="COUNT_0">%1$s</xliff:g> принтер таап аласыз</item>
+    </plurals>
+    <string name="printing_notification_title_template" msgid="295903957762447362">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> басылууда"</string>
+    <string name="cancelling_notification_title_template" msgid="1821759594704703197">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> токтотулууда"</string>
+    <string name="failed_notification_title_template" msgid="2256217208186530973">"Принтерде ката кетти: <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
+    <string name="blocked_notification_title_template" msgid="1175435827331588646">"Принтер бөгөттөдү: <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
+    <string name="cancel" msgid="4373674107267141885">"Айнуу"</string>
+    <string name="restart" msgid="2472034227037808749">"Кайра баштоо"</string>
+    <string name="no_connection_to_printer" msgid="2159246915977282728">"Принтер менен байланыш жок"</string>
+    <string name="reason_unknown" msgid="5507940196503246139">"белгисиз"</string>
+    <string name="print_service_security_warning_title" msgid="2160752291246775320">"<xliff:g id="SERVICE">%1$s</xliff:g> колдоносузбу?"</string>
+    <string name="print_service_security_warning_summary" msgid="1427434625361692006">"Принтерге жеткиче документиңиз бир же андан көп серверлерден өтүшү мүмкүн."</string>
+  <string-array name="color_mode_labels">
+    <item msgid="7602948745415174937">"Кара-ак"</item>
+    <item msgid="2762241247228983754">"Түстүү"</item>
+  </string-array>
+  <string-array name="duplex_mode_labels">
+    <item msgid="3882302912790928315">"Эч бири"</item>
+    <item msgid="7296563835355641719">"Узун кыр"</item>
+    <item msgid="79513688117503758">"Кыска кыр"</item>
+  </string-array>
+  <string-array name="orientation_labels">
+    <item msgid="4061931020926489228">"Тикесинен"</item>
+    <item msgid="3199660090246166812">"Туурасынан"</item>
+  </string-array>
+    <string name="print_write_error_message" msgid="5787642615179572543">"Файлга жазылган жок"</string>
+    <string name="print_error_default_message" msgid="8602678405502922346">"Кечиресиз, иштеген жок. Дагы бир жолу аракет кылып көрүңүз."</string>
+    <string name="print_error_retry" msgid="1426421728784259538">"Дагы бир жолу аракет кылуу"</string>
+    <string name="print_error_printer_unavailable" msgid="8985614415253203381">"Учурда бул принтерди колдонуу мүмкүн эмес."</string>
+    <string name="print_cannot_load_page" msgid="6179560924492912009">"Алдын ала көрүнүшү көрсөтүлбөй жатат"</string>
+    <string name="print_preparing_preview" msgid="3939930735671364712">"Алдын-ала көрүүгө даярданууда…"</string>
+</resources>

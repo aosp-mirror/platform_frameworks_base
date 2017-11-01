@@ -15,45 +15,43 @@
  */
 package com.android.tests.applaunch;
 
-import java.io.OutputStreamWriter;
-
 import android.accounts.Account;
 import android.accounts.AccountManager;
-import android.app.ActivityManagerNative;
 import android.app.ActivityManager;
 import android.app.ActivityManager.ProcessErrorStateInfo;
+import android.app.IActivityManager;
+import android.app.UiAutomation;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
+import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.app.UiAutomation;
-import android.app.IActivityManager;
-import android.app.IActivityManager.WaitResult;
 import android.support.test.rule.logging.AtraceLogger;
 import android.test.InstrumentationTestCase;
 import android.test.InstrumentationTestRunner;
 import android.util.Log;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
-import android.os.ParcelFileDescriptor;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.InputStreamReader;
-
 /**
  * This test is intended to measure the time it takes for the apps to start.
  * Names of the applications are passed in command line, and the
@@ -75,6 +73,7 @@ public class AppLaunch extends InstrumentationTestCase {
     private static final String KEY_LAUNCH_ITERATIONS = "launch_iterations";
     private static final String KEY_LAUNCH_ORDER = "launch_order";
     private static final String KEY_DROP_CACHE = "drop_cache";
+    private static final String KEY_SIMULATE_MAINTANANCE = "simulate_maintanance";
     private static final String KEY_SIMPLEPPERF_CMD = "simpleperf_cmd";
     private static final String KEY_TRACE_ITERATIONS = "trace_iterations";
     private static final String KEY_LAUNCH_DIRECTORY = "launch_directory";
@@ -99,6 +98,7 @@ public class AppLaunch extends InstrumentationTestCase {
     private static final String DROP_CACHE_SCRIPT = "/data/local/tmp/dropCache.sh";
     private static final String APP_LAUNCH_CMD = "am start -W -n";
     private static final String SUCCESS_MESSAGE = "Status: ok";
+    private static final String PROFILE_COMPILE_SUCCESS = "Success";
     private static final String THIS_TIME = "ThisTime:";
     private static final String LAUNCH_ITERATION = "LAUNCH_ITERATION - %d";
     private static final String TRACE_ITERATION = "TRACE_ITERATION - %d";
@@ -106,10 +106,11 @@ public class AppLaunch extends InstrumentationTestCase {
     private static final String TRACE_ITERATION_PREFIX = "TRACE_ITERATION";
     private static final String LAUNCH_ORDER_CYCLIC = "cyclic";
     private static final String LAUNCH_ORDER_SEQUENTIAL = "sequential";
+    private static final String SPEED_PROFILE_CMD = "cmd package compile -f -m speed-profile %s";
+
 
 
     private Map<String, Intent> mNameToIntent;
-    private Map<String, String> mNameToProcess;
     private List<LaunchOrder> mLaunchOrderList = new ArrayList<LaunchOrder>();
     private Map<String, String> mNameToResultKey;
     private Map<String, List<Long>> mNameToLaunchTime;
@@ -126,6 +127,7 @@ public class AppLaunch extends InstrumentationTestCase {
     private File mFile = null;
     private FileOutputStream mOutputStream = null;
     private BufferedWriter mBufferedWriter = null;
+    private boolean mSimulateMaintanance = false;
 
 
     @Override
@@ -145,12 +147,14 @@ public class AppLaunch extends InstrumentationTestCase {
         InstrumentationTestRunner instrumentation =
                 (InstrumentationTestRunner)getInstrumentation();
         Bundle args = instrumentation.getArguments();
-        mAm = ActivityManagerNative.getDefault();
+        mAm = ActivityManager.getService();
         String launchDirectory = args.getString(KEY_LAUNCH_DIRECTORY);
         mTraceDirectoryStr = args.getString(KEY_TRACE_DIRECTORY);
         mDropCache = Boolean.parseBoolean(args.getString(KEY_DROP_CACHE));
         mSimplePerfCmd = args.getString(KEY_SIMPLEPPERF_CMD);
         mLaunchOrder = args.getString(KEY_LAUNCH_ORDER, LAUNCH_ORDER_CYCLIC);
+        mSimulateMaintanance =  Boolean.parseBoolean(args.getString(KEY_SIMULATE_MAINTANANCE));
+
         createMappings();
         parseArgs(args);
         checkAccountSignIn();
@@ -231,6 +235,12 @@ public class AppLaunch extends InstrumentationTestCase {
                     sleep(INITIAL_LAUNCH_IDLE_TIMEOUT);
                     closeApp(launch.getApp(), true);
                     dropCache();
+                    if (mSimulateMaintanance) {
+                        String appPkgName = mNameToIntent.get(launch.getApp())
+                                .getComponent().getPackageName();
+                        assertTrue(String.format("Not able to speed profile the app : %s",
+                                appPkgName), profileCompileApp(appPkgName));
+                    }
                     sleep(BETWEEN_LAUNCH_SLEEP_TIMEOUT);
                 }
 
@@ -304,6 +314,26 @@ public class AppLaunch extends InstrumentationTestCase {
             mResult.putString(mNameToResultKey.get(app), launchTimes.toString());
         }
         instrumentation.sendStatus(0, mResult);
+    }
+
+    /**
+     * Compile the app package using speed compile command and return true or false
+     * based on status of the compilation command.
+     */
+    private boolean profileCompileApp(String appPkgName) throws IOException {
+        Log.i(TAG, "Starting to speed profile " + appPkgName);
+        try (ParcelFileDescriptor result = getInstrumentation().getUiAutomation().
+                executeShellCommand(String.format(SPEED_PROFILE_CMD, appPkgName));
+                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(
+                        new FileInputStream(result.getFileDescriptor())))) {
+            String line;
+            while ((line = bufferedReader.readLine()) != null) {
+                if (line.contains(PROFILE_COMPILE_SUCCESS)) {
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 
     /**
@@ -400,7 +430,6 @@ public class AppLaunch extends InstrumentationTestCase {
 
     private void createMappings() {
         mNameToIntent = new LinkedHashMap<String, Intent>();
-        mNameToProcess = new LinkedHashMap<String, String>();
 
         PackageManager pm = getInstrumentation().getContext()
                 .getPackageManager();
@@ -428,8 +457,9 @@ public class AppLaunch extends InstrumentationTestCase {
                         ri.activityInfo.name);
                 String appName = ri.loadLabel(pm).toString();
                 if (appName != null) {
+                    // Support launching intent using package name or app name
+                    mNameToIntent.put(ri.activityInfo.packageName, startIntent);
                     mNameToIntent.put(appName, startIntent);
-                    mNameToProcess.put(appName, ri.activityInfo.processName);
                 }
             }
         }
@@ -634,7 +664,8 @@ public class AppLaunch extends InstrumentationTestCase {
                     if (lineCount == 2 && line.contains(SUCCESS_MESSAGE)) {
                         launchSuccess = true;
                     }
-                    if (launchSuccess && lineCount == 4) {
+                    // Parse TotalTime which is the launch time
+                    if (launchSuccess && lineCount == 5) {
                         String launchSplit[] = line.split(":");
                         launchTime = launchSplit[1].trim();
                     }

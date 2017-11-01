@@ -17,82 +17,84 @@
 #ifndef AAPT_NAME_MANGLER_H
 #define AAPT_NAME_MANGLER_H
 
-#include "Resource.h"
-
-#include "util/Maybe.h"
-
 #include <set>
 #include <string>
+
+#include "Resource.h"
+#include "util/Maybe.h"
 
 namespace aapt {
 
 struct NameManglerPolicy {
-    /**
-     * Represents the package we are trying to build. References pointing
-     * to this package are not mangled, and mangled references inherit this package name.
-     */
-    std::u16string targetPackageName;
+  /**
+   * Represents the package we are trying to build. References pointing
+   * to this package are not mangled, and mangled references inherit this
+   * package name.
+   */
+  std::string target_package_name;
 
-    /**
-     * We must know which references to mangle, and which to keep (android vs. com.android.support).
-     */
-    std::set<std::u16string> packagesToMangle;
+  /**
+   * We must know which references to mangle, and which to keep (android vs.
+   * com.android.support).
+   */
+  std::set<std::string> packages_to_mangle;
 };
 
 class NameMangler {
-private:
-    NameManglerPolicy mPolicy;
+ public:
+  explicit NameMangler(NameManglerPolicy policy) : policy_(policy) {}
 
-public:
-    NameMangler(NameManglerPolicy policy) : mPolicy(policy) {
+  Maybe<ResourceName> MangleName(const ResourceName& name) {
+    if (policy_.target_package_name == name.package ||
+        policy_.packages_to_mangle.count(name.package) == 0) {
+      return {};
     }
 
-    Maybe<ResourceName> mangleName(const ResourceName& name) {
-        if (mPolicy.targetPackageName == name.package ||
-                mPolicy.packagesToMangle.count(name.package) == 0) {
-            return {};
-        }
+    std::string mangled_entry_name = MangleEntry(name.package, name.entry);
+    return ResourceName(policy_.target_package_name, name.type,
+                        mangled_entry_name);
+  }
 
-        return ResourceName{
-                mPolicy.targetPackageName,
-                name.type,
-                mangleEntry(name.package, name.entry)
-        };
+  bool ShouldMangle(const std::string& package) const {
+    if (package.empty() || policy_.target_package_name == package) {
+      return false;
+    }
+    return policy_.packages_to_mangle.count(package) != 0;
+  }
+
+  const std::string& GetTargetPackageName() const { return policy_.target_package_name; }
+
+  /**
+   * Returns a mangled name that is a combination of `name` and `package`.
+   * The mangled name should contain symbols that are illegal to define in XML,
+   * so that there will never be name mangling collisions.
+   */
+  static std::string MangleEntry(const std::string& package,
+                                 const std::string& name) {
+    return package + "$" + name;
+  }
+
+  /**
+   * Unmangles the name in `outName`, storing the correct name back in `outName`
+   * and the package in `outPackage`. Returns true if the name was unmangled or
+   * false if the name was never mangled to begin with.
+   */
+  static bool Unmangle(std::string* out_name, std::string* out_package) {
+    size_t pivot = out_name->find('$');
+    if (pivot == std::string::npos) {
+      return false;
     }
 
-    bool shouldMangle(const std::u16string& package) const {
-        if (package.empty() || mPolicy.targetPackageName == package) {
-            return false;
-        }
-        return mPolicy.packagesToMangle.count(package) != 0;
-    }
+    out_package->assign(out_name->data(), pivot);
+    out_name->assign(out_name->data() + pivot + 1,
+                     out_name->size() - (pivot + 1));
+    return true;
+  }
 
-    /**
-     * Returns a mangled name that is a combination of `name` and `package`.
-     * The mangled name should contain symbols that are illegal to define in XML,
-     * so that there will never be name mangling collisions.
-     */
-    static std::u16string mangleEntry(const std::u16string& package, const std::u16string& name) {
-        return package + u"$" + name;
-    }
-
-    /**
-     * Unmangles the name in `outName`, storing the correct name back in `outName`
-     * and the package in `outPackage`. Returns true if the name was unmangled or
-     * false if the name was never mangled to begin with.
-     */
-    static bool unmangle(std::u16string* outName, std::u16string* outPackage) {
-        size_t pivot = outName->find(u'$');
-        if (pivot == std::string::npos) {
-            return false;
-        }
-
-        outPackage->assign(outName->data(), pivot);
-        outName->assign(outName->data() + pivot + 1, outName->size() - (pivot + 1));
-        return true;
-    }
+ private:
+  NameManglerPolicy policy_;
 };
 
-} // namespace aapt
+}  // namespace aapt
 
-#endif // AAPT_NAME_MANGLER_H
+#endif  // AAPT_NAME_MANGLER_H

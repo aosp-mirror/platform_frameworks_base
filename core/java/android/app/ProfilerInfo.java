@@ -39,11 +39,16 @@ public class ProfilerInfo implements Parcelable {
     /* Automatically stop the profiler when the app goes idle. */
     public final boolean autoStopProfiler;
 
-    public ProfilerInfo(String filename, ParcelFileDescriptor fd, int interval, boolean autoStop) {
+    /* Indicates whether to stream the profiling info to the out file continuously. */
+    public final boolean streamingOutput;
+
+    public ProfilerInfo(String filename, ParcelFileDescriptor fd, int interval, boolean autoStop,
+                        boolean streaming) {
         profileFile = filename;
         profileFd = fd;
         samplingInterval = interval;
         autoStopProfiler = autoStop;
+        streamingOutput = streaming;
     }
 
     public int describeContents() {
@@ -64,6 +69,7 @@ public class ProfilerInfo implements Parcelable {
         }
         out.writeInt(samplingInterval);
         out.writeInt(autoStopProfiler ? 1 : 0);
+        out.writeInt(streamingOutput ? 1 : 0);
     }
 
     public static final Parcelable.Creator<ProfilerInfo> CREATOR =
@@ -82,5 +88,6 @@ public class ProfilerInfo implements Parcelable {
         profileFd = in.readInt() != 0 ? ParcelFileDescriptor.CREATOR.createFromParcel(in) : null;
         samplingInterval = in.readInt();
         autoStopProfiler = in.readInt() != 0;
+        streamingOutput = in.readInt() != 0;
     }
 }

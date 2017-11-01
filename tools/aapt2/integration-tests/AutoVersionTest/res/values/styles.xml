@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2017 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+
+<resources>
+    <style name="Style1">
+        <!-- API 7 -->
+        <item name="android:autoStart">true</item>
+
+        <!-- API 8 -->
+        <item name="android:expandableListViewWhiteStyle">@null</item>
+
+        <!-- API 9 -->
+        <item name="android:screenSize">large</item>
+
+        <!-- API 11 -->
+        <item name="android:subtitle">Hello</item>
+
+        <!-- API 12 -->
+        <item name="android:resizeMode">none</item>
+
+        <!-- API 13 -->
+        <item name="android:largestWidthLimitDp">999</item>
+
+        <!-- API 14 -->
+        <item name="android:uiOptions">none</item>
+
+        <!-- API 16 -->
+        <item name="android:parentActivityName">Hello</item>
+
+        <!-- API 17 -->
+        <item name="android:paddingStart">999dp</item>
+
+        <!-- API 18 -->
+        <item name="android:requiredForAllUsers">true</item>
+
+        <!-- API 19 -->
+        <item name="android:category">Hello</item>
+
+        <!-- API 20 -->
+        <item name="android:isGame">true</item>
+
+        <!-- API 21 -->
+        <item name="android:colorPrimary">#ffffff</item>
+
+        <!-- API 22 -->
+        <item name="android:revisionCode">999</item>
+
+        <!-- API 23 -->
+        <item name="android:autoVerify">true</item>
+
+        <!-- API 24 -->
+        <item name="android:use32bitAbi">true</item>
+
+        <!-- API 25 -->
+        <item name="android:shortcutId">@+id/id</item>
+
+        <!-- API 26 -->
+        <item name="android:paddingHorizontal">999dp</item>
+    </style>
+
+    <style name="Style2">
+        <!-- API 7 -->
+        <item name="android:autoStart">true</item>
+
+        <!-- API 17 -->
+        <item name="android:paddingStart">999dp</item>
+
+        <!-- API 21 -->
+        <item name="android:colorPrimary">#ffffff</item>
+    </style>
+</resources>

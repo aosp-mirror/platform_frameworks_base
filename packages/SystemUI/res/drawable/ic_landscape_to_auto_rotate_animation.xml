@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-     Copyright (C) 2014 The Android Open Source Project
+     Copyright (C) 2017 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -14,21 +14,16 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
+<animated-vector
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:drawable="@drawable/ic_landscape_to_auto_rotate" >
     <target
+        android:name="landscape"
+        android:animation="@anim/ic_landscape_to_rotate_landscape_animation" />
+    <target
         android:name="arrows"
-        android:animation="@anim/ic_landscape_to_auto_rotate_animation_arrows" />
+        android:animation="@anim/ic_landscape_to_rotate_arrows_animation" />
     <target
-        android:name="arrow_top"
-        android:animation="@anim/ic_landscape_to_auto_rotate_animation_arrow_top" />
-    <target
-        android:name="arrow_bottom"
-        android:animation="@anim/ic_landscape_to_auto_rotate_animation_arrow_bottom" />
-    <target
-        android:name="device"
-        android:animation="@anim/ic_landscape_to_auto_rotate_animation_device" />
-    <target
-        android:name="body"
-        android:animation="@anim/ic_landscape_to_auto_rotate_animation_body" />
+        android:name="bottom_merged"
+        android:animation="@anim/ic_landscape_to_rotate_bottom_merged_animation" />
 </animated-vector>

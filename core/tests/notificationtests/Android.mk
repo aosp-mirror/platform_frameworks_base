@@ -12,6 +12,8 @@ LOCAL_JAVA_LIBRARIES := android.test.runner
 LOCAL_PACKAGE_NAME := NotificationStressTests
 
 LOCAL_STATIC_JAVA_LIBRARIES := \
+    junit \
+    legacy-android-test \
     ub-uiautomator
 
 include $(BUILD_PACKAGE)

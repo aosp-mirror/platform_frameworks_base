@@ -19,6 +19,6 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="car_lockscreen_disclaimer_title" msgid="7997539137376896441">"Kör försiktigt"</string>
-    <string name="car_lockscreen_disclaimer_text" msgid="3061224684092952864">"Håll koll på trafik- och körförhållanden och följ gällande lagar. Det kan hända att vägbeskrivningen inte stämmer, att den är ofullständig, farlig, olämplig, förbjuden eller att den innebär att du måste korsa en administrativ enhet. Det kan även hända att företagsuppgifter är felaktiga eller ofullständiga. Uppgifter visas inte i realtid och det går inte att garantera att platsen är korrekt. Hantera inte din mobila enhet och använd inte appar som inte är ämnade för Android Auto medan du kör."</string>
+    <string name="unknown_user_label" msgid="4323896111737677955">"Okänt"</string>
+    <string name="start_driving" msgid="864023351402918991">"Börja köra"</string>
 </resources>

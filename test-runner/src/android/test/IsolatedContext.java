@@ -16,8 +16,6 @@
 
 package android.test;
 
-import com.google.android.collect.Lists;
-
 import android.accounts.AccountManager;
 import android.accounts.AccountManagerCallback;
 import android.accounts.AccountManagerFuture;
@@ -38,6 +36,7 @@ import android.os.Handler;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.List;
 
@@ -55,7 +54,7 @@ public class IsolatedContext extends ContextWrapper {
     private ContentResolver mResolver;
     private final MockAccountManager mMockAccountManager;
 
-    private List<Intent> mBroadcastIntents = Lists.newArrayList();
+    private List<Intent> mBroadcastIntents = new ArrayList<>();
 
     public IsolatedContext(
             ContentResolver resolver, Context targetContext) {
@@ -67,7 +66,7 @@ public class IsolatedContext extends ContextWrapper {
     /** Returns the list of intents that were broadcast since the last call to this method. */
     public List<Intent> getAndClearBroadcastIntents() {
         List<Intent> intents = mBroadcastIntents;
-        mBroadcastIntents = Lists.newArrayList();
+        mBroadcastIntents = new ArrayList<>();
         return intents;
     }
 

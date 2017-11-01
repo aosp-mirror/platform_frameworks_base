@@ -62,4 +62,9 @@
          ListView/GridView are notably absent since this is their default anyway.
          Set to true for watch devices. -->
     <bool name="config_focusScrollContainersInTouchMode">true</bool>
+
+    <!-- Enable generic multi-window in order to support Activity in virtual display. -->
+    <bool name="config_supportsMultiWindow">true</bool>
+    <bool name="config_supportsMultiDisplay">true</bool>
+    <bool name="config_supportsSplitScreenMultiWindow">false</bool>
 </resources>

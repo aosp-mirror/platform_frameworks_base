@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2016 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:sysui="http://schemas.android.com/apk/res-auto"
+    android:title="@string/other">
+
+
+    <Preference
+        android:key="sysui_keyguard_left"
+        android:title="@string/lockscreen_shortcut_left"
+        android:fragment="com.android.systemui.tuner.ShortcutPicker" />
+
+    <com.android.systemui.tuner.TunerSwitch
+        android:key="sysui_keyguard_left_unlock"
+        android:title="@string/lockscreen_unlock_left"
+        sysui:defValue="true" />
+
+    <Preference
+        android:key="sysui_keyguard_right"
+        android:title="@string/lockscreen_shortcut_right" 
+        android:fragment="com.android.systemui.tuner.ShortcutPicker" />
+
+    <com.android.systemui.tuner.TunerSwitch
+        android:key="sysui_keyguard_right_unlock"
+        android:title="@string/lockscreen_unlock_right"
+        sysui:defValue="true" />
+
+</PreferenceScreen>

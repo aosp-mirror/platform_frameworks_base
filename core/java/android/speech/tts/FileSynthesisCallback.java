@@ -309,4 +309,9 @@ class FileSynthesisCallback extends AbstractSynthesisCallback {
 
         return header;
     }
+
+    @Override
+    public void rangeStart(int markerInFrames, int start, int end) {
+        mDispatcher.dispatchOnRangeStart(markerInFrames, start, end);
+    }
 }

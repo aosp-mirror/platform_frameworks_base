@@ -24,10 +24,19 @@
 
 #include "Caches.h"
 #include "DeviceInfo.h"
+#include "Frame.h"
 #include "Properties.h"
 #include "RenderThread.h"
 #include "renderstate/RenderState.h"
+#include "Texture.h"
+
 #include <EGL/eglext.h>
+#include <GrContextOptions.h>
+#include <gl/GrGLInterface.h>
+
+#ifdef HWUI_GLES_WRAP_ENABLED
+#include "debug/GlesDriver.h"
+#endif
 
 #define GLES_VERSION 2
 
@@ -60,42 +69,27 @@ static const char* egl_error_str(EGLint error) {
         return "Unknown error";
     }
 }
-static const char* egl_error_str() {
+const char* EglManager::eglErrorString() {
     return egl_error_str(eglGetError());
 }
 
 static struct {
     bool bufferAge = false;
     bool setDamage = false;
+    bool noConfigContext = false;
+    bool pixelFormatFloat = false;
+    bool glColorSpace = false;
+    bool scRGB = false;
 } EglExtensions;
-
-void Frame::map(const SkRect& in, EGLint* out) const {
-    /* The rectangles are specified relative to the bottom-left of the surface
-     * and the x and y components of each rectangle specify the bottom-left
-     * position of that rectangle.
-     *
-     * HWUI does everything with 0,0 being top-left, so need to map
-     * the rect
-     */
-    SkIRect idirty;
-    in.roundOut(&idirty);
-    EGLint y = mHeight - (idirty.y() + idirty.height());
-    // layout: {x, y, width, height}
-    out[0] = idirty.x();
-    out[1] = y;
-    out[2] = idirty.width();
-    out[3] = idirty.height();
-}
 
 EglManager::EglManager(RenderThread& thread)
         : mRenderThread(thread)
         , mEglDisplay(EGL_NO_DISPLAY)
         , mEglConfig(nullptr)
+        , mEglConfigWideGamut(nullptr)
         , mEglContext(EGL_NO_CONTEXT)
         , mPBufferSurface(EGL_NO_SURFACE)
-        , mCurrentSurface(EGL_NO_SURFACE)
-        , mAtlasMap(nullptr)
-        , mAtlasMapSize(0) {
+        , mCurrentSurface(EGL_NO_SURFACE) {
 }
 
 void EglManager::initialize() {
@@ -105,11 +99,11 @@ void EglManager::initialize() {
 
     mEglDisplay = eglGetDisplay(EGL_DEFAULT_DISPLAY);
     LOG_ALWAYS_FATAL_IF(mEglDisplay == EGL_NO_DISPLAY,
-            "Failed to get EGL_DEFAULT_DISPLAY! err=%s", egl_error_str());
+            "Failed to get EGL_DEFAULT_DISPLAY! err=%s", eglErrorString());
 
     EGLint major, minor;
     LOG_ALWAYS_FATAL_IF(eglInitialize(mEglDisplay, &major, &minor) == EGL_FALSE,
-            "Failed to initialize display %p! err=%s", mEglDisplay, egl_error_str());
+            "Failed to initialize display %p! err=%s", mEglDisplay, eglErrorString());
 
     ALOGI("Initialized EGL, version %d.%d", (int)major, (int)minor);
 
@@ -117,25 +111,44 @@ void EglManager::initialize() {
 
     // Now that extensions are loaded, pick a swap behavior
     if (Properties::enablePartialUpdates) {
-        if (Properties::useBufferAge && EglExtensions.bufferAge) {
+        // An Adreno driver bug is causing rendering problems for SkiaGL with
+        // buffer age swap behavior (b/31957043).  To temporarily workaround,
+        // we will use preserved swap behavior.
+        if (Properties::useBufferAge && EglExtensions.bufferAge && !Properties::isSkiaEnabled()) {
             mSwapBehavior = SwapBehavior::BufferAge;
         } else {
             mSwapBehavior = SwapBehavior::Preserved;
         }
     }
 
-    loadConfig();
+    loadConfigs();
     createContext();
     createPBufferSurface();
     makeCurrent(mPBufferSurface);
     DeviceInfo::initialize();
     mRenderThread.renderState().onGLContextCreated();
-    initAtlas();
+
+    if (Properties::getRenderPipelineType() == RenderPipelineType::SkiaGL) {
+#ifdef HWUI_GLES_WRAP_ENABLED
+        debug::GlesDriver* driver = debug::GlesDriver::get();
+        sk_sp<const GrGLInterface> glInterface(driver->getSkiaInterface());
+#else
+        sk_sp<const GrGLInterface> glInterface(GrGLCreateNativeInterface());
+#endif
+        LOG_ALWAYS_FATAL_IF(!glInterface.get());
+
+        GrContextOptions options;
+        options.fGpuPathRenderers &= ~GrContextOptions::GpuPathRenderers::kDistanceField;
+        mRenderThread.cacheManager().configureContext(&options);
+        mRenderThread.setGrContext(GrContext::Create(GrBackend::kOpenGL_GrBackend,
+                (GrBackendContext)glInterface.get(), options));
+    }
 }
 
 void EglManager::initExtensions() {
     auto extensions = StringUtils::split(
             eglQueryString(mEglDisplay, EGL_EXTENSIONS));
+
     // For our purposes we don't care if EGL_BUFFER_AGE is a result of
     // EGL_EXT_buffer_age or EGL_KHR_partial_update as our usage is covered
     // under EGL_KHR_partial_update and we don't need the expanded scope
@@ -145,13 +158,22 @@ void EglManager::initExtensions() {
     EglExtensions.setDamage = extensions.has("EGL_KHR_partial_update");
     LOG_ALWAYS_FATAL_IF(!extensions.has("EGL_KHR_swap_buffers_with_damage"),
             "Missing required extension EGL_KHR_swap_buffers_with_damage");
+
+    EglExtensions.glColorSpace = extensions.has("EGL_KHR_gl_colorspace");
+    EglExtensions.noConfigContext = extensions.has("EGL_KHR_no_config_context");
+    EglExtensions.pixelFormatFloat = extensions.has("EGL_EXT_pixel_format_float");
+#ifdef ANDROID_ENABLE_LINEAR_BLENDING
+    EglExtensions.scRGB = extensions.has("EGL_EXT_gl_colorspace_scrgb_linear");
+#else
+    EglExtensions.scRGB = extensions.has("EGL_EXT_gl_colorspace_scrgb");
+#endif
 }
 
 bool EglManager::hasEglContext() {
     return mEglDisplay != EGL_NO_DISPLAY;
 }
 
-void EglManager::loadConfig() {
+void EglManager::loadConfigs() {
     ALOGD("Swap behavior %d", static_cast<int>(mSwapBehavior));
     EGLint swapBehavior = (mSwapBehavior == SwapBehavior::Preserved)
             ? EGL_SWAP_BEHAVIOR_PRESERVED_BIT : 0;
@@ -168,17 +190,42 @@ void EglManager::loadConfig() {
             EGL_NONE
     };
 
-    EGLint num_configs = 1;
-    if (!eglChooseConfig(mEglDisplay, attribs, &mEglConfig, num_configs, &num_configs)
-            || num_configs != 1) {
+    EGLint numConfigs = 1;
+    if (!eglChooseConfig(mEglDisplay, attribs, &mEglConfig, numConfigs, &numConfigs)
+            || numConfigs != 1) {
         if (mSwapBehavior == SwapBehavior::Preserved) {
             // Try again without dirty regions enabled
             ALOGW("Failed to choose config with EGL_SWAP_BEHAVIOR_PRESERVED, retrying without...");
             mSwapBehavior = SwapBehavior::Discard;
-            loadConfig();
+            loadConfigs();
+            return; // the call to loadConfigs() we just made picks the wide gamut config
         } else {
             // Failed to get a valid config
-            LOG_ALWAYS_FATAL("Failed to choose config, error = %s", egl_error_str());
+            LOG_ALWAYS_FATAL("Failed to choose config, error = %s", eglErrorString());
+        }
+    }
+
+    if (EglExtensions.pixelFormatFloat) {
+        // If we reached this point, we have a valid swap behavior
+        EGLint attribs16F[] = {
+                EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
+                EGL_COLOR_COMPONENT_TYPE_EXT, EGL_COLOR_COMPONENT_TYPE_FLOAT_EXT,
+                EGL_RED_SIZE, 16,
+                EGL_GREEN_SIZE, 16,
+                EGL_BLUE_SIZE, 16,
+                EGL_ALPHA_SIZE, 16,
+                EGL_DEPTH_SIZE, 0,
+                EGL_STENCIL_SIZE, Stencil::getStencilSize(),
+                EGL_SURFACE_TYPE, EGL_WINDOW_BIT | swapBehavior,
+                EGL_NONE
+        };
+
+        numConfigs = 1;
+        if (!eglChooseConfig(mEglDisplay, attribs16F, &mEglConfigWideGamut, numConfigs, &numConfigs)
+                || numConfigs != 1) {
+            LOG_ALWAYS_FATAL(
+                    "Device claims wide gamut support, cannot find matching config, error = %s",
+                    eglErrorString());
         }
     }
 }
@@ -188,35 +235,11 @@ void EglManager::createContext() {
             EGL_CONTEXT_CLIENT_VERSION, GLES_VERSION,
             EGL_NONE
     };
-    mEglContext = eglCreateContext(mEglDisplay, mEglConfig, EGL_NO_CONTEXT, attribs);
+    mEglContext = eglCreateContext(mEglDisplay,
+            EglExtensions.noConfigContext ? ((EGLConfig) nullptr) : mEglConfig,
+            EGL_NO_CONTEXT, attribs);
     LOG_ALWAYS_FATAL_IF(mEglContext == EGL_NO_CONTEXT,
-        "Failed to create context, error = %s", egl_error_str());
-}
-
-void EglManager::setTextureAtlas(const sp<GraphicBuffer>& buffer,
-        int64_t* map, size_t mapSize) {
-
-    // Already initialized
-    if (mAtlasBuffer.get()) {
-        ALOGW("Multiple calls to setTextureAtlas!");
-        delete map;
-        return;
-    }
-
-    mAtlasBuffer = buffer;
-    mAtlasMap = map;
-    mAtlasMapSize = mapSize;
-
-    if (hasEglContext()) {
-        initAtlas();
-    }
-}
-
-void EglManager::initAtlas() {
-    if (mAtlasBuffer.get()) {
-        mRenderThread.renderState().assetAtlas().init(mAtlasBuffer,
-                mAtlasMap, mAtlasMapSize);
-    }
+        "Failed to create context, error = %s", eglErrorString());
 }
 
 void EglManager::createPBufferSurface() {
@@ -229,17 +252,66 @@ void EglManager::createPBufferSurface() {
     }
 }
 
-EGLSurface EglManager::createSurface(EGLNativeWindowType window) {
+EGLSurface EglManager::createSurface(EGLNativeWindowType window, bool wideColorGamut) {
     initialize();
-    EGLSurface surface = eglCreateWindowSurface(mEglDisplay, mEglConfig, window, nullptr);
+
+    wideColorGamut = wideColorGamut && EglExtensions.glColorSpace && EglExtensions.scRGB
+            && EglExtensions.pixelFormatFloat && EglExtensions.noConfigContext;
+
+    // The color space we want to use depends on whether linear blending is turned
+    // on and whether the app has requested wide color gamut rendering. When wide
+    // color gamut rendering is off, the app simply renders in the display's native
+    // color gamut.
+    //
+    // When wide gamut rendering is off:
+    // - Blending is done by default in gamma space, which requires using a
+    //   linear EGL color space (the GPU uses the color values as is)
+    // - If linear blending is on, we must use the sRGB EGL color space (the
+    //   GPU will perform sRGB to linear and linear to SRGB conversions before
+    //   and after blending)
+    //
+    // When wide gamut rendering is on we cannot rely on the GPU performing
+    // linear blending for us. We use two different color spaces to tag the
+    // surface appropriately for SurfaceFlinger:
+    // - Gamma blending (default) requires the use of the scRGB-nl color space
+    // - Linear blending requires the use of the scRGB color space
+
+    // Not all Android targets support the EGL_GL_COLOR_SPACE_KHR extension
+    // We insert to placeholders to set EGL_GL_COLORSPACE_KHR and its value.
+    // According to section 3.4.1 of the EGL specification, the attributes
+    // list is considered empty if the first entry is EGL_NONE
+    EGLint attribs[] = {
+            EGL_NONE, EGL_NONE,
+            EGL_NONE
+    };
+
+    if (EglExtensions.glColorSpace) {
+        attribs[0] = EGL_GL_COLORSPACE_KHR;
+#ifdef ANDROID_ENABLE_LINEAR_BLENDING
+        if (wideColorGamut) {
+            attribs[1] = EGL_GL_COLORSPACE_SCRGB_LINEAR_EXT;
+        } else {
+            attribs[1] = EGL_GL_COLORSPACE_SRGB_KHR;
+        }
+#else
+        if (wideColorGamut) {
+            attribs[1] = EGL_GL_COLORSPACE_SCRGB_EXT;
+        } else {
+            attribs[1] = EGL_GL_COLORSPACE_LINEAR_KHR;
+        }
+#endif
+    }
+
+    EGLSurface surface = eglCreateWindowSurface(mEglDisplay,
+            wideColorGamut ? mEglConfigWideGamut : mEglConfig, window, attribs);
     LOG_ALWAYS_FATAL_IF(surface == EGL_NO_SURFACE,
             "Failed to create EGLSurface for window %p, eglErr = %s",
-            (void*) window, egl_error_str());
+            (void*) window, eglErrorString());
 
     if (mSwapBehavior != SwapBehavior::Preserved) {
         LOG_ALWAYS_FATAL_IF(eglSurfaceAttrib(mEglDisplay, surface, EGL_SWAP_BEHAVIOR, EGL_BUFFER_DESTROYED) == EGL_FALSE,
                             "Failed to set swap behavior to destroyed for window %p, eglErr = %s",
-                            (void*) window, egl_error_str());
+                            (void*) window, eglErrorString());
     }
 
     return surface;
@@ -250,13 +322,14 @@ void EglManager::destroySurface(EGLSurface surface) {
         makeCurrent(EGL_NO_SURFACE);
     }
     if (!eglDestroySurface(mEglDisplay, surface)) {
-        ALOGW("Failed to destroy surface %p, error=%s", (void*)surface, egl_error_str());
+        ALOGW("Failed to destroy surface %p, error=%s", (void*)surface, eglErrorString());
     }
 }
 
 void EglManager::destroy() {
     if (mEglDisplay == EGL_NO_DISPLAY) return;
 
+    mRenderThread.setGrContext(nullptr);
     mRenderThread.renderState().onGLContextDestroyed();
     eglDestroyContext(mEglDisplay, mEglContext);
     eglDestroySurface(mEglDisplay, mPBufferSurface);
@@ -284,10 +357,13 @@ bool EglManager::makeCurrent(EGLSurface surface, EGLint* errOut) {
                     (void*)surface, egl_error_str(*errOut));
         } else {
             LOG_ALWAYS_FATAL("Failed to make current on surface %p, error=%s",
-                    (void*)surface, egl_error_str());
+                    (void*)surface, eglErrorString());
         }
     }
     mCurrentSurface = surface;
+    if (Properties::disableVsync) {
+        eglSwapInterval(mEglDisplay, 0);
+    }
     return true;
 }
 
@@ -325,7 +401,7 @@ void EglManager::damageFrame(const Frame& frame, const SkRect& dirty) {
         frame.map(dirty, rects);
         if (!eglSetDamageRegionKHR(mEglDisplay, frame.mSurface, rects, 1)) {
             LOG_ALWAYS_FATAL("Failed to set damage region on surface %p, error=%s",
-                    (void*)frame.mSurface, egl_error_str());
+                    (void*)frame.mSurface, eglErrorString());
         }
     }
 #endif
@@ -379,14 +455,14 @@ bool EglManager::setPreserveBuffer(EGLSurface surface, bool preserve) {
             preserve ? EGL_BUFFER_PRESERVED : EGL_BUFFER_DESTROYED);
     if (!preserved) {
         ALOGW("Failed to set EGL_SWAP_BEHAVIOR on surface %p, error=%s",
-                (void*) surface, egl_error_str());
+                (void*) surface, eglErrorString());
         // Maybe it's already set?
         EGLint swapBehavior;
         if (eglQuerySurface(mEglDisplay, surface, EGL_SWAP_BEHAVIOR, &swapBehavior)) {
             preserved = (swapBehavior == EGL_BUFFER_PRESERVED);
         } else {
             ALOGW("Failed to query EGL_SWAP_BEHAVIOR on surface %p, error=%p",
-                                (void*) surface, egl_error_str());
+                                (void*) surface, eglErrorString());
         }
     }
 

@@ -27,6 +27,16 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Collection;
 
+/**
+ * Definitions for working with security logs.
+ *
+ * <p>Device owner apps can control the logging with
+ * {@link DevicePolicyManager#setSecurityLoggingEnabled}. When security logs are enabled, device
+ * owner apps receive periodic callbacks from {@link DeviceAdminReceiver#onSecurityLogsAvailable},
+ * at which time new batch of logs can be collected via
+ * {@link DevicePolicyManager#retrieveSecurityLogs}. {@link SecurityEvent} describes the type and
+ * format of security logs being collected.
+ */
 public class SecurityLog {
 
     private static final String PROPERTY_LOGGING_ENABLED = "persist.logd.security";
@@ -144,8 +154,7 @@ public class SecurityLog {
         }
 
         /**
-         * Returns the payload contained in this log. Each call to this method will
-         * retrieve the next payload item. If no more payload exists, it returns {@code null}.
+         * Returns the payload contained in this log entry or {@code null} if there is no payload.
          */
         public Object getData() {
             return mEvent.getData();
@@ -173,6 +182,25 @@ public class SecurityLog {
                 return new SecurityEvent[size];
             }
         };
+
+        /**
+         * @hide
+         */
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            SecurityEvent other = (SecurityEvent) o;
+            return mEvent.equals(other.mEvent);
+        }
+
+        /**
+         * @hide
+         */
+        @Override
+        public int hashCode() {
+            return mEvent.hashCode();
+        }
     }
     /**
      * Retrieve all security logs and return immediately.

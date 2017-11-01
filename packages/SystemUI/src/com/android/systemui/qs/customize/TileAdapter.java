@@ -40,14 +40,14 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.MetricsProto;
+import com.android.internal.logging.nano.MetricsProto;
 import com.android.systemui.R;
-import com.android.systemui.qs.QSIconView;
+import com.android.systemui.qs.tileimpl.QSIconViewImpl;
 import com.android.systemui.qs.customize.TileAdapter.Holder;
 import com.android.systemui.qs.customize.TileQueryHelper.TileInfo;
 import com.android.systemui.qs.customize.TileQueryHelper.TileStateListener;
 import com.android.systemui.qs.external.CustomTile;
-import com.android.systemui.statusbar.phone.QSTileHost;
+import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 
 import java.util.ArrayList;
@@ -112,6 +112,12 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         }
         host.changeTiles(mCurrentSpecs, newSpecs);
         mCurrentSpecs = newSpecs;
+    }
+
+    public void resetTileSpecs(QSTileHost host, List<String> specs) {
+        // Notify the host so the tiles get removed callbacks.
+        host.changeTiles(mCurrentSpecs, specs);
+        setTileSpecs(specs);
     }
 
     public void setTileSpecs(List<String> currentSpecs) {
@@ -190,7 +196,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         }
         FrameLayout frame = (FrameLayout) inflater.inflate(R.layout.qs_customize_tile_frame, parent,
                 false);
-        frame.addView(new CustomizeTileView(context, new QSIconView(context)));
+        frame.addView(new CustomizeTileView(context, new QSIconViewImpl(context)));
         return new Holder(frame);
     }
 
@@ -301,6 +307,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         if (position == mEditIndex) position--;
 
         move(mAccessibilityFromIndex, position, v);
+
         notifyDataSetChanged();
     }
 
@@ -549,7 +556,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
 
         @Override
         public int getMovementFlags(RecyclerView recyclerView, ViewHolder viewHolder) {
-            if (viewHolder.getItemViewType() == TYPE_EDIT) {
+            if (viewHolder.getItemViewType() == TYPE_EDIT || viewHolder.getItemViewType() == TYPE_DIVIDER) {
                 return makeMovementFlags(0, 0);
             }
             int dragFlags = ItemTouchHelper.UP | ItemTouchHelper.DOWN | ItemTouchHelper.RIGHT

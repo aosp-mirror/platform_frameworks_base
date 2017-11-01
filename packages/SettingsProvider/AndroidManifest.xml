@@ -17,6 +17,7 @@
                   android:multiprocess="false"
                   android:exported="true"
                   android:singleUser="true"
-                  android:initOrder="100" />
+                  android:initOrder="100"
+                  android:visibleToInstantApps="true" />
     </application>
 </manifest>

@@ -17,8 +17,6 @@
 package com.android.commands.svc;
 
 import android.content.Context;
-import android.content.pm.IPackageManager;
-import android.content.pm.PackageManager;
 import android.nfc.INfcAdapter;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -44,41 +42,27 @@ public class NfcCommand extends Svc.Command {
 
     @Override
     public void run(String[] args) {
-        boolean validCommand = false;
-        if (args.length >= 2) {
-            boolean flag = false;
-            if ("enable".equals(args[1])) {
-                flag = true;
-                validCommand = true;
-            } else if ("disable".equals(args[1])) {
-                flag = false;
-                validCommand = true;
-            }
-            if (validCommand) {
-                IPackageManager pm = IPackageManager.Stub.asInterface(
-                        ServiceManager.getService("package"));
-                try {
-                    if (pm.hasSystemFeature(PackageManager.FEATURE_NFC, 0)) {
-                        INfcAdapter nfc = INfcAdapter.Stub
-                                .asInterface(ServiceManager.getService(Context.NFC_SERVICE));
-                        try {
-                            if (flag) {
-                                nfc.enable();
-                            } else
-                                nfc.disable(true);
-                        } catch (RemoteException e) {
-                            System.err.println("NFC operation failed: " + e);
-                        }
-                    } else {
-                        System.err.println("NFC feature not supported.");
-                    }
-                } catch (RemoteException e) {
-                    System.err.println("RemoteException while calling PackageManager, is the "
-                            + "system running?");
-                }
+        INfcAdapter adapter = INfcAdapter.Stub.asInterface(
+                ServiceManager.getService(Context.NFC_SERVICE));
+
+        if (adapter == null) {
+            System.err.println("Got a null NfcAdapter, is the system running?");
+            return;
+        }
+
+        try {
+            if (args.length == 2 && "enable".equals(args[1])) {
+                adapter.enable();
+                return;
+            } else if (args.length == 2 && "disable".equals(args[1])) {
+                adapter.disable(true);
                 return;
             }
+        } catch (RemoteException e) {
+            System.err.println("NFC operation failed: " + e);
+            return;
         }
+
         System.err.println(longHelp());
     }
 

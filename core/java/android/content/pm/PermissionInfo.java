@@ -17,6 +17,7 @@
 package android.content.pm;
 
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -120,6 +121,23 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
     public static final int PROTECTION_FLAG_SETUP = 0x800;
 
     /**
+     * Additional flag for {@link #protectionLevel}, corresponding
+     * to the <code>ephemeral</code> value of
+     * {@link android.R.attr#protectionLevel}.
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    public static final int PROTECTION_FLAG_EPHEMERAL = 0x1000;
+
+    /**
+     * Additional flag for {@link #protectionLevel}, corresponding
+     * to the <code>runtime</code> value of
+     * {@link android.R.attr#protectionLevel}.
+     */
+    public static final int PROTECTION_FLAG_RUNTIME_ONLY = 0x2000;
+
+    /**
      * Mask for {@link #protectionLevel}: the basic protection type.
      */
     public static final int PROTECTION_MASK_BASE = 0xf;
@@ -127,7 +145,7 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
     /**
      * Mask for {@link #protectionLevel}: additional flag bits.
      */
-    public static final int PROTECTION_MASK_FLAGS = 0xff0;
+    public static final int PROTECTION_MASK_FLAGS = 0xfff0;
 
     /**
      * The level of access this permission is protecting, as per
@@ -235,6 +253,12 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
         }
         if ((level&PermissionInfo.PROTECTION_FLAG_SETUP) != 0) {
             protLevel += "|setup";
+        }
+        if ((level&PermissionInfo.PROTECTION_FLAG_EPHEMERAL) != 0) {
+            protLevel += "|ephemeral";
+        }
+        if ((level&PermissionInfo.PROTECTION_FLAG_RUNTIME_ONLY) != 0) {
+            protLevel += "|runtime";
         }
         return protLevel;
     }

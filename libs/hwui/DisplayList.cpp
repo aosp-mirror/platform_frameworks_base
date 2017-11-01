@@ -19,15 +19,14 @@
 
 #include <utils/Trace.h>
 
+#include "DamageAccumulator.h"
 #include "Debug.h"
 #include "DisplayList.h"
-#include "RenderNode.h"
-
-#if HWUI_NEW_OPS
+#include "OpDumper.h"
 #include "RecordedOp.h"
-#else
-#include "DisplayListOp.h"
-#endif
+#include "RenderNode.h"
+#include "VectorDrawable.h"
+#include "renderthread/CanvasContext.h"
 
 namespace android {
 namespace uirenderer {
@@ -45,8 +44,7 @@ DisplayList::DisplayList()
         , regions(stdAllocator)
         , referenceHolders(stdAllocator)
         , functors(stdAllocator)
-        , vectorDrawables(stdAllocator)
-        , hasDrawOps(false) {
+        , vectorDrawables(stdAllocator) {
 }
 
 DisplayList::~DisplayList() {
@@ -90,6 +88,56 @@ size_t DisplayList::addChild(NodeOpType* op) {
     size_t index = children.size();
     children.push_back(op);
     return index;
+}
+
+void DisplayList::syncContents() {
+    for (auto& iter : functors) {
+        (*iter.functor)(DrawGlInfo::kModeSync, nullptr);
+    }
+    for (auto& vectorDrawable : vectorDrawables) {
+        vectorDrawable->syncProperties();
+    }
+}
+
+void DisplayList::updateChildren(std::function<void(RenderNode*)> updateFn) {
+    for (auto&& child : children) {
+        updateFn(child->renderNode);
+    }
+}
+
+bool DisplayList::prepareListAndChildren(TreeObserver& observer, TreeInfo& info, bool functorsNeedLayer,
+        std::function<void(RenderNode*, TreeObserver&, TreeInfo&, bool)> childFn) {
+    info.prepareTextures = info.canvasContext.pinImages(bitmapResources);
+
+    for (auto&& op : children) {
+        RenderNode* childNode = op->renderNode;
+        info.damageAccumulator->pushTransform(&op->localMatrix);
+        bool childFunctorsNeedLayer = functorsNeedLayer; // TODO! || op->mRecordedWithPotentialStencilClip;
+        childFn(childNode, observer, info, childFunctorsNeedLayer);
+        info.damageAccumulator->popTransform();
+    }
+
+    bool isDirty = false;
+    for (auto& vectorDrawable : vectorDrawables) {
+        // If any vector drawable in the display list needs update, damage the node.
+        if (vectorDrawable->isDirty()) {
+            isDirty = true;
+        }
+        vectorDrawable->setPropertyChangeWillBeConsumed(true);
+    }
+    return isDirty;
+}
+
+void DisplayList::output(std::ostream& output, uint32_t level) {
+    for (auto&& op : getOps()) {
+        OpDumper::dump(*op, output, level + 1);
+        if (op->opId == RecordedOpId::RenderNodeOp) {
+            auto rnOp = reinterpret_cast<const RenderNodeOp*>(op);
+            rnOp->renderNode->output(output, level + 1);
+        } else {
+            output << std::endl;
+        }
+    }
 }
 
 }; // namespace uirenderer

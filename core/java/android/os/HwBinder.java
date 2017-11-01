@@ -16,9 +16,9 @@
 
 package android.os;
 
-import java.util.ArrayList;
-import java.util.NoSuchElementException;
 import libcore.util.NativeAllocationRegistry;
+
+import java.util.NoSuchElementException;
 
 /** @hide */
 public abstract class HwBinder implements IHwBinder {
@@ -43,15 +43,25 @@ public abstract class HwBinder implements IHwBinder {
             int code, HwParcel request, HwParcel reply, int flags)
         throws RemoteException;
 
-    public native final void registerService(
-            ArrayList<String> interfaceChain,
-            String serviceName)
+    public native final void registerService(String serviceName)
         throws RemoteException;
 
-    public static native final IHwBinder getService(
+    public static final IHwBinder getService(
             String iface,
             String serviceName)
+        throws RemoteException, NoSuchElementException {
+        return getService(iface, serviceName, false /* retry */);
+    }
+    public static native final IHwBinder getService(
+            String iface,
+            String serviceName,
+            boolean retry)
         throws RemoteException, NoSuchElementException;
+
+    public static native final void configureRpcThreadpool(
+            long maxThreads, boolean callerWillJoin);
+
+    public static native final void joinRpcThreadpool();
 
     // Returns address of the "freeFunction".
     private static native final long native_init();
@@ -68,4 +78,13 @@ public abstract class HwBinder implements IHwBinder {
     }
 
     private long mNativeContext;
+
+    private static native void native_report_sysprop_change();
+
+    /**
+     * Notifies listeners that a system property has changed
+     */
+    public static void reportSyspropChanged() {
+        native_report_sysprop_change();
+    }
 }

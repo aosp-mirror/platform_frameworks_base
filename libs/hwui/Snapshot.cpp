@@ -30,14 +30,11 @@ Snapshot::Snapshot()
         , previous(nullptr)
         , layer(nullptr)
         , fbo(0)
-        , invisible(false)
-        , empty(false)
         , alpha(1.0f)
         , roundRectClipState(nullptr)
         , projectionPathMask(nullptr)
         , mClipArea(&mClipAreaRoot) {
     transform = &mTransformRoot;
-    region = nullptr;
     mRelativeLightCenter.x = mRelativeLightCenter.y = mRelativeLightCenter.z = 0;
 }
 
@@ -50,8 +47,6 @@ Snapshot::Snapshot(Snapshot* s, int saveFlags)
         , previous(s)
         , layer(s->layer)
         , fbo(s->fbo)
-        , invisible(s->invisible)
-        , empty(false)
         , alpha(s->alpha)
         , roundRectClipState(s->roundRectClipState)
         , projectionPathMask(s->projectionPathMask)
@@ -71,32 +66,20 @@ Snapshot::Snapshot(Snapshot* s, int saveFlags)
     } else {
         mClipArea = s->mClipArea;
     }
-
-    if (s->flags & Snapshot::kFlagFboTarget) {
-        flags |= Snapshot::kFlagFboTarget;
-        region = s->region;
-    } else {
-        region = nullptr;
-    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // Clipping
 ///////////////////////////////////////////////////////////////////////////////
 
-void Snapshot::clipRegionTransformed(const SkRegion& region, SkRegion::Op op) {
+void Snapshot::clip(const Rect& localClip, SkClipOp op) {
     flags |= Snapshot::kFlagClipSet;
-    mClipArea->clipRegion(region, op);
+    mClipArea->clipRectWithTransform(localClip, transform, static_cast<SkRegion::Op>(op));
 }
 
-void Snapshot::clip(const Rect& localClip, SkRegion::Op op) {
+void Snapshot::clipPath(const SkPath& path, SkClipOp op) {
     flags |= Snapshot::kFlagClipSet;
-    mClipArea->clipRectWithTransform(localClip, transform, op);
-}
-
-void Snapshot::clipPath(const SkPath& path, SkRegion::Op op) {
-    flags |= Snapshot::kFlagClipSet;
-    mClipArea->clipPathWithTransform(path, transform, op);
+    mClipArea->clipPathWithTransform(path, transform, static_cast<SkRegion::Op>(op));
 }
 
 void Snapshot::setClip(float left, float top, float right, float bottom) {
@@ -124,58 +107,6 @@ void Snapshot::resetClip(float left, float top, float right, float bottom) {
     // region if the previous restore() call did not restore the clip
     mClipArea = &mClipAreaRoot;
     setClip(left, top, right, bottom);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// Transforms
-///////////////////////////////////////////////////////////////////////////////
-
-void Snapshot::resetTransform(float x, float y, float z) {
-#if HWUI_NEW_OPS
-    LOG_ALWAYS_FATAL("not supported - light center managed differently");
-#else
-    // before resetting, map current light pos with inverse of current transform
-    Vector3 center = mRelativeLightCenter;
-    mat4 inverse;
-    inverse.loadInverse(*transform);
-    inverse.mapPoint3d(center);
-    mRelativeLightCenter = center;
-
-    transform = &mTransformRoot;
-    transform->loadTranslate(x, y, z);
-#endif
-}
-
-void Snapshot::buildScreenSpaceTransform(Matrix4* outTransform) const {
-#if HWUI_NEW_OPS
-    LOG_ALWAYS_FATAL("not supported - not needed by new ops");
-#else
-    // build (reverse ordered) list of the stack of snapshots, terminated with a NULL
-    Vector<const Snapshot*> snapshotList;
-    snapshotList.push(nullptr);
-    const Snapshot* current = this;
-    do {
-        snapshotList.push(current);
-        current = current->previous;
-    } while (current);
-
-    // traverse the list, adding in each transform that contributes to the total transform
-    outTransform->loadIdentity();
-    for (size_t i = snapshotList.size() - 1; i > 0; i--) {
-        // iterate down the stack
-        const Snapshot* current = snapshotList[i];
-        const Snapshot* next = snapshotList[i - 1];
-        if (current->flags & kFlagIsFboLayer) {
-            // if we've hit a layer, translate by the layer's draw offset
-            outTransform->translate(current->layer->layer.left, current->layer->layer.top);
-        }
-        if (!next || (next->flags & kFlagIsFboLayer)) {
-            // if this snapshot is last, or if this snapshot is last before an
-            // FBO layer (which reset the transform), apply it
-            outTransform->multiply(*(current->transform));
-        }
-    }
-#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -227,20 +158,8 @@ void Snapshot::setClippingRoundRect(LinearAllocator& allocator, const Rect& boun
     roundRectClipState = state;
 }
 
-void Snapshot::setProjectionPathMask(LinearAllocator& allocator, const SkPath* path) {
-#if HWUI_NEW_OPS
-    // TODO: remove allocator param for HWUI_NEW_OPS
+void Snapshot::setProjectionPathMask(const SkPath* path) {
     projectionPathMask = path;
-#else
-    if (path) {
-        ProjectionPathMask* mask = new (allocator) ProjectionPathMask;
-        mask->projectionMask = path;
-        buildScreenSpaceTransform(&(mask->projectionMaskTransform));
-        projectionPathMask = mask;
-    } else {
-        projectionPathMask = nullptr;
-    }
-#endif
 }
 
 static Snapshot* getClipRoot(Snapshot* target) {
@@ -274,13 +193,9 @@ void Snapshot::applyClip(const ClipBase* recordedClip, const Matrix4& transform)
 // Queries
 ///////////////////////////////////////////////////////////////////////////////
 
-bool Snapshot::isIgnored() const {
-    return invisible || empty;
-}
-
 void Snapshot::dump() const {
-    ALOGD("Snapshot %p, flags %x, prev %p, height %d, ignored %d, hasComplexClip %d",
-            this, flags, previous, getViewportHeight(), isIgnored(), !mClipArea->isSimple());
+    ALOGD("Snapshot %p, flags %x, prev %p, height %d, hasComplexClip %d",
+            this, flags, previous, getViewportHeight(), !mClipArea->isSimple());
     const Rect& clipRect(mClipArea->getClipRect());
     ALOGD("  ClipRect %.1f %.1f %.1f %.1f, clip simple %d",
             clipRect.left, clipRect.top, clipRect.right, clipRect.bottom, mClipArea->isSimple());

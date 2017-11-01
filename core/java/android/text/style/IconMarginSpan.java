@@ -16,11 +16,11 @@
 
 package android.text.style;
 
-import android.graphics.Paint;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.text.Spanned;
+import android.graphics.Paint;
 import android.text.Layout;
+import android.text.Spanned;
 
 public class IconMarginSpan
 implements LeadingMarginSpan, LineHeightSpan

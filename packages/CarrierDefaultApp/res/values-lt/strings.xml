@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="5247871339820894594">"CarrierDefaultApp"</string>
+    <string name="android_system_label" msgid="2797790869522345065">"Mobiliojo ryšio operatorius"</string>
+    <string name="portal_notification_id" msgid="5155057562457079297">"Mobiliojo ryšio duomenys baigėsi"</string>
+    <string name="no_data_notification_id" msgid="668400731803969521">"Mobiliojo ryšio duomenys išaktyvinti"</string>
+    <string name="portal_notification_detail" msgid="2295729385924660881">"Palieskite ir apsilankykite svetainėje %s"</string>
+    <string name="no_data_notification_detail" msgid="3112125343857014825">"Susisiekite su paslaugos teikėju „%s“"</string>
+    <string name="no_mobile_data_connection_title" msgid="7449525772416200578">"Nėra mobiliojo duomenų ryšio"</string>
+    <string name="no_mobile_data_connection" msgid="544980465184147010">"Pridėkite duomenų ar tarptinklinio ryšio planą naudodami „%s“"</string>
+    <string name="mobile_data_status_notification_channel_name" msgid="833999690121305708">"Mobiliojo ryšio duomenų būsena"</string>
+    <string name="action_bar_label" msgid="4290345990334377177">"Prisijungti prie mobiliojo ryšio tinklo"</string>
+    <string name="ssl_error_warning" msgid="3127935140338254180">"Kilo tinklo, prie kurio bandote prisijungti, saugos problemų."</string>
+    <string name="ssl_error_example" msgid="6188711843183058764">"Pavyzdžiui, prisijungimo puslapis gali nepriklausyti rodomai organizacijai."</string>
+    <string name="ssl_error_continue" msgid="1138548463994095584">"Vis tiek tęsti naudojant naršyklę"</string>
+</resources>

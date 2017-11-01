@@ -92,6 +92,7 @@ public class NetworkUtils {
      *
      * @deprecated This is strictly for legacy usage to support startUsingNetworkFeature().
      */
+    @Deprecated
     public native static boolean bindProcessToNetworkForHostResolution(int netId);
 
     /**

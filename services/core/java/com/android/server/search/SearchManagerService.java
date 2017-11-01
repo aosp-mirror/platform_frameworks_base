@@ -17,7 +17,6 @@
 package com.android.server.search;
 
 import android.app.ActivityManager;
-import android.app.ActivityManagerNative;
 import android.app.AppGlobals;
 import android.app.IActivityManager;
 import android.app.ISearchManager;
@@ -44,6 +43,7 @@ import android.util.SparseArray;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.BackgroundThread;
+import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
@@ -306,7 +306,7 @@ public class SearchManagerService extends ISearchManager.Stub {
         try {
             Intent intent = new Intent(Intent.ACTION_ASSIST);
             intent.setComponent(comp);
-            IActivityManager am = ActivityManagerNative.getDefault();
+            IActivityManager am = ActivityManager.getService();
             return am.launchAssistIntent(intent, ActivityManager.ASSIST_CONTEXT_BASIC, hint,
                     userHandle, args);
         } catch (RemoteException e) {
@@ -318,7 +318,7 @@ public class SearchManagerService extends ISearchManager.Stub {
 
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DUMP, TAG);
+        if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
 
         IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ");
         synchronized (mSearchables) {

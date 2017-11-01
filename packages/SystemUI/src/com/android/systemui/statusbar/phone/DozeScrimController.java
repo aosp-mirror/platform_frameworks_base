@@ -40,6 +40,8 @@ public class DozeScrimController {
     private final Handler mHandler = new Handler();
     private final ScrimController mScrimController;
 
+    private final Context mContext;
+
     private boolean mDozing;
     private DozeHost.PulseCallback mPulseCallback;
     private int mPulseReason;
@@ -47,8 +49,14 @@ public class DozeScrimController {
     private Animator mBehindAnimator;
     private float mInFrontTarget;
     private float mBehindTarget;
+    private boolean mDozingAborted;
+    private boolean mWakeAndUnlocking;
+    private boolean mFullyPulsing;
+
+    private float mAodFrontScrimOpacity = 0;
 
     public DozeScrimController(ScrimController scrimController, Context context) {
+        mContext = context;
         mScrimController = scrimController;
         mDozeParameters = new DozeParameters(context);
     }
@@ -56,10 +64,13 @@ public class DozeScrimController {
     public void setDozing(boolean dozing, boolean animate) {
         if (mDozing == dozing) return;
         mDozing = dozing;
+        mWakeAndUnlocking = false;
         if (mDozing) {
+            mDozingAborted = false;
             abortAnimations();
             mScrimController.setDozeBehindAlpha(1f);
-            mScrimController.setDozeInFrontAlpha(1f);
+            mScrimController.setDozeInFrontAlpha(
+                    mDozeParameters.getAlwaysOn() ? mAodFrontScrimOpacity : 1f);
         } else {
             cancelPulsing();
             if (animate) {
@@ -74,6 +85,29 @@ public class DozeScrimController {
                 mScrimController.setDozeBehindAlpha(0f);
                 mScrimController.setDozeInFrontAlpha(0f);
             }
+        }
+    }
+
+    /**
+     * Set the opacity of the front scrim when showing AOD1
+     *
+     * Used to emulate lower brightness values than the hardware supports natively.
+     */
+    public void setAodDimmingScrim(float scrimOpacity) {
+        mAodFrontScrimOpacity = scrimOpacity;
+        if (mDozing && !isPulsing() && !mDozingAborted && !mWakeAndUnlocking
+                && mDozeParameters.getAlwaysOn()) {
+            mScrimController.setDozeInFrontAlpha(mAodFrontScrimOpacity);
+        }
+    }
+
+    public void setWakeAndUnlocking() {
+        // Immediately abort the doze scrims in case of wake-and-unlock
+        // for pulsing so the Keyguard fade-out animation scrim can take over.
+        if (!mWakeAndUnlocking) {
+            mWakeAndUnlocking = true;
+            mScrimController.setDozeBehindAlpha(0f);
+            mScrimController.setDozeInFrontAlpha(0f);
         }
     }
 
@@ -93,6 +127,7 @@ public class DozeScrimController {
         // be invoked when we're done so that the caller can drop the pulse wakelock.
         mPulseCallback = callback;
         mPulseReason = reason;
+        mScrimController.setDozeInFrontAlpha(1f);
         mHandler.post(mPulseIn);
     }
 
@@ -101,9 +136,25 @@ public class DozeScrimController {
      */
     public void abortPulsing() {
         cancelPulsing();
-        if (mDozing) {
+        if (mDozing && !mWakeAndUnlocking) {
             mScrimController.setDozeBehindAlpha(1f);
-            mScrimController.setDozeInFrontAlpha(1f);
+            mScrimController.setDozeInFrontAlpha(
+                    mDozeParameters.getAlwaysOn() && !mDozingAborted ?
+                            mAodFrontScrimOpacity : 1f);
+        }
+    }
+
+    /**
+     * Aborts dozing immediately.
+     */
+    public void abortDoze() {
+        mDozingAborted = true;
+        abortPulsing();
+    }
+
+    public void pulseOutNow() {
+        if (mPulseCallback != null && mFullyPulsing) {
+            mPulseOut.run();
         }
     }
 
@@ -126,12 +177,18 @@ public class DozeScrimController {
         return mDozing;
     }
 
+    public void extendPulse() {
+        mHandler.removeCallbacks(mPulseOut);
+    }
+
     private void cancelPulsing() {
         if (DEBUG) Log.d(TAG, "Cancel pulsing");
 
         if (mPulseCallback != null) {
+            mFullyPulsing = false;
             mHandler.removeCallbacks(mPulseIn);
             mHandler.removeCallbacks(mPulseOut);
+            mHandler.removeCallbacks(mPulseOutExtended);
             pulseFinished();
         }
     }
@@ -222,6 +279,9 @@ public class DozeScrimController {
     }
 
     private void setDozeAlpha(boolean inFront, float alpha) {
+        if (mWakeAndUnlocking) {
+            return;
+        }
         if (inFront) {
             mScrimController.setDozeInFrontAlpha(alpha);
         } else {
@@ -254,27 +314,58 @@ public class DozeScrimController {
             if (DEBUG) Log.d(TAG, "Pulse in finished, mDozing=" + mDozing);
             if (!mDozing) return;
             mHandler.postDelayed(mPulseOut, mDozeParameters.getPulseVisibleDuration());
+            mHandler.postDelayed(mPulseOutExtended,
+                    mDozeParameters.getPulseVisibleDurationExtended());
+            mFullyPulsing = true;
+        }
+    };
+
+    private final Runnable mPulseOutExtended = new Runnable() {
+        @Override
+        public void run() {
+            mHandler.removeCallbacks(mPulseOut);
+            mPulseOut.run();
         }
     };
 
     private final Runnable mPulseOut = new Runnable() {
         @Override
         public void run() {
+            mFullyPulsing = false;
+            mHandler.removeCallbacks(mPulseOut);
+            mHandler.removeCallbacks(mPulseOutExtended);
             if (DEBUG) Log.d(TAG, "Pulse out, mDozing=" + mDozing);
             if (!mDozing) return;
-            startScrimAnimation(true /* inFront */, 1f, mDozeParameters.getPulseOutDuration(),
-                    Interpolators.ALPHA_IN, mPulseOutFinished);
+            startScrimAnimation(true /* inFront */, 1,
+                    mDozeParameters.getPulseOutDuration(),
+                    Interpolators.ALPHA_IN, mPulseOutFinishing);
+        }
+    };
+
+    private final Runnable mPulseOutFinishing = new Runnable() {
+        @Override
+        public void run() {
+            if (DEBUG) Log.d(TAG, "Pulse out finished");
+            DozeLog.tracePulseFinish();
+            if (mDozeParameters.getAlwaysOn() && mDozing) {
+                // Setting power states can block rendering. For AOD, delay finishing the pulse and
+                // setting the power state until the fully black scrim had time to hit the
+                // framebuffer.
+                mHandler.postDelayed(mPulseOutFinished, 30);
+            } else {
+                mPulseOutFinished.run();
+            }
         }
     };
 
     private final Runnable mPulseOutFinished = new Runnable() {
         @Override
         public void run() {
-            if (DEBUG) Log.d(TAG, "Pulse out finished");
-            DozeLog.tracePulseFinish();
-
             // Signal that the pulse is all finished so we can turn the screen off now.
-            pulseFinished();
+            DozeScrimController.this.pulseFinished();
+            if (mDozeParameters.getAlwaysOn()) {
+                mScrimController.setDozeInFrontAlpha(mAodFrontScrimOpacity);
+            }
         }
     };
 }

@@ -17,207 +17,227 @@
 #ifndef AAPT_STRING_POOL_H
 #define AAPT_STRING_POOL_H
 
-#include "util/BigBuffer.h"
-#include "ConfigDescription.h"
-#include "util/StringPiece.h"
-
 #include <functional>
-#include <map>
 #include <memory>
 #include <string>
+#include <unordered_map>
 #include <vector>
+
+#include "android-base/macros.h"
+#include "androidfw/StringPiece.h"
+
+#include "ConfigDescription.h"
+#include "util/BigBuffer.h"
 
 namespace aapt {
 
 struct Span {
-    std::u16string name;
-    uint32_t firstChar;
-    uint32_t lastChar;
+  std::string name;
+  uint32_t first_char;
+  uint32_t last_char;
 };
 
 struct StyleString {
-    std::u16string str;
-    std::vector<Span> spans;
+  std::string str;
+  std::vector<Span> spans;
 };
 
 class StringPool {
-public:
-    struct Context {
-        uint32_t priority;
-        ConfigDescription config;
+ public:
+  class Context {
+   public:
+    enum : uint32_t {
+      kStylePriority = 0u,
+      kHighPriority = 1u,
+      kNormalPriority = 0x7fffffffu,
+      kLowPriority = 0xffffffffu,
     };
+    uint32_t priority = kNormalPriority;
+    ConfigDescription config;
 
-    class Entry;
+    Context() = default;
+    Context(uint32_t p, const ConfigDescription& c) : priority(p), config(c) {}
+    explicit Context(uint32_t p) : priority(p) {}
+    explicit Context(const ConfigDescription& c)
+        : priority(kNormalPriority), config(c) {}
+  };
 
-    class Ref {
-    public:
-        Ref();
-        Ref(const Ref&);
-        ~Ref();
+  class Entry;
 
-        Ref& operator=(const Ref& rhs);
-        const std::u16string* operator->() const;
-        const std::u16string& operator*() const;
+  class Ref {
+   public:
+    Ref();
+    Ref(const Ref&);
+    ~Ref();
 
-        size_t getIndex() const;
-        const Context& getContext() const;
+    Ref& operator=(const Ref& rhs);
+    bool operator==(const Ref& rhs) const;
+    bool operator!=(const Ref& rhs) const;
+    const std::string* operator->() const;
+    const std::string& operator*() const;
 
-    private:
-        friend class StringPool;
+    size_t index() const;
+    const Context& GetContext() const;
 
-        explicit Ref(Entry* entry);
+   private:
+    friend class StringPool;
 
-        Entry* mEntry;
-    };
+    explicit Ref(Entry* entry);
 
-    class StyleEntry;
+    Entry* entry_;
+  };
 
-    class StyleRef {
-    public:
-        StyleRef();
-        StyleRef(const StyleRef&);
-        ~StyleRef();
+  class StyleEntry;
 
-        StyleRef& operator=(const StyleRef& rhs);
-        const StyleEntry* operator->() const;
-        const StyleEntry& operator*() const;
+  class StyleRef {
+   public:
+    StyleRef();
+    StyleRef(const StyleRef&);
+    ~StyleRef();
 
-        size_t getIndex() const;
-        const Context& getContext() const;
+    StyleRef& operator=(const StyleRef& rhs);
+    bool operator==(const StyleRef& rhs) const;
+    bool operator!=(const StyleRef& rhs) const;
+    const StyleEntry* operator->() const;
+    const StyleEntry& operator*() const;
 
-    private:
-        friend class StringPool;
+    size_t index() const;
+    const Context& GetContext() const;
 
-        explicit StyleRef(StyleEntry* entry);
+   private:
+    friend class StringPool;
 
-        StyleEntry* mEntry;
-    };
+    explicit StyleRef(StyleEntry* entry);
 
-    class Entry {
-    public:
-        std::u16string value;
-        Context context;
-        size_t index;
+    StyleEntry* entry_;
+  };
 
-    private:
-        friend class StringPool;
-        friend class Ref;
+  class Entry {
+   public:
+    std::string value;
+    Context context;
+    size_t index;
 
-        int ref;
-    };
+   private:
+    friend class StringPool;
+    friend class Ref;
 
-    struct Span {
-        Ref name;
-        uint32_t firstChar;
-        uint32_t lastChar;
-    };
+    int ref_;
+  };
 
-    class StyleEntry {
-    public:
-        Ref str;
-        std::vector<Span> spans;
+  struct Span {
+    Ref name;
+    uint32_t first_char;
+    uint32_t last_char;
+  };
 
-    private:
-        friend class StringPool;
-        friend class StyleRef;
+  class StyleEntry {
+   public:
+    Ref str;
+    std::vector<Span> spans;
 
-        int ref;
-    };
+   private:
+    friend class StringPool;
+    friend class StyleRef;
 
-    using const_iterator = std::vector<std::unique_ptr<Entry>>::const_iterator;
+    int ref_;
+  };
 
-    static bool flattenUtf8(BigBuffer* out, const StringPool& pool);
-    static bool flattenUtf16(BigBuffer* out, const StringPool& pool);
+  using const_iterator = std::vector<std::unique_ptr<Entry>>::const_iterator;
 
-    StringPool() = default;
-    StringPool(const StringPool&) = delete;
+  static bool FlattenUtf8(BigBuffer* out, const StringPool& pool);
+  static bool FlattenUtf16(BigBuffer* out, const StringPool& pool);
 
-    /**
-     * Adds a string to the pool, unless it already exists. Returns
-     * a reference to the string in the pool.
-     */
-    Ref makeRef(const StringPiece16& str);
+  StringPool() = default;
+  StringPool(StringPool&&) = default;
+  StringPool& operator=(StringPool&&) = default;
 
-    /**
-     * Adds a string to the pool, unless it already exists, with a context
-     * object that can be used when sorting the string pool. Returns
-     * a reference to the string in the pool.
-     */
-    Ref makeRef(const StringPiece16& str, const Context& context);
+  /**
+   * Adds a string to the pool, unless it already exists. Returns
+   * a reference to the string in the pool.
+   */
+  Ref MakeRef(const android::StringPiece& str);
 
-    /**
-     * Adds a style to the string pool and returns a reference to it.
-     */
-    StyleRef makeRef(const StyleString& str);
+  /**
+   * Adds a string to the pool, unless it already exists, with a context
+   * object that can be used when sorting the string pool. Returns
+   * a reference to the string in the pool.
+   */
+  Ref MakeRef(const android::StringPiece& str, const Context& context);
 
-    /**
-     * Adds a style to the string pool with a context object that
-     * can be used when sorting the string pool. Returns a reference
-     * to the style in the string pool.
-     */
-    StyleRef makeRef(const StyleString& str, const Context& context);
+  /**
+   * Adds a style to the string pool and returns a reference to it.
+   */
+  StyleRef MakeRef(const StyleString& str);
 
-    /**
-     * Adds a style from another string pool. Returns a reference to the
-     * style in the string pool.
-     */
-    StyleRef makeRef(const StyleRef& ref);
+  /**
+   * Adds a style to the string pool with a context object that
+   * can be used when sorting the string pool. Returns a reference
+   * to the style in the string pool.
+   */
+  StyleRef MakeRef(const StyleString& str, const Context& context);
 
-    /**
-     * Moves pool into this one without coalescing strings. When this
-     * function returns, pool will be empty.
-     */
-    void merge(StringPool&& pool);
+  /**
+   * Adds a style from another string pool. Returns a reference to the
+   * style in the string pool.
+   */
+  StyleRef MakeRef(const StyleRef& ref);
 
-    /**
-     * Retuns the number of strings in the table.
-     */
-    inline size_t size() const;
+  /**
+   * Moves pool into this one without coalescing strings. When this
+   * function returns, pool will be empty.
+   */
+  void Merge(StringPool&& pool);
 
-    /**
-     * Reserves space for strings and styles as an optimization.
-     */
-    void hintWillAdd(size_t stringCount, size_t styleCount);
+  /**
+   * Returns the number of strings in the table.
+   */
+  inline size_t size() const;
 
-    /**
-     * Sorts the strings according to some comparison function.
-     */
-    void sort(const std::function<bool(const Entry&, const Entry&)>& cmp);
+  /**
+   * Reserves space for strings and styles as an optimization.
+   */
+  void HintWillAdd(size_t string_count, size_t style_count);
 
-    /**
-     * Removes any strings that have no references.
-     */
-    void prune();
+  /**
+   * Sorts the strings according to some comparison function.
+   */
+  void Sort(const std::function<bool(const Entry&, const Entry&)>& cmp);
 
-private:
-    friend const_iterator begin(const StringPool& pool);
-    friend const_iterator end(const StringPool& pool);
+  /**
+   * Removes any strings that have no references.
+   */
+  void Prune();
 
-    static bool flatten(BigBuffer* out, const StringPool& pool, bool utf8);
+ private:
+  DISALLOW_COPY_AND_ASSIGN(StringPool);
 
-    Ref makeRefImpl(const StringPiece16& str, const Context& context, bool unique);
+  friend const_iterator begin(const StringPool& pool);
+  friend const_iterator end(const StringPool& pool);
 
-    std::vector<std::unique_ptr<Entry>> mStrings;
-    std::vector<std::unique_ptr<StyleEntry>> mStyles;
-    std::multimap<StringPiece16, Entry*> mIndexedStrings;
+  static bool Flatten(BigBuffer* out, const StringPool& pool, bool utf8);
+
+  Ref MakeRefImpl(const android::StringPiece& str, const Context& context, bool unique);
+
+  std::vector<std::unique_ptr<Entry>> strings_;
+  std::vector<std::unique_ptr<StyleEntry>> styles_;
+  std::unordered_multimap<android::StringPiece, Entry*> indexed_strings_;
 };
 
 //
 // Inline implementation
 //
 
-inline size_t StringPool::size() const {
-    return mStrings.size();
-}
+inline size_t StringPool::size() const { return strings_.size(); }
 
 inline StringPool::const_iterator begin(const StringPool& pool) {
-    return pool.mStrings.begin();
+  return pool.strings_.begin();
 }
 
 inline StringPool::const_iterator end(const StringPool& pool) {
-    return pool.mStrings.end();
+  return pool.strings_.end();
 }
 
-} // namespace aapt
+}  // namespace aapt
 
-#endif // AAPT_STRING_POOL_H
+#endif  // AAPT_STRING_POOL_H

@@ -15,16 +15,16 @@
 ** limitations under the License.
 */
 
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 #include <android_runtime/AndroidRuntime.h>
 #include <android_runtime/android_view_Surface.h>
 #include <android_runtime/android_graphics_SurfaceTexture.h>
 #include <utils/misc.h>
 
 
-#include <EGL/egl_display.h>
 #include <EGL/egl.h>
 #include <GLES/gl.h>
+#include <private/EGL/display.h>
 
 #include <gui/Surface.h>
 #include <gui/GLConsumer.h>
@@ -45,7 +45,6 @@ static jmethodID gConfig_ctorID;
 static jfieldID gDisplay_EGLDisplayFieldID;
 static jfieldID gContext_EGLContextFieldID;
 static jfieldID gSurface_EGLSurfaceFieldID;
-static jfieldID gSurface_NativePixelRefFieldID;
 static jfieldID gConfig_EGLConfigFieldID;
 
 static inline EGLDisplay getDisplay(JNIEnv* env, jobject o) {
@@ -84,7 +83,6 @@ static void nativeClassInit(JNIEnv *_env, jclass eglImplClass)
 
     jclass surface_class = _env->FindClass("com/google/android/gles_jni/EGLSurfaceImpl");
     gSurface_EGLSurfaceFieldID = _env->GetFieldID(surface_class, "mEGLSurface", "J");
-    gSurface_NativePixelRefFieldID = _env->GetFieldID(surface_class, "mNativePixelRef", "J");
 }
 
 static const jint gNull_attrib_base[] = {EGL_NONE};
@@ -180,8 +178,7 @@ static jboolean jni_eglQuerySurface(JNIEnv *_env, jobject _this, jobject display
 
 static jint jni_getInitCount(JNIEnv *_env, jobject _clazz, jobject display) {
     EGLDisplay dpy = getDisplay(_env, display);
-    egl_display_t* eglDisplay = get_display_nowake(dpy);
-    return eglDisplay ? eglDisplay->getRefsCount() : 0;
+    return android::egl_get_init_count(dpy);
 }
 
 static jboolean jni_eglReleaseThread(JNIEnv *_env, jobject _this) {
@@ -254,59 +251,11 @@ static jlong jni_eglCreatePbufferSurface(JNIEnv *_env, jobject _this, jobject di
     return reinterpret_cast<jlong>(sur);
 }
 
-static PixelFormat convertPixelFormat(SkColorType format)
-{
-    switch (format) {
-    case kN32_SkColorType:         return PIXEL_FORMAT_RGBA_8888;
-    case kARGB_4444_SkColorType:   return PIXEL_FORMAT_RGBA_4444;
-    case kRGB_565_SkColorType:     return PIXEL_FORMAT_RGB_565;
-    default:                       return PIXEL_FORMAT_NONE;
-    }
-}
-
 static void jni_eglCreatePixmapSurface(JNIEnv *_env, jobject _this, jobject out_sur,
         jobject display, jobject config, jobject native_pixmap,
         jintArray attrib_list)
 {
-    if (display == NULL || config == NULL || native_pixmap == NULL
-        || !validAttribList(_env, attrib_list)) {
-        jniThrowException(_env, "java/lang/IllegalArgumentException", NULL);
-        return;
-    }
-    EGLDisplay dpy = getDisplay(_env, display);
-    EGLConfig  cnf = getConfig(_env, config);
-    jint* base = 0;
-
-    SkBitmap nativeBitmap;
-    GraphicsJNI::getSkBitmap(_env, native_pixmap, &nativeBitmap);
-    SkPixelRef* ref = nativeBitmap.pixelRef();
-    if (ref == NULL) {
-        jniThrowException(_env, "java/lang/IllegalArgumentException", "Bitmap has no PixelRef");
-        return;
-    }
-
-    SkSafeRef(ref);
-    ref->lockPixels();
-
-    egl_native_pixmap_t pixmap;
-    pixmap.version = sizeof(pixmap);
-    pixmap.width  = nativeBitmap.width();
-    pixmap.height = nativeBitmap.height();
-    pixmap.stride = nativeBitmap.rowBytes() / nativeBitmap.bytesPerPixel();
-    pixmap.format = convertPixelFormat(nativeBitmap.colorType());
-    pixmap.data   = (uint8_t*)ref->pixels();
-
-    base = beginNativeAttribList(_env, attrib_list);
-    EGLSurface sur = eglCreatePixmapSurface(dpy, cnf, &pixmap, base);
-    endNativeAttributeList(_env, attrib_list, base);
-
-    if (sur != EGL_NO_SURFACE) {
-        _env->SetLongField(out_sur, gSurface_EGLSurfaceFieldID, reinterpret_cast<jlong>(sur));
-        _env->SetLongField(out_sur, gSurface_NativePixelRefFieldID, reinterpret_cast<jlong>(ref));
-    } else {
-        ref->unlockPixels();
-        SkSafeUnref(ref);
-    }
+    jniThrowException(_env, "java/lang/UnsupportedOperationException", "eglCreatePixmapSurface");
 }
 
 static jlong jni_eglCreateWindowSurface(JNIEnv *_env, jobject _this, jobject display,
@@ -447,15 +396,6 @@ static jboolean jni_eglDestroySurface(JNIEnv *_env, jobject _this, jobject displ
     }
     EGLDisplay dpy = getDisplay(_env, display);
     EGLSurface sur = getSurface(_env, surface);
-
-    if (sur) {
-        SkPixelRef* ref = (SkPixelRef*)(_env->GetLongField(surface,
-                gSurface_NativePixelRefFieldID));
-        if (ref) {
-            ref->unlockPixels();
-            SkSafeUnref(ref);
-        }
-    }
     return EglBoolToJBool(eglDestroySurface(dpy, sur));
 }
 

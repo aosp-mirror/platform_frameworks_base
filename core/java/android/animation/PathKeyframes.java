@@ -118,10 +118,6 @@ public class PathKeyframes implements Keyframes {
     }
 
     @Override
-    public void invalidateCache() {
-    }
-
-    @Override
     public void setEvaluator(TypeEvaluator evaluator) {
     }
 
@@ -211,10 +207,6 @@ public class PathKeyframes implements Keyframes {
     private abstract static class SimpleKeyframes implements Keyframes {
         @Override
         public void setEvaluator(TypeEvaluator evaluator) {
-        }
-
-        @Override
-        public void invalidateCache() {
         }
 
         @Override

@@ -14,28 +14,42 @@
  * limitations under the License.
  */
 
-#include <androidfw/ByteBucketArray.h>
+#include "androidfw/ByteBucketArray.h"
 
-#include <gtest/gtest.h>
+#include "gtest/gtest.h"
 
-using android::ByteBucketArray;
+namespace android {
 
 TEST(ByteBucketArrayTest, TestSparseInsertion) {
-    ByteBucketArray<int> bba;
-    ASSERT_TRUE(bba.set(0, 1));
-    ASSERT_TRUE(bba.set(10, 2));
-    ASSERT_TRUE(bba.set(26, 3));
-    ASSERT_TRUE(bba.set(129, 4));
-    ASSERT_TRUE(bba.set(234, 5));
+  ByteBucketArray<int> bba;
+  ASSERT_TRUE(bba.set(0, 1));
+  ASSERT_TRUE(bba.set(10, 2));
+  ASSERT_TRUE(bba.set(26, 3));
+  ASSERT_TRUE(bba.set(129, 4));
+  ASSERT_TRUE(bba.set(234, 5));
 
-    for (size_t i = 0; i < bba.size(); i++) {
-        switch (i) {
-            case 0: EXPECT_EQ(1, bba[i]); break;
-            case 10: EXPECT_EQ(2, bba[i]); break;
-            case 26: EXPECT_EQ(3, bba[i]); break;
-            case 129: EXPECT_EQ(4, bba[i]); break;
-            case 234: EXPECT_EQ(5, bba[i]); break;
-            default: EXPECT_EQ(0, bba[i]); break;
-        }
+  for (size_t i = 0; i < bba.size(); i++) {
+    switch (i) {
+      case 0:
+        EXPECT_EQ(1, bba[i]);
+        break;
+      case 10:
+        EXPECT_EQ(2, bba[i]);
+        break;
+      case 26:
+        EXPECT_EQ(3, bba[i]);
+        break;
+      case 129:
+        EXPECT_EQ(4, bba[i]);
+        break;
+      case 234:
+        EXPECT_EQ(5, bba[i]);
+        break;
+      default:
+        EXPECT_EQ(0, bba[i]);
+        break;
     }
+  }
 }
+
+}  // namespace android

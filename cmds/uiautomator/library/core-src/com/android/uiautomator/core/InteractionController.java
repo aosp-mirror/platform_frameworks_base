@@ -32,8 +32,6 @@ import android.view.MotionEvent.PointerCoords;
 import android.view.MotionEvent.PointerProperties;
 import android.view.accessibility.AccessibilityEvent;
 
-import com.android.internal.util.Predicate;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
@@ -261,7 +259,7 @@ class InteractionController {
     }
 
     /**
-     * Returns a Runnable for use in {@link #runAndWaitForEvents(Runnable, Predicate, long) to
+     * Returns a Runnable for use in {@link #runAndWaitForEvents(Runnable, AccessibilityEventFilter, long) to
      * perform a click.
      *
      * @param x coordinate

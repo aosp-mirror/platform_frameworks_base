@@ -16,6 +16,9 @@
 
 package com.android.systemui.stackdivider;
 
+import static android.app.ITaskStackListener.FORCED_RESIZEABLE_REASON_SECONDARY_DISPLAY;
+import static android.app.ITaskStackListener.FORCED_RESIZEABLE_REASON_SPLIT_SCREEN;
+
 import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -34,6 +37,8 @@ import com.android.systemui.R;
  */
 public class ForcedResizableInfoActivity extends Activity implements OnTouchListener {
 
+    public static final String EXTRA_FORCED_RESIZEABLE_REASON = "extra_forced_resizeable_reason";
+
     private static final long DISMISS_DELAY = 2500;
 
     private final Runnable mFinishRunnable = new Runnable() {
@@ -48,8 +53,21 @@ public class ForcedResizableInfoActivity extends Activity implements OnTouchList
         super.onCreate(savedInstanceState);
         setContentView(R.layout.forced_resizable_activity);
         TextView tv = (TextView) findViewById(com.android.internal.R.id.message);
-        tv.setText(R.string.dock_forced_resizable);
-        getWindow().setTitle(getString(R.string.dock_forced_resizable));
+        int reason = getIntent().getIntExtra(EXTRA_FORCED_RESIZEABLE_REASON, -1);
+        String text;
+        switch (reason) {
+            case FORCED_RESIZEABLE_REASON_SPLIT_SCREEN:
+                text = getString(R.string.dock_forced_resizable);
+                break;
+            case FORCED_RESIZEABLE_REASON_SECONDARY_DISPLAY:
+                text = getString(R.string.forced_resizable_secondary_display);
+                break;
+            default:
+                throw new IllegalArgumentException("Unexpected forced resizeable reason: "
+                        + reason);
+        }
+        tv.setText(text);
+        getWindow().setTitle(text);
         getWindow().getDecorView().setOnTouchListener(this);
     }
 

@@ -164,7 +164,7 @@ public class PreferenceGroupAdapter extends BaseAdapter
             
             preferences.add(preference);
             
-            if (!mHasReturnedViewTypeCount && preference.canRecycleLayout()) {
+            if (!mHasReturnedViewTypeCount && preference.isRecycleEnabled()) {
                 addPreferenceClassName(preference);
             }
             
@@ -296,7 +296,7 @@ public class PreferenceGroupAdapter extends BaseAdapter
         }
         
         final Preference preference = this.getItem(position);
-        if (!preference.canRecycleLayout()) {
+        if (!preference.isRecycleEnabled()) {
             return IGNORE_ITEM_VIEW_TYPE;
         }
 

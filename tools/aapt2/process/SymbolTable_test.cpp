@@ -15,39 +15,57 @@
  */
 
 #include "process/SymbolTable.h"
+
 #include "test/Test.h"
 
 namespace aapt {
 
 TEST(ResourceTableSymbolSourceTest, FindSymbols) {
-    std::unique_ptr<ResourceTable> table = test::ResourceTableBuilder()
-            .addSimple(u"@android:id/foo", ResourceId(0x01020000))
-            .addSimple(u"@android:id/bar")
-            .addValue(u"@android:attr/foo", ResourceId(0x01010000),
-                      test::AttributeBuilder().build())
-            .build();
+  std::unique_ptr<ResourceTable> table =
+      test::ResourceTableBuilder()
+          .AddSimple("android:id/foo", ResourceId(0x01020000))
+          .AddSimple("android:id/bar")
+          .AddValue("android:attr/foo", ResourceId(0x01010000),
+                    test::AttributeBuilder().Build())
+          .Build();
 
-    ResourceTableSymbolSource symbolSource(table.get());
-    EXPECT_NE(nullptr, symbolSource.findByName(test::parseNameOrDie(u"@android:id/foo")));
-    EXPECT_NE(nullptr, symbolSource.findByName(test::parseNameOrDie(u"@android:id/bar")));
+  ResourceTableSymbolSource symbol_source(table.get());
+  EXPECT_NE(nullptr, symbol_source.FindByName(test::ParseNameOrDie("android:id/foo")));
+  EXPECT_NE(nullptr, symbol_source.FindByName(test::ParseNameOrDie("android:id/bar")));
 
-    std::unique_ptr<SymbolTable::Symbol> s = symbolSource.findByName(
-            test::parseNameOrDie(u"@android:attr/foo"));
-    ASSERT_NE(nullptr, s);
-    EXPECT_NE(nullptr, s->attribute);
+  std::unique_ptr<SymbolTable::Symbol> s =
+      symbol_source.FindByName(test::ParseNameOrDie("android:attr/foo"));
+  ASSERT_NE(nullptr, s);
+  EXPECT_NE(nullptr, s->attribute);
 }
 
 TEST(ResourceTableSymbolSourceTest, FindPrivateAttrSymbol) {
-    std::unique_ptr<ResourceTable> table = test::ResourceTableBuilder()
-            .addValue(u"@android:^attr-private/foo", ResourceId(0x01010000),
-                      test::AttributeBuilder().build())
-            .build();
+  std::unique_ptr<ResourceTable> table =
+      test::ResourceTableBuilder()
+          .AddValue("android:^attr-private/foo", ResourceId(0x01010000),
+                    test::AttributeBuilder().Build())
+          .Build();
 
-    ResourceTableSymbolSource symbolSource(table.get());
-    std::unique_ptr<SymbolTable::Symbol> s = symbolSource.findByName(
-                test::parseNameOrDie(u"@android:attr/foo"));
-    ASSERT_NE(nullptr, s);
-    EXPECT_NE(nullptr, s->attribute);
+  ResourceTableSymbolSource symbol_source(table.get());
+  std::unique_ptr<SymbolTable::Symbol> s =
+      symbol_source.FindByName(test::ParseNameOrDie("android:attr/foo"));
+  ASSERT_NE(nullptr, s);
+  EXPECT_NE(nullptr, s->attribute);
 }
 
-} // namespace aapt
+TEST(SymbolTableTest, FindByName) {
+  std::unique_ptr<ResourceTable> table =
+      test::ResourceTableBuilder()
+          .AddSimple("com.android.app:id/foo")
+          .AddSimple("com.android.app:id/" + NameMangler::MangleEntry("com.android.lib", "foo"))
+          .Build();
+
+  NameMangler mangler(NameManglerPolicy{"com.android.app", {"com.android.lib"}});
+  SymbolTable symbol_table(&mangler);
+  symbol_table.AppendSource(util::make_unique<ResourceTableSymbolSource>(table.get()));
+
+  EXPECT_NE(nullptr, symbol_table.FindByName(test::ParseNameOrDie("id/foo")));
+  EXPECT_NE(nullptr, symbol_table.FindByName(test::ParseNameOrDie("com.android.lib:id/foo")));
+}
+
+}  // namespace aapt

@@ -25,6 +25,7 @@ import android.os.Handler;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.PacketSocketAddress;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.LocalLog;
 
@@ -59,13 +60,16 @@ public class ConnectivityPacketTracker {
     private static final boolean DBG = false;
     private static final String MARK_START = "--- START ---";
     private static final String MARK_STOP = "--- STOP ---";
+    private static final String MARK_NAMED_START = "--- START (%s) ---";
+    private static final String MARK_NAMED_STOP = "--- STOP (%s) ---";
 
     private final String mTag;
-    private final Handler mHandler;
     private final LocalLog mLog;
     private final BlockingSocketReader mPacketListener;
+    private boolean mRunning;
+    private String mDisplayName;
 
-    public ConnectivityPacketTracker(NetworkInterface netif, LocalLog log) {
+    public ConnectivityPacketTracker(Handler h, NetworkInterface netif, LocalLog log) {
         final String ifname;
         final int ifindex;
         final byte[] hwaddr;
@@ -81,44 +85,42 @@ public class ConnectivityPacketTracker {
         }
 
         mTag = TAG + "." + ifname;
-        mHandler = new Handler();
         mLog = log;
-        mPacketListener = new PacketListener(ifindex, hwaddr, mtu);
+        mPacketListener = new PacketListener(h, ifindex, hwaddr, mtu);
     }
 
-    public void start() {
-        mLog.log(MARK_START);
+    public void start(String displayName) {
+        mRunning = true;
+        mDisplayName = displayName;
         mPacketListener.start();
     }
 
     public void stop() {
         mPacketListener.stop();
-        mLog.log(MARK_STOP);
+        mRunning = false;
+        mDisplayName = null;
     }
 
     private final class PacketListener extends BlockingSocketReader {
         private final int mIfIndex;
         private final byte mHwAddr[];
 
-        PacketListener(int ifindex, byte[] hwaddr, int mtu) {
-            super(mtu);
+        PacketListener(Handler h, int ifindex, byte[] hwaddr, int mtu) {
+            super(h, mtu);
             mIfIndex = ifindex;
             mHwAddr = hwaddr;
         }
 
         @Override
-        protected FileDescriptor createSocket() {
+        protected FileDescriptor createFd() {
             FileDescriptor s = null;
             try {
-                // TODO: Evaluate switching to SOCK_DGRAM and changing the
-                // BlockingSocketReader's read() to recvfrom(), so that this
-                // might work on non-ethernet-like links (via SLL).
                 s = Os.socket(AF_PACKET, SOCK_RAW, 0);
                 NetworkUtils.attachControlPacketFilter(s, ARPHRD_ETHER);
                 Os.bind(s, new PacketSocketAddress((short) ETH_P_ALL, mIfIndex));
             } catch (ErrnoException | IOException e) {
                 logError("Failed to create packet tracking socket: ", e);
-                closeSocket(s);
+                closeFd(s);
                 return null;
             }
             return s;
@@ -136,13 +138,30 @@ public class ConnectivityPacketTracker {
         }
 
         @Override
+        protected void onStart() {
+            final String msg = TextUtils.isEmpty(mDisplayName)
+                    ? MARK_START
+                    : String.format(MARK_NAMED_START, mDisplayName);
+            mLog.log(msg);
+        }
+
+        @Override
+        protected void onStop() {
+            String msg = TextUtils.isEmpty(mDisplayName)
+                    ? MARK_STOP
+                    : String.format(MARK_NAMED_STOP, mDisplayName);
+            if (!mRunning) msg += " (packet listener stopped unexpectedly)";
+            mLog.log(msg);
+        }
+
+        @Override
         protected void logError(String msg, Exception e) {
             Log.e(mTag, msg, e);
             addLogEntry(msg + e);
         }
 
         private void addLogEntry(String entry) {
-            mHandler.post(() -> mLog.log(entry));
+            mLog.log(entry);
         }
     }
 }

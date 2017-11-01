@@ -24,8 +24,10 @@ import android.os.BatteryManager;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
+import android.service.power.WirelessChargerDetectorProto;
 import android.util.Slog;
 import android.util.TimeUtils;
+import android.util.proto.ProtoOutputStream;
 
 import java.io.PrintWriter;
 
@@ -168,6 +170,44 @@ final class WirelessChargerDetector {
             pw.println("  mLastSampleX=" + mLastSampleX
                     + ", mLastSampleY=" + mLastSampleY + ", mLastSampleZ=" + mLastSampleZ);
         }
+    }
+
+    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+        final long wcdToken = proto.start(fieldId);
+        synchronized (mLock) {
+            proto.write(WirelessChargerDetectorProto.IS_POWERED_WIRELESSLY, mPoweredWirelessly);
+            proto.write(WirelessChargerDetectorProto.IS_AT_REST, mAtRest);
+
+            final long restVectorToken = proto.start(WirelessChargerDetectorProto.REST);
+            proto.write(WirelessChargerDetectorProto.VectorProto.X, mRestX);
+            proto.write(WirelessChargerDetectorProto.VectorProto.Y, mRestY);
+            proto.write(WirelessChargerDetectorProto.VectorProto.Z, mRestZ);
+            proto.end(restVectorToken);
+
+            proto.write(
+                    WirelessChargerDetectorProto.IS_DETECTION_IN_PROGRESS, mDetectionInProgress);
+            proto.write(WirelessChargerDetectorProto.DETECTION_START_TIME_MS, mDetectionStartTime);
+            proto.write(
+                    WirelessChargerDetectorProto.IS_MUST_UPDATE_REST_POSITION,
+                    mMustUpdateRestPosition);
+            proto.write(WirelessChargerDetectorProto.TOTAL_SAMPLES, mTotalSamples);
+            proto.write(WirelessChargerDetectorProto.MOVING_SAMPLES, mMovingSamples);
+
+            final long firstSampleVectorToken =
+                    proto.start(WirelessChargerDetectorProto.FIRST_SAMPLE);
+            proto.write(WirelessChargerDetectorProto.VectorProto.X, mFirstSampleX);
+            proto.write(WirelessChargerDetectorProto.VectorProto.Y, mFirstSampleY);
+            proto.write(WirelessChargerDetectorProto.VectorProto.Z, mFirstSampleZ);
+            proto.end(firstSampleVectorToken);
+
+            final long lastSampleVectorToken =
+                    proto.start(WirelessChargerDetectorProto.LAST_SAMPLE);
+            proto.write(WirelessChargerDetectorProto.VectorProto.X, mLastSampleX);
+            proto.write(WirelessChargerDetectorProto.VectorProto.Y, mLastSampleY);
+            proto.write(WirelessChargerDetectorProto.VectorProto.Z, mLastSampleZ);
+            proto.end(lastSampleVectorToken);
+        }
+        proto.end(wcdToken);
     }
 
     /**

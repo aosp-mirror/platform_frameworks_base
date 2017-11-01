@@ -34,6 +34,7 @@ public class AppWidgetService extends SystemService {
 
     @Override
     public void onStart() {
+        mImpl.onStart();
         publishBinderService(Context.APPWIDGET_SERVICE, mImpl);
         AppWidgetBackupBridge.register(mImpl);
     }

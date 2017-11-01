@@ -17,8 +17,8 @@
 package android.webkit;
 
 import android.annotation.SystemApi;
+import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
-import android.app.ActivityManagerNative;
 import android.app.AppGlobals;
 import android.app.Application;
 import android.content.Context;
@@ -42,6 +42,7 @@ import com.android.server.LocalServices;
 
 import dalvik.system.VMRuntime;
 
+import java.lang.reflect.Method;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
@@ -58,8 +59,10 @@ public final class WebViewFactory {
 
     // visible for WebViewZygoteInit to look up the class by reflection and call preloadInZygote.
     /** @hide */
-    public static final String CHROMIUM_WEBVIEW_FACTORY =
-            "com.android.webview.chromium.WebViewChromiumFactoryProvider";
+    private static final String CHROMIUM_WEBVIEW_FACTORY =
+            "com.android.webview.chromium.WebViewChromiumFactoryProviderForO";
+
+    private static final String CHROMIUM_WEBVIEW_FACTORY_METHOD = "create";
 
     private static final String NULL_WEBVIEW_FACTORY =
             "com.android.webview.nullwebview.NullWebViewFactoryProvider";
@@ -104,6 +107,7 @@ public final class WebViewFactory {
     // error for namespace lookup
     public static final int LIBLOAD_FAILED_TO_FIND_NAMESPACE = 10;
 
+
     private static String getWebViewPreparationErrorReason(int error) {
         switch (error) {
             case LIBLOAD_FAILED_WAITING_FOR_RELRO:
@@ -116,10 +120,7 @@ public final class WebViewFactory {
         return "Unknown";
     }
 
-    /**
-     * @hide
-     */
-    public static class MissingWebViewPackageException extends AndroidRuntimeException {
+    private static class MissingWebViewPackageException extends Exception {
         public MissingWebViewPackageException(String message) { super(message); }
         public MissingWebViewPackageException(Exception e) { super(e); }
     }
@@ -134,7 +135,18 @@ public final class WebViewFactory {
     }
 
     public static PackageInfo getLoadedPackageInfo() {
-        return sPackageInfo;
+        synchronized (sProviderLock) {
+            return sPackageInfo;
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public static Class<WebViewFactoryProvider> getWebViewProviderClass(ClassLoader clazzLoader)
+            throws ClassNotFoundException {
+        return (Class<WebViewFactoryProvider>) Class.forName(CHROMIUM_WEBVIEW_FACTORY,
+                true, clazzLoader);
     }
 
     /**
@@ -169,13 +181,17 @@ public final class WebViewFactory {
             Log.e(LOGTAG, "Couldn't find package " + packageName);
             return LIBLOAD_WRONG_PACKAGE_NAME;
         }
-        sPackageInfo = packageInfo;
 
-        int loadNativeRet = loadNativeLibrary(clazzLoader);
-        // If we failed waiting for relro we want to return that fact even if we successfully load
-        // the relro file.
-        if (loadNativeRet == LIBLOAD_SUCCESS) return response.status;
-        return loadNativeRet;
+        try {
+            int loadNativeRet = loadNativeLibrary(clazzLoader, packageInfo);
+            // If we failed waiting for relro we want to return that fact even if we successfully
+            // load the relro file.
+            if (loadNativeRet == LIBLOAD_SUCCESS) return response.status;
+            return loadNativeRet;
+        } catch (MissingWebViewPackageException e) {
+            Log.e(LOGTAG, "Couldn't load native library: " + e);
+            return LIBLOAD_FAILED_TO_LOAD_LIBRARY;
+        }
     }
 
     static WebViewFactoryProvider getProvider() {
@@ -185,7 +201,9 @@ public final class WebViewFactory {
             if (sProviderInstance != null) return sProviderInstance;
 
             final int uid = android.os.Process.myUid();
-            if (uid == android.os.Process.ROOT_UID || uid == android.os.Process.SYSTEM_UID) {
+            if (uid == android.os.Process.ROOT_UID || uid == android.os.Process.SYSTEM_UID
+                    || uid == android.os.Process.PHONE_UID || uid == android.os.Process.NFC_UID
+                    || uid == android.os.Process.BLUETOOTH_UID) {
                 throw new UnsupportedOperationException(
                         "For security reasons, WebView is not allowed in privileged processes");
             }
@@ -194,11 +212,20 @@ public final class WebViewFactory {
             Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "WebViewFactory.getProvider()");
             try {
                 Class<WebViewFactoryProvider> providerClass = getProviderClass();
-
-                Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "providerClass.newInstance()");
+                Method staticFactory = null;
                 try {
-                    sProviderInstance = providerClass.getConstructor(WebViewDelegate.class)
-                            .newInstance(new WebViewDelegate());
+                    staticFactory = providerClass.getMethod(
+                        CHROMIUM_WEBVIEW_FACTORY_METHOD, WebViewDelegate.class);
+                } catch (Exception e) {
+                    if (DEBUG) {
+                        Log.w(LOGTAG, "error instantiating provider with static factory method", e);
+                    }
+                }
+
+                Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "WebViewFactoryProvider invocation");
+                try {
+                    sProviderInstance = (WebViewFactoryProvider)
+                            staticFactory.invoke(null, new WebViewDelegate());
                     if (DEBUG) Log.v(LOGTAG, "Loaded provider: " + sProviderInstance);
                     return sProviderInstance;
                 } catch (Exception e) {
@@ -235,7 +262,8 @@ public final class WebViewFactory {
     }
 
     // Throws MissingWebViewPackageException on failure
-    private static void verifyPackageInfo(PackageInfo chosen, PackageInfo toUse) {
+    private static void verifyPackageInfo(PackageInfo chosen, PackageInfo toUse)
+            throws MissingWebViewPackageException {
         if (!chosen.packageName.equals(toUse.packageName)) {
             throw new MissingWebViewPackageException("Failed to verify WebView provider, "
                     + "packageName mismatch, expected: "
@@ -256,7 +284,46 @@ public final class WebViewFactory {
         }
     }
 
-    private static Context getWebViewContextAndSetProvider() {
+    /**
+     * If the ApplicationInfo provided is for a stub WebView, fix up the object to include the
+     * required values from the donor package. If the ApplicationInfo is for a full WebView,
+     * leave it alone. Throws MissingWebViewPackageException if the donor is missing.
+     */
+    private static void fixupStubApplicationInfo(ApplicationInfo ai, PackageManager pm)
+            throws MissingWebViewPackageException {
+        String donorPackageName = null;
+        if (ai.metaData != null) {
+            donorPackageName = ai.metaData.getString("com.android.webview.WebViewDonorPackage");
+        }
+        if (donorPackageName != null) {
+            PackageInfo donorPackage;
+            try {
+                donorPackage = pm.getPackageInfo(
+                        donorPackageName,
+                        PackageManager.GET_SHARED_LIBRARY_FILES
+                        | PackageManager.MATCH_DEBUG_TRIAGED_MISSING
+                        | PackageManager.MATCH_UNINSTALLED_PACKAGES
+                        | PackageManager.MATCH_FACTORY_ONLY);
+            } catch (PackageManager.NameNotFoundException e) {
+                throw new MissingWebViewPackageException("Failed to find donor package: " +
+                                                         donorPackageName);
+            }
+            ApplicationInfo donorInfo = donorPackage.applicationInfo;
+
+            // Replace the stub's code locations with the donor's.
+            ai.sourceDir = donorInfo.sourceDir;
+            ai.splitSourceDirs = donorInfo.splitSourceDirs;
+            ai.nativeLibraryDir = donorInfo.nativeLibraryDir;
+            ai.secondaryNativeLibraryDir = donorInfo.secondaryNativeLibraryDir;
+
+            // Copy the donor's primary and secondary ABIs, since the stub doesn't have native code
+            // and so they are unset.
+            ai.primaryCpuAbi = donorInfo.primaryCpuAbi;
+            ai.secondaryCpuAbi = donorInfo.secondaryCpuAbi;
+        }
+    }
+
+    private static Context getWebViewContextAndSetProvider() throws MissingWebViewPackageException {
         Application initialApplication = AppGlobals.getInitialApplication();
         try {
             WebViewProviderResponse response = null;
@@ -276,16 +343,17 @@ public final class WebViewFactory {
             // killed if the package info goes out-of-date.
             Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "ActivityManager.addPackageDependency()");
             try {
-                ActivityManagerNative.getDefault().addPackageDependency(
+                ActivityManager.getService().addPackageDependency(
                         response.packageInfo.packageName);
             } finally {
                 Trace.traceEnd(Trace.TRACE_TAG_WEBVIEW);
             }
             // Fetch package info and verify it against the chosen package
             PackageInfo newPackageInfo = null;
+            PackageManager pm = initialApplication.getPackageManager();
             Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "PackageManager.getPackageInfo()");
             try {
-                newPackageInfo = initialApplication.getPackageManager().getPackageInfo(
+                newPackageInfo = pm.getPackageInfo(
                     response.packageInfo.packageName,
                     PackageManager.GET_SHARED_LIBRARY_FILES
                     | PackageManager.MATCH_DEBUG_TRIAGED_MISSING
@@ -304,12 +372,15 @@ public final class WebViewFactory {
             // failure
             verifyPackageInfo(response.packageInfo, newPackageInfo);
 
+            ApplicationInfo ai = newPackageInfo.applicationInfo;
+            fixupStubApplicationInfo(ai, pm);
+
             Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW,
                     "initialApplication.createApplicationContext");
             try {
                 // Construct an app context to load the Java code into the current app.
                 Context webViewContext = initialApplication.createApplicationContext(
-                        newPackageInfo.applicationInfo,
+                        ai,
                         Context.CONTEXT_INCLUDE_CODE | Context.CONTEXT_IGNORE_SECURITY);
                 sPackageInfo = newPackageInfo;
                 return webViewContext;
@@ -343,13 +414,12 @@ public final class WebViewFactory {
                 ClassLoader clazzLoader = webViewContext.getClassLoader();
 
                 Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "WebViewFactory.loadNativeLibrary()");
-                loadNativeLibrary(clazzLoader);
+                loadNativeLibrary(clazzLoader, sPackageInfo);
                 Trace.traceEnd(Trace.TRACE_TAG_WEBVIEW);
 
                 Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "Class.forName()");
                 try {
-                    return (Class<WebViewFactoryProvider>) Class.forName(CHROMIUM_WEBVIEW_FACTORY,
-                            true, clazzLoader);
+                    return getWebViewProviderClass(clazzLoader);
                 } finally {
                     Trace.traceEnd(Trace.TRACE_TAG_WEBVIEW);
                 }
@@ -426,7 +496,11 @@ public final class WebViewFactory {
      */
     public static int onWebViewProviderChanged(PackageInfo packageInfo) {
         String[] nativeLibs = null;
+        String originalSourceDir = packageInfo.applicationInfo.sourceDir;
         try {
+            fixupStubApplicationInfo(packageInfo.applicationInfo,
+                                     AppGlobals.getInitialApplication().getPackageManager());
+
             nativeLibs = WebViewFactory.getWebViewNativeLibraryPaths(packageInfo);
             if (nativeLibs != null) {
                 long newVmSize = 0L;
@@ -475,15 +549,15 @@ public final class WebViewFactory {
             Log.e(LOGTAG, "error preparing webview native library", t);
         }
 
-        WebViewZygote.onWebViewProviderChanged(packageInfo);
+        WebViewZygote.onWebViewProviderChanged(packageInfo, originalSourceDir);
 
         return prepareWebViewInSystemServer(nativeLibs);
     }
 
-    // throws MissingWebViewPackageException
     private static String getLoadFromApkPath(String apkPath,
                                              String[] abiList,
-                                             String nativeLibFileName) {
+                                             String nativeLibFileName)
+            throws MissingWebViewPackageException {
         // Search the APK for a native library conforming to a listed ABI.
         try (ZipFile z = new ZipFile(apkPath)) {
             for (String abi : abiList) {
@@ -500,8 +574,8 @@ public final class WebViewFactory {
         return "";
     }
 
-    // throws MissingWebViewPackageException
-    private static String[] getWebViewNativeLibraryPaths(PackageInfo packageInfo) {
+    private static String[] getWebViewNativeLibraryPaths(PackageInfo packageInfo)
+            throws MissingWebViewPackageException {
         ApplicationInfo ai = packageInfo.applicationInfo;
         final String NATIVE_LIB_FILE_NAME = getWebViewLibrary(ai);
 
@@ -625,14 +699,15 @@ public final class WebViewFactory {
         }
     }
 
-    // Assumes that we have waited for relro creation and set sPackageInfo
-    private static int loadNativeLibrary(ClassLoader clazzLoader) {
+    // Assumes that we have waited for relro creation
+    private static int loadNativeLibrary(ClassLoader clazzLoader, PackageInfo packageInfo)
+            throws MissingWebViewPackageException {
         if (!sAddressSpaceReserved) {
             Log.e(LOGTAG, "can't load with relro file; address space not reserved");
             return LIBLOAD_ADDRESS_SPACE_NOT_RESERVED;
         }
 
-        String[] args = getWebViewNativeLibraryPaths(sPackageInfo);
+        String[] args = getWebViewNativeLibraryPaths(packageInfo);
         int result = nativeLoadWithRelroFile(args[0] /* path32 */,
                                              args[1] /* path64 */,
                                              CHROMIUM_WEBVIEW_NATIVE_RELRO_32,

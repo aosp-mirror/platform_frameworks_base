@@ -26,7 +26,7 @@
 #include <utils/Vector.h>
 #include <utils/threads.h>
 #include <pthread.h>
-#include <nativehelper/jni.h>
+#include <jni.h>
 
 
 namespace android {

@@ -251,7 +251,7 @@ public class ConditionProviders extends ManagedServices {
 
     public IConditionProvider findConditionProvider(ComponentName component) {
         if (component == null) return null;
-        for (ManagedServiceInfo service : mServices) {
+        for (ManagedServiceInfo service : getServices()) {
             if (component.equals(service.component)) {
                 return provider(service);
             }

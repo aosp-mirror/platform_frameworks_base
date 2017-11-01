@@ -15,7 +15,6 @@
 # limitations under the License.
 #
 
-aapt package -M AndroidManifest.xml -S res -F bundle.apk -f && \
-unzip bundle.apk resources.arsc && \
-mv resources.arsc overlay.arsc && \
-xxd -i overlay.arsc > overlay_arsc.h
+set -e
+
+aapt package -M AndroidManifest.xml -S res -F overlay.apk -f

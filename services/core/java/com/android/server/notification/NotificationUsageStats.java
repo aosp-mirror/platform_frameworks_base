@@ -16,7 +16,7 @@
 
 package com.android.server.notification;
 
-import static android.service.notification.NotificationListenerService.Ranking.IMPORTANCE_HIGH;
+import static android.app.NotificationManager.IMPORTANCE_HIGH;
 
 import android.app.Notification;
 import android.content.ContentValues;
@@ -40,6 +40,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.PrintWriter;
+import java.lang.Math;
 import java.util.ArrayDeque;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -110,6 +111,18 @@ public class NotificationUsageStats {
             return stats.getEnqueueRate(SystemClock.elapsedRealtime());
         } else {
             return 0f;
+        }
+    }
+
+    /**
+     * Called when a notification wants to alert.
+     */
+    public synchronized boolean isAlertRateLimited(String packageName) {
+        AggregatedStats stats = getOrCreateAggregatedStatsLocked(packageName);
+        if (stats != null) {
+            return stats.isAlertRateLimited();
+        } else {
+            return false;
         }
     }
 
@@ -386,7 +399,9 @@ public class NotificationUsageStats {
         public ImportanceHistogram quietImportance;
         public ImportanceHistogram finalImportance;
         public RateEstimator enqueueRate;
+        public AlertRateLimiter alertRate;
         public int numRateViolations;
+        public int numAlertViolations;
         public int numQuotaViolations;
         public long mLastAccessTime;
 
@@ -398,6 +413,7 @@ public class NotificationUsageStats {
             quietImportance = new ImportanceHistogram(context, "note_imp_quiet_");
             finalImportance = new ImportanceHistogram(context, "note_importance_");
             enqueueRate = new RateEstimator();
+            alertRate = new AlertRateLimiter();
         }
 
         public AggregatedStats getPrevious() {
@@ -510,6 +526,7 @@ public class NotificationUsageStats {
             maybeCount("note_sub_text", (numWithSubText - previous.numWithSubText));
             maybeCount("note_info_text", (numWithInfoText - previous.numWithInfoText));
             maybeCount("note_over_rate", (numRateViolations - previous.numRateViolations));
+            maybeCount("note_over_alert_rate", (numAlertViolations - previous.numAlertViolations));
             maybeCount("note_over_quota", (numQuotaViolations - previous.numQuotaViolations));
             noisyImportance.maybeCount(previous.noisyImportance);
             quietImportance.maybeCount(previous.quietImportance);
@@ -542,6 +559,7 @@ public class NotificationUsageStats {
             previous.numWithSubText = numWithSubText;
             previous.numWithInfoText = numWithInfoText;
             previous.numRateViolations = numRateViolations;
+            previous.numAlertViolations = numAlertViolations;
             previous.numQuotaViolations = numQuotaViolations;
             noisyImportance.update(previous.noisyImportance);
             quietImportance.update(previous.quietImportance);
@@ -574,6 +592,14 @@ public class NotificationUsageStats {
 
         public void updateInterarrivalEstimate(long now) {
             enqueueRate.update(now);
+        }
+
+        public boolean isAlertRateLimited() {
+            boolean limited = alertRate.shouldRateLimitAlert(SystemClock.elapsedRealtime());
+            if (limited) {
+                numAlertViolations++;
+            }
+            return limited;
         }
 
         private String toStringWithIndent(String indent) {
@@ -634,7 +660,11 @@ public class NotificationUsageStats {
             output.append("numWithSubText=").append(numWithSubText).append("\n");
             output.append(indentPlusTwo);
             output.append("numWithInfoText=").append(numWithInfoText).append("\n");
+            output.append(indentPlusTwo);
             output.append("numRateViolations=").append(numRateViolations).append("\n");
+            output.append(indentPlusTwo);
+            output.append("numAlertViolations=").append(numAlertViolations).append("\n");
+            output.append(indentPlusTwo);
             output.append("numQuotaViolations=").append(numQuotaViolations).append("\n");
             output.append(indentPlusTwo).append(noisyImportance.toString()).append("\n");
             output.append(indentPlusTwo).append(quietImportance.toString()).append("\n");
@@ -677,6 +707,7 @@ public class NotificationUsageStats {
             maybePut(dump, "numRateViolations", numRateViolations);
             maybePut(dump, "numQuotaLViolations", numQuotaViolations);
             maybePut(dump, "notificationEnqueueRate", getEnqueueRate());
+            maybePut(dump, "numAlertViolations", numAlertViolations);
             noisyImportance.maybePut(dump, previous.noisyImportance);
             quietImportance.maybePut(dump, previous.quietImportance);
             finalImportance.maybePut(dump, previous.finalImportance);
@@ -718,8 +749,8 @@ public class NotificationUsageStats {
         }
 
         void increment(int imp) {
-            imp = imp < 0 ? 0 : imp > NUM_IMPORTANCES ? NUM_IMPORTANCES : imp;
-            mCount[imp] ++;
+            imp = Math.max(0, Math.min(imp, mCount.length - 1));
+            mCount[imp]++;
         }
 
         void maybeCount(ImportanceHistogram prev) {

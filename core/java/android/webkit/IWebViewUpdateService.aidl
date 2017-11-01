@@ -64,6 +64,11 @@ interface IWebViewUpdateService {
     String getCurrentWebViewPackageName();
 
     /**
+     * Used by public API for debugging purposes.
+     */
+    PackageInfo getCurrentWebViewPackage();
+
+    /**
      * Used by Settings to determine whether a certain package can be enabled/disabled by the user -
      * the package should not be modifiable in this way if it is a fallback package.
      */
@@ -73,4 +78,14 @@ interface IWebViewUpdateService {
      * Enable or disable the WebView package fallback mechanism.
      */
     void enableFallbackLogic(boolean enable);
+
+    /**
+     * Used by Settings to determine whether multiprocess is enabled.
+     */
+    boolean isMultiProcessEnabled();
+
+    /**
+     * Used by Settings to enable/disable multiprocess.
+     */
+    void enableMultiProcess(boolean enable);
 }

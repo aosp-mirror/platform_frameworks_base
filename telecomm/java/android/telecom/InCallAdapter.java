@@ -34,7 +34,7 @@ import java.util.List;
  * <p>
  * The adapter will stop functioning when there are no more calls.
  *
- * {@hide}
+ * @hide
  */
 public final class InCallAdapter {
     private final IInCallAdapter mAdapter;
@@ -372,6 +372,50 @@ public final class InCallAdapter {
     public void turnProximitySensorOff(boolean screenOnImmediately) {
         try {
             mAdapter.turnOffProximitySensor(screenOnImmediately);
+        } catch (RemoteException ignored) {
+        }
+    }
+
+    /**
+     * Sends an RTT upgrade request to the remote end of the connection.
+     */
+    public void sendRttRequest(String callId) {
+        try {
+            mAdapter.sendRttRequest(callId);
+        } catch (RemoteException ignored) {
+        }
+    }
+
+    /**
+     * Responds to an RTT upgrade request initiated from the remote end.
+     *
+     * @param id the ID of the request as specified by Telecom
+     * @param accept Whether the request should be accepted.
+     */
+    public void respondToRttRequest(String callId, int id, boolean accept) {
+        try {
+            mAdapter.respondToRttRequest(callId, id, accept);
+        } catch (RemoteException ignored) {
+        }
+    }
+
+    /**
+     * Instructs Telecom to shut down the RTT communication channel.
+     */
+    public void stopRtt(String callId) {
+        try {
+            mAdapter.stopRtt(callId);
+        } catch (RemoteException ignored) {
+        }
+    }
+
+    /**
+     * Sets the RTT audio mode.
+     * @param mode the desired RTT audio mode
+     */
+    public void setRttMode(String callId, int mode) {
+        try {
+            mAdapter.setRttMode(callId, mode);
         } catch (RemoteException ignored) {
         }
     }

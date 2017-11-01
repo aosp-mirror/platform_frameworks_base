@@ -85,4 +85,19 @@ public class KeyUtils {
         }
         inst.sendKeySync(new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_DPAD_CENTER));
     }
+
+    /**
+     * Generates a {@link KeyEvent}.
+     *
+     * @param keycode The integer keycode for the event to be generated.
+     * @param keyEventAction The integer {@link KeyEvent} action code.
+     * @param metaState Flags indicating which meta keys are currently pressed.
+     *
+     * @return a new {@link KeyEvent} for current time.
+     */
+    public static KeyEvent generateKeyEvent(int keycode, int keyEventAction, int metaState) {
+        long currentTime = System.currentTimeMillis();
+        return new KeyEvent(currentTime, currentTime, keyEventAction, keycode,
+            0 /* repeat */, metaState);
+    }
 }

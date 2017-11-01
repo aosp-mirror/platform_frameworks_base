@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_HWUI_CANVAS_STATE_H
-#define ANDROID_HWUI_CANVAS_STATE_H
+#pragma once
 
 #include "Snapshot.h"
 
+#include <SkClipOp.h>
 #include <SkMatrix.h>
 #include <SkPath.h>
 #include <SkRegion.h>
@@ -62,11 +62,11 @@ public:
  * Renderer interface. Drawing and recording classes that include a CanvasState will have
  * different use cases:
  *
- * Drawing code maintaining canvas state (i.e. OpenGLRenderer) can query attributes (such as
+ * Drawing code maintaining canvas state (e.g. FrameBuilder) can query attributes (such as
  * transform) or hook into changes (e.g. save/restore) with minimal surface area for manipulating
  * the stack itself.
  *
- * Recording code maintaining canvas state (i.e. DisplayListCanvas) can both record and pass
+ * Recording code maintaining canvas state (e.g. RecordingCanvas) can both record and pass
  * through state operations to CanvasState, so that not only will querying operations work
  * (getClip/Matrix), but so that quickRejection can also be used.
  */
@@ -122,9 +122,8 @@ public:
 
     bool quickRejectConservative(float left, float top, float right, float bottom) const;
 
-    bool clipRect(float left, float top, float right, float bottom, SkRegion::Op op);
-    bool clipPath(const SkPath* path, SkRegion::Op op);
-    bool clipRegion(const SkRegion* region, SkRegion::Op op);
+    bool clipRect(float left, float top, float right, float bottom, SkClipOp op);
+    bool clipPath(const SkPath* path, SkClipOp op);
 
     /**
      * Sets a "clipping outline", which is independent from the regular clip.
@@ -134,8 +133,12 @@ public:
      */
     void setClippingOutline(LinearAllocator& allocator, const Outline* outline);
     void setClippingRoundRect(LinearAllocator& allocator,
-            const Rect& rect, float radius, bool highPriority = true);
-    void setProjectionPathMask(LinearAllocator& allocator, const SkPath* path);
+            const Rect& rect, float radius, bool highPriority = true) {
+        mSnapshot->setClippingRoundRect(allocator, rect, radius, highPriority);
+    }
+    void setProjectionPathMask(const SkPath* path) {
+        mSnapshot->setProjectionPathMask(path);
+    }
 
     /**
      * Returns true if drawing in the rectangle (left, top, right, bottom)
@@ -145,19 +148,12 @@ public:
     bool calculateQuickRejectForScissor(float left, float top, float right, float bottom,
             bool* clipRequired, bool* roundRectClipRequired, bool snapOut) const;
 
-    void setDirtyClip(bool opaque) { mDirtyClip = opaque; }
-    bool getDirtyClip() const { return mDirtyClip; }
-
     void scaleAlpha(float alpha) { mSnapshot->alpha *= alpha; }
-    void setEmpty(bool value) { mSnapshot->empty = value; }
-    void setInvisible(bool value) { mSnapshot->invisible = value; }
 
     inline const mat4* currentTransform() const { return currentSnapshot()->transform; }
     inline const Rect& currentRenderTargetClip() const { return currentSnapshot()->getRenderTargetClip(); }
-    inline Region* currentRegion() const { return currentSnapshot()->region; }
     inline int currentFlags() const { return currentSnapshot()->flags; }
     const Vector3& currentLightCenter() const { return currentSnapshot()->getRelativeLightCenter(); }
-    inline bool currentlyIgnored() const { return currentSnapshot()->isIgnored(); }
     int getViewportWidth() const { return currentSnapshot()->getViewportWidth(); }
     int getViewportHeight() const { return currentSnapshot()->getViewportHeight(); }
     int getWidth() const { return mWidth; }
@@ -172,10 +168,6 @@ private:
     Snapshot* allocSnapshot(Snapshot* previous, int savecount);
     void freeSnapshot(Snapshot* snapshot);
     void freeAllSnapshots();
-
-    /// indicates that the clip has been changed since the last time it was consumed
-    // TODO: delete when switching to HWUI_NEW_OPS
-    bool mDirtyClip;
 
     /// Dimensions of the drawing surface
     int mWidth, mHeight;
@@ -201,5 +193,3 @@ private:
 
 }; // namespace uirenderer
 }; // namespace android
-
-#endif // ANDROID_HWUI_CANVAS_STATE_H

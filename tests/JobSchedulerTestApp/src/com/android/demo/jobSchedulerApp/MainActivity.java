@@ -56,16 +56,17 @@ public class MainActivity extends Activity {
         stopJobColor = getColor(R.color.stop_received);
 
         // Set up UI.
-        mShowStartView = (TextView) findViewById(R.id.onstart_textview);
-        mShowStopView = (TextView) findViewById(R.id.onstop_textview);
-        mParamsTextView = (TextView) findViewById(R.id.task_params);
-        mDelayEditText = (EditText) findViewById(R.id.delay_time);
-        mDeadlineEditText = (EditText) findViewById(R.id.deadline_time);
-        mWiFiConnectivityRadioButton = (RadioButton) findViewById(R.id.checkbox_unmetered);
-        mAnyConnectivityRadioButton = (RadioButton) findViewById(R.id.checkbox_any);
-        mRequiresChargingCheckBox = (CheckBox) findViewById(R.id.checkbox_charging);
-        mRequiresIdleCheckbox = (CheckBox) findViewById(R.id.checkbox_idle);
-        mIsPersistedCheckbox = (CheckBox) findViewById(R.id.checkbox_persisted);
+        mShowStartView = findViewById(R.id.onstart_textview);
+        mShowStopView = findViewById(R.id.onstop_textview);
+        mParamsTextView = findViewById(R.id.task_params);
+        mDelayEditText = findViewById(R.id.delay_time);
+        mDeadlineEditText = findViewById(R.id.deadline_time);
+        mWiFiConnectivityRadioButton = findViewById(R.id.checkbox_unmetered);
+        mAnyConnectivityRadioButton = findViewById(R.id.checkbox_any);
+        mCellConnectivityRadioButton = findViewById(R.id.checkbox_metered);
+        mRequiresChargingCheckBox = findViewById(R.id.checkbox_charging);
+        mRequiresIdleCheckbox = findViewById(R.id.checkbox_idle);
+        mIsPersistedCheckbox = findViewById(R.id.checkbox_persisted);
 
         mServiceComponent = new ComponentName(this, TestJobService.class);
         // Start service and provide it a way to communicate with us.
@@ -85,6 +86,7 @@ public class MainActivity extends Activity {
     EditText mDeadlineEditText;
     RadioButton mWiFiConnectivityRadioButton;
     RadioButton mAnyConnectivityRadioButton;
+    RadioButton mCellConnectivityRadioButton;
     CheckBox mRequiresChargingCheckBox;
     CheckBox mRequiresIdleCheckbox;
     CheckBox mIsPersistedCheckbox;
@@ -141,9 +143,12 @@ public class MainActivity extends Activity {
             builder.setOverrideDeadline(Long.parseLong(deadline) * 1000);
         }
         boolean requiresUnmetered = mWiFiConnectivityRadioButton.isChecked();
+        boolean requiresMetered = mCellConnectivityRadioButton.isChecked();
         boolean requiresAnyConnectivity = mAnyConnectivityRadioButton.isChecked();
         if (requiresUnmetered) {
             builder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED);
+        } else if (requiresMetered) {
+            builder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_METERED);
         } else if (requiresAnyConnectivity) {
             builder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY);
         }

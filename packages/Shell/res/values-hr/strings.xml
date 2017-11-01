@@ -4,9 +4,9 @@
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
      You may obtain a copy of the License at
-  
+
           http://www.apache.org/licenses/LICENSE-2.0
-  
+
      Unless required by applicable law or agreed to in writing, software
      distributed under the License is distributed on an "AS IS" BASIS,
      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,12 +17,15 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"Ljuska"</string>
+    <string name="bugreport_notification_channel" msgid="2574150205913861141">"Izvješća o programskoj pogrešci"</string>
     <string name="bugreport_in_progress_title" msgid="4311705936714972757">"Generira se izvješće o programskoj pogrešci <xliff:g id="ID">#%d</xliff:g>"</string>
     <string name="bugreport_finished_title" msgid="4429132808670114081">"Izvješće o programskoj pogrešci <xliff:g id="ID">#%d</xliff:g> snimljeno"</string>
     <string name="bugreport_updating_title" msgid="4423539949559634214">"Dodavanje pojedinosti u izvješće o progr. pogrešci"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"Pričekajte..."</string>
     <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"Izvješće o programskoj pogrešci uskoro će se pojaviti na telefonu"</string>
+    <string name="bugreport_finished_text" product="tv" msgid="5758325479058638893">"Odaberite da biste podijelili izvješće o programskoj pogrešci"</string>
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"Dodirnite da biste podijelili izvješće o programskoj pogrešci"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="tv" msgid="2343263822812016950">"Odaberite za dijeljenje izvješća o pogrešci bez snimke zaslona ili pričekajte da se izradi snimka"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"Dodirnite za dijeljenje izvješća o pogrešci bez snimke zaslona ili pričekajte da se izradi snimka"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Dodirnite za dijeljenje izvješća o pogrešci bez snimke zaslona ili pričekajte da se izradi snimka"</string>
     <string name="bugreport_confirm" msgid="5917407234515812495">"Izvješća o programskim pogreškama sadržavaju podatke iz različitih datoteka zapisnika sustava, što može uključivati podatke koje smatrate osjetljivima (na primjer podatke o upotrebi aplikacije i lokaciji). Izvješća o programskim pogreškama dijelite samo s osobama i aplikacijama koje smatrate pouzdanima."</string>
@@ -40,4 +43,5 @@
     <string name="bugreport_info_title" msgid="2306030793918239804">"Naslov izvješća o programskoj pogrešci"</string>
     <string name="bugreport_info_description" msgid="5072835127481627722">"Sažetak izvješća o programskoj pogrešci"</string>
     <string name="save" msgid="4781509040564835759">"Spremi"</string>
+    <string name="bugreport_intent_chooser_title" msgid="7605709494790894076">"Dijeljenje izvješća o pogrešci"</string>
 </resources>

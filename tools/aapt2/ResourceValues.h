@@ -17,342 +17,318 @@
 #ifndef AAPT_RESOURCE_VALUES_H
 #define AAPT_RESOURCE_VALUES_H
 
+#include <array>
+#include <limits>
+#include <ostream>
+#include <vector>
+
+#include "androidfw/ResourceTypes.h"
+#include "androidfw/StringPiece.h"
+
 #include "Diagnostics.h"
 #include "Resource.h"
 #include "StringPool.h"
 #include "io/File.h"
 #include "util/Maybe.h"
 
-#include <array>
-#include <androidfw/ResourceTypes.h>
-#include <ostream>
-#include <vector>
-
 namespace aapt {
 
 struct RawValueVisitor;
 
-/**
- * A resource value. This is an all-encompassing representation
- * of Item and Map and their subclasses. The way to do
- * type specific operations is to check the Value's type() and
- * cast it to the appropriate subclass. This isn't super clean,
- * but it is the simplest strategy.
- */
-struct Value {
-	virtual ~Value() = default;
+// A resource value. This is an all-encompassing representation
+// of Item and Map and their subclasses. The way to do
+// type specific operations is to check the Value's type() and
+// cast it to the appropriate subclass. This isn't super clean,
+// but it is the simplest strategy.
+class Value {
+ public:
+  virtual ~Value() = default;
 
-    /**
-     * Whether this value is weak and can be overridden without
-     * warning or error. Default is false.
-     */
-    bool isWeak() const {
-        return mWeak;
-    }
+  // Whether this value is weak and can be overridden without warning or error. Default is false.
+  bool IsWeak() const { return weak_; }
 
-    void setWeak(bool val) {
-        mWeak = val;
-    }
+  void SetWeak(bool val) { weak_ = val; }
 
-    // Whether the value is marked as translateable.
-    // This does not persist when flattened.
-    // It is only used during compilation phase.
-    void setTranslateable(bool val) {
-        mTranslateable = val;
-    }
+  // Whether the value is marked as translatable.
+  // This does not persist when flattened.
+  // It is only used during compilation phase.
+  void SetTranslatable(bool val) { translatable_ = val; }
 
-    // Default true.
-    bool isTranslateable() const {
-        return mTranslateable;
-    }
+  // Default true.
+  bool IsTranslatable() const { return translatable_; }
 
-    /**
-     * Returns the source where this value was defined.
-     */
-    const Source& getSource() const {
-        return mSource;
-    }
+  // Returns the source where this value was defined.
+  const Source& GetSource() const { return source_; }
 
-    void setSource(const Source& source) {
-        mSource = source;
-    }
+  void SetSource(const Source& source) { source_ = source; }
 
-    void setSource(Source&& source) {
-        mSource = std::move(source);
-    }
+  void SetSource(Source&& source) { source_ = std::move(source); }
 
-    /**
-     * Returns the comment that was associated with this resource.
-     */
-    StringPiece16 getComment() const {
-        return mComment;
-    }
+  // Returns the comment that was associated with this resource.
+  const std::string& GetComment() const { return comment_; }
 
-    void setComment(const StringPiece16& str) {
-        mComment = str.toString();
-    }
+  void SetComment(const android::StringPiece& str) { comment_ = str.to_string(); }
 
-    void setComment(std::u16string&& str) {
-        mComment = std::move(str);
-    }
+  void SetComment(std::string&& str) { comment_ = std::move(str); }
 
-    virtual bool equals(const Value* value) const = 0;
+  virtual bool Equals(const Value* value) const = 0;
 
-    /**
-     * Calls the appropriate overload of ValueVisitor.
-     */
-    virtual void accept(RawValueVisitor* visitor) = 0;
+  // Calls the appropriate overload of ValueVisitor.
+  virtual void Accept(RawValueVisitor* visitor) = 0;
 
-    /**
-     * Clone the value.
-     */
-    virtual Value* clone(StringPool* newPool) const = 0;
+  // Clone the value. `new_pool` is the new StringPool that
+  // any resources with strings should use when copying their string.
+  virtual Value* Clone(StringPool* new_pool) const = 0;
 
-    /**
-     * Human readable printout of this value.
-     */
-    virtual void print(std::ostream* out) const = 0;
+  // Human readable printout of this value.
+  virtual void Print(std::ostream* out) const = 0;
 
-protected:
-    Source mSource;
-    std::u16string mComment;
-    bool mWeak = false;
-    bool mTranslateable = true;
+  friend std::ostream& operator<<(std::ostream& out, const Value& value);
+
+ protected:
+  Source source_;
+  std::string comment_;
+  bool weak_ = false;
+  bool translatable_ = true;
 };
 
-/**
- * Inherit from this to get visitor accepting implementations for free.
- */
+// Inherit from this to get visitor accepting implementations for free.
 template <typename Derived>
 struct BaseValue : public Value {
-    void accept(RawValueVisitor* visitor) override;
+  void Accept(RawValueVisitor* visitor) override;
 };
 
-/**
- * A resource item with a single value. This maps to android::ResTable_entry.
- */
+// A resource item with a single value. This maps to android::ResTable_entry.
 struct Item : public Value {
-    /**
-     * Clone the Item.
-     */
-    virtual Item* clone(StringPool* newPool) const override = 0;
+  // Clone the Item.
+  virtual Item* Clone(StringPool* new_pool) const override = 0;
 
-    /**
-     * Fills in an android::Res_value structure with this Item's binary representation.
-     * Returns false if an error occurred.
-     */
-    virtual bool flatten(android::Res_value* outValue) const = 0;
+  // Fills in an android::Res_value structure with this Item's binary representation.
+  // Returns false if an error occurred.
+  virtual bool Flatten(android::Res_value* out_value) const = 0;
 };
 
-/**
- * Inherit from this to get visitor accepting implementations for free.
- */
+// Inherit from this to get visitor accepting implementations for free.
 template <typename Derived>
 struct BaseItem : public Item {
-    void accept(RawValueVisitor* visitor) override;
+  void Accept(RawValueVisitor* visitor) override;
 };
 
-/**
- * A reference to another resource. This maps to android::Res_value::TYPE_REFERENCE.
- *
- * A reference can be symbolic (with the name set to a valid resource name) or be
- * numeric (the id is set to a valid resource ID).
- */
+// A reference to another resource. This maps to android::Res_value::TYPE_REFERENCE.
+// A reference can be symbolic (with the name set to a valid resource name) or be
+// numeric (the id is set to a valid resource ID).
 struct Reference : public BaseItem<Reference> {
-    enum class Type {
-        kResource,
-        kAttribute,
-    };
+  enum class Type {
+    kResource,
+    kAttribute,
+  };
 
-    Maybe<ResourceName> name;
-    Maybe<ResourceId> id;
-    Reference::Type referenceType;
-    bool privateReference = false;
+  Maybe<ResourceName> name;
+  Maybe<ResourceId> id;
+  Reference::Type reference_type;
+  bool private_reference = false;
 
-    Reference();
-    explicit Reference(const ResourceNameRef& n, Type type = Type::kResource);
-    explicit Reference(const ResourceId& i, Type type = Type::kResource);
+  Reference();
+  explicit Reference(const ResourceNameRef& n, Type type = Type::kResource);
+  explicit Reference(const ResourceId& i, Type type = Type::kResource);
+  Reference(const ResourceNameRef& n, const ResourceId& i);
 
-    bool equals(const Value* value) const override;
-    bool flatten(android::Res_value* outValue) const override;
-    Reference* clone(StringPool* newPool) const override;
-    void print(std::ostream* out) const override;
+  bool Equals(const Value* value) const override;
+  bool Flatten(android::Res_value* out_value) const override;
+  Reference* Clone(StringPool* new_pool) const override;
+  void Print(std::ostream* out) const override;
 };
 
-/**
- * An ID resource. Has no real value, just a place holder.
- */
+bool operator<(const Reference&, const Reference&);
+bool operator==(const Reference&, const Reference&);
+
+// An ID resource. Has no real value, just a place holder.
 struct Id : public BaseItem<Id> {
-    Id() { mWeak = true; }
-    bool equals(const Value* value) const override;
-    bool flatten(android::Res_value* out) const override;
-    Id* clone(StringPool* newPool) const override;
-    void print(std::ostream* out) const override;
+  Id() { weak_ = true; }
+  bool Equals(const Value* value) const override;
+  bool Flatten(android::Res_value* out) const override;
+  Id* Clone(StringPool* new_pool) const override;
+  void Print(std::ostream* out) const override;
 };
 
-/**
- * A raw, unprocessed string. This may contain quotations,
- * escape sequences, and whitespace. This shall *NOT*
- * end up in the final resource table.
- */
+// A raw, unprocessed string. This may contain quotations, escape sequences, and whitespace.
+// This shall *NOT* end up in the final resource table.
 struct RawString : public BaseItem<RawString> {
-    StringPool::Ref value;
+  StringPool::Ref value;
 
-    explicit RawString(const StringPool::Ref& ref);
+  explicit RawString(const StringPool::Ref& ref);
 
-    bool equals(const Value* value) const override;
-    bool flatten(android::Res_value* outValue) const override;
-    RawString* clone(StringPool* newPool) const override;
-    void print(std::ostream* out) const override;
+  bool Equals(const Value* value) const override;
+  bool Flatten(android::Res_value* out_value) const override;
+  RawString* Clone(StringPool* new_pool) const override;
+  void Print(std::ostream* out) const override;
 };
+
+// Identifies a range of characters in a string that are untranslatable.
+// These should not be pseudolocalized. The start and end indices are measured in bytes.
+struct UntranslatableSection {
+  // Start offset inclusive.
+  size_t start;
+
+  // End offset exclusive.
+  size_t end;
+};
+
+inline bool operator==(const UntranslatableSection& a, const UntranslatableSection& b) {
+  return a.start == b.start && a.end == b.end;
+}
+
+inline bool operator!=(const UntranslatableSection& a, const UntranslatableSection& b) {
+  return a.start != b.start || a.end != b.end;
+}
 
 struct String : public BaseItem<String> {
-    StringPool::Ref value;
+  StringPool::Ref value;
 
-    explicit String(const StringPool::Ref& ref);
+  // Sections of the string to NOT translate. Mainly used
+  // for pseudolocalization. This data is NOT persisted
+  // in any format.
+  std::vector<UntranslatableSection> untranslatable_sections;
 
-    bool equals(const Value* value) const override;
-    bool flatten(android::Res_value* outValue) const override;
-    String* clone(StringPool* newPool) const override;
-    void print(std::ostream* out) const override;
+  explicit String(const StringPool::Ref& ref);
+
+  bool Equals(const Value* value) const override;
+  bool Flatten(android::Res_value* out_value) const override;
+  String* Clone(StringPool* new_pool) const override;
+  void Print(std::ostream* out) const override;
 };
 
 struct StyledString : public BaseItem<StyledString> {
-    StringPool::StyleRef value;
+  StringPool::StyleRef value;
 
-    explicit StyledString(const StringPool::StyleRef& ref);
+  // Sections of the string to NOT translate. Mainly used
+  // for pseudolocalization. This data is NOT persisted
+  // in any format.
+  std::vector<UntranslatableSection> untranslatable_sections;
 
-    bool equals(const Value* value) const override;
-    bool flatten(android::Res_value* outValue) const override;
-    StyledString* clone(StringPool* newPool) const override;
-    void print(std::ostream* out) const override;
+  explicit StyledString(const StringPool::StyleRef& ref);
+
+  bool Equals(const Value* value) const override;
+  bool Flatten(android::Res_value* out_value) const override;
+  StyledString* Clone(StringPool* new_pool) const override;
+  void Print(std::ostream* out) const override;
 };
 
 struct FileReference : public BaseItem<FileReference> {
-    StringPool::Ref path;
+  StringPool::Ref path;
 
-    /**
-     * A handle to the file object from which this file can be read.
-     */
-    io::IFile* file = nullptr;
+  // A handle to the file object from which this file can be read.
+  // This field is NOT persisted in any format. It is transient.
+  io::IFile* file = nullptr;
 
-    FileReference() = default;
-    explicit FileReference(const StringPool::Ref& path);
+  FileReference() = default;
+  explicit FileReference(const StringPool::Ref& path);
 
-    bool equals(const Value* value) const override;
-    bool flatten(android::Res_value* outValue) const override;
-    FileReference* clone(StringPool* newPool) const override;
-    void print(std::ostream* out) const override;
+  bool Equals(const Value* value) const override;
+  bool Flatten(android::Res_value* out_value) const override;
+  FileReference* Clone(StringPool* new_pool) const override;
+  void Print(std::ostream* out) const override;
 };
 
-/**
- * Represents any other android::Res_value.
- */
+// Represents any other android::Res_value.
 struct BinaryPrimitive : public BaseItem<BinaryPrimitive> {
-    android::Res_value value;
+  android::Res_value value;
 
-    BinaryPrimitive() = default;
-    explicit BinaryPrimitive(const android::Res_value& val);
-    BinaryPrimitive(uint8_t dataType, uint32_t data);
+  BinaryPrimitive() = default;
+  explicit BinaryPrimitive(const android::Res_value& val);
+  BinaryPrimitive(uint8_t dataType, uint32_t data);
 
-    bool equals(const Value* value) const override;
-    bool flatten(android::Res_value* outValue) const override;
-    BinaryPrimitive* clone(StringPool* newPool) const override;
-    void print(std::ostream* out) const override;
+  bool Equals(const Value* value) const override;
+  bool Flatten(android::Res_value* out_value) const override;
+  BinaryPrimitive* Clone(StringPool* new_pool) const override;
+  void Print(std::ostream* out) const override;
 };
 
 struct Attribute : public BaseValue<Attribute> {
-    struct Symbol {
-        Reference symbol;
-        uint32_t value;
-    };
+  struct Symbol {
+    Reference symbol;
+    uint32_t value;
 
-    uint32_t typeMask;
-    int32_t minInt;
-    int32_t maxInt;
-    std::vector<Symbol> symbols;
+    friend std::ostream& operator<<(std::ostream& out, const Symbol& symbol);
+  };
 
-    explicit Attribute(bool w, uint32_t t = 0u);
+  uint32_t type_mask;
+  int32_t min_int;
+  int32_t max_int;
+  std::vector<Symbol> symbols;
 
-    bool equals(const Value* value) const override;
-    Attribute* clone(StringPool* newPool) const override;
-    void printMask(std::ostream* out) const;
-    void print(std::ostream* out) const override;
-    bool matches(const Item* item, DiagMessage* outMsg) const;
+  Attribute();
+  explicit Attribute(bool w, uint32_t t = 0u);
+
+  bool Equals(const Value* value) const override;
+  Attribute* Clone(StringPool* new_pool) const override;
+  void PrintMask(std::ostream* out) const;
+  void Print(std::ostream* out) const override;
+  bool Matches(const Item* item, DiagMessage* out_msg) const;
 };
 
 struct Style : public BaseValue<Style> {
-    struct Entry {
-        Reference key;
-        std::unique_ptr<Item> value;
-    };
+  struct Entry {
+    Reference key;
+    std::unique_ptr<Item> value;
 
-    Maybe<Reference> parent;
+    friend std::ostream& operator<<(std::ostream& out, const Entry& entry);
+  };
 
-    /**
-     * If set to true, the parent was auto inferred from the
-     * style's name.
-     */
-    bool parentInferred = false;
+  Maybe<Reference> parent;
 
-    std::vector<Entry> entries;
+  // If set to true, the parent was auto inferred from the style's name.
+  bool parent_inferred = false;
 
-    bool equals(const Value* value) const override;
-    Style* clone(StringPool* newPool) const override;
-    void print(std::ostream* out) const override;
+  std::vector<Entry> entries;
+
+  bool Equals(const Value* value) const override;
+  Style* Clone(StringPool* new_pool) const override;
+  void Print(std::ostream* out) const override;
+
+  // Merges `style` into this Style. All identical attributes of `style` take precedence, including
+  // the parent, if there is one.
+  void MergeWith(Style* style, StringPool* pool);
 };
 
 struct Array : public BaseValue<Array> {
-    std::vector<std::unique_ptr<Item>> items;
+  std::vector<std::unique_ptr<Item>> items;
 
-    bool equals(const Value* value) const override;
-    Array* clone(StringPool* newPool) const override;
-    void print(std::ostream* out) const override;
+  bool Equals(const Value* value) const override;
+  Array* Clone(StringPool* new_pool) const override;
+  void Print(std::ostream* out) const override;
 };
 
 struct Plural : public BaseValue<Plural> {
-    enum {
-        Zero = 0,
-        One,
-        Two,
-        Few,
-        Many,
-        Other,
-        Count
-    };
+  enum { Zero = 0, One, Two, Few, Many, Other, Count };
 
-    std::array<std::unique_ptr<Item>, Count> values;
+  std::array<std::unique_ptr<Item>, Count> values;
 
-    bool equals(const Value* value) const override;
-    Plural* clone(StringPool* newPool) const override;
-    void print(std::ostream* out) const override;
+  bool Equals(const Value* value) const override;
+  Plural* Clone(StringPool* new_pool) const override;
+  void Print(std::ostream* out) const override;
 };
 
 struct Styleable : public BaseValue<Styleable> {
-    std::vector<Reference> entries;
+  std::vector<Reference> entries;
 
-    bool equals(const Value* value) const override;
-    Styleable* clone(StringPool* newPool) const override;
-    void print(std::ostream* out) const override;
+  bool Equals(const Value* value) const override;
+  Styleable* Clone(StringPool* newPool) const override;
+  void Print(std::ostream* out) const override;
+  void MergeWith(Styleable* styleable);
 };
 
-/**
- * Stream operator for printing Value objects.
- */
-inline ::std::ostream& operator<<(::std::ostream& out, const Value& value) {
-    value.print(&out);
-    return out;
+template <typename T>
+typename std::enable_if<std::is_base_of<Value, T>::value, std::ostream&>::type operator<<(
+    std::ostream& out, const std::unique_ptr<T>& value) {
+  if (value == nullptr) {
+    out << "NULL";
+  } else {
+    value->Print(&out);
+  }
+  return out;
 }
 
-inline ::std::ostream& operator<<(::std::ostream& out, const Attribute::Symbol& s) {
-    if (s.symbol.name) {
-        out << s.symbol.name.value().entry;
-    } else {
-        out << "???";
-    }
-    return out << "=" << s.value;
-}
+}  // namespace aapt
 
-} // namespace aapt
-
-#endif // AAPT_RESOURCE_VALUES_H
+#endif  // AAPT_RESOURCE_VALUES_H

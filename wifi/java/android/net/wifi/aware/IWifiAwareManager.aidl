@@ -34,8 +34,6 @@ import android.net.wifi.RttManager;
 interface IWifiAwareManager
 {
     // Aware API
-    void enableUsage();
-    void disableUsage();
     boolean isUsageEnabled();
     Characteristics getCharacteristics();
 

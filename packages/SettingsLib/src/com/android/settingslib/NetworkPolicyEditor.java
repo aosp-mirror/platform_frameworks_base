@@ -167,7 +167,7 @@ public class NetworkPolicyEditor {
         return (policy != null) ? policy.warningBytes : WARNING_DISABLED;
     }
 
-    public void setPolicyWarningBytes(NetworkTemplate template, long warningBytes) {
+    private void setPolicyWarningBytesInner(NetworkTemplate template, long warningBytes) {
         final NetworkPolicy policy = getOrCreatePolicy(template);
         policy.warningBytes = warningBytes;
         policy.inferred = false;
@@ -175,12 +175,28 @@ public class NetworkPolicyEditor {
         writeAsync();
     }
 
+    public void setPolicyWarningBytes(NetworkTemplate template, long warningBytes) {
+        long limitBytes = getPolicyLimitBytes(template);
+
+        warningBytes =
+            (limitBytes == LIMIT_DISABLED) ? warningBytes : Math.min(warningBytes, limitBytes);
+
+        setPolicyWarningBytesInner(template, warningBytes);
+    }
+
     public long getPolicyLimitBytes(NetworkTemplate template) {
         final NetworkPolicy policy = getPolicy(template);
         return (policy != null) ? policy.limitBytes : LIMIT_DISABLED;
     }
 
+
     public void setPolicyLimitBytes(NetworkTemplate template, long limitBytes) {
+        long warningBytes = getPolicyWarningBytes(template);
+
+        if (warningBytes > limitBytes && limitBytes != LIMIT_DISABLED) {
+            setPolicyWarningBytesInner(template, limitBytes);
+        }
+
         final NetworkPolicy policy = getOrCreatePolicy(template);
         policy.limitBytes = limitBytes;
         policy.inferred = false;

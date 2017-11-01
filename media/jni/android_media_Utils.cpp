@@ -17,6 +17,7 @@
 // #define LOG_NDEBUG 0
 #define LOG_TAG "AndroidMediaUtils"
 
+#include <hardware/camera3.h>
 #include <utils/Log.h>
 #include "android_media_Utils.h"
 

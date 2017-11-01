@@ -24,57 +24,52 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.FrameLayout;
 
+import com.android.systemui.statusbar.policy.ConfigurationController;
+
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Custom {@link FrameLayout} that re-inflates when changes to {@link Configuration} happen.
- * Currently supports changes to density and locale.
+ * Currently supports changes to density, asset path, and locale.
  */
-public class AutoReinflateContainer extends FrameLayout {
+public class AutoReinflateContainer extends FrameLayout implements
+        ConfigurationController.ConfigurationListener {
 
     private final List<InflateListener> mInflateListeners = new ArrayList<>();
     private final int mLayout;
-    private int mDensity;
-    private LocaleList mLocaleList;
 
     public AutoReinflateContainer(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
-
-        mDensity = context.getResources().getConfiguration().densityDpi;
-        mLocaleList = context.getResources().getConfiguration().getLocales();
 
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.AutoReinflateContainer);
         if (!a.hasValue(R.styleable.AutoReinflateContainer_android_layout)) {
             throw new IllegalArgumentException("AutoReinflateContainer must contain a layout");
         }
         mLayout = a.getResourceId(R.styleable.AutoReinflateContainer_android_layout, 0);
+        a.recycle();
         inflateLayout();
     }
 
     @Override
-    protected void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        boolean shouldInflateLayout = false;
-        final int density = newConfig.densityDpi;
-        if (density != mDensity) {
-            mDensity = density;
-            shouldInflateLayout = true;
-        }
-        final LocaleList localeList = newConfig.getLocales();
-        if (localeList != mLocaleList) {
-            mLocaleList = localeList;
-            shouldInflateLayout = true;
-        }
-
-        if (shouldInflateLayout) {
-            inflateLayout();
-        }
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        Dependency.get(ConfigurationController.class).addCallback(this);
     }
 
-    private void inflateLayout() {
-        removeAllViews();
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        Dependency.get(ConfigurationController.class).removeCallback(this);
+    }
+
+    protected void inflateLayoutImpl() {
         LayoutInflater.from(getContext()).inflate(mLayout, this);
+    }
+
+    public void inflateLayout() {
+        removeAllViews();
+        inflateLayoutImpl();
         final int N = mInflateListeners.size();
         for (int i = 0; i < N; i++) {
             mInflateListeners.get(i).onInflated(getChildAt(0));
@@ -84,6 +79,21 @@ public class AutoReinflateContainer extends FrameLayout {
     public void addInflateListener(InflateListener listener) {
         mInflateListeners.add(listener);
         listener.onInflated(getChildAt(0));
+    }
+
+    @Override
+    public void onDensityOrFontScaleChanged() {
+        inflateLayout();
+    }
+
+    @Override
+    public void onOverlayChanged() {
+        inflateLayout();
+    }
+
+    @Override
+    public void onLocaleListChanged() {
+        inflateLayout();
     }
 
     public interface InflateListener {

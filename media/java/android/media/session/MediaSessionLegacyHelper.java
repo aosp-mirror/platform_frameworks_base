@@ -176,54 +176,12 @@ public class MediaSessionLegacyHelper {
         }
     }
 
-    public void sendVolumeKeyEvent(KeyEvent keyEvent, boolean musicOnly) {
+    public void sendVolumeKeyEvent(KeyEvent keyEvent, int stream, boolean musicOnly) {
         if (keyEvent == null) {
             Log.w(TAG, "Tried to send a null key event. Ignoring.");
             return;
         }
-        boolean down = keyEvent.getAction() == KeyEvent.ACTION_DOWN;
-        boolean up = keyEvent.getAction() == KeyEvent.ACTION_UP;
-        int direction = 0;
-        boolean isMute = false;
-        switch (keyEvent.getKeyCode()) {
-            case KeyEvent.KEYCODE_VOLUME_UP:
-                direction = AudioManager.ADJUST_RAISE;
-                break;
-            case KeyEvent.KEYCODE_VOLUME_DOWN:
-                direction = AudioManager.ADJUST_LOWER;
-                break;
-            case KeyEvent.KEYCODE_VOLUME_MUTE:
-                isMute = true;
-                break;
-        }
-        if (down || up) {
-            int flags = AudioManager.FLAG_FROM_KEY;
-            if (musicOnly) {
-                // This flag is used when the screen is off to only affect
-                // active media
-                flags |= AudioManager.FLAG_ACTIVE_MEDIA_ONLY;
-            } else {
-                // These flags are consistent with the home screen
-                if (up) {
-                    flags |= AudioManager.FLAG_PLAY_SOUND | AudioManager.FLAG_VIBRATE;
-                } else {
-                    flags |= AudioManager.FLAG_SHOW_UI | AudioManager.FLAG_VIBRATE;
-                }
-            }
-            if (direction != 0) {
-                // If this is action up we want to send a beep for non-music events
-                if (up) {
-                    direction = 0;
-                }
-                mSessionManager.dispatchAdjustVolume(AudioManager.USE_DEFAULT_STREAM_TYPE,
-                        direction, flags);
-            } else if (isMute) {
-                if (down && keyEvent.getRepeatCount() == 0) {
-                    mSessionManager.dispatchAdjustVolume(AudioManager.USE_DEFAULT_STREAM_TYPE,
-                            AudioManager.ADJUST_TOGGLE_MUTE, flags);
-                }
-            }
-        }
+        mSessionManager.dispatchVolumeKeyEvent(keyEvent, stream, musicOnly);
     }
 
     public void sendAdjustVolumeBy(int suggestedStream, int delta, int flags) {

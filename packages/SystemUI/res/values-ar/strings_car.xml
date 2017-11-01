@@ -19,6 +19,6 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="car_lockscreen_disclaimer_title" msgid="7997539137376896441">"القيادة بأمان"</string>
-    <string name="car_lockscreen_disclaimer_text" msgid="3061224684092952864">"‏عليك التعرف بشكل تام على ظروف القيادة والالتزام بالقوانين السارية. ويمكن أن تكون الاتجاهات غير دقيقة أو غير مكتملة أو خطيرة أو غير مناسبة أو محظورة أو تتضمن عبور مناطق إدارية. ويمكن أن تكون معلومات الأنشطة التجارية أيضًا غير دقيقة أو غير مكتملة. ولا يتم نشر البيانات في الوقت الفعلي، كما لا يمكن ضمان دقة المواقع. ولا تتعامل مع جهازك الجوّال أو تستخدم تطبيقات ليست متوافقة مع Android Auto أثناء القيادة."</string>
+    <string name="unknown_user_label" msgid="4323896111737677955">"غير معروف"</string>
+    <string name="start_driving" msgid="864023351402918991">"بدء القيادة"</string>
 </resources>

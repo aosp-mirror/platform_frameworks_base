@@ -65,6 +65,7 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
     int mChangeType;
     int mChangeUserId = UserHandle.USER_NULL;
     boolean mSomePackagesChanged;
+    String[] mModifiedComponents;
 
     String[] mTempArray = new String[1];
 
@@ -269,6 +270,18 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
         }
         return false;
     }
+
+    public boolean isComponentModified(String className) {
+        if (className == null || mModifiedComponents == null) {
+            return false;
+        }
+        for (int i = mModifiedComponents.length - 1; i >= 0; i--) {
+            if (className.equals(mModifiedComponents[i])) {
+                return true;
+            }
+        }
+        return false;
+    }
     
     public void onSomePackagesChanged() {
     }
@@ -301,6 +314,7 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
         
         mDisappearingPackages = mAppearingPackages = null;
         mSomePackagesChanged = false;
+        mModifiedComponents = null;
         
         String action = intent.getAction();
         if (Intent.ACTION_PACKAGE_ADDED.equals(action)) {
@@ -358,13 +372,13 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
         } else if (Intent.ACTION_PACKAGE_CHANGED.equals(action)) {
             String pkg = getPackageName(intent);
             int uid = intent.getIntExtra(Intent.EXTRA_UID, 0);
-            String[] components = intent.getStringArrayExtra(
+            mModifiedComponents = intent.getStringArrayExtra(
                     Intent.EXTRA_CHANGED_COMPONENT_NAME_LIST);
             if (pkg != null) {
                 mModifiedPackages = mTempArray;
                 mTempArray[0] = pkg;
                 mChangeType = PACKAGE_PERMANENT_CHANGE;
-                if (onPackageChanged(pkg, uid, components)) {
+                if (onPackageChanged(pkg, uid, mModifiedComponents)) {
                     mSomePackagesChanged = true;
                 }
                 onPackageModified(pkg);

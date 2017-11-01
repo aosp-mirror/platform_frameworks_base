@@ -29,6 +29,7 @@ import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.mockito.Mockito;
+import org.mockito.hamcrest.MockitoHamcrest;
 
 public class MockUtils {
     private MockUtils() {
@@ -47,7 +48,7 @@ public class MockUtils {
                 description.appendText("UserHandle: user-id= \"" + userId + "\"");
             }
         };
-        return Mockito.argThat(m);
+        return MockitoHamcrest.argThat(m);
     }
 
     public static Intent checkIntentComponent(final ComponentName component) {
@@ -63,7 +64,7 @@ public class MockUtils {
                 description.appendText("Intent: component=\"" + component + "\"");
             }
         };
-        return Mockito.argThat(m);
+        return MockitoHamcrest.argThat(m);
     }
 
     public static Intent checkIntentAction(final String action) {
@@ -79,7 +80,7 @@ public class MockUtils {
                 description.appendText("Intent: action=\"" + action + "\"");
             }
         };
-        return Mockito.argThat(m);
+        return MockitoHamcrest.argThat(m);
     }
 
     public static Intent checkIntent(final Intent intent) {
@@ -94,7 +95,7 @@ public class MockUtils {
                 description.appendText(intent.toString());
             }
         };
-        return Mockito.argThat(m);
+        return MockitoHamcrest.argThat(m);
     }
 
     public static Bundle checkUserRestrictions(String... keys) {
@@ -111,7 +112,7 @@ public class MockUtils {
                 description.appendText("User restrictions=" + getRestrictionsAsString(expected));
             }
         };
-        return Mockito.argThat(m);
+        return MockitoHamcrest.argThat(m);
     }
 
     private static String getRestrictionsAsString(Bundle b) {

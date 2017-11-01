@@ -20,22 +20,21 @@ import android.annotation.Widget;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
-import android.widget.RelativeLayout;
 
 /**
- * <p>A view group with two children, intended for use in ListViews. This item has two 
- * {@link android.widget.TextView TextViews} elements (or subclasses) with the ID values 
+ * <p>A view group with two children, intended for use in ListViews. This item has two
+ * {@link android.widget.TextView TextViews} elements (or subclasses) with the ID values
  * {@link android.R.id#text1 text1}
- * and {@link android.R.id#text2 text2}. There is an optional third View element with the 
- * ID {@link android.R.id#selectedIcon selectedIcon}, which can be any View subclass 
+ * and {@link android.R.id#text2 text2}. There is an optional third View element with the
+ * ID {@link android.R.id#selectedIcon selectedIcon}, which can be any View subclass
  * (though it is typically a graphic View, such as {@link android.widget.ImageView ImageView})
- * that can be displayed when a TwoLineListItem has focus. Android supplies a 
- * {@link android.R.layout#two_line_list_item standard layout resource for TwoLineListView} 
+ * that can be displayed when a TwoLineListItem has focus. Android supplies a
+ * {@link android.R.layout#two_line_list_item standard layout resource for TwoLineListView}
  * (which does not include a selected item icon), but you can design your own custom XML
  * layout for this object.
- * 
+ *
  * @attr ref android.R.styleable#TwoLineListItem_mode
- * 
+ *
  * @deprecated This class can be implemented easily by apps using a {@link RelativeLayout}
  * or a {@link LinearLayout}.
  */
@@ -51,7 +50,7 @@ public class TwoLineListItem extends RelativeLayout {
     }
 
     public TwoLineListItem(Context context, AttributeSet attrs) {
-        this(context, attrs, 0); 
+        this(context, attrs, 0);
     }
 
     public TwoLineListItem(Context context, AttributeSet attrs, int defStyleAttr) {
@@ -70,11 +69,11 @@ public class TwoLineListItem extends RelativeLayout {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        
-        mText1 = (TextView) findViewById(com.android.internal.R.id.text1);
-        mText2 = (TextView) findViewById(com.android.internal.R.id.text2);
+
+        mText1 = findViewById(com.android.internal.R.id.text1);
+        mText2 = findViewById(com.android.internal.R.id.text2);
     }
-    
+
     /**
      * Returns a handle to the item with ID text1.
      * @return A handle to the item with ID text1.
@@ -82,7 +81,7 @@ public class TwoLineListItem extends RelativeLayout {
     public TextView getText1() {
         return mText1;
     }
-    
+
     /**
      * Returns a handle to the item with ID text2.
      * @return A handle to the item with ID text2.

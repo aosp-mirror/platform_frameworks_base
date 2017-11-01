@@ -22,7 +22,6 @@ import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
-import android.app.ActivityManager;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Outline;
@@ -39,7 +38,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.MetricsProto.MetricsEvent;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.recents.Recents;
@@ -57,7 +56,9 @@ import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
+import com.android.systemui.recents.model.ThumbnailData;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 
 /**
@@ -132,6 +133,7 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
 
     @ViewDebug.ExportedProperty(deepExport=true, prefix="task_")
     private Task mTask;
+    private boolean mTaskBound;
     @ViewDebug.ExportedProperty(category="recents")
     private boolean mClipViewInStack = true;
     @ViewDebug.ExportedProperty(category="recents")
@@ -148,9 +150,9 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
     private ArrayList<Animator> mTmpAnimators = new ArrayList<>();
 
     @ViewDebug.ExportedProperty(deepExport=true, prefix="thumbnail_")
-    TaskViewThumbnail mThumbnailView;
+    protected TaskViewThumbnail mThumbnailView;
     @ViewDebug.ExportedProperty(deepExport=true, prefix="header_")
-    TaskViewHeader mHeaderView;
+    protected TaskViewHeader mHeaderView;
     private View mActionButtonView;
     private View mIncompatibleAppToastView;
     private TaskViewCallbacks mCb;
@@ -176,13 +178,13 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
         super(context, attrs, defStyleAttr, defStyleRes);
         RecentsConfiguration config = Recents.getConfiguration();
         Resources res = context.getResources();
-        mViewBounds = new AnimateableViewBounds(this, res.getDimensionPixelSize(
-                R.dimen.recents_task_view_shadow_rounded_corners_radius));
+        mViewBounds = createOutlineProvider();
         if (config.fakeShadows) {
             setBackground(new FakeShadowDrawable(res, config));
         }
         setOutlineProvider(mViewBounds);
         setOnLongClickListener(this);
+        setAccessibilityDelegate(new TaskViewAccessibilityDelegate(this));
     }
 
     /** Set callback */
@@ -194,7 +196,9 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
      * Called from RecentsActivity when it is relaunched.
      */
     void onReload(boolean isResumingFromVisible) {
-        resetNoUserInteractionState();
+        if (!Recents.getSystemServices().hasFreeformWorkspaceSupport()) {
+            resetNoUserInteractionState();
+        }
         if (!isResumingFromVisible) {
             resetViewProperties();
         }
@@ -205,6 +209,12 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
         return mTask;
     }
 
+    /* Create an outline provider to clip and outline the view */
+    protected AnimateableViewBounds createOutlineProvider() {
+        return new AnimateableViewBounds(this, mContext.getResources().getDimensionPixelSize(
+            R.dimen.recents_task_view_shadow_rounded_corners_radius));
+    }
+
     /** Returns the view bounds. */
     AnimateableViewBounds getViewBounds() {
         return mViewBounds;
@@ -213,8 +223,8 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
     @Override
     protected void onFinishInflate() {
         // Bind the views
-        mHeaderView = (TaskViewHeader) findViewById(R.id.task_view_bar);
-        mThumbnailView = (TaskViewThumbnail) findViewById(R.id.task_view_thumbnail);
+        mHeaderView = findViewById(R.id.task_view_bar);
+        mThumbnailView = findViewById(R.id.task_view_thumbnail);
         mThumbnailView.updateClipToTaskBar(mHeaderView);
         mActionButtonView = findViewById(R.id.lock_to_app_fab);
         mActionButtonView.setOutlineProvider(new ViewOutlineProvider() {
@@ -232,7 +242,7 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
     /**
      * Update the task view when the configuration changes.
      */
-    void onConfigurationChanged() {
+    protected void onConfigurationChanged() {
         mHeaderView.onConfigurationChanged();
     }
 
@@ -260,7 +270,6 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
         }
         return super.onInterceptTouchEvent(ev);
     }
-
 
     @Override
     protected void measureContents(int width, int height) {
@@ -354,18 +363,24 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
      * Cancels any current transform animations.
      */
     public void cancelTransformAnimation() {
+        cancelDimAnimationIfExists();
         Utilities.cancelAnimationWithoutCallbacks(mTransformAnimation);
-        Utilities.cancelAnimationWithoutCallbacks(mDimAnimator);
         Utilities.cancelAnimationWithoutCallbacks(mOutlineAnimator);
     }
 
+    private void cancelDimAnimationIfExists() {
+        if (mDimAnimator != null) {
+            mDimAnimator.cancel();
+        }
+    }
+
     /** Enables/disables handling touch on this task view. */
-    void setTouchEnabled(boolean enabled) {
+    public void setTouchEnabled(boolean enabled) {
         setOnClickListener(enabled ? this : null);
     }
 
     /** Animates this task view if the user does not interact with the stack after a certain time. */
-    void startNoUserInteractionAnimation() {
+    public void startNoUserInteractionAnimation() {
         mHeaderView.startNoUserInteractionAnimation();
     }
 
@@ -538,7 +553,7 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
     @Override
     public void onStartLaunchTargetEnterAnimation(TaskViewTransform transform, int duration,
             boolean screenPinningEnabled, ReferenceCountedTrigger postAnimationTrigger) {
-        Utilities.cancelAnimationWithoutCallbacks(mDimAnimator);
+        cancelDimAnimationIfExists();
 
         // Dim the view after the app window transitions down into recents
         postAnimationTrigger.increment();
@@ -593,6 +608,7 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
         SystemServicesProxy ssp = Recents.getSystemServices();
         mTouchExplorationEnabled = touchExplorationEnabled;
         mTask = t;
+        mTaskBound = true;
         mTask.addCallback(this);
         mIsDisabledInSafeMode = !mTask.isSystemApp && ssp.isInSafeMode();
         mThumbnailView.bindToTask(mTask, mIsDisabledInSafeMode, displayOrientation, displayRect);
@@ -602,8 +618,8 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
             if (mIncompatibleAppToastView == null) {
                 mIncompatibleAppToastView = Utilities.findViewStubById(this,
                         R.id.incompatible_app_toast_stub).inflate();
-                TextView msg = (TextView) findViewById(com.android.internal.R.id.message);
-                msg.setText(R.string.recents_incompatible_app_message);
+                TextView msg = findViewById(com.android.internal.R.id.message);
+                msg.setText(R.string.dock_non_resizeble_failed_to_dock_text);
             }
             mIncompatibleAppToastView.setVisibility(View.VISIBLE);
         } else if (mIncompatibleAppToastView != null) {
@@ -612,10 +628,12 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
     }
 
     @Override
-    public void onTaskDataLoaded(Task task, ActivityManager.TaskThumbnailInfo thumbnailInfo) {
-        // Update each of the views to the new task data
-        mThumbnailView.onTaskDataLoaded(thumbnailInfo);
-        mHeaderView.onTaskDataLoaded();
+    public void onTaskDataLoaded(Task task, ThumbnailData thumbnailData) {
+        if (mTaskBound) {
+            // Update each of the views to the new task data
+            mThumbnailView.onTaskDataLoaded(thumbnailData);
+            mHeaderView.onTaskDataLoaded();
+        }
     }
 
     @Override
@@ -624,6 +642,7 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
         mTask.removeCallback(this);
         mThumbnailView.unbindFromTask();
         mHeaderView.unbindFromTask(mTouchExplorationEnabled);
+        mTaskBound = false;
     }
 
     @Override
@@ -666,10 +685,16 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
     @Override
     public boolean onLongClick(View v) {
         SystemServicesProxy ssp = Recents.getSystemServices();
-        // Since we are clipping the view to the bounds, manually do the hit test
+        boolean inBounds = false;
         Rect clipBounds = new Rect(mViewBounds.mClipBounds);
-        clipBounds.scale(getScaleX());
-        boolean inBounds = clipBounds.contains(mDownTouchPos.x, mDownTouchPos.y);
+        if (!clipBounds.isEmpty()) {
+            // If we are clipping the view to the bounds, manually do the hit test.
+            clipBounds.scale(getScaleX());
+            inBounds = clipBounds.contains(mDownTouchPos.x, mDownTouchPos.y);
+        } else {
+            // Otherwise just make sure we're within the view's bounds.
+            inBounds = mDownTouchPos.x <= getWidth() && mDownTouchPos.y <= getHeight();
+        }
         if (v == this && inBounds && !ssp.hasDockedTask()) {
             // Start listening for drag events
             setClipViewInStack(false);
@@ -701,5 +726,15 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
         event.addPostAnimationCallback(() -> {
             setClipViewInStack(true);
         });
+    }
+
+    public void dump(String prefix, PrintWriter writer) {
+        String innerPrefix = prefix + "  ";
+
+        writer.print(prefix); writer.print("TaskView");
+        writer.print(" mTask="); writer.print(mTask.key.id);
+        writer.println();
+
+        mThumbnailView.dump(innerPrefix, writer);
     }
 }

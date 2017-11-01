@@ -35,6 +35,8 @@ import android.provider.Settings;
 import android.util.Log;
 import android.util.Slog;
 
+import com.android.internal.util.DumpUtils;
+
 import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -167,10 +169,17 @@ final class DockObserver extends SystemService {
             intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
             intent.putExtra(Intent.EXTRA_DOCK_STATE, mReportedDockState);
 
+            boolean dockSoundsEnabled = Settings.Global.getInt(cr,
+                    Settings.Global.DOCK_SOUNDS_ENABLED, 1) == 1;
+            boolean dockSoundsEnabledWhenAccessibility = Settings.Global.getInt(cr,
+                    Settings.Global.DOCK_SOUNDS_ENABLED_WHEN_ACCESSIBILITY, 1) == 1;
+            boolean accessibilityEnabled = Settings.Secure.getInt(cr,
+                    Settings.Secure.ACCESSIBILITY_ENABLED, 0) == 1;
+
             // Play a sound to provide feedback to confirm dock connection.
             // Particularly useful for flaky contact pins...
-            if (Settings.Global.getInt(cr,
-                    Settings.Global.DOCK_SOUNDS_ENABLED, 1) == 1) {
+            if ((dockSoundsEnabled) ||
+                   (accessibilityEnabled && dockSoundsEnabledWhenAccessibility)) {
                 String whichSound = null;
                 if (mReportedDockState == Intent.EXTRA_DOCK_STATE_UNDOCKED) {
                     if ((previousDockState == Intent.EXTRA_DOCK_STATE_DESK) ||
@@ -245,14 +254,7 @@ final class DockObserver extends SystemService {
     private final class BinderService extends Binder {
         @Override
         protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-            if (getContext().checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
-                    != PackageManager.PERMISSION_GRANTED) {
-                pw.println("Permission Denial: can't dump dock observer service from from pid="
-                        + Binder.getCallingPid()
-                        + ", uid=" + Binder.getCallingUid());
-                return;
-            }
-
+            if (!DumpUtils.checkDumpPermission(getContext(), TAG, pw)) return;
             final long ident = Binder.clearCallingIdentity();
             try {
                 synchronized (mLock) {

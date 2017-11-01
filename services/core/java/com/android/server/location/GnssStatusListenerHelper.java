@@ -77,7 +77,8 @@ abstract class GnssStatusListenerHelper extends RemoteListenerHelper<IGnssStatus
             final int[] prnWithFlags,
             final float[] cn0s,
             final float[] elevations,
-            final float[] azimuths) {
+            final float[] azimuths,
+            final float[] carrierFreqs) {
         Operation operation = new Operation() {
             @Override
             public void execute(IGnssStatusListener listener) throws RemoteException {
@@ -86,7 +87,8 @@ abstract class GnssStatusListenerHelper extends RemoteListenerHelper<IGnssStatus
                         prnWithFlags,
                         cn0s,
                         elevations,
-                        azimuths);
+                        azimuths,
+                        carrierFreqs);
             }
         };
         foreach(operation);

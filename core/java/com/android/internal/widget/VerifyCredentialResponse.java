@@ -18,6 +18,8 @@ package com.android.internal.widget;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.service.gatekeeper.GateKeeperResponse;
+import android.util.Slog;
 
 /**
  * Response object for a ILockSettings credential verification request.
@@ -32,6 +34,7 @@ public final class VerifyCredentialResponse implements Parcelable {
     public static final VerifyCredentialResponse OK = new VerifyCredentialResponse();
     public static final VerifyCredentialResponse ERROR
             = new VerifyCredentialResponse(RESPONSE_ERROR, 0, null);
+    private static final String TAG = "VerifyCredentialResponse";
 
     private int mResponseCode;
     private byte[] mPayload;
@@ -122,5 +125,30 @@ public final class VerifyCredentialResponse implements Parcelable {
 
     private void setPayload(byte[] payload) {
         mPayload = payload;
+    }
+
+    public VerifyCredentialResponse stripPayload() {
+        return new VerifyCredentialResponse(mResponseCode, mTimeout, new byte[0]);
+    }
+
+    public static VerifyCredentialResponse fromGateKeeperResponse(
+            GateKeeperResponse gateKeeperResponse) {
+        VerifyCredentialResponse response;
+        int responseCode = gateKeeperResponse.getResponseCode();
+        if (responseCode == GateKeeperResponse.RESPONSE_RETRY) {
+            response = new VerifyCredentialResponse(gateKeeperResponse.getTimeout());
+        } else if (responseCode == GateKeeperResponse.RESPONSE_OK) {
+            byte[] token = gateKeeperResponse.getPayload();
+            if (token == null) {
+                // something's wrong if there's no payload with a challenge
+                Slog.e(TAG, "verifyChallenge response had no associated payload");
+                response = VerifyCredentialResponse.ERROR;
+            } else {
+                response = new VerifyCredentialResponse(token);
+            }
+        } else {
+            response = VerifyCredentialResponse.ERROR;
+        }
+        return response;
     }
 }

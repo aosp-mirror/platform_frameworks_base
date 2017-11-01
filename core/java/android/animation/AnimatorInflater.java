@@ -439,8 +439,7 @@ public class AnimatorInflater {
         }
 
         if (arrayObjectAnimator != null) {
-            setupObjectAnimator(anim, arrayObjectAnimator, valueType == VALUE_TYPE_FLOAT,
-                    pixelSize);
+            setupObjectAnimator(anim, arrayObjectAnimator, valueType, pixelSize);
         }
     }
 
@@ -494,7 +493,7 @@ public class AnimatorInflater {
      *                  maximum error for path animations.
      */
     private static void setupObjectAnimator(ValueAnimator anim, TypedArray arrayObjectAnimator,
-            boolean getFloats, float pixelSize) {
+            int valueType, float pixelSize) {
         ObjectAnimator oa = (ObjectAnimator) anim;
         String pathData = arrayObjectAnimator.getString(R.styleable.PropertyAnimator_pathData);
 
@@ -512,6 +511,11 @@ public class AnimatorInflater {
             String propertyYName =
                     arrayObjectAnimator.getString(R.styleable.PropertyAnimator_propertyYName);
 
+            if (valueType == VALUE_TYPE_PATH || valueType == VALUE_TYPE_UNDEFINED) {
+                // When pathData is defined, we are in case #2 mentioned above. ValueType can only
+                // be float type, or int type. Otherwise we fallback to default type.
+                valueType = VALUE_TYPE_FLOAT;
+            }
             if (propertyXName == null && propertyYName == null) {
                 throw new InflateException(arrayObjectAnimator.getPositionDescription()
                         + " propertyXName or propertyYName is needed for PathData");
@@ -521,7 +525,7 @@ public class AnimatorInflater {
                 PathKeyframes keyframeSet = KeyframeSet.ofPath(path, error);
                 Keyframes xKeyframes;
                 Keyframes yKeyframes;
-                if (getFloats) {
+                if (valueType == VALUE_TYPE_FLOAT) {
                     xKeyframes = keyframeSet.createXFloatKeyframes();
                     yKeyframes = keyframeSet.createYFloatKeyframes();
                 } else {

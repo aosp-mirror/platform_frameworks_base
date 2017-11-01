@@ -257,13 +257,13 @@ public class MediaController extends FrameLayout {
                 .getText(com.android.internal.R.string.lockscreen_transport_play_description);
         mPauseDescription = res
                 .getText(com.android.internal.R.string.lockscreen_transport_pause_description);
-        mPauseButton = (ImageButton) v.findViewById(com.android.internal.R.id.pause);
+        mPauseButton = v.findViewById(com.android.internal.R.id.pause);
         if (mPauseButton != null) {
             mPauseButton.requestFocus();
             mPauseButton.setOnClickListener(mPauseListener);
         }
 
-        mFfwdButton = (ImageButton) v.findViewById(com.android.internal.R.id.ffwd);
+        mFfwdButton = v.findViewById(com.android.internal.R.id.ffwd);
         if (mFfwdButton != null) {
             mFfwdButton.setOnClickListener(mFfwdListener);
             if (!mFromXml) {
@@ -271,7 +271,7 @@ public class MediaController extends FrameLayout {
             }
         }
 
-        mRewButton = (ImageButton) v.findViewById(com.android.internal.R.id.rew);
+        mRewButton = v.findViewById(com.android.internal.R.id.rew);
         if (mRewButton != null) {
             mRewButton.setOnClickListener(mRewListener);
             if (!mFromXml) {
@@ -280,16 +280,16 @@ public class MediaController extends FrameLayout {
         }
 
         // By default these are hidden. They will be enabled when setPrevNextListeners() is called
-        mNextButton = (ImageButton) v.findViewById(com.android.internal.R.id.next);
+        mNextButton = v.findViewById(com.android.internal.R.id.next);
         if (mNextButton != null && !mFromXml && !mListenersSet) {
             mNextButton.setVisibility(View.GONE);
         }
-        mPrevButton = (ImageButton) v.findViewById(com.android.internal.R.id.prev);
+        mPrevButton = v.findViewById(com.android.internal.R.id.prev);
         if (mPrevButton != null && !mFromXml && !mListenersSet) {
             mPrevButton.setVisibility(View.GONE);
         }
 
-        mProgress = (ProgressBar) v.findViewById(com.android.internal.R.id.mediacontroller_progress);
+        mProgress = v.findViewById(com.android.internal.R.id.mediacontroller_progress);
         if (mProgress != null) {
             if (mProgress instanceof SeekBar) {
                 SeekBar seeker = (SeekBar) mProgress;
@@ -298,8 +298,8 @@ public class MediaController extends FrameLayout {
             mProgress.setMax(1000);
         }
 
-        mEndTime = (TextView) v.findViewById(com.android.internal.R.id.time);
-        mCurrentTime = (TextView) v.findViewById(com.android.internal.R.id.time_current);
+        mEndTime = v.findViewById(com.android.internal.R.id.time);
+        mCurrentTime = v.findViewById(com.android.internal.R.id.time_current);
         mFormatBuilder = new StringBuilder();
         mFormatter = new Formatter(mFormatBuilder, Locale.getDefault());
 

@@ -18,6 +18,8 @@ package android.net.wifi.aware;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
+import android.net.NetworkSpecifier;
 import android.net.wifi.RttManager;
 import android.util.Log;
 
@@ -31,15 +33,15 @@ import java.lang.ref.WeakReference;
  * {@link PublishDiscoverySession} and {@link SubscribeDiscoverySession}. This
  * class provides functionality common to both publish and subscribe discovery sessions:
  * <ul>
- *     <li>Sending messages: {@link #sendMessage(PeerHandle, int, byte[])} or
- *     {@link #sendMessage(PeerHandle, int, byte[], int)} methods.
+ *     <li>Sending messages: {@link #sendMessage(PeerHandle, int, byte[])} method.
  *     <li>Creating a network-specifier when requesting a Aware connection:
- *     {@link #createNetworkSpecifier(PeerHandle, byte[])}.
+ *     {@link #createNetworkSpecifierOpen(PeerHandle)} or
+ *     {@link #createNetworkSpecifierPassphrase(PeerHandle, String)}.
  * </ul>
- * The {@link #destroy()} method must be called to destroy discovery sessions once they are
+ * The {@link #close()} method must be called to destroy discovery sessions once they are
  * no longer needed.
  */
-public class DiscoverySession {
+public class DiscoverySession implements AutoCloseable {
     private static final String TAG = "DiscoverySession";
     private static final boolean DBG = false;
     private static final boolean VDBG = false; // STOPSHIP if true
@@ -62,6 +64,8 @@ public class DiscoverySession {
      * {@link #sendMessage(PeerHandle, int, byte[], int)}.
      *
      * @return Maximum retry count when sending messages.
+     *
+     * @hide
      */
     public static int getMaxSendRetryCount() {
         return MAX_SEND_RETRY_COUNT;
@@ -78,7 +82,7 @@ public class DiscoverySession {
         mClientId = clientId;
         mSessionId = sessionId;
 
-        mCloseGuard.open("destroy");
+        mCloseGuard.open("close");
     }
 
     /**
@@ -92,7 +96,8 @@ public class DiscoverySession {
      *     exception is a session for which we received a termination callback,
      *     {@link DiscoverySessionCallback#onSessionTerminated()}.
      */
-    public void destroy() {
+    @Override
+    public void close() {
         WifiAwareManager mgr = mMgr.get();
         if (mgr == null) {
             Log.w(TAG, "destroy: called post GC on WifiAwareManager");
@@ -115,6 +120,7 @@ public class DiscoverySession {
             Log.w(TAG, "terminate: already terminated.");
             return;
         }
+
         mTerminated = true;
         mMgr.clear();
         mCloseGuard.close();
@@ -124,9 +130,12 @@ public class DiscoverySession {
     @Override
     protected void finalize() throws Throwable {
         try {
-            if (!mTerminated) {
+            if (mCloseGuard != null) {
                 mCloseGuard.warnIfOpen();
-                destroy();
+            }
+
+            if (!mTerminated) {
+                close();
             }
         } finally {
             super.finalize();
@@ -163,21 +172,23 @@ public class DiscoverySession {
      *            or MAC level) retries should be attempted if there is no ACK from the receiver
      *            (note: no retransmissions are attempted in other failure cases). A value of 0
      *            indicates no retries. Max permitted value is {@link #getMaxSendRetryCount()}.
+     *
+     * @hide
      */
     public void sendMessage(@NonNull PeerHandle peerHandle, int messageId,
             @Nullable byte[] message, int retryCount) {
         if (mTerminated) {
             Log.w(TAG, "sendMessage: called on terminated session");
             return;
-        } else {
-            WifiAwareManager mgr = mMgr.get();
-            if (mgr == null) {
-                Log.w(TAG, "sendMessage: called post GC on WifiAwareManager");
-                return;
-            }
-
-            mgr.sendMessage(mClientId, mSessionId, peerHandle, message, messageId, retryCount);
         }
+
+        WifiAwareManager mgr = mMgr.get();
+        if (mgr == null) {
+            Log.w(TAG, "sendMessage: called post GC on WifiAwareManager");
+            return;
+        }
+
+        mgr.sendMessage(mClientId, mSessionId, peerHandle, message, messageId, retryCount);
     }
 
     /**
@@ -195,8 +206,6 @@ public class DiscoverySession {
      * The peer will get a callback indicating a message was received using
      * {@link DiscoverySessionCallback#onMessageReceived(PeerHandle,
      * byte[])}.
-     * Equivalent to {@link #sendMessage(PeerHandle, int, byte[], int)}
-     * with a {@code retryCount} of 0.
      *
      * @param peerHandle The peer's handle for the message. Must be a result of an
      * {@link DiscoverySessionCallback#onServiceDiscovered(PeerHandle,
@@ -234,29 +243,81 @@ public class DiscoverySession {
         if (mTerminated) {
             Log.w(TAG, "startRanging: called on terminated session");
             return;
-        } else {
-            WifiAwareManager mgr = mMgr.get();
-            if (mgr == null) {
-                Log.w(TAG, "startRanging: called post GC on WifiAwareManager");
-                return;
-            }
-
-            mgr.startRanging(mClientId, mSessionId, params, listener);
         }
+
+        WifiAwareManager mgr = mMgr.get();
+        if (mgr == null) {
+            Log.w(TAG, "startRanging: called post GC on WifiAwareManager");
+            return;
+        }
+
+        mgr.startRanging(mClientId, mSessionId, params, listener);
     }
 
     /**
-     * Create a {@link android.net.NetworkRequest.Builder#setNetworkSpecifier(String)} for a
-     * WiFi Aware connection to the specified peer. The
+     * Create a {@link android.net.NetworkRequest.Builder#setNetworkSpecifier(NetworkSpecifier)} for
+     * an unencrypted WiFi Aware connection (link) to the specified peer. The
      * {@link android.net.NetworkRequest.Builder#addTransportType(int)} should be set to
      * {@link android.net.NetworkCapabilities#TRANSPORT_WIFI_AWARE}.
      * <p>
      * This method should be used when setting up a connection with a peer discovered through Aware
      * discovery or communication (in such scenarios the MAC address of the peer is shielded by
-     * an opaque peer ID handle). If a Aware connection is needed to a peer discovered using other
+     * an opaque peer ID handle). If an Aware connection is needed to a peer discovered using other
      * OOB (out-of-band) mechanism then use the alternative
-     * {@link WifiAwareSession#createNetworkSpecifier(int, byte[], byte[])} method - which uses the
+     * {@link WifiAwareSession#createNetworkSpecifierOpen(int, byte[])} method - which uses the
      * peer's MAC address.
+     * <p>
+     * Note: per the Wi-Fi Aware specification the roles are fixed - a Subscriber is an INITIATOR
+     * and a Publisher is a RESPONDER.
+     * <p>
+     * To set up an encrypted link use the
+     * {@link #createNetworkSpecifierPassphrase(PeerHandle, String)} API.
+     *
+     * @param peerHandle The peer's handle obtained through
+     * {@link DiscoverySessionCallback#onServiceDiscovered(PeerHandle, byte[], java.util.List)}
+     *                   or
+     *                   {@link DiscoverySessionCallback#onMessageReceived(PeerHandle, byte[])}.
+     *                   On a RESPONDER this value is used to gate the acceptance of a connection
+     *                   request from only that peer. A RESPONDER may specify a {@code null} -
+     *                   indicating that it will accept connection requests from any device.
+     *
+     * @return A {@link NetworkSpecifier} to be used to construct
+     * {@link android.net.NetworkRequest.Builder#setNetworkSpecifier(NetworkSpecifier)} to pass to
+     * {@link android.net.ConnectivityManager#requestNetwork(android.net.NetworkRequest,
+     * android.net.ConnectivityManager.NetworkCallback)}
+     * [or other varieties of that API].
+     */
+    public NetworkSpecifier createNetworkSpecifierOpen(@Nullable PeerHandle peerHandle) {
+        if (mTerminated) {
+            Log.w(TAG, "createNetworkSpecifierOpen: called on terminated session");
+            return null;
+        }
+
+        WifiAwareManager mgr = mMgr.get();
+        if (mgr == null) {
+            Log.w(TAG, "createNetworkSpecifierOpen: called post GC on WifiAwareManager");
+            return null;
+        }
+
+        int role = this instanceof SubscribeDiscoverySession
+                ? WifiAwareManager.WIFI_AWARE_DATA_PATH_ROLE_INITIATOR
+                : WifiAwareManager.WIFI_AWARE_DATA_PATH_ROLE_RESPONDER;
+
+        return mgr.createNetworkSpecifier(mClientId, role, mSessionId, peerHandle, null, null);
+    }
+
+    /**
+     * Create a {@link android.net.NetworkRequest.Builder#setNetworkSpecifier(NetworkSpecifier)} for
+     * an encrypted WiFi Aware connection (link) to the specified peer. The
+     * {@link android.net.NetworkRequest.Builder#addTransportType(int)} should be set to
+     * {@link android.net.NetworkCapabilities#TRANSPORT_WIFI_AWARE}.
+     * <p>
+     * This method should be used when setting up a connection with a peer discovered through Aware
+     * discovery or communication (in such scenarios the MAC address of the peer is shielded by
+     * an opaque peer ID handle). If an Aware connection is needed to a peer discovered using other
+     * OOB (out-of-band) mechanism then use the alternative
+     * {@link WifiAwareSession#createNetworkSpecifierPassphrase(int, byte[], String)} method -
+     * which uses the peer's MAC address.
      * <p>
      * Note: per the Wi-Fi Aware specification the roles are fixed - a Subscriber is an INITIATOR
      * and a Publisher is a RESPONDER.
@@ -266,37 +327,103 @@ public class DiscoverySession {
      * byte[], java.util.List)} or
      * {@link DiscoverySessionCallback#onMessageReceived(PeerHandle,
      * byte[])}. On a RESPONDER this value is used to gate the acceptance of a connection request
-     *                   from only that peer. A RESPONDER may specified a null - indicating that
-     *                   it will accept connection requests from any device.
-     * @param token An arbitrary token (message) to be used to match connection initiation request
-     *              to a responder setup. A RESPONDER is set up with a {@code token} which must
-     *              be matched by the token provided by the INITIATOR. A null token is permitted
-     *              on the RESPONDER and matches any peer token. An empty ({@code ""}) token is
-     *              not the same as a null token and requires the peer token to be empty as well.
+     *                   from only that peer. A RESPONDER may specify a {@code null} - indicating
+     *                   that it will accept connection requests from any device.
+     * @param passphrase The passphrase to be used to encrypt the link. The PMK is generated from
+     *                   the passphrase. Use the
+     *                   {@link #createNetworkSpecifierOpen(PeerHandle)} API to
+     *                   specify an open (unencrypted) link.
      *
-     * @return A string to be used to construct
-     * {@link android.net.NetworkRequest.Builder#setNetworkSpecifier(String)} to pass to
+     * @return A {@link NetworkSpecifier} to be used to construct
+     * {@link android.net.NetworkRequest.Builder#setNetworkSpecifier(NetworkSpecifier)} to pass to
      * {@link android.net.ConnectivityManager#requestNetwork(android.net.NetworkRequest,
      * android.net.ConnectivityManager.NetworkCallback)}
      * [or other varieties of that API].
      */
-    public String createNetworkSpecifier(@Nullable PeerHandle peerHandle,
-            @Nullable byte[] token) {
-        if (mTerminated) {
-            Log.w(TAG, "createNetworkSpecifier: called on terminated session");
-            return null;
-        } else {
-            WifiAwareManager mgr = mMgr.get();
-            if (mgr == null) {
-                Log.w(TAG, "createNetworkSpecifier: called post GC on WifiAwareManager");
-                return null;
-            }
-
-            int role = this instanceof SubscribeDiscoverySession
-                    ? WifiAwareManager.WIFI_AWARE_DATA_PATH_ROLE_INITIATOR
-                    : WifiAwareManager.WIFI_AWARE_DATA_PATH_ROLE_RESPONDER;
-
-            return mgr.createNetworkSpecifier(mClientId, role, mSessionId, peerHandle, token);
+    public NetworkSpecifier createNetworkSpecifierPassphrase(
+            @Nullable PeerHandle peerHandle, @NonNull String passphrase) {
+        if (!WifiAwareUtils.validatePassphrase(passphrase)) {
+            throw new IllegalArgumentException("Passphrase must meet length requirements");
         }
+
+        if (mTerminated) {
+            Log.w(TAG, "createNetworkSpecifierPassphrase: called on terminated session");
+            return null;
+        }
+
+        WifiAwareManager mgr = mMgr.get();
+        if (mgr == null) {
+            Log.w(TAG, "createNetworkSpecifierPassphrase: called post GC on WifiAwareManager");
+            return null;
+        }
+
+        int role = this instanceof SubscribeDiscoverySession
+                ? WifiAwareManager.WIFI_AWARE_DATA_PATH_ROLE_INITIATOR
+                : WifiAwareManager.WIFI_AWARE_DATA_PATH_ROLE_RESPONDER;
+
+        return mgr.createNetworkSpecifier(mClientId, role, mSessionId, peerHandle, null,
+                passphrase);
+    }
+
+    /**
+     * Create a {@link android.net.NetworkRequest.Builder#setNetworkSpecifier(NetworkSpecifier)} for
+     * an encrypted WiFi Aware connection (link) to the specified peer. The
+     * {@link android.net.NetworkRequest.Builder#addTransportType(int)} should be set to
+     * {@link android.net.NetworkCapabilities#TRANSPORT_WIFI_AWARE}.
+     * <p>
+     * This method should be used when setting up a connection with a peer discovered through Aware
+     * discovery or communication (in such scenarios the MAC address of the peer is shielded by
+     * an opaque peer ID handle). If an Aware connection is needed to a peer discovered using other
+     * OOB (out-of-band) mechanism then use the alternative
+     * {@link WifiAwareSession#createNetworkSpecifierPmk(int, byte[], byte[])} method - which uses
+     * the peer's MAC address.
+     * <p>
+     * Note: per the Wi-Fi Aware specification the roles are fixed - a Subscriber is an INITIATOR
+     * and a Publisher is a RESPONDER.
+     *
+     * @param peerHandle The peer's handle obtained through
+     * {@link DiscoverySessionCallback#onServiceDiscovered(PeerHandle,
+     * byte[], java.util.List)} or
+     * {@link DiscoverySessionCallback#onMessageReceived(PeerHandle,
+     * byte[])}. On a RESPONDER this value is used to gate the acceptance of a connection request
+     *                   from only that peer. A RESPONDER may specify a null - indicating that
+     *                   it will accept connection requests from any device.
+     * @param pmk A PMK (pairwise master key, see IEEE 802.11i) specifying the key to use for
+     *            encrypting the data-path. Use the
+     *            {@link #createNetworkSpecifierPassphrase(PeerHandle, String)} to specify a
+     *            Passphrase or {@link #createNetworkSpecifierOpen(PeerHandle)} to specify an
+     *            open (unencrypted) link.
+     *
+     * @return A {@link NetworkSpecifier} to be used to construct
+     * {@link android.net.NetworkRequest.Builder#setNetworkSpecifier(NetworkSpecifier)} to pass to
+     * {@link android.net.ConnectivityManager#requestNetwork(android.net.NetworkRequest,
+     * android.net.ConnectivityManager.NetworkCallback)}
+     * [or other varieties of that API].
+     *
+     * @hide
+     */
+    @SystemApi
+    public NetworkSpecifier createNetworkSpecifierPmk(@Nullable PeerHandle peerHandle,
+            @NonNull byte[] pmk) {
+        if (!WifiAwareUtils.validatePmk(pmk)) {
+            throw new IllegalArgumentException("PMK must 32 bytes");
+        }
+
+        if (mTerminated) {
+            Log.w(TAG, "createNetworkSpecifierPmk: called on terminated session");
+            return null;
+        }
+
+        WifiAwareManager mgr = mMgr.get();
+        if (mgr == null) {
+            Log.w(TAG, "createNetworkSpecifierPmk: called post GC on WifiAwareManager");
+            return null;
+        }
+
+        int role = this instanceof SubscribeDiscoverySession
+                ? WifiAwareManager.WIFI_AWARE_DATA_PATH_ROLE_INITIATOR
+                : WifiAwareManager.WIFI_AWARE_DATA_PATH_ROLE_RESPONDER;
+
+        return mgr.createNetworkSpecifier(mClientId, role, mSessionId, peerHandle, pmk, null);
     }
 }

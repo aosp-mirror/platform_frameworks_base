@@ -16,30 +16,32 @@
 
 #include "NameMangler.h"
 
-#include <gtest/gtest.h>
 #include <string>
+
+#include "test/Test.h"
 
 namespace aapt {
 
 TEST(NameManglerTest, MangleName) {
-    std::u16string package = u"android.appcompat";
-    std::u16string name = u"Platform.AppCompat";
+  std::string package = "android.appcompat";
+  std::string name = "Platform.AppCompat";
 
-    NameMangler::mangle(package, &name);
-    EXPECT_EQ(name, u"android.appcompat$Platform.AppCompat");
+  std::string mangled_name = NameMangler::MangleEntry(package, name);
+  EXPECT_EQ(mangled_name, "android.appcompat$Platform.AppCompat");
 
-    std::u16string newPackage;
-    ASSERT_TRUE(NameMangler::unmangle(&name, &newPackage));
-    EXPECT_EQ(name, u"Platform.AppCompat");
-    EXPECT_EQ(newPackage, u"android.appcompat");
+  std::string unmangled_package;
+  std::string unmangled_name = mangled_name;
+  ASSERT_TRUE(NameMangler::Unmangle(&unmangled_name, &unmangled_package));
+  EXPECT_EQ(unmangled_name, "Platform.AppCompat");
+  EXPECT_EQ(unmangled_package, "android.appcompat");
 }
 
 TEST(NameManglerTest, IgnoreUnmangledName) {
-    std::u16string package;
-    std::u16string name = u"foo_bar";
+  std::string package;
+  std::string name = "foo_bar";
 
-    EXPECT_FALSE(NameMangler::unmangle(&name, &package));
-    EXPECT_EQ(name, u"foo_bar");
+  EXPECT_FALSE(NameMangler::Unmangle(&name, &package));
+  EXPECT_EQ(name, "foo_bar");
 }
 
-} // namespace aapt
+}  // namespace aapt

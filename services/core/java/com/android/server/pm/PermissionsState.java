@@ -140,6 +140,36 @@ public final class PermissionsState {
         }
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final PermissionsState other = (PermissionsState) obj;
+
+        if (mPermissions == null) {
+            if (other.mPermissions != null) {
+                return false;
+            }
+        } else if (!mPermissions.equals(other.mPermissions)) {
+            return false;
+        }
+        if (mPermissionReviewRequired == null) {
+            if (other.mPermissionReviewRequired != null) {
+                return false;
+            }
+        } else if (!mPermissionReviewRequired.equals(other.mPermissionReviewRequired)) {
+            return false;
+        }
+        return Arrays.equals(mGlobalGids, other.mGlobalGids);
+    }
+
     public boolean isPermissionReviewRequired(int userId) {
         return mPermissionReviewRequired != null && mPermissionReviewRequired.get(userId);
     }
@@ -566,6 +596,7 @@ public final class PermissionsState {
         return PERMISSION_OPERATION_SUCCESS;
     }
 
+    // TODO: fix this to use arraycopy and append all ints in one go
     private static int[] appendInts(int[] current, int[] added) {
         if (current != null && added != null) {
             for (int guid : added) {

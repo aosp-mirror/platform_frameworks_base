@@ -332,7 +332,7 @@ public final class StorageVolume implements Parcelable {
      *            {@link Environment#DIRECTORY_ALARMS}, {@link Environment#DIRECTORY_NOTIFICATIONS},
      *            {@link Environment#DIRECTORY_PICTURES}, {@link Environment#DIRECTORY_MOVIES},
      *            {@link Environment#DIRECTORY_DOWNLOADS}, {@link Environment#DIRECTORY_DCIM}, or
-     *            {@link Environment#DIRECTORY_DOCUMENTS}, or {code null} to request access to the
+     *            {@link Environment#DIRECTORY_DOCUMENTS}, or {@code null} to request access to the
      *            entire volume.
      * @return intent to request access, or {@code null} if the requested directory is invalid for
      *         that volume.
@@ -373,8 +373,7 @@ public final class StorageVolume implements Parcelable {
     }
 
     /** {@hide} */
-    // TODO(b/26742218): find out where toString() is called internally and replace these calls by
-    // dump().
+    // TODO: find out where toString() is called internally and replace these calls by dump().
     public String dump() {
         final CharArrayWriter writer = new CharArrayWriter();
         dump(new IndentingPrintWriter(writer, "    ", 80));

@@ -16,6 +16,7 @@
 package android.transition;
 
 import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.RectEvaluator;
 import android.content.Context;
@@ -84,6 +85,7 @@ public class ChangeClipBounds extends Transition {
         }
         Rect start = (Rect) startValues.values.get(PROPNAME_CLIP);
         Rect end = (Rect) endValues.values.get(PROPNAME_CLIP);
+        boolean endIsNull = end == null;
         if (start == null && end == null) {
             return null; // No animation required since there is no clip.
         }
@@ -99,6 +101,17 @@ public class ChangeClipBounds extends Transition {
 
         endValues.view.setClipBounds(start);
         RectEvaluator evaluator = new RectEvaluator(new Rect());
-        return ObjectAnimator.ofObject(endValues.view, "clipBounds", evaluator, start, end);
+        ObjectAnimator animator =
+                ObjectAnimator.ofObject(endValues.view, "clipBounds", evaluator, start, end);
+        if (endIsNull) {
+            final View endView = endValues.view;
+            animator.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    endView.setClipBounds(null);
+                }
+            });
+        }
+        return animator;
     }
 }

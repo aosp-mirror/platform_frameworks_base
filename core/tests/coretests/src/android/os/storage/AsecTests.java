@@ -50,21 +50,21 @@ public class AsecTests extends AndroidTestCase {
     }
 
     private void cleanupContainers() throws RemoteException {
-        IMountService ms = getMs();
-        String[] containers = ms.getSecureContainerList();
+        IStorageManager sm = getSm();
+        String[] containers = sm.getSecureContainerList();
 
         for (int i = 0; i < containers.length; i++) {
             if (containers[i].startsWith(SECURE_CONTAINER_PREFIX)) {
                 if (localLOGV)
                     Log.i(TAG, "Cleaning: " + containers[i]);
-                ms.destroySecureContainer(containers[i], true);
+                sm.destroySecureContainer(containers[i], true);
             }
         }
     }
 
     private boolean containerExists(String localId) throws RemoteException {
-        IMountService ms = getMs();
-        String[] containers = ms.getSecureContainerList();
+        IStorageManager sm = getSm();
+        String[] containers = sm.getSecureContainerList();
         String fullId = SECURE_CONTAINER_PREFIX + localId;
 
         for (int i = 0; i < containers.length; i++) {
@@ -80,8 +80,8 @@ public class AsecTests extends AndroidTestCase {
         assertTrue("Media should be mounted", isMediaMounted());
         String fullId = SECURE_CONTAINER_PREFIX + localId;
 
-        IMountService ms = getMs();
-        return ms.createSecureContainer(fullId, size, filesystem, key, android.os.Process.myUid(),
+        IStorageManager sm = getSm();
+        return sm.createSecureContainer(fullId, size, filesystem, key, android.os.Process.myUid(),
                 isExternal);
     }
 
@@ -89,8 +89,8 @@ public class AsecTests extends AndroidTestCase {
         assertTrue("Media should be mounted", isMediaMounted());
         String fullId = SECURE_CONTAINER_PREFIX + localId;
 
-        IMountService ms = getMs();
-        return ms.mountSecureContainer(fullId, key, android.os.Process.myUid(), true);
+        IStorageManager sm = getSm();
+        return sm.mountSecureContainer(fullId, key, android.os.Process.myUid(), true);
     }
 
     private int renameContainer(String localId1, String localId2) throws Exception {
@@ -98,47 +98,47 @@ public class AsecTests extends AndroidTestCase {
         String fullId1 = SECURE_CONTAINER_PREFIX + localId1;
         String fullId2 = SECURE_CONTAINER_PREFIX + localId2;
 
-        IMountService ms = getMs();
-        return ms.renameSecureContainer(fullId1, fullId2);
+        IStorageManager sm = getSm();
+        return sm.renameSecureContainer(fullId1, fullId2);
     }
 
     private int unmountContainer(String localId, boolean force) throws Exception {
         assertTrue("Media should be mounted", isMediaMounted());
         String fullId = SECURE_CONTAINER_PREFIX + localId;
 
-        IMountService ms = getMs();
-        return ms.unmountSecureContainer(fullId, force);
+        IStorageManager sm = getSm();
+        return sm.unmountSecureContainer(fullId, force);
     }
 
     private int destroyContainer(String localId, boolean force) throws Exception {
         assertTrue("Media should be mounted", isMediaMounted());
         String fullId = SECURE_CONTAINER_PREFIX + localId;
 
-        IMountService ms = getMs();
-        return ms.destroySecureContainer(fullId, force);
+        IStorageManager sm = getSm();
+        return sm.destroySecureContainer(fullId, force);
     }
 
     private boolean isContainerMounted(String localId) throws Exception {
         assertTrue("Media should be mounted", isMediaMounted());
         String fullId = SECURE_CONTAINER_PREFIX + localId;
 
-        IMountService ms = getMs();
-        return ms.isSecureContainerMounted(fullId);
+        IStorageManager sm = getSm();
+        return sm.isSecureContainerMounted(fullId);
     }
 
-    private IMountService getMs() {
+    private IStorageManager getSm() {
         IBinder service = ServiceManager.getService("mount");
         if (service != null) {
-            return IMountService.Stub.asInterface(service);
+            return IStorageManager.Stub.asInterface(service);
         } else {
-            Log.e(TAG, "Can't get mount service");
+            Log.e(TAG, "Can't get storagemanager service");
         }
         return null;
     }
 
     private boolean isMediaMounted() throws Exception {
         String mPath = Environment.getExternalStorageDirectory().toString();
-        String state = getMs().getVolumeState(mPath);
+        String state = getSm().getVolumeState(mPath);
         return Environment.MEDIA_MOUNTED.equals(state);
     }
 
@@ -385,11 +385,11 @@ public class AsecTests extends AndroidTestCase {
             return;
         }
 
-        IMountService ms = getMs();
+        IStorageManager sm = getSm();
         assertEquals(StorageResultCode.OperationSucceeded,
                 createContainer("testUnmountBusyContainer", 4, "none", FS_FAT, true));
 
-        String path = ms.getSecureContainerPath(SECURE_CONTAINER_PREFIX
+        String path = sm.getSecureContainerPath(SECURE_CONTAINER_PREFIX
                 + "testUnmountBusyContainer");
 
         File f = new File(path, "reference");
@@ -408,12 +408,12 @@ public class AsecTests extends AndroidTestCase {
             return;
         }
 
-        IMountService ms = getMs();
+        IStorageManager sm = getSm();
 
         assertEquals(StorageResultCode.OperationSucceeded,
                 createContainer("testDestroyBusyContainer", 4, "none", FS_FAT, true));
 
-        String path = ms.getSecureContainerPath(SECURE_CONTAINER_PREFIX
+        String path = sm.getSecureContainerPath(SECURE_CONTAINER_PREFIX
                 + "testDestroyBusyContainer");
 
         File f = new File(path, "reference");
@@ -480,10 +480,10 @@ public class AsecTests extends AndroidTestCase {
             return;
         }
 
-        IMountService ms = getMs();
+        IStorageManager sm = getSm();
         assertEquals(StorageResultCode.OperationSucceeded,
                 createContainer("testContainerSize", 1, "none", FS_FAT, true));
-        String path = ms.getSecureContainerPath(SECURE_CONTAINER_PREFIX + "testContainerSize");
+        String path = sm.getSecureContainerPath(SECURE_CONTAINER_PREFIX + "testContainerSize");
 
         byte[] buf = new byte[4096];
         File f = new File(path, "reference");
@@ -495,9 +495,9 @@ public class AsecTests extends AndroidTestCase {
     }
 
     public void testGetSecureContainerPath_NonExistPath_Failure() throws Exception {
-        IMountService ms = getMs();
+        IStorageManager sm = getSm();
         assertNull("Getting the path for an invalid container should return null",
-                ms.getSecureContainerPath("jparks.broke.it"));
+                sm.getSecureContainerPath("jparks.broke.it"));
     }
 
     /*------------ Tests for unmounting volume ---*/
@@ -506,7 +506,7 @@ public class AsecTests extends AndroidTestCase {
 
     boolean getMediaState() throws Exception {
         String mPath = Environment.getExternalStorageDirectory().toString();
-        String state = getMs().getVolumeState(mPath);
+        String state = getSm().getVolumeState(mPath);
         return Environment.MEDIA_MOUNTED.equals(state);
     }
 
@@ -520,7 +520,7 @@ public class AsecTests extends AndroidTestCase {
         }
 
         String mPath = Environment.getExternalStorageDirectory().toString();
-        int ret = getMs().mountVolume(mPath);
+        int ret = getSm().mountVolume(mPath);
         return ret == StorageResultCode.OperationSucceeded;
     }
 
@@ -567,7 +567,7 @@ public class AsecTests extends AndroidTestCase {
         try {
             // Wait on observer
             synchronized(observer) {
-                getMs().unmountVolume(path, false, false);
+                getSm().unmountVolume(path, false, false);
                 long waitTime = 0;
                 while((!observer.isDone()) && (waitTime < MAX_WAIT_TIME) ) {
                     observer.wait(WAIT_TIME_INCR);
@@ -634,7 +634,7 @@ public class AsecTests extends AndroidTestCase {
             // Wait on observer
             synchronized(observer) {
                 for (int i = 0; i < 5; i++) {
-                    getMs().unmountVolume(path, false, false);
+                    getSm().unmountVolume(path, false, false);
                 }
                 long waitTime = 0;
                 while((!observer.isDone()) && (waitTime < MAX_WAIT_TIME) ) {
@@ -661,7 +661,7 @@ public class AsecTests extends AndroidTestCase {
         }
     }
 
-    class ShutdownObserver extends  IMountShutdownObserver.Stub{
+    class ShutdownObserver extends  IStorageShutdownObserver.Stub{
         private boolean doneFlag = false;
         int statusCode;
 
@@ -683,10 +683,10 @@ public class AsecTests extends AndroidTestCase {
     }
 
     void invokeShutdown() throws Exception {
-        IMountService ms = getMs();
+        IStorageManager sm = getSm();
         ShutdownObserver observer = new ShutdownObserver();
         synchronized (observer) {
-            ms.shutdown(observer);
+            sm.shutdown(observer);
         }
     }
 
@@ -731,12 +731,12 @@ public class AsecTests extends AndroidTestCase {
             if (!getMediaState()) {
                 mountMedia();
             }
-            IMountService ms = getMs();
+            IStorageManager sm = getSm();
             ShutdownObserver observer = new ShutdownObserver();
             synchronized (observer) {
-                ms.shutdown(observer);
+                sm.shutdown(observer);
                 for (int i = 0; i < 4; i++) {
-                    ms.shutdown(null);
+                    sm.shutdown(null);
                 }
             }
         } finally {

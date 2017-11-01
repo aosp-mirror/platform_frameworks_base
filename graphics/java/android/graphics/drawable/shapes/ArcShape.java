@@ -21,37 +21,58 @@ import android.graphics.Outline;
 import android.graphics.Paint;
 
 /**
- * Creates an arc shape. The arc shape starts at a specified
- * angle and sweeps clockwise, drawing slices of pie.
- * The arc can be drawn to a Canvas with its own draw() method,
- * but more graphical control is available if you instead pass
- * the ArcShape to a {@link android.graphics.drawable.ShapeDrawable}.
+ * Creates an arc shape. The arc shape starts at a specified angle and sweeps
+ * clockwise, drawing slices of pie.
+ * <p>
+ * The arc can be drawn to a {@link Canvas} with its own
+ * {@link #draw(Canvas, Paint)} method, but more graphical control is available
+ * if you instead pass the ArcShape to a
+ * {@link android.graphics.drawable.ShapeDrawable}.
  */
 public class ArcShape extends RectShape {
-    private float mStart;
-    private float mSweep;
-    
+    private final float mStartAngle;
+    private final float mSweepAngle;
+
     /**
-     * ArcShape constructor. 
-     * 
+     * ArcShape constructor.
+     *
      * @param startAngle the angle (in degrees) where the arc begins
-     * @param sweepAngle the sweep angle (in degrees). Anything equal to or 
+     * @param sweepAngle the sweep angle (in degrees). Anything equal to or
      *                   greater than 360 results in a complete circle/oval.
      */
     public ArcShape(float startAngle, float sweepAngle) {
-        mStart = startAngle;
-        mSweep = sweepAngle;
+        mStartAngle = startAngle;
+        mSweepAngle = sweepAngle;
     }
-    
+
+    /**
+     * @return the angle (in degrees) where the arc begins
+     */
+    public final float getStartAngle() {
+        return mStartAngle;
+    }
+
+    /**
+     * @return the sweep angle (in degrees)
+     */
+    public final float getSweepAngle() {
+        return mSweepAngle;
+    }
+
     @Override
     public void draw(Canvas canvas, Paint paint) {
-        canvas.drawArc(rect(), mStart, mSweep, true, paint);
+        canvas.drawArc(rect(), mStartAngle, mSweepAngle, true, paint);
     }
 
     @Override
     public void getOutline(Outline outline) {
         // Since we don't support concave outlines, arc shape does not attempt
         // to provide an outline.
+    }
+
+    @Override
+    public ArcShape clone() throws CloneNotSupportedException {
+        return (ArcShape) super.clone();
     }
 }
 

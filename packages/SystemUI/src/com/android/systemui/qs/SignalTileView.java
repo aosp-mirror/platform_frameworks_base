@@ -24,15 +24,18 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import com.android.systemui.R;
-import com.android.systemui.qs.QSTile.SignalState;
+import com.android.systemui.plugins.qs.QSTile;
+import com.android.systemui.plugins.qs.QSTile.SignalState;
+import com.android.systemui.qs.tileimpl.QSIconViewImpl;
+import com.android.systemui.qs.tileimpl.SlashImageView;
 
 /** View that represents a custom quick settings tile for displaying signal info (wifi/cell). **/
-public final class SignalTileView extends QSIconView {
+public class SignalTileView extends QSIconViewImpl {
     private static final long DEFAULT_DURATION = new ValueAnimator().getDuration();
     private static final long SHORT_DURATION = DEFAULT_DURATION / 3;
 
-    private FrameLayout mIconFrame;
-    private ImageView mSignal;
+    protected FrameLayout mIconFrame;
+    protected ImageView mSignal;
     private ImageView mOverlay;
     private ImageView mIn;
     private ImageView mOut;
@@ -60,7 +63,7 @@ public final class SignalTileView extends QSIconView {
     @Override
     protected View createIcon() {
         mIconFrame = new FrameLayout(mContext);
-        mSignal = new ImageView(mContext);
+        mSignal = new SlashImageView(mContext);
         mIconFrame.addView(mSignal);
         mOverlay = new ImageView(mContext);
         mIconFrame.addView(mOverlay, LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
@@ -109,6 +112,7 @@ public final class SignalTileView extends QSIconView {
     public void setIcon(QSTile.State state) {
         final SignalState s = (SignalState) state;
         setIcon(mSignal, s);
+
         if (s.overlayIconId > 0) {
             mOverlay.setVisibility(VISIBLE);
             mOverlay.setImageResource(s.overlayIconId);
@@ -119,10 +123,6 @@ public final class SignalTileView extends QSIconView {
             mSignal.setPaddingRelative(mWideOverlayIconStartPadding, 0, 0, 0);
         } else {
             mSignal.setPaddingRelative(0, 0, 0, 0);
-        }
-        Drawable drawable = mSignal.getDrawable();
-        if (state.autoMirrorDrawable && drawable != null) {
-            drawable.setAutoMirrored(true);
         }
         final boolean shown = isShown();
         setVisibility(mIn, shown, s.activityIn);

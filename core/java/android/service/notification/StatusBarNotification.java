@@ -17,6 +17,7 @@
 package android.service.notification;
 
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -46,16 +47,9 @@ public class StatusBarNotification implements Parcelable {
     private Context mContext; // used for inflation & icon expansion
 
     /** @hide */
-    public StatusBarNotification(String pkg, String opPkg, int id, String tag, int uid,
-            int initialPid, int score, Notification notification, UserHandle user) {
-        this(pkg, opPkg, id, tag, uid, initialPid, score, notification, user,
-                System.currentTimeMillis());
-    }
-
-    /** @hide */
-    public StatusBarNotification(String pkg, String opPkg, int id, String tag, int uid,
-            int initialPid, Notification notification, UserHandle user, String overrideGroupKey,
-            long postTime) {
+    public StatusBarNotification(String pkg, String opPkg, int id,
+            String tag, int uid, int initialPid, Notification notification, UserHandle user,
+            String overrideGroupKey, long postTime) {
         if (pkg == null) throw new NullPointerException();
         if (notification == null) throw new NullPointerException();
 
@@ -73,6 +67,10 @@ public class StatusBarNotification implements Parcelable {
         this.groupKey = groupKey();
     }
 
+    /**
+     * @deprecated Non-system apps should not need to create StatusBarNotifications.
+     */
+    @Deprecated
     public StatusBarNotification(String pkg, String opPkg, int id, String tag, int uid,
             int initialPid, int score, Notification notification, UserHandle user,
             long postTime) {
@@ -135,7 +133,7 @@ public class StatusBarNotification implements Parcelable {
         }
         return user.getIdentifier() + "|" + pkg + "|" +
                 (group == null
-                        ? "p:" + notification.priority
+                        ? "c:" + notification.getChannelId()
                         : "g:" + group);
     }
 
@@ -245,10 +243,11 @@ public class StatusBarNotification implements Parcelable {
     }
 
     /**
-     * Returns a userHandle for the instance of the app that posted this notification.
+     * Returns a userid for whom this notification is intended.
      *
      * @deprecated Use {@link #getUser()} instead.
      */
+    @Deprecated
     public int getUserId() {
         return this.user.getIdentifier();
     }
@@ -319,6 +318,17 @@ public class StatusBarNotification implements Parcelable {
     }
 
     /**
+     * The ID passed to setGroup(), or the override, or null.
+     * @hide
+     */
+    public String getGroup() {
+        if (overrideGroupKey != null) {
+            return overrideGroupKey;
+        }
+        return getNotification().getGroup();
+    }
+
+    /**
      * Sets the override group key.
      */
     public void setOverrideGroupKey(String overrideGroupKey) {
@@ -340,7 +350,8 @@ public class StatusBarNotification implements Parcelable {
         if (mContext == null) {
             try {
                 ApplicationInfo ai = context.getPackageManager()
-                        .getApplicationInfo(pkg, PackageManager.GET_UNINSTALLED_PACKAGES);
+                        .getApplicationInfoAsUser(pkg, PackageManager.MATCH_UNINSTALLED_PACKAGES,
+                                getUserId());
                 mContext = context.createApplicationContext(ai,
                         Context.CONTEXT_RESTRICTED);
             } catch (PackageManager.NameNotFoundException e) {

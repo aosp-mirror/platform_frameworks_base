@@ -16,8 +16,6 @@
 
 package android.view.textservice;
 
-import com.android.internal.inputmethod.InputMethodUtils;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
@@ -26,6 +24,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.Slog;
+
+import com.android.internal.inputmethod.InputMethodUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -100,6 +100,7 @@ public final class SpellCheckerSubtype implements Parcelable {
      * {@link SpellCheckerSubtype} objects right now.  Hence only the system is expected to be able
      * to instantiate {@link SpellCheckerSubtype} object.
      */
+    @Deprecated
     public SpellCheckerSubtype(int nameId, String locale, String extraValue) {
         this(nameId, locale, SUBTYPE_LANGUAGE_TAG_NONE, extraValue, SUBTYPE_ID_NONE);
     }

@@ -36,9 +36,11 @@ import android.view.WindowAnimationFrameStats;
 import android.view.WindowContentFrameStats;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.IAccessibilityManager;
+import android.util.Log;
 
 import libcore.io.IoUtils;
 
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -54,6 +56,8 @@ import java.io.OutputStream;
  * @hide
  */
 public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
+
+    private static final String TAG = "UiAutomationConnection";
 
     private static final int INITIAL_FROZEN_ROTATION_UNSPECIFIED = -1;
 
@@ -267,47 +271,95 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
         }
     }
 
+    public class Repeater implements Runnable {
+        // Continuously read readFrom and write back to writeTo until EOF is encountered
+        private final InputStream readFrom;
+        private final OutputStream writeTo;
+        public Repeater (InputStream readFrom, OutputStream writeTo) {
+            this.readFrom = readFrom;
+            this.writeTo = writeTo;
+        }
+        @Override
+        public void run() {
+            try {
+                final byte[] buffer = new byte[8192];
+                int readByteCount;
+                while (true) {
+                    readByteCount = readFrom.read(buffer);
+                    if (readByteCount < 0) {
+                        break;
+                    }
+                    writeTo.write(buffer, 0, readByteCount);
+                    writeTo.flush();
+                }
+            } catch (IOException ioe) {
+                throw new RuntimeException("Error while reading/writing ", ioe);
+            } finally {
+                IoUtils.closeQuietly(readFrom);
+                IoUtils.closeQuietly(writeTo);
+            }
+        }
+    }
+
     @Override
-    public void executeShellCommand(final String command, final ParcelFileDescriptor sink)
-            throws RemoteException {
+    public void executeShellCommand(final String command, final ParcelFileDescriptor sink,
+            final ParcelFileDescriptor source) throws RemoteException {
         synchronized (mLock) {
             throwIfCalledByNotTrustedUidLocked();
             throwIfShutdownLocked();
             throwIfNotConnectedLocked();
         }
+        final java.lang.Process process;
 
-        Thread streamReader = new Thread() {
+        try {
+            process = Runtime.getRuntime().exec(command);
+        } catch (IOException exc) {
+            throw new RuntimeException("Error running shell command '" + command + "'", exc);
+        }
+
+        // Read from process and write to pipe
+        final Thread readFromProcess;
+        if (sink != null) {
+            InputStream sink_in = process.getInputStream();;
+            OutputStream sink_out = new FileOutputStream(sink.getFileDescriptor());
+
+            readFromProcess = new Thread(new Repeater(sink_in, sink_out));
+            readFromProcess.start();
+        } else {
+            readFromProcess = null;
+        }
+
+        // Read from pipe and write to process
+        final Thread writeToProcess;
+        if (source != null) {
+            OutputStream source_out = process.getOutputStream();
+            InputStream source_in = new FileInputStream(source.getFileDescriptor());
+
+            writeToProcess = new Thread(new Repeater(source_in, source_out));
+            writeToProcess.start();
+        } else {
+            writeToProcess = null;
+        }
+
+        Thread cleanup = new Thread(new Runnable() {
+            @Override
             public void run() {
-                InputStream in = null;
-                OutputStream out = null;
-                java.lang.Process process = null;
-
                 try {
-                    process = Runtime.getRuntime().exec(command);
-
-                    in = process.getInputStream();
-                    out = new FileOutputStream(sink.getFileDescriptor());
-
-                    final byte[] buffer = new byte[8192];
-                    while (true) {
-                        final int readByteCount = in.read(buffer);
-                        if (readByteCount < 0) {
-                            break;
-                        }
-                        out.write(buffer, 0, readByteCount);
+                    if (writeToProcess != null) {
+                        writeToProcess.join();
                     }
-                } catch (IOException ioe) {
-                    throw new RuntimeException("Error running shell command", ioe);
-                } finally {
-                    if (process != null) {
-                        process.destroy();
+                    if (readFromProcess != null) {
+                        readFromProcess.join();
                     }
-                    IoUtils.closeQuietly(out);
-                    IoUtils.closeQuietly(sink);
+                } catch (InterruptedException exc) {
+                    Log.e(TAG, "At least one of the threads was interrupted");
                 }
-            };
-        };
-        streamReader.start();
+                IoUtils.closeQuietly(sink);
+                IoUtils.closeQuietly(source);
+                process.destroy();
+                }
+            });
+        cleanup.start();
     }
 
     @Override
@@ -367,7 +419,7 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
             if (mWindowManager.isRotationFrozen()) {
                 // Calling out with a lock held is fine since if the system
                 // process is gone the client calling in will be killed.
-                mInitialFrozenRotation = mWindowManager.getRotation();
+                mInitialFrozenRotation = mWindowManager.getDefaultDisplayRotation();
             }
         } catch (RemoteException re) {
             /* ignore */

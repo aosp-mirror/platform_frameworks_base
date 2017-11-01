@@ -21,7 +21,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.TypedArray;
-import android.os.*;
+import android.os.Message;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.widget.RemoteViews.RemoteView;

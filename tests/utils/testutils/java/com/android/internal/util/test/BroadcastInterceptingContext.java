@@ -49,6 +49,14 @@ public class BroadcastInterceptingContext extends ContextWrapper {
                 () -> { throw new IllegalStateException("Cannot happen"); }
             );
         }
+
+        public void assertNotReceived()
+                throws InterruptedException, ExecutionException {
+            assertNotReceived(5, TimeUnit.SECONDS);
+        }
+
+        public abstract void assertNotReceived(long timeout, TimeUnit unit)
+                throws InterruptedException, ExecutionException;
     }
 
     public class BroadcastInterceptor extends FutureIntent {
@@ -81,6 +89,21 @@ public class BroadcastInterceptingContext extends ContextWrapper {
                 return get(5, TimeUnit.SECONDS);
             } catch (TimeoutException e) {
                 throw new RuntimeException(e);
+            }
+        }
+
+        @Override
+        public void assertNotReceived()
+            throws InterruptedException, ExecutionException {
+            assertNotReceived(5, TimeUnit.SECONDS);
+        }
+
+        public void assertNotReceived(long timeout, TimeUnit unit)
+                throws InterruptedException, ExecutionException {
+            try {
+                final Intent intent = get(timeout, unit);
+                throw new AssertionError("Received intent: " + intent);
+            } catch (TimeoutException e) {
             }
         }
     }

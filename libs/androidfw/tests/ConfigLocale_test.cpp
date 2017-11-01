@@ -279,6 +279,23 @@ TEST(ConfigLocaleTest, getBcp47Locale_script) {
     EXPECT_EQ(0, strcmp("en", out));
 }
 
+TEST(ConfigLocaleTest, getBcp47Locale_canonicalize) {
+    ResTable_config config;
+    char out[RESTABLE_MAX_LOCALE_LEN];
+
+    fillIn("tl", NULL, NULL, NULL, &config);
+    config.getBcp47Locale(out);
+    EXPECT_EQ(0, strcmp("tl", out));
+    config.getBcp47Locale(out, true /* canonicalize */);
+    EXPECT_EQ(0, strcmp("fil", out));
+
+    fillIn("tl", "PH", NULL, NULL, &config);
+    config.getBcp47Locale(out);
+    EXPECT_EQ(0, strcmp("tl-PH", out));
+    config.getBcp47Locale(out, true /* canonicalize */);
+    EXPECT_EQ(0, strcmp("fil-PH", out));
+}
+
 TEST(ConfigLocaleTest, match) {
     ResTable_config supported, requested;
 
@@ -291,6 +308,11 @@ TEST(ConfigLocaleTest, match) {
     fillIn("fr", "CA", NULL, NULL, &requested);
     // Different languages don't match.
     EXPECT_FALSE(supported.match(requested));
+
+    fillIn("tl", "PH", NULL, NULL, &supported);
+    fillIn("fil", "PH", NULL, NULL, &requested);
+    // Equivalent languages match.
+    EXPECT_TRUE(supported.match(requested));
 
     fillIn("qaa", "FR", NULL, NULL, &supported);
     fillIn("qaa", "CA", NULL, NULL, &requested);
@@ -406,6 +428,12 @@ TEST(ConfigLocaleTest, isLocaleBetterThan_basics) {
     EXPECT_FALSE(config2.isLocaleBetterThan(config1, &request));
 
     fillIn("de", "DE", NULL, NULL, &request);
+    fillIn("de", "DE", NULL, NULL, &config1);
+    fillIn("de", "DE", NULL, "1901", &config2);
+    EXPECT_TRUE(config1.isLocaleBetterThan(config2, &request));
+    EXPECT_FALSE(config2.isLocaleBetterThan(config1, &request));
+
+    fillIn("de", "DE", NULL, NULL, &request);
     fillIn("de", "DE", NULL, "1901", &config1);
     fillIn("de", "DE", NULL, "1996", &config2);
     EXPECT_FALSE(config1.isLocaleBetterThan(config2, &request));
@@ -421,6 +449,24 @@ TEST(ConfigLocaleTest, isLocaleBetterThan_basics) {
     fillIn("de", "DE", NULL, "1996", &config1);
     fillIn("de", "DE", NULL, NULL, &config2);
     EXPECT_FALSE(config1.isLocaleBetterThan(config2, &request));
+    EXPECT_FALSE(config2.isLocaleBetterThan(config1, &request));
+
+    fillIn("fil", "PH", NULL, NULL, &request);
+    fillIn("tl", "PH", NULL, NULL, &config1);
+    fillIn("fil", "US", NULL, NULL, &config2);
+    EXPECT_TRUE(config1.isLocaleBetterThan(config2, &request));
+    EXPECT_FALSE(config2.isLocaleBetterThan(config1, &request));
+
+    fillIn("fil", "PH", NULL, "fonipa", &request);
+    fillIn("tl", "PH", NULL, "fonipa", &config1);
+    fillIn("fil", "PH", NULL, NULL, &config2);
+    EXPECT_TRUE(config1.isLocaleBetterThan(config2, &request));
+    EXPECT_FALSE(config2.isLocaleBetterThan(config1, &request));
+
+    fillIn("fil", "PH", NULL, NULL, &request);
+    fillIn("fil", "PH", NULL, NULL, &config1);
+    fillIn("tl", "PH", NULL, NULL, &config2);
+    EXPECT_TRUE(config1.isLocaleBetterThan(config2, &request));
     EXPECT_FALSE(config2.isLocaleBetterThan(config1, &request));
 }
 
@@ -470,15 +516,80 @@ TEST(ConfigLocaleTest, isLocaleBetterThan_regionComparison) {
     EXPECT_FALSE(config2.isLocaleBetterThan(config1, &request));
 
     fillIn("es", "AR", NULL, NULL, &request);
+    fillIn("es", "US", NULL, NULL, &config1);
+    fillIn("es", NULL, NULL, NULL, &config2);
+    // Special case for Latin American Spanish: es-MX and es-US are
+    // pseudo-parents of all Latin Ameircan Spanish locales.
+    EXPECT_TRUE(config1.isLocaleBetterThan(config2, &request));
+    EXPECT_FALSE(config2.isLocaleBetterThan(config1, &request));
+
+    fillIn("es", "MX", NULL, NULL, &request);
+    fillIn("es", "US", NULL, NULL, &config1);
+    fillIn("es", NULL, NULL, NULL, &config2);
+    // Special case for Latin American Spanish: es-MX and es-US are
+    // pseudo-parents of all Latin Ameircan Spanish locales.
+    EXPECT_TRUE(config1.isLocaleBetterThan(config2, &request));
+    EXPECT_FALSE(config2.isLocaleBetterThan(config1, &request));
+
+    fillIn("es", "AR", NULL, NULL, &request);
+    fillIn("es", "MX", NULL, NULL, &config1);
+    fillIn("es", NULL, NULL, NULL, &config2);
+    // Special case for Latin American Spanish: es-MX and es-US are
+    // pseudo-parents of all Latin Ameircan Spanish locales.
+    EXPECT_TRUE(config1.isLocaleBetterThan(config2, &request));
+    EXPECT_FALSE(config2.isLocaleBetterThan(config1, &request));
+
+    fillIn("es", "US", NULL, NULL, &request);
+    fillIn("es", "MX", NULL, NULL, &config1);
+    fillIn("es", NULL, NULL, NULL, &config2);
+    // Special case for Latin American Spanish: es-MX and es-US are
+    // pseudo-parents of all Latin Ameircan Spanish locales.
+    EXPECT_TRUE(config1.isLocaleBetterThan(config2, &request));
+    EXPECT_FALSE(config2.isLocaleBetterThan(config1, &request));
+
+    fillIn("es", "AR", NULL, NULL, &request);
+    fillIn("es", "419", NULL, NULL, &config1);
+    fillIn("es", "MX", NULL, NULL, &config2);
+    // Even though es-MX and es-US are pseudo-parents of all Latin Ameircan
+    // Spanish locales, es-419 is a closer parent.
+    EXPECT_TRUE(config1.isLocaleBetterThan(config2, &request));
+    EXPECT_FALSE(config2.isLocaleBetterThan(config1, &request));
+
+    fillIn("es", "US", NULL, NULL, &request);
+    fillIn("es", "419", NULL, NULL, &config1);
+    fillIn("es", "MX", NULL, NULL, &config2);
+    // Even though es-MX and es-US are pseudo-parents of all Latin Ameircan
+    // Spanish locales, es-419 is a closer parent.
+    EXPECT_TRUE(config1.isLocaleBetterThan(config2, &request));
+    EXPECT_FALSE(config2.isLocaleBetterThan(config1, &request));
+
+    fillIn("es", "MX", NULL, NULL, &request);
+    fillIn("es", "419", NULL, NULL, &config1);
+    fillIn("es", "US", NULL, NULL, &config2);
+    // Even though es-MX and es-US are pseudo-parents of all Latin Ameircan
+    // Spanish locales, es-419 is a closer parent.
+    EXPECT_TRUE(config1.isLocaleBetterThan(config2, &request));
+    EXPECT_FALSE(config2.isLocaleBetterThan(config1, &request));
+
+    fillIn("es", "AR", NULL, NULL, &request);
     fillIn("es", "MX", NULL, NULL, &config1);
     fillIn("es", "BO", NULL, NULL, &config2);
-    // A representative locale is better if they are equidistant.
+    // Special case for Latin American Spanish: es-MX and es-US are
+    // pseudo-parents of all Latin Ameircan Spanish locales.
     EXPECT_TRUE(config1.isLocaleBetterThan(config2, &request));
     EXPECT_FALSE(config2.isLocaleBetterThan(config1, &request));
 
     fillIn("es", "AR", NULL, NULL, &request);
     fillIn("es", "US", NULL, NULL, &config1);
     fillIn("es", "BO", NULL, NULL, &config2);
+    // Special case for Latin American Spanish: es-MX and es-US are
+    // pseudo-parents of all Latin Ameircan Spanish locales.
+    EXPECT_TRUE(config1.isLocaleBetterThan(config2, &request));
+    EXPECT_FALSE(config2.isLocaleBetterThan(config1, &request));
+
+    fillIn("es", "IC", NULL, NULL, &request);
+    fillIn("es", "ES", NULL, NULL, &config1);
+    fillIn("es", "GQ", NULL, NULL, &config2);
     // A representative locale is better if they are equidistant.
     EXPECT_TRUE(config1.isLocaleBetterThan(config2, &request));
     EXPECT_FALSE(config2.isLocaleBetterThan(config1, &request));

@@ -30,14 +30,14 @@ import android.os.Looper;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.service.quicksettings.IQSService;
-import android.service.quicksettings.IQSTileService;
 import android.service.quicksettings.Tile;
 import android.service.quicksettings.TileService;
 import android.util.ArrayMap;
 import android.util.Log;
 
 import com.android.internal.statusbar.StatusBarIcon;
-import com.android.systemui.statusbar.phone.QSTileHost;
+import com.android.systemui.Dependency;
+import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
 
@@ -102,12 +102,7 @@ public class TileServices extends IQSService.Stub {
             mTokenMap.remove(service.getToken());
             mTiles.remove(tile.getComponent());
             final String slot = tile.getComponent().getClassName();
-            mMainHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    mHost.getIconController().removeIcon(slot);
-                }
-            });
+            mMainHandler.post(() -> mHost.getIconController().removeIcon(slot));
         }
     }
 
@@ -209,7 +204,7 @@ public class TileServices extends IQSService.Stub {
         if (customTile != null) {
             verifyCaller(customTile);
             customTile.onDialogShown();
-            mHost.collapsePanels();
+            mHost.forceCollapsePanels();
             mServices.get(customTile).setShowingDialog(true);
         }
     }
@@ -229,7 +224,7 @@ public class TileServices extends IQSService.Stub {
         CustomTile customTile = getTileForToken(token);
         if (customTile != null) {
             verifyCaller(customTile);
-            mHost.collapsePanels();
+            mHost.forceCollapsePanels();
         }
     }
 
@@ -284,13 +279,13 @@ public class TileServices extends IQSService.Stub {
 
     @Override
     public boolean isLocked() {
-        KeyguardMonitor keyguardMonitor = mHost.getKeyguardMonitor();
+        KeyguardMonitor keyguardMonitor = Dependency.get(KeyguardMonitor.class);
         return keyguardMonitor.isShowing();
     }
 
     @Override
     public boolean isSecure() {
-        KeyguardMonitor keyguardMonitor = mHost.getKeyguardMonitor();
+        KeyguardMonitor keyguardMonitor = Dependency.get(KeyguardMonitor.class);
         return keyguardMonitor.isSecure() && keyguardMonitor.isShowing();
     }
 
@@ -306,12 +301,19 @@ public class TileServices extends IQSService.Stub {
         }
     }
 
+    public void destroy() {
+        synchronized (mServices) {
+            mServices.values().forEach(service -> service.handleDestroy());
+            mContext.unregisterReceiver(mRequestListeningReceiver);
+        }
+    }
+
     private final BroadcastReceiver mRequestListeningReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (TileService.ACTION_REQUEST_LISTENING.equals(intent.getAction())) {
                 requestListening(
-                        (ComponentName) intent.getParcelableExtra(TileService.EXTRA_COMPONENT));
+                        (ComponentName) intent.getParcelableExtra(Intent.EXTRA_COMPONENT_NAME));
             }
         }
     };

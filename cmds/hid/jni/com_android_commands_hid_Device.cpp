@@ -26,17 +26,17 @@
 #include <memory>
 #include <unistd.h>
 
-#include <android_runtime/AndroidRuntime.h>
-#include <android_runtime/Log.h>
-#include <android_os_MessageQueue.h>
-#include <core_jni_helpers.h>
 #include <jni.h>
-#include <JNIHelp.h>
-#include <ScopedPrimitiveArray.h>
-#include <ScopedUtfChars.h>
-#include <utils/Log.h>
-#include <utils/Looper.h>
-#include <utils/StrongPointer.h>
+#include <nativehelper/JNIHelp.h>
+#include <nativehelper/ScopedPrimitiveArray.h>
+#include <nativehelper/ScopedUtfChars.h>
+#include <android/looper.h>
+#include <android/log.h>
+
+#define  LOGE(...)  __android_log_print(ANDROID_LOG_ERROR,LOG_TAG,__VA_ARGS__)
+#define  LOGW(...)  __android_log_print(ANDROID_LOG_WARN,LOG_TAG,__VA_ARGS__)
+#define  LOGD(...)  __android_log_print(ANDROID_LOG_DEBUG,LOG_TAG,__VA_ARGS__)
+#define  LOGI(...)  __android_log_print(ANDROID_LOG_INFO,LOG_TAG,__VA_ARGS__)
 
 namespace android {
 namespace uhid {
@@ -56,59 +56,67 @@ static int handleLooperEvents(int /* fd */, int events, void* data) {
 
 static void checkAndClearException(JNIEnv* env, const char* methodName) {
     if (env->ExceptionCheck()) {
-        ALOGE("An exception was thrown by callback '%s'.", methodName);
-        LOGE_EX(env);
+        LOGE("An exception was thrown by callback '%s'.", methodName);
         env->ExceptionClear();
     }
 }
 
 DeviceCallback::DeviceCallback(JNIEnv* env, jobject callback) :
-    mCallbackObject(env->NewGlobalRef(callback)) { }
+    mCallbackObject(env->NewGlobalRef(callback)) {
+    env->GetJavaVM(&mJavaVM);
+ }
 
 DeviceCallback::~DeviceCallback() {
-    JNIEnv* env = AndroidRuntime::getJNIEnv();
+    JNIEnv* env = getJNIEnv();
     env->DeleteGlobalRef(mCallbackObject);
 }
 
 void DeviceCallback::onDeviceError() {
-    JNIEnv* env = AndroidRuntime::getJNIEnv();
+    JNIEnv* env = getJNIEnv();
     env->CallVoidMethod(mCallbackObject, gDeviceCallbackClassInfo.onDeviceError);
     checkAndClearException(env, "onDeviceError");
 }
 
 void DeviceCallback::onDeviceOpen() {
-    JNIEnv* env = AndroidRuntime::getJNIEnv();
+    JNIEnv* env = getJNIEnv();
     env->CallVoidMethod(mCallbackObject, gDeviceCallbackClassInfo.onDeviceOpen);
     checkAndClearException(env, "onDeviceOpen");
 }
 
+JNIEnv* DeviceCallback::getJNIEnv() {
+    JNIEnv* env;
+    mJavaVM->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6);
+    return env;
+}
+
 Device* Device::open(int32_t id, const char* name, int32_t vid, int32_t pid,
         std::unique_ptr<uint8_t[]> descriptor, size_t descriptorSize,
-        std::unique_ptr<DeviceCallback> callback, sp<Looper> looper) {
+        std::unique_ptr<DeviceCallback> callback) {
 
     int fd = ::open(UHID_PATH, O_RDWR | O_CLOEXEC);
     if (fd < 0) {
-        ALOGE("Failed to open uhid: %s", strerror(errno));
+        LOGE("Failed to open uhid: %s", strerror(errno));
         return nullptr;
     }
 
     struct uhid_event ev;
     memset(&ev, 0, sizeof(ev));
-    ev.type = UHID_CREATE;
-    strncpy((char*)ev.u.create.name, name, UHID_MAX_NAME_LENGTH);
-    ev.u.create.rd_data = descriptor.get();
-    ev.u.create.rd_size = descriptorSize;
-    ev.u.create.bus = BUS_BLUETOOTH;
-    ev.u.create.vendor = vid;
-    ev.u.create.product = pid;
-    ev.u.create.version = 0;
-    ev.u.create.country = 0;
+    ev.type = UHID_CREATE2;
+    strncpy((char*)ev.u.create2.name, name, UHID_MAX_NAME_LENGTH);
+    memcpy(&ev.u.create2.rd_data, descriptor.get(),
+            descriptorSize * sizeof(ev.u.create2.rd_data[0]));
+    ev.u.create2.rd_size = descriptorSize;
+    ev.u.create2.bus = BUS_BLUETOOTH;
+    ev.u.create2.vendor = vid;
+    ev.u.create2.product = pid;
+    ev.u.create2.version = 0;
+    ev.u.create2.country = 0;
 
     errno = 0;
     ssize_t ret = TEMP_FAILURE_RETRY(::write(fd, &ev, sizeof(ev)));
     if (ret < 0 || ret != sizeof(ev)) {
         ::close(fd);
-        ALOGE("Failed to create uhid node: %s", strerror(errno));
+        LOGE("Failed to create uhid node: %s", strerror(errno));
         return nullptr;
     }
 
@@ -116,20 +124,30 @@ Device* Device::open(int32_t id, const char* name, int32_t vid, int32_t pid,
     ret = TEMP_FAILURE_RETRY(::read(fd, &ev, sizeof(ev)));
     if (ret < 0 || ev.type != UHID_START) {
         ::close(fd);
-        ALOGE("uhid node failed to start: %s", strerror(errno));
+        LOGE("uhid node failed to start: %s", strerror(errno));
         return nullptr;
     }
-
-    return new Device(id, fd, std::move(callback), looper);
+    return new Device(id, fd, std::move(callback));
 }
 
-Device::Device(int32_t id, int fd, std::unique_ptr<DeviceCallback> callback, sp<Looper> looper) :
-            mId(id), mFd(fd), mDeviceCallback(std::move(callback)), mLooper(looper) {
-    looper->addFd(fd, 0, Looper::EVENT_INPUT, handleLooperEvents, reinterpret_cast<void*>(this));
+Device::Device(int32_t id, int fd, std::unique_ptr<DeviceCallback> callback) :
+            mId(id), mFd(fd), mDeviceCallback(std::move(callback)) {
+    ALooper* aLooper = ALooper_forThread();
+    if (aLooper == NULL) {
+        LOGE("Could not get ALooper, ALooper_forThread returned NULL");
+        aLooper = ALooper_prepare(ALOOPER_PREPARE_ALLOW_NON_CALLBACKS);
+    }
+    ALooper_addFd(aLooper, fd, 0, ALOOPER_EVENT_INPUT, handleLooperEvents,
+                  reinterpret_cast<void*>(this));
 }
 
 Device::~Device() {
-    mLooper->removeFd(mFd);
+    ALooper* looper = ALooper_forThread();
+    if (looper != NULL) {
+        ALooper_removeFd(looper, mFd);
+    } else {
+        LOGE("Could not remove fd, ALooper_forThread() returned NULL!");
+    }
     struct uhid_event ev;
     memset(&ev, 0, sizeof(ev));
     ev.type = UHID_DESTROY;
@@ -141,25 +159,25 @@ Device::~Device() {
 void Device::sendReport(uint8_t* report, size_t reportSize) {
     struct uhid_event ev;
     memset(&ev, 0, sizeof(ev));
-    ev.type = UHID_INPUT;
-    ev.u.input.size = reportSize;
-    memcpy(&ev.u.input.data, report, reportSize);
+    ev.type = UHID_INPUT2;
+    ev.u.input2.size = reportSize;
+    memcpy(&ev.u.input2.data, report, reportSize);
     ssize_t ret = TEMP_FAILURE_RETRY(::write(mFd, &ev, sizeof(ev)));
     if (ret < 0 || ret != sizeof(ev)) {
-        ALOGE("Failed to send hid event: %s", strerror(errno));
+        LOGE("Failed to send hid event: %s", strerror(errno));
     }
 }
 
 int Device::handleEvents(int events) {
-    if (events & (Looper::EVENT_ERROR | Looper::EVENT_HANGUP)) {
-        ALOGE("uhid node was closed or an error occurred. events=0x%x", events);
+    if (events & (ALOOPER_EVENT_ERROR | ALOOPER_EVENT_HANGUP)) {
+        LOGE("uhid node was closed or an error occurred. events=0x%x", events);
         mDeviceCallback->onDeviceError();
         return 0;
     }
     struct uhid_event ev;
     ssize_t ret = TEMP_FAILURE_RETRY(::read(mFd, &ev, sizeof(ev)));
     if (ret < 0) {
-        ALOGE("Failed to read from uhid node: %s", strerror(errno));
+        LOGE("Failed to read from uhid node: %s", strerror(errno));
         mDeviceCallback->onDeviceError();
         return 0;
     }
@@ -184,7 +202,7 @@ std::unique_ptr<uint8_t[]> getData(JNIEnv* env, jbyteArray javaArray, size_t& ou
 }
 
 static jlong openDevice(JNIEnv* env, jclass /* clazz */, jstring rawName, jint id, jint vid, jint pid,
-        jbyteArray rawDescriptor, jobject queue, jobject callback) {
+        jbyteArray rawDescriptor, jobject callback) {
     ScopedUtfChars name(env, rawName);
     if (name.c_str() == nullptr) {
         return 0;
@@ -194,20 +212,21 @@ static jlong openDevice(JNIEnv* env, jclass /* clazz */, jstring rawName, jint i
     std::unique_ptr<uint8_t[]> desc = getData(env, rawDescriptor, size);
 
     std::unique_ptr<uhid::DeviceCallback> cb(new uhid::DeviceCallback(env, callback));
-    sp<Looper> looper = android_os_MessageQueue_getMessageQueue(env, queue)->getLooper();
 
     uhid::Device* d = uhid::Device::open(
             id, reinterpret_cast<const char*>(name.c_str()), vid, pid,
-            std::move(desc), size, std::move(cb), std::move(looper));
+            std::move(desc), size, std::move(cb));
     return reinterpret_cast<jlong>(d);
 }
 
-static void sendReport(JNIEnv* env, jclass /* clazz */, jlong ptr,jbyteArray rawReport) {
+static void sendReport(JNIEnv* env, jclass /* clazz */, jlong ptr, jbyteArray rawReport) {
     size_t size;
     std::unique_ptr<uint8_t[]> report = getData(env, rawReport, size);
     uhid::Device* d = reinterpret_cast<uhid::Device*>(ptr);
     if (d) {
         d->sendReport(report.get(), size);
+    } else {
+        LOGE("Could not send report, Device* is null!");
     }
 }
 
@@ -220,7 +239,7 @@ static void closeDevice(JNIEnv* /* env */, jclass /* clazz */, jlong ptr) {
 
 static JNINativeMethod sMethods[] = {
     { "nativeOpenDevice",
-            "(Ljava/lang/String;III[BLandroid/os/MessageQueue;"
+            "(Ljava/lang/String;III[B"
             "Lcom/android/commands/hid/Device$DeviceCallback;)J",
             reinterpret_cast<void*>(openDevice) },
     { "nativeSendReport", "(J[B)V", reinterpret_cast<void*>(sendReport) },
@@ -228,11 +247,21 @@ static JNINativeMethod sMethods[] = {
 };
 
 int register_com_android_commands_hid_Device(JNIEnv* env) {
-    jclass clazz = FindClassOrDie(env, "com/android/commands/hid/Device$DeviceCallback");
+    jclass clazz = env->FindClass("com/android/commands/hid/Device$DeviceCallback");
+    if (clazz == NULL) {
+        LOGE("Unable to find class 'DeviceCallback'");
+        return JNI_ERR;
+    }
     uhid::gDeviceCallbackClassInfo.onDeviceOpen =
-            GetMethodIDOrDie(env, clazz, "onDeviceOpen", "()V");
-    uhid::gDeviceCallbackClassInfo.onDeviceError=
-            GetMethodIDOrDie(env, clazz, "onDeviceError", "()V");
+            env->GetMethodID(clazz, "onDeviceOpen", "()V");
+    uhid::gDeviceCallbackClassInfo.onDeviceError =
+            env->GetMethodID(clazz, "onDeviceError", "()V");
+    if (uhid::gDeviceCallbackClassInfo.onDeviceOpen == NULL ||
+            uhid::gDeviceCallbackClassInfo.onDeviceError == NULL) {
+        LOGE("Unable to obtain onDeviceOpen or onDeviceError methods");
+        return JNI_ERR;
+    }
+
     return jniRegisterNativeMethods(env, "com/android/commands/hid/Device",
             sMethods, NELEM(sMethods));
 }

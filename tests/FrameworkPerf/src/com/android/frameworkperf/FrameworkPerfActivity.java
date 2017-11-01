@@ -162,19 +162,19 @@ public class FrameworkPerfActivity extends Activity
         // in res/layout/hello_activity.xml
         setContentView(R.layout.main);
 
-        mFgSpinner = (Spinner) findViewById(R.id.fgspinner);
+        mFgSpinner = findViewById(R.id.fgspinner);
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
                 android.R.layout.simple_spinner_item, mAvailOpLabels);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         mFgSpinner.setAdapter(adapter);
         mFgSpinner.setOnItemSelectedListener(this);
-        mBgSpinner = (Spinner) findViewById(R.id.bgspinner);
+        mBgSpinner = findViewById(R.id.bgspinner);
         adapter = new ArrayAdapter<String>(this,
                 android.R.layout.simple_spinner_item, mAvailOpLabels);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         mBgSpinner.setAdapter(adapter);
         mBgSpinner.setOnItemSelectedListener(this);
-        mLimitSpinner = (Spinner) findViewById(R.id.limitspinner);
+        mLimitSpinner = findViewById(R.id.limitspinner);
         adapter = new ArrayAdapter<String>(this,
                 android.R.layout.simple_spinner_item, mLimitLabels);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);

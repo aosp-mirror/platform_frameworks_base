@@ -1,6 +1,6 @@
 package android.view;
 
-import android.graphics.Bitmap;
+import android.graphics.GraphicBuffer;
 import android.graphics.Rect;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -15,19 +15,19 @@ import android.os.Parcelable;
  */
 public class AppTransitionAnimationSpec implements Parcelable {
     public final int taskId;
-    public final Bitmap bitmap;
+    public final GraphicBuffer buffer;
     public final Rect rect;
 
-    public AppTransitionAnimationSpec(int taskId, Bitmap bitmap, Rect rect) {
+    public AppTransitionAnimationSpec(int taskId, GraphicBuffer buffer, Rect rect) {
         this.taskId = taskId;
-        this.bitmap = bitmap;
         this.rect = rect;
+        this.buffer = buffer;
     }
 
     public AppTransitionAnimationSpec(Parcel in) {
         taskId = in.readInt();
-        bitmap = in.readParcelable(null);
         rect = in.readParcelable(null);
+        buffer = in.readParcelable(null);
     }
 
     @Override
@@ -38,9 +38,8 @@ public class AppTransitionAnimationSpec implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(taskId);
-        dest.writeParcelable(bitmap, 0 /* flags */);
         dest.writeParcelable(rect, 0 /* flags */);
-
+        dest.writeParcelable(buffer, 0);
     }
 
     public static final Parcelable.Creator<AppTransitionAnimationSpec> CREATOR
@@ -56,6 +55,6 @@ public class AppTransitionAnimationSpec implements Parcelable {
 
     @Override
     public String toString() {
-        return "{taskId: " + taskId + ", bitmap: " + bitmap + ", rect: " + rect + "}";
+        return "{taskId: " + taskId + ", buffer: " + buffer + ", rect: " + rect + "}";
     }
 }

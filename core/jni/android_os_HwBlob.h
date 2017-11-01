@@ -50,6 +50,8 @@ struct JHwBlob : public RefBase {
             size_t offset, const android::hardware::hidl_string **s) const;
 
     const void *data() const;
+    void *data();
+
     size_t size() const;
 
     status_t putBlob(size_t offset, const sp<JHwBlob> &blob);
@@ -69,9 +71,6 @@ private:
         size_t mOffset;
         sp<JHwBlob> mBlob;
     };
-
-    jclass mClass;
-    jobject mObject;
 
     void *mBuffer;
     size_t mSize;

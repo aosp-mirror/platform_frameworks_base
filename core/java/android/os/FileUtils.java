@@ -38,7 +38,6 @@ import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -316,6 +315,16 @@ public class FileUtils {
         stringToFile(file.getAbsolutePath(), string);
     }
 
+    /*
+     * Writes the bytes given in {@code content} to the file whose absolute path
+     * is {@code filename}.
+     */
+    public static void bytesToFile(String filename, byte[] content) throws IOException {
+        try (FileOutputStream fos = new FileOutputStream(filename)) {
+            fos.write(content);
+        }
+    }
+
     /**
      * Writes string to file. Basically same as "echo -n $string > $filename"
      *
@@ -324,12 +333,7 @@ public class FileUtils {
      * @throws IOException
      */
     public static void stringToFile(String filename, String string) throws IOException {
-        FileWriter out = new FileWriter(filename);
-        try {
-            out.write(string);
-        } finally {
-            out.close();
-        }
+        bytesToFile(filename, string.getBytes(StandardCharsets.UTF_8));
     }
 
     /**
@@ -365,11 +369,11 @@ public class FileUtils {
      * constraints remain.
      *
      * @param minCount Always keep at least this many files.
-     * @param minAge Always keep files younger than this age.
+     * @param minAgeMs Always keep files younger than this age, in milliseconds.
      * @return if any files were deleted.
      */
-    public static boolean deleteOlderFiles(File dir, int minCount, long minAge) {
-        if (minCount < 0 || minAge < 0) {
+    public static boolean deleteOlderFiles(File dir, int minCount, long minAgeMs) {
+        if (minCount < 0 || minAgeMs < 0) {
             throw new IllegalArgumentException("Constraints must be positive or 0");
         }
 
@@ -380,7 +384,7 @@ public class FileUtils {
         Arrays.sort(files, new Comparator<File>() {
             @Override
             public int compare(File lhs, File rhs) {
-                return (int) (rhs.lastModified() - lhs.lastModified());
+                return Long.compare(rhs.lastModified(), lhs.lastModified());
             }
         });
 
@@ -389,9 +393,9 @@ public class FileUtils {
         for (int i = minCount; i < files.length; i++) {
             final File file = files[i];
 
-            // Keep files newer than minAge
+            // Keep files newer than minAgeMs
             final long age = System.currentTimeMillis() - file.lastModified();
-            if (age > minAge) {
+            if (age > minAgeMs) {
                 if (file.delete()) {
                     Log.d(TAG, "Deleted old file " + file);
                     deleted = true;
@@ -428,14 +432,13 @@ public class FileUtils {
      */
     public static boolean contains(File dir, File file) {
         if (dir == null || file == null) return false;
+        return contains(dir.getAbsolutePath(), file.getAbsolutePath());
+    }
 
-        String dirPath = dir.getAbsolutePath();
-        String filePath = file.getAbsolutePath();
-
+    public static boolean contains(String dirPath, String filePath) {
         if (dirPath.equals(filePath)) {
             return true;
         }
-
         if (!dirPath.endsWith("/")) {
             dirPath += "/";
         }
@@ -751,5 +754,38 @@ public class FileUtils {
 
     public static @Nullable File newFileOrNull(@Nullable String path) {
         return (path != null) ? new File(path) : null;
+    }
+
+    /**
+     * Creates a directory with name {@code name} under an existing directory {@code baseDir}.
+     * Returns a {@code File} object representing the directory on success, {@code null} on
+     * failure.
+     */
+    public static @Nullable File createDir(File baseDir, String name) {
+        final File dir = new File(baseDir, name);
+
+        if (dir.exists()) {
+            return dir.isDirectory() ? dir : null;
+        }
+
+        return dir.mkdir() ? dir : null;
+    }
+
+    /**
+     * Round the given size of a storage device to a nice round power-of-two
+     * value, such as 256MB or 32GB. This avoids showing weird values like
+     * "29.5GB" in UI.
+     */
+    public static long roundStorageSize(long size) {
+        long val = 1;
+        long pow = 1;
+        while ((val * pow) < size) {
+            val <<= 1;
+            if (val > 512) {
+                val = 1;
+                pow *= 1000;
+            }
+        }
+        return val * pow;
     }
 }

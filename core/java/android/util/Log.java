@@ -30,8 +30,9 @@ import java.net.UnknownHostException;
 /**
  * API for sending log output.
  *
- * <p>Generally, use the Log.v() Log.d() Log.i() Log.w() and Log.e()
- * methods.
+ * <p>Generally, you should use the {@link #v Log.v()}, {@link #d Log.d()},
+ * {@link #i Log.i()}, {@link #w Log.w()}, and {@link #e Log.e()} methods to write logs.
+ * You can then <a href="{@docRoot}studio/debug/am-logcat.html">view the logs in logcat</a>.
  *
  * <p>The order in terms of verbosity, from least to most is
  * ERROR, WARN, INFO, DEBUG, VERBOSE.  Verbose should never be compiled
@@ -89,8 +90,9 @@ public final class Log {
 
     /**
      * Exception class used to capture a stack trace in {@link #wtf}.
+     * @hide
      */
-    private static class TerribleFailure extends Exception {
+    public static class TerribleFailure extends Exception {
         TerribleFailure(String msg, Throwable cause) { super(msg, cause); }
     }
 
@@ -212,7 +214,9 @@ public final class Log {
      * @param tag The tag to check.
      * @param level The level to check.
      * @return Whether or not that this is allowed to be logged.
-     * @throws IllegalArgumentException is thrown if the tag.length() > 23.
+     * @throws IllegalArgumentException is thrown if the tag.length() > 23
+     *         for Nougat (7.0) releases (API <= 23) and prior, there is no
+     *         tag limit of concern after this API level.
      */
     public static native boolean isLoggable(String tag, int level);
 
@@ -388,7 +392,7 @@ public final class Log {
         // and the length of the tag.
         // Note: we implicitly accept possible truncation for Modified-UTF8 differences. It
         //       is too expensive to compute that ahead of time.
-        int bufferSize = NoPreloadHolder.LOGGER_ENTRY_MAX_PAYLOAD  // Base.
+        int bufferSize = PreloadHolder.LOGGER_ENTRY_MAX_PAYLOAD    // Base.
                 - 2                                                // Two terminators.
                 - (tag != null ? tag.length() : 0)                 // Tag length.
                 - 32;                                              // Some slack.
@@ -425,10 +429,10 @@ public final class Log {
     }
 
     /**
-     * NoPreloadHelper class. Caches the LOGGER_ENTRY_MAX_PAYLOAD value to avoid
+     * PreloadHelper class. Caches the LOGGER_ENTRY_MAX_PAYLOAD value to avoid
      * a JNI call during logging.
      */
-    static class NoPreloadHolder {
+    static class PreloadHolder {
         public final static int LOGGER_ENTRY_MAX_PAYLOAD =
                 logger_entry_max_payload_native();
     }

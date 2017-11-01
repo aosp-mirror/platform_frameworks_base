@@ -25,16 +25,27 @@
     <string name="wifi_remembered" msgid="4955746899347821096">"ذخیره‌شده"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"غیرفعال شد"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"‏پیکربندی IP انجام نشد"</string>
+    <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"اتصال ناموفق به دلیل شبکه با کیفیت پایین"</string>
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"‏اتصال Wi-Fi برقرار نشد"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"مشکل احراز هویت"</string>
+    <string name="wifi_cant_connect" msgid="5410016875644565884">"برقراری اتصال ممکن نیست"</string>
+    <string name="wifi_cant_connect_to_ap" msgid="1222553274052685331">"برقراری اتصال به «<xliff:g id="AP_NAME">%1$s</xliff:g>» ممکن نیست"</string>
+    <string name="wifi_check_password_try_again" msgid="516958988102584767">"گذرواژه را بررسی و دوباره امتحان کنید"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"در محدوده نیست"</string>
-    <string name="wifi_no_internet_no_reconnect" msgid="2211781637653149657">"دسترسی به اینترنت شناسایی نشد، به‌صورت خودکار وصل نمی‌شود."</string>
-    <string name="wifi_no_internet" msgid="5011955173375805204">"دسترسی به اینترنت وجود ندارد."</string>
+    <string name="wifi_no_internet_no_reconnect" msgid="5724903347310541706">"اتصال به‌صورت خودکار انجام نمی‌شود"</string>
+    <string name="wifi_no_internet" msgid="3880396223819116454">"دسترسی به اینترنت وجود ندارد"</string>
     <string name="saved_network" msgid="4352716707126620811">"ذخیره‌شده توسط <xliff:g id="NAME">%1$s</xliff:g>"</string>
-    <string name="connected_via_wfa" msgid="3805736726317410714">"‏متصل شده از طریق دستیار Wi-Fi"</string>
+    <string name="connected_via_network_scorer" msgid="5713793306870815341">"‏اتصال خودکار ازطریق %1$s"</string>
+    <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"اتصال خودکار ازطریق ارائه‌دهنده رتبه‌بندی شبکه"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"‏متصل از طریق %1$s"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"‏در دسترس از طریق %1$s"</string>
     <string name="wifi_connected_no_internet" msgid="3149853966840874992">"متصل، بدون اینترنت"</string>
+    <string name="speed_label_very_slow" msgid="1867055264243608530">"بسیار آهسته"</string>
+    <string name="speed_label_slow" msgid="813109590815810235">"آهسته"</string>
+    <string name="speed_label_okay" msgid="2331665440671174858">"تأیید"</string>
+    <string name="speed_label_medium" msgid="3175763313268941953">"متوسط"</string>
+    <string name="speed_label_fast" msgid="7715732164050975057">"سریع"</string>
+    <string name="speed_label_very_fast" msgid="2265363430784523409">"خیلی سریع"</string>
     <string name="bluetooth_disconnected" msgid="6557104142667339895">"اتصال قطع شد"</string>
     <string name="bluetooth_disconnecting" msgid="8913264760027764974">"در حال قطع اتصال..."</string>
     <string name="bluetooth_connecting" msgid="8555009514614320497">"در حال اتصال…"</string>
@@ -44,16 +55,22 @@
     <string name="bluetooth_connected_no_a2dp" msgid="4576188601581440337">"متصل شد (بدون رسانه)"</string>
     <string name="bluetooth_connected_no_map" msgid="6504436917057479986">"متصل (عدم دسترسی به پیام)"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp" msgid="9195757766755553810">"متصل شد (بدون تلفن یا رسانه)"</string>
+    <string name="bluetooth_connected_battery_level" msgid="7049181126136692368">"متصل، باتری <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset_battery_level" msgid="5504193961248406027">"متصل (بدون تلفن)، باتری <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_a2dp_battery_level" msgid="4751724026365870779">"متصل (بدون رسانه)، باتری <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1549265779323455261">"متصل (بدون تلفن یا رسانه)، باتری <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"رسانه صوتی"</string>
-    <string name="bluetooth_profile_headset" msgid="8658779596261212609">"صدای تلفن"</string>
+    <string name="bluetooth_profile_headset" msgid="7815495680863246034">"تماس‌های تلفنی"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"انتقال فایل"</string>
     <string name="bluetooth_profile_hid" msgid="3680729023366986480">"دستگاه ورودی"</string>
     <string name="bluetooth_profile_pan" msgid="3391606497945147673">"دسترسی به اینترنت"</string>
     <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"اشتراک‌گذاری مخاطب"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"استفاده برای اشتراک‌گذاری مخاطب"</string>
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"اشتراک‌گذاری اتصال اینترنت"</string>
-    <string name="bluetooth_profile_map" msgid="5465271250454324383">"دسترسی به پیام"</string>
+    <string name="bluetooth_profile_map" msgid="1019763341565580450">"پیام‌های نوشتاری"</string>
     <string name="bluetooth_profile_sap" msgid="5764222021851283125">"دسترسی سیم‌کارت"</string>
+    <string name="bluetooth_profile_a2dp_high_quality" msgid="5444517801472820055">"‏صدای HD: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
+    <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="8510588052415438887">"‏صدای HD"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"به رسانه صوتی متصل شد"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"به تلفن صوتی متصل شد"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"به سرور انتقال فایل متصل شد"</string>
@@ -137,7 +154,7 @@
     <item msgid="5194774745031751806">"خیلی تند"</item>
     <item msgid="9085102246155045744">"سریع‌ترین"</item>
   </string-array>
-    <string name="choose_profile" msgid="8229363046053568878">"انتخاب نمایه"</string>
+    <string name="choose_profile" msgid="6921016979430278661">"انتخاب نمایه"</string>
     <string name="category_personal" msgid="1299663247844969448">"شخصی"</string>
     <string name="category_work" msgid="8699184680584175622">"محل کار"</string>
     <string name="development_settings_title" msgid="215179176067683667">"گزینه‌های برنامه‌نویسان"</string>
@@ -166,13 +183,28 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"شبکه"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"گواهینامه نمایش بی‌سیم"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"‏فعال کردن گزارش‌گیری طولانی Wi‑Fi"</string>
-    <string name="wifi_aggressive_handover" msgid="9194078645887480917">"‏Wi‑Fi فعال برای واگذاری به شبکه سلولی"</string>
+    <string name="wifi_aggressive_handover" msgid="5309131983693661320">"‏Wi‑Fi قوی برای واگذاری به دستگاه همراه"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"‏اسکن‌های رومینگ Wi‑Fi همیشه مجاز است"</string>
-    <string name="mobile_data_always_on" msgid="7745605759775320362">"داده سلولی همیشه فعال"</string>
+    <string name="mobile_data_always_on" msgid="8774857027458200434">"داده تلفن همراه همیشه فعال باشد"</string>
+    <string name="tethering_hardware_offload" msgid="7470077827090325814">"شتاب سخت‌افزاری اتصال به اینترنت با تلفن همراه"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"غیرفعال کردن میزان صدای مطلق"</string>
+    <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"فعال کردن زنگ زدن درون باندی"</string>
+    <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"‏نسخه AVRCP بلوتوث"</string>
+    <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"‏انتخاب نسخه AVRCP بلوتوث"</string>
+    <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"کدک بلوتوث صوتی"</string>
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="4558347981670553665">"انتخاب کدک صوتی بلوتوث"</string>
+    <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"سرعت نمونه بلوتوث صوتی"</string>
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5628790207448471613">"انتخاب کدک صوتی بلوتوث:\nنرخ نمونه"</string>
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"بیت‌های بلوتوث صوتی در هر نمونه"</string>
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4546131401358681321">"انتخاب کدک صوتی بلوتوث:\nبیت در نمونه"</string>
+    <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"حالت کانال بلوتوث‌ صوتی"</string>
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="9133545781346216071">"انتخاب کدک صوتی بلوتوث:\nحالت کانال"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"‏کدک LDAC صوتی بلوتوث: کیفیت پخش"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"‏انتخاب کدک LDAC صوتی بلوتوث:\nکیفیت پخش"</string>
+    <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"پخش جریانی: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"نمایش گزینه‌ها برای گواهینامه نمایش بی‌سیم"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"‏افزایش سطح گزارش‌گیری Wi‑Fi، نمایش به ازای SSID RSSI در انتخاب‌کننده Wi‑Fi"</string>
-    <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"‏وقتی فعال است، در شرایط پایین بودن سیگنال، Wi‑Fi برای واگذار کردن اتصال داده به شبکه سلولی فعال‌تر خواهد بود."</string>
+    <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"‏زمانی‌که فعال است، درشرایطی که سیگنال Wi-Fi ضعیف باشد، Wi‑Fi برای واگذاری اتصال داده به دستگاه همراه قوی‌تر عمل خواهد کرد."</string>
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"‏مجاز/غیرمجاز کردن اسکن‌های رومینگ Wi‑Fi براساس مقدار ترافیک داده موجود در واسط"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"اندازه‌های حافظه موقت ثبت‌کننده"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"انتخاب اندازه‌ ثبت‌کننده در حافظه موقت ثبت"</string>
@@ -186,6 +218,7 @@
     <string name="allow_mock_location_summary" msgid="317615105156345626">"مکان‌های کاذب مجاز هستند"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"فعال کردن نمایش بازبینی ویژگی"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"‏داده سلولی همیشه فعال نگه داشته می‌شود، حتی وقتی Wi-Fi فعال است (برای جابه‌جایی سریع شبکه)."</string>
+    <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"استفاده از شتاب سخت‌افزاری اتصال به اینترنت با تلفن همراه درصورت دردسترس بودن"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"‏اشکال‌زدایی USB انجام شود؟"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"‏اشکال‌زدایی USB فقط برای اهداف برنامه‌نویسی در نظر گرفته شده است. از آن برای رونوشت‌برداری داده بین رایانه و دستگاهتان، نصب برنامه‌ها در دستگاهتان بدون اعلان و خواندن داده‌های گزارش استفاده کنید."</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"‏دسترسی به اشکال‌زدایی USB از تمام رایانه‌هایی که قبلاً مجاز دانسته‌اید لغو شود؟"</string>
@@ -194,6 +227,7 @@
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"‏تأیید برنامه‌های نصب شده از طریق USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"‏برنامه‌های نصب شده از طریق ADB/ADT را ازنظر رفتار مخاطره‌آمیز بررسی کنید."</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"در صورت وجود مشکل میزان صدا با دستگاه‌های راه دور مثل میزان صدای بلند ناخوشایند یا عدم کنترل صدا، قابلیت میزان صدای کامل بلوتوث را غیرفعال کنید."</string>
+    <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"اجازه می‌دهد آهنگ‌های زنگ تلفن در هدست‌های بلوتوث پخش شود"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"ترمینال محلی"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"فعال کردن ترمینال برنامه‌ کاربردی که دسترسی به برنامه محلی را پیشنهاد می‌کند"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"‏بررسی HDCP"</string>
@@ -206,6 +240,8 @@
     <string name="no_application" msgid="2813387563129153880">"هیچ چیز"</string>
     <string name="wait_for_debugger" msgid="1202370874528893091">"انتظار برای اشکال‌زدا"</string>
     <string name="wait_for_debugger_summary" msgid="1766918303462746804">"برنامه اشکال‌زدایی شده منتظر پیوست شدن اشکال‌زدا قبل از اجرا است"</string>
+    <string name="telephony_monitor_switch" msgid="1764958220062121194">"Telephony Monitor"</string>
+    <string name="telephony_monitor_switch_summary" msgid="7695552966547975635">"‏TelephonyMonitor وقتی مشکلی در ارتباط با عملکرد تلفن/مودم تشخیص می‌دهد، گزارش جمع‌آوری می‌کند و با اعلانی از کاربر می‌خواهد گزارش اشکال تهیه کند"</string>
     <string name="debug_input_category" msgid="1811069939601180246">"ورودی"</string>
     <string name="debug_drawing_category" msgid="6755716469267367852">"طراحی"</string>
     <string name="debug_hw_drawing_category" msgid="6220174216912308658">"پردازش سخت‌افزاری سریع"</string>
@@ -224,6 +260,7 @@
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"نمایش به‌روزرسانی‌های لایه‌های سخت‌افزار"</string>
     <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"وقتی لایه‌های سخت‌افزاری به‌روزرسانی‌ می‌شوند، به رنگ سبز درآیند"</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"‏اشکال‌زدایی بازنویسی GPU"</string>
+    <string name="debug_hw_renderer" msgid="7568529019431785816">"‏تنظیم تولیدکننده تصویرGPU"</string>
     <string name="disable_overlays" msgid="2074488440505934665">"‏غیر فعال کردن پوشش HW"</string>
     <string name="disable_overlays_summary" msgid="3578941133710758592">"‏همیشه از GPU در ترکیب صفحه استفاده شود"</string>
     <string name="simulate_color_space" msgid="6745847141353345872">"شبیه‌سازی فضای رنگ"</string>
@@ -250,6 +287,8 @@
     <string name="app_process_limit_title" msgid="4280600650253107163">"محدودیت پردازش در پس‌زمینه"</string>
     <string name="show_all_anrs" msgid="28462979638729082">"‏نمایش تمام ANRها"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"نمایش گفتگوی \"برنامه پاسخ نمی‌دهد\" برای برنامه‌های پس‌زمینه"</string>
+    <string name="show_notification_channel_warnings" msgid="1399948193466922683">"نمایش هشدارهای کانال اعلان"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"هنگامی که برنامه‌ای بدون وجود کانالی معتبر، اعلانی پست می‌کند، هشدار روی صفحه‌ای نمایش می‌دهد"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"اجازه اجباری به برنامه‌های دستگاه ذخیره خارجی"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"بدون توجه به مقادیر مانیفست، هر برنامه‌ای را برای نوشتن در حافظه خارجی واجد شرایط می‌کند"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"اجبار فعالیت‌ها به قابل تغییر اندازه بودن"</string>
@@ -277,8 +316,6 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"فعال. برای تغییر حالت ضربه بزنید."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"سرویس‌های در حال اجرا"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"مشاهده و کنترل سرویس‌های در حال اجرای فعلی"</string>
-    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"وب‌نمای چندپردازشی"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"اجرای تولیدکننده تصویر وب‌نما"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"اجرای وب‌نما"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"تنظیم اجرای وب‌نما"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"این انتخاب دیگر معتبر نیست. دوباره امتحان کنید."</string>
@@ -298,33 +335,30 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"تصحیح رنگ"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"این قابلیت آزمایشی است و ممکن است عملکرد را تحت تأثیر قرار دهد."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"توسط <xliff:g id="TITLE">%1$s</xliff:g> لغو شد"</string>
-    <string name="power_remaining_duration_only" msgid="4400068916452346544">"تقریباً <xliff:g id="TIME">%1$s</xliff:g> باقی مانده است"</string>
-    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">%1$s</xliff:g> باقی مانده"</string>
-    <string name="power_discharging_duration" msgid="1605929174734600590">"<xliff:g id="LEVEL">%1$s</xliff:g> - تقریباً ‏<xliff:g id="TIME">%2$s</xliff:g> باقی مانده است"</string>
-    <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> باقی مانده"</string>
+    <string name="power_remaining_duration_only" msgid="845431008899029842">"حدود <xliff:g id="TIME">^1</xliff:g> باقی مانده است"</string>
+    <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"براساس میزان مصرف شما، <xliff:g id="TIME">^1</xliff:g> باقی‌مانده است"</string>
+    <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"<xliff:g id="TIME">^1</xliff:g> تا شارژ شدن کامل باقی مانده است"</string>
+    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">^1</xliff:g> باقی مانده"</string>
+    <string name="power_remaining_duration_only_short_enhanced" msgid="7450425624026394823">"براساس میزان مصرف شما، <xliff:g id="TIME">^1</xliff:g> باقی‌مانده است"</string>
+    <string name="power_discharging_duration" msgid="2843747179907396142">"<xliff:g id="LEVEL">^1</xliff:g> - تقریباً <xliff:g id="TIME">^2</xliff:g> باقی مانده است"</string>
+    <string name="power_discharging_duration_enhanced" msgid="4401782117770255046">"<xliff:g id="LEVEL">^1</xliff:g> - براساس میزان مصرف شما، <xliff:g id="TIME">^2</xliff:g> باقی‌مانده است"</string>
+    <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">^1</xliff:g> - <xliff:g id="TIME">^2</xliff:g> باقی مانده"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - ‏<xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_charging_duration" msgid="2853265177761520490">"<xliff:g id="LEVEL">%1$s</xliff:g> - ‏<xliff:g id="TIME">%2$s</xliff:g> تا شارژ کامل"</string>
-    <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="power_charging_duration_ac" msgid="3969186192576594254">"<xliff:g id="LEVEL">%1$s</xliff:g> - ‏<xliff:g id="TIME">%2$s</xliff:g> تا شارژ کامل با جریان متناوب"</string>
-    <string name="power_charging_duration_ac_short" msgid="7895864687218765582">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="power_charging_duration_usb" msgid="182405645340976546">"‏<xliff:g id="LEVEL">%1$s</xliff:g> - ‏<xliff:g id="TIME">%2$s</xliff:g> تا شارژ کامل از طریق USB"</string>
-    <string name="power_charging_duration_usb_short" msgid="941854728040426399">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="power_charging_duration_wireless" msgid="1829295708243159464">"<xliff:g id="LEVEL">%1$s</xliff:g> - ‏<xliff:g id="TIME">%2$s</xliff:g> تا شارژ کامل به‌طور بی‌سیم"</string>
-    <string name="power_charging_duration_wireless_short" msgid="1642664799869599476">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">^1</xliff:g> - <xliff:g id="TIME">^2</xliff:g> مانده تا شارژ کامل"</string>
+    <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">^1</xliff:g> - <xliff:g id="TIME">^2</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"ناشناس"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"در حال شارژ شدن"</string>
-    <string name="battery_info_status_charging_ac" msgid="2909861890674399949">"شارژ با جریان متناوب"</string>
-    <string name="battery_info_status_charging_ac_short" msgid="7431401092096415502">"درحال شارژ شدن"</string>
-    <string name="battery_info_status_charging_usb" msgid="2207489369680923929">"‏شارژ از طریق USB"</string>
-    <string name="battery_info_status_charging_usb_short" msgid="6733371990319101366">"درحال شارژ شدن"</string>
-    <string name="battery_info_status_charging_wireless" msgid="3574032603735446573">"شارژ به صورت بی‌سیم"</string>
-    <string name="battery_info_status_charging_wireless_short" msgid="752569941028903610">"درحال شارژ شدن"</string>
+    <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"درحال شارژ شدن"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"شارژ نمی‌شود"</string>
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"شارژ نمی‌شود"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"پر"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"توسط سرپرست سیستم کنترل می‌شود"</string>
-    <string name="enabled_by_admin" msgid="2386503803463071894">"سرپرست آن را فعال کرده است"</string>
-    <string name="disabled_by_admin" msgid="3669999613095206948">"سرپرست آن را غیرفعال کرده است"</string>
+    <string name="enabled_by_admin" msgid="5302986023578399263">"فعال‌شده توسط سرپرست"</string>
+    <string name="disabled_by_admin" msgid="8505398946020816620">"غیرفعال‌شده توسط سرپرست"</string>
+    <string name="disabled" msgid="9206776641295849915">"غیر فعال شد"</string>
+    <string name="external_source_trusted" msgid="2707996266575928037">"مجاز"</string>
+    <string name="external_source_untrusted" msgid="2677442511837596726">"مجاز نیست"</string>
+    <string name="install_other_apps" msgid="6986686991775883017">"نصب برنامه‌های ناشناس"</string>
     <string name="home" msgid="3256884684164448244">"صفحه اصلی تنظیمات"</string>
   <string-array name="battery_labels">
     <item msgid="8494684293649631252">"٪۰"</item>
@@ -341,4 +375,13 @@
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"سفارشی (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="help_feedback_label" msgid="6815040660801785649">"راهنما و بازخورد"</string>
     <string name="content_description_menu_button" msgid="8182594799812351266">"منو"</string>
+    <string name="time_zone_gmt" msgid="2587097992671450782">"GMT"</string>
+    <string name="retail_demo_reset_message" msgid="118771671364131297">"برای انجام بازنشانی کارخانه‌ای در حالت نمایشی، گذرواژه را وارد کنید"</string>
+    <string name="retail_demo_reset_next" msgid="8356731459226304963">"بعدی"</string>
+    <string name="retail_demo_reset_title" msgid="696589204029930100">"وارد کردن گذرواژه الزامی است"</string>
+    <string name="active_input_method_subtypes" msgid="3596398805424733238">"روش‌های ورودی فعال"</string>
+    <string name="use_system_language_to_select_input_method_subtypes" msgid="5747329075020379587">"استفاده از زبان‌های سیستم"</string>
+    <string name="failed_to_open_app_settings_toast" msgid="1251067459298072462">"تنظیمات <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g> بازنشد"</string>
+    <string name="ime_security_warning" msgid="4135828934735934248">"این روش ورودی ممکن است بتواند تمام متنی را که تایپ می‌کنید جمع‌آوری کند، از جمله اطلاعات شخصی مانند گذرواژه‌ها و شماره‌های کارت اعتباری. این روش توسط برنامه <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g> ارائه می‌شود. از این روش ورودی استفاده می‌کنید؟"</string>
+    <string name="direct_boot_unaware_dialog_message" msgid="7870273558547549125">"توجه: بعد از راه‌اندازی تا زمانی‌که قفل تلفنتان را باز نکنید، این برنامه نمی‌تواند شروع شود"</string>
 </resources>

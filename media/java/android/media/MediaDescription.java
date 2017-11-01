@@ -2,6 +2,7 @@ package android.media;
 
 import android.annotation.Nullable;
 import android.graphics.Bitmap;
+import android.media.browse.MediaBrowser;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -45,6 +46,67 @@ public class MediaDescription implements Parcelable {
      * A Uri to identify this content.
      */
     private final Uri mMediaUri;
+
+    /**
+     * Used as a long extra field to indicate the bluetooth folder type of the media item as
+     * specified in the section 6.10.2.2 of the Bluetooth AVRCP 1.5. This is valid only for
+     * {@link MediaBrowser.MediaItem} with {@link MediaBrowser.MediaItem#FLAG_BROWSABLE}. The value
+     * should be one of the following:
+     * <ul>
+     * <li>{@link #BT_FOLDER_TYPE_MIXED}</li>
+     * <li>{@link #BT_FOLDER_TYPE_TITLES}</li>
+     * <li>{@link #BT_FOLDER_TYPE_ALBUMS}</li>
+     * <li>{@link #BT_FOLDER_TYPE_ARTISTS}</li>
+     * <li>{@link #BT_FOLDER_TYPE_GENRES}</li>
+     * <li>{@link #BT_FOLDER_TYPE_PLAYLISTS}</li>
+     * <li>{@link #BT_FOLDER_TYPE_YEARS}</li>
+     * </ul>
+     *
+     * @see #getExtras()
+     */
+    public static final String EXTRA_BT_FOLDER_TYPE = "android.media.extra.BT_FOLDER_TYPE";
+
+    /**
+     * The type of folder that is unknown or contains media elements of mixed types as specified in
+     * the section 6.10.2.2 of the Bluetooth AVRCP 1.5.
+     */
+    public static final long BT_FOLDER_TYPE_MIXED = 0;
+
+    /**
+     * The type of folder that contains media elements only as specified in the section 6.10.2.2 of
+     * the Bluetooth AVRCP 1.5.
+     */
+    public static final long BT_FOLDER_TYPE_TITLES = 1;
+
+    /**
+     * The type of folder that contains folders categorized by album as specified in the section
+     * 6.10.2.2 of the Bluetooth AVRCP 1.5.
+     */
+    public static final long BT_FOLDER_TYPE_ALBUMS = 2;
+
+    /**
+     * The type of folder that contains folders categorized by artist as specified in the section
+     * 6.10.2.2 of the Bluetooth AVRCP 1.5.
+     */
+    public static final long BT_FOLDER_TYPE_ARTISTS = 3;
+
+    /**
+     * The type of folder that contains folders categorized by genre as specified in the section
+     * 6.10.2.2 of the Bluetooth AVRCP 1.5.
+     */
+    public static final long BT_FOLDER_TYPE_GENRES = 4;
+
+    /**
+     * The type of folder that contains folders categorized by playlist as specified in the section
+     * 6.10.2.2 of the Bluetooth AVRCP 1.5.
+     */
+    public static final long BT_FOLDER_TYPE_PLAYLISTS = 5;
+
+    /**
+     * The type of folder that contains folders categorized by year as specified in the section
+     * 6.10.2.2 of the Bluetooth AVRCP 1.5.
+     */
+    public static final long BT_FOLDER_TYPE_YEARS = 6;
 
     private MediaDescription(String mediaId, CharSequence title, CharSequence subtitle,
             CharSequence description, Bitmap icon, Uri iconUri, Bundle extras, Uri mediaUri) {
@@ -155,6 +217,33 @@ public class MediaDescription implements Parcelable {
         dest.writeParcelable(mIconUri, flags);
         dest.writeBundle(mExtras);
         dest.writeParcelable(mMediaUri, flags);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null) {
+            return false;
+        }
+
+        if (!(o instanceof MediaDescription)){
+            return false;
+        }
+
+        final MediaDescription d = (MediaDescription) o;
+
+        if (!String.valueOf(mTitle).equals(String.valueOf(d.mTitle))) {
+            return false;
+        }
+
+        if (!String.valueOf(mSubtitle).equals(String.valueOf(d.mSubtitle))) {
+            return false;
+        }
+
+        if (!String.valueOf(mDescription).equals(String.valueOf(d.mDescription))) {
+            return false;
+        }
+
+        return true;
     }
 
     @Override

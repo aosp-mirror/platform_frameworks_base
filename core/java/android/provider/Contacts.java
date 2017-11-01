@@ -18,6 +18,8 @@ package android.provider;
 
 import com.android.internal.R;
 
+import android.annotation.SdkConstant;
+import android.annotation.SdkConstant.SdkConstantType;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -343,6 +345,7 @@ public class Contacts {
          * no public constructor since this is a utility class
          * @deprecated see {@link android.provider.ContactsContract}
          */
+        @Deprecated
         private People() {}
 
         /**
@@ -437,21 +440,11 @@ public class Contacts {
         public static final String PRIMARY_ORGANIZATION_ID = "primary_organization";
 
         /**
-         * Mark a person as having been contacted.
-         *
-         * @param resolver the ContentResolver to use
-         * @param personId the person who was contacted
-         * @deprecated see {@link android.provider.ContactsContract}
+         * This API is no longer supported as of O.
          */
         @Deprecated
         public static void markAsContacted(ContentResolver resolver, long personId) {
-            Uri uri = ContentUris.withAppendedId(CONTENT_URI, personId);
-            uri = Uri.withAppendedPath(uri, "update_contact_time");
-            ContentValues values = new ContentValues();
-            // There is a trigger in place that will update TIMES_CONTACTED when
-            // LAST_TIME_CONTACTED is modified.
-            values.put(LAST_TIME_CONTACTED, System.currentTimeMillis());
-            resolver.update(uri, values, null, null);
+            // No longer supported.
         }
 
         /**
@@ -718,6 +711,7 @@ public class Contacts {
              * no public constructor since this is a utility class
              * @deprecated see {@link android.provider.ContactsContract}
              */
+            @Deprecated
             private Extensions() {}
 
             /**
@@ -2172,6 +2166,7 @@ public class Contacts {
              * @deprecated Do not use. This is not supported.
              */
             @Deprecated
+            @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
             public static final String FILTER_CONTACTS_ACTION =
                     "com.android.contacts.action.FILTER_CONTACTS";
 

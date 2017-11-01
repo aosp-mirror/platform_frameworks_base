@@ -44,8 +44,8 @@ public:
     GpuObjectType objectType() { return mType; }
     int objectSize() { return mSize; }
 
-    static void onGLContextCreated();
-    static void onGLContextDestroyed();
+    static void onGpuContextCreated();
+    static void onGpuContextDestroyed();
     static void dump();
     static void dump(std::ostream& stream);
     static int getInstanceCount(GpuObjectType type);

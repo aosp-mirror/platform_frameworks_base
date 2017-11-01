@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#include <JNIHelp.h>
-#include <ScopedUtfChars.h>
+#include <nativehelper/JNIHelp.h>
+#include <nativehelper/ScopedUtfChars.h>
 #include <jni.h>
 #include <pcap.h>
 #include <stdlib.h>
@@ -39,7 +39,7 @@ static jint com_android_server_ApfTest_apfSimulate(
 
 class ScopedPcap {
   public:
-    ScopedPcap(pcap_t* pcap) : pcap_ptr(pcap) {}
+    explicit ScopedPcap(pcap_t* pcap) : pcap_ptr(pcap) {}
     ~ScopedPcap() {
         pcap_close(pcap_ptr);
     }
@@ -51,7 +51,7 @@ class ScopedPcap {
 
 class ScopedFILE {
   public:
-    ScopedFILE(FILE* fp) : file(fp) {}
+    explicit ScopedFILE(FILE* fp) : file(fp) {}
     ~ScopedFILE() {
         fclose(file);
     }

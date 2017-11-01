@@ -1246,7 +1246,7 @@ static void write_png(const char* imageName,
         if (kIsDebug) {
             printf("Adding 9-patch info...\n");
         }
-        strcpy((char*)unknowns[p_index].name, "npTc");
+        memcpy((char*)unknowns[p_index].name, "npTc", 5);
         unknowns[p_index].data = (png_byte*)imageInfo.serialize9patch();
         unknowns[p_index].size = imageInfo.info9Patch.serializedSize();
         // TODO: remove the check below when everything works
@@ -1254,7 +1254,7 @@ static void write_png(const char* imageName,
 
         // automatically generated 9 patch outline data
         int chunk_size = sizeof(png_uint_32) * 6;
-        strcpy((char*)unknowns[o_index].name, "npOl");
+        memcpy((char*)unknowns[o_index].name, "npOl", 5);
         unknowns[o_index].data = (png_byte*) calloc(chunk_size, 1);
         png_byte outputData[chunk_size];
         memcpy(&outputData, &imageInfo.outlineInsetsLeft, 4 * sizeof(png_uint_32));
@@ -1266,7 +1266,7 @@ static void write_png(const char* imageName,
         // optional optical inset / layout bounds data
         if (imageInfo.haveLayoutBounds) {
             int chunk_size = sizeof(png_uint_32) * 4;
-            strcpy((char*)unknowns[b_index].name, "npLb");
+            memcpy((char*)unknowns[b_index].name, "npLb", 5);
             unknowns[b_index].data = (png_byte*) calloc(chunk_size, 1);
             memcpy(unknowns[b_index].data, &imageInfo.layoutBoundsLeft, chunk_size);
             unknowns[b_index].size = chunk_size;

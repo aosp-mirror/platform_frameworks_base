@@ -1,9 +1,9 @@
 package android.widget;
 
-import com.android.internal.view.menu.MenuBuilder;
-
 import android.annotation.NonNull;
 import android.view.MenuItem;
+
+import com.android.internal.view.menu.MenuBuilder;
 
 /**
  * An interface notified when a menu item is hovered. Useful for cases when hover should trigger

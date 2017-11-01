@@ -20,7 +20,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.os.storage.DiskInfo;
-import android.os.storage.IMountService;
+import android.os.storage.IStorageManager;
 import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
 import android.util.Log;
@@ -28,7 +28,7 @@ import android.util.Log;
 public final class Sm {
     private static final String TAG = "Sm";
 
-    IMountService mSm;
+    IStorageManager mSm;
 
     private String[] mArgs;
     private int mNextArg;
@@ -55,7 +55,7 @@ public final class Sm {
             throw new IllegalArgumentException();
         }
 
-        mSm = IMountService.Stub.asInterface(ServiceManager.getService("mount"));
+        mSm = IStorageManager.Stub.asInterface(ServiceManager.getService("mount"));
         if (mSm == null) {
             throw new RemoteException("Failed to find running mount service");
         }
@@ -92,6 +92,10 @@ public final class Sm {
             runSetEmulateFbe();
         } else if ("get-fbe-mode".equals(op)) {
             runGetFbeMode();
+        } else if ("fstrim".equals(op)) {
+            runFstrim();
+        } else if ("set-virtual-disk".equals(op)) {
+            runSetVirtualDisk();
         } else {
             throw new IllegalArgumentException();
         }
@@ -210,13 +214,23 @@ public final class Sm {
         mSm.benchmark(volId);
     }
 
-    public void runForget() throws RemoteException{
+    public void runForget() throws RemoteException {
         final String fsUuid = nextArg();
         if ("all".equals(fsUuid)) {
             mSm.forgetAllVolumes();
         } else {
             mSm.forgetVolume(fsUuid);
         }
+    }
+
+    public void runFstrim() throws RemoteException {
+        mSm.fstrim(0);
+    }
+
+    public void runSetVirtualDisk() throws RemoteException {
+        final boolean virtualDisk = Boolean.parseBoolean(nextArg());
+        mSm.setDebugFlags(virtualDisk ? StorageManager.DEBUG_VIRTUAL_DISK : 0,
+                StorageManager.DEBUG_VIRTUAL_DISK);
     }
 
     private String nextArg() {
@@ -234,12 +248,14 @@ public final class Sm {
         System.err.println("       sm has-adoptable");
         System.err.println("       sm get-primary-storage-uuid");
         System.err.println("       sm set-force-adoptable [true|false]");
+        System.err.println("       sm set-virtual-disk [true|false]");
         System.err.println("");
         System.err.println("       sm partition DISK [public|private|mixed] [ratio]");
         System.err.println("       sm mount VOLUME");
         System.err.println("       sm unmount VOLUME");
         System.err.println("       sm format VOLUME");
         System.err.println("       sm benchmark VOLUME");
+        System.err.println("       sm fstrim");
         System.err.println("");
         System.err.println("       sm forget [UUID|all]");
         System.err.println("");

@@ -58,6 +58,84 @@
     <item msgid="3878793616631049349">"Koristi HDCP proveru samo za DRM sadržaj"</item>
     <item msgid="45075631231212732">"Uvek koristi HDCP proveru"</item>
   </string-array>
+  <string-array name="bluetooth_avrcp_versions">
+    <item msgid="5347678900838034763">"AVRCP 1.4 (podrazumevano)"</item>
+    <item msgid="2089555299377409443">"AVRCP 1.5"</item>
+    <item msgid="2895327394279434278">"AVRCP 1.6"</item>
+  </string-array>
+  <string-array name="bluetooth_avrcp_version_values">
+    <item msgid="2838624067805073303">"avrcp14"</item>
+    <item msgid="1913619118958233129">"avrcp15"</item>
+    <item msgid="7142710449249088270">"avrcp16"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_titles">
+    <item msgid="7065842274271279580">"Koristi izbor sistema (podrazumevano)"</item>
+    <item msgid="7539690996561263909">"SBC"</item>
+    <item msgid="686685526567131661">"AAC"</item>
+    <item msgid="8910200421843557332">"<xliff:g id="APTX">Qualcomm(R) aptX(TM) audio</xliff:g>"</item>
+    <item msgid="8434403964359457768">"<xliff:g id="APTX_HD">Qualcomm(R) aptX(TM) HD audio</xliff:g>"</item>
+    <item msgid="6751080638867012696">"LDAC"</item>
+    <item msgid="723675059572222462">"Omogući opcionalne kodeke"</item>
+    <item msgid="3304843301758635896">"Onemogući opcionalne kodeke"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_summaries">
+    <item msgid="5062108632402595000">"Koristi izbor sistema (podrazumevano)"</item>
+    <item msgid="6898329690939802290">"SBC"</item>
+    <item msgid="6839647709301342559">"AAC"</item>
+    <item msgid="2279916056363477395">"<xliff:g id="APTX">Qualcomm(R) aptX(TM) audio</xliff:g>"</item>
+    <item msgid="6641171061200063516">"<xliff:g id="APTX_HD">Qualcomm(R) aptX(TM) HD audio</xliff:g>"</item>
+    <item msgid="7950781694447359344">"LDAC"</item>
+    <item msgid="2209680154067241740">"Omogući opcionalne kodeke"</item>
+    <item msgid="741805482892725657">"Onemogući opcionalne kodeke"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_sample_rate_titles">
+    <item msgid="3093023430402746802">"Koristi izbor sistema (podrazumevano)"</item>
+    <item msgid="8895532488906185219">"44,1 kHz"</item>
+    <item msgid="2909915718994807056">"48,0 kHz"</item>
+    <item msgid="3347287377354164611">"88,2 kHz"</item>
+    <item msgid="1234212100239985373">"96,0 kHz"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_sample_rate_summaries">
+    <item msgid="3214516120190965356">"Koristi izbor sistema (podrazumevano)"</item>
+    <item msgid="4482862757811638365">"44,1 kHz"</item>
+    <item msgid="354495328188724404">"48,0 kHz"</item>
+    <item msgid="7329816882213695083">"88,2 kHz"</item>
+    <item msgid="6967397666254430476">"96,0 kHz"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_bits_per_sample_titles">
+    <item msgid="2684127272582591429">"Koristi izbor sistema (podrazumevano)"</item>
+    <item msgid="5618929009984956469">"16 bitova po uzorku"</item>
+    <item msgid="3412640499234627248">"24 bita po uzorku"</item>
+    <item msgid="121583001492929387">"32 bita po uzorku"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_bits_per_sample_summaries">
+    <item msgid="1081159789834584363">"Koristi izbor sistema (podrazumevano)"</item>
+    <item msgid="4726688794884191540">"16 bitova po uzorku"</item>
+    <item msgid="305344756485516870">"24 bita po uzorku"</item>
+    <item msgid="244568657919675099">"32 bita po uzorku"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_channel_mode_titles">
+    <item msgid="5226878858503393706">"Koristi izbor sistema (podrazumevano)"</item>
+    <item msgid="4106832974775067314">"Mono"</item>
+    <item msgid="5571632958424639155">"Stereo"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_channel_mode_summaries">
+    <item msgid="4118561796005528173">"Koristi izbor sistema (podrazumevano)"</item>
+    <item msgid="8900559293912978337">"Mono"</item>
+    <item msgid="8883739882299884241">"Stereo"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_titles">
+    <item msgid="7158319962230727476">"Optimizovano za kvalitet zvuka (990 kb/s/909 kb/s)"</item>
+    <item msgid="2921767058740704969">"Ujednačen kvalitet zvuka i veze (660 kb/s/606 kb/s)"</item>
+    <item msgid="8860982705384396512">"Optimizovano za kvalitet veze (330 kb/s/303 kb/s)"</item>
+    <item msgid="4414060457677684127">"Najbolje moguće (prilagodljiva brzina prenosa)"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_summaries">
+    <item msgid="6398189564246596868">"Optimizovano za kvalitet zvuka"</item>
+    <item msgid="4327143584633311908">"Ujednačen kvalitet zvuka i veze"</item>
+    <item msgid="4681409244565426925">"Optimizovano za kvalitet veze"</item>
+    <item msgid="364670732877872677">"Najbolje moguće (prilagodljiva brzina prenosa)"</item>
+  </string-array>
   <string-array name="select_logd_size_titles">
     <item msgid="8665206199209698501">"Isključeno"</item>
     <item msgid="1593289376502312923">"64 kB"</item>
@@ -79,6 +157,18 @@
     <item msgid="1314234299552254621">"1 MB po međumemoriji evidencije"</item>
     <item msgid="3606047780792894151">"4 MB po međumemoriji evidencije"</item>
     <item msgid="5431354956856655120">"16 MB po međumemoriji evidencije"</item>
+  </string-array>
+  <string-array name="select_logpersist_titles">
+    <item msgid="1744840221860799971">"Isključeno"</item>
+    <item msgid="3054662377365844197">"Sve"</item>
+    <item msgid="688870735111627832">"Sve sem radija"</item>
+    <item msgid="2850427388488887328">"samo jezgro"</item>
+  </string-array>
+  <string-array name="select_logpersist_summaries">
+    <item msgid="2216470072500521830">"Isključeno"</item>
+    <item msgid="172978079776521897">"Sve međumemorije evidencija"</item>
+    <item msgid="3873873912383879240">"Sve osim međumemorija evidencija za radio"</item>
+    <item msgid="8489661142527693381">"samo međumemorija evidencije jezgra"</item>
   </string-array>
   <string-array name="window_animation_scale_entries">
     <item msgid="8134156599370824081">"Animacija je isključena"</item>
@@ -108,7 +198,7 @@
     <item msgid="1069584980746680398">"Razmera animacije 10x"</item>
   </string-array>
   <string-array name="overlay_display_devices_entries">
-    <item msgid="1606809880904982133">"Nijedno"</item>
+    <item msgid="1606809880904982133">"Ništa"</item>
     <item msgid="9033194758688161545">"480 piksela"</item>
     <item msgid="1025306206556583600">"480 piksela (bezbedno)"</item>
     <item msgid="1853913333042744661">"720 piksela"</item>
@@ -135,12 +225,16 @@
   <string-array name="track_frame_time_entries">
     <item msgid="2193584639058893150">"Isključeno"</item>
     <item msgid="2751513398307949636">"Na ekranu u vidu traka"</item>
-    <item msgid="1851438178120770973">"U adb shell dumpsys gfxinfo"</item>
+    <item msgid="2355151170975410323">"U <xliff:g id="AS_TYPED_COMMAND">adb shell dumpsys gfxinfo</xliff:g>"</item>
   </string-array>
   <string-array name="debug_hw_overdraw_entries">
     <item msgid="8190572633763871652">"Isključi"</item>
     <item msgid="7688197031296835369">"Prikaži oblasti preklapanja"</item>
     <item msgid="2290859360633824369">"Prikaži oblasti za deuteranomaliju"</item>
+  </string-array>
+  <string-array name="debug_hw_renderer_entries">
+    <item msgid="2578620445459945681">"OpenGL (podrazumevano)"</item>
+    <item msgid="2839130076198120436">"OpenGL (Skia)"</item>
   </string-array>
   <string-array name="app_process_limit_entries">
     <item msgid="3401625457385943795">"Standardno ograničenje"</item>

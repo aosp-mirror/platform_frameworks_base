@@ -22,6 +22,7 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.os.Binder;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemProperties;
@@ -378,6 +379,11 @@ public class ApplicationErrorReport implements Parcelable {
             exceptionMessage = sanitizeString(exceptionMessage);
         }
 
+        /** {@hide} */
+        public void appendStackTrace(String tr) {
+            stackTrace = sanitizeString(stackTrace + tr);
+        }
+
         /**
          * Ensure that the string is of reasonable size, truncating from the middle if needed.
          */
@@ -425,7 +431,7 @@ public class ApplicationErrorReport implements Parcelable {
             dest.writeInt(throwLineNumber);
             dest.writeString(stackTrace);
             int total = dest.dataPosition()-start;
-            if (total > 20*1024) {
+            if (Binder.CHECK_PARCEL_SIZE && total > 20*1024) {
                 Slog.d("Error", "ERR: exClass=" + exceptionClassName);
                 Slog.d("Error", "ERR: exMsg=" + exceptionMessage);
                 Slog.d("Error", "ERR: file=" + throwFileName);
@@ -448,6 +454,47 @@ public class ApplicationErrorReport implements Parcelable {
             pw.println(prefix + "throwLineNumber: " + throwLineNumber);
             pw.println(prefix + "stackTrace: " + stackTrace);
         }
+    }
+
+    /**
+     * Parcelable version of {@link CrashInfo}
+     *
+     * @hide
+     */
+    public static class ParcelableCrashInfo extends CrashInfo implements Parcelable {
+        /**
+         * Create an uninitialized instance of CrashInfo.
+         */
+        public ParcelableCrashInfo() {
+        }
+
+        /**
+         * Create an instance of CrashInfo initialized from an exception.
+         */
+        public ParcelableCrashInfo(Throwable tr) {
+            super(tr);
+        }
+
+        public ParcelableCrashInfo(Parcel in) {
+            super(in);
+        }
+
+        public int describeContents() {
+            return 0;
+        }
+
+        public static final Parcelable.Creator<ParcelableCrashInfo> CREATOR =
+                new Parcelable.Creator<ParcelableCrashInfo>() {
+                    @Override
+                    public ParcelableCrashInfo createFromParcel(Parcel in) {
+                        return new ParcelableCrashInfo(in);
+                    }
+
+                    @Override
+                    public ParcelableCrashInfo[] newArray(int size) {
+                        return new ParcelableCrashInfo[size];
+                    }
+                };
     }
 
     /**

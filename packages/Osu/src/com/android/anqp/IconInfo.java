@@ -1,5 +1,7 @@
 package com.android.anqp;
 
+import android.os.Parcel;
+
 import java.net.ProtocolException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -87,5 +89,21 @@ public class IconInfo {
                 ", IconType='" + mIconType + '\'' +
                 ", FileName='" + mFileName + '\'' +
                 '}';
+    }
+
+    public IconInfo(Parcel in) {
+        mWidth = in.readInt();
+        mHeight = in.readInt();
+        mLanguage = in.readString();
+        mIconType = in.readString();
+        mFileName = in.readString();
+    }
+
+    public void writeParcel(Parcel out) {
+        out.writeInt(mWidth);
+        out.writeInt(mHeight);
+        out.writeString(mLanguage);
+        out.writeString(mIconType);
+        out.writeString(mFileName);
     }
 }

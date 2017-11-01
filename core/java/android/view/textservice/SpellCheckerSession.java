@@ -16,11 +16,6 @@
 
 package android.view.textservice;
 
-import com.android.internal.textservice.ISpellCheckerSession;
-import com.android.internal.textservice.ISpellCheckerSessionListener;
-import com.android.internal.textservice.ITextServicesManager;
-import com.android.internal.textservice.ITextServicesSessionListener;
-
 import android.os.Binder;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -28,6 +23,13 @@ import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
 import android.util.Log;
+
+import com.android.internal.textservice.ISpellCheckerSession;
+import com.android.internal.textservice.ISpellCheckerSessionListener;
+import com.android.internal.textservice.ITextServicesManager;
+import com.android.internal.textservice.ITextServicesSessionListener;
+
+import dalvik.system.CloseGuard;
 
 import java.util.LinkedList;
 import java.util.Queue;
@@ -97,9 +99,8 @@ public class SpellCheckerSession {
     private final SpellCheckerInfo mSpellCheckerInfo;
     private final SpellCheckerSessionListener mSpellCheckerSessionListener;
     private final SpellCheckerSessionListenerImpl mSpellCheckerSessionListenerImpl;
-    private final SpellCheckerSubtype mSubtype;
 
-    private boolean mIsUsed;
+    private final CloseGuard mGuard = CloseGuard.get();
 
     /** Handler that will execute the main tasks */
     private final Handler mHandler = new Handler() {
@@ -121,8 +122,7 @@ public class SpellCheckerSession {
      * @hide
      */
     public SpellCheckerSession(
-            SpellCheckerInfo info, ITextServicesManager tsm, SpellCheckerSessionListener listener,
-            SpellCheckerSubtype subtype) {
+            SpellCheckerInfo info, ITextServicesManager tsm, SpellCheckerSessionListener listener) {
         if (info == null || listener == null || tsm == null) {
             throw new NullPointerException();
         }
@@ -130,9 +130,9 @@ public class SpellCheckerSession {
         mSpellCheckerSessionListenerImpl = new SpellCheckerSessionListenerImpl(mHandler);
         mInternalListener = new InternalListener(mSpellCheckerSessionListenerImpl);
         mTextServicesManager = tsm;
-        mIsUsed = true;
         mSpellCheckerSessionListener = listener;
-        mSubtype = subtype;
+
+        mGuard.open("finishSession");
     }
 
     /**
@@ -163,7 +163,7 @@ public class SpellCheckerSession {
      * checker.
      */
     public void close() {
-        mIsUsed = false;
+        mGuard.close();
         try {
             mSpellCheckerSessionListenerImpl.close();
             mTextServicesManager.finishSpellCheckerService(mSpellCheckerSessionListenerImpl);
@@ -218,7 +218,8 @@ public class SpellCheckerSession {
         mSpellCheckerSessionListener.onGetSentenceSuggestions(suggestionInfos);
     }
 
-    private static class SpellCheckerSessionListenerImpl extends ISpellCheckerSessionListener.Stub {
+    private static final class SpellCheckerSessionListenerImpl
+            extends ISpellCheckerSessionListener.Stub {
         private static final int TASK_CANCEL = 1;
         private static final int TASK_GET_SUGGESTIONS_MULTIPLE = 2;
         private static final int TASK_CLOSE = 3;
@@ -366,7 +367,7 @@ public class SpellCheckerSession {
             }
         }
 
-        public synchronized void onServiceConnected(ISpellCheckerSession session) {
+        public void onServiceConnected(ISpellCheckerSession session) {
             synchronized (this) {
                 switch (mState) {
                     case STATE_WAIT_CONNECTION:
@@ -408,9 +409,9 @@ public class SpellCheckerSession {
                             + Integer.toHexString(mISpellCheckerSession.hashCode())
                             + " mPendingTasks.size()=" + mPendingTasks.size());
                 }
-            }
-            while (!mPendingTasks.isEmpty()) {
-                processTask(session, mPendingTasks.poll(), false);
+                while (!mPendingTasks.isEmpty()) {
+                    processTask(session, mPendingTasks.poll(), false);
+                }
             }
         }
 
@@ -529,7 +530,7 @@ public class SpellCheckerSession {
         public void onGetSentenceSuggestions(SentenceSuggestionsInfo[] results);
     }
 
-    private static class InternalListener extends ITextServicesSessionListener.Stub {
+    private static final class InternalListener extends ITextServicesSessionListener.Stub {
         private final SpellCheckerSessionListenerImpl mParentSpellCheckerSessionListenerImpl;
 
         public InternalListener(SpellCheckerSessionListenerImpl spellCheckerSessionListenerImpl) {
@@ -544,11 +545,14 @@ public class SpellCheckerSession {
 
     @Override
     protected void finalize() throws Throwable {
-        super.finalize();
-        if (mIsUsed) {
-            Log.e(TAG, "SpellCheckerSession was not finished properly." +
-                    "You should call finishShession() when you finished to use a spell checker.");
-            close();
+        try {
+            // Note that mGuard will be null if the constructor threw.
+            if (mGuard != null) {
+                mGuard.warnIfOpen();
+                close();
+            }
+        } finally {
+            super.finalize();
         }
     }
 
