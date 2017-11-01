@@ -45,8 +45,8 @@ import android.view.WindowManagerGlobal;
 
 import com.android.systemui.R;
 import com.android.systemui.pip.BasePipManager;
+import com.android.systemui.recents.misc.SysUiTaskStackChangeListener;
 import com.android.systemui.recents.misc.SystemServicesProxy;
-import com.android.systemui.recents.misc.TaskStackChangeListener;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -620,7 +620,7 @@ public class PipManager implements BasePipManager {
         return false;
     }
 
-    private TaskStackChangeListener mTaskStackListener = new TaskStackChangeListener() {
+    private SysUiTaskStackChangeListener mTaskStackListener = new SysUiTaskStackChangeListener() {
         @Override
         public void onTaskStackChanged() {
             if (DEBUG) Log.d(TAG, "onTaskStackChanged()");

@@ -232,7 +232,7 @@ interface IActivityManager {
             boolean requireFull, in String name, in String callerPackage);
     void addPackageDependency(in String packageName);
     void killApplication(in String pkg, int appId, int userId, in String reason);
-    void closeSystemDialogs(in String reason);
+    oneway void closeSystemDialogs(in String reason);
     Debug.MemoryInfo[] getProcessMemoryInfo(in int[] pids);
     void killApplicationProcess(in String processName, int uid);
     int startActivityIntentSender(in IApplicationThread caller,
@@ -450,9 +450,8 @@ interface IActivityManager {
     int checkPermissionWithToken(in String permission, int pid, int uid,
             in IBinder callerToken);
     void registerTaskStackListener(in ITaskStackListener listener);
+    void unregisterTaskStackListener(in ITaskStackListener listener);
 
-
-    // Start of M transactions
     void notifyCleartextNetwork(int uid, in byte[] firstPacket);
     int createStackOnDisplay(int displayId);
     void setTaskResizeable(int taskId, int resizeableMode);
@@ -618,7 +617,6 @@ interface IActivityManager {
      * @return Returns true if the configuration was updated.
      */
     boolean updateDisplayOverrideConfiguration(in Configuration values, int displayId);
-    void unregisterTaskStackListener(ITaskStackListener listener);
     void moveStackToDisplay(int stackId, int displayId);
     boolean requestAutofillData(in IAssistDataReceiver receiver, in Bundle receiverExtras,
                                 in IBinder activityToken, int flags);

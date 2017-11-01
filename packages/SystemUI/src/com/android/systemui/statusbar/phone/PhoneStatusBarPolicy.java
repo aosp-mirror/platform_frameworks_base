@@ -65,8 +65,8 @@ import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.UiOffloadThread;
 import com.android.systemui.qs.tiles.DndTile;
 import com.android.systemui.qs.tiles.RotationLockTile;
+import com.android.systemui.recents.misc.SysUiTaskStackChangeListener;
 import com.android.systemui.recents.misc.SystemServicesProxy;
-import com.android.systemui.recents.misc.TaskStackChangeListener;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.CommandQueue.Callbacks;
 import com.android.systemui.statusbar.policy.BluetoothController;
@@ -768,7 +768,7 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
         mIconController.setIconVisibility(mSlotDataSaver, isDataSaving);
     }
 
-    private final TaskStackChangeListener mTaskListener = new TaskStackChangeListener() {
+    private final SysUiTaskStackChangeListener mTaskListener = new SysUiTaskStackChangeListener() {
         @Override
         public void onTaskStackChanged() {
             // Listen for changes to stacks and then check which instant apps are foreground.

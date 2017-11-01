@@ -16,6 +16,9 @@
 
 package com.android.systemui.recents;
 
+import static com.android.systemui.statusbar.phone.StatusBar.SYSTEM_DIALOG_REASON_HOME_KEY;
+import static com.android.systemui.statusbar.phone.StatusBar.SYSTEM_DIALOG_REASON_RECENT_APPS;
+
 import android.app.Activity;
 import android.app.ActivityOptions;
 import android.app.TaskStackBuilder;
@@ -92,6 +95,7 @@ import com.android.systemui.shared.recents.model.Task;
 import com.android.systemui.shared.recents.model.TaskStack;
 import com.android.systemui.recents.views.RecentsView;
 import com.android.systemui.recents.views.SystemBarScrimViews;
+import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.statusbar.phone.StatusBar;
 
 import java.io.FileDescriptor;
@@ -280,8 +284,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
                 new DismissRecentsToHomeAnimationStarted(animateTaskViews);
         dismissEvent.addPostAnimationCallback(new LaunchHomeRunnable(mHomeIntent,
                 overrideAnimation));
-        Recents.getSystemServices().sendCloseSystemWindows(
-                StatusBar.SYSTEM_DIALOG_REASON_HOME_KEY);
+        ActivityManagerWrapper.getInstance().closeSystemWindows(SYSTEM_DIALOG_REASON_HOME_KEY);
         EventBus.getDefault().send(dismissEvent);
     }
 
@@ -706,9 +709,9 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         int launchToTaskId = launchState.launchedToTaskId;
         if (launchToTaskId != -1 &&
                 (event.launchTask == null || launchToTaskId != event.launchTask.key.id)) {
-            SystemServicesProxy ssp = Recents.getSystemServices();
-            ssp.cancelWindowTransition(launchState.launchedToTaskId);
-            ssp.cancelThumbnailTransition(getTaskId());
+            ActivityManagerWrapper am = ActivityManagerWrapper.getInstance();
+            am.cancelWindowTransition(launchState.launchedToTaskId);
+            am.cancelThumbnailTransition(getTaskId());
         }
     }
 
@@ -755,8 +758,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         loader.deleteTaskData(event.task, false);
 
         // Remove the task from activity manager
-        SystemServicesProxy ssp = Recents.getSystemServices();
-        ssp.removeTask(event.task.key.id);
+        ActivityManagerWrapper.getInstance().removeTask(event.task.key.id);
     }
 
     public final void onBusEvent(TaskViewDismissedEvent event) {

@@ -20,6 +20,8 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.view.View.MeasureSpec;
 
+import static com.android.systemui.statusbar.phone.StatusBar.SYSTEM_DIALOG_REASON_RECENT_APPS;
+
 import android.app.ActivityManager;
 import android.app.ActivityManager.TaskSnapshot;
 import android.app.ActivityOptions;
@@ -70,26 +72,28 @@ import com.android.systemui.recents.events.ui.TaskSnapshotChangedEvent;
 import com.android.systemui.recents.misc.DozeTrigger;
 import com.android.systemui.recents.misc.ForegroundThread;
 import com.android.systemui.recents.misc.SystemServicesProxy;
-import com.android.systemui.recents.misc.TaskStackChangeListener;
+import com.android.systemui.recents.misc.SysUiTaskStackChangeListener;
 import com.android.systemui.shared.recents.model.RecentsTaskLoadPlan;
 import com.android.systemui.shared.recents.model.RecentsTaskLoader;
 import com.android.systemui.shared.recents.model.Task;
 import com.android.systemui.shared.recents.model.Task.TaskKey;
 import com.android.systemui.shared.recents.model.TaskStack;
 import com.android.systemui.shared.recents.model.ThumbnailData;
-import com.android.systemui.recents.views.RecentsTransitionHelper;
-import com.android.systemui.recents.views.RecentsTransitionHelper.AppTransitionAnimationSpecsFuture;
 import com.android.systemui.recents.views.TaskStackLayoutAlgorithm;
 import com.android.systemui.recents.views.TaskStackLayoutAlgorithm.VisibilityReport;
 import com.android.systemui.recents.views.TaskStackView;
 import com.android.systemui.recents.views.TaskViewHeader;
 import com.android.systemui.recents.views.TaskViewTransform;
 import com.android.systemui.recents.views.grid.TaskGridLayoutAlgorithm;
+import com.android.systemui.shared.recents.view.AppTransitionAnimationSpecsFuture;
+import com.android.systemui.shared.recents.view.RecentsTransition;
+import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.stackdivider.DividerView;
 import com.android.systemui.statusbar.phone.NavigationBarGestureHelper;
 import com.android.systemui.statusbar.phone.StatusBar;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * An implementation of the Recents component for the current user.  For secondary users, this can
@@ -113,10 +117,10 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
     public final static String RECENTS_ACTIVITY = "com.android.systemui.recents.RecentsActivity";
 
     /**
-     * An implementation of TaskStackChangeListener, that allows us to listen for changes to the system
+     * An implementation of SysUiTaskStackChangeListener, that allows us to listen for changes to the system
      * task stacks and update recents accordingly.
      */
-    class TaskStackListenerImpl extends TaskStackChangeListener {
+    class TaskStackListenerImpl extends SysUiTaskStackChangeListener {
 
         @Override
         public void onTaskStackChangedBackground() {
@@ -445,7 +449,8 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
                         growTarget);
 
                 // Only close the other system windows if we are actually showing recents
-                ssp.sendCloseSystemWindows(StatusBar.SYSTEM_DIALOG_REASON_RECENT_APPS);
+                ActivityManagerWrapper.getInstance().closeSystemWindows(
+                        SYSTEM_DIALOG_REASON_RECENT_APPS);
                 mLastToggleTime = SystemClock.elapsedRealtime();
             }
         } catch (ActivityNotFoundException e) {
@@ -864,22 +869,22 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
                 windowOverrideRect);
 
         RectF toTaskRect = toTransform.rect;
-        AppTransitionAnimationSpecsFuture future =
-                new RecentsTransitionHelper(mContext).getAppTransitionFuture(
-                        () -> {
-                    Rect rect = new Rect();
-                    toTaskRect.round(rect);
-                    GraphicBuffer thumbnail = drawThumbnailTransitionBitmap(toTask,
-                            toTransform);
-                    return Lists.newArrayList(new AppTransitionAnimationSpec(
-                            toTask.key.id, thumbnail, rect));
-                });
+        AppTransitionAnimationSpecsFuture future = new AppTransitionAnimationSpecsFuture(mHandler) {
+            @Override
+            public List<AppTransitionAnimationSpec> composeSpecs() {
+                Rect rect = new Rect();
+                toTaskRect.round(rect);
+                GraphicBuffer thumbnail = drawThumbnailTransitionBitmap(toTask, toTransform);
+                return Lists.newArrayList(new AppTransitionAnimationSpec(toTask.key.id, thumbnail,
+                        rect));
+            }
+        };
 
         // For low end ram devices, wait for transition flag is reset when Recents entrance
         // animation is complete instead of when the transition animation starts
-        return new Pair<>(ActivityOptions.makeMultiThumbFutureAspectScaleAnimation(mContext,
-                mHandler, future.getFuture(), isLowRamDevice ? null : mResetToggleFlagListener,
-                false /* scaleUp */), future);
+        return new Pair<>(RecentsTransition.createAspectScaleAnimation(mContext, mHandler,
+                false /* scaleUp */, future, isLowRamDevice ? null : mResetToggleFlagListener),
+                future);
     }
 
     /**
@@ -919,7 +924,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
                 boolean disabledInSafeMode = !toTask.isSystemApp && ssp.isInSafeMode();
                 mHeaderBar.onTaskViewSizeChanged(width, height);
                 if (RecentsDebugFlags.Static.EnableTransitionThumbnailDebugMode) {
-                    return RecentsTransitionHelper.drawViewIntoGraphicBuffer(width, mTaskBarHeight,
+                    return RecentsTransition.drawViewIntoGraphicBuffer(width, mTaskBarHeight,
                             null, 1f, 0xFFff0000);
                 } else {
                     // Workaround for b/27815919, reset the callback so that we do not trigger an
@@ -932,7 +937,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
                             disabledInSafeMode);
                     mHeaderBar.onTaskDataLoaded();
                     mHeaderBar.setDimAlpha(toTransform.dimAlpha);
-                    return RecentsTransitionHelper.drawViewIntoGraphicBuffer(width, mTaskBarHeight,
+                    return RecentsTransition.drawViewIntoGraphicBuffer(width, mTaskBarHeight,
                             mHeaderBar, 1f, 0);
                 }
             }
@@ -1047,7 +1052,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
             Recents.getSystemServices().startActivityAsUserAsync(intent, opts);
             EventBus.getDefault().send(new RecentsActivityStartingEvent());
             if (future != null) {
-                future.precacheSpecs();
+                future.composeSpecsSynchronous();
             }
         });
         EventBus.getDefault().send(hideMenuEvent);
