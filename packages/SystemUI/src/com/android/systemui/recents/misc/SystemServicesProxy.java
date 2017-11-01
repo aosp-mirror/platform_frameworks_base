@@ -68,7 +68,6 @@ import android.view.accessibility.AccessibilityManager;
 import com.android.internal.app.AssistUtils;
 import com.android.internal.os.BackgroundThread;
 import com.android.systemui.Dependency;
-import com.android.systemui.R;
 import com.android.systemui.UiOffloadThread;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsImpl;
@@ -372,7 +371,7 @@ public class SystemServicesProxy {
         if (mIam == null) return false;
 
         try {
-            return mIam.isInLockTaskMode();
+            return mIam.getLockTaskModeState() == ActivityManager.LOCK_TASK_MODE_PINNED;
         } catch (RemoteException e) {
             return false;
         }
