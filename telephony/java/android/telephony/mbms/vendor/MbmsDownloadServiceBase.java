@@ -18,6 +18,7 @@ package android.telephony.mbms.vendor;
 
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
@@ -42,6 +43,7 @@ import java.util.Map;
  * @hide
  */
 @SystemApi
+@TestApi
 public class MbmsDownloadServiceBase extends IMbmsDownloadService.Stub {
     private final Map<IBinder, DownloadStateCallback> mDownloadCallbackBinderMap = new HashMap<>();
     private final Map<IBinder, DeathRecipient> mDownloadCallbackDeathRecipients = new HashMap<>();
