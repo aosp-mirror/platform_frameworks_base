@@ -94,6 +94,17 @@ public class AssistDataRequester extends IAssistDataReceiver.Stub {
          */
         @GuardedBy("mCallbacksLock")
         void onAssistScreenshotReceivedLocked(Bitmap screenshot);
+
+        /**
+         * Called when there is no more pending assist data or screenshots for the last request.
+         * If the request was canceled, then this callback will not be made. In addition, the
+         * callback will be made with the {@param mCallbacksLock} held, and only if
+         * {@link #canHandleReceivedAssistDataLocked()} is true.
+         */
+        @GuardedBy("mCallbacksLock")
+        default void onAssistRequestCompleted() {
+            // Do nothing
+        }
     }
 
     /**
@@ -139,12 +150,13 @@ public class AssistDataRequester extends IAssistDataReceiver.Stub {
     public void requestAssistData(List<IBinder> activityTokens, final boolean fetchData,
             final boolean fetchScreenshot, boolean allowFetchData, boolean allowFetchScreenshot,
             int callingUid, String callingPackage) {
-        // TODO: Better handle the cancel case if a request can be reused
-        // TODO: Known issue, if the assist data is not allowed on the current activity, then no
-        //       assist data is requested for any of the other activities
+        // TODO(b/34090158): Known issue, if the assist data is not allowed on the current activity,
+        //                   then no assist data is requested for any of the other activities
 
         // Early exit if there are no activity to fetch for
         if (activityTokens.isEmpty()) {
+            // No activities, just dispatch request-complete
+            tryDispatchRequestComplete();
             return;
         }
 
@@ -223,6 +235,9 @@ public class AssistDataRequester extends IAssistDataReceiver.Stub {
                 }
             }
         }
+        // For the cases where we dispatch null data/screenshot due to permissions, just dispatch
+        // request-complete after those are made
+        tryDispatchRequestComplete();
     }
 
     /**
@@ -230,6 +245,11 @@ public class AssistDataRequester extends IAssistDataReceiver.Stub {
      * data. The owner is also responsible for locking before calling this method.
      */
     public void processPendingAssistData() {
+        flushPendingAssistData();
+        tryDispatchRequestComplete();
+    }
+
+    private void flushPendingAssistData() {
         final int dataCount = mAssistData.size();
         for (int i = 0; i < dataCount; i++) {
             dispatchAssistDataReceived(mAssistData.get(i));
@@ -273,8 +293,9 @@ public class AssistDataRequester extends IAssistDataReceiver.Stub {
 
             if (mCallbacks.canHandleReceivedAssistDataLocked()) {
                 // Process any pending data and dispatch the new data as well
-                processPendingAssistData();
+                flushPendingAssistData();
                 dispatchAssistDataReceived(data);
+                tryDispatchRequestComplete();
             } else {
                 // Queue up the data for processing later
                 mAssistData.add(data);
@@ -292,8 +313,9 @@ public class AssistDataRequester extends IAssistDataReceiver.Stub {
 
             if (mCallbacks.canHandleReceivedAssistDataLocked()) {
                 // Process any pending data and dispatch the new data as well
-                processPendingAssistData();
+                flushPendingAssistData();
                 dispatchAssistScreenshotReceived(screenshot);
+                tryDispatchRequestComplete();
             } else {
                 // Queue up the data for processing later
                 mAssistScreenshot.add(screenshot);
@@ -315,6 +337,13 @@ public class AssistDataRequester extends IAssistDataReceiver.Stub {
 
     private void dispatchAssistScreenshotReceived(Bitmap screenshot) {
         mCallbacks.onAssistScreenshotReceivedLocked(screenshot);
+    }
+
+    private void tryDispatchRequestComplete() {
+        if (mPendingDataCount == 0 && mPendingScreenshotCount == 0 &&
+                mAssistData.isEmpty() && mAssistScreenshot.isEmpty()) {
+            mCallbacks.onAssistRequestCompleted();
+        }
     }
 
     public void dump(String prefix, PrintWriter pw) {

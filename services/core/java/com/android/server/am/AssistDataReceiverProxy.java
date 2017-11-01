@@ -37,17 +37,12 @@ class AssistDataReceiverProxy implements AssistDataRequesterCallbacks,
     private static final String TAG = TAG_WITH_CLASS_NAME ? "AssistDataReceiverProxy" : TAG_AM;
 
     private String mCallerPackage;
-    private boolean mBinderDied;
     private IAssistDataReceiver mReceiver;
 
     public AssistDataReceiverProxy(IAssistDataReceiver receiver, String callerPackage) {
-        try {
-            receiver.asBinder().linkToDeath(this, 0);
-        } catch (RemoteException e) {
-            Log.w(TAG, "Could not link to client death", e);
-        }
         mReceiver = receiver;
         mCallerPackage = callerPackage;
+        linkToDeath();
     }
 
     @Override
@@ -58,7 +53,7 @@ class AssistDataReceiverProxy implements AssistDataRequesterCallbacks,
 
     @Override
     public void onAssistDataReceivedLocked(Bundle data, int activityIndex, int activityCount) {
-        if (!mBinderDied) {
+        if (mReceiver != null) {
             try {
                 mReceiver.onHandleAssistData(data);
             } catch (RemoteException e) {
@@ -70,7 +65,7 @@ class AssistDataReceiverProxy implements AssistDataRequesterCallbacks,
 
     @Override
     public void onAssistScreenshotReceivedLocked(Bitmap screenshot) {
-        if (!mBinderDied) {
+        if (mReceiver != null) {
             try {
                 mReceiver.onHandleAssistScreenshot(screenshot);
             } catch (RemoteException e) {
@@ -81,7 +76,27 @@ class AssistDataReceiverProxy implements AssistDataRequesterCallbacks,
     }
 
     @Override
+    public void onAssistRequestCompleted() {
+        unlinkToDeath();
+    }
+
+    @Override
     public void binderDied() {
-        mBinderDied = true;
+        unlinkToDeath();
+    }
+
+    private void linkToDeath() {
+        try {
+            mReceiver.asBinder().linkToDeath(this, 0);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Could not link to client death", e);
+        }
+    }
+
+    private void unlinkToDeath() {
+        if (mReceiver != null) {
+            mReceiver.asBinder().unlinkToDeath(this, 0);
+        }
+        mReceiver = null;
     }
 }

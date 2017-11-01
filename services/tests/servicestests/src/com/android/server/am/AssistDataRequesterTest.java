@@ -22,6 +22,7 @@ import static android.app.AppOpsManager.OP_ASSIST_SCREENSHOT;
 import static android.app.AppOpsManager.OP_ASSIST_STRUCTURE;
 import static android.graphics.Bitmap.Config.ARGB_8888;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -130,8 +131,7 @@ public class AssistDataRequesterTest extends ActivityTestsBase {
             mHandler.post(() -> {
                 try {
                     mGate.await(10, TimeUnit.SECONDS);
-                    mDataRequester.onHandleAssistScreenshot(Bitmap.createBitmap(1, 1,
-                            ARGB_8888));
+                    mDataRequester.onHandleAssistScreenshot(Bitmap.createBitmap(1, 1, ARGB_8888));
                 } catch (InterruptedException e) {
                     Log.e(TAG, "Failed to wait", e);
                 }
@@ -197,11 +197,16 @@ public class AssistDataRequesterTest extends ActivityTestsBase {
         assertTrue(mDataRequester.getPendingScreenshotCount() == 0);
         assertTrue(mCallbacks.receivedData.isEmpty());
         assertTrue(mCallbacks.receivedScreenshots.isEmpty());
+        assertFalse(mCallbacks.requestCompleted);
 
         mCallbacks.canHandleReceivedData = true;
         mDataRequester.processPendingAssistData();
+        // Since we are posting the callback for the request-complete, flush the handler as well
+        mGate.countDown();
+        waitForIdle(mHandler);
         assertTrue(mCallbacks.receivedData.size() == 5);
         assertTrue(mCallbacks.receivedScreenshots.size() == 1);
+        assertTrue(mCallbacks.requestCompleted);
 
         // Clear the state and ensure that we only process pending data once
         mCallbacks.reset();
@@ -297,6 +302,7 @@ public class AssistDataRequesterTest extends ActivityTestsBase {
         assertTrue("Expected " + numPendingScreenshots + " pending screenshots, got "
                         + mDataRequester.getPendingScreenshotCount(),
                 mDataRequester.getPendingScreenshotCount() == numPendingScreenshots);
+        assertFalse("Expected request NOT completed", mCallbacks.requestCompleted);
         mGate.countDown();
         waitForIdle(mHandler);
         assertTrue("Expected " + numReceivedData + " data, received "
@@ -305,6 +311,7 @@ public class AssistDataRequesterTest extends ActivityTestsBase {
         assertTrue("Expected " + numReceivedScreenshots + " screenshots, received "
                         + mCallbacks.receivedScreenshots.size(),
                 mCallbacks.receivedScreenshots.size() == numReceivedScreenshots);
+        assertTrue("Expected request completed", mCallbacks.requestCompleted);
     }
 
     private List<IBinder> createActivityList(int size) {
@@ -324,9 +331,10 @@ public class AssistDataRequesterTest extends ActivityTestsBase {
         latch.await(2, TimeUnit.SECONDS);
     }
 
-    private static class Callbacks implements AssistDataRequesterCallbacks {
+    private class Callbacks implements AssistDataRequesterCallbacks {
 
         boolean canHandleReceivedData = true;
+        boolean requestCompleted = false;
         ArrayList<Bundle> receivedData = new ArrayList<>();
         ArrayList<Bitmap> receivedScreenshots = new ArrayList<>();
 
@@ -349,6 +357,18 @@ public class AssistDataRequesterTest extends ActivityTestsBase {
         @Override
         public void onAssistScreenshotReceivedLocked(Bitmap screenshot) {
             receivedScreenshots.add(screenshot);
+        }
+
+        @Override
+        public void onAssistRequestCompleted() {
+            mHandler.post(() -> {
+                try {
+                    mGate.await(10, TimeUnit.SECONDS);
+                    requestCompleted = true;
+                } catch (InterruptedException e) {
+                    Log.e(TAG, "Failed to wait", e);
+                }
+            });
         }
     }
 }
