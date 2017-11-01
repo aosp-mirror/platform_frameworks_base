@@ -112,6 +112,17 @@ public final class DrawableInflater {
     public Drawable inflateFromXml(@NonNull String name, @NonNull XmlPullParser parser,
             @NonNull AttributeSet attrs, @Nullable Theme theme)
             throws XmlPullParserException, IOException {
+        return inflateFromXmlForDensity(name, parser, attrs, 0, theme);
+    }
+
+    /**
+     * Version of {@link #inflateFromXml(String, XmlPullParser, AttributeSet, Theme)} that accepts
+     * an override density.
+     */
+    @NonNull
+    Drawable inflateFromXmlForDensity(@NonNull String name, @NonNull XmlPullParser parser,
+            @NonNull AttributeSet attrs, int density, @Nullable Theme theme)
+            throws XmlPullParserException, IOException {
         // Inner classes must be referenced as Outer$Inner, but XML tag names
         // can't contain $, so the <drawable> tag allows developers to specify
         // the class in an attribute. We'll still run it through inflateFromTag
@@ -127,6 +138,7 @@ public final class DrawableInflater {
         if (drawable == null) {
             drawable = inflateFromClass(name);
         }
+        drawable.setSrcDensityOverride(density);
         drawable.inflate(mRes, parser, attrs, theme);
         return drawable;
     }
@@ -147,6 +159,8 @@ public final class DrawableInflater {
                 return new TransitionDrawable();
             case "ripple":
                 return new RippleDrawable();
+            case "adaptive-icon":
+                return new AdaptiveIconDrawable();
             case "color":
                 return new ColorDrawable();
             case "shape":

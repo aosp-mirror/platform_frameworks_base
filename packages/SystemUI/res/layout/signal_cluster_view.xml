@@ -32,6 +32,8 @@
         android:layout_width="wrap_content"
         android:paddingEnd="6dp"
         android:src="@drawable/stat_sys_vpn_ic"
+        android:tint="@color/background_protect_secondary"
+        android:contentDescription="@string/accessibility_vpn_on"
         />
     <FrameLayout
         android:id="@+id/ethernet_combo"
@@ -39,17 +41,37 @@
         android:layout_width="wrap_content"
         >
         <com.android.systemui.statusbar.AlphaOptimizedImageView
-            android:theme="@style/DualToneLightTheme"
+            android:theme="?attr/lightIconTheme"
             android:id="@+id/ethernet"
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
             />
         <com.android.systemui.statusbar.AlphaOptimizedImageView
-            android:theme="@style/DualToneDarkTheme"
+            android:theme="?attr/darkIconTheme"
             android:id="@+id/ethernet_dark"
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
             android:alpha="0.0"
+            />
+    </FrameLayout>
+    <FrameLayout
+        android:layout_height="17dp"
+        android:layout_width="wrap_content">
+        <ImageView
+            android:id="@+id/wifi_in"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:src="@drawable/ic_activity_down"
+            android:visibility="gone"
+            android:paddingEnd="2dp"
+            />
+        <ImageView
+            android:id="@+id/wifi_out"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:src="@drawable/ic_activity_up"
+            android:paddingEnd="2dp"
+            android:visibility="gone"
             />
     </FrameLayout>
     <FrameLayout
@@ -58,17 +80,22 @@
         android:layout_width="wrap_content"
         >
         <com.android.systemui.statusbar.AlphaOptimizedImageView
-            android:theme="@style/DualToneLightTheme"
+            android:theme="?attr/lightIconTheme"
             android:id="@+id/wifi_signal"
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
             />
         <com.android.systemui.statusbar.AlphaOptimizedImageView
-            android:theme="@style/DualToneDarkTheme"
+            android:theme="?attr/darkIconTheme"
             android:id="@+id/wifi_signal_dark"
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
             android:alpha="0.0"
+            />
+        <ImageView
+            android:id="@+id/wifi_inout"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
             />
     </FrameLayout>
     <View
@@ -77,6 +104,11 @@
         android:layout_height="4dp"
         android:visibility="gone"
         />
+    <ViewStub
+        android:id="@+id/connected_device_signals_stub"
+        android:layout="@layout/connected_device_signal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
     <LinearLayout
         android:id="@+id/mobile_signal_group"
         android:layout_height="wrap_content"
@@ -89,14 +121,14 @@
         android:layout_width="wrap_content"
         android:contentDescription="@string/accessibility_no_sims">
         <com.android.systemui.statusbar.AlphaOptimizedImageView
-            android:theme="@style/DualToneLightTheme"
+            android:theme="?attr/lightIconTheme"
             android:id="@+id/no_sims"
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
             android:src="@drawable/stat_sys_no_sims"
             />
         <com.android.systemui.statusbar.AlphaOptimizedImageView
-            android:theme="@style/DualToneDarkTheme"
+            android:theme="?attr/darkIconTheme"
             android:id="@+id/no_sims_dark"
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"

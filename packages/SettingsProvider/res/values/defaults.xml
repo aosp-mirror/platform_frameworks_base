@@ -51,7 +51,7 @@
     <bool name="def_wifi_on">false</bool>
     <!-- 0 == never, 1 == only when plugged in, 2 == always -->
     <integer name="def_wifi_sleep_policy">2</integer>
-    <bool name="def_wifi_wakeup_enabled">false</bool>
+    <bool name="def_wifi_wakeup_enabled">true</bool>
     <bool name="def_networks_available_notification_on">true</bool>
 
     <bool name="def_backup_enabled">false</bool>
@@ -70,6 +70,7 @@
     <integer name="def_power_sounds_enabled">1</integer>
     <string name="def_low_battery_sound" translatable="false">/system/media/audio/ui/LowBattery.ogg</string>
     <integer name="def_dock_sounds_enabled">0</integer>
+    <integer name="def_dock_sounds_enabled_when_accessibility">0</integer>
     <string name="def_desk_dock_sound" translatable="false">/system/media/audio/ui/Dock.ogg</string>
     <string name="def_desk_undock_sound" translatable="false">/system/media/audio/ui/Undock.ogg</string>
     <string name="def_car_dock_sound" translatable="false">/system/media/audio/ui/Dock.ogg</string>
@@ -90,48 +91,11 @@
     <!-- Default for Settings.System.VIBRATE_IN_SILENT -->
     <bool name="def_vibrate_in_silent">true</bool>
 
-    <!-- Default for Settings.Secure.ACCESSIBILITY_SCRIPT_INJECTION -->
-    <bool name="def_accessibility_script_injection">false</bool>
+    <!-- Default for Settings.Secure.SYNC_PARENT_SOUNDS -->
+    <bool name="def_sync_parent_sounds">true</bool>
 
     <!-- Default for Settings.Secure.ACCESSIBILITY_SPEAK_PASSWORD -->
-    <bool name="def_accessibility_speak_password">false</bool>
-
-    <!-- Default for Settings.Secure.ACCESSIBILITY_WEB_CONTENT_KEY_BINDINGS -->
-    <string name="def_accessibility_web_content_key_bindings" translatable="false">
-            <!-- DPAD/Trackball UP - traverse previous on current axis and send an event. -->
-            0x13=0x01000100;
-            <!-- DPAD/Trackball DOWN - traverse next on current axis and send an event. -->
-            0x14=0x01010100;
-            <!-- DPAD/Trackball LEFT - traverse previous on the character navigation axis and send event. -->
-            0x15=0x02000001;
-            <!-- DPAD/Trackball RIGHT - traverse next on the character navigation axis end send event. -->
-            0x16=0x02010001;
-            <!-- Alt+DPAD/Trackball UP - go to the top of the document. -->
-            0x200000013=0x02000601;
-            <!-- Alt+DPAD/Trackball DOWN - go to the bottom of the document. -->
-            0x200000014=0x02010601;
-            <!-- Alt+DPAD/Trackball LEFT - transition from an axis to another and sends an event.-->
-            <!-- Axis transitions: 2 -> 1; -->
-            0x200000015=0x03020101;
-            <!-- Alt+DPAD/Trackball RIGHT - transition from an axis to another and sends an event. -->
-            <!-- Axis transitions:  1 -> 2; -->
-            0x200000016=0x03010201;
-            <!-- Alt+g - go to the previous heading and send an event. -->
-            0x200000023=0x02000301;
-            <!-- Alt+h - go to the next heading and send an event. -->
-            0x200000024=0x02010301;
-            <!-- Alt+COMMA - transition to sentence navigation axis and send an event. -->
-            <!-- Axis transitions:  7 -> 2; -->
-            0x200000037=0x03070201;
-            <!-- Alt+PERIOD - transition to default web view behavior axis and send an event. -->
-            <!-- Axis transitions:  0 -> 7; 1 - > 7; 2 -> 7; -->
-            0x200000038=0x03000701:0x03010701:0x03020701;
-    </string>
-
-    <!-- Default for Settings.Secure.ACCESSIBILITY_SCRIPT_INJECTION_URL -->
-    <string name="def_accessibility_screen_reader_url" translatable="false">
-        https://ssl.gstatic.com/accessibility/javascript/android/AndroidVox_v1.js
-    </string>
+    <bool name="def_accessibility_speak_password">true</bool>
 
     <!-- Default for Settings.Secure.TOUCH_EXPLORATION_ENABLED -->
     <bool name="def_touch_exploration_enabled">false</bool>
@@ -220,4 +184,7 @@
 
     <!-- Default setting for ability to add users from the lock screen -->
     <bool name="def_add_users_from_lockscreen">false</bool>
+
+    <!--  default setting for Settings.System.END_BUTTON_BEHAVIOR : END_BUTTON_BEHAVIOR_SLEEP -->
+    <integer name="def_end_button_behavior">0x2</integer>
 </resources>

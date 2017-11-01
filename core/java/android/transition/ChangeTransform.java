@@ -30,6 +30,7 @@ import android.util.Property;
 import android.view.GhostView;
 import android.view.View;
 import android.view.ViewGroup;
+
 import com.android.internal.R;
 
 /**
@@ -140,9 +141,10 @@ public class ChangeTransform extends Transition {
      * child view will be relative to its parent's final position, so it may appear to "jump"
      * at the beginning.</p>
      *
-     * @return <code>true</code> when a changed parent should execute the transition
-     * inside the scene root's overlay or <code>false</code> if a parent change only
-     * affects the transform of the transitioning view.
+     * @param reparentWithOverlay <code>true</code> when a changed parent should execute the
+     *                            transition inside the scene root's overlay or <code>false</code>
+     *                            if a parent change only affects the transform of the transitioning
+     *                            view.
      * @attr ref android.R.styleable#ChangeTransform_reparentWithOverlay
      */
     public void setReparentWithOverlay(boolean reparentWithOverlay) {
@@ -464,7 +466,7 @@ public class ChangeTransform extends Transition {
         }
     }
 
-    private static class GhostListener extends Transition.TransitionListenerAdapter {
+    private static class GhostListener extends TransitionListenerAdapter {
         private View mView;
         private View mStartView;
         private GhostView mGhostView;

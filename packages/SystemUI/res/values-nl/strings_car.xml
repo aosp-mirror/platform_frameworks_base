@@ -19,6 +19,6 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="car_lockscreen_disclaimer_title" msgid="7997539137376896441">"Rijd veilig"</string>
-    <string name="car_lockscreen_disclaimer_text" msgid="3061224684092952864">"Blijf je volledig bewust van de rijomstandigheden en houd je altijd aan de wet. Aanwijzingen kunnen onnauwkeurig, onvolledig, gevaarlijk, ongeschikt of verboden zijn of het doorkruisen van overheidszones vereisen. Bedrijfsinformatie kan ook onnauwkeurg of onvolledig zijn. De gegevens worden niet in realtime verstrekt en de nauwkeurigheid van een locatie kan niet worden gegarandeerd. Bedien tijdens het rijden je mobiele apparaat niet en gebruik geen apps die niet bedoeld zijn voor Android Auto."</string>
+    <string name="unknown_user_label" msgid="4323896111737677955">"Onbekend"</string>
+    <string name="start_driving" msgid="864023351402918991">"Beginnen met rijden"</string>
 </resources>

@@ -16,4 +16,4 @@
 
 package android.os;
 
-parcelable DropBoxManager.Entry;
+parcelable DropBoxManager.Entry cpp_header "android/os/DropBoxManager.h";

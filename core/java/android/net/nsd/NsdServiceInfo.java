@@ -30,7 +30,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Map;
 
-
 /**
  * A class representing service information for network service discovery
  * {@see NsdManager}
@@ -43,7 +42,7 @@ public final class NsdServiceInfo implements Parcelable {
 
     private String mServiceType;
 
-    private final ArrayMap<String, byte[]> mTxtRecord = new ArrayMap<String, byte[]>();
+    private final ArrayMap<String, byte[]> mTxtRecord = new ArrayMap<>();
 
     private InetAddress mHost;
 

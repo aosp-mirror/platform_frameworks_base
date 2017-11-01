@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="5247871339820894594">"Privzeta aplikacija operaterja"</string>
+    <string name="android_system_label" msgid="2797790869522345065">"Mobilni operater"</string>
+    <string name="portal_notification_id" msgid="5155057562457079297">"Porabili ste vse mobilne podatke"</string>
+    <string name="no_data_notification_id" msgid="668400731803969521">"Prenos podatkov v mobilnih omrežjih je deaktiviran"</string>
+    <string name="portal_notification_detail" msgid="2295729385924660881">"Dotaknite se, če želite obiskati spletno mesto %s"</string>
+    <string name="no_data_notification_detail" msgid="3112125343857014825">"Obrnite se na ponudnika storitev %s"</string>
+    <string name="no_mobile_data_connection_title" msgid="7449525772416200578">"Brez mobilne podatkovne povezave"</string>
+    <string name="no_mobile_data_connection" msgid="544980465184147010">"Dodajte podatkovni paket ali paket gostovanja operaterja %s"</string>
+    <string name="mobile_data_status_notification_channel_name" msgid="833999690121305708">"Stanje prenosa podatkov v mobilnem omrežju"</string>
+    <string name="action_bar_label" msgid="4290345990334377177">"Prijava v mobilno omrežje"</string>
+    <string name="ssl_error_warning" msgid="3127935140338254180">"Omrežje, ki se mu poskušate pridružiti, ima varnostne težave."</string>
+    <string name="ssl_error_example" msgid="6188711843183058764">"Stran za prijavo na primer morda ne pripada prikazani organizaciji."</string>
+    <string name="ssl_error_continue" msgid="1138548463994095584">"Vseeno nadaljuj v brskalniku"</string>
+</resources>

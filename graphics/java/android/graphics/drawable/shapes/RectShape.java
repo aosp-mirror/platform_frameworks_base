@@ -23,6 +23,7 @@ import android.graphics.RectF;
 
 /**
  * Defines a rectangle shape.
+ * <p>
  * The rectangle can be drawn to a Canvas with its own draw() method,
  * but more graphical control is available if you instead pass
  * the RectShape to a {@link android.graphics.drawable.ShapeDrawable}.

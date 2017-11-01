@@ -20,5 +20,5 @@ import android.content.ComponentName;
 
 /** @hide */
 oneway interface IVrListener {
-    void focusedActivityChanged(in ComponentName component);
+    void focusedActivityChanged(in ComponentName component, boolean running2dInVr, int pid);
 }

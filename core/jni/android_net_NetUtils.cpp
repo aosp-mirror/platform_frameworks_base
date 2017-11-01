@@ -17,7 +17,7 @@
 #define LOG_TAG "NetUtils"
 
 #include "jni.h"
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 #include "NetdClient.h"
 #include <utils/misc.h>
 #include <android_runtime/AndroidRuntime.h>

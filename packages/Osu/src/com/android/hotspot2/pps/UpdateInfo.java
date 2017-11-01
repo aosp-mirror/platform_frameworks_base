@@ -23,6 +23,8 @@ import static com.android.hotspot2.omadm.MOManager.TAG_UsernamePassword;
 public class UpdateInfo {
     public enum UpdateRestriction {HomeSP, RoamingPartner, Unrestricted}
 
+    public static final long NO_UPDATE = 0xffffffffL;
+
     private final long mInterval;
     private final boolean mSPPClientInitiated;
     private final UpdateRestriction mUpdateRestriction;
@@ -33,8 +35,8 @@ public class UpdateInfo {
     private final String mCertFP;
 
     public UpdateInfo(OMANode policyUpdate) throws OMAException {
-        mInterval = MOManager.getLong(policyUpdate, TAG_UpdateInterval, null) *
-                MOManager.IntervalFactor;
+        long minutes = MOManager.getLong(policyUpdate, TAG_UpdateInterval, null);
+        mInterval = minutes == NO_UPDATE ? -1 : minutes * MOManager.IntervalFactor;
         mSPPClientInitiated = MOManager.getSelection(policyUpdate, TAG_UpdateMethod);
         mUpdateRestriction = MOManager.getSelection(policyUpdate, TAG_Restriction);
         mURI = MOManager.getString(policyUpdate, TAG_URI);

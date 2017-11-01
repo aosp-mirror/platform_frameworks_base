@@ -16,6 +16,8 @@
 
 package android.mtp;
 
+import android.annotation.NonNull;
+
 /**
  * This class encapsulates information about a storage unit on an MTP device.
  * This corresponds to the StorageInfo Dataset described in
@@ -68,7 +70,7 @@ public final class MtpStorageInfo {
      *
      * @return the storage unit description
      */
-    public final String getDescription() {
+    public final @NonNull String getDescription() {
         return mDescription;
     }
 
@@ -77,7 +79,7 @@ public final class MtpStorageInfo {
      *
      * @return the storage volume identifier
      */
-    public final String getVolumeIdentifier() {
+    public final @NonNull String getVolumeIdentifier() {
         return mVolumeIdentifier;
     }
 }

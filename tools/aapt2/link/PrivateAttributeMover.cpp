@@ -14,67 +14,77 @@
  * limitations under the License.
  */
 
-#include "ResourceTable.h"
 #include "link/Linkers.h"
 
 #include <algorithm>
 #include <iterator>
 
+#include "android-base/logging.h"
+
+#include "ResourceTable.h"
+
 namespace aapt {
 
 template <typename InputContainer, typename OutputIterator, typename Predicate>
-OutputIterator moveIf(InputContainer& inputContainer, OutputIterator result,
-                      Predicate pred) {
-    const auto last = inputContainer.end();
-    auto newEnd = std::find_if(inputContainer.begin(), inputContainer.end(), pred);
-    if (newEnd == last) {
-        return result;
-    }
-
-    *result = std::move(*newEnd);
-
-    auto first = newEnd;
-    ++first;
-
-    for (; first != last; ++first) {
-        if (bool(pred(*first))) {
-            // We want to move this guy
-            *result = std::move(*first);
-            ++result;
-        } else {
-            // We want to keep this guy, but we will need to move it up the list to replace
-            // missing items.
-            *newEnd = std::move(*first);
-            ++newEnd;
-        }
-    }
-
-    inputContainer.erase(newEnd, last);
+OutputIterator move_if(InputContainer& input_container, OutputIterator result, Predicate pred) {
+  const auto last = input_container.end();
+  auto new_end = std::find_if(input_container.begin(), input_container.end(), pred);
+  if (new_end == last) {
     return result;
-}
+  }
 
-bool PrivateAttributeMover::consume(IAaptContext* context, ResourceTable* table) {
-    for (auto& package : table->packages) {
-        ResourceTableType* type = package->findType(ResourceType::kAttr);
-        if (!type) {
-            continue;
-        }
+  *result = std::move(*new_end);
 
-        if (type->symbolStatus.state != SymbolState::kPublic) {
-            // No public attributes, so we can safely leave these private attributes where they are.
-            return true;
-        }
+  auto first = new_end;
+  ++first;
 
-        ResourceTableType* privAttrType = package->findOrCreateType(ResourceType::kAttrPrivate);
-        assert(privAttrType->entries.empty());
-
-        moveIf(type->entries, std::back_inserter(privAttrType->entries),
-               [](const std::unique_ptr<ResourceEntry>& entry) -> bool {
-                   return entry->symbolStatus.state != SymbolState::kPublic;
-               });
-        break;
+  for (; first != last; ++first) {
+    if (bool(pred(*first))) {
+      // We want to move this guy
+      *result = std::move(*first);
+      ++result;
+    } else {
+      // We want to keep this guy, but we will need to move it up the list to
+      // replace missing items.
+      *new_end = std::move(*first);
+      ++new_end;
     }
-    return true;
+  }
+
+  input_container.erase(new_end, last);
+  return result;
 }
 
-} // namespace aapt
+bool PrivateAttributeMover::Consume(IAaptContext* context, ResourceTable* table) {
+  for (auto& package : table->packages) {
+    ResourceTableType* type = package->FindType(ResourceType::kAttr);
+    if (!type) {
+      continue;
+    }
+
+    if (type->symbol_status.state != SymbolState::kPublic) {
+      // No public attributes, so we can safely leave these private attributes
+      // where they are.
+      continue;
+    }
+
+    std::vector<std::unique_ptr<ResourceEntry>> private_attr_entries;
+
+    move_if(type->entries, std::back_inserter(private_attr_entries),
+            [](const std::unique_ptr<ResourceEntry>& entry) -> bool {
+              return entry->symbol_status.state != SymbolState::kPublic;
+            });
+
+    if (private_attr_entries.empty()) {
+      // No private attributes.
+      continue;
+    }
+
+    ResourceTableType* priv_attr_type = package->FindOrCreateType(ResourceType::kAttrPrivate);
+    CHECK(priv_attr_type->entries.empty());
+    priv_attr_type->entries = std::move(private_attr_entries);
+  }
+  return true;
+}
+
+}  // namespace aapt

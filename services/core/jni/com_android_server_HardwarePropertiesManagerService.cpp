@@ -16,18 +16,29 @@
 
 #define LOG_TAG "HardwarePropertiesManagerService-JNI"
 
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 #include "jni.h"
 
+#include <math.h>
 #include <stdlib.h>
 
-#include <hardware/thermal.h>
+#include <android/hardware/thermal/1.0/IThermal.h>
 #include <utils/Log.h>
 #include <utils/String8.h>
 
 #include "core_jni_helpers.h"
 
 namespace android {
+
+using hardware::hidl_vec;
+using hardware::thermal::V1_0::CoolingDevice;
+using hardware::thermal::V1_0::CpuUsage;
+using hardware::thermal::V1_0::IThermal;
+using hardware::thermal::V1_0::Temperature;
+using hardware::thermal::V1_0::ThermalStatus;
+using hardware::thermal::V1_0::ThermalStatusCode;
+template<typename T>
+using Return = hardware::Return<T>;
 
 // ---------------------------------------------------------------------------
 
@@ -47,134 +58,133 @@ static struct {
 
 jfloat gUndefinedTemperature;
 
-static struct thermal_module* gThermalModule;
+static sp<IThermal> gThermalModule;
 
 // ----------------------------------------------------------------------------
 
+float finalizeTemperature(float temperature) {
+    return isnan(temperature) ? gUndefinedTemperature : temperature;
+}
+
 static void nativeInit(JNIEnv* env, jobject obj) {
-    status_t err = hw_get_module(THERMAL_HARDWARE_MODULE_ID, (hw_module_t const**)&gThermalModule);
-    if (err) {
-        ALOGE("Couldn't load %s module (%s)", THERMAL_HARDWARE_MODULE_ID, strerror(-err));
+    // TODO(b/31632518)
+    if (gThermalModule == nullptr) {
+        gThermalModule = IThermal::getService();
+    }
+
+    if (gThermalModule == nullptr) {
+        ALOGE("Unable to get Thermal service.");
     }
 }
 
 static jfloatArray nativeGetFanSpeeds(JNIEnv *env, jclass /* clazz */) {
-    if (gThermalModule && gThermalModule->getCoolingDevices) {
-        ssize_t list_size = gThermalModule->getCoolingDevices(gThermalModule, nullptr, 0);
-
-        if (list_size >= 0) {
-            cooling_device_t *list = (cooling_device_t *)
-                    malloc(list_size * sizeof(cooling_device_t));
-            ssize_t size = gThermalModule->getCoolingDevices(gThermalModule, list, list_size);
-            if (size >= 0) {
-                if (list_size > size) {
-                    list_size = size;
-                }
-                jfloat values[list_size];
-                for (ssize_t i = 0; i < list_size; ++i) {
-                    values[i] = list[i].current_value;
-                }
-
-                jfloatArray fanSpeeds = env->NewFloatArray(list_size);
-                env->SetFloatArrayRegion(fanSpeeds, 0, list_size, values);
-                free(list);
-                return fanSpeeds;
-            }
-
-            free(list);
-        }
-
-        ALOGE("Cloudn't get fan speeds because of HAL error");
+    if (gThermalModule == nullptr) {
+        ALOGE("Couldn't get fan speeds because of HAL error.");
+        return env->NewFloatArray(0);
     }
-    return env->NewFloatArray(0);
+
+    hidl_vec<CoolingDevice> list;
+    Return<void> ret = gThermalModule->getCoolingDevices(
+            [&list](ThermalStatus status, hidl_vec<CoolingDevice> devices) {
+                if (status.code == ThermalStatusCode::SUCCESS) {
+                    list = std::move(devices);
+                } else {
+                    ALOGE("Couldn't get fan speeds because of HAL error: %s",
+                          status.debugMessage.c_str());
+                }
+            });
+
+    if (!ret.isOk()) {
+        ALOGE("getCoolingDevices failed status: %s", ret.description().c_str());
+    }
+
+    float values[list.size()];
+    for (size_t i = 0; i < list.size(); ++i) {
+        values[i] = list[i].currentValue;
+    }
+    jfloatArray fanSpeeds = env->NewFloatArray(list.size());
+    env->SetFloatArrayRegion(fanSpeeds, 0, list.size(), values);
+    return fanSpeeds;
 }
 
 static jfloatArray nativeGetDeviceTemperatures(JNIEnv *env, jclass /* clazz */, int type,
                                                int source) {
-    if (gThermalModule && gThermalModule->getTemperatures) {
-        ssize_t list_size = gThermalModule->getTemperatures(gThermalModule, nullptr, 0);
-        if (list_size >= 0) {
-            temperature_t *list = (temperature_t *) malloc(list_size * sizeof(temperature_t));
-            ssize_t size = gThermalModule->getTemperatures(gThermalModule, list, list_size);
-            if (size >= 0) {
-                if (list_size > size) {
-                    list_size = size;
-                }
-
-                jfloat values[list_size];
-                size_t length = 0;
-
-                for (ssize_t i = 0; i < list_size; ++i) {
-                    if (list[i].type == type) {
-                        switch (source) {
-                            case TEMPERATURE_CURRENT:
-                                if (list[i].current_value == UNKNOWN_TEMPERATURE) {
-                                    values[length++] = gUndefinedTemperature;
-                                } else {
-                                    values[length++] = list[i].current_value;
-                                }
-                                break;
-                            case TEMPERATURE_THROTTLING:
-                                if (list[i].throttling_threshold == UNKNOWN_TEMPERATURE) {
-                                    values[length++] = gUndefinedTemperature;
-                                } else {
-                                    values[length++] = list[i].throttling_threshold;
-                                }
-                                break;
-                            case TEMPERATURE_SHUTDOWN:
-                                if (list[i].shutdown_threshold == UNKNOWN_TEMPERATURE) {
-                                    values[length++] = gUndefinedTemperature;
-                                } else {
-                                    values[length++] = list[i].shutdown_threshold;
-                                }
-                                break;
-                            case TEMPERATURE_THROTTLING_BELOW_VR_MIN:
-                                if (list[i].vr_throttling_threshold == UNKNOWN_TEMPERATURE) {
-                                    values[length++] = gUndefinedTemperature;
-                                } else {
-                                    values[length++] = list[i].vr_throttling_threshold;
-                                }
-                                break;
-                        }
-                    }
-                }
-                jfloatArray deviceTemps = env->NewFloatArray(length);
-                env->SetFloatArrayRegion(deviceTemps, 0, length, values);
-                free(list);
-                return deviceTemps;
-            }
-            free(list);
-        }
-        ALOGE("Couldn't get device temperatures because of HAL error");
+    if (gThermalModule == nullptr) {
+        ALOGE("Couldn't get device temperatures because of HAL error.");
+        return env->NewFloatArray(0);
     }
-    return env->NewFloatArray(0);
+    hidl_vec<Temperature> list;
+    Return<void> ret = gThermalModule->getTemperatures(
+            [&list](ThermalStatus status, hidl_vec<Temperature> temperatures) {
+                if (status.code == ThermalStatusCode::SUCCESS) {
+                    list = std::move(temperatures);
+                } else {
+                    ALOGE("Couldn't get temperatures because of HAL error: %s",
+                          status.debugMessage.c_str());
+                }
+            });
+
+    if (!ret.isOk()) {
+        ALOGE("getDeviceTemperatures failed status: %s", ret.description().c_str());
+    }
+
+    jfloat values[list.size()];
+    size_t length = 0;
+    for (size_t i = 0; i < list.size(); ++i) {
+        if (static_cast<int>(list[i].type) == type) {
+            switch (source) {
+                case TEMPERATURE_CURRENT:
+                    values[length++] = finalizeTemperature(list[i].currentValue);
+                    break;
+                case TEMPERATURE_THROTTLING:
+                    values[length++] = finalizeTemperature(list[i].throttlingThreshold);
+                    break;
+                case TEMPERATURE_SHUTDOWN:
+                    values[length++] = finalizeTemperature(list[i].shutdownThreshold);
+                    break;
+                case TEMPERATURE_THROTTLING_BELOW_VR_MIN:
+                    values[length++] = finalizeTemperature(list[i].vrThrottlingThreshold);
+                    break;
+            }
+        }
+    }
+    jfloatArray deviceTemps = env->NewFloatArray(length);
+    env->SetFloatArrayRegion(deviceTemps, 0, length, values);
+    return deviceTemps;
 }
 
 static jobjectArray nativeGetCpuUsages(JNIEnv *env, jclass /* clazz */) {
-    if (gThermalModule && gThermalModule->getCpuUsages
-            && gCpuUsageInfoClassInfo.initMethod) {
-        ssize_t size = gThermalModule->getCpuUsages(gThermalModule, nullptr);
-        if (size >= 0) {
-            cpu_usage_t *list = (cpu_usage_t *) malloc(size * sizeof(cpu_usage_t));
-            size = gThermalModule->getCpuUsages(gThermalModule, list);
-            if (size >= 0) {
-                jobjectArray cpuUsages = env->NewObjectArray(size, gCpuUsageInfoClassInfo.clazz,
-                        nullptr);
-                for (ssize_t i = 0; i < size; ++i) {
-                    if (list[i].is_online) {
-                        jobject cpuUsage = env->NewObject(gCpuUsageInfoClassInfo.clazz,
-                                gCpuUsageInfoClassInfo.initMethod, list[i].active, list[i].total);
-                        env->SetObjectArrayElement(cpuUsages, i, cpuUsage);
-                    }
-                }
-                free(list);
-                return cpuUsages;
-            }
-            free(list);
-        }
-        ALOGE("Couldn't get CPU usages because of HAL error");
+    if (gThermalModule == nullptr || !gCpuUsageInfoClassInfo.initMethod) {
+        ALOGE("Couldn't get CPU usages because of HAL error.");
+        return env->NewObjectArray(0, gCpuUsageInfoClassInfo.clazz, nullptr);
     }
-    return env->NewObjectArray(0, gCpuUsageInfoClassInfo.clazz, nullptr);
+    hidl_vec<CpuUsage> list;
+    Return<void> ret = gThermalModule->getCpuUsages(
+            [&list](ThermalStatus status, hidl_vec<CpuUsage> cpuUsages) {
+                if (status.code == ThermalStatusCode::SUCCESS) {
+                    list = std::move(cpuUsages);
+                } else {
+                    ALOGE("Couldn't get CPU usages because of HAL error: %s",
+                          status.debugMessage.c_str());
+                }
+            });
+
+    if (!ret.isOk()) {
+        ALOGE("getCpuUsages failed status: %s", ret.description().c_str());
+    }
+
+    jobjectArray cpuUsages = env->NewObjectArray(list.size(), gCpuUsageInfoClassInfo.clazz,
+                                                 nullptr);
+    for (size_t i = 0; i < list.size(); ++i) {
+        if (list[i].isOnline) {
+            jobject cpuUsage = env->NewObject(gCpuUsageInfoClassInfo.clazz,
+                                              gCpuUsageInfoClassInfo.initMethod,
+                                              list[i].active,
+                                              list[i].total);
+            env->SetObjectArrayElement(cpuUsages, i, cpuUsage);
+        }
+    }
+    return cpuUsages;
 }
 
 // ----------------------------------------------------------------------------

@@ -27,4 +27,15 @@ public abstract class NetworkPolicyManagerInternal {
      * Resets all policies associated with a given user.
      */
     public abstract void resetUserState(int userId);
+
+    /**
+     * @return true if the given uid is restricted from doing networking on metered networks.
+     */
+    public abstract boolean isUidRestrictedOnMeteredNetworks(int uid);
+
+    /**
+     * @return true if networking is blocked on the given interface for the given uid according
+     * to current networking policies.
+     */
+    public abstract boolean isUidNetworkingBlocked(int uid, String ifname);
 }

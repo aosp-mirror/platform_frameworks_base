@@ -18,9 +18,9 @@ package android.widget;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.LayoutInflater;
 
 /**
  * A fairly simple ExpandableListAdapter that creates views defined in an XML
@@ -32,10 +32,10 @@ public abstract class ResourceCursorTreeAdapter extends CursorTreeAdapter {
     private int mChildLayout;
     private int mLastChildLayout;
     private LayoutInflater mInflater;
-    
+
     /**
      * Constructor.
-     * 
+     *
      * @param context The context where the ListView associated with this
      *            SimpleListItemFactory is running
      * @param cursor The database cursor
@@ -51,18 +51,18 @@ public abstract class ResourceCursorTreeAdapter extends CursorTreeAdapter {
     public ResourceCursorTreeAdapter(Context context, Cursor cursor, int collapsedGroupLayout,
             int expandedGroupLayout, int childLayout, int lastChildLayout) {
         super(cursor, context);
-        
+
         mCollapsedGroupLayout = collapsedGroupLayout;
         mExpandedGroupLayout = expandedGroupLayout;
         mChildLayout = childLayout;
         mLastChildLayout = lastChildLayout;
-        
+
         mInflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
     /**
      * Constructor.
-     * 
+     *
      * @param context The context where the ListView associated with this
      *            SimpleListItemFactory is running
      * @param cursor The database cursor
@@ -80,7 +80,7 @@ public abstract class ResourceCursorTreeAdapter extends CursorTreeAdapter {
 
     /**
      * Constructor.
-     * 
+     *
      * @param context The context where the ListView associated with this
      *            SimpleListItemFactory is running
      * @param cursor The database cursor
@@ -93,7 +93,7 @@ public abstract class ResourceCursorTreeAdapter extends CursorTreeAdapter {
             int childLayout) {
         this(context, cursor, groupLayout, groupLayout, childLayout, childLayout);
     }
-    
+
     @Override
     public View newChildView(Context context, Cursor cursor, boolean isLastChild,
             ViewGroup parent) {

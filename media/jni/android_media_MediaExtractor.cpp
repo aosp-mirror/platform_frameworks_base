@@ -19,6 +19,7 @@
 #include <utils/Log.h>
 
 #include "android_media_MediaExtractor.h"
+#include "android_media_MediaMetricsJNI.h"
 
 #include "android_media_Utils.h"
 #include "android_runtime/AndroidRuntime.h"
@@ -36,6 +37,7 @@
 #include <media/stagefright/MediaErrors.h>
 #include <media/stagefright/MetaData.h>
 #include <media/stagefright/NuMediaExtractor.h>
+#include <android/media/ICas.h>
 
 #include <nativehelper/ScopedLocalRef.h>
 
@@ -85,6 +87,10 @@ status_t JMediaExtractor::setDataSource(int fd, off64_t offset, off64_t size) {
 
 status_t JMediaExtractor::setDataSource(const sp<DataSource> &datasource) {
     return mImpl->setDataSource(datasource);
+}
+
+status_t JMediaExtractor::setMediaCas(const sp<ICas> &cas) {
+    return mImpl->setMediaCas(cas);
 }
 
 size_t JMediaExtractor::countTracks() const {
@@ -239,6 +245,13 @@ status_t JMediaExtractor::getSampleFlags(uint32_t *sampleFlags) {
 
     return OK;
 }
+
+status_t JMediaExtractor::getMetrics(Parcel *reply) const {
+
+    status_t status = mImpl->getMetrics(reply);
+    return status;
+}
+
 
 status_t JMediaExtractor::getSampleMeta(sp<MetaData> *sampleMeta) {
     return mImpl->getSampleMeta(sampleMeta);
@@ -607,8 +620,6 @@ static void android_media_MediaExtractor_native_init(JNIEnv *env) {
 
     gFields.cryptoInfoSetID =
         env->GetMethodID(clazz, "set", "(I[I[I[B[BI)V");
-
-    DataSource::RegisterDefaultSniffers();
 }
 
 static void android_media_MediaExtractor_native_setup(
@@ -728,6 +739,36 @@ static void android_media_MediaExtractor_setDataSourceCallback(
     }
 }
 
+static void android_media_MediaExtractor_setMediaCas(
+        JNIEnv *env, jobject thiz, jobject casBinderObj) {
+    sp<JMediaExtractor> extractor = getMediaExtractor(env, thiz);
+
+    if (extractor == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return;
+    }
+
+    if (casBinderObj == NULL) {
+        jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
+        return;
+    }
+
+    sp<ICas> cas;
+    if (casBinderObj != NULL) {
+        sp<IBinder> binder = ibinderForJavaObject(env, casBinderObj);
+        cas = interface_cast<ICas>(binder);
+    }
+    status_t err = extractor->setMediaCas(cas);
+
+    if (err != OK) {
+        cas.clear();
+        jniThrowException(
+                env,
+                "java/io/IllegalArgumentException",
+                "Failed to set MediaCas on extractor.");
+    }
+}
+
 static jlong android_media_MediaExtractor_getCachedDurationUs(
         JNIEnv *env, jobject thiz) {
     sp<JMediaExtractor> extractor = getMediaExtractor(env, thiz);
@@ -768,6 +809,38 @@ static void android_media_MediaExtractor_native_finalize(
         JNIEnv *env, jobject thiz) {
     android_media_MediaExtractor_release(env, thiz);
 }
+
+static jobject
+android_media_MediaExtractor_native_getMetrics(JNIEnv * env, jobject thiz)
+{
+    ALOGV("android_media_MediaExtractor_native_getMetrics");
+
+    sp<JMediaExtractor> extractor = getMediaExtractor(env, thiz);
+    if (extractor == NULL ) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return NULL;
+    }
+
+    // get what we have for the metrics from the codec
+    Parcel reply;
+    status_t err = extractor->getMetrics(&reply);
+    if (err != OK) {
+        ALOGE("getMetrics failed");
+        return (jobject) NULL;
+    }
+
+    // build and return the Bundle
+    MediaAnalyticsItem *item = new MediaAnalyticsItem;
+    item->readFromParcel(reply);
+    jobject mybundle = MediaMetricsJNI::writeMetricsToBundle(env, item, NULL);
+
+    // housekeeping
+    delete item;
+    item = NULL;
+
+    return mybundle;
+}
+
 
 static const JNINativeMethod gMethods[] = {
     { "release", "()V", (void *)android_media_MediaExtractor_release },
@@ -823,11 +896,17 @@ static const JNINativeMethod gMethods[] = {
     { "setDataSource", "(Landroid/media/MediaDataSource;)V",
       (void *)android_media_MediaExtractor_setDataSourceCallback },
 
+    { "nativeSetMediaCas", "(Landroid/os/IBinder;)V",
+      (void *)android_media_MediaExtractor_setMediaCas },
+
     { "getCachedDuration", "()J",
       (void *)android_media_MediaExtractor_getCachedDurationUs },
 
     { "hasCacheReachedEndOfStream", "()Z",
       (void *)android_media_MediaExtractor_hasCacheReachedEOS },
+
+    {"native_getMetrics",          "()Landroid/os/PersistableBundle;",
+      (void *)android_media_MediaExtractor_native_getMetrics},
 };
 
 int register_android_media_MediaExtractor(JNIEnv *env) {

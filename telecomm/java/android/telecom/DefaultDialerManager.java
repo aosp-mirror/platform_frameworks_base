@@ -118,7 +118,7 @@ public class DefaultDialerManager {
         String defaultPackageName = Settings.Secure.getStringForUser(context.getContentResolver(),
                 Settings.Secure.DIALER_DEFAULT_APPLICATION, user);
 
-        final List<String> packageNames = getInstalledDialerApplications(context);
+        final List<String> packageNames = getInstalledDialerApplications(context, user);
 
         // Verify that the default dialer has not been disabled or uninstalled.
         if (packageNames.contains(defaultPackageName)) {
@@ -170,7 +170,7 @@ public class DefaultDialerManager {
 
         final Intent dialIntentWithTelScheme = new Intent(Intent.ACTION_DIAL);
         dialIntentWithTelScheme.setData(Uri.fromParts(PhoneAccount.SCHEME_TEL, "", null));
-        return filterByIntent(context, packageNames, dialIntentWithTelScheme);
+        return filterByIntent(context, packageNames, dialIntentWithTelScheme, userId);
     }
 
     public static List<String> getInstalledDialerApplications(Context context) {
@@ -204,17 +204,18 @@ public class DefaultDialerManager {
      *
      * @param context A valid context
      * @param packageNames List of package names to filter.
+     * @param userId The UserId
      * @return The filtered list.
      */
     private static List<String> filterByIntent(Context context, List<String> packageNames,
-            Intent intent) {
+            Intent intent, int userId) {
         if (packageNames == null || packageNames.isEmpty()) {
             return new ArrayList<>();
         }
 
         final List<String> result = new ArrayList<>();
         final List<ResolveInfo> resolveInfoList = context.getPackageManager()
-                .queryIntentActivities(intent, 0);
+                .queryIntentActivitiesAsUser(intent, 0, userId);
         final int length = resolveInfoList.size();
         for (int i = 0; i < length; i++) {
             final ActivityInfo info = resolveInfoList.get(i).activityInfo;

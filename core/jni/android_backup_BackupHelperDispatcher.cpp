@@ -17,7 +17,7 @@
 #define LOG_TAG "BackupHelperDispatcher_native"
 #include <utils/Log.h>
 
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 #include <android_runtime/AndroidRuntime.h>
 
 #include <sys/types.h>

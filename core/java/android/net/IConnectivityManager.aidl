@@ -69,17 +69,18 @@ interface IConnectivityManager
 
     boolean requestRouteToHostAddress(int networkType, in byte[] hostAddress);
 
-    int tether(String iface);
+    int tether(String iface, String callerPkg);
 
-    int untether(String iface);
+    int untether(String iface, String callerPkg);
 
     int getLastTetherError(String iface);
 
-    boolean isTetheringSupported();
+    boolean isTetheringSupported(String callerPkg);
 
-    void startTethering(int type, in ResultReceiver receiver, boolean showProvisioningUi);
+    void startTethering(int type, in ResultReceiver receiver, boolean showProvisioningUi,
+            String callerPkg);
 
-    void stopTethering(int type);
+    void stopTethering(int type, String callerPkg);
 
     String[] getTetherableIfaces();
 
@@ -95,7 +96,7 @@ interface IConnectivityManager
 
     String[] getTetherableBluetoothRegexs();
 
-    int setUsbTethering(boolean enable);
+    int setUsbTethering(boolean enable, String callerPkg);
 
     void reportInetCondition(int networkType, int percentage);
 
@@ -122,6 +123,7 @@ interface IConnectivityManager
     VpnInfo[] getAllVpnInfo();
 
     boolean updateLockdownVpn();
+    boolean isAlwaysOnVpnPackageSupported(int userId, String packageName);
     boolean setAlwaysOnVpnPackage(int userId, String packageName, boolean lockdown);
     String getAlwaysOnVpnPackage(int userId);
 
@@ -156,12 +158,13 @@ interface IConnectivityManager
     void pendingListenForNetwork(in NetworkCapabilities networkCapabilities,
             in PendingIntent operation);
 
-    void requestLinkProperties(in NetworkRequest networkRequest);
-    void requestNetworkCapabilities(in NetworkRequest networkRequest);
     void releaseNetworkRequest(in NetworkRequest networkRequest);
 
     void setAcceptUnvalidated(in Network network, boolean accept, boolean always);
     void setAvoidUnvalidated(in Network network);
+    void startCaptivePortalApp(in Network network);
+
+    int getMultipathPreference(in Network Network);
 
     int getRestoreDefaultNetworkDelay(int networkType);
 

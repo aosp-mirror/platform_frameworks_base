@@ -36,7 +36,7 @@ public class MediaSyncEvent {
      * The corresponding action is triggered only when the presentation is completed
      * (meaning the media has been presented to the user) on the specified session.
      * A synchronization of this type requires a source audio session ID to be set via
-     * {@link #setAudioSessionId(int) method.
+     * {@link #setAudioSessionId(int)} method.
      */
     public static final int SYNC_EVENT_PRESENTATION_COMPLETE =
                                                     AudioSystem.SYNC_EVENT_PRESENTATION_COMPLETE;

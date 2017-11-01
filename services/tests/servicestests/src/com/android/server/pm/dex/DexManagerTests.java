@@ -16,9 +16,10 @@
 
 package com.android.server.pm.dex;
 
-import android.os.Build;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
+import android.os.Build;
+import android.os.UserHandle;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
@@ -57,9 +58,9 @@ public class DexManagerTests {
 
     private int mUser0;
     private int mUser1;
+
     @Before
     public void setup() {
-
         mUser0 = 0;
         mUser1 = 1;
 
@@ -73,8 +74,7 @@ public class DexManagerTests {
         mInvalidIsa = new TestData("INVALID", "INVALID_ISA", mUser0);
         mDoesNotExist = new TestData("DOES.NOT.EXIST", isa, mUser1);
 
-
-        mDexManager = new DexManager();
+        mDexManager = new DexManager(null, null, null, null);
 
         // Foo and Bar are available to user0.
         // Only Bar is available to user1;
@@ -204,6 +204,175 @@ public class DexManagerTests {
         assertNull(getPackageUseInfo(mBarUser1));
     }
 
+    @Test
+    public void testNotifyPackageInstallUsedByOther() {
+        TestData newPackage = new TestData("newPackage",
+                VMRuntime.getInstructionSet(Build.SUPPORTED_ABIS[0]), mUser0);
+
+        List<String> newSecondaries = newPackage.getSecondaryDexPaths();
+        // Before we notify about the installation of the newPackage if mFoo
+        // is trying to load something from it we should not find it.
+        notifyDexLoad(mFooUser0, newSecondaries, mUser0);
+        assertNull(getPackageUseInfo(newPackage));
+
+        // Notify about newPackage install and let mFoo load its dexes.
+        mDexManager.notifyPackageInstalled(newPackage.mPackageInfo, mUser0);
+        notifyDexLoad(mFooUser0, newSecondaries, mUser0);
+
+        // We should get back the right info.
+        PackageUseInfo pui = getPackageUseInfo(newPackage);
+        assertNotNull(pui);
+        assertFalse(pui.isUsedByOtherApps());
+        assertEquals(newSecondaries.size(), pui.getDexUseInfoMap().size());
+        assertSecondaryUse(newPackage, pui, newSecondaries, /*isUsedByOtherApps*/true, mUser0);
+    }
+
+    @Test
+    public void testNotifyPackageInstallSelfUse() {
+        TestData newPackage = new TestData("newPackage",
+                VMRuntime.getInstructionSet(Build.SUPPORTED_ABIS[0]), mUser0);
+
+        List<String> newSecondaries = newPackage.getSecondaryDexPaths();
+        // Packages should be able to find their own dex files even if the notification about
+        // their installation is delayed.
+        notifyDexLoad(newPackage, newSecondaries, mUser0);
+
+        PackageUseInfo pui = getPackageUseInfo(newPackage);
+        assertNotNull(pui);
+        assertFalse(pui.isUsedByOtherApps());
+        assertEquals(newSecondaries.size(), pui.getDexUseInfoMap().size());
+        assertSecondaryUse(newPackage, pui, newSecondaries, /*isUsedByOtherApps*/false, mUser0);
+    }
+
+    @Test
+    public void testNotifyPackageUpdated() {
+        // Foo loads Bar main apks.
+        notifyDexLoad(mFooUser0, mBarUser0.getBaseAndSplitDexPaths(), mUser0);
+
+        // Bar is used by others now and should be in our records.
+        PackageUseInfo pui = getPackageUseInfo(mBarUser0);
+        assertNotNull(pui);
+        assertTrue(pui.isUsedByOtherApps());
+        assertTrue(pui.getDexUseInfoMap().isEmpty());
+
+        // Notify that bar is updated.
+        mDexManager.notifyPackageUpdated(mBarUser0.getPackageName(),
+                mBarUser0.mPackageInfo.applicationInfo.sourceDir,
+                mBarUser0.mPackageInfo.applicationInfo.splitSourceDirs);
+
+        // The usedByOtherApps flag should be clear now.
+        pui = getPackageUseInfo(mBarUser0);
+        assertNotNull(pui);
+        assertFalse(pui.isUsedByOtherApps());
+    }
+
+    @Test
+    public void testNotifyPackageUpdatedCodeLocations() {
+        // Simulate a split update.
+        String newSplit = mBarUser0.replaceLastSplit();
+        List<String> newSplits = new ArrayList<>();
+        newSplits.add(newSplit);
+
+        // We shouldn't find yet the new split as we didn't notify the package update.
+        notifyDexLoad(mFooUser0, newSplits, mUser0);
+        PackageUseInfo pui = getPackageUseInfo(mBarUser0);
+        assertNull(pui);
+
+        // Notify that bar is updated. splitSourceDirs will contain the updated path.
+        mDexManager.notifyPackageUpdated(mBarUser0.getPackageName(),
+                mBarUser0.mPackageInfo.applicationInfo.sourceDir,
+                mBarUser0.mPackageInfo.applicationInfo.splitSourceDirs);
+
+        // Now, when the split is loaded we will find it and we should mark Bar as usedByOthers.
+        notifyDexLoad(mFooUser0, newSplits, mUser0);
+        pui = getPackageUseInfo(mBarUser0);
+        assertNotNull(pui);
+        assertTrue(pui.isUsedByOtherApps());
+    }
+
+    @Test
+    public void testNotifyPackageDataDestroyForOne() {
+        // Bar loads its own secondary files.
+        notifyDexLoad(mBarUser0, mBarUser0.getSecondaryDexPaths(), mUser0);
+        notifyDexLoad(mBarUser1, mBarUser1.getSecondaryDexPaths(), mUser1);
+
+        mDexManager.notifyPackageDataDestroyed(mBarUser0.getPackageName(), mUser0);
+
+        // Bar should not be around since it was removed for all users.
+        PackageUseInfo pui = getPackageUseInfo(mBarUser1);
+        assertNotNull(pui);
+        assertSecondaryUse(mBarUser1, pui, mBarUser1.getSecondaryDexPaths(),
+                /*isUsedByOtherApps*/false, mUser1);
+    }
+
+    @Test
+    public void testNotifyPackageDataDestroyForeignUse() {
+        // Foo loads its own secondary files.
+        List<String> fooSecondaries = mFooUser0.getSecondaryDexPaths();
+        notifyDexLoad(mFooUser0, fooSecondaries, mUser0);
+
+        // Bar loads Foo main apks.
+        notifyDexLoad(mBarUser0, mFooUser0.getBaseAndSplitDexPaths(), mUser0);
+
+        mDexManager.notifyPackageDataDestroyed(mFooUser0.getPackageName(), mUser0);
+
+        // Foo should still be around since it's used by other apps but with no
+        // secondary dex info.
+        PackageUseInfo pui = getPackageUseInfo(mFooUser0);
+        assertNotNull(pui);
+        assertTrue(pui.isUsedByOtherApps());
+        assertTrue(pui.getDexUseInfoMap().isEmpty());
+    }
+
+    @Test
+    public void testNotifyPackageDataDestroyComplete() {
+        // Foo loads its own secondary files.
+        List<String> fooSecondaries = mFooUser0.getSecondaryDexPaths();
+        notifyDexLoad(mFooUser0, fooSecondaries, mUser0);
+
+        mDexManager.notifyPackageDataDestroyed(mFooUser0.getPackageName(), mUser0);
+
+        // Foo should not be around since all its secondary dex info were deleted
+        // and it is not used by other apps.
+        PackageUseInfo pui = getPackageUseInfo(mFooUser0);
+        assertNull(pui);
+    }
+
+    @Test
+    public void testNotifyPackageDataDestroyForAll() {
+        // Foo loads its own secondary files.
+        notifyDexLoad(mBarUser0, mBarUser0.getSecondaryDexPaths(), mUser0);
+        notifyDexLoad(mBarUser1, mBarUser1.getSecondaryDexPaths(), mUser1);
+
+        mDexManager.notifyPackageDataDestroyed(mBarUser0.getPackageName(), UserHandle.USER_ALL);
+
+        // Bar should not be around since it was removed for all users.
+        PackageUseInfo pui = getPackageUseInfo(mBarUser0);
+        assertNull(pui);
+    }
+
+    @Test
+    public void testNotifyFrameworkLoad() {
+        String frameworkDex = "/system/framework/com.android.location.provider.jar";
+        // Load a dex file from framework.
+        notifyDexLoad(mFooUser0, Arrays.asList(frameworkDex), mUser0);
+        // The dex file should not be recognized as a package.
+        assertNull(mDexManager.getPackageUseInfo(frameworkDex));
+    }
+
+    @Test
+    public void testNotifySecondaryFromProtected() {
+        // Foo loads its own secondary files.
+        List<String> fooSecondaries = mFooUser0.getSecondaryDexPathsFromProtectedDirs();
+        notifyDexLoad(mFooUser0, fooSecondaries, mUser0);
+
+        PackageUseInfo pui = getPackageUseInfo(mFooUser0);
+        assertNotNull(pui);
+        assertFalse(pui.isUsedByOtherApps());
+        assertEquals(fooSecondaries.size(), pui.getDexUseInfoMap().size());
+        assertSecondaryUse(mFooUser0, pui, fooSecondaries, /*isUsedByOtherApps*/false, mUser0);
+    }
+
     private void assertSecondaryUse(TestData testData, PackageUseInfo pui,
             List<String> secondaries, boolean isUsedByOtherApps, int ownerUserId) {
         for (String dex : secondaries) {
@@ -238,6 +407,8 @@ public class DexManagerTests {
         ai.setBaseCodePath(codeDir + "/base.dex");
         ai.setSplitCodePaths(new String[] {codeDir + "/split-1.dex", codeDir + "/split-2.dex"});
         ai.dataDir = "/data/user/" + userId + "/" + packageName;
+        ai.deviceProtectedDataDir = "/data/user_de/" + userId + "/" + packageName;
+        ai.credentialProtectedDataDir = "/data/user_ce/" + userId + "/" + packageName;
         ai.packageName = packageName;
         return ai;
     }
@@ -270,6 +441,13 @@ public class DexManagerTests {
             return paths;
         }
 
+        List<String> getSecondaryDexPathsFromProtectedDirs() {
+            List<String> paths = new ArrayList<>();
+            paths.add(mPackageInfo.applicationInfo.dataDir + "/secondary6.dex");
+            paths.add(mPackageInfo.applicationInfo.dataDir + "/secondary7.dex");
+            return paths;
+        }
+
         List<String> getBaseAndSplitDexPaths() {
             List<String> paths = new ArrayList<>();
             paths.add(mPackageInfo.applicationInfo.sourceDir);
@@ -277,6 +455,13 @@ public class DexManagerTests {
                 paths.add(split);
             }
             return paths;
+        }
+
+        String replaceLastSplit() {
+            int length = mPackageInfo.applicationInfo.splitSourceDirs.length;
+            // Add an extra bogus dex extension to simulate a new split name.
+            mPackageInfo.applicationInfo.splitSourceDirs[length - 1] += ".dex";
+            return mPackageInfo.applicationInfo.splitSourceDirs[length - 1];
         }
     }
 }

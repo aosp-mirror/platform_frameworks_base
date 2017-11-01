@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<post-process xmlns="http://schemas.android.com/tools/aapt2">
+  <groups>
+    <abi-group label="arm">
+      <abi>armeabi-v7a</abi>
+      <abi>arm64-v8a</abi>
+    </abi-group>
+
+    <abi-group label="other">
+      <abi>x86</abi>
+      <abi>mips</abi>
+    </abi-group>
+
+    <screen-density-group label="large">
+      <screen-density>xhdpi</screen-density>
+      <screen-density>xxhdpi</screen-density>
+      <screen-density>xxxhdpi</screen-density>
+    </screen-density-group>
+
+    <screen-density-group label="alldpi">
+      <screen-density>ldpi</screen-density>
+      <screen-density>mdpi</screen-density>
+      <screen-density>hdpi</screen-density>
+      <screen-density>xhdpi</screen-density>
+      <screen-density>xxhdpi</screen-density>
+      <screen-density>xxxhdpi</screen-density>
+    </screen-density-group>
+
+    <locale-group label="europe">
+      <locale lang="en"/>
+      <locale lang="es"/>
+      <locale lang="fr"/>
+      <locale lang="de" compressed="true"/>
+    </locale-group>
+
+    <locale-group label="north-america">
+      <locale lang="en"/>
+      <locale lang="es" region="MX"/>
+      <locale lang="fr" region="CA" compressed="true"/>
+    </locale-group>
+
+    <locale-group label="all">
+      <locale compressed="true"/>
+    </locale-group>
+
+    <android-sdk-group label="19">
+      <android-sdk
+          minSdkVersion="19"
+          targetSdkVersion="24"
+          maxSdkVersion="25">
+        <manifest>
+          <!--- manifest additions here XSLT? TODO -->
+        </manifest>
+      </android-sdk>
+    </android-sdk-group>
+
+    <gl-texture-group label="dxt1">
+      <gl-texture name="GL_EXT_texture_compression_dxt1">
+        <texture-path>assets/dxt1/*</texture-path>
+      </gl-texture>
+    </gl-texture-group>
+
+    <device-feature-group label="low-latency">
+      <supports-feature>android.hardware.audio.low_latency</supports-feature>
+    </device-feature-group>
+  </groups>
+
+  <artifacts>
+    <artifact-format>
+      ${base}.${abi}.${screen-density}.${locale}.${sdk}.${gl}.${feature}.release
+    </artifact-format>
+
+    <artifact
+        abi-group="arm"
+        screen-density-group="large"
+        locale-group="europe"
+        android-sdk-group="19"
+        gl-texture-group="dxt1"
+        device-feature-group="low-latency"/>
+
+    <artifact
+        abi-group="other"
+        screen-density-group="alldpi"
+        locale-group="north-america"
+        android-sdk-group="19"
+        gl-texture-group="dxt1"
+        device-feature-group="low-latency"/>
+
+  </artifacts>
+</post-process>

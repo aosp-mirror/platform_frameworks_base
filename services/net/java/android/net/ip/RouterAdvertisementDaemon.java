@@ -16,12 +16,15 @@
 
 package android.net.ip;
 
+import static android.net.util.NetworkConstants.IPV6_MIN_MTU;
+import static android.net.util.NetworkConstants.RFC7421_PREFIX_LENGTH;
 import static android.system.OsConstants.*;
 
 import android.net.IpPrefix;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.NetworkUtils;
+import android.net.TrafficStats;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.StructGroupReq;
@@ -68,7 +71,6 @@ public class RouterAdvertisementDaemon {
     private static final String TAG = RouterAdvertisementDaemon.class.getSimpleName();
     private static final byte ICMPV6_ND_ROUTER_SOLICIT = asByte(133);
     private static final byte ICMPV6_ND_ROUTER_ADVERT  = asByte(134);
-    private static final int IPV6_MIN_MTU = 1280;
     private static final int MIN_RA_HEADER_SIZE = 16;
 
     // Summary of various timers and lifetimes.
@@ -542,6 +544,14 @@ public class RouterAdvertisementDaemon {
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
          */
 
+        final HashSet<Inet6Address> filteredDnses = new HashSet<>();
+        for (Inet6Address dns : dnses) {
+            if ((new LinkAddress(dns, RFC7421_PREFIX_LENGTH)).isGlobalPreferred()) {
+                filteredDnses.add(dns);
+            }
+        }
+        if (filteredDnses.isEmpty()) return;
+
         final byte ND_OPTION_RDNSS = 25;
         final byte RDNSS_NUM_8OCTETS = asByte(dnses.size() * 2 + 1);
         ra.put(ND_OPTION_RDNSS)
@@ -549,7 +559,7 @@ public class RouterAdvertisementDaemon {
           .putShort(asShort(0))
           .putInt(lifetime);
 
-        for (Inet6Address dns : dnses) {
+        for (Inet6Address dns : filteredDnses) {
             // NOTE: If the full of list DNS servers doesn't fit in the packet,
             // this code will cause a buffer overflow and the RA won't include
             // this instance of the option at all.
@@ -563,6 +573,7 @@ public class RouterAdvertisementDaemon {
     private boolean createSocket() {
         final int SEND_TIMEOUT_MS = 300;
 
+        final int oldTag = TrafficStats.getAndSetThreadStatsTag(TrafficStats.TAG_SYSTEM_NEIGHBOR);
         try {
             mSocket = Os.socket(AF_INET6, SOCK_RAW, IPPROTO_ICMPV6);
             // Setting SNDTIMEO is purely for defensive purposes.
@@ -574,6 +585,8 @@ public class RouterAdvertisementDaemon {
         } catch (ErrnoException | IOException e) {
             Log.e(TAG, "Failed to create RA daemon socket: " + e);
             return false;
+        } finally {
+            TrafficStats.setThreadStatsTag(oldTag);
         }
 
         return true;

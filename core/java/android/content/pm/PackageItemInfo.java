@@ -24,14 +24,10 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.UserHandle;
-import android.text.BidiFormatter;
 import android.text.Html;
 import android.text.TextPaint;
 import android.text.TextUtils;
 import android.util.Printer;
-import android.text.BidiFormatter;
-import android.text.TextPaint;
-import android.text.Html;
 import java.text.Collator;
 import java.util.Comparator;
 
@@ -50,31 +46,31 @@ public class PackageItemInfo {
      * Public name of this item. From the "android:name" attribute.
      */
     public String name;
-    
+
     /**
      * Name of the package that this item is in.
      */
     public String packageName;
-    
+
     /**
      * A string resource identifier (in the package's resources) of this
      * component's label.  From the "label" attribute or, if not set, 0.
      */
     public int labelRes;
-    
+
     /**
      * The string provided in the AndroidManifest file, if any.  You
      * probably don't want to use this.  You probably want
      * {@link PackageManager#getApplicationLabel}
      */
     public CharSequence nonLocalizedLabel;
-    
+
     /**
      * A drawable resource identifier (in the package's resources) of this
      * component's icon.  From the "icon" attribute or, if not set, 0.
      */
     public int icon;
-    
+
     /**
      * A drawable resource identifier (in the package's resources) of this
      * component's banner.  From the "banner" attribute or, if not set, 0.
@@ -85,10 +81,10 @@ public class PackageItemInfo {
      * A drawable resource identifier (in the package's resources) of this
      * component's logo. Logos may be larger/wider than icons and are
      * displayed by certain UI elements in place of a name or name/icon
-     * combination. From the "logo" attribute or, if not set, 0. 
+     * combination. From the "logo" attribute or, if not set, 0.
      */
     public int logo;
-    
+
     /**
      * Additional meta-data associated with this component.  This field
      * will only be filled in if you set the
@@ -124,10 +120,10 @@ public class PackageItemInfo {
      * Retrieve the current textual label associated with this item.  This
      * will call back on the given PackageManager to load the label from
      * the application.
-     * 
+     *
      * @param pm A PackageManager from which the label can be loaded; usually
      * the PackageManager from which you originally retrieved this item.
-     * 
+     *
      * @return Returns a CharSequence containing the item's label.  If the
      * item does not have a label, its name is returned.
      */
@@ -146,7 +142,7 @@ public class PackageItemInfo {
         }
         return packageName;
     }
- 
+
     /**
      * Same as {@link #loadLabel(PackageManager)} with the addition that
      * the returned label is safe for being presented in the UI since it
@@ -207,10 +203,10 @@ public class PackageItemInfo {
      * Retrieve the current graphical icon associated with this item.  This
      * will call back on the given PackageManager to load the icon from
      * the application.
-     * 
+     *
      * @param pm A PackageManager from which the icon can be loaded; usually
      * the PackageManager from which you originally retrieved this item.
-     * 
+     *
      * @return Returns a Drawable containing the item's icon.  If the
      * item does not have an icon, the item's default icon is returned
      * such as the default activity icon.
@@ -259,13 +255,13 @@ public class PackageItemInfo {
 
     /**
      * Retrieve the default graphical icon associated with this item.
-     * 
+     *
      * @param pm A PackageManager from which the icon can be loaded; usually
      * the PackageManager from which you originally retrieved this item.
-     * 
+     *
      * @return Returns a Drawable containing the item's default icon
      * such as the default activity icon.
-     * 
+     *
      * @hide
      */
     public Drawable loadDefaultIcon(PackageManager pm) {
@@ -291,10 +287,10 @@ public class PackageItemInfo {
      * Retrieve the current graphical logo associated with this item. This
      * will call back on the given PackageManager to load the logo from
      * the application.
-     * 
+     *
      * @param pm A PackageManager from which the logo can be loaded; usually
      * the PackageManager from which you originally retrieved this item.
-     * 
+     *
      * @return Returns a Drawable containing the item's logo. If the item
      * does not have a logo, this method will return null.
      */
@@ -307,31 +303,31 @@ public class PackageItemInfo {
         }
         return loadDefaultLogo(pm);
     }
-    
+
     /**
      * Retrieve the default graphical logo associated with this item.
-     * 
+     *
      * @param pm A PackageManager from which the logo can be loaded; usually
      * the PackageManager from which you originally retrieved this item.
-     * 
+     *
      * @return Returns a Drawable containing the item's default logo
      * or null if no default logo is available.
-     * 
+     *
      * @hide
      */
     protected Drawable loadDefaultLogo(PackageManager pm) {
         return null;
     }
-    
+
     /**
      * Load an XML resource attached to the meta-data of this item.  This will
      * retrieved the name meta-data entry, and if defined call back on the
      * given PackageManager to load its XML file from the application.
-     * 
+     *
      * @param pm A PackageManager from which the XML can be loaded; usually
      * the PackageManager from which you originally retrieved this item.
      * @param name Name of the meta-date you would like to load.
-     * 
+     *
      * @return Returns an XmlPullParser you can use to parse the XML file
      * assigned as the given meta-data.  If the meta-data name is not defined
      * or the XML resource could not be found, null is returned.
@@ -373,11 +369,11 @@ public class PackageItemInfo {
                     + " banner=0x" + Integer.toHexString(banner));
         }
     }
-    
+
     protected void dumpBack(Printer pw, String prefix) {
         // no back here
     }
-    
+
     public void writeToParcel(Parcel dest, int parcelableFlags) {
         dest.writeString(name);
         dest.writeString(packageName);
@@ -389,7 +385,7 @@ public class PackageItemInfo {
         dest.writeInt(banner);
         dest.writeInt(showUserIcon);
     }
-    
+
     protected PackageItemInfo(Parcel source) {
         name = source.readString();
         packageName = source.readString();
@@ -406,9 +402,9 @@ public class PackageItemInfo {
     /**
      * Get the ApplicationInfo for the application to which this item belongs,
      * if available, otherwise returns null.
-     * 
+     *
      * @return Returns the ApplicationInfo of this item, or null if not known.
-     * 
+     *
      * @hide
      */
     protected ApplicationInfo getApplicationInfo() {

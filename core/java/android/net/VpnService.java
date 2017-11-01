@@ -19,6 +19,7 @@ package android.net;
 import static android.system.OsConstants.AF_INET;
 import static android.system.OsConstants.AF_INET6;
 
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.app.Activity;
 import android.app.PendingIntent;
@@ -27,8 +28,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
-import android.net.Network;
-import android.net.NetworkUtils;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.Parcel;
@@ -98,7 +97,7 @@ import java.util.List;
  *       shut down the tunnel gracefully.</li>
  * </ol>
  *
- * <p>Services extended this class need to be declared with appropriate
+ * <p>Services extending this class need to be declared with an appropriate
  * permission and intent filter. Their access must be secured by
  * {@link android.Manifest.permission#BIND_VPN_SERVICE} permission, and
  * their intent filter must match {@link #SERVICE_INTERFACE} action. Here
@@ -111,6 +110,13 @@ import java.util.List;
  *     &lt;/intent-filter&gt;
  * &lt;/service&gt;</pre>
  *
+ * <p> The Android system starts a VPN in the background by calling
+ * {@link android.content.Context#startService startService()}. In Android 8.0
+ * (API level 26) and higher, the system places VPN apps on the temporary
+ * whitelist for a short period so the app can start in the background. The VPN
+ * app must promote itself to the foreground after it's launched or the system
+ * will shut down the app.
+ *
  * @see Builder
  */
 public class VpnService extends Service {
@@ -121,6 +127,36 @@ public class VpnService extends Service {
      * permission so that other applications cannot abuse it.
      */
     public static final String SERVICE_INTERFACE = VpnConfig.SERVICE_INTERFACE;
+
+    /**
+     * Key for boolean meta-data field indicating whether this VpnService supports always-on mode.
+     *
+     * <p>For a VPN app targeting {@link android.os.Build.VERSION_CODES#N API 24} or above, Android
+     * provides users with the ability to set it as always-on, so that VPN connection is
+     * persisted after device reboot and app upgrade. Always-on VPN can also be enabled by device
+     * owner and profile owner apps through
+     * {@link android.app.admin.DevicePolicyManager#setAlwaysOnVpnPackage}.
+     *
+     * <p>VPN apps not supporting this feature should opt out by adding this meta-data field to the
+     * {@code VpnService} component of {@code AndroidManifest.xml}. In case there is more than one
+     * {@code VpnService} component defined in {@code AndroidManifest.xml}, opting out any one of
+     * them will opt out the entire app. For example,
+     * <pre> {@code
+     * <service android:name=".ExampleVpnService"
+     *         android:permission="android.permission.BIND_VPN_SERVICE">
+     *     <intent-filter>
+     *         <action android:name="android.net.VpnService"/>
+     *     </intent-filter>
+     *     <meta-data android:name="android.net.VpnService.SUPPORTS_ALWAYS_ON"
+     *             android:value=false/>
+     * </service>
+     * } </pre>
+     *
+     * <p>This meta-data field defaults to {@code true} if absent. It will only have effect on
+     * {@link android.os.Build.VERSION_CODES#O_MR1} or higher.
+     */
+    public static final String SERVICE_META_DATA_SUPPORTS_ALWAYS_ON =
+            "android.net.VpnService.SUPPORTS_ALWAYS_ON";
 
     /**
      * Use IConnectivityManager since those methods are hidden and not
@@ -177,6 +213,7 @@ public class VpnService extends Service {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.CONTROL_VPN)
     public static void prepareAndAuthorize(Context context) {
         IConnectivityManager cm = getService();
         String packageName = context.getPackageName();

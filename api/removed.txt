@@ -1,7 +1,66 @@
 package android.app {
 
+  public class Activity extends android.view.ContextThemeWrapper implements android.content.ComponentCallbacks2 android.view.KeyEvent.Callback android.view.LayoutInflater.Factory2 android.view.View.OnCreateContextMenuListener android.view.Window.Callback {
+    method public deprecated boolean enterPictureInPictureMode(android.app.PictureInPictureArgs);
+    method public deprecated void setPictureInPictureArgs(android.app.PictureInPictureArgs);
+  }
+
+  public class ActivityManager {
+    method public static deprecated int getMaxNumPictureInPictureActions();
+  }
+
+  public class KeyguardManager {
+    method public deprecated void dismissKeyguard(android.app.Activity, android.app.KeyguardManager.KeyguardDismissCallback, android.os.Handler);
+  }
+
   public class Notification implements android.os.Parcelable {
+    method public deprecated java.lang.String getChannel();
+    method public deprecated long getTimeout();
     method public deprecated void setLatestEventInfo(android.content.Context, java.lang.CharSequence, java.lang.CharSequence, android.app.PendingIntent);
+  }
+
+  public static class Notification.Builder {
+    method public deprecated android.app.Notification.Builder setChannel(java.lang.String);
+    method public deprecated android.app.Notification.Builder setTimeout(long);
+  }
+
+  public static final class Notification.TvExtender implements android.app.Notification.Extender {
+    method public deprecated java.lang.String getChannel();
+  }
+
+  public final deprecated class PictureInPictureArgs implements android.os.Parcelable {
+    ctor public deprecated PictureInPictureArgs();
+    ctor public deprecated PictureInPictureArgs(float, java.util.List<android.app.RemoteAction>);
+    method public static android.app.PictureInPictureArgs convert(android.app.PictureInPictureParams);
+    method public static android.app.PictureInPictureParams convert(android.app.PictureInPictureArgs);
+    method public void copyOnlySet(android.app.PictureInPictureArgs);
+    method public java.util.List<android.app.RemoteAction> getActions();
+    method public float getAspectRatio();
+    method public android.util.Rational getAspectRatioRational();
+    method public android.graphics.Rect getSourceRectHint();
+    method public android.graphics.Rect getSourceRectHintInsets();
+    method public boolean hasSetActions();
+    method public boolean hasSetAspectRatio();
+    method public boolean hasSourceBoundsHint();
+    method public boolean hasSourceBoundsHintInsets();
+    method public deprecated void setActions(java.util.List<android.app.RemoteAction>);
+    method public deprecated void setAspectRatio(float);
+    method public deprecated void setSourceRectHint(android.graphics.Rect);
+    method public deprecated void setSourceRectHintInsets(android.graphics.Rect);
+    method public void truncateActions(int);
+    field public static final android.os.Parcelable.Creator<android.app.PictureInPictureArgs> CREATOR;
+  }
+
+  public static class PictureInPictureArgs.Builder {
+    ctor public PictureInPictureArgs.Builder();
+    method public android.app.PictureInPictureArgs build();
+    method public android.app.PictureInPictureArgs.Builder setActions(java.util.List<android.app.RemoteAction>);
+    method public android.app.PictureInPictureArgs.Builder setAspectRatio(android.util.Rational);
+    method public android.app.PictureInPictureArgs.Builder setSourceRectHint(android.graphics.Rect);
+  }
+
+  public final class RecoverableSecurityException extends java.lang.SecurityException implements android.os.Parcelable {
+    method public deprecated void showAsNotification(android.content.Context);
   }
 
 }
@@ -17,17 +76,37 @@ package android.app.admin {
 
 }
 
+package android.app.usage {
+
+  public final class StorageStats implements android.os.Parcelable {
+    method public deprecated long getCodeBytes();
+  }
+
+  public class StorageStatsManager {
+    method public deprecated long getFreeBytes(java.lang.String) throws java.io.IOException;
+    method public deprecated long getTotalBytes(java.lang.String) throws java.io.IOException;
+    method public deprecated boolean isQuotaSupported(java.lang.String);
+    method public deprecated android.app.usage.ExternalStorageStats queryExternalStatsForUser(java.lang.String, android.os.UserHandle) throws java.io.IOException;
+    method public deprecated android.app.usage.StorageStats queryStatsForPackage(java.lang.String, java.lang.String, android.os.UserHandle) throws java.io.IOException, android.content.pm.PackageManager.NameNotFoundException;
+    method public deprecated android.app.usage.StorageStats queryStatsForUid(java.lang.String, int) throws java.io.IOException;
+    method public deprecated android.app.usage.StorageStats queryStatsForUser(java.lang.String, android.os.UserHandle) throws java.io.IOException;
+  }
+
+}
+
 package android.content {
 
+  public class ClipData implements android.os.Parcelable {
+    method public deprecated void addItem(android.content.ClipData.Item, android.content.ContentResolver);
+  }
+
   public abstract class Context {
-    method public deprecated android.content.Context createCredentialEncryptedStorageContext();
-    method public deprecated android.content.Context createDeviceEncryptedStorageContext();
     method public abstract android.content.SharedPreferences getSharedPreferences(java.io.File, int);
     method public abstract java.io.File getSharedPreferencesPath(java.lang.String);
-    method public deprecated boolean isCredentialEncryptedStorage();
-    method public deprecated boolean isDeviceEncryptedStorage();
-    method public deprecated boolean migrateDatabaseFrom(android.content.Context, java.lang.String);
-    method public deprecated boolean migrateSharedPreferencesFrom(android.content.Context, java.lang.String);
+  }
+
+  public class Intent implements java.lang.Cloneable android.os.Parcelable {
+    field public static final deprecated java.lang.String EXTRA_QUICK_VIEW_ADVANCED = "android.intent.extra.QUICK_VIEW_ADVANCED";
   }
 
 }
@@ -35,8 +114,7 @@ package android.content {
 package android.content.pm {
 
   public class ApplicationInfo extends android.content.pm.PackageItemInfo implements android.os.Parcelable {
-    field public deprecated java.lang.String credentialEncryptedDataDir;
-    field public deprecated java.lang.String deviceEncryptedDataDir;
+    field public deprecated java.lang.String volumeUuid;
   }
 
   public class ComponentInfo extends android.content.pm.PackageItemInfo {
@@ -48,9 +126,17 @@ package android.content.pm {
   }
 
   public abstract class PackageManager {
-    field public static final deprecated int MATCH_ENCRYPTION_AWARE = 524288; // 0x80000
-    field public static final deprecated int MATCH_ENCRYPTION_AWARE_AND_UNAWARE = 786432; // 0xc0000
-    field public static final deprecated int MATCH_ENCRYPTION_UNAWARE = 262144; // 0x40000
+    method public abstract boolean setInstantAppCookie(byte[]);
+  }
+
+  public class ResolveInfo implements android.os.Parcelable {
+    field public deprecated boolean instantAppAvailable;
+  }
+
+  public final class SharedLibraryInfo implements android.os.Parcelable {
+    method public boolean isBuiltin();
+    method public boolean isDynamic();
+    method public boolean isStatic();
   }
 
 }
@@ -78,69 +164,55 @@ package android.graphics {
     enum_constant public static final android.graphics.AvoidXfermode.Mode TARGET;
   }
 
+  public class Canvas {
+    method public deprecated boolean clipRegion(android.graphics.Region, android.graphics.Region.Op);
+    method public deprecated boolean clipRegion(android.graphics.Region);
+  }
+
+  public deprecated class LayerRasterizer extends android.graphics.Rasterizer {
+    ctor public LayerRasterizer();
+    method public void addLayer(android.graphics.Paint, float, float);
+    method public void addLayer(android.graphics.Paint);
+  }
+
+  public class Paint {
+    method public deprecated android.graphics.Rasterizer getRasterizer();
+    method public deprecated android.graphics.Rasterizer setRasterizer(android.graphics.Rasterizer);
+  }
+
   public deprecated class PixelXorXfermode extends android.graphics.Xfermode {
     ctor public PixelXorXfermode(int);
+  }
+
+  public class Rasterizer {
+    ctor public Rasterizer();
+  }
+
+}
+
+package android.hardware {
+
+  public final class HardwareBuffer implements java.lang.AutoCloseable android.os.Parcelable {
+    method public deprecated void destroy();
+    method public deprecated boolean isDestroyed();
+  }
+
+  public final class SensorDirectChannel implements java.nio.channels.Channel {
+    method public deprecated boolean isValid();
+  }
+
+  public abstract class SensorManager {
+    method public deprecated int configureDirectChannel(android.hardware.SensorDirectChannel, android.hardware.Sensor, int);
   }
 
 }
 
 package android.location {
 
-  public final class GnssMeasurement implements android.os.Parcelable {
-    field public static final int MULTIPATH_INDICATOR_NOT_USED = 2; // 0x2
-  }
-
-  public final class GnssMeasurementsEvent implements android.os.Parcelable {
-    field public static final int STATUS_GNSS_LOCATION_DISABLED = 2; // 0x2
-    field public static final int STATUS_NOT_SUPPORTED = 0; // 0x0
-    field public static final int STATUS_READY = 1; // 0x1
-  }
-
-  public final class GnssNavigationMessageEvent implements android.os.Parcelable {
-    ctor public GnssNavigationMessageEvent(android.location.GnssNavigationMessage);
-    method public int describeContents();
-    method public android.location.GnssNavigationMessage getNavigationMessage();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.location.GnssNavigationMessageEvent> CREATOR;
-    field public static final int STATUS_GNSS_LOCATION_DISABLED = 2; // 0x2
-    field public static final int STATUS_NOT_SUPPORTED = 0; // 0x0
-    field public static final int STATUS_READY = 1; // 0x1
-  }
-
-  public static abstract class GnssNavigationMessageEvent.Callback {
-    ctor public GnssNavigationMessageEvent.Callback();
-    method public void onGnssNavigationMessageReceived(android.location.GnssNavigationMessageEvent);
-    method public void onStatusChanged(int);
-  }
-
-  public abstract interface GnssNmeaListener {
-    method public abstract void onNmeaReceived(long, java.lang.String);
-  }
-
-  public final class GnssStatus {
-    method public int getNumSatellites();
-    method public boolean hasAlmanac(int);
-    method public boolean hasEphemeris(int);
-  }
-
-  public abstract class GnssStatusCallback {
-    ctor public GnssStatusCallback();
-    method public void onFirstFix(int);
-    method public void onSatelliteStatusChanged(android.location.GnssStatus);
-    method public void onStarted();
-    method public void onStopped();
-  }
-
-  public class LocationManager {
-    method public boolean addNmeaListener(android.location.GnssNmeaListener);
-    method public boolean addNmeaListener(android.location.GnssNmeaListener, android.os.Handler);
-    method public boolean registerGnssNavigationMessageCallback(android.location.GnssNavigationMessageEvent.Callback);
-    method public boolean registerGnssNavigationMessageCallback(android.location.GnssNavigationMessageEvent.Callback, android.os.Handler);
-    method public boolean registerGnssStatusCallback(android.location.GnssStatusCallback);
-    method public boolean registerGnssStatusCallback(android.location.GnssStatusCallback, android.os.Handler);
-    method public void removeNmeaListener(android.location.GnssNmeaListener);
-    method public void unregisterGnssNavigationMessageCallback(android.location.GnssNavigationMessageEvent.Callback);
-    method public void unregisterGnssStatusCallback(android.location.GnssStatusCallback);
+  public class Location implements android.os.Parcelable {
+    method public deprecated void removeBearingAccuracy();
+    method public deprecated void removeSpeedAccuracy();
+    method public deprecated void removeVerticalAccuracy();
   }
 
 }
@@ -165,32 +237,28 @@ package android.media.tv {
 
 }
 
-package android.mtp {
+package android.net {
 
-  public final class MtpConstants {
-    field public static final int EVENT_CANCEL_TRANSACTION = 16385; // 0x4001
-    field public static final int EVENT_CAPTURE_COMPLETE = 16397; // 0x400d
-    field public static final int EVENT_DEVICE_INFO_CHANGED = 16392; // 0x4008
-    field public static final int EVENT_DEVICE_PROP_CHANGED = 16390; // 0x4006
-    field public static final int EVENT_DEVICE_RESET = 16395; // 0x400b
-    field public static final int EVENT_OBJECT_ADDED = 16386; // 0x4002
-    field public static final int EVENT_OBJECT_INFO_CHANGED = 16391; // 0x4007
-    field public static final int EVENT_OBJECT_PROP_CHANGED = 51201; // 0xc801
-    field public static final int EVENT_OBJECT_PROP_DESC_CHANGED = 51202; // 0xc802
-    field public static final int EVENT_OBJECT_REFERENCES_CHANGED = 51203; // 0xc803
-    field public static final int EVENT_OBJECT_REMOVED = 16387; // 0x4003
-    field public static final int EVENT_REQUEST_OBJECT_TRANSFER = 16393; // 0x4009
-    field public static final int EVENT_STORAGE_INFO_CHANGED = 16396; // 0x400c
-    field public static final int EVENT_STORE_ADDED = 16388; // 0x4004
-    field public static final int EVENT_STORE_FULL = 16394; // 0x400a
-    field public static final int EVENT_STORE_REMOVED = 16389; // 0x4005
-    field public static final int EVENT_UNDEFINED = 16384; // 0x4000
-    field public static final int EVENT_UNREPORTED_STATUS = 16398; // 0x400e
+  public class ConnectivityManager {
+    method public deprecated boolean requestRouteToHost(int, int);
+    method public deprecated int startUsingNetworkFeature(int, java.lang.String);
+    method public deprecated int stopUsingNetworkFeature(int, java.lang.String);
   }
 
-}
+  public deprecated class NetworkBadging {
+    method public static android.graphics.drawable.Drawable getWifiIcon(int, int, android.content.res.Resources.Theme);
+    field public static final int BADGING_4K = 30; // 0x1e
+    field public static final int BADGING_HD = 20; // 0x14
+    field public static final int BADGING_NONE = 0; // 0x0
+    field public static final int BADGING_SD = 10; // 0xa
+  }
 
-package android.net {
+  public abstract class PskKeyManager {
+    ctor public PskKeyManager();
+    field public static final int MAX_IDENTITY_HINT_LENGTH_BYTES = 128; // 0x80
+    field public static final int MAX_IDENTITY_LENGTH_BYTES = 128; // 0x80
+    field public static final int MAX_KEY_LENGTH_BYTES = 256; // 0x100
+  }
 
   public class SSLCertificateSocketFactory extends javax.net.ssl.SSLSocketFactory {
     method public static deprecated org.apache.http.conn.ssl.SSLSocketFactory getHttpSocketFactory(int, android.net.SSLSessionCache);
@@ -204,6 +272,10 @@ package android.os {
     ctor public BatteryManager();
   }
 
+  public class Build {
+    field public static final boolean PERMISSIONS_REVIEW_REQUIRED;
+  }
+
   public final class PowerManager {
     method public void goToSleep(long);
     method public deprecated void userActivity(long, boolean);
@@ -214,14 +286,14 @@ package android.os {
     ctor public RecoverySystem();
   }
 
+  public class TestLooperManager {
+    method public deprecated android.os.MessageQueue getQueue();
+  }
+
   public class UserManager {
     method public android.graphics.drawable.Drawable getBadgedDrawableForUser(android.graphics.drawable.Drawable, android.os.UserHandle, android.graphics.Rect, int);
     method public android.graphics.drawable.Drawable getBadgedIconForUser(android.graphics.drawable.Drawable, android.os.UserHandle);
     method public java.lang.CharSequence getBadgedLabelForUser(java.lang.CharSequence, android.os.UserHandle);
-    method public deprecated boolean isUserRunningAndLocked();
-    method public deprecated boolean isUserRunningAndLocked(android.os.UserHandle);
-    method public deprecated boolean isUserRunningAndUnlocked();
-    method public deprecated boolean isUserRunningAndUnlocked(android.os.UserHandle);
   }
 
 }
@@ -229,17 +301,18 @@ package android.os {
 package android.os.storage {
 
   public class StorageManager {
+    method public deprecated void allocateBytes(java.io.File, long, int) throws java.io.IOException;
+    method public deprecated long getAllocatableBytes(java.io.File, int) throws java.io.IOException;
+    method public deprecated long getCacheQuotaBytes(java.io.File) throws java.io.IOException;
+    method public deprecated long getCacheQuotaBytes() throws java.io.IOException;
+    method public deprecated long getCacheSizeBytes(java.io.File) throws java.io.IOException;
+    method public deprecated long getCacheSizeBytes() throws java.io.IOException;
+    method public deprecated long getExternalCacheQuotaBytes() throws java.io.IOException;
+    method public deprecated long getExternalCacheSizeBytes() throws java.io.IOException;
     method public android.os.storage.StorageVolume getPrimaryVolume();
     method public android.os.storage.StorageVolume[] getVolumeList();
-  }
-
-}
-
-package android.preference {
-
-  public class PreferenceManager {
-    method public deprecated void setStorageCredentialEncrypted();
-    method public deprecated void setStorageDeviceEncrypted();
+    method public deprecated boolean isCacheBehaviorAtomic(java.io.File) throws java.io.IOException;
+    method public deprecated void setCacheBehaviorAtomic(java.io.File, boolean) throws java.io.IOException;
   }
 
 }
@@ -378,6 +451,14 @@ package android.provider {
 
 }
 
+package android.speech.tts {
+
+  public abstract class UtteranceProgressListener {
+    method public deprecated void onUtteranceRangeStart(java.lang.String, int, int);
+  }
+
+}
+
 package android.test.mock {
 
   public deprecated class MockPackageManager extends android.content.pm.PackageManager {
@@ -407,6 +488,15 @@ package android.text.format {
 
 }
 
+package android.text.style {
+
+  public class RasterizerSpan extends android.text.style.CharacterStyle implements android.text.style.UpdateAppearance {
+    ctor public RasterizerSpan(android.graphics.Rasterizer);
+    method public android.graphics.Rasterizer getRasterizer();
+  }
+
+}
+
 package android.util {
 
   public deprecated class FloatMath {
@@ -429,8 +519,20 @@ package android.view {
     method protected void initializeScrollbars(android.content.res.TypedArray);
   }
 
+  public class ViewConfiguration {
+    method public int getScaledScrollFactor();
+  }
+
   public static class WindowManager.LayoutParams extends android.view.ViewGroup.LayoutParams implements android.os.Parcelable {
     field public static final int TYPE_KEYGUARD = 2004; // 0x7d4
+  }
+
+}
+
+package android.view.accessibility {
+
+  public final class AccessibilityWindowInfo implements android.os.Parcelable {
+    method public boolean inPictureInPicture();
   }
 
 }
@@ -448,15 +550,6 @@ package android.widget {
   public class TextView extends android.view.View implements android.view.ViewTreeObserver.OnPreDrawListener {
     method public static int getTextColor(android.content.Context, android.content.res.TypedArray, int);
     method public static android.content.res.ColorStateList getTextColors(android.content.Context, android.content.res.TypedArray);
-  }
-
-}
-
-package com.android.internal {
-
-  public static final class R.styleable {
-    field public static final int AndroidManifestLayout_minimalHeight = 6; // 0x6
-    field public static final int AndroidManifestLayout_minimalWidth = 5; // 0x5
   }
 
 }

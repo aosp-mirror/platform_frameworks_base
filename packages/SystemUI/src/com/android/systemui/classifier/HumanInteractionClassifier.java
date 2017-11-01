@@ -20,6 +20,7 @@ import android.content.Context;
 import android.database.ContentObserver;
 import android.hardware.SensorEvent;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
@@ -41,7 +42,7 @@ public class HumanInteractionClassifier extends Classifier {
 
     private static HumanInteractionClassifier sInstance = null;
 
-    private final Handler mHandler = new Handler();
+    private final Handler mHandler = new Handler(Looper.getMainLooper());
     private final Context mContext;
 
     private final StrokeClassifier[] mStrokeClassifiers;

@@ -16,194 +16,449 @@
 
 package com.android.server.connectivity;
 
-import android.net.ConnectivityManager.NetworkCallback;
-import android.net.ConnectivityManager;
-import android.net.Network;
-import android.net.metrics.DnsEvent;
-import android.net.metrics.INetdEventListener;
-import android.net.metrics.IpConnectivityLog;
-import android.os.RemoteException;
-import android.test.suitebuilder.annotation.SmallTest;
-
-import junit.framework.TestCase;
-import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.assertArrayEquals;
+import static android.net.metrics.INetdEventListener.EVENT_GETADDRINFO;
+import static android.net.metrics.INetdEventListener.EVENT_GETHOSTBYNAME;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkCapabilities;
+import android.support.test.runner.AndroidJUnit4;
+import android.system.OsConstants;
+import android.test.suitebuilder.annotation.SmallTest;
+import android.util.Base64;
+
+import com.android.server.connectivity.metrics.nano.IpConnectivityLogClass.DNSLookupBatch;
+import com.android.server.connectivity.metrics.nano.IpConnectivityLogClass.IpConnectivityEvent;
+import com.android.server.connectivity.metrics.nano.IpConnectivityLogClass.IpConnectivityLog;
 
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
-import java.util.OptionalInt;
-import java.util.stream.IntStream;
 
-public class NetdEventListenerServiceTest extends TestCase {
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
-    // TODO: read from NetdEventListenerService after this constant is read from system property
-    static final int BATCH_SIZE = 100;
-    static final int EVENT_TYPE = INetdEventListener.EVENT_GETADDRINFO;
-    // TODO: read from INetdEventListener
-    static final int RETURN_CODE = 1;
-
-    static final byte[] EVENT_TYPES  = new byte[BATCH_SIZE];
-    static final byte[] RETURN_CODES = new byte[BATCH_SIZE];
-    static final int[] LATENCIES     = new int[BATCH_SIZE];
-    static {
-        for (int i = 0; i < BATCH_SIZE; i++) {
-            EVENT_TYPES[i] = EVENT_TYPE;
-            RETURN_CODES[i] = RETURN_CODE;
-            LATENCIES[i] = i;
-        }
-    }
+@RunWith(AndroidJUnit4.class)
+@SmallTest
+public class NetdEventListenerServiceTest {
+    private static final String EXAMPLE_IPV4 = "192.0.2.1";
+    private static final String EXAMPLE_IPV6 = "2001:db8:1200::2:1";
 
     NetdEventListenerService mNetdEventListenerService;
+    ConnectivityManager mCm;
 
-    @Mock ConnectivityManager mCm;
-    @Mock IpConnectivityLog mLog;
-    ArgumentCaptor<NetworkCallback> mCallbackCaptor;
-    ArgumentCaptor<DnsEvent> mEvCaptor;
-
+    @Before
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
-        mCallbackCaptor = ArgumentCaptor.forClass(NetworkCallback.class);
-        mEvCaptor = ArgumentCaptor.forClass(DnsEvent.class);
-        mNetdEventListenerService = new NetdEventListenerService(mCm, mLog);
+        NetworkCapabilities ncWifi = new NetworkCapabilities();
+        NetworkCapabilities ncCell = new NetworkCapabilities();
+        ncWifi.addTransportType(NetworkCapabilities.TRANSPORT_WIFI);
+        ncCell.addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR);
 
-        verify(mCm, times(1)).registerNetworkCallback(any(), mCallbackCaptor.capture());
+        mCm = mock(ConnectivityManager.class);
+        when(mCm.getNetworkCapabilities(new Network(100))).thenReturn(ncWifi);
+        when(mCm.getNetworkCapabilities(new Network(101))).thenReturn(ncCell);
+
+        mNetdEventListenerService = new NetdEventListenerService(mCm);
     }
 
-    @SmallTest
-    public void testOneBatch() throws Exception {
-        log(105, LATENCIES);
-        log(106, Arrays.copyOf(LATENCIES, BATCH_SIZE - 1)); // one lookup short of a batch event
+    @Test
+    public void testWakeupEventLogging() throws Exception {
+        final int BUFFER_LENGTH = NetdEventListenerService.WAKEUP_EVENT_BUFFER_LENGTH;
 
-        verifyLoggedEvents(new DnsEvent(105, EVENT_TYPES, RETURN_CODES, LATENCIES));
+        // Assert no events
+        String[] events1 = listNetdEvent();
+        assertEquals(new String[]{""}, events1);
 
-        log(106, Arrays.copyOfRange(LATENCIES, BATCH_SIZE - 1, BATCH_SIZE));
+        long now = System.currentTimeMillis();
+        String prefix = "iface:wlan0";
+        int[] uids = { 10001, 10002, 10004, 1000, 10052, 10023, 10002, 10123, 10004 };
+        for (int uid : uids) {
+            mNetdEventListenerService.onWakeupEvent(prefix, uid, uid, now);
+        }
 
-        mEvCaptor = ArgumentCaptor.forClass(DnsEvent.class); // reset argument captor
-        verifyLoggedEvents(
-            new DnsEvent(105, EVENT_TYPES, RETURN_CODES, LATENCIES),
-            new DnsEvent(106, EVENT_TYPES, RETURN_CODES, LATENCIES));
+        String[] events2 = listNetdEvent();
+        int expectedLength2 = uids.length + 1; // +1 for the WakeupStats line
+        assertEquals(expectedLength2, events2.length);
+        assertContains(events2[0], "WakeupStats");
+        assertContains(events2[0], "wlan0");
+        for (int i = 0; i < uids.length; i++) {
+            String got = events2[i+1];
+            assertContains(got, "WakeupEvent");
+            assertContains(got, "wlan0");
+            assertContains(got, "uid: " + uids[i]);
+        }
+
+        int uid = 20000;
+        for (int i = 0; i < BUFFER_LENGTH * 2; i++) {
+            long ts = now + 10;
+            mNetdEventListenerService.onWakeupEvent(prefix, uid, uid, ts);
+        }
+
+        String[] events3 = listNetdEvent();
+        int expectedLength3 = BUFFER_LENGTH + 1; // +1 for the WakeupStats line
+        assertEquals(expectedLength3, events3.length);
+        assertContains(events2[0], "WakeupStats");
+        assertContains(events2[0], "wlan0");
+        for (int i = 1; i < expectedLength3; i++) {
+            String got = events3[i];
+            assertContains(got, "WakeupEvent");
+            assertContains(got, "wlan0");
+            assertContains(got, "uid: " + uid);
+        }
+
+        uid = 45678;
+        mNetdEventListenerService.onWakeupEvent(prefix, uid, uid, now);
+
+        String[] events4 = listNetdEvent();
+        String lastEvent = events4[events4.length - 1];
+        assertContains(lastEvent, "WakeupEvent");
+        assertContains(lastEvent, "wlan0");
+        assertContains(lastEvent, "uid: " + uid);
     }
 
-    @SmallTest
-    public void testSeveralBatches() throws Exception {
-        log(105, LATENCIES);
-        log(106, LATENCIES);
-        log(105, LATENCIES);
-        log(107, LATENCIES);
+    @Test
+    public void testWakeupStatsLogging() throws Exception {
+        wakeupEvent("wlan0", 1000);
+        wakeupEvent("rmnet0", 10123);
+        wakeupEvent("wlan0", 1000);
+        wakeupEvent("rmnet0", 10008);
+        wakeupEvent("wlan0", -1);
+        wakeupEvent("wlan0", 10008);
+        wakeupEvent("rmnet0", 1000);
+        wakeupEvent("wlan0", 10004);
+        wakeupEvent("wlan0", 1000);
+        wakeupEvent("wlan0", 0);
+        wakeupEvent("wlan0", -1);
+        wakeupEvent("rmnet0", 10052);
+        wakeupEvent("wlan0", 0);
+        wakeupEvent("rmnet0", 1000);
+        wakeupEvent("wlan0", 1010);
 
-        verifyLoggedEvents(
-            new DnsEvent(105, EVENT_TYPES, RETURN_CODES, LATENCIES),
-            new DnsEvent(106, EVENT_TYPES, RETURN_CODES, LATENCIES),
-            new DnsEvent(105, EVENT_TYPES, RETURN_CODES, LATENCIES),
-            new DnsEvent(107, EVENT_TYPES, RETURN_CODES, LATENCIES));
+        String got = flushStatistics();
+        String want = String.join("\n",
+                "dropped_events: 0",
+                "events <",
+                "  if_name: \"\"",
+                "  link_layer: 2",
+                "  network_id: 0",
+                "  time_ms: 0",
+                "  transports: 0",
+                "  wakeup_stats <",
+                "    application_wakeups: 3",
+                "    duration_sec: 0",
+                "    no_uid_wakeups: 0",
+                "    non_application_wakeups: 0",
+                "    root_wakeups: 0",
+                "    system_wakeups: 2",
+                "    total_wakeups: 5",
+                "  >",
+                ">",
+                "events <",
+                "  if_name: \"\"",
+                "  link_layer: 4",
+                "  network_id: 0",
+                "  time_ms: 0",
+                "  transports: 0",
+                "  wakeup_stats <",
+                "    application_wakeups: 2",
+                "    duration_sec: 0",
+                "    no_uid_wakeups: 2",
+                "    non_application_wakeups: 1",
+                "    root_wakeups: 2",
+                "    system_wakeups: 3",
+                "    total_wakeups: 10",
+                "  >",
+                ">",
+                "version: 2\n");
+        assertEquals(want, got);
     }
 
-    @SmallTest
-    public void testBatchAndNetworkLost() throws Exception {
-        byte[] eventTypes = Arrays.copyOf(EVENT_TYPES, 20);
-        byte[] returnCodes = Arrays.copyOf(RETURN_CODES, 20);
-        int[] latencies = Arrays.copyOf(LATENCIES, 20);
+    @Test
+    public void testDnsLogging() throws Exception {
+        asyncDump(100);
 
-        log(105, LATENCIES);
-        log(105, latencies);
-        mCallbackCaptor.getValue().onLost(new Network(105));
-        log(105, LATENCIES);
+        dnsEvent(100, EVENT_GETADDRINFO, 0, 3456);
+        dnsEvent(100, EVENT_GETADDRINFO, 0, 267);
+        dnsEvent(100, EVENT_GETHOSTBYNAME, 22, 1230);
+        dnsEvent(100, EVENT_GETADDRINFO, 3, 45);
+        dnsEvent(100, EVENT_GETADDRINFO, 1, 2111);
+        dnsEvent(100, EVENT_GETADDRINFO, 0, 450);
+        dnsEvent(100, EVENT_GETHOSTBYNAME, 200, 638);
+        dnsEvent(100, EVENT_GETHOSTBYNAME, 178, 1300);
+        dnsEvent(101, EVENT_GETADDRINFO, 0, 56);
+        dnsEvent(101, EVENT_GETADDRINFO, 0, 78);
+        dnsEvent(101, EVENT_GETADDRINFO, 0, 14);
+        dnsEvent(101, EVENT_GETHOSTBYNAME, 0, 56);
+        dnsEvent(101, EVENT_GETADDRINFO, 0, 78);
+        dnsEvent(101, EVENT_GETADDRINFO, 0, 14);
 
-        verifyLoggedEvents(
-            new DnsEvent(105, eventTypes, returnCodes, latencies),
-            new DnsEvent(105, EVENT_TYPES, RETURN_CODES, LATENCIES),
-            new DnsEvent(105, EVENT_TYPES, RETURN_CODES, LATENCIES));
+        String got = flushStatistics();
+        String want = String.join("\n",
+                "dropped_events: 0",
+                "events <",
+                "  if_name: \"\"",
+                "  link_layer: 4",
+                "  network_id: 100",
+                "  time_ms: 0",
+                "  transports: 2",
+                "  dns_lookup_batch <",
+                "    event_types: 1",
+                "    event_types: 1",
+                "    event_types: 2",
+                "    event_types: 1",
+                "    event_types: 1",
+                "    event_types: 1",
+                "    event_types: 2",
+                "    event_types: 2",
+                "    getaddrinfo_error_count: 0",
+                "    getaddrinfo_query_count: 0",
+                "    gethostbyname_error_count: 0",
+                "    gethostbyname_query_count: 0",
+                "    latencies_ms: 3456",
+                "    latencies_ms: 267",
+                "    latencies_ms: 1230",
+                "    latencies_ms: 45",
+                "    latencies_ms: 2111",
+                "    latencies_ms: 450",
+                "    latencies_ms: 638",
+                "    latencies_ms: 1300",
+                "    return_codes: 0",
+                "    return_codes: 0",
+                "    return_codes: 22",
+                "    return_codes: 3",
+                "    return_codes: 1",
+                "    return_codes: 0",
+                "    return_codes: 200",
+                "    return_codes: 178",
+                "  >",
+                ">",
+                "events <",
+                "  if_name: \"\"",
+                "  link_layer: 2",
+                "  network_id: 101",
+                "  time_ms: 0",
+                "  transports: 1",
+                "  dns_lookup_batch <",
+                "    event_types: 1",
+                "    event_types: 1",
+                "    event_types: 1",
+                "    event_types: 2",
+                "    event_types: 1",
+                "    event_types: 1",
+                "    getaddrinfo_error_count: 0",
+                "    getaddrinfo_query_count: 0",
+                "    gethostbyname_error_count: 0",
+                "    gethostbyname_query_count: 0",
+                "    latencies_ms: 56",
+                "    latencies_ms: 78",
+                "    latencies_ms: 14",
+                "    latencies_ms: 56",
+                "    latencies_ms: 78",
+                "    latencies_ms: 14",
+                "    return_codes: 0",
+                "    return_codes: 0",
+                "    return_codes: 0",
+                "    return_codes: 0",
+                "    return_codes: 0",
+                "    return_codes: 0",
+                "  >",
+                ">",
+                "version: 2\n");
+        assertEquals(want, got);
     }
 
-    @SmallTest
-    public void testConcurrentBatchesAndDumps() throws Exception {
-        final long stop = System.currentTimeMillis() + 100;
+    @Test
+    public void testConnectLogging() throws Exception {
+        asyncDump(100);
+
+        final int OK = 0;
+        Thread[] logActions = {
+            // ignored
+            connectEventAction(100, OsConstants.EALREADY, 0, EXAMPLE_IPV4),
+            connectEventAction(100, OsConstants.EALREADY, 0, EXAMPLE_IPV6),
+            connectEventAction(100, OsConstants.EINPROGRESS, 0, EXAMPLE_IPV4),
+            connectEventAction(101, OsConstants.EINPROGRESS, 0, EXAMPLE_IPV6),
+            connectEventAction(101, OsConstants.EINPROGRESS, 0, EXAMPLE_IPV6),
+            // valid latencies
+            connectEventAction(100, OK, 110, EXAMPLE_IPV4),
+            connectEventAction(100, OK, 23, EXAMPLE_IPV4),
+            connectEventAction(100, OK, 45, EXAMPLE_IPV4),
+            connectEventAction(101, OK, 56, EXAMPLE_IPV4),
+            connectEventAction(101, OK, 523, EXAMPLE_IPV6),
+            connectEventAction(101, OK, 214, EXAMPLE_IPV6),
+            connectEventAction(101, OK, 67, EXAMPLE_IPV6),
+            // errors
+            connectEventAction(100, OsConstants.EPERM, 0, EXAMPLE_IPV4),
+            connectEventAction(101, OsConstants.EPERM, 0, EXAMPLE_IPV4),
+            connectEventAction(100, OsConstants.EAGAIN, 0, EXAMPLE_IPV4),
+            connectEventAction(100, OsConstants.EACCES, 0, EXAMPLE_IPV4),
+            connectEventAction(101, OsConstants.EACCES, 0, EXAMPLE_IPV4),
+            connectEventAction(101, OsConstants.EACCES, 0, EXAMPLE_IPV6),
+            connectEventAction(100, OsConstants.EADDRINUSE, 0, EXAMPLE_IPV4),
+            connectEventAction(101, OsConstants.ETIMEDOUT, 0, EXAMPLE_IPV4),
+            connectEventAction(100, OsConstants.ETIMEDOUT, 0, EXAMPLE_IPV6),
+            connectEventAction(100, OsConstants.ETIMEDOUT, 0, EXAMPLE_IPV6),
+            connectEventAction(101, OsConstants.ECONNREFUSED, 0, EXAMPLE_IPV4),
+        };
+
+        for (Thread t : logActions) {
+            t.start();
+        }
+        for (Thread t : logActions) {
+            t.join();
+        }
+
+        String got = flushStatistics();
+        String want = String.join("\n",
+                "dropped_events: 0",
+                "events <",
+                "  if_name: \"\"",
+                "  link_layer: 4",
+                "  network_id: 100",
+                "  time_ms: 0",
+                "  transports: 2",
+                "  connect_statistics <",
+                "    connect_blocking_count: 3",
+                "    connect_count: 6",
+                "    errnos_counters <",
+                "      key: 1",
+                "      value: 1",
+                "    >",
+                "    errnos_counters <",
+                "      key: 11",
+                "      value: 1",
+                "    >",
+                "    errnos_counters <",
+                "      key: 13",
+                "      value: 1",
+                "    >",
+                "    errnos_counters <",
+                "      key: 98",
+                "      value: 1",
+                "    >",
+                "    errnos_counters <",
+                "      key: 110",
+                "      value: 2",
+                "    >",
+                "    ipv6_addr_count: 1",
+                "    latencies_ms: 23",
+                "    latencies_ms: 45",
+                "    latencies_ms: 110",
+                "  >",
+                ">",
+                "events <",
+                "  if_name: \"\"",
+                "  link_layer: 2",
+                "  network_id: 101",
+                "  time_ms: 0",
+                "  transports: 1",
+                "  connect_statistics <",
+                "    connect_blocking_count: 4",
+                "    connect_count: 6",
+                "    errnos_counters <",
+                "      key: 1",
+                "      value: 1",
+                "    >",
+                "    errnos_counters <",
+                "      key: 13",
+                "      value: 2",
+                "    >",
+                "    errnos_counters <",
+                "      key: 110",
+                "      value: 1",
+                "    >",
+                "    errnos_counters <",
+                "      key: 111",
+                "      value: 1",
+                "    >",
+                "    ipv6_addr_count: 5",
+                "    latencies_ms: 56",
+                "    latencies_ms: 67",
+                "    latencies_ms: 214",
+                "    latencies_ms: 523",
+                "  >",
+                ">",
+                "version: 2\n");
+        assertEquals(want, got);
+    }
+
+    Thread connectEventAction(int netId, int error, int latencyMs, String ipAddr) {
+        return new Thread(() -> {
+            try {
+                mNetdEventListenerService.onConnectEvent(netId, error, latencyMs, ipAddr, 80, 1);
+            } catch (Exception e) {
+                fail(e.toString());
+            }
+        });
+    }
+
+    void dnsEvent(int netId, int type, int result, int latency) throws Exception {
+        mNetdEventListenerService.onDnsEvent(netId, type, result, latency, "", null, 0, 0);
+    }
+
+    void wakeupEvent(String iface, int uid) throws Exception {
+        String prefix = NetdEventListenerService.WAKEUP_EVENT_IFACE_PREFIX + iface;
+        mNetdEventListenerService.onWakeupEvent(prefix, uid, uid, 0);
+    }
+
+    void asyncDump(long durationMs) throws Exception {
+        final long stop = System.currentTimeMillis() + durationMs;
         final PrintWriter pw = new PrintWriter(new FileOutputStream("/dev/null"));
-        new Thread() {
-            public void run() {
-                while (System.currentTimeMillis() < stop) {
-                    mNetdEventListenerService.dump(pw);
-                }
+        new Thread(() -> {
+            while (System.currentTimeMillis() < stop) {
+                mNetdEventListenerService.dump(pw);
             }
-        }.start();
-
-        logAsync(105, LATENCIES);
-        logAsync(106, LATENCIES);
-        logAsync(107, LATENCIES);
-
-        verifyLoggedEvents(500,
-            new DnsEvent(105, EVENT_TYPES, RETURN_CODES, LATENCIES),
-            new DnsEvent(106, EVENT_TYPES, RETURN_CODES, LATENCIES),
-            new DnsEvent(107, EVENT_TYPES, RETURN_CODES, LATENCIES));
+        }).start();
     }
 
-    @SmallTest
-    public void testConcurrentBatchesAndNetworkLoss() throws Exception {
-        logAsync(105, LATENCIES);
-        Thread.sleep(10L);
-        // call onLost() asynchronously to logAsync's onDnsEvent() calls.
-        mCallbackCaptor.getValue().onLost(new Network(105));
+    // TODO: instead of comparing textpb to textpb, parse textpb and compare proto to proto.
+    String flushStatistics() throws Exception {
+        IpConnectivityMetrics metricsService =
+                new IpConnectivityMetrics(mock(Context.class), (ctx) -> 2000);
+        metricsService.mNetdListener = mNetdEventListenerService;
 
-        // do not verify unpredictable batch
-        verify(mLog, timeout(500).times(1)).log(any());
-    }
-
-    void log(int netId, int[] latencies) {
-        try {
-            for (int l : latencies) {
-                mNetdEventListenerService.onDnsEvent(netId, EVENT_TYPE, RETURN_CODE, l, null, null,
-                        0, 0);
+        StringWriter buffer = new StringWriter();
+        PrintWriter writer = new PrintWriter(buffer);
+        metricsService.impl.dump(null, writer, new String[]{"flush"});
+        byte[] bytes = Base64.decode(buffer.toString(), Base64.DEFAULT);
+        IpConnectivityLog log = IpConnectivityLog.parseFrom(bytes);
+        for (IpConnectivityEvent ev : log.events) {
+            if (ev.getConnectStatistics() == null) {
+                continue;
             }
-        } catch (RemoteException re) {
-            throw re.rethrowFromSystemServer();
+            // Sort repeated fields of connect() events arriving in non-deterministic order.
+            Arrays.sort(ev.getConnectStatistics().latenciesMs);
+            Arrays.sort(ev.getConnectStatistics().errnosCounters,
+                    Comparator.comparingInt((p) -> p.key));
         }
+        return log.toString();
     }
 
-    void logAsync(int netId, int[] latencies) {
-        new Thread() {
-            public void run() {
-                log(netId, latencies);
-            }
-        }.start();
+    String[] listNetdEvent() throws Exception {
+        StringWriter buffer = new StringWriter();
+        PrintWriter writer = new PrintWriter(buffer);
+        mNetdEventListenerService.list(writer);
+        return buffer.toString().split("\\n");
     }
 
-    void verifyLoggedEvents(DnsEvent... expected) {
-        verifyLoggedEvents(0, expected);
-    }
-
-    void verifyLoggedEvents(int wait, DnsEvent... expectedEvents) {
-        verify(mLog, timeout(wait).times(expectedEvents.length)).log(mEvCaptor.capture());
-        for (DnsEvent got : mEvCaptor.getAllValues()) {
-            OptionalInt index = IntStream.range(0, expectedEvents.length)
-                    .filter(i -> eventsEqual(expectedEvents[i], got))
-                    .findFirst();
-            // Don't match same expected event more than once.
-            index.ifPresent(i -> expectedEvents[i] = null);
-            assertTrue(index.isPresent());
-        }
-    }
-
-    /** equality function for DnsEvent to avoid overriding equals() and hashCode(). */
-    static boolean eventsEqual(DnsEvent expected, DnsEvent got) {
-        return (expected == got) || ((expected != null) && (got != null)
-                && (expected.netId == got.netId)
-                && Arrays.equals(expected.eventTypes, got.eventTypes)
-                && Arrays.equals(expected.returnCodes, got.returnCodes)
-                && Arrays.equals(expected.latenciesMs, got.latenciesMs));
+    static void assertContains(String got, String want) {
+        assertTrue(got + " did not contain \"" + want + "\"", got.contains(want));
     }
 }

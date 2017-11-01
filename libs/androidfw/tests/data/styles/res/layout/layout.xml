@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<View xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:attr_four="?attr/attr_indirect"
+    app:attr_three="10"
+    app:attr_one="@empty" />

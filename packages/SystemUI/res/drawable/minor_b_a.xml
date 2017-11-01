@@ -17,7 +17,6 @@
 <vector
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:name="minor_b_a"
-    android:alpha="0.3"
     android:width="16dp"
     android:viewportWidth="16"
     android:height="8dp"

@@ -25,9 +25,9 @@
         android:layout_width="@dimen/navigation_extra_key_width"
         android:layout_height="match_parent"
         android:layout_marginEnd="2dp"
-        android:src="@drawable/ic_sysbar_menu"
         android:scaleType="centerInside"
         systemui:keyCode="82"
+        systemui:playSound="false"
         android:visibility="invisible"
         android:contentDescription="@string/accessibility_menu"
         />
@@ -36,9 +36,17 @@
         android:layout_width="@dimen/navigation_extra_key_width"
         android:layout_height="match_parent"
         android:layout_marginEnd="2dp"
-        android:src="@drawable/ic_ime_switcher_default"
         android:visibility="invisible"
         android:contentDescription="@string/accessibility_ime_switch_button"
         android:scaleType="centerInside"
         />
+    <com.android.systemui.statusbar.policy.KeyButtonView
+        android:id="@+id/accessibility_button"
+        android:layout_width="@dimen/navigation_extra_key_width"
+        android:layout_height="match_parent"
+        android:layout_marginEnd="2dp"
+        android:visibility="invisible"
+        android:contentDescription="@string/accessibility_accessibility_button"
+        android:scaleType="centerInside"
+    />
 </FrameLayout>

@@ -16,7 +16,7 @@
 
 package com.android.internal.os;
 
-import android.app.ActivityManagerNative;
+import android.app.ActivityManager;
 import android.app.ActivityThread;
 import android.app.ApplicationErrorReport;
 import android.os.Build;
@@ -31,6 +31,7 @@ import android.util.Slog;
 import com.android.internal.logging.AndroidConfig;
 import com.android.server.NetworkManagementSocketTagger;
 import dalvik.system.VMRuntime;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.TimeZone;
@@ -43,8 +44,8 @@ import org.apache.harmony.luni.internal.util.TimezoneGetter;
  * @hide
  */
 public class RuntimeInit {
-    private final static String TAG = "AndroidRuntime";
-    private final static boolean DEBUG = false;
+    final static String TAG = "AndroidRuntime";
+    final static boolean DEBUG = false;
 
     /** true if commonInit() has been called */
     private static boolean initialized;
@@ -53,7 +54,6 @@ public class RuntimeInit {
 
     private static volatile boolean mCrashing = false;
 
-    private static final native void nativeZygoteInit();
     private static final native void nativeFinishInit();
     private static final native void nativeSetExitWithoutCleanup(boolean exitWithoutCleanup);
 
@@ -113,8 +113,8 @@ public class RuntimeInit {
                 }
 
                 // Bring up crash dialog, wait for it to be dismissed
-                ActivityManagerNative.getDefault().handleApplicationCrash(
-                        mApplicationObject, new ApplicationErrorReport.CrashInfo(e));
+                ActivityManager.getService().handleApplicationCrash(
+                        mApplicationObject, new ApplicationErrorReport.ParcelableCrashInfo(e));
             } catch (Throwable t2) {
                 if (t2 instanceof DeadObjectException) {
                     // System process is dead; ignore
@@ -133,7 +133,7 @@ public class RuntimeInit {
         }
     }
 
-    private static final void commonInit() {
+    protected static final void commonInit() {
         if (DEBUG) Slog.d(TAG, "Entered RuntimeInit!");
 
         /*
@@ -229,8 +229,8 @@ public class RuntimeInit {
      * @param argv Argument vector for main()
      * @param classLoader the classLoader to load {@className} with
      */
-    private static void invokeStaticMain(String className, String[] argv, ClassLoader classLoader)
-            throws Zygote.MethodAndArgsCaller {
+    private static Runnable findStaticMain(String className, String[] argv,
+            ClassLoader classLoader) {
         Class<?> cl;
 
         try {
@@ -264,7 +264,7 @@ public class RuntimeInit {
          * clears up all the stack frames that were required in setting
          * up the process.
          */
-        throw new Zygote.MethodAndArgsCaller(m, argv);
+        return new MethodAndArgsCaller(m, argv);
     }
 
     public static final void main(String[] argv) {
@@ -287,51 +287,8 @@ public class RuntimeInit {
         if (DEBUG) Slog.d(TAG, "Leaving RuntimeInit!");
     }
 
-    /**
-     * The main function called when started through the zygote process. This
-     * could be unified with main(), if the native code in nativeFinishInit()
-     * were rationalized with Zygote startup.<p>
-     *
-     * Current recognized args:
-     * <ul>
-     *   <li> <code> [--] &lt;start class name&gt;  &lt;args&gt;
-     * </ul>
-     *
-     * @param targetSdkVersion target SDK version
-     * @param argv arg strings
-     */
-    public static final void zygoteInit(int targetSdkVersion, String[] argv, ClassLoader classLoader)
-            throws Zygote.MethodAndArgsCaller {
-        if (DEBUG) Slog.d(TAG, "RuntimeInit: Starting application from zygote");
-
-        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "RuntimeInit");
-        redirectLogStreams();
-
-        commonInit();
-        nativeZygoteInit();
-        applicationInit(targetSdkVersion, argv, classLoader);
-    }
-
-    /**
-     * The main function called when an application is started through a
-     * wrapper process.
-     *
-     * When the wrapper starts, the runtime starts {@link RuntimeInit#main}
-     * which calls {@link WrapperInit#main} which then calls this method.
-     * So we don't need to call commonInit() here.
-     *
-     * @param targetSdkVersion target SDK version
-     * @param argv arg strings
-     */
-    public static void wrapperInit(int targetSdkVersion, String[] argv)
-            throws Zygote.MethodAndArgsCaller {
-        if (DEBUG) Slog.d(TAG, "RuntimeInit: Starting application from wrapper");
-
-        applicationInit(targetSdkVersion, argv, null);
-    }
-
-    private static void applicationInit(int targetSdkVersion, String[] argv, ClassLoader classLoader)
-            throws Zygote.MethodAndArgsCaller {
+    protected static Runnable applicationInit(int targetSdkVersion, String[] argv,
+            ClassLoader classLoader) {
         // If the application calls System.exit(), terminate the process
         // immediately without running any shutdown hooks.  It is not possible to
         // shutdown an Android application gracefully.  Among other things, the
@@ -344,20 +301,13 @@ public class RuntimeInit {
         VMRuntime.getRuntime().setTargetHeapUtilization(0.75f);
         VMRuntime.getRuntime().setTargetSdkVersion(targetSdkVersion);
 
-        final Arguments args;
-        try {
-            args = new Arguments(argv);
-        } catch (IllegalArgumentException ex) {
-            Slog.e(TAG, ex.getMessage());
-            // let the process exit
-            return;
-        }
+        final Arguments args = new Arguments(argv);
 
         // The end of of the RuntimeInit event (see #zygoteInit).
         Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
 
         // Remaining arguments are passed to the start class's static main
-        invokeStaticMain(args.startClass, args.startArgs, classLoader);
+        return findStaticMain(args.startClass, args.startArgs, classLoader);
     }
 
     /**
@@ -379,8 +329,9 @@ public class RuntimeInit {
      */
     public static void wtf(String tag, Throwable t, boolean system) {
         try {
-            if (ActivityManagerNative.getDefault().handleApplicationWtf(
-                    mApplicationObject, tag, system, new ApplicationErrorReport.CrashInfo(t))) {
+            if (ActivityManager.getService().handleApplicationWtf(
+                    mApplicationObject, tag, system,
+                    new ApplicationErrorReport.ParcelableCrashInfo(t))) {
                 // The Activity Manager has already written us off -- now exit.
                 Process.killProcess(Process.myPid());
                 System.exit(10);
@@ -463,6 +414,39 @@ public class RuntimeInit {
             startClass = args[curArg++];
             startArgs = new String[args.length - curArg];
             System.arraycopy(args, curArg, startArgs, 0, startArgs.length);
+        }
+    }
+
+    /**
+     * Helper class which holds a method and arguments and can call them. This is used as part of
+     * a trampoline to get rid of the initial process setup stack frames.
+     */
+    static class MethodAndArgsCaller implements Runnable {
+        /** method to call */
+        private final Method mMethod;
+
+        /** argument array */
+        private final String[] mArgs;
+
+        public MethodAndArgsCaller(Method method, String[] args) {
+            mMethod = method;
+            mArgs = args;
+        }
+
+        public void run() {
+            try {
+                mMethod.invoke(null, new Object[] { mArgs });
+            } catch (IllegalAccessException ex) {
+                throw new RuntimeException(ex);
+            } catch (InvocationTargetException ex) {
+                Throwable cause = ex.getCause();
+                if (cause instanceof RuntimeException) {
+                    throw (RuntimeException) cause;
+                } else if (cause instanceof Error) {
+                    throw (Error) cause;
+                }
+                throw new RuntimeException(ex);
+            }
         }
     }
 }

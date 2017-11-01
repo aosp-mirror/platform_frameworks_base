@@ -24,7 +24,7 @@
 #include "android_os_HwBlob.h"
 #include "android_os_HwRemoteBinder.h"
 
-#include <JNIHelp.h>
+#include <nativehelper/JNIHelp.h>
 #include <android_runtime/AndroidRuntime.h>
 #include <hidl/HidlTransportSupport.h>
 #include <hidl/Status.h>
@@ -166,11 +166,6 @@ JHwParcel::JHwParcel(JNIEnv *env, jobject thiz)
       mOwnsParcel(false),
       mTransactCallback(nullptr),
       mWasSent(false) {
-    jclass clazz = env->GetObjectClass(thiz);
-    CHECK(clazz != NULL);
-
-    mClass = (jclass)env->NewGlobalRef(clazz);
-    mObject = env->NewWeakGlobalRef(thiz);
 }
 
 JHwParcel::~JHwParcel() {
@@ -179,12 +174,6 @@ JHwParcel::~JHwParcel() {
     mStorage.release(env);
 
     setParcel(NULL, false /* assumeOwnership */);
-
-    env->DeleteWeakGlobalRef(mObject);
-    mObject = NULL;
-
-    env->DeleteGlobalRef(mClass);
-    mClass = NULL;
 }
 
 hardware::Parcel *JHwParcel::getParcel() {
@@ -404,6 +393,11 @@ static void JHwParcel_native_verifySuccess(JNIEnv *env, jobject thiz) {
     signalExceptionForError(env, err);
 }
 
+static void JHwParcel_native_release(
+        JNIEnv *env, jobject thiz) {
+    JHwParcel::GetNativeContext(env, thiz)->setParcel(NULL, false /* assumeOwnership */);
+}
+
 static void JHwParcel_native_releaseTemporaryStorage(
         JNIEnv *env, jobject thiz) {
     JHwParcel::GetNativeContext(env, thiz)->getStorage()->release(env);
@@ -537,7 +531,7 @@ static void JHwParcel_native_writeStrongBinder(
                 env, FindClassOrDie(env, PACKAGE_PATH "/HwRemoteBinder"));
 
         if (env->IsInstanceOf(binderObj, hwBinderKlass.get())) {
-            binder = JHwBinder::GetNativeContext(env, binderObj);
+            binder = JHwBinder::GetNativeBinder(env, binderObj);
         } else if (env->IsInstanceOf(binderObj, hwRemoteBinderKlass.get())) {
             binder = JHwRemoteBinder::GetNativeContext(
                     env, binderObj)->getBinder();
@@ -569,7 +563,7 @@ static jstring JHwParcel_native_readString(JNIEnv *env, jobject thiz) {
     size_t parentHandle;
 
     const hidl_string *s;
-    status_t err = parcel->readBuffer(&parentHandle,
+    status_t err = parcel->readBuffer(sizeof(*s), &parentHandle,
             reinterpret_cast<const void**>(&s));
 
     if (err != OK) {
@@ -578,7 +572,7 @@ static jstring JHwParcel_native_readString(JNIEnv *env, jobject thiz) {
     }
 
     err = ::android::hardware::readEmbeddedFromParcel(
-            const_cast<hidl_string *>(s),
+            const_cast<hidl_string &>(*s),
             *parcel, parentHandle, 0 /* parentOffset */);
 
     if (err != OK) {
@@ -597,7 +591,7 @@ static Type ## Array JHwParcel_native_read ## Suffix ## Vector(                \
     size_t parentHandle;                                                       \
                                                                                \
     const hidl_vec<Type> *vec;                                                 \
-    status_t err = parcel->readBuffer(&parentHandle,                           \
+    status_t err = parcel->readBuffer(sizeof(*vec), &parentHandle,             \
             reinterpret_cast<const void**>(&vec));                             \
                                                                                \
     if (err != OK) {                                                           \
@@ -608,7 +602,7 @@ static Type ## Array JHwParcel_native_read ## Suffix ## Vector(                \
     size_t childHandle;                                                        \
                                                                                \
     err = ::android::hardware::readEmbeddedFromParcel(                         \
-                const_cast<hidl_vec<Type> *>(vec),                             \
+                const_cast<hidl_vec<Type> &>(*vec),                            \
                 *parcel,                                                       \
                 parentHandle,                                                  \
                 0 /* parentOffset */,                                          \
@@ -640,7 +634,7 @@ static jbooleanArray JHwParcel_native_readBoolVector(
     size_t parentHandle;
 
     const hidl_vec<bool> *vec;
-    status_t err = parcel->readBuffer(&parentHandle,
+    status_t err = parcel->readBuffer(sizeof(*vec), &parentHandle,
             reinterpret_cast<const void**>(&vec));
 
     if (err != OK) {
@@ -651,7 +645,7 @@ static jbooleanArray JHwParcel_native_readBoolVector(
     size_t childHandle;
 
     err = ::android::hardware::readEmbeddedFromParcel(
-                const_cast<hidl_vec<bool> *>(vec),
+                const_cast<hidl_vec<bool> &>(*vec),
                 *parcel,
                 parentHandle,
                 0 /* parentOffset */,
@@ -704,7 +698,7 @@ static jobjectArray JHwParcel_native_readStringVector(
     size_t parentHandle;
 
     const string_vec *vec;
-    status_t err = parcel->readBuffer(&parentHandle,
+    status_t err = parcel->readBuffer(sizeof(*vec), &parentHandle,
             reinterpret_cast<const void **>(&vec));
 
     if (err != OK) {
@@ -714,16 +708,15 @@ static jobjectArray JHwParcel_native_readStringVector(
 
     size_t childHandle;
     err = ::android::hardware::readEmbeddedFromParcel(
-            const_cast<string_vec *>(vec),
+            const_cast<string_vec &>(*vec),
             *parcel, parentHandle, 0 /* parentOffset */, &childHandle);
 
     for (size_t i = 0; (err == OK) && (i < vec->size()); ++i) {
         err = android::hardware::readEmbeddedFromParcel(
-                    const_cast<hidl_vec<hidl_string> *>(vec),
+                    const_cast<hidl_string &>((*vec)[i]),
                     *parcel,
                     childHandle,
-                    i * sizeof(hidl_string),
-                    nullptr /* childHandle */);
+                    i * sizeof(hidl_string) /* parentOffset */);
     }
 
     if (err != OK) {
@@ -805,13 +798,20 @@ static jobject JHwParcel_native_readStrongBinder(JNIEnv *env, jobject thiz) {
     return JHwRemoteBinder::NewObject(env, binder);
 }
 
-static jobject JHwParcel_native_readBuffer(JNIEnv *env, jobject thiz) {
+static jobject JHwParcel_native_readBuffer(JNIEnv *env, jobject thiz,
+                                           jlong expectedSize) {
     hardware::Parcel *parcel =
         JHwParcel::GetNativeContext(env, thiz)->getParcel();
 
     size_t handle;
     const void *ptr;
-    status_t status = parcel->readBuffer(&handle, &ptr);
+
+    if (expectedSize < 0) {
+        jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
+        return nullptr;
+    }
+
+    status_t status = parcel->readBuffer(expectedSize, &handle, &ptr);
 
     if (status != OK) {
         jniThrowException(env, "java/util/NoSuchElementException", NULL);
@@ -822,7 +822,8 @@ static jobject JHwParcel_native_readBuffer(JNIEnv *env, jobject thiz) {
 }
 
 static jobject JHwParcel_native_readEmbeddedBuffer(
-        JNIEnv *env, jobject thiz, jlong parentHandle, jlong offset) {
+        JNIEnv *env, jobject thiz, jlong expectedSize,
+        jlong parentHandle, jlong offset, jboolean nullable) {
     hardware::Parcel *parcel =
         JHwParcel::GetNativeContext(env, thiz)->getParcel();
 
@@ -830,10 +831,19 @@ static jobject JHwParcel_native_readEmbeddedBuffer(
 
     const void *ptr;
     status_t status =
-        parcel->readEmbeddedBuffer(&childHandle, parentHandle, offset, &ptr);
+        parcel->readNullableEmbeddedBuffer(expectedSize,
+                &childHandle, parentHandle, offset, &ptr);
+
+    if (expectedSize < 0) {
+        jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
+        return nullptr;
+    }
 
     if (status != OK) {
         jniThrowException(env, "java/util/NoSuchElementException", NULL);
+        return 0;
+    } else if (status == OK && !nullable && ptr == nullptr) {
+        jniThrowException(env, "java/lang/NullPointerException", NULL);
         return 0;
     }
 
@@ -942,14 +952,18 @@ static JNINativeMethod gMethods[] = {
 
     { "send", "()V", (void *)JHwParcel_native_send },
 
-    { "readBuffer", "()L" PACKAGE_PATH "/HwBlob;",
+    { "readBuffer", "(J)L" PACKAGE_PATH "/HwBlob;",
         (void *)JHwParcel_native_readBuffer },
 
-    { "readEmbeddedBuffer", "(JJ)L" PACKAGE_PATH "/HwBlob;",
+    { "readEmbeddedBuffer", "(JJJZ)L" PACKAGE_PATH "/HwBlob;",
         (void *)JHwParcel_native_readEmbeddedBuffer },
 
     { "writeBuffer", "(L" PACKAGE_PATH "/HwBlob;)V",
         (void *)JHwParcel_native_writeBuffer },
+
+    { "release", "()V",
+        (void *)JHwParcel_native_release },
+
 };
 
 namespace android {

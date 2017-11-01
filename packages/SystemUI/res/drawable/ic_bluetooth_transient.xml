@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2017 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<vector
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:name="ic_bluetooth_transient"
+    android:width="48dp"
+    android:viewportWidth="48"
+    android:height="48dp"
+    android:viewportHeight="48" >
+    <group
+        android:name="ic_bluetooth_transient_0"
+        android:translateX="23.99883"
+        android:translateY="23.99839" >
+        <group
+            android:name="ic_bluetooth_transient_pivot"
+            android:translateX="-23.99883"
+            android:translateY="-23.99839" >
+            <group
+                android:name="ic_bluetooth_white_outlines"
+                android:translateX="22.73986"
+                android:translateY="23.99839" >
+                <group
+                    android:name="ic_bluetooth_white_outlines_pivot"
+                    android:translateX="-12.84937"
+                    android:translateY="-20.4772" >
+                    <path
+                        android:name="b_shape_merged"
+                        android:pathData="M 17.1289978027,20.4790039062 c 0.0,0.0 7.5,-7.48100280762 7.5,-7.48100280762 c 0.81999206543,-0.819000244141 0.81999206543,-2.13899230957 0.0,-2.95999145508 c 0.0,0.0 -8.93899536133,-8.93899536133 -8.93899536133,-8.93899536133 c 0.0,0.0 -0.0610046386719,-0.0610046386719 -0.0610046386718,-0.0610046386719 c -0.844009399414,-0.788009643555 -2.16799926758,-0.74299621582 -2.95600891113,0.102005004883 c -0.359985351562,0.384994506836 -0.561996459961,0.891998291016 -0.56298828125,1.41899108887 c 0.0,0.0 0.0,12.8800048828 0.0,12.8800048828 c 0.0,0.0 -8.10000610352,-8.10000610352 -8.10000610352,-8.10000610352 c -0.81999206543,-0.81999206543 -2.12100219727,-0.81999206543 -2.9409942627,0.0 c -0.819000244141,0.819000244141 -0.819000244141,2.12001037598 0.0,2.94000244141 c 0.0,0.0 10.1799926758,10.1999969482 10.1799926758,10.1999969482 c 0.0,0.0 -10.1799926758,10.1790008545 -10.1799926758,10.1790008545 c -0.819000244141,0.820999145508 -0.819000244141,2.12100219727 0.0,2.94100952148 c 0.81999206543,0.81999206543 2.12100219727,0.81999206543 2.9409942627,0.0 c 0.0,0.0 8.10000610352,-8.1009979248 8.10000610352,-8.1009979248 c 0.0,0.0 0.0,12.9009857178 0.0,12.9009857178 c 0.0,1.14801025391 0.929992675781,2.08000183105 2.08000183105,2.08000183105 c 0.526992797852,0.0 1.03399658203,-0.199996948242 1.41999816895,-0.559997558594 c 0.0,0.0 0.0989990234375,-0.100006103516 0.0989990234375,-0.100006103516 c 0.0,0.0 8.91999816895,-8.91999816895 8.91999816895,-8.91999816895 c 0.81999206543,-0.820999145508 0.81999206543,-2.13999938965 0.0,-2.95999145508 c 0.0,0.0 -7.5,-7.46000671387 -7.5,-7.46000671387 Z M 16.0899963379,15.8190002441 c 0.0,0.0 0.0,-8.59999084473 0.0,-8.59999084473 c 0.0,0.0 4.30000305176,4.30000305176 4.30000305176,4.30000305176 c 0.0,0.0 -4.30000305176,4.29998779297 -4.30000305176,4.29998779297 Z M 16.0899963379,33.7190093994 c 0.0,0.0 0.0,-8.6009979248 0.0,-8.6009979248 c 0.0,0.0 4.30000305176,4.30099487305 4.30000305176,4.30099487305 c 0.0,0.0 -4.30000305176,4.30000305176 -4.30000305176,4.30000305176 Z"
+                        android:fillColor="#FFFFFFFF" />
+                </group>
+            </group>
+            <group
+                android:name="dot_left_outlines"
+                android:translateX="20.6501"
+                android:translateY="24.00011" >
+                <group
+                    android:name="dot_left_outlines_pivot"
+                    android:translateX="-14.2"
+                    android:translateY="-3.55" >
+                    <path
+                        android:name="dot_left"
+                        android:pathData="M 5.66999816895,5.66999816895 c -1.18000793457,1.17999267578 -3.08000183105,1.17999267578 -4.24000549316,0.0 c -1.17999267578,-1.16000366211 -1.17999267578,-3.03999328613 -0.0199890136719,-4.2200012207 c 0.0,0.0 0.0199890136719,-0.0200042724609 0.0199890136719,-0.0200042724609 c 1.16000366211,-1.17999267578 3.04000854492,-1.17999267578 4.2200012207,-0.0199890136719 c 0.0,0.0 0.0200042724609,0.0199890136719 0.0200042724609,0.0199890136719 c 1.17999267578,1.17900085449 1.17999267578,3.06001281738 0.0,4.24000549316 Z"
+                        android:fillColor="#FFFFFFFF"
+                        android:fillAlpha="0.5" />
+                </group>
+            </group>
+            <group
+                android:name="dot_right_outlines"
+                android:translateX="27.3501"
+                android:translateY="23.99741" >
+                <group
+                    android:name="dot_right_outlines_pivot"
+                    android:translateX="7.1"
+                    android:translateY="-3.5525" >
+                    <path
+                        android:name="dot_right"
+                        android:pathData="M 5.66999816895,1.43499755859 c 1.17999267578,1.18000793457 1.17999267578,3.08000183105 0.0,4.24000549316 c -1.18000793457,1.17999267578 -3.08000183105,1.17999267578 -4.24000549316,0.0 c -1.17999267578,-1.16000366211 -1.17999267578,-3.04000854492 -0.0200042724609,-4.21899414062 c 0.0,0.0 0.0200042724609,-0.0210113525391 0.0200042724609,-0.0210113525391 c 1.15299987793,-1.17098999023 3.03799438477,-1.18499755859 4.20899963379,-0.0309906005859 c 0.0,0.0 0.031005859375,0.0309906005859 0.031005859375,0.0309906005859 Z"
+                        android:fillColor="#FFFFFFFF" />
+                </group>
+            </group>
+        </group>
+    </group>
+</vector>

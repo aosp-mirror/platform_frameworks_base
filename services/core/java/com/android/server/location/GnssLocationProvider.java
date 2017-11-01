@@ -16,13 +16,6 @@
 
 package com.android.server.location;
 
-import com.android.internal.app.IAppOpsService;
-import com.android.internal.app.IBatteryStats;
-import com.android.internal.location.GpsNetInitiatedHandler;
-import com.android.internal.location.GpsNetInitiatedHandler.GpsNiNotification;
-import com.android.internal.location.ProviderProperties;
-import com.android.internal.location.ProviderRequest;
-
 import android.app.AlarmManager;
 import android.app.AppOpsManager;
 import android.app.PendingIntent;
@@ -55,9 +48,11 @@ import android.net.NetworkInfo;
 import android.net.NetworkRequest;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.PowerSaveState;
 import android.os.BatteryStats;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -71,33 +66,46 @@ import android.os.WorkSource;
 import android.provider.Settings;
 import android.provider.Telephony.Carriers;
 import android.provider.Telephony.Sms.Intents;
-import android.telephony.SmsMessage;
 import android.telephony.SubscriptionManager;
 import android.telephony.SubscriptionManager.OnSubscriptionsChangedListener;
 import android.telephony.TelephonyManager;
+import android.telephony.CarrierConfigManager;
 import android.telephony.gsm.GsmCellLocation;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.NtpTrustedTime;
 
-import java.io.ByteArrayOutputStream;
+import com.android.internal.app.IAppOpsService;
+import com.android.internal.app.IBatteryStats;
+import com.android.internal.location.gnssmetrics.GnssMetrics;
+import com.android.internal.location.GpsNetInitiatedHandler;
+import com.android.internal.location.GpsNetInitiatedHandler.GpsNiNotification;
+import com.android.internal.location.ProviderProperties;
+import com.android.internal.location.ProviderRequest;
+
+import com.android.server.power.BatterySaverPolicy;
+import com.android.server.power.BatterySaverPolicy.ServiceType;
+
+import libcore.io.IoUtils;
+
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.StringReader;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.Properties;
-
-import libcore.io.IoUtils;
+import java.util.Map;
+import java.util.HashMap;
 
 /**
- * A GPS implementation of LocationProvider used by LocationManager.
+ * A GNSS implementation of LocationProvider used by LocationManager.
  *
  * {@hide}
  */
@@ -112,23 +120,23 @@ public class GnssLocationProvider implements LocationProviderInterface {
             true, true, false, false, true, true, true,
             Criteria.POWER_HIGH, Criteria.ACCURACY_FINE);
 
-    // these need to match GpsPositionMode enum in gps.h
+    // these need to match GnssPositionMode enum in IGnss.hal
     private static final int GPS_POSITION_MODE_STANDALONE = 0;
     private static final int GPS_POSITION_MODE_MS_BASED = 1;
     private static final int GPS_POSITION_MODE_MS_ASSISTED = 2;
 
-    // these need to match GpsPositionRecurrence enum in gps.h
+    // these need to match GnssPositionRecurrence enum in IGnss.hal
     private static final int GPS_POSITION_RECURRENCE_PERIODIC = 0;
     private static final int GPS_POSITION_RECURRENCE_SINGLE = 1;
 
-    // these need to match GpsStatusValue defines in gps.h
+    // these need to match GnssStatusValue enum in IGnssCallback.hal
     private static final int GPS_STATUS_NONE = 0;
     private static final int GPS_STATUS_SESSION_BEGIN = 1;
     private static final int GPS_STATUS_SESSION_END = 2;
     private static final int GPS_STATUS_ENGINE_ON = 3;
     private static final int GPS_STATUS_ENGINE_OFF = 4;
 
-    // these need to match GpsApgsStatusValue defines in gps.h
+    // these need to match AGnssStatusValue enum in IAGnssCallback.hal
     /** AGPS status event values. */
     private static final int GPS_REQUEST_AGPS_DATA_CONN = 1;
     private static final int GPS_RELEASE_AGPS_DATA_CONN = 2;
@@ -136,15 +144,19 @@ public class GnssLocationProvider implements LocationProviderInterface {
     private static final int GPS_AGPS_DATA_CONN_DONE = 4;
     private static final int GPS_AGPS_DATA_CONN_FAILED = 5;
 
-    // these need to match GpsLocationFlags enum in gps.h
+    // these need to match GnssLocationFlags enum in types.hal
     private static final int LOCATION_INVALID = 0;
     private static final int LOCATION_HAS_LAT_LONG = 1;
     private static final int LOCATION_HAS_ALTITUDE = 2;
     private static final int LOCATION_HAS_SPEED = 4;
     private static final int LOCATION_HAS_BEARING = 8;
-    private static final int LOCATION_HAS_ACCURACY = 16;
+    private static final int LOCATION_HAS_HORIZONTAL_ACCURACY = 16;
+    private static final int LOCATION_HAS_VERTICAL_ACCURACY = 32;
+    private static final int LOCATION_HAS_SPEED_ACCURACY = 64;
+    private static final int LOCATION_HAS_BEARING_ACCURACY = 128;
 
-    // IMPORTANT - the GPS_DELETE_* symbols here must match constants in gps.h
+
+    // IMPORTANT - the GPS_DELETE_* symbols here must match GnssAidingData enum in IGnss.hal
     private static final int GPS_DELETE_EPHEMERIS = 0x0001;
     private static final int GPS_DELETE_ALMANAC = 0x0002;
     private static final int GPS_DELETE_POSITION = 0x0004;
@@ -159,7 +171,7 @@ public class GnssLocationProvider implements LocationProviderInterface {
     private static final int GPS_DELETE_CELLDB_INFO = 0x8000;
     private static final int GPS_DELETE_ALL = 0xFFFF;
 
-    // The GPS_CAPABILITY_* flags must match the values in gps.h
+    // The GPS_CAPABILITY_* flags must match Capabilities enum in IGnssCallback.hal
     private static final int GPS_CAPABILITY_SCHEDULING = 0x0000001;
     private static final int GPS_CAPABILITY_MSB = 0x0000002;
     private static final int GPS_CAPABILITY_MSA = 0x0000004;
@@ -173,11 +185,11 @@ public class GnssLocationProvider implements LocationProviderInterface {
     private static final int AGPS_SUPL_MODE_MSA = 0x02;
     private static final int AGPS_SUPL_MODE_MSB = 0x01;
 
-    // these need to match AGpsType enum in gps.h
+    // these need to match AGnssType enum in IAGnssCallback.hal
     private static final int AGPS_TYPE_SUPL = 1;
     private static final int AGPS_TYPE_C2K = 2;
 
-    // these must match the definitions in gps.h
+    // these must match the ApnIpType enum in IAGnss.hal
     private static final int APN_INVALID = 0;
     private static final int APN_IPV4 = 1;
     private static final int APN_IPV6 = 2;
@@ -209,28 +221,22 @@ public class GnssLocationProvider implements LocationProviderInterface {
     private static final int AGPS_RIL_REQUEST_SETID_IMSI = 1;
     private static final int AGPS_RIL_REQUEST_SETID_MSISDN = 2;
 
-    // Request ref location
-    private static final int AGPS_RIL_REQUEST_REFLOC_CELLID = 1;
-    private static final int AGPS_RIL_REQUEST_REFLOC_MAC = 2;
+    //TODO(b/33112647): Create gps_debug.conf with commented career parameters.
+    private static final String DEBUG_PROPERTIES_FILE = "/etc/gps_debug.conf";
 
     // ref. location info
     private static final int AGPS_REF_LOCATION_TYPE_GSM_CELLID = 1;
     private static final int AGPS_REF_LOCATION_TYPE_UMTS_CELLID = 2;
-    private static final int AGPS_REG_LOCATION_TYPE_MAC        = 3;
 
     // set id info
     private static final int AGPS_SETID_TYPE_NONE = 0;
     private static final int AGPS_SETID_TYPE_IMSI = 1;
     private static final int AGPS_SETID_TYPE_MSISDN = 2;
 
-    private static final String PROPERTIES_FILE_PREFIX = "/etc/gps";
-    private static final String PROPERTIES_FILE_SUFFIX = ".conf";
-    private static final String DEFAULT_PROPERTIES_FILE = PROPERTIES_FILE_PREFIX + PROPERTIES_FILE_SUFFIX;
-
     private static final int GPS_GEOFENCE_UNAVAILABLE = 1<<0L;
     private static final int GPS_GEOFENCE_AVAILABLE = 1<<1L;
 
-    // GPS Geofence errors. Should match gps.h constants.
+    // GPS Geofence errors. Should match GeofenceStatus enum in IGnssGeofenceCallback.hal.
     private static final int GPS_GEOFENCE_OPERATION_SUCCESS = 0;
     private static final int GPS_GEOFENCE_ERROR_TOO_MANY_GEOFENCES = 100;
     private static final int GPS_GEOFENCE_ERROR_ID_EXISTS  = -101;
@@ -243,14 +249,6 @@ public class GnssLocationProvider implements LocationProviderInterface {
     private static final int TCP_MIN_PORT = 0;
     private static final int TCP_MAX_PORT = 0xffff;
 
-    // Value of batterySaverGpsMode such that GPS isn't affected by battery saver mode.
-    private static final int BATTERY_SAVER_MODE_NO_CHANGE = 0;
-    // Value of batterySaverGpsMode such that GPS is disabled when battery saver mode
-    // is enabled and the screen is off.
-    private static final int BATTERY_SAVER_MODE_DISABLED_WHEN_SCREEN_OFF = 1;
-    // Secure setting for GPS behavior when battery saver mode is on.
-    private static final String BATTERY_SAVER_GPS_MODE = "batterySaverGpsMode";
-
     /** simpler wrapper for ProviderRequest + Worksource */
     private static class GpsRequest {
         public ProviderRequest request;
@@ -262,8 +260,6 @@ public class GnssLocationProvider implements LocationProviderInterface {
     }
 
     private Object mLock = new Object();
-
-    private int mLocationFlags = LOCATION_INVALID;
 
     // current status
     private int mStatus = LocationProvider.TEMPORARILY_UNAVAILABLE;
@@ -293,6 +289,9 @@ public class GnssLocationProvider implements LocationProviderInterface {
     // the max value of the exponential backoff
     // current setting - 4 hours
     private static final long MAX_RETRY_INTERVAL = 4*60*60*1000;
+
+    // Timeout when holding wakelocks for downloading XTRA data.
+    private static final long DOWNLOAD_XTRA_DATA_TIMEOUT_MS = 60 * 1000;
 
     private BackOff mNtpBackOff = new BackOff(RETRY_INTERVAL, MAX_RETRY_INTERVAL);
     private BackOff mXtraBackOff = new BackOff(RETRY_INTERVAL, MAX_RETRY_INTERVAL);
@@ -385,6 +384,8 @@ public class GnssLocationProvider implements LocationProviderInterface {
     // Wakelocks
     private final static String WAKELOCK_KEY = "GnssLocationProvider";
     private final PowerManager.WakeLock mWakeLock;
+    private static final String DOWNLOAD_EXTRA_WAKELOCK_KEY = "GnssLocationProviderXtraDownload";
+    private final PowerManager.WakeLock mDownloadXtraWakeLock;
 
     // Alarms
     private final static String ALARM_WAKEUP = "com.android.internal.location.ALARM_WAKEUP";
@@ -396,10 +397,6 @@ public class GnssLocationProvider implements LocationProviderInterface {
     // Persist property for LPP_PROFILE
     private final static String LPP_PROFILE = "persist.sys.gps.lpp";
 
-    // VZW PLMN info
-    private static final String[] VzwMccMncList = {"311480", "310004", "20404"};
-    // corresponding GID1 value, empty string means ignore gid1 match.
-    private static final String[] VzwGid1List = {"", "", "BAE0000000000000"};
 
 
     private final PowerManager mPowerManager;
@@ -414,8 +411,16 @@ public class GnssLocationProvider implements LocationProviderInterface {
     private WorkSource mClientSource = new WorkSource();
 
     private GeofenceHardwareImpl mGeofenceHardwareImpl;
-
     private int mYearOfHardware = 0;
+
+    // Set lower than the current ITAR limit of 600m/s to allow this to trigger even if GPS HAL
+    // stops output right at 600m/s, depriving this of the information of a device that reaches
+    // greater than 600m/s, and higher than the speed of sound to avoid impacting most use cases.
+    private static final float ITAR_SPEED_LIMIT_METERS_PER_SECOND = 400.0F;
+    private boolean mItarSpeedLimitExceeded = false;
+
+    // GNSS Metrics
+    private GnssMetrics mGnssMetrics;
 
     private final IGnssStatusProvider mGnssStatusProvider = new IGnssStatusProvider.Stub() {
         @Override
@@ -458,6 +463,13 @@ public class GnssLocationProvider implements LocationProviderInterface {
             if (mDownloadXtraDataPending == STATE_PENDING_NETWORK) {
                 xtraDownloadRequest();
             }
+            // Always on, notify HAL so it can get data it needs
+            sendMessage(UPDATE_NETWORK_STATE, 0 /*arg*/, network);
+        }
+
+        @Override
+        public void onLost(Network network) {
+            sendMessage(UPDATE_NETWORK_STATE, 0 /*arg*/, network);
         }
     };
 
@@ -470,18 +482,13 @@ public class GnssLocationProvider implements LocationProviderInterface {
             new ConnectivityManager.NetworkCallback() {
         @Override
         public void onAvailable(Network network) {
+            // Specific to a change to a SUPL enabled network becoming ready
             sendMessage(UPDATE_NETWORK_STATE, 0 /*arg*/, network);
         }
 
         @Override
         public void onLost(Network network) {
             releaseSuplConnection(GPS_RELEASE_AGPS_DATA_CONN);
-        }
-
-        @Override
-        public void onUnavailable() {
-            // timeout, it was not possible to establish the required connection
-            releaseSuplConnection(GPS_AGPS_DATA_CONN_FAILED);
         }
     };
 
@@ -497,10 +504,6 @@ public class GnssLocationProvider implements LocationProviderInterface {
                 startNavigating(false);
             } else if (action.equals(ALARM_TIMEOUT)) {
                 hibernate();
-            } else if (action.equals(Intents.DATA_SMS_RECEIVED_ACTION)) {
-                checkSmsSuplInit(intent);
-            } else if (action.equals(Intents.WAP_PUSH_RECEIVED_ACTION)) {
-                checkWapSuplInit(intent);
             } else if (PowerManager.ACTION_POWER_SAVE_MODE_CHANGED.equals(action)
                     || PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED.equals(action)
                     || Intent.ACTION_SCREEN_OFF.equals(action)
@@ -520,42 +523,32 @@ public class GnssLocationProvider implements LocationProviderInterface {
         }
     };
 
-    private final boolean isVerizon(String mccMnc, String imsi, String groupId) {
-        if (DEBUG) Log.d(TAG, "simOperator: " + mccMnc);
-        if (!TextUtils.isEmpty(mccMnc) || !TextUtils.isEmpty(imsi)) {
-            for (int i = 0; i < VzwMccMncList.length; i++) {
-                if ((!TextUtils.isEmpty(mccMnc) && mccMnc.equals(VzwMccMncList[i])) ||
-                        (!TextUtils.isEmpty(imsi) && imsi.startsWith(VzwMccMncList[i]))) {
-                    // check gid too if needed
-                    if (TextUtils.isEmpty(VzwGid1List[i]) || VzwGid1List[i].equals(groupId)) {
-                        if (DEBUG) Log.d(TAG, "Verizon UICC");
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    }
-
     private void subscriptionOrSimChanged(Context context) {
         if (DEBUG) Log.d(TAG, "received SIM related action: ");
         TelephonyManager phone = (TelephonyManager)
                 mContext.getSystemService(Context.TELEPHONY_SERVICE);
+        CarrierConfigManager configManager = (CarrierConfigManager)
+                mContext.getSystemService(Context.CARRIER_CONFIG_SERVICE);
         String mccMnc = phone.getSimOperator();
-        String imsi = phone.getSubscriberId();
-        String groupId = phone.getGroupIdLevel1();
+        boolean isKeepLppProfile = false;
         if (!TextUtils.isEmpty(mccMnc)) {
             if (DEBUG) Log.d(TAG, "SIM MCC/MNC is available: " + mccMnc);
             synchronized (mLock) {
-                if (isVerizon(mccMnc, imsi, groupId)) {
-                        // load current properties for carrier VZW
-                        loadPropertiesFromResource(context, mProperties);
-                        String lpp_profile = mProperties.getProperty("LPP_PROFILE");
-                        // set the persist property LPP_PROFILE for VZW
+                if (configManager != null) {
+                    PersistableBundle b = configManager.getConfig();
+                    isKeepLppProfile = b.getBoolean(CarrierConfigManager.KEY_PERSIST_LPP_MODE_BOOL);
+                }
+                if (isKeepLppProfile) {
+                    // load current properties for the carrier
+                    loadPropertiesFromResource(context, mProperties);
+                    String lpp_profile = mProperties.getProperty("LPP_PROFILE");
+                    // set the persist property LPP_PROFILE for the value
+                    if (lpp_profile != null) {
                         SystemProperties.set(LPP_PROFILE, lpp_profile);
+                    }
                 } else {
-                        // reset the persist property for Non VZW
-                        SystemProperties.set(LPP_PROFILE, "");
+                    // reset the persist property
+                    SystemProperties.set(LPP_PROFILE, "");
                 }
                 reloadGpsProperties(context, mProperties);
                 mNIHandler.setSuplEsEnabled(mSuplEsEnabled);
@@ -565,39 +558,15 @@ public class GnssLocationProvider implements LocationProviderInterface {
         }
     }
 
-    private void checkSmsSuplInit(Intent intent) {
-        SmsMessage[] messages = Intents.getMessagesFromIntent(intent);
-        if (messages == null) {
-            Log.e(TAG, "Message does not exist in the intent.");
-            return;
-        }
-
-        for (SmsMessage message : messages) {
-            if (message != null && message.mWrappedSmsMessage != null) {
-                byte[] suplInit = message.getUserData();
-                if (suplInit != null) {
-                    native_agps_ni_message(suplInit, suplInit.length);
-                }
-            }
-        }
-    }
-
-    private void checkWapSuplInit(Intent intent) {
-        byte[] suplInit = intent.getByteArrayExtra("data");
-        if (suplInit == null) {
-            return;
-        }
-        native_agps_ni_message(suplInit,suplInit.length);
-    }
-
     private void updateLowPowerMode() {
         // Disable GPS if we are in device idle mode.
         boolean disableGps = mPowerManager.isDeviceIdleMode();
-        switch (Settings.Secure.getInt(mContext.getContentResolver(), BATTERY_SAVER_GPS_MODE,
-                BATTERY_SAVER_MODE_DISABLED_WHEN_SCREEN_OFF)) {
-            case BATTERY_SAVER_MODE_DISABLED_WHEN_SCREEN_OFF:
+        final PowerSaveState result =
+                mPowerManager.getPowerSaveState(ServiceType.GPS);
+        switch (result.gpsMode) {
+            case BatterySaverPolicy.GPS_MODE_DISABLED_WHEN_SCREEN_OFF:
                 // If we are in battery saver mode and the screen is off, disable GPS.
-                disableGps |= mPowerManager.isPowerSaveMode() && !mPowerManager.isInteractive();
+                disableGps |= result.batterySaverEnabled && !mPowerManager.isInteractive();
                 break;
         }
         if (disableGps != mDisableGps) {
@@ -610,28 +579,23 @@ public class GnssLocationProvider implements LocationProviderInterface {
         return native_is_supported();
     }
 
+    interface SetCarrierProperty {
+        public boolean set(int value);
+    }
+
     private void reloadGpsProperties(Context context, Properties properties) {
         if (DEBUG) Log.d(TAG, "Reset GPS properties, previous size = " + properties.size());
         loadPropertiesFromResource(context, properties);
 
-        boolean isPropertiesLoadedFromFile = false;
-        final String gpsHardware = SystemProperties.get("ro.hardware.gps");
-
-        if (!TextUtils.isEmpty(gpsHardware)) {
-            final String propFilename =
-                    PROPERTIES_FILE_PREFIX + "." + gpsHardware + PROPERTIES_FILE_SUFFIX;
-            isPropertiesLoadedFromFile =
-                    loadPropertiesFromFile(propFilename, properties);
-        }
-        if (!isPropertiesLoadedFromFile) {
-            loadPropertiesFromFile(DEFAULT_PROPERTIES_FILE, properties);
-        }
-        if (DEBUG) Log.d(TAG, "GPS properties reloaded, size = " + properties.size());
         String lpp_prof = SystemProperties.get(LPP_PROFILE);
         if (!TextUtils.isEmpty(lpp_prof)) {
                 // override default value of this if lpp_prof is not empty
                 properties.setProperty("LPP_PROFILE", lpp_prof);
         }
+        /*
+         * Overlay carrier properties from a debug configuration file.
+         */
+        loadPropertiesFromFile(DEBUG_PROPERTIES_FILE, properties);
         // TODO: we should get rid of C2K specific setting.
         setSuplHostPort(properties.getProperty("SUPL_HOST"),
                         properties.getProperty("SUPL_PORT"));
@@ -644,16 +608,33 @@ public class GnssLocationProvider implements LocationProviderInterface {
                 Log.e(TAG, "unable to parse C2K_PORT: " + portString);
             }
         }
-
         if (native_is_gnss_configuration_supported()) {
-            try {
-                // Convert properties to string contents and send it to HAL.
-                ByteArrayOutputStream baos = new ByteArrayOutputStream(4096);
-                properties.store(baos, null);
-                native_configuration_update(baos.toString());
-                if (DEBUG) Log.d(TAG, "final config = " + baos.toString());
-            } catch (IOException ex) {
-                Log.e(TAG, "failed to dump properties contents");
+            Map<String, SetCarrierProperty> map = new HashMap<String, SetCarrierProperty>() {
+                {
+                    put("SUPL_VER", (val) -> native_set_supl_version(val));
+                    put("SUPL_MODE", (val) -> native_set_supl_mode(val));
+                    put("SUPL_ES", (val) -> native_set_supl_es(val));
+                    put("LPP_PROFILE", (val) -> native_set_lpp_profile(val));
+                    put("A_GLONASS_POS_PROTOCOL_SELECT", (val) -> native_set_gnss_pos_protocol_select(val));
+                    put("USE_EMERGENCY_PDN_FOR_EMERGENCY_SUPL", (val) -> native_set_emergency_supl_pdn(val));
+                    put("GPS_LOCK", (val) -> native_set_gps_lock(val));
+                }
+            };
+
+            for(Entry<String, SetCarrierProperty> entry : map.entrySet()) {
+                String propertyName = entry.getKey();
+                String propertyValueString = properties.getProperty(propertyName);
+                if (propertyValueString != null) {
+                    try {
+                          int propertyValueInt = Integer.decode(propertyValueString);
+                          boolean result = entry.getValue().set(propertyValueInt);
+                          if (result == false) {
+                              Log.e(TAG, "Unable to set " + propertyName);
+                          }
+                    } catch (NumberFormatException e) {
+                          Log.e(TAG, "unable to parse propertyName: " + propertyValueString);
+                    }
+                }
             }
         } else if (DEBUG) {
             Log.d(TAG, "Skipped configuration update because GNSS configuration in GPS HAL is not"
@@ -700,7 +681,7 @@ public class GnssLocationProvider implements LocationProviderInterface {
             }
 
         } catch (IOException e) {
-            Log.w(TAG, "Could not open GPS configuration file " + filename);
+            if (DEBUG) Log.d(TAG, "Could not open GPS configuration file " + filename);
             return false;
         }
         return true;
@@ -718,6 +699,11 @@ public class GnssLocationProvider implements LocationProviderInterface {
         mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         mWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKELOCK_KEY);
         mWakeLock.setReferenceCounted(true);
+
+        // Create a separate wake lock for xtra downloader as it may be released due to timeout.
+        mDownloadXtraWakeLock = mPowerManager.newWakeLock(
+                PowerManager.PARTIAL_WAKE_LOCK, DOWNLOAD_EXTRA_WAKELOCK_KEY);
+        mDownloadXtraWakeLock.setReferenceCounted(true);
 
         mAlarmManager = (AlarmManager)mContext.getSystemService(Context.ALARM_SERVICE);
         mWakeupIntent = PendingIntent.getBroadcast(mContext, 0, new Intent(ALARM_WAKEUP), 0);
@@ -804,6 +790,19 @@ public class GnssLocationProvider implements LocationProviderInterface {
                 return isEnabled();
             }
         };
+        mGnssMetrics = new GnssMetrics();
+
+        /*
+        * A cycle of native_init() and native_cleanup() is needed so that callbacks are registered
+        * after bootup even when location is disabled. This will allow Emergency SUPL to work even
+        * when location is disabled before device restart.
+        * */
+        boolean isInitialized = native_init();
+        if(!isInitialized) {
+            Log.d(TAG, "Failed to initialize at bootup");
+        } else {
+            native_cleanup();
+        }
     }
 
     /**
@@ -822,11 +821,21 @@ public class GnssLocationProvider implements LocationProviderInterface {
     private void handleUpdateNetworkState(Network network) {
         // retrieve NetworkInfo for this UID
         NetworkInfo info = mConnMgr.getNetworkInfo(network);
-        if (info == null) {
-            return;
+
+        boolean networkAvailable = false;
+        boolean isConnected = false;
+        int type = ConnectivityManager.TYPE_NONE;
+        boolean isRoaming = false;
+        String apnName = null;
+
+        if (info != null) {
+            networkAvailable = info.isAvailable() && TelephonyManager.getDefault().getDataEnabled();
+            isConnected = info.isConnected();
+            type = info.getType();
+            isRoaming = info.isRoaming();
+            apnName = info.getExtraInfo();
         }
 
-        boolean isConnected = info.isConnected();
         if (DEBUG) {
             String message = String.format(
                     "UpdateNetworkState, state=%s, connected=%s, info=%s, capabilities=%S",
@@ -838,8 +847,6 @@ public class GnssLocationProvider implements LocationProviderInterface {
         }
 
         if (native_is_agps_ril_supported()) {
-            boolean dataEnabled = TelephonyManager.getDefault().getDataEnabled();
-            boolean networkAvailable = info.isAvailable() && dataEnabled;
             String defaultApn = getSelectedApn();
             if (defaultApn == null) {
                 defaultApn = "dummy-apn";
@@ -847,10 +854,10 @@ public class GnssLocationProvider implements LocationProviderInterface {
 
             native_update_network_state(
                     isConnected,
-                    info.getType(),
-                    info.isRoaming(),
+                    type,
+                    isRoaming,
                     networkAvailable,
-                    info.getExtraInfo(),
+                    apnName,
                     defaultApn);
         } else if (DEBUG) {
             Log.d(TAG, "Skipped network state update because GPS HAL AGPS-RIL is not  supported");
@@ -858,7 +865,6 @@ public class GnssLocationProvider implements LocationProviderInterface {
 
         if (mAGpsDataConnectionState == AGPS_DATA_CONNECTION_OPENING) {
             if (isConnected) {
-                String apnName = info.getExtraInfo();
                 if (apnName == null) {
                     // assign a dummy value in the case of C2K as otherwise we will have a runtime
                     // exception in the following call to native_agps_data_conn_open
@@ -902,8 +908,7 @@ public class GnssLocationProvider implements LocationProviderInterface {
         NetworkRequest request = requestBuilder.build();
         mConnMgr.requestNetwork(
                 request,
-                mSuplConnectivityCallback,
-                ConnectivityManager.MAX_NETWORK_REQUEST_TIMEOUT_MS);
+                mSuplConnectivityCallback);
     }
 
     private void handleReleaseSuplConnection(int agpsDataConnStatus) {
@@ -964,9 +969,9 @@ public class GnssLocationProvider implements LocationProviderInterface {
                     long time = mNtpTime.getCachedNtpTime();
                     long timeReference = mNtpTime.getCachedNtpTimeReference();
                     long certainty = mNtpTime.getCacheCertainty();
-                    long now = System.currentTimeMillis();
 
                     if (DEBUG) {
+                        long now = System.currentTimeMillis();
                         Log.d(TAG, "NTP server returned: "
                                 + time + " (" + new Date(time)
                                 + ") reference: " + timeReference
@@ -1023,7 +1028,7 @@ public class GnssLocationProvider implements LocationProviderInterface {
         mDownloadXtraDataPending = STATE_DOWNLOADING;
 
         // hold wake lock while task runs
-        mWakeLock.acquire();
+        mDownloadXtraWakeLock.acquire(DOWNLOAD_XTRA_DATA_TIMEOUT_MS);
         Log.i(TAG, "WakeLock acquired by handleDownloadXtraData()");
         AsyncTask.THREAD_POOL_EXECUTOR.execute(new Runnable() {
             @Override
@@ -1045,9 +1050,17 @@ public class GnssLocationProvider implements LocationProviderInterface {
                             mXtraBackOff.nextBackoffMillis());
                 }
 
-                // release wake lock held by task
-                mWakeLock.release();
-                Log.i(TAG, "WakeLock released by handleDownloadXtraData()");
+                // Release wake lock held by task, synchronize on mLock in case multiple
+                // download tasks overrun.
+                synchronized (mLock) {
+                    if (mDownloadXtraWakeLock.isHeld()) {
+                        mDownloadXtraWakeLock.release();
+                        if (DEBUG) Log.d(TAG, "WakeLock released by handleDownloadXtraData()");
+                    } else {
+                        Log.e(TAG, "WakeLock expired before release in "
+                                + "handleDownloadXtraData()");
+                    }
+                }
             }
         });
     }
@@ -1148,6 +1161,7 @@ public class GnssLocationProvider implements LocationProviderInterface {
 
             mGnssMeasurementsProvider.onGpsEnabledChanged();
             mGnssNavigationMessageProvider.onGpsEnabledChanged();
+            enableBatching();
         } else {
             synchronized (mLock) {
                 mEnabled = false;
@@ -1179,6 +1193,7 @@ public class GnssLocationProvider implements LocationProviderInterface {
         mAlarmManager.cancel(mWakeupIntent);
         mAlarmManager.cancel(mTimeoutIntent);
 
+        disableBatching();
         // do this before releasing wakelock
         native_cleanup();
 
@@ -1195,18 +1210,26 @@ public class GnssLocationProvider implements LocationProviderInterface {
 
     @Override
     public int getStatus(Bundle extras) {
-        if (extras != null) {
-            extras.putInt("satellites", mSvCount);
-        }
+        setLocationExtras(extras);
         return mStatus;
     }
 
-    private void updateStatus(int status, int svCount) {
-        if (status != mStatus || svCount != mSvCount) {
+    private void updateStatus(int status, int svCount, int meanCn0, int maxCn0) {
+        if (status != mStatus || svCount != mSvCount || meanCn0 != mMeanCn0 || maxCn0 != mMaxCn0 ) {
             mStatus = status;
             mSvCount = svCount;
-            mLocationExtras.putInt("satellites", svCount);
+            mMeanCn0 = meanCn0;
+            mMaxCn0 = maxCn0;
+            setLocationExtras(mLocationExtras);
             mStatusUpdateTime = SystemClock.elapsedRealtime();
+        }
+    }
+
+    private void setLocationExtras(Bundle extras) {
+        if (extras != null) {
+            extras.putInt("satellites", mSvCount);
+            extras.putInt("meanCn0", mMeanCn0);
+            extras.putInt("maxCn0", mMaxCn0);
         }
     }
 
@@ -1414,6 +1437,12 @@ public class GnssLocationProvider implements LocationProviderInterface {
             mStarted = true;
             mSingleShot = singleShot;
             mPositionMode = GPS_POSITION_MODE_STANDALONE;
+            // Notify about suppressed output, if speed limit was previously exceeded.
+            // Elsewhere, we check again with every speed output reported.
+            if (mItarSpeedLimitExceeded) {
+                Log.i(TAG, "startNavigating with ITAR limit in place. Output limited  " +
+                        "until slow enough speed reported.");
+            }
 
             boolean agpsEnabled =
                     (Settings.Global.getInt(mContext.getContentResolver(),
@@ -1454,8 +1483,8 @@ public class GnssLocationProvider implements LocationProviderInterface {
             }
 
             // reset SV count to zero
-            updateStatus(LocationProvider.TEMPORARILY_UNAVAILABLE, 0);
-            mFixRequestTime = System.currentTimeMillis();
+            updateStatus(LocationProvider.TEMPORARILY_UNAVAILABLE, 0, 0, 0);
+            mFixRequestTime = SystemClock.elapsedRealtime();
             if (!hasCapability(GPS_CAPABILITY_SCHEDULING)) {
                 // set timer to give up if we do not receive a fix within NO_FIX_TIMEOUT
                 // and our fix interval is not short
@@ -1475,10 +1504,9 @@ public class GnssLocationProvider implements LocationProviderInterface {
             native_stop();
             mTimeToFirstFix = 0;
             mLastFixTime = 0;
-            mLocationFlags = LOCATION_INVALID;
 
             // reset SV count to zero
-            updateStatus(LocationProvider.TEMPORARILY_UNAVAILABLE, 0);
+            updateStatus(LocationProvider.TEMPORARILY_UNAVAILABLE, 0, 0, 0);
         }
     }
 
@@ -1499,41 +1527,25 @@ public class GnssLocationProvider implements LocationProviderInterface {
     /**
      * called from native code to update our position.
      */
-    private void reportLocation(int flags, double latitude, double longitude, double altitude,
-            float speed, float bearing, float accuracy, long timestamp) {
-        if (VERBOSE) Log.v(TAG, "reportLocation lat: " + latitude + " long: " + longitude +
-                " timestamp: " + timestamp);
+    private void reportLocation(boolean hasLatLong, Location location) {
+        if (location.hasSpeed()) {
+            mItarSpeedLimitExceeded = location.getSpeed() > ITAR_SPEED_LIMIT_METERS_PER_SECOND;
+        }
+
+        if (mItarSpeedLimitExceeded) {
+            Log.i(TAG, "Hal reported a speed in excess of ITAR limit." +
+                    "  GPS/GNSS Navigation output blocked.");
+            mGnssMetrics.logReceivedLocationStatus(false);
+            return;  // No output of location allowed
+        }
+
+        if (VERBOSE) Log.v(TAG, "reportLocation " + location.toString());
 
         synchronized (mLocation) {
-            mLocationFlags = flags;
-            if ((flags & LOCATION_HAS_LAT_LONG) == LOCATION_HAS_LAT_LONG) {
-                mLocation.setLatitude(latitude);
-                mLocation.setLongitude(longitude);
-                mLocation.setTime(timestamp);
-                // It would be nice to push the elapsed real-time timestamp
-                // further down the stack, but this is still useful
-                mLocation.setElapsedRealtimeNanos(SystemClock.elapsedRealtimeNanos());
-            }
-            if ((flags & LOCATION_HAS_ALTITUDE) == LOCATION_HAS_ALTITUDE) {
-                mLocation.setAltitude(altitude);
-            } else {
-                mLocation.removeAltitude();
-            }
-            if ((flags & LOCATION_HAS_SPEED) == LOCATION_HAS_SPEED) {
-                mLocation.setSpeed(speed);
-            } else {
-                mLocation.removeSpeed();
-            }
-            if ((flags & LOCATION_HAS_BEARING) == LOCATION_HAS_BEARING) {
-                mLocation.setBearing(bearing);
-            } else {
-                mLocation.removeBearing();
-            }
-            if ((flags & LOCATION_HAS_ACCURACY) == LOCATION_HAS_ACCURACY) {
-                mLocation.setAccuracy(accuracy);
-            } else {
-                mLocation.removeAccuracy();
-            }
+            mLocation = location;
+            // It would be nice to push the elapsed real-time timestamp
+            // further down the stack, but this is still useful
+            mLocation.setElapsedRealtimeNanos(SystemClock.elapsedRealtimeNanos());
             mLocation.setExtras(mLocationExtras);
 
             try {
@@ -1543,11 +1555,23 @@ public class GnssLocationProvider implements LocationProviderInterface {
             }
         }
 
-        mLastFixTime = System.currentTimeMillis();
+        mGnssMetrics.logReceivedLocationStatus(hasLatLong);
+        if (hasLatLong) {
+            if (location.hasAccuracy()) {
+                mGnssMetrics.logPositionAccuracyMeters(location.getAccuracy());
+            }
+            if (mTimeToFirstFix > 0) {
+                int timeBetweenFixes = (int) (SystemClock.elapsedRealtime() - mLastFixTime);
+                mGnssMetrics.logMissedReports(mFixInterval, timeBetweenFixes);
+            }
+        }
+
+        mLastFixTime = SystemClock.elapsedRealtime();
         // report time to first fix
-        if (mTimeToFirstFix == 0 && (flags & LOCATION_HAS_LAT_LONG) == LOCATION_HAS_LAT_LONG) {
+        if (mTimeToFirstFix == 0 && hasLatLong) {
             mTimeToFirstFix = (int)(mLastFixTime - mFixRequestTime);
             if (DEBUG) Log.d(TAG, "TTFF: " + mTimeToFirstFix);
+            mGnssMetrics.logTimeToFirstFixMilliSecs(mTimeToFirstFix);
 
             // notify status listeners
             mListenerHelper.onFirstFix(mTimeToFirstFix);
@@ -1568,7 +1592,7 @@ public class GnssLocationProvider implements LocationProviderInterface {
             Intent intent = new Intent(LocationManager.GPS_FIX_CHANGE_ACTION);
             intent.putExtra(LocationManager.EXTRA_GPS_ENABLED, true);
             mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
-            updateStatus(LocationProvider.AVAILABLE, mSvCount);
+            updateStatus(LocationProvider.AVAILABLE, mSvCount, mMeanCn0, mMaxCn0);
         }
 
        if (!hasCapability(GPS_CAPABILITY_SCHEDULING) && mStarted &&
@@ -1616,46 +1640,66 @@ public class GnssLocationProvider implements LocationProviderInterface {
      * called from native code to update SV info
      */
     private void reportSvStatus() {
-        int svCount = native_read_sv_status(mSvidWithFlags, mCn0s, mSvElevations, mSvAzimuths);
+        int svCount = native_read_sv_status(mSvidWithFlags,
+            mCn0s,
+            mSvElevations,
+            mSvAzimuths,
+            mSvCarrierFreqs);
         mListenerHelper.onSvStatusChanged(
                 svCount,
                 mSvidWithFlags,
                 mCn0s,
                 mSvElevations,
-                mSvAzimuths);
+                mSvAzimuths,
+                mSvCarrierFreqs);
+
+        // Log CN0 as part of GNSS metrics
+        mGnssMetrics.logCn0(mCn0s, svCount);
 
         if (VERBOSE) {
             Log.v(TAG, "SV count: " + svCount);
         }
-        // Calculate number of sets used in fix.
+        // Calculate number of satellites used in fix.
         int usedInFixCount = 0;
+        int maxCn0 = 0;
+        int meanCn0 = 0;
         for (int i = 0; i < svCount; i++) {
             if ((mSvidWithFlags[i] & GnssStatus.GNSS_SV_FLAGS_USED_IN_FIX) != 0) {
                 ++usedInFixCount;
+                if (mCn0s[i] > maxCn0) {
+                    maxCn0 = (int)mCn0s[i];
+                }
+                meanCn0 += mCn0s[i];
             }
             if (VERBOSE) {
                 Log.v(TAG, "svid: " + (mSvidWithFlags[i] >> GnssStatus.SVID_SHIFT_WIDTH) +
-                        " cn0: " + mCn0s[i]/10 +
+                        " cn0: " + mCn0s[i] +
                         " elev: " + mSvElevations[i] +
                         " azimuth: " + mSvAzimuths[i] +
+                        " carrier frequency: " + mSvCarrierFreqs[i] +
                         ((mSvidWithFlags[i] & GnssStatus.GNSS_SV_FLAGS_HAS_EPHEMERIS_DATA) == 0
                                 ? "  " : " E") +
                         ((mSvidWithFlags[i] & GnssStatus.GNSS_SV_FLAGS_HAS_ALMANAC_DATA) == 0
                                 ? "  " : " A") +
                         ((mSvidWithFlags[i] & GnssStatus.GNSS_SV_FLAGS_USED_IN_FIX) == 0
-                                ? "" : "U"));
+                                ? "" : "U") +
+                        ((mSvidWithFlags[i] & GnssStatus.GNSS_SV_FLAGS_HAS_CARRIER_FREQUENCY) == 0
+                        ? "" : "F"));
             }
         }
-        // return number of sets used in fix instead of total
-        updateStatus(mStatus, usedInFixCount);
+        if (usedInFixCount > 0) {
+            meanCn0 /= usedInFixCount;
+        }
+        // return number of sats used in fix instead of total reported
+        updateStatus(mStatus, usedInFixCount, meanCn0, maxCn0);
 
         if (mNavigating && mStatus == LocationProvider.AVAILABLE && mLastFixTime > 0 &&
-            System.currentTimeMillis() - mLastFixTime > RECENT_FIX_TIMEOUT) {
+            SystemClock.elapsedRealtime() - mLastFixTime > RECENT_FIX_TIMEOUT) {
             // send an intent to notify that the GPS is no longer receiving fixes.
             Intent intent = new Intent(LocationManager.GPS_FIX_CHANGE_ACTION);
             intent.putExtra(LocationManager.EXTRA_GPS_ENABLED, false);
             mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
-            updateStatus(LocationProvider.TEMPORARILY_UNAVAILABLE, mSvCount);
+            updateStatus(LocationProvider.TEMPORARILY_UNAVAILABLE, mSvCount, mMeanCn0, mMaxCn0);
         }
     }
 
@@ -1704,23 +1748,41 @@ public class GnssLocationProvider implements LocationProviderInterface {
      * called from native code to report NMEA data received
      */
     private void reportNmea(long timestamp) {
-        int length = native_read_nmea(mNmeaBuffer, mNmeaBuffer.length);
-        String nmea = new String(mNmeaBuffer, 0 /* offset */, length);
-        mListenerHelper.onNmeaReceived(timestamp, nmea);
+        if (!mItarSpeedLimitExceeded) {
+            int length = native_read_nmea(mNmeaBuffer, mNmeaBuffer.length);
+            String nmea = new String(mNmeaBuffer, 0 /* offset */, length);
+            mListenerHelper.onNmeaReceived(timestamp, nmea);
+        }
     }
 
     /**
-     * called from native code - Gps measurements callback
+     * called from native code - GNSS measurements callback
      */
     private void reportMeasurementData(GnssMeasurementsEvent event) {
-        mGnssMeasurementsProvider.onMeasurementsAvailable(event);
+        if (!mItarSpeedLimitExceeded) {
+            // send to handler to allow native to return quickly
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mGnssMeasurementsProvider.onMeasurementsAvailable(event);
+                }
+            });
+        }
     }
 
     /**
-     * called from native code - GPS navigation message callback
+     * called from native code - GNSS navigation message callback
      */
     private void reportNavigationMessage(GnssNavigationMessage event) {
-        mGnssNavigationMessageProvider.onNavigationMessageAvailable(event);
+        if (!mItarSpeedLimitExceeded) {
+            // send to handler to allow native to return quickly
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mGnssNavigationMessageProvider.onNavigationMessageAvailable(event);
+                }
+            });
+        }
     }
 
     /**
@@ -1767,46 +1829,109 @@ public class GnssLocationProvider implements LocationProviderInterface {
         };
     }
 
+    public interface GnssBatchingProvider {
+        /**
+         * Returns the GNSS batching size
+         */
+        int getSize();
+        /**
+         * Starts the hardware batching operation
+         */
+        boolean start(long periodNanos, boolean wakeOnFifoFull);
+        /**
+         * Forces a flush of existing locations from the hardware batching
+         */
+        void flush();
+        /**
+         * Stops the batching operation
+         */
+        boolean stop();
+    }
+
+    /**
+     * @hide
+     */
+    public GnssBatchingProvider getGnssBatchingProvider() {
+        return new GnssBatchingProvider() {
+            @Override
+            public int getSize() {
+                return native_get_batch_size();
+            }
+            @Override
+            public boolean start(long periodNanos, boolean wakeOnFifoFull) {
+                if (periodNanos <= 0) {
+                    Log.e(TAG, "Invalid periodNanos " + periodNanos +
+                            "in batching request, not started");
+                    return false;
+                }
+                return native_start_batch(periodNanos, wakeOnFifoFull);
+            }
+            @Override
+            public void flush() {
+                native_flush_batch();
+            }
+            @Override
+            public boolean stop() {
+                return native_stop_batch();
+            }
+        };
+    }
+
+    public interface GnssMetricsProvider {
+        /**
+         * Returns GNSS metrics as proto string
+         */
+        String getGnssMetricsAsProtoString();
+    }
+
+    /**
+     * @hide
+     */
+    public GnssMetricsProvider getGnssMetricsProvider() {
+        return new GnssMetricsProvider() {
+            @Override
+            public String getGnssMetricsAsProtoString() {
+                return mGnssMetrics.dumpGnssMetricsAsProtoString();
+            }
+        };
+    }
+
+    /**
+     * Initialize Batching if enabled
+     */
+    private void enableBatching() {
+        if (!native_init_batching()) {
+            Log.e(TAG, "Failed to initialize GNSS batching");
+        };
+    }
+
+    /**
+     * Disable batching
+     */
+    private void disableBatching() {
+        native_stop_batch();
+        native_cleanup_batching();
+    }
+
+    /**
+     * called from native code - GNSS location batch callback
+     */
+    private void reportLocationBatch(Location[] locationArray) {
+        List<Location> locations = new ArrayList<>(Arrays.asList(locationArray));
+        if(DEBUG) { Log.d(TAG, "Location batch of size " + locationArray.length + "reported"); }
+        try {
+            mILocationManager.reportLocationBatch(locations);
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException calling reportLocationBatch");
+        }
+    }
+
     /**
      * called from native code to request XTRA data
      */
     private void xtraDownloadRequest() {
         if (DEBUG) Log.d(TAG, "xtraDownloadRequest");
         sendMessage(DOWNLOAD_XTRA_DATA, 0, null);
-    }
-
-    /**
-     * Helper method to construct a location object.
-     */
-    private Location buildLocation(
-            int flags,
-            double latitude,
-            double longitude,
-            double altitude,
-            float speed,
-            float bearing,
-            float accuracy,
-            long timestamp) {
-        Location location = new Location(LocationManager.GPS_PROVIDER);
-        if((flags & LOCATION_HAS_LAT_LONG) == LOCATION_HAS_LAT_LONG) {
-            location.setLatitude(latitude);
-            location.setLongitude(longitude);
-            location.setTime(timestamp);
-            location.setElapsedRealtimeNanos(SystemClock.elapsedRealtimeNanos());
-        }
-        if((flags & LOCATION_HAS_ALTITUDE) == LOCATION_HAS_ALTITUDE) {
-            location.setAltitude(altitude);
-        }
-        if((flags & LOCATION_HAS_SPEED) == LOCATION_HAS_SPEED) {
-            location.setSpeed(speed);
-        }
-        if((flags & LOCATION_HAS_BEARING) == LOCATION_HAS_BEARING) {
-            location.setBearing(bearing);
-        }
-        if((flags & LOCATION_HAS_ACCURACY) == LOCATION_HAS_ACCURACY) {
-            location.setAccuracy(accuracy);
-        }
-        return location;
     }
 
     /**
@@ -1835,21 +1960,12 @@ public class GnssLocationProvider implements LocationProviderInterface {
      * Called from native to report GPS Geofence transition
      * All geofence callbacks are called on the same thread
      */
-    private void reportGeofenceTransition(int geofenceId, int flags, double latitude,
-            double longitude, double altitude, float speed, float bearing, float accuracy,
-            long timestamp, int transition, long transitionTimestamp) {
+    private void reportGeofenceTransition(int geofenceId, Location location, int transition,
+                                          long transitionTimestamp) {
         if (mGeofenceHardwareImpl == null) {
             mGeofenceHardwareImpl = GeofenceHardwareImpl.getInstance(mContext);
         }
-        Location location = buildLocation(
-                flags,
-                latitude,
-                longitude,
-                altitude,
-                speed,
-                bearing,
-                accuracy,
-                timestamp);
+
         mGeofenceHardwareImpl.reportGeofenceTransition(
                 geofenceId,
                 location,
@@ -1862,21 +1978,10 @@ public class GnssLocationProvider implements LocationProviderInterface {
     /**
      * called from native code to report GPS status change.
      */
-    private void reportGeofenceStatus(int status, int flags, double latitude,
-            double longitude, double altitude, float speed, float bearing, float accuracy,
-            long timestamp) {
+    private void reportGeofenceStatus(int status, Location location) {
         if (mGeofenceHardwareImpl == null) {
             mGeofenceHardwareImpl = GeofenceHardwareImpl.getInstance(mContext);
         }
-        Location location = buildLocation(
-                flags,
-                latitude,
-                longitude,
-                altitude,
-                speed,
-                bearing,
-                accuracy,
-                timestamp);
         int monitorStatus = GeofenceHardware.MONITOR_CURRENTLY_UNAVAILABLE;
         if(status == GPS_GEOFENCE_AVAILABLE) {
             monitorStatus = GeofenceHardware.MONITOR_CURRENTLY_AVAILABLE;
@@ -1959,8 +2064,7 @@ public class GnssLocationProvider implements LocationProviderInterface {
             String requestorId,
             String text,
             int requestorIdEncoding,
-            int textEncoding,
-            String extras  // Encoded extra data
+            int textEncoding
         )
     {
         Log.i(TAG, "reportNiNotification: entered");
@@ -1988,28 +2092,6 @@ public class GnssLocationProvider implements LocationProviderInterface {
         notification.text = text;
         notification.requestorIdEncoding = requestorIdEncoding;
         notification.textEncoding = textEncoding;
-
-        // Process extras, assuming the format is
-        // one of more lines of "key = value"
-        Bundle bundle = new Bundle();
-
-        if (extras == null) extras = "";
-        Properties extraProp = new Properties();
-
-        try {
-            extraProp.load(new StringReader(extras));
-        }
-        catch (IOException e)
-        {
-            Log.e(TAG, "reportNiNotification cannot parse extras data: " + extras);
-        }
-
-        for (Entry<Object, Object> ent : extraProp.entrySet())
-        {
-            bundle.putString((String) ent.getKey(), (String) ent.getValue());
-        }
-
-        notification.extras = bundle;
 
         mNIHandler.handleNiNotification(notification);
     }
@@ -2061,7 +2143,7 @@ public class GnssLocationProvider implements LocationProviderInterface {
      * Called from native code to request reference location info
      */
 
-    private void requestRefLocation(int flags) {
+    private void requestRefLocation() {
         TelephonyManager phone = (TelephonyManager)
                 mContext.getSystemService(Context.TELEPHONY_SERVICE);
         final int phoneType = phone.getPhoneType();
@@ -2097,7 +2179,10 @@ public class GnssLocationProvider implements LocationProviderInterface {
         // note that this assumes the message will not be removed from the queue before
         // it is handled (otherwise the wake lock would be leaked).
         mWakeLock.acquire();
-        Log.i(TAG, "WakeLock acquired by sendMessage(" + message + ", " + arg + ", " + obj + ")");
+        if (Log.isLoggable(TAG, Log.INFO)) {
+            Log.i(TAG, "WakeLock acquired by sendMessage(" + messageIdAsString(message) + ", " + arg
+                    + ", " + obj + ")");
+        }
         mHandler.obtainMessage(message, arg, 1, obj).sendToTarget();
     }
 
@@ -2155,8 +2240,10 @@ public class GnssLocationProvider implements LocationProviderInterface {
             if (msg.arg2 == 1) {
                 // wakelock was taken for this message, release it
                 mWakeLock.release();
-                Log.i(TAG, "WakeLock released by handleMessage(" + message + ", " + msg.arg1 + ", "
-                        + msg.obj + ")");
+                if (Log.isLoggable(TAG, Log.INFO)) {
+                    Log.i(TAG, "WakeLock released by handleMessage(" + messageIdAsString(message)
+                            + ", " + msg.arg1 + ", " + msg.obj + ")");
+                }
             }
         }
 
@@ -2404,9 +2491,46 @@ public class GnssLocationProvider implements LocationProviderInterface {
         }
     }
 
+    /**
+     * @return A string representing the given message ID.
+     */
+    private String messageIdAsString(int message) {
+        switch (message) {
+            case ENABLE:
+                return "ENABLE";
+            case SET_REQUEST:
+                return "SET_REQUEST";
+            case UPDATE_NETWORK_STATE:
+                return "UPDATE_NETWORK_STATE";
+            case REQUEST_SUPL_CONNECTION:
+                return "REQUEST_SUPL_CONNECTION";
+            case RELEASE_SUPL_CONNECTION:
+                return "RELEASE_SUPL_CONNECTION";
+            case INJECT_NTP_TIME:
+                return "INJECT_NTP_TIME";
+            case DOWNLOAD_XTRA_DATA:
+                return "DOWNLOAD_XTRA_DATA";
+            case INJECT_NTP_TIME_FINISHED:
+                return "INJECT_NTP_TIME_FINISHED";
+            case DOWNLOAD_XTRA_DATA_FINISHED:
+                return "DOWNLOAD_XTRA_DATA_FINISHED";
+            case UPDATE_LOCATION:
+                return "UPDATE_LOCATION";
+            case SUBSCRIPTION_OR_SIM_CHANGED:
+                return "SUBSCRIPTION_OR_SIM_CHANGED";
+            case INITIALIZE_HANDLER:
+                return "INITIALIZE_HANDLER";
+            default:
+                return "<Unknown>";
+        }
+    }
+
+
+
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         StringBuilder s = new StringBuilder();
+        s.append("  mStarted=").append(mStarted).append('\n');
         s.append("  mFixInterval=").append(mFixInterval).append('\n');
         s.append("  mDisableGps (battery saver mode)=").append(mDisableGps).append('\n');
         s.append("  mEngineCapabilities=0x").append(Integer.toHexString(mEngineCapabilities));
@@ -2420,8 +2544,9 @@ public class GnssLocationProvider implements LocationProviderInterface {
         if (hasCapability(GPS_CAPABILITY_MEASUREMENTS)) s.append("MEASUREMENTS ");
         if (hasCapability(GPS_CAPABILITY_NAV_MESSAGES)) s.append("NAV_MESSAGES ");
         s.append(")\n");
-
-        s.append(native_get_internal_state());
+        s.append(mGnssMetrics.dumpGnssMetricsAsText());
+        s.append("  native internal state: ").append(native_get_internal_state());
+        s.append("\n");
         pw.append(s);
     }
 
@@ -2463,7 +2588,10 @@ public class GnssLocationProvider implements LocationProviderInterface {
     private float mCn0s[] = new float[MAX_SVS];
     private float mSvElevations[] = new float[MAX_SVS];
     private float mSvAzimuths[] = new float[MAX_SVS];
+    private float mSvCarrierFreqs[] = new float[MAX_SVS];
     private int mSvCount;
+    private int mMeanCn0;
+    private int mMaxCn0;
     // preallocated to avoid memory allocation in reportNmea()
     private byte[] mNmeaBuffer = new byte[120];
 
@@ -2483,7 +2611,7 @@ public class GnssLocationProvider implements LocationProviderInterface {
     // returns number of SVs
     // mask[0] is ephemeris mask and mask[1] is almanac mask
     private native int native_read_sv_status(int[] prnWithFlags, float[] cn0s, float[] elevations,
-            float[] azimuths);
+            float[] azimuths, float[] carrierFrequencies);
     private native int native_read_nmea(byte[] buffer, int bufferSize);
     private native void native_inject_location(double latitude, double longitude, float accuracy);
 
@@ -2533,5 +2661,20 @@ public class GnssLocationProvider implements LocationProviderInterface {
     private native boolean native_stop_navigation_message_collection();
 
     // GNSS Configuration
-    private static native void native_configuration_update(String configData);
+    private static native boolean native_set_supl_version(int version);
+    private static native boolean native_set_supl_mode(int mode);
+    private static native boolean native_set_supl_es(int es);
+    private static native boolean native_set_lpp_profile(int lppProfile);
+    private static native boolean native_set_gnss_pos_protocol_select(int gnssPosProtocolSelect);
+    private static native boolean native_set_gps_lock(int gpsLock);
+    private static native boolean native_set_emergency_supl_pdn(int emergencySuplPdn);
+
+    // GNSS Batching
+    private static native int native_get_batch_size();
+    private static native boolean native_start_batch(long periodNanos, boolean wakeOnFifoFull);
+    private static native void native_flush_batch();
+    private static native boolean native_stop_batch();
+    private static native boolean native_init_batching();
+    private static native void native_cleanup_batching();
+
 }

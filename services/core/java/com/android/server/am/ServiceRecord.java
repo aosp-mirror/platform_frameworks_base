@@ -92,6 +92,8 @@ final class ServiceRecord extends Binder {
     ServiceState restartTracker; // tracking service restart
     boolean whitelistManager; // any bindings to this service have BIND_ALLOW_WHITELIST_MANAGEMENT?
     boolean delayed;        // are we waiting to start this service in the background?
+    boolean fgRequired;     // is the service required to go foreground after starting?
+    boolean fgWaiting;      // is a timeout for going foreground already scheduled?
     boolean isForeground;   // is service currently in foreground mode?
     int foregroundId;       // Notification ID of last foreground req.
     Notification foregroundNoti; // Notification record of foreground state.
@@ -115,13 +117,14 @@ final class ServiceRecord extends Binder {
     long destroyTime;       // time at which destory was initiated.
 
     String stringName;      // caching of toString
-    
+
     private int lastStartId;    // identifier of most recent start request.
 
     static class StartItem {
         final ServiceRecord sr;
         final boolean taskRemoved;
         final int id;
+        final int callingId;
         final Intent intent;
         final ActivityManagerService.NeededUriGrants neededGrants;
         long deliveredTime;
@@ -132,12 +135,13 @@ final class ServiceRecord extends Binder {
         String stringName;      // caching of toString
 
         StartItem(ServiceRecord _sr, boolean _taskRemoved, int _id, Intent _intent,
-                ActivityManagerService.NeededUriGrants _neededGrants) {
+                ActivityManagerService.NeededUriGrants _neededGrants, int _callingId) {
             sr = _sr;
             taskRemoved = _taskRemoved;
             id = _id;
             intent = _intent;
             neededGrants = _neededGrants;
+            callingId = _callingId;
         }
 
         UriPermissionOwner getUriPermissionsLocked() {
@@ -203,7 +207,7 @@ final class ServiceRecord extends Binder {
             }
         }
     }
-    
+
     void dump(PrintWriter pw, String prefix) {
         pw.print(prefix); pw.print("intent={");
                 pw.print(intent.getIntent().toShortString(false, true, false, true));
@@ -413,7 +417,7 @@ final class ServiceRecord extends Binder {
         restartDelay = 0;
         restartTime = 0;
     }
-    
+
     public StartItem findDeliveredStart(int id, boolean remove) {
         final int N = deliveredStarts.size();
         for (int i=0; i<N; i++) {
@@ -423,10 +427,10 @@ final class ServiceRecord extends Binder {
                 return si;
             }
         }
-        
+
         return null;
     }
-    
+
     public int getLastStartId() {
         return lastStartId;
     }
@@ -478,7 +482,8 @@ final class ServiceRecord extends Binder {
                                 ctx = ams.mContext.createPackageContextAsUser(
                                         appInfo.packageName, 0, new UserHandle(userId));
 
-                                Notification.Builder notiBuilder = new Notification.Builder(ctx);
+                                Notification.Builder notiBuilder = new Notification.Builder(ctx,
+                                        localForegroundNoti.getChannelId());
 
                                 // it's ugly, but it clearly identifies the app
                                 notiBuilder.setSmallIcon(appInfo.icon);
@@ -486,15 +491,13 @@ final class ServiceRecord extends Binder {
                                 // mark as foreground
                                 notiBuilder.setFlag(Notification.FLAG_FOREGROUND_SERVICE, true);
 
-                                // we are doing the app a kindness here
-                                notiBuilder.setPriority(Notification.PRIORITY_MIN);
-
                                 Intent runningIntent = new Intent(
                                         Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
                                 runningIntent.setData(Uri.fromParts("package",
                                         appInfo.packageName, null));
-                                PendingIntent pi = PendingIntent.getActivity(ams.mContext, 0,
-                                        runningIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                                PendingIntent pi = PendingIntent.getActivityAsUser(ams.mContext, 0,
+                                        runningIntent, PendingIntent.FLAG_UPDATE_CURRENT, null,
+                                        UserHandle.of(userId));
                                 notiBuilder.setColor(ams.mContext.getColor(
                                         com.android.internal
                                                 .R.color.system_notification_accent_color));
@@ -522,10 +525,9 @@ final class ServiceRecord extends Binder {
                             throw new RuntimeException("invalid service notification: "
                                     + foregroundNoti);
                         }
-                        int[] outId = new int[1];
                         nm.enqueueNotification(localPackageName, localPackageName,
                                 appUid, appPid, null, localForegroundId, localForegroundNoti,
-                                outId, userId);
+                                userId);
 
                         foregroundNoti = localForegroundNoti; // save it for amending next time
                     } catch (RuntimeException e) {
@@ -534,14 +536,14 @@ final class ServiceRecord extends Binder {
                         // get to be foreground.
                         ams.setServiceForeground(name, ServiceRecord.this,
                                 0, null, 0);
-                        ams.crashApplication(appUid, appPid, localPackageName,
+                        ams.crashApplication(appUid, appPid, localPackageName, -1,
                                 "Bad notification for startForeground: " + e);
                     }
                 }
             });
         }
     }
-    
+
     public void cancelNotification() {
         // Do asynchronous communication with notification manager to
         // avoid deadlocks.
@@ -588,7 +590,7 @@ final class ServiceRecord extends Binder {
             }
         });
     }
-    
+
     public void clearDeliveredStartsLocked() {
         for (int i=deliveredStarts.size()-1; i>=0; i--) {
             deliveredStarts.get(i).removeUriPermissionsLocked();

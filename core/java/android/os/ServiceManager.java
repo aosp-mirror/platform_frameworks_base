@@ -16,9 +16,9 @@
 
 package android.os;
 
-import com.android.internal.os.BinderInternal;
-
 import android.util.Log;
+
+import com.android.internal.os.BinderInternal;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -36,7 +36,8 @@ public final class ServiceManager {
         }
 
         // Find the service manager
-        sServiceManager = ServiceManagerNative.asInterface(BinderInternal.getContextObject());
+        sServiceManager = ServiceManagerNative
+                .asInterface(Binder.allowBlocking(BinderInternal.getContextObject()));
         return sServiceManager;
     }
 
@@ -52,12 +53,27 @@ public final class ServiceManager {
             if (service != null) {
                 return service;
             } else {
-                return getIServiceManager().getService(name);
+                return Binder.allowBlocking(getIServiceManager().getService(name));
             }
         } catch (RemoteException e) {
             Log.e(TAG, "error in getService", e);
         }
         return null;
+    }
+
+    /**
+     * Returns a reference to a service with the given name, or throws
+     * {@link NullPointerException} if none is found.
+     *
+     * @hide
+     */
+    public static IBinder getServiceOrThrow(String name) throws ServiceNotFoundException {
+        final IBinder binder = getService(name);
+        if (binder != null) {
+            return binder;
+        } else {
+            throw new ServiceNotFoundException(name);
+        }
     }
 
     /**
@@ -102,7 +118,7 @@ public final class ServiceManager {
             if (service != null) {
                 return service;
             } else {
-                return getIServiceManager().checkService(name);
+                return Binder.allowBlocking(getIServiceManager().checkService(name));
             }
         } catch (RemoteException e) {
             Log.e(TAG, "error in checkService", e);
@@ -137,5 +153,18 @@ public final class ServiceManager {
             throw new IllegalStateException("setServiceCache may only be called once");
         }
         sCache.putAll(cache);
+    }
+
+    /**
+     * Exception thrown when no service published for given name. This might be
+     * thrown early during boot before certain services have published
+     * themselves.
+     *
+     * @hide
+     */
+    public static class ServiceNotFoundException extends Exception {
+        public ServiceNotFoundException(String name) {
+            super("No service published for: " + name);
+        }
     }
 }

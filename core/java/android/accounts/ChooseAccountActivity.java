@@ -52,7 +52,9 @@ public class ChooseAccountActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        // TODO This activity is only used by getAuthTokenByFeatures and can not see
+        // VISIBILITY_USER_MANAGED_NOT_VISIBLE accounts. It should be moved to account managed
+        // service.
         mAccounts = getIntent().getParcelableArrayExtra(AccountManager.KEY_ACCOUNTS);
         mAccountManagerResponse =
                 getIntent().getParcelableExtra(AccountManager.KEY_ACCOUNT_MANAGER_RESPONSE);
@@ -75,7 +77,7 @@ public class ChooseAccountActivity extends Activity {
         setContentView(R.layout.choose_account);
 
         // Setup the list
-        ListView list = (ListView) findViewById(android.R.id.list);
+        ListView list = findViewById(android.R.id.list);
         // Use an existing ListAdapter that will map an array of strings to TextViews
         list.setAdapter(new AccountArrayAdapter(this,
                 android.R.layout.simple_list_item_1, mAccountInfos));

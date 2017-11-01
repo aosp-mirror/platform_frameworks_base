@@ -1,0 +1,612 @@
+/*
+ * Copyright (C) 2017 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto3";
+
+package android.providers.settings;
+
+option java_multiple_files = true;
+option java_outer_classname = "SettingsServiceProto";
+
+message SettingsServiceDumpProto {
+    // Per user settings
+    repeated UserSettingsProto user_settings = 1;
+
+    // Global settings
+    GlobalSettingsProto global_settings = 2;
+}
+
+message UserSettingsProto {
+    // Should be 0, 10, 11, 12, etc. where 0 is the owner.
+    int32 user_id = 1;
+
+    // The secure settings for this user
+    SecureSettingsProto secure_settings = 2;
+
+    // The system settings for this user
+    SystemSettingsProto system_settings = 3;
+}
+
+message GlobalSettingsProto {
+    // Historical operations
+    repeated SettingsOperationProto historical_op = 1;
+
+    SettingProto add_users_when_locked = 2;
+    SettingProto enable_accessibility_global_gesture_enabled = 3;
+    SettingProto airplane_mode_on = 4;
+    SettingProto theater_mode_on = 5;
+    SettingProto radio_bluetooth = 6;
+    SettingProto radio_wifi = 7;
+    SettingProto radio_wimax = 8;
+    SettingProto radio_cell = 9;
+    SettingProto radio_nfc = 10;
+    SettingProto airplane_mode_radios = 11;
+    SettingProto airplane_mode_toggleable_radios = 12;
+    SettingProto bluetooth_disabled_profiles = 13;
+    SettingProto bluetooth_interoperability_list = 14;
+    SettingProto wifi_sleep_policy = 15;
+    SettingProto auto_time = 16;
+    SettingProto auto_time_zone = 17;
+    SettingProto car_dock_sound = 18;
+    SettingProto car_undock_sound = 19;
+    SettingProto desk_dock_sound = 20;
+    SettingProto desk_undock_sound = 21;
+    SettingProto dock_sounds_enabled = 22;
+    SettingProto dock_sounds_enabled_when_accessibility = 23;
+    SettingProto lock_sound = 24;
+    SettingProto unlock_sound = 25;
+    SettingProto trusted_sound = 26;
+    SettingProto low_battery_sound = 27;
+    SettingProto power_sounds_enabled = 28;
+    SettingProto wireless_charging_started_sound = 29;
+    SettingProto charging_sounds_enabled = 30;
+    SettingProto stay_on_while_plugged_in = 31;
+    SettingProto bugreport_in_power_menu = 32;
+    SettingProto adb_enabled = 33;
+    SettingProto debug_view_attributes = 34;
+    SettingProto assisted_gps_enabled = 35;
+    SettingProto bluetooth_on = 36;
+    SettingProto cdma_cell_broadcast_sms = 37;
+    SettingProto cdma_roaming_mode = 38;
+    SettingProto cdma_subscription_mode = 39;
+    SettingProto data_activity_timeout_mobile = 40;
+    SettingProto data_activity_timeout_wifi = 41;
+    SettingProto data_roaming = 42;
+    SettingProto mdc_initial_max_retry = 43;
+    SettingProto force_allow_on_external = 44;
+    SettingProto development_force_resizable_activities = 45;
+    SettingProto development_enable_freeform_windows_support = 46;
+    SettingProto development_settings_enabled = 47;
+    SettingProto device_provisioned = 48;
+    SettingProto device_provisioning_mobile_data_enabled = 49;
+    SettingProto display_size_forced = 50;
+    SettingProto display_scaling_force = 51;
+    SettingProto download_max_bytes_over_mobile = 52;
+    SettingProto download_recommended_max_bytes_over_mobile = 53;
+    SettingProto hdmi_control_enabled = 54;
+    SettingProto hdmi_system_audio_control_enabled = 55;
+    SettingProto hdmi_control_auto_wakeup_enabled = 56;
+    SettingProto hdmi_control_auto_device_off_enabled = 57;
+    SettingProto mhl_input_switching_enabled = 58;
+    SettingProto mhl_power_charge_enabled = 59;
+    SettingProto mobile_data = 60;
+    SettingProto mobile_data_always_on = 61;
+    SettingProto connectivity_metrics_buffer_size = 62;
+    SettingProto netstats_enabled = 63;
+    SettingProto netstats_poll_interval = 64;
+    SettingProto netstats_time_cache_max_age = 65;
+    SettingProto netstats_global_alert_bytes = 66;
+    SettingProto netstats_sample_enabled = 67;
+    SettingProto netstats_dev_bucket_duration = 68;
+    SettingProto netstats_dev_persist_bytes = 69;
+    SettingProto netstats_dev_rotate_age = 70;
+    SettingProto netstats_dev_delete_age = 71;
+    SettingProto netstats_uid_bucket_duration = 72;
+    SettingProto netstats_uid_persist_bytes = 73;
+    SettingProto netstats_uid_rotate_age = 74;
+    SettingProto netstats_uid_delete_age = 75;
+    SettingProto netstats_uid_tag_bucket_duration = 76;
+    SettingProto netstats_uid_tag_persist_bytes = 77;
+    SettingProto netstats_uid_tag_rotate_age = 78;
+    SettingProto netstats_uid_tag_delete_age = 79;
+    SettingProto network_preference = 80;
+    SettingProto network_scorer_app = 81;
+    SettingProto nitz_update_diff = 82;
+    SettingProto nitz_update_spacing = 83;
+    SettingProto ntp_server = 84;
+    SettingProto ntp_timeout = 85;
+    SettingProto storage_benchmark_interval = 86;
+    SettingProto dns_resolver_sample_validity_seconds = 87;
+    SettingProto dns_resolver_success_threshold_percent = 88;
+    SettingProto dns_resolver_min_samples = 89;
+    SettingProto dns_resolver_max_samples = 90;
+    SettingProto ota_disable_automatic_update = 91;
+    SettingProto package_verifier_enable = 92;
+    SettingProto package_verifier_timeout = 93;
+    SettingProto package_verifier_default_response = 94;
+    SettingProto package_verifier_setting_visible = 95;
+    SettingProto package_verifier_include_adb = 96;
+    SettingProto fstrim_mandatory_interval = 97;
+    SettingProto pdp_watchdog_poll_interval_ms = 98;
+    SettingProto pdp_watchdog_long_poll_interval_ms = 99;
+    SettingProto pdp_watchdog_error_poll_interval_ms = 100;
+    SettingProto pdp_watchdog_trigger_packet_count = 101;
+    SettingProto pdp_watchdog_error_poll_count = 102;
+    SettingProto pdp_watchdog_max_pdp_reset_fail_count = 103;
+    SettingProto sampling_profiler_ms = 104;
+    SettingProto setup_prepaid_data_service_url = 105;
+    SettingProto setup_prepaid_detection_target_url = 106;
+    SettingProto setup_prepaid_detection_redir_host = 107;
+    SettingProto sms_outgoing_check_interval_ms = 108;
+    SettingProto sms_outgoing_check_max_count = 109;
+    SettingProto sms_short_code_confirmation = 110;
+    SettingProto sms_short_code_rule = 111;
+    SettingProto tcp_default_init_rwnd = 112;
+    SettingProto tether_supported = 113;
+    SettingProto tether_dun_required = 114;
+    SettingProto tether_dun_apn = 115;
+    SettingProto carrier_app_whitelist = 116;
+    SettingProto usb_mass_storage_enabled = 117;
+    SettingProto use_google_mail = 118;
+    SettingProto webview_data_reduction_proxy_key = 119;
+    SettingProto webview_fallback_logic_enabled = 120;
+    SettingProto webview_provider = 121;
+    SettingProto webview_multiprocess = 122;
+    SettingProto network_switch_notification_daily_limit = 123;
+    SettingProto network_switch_notification_rate_limit_millis = 124;
+    SettingProto network_avoid_bad_wifi = 125;
+    SettingProto wifi_display_on = 126;
+    SettingProto wifi_display_certification_on = 127;
+    SettingProto wifi_display_wps_config = 128;
+    SettingProto wifi_networks_available_notification_on = 129;
+    SettingProto wimax_networks_available_notification_on = 130;
+    SettingProto wifi_networks_available_repeat_delay = 131;
+    SettingProto wifi_country_code = 132;
+    SettingProto wifi_framework_scan_interval_ms = 133;
+    SettingProto wifi_idle_ms = 134;
+    SettingProto wifi_num_open_networks_kept = 135;
+    SettingProto wifi_on = 136;
+    SettingProto wifi_scan_always_available = 137;
+    SettingProto wifi_wakeup_enabled = 138;
+    SettingProto network_recommendations_enabled = 139;
+    SettingProto ble_scan_always_available = 140;
+    SettingProto wifi_saved_state = 141;
+    SettingProto wifi_supplicant_scan_interval_ms = 142;
+    SettingProto wifi_enhanced_auto_join = 143;
+    SettingProto wifi_network_show_rssi = 144;
+    SettingProto wifi_scan_interval_when_p2p_connected_ms = 145;
+    SettingProto wifi_watchdog_on = 146;
+    SettingProto wifi_watchdog_poor_network_test_enabled = 147;
+    SettingProto wifi_suspend_optimizations_enabled = 148;
+    SettingProto wifi_verbose_logging_enabled = 149;
+    SettingProto wifi_max_dhcp_retry_count = 150;
+    SettingProto wifi_mobile_data_transition_wakelock_timeout_ms = 151;
+    SettingProto wifi_device_owner_configs_lockdown = 152;
+    SettingProto wifi_frequency_band = 153;
+    SettingProto wifi_p2p_device_name = 154;
+    SettingProto wifi_reenable_delay_ms = 155;
+    SettingProto wifi_ephemeral_out_of_range_timeout_ms = 156;
+    SettingProto data_stall_alarm_non_aggressive_delay_in_ms = 157;
+    SettingProto data_stall_alarm_aggressive_delay_in_ms = 158;
+    SettingProto provisioning_apn_alarm_delay_in_ms = 159;
+    SettingProto gprs_register_check_period_ms = 160;
+    SettingProto wtf_is_fatal = 161;
+    SettingProto mode_ringer = 162;
+    SettingProto overlay_display_devices = 163;
+    SettingProto battery_discharge_duration_threshold = 164;
+    SettingProto battery_discharge_threshold = 165;
+    SettingProto send_action_app_error = 166;
+    SettingProto dropbox_age_seconds = 167;
+    SettingProto dropbox_max_files = 168;
+    SettingProto dropbox_quota_kb = 169;
+    SettingProto dropbox_quota_percent = 170;
+    SettingProto dropbox_reserve_percent = 171;
+    SettingProto dropbox_tag_prefix = 172;
+    SettingProto error_logcat_prefix = 173;
+    SettingProto sys_free_storage_log_interval = 174;
+    SettingProto disk_free_change_reporting_threshold = 175;
+    SettingProto sys_storage_threshold_percentage = 176;
+    SettingProto sys_storage_threshold_max_bytes = 177;
+    SettingProto sys_storage_full_threshold_bytes = 178;
+    SettingProto sync_max_retry_delay_in_seconds = 179;
+    SettingProto connectivity_change_delay = 180;
+    SettingProto connectivity_sampling_interval_in_seconds = 181;
+    SettingProto pac_change_delay = 182;
+    SettingProto captive_portal_mode = 183;
+    SettingProto captive_portal_server = 184;
+    SettingProto captive_portal_https_url = 185;
+    SettingProto captive_portal_http_url = 186;
+    SettingProto captive_portal_fallback_url = 187;
+    SettingProto captive_portal_use_https = 188;
+    SettingProto captive_portal_user_agent = 189;
+    SettingProto nsd_on = 190;
+    SettingProto set_install_location = 191;
+    SettingProto default_install_location = 192;
+    SettingProto inet_condition_debounce_up_delay = 193;
+    SettingProto inet_condition_debounce_down_delay = 194;
+    SettingProto read_external_storage_enforced_default = 195;
+    SettingProto http_proxy = 196;
+    SettingProto global_http_proxy_host = 197;
+    SettingProto global_http_proxy_port = 198;
+    SettingProto global_http_proxy_exclusion_list = 199;
+    SettingProto global_http_proxy_pac = 200;
+    SettingProto set_global_http_proxy = 201;
+    SettingProto default_dns_server = 202;
+    SettingProto bluetooth_headset_priority_prefix = 203;
+    SettingProto bluetooth_a2dp_sink_priority_prefix = 204;
+    SettingProto bluetooth_a2dp_src_priority_prefix = 205;
+    SettingProto bluetooth_input_device_priority_prefix = 206;
+    SettingProto bluetooth_map_priority_prefix = 207;
+    SettingProto bluetooth_map_client_priority_prefix = 208;
+    SettingProto bluetooth_pbap_client_priority_prefix = 209;
+    SettingProto bluetooth_sap_priority_prefix = 210;
+    SettingProto bluetooth_pan_priority_prefix = 211;
+    SettingProto device_idle_constants = 212;
+    SettingProto device_idle_constants_watch = 213;
+    SettingProto app_idle_constants = 214;
+    SettingProto alarm_manager_constants = 215;
+    SettingProto job_scheduler_constants = 216;
+    SettingProto shortcut_manager_constants = 217;
+    SettingProto window_animation_scale = 218;
+    SettingProto transition_animation_scale = 219;
+    SettingProto animator_duration_scale = 220;
+    SettingProto fancy_ime_animations = 221;
+    SettingProto compatibility_mode = 222;
+    SettingProto emergency_tone = 223;
+    SettingProto call_auto_retry = 224;
+    SettingProto emergency_affordance_needed = 225;
+    SettingProto preferred_network_mode = 226;
+    SettingProto debug_app = 227;
+    SettingProto wait_for_debugger = 228;
+    SettingProto low_power_mode = 229;
+    SettingProto low_power_mode_trigger_level = 230;
+    SettingProto always_finish_activities = 231;
+    SettingProto dock_audio_media_enabled = 232;
+    SettingProto encoded_surround_output = 233;
+    SettingProto audio_safe_volume_state = 234;
+    SettingProto tzinfo_update_content_url = 235;
+    SettingProto tzinfo_update_metadata_url = 236;
+    SettingProto selinux_update_content_url = 237;
+    SettingProto selinux_update_metadata_url = 238;
+    SettingProto sms_short_codes_update_content_url = 239;
+    SettingProto sms_short_codes_update_metadata_url = 240;
+    SettingProto apn_db_update_content_url = 241;
+    SettingProto apn_db_update_metadata_url = 242;
+    SettingProto cert_pin_update_content_url = 243;
+    SettingProto cert_pin_update_metadata_url = 244;
+    SettingProto intent_firewall_update_content_url = 245;
+    SettingProto intent_firewall_update_metadata_url = 246;
+    SettingProto selinux_status = 247;
+    SettingProto development_force_rtl = 248;
+    SettingProto low_battery_sound_timeout = 249;
+    SettingProto wifi_bounce_delay_override_ms = 250;
+    SettingProto policy_control = 251;
+    SettingProto zen_mode = 252;
+    SettingProto zen_mode_ringer_level = 253;
+    SettingProto zen_mode_config_etag = 254;
+    SettingProto heads_up_notifications_enabled = 255;
+    SettingProto device_name = 256;
+    SettingProto network_scoring_provisioned = 257;
+    SettingProto require_password_to_decrypt = 258;
+    SettingProto enhanced_4g_mode_enabled = 259;
+    SettingProto vt_ims_enabled = 260;
+    SettingProto wfc_ims_enabled = 261;
+    SettingProto wfc_ims_mode = 262;
+    SettingProto wfc_ims_roaming_mode = 263;
+    SettingProto wfc_ims_roaming_enabled = 264;
+    SettingProto lte_service_forced = 265;
+    SettingProto ephemeral_cookie_max_size_bytes = 266;
+    SettingProto enable_ephemeral_feature = 267;
+    SettingProto installed_instant_app_min_cache_period = 268;
+    SettingProto allow_user_switching_when_system_user_locked = 269;
+    SettingProto boot_count = 270;
+    SettingProto safe_boot_disallowed = 271;
+    SettingProto device_demo_mode = 272;
+    SettingProto database_downgrade_reason = 274;
+    SettingProto contacts_database_wal_enabled = 275;
+    SettingProto multi_sim_voice_call_subscription = 276;
+    SettingProto multi_sim_voice_prompt = 277;
+    SettingProto multi_sim_data_call_subscription = 278;
+    SettingProto multi_sim_sms_subscription = 279;
+    SettingProto multi_sim_sms_prompt = 280;
+    SettingProto new_contact_aggregator = 281;
+    SettingProto contact_metadata_sync_enabled = 282;
+    SettingProto enable_cellular_on_boot = 283;
+    SettingProto max_notification_enqueue_rate = 284;
+    SettingProto cell_on = 285;
+    SettingProto network_recommendations_package = 286;
+    SettingProto bluetooth_a2dp_supports_optional_codecs_prefix = 287;
+    SettingProto bluetooth_a2dp_optional_codecs_enabled_prefix = 288;
+    SettingProto installed_instant_app_max_cache_period = 289;
+    SettingProto uninstalled_instant_app_min_cache_period = 290;
+    SettingProto uninstalled_instant_app_max_cache_period = 291;
+    SettingProto unused_static_shared_lib_min_cache_period = 292;
+}
+
+message SecureSettingsProto {
+    // Historical operations
+    repeated SettingsOperationProto historical_op = 1;
+
+    SettingProto android_id = 2;
+    SettingProto default_input_method = 3;
+    SettingProto selected_input_method_subtype = 4;
+    SettingProto input_methods_subtype_history = 5;
+    SettingProto input_method_selector_visibility = 6;
+    SettingProto voice_interaction_service = 7;
+    SettingProto autofill_service = 8;
+    SettingProto bluetooth_hci_log = 9;
+    SettingProto user_setup_complete = 10;
+    SettingProto completed_category_prefix = 11;
+    SettingProto enabled_input_methods = 12;
+    SettingProto disabled_system_input_methods = 13;
+    SettingProto show_ime_with_hard_keyboard = 14;
+    SettingProto always_on_vpn_app = 15;
+    SettingProto always_on_vpn_lockdown = 16;
+    SettingProto install_non_market_apps = 17;
+    SettingProto location_mode = 18;
+    SettingProto location_previous_mode = 19;
+    SettingProto lock_to_app_exit_locked = 20;
+    SettingProto lock_screen_lock_after_timeout = 21;
+    SettingProto lock_screen_allow_remote_input = 22;
+    SettingProto show_note_about_notification_hiding = 23;
+    SettingProto trust_agents_initialized = 24;
+    SettingProto parental_control_enabled = 25;
+    SettingProto parental_control_last_update = 26;
+    SettingProto parental_control_redirect_url = 27;
+    SettingProto settings_classname = 28;
+    SettingProto accessibility_enabled = 29;
+    SettingProto touch_exploration_enabled = 30;
+    SettingProto enabled_accessibility_services = 31;
+    SettingProto touch_exploration_granted_accessibility_services = 32;
+    SettingProto accessibility_speak_password = 33;
+    SettingProto accessibility_high_text_contrast_enabled = 34;
+    SettingProto accessibility_script_injection = 35;
+    SettingProto accessibility_screen_reader_url = 36;
+    SettingProto accessibility_web_content_key_bindings = 37;
+    SettingProto accessibility_display_magnification_enabled = 38;
+    SettingProto accessibility_display_magnification_scale = 39;
+    SettingProto accessibility_soft_keyboard_mode = 40;
+    SettingProto accessibility_captioning_enabled = 41;
+    SettingProto accessibility_captioning_locale = 42;
+    SettingProto accessibility_captioning_preset = 43;
+    SettingProto accessibility_captioning_background_color = 44;
+    SettingProto accessibility_captioning_foreground_color = 45;
+    SettingProto accessibility_captioning_edge_type = 46;
+    SettingProto accessibility_captioning_edge_color = 47;
+    SettingProto accessibility_captioning_window_color = 48;
+    SettingProto accessibility_captioning_typeface = 49;
+    SettingProto accessibility_captioning_font_scale = 50;
+    SettingProto accessibility_display_inversion_enabled = 51;
+    SettingProto accessibility_display_daltonizer_enabled = 52;
+    SettingProto accessibility_display_daltonizer = 53;
+    SettingProto accessibility_autoclick_enabled = 54;
+    SettingProto accessibility_autoclick_delay = 55;
+    SettingProto accessibility_large_pointer_icon = 56;
+    SettingProto long_press_timeout = 57;
+    SettingProto multi_press_timeout = 58;
+    SettingProto enabled_print_services = 59;
+    SettingProto disabled_print_services = 60;
+    SettingProto display_density_forced = 61;
+    SettingProto tts_default_rate = 62;
+    SettingProto tts_default_pitch = 63;
+    SettingProto tts_default_synth = 64;
+    SettingProto tts_default_locale = 65;
+    SettingProto tts_enabled_plugins = 66;
+    SettingProto connectivity_release_pending_intent_delay_ms = 67;
+    SettingProto allowed_geolocation_origins = 68;
+    SettingProto preferred_tty_mode = 69;
+    SettingProto enhanced_voice_privacy_enabled = 70;
+    SettingProto tty_mode_enabled = 71;
+    SettingProto backup_enabled = 72;
+    SettingProto backup_auto_restore = 73;
+    SettingProto backup_provisioned = 74;
+    SettingProto backup_transport = 75;
+    SettingProto last_setup_shown = 76;
+    SettingProto search_global_search_activity = 77;
+    SettingProto search_num_promoted_sources = 78;
+    SettingProto search_max_results_to_display = 79;
+    SettingProto search_max_results_per_source = 80;
+    SettingProto search_web_results_override_limit = 81;
+    SettingProto search_promoted_source_deadline_millis = 82;
+    SettingProto search_source_timeout_millis = 83;
+    SettingProto search_prefill_millis = 84;
+    SettingProto search_max_stat_age_millis = 85;
+    SettingProto search_max_source_event_age_millis = 86;
+    SettingProto search_min_impressions_for_source_ranking = 87;
+    SettingProto search_min_clicks_for_source_ranking = 88;
+    SettingProto search_max_shortcuts_returned = 89;
+    SettingProto search_query_thread_core_pool_size = 90;
+    SettingProto search_query_thread_max_pool_size = 91;
+    SettingProto search_shortcut_refresh_core_pool_size = 92;
+    SettingProto search_shortcut_refresh_max_pool_size = 93;
+    SettingProto search_thread_keepalive_seconds = 94;
+    SettingProto search_per_source_concurrent_query_limit = 95;
+    SettingProto mount_play_notification_snd = 96;
+    SettingProto mount_ums_autostart = 97;
+    SettingProto mount_ums_prompt = 98;
+    SettingProto mount_ums_notify_enabled = 99;
+    SettingProto anr_show_background = 100;
+    SettingProto voice_recognition_service = 101;
+    SettingProto package_verifier_user_consent = 102;
+    SettingProto selected_spell_checker = 103;
+    SettingProto selected_spell_checker_subtype = 104;
+    SettingProto spell_checker_enabled = 105;
+    SettingProto incall_power_button_behavior = 106;
+    SettingProto incall_back_button_behavior = 107;
+    SettingProto wake_gesture_enabled = 108;
+    SettingProto doze_enabled = 109;
+    SettingProto doze_always_on = 110;
+    SettingProto doze_pulse_on_pick_up = 111;
+    SettingProto doze_pulse_on_double_tap = 112;
+    SettingProto ui_night_mode = 113;
+    SettingProto screensaver_enabled = 114;
+    SettingProto screensaver_components = 115;
+    SettingProto screensaver_activate_on_dock = 116;
+    SettingProto screensaver_activate_on_sleep = 117;
+    SettingProto screensaver_default_component = 118;
+    SettingProto nfc_payment_default_component = 119;
+    SettingProto nfc_payment_foreground = 120;
+    SettingProto sms_default_application = 121;
+    SettingProto dialer_default_application = 122;
+    SettingProto emergency_assistance_application = 123;
+    SettingProto assist_structure_enabled = 124;
+    SettingProto assist_screenshot_enabled = 125;
+    SettingProto assist_disclosure_enabled = 126;
+    SettingProto enabled_notification_assistant = 127;
+    SettingProto enabled_notification_listeners = 128;
+    SettingProto enabled_notification_policy_access_packages = 129;
+    SettingProto sync_parent_sounds = 130;
+    SettingProto immersive_mode_confirmations = 131;
+    SettingProto print_service_search_uri = 132;
+    SettingProto payment_service_search_uri = 133;
+    SettingProto skip_first_use_hints = 134;
+    SettingProto unsafe_volume_music_active_ms = 135;
+    SettingProto lock_screen_show_notifications = 136;
+    SettingProto tv_input_hidden_inputs = 137;
+    SettingProto tv_input_custom_labels = 138;
+    SettingProto usb_audio_automatic_routing_disabled = 139;
+    SettingProto sleep_timeout = 140;
+    SettingProto double_tap_to_wake = 141;
+    SettingProto assistant = 142;
+    SettingProto camera_gesture_disabled = 143;
+    SettingProto camera_double_tap_power_gesture_disabled = 144;
+    SettingProto camera_double_twist_to_flip_enabled = 145;
+    SettingProto night_display_activated = 146;
+    SettingProto night_display_auto_mode = 147;
+    SettingProto night_display_custom_start_time = 148;
+    SettingProto night_display_custom_end_time = 149;
+    SettingProto brightness_use_twilight = 150;
+    SettingProto enabled_vr_listeners = 151;
+    SettingProto vr_display_mode = 152;
+    SettingProto carrier_apps_handled = 153;
+    SettingProto managed_profile_contact_remote_search = 154;
+    SettingProto automatic_storage_manager_enabled = 155;
+    SettingProto automatic_storage_manager_days_to_retain = 156;
+    SettingProto automatic_storage_manager_bytes_cleared = 157;
+    SettingProto automatic_storage_manager_last_run = 158;
+    SettingProto system_navigation_keys_enabled = 159;
+    SettingProto downloads_backup_enabled = 160;
+    SettingProto downloads_backup_allow_metered = 161;
+    SettingProto downloads_backup_charging_only = 162;
+    SettingProto automatic_storage_manager_downloads_days_to_retain = 163;
+    SettingProto qs_tiles = 164;
+    SettingProto demo_user_setup_complete = 165;
+    SettingProto instant_apps_enabled = 166;
+    SettingProto device_paired = 167;
+    SettingProto notification_badging = 168;
+}
+
+message SystemSettingsProto {
+    // Historical operations
+    repeated SettingsOperationProto historical_op = 1;
+
+    SettingProto end_button_behavior = 2;
+    SettingProto advanced_settings = 3;
+    SettingProto bluetooth_discoverability = 4;
+    SettingProto bluetooth_discoverability_timeout = 5;
+    SettingProto font_scale = 6;
+    SettingProto system_locales = 7;
+    SettingProto screen_off_timeout = 8;
+    SettingProto screen_brightness = 9;
+    SettingProto screen_brightness_for_vr = 10;
+    SettingProto screen_brightness_mode = 11;
+    SettingProto screen_auto_brightness_adj = 12;
+    SettingProto mode_ringer_streams_affected = 13;
+    SettingProto mute_streams_affected = 14;
+    SettingProto vibrate_on = 15;
+    SettingProto vibrate_input_devices = 16;
+    SettingProto volume_ring = 17;
+    SettingProto volume_system = 18;
+    SettingProto volume_voice = 19;
+    SettingProto volume_music = 20;
+    SettingProto volume_alarm = 21;
+    SettingProto volume_notification = 22;
+    SettingProto volume_bluetooth_sco = 23;
+    SettingProto volume_master = 24;
+    SettingProto master_mono = 25;
+    SettingProto vibrate_in_silent = 26;
+    SettingProto append_for_last_audible = 27;
+    SettingProto ringtone = 28;
+    SettingProto ringtone_cache = 29;
+    SettingProto notification_sound = 30;
+    SettingProto notification_sound_cache = 31;
+    SettingProto alarm_alert = 32;
+    SettingProto alarm_alert_cache = 33;
+    SettingProto media_button_receiver = 34;
+    SettingProto text_auto_replace = 35;
+    SettingProto text_auto_caps = 36;
+    SettingProto text_auto_punctuate = 37;
+    SettingProto text_show_password = 38;
+    SettingProto show_gtalk_service_status = 39;
+    SettingProto time_12_24 = 40;
+    SettingProto date_format = 41;
+    SettingProto setup_wizard_has_run = 42;
+    SettingProto accelerometer_rotation = 43;
+    SettingProto user_rotation = 44;
+    SettingProto hide_rotation_lock_toggle_for_accessibility = 45;
+    SettingProto vibrate_when_ringing = 46;
+    SettingProto dtmf_tone_when_dialing = 47;
+    SettingProto dtmf_tone_type_when_dialing = 48;
+    SettingProto hearing_aid = 49;
+    SettingProto tty_mode = 50;
+    SettingProto sound_effects_enabled = 51;
+    SettingProto haptic_feedback_enabled = 52;
+    SettingProto notification_light_pulse = 53;
+    SettingProto pointer_location = 54;
+    SettingProto show_touches = 55;
+    SettingProto window_orientation_listener_log = 56;
+    SettingProto lockscreen_sounds_enabled = 57;
+    SettingProto lockscreen_disabled = 58;
+    SettingProto sip_receive_calls = 59;
+    SettingProto sip_call_options = 60;
+    SettingProto sip_always = 61;
+    SettingProto sip_address_only = 62;
+    SettingProto pointer_speed = 63;
+    SettingProto lock_to_app_enabled = 64;
+    SettingProto egg_mode = 65;
+    SettingProto when_to_make_wifi_calls = 66;
+}
+
+message SettingProto {
+    // ID of the setting
+    string id = 1;
+
+    // Name of the setting
+    string name = 2;
+
+    // Package name of the setting
+    string pkg = 3;
+
+    // Value of this setting
+    string value = 4;
+
+    // Default value of this setting
+    string default_value = 5;
+
+    // Whether the default is set by the system
+    bool default_from_system = 6;
+}
+
+message SettingsOperationProto {
+    // When the operation happened
+    int64 timestamp = 1;
+
+    // Type of the operation
+    string operation = 2;
+
+    // Name of the setting that was affected (optional)
+    string setting = 3;
+}

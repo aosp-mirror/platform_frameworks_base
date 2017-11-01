@@ -16,20 +16,29 @@
 
 package com.android.server.pm;
 
+import com.android.server.pm.dex.DexManager;
+import com.android.server.pm.dex.PackageDexUsage;
+
 import static com.android.server.pm.PackageManagerService.DEBUG_DEXOPT;
 import static com.android.server.pm.PackageManagerService.TAG;
+
+import com.android.internal.util.ArrayUtils;
 
 import android.annotation.NonNull;
 import android.app.AppGlobals;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageParser;
 import android.content.pm.ResolveInfo;
 import android.os.Build;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.system.ErrnoException;
+import android.system.Os;
 import android.util.ArraySet;
 import android.util.Log;
+import android.util.Slog;
+import android.util.jar.StrictJarFile;
 import dalvik.system.VMRuntime;
 import libcore.io.Libcore;
 
@@ -38,9 +47,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Predicate;
+import java.util.zip.ZipEntry;
 
 /**
  * Class containing helper methods for the PackageManagerService.
@@ -133,7 +144,8 @@ public class PackageManagerServiceUtils {
                 sortTemp, packageManagerService);
 
         // Give priority to apps used by other apps.
-        applyPackageFilter((pkg) -> PackageDexOptimizer.isUsedByOtherApps(pkg), result,
+        applyPackageFilter((pkg) ->
+                packageManagerService.getDexManager().isUsedByOtherApps(pkg.packageName), result,
                 remainingPkgs, sortTemp, packageManagerService);
 
         // Filter out packages that aren't recently used, add all remaining apps.
@@ -178,12 +190,47 @@ public class PackageManagerServiceUtils {
     }
 
     /**
+     * Checks if the package was inactive during since <code>thresholdTimeinMillis</code>.
+     * Package is considered active, if:
+     * 1) It was active in foreground.
+     * 2) It was active in background and also used by other apps.
+     *
+     * If it doesn't have sufficient information about the package, it return <code>false</code>.
+     */
+    static boolean isUnusedSinceTimeInMillis(long firstInstallTime, long currentTimeInMillis,
+            long thresholdTimeinMillis, PackageDexUsage.PackageUseInfo packageUseInfo,
+            long latestPackageUseTimeInMillis, long latestForegroundPackageUseTimeInMillis) {
+
+        if (currentTimeInMillis - firstInstallTime < thresholdTimeinMillis) {
+            return false;
+        }
+
+        // If the app was active in foreground during the threshold period.
+        boolean isActiveInForeground = (currentTimeInMillis
+                - latestForegroundPackageUseTimeInMillis)
+                < thresholdTimeinMillis;
+
+        if (isActiveInForeground) {
+            return false;
+        }
+
+        // If the app was active in background during the threshold period and was used
+        // by other packages.
+        boolean isActiveInBackgroundAndUsedByOtherPackages = ((currentTimeInMillis
+                - latestPackageUseTimeInMillis)
+                < thresholdTimeinMillis)
+                && packageUseInfo.isUsedByOtherApps();
+
+        return !isActiveInBackgroundAndUsedByOtherPackages;
+    }
+
+    /**
      * Returns the canonicalized path of {@code path} as per {@code realpath(3)}
      * semantics.
      */
     public static String realpath(File path) throws IOException {
         try {
-            return Libcore.os.realpath(path.getAbsolutePath());
+            return Os.realpath(path.getAbsolutePath());
         } catch (ErrnoException ee) {
             throw ee.rethrowAsIOException();
         }
@@ -211,5 +258,60 @@ public class PackageManagerServiceUtils {
             }
         }
         return false;
+    }
+
+    /**
+     * Checks that the archive located at {@code fileName} has uncompressed dex file and so
+     * files that can be direclty mapped.
+     */
+    public static void logApkHasUncompressedCode(String fileName) {
+        StrictJarFile jarFile = null;
+        try {
+            jarFile = new StrictJarFile(fileName,
+                    false /*verify*/, false /*signatureSchemeRollbackProtectionsEnforced*/);
+            Iterator<ZipEntry> it = jarFile.iterator();
+            while (it.hasNext()) {
+                ZipEntry entry = it.next();
+                if (entry.getName().endsWith(".dex")) {
+                    if (entry.getMethod() != ZipEntry.STORED) {
+                        Slog.wtf(TAG, "APK " + fileName + " has compressed dex code " +
+                                entry.getName());
+                    } else if ((entry.getDataOffset() & 0x3) != 0) {
+                        Slog.wtf(TAG, "APK " + fileName + " has unaligned dex code " +
+                                entry.getName());
+                    }
+                } else if (entry.getName().endsWith(".so")) {
+                    if (entry.getMethod() != ZipEntry.STORED) {
+                        Slog.wtf(TAG, "APK " + fileName + " has compressed native code " +
+                                entry.getName());
+                    } else if ((entry.getDataOffset() & (0x1000 - 1)) != 0) {
+                        Slog.wtf(TAG, "APK " + fileName + " has unaligned native code " +
+                                entry.getName());
+                    }
+                }
+            }
+        } catch (IOException ignore) {
+            Slog.wtf(TAG, "Error when parsing APK " + fileName);
+        } finally {
+            try {
+                if (jarFile != null) {
+                    jarFile.close();
+                }
+            } catch (IOException ignore) {}
+        }
+        return;
+    }
+
+    /**
+     * Checks that the APKs in the given package have uncompressed dex file and so
+     * files that can be direclty mapped.
+     */
+    public static void logPackageHasUncompressedCode(PackageParser.Package pkg) {
+        logApkHasUncompressedCode(pkg.baseCodePath);
+        if (!ArrayUtils.isEmpty(pkg.splitCodePaths)) {
+            for (int i = 0; i < pkg.splitCodePaths.length; i++) {
+                logApkHasUncompressedCode(pkg.splitCodePaths[i]);
+            }
+        }
     }
 }

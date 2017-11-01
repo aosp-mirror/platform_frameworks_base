@@ -25,6 +25,10 @@ import com.android.mediaframeworktest.MediaNames;
 import android.content.res.AssetFileDescriptor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.MediaCodecInfo;
+import android.media.MediaCodecList;
+import android.media.MediaExtractor;
+import android.media.MediaFormat;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
@@ -39,7 +43,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Writer;
 import java.io.FileOutputStream;
+import java.util.HashSet;
 import java.util.Random;
+import java.util.Set;
 /**
  * Junit / Instrumentation test case for the media player api
 
@@ -66,6 +72,7 @@ public class CodecTest {
     public static int mMediaInfoBadInterleavingCount = 0;
     public static int mMediaInfoNotSeekableCount = 0;
     public static int mMediaInfoMetdataUpdateCount = 0;
+    private static Set<String> mSupportedTypes = new HashSet<>();
 
     public static String printCpuInfo(){
         String cm = "dumpsys cpuinfo";
@@ -786,11 +793,12 @@ public class CodecTest {
     };
 
     public static boolean playMediaSamples(String filePath) throws Exception {
-        return playMediaSamples(filePath, 2000);
+        return playMediaSamples(filePath, 2000, false /* streamingTest */);
     }
 
-    // For each media file, forward twice and backward once, then play to the end
-    public static boolean playMediaSamples(String filePath, int buffertime) throws Exception {
+    // For each media file, just play to the end
+    public static boolean playMediaSamples(String filePath, int buffertime, boolean streamingTest)
+            throws Exception {
         int duration = 0;
         int curPosition = 0;
         int nextPosition = 0;
@@ -804,6 +812,41 @@ public class CodecTest {
         mPlaybackError = false;
         mFailedToCompleteWithNoError = true;
         String testResult;
+
+        boolean hasSupportedVideo = false;
+
+        if (!streamingTest) {
+            if (mSupportedTypes.isEmpty()) {
+                final MediaCodecList list = new MediaCodecList(MediaCodecList.REGULAR_CODECS);
+                for (MediaCodecInfo info : list.getCodecInfos()) {
+                    for (String type : info.getSupportedTypes()) {
+                        mSupportedTypes.add(type);
+                    }
+                }
+            }
+            final MediaExtractor extractor = new MediaExtractor();
+
+            try {
+                extractor.setDataSource(filePath);
+
+                for (int index = 0; index < extractor.getTrackCount(); ++index) {
+                    MediaFormat format = extractor.getTrackFormat(index);
+                    String type = format.getString(MediaFormat.KEY_MIME);
+                    if (!type.startsWith("video/")) {
+                        continue;
+                    }
+
+                    if (mSupportedTypes.contains(type)) {
+                        hasSupportedVideo = true;
+                        break;
+                    }
+                }
+            } finally {
+                extractor.release();
+            }
+        } else { // streamingTest
+            hasSupportedVideo = true;
+        }
 
         initializeMessageLooper();
         synchronized (lock) {
@@ -820,7 +863,12 @@ public class CodecTest {
             mMediaPlayer.setOnInfoListener(mInfoListener);
             Log.v(TAG, "playMediaSamples: sample file name " + filePath);
             mMediaPlayer.setDataSource(filePath);
-            mMediaPlayer.setDisplay(MediaFrameworkTest.mSurfaceView.getHolder());
+            if (hasSupportedVideo) {
+                mMediaPlayer.setDisplay(MediaFrameworkTest.mSurfaceView.getHolder());
+            } else {
+                Log.i(TAG, "Set no display due to no (supported) video track.");
+                mMediaPlayer.setDisplay(null);
+            }
             mMediaPlayer.prepare();
             duration = mMediaPlayer.getDuration();
             // start to play

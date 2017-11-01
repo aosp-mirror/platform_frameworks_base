@@ -23,5 +23,6 @@
 
     <declare-styleable name="Widget">
         <attr name="StaticLibOne_attr" />
+        <attr name="android:text" />
     </declare-styleable>
 </resources>

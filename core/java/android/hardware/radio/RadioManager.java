@@ -16,11 +16,21 @@
 
 package android.hardware.radio;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.annotation.SystemService;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.RemoteException;
+import android.os.ServiceManager;
+import android.os.ServiceManager.ServiceNotFoundException;
+import android.os.SystemProperties;
+import android.text.TextUtils;
+import android.util.Log;
+
 import java.util.List;
 import java.util.Arrays;
 
@@ -32,7 +42,9 @@ import java.util.Arrays;
  * @hide
  */
 @SystemApi
+@SystemService(Context.RADIO_SERVICE)
 public class RadioManager {
+    private static final String TAG = "RadioManager";
 
     /** Method return status: successful operation */
     public static final int STATUS_OK = 0;
@@ -108,10 +120,12 @@ public class RadioManager {
         private final int mNumAudioSources;
         private final boolean mIsCaptureSupported;
         private final BandDescriptor[] mBands;
+        private final boolean mIsBgScanSupported;
+        private final String mVendorExension;
 
         ModuleProperties(int id, int classId, String implementor, String product, String version,
                 String serial, int numTuners, int numAudioSources, boolean isCaptureSupported,
-                BandDescriptor[] bands) {
+                BandDescriptor[] bands, boolean isBgScanSupported, String vendorExension) {
             mId = id;
             mClassId = classId;
             mImplementor = implementor;
@@ -122,6 +136,8 @@ public class RadioManager {
             mNumAudioSources = numAudioSources;
             mIsCaptureSupported = isCaptureSupported;
             mBands = bands;
+            mIsBgScanSupported = isBgScanSupported;
+            mVendorExension = vendorExension;
         }
 
 
@@ -196,6 +212,35 @@ public class RadioManager {
             return mIsCaptureSupported;
         }
 
+        /**
+         * {@code true} if the module supports background scanning. At the given time it may not
+         * be available though, see {@link RadioTuner#startBackgroundScan()}.
+         *
+         * @return {@code true} if background scanning is supported (not necessary available
+         * at a given time), {@code false} otherwise.
+         *
+         * @hide FutureFeature
+         */
+        public boolean isBackgroundScanningSupported() {
+            return mIsBgScanSupported;
+        }
+
+        /**
+         * Opaque vendor-specific string, passed from HAL without changes.
+         * Format of this string can vary across vendors.
+         *
+         * It may be used for extra features, that's not supported by a platform,
+         * for example: "preset-slots=6;ultra-hd-capable=false".
+         *
+         * Client application MUST verify vendor/product name from the
+         * ModuleProperties class before doing any interpretation of this value.
+         *
+         * @hide FutureFeature
+         */
+        public @NonNull String getVendorExension() {
+            return mVendorExension == null ? "" : mVendorExension;
+        }
+
         /** List of descriptors for all bands supported by this module.
          * @return an array of {@link BandDescriptor}.
          */
@@ -218,6 +263,8 @@ public class RadioManager {
             for (int i = 0; i < tmp.length; i++) {
                 mBands[i] = (BandDescriptor) tmp[i];
             }
+            mIsBgScanSupported = in.readInt() == 1;
+            mVendorExension = in.readString();
         }
 
         public static final Parcelable.Creator<ModuleProperties> CREATOR
@@ -243,6 +290,8 @@ public class RadioManager {
             dest.writeInt(mNumAudioSources);
             dest.writeInt(mIsCaptureSupported ? 1 : 0);
             dest.writeParcelableArray(mBands, flags);
+            dest.writeInt(mIsBgScanSupported ? 1 : 0);
+            dest.writeString(mVendorExension);
         }
 
         @Override
@@ -258,6 +307,7 @@ public class RadioManager {
                     + ", mNumTuners=" + mNumTuners
                     + ", mNumAudioSources=" + mNumAudioSources
                     + ", mIsCaptureSupported=" + mIsCaptureSupported
+                    + ", mIsBgScanSupported=" + mIsBgScanSupported
                     + ", mBands=" + Arrays.toString(mBands) + "]";
         }
 
@@ -275,6 +325,8 @@ public class RadioManager {
             result = prime * result + mNumAudioSources;
             result = prime * result + (mIsCaptureSupported ? 1 : 0);
             result = prime * result + Arrays.hashCode(mBands);
+            result = prime * result + (mIsBgScanSupported ? 1 : 0);
+            result = prime * result + ((mVendorExension == null) ? 0 : mVendorExension.hashCode());
             return result;
         }
 
@@ -317,6 +369,10 @@ public class RadioManager {
                 return false;
             if (!Arrays.equals(mBands, other.getBands()))
                 return false;
+            if (mIsBgScanSupported != other.isBackgroundScanningSupported())
+                return false;
+            if (!TextUtils.equals(mVendorExension, other.mVendorExension))
+                return false;
             return true;
         }
     }
@@ -332,6 +388,9 @@ public class RadioManager {
         private final int mSpacing;
 
         BandDescriptor(int region, int type, int lowerLimit, int upperLimit, int spacing) {
+            if (type != BAND_AM && type != BAND_FM && type != BAND_FM_HD && type != BAND_AM_HD) {
+                throw new IllegalArgumentException("Unsupported band: " + type);
+            }
             mRegion = region;
             mType = type;
             mLowerLimit = lowerLimit;
@@ -385,10 +444,28 @@ public class RadioManager {
             mSpacing = in.readInt();
         }
 
+        private static int lookupTypeFromParcel(Parcel in) {
+            int pos = in.dataPosition();
+            in.readInt();  // skip region
+            int type = in.readInt();
+            in.setDataPosition(pos);
+            return type;
+        }
+
         public static final Parcelable.Creator<BandDescriptor> CREATOR
                 = new Parcelable.Creator<BandDescriptor>() {
             public BandDescriptor createFromParcel(Parcel in) {
-                return new BandDescriptor(in);
+                int type = lookupTypeFromParcel(in);
+                switch (type) {
+                    case BAND_FM:
+                    case BAND_FM_HD:
+                        return new FmBandDescriptor(in);
+                    case BAND_AM:
+                    case BAND_AM_HD:
+                        return new AmBandDescriptor(in);
+                    default:
+                        throw new IllegalArgumentException("Unsupported band: " + type);
+                }
             }
 
             public BandDescriptor[] newArray(int size) {
@@ -717,7 +794,17 @@ public class RadioManager {
         public static final Parcelable.Creator<BandConfig> CREATOR
                 = new Parcelable.Creator<BandConfig>() {
             public BandConfig createFromParcel(Parcel in) {
-                return new BandConfig(in);
+                int type = BandDescriptor.lookupTypeFromParcel(in);
+                switch (type) {
+                    case BAND_FM:
+                    case BAND_FM_HD:
+                        return new FmBandConfig(in);
+                    case BAND_AM:
+                    case BAND_AM_HD:
+                        return new AmBandConfig(in);
+                    default:
+                        throw new IllegalArgumentException("Unsupported band: " + type);
+                }
             }
 
             public BandConfig[] newArray(int size) {
@@ -755,8 +842,9 @@ public class RadioManager {
             if (!(obj instanceof BandConfig))
                 return false;
             BandConfig other = (BandConfig) obj;
-            if (mDescriptor != other.getDescriptor())
-                return false;
+            BandDescriptor otherDesc = other.getDescriptor();
+            if ((mDescriptor == null) != (otherDesc == null)) return false;
+            if (mDescriptor != null && !mDescriptor.equals(otherDesc)) return false;
             return true;
         }
     }
@@ -1136,23 +1224,32 @@ public class RadioManager {
      * {@link RadioTuner#getProgramInformation(RadioManager.ProgramInfo[])} */
     public static class ProgramInfo implements Parcelable {
 
+        // sourced from hardware/interfaces/broadcastradio/1.1/types.hal
+        private final static int FLAG_LIVE = 1 << 0;
+        private final static int FLAG_MUTED = 1 << 1;
+
         private final int mChannel;
         private final int mSubChannel;
         private final boolean mTuned;
         private final boolean mStereo;
         private final boolean mDigital;
+        private final int mFlags;
         private final int mSignalStrength;
         private final RadioMetadata mMetadata;
+        private final String mVendorExension;
 
         ProgramInfo(int channel, int subChannel, boolean tuned, boolean stereo,
-                boolean digital, int signalStrength, RadioMetadata metadata) {
+                boolean digital, int signalStrength, RadioMetadata metadata, int flags,
+                String vendorExension) {
             mChannel = channel;
             mSubChannel = subChannel;
             mTuned = tuned;
             mStereo = stereo;
             mDigital = digital;
+            mFlags = flags;
             mSignalStrength = signalStrength;
             mMetadata = metadata;
+            mVendorExension = vendorExension;
         }
 
         /** Main channel expressed in units according to band type.
@@ -1186,6 +1283,30 @@ public class RadioManager {
         public boolean isDigital() {
             return mDigital;
         }
+
+        /**
+         * {@code true} if the program is currently playing live stream.
+         * This may result in a slightly altered reception parameters,
+         * usually targetted at reduced latency.
+         *
+         * @hide FutureFeature
+         */
+        public boolean isLive() {
+            return (mFlags & FLAG_LIVE) != 0;
+        }
+
+        /**
+         * {@code true} if radio stream is not playing, ie. due to bad reception
+         * conditions or buffering. In this state volume knob MAY be disabled to
+         * prevent user increasing volume too much.
+         * It does NOT mean the user has muted audio.
+         *
+         * @hide FutureFeature
+         */
+        public boolean isMuted() {
+            return (mFlags & FLAG_MUTED) != 0;
+        }
+
         /** Signal strength indicator from 0 (no signal) to 100 (excellent)
          * @return the signal strength indication.
          */
@@ -1200,6 +1321,22 @@ public class RadioManager {
             return mMetadata;
         }
 
+        /**
+         * Opaque vendor-specific string, passed from HAL without changes.
+         * Format of this string can vary across vendors.
+         *
+         * It may be used for extra features, that's not supported by a platform,
+         * for example: "paid-service=true;bitrate=320kbps".
+         *
+         * Client application MUST verify vendor/product name from the
+         * ModuleProperties class before doing any interpretation of this value.
+         *
+         * @hide FutureFeature
+         */
+        public @NonNull String getVendorExension() {
+            return mVendorExension == null ? "" : mVendorExension;
+        }
+
         private ProgramInfo(Parcel in) {
             mChannel = in.readInt();
             mSubChannel = in.readInt();
@@ -1212,6 +1349,8 @@ public class RadioManager {
             } else {
                 mMetadata = null;
             }
+            mFlags = in.readInt();
+            mVendorExension = in.readString();
         }
 
         public static final Parcelable.Creator<ProgramInfo> CREATOR
@@ -1239,6 +1378,8 @@ public class RadioManager {
                 dest.writeByte((byte)1);
                 mMetadata.writeToParcel(dest, flags);
             }
+            dest.writeInt(mFlags);
+            dest.writeString(mVendorExension);
         }
 
         @Override
@@ -1250,7 +1391,7 @@ public class RadioManager {
         public String toString() {
             return "ProgramInfo [mChannel=" + mChannel + ", mSubChannel=" + mSubChannel
                     + ", mTuned=" + mTuned + ", mStereo=" + mStereo + ", mDigital=" + mDigital
-                    + ", mSignalStrength=" + mSignalStrength
+                    + ", mFlags=" + mFlags + ", mSignalStrength=" + mSignalStrength
                     + ((mMetadata == null) ? "" : (", mMetadata=" + mMetadata.toString()))
                     + "]";
         }
@@ -1264,8 +1405,10 @@ public class RadioManager {
             result = prime * result + (mTuned ? 1 : 0);
             result = prime * result + (mStereo ? 1 : 0);
             result = prime * result + (mDigital ? 1 : 0);
+            result = prime * result + mFlags;
             result = prime * result + mSignalStrength;
             result = prime * result + ((mMetadata == null) ? 0 : mMetadata.hashCode());
+            result = prime * result + ((mVendorExension == null) ? 0 : mVendorExension.hashCode());
             return result;
         }
 
@@ -1286,12 +1429,16 @@ public class RadioManager {
                 return false;
             if (mDigital != other.isDigital())
                 return false;
+            if (mFlags != other.mFlags)
+                return false;
             if (mSignalStrength != other.getSignalStrength())
                 return false;
             if (mMetadata == null) {
                 if (other.getMetadata() != null)
                     return false;
             } else if (!mMetadata.equals(other.getMetadata()))
+                return false;
+            if (!TextUtils.equals(mVendorExension, other.mVendorExension))
                 return false;
             return true;
         }
@@ -1329,23 +1476,47 @@ public class RadioManager {
     public RadioTuner openTuner(int moduleId, BandConfig config, boolean withAudio,
             RadioTuner.Callback callback, Handler handler) {
         if (callback == null) {
-            return null;
+            throw new IllegalArgumentException("callback must not be empty");
         }
-        RadioModule module = new RadioModule(moduleId, config, withAudio, callback, handler);
-        if (module != null) {
-            if (!module.initCheck()) {
-                module = null;
+
+        if (mService != null) {
+            Log.d(TAG, "Opening tuner...");
+
+            ITuner tuner;
+            ITunerCallback halCallback = new TunerCallbackAdapter(callback, handler);
+            try {
+                tuner = mService.openTuner(moduleId, config, withAudio, halCallback);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
             }
+            if (tuner == null) {
+                Log.e(TAG, "Failed to open tuner");
+                return null;
+            }
+            return new TunerAdapter(tuner);
         }
+
+        RadioModule module = new RadioModule(moduleId, config, withAudio, callback, handler);
+        if (!module.initCheck()) {
+            Log.e(TAG, "Failed to open tuner");
+            module = null;
+        }
+
         return (RadioTuner)module;
     }
 
-    private final Context mContext;
+    @NonNull private final Context mContext;
+    // TODO(b/36863239): NonNull when transitioned from native service
+    @Nullable private final IRadioService mService;
 
     /**
      * @hide
      */
-    public RadioManager(Context context) {
+    public RadioManager(@NonNull Context context) throws ServiceNotFoundException {
         mContext = context;
+
+        boolean isServiceJava = SystemProperties.getBoolean("config.enable_java_radio", false);
+        mService = isServiceJava ? IRadioService.Stub.asInterface(
+                ServiceManager.getServiceOrThrow(Context.RADIO_SERVICE)) : null;
     }
 }

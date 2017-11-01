@@ -42,10 +42,11 @@ public class MessageUtils {
 
     /**
      * Finds the names of integer constants. Searches the specified {@code classes}, looking for
-     * accessible static integer fields whose names begin with one of the specified {@prefixes}.
+     * accessible static integer fields whose names begin with one of the specified
+     * {@code prefixes}.
      *
      * @param classes the classes to examine.
-     * @prefixes only consider fields names starting with one of these prefixes.
+     * @param prefixes only consider fields names starting with one of these prefixes.
      * @return a {@link SparseArray} mapping integer constants to their names.
      */
     public static SparseArray<String> findMessageNames(Class[] classes, String[] prefixes) {
@@ -122,7 +123,6 @@ public class MessageUtils {
      * accessible static integer values whose names begin with {@link #DEFAULT_PREFIXES}.
      *
      * @param classNames the classes to examine.
-     * @prefixes only consider fields names starting with one of these prefixes.
      * @return a {@link SparseArray} mapping integer constants to their names.
      */
     public static SparseArray<String> findMessageNames(Class[] classNames) {

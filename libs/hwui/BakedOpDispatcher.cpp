@@ -18,6 +18,7 @@
 
 #include "BakedOpRenderer.h"
 #include "Caches.h"
+#include "DeferredLayerUpdater.h"
 #include "Glop.h"
 #include "GlopBuilder.h"
 #include "Patch.h"
@@ -35,29 +36,24 @@
 namespace android {
 namespace uirenderer {
 
-static void storeTexturedRect(TextureVertex* vertices, const Rect& bounds, const Rect& texCoord) {
-    vertices[0] = { bounds.left, bounds.top, texCoord.left, texCoord.top };
-    vertices[1] = { bounds.right, bounds.top, texCoord.right, texCoord.top };
-    vertices[2] = { bounds.left, bounds.bottom, texCoord.left, texCoord.bottom };
-    vertices[3] = { bounds.right, bounds.bottom, texCoord.right, texCoord.bottom };
+static void storeTexturedRect(TextureVertex* vertices, const Rect& bounds) {
+    vertices[0] = { bounds.left,  bounds.top,    0, 0 };
+    vertices[1] = { bounds.right, bounds.top,    1, 0 };
+    vertices[2] = { bounds.left,  bounds.bottom, 0, 1 };
+    vertices[3] = { bounds.right, bounds.bottom, 1, 1 };
 }
 
 void BakedOpDispatcher::onMergedBitmapOps(BakedOpRenderer& renderer,
         const MergedBakedOpList& opList) {
 
     const BakedOpState& firstState = *(opList.states[0]);
-    const SkBitmap* bitmap = (static_cast<const BitmapOp*>(opList.states[0]->op))->bitmap;
+    Bitmap* bitmap = (static_cast<const BitmapOp*>(opList.states[0]->op))->bitmap;
 
-    AssetAtlas::Entry* entry = renderer.renderState().assetAtlas().getEntry(bitmap->pixelRef());
-    Texture* texture = entry ? entry->texture : renderer.caches().textureCache.get(bitmap);
+    Texture* texture = renderer.caches().textureCache.get(bitmap);
     if (!texture) return;
     const AutoTexture autoCleanup(texture);
 
     TextureVertex vertices[opList.count * 4];
-    Rect texCoords(0, 0, 1, 1);
-    if (entry) {
-        entry->uvMapper.map(texCoords);
-    }
     for (size_t i = 0; i < opList.count; i++) {
         const BakedOpState& state = *(opList.states[i]);
         TextureVertex* rectVerts = &vertices[i * 4];
@@ -69,7 +65,7 @@ void BakedOpDispatcher::onMergedBitmapOps(BakedOpRenderer& renderer,
             // pure translate, so snap (same behavior as onBitmapOp)
             opBounds.snapToPixelBoundaries();
         }
-        storeTexturedRect(rectVerts, opBounds, texCoords);
+        storeTexturedRect(rectVerts, opBounds);
         renderer.dirtyRenderTarget(opBounds);
     }
 
@@ -92,8 +88,6 @@ void BakedOpDispatcher::onMergedPatchOps(BakedOpRenderer& renderer,
         const MergedBakedOpList& opList) {
     const PatchOp& firstOp = *(static_cast<const PatchOp*>(opList.states[0]->op));
     const BakedOpState& firstState = *(opList.states[0]);
-    AssetAtlas::Entry* entry = renderer.renderState().assetAtlas().getEntry(
-            firstOp.bitmap->pixelRef());
 
     // Batches will usually contain a small number of items so it's
     // worth performing a first iteration to count the exact number
@@ -105,7 +99,7 @@ void BakedOpDispatcher::onMergedPatchOps(BakedOpRenderer& renderer,
 
         // TODO: cache mesh lookups
         const Patch* opMesh = renderer.caches().patchCache.get(
-                entry, op.bitmap->width(), op.bitmap->height(),
+                op.bitmap->width(), op.bitmap->height(),
                 op.unmappedBounds.getWidth(), op.unmappedBounds.getHeight(), op.patch);
         totalVertices += opMesh->verticesCount;
     }
@@ -126,7 +120,7 @@ void BakedOpDispatcher::onMergedPatchOps(BakedOpRenderer& renderer,
 
         // TODO: cache mesh lookups
         const Patch* opMesh = renderer.caches().patchCache.get(
-                entry, op.bitmap->width(), op.bitmap->height(),
+                op.bitmap->width(), op.bitmap->height(),
                 op.unmappedBounds.getWidth(), op.unmappedBounds.getHeight(), op.patch);
 
 
@@ -172,7 +166,7 @@ void BakedOpDispatcher::onMergedPatchOps(BakedOpRenderer& renderer,
     }
 
 
-    Texture* texture = entry ? entry->texture : renderer.caches().textureCache.get(firstOp.bitmap);
+    Texture* texture = renderer.caches().textureCache.get(firstOp.bitmap);
     if (!texture) return;
     const AutoTexture autoCleanup(texture);
 
@@ -299,7 +293,7 @@ static void renderText(BakedOpRenderer& renderer, const TextOp& op, const BakedO
     Rect layerBounds(FLT_MAX / 2.0f, FLT_MAX / 2.0f, FLT_MIN / 2.0f, FLT_MIN / 2.0f);
 
     int alpha = PaintUtils::getAlphaDirect(op.paint) * state.alpha;
-    SkXfermode::Mode mode = PaintUtils::getXfermodeDirect(op.paint);
+    SkBlendMode mode = PaintUtils::getBlendModeDirect(op.paint);
     TextDrawFunctor functor(&renderer, &state, renderClip,
             x, y, pureTranslate, alpha, mode, op.paint);
 
@@ -442,7 +436,12 @@ void BakedOpDispatcher::onBitmapOp(BakedOpRenderer& renderer, const BitmapOp& op
 }
 
 void BakedOpDispatcher::onBitmapMeshOp(BakedOpRenderer& renderer, const BitmapMeshOp& op, const BakedOpState& state) {
-    const static UvMapper defaultUvMapper;
+    Texture* texture = renderer.caches().textureCache.get(op.bitmap);
+    if (!texture) {
+        return;
+    }
+    const AutoTexture autoCleanup(texture);
+
     const uint32_t elementCount = op.meshWidth * op.meshHeight * 6;
 
     std::unique_ptr<ColorTextureVertex[]> mesh(new ColorTextureVertex[elementCount]);
@@ -457,9 +456,6 @@ void BakedOpDispatcher::onBitmapMeshOp(BakedOpRenderer& renderer, const BitmapMe
         colors = tempColors.get();
     }
 
-    Texture* texture = renderer.renderState().assetAtlas().getEntryTexture(op.bitmap->pixelRef());
-    const UvMapper& mapper(texture && texture->uvMapper ? *texture->uvMapper : defaultUvMapper);
-
     for (int32_t y = 0; y < op.meshHeight; y++) {
         for (int32_t x = 0; x < op.meshWidth; x++) {
             uint32_t i = (y * (op.meshWidth + 1) + x) * 2;
@@ -468,8 +464,6 @@ void BakedOpDispatcher::onBitmapMeshOp(BakedOpRenderer& renderer, const BitmapMe
             float u2 = float(x + 1) / op.meshWidth;
             float v1 = float(y) / op.meshHeight;
             float v2 = float(y + 1) / op.meshHeight;
-
-            mapper.map(u1, v1, u2, v2);
 
             int ax = i + (op.meshWidth + 1) * 2;
             int ay = ax + 1;
@@ -490,14 +484,6 @@ void BakedOpDispatcher::onBitmapMeshOp(BakedOpRenderer& renderer, const BitmapMe
             ColorTextureVertex::set(vertex++, vertices[cx], vertices[cy], u2, v1, colors[cx / 2]);
         }
     }
-
-    if (!texture) {
-        texture = renderer.caches().textureCache.get(op.bitmap);
-        if (!texture) {
-            return;
-        }
-    }
-    const AutoTexture autoCleanup(texture);
 
     /*
      * TODO: handle alpha_8 textures correctly by applying paint color, but *not*
@@ -543,7 +529,7 @@ void BakedOpDispatcher::onBitmapRectOp(BakedOpRenderer& renderer, const BitmapRe
 void BakedOpDispatcher::onColorOp(BakedOpRenderer& renderer, const ColorOp& op, const BakedOpState& state) {
     SkPaint paint;
     paint.setColor(op.color);
-    paint.setXfermodeMode(op.mode);
+    paint.setBlendMode(op.mode);
 
     Glop glop;
     GlopBuilder(renderer.renderState(), renderer.caches(), &glop)
@@ -599,12 +585,11 @@ void BakedOpDispatcher::onPatchOp(BakedOpRenderer& renderer, const PatchOp& op, 
     }
 
     // TODO: avoid redoing the below work each frame:
-    AssetAtlas::Entry* entry = renderer.renderState().assetAtlas().getEntry(op.bitmap->pixelRef());
     const Patch* mesh = renderer.caches().patchCache.get(
-            entry, op.bitmap->width(), op.bitmap->height(),
+            op.bitmap->width(), op.bitmap->height(),
             op.unmappedBounds.getWidth(), op.unmappedBounds.getHeight(), op.patch);
 
-    Texture* texture = entry ? entry->texture : renderer.caches().textureCache.get(op.bitmap);
+    Texture* texture = renderer.caches().textureCache.get(op.bitmap);
     if (CC_LIKELY(texture)) {
         const AutoTexture autoCleanup(texture);
         Glop glop;
@@ -760,7 +745,7 @@ void BakedOpDispatcher::onTextOnPathOp(BakedOpRenderer& renderer, const TextOnPa
     Rect layerBounds(FLT_MAX / 2.0f, FLT_MAX / 2.0f, FLT_MIN / 2.0f, FLT_MIN / 2.0f);
 
     int alpha = PaintUtils::getAlphaDirect(op.paint) * state.alpha;
-    SkXfermode::Mode mode = PaintUtils::getXfermodeDirect(op.paint);
+    SkBlendMode mode = PaintUtils::getBlendModeDirect(op.paint);
     TextDrawFunctor functor(&renderer, &state, renderTargetClip,
             0.0f, 0.0f, false, alpha, mode, op.paint);
 
@@ -778,25 +763,29 @@ void BakedOpDispatcher::onTextOnPathOp(BakedOpRenderer& renderer, const TextOnPa
 }
 
 void BakedOpDispatcher::onTextureLayerOp(BakedOpRenderer& renderer, const TextureLayerOp& op, const BakedOpState& state) {
-    const bool tryToSnap = !op.layer->getForceFilter();
-    float alpha = (op.layer->getAlpha() / 255.0f) * state.alpha;
+    GlLayer* layer = static_cast<GlLayer*>(op.layerHandle->backingLayer());
+    if (!layer) {
+        return;
+    }
+    const bool tryToSnap = layer->getForceFilter();
+    float alpha = (layer->getAlpha() / 255.0f) * state.alpha;
     Glop glop;
     GlopBuilder(renderer.renderState(), renderer.caches(), &glop)
             .setRoundRectClipState(state.roundRectClipState)
             .setMeshTexturedUvQuad(nullptr, Rect(0, 1, 1, 0)) // TODO: simplify with VBO
-            .setFillTextureLayer(*(op.layer), alpha)
+            .setFillTextureLayer(*(layer), alpha)
             .setTransform(state.computedState.transform, TransformFlags::None)
-            .setModelViewMapUnitToRectOptionalSnap(tryToSnap, Rect(op.layer->getWidth(), op.layer->getHeight()))
+            .setModelViewMapUnitToRectOptionalSnap(tryToSnap, Rect(layer->getWidth(), layer->getHeight()))
             .build();
     renderer.renderGlop(state, glop);
 }
 
 void renderRectForLayer(BakedOpRenderer& renderer, const LayerOp& op, const BakedOpState& state,
-        int color, SkXfermode::Mode mode, SkColorFilter* colorFilter) {
+        int color, SkBlendMode mode, SkColorFilter* colorFilter) {
     SkPaint paint;
     paint.setColor(color);
-    paint.setXfermodeMode(mode);
-    paint.setColorFilter(colorFilter);
+    paint.setBlendMode(mode);
+    paint.setColorFilter(sk_ref_sp(colorFilter));
     RectOp rectOp(op.unmappedBounds, op.localMatrix, op.localClip, &paint);
     BakedOpDispatcher::onRectOp(renderer, rectOp, state);
 }
@@ -824,11 +813,11 @@ void BakedOpDispatcher::onLayerOp(BakedOpRenderer& renderer, const LayerOp& op, 
         if (CC_UNLIKELY(Properties::debugLayersUpdates)) {
             // render debug layer highlight
             renderRectForLayer(renderer, op, state,
-                    0x7f00ff00, SkXfermode::Mode::kSrcOver_Mode, nullptr);
+                    0x7f00ff00, SkBlendMode::kSrcOver, nullptr);
         } else if (CC_UNLIKELY(Properties::debugOverdraw)) {
             // render transparent to increment overdraw for repaint area
             renderRectForLayer(renderer, op, state,
-                    SK_ColorTRANSPARENT, SkXfermode::Mode::kSrcOver_Mode, nullptr);
+                    SK_ColorTRANSPARENT, SkBlendMode::kSrcOver, nullptr);
         }
     }
 }
@@ -845,14 +834,14 @@ void BakedOpDispatcher::onCopyFromLayerOp(BakedOpRenderer& renderer, const CopyF
         if (op.paint && op.paint->getAlpha() < 255) {
             SkPaint layerPaint;
             layerPaint.setAlpha(op.paint->getAlpha());
-            layerPaint.setXfermodeMode(SkXfermode::kDstIn_Mode);
-            layerPaint.setColorFilter(op.paint->getColorFilter());
+            layerPaint.setBlendMode(SkBlendMode::kDstIn);
+            layerPaint.setColorFilter(sk_ref_sp(op.paint->getColorFilter()));
             RectOp rectOp(state.computedState.clippedBounds, Matrix4::identity(), nullptr, &layerPaint);
             BakedOpDispatcher::onRectOp(renderer, rectOp, state);
         }
 
         OffscreenBuffer& layer = **(op.layerHandle);
-        auto mode = PaintUtils::getXfermodeDirect(op.paint);
+        auto mode = PaintUtils::getBlendModeDirect(op.paint);
         Glop glop;
         GlopBuilder(renderer.renderState(), renderer.caches(), &glop)
                 .setRoundRectClipState(state.roundRectClipState)

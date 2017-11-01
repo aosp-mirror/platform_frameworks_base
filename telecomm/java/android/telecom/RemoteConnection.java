@@ -20,10 +20,12 @@ import com.android.internal.telecom.IConnectionService;
 import com.android.internal.telecom.IVideoCallback;
 import com.android.internal.telecom.IVideoProvider;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.hardware.camera2.CameraManager;
 import android.net.Uri;
+import android.os.BadParcelableException;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -231,6 +233,41 @@ public final class RemoteConnection {
          * @param extras Extras associated with the event.
          */
         public void onConnectionEvent(RemoteConnection connection, String event, Bundle extras) {}
+
+        /**
+         * Indicates that a RTT session was successfully established on this
+         * {@link RemoteConnection}. See {@link Connection#sendRttInitiationSuccess()}.
+         * @hide
+         * @param connection The {@code RemoteConnection} invoking this method.
+         */
+        public void onRttInitiationSuccess(RemoteConnection connection) {}
+
+        /**
+         * Indicates that a RTT session failed to be established on this
+         * {@link RemoteConnection}. See {@link Connection#sendRttInitiationFailure()}.
+         * @hide
+         * @param connection The {@code RemoteConnection} invoking this method.
+         * @param reason One of the reason codes defined in {@link Connection.RttModifyStatus},
+         *               with the exception of
+         *               {@link Connection.RttModifyStatus#SESSION_MODIFY_REQUEST_SUCCESS}.
+         */
+        public void onRttInitiationFailure(RemoteConnection connection, int reason) {}
+
+        /**
+         * Indicates that an established RTT session was terminated remotely on this
+         * {@link RemoteConnection}. See {@link Connection#sendRttSessionRemotelyTerminated()}
+         * @hide
+         * @param connection The {@code RemoteConnection} invoking this method.
+         */
+        public void onRttSessionRemotelyTerminated(RemoteConnection connection) {}
+
+        /**
+         * Indicates that the remote user on this {@link RemoteConnection} has requested an upgrade
+         * to an RTT session. See {@link Connection#sendRemoteRttRequest()}
+         * @hide
+         * @param connection The {@code RemoteConnection} invoking this method.
+         */
+        public void onRemoteRttRequest(RemoteConnection connection) {}
     }
 
     /**
@@ -408,6 +445,10 @@ public final class RemoteConnection {
 
         private final IVideoProvider mVideoProviderBinder;
 
+        private final String mCallingPackage;
+
+        private final int mTargetSdkVersion;
+
         /**
          * ConcurrentHashMap constructor params: 8 is initial table size, 0.9f is
          * load factor before resizing, 1 means we only expect a single thread to
@@ -416,8 +457,12 @@ public final class RemoteConnection {
         private final Set<Callback> mCallbacks = Collections.newSetFromMap(
                 new ConcurrentHashMap<Callback, Boolean>(8, 0.9f, 1));
 
-        VideoProvider(IVideoProvider videoProviderBinder) {
+        VideoProvider(IVideoProvider videoProviderBinder, String callingPackage,
+                      int targetSdkVersion) {
+
             mVideoProviderBinder = videoProviderBinder;
+            mCallingPackage = callingPackage;
+            mTargetSdkVersion = targetSdkVersion;
             try {
                 mVideoProviderBinder.addVideoCallback(mVideoCallbackServant.getStub().asBinder());
             } catch (RemoteException e) {
@@ -452,7 +497,7 @@ public final class RemoteConnection {
          */
         public void setCamera(String cameraId) {
             try {
-                mVideoProviderBinder.setCamera(cameraId);
+                mVideoProviderBinder.setCamera(cameraId, mCallingPackage, mTargetSdkVersion);
             } catch (RemoteException e) {
             }
         }
@@ -628,7 +673,7 @@ public final class RemoteConnection {
      * @hide
      */
     RemoteConnection(String callId, IConnectionService connectionService,
-            ParcelableConnection connection) {
+            ParcelableConnection connection, String callingPackage, int targetSdkVersion) {
         mConnectionId = callId;
         mConnectionService = connectionService;
         mConnected = true;
@@ -640,7 +685,8 @@ public final class RemoteConnection {
         mVideoState = connection.getVideoState();
         IVideoProvider videoProvider = connection.getVideoProvider();
         if (videoProvider != null) {
-            mVideoProvider = new RemoteConnection.VideoProvider(videoProvider);
+            mVideoProvider = new RemoteConnection.VideoProvider(videoProvider, callingPackage,
+                    targetSdkVersion);
         } else {
             mVideoProvider = null;
         }
@@ -651,6 +697,14 @@ public final class RemoteConnection {
         mCallerDisplayName = connection.getCallerDisplayName();
         mCallerDisplayNamePresentation = connection.getCallerDisplayNamePresentation();
         mConference = null;
+        putExtras(connection.getExtras());
+
+        // Stash the original connection ID as it exists in the source ConnectionService.
+        // Telecom will use this to avoid adding duplicates later.
+        // See comments on Connection.EXTRA_ORIGINAL_CONNECTION_ID for more information.
+        Bundle newExtras = new Bundle();
+        newExtras.putString(Connection.EXTRA_ORIGINAL_CONNECTION_ID, callId);
+        putExtras(newExtras);
     }
 
     /**
@@ -1035,6 +1089,61 @@ public final class RemoteConnection {
     }
 
     /**
+     * Notifies this {@link RemoteConnection} that the user has requested an RTT session.
+     * @param rttTextStream The object that should be used to send text to or receive text from
+     *                      the in-call app.
+     * @hide
+     */
+    public void startRtt(@NonNull Connection.RttTextStream rttTextStream) {
+        try {
+            if (mConnected) {
+                mConnectionService.startRtt(mConnectionId, rttTextStream.getFdFromInCall(),
+                        rttTextStream.getFdToInCall(), null /*Session.Info*/);
+            }
+        } catch (RemoteException ignored) {
+        }
+    }
+
+    /**
+     * Notifies this {@link RemoteConnection} that it should terminate any existing RTT
+     * session. No response to Telecom is needed for this method.
+     * @hide
+     */
+    public void stopRtt() {
+        try {
+            if (mConnected) {
+                mConnectionService.stopRtt(mConnectionId, null /*Session.Info*/);
+            }
+        } catch (RemoteException ignored) {
+        }
+    }
+
+    /**
+     * Notifies this {@link RemoteConnection} of a response to a previous remotely-initiated RTT
+     * upgrade request sent via {@link Connection#sendRemoteRttRequest}.
+     * Acceptance of the request is indicated by the supplied {@link RttTextStream} being non-null,
+     * and rejection is indicated by {@code rttTextStream} being {@code null}
+     * @hide
+     * @param rttTextStream The object that should be used to send text to or receive text from
+     *                      the in-call app.
+     */
+    public void sendRttUpgradeResponse(@Nullable Connection.RttTextStream rttTextStream) {
+        try {
+            if (mConnected) {
+                if (rttTextStream == null) {
+                    mConnectionService.respondToRttUpgradeRequest(mConnectionId,
+                            null, null, null /*Session.Info*/);
+                } else {
+                    mConnectionService.respondToRttUpgradeRequest(mConnectionId,
+                            rttTextStream.getFdFromInCall(), rttTextStream.getFdToInCall(),
+                            null /*Session.Info*/);
+                }
+            }
+        } catch (RemoteException ignored) {
+        }
+    }
+
+    /**
      * Obtain the {@code RemoteConnection}s with which this {@code RemoteConnection} may be
      * successfully asked to create a conference with.
      *
@@ -1350,10 +1459,17 @@ public final class RemoteConnection {
 
     /** @hide */
     void putExtras(final Bundle extras) {
+        if (extras == null) {
+            return;
+        }
         if (mExtras == null) {
             mExtras = new Bundle();
         }
-        mExtras.putAll(extras);
+        try {
+            mExtras.putAll(extras);
+        } catch (BadParcelableException bpe) {
+            Log.w(this, "putExtras: could not unmarshal extras; exception = " + bpe);
+        }
 
         notifyExtrasChanged();
     }
@@ -1397,6 +1513,47 @@ public final class RemoteConnection {
         }
     }
 
+    /** @hide */
+    void onRttInitiationSuccess() {
+        for (CallbackRecord record : mCallbackRecords) {
+            final RemoteConnection connection = this;
+            final Callback callback = record.getCallback();
+            record.getHandler().post(
+                    () -> callback.onRttInitiationSuccess(connection));
+        }
+    }
+
+    /** @hide */
+    void onRttInitiationFailure(int reason) {
+        for (CallbackRecord record : mCallbackRecords) {
+            final RemoteConnection connection = this;
+            final Callback callback = record.getCallback();
+            record.getHandler().post(
+                    () -> callback.onRttInitiationFailure(connection, reason));
+        }
+    }
+
+    /** @hide */
+    void onRttSessionRemotelyTerminated() {
+        for (CallbackRecord record : mCallbackRecords) {
+            final RemoteConnection connection = this;
+            final Callback callback = record.getCallback();
+            record.getHandler().post(
+                    () -> callback.onRttSessionRemotelyTerminated(connection));
+        }
+    }
+
+    /** @hide */
+    void onRemoteRttRequest() {
+        for (CallbackRecord record : mCallbackRecords) {
+            final RemoteConnection connection = this;
+            final Callback callback = record.getCallback();
+            record.getHandler().post(
+                    () -> callback.onRemoteRttRequest(connection));
+        }
+    }
+
+    /**
     /**
      * Create a RemoteConnection represents a failure, and which will be in
      * {@link Connection#STATE_DISCONNECTED}. Attempting to use it for anything will almost

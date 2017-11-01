@@ -43,7 +43,7 @@ public class ImageSpan extends DynamicDrawableSpan {
     }
 
     /**
-     * @deprecated Use {@link #ImageSpan(Context, Bitmap, int) instead.
+     * @deprecated Use {@link #ImageSpan(Context, Bitmap, int)} instead.
      */
     @Deprecated
     public ImageSpan(Bitmap b, int verticalAlignment) {

@@ -18,6 +18,9 @@ package android.net;
 
 import android.os.SystemProperties;
 import android.util.Log;
+
+import com.android.internal.os.RoSystemProperties;
+import com.android.org.conscrypt.Conscrypt;
 import com.android.org.conscrypt.OpenSSLContextImpl;
 import com.android.org.conscrypt.OpenSSLSocketImpl;
 import com.android.org.conscrypt.SSLClientSessionCache;
@@ -210,7 +213,7 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
     private SSLSocketFactory makeSocketFactory(
             KeyManager[] keyManagers, TrustManager[] trustManagers) {
         try {
-            OpenSSLContextImpl sslContext = OpenSSLContextImpl.getPreferred();
+            OpenSSLContextImpl sslContext =  (OpenSSLContextImpl) Conscrypt.newPreferredSSLContextSpi();
             sslContext.engineInit(keyManagers, trustManagers, null);
             sslContext.engineGetClientSessionContext().setPersistentCache(mSessionCache);
             return sslContext.engineGetSocketFactory();
@@ -221,8 +224,8 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
     }
 
     private static boolean isSslCheckRelaxed() {
-        return "1".equals(SystemProperties.get("ro.debuggable")) &&
-            "yes".equals(SystemProperties.get("socket.relaxsslcheck"));
+        return RoSystemProperties.DEBUGGABLE &&
+            SystemProperties.getBoolean("socket.relaxsslcheck", false);
     }
 
     private synchronized SSLSocketFactory getDelegate() {

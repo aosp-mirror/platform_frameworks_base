@@ -19,7 +19,7 @@
 
 int init_audio(unsigned int ic, unsigned int id, unsigned int oc, unsigned int od);
 void init_hid();
-void usb_run(int enable_accessory);
+void usb_run(uintptr_t enable_accessory);
 
 struct usb_device* usb_wait_for_device();
 

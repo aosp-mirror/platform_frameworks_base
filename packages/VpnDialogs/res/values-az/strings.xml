@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--  Copyright (C) 2011 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="prompt" msgid="3183836924226407828">"Bağlantı Sorğusu"</string>
+    <string name="warning" msgid="809658604548412033">"<xliff:g id="APP">%s</xliff:g> VPN bağlantı yaratmaq istəyir ki, bu da şəbəkə trafikini izləyə bilər. Yalnız mənbəyə güvəndiyiniz halda qəbul edin. VPN aktiv olan zaman &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; ekranın yuxarısında görünür."</string>
+    <string name="legacy_title" msgid="192936250066580964">"VPN qoşuludur"</string>
+    <string name="session" msgid="6470628549473641030">"Sessiya:"</string>
+    <string name="duration" msgid="3584782459928719435">"Müddət:"</string>
+    <string name="data_transmitted" msgid="7988167672982199061">"Göndərilən:"</string>
+    <string name="data_received" msgid="4062776929376067820">"Qəbul edilən:"</string>
+    <string name="data_value_format" msgid="2192466557826897580">"<xliff:g id="NUMBER_0">%1$s</xliff:g> bayt / <xliff:g id="NUMBER_1">%2$s</xliff:g> paket"</string>
+    <string name="always_on_disconnected_title" msgid="1906740176262776166">"Həmişə aktiv VPN-ə qoşulmaq mümkün deyil"</string>
+    <string name="always_on_disconnected_message" msgid="555634519845992917">"<xliff:g id="VPN_APP_0">%1$s</xliff:g> həmişə aktiv olacaq şəkildə ayarlanıb, lakin hazırda qoşulmaq mümkün deyil. Telefonunuz <xliff:g id="VPN_APP_1">%1$s</xliff:g> şəbəkəsinə qoşulana qədər ictimai şəbəkədən istifadə edəcək."</string>
+    <string name="always_on_disconnected_message_lockdown" msgid="4232225539869452120">"<xliff:g id="VPN_APP">%1$s</xliff:g> həmişə aktiv olacaq şəkildə ayarlanıb, lakin hazırda qoşulmaq mümkün deyil. VPN təkrar qoşuluncaya qədər bağlantınız olmayacaq."</string>
+    <string name="always_on_disconnected_message_separator" msgid="3310614409322581371">" "</string>
+    <string name="always_on_disconnected_message_settings_link" msgid="6172280302829992412">"VPN ayarlarını dəyişin"</string>
+    <string name="configure" msgid="4905518375574791375">"Konfiqurasiya edin"</string>
+    <string name="disconnect" msgid="971412338304200056">"Əlaqəni kəs"</string>
+    <string name="open_app" msgid="3717639178595958667">"Tətbiqi açın"</string>
+    <string name="dismiss" msgid="6192859333764711227">"İmtina edin"</string>
+</resources>

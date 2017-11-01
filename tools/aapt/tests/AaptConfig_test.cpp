@@ -98,3 +98,33 @@ TEST(AaptConfigTest, TestParsingRoundQualifier) {
     EXPECT_EQ(SDK_MNC, config.sdkVersion);
     EXPECT_EQ(String8("notround-v23"), config.toString());
 }
+
+TEST(AaptConfigTest, WideColorGamutQualifier) {
+    ConfigDescription config;
+    EXPECT_TRUE(TestParse("widecg", &config));
+    EXPECT_EQ(android::ResTable_config::WIDE_COLOR_GAMUT_YES,
+              config.colorMode & android::ResTable_config::MASK_WIDE_COLOR_GAMUT);
+    EXPECT_EQ(SDK_O, config.sdkVersion);
+    EXPECT_EQ(String8("widecg-v26"), config.toString());
+
+    EXPECT_TRUE(TestParse("nowidecg", &config));
+    EXPECT_EQ(android::ResTable_config::WIDE_COLOR_GAMUT_NO,
+              config.colorMode & android::ResTable_config::MASK_WIDE_COLOR_GAMUT);
+    EXPECT_EQ(SDK_O, config.sdkVersion);
+    EXPECT_EQ(String8("nowidecg-v26"), config.toString());
+}
+
+TEST(AaptConfigTest, HdrQualifier) {
+    ConfigDescription config;
+    EXPECT_TRUE(TestParse("highdr", &config));
+    EXPECT_EQ(android::ResTable_config::HDR_YES,
+              config.colorMode & android::ResTable_config::MASK_HDR);
+    EXPECT_EQ(SDK_O, config.sdkVersion);
+    EXPECT_EQ(String8("highdr-v26"), config.toString());
+
+    EXPECT_TRUE(TestParse("lowdr", &config));
+    EXPECT_EQ(android::ResTable_config::HDR_NO,
+              config.colorMode & android::ResTable_config::MASK_HDR);
+    EXPECT_EQ(SDK_O, config.sdkVersion);
+    EXPECT_EQ(String8("lowdr-v26"), config.toString());
+}

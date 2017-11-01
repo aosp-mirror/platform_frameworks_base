@@ -30,6 +30,11 @@ public final class LockPatternChecker {
          * the call. Only non-0 if matched is false.
          */
         void onChecked(boolean matched, int throttleTimeoutMs);
+
+        /**
+         * Called when the underlying AsyncTask was cancelled.
+         */
+        default void onCancelled() {}
     }
 
     /**
@@ -126,6 +131,11 @@ public final class LockPatternChecker {
             @Override
             protected void onPostExecute(Boolean result) {
                 callback.onChecked(result, mThrottleTimeout);
+            }
+
+            @Override
+            protected void onCancelled() {
+                callback.onCancelled();
             }
         };
         task.execute();
@@ -233,6 +243,11 @@ public final class LockPatternChecker {
             @Override
             protected void onPostExecute(Boolean result) {
                 callback.onChecked(result, mThrottleTimeout);
+            }
+
+            @Override
+            protected void onCancelled() {
+                callback.onCancelled();
             }
         };
         task.execute();

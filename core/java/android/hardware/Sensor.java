@@ -644,6 +644,45 @@ public final class Sensor {
     public static final String STRING_TYPE_DYNAMIC_SENSOR_META =
             "android.sensor.dynamic_sensor_meta";
 
+    /* TYPE_ADDITIONAL_INFO - defined as type 33 in the HAL is not exposed to
+     * applications. There are parts of the framework that require the sensors
+     * to be in the same order as the HAL. Skipping this sensor
+     */
+
+    /**
+     * A constant describing a low latency off-body detect sensor.
+     *
+     * See {@link android.hardware.SensorEvent#values SensorEvent.values} for more details.
+     *
+     */
+    public static final int TYPE_LOW_LATENCY_OFFBODY_DETECT = 34;
+
+
+    /**
+     * A constant string describing a low-latency offbody detector sensor.
+     *
+     * @see #TYPE_LOW_LATENCY_OFFBODY_DETECT
+     */
+    public static final String STRING_TYPE_LOW_LATENCY_OFFBODY_DETECT =
+            "android.sensor.low_latency_offbody_detect";
+
+    /**
+     * A constant describing an uncalibrated accelerometer sensor.
+     *
+     * See {@link android.hardware.SensorEvent#values SensorEvent.values} for more details.
+     *
+     */
+    public static final int TYPE_ACCELEROMETER_UNCALIBRATED = 35;
+
+    /**
+     * A constant string describing an uncalibrated accelerometer sensor.
+     *
+     * @see #TYPE_ACCELEROMETER_UNCALIBRATED
+     *
+     */
+    public static final String STRING_TYPE_ACCELEROMETER_UNCALIBRATED =
+            "android.sensor.accelerometer_uncalibrated";
+
     /**
      * A constant describing all sensor types.
      */
@@ -704,13 +743,21 @@ public final class Sensor {
     private static final int DATA_INJECTION_MASK = 0x10;
     private static final int DATA_INJECTION_SHIFT = 4;
 
-    // MASK for dynamic sensor (sensor that added during runtime), bit 6.
+    // MASK for dynamic sensor (sensor that added during runtime), bit 5.
     private static final int DYNAMIC_SENSOR_MASK = 0x20;
     private static final int DYNAMIC_SENSOR_SHIFT = 5;
 
-    // MASK for indication bit of sensor additional information support (bit 7).
+    // MASK for indication bit of sensor additional information support, bit 6.
     private static final int ADDITIONAL_INFO_MASK = 0x40;
     private static final int ADDITIONAL_INFO_SHIFT = 6;
+
+    // Mask for direct mode highest rate level, bit 7, 8, 9.
+    private static final int DIRECT_REPORT_MASK = 0x380;
+    private static final int DIRECT_REPORT_SHIFT = 7;
+
+    // Mask for supported direct channel, bit 10, 11
+    private static final int DIRECT_CHANNEL_MASK = 0xC00;
+    private static final int DIRECT_CHANNEL_SHIFT = 10;
 
     // TODO(): The following arrays are fragile and error-prone. This needs to be refactored.
 
@@ -724,15 +771,15 @@ public final class Sensor {
             3, // SENSOR_TYPE_GEOMAGNETIC_FIELD
             3, // SENSOR_TYPE_ORIENTATION
             3, // SENSOR_TYPE_GYROSCOPE
-            3, // SENSOR_TYPE_LIGHT
-            3, // SENSOR_TYPE_PRESSURE
-            3, // SENSOR_TYPE_TEMPERATURE
-            3, // SENSOR_TYPE_PROXIMITY
+            1, // SENSOR_TYPE_LIGHT
+            1, // SENSOR_TYPE_PRESSURE
+            1, // SENSOR_TYPE_TEMPERATURE
+            1, // SENSOR_TYPE_PROXIMITY
             3, // SENSOR_TYPE_GRAVITY
             3, // SENSOR_TYPE_LINEAR_ACCELERATION
             5, // SENSOR_TYPE_ROTATION_VECTOR
-            3, // SENSOR_TYPE_RELATIVE_HUMIDITY
-            3, // SENSOR_TYPE_AMBIENT_TEMPERATURE
+            1, // SENSOR_TYPE_RELATIVE_HUMIDITY
+            1, // SENSOR_TYPE_AMBIENT_TEMPERATURE
             6, // SENSOR_TYPE_MAGNETIC_FIELD_UNCALIBRATED
             4, // SENSOR_TYPE_GAME_ROTATION_VECTOR
             6, // SENSOR_TYPE_GYROSCOPE_UNCALIBRATED
@@ -747,11 +794,14 @@ public final class Sensor {
             1, // SENSOR_TYPE_PICK_UP_GESTURE
             1, // SENSOR_TYPE_WRIST_TILT_GESTURE
             1, // SENSOR_TYPE_DEVICE_ORIENTATION
-            16,// SENSOR_TYPE_POSE_6DOF
+            16, // SENSOR_TYPE_POSE_6DOF
             1, // SENSOR_TYPE_STATIONARY_DETECT
             1, // SENSOR_TYPE_MOTION_DETECT
             1, // SENSOR_TYPE_HEART_BEAT
             2, // SENSOR_TYPE_DYNAMIC_SENSOR_META
+            16, // skip over additional sensor info type
+            1, // SENSOR_TYPE_LOW_LATENCY_OFFBODY_DETECT
+            6, // SENSOR_TYPE_ACCELEROMETER_UNCALIBRATED
     };
 
     /**
@@ -768,11 +818,47 @@ public final class Sensor {
         return ((mFlags & REPORTING_MODE_MASK) >> REPORTING_MODE_SHIFT);
     }
 
+    /**
+     * Get the highest supported direct report mode rate level of the sensor.
+     *
+     * @return Highest direct report rate level of this sensor. If the sensor does not support
+     * direct report mode, this returns {@link SensorDirectChannel#RATE_STOP}.
+     * @see SensorDirectChannel#RATE_STOP
+     * @see SensorDirectChannel#RATE_NORMAL
+     * @see SensorDirectChannel#RATE_FAST
+     * @see SensorDirectChannel#RATE_VERY_FAST
+     */
+    @SensorDirectChannel.RateLevel
+    public int getHighestDirectReportRateLevel() {
+        int rateLevel = ((mFlags & DIRECT_REPORT_MASK) >> DIRECT_REPORT_SHIFT);
+        return rateLevel <= SensorDirectChannel.RATE_VERY_FAST
+                ? rateLevel : SensorDirectChannel.RATE_VERY_FAST;
+    }
+
+    /**
+     * Test if a sensor supports a specified direct channel type.
+     *
+     * @param sharedMemType type of shared memory used by direct channel.
+     * @return <code>true</code> if the specified shared memory type is supported.
+     * @see SensorDirectChannel#TYPE_MEMORY_FILE
+     * @see SensorDirectChannel#TYPE_HARDWARE_BUFFER
+     */
+    public boolean isDirectChannelTypeSupported(@SensorDirectChannel.MemoryType int sharedMemType) {
+        switch (sharedMemType) {
+            case SensorDirectChannel.TYPE_MEMORY_FILE:
+                return (mFlags & (1 << DIRECT_CHANNEL_SHIFT)) > 0;
+            case SensorDirectChannel.TYPE_HARDWARE_BUFFER:
+                return (mFlags & (1 << DIRECT_CHANNEL_SHIFT + 1)) > 0;
+            default:
+                return false;
+        }
+    }
+
     static int getMaxLengthValuesArray(Sensor sensor, int sdkLevel) {
         // RotationVector length has changed to 3 to 5 for API level 18
         // Set it to 3 for backward compatibility.
-        if (sensor.mType == Sensor.TYPE_ROTATION_VECTOR &&
-                sdkLevel <= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+        if (sensor.mType == Sensor.TYPE_ROTATION_VECTOR
+                && sdkLevel <= Build.VERSION_CODES.JELLY_BEAN_MR1) {
             return 3;
         }
         int offset = sensor.mType;
@@ -947,9 +1033,9 @@ public final class Sensor {
      * Returns true if the sensor is a wake-up sensor.
      * <p>
      * <b>Application Processor Power modes</b> <p>
-     * Application Processor(AP), is the processor on which applications run.  When no wake lock is held
-     * and the user is not interacting with the device, this processor can enter a “Suspend” mode,
-     * reducing the power consumption by 10 times or more.
+     * Application Processor(AP), is the processor on which applications run.  When no wake lock is
+     * held and the user is not interacting with the device, this processor can enter a “Suspend”
+     * mode, reducing the power consumption by 10 times or more.
      * </p>
      * <p>
      * <b>Non-wake-up sensors</b> <p>
@@ -1123,6 +1209,12 @@ public final class Sensor {
             case TYPE_DYNAMIC_SENSOR_META:
                 mStringType = STRING_TYPE_DYNAMIC_SENSOR_META;
                 return true;
+            case TYPE_LOW_LATENCY_OFFBODY_DETECT:
+                mStringType = STRING_TYPE_LOW_LATENCY_OFFBODY_DETECT;
+                return true;
+            case TYPE_ACCELEROMETER_UNCALIBRATED:
+                mStringType = STRING_TYPE_ACCELEROMETER_UNCALIBRATED;
+                return true;
             default:
                 return false;
         }
@@ -1140,6 +1232,6 @@ public final class Sensor {
      */
     private void setUuid(long msb, long lsb) {
         // TODO(b/29547335): Rename this method to setId.
-        mId = (int)msb;
+        mId = (int) msb;
     }
 }

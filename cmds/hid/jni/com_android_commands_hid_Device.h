@@ -17,8 +17,6 @@
 #include <memory>
 
 #include <jni.h>
-#include <utils/Looper.h>
-#include <utils/StrongPointer.h>
 
 namespace android {
 namespace uhid {
@@ -32,16 +30,18 @@ public:
     void onDeviceError();
 
 private:
+    JNIEnv* getJNIEnv();
     jobject mCallbackObject;
+    JavaVM* mJavaVM;
 };
 
 class Device {
 public:
     static Device* open(int32_t id, const char* name, int32_t vid, int32_t pid,
             std::unique_ptr<uint8_t[]> descriptor, size_t descriptorSize,
-            std::unique_ptr<DeviceCallback> callback, sp<Looper> looper);
+            std::unique_ptr<DeviceCallback> callback);
 
-    Device(int32_t id, int fd, std::unique_ptr<DeviceCallback> callback, sp<Looper> looper);
+    Device(int32_t id, int fd, std::unique_ptr<DeviceCallback> callback);
     ~Device();
 
     void sendReport(uint8_t* report, size_t reportSize);
@@ -53,7 +53,6 @@ private:
     int32_t mId;
     int mFd;
     std::unique_ptr<DeviceCallback> mDeviceCallback;
-    sp<Looper> mLooper;
 };
 
 

@@ -16,26 +16,38 @@
 
 package com.android.server.connectivity;
 
+import static android.util.TimeUtils.NANOS_PER_MS;
+
 import android.content.Context;
 import android.net.ConnectivityManager;
-import android.net.ConnectivityManager.NetworkCallback;
+import android.net.INetdEventCallback;
 import android.net.Network;
-import android.net.NetworkRequest;
+import android.net.NetworkCapabilities;
+import android.net.metrics.ConnectStats;
 import android.net.metrics.DnsEvent;
 import android.net.metrics.INetdEventListener;
 import android.net.metrics.IpConnectivityLog;
+import android.net.metrics.NetworkMetrics;
+import android.net.metrics.WakeupEvent;
+import android.net.metrics.WakeupStats;
 import android.os.RemoteException;
+import android.text.format.DateUtils;
 import android.util.Log;
+import android.util.ArrayMap;
+import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.BitUtils;
 import com.android.internal.util.IndentingPrintWriter;
+import com.android.internal.util.RingBuffer;
+import com.android.internal.util.TokenBucket;
+import com.android.server.connectivity.metrics.nano.IpConnectivityLogClass.IpConnectivityEvent;
 
 import java.io.PrintWriter;
-import java.util.Arrays;
-import java.util.SortedMap;
-import java.util.TreeMap;
-
+import java.util.ArrayList;
+import java.util.List;
+import java.util.StringJoiner;
 
 /**
  * Implementation of the INetdEventListener interface.
@@ -48,89 +60,102 @@ public class NetdEventListenerService extends INetdEventListener.Stub {
     private static final boolean DBG = false;
     private static final boolean VDBG = false;
 
-    // TODO: read this constant from system property
-    private static final int MAX_LOOKUPS_PER_DNS_EVENT = 100;
+    // Rate limit connect latency logging to 1 measurement per 15 seconds (5760 / day) with maximum
+    // bursts of 5000 measurements.
+    private static final int CONNECT_LATENCY_BURST_LIMIT  = 5000;
+    private static final int CONNECT_LATENCY_FILL_RATE    = 15 * (int) DateUtils.SECOND_IN_MILLIS;
 
-    // Stores the results of a number of consecutive DNS lookups on the same network.
-    // This class is not thread-safe and it is the responsibility of the service to call its methods
-    // on one thread at a time.
-    private class DnsEventBatch {
-        private final int mNetId;
+    private static final long METRICS_SNAPSHOT_SPAN_MS = 5 * DateUtils.MINUTE_IN_MILLIS;
+    private static final int METRICS_SNAPSHOT_BUFFER_SIZE = 48; // 4 hours
 
-        private final byte[] mEventTypes = new byte[MAX_LOOKUPS_PER_DNS_EVENT];
-        private final byte[] mReturnCodes = new byte[MAX_LOOKUPS_PER_DNS_EVENT];
-        private final int[] mLatenciesMs = new int[MAX_LOOKUPS_PER_DNS_EVENT];
-        private int mEventCount;
+    @VisibleForTesting
+    static final int WAKEUP_EVENT_BUFFER_LENGTH = 1024;
+    // TODO: dedup this String constant with the one used in
+    // ConnectivityService#wakeupModifyInterface().
+    @VisibleForTesting
+    static final String WAKEUP_EVENT_IFACE_PREFIX = "iface:";
 
-        public DnsEventBatch(int netId) {
-            mNetId = netId;
-        }
+    // Array of aggregated DNS and connect events sent by netd, grouped by net id.
+    @GuardedBy("this")
+    private final SparseArray<NetworkMetrics> mNetworkMetrics = new SparseArray<>();
 
-        public void addResult(byte eventType, byte returnCode, int latencyMs) {
-            mEventTypes[mEventCount] = eventType;
-            mReturnCodes[mEventCount] = returnCode;
-            mLatenciesMs[mEventCount] = latencyMs;
-            mEventCount++;
-            if (mEventCount == MAX_LOOKUPS_PER_DNS_EVENT) {
-                logAndClear();
-            }
-        }
+    @GuardedBy("this")
+    private final RingBuffer<NetworkMetricsSnapshot> mNetworkMetricsSnapshots =
+            new RingBuffer<>(NetworkMetricsSnapshot.class, METRICS_SNAPSHOT_BUFFER_SIZE);
+    @GuardedBy("this")
+    private long mLastSnapshot = 0;
 
-        public void logAndClear() {
-            // Did we lose a race with addResult?
-            if (mEventCount == 0) {
-                return;
-            }
+    // Array of aggregated wakeup event stats, grouped by interface name.
+    @GuardedBy("this")
+    private final ArrayMap<String, WakeupStats> mWakeupStats = new ArrayMap<>();
+    // Ring buffer array for storing packet wake up events sent by Netd.
+    @GuardedBy("this")
+    private final RingBuffer<WakeupEvent> mWakeupEvents =
+            new RingBuffer<>(WakeupEvent.class, WAKEUP_EVENT_BUFFER_LENGTH);
 
-            // Only log as many events as we actually have.
-            byte[] eventTypes = Arrays.copyOf(mEventTypes, mEventCount);
-            byte[] returnCodes = Arrays.copyOf(mReturnCodes, mEventCount);
-            int[] latenciesMs = Arrays.copyOf(mLatenciesMs, mEventCount);
-            mMetricsLog.log(new DnsEvent(mNetId, eventTypes, returnCodes, latenciesMs));
-            maybeLog("Logging %d results for netId %d", mEventCount, mNetId);
-            mEventCount = 0;
-        }
+    private final ConnectivityManager mCm;
 
-        // For debugging and unit tests only.
-        public String toString() {
-            return String.format("%s %d %d", getClass().getSimpleName(), mNetId, mEventCount);
-        }
+    @GuardedBy("this")
+    private final TokenBucket mConnectTb =
+            new TokenBucket(CONNECT_LATENCY_FILL_RATE, CONNECT_LATENCY_BURST_LIMIT);
+    // Callback should only be registered/unregistered when logging is being enabled/disabled in DPM
+    // by the device owner. It's DevicePolicyManager's responsibility to ensure that.
+    @GuardedBy("this")
+    private INetdEventCallback mNetdEventCallback;
+
+    public synchronized boolean registerNetdEventCallback(INetdEventCallback callback) {
+        mNetdEventCallback = callback;
+        return true;
     }
 
-    // Only sorted for ease of debugging. Because we only typically have a handful of networks up
-    // at any given time, performance is not a concern.
-    @GuardedBy("this")
-    private final SortedMap<Integer, DnsEventBatch> mEventBatches = new TreeMap<>();
-
-    // We register a NetworkCallback to ensure that when a network disconnects, we flush the DNS
-    // queries we've logged on that network. Because we do not do this periodically, we might lose
-    // up to MAX_LOOKUPS_PER_DNS_EVENT lookup stats on each network when the system is shutting
-    // down. We believe this to be sufficient for now.
-    private final ConnectivityManager mCm;
-    private final IpConnectivityLog mMetricsLog;
-    private final NetworkCallback mNetworkCallback = new NetworkCallback() {
-        @Override
-        public void onLost(Network network) {
-            synchronized (NetdEventListenerService.this) {
-                DnsEventBatch batch = mEventBatches.remove(network.netId);
-                if (batch != null) {
-                    batch.logAndClear();
-                }
-            }
-        }
-    };
+    public synchronized boolean unregisterNetdEventCallback() {
+        mNetdEventCallback = null;
+        return true;
+    }
 
     public NetdEventListenerService(Context context) {
-        this(context.getSystemService(ConnectivityManager.class), new IpConnectivityLog());
+        this(context.getSystemService(ConnectivityManager.class));
     }
 
     @VisibleForTesting
-    public NetdEventListenerService(ConnectivityManager cm, IpConnectivityLog log) {
+    public NetdEventListenerService(ConnectivityManager cm) {
         // We are started when boot is complete, so ConnectivityService should already be running.
         mCm = cm;
-        mMetricsLog = log;
-        final NetworkRequest request = new NetworkRequest.Builder().clearCapabilities().build();
-        mCm.registerNetworkCallback(request, mNetworkCallback);
+    }
+
+    private static long projectSnapshotTime(long timeMs) {
+        return (timeMs / METRICS_SNAPSHOT_SPAN_MS) * METRICS_SNAPSHOT_SPAN_MS;
+    }
+
+    private NetworkMetrics getMetricsForNetwork(long timeMs, int netId) {
+        collectPendingMetricsSnapshot(timeMs);
+        NetworkMetrics metrics = mNetworkMetrics.get(netId);
+        if (metrics == null) {
+            // TODO: allow to change transport for a given netid.
+            metrics = new NetworkMetrics(netId, getTransports(netId), mConnectTb);
+            mNetworkMetrics.put(netId, metrics);
+        }
+        return metrics;
+    }
+
+    private NetworkMetricsSnapshot[] getNetworkMetricsSnapshots() {
+        collectPendingMetricsSnapshot(System.currentTimeMillis());
+        return mNetworkMetricsSnapshots.toArray();
+    }
+
+    private void collectPendingMetricsSnapshot(long timeMs) {
+        // Detects time differences larger than the snapshot collection period.
+        // This is robust against clock jumps and long inactivity periods.
+        if (Math.abs(timeMs - mLastSnapshot) <= METRICS_SNAPSHOT_SPAN_MS) {
+            return;
+        }
+        mLastSnapshot = projectSnapshotTime(timeMs);
+        NetworkMetricsSnapshot snapshot =
+                NetworkMetricsSnapshot.collect(mLastSnapshot, mNetworkMetrics);
+        if (snapshot.stats.isEmpty()) {
+            return;
+        }
+        mNetworkMetricsSnapshots.append(snapshot);
     }
 
     @Override
@@ -141,30 +166,128 @@ public class NetdEventListenerService extends INetdEventListener.Stub {
             throws RemoteException {
         maybeVerboseLog("onDnsEvent(%d, %d, %d, %dms)", netId, eventType, returnCode, latencyMs);
 
-        DnsEventBatch batch = mEventBatches.get(netId);
-        if (batch == null) {
-            batch = new DnsEventBatch(netId);
-            mEventBatches.put(netId, batch);
+        long timestamp = System.currentTimeMillis();
+        getMetricsForNetwork(timestamp, netId).addDnsResult(eventType, returnCode, latencyMs);
+
+        if (mNetdEventCallback != null) {
+            mNetdEventCallback.onDnsEvent(hostname, ipAddresses, ipAddressesCount, timestamp, uid);
         }
-        batch.addResult((byte) eventType, (byte) returnCode, latencyMs);
     }
 
     @Override
     // Called concurrently by multiple binder threads.
     // This method must not block or perform long-running operations.
-    public synchronized void onConnectEvent(int netId, int error, int latencyMs, String ipAddr, int port,
-            int uid) throws RemoteException {
+    public synchronized void onConnectEvent(int netId, int error, int latencyMs, String ipAddr,
+            int port, int uid) throws RemoteException {
         maybeVerboseLog("onConnectEvent(%d, %d, %dms)", netId, error, latencyMs);
+
+        long timestamp = System.currentTimeMillis();
+        getMetricsForNetwork(timestamp, netId).addConnectResult(error, latencyMs, ipAddr);
+
+        if (mNetdEventCallback != null) {
+            mNetdEventCallback.onConnectEvent(ipAddr, port, timestamp, uid);
+        }
+    }
+
+    @Override
+    public synchronized void onWakeupEvent(String prefix, int uid, int gid, long timestampNs) {
+        maybeVerboseLog("onWakeupEvent(%s, %d, %d, %sns)", prefix, uid, gid, timestampNs);
+
+        // TODO: add ip protocol and port
+
+        String iface = prefix.replaceFirst(WAKEUP_EVENT_IFACE_PREFIX, "");
+        final long timestampMs;
+        if (timestampNs > 0) {
+            timestampMs = timestampNs / NANOS_PER_MS;
+        } else {
+            timestampMs = System.currentTimeMillis();
+        }
+
+        addWakeupEvent(iface, timestampMs, uid);
+    }
+
+    @GuardedBy("this")
+    private void addWakeupEvent(String iface, long timestampMs, int uid) {
+        WakeupEvent event = new WakeupEvent();
+        event.iface = iface;
+        event.timestampMs = timestampMs;
+        event.uid = uid;
+        mWakeupEvents.append(event);
+        WakeupStats stats = mWakeupStats.get(iface);
+        if (stats == null) {
+            stats = new WakeupStats(iface);
+            mWakeupStats.put(iface, stats);
+        }
+        stats.countEvent(event);
+    }
+
+    public synchronized void flushStatistics(List<IpConnectivityEvent> events) {
+        for (int i = 0; i < mNetworkMetrics.size(); i++) {
+            ConnectStats stats = mNetworkMetrics.valueAt(i).connectMetrics;
+            if (stats.eventCount == 0) {
+                continue;
+            }
+            events.add(IpConnectivityEventBuilder.toProto(stats));
+        }
+        for (int i = 0; i < mNetworkMetrics.size(); i++) {
+            DnsEvent ev = mNetworkMetrics.valueAt(i).dnsMetrics;
+            if (ev.eventCount == 0) {
+                continue;
+            }
+            events.add(IpConnectivityEventBuilder.toProto(ev));
+        }
+        for (int i = 0; i < mWakeupStats.size(); i++) {
+            events.add(IpConnectivityEventBuilder.toProto(mWakeupStats.valueAt(i)));
+        }
+        mNetworkMetrics.clear();
+        mWakeupStats.clear();
     }
 
     public synchronized void dump(PrintWriter writer) {
         IndentingPrintWriter pw = new IndentingPrintWriter(writer, "  ");
         pw.println(TAG + ":");
         pw.increaseIndent();
-        for (DnsEventBatch batch : mEventBatches.values()) {
-            pw.println(batch.toString());
-        }
+        list(pw);
         pw.decreaseIndent();
+    }
+
+    public synchronized void list(PrintWriter pw) {
+        for (int i = 0; i < mNetworkMetrics.size(); i++) {
+            pw.println(mNetworkMetrics.valueAt(i).connectMetrics);
+        }
+        for (int i = 0; i < mNetworkMetrics.size(); i++) {
+            pw.println(mNetworkMetrics.valueAt(i).dnsMetrics);
+        }
+        for (NetworkMetricsSnapshot s : getNetworkMetricsSnapshots()) {
+            pw.println(s);
+        }
+        for (int i = 0; i < mWakeupStats.size(); i++) {
+            pw.println(mWakeupStats.valueAt(i));
+        }
+        for (WakeupEvent wakeup : mWakeupEvents.toArray()) {
+            pw.println(wakeup);
+        }
+    }
+
+    public synchronized void listAsProtos(PrintWriter pw) {
+        for (int i = 0; i < mNetworkMetrics.size(); i++) {
+            pw.print(IpConnectivityEventBuilder.toProto(mNetworkMetrics.valueAt(i).connectMetrics));
+        }
+        for (int i = 0; i < mNetworkMetrics.size(); i++) {
+            pw.print(IpConnectivityEventBuilder.toProto(mNetworkMetrics.valueAt(i).dnsMetrics));
+        }
+        for (int i = 0; i < mWakeupStats.size(); i++) {
+            pw.print(IpConnectivityEventBuilder.toProto(mWakeupStats.valueAt(i)));
+        }
+    }
+
+    private long getTransports(int netId) {
+        // TODO: directly query ConnectivityService instead of going through Binder interface.
+        NetworkCapabilities nc = mCm.getNetworkCapabilities(new Network(netId));
+        if (nc == null) {
+            return 0;
+        }
+        return BitUtils.packBits(nc.getTransportTypes());
     }
 
     private static void maybeLog(String s, Object... args) {
@@ -173,5 +296,33 @@ public class NetdEventListenerService extends INetdEventListener.Stub {
 
     private static void maybeVerboseLog(String s, Object... args) {
         if (VDBG) Log.d(TAG, String.format(s, args));
+    }
+
+    /** Helper class for buffering summaries of NetworkMetrics at regular time intervals */
+    static class NetworkMetricsSnapshot {
+
+        public long timeMs;
+        public List<NetworkMetrics.Summary> stats = new ArrayList<>();
+
+        static NetworkMetricsSnapshot collect(long timeMs, SparseArray<NetworkMetrics> networkMetrics) {
+            NetworkMetricsSnapshot snapshot = new NetworkMetricsSnapshot();
+            snapshot.timeMs = timeMs;
+            for (int i = 0; i < networkMetrics.size(); i++) {
+                NetworkMetrics.Summary s = networkMetrics.valueAt(i).getPendingStats();
+                if (s != null) {
+                    snapshot.stats.add(s);
+                }
+            }
+            return snapshot;
+        }
+
+        @Override
+        public String toString() {
+            StringJoiner j = new StringJoiner(", ");
+            for (NetworkMetrics.Summary s : stats) {
+                j.add(s.toString());
+            }
+            return String.format("%tT.%tL: %s", timeMs, timeMs, j.toString());
+        }
     }
 }

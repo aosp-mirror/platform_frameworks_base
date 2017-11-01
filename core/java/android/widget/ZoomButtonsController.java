@@ -30,11 +30,11 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.ViewRootImpl;
 import android.view.WindowManager;
-import android.view.View.OnClickListener;
 import android.view.WindowManager.LayoutParams;
 
 /*
@@ -69,7 +69,10 @@ import android.view.WindowManager.LayoutParams;
  * {@link View#onDetachedFromWindow} and from {@link View#onVisibilityChanged}
  * when <code>visibility != View.VISIBLE</code>.
  *
+ * @deprecated This functionality and UI is better handled with custom views and layouts
+ * rather than a dedicated zoom-control widget
  */
+@Deprecated
 public class ZoomButtonsController implements View.OnTouchListener {
 
     private static final String TAG = "ZoomButtonsController";
@@ -261,7 +264,7 @@ public class ZoomButtonsController implements View.OnTouchListener {
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         inflater.inflate(com.android.internal.R.layout.zoom_container, container);
 
-        mControls = (ZoomControls) container.findViewById(com.android.internal.R.id.zoomControls);
+        mControls = container.findViewById(com.android.internal.R.id.zoomControls);
         mControls.setOnZoomInClickListener(new OnClickListener() {
             public void onClick(View v) {
                 dismissControlsDelayed(ZOOM_CONTROLS_TIMEOUT);

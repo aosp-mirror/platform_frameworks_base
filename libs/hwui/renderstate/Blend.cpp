@@ -25,70 +25,70 @@ namespace uirenderer {
  * Structure mapping Skia xfermodes to OpenGL blending factors.
  */
 struct Blender {
-    SkXfermode::Mode mode;
+    SkBlendMode mode;
     GLenum src;
     GLenum dst;
 };
 
 // assumptions made by lookup tables in either this file or ProgramCache
-static_assert(0 == SkXfermode::kClear_Mode, "SkXfermode enums have changed");
-static_assert(1 == SkXfermode::kSrc_Mode, "SkXfermode enums have changed");
-static_assert(2 == SkXfermode::kDst_Mode, "SkXfermode enums have changed");
-static_assert(3 == SkXfermode::kSrcOver_Mode, "SkXfermode enums have changed");
-static_assert(4 == SkXfermode::kDstOver_Mode, "SkXfermode enums have changed");
-static_assert(5 == SkXfermode::kSrcIn_Mode, "SkXfermode enums have changed");
-static_assert(6 == SkXfermode::kDstIn_Mode, "SkXfermode enums have changed");
-static_assert(7 == SkXfermode::kSrcOut_Mode, "SkXfermode enums have changed");
-static_assert(8 == SkXfermode::kDstOut_Mode, "SkXfermode enums have changed");
-static_assert(9 == SkXfermode::kSrcATop_Mode, "SkXfermode enums have changed");
-static_assert(10 == SkXfermode::kDstATop_Mode, "SkXfermode enums have changed");
-static_assert(11 == SkXfermode::kXor_Mode, "SkXfermode enums have changed");
-static_assert(12 == SkXfermode::kPlus_Mode, "SkXfermode enums have changed");
-static_assert(13 == SkXfermode::kModulate_Mode, "SkXfermode enums have changed");
-static_assert(14 == SkXfermode::kScreen_Mode, "SkXfermode enums have changed");
-static_assert(15 == SkXfermode::kOverlay_Mode, "SkXfermode enums have changed");
-static_assert(16 == SkXfermode::kDarken_Mode, "SkXfermode enums have changed");
-static_assert(17 == SkXfermode::kLighten_Mode, "SkXfermode enums have changed");
+static_assert(0 == static_cast<int>(SkBlendMode::kClear), "SkBlendMode enums have changed");
+static_assert(1 == static_cast<int>(SkBlendMode::kSrc), "SkBlendMode enums have changed");
+static_assert(2 == static_cast<int>(SkBlendMode::kDst), "SkBlendMode enums have changed");
+static_assert(3 == static_cast<int>(SkBlendMode::kSrcOver), "SkBlendMode enums have changed");
+static_assert(4 == static_cast<int>(SkBlendMode::kDstOver), "SkBlendMode enums have changed");
+static_assert(5 == static_cast<int>(SkBlendMode::kSrcIn), "SkBlendMode enums have changed");
+static_assert(6 == static_cast<int>(SkBlendMode::kDstIn), "SkBlendMode enums have changed");
+static_assert(7 == static_cast<int>(SkBlendMode::kSrcOut), "SkBlendMode enums have changed");
+static_assert(8 == static_cast<int>(SkBlendMode::kDstOut), "SkBlendMode enums have changed");
+static_assert(9 == static_cast<int>(SkBlendMode::kSrcATop), "SkBlendMode enums have changed");
+static_assert(10 == static_cast<int>(SkBlendMode::kDstATop), "SkBlendMode enums have changed");
+static_assert(11 == static_cast<int>(SkBlendMode::kXor), "SkBlendMode enums have changed");
+static_assert(12 == static_cast<int>(SkBlendMode::kPlus), "SkBlendMode enums have changed");
+static_assert(13 == static_cast<int>(SkBlendMode::kModulate), "SkBlendMode enums have changed");
+static_assert(14 == static_cast<int>(SkBlendMode::kScreen), "SkBlendMode enums have changed");
+static_assert(15 == static_cast<int>(SkBlendMode::kOverlay), "SkBlendMode enums have changed");
+static_assert(16 == static_cast<int>(SkBlendMode::kDarken), "SkBlendMode enums have changed");
+static_assert(17 == static_cast<int>(SkBlendMode::kLighten), "SkBlendMode enums have changed");
 
 // In this array, the index of each Blender equals the value of the first
-// entry. For instance, gBlends[1] == gBlends[SkXfermode::kSrc_Mode]
+// entry. For instance, gBlends[1] == gBlends[SkBlendMode::kSrc]
 const Blender kBlends[] = {
-    { SkXfermode::kClear_Mode,    GL_ZERO,                GL_ONE_MINUS_SRC_ALPHA },
-    { SkXfermode::kSrc_Mode,      GL_ONE,                 GL_ZERO },
-    { SkXfermode::kDst_Mode,      GL_ZERO,                GL_ONE },
-    { SkXfermode::kSrcOver_Mode,  GL_ONE,                 GL_ONE_MINUS_SRC_ALPHA },
-    { SkXfermode::kDstOver_Mode,  GL_ONE_MINUS_DST_ALPHA, GL_ONE },
-    { SkXfermode::kSrcIn_Mode,    GL_DST_ALPHA,           GL_ZERO },
-    { SkXfermode::kDstIn_Mode,    GL_ZERO,                GL_SRC_ALPHA },
-    { SkXfermode::kSrcOut_Mode,   GL_ONE_MINUS_DST_ALPHA, GL_ZERO },
-    { SkXfermode::kDstOut_Mode,   GL_ZERO,                GL_ONE_MINUS_SRC_ALPHA },
-    { SkXfermode::kSrcATop_Mode,  GL_DST_ALPHA,           GL_ONE_MINUS_SRC_ALPHA },
-    { SkXfermode::kDstATop_Mode,  GL_ONE_MINUS_DST_ALPHA, GL_SRC_ALPHA },
-    { SkXfermode::kXor_Mode,      GL_ONE_MINUS_DST_ALPHA, GL_ONE_MINUS_SRC_ALPHA },
-    { SkXfermode::kPlus_Mode,     GL_ONE,                 GL_ONE },
-    { SkXfermode::kModulate_Mode, GL_ZERO,                GL_SRC_COLOR },
-    { SkXfermode::kScreen_Mode,   GL_ONE,                 GL_ONE_MINUS_SRC_COLOR }
+    { SkBlendMode::kClear,    GL_ZERO,                GL_ONE_MINUS_SRC_ALPHA },
+    { SkBlendMode::kSrc,      GL_ONE,                 GL_ZERO },
+    { SkBlendMode::kDst,      GL_ZERO,                GL_ONE },
+    { SkBlendMode::kSrcOver,  GL_ONE,                 GL_ONE_MINUS_SRC_ALPHA },
+    { SkBlendMode::kDstOver,  GL_ONE_MINUS_DST_ALPHA, GL_ONE },
+    { SkBlendMode::kSrcIn,    GL_DST_ALPHA,           GL_ZERO },
+    { SkBlendMode::kDstIn,    GL_ZERO,                GL_SRC_ALPHA },
+    { SkBlendMode::kSrcOut,   GL_ONE_MINUS_DST_ALPHA, GL_ZERO },
+    { SkBlendMode::kDstOut,   GL_ZERO,                GL_ONE_MINUS_SRC_ALPHA },
+    { SkBlendMode::kSrcATop,  GL_DST_ALPHA,           GL_ONE_MINUS_SRC_ALPHA },
+    { SkBlendMode::kDstATop,  GL_ONE_MINUS_DST_ALPHA, GL_SRC_ALPHA },
+    { SkBlendMode::kXor,      GL_ONE_MINUS_DST_ALPHA, GL_ONE_MINUS_SRC_ALPHA },
+    { SkBlendMode::kPlus,     GL_ONE,                 GL_ONE },
+    { SkBlendMode::kModulate, GL_ZERO,                GL_SRC_COLOR },
+    { SkBlendMode::kScreen,   GL_ONE,                 GL_ONE_MINUS_SRC_COLOR }
 };
 
-// This array contains the swapped version of each SkXfermode. For instance
+// This array contains the swapped version of each SkBlendMode. For instance
 // this array's SrcOver blending mode is actually DstOver. You can refer to
 // createLayer() for more information on the purpose of this array.
 const Blender kBlendsSwap[] = {
-    { SkXfermode::kClear_Mode,    GL_ONE_MINUS_DST_ALPHA, GL_ZERO },
-    { SkXfermode::kSrc_Mode,      GL_ZERO,                GL_ONE },
-    { SkXfermode::kDst_Mode,      GL_ONE,                 GL_ZERO },
-    { SkXfermode::kSrcOver_Mode,  GL_ONE_MINUS_DST_ALPHA, GL_ONE },
-    { SkXfermode::kDstOver_Mode,  GL_ONE,                 GL_ONE_MINUS_SRC_ALPHA },
-    { SkXfermode::kSrcIn_Mode,    GL_ZERO,                GL_SRC_ALPHA },
-    { SkXfermode::kDstIn_Mode,    GL_DST_ALPHA,           GL_ZERO },
-    { SkXfermode::kSrcOut_Mode,   GL_ZERO,                GL_ONE_MINUS_SRC_ALPHA },
-    { SkXfermode::kDstOut_Mode,   GL_ONE_MINUS_DST_ALPHA, GL_ZERO },
-    { SkXfermode::kSrcATop_Mode,  GL_ONE_MINUS_DST_ALPHA, GL_SRC_ALPHA },
-    { SkXfermode::kDstATop_Mode,  GL_DST_ALPHA,           GL_ONE_MINUS_SRC_ALPHA },
-    { SkXfermode::kXor_Mode,      GL_ONE_MINUS_DST_ALPHA, GL_ONE_MINUS_SRC_ALPHA },
-    { SkXfermode::kPlus_Mode,     GL_ONE,                 GL_ONE },
-    { SkXfermode::kModulate_Mode, GL_DST_COLOR,           GL_ZERO },
-    { SkXfermode::kScreen_Mode,   GL_ONE_MINUS_DST_COLOR, GL_ONE }
+    { SkBlendMode::kClear,    GL_ONE_MINUS_DST_ALPHA, GL_ZERO },
+    { SkBlendMode::kSrc,      GL_ZERO,                GL_ONE },
+    { SkBlendMode::kDst,      GL_ONE,                 GL_ZERO },
+    { SkBlendMode::kSrcOver,  GL_ONE_MINUS_DST_ALPHA, GL_ONE },
+    { SkBlendMode::kDstOver,  GL_ONE,                 GL_ONE_MINUS_SRC_ALPHA },
+    { SkBlendMode::kSrcIn,    GL_ZERO,                GL_SRC_ALPHA },
+    { SkBlendMode::kDstIn,    GL_DST_ALPHA,           GL_ZERO },
+    { SkBlendMode::kSrcOut,   GL_ZERO,                GL_ONE_MINUS_SRC_ALPHA },
+    { SkBlendMode::kDstOut,   GL_ONE_MINUS_DST_ALPHA, GL_ZERO },
+    { SkBlendMode::kSrcATop,  GL_ONE_MINUS_DST_ALPHA, GL_SRC_ALPHA },
+    { SkBlendMode::kDstATop,  GL_DST_ALPHA,           GL_ONE_MINUS_SRC_ALPHA },
+    { SkBlendMode::kXor,      GL_ONE_MINUS_DST_ALPHA, GL_ONE_MINUS_SRC_ALPHA },
+    { SkBlendMode::kPlus,     GL_ONE,                 GL_ONE },
+    { SkBlendMode::kModulate, GL_DST_COLOR,           GL_ZERO },
+    { SkBlendMode::kScreen,   GL_ONE_MINUS_DST_COLOR, GL_ONE }
 };
 
 Blend::Blend()
@@ -111,9 +111,10 @@ void Blend::syncEnabled() {
     }
 }
 
-void Blend::getFactors(SkXfermode::Mode mode, ModeOrderSwap modeUsage, GLenum* outSrc, GLenum* outDst) {
-    *outSrc = (modeUsage == ModeOrderSwap::Swap) ? kBlendsSwap[mode].src : kBlends[mode].src;
-    *outDst = (modeUsage == ModeOrderSwap::Swap) ? kBlendsSwap[mode].dst : kBlends[mode].dst;
+void Blend::getFactors(SkBlendMode mode, ModeOrderSwap modeUsage, GLenum* outSrc, GLenum* outDst) {
+    int index = static_cast<int>(mode);
+    *outSrc = (modeUsage == ModeOrderSwap::Swap) ? kBlendsSwap[index].src : kBlends[index].src;
+    *outDst = (modeUsage == ModeOrderSwap::Swap) ? kBlendsSwap[index].dst : kBlends[index].dst;
 }
 
 void Blend::setFactors(GLenum srcMode, GLenum dstMode) {

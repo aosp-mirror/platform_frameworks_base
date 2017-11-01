@@ -18,6 +18,7 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 
+import com.android.systemui.Dependency;
 import com.android.systemui.statusbar.phone.NavigationBarInflaterView;
 
 public class PreviewNavInflater extends NavigationBarInflaterView {
@@ -31,7 +32,7 @@ public class PreviewNavInflater extends NavigationBarInflaterView {
         super.onAttachedToWindow();
         // Immediately remove tuner listening, since this is a preview, all values will be injected
         // manually.
-        TunerService.get(getContext()).removeTunable(this);
+        Dependency.get(TunerService.class).removeTunable(this);
     }
 
     @Override

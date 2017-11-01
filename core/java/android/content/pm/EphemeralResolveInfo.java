@@ -17,8 +17,10 @@
 package android.content.pm;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.content.IntentFilter;
+import android.content.pm.InstantAppResolveInfo.InstantAppDigest;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -33,51 +35,102 @@ import java.util.Locale;
  * Information about an ephemeral application.
  * @hide
  */
+@Deprecated
 @SystemApi
 public final class EphemeralResolveInfo implements Parcelable {
     /** Algorithm that will be used to generate the domain digest */
     public static final String SHA_ALGORITHM = "SHA-256";
 
-    private final EphemeralDigest mDigest;
-    private final String mPackageName;
-    /** The filters used to match domain */
-    private final List<IntentFilter> mFilters = new ArrayList<IntentFilter>();
+    private final InstantAppResolveInfo mInstantAppResolveInfo;
+    @Deprecated
+    private final List<IntentFilter> mLegacyFilters;
 
+    @Deprecated
     public EphemeralResolveInfo(@NonNull Uri uri, @NonNull String packageName,
             @NonNull List<IntentFilter> filters) {
-        // validate arguments
-        if (uri == null
-                || packageName == null
-                || filters == null
-                || filters.size() == 0) {
+        if (uri == null || packageName == null || filters == null || filters.isEmpty()) {
             throw new IllegalArgumentException();
         }
+        final List<EphemeralIntentFilter> ephemeralFilters = new ArrayList<>(1);
+        ephemeralFilters.add(new EphemeralIntentFilter(packageName, filters));
+        mInstantAppResolveInfo = new InstantAppResolveInfo(uri.getHost(), packageName,
+                createInstantAppIntentFilterList(ephemeralFilters));
+        mLegacyFilters = new ArrayList<IntentFilter>(filters.size());
+        mLegacyFilters.addAll(filters);
+    }
 
-        mDigest = new EphemeralDigest(uri, 0xFFFFFFFF, -1);
-        mFilters.addAll(filters);
-        mPackageName = packageName;
+    @Deprecated
+    public EphemeralResolveInfo(@NonNull EphemeralDigest digest, @Nullable String packageName,
+            @Nullable List<EphemeralIntentFilter> filters) {
+        this(digest, packageName, filters, -1 /*versionCode*/);
+    }
+
+    public EphemeralResolveInfo(@NonNull EphemeralDigest digest, @Nullable String packageName,
+            @Nullable List<EphemeralIntentFilter> filters, int versionCode) {
+        mInstantAppResolveInfo = new InstantAppResolveInfo(
+                digest.getInstantAppDigest(), packageName,
+                createInstantAppIntentFilterList(filters), versionCode);
+        mLegacyFilters = null;
+    }
+
+    public EphemeralResolveInfo(@NonNull String hostName, @Nullable String packageName,
+            @Nullable List<EphemeralIntentFilter> filters) {
+        this(new EphemeralDigest(hostName), packageName, filters);
     }
 
     EphemeralResolveInfo(Parcel in) {
-        mDigest = in.readParcelable(null /*loader*/);
-        mPackageName = in.readString();
-        in.readList(mFilters, null /*loader*/);
+        mInstantAppResolveInfo = in.readParcelable(null /*loader*/);
+        mLegacyFilters = new ArrayList<IntentFilter>();
+        in.readList(mLegacyFilters, null /*loader*/);
+    }
+
+    /** @hide */
+    public InstantAppResolveInfo getInstantAppResolveInfo() {
+        return mInstantAppResolveInfo;
+    }
+
+    private static List<InstantAppIntentFilter> createInstantAppIntentFilterList(
+            List<EphemeralIntentFilter> filters) {
+        if (filters == null) {
+            return null;
+        }
+        final int filterCount = filters.size();
+        final List<InstantAppIntentFilter> returnList = new ArrayList<>(filterCount);
+        for (int i = 0; i < filterCount; i++) {
+            returnList.add(filters.get(i).getInstantAppIntentFilter());
+        }
+        return returnList;
     }
 
     public byte[] getDigestBytes() {
-        return mDigest.getDigestBytes()[0];
+        return mInstantAppResolveInfo.getDigestBytes();
     }
 
     public int getDigestPrefix() {
-        return mDigest.getDigestPrefix()[0];
+        return mInstantAppResolveInfo.getDigestPrefix();
     }
 
     public String getPackageName() {
-        return mPackageName;
+        return mInstantAppResolveInfo.getPackageName();
     }
 
+    public List<EphemeralIntentFilter> getIntentFilters() {
+        final List<InstantAppIntentFilter> filters = mInstantAppResolveInfo.getIntentFilters();
+        final int filterCount = filters.size();
+        final List<EphemeralIntentFilter> returnList = new ArrayList<>(filterCount);
+        for (int i = 0; i < filterCount; i++) {
+            returnList.add(new EphemeralIntentFilter(filters.get(i)));
+        }
+        return returnList;
+    }
+
+    public int getVersionCode() {
+        return mInstantAppResolveInfo.getVersionCode();
+    }
+
+    @Deprecated
     public List<IntentFilter> getFilters() {
-        return mFilters;
+        return mLegacyFilters;
     }
 
     @Override
@@ -87,36 +140,21 @@ public final class EphemeralResolveInfo implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel out, int flags) {
-        out.writeParcelable(mDigest, flags);
-        out.writeString(mPackageName);
-        out.writeList(mFilters);
+        out.writeParcelable(mInstantAppResolveInfo, flags);
+        out.writeList(mLegacyFilters);
     }
 
     public static final Parcelable.Creator<EphemeralResolveInfo> CREATOR
             = new Parcelable.Creator<EphemeralResolveInfo>() {
+        @Override
         public EphemeralResolveInfo createFromParcel(Parcel in) {
             return new EphemeralResolveInfo(in);
         }
-
+        @Override
         public EphemeralResolveInfo[] newArray(int size) {
             return new EphemeralResolveInfo[size];
         }
     };
-
-    /** @hide */
-    public static final class EphemeralResolveIntentInfo extends IntentFilter {
-        private final EphemeralResolveInfo mResolveInfo;
-
-        public EphemeralResolveIntentInfo(@NonNull IntentFilter orig,
-                @NonNull EphemeralResolveInfo resolveInfo) {
-            super(orig);
-            this.mResolveInfo = resolveInfo;
-        }
-
-        public EphemeralResolveInfo getEphemeralResolveInfo() {
-            return mResolveInfo;
-        }
-    }
 
     /**
      * Helper class to generate and store each of the digests and prefixes
@@ -129,79 +167,34 @@ public final class EphemeralResolveInfo implements Parcelable {
      *
      * @hide
      */
+    @SystemApi
     public static final class EphemeralDigest implements Parcelable {
-        /** Full digest of the domain hashes */
-        private final byte[][] mDigestBytes;
-        /** The first 4 bytes of the domain hashes */
-        private final int[] mDigestPrefix;
+        private final InstantAppDigest mInstantAppDigest;
 
-        public EphemeralDigest(@NonNull Uri uri, int digestMask, int maxDigests) {
-            if (uri == null) {
-                throw new IllegalArgumentException();
-            }
-            mDigestBytes = generateDigest(uri, maxDigests);
-            mDigestPrefix = new int[mDigestBytes.length];
-            for (int i = 0; i < mDigestBytes.length; i++) {
-                mDigestPrefix[i] =
-                        ((mDigestBytes[i][0] & 0xFF) << 24
-                                | (mDigestBytes[i][1] & 0xFF) << 16
-                                | (mDigestBytes[i][2] & 0xFF) << 8
-                                | (mDigestBytes[i][3] & 0xFF) << 0)
-                        & digestMask;
-            }
+        public EphemeralDigest(@NonNull String hostName) {
+            this(hostName, -1 /*maxDigests*/);
         }
 
-        private static byte[][] generateDigest(Uri uri, int maxDigests) {
-            ArrayList<byte[]> digests = new ArrayList<>();
-            try {
-                final String host = uri.getHost().toLowerCase(Locale.ENGLISH);
-                final MessageDigest digest = MessageDigest.getInstance(SHA_ALGORITHM);
-                if (maxDigests <= 0) {
-                    final byte[] hostBytes = host.getBytes();
-                    digests.add(digest.digest(hostBytes));
-                } else {
-                    int prevDot = host.lastIndexOf('.');
-                    prevDot = host.lastIndexOf('.', prevDot - 1);
-                    // shortcut for short URLs
-                    if (prevDot < 0) {
-                        digests.add(digest.digest(host.getBytes()));
-                    } else {
-                        byte[] hostBytes = host.substring(prevDot + 1, host.length()).getBytes();
-                        digests.add(digest.digest(hostBytes));
-                        int digestCount = 1;
-                        while (prevDot >= 0 && digestCount < maxDigests) {
-                            prevDot = host.lastIndexOf('.', prevDot - 1);
-                            hostBytes = host.substring(prevDot + 1, host.length()).getBytes();
-                            digests.add(digest.digest(hostBytes));
-                            digestCount++;
-                        }
-                    }
-                }
-            } catch (NoSuchAlgorithmException e) {
-                throw new IllegalStateException("could not find digest algorithm");
-            }
-            return digests.toArray(new byte[digests.size()][]);
+        /** @hide */
+        public EphemeralDigest(@NonNull String hostName, int maxDigests) {
+            mInstantAppDigest = new InstantAppDigest(hostName, maxDigests);
         }
 
         EphemeralDigest(Parcel in) {
-            final int digestCount = in.readInt();
-            if (digestCount == -1) {
-                mDigestBytes = null;
-            } else {
-                mDigestBytes = new byte[digestCount][];
-                for (int i = 0; i < digestCount; i++) {
-                    mDigestBytes[i] = in.createByteArray();
-                }
-            }
-            mDigestPrefix = in.createIntArray();
+            mInstantAppDigest = in.readParcelable(null /*loader*/);
+        }
+
+        /** @hide */
+        InstantAppDigest getInstantAppDigest() {
+            return mInstantAppDigest;
         }
 
         public byte[][] getDigestBytes() {
-            return mDigestBytes;
+            return mInstantAppDigest.getDigestBytes();
         }
 
         public int[] getDigestPrefix() {
-            return mDigestPrefix;
+            return mInstantAppDigest.getDigestPrefix();
         }
 
         @Override
@@ -211,24 +204,17 @@ public final class EphemeralResolveInfo implements Parcelable {
 
         @Override
         public void writeToParcel(Parcel out, int flags) {
-            if (mDigestBytes == null) {
-                out.writeInt(-1);
-            } else {
-                out.writeInt(mDigestBytes.length);
-                for (int i = 0; i < mDigestBytes.length; i++) {
-                    out.writeByteArray(mDigestBytes[i]);
-                }
-            }
-            out.writeIntArray(mDigestPrefix);
+            out.writeParcelable(mInstantAppDigest, flags);
         }
 
         @SuppressWarnings("hiding")
         public static final Parcelable.Creator<EphemeralDigest> CREATOR =
                 new Parcelable.Creator<EphemeralDigest>() {
+            @Override
             public EphemeralDigest createFromParcel(Parcel in) {
                 return new EphemeralDigest(in);
             }
-
+            @Override
             public EphemeralDigest[] newArray(int size) {
                 return new EphemeralDigest[size];
             }

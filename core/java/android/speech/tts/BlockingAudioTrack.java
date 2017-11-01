@@ -164,7 +164,7 @@ class BlockingAudioTrack {
         // all data from the audioTrack has been sent to the mixer, so
         // it's safe to release at this point.
         if (DBG) Log.d(TAG, "Releasing audio track [" + track.hashCode() + "]");
-        synchronized(mAudioTrackLock) {
+        synchronized (mAudioTrackLock) {
             mAudioTrack = null;
         }
         track.release();
@@ -340,4 +340,25 @@ class BlockingAudioTrack {
         return value < min ? min : (value < max ? value : max);
     }
 
+    /**
+     * @see
+     *     AudioTrack#setPlaybackPositionUpdateListener(AudioTrack.OnPlaybackPositionUpdateListener).
+     */
+    public void setPlaybackPositionUpdateListener(
+            AudioTrack.OnPlaybackPositionUpdateListener listener) {
+        synchronized (mAudioTrackLock) {
+            if (mAudioTrack != null) {
+                mAudioTrack.setPlaybackPositionUpdateListener(listener);
+            }
+        }
+    }
+
+    /** @see AudioTrack#setNotificationMarkerPosition(int). */
+    public void setNotificationMarkerPosition(int frames) {
+        synchronized (mAudioTrackLock) {
+            if (mAudioTrack != null) {
+                mAudioTrack.setNotificationMarkerPosition(frames);
+            }
+        }
+    }
 }

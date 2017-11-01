@@ -27,16 +27,19 @@
 #include <androidfw/Asset.h>
 #include <androidfw/AssetManager.h>
 #include <androidfw/ResourceTypes.h>
+#include <android-base/macros.h>
 
 #include "jni.h"
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 #include "android_runtime/AndroidRuntime.h"
 #include "android_runtime/android_view_Surface.h"
 #include "android_runtime/android_util_AssetManager.h"
 #include "android/graphics/GraphicsJNI.h"
+#include "android/native_window.h"
+#include "android/native_window_jni.h"
 
-#include <rs.h>
 #include <rsEnv.h>
+#include <rsApiStubs.h>
 #include <gui/Surface.h>
 #include <gui/GLConsumer.h>
 #include <android_runtime/android_graphics_SurfaceTexture.h>
@@ -45,9 +48,6 @@
 static constexpr bool kLogApi = false;
 
 using namespace android;
-
-template <typename... T>
-void UNUSED(T... t) {}
 
 #define PER_ARRAY_TYPE(flag, fnc, readonly, ...) {                                      \
     jint len = 0;                                                                       \
@@ -1134,7 +1134,7 @@ nElementGetNativeData(JNIEnv *_env, jobject _this, jlong con, jlong id, jintArra
     // we will pack mType; mKind; mNormalized; mVectorSize; NumSubElements
     assert(dataSize == 5);
 
-    uintptr_t elementData[5];
+    uint32_t elementData[5];
     rsaElementGetNativeData((RsContext)con, (RsElement)id, elementData, dataSize);
 
     for(jint i = 0; i < dataSize; i ++) {
@@ -1157,7 +1157,7 @@ nElementGetSubElements(JNIEnv *_env, jobject _this, jlong con, jlong id,
 
     uintptr_t *ids = (uintptr_t*)malloc(dataSize * sizeof(uintptr_t));
     const char **names = (const char **)malloc(dataSize * sizeof(const char *));
-    uint32_t *arraySizes = (uint32_t *)malloc(dataSize * sizeof(uint32_t));
+    size_t *arraySizes = (size_t *)malloc(dataSize * sizeof(size_t));
 
     rsaElementGetSubElements((RsContext)con, (RsElement)id, ids, names, arraySizes,
                              (uint32_t)dataSize);
@@ -1264,10 +1264,10 @@ nAllocationGetSurface(JNIEnv *_env, jobject _this, jlong con, jlong a)
         ALOGD("nAllocationGetSurface, con(%p), a(%p)", (RsContext)con, (RsAllocation)a);
     }
 
-    IGraphicBufferProducer *v = (IGraphicBufferProducer *)rsAllocationGetSurface((RsContext)con,
-                                                                                 (RsAllocation)a);
-    sp<IGraphicBufferProducer> bp = v;
-    v->decStrong(nullptr);
+    ANativeWindow *anw = (ANativeWindow *)rsAllocationGetSurface((RsContext)con, (RsAllocation)a);
+
+    sp<Surface> surface(static_cast<Surface*>(anw));
+    sp<IGraphicBufferProducer> bp = surface->getIGraphicBufferProducer();
 
     jobject o = android_view_Surface_createFromIGraphicBufferProducer(_env, bp);
     return o;
@@ -1281,13 +1281,14 @@ nAllocationSetSurface(JNIEnv *_env, jobject _this, jlong con, jlong alloc, jobje
               (RsAllocation)alloc, (Surface *)sur);
     }
 
-    sp<Surface> s;
+    ANativeWindow *anw = nullptr;
     if (sur != 0) {
-        s = android_view_Surface_getSurface(_env, sur);
+        // Connect the native window handle to buffer queue.
+        anw = ANativeWindow_fromSurface(_env, sur);
+        native_window_api_connect(anw, NATIVE_WINDOW_API_CPU);
     }
 
-    rsAllocationSetSurface((RsContext)con, (RsAllocation)alloc,
-                           static_cast<ANativeWindow *>(s.get()));
+    rsAllocationSetSurface((RsContext)con, (RsAllocation)alloc, anw);
 }
 
 static void
@@ -1324,12 +1325,10 @@ nAllocationCreateFromBitmap(JNIEnv *_env, jobject _this, jlong con, jlong type, 
     SkBitmap bitmap;
     GraphicsJNI::getSkBitmap(_env, jbitmap, &bitmap);
 
-    bitmap.lockPixels();
     const void* ptr = bitmap.getPixels();
     jlong id = (jlong)(uintptr_t)rsAllocationCreateFromBitmap((RsContext)con,
                                                   (RsType)type, (RsAllocationMipmapControl)mip,
                                                   ptr, bitmap.getSize(), usage);
-    bitmap.unlockPixels();
     return id;
 }
 
@@ -1340,12 +1339,10 @@ nAllocationCreateBitmapBackedAllocation(JNIEnv *_env, jobject _this, jlong con, 
     SkBitmap bitmap;
     GraphicsJNI::getSkBitmap(_env, jbitmap, &bitmap);
 
-    bitmap.lockPixels();
     const void* ptr = bitmap.getPixels();
     jlong id = (jlong)(uintptr_t)rsAllocationCreateTyped((RsContext)con,
                                             (RsType)type, (RsAllocationMipmapControl)mip,
                                             (uint32_t)usage, (uintptr_t)ptr);
-    bitmap.unlockPixels();
     return id;
 }
 
@@ -1356,12 +1353,10 @@ nAllocationCubeCreateFromBitmap(JNIEnv *_env, jobject _this, jlong con, jlong ty
     SkBitmap bitmap;
     GraphicsJNI::getSkBitmap(_env, jbitmap, &bitmap);
 
-    bitmap.lockPixels();
     const void* ptr = bitmap.getPixels();
     jlong id = (jlong)(uintptr_t)rsAllocationCubeCreateFromBitmap((RsContext)con,
                                                       (RsType)type, (RsAllocationMipmapControl)mip,
                                                       ptr, bitmap.getSize(), usage);
-    bitmap.unlockPixels();
     return id;
 }
 
@@ -1373,12 +1368,10 @@ nAllocationCopyFromBitmap(JNIEnv *_env, jobject _this, jlong con, jlong alloc, j
     int w = bitmap.width();
     int h = bitmap.height();
 
-    bitmap.lockPixels();
     const void* ptr = bitmap.getPixels();
     rsAllocation2DData((RsContext)con, (RsAllocation)alloc, 0, 0,
                        0, RS_ALLOCATION_CUBEMAP_FACE_POSITIVE_X,
                        w, h, ptr, bitmap.getSize(), 0);
-    bitmap.unlockPixels();
 }
 
 static void
@@ -1387,10 +1380,8 @@ nAllocationCopyToBitmap(JNIEnv *_env, jobject _this, jlong con, jlong alloc, job
     SkBitmap bitmap;
     GraphicsJNI::getSkBitmap(_env, jbitmap, &bitmap);
 
-    bitmap.lockPixels();
     void* ptr = bitmap.getPixels();
     rsAllocationCopyToBitmap((RsContext)con, (RsAllocation)alloc, ptr, bitmap.getSize());
-    bitmap.unlockPixels();
     bitmap.notifyPixelsChanged();
 }
 

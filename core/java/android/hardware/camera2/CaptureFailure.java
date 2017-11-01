@@ -51,7 +51,7 @@ public class CaptureFailure {
 
      /** @hide */
      @Retention(RetentionPolicy.SOURCE)
-     @IntDef(
+     @IntDef(prefix = {"REASON_"}, value =
          {REASON_ERROR,
           REASON_FLUSHED })
      public @interface FailureReason {};
@@ -119,7 +119,7 @@ public class CaptureFailure {
      * Determine why the request was dropped, whether due to an error or to a user
      * action.
      *
-     * @return int One of {@code REASON_*} integer constants.
+     * @return int The reason code.
      *
      * @see #REASON_ERROR
      * @see #REASON_FLUSHED

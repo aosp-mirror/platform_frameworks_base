@@ -24,6 +24,8 @@ import android.os.Bundle;
 import android.os.RemoteCallback;
 import android.os.UserHandle;
 
+import java.util.Map;
+
 /**
  * Central application service that provides account management.
  * @hide
@@ -38,6 +40,8 @@ interface IAccountManager {
     Account[] getAccountsAsUser(String accountType, int userId, String opPackageName);
     void hasFeatures(in IAccountManagerResponse response, in Account account, in String[] features,
         String opPackageName);
+    void getAccountByTypeAndFeatures(in IAccountManagerResponse response, String accountType,
+        in String[] features, String opPackageName);
     void getAccountsByFeatures(in IAccountManagerResponse response, String accountType,
         in String[] features, String opPackageName);
     boolean addAccountExplicitly(in Account account, String password, in Bundle extras);
@@ -78,7 +82,7 @@ interface IAccountManager {
     /* Shared accounts */
     Account[] getSharedAccountsAsUser(int userId);
     boolean removeSharedAccountAsUser(in Account account, int userId);
-    void addSharedAccountsFromParentUser(int parentUserId, int userId);
+    void addSharedAccountsFromParentUser(int parentUserId, int userId, String opPackageName);
 
     /* Account renaming. */
     void renameAccount(in IAccountManagerResponse response, in Account accountToRename, String newName);
@@ -94,7 +98,8 @@ interface IAccountManager {
     void startUpdateCredentialsSession(in IAccountManagerResponse response, in Account account,
         String authTokenType, boolean expectActivityLaunch, in Bundle options);
 
-    /* Finish session started by startAddAccountSession(...) or startUpdateCredentialsSession(...) for user */
+    /* Finish session started by startAddAccountSession(...) or startUpdateCredentialsSession(...)
+    for user */
     void finishSessionAsUser(in IAccountManagerResponse response, in Bundle sessionBundle,
         boolean expectActivityLaunch, in Bundle appInfo, int userId);
 
@@ -104,6 +109,18 @@ interface IAccountManager {
     /* Check if credentials update is suggested */
     void isCredentialsUpdateSuggested(in IAccountManagerResponse response, in Account account,
         String statusToken);
+
+    /* Returns Map<String, Integer> from package name to visibility with all values stored for given account */
+    Map getPackagesAndVisibilityForAccount(in Account account);
+    boolean addAccountExplicitlyWithVisibility(in Account account, String password, in Bundle extras,
+            in Map visibility);
+    boolean setAccountVisibility(in Account a, in String packageName, int newVisibility);
+    int getAccountVisibility(in Account a, in String packageName);
+    /* Type may be null returns Map <Account, Integer>*/
+    Map getAccountsAndVisibilityForPackage(in String packageName, in String accountType);
+
+    void registerAccountListener(in String[] accountTypes, String opPackageName);
+    void unregisterAccountListener(in String[] accountTypes, String opPackageName);
 
     /* Check if the package in a user can access an account */
     boolean hasAccountAccess(in Account account, String packageName, in UserHandle userHandle);

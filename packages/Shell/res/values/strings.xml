@@ -4,9 +4,9 @@
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
      You may obtain a copy of the License at
-  
+
           http://www.apache.org/licenses/LICENSE-2.0
-  
+
      Unless required by applicable law or agreed to in writing, software
      distributed under the License is distributed on an "AS IS" BASIS,
      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,6 +15,9 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label">Shell</string>
+
+    <!-- Title of notification channel for bug report related notifications. [CHAR LIMIT=50] -->
+    <string name="bugreport_notification_channel">Bug reports</string>
 
     <!-- Title of notification indicating a bugreport is being generated. [CHAR LIMIT=50] -->
     <string name="bugreport_in_progress_title">Bug report <xliff:g id="id">#%d</xliff:g> is being generated</string>
@@ -28,7 +31,11 @@
     <!-- Text of notification indicating that bugreport will appear on the phone. [CHAR LIMIT=100] -->
     <string name="bugreport_finished_text" product="watch">The bug report will appear on the phone shortly</string>
     <!-- Text of notification indicating that tapping will share the captured bugreport. [CHAR LIMIT=100] -->
+    <string name="bugreport_finished_text" product="tv">Select to share your bug report</string>
+    <!-- Text of notification indicating that tapping will share the captured bugreport. [CHAR LIMIT=100] -->
     <string name="bugreport_finished_text" product="default">Tap to share your bug report</string>
+    <!-- Text of notification indicating that swipe left will share the captured bugreport, but giving user the option to wait for the screenshot. [CHAR LIMIT=100] -->
+    <string name="bugreport_finished_pending_screenshot_text" product="tv">Select to share your bug report without a screenshot or wait for the screenshot to finish</string>
     <!-- Text of notification indicating that swipe left will share the captured bugreport, but giving user the option to wait for the screenshot. [CHAR LIMIT=100] -->
     <string name="bugreport_finished_pending_screenshot_text" product="watch">Tap to share your bug report without a screenshot or wait for the screenshot to finish</string>
     <!-- Text of notification indicating that tapping will share the captured bugreport, but giving user the option to wait for the screenshot. [CHAR LIMIT=100] -->
@@ -76,4 +83,7 @@
 
     <!-- Label of button that save bugreport details.  -->
     <string name="save">Save</string>
+
+    <!-- Title displayed in the activity chooser used to share the bug report [CHAR LIMIT=35]-->
+    <string name="bugreport_intent_chooser_title">Share Bug report</string>
 </resources>

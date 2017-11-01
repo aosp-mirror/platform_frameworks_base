@@ -45,7 +45,7 @@ public class AutoCompleteTextViewActivityPortrait extends Activity
 
        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, 
                android.R.layout.simple_dropdown_item_1line, COUNTRIES);
-       AutoCompleteTextView textView = (AutoCompleteTextView) findViewById(R.id.edit);
+       AutoCompleteTextView textView = findViewById(R.id.edit);
        textView.setAdapter(adapter);
    }
 
@@ -60,7 +60,7 @@ public class AutoCompleteTextViewActivityPortrait extends Activity
    "Cote d'Ivoire", "Cambodia", "Cameroon", "Canada", "Cape Verde",
    "Cayman Islands", "Central African Republic", "Chad", "Chile", "China",
    "Christmas Island", "Cocos (Keeling) Islands", "Colombia", "Comoros", "Congo",
-   "Cook Islands", "Costa Rica", "Croatia", "Cuba", "Cyprus", "Czech Republic",
+   "Cook Islands", "Costa Rica", "Croatia", "Cuba", "Cyprus", "Czechia",
    "Democratic Republic of the Congo", "Denmark", "Djibouti", "Dominica", "Dominican Republic",
    "East Timor", "Ecuador", "Egypt", "El Salvador", "Equatorial Guinea", "Eritrea",
    "Estonia", "Ethiopia", "Faeroe Islands", "Falkland Islands", "Fiji", "Finland",

@@ -1,8 +1,0 @@
-@jd:body
-
-<script type="text/javascript">
-  document.location=toRoot+"resources/faq/commontasks.html"
-</script>
-
-<p>You should have already been redirected by your browser. Please follow
-<a href="{@docRoot}resources/faq/commontasks.html">this link</a>.</p>

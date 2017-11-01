@@ -27,6 +27,7 @@ import java.util.Collection;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityThread;
 import android.content.Context;
 import android.os.Handler;
@@ -78,6 +79,7 @@ import com.android.internal.annotations.GuardedBy;
  */
 public class AudioTrack extends PlayerBase
                         implements AudioRouting
+                                 , VolumeAutomation
 {
     //---------------------------------------------------------
     // Constants
@@ -213,6 +215,66 @@ public class AudioTrack extends PlayerBase
      * {@link #write(ByteBuffer, int, int, long)}.
      */
     public final static int WRITE_NON_BLOCKING = 1;
+
+    /** @hide */
+    @IntDef({
+        PERFORMANCE_MODE_NONE,
+        PERFORMANCE_MODE_LOW_LATENCY,
+        PERFORMANCE_MODE_POWER_SAVING
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface PerformanceMode {}
+
+    /**
+     * Default performance mode for an {@link AudioTrack}.
+     */
+    public static final int PERFORMANCE_MODE_NONE = 0;
+
+    /**
+     * Low latency performance mode for an {@link AudioTrack}.
+     * If the device supports it, this mode
+     * enables a lower latency path through to the audio output sink.
+     * Effects may no longer work with such an {@code AudioTrack} and
+     * the sample rate must match that of the output sink.
+     * <p>
+     * Applications should be aware that low latency requires careful
+     * buffer management, with smaller chunks of audio data written by each
+     * {@code write()} call.
+     * <p>
+     * If this flag is used without specifying a {@code bufferSizeInBytes} then the
+     * {@code AudioTrack}'s actual buffer size may be too small.
+     * It is recommended that a fairly
+     * large buffer should be specified when the {@code AudioTrack} is created.
+     * Then the actual size can be reduced by calling
+     * {@link #setBufferSizeInFrames(int)}. The buffer size can be optimized
+     * by lowering it after each {@code write()} call until the audio glitches,
+     * which is detected by calling
+     * {@link #getUnderrunCount()}. Then the buffer size can be increased
+     * until there are no glitches.
+     * This tuning step should be done while playing silence.
+     * This technique provides a compromise between latency and glitch rate.
+     */
+    public static final int PERFORMANCE_MODE_LOW_LATENCY = 1;
+
+    /**
+     * Power saving performance mode for an {@link AudioTrack}.
+     * If the device supports it, this
+     * mode will enable a lower power path to the audio output sink.
+     * In addition, this lower power path typically will have
+     * deeper internal buffers and better underrun resistance,
+     * with a tradeoff of higher latency.
+     * <p>
+     * In this mode, applications should attempt to use a larger buffer size
+     * and deliver larger chunks of audio data per {@code write()} call.
+     * Use {@link #getBufferSizeInFrames()} to determine
+     * the actual buffer size of the {@code AudioTrack} as it may have increased
+     * to accommodate a deeper buffer.
+     */
+    public static final int PERFORMANCE_MODE_POWER_SAVING = 2;
+
+    // keep in sync with system/media/audio/include/system/audio-base.h
+    private static final int AUDIO_OUTPUT_FLAG_FAST = 0x4;
+    private static final int AUDIO_OUTPUT_FLAG_DEEP_BUFFER = 0x8;
 
     //--------------------------------------------------------------------------
     // Member variables
@@ -359,6 +421,9 @@ public class AudioTrack extends PlayerBase
      *   for an AudioTrack instance in streaming mode.
      * @param mode streaming or static buffer. See {@link #MODE_STATIC} and {@link #MODE_STREAM}
      * @throws java.lang.IllegalArgumentException
+     * @deprecated use {@link Builder} or
+     *   {@link #AudioTrack(AudioAttributes, AudioFormat, int, int, int)} to specify the
+     *   {@link AudioAttributes} instead of the stream type which is only for volume control.
      */
     public AudioTrack(int streamType, int sampleRateInHz, int channelConfig, int audioFormat,
             int bufferSizeInBytes, int mode)
@@ -414,6 +479,9 @@ public class AudioTrack extends PlayerBase
      * @param mode streaming or static buffer. See {@link #MODE_STATIC} and {@link #MODE_STREAM}
      * @param sessionId Id of audio session the AudioTrack must be attached to
      * @throws java.lang.IllegalArgumentException
+     * @deprecated use {@link Builder} or
+     *   {@link #AudioTrack(AudioAttributes, AudioFormat, int, int, int)} to specify the
+     *   {@link AudioAttributes} instead of the stream type which is only for volume control.
      */
     public AudioTrack(int streamType, int sampleRateInHz, int channelConfig, int audioFormat,
             int bufferSizeInBytes, int mode, int sessionId)
@@ -429,6 +497,7 @@ public class AudioTrack extends PlayerBase
                     .build(),
                 bufferSizeInBytes,
                 mode, sessionId);
+        deprecateStreamTypeForPlayback(streamType, "AudioTrack", "AudioTrack()");
     }
 
     /**
@@ -464,11 +533,20 @@ public class AudioTrack extends PlayerBase
     public AudioTrack(AudioAttributes attributes, AudioFormat format, int bufferSizeInBytes,
             int mode, int sessionId)
                     throws IllegalArgumentException {
-        super(attributes);
+        super(attributes, AudioPlaybackConfiguration.PLAYER_TYPE_JAM_AUDIOTRACK);
         // mState already == STATE_UNINITIALIZED
 
         if (format == null) {
             throw new IllegalArgumentException("Illegal null AudioFormat");
+        }
+
+        // Check if we should enable deep buffer mode
+        if (shouldEnablePowerSaving(mAttributes, format, bufferSizeInBytes, mode)) {
+            mAttributes = new AudioAttributes.Builder(mAttributes)
+                .replaceFlags((mAttributes.getAllFlags()
+                        | AudioAttributes.FLAG_DEEP_BUFFER)
+                        & ~AudioAttributes.FLAG_LOW_LATENCY)
+                .build();
         }
 
         // remember which looper is associated with the AudioTrack instantiation
@@ -530,6 +608,8 @@ public class AudioTrack extends PlayerBase
         } else {
             mState = STATE_INITIALIZED;
         }
+
+        baseRegisterPlayer();
     }
 
     /**
@@ -544,7 +624,8 @@ public class AudioTrack extends PlayerBase
      * OpenSLES interface is realized.
      */
     /*package*/ AudioTrack(long nativeTrackInJavaObj) {
-        super(new AudioAttributes.Builder().build());
+        super(new AudioAttributes.Builder().build(),
+                AudioPlaybackConfiguration.PLAYER_TYPE_JAM_AUDIOTRACK);
         // "final"s
         mNativeTrackInJavaObj = 0;
         mJniData = 0;
@@ -558,6 +639,7 @@ public class AudioTrack extends PlayerBase
 
         // other initialization...
         if (nativeTrackInJavaObj != 0) {
+            baseRegisterPlayer();
             deferred_connect(nativeTrackInJavaObj);
         } else {
             mState = STATE_UNINITIALIZED;
@@ -637,6 +719,7 @@ public class AudioTrack extends PlayerBase
         private int mBufferSizeInBytes;
         private int mSessionId = AudioManager.AUDIO_SESSION_ID_GENERATE;
         private int mMode = MODE_STREAM;
+        private int mPerformanceMode = PERFORMANCE_MODE_NONE;
 
         /**
          * Constructs a new Builder with the default values as described above.
@@ -741,6 +824,32 @@ public class AudioTrack extends PlayerBase
         }
 
         /**
+         * Sets the {@link AudioTrack} performance mode.  This is an advisory request which
+         * may not be supported by the particular device, and the framework is free
+         * to ignore such request if it is incompatible with other requests or hardware.
+         *
+         * @param performanceMode one of
+         * {@link AudioTrack#PERFORMANCE_MODE_NONE},
+         * {@link AudioTrack#PERFORMANCE_MODE_LOW_LATENCY},
+         * or {@link AudioTrack#PERFORMANCE_MODE_POWER_SAVING}.
+         * @return the same Builder instance.
+         * @throws IllegalArgumentException if {@code performanceMode} is not valid.
+         */
+        public @NonNull Builder setPerformanceMode(@PerformanceMode int performanceMode) {
+            switch (performanceMode) {
+                case PERFORMANCE_MODE_NONE:
+                case PERFORMANCE_MODE_LOW_LATENCY:
+                case PERFORMANCE_MODE_POWER_SAVING:
+                    mPerformanceMode = performanceMode;
+                    break;
+                default:
+                    throw new IllegalArgumentException(
+                            "Invalid performance mode " + performanceMode);
+            }
+            return this;
+        }
+
+        /**
          * Builds an {@link AudioTrack} instance initialized with all the parameters set
          * on this <code>Builder</code>.
          * @return a new successfully initialized {@link AudioTrack} instance.
@@ -754,6 +863,28 @@ public class AudioTrack extends PlayerBase
                         .setUsage(AudioAttributes.USAGE_MEDIA)
                         .build();
             }
+            switch (mPerformanceMode) {
+            case PERFORMANCE_MODE_LOW_LATENCY:
+                mAttributes = new AudioAttributes.Builder(mAttributes)
+                    .replaceFlags((mAttributes.getAllFlags()
+                            | AudioAttributes.FLAG_LOW_LATENCY)
+                            & ~AudioAttributes.FLAG_DEEP_BUFFER)
+                    .build();
+                break;
+            case PERFORMANCE_MODE_NONE:
+                if (!shouldEnablePowerSaving(mAttributes, mFormat, mBufferSizeInBytes, mMode)) {
+                    break; // do not enable deep buffer mode.
+                }
+                // permitted to fall through to enable deep buffer
+            case PERFORMANCE_MODE_POWER_SAVING:
+                mAttributes = new AudioAttributes.Builder(mAttributes)
+                .replaceFlags((mAttributes.getAllFlags()
+                        | AudioAttributes.FLAG_DEEP_BUFFER)
+                        & ~AudioAttributes.FLAG_LOW_LATENCY)
+                .build();
+                break;
+            }
+
             if (mFormat == null) {
                 mFormat = new AudioFormat.Builder()
                         .setChannelMask(AudioFormat.CHANNEL_OUT_STEREO)
@@ -794,6 +925,56 @@ public class AudioTrack extends PlayerBase
             AudioFormat.CHANNEL_OUT_BACK_CENTER |
             AudioFormat.CHANNEL_OUT_SIDE_LEFT |
             AudioFormat.CHANNEL_OUT_SIDE_RIGHT;
+
+    // Returns a boolean whether the attributes, format, bufferSizeInBytes, mode allow
+    // power saving to be automatically enabled for an AudioTrack. Returns false if
+    // power saving is already enabled in the attributes parameter.
+    private static boolean shouldEnablePowerSaving(
+            @Nullable AudioAttributes attributes, @Nullable AudioFormat format,
+            int bufferSizeInBytes, int mode) {
+        // If no attributes, OK
+        // otherwise check attributes for USAGE_MEDIA and CONTENT_UNKNOWN, MUSIC, or MOVIE.
+        if (attributes != null &&
+                (attributes.getAllFlags() != 0  // cannot have any special flags
+                || attributes.getUsage() != AudioAttributes.USAGE_MEDIA
+                || (attributes.getContentType() != AudioAttributes.CONTENT_TYPE_UNKNOWN
+                    && attributes.getContentType() != AudioAttributes.CONTENT_TYPE_MUSIC
+                    && attributes.getContentType() != AudioAttributes.CONTENT_TYPE_MOVIE))) {
+            return false;
+        }
+
+        // Format must be fully specified and be linear pcm
+        if (format == null
+                || format.getSampleRate() == AudioFormat.SAMPLE_RATE_UNSPECIFIED
+                || !AudioFormat.isEncodingLinearPcm(format.getEncoding())
+                || !AudioFormat.isValidEncoding(format.getEncoding())
+                || format.getChannelCount() < 1) {
+            return false;
+        }
+
+        // Mode must be streaming
+        if (mode != MODE_STREAM) {
+            return false;
+        }
+
+        // A buffer size of 0 is always compatible with deep buffer (when called from the Builder)
+        // but for app compatibility we only use deep buffer power saving for large buffer sizes.
+        if (bufferSizeInBytes != 0) {
+            final long BUFFER_TARGET_MODE_STREAM_MS = 100;
+            final int MILLIS_PER_SECOND = 1000;
+            final long bufferTargetSize =
+                    BUFFER_TARGET_MODE_STREAM_MS
+                    * format.getChannelCount()
+                    * format.getBytesPerSample(format.getEncoding())
+                    * format.getSampleRate()
+                    / MILLIS_PER_SECOND;
+            if (bufferSizeInBytes < bufferTargetSize) {
+                return false;
+            }
+        }
+
+        return true;
+    }
 
     // Convenience method for the constructor's parameter checks.
     // This is where constructor IllegalArgumentException-s are thrown
@@ -1044,11 +1225,12 @@ public class AudioTrack extends PlayerBase
     }
 
     /**
-     * Returns the type of audio stream this AudioTrack is configured for.
+     * Returns the volume stream type of this AudioTrack.
      * Compare the result against {@link AudioManager#STREAM_VOICE_CALL},
      * {@link AudioManager#STREAM_SYSTEM}, {@link AudioManager#STREAM_RING},
      * {@link AudioManager#STREAM_MUSIC}, {@link AudioManager#STREAM_ALARM},
-     * {@link AudioManager#STREAM_NOTIFICATION}, or {@link AudioManager#STREAM_DTMF}.
+     * {@link AudioManager#STREAM_NOTIFICATION}, {@link AudioManager#STREAM_DTMF} or
+     * {@link AudioManager#STREAM_ACCESSIBILITY}.
      */
     public int getStreamType() {
         return mStreamType;
@@ -1263,6 +1445,27 @@ public class AudioTrack extends PlayerBase
      */
     public int getUnderrunCount() {
         return native_get_underrun_count();
+    }
+
+    /**
+     * Returns the current performance mode of the {@link AudioTrack}.
+     *
+     * @return one of {@link AudioTrack#PERFORMANCE_MODE_NONE},
+     * {@link AudioTrack#PERFORMANCE_MODE_LOW_LATENCY},
+     * or {@link AudioTrack#PERFORMANCE_MODE_POWER_SAVING}.
+     * Use {@link AudioTrack.Builder#setPerformanceMode}
+     * in the {@link AudioTrack.Builder} to enable a performance mode.
+     * @throws IllegalStateException if track is not initialized.
+     */
+    public @PerformanceMode int getPerformanceMode() {
+        final int flags = native_get_flags();
+        if ((flags & AUDIO_OUTPUT_FLAG_FAST) != 0) {
+            return PERFORMANCE_MODE_LOW_LATENCY;
+        } else if ((flags & AUDIO_OUTPUT_FLAG_DEEP_BUFFER) != 0) {
+            return PERFORMANCE_MODE_POWER_SAVING;
+        } else {
+            return PERFORMANCE_MODE_NONE;
+        }
     }
 
     /**
@@ -1513,9 +1716,9 @@ public class AudioTrack extends PlayerBase
     }
 
     @Override
-    void playerSetVolume(float leftVolume, float rightVolume) {
-        leftVolume = clampGainOrLevel(leftVolume);
-        rightVolume = clampGainOrLevel(rightVolume);
+    void playerSetVolume(boolean muting, float leftVolume, float rightVolume) {
+        leftVolume = clampGainOrLevel(muting ? 0.0f : leftVolume);
+        rightVolume = clampGainOrLevel(muting ? 0.0f : rightVolume);
 
         native_setVolume(leftVolume, rightVolume);
     }
@@ -1539,6 +1742,23 @@ public class AudioTrack extends PlayerBase
         return setStereoVolume(gain, gain);
     }
 
+    @Override
+    /* package */ int playerApplyVolumeShaper(
+            @NonNull VolumeShaper.Configuration configuration,
+            @NonNull VolumeShaper.Operation operation) {
+        return native_applyVolumeShaper(configuration, operation);
+    }
+
+    @Override
+    /* package */ @Nullable VolumeShaper.State playerGetVolumeShaperState(int id) {
+        return native_getVolumeShaperState(id);
+    }
+
+    @Override
+    public @NonNull VolumeShaper createVolumeShaper(
+            @NonNull VolumeShaper.Configuration configuration) {
+        return new VolumeShaper(configuration, this);
+    }
 
     /**
      * Sets the playback sample rate for this track. This sets the sampling rate at which
@@ -1741,8 +1961,34 @@ public class AudioTrack extends PlayerBase
         if (mState != STATE_INITIALIZED) {
             throw new IllegalStateException("play() called on uninitialized AudioTrack.");
         }
-        baseStart();
+        //FIXME use lambda to pass startImpl to superclass
+        final int delay = getStartDelayMs();
+        if (delay == 0) {
+            startImpl();
+        } else {
+            new Thread() {
+                public void run() {
+                    try {
+                        Thread.sleep(delay);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    baseSetStartDelayMs(0);
+                    try {
+                        startImpl();
+                    } catch (IllegalStateException e) {
+                        // fail silently for a state exception when it is happening after
+                        // a delayed start, as the player state could have changed between the
+                        // call to start() and the execution of startImpl()
+                    }
+                }
+            }.start();
+        }
+    }
+
+    private void startImpl() {
         synchronized(mPlayStateLock) {
+            baseStart();
             native_start();
             mPlayState = PLAYSTATE_PLAYING;
         }
@@ -1765,6 +2011,7 @@ public class AudioTrack extends PlayerBase
         // stop playing
         synchronized(mPlayStateLock) {
             native_stop();
+            baseStop();
             mPlayState = PLAYSTATE_STOPPED;
             mAvSyncHeader = null;
             mAvSyncBytesRemaining = 0;
@@ -1783,11 +2030,11 @@ public class AudioTrack extends PlayerBase
         if (mState != STATE_INITIALIZED) {
             throw new IllegalStateException("pause() called on uninitialized AudioTrack.");
         }
-        //logd("pause()");
 
         // pause playback
         synchronized(mPlayStateLock) {
             native_pause();
+            basePause();
             mPlayState = PLAYSTATE_PAUSED;
         }
     }
@@ -2276,8 +2523,11 @@ public class AudioTrack extends PlayerBase
             mAvSyncHeader = ByteBuffer.allocate(16);
             mAvSyncHeader.order(ByteOrder.BIG_ENDIAN);
             mAvSyncHeader.putInt(0x55550001);
-            mAvSyncHeader.putInt(sizeInBytes);
-            mAvSyncHeader.putLong(timestamp);
+        }
+
+        if (mAvSyncBytesRemaining == 0) {
+            mAvSyncHeader.putInt(4, sizeInBytes);
+            mAvSyncHeader.putLong(8, timestamp);
             mAvSyncHeader.position(0);
             mAvSyncBytesRemaining = sizeInBytes;
         }
@@ -2309,9 +2559,6 @@ public class AudioTrack extends PlayerBase
         }
 
         mAvSyncBytesRemaining -= ret;
-        if (mAvSyncBytesRemaining == 0) {
-            mAvSyncHeader = null;
-        }
 
         return ret;
     }
@@ -2393,8 +2640,8 @@ public class AudioTrack extends PlayerBase
     }
 
     @Override
-    int playerSetAuxEffectSendLevel(float level) {
-        level = clampGainOrLevel(level);
+    int playerSetAuxEffectSendLevel(boolean muting, float level) {
+        level = clampGainOrLevel(muting ? 0.0f : level);
         int err = native_setAuxEffectSendLevel(level);
         return err == 0 ? SUCCESS : ERROR;
     }
@@ -2483,8 +2730,8 @@ public class AudioTrack extends PlayerBase
     //--------------------
     /**
      * The list of AudioRouting.OnRoutingChangedListener interfaces added (with
-     * {@link AudioRecord#addOnRoutingChangedListener} by an app to receive
-     * (re)routing notifications.
+     * {@link #addOnRoutingChangedListener(android.media.AudioRouting.OnRoutingChangedListener, Handler)}
+     * by an app to receive (re)routing notifications.
      */
     @GuardedBy("mRoutingChangeListeners")
     private ArrayMap<AudioRouting.OnRoutingChangedListener,
@@ -2729,6 +2976,24 @@ public class AudioTrack extends PlayerBase
     }
 
     //---------------------------------------------------------
+    // Methods for IPlayer interface
+    //--------------------
+    @Override
+    void playerStart() {
+        play();
+    }
+
+    @Override
+    void playerPause() {
+        pause();
+    }
+
+    @Override
+    void playerStop() {
+        stop();
+    }
+
+    //---------------------------------------------------------
     // Java methods called from the native side
     //--------------------
     @SuppressWarnings("unused")
@@ -2824,6 +3089,8 @@ public class AudioTrack extends PlayerBase
 
     private native final int native_get_underrun_count();
 
+    private native final int native_get_flags();
+
     // longArray must be a non-null array of length >= 2
     // [0] is assigned the frame position
     // [1] is assigned the time in CLOCK_MONOTONIC nanoseconds
@@ -2843,6 +3110,12 @@ public class AudioTrack extends PlayerBase
     private native final void native_enableDeviceCallback();
     private native final void native_disableDeviceCallback();
     static private native int native_get_FCC_8();
+
+    private native int native_applyVolumeShaper(
+            @NonNull VolumeShaper.Configuration configuration,
+            @NonNull VolumeShaper.Operation operation);
+
+    private native @Nullable VolumeShaper.State native_getVolumeShaperState(int id);
 
     //---------------------------------------------------------
     // Utility methods

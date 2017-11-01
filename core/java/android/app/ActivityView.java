@@ -152,7 +152,7 @@ public class ActivityView extends ViewGroup {
 
         try {
             mActivityContainer = new ActivityContainerWrapper(
-                    ActivityManagerNative.getDefault().createVirtualActivityContainer(
+                    ActivityManager.getService().createVirtualActivityContainer(
                             mActivity.getActivityToken(), new ActivityContainerCallback(this)));
         } catch (RemoteException e) {
             throw new RuntimeException("ActivityView: Unable to create ActivityContainer. "
@@ -446,13 +446,6 @@ public class ActivityView extends ViewGroup {
             mIActivityContainer = container;
             mOpened = true;
             mGuard.open("release");
-        }
-
-        void attachToDisplay(int displayId) {
-            try {
-                mIActivityContainer.attachToDisplay(displayId);
-            } catch (RemoteException e) {
-            }
         }
 
         void setSurface(Surface surface, int width, int height, int density)

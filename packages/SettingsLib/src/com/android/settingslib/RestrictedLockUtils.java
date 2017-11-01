@@ -16,6 +16,12 @@
 
 package com.android.settingslib;
 
+import static android.app.admin.DevicePolicyManager.KEYGUARD_DISABLE_FEATURES_NONE;
+import static android.app.admin.DevicePolicyManager.PROFILE_KEYGUARD_FEATURES_AFFECT_OWNER;
+
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.app.AppGlobals;
 import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
@@ -28,8 +34,9 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
-import android.text.Spanned;
+import android.support.annotation.VisibleForTesting;
 import android.text.SpannableStringBuilder;
+import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.ImageSpan;
 import android.view.MenuItem;
@@ -68,117 +75,114 @@ public class RestrictedLockUtils {
      */
     public static EnforcedAdmin checkIfRestrictionEnforced(Context context,
             String userRestriction, int userId) {
-        DevicePolicyManager dpm = (DevicePolicyManager) context.getSystemService(
+        final DevicePolicyManager dpm = (DevicePolicyManager) context.getSystemService(
                 Context.DEVICE_POLICY_SERVICE);
         if (dpm == null) {
             return null;
         }
-        UserManager um = UserManager.get(context);
-        int restrictionSource = um.getUserRestrictionSource(userRestriction,
-                UserHandle.of(userId));
 
-        // If the restriction is not enforced or enforced only by system then return null
-        if (restrictionSource == UserManager.RESTRICTION_NOT_SET
-                || restrictionSource == UserManager.RESTRICTION_SOURCE_SYSTEM) {
+        final UserManager um = UserManager.get(context);
+        final List<UserManager.EnforcingUser> enforcingUsers =
+                um.getUserRestrictionSources(userRestriction, UserHandle.of(userId));
+
+        if (enforcingUsers.isEmpty()) {
+            // Restriction is not enforced.
             return null;
+        } else if (enforcingUsers.size() > 1) {
+            return EnforcedAdmin.MULTIPLE_ENFORCED_ADMIN;
         }
 
-        final boolean enforcedByProfileOwner =
-                (restrictionSource & UserManager.RESTRICTION_SOURCE_PROFILE_OWNER) != 0;
-        final boolean enforcedByDeviceOwner =
-                (restrictionSource & UserManager.RESTRICTION_SOURCE_DEVICE_OWNER) != 0;
-        if (enforcedByProfileOwner) {
-            return getProfileOwner(context, userId);
-        } else if (enforcedByDeviceOwner) {
+        final int restrictionSource = enforcingUsers.get(0).getUserRestrictionSource();
+        final int adminUserId = enforcingUsers.get(0).getUserHandle().getIdentifier();
+
+        if (restrictionSource == UserManager.RESTRICTION_SOURCE_PROFILE_OWNER) {
+            // Check if it is a profile owner of the user under consideration.
+            if (adminUserId == userId) {
+                return getProfileOwner(context, adminUserId);
+            } else {
+                // Check if it is a profile owner of a managed profile of the current user.
+                // Otherwise it is in a separate user and we return a default EnforcedAdmin.
+                final UserInfo parentUser = um.getProfileParent(adminUserId);
+                return (parentUser != null && parentUser.id == userId)
+                        ? getProfileOwner(context, adminUserId)
+                        : EnforcedAdmin.MULTIPLE_ENFORCED_ADMIN;
+            }
+        } else if (restrictionSource == UserManager.RESTRICTION_SOURCE_DEVICE_OWNER) {
             // When the restriction is enforced by device owner, return the device owner admin only
             // if the admin is for the {@param userId} otherwise return a default EnforcedAdmin.
-            final EnforcedAdmin deviceOwner = getDeviceOwner(context);
-            return deviceOwner.userId == userId
-                    ? deviceOwner
-                    : EnforcedAdmin.MULTIPLE_ENFORCED_ADMIN;
+            return adminUserId == userId
+                    ? getDeviceOwner(context) : EnforcedAdmin.MULTIPLE_ENFORCED_ADMIN;
         }
+
+        // If the restriction is enforced by system then return null.
         return null;
     }
 
     public static boolean hasBaseUserRestriction(Context context,
             String userRestriction, int userId) {
-        UserManager um = (UserManager) context.getSystemService(Context.USER_SERVICE);
+        final UserManager um = (UserManager) context.getSystemService(Context.USER_SERVICE);
         return um.hasBaseUserRestriction(userRestriction, UserHandle.of(userId));
     }
 
     /**
-     * Checks if keyguard features are disabled by policy.
+     * Checks whether keyguard features are disabled by policy.
      *
-     * @param keyguardFeatures Could be any of keyguard features that can be
+     * @param context {@link Context} for the calling user.
+     *
+     * @param keyguardFeatures Any one of keyguard features that can be
      * disabled by {@link android.app.admin.DevicePolicyManager#setKeyguardDisabledFeatures}.
+     *
+     * @param userId User to check enforced admin status for.
+     *
      * @return EnforcedAdmin Object containing the enforced admin component and admin user details,
      * or {@code null} If the notification features are not disabled. If the restriction is set by
      * multiple admins, then the admin component will be set to {@code null} and userId to
      * {@link UserHandle#USER_NULL}.
      */
     public static EnforcedAdmin checkIfKeyguardFeaturesDisabled(Context context,
-            int keyguardFeatures, int userId) {
-        final DevicePolicyManager dpm = (DevicePolicyManager) context.getSystemService(
-                Context.DEVICE_POLICY_SERVICE);
-        if (dpm == null) {
+            int keyguardFeatures, final @UserIdInt int userId) {
+        final LockSettingCheck check = (dpm, admin, checkUser) -> {
+            int effectiveFeatures = dpm.getKeyguardDisabledFeatures(admin, checkUser);
+            if (checkUser != userId) {
+                effectiveFeatures &= PROFILE_KEYGUARD_FEATURES_AFFECT_OWNER;
+            }
+            return (effectiveFeatures & keyguardFeatures) != KEYGUARD_DISABLE_FEATURES_NONE;
+        };
+        if (UserManager.get(context).getUserInfo(userId).isManagedProfile()) {
+            DevicePolicyManager dpm =
+                    (DevicePolicyManager) context.getSystemService(Context.DEVICE_POLICY_SERVICE);
+            return findEnforcedAdmin(dpm.getActiveAdminsAsUser(userId), dpm, userId, check);
+        }
+        return checkForLockSetting(context, userId, check);
+    }
+
+    /**
+     * Filter a set of device admins based on a predicate {@code check}. This is equivalent to
+     * {@code admins.stream().filter(check).map(x → new EnforcedAdmin(admin, userId)} except it's
+     * returning a zero/one/many-type thing.
+     *
+     * @param admins set of candidate device admins identified by {@link ComponentName}.
+     * @param userId user to create the resultant {@link EnforcedAdmin} as.
+     * @param check filter predicate.
+     *
+     * @return {@code null} if none of the {@param admins} match.
+     *         An {@link EnforcedAdmin} if exactly one of the admins matches.
+     *         Otherwise, {@link EnforcedAdmin#MULTIPLE_ENFORCED_ADMIN} for multiple matches.
+     */
+    @Nullable
+    private static EnforcedAdmin findEnforcedAdmin(@Nullable List<ComponentName> admins,
+            @NonNull DevicePolicyManager dpm, @UserIdInt int userId,
+            @NonNull LockSettingCheck check) {
+        if (admins == null) {
             return null;
         }
-        final UserManager um = (UserManager) context.getSystemService(Context.USER_SERVICE);
-        LockPatternUtils lockPatternUtils = new LockPatternUtils(context);
         EnforcedAdmin enforcedAdmin = null;
-        if (um.getUserInfo(userId).isManagedProfile()) {
-            final List<ComponentName> admins = dpm.getActiveAdminsAsUser(userId);
-            if (admins == null) {
-                return null;
-            }
-            for (ComponentName admin : admins) {
-                if ((dpm.getKeyguardDisabledFeatures(admin, userId) & keyguardFeatures) != 0) {
-                    if (enforcedAdmin == null) {
-                        enforcedAdmin = new EnforcedAdmin(admin, userId);
-                    } else {
-                        return EnforcedAdmin.MULTIPLE_ENFORCED_ADMIN;
-                    }
-                }
-            }
-        } else {
-            // Consider all admins for this user and the profiles that are visible from this
-            // user that do not use a separate work challenge.
-            for (UserInfo userInfo : um.getProfiles(userId)) {
-                final List<ComponentName> admins = dpm.getActiveAdminsAsUser(userInfo.id);
-                if (admins == null) {
-                    continue;
-                }
-                final boolean isSeparateProfileChallengeEnabled =
-                        lockPatternUtils.isSeparateProfileChallengeEnabled(userInfo.id);
-                for (ComponentName admin : admins) {
-                    if (!isSeparateProfileChallengeEnabled) {
-                        if ((dpm.getKeyguardDisabledFeatures(admin, userInfo.id)
-                                    & keyguardFeatures) != 0) {
-                            if (enforcedAdmin == null) {
-                                enforcedAdmin = new EnforcedAdmin(admin, userInfo.id);
-                            } else {
-                                return EnforcedAdmin.MULTIPLE_ENFORCED_ADMIN;
-                            }
-                            // This same admins could have set policies both on the managed profile
-                            // and on the parent. So, if the admin has set the policy on the
-                            // managed profile here, we don't need to further check if that admin
-                            // has set policy on the parent admin.
-                            continue;
-                        }
-                    }
-                    if (userInfo.isManagedProfile()) {
-                        // If userInfo.id is a managed profile, we also need to look at
-                        // the policies set on the parent.
-                        DevicePolicyManager parentDpm = dpm.getParentProfileInstance(userInfo);
-                        if ((parentDpm.getKeyguardDisabledFeatures(admin, userInfo.id)
-                                & keyguardFeatures) != 0) {
-                            if (enforcedAdmin == null) {
-                                enforcedAdmin = new EnforcedAdmin(admin, userInfo.id);
-                            } else {
-                                return EnforcedAdmin.MULTIPLE_ENFORCED_ADMIN;
-                            }
-                        }
-                    }
+        for (ComponentName admin : admins) {
+            if (check.isEnforcing(dpm, admin, userId)) {
+                if (enforcedAdmin == null) {
+                    enforcedAdmin = new EnforcedAdmin(admin, userId);
+                } else {
+                    return EnforcedAdmin.MULTIPLE_ENFORCED_ADMIN;
                 }
             }
         }
@@ -383,6 +387,11 @@ public class RestrictedLockUtils {
      *
      */
     public static EnforcedAdmin checkIfPasswordQualityIsSet(Context context, int userId) {
+        final LockSettingCheck check =
+                (DevicePolicyManager dpm, ComponentName admin, @UserIdInt int checkUser) ->
+                        dpm.getPasswordQuality(admin, checkUser)
+                                > DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
+
         final DevicePolicyManager dpm = (DevicePolicyManager) context.getSystemService(
                 Context.DEVICE_POLICY_SERVICE);
         if (dpm == null) {
@@ -390,17 +399,16 @@ public class RestrictedLockUtils {
         }
 
         LockPatternUtils lockPatternUtils = new LockPatternUtils(context);
-        EnforcedAdmin enforcedAdmin = null;
-        if (lockPatternUtils.isSeparateProfileChallengeEnabled(userId)) {
+        if (sProxy.isSeparateProfileChallengeEnabled(lockPatternUtils, userId)) {
             // userId is managed profile and has a separate challenge, only consider
             // the admins in that user.
             final List<ComponentName> admins = dpm.getActiveAdminsAsUser(userId);
             if (admins == null) {
                 return null;
             }
+            EnforcedAdmin enforcedAdmin = null;
             for (ComponentName admin : admins) {
-                if (dpm.getPasswordQuality(admin, userId)
-                        > DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED) {
+                if (check.isEnforcing(dpm, admin, userId)) {
                     if (enforcedAdmin == null) {
                         enforcedAdmin = new EnforcedAdmin(admin, userId);
                     } else {
@@ -408,50 +416,10 @@ public class RestrictedLockUtils {
                     }
                 }
             }
+            return enforcedAdmin;
         } else {
-            // Return all admins for this user and the profiles that are visible from this
-            // user that do not use a separate work challenge.
-            final UserManager um = (UserManager) context.getSystemService(Context.USER_SERVICE);
-            for (UserInfo userInfo : um.getProfiles(userId)) {
-                final List<ComponentName> admins = dpm.getActiveAdminsAsUser(userInfo.id);
-                if (admins == null) {
-                    continue;
-                }
-                final boolean isSeparateProfileChallengeEnabled =
-                        lockPatternUtils.isSeparateProfileChallengeEnabled(userInfo.id);
-                for (ComponentName admin : admins) {
-                    if (!isSeparateProfileChallengeEnabled) {
-                        if (dpm.getPasswordQuality(admin, userInfo.id)
-                                > DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED) {
-                            if (enforcedAdmin == null) {
-                                enforcedAdmin = new EnforcedAdmin(admin, userInfo.id);
-                            } else {
-                                return EnforcedAdmin.MULTIPLE_ENFORCED_ADMIN;
-                            }
-                            // This same admins could have set policies both on the managed profile
-                            // and on the parent. So, if the admin has set the policy on the
-                            // managed profile here, we don't need to further check if that admin
-                            // has set policy on the parent admin.
-                            continue;
-                        }
-                    }
-                    if (userInfo.isManagedProfile()) {
-                        // If userInfo.id is a managed profile, we also need to look at
-                        // the policies set on the parent.
-                        DevicePolicyManager parentDpm = dpm.getParentProfileInstance(userInfo);
-                        if (parentDpm.getPasswordQuality(admin, userInfo.id)
-                                > DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED) {
-                            if (enforcedAdmin == null) {
-                                enforcedAdmin = new EnforcedAdmin(admin, userInfo.id);
-                            } else {
-                                return EnforcedAdmin.MULTIPLE_ENFORCED_ADMIN;
-                            }
-                        }
-                    }
-                }
-            }
+            return checkForLockSetting(context, userId, check);
         }
-        return enforcedAdmin;
     }
 
     /**
@@ -467,7 +435,6 @@ public class RestrictedLockUtils {
         if (dpm == null) {
             return null;
         }
-        LockPatternUtils lockPatternUtils = new LockPatternUtils(context);
         EnforcedAdmin enforcedAdmin = null;
         final int userId = UserHandle.myUserId();
         final UserManager um = UserManager.get(context);
@@ -498,8 +465,68 @@ public class RestrictedLockUtils {
                 if (userInfo.isManagedProfile()) {
                     // If userInfo.id is a managed profile, we also need to look at
                     // the policies set on the parent.
-                    final DevicePolicyManager parentDpm = dpm.getParentProfileInstance(userInfo);
+                    DevicePolicyManager parentDpm = sProxy.getParentProfileInstance(dpm, userInfo);
                     if (parentDpm.getMaximumTimeToLock(admin, userInfo.id) > 0) {
+                        if (enforcedAdmin == null) {
+                            enforcedAdmin = new EnforcedAdmin(admin, userInfo.id);
+                        } else {
+                            return EnforcedAdmin.MULTIPLE_ENFORCED_ADMIN;
+                        }
+                    }
+                }
+            }
+        }
+        return enforcedAdmin;
+    }
+
+    private interface LockSettingCheck {
+        boolean isEnforcing(DevicePolicyManager dpm, ComponentName admin, @UserIdInt int userId);
+    }
+
+    /**
+     * Checks whether any of the user's profiles enforce the lock setting. A managed profile is only
+     * included if it does not have a separate challenge.
+     *
+     * The user identified by {@param userId} is always included.
+     */
+    private static EnforcedAdmin checkForLockSetting(
+            Context context, @UserIdInt int userId, LockSettingCheck check) {
+        final DevicePolicyManager dpm = (DevicePolicyManager) context.getSystemService(
+                Context.DEVICE_POLICY_SERVICE);
+        if (dpm == null) {
+            return null;
+        }
+        final LockPatternUtils lockPatternUtils = new LockPatternUtils(context);
+        EnforcedAdmin enforcedAdmin = null;
+        // Return all admins for this user and the profiles that are visible from this
+        // user that do not use a separate work challenge.
+        for (UserInfo userInfo : UserManager.get(context).getProfiles(userId)) {
+            final List<ComponentName> admins = dpm.getActiveAdminsAsUser(userInfo.id);
+            if (admins == null) {
+                continue;
+            }
+            final boolean isSeparateProfileChallengeEnabled =
+                    sProxy.isSeparateProfileChallengeEnabled(lockPatternUtils, userInfo.id);
+            for (ComponentName admin : admins) {
+                if (!isSeparateProfileChallengeEnabled) {
+                    if (check.isEnforcing(dpm, admin, userInfo.id)) {
+                        if (enforcedAdmin == null) {
+                            enforcedAdmin = new EnforcedAdmin(admin, userInfo.id);
+                        } else {
+                            return EnforcedAdmin.MULTIPLE_ENFORCED_ADMIN;
+                        }
+                        // This same admins could have set policies both on the managed profile
+                        // and on the parent. So, if the admin has set the policy on the
+                        // managed profile here, we don't need to further check if that admin
+                        // has set policy on the parent admin.
+                        continue;
+                    }
+                }
+                if (userInfo.isManagedProfile()) {
+                    // If userInfo.id is a managed profile, we also need to look at
+                    // the policies set on the parent.
+                    DevicePolicyManager parentDpm = sProxy.getParentProfileInstance(dpm, userInfo);
+                    if (check.isEnforcing(parentDpm, admin, userInfo.id)) {
                         if (enforcedAdmin == null) {
                             enforcedAdmin = new EnforcedAdmin(admin, userInfo.id);
                         } else {
@@ -742,6 +769,25 @@ public class RestrictedLockUtils {
             }
             other.component = component;
             other.userId = userId;
+        }
+    }
+
+    /**
+     * Static {@link LockPatternUtils} and {@link DevicePolicyManager} wrapper for testing purposes.
+     * {@link LockPatternUtils} is an internal API not supported by robolectric.
+     * {@link DevicePolicyManager} has a {@code getProfileParent} not yet suppored by robolectric.
+     */
+    @VisibleForTesting
+    static Proxy sProxy = new Proxy();
+
+    @VisibleForTesting
+    static class Proxy {
+        public boolean isSeparateProfileChallengeEnabled(LockPatternUtils utils, int userHandle) {
+            return utils.isSeparateProfileChallengeEnabled(userHandle);
+        }
+
+        public DevicePolicyManager getParentProfileInstance(DevicePolicyManager dpm, UserInfo ui) {
+            return dpm.getParentProfileInstance(ui);
         }
     }
 }

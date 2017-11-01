@@ -20,6 +20,8 @@ import android.util.TypedValue;
 
 import com.android.internal.util.XmlUtils;
 
+import dalvik.annotation.optimization.FastNative;
+
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
@@ -492,25 +494,42 @@ final class XmlBlock {
                                                  int offset,
                                                  int size);
     private static final native long nativeGetStringBlock(long obj);
-
     private static final native long nativeCreateParseState(long obj);
-    /*package*/ static final native int nativeNext(long state);
-    private static final native int nativeGetNamespace(long state);
-    /*package*/ static final native int nativeGetName(long state);
-    private static final native int nativeGetText(long state);
-    private static final native int nativeGetLineNumber(long state);
-    private static final native int nativeGetAttributeCount(long state);
-    private static final native int nativeGetAttributeNamespace(long state, int idx);
-    private static final native int nativeGetAttributeName(long state, int idx);
-    private static final native int nativeGetAttributeResource(long state, int idx);
-    private static final native int nativeGetAttributeDataType(long state, int idx);
-    private static final native int nativeGetAttributeData(long state, int idx);
-    private static final native int nativeGetAttributeStringValue(long state, int idx);
-    private static final native int nativeGetIdAttribute(long state);
-    private static final native int nativeGetClassAttribute(long state);
-    private static final native int nativeGetStyleAttribute(long state);
-    private static final native int nativeGetAttributeIndex(long state, String namespace, String name);
     private static final native void nativeDestroyParseState(long state);
-
     private static final native void nativeDestroy(long obj);
+
+    // ----------- @FastNative ------------------
+
+    @FastNative
+    /*package*/ static final native int nativeNext(long state);
+    @FastNative
+    private static final native int nativeGetNamespace(long state);
+    @FastNative
+    /*package*/ static final native int nativeGetName(long state);
+    @FastNative
+    private static final native int nativeGetText(long state);
+    @FastNative
+    private static final native int nativeGetLineNumber(long state);
+    @FastNative
+    private static final native int nativeGetAttributeCount(long state);
+    @FastNative
+    private static final native int nativeGetAttributeNamespace(long state, int idx);
+    @FastNative
+    private static final native int nativeGetAttributeName(long state, int idx);
+    @FastNative
+    private static final native int nativeGetAttributeResource(long state, int idx);
+    @FastNative
+    private static final native int nativeGetAttributeDataType(long state, int idx);
+    @FastNative
+    private static final native int nativeGetAttributeData(long state, int idx);
+    @FastNative
+    private static final native int nativeGetAttributeStringValue(long state, int idx);
+    @FastNative
+    private static final native int nativeGetIdAttribute(long state);
+    @FastNative
+    private static final native int nativeGetClassAttribute(long state);
+    @FastNative
+    private static final native int nativeGetStyleAttribute(long state);
+    @FastNative
+    private static final native int nativeGetAttributeIndex(long state, String namespace, String name);
 }

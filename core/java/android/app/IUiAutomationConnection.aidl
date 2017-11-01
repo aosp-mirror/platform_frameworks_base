@@ -42,7 +42,8 @@ interface IUiAutomationConnection {
     WindowContentFrameStats getWindowContentFrameStats(int windowId);
     void clearWindowAnimationFrameStats();
     WindowAnimationFrameStats getWindowAnimationFrameStats();
-    void executeShellCommand(String command, in ParcelFileDescriptor fd);
+    void executeShellCommand(String command, in ParcelFileDescriptor sink,
+            in ParcelFileDescriptor source);
     void grantRuntimePermission(String packageName, String permission, int userId);
     void revokeRuntimePermission(String packageName, String permission, int userId);
 

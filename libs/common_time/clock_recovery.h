@@ -19,8 +19,9 @@
 
 #include <stdint.h>
 #include <common_time/ICommonClock.h>
-#include <utils/LinearTransform.h>
 #include <utils/threads.h>
+
+#include "LinearTransform.h"
 
 #ifdef TIME_SERVICE_DEBUG
 #include "diag_thread.h"

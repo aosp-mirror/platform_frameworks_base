@@ -13,11 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef RENDERSTATE_GLOPBUILDER_H
-#define RENDERSTATE_GLOPBUILDER_H
+
+#pragma once
 
 #include "Glop.h"
-#include "OpenGLRenderer.h"
 #include "Program.h"
 #include "renderstate/Blend.h"
 #include "utils/Macros.h"
@@ -29,10 +28,15 @@ namespace android {
 namespace uirenderer {
 
 class Caches;
+class GlLayer;
 class Matrix4;
+class Patch;
 class RenderState;
 class Texture;
+class UvMapper;
 class VertexBuffer;
+struct PathTexture;
+struct ShadowTexture;
 
 namespace TextureFillFlags {
     enum {
@@ -53,7 +57,6 @@ public:
     GlopBuilder& setMeshTexturedUvQuad(const UvMapper* uvMapper, const Rect uvs);
     GlopBuilder& setMeshVertexBuffer(const VertexBuffer& vertexBuffer);
     GlopBuilder& setMeshIndexedQuads(Vertex* vertexData, int quadCount);
-    GlopBuilder& setMeshTexturedMesh(TextureVertex* vertexData, int elementCount); // TODO: delete
     GlopBuilder& setMeshColoredTexturedMesh(ColorTextureVertex* vertexData, int elementCount); // TODO: use indexed quads
     GlopBuilder& setMeshTexturedIndexedQuads(TextureVertex* vertexData, int elementCount); // TODO: take quadCount
     GlopBuilder& setMeshPatchQuads(const Patch& patch);
@@ -68,16 +71,13 @@ public:
     GlopBuilder& setFillBlack();
     GlopBuilder& setFillClear();
     GlopBuilder& setFillLayer(Texture& texture, const SkColorFilter* colorFilter,
-            float alpha, SkXfermode::Mode mode, Blend::ModeOrderSwap modeUsage);
-    GlopBuilder& setFillTextureLayer(Layer& layer, float alpha);
-    // TODO: Texture should probably know and own its target.
-    // setFillLayer() forces it to GL_TEXTURE which isn't always correct.
-    // Similarly setFillLayer normally forces its own wrap & filter mode
-    GlopBuilder& setFillExternalTexture(Texture& texture, Matrix4& textureTransform);
+            float alpha, SkBlendMode mode, Blend::ModeOrderSwap modeUsage);
+    GlopBuilder& setFillTextureLayer(GlLayer& layer, float alpha);
+    // TODO: setFillLayer normally forces its own wrap & filter mode,
+    // which isn't always correct.
+    GlopBuilder& setFillExternalTexture(Texture& texture, Matrix4& textureTransform,
+            bool requiresFilter);
 
-    GlopBuilder& setTransform(const Snapshot& snapshot, const int transformFlags) {
-        return setTransform(*snapshot.transform, transformFlags);
-    }
     GlopBuilder& setTransform(const Matrix4& canvas, const int transformFlags);
 
     GlopBuilder& setModelViewMapUnitToRect(const Rect destination);
@@ -106,12 +106,14 @@ public:
 
     GlopBuilder& setRoundRectClipState(const RoundRectClipState* roundRectClipState);
 
+    GlopBuilder& setGammaCorrection(bool enabled);
+
     void build();
 
     static void dump(const Glop& glop);
 private:
     void setFill(int color, float alphaScale,
-            SkXfermode::Mode mode, Blend::ModeOrderSwap modeUsage,
+            SkBlendMode mode, Blend::ModeOrderSwap modeUsage,
             const SkShader* shader, const SkColorFilter* colorFilter);
 
     enum StageFlags {
@@ -133,5 +135,3 @@ private:
 
 } /* namespace uirenderer */
 } /* namespace android */
-
-#endif // RENDERSTATE_GLOPBUILDER_H

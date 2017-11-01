@@ -14,112 +14,124 @@
  * limitations under the License.
  */
 
-#include "ConfigDescription.h"
 #include "link/Linkers.h"
-#include "test/Builders.h"
-#include "test/Context.h"
 
-#include <gtest/gtest.h>
+#include "ConfigDescription.h"
+#include "test/Test.h"
 
 namespace aapt {
 
 TEST(AutoVersionerTest, GenerateVersionedResources) {
-    const ConfigDescription defaultConfig = {};
-    const ConfigDescription landConfig = test::parseConfigOrDie("land");
-    const ConfigDescription sw600dpLandConfig = test::parseConfigOrDie("sw600dp-land");
+  const ConfigDescription land_config = test::ParseConfigOrDie("land");
+  const ConfigDescription sw600dp_land_config =
+      test::ParseConfigOrDie("sw600dp-land");
 
-    ResourceEntry entry(u"foo");
-    entry.values.push_back(util::make_unique<ResourceConfigValue>(defaultConfig, ""));
-    entry.values.push_back(util::make_unique<ResourceConfigValue>(landConfig, ""));
-    entry.values.push_back(util::make_unique<ResourceConfigValue>(sw600dpLandConfig, ""));
+  ResourceEntry entry("foo");
+  entry.values.push_back(util::make_unique<ResourceConfigValue>(
+      ConfigDescription::DefaultConfig(), ""));
+  entry.values.push_back(
+      util::make_unique<ResourceConfigValue>(land_config, ""));
+  entry.values.push_back(
+      util::make_unique<ResourceConfigValue>(sw600dp_land_config, ""));
 
-    EXPECT_TRUE(shouldGenerateVersionedResource(&entry, defaultConfig, 17));
-    EXPECT_TRUE(shouldGenerateVersionedResource(&entry, landConfig, 17));
+  EXPECT_TRUE(ShouldGenerateVersionedResource(
+      &entry, ConfigDescription::DefaultConfig(), 17));
+  EXPECT_TRUE(ShouldGenerateVersionedResource(&entry, land_config, 17));
 }
 
 TEST(AutoVersionerTest, GenerateVersionedResourceWhenHigherVersionExists) {
-    const ConfigDescription defaultConfig = {};
-    const ConfigDescription sw600dpV13Config = test::parseConfigOrDie("sw600dp-v13");
-    const ConfigDescription v21Config = test::parseConfigOrDie("v21");
+  const ConfigDescription sw600dp_v13_config =
+      test::ParseConfigOrDie("sw600dp-v13");
+  const ConfigDescription v21_config = test::ParseConfigOrDie("v21");
 
-    ResourceEntry entry(u"foo");
-    entry.values.push_back(util::make_unique<ResourceConfigValue>(defaultConfig, ""));
-    entry.values.push_back(util::make_unique<ResourceConfigValue>(sw600dpV13Config, ""));
-    entry.values.push_back(util::make_unique<ResourceConfigValue>(v21Config, ""));
+  ResourceEntry entry("foo");
+  entry.values.push_back(util::make_unique<ResourceConfigValue>(
+      ConfigDescription::DefaultConfig(), ""));
+  entry.values.push_back(
+      util::make_unique<ResourceConfigValue>(sw600dp_v13_config, ""));
+  entry.values.push_back(
+      util::make_unique<ResourceConfigValue>(v21_config, ""));
 
-    EXPECT_TRUE(shouldGenerateVersionedResource(&entry, defaultConfig, 17));
-    EXPECT_FALSE(shouldGenerateVersionedResource(&entry, defaultConfig, 22));
+  EXPECT_TRUE(ShouldGenerateVersionedResource(
+      &entry, ConfigDescription::DefaultConfig(), 17));
+  EXPECT_FALSE(ShouldGenerateVersionedResource(
+      &entry, ConfigDescription::DefaultConfig(), 22));
 }
 
 TEST(AutoVersionerTest, VersionStylesForTable) {
-    std::unique_ptr<ResourceTable> table = test::ResourceTableBuilder()
-            .setPackageId(u"app", 0x7f)
-            .addValue(u"@app:style/Foo", ResourceId(0x7f020000), test::parseConfigOrDie("v4"),
-                      test::StyleBuilder()
-                            .addItem(u"@android:attr/onClick", ResourceId(0x0101026f),
-                                     util::make_unique<Id>())
-                            .addItem(u"@android:attr/paddingStart", ResourceId(0x010103b3),
-                                     util::make_unique<Id>())
-                            .addItem(u"@android:attr/requiresSmallestWidthDp",
-                                     ResourceId(0x01010364), util::make_unique<Id>())
-                            .addItem(u"@android:attr/colorAccent", ResourceId(0x01010435),
-                                     util::make_unique<Id>())
-                            .build())
-            .addValue(u"@app:style/Foo", ResourceId(0x7f020000), test::parseConfigOrDie("v21"),
-                      test::StyleBuilder()
-                            .addItem(u"@android:attr/paddingEnd", ResourceId(0x010103b4),
-                                     util::make_unique<Id>())
-                            .build())
-            .build();
+  std::unique_ptr<ResourceTable> table =
+      test::ResourceTableBuilder()
+          .SetPackageId("app", 0x7f)
+          .AddValue(
+              "app:style/Foo", test::ParseConfigOrDie("v4"),
+              ResourceId(0x7f020000),
+              test::StyleBuilder()
+                  .AddItem("android:attr/onClick", ResourceId(0x0101026f),
+                           util::make_unique<Id>())
+                  .AddItem("android:attr/paddingStart", ResourceId(0x010103b3),
+                           util::make_unique<Id>())
+                  .AddItem("android:attr/requiresSmallestWidthDp",
+                           ResourceId(0x01010364), util::make_unique<Id>())
+                  .AddItem("android:attr/colorAccent", ResourceId(0x01010435),
+                           util::make_unique<Id>())
+                  .Build())
+          .AddValue(
+              "app:style/Foo", test::ParseConfigOrDie("v21"),
+              ResourceId(0x7f020000),
+              test::StyleBuilder()
+                  .AddItem("android:attr/paddingEnd", ResourceId(0x010103b4),
+                           util::make_unique<Id>())
+                  .Build())
+          .Build();
 
-    std::unique_ptr<IAaptContext> context = test::ContextBuilder()
-            .setCompilationPackage(u"app")
-            .setPackageId(0x7f)
-            .build();
+  std::unique_ptr<IAaptContext> context = test::ContextBuilder()
+                                              .SetCompilationPackage("app")
+                                              .SetPackageId(0x7f)
+                                              .Build();
 
-    AutoVersioner versioner;
-    ASSERT_TRUE(versioner.consume(context.get(), table.get()));
+  AutoVersioner versioner;
+  ASSERT_TRUE(versioner.Consume(context.get(), table.get()));
 
-    Style* style = test::getValueForConfig<Style>(table.get(), u"@app:style/Foo",
-                                                  test::parseConfigOrDie("v4"));
-    ASSERT_NE(style, nullptr);
-    ASSERT_EQ(style->entries.size(), 1u);
-    AAPT_ASSERT_TRUE(style->entries.front().key.name);
-    EXPECT_EQ(style->entries.front().key.name.value(),
-              test::parseNameOrDie(u"@android:attr/onClick"));
+  Style* style = test::GetValueForConfig<Style>(table.get(), "app:style/Foo",
+                                                test::ParseConfigOrDie("v4"));
+  ASSERT_NE(style, nullptr);
+  ASSERT_EQ(style->entries.size(), 1u);
+  AAPT_ASSERT_TRUE(style->entries.front().key.name);
+  EXPECT_EQ(style->entries.front().key.name.value(),
+            test::ParseNameOrDie("android:attr/onClick"));
 
-    style = test::getValueForConfig<Style>(table.get(), u"@app:style/Foo",
-                                           test::parseConfigOrDie("v13"));
-    ASSERT_NE(style, nullptr);
-    ASSERT_EQ(style->entries.size(), 2u);
-    AAPT_ASSERT_TRUE(style->entries[0].key.name);
-    EXPECT_EQ(style->entries[0].key.name.value(),
-              test::parseNameOrDie(u"@android:attr/onClick"));
-    AAPT_ASSERT_TRUE(style->entries[1].key.name);
-    EXPECT_EQ(style->entries[1].key.name.value(),
-                  test::parseNameOrDie(u"@android:attr/requiresSmallestWidthDp"));
+  style = test::GetValueForConfig<Style>(table.get(), "app:style/Foo",
+                                         test::ParseConfigOrDie("v13"));
+  ASSERT_NE(style, nullptr);
+  ASSERT_EQ(style->entries.size(), 2u);
+  AAPT_ASSERT_TRUE(style->entries[0].key.name);
+  EXPECT_EQ(style->entries[0].key.name.value(),
+            test::ParseNameOrDie("android:attr/onClick"));
+  AAPT_ASSERT_TRUE(style->entries[1].key.name);
+  EXPECT_EQ(style->entries[1].key.name.value(),
+            test::ParseNameOrDie("android:attr/requiresSmallestWidthDp"));
 
-    style = test::getValueForConfig<Style>(table.get(), u"@app:style/Foo",
-                                           test::parseConfigOrDie("v17"));
-    ASSERT_NE(style, nullptr);
-    ASSERT_EQ(style->entries.size(), 3u);
-    AAPT_ASSERT_TRUE(style->entries[0].key.name);
-    EXPECT_EQ(style->entries[0].key.name.value(),
-                  test::parseNameOrDie(u"@android:attr/onClick"));
-    AAPT_ASSERT_TRUE(style->entries[1].key.name);
-    EXPECT_EQ(style->entries[1].key.name.value(),
-                  test::parseNameOrDie(u"@android:attr/requiresSmallestWidthDp"));
-    AAPT_ASSERT_TRUE(style->entries[2].key.name);
-    EXPECT_EQ(style->entries[2].key.name.value(),
-                  test::parseNameOrDie(u"@android:attr/paddingStart"));
+  style = test::GetValueForConfig<Style>(table.get(), "app:style/Foo",
+                                         test::ParseConfigOrDie("v17"));
+  ASSERT_NE(style, nullptr);
+  ASSERT_EQ(style->entries.size(), 3u);
+  AAPT_ASSERT_TRUE(style->entries[0].key.name);
+  EXPECT_EQ(style->entries[0].key.name.value(),
+            test::ParseNameOrDie("android:attr/onClick"));
+  AAPT_ASSERT_TRUE(style->entries[1].key.name);
+  EXPECT_EQ(style->entries[1].key.name.value(),
+            test::ParseNameOrDie("android:attr/requiresSmallestWidthDp"));
+  AAPT_ASSERT_TRUE(style->entries[2].key.name);
+  EXPECT_EQ(style->entries[2].key.name.value(),
+            test::ParseNameOrDie("android:attr/paddingStart"));
 
-    style = test::getValueForConfig<Style>(table.get(), u"@app:style/Foo",
-                                           test::parseConfigOrDie("v21"));
-    ASSERT_NE(style, nullptr);
-    ASSERT_EQ(style->entries.size(), 1u);
-    AAPT_ASSERT_TRUE(style->entries.front().key.name);
-    EXPECT_EQ(style->entries.front().key.name.value(),
-              test::parseNameOrDie(u"@android:attr/paddingEnd"));
+  style = test::GetValueForConfig<Style>(table.get(), "app:style/Foo",
+                                         test::ParseConfigOrDie("v21"));
+  ASSERT_NE(style, nullptr);
+  ASSERT_EQ(style->entries.size(), 1u);
+  AAPT_ASSERT_TRUE(style->entries.front().key.name);
+  EXPECT_EQ(style->entries.front().key.name.value(),
+            test::ParseNameOrDie("android:attr/paddingEnd"));
 }
 
-} // namespace aapt
+}  // namespace aapt

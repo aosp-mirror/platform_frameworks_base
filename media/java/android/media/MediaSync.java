@@ -35,7 +35,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * MediaSync class can be used to synchronously playback audio and video streams.
+ * MediaSync class can be used to synchronously play audio and video streams.
  * It can be used to play audio-only or video-only stream, too.
  *
  * <p>MediaSync is generally used like this:

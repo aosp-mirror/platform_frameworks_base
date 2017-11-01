@@ -56,6 +56,7 @@ public class FullBackup {
 
     public static final String APK_TREE_TOKEN = "a";
     public static final String OBB_TREE_TOKEN = "obb";
+    public static final String KEY_VALUE_DATA_TOKEN = "k";
 
     public static final String ROOT_TREE_TOKEN = "r";
     public static final String FILES_TREE_TOKEN = "f";

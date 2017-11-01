@@ -5,19 +5,29 @@ import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
 
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
 
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
+import static junit.framework.Assert.assertEquals;
+
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
+
 @SmallTest
+@RunWith(AndroidJUnit4.class)
 public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
     // These match the constants in WifiManager and need to be kept up to date.
     private static final int MIN_RSSI = -100;
     private static final int MAX_RSSI = -55;
 
+    @Test
     public void testWifiIcon() {
         String testSsid = "Test SSID";
         setWifiEnabled(true);
@@ -36,6 +46,7 @@ public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
         }
     }
 
+    @Test
     public void testQsWifiIcon() {
         String testSsid = "Test SSID";
 
@@ -58,6 +69,7 @@ public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
         }
     }
 
+    @Test
     public void testQsDataDirection() {
         // Setup normal connection
         String testSsid = "Test SSID";
@@ -69,6 +81,9 @@ public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
         verifyLastQsWifiIcon(true, true,
                 WifiIcons.QS_WIFI_SIGNAL_STRENGTH[1][testLevel], testSsid);
 
+        // Set to different activity state first to ensure a callback happens.
+        setWifiActivity(WifiManager.DATA_ACTIVITY_IN);
+
         setWifiActivity(WifiManager.DATA_ACTIVITY_NONE);
         verifyLastQsDataDirection(false, false);
         setWifiActivity(WifiManager.DATA_ACTIVITY_IN);
@@ -79,6 +94,7 @@ public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
         verifyLastQsDataDirection(true, true);
     }
 
+    @Test
     public void testRoamingIconDuringWifi() {
         // Setup normal connection
         String testSsid = "Test SSID";
@@ -93,9 +109,10 @@ public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
         setGsmRoaming(true);
         // Still be on wifi though.
         setConnectivity(NetworkCapabilities.TRANSPORT_WIFI, true, true);
+        setConnectivity(NetworkCapabilities.TRANSPORT_CELLULAR, false, false);
         verifyLastMobileDataIndicators(true,
-                TelephonyIcons.TELEPHONY_SIGNAL_STRENGTH_ROAMING[1][DEFAULT_LEVEL],
-                TelephonyIcons.ROAMING_ICON);
+                DEFAULT_LEVEL,
+                0, true);
     }
 
     protected void setWifiActivity(int activity) {
@@ -138,8 +155,7 @@ public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
         ArgumentCaptor<Boolean> outArg = ArgumentCaptor.forClass(Boolean.class);
 
         Mockito.verify(mCallbackHandler, Mockito.atLeastOnce()).setWifiIndicators(
-                Mockito.anyBoolean(), Mockito.any(IconState.class), Mockito.any(IconState.class),
-                inArg.capture(), outArg.capture(), Mockito.anyString());
+                anyBoolean(), any(), any(), inArg.capture(), outArg.capture(), any(), anyBoolean());
         assertEquals("WiFi data in, in quick settings", in, (boolean) inArg.getValue());
         assertEquals("WiFi data out, in quick settings", out, (boolean) outArg.getValue());
     }
@@ -151,10 +167,8 @@ public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
         ArgumentCaptor<String> descArg = ArgumentCaptor.forClass(String.class);
 
         Mockito.verify(mCallbackHandler, Mockito.atLeastOnce()).setWifiIndicators(
-                enabledArg.capture(), Mockito.any(IconState.class),
-                iconArg.capture(), Mockito.anyBoolean(),
-                Mockito.anyBoolean(),
-                descArg.capture());
+                enabledArg.capture(), any(), iconArg.capture(), anyBoolean(),
+                anyBoolean(), descArg.capture(), anyBoolean());
         IconState iconState = iconArg.getValue();
         assertEquals("WiFi enabled, in quick settings", enabled, (boolean) enabledArg.getValue());
         assertEquals("WiFi connected, in quick settings", connected, iconState.visible);
@@ -166,8 +180,8 @@ public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
         ArgumentCaptor<IconState> iconArg = ArgumentCaptor.forClass(IconState.class);
 
         Mockito.verify(mCallbackHandler, Mockito.atLeastOnce()).setWifiIndicators(
-                Mockito.anyBoolean(), iconArg.capture(), Mockito.any(IconState.class),
-                Mockito.anyBoolean(), Mockito.anyBoolean(), Mockito.anyString());
+                anyBoolean(), iconArg.capture(), any(), anyBoolean(), anyBoolean(),
+                any(), anyBoolean());
         IconState iconState = iconArg.getValue();
         assertEquals("WiFi visible, in status bar", visible, iconState.visible);
         assertEquals("WiFi signal, in status bar", icon, iconState.icon);

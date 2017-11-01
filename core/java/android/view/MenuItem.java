@@ -18,9 +18,12 @@ package android.view;
 
 import android.annotation.DrawableRes;
 import android.annotation.LayoutRes;
+import android.annotation.Nullable;
 import android.annotation.StringRes;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.res.ColorStateList;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View.OnCreateContextMenuListener;
@@ -67,7 +70,12 @@ public interface MenuItem {
      * a larger segment of its container.
      */
     public static final int SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW = 8;
-    
+
+    /**
+     * @hide
+     */
+    int SHOW_AS_OVERFLOW_ALWAYS = 1 << 31;
+
     /**
      * Interface definition for a callback to be invoked when a menu item is
      * clicked.
@@ -221,11 +229,62 @@ public interface MenuItem {
     
     /**
      * Returns the icon for this item as a Drawable (getting it from resources if it hasn't been
-     * loaded before).
+     * loaded before). Note that if you call {@link #setIconTintList(ColorStateList)} or
+     * {@link #setIconTintMode(PorterDuff.Mode)} on this item, and you use a custom menu presenter
+     * in your application, you have to apply the tinting explicitly on the {@link Drawable}
+     * returned by this method.
      * 
      * @return The icon as a Drawable.
      */
     public Drawable getIcon();
+
+    /**
+     * Applies a tint to this item's icon. Does not modify the
+     * current tint mode, which is {@link PorterDuff.Mode#SRC_IN} by default.
+     * <p>
+     * Subsequent calls to {@link #setIcon(Drawable)} or {@link #setIcon(int)} will
+     * automatically mutate the icon and apply the specified tint and
+     * tint mode using
+     * {@link Drawable#setTintList(ColorStateList)}.
+     *
+     * @param tint the tint to apply, may be {@code null} to clear tint
+     *
+     * @attr ref android.R.styleable#MenuItem_iconTint
+     * @see #getIconTintList()
+     * @see Drawable#setTintList(ColorStateList)
+     */
+    public default MenuItem setIconTintList(@Nullable ColorStateList tint) { return this; }
+
+    /**
+     * @return the tint applied to this item's icon
+     * @attr ref android.R.styleable#MenuItem_iconTint
+     * @see #setIconTintList(ColorStateList)
+     */
+    @Nullable
+    public default ColorStateList getIconTintList() { return null; }
+
+    /**
+     * Specifies the blending mode used to apply the tint specified by
+     * {@link #setIconTintList(ColorStateList)} to this item's icon. The default mode is
+     * {@link PorterDuff.Mode#SRC_IN}.
+     *
+     * @param tintMode the blending mode used to apply the tint, may be
+     *                 {@code null} to clear tint
+     * @attr ref android.R.styleable#MenuItem_iconTintMode
+     * @see #setIconTintList(ColorStateList)
+     * @see Drawable#setTintMode(PorterDuff.Mode)
+     */
+    public default MenuItem setIconTintMode(@Nullable PorterDuff.Mode tintMode) { return this; }
+
+    /**
+     * Returns the blending mode used to apply the tint to this item's icon, if specified.
+     *
+     * @return the blending mode used to apply the tint to this item's icon
+     * @attr ref android.R.styleable#MenuItem_iconTintMode
+     * @see #setIconTintMode(PorterDuff.Mode)
+     */
+    @Nullable
+    public default PorterDuff.Mode getIconTintMode() { return null; }
     
     /**
      * Change the Intent associated with this item.  By default there is no
@@ -261,12 +320,13 @@ public interface MenuItem {
     /**
      * Change both the numeric and alphabetic shortcut associated with this
      * item. Note that the shortcut will be triggered when the key that
-     * generates the given character is pressed along with the ctrl key.
-     * Also note that case is not significant and that alphabetic shortcut
-     * characters will be displayed in lower case.
+     * generates the given character is pressed along with the corresponding
+     * modifier key. The default modifier is  {@link KeyEvent#META_CTRL_ON} in
+     * case nothing is specified. Also note that case is not significant and
+     * that alphabetic shortcut characters will be handled in lower case.
      * <p>
      * See {@link Menu} for the menu types that support shortcuts.
-     * 
+     *
      * @param numericChar The numeric shortcut key. This is the shortcut when
      *        using a numeric (e.g., 12-key) keyboard.
      * @param alphaChar The alphabetic shortcut key. This is the shortcut when
@@ -274,6 +334,39 @@ public interface MenuItem {
      * @return This Item so additional setters can be called.
      */
     public MenuItem setShortcut(char numericChar, char alphaChar);
+
+    /**
+     * Change both the numeric and alphabetic shortcut associated with this
+     * item. Note that the shortcut will be triggered when the key that
+     * generates the given character is pressed along with the corresponding
+     * modifier key. Also note that case is not significant and that alphabetic
+     * shortcut characters will be handled in lower case.
+     * <p>
+     * See {@link Menu} for the menu types that support shortcuts.
+     *
+     * @param numericChar The numeric shortcut key. This is the shortcut when
+     *        using a numeric (e.g., 12-key) keyboard.
+     * @param numericModifiers The numeric modifier associated with the shortcut. It should
+     *        be a combination of {@link KeyEvent#META_META_ON}, {@link KeyEvent#META_CTRL_ON},
+     *        {@link KeyEvent#META_ALT_ON}, {@link KeyEvent#META_SHIFT_ON},
+     *        {@link KeyEvent#META_SYM_ON}, {@link KeyEvent#META_FUNCTION_ON}.
+     * @param alphaChar The alphabetic shortcut key. This is the shortcut when
+     *        using a keyboard with alphabetic keys.
+     * @param alphaModifiers The alphabetic modifier associated with the shortcut. It should
+     *        be a combination of {@link KeyEvent#META_META_ON}, {@link KeyEvent#META_CTRL_ON},
+     *        {@link KeyEvent#META_ALT_ON}, {@link KeyEvent#META_SHIFT_ON},
+     *        {@link KeyEvent#META_SYM_ON}, {@link KeyEvent#META_FUNCTION_ON}.
+     * @return This Item so additional setters can be called.
+     */
+    default public MenuItem setShortcut(char numericChar, char alphaChar, int numericModifiers,
+            int alphaModifiers) {
+        if ((alphaModifiers & Menu.SUPPORTED_MODIFIERS_MASK) == KeyEvent.META_CTRL_ON
+                && (numericModifiers & Menu.SUPPORTED_MODIFIERS_MASK) == KeyEvent.META_CTRL_ON) {
+            return setShortcut(numericChar, alphaChar);
+        } else {
+            return this;
+        }
+    }
 
     /**
      * Change the numeric shortcut associated with this item.
@@ -287,6 +380,27 @@ public interface MenuItem {
     public MenuItem setNumericShortcut(char numericChar);
 
     /**
+     * Change the numeric shortcut and modifiers associated with this item.
+     * <p>
+     * See {@link Menu} for the menu types that support shortcuts.
+     *
+     * @param numericChar The numeric shortcut key.  This is the shortcut when
+     *                 using a 12-key (numeric) keyboard.
+     * @param numericModifiers The modifier associated with the shortcut. It should
+     *        be a combination of {@link KeyEvent#META_META_ON}, {@link KeyEvent#META_CTRL_ON},
+     *        {@link KeyEvent#META_ALT_ON}, {@link KeyEvent#META_SHIFT_ON},
+     *        {@link KeyEvent#META_SYM_ON}, {@link KeyEvent#META_FUNCTION_ON}.
+     * @return This Item so additional setters can be called.
+     */
+    default public MenuItem setNumericShortcut(char numericChar, int numericModifiers) {
+        if ((numericModifiers & Menu.SUPPORTED_MODIFIERS_MASK) == KeyEvent.META_CTRL_ON) {
+            return setNumericShortcut(numericChar);
+        } else {
+            return this;
+        }
+    }
+
+    /**
      * Return the char for this menu item's numeric (12-key) shortcut.
      *
      * @return Numeric character to use as a shortcut.
@@ -294,20 +408,61 @@ public interface MenuItem {
     public char getNumericShortcut();
 
     /**
+     * Return the modifiers for this menu item's numeric (12-key) shortcut.
+     * The modifier is a combination of {@link KeyEvent#META_META_ON},
+     * {@link KeyEvent#META_CTRL_ON}, {@link KeyEvent#META_ALT_ON},
+     * {@link KeyEvent#META_SHIFT_ON}, {@link KeyEvent#META_SYM_ON},
+     * {@link KeyEvent#META_FUNCTION_ON}.
+     * For example, {@link KeyEvent#META_FUNCTION_ON}|{@link KeyEvent#META_CTRL_ON}
+     *
+     * @return Modifier associated with the numeric shortcut.
+     */
+    default public int getNumericModifiers() {
+        return KeyEvent.META_CTRL_ON;
+    }
+
+    /**
      * Change the alphabetic shortcut associated with this item. The shortcut
      * will be triggered when the key that generates the given character is
-     * pressed along with the ctrl key. Case is not significant and shortcut
-     * characters will be displayed in lower case. Note that menu items with
-     * the characters '\b' or '\n' as shortcuts will get triggered by the
-     * Delete key or Carriage Return key, respectively.
+     * pressed along with the corresponding modifier key. The default modifier
+     * is {@link KeyEvent#META_CTRL_ON} in case nothing is specified. Case is
+     * not significant and shortcut characters will be displayed in lower case.
+     * Note that menu items with the characters '\b' or '\n' as shortcuts will
+     * get triggered by the Delete key or Carriage Return key, respectively.
      * <p>
      * See {@link Menu} for the menu types that support shortcuts.
-     * 
+     *
      * @param alphaChar The alphabetic shortcut key. This is the shortcut when
      *        using a keyboard with alphabetic keys.
      * @return This Item so additional setters can be called.
      */
     public MenuItem setAlphabeticShortcut(char alphaChar);
+
+    /**
+     * Change the alphabetic shortcut associated with this item. The shortcut
+     * will be triggered when the key that generates the given character is
+     * pressed along with the modifier keys. Case is not significant and shortcut
+     * characters will be displayed in lower case. Note that menu items with
+     * the characters '\b' or '\n' as shortcuts will get triggered by the
+     * Delete key or Carriage Return key, respectively.
+     * <p>
+     * See {@link Menu} for the menu types that support shortcuts.
+     *
+     * @param alphaChar The alphabetic shortcut key. This is the shortcut when
+     *        using a keyboard with alphabetic keys.
+     * @param alphaModifiers The modifier associated with the shortcut. It should
+     *        be a combination of {@link KeyEvent#META_META_ON}, {@link KeyEvent#META_CTRL_ON},
+     *        {@link KeyEvent#META_ALT_ON}, {@link KeyEvent#META_SHIFT_ON},
+     *        {@link KeyEvent#META_SYM_ON}, {@link KeyEvent#META_FUNCTION_ON}.
+     * @return This Item so additional setters can be called.
+     */
+    default public MenuItem setAlphabeticShortcut(char alphaChar, int alphaModifiers) {
+        if ((alphaModifiers & Menu.SUPPORTED_MODIFIERS_MASK) == KeyEvent.META_CTRL_ON) {
+            return setAlphabeticShortcut(alphaChar);
+        } else {
+            return this;
+        }
+    }
 
     /**
      * Return the char for this menu item's alphabetic shortcut.
@@ -317,13 +472,27 @@ public interface MenuItem {
     public char getAlphabeticShortcut();
 
     /**
+     * Return the modifier for this menu item's alphabetic shortcut.
+     * The modifier is a combination of {@link KeyEvent#META_META_ON},
+     * {@link KeyEvent#META_CTRL_ON}, {@link KeyEvent#META_ALT_ON},
+     * {@link KeyEvent#META_SHIFT_ON}, {@link KeyEvent#META_SYM_ON},
+     * {@link KeyEvent#META_FUNCTION_ON}.
+     * For example, {@link KeyEvent#META_FUNCTION_ON}|{@link KeyEvent#META_CTRL_ON}
+     *
+     * @return Modifier associated with the keyboard shortcut.
+     */
+    default public int getAlphabeticModifiers() {
+        return KeyEvent.META_CTRL_ON;
+    }
+
+    /**
      * Control whether this item can display a check mark. Setting this does
      * not actually display a check mark (see {@link #setChecked} for that);
      * rather, it ensures there is room in the item in which to display a
      * check mark.
      * <p>
      * See {@link Menu} for the menu types that support check marks.
-     * 
+     *
      * @param checkable Set to true to allow a check mark, false to
      *            disallow. The default is false.
      * @see #setChecked
@@ -599,4 +768,50 @@ public interface MenuItem {
      * @return This menu item instance for call chaining
      */
     public MenuItem setOnActionExpandListener(OnActionExpandListener listener);
+
+    /**
+     * Change the content description associated with this menu item.
+     *
+     * @param contentDescription The new content description.
+     */
+    default MenuItem setContentDescription(CharSequence contentDescription) {
+        return this;
+    }
+
+    /**
+     * Retrieve the content description associated with this menu item.
+     *
+     * @return The content description.
+     */
+    default CharSequence getContentDescription() {
+        return null;
+    }
+
+    /**
+     * Change the tooltip text associated with this menu item.
+     *
+     * @param tooltipText The new tooltip text.
+     */
+    default MenuItem setTooltipText(CharSequence tooltipText) {
+        return this;
+    }
+
+    /**
+     * Retrieve the tooltip text associated with this menu item.
+     *
+     * @return The tooltip text.
+     */
+    default CharSequence getTooltipText() {
+        return null;
+    }
+
+    /**
+     * Returns true if {@link #setShowAsAction(int)} was set to {@link #SHOW_AS_OVERFLOW_ALWAYS}.
+     * Default value if {@code false}.
+     *
+     * @hide
+     */
+    default boolean requiresOverflow() {
+        return false;
+    }
 }

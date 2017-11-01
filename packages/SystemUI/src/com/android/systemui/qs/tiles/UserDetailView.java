@@ -24,7 +24,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.MetricsProto.MetricsEvent;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.settingslib.RestrictedLockUtils;
 import com.android.systemui.R;
 import com.android.systemui.qs.PseudoGridView;
@@ -34,7 +34,7 @@ import com.android.systemui.statusbar.policy.UserSwitcherController;
  */
 public class UserDetailView extends PseudoGridView {
 
-    private Adapter mAdapter;
+    protected Adapter mAdapter;
 
     public UserDetailView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -58,7 +58,7 @@ public class UserDetailView extends PseudoGridView {
             implements OnClickListener {
 
         private final Context mContext;
-        private final UserSwitcherController mController;
+        protected UserSwitcherController mController;
 
         public Adapter(Context context, UserSwitcherController controller) {
             super(controller);
@@ -69,6 +69,11 @@ public class UserDetailView extends PseudoGridView {
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             UserSwitcherController.UserRecord item = getItem(position);
+            return createUserDetailItemView(convertView, parent, item);
+        }
+
+        public UserDetailItemView createUserDetailItemView(View convertView, ViewGroup parent,
+                UserSwitcherController.UserRecord item) {
             UserDetailItemView v = UserDetailItemView.convertOrInflate(
                     mContext, convertView, parent);
             if (v != convertView) {

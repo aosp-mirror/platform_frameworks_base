@@ -56,6 +56,12 @@ public class ServiceInfo extends ComponentInfo
     public static final int FLAG_EXTERNAL_SERVICE = 0x0004;
 
     /**
+     * Bit in {@link #flags} indicating if the service is visible to ephemeral applications.
+     * @hide
+     */
+    public static final int FLAG_VISIBLE_TO_INSTANT_APP = 0x100000;
+
+    /**
      * Bit in {@link #flags}: If set, a single instance of the service will
      * run for all users on the device.  Set from the
      * {@link android.R.attr#singleUser} attribute.

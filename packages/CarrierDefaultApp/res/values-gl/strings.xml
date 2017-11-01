@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="5247871339820894594">"CarrierDefaultApp"</string>
+    <string name="android_system_label" msgid="2797790869522345065">"Operador móbil"</string>
+    <string name="portal_notification_id" msgid="5155057562457079297">"Esgotáronse os datos móbiles"</string>
+    <string name="no_data_notification_id" msgid="668400731803969521">"Desactiváronse os datos móbiles"</string>
+    <string name="portal_notification_detail" msgid="2295729385924660881">"Toca para acceder ao sitio web de %s"</string>
+    <string name="no_data_notification_detail" msgid="3112125343857014825">"Ponte en contacto co teu fornecedor de servizo %s"</string>
+    <string name="no_mobile_data_connection_title" msgid="7449525772416200578">"Non hai conexión de datos móbiles"</string>
+    <string name="no_mobile_data_connection" msgid="544980465184147010">"Engadir plan de datos ou itinerancia a través de %s"</string>
+    <string name="mobile_data_status_notification_channel_name" msgid="833999690121305708">"Estado dos datos móbiles"</string>
+    <string name="action_bar_label" msgid="4290345990334377177">"Iniciar sesión na rede de telefonía móbil"</string>
+    <string name="ssl_error_warning" msgid="3127935140338254180">"A rede á que tentas unirte ten problemas de seguranza."</string>
+    <string name="ssl_error_example" msgid="6188711843183058764">"Por exemplo, é posible que a páxina de inicio de sesión non pertenza á organización que se mostra."</string>
+    <string name="ssl_error_continue" msgid="1138548463994095584">"Continuar igualmente co navegador"</string>
+</resources>

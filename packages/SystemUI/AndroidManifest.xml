@@ -22,6 +22,11 @@
         android:sharedUserId="android.uid.systemui"
         coreApp="true">
 
+    <!-- SysUI must be the one to define this permission; its name is
+         referenced by the core OS. -->
+    <permission android:name="android.permission.systemui.IDENTITY"
+        android:protectionLevel="signature" />
+
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -58,8 +63,10 @@
     <uses-permission android:name="android.permission.OVERRIDE_WIFI_CONFIG" />
     <uses-permission android:name="android.permission.MANAGE_NETWORK_POLICY" />
     <uses-permission android:name="android.permission.CONNECTIVITY_INTERNAL" />
+    <uses-permission android:name="android.permission.NETWORK_SETTINGS" />
     <uses-permission android:name="android.permission.TETHER_PRIVILEGED" />
     <uses-permission android:name="android.permission.READ_NETWORK_USAGE_HISTORY" />
+    <uses-permission android:name="android.permission.REQUEST_NETWORK_SCORES" />
     <uses-permission android:name="android.permission.CONTROL_VPN" />
     <uses-permission android:name="android.permission.PEERS_MAC_ADDRESS"/>
     <!-- Physical hardware -->
@@ -130,6 +137,9 @@
     <!-- Assist -->
     <uses-permission android:name="android.permission.ACCESS_VOICE_INTERACTION_SERVICE" />
 
+    <!-- Doze mode temp whitelisting for notification dispatching. -->
+    <uses-permission android:name="android.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST" />
+
     <!-- Listen for keyboard attachment / detachment -->
     <uses-permission android:name="android.permission.TABLET_MODE" />
 
@@ -137,6 +147,9 @@
     <permission android:name="com.android.systemui.permission.SELF"
             android:protectionLevel="signature" />
     <uses-permission android:name="com.android.systemui.permission.SELF" />
+
+    <permission android:name="com.android.systemui.permission.PLUGIN"
+            android:protectionLevel="signature" />
 
     <!-- Adding Quick Settings tiles -->
     <uses-permission android:name="android.permission.BIND_QUICK_SETTINGS_TILE" />
@@ -159,11 +172,31 @@
     <!-- It's like, reality, but, you know, virtual -->
     <uses-permission android:name="android.permission.ACCESS_VR_MANAGER" />
 
+    <!-- To control car audio module volume -->
+    <uses-permission android:name="android.car.permission.CAR_CONTROL_AUDIO_VOLUME" />
+
     <!-- the ability to rename notifications posted by other apps -->
     <uses-permission android:name="android.permission.SUBSTITUTE_NOTIFICATION_APP_NAME" />
 
     <!-- shortcut manager -->
     <uses-permission android:name="android.permission.RESET_SHORTCUT_MANAGER_THROTTLING" />
+
+    <uses-permission android:name="android.permission.MODIFY_THEME_OVERLAY" />
+
+    <!-- accessibility -->
+    <uses-permission android:name="android.permission.MODIFY_ACCESSIBILITY_DATA" />
+
+    <!-- to control accessibility volume -->
+    <uses-permission android:name="android.permission.CHANGE_ACCESSIBILITY_VOLUME" />
+
+    <!-- to access ResolverRankerServices -->
+    <uses-permission android:name="android.permission.BIND_RESOLVER_RANKER_SERVICE" />
+
+    <!-- to access instant apps -->
+    <uses-permission android:name="android.permission.ACCESS_INSTANT_APPS" />
+
+    <!-- to change themes - light or dark -->
+    <uses-permission android:name="android.permission.CHANGE_OVERLAY_PACKAGES" />
 
     <application
         android:name=".SystemUIApplication"
@@ -175,7 +208,7 @@
         android:icon="@drawable/icon"
         android:process="com.android.systemui"
         android:supportsRtl="true"
-        android:theme="@style/systemui_theme"
+        android:theme="@style/Theme.SystemUI"
         android:defaultToDeviceProtectedStorage="true"
         android:directBootAware="true">
         <!-- Keep theme in sync with SystemUIApplication.onCreate().
@@ -213,6 +246,15 @@
             </intent-filter>
         </receiver>
 
+        <receiver android:name=".SysuiRestartReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.android.systemui.action.RESTART" />
+
+                <data android:scheme="package" />
+            </intent-filter>
+        </receiver>
+
         <service android:name=".ImageWallpaper"
                 android:permission="android.permission.BIND_WALLPAPER"
                 android:exported="true" />
@@ -231,6 +273,18 @@
             <meta-data android:name="com.android.settings.category"
                     android:value="com.android.settings.category.system" />
         </activity>
+
+        <activity-alias android:name=".tuner.TunerSettingLink"
+                        android:targetActivity=".tuner.TunerActivity"
+                        android:enabled="false"
+                        android:process=":tuner">
+            <intent-filter android:priority="1">
+                <action android:name="com.android.settings.action.EXTRA_SETTINGS" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <meta-data android:name="com.android.settings.category"
+                       android:value="com.android.settings.category.ia.system" />
+        </activity-alias>
 
         <activity-alias android:name=".DemoMode"
                   android:targetActivity=".tuner.TunerActivity"
@@ -258,24 +312,9 @@
                   android:excludeFromRecents="true"
                   android:stateNotNeeded="true"
                   android:resumeWhilePausing="true"
-                  android:screenOrientation="behind"
                   android:resizeableActivity="true"
-                  android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout"
+                  android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboard|keyboardHidden"
                   android:theme="@style/RecentsTheme.Wallpaper">
-            <intent-filter>
-                <action android:name="com.android.systemui.recents.TOGGLE_RECENTS" />
-            </intent-filter>
-        </activity>
-
-        <activity android:name=".recents.tv.RecentsTvActivity"
-                  android:label="@string/accessibility_desc_recent_apps"
-                  android:exported="false"
-                  android:launchMode="singleInstance"
-                  android:excludeFromRecents="true"
-                  android:stateNotNeeded="true"
-                  android:resumeWhilePausing="true"
-                  android:screenOrientation="behind"
-                  android:theme="@style/RecentsTvTheme.Wallpaper">
             <intent-filter>
                 <action android:name="com.android.systemui.recents.TOGGLE_RECENTS" />
             </intent-filter>
@@ -358,6 +397,7 @@
             android:finishOnCloseSystemDialogs="true"
             android:launchMode="singleTop"
             android:taskAffinity="com.android.systemui.net"
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
             android:excludeFromRecents="true" />
 
         <!-- started from MediaProjectionManager -->
@@ -371,7 +411,7 @@
 
         <!-- started from PipUI -->
         <activity
-            android:name="com.android.systemui.tv.pip.PipMenuActivity"
+            android:name=".pip.tv.PipMenuActivity"
             android:exported="true"
             android:theme="@style/PipTheme"
             android:launchMode="singleTop"
@@ -382,7 +422,7 @@
             androidprv:alwaysFocusable="true"
             android:excludeFromRecents="true" />
         <activity
-            android:name="com.android.systemui.tv.pip.PipOverlayActivity"
+            android:name=".pip.tv.PipOverlayActivity"
             android:exported="true"
             android:theme="@style/PipTheme"
             android:taskAffinity=""
@@ -391,11 +431,24 @@
             android:supportsPictureInPicture="true"
             android:excludeFromRecents="true" />
         <activity
-            android:name="com.android.systemui.tv.pip.PipOnboardingActivity"
+            android:name=".pip.tv.PipOnboardingActivity"
             android:exported="true"
             android:theme="@style/PipTheme"
             android:launchMode="singleTop"
             android:excludeFromRecents="true" />
+
+        <activity
+            android:name=".pip.phone.PipMenuActivity"
+            android:theme="@style/PipPhoneOverlayControlTheme"
+            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:resizeableActivity="true"
+            android:supportsPictureInPicture="true"
+            android:stateNotNeeded="true"
+            android:taskAffinity=""
+            android:launchMode="singleTop"
+            androidprv:alwaysFocusable="true" />
 
         <!-- platform logo easter egg activity -->
         <activity
@@ -450,6 +503,20 @@
             android:exported="true"
             android:enabled="@bool/config_enableKeyguardService" />
 
+        <activity android:name=".keyguard.WorkLockActivity"
+                  android:label="@string/accessibility_desc_work_lock"
+                  android:permission="android.permission.MANAGE_USERS"
+                  android:exported="false"
+                  android:excludeFromRecents="true"
+                  android:stateNotNeeded="true"
+                  android:resumeWhilePausing="true"
+                  android:theme="@android:style/Theme.Black.NoTitleBar">
+            <intent-filter>
+                <action android:name="android.app.action.CONFIRM_DEVICE_CREDENTIAL_WITH_USER" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
         <activity android:name=".Somnambulator"
             android:label="@string/start_dreams"
             android:icon="@mipmap/ic_launcher_dreams"
@@ -473,13 +540,24 @@
         <activity
             android:name=".settings.BrightnessDialog"
             android:label="@string/quick_settings_brightness_dialog_title"
-            android:theme="@android:style/Theme.DeviceDefault.Dialog"
+            android:theme="@*android:style/Theme.DeviceDefault.QuickSettings.Dialog"
             android:finishOnCloseSystemDialogs="true"
             android:launchMode="singleInstance"
             android:excludeFromRecents="true"
             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.SHOW_BRIGHTNESS_DIALOG" />
+                <action android:name="com.android.intent.action.SHOW_BRIGHTNESS_DIALOG" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        <activity android:name=".ForegroundServicesDialog"
+            android:process=":fgservices"
+            android:excludeFromRecents="true"
+            android:launchMode="singleTop"
+            android:theme="@*android:style/Theme.DeviceDefault.Settings.Dialog">
+            <intent-filter android:priority="1">
+                <action android:name="android.settings.FOREGROUND_SERVICES_SETTINGS" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
@@ -499,11 +577,21 @@
             </intent-filter>
         </receiver>
 
+        <provider
+            android:name="android.support.v4.content.FileProvider"
+            android:authorities="com.android.systemui.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/fileprovider" />
+        </provider>
+
         <receiver
             android:name=".statusbar.KeyboardShortcutsReceiver">
             <intent-filter>
-                <action android:name="android.intent.action.DISMISS_KEYBOARD_SHORTCUTS" />
-                <action android:name="android.intent.action.SHOW_KEYBOARD_SHORTCUTS" />
+                <action android:name="com.android.intent.action.DISMISS_KEYBOARD_SHORTCUTS" />
+                <action android:name="com.android.intent.action.SHOW_KEYBOARD_SHORTCUTS" />
             </intent-filter>
         </receiver>
     </application>

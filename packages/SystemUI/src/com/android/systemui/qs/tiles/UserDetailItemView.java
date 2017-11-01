@@ -40,6 +40,8 @@ import com.android.systemui.statusbar.phone.UserAvatarView;
  */
 public class UserDetailItemView extends LinearLayout {
 
+    protected static int layoutResId = R.layout.qs_user_detail_item;
+
     private UserAvatarView mAvatar;
     private TextView mName;
     private Typeface mRegularTypeface;
@@ -83,7 +85,7 @@ public class UserDetailItemView extends LinearLayout {
             ViewGroup root) {
         if (!(convertView instanceof UserDetailItemView)) {
             convertView = LayoutInflater.from(context).inflate(
-                    R.layout.qs_user_detail_item, root, false);
+                    layoutResId, root, false);
         }
         return (UserDetailItemView) convertView;
     }
@@ -115,8 +117,8 @@ public class UserDetailItemView extends LinearLayout {
 
     @Override
     protected void onFinishInflate() {
-        mAvatar = (UserAvatarView) findViewById(R.id.user_picture);
-        mName = (TextView) findViewById(R.id.user_name);
+        mAvatar = findViewById(R.id.user_picture);
+        mName = findViewById(R.id.user_name);
         if (mRegularTypeface == null) {
             mRegularTypeface = mName.getTypeface();
         }

@@ -17,156 +17,211 @@
 #ifndef AAPT_RESOURCEUTILS_H
 #define AAPT_RESOURCEUTILS_H
 
+#include <functional>
+#include <memory>
+
+#include "androidfw/ResourceTypes.h"
+#include "androidfw/StringPiece.h"
+
 #include "NameMangler.h"
 #include "Resource.h"
 #include "ResourceValues.h"
-#include "util/StringPiece.h"
-
-#include <functional>
-#include <memory>
+#include "StringPool.h"
 
 namespace aapt {
 namespace ResourceUtils {
 
-/*
- * Extracts the package, type, and name from a string of the format:
- *
- *      [package:]type/name
- *
- * where the package can be empty. Validation must be performed on each
- * individual extracted piece to verify that the pieces are valid.
- * Returns false if there was no package but a ':' was present.
+/**
+ * Returns true if the string was parsed as a resource name
+ * ([*][package:]type/name), with
+ * `out_resource` set to the parsed resource name and `out_private` set to true
+ * if a '*' prefix was present.
  */
-bool extractResourceName(const StringPiece16& str, StringPiece16* outPackage,
-                         StringPiece16* outType, StringPiece16* outEntry);
+bool ParseResourceName(const android::StringPiece& str, ResourceNameRef* out_resource,
+                       bool* out_private = nullptr);
+
+/*
+ * Returns true if the string was parsed as a reference
+ * (@[+][package:]type/name), with
+ * `out_reference` set to the parsed reference.
+ *
+ * If '+' was present in the reference, `out_create` is set to true.
+ * If '*' was present in the reference, `out_private` is set to true.
+ */
+bool ParseReference(const android::StringPiece& str, ResourceNameRef* out_reference,
+                    bool* out_create = nullptr, bool* out_private = nullptr);
+
+/*
+ * Returns true if the string is in the form of a resource reference
+ * (@[+][package:]type/name).
+ */
+bool IsReference(const android::StringPiece& str);
+
+/*
+ * Returns true if the string was parsed as an attribute reference
+ * (?[package:][type/]name),
+ * with `out_reference` set to the parsed reference.
+ */
+bool ParseAttributeReference(const android::StringPiece& str, ResourceNameRef* out_reference);
 
 /**
- * Returns true if the string was parsed as a resource name ([*][package:]type/name), with
- * `outResource` set to the parsed resource name and `outPrivate` set to true if a '*' prefix
- * was present.
+ * Returns true if the string is in the form of an attribute
+ * reference(?[package:][type/]name).
  */
-bool parseResourceName(const StringPiece16& str, ResourceNameRef* outResource,
-                       bool* outPrivate = nullptr);
-
-/*
- * Returns true if the string was parsed as a reference (@[+][package:]type/name), with
- * `outReference` set to the parsed reference.
- *
- * If '+' was present in the reference, `outCreate` is set to true.
- * If '*' was present in the reference, `outPrivate` is set to true.
- */
-bool tryParseReference(const StringPiece16& str, ResourceNameRef* outReference,
-                       bool* outCreate = nullptr, bool* outPrivate = nullptr);
-
-/*
- * Returns true if the string is in the form of a resource reference (@[+][package:]type/name).
- */
-bool isReference(const StringPiece16& str);
-
-/*
- * Returns true if the string was parsed as an attribute reference (?[package:][type/]name),
- * with `outReference` set to the parsed reference.
- */
-bool tryParseAttributeReference(const StringPiece16& str, ResourceNameRef* outReference);
+bool IsAttributeReference(const android::StringPiece& str);
 
 /**
- * Returns true if the string is in the form of an attribute reference(?[package:][type/]name).
+ * Convert an android::ResTable::resource_name to an aapt::ResourceName struct.
  */
-bool isAttributeReference(const StringPiece16& str);
+Maybe<ResourceName> ToResourceName(
+    const android::ResTable::resource_name& name);
 
 /**
- * Returns true if the value is a boolean, putting the result in `outValue`.
+ * Returns a boolean value if the string is equal to TRUE, true, True, FALSE,
+ * false, or False.
  */
-bool tryParseBool(const StringPiece16& str, bool* outValue);
+Maybe<bool> ParseBool(const android::StringPiece& str);
+
+/**
+ * Returns a uint32_t if the string is an integer.
+ */
+Maybe<uint32_t> ParseInt(const android::StringPiece& str);
+
+/**
+ * Returns an ID if it the string represented a valid ID.
+ */
+Maybe<ResourceId> ParseResourceId(const android::StringPiece& str);
+
+/**
+ * Parses an SDK version, which can be an integer, or a letter from A-Z.
+ */
+Maybe<int> ParseSdkVersion(const android::StringPiece& str);
 
 /*
- * Returns a Reference, or None Maybe instance if the string `str` was parsed as a
+ * Returns a Reference, or None Maybe instance if the string `str` was parsed as
+ * a
  * valid reference to a style.
- * The format for a style parent is slightly more flexible than a normal reference:
+ * The format for a style parent is slightly more flexible than a normal
+ * reference:
  *
  * @[package:]style/<entry> or
  * ?[package:]style/<entry> or
  * <package>:[style/]<entry>
  */
-Maybe<Reference> parseStyleParentReference(const StringPiece16& str, std::string* outError);
+Maybe<Reference> ParseStyleParentReference(const android::StringPiece& str, std::string* out_error);
 
 /*
- * Returns a Reference object if the string was parsed as a resource or attribute reference,
- * ( @[+][package:]type/name | ?[package:]type/name ) setting outCreate to true if
+ * Returns a Reference if the string `str` was parsed as a valid XML attribute
+ * name.
+ * The valid format for an XML attribute name is:
+ *
+ * package:entry
+ */
+Maybe<Reference> ParseXmlAttributeName(const android::StringPiece& str);
+
+/*
+ * Returns a Reference object if the string was parsed as a resource or
+ * attribute reference,
+ * ( @[+][package:]type/name | ?[package:]type/name ) setting outCreate to true
+ * if
  * the '+' was present in the string.
  */
-std::unique_ptr<Reference> tryParseReference(const StringPiece16& str, bool* outCreate = nullptr);
+std::unique_ptr<Reference> TryParseReference(const android::StringPiece& str,
+                                             bool* out_create = nullptr);
 
 /*
- * Returns a BinaryPrimitve object representing @null or @empty if the string was parsed
- * as one.
+ * Returns a BinaryPrimitve object representing @null or @empty if the string
+ * was parsed as one.
  */
-std::unique_ptr<BinaryPrimitive> tryParseNullOrEmpty(const StringPiece16& str);
+std::unique_ptr<Item> TryParseNullOrEmpty(const android::StringPiece& str);
+
+// Returns a Reference representing @null.
+// Due to runtime compatibility issues, this is encoded as a reference with ID 0.
+// The runtime will convert this to TYPE_NULL.
+std::unique_ptr<Reference> MakeNull();
+
+// Returns a BinaryPrimitive representing @empty. This is encoded as a Res_value with
+// type Res_value::TYPE_NULL and data Res_value::DATA_NULL_EMPTY.
+std::unique_ptr<BinaryPrimitive> MakeEmpty();
 
 /*
  * Returns a BinaryPrimitve object representing a color if the string was parsed
  * as one.
  */
-std::unique_ptr<BinaryPrimitive> tryParseColor(const StringPiece16& str);
+std::unique_ptr<BinaryPrimitive> TryParseColor(const android::StringPiece& str);
 
 /*
- * Returns a BinaryPrimitve object representing a boolean if the string was parsed
- * as one.
+ * Returns a BinaryPrimitve object representing a boolean if the string was
+ * parsed as one.
  */
-std::unique_ptr<BinaryPrimitive> tryParseBool(const StringPiece16& str);
+std::unique_ptr<BinaryPrimitive> TryParseBool(const android::StringPiece& str);
+
+// Returns a boolean BinaryPrimitive.
+std::unique_ptr<BinaryPrimitive> MakeBool(bool val);
 
 /*
- * Returns a BinaryPrimitve object representing an integer if the string was parsed
- * as one.
+ * Returns a BinaryPrimitve object representing an integer if the string was
+ * parsed as one.
  */
-std::unique_ptr<BinaryPrimitive> tryParseInt(const StringPiece16& str);
+std::unique_ptr<BinaryPrimitive> TryParseInt(const android::StringPiece& str);
 
 /*
  * Returns a BinaryPrimitve object representing a floating point number
  * (float, dimension, etc) if the string was parsed as one.
  */
-std::unique_ptr<BinaryPrimitive> tryParseFloat(const StringPiece16& str);
+std::unique_ptr<BinaryPrimitive> TryParseFloat(const android::StringPiece& str);
 
 /*
- * Returns a BinaryPrimitve object representing an enum symbol if the string was parsed
- * as one.
+ * Returns a BinaryPrimitve object representing an enum symbol if the string was
+ * parsed as one.
  */
-std::unique_ptr<BinaryPrimitive> tryParseEnumSymbol(const Attribute* enumAttr,
-                                                    const StringPiece16& str);
+std::unique_ptr<BinaryPrimitive> TryParseEnumSymbol(const Attribute* enum_attr,
+                                                    const android::StringPiece& str);
 
 /*
- * Returns a BinaryPrimitve object representing a flag symbol if the string was parsed
- * as one.
+ * Returns a BinaryPrimitve object representing a flag symbol if the string was
+ * parsed as one.
  */
-std::unique_ptr<BinaryPrimitive> tryParseFlagSymbol(const Attribute* enumAttr,
-                                                    const StringPiece16& str);
+std::unique_ptr<BinaryPrimitive> TryParseFlagSymbol(const Attribute* enum_attr,
+                                                    const android::StringPiece& str);
 /*
- * Try to convert a string to an Item for the given attribute. The attribute will
+ * Try to convert a string to an Item for the given attribute. The attribute
+ * will
  * restrict what values the string can be converted to.
- * The callback function onCreateReference is called when the parsed item is a
+ * The callback function on_create_reference is called when the parsed item is a
  * reference to an ID that must be created (@+id/foo).
  */
-std::unique_ptr<Item> parseItemForAttribute(
-        const StringPiece16& value, const Attribute* attr,
-        std::function<void(const ResourceName&)> onCreateReference = {});
+std::unique_ptr<Item> TryParseItemForAttribute(
+    const android::StringPiece& value, const Attribute* attr,
+    const std::function<void(const ResourceName&)>& on_create_reference = {});
 
-std::unique_ptr<Item> parseItemForAttribute(
-        const StringPiece16& value, uint32_t typeMask,
-        std::function<void(const ResourceName&)> onCreateReference = {});
+std::unique_ptr<Item> TryParseItemForAttribute(
+    const android::StringPiece& value, uint32_t type_mask,
+    const std::function<void(const ResourceName&)>& on_create_reference = {});
 
-uint32_t androidTypeToAttributeTypeMask(uint16_t type);
+uint32_t AndroidTypeToAttributeTypeMask(uint16_t type);
 
 /**
- * Returns a string path suitable for use within an APK. The path will look like:
+ * Returns a string path suitable for use within an APK. The path will look
+ * like:
  *
  * res/type[-config]/<name>.<ext>
  *
- * Then name may be mangled if a NameMangler is supplied (can be nullptr) and the package
+ * Then name may be mangled if a NameMangler is supplied (can be nullptr) and
+ * the package
  * requires mangling.
  */
-std::string buildResourceFileName(const ResourceFile& resFile, const NameMangler* mangler);
+std::string BuildResourceFileName(const ResourceFile& res_file,
+                                  const NameMangler* mangler = nullptr);
 
-} // namespace ResourceUtils
-} // namespace aapt
+// Parses the binary form of a resource value. `type` is used as a hint to know when a value is
+// an ID versus a False boolean value, etc. `config` is for sorting strings in the string pool.
+std::unique_ptr<Item> ParseBinaryResValue(const ResourceType& type, const ConfigDescription& config,
+                                          const android::ResStringPool& src_pool,
+                                          const android::Res_value& res_value,
+                                          StringPool* dst_pool);
+
+}  // namespace ResourceUtils
+}  // namespace aapt
 
 #endif /* AAPT_RESOURCEUTILS_H */

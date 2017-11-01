@@ -170,6 +170,9 @@ public abstract class AsyncTaskLoader<D> extends Loader<D> {
     protected boolean onCancelLoad() {
         if (DEBUG) Log.v(TAG, "onCancelLoad: mTask=" + mTask);
         if (mTask != null) {
+            if (!mStarted) {
+                mContentChanged = true;
+            }
             if (mCancellingTask != null) {
                 // There was a pending task already waiting for a previous
                 // one being canceled; just drop it.

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="5247871339820894594">"CarrierDefaultApp"</string>
+    <string name="android_system_label" msgid="2797790869522345065">"မိုဘိုင်း ဝန်ဆောင်မှုပေးသူ"</string>
+    <string name="portal_notification_id" msgid="5155057562457079297">"မိုဘိုင်းဒေတာ ကုန်သွားပါပြီ"</string>
+    <string name="no_data_notification_id" msgid="668400731803969521">"သင်၏ မိုဘိုင်း ဒေတာကို ပိတ်ထားပါသည်"</string>
+    <string name="portal_notification_detail" msgid="2295729385924660881">"%s ဝဘ်ဆိုက်ကို ကြည့်ရှုရန် တို့ပါ"</string>
+    <string name="no_data_notification_detail" msgid="3112125343857014825">"သင်၏ဝန်ဆောင်မှုပေးသူ %s ကို ဆက်သွယ်ပါ"</string>
+    <string name="no_mobile_data_connection_title" msgid="7449525772416200578">"မိုဘိုင်း ဒေတာချိတ်ဆက်မှုမရှိပါ"</string>
+    <string name="no_mobile_data_connection" msgid="544980465184147010">"ဒေတာပလန် သို့မဟုတ် နိုင်ငံကူးလူးဖုန်းပလန်ကို %s မှ တစ်ဆင့် ထည့်ပါ"</string>
+    <string name="mobile_data_status_notification_channel_name" msgid="833999690121305708">"မိုဘိုင်းဒေတာ အခြေအနေ"</string>
+    <string name="action_bar_label" msgid="4290345990334377177">"မိုဘိုင်းကွန်ရက်သို့ လက်မှတ်ထိုးဝင်ပါ"</string>
+    <string name="ssl_error_warning" msgid="3127935140338254180">"သင်ချိတ်ဆက်ရန် ကြိုးစားနေသည့် ကွန်ရက်တွင် လုံခြုံရေးပြဿနာများ ရှိနေသည်။"</string>
+    <string name="ssl_error_example" msgid="6188711843183058764">"ဥပမာ− ဝင်ရောက်ရန် စာမျက်နှာသည် ပြသထားသည့် အဖွဲ့အစည်းနှင့် သက်ဆိုင်မှုမရှိခြင်း ဖြစ်နိုင်ပါသည်။"</string>
+    <string name="ssl_error_continue" msgid="1138548463994095584">"မည်သို့ပင်ဖြစ်စေ ဘရောက်ဇာမှတစ်ဆင့် ရှေ့ဆက်ရန်"</string>
+</resources>

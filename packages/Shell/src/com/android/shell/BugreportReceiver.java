@@ -40,8 +40,7 @@ public class BugreportReceiver extends BroadcastReceiver {
     private static final String TAG = "BugreportReceiver";
 
     /**
-     * Always keep the newest 8 bugreport files; 4 reports and 4 screenshots are
-     * roughly 17MB of disk space.
+     * Always keep the newest 8 bugreport files.
      */
     private static final int MIN_KEEP_COUNT = 8;
 

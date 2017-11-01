@@ -78,4 +78,10 @@ interface IGateKeeperService {
      * @param uid the Android user id.
      */
     void clearSecureUserId(int uid);
+
+    /**
+     * Notifies gatekeeper that device setup has been completed and any potentially still existing
+     * state from before a factory reset can be cleaned up (if it has not been already).
+     */
+    void reportDeviceSetupComplete();
 }

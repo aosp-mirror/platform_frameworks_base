@@ -28,12 +28,12 @@ import java.lang.reflect.Method;
 /** @hide */
 public final class Zygote {
     /*
-    * Bit values for "debugFlags" argument.  The definitions are duplicated
+    * Bit values for "runtimeFlags" argument.  The definitions are duplicated
     * in the native code.
     */
 
     /** enable debugging over JDWP */
-    public static final int DEBUG_ENABLE_DEBUGGER   = 1;
+    public static final int DEBUG_ENABLE_JDWP   = 1;
     /** enable JNI checks */
     public static final int DEBUG_ENABLE_CHECKJNI   = 1 << 1;
     /** enable Java programming language "assert" statements */
@@ -46,8 +46,15 @@ public final class Zygote {
     public static final int DEBUG_GENERATE_DEBUG_INFO = 1 << 5;
     /** Always use JIT-ed code. */
     public static final int DEBUG_ALWAYS_JIT = 1 << 6;
-    /** Make the code debuggable with turning off some optimizations. */
+    /** Make the code native debuggable by turning off some optimizations. */
     public static final int DEBUG_NATIVE_DEBUGGABLE = 1 << 7;
+    /** Make the code Java debuggable by turning off some optimizations. */
+    public static final int DEBUG_JAVA_DEBUGGABLE = 1 << 8;
+
+    /** Turn off the verifier. */
+    public static final int DISABLE_VERIFIER = 1 << 9;
+    /** Only use oat files located in /system. Otherwise use dex/jar/apk . */
+    public static final int ONLY_USE_SYSTEM_OAT_FILES = 1 << 10;
 
     /** No external storage should be mounted. */
     public static final int MOUNT_EXTERNAL_NONE = 0;
@@ -73,7 +80,7 @@ public final class Zygote {
      * fork()ing and and before spawning any threads.
      * @param gids null-ok; a list of UNIX gids that the new process should
      * setgroups() to after fork and before spawning any threads.
-     * @param debugFlags bit flags that enable debugging features.
+     * @param runtimeFlags bit flags that enable ART features.
      * @param rlimits null-ok an array of rlimit tuples, with the second
      * dimension having a length of 3 and representing
      * (resource, rlim_cur, rlim_max). These are set via the posix
@@ -94,16 +101,18 @@ public final class Zygote {
      * @return 0 if this is the child, pid of the child
      * if this is the parent, or -1 on error.
      */
-    public static int forkAndSpecialize(int uid, int gid, int[] gids, int debugFlags,
+    public static int forkAndSpecialize(int uid, int gid, int[] gids, int runtimeFlags,
           int[][] rlimits, int mountExternal, String seInfo, String niceName, int[] fdsToClose,
           int[] fdsToIgnore, String instructionSet, String appDataDir) {
         VM_HOOKS.preFork();
+        // Resets nice priority for zygote process.
+        resetNicePriority();
         int pid = nativeForkAndSpecialize(
-                  uid, gid, gids, debugFlags, rlimits, mountExternal, seInfo, niceName, fdsToClose,
+                  uid, gid, gids, runtimeFlags, rlimits, mountExternal, seInfo, niceName, fdsToClose,
                   fdsToIgnore, instructionSet, appDataDir);
         // Enable tracing as soon as possible for the child process.
         if (pid == 0) {
-            Trace.setTracingEnabled(true);
+            Trace.setTracingEnabled(true, runtimeFlags);
 
             // Note that this event ends at the end of handleChildProc,
             Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "PostFork");
@@ -112,9 +121,14 @@ public final class Zygote {
         return pid;
     }
 
-    native private static int nativeForkAndSpecialize(int uid, int gid, int[] gids,int debugFlags,
+    native private static int nativeForkAndSpecialize(int uid, int gid, int[] gids,int runtimeFlags,
           int[][] rlimits, int mountExternal, String seInfo, String niceName, int[] fdsToClose,
           int[] fdsToIgnore, String instructionSet, String appDataDir);
+
+    /**
+     * Called to do any initialization before starting an application.
+     */
+    native static void nativePreApplicationInit();
 
     /**
      * Special method to start the system server process. In addition to the
@@ -128,7 +142,7 @@ public final class Zygote {
      * fork()ing and and before spawning any threads.
      * @param gids null-ok; a list of UNIX gids that the new process should
      * setgroups() to after fork and before spawning any threads.
-     * @param debugFlags bit flags that enable debugging features.
+     * @param runtimeFlags bit flags that enable ART features.
      * @param rlimits null-ok an array of rlimit tuples, with the second
      * dimension having a length of 3 and representing
      * (resource, rlim_cur, rlim_max). These are set via the posix
@@ -139,20 +153,22 @@ public final class Zygote {
      * @return 0 if this is the child, pid of the child
      * if this is the parent, or -1 on error.
      */
-    public static int forkSystemServer(int uid, int gid, int[] gids, int debugFlags,
+    public static int forkSystemServer(int uid, int gid, int[] gids, int runtimeFlags,
             int[][] rlimits, long permittedCapabilities, long effectiveCapabilities) {
         VM_HOOKS.preFork();
+        // Resets nice priority for zygote process.
+        resetNicePriority();
         int pid = nativeForkSystemServer(
-                uid, gid, gids, debugFlags, rlimits, permittedCapabilities, effectiveCapabilities);
+                uid, gid, gids, runtimeFlags, rlimits, permittedCapabilities, effectiveCapabilities);
         // Enable tracing as soon as we enter the system_server.
         if (pid == 0) {
-            Trace.setTracingEnabled(true);
+            Trace.setTracingEnabled(true, runtimeFlags);
         }
         VM_HOOKS.postForkCommon();
         return pid;
     }
 
-    native private static int nativeForkSystemServer(int uid, int gid, int[] gids, int debugFlags,
+    native private static int nativeForkSystemServer(int uid, int gid, int[] gids, int runtimeFlags,
             int[][] rlimits, long permittedCapabilities, long effectiveCapabilities);
 
     /**
@@ -166,11 +182,19 @@ public final class Zygote {
      */
     native protected static void nativeUnmountStorageOnInit();
 
-    private static void callPostForkChildHooks(int debugFlags, boolean isSystemServer,
+    private static void callPostForkChildHooks(int runtimeFlags, boolean isSystemServer,
             String instructionSet) {
-        VM_HOOKS.postForkChild(debugFlags, isSystemServer, instructionSet);
+        VM_HOOKS.postForkChild(runtimeFlags, isSystemServer, instructionSet);
     }
 
+    /**
+     * Resets the calling thread priority to the default value (Thread.NORM_PRIORITY
+     * or nice value 0). This updates both the priority value in java.lang.Thread and
+     * the nice value (setpriority).
+     */
+    static void resetNicePriority() {
+        Thread.currentThread().setPriority(Thread.NORM_PRIORITY);
+    }
 
     /**
      * Executes "/system/bin/sh -c &lt;command&gt;" using the exec() system call.
@@ -200,41 +224,6 @@ public final class Zygote {
     public static void appendQuotedShellArgs(StringBuilder command, String[] args) {
         for (String arg : args) {
             command.append(" '").append(arg.replace("'", "'\\''")).append("'");
-        }
-    }
-
-    /**
-     * Helper exception class which holds a method and arguments and
-     * can call them. This is used as part of a trampoline to get rid of
-     * the initial process setup stack frames.
-     */
-    public static class MethodAndArgsCaller extends Exception
-            implements Runnable {
-        /** method to call */
-        private final Method mMethod;
-
-        /** argument array */
-        private final String[] mArgs;
-
-        public MethodAndArgsCaller(Method method, String[] args) {
-            mMethod = method;
-            mArgs = args;
-        }
-
-        public void run() {
-            try {
-                mMethod.invoke(null, new Object[] { mArgs });
-            } catch (IllegalAccessException ex) {
-                throw new RuntimeException(ex);
-            } catch (InvocationTargetException ex) {
-                Throwable cause = ex.getCause();
-                if (cause instanceof RuntimeException) {
-                    throw (RuntimeException) cause;
-                } else if (cause instanceof Error) {
-                    throw (Error) cause;
-                }
-                throw new RuntimeException(ex);
-            }
         }
     }
 }

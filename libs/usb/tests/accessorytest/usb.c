@@ -219,7 +219,7 @@ struct usb_device* usb_wait_for_device() {
     return device;
 }
 
-void usb_run(int enable_accessory) {
+void usb_run(uintptr_t enable_accessory) {
     struct usb_host_context* context = usb_host_init();
 
     usb_host_run(context, usb_device_added, usb_device_removed, NULL, (void *)enable_accessory);

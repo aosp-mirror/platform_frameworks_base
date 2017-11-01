@@ -19,7 +19,7 @@
 
 #include <inputflinger/InputWindow.h>
 
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 #include "jni.h"
 
 namespace android {

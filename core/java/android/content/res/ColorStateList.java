@@ -91,7 +91,7 @@ import java.util.Arrays;
  * file. An item with no state spec is considered to match any set of states and is generally
  * useful as a final item to be used as a default.
  * <p>
- * If an item with no state spec if placed before other items, those items
+ * If an item with no state spec is placed before other items, those items
  * will be ignored.
  *
  * <a name="ItemAttributes"></a>
@@ -508,8 +508,8 @@ public class ColorStateList extends ComplexColor implements Parcelable {
     }
 
     /**
-     * Indicates whether this color state list contains more than one state spec
-     * and will change color based on state.
+     * Indicates whether this color state list contains at least one state spec
+     * and the first spec is not empty (e.g. match-all).
      *
      * @return True if this color state list changes color based on state, false
      *         otherwise.
@@ -517,7 +517,16 @@ public class ColorStateList extends ComplexColor implements Parcelable {
      */
     @Override
     public boolean isStateful() {
-        return mStateSpecs.length > 1;
+        return mStateSpecs.length >= 1 && mStateSpecs[0].length > 0;
+    }
+
+    /**
+     * Return whether the state spec list has at least one item explicitly specifying
+     * {@link android.R.attr#state_focused}.
+     * @hide
+     */
+    public boolean hasFocusStateSpecified() {
+        return StateSet.containsAttribute(mStateSpecs, R.attr.state_focused);
     }
 
     /**

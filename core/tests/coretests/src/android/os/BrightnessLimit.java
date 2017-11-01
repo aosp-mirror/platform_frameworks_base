@@ -40,7 +40,7 @@ public class BrightnessLimit extends Activity implements OnClickListener {
         
         setContentView(R.layout.brightness_limit);
         
-        Button b = (Button) findViewById(R.id.go);
+        Button b = findViewById(R.id.go);
         b.setOnClickListener(this);
     }
 

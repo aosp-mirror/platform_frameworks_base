@@ -23,6 +23,6 @@ import com.android.systemui.recents.events.EventBus;
  * we can start in-app animations so that they don't conflict with the window transition into
  * Recents.
  */
-public class EnterRecentsWindowAnimationCompletedEvent extends EventBus.AnimatedEvent {
+public class EnterRecentsWindowAnimationCompletedEvent extends EventBus.Event {
     // Simple event
 }

@@ -49,6 +49,8 @@ public class FisheyeFilter extends Filter {
     private int mHeight = 0;
     private int mTarget = FrameFormat.TARGET_UNSPECIFIED;
 
+    // The constant min_dist, below, is an arbitrary number that gives good enough precision in
+    // the center of the picture without affecting the fisheye effect noticeably.
     private static final String mFisheyeShader =
             "precision mediump float;\n" +
             "uniform sampler2D tex_sampler_0;\n" +
@@ -59,8 +61,10 @@ public class FisheyeFilter extends Filter {
             "varying vec2 v_texcoord;\n" +
             "void main() {\n" +
             "  const float m_pi_2 = 1.570963;\n" +
+            "  const float min_dist = 0.01;\n" +
             "  vec2 coord = v_texcoord - vec2(0.5, 0.5);\n" +
             "  float dist = length(coord * scale);\n" +
+            "  dist = max(dist, min_dist);\n" +
             "  float radian = m_pi_2 - atan(alpha * sqrt(radius2 - dist * dist), dist);\n" +
             "  float scalar = radian * factor / dist;\n" +
             "  vec2 new_coord = coord * scalar + vec2(0.5, 0.5);\n" +

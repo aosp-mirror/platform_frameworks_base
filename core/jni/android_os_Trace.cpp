@@ -23,9 +23,9 @@
 #include <utils/String8.h>
 #include <log/log.h>
 
-#include <JNIHelp.h>
-#include <ScopedUtfChars.h>
-#include <ScopedStringChars.h>
+#include <nativehelper/JNIHelp.h>
+#include <nativehelper/ScopedUtfChars.h>
+#include <nativehelper/ScopedStringChars.h>
 
 namespace android {
 
@@ -109,27 +109,30 @@ static const JNINativeMethod gTraceMethods[] = {
     { "nativeGetEnabledTags",
             "()J",
             (void*)android_os_Trace_nativeGetEnabledTags },
-    { "nativeTraceCounter",
-            "!(JLjava/lang/String;I)V",
-            (void*)android_os_Trace_nativeTraceCounter },
-    { "nativeTraceBegin",
-            "!(JLjava/lang/String;)V",
-            (void*)android_os_Trace_nativeTraceBegin },
-    { "nativeTraceEnd",
-            "!(J)V",
-            (void*)android_os_Trace_nativeTraceEnd },
-    { "nativeAsyncTraceBegin",
-            "!(JLjava/lang/String;I)V",
-            (void*)android_os_Trace_nativeAsyncTraceBegin },
-    { "nativeAsyncTraceEnd",
-            "!(JLjava/lang/String;I)V",
-            (void*)android_os_Trace_nativeAsyncTraceEnd },
     { "nativeSetAppTracingAllowed",
             "(Z)V",
             (void*)android_os_Trace_nativeSetAppTracingAllowed },
     { "nativeSetTracingEnabled",
             "(Z)V",
             (void*)android_os_Trace_nativeSetTracingEnabled },
+
+    // ----------- @FastNative  ----------------
+
+    { "nativeTraceCounter",
+            "(JLjava/lang/String;I)V",
+            (void*)android_os_Trace_nativeTraceCounter },
+    { "nativeTraceBegin",
+            "(JLjava/lang/String;)V",
+            (void*)android_os_Trace_nativeTraceBegin },
+    { "nativeTraceEnd",
+            "(J)V",
+            (void*)android_os_Trace_nativeTraceEnd },
+    { "nativeAsyncTraceBegin",
+            "(JLjava/lang/String;I)V",
+            (void*)android_os_Trace_nativeAsyncTraceBegin },
+    { "nativeAsyncTraceEnd",
+            "(JLjava/lang/String;I)V",
+            (void*)android_os_Trace_nativeAsyncTraceEnd },
 };
 
 int register_android_os_Trace(JNIEnv* env) {

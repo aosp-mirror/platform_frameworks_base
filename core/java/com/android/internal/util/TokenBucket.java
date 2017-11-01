@@ -33,6 +33,8 @@ import static com.android.internal.util.Preconditions.checkArgumentPositive;
  * The available amount of tokens is computed lazily when the bucket state is inspected.
  * Therefore it is purely synchronous and does not involve any asynchronous activity.
  * It is not synchronized in any way and not a thread-safe object.
+ *
+ * {@hide}
  */
 public class TokenBucket {
 

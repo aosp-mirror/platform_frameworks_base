@@ -59,6 +59,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:textAppearance="@style/TextAppearance.QS.DataUsage" />
+
     </LinearLayout>
 
     <LinearLayout
@@ -81,5 +82,14 @@
             android:layout_weight="1"
             android:textAppearance="@style/TextAppearance.QS.DataUsage.Secondary" />
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/roaming_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingTop="16dp"
+        android:text="@string/accessibility_data_connection_roaming"
+        android:textAppearance="@style/TextAppearance.QS.DataUsage.Secondary"
+        android:visibility="gone" />
 
 </com.android.systemui.qs.tiles.DataUsageDetailView>

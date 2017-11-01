@@ -14,10 +14,11 @@
 
 package com.android.systemui.statusbar.phone;
 
-import android.annotation.DrawableRes;
-import android.annotation.Nullable;
 import android.graphics.drawable.Drawable;
 import android.view.View;
+
+import com.android.systemui.plugins.statusbar.phone.NavBarButtonProvider.ButtonInterface;
+import com.android.systemui.statusbar.policy.KeyButtonDrawable;
 
 import java.util.ArrayList;
 
@@ -36,10 +37,11 @@ public class ButtonDispatcher {
     private View.OnLongClickListener mLongClickListener;
     private Boolean mLongClickable;
     private Integer mAlpha;
+    private Float mDarkIntensity;
     private Integer mVisibility = -1;
-    private int mImageResource = -1;
-    private Drawable mImageDrawable;
+    private KeyButtonDrawable mImageDrawable;
     private View mCurrentView;
+    private boolean mVertical;
 
     public ButtonDispatcher(int id) {
         mId = id;
@@ -47,13 +49,6 @@ public class ButtonDispatcher {
 
     void clear() {
         mViews.clear();
-    }
-
-    void addView(View view, boolean landscape) {
-        addView(view);
-        if (view instanceof ButtonInterface) {
-            ((ButtonInterface) view).setLandscape(landscape);
-        }
     }
 
     void addView(View view) {
@@ -67,13 +62,18 @@ public class ButtonDispatcher {
         if (mAlpha != null) {
             view.setAlpha(mAlpha);
         }
+        if (mDarkIntensity != null) {
+            ((ButtonInterface) view).setDarkIntensity(mDarkIntensity);
+        }
         if (mVisibility != null) {
             view.setVisibility(mVisibility);
         }
-        if (mImageResource > 0) {
-            ((ButtonInterface) view).setImageResource(mImageResource);
-        } else if (mImageDrawable != null) {
+        if (mImageDrawable != null) {
             ((ButtonInterface) view).setImageDrawable(mImageDrawable);
+        }
+
+        if (view instanceof  ButtonInterface) {
+            ((ButtonInterface) view).setVertical(mVertical);
         }
     }
 
@@ -89,21 +89,11 @@ public class ButtonDispatcher {
         return mAlpha != null ? mAlpha : 1;
     }
 
-    public void setImageDrawable(Drawable drawable) {
+    public void setImageDrawable(KeyButtonDrawable drawable) {
         mImageDrawable = drawable;
-        mImageResource = -1;
         final int N = mViews.size();
         for (int i = 0; i < N; i++) {
             ((ButtonInterface) mViews.get(i)).setImageDrawable(mImageDrawable);
-        }
-    }
-
-    public void setImageResource(int resource) {
-        mImageResource = resource;
-        mImageDrawable = null;
-        final int N = mViews.size();
-        for (int i = 0; i < N; i++) {
-            ((ButtonInterface) mViews.get(i)).setImageResource(mImageResource);
         }
     }
 
@@ -129,6 +119,14 @@ public class ButtonDispatcher {
         final int N = mViews.size();
         for (int i = 0; i < N; i++) {
             mViews.get(i).setAlpha(alpha);
+        }
+    }
+
+    public void setDarkIntensity(float darkIntensity) {
+        mDarkIntensity = darkIntensity;
+        final int N = mViews.size();
+        for (int i = 0; i < N; i++) {
+            ((ButtonInterface) mViews.get(i)).setDarkIntensity(darkIntensity);
         }
     }
 
@@ -186,18 +184,14 @@ public class ButtonDispatcher {
         }
     }
 
-    /**
-     * Interface for button actions.
-     */
-    public interface ButtonInterface {
-        void setImageResource(@DrawableRes int resId);
-
-        void setImageDrawable(@Nullable Drawable drawable);
-
-        void abortCurrentGesture();
-
-        void setLandscape(boolean landscape);
-
-        void setCarMode(boolean carMode);
+    public void setVertical(boolean vertical) {
+        mVertical = vertical;
+        final int N = mViews.size();
+        for (int i = 0; i < N; i++) {
+            final View view = mViews.get(i);
+            if (view instanceof ButtonInterface) {
+                ((ButtonInterface) view).setVertical(vertical);
+            }
+        }
     }
 }

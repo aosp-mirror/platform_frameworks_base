@@ -46,7 +46,7 @@ public class ListScrollListener extends ListActivity implements AbsListView.OnSc
             values[i] = ((Integer)i).toString();
         }
         
-        mText = (TextView) findViewById(R.id.text);
+        mText = findViewById(R.id.text);
         setListAdapter(new ArrayAdapter<String>(this,
                 android.R.layout.simple_list_item_1, values));
 

@@ -16,7 +16,6 @@
 
 package android.net.metrics;
 
-import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -24,29 +23,30 @@ import android.os.Parcelable;
  * An event logged for an interface with APF capabilities when its IpManager state machine exits.
  * {@hide}
  */
-@SystemApi
 public final class ApfStats implements Parcelable {
 
-    public final long durationMs;     // time interval in milliseconds these stastistics covers
-    public final int receivedRas;     // number of received RAs
-    public final int matchingRas;     // number of received RAs matching a known RA
-    public final int droppedRas;      // number of received RAs ignored due to the MAX_RAS limit
-    public final int zeroLifetimeRas; // number of received RAs with a minimum lifetime of 0
-    public final int parseErrors;     // number of received RAs that could not be parsed
-    public final int programUpdates;  // number of APF program updates
-    public final int maxProgramSize;  // maximum APF program size advertised by hardware
+    /** time interval in milliseconds these stastistics covers. */
+    public long durationMs;
+    /** number of received RAs. */
+    public int receivedRas;
+    /** number of received RAs matching a known RA. */
+    public int matchingRas;
+    /** number of received RAs ignored due to the MAX_RAS limit. */
+    public int droppedRas;
+    /** number of received RAs with a minimum lifetime of 0. */
+    public int zeroLifetimeRas;
+    /** number of received RAs that could not be parsed. */
+    public int parseErrors;
+    /** number of APF program updates from receiving RAs.. */
+    public int programUpdates;
+    /** total number of APF program updates. */
+    public int programUpdatesAll;
+    /** number of APF program updates from allowing multicast traffic. */
+    public int programUpdatesAllowingMulticast;
+    /** maximum APF program size advertised by hardware. */
+    public int maxProgramSize;
 
-    /** {@hide} */
-    public ApfStats(long durationMs, int receivedRas, int matchingRas, int droppedRas,
-            int zeroLifetimeRas, int parseErrors, int programUpdates, int maxProgramSize) {
-        this.durationMs = durationMs;
-        this.receivedRas = receivedRas;
-        this.matchingRas = matchingRas;
-        this.droppedRas = droppedRas;
-        this.zeroLifetimeRas = zeroLifetimeRas;
-        this.parseErrors = parseErrors;
-        this.programUpdates = programUpdates;
-        this.maxProgramSize = maxProgramSize;
+    public ApfStats() {
     }
 
     private ApfStats(Parcel in) {
@@ -57,6 +57,8 @@ public final class ApfStats implements Parcelable {
         this.zeroLifetimeRas = in.readInt();
         this.parseErrors = in.readInt();
         this.programUpdates = in.readInt();
+        this.programUpdatesAll = in.readInt();
+        this.programUpdatesAllowingMulticast = in.readInt();
         this.maxProgramSize = in.readInt();
     }
 
@@ -69,6 +71,8 @@ public final class ApfStats implements Parcelable {
         out.writeInt(zeroLifetimeRas);
         out.writeInt(parseErrors);
         out.writeInt(programUpdates);
+        out.writeInt(programUpdatesAll);
+        out.writeInt(programUpdatesAllowingMulticast);
         out.writeInt(maxProgramSize);
     }
 
@@ -86,8 +90,9 @@ public final class ApfStats implements Parcelable {
                 .append(String.format("%d matching, ", matchingRas))
                 .append(String.format("%d dropped, ", droppedRas))
                 .append(String.format("%d zero lifetime, ", zeroLifetimeRas))
-                .append(String.format("%d parse errors, ", parseErrors))
-                .append(String.format("%d program updates})", programUpdates))
+                .append(String.format("%d parse errors}, ", parseErrors))
+                .append(String.format("updates: {all: %d, RAs: %d, allow multicast: %d})",
+                        programUpdatesAll, programUpdates, programUpdatesAllowingMulticast))
                 .toString();
     }
 

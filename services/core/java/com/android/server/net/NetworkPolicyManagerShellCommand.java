@@ -16,9 +16,11 @@
 
 package com.android.server.net;
 
+import static android.net.NetworkPolicyManager.POLICY_ALLOW_METERED_BACKGROUND;
 import static android.net.NetworkPolicyManager.POLICY_NONE;
 import static android.net.NetworkPolicyManager.POLICY_REJECT_METERED_BACKGROUND;
 import static android.net.wifi.WifiInfo.removeDoubleQuotes;
+
 import static com.android.server.net.NetworkPolicyManagerService.newWifiPolicy;
 import static com.android.server.net.NetworkPolicyManagerService.TAG;
 
@@ -191,10 +193,10 @@ class NetworkPolicyManagerShellCommand extends ShellCommand {
         return -1;
     }
 
-    private int listRestrictBackgroundWhitelist() throws RemoteException {
+    private int listUidPolicies(String msg, int policy) throws RemoteException {
         final PrintWriter pw = getOutPrintWriter();
-        final int[] uids = mInterface.getRestrictBackgroundWhitelistedUids();
-        pw.print("Restrict background whitelisted UIDs: ");
+        final int[] uids = mInterface.getUidsWithPolicy(policy);
+        pw.print(msg); pw.print(": ");
         if (uids.length == 0) {
             pw.println("none");
         } else {
@@ -208,22 +210,14 @@ class NetworkPolicyManagerShellCommand extends ShellCommand {
         return 0;
     }
 
-    private int listRestrictBackgroundBlacklist() throws RemoteException {
-        final PrintWriter pw = getOutPrintWriter();
+    private int listRestrictBackgroundWhitelist() throws RemoteException {
+        return listUidPolicies("Restrict background whitelisted UIDs",
+                POLICY_ALLOW_METERED_BACKGROUND);
+    }
 
-        final int[] uids = mInterface.getUidsWithPolicy(POLICY_REJECT_METERED_BACKGROUND);
-        pw.print("Restrict background blacklisted UIDs: ");
-        if (uids.length == 0) {
-            pw.println("none");
-        } else {
-            for (int i = 0; i < uids.length; i++) {
-                int uid = uids[i];
-                pw.print(uid);
-                pw.print(' ');
-            }
-        }
-        pw.println();
-        return 0;
+    private int listRestrictBackgroundBlacklist() throws RemoteException {
+        return listUidPolicies("Restrict background blacklisted UIDs",
+                POLICY_REJECT_METERED_BACKGROUND);
     }
 
     private int getRestrictBackground() throws RemoteException {
@@ -242,40 +236,44 @@ class NetworkPolicyManagerShellCommand extends ShellCommand {
         return 0;
     }
 
-    private int addRestrictBackgroundWhitelist() throws RemoteException {
-      final int uid = getUidFromNextArg();
-      if (uid < 0) {
-          return uid;
-      }
-      mInterface.addRestrictBackgroundWhitelistedUid(uid);
-      return 0;
-    }
-
-    private int removeRestrictBackgroundWhitelist() throws RemoteException {
+    private int setUidPolicy(int policy) throws RemoteException {
         final int uid = getUidFromNextArg();
         if (uid < 0) {
             return uid;
         }
-        mInterface.removeRestrictBackgroundWhitelistedUid(uid);
+        mInterface.setUidPolicy(uid, policy);
         return 0;
     }
 
-    private int addRestrictBackgroundBlacklist() throws RemoteException {
+    private int resetUidPolicy(String errorMessage, int expectedPolicy) throws RemoteException {
         final int uid = getUidFromNextArg();
         if (uid < 0) {
             return uid;
         }
-        mInterface.setUidPolicy(uid, POLICY_REJECT_METERED_BACKGROUND);
-        return 0;
-    }
-
-    private int removeRestrictBackgroundBlacklist() throws RemoteException {
-        final int uid = getUidFromNextArg();
-        if (uid < 0) {
-            return uid;
+        int actualPolicy = mInterface.getUidPolicy(uid);
+        if (actualPolicy != expectedPolicy) {
+            final PrintWriter pw = getOutPrintWriter();
+            pw.print("Error: UID "); pw.print(uid); pw.print(' '); pw.println(errorMessage);
+            return -1;
         }
         mInterface.setUidPolicy(uid, POLICY_NONE);
         return 0;
+    }
+
+    private int addRestrictBackgroundWhitelist() throws RemoteException {
+        return setUidPolicy(POLICY_ALLOW_METERED_BACKGROUND);
+    }
+
+    private int removeRestrictBackgroundWhitelist() throws RemoteException {
+        return resetUidPolicy("not whitelisted", POLICY_ALLOW_METERED_BACKGROUND);
+    }
+
+    private int addRestrictBackgroundBlacklist() throws RemoteException {
+        return setUidPolicy(POLICY_REJECT_METERED_BACKGROUND);
+    }
+
+    private int removeRestrictBackgroundBlacklist() throws RemoteException {
+        return resetUidPolicy("not blacklisted", POLICY_REJECT_METERED_BACKGROUND);
     }
 
     private int listWifiNetworks() throws RemoteException {
@@ -335,9 +333,11 @@ class NetworkPolicyManagerShellCommand extends ShellCommand {
                 System.arraycopy(policies, 0, newPolicies, 0, policies.length);
                 newPolicies[newPolicies.length - 1] = policy;
                 mInterface.setNetworkPolicies(newPolicies);
+                return 0;
             }
         }
-        return 0;
+        pw.print("Error: didn't find network with SSID "); pw.println(id);
+        return -1;
     }
 
     private List<NetworkPolicy> getWifiPolicies() throws RemoteException {

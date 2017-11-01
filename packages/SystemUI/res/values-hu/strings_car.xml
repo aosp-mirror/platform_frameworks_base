@@ -19,6 +19,6 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="car_lockscreen_disclaimer_title" msgid="7997539137376896441">"Vezessen óvatosan"</string>
-    <string name="car_lockscreen_disclaimer_text" msgid="3061224684092952864">"Mindig legyen teljes mértékben tisztában a vezetési körülményekkel, és a vonatkozó törvényeket tartsa be! Az útvonaltervek pontatlanok, hiányosak, veszélyesek, nem megfelelők vagy tiltottak lehetnek, illetve a közforgalom számára nem használható utakat érinthetnek. Az üzleti információk is pontatlanok vagy hiányosak lehetnek. Az adatok nem valós idejűek, ezért nem garantálhatjuk a helyadatok pontosságát. Vezetés közben ne kezelje mobileszközét, illetve ne használjon olyan alkalmazásokat az Android Auto rendszerrel, amelyeket nem ahhoz terveztek."</string>
+    <string name="unknown_user_label" msgid="4323896111737677955">"Ismeretlen"</string>
+    <string name="start_driving" msgid="864023351402918991">"Kezdhet vezetni"</string>
 </resources>

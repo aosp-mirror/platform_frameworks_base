@@ -16,9 +16,7 @@
 
 package android.test.suitebuilder;
 
-import android.test.ClassPathPackageInfo;
 import android.test.ClassPathPackageInfoSource;
-import android.test.PackageInfoSources;
 import android.util.Log;
 import com.android.internal.util.Predicate;
 import junit.framework.TestCase;
@@ -44,23 +42,23 @@ import java.util.TreeSet;
  * 
  * {@hide} Not needed for 1.0 SDK.
  */
-public class TestGrouping {
+class TestGrouping {
 
     private static final String LOG_TAG = "TestGrouping";
 
-    SortedSet<Class<? extends TestCase>> testCaseClasses;
+    private final SortedSet<Class<? extends TestCase>> testCaseClasses;
 
-    public static final Comparator<Class<? extends TestCase>> SORT_BY_SIMPLE_NAME
+    static final Comparator<Class<? extends TestCase>> SORT_BY_SIMPLE_NAME
             = new SortBySimpleName();
 
-    public static final Comparator<Class<? extends TestCase>> SORT_BY_FULLY_QUALIFIED_NAME
+    static final Comparator<Class<? extends TestCase>> SORT_BY_FULLY_QUALIFIED_NAME
             = new SortByFullyQualifiedName();
 
-    protected String firstIncludedPackage = null;
-    private ClassLoader classLoader;
+    private final ClassLoader classLoader;
 
-    public TestGrouping(Comparator<Class<? extends TestCase>> comparator) {
+    TestGrouping(Comparator<Class<? extends TestCase>> comparator, ClassLoader classLoader) {
         testCaseClasses = new TreeSet<Class<? extends TestCase>>(comparator);
+        this.classLoader = classLoader;
     }
 
     /**
@@ -77,13 +75,9 @@ public class TestGrouping {
         return testMethods;
     }
 
-    protected List<Method> getTestMethods(Class<? extends TestCase> testCaseClass) {
+    private List<Method> getTestMethods(Class<? extends TestCase> testCaseClass) {
         List<Method> methods = Arrays.asList(testCaseClass.getMethods());
         return select(methods, new TestMethodPredicate());
-    }
-
-    SortedSet<Class<? extends TestCase>> getTestCaseClasses() {
-        return testCaseClasses;
     }
 
     public boolean equals(Object o) {
@@ -110,9 +104,8 @@ public class TestGrouping {
      * or in a sub-package.
      *
      * @param packageNames Names of packages to add.
-     * @return The {@link TestGrouping} for method chaining.
      */
-    public TestGrouping addPackagesRecursive(String... packageNames) {
+    void addPackagesRecursive(String... packageNames) {
         for (String packageName : packageNames) {
             List<Class<? extends TestCase>> addedClasses = testCaseClassesInPackage(packageName);
             if (addedClasses.isEmpty()) {
@@ -120,11 +113,7 @@ public class TestGrouping {
                         + "' could not be found or has no tests");
             }
             testCaseClasses.addAll(addedClasses);
-            if (firstIncludedPackage == null) {
-                firstIncludedPackage = packageName;
-            }
         }
-        return this;
     }
 
     /**
@@ -132,28 +121,17 @@ public class TestGrouping {
      * specified.
      *
      * @param packageNames Names of packages to remove.
-     * @return The {@link TestGrouping} for method chaining.
      */
-    public TestGrouping removePackagesRecursive(String... packageNames) {
+    void removePackagesRecursive(String... packageNames) {
         for (String packageName : packageNames) {
             testCaseClasses.removeAll(testCaseClassesInPackage(packageName));
         }
-        return this;
-    }
-
-    /**
-     * @return The first package name passed to {@link #addPackagesRecursive(String[])}, or null
-     *         if that method was never called.
-     */
-    public String getFirstIncludedPackage() {
-        return firstIncludedPackage;
     }
 
     private List<Class<? extends TestCase>> testCaseClassesInPackage(String packageName) {
-        ClassPathPackageInfoSource source = PackageInfoSources.forClassPath(classLoader);
-        ClassPathPackageInfo packageInfo = source.getPackageInfo(packageName);
+        ClassPathPackageInfoSource source = ClassPathPackageInfoSource.forClassPath(classLoader);
 
-        return selectTestClasses(packageInfo.getTopLevelClassesRecursive());
+        return selectTestClasses(source.getTopLevelClassesRecursive(packageName));
     }
 
     @SuppressWarnings("unchecked")
@@ -174,10 +152,6 @@ public class TestGrouping {
             }
         }
         return selectedItems;
-    }
-
-    public void setClassLoader(ClassLoader classLoader) {
-        this.classLoader = classLoader;
     }
 
     /**

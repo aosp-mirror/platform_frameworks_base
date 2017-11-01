@@ -16,43 +16,43 @@
 
 package android.text.format;
 
+import static org.junit.Assert.assertEquals;
+
+import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.test.AndroidTestCase;
-import android.test.suitebuilder.annotation.SmallTest;
+import android.support.test.InstrumentationRegistry;
+import android.support.test.filters.SmallTest;
+import android.support.test.runner.AndroidJUnit4;
 import android.text.format.Formatter.BytesResult;
 
 import java.util.Locale;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
-public class FormatterTest extends AndroidTestCase {
-
+@SmallTest
+@RunWith(AndroidJUnit4.class)
+public class FormatterTest {
     private Locale mOriginalLocale;
+    private Context mContext;
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-
-        mOriginalLocale = mContext.getResources().getConfiguration().locale;
+    @Before
+    public void setup() {
+        mContext = InstrumentationRegistry.getContext();
+        mOriginalLocale = mContext.getResources()
+            .getConfiguration().locale;
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() {
         if (mOriginalLocale != null) {
             setLocale(mOriginalLocale);
         }
-        super.tearDown();
     }
 
-    private void setLocale(Locale locale) {
-        Resources res = getContext().getResources();
-        Configuration config = res.getConfiguration();
-        config.locale = locale;
-        res.updateConfiguration(config, res.getDisplayMetrics());
-
-        Locale.setDefault(locale);
-    }
-
-    @SmallTest
+    @Test
     public void testFormatBytes() {
         setLocale(Locale.ENGLISH);
 
@@ -68,39 +68,51 @@ public class FormatterTest extends AndroidTestCase {
         checkFormatBytes(123, true, "123", 123);
         checkFormatBytes(123, false, "123", 123);
 
-        checkFormatBytes(812, true, "812", 812);
-        checkFormatBytes(812, false, "812", 812);
+        checkFormatBytes(900, true, "900", 900);
+        checkFormatBytes(900, false, "900", 900);
 
-        checkFormatBytes(912, true, "0.89", 911);
-        checkFormatBytes(912, false, "0.89", 911);
+        checkFormatBytes(901, true, "0.90", 900);
+        checkFormatBytes(901, false, "0.90", 900);
 
-        checkFormatBytes(9123, true, "8.9", 9113);
-        checkFormatBytes(9123, false, "8.91", 9123);
+        checkFormatBytes(912, true, "0.91", 910);
+        checkFormatBytes(912, false, "0.91", 910);
 
-        checkFormatBytes(9123000, true, "8.7", 9122611);
-        checkFormatBytes(9123000, false, "8.70", 9122611);
+        checkFormatBytes(9123, true, "9.1", 9100);
+        checkFormatBytes(9123, false, "9.12", 9120);
+
+        checkFormatBytes(9123456, true, "9.1", 9100000);
+        checkFormatBytes(9123456, false, "9.12", 9120000);
 
         checkFormatBytes(-1, true, "-1", -1);
         checkFormatBytes(-1, false, "-1", -1);
 
-        checkFormatBytes(-912, true, "-0.89", -911);
-        checkFormatBytes(-912, false, "-0.89", -911);
+        checkFormatBytes(-914, true, "-0.91", -910);
+        checkFormatBytes(-914, false, "-0.91", -910);
 
         // Missing FLAG_CALCULATE_ROUNDED case.
-        BytesResult r = Formatter.formatBytes(getContext().getResources(), 1, 0);
+        BytesResult r = Formatter.formatBytes(mContext.getResources(), 1, 0);
         assertEquals("1", r.value);
         assertEquals(0, r.roundedBytes); // Didn't pass FLAG_CALCULATE_ROUNDED
 
         // Make sure it works on different locales.
         setLocale(new Locale("es", "ES"));
-        checkFormatBytes(9123000, false, "8,70", 9122611);
+        checkFormatBytes(9123000, false, "9,12", 9120000);
     }
 
     private void checkFormatBytes(long bytes, boolean useShort,
             String expectedString, long expectedRounded) {
-        BytesResult r = Formatter.formatBytes(getContext().getResources(), bytes,
+        BytesResult r = Formatter.formatBytes(mContext.getResources(), bytes,
                 Formatter.FLAG_CALCULATE_ROUNDED | (useShort ? Formatter.FLAG_SHORTER : 0));
         assertEquals(expectedString, r.value);
         assertEquals(expectedRounded, r.roundedBytes);
+    }
+
+    private void setLocale(Locale locale) {
+        Resources res = mContext.getResources();
+        Configuration config = res.getConfiguration();
+        config.locale = locale;
+        res.updateConfiguration(config, res.getDisplayMetrics());
+
+        Locale.setDefault(locale);
     }
 }

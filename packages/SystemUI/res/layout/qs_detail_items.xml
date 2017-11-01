@@ -20,8 +20,7 @@
     xmlns:sysui="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingTop="@dimen/qs_detail_items_padding_top"
-    android:paddingStart="16dp"
+    android:paddingStart="@dimen/qs_detail_padding_start"
     android:paddingEnd="16dp">
 
     <com.android.systemui.qs.AutoSizingList
@@ -29,7 +28,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        sysui:itemHeight="@dimen/qs_detail_item_height"/>
+        sysui:itemHeight="@dimen/qs_detail_item_height"
+        style="@style/AutoSizingList"/>
 
     <LinearLayout
         android:id="@android:id/empty"
@@ -42,7 +42,8 @@
         <ImageView
             android:id="@android:id/icon"
             android:layout_width="56dp"
-            android:layout_height="56dp"/>
+            android:layout_height="56dp"
+            android:tint="?android:attr/textColorSecondary" />
 
         <TextView
             android:id="@android:id/title"

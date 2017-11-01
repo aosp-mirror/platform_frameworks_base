@@ -31,7 +31,7 @@ import android.view.ViewGroup;
  * Tests invalidation performance by invalidating a large number of easily rendered views,
  */
 public class InvalidateActivity extends AppCompatActivity {
-    public static class ColorView extends View {
+    private static class ColorView extends View {
         @ColorInt
         public int mColor;
 
@@ -50,7 +50,7 @@ public class InvalidateActivity extends AppCompatActivity {
         }
     }
 
-    ColorView[][] mColorViews;
+    private ColorView[][] mColorViews;
 
     @SuppressWarnings("unused")
     public void setColorValue(int colorValue) {

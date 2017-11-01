@@ -22,7 +22,7 @@
 #include <camera/CameraUtils.h>
 
 #include "jni.h"
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 #include "core_jni_helpers.h"
 #include "android_runtime/android_view_Surface.h"
 #include "android_runtime/android_graphics_SurfaceTexture.h"
@@ -182,7 +182,7 @@ static status_t produceFrame(const sp<ANativeWindow>& anw,
     err = native_window_dequeue_buffer_and_wait(anw.get(), &anb);
     if (err != NO_ERROR) return err;
 
-    sp<GraphicBuffer> buf(new GraphicBuffer(anb, /*keepOwnership*/false));
+    sp<GraphicBuffer> buf(GraphicBuffer::from(anb));
     uint32_t grallocBufWidth = buf->getWidth();
     uint32_t grallocBufHeight = buf->getHeight();
     uint32_t grallocBufStride = buf->getStride();

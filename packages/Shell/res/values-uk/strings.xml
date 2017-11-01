@@ -4,9 +4,9 @@
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
      You may obtain a copy of the License at
-  
+
           http://www.apache.org/licenses/LICENSE-2.0
-  
+
      Unless required by applicable law or agreed to in writing, software
      distributed under the License is distributed on an "AS IS" BASIS,
      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,12 +17,15 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"Оболонка"</string>
+    <string name="bugreport_notification_channel" msgid="2574150205913861141">"Звіти про помилки"</string>
     <string name="bugreport_in_progress_title" msgid="4311705936714972757">"Генерується повідомлення про помилку <xliff:g id="ID">#%d</xliff:g>"</string>
     <string name="bugreport_finished_title" msgid="4429132808670114081">"Повідомлення про помилку <xliff:g id="ID">#%d</xliff:g> створено"</string>
     <string name="bugreport_updating_title" msgid="4423539949559634214">"Додаються деталі до повідомлення про помилку"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"Зачекайте…"</string>
     <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"Звіт про помилку невдовзі з’явиться на телефоні"</string>
+    <string name="bugreport_finished_text" product="tv" msgid="5758325479058638893">"Виберіть, щоб надіслати повідомлення про помилку"</string>
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"Торкніться, щоб надіслати повідомлення про помилку"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="tv" msgid="2343263822812016950">"Виберіть, щоб надіслати повідомлення про помилку без знімка екрана або зачекайте на знімок"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"Торкніться, щоб надіслати повідомлення про помилку без знімка екрана або зачекайте на знімок"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Торкніться, щоб надіслати повідомлення про помилку без знімка екрана або зачекайте на знімок"</string>
     <string name="bugreport_confirm" msgid="5917407234515812495">"Звіти про помилки містять дані з різних файлів журналів системи, зокрема відомості, які ви вважаєте конфіденційними (як-от інформація про місцезнаходження та використання додатка). Діліться звітами про помилки лише з людьми та в додатках, яким довіряєте."</string>
@@ -40,4 +43,5 @@
     <string name="bugreport_info_title" msgid="2306030793918239804">"Назва помилки"</string>
     <string name="bugreport_info_description" msgid="5072835127481627722">"Опис помилки"</string>
     <string name="save" msgid="4781509040564835759">"Зберегти"</string>
+    <string name="bugreport_intent_chooser_title" msgid="7605709494790894076">"Надіслати звіт про помилку"</string>
 </resources>

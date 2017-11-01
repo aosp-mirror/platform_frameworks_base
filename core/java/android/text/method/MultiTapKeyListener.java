@@ -16,13 +16,16 @@
 
 package android.text.method;
 
-import android.view.KeyEvent;
-import android.view.View;
 import android.os.Handler;
 import android.os.SystemClock;
-import android.text.*;
+import android.text.Editable;
+import android.text.Selection;
+import android.text.SpanWatcher;
+import android.text.Spannable;
 import android.text.method.TextKeyListener.Capitalize;
 import android.util.SparseArray;
+import android.view.KeyEvent;
+import android.view.View;
 
 /**
  * This is the standard key listener for alphabetic input on 12-key
@@ -81,7 +84,7 @@ public class MultiTapKeyListener extends BaseKeyListener
     public int getInputType() {
         return makeTextContentType(mCapitalize, mAutoText);
     }
-    
+
     public boolean onKeyDown(View view, Editable content,
                              int keyCode, KeyEvent event) {
         int selStart, selEnd;
@@ -198,7 +201,7 @@ public class MultiTapKeyListener extends BaseKeyListener
             if (selEnd != oldStart) {
                 Selection.setSelection(content, oldStart, selEnd);
 
-                content.setSpan(TextKeyListener.LAST_TYPED, 
+                content.setSpan(TextKeyListener.LAST_TYPED,
                                 oldStart, selEnd,
                                 Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 

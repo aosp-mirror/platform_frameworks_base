@@ -47,17 +47,19 @@ public class WakeupMessage implements AlarmManager.OnAlarmListener {
     protected final int mCmd, mArg1, mArg2;
     @VisibleForTesting
     protected final Object mObj;
+    private final Runnable mRunnable;
     private boolean mScheduled;
 
     public WakeupMessage(Context context, Handler handler,
             String cmdName, int cmd, int arg1, int arg2, Object obj) {
-        mAlarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        mAlarmManager = getAlarmManager(context);
         mHandler = handler;
         mCmdName = cmdName;
         mCmd = cmd;
         mArg1 = arg1;
         mArg2 = arg2;
         mObj = obj;
+        mRunnable = null;
     }
 
     public WakeupMessage(Context context, Handler handler, String cmdName, int cmd, int arg1) {
@@ -71,6 +73,21 @@ public class WakeupMessage implements AlarmManager.OnAlarmListener {
 
     public WakeupMessage(Context context, Handler handler, String cmdName, int cmd) {
         this(context, handler, cmdName, cmd, 0, 0, null);
+    }
+
+    public WakeupMessage(Context context, Handler handler, String cmdName, Runnable runnable) {
+        mAlarmManager = getAlarmManager(context);
+        mHandler = handler;
+        mCmdName = cmdName;
+        mCmd = 0;
+        mArg1 = 0;
+        mArg2 = 0;
+        mObj = null;
+        mRunnable = runnable;
+    }
+
+    private static AlarmManager getAlarmManager(Context context) {
+        return (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
     }
 
     /**
@@ -107,7 +124,12 @@ public class WakeupMessage implements AlarmManager.OnAlarmListener {
             mScheduled = false;
         }
         if (stillScheduled) {
-            Message msg = mHandler.obtainMessage(mCmd, mArg1, mArg2, mObj);
+            Message msg;
+            if (mRunnable == null) {
+                msg = mHandler.obtainMessage(mCmd, mArg1, mArg2, mObj);
+            } else {
+                msg = Message.obtain(mHandler, mRunnable);
+            }
             mHandler.dispatchMessage(msg);
             msg.recycle();
         }

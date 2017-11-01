@@ -17,11 +17,11 @@
 #ifndef AAPT_LOCALE_VALUE_H
 #define AAPT_LOCALE_VALUE_H
 
-#include "util/StringPiece.h"
-
-#include <androidfw/ResourceTypes.h>
 #include <string>
 #include <vector>
+
+#include "androidfw/ResourceTypes.h"
+#include "androidfw/StringPiece.h"
 
 namespace aapt {
 
@@ -29,88 +29,84 @@ namespace aapt {
  * A convenience class to build and parse locales.
  */
 struct LocaleValue {
-    char language[4];
-    char region[4];
-    char script[4];
-    char variant[8];
+  char language[4];
+  char region[4];
+  char script[4];
+  char variant[8];
 
-    inline LocaleValue();
+  inline LocaleValue();
 
-    /**
-     * Initialize this LocaleValue from a config string.
-     */
-    bool initFromFilterString(const StringPiece& config);
+  /**
+   * Initialize this LocaleValue from a config string.
+   */
+  bool InitFromFilterString(const android::StringPiece& config);
 
-    /**
-     * Initialize this LocaleValue from parts of a vector.
-     */
-    ssize_t initFromParts(std::vector<std::string>::iterator iter,
-            std::vector<std::string>::iterator end);
+  /**
+   * Initialize this LocaleValue from parts of a vector.
+   */
+  ssize_t InitFromParts(std::vector<std::string>::iterator iter,
+                        std::vector<std::string>::iterator end);
 
-    /**
-     * Initialize this LocaleValue from a ResTable_config.
-     */
-    void initFromResTable(const android::ResTable_config& config);
+  /**
+   * Initialize this LocaleValue from a ResTable_config.
+   */
+  void InitFromResTable(const android::ResTable_config& config);
 
-    /**
-     * Set the locale in a ResTable_config from this LocaleValue.
-     */
-    void writeTo(android::ResTable_config* out) const;
+  /**
+   * Set the locale in a ResTable_config from this LocaleValue.
+   */
+  void WriteTo(android::ResTable_config* out) const;
 
-    std::string toDirName() const;
+  inline int compare(const LocaleValue& other) const;
 
-    inline int compare(const LocaleValue& other) const;
+  inline bool operator<(const LocaleValue& o) const;
+  inline bool operator<=(const LocaleValue& o) const;
+  inline bool operator==(const LocaleValue& o) const;
+  inline bool operator!=(const LocaleValue& o) const;
+  inline bool operator>=(const LocaleValue& o) const;
+  inline bool operator>(const LocaleValue& o) const;
 
-    inline bool operator<(const LocaleValue& o) const;
-    inline bool operator<=(const LocaleValue& o) const;
-    inline bool operator==(const LocaleValue& o) const;
-    inline bool operator!=(const LocaleValue& o) const;
-    inline bool operator>=(const LocaleValue& o) const;
-    inline bool operator>(const LocaleValue& o) const;
-
-private:
-     void setLanguage(const char* language);
-     void setRegion(const char* language);
-     void setScript(const char* script);
-     void setVariant(const char* variant);
+ private:
+  void set_language(const char* language);
+  void set_region(const char* language);
+  void set_script(const char* script);
+  void set_variant(const char* variant);
 };
 
 //
 // Implementation
 //
 
-LocaleValue::LocaleValue() {
-    memset(this, 0, sizeof(LocaleValue));
-}
+LocaleValue::LocaleValue() { memset(this, 0, sizeof(LocaleValue)); }
 
 int LocaleValue::compare(const LocaleValue& other) const {
-    return memcmp(this, &other, sizeof(LocaleValue));
+  return memcmp(this, &other, sizeof(LocaleValue));
 }
 
 bool LocaleValue::operator<(const LocaleValue& o) const {
-    return compare(o) < 0;
+  return compare(o) < 0;
 }
 
 bool LocaleValue::operator<=(const LocaleValue& o) const {
-    return compare(o) <= 0;
+  return compare(o) <= 0;
 }
 
 bool LocaleValue::operator==(const LocaleValue& o) const {
-    return compare(o) == 0;
+  return compare(o) == 0;
 }
 
 bool LocaleValue::operator!=(const LocaleValue& o) const {
-    return compare(o) != 0;
+  return compare(o) != 0;
 }
 
 bool LocaleValue::operator>=(const LocaleValue& o) const {
-    return compare(o) >= 0;
+  return compare(o) >= 0;
 }
 
 bool LocaleValue::operator>(const LocaleValue& o) const {
-    return compare(o) > 0;
+  return compare(o) > 0;
 }
 
-} // namespace aapt
+}  // namespace aapt
 
-#endif // AAPT_LOCALE_VALUE_H
+#endif  // AAPT_LOCALE_VALUE_H

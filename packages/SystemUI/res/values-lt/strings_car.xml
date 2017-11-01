@@ -19,6 +19,6 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="car_lockscreen_disclaimer_title" msgid="7997539137376896441">"Vairuokite saugiai"</string>
-    <string name="car_lockscreen_disclaimer_text" msgid="3061224684092952864">"Visada atsižvelkite į vairavimo sąlygas ir laikykitės galiojančių įstatymų. Nuorodos gali būti netikslios, neužbaigtos, pavojingos, netinkamos, draudžiamos ar nukreipiančios per administracines sritis. Įmonių informacija taip pat gali būti netiksli ar neužbaigta. Duomenys nėra teikiami realiuoju laiku ir vietovių tikslumo negalima garantuoti. Vairuodami nenaudokite mobiliojo įrenginio ar programų, kurios nėra skirtos „Android Auto“."</string>
+    <string name="unknown_user_label" msgid="4323896111737677955">"Nežinoma"</string>
+    <string name="start_driving" msgid="864023351402918991">"Pradėti vairuoti"</string>
 </resources>

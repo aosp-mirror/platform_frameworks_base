@@ -493,7 +493,7 @@ public abstract class BackupAgent extends ContextWrapper {
      * <p class="note">Attempting to back up files in directories that are ignored by
      * the backup system will have no effect.  For example, if the app calls this method
      * with a file inside the {@link #getNoBackupFilesDir()} directory, it will be ignored.
-     * See {@link #onFullBackup(FullBackupDataOutput) for details on what directories
+     * See {@link #onFullBackup(FullBackupDataOutput)} for details on what directories
      * are excluded from backups.
      *
      * @param file The file to be backed up.  The file must exist and be readable by
@@ -897,12 +897,12 @@ public abstract class BackupAgent extends ContextWrapper {
         public void doBackup(ParcelFileDescriptor oldState,
                 ParcelFileDescriptor data,
                 ParcelFileDescriptor newState,
-                int token, IBackupManager callbackBinder) throws RemoteException {
+                long quotaBytes, int token, IBackupManager callbackBinder) throws RemoteException {
             // Ensure that we're running with the app's normal permission level
             long ident = Binder.clearCallingIdentity();
 
             if (DEBUG) Log.v(TAG, "doBackup() invoked");
-            BackupDataOutput output = new BackupDataOutput(data.getFileDescriptor());
+            BackupDataOutput output = new BackupDataOutput(data.getFileDescriptor(), quotaBytes);
 
             try {
                 BackupAgent.this.onBackup(oldState, output, newState);
@@ -942,6 +942,11 @@ public abstract class BackupAgent extends ContextWrapper {
             long ident = Binder.clearCallingIdentity();
 
             if (DEBUG) Log.v(TAG, "doRestore() invoked");
+
+            // Ensure that any side-effect SharedPreferences writes have landed *before*
+            // we may be about to rewrite the file out from underneath
+            waitForSharedPrefs();
+
             BackupDataInput input = new BackupDataInput(data.getFileDescriptor());
             try {
                 BackupAgent.this.onRestore(input, appVersionCode, newState);
@@ -952,8 +957,8 @@ public abstract class BackupAgent extends ContextWrapper {
                 Log.d(TAG, "onRestore (" + BackupAgent.this.getClass().getName() + ") threw", ex);
                 throw ex;
             } finally {
-                // Ensure that any side-effect SharedPreferences writes have landed
-                waitForSharedPrefs();
+                // And bring live SharedPreferences instances up to date
+                reloadSharedPreferences();
 
                 Binder.restoreCallingIdentity(ident);
                 try {
@@ -971,7 +976,7 @@ public abstract class BackupAgent extends ContextWrapper {
 
         @Override
         public void doFullBackup(ParcelFileDescriptor data,
-                int token, IBackupManager callbackBinder) {
+                long quotaBytes, int token, IBackupManager callbackBinder) {
             // Ensure that we're running with the app's normal permission level
             long ident = Binder.clearCallingIdentity();
 
@@ -982,7 +987,7 @@ public abstract class BackupAgent extends ContextWrapper {
             waitForSharedPrefs();
 
             try {
-                BackupAgent.this.onFullBackup(new FullBackupDataOutput(data));
+                BackupAgent.this.onFullBackup(new FullBackupDataOutput(data, quotaBytes));
             } catch (IOException ex) {
                 Log.d(TAG, "onFullBackup (" + BackupAgent.this.getClass().getName() + ") threw", ex);
                 throw new RuntimeException(ex);
@@ -1016,10 +1021,10 @@ public abstract class BackupAgent extends ContextWrapper {
             }
         }
 
-        public void doMeasureFullBackup(int token, IBackupManager callbackBinder) {
+        public void doMeasureFullBackup(long quotaBytes, int token, IBackupManager callbackBinder) {
             // Ensure that we're running with the app's normal permission level
             final long ident = Binder.clearCallingIdentity();
-            FullBackupDataOutput measureOutput = new FullBackupDataOutput();
+            FullBackupDataOutput measureOutput = new FullBackupDataOutput(quotaBytes);
 
             waitForSharedPrefs();
             try {
@@ -1053,6 +1058,8 @@ public abstract class BackupAgent extends ContextWrapper {
             } finally {
                 // Ensure that any side-effect SharedPreferences writes have landed
                 waitForSharedPrefs();
+                // And bring live SharedPreferences instances up to date
+                reloadSharedPreferences();
 
                 Binder.restoreCallingIdentity(ident);
                 try {

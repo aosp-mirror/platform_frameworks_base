@@ -28,6 +28,10 @@
 #include "jni.h"
 
 namespace android {
+namespace media {
+class ICas;
+};
+using namespace media;
 
 struct IMediaHTTPService;
 class MetaData;
@@ -43,6 +47,8 @@ struct JMediaExtractor : public RefBase {
 
     status_t setDataSource(int fd, off64_t offset, off64_t size);
     status_t setDataSource(const sp<DataSource> &source);
+
+    status_t setMediaCas(const sp<ICas> &cas);
 
     size_t countTracks() const;
     status_t getTrackFormat(size_t index, jobject *format) const;
@@ -60,6 +66,7 @@ struct JMediaExtractor : public RefBase {
     status_t getSampleTime(int64_t *sampleTimeUs);
     status_t getSampleFlags(uint32_t *sampleFlags);
     status_t getSampleMeta(sp<MetaData> *sampleMeta);
+    status_t getMetrics(Parcel *reply) const;
 
     bool getCachedDuration(int64_t *durationUs, bool *eos) const;
 

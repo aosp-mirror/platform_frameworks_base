@@ -18,12 +18,15 @@ package android.app;
 
 import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
+import static android.view.Display.INVALID_DISPLAY;
 
 import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
+import android.graphics.GraphicBuffer;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
@@ -32,10 +35,12 @@ import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.transition.Transition;
+import android.transition.TransitionListenerAdapter;
 import android.transition.TransitionManager;
 import android.util.Pair;
 import android.util.Slog;
 import android.view.AppTransitionAnimationSpec;
+import android.view.IAppTransitionAnimationSpecsFuture;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -152,6 +157,13 @@ public class ActivityOptions {
     private static final String KEY_ANIM_SPECS = "android:activity.animSpecs";
 
     /**
+     * The display id the activity should be launched into.
+     * @see #setLaunchDisplayId(int)
+     * @hide
+     */
+    private static final String KEY_LAUNCH_DISPLAY_ID = "android.activity.launchDisplayId";
+
+    /**
      * The stack id the activity should be launched into.
      * @hide
      */
@@ -168,6 +180,13 @@ public class ActivityOptions {
      * @hide
      */
     private static final String KEY_TASK_OVERLAY = "android.activity.taskOverlay";
+
+    /**
+     * See {@link #setTaskOverlay}.
+     * @hide
+     */
+    private static final String KEY_TASK_OVERLAY_CAN_RESUME =
+            "android.activity.taskOverlayCanResume";
 
     /**
      * Where the docked stack should be positioned.
@@ -194,6 +213,10 @@ public class ActivityOptions {
 
     private static final String KEY_USAGE_TIME_REPORT = "android:activity.usageTimeReport";
     private static final String KEY_ROTATION_ANIMATION_HINT = "android:activity.rotationAnimationHint";
+
+    private static final String KEY_INSTANT_APP_VERIFICATION_BUNDLE
+            = "android:instantapps.installerbundle";
+    private static final String KEY_SPECS_FUTURE = "android:activity.specsFuture";
 
     /** @hide */
     public static final int ANIM_NONE = 0;
@@ -240,12 +263,16 @@ public class ActivityOptions {
     private int mResultCode;
     private int mExitCoordinatorIndex;
     private PendingIntent mUsageTimeReport;
+    private int mLaunchDisplayId = INVALID_DISPLAY;
     private int mLaunchStackId = INVALID_STACK_ID;
     private int mLaunchTaskId = -1;
     private int mDockCreateMode = DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
     private boolean mTaskOverlay;
+    private boolean mTaskOverlayCanResume;
     private AppTransitionAnimationSpec mAnimSpecs[];
     private int mRotationAnimationHint = -1;
+    private Bundle mAppVerificationBundle;
+    private IAppTransitionAnimationSpecsFuture mSpecsFuture;
 
     /**
      * Create an ActivityOptions specifying a custom animation to run when
@@ -470,33 +497,10 @@ public class ActivityOptions {
      * is not executed, the callback will happen immediately.
      * @return Returns a new ActivityOptions object that you can use to
      * supply these options as the options Bundle when starting an activity.
-     * @hide
      */
-    public static ActivityOptions makeThumbnailScaleUpAnimation(View source,
+    private static ActivityOptions makeThumbnailScaleUpAnimation(View source,
             Bitmap thumbnail, int startX, int startY, OnAnimationStartedListener listener) {
         return makeThumbnailAnimation(source, thumbnail, startX, startY, listener, true);
-    }
-
-    /**
-     * Create an ActivityOptions specifying an animation where an activity window
-     * is scaled from a given position to a thumbnail at a specified location.
-     *
-     * @param source The View that this thumbnail is animating to.  This
-     * defines the coordinate space for <var>startX</var> and <var>startY</var>.
-     * @param thumbnail The bitmap that will be shown as the final thumbnail
-     * of the animation.
-     * @param startX The x end location of the bitmap, relative to <var>source</var>.
-     * @param startY The y end location of the bitmap, relative to <var>source</var>.
-     * @param listener Optional OnAnimationStartedListener to find out when the
-     * requested animation has started running.  If for some reason the animation
-     * is not executed, the callback will happen immediately.
-     * @return Returns a new ActivityOptions object that you can use to
-     * supply these options as the options Bundle when starting an activity.
-     * @hide
-     */
-    public static ActivityOptions makeThumbnailScaleDownAnimation(View source,
-            Bitmap thumbnail, int startX, int startY, OnAnimationStartedListener listener) {
-        return makeThumbnailAnimation(source, thumbnail, startX, startY, listener, false);
     }
 
     private static ActivityOptions makeThumbnailAnimation(View source,
@@ -515,29 +519,21 @@ public class ActivityOptions {
     }
 
     /**
-     * Create an ActivityOptions specifying an animation where the new activity
-     * window and a thumbnail is aspect-scaled to a new location.
-     *
-     * @param source The View that this thumbnail is animating from.  This
-     * defines the coordinate space for <var>startX</var> and <var>startY</var>.
-     * @param thumbnail The bitmap that will be shown as the initial thumbnail
-     * of the animation.
-     * @param startX The x starting location of the bitmap, relative to <var>source</var>.
-     * @param startY The y starting location of the bitmap, relative to <var>source</var>.
-     * @param handler If <var>listener</var> is non-null this must be a valid
-     * Handler on which to dispatch the callback; otherwise it should be null.
-     * @param listener Optional OnAnimationStartedListener to find out when the
-     * requested animation has started running.  If for some reason the animation
-     * is not executed, the callback will happen immediately.
-     * @return Returns a new ActivityOptions object that you can use to
-     * supply these options as the options Bundle when starting an activity.
+     * Create an ActivityOptions specifying an animation where a list of activity windows and
+     * thumbnails are aspect scaled to/from a new location.
      * @hide
      */
-    public static ActivityOptions makeThumbnailAspectScaleUpAnimation(View source,
-            Bitmap thumbnail, int startX, int startY, int targetWidth, int targetHeight,
-            Handler handler, OnAnimationStartedListener listener) {
-        return makeAspectScaledThumbnailAnimation(source, thumbnail, startX, startY,
-                targetWidth, targetHeight, handler, listener, true);
+    public static ActivityOptions makeMultiThumbFutureAspectScaleAnimation(Context context,
+            Handler handler, IAppTransitionAnimationSpecsFuture specsFuture,
+            OnAnimationStartedListener listener, boolean scaleUp) {
+        ActivityOptions opts = new ActivityOptions();
+        opts.mPackageName = context.getPackageName();
+        opts.mAnimationType = scaleUp
+                ? ANIM_THUMBNAIL_ASPECT_SCALE_UP
+                : ANIM_THUMBNAIL_ASPECT_SCALE_DOWN;
+        opts.mSpecsFuture = specsFuture;
+        opts.setOnAnimationStartedListener(handler, listener);
+        return opts;
     }
 
     /**
@@ -832,7 +828,11 @@ public class ActivityOptions {
             case ANIM_THUMBNAIL_SCALE_DOWN:
             case ANIM_THUMBNAIL_ASPECT_SCALE_UP:
             case ANIM_THUMBNAIL_ASPECT_SCALE_DOWN:
-                mThumbnail = (Bitmap) opts.getParcelable(KEY_ANIM_THUMBNAIL);
+                // Unpackage the GraphicBuffer from the parceled thumbnail
+                final GraphicBuffer buffer = opts.getParcelable(KEY_ANIM_THUMBNAIL);
+                if (buffer != null) {
+                    mThumbnail = Bitmap.createHardwareBitmap(buffer);
+                }
                 mStartX = opts.getInt(KEY_ANIM_START_X, 0);
                 mStartY = opts.getInt(KEY_ANIM_START_Y, 0);
                 mWidth = opts.getInt(KEY_ANIM_WIDTH, 0);
@@ -850,9 +850,11 @@ public class ActivityOptions {
                 mExitCoordinatorIndex = opts.getInt(KEY_EXIT_COORDINATOR_INDEX);
                 break;
         }
+        mLaunchDisplayId = opts.getInt(KEY_LAUNCH_DISPLAY_ID, INVALID_DISPLAY);
         mLaunchStackId = opts.getInt(KEY_LAUNCH_STACK_ID, INVALID_STACK_ID);
         mLaunchTaskId = opts.getInt(KEY_LAUNCH_TASK_ID, -1);
         mTaskOverlay = opts.getBoolean(KEY_TASK_OVERLAY, false);
+        mTaskOverlayCanResume = opts.getBoolean(KEY_TASK_OVERLAY_CAN_RESUME, false);
         mDockCreateMode = opts.getInt(KEY_DOCK_CREATE_MODE, DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT);
         if (opts.containsKey(KEY_ANIM_SPECS)) {
             Parcelable[] specs = opts.getParcelableArray(KEY_ANIM_SPECS);
@@ -866,6 +868,11 @@ public class ActivityOptions {
                     opts.getBinder(KEY_ANIMATION_FINISHED_LISTENER));
         }
         mRotationAnimationHint = opts.getInt(KEY_ROTATION_ANIMATION_HINT);
+        mAppVerificationBundle = opts.getBundle(KEY_INSTANT_APP_VERIFICATION_BUNDLE);
+        if (opts.containsKey(KEY_SPECS_FUTURE)) {
+            mSpecsFuture = IAppTransitionAnimationSpecsFuture.Stub.asInterface(opts.getBinder(
+                    KEY_SPECS_FUTURE));
+        }
     }
 
     /**
@@ -918,9 +925,14 @@ public class ActivityOptions {
         return mCustomInPlaceResId;
     }
 
-    /** @hide */
-    public Bitmap getThumbnail() {
-        return mThumbnail;
+    /**
+     * The thumbnail is copied into a hardware bitmap when it is bundled and sent to the system, so
+     * it should always be backed by a GraphicBuffer on the other end.
+     *
+     * @hide
+     */
+    public GraphicBuffer getThumbnail() {
+        return mThumbnail != null ? mThumbnail.createGraphicBufferHandle() : null;
     }
 
     /** @hide */
@@ -1004,6 +1016,11 @@ public class ActivityOptions {
     public AppTransitionAnimationSpec[] getAnimSpecs() { return mAnimSpecs; }
 
     /** @hide */
+    public IAppTransitionAnimationSpecsFuture getSpecsFuture() {
+        return mSpecsFuture;
+    }
+
+    /** @hide */
     public static ActivityOptions fromBundle(Bundle bOptions) {
         return bOptions != null ? new ActivityOptions(bOptions) : null;
     }
@@ -1013,6 +1030,32 @@ public class ActivityOptions {
         if (options != null) {
             options.abort();
         }
+    }
+
+    /**
+     * Gets the id of the display where activity should be launched.
+     * @return The id of the display where activity should be launched,
+     *         {@link android.view.Display#INVALID_DISPLAY} if not set.
+     * @see #setLaunchDisplayId(int)
+     */
+    public int getLaunchDisplayId() {
+        return mLaunchDisplayId;
+    }
+
+    /**
+     * Sets the id of the display where activity should be launched.
+     * An app can launch activities on public displays or private displays that are owned by the app
+     * or where an app already has activities. Otherwise, trying to launch on a private display
+     * or providing an invalid display id will result in an exception.
+     * <p>
+     * Setting launch display id will be ignored on devices that don't have
+     * {@link android.content.pm.PackageManager#FEATURE_ACTIVITIES_ON_SECONDARY_DISPLAYS}.
+     * @param launchDisplayId The id of the display where the activity should be launched.
+     * @return {@code this} {@link ActivityOptions} instance.
+     */
+    public ActivityOptions setLaunchDisplayId(int launchDisplayId) {
+        mLaunchDisplayId = launchDisplayId;
+        return this;
     }
 
     /** @hide */
@@ -1030,6 +1073,7 @@ public class ActivityOptions {
      * Sets the task the activity will be launched in.
      * @hide
      */
+    @TestApi
     public void setLaunchTaskId(int taskId) {
         mLaunchTaskId = taskId;
     }
@@ -1043,12 +1087,14 @@ public class ActivityOptions {
 
     /**
      * Set's whether the activity launched with this option should be a task overlay. That is the
-     * activity will always be the top activity of the task and doesn't cause the task to be moved
-     * to the front when it is added.
+     * activity will always be the top activity of the task.  If {@param canResume} is true, then
+     * the task will also not be moved to the front of the stack.
      * @hide
      */
-    public void setTaskOverlay(boolean taskOverlay) {
+    @TestApi
+    public void setTaskOverlay(boolean taskOverlay, boolean canResume) {
         mTaskOverlay = taskOverlay;
+        mTaskOverlayCanResume = canResume;
     }
 
     /**
@@ -1056,6 +1102,13 @@ public class ActivityOptions {
      */
     public boolean getTaskOverlay() {
         return mTaskOverlay;
+    }
+
+    /**
+     * @hide
+     */
+    public boolean canTaskOverlayResume() {
+        return mTaskOverlayCanResume;
     }
 
     /** @hide */
@@ -1144,6 +1197,7 @@ public class ActivityOptions {
         }
         mAnimSpecs = otherOptions.mAnimSpecs;
         mAnimationFinishedListener = otherOptions.mAnimationFinishedListener;
+        mSpecsFuture = otherOptions.mSpecsFuture;
     }
 
     /**
@@ -1155,9 +1209,6 @@ public class ActivityOptions {
      * methods that take an options Bundle.
      */
     public Bundle toBundle() {
-        if (mAnimationType == ANIM_DEFAULT) {
-            return null;
-        }
         Bundle b = new Bundle();
         if (mPackageName != null) {
             b.putString(KEY_PACKAGE_NAME, mPackageName);
@@ -1190,7 +1241,16 @@ public class ActivityOptions {
             case ANIM_THUMBNAIL_SCALE_DOWN:
             case ANIM_THUMBNAIL_ASPECT_SCALE_UP:
             case ANIM_THUMBNAIL_ASPECT_SCALE_DOWN:
-                b.putParcelable(KEY_ANIM_THUMBNAIL, mThumbnail);
+                // Once we parcel the thumbnail for transfering over to the system, create a copy of
+                // the bitmap to a hardware bitmap and pass through the GraphicBuffer
+                if (mThumbnail != null) {
+                    final Bitmap hwBitmap = mThumbnail.copy(Config.HARDWARE, false /* isMutable */);
+                    if (hwBitmap != null) {
+                        b.putParcelable(KEY_ANIM_THUMBNAIL, hwBitmap.createGraphicBufferHandle());
+                    } else {
+                        Slog.w(TAG, "Failed to copy thumbnail");
+                    }
+                }
                 b.putInt(KEY_ANIM_START_X, mStartX);
                 b.putInt(KEY_ANIM_START_Y, mStartY);
                 b.putInt(KEY_ANIM_WIDTH, mWidth);
@@ -1209,9 +1269,11 @@ public class ActivityOptions {
                 b.putInt(KEY_EXIT_COORDINATOR_INDEX, mExitCoordinatorIndex);
                 break;
         }
+        b.putInt(KEY_LAUNCH_DISPLAY_ID, mLaunchDisplayId);
         b.putInt(KEY_LAUNCH_STACK_ID, mLaunchStackId);
         b.putInt(KEY_LAUNCH_TASK_ID, mLaunchTaskId);
         b.putBoolean(KEY_TASK_OVERLAY, mTaskOverlay);
+        b.putBoolean(KEY_TASK_OVERLAY_CAN_RESUME, mTaskOverlayCanResume);
         b.putInt(KEY_DOCK_CREATE_MODE, mDockCreateMode);
         if (mAnimSpecs != null) {
             b.putParcelableArray(KEY_ANIM_SPECS, mAnimSpecs);
@@ -1219,7 +1281,13 @@ public class ActivityOptions {
         if (mAnimationFinishedListener != null) {
             b.putBinder(KEY_ANIMATION_FINISHED_LISTENER, mAnimationFinishedListener.asBinder());
         }
+        if (mSpecsFuture != null) {
+            b.putBinder(KEY_SPECS_FUTURE, mSpecsFuture.asBinder());
+        }
         b.putInt(KEY_ROTATION_ANIMATION_HINT, mRotationAnimationHint);
+        if (mAppVerificationBundle != null) {
+            b.putBundle(KEY_INSTANT_APP_VERIFICATION_BUNDLE, mAppVerificationBundle);
+        }
 
         return b;
     }
@@ -1287,6 +1355,30 @@ public class ActivityOptions {
         mRotationAnimationHint = hint;
     }
 
+    /**
+     * Pop the extra verification bundle for the installer.
+     * This removes the bundle from the ActivityOptions to make sure the installer bundle
+     * is only available once.
+     * @hide
+     */
+    public Bundle popAppVerificationBundle() {
+        Bundle out = mAppVerificationBundle;
+        mAppVerificationBundle = null;
+        return out;
+    }
+
+    /**
+     * Set the {@link Bundle} that is provided to the app installer for additional verification
+     * if the call to {@link Context#startActivity} results in an app being installed.
+     *
+     * This Bundle is not provided to any other app besides the installer.
+     */
+    public ActivityOptions setAppVerificationBundle(Bundle bundle) {
+        mAppVerificationBundle = bundle;
+        return this;
+
+    }
+
     /** @hide */
     @Override
     public String toString() {
@@ -1295,7 +1387,7 @@ public class ActivityOptions {
                 + mStartY + ", mWidth=" + mWidth + ", mHeight=" + mHeight;
     }
 
-    private static class HideWindowListener extends Transition.TransitionListenerAdapter
+    private static class HideWindowListener extends TransitionListenerAdapter
         implements ExitTransitionCoordinator.HideSharedElementsCallback {
         private final Window mWindow;
         private final ExitTransitionCoordinator mExit;

@@ -17,6 +17,8 @@ package com.android.server.statusbar;
 import android.content.ComponentName;
 import android.os.RemoteException;
 import android.os.ShellCommand;
+import android.service.quicksettings.TileService;
+
 import com.android.internal.statusbar.IStatusBarService;
 
 import java.io.PrintWriter;
@@ -48,6 +50,10 @@ public class StatusBarShellCommand extends ShellCommand {
                     return runRemoveTile();
                 case "click-tile":
                     return runClickTile();
+                case "check-support":
+                    final PrintWriter pw = getOutPrintWriter();
+                    pw.println(String.valueOf(TileService.isQuickSettingsSupported()));
+                    return 0;
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -112,6 +118,9 @@ public class StatusBarShellCommand extends ShellCommand {
         pw.println("");
         pw.println("  click-tile COMPONENT");
         pw.println("    Click on a TileService of the specified component");
+        pw.println("");
+        pw.println("  check-support");
+        pw.println("    Check if this device supports QS + APIs");
         pw.println("");
     }
 }

@@ -11,6 +11,11 @@ public class MgmtTreeRoot extends OMAConstructed {
         mDtdRev = dtdRev;
     }
 
+    public MgmtTreeRoot(String dtdRev) {
+        super(null, MOTree.MgmtTreeTag, null, "xmlns", OMAConstants.SyncML);
+        mDtdRev = dtdRev;
+    }
+
     @Override
     public void toXml(StringBuilder sb) {
         sb.append('<').append(MOTree.MgmtTreeTag);

@@ -84,8 +84,8 @@ public class DiscoverySessionCallback {
 
     /**
      * Called when a discovery session (publish or subscribe) terminates. Termination may be due
-     * to user-request (either directly through {@link DiscoverySession#destroy()} or
-     * application-specified expiration, e.g. {@link PublishConfig.Builder#setPublishCount(int)}
+     * to user-request (either directly through {@link DiscoverySession#close()} or
+     * application-specified expiration, e.g. {@link PublishConfig.Builder#setTtlSec(int)}
      * or {@link SubscribeConfig.Builder#setTtlSec(int)}).
      */
     public void onSessionTerminated() {
@@ -100,7 +100,12 @@ public class DiscoverySessionCallback {
      * @param serviceSpecificInfo The service specific information (arbitrary
      *            byte array) provided by the peer as part of its discovery
      *            configuration.
-     * @param matchFilter The filter which resulted in this service discovery.
+     * @param matchFilter The filter which resulted in this service discovery. For
+     * {@link PublishConfig#PUBLISH_TYPE_UNSOLICITED},
+     * {@link SubscribeConfig#SUBSCRIBE_TYPE_PASSIVE} discovery sessions this is the publisher's
+     *                    match filter. For {@link PublishConfig#PUBLISH_TYPE_SOLICITED},
+     *                    {@link SubscribeConfig#SUBSCRIBE_TYPE_ACTIVE} discovery sessions this
+     *                    is the subscriber's match filter.
      */
     public void onServiceDiscovered(PeerHandle peerHandle,
             byte[] serviceSpecificInfo, List<byte[]> matchFilter) {
@@ -124,10 +129,9 @@ public class DiscoverySessionCallback {
     }
 
     /**
-     * Called when message transmission fails - when no ACK is received from the peer.
-     * Retries when ACKs are not received are done by hardware, MAC, and in the Aware stack (using
-     * the {@link DiscoverySession#sendMessage(PeerHandle, int,
-     * byte[], int)} method) - this event is received after all retries are exhausted.
+     * Called when message transmission initiated with
+     * {@link DiscoverySession#sendMessage(PeerHandle, int, byte[])} fails. E.g. when no ACK is
+     * received from the peer.
      * <p>
      * Note that either this callback or
      * {@link DiscoverySessionCallback#onMessageSendSucceeded(int)} will be received
@@ -141,9 +145,7 @@ public class DiscoverySessionCallback {
 
     /**
      * Called when a message is received from a discovery session peer - in response to the
-     * peer's {@link DiscoverySession#sendMessage(PeerHandle, int,
-     * byte[])} or {@link DiscoverySession#sendMessage(PeerHandle,
-     * int, byte[], int)}.
+     * peer's {@link DiscoverySession#sendMessage(PeerHandle, int, byte[])}.
      *
      * @param peerHandle An opaque handle to the peer matching our discovery operation.
      * @param message A byte array containing the message.

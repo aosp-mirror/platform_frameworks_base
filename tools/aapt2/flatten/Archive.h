@@ -17,50 +17,65 @@
 #ifndef AAPT_FLATTEN_ARCHIVE_H
 #define AAPT_FLATTEN_ARCHIVE_H
 
-#include "Diagnostics.h"
-#include "util/BigBuffer.h"
-#include "util/Files.h"
-#include "util/StringPiece.h"
-
-#include <google/protobuf/io/zero_copy_stream_impl_lite.h>
 #include <fstream>
 #include <memory>
 #include <string>
 #include <vector>
 
+#include "androidfw/StringPiece.h"
+#include "google/protobuf/io/zero_copy_stream_impl_lite.h"
+
+#include "Diagnostics.h"
+#include "io/Io.h"
+#include "util/BigBuffer.h"
+#include "util/Files.h"
+
 namespace aapt {
 
 struct ArchiveEntry {
-    enum : uint32_t {
-        kCompress = 0x01,
-        kAlign    = 0x02,
-    };
+  enum : uint32_t {
+    kCompress = 0x01,
+    kAlign = 0x02,
+  };
 
-    std::string path;
-    uint32_t flags;
-    size_t uncompressedSize;
+  std::string path;
+  uint32_t flags;
+  size_t uncompressed_size;
 };
 
-struct IArchiveWriter : public google::protobuf::io::CopyingOutputStream {
-    virtual ~IArchiveWriter() = default;
+class IArchiveWriter : public ::google::protobuf::io::CopyingOutputStream {
+ public:
+  virtual ~IArchiveWriter() = default;
 
-    virtual bool startEntry(const StringPiece& path, uint32_t flags) = 0;
-    virtual bool writeEntry(const BigBuffer& buffer) = 0;
-    virtual bool writeEntry(const void* data, size_t len) = 0;
-    virtual bool finishEntry() = 0;
+  virtual bool WriteFile(const android::StringPiece& path, uint32_t flags, io::InputStream* in) = 0;
 
-    // CopyingOutputStream implementations.
-    bool Write(const void* buffer, int size) override {
-        return writeEntry(buffer, size);
-    }
+  // Starts a new entry and allows caller to write bytes to it sequentially.
+  // Only use StartEntry if code you do not control needs to write to a CopyingOutputStream.
+  // Prefer WriteFile instead of manually calling StartEntry/FinishEntry.
+  virtual bool StartEntry(const android::StringPiece& path, uint32_t flags) = 0;
+
+  // Called to finish writing an entry previously started by StartEntry.
+  // Prefer WriteFile instead of manually calling StartEntry/FinishEntry.
+  virtual bool FinishEntry() = 0;
+
+  // CopyingOutputStream implementation that allows sequential writes to this archive. Only
+  // valid between calls to StartEntry and FinishEntry.
+  virtual bool Write(const void* buffer, int size) = 0;
+
+  // Returns true if there was an error writing to the archive.
+  // The resulting error message can be retrieved from GetError().
+  virtual bool HadError() const = 0;
+
+  // Returns the error message if HadError() returns true.
+  virtual std::string GetError() const = 0;
 };
 
-std::unique_ptr<IArchiveWriter> createDirectoryArchiveWriter(IDiagnostics* diag,
-                                                             const StringPiece& path);
+std::unique_ptr<IArchiveWriter> CreateDirectoryArchiveWriter(IDiagnostics* diag,
+                                                             const android::StringPiece& path);
 
-std::unique_ptr<IArchiveWriter> createZipFileArchiveWriter(IDiagnostics* diag,
-                                                           const StringPiece& path);
+std::unique_ptr<IArchiveWriter> CreateZipFileArchiveWriter(IDiagnostics* diag,
+                                                           const android::StringPiece& path);
 
-} // namespace aapt
+}  // namespace aapt
 
 #endif /* AAPT_FLATTEN_ARCHIVE_H */

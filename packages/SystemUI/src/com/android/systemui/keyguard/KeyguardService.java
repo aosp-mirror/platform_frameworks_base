@@ -26,10 +26,12 @@ import android.os.Process;
 import android.os.Trace;
 import android.util.Log;
 
+import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.IKeyguardDrawnCallback;
 import com.android.internal.policy.IKeyguardExitCallback;
 import com.android.internal.policy.IKeyguardService;
 import com.android.internal.policy.IKeyguardStateCallback;
+import com.android.systemui.Dependency;
 import com.android.systemui.SystemUIApplication;
 
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
@@ -39,12 +41,17 @@ public class KeyguardService extends Service {
     static final String PERMISSION = android.Manifest.permission.CONTROL_KEYGUARD;
 
     private KeyguardViewMediator mKeyguardViewMediator;
+    private KeyguardLifecyclesDispatcher mKeyguardLifecyclesDispatcher;
 
     @Override
     public void onCreate() {
         ((SystemUIApplication) getApplication()).startServicesIfNeeded();
         mKeyguardViewMediator =
                 ((SystemUIApplication) getApplication()).getComponent(KeyguardViewMediator.class);
+        mKeyguardLifecyclesDispatcher = new KeyguardLifecyclesDispatcher(
+                Dependency.get(ScreenLifecycle.class),
+                Dependency.get(WakefulnessLifecycle.class));
+
     }
 
     @Override
@@ -81,15 +88,6 @@ public class KeyguardService extends Service {
         }
 
         @Override // Binder interface
-        public void keyguardDone(boolean authenticated, boolean wakeup) {
-            Trace.beginSection("KeyguardService.mBinder#keyguardDone");
-            checkPermission();
-            // TODO: Remove wakeup
-            mKeyguardViewMediator.keyguardDone(authenticated);
-            Trace.endSection();
-        }
-
-        @Override // Binder interface
         public void setOccluded(boolean isOccluded, boolean animate) {
             Trace.beginSection("KeyguardService.mBinder#setOccluded");
             checkPermission();
@@ -98,9 +96,9 @@ public class KeyguardService extends Service {
         }
 
         @Override // Binder interface
-        public void dismiss(boolean allowWhileOccluded) {
+        public void dismiss(IKeyguardDismissCallback callback) {
             checkPermission();
-            mKeyguardViewMediator.dismiss(allowWhileOccluded);
+            mKeyguardViewMediator.dismiss(callback);
         }
 
         @Override // Binder interface
@@ -119,12 +117,16 @@ public class KeyguardService extends Service {
         public void onStartedGoingToSleep(int reason) {
             checkPermission();
             mKeyguardViewMediator.onStartedGoingToSleep(reason);
+            mKeyguardLifecyclesDispatcher.dispatch(
+                    KeyguardLifecyclesDispatcher.STARTED_GOING_TO_SLEEP);
         }
 
         @Override // Binder interface
         public void onFinishedGoingToSleep(int reason, boolean cameraGestureTriggered) {
             checkPermission();
             mKeyguardViewMediator.onFinishedGoingToSleep(reason, cameraGestureTriggered);
+            mKeyguardLifecyclesDispatcher.dispatch(
+                    KeyguardLifecyclesDispatcher.FINISHED_GOING_TO_SLEEP);
         }
 
         @Override // Binder interface
@@ -132,6 +134,15 @@ public class KeyguardService extends Service {
             Trace.beginSection("KeyguardService.mBinder#onStartedWakingUp");
             checkPermission();
             mKeyguardViewMediator.onStartedWakingUp();
+            mKeyguardLifecyclesDispatcher.dispatch(KeyguardLifecyclesDispatcher.STARTED_WAKING_UP);
+            Trace.endSection();
+        }
+
+        @Override // Binder interface
+        public void onFinishedWakingUp() {
+            Trace.beginSection("KeyguardService.mBinder#onFinishedWakingUp");
+            checkPermission();
+            mKeyguardLifecyclesDispatcher.dispatch(KeyguardLifecyclesDispatcher.FINISHED_WAKING_UP);
             Trace.endSection();
         }
 
@@ -140,21 +151,30 @@ public class KeyguardService extends Service {
             Trace.beginSection("KeyguardService.mBinder#onScreenTurningOn");
             checkPermission();
             mKeyguardViewMediator.onScreenTurningOn(callback);
+            mKeyguardLifecyclesDispatcher.dispatch(KeyguardLifecyclesDispatcher.SCREEN_TURNING_ON);
             Trace.endSection();
         }
 
         @Override // Binder interface
         public void onScreenTurnedOn() {
-            Trace.beginSection("KeyguardService.mBinder#onScreenTurningOn");
+            Trace.beginSection("KeyguardService.mBinder#onScreenTurnedOn");
             checkPermission();
             mKeyguardViewMediator.onScreenTurnedOn();
+            mKeyguardLifecyclesDispatcher.dispatch(KeyguardLifecyclesDispatcher.SCREEN_TURNED_ON);
             Trace.endSection();
+        }
+
+        @Override // Binder interface
+        public void onScreenTurningOff() {
+            checkPermission();
+            mKeyguardLifecyclesDispatcher.dispatch(KeyguardLifecyclesDispatcher.SCREEN_TURNING_OFF);
         }
 
         @Override // Binder interface
         public void onScreenTurnedOff() {
             checkPermission();
             mKeyguardViewMediator.onScreenTurnedOff();
+            mKeyguardLifecyclesDispatcher.dispatch(KeyguardLifecyclesDispatcher.SCREEN_TURNED_OFF);
         }
 
         @Override // Binder interface
@@ -178,6 +198,12 @@ public class KeyguardService extends Service {
         }
 
         @Override // Binder interface
+        public void setSwitchingUser(boolean switching) {
+            checkPermission();
+            mKeyguardViewMediator.setSwitchingUser(switching);
+        }
+
+        @Override // Binder interface
         public void setCurrentUser(int userId) {
             checkPermission();
             mKeyguardViewMediator.setCurrentUser(userId);
@@ -198,9 +224,9 @@ public class KeyguardService extends Service {
         }
 
         @Override
-        public void onActivityDrawn() {
+        public void onShortPowerPressedGoHome() {
             checkPermission();
-            mKeyguardViewMediator.onActivityDrawn();
+            mKeyguardViewMediator.onShortPowerPressedGoHome();
         }
     };
 }

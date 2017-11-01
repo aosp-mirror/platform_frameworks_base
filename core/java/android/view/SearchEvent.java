@@ -16,8 +16,6 @@
 
 package android.view;
 
-import android.view.InputDevice;
-
 /**
  * Class that contains information about an event that triggers a search.
  */

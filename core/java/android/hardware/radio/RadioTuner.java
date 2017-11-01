@@ -16,6 +16,8 @@
 
 package android.hardware.radio;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.content.Context;
 import android.content.Intent;
@@ -23,6 +25,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import java.lang.ref.WeakReference;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -209,6 +212,64 @@ public abstract class RadioTuner {
     public abstract int getProgramInformation(RadioManager.ProgramInfo[] info);
 
     /**
+     * Initiates a background scan to update internally cached program list.
+     *
+     * It may not be necessary to initiate the scan explicitly - the scan MAY be performed on boot.
+     *
+     * The operation is asynchronous and {@link Callback} backgroundScanComplete or onError will
+     * be called if the return value of this call was {@code true}. As result of this call
+     * programListChanged may be triggered (if the scanned list differs).
+     *
+     * @return {@code true} if the scan was properly scheduled, {@code false} if the scan feature
+     * is unavailable; ie. temporarily due to ongoing foreground playback in single-tuner device
+     * or permanently if the feature is not supported
+     * (see ModuleProperties#isBackgroundScanningSupported()).
+     * @hide FutureFeature
+     */
+    public abstract boolean startBackgroundScan();
+
+    /**
+     * Get the list of discovered radio stations.
+     *
+     * To get the full list, set filter to null or empty string. Otherwise, client application
+     * must verify vendor product/name before setting this parameter to anything else.
+     *
+     * @param filter vendor-specific selector for radio stations.
+     * @return a list of radio stations.
+     * @throws IllegalStateException if the scan is in progress or has not been started,
+     *         startBackgroundScan() call may fix it.
+     * @throws IllegalArgumentException if the filter argument is not valid.
+     * @hide FutureFeature
+     */
+    public abstract @NonNull List<RadioManager.ProgramInfo> getProgramList(@Nullable String filter);
+
+    /**
+     * Checks, if the analog playback is forced, see setAnalogForced.
+     *
+     * @throws IllegalStateException if the switch is not supported at current
+     *         configuration.
+     * @return {@code true} if analog is forced, {@code false} otherwise.
+     * @hide FutureFeature
+     */
+    public abstract boolean isAnalogForced();
+
+    /**
+     * Forces the analog playback for the supporting radio technology.
+     *
+     * User may disable digital playback for FM HD Radio or hybrid FM/DAB with
+     * this option. This is purely user choice, ie. does not reflect digital-
+     * analog handover managed from the HAL implementation side.
+     *
+     * Some radio technologies may not support this, ie. DAB.
+     *
+     * @param isForced {@code true} to force analog, {@code false} for a default behaviour.
+     * @throws IllegalStateException if the switch is not supported at current
+     *         configuration.
+     * @hide FutureFeature
+     */
+    public abstract void setAnalogForced(boolean isForced);
+
+    /**
      * Get current antenna connection state for current configuration.
      * Only valid if a configuration has been applied.
      * @return {@code true} if the antenna is connected, {@code false} otherwise.
@@ -300,6 +361,32 @@ public abstract class RadioTuner {
          * with control set to {@code true}.
          */
         public void onControlChanged(boolean control) {}
+
+        /**
+         * onBackgroundScanAvailabilityChange() is called when background scan
+         * feature becomes available or not.
+         *
+         * @param isAvailable true, if the tuner turned temporarily background-
+         *                    capable, false in the other case.
+         * @hide FutureFeature
+         */
+        public void onBackgroundScanAvailabilityChange(boolean isAvailable) {}
+
+        /**
+         * Called when a background scan completes successfully.
+         *
+         * @hide FutureFeature
+         */
+        public void onBackgroundScanComplete() {}
+
+        /**
+         * Called when available program list changed.
+         *
+         * Use getProgramList() to get the actual list.
+         *
+         * @hide FutureFeature
+         */
+        public void onProgramListChanged() {}
     }
 
 }

@@ -20,6 +20,7 @@
 #include <memory>
 
 #include <cutils/compiler.h>
+#include <vector>
 
 namespace android {
 namespace uirenderer {
@@ -98,6 +99,16 @@ public:
     virtual float interpolate(float input) override;
 private:
     const float mTension;
+};
+
+class ANDROID_API PathInterpolator : public Interpolator {
+public:
+    explicit PathInterpolator(std::vector<float>&& x, std::vector<float>&& y)
+            : mX (x), mY(y) {}
+    virtual float interpolate(float input) override;
+private:
+    std::vector<float> mX;
+    std::vector<float> mY;
 };
 
 class ANDROID_API LUTInterpolator : public Interpolator {

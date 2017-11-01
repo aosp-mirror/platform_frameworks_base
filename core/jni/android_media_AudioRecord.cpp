@@ -20,13 +20,13 @@
 
 #include <inttypes.h>
 #include <jni.h>
-#include <JNIHelp.h>
+#include <nativehelper/JNIHelp.h>
 #include "core_jni_helpers.h"
 
 #include <utils/Log.h>
 #include <media/AudioRecord.h>
 
-#include <ScopedUtfChars.h>
+#include <nativehelper/ScopedUtfChars.h>
 
 #include "android_media_AudioFormat.h"
 #include "android_media_AudioErrors.h"

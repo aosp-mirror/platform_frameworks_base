@@ -31,11 +31,6 @@ import java.util.List;
  * Object equivalents of these primitive types.</p>
  */
 class FloatKeyframeSet extends KeyframeSet implements Keyframes.FloatKeyframes {
-    private float firstValue;
-    private float lastValue;
-    private float deltaValue;
-    private boolean firstTime = true;
-
     public FloatKeyframeSet(FloatKeyframe... keyframes) {
         super(keyframes);
     }
@@ -58,28 +53,7 @@ class FloatKeyframeSet extends KeyframeSet implements Keyframes.FloatKeyframes {
     }
 
     @Override
-    public void invalidateCache() {
-        firstTime = true;
-    }
-
-    @Override
     public float getFloatValue(float fraction) {
-        if (mNumKeyframes == 2) {
-            if (firstTime) {
-                firstTime = false;
-                firstValue = ((FloatKeyframe) mKeyframes.get(0)).getFloatValue();
-                lastValue = ((FloatKeyframe) mKeyframes.get(1)).getFloatValue();
-                deltaValue = lastValue - firstValue;
-            }
-            if (mInterpolator != null) {
-                fraction = mInterpolator.getInterpolation(fraction);
-            }
-            if (mEvaluator == null) {
-                return firstValue + fraction * deltaValue;
-            } else {
-                return ((Number)mEvaluator.evaluate(fraction, firstValue, lastValue)).floatValue();
-            }
-        }
         if (fraction <= 0f) {
             final FloatKeyframe prevKeyframe = (FloatKeyframe) mKeyframes.get(0);
             final FloatKeyframe nextKeyframe = (FloatKeyframe) mKeyframes.get(1);

@@ -24,6 +24,7 @@ import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.util.Slog;
 import android.view.MotionEvent;
+import android.view.Surface;
 import android.view.View;
 
 import com.android.systemui.R;
@@ -54,6 +55,7 @@ public class DeadZone extends View {
     private int mHold, mDecay;
     private boolean mVertical;
     private long mLastPokeTime;
+    private int mDisplayRotation;
 
     private final Runnable mDebugFlash = new Runnable() {
         @Override
@@ -125,6 +127,7 @@ public class DeadZone extends View {
         final int action = event.getAction();
         if (action == MotionEvent.ACTION_OUTSIDE) {
             poke(event);
+            return true;
         } else if (action == MotionEvent.ACTION_DOWN) {
             if (DEBUG) {
                 Slog.v(TAG, this + " ACTION_DOWN: " + event.getX() + "," + event.getY());
@@ -132,7 +135,16 @@ public class DeadZone extends View {
             int size = (int) getSize(event.getEventTime());
             // In the vertical orientation consume taps along the left edge.
             // In horizontal orientation consume taps along the top edge.
-            final boolean consumeEvent = mVertical ? event.getX() < size : event.getY() < size;
+            final boolean consumeEvent;
+            if (mVertical) {
+                if (mDisplayRotation == Surface.ROTATION_270) {
+                    consumeEvent = event.getX() > getWidth() - size;
+                } else {
+                    consumeEvent = event.getX() < size;
+                }
+            } else {
+                consumeEvent = event.getY() < size;
+            }
             if (consumeEvent) {
                 if (CHATTY) {
                     Slog.v(TAG, "consuming errant click: (" + event.getX() + "," + event.getY() + ")");
@@ -147,7 +159,7 @@ public class DeadZone extends View {
         return false;
     }
 
-    public void poke(MotionEvent event) {
+    private void poke(MotionEvent event) {
         mLastPokeTime = event.getEventTime();
         if (DEBUG)
             Slog.v(TAG, "poked! size=" + getSize(mLastPokeTime));
@@ -170,12 +182,25 @@ public class DeadZone extends View {
         }
 
         final int size = (int) getSize(SystemClock.uptimeMillis());
-        can.clipRect(0, 0, mVertical ? size : can.getWidth(), mVertical ? can.getHeight() : size);
+        if (mVertical) {
+            if (mDisplayRotation == Surface.ROTATION_270) {
+                can.clipRect(can.getWidth() - size, 0, can.getWidth(), can.getHeight());
+            } else {
+                can.clipRect(0, 0, size, can.getHeight());
+            }
+        } else {
+            can.clipRect(0, 0, can.getWidth(), size);
+        }
+
         final float frac = DEBUG ? (mFlashFrac - 0.5f) + 0.5f : mFlashFrac;
         can.drawARGB((int) (frac * 0xFF), 0xDD, 0xEE, 0xAA);
 
         if (DEBUG && size > mSizeMin)
             // crazy aggressive redrawing here, for debugging only
             postInvalidateDelayed(100);
+    }
+
+    public void setDisplayRotation(int rotation) {
+        mDisplayRotation = rotation;
     }
 }

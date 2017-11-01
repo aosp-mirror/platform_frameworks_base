@@ -321,11 +321,10 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
     public static final int STOP_FOREGROUND_DETACH = 1<<1;
 
     /** @hide */
-    @IntDef(flag = true,
-            value = {
-                STOP_FOREGROUND_REMOVE,
-                STOP_FOREGROUND_DETACH
-            })
+    @IntDef(flag = true, prefix = { "STOP_FOREGROUND_" }, value = {
+            STOP_FOREGROUND_REMOVE,
+            STOP_FOREGROUND_DETACH
+    })
     @Retention(RetentionPolicy.SOURCE)
     public @interface StopForegroundFlags {}
 
@@ -423,13 +422,12 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
     public static final int START_REDELIVER_INTENT = 3;
 
     /** @hide */
-    @IntDef(flag = false,
-            value = {
-                START_STICKY_COMPATIBILITY,
-                START_STICKY,
-                START_NOT_STICKY,
-                START_REDELIVER_INTENT,
-            })
+    @IntDef(flag = false, prefix = { "START_" }, value = {
+            START_STICKY_COMPATIBILITY,
+            START_STICKY,
+            START_NOT_STICKY,
+            START_REDELIVER_INTENT,
+    })
     @Retention(RetentionPolicy.SOURCE)
     public @interface StartResult {}
 
@@ -456,11 +454,10 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
     public static final int START_FLAG_RETRY = 0x0002;
 
     /** @hide */
-    @IntDef(flag = true,
-            value = {
-                START_FLAG_REDELIVERY,
-                START_FLAG_RETRY,
-            })
+    @IntDef(flag = true, prefix = { "START_FLAG_" }, value = {
+            START_FLAG_REDELIVERY,
+            START_FLAG_RETRY,
+    })
     @Retention(RetentionPolicy.SOURCE)
     public @interface StartArgFlags {}
 
@@ -494,8 +491,7 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
      * as given.  This may be null if the service is being restarted after
      * its process has gone away, and it had previously returned anything
      * except {@link #START_STICKY_COMPATIBILITY}.
-     * @param flags Additional data about this start request.  Currently either
-     * 0, {@link #START_FLAG_REDELIVERY}, or {@link #START_FLAG_RETRY}.
+     * @param flags Additional data about this start request.
      * @param startId A unique integer representing this specific request to 
      * start.  Use with {@link #stopSelfResult(int)}.
      * 
@@ -675,22 +671,22 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
     }
     
     /**
-     * Make this service run in the foreground, supplying the ongoing
+     * If your service is started (running through {@link Context#startService(Intent)}), then
+     * also make this service run in the foreground, supplying the ongoing
      * notification to be shown to the user while in this state.
-     * By default services are background, meaning that if the system needs to
-     * kill them to reclaim more memory (such as to display a large page in a
-     * web browser), they can be killed without too much harm.  You can set this
-     * flag if killing your service would be disruptive to the user, such as
+     * By default started services are background, meaning that their process won't be given
+     * foreground CPU scheduling (unless something else in that process is foreground) and,
+     * if the system needs to kill them to reclaim more memory (such as to display a large page in a
+     * web browser), they can be killed without too much harm.  You use
+     * {@link #startForeground} if killing your service would be disruptive to the user, such as
      * if your service is performing background music playback, so the user
      * would notice if their music stopped playing.
-     * 
-     * <p>If you need your application to run on platform versions prior to API
-     * level 5, you can use the following model to call the the older setForeground()
-     * or this modern method as appropriate:
-     * 
-     * {@sample development/samples/ApiDemos/src/com/example/android/apis/app/ForegroundService.java
-     *   foreground_compatibility}
-     * 
+     *
+     * <p>Note that calling this method does <em>not</em> put the service in the started state
+     * itself, even though the name sounds like it.  You must always call
+     * {@link #startService(Intent)} first to tell the system it should keep the service running,
+     * and then use this method to tell it to keep it running harder.</p>
+     *
      * @param id The identifier for this notification as per
      * {@link NotificationManager#notify(int, Notification)
      * NotificationManager.notify(int, Notification)}; must not be 0.
@@ -720,9 +716,11 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
 
     /**
      * Remove this service from foreground state, allowing it to be killed if
-     * more memory is needed.
-     * @param flags Additional behavior options: {@link #STOP_FOREGROUND_REMOVE},
-     * {@link #STOP_FOREGROUND_DETACH}.
+     * more memory is needed.  This does not stop the service from running (for that
+     * you use {@link #stopSelf()} or related methods), just takes it out of the
+     * foreground state.
+     *
+     * @param flags additional behavior options.
      * @see #startForeground(int, Notification)
      */
     public final void stopForeground(@StopForegroundFlags int flags) {
@@ -769,7 +767,15 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
         mStartCompatibility = getApplicationInfo().targetSdkVersion
                 < Build.VERSION_CODES.ECLAIR;
     }
-    
+
+    /**
+     * @hide
+     * Clean up any references to avoid leaks.
+     */
+    public final void detachAndCleanUp() {
+        mToken = null;
+    }
+
     final String getClassName() {
         return mClassName;
     }

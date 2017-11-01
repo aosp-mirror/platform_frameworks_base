@@ -14,24 +14,30 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License
   -->
-<FrameLayout
+<LinearLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="top|center_horizontal"
-        android:minHeight="@dimen/alert_dialog_title_height">
-    <ImageView android:id="@+id/icon"
-            android:maxHeight="24dp"
-            android:maxWidth="24dp"
-            android:layout_marginTop="12dp"
-            android:layout_gravity="center_horizontal"
-            android:layout_width="wrap_content"
+        android:paddingBottom="8dp"
+        android:orientation="vertical"
+        android:gravity="top|center_horizontal">
+    <FrameLayout
+            android:adjustViewBounds="true"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:src="@null" />
+            android:minHeight="@dimen/screen_percentage_15">
+        <ImageView android:id="@+id/icon"
+                android:adjustViewBounds="true"
+                android:maxHeight="24dp"
+                android:maxWidth="24dp"
+                android:layout_marginTop="@dimen/screen_percentage_10"
+                android:layout_gravity="center_horizontal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@null" />
+    </FrameLayout>
     <TextView android:id="@+id/alertTitle"
             style="?android:attr/windowTitleStyle"
-            android:layout_marginTop="36dp"
-            android:layout_marginBottom="8dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
-</FrameLayout>
+</LinearLayout>

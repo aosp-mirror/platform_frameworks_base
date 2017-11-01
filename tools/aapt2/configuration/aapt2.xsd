@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<xsd:schema
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    elementFormDefault="qualified"
+    xmlns="http://schemas.android.com/tools/aapt2"
+    targetNamespace="http://schemas.android.com/tools/aapt2">
+
+  <xsd:element name="post-process">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element name="groups" type="groups"/>
+        <xsd:element name="artifacts" type="artifacts"/>
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
+  <xsd:complexType name="groups">
+    <xsd:sequence>
+      <xsd:element name="abi-group" type="abi-group" maxOccurs="unbounded"/>
+      <xsd:element name="screen-density-group" type="screen-density-group" maxOccurs="unbounded"/>
+      <xsd:element name="locale-group" type="locale-group" maxOccurs="unbounded"/>
+      <xsd:element name="android-sdk-group" type="android-sdk-group" maxOccurs="unbounded"/>
+      <xsd:element
+          name="gl-texture-group"
+          type="gl-texture-group"
+          maxOccurs="unbounded"/>
+      <xsd:element name="device-feature-group" type="device-feature-group" maxOccurs="unbounded"/>
+    </xsd:sequence>
+  </xsd:complexType>
+
+  <xsd:complexType name="artifacts">
+    <xsd:sequence>
+      <xsd:element name="artifact-format" type="xsd:string"/>
+      <xsd:element name="artifact" type="artifact" maxOccurs="unbounded"/>
+    </xsd:sequence>
+    <xsd:attribute name="generate-all" type="xsd:boolean"/>
+  </xsd:complexType>
+
+  <!-- Groups output artifacts together by dimension labels. -->
+  <xsd:complexType name="artifact">
+    <xsd:attribute name="name" type="xsd:string"/>
+    <xsd:attribute name="abi-group" type="xsd:string"/>
+    <xsd:attribute name="android-sdk-group" type="xsd:string"/>
+    <xsd:attribute name="device-feature-group" type="xsd:string"/>
+    <xsd:attribute name="gl-texture-group" type="xsd:string"/>
+    <xsd:attribute name="screen-density-group" type="xsd:string"/>
+    <xsd:attribute name="locale-group" type="xsd:string"/>
+  </xsd:complexType>
+
+  <xsd:complexType name="gl-texture-group">
+    <xsd:sequence>
+      <xsd:element name="gl-texture" type="gl-texture" maxOccurs="unbounded"/>
+    </xsd:sequence>
+    <xsd:attribute name="label" type="xsd:string" use="optional"/>
+  </xsd:complexType>
+
+  <xsd:complexType name="gl-texture">
+    <xsd:sequence>
+      <xsd:element name="texture-path" type="xsd:string" maxOccurs="unbounded"/>
+    </xsd:sequence>
+    <xsd:attribute name="name" type="xsd:string" use="required"/>
+  </xsd:complexType>
+
+  <xsd:complexType name="device-feature-group">
+    <xsd:sequence>
+      <xsd:element name="supports-feature" type="xsd:string" maxOccurs="unbounded"/>
+    </xsd:sequence>
+    <xsd:attribute name="label" type="xsd:string" use="optional"/>
+  </xsd:complexType>
+
+  <xsd:complexType name="abi-group">
+    <xsd:sequence>
+      <xsd:element name="abi" type="abi-name" maxOccurs="unbounded"/>
+    </xsd:sequence>
+    <xsd:attribute name="label" type="xsd:string" use="optional"/>
+  </xsd:complexType>
+
+  <xsd:simpleType name="abi-name">
+    <xsd:restriction base="xsd:string">
+      <xsd:enumeration value="armeabi"/>
+      <xsd:enumeration value="armeabi-v7a"/>
+      <xsd:enumeration value="arm64-v8a"/>
+      <xsd:enumeration value="x86"/>
+      <xsd:enumeration value="x86_64"/>
+      <xsd:enumeration value="mips"/>
+      <xsd:enumeration value="mips64"/>
+      <xsd:enumeration value="fat"/>
+    </xsd:restriction>
+  </xsd:simpleType>
+
+  <xsd:complexType name="screen-density-group">
+    <xsd:sequence>
+      <xsd:element name="screen-density" type="screen-density" maxOccurs="unbounded"/>
+    </xsd:sequence>
+    <xsd:attribute name="label" type="xsd:string" use="optional"/>
+  </xsd:complexType>
+
+  <xsd:simpleType name="screen-density">
+    <xsd:restriction base="xsd:string">
+      <xsd:enumeration value="alldpi"/>
+      <xsd:enumeration value="ldpi"/>
+      <xsd:enumeration value="mdpi"/>
+      <xsd:enumeration value="hdpi"/>
+      <xsd:enumeration value="xhdpi"/>
+      <xsd:enumeration value="xxhdpi"/>
+      <xsd:enumeration value="xxxhdpi"/>
+    </xsd:restriction>
+  </xsd:simpleType>
+
+  <xsd:complexType name="android-sdk-group">
+    <xsd:sequence>
+      <xsd:element name="android-sdk" type="android-sdk" maxOccurs="unbounded"/>
+    </xsd:sequence>
+    <xsd:attribute name="label" type="xsd:string" use="optional"/>
+  </xsd:complexType>
+
+  <xsd:complexType name="android-sdk">
+    <!-- TODO(safarmer): Add permissions to add/remove. -->
+    <!-- TODO(safarmer): Add option for uncompressed native libs. -->
+    <xsd:sequence>
+      <xsd:element name="manifest" type="manifest"/>
+    </xsd:sequence>
+    <xsd:attribute name="minSdkVersion" type="xsd:integer"/>
+    <xsd:attribute name="targetSdkVersion" type="xsd:integer"/>
+    <xsd:attribute name="maxSdkVersion" type="xsd:integer"/>
+  </xsd:complexType>
+
+  <!-- TODO(safarmer): Figure out the best way to handle manifest updates. -->
+  <xsd:simpleType name="manifest">
+    <xsd:restriction base="xsd:string"/>
+  </xsd:simpleType>
+
+  <xsd:complexType name="locale-group">
+    <xsd:sequence>
+      <xsd:element name="locale" type="locale" maxOccurs="unbounded"/>
+    </xsd:sequence>
+    <xsd:attribute name="label" type="xsd:string" use="optional"/>
+  </xsd:complexType>
+
+  <xsd:complexType name="locale">
+    <xsd:attribute name="lang" type="xsd:string"/>
+    <xsd:attribute name="region" type="xsd:string"/>
+    <xsd:attribute name="compressed" type="xsd:boolean"/>
+  </xsd:complexType>
+
+</xsd:schema>

@@ -17,37 +17,47 @@
 #ifndef AAPT_XML_DOM_H
 #define AAPT_XML_DOM_H
 
-#include "Diagnostics.h"
-#include "Resource.h"
-#include "ResourceValues.h"
-#include "util/StringPiece.h"
-#include "util/Util.h"
-#include "xml/XmlUtil.h"
-
 #include <istream>
 #include <memory>
 #include <string>
 #include <vector>
 
+#include "androidfw/StringPiece.h"
+
+#include "Diagnostics.h"
+#include "Resource.h"
+#include "ResourceValues.h"
+#include "util/Util.h"
+#include "xml/XmlUtil.h"
+
 namespace aapt {
 namespace xml {
 
-struct RawVisitor;
+class RawVisitor;
+
+class Element;
 
 /**
  * Base class for all XML nodes.
  */
-struct Node {
-    Node* parent = nullptr;
-    size_t lineNumber = 0;
-    size_t columnNumber = 0;
-    std::u16string comment;
-    std::vector<std::unique_ptr<Node>> children;
+class Node {
+ public:
+  Node* parent = nullptr;
+  size_t line_number = 0;
+  size_t column_number = 0;
+  std::string comment;
+  std::vector<std::unique_ptr<Node>> children;
 
-    virtual ~Node() = default;
+  virtual ~Node() = default;
 
-    void addChild(std::unique_ptr<Node> child);
-    virtual void accept(RawVisitor* visitor) = 0;
+  void AppendChild(std::unique_ptr<Node> child);
+  void InsertChild(size_t index, std::unique_ptr<Node> child);
+  virtual void Accept(RawVisitor* visitor) = 0;
+
+  using ElementCloneFunc = std::function<void(const Element&, Element*)>;
+
+  // Clones the Node subtree, using the given function to decide how to clone an Element.
+  virtual std::unique_ptr<Node> Clone(const ElementCloneFunc& el_cloner) = 0;
 };
 
 /**
@@ -55,166 +65,185 @@ struct Node {
  * subclass of Node.
  */
 template <typename Derived>
-struct BaseNode : public Node {
-    virtual void accept(RawVisitor* visitor) override;
+class BaseNode : public Node {
+ public:
+  virtual void Accept(RawVisitor* visitor) override;
 };
 
 /**
  * A Namespace XML node. Can only have one child.
  */
-struct Namespace : public BaseNode<Namespace> {
-    std::u16string namespacePrefix;
-    std::u16string namespaceUri;
+class Namespace : public BaseNode<Namespace> {
+ public:
+  std::string namespace_prefix;
+  std::string namespace_uri;
+
+  std::unique_ptr<Node> Clone(const ElementCloneFunc& el_cloner) override;
 };
 
 struct AaptAttribute {
-    Maybe<ResourceId> id;
-    aapt::Attribute attribute;
+  explicit AaptAttribute(const ::aapt::Attribute& attr, const Maybe<ResourceId>& resid = {})
+      : attribute(attr), id(resid) {
+  }
+
+  aapt::Attribute attribute;
+  Maybe<ResourceId> id;
 };
 
 /**
  * An XML attribute.
  */
 struct Attribute {
-    std::u16string namespaceUri;
-    std::u16string name;
-    std::u16string value;
+  std::string namespace_uri;
+  std::string name;
+  std::string value;
 
-    Maybe<AaptAttribute> compiledAttribute;
-    std::unique_ptr<Item> compiledValue;
+  Maybe<AaptAttribute> compiled_attribute;
+  std::unique_ptr<Item> compiled_value;
 };
 
 /**
  * An Element XML node.
  */
-struct Element : public BaseNode<Element> {
-    std::u16string namespaceUri;
-    std::u16string name;
-    std::vector<Attribute> attributes;
+class Element : public BaseNode<Element> {
+ public:
+  std::string namespace_uri;
+  std::string name;
+  std::vector<Attribute> attributes;
 
-    Attribute* findAttribute(const StringPiece16& ns, const StringPiece16& name);
-    xml::Element* findChild(const StringPiece16& ns, const StringPiece16& name);
-    xml::Element* findChildWithAttribute(const StringPiece16& ns, const StringPiece16& name,
-                                         const StringPiece16& attrNs,
-                                         const StringPiece16& attrName,
-                                         const StringPiece16& attrValue);
-    std::vector<xml::Element*> getChildElements();
+  Attribute* FindAttribute(const android::StringPiece& ns, const android::StringPiece& name);
+  const Attribute* FindAttribute(const android::StringPiece& ns,
+                                 const android::StringPiece& name) const;
+  xml::Element* FindChild(const android::StringPiece& ns, const android::StringPiece& name);
+  xml::Element* FindChildWithAttribute(const android::StringPiece& ns,
+                                       const android::StringPiece& name,
+                                       const android::StringPiece& attr_ns,
+                                       const android::StringPiece& attr_name,
+                                       const android::StringPiece& attr_value);
+  std::vector<xml::Element*> GetChildElements();
+  std::unique_ptr<Node> Clone(const ElementCloneFunc& el_cloner) override;
 };
 
 /**
  * A Text (CDATA) XML node. Can not have any children.
  */
-struct Text : public BaseNode<Text> {
-    std::u16string text;
+class Text : public BaseNode<Text> {
+ public:
+  std::string text;
+
+  std::unique_ptr<Node> Clone(const ElementCloneFunc& el_cloner) override;
 };
 
 /**
  * An XML resource with a source, name, and XML tree.
  */
-struct XmlResource {
-    ResourceFile file;
-    std::unique_ptr<xml::Node> root;
+class XmlResource {
+ public:
+  ResourceFile file;
+
+  // StringPool must come before the xml::Node. Destructors are called in reverse order, and
+  // the xml::Node may have StringPool references that need to be destroyed before the StringPool
+  // is destroyed.
+  StringPool string_pool;
+
+  std::unique_ptr<xml::Node> root;
 };
 
 /**
  * Inflates an XML DOM from a text stream, logging errors to the logger.
  * Returns the root node on success, or nullptr on failure.
  */
-std::unique_ptr<XmlResource> inflate(std::istream* in, IDiagnostics* diag, const Source& source);
+std::unique_ptr<XmlResource> Inflate(std::istream* in, IDiagnostics* diag, const Source& source);
 
 /**
  * Inflates an XML DOM from a binary ResXMLTree, logging errors to the logger.
  * Returns the root node on success, or nullptr on failure.
  */
-std::unique_ptr<XmlResource> inflate(const void* data, size_t dataLen, IDiagnostics* diag,
+std::unique_ptr<XmlResource> Inflate(const void* data, size_t data_len, IDiagnostics* diag,
                                      const Source& source);
 
-Element* findRootElement(XmlResource* doc);
-Element* findRootElement(Node* node);
+Element* FindRootElement(XmlResource* doc);
+Element* FindRootElement(Node* node);
 
 /**
- * A visitor interface for the different XML Node subtypes. This will not traverse into
+ * A visitor interface for the different XML Node subtypes. This will not
+ * traverse into
  * children. Use Visitor for that.
  */
-struct RawVisitor {
-    virtual ~RawVisitor() = default;
+class RawVisitor {
+ public:
+  virtual ~RawVisitor() = default;
 
-    virtual void visit(Namespace* node) {}
-    virtual void visit(Element* node) {}
-    virtual void visit(Text* text) {}
+  virtual void Visit(Namespace* node) {}
+  virtual void Visit(Element* node) {}
+  virtual void Visit(Text* text) {}
 };
 
 /**
  * Visitor whose default implementation visits the children nodes of any node.
  */
-struct Visitor : public RawVisitor {
-    using RawVisitor::visit;
+class Visitor : public RawVisitor {
+ public:
+  using RawVisitor::Visit;
 
-    void visit(Namespace* node) override {
-        visitChildren(node);
-    }
+  void Visit(Namespace* node) override { VisitChildren(node); }
 
-    void visit(Element* node) override {
-        visitChildren(node);
-    }
+  void Visit(Element* node) override { VisitChildren(node); }
 
-    void visit(Text* text) override {
-        visitChildren(text);
-    }
+  void Visit(Text* text) override { VisitChildren(text); }
 
-    void visitChildren(Node* node) {
-        for (auto& child : node->children) {
-            child->accept(this);
-        }
+  void VisitChildren(Node* node) {
+    for (auto& child : node->children) {
+      child->Accept(this);
     }
+  }
 };
 
 /**
  * An XML DOM visitor that will record the package name for a namespace prefix.
  */
 class PackageAwareVisitor : public Visitor, public IPackageDeclStack {
-private:
-    struct PackageDecl {
-        std::u16string prefix;
-        ExtractedPackage package;
-    };
+ public:
+  using Visitor::Visit;
 
-    std::vector<PackageDecl> mPackageDecls;
+  void Visit(Namespace* ns) override;
+  Maybe<ExtractedPackage> TransformPackageAlias(
+      const android::StringPiece& alias, const android::StringPiece& local_package) const override;
 
-public:
-    using Visitor::visit;
+ private:
+  struct PackageDecl {
+    std::string prefix;
+    ExtractedPackage package;
+  };
 
-    void visit(Namespace* ns) override;
-    Maybe<ExtractedPackage> transformPackageAlias(
-            const StringPiece16& alias, const StringPiece16& localPackage) const override;
+  std::vector<PackageDecl> package_decls_;
 };
 
 // Implementations
 
 template <typename Derived>
-void BaseNode<Derived>::accept(RawVisitor* visitor) {
-    visitor->visit(static_cast<Derived*>(this));
+void BaseNode<Derived>::Accept(RawVisitor* visitor) {
+  visitor->Visit(static_cast<Derived*>(this));
 }
 
 template <typename T>
-struct NodeCastImpl : public RawVisitor {
-    using RawVisitor::visit;
+class NodeCastImpl : public RawVisitor {
+ public:
+  using RawVisitor::Visit;
 
-    T* value = nullptr;
+  T* value = nullptr;
 
-    void visit(T* v) override {
-        value = v;
-    }
+  void Visit(T* v) override { value = v; }
 };
 
 template <typename T>
-T* nodeCast(Node* node) {
-    NodeCastImpl<T> visitor;
-    node->accept(&visitor);
-    return visitor.value;
+T* NodeCast(Node* node) {
+  NodeCastImpl<T> visitor;
+  node->Accept(&visitor);
+  return visitor.value;
 }
 
-} // namespace xml
-} // namespace aapt
+}  // namespace xml
+}  // namespace aapt
 
-#endif // AAPT_XML_DOM_H
+#endif  // AAPT_XML_DOM_H

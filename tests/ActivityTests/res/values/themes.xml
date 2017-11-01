@@ -22,4 +22,11 @@
         <item name="android:windowEnterAnimation">@anim/slow_enter</item>
         <item name="android:windowExitAnimation">@anim/slow_exit</item>
     </style>
+    <style name="DisableScreenshots" parent="@android:style/Theme.Material">
+        <item name="android:colorBackground">@color/blue</item>
+        <item name="android:windowBackground">@color/blue</item>
+    </style>
+    <style name="CustomSplashscreen" parent="@android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:windowSplashscreenContent">@drawable/splashscreen</item>
+    </style>
 </resources>

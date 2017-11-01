@@ -30,6 +30,7 @@ import android.content.pm.PackageParser.PackageLite;
 import android.content.pm.PackageParser.PackageParserException;
 import android.content.res.ObbInfo;
 import android.content.res.ObbScanner;
+import android.os.Binder;
 import android.os.Environment;
 import android.os.Environment.UserEnvironment;
 import android.os.FileUtils;
@@ -179,6 +180,15 @@ public class DefaultContainerService extends IntentService {
                 return ret;
             }
 
+            final int recommendedInstallLocation;
+            final long token = Binder.clearCallingIdentity();
+            try {
+                recommendedInstallLocation = PackageHelper.resolveInstallLocation(context,
+                        pkg.packageName, pkg.installLocation, sizeBytes, flags);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+
             ret.packageName = pkg.packageName;
             ret.splitNames = pkg.splitNames;
             ret.versionCode = pkg.versionCode;
@@ -186,8 +196,7 @@ public class DefaultContainerService extends IntentService {
             ret.splitRevisionCodes = pkg.splitRevisionCodes;
             ret.installLocation = pkg.installLocation;
             ret.verifiers = pkg.verifiers;
-            ret.recommendedInstallLocation = PackageHelper.resolveInstallLocation(context,
-                    pkg.packageName, pkg.installLocation, sizeBytes, flags);
+            ret.recommendedInstallLocation = recommendedInstallLocation;
             ret.multiArch = pkg.multiArch;
 
             return ret;
@@ -200,33 +209,6 @@ public class DefaultContainerService extends IntentService {
             } catch (IOException e) {
                 Slog.d(TAG, "Couldn't get OBB info for " + filename);
                 return null;
-            }
-        }
-
-        @Override
-        public long calculateDirectorySize(String path) throws RemoteException {
-            Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-
-            final File dir = Environment.maybeTranslateEmulatedPathToInternal(new File(path));
-            if (dir.exists() && dir.isDirectory()) {
-                final String targetPath = dir.getAbsolutePath();
-                return MeasurementUtils.measureDirectory(targetPath);
-            } else {
-                return 0L;
-            }
-        }
-
-        @Override
-        public long[] getFileSystemStats(String path) {
-            Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-
-            try {
-                final StructStatVfs stat = Os.statvfs(path);
-                final long totalSize = stat.f_blocks * stat.f_bsize;
-                final long availSize = stat.f_bavail * stat.f_bsize;
-                return new long[] { totalSize, availSize };
-            } catch (ErrnoException e) {
-                throw new IllegalStateException(e);
             }
         }
 

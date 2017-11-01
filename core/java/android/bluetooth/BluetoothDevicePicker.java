@@ -48,11 +48,11 @@ public interface BluetoothDevicePicker {
      * This intent contains below extra data:
      * - {@link #EXTRA_NEED_AUTH} (boolean): if need authentication
      * - {@link #EXTRA_FILTER_TYPE} (int): what kinds of device should be
-     *                                     listed
+     * listed
      * - {@link #EXTRA_LAUNCH_PACKAGE} (string): where(which package) this
-     *                                           intent come from
+     * intent come from
      * - {@link #EXTRA_LAUNCH_CLASS} (string): where(which class) this intent
-     *                                         come from
+     * come from
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_LAUNCH =
@@ -64,8 +64,10 @@ public interface BluetoothDevicePicker {
     public static final int FILTER_TYPE_AUDIO = 1;
     /** Ask device picker to show BT devices that support Object Transfer */
     public static final int FILTER_TYPE_TRANSFER = 2;
-    /** Ask device picker to show BT devices that support
-     * Personal Area Networking User (PANU) profile*/
+    /**
+     * Ask device picker to show BT devices that support
+     * Personal Area Networking User (PANU) profile
+     */
     public static final int FILTER_TYPE_PANU = 3;
     /** Ask device picker to show BT devices that support Network Access Point (NAP) profile */
     public static final int FILTER_TYPE_NAP = 4;

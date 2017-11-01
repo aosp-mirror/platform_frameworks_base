@@ -227,8 +227,8 @@ public class BluetoothTestUtils extends Assert {
                 case BluetoothProfile.HEADSET:
                     mConnectionAction = BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED;
                     break;
-                case BluetoothProfile.INPUT_DEVICE:
-                    mConnectionAction = BluetoothInputDevice.ACTION_CONNECTION_STATE_CHANGED;
+                case BluetoothProfile.HID_HOST:
+                    mConnectionAction = BluetoothHidHost.ACTION_CONNECTION_STATE_CHANGED;
                     break;
                 case BluetoothProfile.PAN:
                     mConnectionAction = BluetoothPan.ACTION_CONNECTION_STATE_CHANGED;
@@ -322,8 +322,8 @@ public class BluetoothTestUtils extends Assert {
                     case BluetoothProfile.HEADSET:
                         mHeadset = (BluetoothHeadset) proxy;
                         break;
-                    case BluetoothProfile.INPUT_DEVICE:
-                        mInput = (BluetoothInputDevice) proxy;
+                    case BluetoothProfile.HID_HOST:
+                        mInput = (BluetoothHidHost) proxy;
                         break;
                     case BluetoothProfile.PAN:
                         mPan = (BluetoothPan) proxy;
@@ -342,7 +342,7 @@ public class BluetoothTestUtils extends Assert {
                     case BluetoothProfile.HEADSET:
                         mHeadset = null;
                         break;
-                    case BluetoothProfile.INPUT_DEVICE:
+                    case BluetoothProfile.HID_HOST:
                         mInput = null;
                         break;
                     case BluetoothProfile.PAN:
@@ -362,7 +362,7 @@ public class BluetoothTestUtils extends Assert {
     private Context mContext;
     private BluetoothA2dp mA2dp = null;
     private BluetoothHeadset mHeadset = null;
-    private BluetoothInputDevice mInput = null;
+    private BluetoothHidHost mInput = null;
     private BluetoothPan mPan = null;
 
     /**
@@ -894,7 +894,7 @@ public class BluetoothTestUtils extends Assert {
      * @param adapter The BT adapter.
      * @param device The remote device.
      * @param profile The profile to connect. One of {@link BluetoothProfile#A2DP},
-     * {@link BluetoothProfile#HEADSET}, or {@link BluetoothProfile#INPUT_DEVICE}.
+     * {@link BluetoothProfile#HEADSET}, or {@link BluetoothProfile#HID_HOST}.
      * @param methodName The method name to printed in the logs.  If null, will be
      * "connectProfile(profile=&lt;profile&gt;, device=&lt;device&gt;)"
      */
@@ -935,8 +935,8 @@ public class BluetoothTestUtils extends Assert {
                     assertTrue(((BluetoothA2dp)proxy).connect(device));
                 } else if (profile == BluetoothProfile.HEADSET) {
                     assertTrue(((BluetoothHeadset)proxy).connect(device));
-                } else if (profile == BluetoothProfile.INPUT_DEVICE) {
-                    assertTrue(((BluetoothInputDevice)proxy).connect(device));
+                } else if (profile == BluetoothProfile.HID_HOST) {
+                    assertTrue(((BluetoothHidHost)proxy).connect(device));
                 }
                 break;
             default:
@@ -975,7 +975,7 @@ public class BluetoothTestUtils extends Assert {
      * @param adapter The BT adapter.
      * @param device The remote device.
      * @param profile The profile to disconnect. One of {@link BluetoothProfile#A2DP},
-     * {@link BluetoothProfile#HEADSET}, or {@link BluetoothProfile#INPUT_DEVICE}.
+     * {@link BluetoothProfile#HEADSET}, or {@link BluetoothProfile#HID_HOST}.
      * @param methodName The method name to printed in the logs.  If null, will be
      * "connectProfile(profile=&lt;profile&gt;, device=&lt;device&gt;)"
      */
@@ -1010,8 +1010,8 @@ public class BluetoothTestUtils extends Assert {
                     assertTrue(((BluetoothA2dp)proxy).disconnect(device));
                 } else if (profile == BluetoothProfile.HEADSET) {
                     assertTrue(((BluetoothHeadset)proxy).disconnect(device));
-                } else if (profile == BluetoothProfile.INPUT_DEVICE) {
-                    assertTrue(((BluetoothInputDevice)proxy).disconnect(device));
+                } else if (profile == BluetoothProfile.HID_HOST) {
+                    assertTrue(((BluetoothHidHost)proxy).disconnect(device));
                 }
                 break;
             case BluetoothProfile.STATE_DISCONNECTED:
@@ -1237,7 +1237,7 @@ public class BluetoothTestUtils extends Assert {
         long s = System.currentTimeMillis();
         while (System.currentTimeMillis() - s < CONNECT_DISCONNECT_PROFILE_TIMEOUT) {
             state = mPan.getConnectionState(device);
-            if (state == BluetoothInputDevice.STATE_DISCONNECTED
+            if (state == BluetoothHidHost.STATE_DISCONNECTED
                     && (receiver.getFiredFlags() & mask) == mask) {
                 long finish = receiver.getCompletedTime();
                 if (start != -1 && finish != -1) {
@@ -1255,7 +1255,7 @@ public class BluetoothTestUtils extends Assert {
         int firedFlags = receiver.getFiredFlags();
         removeReceiver(receiver);
         fail(String.format("%s timeout: state=%d (expected %d), flags=0x%x (expected 0x%s)",
-                methodName, state, BluetoothInputDevice.STATE_DISCONNECTED, firedFlags, mask));
+                methodName, state, BluetoothHidHost.STATE_DISCONNECTED, firedFlags, mask));
     }
 
     /**
@@ -1404,7 +1404,7 @@ public class BluetoothTestUtils extends Assert {
         String[] actions = {
                 BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED,
                 BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED,
-                BluetoothInputDevice.ACTION_CONNECTION_STATE_CHANGED};
+                BluetoothHidHost.ACTION_CONNECTION_STATE_CHANGED};
         ConnectProfileReceiver receiver = new ConnectProfileReceiver(device, profile,
                 expectedFlags);
         addReceiver(receiver, actions);
@@ -1443,7 +1443,7 @@ public class BluetoothTestUtils extends Assert {
                     return mHeadset;
                 }
                 break;
-            case BluetoothProfile.INPUT_DEVICE:
+            case BluetoothProfile.HID_HOST:
                 if (mInput != null) {
                     return mInput;
                 }
@@ -1469,7 +1469,7 @@ public class BluetoothTestUtils extends Assert {
                     sleep(POLL_TIME);
                 }
                 return mHeadset;
-            case BluetoothProfile.INPUT_DEVICE:
+            case BluetoothProfile.HID_HOST:
                 while (mInput == null && System.currentTimeMillis() - s < CONNECT_PROXY_TIMEOUT) {
                     sleep(POLL_TIME);
                 }

@@ -22,7 +22,6 @@
 
 #include <GLES2/gl2.h>
 #include <SkShader.h>
-#include <SkXfermode.h>
 #include <cutils/compiler.h>
 
 namespace android {
@@ -30,7 +29,6 @@ namespace uirenderer {
 
 class Caches;
 class Extensions;
-class Layer;
 class Texture;
 struct ProgramDescription;
 
@@ -46,7 +44,6 @@ enum SkiaShaderType {
     kBitmap_SkiaShaderType = 1,
     kGradient_SkiaShaderType = 2,
     kCompose_SkiaShaderType = kBitmap_SkiaShaderType | kGradient_SkiaShaderType,
-    kLayer_SkiaShaderType = 4,
 };
 
 struct SkiaShaderData {
@@ -62,7 +59,6 @@ struct SkiaShaderData {
     } bitmapData;
     struct GradientShaderData {
         Matrix4 screenSpace;
-        GLuint ditherSampler;
 
         // simple gradient
         FloatColor startColor;
@@ -72,17 +68,7 @@ struct SkiaShaderData {
         Texture* gradientTexture;
         GLuint gradientSampler;
         GLenum wrapST;
-
     } gradientData;
-    struct LayerShaderData {
-        Layer* layer;
-        GLuint bitmapSampler;
-        GLenum wrapS;
-        GLenum wrapT;
-
-        Matrix4 textureTransform;
-        float textureDimension[2];
-    } layerData;
 };
 
 class SkiaShader {
@@ -90,7 +76,8 @@ public:
     static void store(Caches& caches, const SkShader& shader, const Matrix4& modelViewMatrix,
             GLuint* textureUnit, ProgramDescription* description,
             SkiaShaderData* outData);
-    static void apply(Caches& caches, const SkiaShaderData& data);
+    static void apply(Caches& caches, const SkiaShaderData& data,
+            const GLsizei width, const GLsizei height);
 };
 
 }; // namespace uirenderer

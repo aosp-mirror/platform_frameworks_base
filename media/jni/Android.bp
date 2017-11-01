@@ -1,0 +1,83 @@
+cc_library_shared {
+    name: "libmedia_jni",
+
+    srcs: [
+        "android_media_ImageWriter.cpp",
+        "android_media_ImageReader.cpp",
+        "android_media_MediaCrypto.cpp",
+        "android_media_MediaCodec.cpp",
+        "android_media_MediaCodecList.cpp",
+        "android_media_MediaDataSource.cpp",
+        "android_media_MediaDescrambler.cpp",
+        "android_media_MediaDrm.cpp",
+        "android_media_MediaExtractor.cpp",
+        "android_media_MediaHTTPConnection.cpp",
+        "android_media_MediaMetricsJNI.cpp",
+        "android_media_MediaMetadataRetriever.cpp",
+        "android_media_MediaMuxer.cpp",
+        "android_media_MediaPlayer.cpp",
+        "android_media_MediaProfiles.cpp",
+        "android_media_MediaRecorder.cpp",
+        "android_media_MediaScanner.cpp",
+        "android_media_MediaSync.cpp",
+        "android_media_ResampleInputStream.cpp",
+        "android_media_SyncParams.cpp",
+        "android_media_Utils.cpp",
+        "android_mtp_MtpDatabase.cpp",
+        "android_mtp_MtpDevice.cpp",
+        "android_mtp_MtpServer.cpp",
+        "midi/android_media_midi_MidiDevice.cpp",
+    ],
+
+    shared_libs: [
+        "libandroid_runtime",
+        "libnativehelper",
+        "libutils",
+        "libbinder",
+        "libmedia",
+        "libmediametrics",
+        "libmediadrm",
+        "libmidi",
+        "libskia",
+        "libui",
+        "liblog",
+        "libcutils",
+        "libgui",
+        "libstagefright",
+        "libstagefright_foundation",
+        "libcamera_client",
+        "libmtp",
+        "libexif",
+        "libpiex",
+        "libandroidfw",
+    ],
+
+    header_libs: ["libhardware_headers"],
+
+    static_libs: ["libgrallocusage"],
+
+    include_dirs: [
+        "frameworks/base/core/jni",
+        "frameworks/native/include/media/openmax",
+        "system/media/camera/include",
+    ],
+
+    export_include_dirs: ["."],
+
+    export_shared_lib_headers: [
+        "libpiex",
+    ],
+
+    cflags: [
+        "-Wall",
+        "-Werror",
+        "-Wno-error=deprecated-declarations",
+        "-Wunused",
+        "-Wunreachable-code",
+    ],
+}
+
+subdirs = [
+    "audioeffect",
+    "soundpool",
+]

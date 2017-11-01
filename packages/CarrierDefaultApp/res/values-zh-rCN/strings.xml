@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="5247871339820894594">"运营商默认应用"</string>
+    <string name="android_system_label" msgid="2797790869522345065">"移动运营商"</string>
+    <string name="portal_notification_id" msgid="5155057562457079297">"移动数据流量已用尽"</string>
+    <string name="no_data_notification_id" msgid="668400731803969521">"您的移动数据网络已停用"</string>
+    <string name="portal_notification_detail" msgid="2295729385924660881">"点按即可访问%s网站"</string>
+    <string name="no_data_notification_detail" msgid="3112125343857014825">"请与您的服务提供商（%s）联系"</string>
+    <string name="no_mobile_data_connection_title" msgid="7449525772416200578">"无移动数据网络连接"</string>
+    <string name="no_mobile_data_connection" msgid="544980465184147010">"通过%s添加流量或漫游套餐"</string>
+    <string name="mobile_data_status_notification_channel_name" msgid="833999690121305708">"移动数据状态"</string>
+    <string name="action_bar_label" msgid="4290345990334377177">"登录到移动网络"</string>
+    <string name="ssl_error_warning" msgid="3127935140338254180">"您尝试加入的网络存在安全问题。"</string>
+    <string name="ssl_error_example" msgid="6188711843183058764">"例如，登录页面可能并不属于页面上显示的单位。"</string>
+    <string name="ssl_error_continue" msgid="1138548463994095584">"仍然通过浏览器继续操作"</string>
+</resources>

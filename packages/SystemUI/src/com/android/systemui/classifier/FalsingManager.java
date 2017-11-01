@@ -24,14 +24,18 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.net.Uri;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.PowerManager;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.view.MotionEvent;
 import android.view.accessibility.AccessibilityManager;
 
+import com.android.systemui.Dependency;
+import com.android.systemui.UiOffloadThread;
 import com.android.systemui.analytics.DataCollector;
 import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.util.AsyncSensorManager;
 
 import java.io.PrintWriter;
 
@@ -56,13 +60,14 @@ public class FalsingManager implements SensorEventListener {
             Sensor.TYPE_ROTATION_VECTOR,
     };
 
-    private final Handler mHandler = new Handler();
+    private final Handler mHandler = new Handler(Looper.getMainLooper());
     private final Context mContext;
 
     private final SensorManager mSensorManager;
     private final DataCollector mDataCollector;
     private final HumanInteractionClassifier mHumanInteractionClassifier;
     private final AccessibilityManager mAccessibilityManager;
+    private final UiOffloadThread mUiOffloadThread;
 
     private static FalsingManager sInstance = null;
 
@@ -71,6 +76,8 @@ public class FalsingManager implements SensorEventListener {
     private boolean mSessionActive = false;
     private int mState = StatusBarState.SHADE;
     private boolean mScreenOn;
+    private boolean mShowingAod;
+    private Runnable mPendingWtf;
 
     protected final ContentObserver mSettingsObserver = new ContentObserver(mHandler) {
         @Override
@@ -81,10 +88,11 @@ public class FalsingManager implements SensorEventListener {
 
     private FalsingManager(Context context) {
         mContext = context;
-        mSensorManager = mContext.getSystemService(SensorManager.class);
+        mSensorManager = Dependency.get(AsyncSensorManager.class);
         mAccessibilityManager = context.getSystemService(AccessibilityManager.class);
         mDataCollector = DataCollector.getInstance(mContext);
         mHumanInteractionClassifier = HumanInteractionClassifier.getInstance(mContext);
+        mUiOffloadThread = Dependency.get(UiOffloadThread.class);
         mScreenOn = context.getSystemService(PowerManager.class).isInteractive();
 
         mContext.getContentResolver().registerContentObserver(
@@ -115,7 +123,7 @@ public class FalsingManager implements SensorEventListener {
                     .append(" mState=").append(StatusBarState.toShortString(mState))
                     .toString()
             );
-        return isEnabled() && mScreenOn && (mState == StatusBarState.KEYGUARD);
+        return isEnabled() && mScreenOn && (mState == StatusBarState.KEYGUARD) && !mShowingAod;
     }
 
     private boolean sessionEntrypoint() {
@@ -129,13 +137,26 @@ public class FalsingManager implements SensorEventListener {
     private void sessionExitpoint(boolean force) {
         if (mSessionActive && (force || !shouldSessionBeActive())) {
             mSessionActive = false;
-            mSensorManager.unregisterListener(this);
+
+            // This can be expensive, and doesn't need to happen on the main thread.
+            mUiOffloadThread.submit(() -> {
+                mSensorManager.unregisterListener(this);
+            });
+        }
+    }
+
+    public void updateSessionActive() {
+        if (shouldSessionBeActive()) {
+            sessionEntrypoint();
+        } else {
+            sessionExitpoint(false /* force */);
         }
     }
 
     private void onSessionStart() {
         if (FalsingLog.ENABLED) {
             FalsingLog.i("onSessionStart", "classifierEnabled=" + isClassiferEnabled());
+            clearPendingWtf();
         }
         mBouncerOn = false;
         mSessionActive = true;
@@ -152,7 +173,11 @@ public class FalsingManager implements SensorEventListener {
         for (int sensorType : sensors) {
             Sensor s = mSensorManager.getDefaultSensor(sensorType);
             if (s != null) {
-                mSensorManager.registerListener(this, s, SensorManager.SENSOR_DELAY_GAME);
+
+                // This can be expensive, and doesn't need to happen on the main thread.
+                mUiOffloadThread.submit(() -> {
+                    mSensorManager.registerListener(this, s, SensorManager.SENSOR_DELAY_GAME);
+                });
             }
         }
     }
@@ -172,13 +197,35 @@ public class FalsingManager implements SensorEventListener {
         if (FalsingLog.ENABLED) {
             // We're getting some false wtfs from touches that happen after the device went
             // to sleep. Only report missing sessions that happen when the device is interactive.
-            if (!mSessionActive && mContext.getSystemService(PowerManager.class).isInteractive()) {
-                FalsingLog.wtf("isFalseTouch", new StringBuilder()
+            if (!mSessionActive && mContext.getSystemService(PowerManager.class).isInteractive()
+                    && mPendingWtf == null) {
+                int enabled = isEnabled() ? 1 : 0;
+                int screenOn = mScreenOn ? 1 : 0;
+                String state = StatusBarState.toShortString(mState);
+                Throwable here = new Throwable("here");
+                FalsingLog.wLogcat("isFalseTouch", new StringBuilder()
                         .append("Session is not active, yet there's a query for a false touch.")
-                        .append(" enabled=").append(isEnabled() ? 1 : 0)
-                        .append(" mScreenOn=").append(mScreenOn ? 1 : 0)
-                        .append(" mState=").append(StatusBarState.toShortString(mState))
+                        .append(" enabled=").append(enabled)
+                        .append(" mScreenOn=").append(screenOn)
+                        .append(" mState=").append(state)
+                        .append(". Escalating to WTF if screen does not turn on soon.")
                         .toString());
+
+                // Unfortunately we're also getting false positives for touches that happen right
+                // after the screen turns on, but before that notification has made it to us.
+                // Unfortunately there's no good way to catch that, except to wait and see if we get
+                // the screen on notification soon.
+                mPendingWtf = () -> FalsingLog.wtf("isFalseTouch", new StringBuilder()
+                        .append("Session did not become active after query for a false touch.")
+                        .append(" enabled=").append(enabled)
+                        .append('/').append(isEnabled() ? 1 : 0)
+                        .append(" mScreenOn=").append(screenOn)
+                        .append('/').append(mScreenOn ? 1 : 0)
+                        .append(" mState=").append(state)
+                        .append('/').append(StatusBarState.toShortString(mState))
+                        .append(". Look for warnings ~1000ms earlier to see root cause.")
+                        .toString(), here);
+                mHandler.postDelayed(mPendingWtf, 1000);
             }
         }
         if (mAccessibilityManager.isTouchExplorationEnabled()) {
@@ -187,6 +234,13 @@ public class FalsingManager implements SensorEventListener {
             return false;
         }
         return mHumanInteractionClassifier.isFalseTouch();
+    }
+
+    private void clearPendingWtf() {
+        if (mPendingWtf != null) {
+            mHandler.removeCallbacks(mPendingWtf);
+            mPendingWtf = null;
+        }
     }
 
     @Override
@@ -204,6 +258,11 @@ public class FalsingManager implements SensorEventListener {
         return mEnforceBouncer;
     }
 
+    public void setShowingAod(boolean showingAod) {
+        mShowingAod = showingAod;
+        updateSessionActive();
+    }
+
     public void setStatusBarState(int state) {
         if (FalsingLog.ENABLED) {
             FalsingLog.i("setStatusBarState", new StringBuilder()
@@ -212,11 +271,7 @@ public class FalsingManager implements SensorEventListener {
                     .toString());
         }
         mState = state;
-        if (shouldSessionBeActive()) {
-            sessionEntrypoint();
-        } else {
-            sessionExitpoint(false /* force */);
-        }
+        updateSessionActive();
     }
 
     public void onScreenTurningOn() {
@@ -224,6 +279,7 @@ public class FalsingManager implements SensorEventListener {
             FalsingLog.i("onScreenTurningOn", new StringBuilder()
                     .append("from=").append(mScreenOn ? 1 : 0)
                     .toString());
+            clearPendingWtf();
         }
         mScreenOn = true;
         if (sessionEntrypoint()) {
@@ -313,7 +369,11 @@ public class FalsingManager implements SensorEventListener {
         mDataCollector.onNotificationActive();
     }
 
-    public void onNotificationDoubleTap() {
+    public void onNotificationDoubleTap(boolean accepted, float dx, float dy) {
+        if (FalsingLog.ENABLED) {
+            FalsingLog.i("onNotificationDoubleTap", "accepted=" + accepted
+                    + " dx=" + dx + " dy=" + dy + " (px)");
+        }
         mDataCollector.onNotificationDoubleTap();
     }
 

@@ -19,6 +19,8 @@ package com.android.settingslib.applications;
 import android.app.ActivityManager;
 import android.app.AppGlobals;
 import android.app.Application;
+import android.app.usage.StorageStats;
+import android.app.usage.StorageStatsManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -27,6 +29,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.IPackageStatsObserver;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageStats;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
@@ -43,13 +46,15 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.text.format.Formatter;
+import android.util.IconDrawableFactory;
 import android.util.Log;
 import android.util.SparseArray;
 
+import com.android.internal.R;
 import com.android.internal.util.ArrayUtils;
-import com.android.settingslib.R;
 
 import java.io.File;
+import java.io.IOException;
 import java.text.Collator;
 import java.text.Normalizer;
 import java.text.Normalizer.Form;
@@ -59,6 +64,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.regex.Pattern;
 
 /**
@@ -90,14 +96,17 @@ public class ApplicationsState {
 
     final Context mContext;
     final PackageManager mPm;
+    final IconDrawableFactory mDrawableFactory;
     final IPackageManager mIpm;
     final UserManager mUm;
+    final StorageStatsManager mStats;
     final int mAdminRetrieveFlags;
     final int mRetrieveFlags;
     PackageIntentReceiver mPackageIntentReceiver;
 
     boolean mResumed;
     boolean mHaveDisabledApps;
+    boolean mHaveInstantApps;
 
     // Information about all applications.  Synchronize on mEntriesMap
     // to protect access to these.
@@ -110,6 +119,7 @@ public class ApplicationsState {
     final ArrayList<AppEntry> mAppEntries = new ArrayList<AppEntry>();
     List<ApplicationInfo> mApplications = new ArrayList<ApplicationInfo>();
     long mCurId = 1;
+    UUID mCurComputingSizeUuid;
     String mCurComputingSizePkg;
     int mCurComputingSizeUserId;
     boolean mSessionsChanged;
@@ -124,8 +134,10 @@ public class ApplicationsState {
     private ApplicationsState(Application app) {
         mContext = app;
         mPm = mContext.getPackageManager();
+        mDrawableFactory = IconDrawableFactory.newInstance(mContext);
         mIpm = AppGlobals.getPackageManager();
-        mUm = (UserManager) app.getSystemService(Context.USER_SERVICE);
+        mUm = mContext.getSystemService(UserManager.class);
+        mStats = mContext.getSystemService(StorageStatsManager.class);
         for (int userId : mUm.getProfileIdsWithDisabled(UserHandle.myUserId())) {
             mEntriesMap.put(userId, new HashMap<String, AppEntry>());
         }
@@ -135,11 +147,11 @@ public class ApplicationsState {
         mBackgroundHandler = new BackgroundHandler(mThread.getLooper());
 
         // Only the owner can see all apps.
-        mAdminRetrieveFlags = PackageManager.GET_UNINSTALLED_PACKAGES |
-                PackageManager.GET_DISABLED_COMPONENTS |
-                PackageManager.GET_DISABLED_UNTIL_USED_COMPONENTS;
-        mRetrieveFlags = PackageManager.GET_DISABLED_COMPONENTS |
-                PackageManager.GET_DISABLED_UNTIL_USED_COMPONENTS;
+        mAdminRetrieveFlags = PackageManager.MATCH_ANY_USER |
+                PackageManager.MATCH_DISABLED_COMPONENTS |
+                PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS;
+        mRetrieveFlags = PackageManager.MATCH_DISABLED_COMPONENTS |
+                PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS;
 
         /**
          * This is a trick to prevent the foreground thread from being delayed.
@@ -212,6 +224,7 @@ public class ApplicationsState {
         }
 
         mHaveDisabledApps = false;
+        mHaveInstantApps = false;
         for (int i=0; i<mApplications.size(); i++) {
             final ApplicationInfo info = mApplications.get(i);
             // Need to trim out any applications that are disabled by
@@ -224,6 +237,10 @@ public class ApplicationsState {
                 }
                 mHaveDisabledApps = true;
             }
+            if (!mHaveInstantApps && AppUtils.isInstant(info)) {
+                mHaveInstantApps = true;
+            }
+
             int userId = UserHandle.getUserId(info.uid);
             final AppEntry entry = mEntriesMap.get(userId).get(info.packageName);
             if (entry != null) {
@@ -249,6 +266,9 @@ public class ApplicationsState {
 
     public boolean haveDisabledApps() {
         return mHaveDisabledApps;
+    }
+    public boolean haveInstantApps() {
+        return mHaveInstantApps;
     }
 
     void doPauseIfNeededLocked() {
@@ -310,7 +330,7 @@ public class ApplicationsState {
             return;
         }
         synchronized (entry) {
-            entry.ensureIconLocked(mContext, mPm);
+            entry.ensureIconLocked(mContext, mDrawableFactory);
         }
     }
 
@@ -318,8 +338,27 @@ public class ApplicationsState {
         if (DEBUG_LOCKING) Log.v(TAG, "requestSize about to acquire lock...");
         synchronized (mEntriesMap) {
             AppEntry entry = mEntriesMap.get(userId).get(packageName);
-            if (entry != null) {
-                mPm.getPackageSizeInfoAsUser(packageName, userId, mBackgroundHandler.mStatsObserver);
+            if (entry != null && (entry.info.flags & ApplicationInfo.FLAG_INSTALLED) != 0) {
+                mBackgroundHandler.post(() -> {
+                    try {
+                        final StorageStats stats = mStats.queryStatsForPackage(
+                                entry.info.storageUuid, packageName, UserHandle.of(userId));
+                        final PackageStats legacy = new PackageStats(packageName, userId);
+                        legacy.codeSize = stats.getCodeBytes();
+                        legacy.dataSize = stats.getDataBytes();
+                        legacy.cacheSize = stats.getCacheBytes();
+                        try {
+                            mBackgroundHandler.mStatsObserver.onGetStatsCompleted(legacy, true);
+                        } catch (RemoteException ignored) {
+                        }
+                    } catch (NameNotFoundException | IOException e) {
+                        Log.w(TAG, "Failed to query stats: " + e);
+                        try {
+                            mBackgroundHandler.mStatsObserver.onGetStatsCompleted(null, false);
+                        } catch (RemoteException ignored) {
+                        }
+                    }
+                });
             }
             if (DEBUG_LOCKING) Log.v(TAG, "...requestSize releasing lock");
         }
@@ -379,6 +418,9 @@ public class ApplicationsState {
                     }
                     mHaveDisabledApps = true;
                 }
+                if (AppUtils.isInstant(info)) {
+                    mHaveInstantApps = true;
+                }
                 mApplications.add(info);
                 if (!mBackgroundHandler.hasMessages(BackgroundHandler.MSG_LOAD_ENTRIES)) {
                     mBackgroundHandler.sendEmptyMessage(BackgroundHandler.MSG_LOAD_ENTRIES);
@@ -408,9 +450,18 @@ public class ApplicationsState {
                 mApplications.remove(idx);
                 if (!info.enabled) {
                     mHaveDisabledApps = false;
-                    for (int i=0; i<mApplications.size(); i++) {
-                        if (!mApplications.get(i).enabled) {
+                    for (ApplicationInfo otherInfo : mApplications) {
+                        if (!otherInfo.enabled) {
                             mHaveDisabledApps = true;
+                            break;
+                        }
+                    }
+                }
+                if (AppUtils.isInstant(info)) {
+                    mHaveInstantApps = false;
+                    for (ApplicationInfo otherInfo : mApplications) {
+                        if (AppUtils.isInstant(otherInfo)) {
+                            mHaveInstantApps = true;
                             break;
                         }
                     }
@@ -649,7 +700,11 @@ public class ApplicationsState {
             }
 
             if (comparator != null) {
-                Collections.sort(filteredApps, comparator);
+                synchronized (mEntriesMap) {
+                    // Locking to ensure that the background handler does not mutate
+                    // the size of AppEntries used for ordering while sorting.
+                    Collections.sort(filteredApps, comparator);
+                }
             }
 
             synchronized (mRebuildSync) {
@@ -855,7 +910,7 @@ public class ApplicationsState {
                         // explicitly include both direct boot aware and unaware components here.
                         List<ResolveInfo> intents = mPm.queryIntentActivitiesAsUser(
                                 launchIntent,
-                                PackageManager.GET_DISABLED_COMPONENTS
+                                PackageManager.MATCH_DISABLED_COMPONENTS
                                         | PackageManager.MATCH_DIRECT_BOOT_AWARE
                                         | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
                                 userId
@@ -891,7 +946,7 @@ public class ApplicationsState {
                             AppEntry entry = mAppEntries.get(i);
                             if (entry.icon == null || !entry.mounted) {
                                 synchronized (entry) {
-                                    if (entry.ensureIconLocked(mContext, mPm)) {
+                                    if (entry.ensureIconLocked(mContext, mDrawableFactory)) {
                                         if (!mRunning) {
                                             mRunning = true;
                                             Message m = mMainHandler.obtainMessage(
@@ -927,7 +982,8 @@ public class ApplicationsState {
                         long now = SystemClock.uptimeMillis();
                         for (int i=0; i<mAppEntries.size(); i++) {
                             AppEntry entry = mAppEntries.get(i);
-                            if (entry.size == SIZE_UNKNOWN || entry.sizeStale) {
+                            if ((entry.info.flags & ApplicationInfo.FLAG_INSTALLED) != 0
+                                    && (entry.size == SIZE_UNKNOWN || entry.sizeStale)) {
                                 if (entry.sizeLoadStart == 0 ||
                                         (entry.sizeLoadStart < (now-20*1000))) {
                                     if (!mRunning) {
@@ -937,10 +993,33 @@ public class ApplicationsState {
                                         mMainHandler.sendMessage(m);
                                     }
                                     entry.sizeLoadStart = now;
+                                    mCurComputingSizeUuid = entry.info.storageUuid;
                                     mCurComputingSizePkg = entry.info.packageName;
                                     mCurComputingSizeUserId = UserHandle.getUserId(entry.info.uid);
-                                    mPm.getPackageSizeInfoAsUser(mCurComputingSizePkg,
-                                            mCurComputingSizeUserId, mStatsObserver);
+
+                                    mBackgroundHandler.post(() -> {
+                                        try {
+                                            final StorageStats stats = mStats.queryStatsForPackage(
+                                                    mCurComputingSizeUuid, mCurComputingSizePkg,
+                                                    UserHandle.of(mCurComputingSizeUserId));
+                                            final PackageStats legacy = new PackageStats(
+                                                    mCurComputingSizePkg, mCurComputingSizeUserId);
+                                            legacy.codeSize = stats.getCodeBytes();
+                                            legacy.dataSize = stats.getDataBytes();
+                                            legacy.cacheSize = stats.getCacheBytes();
+                                            try {
+                                                mStatsObserver.onGetStatsCompleted(legacy, true);
+                                            } catch (RemoteException ignored) {
+                                            }
+                                        } catch (NameNotFoundException | IOException e) {
+                                            Log.w(TAG, "Failed to query stats: " + e);
+                                            try {
+                                                mStatsObserver.onGetStatsCompleted(null, false);
+                                            } catch (RemoteException ignored) {
+                                            }
+                                        }
+
+                                    });
                                 }
                                 if (DEBUG_LOCKING) Log.v(TAG, "MSG_LOAD_SIZES releasing: now computing");
                                 return;
@@ -961,6 +1040,11 @@ public class ApplicationsState {
 
         final IPackageStatsObserver.Stub mStatsObserver = new IPackageStatsObserver.Stub() {
             public void onGetStatsCompleted(PackageStats stats, boolean succeeded) {
+                if (!succeeded) {
+                    // There is no meaningful information in stats if the call failed.
+                    return;
+                }
+
                 boolean sizeChanged = false;
                 synchronized (mEntriesMap) {
                     if (DEBUG_LOCKING) Log.v(TAG, "onGetStatsCompleted acquired lock");
@@ -1190,32 +1274,25 @@ public class ApplicationsState {
             }
         }
 
-        boolean ensureIconLocked(Context context, PackageManager pm) {
+        boolean ensureIconLocked(Context context, IconDrawableFactory drawableFactory) {
             if (this.icon == null) {
                 if (this.apkFile.exists()) {
-                    this.icon = getBadgedIcon(pm);
+                    this.icon = drawableFactory.getBadgedIcon(info);
                     return true;
                 } else {
                     this.mounted = false;
-                    this.icon = context.getDrawable(
-                            com.android.internal.R.drawable.sym_app_on_sd_unavailable_icon);
+                    this.icon = context.getDrawable(R.drawable.sym_app_on_sd_unavailable_icon);
                 }
             } else if (!this.mounted) {
                 // If the app wasn't mounted but is now mounted, reload
                 // its icon.
                 if (this.apkFile.exists()) {
                     this.mounted = true;
-                    this.icon = getBadgedIcon(pm);
+                    this.icon = drawableFactory.getBadgedIcon(info);
                     return true;
                 }
             }
             return false;
-        }
-
-        private Drawable getBadgedIcon(PackageManager pm) {
-            // Do badging ourself so that it comes from the user of the app not the current user.
-            return pm.getUserBadgedIcon(pm.loadUnbadgedItemIcon(info, info),
-                    new UserHandle(UserHandle.getUserId(info.uid)));
         }
 
         public String getVersion(Context context) {
@@ -1290,6 +1367,7 @@ public class ApplicationsState {
     public static final AppFilter FILTER_PERSONAL = new AppFilter() {
         private int mCurrentUser;
 
+        @Override
         public void init() {
             mCurrentUser = ActivityManager.getCurrentUser();
         }
@@ -1301,8 +1379,9 @@ public class ApplicationsState {
     };
 
     public static final AppFilter FILTER_WITHOUT_DISABLED_UNTIL_USED = new AppFilter() {
+        @Override
         public void init() {
-            // do nothings
+            // do nothing
         }
 
         @Override
@@ -1315,6 +1394,7 @@ public class ApplicationsState {
     public static final AppFilter FILTER_WORK = new AppFilter() {
         private int mCurrentUser;
 
+        @Override
         public void init() {
             mCurrentUser = ActivityManager.getCurrentUser();
         }
@@ -1329,12 +1409,15 @@ public class ApplicationsState {
      * Displays a combined list with "downloaded" and "visible in launcher" apps only.
      */
     public static final AppFilter FILTER_DOWNLOADED_AND_LAUNCHER = new AppFilter() {
+        @Override
         public void init() {
         }
 
         @Override
         public boolean filterApp(AppEntry entry) {
-            if ((entry.info.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0) {
+            if (AppUtils.isInstant(entry.info)) {
+                return false;
+            } else if ((entry.info.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0) {
                 return true;
             } else if ((entry.info.flags & ApplicationInfo.FLAG_SYSTEM) == 0) {
                 return true;
@@ -1347,7 +1430,25 @@ public class ApplicationsState {
         }
     };
 
+    /**
+     * Displays a combined list with "downloaded" and "visible in launcher" apps only.
+     */
+    public static final AppFilter FILTER_DOWNLOADED_AND_LAUNCHER_AND_INSTANT = new AppFilter() {
+
+        @Override
+        public void init() {
+        }
+
+        @Override
+        public boolean filterApp(AppEntry entry) {
+            return AppUtils.isInstant(entry.info)
+                    || FILTER_DOWNLOADED_AND_LAUNCHER.filterApp(entry);
+        }
+
+    };
+
     public static final AppFilter FILTER_THIRD_PARTY = new AppFilter() {
+        @Override
         public void init() {
         }
 
@@ -1363,26 +1464,40 @@ public class ApplicationsState {
     };
 
     public static final AppFilter FILTER_DISABLED = new AppFilter() {
+        @Override
         public void init() {
         }
 
         @Override
         public boolean filterApp(AppEntry entry) {
-            return !entry.info.enabled;
+            return !entry.info.enabled && !AppUtils.isInstant(entry.info);
+        }
+    };
+
+    public static final AppFilter FILTER_INSTANT = new AppFilter() {
+        @Override
+        public void init() {
+        }
+
+        @Override
+        public boolean filterApp(AppEntry entry) {
+            return AppUtils.isInstant(entry.info);
         }
     };
 
     public static final AppFilter FILTER_ALL_ENABLED = new AppFilter() {
+        @Override
         public void init() {
         }
 
         @Override
         public boolean filterApp(AppEntry entry) {
-            return entry.info.enabled;
+            return entry.info.enabled && !AppUtils.isInstant(entry.info);
         }
     };
 
     public static final AppFilter FILTER_EVERYTHING = new AppFilter() {
+        @Override
         public void init() {
         }
 
@@ -1393,18 +1508,21 @@ public class ApplicationsState {
     };
 
     public static final AppFilter FILTER_WITH_DOMAIN_URLS = new AppFilter() {
+        @Override
         public void init() {
         }
 
         @Override
         public boolean filterApp(AppEntry entry) {
-            return (entry.info.privateFlags & ApplicationInfo.PRIVATE_FLAG_HAS_DOMAIN_URLS) != 0;
+            return !AppUtils.isInstant(entry.info)
+                && (entry.info.privateFlags & ApplicationInfo.PRIVATE_FLAG_HAS_DOMAIN_URLS) != 0;
         }
     };
 
     public static final AppFilter FILTER_NOT_HIDE = new AppFilter() {
         private String[] mHidePackageNames;
 
+        @Override
         public void init(Context context) {
             mHidePackageNames = context.getResources()
                 .getStringArray(R.array.config_hideWhenDisabled_packageNames);
@@ -1426,6 +1544,23 @@ public class ApplicationsState {
             }
 
             return true;
+        }
+    };
+
+    public static final AppFilter FILTER_GAMES = new AppFilter() {
+        @Override
+        public void init() {
+        }
+
+        @Override
+        public boolean filterApp(ApplicationsState.AppEntry info) {
+            // TODO: Update for the new game category.
+            boolean isGame;
+            synchronized (info.info) {
+                isGame = ((info.info.flags & ApplicationInfo.FLAG_IS_GAME) != 0)
+                        || info.info.category == ApplicationInfo.CATEGORY_GAME;
+            }
+            return isGame;
         }
     };
 
@@ -1472,4 +1607,52 @@ public class ApplicationsState {
             return mFirstFilter.filterApp(info) && mSecondFilter.filterApp(info);
         }
     }
+
+    public static final AppFilter FILTER_AUDIO = new AppFilter() {
+        @Override
+        public void init() {
+        }
+
+        @Override
+        public boolean filterApp(AppEntry entry) {
+            boolean isMusicApp;
+            synchronized(entry) {
+                isMusicApp = entry.info.category == ApplicationInfo.CATEGORY_AUDIO;
+            }
+            return isMusicApp;
+        }
+    };
+
+    public static final AppFilter FILTER_MOVIES = new AppFilter() {
+        @Override
+        public void init() {
+        }
+
+        @Override
+        public boolean filterApp(AppEntry entry) {
+            boolean isMovieApp;
+            synchronized(entry) {
+                isMovieApp = entry.info.category == ApplicationInfo.CATEGORY_VIDEO;
+            }
+            return isMovieApp;
+        }
+    };
+
+    public static final AppFilter FILTER_OTHER_APPS =
+            new AppFilter() {
+                @Override
+                public void init() {}
+
+                @Override
+                public boolean filterApp(AppEntry entry) {
+                    boolean isCategorized;
+                    synchronized (entry) {
+                        isCategorized =
+                                FILTER_AUDIO.filterApp(entry)
+                                        || FILTER_GAMES.filterApp(entry)
+                                        || FILTER_MOVIES.filterApp(entry);
+                    }
+                    return !isCategorized;
+                }
+            };
 }

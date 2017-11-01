@@ -329,6 +329,7 @@ public class Virtualizer extends AudioEffect {
             case AudioDeviceInfo.TYPE_WIRED_HEADPHONES:
             case AudioDeviceInfo.TYPE_BLUETOOTH_SCO:
             case AudioDeviceInfo.TYPE_BUILTIN_EARPIECE:
+            case AudioDeviceInfo.TYPE_USB_HEADSET:
                 return VIRTUALIZATION_MODE_BINAURAL;
             case AudioDeviceInfo.TYPE_BUILTIN_SPEAKER:
             case AudioDeviceInfo.TYPE_LINE_ANALOG:

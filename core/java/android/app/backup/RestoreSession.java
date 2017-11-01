@@ -22,6 +22,7 @@ import android.app.backup.RestoreSet;
 import android.app.backup.IRestoreObserver;
 import android.app.backup.IRestoreSession;
 import android.content.Context;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.RemoteException;
@@ -46,16 +47,67 @@ public class RestoreSession {
      *   be called on the application's main thread in order to supply the results of
      *   the restore set lookup by the backup transport.  This parameter must not be
      *   null.
+     * @param monitor a BackupManagerMonitor object will supply data about important events.
+     * @return Zero on success, nonzero on error.  The observer's restoreSetsAvailable()
+     *   method will only be called if this method returned zero.
+     */
+    public int getAvailableRestoreSets(RestoreObserver observer, BackupManagerMonitor monitor) {
+        int err = -1;
+        RestoreObserverWrapper obsWrapper = new RestoreObserverWrapper(mContext, observer);
+        BackupManagerMonitorWrapper monitorWrapper = monitor == null
+                ? null
+                : new BackupManagerMonitorWrapper(monitor);
+        try {
+            err = mBinder.getAvailableRestoreSets(obsWrapper, monitorWrapper);
+        } catch (RemoteException e) {
+            Log.d(TAG, "Can't contact server to get available sets");
+        }
+        return err;
+    }
+
+    /**
+     * Ask the current transport what the available restore sets are.
+     *
+     * @param observer a RestoreObserver object whose restoreSetsAvailable() method will
+     *   be called on the application's main thread in order to supply the results of
+     *   the restore set lookup by the backup transport.  This parameter must not be
+     *   null.
      * @return Zero on success, nonzero on error.  The observer's restoreSetsAvailable()
      *   method will only be called if this method returned zero.
      */
     public int getAvailableRestoreSets(RestoreObserver observer) {
+        return getAvailableRestoreSets(observer, null);
+    }
+
+    /**
+     * Restore the given set onto the device, replacing the current data of any app
+     * contained in the restore set with the data previously backed up.
+     *
+     * <p>Callers must hold the android.permission.BACKUP permission to use this method.
+     *
+     * @return Zero on success; nonzero on error.  The observer will only receive
+     *   progress callbacks if this method returned zero.
+     * @param token The token from {@link #getAvailableRestoreSets()} corresponding to
+     *   the restore set that should be used.
+     * @param observer If non-null, this binder points to an object that will receive
+     *   progress callbacks during the restore operation.
+     * @param monitor If non-null, this binder points to an object that will receive
+     *   progress callbacks during the restore operation.
+     */
+    public int restoreAll(long token, RestoreObserver observer, BackupManagerMonitor monitor) {
         int err = -1;
-        RestoreObserverWrapper obsWrapper = new RestoreObserverWrapper(mContext, observer);
+        if (mObserver != null) {
+            Log.d(TAG, "restoreAll() called during active restore");
+            return -1;
+        }
+        mObserver = new RestoreObserverWrapper(mContext, observer);
+        BackupManagerMonitorWrapper monitorWrapper = monitor == null
+                ? null
+                : new BackupManagerMonitorWrapper(monitor);
         try {
-            err = mBinder.getAvailableRestoreSets(obsWrapper);
+            err = mBinder.restoreAll(token, mObserver, monitorWrapper);
         } catch (RemoteException e) {
-            Log.d(TAG, "Can't contact server to get available sets");
+            Log.d(TAG, "Can't contact server to restore");
         }
         return err;
     }
@@ -74,16 +126,45 @@ public class RestoreSession {
      *   progress callbacks during the restore operation.
      */
     public int restoreAll(long token, RestoreObserver observer) {
+        return restoreAll(token, observer, null);
+    }
+
+    /**
+     * Restore select packages from the given set onto the device, replacing the
+     * current data of any app contained in the set with the data previously
+     * backed up.
+     *
+     * <p>Callers must hold the android.permission.BACKUP permission to use this method.
+     *
+     * @return Zero on success, nonzero on error. The observer will only receive
+     *   progress callbacks if this method returned zero.
+     * @param token The token from {@link getAvailableRestoreSets()} corresponding to
+     *   the restore set that should be used.
+     * @param observer If non-null, this binder points to an object that will receive
+     *   progress callbacks during the restore operation.
+     * @param monitor If non-null, this binder points to an object that will receive
+     *   progress callbacks during the restore operation.
+     * @param packages The set of packages for which to attempt a restore.  Regardless of
+     *   the contents of the actual back-end dataset named by {@code token}, only
+     *   applications mentioned in this list will have their data restored.
+     *
+     * @hide
+     */
+    public int restoreSome(long token, RestoreObserver observer, BackupManagerMonitor monitor,
+            String[] packages) {
         int err = -1;
         if (mObserver != null) {
             Log.d(TAG, "restoreAll() called during active restore");
             return -1;
         }
         mObserver = new RestoreObserverWrapper(mContext, observer);
+        BackupManagerMonitorWrapper monitorWrapper = monitor == null
+                ? null
+                : new BackupManagerMonitorWrapper(monitor);
         try {
-            err = mBinder.restoreAll(token, mObserver);
+            err = mBinder.restoreSome(token, mObserver, monitorWrapper, packages);
         } catch (RemoteException e) {
-            Log.d(TAG, "Can't contact server to restore");
+            Log.d(TAG, "Can't contact server to restore packages");
         }
         return err;
     }
@@ -108,19 +189,46 @@ public class RestoreSession {
      * @hide
      */
     public int restoreSome(long token, RestoreObserver observer, String[] packages) {
+        return restoreSome(token, observer, null, packages);
+    }
+
+    /**
+     * Restore a single application from backup.  The data will be restored from the
+     * current backup dataset if the given package has stored data there, or from
+     * the dataset used during the last full device setup operation if the current
+     * backup dataset has no matching data.  If no backup data exists for this package
+     * in either source, a nonzero value will be returned.
+     *
+     * @return Zero on success; nonzero on error.  The observer will only receive
+     *   progress callbacks if this method returned zero.
+     * @param packageName The name of the package whose data to restore.  If this is
+     *   not the name of the caller's own package, then the android.permission.BACKUP
+     *   permission must be held.
+     * @param observer If non-null, this binder points to an object that will receive
+     *   progress callbacks during the restore operation.
+     *
+     * @param monitor If non-null, this binder points to an object that will receive
+     *   event callbacks during the restore operation.
+     */
+    public int restorePackage(String packageName, RestoreObserver observer,
+            BackupManagerMonitor monitor) {
         int err = -1;
         if (mObserver != null) {
-            Log.d(TAG, "restoreAll() called during active restore");
+            Log.d(TAG, "restorePackage() called during active restore");
             return -1;
         }
         mObserver = new RestoreObserverWrapper(mContext, observer);
+        BackupManagerMonitorWrapper monitorWrapper = monitor == null
+                ? null
+                : new BackupManagerMonitorWrapper(monitor);
         try {
-            err = mBinder.restoreSome(token, mObserver, packages);
+            err = mBinder.restorePackage(packageName, mObserver, monitorWrapper);
         } catch (RemoteException e) {
-            Log.d(TAG, "Can't contact server to restore packages");
+            Log.d(TAG, "Can't contact server to restore package");
         }
         return err;
     }
+
 
     /**
      * Restore a single application from backup.  The data will be restored from the
@@ -138,18 +246,7 @@ public class RestoreSession {
      *   progress callbacks during the restore operation.
      */
     public int restorePackage(String packageName, RestoreObserver observer) {
-        int err = -1;
-        if (mObserver != null) {
-            Log.d(TAG, "restorePackage() called during active restore");
-            return -1;
-        }
-        mObserver = new RestoreObserverWrapper(mContext, observer);
-        try {
-            err = mBinder.restorePackage(packageName, mObserver);
-        } catch (RemoteException e) {
-            Log.d(TAG, "Can't contact server to restore package");
-        }
-        return err;
+        return restorePackage(packageName, observer, null);
     }
 
     /**
@@ -234,6 +331,19 @@ public class RestoreSession {
         public void restoreFinished(int error) {
             mHandler.sendMessage(
                     mHandler.obtainMessage(MSG_RESTORE_FINISHED, error, 0));
+        }
+    }
+
+    private class BackupManagerMonitorWrapper extends IBackupManagerMonitor.Stub {
+        final BackupManagerMonitor mMonitor;
+
+        BackupManagerMonitorWrapper(BackupManagerMonitor monitor) {
+            mMonitor = monitor;
+        }
+
+        @Override
+        public void onEvent(final Bundle event) throws RemoteException {
+            mMonitor.onEvent(event);
         }
     }
 }

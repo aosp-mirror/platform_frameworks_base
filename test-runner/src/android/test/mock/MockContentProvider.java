@@ -16,6 +16,7 @@
 
 package android.test.mock;
 
+import android.annotation.Nullable;
 import android.content.ContentProvider;
 import android.content.ContentProviderOperation;
 import android.content.ContentProviderResult;
@@ -97,11 +98,11 @@ public class MockContentProvider extends ContentProvider {
         }
 
         @Override
-        public Cursor query(String callingPackage, Uri url, String[] projection, String selection,
-                String[] selectionArgs,
-                String sortOrder, ICancellationSignal cancellationSignal) throws RemoteException {
-            return MockContentProvider.this.query(url, projection, selection,
-                    selectionArgs, sortOrder);
+        public Cursor query(String callingPackage, Uri url, @Nullable String[] projection,
+                @Nullable Bundle queryArgs,
+                @Nullable ICancellationSignal cancellationSignal)
+                throws RemoteException {
+            return MockContentProvider.this.query(url, projection, queryArgs, null);
         }
 
         @Override
@@ -146,6 +147,12 @@ public class MockContentProvider extends ContentProvider {
         @Override
         public Uri uncanonicalize(String callingPkg, Uri uri) throws RemoteException {
             return MockContentProvider.this.uncanonicalize(uri);
+        }
+
+        @Override
+        public boolean refresh(String callingPkg, Uri url, Bundle args,
+                ICancellationSignal cancellationSignal) throws RemoteException {
+            return MockContentProvider.this.refresh(url, args);
         }
     }
     private final InversionIContentProvider mIContentProvider = new InversionIContentProvider();
@@ -242,11 +249,20 @@ public class MockContentProvider extends ContentProvider {
         throw new UnsupportedOperationException("unimplemented mock method call");
     }
 
+    @Override
     public String[] getStreamTypes(Uri url, String mimeTypeFilter) {
         throw new UnsupportedOperationException("unimplemented mock method call");
     }
 
+    @Override
     public AssetFileDescriptor openTypedAssetFile(Uri url, String mimeType, Bundle opts) {
+        throw new UnsupportedOperationException("unimplemented mock method call");
+    }
+
+    /**
+     * @hide
+     */
+    public boolean refresh(Uri url, Bundle args) {
         throw new UnsupportedOperationException("unimplemented mock method call");
     }
 

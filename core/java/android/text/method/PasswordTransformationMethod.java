@@ -16,18 +16,18 @@
 
 package android.text.method;
 
+import android.graphics.Rect;
 import android.os.Handler;
 import android.os.SystemClock;
-import android.graphics.Rect;
-import android.view.View;
 import android.text.Editable;
 import android.text.GetChars;
 import android.text.NoCopySpan;
+import android.text.Spannable;
+import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.text.Spanned;
-import android.text.Spannable;
 import android.text.style.UpdateLayout;
+import android.view.View;
 
 import java.lang.ref.WeakReference;
 

@@ -282,8 +282,8 @@ class MtpManager {
             }
             final MtpDeviceInfo info = mtpDevice.getDeviceInfo();
             if (info != null) {
-                operationsSupported = mtpDevice.getDeviceInfo().getOperationsSupported();
-                eventsSupported = mtpDevice.getDeviceInfo().getEventsSupported();
+                operationsSupported = info.getOperationsSupported();
+                eventsSupported = info.getEventsSupported();
             }
         } else {
             roots = new MtpRoot[0];

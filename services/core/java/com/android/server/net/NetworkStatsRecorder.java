@@ -29,9 +29,11 @@ import android.net.NetworkStatsHistory;
 import android.net.NetworkTemplate;
 import android.net.TrafficStats;
 import android.os.DropBoxManager;
+import android.service.NetworkStatsRecorderProto;
 import android.util.Log;
 import android.util.MathUtils;
 import android.util.Slog;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.net.VpnInfo;
 import com.android.internal.util.FileRotator;
@@ -463,6 +465,15 @@ public class NetworkStatsRecorder {
             pw.println("History since boot:");
             mSinceBoot.dump(pw);
         }
+    }
+
+    public void writeToProtoLocked(ProtoOutputStream proto, long tag) {
+        final long start = proto.start(tag);
+        if (mPending != null) {
+            proto.write(NetworkStatsRecorderProto.PENDING_TOTAL_BYTES, mPending.getTotalBytes());
+        }
+        getOrLoadCompleteLocked().writeToProto(proto, NetworkStatsRecorderProto.COMPLETE_HISTORY);
+        proto.end(start);
     }
 
     public void dumpCheckin(PrintWriter pw, long start, long end) {

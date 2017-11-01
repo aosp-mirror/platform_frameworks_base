@@ -426,6 +426,7 @@ public abstract class Visibility extends Transition {
                     @Override
                     public void onTransitionEnd(Transition transition) {
                         finalSceneRoot.getOverlay().remove(finalOverlayView);
+                        transition.removeListener(this);
                     }
                 });
             }
@@ -542,6 +543,7 @@ public abstract class Visibility extends Transition {
         @Override
         public void onTransitionEnd(Transition transition) {
             hideViewWhenNotCanceled();
+            transition.removeListener(this);
         }
 
         @Override

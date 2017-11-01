@@ -18,6 +18,7 @@
 #define LOG_TAG "BootAnimation"
 
 #include <stdint.h>
+#include <inttypes.h>
 #include <sys/inotify.h>
 #include <sys/poll.h>
 #include <sys/stat.h>
@@ -35,6 +36,9 @@
 #include <utils/Atomic.h>
 #include <utils/Errors.h>
 #include <utils/Log.h>
+#include <utils/SystemClock.h>
+
+#include <android-base/properties.h>
 
 #include <ui/PixelFormat.h>
 #include <ui/Rect.h>
@@ -49,8 +53,8 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #include <SkBitmap.h>
+#include <SkImage.h>
 #include <SkStream.h>
-#include <SkImageDecoder.h>
 #pragma GCC diagnostic pop
 
 #include <GLES/gl.h>
@@ -58,13 +62,15 @@
 #include <EGL/eglext.h>
 
 #include "BootAnimation.h"
-#include "audioplay.h"
 
 namespace android {
 
 static const char OEM_BOOTANIMATION_FILE[] = "/oem/media/bootanimation.zip";
 static const char SYSTEM_BOOTANIMATION_FILE[] = "/system/media/bootanimation.zip";
 static const char SYSTEM_ENCRYPTED_BOOTANIMATION_FILE[] = "/system/media/bootanimation-encrypted.zip";
+static const char OEM_SHUTDOWNANIMATION_FILE[] = "/oem/media/shutdownanimation.zip";
+static const char SYSTEM_SHUTDOWNANIMATION_FILE[] = "/system/media/shutdownanimation.zip";
+
 static const char SYSTEM_DATA_DIR_PATH[] = "/data/system";
 static const char SYSTEM_TIME_DIR_NAME[] = "time";
 static const char SYSTEM_TIME_DIR_PATH[] = "/data/system/time";
@@ -74,6 +80,7 @@ static const char LAST_TIME_CHANGED_FILE_NAME[] = "last_time_change";
 static const char LAST_TIME_CHANGED_FILE_PATH[] = "/data/system/time/last_time_change";
 static const char ACCURATE_TIME_FLAG_FILE_NAME[] = "time_is_accurate";
 static const char ACCURATE_TIME_FLAG_FILE_PATH[] = "/data/system/time/time_is_accurate";
+static const char TIME_FORMAT_12_HOUR_FLAG_FILE_PATH[] = "/data/system/time/time_format_12_hour";
 // Java timestamp format. Don't show the clock if the date is before 2000-01-01 00:00:00.
 static const long long ACCURATE_TIME_EPOCH = 946684800000;
 static constexpr char FONT_BEGIN_CHAR = ' ';
@@ -84,29 +91,25 @@ static constexpr size_t FONT_NUM_ROWS = FONT_NUM_CHARS / FONT_NUM_COLS;
 static const int TEXT_CENTER_VALUE = INT_MAX;
 static const int TEXT_MISSING_VALUE = INT_MIN;
 static const char EXIT_PROP_NAME[] = "service.bootanim.exit";
-static const char PLAY_SOUND_PROP_NAME[] = "persist.sys.bootanim.play_sound";
 static const int ANIM_ENTRY_NAME_MAX = 256;
 static constexpr size_t TEXT_POS_LEN_MAX = 16;
-static const char BOOT_COMPLETED_PROP_NAME[] = "sys.boot_completed";
-static const char BOOTREASON_PROP_NAME[] = "ro.boot.bootreason";
-// bootreasons list in "system/core/bootstat/bootstat.cpp".
-static const std::vector<std::string> PLAY_SOUND_BOOTREASON_BLACKLIST {
-  "kernel_panic",
-  "Panic",
-  "Watchdog",
-};
 
 // ---------------------------------------------------------------------------
 
-BootAnimation::BootAnimation() : Thread(false), mClockEnabled(true), mTimeIsAccurate(false),
-        mTimeCheckThread(NULL) {
+BootAnimation::BootAnimation(InitCallback initCallback,
+                             PlayPartCallback partCallback)
+        : Thread(false), mClockEnabled(true), mTimeIsAccurate(false),
+        mTimeFormat12Hour(false), mTimeCheckThread(NULL),
+        mInitCallback(initCallback), mPlayPartCallback(partCallback) {
     mSession = new SurfaceComposerClient();
 
-    // If the system has already booted, the animation is not being used for a boot.
-    mSystemBoot = !property_get_bool(BOOT_COMPLETED_PROP_NAME, 0);
+    std::string powerCtl = android::base::GetProperty("sys.powerctl", "");
+    if (powerCtl.empty()) {
+        mShuttingDown = false;
+    } else {
+        mShuttingDown = true;
+    }
 }
-
-BootAnimation::~BootAnimation() {}
 
 void BootAnimation::onFirstRef() {
     status_t err = mSession->linkToComposerDeath(this);
@@ -130,7 +133,6 @@ void BootAnimation::binderDied(const wp<IBinder>&)
     // might be blocked on a condition variable that will never be updated.
     kill( getpid(), SIGKILL );
     requestExit();
-    audioplay::destroy();
 }
 
 status_t BootAnimation::initTexture(Texture* texture, AssetManager& assets,
@@ -139,14 +141,12 @@ status_t BootAnimation::initTexture(Texture* texture, AssetManager& assets,
     if (asset == NULL)
         return NO_INIT;
     SkBitmap bitmap;
-    SkImageDecoder::DecodeMemory(asset->getBuffer(false), asset->getLength(),
-            &bitmap, kUnknown_SkColorType, SkImageDecoder::kDecodePixels_Mode);
+    sk_sp<SkData> data = SkData::MakeWithoutCopy(asset->getBuffer(false),
+            asset->getLength());
+    sk_sp<SkImage> image = SkImage::MakeFromEncoded(data);
+    image->asLegacyBitmap(&bitmap, SkImage::kRO_LegacyBitmapMode);
     asset->close();
     delete asset;
-
-    // ensure we can call getPixels(). No need to call unlock, since the
-    // bitmap will go out of scope when we return from this method.
-    bitmap.lockPixels();
 
     const int w = bitmap.width();
     const int h = bitmap.height();
@@ -192,24 +192,15 @@ status_t BootAnimation::initTexture(Texture* texture, AssetManager& assets,
 status_t BootAnimation::initTexture(FileMap* map, int* width, int* height)
 {
     SkBitmap bitmap;
-    SkMemoryStream  stream(map->getDataPtr(), map->getDataLength());
-    SkImageDecoder* codec = SkImageDecoder::Factory(&stream);
-    if (codec != NULL) {
-        codec->setDitherImage(false);
-        codec->decode(&stream, &bitmap,
-                kN32_SkColorType,
-                SkImageDecoder::kDecodePixels_Mode);
-        delete codec;
-    }
+    sk_sp<SkData> data = SkData::MakeWithoutCopy(map->getDataPtr(),
+            map->getDataLength());
+    sk_sp<SkImage> image = SkImage::MakeFromEncoded(data);
+    image->asLegacyBitmap(&bitmap, SkImage::kRO_LegacyBitmapMode);
 
     // FileMap memory is never released until application exit.
     // Release it now as the texture is already loaded and the memory used for
     // the packed resource can be released.
     delete map;
-
-    // ensure we can call getPixels(). No need to call unlock, since the
-    // bitmap will go out of scope when we return from this method.
-    bitmap.lockPixels();
 
     const int w = bitmap.width();
     const int h = bitmap.height();
@@ -316,16 +307,23 @@ status_t BootAnimation::readyToRun() {
     char decrypt[PROPERTY_VALUE_MAX];
     property_get("vold.decrypt", decrypt, "");
 
-    bool encryptedAnimation = atoi(decrypt) != 0 || !strcmp("trigger_restart_min_framework", decrypt);
+    bool encryptedAnimation = atoi(decrypt) != 0 ||
+        !strcmp("trigger_restart_min_framework", decrypt);
 
-    if (encryptedAnimation && (access(SYSTEM_ENCRYPTED_BOOTANIMATION_FILE, R_OK) == 0)) {
+    if (!mShuttingDown && encryptedAnimation &&
+        (access(SYSTEM_ENCRYPTED_BOOTANIMATION_FILE, R_OK) == 0)) {
         mZipFileName = SYSTEM_ENCRYPTED_BOOTANIMATION_FILE;
+        return NO_ERROR;
     }
-    else if (access(OEM_BOOTANIMATION_FILE, R_OK) == 0) {
-        mZipFileName = OEM_BOOTANIMATION_FILE;
-    }
-    else if (access(SYSTEM_BOOTANIMATION_FILE, R_OK) == 0) {
-        mZipFileName = SYSTEM_BOOTANIMATION_FILE;
+    static const char* bootFiles[] = {OEM_BOOTANIMATION_FILE, SYSTEM_BOOTANIMATION_FILE};
+    static const char* shutdownFiles[] =
+        {OEM_SHUTDOWNANIMATION_FILE, SYSTEM_SHUTDOWNANIMATION_FILE};
+
+    for (const char* f : (!mShuttingDown ? bootFiles : shutdownFiles)) {
+        if (access(f, R_OK) == 0) {
+            mZipFileName = f;
+            return NO_ERROR;
+        }
     }
     return NO_ERROR;
 }
@@ -354,6 +352,8 @@ bool BootAnimation::threadLoop()
 
 bool BootAnimation::android()
 {
+    ALOGD("%sAnimationShownTiming start time: %" PRId64 "ms", mShuttingDown ? "Shutdown" : "Boot",
+            elapsedRealtime());
     initTexture(&mAndroid[0], mAssets, "images/android-logo-mask.png");
     initTexture(&mAndroid[1], mAssets, "images/android-logo-shine.png");
 
@@ -590,9 +590,10 @@ void BootAnimation::drawText(const char* str, const Font& font, bool bold, int* 
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-// We render 24 hour time.
+// We render 12 or 24 hour time.
 void BootAnimation::drawClock(const Font& font, const int xPos, const int yPos) {
-    static constexpr char TIME_FORMAT[] = "%H:%M";
+    static constexpr char TIME_FORMAT_12[] = "%l:%M";
+    static constexpr char TIME_FORMAT_24[] = "%H:%M";
     static constexpr int TIME_LENGTH = 6;
 
     time_t rawtime;
@@ -600,7 +601,8 @@ void BootAnimation::drawClock(const Font& font, const int xPos, const int yPos) 
     struct tm* timeInfo = localtime(&rawtime);
 
     char timeBuff[TIME_LENGTH];
-    size_t length = strftime(timeBuff, TIME_LENGTH, TIME_FORMAT, timeInfo);
+    const char* timeFormat = mTimeFormat12Hour ? TIME_FORMAT_12 : TIME_FORMAT_24;
+    size_t length = strftime(timeBuff, TIME_LENGTH, timeFormat, timeInfo);
 
     if (length != TIME_LENGTH - 1) {
         ALOGE("Couldn't format time; abandoning boot animation clock");
@@ -608,9 +610,10 @@ void BootAnimation::drawClock(const Font& font, const int xPos, const int yPos) 
         return;
     }
 
+    char* out = timeBuff[0] == ' ' ? &timeBuff[1] : &timeBuff[0];
     int x = xPos;
     int y = yPos;
-    drawText(timeBuff, font, false, &x, &y);
+    drawText(out, font, false, &x, &y);
 }
 
 bool BootAnimation::parseAnimationDesc(Animation& animation)
@@ -691,7 +694,6 @@ bool BootAnimation::preloadZip(Animation& animation)
         return false;
     }
 
-    Animation::Part* partWithAudio = NULL;
     ZipEntryRO entry;
     char name[ANIM_ENTRY_NAME_MAX];
     while ((entry = zip->nextEntry(cookie)) != NULL) {
@@ -726,7 +728,6 @@ bool BootAnimation::preloadZip(Animation& animation)
                                     // a part may have at most one audio file
                                     part.audioData = (uint8_t *)map->getDataPtr();
                                     part.audioLength = map->getDataLength();
-                                    partWithAudio = &part;
                                 } else if (leaf == "trim.txt") {
                                     part.trimData.setTo((char const*)map->getDataPtr(),
                                                         map->getDataLength());
@@ -776,12 +777,8 @@ bool BootAnimation::preloadZip(Animation& animation)
         }
     }
 
-    // Create and initialize audioplay if there is a wav file in any of the animations.
-    if (partWithAudio != NULL) {
-        ALOGD("found audio.wav, creating playback engine");
-        if (!audioplay::create(partWithAudio->audioData, partWithAudio->audioLength)) {
-            return false;
-        }
+    if (mInitCallback != nullptr) {
+        mInitCallback(animation.parts);
     }
 
     zip->endIteration(cookie);
@@ -849,9 +846,9 @@ bool BootAnimation::movie()
 
     playAnimation(*animation);
 
-    if (mTimeCheckThread != NULL) {
+    if (mTimeCheckThread != nullptr) {
         mTimeCheckThread->requestExit();
-        mTimeCheckThread = NULL;
+        mTimeCheckThread = nullptr;
     }
 
     releaseAnimation(animation);
@@ -870,6 +867,8 @@ bool BootAnimation::playAnimation(const Animation& animation)
     const int animationX = (mWidth - animation.width) / 2;
     const int animationY = (mHeight - animation.height) / 2;
 
+    ALOGD("%sAnimationShownTiming start time: %" PRId64 "ms", mShuttingDown ? "Shutdown" : "Boot",
+            elapsedRealtime());
     for (size_t i=0 ; i<pcount ; i++) {
         const Animation::Part& part(animation.parts[i]);
         const size_t fcount = part.frames.size();
@@ -888,10 +887,8 @@ bool BootAnimation::playAnimation(const Animation& animation)
             if(exitPending() && !part.playUntilComplete)
                 break;
 
-            // only play audio file the first time we animate the part
-            if (r == 0 && part.audioData && playSoundsAllowed()) {
-                ALOGD("playing clip for part%d, size=%d", (int) i, part.audioLength);
-                audioplay::playClip(part.audioData, part.audioLength);
+            if (mPlayPartCallback != nullptr) {
+                mPlayPartCallback(i, part, r);
             }
 
             glClearColor(
@@ -980,10 +977,6 @@ bool BootAnimation::playAnimation(const Animation& animation)
         }
     }
 
-    // we've finally played everything we're going to play
-    audioplay::setPlaying(false);
-    audioplay::destroy();
-
     return true;
 }
 
@@ -1029,30 +1022,6 @@ BootAnimation::Animation* BootAnimation::loadAnimation(const String8& fn)
     return animation;
 }
 
-bool BootAnimation::playSoundsAllowed() const {
-    // Only play sounds for system boots, not runtime restarts.
-    if (!mSystemBoot) {
-        return false;
-    }
-
-    // Read the system property to see if we should play the sound.
-    // If it's not present, default to allowed.
-    if (!property_get_bool(PLAY_SOUND_PROP_NAME, 1)) {
-        return false;
-    }
-
-    // Don't play sounds if this is a reboot due to an error.
-    char bootreason[PROPERTY_VALUE_MAX];
-    if (property_get(BOOTREASON_PROP_NAME, bootreason, nullptr) > 0) {
-        for (const auto& str : PLAY_SOUND_BOOTREASON_BLACKLIST) {
-            if (strcasecmp(str.c_str(), bootreason) == 0) {
-                return false;
-            }
-        }
-    }
-    return true;
-}
-
 bool BootAnimation::updateIsTimeAccurate() {
     static constexpr long long MAX_TIME_IN_PAST =   60000LL * 60LL * 24LL * 30LL;  // 30 days
     static constexpr long long MAX_TIME_IN_FUTURE = 60000LL * 90LL;  // 90 minutes
@@ -1060,8 +1029,13 @@ bool BootAnimation::updateIsTimeAccurate() {
     if (mTimeIsAccurate) {
         return true;
     }
-
+    if (mShuttingDown) return true;
     struct stat statResult;
+
+    if(stat(TIME_FORMAT_12_HOUR_FLAG_FILE_PATH, &statResult) == 0) {
+        mTimeFormat12Hour = true;
+    }
+
     if(stat(ACCURATE_TIME_FLAG_FILE_PATH, &statResult) == 0) {
         mTimeIsAccurate = true;
         return true;

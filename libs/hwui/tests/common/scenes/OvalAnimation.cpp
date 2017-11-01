@@ -28,10 +28,10 @@ static TestScene::Registrar _Oval(TestScene::Info{
 class OvalAnimation : public TestScene {
 public:
     sp<RenderNode> card;
-    void createContent(int width, int height, TestCanvas& canvas) override {
-        canvas.drawColor(Color::White, SkXfermode::kSrcOver_Mode);
+    void createContent(int width, int height, Canvas& canvas) override {
+        canvas.drawColor(Color::White, SkBlendMode::kSrcOver);
         card = TestUtils::createNode(0, 0, 200, 200,
-                [](RenderProperties& props, TestCanvas& canvas) {
+                [](RenderProperties& props, Canvas& canvas) {
             SkPaint paint;
             paint.setAntiAlias(true);
             paint.setColor(Color::Black);

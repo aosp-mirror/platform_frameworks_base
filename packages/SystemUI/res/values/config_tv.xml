@@ -17,17 +17,9 @@
 <resources>
     <!-- Bounds [left top right bottom] on screen for picture-in-picture (PIP) windows,
          when the PIP menu is shown with settings. -->
-    <string translatable="false" name="pip_settings_bounds">"662 54 1142 324"</string>
+    <string translatable="false" name="pip_settings_bounds">"662 756 1142 1026"</string>
 
     <!-- Bounds [left top right bottom] on screen for picture-in-picture (PIP) windows,
          when the PIP menu is shown in center. -->
     <string translatable="false" name="pip_menu_bounds">"596 280 1324 690"</string>
-
-    <!-- Bounds [left top right bottom] on screen for picture-in-picture (PIP) windows,
-         when the PIP is shown in Recents without focus. -->
-    <string translatable="false" name="pip_recents_bounds">"800 54 1120 234"</string>
-
-    <!-- Bounds [left top right bottom] on screen for picture-in-picture (PIP) windows,
-         when the PIP is shown in Recents with focus. -->
-    <string translatable="false" name="pip_recents_focused_bounds">"775 54 1145 262"</string>
 </resources>

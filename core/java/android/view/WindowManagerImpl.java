@@ -18,12 +18,12 @@ package android.view;
 
 import android.annotation.NonNull;
 import android.content.Context;
+import android.graphics.Region;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 
 import com.android.internal.os.IResultReceiver;
-import com.android.internal.R;
 
 import java.util.List;
 
@@ -38,11 +38,11 @@ import java.util.List;
  * Additional window manager specific layout parameters are defined for
  * control over how windows are displayed.  It also implements the {@link WindowManager}
  * interface, allowing you to control the displays attached to the device.
- * 
+ *
  * <p>Applications will not normally use WindowManager directly, instead relying
  * on the higher-level facilities in {@link android.app.Activity} and
  * {@link android.app.Dialog}.
- * 
+ *
  * <p>Even for low-level window manager access, it is almost never correct to use
  * this class.  For example, {@link android.app.Activity#getWindowManager}
  * provides a window manager for adding windows that are associated with that
@@ -145,5 +145,14 @@ public final class WindowManagerImpl implements WindowManager {
     @Override
     public Display getDefaultDisplay() {
         return mContext.getDisplay();
+    }
+
+    @Override
+    public Region getCurrentImeTouchRegion() {
+        try {
+            return WindowManagerGlobal.getWindowManagerService().getCurrentImeTouchRegion();
+        } catch (RemoteException e) {
+        }
+        return null;
     }
 }

@@ -98,9 +98,12 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
 
     /**
      * Constructs a Bundle containing a copy of the mappings from the given
-     * Bundle.
+     * Bundle.  Does only a shallow copy of the original Bundle -- see
+     * {@link #deepCopy()} if that is not what you want.
      *
      * @param b a Bundle to be copied.
+     *
+     * @see #deepCopy()
      */
     public Bundle(Bundle b) {
         super(b);
@@ -109,13 +112,21 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
 
     /**
      * Constructs a Bundle containing a copy of the mappings from the given
-     * PersistableBundle.
+     * PersistableBundle.  Does only a shallow copy of the PersistableBundle -- see
+     * {@link PersistableBundle#deepCopy()} if you don't want that.
      *
-     * @param b a Bundle to be copied.
+     * @param b a PersistableBundle to be copied.
      */
     public Bundle(PersistableBundle b) {
         super(b);
         mFlags = FLAG_HAS_FDS_KNOWN | FLAG_ALLOW_FDS;
+    }
+
+    /**
+     * Constructs a Bundle without initializing it.
+     */
+    Bundle(boolean doInit) {
+        super(doInit);
     }
 
     /**
@@ -196,6 +207,19 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
     }
 
     /**
+     * Make a deep copy of the given bundle.  Traverses into inner containers and copies
+     * them as well, so they are not shared across bundles.  Will traverse in to
+     * {@link Bundle}, {@link PersistableBundle}, {@link ArrayList}, and all types of
+     * primitive arrays.  Other types of objects (such as Parcelable or Serializable)
+     * are referenced as-is and not copied in any way.
+     */
+    public Bundle deepCopy() {
+        Bundle b = new Bundle(false);
+        b.copyInternal(this, true);
+        return b;
+    }
+
+    /**
      * Removes all elements from the mapping of this Bundle.
      */
     @Override
@@ -232,6 +256,19 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
         }
         if ((bundle.mFlags & FLAG_HAS_FDS_KNOWN) == 0) {
             mFlags &= ~FLAG_HAS_FDS_KNOWN;
+        }
+    }
+
+    /**
+     * Return the size of {@link #mParcelledData} in bytes if available, otherwise {@code 0}.
+     *
+     * @hide
+     */
+    public int getSize() {
+        if (mParcelledData != null) {
+            return mParcelledData.dataSize();
+        } else {
+            return 0;
         }
     }
 
@@ -1184,5 +1221,19 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
             }
         }
         return "Bundle[" + mMap.toString() + "]";
+    }
+
+    /**
+     * @hide
+     */
+    public synchronized String toShortString() {
+        if (mParcelledData != null) {
+            if (isEmptyParcel()) {
+                return "EMPTY_PARCEL";
+            } else {
+                return "mParcelledData.dataSize=" + mParcelledData.dataSize();
+            }
+        }
+        return mMap.toString();
     }
 }

@@ -104,7 +104,8 @@ public final class MediaProjection {
         int flags = isSecure ? DisplayManager.VIRTUAL_DISPLAY_FLAG_SECURE : 0;
         return dm.createVirtualDisplay(this, name, width, height, dpi, surface,
                     flags | DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR |
-                    DisplayManager.VIRTUAL_DISPLAY_FLAG_PRESENTATION, callback, handler);
+                    DisplayManager.VIRTUAL_DISPLAY_FLAG_PRESENTATION, callback, handler,
+                    null /* uniqueId */);
     }
 
     /**
@@ -134,8 +135,8 @@ public final class MediaProjection {
             int width, int height, int dpi, int flags, @Nullable Surface surface,
             @Nullable VirtualDisplay.Callback callback, @Nullable Handler handler) {
         DisplayManager dm = (DisplayManager) mContext.getSystemService(Context.DISPLAY_SERVICE);
-        return dm.createVirtualDisplay(
-                    this, name, width, height, dpi, surface, flags, callback, handler);
+        return dm.createVirtualDisplay(this, name, width, height, dpi, surface, flags, callback,
+                handler, null /* uniqueId */);
     }
 
     /**

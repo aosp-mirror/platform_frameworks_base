@@ -22,11 +22,16 @@ import android.database.ContentObserver;
 import android.os.Handler;
 import android.provider.Settings;
 import android.provider.Settings.System;
-import android.text.*;
+import android.text.Editable;
+import android.text.InputType;
+import android.text.NoCopySpan;
+import android.text.Selection;
+import android.text.SpanWatcher;
+import android.text.Spannable;
+import android.text.TextUtils;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.View;
-import android.text.InputType;
 
 import java.lang.ref.WeakReference;
 
@@ -127,7 +132,7 @@ public class TextKeyListener extends BaseKeyListener implements SpanWatcher {
     public int getInputType() {
         return makeTextContentType(mAutoCap, mAutoText);
     }
-    
+
     @Override
     public boolean onKeyDown(View view, Editable content,
                              int keyCode, KeyEvent event) {
@@ -213,7 +218,7 @@ public class TextKeyListener extends BaseKeyListener implements SpanWatcher {
         public int getInputType() {
             return InputType.TYPE_NULL;
         }
-        
+
         public boolean onKeyDown(View view, Editable content,
                                  int keyCode, KeyEvent event) {
             return false;
@@ -230,7 +235,7 @@ public class TextKeyListener extends BaseKeyListener implements SpanWatcher {
 
         public void clearMetaKeyState(View view, Editable content, int states) {
         }
-        
+
         public static NullKeyListener getInstance() {
             if (sInstance != null)
                 return sInstance;

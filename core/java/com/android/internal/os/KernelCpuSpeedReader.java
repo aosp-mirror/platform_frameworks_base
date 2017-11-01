@@ -15,11 +15,11 @@
  */
 package com.android.internal.os;
 
+import android.system.Os;
 import android.text.TextUtils;
+import android.os.StrictMode;
 import android.system.OsConstants;
 import android.util.Slog;
-
-import libcore.io.Libcore;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -52,7 +52,7 @@ public class KernelCpuSpeedReader {
                 cpuNumber);
         mLastSpeedTimes = new long[numSpeedSteps];
         mDeltaSpeedTimes = new long[numSpeedSteps];
-        long jiffyHz = Libcore.os.sysconf(OsConstants._SC_CLK_TCK);
+        long jiffyHz = Os.sysconf(OsConstants._SC_CLK_TCK);
         mJiffyMillis = 1000/jiffyHz;
     }
 
@@ -62,6 +62,7 @@ public class KernelCpuSpeedReader {
      * {@link #readDelta}.
      */
     public long[] readDelta() {
+        StrictMode.ThreadPolicy policy = StrictMode.allowThreadDiskReads();
         try (BufferedReader reader = new BufferedReader(new FileReader(mProcFile))) {
             TextUtils.SimpleStringSplitter splitter = new TextUtils.SimpleStringSplitter(' ');
             String line;
@@ -84,6 +85,8 @@ public class KernelCpuSpeedReader {
         } catch (IOException e) {
             Slog.e(TAG, "Failed to read cpu-freq: " + e.getMessage());
             Arrays.fill(mDeltaSpeedTimes, 0);
+        } finally {
+            StrictMode.setThreadPolicy(policy);
         }
         return mDeltaSpeedTimes;
     }

@@ -16,15 +16,18 @@
 
 package android.text.method;
 
-import android.app.Activity;
-import android.test.suitebuilder.annotation.SmallTest;
-import android.test.suitebuilder.annotation.Suppress;
+import android.support.test.InstrumentationRegistry;
+import android.support.test.filters.SmallTest;
+import android.support.test.runner.AndroidJUnit4;
 import android.text.InputType;
-import android.text.method.BaseKeyListener;
-import android.text.method.KeyListenerTestCase;
+import android.util.KeyUtils;
 import android.view.KeyEvent;
 import android.widget.EditText;
 import android.widget.TextView.BufferType;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * Test forward delete key handling of  {@link android.text.method.BaseKeyListener}.
@@ -32,40 +35,39 @@ import android.widget.TextView.BufferType;
  * Only contains edge cases. For normal cases, see {@see android.text.method.cts.ForwardDeleteTest}.
  * TODO: introduce test cases for surrogate pairs and replacement span.
  */
-public class ForwardDeleteTest extends KeyListenerTestCase {
+@SmallTest
+@RunWith(AndroidJUnit4.class)
+public class ForwardDeleteTest {
+    private EditText mTextView;
+
     private static final BaseKeyListener mKeyListener = new BaseKeyListener() {
         public int getInputType() {
             return InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_NORMAL;
         }
     };
 
+    @Before
+    public void setup() {
+        mTextView = new EditText(InstrumentationRegistry.getInstrumentation().getContext());
+    }
+
     // Sync the state to the TextView and call onKeyDown with KEYCODE_FORWARD_DEL key event.
     // Then update the state to the result of TextView.
     private void forwardDelete(final EditorState state, int modifiers) {
-        mActivity.runOnUiThread(new Runnable() {
-            public void run() {
-                mTextView.setText(state.mText, BufferType.EDITABLE);
-                mTextView.setKeyListener(mKeyListener);
-                mTextView.setSelection(state.mSelectionStart, state.mSelectionEnd);
-            }
-        });
-        mInstrumentation.waitForIdleSync();
-        assertTrue(mTextView.hasWindowFocus());
+        mTextView.setText(state.mText, BufferType.EDITABLE);
+        mTextView.setKeyListener(mKeyListener);
+        mTextView.setSelection(state.mSelectionStart, state.mSelectionEnd);
 
-        final KeyEvent keyEvent = getKey(KeyEvent.KEYCODE_FORWARD_DEL, modifiers);
-        mActivity.runOnUiThread(new Runnable() {
-            public void run() {
-                mTextView.onKeyDown(keyEvent.getKeyCode(), keyEvent);
-            }
-        });
-        mInstrumentation.waitForIdleSync();
+        final KeyEvent keyEvent = KeyUtils.generateKeyEvent(
+            KeyEvent.KEYCODE_FORWARD_DEL, KeyEvent.ACTION_DOWN, modifiers);
+        mTextView.onKeyDown(keyEvent.getKeyCode(), keyEvent);
 
         state.mText = mTextView.getText();
         state.mSelectionStart = mTextView.getSelectionStart();
         state.mSelectionEnd = mTextView.getSelectionEnd();
     }
 
-    @SmallTest
+    @Test
     public void testCombiningEnclosingKeycaps() {
         EditorState state = new EditorState();
 
@@ -85,7 +87,7 @@ public class ForwardDeleteTest extends KeyListenerTestCase {
         state.assertEquals("|");
     }
 
-    @SmallTest
+    @Test
     public void testVariationSelector() {
         EditorState state = new EditorState();
 
@@ -133,7 +135,7 @@ public class ForwardDeleteTest extends KeyListenerTestCase {
         state.assertEquals("|");
     }
 
-    @SmallTest
+    @Test
     public void testEmojiZeroWidthJoinerSequence() {
         EditorState state = new EditorState();
 
@@ -176,7 +178,7 @@ public class ForwardDeleteTest extends KeyListenerTestCase {
         state.assertEquals("|");
     }
 
-    @SmallTest
+    @Test
     public void testFlags() {
         EditorState state = new EditorState();
 
@@ -191,9 +193,49 @@ public class ForwardDeleteTest extends KeyListenerTestCase {
         state.assertEquals("| U+1F1FA");
         forwardDelete(state, 0);
         state.assertEquals("|");
+
+        // Incomplete sequence. (no tag_term:U+E007E)
+        state.setByString("| 'a' U+1F3F4 U+E0067 'b'");
+        forwardDelete(state, 0);
+        state.assertEquals("| U+1F3F4 U+E0067 'b'");
+        forwardDelete(state, 0);
+        state.assertEquals("| 'b'");
+
+        // No tag_base
+        state.setByString("| 'a' U+E0067 U+E007F 'b'");
+        forwardDelete(state, 0);
+        state.assertEquals("| 'b'");
+
+        // Isolated tag chars
+        state.setByString("| 'a' U+E0067 U+E0067 'b'");
+        forwardDelete(state, 0);
+        state.assertEquals("| 'b'");
+
+        // Isolated tag base.
+        state.setByString("| 'a' U+1F3F4 U+1F3F4 'b'");
+        forwardDelete(state, 0);
+        state.assertEquals("| U+1F3F4 U+1F3F4 'b'");
+        forwardDelete(state, 0);
+        state.assertEquals("| U+1F3F4 'b'");
+        forwardDelete(state, 0);
+        state.assertEquals("| 'b'");
+
+        // Isolated tab term.
+        state.setByString("| 'a' U+E007F U+E007F 'b'");
+        forwardDelete(state, 0);
+        state.assertEquals("| 'b'");
+
+        // Immediate tag_term after tag_base
+        state.setByString("| 'a' U+1F3F4 U+E007F U+1F3F4 U+E007F 'b'");
+        forwardDelete(state, 0);
+        state.assertEquals("| U+1F3F4 U+E007F U+1F3F4 U+E007F 'b'");
+        forwardDelete(state, 0);
+        state.assertEquals("| U+1F3F4 U+E007F 'b'");
+        forwardDelete(state, 0);
+        state.assertEquals("| 'b'");
     }
 
-    @SmallTest
+    @Test
     public void testEmojiModifier() {
         EditorState state = new EditorState();
 
@@ -222,7 +264,7 @@ public class ForwardDeleteTest extends KeyListenerTestCase {
         state.assertEquals("|");
     }
 
-    @SmallTest
+    @Test
     public void testMixedEdgeCases() {
         EditorState state = new EditorState();
 
@@ -331,6 +373,8 @@ public class ForwardDeleteTest extends KeyListenerTestCase {
         state.setByString("| U+1F469 U+200D U+1F1FA");
         forwardDelete(state, 0);
         state.assertEquals("| U+1F1FA");
+        forwardDelete(state, 0);
+        state.assertEquals("|");
 
         // Regional indicator symbol + end with ZERO WIDTH JOINER
         state.setByString("| U+1F1FA U+200D");
@@ -352,7 +396,7 @@ public class ForwardDeleteTest extends KeyListenerTestCase {
         // ZERO WIDTH JOINER + emoji modifier
         state.setByString("| U+1F469 U+200D U+1F3FB");
         forwardDelete(state, 0);
-        state.assertEquals("| U+1F3FB");
+        state.assertEquals("|");
 
         // Emoji modifier + end with ZERO WIDTH JOINER
         state.setByString("| U+1F466 U+1F3FB U+200D");

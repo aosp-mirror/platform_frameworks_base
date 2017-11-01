@@ -28,18 +28,28 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include <android/hardware/power/1.0/IPower.h>
+#include <android/hardware/power/1.1/IPower.h>
 #include <android_runtime/AndroidRuntime.h>
 #include <jni.h>
 
-#include <ScopedLocalRef.h>
-#include <ScopedPrimitiveArray.h>
+#include <nativehelper/ScopedLocalRef.h>
+#include <nativehelper/ScopedPrimitiveArray.h>
 
 #include <log/log.h>
 #include <utils/misc.h>
 #include <utils/Log.h>
-#include <hardware/hardware.h>
-#include <hardware/power.h>
 #include <suspend/autosuspend.h>
+
+using android::hardware::Return;
+using android::hardware::Void;
+using android::hardware::power::V1_0::IPower;
+using android::hardware::power::V1_0::PowerStatePlatformSleepState;
+using android::hardware::power::V1_0::PowerStateVoter;
+using android::hardware::power::V1_0::Status;
+using android::hardware::power::V1_1::PowerStateSubsystem;
+using android::hardware::power::V1_1::PowerStateSubsystemSleepState;
+using android::hardware::hidl_vec;
 
 namespace android
 {
@@ -49,7 +59,9 @@ namespace android
 
 static bool wakeup_init = false;
 static sem_t wakeup_sem;
-extern struct power_module* gPowerModule;
+extern sp<android::hardware::power::V1_0::IPower> gPowerHalV1_0;
+extern std::mutex gPowerHalMutex;
+extern bool getPowerHal();
 
 static void wakeup_callback(bool success)
 {
@@ -174,122 +186,191 @@ static jint nativeWaitWakeup(JNIEnv *env, jobject clazz, jobject outBuf)
 }
 
 static jint getPlatformLowPowerStats(JNIEnv* env, jobject /* clazz */, jobject outBuf) {
-    int num_modes = -1;
-    char *output = (char*)env->GetDirectBufferAddress(outBuf), *offset = output;
+    char *output = (char*)env->GetDirectBufferAddress(outBuf);
+    char *offset = output;
     int remaining = (int)env->GetDirectBufferCapacity(outBuf);
-    power_state_platform_sleep_state_t *list;
-    size_t *voter_list;
     int total_added = -1;
 
     if (outBuf == NULL) {
         jniThrowException(env, "java/lang/NullPointerException", "null argument");
-        goto error;
+        return -1;
     }
 
-    if (!gPowerModule) {
-        ALOGE("%s: gPowerModule not loaded", POWER_HARDWARE_MODULE_ID);
-        goto error;
-    }
-
-    if (! (gPowerModule->get_platform_low_power_stats && gPowerModule->get_number_of_platform_modes
-       && gPowerModule->get_voter_list)) {
-        ALOGE("%s: Missing API", POWER_HARDWARE_MODULE_ID);
-        goto error;
-    }
-
-    if (gPowerModule->get_number_of_platform_modes) {
-        num_modes = gPowerModule->get_number_of_platform_modes(gPowerModule);
-    }
-
-    if (num_modes < 1) {
-        ALOGE("%s: Platform does not even have one low power mode", POWER_HARDWARE_MODULE_ID);
-        goto error;
-    }
-
-    list = (power_state_platform_sleep_state_t *)calloc(num_modes,
-        sizeof(power_state_platform_sleep_state_t));
-    if (!list) {
-        ALOGE("%s: power_state_platform_sleep_state_t allocation failed", POWER_HARDWARE_MODULE_ID);
-        goto error;
-    }
-
-    voter_list = (size_t *)calloc(num_modes, sizeof(*voter_list));
-    if (!voter_list) {
-        ALOGE("%s: voter_list allocation failed", POWER_HARDWARE_MODULE_ID);
-        goto err_free;
-    }
-
-    gPowerModule->get_voter_list(gPowerModule, voter_list);
-
-    for (int i = 0; i < num_modes; i++) {
-        list[i].voters = (power_state_voter_t *)calloc(voter_list[i],
-                         sizeof(power_state_voter_t));
-        if (!list[i].voters) {
-            ALOGE("%s: voter_t allocation failed", POWER_HARDWARE_MODULE_ID);
-            goto err_free;
+    {
+        std::lock_guard<std::mutex> lock(gPowerHalMutex);
+        if (!getPowerHal()) {
+            ALOGE("Power Hal not loaded");
+            return -1;
         }
-    }
 
-    if (!gPowerModule->get_platform_low_power_stats(gPowerModule, list)) {
-        for (int i = 0; i < num_modes; i++) {
-            int added;
+        Return<void> ret = gPowerHalV1_0->getPlatformLowPowerStats(
+            [&offset, &remaining, &total_added](hidl_vec<PowerStatePlatformSleepState> states,
+                    Status status) {
+                if (status != Status::SUCCESS)
+                    return;
+                for (size_t i = 0; i < states.size(); i++) {
+                    int added;
+                    const PowerStatePlatformSleepState& state = states[i];
 
-            added = snprintf(offset, remaining,
-                    "state_%d name=%s time=%" PRIu64 " count=%" PRIu64 " ",
-                    i + 1, list[i].name, list[i].residency_in_msec_since_boot,
-                    list[i].total_transitions);
-            if (added < 0) {
-                break;
-            }
-            if (added > remaining) {
-                added = remaining;
-            }
-            offset += added;
-            remaining -= added;
-            total_added += added;
+                    added = snprintf(offset, remaining,
+                        "state_%zu name=%s time=%" PRIu64 " count=%" PRIu64 " ",
+                        i + 1, state.name.c_str(), state.residencyInMsecSinceBoot,
+                        state.totalTransitions);
+                    if (added < 0) {
+                        break;
+                    }
+                    if (added > remaining) {
+                        added = remaining;
+                    }
+                    offset += added;
+                    remaining -= added;
+                    total_added += added;
 
-            for (unsigned int j = 0; j < list[i].number_of_voters; j++) {
-                added = snprintf(offset, remaining,
-                        "voter_%d name=%s time=%" PRIu64 " count=%" PRIu64 " ",
-                        j + 1, list[i].voters[j].name,
-                        list[i].voters[j].total_time_in_msec_voted_for_since_boot,
-                        list[i].voters[j].total_number_of_times_voted_since_boot);
-                if (added < 0) {
-                    break;
+                    for (size_t j = 0; j < state.voters.size(); j++) {
+                        const PowerStateVoter& voter = state.voters[j];
+                        added = snprintf(offset, remaining,
+                                "voter_%zu name=%s time=%" PRIu64 " count=%" PRIu64 " ",
+                                j + 1, voter.name.c_str(),
+                                voter.totalTimeInMsecVotedForSinceBoot,
+                                voter.totalNumberOfTimesVotedSinceBoot);
+                        if (added < 0) {
+                            break;
+                        }
+                        if (added > remaining) {
+                            added = remaining;
+                        }
+                        offset += added;
+                        remaining -= added;
+                        total_added += added;
+                    }
+
+                    if (remaining <= 0) {
+                        /* rewrite NULL character*/
+                        offset--;
+                        total_added--;
+                        ALOGE("PowerHal: buffer not enough");
+                        break;
+                    }
                 }
-                if (added > remaining) {
-                    added = remaining;
-                }
-                offset += added;
-                remaining -= added;
-                total_added += added;
             }
+        );
 
-            if (remaining <= 0) {
-                /* rewrite NULL character*/
-                offset--;
-                total_added--;
-                ALOGE("%s module: buffer not enough", POWER_HARDWARE_MODULE_ID);
-                break;
-            }
+        if (!ret.isOk()) {
+            ALOGE("getPlatformLowPowerStats() failed: power HAL service not available");
+            gPowerHalV1_0 = nullptr;
+            return -1;
         }
     }
     *offset = 0;
     total_added += 1;
+    return total_added;
+}
 
-err_free:
-    for (int i = 0; i < num_modes; i++) {
-        free(list[i].voters);
+static jint getSubsystemLowPowerStats(JNIEnv* env, jobject /* clazz */, jobject outBuf) {
+    char *output = (char*)env->GetDirectBufferAddress(outBuf);
+    char *offset = output;
+    int remaining = (int)env->GetDirectBufferCapacity(outBuf);
+    int total_added = -1;
+
+	//This is a IPower 1.1 API
+    sp<android::hardware::power::V1_1::IPower> gPowerHal_1_1 = nullptr;
+
+    if (outBuf == NULL) {
+        jniThrowException(env, "java/lang/NullPointerException", "null argument");
+        return -1;
     }
-    free(list);
-    free(voter_list);
-error:
+
+    {
+        std::lock_guard<std::mutex> lock(gPowerHalMutex);
+        if (!getPowerHal()) {
+            ALOGE("Power Hal not loaded");
+            return -1;
+        }
+
+        //Trying to cast to 1.1, this will succeed only for devices supporting 1.1
+        gPowerHal_1_1 = android::hardware::power::V1_1::IPower::castFrom(gPowerHalV1_0);
+    	if (gPowerHal_1_1 == nullptr) {
+            //This device does not support IPower@1.1, exiting gracefully
+            return 0;
+    	}
+
+        Return<void> ret = gPowerHal_1_1->getSubsystemLowPowerStats(
+           [&offset, &remaining, &total_added](hidl_vec<PowerStateSubsystem> subsystems,
+                Status status) {
+
+            if (status != Status::SUCCESS)
+                return;
+
+            if (subsystems.size() > 0) {
+                int added = snprintf(offset, remaining, "SubsystemPowerState ");
+                offset += added;
+                remaining -= added;
+                total_added += added;
+
+                for (size_t i = 0; i < subsystems.size(); i++) {
+                    const PowerStateSubsystem &subsystem = subsystems[i];
+
+                    added = snprintf(offset, remaining,
+                                     "subsystem_%zu name=%s ", i + 1, subsystem.name.c_str());
+                    if (added < 0) {
+                        break;
+                    }
+
+                    if (added > remaining) {
+                        added = remaining;
+                    }
+
+                    offset += added;
+                    remaining -= added;
+                    total_added += added;
+
+                    for (size_t j = 0; j < subsystem.states.size(); j++) {
+                        const PowerStateSubsystemSleepState& state = subsystem.states[j];
+                        added = snprintf(offset, remaining,
+                                         "state_%zu name=%s time=%" PRIu64 " count=%" PRIu64 " last entry=%" PRIu64 " ",
+                                         j + 1, state.name.c_str(), state.residencyInMsecSinceBoot,
+                                         state.totalTransitions, state.lastEntryTimestampMs);
+                        if (added < 0) {
+                            break;
+                        }
+
+                        if (added > remaining) {
+                            added = remaining;
+                        }
+
+                        offset += added;
+                        remaining -= added;
+                        total_added += added;
+                    }
+
+                    if (remaining <= 0) {
+                        /* rewrite NULL character*/
+                        offset--;
+                        total_added--;
+                        ALOGE("PowerHal: buffer not enough");
+                        break;
+                    }
+                }
+            }
+        }
+        );
+
+        if (!ret.isOk()) {
+            ALOGE("getSubsystemLowPowerStats() failed: power HAL service not available");
+            gPowerHalV1_0 = nullptr;
+            return -1;
+        }
+    }
+
+    *offset = 0;
+    total_added += 1;
     return total_added;
 }
 
 static const JNINativeMethod method_table[] = {
     { "nativeWaitWakeup", "(Ljava/nio/ByteBuffer;)I", (void*)nativeWaitWakeup },
     { "getPlatformLowPowerStats", "(Ljava/nio/ByteBuffer;)I", (void*)getPlatformLowPowerStats },
+    { "getSubsystemLowPowerStats", "(Ljava/nio/ByteBuffer;)I", (void*)getSubsystemLowPowerStats },
 };
 
 int register_android_server_BatteryStatsService(JNIEnv *env)

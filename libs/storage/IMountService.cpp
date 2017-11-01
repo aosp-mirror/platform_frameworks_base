@@ -553,7 +553,7 @@ public:
     }
 };
 
-IMPLEMENT_META_INTERFACE(MountService, "IMountService")
+IMPLEMENT_META_INTERFACE(MountService, "android.os.storage.IStorageManager")
 
 // ----------------------------------------------------------------------
 

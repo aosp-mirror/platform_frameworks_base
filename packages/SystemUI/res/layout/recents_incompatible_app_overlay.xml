@@ -26,6 +26,6 @@
         android:layout_gravity="center"
         android:drawableTop="@drawable/recents_info_light"
         android:drawablePadding="8dp"
-        android:text="@string/recents_incompatible_app_message"
+        android:text="@string/dock_non_resizeble_failed_to_dock_text"
         android:textColor="@android:color/white" />
 </FrameLayout>

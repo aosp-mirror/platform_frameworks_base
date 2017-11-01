@@ -24,6 +24,7 @@ LOCAL_JAVA_LIBRARIES := \
     android.test.runner
 
 LOCAL_PACKAGE_NAME := FrameworksNetTests
+LOCAL_COMPATIBILITY_SUITE := device-tests
 
 LOCAL_CERTIFICATE := platform
 
@@ -40,7 +41,20 @@ LOCAL_JNI_SHARED_LIBRARIES := libframeworksnettestsjni \
     libnetdaidl \
     libui \
     libunwind \
-    libutils
+    libutils \
+    libvndksupport \
+    libcrypto \
+    libhidl-gen-utils \
+    libhidlbase \
+    libhidltransport \
+    libpackagelistparser \
+    libpcre2 \
+    libselinux \
+    libtinyxml2 \
+    libvintf \
+    libhwbinder \
+    libunwindstack \
+    android.hidl.token@1.0
 
 LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/Android.mk
 

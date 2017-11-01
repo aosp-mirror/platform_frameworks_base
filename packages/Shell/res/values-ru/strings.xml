@@ -4,9 +4,9 @@
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
      You may obtain a copy of the License at
-  
+
           http://www.apache.org/licenses/LICENSE-2.0
-  
+
      Unless required by applicable law or agreed to in writing, software
      distributed under the License is distributed on an "AS IS" BASIS,
      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,12 +17,15 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"Оболочка"</string>
+    <string name="bugreport_notification_channel" msgid="2574150205913861141">"Отчеты об ошибках"</string>
     <string name="bugreport_in_progress_title" msgid="4311705936714972757">"Создание отчета об ошибке <xliff:g id="ID">#%d</xliff:g>…"</string>
     <string name="bugreport_finished_title" msgid="4429132808670114081">"Отчет об ошибке <xliff:g id="ID">#%d</xliff:g> сохранен"</string>
     <string name="bugreport_updating_title" msgid="4423539949559634214">"Добавление данных в отчет об ошибке"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"Подождите…"</string>
     <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"Отчет об ошибке скоро появится на телефоне"</string>
+    <string name="bugreport_finished_text" product="tv" msgid="5758325479058638893">"Нажмите, чтобы отправить отчет об ошибке"</string>
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"Нажмите, чтобы отправить отчет об ошибке."</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="tv" msgid="2343263822812016950">"Проведите влево, чтобы отправить отчет об ошибке сразу, или подождите, пока будет сохранен скриншот"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"Нажмите, чтобы отправить отчет об ошибке сразу, или подождите, пока будет сохранен скриншот."</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Нажмите, чтобы отправить отчет об ошибке сразу, или подождите, пока будет сохранен скриншот."</string>
     <string name="bugreport_confirm" msgid="5917407234515812495">"Отчеты об ошибках содержат данные различных системных журналов и могут включать конфиденциальную информацию (например, данные о местоположении). Открывайте к ним доступ только надежным пользователям и приложениям."</string>
@@ -32,7 +35,7 @@
     <string name="bugreport_add_details_to_zip_failed" msgid="1302931926486712371">"Не удалось добавить данные отчета об ошибке в ZIP-файл"</string>
     <string name="bugreport_unnamed" msgid="2800582406842092709">"без названия"</string>
     <string name="bugreport_info_action" msgid="2158204228510576227">"Детали"</string>
-    <string name="bugreport_screenshot_action" msgid="8677781721940614995">"Скриншоты"</string>
+    <string name="bugreport_screenshot_action" msgid="8677781721940614995">"Сделать скриншот"</string>
     <string name="bugreport_screenshot_taken" msgid="5684211273096253120">"Скриншот сделан"</string>
     <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"Не удалось сделать скриншот"</string>
     <string name="bugreport_info_dialog_title" msgid="1355948594292983332">"Данные отчета об ошибке <xliff:g id="ID">#%d</xliff:g>"</string>
@@ -40,4 +43,5 @@
     <string name="bugreport_info_title" msgid="2306030793918239804">"Название ошибки"</string>
     <string name="bugreport_info_description" msgid="5072835127481627722">"Описание ошибки"</string>
     <string name="save" msgid="4781509040564835759">"Сохранить"</string>
+    <string name="bugreport_intent_chooser_title" msgid="7605709494790894076">"Поделиться отчетом об ошибке"</string>
 </resources>

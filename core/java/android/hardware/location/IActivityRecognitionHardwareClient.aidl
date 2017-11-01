@@ -25,7 +25,7 @@ import android.hardware.location.IActivityRecognitionHardware;
  *
  * @hide
  */
-interface IActivityRecognitionHardwareClient {
+oneway interface IActivityRecognitionHardwareClient {
     /**
      * Hardware Activity-Recognition availability event.
      *

@@ -44,6 +44,8 @@ typedef uint16_t glyph_t;
 #define GET_METRICS(cache, glyph) cache->getGlyphIDMetrics(glyph)
 #define IS_END_OF_STRING(glyph) false
 
-#define AUTO_KERN(prev, next) (((next) - (prev) + 32) >> 6 << 16)
+// prev, next are assumed to be signed x.6 fixed-point numbers with range
+// [-1, 1]. Result is an integral float.
+#define AUTO_KERN(prev, next) static_cast<float>(((next) - (prev) + 32) >> 6)
 
 #endif // ANDROID_HWUI_FONT_UTIL_H

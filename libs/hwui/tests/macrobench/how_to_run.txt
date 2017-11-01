@@ -1,5 +1,5 @@
 mmm -j8 frameworks/base/libs/hwui/ &&
-    adb push $OUT/data/local/tmp/hwuitest /data/local/tmp/hwuitest &&
-    adb shell /data/local/tmp/hwuitest
+adb push $OUT/data/benchmarktest/hwuimacro/hwuimacro /data/benchmarktest/hwuimacro/hwuimacro &&
+adb shell /data/benchmarktest/hwuimacro/hwuimacro shadowgrid2 --onscreen
 
 Pass --help to get help

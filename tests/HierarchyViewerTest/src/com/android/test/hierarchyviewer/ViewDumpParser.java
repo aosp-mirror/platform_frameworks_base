@@ -15,6 +15,17 @@ public class ViewDumpParser {
         Decoder d = new Decoder(ByteBuffer.wrap(data));
 
         mViews = new ArrayList<>(100);
+
+        boolean dataIncludesWindowPosition = (data[0] == 'S');
+        Short windowLeftKey = null, windowTopKey = null;
+        Integer windowLeftValue = null, windowTopValue = null;
+        if (dataIncludesWindowPosition) {
+            windowLeftKey = (Short) d.readObject();
+            windowLeftValue = (Integer) d.readObject();
+            windowTopKey = (Short) d.readObject();
+            windowTopValue = (Integer) d.readObject();
+        }
+
         while (d.hasRemaining()) {
             Object o = d.readObject();
             if (o instanceof Map) {
@@ -25,6 +36,11 @@ public class ViewDumpParser {
 
         if (mViews.isEmpty()) {
             return;
+        }
+
+        if (dataIncludesWindowPosition) {
+          mViews.get(0).put(windowLeftKey, windowLeftValue);
+          mViews.get(0).put(windowTopKey, windowTopValue);
         }
 
         // the last one is the property map

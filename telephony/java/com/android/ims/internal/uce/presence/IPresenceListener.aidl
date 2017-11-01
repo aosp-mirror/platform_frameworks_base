@@ -89,4 +89,11 @@ interface IPresenceListener
      */
     void listCapInfoReceived(in PresRlmiInfo rlmiInfo,
                              in PresResInfo [] resInfo);
+
+    /**
+     * Callback function to be invoked to inform the client when Unpublish message
+     * is sent to network.
+     */
+    void unpublishMessageSent();
+
 }

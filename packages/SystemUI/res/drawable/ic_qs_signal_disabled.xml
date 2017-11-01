@@ -15,14 +15,15 @@ Copyright (C) 2014 The Android Open Source Project
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
         android:autoMirrored="true"
-        android:width="32dp"
-        android:height="32dp"
+        android:width="24dp"
+        android:height="24dp"
         android:viewportWidth="24.0"
-        android:viewportHeight="24.0">
+        android:viewportHeight="24.0"
+        android:tint="?android:attr/colorControlNormal">
     <path
-        android:fillColor="#4DFFFFFF"
+        android:fillColor="#FFFFFFFF"
         android:pathData="M21.799999,22.299999l-1.199999,-1.299999 0.000000,0.000000 -9.600000,-10.000000 0.000000,0.000000 -6.400000,-6.700000 -1.300000,1.300000 6.400000,6.700000 -8.700000,8.700000 16.900000,0.000000 2.600000,2.700001z"/>
     <path
-        android:fillColor="#4DFFFFFF"
+        android:fillColor="#FFFFFFFF"
         android:pathData="M21.000000,1.000000l-8.600000,8.600000 8.600000,9.100000z"/>
 </vector>

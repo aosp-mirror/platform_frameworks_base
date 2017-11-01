@@ -16,12 +16,17 @@
 
 package android.app.job;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.job.IJobCallback;
+import android.content.ClipData;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
+import android.os.RemoteException;
 
 /**
  * Contains the parameters used to configure/identify your job. You do not create this object
@@ -42,6 +47,9 @@ public class JobParameters implements Parcelable {
 
     private final int jobId;
     private final PersistableBundle extras;
+    private final Bundle transientExtras;
+    private final ClipData clipData;
+    private final int clipGrantFlags;
     private final IBinder callback;
     private final boolean overrideDeadlineExpired;
     private final Uri[] mTriggeredContentUris;
@@ -51,10 +59,14 @@ public class JobParameters implements Parcelable {
 
     /** @hide */
     public JobParameters(IBinder callback, int jobId, PersistableBundle extras,
-                boolean overrideDeadlineExpired, Uri[] triggeredContentUris,
+            Bundle transientExtras, ClipData clipData, int clipGrantFlags,
+            boolean overrideDeadlineExpired, Uri[] triggeredContentUris,
             String[] triggeredContentAuthorities) {
         this.jobId = jobId;
         this.extras = extras;
+        this.transientExtras = transientExtras;
+        this.clipData = clipData;
+        this.clipGrantFlags = clipGrantFlags;
         this.callback = callback;
         this.overrideDeadlineExpired = overrideDeadlineExpired;
         this.mTriggeredContentUris = triggeredContentUris;
@@ -81,8 +93,35 @@ public class JobParameters implements Parcelable {
      * {@link android.app.job.JobInfo.Builder#setExtras(android.os.PersistableBundle)}. This will
      * never be null. If you did not set any extras this will be an empty bundle.
      */
-    public PersistableBundle getExtras() {
+    public @NonNull PersistableBundle getExtras() {
         return extras;
+    }
+
+    /**
+     * @return The transient extras you passed in when constructing this job with
+     * {@link android.app.job.JobInfo.Builder#setTransientExtras(android.os.Bundle)}. This will
+     * never be null. If you did not set any extras this will be an empty bundle.
+     */
+    public @NonNull Bundle getTransientExtras() {
+        return transientExtras;
+    }
+
+    /**
+     * @return The clip you passed in when constructing this job with
+     * {@link android.app.job.JobInfo.Builder#setClipData(ClipData, int)}. Will be null
+     * if it was not set.
+     */
+    public @Nullable ClipData getClipData() {
+        return clipData;
+    }
+
+    /**
+     * @return The clip grant flags you passed in when constructing this job with
+     * {@link android.app.job.JobInfo.Builder#setClipData(ClipData, int)}. Will be 0
+     * if it was not set.
+     */
+    public int getClipGrantFlags() {
+        return clipGrantFlags;
     }
 
     /**
@@ -103,7 +142,7 @@ public class JobParameters implements Parcelable {
      * always use {@link #getTriggeredContentAuthorities()} to determine whether the job was
      * triggered due to any content changes and the authorities they are associated with.
      */
-    public Uri[] getTriggeredContentUris() {
+    public @Nullable Uri[] getTriggeredContentUris() {
         return mTriggeredContentUris;
     }
 
@@ -115,8 +154,75 @@ public class JobParameters implements Parcelable {
      * to retrieve the details of which URIs changed (as long as that has not exceeded the maximum
      * number it can reported).
      */
-    public String[] getTriggeredContentAuthorities() {
+    public @Nullable String[] getTriggeredContentAuthorities() {
         return mTriggeredContentAuthorities;
+    }
+
+    /**
+     * Dequeue the next pending {@link JobWorkItem} from these JobParameters associated with their
+     * currently running job.  Calling this method when there is no more work available and all
+     * previously dequeued work has been completed will result in the system taking care of
+     * stopping the job for you --
+     * you should not call {@link JobService#jobFinished(JobParameters, boolean)} yourself
+     * (otherwise you risk losing an upcoming JobWorkItem that is being enqueued at the same time).
+     *
+     * <p>Once you are done with the {@link JobWorkItem} returned by this method, you must call
+     * {@link #completeWork(JobWorkItem)} with it to inform the system that you are done
+     * executing the work.  The job will not be finished until all dequeued work has been
+     * completed.  You do not, however, have to complete each returned work item before deqeueing
+     * the next one -- you can use {@link #dequeueWork()} multiple times before completing
+     * previous work if you want to process work in parallel, and you can complete the work
+     * in whatever order you want.</p>
+     *
+     * <p>If the job runs to the end of its available time period before all work has been
+     * completed, it will stop as normal.  You should return true from
+     * {@link JobService#onStopJob(JobParameters)} in order to have the job rescheduled, and by
+     * doing so any pending as well as remaining uncompleted work will be re-queued
+     * for the next time the job runs.</p>
+     *
+     * <p>This example shows how to construct a JobService that will serially dequeue and
+     * process work that is available for it:</p>
+     *
+     * {@sample development/samples/ApiDemos/src/com/example/android/apis/app/JobWorkService.java
+     *      service}
+     *
+     * @return Returns a new {@link JobWorkItem} if there is one pending, otherwise null.
+     * If null is returned, the system will also stop the job if all work has also been completed.
+     * (This means that for correct operation, you must always call dequeueWork() after you have
+     * completed other work, to check either for more work or allow the system to stop the job.)
+     */
+    public @Nullable JobWorkItem dequeueWork() {
+        try {
+            return getCallback().dequeueWork(getJobId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Report the completion of executing a {@link JobWorkItem} previously returned by
+     * {@link #dequeueWork()}.  This tells the system you are done with the
+     * work associated with that item, so it will not be returned again.  Note that if this
+     * is the last work in the queue, completing it here will <em>not</em> finish the overall
+     * job -- for that to happen, you still need to call {@link #dequeueWork()}
+     * again.
+     *
+     * <p>If you are enqueueing work into a job, you must call this method for each piece
+     * of work you process.  Do <em>not</em> call
+     * {@link JobService#jobFinished(JobParameters, boolean)}
+     * or else you can lose work in your queue.</p>
+     *
+     * @param work The work you have completed processing, as previously returned by
+     * {@link #dequeueWork()}
+     */
+    public void completeWork(@NonNull JobWorkItem work) {
+        try {
+            if (!getCallback().completeWork(getJobId(), work.getWorkId())) {
+                throw new IllegalArgumentException("Given work is not active: " + work);
+            }
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /** @hide */
@@ -127,6 +233,14 @@ public class JobParameters implements Parcelable {
     private JobParameters(Parcel in) {
         jobId = in.readInt();
         extras = in.readPersistableBundle();
+        transientExtras = in.readBundle();
+        if (in.readInt() != 0) {
+            clipData = ClipData.CREATOR.createFromParcel(in);
+            clipGrantFlags = in.readInt();
+        } else {
+            clipData = null;
+            clipGrantFlags = 0;
+        }
         callback = in.readStrongBinder();
         overrideDeadlineExpired = in.readInt() == 1;
         mTriggeredContentUris = in.createTypedArray(Uri.CREATOR);
@@ -148,6 +262,14 @@ public class JobParameters implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(jobId);
         dest.writePersistableBundle(extras);
+        dest.writeBundle(transientExtras);
+        if (clipData != null) {
+            dest.writeInt(1);
+            clipData.writeToParcel(dest, flags);
+            dest.writeInt(clipGrantFlags);
+        } else {
+            dest.writeInt(0);
+        }
         dest.writeStrongBinder(callback);
         dest.writeInt(overrideDeadlineExpired ? 1 : 0);
         dest.writeTypedArray(mTriggeredContentUris, flags);

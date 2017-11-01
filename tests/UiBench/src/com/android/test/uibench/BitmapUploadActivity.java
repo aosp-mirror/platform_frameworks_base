@@ -80,7 +80,7 @@ public class BitmapUploadActivity extends AppCompatActivity {
         setContentView(R.layout.activity_bitmap_upload);
 
         // animate color to force bitmap uploads
-        UploadView uploadView = (UploadView) findViewById(R.id.upload_view);
+        UploadView uploadView = findViewById(R.id.upload_view);
         ObjectAnimator colorValueAnimator = ObjectAnimator.ofInt(uploadView, "colorValue", 0, 255);
         colorValueAnimator.setRepeatMode(ValueAnimator.REVERSE);
         colorValueAnimator.setRepeatCount(ValueAnimator.INFINITE);

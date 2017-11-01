@@ -16,14 +16,14 @@
 
 package android.animation;
 
-import java.util.Arrays;
-import java.util.List;
-
-import android.animation.Keyframe.IntKeyframe;
 import android.animation.Keyframe.FloatKeyframe;
+import android.animation.Keyframe.IntKeyframe;
 import android.animation.Keyframe.ObjectKeyframe;
 import android.graphics.Path;
 import android.util.Log;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * This class holds a collection of Keyframe objects and is called by ValueAnimator to calculate
@@ -49,14 +49,6 @@ public class KeyframeSet implements Keyframes {
         mFirstKeyframe = keyframes[0];
         mLastKeyframe = keyframes[mNumKeyframes - 1];
         mInterpolator = mLastKeyframe.getInterpolator();
-    }
-
-    /**
-     * If subclass has variables that it calculates based on the Keyframes, it should reset them
-     * when this method is called because Keyframe contents might have changed.
-     */
-    @Override
-    public void invalidateCache() {
     }
 
     public List<Keyframe> getKeyframes() {

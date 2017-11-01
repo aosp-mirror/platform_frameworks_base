@@ -139,7 +139,7 @@ public class WifiP2pWfdInfo implements Parcelable {
 
     public String getDeviceInfoHex() {
         return String.format(
-                Locale.US, "%04x%04x%04x%04x", 6, mDeviceInfo, mCtrlPort, mMaxThroughput);
+                Locale.US, "%04x%04x%04x", mDeviceInfo, mCtrlPort, mMaxThroughput);
     }
 
     public String toString() {

@@ -17,6 +17,6 @@
   -->
 
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:state_enabled="false" android:color="@color/qs_tile_disabled_color" />
+    <item android:state_enabled="false" android:color="?android:attr/textColorPrimary" />
     <item android:color="@android:color/transparent" />
 </selector>

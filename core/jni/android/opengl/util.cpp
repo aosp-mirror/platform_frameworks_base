@@ -15,7 +15,7 @@
  */
 
 #include "jni.h"
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 #include "GraphicsJNI.h"
 
 #include <math.h>
@@ -49,27 +49,6 @@ void mx4transform(float x, float y, float z, float w, const float* pM, float* pD
     pDest[3] = pM[3 + 4 * 0] * x + pM[3 + 4 * 1] * y + pM[3 + 4 * 2] * z + pM[3 + 4 * 3] * w;
 }
 
-class MallocHelper {
-public:
-    MallocHelper() {
-        mData = 0;
-    }
-
-    ~MallocHelper() {
-        if (mData != 0) {
-            free(mData);
-        }
-    }
-
-    void* alloc(size_t size) {
-        mData = malloc(size);
-        return mData;
-    }
-
-private:
-    void* mData;
-};
-
 #if 0
 static
 void
@@ -85,10 +64,7 @@ print_poly(const char* label, Poly* pPoly) {
 static
 int visibilityTest(float* pWS, float* pPositions, int positionsLength,
         unsigned short* pIndices, int indexCount) {
-    MallocHelper mallocHelper;
     int result = POLY_CLIP_OUT;
-    float* pTransformed = 0;
-    int transformedIndexCount = 0;
 
     if ( indexCount < 3 ) {
         return POLY_CLIP_OUT;
@@ -116,8 +92,9 @@ int visibilityTest(float* pWS, float* pPositions, int positionsLength,
         return -1;
     }
 
-    transformedIndexCount = maxIndex - minIndex + 1;
-    pTransformed = (float*) mallocHelper.alloc(transformedIndexCount * 4 * sizeof(float));
+    int transformedIndexCount = maxIndex - minIndex + 1;
+    std::unique_ptr<float[]> holder{new float[transformedIndexCount * 4]};
+    float* pTransformed = holder.get();
 
     if (pTransformed == 0 ) {
         return -2;
@@ -739,7 +716,6 @@ static jint util_texImage2D(JNIEnv *env, jclass clazz,
     int err = checkFormat(colorType, internalformat, type);
     if (err)
         return err;
-    bitmap.lockPixels();
     const int w = bitmap.width();
     const int h = bitmap.height();
     const void* p = bitmap.getPixels();
@@ -766,7 +742,6 @@ static jint util_texImage2D(JNIEnv *env, jclass clazz,
         glTexImage2D(target, level, internalformat, w, h, border, internalformat, type, p);
     }
 error:
-    bitmap.unlockPixels();
     return err;
 }
 
@@ -785,12 +760,10 @@ static jint util_texSubImage2D(JNIEnv *env, jclass clazz,
     int err = checkFormat(colorType, format, type);
     if (err)
         return err;
-    bitmap.lockPixels();
     const int w = bitmap.width();
     const int h = bitmap.height();
     const void* p = bitmap.getPixels();
     glTexSubImage2D(target, level, xoffset, yoffset, w, h, format, type, p);
-    bitmap.unlockPixels();
     return 0;
 }
 

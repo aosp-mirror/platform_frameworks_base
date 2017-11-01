@@ -175,7 +175,7 @@ public class SyncRequest implements Parcelable {
     }
 
     /**
-     * Builder class for a @link SyncRequest. As you build your SyncRequest this class will also
+     * Builder class for a {@link SyncRequest}. As you build your SyncRequest this class will also
      * perform validation.
      */
     public static class Builder {
@@ -351,7 +351,7 @@ public class SyncRequest implements Parcelable {
          * @param requiresCharging true if sync requires the phone to be plugged in. Default false.
          */
         public Builder setRequiresCharging(boolean requiresCharging) {
-            mRequiresCharging = true;
+            mRequiresCharging = requiresCharging;
             return this;
         }
 

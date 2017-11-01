@@ -16,14 +16,137 @@
 
 package android.text.method;
 
-import android.test.AndroidTestCase;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import android.support.test.filters.SmallTest;
+import android.support.test.runner.AndroidJUnit4;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.text.BreakIterator;
 import java.util.Locale;
 
 // TODO(Bug: 24062099): Add more tests for non-ascii text.
-public class WordIteratorTest  extends AndroidTestCase {
+@SmallTest
+@RunWith(AndroidJUnit4.class)
+public class WordIteratorTest {
 
+    private WordIterator mWordIterator = new WordIterator();
+
+    private void verifyIsWordWithSurrogate(int beginning, int end, int surrogateIndex) {
+        for (int i = beginning; i <= end; i++) {
+            if (i == surrogateIndex) continue;
+            assertEquals(beginning, mWordIterator.getBeginning(i));
+            assertEquals(end, mWordIterator.getEnd(i));
+        }
+    }
+
+    private void setCharSequence(String string) {
+        mWordIterator.setCharSequence(string, 0, string.length());
+    }
+
+    private void verifyIsWord(int beginning, int end) {
+        verifyIsWordWithSurrogate(beginning, end, -1);
+    }
+
+    private void verifyIsNotWord(int beginning, int end) {
+        for (int i = beginning; i <= end; i++) {
+            assertEquals(BreakIterator.DONE, mWordIterator.getBeginning(i));
+            assertEquals(BreakIterator.DONE, mWordIterator.getEnd(i));
+        }
+    }
+
+    @Test
+    public void testEmptyString() {
+        setCharSequence("");
+        assertEquals(BreakIterator.DONE, mWordIterator.following(0));
+        assertEquals(BreakIterator.DONE, mWordIterator.preceding(0));
+
+        assertEquals(BreakIterator.DONE, mWordIterator.getBeginning(0));
+        assertEquals(BreakIterator.DONE, mWordIterator.getEnd(0));
+    }
+
+    @Test
+    public void testOneWord() {
+        setCharSequence("I");
+        verifyIsWord(0, 1);
+
+        setCharSequence("am");
+        verifyIsWord(0, 2);
+
+        setCharSequence("zen");
+        verifyIsWord(0, 3);
+    }
+
+    @Test
+    public void testSpacesOnly() {
+        setCharSequence(" ");
+        verifyIsNotWord(0, 1);
+
+        setCharSequence(", ");
+        verifyIsNotWord(0, 2);
+
+        setCharSequence(":-)");
+        verifyIsNotWord(0, 3);
+    }
+
+    @Test
+    public void testBeginningEnd() {
+        setCharSequence("Well hello,   there! ");
+        //                  0123456789012345678901
+        verifyIsWord(0, 4);
+        verifyIsWord(5, 10);
+        verifyIsNotWord(11, 13);
+        verifyIsWord(14, 19);
+        verifyIsNotWord(20, 21);
+
+        setCharSequence("  Another - sentence");
+        //                  012345678901234567890
+        verifyIsNotWord(0, 1);
+        verifyIsWord(2, 9);
+        verifyIsNotWord(10, 11);
+        verifyIsWord(12, 20);
+
+        setCharSequence("This is \u0644\u0627 tested"); // Lama-aleph
+        //                  012345678     9     01234567
+        verifyIsWord(0, 4);
+        verifyIsWord(5, 7);
+        verifyIsWord(8, 10);
+        verifyIsWord(11, 17);
+    }
+
+    @Test
+    public void testSurrogate() {
+        final String gothicBairkan = "\uD800\uDF31";
+
+        setCharSequence("one we" + gothicBairkan + "ird word");
+        //                  012345    67         890123456
+
+        verifyIsWord(0, 3);
+        // Skip index 7 (there is no point in starting between the two surrogate characters)
+        verifyIsWordWithSurrogate(4, 11, 7);
+        verifyIsWord(12, 16);
+
+        setCharSequence("one " + gothicBairkan + "xxx word");
+        //                  0123    45         678901234
+
+        verifyIsWord(0, 3);
+        verifyIsWordWithSurrogate(4, 9, 5);
+        verifyIsWord(10, 14);
+
+        setCharSequence("one xxx" + gothicBairkan + " word");
+        //                  0123456    78         901234
+
+        verifyIsWord(0, 3);
+        verifyIsWordWithSurrogate(4, 9, 8);
+        verifyIsWord(10, 14);
+    }
+
+    @Test
     public void testSetCharSequence() {
         final String text = "text";
         WordIterator wordIterator = new WordIterator(Locale.ENGLISH);
@@ -46,6 +169,24 @@ public class WordIteratorTest  extends AndroidTestCase {
         wordIterator.setCharSequence(text, text.length(), text.length());
     }
 
+    @Test
+    public void testWindowWidth() {
+        final String text = "aaaa bbbb cccc dddd eeee ffff gggg hhhh iiii jjjj kkkk llll mmmm nnnn";
+        WordIterator wordIterator = new WordIterator(Locale.ENGLISH);
+
+        // The first 'n' is more than 50 characters into the string.
+        wordIterator.setCharSequence(text, text.indexOf('n'), text.length());
+        final int expectedWindowStart = text.indexOf('n') - 50;
+        assertEquals(expectedWindowStart, wordIterator.preceding(expectedWindowStart + 1));
+        assertEquals(BreakIterator.DONE, wordIterator.preceding(expectedWindowStart));
+
+        wordIterator.setCharSequence(text, 0, 1);
+        final int expectedWindowEnd = 1 + 50;
+        assertEquals(expectedWindowEnd, wordIterator.following(expectedWindowEnd - 1));
+        assertEquals(BreakIterator.DONE, wordIterator.following(expectedWindowEnd));
+    }
+
+    @Test
     public void testPreceding() {
         final String text = "abc def-ghi. jkl";
         WordIterator wordIterator = new WordIterator(Locale.ENGLISH);
@@ -70,8 +211,22 @@ public class WordIteratorTest  extends AndroidTestCase {
         assertEquals(text.indexOf('g'), wordIterator.preceding(text.indexOf('h')));
         assertEquals(text.indexOf('g'), wordIterator.preceding(text.indexOf('j')));
         assertEquals(text.indexOf('j'), wordIterator.preceding(text.indexOf('l')));
+
+        // The results should be the same even if we set an smaller window, since WordIterator
+        // enlargens the window by 50 code units on each side anyway.
+        wordIterator.setCharSequence(text, text.indexOf('d'), text.indexOf('e'));
+
+        assertEquals(BreakIterator.DONE, wordIterator.preceding(text.indexOf('a')));
+        assertEquals(text.indexOf('a'), wordIterator.preceding(text.indexOf('c')));
+        assertEquals(text.indexOf('a'), wordIterator.preceding(text.indexOf('d')));
+        assertEquals(text.indexOf('d'), wordIterator.preceding(text.indexOf('e')));
+        assertEquals(text.indexOf('d'), wordIterator.preceding(text.indexOf('g')));
+        assertEquals(text.indexOf('g'), wordIterator.preceding(text.indexOf('h')));
+        assertEquals(text.indexOf('g'), wordIterator.preceding(text.indexOf('j')));
+        assertEquals(text.indexOf('j'), wordIterator.preceding(text.indexOf('l')));
     }
 
+    @Test
     public void testFollowing() {
         final String text = "abc def-ghi. jkl";
         WordIterator wordIterator = new WordIterator(Locale.ENGLISH);
@@ -96,8 +251,22 @@ public class WordIteratorTest  extends AndroidTestCase {
         assertEquals(text.indexOf('i') + 1, wordIterator.following(text.indexOf('g')));
         assertEquals(text.length(), wordIterator.following(text.indexOf('j')));
         assertEquals(BreakIterator.DONE, wordIterator.following(text.length()));
+
+        // The results should be the same even if we set an smaller window, since WordIterator
+        // enlargens the window by 50 code units on each side anyway.
+        wordIterator.setCharSequence(text, text.indexOf('d'), text.indexOf('e'));
+
+        assertEquals(text.indexOf('c') + 1, wordIterator.following(text.indexOf('a')));
+        assertEquals(text.indexOf('c') + 1, wordIterator.following(text.indexOf('c')));
+        assertEquals(text.indexOf('f') + 1, wordIterator.following(text.indexOf('c') + 1));
+        assertEquals(text.indexOf('f') + 1, wordIterator.following(text.indexOf('d')));
+        assertEquals(text.indexOf('i') + 1, wordIterator.following(text.indexOf('-')));
+        assertEquals(text.indexOf('i') + 1, wordIterator.following(text.indexOf('g')));
+        assertEquals(text.length(), wordIterator.following(text.indexOf('j')));
+        assertEquals(BreakIterator.DONE, wordIterator.following(text.length()));
     }
 
+    @Test
     public void testIsBoundary() {
         final String text = "abc def-ghi. jkl";
         WordIterator wordIterator = new WordIterator(Locale.ENGLISH);
@@ -125,6 +294,7 @@ public class WordIteratorTest  extends AndroidTestCase {
         assertTrue(wordIterator.isBoundary(text.length()));
     }
 
+    @Test
     public void testNextBoundary() {
         final String text = "abc def-ghi. jkl";
         WordIterator wordIterator = new WordIterator(Locale.ENGLISH);
@@ -171,6 +341,7 @@ public class WordIteratorTest  extends AndroidTestCase {
         assertEquals(BreakIterator.DONE, currentOffset);
     }
 
+    @Test
     public void testPrevBoundary() {
         final String text = "abc def-ghi. jkl";
         WordIterator wordIterator = new WordIterator(Locale.ENGLISH);
@@ -216,6 +387,7 @@ public class WordIteratorTest  extends AndroidTestCase {
         assertEquals(BreakIterator.DONE, currentOffset);
     }
 
+    @Test
     public void testGetBeginning() {
         {
             final String text = "abc def-ghi. jkl";
@@ -289,6 +461,7 @@ public class WordIteratorTest  extends AndroidTestCase {
         }
     }
 
+    @Test
     public void testGetEnd() {
         {
             final String text = "abc def-ghi. jkl";
@@ -363,14 +536,18 @@ public class WordIteratorTest  extends AndroidTestCase {
         }
     }
 
+    @Test
     public void testGetPunctuationBeginning() {
         final String text = "abc!? (^^;) def";
         WordIterator wordIterator = new WordIterator(Locale.ENGLISH);
         wordIterator.setCharSequence(text, 0, text.length());
 
-        // TODO: Shouldn't this throw an exception?
-        assertEquals(BreakIterator.DONE, wordIterator.getPunctuationBeginning(BreakIterator.DONE));
-
+        try {
+            wordIterator.getPunctuationBeginning(BreakIterator.DONE);
+            fail("getPunctuationBeginning with invalid offset should throw "
+                    + "IllegalArgumentException.");
+        } catch (IllegalArgumentException e) {
+        }
         try {
             wordIterator.getPunctuationBeginning(-2);
             fail("getPunctuationBeginning with invalid offset should throw "
@@ -394,14 +571,17 @@ public class WordIteratorTest  extends AndroidTestCase {
         assertEquals(text.indexOf(';'), wordIterator.getPunctuationBeginning(text.length()));
     }
 
+    @Test
     public void testGetPunctuationEnd() {
         final String text = "abc!? (^^;) def";
         WordIterator wordIterator = new WordIterator(Locale.ENGLISH);
         wordIterator.setCharSequence(text, 0, text.length());
 
-        // TODO: Shouldn't this throw an exception?
-        assertEquals(BreakIterator.DONE, wordIterator.getPunctuationEnd(BreakIterator.DONE));
-
+        try {
+            wordIterator.getPunctuationEnd(BreakIterator.DONE);
+            fail("getPunctuationEnd with invalid offset should throw IllegalArgumentException.");
+        } catch (IllegalArgumentException e) {
+        }
         try {
             wordIterator.getPunctuationEnd(-2);
             fail("getPunctuationEnd with invalid offset should throw IllegalArgumentException.");
@@ -423,6 +603,7 @@ public class WordIteratorTest  extends AndroidTestCase {
         assertEquals(BreakIterator.DONE, wordIterator.getPunctuationEnd(text.length()));
     }
 
+    @Test
     public void testIsAfterPunctuation() {
         final String text = "abc!? (^^;) def";
         WordIterator wordIterator = new WordIterator(Locale.ENGLISH);
@@ -438,6 +619,7 @@ public class WordIteratorTest  extends AndroidTestCase {
         assertFalse(wordIterator.isAfterPunctuation(text.length() + 1));
     }
 
+    @Test
     public void testIsOnPunctuation() {
         final String text = "abc!? (^^;) def";
         WordIterator wordIterator = new WordIterator(Locale.ENGLISH);
@@ -454,5 +636,35 @@ public class WordIteratorTest  extends AndroidTestCase {
         assertFalse(wordIterator.isOnPunctuation(BreakIterator.DONE));
         assertFalse(wordIterator.isOnPunctuation(text.length()));
         assertFalse(wordIterator.isOnPunctuation(text.length() + 1));
+    }
+
+    @Test
+    public void testApostropheMiddleOfWord() {
+        // These tests confirm that the word "isn't" is treated like one word.
+        final String text = "isn't he";
+        WordIterator wordIterator = new WordIterator(Locale.ENGLISH);
+        wordIterator.setCharSequence(text, 0, text.length());
+
+        assertEquals(text.indexOf('i'), wordIterator.preceding(text.indexOf('h')));
+        assertEquals(text.indexOf('t') + 1, wordIterator.following(text.indexOf('i')));
+
+        assertTrue(wordIterator.isBoundary(text.indexOf('i')));
+        assertFalse(wordIterator.isBoundary(text.indexOf('\'')));
+        assertFalse(wordIterator.isBoundary(text.indexOf('t')));
+        assertTrue(wordIterator.isBoundary(text.indexOf('t') + 1));
+        assertTrue(wordIterator.isBoundary(text.indexOf('h')));
+
+        assertEquals(text.indexOf('i'), wordIterator.getBeginning(text.indexOf('i')));
+        assertEquals(text.indexOf('i'), wordIterator.getBeginning(text.indexOf('n')));
+        assertEquals(text.indexOf('i'), wordIterator.getBeginning(text.indexOf('\'')));
+        assertEquals(text.indexOf('i'), wordIterator.getBeginning(text.indexOf('t')));
+        assertEquals(text.indexOf('i'), wordIterator.getBeginning(text.indexOf('t') + 1));
+        assertEquals(text.indexOf('h'), wordIterator.getBeginning(text.indexOf('h')));
+
+        assertEquals(text.indexOf('t') + 1, wordIterator.getEnd(text.indexOf('i')));
+        assertEquals(text.indexOf('t') + 1, wordIterator.getEnd(text.indexOf('n')));
+        assertEquals(text.indexOf('t') + 1, wordIterator.getEnd(text.indexOf('\'')));
+        assertEquals(text.indexOf('t') + 1, wordIterator.getEnd(text.indexOf('t')));
+        assertEquals(text.indexOf('e') + 1, wordIterator.getEnd(text.indexOf('h')));
     }
 }

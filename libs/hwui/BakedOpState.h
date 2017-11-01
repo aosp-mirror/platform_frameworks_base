@@ -53,7 +53,7 @@ struct MergedBakedOpList {
 class ResolvedRenderState {
 public:
     ResolvedRenderState(LinearAllocator& allocator, Snapshot& snapshot,
-            const RecordedOp& recordedOp, bool expandForStroke);
+            const RecordedOp& recordedOp, bool expandForStroke, bool expandForPathTexture);
 
     // Constructor for unbounded ops *with* transform/clip
     ResolvedRenderState(LinearAllocator& allocator, Snapshot& snapshot,
@@ -117,7 +117,8 @@ public:
     };
 
     static BakedOpState* tryStrokeableOpConstruct(LinearAllocator& allocator,
-            Snapshot& snapshot, const RecordedOp& recordedOp, StrokeBehavior strokeBehavior);
+            Snapshot& snapshot, const RecordedOp& recordedOp, StrokeBehavior strokeBehavior,
+            bool expandForPathTexture);
 
     static BakedOpState* tryShadowOpConstruct(LinearAllocator& allocator,
             Snapshot& snapshot, const ShadowOp* shadowOpPtr);
@@ -140,8 +141,8 @@ private:
     friend class LinearAllocator;
 
     BakedOpState(LinearAllocator& allocator, Snapshot& snapshot,
-            const RecordedOp& recordedOp, bool expandForStroke)
-            : computedState(allocator, snapshot, recordedOp, expandForStroke)
+            const RecordedOp& recordedOp, bool expandForStroke, bool expandForPathTexture)
+            : computedState(allocator, snapshot, recordedOp, expandForStroke, expandForPathTexture)
             , alpha(snapshot.alpha)
             , roundRectClipState(snapshot.roundRectClipState)
             , op(&recordedOp) {}

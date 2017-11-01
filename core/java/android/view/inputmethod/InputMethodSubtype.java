@@ -237,6 +237,7 @@ public final class InputMethodSubtype implements Parcelable {
      * {@link InputMethodSubtype#InputMethodSubtype(int, int, String, String, String, boolean,
      * boolean, int)} except "id".
      */
+    @Deprecated
     public InputMethodSubtype(int nameId, int iconId, String locale, String mode, String extraValue,
             boolean isAuxiliary, boolean overridesImplicitlyEnabledSubtype) {
         this(nameId, iconId, locale, mode, extraValue, isAuxiliary,
@@ -274,6 +275,7 @@ public final class InputMethodSubtype implements Parcelable {
      * Arrays.hashCode(new Object[] {locale, mode, extraValue,
      * isAuxiliary, overridesImplicitlyEnabledSubtype, isAsciiCapable}) will be used instead.
      */
+    @Deprecated
     public InputMethodSubtype(int nameId, int iconId, String locale, String mode, String extraValue,
             boolean isAuxiliary, boolean overridesImplicitlyEnabledSubtype, int id) {
         this(getBuilder(nameId, iconId, locale, mode, extraValue, isAuxiliary,
@@ -518,27 +520,27 @@ public final class InputMethodSubtype implements Parcelable {
     }
 
     private HashMap<String, String> getExtraValueHashMap() {
-        if (mExtraValueHashMapCache == null) {
-            synchronized(this) {
-                if (mExtraValueHashMapCache == null) {
-                    mExtraValueHashMapCache = new HashMap<String, String>();
-                    final String[] pairs = mSubtypeExtraValue.split(EXTRA_VALUE_PAIR_SEPARATOR);
-                    final int N = pairs.length;
-                    for (int i = 0; i < N; ++i) {
-                        final String[] pair = pairs[i].split(EXTRA_VALUE_KEY_VALUE_SEPARATOR);
-                        if (pair.length == 1) {
-                            mExtraValueHashMapCache.put(pair[0], null);
-                        } else if (pair.length > 1) {
-                            if (pair.length > 2) {
-                                Slog.w(TAG, "ExtraValue has two or more '='s");
-                            }
-                            mExtraValueHashMapCache.put(pair[0], pair[1]);
-                        }
+        synchronized (this) {
+            HashMap<String, String> extraValueMap = mExtraValueHashMapCache;
+            if (extraValueMap != null) {
+                return extraValueMap;
+            }
+            extraValueMap = new HashMap<>();
+            final String[] pairs = mSubtypeExtraValue.split(EXTRA_VALUE_PAIR_SEPARATOR);
+            for (int i = 0; i < pairs.length; ++i) {
+                final String[] pair = pairs[i].split(EXTRA_VALUE_KEY_VALUE_SEPARATOR);
+                if (pair.length == 1) {
+                    extraValueMap.put(pair[0], null);
+                } else if (pair.length > 1) {
+                    if (pair.length > 2) {
+                        Slog.w(TAG, "ExtraValue has two or more '='s");
                     }
+                    extraValueMap.put(pair[0], pair[1]);
                 }
             }
+            mExtraValueHashMapCache = extraValueMap;
+            return extraValueMap;
         }
-        return mExtraValueHashMapCache;
     }
 
     /**

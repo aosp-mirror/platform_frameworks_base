@@ -16,20 +16,24 @@
 
 package android.test;
 
-import com.google.android.collect.Sets;
-
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.ContentProvider;
 import android.database.DatabaseErrorHandler;
 import android.database.sqlite.SQLiteDatabase;
-import android.os.FileUtils;
 import android.util.Log;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.attribute.PosixFilePermissions;
+import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -48,8 +52,8 @@ public class RenamingDelegatingContext extends ContextWrapper {
     private File mCacheDir;
     private final Object mSync = new Object();
 
-    private Set<String> mDatabaseNames = Sets.newHashSet();
-    private Set<String> mFileNames = Sets.newHashSet();
+    private Set<String> mDatabaseNames = new HashSet<>();
+    private Set<String> mFileNames = new HashSet<>();
 
     public static <T extends ContentProvider> T providerWithRenamedContext(
             Class<T> contentProvider, Context c, String filePrefix)
@@ -237,10 +241,14 @@ public class RenamingDelegatingContext extends ContextWrapper {
                     Log.w("RenamingDelegatingContext", "Unable to create cache directory");
                     return null;
                 }
-                FileUtils.setPermissions(
-                        mCacheDir.getPath(),
-                        FileUtils.S_IRWXU|FileUtils.S_IRWXG|FileUtils.S_IXOTH,
-                        -1, -1);
+                try {
+                    // Give the directory all possible permissions.
+                    Files.setPosixFilePermissions(mCacheDir.toPath(),
+                            EnumSet.allOf(PosixFilePermission.class));
+                } catch (IOException e) {
+                    Log.e("RenamingDelegatingContext",
+                            "Could not set permissions of test cacheDir", e);
+                }
             }
         }
         return mCacheDir;

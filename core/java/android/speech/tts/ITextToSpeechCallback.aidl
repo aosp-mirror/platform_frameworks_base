@@ -83,4 +83,21 @@ oneway interface ITextToSpeechCallback {
      * callback.
      */
     void onAudioAvailable(String utteranceId, in byte[] audio);
+
+    /**
+     * Tells the client that the engine is about to speak the specified range of the utterance.
+     *
+     * <p>
+     * Only called if the engine supplies timing information by calling
+     * {@link SynthesisCallback#rangeStart(int, int, int)} and only when the request is played back
+     * by the service, not when using {@link android.speech.tts.TextToSpeech#synthesizeToFile}.
+     * </p>
+     *
+     * @param utteranceId Unique id identifying the synthesis request.
+     * @param start The start character index of the range in the utterance text.
+     * @param end The end character index of the range (exclusive) in the utterance text.
+     * @param frame The start position in frames in the audio of the request where this range is
+     *        spoken.
+     */
+    void onRangeStart(String utteranceId, int start, int end, int frame);
 }

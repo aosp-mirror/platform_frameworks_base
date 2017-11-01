@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="5247871339820894594">"CarrierDefaultApp"</string>
+    <string name="android_system_label" msgid="2797790869522345065">"ຜູ້ໃຫ້ບໍລິການມືຖື"</string>
+    <string name="portal_notification_id" msgid="5155057562457079297">"ອິນເຕີເນັດມືຖືໝົດແລ້ວ"</string>
+    <string name="no_data_notification_id" msgid="668400731803969521">"ປິດການນຳໃຊ້ອິນເຕີເນັດມືຖືຂອງທ່ານແລ້ວ"</string>
+    <string name="portal_notification_detail" msgid="2295729385924660881">"ແຕະເພື່ອເຂົ້າເບິ່ງເວັບໄຊ %s"</string>
+    <string name="no_data_notification_detail" msgid="3112125343857014825">"ກະລຸນາຕິດຕໍ່ຜູ້ໃຫ້ບໍລິການຂອງທ່ານ %s"</string>
+    <string name="no_mobile_data_connection_title" msgid="7449525772416200578">"ບໍ່ມີອິນເຕີເນັດມືຖື"</string>
+    <string name="no_mobile_data_connection" msgid="544980465184147010">"ເພີ່ມແພັກເກດອິນເຕີເນັດ ຫຼື ແພັກເກດໂຣມມິງຜ່ານ %s"</string>
+    <string name="mobile_data_status_notification_channel_name" msgid="833999690121305708">"ສະຖານະຂໍ້ມູນມືຖື"</string>
+    <string name="action_bar_label" msgid="4290345990334377177">"ເຂົ້າສູ່ລະບົບເຄືອຂ່າຍມືຖື"</string>
+    <string name="ssl_error_warning" msgid="3127935140338254180">"ເຄືອຂ່າຍທີ່ທ່ານກຳລັງເຂົ້າຮ່ວມມີບັນຫາຄວາມປອດໄພ."</string>
+    <string name="ssl_error_example" msgid="6188711843183058764">"ຕົວຢ່າງ, ໜ້າເຂົ້າສູ່ລະບົບອາດຈະບໍ່ແມ່ນຂອງອົງກອນທີ່ປາກົດ."</string>
+    <string name="ssl_error_continue" msgid="1138548463994095584">"ດຳເນີນການຕໍ່ຜ່ານໂປຣແກຣມທ່ອງເວັບ"</string>
+</resources>

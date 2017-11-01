@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">CarrierDefaultApp</string>
+    <string name="android_system_label">Mobile Carrier</string>
+    <string name="portal_notification_id">Mobile data has run out</string>
+    <string name="no_data_notification_id">Your mobile data has been deactivated</string>
+    <string name="portal_notification_detail">Tap to visit the %s website</string>
+    <string name="no_data_notification_detail">Please contact your service provider %s</string>
+    <string name="no_mobile_data_connection_title">No mobile data connection</string>
+    <string name="no_mobile_data_connection">Add data or roaming plan through %s</string>
+    <string name="mobile_data_status_notification_channel_name">Mobile data status</string>
+    <string name="action_bar_label">Sign in to mobile network</string>
+    <string name="ssl_error_warning">The network you&#8217;re trying to join has security issues.</string>
+    <string name="ssl_error_example">For example, the login page may not belong to the organization shown.</string>
+    <string name="ssl_error_continue">Continue anyway via browser</string>
+</resources>

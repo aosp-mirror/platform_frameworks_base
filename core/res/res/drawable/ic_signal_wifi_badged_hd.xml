@@ -13,11 +13,11 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<vector xmlns:api24="http://schemas.android.com/apk/res/android" xmlns:android="http://schemas.android.com/apk/res/android"
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:viewportWidth="18"
     android:viewportHeight="18"
-    android:width="18dp"
-    android:height="18dp">
+    android:width="26dp"
+    android:height="24dp">
     <group
         android:translateX="386"
         android:translateY="-298">

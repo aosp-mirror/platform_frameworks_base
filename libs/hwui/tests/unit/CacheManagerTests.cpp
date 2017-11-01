@@ -1,0 +1,75 @@
+/*
+ * Copyright (C) 2017 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include <gtest/gtest.h>
+
+#include "renderthread/CacheManager.h"
+#include "renderthread/EglManager.h"
+#include "tests/common/TestUtils.h"
+
+using namespace android;
+using namespace android::uirenderer;
+using namespace android::uirenderer::renderthread;
+
+static size_t getCacheUsage(GrContext* grContext) {
+    size_t cacheUsage;
+    grContext->getResourceCacheUsage(nullptr, &cacheUsage);
+    return cacheUsage;
+}
+
+RENDERTHREAD_SKIA_PIPELINE_TEST(CacheManager, trimMemory) {
+    DisplayInfo displayInfo = renderThread.mainDisplayInfo();
+    GrContext* grContext = renderThread.getGrContext();
+    ASSERT_TRUE(grContext != nullptr);
+
+    // create pairs of offscreen render targets and images until we exceed the backgroundCacheSizeLimit
+    std::vector<sk_sp<SkSurface>> surfaces;
+
+    while (getCacheUsage(grContext) <= renderThread.cacheManager().getBackgroundCacheSize()) {
+        SkImageInfo info = SkImageInfo::MakeA8(displayInfo.w, displayInfo.h);
+        sk_sp<SkSurface> surface = SkSurface::MakeRenderTarget(grContext, SkBudgeted::kYes, info);
+        surface->getCanvas()->drawColor(SK_AlphaTRANSPARENT);
+
+        grContext->flush();
+
+        surfaces.push_back(surface);
+    }
+
+    ASSERT_TRUE(1 < surfaces.size());
+
+    // attempt to trim all memory while we still hold strong refs
+    renderThread.cacheManager().trimMemory(CacheManager::TrimMemoryMode::Complete);
+    ASSERT_TRUE(0 == grContext->getResourceCachePurgeableBytes());
+
+    // free the surfaces
+    for (size_t i = 0; i < surfaces.size(); i++) {
+        ASSERT_TRUE(surfaces[i]->unique());
+        surfaces[i].reset();
+    }
+
+    // verify that we have enough purgeable bytes
+    const size_t purgeableBytes = grContext->getResourceCachePurgeableBytes();
+    ASSERT_TRUE(renderThread.cacheManager().getBackgroundCacheSize() < purgeableBytes);
+
+    // UI hidden and make sure only some got purged
+    renderThread.cacheManager().trimMemory(CacheManager::TrimMemoryMode::UiHidden);
+    ASSERT_TRUE(0 < grContext->getResourceCachePurgeableBytes());
+    ASSERT_TRUE(renderThread.cacheManager().getBackgroundCacheSize() > getCacheUsage(grContext));
+
+    // complete and make sure all get purged
+    renderThread.cacheManager().trimMemory(CacheManager::TrimMemoryMode::Complete);
+    ASSERT_TRUE(0 == grContext->getResourceCachePurgeableBytes());
+}

@@ -35,17 +35,18 @@
 
 #include <utils/Looper.h>
 
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 #include "android_os_MessageQueue.h"
 #include "android_view_InputChannel.h"
 #include "android_view_KeyEvent.h"
 
+#include "android-base/stringprintf.h"
 #include "nativebridge/native_bridge.h"
 #include "nativeloader/native_loader.h"
 
 #include "core_jni_helpers.h"
 
-#include "ScopedUtfChars.h"
+#include <nativehelper/ScopedUtfChars.h>
 
 #define LOG_TRACE(...)
 //#define LOG_TRACE(...) ALOG(LOG_DEBUG, LOG_TAG, __VA_ARGS__)
@@ -128,8 +129,13 @@ struct NativeCode : public ANativeActivity {
         if (callbacks.onDestroy != NULL) {
             callbacks.onDestroy(this);
         }
-        if (env != NULL && clazz != NULL) {
+        if (env != NULL) {
+          if (clazz != NULL) {
             env->DeleteGlobalRef(clazz);
+          }
+          if (javaAssetManager != NULL) {
+            env->DeleteGlobalRef(javaAssetManager);
+          }
         }
         if (messageQueue != NULL && mainWorkRead >= 0) {
             messageQueue->getLooper()->removeFd(mainWorkRead);
@@ -170,6 +176,10 @@ struct NativeCode : public ANativeActivity {
     int mainWorkRead;
     int mainWorkWrite;
     sp<MessageQueue> messageQueue;
+
+    // Need to hold on to a reference here in case the upper layers destroy our
+    // AssetManager.
+    jobject javaAssetManager;
 };
 
 void android_NativeActivity_finish(ANativeActivity* activity) {
@@ -256,6 +266,8 @@ static int mainWorkCallback(int fd, int events, void* data) {
 
 // ------------------------------------------------------------------------
 
+static thread_local std::string g_error_msg;
+
 static jlong
 loadNativeCode_native(JNIEnv* env, jobject clazz, jstring path, jstring funcName,
         jobject messageQueue, jstring internalDataDir, jstring obbDir,
@@ -268,7 +280,6 @@ loadNativeCode_native(JNIEnv* env, jobject clazz, jstring path, jstring funcName
     ScopedUtfChars pathStr(env, path);
     std::unique_ptr<NativeCode> code;
     bool needs_native_bridge = false;
-    std::string error_msg;
 
     void* handle = OpenNativeLibrary(env,
                                      sdkVersion,
@@ -276,12 +287,12 @@ loadNativeCode_native(JNIEnv* env, jobject clazz, jstring path, jstring funcName
                                      classLoader,
                                      libraryPath,
                                      &needs_native_bridge,
-                                     &error_msg);
+                                     &g_error_msg);
 
     if (handle == nullptr) {
         ALOGW("NativeActivity LoadNativeLibrary(\"%s\") failed: %s",
               pathStr.c_str(),
-              error_msg.c_str());
+              g_error_msg.c_str());
         return 0;
     }
 
@@ -297,19 +308,22 @@ loadNativeCode_native(JNIEnv* env, jobject clazz, jstring path, jstring funcName
     env->ReleaseStringUTFChars(funcName, funcStr);
 
     if (code->createActivityFunc == NULL) {
-        ALOGW("ANativeActivity_onCreate not found");
+        g_error_msg = needs_native_bridge ? NativeBridgeGetError() : dlerror();
+        ALOGW("ANativeActivity_onCreate not found: %s", g_error_msg.c_str());
         return 0;
     }
 
     code->messageQueue = android_os_MessageQueue_getMessageQueue(env, messageQueue);
     if (code->messageQueue == NULL) {
-        ALOGW("Unable to retrieve native MessageQueue");
+        g_error_msg = "Unable to retrieve native MessageQueue";
+        ALOGW("%s", g_error_msg.c_str());
         return 0;
     }
 
     int msgpipe[2];
     if (pipe(msgpipe)) {
-        ALOGW("could not create pipe: %s", strerror(errno));
+        g_error_msg = android::base::StringPrintf("could not create pipe: %s", strerror(errno));
+        ALOGW("%s", g_error_msg.c_str());
         return 0;
     }
     code->mainWorkRead = msgpipe[0];
@@ -325,7 +339,8 @@ loadNativeCode_native(JNIEnv* env, jobject clazz, jstring path, jstring funcName
 
     code->ANativeActivity::callbacks = &code->callbacks;
     if (env->GetJavaVM(&code->vm) < 0) {
-        ALOGW("NativeActivity GetJavaVM failed");
+        g_error_msg = "NativeActivity GetJavaVM failed";
+        ALOGW("%s", g_error_msg.c_str());
         return 0;
     }
     code->env = env;
@@ -345,6 +360,7 @@ loadNativeCode_native(JNIEnv* env, jobject clazz, jstring path, jstring funcName
 
     code->sdkVersion = sdkVersion;
 
+    code->javaAssetManager = env->NewGlobalRef(jAssetMgr);
     code->assetManager = assetManagerForJavaObject(env, jAssetMgr);
 
     if (obbDir != NULL) {
@@ -371,7 +387,9 @@ loadNativeCode_native(JNIEnv* env, jobject clazz, jstring path, jstring funcName
 }
 
 static jstring getDlError_native(JNIEnv* env, jobject clazz) {
-  return env->NewStringUTF(dlerror());
+  jstring result = env->NewStringUTF(g_error_msg.c_str());
+  g_error_msg.clear();
+  return result;
 }
 
 static void

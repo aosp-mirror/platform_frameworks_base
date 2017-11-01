@@ -24,6 +24,20 @@ enum {
     TRANSACTION_onStorageStateChanged,
 };
 
+class BpMountServiceListener: public BpInterface<IMountServiceListener> {
+public:
+    explicit BpMountServiceListener(const sp<IBinder>& impl)
+            : BpInterface<IMountServiceListener>(impl) { }
+
+    virtual void onUsbMassStorageConnectionChanged(const bool /* connected */) { }
+    virtual void onStorageStateChanged(const String16& /* path */,
+            const String16& /* oldState */, const String16& /* newState */) { }
+};
+
+IMPLEMENT_META_INTERFACE(MountServiceListener, "android.os.storage.IStorageEventListener")
+
+// ----------------------------------------------------------------------
+
 status_t BnMountServiceListener::onTransact(
     uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags)
 {

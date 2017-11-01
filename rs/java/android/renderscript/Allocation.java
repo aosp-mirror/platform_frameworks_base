@@ -2895,6 +2895,7 @@ public class Allocation extends BaseObj {
             mAllocationArray[0] = createTyped(rs, t, usage);
             if ((usage & USAGE_IO_INPUT) != 0) {
                 if (numAlloc > MAX_NUMBER_IO_INPUT_ALLOC) {
+                    mAllocationArray[0].destroy();
                     throw new RSIllegalArgumentException("Exceeds the max number of Allocations allowed: " +
                                                          MAX_NUMBER_IO_INPUT_ALLOC);
                 }

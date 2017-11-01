@@ -17,11 +17,21 @@
 package android.os;
 
 import static android.system.OsConstants.AF_UNIX;
+import static android.system.OsConstants.O_APPEND;
+import static android.system.OsConstants.O_CREAT;
+import static android.system.OsConstants.O_RDONLY;
+import static android.system.OsConstants.O_RDWR;
+import static android.system.OsConstants.O_TRUNC;
+import static android.system.OsConstants.O_WRONLY;
 import static android.system.OsConstants.SEEK_SET;
-import static android.system.OsConstants.SOCK_STREAM;
 import static android.system.OsConstants.SOCK_SEQPACKET;
+import static android.system.OsConstants.SOCK_STREAM;
+import static android.system.OsConstants.S_IROTH;
+import static android.system.OsConstants.S_IRWXG;
+import static android.system.OsConstants.S_IRWXU;
 import static android.system.OsConstants.S_ISLNK;
 import static android.system.OsConstants.S_ISREG;
+import static android.system.OsConstants.S_IWOTH;
 
 import android.content.BroadcastReceiver;
 import android.content.ContentProvider;
@@ -33,6 +43,7 @@ import android.system.StructStat;
 import android.util.Log;
 
 import dalvik.system.CloseGuard;
+
 import libcore.io.IoUtils;
 import libcore.io.Memory;
 
@@ -279,8 +290,28 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
                     "Must specify MODE_READ_ONLY, MODE_WRITE_ONLY, or MODE_READ_WRITE");
         }
 
+        int flags = 0;
+        switch (mode & MODE_READ_WRITE) {
+            case 0:
+            case MODE_READ_ONLY: flags = O_RDONLY; break;
+            case MODE_WRITE_ONLY: flags = O_WRONLY; break;
+            case MODE_READ_WRITE: flags = O_RDWR; break;
+        }
+
+        if ((mode & MODE_CREATE) != 0) flags |= O_CREAT;
+        if ((mode & MODE_TRUNCATE) != 0) flags |= O_TRUNC;
+        if ((mode & MODE_APPEND) != 0) flags |= O_APPEND;
+
+        int realMode = S_IRWXU | S_IRWXG;
+        if ((mode & MODE_WORLD_READABLE) != 0) realMode |= S_IROTH;
+        if ((mode & MODE_WORLD_WRITEABLE) != 0) realMode |= S_IWOTH;
+
         final String path = file.getPath();
-        return Parcel.openFileDescriptor(path, mode);
+        try {
+            return Os.open(path, flags, realMode);
+        } catch (ErrnoException e) {
+            throw new FileNotFoundException(e.getMessage());
+        }
     }
 
     /**
@@ -516,7 +547,8 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
      * Converts a string representing a file mode, such as "rw", into a bitmask suitable for use
      * with {@link #open}.
      * <p>
-     * @param mode The string representation of the file mode.
+     * @param mode The string representation of the file mode. Can be "r", "w", "wt", "wa", "rw"
+     *             or "rwt".
      * @return A bitmask representing the given file mode.
      * @throws IllegalArgumentException if the given string does not match a known file mode.
      */
@@ -543,6 +575,25 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
             throw new IllegalArgumentException("Bad mode '" + mode + "'");
         }
         return modeBits;
+    }
+
+    /**
+     * Return the filesystem path of the real file on disk that is represented
+     * by the given {@link FileDescriptor}.
+     *
+     * @hide
+     */
+    public static File getFile(FileDescriptor fd) throws IOException {
+        try {
+            final String path = Os.readlink("/proc/self/fd/" + fd.getInt$());
+            if (OsConstants.S_ISREG(Os.stat(path).st_mode)) {
+                return new File(path);
+            } else {
+                throw new IOException("Not a regular file: " + path);
+            }
+        } catch (ErrnoException e) {
+            throw e.rethrowAsIOException();
+        }
     }
 
     /**
@@ -686,7 +737,9 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
     private void closeWithStatus(int status, String msg) {
         if (mClosed) return;
         mClosed = true;
-        mGuard.close();
+        if (mGuard != null) {
+            mGuard.close();
+        }
         // Status MUST be sent before closing actual descriptor
         writeCommStatusAndClose(status, msg);
         IoUtils.closeQuietly(mFd);

@@ -17,7 +17,6 @@
 package android.net.metrics;
 
 import android.annotation.IntDef;
-import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -36,7 +35,6 @@ import java.util.List;
  * the APF program in place with a new APF program.
  * {@hide}
  */
-@SystemApi
 public final class ApfProgramEvent implements Parcelable {
 
     // Bitflag constants describing what an Apf program filters.
@@ -49,24 +47,19 @@ public final class ApfProgramEvent implements Parcelable {
     @Retention(RetentionPolicy.SOURCE)
     public @interface Flags {}
 
-    public final long lifetime;     // Lifetime of the program in seconds
-    public final int filteredRas;   // Number of RAs filtered by the APF program
-    public final int currentRas;    // Total number of current RAs at generation time
-    public final int programLength; // Length of the APF program in bytes
-    public final int flags;         // Bitfield compound of FLAG_* constants
+    public long lifetime;       // Maximum computed lifetime of the program in seconds
+    public long actualLifetime; // Effective program lifetime in seconds
+    public int filteredRas;     // Number of RAs filtered by the APF program
+    public int currentRas;      // Total number of current RAs at generation time
+    public int programLength;   // Length of the APF program in bytes
+    public int flags;           // Bitfield compound of FLAG_* constants
 
-    /** {@hide} */
-    public ApfProgramEvent(
-            long lifetime, int filteredRas, int currentRas, int programLength, @Flags int flags) {
-        this.lifetime = lifetime;
-        this.filteredRas = filteredRas;
-        this.currentRas = currentRas;
-        this.programLength = programLength;
-        this.flags = flags;
+    public ApfProgramEvent() {
     }
 
     private ApfProgramEvent(Parcel in) {
         this.lifetime = in.readLong();
+        this.actualLifetime = in.readLong();
         this.filteredRas = in.readInt();
         this.currentRas = in.readInt();
         this.programLength = in.readInt();
@@ -76,6 +69,7 @@ public final class ApfProgramEvent implements Parcelable {
     @Override
     public void writeToParcel(Parcel out, int flags) {
         out.writeLong(lifetime);
+        out.writeLong(actualLifetime);
         out.writeInt(filteredRas);
         out.writeInt(currentRas);
         out.writeInt(programLength);
@@ -90,8 +84,8 @@ public final class ApfProgramEvent implements Parcelable {
     @Override
     public String toString() {
         String lifetimeString = (lifetime < Long.MAX_VALUE) ? lifetime + "s" : "forever";
-        return String.format("ApfProgramEvent(%d/%d RAs %dB %s %s)",
-                filteredRas, currentRas, programLength, lifetimeString, namesOf(flags));
+        return String.format("ApfProgramEvent(%d/%d RAs %dB %ds/%s %s)", filteredRas, currentRas,
+                programLength, actualLifetime, lifetimeString, namesOf(flags));
     }
 
     public static final Parcelable.Creator<ApfProgramEvent> CREATOR
@@ -105,7 +99,6 @@ public final class ApfProgramEvent implements Parcelable {
         }
     };
 
-    /** {@hide} */
     public static @Flags int flagsFor(boolean hasIPv4, boolean multicastFilterOn) {
         int bitfield = 0;
         if (hasIPv4) {

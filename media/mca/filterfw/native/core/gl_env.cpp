@@ -26,7 +26,10 @@
 #include <string>
 #include <EGL/eglext.h>
 
+#include <gui/BufferQueue.h>
+#include <gui/Surface.h>
 #include <gui/GLConsumer.h>
+#include <gui/IGraphicBufferProducer.h>
 
 namespace android {
 namespace filterfw {

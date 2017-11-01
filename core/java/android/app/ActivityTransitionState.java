@@ -15,14 +15,16 @@
  */
 package android.app;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.ResultReceiver;
 import android.transition.Transition;
 import android.util.SparseArray;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.view.Window;
+
+import com.android.internal.view.OneShotPreDrawListener;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -166,7 +168,11 @@ class ActivityTransitionState {
                 restoreExitedViews();
                 int result = mEnterActivityOptions.getResultCode();
                 if (result != 0) {
-                    activity.onActivityReenter(result, mEnterActivityOptions.getResultData());
+                    Intent intent = mEnterActivityOptions.getResultData();
+                    if (intent != null) {
+                        intent.setExtrasClassLoader(activity.getClassLoader());
+                    }
+                    activity.onActivityReenter(result, intent);
                 }
             }
         }
@@ -316,24 +322,38 @@ class ActivityTransitionState {
                 }
                 if (delayExitBack && decor != null) {
                     final ViewGroup finalDecor = decor;
-                    decor.getViewTreeObserver().addOnPreDrawListener(
-                            new ViewTreeObserver.OnPreDrawListener() {
-                                @Override
-                                public boolean onPreDraw() {
-                                    finalDecor.getViewTreeObserver().removeOnPreDrawListener(this);
-                                    if (mReturnExitCoordinator != null) {
-                                        mReturnExitCoordinator.startExit(activity.mResultCode,
-                                                activity.mResultData);
-                                    }
-                                    return true;
-                                }
-                            });
+                    OneShotPreDrawListener.add(decor, () -> {
+                        if (mReturnExitCoordinator != null) {
+                            mReturnExitCoordinator.startExit(activity.mResultCode,
+                                    activity.mResultData);
+                        }
+                    });
                 } else {
                     mReturnExitCoordinator.startExit(activity.mResultCode, activity.mResultData);
                 }
             }
             return true;
         }
+    }
+
+    public boolean isTransitionRunning() {
+        // Note that *only* enter *or* exit will be running at any given time
+        if (mEnterTransitionCoordinator != null) {
+            if (mEnterTransitionCoordinator.isTransitionRunning()) {
+                return true;
+            }
+        }
+        if (mCalledExitCoordinator != null) {
+            if (mCalledExitCoordinator.isTransitionRunning()) {
+                return true;
+            }
+        }
+        if (mReturnExitCoordinator != null) {
+            if (mReturnExitCoordinator.isTransitionRunning()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public void startExitOutTransition(Activity activity, Bundle options) {

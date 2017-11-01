@@ -37,6 +37,8 @@ public class SoundEffectConstants {
      *     or {@link View#FOCUS_BACKWARD}
 
      * @return The appropriate sonification constant.
+     * @throws {@link IllegalArgumentException} when the passed direction is not one of the
+     *     documented values.
      */
     public static int getContantForFocusDirection(int direction) {
         switch (direction) {

@@ -22,6 +22,7 @@
 #include "utils/FatVector.h"
 #include "utils/TraceUtils.h"
 
+#include <utils/Color.h>
 #include <utils/Log.h>
 
 #include <GLES2/gl2.h>
@@ -34,17 +35,19 @@ namespace uirenderer {
 ////////////////////////////////////////////////////////////////////////////////
 
 OffscreenBuffer::OffscreenBuffer(RenderState& renderState, Caches& caches,
-        uint32_t viewportWidth, uint32_t viewportHeight)
+        uint32_t viewportWidth, uint32_t viewportHeight, bool wideColorGamut)
         : GpuMemoryTracker(GpuObjectType::OffscreenBuffer)
         , renderState(renderState)
         , viewportWidth(viewportWidth)
         , viewportHeight(viewportHeight)
-        , texture(caches) {
+        , texture(caches)
+        , wideColorGamut(wideColorGamut) {
     uint32_t width = computeIdealDimension(viewportWidth);
     uint32_t height = computeIdealDimension(viewportHeight);
     ATRACE_FORMAT("Allocate %ux%u HW Layer", width, height);
     caches.textureState().activateTexture(0);
-    texture.resize(width, height, GL_RGBA);
+    texture.resize(width, height,
+            wideColorGamut ? GL_RGBA16F : caches.rgbaInternalFormat(), GL_RGBA);
     texture.blend = true;
     texture.setWrap(GL_CLAMP_TO_EDGE);
     // not setting filter on texture, since it's set when drawing, based on transform
@@ -126,7 +129,10 @@ int OffscreenBufferPool::Entry::compare(const Entry& lhs, const Entry& rhs) {
     int deltaInt = int(lhs.width) - int(rhs.width);
     if (deltaInt != 0) return deltaInt;
 
-    return int(lhs.height) - int(rhs.height);
+    deltaInt = int(lhs.height) - int(rhs.height);
+    if (deltaInt != 0) return deltaInt;
+
+    return int(lhs.wideColorGamut) - int(rhs.wideColorGamut);
 }
 
 void OffscreenBufferPool::clear() {
@@ -138,10 +144,10 @@ void OffscreenBufferPool::clear() {
 }
 
 OffscreenBuffer* OffscreenBufferPool::get(RenderState& renderState,
-        const uint32_t width, const uint32_t height) {
+        const uint32_t width, const uint32_t height, bool wideColorGamut) {
     OffscreenBuffer* layer = nullptr;
 
-    Entry entry(width, height);
+    Entry entry(width, height, wideColorGamut);
     auto iter = mPool.find(entry);
 
     if (iter != mPool.end()) {
@@ -153,7 +159,8 @@ OffscreenBuffer* OffscreenBufferPool::get(RenderState& renderState,
         layer->viewportHeight = height;
         mSize -= layer->getSizeInBytes();
     } else {
-        layer = new OffscreenBuffer(renderState, Caches::getInstance(), width, height);
+        layer = new OffscreenBuffer(renderState, Caches::getInstance(),
+                width, height, wideColorGamut);
     }
 
     return layer;
@@ -173,7 +180,7 @@ OffscreenBuffer* OffscreenBufferPool::resize(OffscreenBuffer* layer,
         return layer;
     }
     putOrDelete(layer);
-    return get(renderState, width, height);
+    return get(renderState, width, height, layer->wideColorGamut);
 }
 
 void OffscreenBufferPool::dump() {

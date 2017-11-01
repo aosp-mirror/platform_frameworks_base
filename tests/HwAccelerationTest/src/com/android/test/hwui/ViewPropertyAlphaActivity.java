@@ -60,12 +60,12 @@ public class ViewPropertyAlphaActivity extends Activity {
                 startAnim(R.id.imageview);
                 startAnim(myViewAlphaDefault);
                 startAnim(myViewAlphaHandled);
-                EditText selectedText = (EditText) findViewById(R.id.selectedtext);
+                EditText selectedText = findViewById(R.id.selectedtext);
                 selectedText.setSelection(3, 8);
             }
         }, 2000);
         
-        Button invalidator = (Button) findViewById(R.id.invalidateButton);
+        Button invalidator = findViewById(R.id.invalidateButton);
         invalidator.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -74,7 +74,7 @@ public class ViewPropertyAlphaActivity extends Activity {
             }
         });
 
-        TextView textView = (TextView) findViewById(R.id.spantext);
+        TextView textView = findViewById(R.id.spantext);
         if (textView != null) {
             SpannableStringBuilder text =
                     new SpannableStringBuilder("Now this is a short text message with spans");
@@ -93,7 +93,7 @@ public class ViewPropertyAlphaActivity extends Activity {
             textView.setText(text);
         }
         
-        LinearLayout container = (LinearLayout) findViewById(R.id.container);
+        LinearLayout container = findViewById(R.id.container);
         myViewAlphaDefault = new MyView(this, false);
         myViewAlphaDefault.setLayoutParams(new LinearLayout.LayoutParams(75, 75));
         container.addView(myViewAlphaDefault);

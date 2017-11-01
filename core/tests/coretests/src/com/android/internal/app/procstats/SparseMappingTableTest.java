@@ -180,7 +180,9 @@ public class SparseMappingTableTest extends TestCase {
 
         try {
             table.getValue(key);
-            throw new Exception("Exception not thrown after mismatched reset calls.");
+            // Turn off this assertion because the check in SparseMappingTable.assertConsistency
+            // is also turned off.
+            //throw new Exception("Exception not thrown after mismatched reset calls.");
         } catch (RuntimeException ex) {
             // Good
         }

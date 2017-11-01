@@ -16,24 +16,8 @@
 
 package com.android.server.connectivity;
 
-import android.app.PendingIntent;
-import android.content.Context;
-import android.content.res.Resources;
-import android.net.ConnectivityManager;
-import android.net.Network;
-import android.net.NetworkCapabilities;
-import android.net.NetworkInfo;
-import android.net.NetworkMisc;
-import android.test.suitebuilder.annotation.SmallTest;
-import android.text.format.DateUtils;
-import com.android.internal.R;
-import com.android.server.ConnectivityService;
-import com.android.server.connectivity.NetworkNotificationManager;
-import com.android.server.connectivity.NetworkNotificationManager.NotificationType;
-import junit.framework.TestCase;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyBoolean;
 import static org.mockito.Mockito.anyInt;
@@ -44,7 +28,32 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.reset;
 
-public class LingerMonitorTest extends TestCase {
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.res.Resources;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkCapabilities;
+import android.net.NetworkInfo;
+import android.net.NetworkMisc;
+import android.support.test.runner.AndroidJUnit4;
+import android.support.test.filters.SmallTest;
+import android.text.format.DateUtils;
+
+import com.android.internal.R;
+import com.android.server.ConnectivityService;
+import com.android.server.connectivity.NetworkNotificationManager;
+import com.android.server.connectivity.NetworkNotificationManager.NotificationType;
+
+import org.junit.runner.RunWith;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
+@RunWith(AndroidJUnit4.class)
+@SmallTest
+public class LingerMonitorTest {
     static final String CELLULAR = "CELLULAR";
     static final String WIFI     = "WIFI";
 
@@ -62,6 +71,7 @@ public class LingerMonitorTest extends TestCase {
     @Mock NetworkNotificationManager mNotifier;
     @Mock Resources mResources;
 
+    @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         when(mCtx.getResources()).thenReturn(mResources);
@@ -71,7 +81,7 @@ public class LingerMonitorTest extends TestCase {
         mMonitor = new TestableLingerMonitor(mCtx, mNotifier, HIGH_DAILY_LIMIT, HIGH_RATE_LIMIT);
     }
 
-    @SmallTest
+    @Test
     public void testTransitions() {
         setNotificationSwitch(transition(WIFI, CELLULAR));
         NetworkAgentInfo nai1 = wifiNai(100);
@@ -81,7 +91,7 @@ public class LingerMonitorTest extends TestCase {
         assertFalse(mMonitor.isNotificationEnabled(nai2, nai1));
     }
 
-    @SmallTest
+    @Test
     public void testNotificationOnLinger() {
         setNotificationSwitch(transition(WIFI, CELLULAR));
         setNotificationType(LingerMonitor.NOTIFY_TYPE_NOTIFICATION);
@@ -92,7 +102,7 @@ public class LingerMonitorTest extends TestCase {
         verifyNotification(from, to);
     }
 
-    @SmallTest
+    @Test
     public void testToastOnLinger() {
         setNotificationSwitch(transition(WIFI, CELLULAR));
         setNotificationType(LingerMonitor.NOTIFY_TYPE_TOAST);
@@ -103,7 +113,7 @@ public class LingerMonitorTest extends TestCase {
         verifyToast(from, to);
     }
 
-    @SmallTest
+    @Test
     public void testNotificationClearedAfterDisconnect() {
         setNotificationSwitch(transition(WIFI, CELLULAR));
         setNotificationType(LingerMonitor.NOTIFY_TYPE_NOTIFICATION);
@@ -117,7 +127,7 @@ public class LingerMonitorTest extends TestCase {
         verify(mNotifier, times(1)).clearNotification(100);
     }
 
-    @SmallTest
+    @Test
     public void testNotificationClearedAfterSwitchingBack() {
         setNotificationSwitch(transition(WIFI, CELLULAR));
         setNotificationType(LingerMonitor.NOTIFY_TYPE_NOTIFICATION);
@@ -131,7 +141,7 @@ public class LingerMonitorTest extends TestCase {
         verify(mNotifier, times(1)).clearNotification(100);
     }
 
-    @SmallTest
+    @Test
     public void testUniqueToast() {
         setNotificationSwitch(transition(WIFI, CELLULAR));
         setNotificationType(LingerMonitor.NOTIFY_TYPE_TOAST);
@@ -149,7 +159,7 @@ public class LingerMonitorTest extends TestCase {
         verifyNoNotifications();
     }
 
-    @SmallTest
+    @Test
     public void testMultipleNotifications() {
         setNotificationSwitch(transition(WIFI, CELLULAR));
         setNotificationType(LingerMonitor.NOTIFY_TYPE_NOTIFICATION);
@@ -168,7 +178,7 @@ public class LingerMonitorTest extends TestCase {
         verifyNotification(wifi2, cell);
     }
 
-    @SmallTest
+    @Test
     public void testRateLimiting() throws InterruptedException {
         mMonitor = new TestableLingerMonitor(mCtx, mNotifier, HIGH_DAILY_LIMIT, LOW_RATE_LIMIT);
 
@@ -194,7 +204,7 @@ public class LingerMonitorTest extends TestCase {
         verifyNoNotifications();
     }
 
-    @SmallTest
+    @Test
     public void testDailyLimiting() throws InterruptedException {
         mMonitor = new TestableLingerMonitor(mCtx, mNotifier, LOW_DAILY_LIMIT, HIGH_RATE_LIMIT);
 
@@ -221,7 +231,7 @@ public class LingerMonitorTest extends TestCase {
         verifyNoNotifications();
     }
 
-    @SmallTest
+    @Test
     public void testUniqueNotification() {
         setNotificationSwitch(transition(WIFI, CELLULAR));
         setNotificationType(LingerMonitor.NOTIFY_TYPE_NOTIFICATION);
@@ -238,7 +248,7 @@ public class LingerMonitorTest extends TestCase {
         verifyNotification(from, to);
     }
 
-    @SmallTest
+    @Test
     public void testIgnoreNeverValidatedNetworks() {
         setNotificationType(LingerMonitor.NOTIFY_TYPE_TOAST);
         setNotificationSwitch(transition(WIFI, CELLULAR));
@@ -250,7 +260,7 @@ public class LingerMonitorTest extends TestCase {
         verifyNoNotifications();
     }
 
-    @SmallTest
+    @Test
     public void testIgnoreCurrentlyValidatedNetworks() {
         setNotificationType(LingerMonitor.NOTIFY_TYPE_TOAST);
         setNotificationSwitch(transition(WIFI, CELLULAR));
@@ -262,7 +272,7 @@ public class LingerMonitorTest extends TestCase {
         verifyNoNotifications();
     }
 
-    @SmallTest
+    @Test
     public void testNoNotificationType() {
         setNotificationType(LingerMonitor.NOTIFY_TYPE_TOAST);
         setNotificationSwitch();
@@ -273,7 +283,7 @@ public class LingerMonitorTest extends TestCase {
         verifyNoNotifications();
     }
 
-    @SmallTest
+    @Test
     public void testNoTransitionToNotify() {
         setNotificationType(LingerMonitor.NOTIFY_TYPE_NONE);
         setNotificationSwitch(transition(WIFI, CELLULAR));
@@ -284,7 +294,7 @@ public class LingerMonitorTest extends TestCase {
         verifyNoNotifications();
     }
 
-    @SmallTest
+    @Test
     public void testDifferentTransitionToNotify() {
         setNotificationType(LingerMonitor.NOTIFY_TYPE_TOAST);
         setNotificationSwitch(transition(CELLULAR, WIFI));

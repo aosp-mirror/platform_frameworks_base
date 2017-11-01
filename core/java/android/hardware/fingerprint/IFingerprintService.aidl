@@ -16,6 +16,7 @@
 package android.hardware.fingerprint;
 
 import android.os.Bundle;
+import android.hardware.fingerprint.IFingerprintClientActiveCallback;
 import android.hardware.fingerprint.IFingerprintServiceReceiver;
 import android.hardware.fingerprint.IFingerprintServiceLockoutResetCallback;
 import android.hardware.fingerprint.Fingerprint;
@@ -79,4 +80,16 @@ interface IFingerprintService {
 
     // Explicitly set the active user (for enrolling work profile)
     void setActiveUser(int uid);
+
+    // Enumerate all fingerprints
+    void enumerate(IBinder token, int userId, IFingerprintServiceReceiver receiver);
+
+    // Check if a client request is currently being handled
+    boolean isClientActive();
+
+    // Add a callback which gets notified when the service starts and stops handling client requests
+    void addClientActiveCallback(IFingerprintClientActiveCallback callback);
+
+    // Removes a callback set by addClientActiveCallback
+    void removeClientActiveCallback(IFingerprintClientActiveCallback callback);
 }

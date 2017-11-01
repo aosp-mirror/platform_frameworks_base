@@ -139,9 +139,21 @@ LIBANDROID {
     ANativeActivity_setWindowFlags;
     ANativeActivity_setWindowFormat;
     ANativeActivity_showSoftInput;
+    AHardwareBuffer_acquire; # introduced=26
+    AHardwareBuffer_allocate; # introduced=26
+    AHardwareBuffer_describe; # introduced=26
+    AHardwareBuffer_fromHardwareBuffer; # introduced=26
+    AHardwareBuffer_getNativeHandle; # introduced=26
+    AHardwareBuffer_lock; # introduced=26
+    AHardwareBuffer_recvHandleFromUnixSocket; # introduced=26
+    AHardwareBuffer_release; # introduced=26
+    AHardwareBuffer_sendHandleToUnixSocket; # introduced=26
+    AHardwareBuffer_toHardwareBuffer; # introduced=26
+    AHardwareBuffer_unlock; # introduced=26
     ANativeWindow_acquire;
     ANativeWindow_fromSurface;
     ANativeWindow_fromSurfaceTexture; # introduced-arm=13 introduced-mips=13 introduced-x86=13
+    ANativeWindow_toSurface; # introduced=26
     ANativeWindow_getFormat;
     ANativeWindow_getHeight;
     ANativeWindow_getWidth;
@@ -158,15 +170,22 @@ LIBANDROID {
     ASensorEventQueue_enableSensor;
     ASensorEventQueue_getEvents;
     ASensorEventQueue_hasEvents;
+    ASensorEventQueue_registerSensor; # introduced=26
     ASensorEventQueue_setEventRate;
+    ASensorManager_configureDirectReport; # introduced=26
     ASensorManager_createEventQueue;
+    ASensorManager_createHardwareBufferDirectChannel; # introduced=26
+    ASensorManager_createSharedMemoryDirectChannel; # introduced=26
+    ASensorManager_destroyDirectChannel; # introduced=26
     ASensorManager_destroyEventQueue;
     ASensorManager_getDefaultSensor;
     ASensorManager_getDefaultSensorEx; # introduced=21
     ASensorManager_getInstance;
+    ASensorManager_getInstanceForPackage; # introduced=26
     ASensorManager_getSensorList;
     ASensor_getFifoMaxEventCount; # introduced=21
     ASensor_getFifoReservedEventCount; # introduced=21
+    ASensor_getHighestDirectReportRateLevel; # introduced=26
     ASensor_getMinDelay;
     ASensor_getName;
     ASensor_getReportingMode; # introduced=21
@@ -174,7 +193,11 @@ LIBANDROID {
     ASensor_getStringType; # introduced=21
     ASensor_getType;
     ASensor_getVendor;
+    ASensor_isDirectChannelTypeSupported; # introduced=26
     ASensor_isWakeUpSensor; # introduced=21
+    ASharedMemory_create; # introduced=26
+    ASharedMemory_getSize; # introduced=26
+    ASharedMemory_setProt; # introduced=26
     AStorageManager_delete;
     AStorageManager_getMountedObbPath;
     AStorageManager_isObbMounted;
@@ -184,11 +207,9 @@ LIBANDROID {
     ATrace_beginSection; # introduced=23
     ATrace_endSection; # introduced=23
     ATrace_isEnabled; # introduced=23
-    android_getTtsEngine; # introduced-arm=13 introduced-arm64=21 introduced-mips=13 introduced-mips64=21 introduced-x86=13 introduced-x86_64=21
     android_getaddrinfofornetwork; # introduced=23
     android_setprocnetwork; # introduced=23
     android_setsocknetwork; # introduced=23
-    getTtsEngine; # introduced-arm=13 introduced-arm64=21 introduced-mips=13 introduced-mips64=21 introduced-x86=13 introduced-x86_64=21
   local:
     *;
 };

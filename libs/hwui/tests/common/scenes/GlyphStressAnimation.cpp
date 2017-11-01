@@ -17,8 +17,8 @@
 #include "TestSceneBase.h"
 #include "utils/Color.h"
 
-#include <minikin/Layout.h>
 #include <hwui/Paint.h>
+#include <minikin/Layout.h>
 
 #include <cstdio>
 
@@ -33,11 +33,11 @@ static TestScene::Registrar _GlyphStress(TestScene::Info{
 class GlyphStressAnimation : public TestScene {
 public:
     sp<RenderNode> container;
-    void createContent(int width, int height, TestCanvas& canvas) override {
+    void createContent(int width, int height, Canvas& canvas) override {
         container = TestUtils::createNode(0, 0, width, height, nullptr);
         doFrame(0); // update container
 
-        canvas.drawColor(Color::White, SkXfermode::kSrcOver_Mode);
+        canvas.drawColor(Color::White, SkBlendMode::kSrcOver);
         canvas.drawRenderNode(container.get());
     }
 
@@ -46,19 +46,20 @@ public:
                 "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ");
         ssize_t textLength = 26 * 2;
 
-        TestCanvas canvas(
+        std::unique_ptr<Canvas> canvas(Canvas::create_recording_canvas(
                 container->stagingProperties().getWidth(),
-                container->stagingProperties().getHeight());
+                container->stagingProperties().getHeight()));
+
         Paint paint;
         paint.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
         paint.setAntiAlias(true);
         paint.setColor(Color::Black);
         for (int i = 0; i < 5; i++) {
             paint.setTextSize(10 + (frameNr % 20) + i * 20);
-            canvas.drawText(text.get(), 0, textLength, textLength,
-                    0, 100 * (i + 2), kBidi_Force_LTR, paint, nullptr);
+            canvas->drawText(text.get(), 0, textLength, textLength,
+                    0, 100 * (i + 2), minikin::kBidi_Force_LTR, paint, nullptr);
         }
 
-        container->setStagingDisplayList(canvas.finishRecording(), nullptr);
+        container->setStagingDisplayList(canvas->finishRecording());
     }
 };

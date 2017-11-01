@@ -29,6 +29,7 @@ Command              | Subcommand                 | Argument       | Description
 ```battery```        |                            |                | Control the battery display
                      | ```level```                |                | Sets the battery level (0 - 100)
                      | ```plugged```              |                | Sets charging state (```true```, ```false```)
+                     | ```powersave```            |                | Sets power save mode (```true```, ```anything else```)
 ```network```        |                            |                | Control the RSSI display
                      | ```airplane```             |                | ```show``` to show icon, any other value to hide
                      | ```fully```                |                | Sets MCS state to fully connected (```true```, ```false```)

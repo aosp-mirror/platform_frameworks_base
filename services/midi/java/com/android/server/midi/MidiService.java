@@ -45,6 +45,7 @@ import android.os.UserHandle;
 import android.util.Log;
 
 import com.android.internal.content.PackageMonitor;
+import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.XmlUtils;
 import com.android.server.SystemService;
@@ -324,9 +325,6 @@ public class MidiService extends IMidiManager.Stub {
                 }
                 IBinder binder = server.asBinder();
                 try {
-                    if (mDeviceInfo == null) {
-                        mDeviceInfo = server.getDeviceInfo();
-                    }
                     binder.linkToDeath(this, 0);
                     mServer = server;
                 } catch (RemoteException e) {
@@ -1011,7 +1009,7 @@ public class MidiService extends IMidiManager.Stub {
 
     @Override
     public void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DUMP, TAG);
+        if (!DumpUtils.checkDumpPermission(mContext, TAG, writer)) return;
         final IndentingPrintWriter pw = new IndentingPrintWriter(writer, "  ");
 
         pw.println("MIDI Manager State:");

@@ -19,8 +19,9 @@ package android.util;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
-import android.os.Process;
+
 import libcore.io.IoUtils;
+import dalvik.system.CloseGuard;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -35,13 +36,13 @@ import java.util.UUID;
  * each other.
  * <p>
  * The data structure is designed to have one owner process that can
- * read/write. There may be multiple client processes that can only read or
- * read/write depending how the data structure was configured when
- * instantiated. The owner process is the process that created the array.
- * The shared memory is pinned (not reclaimed by the system) until the
- * owning process dies or the data structure is closed. This class
- * is <strong>not</strong> thread safe. You should not interact with
- * an instance of this class once it is closed.
+ * read/write. There may be multiple client processes that can only read.
+ * The owner process is the process that created the array. The shared
+ * memory is pinned (not reclaimed by the system) until the owning process
+ * dies or the data structure is closed. This class is <strong>not</strong>
+ * thread safe. You should not interact with an instance of this class
+ * once it is closed. If you pass back to the owner process an instance
+ * it will be read only even in the owning process.
  * </p>
  *
  * @hide
@@ -51,44 +52,39 @@ public final class MemoryIntArray implements Parcelable, Closeable {
 
     private static final int MAX_SIZE = 1024;
 
-    private final int mOwnerPid;
-    private final boolean mClientWritable;
+    private final CloseGuard mCloseGuard = CloseGuard.get();
+
+    private final boolean mIsOwner;
     private final long mMemoryAddr;
-    private int mFd;
+    private int mFd = -1;
 
     /**
      * Creates a new instance.
      *
      * @param size The size of the array in terms of integer slots. Cannot be
      *     more than {@link #getMaxSize()}.
-     * @param clientWritable Whether other processes can write to the array.
      * @throws IOException If an error occurs while accessing the shared memory.
      */
-    public MemoryIntArray(int size, boolean clientWritable) throws IOException {
+    public MemoryIntArray(int size) throws IOException {
         if (size > MAX_SIZE) {
             throw new IllegalArgumentException("Max size is " + MAX_SIZE);
         }
-        mOwnerPid = Process.myPid();
-        mClientWritable = clientWritable;
+        mIsOwner = true;
         final String name = UUID.randomUUID().toString();
         mFd = nativeCreate(name, size);
-        mMemoryAddr = nativeOpen(mFd, true, clientWritable);
+        mMemoryAddr = nativeOpen(mFd, mIsOwner);
+        mCloseGuard.open("close");
     }
 
     private MemoryIntArray(Parcel parcel) throws IOException {
-        mOwnerPid = parcel.readInt();
-        mClientWritable = (parcel.readInt() == 1);
+        mIsOwner = false;
         ParcelFileDescriptor pfd = parcel.readParcelable(null);
         if (pfd == null) {
             throw new IOException("No backing file descriptor");
         }
         mFd = pfd.detachFd();
-        final long memoryAddress = parcel.readLong();
-        if (isOwner()) {
-            mMemoryAddr = memoryAddress;
-        } else {
-            mMemoryAddr = nativeOpen(mFd, false, mClientWritable);
-        }
+        mMemoryAddr = nativeOpen(mFd, mIsOwner);
+        mCloseGuard.open("close");
     }
 
     /**
@@ -96,7 +92,7 @@ public final class MemoryIntArray implements Parcelable, Closeable {
      */
     public boolean isWritable() {
         enforceNotClosed();
-        return isOwner() || mClientWritable;
+        return mIsOwner;
     }
 
     /**
@@ -109,7 +105,7 @@ public final class MemoryIntArray implements Parcelable, Closeable {
     public int get(int index) throws IOException {
         enforceNotClosed();
         enforceValidIndex(index);
-        return nativeGet(mFd, mMemoryAddr, index, isOwner());
+        return nativeGet(mFd, mMemoryAddr, index);
     }
 
     /**
@@ -125,7 +121,7 @@ public final class MemoryIntArray implements Parcelable, Closeable {
         enforceNotClosed();
         enforceWritable();
         enforceValidIndex(index);
-        nativeSet(mFd, mMemoryAddr, index, value, isOwner());
+        nativeSet(mFd, mMemoryAddr, index, value);
     }
 
     /**
@@ -146,8 +142,9 @@ public final class MemoryIntArray implements Parcelable, Closeable {
     @Override
     public void close() throws IOException {
         if (!isClosed()) {
-            nativeClose(mFd, mMemoryAddr, isOwner());
+            nativeClose(mFd, mMemoryAddr, mIsOwner);
             mFd = -1;
+            mCloseGuard.close();
         }
     }
 
@@ -160,8 +157,15 @@ public final class MemoryIntArray implements Parcelable, Closeable {
 
     @Override
     protected void finalize() throws Throwable {
-        IoUtils.closeQuietly(this);
-        super.finalize();
+        try {
+            if (mCloseGuard != null) {
+                mCloseGuard.warnIfOpen();
+            }
+
+            IoUtils.closeQuietly(this);
+        } finally {
+            super.finalize();
+        }
     }
 
     @Override
@@ -173,10 +177,8 @@ public final class MemoryIntArray implements Parcelable, Closeable {
     public void writeToParcel(Parcel parcel, int flags) {
         ParcelFileDescriptor pfd = ParcelFileDescriptor.adoptFd(mFd);
         try {
-            parcel.writeInt(mOwnerPid);
-            parcel.writeInt(mClientWritable ? 1 : 0);
+            // Don't let writing to a parcel to close our fd - plz
             parcel.writeParcelable(pfd, flags & ~Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
-            parcel.writeLong(mMemoryAddr);
         } finally {
             pfd.detachFd();
         }
@@ -202,10 +204,6 @@ public final class MemoryIntArray implements Parcelable, Closeable {
         return mFd;
     }
 
-    private boolean isOwner() {
-        return mOwnerPid == Process.myPid();
-    }
-
     private void enforceNotClosed() {
         if (isClosed()) {
             throw new IllegalStateException("cannot interact with a closed instance");
@@ -227,10 +225,10 @@ public final class MemoryIntArray implements Parcelable, Closeable {
     }
 
     private native int nativeCreate(String name, int size);
-    private native long nativeOpen(int fd, boolean owner, boolean writable);
+    private native long nativeOpen(int fd, boolean owner);
     private native void nativeClose(int fd, long memoryAddr, boolean owner);
-    private native int nativeGet(int fd, long memoryAddr, int index, boolean owner);
-    private native void nativeSet(int fd, long memoryAddr, int index, int value, boolean owner);
+    private native int nativeGet(int fd, long memoryAddr, int index);
+    private native void nativeSet(int fd, long memoryAddr, int index, int value);
     private native int nativeSize(int fd);
 
     /**
@@ -247,8 +245,7 @@ public final class MemoryIntArray implements Parcelable, Closeable {
             try {
                 return new MemoryIntArray(parcel);
             } catch (IOException ioe) {
-                Log.e(TAG, "Error unparceling MemoryIntArray");
-                return null;
+                throw new IllegalArgumentException("Error unparceling MemoryIntArray");
             }
         }
 

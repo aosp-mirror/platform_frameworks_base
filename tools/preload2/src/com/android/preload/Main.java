@@ -29,6 +29,7 @@ import com.android.preload.actions.RunMonkeyAction;
 import com.android.preload.actions.ScanAllPackagesAction;
 import com.android.preload.actions.ScanPackageAction;
 import com.android.preload.actions.ShowDataAction;
+import com.android.preload.actions.WritePreloadedClassesAction;
 import com.android.preload.classdataretrieval.ClassDataRetriever;
 import com.android.preload.classdataretrieval.hprof.Hprof;
 import com.android.preload.classdataretrieval.jdwp.JDWPClassDataRetriever;
@@ -96,6 +97,7 @@ public class Main {
     public final static String COMPUTE_FILE_CMD = "comp";
     public final static String EXPORT_CMD = "export";
     public final static String IMPORT_CMD = "import";
+    public final static String WRITE_CMD = "write";
 
     /**
      * @param args
@@ -132,6 +134,7 @@ public class Main {
                 null));
         actions.add(new ComputeThresholdXAction("Compute(X)", dataTableModel,
                 CLASS_PRELOAD_BLACKLIST));
+        actions.add(new WritePreloadedClassesAction(clientUtils, null, dataTableModel));
         actions.add(new ShowDataAction(dataTableModel));
         actions.add(new ImportAction(dataTableModel));
         actions.add(new ExportAction(dataTableModel));
@@ -200,6 +203,11 @@ public class Main {
                     ui.input(it.next());
                     ui.confirmYes();
                     ui.output(new File(it.next()));
+                // Operation: Write preloaded classes from a specific file
+                } else if (WRITE_CMD.equals(op)) {
+                    System.out.println("Writing preloaded classes.");
+                    ui.action(WritePreloadedClassesAction.class);
+                    ui.input(new File(it.next()));
                 }
             }
         } catch (NoSuchElementException e) {
@@ -305,8 +313,16 @@ public class Main {
 
             Main.getUI().showMessageDialog("The device will reboot. This will potentially take a "
                     + "long time. Please be patient.");
-            if (!DeviceUtils.removePreloaded(device, 15 * 60) /* 15m timeout */) {
-                Main.getUI().showMessageDialog("Removing preloaded-classes failed unexpectedly!");
+            boolean success = false;
+            try {
+                success = DeviceUtils.overwritePreloaded(device, null, 15 * 60);
+            } catch (Exception e) {
+                System.err.println(e);
+            } finally {
+                if (!success) {
+                    Main.getUI().showMessageDialog(
+                            "Removing preloaded-classes failed unexpectedly!");
+                }
             }
         }
     }

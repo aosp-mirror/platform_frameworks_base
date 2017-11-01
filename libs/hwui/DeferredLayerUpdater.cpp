@@ -15,57 +15,91 @@
  */
 #include "DeferredLayerUpdater.h"
 
-#include "OpenGLRenderer.h"
-
-#include "LayerRenderer.h"
+#include "GlLayer.h"
+#include "VkLayer.h"
+#include "renderstate/RenderState.h"
 #include "renderthread/EglManager.h"
 #include "renderthread/RenderTask.h"
+#include "utils/PaintUtils.h"
 
 namespace android {
 namespace uirenderer {
 
-DeferredLayerUpdater::DeferredLayerUpdater(Layer* layer)
-        : mSurfaceTexture(nullptr)
+DeferredLayerUpdater::DeferredLayerUpdater(RenderState& renderState, CreateLayerFn createLayerFn,
+        Layer::Api layerApi)
+        : mRenderState(renderState)
+        , mBlend(false)
+        , mSurfaceTexture(nullptr)
         , mTransform(nullptr)
-        , mNeedsGLContextAttach(false)
+        , mGLContextAttached(false)
         , mUpdateTexImage(false)
-        , mLayer(layer)
-        , mCaches(Caches::getInstance()) {
-    mWidth = mLayer->layer.getWidth();
-    mHeight = mLayer->layer.getHeight();
-    mBlend = mLayer->isBlend();
-    mColorFilter = SkSafeRef(mLayer->getColorFilter());
-    mAlpha = mLayer->getAlpha();
-    mMode = mLayer->getMode();
+        , mLayer(nullptr)
+        , mLayerApi(layerApi)
+        , mCreateLayerFn(createLayerFn) {
+    renderState.registerDeferredLayerUpdater(this);
 }
 
 DeferredLayerUpdater::~DeferredLayerUpdater() {
     SkSafeUnref(mColorFilter);
     setTransform(nullptr);
+    mRenderState.unregisterDeferredLayerUpdater(this);
+    destroyLayer();
+}
+
+void DeferredLayerUpdater::destroyLayer() {
+    if (!mLayer) {
+        return;
+    }
+
+    if (mSurfaceTexture.get() && mLayerApi == Layer::Api::OpenGL && mGLContextAttached) {
+        status_t err = mSurfaceTexture->detachFromContext();
+        mGLContextAttached = false;
+        if (err != 0) {
+            // TODO: Elevate to fatal exception
+            ALOGE("Failed to detach SurfaceTexture from context %d", err);
+        }
+    }
+
     mLayer->postDecStrong();
     mLayer = nullptr;
 }
 
 void DeferredLayerUpdater::setPaint(const SkPaint* paint) {
     mAlpha = PaintUtils::getAlphaDirect(paint);
-    mMode = PaintUtils::getXfermodeDirect(paint);
+    mMode = PaintUtils::getBlendModeDirect(paint);
     SkColorFilter* colorFilter = (paint) ? paint->getColorFilter() : nullptr;
     SkRefCnt_SafeAssign(mColorFilter, colorFilter);
 }
 
 void DeferredLayerUpdater::apply() {
-    // These properties are applied the same to both layer types
+    if (!mLayer) {
+        mLayer = mCreateLayerFn(mRenderState, mWidth, mHeight, mColorFilter, mAlpha, mMode, mBlend);
+    }
+
     mLayer->setColorFilter(mColorFilter);
     mLayer->setAlpha(mAlpha, mMode);
 
     if (mSurfaceTexture.get()) {
-        if (mNeedsGLContextAttach) {
-            mNeedsGLContextAttach = false;
-            mSurfaceTexture->attachToContext(mLayer->getTextureId());
-        }
-        if (mUpdateTexImage) {
-            mUpdateTexImage = false;
-            doUpdateTexImage();
+        if (mLayer->getApi() == Layer::Api::Vulkan) {
+            if (mUpdateTexImage) {
+                mUpdateTexImage = false;
+                doUpdateVkTexImage();
+            }
+        } else {
+            LOG_ALWAYS_FATAL_IF(mLayer->getApi() != Layer::Api::OpenGL,
+                                "apply surfaceTexture with non GL backend %x, GL %x, VK %x",
+                                mLayer->getApi(), Layer::Api::OpenGL, Layer::Api::Vulkan);
+            if (!mGLContextAttached) {
+                mGLContextAttached = true;
+                mUpdateTexImage = true;
+                mSurfaceTexture->attachToContext(static_cast<GlLayer*>(mLayer)->getTextureId());
+            }
+            if (mUpdateTexImage) {
+                mUpdateTexImage = false;
+                doUpdateTexImage();
+            }
+            GLenum renderTarget = mSurfaceTexture->getCurrentTextureTarget();
+            static_cast<GlLayer*>(mLayer)->setRenderTarget(renderTarget);
         }
         if (mTransform) {
             mLayer->getTransform().load(*mTransform);
@@ -75,6 +109,9 @@ void DeferredLayerUpdater::apply() {
 }
 
 void DeferredLayerUpdater::doUpdateTexImage() {
+    LOG_ALWAYS_FATAL_IF(mLayer->getApi() != Layer::Api::OpenGL,
+                        "doUpdateTexImage non GL backend %x, GL %x, VK %x",
+                        mLayer->getApi(), Layer::Api::OpenGL, Layer::Api::Vulkan);
     if (mSurfaceTexture->updateTexImage() == NO_ERROR) {
         float transform[16];
 
@@ -105,25 +142,34 @@ void DeferredLayerUpdater::doUpdateTexImage() {
         }
         #endif
         mSurfaceTexture->getTransformMatrix(transform);
-        GLenum renderTarget = mSurfaceTexture->getCurrentTextureTarget();
 
-        LOG_ALWAYS_FATAL_IF(renderTarget != GL_TEXTURE_2D && renderTarget != GL_TEXTURE_EXTERNAL_OES,
-                "doUpdateTexImage target %x, 2d %x, EXT %x",
-                renderTarget, GL_TEXTURE_2D, GL_TEXTURE_EXTERNAL_OES);
-        LayerRenderer::updateTextureLayer(mLayer, mWidth, mHeight,
-                !mBlend, forceFilter, renderTarget, transform);
+        updateLayer(forceFilter, transform);
     }
+}
+
+void DeferredLayerUpdater::doUpdateVkTexImage() {
+    LOG_ALWAYS_FATAL_IF(mLayer->getApi() != Layer::Api::Vulkan,
+                        "updateLayer non Vulkan backend %x, GL %x, VK %x",
+                        mLayer->getApi(), Layer::Api::OpenGL, Layer::Api::Vulkan);
+
+    static const mat4 identityMatrix;
+    updateLayer(false, identityMatrix.data);
+
+    VkLayer* vkLayer = static_cast<VkLayer*>(mLayer);
+    vkLayer->updateTexture();
+}
+
+void DeferredLayerUpdater::updateLayer(bool forceFilter, const float* textureTransform) {
+    mLayer->setBlend(mBlend);
+    mLayer->setForceFilter(forceFilter);
+    mLayer->setSize(mWidth, mHeight);
+    mLayer->getTexTransform().load(textureTransform);
 }
 
 void DeferredLayerUpdater::detachSurfaceTexture() {
     if (mSurfaceTexture.get()) {
-        status_t err = mSurfaceTexture->detachFromContext();
-        if (err != 0) {
-            // TODO: Elevate to fatal exception
-            ALOGE("Failed to detach SurfaceTexture from context %d", err);
-        }
+        destroyLayer();
         mSurfaceTexture = nullptr;
-        mLayer->clearTexture();
     }
 }
 

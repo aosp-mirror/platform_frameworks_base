@@ -4,9 +4,9 @@
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
      You may obtain a copy of the License at
-  
+
           http://www.apache.org/licenses/LICENSE-2.0
-  
+
      Unless required by applicable law or agreed to in writing, software
      distributed under the License is distributed on an "AS IS" BASIS,
      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,12 +17,15 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"Kabuk"</string>
+    <string name="bugreport_notification_channel" msgid="2574150205913861141">"Hata raporları"</string>
     <string name="bugreport_in_progress_title" msgid="4311705936714972757">"Hata raporu (<xliff:g id="ID">#%d</xliff:g>) oluşturuluyor"</string>
     <string name="bugreport_finished_title" msgid="4429132808670114081">"Hata raporu (<xliff:g id="ID">#%d</xliff:g>) yakalandı"</string>
     <string name="bugreport_updating_title" msgid="4423539949559634214">"Hata raporuna ayrıntılar ekleniyor"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"Lütfen bekleyin…"</string>
     <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"Hata raporu kısa süre içinde telefonda görüntülenecektir"</string>
+    <string name="bugreport_finished_text" product="tv" msgid="5758325479058638893">"Hata raporunuzu paylaşmak için seçin"</string>
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"Hata raporunuzu paylaşmak için dokunun"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="tv" msgid="2343263822812016950">"Hata raporunu ekran görüntüsüz paylaşmak için seçin veya bitirmek için ekran görüntüsünü bekleyin"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"Hata raporunu ekran görüntüsüz paylaşmak için dokunun veya bitirmek için ekran görüntüsünü bekleyin"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Hata raporunu ekran görüntüsüz paylaşmak için dokunun veya bitirmek için ekran görüntüsünü bekleyin"</string>
     <string name="bugreport_confirm" msgid="5917407234515812495">"Hata raporları, sistemin çeşitli günlük dosyalarından veriler içerir. Bu günlükler, hassas olarak kabul ettiğiniz verileri (uygulama kullanımı ve konum verileri gibi) içerebilir. Hata raporlarını yalnızca güvendiğiniz kişiler ve uygulamalarla paylaşın."</string>
@@ -40,4 +43,5 @@
     <string name="bugreport_info_title" msgid="2306030793918239804">"Hata başlığı"</string>
     <string name="bugreport_info_description" msgid="5072835127481627722">"Hata özeti"</string>
     <string name="save" msgid="4781509040564835759">"Kaydet"</string>
+    <string name="bugreport_intent_chooser_title" msgid="7605709494790894076">"Hata raporunu paylaş"</string>
 </resources>

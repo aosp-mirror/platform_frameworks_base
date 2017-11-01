@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='utf-8' standalone='yes' ?>
+<policy-list version="10">
+  <uid-policy uid="10004" policy="0" />
+  <uid-policy uid="10008" policy="1" />
+  <uid-policy uid="10015" policy="2" />
+  <uid-policy uid="10016" policy="3" />
+  <uid-policy uid="10023" policy="4" />
+  <uid-policy uid="10042" policy="6" />
+</policy-list>

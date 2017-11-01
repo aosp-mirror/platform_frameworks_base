@@ -43,8 +43,8 @@ public class RequestRectangleVisible extends Activity {
         final Rect rect = new Rect();
         final View childToMakeVisible = findViewById(R.id.childToMakeVisible);
 
-        final TextView topBlob = (TextView) findViewById(R.id.topBlob);
-        final TextView bottomBlob = (TextView) findViewById(R.id.bottomBlob);
+        final TextView topBlob = findViewById(R.id.topBlob);
+        final TextView bottomBlob = findViewById(R.id.bottomBlob);
 
         // estimate to get blobs larger than screen
         int screenHeight = getWindowManager().getDefaultDisplay().getHeight();

@@ -16,9 +16,13 @@
 
 package com.android.providers.settings;
 
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertTrue;
+
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.Log;
+import org.junit.Test;
 
 /**
 * Performance tests for the SettingContentProvider.
@@ -32,6 +36,7 @@ public class SettingsProviderPerformanceTest extends BaseSettingsProviderTest {
 
     private static final long MAX_AVERAGE_SET_AND_GET_SETTING_DURATION_MILLIS = 20;
 
+    @Test
     public void testSetAndGetPerformanceForGlobalViaFrontEndApi() throws Exception {
         // Start with a clean slate.
         insertStringViaProviderApi(SETTING_TYPE_GLOBAL,
@@ -76,6 +81,7 @@ public class SettingsProviderPerformanceTest extends BaseSettingsProviderTest {
                 < MAX_AVERAGE_SET_AND_GET_SETTING_DURATION_MILLIS);
     }
 
+    @Test
     public void testSetAndGetPerformanceForGlobalViaProviderApi() throws Exception {
         // Start with a clean slate.
         deleteStringViaProviderApi(SETTING_TYPE_GLOBAL, FAKE_SETTING_NAME);

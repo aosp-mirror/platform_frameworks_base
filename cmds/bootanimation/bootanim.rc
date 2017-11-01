@@ -1,5 +1,5 @@
 service bootanim /system/bin/bootanimation
-    class core
+    class core animation
     user graphics
     group graphics audio
     disabled

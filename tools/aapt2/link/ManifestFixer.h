@@ -17,22 +17,24 @@
 #ifndef AAPT_LINK_MANIFESTFIXER_H
 #define AAPT_LINK_MANIFESTFIXER_H
 
+#include <string>
+
+#include "android-base/macros.h"
+
 #include "process/IResourceTableConsumer.h"
 #include "util/Maybe.h"
 #include "xml/XmlActionExecutor.h"
 #include "xml/XmlDom.h"
 
-#include <string>
-
 namespace aapt {
 
 struct ManifestFixerOptions {
-    Maybe<std::u16string> minSdkVersionDefault;
-    Maybe<std::u16string> targetSdkVersionDefault;
-    Maybe<std::u16string> renameManifestPackage;
-    Maybe<std::u16string> renameInstrumentationTargetPackage;
-    Maybe<std::u16string> versionNameDefault;
-    Maybe<std::u16string> versionCodeDefault;
+  Maybe<std::string> min_sdk_version_default;
+  Maybe<std::string> target_sdk_version_default;
+  Maybe<std::string> rename_manifest_package;
+  Maybe<std::string> rename_instrumentation_target_package;
+  Maybe<std::string> version_name_default;
+  Maybe<std::string> version_code_default;
 };
 
 /**
@@ -40,18 +42,20 @@ struct ManifestFixerOptions {
  * where specified with ManifestFixerOptions.
  */
 class ManifestFixer : public IXmlResourceConsumer {
-public:
-    ManifestFixer(const ManifestFixerOptions& options) : mOptions(options) {
-    }
+ public:
+  explicit ManifestFixer(const ManifestFixerOptions& options)
+      : options_(options) {}
 
-    bool consume(IAaptContext* context, xml::XmlResource* doc) override;
+  bool Consume(IAaptContext* context, xml::XmlResource* doc) override;
 
-private:
-    bool buildRules(xml::XmlActionExecutor* executor, IDiagnostics* diag);
+ private:
+  DISALLOW_COPY_AND_ASSIGN(ManifestFixer);
 
-    ManifestFixerOptions mOptions;
+  bool BuildRules(xml::XmlActionExecutor* executor, IDiagnostics* diag);
+
+  ManifestFixerOptions options_;
 };
 
-} // namespace aapt
+}  // namespace aapt
 
 #endif /* AAPT_LINK_MANIFESTFIXER_H */

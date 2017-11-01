@@ -142,7 +142,7 @@ public class PackageInfo implements Parcelable {
      * {@link PackageManager#GET_INSTRUMENTATION} was set.
      */
     public InstrumentationInfo[] instrumentation;
-    
+
     /**
      * Array of all {@link android.R.styleable#AndroidManifestPermission
      * &lt;permission&gt;} tags included under &lt;manifest&gt;,
@@ -150,7 +150,7 @@ public class PackageInfo implements Parcelable {
      * {@link PackageManager#GET_PERMISSIONS} was set.
      */
     public PermissionInfo[] permissions;
-    
+
     /**
      * Array of all {@link android.R.styleable#AndroidManifestUsesPermission
      * &lt;uses-permission&gt;} tags included under &lt;manifest&gt;,
@@ -160,7 +160,7 @@ public class PackageInfo implements Parcelable {
      * by the system at install time.
      */
     public String[] requestedPermissions;
-    
+
     /**
      * Array of flags of all {@link android.R.styleable#AndroidManifestUsesPermission
      * &lt;uses-permission&gt;} tags included under &lt;manifest&gt;,
@@ -271,6 +271,12 @@ public class PackageInfo implements Parcelable {
      */
     public String overlayTarget;
 
+    /** @hide */
+    public int overlayPriority;
+
+    /** @hide */
+    public boolean isStaticOverlay;
+
     public PackageInfo() {
     }
 
@@ -323,6 +329,8 @@ public class PackageInfo implements Parcelable {
         dest.writeString(restrictedAccountType);
         dest.writeString(requiredAccountType);
         dest.writeString(overlayTarget);
+        dest.writeInt(isStaticOverlay ? 1 : 0);
+        dest.writeInt(overlayPriority);
     }
 
     public static final Parcelable.Creator<PackageInfo> CREATOR
@@ -372,6 +380,8 @@ public class PackageInfo implements Parcelable {
         restrictedAccountType = source.readString();
         requiredAccountType = source.readString();
         overlayTarget = source.readString();
+        isStaticOverlay = source.readInt() != 0;
+        overlayPriority = source.readInt();
 
         // The component lists were flattened with the redundant ApplicationInfo
         // instances omitted.  Distribute the canonical one here as appropriate.

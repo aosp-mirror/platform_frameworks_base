@@ -16,9 +16,10 @@
 
 package com.android.commands.content;
 
-import android.app.ActivityManagerNative;
+import android.app.ActivityManager;
+import android.app.ContentProviderHolder;
 import android.app.IActivityManager;
-import android.app.IActivityManager.ContentProviderHolder;
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.IContentProvider;
 import android.database.Cursor;
@@ -72,59 +73,64 @@ import libcore.io.IoUtils;
 public class Content {
 
     private static final String USAGE =
-        "usage: adb shell content [subcommand] [options]\n"
-        + "\n"
-        + "usage: adb shell content insert --uri <URI> [--user <USER_ID>]"
-                + " --bind <BINDING> [--bind <BINDING>...]\n"
-        + "  <URI> a content provider URI.\n"
-        + "  <BINDING> binds a typed value to a column and is formatted:\n"
-        + "  <COLUMN_NAME>:<TYPE>:<COLUMN_VALUE> where:\n"
-        + "  <TYPE> specifies data type such as:\n"
-        + "  b - boolean, s - string, i - integer, l - long, f - float, d - double\n"
-        + "  Note: Omit the value for passing an empty string, e.g column:s:\n"
-        + "  Example:\n"
-        + "  # Add \"new_setting\" secure setting with value \"new_value\".\n"
-        + "  adb shell content insert --uri content://settings/secure --bind name:s:new_setting"
-                + " --bind value:s:new_value\n"
-        + "\n"
-        + "usage: adb shell content update --uri <URI> [--user <USER_ID>] [--where <WHERE>]\n"
-        + "  <WHERE> is a SQL style where clause in quotes (You have to escape single quotes"
-                + " - see example below).\n"
-        + "  Example:\n"
-        + "  # Change \"new_setting\" secure setting to \"newer_value\".\n"
-        + "  adb shell content update --uri content://settings/secure --bind"
-                + " value:s:newer_value --where \"name=\'new_setting\'\"\n"
-        + "\n"
-        + "usage: adb shell content delete --uri <URI> [--user <USER_ID>] --bind <BINDING>"
-                + " [--bind <BINDING>...] [--where <WHERE>]\n"
-        + "  Example:\n"
-        + "  # Remove \"new_setting\" secure setting.\n"
-        + "  adb shell content delete --uri content://settings/secure "
-                + "--where \"name=\'new_setting\'\"\n"
-        + "\n"
-        + "usage: adb shell content query --uri <URI> [--user <USER_ID>]"
-                + " [--projection <PROJECTION>] [--where <WHERE>] [--sort <SORT_ORDER>]\n"
-        + "  <PROJECTION> is a list of colon separated column names and is formatted:\n"
-        + "  <COLUMN_NAME>[:<COLUMN_NAME>...]\n"
-        + "  <SORT_ORDER> is the order in which rows in the result should be sorted.\n"
-        + "  Example:\n"
-        + "  # Select \"name\" and \"value\" columns from secure settings where \"name\" is "
-                + "equal to \"new_setting\" and sort the result by name in ascending order.\n"
-        + "  adb shell content query --uri content://settings/secure --projection name:value"
-                + " --where \"name=\'new_setting\'\" --sort \"name ASC\"\n"
-        + "\n"
-        + "usage: adb shell content call --uri <URI> --method <METHOD> [--arg <ARG>]\n"
-        + "       [--extra <BINDING> ...]\n"
-        + "  <METHOD> is the name of a provider-defined method\n"
-        + "  <ARG> is an optional string argument\n"
-        + "  <BINDING> is like --bind above, typed data of the form <KEY>:{b,s,i,l,f,d}:<VAL>\n"
-        + "\n"
-        + "usage: adb shell content read --uri <URI> [--user <USER_ID>]\n"
-        + "  Example:\n"
-        + "  # cat default ringtone to a file, then pull to host\n"
-        + "  adb shell 'content read --uri content://settings/system/ringtone >"
-                + " /mnt/sdcard/tmp.ogg' && adb pull /mnt/sdcard/tmp.ogg\n"
-        + "\n";
+            "usage: adb shell content [subcommand] [options]\n"
+                    + "\n"
+                    + "usage: adb shell content insert --uri <URI> [--user <USER_ID>]"
+                    + " --bind <BINDING> [--bind <BINDING>...]\n"
+                    + "  <URI> a content provider URI.\n"
+                    + "  <BINDING> binds a typed value to a column and is formatted:\n"
+                    + "  <COLUMN_NAME>:<TYPE>:<COLUMN_VALUE> where:\n"
+                    + "  <TYPE> specifies data type such as:\n"
+                    + "  b - boolean, s - string, i - integer, l - long, f - float, d - double\n"
+                    + "  Note: Omit the value for passing an empty string, e.g column:s:\n"
+                    + "  Example:\n"
+                    + "  # Add \"new_setting\" secure setting with value \"new_value\".\n"
+                    + "  adb shell content insert --uri content://settings/secure --bind name:s:new_setting"
+                    + " --bind value:s:new_value\n"
+                    + "\n"
+                    + "usage: adb shell content update --uri <URI> [--user <USER_ID>] [--where <WHERE>]\n"
+                    + "  <WHERE> is a SQL style where clause in quotes (You have to escape single quotes"
+                    + " - see example below).\n"
+                    + "  Example:\n"
+                    + "  # Change \"new_setting\" secure setting to \"newer_value\".\n"
+                    + "  adb shell content update --uri content://settings/secure --bind"
+                    + " value:s:newer_value --where \"name=\'new_setting\'\"\n"
+                    + "\n"
+                    + "usage: adb shell content delete --uri <URI> [--user <USER_ID>] --bind <BINDING>"
+                    + " [--bind <BINDING>...] [--where <WHERE>]\n"
+                    + "  Example:\n"
+                    + "  # Remove \"new_setting\" secure setting.\n"
+                    + "  adb shell content delete --uri content://settings/secure "
+                    + "--where \"name=\'new_setting\'\"\n"
+                    + "\n"
+                    + "usage: adb shell content query --uri <URI> [--user <USER_ID>]"
+                    + " [--projection <PROJECTION>] [--where <WHERE>] [--sort <SORT_ORDER>]\n"
+                    + "  <PROJECTION> is a list of colon separated column names and is formatted:\n"
+                    + "  <COLUMN_NAME>[:<COLUMN_NAME>...]\n"
+                    + "  <SORT_ORDER> is the order in which rows in the result should be sorted.\n"
+                    + "  Example:\n"
+                    + "  # Select \"name\" and \"value\" columns from secure settings where \"name\" is "
+                    + "equal to \"new_setting\" and sort the result by name in ascending order.\n"
+                    + "  adb shell content query --uri content://settings/secure --projection name:value"
+                    + " --where \"name=\'new_setting\'\" --sort \"name ASC\"\n"
+                    + "\n"
+                    + "usage: adb shell content call --uri <URI> --method <METHOD> [--arg <ARG>]\n"
+                    + "       [--extra <BINDING> ...]\n"
+                    + "  <METHOD> is the name of a provider-defined method\n"
+                    + "  <ARG> is an optional string argument\n"
+                    + "  <BINDING> is like --bind above, typed data of the form <KEY>:{b,s,i,l,f,d}:<VAL>\n"
+                    + "\n"
+                    + "usage: adb shell content read --uri <URI> [--user <USER_ID>]\n"
+                    + "  Example:\n"
+                    + "  # cat default ringtone to a file, then pull to host\n"
+                    + "  adb shell 'content read --uri content://settings/system/ringtone >"
+                    + " /mnt/sdcard/tmp.ogg' && adb pull /mnt/sdcard/tmp.ogg\n"
+                    + "\n"
+                    + "usage: adb shell content gettype --uri <URI> [--user <USER_ID>]\n"
+                    + "  Example:\n"
+                    + "  # Show the mime-type of the URI\n"
+                    + "  adb shell content gettype --uri content://media/internal/audio/media/\n"
+                    + "\n";
 
     private static class Parser {
         private static final String ARGUMENT_INSERT = "insert";
@@ -133,6 +139,7 @@ public class Content {
         private static final String ARGUMENT_QUERY = "query";
         private static final String ARGUMENT_CALL = "call";
         private static final String ARGUMENT_READ = "read";
+        private static final String ARGUMENT_GET_TYPE = "gettype";
         private static final String ARGUMENT_WHERE = "--where";
         private static final String ARGUMENT_BIND = "--bind";
         private static final String ARGUMENT_URI = "--uri";
@@ -172,6 +179,8 @@ public class Content {
                     return parseCallCommand();
                 } else if (ARGUMENT_READ.equals(operation)) {
                     return parseReadCommand();
+                } else if (ARGUMENT_GET_TYPE.equals(operation)) {
+                    return parseGetTypeCommand();
                 } else {
                     throw new IllegalArgumentException("Unsupported operation: " + operation);
                 }
@@ -291,6 +300,26 @@ public class Content {
             return new CallCommand(uri, userId, method, arg, values);
         }
 
+        private GetTypeCommand parseGetTypeCommand() {
+            Uri uri = null;
+            int userId = UserHandle.USER_SYSTEM;
+
+            for (String argument; (argument = mTokenizer.nextArg()) != null;) {
+                if (ARGUMENT_URI.equals(argument)) {
+                    uri = Uri.parse(argumentValueRequired(argument));
+                } else if (ARGUMENT_USER.equals(argument)) {
+                    userId = Integer.parseInt(argumentValueRequired(argument));
+                } else {
+                    throw new IllegalArgumentException("Unsupported argument: " + argument);
+                }
+            }
+            if (uri == null) {
+                throw new IllegalArgumentException("Content provider URI not specified."
+                        + " Did you specify --uri argument?");
+            }
+            return new GetTypeCommand(uri, userId);
+        }
+
         private ReadCommand parseReadCommand() {
             Uri uri = null;
             int userId = UserHandle.USER_SYSTEM;
@@ -405,7 +434,7 @@ public class Content {
         public final void execute() {
             String providerName = mUri.getAuthority();
             try {
-                IActivityManager activityManager = ActivityManagerNative.getDefault();
+                IActivityManager activityManager = ActivityManager.getService();
                 IContentProvider provider = null;
                 IBinder token = new Binder();
                 try {
@@ -511,6 +540,18 @@ public class Content {
         }
     }
 
+    private static class GetTypeCommand extends Command {
+        public GetTypeCommand(Uri uri, int userId) {
+            super(uri, userId);
+        }
+
+        @Override
+        public void onExecute(IContentProvider provider) throws Exception {
+            String type = provider.getType(mUri);
+            System.out.println("Result: " + type);
+        }
+    }
+
     private static class ReadCommand extends Command {
         public ReadCommand(Uri uri, int userId) {
             super(uri, userId);
@@ -549,8 +590,8 @@ public class Content {
 
         @Override
         public void onExecute(IContentProvider provider) throws Exception {
-            Cursor cursor = provider.query(resolveCallingPackage(), mUri, mProjection, mWhere,
-                    null, mSortOrder, null);
+            Cursor cursor = provider.query(resolveCallingPackage(), mUri, mProjection,
+                    ContentResolver.createSqlQueryBundle(mWhere, null, mSortOrder), null);
             if (cursor == null) {
                 System.out.println("No result found.");
                 return;

@@ -25,6 +25,7 @@
 #include <utils/Color.h>
 
 #include <SkGradientShader.h>
+#include <SkImagePriv.h>
 #include <SkShader.h>
 
 namespace android {
@@ -46,7 +47,13 @@ static void validateSingleOp(std::unique_ptr<DisplayList>& dl,
     opValidator(*(dl->getOps()[0]));
 }
 
-TEST(RecordingCanvas, emptyPlayback) {
+// The RecordingCanvas is only ever used by the OpenGL RenderPipeline and never when Skia is in use.
+// Thus, even though many of these test are not directly dependent on the current RenderPipeline, we
+// set them all to be OPENGL_PIPELINE_TESTs in case the underlying code in RecordingCanvas ever
+// changes to require the use of the OPENGL_PIPELINE. Currently the textureLayer test is the only
+// test that requires being an OPENGL_PIPELINE_TEST.
+
+OPENGL_PIPELINE_TEST(RecordingCanvas, emptyPlayback) {
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(100, 200, [](RecordingCanvas& canvas) {
         canvas.save(SaveFlags::MatrixClip);
         canvas.restore();
@@ -54,10 +61,10 @@ TEST(RecordingCanvas, emptyPlayback) {
     playbackOps(*dl, [](const RecordedOp& op) { ADD_FAILURE(); });
 }
 
-TEST(RecordingCanvas, clipRect) {
+OPENGL_PIPELINE_TEST(RecordingCanvas, clipRect) {
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(100, 100, [](RecordingCanvas& canvas) {
         canvas.save(SaveFlags::MatrixClip);
-        canvas.clipRect(0, 0, 100, 100, SkRegion::kIntersect_Op);
+        canvas.clipRect(0, 0, 100, 100, SkClipOp::kIntersect);
         canvas.drawRect(0, 0, 50, 50, SkPaint());
         canvas.drawRect(50, 50, 100, 100, SkPaint());
         canvas.restore();
@@ -70,18 +77,18 @@ TEST(RecordingCanvas, clipRect) {
             << "Clip should be serialized once";
 }
 
-TEST(RecordingCanvas, emptyClipRect) {
+OPENGL_PIPELINE_TEST(RecordingCanvas, emptyClipRect) {
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
         canvas.save(SaveFlags::MatrixClip);
-        canvas.clipRect(0, 0, 100, 100, SkRegion::kIntersect_Op);
-        canvas.clipRect(100, 100, 200, 200, SkRegion::kIntersect_Op);
+        canvas.clipRect(0, 0, 100, 100, SkClipOp::kIntersect);
+        canvas.clipRect(100, 100, 200, 200, SkClipOp::kIntersect);
         canvas.drawRect(0, 0, 50, 50, SkPaint()); // rejected at record time
         canvas.restore();
     });
     ASSERT_EQ(0u, dl->getOps().size()) << "Must be zero ops. Rect should be rejected.";
 }
 
-TEST(RecordingCanvas, emptyPaintRejection) {
+OPENGL_PIPELINE_TEST(RecordingCanvas, emptyPaintRejection) {
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
         SkPaint emptyPaint;
         emptyPaint.setColor(Color::Transparent);
@@ -102,7 +109,7 @@ TEST(RecordingCanvas, emptyPaintRejection) {
     EXPECT_EQ(0u, dl->getOps().size()) << "Op should be rejected";
 }
 
-TEST(RecordingCanvas, drawArc) {
+OPENGL_PIPELINE_TEST(RecordingCanvas, drawArc) {
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
         canvas.drawArc(0, 0, 200, 200, 0, 180, true, SkPaint());
         canvas.drawArc(0, 0, 100, 100, 0, 360, true, SkPaint());
@@ -118,7 +125,7 @@ TEST(RecordingCanvas, drawArc) {
     EXPECT_EQ(Rect(100, 100), ops[1]->unmappedBounds);
 }
 
-TEST(RecordingCanvas, drawLines) {
+OPENGL_PIPELINE_TEST(RecordingCanvas, drawLines) {
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(100, 200, [](RecordingCanvas& canvas) {
         SkPaint paint;
         paint.setStrokeWidth(20); // doesn't affect recorded bounds - would be resolved at bake time
@@ -135,7 +142,7 @@ TEST(RecordingCanvas, drawLines) {
             << "unmapped bounds must be size of line, and not outset for stroke width";
 }
 
-TEST(RecordingCanvas, drawRect) {
+OPENGL_PIPELINE_TEST(RecordingCanvas, drawRect) {
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(100, 200, [](RecordingCanvas& canvas) {
         canvas.drawRect(10, 20, 90, 180, SkPaint());
     });
@@ -147,7 +154,7 @@ TEST(RecordingCanvas, drawRect) {
     EXPECT_EQ(Rect(10, 20, 90, 180), op.unmappedBounds);
 }
 
-TEST(RecordingCanvas, drawRoundRect) {
+OPENGL_PIPELINE_TEST(RecordingCanvas, drawRoundRect) {
     // Round case - stays rounded
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(100, 200, [](RecordingCanvas& canvas) {
         canvas.drawRoundRect(0, 0, 100, 100, 10, 10, SkPaint());
@@ -164,7 +171,7 @@ TEST(RecordingCanvas, drawRoundRect) {
         << "Non-rounded rects should be converted";
 }
 
-TEST(RecordingCanvas, drawGlyphs) {
+OPENGL_PIPELINE_TEST(RecordingCanvas, drawGlyphs) {
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
         SkPaint paint;
         paint.setAntiAlias(true);
@@ -185,7 +192,7 @@ TEST(RecordingCanvas, drawGlyphs) {
     ASSERT_EQ(1, count);
 }
 
-TEST(RecordingCanvas, drawGlyphs_strikeThruAndUnderline) {
+OPENGL_PIPELINE_TEST(RecordingCanvas, drawGlyphs_strikeThruAndUnderline) {
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
         SkPaint paint;
         paint.setAntiAlias(true);
@@ -193,8 +200,18 @@ TEST(RecordingCanvas, drawGlyphs_strikeThruAndUnderline) {
         paint.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
         for (int i = 0; i < 2; i++) {
             for (int j = 0; j < 2; j++) {
-                paint.setUnderlineText(i != 0);
-                paint.setStrikeThruText(j != 0);
+                uint32_t flags = paint.getFlags();
+                if (i != 0) {
+                    flags |= SkPaint::kUnderlineText_ReserveFlag;
+                } else {
+                    flags &= ~SkPaint::kUnderlineText_ReserveFlag;
+                }
+                if (j != 0) {
+                    flags |= SkPaint::kStrikeThruText_ReserveFlag;
+                } else {
+                    flags &= ~SkPaint::kStrikeThruText_ReserveFlag;
+                }
+                paint.setFlags(flags);
                 TestUtils::drawUtf8ToCanvas(&canvas, "test text", paint, 25, 25);
             }
         }
@@ -217,7 +234,7 @@ TEST(RecordingCanvas, drawGlyphs_strikeThruAndUnderline) {
     EXPECT_EQ(RecordedOpId::RectOp, ops[index++]->opId); // strikethrough
 }
 
-TEST(RecordingCanvas, drawGlyphs_forceAlignLeft) {
+OPENGL_PIPELINE_TEST(RecordingCanvas, drawGlyphs_forceAlignLeft) {
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
         SkPaint paint;
         paint.setAntiAlias(true);
@@ -247,9 +264,9 @@ TEST(RecordingCanvas, drawGlyphs_forceAlignLeft) {
     ASSERT_EQ(3, count);
 }
 
-TEST(RecordingCanvas, drawColor) {
+OPENGL_PIPELINE_TEST(RecordingCanvas, drawColor) {
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
-        canvas.drawColor(Color::Black, SkXfermode::kSrcOver_Mode);
+        canvas.drawColor(Color::Black, SkBlendMode::kSrcOver);
     });
 
     ASSERT_EQ(1u, dl->getOps().size()) << "Must be exactly one op";
@@ -259,10 +276,9 @@ TEST(RecordingCanvas, drawColor) {
     EXPECT_TRUE(op.unmappedBounds.isEmpty()) << "Expect undefined recorded bounds";
 }
 
-TEST(RecordingCanvas, backgroundAndImage) {
+OPENGL_PIPELINE_TEST(RecordingCanvas, backgroundAndImage) {
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(100, 200, [](RecordingCanvas& canvas) {
-        SkBitmap bitmap;
-        bitmap.setInfo(SkImageInfo::MakeUnknown(25, 25));
+        sk_sp<Bitmap> bitmap(TestUtils::createBitmap(25, 25));
         SkPaint paint;
         paint.setColor(SK_ColorBLUE);
 
@@ -278,7 +294,7 @@ TEST(RecordingCanvas, backgroundAndImage) {
             canvas.save(SaveFlags::MatrixClip);
             canvas.translate(25, 25);
             canvas.scale(2, 2);
-            canvas.drawBitmap(bitmap, 0, 0, nullptr);
+            canvas.drawBitmap(*bitmap, 0, 0, nullptr);
             canvas.restore();
         }
         canvas.restore();
@@ -312,7 +328,7 @@ TEST(RecordingCanvas, backgroundAndImage) {
     ASSERT_EQ(2, count);
 }
 
-RENDERTHREAD_TEST(RecordingCanvas, textureLayer) {
+RENDERTHREAD_OPENGL_PIPELINE_TEST(RecordingCanvas, textureLayer) {
     auto layerUpdater = TestUtils::createTextureLayerUpdater(renderThread, 100, 100,
             SkMatrix::MakeTrans(5, 5));
 
@@ -327,7 +343,7 @@ RENDERTHREAD_TEST(RecordingCanvas, textureLayer) {
     });
 }
 
-TEST(RecordingCanvas, saveLayer_simple) {
+OPENGL_PIPELINE_TEST(RecordingCanvas, saveLayer_simple) {
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
         canvas.saveLayerAlpha(10, 20, 190, 180, 128, SaveFlags::ClipToLayer);
         canvas.drawRect(10, 20, 190, 180, SkPaint());
@@ -361,7 +377,7 @@ TEST(RecordingCanvas, saveLayer_simple) {
     EXPECT_EQ(3, count);
 }
 
-TEST(RecordingCanvas, saveLayer_rounding) {
+OPENGL_PIPELINE_TEST(RecordingCanvas, saveLayer_rounding) {
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(100, 100, [](RecordingCanvas& canvas) {
             canvas.saveLayerAlpha(10.25f, 10.75f, 89.25f, 89.75f, 128, SaveFlags::ClipToLayer);
             canvas.drawRect(20, 20, 80, 80, SkPaint());
@@ -391,7 +407,7 @@ TEST(RecordingCanvas, saveLayer_rounding) {
         EXPECT_EQ(3, count);
 }
 
-TEST(RecordingCanvas, saveLayer_missingRestore) {
+OPENGL_PIPELINE_TEST(RecordingCanvas, saveLayer_missingRestore) {
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
         canvas.saveLayerAlpha(0, 0, 200, 200, 128, SaveFlags::ClipToLayer);
         canvas.drawRect(0, 0, 200, 200, SkPaint());
@@ -406,7 +422,7 @@ TEST(RecordingCanvas, saveLayer_missingRestore) {
     EXPECT_EQ(3, count) << "Missing a restore shouldn't result in an unmatched saveLayer";
 }
 
-TEST(RecordingCanvas, saveLayer_simpleUnclipped) {
+OPENGL_PIPELINE_TEST(RecordingCanvas, saveLayer_simpleUnclipped) {
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
         canvas.saveLayerAlpha(10, 20, 190, 180, 128, (SaveFlags::Flags)0); // unclipped
         canvas.drawRect(10, 20, 190, 180, SkPaint());
@@ -438,10 +454,10 @@ TEST(RecordingCanvas, saveLayer_simpleUnclipped) {
     EXPECT_EQ(3, count);
 }
 
-TEST(RecordingCanvas, saveLayer_addClipFlag) {
+OPENGL_PIPELINE_TEST(RecordingCanvas, saveLayer_addClipFlag) {
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
         canvas.save(SaveFlags::MatrixClip);
-        canvas.clipRect(10, 20, 190, 180, SkRegion::kIntersect_Op);
+        canvas.clipRect(10, 20, 190, 180, SkClipOp::kIntersect);
         canvas.saveLayerAlpha(10, 20, 190, 180, 128, (SaveFlags::Flags)0); // unclipped
         canvas.drawRect(10, 20, 190, 180, SkPaint());
         canvas.restore();
@@ -457,10 +473,10 @@ TEST(RecordingCanvas, saveLayer_addClipFlag) {
     EXPECT_EQ(3, count);
 }
 
-TEST(RecordingCanvas, saveLayer_viewportCrop) {
+OPENGL_PIPELINE_TEST(RecordingCanvas, saveLayer_viewportCrop) {
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
         // shouldn't matter, since saveLayer will clip to its bounds
-        canvas.clipRect(-1000, -1000, 1000, 1000, SkRegion::kReplace_Op);
+        canvas.clipRect(-1000, -1000, 1000, 1000, SkClipOp::kReplace_deprecated);
 
         canvas.saveLayerAlpha(100, 100, 300, 300, 128, SaveFlags::ClipToLayer);
         canvas.drawRect(0, 0, 400, 400, SkPaint());
@@ -481,7 +497,7 @@ TEST(RecordingCanvas, saveLayer_viewportCrop) {
     EXPECT_EQ(3, count);
 }
 
-TEST(RecordingCanvas, saveLayer_rotateUnclipped) {
+OPENGL_PIPELINE_TEST(RecordingCanvas, saveLayer_rotateUnclipped) {
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
         canvas.save(SaveFlags::MatrixClip);
         canvas.translate(100, 100);
@@ -507,7 +523,7 @@ TEST(RecordingCanvas, saveLayer_rotateUnclipped) {
     EXPECT_EQ(3, count);
 }
 
-TEST(RecordingCanvas, saveLayer_rotateClipped) {
+OPENGL_PIPELINE_TEST(RecordingCanvas, saveLayer_rotateClipped) {
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
         canvas.save(SaveFlags::MatrixClip);
         canvas.translate(100, 100);
@@ -545,12 +561,12 @@ TEST(RecordingCanvas, saveLayer_rotateClipped) {
     EXPECT_EQ(3, count);
 }
 
-TEST(RecordingCanvas, saveLayer_rejectBegin) {
+OPENGL_PIPELINE_TEST(RecordingCanvas, saveLayer_rejectBegin) {
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
         canvas.save(SaveFlags::MatrixClip);
         canvas.translate(0, -20); // avoid identity case
         // empty clip rect should force layer + contents to be rejected
-        canvas.clipRect(0, -20, 200, -20, SkRegion::kIntersect_Op);
+        canvas.clipRect(0, -20, 200, -20, SkClipOp::kIntersect);
         canvas.saveLayerAlpha(0, 0, 200, 200, 128, SaveFlags::ClipToLayer);
         canvas.drawRect(0, 0, 200, 200, SkPaint());
         canvas.restore();
@@ -560,24 +576,24 @@ TEST(RecordingCanvas, saveLayer_rejectBegin) {
     ASSERT_EQ(0u, dl->getOps().size()) << "Begin/Rect/End should all be rejected.";
 }
 
-TEST(RecordingCanvas, drawRenderNode_rejection) {
+OPENGL_PIPELINE_TEST(RecordingCanvas, drawRenderNode_rejection) {
     auto child = TestUtils::createNode(50, 50, 150, 150,
-            [](RenderProperties& props, RecordingCanvas& canvas) {
+            [](RenderProperties& props, Canvas& canvas) {
         SkPaint paint;
         paint.setColor(SK_ColorWHITE);
         canvas.drawRect(0, 0, 100, 100, paint);
     });
 
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [&child](RecordingCanvas& canvas) {
-        canvas.clipRect(0, 0, 0, 0, SkRegion::kIntersect_Op); // empty clip, reject node
+        canvas.clipRect(0, 0, 0, 0, SkClipOp::kIntersect); // empty clip, reject node
         canvas.drawRenderNode(child.get()); // shouldn't crash when rejecting node...
     });
     ASSERT_TRUE(dl->isEmpty());
 }
 
-TEST(RecordingCanvas, drawRenderNode_projection) {
+OPENGL_PIPELINE_TEST(RecordingCanvas, drawRenderNode_projection) {
     sp<RenderNode> background = TestUtils::createNode(50, 50, 150, 150,
-            [](RenderProperties& props, RecordingCanvas& canvas) {
+            [](RenderProperties& props, Canvas& canvas) {
         SkPaint paint;
         paint.setColor(SK_ColorWHITE);
         canvas.drawRect(0, 0, 100, 100, paint);
@@ -618,11 +634,11 @@ TEST(RecordingCanvas, drawRenderNode_projection) {
     }
 }
 
-TEST(RecordingCanvas, firstClipWillReplace) {
+OPENGL_PIPELINE_TEST(RecordingCanvas, firstClipWillReplace) {
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
         canvas.save(SaveFlags::MatrixClip);
         // since no explicit clip set on canvas, this should be the one observed on op:
-        canvas.clipRect(-100, -100, 300, 300, SkRegion::kIntersect_Op);
+        canvas.clipRect(-100, -100, 300, 300, SkClipOp::kIntersect);
 
         SkPaint paint;
         paint.setColor(SK_ColorWHITE);
@@ -635,11 +651,11 @@ TEST(RecordingCanvas, firstClipWillReplace) {
     EXPECT_CLIP_RECT(Rect(-100, -100, 300, 300), dl->getOps()[0]->localClip);
 }
 
-TEST(RecordingCanvas, replaceClipIntersectWithRoot) {
+OPENGL_PIPELINE_TEST(RecordingCanvas, replaceClipIntersectWithRoot) {
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(100, 100, [](RecordingCanvas& canvas) {
         canvas.save(SaveFlags::MatrixClip);
-        canvas.clipRect(-10, -10, 110, 110, SkRegion::kReplace_Op);
-        canvas.drawColor(SK_ColorWHITE, SkXfermode::Mode::kSrcOver_Mode);
+        canvas.clipRect(-10, -10, 110, 110, SkClipOp::kReplace_deprecated);
+        canvas.drawColor(SK_ColorWHITE, SkBlendMode::kSrcOver);
         canvas.restore();
     });
     ASSERT_EQ(1u, dl->getOps().size()) << "Must have one op";
@@ -648,7 +664,7 @@ TEST(RecordingCanvas, replaceClipIntersectWithRoot) {
     EXPECT_TRUE(dl->getOps()[0]->localClip->intersectWithRoot);
 }
 
-TEST(RecordingCanvas, insertReorderBarrier) {
+OPENGL_PIPELINE_TEST(RecordingCanvas, insertReorderBarrier) {
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
         canvas.drawRect(0, 0, 400, 400, SkPaint());
         canvas.insertReorderBarrier(true);
@@ -669,14 +685,14 @@ TEST(RecordingCanvas, insertReorderBarrier) {
     EXPECT_TRUE(chunks[1].reorderChildren);
 }
 
-TEST(RecordingCanvas, insertReorderBarrier_clip) {
+OPENGL_PIPELINE_TEST(RecordingCanvas, insertReorderBarrier_clip) {
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
         // first chunk: no recorded clip
         canvas.insertReorderBarrier(true);
         canvas.drawRect(0, 0, 400, 400, SkPaint());
 
         // second chunk: no recorded clip, since inorder region
-        canvas.clipRect(0, 0, 200, 200, SkRegion::kIntersect_Op);
+        canvas.clipRect(0, 0, 200, 200, SkClipOp::kIntersect);
         canvas.insertReorderBarrier(false);
         canvas.drawRect(0, 0, 400, 400, SkPaint());
 
@@ -699,7 +715,7 @@ TEST(RecordingCanvas, insertReorderBarrier_clip) {
     EXPECT_EQ(Rect(200, 200), chunks[2].reorderClip->rect);
 }
 
-TEST(RecordingCanvas, refPaint) {
+OPENGL_PIPELINE_TEST(RecordingCanvas, refPaint) {
     SkPaint paint;
 
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [&paint](RecordingCanvas& canvas) {
@@ -727,62 +743,70 @@ TEST(RecordingCanvas, refPaint) {
     EXPECT_NE(&paint, ops[2]->paint);
 }
 
-TEST(RecordingCanvas, refBitmap) {
-    SkBitmap bitmap = TestUtils::createSkBitmap(100, 100);
+OPENGL_PIPELINE_TEST(RecordingCanvas, refBitmap) {
+    sk_sp<Bitmap> bitmap(TestUtils::createBitmap(100, 100));
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(100, 100, [&bitmap](RecordingCanvas& canvas) {
-        canvas.drawBitmap(bitmap, 0, 0, nullptr);
+        canvas.drawBitmap(*bitmap, 0, 0, nullptr);
     });
     auto& bitmaps = dl->getBitmapResources();
     EXPECT_EQ(1u, bitmaps.size());
 }
 
-TEST(RecordingCanvas, refBitmapInShader_bitmapShader) {
-    SkBitmap bitmap = TestUtils::createSkBitmap(100, 100);
+OPENGL_PIPELINE_TEST(RecordingCanvas, refBitmapInShader_bitmapShader) {
+    sk_sp<Bitmap> bitmap = TestUtils::createBitmap(100, 100);
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(100, 100, [&bitmap](RecordingCanvas& canvas) {
         SkPaint paint;
-        SkAutoTUnref<SkShader> shader(SkShader::CreateBitmapShader(bitmap,
+        SkBitmap skBitmap;
+        bitmap->getSkBitmap(&skBitmap);
+        sk_sp<SkImage> image = SkMakeImageFromRasterBitmap(skBitmap, kNever_SkCopyPixelsMode);
+        sk_sp<SkShader> shader = image->makeShader(
                 SkShader::TileMode::kClamp_TileMode,
-                SkShader::TileMode::kClamp_TileMode));
-        paint.setShader(shader);
+                SkShader::TileMode::kClamp_TileMode,
+                nullptr);
+        paint.setShader(std::move(shader));
         canvas.drawRoundRect(0, 0, 100, 100, 20.0f, 20.0f, paint);
     });
     auto& bitmaps = dl->getBitmapResources();
     EXPECT_EQ(1u, bitmaps.size());
 }
 
-TEST(RecordingCanvas, refBitmapInShader_composeShader) {
-    SkBitmap bitmap = TestUtils::createSkBitmap(100, 100);
+OPENGL_PIPELINE_TEST(RecordingCanvas, refBitmapInShader_composeShader) {
+    sk_sp<Bitmap> bitmap = TestUtils::createBitmap(100, 100);
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(100, 100, [&bitmap](RecordingCanvas& canvas) {
         SkPaint paint;
-        SkAutoTUnref<SkShader> shader1(SkShader::CreateBitmapShader(bitmap,
+        SkBitmap skBitmap;
+        bitmap->getSkBitmap(&skBitmap);
+        sk_sp<SkImage> image = SkMakeImageFromRasterBitmap(skBitmap, kNever_SkCopyPixelsMode);
+        sk_sp<SkShader> shader1 = image->makeShader(
                 SkShader::TileMode::kClamp_TileMode,
-                SkShader::TileMode::kClamp_TileMode));
+                SkShader::TileMode::kClamp_TileMode,
+                nullptr);
 
         SkPoint center;
         center.set(50, 50);
         SkColor colors[2];
         colors[0] = Color::Black;
         colors[1] = Color::White;
-        SkAutoTUnref<SkShader> shader2(SkGradientShader::CreateRadial(center, 50, colors, nullptr, 2,
-                SkShader::TileMode::kRepeat_TileMode));
+        sk_sp<SkShader> shader2 = SkGradientShader::MakeRadial(center, 50, colors, nullptr, 2,
+                SkShader::TileMode::kRepeat_TileMode);
 
-        SkAutoTUnref<SkShader> composeShader(SkShader::CreateComposeShader(shader1, shader2,
-                SkXfermode::Mode::kMultiply_Mode));
-        paint.setShader(composeShader);
+        sk_sp<SkShader> composeShader = SkShader::MakeComposeShader(std::move(shader1), std::move(shader2),
+                SkBlendMode::kMultiply);
+        paint.setShader(std::move(composeShader));
         canvas.drawRoundRect(0, 0, 100, 100, 20.0f, 20.0f, paint);
     });
     auto& bitmaps = dl->getBitmapResources();
     EXPECT_EQ(1u, bitmaps.size());
 }
 
-TEST(RecordingCanvas, drawText) {
+OPENGL_PIPELINE_TEST(RecordingCanvas, drawText) {
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
         Paint paint;
         paint.setAntiAlias(true);
         paint.setTextSize(20);
         paint.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
         std::unique_ptr<uint16_t[]> dst = TestUtils::asciiToUtf16("HELLO");
-        canvas.drawText(dst.get(), 0, 5, 5, 25, 25, kBidi_Force_LTR, paint, NULL);
+        canvas.drawText(dst.get(), 0, 5, 5, 25, 25, minikin::kBidi_Force_LTR, paint, NULL);
     });
 
     int count = 0;
@@ -797,7 +821,7 @@ TEST(RecordingCanvas, drawText) {
     ASSERT_EQ(1, count);
 }
 
-TEST(RecordingCanvas, drawTextInHighContrast) {
+OPENGL_PIPELINE_TEST(RecordingCanvas, drawTextInHighContrast) {
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
         canvas.setHighContrastText(true);
         Paint paint;
@@ -806,7 +830,7 @@ TEST(RecordingCanvas, drawTextInHighContrast) {
         paint.setTextSize(20);
         paint.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
         std::unique_ptr<uint16_t[]> dst = TestUtils::asciiToUtf16("HELLO");
-        canvas.drawText(dst.get(), 0, 5, 5, 25, 25, kBidi_Force_LTR, paint, NULL);
+        canvas.drawText(dst.get(), 0, 5, 5, 25, 25, minikin::kBidi_Force_LTR, paint, NULL);
     });
 
     int count = 0;

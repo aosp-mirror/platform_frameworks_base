@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="5247871339820894594">"CarrierDefaultApp"</string>
+    <string name="android_system_label" msgid="2797790869522345065">"ក្រុមហ៊ុនបម្រើសេវាទូរសព្ទចល័ត"</string>
+    <string name="portal_notification_id" msgid="5155057562457079297">"ទិន្នន័យ​ចល័ត​បាន​អស់​ហើយ"</string>
+    <string name="no_data_notification_id" msgid="668400731803969521">"ទិន្នន័យ​ចល័ត​របស់អ្នក​ត្រូវបាន​បិទដំណើរការហើយ"</string>
+    <string name="portal_notification_detail" msgid="2295729385924660881">"ចុច​ដើម្បី​ចូលទៅកាន់គេហទំព័រ %s"</string>
+    <string name="no_data_notification_detail" msgid="3112125343857014825">"សូម​ទាក់ទង​ទៅ​ក្រុមហ៊ុន​ផ្តល់​សេវា​របស់​អ្នក %s"</string>
+    <string name="no_mobile_data_connection_title" msgid="7449525772416200578">"មិន​មាន​ការតភ្ជាប់​ទិន្នន័យចល័តទេ"</string>
+    <string name="no_mobile_data_connection" msgid="544980465184147010">"បញ្ចូលគម្រោង​ទិន្នន័យ ឬ​រ៉ូមីង​តាម​រយៈ %s"</string>
+    <string name="mobile_data_status_notification_channel_name" msgid="833999690121305708">"ស្ថានភាព​ទិន្នន័យ​ទូរសព្ទ​ចល័ត"</string>
+    <string name="action_bar_label" msgid="4290345990334377177">"ចូលទៅបណ្តាញទូរសព្ទចល័ត"</string>
+    <string name="ssl_error_warning" msgid="3127935140338254180">"បណ្តាញដែលអ្នកកំពុងព្យាយាមចូលមានបញ្ហាសុវត្ថិភាព។"</string>
+    <string name="ssl_error_example" msgid="6188711843183058764">"ឧទាហរណ៍៖ ទំព័រចូលនេះអាចនឹងមិនមែនជាកម្មសិទ្ធិរបស់ស្ថាប័នដែលបានបង្ហាញនេះទេ។"</string>
+    <string name="ssl_error_continue" msgid="1138548463994095584">"យ៉ាងណាក៏ដោយនៅតែបន្តតាមរយៈកម្មវិធីរុករកតាមអ៊ីនធឺណិត"</string>
+</resources>

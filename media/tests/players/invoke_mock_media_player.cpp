@@ -82,7 +82,7 @@ class Player: public MediaPlayerBase
     virtual status_t    stop() { return OK; }
     virtual status_t    pause() { return OK; }
     virtual bool        isPlaying() { return true; }
-    virtual status_t    seekTo(int /* msec */) { return OK; }
+    virtual status_t    seekTo(int /* msec */, android::MediaPlayerSeekMode /* mode */) { return OK; }
     virtual status_t    getCurrentPosition(int* /* msec */) { return OK; }
     virtual status_t    getDuration(int* /* msec */) { return OK; }
     virtual status_t    reset() {return OK;}

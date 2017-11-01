@@ -16,16 +16,20 @@
 
 package android.text;
 
-import android.test.InstrumentationTestCase;
+import android.support.test.filters.MediumTest;
+import android.support.test.runner.AndroidJUnit4;
 import android.test.MoreAsserts;
-import android.test.suitebuilder.annotation.MediumTest;
-import android.text.Spannable;
 
-public abstract class SpannableTest extends InstrumentationTestCase {
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+@MediumTest
+@RunWith(AndroidJUnit4.class)
+public abstract class SpannableTest {
 
     protected abstract Spannable newSpannableWithText(String text);
 
-    @MediumTest
+    @Test
     public void testGetSpans() {
         Spannable spannable = newSpannableWithText("abcdef");
         Object emptySpan = new Object();

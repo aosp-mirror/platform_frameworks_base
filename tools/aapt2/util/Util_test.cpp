@@ -14,191 +14,188 @@
  * limitations under the License.
  */
 
-#include "test/Common.h"
-#include "util/StringPiece.h"
 #include "util/Util.h"
 
-#include <gtest/gtest.h>
 #include <string>
+
+#include "test/Test.h"
+
+using ::android::StringPiece;
+using ::testing::Eq;
+using ::testing::Ne;
+using ::testing::SizeIs;
 
 namespace aapt {
 
 TEST(UtilTest, TrimOnlyWhitespace) {
-    const std::u16string full = u"\n        ";
-
-    StringPiece16 trimmed = util::trimWhitespace(full);
-    EXPECT_TRUE(trimmed.empty());
-    EXPECT_EQ(0u, trimmed.size());
+  const StringPiece trimmed = util::TrimWhitespace("\n        ");
+  EXPECT_TRUE(trimmed.empty());
+  EXPECT_THAT(trimmed, SizeIs(0u));
 }
 
 TEST(UtilTest, StringEndsWith) {
-    EXPECT_TRUE(util::stringEndsWith<char>("hello.xml", ".xml"));
+  EXPECT_TRUE(util::EndsWith("hello.xml", ".xml"));
 }
 
 TEST(UtilTest, StringStartsWith) {
-    EXPECT_TRUE(util::stringStartsWith<char>("hello.xml", "he"));
+  EXPECT_TRUE(util::StartsWith("hello.xml", "he"));
 }
 
 TEST(UtilTest, StringBuilderSplitEscapeSequence) {
-    EXPECT_EQ(StringPiece16(u"this is a new\nline."),
-              util::StringBuilder().append(u"this is a new\\")
-                                   .append(u"nline.")
-                                   .str());
+  EXPECT_THAT(util::StringBuilder().Append("this is a new\\").Append("nline.").ToString(),
+              Eq("this is a new\nline."));
 }
 
 TEST(UtilTest, StringBuilderWhitespaceRemoval) {
-    EXPECT_EQ(StringPiece16(u"hey guys this is so cool"),
-              util::StringBuilder().append(u"    hey guys ")
-                                   .append(u" this is so cool ")
-                                   .str());
-
-    EXPECT_EQ(StringPiece16(u" wow,  so many \t spaces. what?"),
-              util::StringBuilder().append(u" \" wow,  so many \t ")
-                                   .append(u"spaces. \"what? ")
-                                   .str());
-
-    EXPECT_EQ(StringPiece16(u"where is the pie?"),
-              util::StringBuilder().append(u"  where \t ")
-                                   .append(u" \nis the "" pie?")
-                                   .str());
+  EXPECT_THAT(util::StringBuilder().Append("    hey guys ").Append(" this is so cool ").ToString(),
+              Eq("hey guys this is so cool"));
+  EXPECT_THAT(
+      util::StringBuilder().Append(" \" wow,  so many \t ").Append("spaces. \"what? ").ToString(),
+      Eq(" wow,  so many \t spaces. what?"));
+  EXPECT_THAT(util::StringBuilder().Append("  where \t ").Append(" \nis the pie?").ToString(),
+              Eq("where is the pie?"));
 }
 
 TEST(UtilTest, StringBuilderEscaping) {
-    EXPECT_EQ(StringPiece16(u"hey guys\n this \t is so\\ cool"),
-              util::StringBuilder().append(u"    hey guys\\n ")
-                                   .append(u" this \\t is so\\\\ cool ")
-                                   .str());
-
-    EXPECT_EQ(StringPiece16(u"@?#\\\'"),
-              util::StringBuilder().append(u"\\@\\?\\#\\\\\\'")
-                                   .str());
+  EXPECT_THAT(util::StringBuilder()
+                  .Append("    hey guys\\n ")
+                  .Append(" this \\t is so\\\\ cool ")
+                  .ToString(),
+              Eq("hey guys\n this \t is so\\ cool"));
+  EXPECT_THAT(util::StringBuilder().Append("\\@\\?\\#\\\\\\'").ToString(), Eq("@?#\\\'"));
 }
 
 TEST(UtilTest, StringBuilderMisplacedQuote) {
-    util::StringBuilder builder{};
-    EXPECT_FALSE(builder.append(u"they're coming!"));
+  util::StringBuilder builder;
+  EXPECT_FALSE(builder.Append("they're coming!"));
 }
 
 TEST(UtilTest, StringBuilderUnicodeCodes) {
-    EXPECT_EQ(StringPiece16(u"\u00AF\u0AF0 woah"),
-              util::StringBuilder().append(u"\\u00AF\\u0AF0 woah")
-                                   .str());
+  EXPECT_THAT(util::StringBuilder().Append("\\u00AF\\u0AF0 woah").ToString(),
+              Eq("\u00AF\u0AF0 woah"));
+  EXPECT_FALSE(util::StringBuilder().Append("\\u00 yo"));
+}
 
-    EXPECT_FALSE(util::StringBuilder().append(u"\\u00 yo"));
+TEST(UtilTest, StringBuilderPreserveSpaces) {
+  EXPECT_THAT(util::StringBuilder(true /*preserve_spaces*/).Append("\"").ToString(), Eq("\""));
 }
 
 TEST(UtilTest, TokenizeInput) {
-    auto tokenizer = util::tokenize(StringPiece16(u"this| is|the|end"), u'|');
-    auto iter = tokenizer.begin();
-    ASSERT_EQ(*iter, StringPiece16(u"this"));
-    ++iter;
-    ASSERT_EQ(*iter, StringPiece16(u" is"));
-    ++iter;
-    ASSERT_EQ(*iter, StringPiece16(u"the"));
-    ++iter;
-    ASSERT_EQ(*iter, StringPiece16(u"end"));
-    ++iter;
-    ASSERT_EQ(tokenizer.end(), iter);
+  auto tokenizer = util::Tokenize(StringPiece("this| is|the|end"), '|');
+  auto iter = tokenizer.begin();
+  ASSERT_THAT(*iter, Eq("this"));
+  ++iter;
+  ASSERT_THAT(*iter, Eq(" is"));
+  ++iter;
+  ASSERT_THAT(*iter, Eq("the"));
+  ++iter;
+  ASSERT_THAT(*iter, Eq("end"));
+  ++iter;
+  ASSERT_THAT(iter, Eq(tokenizer.end()));
 }
 
 TEST(UtilTest, TokenizeEmptyString) {
-    auto tokenizer = util::tokenize(StringPiece16(u""), u'|');
-    auto iter = tokenizer.begin();
-    ASSERT_NE(tokenizer.end(), iter);
-    ASSERT_EQ(StringPiece16(), *iter);
-    ++iter;
-    ASSERT_EQ(tokenizer.end(), iter);
+  auto tokenizer = util::Tokenize(StringPiece(""), '|');
+  auto iter = tokenizer.begin();
+  ASSERT_THAT(iter, Ne(tokenizer.end()));
+  ASSERT_THAT(*iter, Eq(StringPiece()));
+  ++iter;
+  ASSERT_THAT(iter, Eq(tokenizer.end()));
 }
 
 TEST(UtilTest, TokenizeAtEnd) {
-    auto tokenizer = util::tokenize(StringPiece16(u"one."), u'.');
-    auto iter = tokenizer.begin();
-    ASSERT_EQ(*iter, StringPiece16(u"one"));
-    ++iter;
-    ASSERT_NE(iter, tokenizer.end());
-    ASSERT_EQ(*iter, StringPiece16());
+  auto tokenizer = util::Tokenize(StringPiece("one."), '.');
+  auto iter = tokenizer.begin();
+  ASSERT_THAT(*iter, Eq("one"));
+  ++iter;
+  ASSERT_THAT(iter, Ne(tokenizer.end()));
+  ASSERT_THAT(*iter, Eq(StringPiece()));
 }
 
 TEST(UtilTest, IsJavaClassName) {
-    EXPECT_TRUE(util::isJavaClassName(u"android.test.Class"));
-    EXPECT_TRUE(util::isJavaClassName(u"android.test.Class$Inner"));
-    EXPECT_TRUE(util::isJavaClassName(u"android_test.test.Class"));
-    EXPECT_TRUE(util::isJavaClassName(u"_android_.test._Class_"));
-    EXPECT_FALSE(util::isJavaClassName(u"android.test.$Inner"));
-    EXPECT_FALSE(util::isJavaClassName(u"android.test.Inner$"));
-    EXPECT_FALSE(util::isJavaClassName(u".test.Class"));
-    EXPECT_FALSE(util::isJavaClassName(u"android"));
+  EXPECT_TRUE(util::IsJavaClassName("android.test.Class"));
+  EXPECT_TRUE(util::IsJavaClassName("android.test.Class$Inner"));
+  EXPECT_TRUE(util::IsJavaClassName("android_test.test.Class"));
+  EXPECT_TRUE(util::IsJavaClassName("_android_.test._Class_"));
+  EXPECT_FALSE(util::IsJavaClassName("android.test.$Inner"));
+  EXPECT_FALSE(util::IsJavaClassName("android.test.Inner$"));
+  EXPECT_FALSE(util::IsJavaClassName(".test.Class"));
+  EXPECT_FALSE(util::IsJavaClassName("android"));
 }
 
 TEST(UtilTest, IsJavaPackageName) {
-    EXPECT_TRUE(util::isJavaPackageName(u"android"));
-    EXPECT_TRUE(util::isJavaPackageName(u"android.test"));
-    EXPECT_TRUE(util::isJavaPackageName(u"android.test_thing"));
-    EXPECT_FALSE(util::isJavaPackageName(u"_android"));
-    EXPECT_FALSE(util::isJavaPackageName(u"android_"));
-    EXPECT_FALSE(util::isJavaPackageName(u"android."));
-    EXPECT_FALSE(util::isJavaPackageName(u".android"));
-    EXPECT_FALSE(util::isJavaPackageName(u"android._test"));
-    EXPECT_FALSE(util::isJavaPackageName(u".."));
+  EXPECT_TRUE(util::IsJavaPackageName("android"));
+  EXPECT_TRUE(util::IsJavaPackageName("android.test"));
+  EXPECT_TRUE(util::IsJavaPackageName("android.test_thing"));
+  EXPECT_FALSE(util::IsJavaPackageName("_android"));
+  EXPECT_FALSE(util::IsJavaPackageName("android_"));
+  EXPECT_FALSE(util::IsJavaPackageName("android."));
+  EXPECT_FALSE(util::IsJavaPackageName(".android"));
+  EXPECT_FALSE(util::IsJavaPackageName("android._test"));
+  EXPECT_FALSE(util::IsJavaPackageName(".."));
 }
 
 TEST(UtilTest, FullyQualifiedClassName) {
-    Maybe<std::u16string> res = util::getFullyQualifiedClassName(u"android", u"asdf");
-    AAPT_ASSERT_FALSE(res);
+  Maybe<std::string> res = util::GetFullyQualifiedClassName("android", ".asdf");
+  AAPT_ASSERT_TRUE(res);
+  EXPECT_EQ(res.value(), "android.asdf");
 
-    res = util::getFullyQualifiedClassName(u"android", u".asdf");
-    AAPT_ASSERT_TRUE(res);
-    EXPECT_EQ(res.value(), u"android.asdf");
+  res = util::GetFullyQualifiedClassName("android", ".a.b");
+  AAPT_ASSERT_TRUE(res);
+  EXPECT_EQ(res.value(), "android.a.b");
 
-    res = util::getFullyQualifiedClassName(u"android", u".a.b");
-    AAPT_ASSERT_TRUE(res);
-    EXPECT_EQ(res.value(), u"android.a.b");
+  res = util::GetFullyQualifiedClassName("android", "a.b");
+  AAPT_ASSERT_TRUE(res);
+  EXPECT_EQ(res.value(), "a.b");
 
-    res = util::getFullyQualifiedClassName(u"android", u"a.b");
-    AAPT_ASSERT_TRUE(res);
-    EXPECT_EQ(res.value(), u"a.b");
+  res = util::GetFullyQualifiedClassName("", "a.b");
+  AAPT_ASSERT_TRUE(res);
+  EXPECT_EQ(res.value(), "a.b");
 
-    res = util::getFullyQualifiedClassName(u"", u"a.b");
-    AAPT_ASSERT_TRUE(res);
-    EXPECT_EQ(res.value(), u"a.b");
+  res = util::GetFullyQualifiedClassName("android", "Class");
+  AAPT_ASSERT_TRUE(res);
+  EXPECT_EQ(res.value(), "android.Class");
 
-    res = util::getFullyQualifiedClassName(u"", u"");
-    AAPT_ASSERT_FALSE(res);
+  res = util::GetFullyQualifiedClassName("", "");
+  AAPT_ASSERT_FALSE(res);
 
-    res = util::getFullyQualifiedClassName(u"android", u"./Apple");
-    AAPT_ASSERT_FALSE(res);
+  res = util::GetFullyQualifiedClassName("android", "./Apple");
+  AAPT_ASSERT_FALSE(res);
 }
 
 TEST(UtilTest, ExtractResourcePathComponents) {
-    StringPiece16 prefix, entry, suffix;
-    ASSERT_TRUE(util::extractResFilePathParts(u"res/xml-sw600dp/entry.xml", &prefix, &entry,
-                                              &suffix));
-    EXPECT_EQ(prefix, u"res/xml-sw600dp/");
-    EXPECT_EQ(entry, u"entry");
-    EXPECT_EQ(suffix, u".xml");
+  StringPiece prefix, entry, suffix;
+  ASSERT_TRUE(util::ExtractResFilePathParts("res/xml-sw600dp/entry.xml",
+                                            &prefix, &entry, &suffix));
+  EXPECT_EQ(prefix, "res/xml-sw600dp/");
+  EXPECT_EQ(entry, "entry");
+  EXPECT_EQ(suffix, ".xml");
 
-    ASSERT_TRUE(util::extractResFilePathParts(u"res/xml-sw600dp/entry.9.png", &prefix, &entry,
-                                              &suffix));
+  ASSERT_TRUE(util::ExtractResFilePathParts("res/xml-sw600dp/entry.9.png",
+                                            &prefix, &entry, &suffix));
 
-    EXPECT_EQ(prefix, u"res/xml-sw600dp/");
-    EXPECT_EQ(entry, u"entry");
-    EXPECT_EQ(suffix, u".9.png");
+  EXPECT_EQ(prefix, "res/xml-sw600dp/");
+  EXPECT_EQ(entry, "entry");
+  EXPECT_EQ(suffix, ".9.png");
 
-    EXPECT_FALSE(util::extractResFilePathParts(u"AndroidManifest.xml", &prefix, &entry, &suffix));
-    EXPECT_FALSE(util::extractResFilePathParts(u"res/.xml", &prefix, &entry, &suffix));
+  EXPECT_FALSE(util::ExtractResFilePathParts("AndroidManifest.xml", &prefix,
+                                             &entry, &suffix));
+  EXPECT_FALSE(
+      util::ExtractResFilePathParts("res/.xml", &prefix, &entry, &suffix));
 
-    ASSERT_TRUE(util::extractResFilePathParts(u"res//.", &prefix, &entry, &suffix));
-    EXPECT_EQ(prefix, u"res//");
-    EXPECT_EQ(entry, u"");
-    EXPECT_EQ(suffix, u".");
+  ASSERT_TRUE(
+      util::ExtractResFilePathParts("res//.", &prefix, &entry, &suffix));
+  EXPECT_EQ(prefix, "res//");
+  EXPECT_EQ(entry, "");
+  EXPECT_EQ(suffix, ".");
 }
 
 TEST(UtilTest, VerifyJavaStringFormat) {
-    ASSERT_TRUE(util::verifyJavaStringFormat(u"%09.34f"));
-    ASSERT_TRUE(util::verifyJavaStringFormat(u"%9$.34f %8$"));
-    ASSERT_TRUE(util::verifyJavaStringFormat(u"%% %%"));
-    ASSERT_FALSE(util::verifyJavaStringFormat(u"%09$f %f"));
-    ASSERT_FALSE(util::verifyJavaStringFormat(u"%09f %08s"));
+  ASSERT_TRUE(util::VerifyJavaStringFormat("%09.34f"));
+  ASSERT_TRUE(util::VerifyJavaStringFormat("%9$.34f %8$"));
+  ASSERT_TRUE(util::VerifyJavaStringFormat("%% %%"));
+  ASSERT_FALSE(util::VerifyJavaStringFormat("%09$f %f"));
+  ASSERT_FALSE(util::VerifyJavaStringFormat("%09f %08s"));
 }
 
-} // namespace aapt
+}  // namespace aapt

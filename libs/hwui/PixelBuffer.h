@@ -100,12 +100,6 @@ public:
     }
 
     /**
-     * Returns the currently mapped pointer. Returns NULL if the buffer
-     * is not mapped.
-     */
-    virtual uint8_t* getMappedPointer() const = 0;
-
-    /**
      * Upload the specified rectangle of this pixel buffer as a
      * GL_TEXTURE_2D texture. Calling this method will trigger
      * an unmap() if necessary.
@@ -200,8 +194,7 @@ protected:
     /**
      * Unmaps this buffer, if needed. After the buffer is unmapped,
      * the pointer previously returned by map() becomes invalid and
-     * should not be used. After calling this method, getMappedPointer()
-     * will always return NULL.
+     * should not be used.
      */
     virtual void unmap() = 0;
 

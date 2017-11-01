@@ -15,12 +15,12 @@
  */
 package android.hardware.camera2.dispatch;
 
+import static com.android.internal.util.Preconditions.checkNotNull;
+
 import android.hardware.camera2.utils.UncheckedThrow;
 
 import java.lang.reflect.Method;
 import java.util.concurrent.ConcurrentHashMap;
-
-import static com.android.internal.util.Preconditions.*;
 
 /**
  * Invoke a method on a dispatchable by its name (without knowing the {@code Method} ahead of time).
@@ -31,6 +31,7 @@ public class MethodNameInvoker<T> {
 
     private final Dispatchable<T> mTarget;
     private final Class<T> mTargetClass;
+    private final Method[] mTargetClassMethods;
     private final ConcurrentHashMap<String, Method> mMethods =
             new ConcurrentHashMap<>();
 
@@ -42,6 +43,7 @@ public class MethodNameInvoker<T> {
      */
     public MethodNameInvoker(Dispatchable<T> target, Class<T> targetClass) {
         mTargetClass = targetClass;
+        mTargetClassMethods = targetClass.getMethods();
         mTarget = target;
     }
 
@@ -68,7 +70,7 @@ public class MethodNameInvoker<T> {
 
         Method targetMethod = mMethods.get(methodName);
         if (targetMethod == null) {
-            for (Method method : mTargetClass.getMethods()) {
+            for (Method method : mTargetClassMethods) {
                 // TODO future: match types of params if possible
                 if (method.getName().equals(methodName) &&
                         (params.length == method.getParameterTypes().length) ) {

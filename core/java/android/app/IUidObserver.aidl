@@ -20,13 +20,18 @@ package android.app;
 oneway interface IUidObserver {
     /**
      * General report of a state change of an uid.
+     *
+     * @param uid The uid for which the state change is being reported.
+     * @param procState The updated process state for the uid.
+     * @param procStateSeq The sequence no. associated with process state change of the uid,
+     *                     see UidRecord.procStateSeq for details.
      */
-    void onUidStateChanged(int uid, int procState);
+    void onUidStateChanged(int uid, int procState, long procStateSeq);
 
     /**
      * Report that there are no longer any processes running for a uid.
      */
-    void onUidGone(int uid);
+    void onUidGone(int uid, boolean disabled);
 
     /**
      * Report that a uid is now active (no longer idle).
@@ -37,5 +42,5 @@ oneway interface IUidObserver {
      * Report that a uid is idle -- it has either been running in the background for
      * a sufficient period of time, or all of its processes have gone away.
      */
-    void onUidIdle(int uid);
+    void onUidIdle(int uid, boolean disabled);
 }

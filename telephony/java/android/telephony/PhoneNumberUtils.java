@@ -29,6 +29,7 @@ import android.database.Cursor;
 import android.location.CountryDetector;
 import android.net.Uri;
 import android.os.SystemProperties;
+import android.os.PersistableBundle;
 import android.provider.Contacts;
 import android.provider.ContactsContract;
 import android.telecom.PhoneAccount;
@@ -76,8 +77,27 @@ public class PhoneNumberUtils
     public static final int TOA_International = 0x91;
     public static final int TOA_Unknown = 0x81;
 
+    /*
+     * The BCD extended type used to determine the extended char for the digit which is greater than
+     * 9.
+     *
+     * see TS 51.011 section 10.5.1 EF_ADN(Abbreviated dialling numbers)
+     */
+    public static final int BCD_EXTENDED_TYPE_EF_ADN = 1;
+
+    /*
+     * The BCD extended type used to determine the extended char for the digit which is greater than
+     * 9.
+     *
+     * see TS 24.008 section 10.5.4.7 Called party BCD number
+     */
+    public static final int BCD_EXTENDED_TYPE_CALLED_PARTY = 2;
+
     static final String LOG_TAG = "PhoneNumberUtils";
     private static final boolean DBG = false;
+
+    private static final String BCD_EF_ADN_EXTENDED = "*#,N;";
+    private static final String BCD_CALLED_PARTY_EXTENDED = "*#abc";
 
     /*
      * global-phone-number = ["+"] 1*( DIGIT / written-sep )
@@ -798,11 +818,33 @@ public class PhoneNumberUtils
      *
      * @return partial string on invalid decode
      *
-     * FIXME(mkf) support alphanumeric address type
-     *  currently implemented in SMSMessage.getAddress()
+     * @deprecated use {@link #calledPartyBCDToString(byte[], int, int, int)} instead. Calling this
+     * method is equivalent to calling {@link #calledPartyBCDToString(byte[], int, int)} with
+     * {@link #BCD_EXTENDED_TYPE_EF_ADN} as the extended type.
      */
-    public static String
-    calledPartyBCDToString (byte[] bytes, int offset, int length) {
+    @Deprecated
+    public static String calledPartyBCDToString(byte[] bytes, int offset, int length) {
+        return calledPartyBCDToString(bytes, offset, length, BCD_EXTENDED_TYPE_EF_ADN);
+    }
+
+    /**
+     *  3GPP TS 24.008 10.5.4.7
+     *  Called Party BCD Number
+     *
+     *  See Also TS 51.011 10.5.1 "dialing number/ssc string"
+     *  and TS 11.11 "10.3.1 EF adn (Abbreviated dialing numbers)"
+     *
+     * @param bytes the data buffer
+     * @param offset should point to the TOA (aka. TON/NPI) octet after the length byte
+     * @param length is the number of bytes including TOA byte
+     *                and must be at least 2
+     * @param bcdExtType used to determine the extended bcd coding
+     * @see #BCD_EXTENDED_TYPE_EF_ADN
+     * @see #BCD_EXTENDED_TYPE_CALLED_PARTY
+     *
+     */
+    public static String calledPartyBCDToString(
+            byte[] bytes, int offset, int length, int bcdExtType) {
         boolean prependPlus = false;
         StringBuilder ret = new StringBuilder(1 + length * 2);
 
@@ -816,7 +858,7 @@ public class PhoneNumberUtils
         }
 
         internalCalledPartyBCDFragmentToString(
-                ret, bytes, offset + 1, length - 1);
+                ret, bytes, offset + 1, length - 1, bcdExtType);
 
         if (prependPlus && ret.length() == 0) {
             // If the only thing there is a prepended plus, return ""
@@ -901,14 +943,13 @@ public class PhoneNumberUtils
         return ret.toString();
     }
 
-    private static void
-    internalCalledPartyBCDFragmentToString(
-        StringBuilder sb, byte [] bytes, int offset, int length) {
+    private static void internalCalledPartyBCDFragmentToString(
+            StringBuilder sb, byte [] bytes, int offset, int length, int bcdExtType) {
         for (int i = offset ; i < length + offset ; i++) {
             byte b;
             char c;
 
-            c = bcdToChar((byte)(bytes[i] & 0xf));
+            c = bcdToChar((byte)(bytes[i] & 0xf), bcdExtType);
 
             if (c == 0) {
                 return;
@@ -929,7 +970,7 @@ public class PhoneNumberUtils
                 break;
             }
 
-            c = bcdToChar(b);
+            c = bcdToChar(b, bcdExtType);
             if (c == 0) {
                 return;
             }
@@ -942,49 +983,65 @@ public class PhoneNumberUtils
     /**
      * Like calledPartyBCDToString, but field does not start with a
      * TOA byte. For example: SIM ADN extension fields
+     *
+     * @deprecated use {@link #calledPartyBCDFragmentToString(byte[], int, int, int)} instead.
+     * Calling this method is equivalent to calling
+     * {@link #calledPartyBCDFragmentToString(byte[], int, int, int)} with
+     * {@link #BCD_EXTENDED_TYPE_EF_ADN} as the extended type.
      */
+    @Deprecated
+    public static String calledPartyBCDFragmentToString(byte[] bytes, int offset, int length) {
+        return calledPartyBCDFragmentToString(bytes, offset, length, BCD_EXTENDED_TYPE_EF_ADN);
+    }
 
-    public static String
-    calledPartyBCDFragmentToString(byte [] bytes, int offset, int length) {
+    /**
+     * Like calledPartyBCDToString, but field does not start with a
+     * TOA byte. For example: SIM ADN extension fields
+     */
+    public static String calledPartyBCDFragmentToString(
+            byte[] bytes, int offset, int length, int bcdExtType) {
         StringBuilder ret = new StringBuilder(length * 2);
-
-        internalCalledPartyBCDFragmentToString(ret, bytes, offset, length);
-
+        internalCalledPartyBCDFragmentToString(ret, bytes, offset, length, bcdExtType);
         return ret.toString();
     }
 
-    /** returns 0 on invalid value */
-    private static char
-    bcdToChar(byte b) {
+    /**
+     * Returns the correspond character for given {@code b} based on {@code bcdExtType}, or 0 on
+     * invalid code.
+     */
+    private static char bcdToChar(byte b, int bcdExtType) {
         if (b < 0xa) {
-            return (char)('0' + b);
-        } else switch (b) {
-            case 0xa: return '*';
-            case 0xb: return '#';
-            case 0xc: return PAUSE;
-            case 0xd: return WILD;
-
-            default: return 0;
+            return (char) ('0' + b);
         }
+
+        String extended = null;
+        if (BCD_EXTENDED_TYPE_EF_ADN == bcdExtType) {
+            extended = BCD_EF_ADN_EXTENDED;
+        } else if (BCD_EXTENDED_TYPE_CALLED_PARTY == bcdExtType) {
+            extended = BCD_CALLED_PARTY_EXTENDED;
+        }
+        if (extended == null || b - 0xa >= extended.length()) {
+            return 0;
+        }
+
+        return extended.charAt(b - 0xa);
     }
 
-    private static int
-    charToBCD(char c) {
-        if (c >= '0' && c <= '9') {
+    private static int charToBCD(char c, int bcdExtType) {
+        if ('0' <= c && c <= '9') {
             return c - '0';
-        } else if (c == '*') {
-            return 0xa;
-        } else if (c == '#') {
-            return 0xb;
-        } else if (c == PAUSE) {
-            return 0xc;
-        } else if (c == WILD) {
-            return 0xd;
-        } else if (c == WAIT) {
-            return 0xe;
-        } else {
-            throw new RuntimeException ("invalid char for BCD " + c);
         }
+
+        String extended = null;
+        if (BCD_EXTENDED_TYPE_EF_ADN == bcdExtType) {
+            extended = BCD_EF_ADN_EXTENDED;
+        } else if (BCD_EXTENDED_TYPE_CALLED_PARTY == bcdExtType) {
+            extended = BCD_CALLED_PARTY_EXTENDED;
+        }
+        if (extended == null || extended.indexOf(c) == -1) {
+            throw new RuntimeException("invalid char for BCD " + c);
+        }
+        return 0xa + extended.indexOf(c);
     }
 
     /**
@@ -1033,40 +1090,60 @@ public class PhoneNumberUtils
      *
      * Returns null if network portion is empty.
      */
-    public static byte[]
-    networkPortionToCalledPartyBCD(String s) {
+    public static byte[] networkPortionToCalledPartyBCD(String s) {
         String networkPortion = extractNetworkPortion(s);
-        return numberToCalledPartyBCDHelper(networkPortion, false);
+        return numberToCalledPartyBCDHelper(
+                networkPortion, false, BCD_EXTENDED_TYPE_EF_ADN);
     }
 
     /**
      * Same as {@link #networkPortionToCalledPartyBCD}, but includes a
      * one-byte length prefix.
      */
-    public static byte[]
-    networkPortionToCalledPartyBCDWithLength(String s) {
+    public static byte[] networkPortionToCalledPartyBCDWithLength(String s) {
         String networkPortion = extractNetworkPortion(s);
-        return numberToCalledPartyBCDHelper(networkPortion, true);
+        return numberToCalledPartyBCDHelper(
+                networkPortion, true, BCD_EXTENDED_TYPE_EF_ADN);
     }
 
     /**
      * Convert a dialing number to BCD byte array
      *
-     * @param number dialing number string
-     *        if the dialing number starts with '+', set to international TOA
+     * @param number dialing number string. If the dialing number starts with '+', set to
+     * international TOA
+     *
+     * @return BCD byte array
+     *
+     * @deprecated use {@link #numberToCalledPartyBCD(String, int)} instead. Calling this method
+     * is equivalent to calling {@link #numberToCalledPartyBCD(String, int)} with
+     * {@link #BCD_EXTENDED_TYPE_EF_ADN} as the extended type.
+     */
+    @Deprecated
+    public static byte[] numberToCalledPartyBCD(String number) {
+        return numberToCalledPartyBCD(number, BCD_EXTENDED_TYPE_EF_ADN);
+    }
+
+    /**
+     * Convert a dialing number to BCD byte array
+     *
+     * @param number dialing number string. If the dialing number starts with '+', set to
+     * international TOA
+     * @param bcdExtType used to determine the extended bcd coding
+     * @see #BCD_EXTENDED_TYPE_EF_ADN
+     * @see #BCD_EXTENDED_TYPE_CALLED_PARTY
+     *
      * @return BCD byte array
      */
-    public static byte[]
-    numberToCalledPartyBCD(String number) {
-        return numberToCalledPartyBCDHelper(number, false);
+    public static byte[] numberToCalledPartyBCD(String number, int bcdExtType) {
+        return numberToCalledPartyBCDHelper(number, false, bcdExtType);
     }
 
     /**
      * If includeLength is true, prepend a one-byte length value to
      * the return array.
      */
-    private static byte[]
-    numberToCalledPartyBCDHelper(String number, boolean includeLength) {
+    private static byte[] numberToCalledPartyBCDHelper(
+            String number, boolean includeLength, int bcdExtType) {
         int numberLenReal = number.length();
         int numberLenEffective = numberLenReal;
         boolean hasPlus = number.indexOf('+') != -1;
@@ -1086,7 +1163,8 @@ public class PhoneNumberUtils
             char c = number.charAt(i);
             if (c == '+') continue;
             int shift = ((digitCount & 0x01) == 1) ? 4 : 0;
-            result[extraBytes + (digitCount >> 1)] |= (byte)((charToBCD(c) & 0x0F) << shift);
+            result[extraBytes + (digitCount >> 1)] |=
+                    (byte)((charToBCD(c, bcdExtType) & 0x0F) << shift);
             digitCount++;
         }
 
@@ -1138,6 +1216,8 @@ public class PhoneNumberUtils
     };
 
     private static final String KOREA_ISO_COUNTRY_CODE = "KR";
+
+    private static final String JAPAN_ISO_COUNTRY_CODE = "JP";
 
     /**
      * Breaks the given number down and formats it according to the rules
@@ -1437,6 +1517,35 @@ public class PhoneNumberUtils
     }
 
     /**
+     * Determines if a {@param phoneNumber} is international if dialed from
+     * {@param defaultCountryIso}.
+     *
+     * @param phoneNumber The phone number.
+     * @param defaultCountryIso The current country ISO.
+     * @return {@code true} if the number is international, {@code false} otherwise.
+     * @hide
+     */
+    public static boolean isInternationalNumber(String phoneNumber, String defaultCountryIso) {
+        // If no phone number is provided, it can't be international.
+        if (TextUtils.isEmpty(phoneNumber)) {
+            return false;
+        }
+
+        // If it starts with # or * its not international.
+        if (phoneNumber.startsWith("#") || phoneNumber.startsWith("*")) {
+            return false;
+        }
+
+        PhoneNumberUtil util = PhoneNumberUtil.getInstance();
+        try {
+            PhoneNumber pn = util.parseAndKeepRawInput(phoneNumber, defaultCountryIso);
+            return pn.getCountryCode() != util.getCountryCodeForRegion(defaultCountryIso);
+        } catch (NumberParseException e) {
+            return false;
+        }
+    }
+
+    /**
      * Format a phone number.
      * <p>
      * If the given number doesn't have the country code, the phone will be
@@ -1459,15 +1568,25 @@ public class PhoneNumberUtils
         String result = null;
         try {
             PhoneNumber pn = util.parseAndKeepRawInput(phoneNumber, defaultCountryIso);
-            /**
-             * Need to reformat any local Korean phone numbers (when the user is in Korea) with
-             * country code to corresponding national format which would replace the leading
-             * +82 with 0.
-             */
-            if (KOREA_ISO_COUNTRY_CODE.equals(defaultCountryIso) &&
+
+            if (KOREA_ISO_COUNTRY_CODE.equalsIgnoreCase(defaultCountryIso) &&
                     (pn.getCountryCode() == util.getCountryCodeForRegion(KOREA_ISO_COUNTRY_CODE)) &&
                     (pn.getCountryCodeSource() ==
                             PhoneNumber.CountryCodeSource.FROM_NUMBER_WITH_PLUS_SIGN)) {
+                /**
+                 * Need to reformat any local Korean phone numbers (when the user is in Korea) with
+                 * country code to corresponding national format which would replace the leading
+                 * +82 with 0.
+                 */
+                result = util.format(pn, PhoneNumberUtil.PhoneNumberFormat.NATIONAL);
+            } else if (JAPAN_ISO_COUNTRY_CODE.equalsIgnoreCase(defaultCountryIso) &&
+                    pn.getCountryCode() == util.getCountryCodeForRegion(JAPAN_ISO_COUNTRY_CODE) &&
+                    (pn.getCountryCodeSource() ==
+                            PhoneNumber.CountryCodeSource.FROM_NUMBER_WITH_PLUS_SIGN)) {
+                /**
+                 * Need to reformat Japanese phone numbers (when user is in Japan) with the national
+                 * dialing format.
+                 */
                 result = util.format(pn, PhoneNumberUtil.PhoneNumberFormat.NATIONAL);
             } else {
                 result = util.formatInOriginalFormat(pn, defaultCountryIso);
@@ -1583,7 +1702,7 @@ public class PhoneNumberUtils
     //
     // Australia: Short codes are six or eight digits in length, starting with the prefix "19"
     //            followed by an additional four or six digits and two.
-    // Czech Republic: Codes are seven digits in length for MO and five (not billed) or
+    // Czechia: Codes are seven digits in length for MO and five (not billed) or
     //            eight (billed) for MT direction
     //
     // see http://en.wikipedia.org/wiki/Short_code#Regional_differences for reference
@@ -1860,7 +1979,7 @@ public class PhoneNumberUtils
         number = extractNetworkPortionAlt(number);
 
         String emergencyNumbers = "";
-        int slotId = SubscriptionManager.getSlotId(subId);
+        int slotId = SubscriptionManager.getSlotIndex(subId);
 
         // retrieve the list of emergency numbers
         // check read-write ecclist property first
@@ -2106,7 +2225,7 @@ public class PhoneNumberUtils
      *   number provided by the RIL and SIM card. The caller must have
      *   the READ_PHONE_STATE credential.
      *
-     * @param context a non-null {@link Context}.
+     * @param context {@link Context}.
      * @param subId the subscription id of the SIM.
      * @param number the number to look up.
      * @return true if the number is in the list of voicemail. False
@@ -2115,25 +2234,54 @@ public class PhoneNumberUtils
      * @hide
      */
     public static boolean isVoiceMailNumber(Context context, int subId, String number) {
-        String vmNumber;
+        String vmNumber, mdn;
         try {
             final TelephonyManager tm;
             if (context == null) {
                 tm = TelephonyManager.getDefault();
+                if (DBG) log("isVoiceMailNumber: default tm");
             } else {
                 tm = TelephonyManager.from(context);
+                if (DBG) log("isVoiceMailNumber: tm from context");
             }
             vmNumber = tm.getVoiceMailNumber(subId);
+            mdn = tm.getLine1Number(subId);
+            if (DBG) log("isVoiceMailNumber: mdn=" + mdn + ", vmNumber=" + vmNumber
+                    + ", number=" + number);
         } catch (SecurityException ex) {
+            if (DBG) log("isVoiceMailNumber: SecurityExcpetion caught");
             return false;
         }
         // Strip the separators from the number before comparing it
         // to the list.
         number = extractNetworkPortionAlt(number);
+        if (TextUtils.isEmpty(number)) {
+            if (DBG) log("isVoiceMailNumber: number is empty after stripping");
+            return false;
+        }
 
-        // compare tolerates null so we need to make sure that we
-        // don't return true when both are null.
-        return !TextUtils.isEmpty(number) && compare(number, vmNumber);
+        // check if the carrier considers MDN to be an additional voicemail number
+        boolean compareWithMdn = false;
+        if (context != null) {
+            CarrierConfigManager configManager = (CarrierConfigManager)
+                    context.getSystemService(Context.CARRIER_CONFIG_SERVICE);
+            if (configManager != null) {
+                PersistableBundle b = configManager.getConfigForSubId(subId);
+                if (b != null) {
+                    compareWithMdn = b.getBoolean(CarrierConfigManager.
+                            KEY_MDN_IS_ADDITIONAL_VOICEMAIL_NUMBER_BOOL);
+                    if (DBG) log("isVoiceMailNumber: compareWithMdn=" + compareWithMdn);
+                }
+            }
+        }
+
+        if (compareWithMdn) {
+            if (DBG) log("isVoiceMailNumber: treating mdn as additional vm number");
+            return compare(number, vmNumber) || compare(number, mdn);
+        } else {
+            if (DBG) log("isVoiceMailNumber: returning regular compare");
+            return compare(number, vmNumber);
+        }
     }
 
     /**
@@ -3027,34 +3175,20 @@ public class PhoneNumberUtils
     /*
      * The config held calling number conversion map, expected to convert to emergency number.
      */
-    private static final String[] CONVERT_TO_EMERGENCY_MAP = Resources.getSystem().getStringArray(
-            com.android.internal.R.array.config_convert_to_emergency_number_map);
-    /**
-     * Check whether conversion to emergency number is enabled
-     *
-     * @return {@code true} when conversion to emergency numbers is enabled,
-     *         {@code false} otherwise
-     *
-     * @hide
-     */
-    public static boolean isConvertToEmergencyNumberEnabled() {
-        return CONVERT_TO_EMERGENCY_MAP != null && CONVERT_TO_EMERGENCY_MAP.length > 0;
-    }
+    private static String[] sConvertToEmergencyMap = null;
 
     /**
      * Converts to emergency number based on the conversion map.
      * The conversion map is declared as config_convert_to_emergency_number_map.
      *
-     * Make sure {@link #isConvertToEmergencyNumberEnabled} is true before calling
-     * this function.
-     *
+     * @param context a context to use for accessing resources
      * @return The converted emergency number if the number matches conversion map,
      * otherwise original number.
      *
      * @hide
      */
-    public static String convertToEmergencyNumber(String number) {
-        if (TextUtils.isEmpty(number)) {
+    public static String convertToEmergencyNumber(Context context, String number) {
+        if (context == null || TextUtils.isEmpty(number)) {
             return number;
         }
 
@@ -3065,7 +3199,17 @@ public class PhoneNumberUtils
             return number;
         }
 
-        for (String convertMap : CONVERT_TO_EMERGENCY_MAP) {
+        if (sConvertToEmergencyMap == null) {
+            sConvertToEmergencyMap = context.getResources().getStringArray(
+                    com.android.internal.R.array.config_convert_to_emergency_number_map);
+        }
+
+        // The conversion map is not defined (this is default). Skip conversion.
+        if (sConvertToEmergencyMap == null || sConvertToEmergencyMap.length == 0 ) {
+            return number;
+        }
+
+        for (String convertMap : sConvertToEmergencyMap) {
             if (DBG) log("convertToEmergencyNumber: " + convertMap);
             String[] entry = null;
             String[] filterNumbers = null;

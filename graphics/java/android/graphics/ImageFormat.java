@@ -662,6 +662,15 @@ public class ImageFormat {
     public static final int DEPTH_POINT_CLOUD = 0x101;
 
     /**
+     * Unprocessed implementation-dependent raw
+     * depth measurements, opaque with 16 bit
+     * samples.
+     *
+     * @hide
+     */
+    public static final int RAW_DEPTH = 0x1002;
+
+    /**
      * Android private opaque image format.
      * <p>
      * The choices of the actual format and pixel data layout are entirely up to
@@ -723,6 +732,7 @@ public class ImageFormat {
                 return 24;
             case FLEX_RGBA_8888:
                 return 32;
+            case RAW_DEPTH:
             case RAW_SENSOR:
                 return 16;
             case RAW10:
@@ -765,6 +775,7 @@ public class ImageFormat {
             case DEPTH16:
             case DEPTH_POINT_CLOUD:
             case PRIVATE:
+            case RAW_DEPTH:
                 return true;
         }
 

@@ -20,6 +20,7 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 import android.os.Parcel;
+import android.net.wifi.WifiConfiguration.NetworkSelectionStatus;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -65,5 +66,36 @@ public class WifiConfigurationTest {
         parcelWW.recycle();
 
         assertArrayEquals(bytes, rebytes);
+    }
+
+    @Test
+    public void testNetworkSelectionStatusCopy() {
+        NetworkSelectionStatus networkSelectionStatus = new NetworkSelectionStatus();
+        networkSelectionStatus.setNotRecommended(true);
+
+        NetworkSelectionStatus copy = new NetworkSelectionStatus();
+        copy.copy(networkSelectionStatus);
+
+        assertEquals(networkSelectionStatus.isNotRecommended(), copy.isNotRecommended());
+    }
+
+    @Test
+    public void testNetworkSelectionStatusParcel() {
+        NetworkSelectionStatus networkSelectionStatus = new NetworkSelectionStatus();
+        networkSelectionStatus.setNotRecommended(true);
+
+        Parcel parcelW = Parcel.obtain();
+        networkSelectionStatus.writeToParcel(parcelW);
+        byte[] bytes = parcelW.marshall();
+        parcelW.recycle();
+
+        Parcel parcelR = Parcel.obtain();
+        parcelR.unmarshall(bytes, 0, bytes.length);
+        parcelR.setDataPosition(0);
+
+        NetworkSelectionStatus copy = new NetworkSelectionStatus();
+        copy.readFromParcel(parcelR);
+
+        assertEquals(networkSelectionStatus.isNotRecommended(), copy.isNotRecommended());
     }
 }

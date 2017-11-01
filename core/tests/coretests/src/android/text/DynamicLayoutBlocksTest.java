@@ -16,20 +16,26 @@
 
 package android.text;
 
-import static android.text.Layout.Alignment.*;
+import static android.text.Layout.Alignment.ALIGN_NORMAL;
 
-import android.text.DynamicLayout;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
-import junit.framework.TestCase;
+import android.support.test.filters.SmallTest;
+import android.support.test.runner.AndroidJUnit4;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
- * Tests DynamciLayout updateBlocks method.
+ * Tests DynamicLayout updateBlocks method.
  *
  * Requires disabling access checks in the vm since this calls package-private APIs.
  *
- * @Suppress
  */
-public class DynamicLayoutBlocksTest extends TestCase {
+@SmallTest
+@RunWith(AndroidJUnit4.class)
+public class DynamicLayoutBlocksTest {
     private DynamicLayout dl = new DynamicLayout("", new TextPaint(), 0, ALIGN_NORMAL, 0, 0, false);
     private static final int ___ = DynamicLayout.INVALID_BLOCK_INDEX;
 
@@ -61,7 +67,10 @@ public class DynamicLayoutBlocksTest extends TestCase {
     }
 
     private void update(int startLine, int endLine, int newLineCount) {
-        dl.setBlocksDataForTest(initialBlockEnds, initialBlockIndices, initialBlockEnds.length);
+        final int totalLines = initialBlockEnds[initialBlockEnds.length - 1]
+                + newLineCount - endLine + startLine;
+        dl.setBlocksDataForTest(
+                initialBlockEnds, initialBlockIndices, initialBlockEnds.length, totalLines);
         checkInvariants();
         dl.updateBlocks(startLine, endLine, newLineCount);
     }
@@ -91,6 +100,7 @@ public class DynamicLayoutBlocksTest extends TestCase {
         assertState(sizes, ids);
     }
 
+    @Test
     public void testFrom0() {
         defineInitialState( new int[] { 0 }, new int[] { 123 });
 
@@ -104,6 +114,7 @@ public class DynamicLayoutBlocksTest extends TestCase {
         assertState( new int[] { 10 } );
     }
 
+    @Test
     public void testFrom1ReplaceByEmpty() {
         defineInitialState( new int[] { 100 }, new int[] { 123 });
 
@@ -129,6 +140,7 @@ public class DynamicLayoutBlocksTest extends TestCase {
         assertState( new int[] { 100 } );
     }
 
+    @Test
     public void testFrom1ReplaceFromFirstLine() {
         defineInitialState( new int[] { 100 }, new int[] { 123 });
 
@@ -145,6 +157,7 @@ public class DynamicLayoutBlocksTest extends TestCase {
         assertState( new int[] { 20 } );
     }
 
+    @Test
     public void testFrom1ReplaceFromCenter() {
         defineInitialState( new int[] { 100 }, new int[] { 123 });
 
@@ -161,6 +174,7 @@ public class DynamicLayoutBlocksTest extends TestCase {
         assertState( new int[] { 20, 50 } );
     }
 
+    @Test
     public void testFrom1ReplaceFromEnd() {
         defineInitialState( new int[] { 100 }, new int[] { 123 });
 
@@ -174,6 +188,7 @@ public class DynamicLayoutBlocksTest extends TestCase {
         assertState( new int[] { 100, 10 } );
     }
 
+    @Test
     public void testFrom2ReplaceFromFirstLine() {
         defineInitialState( new int[] { 10, 20 }, new int[] { 123, 456 });
 
@@ -190,6 +205,7 @@ public class DynamicLayoutBlocksTest extends TestCase {
         assertState( new int[] { 50 }, new int[] { ___ } );
     }
 
+    @Test
     public void testFrom2ReplaceFromFirstBlock() {
         defineInitialState( new int[] { 10, 20 }, new int[] { 123, 456 });
 
@@ -206,6 +222,7 @@ public class DynamicLayoutBlocksTest extends TestCase {
         assertState( new int[] { 3, 50 }, new int[] { ___, ___ } );
     }
 
+    @Test
     public void testFrom2ReplaceFromBottomBoundary() {
         defineInitialState( new int[] { 10, 20 }, new int[] { 123, 456 });
 
@@ -219,6 +236,7 @@ public class DynamicLayoutBlocksTest extends TestCase {
         assertState( new int[] { 10, 50 }, new int[] { ___, ___ } );
     }
 
+    @Test
     public void testFrom2ReplaceFromTopBoundary() {
         defineInitialState( new int[] { 10, 20 }, new int[] { 123, 456 });
 
@@ -232,6 +250,7 @@ public class DynamicLayoutBlocksTest extends TestCase {
         assertState( new int[] { 11, 50 }, new int[] { 123, ___ } );
     }
 
+    @Test
     public void testFrom2ReplaceFromSecondBlock() {
         defineInitialState( new int[] { 10, 20 }, new int[] { 123, 456 });
 
@@ -245,6 +264,7 @@ public class DynamicLayoutBlocksTest extends TestCase {
         assertState( new int[] { 11, 14-11, 50 }, new int[] { 123, ___, ___ } );
     }
 
+    @Test
     public void testFrom2RemoveFromFirst() {
         defineInitialState( new int[] { 10, 20 }, new int[] { 123, 456 });
 
@@ -261,6 +281,7 @@ public class DynamicLayoutBlocksTest extends TestCase {
         assertState( new int[] { 0 }, new int[] { ___ } );
     }
 
+    @Test
     public void testFrom2RemoveFromFirstBlock() {
         defineInitialState( new int[] { 10, 20 }, new int[] { 123, 456 });
 
@@ -277,6 +298,7 @@ public class DynamicLayoutBlocksTest extends TestCase {
         assertState( new int[] { 4 }, new int[] { ___ } );
     }
 
+    @Test
     public void testFrom2RemoveFromSecondBlock() {
         defineInitialState( new int[] { 10, 20 }, new int[] { 123, 456 });
 
@@ -287,6 +309,7 @@ public class DynamicLayoutBlocksTest extends TestCase {
         assertState( new int[] { 11, 14-11 }, new int[] { 123, ___ } );
     }
 
+    @Test
     public void testFrom3ReplaceFromFirstBlock() {
         defineInitialState( new int[] { 10, 30, 60 }, new int[] { 123, 456, 789 });
 
@@ -309,6 +332,7 @@ public class DynamicLayoutBlocksTest extends TestCase {
         assertState( new int[] { 3, 50 }, new int[] { ___, ___ } );
     }
 
+    @Test
     public void testFrom3ReplaceFromSecondBlock() {
         defineInitialState( new int[] { 10, 30, 60 }, new int[] { 123, 456, 789 });
 

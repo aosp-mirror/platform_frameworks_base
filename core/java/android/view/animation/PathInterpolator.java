@@ -25,6 +25,9 @@ import android.util.PathParser;
 import android.view.InflateException;
 
 import com.android.internal.R;
+import com.android.internal.view.animation.HasNativeInterpolator;
+import com.android.internal.view.animation.NativeInterpolatorFactory;
+import com.android.internal.view.animation.NativeInterpolatorFactoryHelper;
 
 /**
  * An interpolator that can traverse a Path that extends from <code>Point</code>
@@ -42,7 +45,8 @@ import com.android.internal.R;
  *     path.lineTo(1f, 1f);
  * </pre></blockquote></p>
  */
-public class PathInterpolator extends BaseInterpolator {
+@HasNativeInterpolator
+public class PathInterpolator extends BaseInterpolator implements NativeInterpolatorFactory {
 
     // This governs how accurate the approximation of the Path is.
     private static final float PRECISION = 0.002f;
@@ -229,4 +233,11 @@ public class PathInterpolator extends BaseInterpolator {
         float endY = mY[endIndex];
         return startY + (fraction * (endY - startY));
     }
+
+    /** @hide **/
+    @Override
+    public long createNativeInterpolator() {
+        return NativeInterpolatorFactoryHelper.createPathInterpolator(mX, mY);
+    }
+
 }

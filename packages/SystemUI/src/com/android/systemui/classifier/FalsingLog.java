@@ -84,6 +84,11 @@ public class FalsingLog {
         log("I", tag, s);
     }
 
+    public static void wLogcat(String tag, String s) {
+        Log.w(TAG, tag + "\t" + s);
+        log("W", tag, s);
+    }
+
     public static void w(String tag, String s) {
         if (LOGCAT) {
             Log.w(TAG, tag + "\t" + s);
@@ -133,7 +138,7 @@ public class FalsingLog {
         pw.println();
     }
 
-    public static synchronized void wtf(String tag, String s) {
+    public static synchronized void wtf(String tag, String s, Throwable here) {
         if (!ENABLED) {
             return;
         }
@@ -161,6 +166,6 @@ public class FalsingLog {
             Log.e(TAG, "Unable to write log, build must be debuggable.");
         }
 
-        Log.wtf(TAG, tag + " " + s + "; " + fileMessage);
+        Log.wtf(TAG, tag + " " + s + "; " + fileMessage, here);
     }
 }

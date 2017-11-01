@@ -16,7 +16,6 @@
 
 package android.view.accessibility;
 
-import android.graphics.Point;
 import android.view.accessibility.AccessibilityNodeInfo;
 import java.util.List;
 

@@ -113,6 +113,15 @@
         </activity>
 
         <activity
+            android:name="DrawIntoHwBitmapActivity"
+            android:label="Bitmaps/DrawIntoHwBitmap">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.hwui.TEST" />
+            </intent-filter>
+        </activity>
+
+        <activity
                 android:name="PathOffsetActivity"
                 android:label="Path/Offset">
             <intent-filter>
@@ -983,6 +992,16 @@
         <activity
                 android:name="MultiProducerActivity"
                 android:label="Threads/Multiple Producers">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.hwui.TEST" />
+            </intent-filter>
+        </activity>
+
+        <activity
+                android:name="PixelCopyWindow"
+                android:label="Readback/Window"
+                android:screenOrientation="fullSensor">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="com.android.test.hwui.TEST" />

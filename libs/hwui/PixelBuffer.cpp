@@ -37,8 +37,6 @@ public:
 
     uint8_t* map(AccessMode mode = kAccessMode_ReadWrite) override;
 
-    uint8_t* getMappedPointer() const override;
-
     void upload(uint32_t x, uint32_t y, uint32_t width, uint32_t height, int offset) override;
 
 protected:
@@ -64,10 +62,6 @@ void CpuPixelBuffer::unmap() {
     mAccessMode = kAccessMode_None;
 }
 
-uint8_t* CpuPixelBuffer::getMappedPointer() const {
-    return mAccessMode == kAccessMode_None ? nullptr : mBuffer.get();
-}
-
 void CpuPixelBuffer::upload(uint32_t x, uint32_t y, uint32_t width, uint32_t height, int offset) {
     glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height,
             mFormat, GL_UNSIGNED_BYTE, &mBuffer[offset]);
@@ -83,8 +77,6 @@ public:
     ~GpuPixelBuffer();
 
     uint8_t* map(AccessMode mode = kAccessMode_ReadWrite) override;
-
-    uint8_t* getMappedPointer() const override;
 
     void upload(uint32_t x, uint32_t y, uint32_t width, uint32_t height, int offset) override;
 
@@ -140,10 +132,6 @@ void GpuPixelBuffer::unmap() {
         mAccessMode = kAccessMode_None;
         mMappedPointer = nullptr;
     }
-}
-
-uint8_t* GpuPixelBuffer::getMappedPointer() const {
-    return mMappedPointer;
 }
 
 void GpuPixelBuffer::upload(uint32_t x, uint32_t y, uint32_t width, uint32_t height, int offset) {

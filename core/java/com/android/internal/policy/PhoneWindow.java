@@ -21,7 +21,7 @@ import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import static android.view.WindowManager.LayoutParams.*;
 
-import android.app.ActivityManagerNative;
+import android.app.ActivityManager;
 import android.app.SearchManager;
 import android.os.UserHandle;
 
@@ -47,6 +47,7 @@ import android.view.ViewGroup;
 import android.view.ViewManager;
 import android.view.ViewParent;
 import android.view.ViewRootImpl;
+import android.view.ViewRootImpl.ActivityConfigCallback;
 import android.view.Window;
 import android.view.WindowManager;
 import com.android.internal.R;
@@ -287,6 +288,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     private boolean mUseDecorContext = false;
 
+    /** @see ViewRootImpl#mActivityConfigCallback */
+    private ActivityConfigCallback mActivityConfigCallback;
+
     static class WindowManagerHolder {
         static final IWindowManager sWindowManager = IWindowManager.Stub.asInterface(
                 ServiceManager.getService("window"));
@@ -302,7 +306,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     /**
      * Constructor for main window of an activity.
      */
-    public PhoneWindow(Context context, Window preservedWindow) {
+    public PhoneWindow(Context context, Window preservedWindow,
+            ActivityConfigCallback activityConfigCallback) {
         this(context);
         // Only main activity windows use decor context, all the other windows depend on whatever
         // context that was given to them.
@@ -323,6 +328,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES, 0) != 0;
         mSupportsPictureInPicture = forceResizable || context.getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_PICTURE_IN_PICTURE);
+        mActivityConfigCallback = activityConfigCallback;
     }
 
     @Override
@@ -540,6 +546,13 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             WindowManager.LayoutParams params = getAttributes();
             if (!TextUtils.equals(title, params.accessibilityTitle)) {
                 params.accessibilityTitle = TextUtils.stringOrSpannedString(title);
+                if (mDecor != null) {
+                    // ViewRootImpl will make sure the change propagates to WindowManagerService
+                    ViewRootImpl vr = mDecor.getViewRootImpl();
+                    if (vr != null) {
+                        vr.onWindowTitleChanged();
+                    }
+                }
                 dispatchWindowAttributesChanged(getAttributes());
             }
         }
@@ -712,6 +725,13 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     public void onMultiWindowModeChanged() {
         if (mDecor != null) {
             mDecor.onConfigurationChanged(getContext().getResources().getConfiguration());
+        }
+    }
+
+    @Override
+    public void onPictureInPictureModeChanged(boolean isInPictureInPictureMode) {
+        if (mDecor != null) {
+            mDecor.updatePictureInPictureOutlineProvider(isInPictureInPictureMode);
         }
     }
 
@@ -1580,7 +1600,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         if (featureId == FEATURE_PROGRESS || featureId == FEATURE_INDETERMINATE_PROGRESS) {
             updateProgressBars(value);
         } else if (featureId == FEATURE_CUSTOM_TITLE) {
-            FrameLayout titleContainer = (FrameLayout) findViewById(R.id.title_container);
+            FrameLayout titleContainer = findViewById(R.id.title_container);
             if (titleContainer != null) {
                 mLayoutInflater.inflate(value, titleContainer);
             }
@@ -1849,27 +1869,25 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             case KeyEvent.KEYCODE_VOLUME_UP:
             case KeyEvent.KEYCODE_VOLUME_DOWN:
             case KeyEvent.KEYCODE_VOLUME_MUTE: {
-                int direction = 0;
-                switch (keyCode) {
-                    case KeyEvent.KEYCODE_VOLUME_UP:
-                        direction = AudioManager.ADJUST_RAISE;
-                        break;
-                    case KeyEvent.KEYCODE_VOLUME_DOWN:
-                        direction = AudioManager.ADJUST_LOWER;
-                        break;
-                    case KeyEvent.KEYCODE_VOLUME_MUTE:
-                        direction = AudioManager.ADJUST_TOGGLE_MUTE;
-                        break;
-                }
                 // If we have a session send it the volume command, otherwise
                 // use the suggested stream.
                 if (mMediaController != null) {
+                    int direction = 0;
+                    switch (keyCode) {
+                        case KeyEvent.KEYCODE_VOLUME_UP:
+                            direction = AudioManager.ADJUST_RAISE;
+                            break;
+                        case KeyEvent.KEYCODE_VOLUME_DOWN:
+                            direction = AudioManager.ADJUST_LOWER;
+                            break;
+                        case KeyEvent.KEYCODE_VOLUME_MUTE:
+                            direction = AudioManager.ADJUST_TOGGLE_MUTE;
+                            break;
+                    }
                     mMediaController.adjustVolume(direction, AudioManager.FLAG_SHOW_UI);
                 } else {
-                    MediaSessionLegacyHelper.getHelper(getContext()).sendAdjustVolumeBy(
-                            mVolumeControlStreamType, direction,
-                            AudioManager.FLAG_SHOW_UI | AudioManager.FLAG_VIBRATE
-                                    | AudioManager.FLAG_FROM_KEY);
+                    MediaSessionLegacyHelper.getHelper(getContext()).sendVolumeKeyEvent(
+                            event, mVolumeControlStreamType, false);
                 }
                 return true;
             }
@@ -1947,15 +1965,15 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         switch (keyCode) {
             case KeyEvent.KEYCODE_VOLUME_UP:
             case KeyEvent.KEYCODE_VOLUME_DOWN: {
-                final int flags = AudioManager.FLAG_PLAY_SOUND | AudioManager.FLAG_VIBRATE
-                        | AudioManager.FLAG_FROM_KEY;
                 // If we have a session send it the volume command, otherwise
                 // use the suggested stream.
                 if (mMediaController != null) {
+                    final int flags = AudioManager.FLAG_PLAY_SOUND | AudioManager.FLAG_VIBRATE
+                            | AudioManager.FLAG_FROM_KEY;
                     mMediaController.adjustVolume(0, flags);
                 } else {
-                    MediaSessionLegacyHelper.getHelper(getContext()).sendAdjustVolumeBy(
-                            mVolumeControlStreamType, 0, flags);
+                    MediaSessionLegacyHelper.getHelper(getContext()).sendVolumeKeyEvent(
+                            event, mVolumeControlStreamType, false);
                 }
                 return true;
             }
@@ -1964,7 +1982,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 // doesn't have one of these.  In this case, we execute it here and
                 // eat the event instead, because we have mVolumeControlStreamType
                 // and they don't.
-                getAudioManager().handleKeyUp(event, mVolumeControlStreamType);
+                MediaSessionLegacyHelper.getHelper(getContext()).sendVolumeKeyEvent(
+                        event, AudioManager.USE_DEFAULT_STREAM_TYPE, false);
                 return true;
             }
             // These are all the recognized media key codes in
@@ -2052,6 +2071,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     @Override
     public final View peekDecorView() {
         return mDecor;
+    }
+
+    /** Notify when decor view is attached to window and {@link ViewRootImpl} is available. */
+    void onViewRootImplSet(ViewRootImpl viewRoot) {
+        viewRoot.setActivityConfigCallback(mActivityConfigCallback);
     }
 
     static private final String FOCUSED_ID_TAG = "android:focusedViewId";
@@ -2495,6 +2519,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         // System.out.println("Features: 0x" + Integer.toHexString(features));
         if ((features & (1 << FEATURE_SWIPE_TO_DISMISS)) != 0) {
             layoutResource = R.layout.screen_swipe_dismiss;
+            setCloseOnSwipeEnabled(true);
         } else if ((features & ((1 << FEATURE_LEFT_ICON) | (1 << FEATURE_RIGHT_ICON))) != 0) {
             if (mIsFloating) {
                 TypedValue res = new TypedValue();
@@ -2566,7 +2591,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
 
         if ((features & (1 << FEATURE_SWIPE_TO_DISMISS)) != 0) {
-            registerSwipeCallbacks();
+            registerSwipeCallbacks(contentParent);
         }
 
         // Remaining setup -- of background and title -- that only applies
@@ -2672,7 +2697,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     invalidatePanelMenu(FEATURE_ACTION_BAR);
                 }
             } else {
-                mTitleView = (TextView) findViewById(R.id.title);
+                mTitleView = findViewById(R.id.title);
                 if (mTitleView != null) {
                     if ((getLocalFeatures() & (1 << FEATURE_NO_TITLE)) != 0) {
                         final View titleContainer = findViewById(R.id.title_container);
@@ -2949,7 +2974,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         if (mContentParent == null && shouldInstallDecor) {
             installDecor();
         }
-        mCircularProgressBar = (ProgressBar) findViewById(R.id.progress_circular);
+        mCircularProgressBar = findViewById(R.id.progress_circular);
         if (mCircularProgressBar != null) {
             mCircularProgressBar.setVisibility(View.INVISIBLE);
         }
@@ -2963,7 +2988,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         if (mContentParent == null && shouldInstallDecor) {
             installDecor();
         }
-        mHorizontalProgressBar = (ProgressBar) findViewById(R.id.progress_horizontal);
+        mHorizontalProgressBar = findViewById(R.id.progress_horizontal);
         if (mHorizontalProgressBar != null) {
             mHorizontalProgressBar.setVisibility(View.INVISIBLE);
         }
@@ -2980,25 +3005,27 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         return (mRightIconView = (ImageView)findViewById(R.id.right_icon));
     }
 
-    private void registerSwipeCallbacks() {
-        SwipeDismissLayout swipeDismiss =
-                (SwipeDismissLayout) findViewById(R.id.content);
+    private void registerSwipeCallbacks(ViewGroup contentParent) {
+        if (!(contentParent instanceof SwipeDismissLayout)) {
+            Log.w(TAG, "contentParent is not a SwipeDismissLayout: " + contentParent);
+            return;
+        }
+        SwipeDismissLayout swipeDismiss = (SwipeDismissLayout) contentParent;
         swipeDismiss.setOnDismissedListener(new SwipeDismissLayout.OnDismissedListener() {
             @Override
             public void onDismissed(SwipeDismissLayout layout) {
-                dispatchOnWindowDismissed(false /*finishTask*/);
+                dispatchOnWindowSwipeDismissed();
+                dispatchOnWindowDismissed(false /*finishTask*/, true /*suppressWindowTransition*/);
             }
         });
         swipeDismiss.setOnSwipeProgressChangedListener(
                 new SwipeDismissLayout.OnSwipeProgressChangedListener() {
-                    private static final float ALPHA_DECREASE = 0.5f;
-                    private boolean mIsTranslucent = false;
                     @Override
                     public void onSwipeProgressChanged(
-                            SwipeDismissLayout layout, float progress, float translate) {
+                            SwipeDismissLayout layout, float alpha, float translate) {
                         WindowManager.LayoutParams newParams = getAttributes();
                         newParams.x = (int) translate;
-                        newParams.alpha = 1 - (progress * ALPHA_DECREASE);
+                        newParams.alpha = alpha;
                         setAttributes(newParams);
 
                         int flags = 0;
@@ -3013,12 +3040,26 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     @Override
                     public void onSwipeCancelled(SwipeDismissLayout layout) {
                         WindowManager.LayoutParams newParams = getAttributes();
-                        newParams.x = 0;
-                        newParams.alpha = 1;
-                        setAttributes(newParams);
-                        setFlags(FLAG_FULLSCREEN, FLAG_FULLSCREEN | FLAG_LAYOUT_NO_LIMITS);
+                        // Swipe changes only affect the x-translation and alpha, check to see if
+                        // those values have changed first before resetting them.
+                        if (newParams.x != 0 || newParams.alpha != 1) {
+                            newParams.x = 0;
+                            newParams.alpha = 1;
+                            setAttributes(newParams);
+                            setFlags(FLAG_FULLSCREEN, FLAG_FULLSCREEN | FLAG_LAYOUT_NO_LIMITS);
+                        }
                     }
                 });
+    }
+
+    /** @hide */
+    @Override
+    public void setCloseOnSwipeEnabled(boolean closeOnSwipeEnabled) {
+        if (hasFeature(Window.FEATURE_SWIPE_TO_DISMISS) // swipe-to-dismiss feature is requested
+                && mContentParent instanceof SwipeDismissLayout) { // check casting mContentParent
+            ((SwipeDismissLayout) mContentParent).setDismissable(closeOnSwipeEnabled);
+        }
+        super.setCloseOnSwipeEnabled(closeOnSwipeEnabled);
     }
 
     /**
@@ -3062,12 +3103,29 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     }
 
     /**
+     * Check if Setup or Post-Setup update is completed on TV
+     * @return true if completed
+     */
+    private boolean isTvUserSetupComplete() {
+        boolean isTvSetupComplete = Settings.Secure.getInt(getContext().getContentResolver(),
+                Settings.Secure.USER_SETUP_COMPLETE, 0) != 0;
+        isTvSetupComplete &= Settings.Secure.getInt(getContext().getContentResolver(),
+                Settings.Secure.TV_USER_SETUP_COMPLETE, 0) != 0;
+        return isTvSetupComplete;
+    }
+
+    /**
      * Helper method for adding launch-search to most applications. Opens the
      * search window using default settings.
      *
      * @return true if search window opened
      */
     private boolean launchDefaultSearch(KeyEvent event) {
+        if (getContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_LEANBACK)
+                && !isTvUserSetupComplete()) {
+            // If we are in Setup or Post-Setup update mode on TV, consume the search key
+            return false;
+        }
         boolean result;
         final Callback cb = getCallback();
         if (cb == null || isDestroyed()) {
@@ -3562,7 +3620,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             synchronized (mWindows) {
                 if (!mIsWatching) {
                     try {
-                        WindowManagerHolder.sWindowManager.watchRotation(this);
+                        WindowManagerHolder.sWindowManager.watchRotation(this,
+                                phoneWindow.getContext().getDisplay().getDisplayId());
                         mHandler = new Handler();
                         mIsWatching = true;
                     } catch (RemoteException ex) {
@@ -3708,9 +3767,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     }
 
     public static void sendCloseSystemWindows(Context context, String reason) {
-        if (ActivityManagerNative.isSystemReady()) {
+        if (ActivityManager.isSystemReady()) {
             try {
-                ActivityManagerNative.getDefault().closeSystemDialogs(reason);
+                ActivityManager.getService().closeSystemDialogs(reason);
             } catch (RemoteException e) {
             }
         }

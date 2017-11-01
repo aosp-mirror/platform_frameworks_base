@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="5247871339820894594">"CarrierDefaultApp"</string>
+    <string name="android_system_label" msgid="2797790869522345065">"Selfoondiensverskaffer"</string>
+    <string name="portal_notification_id" msgid="5155057562457079297">"Mobiele data is op"</string>
+    <string name="no_data_notification_id" msgid="668400731803969521">"Jou mobiele data is gedeaktiveer"</string>
+    <string name="portal_notification_detail" msgid="2295729385924660881">"Tik om die %s-webwerf te besoek"</string>
+    <string name="no_data_notification_detail" msgid="3112125343857014825">"Kontak asseblief jou diensverskaffer %s"</string>
+    <string name="no_mobile_data_connection_title" msgid="7449525772416200578">"Geen mobiele dataverbinding nie"</string>
+    <string name="no_mobile_data_connection" msgid="544980465184147010">"Voeg data of swerwingplan by deur %s"</string>
+    <string name="mobile_data_status_notification_channel_name" msgid="833999690121305708">"Status van mobiele data"</string>
+    <string name="action_bar_label" msgid="4290345990334377177">"Meld by mobiele netwerk aan"</string>
+    <string name="ssl_error_warning" msgid="3127935140338254180">"Die netwerk waarby jy probeer aansluit, het sekuriteitkwessies."</string>
+    <string name="ssl_error_example" msgid="6188711843183058764">"Byvoorbeeld, die aanmeldbladsy behoort dalk nie aan die organisasie wat gewys word nie."</string>
+    <string name="ssl_error_continue" msgid="1138548463994095584">"Gaan in elk geval deur blaaier voort"</string>
+</resources>

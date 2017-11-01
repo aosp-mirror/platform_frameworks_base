@@ -42,7 +42,7 @@ interface IContentService {
      *     USER_CURRENT are properly handled.
      */
     void registerContentObserver(in Uri uri, boolean notifyForDescendants,
-            IContentObserver observer, int userHandle);
+            IContentObserver observer, int userHandle, int targetSdkVersion);
 
     /**
      * Notify observers of a particular user's view of the provider.
@@ -53,7 +53,7 @@ interface IContentService {
      */
     void notifyChange(in Uri uri, IContentObserver observer,
             boolean observerWantsSelfNotifications, int flags,
-            int userHandle);
+            int userHandle, int targetSdkVersion);
 
     void requestSync(in Account account, String authority, in Bundle extras);
     /**

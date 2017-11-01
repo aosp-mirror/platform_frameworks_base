@@ -349,8 +349,11 @@ public class SettingsProviderTest extends AndroidTestCase {
         assertCanBeHandled(new Intent(Settings.ACTION_USER_DICTIONARY_SETTINGS));
         assertCanBeHandled(new Intent(Settings.ACTION_WIFI_IP_SETTINGS));
         assertCanBeHandled(new Intent(Settings.ACTION_WIFI_SETTINGS));
-        assertCanBeHandled(new Intent(Settings.ACTION_WIFI_SAVED_NETWORK_SETTINGS));
         assertCanBeHandled(new Intent(Settings.ACTION_WIRELESS_SETTINGS));
+
+        if (mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_DEVICE_ADMIN)) {
+            assertCanBeHandled(new Intent(Settings.ACTION_ENTERPRISE_PRIVACY_SETTINGS));
+        }
     }
 
     private void assertCanBeHandled(final Intent intent) {
@@ -359,5 +362,21 @@ public class SettingsProviderTest extends AndroidTestCase {
         assertNotNull(resolveInfoList);
         // one or more activity can handle this intent.
         assertTrue(resolveInfoList.size() > 0);
+    }
+
+    @SmallTest
+    public void testValidSsaid() {
+        ContentResolver r = getContext().getContentResolver();
+
+        // Verify ssaid
+        String ssaid = Settings.Secure.getString(r, Settings.Secure.ANDROID_ID);
+        assertTrue(ssaid != null);
+        assertTrue(ssaid.length() == 16);
+
+        String ssaid2 = Settings.Secure.getString(r, Settings.Secure.ANDROID_ID);
+        assertTrue(ssaid2 != null);
+        assertTrue(ssaid2.length() == 16);
+
+        assertTrue(ssaid.equals(ssaid2));
     }
 }

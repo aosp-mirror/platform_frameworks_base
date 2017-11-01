@@ -279,7 +279,9 @@ class MeasuredText {
                 if (width < 0.0f) break;
                 i--;
             }
-            while (i < limit - 1 && mChars[i + 1] == ' ') i++;
+            while (i < limit - 1 && (mChars[i + 1] == ' ' || w[i + 1] == 0.0f)) {
+                i++;
+            }
             return limit - i - 1;
         }
     }

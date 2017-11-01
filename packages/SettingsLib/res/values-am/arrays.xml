@@ -58,6 +58,70 @@
     <item msgid="3878793616631049349">"ለDRM ይዘት ብቻ HDCP  ምልከታን ተጠቀም"</item>
     <item msgid="45075631231212732">"ሁልጊዜ የHDCP ምልከታ ተጠቀም"</item>
   </string-array>
+  <string-array name="bluetooth_avrcp_versions">
+    <item msgid="5347678900838034763">"AVRCP 1.4 (ነባሪ)"</item>
+    <item msgid="2809759619990248160">"AVRCP 1.3"</item>
+    <item msgid="6199178154704729352">"AVRCP 1.5"</item>
+    <item msgid="5172170854953034852">"AVRCP 1.6"</item>
+  </string-array>
+  <string-array name="bluetooth_avrcp_version_values">
+    <item msgid="2838624067805073303">"avrcp14"</item>
+    <item msgid="3011533352527449572">"avrcp13"</item>
+    <item msgid="8837606198371920819">"avrcp15"</item>
+    <item msgid="3422726142222090896">"avrcp16"</item>
+  </string-array>
+    <!-- no translation found for bluetooth_a2dp_codec_titles:3 (965655874372831982) -->
+    <!-- no translation found for bluetooth_a2dp_codec_titles:4 (1736964107585972103) -->
+    <!-- no translation found for bluetooth_a2dp_codec_summaries:3 (3558743545747527853) -->
+    <!-- no translation found for bluetooth_a2dp_codec_summaries:4 (9167103241281353659) -->
+  <string-array name="bluetooth_a2dp_codec_sample_rate_titles">
+    <item msgid="3093023430402746802">"የስርዓቱን ምርጫ (ነባሪ) ተጠቀም"</item>
+    <item msgid="8895532488906185219">"44.1 ኪኸ"</item>
+    <item msgid="2909915718994807056">"48.0 ኪኸ"</item>
+    <item msgid="3347287377354164611">"88.2 ኪኸ"</item>
+    <item msgid="1234212100239985373">"96.0 ኪኸ"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_sample_rate_summaries">
+    <item msgid="3214516120190965356">"የስርዓቱን ምርጫ (ነባሪ) ተጠቀም"</item>
+    <item msgid="4482862757811638365">"44.1 ኪኸ"</item>
+    <item msgid="354495328188724404">"48.0 ኪኸ"</item>
+    <item msgid="7329816882213695083">"88.2 ኪኸ"</item>
+    <item msgid="6967397666254430476">"96.0 ኪኸ"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_bits_per_sample_titles">
+    <item msgid="2684127272582591429">"የስርዓቱን ምርጫ (ነባሪ) ተጠቀም"</item>
+    <item msgid="5618929009984956469">"16 ቢት/ናሙና"</item>
+    <item msgid="3412640499234627248">"24 ቢት/ናሙና"</item>
+    <item msgid="121583001492929387">"32 ቢት/ናሙና"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_bits_per_sample_summaries">
+    <item msgid="1081159789834584363">"የስርዓቱን ምርጫ (ነባሪ) ተጠቀም"</item>
+    <item msgid="4726688794884191540">"16 ቢት/ናሙና"</item>
+    <item msgid="305344756485516870">"24 ቢት/ናሙና"</item>
+    <item msgid="244568657919675099">"32 ቢት/ናሙና"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_channel_mode_titles">
+    <item msgid="5226878858503393706">"የስርዓቱን ምርጫ (ነባሪ) ተጠቀም"</item>
+    <item msgid="4106832974775067314">"ሞኖ"</item>
+    <item msgid="5571632958424639155">"ስቲሪዮ"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_channel_mode_summaries">
+    <item msgid="4118561796005528173">"የስርዓቱን ምርጫ (ነባሪ) ተጠቀም"</item>
+    <item msgid="8900559293912978337">"ሞኖ"</item>
+    <item msgid="8883739882299884241">"ስቲሪዮ"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_titles">
+    <item msgid="7158319962230727476">"ለኦዲዮ ጥራት ተብቷል (990 ኪቢ/ሴ / 909 ኪቢ/ሴ)"</item>
+    <item msgid="2921767058740704969">"ለኦዲዮ ጥራት አትባ (660 ኪቢ/ሴ / 606 ኪቢ/ሴ)"</item>
+    <item msgid="8860982705384396512">"ለግንኙነት ጥራት ተብቷል (330 ኪቢ/ሴ / 303 ኪቢ/ሴ)"</item>
+    <item msgid="4414060457677684127">"የተሻለው ጥረት (ተለማማጅ የቢት ፍጥነት)"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_summaries">
+    <item msgid="6398189564246596868">"ለኦዲዮ ጥራት ተብቷል"</item>
+    <item msgid="4327143584633311908">"የተመጣጠነ የኦዲዮ እና ግንኙነት ጥራት"</item>
+    <item msgid="4681409244565426925">"ለግንኙነት ጥራት ተብቷል"</item>
+    <item msgid="364670732877872677">"የተሻለው ጥረት (ተለማማጅ የቢት ፍጥነት)"</item>
+  </string-array>
   <string-array name="select_logd_size_titles">
     <item msgid="8665206199209698501">"ጠፍቷል"</item>
     <item msgid="1593289376502312923">"64 ኪባ"</item>
@@ -147,12 +211,16 @@
   <string-array name="track_frame_time_entries">
     <item msgid="2193584639058893150">"ጠፍቷል"</item>
     <item msgid="2751513398307949636">"ማያ ገጽ ላይ እንደ አሞሌዎች"</item>
-    <item msgid="1851438178120770973">"በ adb shell dumpsys gfxinfo ውስጥ"</item>
+    <item msgid="2355151170975410323">"በ<xliff:g id="AS_TYPED_COMMAND">adb shell dumpsys gfxinfo</xliff:g> ውስጥ"</item>
   </string-array>
   <string-array name="debug_hw_overdraw_entries">
     <item msgid="8190572633763871652">"ጠፍቷል"</item>
     <item msgid="7688197031296835369">"ስዕሉ አልፎ የፈሰሰባቸው አካባቢዎችን አሳይ"</item>
     <item msgid="2290859360633824369">"ቀይ እና አረንጓዴ የማይለይባቸው ቦታዎች አሳይ"</item>
+  </string-array>
+  <string-array name="debug_hw_renderer_entries">
+    <item msgid="2578620445459945681">"OpenGL (ነባሪ)"</item>
+    <item msgid="2839130076198120436">"OpenGL (Skia)"</item>
   </string-array>
   <string-array name="app_process_limit_entries">
     <item msgid="3401625457385943795">"መደበኛ ወሰኖች"</item>

@@ -31,8 +31,10 @@ import android.os.Message;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
+import android.support.annotation.VisibleForTesting;
 
 import com.android.systemui.R;
+import com.android.systemui.util.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,9 +43,6 @@ import java.util.List;
  * A controller to manage changes of location related states and update the views accordingly.
  */
 public class LocationControllerImpl extends BroadcastReceiver implements LocationController {
-    // The name of the placeholder corresponding to the location request status icon.
-    // This string corresponds to config_statusBarIcons in core/res/res/values/config.xml.
-    public static final int LOCATION_STATUS_ICON_ID = R.drawable.stat_sys_location;
 
     private static final int[] mHighPowerRequestAppOpArray
         = new int[] {AppOpsManager.OP_MONITOR_HIGH_POWER_LOCATION};
@@ -55,14 +54,12 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
 
     private boolean mAreActiveLocationRequests;
 
-    private ArrayList<LocationSettingsChangeCallback> mSettingsChangeCallbacks =
-            new ArrayList<LocationSettingsChangeCallback>();
+    private ArrayList<LocationChangeCallback> mSettingsChangeCallbacks =
+            new ArrayList<LocationChangeCallback>();
     private final H mHandler = new H();
-    public final String mSlotLocation;
 
     public LocationControllerImpl(Context context, Looper bgLooper) {
         mContext = context;
-        mSlotLocation = mContext.getString(com.android.internal.R.string.status_bar_location);
 
         // Register to listen for changes in location settings.
         IntentFilter filter = new IntentFilter();
@@ -76,18 +73,17 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
 
         // Examine the current location state and initialize the status view.
         updateActiveLocationRequests();
-        refreshViews();
     }
 
     /**
      * Add a callback to listen for changes in location settings.
      */
-    public void addSettingsChangedCallback(LocationSettingsChangeCallback cb) {
+    public void addCallback(LocationChangeCallback cb) {
         mSettingsChangeCallbacks.add(cb);
         mHandler.sendEmptyMessage(H.MSG_LOCATION_SETTINGS_CHANGED);
     }
 
-    public void removeSettingsChangedCallback(LocationSettingsChangeCallback cb) {
+    public void removeCallback(LocationChangeCallback cb) {
         mSettingsChangeCallbacks.remove(cb);
     }
 
@@ -130,6 +126,11 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
         return mode != Settings.Secure.LOCATION_MODE_OFF;
     }
 
+    @Override
+    public boolean isLocationActive() {
+        return mAreActiveLocationRequests;
+    }
+
     /**
      * Returns true if the current user is restricted from using location.
      */
@@ -142,7 +143,8 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
     /**
      * Returns true if there currently exist active high power location requests.
      */
-    private boolean areActiveHighPowerLocationRequests() {
+    @VisibleForTesting
+    protected boolean areActiveHighPowerLocationRequests() {
         List<AppOpsManager.PackageOps> packages
             = mAppOpsManager.getPackagesForOps(mHighPowerRequestAppOpArray);
         // AppOpsManager can return null when there is no requested data.
@@ -170,22 +172,12 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
         return false;
     }
 
-    // Updates the status view based on the current state of location requests.
-    private void refreshViews() {
-        if (mAreActiveLocationRequests) {
-            mStatusBarManager.setIcon(mSlotLocation, LOCATION_STATUS_ICON_ID,
-                    0, mContext.getString(R.string.accessibility_location_active));
-        } else {
-            mStatusBarManager.removeIcon(mSlotLocation);
-        }
-    }
-
     // Reads the active location requests and updates the status view if necessary.
     private void updateActiveLocationRequests() {
         boolean hadActiveLocationRequests = mAreActiveLocationRequests;
         mAreActiveLocationRequests = areActiveHighPowerLocationRequests();
         if (mAreActiveLocationRequests != hadActiveLocationRequests) {
-            refreshViews();
+            mHandler.sendEmptyMessage(H.MSG_LOCATION_ACTIVE_CHANGED);
         }
     }
 
@@ -201,6 +193,7 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
 
     private final class H extends Handler {
         private static final int MSG_LOCATION_SETTINGS_CHANGED = 1;
+        private static final int MSG_LOCATION_ACTIVE_CHANGED = 2;
 
         @Override
         public void handleMessage(Message msg) {
@@ -208,14 +201,21 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
                 case MSG_LOCATION_SETTINGS_CHANGED:
                     locationSettingsChanged();
                     break;
+                case MSG_LOCATION_ACTIVE_CHANGED:
+                    locationActiveChanged();
+                    break;
             }
+        }
+
+        private void locationActiveChanged() {
+            Utils.safeForeach(mSettingsChangeCallbacks,
+                    cb -> cb.onLocationActiveChanged(mAreActiveLocationRequests));
         }
 
         private void locationSettingsChanged() {
             boolean isEnabled = isLocationEnabled();
-            for (LocationSettingsChangeCallback cb : mSettingsChangeCallbacks) {
-                cb.onLocationSettingsChanged(isEnabled);
-            }
+            Utils.safeForeach(mSettingsChangeCallbacks,
+                    cb -> cb.onLocationSettingsChanged(isEnabled));
         }
     }
 }

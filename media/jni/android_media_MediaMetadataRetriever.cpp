@@ -28,7 +28,7 @@
 #include <private/media/VideoFrame.h>
 
 #include "jni.h"
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 #include "android_runtime/AndroidRuntime.h"
 #include "android_media_MediaDataSource.h"
 #include "android_media_Utils.h"
@@ -302,13 +302,11 @@ static jobject android_media_MediaMetadataRetriever_getFrameAtTime(JNIEnv *env, 
     SkBitmap bitmap;
     GraphicsJNI::getSkBitmap(env, jBitmap, &bitmap);
 
-    bitmap.lockPixels();
     rotate((uint16_t*)bitmap.getPixels(),
            (uint16_t*)((char*)videoFrame + sizeof(VideoFrame)),
            videoFrame->mWidth,
            videoFrame->mHeight,
            videoFrame->mRotationAngle);
-    bitmap.unlockPixels();
 
     if (videoFrame->mDisplayWidth  != videoFrame->mWidth ||
         videoFrame->mDisplayHeight != videoFrame->mHeight) {

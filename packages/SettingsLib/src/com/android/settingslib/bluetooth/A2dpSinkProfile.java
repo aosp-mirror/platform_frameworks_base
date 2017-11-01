@@ -122,9 +122,6 @@ final class A2dpSinkProfile implements LocalBluetoothProfile {
                     return true;
                 }
             }
-            for (BluetoothDevice src : srcs) {
-                mService.disconnect(src);
-            }
         }
         return mService.connect(device);
     }

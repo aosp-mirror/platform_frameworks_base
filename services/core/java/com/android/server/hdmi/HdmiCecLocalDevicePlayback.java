@@ -355,6 +355,11 @@ final class HdmiCecLocalDevicePlayback extends HdmiCecLocalDevice {
     }
 
     @Override
+    protected int findKeyReceiverAddress() {
+        return Constants.ADDR_TV;
+    }
+
+    @Override
     @ServiceThreadOnly
     protected void sendStandby(int deviceId) {
         assertRunOnServiceThread();

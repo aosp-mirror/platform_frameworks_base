@@ -15,231 +15,281 @@
  */
 
 #include "java/ProguardRules.h"
-#include "util/Util.h"
-#include "xml/XmlDom.h"
 
 #include <memory>
 #include <string>
+
+#include "android-base/macros.h"
+
+#include "util/Util.h"
+#include "xml/XmlDom.h"
 
 namespace aapt {
 namespace proguard {
 
 class BaseVisitor : public xml::Visitor {
-public:
-    BaseVisitor(const Source& source, KeepSet* keepSet) : mSource(source), mKeepSet(keepSet) {
+ public:
+  BaseVisitor(const Source& source, KeepSet* keep_set)
+      : source_(source), keep_set_(keep_set) {}
+
+  virtual void Visit(xml::Text*) override{};
+
+  virtual void Visit(xml::Namespace* node) override {
+    for (const auto& child : node->children) {
+      child->Accept(this);
     }
+  }
 
-    virtual void visit(xml::Text*) override {};
-
-    virtual void visit(xml::Namespace* node) override {
-        for (const auto& child : node->children) {
-            child->accept(this);
+  virtual void Visit(xml::Element* node) override {
+    if (!node->namespace_uri.empty()) {
+      Maybe<xml::ExtractedPackage> maybe_package =
+          xml::ExtractPackageFromNamespace(node->namespace_uri);
+      if (maybe_package) {
+        // This is a custom view, let's figure out the class name from this.
+        std::string package = maybe_package.value().package + "." + node->name;
+        if (util::IsJavaClassName(package)) {
+          AddClass(node->line_number, package);
         }
+      }
+    } else if (util::IsJavaClassName(node->name)) {
+      AddClass(node->line_number, node->name);
     }
 
-    virtual void visit(xml::Element* node) override {
-        if (!node->namespaceUri.empty()) {
-            Maybe<xml::ExtractedPackage> maybePackage = xml::extractPackageFromNamespace(
-                    node->namespaceUri);
-            if (maybePackage) {
-                // This is a custom view, let's figure out the class name from this.
-                std::u16string package = maybePackage.value().package + u"." + node->name;
-                if (util::isJavaClassName(package)) {
-                    addClass(node->lineNumber, package);
-                }
-            }
-        } else if (util::isJavaClassName(node->name)) {
-            addClass(node->lineNumber, node->name);
-        }
-
-        for (const auto& child: node->children) {
-            child->accept(this);
-        }
+    for (const auto& child : node->children) {
+      child->Accept(this);
     }
+  }
 
-protected:
-    void addClass(size_t lineNumber, const std::u16string& className) {
-        mKeepSet->addClass(Source(mSource.path, lineNumber), className);
-    }
+ protected:
+  void AddClass(size_t line_number, const std::string& class_name) {
+    keep_set_->AddClass(Source(source_.path, line_number), class_name);
+  }
 
-    void addMethod(size_t lineNumber, const std::u16string& methodName) {
-        mKeepSet->addMethod(Source(mSource.path, lineNumber), methodName);
-    }
+  void AddMethod(size_t line_number, const std::string& method_name) {
+    keep_set_->AddMethod(Source(source_.path, line_number), method_name);
+  }
 
-private:
-    Source mSource;
-    KeepSet* mKeepSet;
+ private:
+  DISALLOW_COPY_AND_ASSIGN(BaseVisitor);
+
+  Source source_;
+  KeepSet* keep_set_;
 };
 
-struct LayoutVisitor : public BaseVisitor {
-    LayoutVisitor(const Source& source, KeepSet* keepSet) : BaseVisitor(source, keepSet) {
+class LayoutVisitor : public BaseVisitor {
+ public:
+  LayoutVisitor(const Source& source, KeepSet* keep_set)
+      : BaseVisitor(source, keep_set) {}
+
+  virtual void Visit(xml::Element* node) override {
+    bool check_class = false;
+    bool check_name = false;
+    if (node->namespace_uri.empty()) {
+      check_class = node->name == "view" || node->name == "fragment";
+    } else if (node->namespace_uri == xml::kSchemaAndroid) {
+      check_name = node->name == "fragment";
     }
 
-    virtual void visit(xml::Element* node) override {
-        bool checkClass = false;
-        bool checkName = false;
-        if (node->namespaceUri.empty()) {
-            checkClass = node->name == u"view" || node->name == u"fragment";
-        } else if (node->namespaceUri == xml::kSchemaAndroid) {
-            checkName = node->name == u"fragment";
-        }
-
-        for (const auto& attr : node->attributes) {
-            if (checkClass && attr.namespaceUri.empty() && attr.name == u"class" &&
-                    util::isJavaClassName(attr.value)) {
-                addClass(node->lineNumber, attr.value);
-            } else if (checkName && attr.namespaceUri == xml::kSchemaAndroid &&
-                    attr.name == u"name" && util::isJavaClassName(attr.value)) {
-                addClass(node->lineNumber, attr.value);
-            } else if (attr.namespaceUri == xml::kSchemaAndroid && attr.name == u"onClick") {
-                addMethod(node->lineNumber, attr.value);
-            }
-        }
-
-        BaseVisitor::visit(node);
+    for (const auto& attr : node->attributes) {
+      if (check_class && attr.namespace_uri.empty() && attr.name == "class" &&
+          util::IsJavaClassName(attr.value)) {
+        AddClass(node->line_number, attr.value);
+      } else if (check_name && attr.namespace_uri == xml::kSchemaAndroid &&
+                 attr.name == "name" && util::IsJavaClassName(attr.value)) {
+        AddClass(node->line_number, attr.value);
+      } else if (attr.namespace_uri == xml::kSchemaAndroid &&
+                 attr.name == "onClick") {
+        AddMethod(node->line_number, attr.value);
+      }
     }
+
+    BaseVisitor::Visit(node);
+  }
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(LayoutVisitor);
 };
 
-struct XmlResourceVisitor : public BaseVisitor {
-    XmlResourceVisitor(const Source& source, KeepSet* keepSet) : BaseVisitor(source, keepSet) {
+class XmlResourceVisitor : public BaseVisitor {
+ public:
+  XmlResourceVisitor(const Source& source, KeepSet* keep_set)
+      : BaseVisitor(source, keep_set) {}
+
+  virtual void Visit(xml::Element* node) override {
+    bool check_fragment = false;
+    if (node->namespace_uri.empty()) {
+      check_fragment =
+          node->name == "PreferenceScreen" || node->name == "header";
     }
 
-    virtual void visit(xml::Element* node) override {
-        bool checkFragment = false;
-        if (node->namespaceUri.empty()) {
-            checkFragment = node->name == u"PreferenceScreen" || node->name == u"header";
-        }
-
-        if (checkFragment) {
-            xml::Attribute* attr = node->findAttribute(xml::kSchemaAndroid, u"fragment");
-            if (attr && util::isJavaClassName(attr->value)) {
-                addClass(node->lineNumber, attr->value);
-            }
-        }
-
-        BaseVisitor::visit(node);
+    if (check_fragment) {
+      xml::Attribute* attr =
+          node->FindAttribute(xml::kSchemaAndroid, "fragment");
+      if (attr && util::IsJavaClassName(attr->value)) {
+        AddClass(node->line_number, attr->value);
+      }
     }
+
+    BaseVisitor::Visit(node);
+  }
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(XmlResourceVisitor);
 };
 
-struct TransitionVisitor : public BaseVisitor {
-    TransitionVisitor(const Source& source, KeepSet* keepSet) : BaseVisitor(source, keepSet) {
+class TransitionVisitor : public BaseVisitor {
+ public:
+  TransitionVisitor(const Source& source, KeepSet* keep_set)
+      : BaseVisitor(source, keep_set) {}
+
+  virtual void Visit(xml::Element* node) override {
+    bool check_class =
+        node->namespace_uri.empty() &&
+        (node->name == "transition" || node->name == "pathMotion");
+    if (check_class) {
+      xml::Attribute* attr = node->FindAttribute({}, "class");
+      if (attr && util::IsJavaClassName(attr->value)) {
+        AddClass(node->line_number, attr->value);
+      }
     }
 
-    virtual void visit(xml::Element* node) override {
-        bool checkClass = node->namespaceUri.empty() &&
-                (node->name == u"transition" || node->name == u"pathMotion");
-        if (checkClass) {
-            xml::Attribute* attr = node->findAttribute({}, u"class");
-            if (attr && util::isJavaClassName(attr->value)) {
-                addClass(node->lineNumber, attr->value);
-            }
-        }
+    BaseVisitor::Visit(node);
+  }
 
-        BaseVisitor::visit(node);
-    }
+ private:
+  DISALLOW_COPY_AND_ASSIGN(TransitionVisitor);
 };
 
-struct ManifestVisitor : public BaseVisitor {
-    ManifestVisitor(const Source& source, KeepSet* keepSet) : BaseVisitor(source, keepSet) {
-    }
+class ManifestVisitor : public BaseVisitor {
+ public:
+  ManifestVisitor(const Source& source, KeepSet* keep_set, bool main_dex_only)
+      : BaseVisitor(source, keep_set), main_dex_only_(main_dex_only) {}
 
-    virtual void visit(xml::Element* node) override {
-        if (node->namespaceUri.empty()) {
-            bool getName = false;
-            if (node->name == u"manifest") {
-                xml::Attribute* attr = node->findAttribute({}, u"package");
-                if (attr) {
-                    mPackage = attr->value;
-                }
-            } else if (node->name == u"application") {
-                getName = true;
-                xml::Attribute* attr = node->findAttribute(xml::kSchemaAndroid, u"backupAgent");
-                if (attr) {
-                    Maybe<std::u16string> result = util::getFullyQualifiedClassName(mPackage,
-                                                                                    attr->value);
-                    if (result) {
-                        addClass(node->lineNumber, result.value());
-                    }
-                }
-            } else if (node->name == u"activity" || node->name == u"service" ||
-                    node->name == u"receiver" || node->name == u"provider" ||
-                    node->name == u"instrumentation") {
-                getName = true;
-            }
-
-            if (getName) {
-                xml::Attribute* attr = node->findAttribute(xml::kSchemaAndroid, u"name");
-                if (attr) {
-                    Maybe<std::u16string> result = util::getFullyQualifiedClassName(mPackage,
-                                                                                    attr->value);
-                    if (result) {
-                        addClass(node->lineNumber, result.value());
-                    }
-                }
-            }
+  virtual void Visit(xml::Element* node) override {
+    if (node->namespace_uri.empty()) {
+      bool get_name = false;
+      if (node->name == "manifest") {
+        xml::Attribute* attr = node->FindAttribute({}, "package");
+        if (attr) {
+          package_ = attr->value;
         }
-        BaseVisitor::visit(node);
-    }
+      } else if (node->name == "application") {
+        get_name = true;
+        xml::Attribute* attr =
+            node->FindAttribute(xml::kSchemaAndroid, "backupAgent");
+        if (attr) {
+          Maybe<std::string> result =
+              util::GetFullyQualifiedClassName(package_, attr->value);
+          if (result) {
+            AddClass(node->line_number, result.value());
+          }
+        }
+        if (main_dex_only_) {
+          xml::Attribute* default_process =
+              node->FindAttribute(xml::kSchemaAndroid, "process");
+          if (default_process) {
+            default_process_ = default_process->value;
+          }
+        }
+      } else if (node->name == "activity" || node->name == "service" ||
+                 node->name == "receiver" || node->name == "provider") {
+        get_name = true;
 
-    std::u16string mPackage;
+        if (main_dex_only_) {
+          xml::Attribute* component_process =
+              node->FindAttribute(xml::kSchemaAndroid, "process");
+
+          const std::string& process =
+              component_process ? component_process->value : default_process_;
+          get_name = !process.empty() && process[0] != ':';
+        }
+      } else if (node->name == "instrumentation") {
+        get_name = true;
+      }
+
+      if (get_name) {
+        xml::Attribute* attr = node->FindAttribute(xml::kSchemaAndroid, "name");
+        get_name = attr != nullptr;
+
+        if (get_name) {
+          Maybe<std::string> result =
+              util::GetFullyQualifiedClassName(package_, attr->value);
+          if (result) {
+            AddClass(node->line_number, result.value());
+          }
+        }
+      }
+    }
+    BaseVisitor::Visit(node);
+  }
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(ManifestVisitor);
+
+  std::string package_;
+  const bool main_dex_only_;
+  std::string default_process_;
 };
 
-bool collectProguardRulesForManifest(const Source& source, xml::XmlResource* res,
-                                     KeepSet* keepSet) {
-    ManifestVisitor visitor(source, keepSet);
-    if (res->root) {
-        res->root->accept(&visitor);
-        return true;
-    }
+bool CollectProguardRulesForManifest(const Source& source,
+                                     xml::XmlResource* res, KeepSet* keep_set,
+                                     bool main_dex_only) {
+  ManifestVisitor visitor(source, keep_set, main_dex_only);
+  if (res->root) {
+    res->root->Accept(&visitor);
+    return true;
+  }
+  return false;
+}
+
+bool CollectProguardRules(const Source& source, xml::XmlResource* res,
+                          KeepSet* keep_set) {
+  if (!res->root) {
     return false;
+  }
+
+  switch (res->file.name.type) {
+    case ResourceType::kLayout: {
+      LayoutVisitor visitor(source, keep_set);
+      res->root->Accept(&visitor);
+      break;
+    }
+
+    case ResourceType::kXml: {
+      XmlResourceVisitor visitor(source, keep_set);
+      res->root->Accept(&visitor);
+      break;
+    }
+
+    case ResourceType::kTransition: {
+      TransitionVisitor visitor(source, keep_set);
+      res->root->Accept(&visitor);
+      break;
+    }
+
+    default:
+      break;
+  }
+  return true;
 }
 
-bool collectProguardRules(const Source& source, xml::XmlResource* res, KeepSet* keepSet) {
-    if (!res->root) {
-        return false;
+bool WriteKeepSet(std::ostream* out, const KeepSet& keep_set) {
+  for (const auto& entry : keep_set.keep_set_) {
+    for (const Source& source : entry.second) {
+      *out << "# Referenced at " << source << "\n";
     }
+    *out << "-keep class " << entry.first << " { <init>(...); }\n" << std::endl;
+  }
 
-    switch (res->file.name.type) {
-        case ResourceType::kLayout: {
-            LayoutVisitor visitor(source, keepSet);
-            res->root->accept(&visitor);
-            break;
-        }
-
-        case ResourceType::kXml: {
-            XmlResourceVisitor visitor(source, keepSet);
-            res->root->accept(&visitor);
-            break;
-        }
-
-        case ResourceType::kTransition: {
-            TransitionVisitor visitor(source, keepSet);
-            res->root->accept(&visitor);
-            break;
-        }
-
-        default:
-            break;
+  for (const auto& entry : keep_set.keep_method_set_) {
+    for (const Source& source : entry.second) {
+      *out << "# Referenced at " << source << "\n";
     }
-    return true;
+    *out << "-keepclassmembers class * { *** " << entry.first << "(...); }\n"
+         << std::endl;
+  }
+  return true;
 }
 
-bool writeKeepSet(std::ostream* out, const KeepSet& keepSet) {
-    for (const auto& entry : keepSet.mKeepSet) {
-        for (const Source& source : entry.second) {
-            *out << "# Referenced at " << source << "\n";
-        }
-        *out << "-keep class " << entry.first << " { <init>(...); }\n" << std::endl;
-    }
-
-    for (const auto& entry : keepSet.mKeepMethodSet) {
-        for (const Source& source : entry.second) {
-            *out << "# Referenced at " << source << "\n";
-        }
-        *out << "-keepclassmembers class * { *** " << entry.first << "(...); }\n" << std::endl;
-    }
-    return true;
-}
-
-} // namespace proguard
-} // namespace aapt
+}  // namespace proguard
+}  // namespace aapt

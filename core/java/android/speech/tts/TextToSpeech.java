@@ -191,7 +191,7 @@ public class TextToSpeech {
          *
          * @param status {@link TextToSpeech#SUCCESS} or {@link TextToSpeech#ERROR}.
          */
-        public void onInit(int status);
+        void onInit(int status);
     }
 
     /**
@@ -208,7 +208,7 @@ public class TextToSpeech {
          *
          * @param utteranceId the identifier of the utterance.
          */
-        public void onUtteranceCompleted(String utteranceId);
+        void onUtteranceCompleted(String utteranceId);
     }
 
     /**
@@ -2103,55 +2103,69 @@ public class TextToSpeech {
 
         private boolean mEstablished;
 
-        private final ITextToSpeechCallback.Stub mCallback = new ITextToSpeechCallback.Stub() {
-            public void onStop(String utteranceId, boolean isStarted) throws RemoteException {
-                UtteranceProgressListener listener = mUtteranceProgressListener;
-                if (listener != null) {
-                    listener.onStop(utteranceId, isStarted);
-                }
-            };
+        private final ITextToSpeechCallback.Stub mCallback =
+                new ITextToSpeechCallback.Stub() {
+                    public void onStop(String utteranceId, boolean isStarted)
+                            throws RemoteException {
+                        UtteranceProgressListener listener = mUtteranceProgressListener;
+                        if (listener != null) {
+                            listener.onStop(utteranceId, isStarted);
+                        }
+                    };
 
-            @Override
-            public void onSuccess(String utteranceId) {
-                UtteranceProgressListener listener = mUtteranceProgressListener;
-                if (listener != null) {
-                    listener.onDone(utteranceId);
-                }
-            }
+                    @Override
+                    public void onSuccess(String utteranceId) {
+                        UtteranceProgressListener listener = mUtteranceProgressListener;
+                        if (listener != null) {
+                            listener.onDone(utteranceId);
+                        }
+                    }
 
-            @Override
-            public void onError(String utteranceId, int errorCode) {
-                UtteranceProgressListener listener = mUtteranceProgressListener;
-                if (listener != null) {
-                    listener.onError(utteranceId);
-                }
-            }
+                    @Override
+                    public void onError(String utteranceId, int errorCode) {
+                        UtteranceProgressListener listener = mUtteranceProgressListener;
+                        if (listener != null) {
+                            listener.onError(utteranceId);
+                        }
+                    }
 
-            @Override
-            public void onStart(String utteranceId) {
-                UtteranceProgressListener listener = mUtteranceProgressListener;
-                if (listener != null) {
-                    listener.onStart(utteranceId);
-                }
-            }
+                    @Override
+                    public void onStart(String utteranceId) {
+                        UtteranceProgressListener listener = mUtteranceProgressListener;
+                        if (listener != null) {
+                            listener.onStart(utteranceId);
+                        }
+                    }
 
-            @Override
-            public void onBeginSynthesis(String utteranceId, int sampleRateInHz, int audioFormat,
-                                     int channelCount) {
-                UtteranceProgressListener listener = mUtteranceProgressListener;
-                if (listener != null) {
-                    listener.onBeginSynthesis(utteranceId, sampleRateInHz, audioFormat, channelCount);
-                }
-            }
+                    @Override
+                    public void onBeginSynthesis(
+                            String utteranceId,
+                            int sampleRateInHz,
+                            int audioFormat,
+                            int channelCount) {
+                        UtteranceProgressListener listener = mUtteranceProgressListener;
+                        if (listener != null) {
+                            listener.onBeginSynthesis(
+                                    utteranceId, sampleRateInHz, audioFormat, channelCount);
+                        }
+                    }
 
-            @Override
-            public void onAudioAvailable(String utteranceId, byte[] audio) {
-                UtteranceProgressListener listener = mUtteranceProgressListener;
-                if (listener != null) {
-                    listener.onAudioAvailable(utteranceId, audio);
-                }
-            }
-        };
+                    @Override
+                    public void onAudioAvailable(String utteranceId, byte[] audio) {
+                        UtteranceProgressListener listener = mUtteranceProgressListener;
+                        if (listener != null) {
+                            listener.onAudioAvailable(utteranceId, audio);
+                        }
+                    }
+
+                    @Override
+                    public void onRangeStart(String utteranceId, int start, int end, int frame) {
+                        UtteranceProgressListener listener = mUtteranceProgressListener;
+                        if (listener != null) {
+                            listener.onRangeStart(utteranceId, start, end, frame);
+                        }
+                    }
+                };
 
         private class SetupConnectionAsyncTask extends AsyncTask<Void, Void, Integer> {
             private final ComponentName mName;

@@ -17,6 +17,8 @@
 package com.android.server.pm;
 
 import android.content.pm.PackageParser;
+import android.content.pm.PackageUserState;
+import android.content.pm.SELinuxUtil;
 import android.content.pm.Signature;
 import android.os.Environment;
 import android.util.Slog;
@@ -60,14 +62,17 @@ public final class SELinuxMMAC {
 
     /** Path to MAC permissions on system image */
     private static final File[] MAC_PERMISSIONS =
-    { new File(Environment.getRootDirectory(), "/etc/security/plat_mac_permissions.xml"),
-      new File(Environment.getRootDirectory(), "/etc/security/nonplat_mac_permissions.xml") };
+    { new File(Environment.getRootDirectory(), "/etc/selinux/plat_mac_permissions.xml"),
+      new File(Environment.getVendorDirectory(), "/etc/selinux/nonplat_mac_permissions.xml") };
 
     // Append privapp to existing seinfo label
     private static final String PRIVILEGED_APP_STR = ":privapp";
 
-    // Append autoplay to existing seinfo label
-    private static final String AUTOPLAY_APP_STR = ":autoplayapp";
+    // Append v2 to existing seinfo label
+    private static final String SANDBOX_V2_STR = ":v2";
+
+    // Append targetSdkVersion=n to existing seinfo label where n is the app's targetSdkVersion
+    private static final String TARGETSDKVERSION_STR = ":targetSdkVersion=";
 
     /**
      * Load the mac_permissions.xml file containing all seinfo assignments used to
@@ -273,26 +278,28 @@ public final class SELinuxMMAC {
      *
      * @param pkg object representing the package to be labeled.
      */
-    public static void assignSeinfoValue(PackageParser.Package pkg) {
+    public static void assignSeInfoValue(PackageParser.Package pkg) {
         synchronized (sPolicies) {
             for (Policy policy : sPolicies) {
-                String seinfo = policy.getMatchedSeinfo(pkg);
-                if (seinfo != null) {
-                    pkg.applicationInfo.seinfo = seinfo;
+                String seInfo = policy.getMatchedSeInfo(pkg);
+                if (seInfo != null) {
+                    pkg.applicationInfo.seInfo = seInfo;
                     break;
                 }
             }
         }
 
-        if (pkg.applicationInfo.isAutoPlayApp())
-            pkg.applicationInfo.seinfo += AUTOPLAY_APP_STR;
+        if (pkg.applicationInfo.targetSandboxVersion == 2)
+            pkg.applicationInfo.seInfo += SANDBOX_V2_STR;
 
         if (pkg.applicationInfo.isPrivilegedApp())
-            pkg.applicationInfo.seinfo += PRIVILEGED_APP_STR;
+            pkg.applicationInfo.seInfo += PRIVILEGED_APP_STR;
+
+        pkg.applicationInfo.seInfo += TARGETSDKVERSION_STR + pkg.applicationInfo.targetSdkVersion;
 
         if (DEBUG_POLICY_INSTALL) {
             Slog.i(TAG, "package (" + pkg.packageName + ") labeled with " +
-                    "seinfo=" + pkg.applicationInfo.seinfo);
+                    "seinfo=" + pkg.applicationInfo.seInfo);
         }
     }
 }
@@ -427,7 +434,7 @@ final class Policy {
      * @return A string representing the seinfo matched during policy lookup.
      *         A value of null can also be returned if no match occured.
      */
-    public String getMatchedSeinfo(PackageParser.Package pkg) {
+    public String getMatchedSeInfo(PackageParser.Package pkg) {
         // Check for exact signature matches across all certs.
         Signature[] certs = mCerts.toArray(new Signature[0]);
         if (!Signature.areExactMatch(certs, pkg.mSignatures)) {

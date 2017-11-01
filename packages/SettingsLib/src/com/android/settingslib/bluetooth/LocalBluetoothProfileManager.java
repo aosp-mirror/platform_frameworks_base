@@ -21,9 +21,9 @@ import android.bluetooth.BluetoothA2dpSink;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothHeadsetClient;
+import android.bluetooth.BluetoothHidHost;
 import android.bluetooth.BluetoothMap;
 import android.bluetooth.BluetoothMapClient;
-import android.bluetooth.BluetoothInputDevice;
 import android.bluetooth.BluetoothPan;
 import android.bluetooth.BluetoothPbapClient;
 import android.bluetooth.BluetoothProfile;
@@ -32,7 +32,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.ParcelUuid;
 import android.util.Log;
-import com.android.settingslib.R;
+import com.android.internal.R;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -42,7 +42,7 @@ import java.util.Map;
  * LocalBluetoothProfileManager provides access to the LocalBluetoothProfile
  * objects for the available Bluetooth profiles.
  */
-public final class LocalBluetoothProfileManager {
+public class LocalBluetoothProfileManager {
     private static final String TAG = "LocalBluetoothProfileManager";
     private static final boolean DEBUG = Utils.D;
     /** Singleton instance. */
@@ -123,7 +123,7 @@ public final class LocalBluetoothProfileManager {
         // Always add HID and PAN profiles
         mHidProfile = new HidProfile(context, mLocalAdapter, mDeviceManager, this);
         addProfile(mHidProfile, HidProfile.NAME,
-                BluetoothInputDevice.ACTION_CONNECTION_STATE_CHANGED);
+                BluetoothHidHost.ACTION_CONNECTION_STATE_CHANGED);
 
         mPanProfile = new PanProfile(context);
         addPanProfile(mPanProfile, PanProfile.NAME,

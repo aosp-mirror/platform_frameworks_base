@@ -18,6 +18,7 @@ package android.net;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
 
 import java.util.Objects;
 
@@ -154,14 +155,13 @@ public class NetworkRequest implements Parcelable {
          * Add the given capability requirement to this builder.  These represent
          * the requested network's required capabilities.  Note that when searching
          * for a network to satisfy a request, all capabilities requested must be
-         * satisfied.  See {@link NetworkCapabilities} for {@code NET_CAPABILITY_*}
-         * definitions.
+         * satisfied.
          *
-         * @param capability The {@code NetworkCapabilities.NET_CAPABILITY_*} to add.
+         * @param capability The capability to add.
          * @return The builder to facilitate chaining
          *         {@code builder.addCapability(...).addCapability();}.
          */
-        public Builder addCapability(int capability) {
+        public Builder addCapability(@NetworkCapabilities.NetCapability int capability) {
             mNetworkCapabilities.addCapability(capability);
             return this;
         }
@@ -169,11 +169,25 @@ public class NetworkRequest implements Parcelable {
         /**
          * Removes (if found) the given capability from this builder instance.
          *
-         * @param capability The {@code NetworkCapabilities.NET_CAPABILITY_*} to remove.
+         * @param capability The capability to remove.
          * @return The builder to facilitate chaining.
          */
-        public Builder removeCapability(int capability) {
+        public Builder removeCapability(@NetworkCapabilities.NetCapability int capability) {
             mNetworkCapabilities.removeCapability(capability);
+            return this;
+        }
+
+        /**
+         * Set the {@code NetworkCapabilities} for this builder instance,
+         * overriding any capabilities that had been previously set.
+         *
+         * @param nc The superseding {@code NetworkCapabilities} instance.
+         * @return The builder to facilitate chaining.
+         * @hide
+         */
+        public Builder setCapabilities(NetworkCapabilities nc) {
+            mNetworkCapabilities.clearAll();
+            mNetworkCapabilities.combineCapabilities(nc);
             return this;
         }
 
@@ -193,13 +207,12 @@ public class NetworkRequest implements Parcelable {
          * Adds the given transport requirement to this builder.  These represent
          * the set of allowed transports for the request.  Only networks using one
          * of these transports will satisfy the request.  If no particular transports
-         * are required, none should be specified here.  See {@link NetworkCapabilities}
-         * for {@code TRANSPORT_*} definitions.
+         * are required, none should be specified here.
          *
-         * @param transportType The {@code NetworkCapabilities.TRANSPORT_*} to add.
+         * @param transportType The transport type to add.
          * @return The builder to facilitate chaining.
          */
-        public Builder addTransportType(int transportType) {
+        public Builder addTransportType(@NetworkCapabilities.Transport int transportType) {
             mNetworkCapabilities.addTransportType(transportType);
             return this;
         }
@@ -207,10 +220,10 @@ public class NetworkRequest implements Parcelable {
         /**
          * Removes (if found) the given transport from this builder instance.
          *
-         * @param transportType The {@code NetworkCapabilities.TRANSPORT_*} to remove.
+         * @param transportType The transport type to remove.
          * @return The builder to facilitate chaining.
          */
-        public Builder removeTransportType(int transportType) {
+        public Builder removeTransportType(@NetworkCapabilities.Transport int transportType) {
             mNetworkCapabilities.removeTransportType(transportType);
             return this;
         }
@@ -245,10 +258,27 @@ public class NetworkRequest implements Parcelable {
          *                         networks.
          */
         public Builder setNetworkSpecifier(String networkSpecifier) {
-            if (NetworkCapabilities.MATCH_ALL_REQUESTS_NETWORK_SPECIFIER.equals(networkSpecifier)) {
-                throw new IllegalArgumentException("Invalid network specifier - must not be '"
-                        + NetworkCapabilities.MATCH_ALL_REQUESTS_NETWORK_SPECIFIER + "'");
-            }
+            /*
+             * A StringNetworkSpecifier does not accept null or empty ("") strings. When network
+             * specifiers were strings a null string and an empty string were considered equivalent.
+             * Hence no meaning is attached to a null or empty ("") string.
+             */
+            return setNetworkSpecifier(TextUtils.isEmpty(networkSpecifier) ? null
+                    : new StringNetworkSpecifier(networkSpecifier));
+        }
+
+        /**
+         * Sets the optional bearer specific network specifier.
+         * This has no meaning if a single transport is also not specified, so calling
+         * this without a single transport set will generate an exception, as will
+         * subsequently adding or removing transports after this is set.
+         * </p>
+         *
+         * @param networkSpecifier A concrete, parcelable framework class that extends
+         *                         NetworkSpecifier.
+         */
+        public Builder setNetworkSpecifier(NetworkSpecifier networkSpecifier) {
+            MatchAllNetworkSpecifier.checkNotMatchAllNetworkSpecifier(networkSpecifier);
             mNetworkCapabilities.setNetworkSpecifier(networkSpecifier);
             return this;
         }

@@ -88,7 +88,7 @@ public class WallpaperCropActivity extends Activity {
     protected void init() {
         setContentView(R.layout.wallpaper_cropper);
 
-        mCropView = (CropView) findViewById(R.id.cropView);
+        mCropView = findViewById(R.id.cropView);
 
         Intent cropIntent = getIntent();
         final Uri imageUri = cropIntent.getData();

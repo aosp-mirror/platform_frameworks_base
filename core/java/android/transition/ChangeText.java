@@ -210,13 +210,12 @@ public class ChangeText extends Transition {
                 ValueAnimator outAnim = null, inAnim = null;
                 if (mChangeBehavior == CHANGE_BEHAVIOR_OUT_IN ||
                         mChangeBehavior == CHANGE_BEHAVIOR_OUT) {
-                    outAnim = ValueAnimator.ofInt(255, 0);
+                    outAnim = ValueAnimator.ofInt(Color.alpha(startColor), 0);
                     outAnim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
                         @Override
                         public void onAnimationUpdate(ValueAnimator animation) {
                             int currAlpha = (Integer) animation.getAnimatedValue();
-                            view.setTextColor(currAlpha << 24 | startColor & 0xff0000 |
-                                    startColor & 0xff00 | startColor & 0xff);
+                            view.setTextColor(currAlpha << 24 | startColor & 0xffffff);
                         }
                     });
                     outAnim.addListener(new AnimatorListenerAdapter() {
@@ -237,13 +236,12 @@ public class ChangeText extends Transition {
                 }
                 if (mChangeBehavior == CHANGE_BEHAVIOR_OUT_IN ||
                         mChangeBehavior == CHANGE_BEHAVIOR_IN) {
-                    inAnim = ValueAnimator.ofInt(0, 255);
+                    inAnim = ValueAnimator.ofInt(0, Color.alpha(endColor));
                     inAnim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
                         @Override
                         public void onAnimationUpdate(ValueAnimator animation) {
                             int currAlpha = (Integer) animation.getAnimatedValue();
-                            view.setTextColor(currAlpha << 24 | Color.red(endColor) << 16 |
-                                    Color.green(endColor) << 8 | Color.red(endColor));
+                            view.setTextColor(currAlpha << 24 | endColor & 0xffffff);
                         }
                     });
                     inAnim.addListener(new AnimatorListenerAdapter() {
@@ -292,6 +290,11 @@ public class ChangeText extends Transition {
                     if (mChangeBehavior > CHANGE_BEHAVIOR_KEEP) {
                         view.setTextColor(mPausedColor);
                     }
+                }
+
+                @Override
+                public void onTransitionEnd(Transition transition) {
+                    transition.removeListener(this);
                 }
             };
             addListener(transitionListener);

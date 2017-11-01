@@ -25,16 +25,27 @@
     <string name="wifi_remembered" msgid="4955746899347821096">"Αποθηκευμένο"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"Απενεργοποιημένο"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"Αποτυχία διαμόρφωσης διεύθυνσης IP"</string>
+    <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"Δεν υπάρχει σύνδεση λόγω χαμηλής ποιότητας δικτύου"</string>
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"Αποτυχία σύνδεσης Wi-Fi"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"Πρόβλημα ελέγχου ταυτότητας"</string>
+    <string name="wifi_cant_connect" msgid="5410016875644565884">"Αδυναμία σύνδεσης"</string>
+    <string name="wifi_cant_connect_to_ap" msgid="1222553274052685331">"Δεν είναι δυνατή η σύνδεση στο δίκτυο \"<xliff:g id="AP_NAME">%1$s</xliff:g>\""</string>
+    <string name="wifi_check_password_try_again" msgid="516958988102584767">"Ελέγξτε τον κωδικό πρόσβασης και δοκιμάστε ξανά"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"Εκτός εμβέλειας"</string>
-    <string name="wifi_no_internet_no_reconnect" msgid="2211781637653149657">"Δεν εντοπίστηκε πρόσβαση στο διαδίκτυο. Δεν θα πραγματοποιηθεί αυτόματη επανασύνδεση."</string>
-    <string name="wifi_no_internet" msgid="5011955173375805204">"Δεν υπάρχει πρόσβαση στο διαδίκτυο."</string>
+    <string name="wifi_no_internet_no_reconnect" msgid="5724903347310541706">"Δεν θα συνδεθεί αυτόματα"</string>
+    <string name="wifi_no_internet" msgid="3880396223819116454">"Δεν υπάρχει πρόσβαση στο διαδίκτυο"</string>
     <string name="saved_network" msgid="4352716707126620811">"Αποθηκεύτηκε από <xliff:g id="NAME">%1$s</xliff:g>"</string>
-    <string name="connected_via_wfa" msgid="3805736726317410714">"Σύνδεση μέσω βοηθού Wi‑Fi"</string>
+    <string name="connected_via_network_scorer" msgid="5713793306870815341">"Συνδέθηκε αυτόματα μέσω %1$s"</string>
+    <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"Συνδέθηκε αυτόματα μέσω παρόχου αξιολόγησης δικτύου"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Συνδέθηκε μέσω %1$s"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"Διαθέσιμο μέσω %1$s"</string>
     <string name="wifi_connected_no_internet" msgid="3149853966840874992">"Συνδέθηκε, χωρίς διαδίκτυο"</string>
+    <string name="speed_label_very_slow" msgid="1867055264243608530">"Πολύ αργή"</string>
+    <string name="speed_label_slow" msgid="813109590815810235">"Αργή"</string>
+    <string name="speed_label_okay" msgid="2331665440671174858">"ΟΚ"</string>
+    <string name="speed_label_medium" msgid="3175763313268941953">"Μέτρια"</string>
+    <string name="speed_label_fast" msgid="7715732164050975057">"Γρήγορη"</string>
+    <string name="speed_label_very_fast" msgid="2265363430784523409">"Πολύ γρήγορη"</string>
     <string name="bluetooth_disconnected" msgid="6557104142667339895">"Αποσυνδέθηκε"</string>
     <string name="bluetooth_disconnecting" msgid="8913264760027764974">"Αποσύνδεση..."</string>
     <string name="bluetooth_connecting" msgid="8555009514614320497">"Σύνδεση..."</string>
@@ -44,16 +55,22 @@
     <string name="bluetooth_connected_no_a2dp" msgid="4576188601581440337">"Συνδεδεμένο (όχι μέσα)"</string>
     <string name="bluetooth_connected_no_map" msgid="6504436917057479986">"Συνδεδεμένο (χωρίς πρόσβαση μηνύματος)"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp" msgid="9195757766755553810">"Συνδεδεμένο (χωρίς τηλέφωνο ή πολυμέσα)"</string>
+    <string name="bluetooth_connected_battery_level" msgid="7049181126136692368">"Συνδεδεμένη, μπαταρία <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset_battery_level" msgid="5504193961248406027">"Συνδεδεμένη (όχι τηλέφωνο), μπαταρία <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_a2dp_battery_level" msgid="4751724026365870779">"Συνδεδεμένη (όχι πολυμέσα), μπαταρία <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1549265779323455261">"Συνδεδεμένη (όχι τηλέφωνο ή πολυμέσα), μπαταρία <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"Ήχος πολυμέσων"</string>
-    <string name="bluetooth_profile_headset" msgid="8658779596261212609">"Ήχος τηλεφώνου"</string>
+    <string name="bluetooth_profile_headset" msgid="7815495680863246034">"Τηλεφωνικές κλήσεις"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Μεταφορά αρχείου"</string>
     <string name="bluetooth_profile_hid" msgid="3680729023366986480">"Συσκευή εισόδου"</string>
     <string name="bluetooth_profile_pan" msgid="3391606497945147673">"Πρόσβαση στο Διαδίκτυο"</string>
     <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"Κοινή χρήση επαφών"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"Για κοινή χρήση επαφών"</string>
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"Κοινή χρήση σύνδεσης στο Διαδίκτυο"</string>
-    <string name="bluetooth_profile_map" msgid="5465271250454324383">"Πρόσβαση στο μήνυμα"</string>
+    <string name="bluetooth_profile_map" msgid="1019763341565580450">"Μηνύματα κειμένου"</string>
     <string name="bluetooth_profile_sap" msgid="5764222021851283125">"Πρόσβαση SIM"</string>
+    <string name="bluetooth_profile_a2dp_high_quality" msgid="5444517801472820055">"Ήχος HD: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
+    <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="8510588052415438887">"Ήχος HD"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"Συνδέθηκε σε ήχο πολυμέσων"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"Συνδεδεμένο στον ήχο τηλεφώνου"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"Συνδεδεμένο σε διακομιστή μεταφοράς αρχείων"</string>
@@ -99,7 +116,7 @@
     <string name="launch_defaults_some" msgid="313159469856372621">"Έχουν οριστεί κάποιες προεπιλογές"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"Δεν έχουν οριστεί προεπιλογές"</string>
     <string name="tts_settings" msgid="8186971894801348327">"Ρυθμίσεις μετατροπής κειμένου σε ομιλία"</string>
-    <string name="tts_settings_title" msgid="1237820681016639683">"Έξοδος μετατροπής κειμένου σε ομιλία"</string>
+    <string name="tts_settings_title" msgid="1237820681016639683">"Μετατρ. κειμ. σε ομιλία"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"Ταχύτητα λόγου"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"Ταχύτητα με την οποία εκφωνείται το κείμενο"</string>
     <string name="tts_default_pitch_title" msgid="6135942113172488671">"Τόνος"</string>
@@ -137,7 +154,7 @@
     <item msgid="5194774745031751806">"Εξαιρετικά ταχεία"</item>
     <item msgid="9085102246155045744">"Ταχύτατη"</item>
   </string-array>
-    <string name="choose_profile" msgid="8229363046053568878">"Επιλογή προφίλ"</string>
+    <string name="choose_profile" msgid="6921016979430278661">"Επιλογή προφίλ"</string>
     <string name="category_personal" msgid="1299663247844969448">"Προσωπικό"</string>
     <string name="category_work" msgid="8699184680584175622">"Εργασία"</string>
     <string name="development_settings_title" msgid="215179176067683667">"Επιλογές για προγραμματιστές"</string>
@@ -166,13 +183,28 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Δικτύωση"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Πιστοποίηση ασύρματης οθόνης"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Ενεργοποίηση λεπτομερ. καταγραφής Wi-Fi"</string>
-    <string name="wifi_aggressive_handover" msgid="9194078645887480917">"Επιθ.μεταβ. Wi-Fi σε δίκτυο κιν.τηλ."</string>
+    <string name="wifi_aggressive_handover" msgid="5309131983693661320">"Επιθ.μεταβ. Wi-Fi σε δίκτυο κιν.τηλ."</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Να επιτρέπεται πάντα η σάρωση Wi-Fi κατά την περιαγωγή"</string>
-    <string name="mobile_data_always_on" msgid="7745605759775320362">"Πάντα ενεργά δεδομένα κινητής τηλεφωνίας"</string>
+    <string name="mobile_data_always_on" msgid="8774857027458200434">"Πάντα ενεργά δεδομένα κινητής τηλεφωνίας"</string>
+    <string name="tethering_hardware_offload" msgid="7470077827090325814">"Σύνδεση επιτάχυνσης υλικού"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Απενεργοποίηση απόλυτης έντασης"</string>
+    <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Ενεργοποίηση κλήσης εντός εύρους"</string>
+    <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Έκδοση AVRCP Bluetooth"</string>
+    <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Επιλογή έκδοσης AVRCP Bluetooth"</string>
+    <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Κωδικοποιητής ήχου Bluetooth"</string>
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="4558347981670553665">"Επιλογή κωδικοποιητή ήχου Bluetooth"</string>
+    <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Ρυθμός δειγματοληψίας ήχου Bluetooth"</string>
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5628790207448471613">"Επιλογή κωδικοποιητή ήχου Bluetooth:\nΠοσοστό δείγματος"</string>
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"Bit ανά δείγμα ήχου Bluetooth"</string>
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4546131401358681321">"Επιλογή κωδικοποιητή ήχου Bluetooth:\nBit ανά δείγμα"</string>
+    <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"Λειτουργία καναλιού ήχου Bluetooth"</string>
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="9133545781346216071">"Επιλογή κωδικοποιητή ήχου Bluetooth:\nΛειτουργία καναλιού"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Κωδικοποιητής LDAC ήχου Bluetooth: Ποιότητα αναπαραγωγής"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"Επιλογή κωδικοποιητή LDAC ήχου Bluetooth:\nΠοιότητα αναπαραγωγής"</string>
+    <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Ροή: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Εμφάνιση επιλογών για πιστοποίηση ασύρματης οθόνης"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Αύξηση επιπέδου καταγ. Wi-Fi, εμφάνιση ανά SSID RSSI στο εργαλείο επιλογής Wi-Fi"</string>
-    <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"Όταν είναι ενεργό, το Wi-Fi θα μεταβιβάζει πιο επιθετικά τη σύνδ.δεδομένων σε δίκτυο κινητής τηλ., όταν το σήμα Wi-Fi είναι χαμηλό"</string>
+    <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"Όταν είναι ενεργό, το Wi-Fi θα μεταβιβάζει πιο επιθετικά τη σύνδ.δεδομένων σε δίκτυο κινητής τηλ., όταν το σήμα Wi-Fi είναι χαμηλό"</string>
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Να επιτρέπεται/να μην επιτρέπεται η σάρωση Wi-Fi κατά την περιαγωγή, βάσει της ποσότητας επισκεψιμότητας δεδομένων στη διεπαφή"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Μέγεθος προσωρινής μνήμης για τη λειτουργία καταγραφής"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Μέγεθος αρχείων κατ/φής ανά προ/νή μνήμη αρχείου κατ/φής"</string>
@@ -186,6 +218,7 @@
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Να επιτρέπονται ψευδείς τοποθεσίες"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Ενεργοποίηση του ελέγχου χαρακτηριστικών προβολής"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Τα δεδομένα κινητής τηλεφωνίας να διατηρούνται πάντα ενεργά, ακόμα και όταν είναι ενεργό το Wi-Fi (για γρήγορη εναλλαγή δικτύου)."</string>
+    <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"Χρήση της σύνδεσης επιτάχυνσης υλικού εάν υπάρχει"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"Να επιτρέπεται ο εντοπισμός σφαλμάτων USB;"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"Ο εντοπισμός σφαλμάτων USB προορίζεται μόνο για σκοπούς προγραμματισμού. Χρησιμοποιήστε τον για αντιγραφή δεδομένων μεταξύ του υπολογιστή και της συσκευής σας, για την εγκατάσταση εφαρμογών στη συσκευή σας χωρίς προειδοποίηση και για την ανάγνωση δεδομένων καταγραφής."</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"Ανάκληση πρόσβασης στον εντοπισμό σφαλμάτων USB από όλους τους υπολογιστές για τους οποίους είχατε εξουσιοδότηση στο παρελθόν;"</string>
@@ -194,6 +227,7 @@
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Επαλήθευση εφαρμογών μέσω USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Έλεγχος εφαρμογών που έχουν εγκατασταθεί μέσω ADB/ADT για επιβλαβή συμπεριφορά."</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Απενεργοποιεί τη δυνατότητα απόλυτης έντασης του Bluetooth σε περίπτωση προβλημάτων έντασης με απομακρυσμένες συσκευές, όπως όταν υπάρχει μη αποδεκτά υψηλή ένταση ή απουσία ελέγχου."</string>
+    <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"Να επιτρέπεται η αναπαραγωγή των ήχων κλήσης του τηλεφώνου στα ακουστικά Bluetooth"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Τοπική τερματική εφαρμογή"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Ενεργοπ.τερμ.εφαρμογής που προσφέρει πρόσβαση στο τοπικό κέλυφος"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"Έλεγχος HDCP"</string>
@@ -206,6 +240,8 @@
     <string name="no_application" msgid="2813387563129153880">"Καμία"</string>
     <string name="wait_for_debugger" msgid="1202370874528893091">"Περιμένετε το εργαλείο εντοπισμού σφαλμάτων"</string>
     <string name="wait_for_debugger_summary" msgid="1766918303462746804">"Αναμονή εφαρμογής για να συνδεθεί ο εντοπισμός σφαλμάτων"</string>
+    <string name="telephony_monitor_switch" msgid="1764958220062121194">"Παρακολούθηση τηλεφωνίας"</string>
+    <string name="telephony_monitor_switch_summary" msgid="7695552966547975635">"Η υπηρεσία TelephonyMonitor θα συλλέξει αρχεία καταγραφής μόλις εντοπίσει κάποιο πρόβλημα στη λειτουργία του τηλεφώνου/μόντεμ και θα εμφανίσει μια ειδοποίηση στον χρήστη για να υποβάλει αναφορά σφάλματος"</string>
     <string name="debug_input_category" msgid="1811069939601180246">"Εισαγωγή"</string>
     <string name="debug_drawing_category" msgid="6755716469267367852">"Σχέδιο"</string>
     <string name="debug_hw_drawing_category" msgid="6220174216912308658">"Απόδοση με επιτάχυνση από υλικό εξοπλισμό"</string>
@@ -224,6 +260,7 @@
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"Εμφ. ενημ. επιπ. υλικού"</string>
     <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"Επισήμ. επιπέδων υλικού με πράσινο κατά την ενημ."</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"Κατάρ.σφαλμ.υπέρβ.GPU"</string>
+    <string name="debug_hw_renderer" msgid="7568529019431785816">"Ρύθμ. λειτ. απόδοσης GPU"</string>
     <string name="disable_overlays" msgid="2074488440505934665">"Απενεργ. επικαλύψεων HW"</string>
     <string name="disable_overlays_summary" msgid="3578941133710758592">"Να γίνεται πάντα χρήση του GPU για σύνθεση οθόνης"</string>
     <string name="simulate_color_space" msgid="6745847141353345872">"Προσομοίωση χρωματικού χώρου"</string>
@@ -250,6 +287,8 @@
     <string name="app_process_limit_title" msgid="4280600650253107163">"Όριο διεργασ. παρασκηνίου"</string>
     <string name="show_all_anrs" msgid="28462979638729082">"Εμφάνιση όλων των ANR"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"Εμφ.του παραθ. \"Η εφαρμ.δεν αποκρ.\" για εφ.παρασκ."</string>
+    <string name="show_notification_channel_warnings" msgid="1399948193466922683">"Εμφάνιση προειδοπ. καναλιού ειδοπ."</string>
+    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"Εμφανίζει προειδοποίηση όταν μια εφαρμογή δημοσιεύει ειδοποίηση χωρίς έγκυρο κανάλι"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Να επιτρέπονται υποχρεωτικά εφαρμογές σε εξωτ.συσ."</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Κάνει κάθε εφαρμογή κατάλληλη για εγγραφή σε εξωτερικό αποθηκευτικό χώρο, ανεξάρτητα από τις τιμές του μανιφέστου"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Αναγκαστική δυνατότητα αλλαγής μεγέθους δραστηριοτήτων"</string>
@@ -277,8 +316,6 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"Ενεργό. Πατήστε για εναλλαγή."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Υπηρεσίες που εκτελούνται"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"Προβολή και έλεγχος των εφαρμογών που εκτελούνται αυτή τη στιγμή"</string>
-    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"WebView πολλαπλών διεργασιών"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"Εκτέλεση λειτουργικών απόδοσης WebView ξεχωριστά"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"Υλοποίηση WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Ορισμός υλοποίησης WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Αυτή η επιλογή δεν είναι πια έγκυρη. Δοκιμάστε ξανά."</string>
@@ -298,33 +335,30 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"Διόρθωση χρωμάτων"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Αυτή η λειτουργία είναι πειραματική και ενδεχομένως να επηρεάσει τις επιδόσεις."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"Αντικαταστάθηκε από <xliff:g id="TITLE">%1$s</xliff:g>"</string>
-    <string name="power_remaining_duration_only" msgid="4400068916452346544">"Απομένουν περίπου <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"Απομένει/ουν <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_discharging_duration" msgid="1605929174734600590">"<xliff:g id="LEVEL">%1$s</xliff:g> - απομένουν περίπου <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">%1$s</xliff:g> - απομένει/ουν <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="power_remaining_duration_only" msgid="845431008899029842">"Απομένουν περίπου <xliff:g id="TIME">^1</xliff:g>"</string>
+    <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"Απομένει/ουν περίπου <xliff:g id="TIME">^1</xliff:g> με βάση τη χρήση σας"</string>
+    <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"Απομένουν <xliff:g id="TIME">^1</xliff:g> έως την πλήρη φόρτιση"</string>
+    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"Απομένει/ουν <xliff:g id="TIME">^1</xliff:g>"</string>
+    <string name="power_remaining_duration_only_short_enhanced" msgid="7450425624026394823">"Απομένει/ουν <xliff:g id="TIME">^1</xliff:g> με βάση τη χρήση σας"</string>
+    <string name="power_discharging_duration" msgid="2843747179907396142">"<xliff:g id="LEVEL">^1</xliff:g> - απομένουν περίπου <xliff:g id="TIME">^2</xliff:g>"</string>
+    <string name="power_discharging_duration_enhanced" msgid="4401782117770255046">"<xliff:g id="LEVEL">^1</xliff:g> - Απομένει/ουν περίπου <xliff:g id="TIME">^2</xliff:g> με βάση τη χρήση σας"</string>
+    <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">^1</xliff:g> - απομένει/ουν <xliff:g id="TIME">^2</xliff:g>"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_charging_duration" msgid="2853265177761520490">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> για πλήρη φόρτιση"</string>
-    <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="power_charging_duration_ac" msgid="3969186192576594254">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> για πλήρη φόρτιση με φορτιστή AC"</string>
-    <string name="power_charging_duration_ac_short" msgid="7895864687218765582">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="power_charging_duration_usb" msgid="182405645340976546">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> για πλήρη φόρτιση μέσω USB"</string>
-    <string name="power_charging_duration_usb_short" msgid="941854728040426399">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="power_charging_duration_wireless" msgid="1829295708243159464">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> για πλήρη ασύρματη φόρτιση"</string>
-    <string name="power_charging_duration_wireless_short" msgid="1642664799869599476">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">^1</xliff:g> - <xliff:g id="TIME">^2</xliff:g> για πλήρη φόρτιση"</string>
+    <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">^1</xliff:g> - <xliff:g id="TIME">^2</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"Άγνωστο"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"Φόρτιση"</string>
-    <string name="battery_info_status_charging_ac" msgid="2909861890674399949">"Φόρτιση με AC"</string>
-    <string name="battery_info_status_charging_ac_short" msgid="7431401092096415502">"Φόρτιση"</string>
-    <string name="battery_info_status_charging_usb" msgid="2207489369680923929">"Φόρτιση μέσω USB"</string>
-    <string name="battery_info_status_charging_usb_short" msgid="6733371990319101366">"Φόρτιση"</string>
-    <string name="battery_info_status_charging_wireless" msgid="3574032603735446573">"Ασύρματη φόρτιση"</string>
-    <string name="battery_info_status_charging_wireless_short" msgid="752569941028903610">"Φόρτιση"</string>
+    <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"φόρτιση"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"Δεν φορτίζει"</string>
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"Δεν φορτίζει"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"Πλήρης"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Ελέγχονται από το διαχειριστή"</string>
-    <string name="enabled_by_admin" msgid="2386503803463071894">"Ενεργοποιήθηκε από το διαχειριστή"</string>
-    <string name="disabled_by_admin" msgid="3669999613095206948">"Απενεργοποιήθηκε από το διαχειριστή"</string>
+    <string name="enabled_by_admin" msgid="5302986023578399263">"Ενεργοποιήθηκε από τον διαχειριστή"</string>
+    <string name="disabled_by_admin" msgid="8505398946020816620">"Απενεργοποιήθηκε από τον διαχειριστή"</string>
+    <string name="disabled" msgid="9206776641295849915">"Απενεργοποιημένο"</string>
+    <string name="external_source_trusted" msgid="2707996266575928037">"Επιτρέπεται"</string>
+    <string name="external_source_untrusted" msgid="2677442511837596726">"Δεν επιτρέπεται"</string>
+    <string name="install_other_apps" msgid="6986686991775883017">"Εγκατ. άγνωστων εφ."</string>
     <string name="home" msgid="3256884684164448244">"Αρχική σελίδα ρυθμίσεων"</string>
   <string-array name="battery_labels">
     <item msgid="8494684293649631252">"0%"</item>
@@ -341,4 +375,13 @@
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"Προσαρμοσμένη (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="help_feedback_label" msgid="6815040660801785649">"Βοήθεια και σχόλια"</string>
     <string name="content_description_menu_button" msgid="8182594799812351266">"Μενού"</string>
+    <string name="time_zone_gmt" msgid="2587097992671450782">"GMT"</string>
+    <string name="retail_demo_reset_message" msgid="118771671364131297">"Εισαγάγετε κωδικό πρόσβασης για επαναφορά εργοστασιακών ρυθμίσεων στη λειτουργία επίδειξης"</string>
+    <string name="retail_demo_reset_next" msgid="8356731459226304963">"Επόμενο"</string>
+    <string name="retail_demo_reset_title" msgid="696589204029930100">"Απαιτείται κωδικός πρόσβασης"</string>
+    <string name="active_input_method_subtypes" msgid="3596398805424733238">"Ενεργές μέθοδοι εισαγωγής"</string>
+    <string name="use_system_language_to_select_input_method_subtypes" msgid="5747329075020379587">"Χρήση γλωσσών συστήματος"</string>
+    <string name="failed_to_open_app_settings_toast" msgid="1251067459298072462">"Δεν ήταν δυνατό το άνοιγμα των ρυθμίσεων για την εφαρμογή <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g>"</string>
+    <string name="ime_security_warning" msgid="4135828934735934248">"Αυτή η μέθοδος εισαγωγής ενδέχεται να έχει τη δυνατότητα να συλλέξει όλα τα κείμενα που πληκτρολογείτε, συμπεριλαμβανομένων προσωπικών δεδομένων, όπως είναι οι κωδικοί πρόσβασης και οι αριθμοί πιστωτικής κάρτας. Προέρχεται από την εφαρμογή <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>. Να γίνει χρήση αυτής της μεθόδου εισαγωγής;"</string>
+    <string name="direct_boot_unaware_dialog_message" msgid="7870273558547549125">"Σημείωση: Μετά από μια επανεκκίνηση, δεν είναι δυνατή η έναρξη αυτής της συσκευής προτού ξεκλειδώσετε το τηλέφωνό σας"</string>
 </resources>

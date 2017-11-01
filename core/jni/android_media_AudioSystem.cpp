@@ -22,7 +22,7 @@
 
 #include <sstream>
 #include <jni.h>
-#include <JNIHelp.h>
+#include <nativehelper/JNIHelp.h>
 #include "core_jni_helpers.h"
 
 #include <media/AudioSystem.h>
@@ -323,6 +323,12 @@ static jint
 android_media_AudioSystem_newAudioSessionId(JNIEnv *env, jobject thiz)
 {
     return AudioSystem::newAudioUniqueId(AUDIO_UNIQUE_ID_USE_SESSION);
+}
+
+static jint
+android_media_AudioSystem_newAudioPlayerId(JNIEnv *env, jobject thiz)
+{
+    return AudioSystem::newAudioUniqueId(AUDIO_UNIQUE_ID_USE_PLAYER);
 }
 
 static jint
@@ -1755,6 +1761,14 @@ android_media_AudioSystem_systemReady(JNIEnv *env, jobject thiz)
     return nativeToJavaStatus(AudioSystem::systemReady());
 }
 
+static jfloat
+android_media_AudioSystem_getStreamVolumeDB(JNIEnv *env, jobject thiz,
+                                            jint stream, jint index, jint device)
+{
+    return (jfloat)AudioSystem::getStreamVolumeDB((audio_stream_type_t)stream,
+                                                  (int)index,
+                                                  (audio_devices_t)device);
+}
 
 // ----------------------------------------------------------------------------
 
@@ -1767,6 +1781,7 @@ static const JNINativeMethod gMethods[] = {
     {"isStreamActiveRemotely","(II)Z",  (void *)android_media_AudioSystem_isStreamActiveRemotely},
     {"isSourceActive",      "(I)Z",     (void *)android_media_AudioSystem_isSourceActive},
     {"newAudioSessionId",   "()I",      (void *)android_media_AudioSystem_newAudioSessionId},
+    {"newAudioPlayerId",    "()I",      (void *)android_media_AudioSystem_newAudioPlayerId},
     {"setDeviceConnectionState", "(IILjava/lang/String;Ljava/lang/String;)I", (void *)android_media_AudioSystem_setDeviceConnectionState},
     {"getDeviceConnectionState", "(ILjava/lang/String;)I",  (void *)android_media_AudioSystem_getDeviceConnectionState},
     {"handleDeviceConfigChange", "(ILjava/lang/String;Ljava/lang/String;)I", (void *)android_media_AudioSystem_handleDeviceConfigChange},
@@ -1807,6 +1822,7 @@ static const JNINativeMethod gMethods[] = {
     {"native_register_recording_callback", "()V",
                                     (void *)android_media_AudioSystem_registerRecordingCallback},
     {"systemReady", "()I", (void *)android_media_AudioSystem_systemReady},
+    {"getStreamVolumeDB", "(III)F", (void *)android_media_AudioSystem_getStreamVolumeDB},
 };
 
 

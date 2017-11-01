@@ -74,7 +74,7 @@ public class FakeBackgroundService extends Service {
         // Make a fake window that is always around eating graphics resources.
         FakeView view = new FakeView(this);
         Dialog dialog = new Dialog(this, android.R.style.Theme_Holo_Dialog);
-        dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+        dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
         dialog.getWindow().setFlags(
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                 | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE

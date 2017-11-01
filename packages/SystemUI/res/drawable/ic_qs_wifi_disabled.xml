@@ -1,5 +1,5 @@
 <!--
-Copyright (C) 2014 The Android Open Source Project
+Copyright (C) 2017 The Android Open Source Project
 
    Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -14,14 +14,15 @@ Copyright (C) 2014 The Android Open Source Project
     limitations under the License.
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-        android:width="32.0dp"
-        android:height="29.5dp"
-        android:viewportWidth="26.0"
-        android:viewportHeight="24.0">
-    <path
-        android:fillColor="#4DFFFFFF"
-        android:pathData="M17.500000,16.500000L5.800000,3.400000c0.000000,0.000000 0.000000,0.000000 0.000000,0.000000l-2.700000,-3.000000L1.600000,1.800000l2.200000,2.500000c-2.000000,1.000000 -3.200000,2.000000 -3.400000,2.200000L13.000000,22.000000l0.000000,0.000000l0.000000,0.000000l0.000000,0.000000l0.000000,0.000000l3.200000,-3.900000l2.400000,2.700000l1.500000,-1.400000L17.500000,16.500000L17.500000,16.500000z"/>
-    <path
-        android:fillColor="#4DFFFFFF"
-        android:pathData="M25.600000,6.500000C25.100000,6.100000 20.299999,2.100000 13.000000,2.100000c-1.900000,0.000000 -3.600000,0.300000 -5.200000,0.700000L18.700001,15.000000L25.600000,6.500000z"/>
+    android:width="32dp"
+    android:height="29.5dp"
+    android:viewportWidth="25.6"
+    android:viewportHeight="23.6">
+    <group
+        android:translateX="0.8"
+        android:translateY="1.1">
+        <path
+            android:pathData="M23.66,8.11c0.39,-0.48 0.29,-1.19 -0.22,-1.54C21.67,5.36 17.55,3 12,3 6.44,3 2.33,5.36 0.56,6.57c-0.51,0.35 -0.61,1.06 -0.23,1.54L11.16,21.6c0.42,0.53 1.23,0.53 1.66,0L23.66,8.11z"
+            android:fillColor="#FFFFFFFF"/>
+    </group>
 </vector>

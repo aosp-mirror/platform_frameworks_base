@@ -34,7 +34,7 @@ import dalvik.system.VMRuntime;
  */
 public class InstructionSets {
     private static final String PREFERRED_INSTRUCTION_SET =
-            VMRuntime.getInstructionSet(Build.SUPPORTED_ABIS[0]);;
+            VMRuntime.getInstructionSet(Build.SUPPORTED_ABIS[0]);
     public static String[] getAppDexInstructionSets(ApplicationInfo info) {
         if (info.primaryCpuAbi != null) {
             if (info.secondaryCpuAbi != null) {

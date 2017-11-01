@@ -51,7 +51,7 @@ private:
     Program* generateProgram(const ProgramDescription& description, programid key);
     String8 generateVertexShader(const ProgramDescription& description);
     String8 generateFragmentShader(const ProgramDescription& description);
-    void generateBlend(String8& shader, const char* name, SkXfermode::Mode mode);
+    void generateBlend(String8& shader, const char* name, SkBlendMode mode);
     void generateTextureWrap(String8& shader, GLenum wrapS, GLenum wrapT);
 
     void printLongString(const String8& shader) const;
@@ -59,6 +59,7 @@ private:
     std::map<programid, std::unique_ptr<Program>> mCache;
 
     const bool mHasES3;
+    const bool mHasLinearBlending;
 }; // class ProgramCache
 
 }; // namespace uirenderer

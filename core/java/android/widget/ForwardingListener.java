@@ -279,7 +279,9 @@ public abstract class ForwardingListener
         @Override
         public void run() {
             final ViewParent parent = mSrc.getParent();
-            parent.requestDisallowInterceptTouchEvent(true);
+            if (parent != null) {
+                parent.requestDisallowInterceptTouchEvent(true);
+            }
         }
     }
 

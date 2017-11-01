@@ -4,9 +4,9 @@
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
      You may obtain a copy of the License at
-  
+
           http://www.apache.org/licenses/LICENSE-2.0
-  
+
      Unless required by applicable law or agreed to in writing, software
      distributed under the License is distributed on an "AS IS" BASIS,
      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,6 +18,8 @@
         package="com.android.frameworks.servicestests">
 
     <uses-permission android:name="android.permission.READ_LOGS" />
+    <uses-permission android:name="android.permission.ACCESS_VR_MANAGER" />
+    <uses-permission android:name="android.permission.ACCOUNT_MANAGER" />
     <uses-permission android:name="android.permission.WRITE_SETTINGS" />
     <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
@@ -30,6 +32,7 @@
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS" />
     <uses-permission android:name="android.permission.REAL_GET_TASKS" />
     <uses-permission android:name="android.permission.GET_DETAILED_TASKS" />
+    <uses-permission android:name="android.permission.REORDER_TASKS" />
     <uses-permission android:name="android.permission.MANAGE_NETWORK_POLICY" />
     <uses-permission android:name="android.permission.READ_NETWORK_USAGE_HISTORY" />
     <uses-permission android:name="android.permission.MODIFY_NETWORK_ACCOUNTING" />
@@ -43,22 +46,35 @@
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
     <uses-permission android:name="android.permission.PACKET_KEEPALIVE_OFFLOAD" />
     <uses-permission android:name="android.permission.GET_INTENT_SENDER_INTENT" />
+    <uses-permission android:name="android.permission.MANAGE_ACTIVITY_STACKS" />
+    <uses-permission android:name="android.permission.INSTALL_PACKAGES" />
+    <uses-permission android:name="android.permission.CHANGE_CONFIGURATION" />
+    <uses-permission android:name="android.permission.CHANGE_COMPONENT_ENABLED_STATE" />
+    <uses-permission android:name="android.permission.DELETE_PACKAGES" />
+
+    <!-- Uses API introduced in O (26) -->
+    <uses-sdk android:minSdkVersion="1"
+          android:targetSdkVersion="26"/>
 
     <application>
         <uses-library android:name="android.test.runner" />
 
-        <service android:name="com.android.server.AccessibilityManagerServiceTest$MyFirstMockAccessibilityService"
-            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+        <service android:name="com.android.server.accounts.TestAccountType1AuthenticatorService"
+            android:exported="false">
           <intent-filter>
-            <action android:name="android.accessibilityservice.AccessibilityService"/>
+            <action android:name="android.accounts.AccountAuthenticator" />
           </intent-filter>
+          <meta-data android:name="android.accounts.AccountAuthenticator"
+              android:resource="@xml/test_account_type1_authenticator" />
         </service>
 
-        <service android:name="com.android.server.AccessibilityManagerServiceTest$MySecondMockAccessibilityService"
-            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+        <service android:name="com.android.server.accounts.TestAccountType2AuthenticatorService"
+            android:exported="false">
           <intent-filter>
-            <action android:name="android.accessibilityservice.AccessibilityService"/>
+            <action android:name="android.accounts.AccountAuthenticator" />
           </intent-filter>
+          <meta-data android:name="android.accounts.AccountAuthenticator"
+              android:resource="@xml/test_account_type2_authenticator" />
         </service>
 
         <receiver android:name="com.android.server.devicepolicy.ApplicationRestrictionsTest$AdminReceiver"
@@ -113,7 +129,9 @@
         <activity android:name="com.android.server.pm.BaseShortcutManagerTest$ShortcutActivity3" />
 
         <activity android:name="com.android.server.pm.ShortcutTestActivity"
-            android:enabled="true" android:exported="true" />
+                 android:enabled="true" android:exported="true" />
+
+        <activity android:name="com.android.server.accounts.AccountAuthenticatorDummyActivity" />
 
         <activity-alias android:name="a.ShortcutEnabled"
             android:targetActivity="com.android.server.pm.ShortcutTestActivity"
@@ -133,6 +151,12 @@
             android:targetActivity="com.android.server.pm.ShortcutTestActivity"
             android:enabled="true" android:exported="true">
             <meta-data android:name="android.app.shortcuts" android:resource="@xml/shortcut_1"/>
+        </activity-alias>
+        <activity-alias android:name="a.ShortcutConfigActivity"
+                        android:targetActivity="com.android.server.pm.ShortcutTestActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.CREATE_SHORTCUT" />
+            </intent-filter>
         </activity-alias>
 
         <activity-alias android:name="a.DisabledMain"
@@ -155,10 +179,23 @@
             </intent-filter>
         </activity-alias>
 
+        <activity android:name="com.android.server.am.TaskStackChangedListenerTest$ActivityA" />
+        <activity android:name="com.android.server.am.TaskStackChangedListenerTest$ActivityB" />
+        <activity android:name="com.android.server.am.TaskStackChangedListenerTest$ActivityRequestedOrientationChange" />
+        <activity android:name="com.android.server.am.TaskStackChangedListenerTest$ActivityTaskChangeCallbacks" />
+        <activity android:name="com.android.server.am.TaskStackChangedListenerTest$ActivityTaskDescriptionChange" />
+
+        <receiver android:name="com.android.server.appwidget.DummyAppWidget">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider"
+              android:resource="@xml/dummy_appwidget_info" />
+        </receiver>
     </application>
 
     <instrumentation
-    	android:name="android.support.test.runner.AndroidJUnitRunner"
-    	android:targetPackage="com.android.frameworks.servicestests"
-    	android:label="Frameworks Services Tests" />
+        android:name="android.support.test.runner.AndroidJUnitRunner"
+        android:targetPackage="com.android.frameworks.servicestests"
+        android:label="Frameworks Services Tests" />
 </manifest>

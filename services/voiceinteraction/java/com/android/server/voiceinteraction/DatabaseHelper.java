@@ -27,6 +27,9 @@ import android.hardware.soundtrigger.SoundTrigger.KeyphraseSoundModel;
 import android.text.TextUtils;
 import android.util.Slog;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
@@ -40,7 +43,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     static final boolean DBG = false;
 
     private static final String NAME = "sound_model.db";
-    private static final int VERSION = 5;
+    private static final int VERSION = 6;
 
     public static interface SoundModelContract {
         public static final String TABLE = "sound_model";
@@ -58,15 +61,19 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // Table Create Statement
     private static final String CREATE_TABLE_SOUND_MODEL = "CREATE TABLE "
             + SoundModelContract.TABLE + "("
-            + SoundModelContract.KEY_MODEL_UUID + " TEXT PRIMARY KEY,"
-            + SoundModelContract.KEY_VENDOR_UUID + " TEXT, "
+            + SoundModelContract.KEY_MODEL_UUID + " TEXT,"
+            + SoundModelContract.KEY_VENDOR_UUID + " TEXT,"
             + SoundModelContract.KEY_KEYPHRASE_ID + " INTEGER,"
             + SoundModelContract.KEY_TYPE + " INTEGER,"
             + SoundModelContract.KEY_DATA + " BLOB,"
             + SoundModelContract.KEY_RECOGNITION_MODES + " INTEGER,"
             + SoundModelContract.KEY_LOCALE + " TEXT,"
             + SoundModelContract.KEY_HINT_TEXT + " TEXT,"
-            + SoundModelContract.KEY_USERS + " TEXT" + ")";
+            + SoundModelContract.KEY_USERS + " TEXT,"
+            + "PRIMARY KEY (" + SoundModelContract.KEY_KEYPHRASE_ID + ","
+                              + SoundModelContract.KEY_LOCALE + ","
+                              + SoundModelContract.KEY_USERS + ")"
+            + ")";
 
     public DatabaseHelper(Context context) {
         super(context, NAME, null, VERSION);
@@ -92,6 +99,44 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                         + SoundModelContract.KEY_VENDOR_UUID + " TEXT");
                 oldVersion++;
             }
+        }
+        if (oldVersion == 5) {
+            // We need to enforce the new primary key constraint that the
+            // keyphrase id, locale, and users are unique. We have to first pull
+            // everything out of the database, remove duplicates, create the new
+            // table, then push everything back in.
+            String selectQuery = "SELECT * FROM " + SoundModelContract.TABLE;
+            Cursor c = db.rawQuery(selectQuery, null);
+            List<SoundModelRecord> old_records = new ArrayList<SoundModelRecord>();
+            try {
+                if (c.moveToFirst()) {
+                    do {
+                        try {
+                            old_records.add(new SoundModelRecord(5, c));
+                        } catch (Exception e) {
+                            Slog.e(TAG, "Failed to extract V5 record", e);
+                        }
+                    } while (c.moveToNext());
+                }
+            } finally {
+                c.close();
+            }
+            db.execSQL("DROP TABLE IF EXISTS " + SoundModelContract.TABLE);
+            onCreate(db);
+            for (SoundModelRecord record : old_records) {
+                if (record.ifViolatesV6PrimaryKeyIsFirstOfAnyDuplicates(old_records)) {
+                    try {
+                        long return_value = record.writeToDatabase(6, db);
+                        if (return_value == -1) {
+                            Slog.e(TAG, "Database write failed " + record.modelUuid + ": "
+                                    + return_value);
+                        }
+                    } catch (Exception e) {
+                        Slog.e(TAG, "Failed to update V6 record " + record.modelUuid, e);
+                    }
+                }
+            }
+            oldVersion++;
         }
     }
 
@@ -278,5 +323,94 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             users[i] = Integer.parseInt(usersStr[i]);
         }
         return users;
+    }
+
+    private static class SoundModelRecord {
+        public final String modelUuid;
+        public final String vendorUuid;
+        public final int keyphraseId;
+        public final int type;
+        public final byte[] data;
+        public final int recognitionModes;
+        public final String locale;
+        public final String hintText;
+        public final String users;
+
+        public SoundModelRecord(int version, Cursor c) {
+            modelUuid = c.getString(c.getColumnIndex(SoundModelContract.KEY_MODEL_UUID));
+            if (version >= 5) {
+                vendorUuid = c.getString(c.getColumnIndex(SoundModelContract.KEY_VENDOR_UUID));
+            } else {
+                vendorUuid = null;
+            }
+            keyphraseId = c.getInt(c.getColumnIndex(SoundModelContract.KEY_KEYPHRASE_ID));
+            type = c.getInt(c.getColumnIndex(SoundModelContract.KEY_TYPE));
+            data = c.getBlob(c.getColumnIndex(SoundModelContract.KEY_DATA));
+            recognitionModes = c.getInt(c.getColumnIndex(SoundModelContract.KEY_RECOGNITION_MODES));
+            locale = c.getString(c.getColumnIndex(SoundModelContract.KEY_LOCALE));
+            hintText = c.getString(c.getColumnIndex(SoundModelContract.KEY_HINT_TEXT));
+            users = c.getString(c.getColumnIndex(SoundModelContract.KEY_USERS));
+        }
+
+        private boolean V6PrimaryKeyMatches(SoundModelRecord record) {
+          return keyphraseId == record.keyphraseId && stringComparisonHelper(locale, record.locale)
+              && stringComparisonHelper(users, record.users);
+        }
+
+        // Returns true if this record is a) the only record with the same V6 primary key, or b) the
+        // first record in the list of all records that have the same primary key and equal data.
+        // It will return false if a) there are any records that have the same primary key and
+        // different data, or b) there is a previous record in the list that has the same primary
+        // key and data.
+        // Note that 'this' object must be inside the list.
+        public boolean ifViolatesV6PrimaryKeyIsFirstOfAnyDuplicates(
+                List<SoundModelRecord> records) {
+            // First pass - check to see if all the records that have the same primary key have
+            // duplicated data.
+            for (SoundModelRecord record : records) {
+                if (this == record) {
+                    continue;
+                }
+                // If we have different/missing data with the same primary key, then we should drop
+                // everything.
+                if (this.V6PrimaryKeyMatches(record) && !Arrays.equals(data, record.data)) {
+                    return false;
+                }
+            }
+
+            // We only want to return true for the first duplicated model.
+            for (SoundModelRecord record : records) {
+                if (this.V6PrimaryKeyMatches(record)) {
+                    return this == record;
+                }
+            }
+            return true;
+        }
+
+        public long writeToDatabase(int version, SQLiteDatabase db) {
+            ContentValues values = new ContentValues();
+            values.put(SoundModelContract.KEY_MODEL_UUID, modelUuid);
+            if (version >= 5) {
+                values.put(SoundModelContract.KEY_VENDOR_UUID, vendorUuid);
+            }
+            values.put(SoundModelContract.KEY_KEYPHRASE_ID, keyphraseId);
+            values.put(SoundModelContract.KEY_TYPE, type);
+            values.put(SoundModelContract.KEY_DATA, data);
+            values.put(SoundModelContract.KEY_RECOGNITION_MODES, recognitionModes);
+            values.put(SoundModelContract.KEY_LOCALE, locale);
+            values.put(SoundModelContract.KEY_HINT_TEXT, hintText);
+            values.put(SoundModelContract.KEY_USERS, users);
+
+            return db.insertWithOnConflict(
+                       SoundModelContract.TABLE, null, values, SQLiteDatabase.CONFLICT_REPLACE);
+        }
+
+        // Helper for checking string equality - including the case when they are null.
+        static private boolean stringComparisonHelper(String a, String b) {
+          if (a != null) {
+            return a.equals(b);
+          }
+          return a == b;
+        }
     }
 }

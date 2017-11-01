@@ -15,17 +15,19 @@
  */
 package com.android.printservice.recommendation.util;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
 import com.android.printservice.recommendation.PrintServicePlugin;
 
+import java.net.InetAddress;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -54,7 +56,7 @@ public class MDNSFilteredDiscovery implements NsdManager.DiscoveryListener  {
 
     /** Printer identifiers of the mPrinters found. */
     @GuardedBy("mLock")
-    private final @NonNull HashSet<String> mPrinters;
+    private final @NonNull HashSet<InetAddress> mPrinters;
 
     /** Service types discovered by this plugin */
     private final @NonNull HashSet<String> mServiceTypes;
@@ -111,7 +113,7 @@ public class MDNSFilteredDiscovery implements NsdManager.DiscoveryListener  {
      */
     public void start(@NonNull PrintServicePlugin.PrinterDiscoveryCallback callback) {
         mCallback = callback;
-        mCallback.onChanged(mPrinters.size());
+        mCallback.onChanged(new ArrayList<>(mPrinters));
 
         for (String serviceType : mServiceTypes) {
             DiscoveryListenerMultiplexer.addListener(getNDSManager(), serviceType, this);
@@ -122,20 +124,12 @@ public class MDNSFilteredDiscovery implements NsdManager.DiscoveryListener  {
      * Stop the discovery. This can only return once the plugin is completely finished and cleaned up.
      */
     public void stop() {
-        mCallback.onChanged(0);
+        mCallback.onChanged(null);
         mCallback = null;
 
         for (int i = 0; i < mServiceTypes.size(); ++i) {
             DiscoveryListenerMultiplexer.removeListener(getNDSManager(), this);
         }
-    }
-
-    /**
-     *
-     * @return The number of discovered printers
-     */
-    public int getCount() {
-        return mPrinters.size();
     }
 
     @Override
@@ -174,9 +168,9 @@ public class MDNSFilteredDiscovery implements NsdManager.DiscoveryListener  {
                     public void onServiceResolved(NsdServiceInfo serviceInfo) {
                         if (mPrinterFilter.matchesCriteria(serviceInfo)) {
                             if (mCallback != null) {
-                                boolean added = mPrinters.add(serviceInfo.getHost().getHostAddress());
+                                boolean added = mPrinters.add(serviceInfo.getHost());
                                 if (added) {
-                                    mCallback.onChanged(mPrinters.size());
+                                    mCallback.onChanged(new ArrayList<>(mPrinters));
                                 }
                             }
                         }
@@ -198,11 +192,10 @@ public class MDNSFilteredDiscovery implements NsdManager.DiscoveryListener  {
                     public void onServiceResolved(NsdServiceInfo serviceInfo) {
                         if (mPrinterFilter.matchesCriteria(serviceInfo)) {
                             if (mCallback != null) {
-                                boolean removed = mPrinters
-                                        .remove(serviceInfo.getHost().getHostAddress());
+                                boolean removed = mPrinters.remove(serviceInfo.getHost());
 
                                 if (removed) {
-                                    mCallback.onChanged(mPrinters.size());
+                                    mCallback.onChanged(new ArrayList<>(mPrinters));
                                 }
                             }
                         }

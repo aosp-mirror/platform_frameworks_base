@@ -114,13 +114,14 @@ class SoundChannel : public SoundEvent {
 public:
     enum state { IDLE, RESUMING, STOPPING, PAUSED, PLAYING };
     SoundChannel() : mState(IDLE), mNumChannels(1),
-            mPos(0), mToggle(0), mAutoPaused(false) {}
+            mPos(0), mToggle(0), mAutoPaused(false), mMuted(false) {}
     ~SoundChannel();
     void init(SoundPool* soundPool);
     void play(const sp<Sample>& sample, int channelID, float leftVolume, float rightVolume,
             int priority, int loop, float rate);
     void setVolume_l(float leftVolume, float rightVolume);
     void setVolume(float leftVolume, float rightVolume);
+    void mute(bool muting);
     void stop_l();
     void stop();
     void pause();
@@ -154,6 +155,7 @@ private:
     unsigned long       mToggle;
     bool                mAutoPaused;
     int                 mPrevSampleID;
+    bool                mMuted;
 };
 
 // application object for managing a pool of sounds
@@ -168,6 +170,7 @@ public:
     int play(int sampleID, float leftVolume, float rightVolume, int priority,
             int loop, float rate);
     void pause(int channelID);
+    void mute(bool muting);
     void autoPause();
     void resume(int channelID);
     void autoResume();
@@ -222,6 +225,7 @@ private:
     int                     mNextSampleID;
     int                     mNextChannelID;
     bool                    mQuit;
+    bool                    mMuted;
 
     // callback
     Mutex                   mCallbackLock;

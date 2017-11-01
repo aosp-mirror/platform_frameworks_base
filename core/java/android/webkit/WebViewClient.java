@@ -234,6 +234,8 @@ public class WebViewClient {
     public static final int ERROR_FILE_NOT_FOUND = -14;
     /** Too many requests during this load */
     public static final int ERROR_TOO_MANY_REQUESTS = -15;
+    /** Resource load was cancelled by Safe Browsing */
+    public static final int ERROR_UNSAFE_RESOURCE = -16;
 
     /**
      * Report an error to the host application. These errors are unrecoverable
@@ -465,5 +467,33 @@ public class WebViewClient {
      */
     public void onReceivedLoginRequest(WebView view, String realm,
             String account, String args) {
+    }
+
+    /**
+     * Notify host application that the given webview's render process has exited.
+     *
+     * Multiple WebView instances may be associated with a single render process;
+     * onRenderProcessGone will be called for each WebView that was affected.
+     * The application's implementation of this callback should only attempt to
+     * clean up the specific WebView given as a parameter, and should not assume
+     * that other WebView instances are affected.
+     *
+     * The given WebView can't be used, and should be removed from the view hierarchy,
+     * all references to it should be cleaned up, e.g any references in the Activity
+     * or other classes saved using findViewById and similar calls, etc
+     *
+     * To cause an render process crash for test purpose, the application can
+     * call loadUrl("chrome://crash") on the WebView. Note that multiple WebView
+     * instances may be affected if they share a render process, not just the
+     * specific WebView which loaded chrome://crash.
+     *
+     * @param view The WebView which needs to be cleaned up.
+     * @param detail the reason why it exited.
+     * @return true if the host application handled the situation that process has
+     *         exited, otherwise, application will crash if render process crashed,
+     *         or be killed if render process was killed by the system.
+     */
+    public boolean onRenderProcessGone(WebView view, RenderProcessGoneDetail detail) {
+        return false;
     }
 }

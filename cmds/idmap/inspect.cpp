@@ -2,6 +2,7 @@
 
 #include <androidfw/AssetManager.h>
 #include <androidfw/ResourceTypes.h>
+#include <utils/ByteOrder.h>
 #include <utils/String8.h>
 
 #include <fcntl.h>
@@ -283,7 +284,9 @@ namespace {
                 if (err != NO_ERROR) {
                     return err;
                 }
-                print("", "entry", data32, "%s/%s", type.string(), name.string());
+                if (data32 != ResTable_type::NO_ENTRY) {
+                    print("", "entry", data32, "%s/%s", type.string(), name.string());
+                }
             }
         }
 

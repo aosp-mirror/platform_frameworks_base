@@ -35,14 +35,11 @@ import com.android.server.job.StateChangedListener;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Objects;
 
 /**
  * Controller for monitoring changes to content URIs through a ContentObserver.
  */
-public class ContentObserverController extends StateController {
+public final class ContentObserverController extends StateController {
     private static final String TAG = "JobScheduler.Content";
     private static final boolean DEBUG = false;
 
@@ -61,11 +58,11 @@ public class ContentObserverController extends StateController {
     private static final Object sCreationLock = new Object();
     private static volatile ContentObserverController sController;
 
-    final private List<JobStatus> mTrackedTasks = new ArrayList<JobStatus>();
+    final private ArraySet<JobStatus> mTrackedTasks = new ArraySet<>();
     /**
      * Per-userid {@link JobInfo.TriggerContentUri} keyed ContentObserver cache.
      */
-    SparseArray<ArrayMap<JobInfo.TriggerContentUri, ObserverInstance>> mObservers =
+    final SparseArray<ArrayMap<JobInfo.TriggerContentUri, ObserverInstance>> mObservers =
             new SparseArray<>();
     final Handler mHandler;
 
@@ -101,6 +98,7 @@ public class ContentObserverController extends StateController {
                 Slog.i(TAG, "Tracking content-trigger job " + taskStatus);
             }
             mTrackedTasks.add(taskStatus);
+            taskStatus.setTrackingController(JobStatus.TRACKING_CONTENT);
             boolean havePendingUris = false;
             // If there is a previous job associated with the new job, propagate over
             // any pending content URI trigger reports.
@@ -156,7 +154,8 @@ public class ContentObserverController extends StateController {
     @Override
     public void maybeStopTrackingJobLocked(JobStatus taskStatus, JobStatus incomingJob,
             boolean forUpdate) {
-        if (taskStatus.hasContentTriggerConstraint()) {
+        if (taskStatus.clearTrackingController(JobStatus.TRACKING_CONTENT)) {
+            mTrackedTasks.remove(taskStatus);
             if (taskStatus.contentObserverJobInstance != null) {
                 taskStatus.contentObserverJobInstance.unscheduleLocked();
                 if (incomingJob != null) {
@@ -164,7 +163,7 @@ public class ContentObserverController extends StateController {
                             && taskStatus.contentObserverJobInstance.mChangedAuthorities != null) {
                         // We are stopping this job, but it is going to be replaced by this given
                         // incoming job.  We want to propagate our state over to it, so we don't
-                        // lose any content changes that had happend since the last one started.
+                        // lose any content changes that had happened since the last one started.
                         // If there is a previous job associated with the new job, propagate over
                         // any pending content URI trigger reports.
                         if (incomingJob.contentObserverJobInstance == null) {
@@ -190,21 +189,18 @@ public class ContentObserverController extends StateController {
             if (DEBUG) {
                 Slog.i(TAG, "No longer tracking job " + taskStatus);
             }
-            mTrackedTasks.remove(taskStatus);
         }
     }
 
     @Override
-    public void rescheduleForFailure(JobStatus newJob, JobStatus failureToReschedule) {
+    public void rescheduleForFailureLocked(JobStatus newJob, JobStatus failureToReschedule) {
         if (failureToReschedule.hasContentTriggerConstraint()
                 && newJob.hasContentTriggerConstraint()) {
-            synchronized (mLock) {
-                // Our job has failed, and we are scheduling a new job for it.
-                // Copy the last reported content changes in to the new job, so when
-                // we schedule the new one we will pick them up and report them again.
-                newJob.changedAuthorities = failureToReschedule.changedAuthorities;
-                newJob.changedUris = failureToReschedule.changedUris;
-            }
+            // Our job has failed, and we are scheduling a new job for it.
+            // Copy the last reported content changes in to the new job, so when
+            // we schedule the new one we will pick them up and report them again.
+            newJob.changedAuthorities = failureToReschedule.changedAuthorities;
+            newJob.changedUris = failureToReschedule.changedUris;
         }
     }
 
@@ -376,9 +372,8 @@ public class ContentObserverController extends StateController {
     @Override
     public void dumpControllerStateLocked(PrintWriter pw, int filterUid) {
         pw.println("Content:");
-        Iterator<JobStatus> it = mTrackedTasks.iterator();
-        while (it.hasNext()) {
-            JobStatus js = it.next();
+        for (int i = 0; i < mTrackedTasks.size(); i++) {
+            JobStatus js = mTrackedTasks.valueAt(i);
             if (!js.shouldDump(filterUid)) {
                 continue;
             }

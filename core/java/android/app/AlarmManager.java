@@ -16,8 +16,11 @@
 
 package android.app;
 
+import android.annotation.IntDef;
+import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
+import android.annotation.SystemService;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
@@ -34,6 +37,8 @@ import android.util.Log;
 import libcore.util.ZoneInfoDB;
 
 import java.io.IOException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * This class provides access to the system alarm services.  These allow you
@@ -69,14 +74,20 @@ import java.io.IOException;
  * {@link #setExact(int, long, PendingIntent)}.  Applications whose {@code targetSdkVersion}
  * is earlier than API 19 will continue to see the previous behavior in which all
  * alarms are delivered exactly when requested.
- *
- * <p>You do not
- * instantiate this class directly; instead, retrieve it through
- * {@link android.content.Context#getSystemService
- * Context.getSystemService(Context.ALARM_SERVICE)}.
  */
+@SystemService(Context.ALARM_SERVICE)
 public class AlarmManager {
     private static final String TAG = "AlarmManager";
+
+    /** @hide */
+    @IntDef(prefix = { "RTC", "ELAPSED" }, value = {
+            RTC_WAKEUP,
+            RTC,
+            ELAPSED_REALTIME_WAKEUP,
+            ELAPSED_REALTIME,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface AlarmType {}
 
     /**
      * Alarm time in {@link System#currentTimeMillis System.currentTimeMillis()}
@@ -213,11 +224,7 @@ public class AlarmManager {
         @Override
         public void doAlarm(IAlarmCompleteListener alarmManager) {
             mCompletion = alarmManager;
-            mHandler.post(this);
-        }
 
-        @Override
-        public void run() {
             // Remove this listener from the wrapper cache first; the server side
             // already considers it gone
             synchronized (AlarmManager.class) {
@@ -226,6 +233,11 @@ public class AlarmManager {
                 }
             }
 
+            mHandler.post(this);
+        }
+
+        @Override
+        public void run() {
             // Now deliver it to the app
             try {
                 mListener.onAlarm();
@@ -311,8 +323,7 @@ public class AlarmManager {
      * will be treated as exact.
      * </div>
      *
-     * @param type One of {@link #ELAPSED_REALTIME}, {@link #ELAPSED_REALTIME_WAKEUP},
-     *        {@link #RTC}, or {@link #RTC_WAKEUP}.
+     * @param type type of alarm.
      * @param triggerAtMillis time in milliseconds that the alarm should go
      * off, using the appropriate clock (depending on the alarm type).
      * @param operation Action to perform when the alarm goes off;
@@ -332,7 +343,7 @@ public class AlarmManager {
      * @see #RTC
      * @see #RTC_WAKEUP
      */
-    public void set(int type, long triggerAtMillis, PendingIntent operation) {
+    public void set(@AlarmType int type, long triggerAtMillis, PendingIntent operation) {
         setImpl(type, triggerAtMillis, legacyExactLength(), 0, 0, operation, null, null,
                 null, null, null);
     }
@@ -346,8 +357,7 @@ public class AlarmManager {
      * invoked via the specified target Handler, or on the application's main looper
      * if {@code null} is passed as the {@code targetHandler} parameter.
      *
-     * @param type One of {@link #ELAPSED_REALTIME}, {@link #ELAPSED_REALTIME_WAKEUP},
-     *         {@link #RTC}, or {@link #RTC_WAKEUP}.
+     * @param type type of alarm.
      * @param triggerAtMillis time in milliseconds that the alarm should go
      *         off, using the appropriate clock (depending on the alarm type).
      * @param tag string describing the alarm, used for logging and battery-use
@@ -360,7 +370,7 @@ public class AlarmManager {
      * @param targetHandler {@link Handler} on which to execute the listener's onAlarm()
      *         callback, or {@code null} to run that callback on the main looper.
      */
-    public void set(int type, long triggerAtMillis, String tag, OnAlarmListener listener,
+    public void set(@AlarmType int type, long triggerAtMillis, String tag, OnAlarmListener listener,
             Handler targetHandler) {
         setImpl(type, triggerAtMillis, legacyExactLength(), 0, 0, null, listener, tag,
                 targetHandler, null, null);
@@ -399,8 +409,7 @@ public class AlarmManager {
      * whose {@code targetSdkVersion} is earlier than API 19 will continue to have all
      * of their alarms, including repeating alarms, treated as exact.
      *
-     * @param type One of {@link #ELAPSED_REALTIME}, {@link #ELAPSED_REALTIME_WAKEUP},
-     *        {@link #RTC}, or {@link #RTC_WAKEUP}.
+     * @param type type of alarm.
      * @param triggerAtMillis time in milliseconds that the alarm should first
      * go off, using the appropriate clock (depending on the alarm type).
      * @param intervalMillis interval in milliseconds between subsequent repeats
@@ -422,7 +431,7 @@ public class AlarmManager {
      * @see #RTC
      * @see #RTC_WAKEUP
      */
-    public void setRepeating(int type, long triggerAtMillis,
+    public void setRepeating(@AlarmType int type, long triggerAtMillis,
             long intervalMillis, PendingIntent operation) {
         setImpl(type, triggerAtMillis, legacyExactLength(), intervalMillis, 0, operation,
                 null, null, null, null, null);
@@ -448,8 +457,7 @@ public class AlarmManager {
      * at precisely-specified times with no acceptable variation, applications can use
      * {@link #setExact(int, long, PendingIntent)}.
      *
-     * @param type One of {@link #ELAPSED_REALTIME}, {@link #ELAPSED_REALTIME_WAKEUP},
-     *        {@link #RTC}, or {@link #RTC_WAKEUP}.
+     * @param type type of alarm.
      * @param windowStartMillis The earliest time, in milliseconds, that the alarm should
      *        be delivered, expressed in the appropriate clock's units (depending on the alarm
      *        type).
@@ -473,7 +481,7 @@ public class AlarmManager {
      * @see #RTC
      * @see #RTC_WAKEUP
      */
-    public void setWindow(int type, long windowStartMillis, long windowLengthMillis,
+    public void setWindow(@AlarmType int type, long windowStartMillis, long windowLengthMillis,
             PendingIntent operation) {
         setImpl(type, windowStartMillis, windowLengthMillis, 0, 0, operation,
                 null, null, null, null, null);
@@ -488,7 +496,7 @@ public class AlarmManager {
      * invoked via the specified target Handler, or on the application's main looper
      * if {@code null} is passed as the {@code targetHandler} parameter.
      */
-    public void setWindow(int type, long windowStartMillis, long windowLengthMillis,
+    public void setWindow(@AlarmType int type, long windowStartMillis, long windowLengthMillis,
             String tag, OnAlarmListener listener, Handler targetHandler) {
         setImpl(type, windowStartMillis, windowLengthMillis, 0, 0, null, listener, tag,
                 targetHandler, null, null);
@@ -508,8 +516,7 @@ public class AlarmManager {
      * scheduled as exact.  Applications are strongly discouraged from using exact
      * alarms unnecessarily as they reduce the OS's ability to minimize battery use.
      *
-     * @param type One of {@link #ELAPSED_REALTIME}, {@link #ELAPSED_REALTIME_WAKEUP},
-     *        {@link #RTC}, or {@link #RTC_WAKEUP}.
+     * @param type type of alarm.
      * @param triggerAtMillis time in milliseconds that the alarm should go
      *        off, using the appropriate clock (depending on the alarm type).
      * @param operation Action to perform when the alarm goes off;
@@ -528,7 +535,7 @@ public class AlarmManager {
      * @see #RTC
      * @see #RTC_WAKEUP
      */
-    public void setExact(int type, long triggerAtMillis, PendingIntent operation) {
+    public void setExact(@AlarmType int type, long triggerAtMillis, PendingIntent operation) {
         setImpl(type, triggerAtMillis, WINDOW_EXACT, 0, 0, operation, null, null, null,
                 null, null);
     }
@@ -542,8 +549,8 @@ public class AlarmManager {
      * invoked via the specified target Handler, or on the application's main looper
      * if {@code null} is passed as the {@code targetHandler} parameter.
      */
-    public void setExact(int type, long triggerAtMillis, String tag, OnAlarmListener listener,
-            Handler targetHandler) {
+    public void setExact(@AlarmType int type, long triggerAtMillis, String tag,
+            OnAlarmListener listener, Handler targetHandler) {
         setImpl(type, triggerAtMillis, WINDOW_EXACT, 0, 0, null, listener, tag,
                 targetHandler, null, null);
     }
@@ -553,8 +560,8 @@ public class AlarmManager {
      * the given time.
      * @hide
      */
-    public void setIdleUntil(int type, long triggerAtMillis, String tag, OnAlarmListener listener,
-            Handler targetHandler) {
+    public void setIdleUntil(@AlarmType int type, long triggerAtMillis, String tag,
+            OnAlarmListener listener, Handler targetHandler) {
         setImpl(type, triggerAtMillis, WINDOW_EXACT, 0, FLAG_IDLE_UNTIL, null,
                 listener, tag, targetHandler, null, null);
     }
@@ -590,8 +597,9 @@ public class AlarmManager {
 
     /** @hide */
     @SystemApi
-    public void set(int type, long triggerAtMillis, long windowMillis, long intervalMillis,
-            PendingIntent operation, WorkSource workSource) {
+    @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS)
+    public void set(@AlarmType int type, long triggerAtMillis, long windowMillis,
+            long intervalMillis, PendingIntent operation, WorkSource workSource) {
         setImpl(type, triggerAtMillis, windowMillis, intervalMillis, 0, operation, null, null,
                 null, workSource, null);
     }
@@ -606,8 +614,9 @@ public class AlarmManager {
      *
      * @hide
      */
-    public void set(int type, long triggerAtMillis, long windowMillis, long intervalMillis,
-            String tag, OnAlarmListener listener, Handler targetHandler, WorkSource workSource) {
+    public void set(@AlarmType int type, long triggerAtMillis, long windowMillis,
+            long intervalMillis, String tag, OnAlarmListener listener, Handler targetHandler,
+            WorkSource workSource) {
         setImpl(type, triggerAtMillis, windowMillis, intervalMillis, 0, null, listener, tag,
                 targetHandler, workSource, null);
     }
@@ -623,15 +632,18 @@ public class AlarmManager {
      * @hide
      */
     @SystemApi
-    public void set(int type, long triggerAtMillis, long windowMillis, long intervalMillis,
-            OnAlarmListener listener, Handler targetHandler, WorkSource workSource) {
+    @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS)
+    public void set(@AlarmType int type, long triggerAtMillis, long windowMillis,
+            long intervalMillis, OnAlarmListener listener, Handler targetHandler,
+            WorkSource workSource) {
         setImpl(type, triggerAtMillis, windowMillis, intervalMillis, 0, null, listener, null,
                 targetHandler, workSource, null);
     }
 
-    private void setImpl(int type, long triggerAtMillis, long windowMillis, long intervalMillis,
-            int flags, PendingIntent operation, final OnAlarmListener listener, String listenerTag,
-            Handler targetHandler, WorkSource workSource, AlarmClockInfo alarmClock) {
+    private void setImpl(@AlarmType int type, long triggerAtMillis, long windowMillis,
+            long intervalMillis, int flags, PendingIntent operation, final OnAlarmListener listener,
+            String listenerTag, Handler targetHandler, WorkSource workSource,
+            AlarmClockInfo alarmClock) {
         if (triggerAtMillis < 0) {
             /* NOTYET
             if (mAlwaysExact) {
@@ -728,8 +740,7 @@ public class AlarmManager {
      * assured that it will get similar behavior on both current and older versions
      * of Android.
      *
-     * @param type One of {@link #ELAPSED_REALTIME}, {@link #ELAPSED_REALTIME_WAKEUP},
-     *        {@link #RTC}, or {@link #RTC_WAKEUP}.
+     * @param type type of alarm.
      * @param triggerAtMillis time in milliseconds that the alarm should first
      * go off, using the appropriate clock (depending on the alarm type).  This
      * is inexact: the alarm will not fire before this time, but there may be a
@@ -763,7 +774,7 @@ public class AlarmManager {
      * @see #INTERVAL_HALF_DAY
      * @see #INTERVAL_DAY
      */
-    public void setInexactRepeating(int type, long triggerAtMillis,
+    public void setInexactRepeating(@AlarmType int type, long triggerAtMillis,
             long intervalMillis, PendingIntent operation) {
         setImpl(type, triggerAtMillis, WINDOW_HEURISTIC, intervalMillis, 0, operation, null,
                 null, null, null, null);
@@ -795,8 +806,7 @@ public class AlarmManager {
      * <p>Regardless of the app's target SDK version, this call always allows batching of the
      * alarm.</p>
      *
-     * @param type One of {@link #ELAPSED_REALTIME}, {@link #ELAPSED_REALTIME_WAKEUP},
-     *        {@link #RTC}, or {@link #RTC_WAKEUP}.
+     * @param type type of alarm.
      * @param triggerAtMillis time in milliseconds that the alarm should go
      * off, using the appropriate clock (depending on the alarm type).
      * @param operation Action to perform when the alarm goes off;
@@ -814,7 +824,8 @@ public class AlarmManager {
      * @see #RTC
      * @see #RTC_WAKEUP
      */
-    public void setAndAllowWhileIdle(int type, long triggerAtMillis, PendingIntent operation) {
+    public void setAndAllowWhileIdle(@AlarmType int type, long triggerAtMillis,
+            PendingIntent operation) {
         setImpl(type, triggerAtMillis, WINDOW_HEURISTIC, 0, FLAG_ALLOW_WHILE_IDLE,
                 operation, null, null, null, null, null);
     }
@@ -848,8 +859,7 @@ public class AlarmManager {
      * device is idle it may take even more liberties with scheduling in order to optimize
      * for battery life.</p>
      *
-     * @param type One of {@link #ELAPSED_REALTIME}, {@link #ELAPSED_REALTIME_WAKEUP},
-     *        {@link #RTC}, or {@link #RTC_WAKEUP}.
+     * @param type type of alarm.
      * @param triggerAtMillis time in milliseconds that the alarm should go
      *        off, using the appropriate clock (depending on the alarm type).
      * @param operation Action to perform when the alarm goes off;
@@ -868,7 +878,8 @@ public class AlarmManager {
      * @see #RTC
      * @see #RTC_WAKEUP
      */
-    public void setExactAndAllowWhileIdle(int type, long triggerAtMillis, PendingIntent operation) {
+    public void setExactAndAllowWhileIdle(@AlarmType int type, long triggerAtMillis,
+            PendingIntent operation) {
         setImpl(type, triggerAtMillis, WINDOW_EXACT, 0, FLAG_ALLOW_WHILE_IDLE, operation,
                 null, null, null, null, null);
     }

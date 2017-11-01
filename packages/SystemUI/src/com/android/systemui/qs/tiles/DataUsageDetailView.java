@@ -91,28 +91,28 @@ public class DataUsageDetailView extends LinearLayout {
                     formatBytes(info.usageLevel));
             bottom = res.getString(R.string.quick_settings_cellular_detail_data_limit,
                     formatBytes(info.limitLevel));
-            usageColor = mContext.getColor(R.color.system_warning_color);
+            usageColor = Utils.getDefaultColor(mContext, android.R.attr.colorError);
         }
 
         if (usageColor == 0) {
             usageColor = Utils.getColorAccent(mContext);
         }
 
-        final TextView title = (TextView) findViewById(android.R.id.title);
+        final TextView title = findViewById(android.R.id.title);
         title.setText(titleId);
-        final TextView usage = (TextView) findViewById(R.id.usage_text);
+        final TextView usage = findViewById(R.id.usage_text);
         usage.setText(formatBytes(bytes));
         usage.setTextColor(usageColor);
-        final DataUsageGraph graph = (DataUsageGraph) findViewById(R.id.usage_graph);
+        final DataUsageGraph graph = findViewById(R.id.usage_graph);
         graph.setLevels(info.limitLevel, info.warningLevel, info.usageLevel);
-        final TextView carrier = (TextView) findViewById(R.id.usage_carrier_text);
+        final TextView carrier = findViewById(R.id.usage_carrier_text);
         carrier.setText(info.carrier);
-        final TextView period = (TextView) findViewById(R.id.usage_period_text);
+        final TextView period = findViewById(R.id.usage_period_text);
         period.setText(info.period);
-        final TextView infoTop = (TextView) findViewById(R.id.usage_info_top_text);
+        final TextView infoTop = findViewById(R.id.usage_info_top_text);
         infoTop.setVisibility(top != null ? View.VISIBLE : View.GONE);
         infoTop.setText(top);
-        final TextView infoBottom = (TextView) findViewById(R.id.usage_info_bottom_text);
+        final TextView infoBottom = findViewById(R.id.usage_info_bottom_text);
         infoBottom.setVisibility(bottom != null ? View.VISIBLE : View.GONE);
         infoBottom.setText(bottom);
         boolean showLevel = info.warningLevel > 0 || info.limitLevel > 0;

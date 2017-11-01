@@ -18,15 +18,35 @@ LOCAL_PATH:= $(call my-dir)
 
 # Build the legacy-test library
 # =============================
-# This contains the junit.framework classes that were in Android API level 25.
+# This contains the junit.framework and android.test classes that were in
+# Android API level 25 excluding those from android.test.runner.
+# Also contains the com.android.internal.util.Predicate[s] classes.
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES := $(call all-java-files-under, src)
+
 LOCAL_MODULE := legacy-test
 LOCAL_NO_STANDARD_LIBRARIES := true
 LOCAL_JAVA_LIBRARIES := core-oj core-libart framework
 
 include $(BUILD_JAVA_LIBRARY)
+
+# Build the legacy-android-test library
+# =====================================
+# This contains the android.test classes that were in Android API level 25,
+# including those from android.test.runner.
+# Also contains the com.android.internal.util.Predicate[s] classes.
+include $(CLEAR_VARS)
+
+LOCAL_SRC_FILES := \
+    $(call all-java-files-under, src/android) \
+    $(call all-java-files-under, ../test-runner/src/android) \
+    $(call all-java-files-under, src/com)
+LOCAL_MODULE := legacy-android-test
+LOCAL_NO_STANDARD_LIBRARIES := true
+LOCAL_JAVA_LIBRARIES := core-oj core-libart framework junit
+
+include $(BUILD_STATIC_JAVA_LIBRARY)
 
 ifeq ($(HOST_OS),linux)
 # Build the legacy-performance-test-hostdex library
@@ -37,5 +57,5 @@ include $(CLEAR_VARS)
 LOCAL_SRC_FILES := src/android/test/PerformanceTestCase.java
 LOCAL_MODULE := legacy-performance-test-hostdex
 
-include $(BUILD_HOST_DALVIK_JAVA_LIBRARY)
+include $(BUILD_HOST_DALVIK_STATIC_JAVA_LIBRARY)
 endif  # HOST_OS == linux

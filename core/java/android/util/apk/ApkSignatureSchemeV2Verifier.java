@@ -17,6 +17,7 @@
 package android.util.apk;
 
 import android.system.ErrnoException;
+import android.system.Os;
 import android.system.OsConstants;
 import android.util.ArrayMap;
 import android.util.Pair;
@@ -58,9 +59,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import libcore.io.Libcore;
-import libcore.io.Os;
 
 /**
  * APK Signature Scheme v2 verifier.
@@ -994,8 +992,7 @@ public class ApkSignatureSchemeV2Verifier {
      * {@link DataSource#feedIntoMessageDigests(MessageDigest[], long, int) feedIntoMessageDigests}.
      */
     private static final class MemoryMappedFileDataSource implements DataSource {
-        private static final Os OS = Libcore.os;
-        private static final long MEMORY_PAGE_SIZE_BYTES = OS.sysconf(OsConstants._SC_PAGESIZE);
+        private static final long MEMORY_PAGE_SIZE_BYTES = Os.sysconf(OsConstants._SC_PAGESIZE);
 
         private final FileDescriptor mFd;
         private final long mFilePosition;
@@ -1041,7 +1038,7 @@ public class ApkSignatureSchemeV2Verifier {
             long mmapRegionSize = size + dataStartOffsetInMmapRegion;
             long mmapPtr = 0;
             try {
-                mmapPtr = OS.mmap(
+                mmapPtr = Os.mmap(
                         0, // let the OS choose the start address of the region in memory
                         mmapRegionSize,
                         OsConstants.PROT_READ,
@@ -1066,7 +1063,7 @@ public class ApkSignatureSchemeV2Verifier {
             } finally {
                 if (mmapPtr != 0) {
                     try {
-                        OS.munmap(mmapPtr, mmapRegionSize);
+                        Os.munmap(mmapPtr, mmapRegionSize);
                     } catch (ErrnoException ignored) {}
                 }
             }

@@ -18,8 +18,11 @@ package android.view;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.graphics.Bitmap;
+import android.graphics.Rect;
 import android.os.Handler;
+import android.view.ViewTreeObserver.OnDrawListener;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -105,6 +108,32 @@ public final class PixelCopy {
     }
 
     /**
+     * Requests for the display content of a {@link SurfaceView} to be copied
+     * into a provided {@link Bitmap}.
+     *
+     * The contents of the source will be scaled to fit exactly inside the bitmap.
+     * The pixel format of the source buffer will be converted, as part of the copy,
+     * to fit the the bitmap's {@link Bitmap.Config}. The most recently queued buffer
+     * in the SurfaceView's Surface will be used as the source of the copy.
+     *
+     * @param source The source from which to copy
+     * @param srcRect The area of the source to copy from. If this is null
+     * the copy area will be the entire surface. The rect will be clamped to
+     * the bounds of the Surface.
+     * @param dest The destination of the copy. The source will be scaled to
+     * match the width, height, and format of this bitmap.
+     * @param listener Callback for when the pixel copy request completes
+     * @param listenerThread The callback will be invoked on this Handler when
+     * the copy is finished.
+     */
+    public static void request(@NonNull SurfaceView source, @Nullable Rect srcRect,
+            @NonNull Bitmap dest, @NonNull OnPixelCopyFinishedListener listener,
+            @NonNull Handler listenerThread) {
+        request(source.getHolder().getSurface(), srcRect,
+                dest, listener, listenerThread);
+    }
+
+    /**
      * Requests a copy of the pixels from a {@link Surface} to be copied into
      * a provided {@link Bitmap}.
      *
@@ -122,18 +151,126 @@ public final class PixelCopy {
      */
     public static void request(@NonNull Surface source, @NonNull Bitmap dest,
             @NonNull OnPixelCopyFinishedListener listener, @NonNull Handler listenerThread) {
+        request(source, null, dest, listener, listenerThread);
+    }
+
+    /**
+     * Requests a copy of the pixels at the provided {@link Rect} from
+     * a {@link Surface} to be copied into a provided {@link Bitmap}.
+     *
+     * The contents of the source rect will be scaled to fit exactly inside the bitmap.
+     * The pixel format of the source buffer will be converted, as part of the copy,
+     * to fit the the bitmap's {@link Bitmap.Config}. The most recently queued buffer
+     * in the Surface will be used as the source of the copy.
+     *
+     * @param source The source from which to copy
+     * @param srcRect The area of the source to copy from. If this is null
+     * the copy area will be the entire surface. The rect will be clamped to
+     * the bounds of the Surface.
+     * @param dest The destination of the copy. The source will be scaled to
+     * match the width, height, and format of this bitmap.
+     * @param listener Callback for when the pixel copy request completes
+     * @param listenerThread The callback will be invoked on this Handler when
+     * the copy is finished.
+     */
+    public static void request(@NonNull Surface source, @Nullable Rect srcRect,
+            @NonNull Bitmap dest, @NonNull OnPixelCopyFinishedListener listener,
+            @NonNull Handler listenerThread) {
         validateBitmapDest(dest);
         if (!source.isValid()) {
             throw new IllegalArgumentException("Surface isn't valid, source.isValid() == false");
         }
+        if (srcRect != null && srcRect.isEmpty()) {
+            throw new IllegalArgumentException("sourceRect is empty");
+        }
         // TODO: Make this actually async and fast and cool and stuff
-        int result = ThreadedRenderer.copySurfaceInto(source, dest);
+        int result = ThreadedRenderer.copySurfaceInto(source, srcRect, dest);
         listenerThread.post(new Runnable() {
             @Override
             public void run() {
                 listener.onPixelCopyFinished(result);
             }
         });
+    }
+
+    /**
+     * Requests a copy of the pixels from a {@link Window} to be copied into
+     * a provided {@link Bitmap}.
+     *
+     * The contents of the source will be scaled to fit exactly inside the bitmap.
+     * The pixel format of the source buffer will be converted, as part of the copy,
+     * to fit the the bitmap's {@link Bitmap.Config}. The most recently queued buffer
+     * in the Window's Surface will be used as the source of the copy.
+     *
+     * Note: This is limited to being able to copy from Window's with a non-null
+     * DecorView. If {@link Window#peekDecorView()} is null this throws an
+     * {@link IllegalArgumentException}. It will similarly throw an exception
+     * if the DecorView has not yet acquired a backing surface. It is recommended
+     * that {@link OnDrawListener} is used to ensure that at least one draw
+     * has happened before trying to copy from the window, otherwise either
+     * an {@link IllegalArgumentException} will be thrown or an error will
+     * be returned to the {@link OnPixelCopyFinishedListener}.
+     *
+     * @param source The source from which to copy
+     * @param dest The destination of the copy. The source will be scaled to
+     * match the width, height, and format of this bitmap.
+     * @param listener Callback for when the pixel copy request completes
+     * @param listenerThread The callback will be invoked on this Handler when
+     * the copy is finished.
+     */
+    public static void request(@NonNull Window source, @NonNull Bitmap dest,
+            @NonNull OnPixelCopyFinishedListener listener, @NonNull Handler listenerThread) {
+        request(source, null, dest, listener, listenerThread);
+    }
+
+    /**
+     * Requests a copy of the pixels at the provided {@link Rect} from
+     * a {@link Window} to be copied into a provided {@link Bitmap}.
+     *
+     * The contents of the source rect will be scaled to fit exactly inside the bitmap.
+     * The pixel format of the source buffer will be converted, as part of the copy,
+     * to fit the the bitmap's {@link Bitmap.Config}. The most recently queued buffer
+     * in the Window's Surface will be used as the source of the copy.
+     *
+     * Note: This is limited to being able to copy from Window's with a non-null
+     * DecorView. If {@link Window#peekDecorView()} is null this throws an
+     * {@link IllegalArgumentException}. It will similarly throw an exception
+     * if the DecorView has not yet acquired a backing surface. It is recommended
+     * that {@link OnDrawListener} is used to ensure that at least one draw
+     * has happened before trying to copy from the window, otherwise either
+     * an {@link IllegalArgumentException} will be thrown or an error will
+     * be returned to the {@link OnPixelCopyFinishedListener}.
+     *
+     * @param source The source from which to copy
+     * @param srcRect The area of the source to copy from. If this is null
+     * the copy area will be the entire surface. The rect will be clamped to
+     * the bounds of the Surface.
+     * @param dest The destination of the copy. The source will be scaled to
+     * match the width, height, and format of this bitmap.
+     * @param listener Callback for when the pixel copy request completes
+     * @param listenerThread The callback will be invoked on this Handler when
+     * the copy is finished.
+     */
+    public static void request(@NonNull Window source, @Nullable Rect srcRect,
+            @NonNull Bitmap dest, @NonNull OnPixelCopyFinishedListener listener,
+            @NonNull Handler listenerThread) {
+        validateBitmapDest(dest);
+        if (source == null) {
+            throw new IllegalArgumentException("source is null");
+        }
+        if (source.peekDecorView() == null) {
+            throw new IllegalArgumentException(
+                    "Only able to copy windows with decor views");
+        }
+        Surface surface = null;
+        if (source.peekDecorView().getViewRootImpl() != null) {
+            surface = source.peekDecorView().getViewRootImpl().mSurface;
+        }
+        if (surface == null || !surface.isValid()) {
+            throw new IllegalArgumentException(
+                    "Window doesn't have a backing surface!");
+        }
+        request(surface, srcRect, dest, listener, listenerThread);
     }
 
     private static void validateBitmapDest(Bitmap bitmap) {

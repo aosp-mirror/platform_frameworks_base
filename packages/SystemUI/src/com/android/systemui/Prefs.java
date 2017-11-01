@@ -41,14 +41,16 @@ public final class Prefs {
         Key.DND_FAVORITE_BUCKET_INDEX,
         Key.DND_NONE_SELECTED,
         Key.DND_FAVORITE_ZEN,
-        Key.TV_PICTURE_IN_PICTURE_ONBOARDING_SHOWN,
         Key.QS_HOTSPOT_ADDED,
         Key.QS_DATA_SAVER_ADDED,
         Key.QS_DATA_SAVER_DIALOG_SHOWN,
         Key.QS_INVERT_COLORS_ADDED,
         Key.QS_WORK_ADDED,
+        Key.QS_NIGHTDISPLAY_ADDED,
+        Key.SEEN_MULTI_USER,
     })
     public @interface Key {
+        @Deprecated
         String OVERVIEW_LAST_STACK_TASK_ACTIVE_TIME = "OverviewLastStackTaskActiveTime";
         String DEBUG_MODE_ENABLED = "debugModeEnabled";
         String HOTSPOT_TILE_LAST_USED = "HotspotTileLastUsed";
@@ -57,15 +59,22 @@ public final class Prefs {
         String DND_TILE_COMBINED_ICON = "DndTileCombinedIcon";
         String DND_CONFIRMED_PRIORITY_INTRODUCTION = "DndConfirmedPriorityIntroduction";
         String DND_CONFIRMED_SILENCE_INTRODUCTION = "DndConfirmedSilenceIntroduction";
+        String DND_CONFIRMED_ALARM_INTRODUCTION = "DndConfirmedAlarmIntroduction";
         String DND_FAVORITE_BUCKET_INDEX = "DndCountdownMinuteIndex";
         String DND_NONE_SELECTED = "DndNoneSelected";
         String DND_FAVORITE_ZEN = "DndFavoriteZen";
-        String TV_PICTURE_IN_PICTURE_ONBOARDING_SHOWN = "TvPictureInPictureOnboardingShown";
-        String QS_HOTSPOT_ADDED = "QsHotspotAdded";
-        String QS_DATA_SAVER_ADDED = "QsDataSaverAdded";
         String QS_DATA_SAVER_DIALOG_SHOWN = "QsDataSaverDialogShown";
+        @Deprecated
+        String QS_HOTSPOT_ADDED = "QsHotspotAdded";
+        @Deprecated
+        String QS_DATA_SAVER_ADDED = "QsDataSaverAdded";
+        @Deprecated
         String QS_INVERT_COLORS_ADDED = "QsInvertColorsAdded";
+        @Deprecated
         String QS_WORK_ADDED = "QsWorkAdded";
+        @Deprecated
+        String QS_NIGHTDISPLAY_ADDED = "QsNightDisplayAdded";
+        String SEEN_MULTI_USER = "HasSeenMultiUser";
     }
 
     public static boolean getBoolean(Context context, @Key String key, boolean defaultValue) {

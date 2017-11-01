@@ -14,41 +14,46 @@
  * limitations under the License.
  */
 
-#include "test/Common.h"
 #include "xml/XmlUtil.h"
 
-#include <gtest/gtest.h>
+#include "test/Test.h"
 
 namespace aapt {
 
 TEST(XmlUtilTest, ExtractPackageFromNamespace) {
-    AAPT_ASSERT_FALSE(xml::extractPackageFromNamespace(u"com.android"));
-    AAPT_ASSERT_FALSE(xml::extractPackageFromNamespace(u"http://schemas.android.com/apk"));
-    AAPT_ASSERT_FALSE(xml::extractPackageFromNamespace(u"http://schemas.android.com/apk/res"));
-    AAPT_ASSERT_FALSE(xml::extractPackageFromNamespace(u"http://schemas.android.com/apk/res/"));
-    AAPT_ASSERT_FALSE(xml::extractPackageFromNamespace(
-            u"http://schemas.android.com/apk/prv/res/"));
+  AAPT_ASSERT_FALSE(xml::ExtractPackageFromNamespace("com.android"));
+  AAPT_ASSERT_FALSE(
+      xml::ExtractPackageFromNamespace("http://schemas.android.com/apk"));
+  AAPT_ASSERT_FALSE(
+      xml::ExtractPackageFromNamespace("http://schemas.android.com/apk/res"));
+  AAPT_ASSERT_FALSE(
+      xml::ExtractPackageFromNamespace("http://schemas.android.com/apk/res/"));
+  AAPT_ASSERT_FALSE(xml::ExtractPackageFromNamespace(
+      "http://schemas.android.com/apk/prv/res/"));
 
-    Maybe<xml::ExtractedPackage> p =
-            xml::extractPackageFromNamespace(u"http://schemas.android.com/apk/res/a");
-    AAPT_ASSERT_TRUE(p);
-    EXPECT_EQ(std::u16string(u"a"), p.value().package);
-    EXPECT_FALSE(p.value().privateNamespace);
+  Maybe<xml::ExtractedPackage> p =
+      xml::ExtractPackageFromNamespace("http://schemas.android.com/apk/res/a");
+  AAPT_ASSERT_TRUE(p);
+  EXPECT_EQ(std::string("a"), p.value().package);
+  EXPECT_FALSE(p.value().private_namespace);
 
-    p = xml::extractPackageFromNamespace(u"http://schemas.android.com/apk/prv/res/android");
-    AAPT_ASSERT_TRUE(p);
-    EXPECT_EQ(std::u16string(u"android"), p.value().package);
-    EXPECT_TRUE(p.value().privateNamespace);
+  p = xml::ExtractPackageFromNamespace(
+      "http://schemas.android.com/apk/prv/res/android");
+  AAPT_ASSERT_TRUE(p);
+  EXPECT_EQ(std::string("android"), p.value().package);
+  EXPECT_TRUE(p.value().private_namespace);
 
-    p = xml::extractPackageFromNamespace(u"http://schemas.android.com/apk/prv/res/com.test");
-    AAPT_ASSERT_TRUE(p);
-    EXPECT_EQ(std::u16string(u"com.test"), p.value().package);
-    EXPECT_TRUE(p.value().privateNamespace);
+  p = xml::ExtractPackageFromNamespace(
+      "http://schemas.android.com/apk/prv/res/com.test");
+  AAPT_ASSERT_TRUE(p);
+  EXPECT_EQ(std::string("com.test"), p.value().package);
+  EXPECT_TRUE(p.value().private_namespace);
 
-    p = xml::extractPackageFromNamespace(u"http://schemas.android.com/apk/res-auto");
-    AAPT_ASSERT_TRUE(p);
-    EXPECT_EQ(std::u16string(), p.value().package);
-    EXPECT_TRUE(p.value().privateNamespace);
+  p = xml::ExtractPackageFromNamespace(
+      "http://schemas.android.com/apk/res-auto");
+  AAPT_ASSERT_TRUE(p);
+  EXPECT_EQ(std::string(), p.value().package);
+  EXPECT_TRUE(p.value().private_namespace);
 }
 
-} // namespace aapt
+}  // namespace aapt

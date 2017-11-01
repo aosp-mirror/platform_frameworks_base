@@ -16,8 +16,11 @@
 
 package android.hardware.usb;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
+import com.android.internal.util.Preconditions;
 
 /**
  * This class represents a USB device attached to the android device with the android device
@@ -34,7 +37,7 @@ import android.os.Parcelable;
  * <div class="special reference">
  * <h3>Developer Guides</h3>
  * <p>For more information about communicating with USB hardware, read the
- * <a href="{@docRoot}guide/topics/usb/index.html">USB</a> developer guide.</p>
+ * <a href="{@docRoot}guide/topics/connectivity/usb/index.html">USB</a> developer guide.</p>
  * </div>
  */
 public class UsbDevice implements Parcelable {
@@ -42,29 +45,31 @@ public class UsbDevice implements Parcelable {
     private static final String TAG = "UsbDevice";
     private static final boolean DEBUG = false;
 
-    private final String mName;
-    private final String mManufacturerName;
-    private final String mProductName;
-    private final String mVersion;
-    private final String mSerialNumber;
+    private final @NonNull String mName;
+    private final @Nullable String mManufacturerName;
+    private final @Nullable String mProductName;
+    private final @NonNull String mVersion;
+    private final @Nullable String mSerialNumber;
     private final int mVendorId;
     private final int mProductId;
     private final int mClass;
     private final int mSubclass;
     private final int mProtocol;
-    private Parcelable[] mConfigurations;
 
-    // list of all interfaces on the device
-    private UsbInterface[] mInterfaces;
+    /** All configurations for this device, only null during creation */
+    private @Nullable Parcelable[] mConfigurations;
+
+    /** All interfaces on the device. Initialized on first call to getInterfaceList */
+    private @Nullable UsbInterface[] mInterfaces;
 
     /**
      * UsbDevice should only be instantiated by UsbService implementation
      * @hide
      */
-    public UsbDevice(String name, int vendorId, int productId,
-            int Class, int subClass, int protocol,
-            String manufacturerName, String productName, String version, String serialNumber) {
-        mName = name;
+    public UsbDevice(@NonNull String name, int vendorId, int productId, int Class, int subClass,
+            int protocol, @Nullable String manufacturerName, @Nullable String productName,
+            @NonNull String version, @Nullable String serialNumber) {
+        mName = Preconditions.checkNotNull(name);
         mVendorId = vendorId;
         mProductId = productId;
         mClass = Class;
@@ -72,7 +77,7 @@ public class UsbDevice implements Parcelable {
         mProtocol = protocol;
         mManufacturerName = manufacturerName;
         mProductName = productName;
-        mVersion = version;
+        mVersion = Preconditions.checkStringNotEmpty(version);
         mSerialNumber = serialNumber;
     }
 
@@ -83,25 +88,25 @@ public class UsbDevice implements Parcelable {
      *
      * @return the device name
      */
-    public String getDeviceName() {
+    public @NonNull String getDeviceName() {
         return mName;
     }
 
     /**
      * Returns the manufacturer name of the device.
      *
-     * @return the manufacturer name
+     * @return the manufacturer name, or {@code null} if the property could not be read
      */
-    public String getManufacturerName() {
+    public @Nullable String getManufacturerName() {
         return mManufacturerName;
     }
 
     /**
      * Returns the product name of the device.
      *
-     * @return the product name
+     * @return the product name, or {@code null} if the property could not be read
      */
-    public String getProductName() {
+    public @Nullable String getProductName() {
         return mProductName;
     }
 
@@ -110,16 +115,16 @@ public class UsbDevice implements Parcelable {
      *
      * @return the device version
      */
-    public String getVersion() {
+    public @NonNull String getVersion() {
         return mVersion;
     }
 
     /**
      * Returns the serial number of the device.
      *
-     * @return the serial number name
+     * @return the serial number name, or {@code null} if the property could not be read
      */
-    public String getSerialNumber() {
+    public @Nullable String getSerialNumber() {
         return mSerialNumber;
     }
 
@@ -195,11 +200,11 @@ public class UsbDevice implements Parcelable {
      *
      * @return the configuration
      */
-    public UsbConfiguration getConfiguration(int index) {
+    public @NonNull UsbConfiguration getConfiguration(int index) {
         return (UsbConfiguration)mConfigurations[index];
     }
 
-    private UsbInterface[] getInterfaceList() {
+    private @Nullable UsbInterface[] getInterfaceList() {
         if (mInterfaces == null) {
             int configurationCount = mConfigurations.length;
             int interfaceCount = 0;
@@ -240,7 +245,7 @@ public class UsbDevice implements Parcelable {
      *
      * @return the interface
      */
-    public UsbInterface getInterface(int index) {
+    public @NonNull UsbInterface getInterface(int index) {
         return getInterfaceList()[index];
     }
 
@@ -248,8 +253,8 @@ public class UsbDevice implements Parcelable {
      * Only used by UsbService implementation
      * @hide
      */
-    public void setConfigurations(Parcelable[] configuration) {
-        mConfigurations = configuration;
+    public void setConfigurations(@NonNull Parcelable[] configuration) {
+        mConfigurations = Preconditions.checkArrayElementsNotNull(configuration, "configuration");
     }
 
     @Override

@@ -17,10 +17,11 @@
 package android.text;
 
 import android.annotation.Nullable;
-import android.graphics.Canvas;
+import android.graphics.BaseCanvas;
 import android.graphics.Paint;
 import android.util.Log;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.GrowingArrayUtils;
 
@@ -73,8 +74,6 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
         mSpanFlags = EmptyArray.INT;
         mSpanMax = EmptyArray.INT;
         mSpanOrder = EmptyArray.INT;
-        mPrioSortBuffer = EmptyArray.INT;
-        mOrderSortBuffer = EmptyArray.INT;
 
         if (text instanceof Spanned) {
             Spanned sp = (Spanned) text;
@@ -99,7 +98,7 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
                 if (en > end - start)
                     en = end - start;
 
-                setSpan(false, spans[i], st, en, fl);
+                setSpan(false, spans[i], st, en, fl, false/*enforceParagraph*/);
             }
             restoreInvariants();
         }
@@ -356,7 +355,8 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
                 }
 
                 if (spanStart != ost || spanEnd != oen) {
-                    setSpan(false, mSpans[i], spanStart, spanEnd, mSpanFlags[i]);
+                    setSpan(false, mSpans[i], spanStart, spanEnd, mSpanFlags[i],
+                            true/*enforceParagraph*/);
                     changed = true;
                 }
             }
@@ -431,13 +431,8 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
                     int copySpanEnd = en - csStart + start;
                     int copySpanFlags = sp.getSpanFlags(spans[i]) | SPAN_ADDED;
 
-                    int flagsStart = (copySpanFlags & START_MASK) >> START_SHIFT;
-                    int flagsEnd = copySpanFlags & END_MASK;
-
-                    if(!isInvalidParagraphStart(copySpanStart, flagsStart) &&
-                            !isInvalidParagraphEnd(copySpanEnd, flagsEnd)) {
-                        setSpan(false, spans[i], copySpanStart, copySpanEnd, copySpanFlags);
-                    }
+                    setSpan(false, spans[i], copySpanStart, copySpanEnd, copySpanFlags,
+                            false/*enforceParagraph*/);
                 }
             }
             restoreInvariants();
@@ -559,7 +554,7 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
 
                 changed = true;
                 setSpan(false, Selection.SELECTION_START, selectionStart, selectionStart,
-                        Spanned.SPAN_POINT_POINT);
+                        Spanned.SPAN_POINT_POINT, true/*enforceParagraph*/);
             }
             if (selectionEnd > start && selectionEnd < end) {
                 final long diff = selectionEnd - start;
@@ -568,7 +563,7 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
 
                 changed = true;
                 setSpan(false, Selection.SELECTION_END, selectionEnd, selectionEnd,
-                        Spanned.SPAN_POINT_POINT);
+                        Spanned.SPAN_POINT_POINT, true/*enforceParagraph*/);
             }
             if (changed) {
                 restoreInvariants();
@@ -674,23 +669,34 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
      * inserted at the start or end of the span's range.
      */
     public void setSpan(Object what, int start, int end, int flags) {
-        setSpan(true, what, start, end, flags);
+        setSpan(true, what, start, end, flags, true/*enforceParagraph*/);
     }
 
     // Note: if send is false, then it is the caller's responsibility to restore
     // invariants. If send is false and the span already exists, then this method
     // will not change the index of any spans.
-    private void setSpan(boolean send, Object what, int start, int end, int flags) {
+    private void setSpan(boolean send, Object what, int start, int end, int flags,
+            boolean enforceParagraph) {
         checkRange("setSpan", start, end);
 
         int flagsStart = (flags & START_MASK) >> START_SHIFT;
-        if(isInvalidParagraphStart(start, flagsStart)) {
-            throw new RuntimeException("PARAGRAPH span must start at paragraph boundary");
+        if (isInvalidParagraph(start, flagsStart)) {
+            if (!enforceParagraph) {
+                // do not set the span
+                return;
+            }
+            throw new RuntimeException("PARAGRAPH span must start at paragraph boundary"
+                    + " (" + start + " follows " + charAt(start - 1) + ")");
         }
 
         int flagsEnd = flags & END_MASK;
-        if(isInvalidParagraphEnd(end, flagsEnd)) {
-            throw new RuntimeException("PARAGRAPH span must end at paragraph boundary");
+        if (isInvalidParagraph(end, flagsEnd)) {
+            if (!enforceParagraph) {
+                // do not set the span
+                return;
+            }
+            throw new RuntimeException("PARAGRAPH span must end at paragraph boundary"
+                    + " (" + end + " follows " + charAt(end - 1) + ")");
         }
 
         // 0-length Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
@@ -768,26 +774,8 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
         }
     }
 
-    private final boolean isInvalidParagraphStart(int start, int flagsStart) {
-        if (flagsStart == PARAGRAPH) {
-            if (start != 0 && start != length()) {
-                char c = charAt(start - 1);
-
-                if (c != '\n') return true;
-            }
-        }
-        return false;
-    }
-
-    private final boolean isInvalidParagraphEnd(int end, int flagsEnd) {
-        if (flagsEnd == PARAGRAPH) {
-            if (end != 0 && end != length()) {
-                char c = charAt(end - 1);
-
-                if (c != '\n') return true;
-            }
-        }
-        return false;
+    private boolean isInvalidParagraph(int index, int flag) {
+        return flag == PARAGRAPH && index != 0 && index != length() && charAt(index - 1) != '\n';
     }
 
     /**
@@ -856,14 +844,14 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
      * @param queryStart Start index.
      * @param queryEnd End index.
      * @param kind Class type to search for.
-     * @param sort If true the results are sorted by the insertion order.
+     * @param sortByInsertionOrder If true the results are sorted by the insertion order.
      * @param <T>
      * @return Array of the spans. Empty array if no results are found.
      *
      * @hide
      */
     public <T> T[] getSpans(int queryStart, int queryEnd, @Nullable Class<T> kind,
-                                 boolean sort) {
+            boolean sortByInsertionOrder) {
         if (kind == null) return (T[]) ArrayUtils.emptyArray(Object.class);
         if (mSpanCount == 0) return ArrayUtils.emptyArray(kind);
         int count = countSpans(queryStart, queryEnd, kind, treeRoot());
@@ -873,13 +861,15 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
 
         // Safe conversion, but requires a suppressWarning
         T[] ret = (T[]) Array.newInstance(kind, count);
-        if (sort) {
-            mPrioSortBuffer = checkSortBuffer(mPrioSortBuffer, count);
-            mOrderSortBuffer = checkSortBuffer(mOrderSortBuffer, count);
+        final int[] prioSortBuffer = sortByInsertionOrder ? obtain(count) : EmptyArray.INT;
+        final int[] orderSortBuffer = sortByInsertionOrder ? obtain(count) : EmptyArray.INT;
+        getSpansRec(queryStart, queryEnd, kind, treeRoot(), ret, prioSortBuffer,
+                orderSortBuffer, 0, sortByInsertionOrder);
+        if (sortByInsertionOrder) {
+            sort(ret, prioSortBuffer, orderSortBuffer);
+            recycle(prioSortBuffer);
+            recycle(orderSortBuffer);
         }
-        getSpansRec(queryStart, queryEnd, kind, treeRoot(), ret, mPrioSortBuffer,
-                mOrderSortBuffer, 0, sort);
-        if (sort) sort(ret, mPrioSortBuffer, mOrderSortBuffer);
         return ret;
     }
 
@@ -992,15 +982,63 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
     }
 
     /**
+     * Obtain a temporary sort buffer.
+     *
+     * @param elementCount the size of the int[] to be returned
+     * @return an int[] with elementCount length
+     */
+    private static int[] obtain(final int elementCount) {
+        int[] result = null;
+        synchronized (sCachedIntBuffer) {
+            // try finding a tmp buffer with length of at least elementCount
+            // if not get the first available one
+            int candidateIndex = -1;
+            for (int i = sCachedIntBuffer.length - 1; i >= 0; i--) {
+                if (sCachedIntBuffer[i] != null) {
+                    if (sCachedIntBuffer[i].length >= elementCount) {
+                        candidateIndex = i;
+                        break;
+                    } else if (candidateIndex == -1) {
+                        candidateIndex = i;
+                    }
+                }
+            }
+
+            if (candidateIndex != -1) {
+                result = sCachedIntBuffer[candidateIndex];
+                sCachedIntBuffer[candidateIndex] = null;
+            }
+        }
+        result = checkSortBuffer(result, elementCount);
+        return result;
+    }
+
+    /**
+     * Recycle sort buffer.
+     *
+     * @param buffer buffer to be recycled
+     */
+    private static void recycle(int[] buffer) {
+        synchronized (sCachedIntBuffer) {
+            for (int i = 0; i < sCachedIntBuffer.length; i++) {
+                if (sCachedIntBuffer[i] == null || buffer.length > sCachedIntBuffer[i].length) {
+                    sCachedIntBuffer[i] = buffer;
+                    break;
+                }
+            }
+        }
+    }
+
+    /**
      * Check the size of the buffer and grow if required.
      *
-     * @param buffer Buffer to be checked.
-     * @param size Required size.
+     * @param buffer buffer to be checked.
+     * @param size   required size.
      * @return Same buffer instance if the current size is greater than required size. Otherwise a
      * new instance is created and returned.
      */
-    private final int[] checkSortBuffer(int[] buffer, int size) {
-        if(size > buffer.length) {
+    private static int[] checkSortBuffer(int[] buffer, int size) {
+        if (buffer == null || size > buffer.length) {
             return ArrayUtils.newUnpaddedIntArray(GrowingArrayUtils.growSize(size));
         }
         return buffer;
@@ -1025,16 +1063,19 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
         }
 
         for (int i = size - 1; i > 0; i--) {
-            T v = array[0];
-            int prio = priority[0];
-            int insertOrder = insertionOrder[0];
+            final T tmpSpan =  array[0];
             array[0] = array[i];
+            array[i] = tmpSpan;
+
+            final int tmpPriority =  priority[0];
             priority[0] = priority[i];
+            priority[i] = tmpPriority;
+
+            final int tmpOrder =  insertionOrder[0];
             insertionOrder[0] = insertionOrder[i];
+            insertionOrder[i] = tmpOrder;
+
             siftDown(0, array, i, priority, insertionOrder);
-            array[i] = v;
-            priority[i] = prio;
-            insertionOrder[i] = insertOrder;
         }
     }
 
@@ -1050,10 +1091,6 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
      */
     private final <T> void siftDown(int index, T[] array, int size, int[] priority,
                                     int[] insertionOrder) {
-        T v = array[index];
-        int prio = priority[index];
-        int insertOrder = insertionOrder[index];
-
         int left = 2 * index + 1;
         while (left < size) {
             if (left < size - 1 && compareSpans(left, left + 1, priority, insertionOrder) < 0) {
@@ -1062,15 +1099,22 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
             if (compareSpans(index, left, priority, insertionOrder) >= 0) {
                 break;
             }
+
+            final T tmpSpan =  array[index];
             array[index] = array[left];
+            array[left] = tmpSpan;
+
+            final int tmpPriority =  priority[index];
             priority[index] = priority[left];
+            priority[left] = tmpPriority;
+
+            final int tmpOrder =  insertionOrder[index];
             insertionOrder[index] = insertionOrder[left];
+            insertionOrder[left] = tmpOrder;
+
             index = left;
             left = 2 * index + 1;
         }
-        array[index] = v;
-        priority[index] = prio;
-        insertionOrder[index] = insertOrder;
     }
 
     /**
@@ -1357,7 +1401,8 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
      * Don't call this yourself -- exists for Canvas to use internally.
      * {@hide}
      */
-    public void drawText(Canvas c, int start, int end, float x, float y, Paint p) {
+    @Override
+    public void drawText(BaseCanvas c, int start, int end, float x, float y, Paint p) {
         checkRange("drawText", start, end);
 
         if (end <= mGapStart) {
@@ -1378,7 +1423,8 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
      * Don't call this yourself -- exists for Canvas to use internally.
      * {@hide}
      */
-    public void drawTextRun(Canvas c, int start, int end, int contextStart, int contextEnd,
+    @Override
+    public void drawTextRun(BaseCanvas c, int start, int end, int contextStart, int contextEnd,
             float x, float y, boolean isRtl, Paint p) {
         checkRange("drawTextRun", start, end);
 
@@ -1702,6 +1748,10 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
     }
 
     private static final InputFilter[] NO_FILTERS = new InputFilter[0];
+
+    @GuardedBy("sCachedIntBuffer")
+    private static final int[][] sCachedIntBuffer = new int[6][0];
+
     private InputFilter[] mFilters = NO_FILTERS;
 
     private char[] mText;
@@ -1715,8 +1765,6 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
     private int[] mSpanFlags;
     private int[] mSpanOrder;  // store the order of span insertion
     private int mSpanInsertCount;  // counter for the span insertion
-    private int[] mPrioSortBuffer;  // buffer used to sort getSpans result
-    private int[] mOrderSortBuffer;  // buffer used to sort getSpans result
 
     private int mSpanCount;
     private IdentityHashMap<Object, Integer> mIndexOfSpan;

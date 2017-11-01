@@ -16,7 +16,9 @@
 
 package android.media.midi;
 
+import android.annotation.SystemService;
 import android.bluetooth.BluetoothDevice;
+import android.content.Context;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.Bundle;
@@ -28,13 +30,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * This class is the public application interface to the MIDI service.
- *
- * <p>You can obtain an instance of this class by calling
- * {@link android.content.Context#getSystemService(java.lang.String) Context.getSystemService()}.
- *
- * {@samplecode
- * MidiManager manager = (MidiManager) getSystemService(Context.MIDI_SERVICE);}
  */
+@SystemService(Context.MIDI_SERVICE)
 public final class MidiManager {
     private static final String TAG = "MidiManager";
 

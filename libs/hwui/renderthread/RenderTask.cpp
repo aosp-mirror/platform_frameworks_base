@@ -26,6 +26,7 @@ namespace renderthread {
 void SignalingRenderTask::run() {
     mTask->run();
     mLock->lock();
+    mHasRun = true;
     mSignal->signal();
     mLock->unlock();
 }

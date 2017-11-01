@@ -21,10 +21,9 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ServiceInfo;
+import android.content.ServiceConnection;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Handler;
@@ -38,6 +37,7 @@ import android.service.quicksettings.TileService;
 import android.support.annotation.VisibleForTesting;
 import android.util.ArraySet;
 import android.util.Log;
+import com.android.systemui.qs.external.PackageManagerAdapter;
 
 import libcore.util.Objects;
 
@@ -63,7 +63,7 @@ public class TileLifecycleManager extends BroadcastReceiver implements
 
     // Bind retry control.
     private static final int MAX_BIND_RETRIES = 5;
-    private static final int BIND_RETRY_DELAY = 1000;
+    private static final int DEFAULT_BIND_RETRY_DELAY = 1000;
 
     // Shared prefs that hold tile lifecycle info.
     private static final String TILES = "tiles_prefs";
@@ -73,6 +73,7 @@ public class TileLifecycleManager extends BroadcastReceiver implements
     private final Intent mIntent;
     private final UserHandle mUser;
     private final IBinder mToken = new Binder();
+    private final PackageManagerAdapter mPackageManagerAdapter;
 
     private Set<Integer> mQueuedMessages = new ArraySet<>();
     private QSTileServiceWrapper mWrapper;
@@ -80,22 +81,29 @@ public class TileLifecycleManager extends BroadcastReceiver implements
     private IBinder mClickBinder;
 
     private int mBindTryCount;
+    private int mBindRetryDelay = DEFAULT_BIND_RETRY_DELAY;
     private boolean mBound;
-    @VisibleForTesting
     boolean mReceiverRegistered;
     private boolean mUnbindImmediate;
     private TileChangeListener mChangeListener;
     // Return value from bindServiceAsUser, determines whether safe to call unbind.
     private boolean mIsBound;
 
-    public TileLifecycleManager(Handler handler, Context context, IQSService service,
-            Tile tile, Intent intent, UserHandle user) {
+    public TileLifecycleManager(Handler handler, Context context, IQSService service, Tile tile,
+            Intent intent, UserHandle user) {
+        this(handler, context, service, tile, intent, user, new PackageManagerAdapter(context));
+    }
+
+    @VisibleForTesting
+    TileLifecycleManager(Handler handler, Context context, IQSService service, Tile tile,
+            Intent intent, UserHandle user, PackageManagerAdapter packageManagerAdapter) {
         mContext = context;
         mHandler = handler;
         mIntent = intent;
         mIntent.putExtra(TileService.EXTRA_SERVICE, service.asBinder());
         mIntent.putExtra(TileService.EXTRA_TOKEN, mToken);
         mUser = user;
+        mPackageManagerAdapter = packageManagerAdapter;
         if (DEBUG) Log.d(TAG, "Creating " + mIntent + " " + mUser);
     }
 
@@ -109,13 +117,17 @@ public class TileLifecycleManager extends BroadcastReceiver implements
         }
     }
 
+    public void setBindRetryDelay(int delayMs) {
+        mBindRetryDelay = delayMs;
+    }
+
     public boolean isActiveTile() {
         try {
-            ServiceInfo info = mContext.getPackageManager().getServiceInfo(mIntent.getComponent(),
+            ServiceInfo info = mPackageManagerAdapter.getServiceInfo(mIntent.getComponent(),
                     PackageManager.MATCH_UNINSTALLED_PACKAGES | PackageManager.GET_META_DATA);
             return info.metaData != null
                     && info.metaData.getBoolean(TileService.META_DATA_ACTIVE_TILE, false);
-        } catch (NameNotFoundException e) {
+        } catch (PackageManager.NameNotFoundException e) {
             return false;
         }
     }
@@ -256,13 +268,12 @@ public class TileLifecycleManager extends BroadcastReceiver implements
                         setBindService(true);
                     }
                 }
-            }, BIND_RETRY_DELAY);
+            }, mBindRetryDelay);
         }
     }
 
     private boolean checkComponentState() {
-        PackageManager pm = mContext.getPackageManager();
-        if (!isPackageAvailable(pm) || !isComponentAvailable(pm)) {
+        if (!isPackageAvailable() || !isComponentAvailable()) {
             startPackageListening();
             return false;
         }
@@ -311,10 +322,10 @@ public class TileLifecycleManager extends BroadcastReceiver implements
         }
     }
 
-    private boolean isComponentAvailable(PackageManager pm) {
+    private boolean isComponentAvailable() {
         String packageName = mIntent.getComponent().getPackageName();
         try {
-            ServiceInfo si = AppGlobals.getPackageManager().getServiceInfo(mIntent.getComponent(),
+            ServiceInfo si = mPackageManagerAdapter.getServiceInfo(mIntent.getComponent(),
                     0, mUser.getIdentifier());
             if (DEBUG && si == null) Log.d(TAG, "Can't find component " + mIntent.getComponent());
             return si != null;
@@ -324,10 +335,10 @@ public class TileLifecycleManager extends BroadcastReceiver implements
         return false;
     }
 
-    private boolean isPackageAvailable(PackageManager pm) {
+    private boolean isPackageAvailable() {
         String packageName = mIntent.getComponent().getPackageName();
         try {
-            pm.getPackageInfoAsUser(packageName, 0, mUser.getIdentifier());
+            mPackageManagerAdapter.getPackageInfoAsUser(packageName, 0, mUser.getIdentifier());
             return true;
         } catch (PackageManager.NameNotFoundException e) {
             if (DEBUG) Log.d(TAG, "Package not available: " + packageName, e);

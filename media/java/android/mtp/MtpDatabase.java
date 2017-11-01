@@ -29,6 +29,7 @@ import android.media.MediaScanner;
 import android.net.Uri;
 import android.os.BatteryManager;
 import android.os.RemoteException;
+import android.os.SystemProperties;
 import android.provider.MediaStore;
 import android.provider.MediaStore.Audio;
 import android.provider.MediaStore.Files;
@@ -133,6 +134,8 @@ public class MtpDatabase implements AutoCloseable {
     private int mBatteryLevel;
     private int mBatteryScale;
 
+    private int mDeviceType;
+
     static {
         System.loadLibrary("media_jni");
     }
@@ -195,6 +198,7 @@ public class MtpDatabase implements AutoCloseable {
         }
 
         initDeviceProperties(context);
+        mDeviceType = SystemProperties.getInt("sys.usb.mtp.device_type", 0);
 
         mCloseGuard.open("close");
     }
@@ -229,7 +233,10 @@ public class MtpDatabase implements AutoCloseable {
     @Override
     protected void finalize() throws Throwable {
         try {
-            mCloseGuard.warnIfOpen();
+            if (mCloseGuard != null) {
+                mCloseGuard.warnIfOpen();
+            }
+
             close();
         } finally {
             super.finalize();
@@ -462,10 +469,14 @@ public class MtpDatabase implements AutoCloseable {
                     if (parent == 0xFFFFFFFF) {
                         // all objects in root of store
                         parent = 0;
+                        where = STORAGE_PARENT_WHERE;
+                        whereArgs = new String[]{Integer.toString(storageID),
+                                Integer.toString(parent)};
+                    }  else {
+                        // If a parent is specified, the storage is redundant
+                        where = PARENT_WHERE;
+                        whereArgs = new String[]{Integer.toString(parent)};
                     }
-                    where = STORAGE_PARENT_WHERE;
-                    whereArgs = new String[] { Integer.toString(storageID),
-                                               Integer.toString(parent) };
                 }
             } else {
                 // query specific format
@@ -478,11 +489,16 @@ public class MtpDatabase implements AutoCloseable {
                     if (parent == 0xFFFFFFFF) {
                         // all objects in root of store
                         parent = 0;
+                        where = STORAGE_FORMAT_PARENT_WHERE;
+                        whereArgs = new String[]{Integer.toString(storageID),
+                                Integer.toString(format),
+                                Integer.toString(parent)};
+                    } else {
+                        // If a parent is specified, the storage is redundant
+                        where = FORMAT_PARENT_WHERE;
+                        whereArgs = new String[]{Integer.toString(format),
+                                Integer.toString(parent)};
                     }
-                    where = STORAGE_FORMAT_PARENT_WHERE;
-                    whereArgs = new String[] { Integer.toString(storageID),
-                                               Integer.toString(format),
-                                               Integer.toString(parent) };
                 }
             }
         }
@@ -710,6 +726,7 @@ public class MtpDatabase implements AutoCloseable {
             MtpConstants.DEVICE_PROPERTY_DEVICE_FRIENDLY_NAME,
             MtpConstants.DEVICE_PROPERTY_IMAGE_SIZE,
             MtpConstants.DEVICE_PROPERTY_BATTERY_LEVEL,
+            MtpConstants.DEVICE_PROPERTY_PERCEIVED_DEVICE_TYPE,
         };
     }
 
@@ -833,6 +850,34 @@ public class MtpDatabase implements AutoCloseable {
         return MtpConstants.RESPONSE_OK;
     }
 
+    private int moveObject(int handle, int newParent, int newStorage, String newPath) {
+        String[] whereArgs = new String[] {  Integer.toString(handle) };
+
+        // do not allow renaming any of the special subdirectories
+        if (isStorageSubDirectory(newPath)) {
+            return MtpConstants.RESPONSE_OBJECT_WRITE_PROTECTED;
+        }
+
+        // update database
+        ContentValues values = new ContentValues();
+        values.put(Files.FileColumns.DATA, newPath);
+        values.put(Files.FileColumns.PARENT, newParent);
+        values.put(Files.FileColumns.STORAGE_ID, newStorage);
+        int updated = 0;
+        try {
+            // note - we are relying on a special case in MediaProvider.update() to update
+            // the paths for all children in the case where this is a directory.
+            updated = mMediaProvider.update(mObjectsUri, values, ID_WHERE, whereArgs);
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException in mMediaProvider.update", e);
+        }
+        if (updated == 0) {
+            Log.e(TAG, "Unable to update path for " + handle + " to " + newPath);
+            return MtpConstants.RESPONSE_GENERAL_ERROR;
+        }
+        return MtpConstants.RESPONSE_OK;
+    }
+
     private int setObjectProperty(int handle, int property,
                             long intValue, String stringValue) {
         switch (property) {
@@ -867,6 +912,10 @@ public class MtpDatabase implements AutoCloseable {
                 String imageSize = Integer.toString(width) + "x" +  Integer.toString(height);
                 imageSize.getChars(0, imageSize.length(), outStringValue, 0);
                 outStringValue[imageSize.length()] = 0;
+                return MtpConstants.RESPONSE_OK;
+
+            case MtpConstants.DEVICE_PROPERTY_PERCEIVED_DEVICE_TYPE:
+                outIntValue[0] = mDeviceType;
                 return MtpConstants.RESPONSE_OK;
 
             // DEVICE_PROPERTY_BATTERY_LEVEL is implemented in the JNI code

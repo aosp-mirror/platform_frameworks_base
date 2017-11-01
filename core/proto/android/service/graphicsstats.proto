@@ -1,0 +1,79 @@
+/*
+ * Copyright (C) 2017 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto3";
+
+package android.service;
+
+option java_multiple_files = true;
+option java_outer_classname = "GraphicsStatsServiceProto";
+option optimize_for = LITE_RUNTIME;
+
+message GraphicsStatsServiceDumpProto {
+    repeated GraphicsStatsProto stats = 1;
+}
+
+message GraphicsStatsProto {
+
+    // The package name of the app
+    string package_name = 1;
+
+    // The version code of the app
+    int32 version_code = 2;
+
+    // The start & end timestamps in UTC as
+    // milliseconds since January 1, 1970
+    // Compatible with java.util.Date#setTime()
+    int64 stats_start = 3;
+    int64 stats_end = 4;
+
+    // The aggregated statistics for the package
+    GraphicsStatsJankSummaryProto summary = 5;
+
+    // The frame time histogram for the package
+    repeated GraphicsStatsHistogramBucketProto histogram = 6;
+}
+
+message GraphicsStatsJankSummaryProto {
+    // Distinct frame count.
+    int32 total_frames = 1;
+
+    // Number of frames with slow render time. Frames are considered janky if
+    // they took more than a vsync interval (typically 16.667ms) to be rendered.
+    int32 janky_frames = 2;
+
+    // Number of "missed vsync" events.
+    int32 missed_vsync_count = 3;
+
+    // Number of "high input latency" events.
+    int32 high_input_latency_count = 4;
+
+    // Number of "slow UI thread" events.
+    int32 slow_ui_thread_count = 5;
+
+    // Number of "slow bitmap upload" events.
+    int32 slow_bitmap_upload_count = 6;
+
+    // Number of "slow draw" events.
+    int32 slow_draw_count = 7;
+}
+
+message GraphicsStatsHistogramBucketProto {
+    // Lower bound of render time in milliseconds.
+    int32 render_millis = 1;
+    // Number of frames in the bucket.
+    int32 frame_count = 2;
+}

@@ -18,13 +18,10 @@ package android.net;
 
 import static org.junit.Assert.*;
 
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
-import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -170,41 +167,41 @@ public class ScoredNetworkTest {
     @Test
     public void calculateBadgeShouldReturnNoBadgeWhenNoAttributesBundle() {
         ScoredNetwork network = new ScoredNetwork(KEY, CURVE);
-        assertEquals(ScoredNetwork.BADGING_NONE, network.calculateBadge(TEST_RSSI));
+        assertEquals(NetworkBadging.BADGING_NONE, network.calculateBadge(TEST_RSSI));
     }
 
     @Test
     public void calculateBadgeShouldReturnNoBadgeWhenNoBadgingCurveInBundle() {
         ScoredNetwork network = new ScoredNetwork(KEY, CURVE, false /* meteredHint */, ATTRIBUTES);
-        assertEquals(ScoredNetwork.BADGING_NONE, network.calculateBadge(TEST_RSSI));
+        assertEquals(NetworkBadging.BADGING_NONE, network.calculateBadge(TEST_RSSI));
     }
 
     @Test
     public void calculateBadgeShouldReturn4kBadge() {
         ScoredNetwork network =
-            buildScoredNetworkWithGivenBadgeForTestRssi(ScoredNetwork.BADGING_4K);
-        assertEquals(ScoredNetwork.BADGING_4K, network.calculateBadge(TEST_RSSI));
+            buildScoredNetworkWithGivenBadgeForTestRssi(NetworkBadging.BADGING_4K);
+        assertEquals(NetworkBadging.BADGING_4K, network.calculateBadge(TEST_RSSI));
     }
 
     @Test
     public void calculateBadgeShouldReturnHdBadge() {
         ScoredNetwork network =
-            buildScoredNetworkWithGivenBadgeForTestRssi(ScoredNetwork.BADGING_HD);
-        assertEquals(ScoredNetwork.BADGING_HD, network.calculateBadge(TEST_RSSI));
+            buildScoredNetworkWithGivenBadgeForTestRssi(NetworkBadging.BADGING_HD);
+        assertEquals(NetworkBadging.BADGING_HD, network.calculateBadge(TEST_RSSI));
     }
 
     @Test
     public void calculateBadgeShouldReturnSdBadge() {
         ScoredNetwork network =
-            buildScoredNetworkWithGivenBadgeForTestRssi(ScoredNetwork.BADGING_SD);
-        assertEquals(ScoredNetwork.BADGING_SD, network.calculateBadge(TEST_RSSI));
+            buildScoredNetworkWithGivenBadgeForTestRssi(NetworkBadging.BADGING_SD);
+        assertEquals(NetworkBadging.BADGING_SD, network.calculateBadge(TEST_RSSI));
     }
 
     @Test
     public void calculateBadgeShouldReturnNoBadge() {
         ScoredNetwork network =
-            buildScoredNetworkWithGivenBadgeForTestRssi(ScoredNetwork.BADGING_NONE);
-        assertEquals(ScoredNetwork.BADGING_NONE, network.calculateBadge(TEST_RSSI));
+            buildScoredNetworkWithGivenBadgeForTestRssi(NetworkBadging.BADGING_NONE);
+        assertEquals(NetworkBadging.BADGING_NONE, network.calculateBadge(TEST_RSSI));
     }
 
     private ScoredNetwork buildScoredNetworkWithGivenBadgeForTestRssi(int badge) {

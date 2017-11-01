@@ -18,9 +18,11 @@ package android.os;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.os.MessageQueueProto;
 import android.util.Log;
 import android.util.Printer;
 import android.util.SparseArray;
+import android.util.proto.ProtoOutputStream;
 
 import java.io.FileDescriptor;
 import java.lang.annotation.Retention;
@@ -31,7 +33,7 @@ import java.util.ArrayList;
  * Low-level class holding the list of messages to be dispatched by a
  * {@link Looper}.  Messages are not added directly to a MessageQueue,
  * but rather through {@link Handler} objects associated with the Looper.
- * 
+ *
  * <p>You can retrieve the MessageQueue for the current thread with
  * {@link Looper#myQueue() Looper.myQueue()}.
  */
@@ -618,6 +620,23 @@ public final class MessageQueue {
         }
     }
 
+    boolean hasMessages(Handler h) {
+        if (h == null) {
+            return false;
+        }
+
+        synchronized (this) {
+            Message p = mMessages;
+            while (p != null) {
+                if (p.target == h) {
+                    return true;
+                }
+                p = p.next;
+            }
+            return false;
+        }
+    }
+
     void removeMessages(Handler h, int what, Object object) {
         if (h == null) {
             return;
@@ -757,17 +776,31 @@ public final class MessageQueue {
         }
     }
 
-    void dump(Printer pw, String prefix) {
+    void dump(Printer pw, String prefix, Handler h) {
         synchronized (this) {
             long now = SystemClock.uptimeMillis();
             int n = 0;
             for (Message msg = mMessages; msg != null; msg = msg.next) {
-                pw.println(prefix + "Message " + n + ": " + msg.toString(now));
+                if (h == null || h == msg.target) {
+                    pw.println(prefix + "Message " + n + ": " + msg.toString(now));
+                }
                 n++;
             }
             pw.println(prefix + "(Total messages: " + n + ", polling=" + isPollingLocked()
                     + ", quitting=" + mQuitting + ")");
         }
+    }
+
+    void writeToProto(ProtoOutputStream proto, long fieldId) {
+        final long messageQueueToken = proto.start(fieldId);
+        synchronized (this) {
+            for (Message msg = mMessages; msg != null; msg = msg.next) {
+                msg.writeToProto(proto, MessageQueueProto.MESSAGES);
+            }
+            proto.write(MessageQueueProto.IS_POLLING_LOCKED, isPollingLocked());
+            proto.write(MessageQueueProto.IS_QUITTING, mQuitting);
+        }
+        proto.end(messageQueueToken);
     }
 
     /**

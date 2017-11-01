@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="5247871339820894594">"CarrierDefaultApp"</string>
+    <string name="android_system_label" msgid="2797790869522345065">"മൊബൈൽ കാരിയർ"</string>
+    <string name="portal_notification_id" msgid="5155057562457079297">"മൊബൈൽ ഡാറ്റ തീർന്നിരിക്കുന്നു"</string>
+    <string name="no_data_notification_id" msgid="668400731803969521">"നിങ്ങളുടെ മൊബൈൽ ഡാറ്റ നിർജീവമാക്കി"</string>
+    <string name="portal_notification_detail" msgid="2295729385924660881">"%s ‌എന്ന വെബ്‌സൈറ്റ് സന്ദർശിക്കാൻ ടാപ്പുചെയ്യുക"</string>
+    <string name="no_data_notification_detail" msgid="3112125343857014825">"നിങ്ങളുടെ ‌%s എന്ന സേവന‌ദാതാവിനെ ‌ബന്ധപ്പെടുക"</string>
+    <string name="no_mobile_data_connection_title" msgid="7449525772416200578">"മൊബൈൽ ഡാറ്റ കണക്ഷൻ ഇല്ല"</string>
+    <string name="no_mobile_data_connection" msgid="544980465184147010">"%s എന്നതിലൂടെ ഡാറ്റ അല്ലെങ്കിൽ റോമിംഗ് പ്ലാൻ ചേർക്കുക"</string>
+    <string name="mobile_data_status_notification_channel_name" msgid="833999690121305708">"മൊബൈൽ ഡാറ്റാ നില"</string>
+    <string name="action_bar_label" msgid="4290345990334377177">"മൊബൈൽ നെറ്റ്‌വർക്കിലേക്ക് സൈൻ ഇൻ ചെയ്യുക"</string>
+    <string name="ssl_error_warning" msgid="3127935140338254180">"നിങ്ങൾ ചേരാൻ ശ്രമിക്കുന്ന നെറ്റ്‌വർക്കിൽ സുരക്ഷാ പ്രശ്‌നങ്ങളുണ്ടായിരിക്കാം."</string>
+    <string name="ssl_error_example" msgid="6188711843183058764">"ഉദാഹരണത്തിന്, കാണിച്ചിരിക്കുന്ന ഓർഗനൈസേഷന്റേതായിരിക്കില്ല ലോഗിൻ പേജ്."</string>
+    <string name="ssl_error_continue" msgid="1138548463994095584">"എന്തായാലും ബ്രൗസർ വഴി തുടരുക"</string>
+</resources>

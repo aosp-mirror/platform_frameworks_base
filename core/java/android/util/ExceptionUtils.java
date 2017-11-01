@@ -16,6 +16,12 @@
 
 package android.util;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.os.ParcelableException;
+
+import com.android.internal.util.Preconditions;
+
 import java.io.IOException;
 
 /**
@@ -24,19 +30,13 @@ import java.io.IOException;
  * @hide
  */
 public class ExceptionUtils {
-    // TODO: longer term these should be replaced with first-class
-    // Parcel.read/writeException() and AIDL support, but for now do this using
-    // a nasty hack.
-
-    private static final String PREFIX_IO = "\u2603";
-
     public static RuntimeException wrap(IOException e) {
-        throw new IllegalStateException(PREFIX_IO + e.getMessage());
+        throw new ParcelableException(e);
     }
 
     public static void maybeUnwrapIOException(RuntimeException e) throws IOException {
-        if ((e instanceof IllegalStateException) && e.getMessage().startsWith(PREFIX_IO)) {
-            throw new IOException(e.getMessage().substring(PREFIX_IO.length()));
+        if (e instanceof ParcelableException) {
+            ((ParcelableException) e).maybeRethrow(IOException.class);
         }
     }
 
@@ -54,5 +54,28 @@ public class ExceptionUtils {
 
     public static String getCompleteMessage(Throwable t) {
         return getCompleteMessage(null, t);
+    }
+
+    public static <E extends Throwable> void propagateIfInstanceOf(
+            @Nullable Throwable t, Class<E> c) throws E {
+        if (t != null && c.isInstance(t)) {
+            throw c.cast(t);
+        }
+    }
+
+    /**
+     * @param <E> a checked exception that is ok to throw without wrapping
+     */
+    public static <E extends Exception> RuntimeException propagate(@NonNull Throwable t, Class<E> c)
+            throws E {
+        propagateIfInstanceOf(t, c);
+        return propagate(t);
+    }
+
+    public static RuntimeException propagate(@NonNull Throwable t) {
+        Preconditions.checkNotNull(t);
+        propagateIfInstanceOf(t, Error.class);
+        propagateIfInstanceOf(t, RuntimeException.class);
+        throw new RuntimeException(t);
     }
 }

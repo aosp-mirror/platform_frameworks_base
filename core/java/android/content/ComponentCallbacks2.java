@@ -16,6 +16,11 @@
 
 package android.content;
 
+import android.annotation.IntDef;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 /**
  * Extended {@link ComponentCallbacks} interface with a new callback for
  * finer-grained memory management. This interface is available in all application components
@@ -83,6 +88,19 @@ package android.content;
  */
 public interface ComponentCallbacks2 extends ComponentCallbacks {
 
+    /** @hide */
+    @IntDef(prefix = { "TRIM_MEMORY_" }, value = {
+            TRIM_MEMORY_COMPLETE,
+            TRIM_MEMORY_MODERATE,
+            TRIM_MEMORY_BACKGROUND,
+            TRIM_MEMORY_UI_HIDDEN,
+            TRIM_MEMORY_RUNNING_CRITICAL,
+            TRIM_MEMORY_RUNNING_LOW,
+            TRIM_MEMORY_RUNNING_MODERATE,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface TrimMemoryLevel {}
+
     /**
      * Level for {@link #onTrimMemory(int)}: the process is nearing the end
      * of the background LRU list, and if more memory isn't found soon it will
@@ -132,7 +150,6 @@ public interface ComponentCallbacks2 extends ComponentCallbacks {
      */
     static final int TRIM_MEMORY_RUNNING_LOW = 10;
 
-
     /**
      * Level for {@link #onTrimMemory(int)}: the process is not an expendable
      * background process, but the device is running moderately low on memory.
@@ -155,11 +172,7 @@ public interface ComponentCallbacks2 extends ComponentCallbacks {
      * ActivityManager.getMyMemoryState(RunningAppProcessInfo)}.
      *
      * @param level The context of the trim, giving a hint of the amount of
-     * trimming the application may like to perform.  May be
-     * {@link #TRIM_MEMORY_COMPLETE}, {@link #TRIM_MEMORY_MODERATE},
-     * {@link #TRIM_MEMORY_BACKGROUND}, {@link #TRIM_MEMORY_UI_HIDDEN},
-     * {@link #TRIM_MEMORY_RUNNING_CRITICAL}, {@link #TRIM_MEMORY_RUNNING_LOW},
-     * or {@link #TRIM_MEMORY_RUNNING_MODERATE}.
+     * trimming the application may like to perform.
      */
-    void onTrimMemory(int level);
+    void onTrimMemory(@TrimMemoryLevel int level);
 }

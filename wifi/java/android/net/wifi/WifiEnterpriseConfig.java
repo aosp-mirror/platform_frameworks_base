@@ -142,7 +142,7 @@ public class WifiEnterpriseConfig implements Parcelable {
     private HashMap<String, String> mFields = new HashMap<String, String>();
     private X509Certificate[] mCaCerts;
     private PrivateKey mClientPrivateKey;
-    private X509Certificate mClientCertificate;
+    private X509Certificate[] mClientCertificateChain;
     private int mEapMethod = Eap.NONE;
     private int mPhase2Method = Phase2.NONE;
 
@@ -156,16 +156,60 @@ public class WifiEnterpriseConfig implements Parcelable {
 
     }
 
-    /** Copy constructor */
-    public WifiEnterpriseConfig(WifiEnterpriseConfig source) {
+    /**
+     * Copy over the contents of the source WifiEnterpriseConfig object over to this object.
+     *
+     * @param source Source WifiEnterpriseConfig object.
+     * @param ignoreMaskedPassword Set to true to ignore masked password field, false otherwise.
+     * @param mask if |ignoreMaskedPassword| is set, check if the incoming password field is set
+     *             to this value.
+     */
+    private void copyFrom(WifiEnterpriseConfig source, boolean ignoreMaskedPassword, String mask) {
         for (String key : source.mFields.keySet()) {
+            if (ignoreMaskedPassword && key.equals(PASSWORD_KEY)
+                    && TextUtils.equals(source.mFields.get(key), mask)) {
+                continue;
+            }
             mFields.put(key, source.mFields.get(key));
         }
-        mCaCerts = source.mCaCerts;
+        if (source.mCaCerts != null) {
+            mCaCerts = Arrays.copyOf(source.mCaCerts, source.mCaCerts.length);
+        } else {
+            mCaCerts = null;
+        }
         mClientPrivateKey = source.mClientPrivateKey;
-        mClientCertificate = source.mClientCertificate;
+        if (source.mClientCertificateChain != null) {
+            mClientCertificateChain = Arrays.copyOf(
+                    source.mClientCertificateChain,
+                    source.mClientCertificateChain.length);
+        } else {
+            mClientCertificateChain = null;
+        }
         mEapMethod = source.mEapMethod;
         mPhase2Method = source.mPhase2Method;
+    }
+
+    /**
+     * Copy constructor.
+     * This copies over all the fields verbatim (does not ignore masked password fields).
+     *
+     * @param source Source WifiEnterpriseConfig object.
+     */
+    public WifiEnterpriseConfig(WifiEnterpriseConfig source) {
+        copyFrom(source, false, "");
+    }
+
+    /**
+     * Copy fields from the provided external WifiEnterpriseConfig.
+     * This is needed to handle the WifiEnterpriseConfig objects which were sent by apps with the
+     * password field masked.
+     *
+     * @param externalConfig External WifiEnterpriseConfig object.
+     * @param mask String mask to compare against.
+     * @hide
+     */
+    public void copyFromExternal(WifiEnterpriseConfig externalConfig, String mask) {
+        copyFrom(externalConfig, true, convertToQuotedString(mask));
     }
 
     @Override
@@ -185,7 +229,7 @@ public class WifiEnterpriseConfig implements Parcelable {
         dest.writeInt(mPhase2Method);
         ParcelUtil.writeCertificates(dest, mCaCerts);
         ParcelUtil.writePrivateKey(dest, mClientPrivateKey);
-        ParcelUtil.writeCertificate(dest, mClientCertificate);
+        ParcelUtil.writeCertificates(dest, mClientCertificateChain);
     }
 
     public static final Creator<WifiEnterpriseConfig> CREATOR =
@@ -204,7 +248,7 @@ public class WifiEnterpriseConfig implements Parcelable {
                     enterpriseConfig.mPhase2Method = in.readInt();
                     enterpriseConfig.mCaCerts = ParcelUtil.readCertificates(in);
                     enterpriseConfig.mClientPrivateKey = ParcelUtil.readPrivateKey(in);
-                    enterpriseConfig.mClientCertificate = ParcelUtil.readCertificate(in);
+                    enterpriseConfig.mClientCertificateChain = ParcelUtil.readCertificates(in);
                     return enterpriseConfig;
                 }
 
@@ -226,11 +270,11 @@ public class WifiEnterpriseConfig implements Parcelable {
         public static final int TTLS    = 2;
         /** EAP-Password */
         public static final int PWD     = 3;
-        /** EAP-Subscriber Identity Module */
+        /** EAP-Subscriber Identity Module [RFC-4186] */
         public static final int SIM     = 4;
-        /** EAP-Authentication and Key Agreement */
+        /** EAP-Authentication and Key Agreement [RFC-4187] */
         public static final int AKA     = 5;
-        /** EAP-Authentication and Key Agreement Prime */
+        /** EAP-Authentication and Key Agreement Prime [RFC-5448] */
         public static final int AKA_PRIME = 6;
         /** Hotspot 2.0 r2 OSEN */
         public static final int UNAUTH_TLS = 7;
@@ -253,11 +297,17 @@ public class WifiEnterpriseConfig implements Parcelable {
         public static final int MSCHAPV2    = 3;
         /** Generic Token Card */
         public static final int GTC         = 4;
+        /** EAP-Subscriber Identity Module [RFC-4186] */
+        public static final int SIM         = 5;
+        /** EAP-Authentication and Key Agreement [RFC-4187] */
+        public static final int AKA         = 6;
+        /** EAP-Authentication and Key Agreement Prime [RFC-5448] */
+        public static final int AKA_PRIME   = 7;
         private static final String AUTH_PREFIX = "auth=";
         private static final String AUTHEAP_PREFIX = "autheap=";
         /** @hide */
         public static final String[] strings = {EMPTY_VALUE, "PAP", "MSCHAP",
-                "MSCHAPV2", "GTC" };
+                "MSCHAPV2", "GTC", "SIM", "AKA", "AKA'" };
 
         /** Prevent initialization */
         private Phase2() {}
@@ -416,6 +466,9 @@ public class WifiEnterpriseConfig implements Parcelable {
             case Phase2.MSCHAP:
             case Phase2.MSCHAPV2:
             case Phase2.GTC:
+            case Phase2.SIM:
+            case Phase2.AKA:
+            case Phase2.AKA_PRIME:
                 mPhase2Method = phase2Method;
                 break;
             default:
@@ -737,15 +790,61 @@ public class WifiEnterpriseConfig implements Parcelable {
      * key entry when the config is saved and removing the key entry when
      * the config is removed.
 
-     * @param privateKey
-     * @param clientCertificate
+     * @param privateKey a PrivateKey instance for the end certificate.
+     * @param clientCertificate an X509Certificate representing the end certificate.
      * @throws IllegalArgumentException for an invalid key or certificate.
      */
     public void setClientKeyEntry(PrivateKey privateKey, X509Certificate clientCertificate) {
+        X509Certificate[] clientCertificates = null;
         if (clientCertificate != null) {
-            if (clientCertificate.getBasicConstraints() != -1) {
-                throw new IllegalArgumentException("Cannot be a CA certificate");
+            clientCertificates = new X509Certificate[] {clientCertificate};
+        }
+        setClientKeyEntryWithCertificateChain(privateKey, clientCertificates);
+    }
+
+    /**
+     * Specify a private key and client certificate chain for client authorization.
+     *
+     * <p>A default name is automatically assigned to the key entry and used
+     * with this configuration.  The framework takes care of installing the
+     * key entry when the config is saved and removing the key entry when
+     * the config is removed.
+     *
+     * @param privateKey a PrivateKey instance for the end certificate.
+     * @param clientCertificateChain an array of X509Certificate instances which starts with
+     *         end certificate and continues with additional CA certificates necessary to
+     *         link the end certificate with some root certificate known by the authenticator.
+     * @throws IllegalArgumentException for an invalid key or certificate.
+     */
+    public void setClientKeyEntryWithCertificateChain(PrivateKey privateKey,
+            X509Certificate[] clientCertificateChain) {
+        X509Certificate[] newCerts = null;
+        if (clientCertificateChain != null && clientCertificateChain.length > 0) {
+            // We validate that this is a well formed chain that starts
+            // with an end-certificate and is followed by CA certificates.
+            // We don't validate that each following certificate verifies
+            // the previous. https://en.wikipedia.org/wiki/Chain_of_trust
+            //
+            // Basic constraints is an X.509 extension type that defines
+            // whether a given certificate is allowed to sign additional
+            // certificates and what path length restrictions may exist.
+            // We use this to judge whether the certificate is an end
+            // certificate or a CA certificate.
+            // https://cryptography.io/en/latest/x509/reference/
+            if (clientCertificateChain[0].getBasicConstraints() != -1) {
+                throw new IllegalArgumentException(
+                        "First certificate in the chain must be a client end certificate");
             }
+
+            for (int i = 1; i < clientCertificateChain.length; i++) {
+                if (clientCertificateChain[i].getBasicConstraints() == -1) {
+                    throw new IllegalArgumentException(
+                            "All certificates following the first must be CA certificates");
+                }
+            }
+            newCerts = Arrays.copyOf(clientCertificateChain,
+                    clientCertificateChain.length);
+
             if (privateKey == null) {
                 throw new IllegalArgumentException("Client cert without a private key");
             }
@@ -755,7 +854,7 @@ public class WifiEnterpriseConfig implements Parcelable {
         }
 
         mClientPrivateKey = privateKey;
-        mClientCertificate = clientCertificate;
+        mClientCertificateChain = newCerts;
     }
 
     /**
@@ -764,7 +863,32 @@ public class WifiEnterpriseConfig implements Parcelable {
      * @return X.509 client certificate
      */
     public X509Certificate getClientCertificate() {
-        return mClientCertificate;
+        if (mClientCertificateChain != null && mClientCertificateChain.length > 0) {
+            return mClientCertificateChain[0];
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Get the complete client certificate chain in the same order as it was last supplied.
+     *
+     * <p>If the chain was last supplied by a call to
+     * {@link #setClientKeyEntry(java.security.PrivateKey, java.security.cert.X509Certificate)}
+     * with a non-null * certificate instance, a single-element array containing the certificate
+     * will be * returned. If {@link #setClientKeyEntryWithCertificateChain(
+     * java.security.PrivateKey, java.security.cert.X509Certificate[])} was last called with a
+     * non-empty array, this array will be returned in the same order as it was supplied.
+     * Otherwise, {@code null} will be returned.
+     *
+     * @return X.509 client certificates
+     */
+    @Nullable public X509Certificate[] getClientCertificateChain() {
+        if (mClientCertificateChain != null && mClientCertificateChain.length > 0) {
+            return mClientCertificateChain;
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -772,7 +896,7 @@ public class WifiEnterpriseConfig implements Parcelable {
      */
     public void resetClientKeyEntry() {
         mClientPrivateKey = null;
-        mClientCertificate = null;
+        mClientCertificateChain = null;
     }
 
     /**
@@ -850,8 +974,8 @@ public class WifiEnterpriseConfig implements Parcelable {
     }
 
     /**
-     * Set realm for passpoint credential; realm identifies a set of networks where your
-     * passpoint credential can be used
+     * Set realm for Passpoint credential; realm identifies a set of networks where your
+     * Passpoint credential can be used
      * @param realm the realm
      */
     public void setRealm(String realm) {
@@ -859,7 +983,7 @@ public class WifiEnterpriseConfig implements Parcelable {
     }
 
     /**
-     * Get realm for passpoint credential; see {@link #setRealm(String)} for more information
+     * Get realm for Passpoint credential; see {@link #setRealm(String)} for more information
      * @return the realm
      */
     public String getRealm() {
@@ -867,7 +991,7 @@ public class WifiEnterpriseConfig implements Parcelable {
     }
 
     /**
-     * Set plmn (Public Land Mobile Network) of the provider of passpoint credential
+     * Set plmn (Public Land Mobile Network) of the provider of Passpoint credential
      * @param plmn the plmn value derived from mcc (mobile country code) & mnc (mobile network code)
      */
     public void setPlmn(String plmn) {
@@ -875,7 +999,7 @@ public class WifiEnterpriseConfig implements Parcelable {
     }
 
     /**
-     * Get plmn (Public Land Mobile Network) for passpoint credential; see {@link #setPlmn
+     * Get plmn (Public Land Mobile Network) for Passpoint credential; see {@link #setPlmn
      * (String)} for more information
      * @return the plmn
      */

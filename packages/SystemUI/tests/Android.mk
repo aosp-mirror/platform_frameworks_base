@@ -15,44 +15,50 @@
 LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 
+LOCAL_USE_AAPT2 := true
 LOCAL_MODULE_TAGS := tests
 
 LOCAL_JACK_FLAGS := --multi-dex native
+LOCAL_DX_FLAGS := --multi-dex
 
 LOCAL_PROTOC_OPTIMIZE_TYPE := nano
 LOCAL_PROTOC_FLAGS := -I$(LOCAL_PATH)/..
 LOCAL_PROTO_JAVA_OUTPUT_PARAMS := optional_field_style=accessors
 
-LOCAL_AAPT_FLAGS := --auto-add-overlay \
-    --extra-packages com.android.systemui:com.android.keyguard:android.support.v14.preference:android.support.v7.preference:android.support.v7.appcompat:android.support.v7.recyclerview \
-    --extra-packages android.support.v17.leanback
+LOCAL_PACKAGE_NAME := SystemUITests
+LOCAL_COMPATIBILITY_SUITE := device-tests
 
 LOCAL_SRC_FILES := $(call all-java-files-under, src) \
     $(call all-Iaidl-files-under, src) \
     $(call all-java-files-under, ../src)
 
 LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/res \
-    frameworks/support/v7/preference/res \
-    frameworks/support/v14/preference/res \
-    frameworks/support/v7/appcompat/res \
-    frameworks/support/v7/recyclerview/res \
-    frameworks/support/v17/leanback/res \
     frameworks/base/packages/SystemUI/res \
-    frameworks/base/packages/Keyguard/res
+    frameworks/base/packages/SystemUI/res-keyguard \
 
-LOCAL_JAVA_LIBRARIES := android.test.runner telephony-common
-
-LOCAL_PACKAGE_NAME := SystemUITests
-
-LOCAL_STATIC_JAVA_LIBRARIES := \
-    mockito-target \
-    Keyguard \
+LOCAL_STATIC_ANDROID_LIBRARIES := \
+    SystemUIPluginLib \
+    android-support-v4 \
     android-support-v7-recyclerview \
     android-support-v7-preference \
     android-support-v7-appcompat \
+    android-support-v7-mediarouter \
+    android-support-v7-palette \
     android-support-v14-preference \
-    android-support-v17-leanback \
-    SystemUI-proto-tags
+    android-support-v17-leanback
+
+LOCAL_STATIC_JAVA_LIBRARIES := \
+    metrics-helper-lib \
+    android-support-test \
+    mockito-target-minus-junit4 \
+    SystemUI-proto \
+    SystemUI-tags \
+    legacy-android-test \
+    testables
+
+LOCAL_JAVA_LIBRARIES := android.test.runner telephony-common android.car
+
+LOCAL_AAPT_FLAGS := --extra-packages com.android.systemui:com.android.keyguard
 
 # sign this with platform cert, so this test is allowed to inject key events into
 # UI it doesn't own. This is necessary to allow screenshots to be taken
@@ -89,7 +95,9 @@ LOCAL_JACK_COVERAGE_EXCLUDE_FILTER := com.android.systemui.tests.*,$(jacoco_excl
 
 include frameworks/base/packages/SettingsLib/common.mk
 
-include $(BUILD_PACKAGE)
+ifeq ($(EXCLUDE_SYSTEMUI_TESTS),)
+    include $(BUILD_PACKAGE)
+endif
 
 # Reset variables
 local_java_files :=

@@ -16,13 +16,13 @@
 
 package android.graphics;
 
-import java.lang.ref.WeakReference;
-
 import android.annotation.Nullable;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.view.Surface;
+
+import java.lang.ref.WeakReference;
 
 /**
  * Captures frames from an image stream as an OpenGL ES texture.
@@ -107,7 +107,7 @@ public class SurfaceTexture {
      *
      * @param texName the OpenGL texture object name (e.g. generated via glGenTextures)
      *
-     * @throws Surface.OutOfResourcesException If the SurfaceTexture cannot be created.
+     * @throws android.view.Surface.OutOfResourcesException If the SurfaceTexture cannot be created.
      */
     public SurfaceTexture(int texName) {
         this(texName, false);
@@ -128,7 +128,7 @@ public class SurfaceTexture {
      * @param texName the OpenGL texture object name (e.g. generated via glGenTextures)
      * @param singleBufferMode whether the SurfaceTexture will be in single buffered mode.
      *
-     * @throws Surface.OutOfResourcesException If the SurfaceTexture cannot be created.
+     * @throws android.view.Surface.OutOfResourcesException If the SurfaceTexture cannot be created.
      */
     public SurfaceTexture(int texName, boolean singleBufferMode) {
         mCreatorLooper = Looper.myLooper();
@@ -155,8 +155,7 @@ public class SurfaceTexture {
      *
      * @param singleBufferMode whether the SurfaceTexture will be in single buffered mode.
      *
-     * @throws Surface.OutOfResourcesException If the SurfaceTexture cannot be created.
-     * @hide
+     * @throws android.view.Surface.OutOfResourcesException If the SurfaceTexture cannot be created.
      */
     public SurfaceTexture(boolean singleBufferMode) {
         mCreatorLooper = Looper.myLooper();
@@ -346,14 +345,17 @@ public class SurfaceTexture {
      * Always call this method when you are done with SurfaceTexture. Failing
      * to do so may delay resource deallocation for a significant amount of
      * time.
+     *
+     * @see #isReleased()
      */
     public void release() {
         nativeRelease();
     }
 
     /**
-     * Returns true if the SurfaceTexture was released
-     * @hide
+     * Returns true if the SurfaceTexture was released.
+     *
+     * @see #release()
      */
     public boolean isReleased() {
         return nativeIsReleased();
@@ -401,14 +403,6 @@ public class SurfaceTexture {
     private native void nativeReleaseTexImage();
     private native int nativeDetachFromGLContext();
     private native int nativeAttachToGLContext(int texName);
-    private native int nativeGetQueuedCount();
     private native void nativeRelease();
     private native boolean nativeIsReleased();
-
-    /*
-     * We use a class initializer to allow the native code to cache some
-     * field offsets.
-     */
-    private static native void nativeClassInit();
-    static { nativeClassInit(); }
 }

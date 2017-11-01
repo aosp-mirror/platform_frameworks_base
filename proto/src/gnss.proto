@@ -1,0 +1,45 @@
+// Copyright 2014 Google Inc. All Rights Reserved.
+// Author: siddharthr@google.com (Siddharth Ray)
+// Protos for uploading GNSS metrics.
+
+syntax = "proto2";
+
+package clearcut.connectivity;
+
+option java_package = "com.android.internal.location";
+option java_outer_classname = "GnssLogsProto";
+
+message GnssLog {
+  // Number of location reports processed
+  optional int32 num_location_report_processed = 1;
+
+  // Location failure (in percent)
+  optional int32 percentage_location_failure = 2;
+
+  // Number of time to first fix processed
+  optional int32 num_time_to_first_fix_processed = 3;
+
+  // Mean time to first fix (in seconds)
+  optional int32 mean_time_to_first_fix_secs = 4;
+
+  // Standard deviation of time to first fix (in seconds)
+  optional int32 standard_deviation_time_to_first_fix_secs = 5;
+
+  // Number of position accuracy processed
+  optional int32 num_position_accuracy_processed = 6;
+
+  // Mean position accuracy (in meters)
+  optional int32 mean_position_accuracy_meters = 7;
+
+  // Standard deviation of position accuracy (in meters)
+  optional int32 standard_deviation_position_accuracy_meters = 8;
+
+  // Number of top 4 average CN0 processed
+  optional int32 num_top_four_average_cn0_processed = 9;
+
+  // Mean of top 4 average CN0 (dB-Hz)
+  optional double mean_top_four_average_cn0_db_hz = 10;
+
+  // Standard deviation of top 4 average CN0 (dB-Hz)
+  optional double standard_deviation_top_four_average_cn0_db_hz = 11;
+}

@@ -28,10 +28,10 @@ static TestScene::Registrar _Text(TestScene::Info{
 class TextAnimation : public TestScene {
 public:
     sp<RenderNode> card;
-    void createContent(int width, int height, TestCanvas& canvas) override {
-        canvas.drawColor(Color::White, SkXfermode::kSrcOver_Mode);
+    void createContent(int width, int height, Canvas& canvas) override {
+        canvas.drawColor(Color::White, SkBlendMode::kSrcOver);
         card = TestUtils::createNode(0, 0, width, height,
-                [](RenderProperties& props, TestCanvas& canvas) {
+                [](RenderProperties& props, Canvas& canvas) {
             SkPaint paint;
             paint.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
             paint.setAntiAlias(true);

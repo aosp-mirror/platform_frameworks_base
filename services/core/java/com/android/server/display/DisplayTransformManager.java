@@ -23,7 +23,6 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Slog;
 import android.util.SparseArray;
-
 import com.android.internal.annotations.GuardedBy;
 
 import java.util.Arrays;
@@ -47,6 +46,9 @@ public class DisplayTransformManager {
      * Color transform level used by A11y services to invert the display colors.
      */
     public static final int LEVEL_COLOR_MATRIX_INVERT_COLOR = 300;
+
+    private static final int SURFACE_FLINGER_TRANSACTION_COLOR_MATRIX = 1015;
+    private static final int SURFACE_FLINGER_TRANSACTION_DALTONIZER = 1014;
 
     /**
      * Map of level -> color transformation matrix.
@@ -172,7 +174,7 @@ public class DisplayTransformManager {
                 data.writeInt(0);
             }
             try {
-                flinger.transact(1015, data, null, 0);
+                flinger.transact(SURFACE_FLINGER_TRANSACTION_COLOR_MATRIX, data, null, 0);
             } catch (RemoteException ex) {
                 Slog.e(TAG, "Failed to set color transform", ex);
             } finally {
@@ -191,7 +193,7 @@ public class DisplayTransformManager {
             data.writeInterfaceToken("android.ui.ISurfaceComposer");
             data.writeInt(mode);
             try {
-                flinger.transact(1014, data, null, 0);
+                flinger.transact(SURFACE_FLINGER_TRANSACTION_DALTONIZER, data, null, 0);
             } catch (RemoteException ex) {
                 Slog.e(TAG, "Failed to set Daltonizer mode", ex);
             } finally {

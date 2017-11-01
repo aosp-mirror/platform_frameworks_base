@@ -36,11 +36,11 @@ public class PointerEventDispatcher extends InputEventReceiver {
     }
 
     @Override
-    public void onInputEvent(InputEvent event) {
+    public void onInputEvent(InputEvent event, int displayId) {
         try {
             if (event instanceof MotionEvent
                     && (event.getSource() & InputDevice.SOURCE_CLASS_POINTER) != 0) {
-                final MotionEvent motionEvent = (MotionEvent)event;
+                final MotionEvent motionEvent = (MotionEvent) event;
                 PointerEventListener[] listeners;
                 synchronized (mListeners) {
                     if (mListenersArray == null) {
@@ -50,7 +50,7 @@ public class PointerEventDispatcher extends InputEventReceiver {
                     listeners = mListenersArray;
                 }
                 for (int i = 0; i < listeners.length; ++i) {
-                    listeners[i].onPointerEvent(motionEvent);
+                    listeners[i].onPointerEvent(motionEvent, displayId);
                 }
             }
         } finally {

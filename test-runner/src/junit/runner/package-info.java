@@ -1,4 +1,4 @@
 /**
- * Provides JUnit v3.x test runners.
+ * Utility classes supporting the junit test framework.
  */
 package junit.runner;

@@ -33,12 +33,14 @@
 #include <string>
 
 #include <android-base/stringprintf.h>
-#include <cutils/debugger.h>
+#include <android-base/unique_fd.h>
+#include <debuggerd/client.h>
 #include <log/log.h>
 #include <utils/misc.h>
 #include <utils/String8.h>
 
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
+#include <nativehelper/ScopedUtfChars.h>
 #include "jni.h"
 #include <memtrack/memtrack.h>
 #include <memunreachable/memunreachable.h>
@@ -75,14 +77,27 @@ enum {
     HEAP_GL,
     HEAP_OTHER_MEMTRACK,
 
+    // Dalvik extra sections (heap).
     HEAP_DALVIK_NORMAL,
     HEAP_DALVIK_LARGE,
-    HEAP_DALVIK_LINEARALLOC,
-    HEAP_DALVIK_ACCOUNTING,
-    HEAP_DALVIK_CODE_CACHE,
     HEAP_DALVIK_ZYGOTE,
     HEAP_DALVIK_NON_MOVING,
-    HEAP_DALVIK_INDIRECT_REFERENCE_TABLE,
+
+    // Dalvik other extra sections.
+    HEAP_DALVIK_OTHER_LINEARALLOC,
+    HEAP_DALVIK_OTHER_ACCOUNTING,
+    HEAP_DALVIK_OTHER_CODE_CACHE,
+    HEAP_DALVIK_OTHER_COMPILER_METADATA,
+    HEAP_DALVIK_OTHER_INDIRECT_REFERENCE_TABLE,
+
+    // Boot vdex / app dex / app vdex
+    HEAP_DEX_BOOT_VDEX,
+    HEAP_DEX_APP_DEX,
+    HEAP_DEX_APP_VDEX,
+
+    // App art, boot art.
+    HEAP_ART_APP,
+    HEAP_ART_BOOT,
 
     _NUM_HEAP,
     _NUM_EXCLUSIVE_HEAP = HEAP_OTHER_MEMTRACK+1,
@@ -124,8 +139,6 @@ static stat_field_names stat_field_names[_NUM_CORE_HEAP] = {
 
 jfieldID otherStats_field;
 jfieldID hasSwappedOutPss_field;
-
-static bool memtrackLoaded;
 
 struct stats_t {
     int pss;
@@ -208,10 +221,6 @@ static int read_memtrack_memory(struct memtrack_proc* p, int pid,
  */
 static int read_memtrack_memory(int pid, struct graphics_memory_pss* graphics_mem)
 {
-    if (!memtrackLoaded) {
-        return -1;
-    }
-
     struct memtrack_proc* p = memtrack_proc_new();
     if (p == NULL) {
         ALOGW("failed to create memtrack_proc");
@@ -297,15 +306,30 @@ static void read_mapinfo(FILE *fp, stats_t* stats, bool* foundSwapPss)
                 whichHeap = HEAP_TTF;
                 is_swappable = true;
             } else if ((nameLen > 4 && strstr(name, ".dex") != NULL) ||
-                       (nameLen > 5 && strcmp(name+nameLen-5, ".odex") == 0) ||
-                       (nameLen > 5 && strcmp(name+nameLen-5, ".vdex") == 0)) {
+                       (nameLen > 5 && strcmp(name+nameLen-5, ".odex") == 0)) {
                 whichHeap = HEAP_DEX;
+                subHeap = HEAP_DEX_APP_DEX;
+                is_swappable = true;
+            } else if (nameLen > 5 && strcmp(name+nameLen-5, ".vdex") == 0) {
+                whichHeap = HEAP_DEX;
+                // Handle system@framework@boot* and system/framework/boot*
+                if (strstr(name, "@boot") != NULL || strstr(name, "/boot") != NULL) {
+                    subHeap = HEAP_DEX_BOOT_VDEX;
+                } else {
+                    subHeap = HEAP_DEX_APP_VDEX;
+                }
                 is_swappable = true;
             } else if (nameLen > 4 && strcmp(name+nameLen-4, ".oat") == 0) {
                 whichHeap = HEAP_OAT;
                 is_swappable = true;
             } else if (nameLen > 4 && strcmp(name+nameLen-4, ".art") == 0) {
                 whichHeap = HEAP_ART;
+                // Handle system@framework@boot* and system/framework/boot*
+                if (strstr(name, "@boot") != NULL || strstr(name, "/boot") != NULL) {
+                    subHeap = HEAP_ART_BOOT;
+                } else {
+                    subHeap = HEAP_ART_APP;
+                }
                 is_swappable = true;
             } else if (strncmp(name, "/dev/", 5) == 0) {
                 if (strncmp(name, "/dev/kgsl-3d0", 13) == 0) {
@@ -314,7 +338,7 @@ static void read_mapinfo(FILE *fp, stats_t* stats, bool* foundSwapPss)
                     if (strncmp(name, "/dev/ashmem/dalvik-", 19) == 0) {
                         whichHeap = HEAP_DALVIK_OTHER;
                         if (strstr(name, "/dev/ashmem/dalvik-LinearAlloc") == name) {
-                            subHeap = HEAP_DALVIK_LINEARALLOC;
+                            subHeap = HEAP_DALVIK_OTHER_LINEARALLOC;
                         } else if ((strstr(name, "/dev/ashmem/dalvik-alloc space") == name) ||
                                    (strstr(name, "/dev/ashmem/dalvik-main space") == name)) {
                             // This is the regular Dalvik heap.
@@ -332,11 +356,14 @@ static void read_mapinfo(FILE *fp, stats_t* stats, bool* foundSwapPss)
                             whichHeap = HEAP_DALVIK;
                             subHeap = HEAP_DALVIK_ZYGOTE;
                         } else if (strstr(name, "/dev/ashmem/dalvik-indirect ref") == name) {
-                            subHeap = HEAP_DALVIK_INDIRECT_REFERENCE_TABLE;
-                        } else if (strstr(name, "/dev/ashmem/dalvik-jit-code-cache") == name) {
-                            subHeap = HEAP_DALVIK_CODE_CACHE;
+                            subHeap = HEAP_DALVIK_OTHER_INDIRECT_REFERENCE_TABLE;
+                        } else if (strstr(name, "/dev/ashmem/dalvik-jit-code-cache") == name ||
+                                   strstr(name, "/dev/ashmem/dalvik-data-code-cache") == name) {
+                            subHeap = HEAP_DALVIK_OTHER_CODE_CACHE;
+                        } else if (strstr(name, "/dev/ashmem/dalvik-CompilerMetadata") == name) {
+                            subHeap = HEAP_DALVIK_OTHER_COMPILER_METADATA;
                         } else {
-                            subHeap = HEAP_DALVIK_ACCOUNTING;  // Default to accounting.
+                            subHeap = HEAP_DALVIK_OTHER_ACCOUNTING;  // Default to accounting.
                         }
                     } else if (strncmp(name, "/dev/ashmem/CursorWindow", 24) == 0) {
                         whichHeap = HEAP_CURSOR;
@@ -421,7 +448,8 @@ static void read_mapinfo(FILE *fp, stats_t* stats, bool* foundSwapPss)
             stats[whichHeap].sharedClean += shared_clean;
             stats[whichHeap].swappedOut += swapped_out;
             stats[whichHeap].swappedOutPss += swapped_out_pss;
-            if (whichHeap == HEAP_DALVIK || whichHeap == HEAP_DALVIK_OTHER) {
+            if (whichHeap == HEAP_DALVIK || whichHeap == HEAP_DALVIK_OTHER ||
+                    whichHeap == HEAP_DEX || whichHeap == HEAP_ART) {
                 stats[subHeap].pss += pss;
                 stats[subHeap].swappablePss += swappable_pss;
                 stats[subHeap].privateDirty += private_dirty;
@@ -691,7 +719,7 @@ static void android_os_Debug_getMemInfo(JNIEnv *env, jobject clazz, jlongArray o
         return;
     }
 
-    int fd = open("/proc/meminfo", O_RDONLY);
+    int fd = open("/proc/meminfo", O_RDONLY | O_CLOEXEC);
 
     if (fd < 0) {
         ALOGW("Unable to open /proc/meminfo: %s\n", strerror(errno));
@@ -1012,35 +1040,34 @@ static void android_os_Debug_dumpNativeHeap(JNIEnv* env, jobject clazz,
     ALOGD("Native heap dump complete.\n");
 }
 
-
-static void android_os_Debug_dumpNativeBacktraceToFile(JNIEnv* env, jobject clazz,
-    jint pid, jstring fileName)
-{
-    if (fileName == NULL) {
-        jniThrowNullPointerException(env, "file == null");
-        return;
-    }
-    const jchar* str = env->GetStringCritical(fileName, 0);
-    String8 fileName8;
-    if (str) {
-        fileName8 = String8(reinterpret_cast<const char16_t*>(str),
-                            env->GetStringLength(fileName));
-        env->ReleaseStringCritical(fileName, str);
+static bool dumpTraces(JNIEnv* env, jint pid, jstring fileName, jint timeoutSecs,
+                       DebuggerdDumpType dumpType) {
+    const ScopedUtfChars fileNameChars(env, fileName);
+    if (fileNameChars.c_str() == nullptr) {
+        return false;
     }
 
-    int fd = open(fileName8.string(), O_CREAT | O_WRONLY | O_NOFOLLOW, 0666);  /* -rw-rw-rw- */
+    android::base::unique_fd fd(open(fileNameChars.c_str(),
+                                     O_CREAT | O_WRONLY | O_NOFOLLOW | O_CLOEXEC | O_APPEND,
+                                     0666));
     if (fd < 0) {
-        fprintf(stderr, "Can't open %s: %s\n", fileName8.string(), strerror(errno));
-        return;
+        fprintf(stderr, "Can't open %s: %s\n", fileNameChars.c_str(), strerror(errno));
+        return false;
     }
 
-    if (lseek(fd, 0, SEEK_END) < 0) {
-        fprintf(stderr, "lseek: %s\n", strerror(errno));
-    } else {
-        dump_backtrace_to_file(pid, fd);
-    }
+    return (dump_backtrace_to_file_timeout(pid, dumpType, timeoutSecs, fd) == 0);
+}
 
-    close(fd);
+static jboolean android_os_Debug_dumpJavaBacktraceToFileTimeout(JNIEnv* env, jobject clazz,
+        jint pid, jstring fileName, jint timeoutSecs) {
+    const bool ret =  dumpTraces(env, pid, fileName, timeoutSecs, kDebuggerdJavaBacktrace);
+    return ret ? JNI_TRUE : JNI_FALSE;
+}
+
+static jboolean android_os_Debug_dumpNativeBacktraceToFileTimeout(JNIEnv* env, jobject clazz,
+        jint pid, jstring fileName, jint timeoutSecs) {
+    const bool ret = dumpTraces(env, pid, fileName, timeoutSecs, kDebuggerdNativeBacktrace);
+    return ret ? JNI_TRUE : JNI_FALSE;
 }
 
 static jstring android_os_Debug_getUnreachableMemory(JNIEnv* env, jobject clazz,
@@ -1083,22 +1110,16 @@ static const JNINativeMethod gMethods[] = {
             (void*)android_os_Debug_getProxyObjectCount },
     { "getBinderDeathObjectCount", "()I",
             (void*)android_os_Debug_getDeathObjectCount },
-    { "dumpNativeBacktraceToFile", "(ILjava/lang/String;)V",
-            (void*)android_os_Debug_dumpNativeBacktraceToFile },
+    { "dumpJavaBacktraceToFileTimeout", "(ILjava/lang/String;I)Z",
+            (void*)android_os_Debug_dumpJavaBacktraceToFileTimeout },
+    { "dumpNativeBacktraceToFileTimeout", "(ILjava/lang/String;I)Z",
+            (void*)android_os_Debug_dumpNativeBacktraceToFileTimeout },
     { "getUnreachableMemory", "(IZ)Ljava/lang/String;",
             (void*)android_os_Debug_getUnreachableMemory },
 };
 
 int register_android_os_Debug(JNIEnv *env)
 {
-    int err = memtrack_init();
-    if (err != 0) {
-        memtrackLoaded = false;
-        ALOGE("failed to load memtrack module: %d", err);
-    } else {
-        memtrackLoaded = true;
-    }
-
     jclass clazz = env->FindClass("android/os/Debug$MemoryInfo");
 
     // Sanity check the number of other statistics expected in Java matches here.

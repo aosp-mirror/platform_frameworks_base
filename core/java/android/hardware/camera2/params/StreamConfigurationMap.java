@@ -408,12 +408,6 @@ public final class StreamConfigurationMap {
         // See if consumer is flexible.
         boolean isFlexible = SurfaceUtils.isFlexibleConsumer(surface);
 
-        // Override RGB formats to IMPLEMENTATION_DEFINED, b/9487482
-        if ((surfaceFormat >= LegacyMetadataMapper.HAL_PIXEL_FORMAT_RGBA_8888 &&
-                        surfaceFormat <= LegacyMetadataMapper.HAL_PIXEL_FORMAT_BGRA_8888)) {
-            surfaceFormat = HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED;
-        }
-
         StreamConfiguration[] configs =
                 surfaceDataspace != HAL_DATASPACE_DEPTH ? mConfigurations : mDepthConfigurations;
         for (StreamConfiguration config : configs) {
@@ -1118,6 +1112,8 @@ public final class StreamConfigurationMap {
                 return ImageFormat.DEPTH_POINT_CLOUD;
             case HAL_PIXEL_FORMAT_Y16:
                 return ImageFormat.DEPTH16;
+            case HAL_PIXEL_FORMAT_RAW16:
+                return ImageFormat.RAW_DEPTH;
             case ImageFormat.JPEG:
                 throw new IllegalArgumentException(
                         "ImageFormat.JPEG is an unknown internal format");
@@ -1185,6 +1181,8 @@ public final class StreamConfigurationMap {
                 return HAL_PIXEL_FORMAT_BLOB;
             case ImageFormat.DEPTH16:
                 return HAL_PIXEL_FORMAT_Y16;
+            case ImageFormat.RAW_DEPTH:
+                return HAL_PIXEL_FORMAT_RAW16;
             default:
                 return format;
         }
@@ -1226,6 +1224,7 @@ public final class StreamConfigurationMap {
                 return HAL_DATASPACE_V0_JFIF;
             case ImageFormat.DEPTH_POINT_CLOUD:
             case ImageFormat.DEPTH16:
+            case ImageFormat.RAW_DEPTH:
                 return HAL_DATASPACE_DEPTH;
             default:
                 return HAL_DATASPACE_UNKNOWN;
@@ -1615,6 +1614,8 @@ public final class StreamConfigurationMap {
                 return "DEPTH16";
             case ImageFormat.DEPTH_POINT_CLOUD:
                 return "DEPTH_POINT_CLOUD";
+            case ImageFormat.RAW_DEPTH:
+                return "RAW_DEPTH";
             case ImageFormat.PRIVATE:
                 return "PRIVATE";
             default:

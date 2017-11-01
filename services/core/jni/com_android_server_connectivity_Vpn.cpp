@@ -38,7 +38,7 @@
 #include "netutils/ifc.h"
 
 #include "jni.h"
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 
 namespace android
 {

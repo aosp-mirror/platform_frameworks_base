@@ -20,7 +20,7 @@
 #include <input/Input.h>
 #include <binder/Parcel.h>
 
-#include <nativehelper/jni.h>
+#include <jni.h>
 #include <nativehelper/JNIHelp.h>
 
 #include "android_os_Parcel.h"

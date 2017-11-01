@@ -17,9 +17,11 @@
 package android.text;
 
 /**
- * AndroidCharacter exposes some character properties that are not
- * easily accessed from java.lang.Character.
+ * AndroidCharacter exposes some character properties that used to be not
+ * easily accessed from java.lang.Character, but are now available in ICU.
+ * @deprecated Use various methods from {@link android.icu.lang.UCharacter}, instead.
  */
+@Deprecated
 public class AndroidCharacter
 {
     public static final int EAST_ASIAN_WIDTH_NEUTRAL = 0;

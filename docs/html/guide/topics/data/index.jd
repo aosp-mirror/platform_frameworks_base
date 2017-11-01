@@ -1,7 +1,0 @@
-page.title=Data Storage
-page.landing=true
-page.landing.intro=Store application data in databases, files, or preferences, in internal or removeable storage. You can also add a data backup service to let users store and recover application and system data.
-page.landing.image=
-
-@jd:body
-

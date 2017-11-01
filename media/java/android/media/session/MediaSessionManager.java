@@ -18,6 +18,9 @@ package android.media.session;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
+import android.annotation.SystemService;
 import android.content.ComponentName;
 import android.content.Context;
 import android.media.AudioManager;
@@ -26,6 +29,7 @@ import android.media.session.ISessionManager;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.service.notification.NotificationListenerService;
@@ -40,15 +44,25 @@ import java.util.List;
  * Provides support for interacting with {@link MediaSession media sessions}
  * that applications have published to express their ongoing media playback
  * state.
- * <p>
- * Use <code>Context.getSystemService(Context.MEDIA_SESSION_SERVICE)</code> to
- * get an instance of this class.
  *
  * @see MediaSession
  * @see MediaController
  */
+@SystemService(Context.MEDIA_SESSION_SERVICE)
 public final class MediaSessionManager {
     private static final String TAG = "SessionManager";
+
+    /**
+     * Used by IOnMediaKeyListener to indicate that the media key event isn't handled.
+     * @hide
+     */
+    public static final int RESULT_MEDIA_KEY_NOT_HANDLED = 0;
+
+    /**
+     * Used by IOnMediaKeyListener to indicate that the media key event is handled.
+     * @hide
+     */
+    public static final int RESULT_MEDIA_KEY_HANDLED = 1;
 
     private final ArrayMap<OnActiveSessionsChangedListener, SessionsChangedWrapper> mListeners
             = new ArrayMap<OnActiveSessionsChangedListener, SessionsChangedWrapper>();
@@ -56,6 +70,10 @@ public final class MediaSessionManager {
     private final ISessionManager mService;
 
     private Context mContext;
+
+    private CallbackImpl mCallback;
+    private OnVolumeKeyLongPressListenerImpl mOnVolumeKeyLongPressListener;
+    private OnMediaKeyListenerImpl mOnMediaKeyListener;
 
     /**
      * @hide
@@ -278,6 +296,21 @@ public final class MediaSessionManager {
     }
 
     /**
+     * Send a volume key event. The receiver will be selected automatically.
+     *
+     * @param keyEvent The volume KeyEvent to send.
+     * @param needWakeLock True if a wake lock should be held while sending the key.
+     * @hide
+     */
+    public void dispatchVolumeKeyEvent(@NonNull KeyEvent keyEvent, int stream, boolean musicOnly) {
+        try {
+            mService.dispatchVolumeKeyEvent(keyEvent, stream, musicOnly);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to send volume key event.", e);
+        }
+    }
+
+    /**
      * Dispatch an adjust volume request to the system. It will be sent to the
      * most relevant audio stream or media session. The direction must be one of
      * {@link AudioManager#ADJUST_LOWER}, {@link AudioManager#ADJUST_RAISE},
@@ -313,11 +346,189 @@ public final class MediaSessionManager {
     }
 
     /**
+     * Set the volume key long-press listener. While the listener is set, the listener
+     * gets the volume key long-presses instead of changing volume.
+     *
+     * <p>System can only have a single volume key long-press listener.
+     *
+     * @param listener The volume key long-press listener. {@code null} to reset.
+     * @param handler The handler on which the listener should be invoked, or {@code null}
+     *            if the listener should be invoked on the calling thread's looper.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.SET_VOLUME_KEY_LONG_PRESS_LISTENER)
+    public void setOnVolumeKeyLongPressListener(
+            OnVolumeKeyLongPressListener listener, @Nullable Handler handler) {
+        synchronized (mLock) {
+            try {
+                if (listener == null) {
+                    mOnVolumeKeyLongPressListener = null;
+                    mService.setOnVolumeKeyLongPressListener(null);
+                } else {
+                    if (handler == null) {
+                        handler = new Handler();
+                    }
+                    mOnVolumeKeyLongPressListener =
+                            new OnVolumeKeyLongPressListenerImpl(listener, handler);
+                    mService.setOnVolumeKeyLongPressListener(mOnVolumeKeyLongPressListener);
+                }
+            } catch (RemoteException e) {
+                Log.e(TAG, "Failed to set volume key long press listener", e);
+            }
+        }
+    }
+
+    /**
+     * Set the media key listener. While the listener is set, the listener
+     * gets the media key before any other media sessions but after the global priority session.
+     * If the listener handles the key (i.e. returns {@code true}),
+     * other sessions will not get the event.
+     *
+     * <p>System can only have a single media key listener.
+     *
+     * @param listener The media key listener. {@code null} to reset.
+     * @param handler The handler on which the listener should be invoked, or {@code null}
+     *            if the listener should be invoked on the calling thread's looper.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.SET_MEDIA_KEY_LISTENER)
+    public void setOnMediaKeyListener(OnMediaKeyListener listener, @Nullable Handler handler) {
+        synchronized (mLock) {
+            try {
+                if (listener == null) {
+                    mOnMediaKeyListener = null;
+                    mService.setOnMediaKeyListener(null);
+                } else {
+                    if (handler == null) {
+                        handler = new Handler();
+                    }
+                    mOnMediaKeyListener = new OnMediaKeyListenerImpl(listener, handler);
+                    mService.setOnMediaKeyListener(mOnMediaKeyListener);
+                }
+            } catch (RemoteException e) {
+                Log.e(TAG, "Failed to set media key listener", e);
+            }
+        }
+    }
+
+    /**
+     * Set a {@link Callback}.
+     *
+     * <p>System can only have a single callback, and the callback can only be set by
+     * Bluetooth service process.
+     *
+     * @param callback A {@link Callback}. {@code null} to reset.
+     * @param handler The handler on which the callback should be invoked, or {@code null}
+     *            if the callback should be invoked on the calling thread's looper.
+     * @hide
+     */
+    public void setCallback(@Nullable Callback callback, @Nullable Handler handler) {
+        synchronized (mLock) {
+            try {
+                if (callback == null) {
+                    mCallback = null;
+                    mService.setCallback(null);
+                } else {
+                    if (handler == null) {
+                        handler = new Handler();
+                    }
+                    mCallback = new CallbackImpl(callback, handler);
+                    mService.setCallback(mCallback);
+                }
+            } catch (RemoteException e) {
+                Log.e(TAG, "Failed to set media key callback", e);
+            }
+        }
+    }
+
+    /**
      * Listens for changes to the list of active sessions. This can be added
      * using {@link #addOnActiveSessionsChangedListener}.
      */
     public interface OnActiveSessionsChangedListener {
         public void onActiveSessionsChanged(@Nullable List<MediaController> controllers);
+    }
+
+    /**
+     * Listens the volume key long-presses.
+     * @hide
+     */
+    @SystemApi
+    public interface OnVolumeKeyLongPressListener {
+        /**
+         * Called when the volume key is long-pressed.
+         * <p>This will be called for both down and up events.
+         */
+        void onVolumeKeyLongPress(KeyEvent event);
+    }
+
+    /**
+     * Listens the media key.
+     * @hide
+     */
+    @SystemApi
+    public interface OnMediaKeyListener {
+        /**
+         * Called when the media key is pressed.
+         * <p>If the listener consumes the initial down event (i.e. ACTION_DOWN with
+         * repeat count zero), it must also comsume all following key events.
+         * (i.e. ACTION_DOWN with repeat count more than zero, and ACTION_UP).
+         * <p>If it takes more than 1s to return, the key event will be sent to
+         * other media sessions.
+         */
+        boolean onMediaKey(KeyEvent event);
+    }
+
+    /**
+     * Callbacks for the media session service.
+     *
+     * <p>Called when a media key event is dispatched or the addressed player is changed.
+     * The addressed player is either the media session or the media button receiver that will
+     * receive media key events.
+     * @hide
+     */
+    public static abstract class Callback {
+        /**
+         * Called when a media key event is dispatched to the media session
+         * through the media session service.
+         *
+         * @param event Dispatched media key event.
+         * @param sessionToken The media session's token.
+         */
+        public abstract void onMediaKeyEventDispatched(KeyEvent event,
+                MediaSession.Token sessionToken);
+
+        /**
+         * Called when a media key event is dispatched to the media button receiver
+         * through the media session service.
+         * <p>MediaSessionService may broadcast key events to the media button receiver
+         * when reviving playback after the media session is released.
+         *
+         * @param event Dispatched media key event.
+         * @param mediaButtonReceiver The media button receiver.
+         */
+        public abstract void onMediaKeyEventDispatched(KeyEvent event,
+                ComponentName mediaButtonReceiver);
+
+        /**
+         * Called when the addressed player is changed to a media session.
+         * <p>One of the {@ #onAddressedPlayerChanged} will be also called immediately after
+         * {@link #setCallback} if the addressed player exists.
+         *
+         * @param sessionToken The media session's token.
+         */
+        public abstract void onAddressedPlayerChanged(MediaSession.Token sessionToken);
+
+        /**
+         * Called when the addressed player is changed to the media button receiver.
+         * <p>One of the {@ #onAddressedPlayerChanged} will be also called immediately after
+         * {@link #setCallback} if the addressed player exists.
+         *
+         * @param mediaButtonReceiver The media button receiver.
+         */
+        public abstract void onAddressedPlayerChanged(ComponentName mediaButtonReceiver);
     }
 
     private static final class SessionsChangedWrapper {
@@ -358,6 +569,117 @@ public final class MediaSessionManager {
             mContext = null;
             mListener = null;
             mHandler = null;
+        }
+    }
+
+    private static final class OnVolumeKeyLongPressListenerImpl
+            extends IOnVolumeKeyLongPressListener.Stub {
+        private OnVolumeKeyLongPressListener mListener;
+        private Handler mHandler;
+
+        public OnVolumeKeyLongPressListenerImpl(
+                OnVolumeKeyLongPressListener listener, Handler handler) {
+            mListener = listener;
+            mHandler = handler;
+        }
+
+        @Override
+        public void onVolumeKeyLongPress(KeyEvent event) {
+            if (mListener == null || mHandler == null) {
+                Log.w(TAG, "Failed to call volume key long-press listener." +
+                        " Either mListener or mHandler is null");
+                return;
+            }
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mListener.onVolumeKeyLongPress(event);
+                }
+            });
+        }
+    }
+
+    private static final class OnMediaKeyListenerImpl extends IOnMediaKeyListener.Stub {
+        private OnMediaKeyListener mListener;
+        private Handler mHandler;
+
+        public OnMediaKeyListenerImpl(OnMediaKeyListener listener, Handler handler) {
+            mListener = listener;
+            mHandler = handler;
+        }
+
+        @Override
+        public void onMediaKey(KeyEvent event, ResultReceiver result) {
+            if (mListener == null || mHandler == null) {
+                Log.w(TAG, "Failed to call media key listener." +
+                        " Either mListener or mHandler is null");
+                return;
+            }
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    boolean handled = mListener.onMediaKey(event);
+                    Log.d(TAG, "The media key listener is returned " + handled);
+                    if (result != null) {
+                        result.send(
+                                handled ? RESULT_MEDIA_KEY_HANDLED : RESULT_MEDIA_KEY_NOT_HANDLED,
+                                null);
+                    }
+                }
+            });
+        }
+    }
+
+    private static final class CallbackImpl extends ICallback.Stub {
+        private final Callback mCallback;
+        private final Handler mHandler;
+
+        public CallbackImpl(@NonNull Callback callback, @NonNull Handler handler) {
+            mCallback = callback;
+            mHandler = handler;
+        }
+
+        @Override
+        public void onMediaKeyEventDispatchedToMediaSession(KeyEvent event,
+                MediaSession.Token sessionToken) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mCallback.onMediaKeyEventDispatched(event, sessionToken);
+                }
+            });
+        }
+
+        @Override
+        public void onMediaKeyEventDispatchedToMediaButtonReceiver(KeyEvent event,
+                ComponentName mediaButtonReceiver) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mCallback.onMediaKeyEventDispatched(event, mediaButtonReceiver);
+                }
+            });
+        }
+
+        @Override
+        public void onAddressedPlayerChangedToMediaSession(MediaSession.Token sessionToken) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mCallback.onAddressedPlayerChanged(sessionToken);
+                }
+            });
+        }
+
+        @Override
+        public void onAddressedPlayerChangedToMediaButtonReceiver(
+                ComponentName mediaButtonReceiver) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mCallback.onAddressedPlayerChanged(mediaButtonReceiver);
+                }
+            });
         }
     }
 }

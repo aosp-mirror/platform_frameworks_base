@@ -16,8 +16,9 @@
 
 package android.test;
 
+import android.test.suitebuilder.annotation.MediumTest;
+import android.test.suitebuilder.annotation.SmallTest;
 import com.android.internal.util.Predicate;
-import com.android.internal.util.Predicates;
 
 import android.app.Activity;
 import android.app.Instrumentation;
@@ -30,7 +31,6 @@ import android.os.PerformanceCollector.PerformanceResultsWriter;
 import android.test.suitebuilder.TestMethod;
 import android.test.suitebuilder.TestPredicates;
 import android.test.suitebuilder.TestSuiteBuilder;
-import android.test.suitebuilder.annotation.HasAnnotation;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.util.Log;
 
@@ -51,6 +51,8 @@ import junit.framework.TestResult;
 import junit.framework.TestSuite;
 import junit.runner.BaseTestRunner;
 import junit.textui.ResultPrinter;
+
+import static android.test.suitebuilder.TestPredicates.hasAnnotation;
 
 /**
  * An {@link Instrumentation} that runs various types of {@link junit.framework.TestCase}s against
@@ -178,13 +180,13 @@ import junit.textui.ResultPrinter;
 public class InstrumentationTestRunner extends Instrumentation implements TestSuiteProvider {
 
     /** @hide */
-    public static final String ARGUMENT_TEST_CLASS = "class";
+    static final String ARGUMENT_TEST_CLASS = "class";
     /** @hide */
-    public static final String ARGUMENT_TEST_PACKAGE = "package";
+    private static final String ARGUMENT_TEST_PACKAGE = "package";
     /** @hide */
-    public static final String ARGUMENT_TEST_SIZE_PREDICATE = "size";
+    private static final String ARGUMENT_TEST_SIZE_PREDICATE = "size";
     /** @hide */
-    public static final String ARGUMENT_DELAY_MSEC = "delay_msec";
+    static final String ARGUMENT_DELAY_MSEC = "delay_msec";
 
     private static final String SMALL_SUITE = "small";
     private static final String MEDIUM_SUITE = "medium";
@@ -195,6 +197,12 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
     static final String ARGUMENT_ANNOTATION = "annotation";
     /** @hide */
     static final String ARGUMENT_NOT_ANNOTATION = "notAnnotation";
+
+    private static final Predicate<TestMethod> SELECT_SMALL = hasAnnotation(SmallTest.class);
+
+    private static final Predicate<TestMethod> SELECT_MEDIUM = hasAnnotation(MediumTest.class);
+
+    private static final Predicate<TestMethod> SELECT_LARGE = hasAnnotation(LargeTest.class);
 
     /**
      * This constant defines the maximum allowed runtime (in ms) for a test included in the "small"
@@ -208,7 +216,7 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
      */
     private static final float MEDIUM_SUITE_MAX_RUNTIME = 1000;
 
-    /**
+    /*
      * The following keys are used in the status bundle to provide structured reports to
      * an IInstrumentationWatcher.
      */
@@ -464,11 +472,11 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
     private Predicate<TestMethod> getSizePredicateFromArg(String sizeArg) {
 
         if (SMALL_SUITE.equals(sizeArg)) {
-            return TestPredicates.SELECT_SMALL;
+            return SELECT_SMALL;
         } else if (MEDIUM_SUITE.equals(sizeArg)) {
-            return TestPredicates.SELECT_MEDIUM;
+            return SELECT_MEDIUM;
         } else if (LARGE_SUITE.equals(sizeArg)) {
-            return TestPredicates.SELECT_LARGE;
+            return SELECT_LARGE;
         } else {
             return null;
         }
@@ -476,28 +484,28 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
 
    /**
     * Returns the test predicate object, corresponding to the annotation class value provided via
-    * the {@link ARGUMENT_ANNOTATION} argument.
+    * the {@link #ARGUMENT_ANNOTATION} argument.
     *
     * @return the predicate or <code>null</code>
     */
     private Predicate<TestMethod> getAnnotationPredicate(String annotationClassName) {
         Class<? extends Annotation> annotationClass = getAnnotationClass(annotationClassName);
         if (annotationClass != null) {
-            return new HasAnnotation(annotationClass);
+            return hasAnnotation(annotationClass);
         }
         return null;
     }
 
     /**
      * Returns the negative test predicate object, corresponding to the annotation class value
-     * provided via the {@link ARGUMENT_NOT_ANNOTATION} argument.
+     * provided via the {@link #ARGUMENT_NOT_ANNOTATION} argument.
      *
      * @return the predicate or <code>null</code>
      */
      private Predicate<TestMethod> getNotAnnotationPredicate(String annotationClassName) {
          Class<? extends Annotation> annotationClass = getAnnotationClass(annotationClassName);
          if (annotationClass != null) {
-             return Predicates.not(new HasAnnotation(annotationClass));
+             return TestPredicates.not(hasAnnotation(annotationClass));
          }
          return null;
      }

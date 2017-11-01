@@ -31,6 +31,8 @@ import android.util.ArraySet;
 
 import com.android.internal.util.ArrayUtils;
 
+import java.util.Arrays;
+
 /**
  * Per-user state information about a package.
  * @hide
@@ -42,14 +44,18 @@ public class PackageUserState {
     public boolean notLaunched;
     public boolean hidden; // Is the app restricted by owner / admin
     public boolean suspended;
-    public boolean blockUninstall;
+    public boolean instantApp;
     public int enabled;
     public String lastDisableAppCaller;
     public int domainVerificationStatus;
     public int appLinkGeneration;
+    public int categoryHint = ApplicationInfo.CATEGORY_UNDEFINED;
+    public int installReason;
 
     public ArraySet<String> disabledComponents;
     public ArraySet<String> enabledComponents;
+
+    public String[] overlayPaths;
 
     public PackageUserState() {
         installed = true;
@@ -58,6 +64,7 @@ public class PackageUserState {
         enabled = COMPONENT_ENABLED_STATE_DEFAULT;
         domainVerificationStatus =
                 PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED;
+        installReason = PackageManager.INSTALL_REASON_UNKNOWN;
     }
 
     public PackageUserState(PackageUserState o) {
@@ -67,21 +74,30 @@ public class PackageUserState {
         notLaunched = o.notLaunched;
         hidden = o.hidden;
         suspended = o.suspended;
-        blockUninstall = o.blockUninstall;
+        instantApp = o.instantApp;
         enabled = o.enabled;
         lastDisableAppCaller = o.lastDisableAppCaller;
         domainVerificationStatus = o.domainVerificationStatus;
         appLinkGeneration = o.appLinkGeneration;
+        categoryHint = o.categoryHint;
+        installReason = o.installReason;
         disabledComponents = ArrayUtils.cloneOrNull(o.disabledComponents);
         enabledComponents = ArrayUtils.cloneOrNull(o.enabledComponents);
+        overlayPaths =
+            o.overlayPaths == null ? null : Arrays.copyOf(o.overlayPaths, o.overlayPaths.length);
     }
 
     /**
      * Test if this package is installed.
      */
-    public boolean isInstalled(int flags) {
-        return (this.installed && !this.hidden)
-                || (flags & PackageManager.MATCH_UNINSTALLED_PACKAGES) != 0;
+    public boolean isAvailable(int flags) {
+        // True if it is installed for this user and it is not hidden. If it is hidden,
+        // still return true if the caller requested MATCH_UNINSTALLED_PACKAGES
+        final boolean matchAnyUser = (flags & PackageManager.MATCH_ANY_USER) != 0;
+        final boolean matchUninstalled = (flags & PackageManager.MATCH_UNINSTALLED_PACKAGES) != 0;
+        return matchAnyUser
+                || (this.installed
+                        && (!this.hidden || matchUninstalled));
     }
 
     /**
@@ -94,11 +110,14 @@ public class PackageUserState {
      * </p>
      */
     public boolean isMatch(ComponentInfo componentInfo, int flags) {
-        if (!isInstalled(flags)) return false;
+        final boolean isSystemApp = componentInfo.applicationInfo.isSystemApp();
+        final boolean matchUninstalled = (flags & PackageManager.MATCH_KNOWN_PACKAGES) != 0;
+        if (!isAvailable(flags)
+                && !(isSystemApp && matchUninstalled)) return false;
         if (!isEnabled(componentInfo, flags)) return false;
 
         if ((flags & MATCH_SYSTEM_ONLY) != 0) {
-            if (!componentInfo.applicationInfo.isSystemApp()) {
+            if (!isSystemApp) {
                 return false;
             }
         }
@@ -146,5 +165,83 @@ public class PackageUserState {
         }
 
         return componentInfo.enabled;
+    }
+
+    @Override
+    final public boolean equals(Object obj) {
+        if (!(obj instanceof PackageUserState)) {
+            return false;
+        }
+        final PackageUserState oldState = (PackageUserState) obj;
+        if (ceDataInode != oldState.ceDataInode) {
+            return false;
+        }
+        if (installed != oldState.installed) {
+            return false;
+        }
+        if (stopped != oldState.stopped) {
+            return false;
+        }
+        if (notLaunched != oldState.notLaunched) {
+            return false;
+        }
+        if (hidden != oldState.hidden) {
+            return false;
+        }
+        if (suspended != oldState.suspended) {
+            return false;
+        }
+        if (instantApp != oldState.instantApp) {
+            return false;
+        }
+        if (enabled != oldState.enabled) {
+            return false;
+        }
+        if ((lastDisableAppCaller == null && oldState.lastDisableAppCaller != null)
+                || (lastDisableAppCaller != null
+                        && !lastDisableAppCaller.equals(oldState.lastDisableAppCaller))) {
+            return false;
+        }
+        if (domainVerificationStatus != oldState.domainVerificationStatus) {
+            return false;
+        }
+        if (appLinkGeneration != oldState.appLinkGeneration) {
+            return false;
+        }
+        if (categoryHint != oldState.categoryHint) {
+            return false;
+        }
+        if (installReason != oldState.installReason) {
+            return false;
+        }
+        if ((disabledComponents == null && oldState.disabledComponents != null)
+                || (disabledComponents != null && oldState.disabledComponents == null)) {
+            return false;
+        }
+        if (disabledComponents != null) {
+            if (disabledComponents.size() != oldState.disabledComponents.size()) {
+                return false;
+            }
+            for (int i = disabledComponents.size() - 1; i >=0; --i) {
+                if (!oldState.disabledComponents.contains(disabledComponents.valueAt(i))) {
+                    return false;
+                }
+            }
+        }
+        if ((enabledComponents == null && oldState.enabledComponents != null)
+                || (enabledComponents != null && oldState.enabledComponents == null)) {
+            return false;
+        }
+        if (enabledComponents != null) {
+            if (enabledComponents.size() != oldState.enabledComponents.size()) {
+                return false;
+            }
+            for (int i = enabledComponents.size() - 1; i >=0; --i) {
+                if (!oldState.enabledComponents.contains(enabledComponents.valueAt(i))) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 }

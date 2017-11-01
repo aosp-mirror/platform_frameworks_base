@@ -20,8 +20,9 @@
 #include <stdint.h>
 
 #include <utils/Errors.h>
-#include <utils/LinearTransform.h>
 #include <utils/threads.h>
+
+#include "LinearTransform.h"
 
 namespace android {
 

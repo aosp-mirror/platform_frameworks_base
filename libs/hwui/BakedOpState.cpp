@@ -31,7 +31,7 @@ static int computeClipSideFlags(const Rect& clip, const Rect& bounds) {
 }
 
 ResolvedRenderState::ResolvedRenderState(LinearAllocator& allocator, Snapshot& snapshot,
-        const RecordedOp& recordedOp, bool expandForStroke) {
+        const RecordedOp& recordedOp, bool expandForStroke, bool expandForPathTexture) {
     // resolvedMatrix = parentMatrix * localMatrix
     transform.loadMultiply(*snapshot.transform, recordedOp.localMatrix);
 
@@ -40,6 +40,8 @@ ResolvedRenderState::ResolvedRenderState(LinearAllocator& allocator, Snapshot& s
     if (CC_UNLIKELY(expandForStroke)) {
         // account for non-hairline stroke
         clippedBounds.outset(recordedOp.paint->getStrokeWidth() * 0.5f);
+    } else if (CC_UNLIKELY(expandForPathTexture)) {
+        clippedBounds.outset(1);
     }
     transform.mapRect(clippedBounds);
     if (CC_UNLIKELY(expandForStroke
@@ -111,7 +113,7 @@ BakedOpState* BakedOpState::tryConstruct(LinearAllocator& allocator,
         Snapshot& snapshot, const RecordedOp& recordedOp) {
     if (CC_UNLIKELY(snapshot.getRenderTargetClip().isEmpty())) return nullptr;
     BakedOpState* bakedState = allocator.create_trivial<BakedOpState>(
-            allocator, snapshot, recordedOp, false);
+            allocator, snapshot, recordedOp, false, false);
     if (bakedState->computedState.clippedBounds.isEmpty()) {
         // bounds are empty, so op is rejected
         allocator.rewindIfLastAlloc(bakedState);
@@ -127,14 +129,14 @@ BakedOpState* BakedOpState::tryConstructUnbounded(LinearAllocator& allocator,
 }
 
 BakedOpState* BakedOpState::tryStrokeableOpConstruct(LinearAllocator& allocator,
-        Snapshot& snapshot, const RecordedOp& recordedOp, StrokeBehavior strokeBehavior) {
+        Snapshot& snapshot, const RecordedOp& recordedOp, StrokeBehavior strokeBehavior,
+        bool expandForPathTexture) {
     if (CC_UNLIKELY(snapshot.getRenderTargetClip().isEmpty())) return nullptr;
-    bool expandForStroke = (strokeBehavior == StrokeBehavior::StyleDefined)
-            ? (recordedOp.paint && recordedOp.paint->getStyle() != SkPaint::kFill_Style)
-            : true;
+    bool expandForStroke = (strokeBehavior == StrokeBehavior::Forced
+            || (recordedOp.paint && recordedOp.paint->getStyle() != SkPaint::kFill_Style));
 
     BakedOpState* bakedState = allocator.create_trivial<BakedOpState>(
-           allocator, snapshot, recordedOp, expandForStroke);
+           allocator, snapshot, recordedOp, expandForStroke, expandForPathTexture);
     if (bakedState->computedState.clippedBounds.isEmpty()) {
         // bounds are empty, so op is rejected
         // NOTE: this won't succeed if a clip was allocated

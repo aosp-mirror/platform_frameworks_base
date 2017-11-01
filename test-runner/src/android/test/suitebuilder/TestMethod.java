@@ -26,7 +26,11 @@ import java.lang.reflect.Method;
 /**
  * Represents a test to be run. Can be constructed without instantiating the TestCase or even
  * loading the class.
+ *
+ * @deprecated New tests should be written using the
+ * <a href="{@docRoot}tools/testing-support-library/index.html">Android Testing Support Library</a>.
  */
+@Deprecated
 public class TestMethod {
 
     private final String enclosingClassname;

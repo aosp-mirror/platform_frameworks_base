@@ -20,12 +20,14 @@
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/preview_page_margin"
     android:orientation="vertical"
-    android:background="?android:attr/colorForeground">
+    android:background="@color/unselected_page_background_color"
+    android:elevation="@dimen/unselected_page_elevation" >
 
     <com.android.printspooler.widget.PageContentView
         android:id="@+id/page_content"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent">
+        android:layout_height="fill_parent"
+        android:alpha="0.5">
     </com.android.printspooler.widget.PageContentView>
 
     <RelativeLayout
@@ -34,7 +36,7 @@
         android:layout_height="@dimen/preview_page_footer_height"
         android:background="@color/material_grey_500"
         android:orientation="horizontal"
-        android:duplicateParentState="true">
+        android:alpha="0.5">
 
         <TextView
             android:id="@+id/page_number"
@@ -52,8 +54,7 @@
             android:layout_marginRight="8dip"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
-            android:background="@drawable/page_selector_background"
-            android:duplicateParentState="true">
+            android:src="@drawable/ic_remove_circle">
         </ImageView>
 
     </RelativeLayout>

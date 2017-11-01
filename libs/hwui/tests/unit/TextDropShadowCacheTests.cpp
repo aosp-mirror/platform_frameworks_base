@@ -26,7 +26,7 @@
 using namespace android;
 using namespace android::uirenderer;
 
-RENDERTHREAD_TEST(TextDropShadowCache, addRemove) {
+RENDERTHREAD_OPENGL_PIPELINE_TEST(TextDropShadowCache, addRemove) {
     SkPaint paint;
     paint.setTextSize(20);
 

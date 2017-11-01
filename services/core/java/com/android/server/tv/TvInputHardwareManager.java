@@ -17,6 +17,7 @@
 package com.android.server.tv;
 
 import static android.media.tv.TvInputManager.INPUT_STATE_CONNECTED;
+import static android.media.tv.TvInputManager.INPUT_STATE_CONNECTED_STANDBY;
 import static android.media.tv.TvInputManager.INPUT_STATE_DISCONNECTED;
 
 import android.content.BroadcastReceiver;
@@ -58,6 +59,7 @@ import android.util.SparseBooleanArray;
 import android.view.KeyEvent;
 import android.view.Surface;
 
+import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.SystemService;
 
@@ -109,7 +111,6 @@ class TvInputHardwareManager implements TvInputHal.Callback {
     private int mCurrentIndex = 0;
     private int mCurrentMaxIndex = 0;
 
-    // TODO: Should handle STANDBY case.
     private final SparseBooleanArray mHdmiStateMap = new SparseBooleanArray();
     private final List<Message> mPendingHdmiDeviceEvents = new LinkedList<>();
 
@@ -209,11 +210,13 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                         + deviceId);
                 return;
             }
+            int previousConfigsLength = connection.getConfigsLengthLocked();
             connection.updateConfigsLocked(configs);
             String inputId = mHardwareInputIdMap.get(deviceId);
-            if (inputId != null) {
+            if (inputId != null
+                    && (previousConfigsLength == 0) != (connection.getConfigsLengthLocked() == 0)) {
                 mHandler.obtainMessage(ListenerHandler.STATE_CHANGED,
-                        convertConnectedToState(configs.length > 0), 0, inputId).sendToTarget();
+                    connection.getInputStateLocked(), 0, inputId).sendToTarget();
             }
             ITvInputHardwareCallback callback = connection.getCallbackLocked();
             if (callback != null) {
@@ -263,14 +266,6 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                 || connectionCallingUid != callingUid || connectionResolvedUserId != resolvedUserId;
     }
 
-    private int convertConnectedToState(boolean connected) {
-        if (connected) {
-            return INPUT_STATE_CONNECTED;
-        } else {
-            return INPUT_STATE_DISCONNECTED;
-        }
-    }
-
     public void addHardwareInput(int deviceId, TvInputInfo info) {
         synchronized (mLock) {
             String oldInputId = mHardwareInputIdMap.get(deviceId);
@@ -293,18 +288,22 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                 }
                 String inputId = mHardwareInputIdMap.get(hardwareInfo.getDeviceId());
                 if (inputId != null && inputId.equals(info.getId())) {
-                    mHandler.obtainMessage(ListenerHandler.STATE_CHANGED,
-                            convertConnectedToState(mHdmiStateMap.valueAt(i)), 0,
-                            inputId).sendToTarget();
+                    // No HDMI hotplug does not necessarily mean disconnected, as old devices may
+                    // not report hotplug state correctly. Using INPUT_STATE_CONNECTED_STANDBY to
+                    // denote unknown state.
+                    int state = mHdmiStateMap.valueAt(i)
+                            ? INPUT_STATE_CONNECTED
+                            : INPUT_STATE_CONNECTED_STANDBY;
+                    mHandler.obtainMessage(
+                        ListenerHandler.STATE_CHANGED, state, 0, inputId).sendToTarget();
                     return;
                 }
             }
-            // For the rest of the devices, we can tell by the number of available streams.
+            // For the rest of the devices, we can tell by the cable connection status.
             Connection connection = mConnections.get(deviceId);
             if (connection != null) {
                 mHandler.obtainMessage(ListenerHandler.STATE_CHANGED,
-                        convertConnectedToState(connection.getConfigsLocked().length > 0), 0,
-                        info.getId()).sendToTarget();
+                    connection.getInputStateLocked(), 0, info.getId()).sendToTarget();
             }
         }
     }
@@ -551,12 +550,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
 
     public void dump(FileDescriptor fd, final PrintWriter writer, String[] args) {
         final IndentingPrintWriter pw = new IndentingPrintWriter(writer, "  ");
-        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
-                != PackageManager.PERMISSION_GRANTED) {
-            pw.println("Permission Denial: can't dump TvInputHardwareManager from pid="
-                    + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid());
-            return;
-        }
+        if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
 
         synchronized (mLock) {
             pw.println("TvInputHardwareManager Info:");
@@ -715,6 +709,26 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                     + ", mCallingUid: " + mCallingUid
                     + ", mResolvedUserId: " + mResolvedUserId
                     + " }";
+        }
+
+        private int getConfigsLengthLocked() {
+            return mConfigs == null ? 0 : mConfigs.length;
+        }
+
+        private int getInputStateLocked() {
+            int configsLength = getConfigsLengthLocked();
+            if (configsLength > 0) {
+                return INPUT_STATE_CONNECTED;
+            }
+            switch (mHardwareInfo.getCableConnectionStatus()) {
+                case TvInputHardwareInfo.CABLE_CONNECTION_STATUS_CONNECTED:
+                    return INPUT_STATE_CONNECTED;
+                case TvInputHardwareInfo.CABLE_CONNECTION_STATUS_DISCONNECTED:
+                    return INPUT_STATE_DISCONNECTED;
+                case TvInputHardwareInfo.CABLE_CONNECTION_STATUS_UNKNOWN:
+                default:
+                    return INPUT_STATE_CONNECTED_STANDBY;
+            }
         }
     }
 
@@ -1199,8 +1213,14 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                 if (inputId == null) {
                     return;
                 }
-                mHandler.obtainMessage(ListenerHandler.STATE_CHANGED,
-                        convertConnectedToState(event.isConnected()), 0, inputId).sendToTarget();
+                // No HDMI hotplug does not necessarily mean disconnected, as old devices may
+                // not report hotplug state correctly. Using INPUT_STATE_CONNECTED_STANDBY to
+                // denote unknown state.
+                int state = event.isConnected()
+                        ? INPUT_STATE_CONNECTED
+                        : INPUT_STATE_CONNECTED_STANDBY;
+                mHandler.obtainMessage(
+                    ListenerHandler.STATE_CHANGED, state, 0, inputId).sendToTarget();
             }
         }
     }

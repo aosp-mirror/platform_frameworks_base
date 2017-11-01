@@ -19,8 +19,7 @@
     android:height="48dp"
     android:width="48dp"
     android:viewportHeight="48"
-    android:viewportWidth="48"
-    android:tint="@color/qs_tile_tint_unavailable" >
+    android:viewportWidth="48" >
     <group
         android:name="ic_hotspot"
         android:translateX="23.97354"

@@ -302,21 +302,6 @@ bool SpotShadow::testPointInsidePolygon(const Vector2 testPoint,
 }
 
 /**
- * Make the polygon turn clockwise.
- *
- * @param polygon the polygon as a Vector2 array.
- * @param len the number of points of the polygon
- */
-void SpotShadow::makeClockwise(Vector2* polygon, int len) {
-    if (polygon == nullptr  || len == 0) {
-        return;
-    }
-    if (!ShadowTessellator::isClockwise(polygon, len)) {
-        reverse(polygon, len);
-    }
-}
-
-/**
  * Reverse the polygon
  *
  * @param polygon the polygon as a Vector2 array

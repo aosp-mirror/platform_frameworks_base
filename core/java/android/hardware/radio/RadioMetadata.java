@@ -530,14 +530,13 @@ public final class RadioMetadata implements Parcelable {
         Bitmap bmp = null;
         try {
             bmp = BitmapFactory.decodeByteArray(value, 0, value.length);
-        } catch (Exception e) {
-        } finally {
-            if (bmp == null) {
-                return -1;
+            if (bmp != null) {
+                mBundle.putParcelable(key, bmp);
+                return 0;
             }
-            mBundle.putParcelable(key, bmp);
-            return 0;
+        } catch (Exception e) {
         }
+        return -1;
     }
 
     int putClockFromNative(int nativeKey, long utcEpochSeconds, int timezoneOffsetInMinutes) {

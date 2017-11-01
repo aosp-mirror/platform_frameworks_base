@@ -155,6 +155,7 @@ public class AlsaDevicesParser {
 
             switch (mDeviceType) {
             case kDeviceType_Unknown:
+            default:
                 sb.append(" N/A");
                 break;
             case kDeviceType_Audio:
@@ -170,6 +171,7 @@ public class AlsaDevicesParser {
 
             switch (mDeviceDir) {
             case kDeviceDir_Unknown:
+            default:
                 sb.append(" N/A");
                 break;
             case kDeviceDir_Capture:
@@ -184,7 +186,7 @@ public class AlsaDevicesParser {
         }
     }
 
-    private ArrayList<AlsaDeviceRecord> mDeviceRecords = new ArrayList<AlsaDeviceRecord>();
+    private final ArrayList<AlsaDeviceRecord> mDeviceRecords = new ArrayList<AlsaDeviceRecord>();
 
     public AlsaDevicesParser() {}
 
@@ -199,9 +201,11 @@ public class AlsaDevicesParser {
     //
     // Predicates
     //
+/*
    public boolean hasPlaybackDevices() {
         return mHasPlaybackDevices;
     }
+*/
 
     public boolean hasPlaybackDevices(int card) {
         for (AlsaDeviceRecord deviceRecord : mDeviceRecords) {
@@ -214,9 +218,11 @@ public class AlsaDevicesParser {
         return false;
     }
 
+/*
     public boolean hasCaptureDevices() {
         return mHasCaptureDevices;
     }
+*/
 
     public boolean hasCaptureDevices(int card) {
         for (AlsaDeviceRecord deviceRecord : mDeviceRecords) {
@@ -229,9 +235,11 @@ public class AlsaDevicesParser {
         return false;
     }
 
+/*
     public boolean hasMIDIDevices() {
         return mHasMIDIDevices;
     }
+*/
 
     public boolean hasMIDIDevices(int card) {
         for (AlsaDeviceRecord deviceRecord : mDeviceRecords) {
@@ -276,7 +284,7 @@ public class AlsaDevicesParser {
     //
     // Loging
     //
-    public void Log(String heading) {
+    private void Log(String heading) {
         if (DEBUG) {
             Slog.i(TAG, heading);
             for (AlsaDeviceRecord deviceRecord : mDeviceRecords) {

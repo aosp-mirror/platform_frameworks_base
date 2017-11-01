@@ -83,8 +83,7 @@
     <string name="print_dialog">Print dialog</string>
 
     <!-- Template for the message that shows the current page out of the total number of pages [CHAR LIMIT=none] -->
-    <string name="current_page_template"><xliff:g id="current_page">%1$d</xliff:g>
-        /<xliff:g id="page_count">%2$d</xliff:g></string>
+    <string name="current_page_template"><xliff:g id="current_page">%1$d</xliff:g>/<xliff:g id="page_count">%2$d</xliff:g></string>
 
     <!-- Description of the current page - spoken to the user [CHAR LIMIT=none] -->
     <string name="page_description_template">Page <xliff:g id="current_page" example="1">%1$d</xliff:g>
@@ -149,6 +148,12 @@
 
     <!-- Description of printer info icon. [CHAR LIMIT=50] -->
     <string name="printer_info_desc">More information about this printer</string>
+
+    <!-- Label for the notification channel that contains print jobs without problems. [CHAR LIMIT=40] -->
+    <string name="notification_channel_progress">Running print jobs</string>
+
+    <!-- Label for the notification channel that contains print jobs with problems. [CHAR LIMIT=40] -->
+    <string name="notification_channel_failure">Failed print jobs</string>
 
     <!-- Notification that we could not create a file name for the printed PDF. [CHAR LIMIT=50] -->
     <string name="could_not_create_file">Could not create file</string>

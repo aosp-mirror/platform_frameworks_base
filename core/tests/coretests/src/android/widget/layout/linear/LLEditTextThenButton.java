@@ -36,9 +36,9 @@ public class LLEditTextThenButton extends Activity {
 
         setContentView(R.layout.linear_layout_edittext_then_button);
 
-        mLayout = (LinearLayout) findViewById(R.id.layout);
-        mEditText = (EditText) findViewById(R.id.editText);
-        mButton = (Button) findViewById(R.id.button);
+        mLayout = findViewById(R.id.layout);
+        mEditText = findViewById(R.id.editText);
+        mButton = findViewById(R.id.button);
     }
 
     public LinearLayout getLayout() {

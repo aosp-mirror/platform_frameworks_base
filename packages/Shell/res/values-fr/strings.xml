@@ -4,9 +4,9 @@
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
      You may obtain a copy of the License at
-  
+
           http://www.apache.org/licenses/LICENSE-2.0
-  
+
      Unless required by applicable law or agreed to in writing, software
      distributed under the License is distributed on an "AS IS" BASIS,
      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,12 +17,15 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"Shell"</string>
+    <string name="bugreport_notification_channel" msgid="2574150205913861141">"Rapports de bugs"</string>
     <string name="bugreport_in_progress_title" msgid="4311705936714972757">"Le rapport de bug \"<xliff:g id="ID">#%d</xliff:g>\" est en cours de création"</string>
     <string name="bugreport_finished_title" msgid="4429132808670114081">"Le rapport de bug \"<xliff:g id="ID">#%d</xliff:g>\" a bien été enregistré"</string>
     <string name="bugreport_updating_title" msgid="4423539949559634214">"Ajout d\'informations au rapport de bug"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"Veuillez patienter…"</string>
     <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"Le rapport de bug s\'affichera bientôt sur le téléphone."</string>
+    <string name="bugreport_finished_text" product="tv" msgid="5758325479058638893">"Sélectionner pour partager le rapport de bug"</string>
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"Appuyer pour partager votre rapport de bug"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="tv" msgid="2343263822812016950">"Sélectionner pour partager le rapport de bug sans capture d\'écran ou attendre la fin de la capture"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"Appuyer pour partager rapport de bug sans capture d\'écran ou attendre finalisation capture d\'écran"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Appuyer pour partager rapport de bug sans capture d\'écran ou attendre finalisation capture d\'écran"</string>
     <string name="bugreport_confirm" msgid="5917407234515812495">"Les rapports de bug contiennent des données des fichiers journaux du système, y compris des informations que vous considérez sensibles concernant, par exemple, la consommation par application et la localisation. Nous vous recommandons de ne partager ces rapports qu\'avec des personnes et des applications que vous estimez fiables."</string>
@@ -40,4 +43,5 @@
     <string name="bugreport_info_title" msgid="2306030793918239804">"Titre du bug"</string>
     <string name="bugreport_info_description" msgid="5072835127481627722">"Résumé du bug"</string>
     <string name="save" msgid="4781509040564835759">"Enregistrer"</string>
+    <string name="bugreport_intent_chooser_title" msgid="7605709494790894076">"Partager le rapport de bug"</string>
 </resources>

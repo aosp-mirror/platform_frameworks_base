@@ -1,8 +1,0 @@
-page.title=Application Resources
-@jd:body
-
-<script type="text/javascript">
-  window.location = toRoot + "guide/topics/resources/index.html";
-</script>
-
-<p><strong>This document has moved. Please see <a href="index.html">Application Resources</a>.</strong></p>

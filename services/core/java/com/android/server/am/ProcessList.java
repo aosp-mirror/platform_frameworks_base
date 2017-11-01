@@ -138,30 +138,8 @@ final class ProcessList {
     // without empty apps being able to push them out of memory.
     static final int MIN_CACHED_APPS = 2;
 
-    // The maximum number of cached processes we will keep around before killing them.
-    // NOTE: this constant is *only* a control to not let us go too crazy with
-    // keeping around processes on devices with large amounts of RAM.  For devices that
-    // are tighter on RAM, the out of memory killer is responsible for killing background
-    // processes as RAM is needed, and we should *never* be relying on this limit to
-    // kill them.  Also note that this limit only applies to cached background processes;
-    // we have no limit on the number of service, visible, foreground, or other such
-    // processes and the number of those processes does not count against the cached
-    // process limit.
-    static final int MAX_CACHED_APPS = 32;
-
     // We allow empty processes to stick around for at most 30 minutes.
     static final long MAX_EMPTY_TIME = 30*60*1000;
-
-    // The maximum number of empty app processes we will let sit around.
-    private static final int MAX_EMPTY_APPS = computeEmptyProcessLimit(MAX_CACHED_APPS);
-
-    // The number of empty apps at which we don't consider it necessary to do
-    // memory trimming.
-    static final int TRIM_EMPTY_APPS = MAX_EMPTY_APPS/2;
-
-    // The number of cached at which we don't consider it necessary to do
-    // memory trimming.
-    static final int TRIM_CACHED_APPS = (MAX_CACHED_APPS-MAX_EMPTY_APPS)/3;
 
     // Threshold of number of cached+empty where we consider memory critical.
     static final int TRIM_CRITICAL_THRESHOLD = 3;
@@ -220,6 +198,7 @@ final class ProcessList {
     void applyDisplaySize(WindowManagerService wm) {
         if (!mHaveDisplaySize) {
             Point p = new Point();
+            // TODO(multi-display): Compute based on sum of all connected displays' resolutions.
             wm.getBaseDisplaySize(Display.DEFAULT_DISPLAY, p);
             if (p.x != 0 && p.y != 0) {
                 updateOomLevels(p.x, p.y, true);
@@ -370,59 +349,62 @@ final class ProcessList {
     public static String makeProcStateString(int curProcState) {
         String procState;
         switch (curProcState) {
-            case -1:
-                procState = "N ";
-                break;
             case ActivityManager.PROCESS_STATE_PERSISTENT:
-                procState = "P ";
+                procState = "PER ";
                 break;
             case ActivityManager.PROCESS_STATE_PERSISTENT_UI:
-                procState = "PU";
+                procState = "PERU";
                 break;
             case ActivityManager.PROCESS_STATE_TOP:
-                procState = "T ";
+                procState = "TOP ";
                 break;
             case ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE:
-                procState = "SB";
+                procState = "BFGS";
                 break;
             case ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE:
-                procState = "SF";
+                procState = "FGS ";
                 break;
             case ActivityManager.PROCESS_STATE_TOP_SLEEPING:
-                procState = "TS";
+                procState = "TPSL";
                 break;
             case ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND:
-                procState = "IF";
+                procState = "IMPF";
                 break;
             case ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND:
-                procState = "IB";
+                procState = "IMPB";
+                break;
+            case ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND:
+                procState = "TRNB";
                 break;
             case ActivityManager.PROCESS_STATE_BACKUP:
-                procState = "BU";
+                procState = "BKUP";
                 break;
             case ActivityManager.PROCESS_STATE_HEAVY_WEIGHT:
-                procState = "HW";
+                procState = "HVY ";
                 break;
             case ActivityManager.PROCESS_STATE_SERVICE:
-                procState = "S ";
+                procState = "SVC ";
                 break;
             case ActivityManager.PROCESS_STATE_RECEIVER:
-                procState = "R ";
+                procState = "RCVR";
                 break;
             case ActivityManager.PROCESS_STATE_HOME:
-                procState = "HO";
+                procState = "HOME";
                 break;
             case ActivityManager.PROCESS_STATE_LAST_ACTIVITY:
-                procState = "LA";
+                procState = "LAST";
                 break;
             case ActivityManager.PROCESS_STATE_CACHED_ACTIVITY:
-                procState = "CA";
+                procState = "CAC ";
                 break;
             case ActivityManager.PROCESS_STATE_CACHED_ACTIVITY_CLIENT:
-                procState = "Ca";
+                procState = "CACC";
                 break;
             case ActivityManager.PROCESS_STATE_CACHED_EMPTY:
-                procState = "CE";
+                procState = "CEM ";
+                break;
+            case ActivityManager.PROCESS_STATE_NONEXISTENT:
+                procState = "NONE";
                 break;
             default:
                 procState = "??";
@@ -503,6 +485,7 @@ final class ProcessList {
         PROC_MEM_TOP,                   // ActivityManager.PROCESS_STATE_TOP_SLEEPING
         PROC_MEM_IMPORTANT,             // ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND
         PROC_MEM_IMPORTANT,             // ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND
+        PROC_MEM_IMPORTANT,             // ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND
         PROC_MEM_IMPORTANT,             // ActivityManager.PROCESS_STATE_BACKUP
         PROC_MEM_IMPORTANT,             // ActivityManager.PROCESS_STATE_HEAVY_WEIGHT
         PROC_MEM_SERVICE,               // ActivityManager.PROCESS_STATE_SERVICE
@@ -523,6 +506,7 @@ final class ProcessList {
         PSS_FIRST_BACKGROUND_INTERVAL,  // ActivityManager.PROCESS_STATE_TOP_SLEEPING
         PSS_FIRST_BACKGROUND_INTERVAL,  // ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND
         PSS_FIRST_BACKGROUND_INTERVAL,  // ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND
+        PSS_FIRST_BACKGROUND_INTERVAL,  // ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND
         PSS_FIRST_BACKGROUND_INTERVAL,  // ActivityManager.PROCESS_STATE_BACKUP
         PSS_FIRST_BACKGROUND_INTERVAL,  // ActivityManager.PROCESS_STATE_HEAVY_WEIGHT
         PSS_FIRST_BACKGROUND_INTERVAL,  // ActivityManager.PROCESS_STATE_SERVICE
@@ -543,6 +527,7 @@ final class ProcessList {
         PSS_SAME_IMPORTANT_INTERVAL,    // ActivityManager.PROCESS_STATE_TOP_SLEEPING
         PSS_SAME_IMPORTANT_INTERVAL,    // ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND
         PSS_SAME_IMPORTANT_INTERVAL,    // ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND
+        PSS_SAME_IMPORTANT_INTERVAL,    // ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND
         PSS_SAME_IMPORTANT_INTERVAL,    // ActivityManager.PROCESS_STATE_BACKUP
         PSS_SAME_IMPORTANT_INTERVAL,    // ActivityManager.PROCESS_STATE_HEAVY_WEIGHT
         PSS_SAME_SERVICE_INTERVAL,      // ActivityManager.PROCESS_STATE_SERVICE
@@ -563,6 +548,7 @@ final class ProcessList {
         PSS_FIRST_BACKGROUND_INTERVAL,      // ActivityManager.PROCESS_STATE_TOP_SLEEPING
         PSS_TEST_FIRST_BACKGROUND_INTERVAL, // ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND
         PSS_TEST_FIRST_BACKGROUND_INTERVAL, // ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND
+        PSS_TEST_FIRST_BACKGROUND_INTERVAL, // ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND
         PSS_TEST_FIRST_BACKGROUND_INTERVAL, // ActivityManager.PROCESS_STATE_BACKUP
         PSS_TEST_FIRST_BACKGROUND_INTERVAL, // ActivityManager.PROCESS_STATE_HEAVY_WEIGHT
         PSS_TEST_FIRST_BACKGROUND_INTERVAL, // ActivityManager.PROCESS_STATE_SERVICE
@@ -583,6 +569,7 @@ final class ProcessList {
         PSS_TEST_SAME_IMPORTANT_INTERVAL,   // ActivityManager.PROCESS_STATE_TOP_SLEEPING
         PSS_TEST_SAME_IMPORTANT_INTERVAL,   // ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND
         PSS_TEST_SAME_IMPORTANT_INTERVAL,   // ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND
+        PSS_TEST_SAME_IMPORTANT_INTERVAL,   // ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND
         PSS_TEST_SAME_IMPORTANT_INTERVAL,   // ActivityManager.PROCESS_STATE_BACKUP
         PSS_TEST_SAME_IMPORTANT_INTERVAL,   // ActivityManager.PROCESS_STATE_HEAVY_WEIGHT
         PSS_TEST_SAME_BACKGROUND_INTERVAL,  // ActivityManager.PROCESS_STATE_SERVICE

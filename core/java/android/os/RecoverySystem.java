@@ -16,17 +16,34 @@
 
 package android.os;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
+import android.annotation.RequiresPermission;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
+import android.annotation.SystemService;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
-import android.os.UserManager;
+import android.content.IntentFilter;
+import android.content.pm.PackageManager;
+import android.provider.Settings;
+import android.telephony.euicc.EuiccManager;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Display;
+import android.view.WindowManager;
 
-import java.io.ByteArrayInputStream;
+import com.android.internal.logging.MetricsLogger;
+
+import libcore.io.Streams;
+
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -35,19 +52,18 @@ import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.security.GeneralSecurityException;
 import java.security.PublicKey;
-import java.security.Signature;
 import java.security.SignatureException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-
-import com.android.internal.logging.MetricsLogger;
+import java.util.zip.ZipInputStream;
 
 import sun.security.pkcs.PKCS7;
 import sun.security.pkcs.SignerInfo;
@@ -57,6 +73,7 @@ import sun.security.pkcs.SignerInfo;
  * recovery system (the separate partition that can be used to install
  * system updates, wipe user data, etc.)
  */
+@SystemService(Context.RECOVERY_SERVICE)
 public class RecoverySystem {
     private static final String TAG = "RecoverySystem";
 
@@ -70,11 +87,19 @@ public class RecoverySystem {
     /** Send progress to listeners no more often than this (in ms). */
     private static final long PUBLISH_PROGRESS_INTERVAL_MS = 500;
 
+    private static final long DEFAULT_EUICC_FACTORY_RESET_TIMEOUT_MILLIS = 30000L; // 30 s
+
+    private static final long MIN_EUICC_FACTORY_RESET_TIMEOUT_MILLIS = 5000L; // 5 s
+
+    private static final long MAX_EUICC_FACTORY_RESET_TIMEOUT_MILLIS = 60000L; // 60 s
+
     /** Used to communicate with recovery.  See bootable/recovery/recovery.cpp. */
     private static final File RECOVERY_DIR = new File("/cache/recovery");
     private static final File LOG_FILE = new File(RECOVERY_DIR, "log");
     private static final File LAST_INSTALL_FILE = new File(RECOVERY_DIR, "last_install");
     private static final String LAST_PREFIX = "last_";
+    private static final String ACTION_EUICC_FACTORY_RESET =
+            "com.android.internal.action.EUICC_FACTORY_RESET";
 
     /**
      * The recovery image uses this file to identify the location (i.e. blocks)
@@ -317,6 +342,71 @@ public class RecoverySystem {
         } finally {
             raf.close();
         }
+
+        // Additionally verify the package compatibility.
+        if (!readAndVerifyPackageCompatibilityEntry(packageFile)) {
+            throw new SignatureException("package compatibility verification failed");
+        }
+    }
+
+    /**
+     * Verifies the compatibility entry from an {@link InputStream}.
+     *
+     * @return the verification result.
+     */
+    private static boolean verifyPackageCompatibility(InputStream inputStream) throws IOException {
+        ArrayList<String> list = new ArrayList<>();
+        ZipInputStream zis = new ZipInputStream(inputStream);
+        ZipEntry entry;
+        while ((entry = zis.getNextEntry()) != null) {
+            long entrySize = entry.getSize();
+            if (entrySize > Integer.MAX_VALUE || entrySize < 0) {
+                throw new IOException(
+                        "invalid entry size (" + entrySize + ") in the compatibility file");
+            }
+            byte[] bytes = new byte[(int) entrySize];
+            Streams.readFully(zis, bytes);
+            list.add(new String(bytes, UTF_8));
+        }
+        if (list.isEmpty()) {
+            throw new IOException("no entries found in the compatibility file");
+        }
+        return (VintfObject.verify(list.toArray(new String[list.size()])) == 0);
+    }
+
+    /**
+     * Reads and verifies the compatibility entry in an OTA zip package. The compatibility entry is
+     * a zip file (inside the OTA package zip).
+     *
+     * @return {@code true} if the entry doesn't exist or verification passes.
+     */
+    private static boolean readAndVerifyPackageCompatibilityEntry(File packageFile)
+            throws IOException {
+        try (ZipFile zip = new ZipFile(packageFile)) {
+            ZipEntry entry = zip.getEntry("compatibility.zip");
+            if (entry == null) {
+                return true;
+            }
+            InputStream inputStream = zip.getInputStream(entry);
+            return verifyPackageCompatibility(inputStream);
+        }
+    }
+
+    /**
+     * Verifies the package compatibility info against the current system.
+     *
+     * @param compatibilityFile the {@link File} that contains the package compatibility info.
+     * @throws IOException if there were any errors reading the compatibility file.
+     * @return the compatibility verification result.
+     *
+     * {@hide}
+     */
+    @SystemApi
+    @SuppressLint("Doclava125")
+    public static boolean verifyPackageCompatibility(File compatibilityFile) throws IOException {
+        try (InputStream inputStream = new FileInputStream(compatibilityFile)) {
+            return verifyPackageCompatibility(inputStream);
+        }
     }
 
     /**
@@ -335,6 +425,7 @@ public class RecoverySystem {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.RECOVERY)
     public static void processPackage(Context context,
                                       File packageFile,
                                       final ProgressListener listener,
@@ -395,6 +486,7 @@ public class RecoverySystem {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.RECOVERY)
     public static void processPackage(Context context,
                                       File packageFile,
                                       final ProgressListener listener)
@@ -416,6 +508,7 @@ public class RecoverySystem {
      * @throws IOException  if writing the recovery command file
      * fails, or if the reboot itself fails.
      */
+    @RequiresPermission(android.Manifest.permission.RECOVERY)
     public static void installPackage(Context context, File packageFile)
             throws IOException {
         installPackage(context, packageFile, false);
@@ -437,6 +530,7 @@ public class RecoverySystem {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.RECOVERY)
     public static void installPackage(Context context, File packageFile, boolean processed)
             throws IOException {
         synchronized (sRequestLock) {
@@ -483,7 +577,7 @@ public class RecoverySystem {
             }
 
             final String filenameArg = "--update_package=" + filename + "\n";
-            final String localeArg = "--locale=" + Locale.getDefault().toString() + "\n";
+            final String localeArg = "--locale=" + Locale.getDefault().toLanguageTag() + "\n";
             final String securityArg = "--security\n";
 
             String command = filenameArg + localeArg;
@@ -499,7 +593,16 @@ public class RecoverySystem {
 
             // Having set up the BCB (bootloader control block), go ahead and reboot
             PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
-            pm.reboot(PowerManager.REBOOT_RECOVERY_UPDATE);
+            String reason = PowerManager.REBOOT_RECOVERY_UPDATE;
+
+            // On TV, reboot quiescently if the screen is off
+            if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_LEANBACK)) {
+                WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+                if (wm.getDefaultDisplay().getState() != Display.STATE_ON) {
+                    reason += ",quiescent";
+                }
+            }
+            pm.reboot(reason);
 
             throw new IOException("Reboot failed (no permissions?)");
         }
@@ -519,6 +622,7 @@ public class RecoverySystem {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.RECOVERY)
     public static void scheduleUpdateOnBoot(Context context, File packageFile)
             throws IOException {
         String filename = packageFile.getCanonicalPath();
@@ -531,7 +635,7 @@ public class RecoverySystem {
         }
 
         final String filenameArg = "--update_package=" + filename + "\n";
-        final String localeArg = "--locale=" + Locale.getDefault().toString() + "\n";
+        final String localeArg = "--locale=" + Locale.getDefault().toLanguageTag() + "\n";
         final String securityArg = "--security\n";
 
         String command = filenameArg + localeArg;
@@ -556,6 +660,7 @@ public class RecoverySystem {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.RECOVERY)
     public static void cancelScheduledUpdate(Context context)
             throws IOException {
         RecoverySystem rs = (RecoverySystem) context.getSystemService(Context.RECOVERY_SERVICE);
@@ -579,18 +684,26 @@ public class RecoverySystem {
      */
     public static void rebootWipeUserData(Context context) throws IOException {
         rebootWipeUserData(context, false /* shutdown */, context.getPackageName(),
-                false /* force */);
+                false /* force */, false /* wipeEuicc */);
     }
 
     /** {@hide} */
     public static void rebootWipeUserData(Context context, String reason) throws IOException {
-        rebootWipeUserData(context, false /* shutdown */, reason, false /* force */);
+        rebootWipeUserData(context, false /* shutdown */, reason, false /* force */,
+                false /* wipeEuicc */);
     }
 
     /** {@hide} */
     public static void rebootWipeUserData(Context context, boolean shutdown)
             throws IOException {
-        rebootWipeUserData(context, shutdown, context.getPackageName(), false /* force */);
+        rebootWipeUserData(context, shutdown, context.getPackageName(), false /* force */,
+                false /* wipeEuicc */);
+    }
+
+    /** {@hide} */
+    public static void rebootWipeUserData(Context context, boolean shutdown, String reason,
+            boolean force) throws IOException {
+        rebootWipeUserData(context, shutdown, reason, force, false /* wipeEuicc */);
     }
 
     /**
@@ -607,6 +720,7 @@ public class RecoverySystem {
      * @param reason    the reason for the wipe that is visible in the logs
      * @param force     whether the {@link UserManager.DISALLOW_FACTORY_RESET} user restriction
      *                  should be ignored
+     * @param wipeEuicc whether wipe the euicc data
      *
      * @throws IOException  if writing the recovery command file
      * fails, or if the reboot itself fails.
@@ -615,7 +729,7 @@ public class RecoverySystem {
      * @hide
      */
     public static void rebootWipeUserData(Context context, boolean shutdown, String reason,
-            boolean force) throws IOException {
+            boolean force, boolean wipeEuicc) throws IOException {
         UserManager um = (UserManager) context.getSystemService(Context.USER_SERVICE);
         if (!force && um.hasUserRestriction(UserManager.DISALLOW_FACTORY_RESET)) {
             throw new SecurityException("Wiping data is not allowed for this user.");
@@ -623,7 +737,8 @@ public class RecoverySystem {
         final ConditionVariable condition = new ConditionVariable();
 
         Intent intent = new Intent("android.intent.action.MASTER_CLEAR_NOTIFICATION");
-        intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+        intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND
+                | Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
         context.sendOrderedBroadcastAsUser(intent, UserHandle.SYSTEM,
                 android.Manifest.permission.MASTER_CLEAR,
                 new BroadcastReceiver() {
@@ -636,6 +751,8 @@ public class RecoverySystem {
         // Block until the ordered broadcast has completed.
         condition.block();
 
+        wipeEuiccData(context, wipeEuicc);
+
         String shutdownArg = null;
         if (shutdown) {
             shutdownArg = "--shutdown_after";
@@ -646,8 +763,105 @@ public class RecoverySystem {
             reasonArg = "--reason=" + sanitizeArg(reason);
         }
 
-        final String localeArg = "--locale=" + Locale.getDefault().toString();
+        final String localeArg = "--locale=" + Locale.getDefault().toLanguageTag() ;
         bootCommand(context, shutdownArg, "--wipe_data", reasonArg, localeArg);
+    }
+
+    private static void wipeEuiccData(Context context, final boolean isWipeEuicc) {
+        ContentResolver cr = context.getContentResolver();
+        if (Settings.Global.getInt(cr, Settings.Global.EUICC_PROVISIONED, 0) == 0) {
+            // If the eUICC isn't provisioned, there's no reason to either wipe or retain profiles,
+            // as there's nothing to wipe nor retain.
+            Log.d(TAG, "Skipping eUICC wipe/retain as it is not provisioned");
+            return;
+        }
+
+        EuiccManager euiccManager = (EuiccManager) context.getSystemService(
+                Context.EUICC_SERVICE);
+        if (euiccManager != null && euiccManager.isEnabled()) {
+            CountDownLatch euiccFactoryResetLatch = new CountDownLatch(1);
+
+            BroadcastReceiver euiccWipeFinishReceiver = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    if (ACTION_EUICC_FACTORY_RESET.equals(intent.getAction())) {
+                        if (getResultCode() != EuiccManager.EMBEDDED_SUBSCRIPTION_RESULT_OK) {
+                            int detailedCode = intent.getIntExtra(
+                                    EuiccManager.EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE, 0);
+                            if (isWipeEuicc) {
+                                Log.e(TAG, "Error wiping euicc data, Detailed code = "
+                                        + detailedCode);
+                            } else {
+                                Log.e(TAG, "Error retaining euicc data, Detailed code = "
+                                        + detailedCode);
+                            }
+                        } else {
+                            if (isWipeEuicc) {
+                                Log.d(TAG, "Successfully wiped euicc data.");
+                            } else {
+                                Log.d(TAG, "Successfully retained euicc data.");
+                            }
+                        }
+                        euiccFactoryResetLatch.countDown();
+                    }
+                }
+            };
+
+            Intent intent = new Intent(ACTION_EUICC_FACTORY_RESET);
+            intent.setPackage("android");
+            PendingIntent callbackIntent = PendingIntent.getBroadcastAsUser(
+                    context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT, UserHandle.SYSTEM);
+            IntentFilter filterConsent = new IntentFilter();
+            filterConsent.addAction(ACTION_EUICC_FACTORY_RESET);
+            HandlerThread euiccHandlerThread = new HandlerThread("euiccWipeFinishReceiverThread");
+            euiccHandlerThread.start();
+            Handler euiccHandler = new Handler(euiccHandlerThread.getLooper());
+            context.getApplicationContext()
+                    .registerReceiver(euiccWipeFinishReceiver, filterConsent, null, euiccHandler);
+            if (isWipeEuicc) {
+                euiccManager.eraseSubscriptions(callbackIntent);
+            } else {
+                euiccManager.retainSubscriptionsForFactoryReset(callbackIntent);
+            }
+            try {
+                long waitingTimeMillis = Settings.Global.getLong(
+                        context.getContentResolver(),
+                        Settings.Global.EUICC_FACTORY_RESET_TIMEOUT_MILLIS,
+                        DEFAULT_EUICC_FACTORY_RESET_TIMEOUT_MILLIS);
+                if (waitingTimeMillis < MIN_EUICC_FACTORY_RESET_TIMEOUT_MILLIS) {
+                    waitingTimeMillis = MIN_EUICC_FACTORY_RESET_TIMEOUT_MILLIS;
+                } else if (waitingTimeMillis > MAX_EUICC_FACTORY_RESET_TIMEOUT_MILLIS) {
+                    waitingTimeMillis = MAX_EUICC_FACTORY_RESET_TIMEOUT_MILLIS;
+                }
+                if (!euiccFactoryResetLatch.await(waitingTimeMillis, TimeUnit.MILLISECONDS)) {
+                    if (isWipeEuicc) {
+                        Log.e(TAG, "Timeout wiping eUICC data.");
+                    } else {
+                        Log.e(TAG, "Timeout retaining eUICC data.");
+                    }
+                }
+                context.getApplicationContext().unregisterReceiver(euiccWipeFinishReceiver);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                if (isWipeEuicc) {
+                    Log.e(TAG, "Wiping eUICC data interrupted", e);
+                } else {
+                    Log.e(TAG, "Retaining eUICC data interrupted", e);
+                }
+            }
+        }
+    }
+
+    /** {@hide} */
+    public static void rebootPromptAndWipeUserData(Context context, String reason)
+            throws IOException {
+        String reasonArg = null;
+        if (!TextUtils.isEmpty(reason)) {
+            reasonArg = "--reason=" + sanitizeArg(reason);
+        }
+
+        final String localeArg = "--locale=" + Locale.getDefault().toString();
+        bootCommand(context, null, "--prompt_and_wipe_data", reasonArg, localeArg);
     }
 
     /**
@@ -665,7 +879,7 @@ public class RecoverySystem {
             reasonArg = "--reason=" + sanitizeArg(reason);
         }
 
-        final String localeArg = "--locale=" + Locale.getDefault().toString();
+        final String localeArg = "--locale=" + Locale.getDefault().toLanguageTag() ;
         bootCommand(context, "--wipe_cache", reasonArg, localeArg);
     }
 
@@ -681,6 +895,10 @@ public class RecoverySystem {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.RECOVERY,
+            android.Manifest.permission.REBOOT
+    })
     public static void rebootWipeAb(Context context, File packageFile, String reason)
             throws IOException {
         String reasonArg = null;
@@ -690,7 +908,7 @@ public class RecoverySystem {
 
         final String filename = packageFile.getCanonicalPath();
         final String filenameArg = "--wipe_package=" + filename;
-        final String localeArg = "--locale=" + Locale.getDefault().toString();
+        final String localeArg = "--locale=" + Locale.getDefault().toLanguageTag() ;
         bootCommand(context, "--wipe_ab", filenameArg, reasonArg, localeArg);
     }
 
@@ -728,6 +946,12 @@ public class RecoverySystem {
             int timeTotal = -1;
             int uncryptTime = -1;
             int sourceVersion = -1;
+            int temperatureStart = -1;
+            int temperatureEnd = -1;
+            int temperatureMax = -1;
+            int errorCode = -1;
+            int causeCode = -1;
+
             while ((line = in.readLine()) != null) {
                 // Here is an example of lines in last_install:
                 // ...
@@ -772,6 +996,16 @@ public class RecoverySystem {
                 } else if (line.startsWith("bytes_stashed")) {
                     bytesStashedInMiB = (bytesStashedInMiB == -1) ? scaled :
                             bytesStashedInMiB + scaled;
+                } else if (line.startsWith("temperature_start")) {
+                    temperatureStart = scaled;
+                } else if (line.startsWith("temperature_end")) {
+                    temperatureEnd = scaled;
+                } else if (line.startsWith("temperature_max")) {
+                    temperatureMax = scaled;
+                } else if (line.startsWith("error")) {
+                    errorCode = scaled;
+                } else if (line.startsWith("cause")) {
+                    causeCode = scaled;
                 }
             }
 
@@ -790,6 +1024,21 @@ public class RecoverySystem {
             }
             if (bytesStashedInMiB != -1) {
                 MetricsLogger.histogram(context, "ota_stashed_in_MiBs", bytesStashedInMiB);
+            }
+            if (temperatureStart != -1) {
+                MetricsLogger.histogram(context, "ota_temperature_start", temperatureStart);
+            }
+            if (temperatureEnd != -1) {
+                MetricsLogger.histogram(context, "ota_temperature_end", temperatureEnd);
+            }
+            if (temperatureMax != -1) {
+                MetricsLogger.histogram(context, "ota_temperature_max", temperatureMax);
+            }
+            if (errorCode != -1) {
+                MetricsLogger.histogram(context, "ota_non_ab_error_code", errorCode);
+            }
+            if (causeCode != -1) {
+                MetricsLogger.histogram(context, "ota_non_ab_cause_code", causeCode);
             }
 
         } catch (IOException e) {

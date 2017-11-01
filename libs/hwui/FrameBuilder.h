@@ -211,7 +211,8 @@ private:
     }
 
     BakedOpState* deferStrokeableOp(const RecordedOp& op, batchid_t batchId,
-            BakedOpState::StrokeBehavior strokeBehavior = BakedOpState::StrokeBehavior::StyleDefined);
+            BakedOpState::StrokeBehavior strokeBehavior = BakedOpState::StrokeBehavior::StyleDefined,
+            bool expandForPathTexture = false);
 
     /**
      * Declares all FrameBuilder::deferXXXXOp() methods for every RecordedOp type.

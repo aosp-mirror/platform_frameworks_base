@@ -129,4 +129,22 @@ public class KeyValueListParser {
         }
         return def;
     }
+
+    /**
+     * Get the value for key as a boolean.
+     * @param key The key to lookup.
+     * @param def The value to return if the key was not found.
+     * @return the string value associated with the key.
+     */
+    public boolean getBoolean(String key, boolean def) {
+        String value = mValues.get(key);
+        if (value != null) {
+            try {
+                return Boolean.parseBoolean(value);
+            } catch (NumberFormatException e) {
+                // fallthrough
+            }
+        }
+        return def;
+    }
 }

@@ -18,14 +18,13 @@ package android.net;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.net.ProxyInfo;
-import android.os.Parcelable;
 import android.os.Parcel;
+import android.os.Parcelable;
 import android.text.TextUtils;
 
-import java.net.InetAddress;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
+import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -71,8 +70,23 @@ public final class LinkProperties implements Parcelable {
      * @hide
      */
     public static class CompareResult<T> {
-        public List<T> removed = new ArrayList<T>();
-        public List<T> added = new ArrayList<T>();
+        public final List<T> removed = new ArrayList<T>();
+        public final List<T> added = new ArrayList<T>();
+
+        public CompareResult() {}
+
+        public CompareResult(Collection<T> oldItems, Collection<T> newItems) {
+            if (oldItems != null) {
+                removed.addAll(oldItems);
+            }
+            if (newItems != null) {
+                for (T newItem : newItems) {
+                    if (!removed.remove(newItem)) {
+                        added.add(newItem);
+                    }
+                }
+            }
+        }
 
         @Override
         public String toString() {
@@ -504,11 +518,22 @@ public final class LinkProperties implements Parcelable {
     }
 
     /**
+     * Make sure this LinkProperties instance contains routes that cover the local subnet
+     * of its link addresses. Add any route that is missing.
+     * @hide
+     */
+    public void ensureDirectlyConnectedRoutes() {
+        for (LinkAddress addr: mLinkAddresses) {
+            addRoute(new RouteInfo(addr, null, mIfaceName));
+        }
+    }
+
+    /**
      * Returns all the routes on this link and all the links stacked above it.
      * @hide
      */
     public List<RouteInfo> getAllRoutes() {
-        List<RouteInfo> routes = new ArrayList();
+        List<RouteInfo> routes = new ArrayList<>();
         routes.addAll(mRoutes);
         for (LinkProperties stacked: mStackedLinks.values()) {
             routes.addAll(stacked.getAllRoutes());
@@ -658,9 +683,9 @@ public final class LinkProperties implements Parcelable {
      */
     public boolean hasIPv4Address() {
         for (LinkAddress address : mLinkAddresses) {
-          if (address.getAddress() instanceof Inet4Address) {
-            return true;
-          }
+            if (address.getAddress() instanceof Inet4Address) {
+                return true;
+            }
         }
         return false;
     }
@@ -700,9 +725,9 @@ public final class LinkProperties implements Parcelable {
      */
     public boolean hasIPv4DefaultRoute() {
         for (RouteInfo r : mRoutes) {
-          if (r.isIPv4Default()) {
-            return true;
-          }
+            if (r.isIPv4Default()) {
+                return true;
+            }
         }
         return false;
     }
@@ -715,9 +740,9 @@ public final class LinkProperties implements Parcelable {
      */
     public boolean hasIPv6DefaultRoute() {
         for (RouteInfo r : mRoutes) {
-          if (r.isIPv6Default()) {
-            return true;
-          }
+            if (r.isIPv6Default()) {
+                return true;
+            }
         }
         return false;
     }
@@ -730,9 +755,9 @@ public final class LinkProperties implements Parcelable {
      */
     public boolean hasIPv4DnsServer() {
         for (InetAddress ia : mDnses) {
-          if (ia instanceof Inet4Address) {
-            return true;
-          }
+            if (ia instanceof Inet4Address) {
+                return true;
+            }
         }
         return false;
     }
@@ -745,9 +770,9 @@ public final class LinkProperties implements Parcelable {
      */
     public boolean hasIPv6DnsServer() {
         for (InetAddress ia : mDnses) {
-          if (ia instanceof Inet6Address) {
-            return true;
-          }
+            if (ia instanceof Inet6Address) {
+                return true;
+            }
         }
         return false;
     }
@@ -990,17 +1015,8 @@ public final class LinkProperties implements Parcelable {
          * are in target but not in mLinkAddresses are placed in the
          * addedAddresses.
          */
-        CompareResult<LinkAddress> result = new CompareResult<LinkAddress>();
-        result.removed = new ArrayList<LinkAddress>(mLinkAddresses);
-        result.added.clear();
-        if (target != null) {
-            for (LinkAddress newAddress : target.getLinkAddresses()) {
-                if (! result.removed.remove(newAddress)) {
-                    result.added.add(newAddress);
-                }
-            }
-        }
-        return result;
+        return new CompareResult<>(mLinkAddresses,
+                target != null ? target.getLinkAddresses() : null);
     }
 
     /**
@@ -1019,18 +1035,7 @@ public final class LinkProperties implements Parcelable {
          * are in target but not in mDnses are placed in the
          * addedAddresses.
          */
-        CompareResult<InetAddress> result = new CompareResult<InetAddress>();
-
-        result.removed = new ArrayList<InetAddress>(mDnses);
-        result.added.clear();
-        if (target != null) {
-            for (InetAddress newAddress : target.getDnsServers()) {
-                if (! result.removed.remove(newAddress)) {
-                    result.added.add(newAddress);
-                }
-            }
-        }
-        return result;
+        return new CompareResult<>(mDnses, target != null ? target.getDnsServers() : null);
     }
 
     /**
@@ -1048,18 +1053,7 @@ public final class LinkProperties implements Parcelable {
          * leaving the routes that are different. And route address which
          * are in target but not in mRoutes are placed in added.
          */
-        CompareResult<RouteInfo> result = new CompareResult<RouteInfo>();
-
-        result.removed = getAllRoutes();
-        result.added.clear();
-        if (target != null) {
-            for (RouteInfo r : target.getAllRoutes()) {
-                if (! result.removed.remove(r)) {
-                    result.added.add(r);
-                }
-            }
-        }
-        return result;
+        return new CompareResult<>(getAllRoutes(), target != null ? target.getAllRoutes() : null);
     }
 
     /**
@@ -1077,18 +1071,8 @@ public final class LinkProperties implements Parcelable {
          * leaving the interface names that are different. And interface names which
          * are in target but not in this are placed in added.
          */
-        CompareResult<String> result = new CompareResult<String>();
-
-        result.removed = getAllInterfaceNames();
-        result.added.clear();
-        if (target != null) {
-            for (String r : target.getAllInterfaceNames()) {
-                if (! result.removed.remove(r)) {
-                    result.added.add(r);
-                }
-            }
-        }
-        return result;
+        return new CompareResult<>(getAllInterfaceNames(),
+                target != null ? target.getAllInterfaceNames() : null);
     }
 
 

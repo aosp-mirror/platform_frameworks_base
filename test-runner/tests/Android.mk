@@ -16,9 +16,17 @@ LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
 # We only want this apk build for tests.
+#
+# Run the tests using the following commands:
+#   adb install -r ${ANDROID_PRODUCT_OUT}/data/app/FrameworkTestRunnerTests/FrameworkTestRunnerTests.apk
+#   adb shell am instrument \
+        -e notAnnotation android.test.suitebuilder.examples.error.RunAsPartOfSeparateTest \
+        -w com.android.frameworks.testrunner.tests/android.test.InstrumentationTestRunner
+#
 LOCAL_MODULE_TAGS := tests
 
 LOCAL_JAVA_LIBRARIES := android.test.runner
+LOCAL_STATIC_JAVA_LIBRARIES := junit legacy-android-test
 
 # Include all test java files.
 LOCAL_SRC_FILES := $(call all-java-files-under, src)

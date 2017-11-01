@@ -22,19 +22,19 @@ Copyright (C) 2015 The Android Open Source Project
     The asset contains a briefcase symbol of 15.26dp x 13.6dp in the center.
 -->
     <path
-        android:fillColor="@android:color/white"
+        android:fillColor="#ff000000"
         android:pathData="M15.0815,4.5903 L15.0815,3.43636 L13.9276,2.2 L9.14696,2.2 L7.99302,3.43636
 L7.99302,4.5903 L9.14696,4.5903 L9.14696,3.43636 L13.9276,3.43636
 L13.9276,4.5903 Z" />
     <path
-        android:fillColor="@android:color/white"
+        android:fillColor="#ff000000"
         android:pathData="M18.0488,4.5903 L5.02575,4.5903 C4.36635,4.5903,3.87181,5.08485,3.87181,5.74424
 L3.87181,9.28848 C3.87181,9.94788,4.36635,10.4424,5.02575,10.4424
 L9.72393,10.4424 L9.72393,9.28848 L13.2682,9.28848 L13.2682,10.4424
 L17.9664,10.4424 C18.6257,10.4424,19.1203,9.94788,19.1203,9.28848
 L19.1203,5.74424 C19.2027,5.08485,18.6257,4.5903,18.0488,4.5903 Z" />
     <path
-        android:fillColor="@android:color/white"
+        android:fillColor="#ff000000"
         android:pathData="M9.80635,12.8327 L9.80635,11.6788 L4.44878,11.6788 L4.44878,14.6461
 C4.44878,15.3055,4.94332,15.8,5.60272,15.8 L17.3894,15.8
 C18.0488,15.8,18.5433,15.3055,18.5433,14.6461 L18.5433,11.6788 L13.2682,11.6788

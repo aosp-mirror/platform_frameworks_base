@@ -42,7 +42,7 @@
             android:singleLine="true"
             android:ellipsize="start"
             android:inputType="textShortMessage|textAutoCorrect|textCapSentences"
-            android:imeOptions="actionNone|flagNoExtractUi|flagNoFullscreen" />
+            android:imeOptions="actionSend|flagNoExtractUi|flagNoFullscreen" />
 
     <FrameLayout
             android:layout_width="wrap_content"

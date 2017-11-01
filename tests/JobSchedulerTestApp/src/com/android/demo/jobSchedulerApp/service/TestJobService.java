@@ -81,7 +81,8 @@ public class TestJobService extends JobService {
 
     @Override
     public boolean onStartJob(JobParameters params) {
-        Log.i(TAG, "on start job: " + params.getJobId());
+        Log.i(TAG, "on start job: " + params.getJobId()
+                + " deadline?=" + params.isOverrideDeadlineExpired());
         currentId++;
         jobParamsMap.put(currentId, params);
         final int currId = this.currentId;

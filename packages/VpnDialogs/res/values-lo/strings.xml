@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--  Copyright (C) 2011 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="prompt" msgid="3183836924226407828">"ການ​ຮ້ອງ​ຂໍ​ການ​ເຊື່ອມ​ຕໍ່"</string>
+    <string name="warning" msgid="809658604548412033">"<xliff:g id="APP">%s</xliff:g> ຕ້ອງ​ການ​ຕັ້​ງ​ຄ່າ​ການ​ເຊື່ອມ​ຕໍ່ VPN ທີ່​ອະ​ນຸ​ຍາດ​ໃຫ້​ຕິດ​ຕາມ​ທຣາບ​ຟິກ​ເຄືອ​ຂ່າຍ​ໄດ້. ​ທ່ານ​​ຄວນ​​ຍິນຍອມ​ສະ​ເພາະ​ໃນ​ກໍ​ລະ​ນີ​ທີ່​ທ່ານ​ເຊື່ອ​ຖື​ແຫລ່ງ​ຂໍ້​ມູນ​ເທົ່າ​ນັ້ນ. &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; ຈະ​ປາ​ກົດ​ຢູ່​ດ້ານ​ເທິງ​ຂອງ​ໜ້າ​ຈໍ​ເມື່ອ​ມີ​ການ​ເປີດ​ໃຊ້ VPN."</string>
+    <string name="legacy_title" msgid="192936250066580964">"ເຊື່ອມຕໍ່ VPN ແລ້ວ"</string>
+    <string name="session" msgid="6470628549473641030">"ເຊສຊັນ:"</string>
+    <string name="duration" msgid="3584782459928719435">"ໄລຍະເວລາ:"</string>
+    <string name="data_transmitted" msgid="7988167672982199061">"ສົ່ງ:"</string>
+    <string name="data_received" msgid="4062776929376067820">"ຮັບ:"</string>
+    <string name="data_value_format" msgid="2192466557826897580">"<xliff:g id="NUMBER_0">%1$s</xliff:g> ໄບ / <xliff:g id="NUMBER_1">%2$s</xliff:g> ແພັກເກັດ"</string>
+    <string name="always_on_disconnected_title" msgid="1906740176262776166">"ບໍ່ສາມາດເຊື່ອມຕໍ່ຫາ VPN ແບບເປີດຕະຫຼອດໄດ້"</string>
+    <string name="always_on_disconnected_message" msgid="555634519845992917">"<xliff:g id="VPN_APP_0">%1$s</xliff:g> ຖືກຕັ້ງຄ່າເພື່ອເຊື່ອມຕໍ່ໄດ້ຕະຫຼອດເວລາ, ແຕ່ມັນບໍ່ສາມາດເຊື່ອມຕໍ່ໄດ້ໃນຕອນນີ້. ໂທລະສັບຂອງທ່ານຈະໃຊ້ເຄືອຂ່າຍສາທາລະນະຈົນກວ່າມັນຈະສາມາດເຊື່ອມຕໍ່ຫາ <xliff:g id="VPN_APP_1">%1$s</xliff:g> ໄດ້ອີກຄັ້ງ."</string>
+    <string name="always_on_disconnected_message_lockdown" msgid="4232225539869452120">"<xliff:g id="VPN_APP">%1$s</xliff:g> ຖືກຕັ້ງຄ່າເພື່ອເຊື່ອມຕໍ່ໄດ້ຕະຫຼອດເວລາ, ແຕ່ມັນບໍ່ສາມາດເຊື່ອມຕໍ່ໄດ້ໃນຕອນນີ້. ທ່ານຈະບໍ່ມີການເຊື່ອມຕໍ່ຈົນກວ່າ VPN ຈະສາມາດເຊື່ອມຕໍ່ຄືນໃໝ່ໄດ້."</string>
+    <string name="always_on_disconnected_message_separator" msgid="3310614409322581371">" "</string>
+    <string name="always_on_disconnected_message_settings_link" msgid="6172280302829992412">"ປ່ຽນການຕັ້ງຄ່າ VPN"</string>
+    <string name="configure" msgid="4905518375574791375">"ປັບຄ່າ"</string>
+    <string name="disconnect" msgid="971412338304200056">"ຕັດການເຊື່ອມຕໍ່"</string>
+    <string name="open_app" msgid="3717639178595958667">"ເປີດແອັບ"</string>
+    <string name="dismiss" msgid="6192859333764711227">"ປິດໄວ້"</string>
+</resources>

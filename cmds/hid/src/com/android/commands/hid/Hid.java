@@ -16,7 +16,6 @@
 
 package com.android.commands.hid;
 
-import android.os.SystemClock;
 import android.util.JsonReader;
 import android.util.JsonToken;
 import android.util.Log;
@@ -91,7 +90,6 @@ public class Hid {
         }
     }
 
-
     private void process(Event e) {
         final int index = mDevices.indexOfKey(e.getId());
         if (index >= 0) {
@@ -101,10 +99,16 @@ public class Hid {
             } else if (Event.COMMAND_REPORT.equals(e.getCommand())) {
                 d.sendReport(e.getReport());
             } else {
-                error("Unknown command \"" + e.getCommand() + "\". Ignoring event.");
+                if (Event.COMMAND_REGISTER.equals(e.getCommand())) {
+                    error("Device id=" + e.getId() + " is already registered. Ignoring event.");
+                } else {
+                    error("Unknown command \"" + e.getCommand() + "\". Ignoring event.");
+                }
             }
-        } else {
+        } else if (Event.COMMAND_REGISTER.equals(e.getCommand())) {
             registerDevice(e);
+        } else {
+            Log.e(TAG, "Unknown device id specified. Ignoring event.");
         }
     }
 
@@ -124,7 +128,6 @@ public class Hid {
     }
 
     private static void error(String msg, Exception e) {
-        System.out.println(msg);
         Log.e(TAG, msg);
         if (e != null) {
             Log.e(TAG, Log.getStackTraceString(e));

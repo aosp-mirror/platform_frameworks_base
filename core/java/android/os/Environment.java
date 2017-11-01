@@ -272,6 +272,11 @@ public class Environment {
     }
 
     /** {@hide} */
+    public static File getDataMiscCeDirectory() {
+        return buildPath(getDataDirectory(), "misc_ce");
+    }
+
+    /** {@hide} */
     public static File getDataMiscCeDirectory(int userId) {
         return buildPath(getDataDirectory(), "misc_ce", String.valueOf(userId));
     }
@@ -296,18 +301,8 @@ public class Environment {
     }
 
     /** {@hide} */
-    public static File getDataProfilesDeForeignDexDirectory(int userId) {
-        return buildPath(getDataProfilesDeDirectory(userId), "foreign-dex");
-    }
-
-    /** {@hide} */
     public static File getDataAppDirectory(String volumeUuid) {
         return new File(getDataDirectory(volumeUuid), "app");
-    }
-
-    /** {@hide} */
-    public static File getDataAppEphemeralDirectory(String volumeUuid) {
-        return new File(getDataDirectory(volumeUuid), "app-ephemeral");
     }
 
     /** {@hide} */
@@ -377,6 +372,24 @@ public class Environment {
      */
     public static File getDataPreloadsMediaDirectory() {
         return new File(getDataPreloadsDirectory(), "media");
+    }
+
+    /**
+     * Returns location of preloaded cache directory for package name
+     * @see #getDataPreloadsDirectory()
+     * {@hide}
+     */
+    public static File getDataPreloadsFileCacheDirectory(String packageName) {
+        return new File(getDataPreloadsFileCacheDirectory(), packageName);
+    }
+
+    /**
+     * Returns location of preloaded cache directory.
+     * @see #getDataPreloadsDirectory()
+     * {@hide}
+     */
+    public static File getDataPreloadsFileCacheDirectory() {
+        return new File(getDataPreloadsDirectory(), "file_cache");
     }
 
     /**

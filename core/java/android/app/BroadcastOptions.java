@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.os.Build;
 import android.os.Bundle;
@@ -72,6 +73,7 @@ public class BroadcastOptions {
      * power whitelist when this broadcast is being delivered to it.
      * @param duration The duration in milliseconds; 0 means to not place on whitelist.
      */
+    @RequiresPermission(android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST)
     public void setTemporaryAppWhitelistDuration(long duration) {
         mTemporaryAppWhitelistDuration = duration;
     }

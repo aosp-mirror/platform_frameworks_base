@@ -1,0 +1,929 @@
+/*
+ * Copyright (C) 2016 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+
+package clearcut.connectivity;
+
+option java_package = "com.android.server.wifi";
+option java_outer_classname = "WifiMetricsProto";
+
+// The information about the Wifi events.
+message WifiLog {
+
+  // Session information that gets logged for every Wifi connection.
+  repeated ConnectionEvent connection_event = 1;
+
+  // Number of saved networks in the user profile.
+  optional int32 num_saved_networks = 2;
+
+  // Number of open networks in the saved networks.
+  optional int32 num_open_networks = 3;
+
+  // Number of personal networks.
+  optional int32 num_personal_networks = 4;
+
+  // Number of enterprise networks.
+  optional int32 num_enterprise_networks = 5;
+
+  // Does the user have location setting enabled.
+  optional bool is_location_enabled = 6;
+
+  // Does the user have scanning enabled.
+  optional bool is_scanning_always_enabled = 7;
+
+  // Number of times user toggled wifi using the settings menu.
+  optional int32 num_wifi_toggled_via_settings = 8;
+
+  // Number of times user toggled wifi using the airplane menu.
+  optional int32 num_wifi_toggled_via_airplane = 9;
+
+  // Number of networks added by the user.
+  optional int32 num_networks_added_by_user = 10;
+
+  // Number of networks added by applications.
+  optional int32 num_networks_added_by_apps = 11;
+
+  // Number scans that returned empty results.
+  optional int32 num_empty_scan_results = 12;
+
+  // Number scans that returned at least one result.
+  optional int32 num_non_empty_scan_results = 13;
+
+  // Number of scans that were one time.
+  optional int32 num_oneshot_scans = 14;
+
+  // Number of repeated background scans that were scheduled to the chip.
+  optional int32 num_background_scans = 15;
+
+  // Error codes that a scan can result in.
+  enum ScanReturnCode {
+
+    // Return Code is unknown.
+    SCAN_UNKNOWN = 0;
+
+    // Scan was successful.
+    SCAN_SUCCESS = 1;
+
+    // Scan was successfully started, but was interrupted.
+    SCAN_FAILURE_INTERRUPTED = 2;
+
+    //  Scan failed to start because of invalid configuration
+    //  (bad channel, etc).
+    SCAN_FAILURE_INVALID_CONFIGURATION = 3;
+
+    // Could not start a scan because wifi is disabled.
+    FAILURE_WIFI_DISABLED = 4;
+
+  }
+
+  // Mapping of error codes to the number of times that scans resulted
+  // in that error.
+  repeated ScanReturnEntry scan_return_entries = 16;
+
+  message ScanReturnEntry {
+
+     // Return code of the scan.
+     optional ScanReturnCode scan_return_code = 1;
+
+     // Number of entries that were found in the scan.
+     optional int32 scan_results_count = 2;
+  }
+
+  // State of the Wifi.
+  enum WifiState {
+
+    // State is unknown.
+    WIFI_UNKNOWN = 0;
+
+    // Wifi is disabled.
+    WIFI_DISABLED = 1;
+
+    // Wifi is enabled.
+    WIFI_DISCONNECTED = 2;
+
+    // Wifi is enabled and associated with an AP.
+    WIFI_ASSOCIATED = 3;
+  }
+
+  // Mapping of system state to the number of times that scans were requested in
+  // that state
+  repeated WifiSystemStateEntry wifi_system_state_entries = 17;
+
+  message WifiSystemStateEntry {
+
+     // Current WiFi state.
+     optional WifiState wifi_state = 1;
+
+     // Count of scans in state.
+     optional int32 wifi_state_count = 2;
+
+     // Is screen on.
+     optional bool is_screen_on = 3;
+  }
+
+  // Mapping of Error/Success codes to the number of background scans that resulted in it
+  repeated ScanReturnEntry background_scan_return_entries = 18;
+
+  // Mapping of system state to the number of times that Background scans were requested in that
+  // state
+  repeated WifiSystemStateEntry background_scan_request_state = 19;
+
+  // Total number of times the Watchdog of Last Resort triggered, resetting the wifi stack
+  optional int32 num_last_resort_watchdog_triggers = 20;
+
+  // Total number of networks over bad association threshold when watchdog triggered
+  optional int32 num_last_resort_watchdog_bad_association_networks_total = 21;
+
+  // Total number of networks over bad authentication threshold when watchdog triggered
+  optional int32 num_last_resort_watchdog_bad_authentication_networks_total = 22;
+
+  // Total number of networks over bad dhcp threshold when watchdog triggered
+  optional int32 num_last_resort_watchdog_bad_dhcp_networks_total = 23;
+
+  // Total number of networks over bad other threshold when watchdog triggered
+  optional int32 num_last_resort_watchdog_bad_other_networks_total = 24;
+
+  // Total count of networks seen when watchdog triggered
+  optional int32 num_last_resort_watchdog_available_networks_total = 25;
+
+  // Total count of triggers with atleast one bad association network
+  optional int32 num_last_resort_watchdog_triggers_with_bad_association = 26;
+
+  // Total count of triggers with atleast one bad authentication network
+  optional int32 num_last_resort_watchdog_triggers_with_bad_authentication = 27;
+
+  // Total count of triggers with atleast one bad dhcp network
+  optional int32 num_last_resort_watchdog_triggers_with_bad_dhcp = 28;
+
+  // Total count of triggers with atleast one bad other network
+  optional int32 num_last_resort_watchdog_triggers_with_bad_other = 29;
+
+  // Count of times connectivity watchdog confirmed pno is working
+  optional int32 num_connectivity_watchdog_pno_good = 30;
+
+  // Count of times connectivity watchdog found pno not working
+  optional int32 num_connectivity_watchdog_pno_bad = 31;
+
+  // Count of times connectivity watchdog confirmed background scan is working
+  optional int32 num_connectivity_watchdog_background_good = 32;
+
+  // Count of times connectivity watchdog found background scan not working
+  optional int32 num_connectivity_watchdog_background_bad = 33;
+
+  // The time duration represented by this wifi log, from start to end of capture
+  optional int32 record_duration_sec = 34;
+
+  // Counts the occurrences of each individual RSSI poll level
+  repeated RssiPollCount rssi_poll_rssi_count = 35;
+
+  // Total number of times WiFi connected immediately after a Last Resort Watchdog trigger,
+  // without new networks becoming available.
+  optional int32 num_last_resort_watchdog_successes = 36;
+
+  // Total number of saved hidden networks
+  optional int32 num_hidden_networks = 37;
+
+  // Total number of saved passpoint / hotspot 2.0 networks
+  optional int32 num_passpoint_networks = 38;
+
+  // Total number of scan results
+  optional int32 num_total_scan_results = 39;
+
+  // Total number of scan results for open networks
+  optional int32 num_open_network_scan_results = 40;
+
+  // Total number of scan results for personal networks
+  optional int32 num_personal_network_scan_results = 41;
+
+  // Total number of scan results for enterprise networks
+  optional int32 num_enterprise_network_scan_results = 42;
+
+  // Total number of scan results for hidden networks
+  optional int32 num_hidden_network_scan_results = 43;
+
+  // Total number of scan results for hotspot 2.0 r1 networks
+  optional int32 num_hotspot2_r1_network_scan_results = 44;
+
+  // Total number of scan results for hotspot 2.0 r2 networks
+  optional int32 num_hotspot2_r2_network_scan_results = 45;
+
+  // Total number of scans handled by framework (oneshot or otherwise)
+  optional int32 num_scans = 46;
+
+  // Counts the occurrences of each alert reason.
+  repeated AlertReasonCount alert_reason_count = 47;
+
+  // Counts the occurrences of each Wifi score
+  repeated WifiScoreCount wifi_score_count = 48;
+
+  // Histogram of Soft AP Durations
+  repeated SoftApDurationBucket soft_ap_duration = 49;
+
+  // Histogram of Soft AP ReturnCode
+  repeated SoftApReturnCodeCount soft_ap_return_code = 50;
+
+  // Histogram of the delta between scan result RSSI and RSSI polls
+  repeated RssiPollCount rssi_poll_delta_count = 51;
+
+  // List of events
+  repeated StaEvent sta_event_list = 52;
+
+  // Total number of times WiFi HAL crashed.
+  optional int32 num_hal_crashes = 53;
+
+  // Total number of times WiFicond crashed.
+  optional int32 num_wificond_crashes = 54;
+
+  // Indicates the number of times an error was encountered in
+  // Wifi HAL when wifi was turned on.
+  optional int32 num_wifi_on_failure_due_to_hal = 55;
+
+  // Indicates the number of times an error was encountered in
+  // Wificond when wifi was turned on.
+  optional int32 num_wifi_on_failure_due_to_wificond = 56;
+
+  // Wi-Fi Aware metrics
+  optional WifiAwareLog wifi_aware_log = 57;
+
+  // Number of saved Passpoint providers in user profile.
+  optional int32 num_passpoint_providers = 58;
+
+  // Count of times Passpoint provider being installed.
+  optional int32 num_passpoint_provider_installation = 59;
+
+  // Count of times Passpoint provivider is installed successfully.
+  optional int32 num_passpoint_provider_install_success = 60;
+
+  // Count of times Passpoint provider is being uninstalled.
+  optional int32 num_passpoint_provider_uninstallation = 61;
+
+  // Count of times Passpoint provider is uninstalled successfully.
+  optional int32 num_passpoint_provider_uninstall_success = 62;
+
+  // Count of saved Passpoint providers device has ever connected to.
+  optional int32 num_passpoint_providers_successfully_connected = 63;
+
+  // Histogram counting instances of scans with N many ScanResults with unique ssids
+  repeated NumConnectableNetworksBucket total_ssids_in_scan_histogram = 64;
+
+  // Histogram counting instances of scans with N many ScanResults/bssids
+  repeated NumConnectableNetworksBucket total_bssids_in_scan_histogram = 65;
+
+  // Histogram counting instances of scans with N many unique open ssids
+  repeated NumConnectableNetworksBucket available_open_ssids_in_scan_histogram = 66;
+
+  // Histogram counting instances of scans with N many bssids for open networks
+  repeated NumConnectableNetworksBucket available_open_bssids_in_scan_histogram = 67;
+
+  // Histogram counting instances of scans with N many unique ssids for saved networks
+  repeated NumConnectableNetworksBucket available_saved_ssids_in_scan_histogram = 68;
+
+  // Histogram counting instances of scans with N many bssids for saved networks
+  repeated NumConnectableNetworksBucket available_saved_bssids_in_scan_histogram = 69;
+
+  // Histogram counting instances of scans with N many unique SSIDs for open or saved networks
+  repeated NumConnectableNetworksBucket available_open_or_saved_ssids_in_scan_histogram = 70;
+
+  // Histogram counting instances of scans with N many BSSIDs for open or saved networks
+  repeated NumConnectableNetworksBucket available_open_or_saved_bssids_in_scan_histogram = 71;
+
+  // Histogram counting instances of scans with N many ScanResults matching unique saved passpoint providers
+  repeated NumConnectableNetworksBucket available_saved_passpoint_provider_profiles_in_scan_histogram = 72;
+
+  // Histogram counting instances of scans with N many ScanResults BSSIDs matching a saved passpoint provider
+  repeated NumConnectableNetworksBucket available_saved_passpoint_provider_bssids_in_scan_histogram = 73;
+
+  // Counts the number of AllSingleScanLister.onResult calls with a full band scan result
+  optional int32 full_band_all_single_scan_listener_results = 74;
+
+  // Counts the number of AllSingleScanLister.onResult calls with a partial (channels) scan result
+  optional int32 partial_all_single_scan_listener_results = 75;
+}
+
+// Information that gets logged for every WiFi connection.
+message RouterFingerPrint {
+
+  enum RoamType {
+
+    // Type is unknown.
+    ROAM_TYPE_UNKNOWN = 0;
+
+    // No roaming - usually happens on a single band (2.4 GHz) router.
+    ROAM_TYPE_NONE = 1;
+
+    // Enterprise router.
+    ROAM_TYPE_ENTERPRISE = 2;
+
+    // DBDC => Dual Band Dual Concurrent essentially a router that
+    // supports both 2.4 GHz and 5 GHz bands.
+    ROAM_TYPE_DBDC = 3;
+  }
+
+  enum Auth {
+
+    // Auth is unknown.
+    AUTH_UNKNOWN = 0;
+
+    // No authentication.
+    AUTH_OPEN = 1;
+
+    // If the router uses a personal authentication.
+    AUTH_PERSONAL = 2;
+
+    // If the router is setup for enterprise authentication.
+    AUTH_ENTERPRISE = 3;
+  }
+
+  enum RouterTechnology {
+
+    // Router is unknown.
+    ROUTER_TECH_UNKNOWN = 0;
+
+    // Router Channel A.
+    ROUTER_TECH_A = 1;
+
+    // Router Channel B.
+    ROUTER_TECH_B = 2;
+
+    // Router Channel G.
+    ROUTER_TECH_G = 3;
+
+    // Router Channel N.
+    ROUTER_TECH_N = 4;
+
+    // Router Channel AC.
+    ROUTER_TECH_AC = 5;
+
+    // When the channel is not one of the above.
+    ROUTER_TECH_OTHER = 6;
+  }
+
+  optional RoamType roam_type = 1;
+
+  // Channel on which the connection takes place.
+  optional int32 channel_info = 2;
+
+  // DTIM setting of the router.
+  optional int32 dtim = 3;
+
+  // Authentication scheme of the router.
+  optional Auth authentication = 4;
+
+  // If the router is hidden.
+  optional bool hidden = 5;
+
+  // Channel information.
+  optional RouterTechnology router_technology = 6;
+
+  // whether ipv6 is supported.
+  optional bool supports_ipv6 = 7;
+
+  // If the router is a passpoint / hotspot 2.0 network
+  optional bool passpoint = 8;
+}
+
+message ConnectionEvent {
+
+  // Roam Type.
+  enum RoamType {
+
+    // Type is unknown.
+    ROAM_UNKNOWN = 0;
+
+    // No roaming.
+    ROAM_NONE  = 1;
+
+    // DBDC roaming.
+    ROAM_DBDC = 2;
+
+    // Enterprise roaming.
+    ROAM_ENTERPRISE = 3;
+
+    // User selected roaming.
+    ROAM_USER_SELECTED = 4;
+
+    // Unrelated.
+    ROAM_UNRELATED = 5;
+  }
+
+  // Connectivity Level Failure.
+  enum ConnectivityLevelFailure {
+
+    // Failure is unknown.
+    HLF_UNKNOWN = 0;
+
+    // No failure.
+    HLF_NONE = 1;
+
+    // DHCP failure.
+    HLF_DHCP = 2;
+
+    // No internet connection.
+    HLF_NO_INTERNET = 3;
+
+    // No internet connection.
+    HLF_UNWANTED = 4;
+  }
+
+  // Start time of the connection.
+  optional int64 start_time_millis = 1;// [(datapol.semantic_type) = ST_TIMESTAMP];
+
+  // Duration to connect.
+  optional int32 duration_taken_to_connect_millis = 2;
+
+  // Router information.
+  optional RouterFingerPrint router_fingerprint = 3;
+
+  // RSSI at the start of the connection.
+  optional int32 signal_strength = 4;
+
+  // Roam Type.
+  optional RoamType roam_type = 5;
+
+  // Result of the connection.
+  optional int32 connection_result = 6;
+
+  // Reasons for level 2 failure (needs to be coordinated with wpa-supplicant).
+  optional int32 level_2_failure_code = 7;
+
+  // Failures that happen at the connectivity layer.
+  optional ConnectivityLevelFailure connectivity_level_failure_code = 8;
+
+  // Has bug report been taken.
+  optional bool automatic_bug_report_taken = 9;
+}
+
+// Number of occurrences of a specific RSSI poll rssi value
+message RssiPollCount {
+  // RSSI
+  optional int32 rssi = 1;
+
+  // Number of RSSI polls with 'rssi'
+  optional int32 count = 2;
+}
+
+// Number of occurrences of a specific alert reason value
+message AlertReasonCount {
+  // Alert reason
+  optional int32 reason = 1;
+
+  // Number of alerts with |reason|.
+  optional int32 count = 2;
+}
+
+// Counts the number of instances of a specific Wifi Score calculated by WifiScoreReport
+message WifiScoreCount {
+  // Wifi Score
+  optional int32 score = 1;
+
+  // Number of Wifi score reports with this score
+  optional int32 count = 2;
+}
+
+// Number of occurrences of Soft AP session durations
+message SoftApDurationBucket {
+  // Bucket covers duration : [duration_sec, duration_sec + bucket_size_sec)
+  // The (inclusive) lower bound of Soft AP session duration represented by this bucket
+  optional int32 duration_sec = 1;
+
+  // The size of this bucket
+  optional int32 bucket_size_sec = 2;
+
+  // Number of soft AP session durations that fit into this bucket
+  optional int32 count = 3;
+}
+
+// Number of occurrences of a soft AP session return code
+message SoftApReturnCodeCount {
+
+  enum SoftApStartResult {
+
+    // SoftApManager return code unknown
+    SOFT_AP_RETURN_CODE_UNKNOWN = 0;
+
+    // SoftAp started successfully
+    SOFT_AP_STARTED_SUCCESSFULLY = 1;
+
+    // Catch all for failures with no specific failure reason
+    SOFT_AP_FAILED_GENERAL_ERROR = 2;
+
+    // SoftAp failed to start due to NO_CHANNEL error
+    SOFT_AP_FAILED_NO_CHANNEL = 3;
+  }
+
+  // Historical, no longer used for writing as of 01/2017.
+  optional int32 return_code = 1 [deprecated = true];
+
+  // Occurrences of this soft AP return code
+  optional int32 count = 2;
+
+  // Result of attempt to start SoftAp
+  optional SoftApStartResult start_result = 3;
+}
+
+message StaEvent {
+  message ConfigInfo {
+    // The set of key management protocols supported by this configuration.
+    optional uint32 allowed_key_management = 1 [default = 0];
+
+    // The set of security protocols supported by this configuration.
+    optional uint32 allowed_protocols = 2 [default = 0];
+
+    // The set of authentication protocols supported by this configuration.
+    optional uint32 allowed_auth_algorithms = 3 [default = 0];
+
+    // The set of pairwise ciphers for WPA supported by this configuration.
+    optional uint32 allowed_pairwise_ciphers = 4 [default = 0];
+
+    // The set of group ciphers supported by this configuration.
+    optional uint32 allowed_group_ciphers = 5;
+
+    // Is this a 'hidden network'
+    optional bool hidden_ssid = 6;
+
+    // Is this a Hotspot 2.0 / passpoint network
+    optional bool is_passpoint = 7;
+
+    // Is this an 'ephemeral' network (Not in saved network list, recommended externally)
+    optional bool is_ephemeral = 8;
+
+    // Has a successful connection ever been established using this WifiConfiguration
+    optional bool has_ever_connected = 9;
+
+    // RSSI of the scan result candidate associated with this WifiConfiguration
+    optional int32 scan_rssi = 10 [default = -127];
+
+    // Frequency of the scan result candidate associated with this WifiConfiguration
+    optional int32 scan_freq = 11 [default = -1];
+  }
+
+  enum EventType {
+    // Default/Invalid event
+    TYPE_UNKNOWN = 0;
+
+    // Supplicant Association Rejection event. Code contains the 802.11
+    TYPE_ASSOCIATION_REJECTION_EVENT = 1;
+
+    // Supplicant L2 event,
+    TYPE_AUTHENTICATION_FAILURE_EVENT = 2;
+
+    // Supplicant L2 event
+    TYPE_NETWORK_CONNECTION_EVENT = 3;
+
+    // Supplicant L2 event
+    TYPE_NETWORK_DISCONNECTION_EVENT = 4;
+
+    // Supplicant L2 event
+    TYPE_SUPPLICANT_STATE_CHANGE_EVENT = 5;
+
+    // Supplicant L2 event
+    TYPE_CMD_ASSOCIATED_BSSID = 6;
+
+    // IP Manager successfully completed IP Provisioning
+    TYPE_CMD_IP_CONFIGURATION_SUCCESSFUL = 7;
+
+    // IP Manager failed to complete IP Provisioning
+    TYPE_CMD_IP_CONFIGURATION_LOST = 8;
+
+    // IP Manager lost reachability to network neighbors
+    TYPE_CMD_IP_REACHABILITY_LOST = 9;
+
+    // Indicator that Supplicant is targeting a BSSID for roam/connection
+    TYPE_CMD_TARGET_BSSID = 10;
+
+    // Wifi framework is initiating a connection attempt
+    TYPE_CMD_START_CONNECT = 11;
+
+    // Wifi framework is initiating a roaming connection attempt
+    TYPE_CMD_START_ROAM = 12;
+
+    // SystemAPI connect() command, Settings App
+    TYPE_CONNECT_NETWORK = 13;
+
+    // Network Agent has validated the internet connection (Captive Portal Check success, or user
+    // validation)
+    TYPE_NETWORK_AGENT_VALID_NETWORK = 14;
+
+    // Framework initiated disconnect. Sometimes generated to give an extra reason for a disconnect
+    // Should typically be followed by a NETWORK_DISCONNECTION_EVENT with a local_gen = true
+    TYPE_FRAMEWORK_DISCONNECT = 15;
+  }
+
+  enum FrameworkDisconnectReason {
+    // default/none/unknown value
+    DISCONNECT_UNKNOWN = 0;
+
+    // API DISCONNECT
+    DISCONNECT_API = 1;
+
+    // Some framework internal reason (generic)
+    DISCONNECT_GENERIC = 2;
+
+    // Network Agent network validation failed, user signaled network unwanted
+    DISCONNECT_UNWANTED = 3;
+
+    // Roaming timed out
+    DISCONNECT_ROAM_WATCHDOG_TIMER = 4;
+
+    // P2P service requested wifi disconnect
+    DISCONNECT_P2P_DISCONNECT_WIFI_REQUEST = 5;
+
+    // SIM was removed while using a SIM config
+    DISCONNECT_RESET_SIM_NETWORKS = 6;
+  }
+
+  // Authentication Failure reasons as reported through the API.
+  enum AuthFailureReason {
+    // Unknown default
+    AUTH_FAILURE_UNKNOWN = 0;
+
+    // The reason code if there is no error during authentication. It could also imply that there no
+    // authentication in progress,
+    AUTH_FAILURE_NONE = 1;
+
+    // The reason code if there was a timeout authenticating.
+    AUTH_FAILURE_TIMEOUT = 2;
+
+    // The reason code if there was a wrong password while authenticating.
+    AUTH_FAILURE_WRONG_PSWD = 3;
+
+    // The reason code if there was EAP failure while authenticating.
+    AUTH_FAILURE_EAP_FAILURE = 4;
+  }
+
+  // What event was this
+  optional EventType type = 1;
+
+  // 80211 death reason code, relevant to NETWORK_DISCONNECTION_EVENTs
+  optional int32 reason = 2 [default = -1];
+
+  // 80211 Association Status code, relevant to ASSOCIATION_REJECTION_EVENTs
+  optional int32 status = 3 [default = -1];
+
+  // Designates whether a NETWORK_DISCONNECT_EVENT was by the STA or AP
+  optional bool local_gen = 4 [default = false];
+
+  // Network information from the WifiConfiguration of a framework initiated connection attempt
+  optional ConfigInfo config_info = 5;
+
+  // RSSI from the last rssi poll (Only valid for active connections)
+  optional int32 last_rssi = 6 [default = -127];
+
+  // Link speed from the last rssi poll (Only valid for active connections)
+  optional int32 last_link_speed = 7 [default = -1];
+
+  // Frequency from the last rssi poll (Only valid for active connections)
+  optional int32 last_freq = 8 [default = -1];
+
+  // Enum used to define bit positions in the supplicant_state_change_bitmask
+  // See {@code frameworks/base/wifi/java/android/net/wifi/SupplicantState.java} for documentation
+  enum SupplicantState {
+    STATE_DISCONNECTED = 0;
+
+    STATE_INTERFACE_DISABLED = 1;
+
+    STATE_INACTIVE = 2;
+
+    STATE_SCANNING = 3;
+
+    STATE_AUTHENTICATING = 4;
+
+    STATE_ASSOCIATING = 5;
+
+    STATE_ASSOCIATED = 6;
+
+    STATE_FOUR_WAY_HANDSHAKE = 7;
+
+    STATE_GROUP_HANDSHAKE = 8;
+
+    STATE_COMPLETED = 9;
+
+    STATE_DORMANT = 10;
+
+    STATE_UNINITIALIZED = 11;
+
+    STATE_INVALID = 12;
+  }
+
+  // Bit mask of all supplicant state changes that occured since the last event
+  optional uint32 supplicant_state_changes_bitmask = 9 [default = 0];
+
+  // The number of milliseconds that have elapsed since the device booted
+  optional int64 start_time_millis = 10 [default = 0];
+
+  optional FrameworkDisconnectReason framework_disconnect_reason = 11 [default = DISCONNECT_UNKNOWN];
+
+  // Flag which indicates if an association rejection event occured due to a timeout
+  optional bool association_timed_out = 12 [default = false];
+
+  // Authentication failure reason, as reported by WifiManager (calculated from state & deauth code)
+  optional AuthFailureReason auth_failure_reason = 13 [default = AUTH_FAILURE_UNKNOWN];
+}
+
+// Wi-Fi Aware metrics
+message WifiAwareLog {
+  // total number of unique apps that used Aware (measured on attach)
+  optional int32 num_apps = 1;
+
+  // total number of unique apps that used an identity callback when attaching
+  optional int32 num_apps_using_identity_callback = 2;
+
+  // maximum number of attaches for an app
+  optional int32 max_concurrent_attach_sessions_in_app = 3;
+
+  // histogram of attach request results
+  repeated NanStatusHistogramBucket histogram_attach_session_status = 4;
+
+  // maximum number of concurrent publish sessions in a single app
+  optional int32 max_concurrent_publish_in_app = 5;
+
+  // maximum number of concurrent subscribe sessions in a single app
+  optional int32 max_concurrent_subscribe_in_app = 6;
+
+  // maximum number of concurrent discovery (publish+subscribe) sessions in a single app
+  optional int32 max_concurrent_discovery_sessions_in_app = 7;
+
+  // maximum number of concurrent publish sessions in the system
+  optional int32 max_concurrent_publish_in_system = 8;
+
+  // maximum number of concurrent subscribe sessions in the system
+  optional int32 max_concurrent_subscribe_in_system = 9;
+
+  // maximum number of concurrent discovery (publish+subscribe) sessions in the system
+  optional int32 max_concurrent_discovery_sessions_in_system = 10;
+
+  // histogram of publish request results
+  repeated NanStatusHistogramBucket histogram_publish_status = 11;
+
+  // histogram of subscribe request results
+  repeated NanStatusHistogramBucket histogram_subscribe_status = 12;
+
+  // number of unique apps which experienced a discovery session creation failure due to lack of
+  // resources
+  optional int32 num_apps_with_discovery_session_failure_out_of_resources = 13;
+
+  // histogram of create ndp request results
+  repeated NanStatusHistogramBucket histogram_request_ndp_status = 14;
+
+  // histogram of create ndp out-of-band (OOB) request results
+  repeated NanStatusHistogramBucket histogram_request_ndp_oob_status = 15;
+
+  // maximum number of concurrent active data-interfaces (NDI) in a single app
+  optional int32 max_concurrent_ndi_in_app = 19;
+
+  // maximum number of concurrent active data-interfaces (NDI) in the system
+  optional int32 max_concurrent_ndi_in_system = 20;
+
+  // maximum number of concurrent data-paths (NDP) in a single app
+  optional int32 max_concurrent_ndp_in_app = 21;
+
+  // maximum number of concurrent data-paths (NDP) in the system
+  optional int32 max_concurrent_ndp_in_system = 22;
+
+  // maximum number of concurrent secure data-paths (NDP) in a single app
+  optional int32 max_concurrent_secure_ndp_in_app = 23;
+
+  // maximum number of concurrent secure data-paths (NDP) in the system
+  optional int32 max_concurrent_secure_ndp_in_system = 24;
+
+  // maximum number of concurrent data-paths (NDP) per data-interface (NDI)
+  optional int32 max_concurrent_ndp_per_ndi = 25;
+
+  // histogram of durations of Aware being available
+  repeated HistogramBucket histogram_aware_available_duration_ms = 26;
+
+  // histogram of durations of Aware being enabled
+  repeated HistogramBucket histogram_aware_enabled_duration_ms = 27;
+
+  // histogram of duration (in ms) of attach sessions
+  repeated HistogramBucket histogram_attach_duration_ms = 28;
+
+  // histogram of duration (in ms) of publish sessions
+  repeated HistogramBucket histogram_publish_session_duration_ms = 29;
+
+  // histogram of duration (in ms) of subscribe sessions
+  repeated HistogramBucket histogram_subscribe_session_duration_ms = 30;
+
+  // histogram of duration (in ms) of data-paths (NDP)
+  repeated HistogramBucket histogram_ndp_session_duration_ms = 31;
+
+  // histogram of usage (in MB) of data-paths (NDP)
+  repeated HistogramBucket histogram_ndp_session_data_usage_mb = 32;
+
+  // histogram of usage (in MB) of data-path creation time (in ms) measured as request -> confirm
+  repeated HistogramBucket histogram_ndp_creation_time_ms = 33;
+
+  // statistics for data-path (NDP) creation time (in ms) measured as request -> confirm: minimum
+  optional int64 ndp_creation_time_ms_min = 34;
+
+  // statistics for data-path (NDP) creation time (in ms) measured as request -> confirm: maximum
+  optional int64 ndp_creation_time_ms_max = 35;
+
+  // statistics for data-path (NDP) creation time (in ms) measured as request -> confirm: sum
+  optional int64 ndp_creation_time_ms_sum = 36;
+
+  // statistics for data-path (NDP) creation time (in ms) measured as request -> confirm: sum of sq
+  optional int64 ndp_creation_time_ms_sum_of_sq = 37;
+
+  // statistics for data-path (NDP) creation time (in ms) measured as request -> confirm: number of
+  // samples
+  optional int64 ndp_creation_time_ms_num_samples = 38;
+
+  // total time within the logging window that aware was available
+  optional int64 available_time_ms = 39;
+
+  // total time within the logging window that aware was enabled
+  optional int64 enabled_time_ms = 40;
+
+  // Histogram bucket for Wi-Fi Aware logs. Range is [start, end)
+  message HistogramBucket {
+    // lower range of the bucket (inclusive)
+    optional int64 start = 1;
+
+    // upper range of the bucket (exclusive)
+    optional int64 end = 2;
+
+    // number of samples in the bucket
+    optional int32 count = 3;
+  }
+
+  // Status of various NAN operations
+  enum NanStatusTypeEnum {
+    // constant to be used by proto
+    UNKNOWN = 0;
+
+    // NAN operation succeeded
+    SUCCESS = 1;
+
+    // NAN Discovery Engine/Host driver failures
+    INTERNAL_FAILURE = 2;
+
+    // NAN OTA failures
+    PROTOCOL_FAILURE = 3;
+
+    // The publish/subscribe discovery session id is invalid
+    INVALID_SESSION_ID = 4;
+
+    // Out of resources to fufill request
+    NO_RESOURCES_AVAILABLE = 5;
+
+    // Invalid arguments passed
+    INVALID_ARGS = 6;
+
+    // Invalid peer id
+    INVALID_PEER_ID = 7;
+
+    // Invalid NAN data-path (ndp) id
+    INVALID_NDP_ID = 8;
+
+    // Attempting to enable NAN when not available, e.g. wifi is disabled
+    NAN_NOT_ALLOWED = 9;
+
+    // Over the air ACK not received
+    NO_OTA_ACK = 10;
+
+    // Attempting to enable NAN when already enabled
+    ALREADY_ENABLED = 11;
+
+    // Can't queue tx followup message foor transmission
+    FOLLOWUP_TX_QUEUE_FULL = 12;
+
+    // Unsupported concurrency of NAN and another feature - NAN disabled
+    UNSUPPORTED_CONCURRENCY_NAN_DISABLED = 13;
+
+    // Unknown NanStatusType
+    UNKNOWN_HAL_STATUS = 14;
+  }
+
+  // Histogram bucket for Wi-Fi Aware (NAN) status.
+  message NanStatusHistogramBucket {
+    // status type defining the bucket
+    optional NanStatusTypeEnum nan_status_type = 1;
+
+    // number of samples in the bucket
+    optional int32 count = 2;
+  }
+}
+
+// Data point used to build 'Number of Connectable Network' histograms
+message NumConnectableNetworksBucket {
+  // Number of connectable networks seen in a scan result
+  optional int32 num_connectable_networks = 1 [default = 0];
+
+  // Number of scan results with num_connectable_networks
+  optional int32 count = 2 [default = 0];
+}

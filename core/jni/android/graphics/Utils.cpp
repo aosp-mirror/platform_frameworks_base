@@ -72,9 +72,6 @@ size_t AssetStreamAdaptor::read(void* buffer, size_t size) {
         amount = newOffset - oldOffset;
     } else {
         amount = fAsset->read(buffer, size);
-        if (amount <= 0) {
-            SkDebugf("---- fAsset->read(%d) returned %d\n", size, amount);
-        }
     }
 
     if (amount < 0) {
@@ -100,14 +97,14 @@ SkMemoryStream* android::CopyAssetToStream(Asset* asset) {
         return NULL;
     }
 
-    SkAutoTUnref<SkData> data(SkData::NewUninitialized(size));
+    sk_sp<SkData> data(SkData::MakeUninitialized(size));
     const off64_t len = asset->read(data->writable_data(), size);
     if (len != size) {
         SkDebugf("---- copyAsset: asset->read(%d) returned %d\n", size, len);
         return NULL;
     }
 
-    return new SkMemoryStream(data);
+    return new SkMemoryStream(std::move(data));
 }
 
 jobject android::nullObjectReturn(const char msg[]) {

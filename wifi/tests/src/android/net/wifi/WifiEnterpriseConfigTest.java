@@ -20,6 +20,7 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
@@ -84,6 +85,70 @@ public class WifiEnterpriseConfigTest {
         X509Certificate[] result = mEnterpriseConfig.getCaCertificates();
         assertEquals(result.length, 2);
         assertTrue(result[0] == cert0 && result[1] == cert1);
+    }
+
+    @Test
+    public void testSetClientKeyEntryWithNull() {
+        mEnterpriseConfig.setClientKeyEntry(null, null);
+        assertNull(mEnterpriseConfig.getClientCertificateChain());
+        assertNull(mEnterpriseConfig.getClientCertificate());
+        mEnterpriseConfig.setClientKeyEntryWithCertificateChain(null, null);
+        assertNull(mEnterpriseConfig.getClientCertificateChain());
+        assertNull(mEnterpriseConfig.getClientCertificate());
+
+        // Setting the client certificate to null should clear the existing chain.
+        PrivateKey clientKey = FakeKeys.RSA_KEY1;
+        X509Certificate clientCert0 = FakeKeys.CLIENT_CERT;
+        X509Certificate clientCert1 = FakeKeys.CA_CERT1;
+        mEnterpriseConfig.setClientKeyEntry(clientKey, clientCert0);
+        assertNotNull(mEnterpriseConfig.getClientCertificate());
+        mEnterpriseConfig.setClientKeyEntry(null, null);
+        assertNull(mEnterpriseConfig.getClientCertificate());
+        assertNull(mEnterpriseConfig.getClientCertificateChain());
+
+        // Setting the chain to null should clear the existing chain.
+        X509Certificate[] clientChain = new X509Certificate[] {clientCert0, clientCert1};
+        mEnterpriseConfig.setClientKeyEntryWithCertificateChain(clientKey, clientChain);
+        assertNotNull(mEnterpriseConfig.getClientCertificateChain());
+        mEnterpriseConfig.setClientKeyEntryWithCertificateChain(null, null);
+        assertNull(mEnterpriseConfig.getClientCertificate());
+        assertNull(mEnterpriseConfig.getClientCertificateChain());
+    }
+
+    @Test
+    public void testSetClientCertificateChain() {
+        PrivateKey clientKey = FakeKeys.RSA_KEY1;
+        X509Certificate cert0 = FakeKeys.CLIENT_CERT;
+        X509Certificate cert1 = FakeKeys.CA_CERT1;
+        X509Certificate[] clientChain = new X509Certificate[] {cert0, cert1};
+        mEnterpriseConfig.setClientKeyEntryWithCertificateChain(clientKey, clientChain);
+        X509Certificate[] result = mEnterpriseConfig.getClientCertificateChain();
+        assertEquals(result.length, 2);
+        assertTrue(result[0] == cert0 && result[1] == cert1);
+        assertTrue(mEnterpriseConfig.getClientCertificate() == cert0);
+    }
+
+    private boolean isClientCertificateChainInvalid(X509Certificate[] clientChain) {
+        boolean exceptionThrown = false;
+        try {
+            PrivateKey clientKey = FakeKeys.RSA_KEY1;
+            mEnterpriseConfig.setClientKeyEntryWithCertificateChain(clientKey, clientChain);
+        } catch (IllegalArgumentException e) {
+            exceptionThrown = true;
+        }
+        return exceptionThrown;
+    }
+
+    @Test
+    public void testSetInvalidClientCertificateChain() {
+        X509Certificate clientCert = FakeKeys.CLIENT_CERT;
+        X509Certificate caCert = FakeKeys.CA_CERT1;
+        assertTrue("Invalid client certificate",
+                isClientCertificateChainInvalid(new X509Certificate[] {caCert, caCert}));
+        assertTrue("Invalid CA certificate",
+                isClientCertificateChainInvalid(new X509Certificate[] {clientCert, clientCert}));
+        assertTrue("Both certificates invalid",
+                isClientCertificateChainInvalid(new X509Certificate[] {caCert, clientCert}));
     }
 
     @Test
@@ -237,15 +302,52 @@ public class WifiEnterpriseConfigTest {
         assertEquals("\"auth=GTC\"", getSupplicantPhase2Method());
     }
 
-    /** Verfies that the copy constructor preseves the inner method information. */
+    /** Verfies PEAP/SIM, PEAP/AKA, PEAP/AKA'. */
+    @Test
+    public void peapSimAkaAkaPrime() {
+        mEnterpriseConfig.setEapMethod(Eap.PEAP);
+        mEnterpriseConfig.setPhase2Method(Phase2.SIM);
+        assertEquals("PEAP", getSupplicantEapMethod());
+        assertEquals("\"auth=SIM\"", getSupplicantPhase2Method());
+
+        mEnterpriseConfig.setPhase2Method(Phase2.AKA);
+        assertEquals("\"auth=AKA\"", getSupplicantPhase2Method());
+
+        mEnterpriseConfig.setPhase2Method(Phase2.AKA_PRIME);
+        assertEquals("\"auth=AKA'\"", getSupplicantPhase2Method());
+    }
+
+    /**
+     * Verifies that the copy constructor preseves both the masked password and inner method
+     * information.
+     */
     @Test
     public void copyConstructor() {
         WifiEnterpriseConfig enterpriseConfig = new WifiEnterpriseConfig();
+        enterpriseConfig.setPassword("*");
         enterpriseConfig.setEapMethod(Eap.TTLS);
         enterpriseConfig.setPhase2Method(Phase2.GTC);
         mEnterpriseConfig = new WifiEnterpriseConfig(enterpriseConfig);
         assertEquals("TTLS", getSupplicantEapMethod());
         assertEquals("\"autheap=GTC\"", getSupplicantPhase2Method());
+        assertEquals("*", mEnterpriseConfig.getPassword());
+    }
+
+    /**
+     * Verifies that the copy from external ignores masked passwords and preserves the
+     * inner method information.
+     */
+    @Test
+    public void copyFromExternal() {
+        WifiEnterpriseConfig enterpriseConfig = new WifiEnterpriseConfig();
+        enterpriseConfig.setPassword("*");
+        enterpriseConfig.setEapMethod(Eap.TTLS);
+        enterpriseConfig.setPhase2Method(Phase2.GTC);
+        mEnterpriseConfig = new WifiEnterpriseConfig();
+        mEnterpriseConfig.copyFromExternal(enterpriseConfig, "*");
+        assertEquals("TTLS", getSupplicantEapMethod());
+        assertEquals("\"autheap=GTC\"", getSupplicantPhase2Method());
+        assertNotEquals("*", mEnterpriseConfig.getPassword());
     }
 
     /** Verfies that parceling a WifiEnterpriseConfig preseves method information. */

@@ -17,13 +17,19 @@ package com.android.settingslib;
 
 import android.content.Context;
 import android.os.SystemProperties;
+import android.support.annotation.VisibleForTesting;
 import android.telephony.CarrierConfigManager;
 
 public class TetherUtil {
 
-    private static boolean isEntitlementCheckRequired(Context context) {
+    @VisibleForTesting
+    static boolean isEntitlementCheckRequired(Context context) {
         final CarrierConfigManager configManager = (CarrierConfigManager) context
              .getSystemService(Context.CARRIER_CONFIG_SERVICE);
+        if (configManager == null || configManager.getConfig() == null) {
+            // return service default
+            return true;
+        }
         return configManager.getConfig().getBoolean(CarrierConfigManager
              .KEY_REQUIRE_ENTITLEMENT_CHECKS_BOOL);
     }

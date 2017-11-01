@@ -344,6 +344,7 @@ public class WebChromeClient {
     // the default JS engine with Froyo and support for building with JSC was
     // removed in b/5495373. V8 does not have a mechanism for making a callback such
     // as this.
+    @Deprecated
     public boolean onJsTimeout() {
         return true;
     }

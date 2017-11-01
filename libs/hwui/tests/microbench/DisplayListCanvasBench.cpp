@@ -17,21 +17,11 @@
 #include <benchmark/benchmark.h>
 
 #include "DisplayList.h"
-#if HWUI_NEW_OPS
 #include "RecordingCanvas.h"
-#else
-#include "DisplayListCanvas.h"
-#endif
 #include "tests/common/TestUtils.h"
 
 using namespace android;
 using namespace android::uirenderer;
-
-#if HWUI_NEW_OPS
-typedef RecordingCanvas TestCanvas;
-#else
-typedef DisplayListCanvas TestCanvas;
-#endif
 
 void BM_DisplayList_alloc(benchmark::State& benchState) {
     while (benchState.KeepRunning()) {
@@ -52,42 +42,42 @@ void BM_DisplayList_alloc_theoretical(benchmark::State& benchState) {
 BENCHMARK(BM_DisplayList_alloc_theoretical);
 
 void BM_DisplayListCanvas_record_empty(benchmark::State& benchState) {
-    TestCanvas canvas(100, 100);
-    delete canvas.finishRecording();
+    std::unique_ptr<Canvas> canvas(Canvas::create_recording_canvas(100, 100));
+    delete canvas->finishRecording();
 
     while (benchState.KeepRunning()) {
-        canvas.resetRecording(100, 100);
-        benchmark::DoNotOptimize(&canvas);
-        delete canvas.finishRecording();
+        canvas->resetRecording(100, 100);
+        benchmark::DoNotOptimize(canvas.get());
+        delete canvas->finishRecording();
     }
 }
 BENCHMARK(BM_DisplayListCanvas_record_empty);
 
 void BM_DisplayListCanvas_record_saverestore(benchmark::State& benchState) {
-    TestCanvas canvas(100, 100);
-    delete canvas.finishRecording();
+    std::unique_ptr<Canvas> canvas(Canvas::create_recording_canvas(100, 100));
+    delete canvas->finishRecording();
 
     while (benchState.KeepRunning()) {
-        canvas.resetRecording(100, 100);
-        canvas.save(SaveFlags::MatrixClip);
-        canvas.save(SaveFlags::MatrixClip);
-        benchmark::DoNotOptimize(&canvas);
-        canvas.restore();
-        canvas.restore();
-        delete canvas.finishRecording();
+        canvas->resetRecording(100, 100);
+        canvas->save(SaveFlags::MatrixClip);
+        canvas->save(SaveFlags::MatrixClip);
+        benchmark::DoNotOptimize(canvas.get());
+        canvas->restore();
+        canvas->restore();
+        delete canvas->finishRecording();
     }
 }
 BENCHMARK(BM_DisplayListCanvas_record_saverestore);
 
 void BM_DisplayListCanvas_record_translate(benchmark::State& benchState) {
-    TestCanvas canvas(100, 100);
-    delete canvas.finishRecording();
+    std::unique_ptr<Canvas> canvas(Canvas::create_recording_canvas(100, 100));
+    delete canvas->finishRecording();
 
     while (benchState.KeepRunning()) {
-        canvas.resetRecording(100, 100);
-        canvas.scale(10, 10);
-        benchmark::DoNotOptimize(&canvas);
-        delete canvas.finishRecording();
+        canvas->resetRecording(100, 100);
+        canvas->scale(10, 10);
+        benchmark::DoNotOptimize(canvas.get());
+        delete canvas->finishRecording();
     }
 }
 BENCHMARK(BM_DisplayListCanvas_record_translate);
@@ -99,27 +89,27 @@ BENCHMARK(BM_DisplayListCanvas_record_translate);
  * View system frequently produces unneeded save/restores.
  */
 void BM_DisplayListCanvas_record_simpleBitmapView(benchmark::State& benchState) {
-    TestCanvas canvas(100, 100);
-    delete canvas.finishRecording();
+    std::unique_ptr<Canvas> canvas(Canvas::create_recording_canvas(100, 100));
+    delete canvas->finishRecording();
 
     SkPaint rectPaint;
-    SkBitmap iconBitmap = TestUtils::createSkBitmap(80, 80);
+    sk_sp<Bitmap> iconBitmap(TestUtils::createBitmap(80, 80));
 
     while (benchState.KeepRunning()) {
-        canvas.resetRecording(100, 100);
+        canvas->resetRecording(100, 100);
         {
-            canvas.save(SaveFlags::MatrixClip);
-            canvas.drawRect(0, 0, 100, 100, rectPaint);
-            canvas.restore();
+            canvas->save(SaveFlags::MatrixClip);
+            canvas->drawRect(0, 0, 100, 100, rectPaint);
+            canvas->restore();
         }
         {
-            canvas.save(SaveFlags::MatrixClip);
-            canvas.translate(10, 10);
-            canvas.drawBitmap(iconBitmap, 0, 0, nullptr);
-            canvas.restore();
+            canvas->save(SaveFlags::MatrixClip);
+            canvas->translate(10, 10);
+            canvas->drawBitmap(*iconBitmap, 0, 0, nullptr);
+            canvas->restore();
         }
-        benchmark::DoNotOptimize(&canvas);
-        delete canvas.finishRecording();
+        benchmark::DoNotOptimize(canvas.get());
+        delete canvas->finishRecording();
     }
 }
 BENCHMARK(BM_DisplayListCanvas_record_simpleBitmapView);
@@ -169,3 +159,37 @@ void BM_CanvasState_translate(benchmark::State& benchState) {
     }
 }
 BENCHMARK(BM_CanvasState_translate);
+
+void BM_DisplayListCanvas_basicViewGroupDraw(benchmark::State& benchState) {
+    sp<RenderNode> child = TestUtils::createNode(50, 50, 100, 100,
+            [](auto& props, auto& canvas) {
+        canvas.drawColor(0xFFFFFFFF, SkBlendMode::kSrcOver);
+    });
+
+    std::unique_ptr<Canvas> canvas(Canvas::create_recording_canvas(100, 100));
+    delete canvas->finishRecording();
+
+    while (benchState.KeepRunning()) {
+        canvas->resetRecording(200, 200);
+        canvas->setHighContrastText(false);
+        canvas->translate(0, 0); // mScrollX, mScrollY
+
+        // Clip to padding
+        // Can expect ~25% of views to have clip to padding with a non-null padding
+        int clipRestoreCount = canvas->save(SaveFlags::MatrixClip);
+        canvas->clipRect(1, 1, 199, 199, SkClipOp::kIntersect);
+
+        canvas->insertReorderBarrier(true);
+
+        // Draw child loop
+        for (int i = 0; i < benchState.range(0); i++) {
+            canvas->drawRenderNode(child.get());
+        }
+
+        canvas->insertReorderBarrier(false);
+        canvas->restoreToCount(clipRestoreCount);
+
+        delete canvas->finishRecording();
+    }
+}
+BENCHMARK(BM_DisplayListCanvas_basicViewGroupDraw)->Arg(1)->Arg(5)->Arg(10);

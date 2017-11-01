@@ -25,7 +25,7 @@ import android.os.RemoteException;
  *
  * @hide
  */
-public abstract class SynchronousUserSwitchObserver extends IUserSwitchObserver.Stub {
+public abstract class SynchronousUserSwitchObserver extends UserSwitchObserver {
     /**
      * Calls {@link #onUserSwitching(int)} and notifies {@code reply} by calling
      * {@link IRemoteCallback#sendResult(Bundle)}.

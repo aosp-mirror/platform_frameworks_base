@@ -22,9 +22,10 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.ContainerEncryptionParams;
-import android.content.pm.EphemeralApplicationInfo;
+import android.content.pm.ChangedPackages;
+import android.content.pm.InstantAppInfo;
 import android.content.pm.FeatureInfo;
+import android.content.pm.IDexModuleRegisterCallback;
 import android.content.pm.IPackageInstallObserver2;
 import android.content.pm.IPackageInstaller;
 import android.content.pm.IPackageDeleteObserver;
@@ -37,7 +38,6 @@ import android.content.pm.IntentFilterVerificationInfo;
 import android.content.pm.InstrumentationInfo;
 import android.content.pm.KeySet;
 import android.content.pm.PackageInfo;
-import android.content.pm.ManifestDigest;
 import android.content.pm.PackageCleanItem;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ProviderInfo;
@@ -47,6 +47,7 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.UserInfo;
 import android.content.pm.VerifierDeviceIdentity;
+import android.content.pm.VersionedPackage;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
@@ -63,13 +64,15 @@ interface IPackageManager {
     void checkPackageStartable(String packageName, int userId);
     boolean isPackageAvailable(String packageName, int userId);
     PackageInfo getPackageInfo(String packageName, int flags, int userId);
+    PackageInfo getPackageInfoVersioned(in VersionedPackage versionedPackage,
+            int flags, int userId);
     int getPackageUid(String packageName, int flags, int userId);
     int[] getPackageGids(String packageName, int flags, int userId);
 
     String[] currentToCanonicalPackageNames(in String[] names);
     String[] canonicalToCurrentPackageNames(in String[] names);
 
-    PermissionInfo getPermissionInfo(String name, int flags);
+    PermissionInfo getPermissionInfo(String name, String packageName, int flags);
 
     ParceledListSlice queryPermissionsByGroup(String group, int flags);
 
@@ -137,6 +140,8 @@ interface IPackageManager {
     String[] getAppOpPermissionPackages(String permissionName);
 
     ResolveInfo resolveIntent(in Intent intent, String resolvedType, int flags, int userId);
+
+    ResolveInfo findPersistentPreferredActivity(in Intent intent, int userId);
 
     boolean canForwardTo(in Intent intent, String resolvedType, int sourceUserId, int targetUserId);
 
@@ -207,7 +212,7 @@ interface IPackageManager {
             inout List<ProviderInfo> outInfo);
 
     ParceledListSlice queryContentProviders(
-            String processName, int uid, int flags);
+            String processName, int uid, int flags, String metaDataKey);
 
     InstrumentationInfo getInstrumentationInfo(
             in ComponentName className, int flags);
@@ -226,19 +231,22 @@ interface IPackageManager {
 
     void setInstallerPackageName(in String targetPackage, in String installerPackageName);
 
+    void setApplicationCategoryHint(String packageName, int categoryHint, String callerPackageName);
+
     /** @deprecated rawr, don't call AIDL methods directly! */
-    void deletePackageAsUser(in String packageName, IPackageDeleteObserver observer,
-            int userId, int flags);
+    void deletePackageAsUser(in String packageName, int versionCode,
+            IPackageDeleteObserver observer, int userId, int flags);
 
     /**
      * Delete a package for a specific user.
      *
-     * @param packageName The fully qualified name of the package to delete.
+     * @param versionedPackage The package to delete.
      * @param observer a callback to use to notify when the package deletion in finished.
      * @param userId the id of the user for whom to delete the package
      * @param flags - possible values: {@link #DONT_DELETE_DATA}
      */
-    void deletePackage(in String packageName, IPackageDeleteObserver2 observer, int userId, int flags);
+    void deletePackageVersioned(in VersionedPackage versionedPackage,
+            IPackageDeleteObserver2 observer, int userId, int flags);
 
     String getInstallerPackageName(in String packageName);
 
@@ -353,7 +361,7 @@ interface IPackageManager {
      * the operation is completed
      */
      void freeStorageAndNotify(in String volumeUuid, in long freeStorageSize,
-             IPackageDataObserver observer);
+             int storageFlags, IPackageDataObserver observer);
 
     /**
      * Free storage by deleting LRU sorted list of cache files across
@@ -377,7 +385,7 @@ interface IPackageManager {
      * to indicate that no call back is desired.
      */
      void freeStorage(in String volumeUuid, in long freeStorageSize,
-             in IntentSender pi);
+             int storageFlags, in IntentSender pi);
 
     /**
      * Delete all the cache files in an applications cache directory
@@ -455,7 +463,7 @@ interface IPackageManager {
      *
      * See PackageManager.NOTIFY_PACKAGE_USE_* for reasons.
      */
-    void notifyPackageUse(String packageName, int reason);
+    oneway void notifyPackageUse(String packageName, int reason);
 
     /**
      * Notify the package manager that a list of dex files have been loaded.
@@ -464,24 +472,41 @@ interface IPackageManager {
      * @param dexPats the list of the dex files paths that have been loaded
      * @param loaderIsa the ISA of the loader process
      */
-    void notifyDexLoad(String loadingPackageName, in List<String> dexPaths, String loaderIsa);
+    oneway void notifyDexLoad(String loadingPackageName, in List<String> dexPaths,
+            String loaderIsa);
 
     /**
-     * Ask the package manager to perform dex-opt (if needed) on the given
-     * package if it already hasn't done so.
+     * Register an application dex module with the package manager.
+     * The package manager will keep track of the given module for future optimizations.
      *
-     * In most cases, apps are dexopted in advance and this function will
-     * be a no-op.
+     * Dex module optimizations will disable the classpath checking at runtime. The client bares
+     * the responsibility to ensure that the static assumptions on classes in the optimized code
+     * hold at runtime (e.g. there's no duplicate classes in the classpath).
+     *
+     * Note that the package manager already keeps track of dex modules loaded with
+     * {@link dalvik.system.DexClassLoader} and {@link dalvik.system.PathClassLoader}.
+     * This can be called for an eager registration.
+     *
+     * The call might take a while and the results will be posted on the main thread, using
+     * the given callback.
+     *
+     * If the module is intended to be shared with other apps, make sure that the file
+     * permissions allow for it.
+     * If at registration time the permissions allow for others to read it, the module would
+     * be marked as a shared module which might undergo a different optimization strategy.
+     * (usually shared modules will generated larger optimizations artifacts,
+     * taking more disk space).
+     *
+     * @param packageName the package name to which the dex module belongs
+     * @param dexModulePath the absolute path of the dex module.
+     * @param isSharedModule whether or not the module is intended to be used by other apps.
+     * @param callback if not null,
+     *   {@link android.content.pm.IDexModuleRegisterCallback.IDexModuleRegisterCallback#onDexModuleRegistered}
+     *   will be called once the registration finishes.
      */
-    boolean performDexOptIfNeeded(String packageName);
+     oneway void registerDexModule(in String packageName, in String dexModulePath,
+             in boolean isSharedModule, IDexModuleRegisterCallback callback);
 
-    /**
-     * Ask the package manager to perform a dex-opt for the given reason. The package
-     * manager will map the reason to a compiler filter according to the current system
-     * configuration.
-     */
-    boolean performDexOpt(String packageName, boolean checkProfiles,
-            int compileReason, boolean force);
     /**
      * Ask the package manager to perform a dex-opt with the given compiler filter.
      *
@@ -489,6 +514,16 @@ interface IPackageManager {
      *       definite state.
      */
     boolean performDexOptMode(String packageName, boolean checkProfiles,
+            String targetCompilerFilter, boolean force, boolean bootComplete, String splitName);
+
+    /**
+     * Ask the package manager to perform a dex-opt with the given compiler filter on the
+     * secondary dex files belonging to the given package.
+     *
+     * Note: exposed only for the shell command to allow moving packages explicitly to a
+     *       definite state.
+     */
+    boolean performDexOptSecondary(String packageName,
             String targetCompilerFilter, boolean force);
 
     /**
@@ -499,9 +534,21 @@ interface IPackageManager {
     void forceDexOpt(String packageName);
 
     /**
+     * Execute the background dexopt job immediately.
+     */
+    boolean runBackgroundDexoptJob();
+
+    /**
+     * Reconcile the information we have about the secondary dex files belonging to
+     * {@code packagName} and the actual dex files. For all dex files that were
+     * deleted, update the internal records and delete the generated oat files.
+     */
+    void reconcileSecondaryDexFiles(String packageName);
+
+    /**
      * Update status of external media on the package manager to scan and
      * install packages installed on the external media. Like say the
-     * MountService uses this to call into the package manager to update
+     * StorageManagerService uses this to call into the package manager to update
      * status of sdcard.
      */
     void updateExternalMediaStatus(boolean mounted, boolean reportStatus);
@@ -521,7 +568,8 @@ interface IPackageManager {
     boolean setInstallLocation(int loc);
     int getInstallLocation();
 
-    int installExistingPackageAsUser(String packageName, int userId);
+    int installExistingPackageAsUser(String packageName, int userId, int installFlags,
+            int installReason);
 
     void verifyPendingInstall(int id, int verificationCode);
     void extendVerificationTimeout(int id, int verificationCodeAtTimeout, long millisecondsToDelay);
@@ -563,23 +611,48 @@ interface IPackageManager {
     void addOnPermissionsChangeListener(in IOnPermissionsChangeListener listener);
     void removeOnPermissionsChangeListener(in IOnPermissionsChangeListener listener);
     void grantDefaultPermissionsToEnabledCarrierApps(in String[] packageNames, int userId);
+    void grantDefaultPermissionsToEnabledImsServices(in String[] packageNames, int userId);
 
     boolean isPermissionRevokedByPolicy(String permission, String packageName, int userId);
 
     String getPermissionControllerPackageName();
 
-    ParceledListSlice getEphemeralApplications(int userId);
-    byte[] getEphemeralApplicationCookie(String packageName, int userId);
-    boolean setEphemeralApplicationCookie(String packageName, in byte[] cookie, int userId);
-    Bitmap getEphemeralApplicationIcon(String packageName, int userId);
-    boolean isEphemeralApplication(String packageName, int userId);
+    ParceledListSlice getInstantApps(int userId);
+    byte[] getInstantAppCookie(String packageName, int userId);
+    boolean setInstantAppCookie(String packageName, in byte[] cookie, int userId);
+    Bitmap getInstantAppIcon(String packageName, int userId);
+    boolean isInstantApp(String packageName, int userId);
 
     boolean setRequiredForSystemUser(String packageName, boolean systemUserApp);
+
+    /**
+     * Sets whether or not an update is available. Ostensibly for instant apps
+     * to force exteranl resolution.
+     */
+    void setUpdateAvailable(String packageName, boolean updateAvaialble);
 
     String getServicesSystemSharedLibraryPackageName();
     String getSharedSystemSharedLibraryPackageName();
 
+    ChangedPackages getChangedPackages(int sequenceNumber, int userId);
+
     boolean isPackageDeviceAdminOnAnyUser(String packageName);
 
     List<String> getPreviousCodePaths(in String packageName);
+
+    int getInstallReason(String packageName, int userId);
+
+    ParceledListSlice getSharedLibraries(in String packageName, int flags, int userId);
+
+    boolean canRequestPackageInstalls(String packageName, int userId);
+
+    void deletePreloadsFileCache();
+
+    ComponentName getInstantAppResolverComponent();
+
+    ComponentName getInstantAppResolverSettingsComponent();
+
+    ComponentName getInstantAppInstallerComponent();
+
+    String getInstantAppAndroidId(String packageName, int userId);
 }

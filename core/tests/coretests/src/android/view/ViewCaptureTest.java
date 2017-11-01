@@ -16,6 +16,8 @@
 
 package android.view;
 
+import static org.junit.Assert.assertTrue;
+
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -31,8 +33,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import static org.junit.Assert.assertTrue;
 
 @RunWith(AndroidJUnit4.class)
 public class ViewCaptureTest {
@@ -70,6 +70,7 @@ public class ViewCaptureTest {
 
     private void testCreateSnapshot(boolean skipChildren, int goldenResId) {
         Bitmap result = mViewToCapture.createSnapshot(Bitmap.Config.ARGB_8888, 0, skipChildren);
+        result.setHasAlpha(false); // resource will have no alpha, since content is opaque
         Bitmap golden = BitmapFactory.decodeResource(mActivity.getResources(), goldenResId);
         assertTrue(golden.sameAs(result));
     }

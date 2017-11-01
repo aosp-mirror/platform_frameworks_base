@@ -8,6 +8,7 @@ LOCAL_MODULE_TAGS := tests
 LOCAL_SRC_FILES := $(call all-subdir-java-files)
 
 LOCAL_JAVA_LIBRARIES := android.test.runner
+LOCAL_STATIC_JAVA_LIBRARIES := junit legacy-android-test
 
 LOCAL_PACKAGE_NAME := ImfTestTests
 

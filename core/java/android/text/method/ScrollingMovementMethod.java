@@ -16,10 +16,11 @@
 
 package android.text.method;
 
+import android.text.Layout;
+import android.text.Spannable;
 import android.view.MotionEvent;
-import android.text.*;
-import android.widget.TextView;
 import android.view.View;
+import android.widget.TextView;
 
 /**
  * A movement method that interprets movement keys by scrolling the text buffer.

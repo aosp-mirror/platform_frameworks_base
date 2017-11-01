@@ -43,6 +43,18 @@ public class HwBlob {
     public native final double getDouble(long offset);
     public native final String getString(long offset);
 
+    /**
+      The copyTo... methods copy the blob's data, starting from the given
+      byte offset, into the array. A total of "size" _elements_ are copied.
+     */
+    public native final void copyToBoolArray(long offset, boolean[] array, int size);
+    public native final void copyToInt8Array(long offset, byte[] array, int size);
+    public native final void copyToInt16Array(long offset, short[] array, int size);
+    public native final void copyToInt32Array(long offset, int[] array, int size);
+    public native final void copyToInt64Array(long offset, long[] array, int size);
+    public native final void copyToFloatArray(long offset, float[] array, int size);
+    public native final void copyToDoubleArray(long offset, double[] array, int size);
+
     public native final void putBool(long offset, boolean x);
     public native final void putInt8(long offset, byte x);
     public native final void putInt16(long offset, short x);
@@ -51,6 +63,14 @@ public class HwBlob {
     public native final void putFloat(long offset, float x);
     public native final void putDouble(long offset, double x);
     public native final void putString(long offset, String x);
+
+    public native final void putBoolArray(long offset, boolean[] x);
+    public native final void putInt8Array(long offset, byte[] x);
+    public native final void putInt16Array(long offset, short[] x);
+    public native final void putInt32Array(long offset, int[] x);
+    public native final void putInt64Array(long offset, long[] x);
+    public native final void putFloatArray(long offset, float[] x);
+    public native final void putDoubleArray(long offset, double[] x);
 
     public native final void putBlob(long offset, HwBlob blob);
 

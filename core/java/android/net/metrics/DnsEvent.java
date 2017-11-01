@@ -16,74 +16,81 @@
 
 package android.net.metrics;
 
-import android.annotation.SystemApi;
-import android.os.Parcel;
-import android.os.Parcelable;
+import android.net.NetworkCapabilities;
+
+import com.android.internal.util.BitUtils;
+
+import java.util.Arrays;
 
 /**
- * A DNS event recorded by NetdEventListenerService.
+ * A batch of DNS events recorded by NetdEventListenerService for a specific network.
  * {@hide}
  */
-@SystemApi
-final public class DnsEvent implements Parcelable {
-    public final int netId;
+final public class DnsEvent {
 
-    // The event type is currently only 1 or 2, so we store it as a byte.
-    public final byte[] eventTypes;
+    private static final int SIZE_LIMIT = 20000;
+
+    // Network id of the network associated with the event, or 0 if unspecified.
+    public final int netId;
+    // Transports of the network associated with the event, as defined in NetworkCapabilities.
+    // It is the caller responsability to ensure the value of transports does not change between
+    // calls to addResult.
+    public final long transports;
+    // The number of DNS queries recorded. Queries are stored in the structure-of-array style where
+    // the eventTypes, returnCodes, and latenciesMs arrays have the same length and the i-th event
+    // is spread across the three array at position i.
+    public int eventCount;
+    // The number of successful DNS queries recorded.
+    public int successCount;
+    // The types of DNS queries as defined in INetdEventListener.
+    public byte[] eventTypes;
     // Current getaddrinfo codes go from 1 to EAI_MAX = 15. gethostbyname returns errno, but there
     // are fewer than 255 errno values. So we store the result code in a byte as well.
-    public final byte[] returnCodes;
-    // The latency is an integer because a) short arrays aren't parcelable and b) a short can only
-    // store a maximum latency of 32757 or 65535 ms, which is too short for pathologically slow
-    // queries.
-    public final int[] latenciesMs;
+    public byte[] returnCodes;
+    // Latencies in milliseconds of queries, stored as ints.
+    public int[] latenciesMs;
 
-    /** {@hide} */
-    public DnsEvent(int netId, byte[] eventTypes, byte[] returnCodes, int[] latenciesMs) {
+    public DnsEvent(int netId, long transports, int initialCapacity) {
         this.netId = netId;
-        this.eventTypes = eventTypes;
-        this.returnCodes = returnCodes;
-        this.latenciesMs = latenciesMs;
+        this.transports = transports;
+        eventTypes = new byte[initialCapacity];
+        returnCodes = new byte[initialCapacity];
+        latenciesMs = new int[initialCapacity];
     }
 
-    private DnsEvent(Parcel in) {
-        this.netId = in.readInt();
-        this.eventTypes = in.createByteArray();
-        this.returnCodes = in.createByteArray();
-        this.latenciesMs = in.createIntArray();
+    boolean addResult(byte eventType, byte returnCode, int latencyMs) {
+        boolean isSuccess = (returnCode == 0);
+        if (eventCount >= SIZE_LIMIT) {
+            // TODO: implement better rate limiting that does not biases metrics.
+            return isSuccess;
+        }
+        if (eventCount == eventTypes.length) {
+            resize((int) (1.4 * eventCount));
+        }
+        eventTypes[eventCount] = eventType;
+        returnCodes[eventCount] = returnCode;
+        latenciesMs[eventCount] = latencyMs;
+        eventCount++;
+        if (isSuccess) {
+            successCount++;
+        }
+        return isSuccess;
     }
 
-    @Override
-    public void writeToParcel(Parcel out, int flags) {
-        out.writeInt(netId);
-        out.writeByteArray(eventTypes);
-        out.writeByteArray(returnCodes);
-        out.writeIntArray(latenciesMs);
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
+    public void resize(int newLength) {
+        eventTypes = Arrays.copyOf(eventTypes, newLength);
+        returnCodes = Arrays.copyOf(returnCodes, newLength);
+        latenciesMs = Arrays.copyOf(latenciesMs, newLength);
     }
 
     @Override
     public String toString() {
-        return String.format("DnsEvent(%d, %d events)", netId, eventTypes.length);
-    }
-
-    public static final Parcelable.Creator<DnsEvent> CREATOR = new Parcelable.Creator<DnsEvent>() {
-        @Override
-        public DnsEvent createFromParcel(Parcel in) {
-            return new DnsEvent(in);
+        StringBuilder builder = new StringBuilder("DnsEvent(").append(netId).append(", ");
+        for (int t : BitUtils.unpackBits(transports)) {
+            builder.append(NetworkCapabilities.transportNameOf(t)).append(", ");
         }
-
-        @Override
-        public DnsEvent[] newArray(int size) {
-            return new DnsEvent[size];
-        }
-    };
-
-    public static void logEvent(
-            int netId, byte[] eventTypes, byte[] returnCodes, int[] latenciesMs) {
+        builder.append(String.format("%d events, ", eventCount));
+        builder.append(String.format("%d success)", successCount));
+        return builder.toString();
     }
 }

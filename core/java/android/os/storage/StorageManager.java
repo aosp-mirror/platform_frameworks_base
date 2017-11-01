@@ -16,14 +16,25 @@
 
 package android.os.storage;
 
+import static android.net.TrafficStats.GB_IN_BYTES;
 import static android.net.TrafficStats.MB_IN_BYTES;
 
+import android.annotation.BytesLong;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
+import android.annotation.SuppressLint;
+import android.annotation.SystemApi;
+import android.annotation.SystemService;
+import android.annotation.WorkerThread;
+import android.app.Activity;
 import android.app.ActivityThread;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageMoveObserver;
 import android.content.pm.PackageManager;
 import android.os.Binder;
@@ -33,33 +44,49 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
+import android.os.ParcelableException;
+import android.os.ProxyFileDescriptorCallback;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.ServiceManager.ServiceNotFoundException;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.system.ErrnoException;
+import android.system.Os;
+import android.system.OsConstants;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 
+import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.os.AppFuseMount;
+import com.android.internal.os.FuseAppLoop;
+import com.android.internal.os.FuseUnavailableMountException;
+import com.android.internal.os.RoSystemProperties;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.Preconditions;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
+import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -74,11 +101,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  * guarantee the security of the OBB file itself: if any program modifies the
  * OBB, there is no guarantee that a read from that OBB will produce the
  * expected output.
- * <p>
- * Get an instance of this class by calling
- * {@link android.content.Context#getSystemService(java.lang.String)} with an
- * argument of {@link android.content.Context#STORAGE_SERVICE}.
  */
+@SystemService(Context.STORAGE_SERVICE)
 public class StorageManager {
     private static final String TAG = "StorageManager";
 
@@ -92,24 +116,81 @@ public class StorageManager {
     public static final String PROP_EMULATE_FBE = "persist.sys.emulate_fbe";
     /** {@hide} */
     public static final String PROP_SDCARDFS = "persist.sys.sdcardfs";
+    /** {@hide} */
+    public static final String PROP_VIRTUAL_DISK = "persist.sys.virtual_disk";
 
     /** {@hide} */
     public static final String UUID_PRIVATE_INTERNAL = null;
     /** {@hide} */
     public static final String UUID_PRIMARY_PHYSICAL = "primary_physical";
+    /** {@hide} */
+    public static final String UUID_SYSTEM = "system";
 
+    // NOTE: UUID constants below are namespaced
+    // uuid -v5 ad99aa3d-308e-4191-a200-ebcab371c0ad default
+    // uuid -v5 ad99aa3d-308e-4191-a200-ebcab371c0ad primary_physical
+    // uuid -v5 ad99aa3d-308e-4191-a200-ebcab371c0ad system
 
     /**
-     * Activity Action: Allows the user to manage their storage. This activity provides the ability
-     * to free up space on the device by deleting data such as apps.
+     * UUID representing the default internal storage of this device which
+     * provides {@link Environment#getDataDirectory()}.
      * <p>
-     * Input: Nothing.
+     * This value is constant across all devices and it will never change, and
+     * thus it cannot be used to uniquely identify a particular physical device.
+     *
+     * @see #getUuidForPath(File)
+     * @see ApplicationInfo#storageUuid
+     */
+    public static final UUID UUID_DEFAULT = UUID
+            .fromString("41217664-9172-527a-b3d5-edabb50a7d69");
+
+    /** {@hide} */
+    public static final UUID UUID_PRIMARY_PHYSICAL_ = UUID
+            .fromString("0f95a519-dae7-5abf-9519-fbd6209e05fd");
+
+    /** {@hide} */
+    public static final UUID UUID_SYSTEM_ = UUID
+            .fromString("5d258386-e60d-59e3-826d-0089cdd42cc0");
+
+    /**
+     * Activity Action: Allows the user to manage their storage. This activity
+     * provides the ability to free up space on the device by deleting data such
+     * as apps.
      * <p>
-     * Output: Nothing.
+     * If the sending application has a specific storage device or allocation
+     * size in mind, they can optionally define {@link #EXTRA_UUID} or
+     * {@link #EXTRA_REQUESTED_BYTES}, respectively.
+     * <p>
+     * This intent should be launched using
+     * {@link Activity#startActivityForResult(Intent, int)} so that the user
+     * knows which app is requesting the storage space. The returned result will
+     * be {@link Activity#RESULT_OK} if the requested space was made available,
+     * or {@link Activity#RESULT_CANCELED} otherwise.
      */
     @SdkConstant(SdkConstant.SdkConstantType.ACTIVITY_INTENT_ACTION)
-    public static final String ACTION_MANAGE_STORAGE
-            = "android.os.storage.action.MANAGE_STORAGE";
+    public static final String ACTION_MANAGE_STORAGE = "android.os.storage.action.MANAGE_STORAGE";
+
+    /**
+     * Extra {@link UUID} used to indicate the storage volume where an
+     * application is interested in allocating or managing disk space.
+     *
+     * @see #ACTION_MANAGE_STORAGE
+     * @see #UUID_DEFAULT
+     * @see #getUuidForPath(File)
+     * @see Intent#putExtra(String, java.io.Serializable)
+     */
+    public static final String EXTRA_UUID = "android.os.storage.extra.UUID";
+
+    /**
+     * Extra used to indicate the total size (in bytes) that an application is
+     * interested in allocating.
+     * <p>
+     * When defined, the management UI will help guide the user to free up
+     * enough disk space to reach this requested value.
+     *
+     * @see #ACTION_MANAGE_STORAGE
+     */
+    public static final String EXTRA_REQUESTED_BYTES = "android.os.storage.extra.REQUESTED_BYTES";
 
     /** {@hide} */
     public static final int DEBUG_FORCE_ADOPTABLE = 1 << 0;
@@ -119,6 +200,8 @@ public class StorageManager {
     public static final int DEBUG_SDCARDFS_FORCE_ON = 1 << 2;
     /** {@hide} */
     public static final int DEBUG_SDCARDFS_FORCE_OFF = 1 << 3;
+    /** {@hide} */
+    public static final int DEBUG_VIRTUAL_DISK = 1 << 4;
 
     // NOTE: keep in sync with installd
     /** {@hide} */
@@ -133,27 +216,41 @@ public class StorageManager {
     /** {@hide} */
     public static final int FLAG_INCLUDE_INVISIBLE = 1 << 10;
 
-    private static volatile IMountService sMountService = null;
+    /** {@hide} */
+    public static final int FSTRIM_FLAG_DEEP = 1 << 0;
+    /** {@hide} */
+    public static final int FSTRIM_FLAG_BENCHMARK = 1 << 1;
 
-    // TODO: the location of the primary storage block varies from device to device, so we need to
-    // try the most likely candidates - a long-term solution would be a device-specific vold
-    // function that returns the calculated size.
-    private static final String[] INTERNAL_STORAGE_SIZE_PATHS = {
-            "/sys/block/mmcblk0/size",
-            "/sys/block/sda/size"
-    };
-    private static final int INTERNAL_STORAGE_SECTOR_SIZE = 512;
+    /** @hide The volume is not encrypted. */
+    public static final int ENCRYPTION_STATE_NONE = 1;
+
+    /** @hide The volume has been encrypted succesfully. */
+    public static final int ENCRYPTION_STATE_OK = 0;
+
+    /** @hide The volume is in a bad state.*/
+    public static final int ENCRYPTION_STATE_ERROR_UNKNOWN = -1;
+
+    /** @hide Encryption is incomplete */
+    public static final int ENCRYPTION_STATE_ERROR_INCOMPLETE = -2;
+
+    /** @hide Encryption is incomplete and irrecoverable */
+    public static final int ENCRYPTION_STATE_ERROR_INCONSISTENT = -3;
+
+    /** @hide Underlying data is corrupt */
+    public static final int ENCRYPTION_STATE_ERROR_CORRUPT = -4;
+
+    private static volatile IStorageManager sStorageManager = null;
 
     private final Context mContext;
     private final ContentResolver mResolver;
 
-    private final IMountService mMountService;
+    private final IStorageManager mStorageManager;
     private final Looper mLooper;
     private final AtomicInteger mNextNonce = new AtomicInteger(0);
 
     private final ArrayList<StorageEventListenerDelegate> mDelegates = new ArrayList<>();
 
-    private static class StorageEventListenerDelegate extends IMountServiceListener.Stub implements
+    private static class StorageEventListenerDelegate extends IStorageEventListener.Stub implements
             Handler.Callback {
         private static final int MSG_STORAGE_STATE_CHANGED = 1;
         private static final int MSG_VOLUME_STATE_CHANGED = 2;
@@ -343,7 +440,7 @@ public class StorageManager {
      * Constructs a StorageManager object through which an application can
      * can communicate with the systems mount service.
      *
-     * @param tgtLooper The {@link android.os.Looper} which events will be received on.
+     * @param looper The {@link android.os.Looper} which events will be received on.
      *
      * <p>Applications can get instance of this class by calling
      * {@link android.content.Context#getSystemService(java.lang.String)} with an argument
@@ -351,14 +448,11 @@ public class StorageManager {
      *
      * @hide
      */
-    public StorageManager(Context context, Looper looper) {
+    public StorageManager(Context context, Looper looper) throws ServiceNotFoundException {
         mContext = context;
         mResolver = context.getContentResolver();
         mLooper = looper;
-        mMountService = IMountService.Stub.asInterface(ServiceManager.getService("mount"));
-        if (mMountService == null) {
-            throw new IllegalStateException("Failed to find running mount service");
-        }
+        mStorageManager = IStorageManager.Stub.asInterface(ServiceManager.getServiceOrThrow("mount"));
     }
 
     /**
@@ -373,7 +467,7 @@ public class StorageManager {
             final StorageEventListenerDelegate delegate = new StorageEventListenerDelegate(listener,
                     mLooper);
             try {
-                mMountService.registerListener(delegate);
+                mStorageManager.registerListener(delegate);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -394,7 +488,7 @@ public class StorageManager {
                 final StorageEventListenerDelegate delegate = i.next();
                 if (delegate.mCallback == listener) {
                     try {
-                        mMountService.unregisterListener(delegate);
+                        mStorageManager.unregisterListener(delegate);
                     } catch (RemoteException e) {
                         throw e.rethrowFromSystemServer();
                     }
@@ -472,7 +566,7 @@ public class StorageManager {
         try {
             final String canonicalPath = new File(rawPath).getCanonicalPath();
             final int nonce = mObbActionListener.addListener(listener);
-            mMountService.mountObb(rawPath, canonicalPath, key, mObbActionListener, nonce);
+            mStorageManager.mountObb(rawPath, canonicalPath, key, mObbActionListener, nonce);
             return true;
         } catch (IOException e) {
             throw new IllegalArgumentException("Failed to resolve path: " + rawPath, e);
@@ -507,7 +601,7 @@ public class StorageManager {
 
         try {
             final int nonce = mObbActionListener.addListener(listener);
-            mMountService.unmountObb(rawPath, force, mObbActionListener, nonce);
+            mStorageManager.unmountObb(rawPath, force, mObbActionListener, nonce);
             return true;
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -524,7 +618,7 @@ public class StorageManager {
         Preconditions.checkNotNull(rawPath, "rawPath cannot be null");
 
         try {
-            return mMountService.isObbMounted(rawPath);
+            return mStorageManager.isObbMounted(rawPath);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -543,7 +637,7 @@ public class StorageManager {
         Preconditions.checkNotNull(rawPath, "rawPath cannot be null");
 
         try {
-            return mMountService.getMountedObbPath(rawPath);
+            return mStorageManager.getMountedObbPath(rawPath);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -552,7 +646,7 @@ public class StorageManager {
     /** {@hide} */
     public @NonNull List<DiskInfo> getDisks() {
         try {
-            return Arrays.asList(mMountService.getDisks());
+            return Arrays.asList(mStorageManager.getDisks());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -635,10 +729,50 @@ public class StorageManager {
         }
     }
 
+    /**
+     * Return a UUID identifying the storage volume that hosts the given
+     * filesystem path.
+     * <p>
+     * If this path is hosted by the default internal storage of the device at
+     * {@link Environment#getDataDirectory()}, the returned value will be
+     * {@link #UUID_DEFAULT}.
+     *
+     * @throws IOException when the storage device at the given path isn't
+     *             present, or when it doesn't have a valid UUID.
+     */
+    public @NonNull UUID getUuidForPath(@NonNull File path) throws IOException {
+        Preconditions.checkNotNull(path);
+        final String pathString = path.getCanonicalPath();
+        if (FileUtils.contains(Environment.getDataDirectory().getAbsolutePath(), pathString)) {
+            return UUID_DEFAULT;
+        }
+        try {
+            for (VolumeInfo vol : mStorageManager.getVolumes(0)) {
+                if (vol.path != null && FileUtils.contains(vol.path, pathString)) {
+                    // TODO: verify that emulated adopted devices have UUID of
+                    // underlying volume
+                    return convert(vol.fsUuid);
+                }
+            }
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+        throw new FileNotFoundException("Failed to find a storage device for " + path);
+    }
+
+    /** {@hide} */
+    public @NonNull File findPathForUuid(String volumeUuid) throws FileNotFoundException {
+        final VolumeInfo vol = findVolumeByQualifiedUuid(volumeUuid);
+        if (vol != null) {
+            return vol.getPath();
+        }
+        throw new FileNotFoundException("Failed to find a storage device for " + volumeUuid);
+    }
+
     /** {@hide} */
     public @NonNull List<VolumeInfo> getVolumes() {
         try {
-            return Arrays.asList(mMountService.getVolumes(0));
+            return Arrays.asList(mStorageManager.getVolumes(0));
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -648,7 +782,7 @@ public class StorageManager {
     public @NonNull List<VolumeInfo> getWritablePrivateVolumes() {
         try {
             final ArrayList<VolumeInfo> res = new ArrayList<>();
-            for (VolumeInfo vol : mMountService.getVolumes(0)) {
+            for (VolumeInfo vol : mStorageManager.getVolumes(0)) {
                 if (vol.getType() == VolumeInfo.TYPE_PRIVATE && vol.isMountedWritable()) {
                     res.add(vol);
                 }
@@ -662,7 +796,7 @@ public class StorageManager {
     /** {@hide} */
     public @NonNull List<VolumeRecord> getVolumeRecords() {
         try {
-            return Arrays.asList(mMountService.getVolumeRecords(0));
+            return Arrays.asList(mStorageManager.getVolumeRecords(0));
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -705,7 +839,7 @@ public class StorageManager {
     /** {@hide} */
     public void mount(String volId) {
         try {
-            mMountService.mount(volId);
+            mStorageManager.mount(volId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -714,7 +848,7 @@ public class StorageManager {
     /** {@hide} */
     public void unmount(String volId) {
         try {
-            mMountService.unmount(volId);
+            mStorageManager.unmount(volId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -723,7 +857,7 @@ public class StorageManager {
     /** {@hide} */
     public void format(String volId) {
         try {
-            mMountService.format(volId);
+            mStorageManager.format(volId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -732,7 +866,7 @@ public class StorageManager {
     /** {@hide} */
     public long benchmark(String volId) {
         try {
-            return mMountService.benchmark(volId);
+            return mStorageManager.benchmark(volId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -741,7 +875,7 @@ public class StorageManager {
     /** {@hide} */
     public void partitionPublic(String diskId) {
         try {
-            mMountService.partitionPublic(diskId);
+            mStorageManager.partitionPublic(diskId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -750,7 +884,7 @@ public class StorageManager {
     /** {@hide} */
     public void partitionPrivate(String diskId) {
         try {
-            mMountService.partitionPrivate(diskId);
+            mStorageManager.partitionPrivate(diskId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -759,7 +893,7 @@ public class StorageManager {
     /** {@hide} */
     public void partitionMixed(String diskId, int ratio) {
         try {
-            mMountService.partitionMixed(diskId, ratio);
+            mStorageManager.partitionMixed(diskId, ratio);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -779,7 +913,7 @@ public class StorageManager {
                 try {
                     // TODO: switch to explicit wipe command when we have it,
                     // for now rely on the fact that vfat format does a wipe
-                    mMountService.partitionPublic(diskId);
+                    mStorageManager.partitionPublic(diskId);
                 } catch (Exception e) {
                     Slog.w(TAG, "Failed to wipe " + diskId + ", but soldiering onward", e);
                 }
@@ -792,7 +926,7 @@ public class StorageManager {
     /** {@hide} */
     public void setVolumeNickname(String fsUuid, String nickname) {
         try {
-            mMountService.setVolumeNickname(fsUuid, nickname);
+            mStorageManager.setVolumeNickname(fsUuid, nickname);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -801,7 +935,7 @@ public class StorageManager {
     /** {@hide} */
     public void setVolumeInited(String fsUuid, boolean inited) {
         try {
-            mMountService.setVolumeUserFlags(fsUuid, inited ? VolumeRecord.USER_FLAG_INITED : 0,
+            mStorageManager.setVolumeUserFlags(fsUuid, inited ? VolumeRecord.USER_FLAG_INITED : 0,
                     VolumeRecord.USER_FLAG_INITED);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -811,7 +945,7 @@ public class StorageManager {
     /** {@hide} */
     public void setVolumeSnoozed(String fsUuid, boolean snoozed) {
         try {
-            mMountService.setVolumeUserFlags(fsUuid, snoozed ? VolumeRecord.USER_FLAG_SNOOZED : 0,
+            mStorageManager.setVolumeUserFlags(fsUuid, snoozed ? VolumeRecord.USER_FLAG_SNOOZED : 0,
                     VolumeRecord.USER_FLAG_SNOOZED);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -821,7 +955,7 @@ public class StorageManager {
     /** {@hide} */
     public void forgetVolume(String fsUuid) {
         try {
-            mMountService.forgetVolume(fsUuid);
+            mStorageManager.forgetVolume(fsUuid);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -835,7 +969,7 @@ public class StorageManager {
      */
     public String getPrimaryStorageUuid() {
         try {
-            return mMountService.getPrimaryStorageUuid();
+            return mStorageManager.getPrimaryStorageUuid();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -849,7 +983,7 @@ public class StorageManager {
      */
     public void setPrimaryStorageUuid(String volumeUuid, IPackageMoveObserver callback) {
         try {
-            mMountService.setPrimaryStorageUuid(volumeUuid, callback);
+            mStorageManager.setPrimaryStorageUuid(volumeUuid, callback);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -933,37 +1067,13 @@ public class StorageManager {
 
     /** {@hide} */
     public static Pair<String, Long> getPrimaryStoragePathAndSize() {
-        for (String path : INTERNAL_STORAGE_SIZE_PATHS) {
-            final long numberBlocks = readLong(path);
-            if (numberBlocks > 0) {
-                return new Pair<>(path, Long.valueOf(numberBlocks * INTERNAL_STORAGE_SECTOR_SIZE));
-            }
-        }
-        return null;
+        return Pair.create(null,
+                FileUtils.roundStorageSize(Environment.getDataDirectory().getTotalSpace()));
     }
-
 
     /** {@hide} */
     public long getPrimaryStorageSize() {
-        final Pair<String, Long> pair = getPrimaryStoragePathAndSize();
-        return pair == null ? 0 : pair.second.longValue();
-    }
-
-    private static long readLong(String path) {
-        try (final FileInputStream fis = new FileInputStream(path);
-                final BufferedReader reader = new BufferedReader(new InputStreamReader(fis));) {
-            return Long.parseLong(reader.readLine());
-        } catch (FileNotFoundException e) {
-            // This is expected since we are trying to parse multiple paths.
-            Slog.i(TAG, "readLong(): Path doesn't exist: " + path + ": " + e);
-            return 0;
-        } catch (NumberFormatException e) {
-            Slog.e(TAG, "readLong(): Could not parse " + path + ": " + e);
-            return 0;
-        } catch (Exception e) {
-            Slog.e(TAG, "readLong(): Unknown exception while opening " + path + ": " + e);
-            return 0;
-       }
+        return FileUtils.roundStorageSize(Environment.getDataDirectory().getTotalSpace());
     }
 
     /** @removed */
@@ -973,7 +1083,7 @@ public class StorageManager {
 
     /** {@hide} */
     public static @NonNull StorageVolume[] getVolumeList(int userId, int flags) {
-        final IMountService mountService = IMountService.Stub.asInterface(
+        final IStorageManager storageManager = IStorageManager.Stub.asInterface(
                 ServiceManager.getService("mount"));
         try {
             String packageName = ActivityThread.currentOpPackageName();
@@ -994,7 +1104,7 @@ public class StorageManager {
             if (uid <= 0) {
                 return new StorageVolume[0];
             }
-            return mountService.getVolumeList(uid, packageName, flags);
+            return storageManager.getVolumeList(uid, packageName, flags);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1030,9 +1140,12 @@ public class StorageManager {
         throw new IllegalStateException("Missing primary storage");
     }
 
-    /** {@hide} */
-    private static final int DEFAULT_THRESHOLD_PERCENTAGE = 10;
+    private static final int DEFAULT_THRESHOLD_PERCENTAGE = 5;
     private static final long DEFAULT_THRESHOLD_MAX_BYTES = 500 * MB_IN_BYTES;
+
+    private static final int DEFAULT_CACHE_PERCENTAGE = 10;
+    private static final long DEFAULT_CACHE_MAX_BYTES = 5 * GB_IN_BYTES;
+
     private static final long DEFAULT_FULL_THRESHOLD_BYTES = MB_IN_BYTES;
 
     /**
@@ -1063,6 +1176,32 @@ public class StorageManager {
     }
 
     /**
+     * Return the minimum number of bytes of storage on the device that should
+     * be reserved for cached data.
+     *
+     * @hide
+     */
+    public long getStorageCacheBytes(File path, @AllocateFlags int flags) {
+        final long cachePercent = Settings.Global.getInt(mResolver,
+                Settings.Global.SYS_STORAGE_CACHE_PERCENTAGE, DEFAULT_CACHE_PERCENTAGE);
+        final long cacheBytes = (path.getTotalSpace() * cachePercent) / 100;
+
+        final long maxCacheBytes = Settings.Global.getLong(mResolver,
+                Settings.Global.SYS_STORAGE_CACHE_MAX_BYTES, DEFAULT_CACHE_MAX_BYTES);
+
+        final long result = Math.min(cacheBytes, maxCacheBytes);
+        if ((flags & StorageManager.FLAG_ALLOCATE_AGGRESSIVE) != 0) {
+            return 0;
+        } else if ((flags & StorageManager.FLAG_ALLOCATE_DEFY_ALL_RESERVED) != 0) {
+            return 0;
+        } else if ((flags & StorageManager.FLAG_ALLOCATE_DEFY_HALF_RESERVED) != 0) {
+            return result / 2;
+        } else {
+            return result;
+        }
+    }
+
+    /**
      * Return the number of available bytes at which the given path is
      * considered full.
      *
@@ -1076,7 +1215,7 @@ public class StorageManager {
     /** {@hide} */
     public void createUserKey(int userId, int serialNumber, boolean ephemeral) {
         try {
-            mMountService.createUserKey(userId, serialNumber, ephemeral);
+            mStorageManager.createUserKey(userId, serialNumber, ephemeral);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1085,7 +1224,7 @@ public class StorageManager {
     /** {@hide} */
     public void destroyUserKey(int userId) {
         try {
-            mMountService.destroyUserKey(userId);
+            mStorageManager.destroyUserKey(userId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1094,7 +1233,7 @@ public class StorageManager {
     /** {@hide} */
     public void unlockUserKey(int userId, int serialNumber, byte[] token, byte[] secret) {
         try {
-            mMountService.unlockUserKey(userId, serialNumber, token, secret);
+            mStorageManager.unlockUserKey(userId, serialNumber, token, secret);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1103,7 +1242,7 @@ public class StorageManager {
     /** {@hide} */
     public void lockUserKey(int userId) {
         try {
-            mMountService.lockUserKey(userId);
+            mStorageManager.lockUserKey(userId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1112,7 +1251,7 @@ public class StorageManager {
     /** {@hide} */
     public void prepareUserStorage(String volumeUuid, int userId, int serialNumber, int flags) {
         try {
-            mMountService.prepareUserStorage(volumeUuid, userId, serialNumber, flags);
+            mStorageManager.prepareUserStorage(volumeUuid, userId, serialNumber, flags);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1121,7 +1260,16 @@ public class StorageManager {
     /** {@hide} */
     public void destroyUserStorage(String volumeUuid, int userId, int flags) {
         try {
-            mMountService.destroyUserStorage(volumeUuid, userId, flags);
+            mStorageManager.destroyUserStorage(volumeUuid, userId, flags);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /** {@hide} */
+    public void secdiscard(String path) {
+        try {
+            mStorageManager.secdiscard(path);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1129,17 +1277,17 @@ public class StorageManager {
 
     /** {@hide} */
     public static boolean isUserKeyUnlocked(int userId) {
-        if (sMountService == null) {
-            sMountService = IMountService.Stub
+        if (sStorageManager == null) {
+            sStorageManager = IStorageManager.Stub
                     .asInterface(ServiceManager.getService("mount"));
         }
-        if (sMountService == null) {
+        if (sStorageManager == null) {
             Slog.w(TAG, "Early during boot, assuming locked");
             return false;
         }
         final long token = Binder.clearCallingIdentity();
         try {
-            return sMountService.isUserKeyUnlocked(userId);
+            return sStorageManager.isUserKeyUnlocked(userId);
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         } finally {
@@ -1167,8 +1315,7 @@ public class StorageManager {
      *         false not encrypted and not encryptable
      */
     public static boolean isEncryptable() {
-        final String state = SystemProperties.get("ro.crypto.state", "unsupported");
-        return !"unsupported".equalsIgnoreCase(state);
+        return RoSystemProperties.CRYPTO_ENCRYPTABLE;
     }
 
     /** {@hide}
@@ -1177,8 +1324,7 @@ public class StorageManager {
      *         false not encrypted
      */
     public static boolean isEncrypted() {
-        final String state = SystemProperties.get("ro.crypto.state", "");
-        return "encrypted".equalsIgnoreCase(state);
+        return RoSystemProperties.CRYPTO_ENCRYPTED;
     }
 
     /** {@hide}
@@ -1190,9 +1336,7 @@ public class StorageManager {
         if (!isEncrypted()) {
             return false;
         }
-
-        final String status = SystemProperties.get("ro.crypto.type", "");
-        return "file".equalsIgnoreCase(status);
+        return RoSystemProperties.CRYPTO_FILE_ENCRYPTED;
     }
 
     /** {@hide}
@@ -1204,8 +1348,7 @@ public class StorageManager {
         if (!isEncrypted()) {
             return false;
         }
-        final String status = SystemProperties.get("ro.crypto.type", "");
-        return "block".equalsIgnoreCase(status);
+        return RoSystemProperties.CRYPTO_BLOCK_ENCRYPTED;
     }
 
     /** {@hide}
@@ -1220,9 +1363,9 @@ public class StorageManager {
         }
 
         try {
-            IMountService mountService = IMountService.Stub.asInterface(
+            IStorageManager storageManager = IStorageManager.Stub.asInterface(
                     ServiceManager.getService("mount"));
-            return mountService.getPasswordType() != CRYPT_TYPE_DEFAULT;
+            return storageManager.getPasswordType() != CRYPT_TYPE_DEFAULT;
         } catch (RemoteException e) {
             Log.e(TAG, "Error getting encryption type");
             return false;
@@ -1276,34 +1419,596 @@ public class StorageManager {
 
     /** {@hide} */
     public static File maybeTranslateEmulatedPathToInternal(File path) {
-        final IMountService mountService = IMountService.Stub.asInterface(
-                ServiceManager.getService("mount"));
-        try {
-            final VolumeInfo[] vols = mountService.getVolumes(0);
-            for (VolumeInfo vol : vols) {
-                if ((vol.getType() == VolumeInfo.TYPE_EMULATED
-                        || vol.getType() == VolumeInfo.TYPE_PUBLIC) && vol.isMountedReadable()) {
-                    final File internalPath = FileUtils.rewriteAfterRename(vol.getPath(),
-                            vol.getInternalPath(), path);
-                    if (internalPath != null && internalPath.exists()) {
-                        return internalPath;
-                    }
-                }
-            }
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        // Disabled now that FUSE has been replaced by sdcardfs
         return path;
     }
 
     /** {@hide} */
-    public ParcelFileDescriptor mountAppFuse(String name) {
+    @VisibleForTesting
+    public @NonNull ParcelFileDescriptor openProxyFileDescriptor(
+            int mode, ProxyFileDescriptorCallback callback, Handler handler, ThreadFactory factory)
+                    throws IOException {
+        Preconditions.checkNotNull(callback);
+        MetricsLogger.count(mContext, "storage_open_proxy_file_descriptor", 1);
+        // Retry is needed because the mount point mFuseAppLoop is using may be unmounted before
+        // invoking StorageManagerService#openProxyFileDescriptor. In this case, we need to re-mount
+        // the bridge by calling mountProxyFileDescriptorBridge.
+        while (true) {
+            try {
+                synchronized (mFuseAppLoopLock) {
+                    boolean newlyCreated = false;
+                    if (mFuseAppLoop == null) {
+                        final AppFuseMount mount = mStorageManager.mountProxyFileDescriptorBridge();
+                        if (mount == null) {
+                            throw new IOException("Failed to mount proxy bridge");
+                        }
+                        mFuseAppLoop = new FuseAppLoop(mount.mountPointId, mount.fd, factory);
+                        newlyCreated = true;
+                    }
+                    if (handler == null) {
+                        handler = new Handler(Looper.getMainLooper());
+                    }
+                    try {
+                        final int fileId = mFuseAppLoop.registerCallback(callback, handler);
+                        final ParcelFileDescriptor pfd = mStorageManager.openProxyFileDescriptor(
+                                mFuseAppLoop.getMountPointId(), fileId, mode);
+                        if (pfd == null) {
+                            mFuseAppLoop.unregisterCallback(fileId);
+                            throw new FuseUnavailableMountException(
+                                    mFuseAppLoop.getMountPointId());
+                        }
+                        return pfd;
+                    } catch (FuseUnavailableMountException exception) {
+                        // The bridge is being unmounted. Tried to recreate it unless the bridge was
+                        // just created.
+                        if (newlyCreated) {
+                            throw new IOException(exception);
+                        }
+                        mFuseAppLoop = null;
+                        continue;
+                    }
+                }
+            } catch (RemoteException e) {
+                // Cannot recover from remote exception.
+                throw new IOException(e);
+            }
+        }
+    }
+
+    /** {@hide} */
+    public @NonNull ParcelFileDescriptor openProxyFileDescriptor(
+            int mode, ProxyFileDescriptorCallback callback)
+                    throws IOException {
+        return openProxyFileDescriptor(mode, callback, null, null);
+    }
+
+    /**
+     * Opens a seekable {@link ParcelFileDescriptor} that proxies all low-level
+     * I/O requests back to the given {@link ProxyFileDescriptorCallback}.
+     * <p>
+     * This can be useful when you want to provide quick access to a large file
+     * that isn't backed by a real file on disk, such as a file on a network
+     * share, cloud storage service, etc. As an example, you could respond to a
+     * {@link ContentResolver#openFileDescriptor(android.net.Uri, String)}
+     * request by returning a {@link ParcelFileDescriptor} created with this
+     * method, and then stream the content on-demand as requested.
+     * <p>
+     * Another useful example might be where you have an encrypted file that
+     * you're willing to decrypt on-demand, but where you want to avoid
+     * persisting the cleartext version.
+     *
+     * @param mode The desired access mode, must be one of
+     *            {@link ParcelFileDescriptor#MODE_READ_ONLY},
+     *            {@link ParcelFileDescriptor#MODE_WRITE_ONLY}, or
+     *            {@link ParcelFileDescriptor#MODE_READ_WRITE}
+     * @param callback Callback to process file operation requests issued on
+     *            returned file descriptor.
+     * @param handler Handler that invokes callback methods.
+     * @return Seekable ParcelFileDescriptor.
+     * @throws IOException
+     */
+    public @NonNull ParcelFileDescriptor openProxyFileDescriptor(
+            int mode, ProxyFileDescriptorCallback callback, Handler handler)
+                    throws IOException {
+        Preconditions.checkNotNull(handler);
+        return openProxyFileDescriptor(mode, callback, handler, null);
+    }
+
+    /** {@hide} */
+    @VisibleForTesting
+    public int getProxyFileDescriptorMountPointId() {
+        synchronized (mFuseAppLoopLock) {
+            return mFuseAppLoop != null ? mFuseAppLoop.getMountPointId() : -1;
+        }
+    }
+
+    /**
+     * Return quota size in bytes for all cached data belonging to the calling
+     * app on the given storage volume.
+     * <p>
+     * If your app goes above this quota, your cached files will be some of the
+     * first to be deleted when additional disk space is needed. Conversely, if
+     * your app stays under this quota, your cached files will be some of the
+     * last to be deleted when additional disk space is needed.
+     * <p>
+     * This quota will change over time depending on how frequently the user
+     * interacts with your app, and depending on how much system-wide disk space
+     * is used.
+     * <p class="note">
+     * Note: if your app uses the {@code android:sharedUserId} manifest feature,
+     * then cached data for all packages in your shared UID is tracked together
+     * as a single unit.
+     * </p>
+     *
+     * @param storageUuid the UUID of the storage volume that you're interested
+     *            in. The UUID for a specific path can be obtained using
+     *            {@link #getUuidForPath(File)}.
+     * @throws IOException when the storage device isn't present, or when it
+     *             doesn't support cache quotas.
+     * @see #getCacheSizeBytes(UUID)
+     */
+    @WorkerThread
+    public @BytesLong long getCacheQuotaBytes(@NonNull UUID storageUuid) throws IOException {
         try {
-            return mMountService.mountAppFuse(name);
+            final ApplicationInfo app = mContext.getApplicationInfo();
+            return mStorageManager.getCacheQuotaBytes(convert(storageUuid), app.uid);
+        } catch (ParcelableException e) {
+            e.maybeRethrow(IOException.class);
+            throw new RuntimeException(e);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
+
+    /** @removed */
+    @Deprecated
+    public long getCacheQuotaBytes(@NonNull File path) throws IOException {
+        return getCacheQuotaBytes(getUuidForPath(path));
+    }
+
+    /**
+     * Return total size in bytes of all cached data belonging to the calling
+     * app on the given storage volume.
+     * <p>
+     * Cached data tracked by this method always includes
+     * {@link Context#getCacheDir()} and {@link Context#getCodeCacheDir()}, and
+     * it also includes {@link Context#getExternalCacheDir()} if the primary
+     * shared/external storage is hosted on the same storage device as your
+     * private data.
+     * <p class="note">
+     * Note: if your app uses the {@code android:sharedUserId} manifest feature,
+     * then cached data for all packages in your shared UID is tracked together
+     * as a single unit.
+     * </p>
+     *
+     * @param storageUuid the UUID of the storage volume that you're interested
+     *            in. The UUID for a specific path can be obtained using
+     *            {@link #getUuidForPath(File)}.
+     * @throws IOException when the storage device isn't present, or when it
+     *             doesn't support cache quotas.
+     * @see #getCacheQuotaBytes(UUID)
+     */
+    @WorkerThread
+    public @BytesLong long getCacheSizeBytes(@NonNull UUID storageUuid) throws IOException {
+        try {
+            final ApplicationInfo app = mContext.getApplicationInfo();
+            return mStorageManager.getCacheSizeBytes(convert(storageUuid), app.uid);
+        } catch (ParcelableException e) {
+            e.maybeRethrow(IOException.class);
+            throw new RuntimeException(e);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /** @removed */
+    @Deprecated
+    public long getCacheSizeBytes(@NonNull File path) throws IOException {
+        return getCacheSizeBytes(getUuidForPath(path));
+    }
+
+    /** @removed */
+    @Deprecated
+    public long getCacheQuotaBytes() throws IOException {
+        return getCacheQuotaBytes(mContext.getCacheDir());
+    }
+
+    /** @removed */
+    @Deprecated
+    public long getCacheSizeBytes() throws IOException {
+        return getCacheSizeBytes(mContext.getCacheDir());
+    }
+
+    /** @removed */
+    @Deprecated
+    public long getExternalCacheQuotaBytes() throws IOException {
+        return getCacheQuotaBytes(mContext.getExternalCacheDir());
+    }
+
+    /** @removed */
+    @Deprecated
+    public long getExternalCacheSizeBytes() throws IOException {
+        return getCacheSizeBytes(mContext.getExternalCacheDir());
+    }
+
+    /**
+     * Flag indicating that a disk space allocation request should operate in an
+     * aggressive mode. This flag should only be rarely used in situations that
+     * are critical to system health or security.
+     * <p>
+     * When set, the system is more aggressive about the data that it considers
+     * for possible deletion when allocating disk space.
+     * <p class="note">
+     * Note: your app must hold the
+     * {@link android.Manifest.permission#ALLOCATE_AGGRESSIVE} permission for
+     * this flag to take effect.
+     * </p>
+     *
+     * @see #getAllocatableBytes(UUID, int)
+     * @see #allocateBytes(UUID, long, int)
+     * @see #allocateBytes(FileDescriptor, long, int)
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.ALLOCATE_AGGRESSIVE)
+    @SystemApi
+    public static final int FLAG_ALLOCATE_AGGRESSIVE = 1 << 0;
+
+    /**
+     * Flag indicating that a disk space allocation request should be allowed to
+     * clear up to all reserved disk space.
+     *
+     * @hide
+     */
+    public static final int FLAG_ALLOCATE_DEFY_ALL_RESERVED = 1 << 1;
+
+    /**
+     * Flag indicating that a disk space allocation request should be allowed to
+     * clear up to half of all reserved disk space.
+     *
+     * @hide
+     */
+    public static final int FLAG_ALLOCATE_DEFY_HALF_RESERVED = 1 << 2;
+
+    /** @hide */
+    @IntDef(flag = true, value = {
+            FLAG_ALLOCATE_AGGRESSIVE,
+            FLAG_ALLOCATE_DEFY_ALL_RESERVED,
+            FLAG_ALLOCATE_DEFY_HALF_RESERVED,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface AllocateFlags {}
+
+    /**
+     * Return the maximum number of new bytes that your app can allocate for
+     * itself on the given storage volume. This value is typically larger than
+     * {@link File#getUsableSpace()}, since the system may be willing to delete
+     * cached files to satisfy an allocation request. You can then allocate
+     * space for yourself using {@link #allocateBytes(UUID, long, int)} or
+     * {@link #allocateBytes(FileDescriptor, long, int)}.
+     * <p>
+     * This method is best used as a pre-flight check, such as deciding if there
+     * is enough space to store an entire music album before you allocate space
+     * for each audio file in the album. Attempts to allocate disk space beyond
+     * the returned value will fail.
+     * <p>
+     * If the returned value is not large enough for the data you'd like to
+     * persist, you can launch {@link #ACTION_MANAGE_STORAGE} with the
+     * {@link #EXTRA_UUID} and {@link #EXTRA_REQUESTED_BYTES} options to help
+     * involve the user in freeing up disk space.
+     * <p>
+     * If you're progressively allocating an unbounded amount of storage space
+     * (such as when recording a video) you should avoid calling this method
+     * more than once every 30 seconds.
+     * <p class="note">
+     * Note: if your app uses the {@code android:sharedUserId} manifest feature,
+     * then allocatable space for all packages in your shared UID is tracked
+     * together as a single unit.
+     * </p>
+     *
+     * @param storageUuid the UUID of the storage volume where you're
+     *            considering allocating disk space, since allocatable space can
+     *            vary widely depending on the underlying storage device. The
+     *            UUID for a specific path can be obtained using
+     *            {@link #getUuidForPath(File)}.
+     * @return the maximum number of new bytes that the calling app can allocate
+     *         using {@link #allocateBytes(UUID, long, int)} or
+     *         {@link #allocateBytes(FileDescriptor, long, int)}.
+     * @throws IOException when the storage device isn't present, or when it
+     *             doesn't support allocating space.
+     */
+    @WorkerThread
+    public @BytesLong long getAllocatableBytes(@NonNull UUID storageUuid)
+            throws IOException {
+        return getAllocatableBytes(storageUuid, 0);
+    }
+
+    /** @hide */
+    @SystemApi
+    @WorkerThread
+    @SuppressLint("Doclava125")
+    public long getAllocatableBytes(@NonNull UUID storageUuid,
+            @RequiresPermission @AllocateFlags int flags) throws IOException {
+        try {
+            return mStorageManager.getAllocatableBytes(convert(storageUuid), flags,
+                    mContext.getOpPackageName());
+        } catch (ParcelableException e) {
+            e.maybeRethrow(IOException.class);
+            throw new RuntimeException(e);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /** @removed */
+    @Deprecated
+    @WorkerThread
+    @SuppressLint("Doclava125")
+    public long getAllocatableBytes(@NonNull File path,
+            @RequiresPermission @AllocateFlags int flags) throws IOException {
+        return getAllocatableBytes(getUuidForPath(path), flags);
+    }
+
+    /**
+     * Allocate the requested number of bytes for your application to use on the
+     * given storage volume. This will cause the system to delete any cached
+     * files necessary to satisfy your request.
+     * <p>
+     * Attempts to allocate disk space beyond the value returned by
+     * {@link #getAllocatableBytes(UUID, int)} will fail.
+     * <p>
+     * Since multiple apps can be running simultaneously, this method may be
+     * subject to race conditions. If possible, consider using
+     * {@link #allocateBytes(FileDescriptor, long, int)} which will guarantee
+     * that bytes are allocated to an opened file.
+     * <p>
+     * If you're progressively allocating an unbounded amount of storage space
+     * (such as when recording a video) you should avoid calling this method
+     * more than once every 60 seconds.
+     *
+     * @param storageUuid the UUID of the storage volume where you'd like to
+     *            allocate disk space. The UUID for a specific path can be
+     *            obtained using {@link #getUuidForPath(File)}.
+     * @param bytes the number of bytes to allocate.
+     * @throws IOException when the storage device isn't present, or when it
+     *             doesn't support allocating space, or if the device had
+     *             trouble allocating the requested space.
+     * @see #getAllocatableBytes(UUID, int)
+     */
+    @WorkerThread
+    public void allocateBytes(@NonNull UUID storageUuid, @BytesLong long bytes)
+            throws IOException {
+        allocateBytes(storageUuid, bytes, 0);
+    }
+
+    /** @hide */
+    @SystemApi
+    @WorkerThread
+    @SuppressLint("Doclava125")
+    public void allocateBytes(@NonNull UUID storageUuid, @BytesLong long bytes,
+            @RequiresPermission @AllocateFlags int flags) throws IOException {
+        try {
+            mStorageManager.allocateBytes(convert(storageUuid), bytes, flags,
+                    mContext.getOpPackageName());
+        } catch (ParcelableException e) {
+            e.maybeRethrow(IOException.class);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /** @removed */
+    @Deprecated
+    @WorkerThread
+    @SuppressLint("Doclava125")
+    public void allocateBytes(@NonNull File path, @BytesLong long bytes,
+            @RequiresPermission @AllocateFlags int flags) throws IOException {
+        allocateBytes(getUuidForPath(path), bytes, flags);
+    }
+
+    /**
+     * Allocate the requested number of bytes for your application to use in the
+     * given open file. This will cause the system to delete any cached files
+     * necessary to satisfy your request.
+     * <p>
+     * Attempts to allocate disk space beyond the value returned by
+     * {@link #getAllocatableBytes(UUID, int)} will fail.
+     * <p>
+     * This method guarantees that bytes have been allocated to the opened file,
+     * otherwise it will throw if fast allocation is not possible. Fast
+     * allocation is typically only supported in private app data directories,
+     * and on shared/external storage devices which are emulated.
+     * <p>
+     * If you're progressively allocating an unbounded amount of storage space
+     * (such as when recording a video) you should avoid calling this method
+     * more than once every 60 seconds.
+     *
+     * @param fd the open file that you'd like to allocate disk space for.
+     * @param bytes the number of bytes to allocate. This is the desired final
+     *            size of the open file. If the open file is smaller than this
+     *            requested size, it will be extended without modifying any
+     *            existing contents. If the open file is larger than this
+     *            requested size, it will be truncated.
+     * @throws IOException when the storage device isn't present, or when it
+     *             doesn't support allocating space, or if the device had
+     *             trouble allocating the requested space.
+     * @see #getAllocatableBytes(UUID, int)
+     * @see Environment#isExternalStorageEmulated(File)
+     */
+    @WorkerThread
+    public void allocateBytes(FileDescriptor fd, @BytesLong long bytes) throws IOException {
+        allocateBytes(fd, bytes, 0);
+    }
+
+    /** @hide */
+    @SystemApi
+    @WorkerThread
+    @SuppressLint("Doclava125")
+    public void allocateBytes(FileDescriptor fd, @BytesLong long bytes,
+            @RequiresPermission @AllocateFlags int flags) throws IOException {
+        final File file = ParcelFileDescriptor.getFile(fd);
+        for (int i = 0; i < 3; i++) {
+            try {
+                final long haveBytes = Os.fstat(fd).st_blocks * 512;
+                final long needBytes = bytes - haveBytes;
+
+                if (needBytes > 0) {
+                    allocateBytes(file, needBytes, flags);
+                }
+
+                Os.posix_fallocate(fd, 0, bytes);
+                return;
+            } catch (ErrnoException e) {
+                if (e.errno == OsConstants.ENOSPC) {
+                    Log.w(TAG, "Odd, not enough space; let's try again?");
+                    continue;
+                }
+                throw e.rethrowAsIOException();
+            }
+        }
+        throw new IOException(
+                "Well this is embarassing; we can't allocate " + bytes + " for " + file);
+    }
+
+    private static final String XATTR_CACHE_GROUP = "user.cache_group";
+    private static final String XATTR_CACHE_TOMBSTONE = "user.cache_tombstone";
+
+    /** {@hide} */
+    private static void setCacheBehavior(File path, String name, boolean enabled)
+            throws IOException {
+        if (!path.isDirectory()) {
+            throw new IOException("Cache behavior can only be set on directories");
+        }
+        if (enabled) {
+            try {
+                Os.setxattr(path.getAbsolutePath(), name,
+                        "1".getBytes(StandardCharsets.UTF_8), 0);
+            } catch (ErrnoException e) {
+                throw e.rethrowAsIOException();
+            }
+        } else {
+            try {
+                Os.removexattr(path.getAbsolutePath(), name);
+            } catch (ErrnoException e) {
+                if (e.errno != OsConstants.ENODATA) {
+                    throw e.rethrowAsIOException();
+                }
+            }
+        }
+    }
+
+    /** {@hide} */
+    private static boolean isCacheBehavior(File path, String name) throws IOException {
+        try {
+            Os.getxattr(path.getAbsolutePath(), name);
+            return true;
+        } catch (ErrnoException e) {
+            if (e.errno != OsConstants.ENODATA) {
+                throw e.rethrowAsIOException();
+            } else {
+                return false;
+            }
+        }
+    }
+
+    /**
+     * Enable or disable special cache behavior that treats this directory and
+     * its contents as an entire group.
+     * <p>
+     * When enabled and this directory is considered for automatic deletion by
+     * the OS, all contained files will either be deleted together, or not at
+     * all. This is useful when you have a directory that contains several
+     * related metadata files that depend on each other, such as movie file and
+     * a subtitle file.
+     * <p>
+     * When enabled, the <em>newest</em> {@link File#lastModified()} value of
+     * any contained files is considered the modified time of the entire
+     * directory.
+     * <p>
+     * This behavior can only be set on a directory, and it applies recursively
+     * to all contained files and directories.
+     */
+    public void setCacheBehaviorGroup(File path, boolean group) throws IOException {
+        setCacheBehavior(path, XATTR_CACHE_GROUP, group);
+    }
+
+    /**
+     * Read the current value set by
+     * {@link #setCacheBehaviorGroup(File, boolean)}.
+     */
+    public boolean isCacheBehaviorGroup(File path) throws IOException {
+        return isCacheBehavior(path, XATTR_CACHE_GROUP);
+    }
+
+    /** @removed */
+    @Deprecated
+    public void setCacheBehaviorAtomic(File path, boolean atomic) throws IOException {
+        setCacheBehaviorGroup(path, atomic);
+    }
+
+    /** @removed */
+    @Deprecated
+    public boolean isCacheBehaviorAtomic(File path) throws IOException {
+        return isCacheBehaviorGroup(path);
+    }
+
+    /**
+     * Enable or disable special cache behavior that leaves deleted cache files
+     * intact as tombstones.
+     * <p>
+     * When enabled and a file contained in this directory is automatically
+     * deleted by the OS, the file will be truncated to have a length of 0 bytes
+     * instead of being fully deleted. This is useful if you need to distinguish
+     * between a file that was deleted versus one that never existed.
+     * <p>
+     * This behavior can only be set on a directory, and it applies recursively
+     * to all contained files and directories.
+     * <p class="note">
+     * Note: this behavior is ignored completely if the user explicitly requests
+     * that all cached data be cleared.
+     * </p>
+     */
+    public void setCacheBehaviorTombstone(File path, boolean tombstone) throws IOException {
+        setCacheBehavior(path, XATTR_CACHE_TOMBSTONE, tombstone);
+    }
+
+    /**
+     * Read the current value set by
+     * {@link #setCacheBehaviorTombstone(File, boolean)}.
+     */
+    public boolean isCacheBehaviorTombstone(File path) throws IOException {
+        return isCacheBehavior(path, XATTR_CACHE_TOMBSTONE);
+    }
+
+    /** {@hide} */
+    public static UUID convert(String uuid) {
+        if (Objects.equals(uuid, UUID_PRIVATE_INTERNAL)) {
+            return UUID_DEFAULT;
+        } else if (Objects.equals(uuid, UUID_PRIMARY_PHYSICAL)) {
+            return UUID_PRIMARY_PHYSICAL_;
+        } else if (Objects.equals(uuid, UUID_SYSTEM)) {
+            return UUID_SYSTEM_;
+        } else {
+            return UUID.fromString(uuid);
+        }
+    }
+
+    /** {@hide} */
+    public static String convert(UUID storageUuid) {
+        if (UUID_DEFAULT.equals(storageUuid)) {
+            return UUID_PRIVATE_INTERNAL;
+        } else if (UUID_PRIMARY_PHYSICAL_.equals(storageUuid)) {
+            return UUID_PRIMARY_PHYSICAL;
+        } else if (UUID_SYSTEM_.equals(storageUuid)) {
+            return UUID_SYSTEM;
+        } else {
+            return storageUuid.toString();
+        }
+    }
+
+    private final Object mFuseAppLoopLock = new Object();
+
+    @GuardedBy("mFuseAppLoopLock")
+    private @Nullable FuseAppLoop mFuseAppLoop = null;
 
     /// Consts to match the password types in cryptfs.h
     /** @hide */
@@ -1315,7 +2020,7 @@ public class StorageManager {
     /** @hide */
     public static final int CRYPT_TYPE_PIN = 3;
 
-    // Constants for the data available via MountService.getField.
+    // Constants for the data available via StorageManagerService.getField.
     /** @hide */
     public static final String SYSTEM_LOCALE_KEY = "SystemLocale";
     /** @hide */

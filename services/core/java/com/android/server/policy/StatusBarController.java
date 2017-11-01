@@ -56,8 +56,8 @@ public class StatusBarController extends BarController {
         }
 
         @Override
-        public void onAppTransitionStartingLocked(IBinder openToken, IBinder closeToken,
-                final Animation openAnimation, final Animation closeAnimation) {
+        public int onAppTransitionStartingLocked(int transit, IBinder openToken,
+                IBinder closeToken, final Animation openAnimation, final Animation closeAnimation) {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
@@ -71,10 +71,11 @@ public class StatusBarController extends BarController {
                     }
                 }
             });
+            return 0;
         }
 
         @Override
-        public void onAppTransitionCancelledLocked() {
+        public void onAppTransitionCancelledLocked(int transit) {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {

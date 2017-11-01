@@ -21,7 +21,7 @@
     android:paddingStart="?attr/listPreferredItemPaddingStart"
     android:paddingEnd="?attr/listPreferredItemPaddingEnd"
     android:minWidth="196dip"
-    android:background="?attr/activatedBackgroundIndicator"
+    android:background="?attr/selectableItemBackground"
     android:orientation="vertical" >
 
     <LinearLayout

@@ -16,35 +16,68 @@
 
 #include "xml/XmlDom.h"
 
-#include <gtest/gtest.h>
 #include <sstream>
 #include <string>
 
+#include "test/Test.h"
+
 namespace aapt {
 
-constexpr const char* kXmlPreamble = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
+constexpr const char* kXmlPreamble =
+    "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
 
 TEST(XmlDomTest, Inflate) {
-    std::stringstream in(kXmlPreamble);
-    in << R"EOF(
-        <Layout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-            <TextView android:id="@+id/id"
-                      android:layout_width="wrap_content"
-                      android:layout_height="wrap_content" />
-        </Layout>
-    )EOF";
+  std::stringstream in(kXmlPreamble);
+  in << R"(
+      <Layout xmlns:android="http://schemas.android.com/apk/res/android"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content">
+        <TextView android:id="@+id/id"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+      </Layout>)";
 
-    const Source source = { "test.xml" };
-    StdErrDiagnostics diag;
-    std::unique_ptr<xml::XmlResource> doc = xml::inflate(&in, &diag, source);
-    ASSERT_NE(doc, nullptr);
+  const Source source("test.xml");
+  StdErrDiagnostics diag;
+  std::unique_ptr<xml::XmlResource> doc = xml::Inflate(&in, &diag, source);
+  ASSERT_NE(doc, nullptr);
 
-    xml::Namespace* ns = xml::nodeCast<xml::Namespace>(doc->root.get());
-    ASSERT_NE(ns, nullptr);
-    EXPECT_EQ(ns->namespaceUri, u"http://schemas.android.com/apk/res/android");
-    EXPECT_EQ(ns->namespacePrefix, u"android");
+  xml::Namespace* ns = xml::NodeCast<xml::Namespace>(doc->root.get());
+  ASSERT_NE(ns, nullptr);
+  EXPECT_EQ(ns->namespace_uri, xml::kSchemaAndroid);
+  EXPECT_EQ(ns->namespace_prefix, "android");
 }
 
-} // namespace aapt
+// Escaping is handled after parsing of the values for resource-specific values.
+TEST(XmlDomTest, ForwardEscapes) {
+  std::unique_ptr<xml::XmlResource> doc = test::BuildXmlDom(R"(
+      <element value="\?hello" pattern="\\d{5}">\\d{5}</element>)");
+
+  xml::Element* el = xml::FindRootElement(doc->root.get());
+  ASSERT_NE(nullptr, el);
+
+  xml::Attribute* attr = el->FindAttribute({}, "pattern");
+  ASSERT_NE(nullptr, attr);
+  EXPECT_EQ("\\\\d{5}", attr->value);
+
+  attr = el->FindAttribute({}, "value");
+  ASSERT_NE(nullptr, attr);
+  EXPECT_EQ("\\?hello", attr->value);
+
+  xml::Text* text = xml::NodeCast<xml::Text>(el->children[0].get());
+  ASSERT_NE(nullptr, text);
+  EXPECT_EQ("\\\\d{5}", text->text);
+}
+
+TEST(XmlDomTest, XmlEscapeSequencesAreParsed) {
+  std::unique_ptr<xml::XmlResource> doc = test::BuildXmlDom(R"(<element value="&quot;" />)");
+
+  xml::Element* el = xml::FindRootElement(doc.get());
+  ASSERT_NE(nullptr, el);
+
+  xml::Attribute* attr = el->FindAttribute({}, "value");
+  ASSERT_NE(nullptr, attr);
+  EXPECT_EQ("\"", attr->value);
+}
+
+}  // namespace aapt

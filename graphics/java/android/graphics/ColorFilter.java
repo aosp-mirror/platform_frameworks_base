@@ -14,12 +14,9 @@
  * limitations under the License.
  */
 
-// This file was generated from the C++ include file: SkColorFilter.h
-// Any changes made to this file will be discarded by the build.
-// To change this file, either edit the include, or device/tools/gluemaker/main.cpp, 
-// or one of the auxilary file specifications in device/tools/gluemaker.
-
 package android.graphics;
+
+import libcore.util.NativeAllocationRegistry;
 
 /**
  * A color filter can be used with a {@link Paint} to modify the color of
@@ -27,22 +24,53 @@ package android.graphics;
  * never be used directly.
  */
 public class ColorFilter {
-    /**
-     * Holds the pointer to the native SkColorFilter instance.
-     *
-     * @hide
-     */
-    public long native_instance;
 
-    @Override
-    protected void finalize() throws Throwable {
-        try {
-            super.finalize();
-        } finally {
-            destroyFilter(native_instance);
-            native_instance = 0;
+    private static class NoImagePreloadHolder {
+        public static final NativeAllocationRegistry sRegistry = new NativeAllocationRegistry(
+                ColorFilter.class.getClassLoader(), nativeGetFinalizer(), 50);
+    }
+
+    /**
+     * @deprecated Use subclass constructors directly instead.
+     */
+    @Deprecated
+    public ColorFilter() {}
+
+    /**
+     * Current native SkColorFilter instance.
+     */
+    private long mNativeInstance;
+    // Runnable to do immediate destruction
+    private Runnable mCleaner;
+
+    long createNativeInstance() {
+        return 0;
+    }
+
+    void discardNativeInstance() {
+        if (mNativeInstance != 0) {
+            mCleaner.run();
+            mCleaner = null;
+            mNativeInstance = 0;
         }
     }
 
-    static native void destroyFilter(long native_instance);
+    /** @hide */
+    public long getNativeInstance() {
+        if (mNativeInstance == 0) {
+            mNativeInstance = createNativeInstance();
+
+            if (mNativeInstance != 0) {
+                // Note: we must check for null here, since it's possible for createNativeInstance()
+                // to return nullptr if the native SkColorFilter would be a no-op at draw time.
+                // See native implementations of subclass create methods for more info.
+                mCleaner = NoImagePreloadHolder.sRegistry.registerNativeAllocation(
+                        this, mNativeInstance);
+            }
+        }
+        return mNativeInstance;
+
+    }
+
+    private static native long nativeGetFinalizer();
 }

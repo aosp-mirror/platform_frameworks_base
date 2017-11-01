@@ -80,6 +80,66 @@ public class StateMachineTest extends TestCase {
     }
 
     /**
+     * Tests {@link StateMachine#toString()}.
+     */
+    class StateMachineToStringTest extends StateMachine {
+        StateMachineToStringTest(String name) {
+            super(name);
+        }
+    }
+
+    class ExampleState extends State {
+        String mName;
+
+        ExampleState(String name) {
+            mName = name;
+        }
+
+        @Override
+        public String getName() {
+            return mName;
+        }
+    }
+
+    @SmallTest
+    public void testToStringSucceedsEvenIfMachineHasNoStates() throws Exception {
+        StateMachine stateMachine = new StateMachineToStringTest("TestStateMachine");
+        assertTrue(stateMachine.toString().contains("TestStateMachine"));
+    }
+
+    @SmallTest
+    public void testToStringSucceedsEvenIfStateHasNoName() throws Exception {
+        StateMachine stateMachine = new StateMachineToStringTest("TestStateMachine");
+        State exampleState = new ExampleState(null);
+        stateMachine.addState(exampleState);
+        stateMachine.setInitialState(exampleState);
+        stateMachine.start();
+        assertTrue(stateMachine.toString().contains("TestStateMachine"));
+        assertTrue(stateMachine.toString().contains("(null)"));
+    }
+
+    @SmallTest
+    public void testToStringIncludesMachineAndStateNames() throws Exception {
+        StateMachine stateMachine = new StateMachineToStringTest("TestStateMachine");
+        State exampleState = new ExampleState("exampleState");
+        stateMachine.addState(exampleState);
+        stateMachine.setInitialState(exampleState);
+        stateMachine.start();
+        assertTrue(stateMachine.toString().contains("TestStateMachine"));
+        assertTrue(stateMachine.toString().contains("exampleState"));
+    }
+
+    @SmallTest
+    public void testToStringDoesNotContainMultipleLines() throws Exception {
+        StateMachine stateMachine = new StateMachineToStringTest("TestStateMachine");
+        State exampleState = new ExampleState("exampleState");
+        stateMachine.addState(exampleState);
+        stateMachine.setInitialState(exampleState);
+        stateMachine.start();
+        assertFalse(stateMachine.toString().contains("\n"));
+    }
+
+    /**
      * Tests {@link StateMachine#quit()}.
      */
     class StateMachineQuitTest extends StateMachine {

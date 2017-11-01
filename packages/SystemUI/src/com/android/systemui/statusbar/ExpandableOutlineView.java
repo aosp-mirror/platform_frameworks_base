@@ -17,12 +17,14 @@
 package com.android.systemui.statusbar;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Outline;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewOutlineProvider;
+import com.android.systemui.R;
 
 /**
  * Like {@link ExpandableView}, but setting an outline for the height and clipping.
@@ -32,18 +34,26 @@ public abstract class ExpandableOutlineView extends ExpandableView {
     private final Rect mOutlineRect = new Rect();
     private boolean mCustomOutline;
     private float mOutlineAlpha = -1f;
+    private float mOutlineRadius;
 
-    ViewOutlineProvider mProvider = new ViewOutlineProvider() {
+    /**
+     * {@code true} if the children views of the {@link ExpandableOutlineView} are translated when
+     * it is moved. Otherwise, the translation is set on the {@code ExpandableOutlineView} itself.
+     */
+    protected boolean mShouldTranslateContents;
+
+    private final ViewOutlineProvider mProvider = new ViewOutlineProvider() {
         @Override
         public void getOutline(View view, Outline outline) {
-            int translation = (int) getTranslation();
+            int translation = mShouldTranslateContents ? (int) getTranslation() : 0;
             if (!mCustomOutline) {
-                outline.setRect(translation,
+                outline.setRoundRect(translation,
                         mClipTopAmount,
                         getWidth() + translation,
-                        Math.max(getActualHeight(), mClipTopAmount));
+                        Math.max(getActualHeight() - mClipBottomAmount, mClipTopAmount),
+                        mOutlineRadius);
             } else {
-                outline.setRect(mOutlineRect);
+                outline.setRoundRect(mOutlineRect, mOutlineRadius);
             }
             outline.setAlpha(mOutlineAlpha);
         }
@@ -52,6 +62,20 @@ public abstract class ExpandableOutlineView extends ExpandableView {
     public ExpandableOutlineView(Context context, AttributeSet attrs) {
         super(context, attrs);
         setOutlineProvider(mProvider);
+        initDimens();
+    }
+
+    private void initDimens() {
+        Resources res = getResources();
+        mShouldTranslateContents =
+                res.getBoolean(R.bool.config_translateNotificationContentsOnSwipe);
+        mOutlineRadius = res.getDimension(R.dimen.notification_shadow_radius);
+        setClipToOutline(res.getBoolean(R.bool.config_clipNotificationsToOutline));
+    }
+
+    public void onDensityOrFontScaleChanged() {
+        initDimens();
+        invalidateOutline();
     }
 
     @Override
@@ -63,6 +87,12 @@ public abstract class ExpandableOutlineView extends ExpandableView {
     @Override
     public void setClipTopAmount(int clipTopAmount) {
         super.setClipTopAmount(clipTopAmount);
+        invalidateOutline();
+    }
+
+    @Override
+    public void setClipBottomAmount(int clipBottomAmount) {
+        super.setClipBottomAmount(clipBottomAmount);
         invalidateOutline();
     }
 
@@ -97,13 +127,21 @@ public abstract class ExpandableOutlineView extends ExpandableView {
         if (mCustomOutline) {
             return;
         }
-        boolean hasOutline = true;
-        if (isChildInGroup()) {
-            hasOutline = isGroupExpanded() && !isGroupExpansionChanging();
-        } else if (isSummaryWithChildren()) {
-            hasOutline = !isGroupExpanded() || isGroupExpansionChanging();
-        }
+        boolean hasOutline = needsOutline();
         setOutlineProvider(hasOutline ? mProvider : null);
+    }
+
+    /**
+     * @return Whether the view currently needs an outline. This is usually {@code false} in case
+     * it doesn't have a background.
+     */
+    protected boolean needsOutline() {
+        if (isChildInGroup()) {
+            return isGroupExpanded() && !isGroupExpansionChanging();
+        } else if (isSummaryWithChildren()) {
+            return !isGroupExpanded() || isGroupExpansionChanging();
+        }
+        return true;
     }
 
     public boolean isOutlineShowing() {

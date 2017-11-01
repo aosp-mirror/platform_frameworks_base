@@ -18,6 +18,7 @@
 
 #include "jni.h"
 #include <nativehelper/JNIHelp.h>
+#include <cutils/log.h>
 #include "core_jni_helpers.h"
 
 #include <Interpolator.h>
@@ -62,6 +63,19 @@ static jlong createOvershootInterpolator(JNIEnv* env, jobject clazz, jfloat tens
     return reinterpret_cast<jlong>(new OvershootInterpolator(tension));
 }
 
+static jlong createPathInterpolator(JNIEnv* env, jobject clazz, jfloatArray jX, jfloatArray jY) {
+    jsize lenX = env->GetArrayLength(jX);
+    jsize lenY = env->GetArrayLength(jY);
+    LOG_ALWAYS_FATAL_IF(lenX != lenY || lenX <= 0, "Invalid path interpolator, x size: %d,"
+            " y size: %d", lenX, lenY);
+    std::vector<float> x(lenX);
+    std::vector<float> y(lenY);
+    env->GetFloatArrayRegion(jX, 0, lenX, x.data());
+    env->GetFloatArrayRegion(jY, 0, lenX, y.data());
+
+    return reinterpret_cast<jlong>(new PathInterpolator(std::move(x), std::move(y)));
+}
+
 static jlong createLutInterpolator(JNIEnv* env, jobject clazz, jfloatArray jlut) {
     jsize len = env->GetArrayLength(jlut);
     if (len <= 0) {
@@ -88,6 +102,7 @@ static const JNINativeMethod gMethods[] = {
     { "createDecelerateInterpolator", "(F)J", (void*) createDecelerateInterpolator },
     { "createLinearInterpolator", "()J", (void*) createLinearInterpolator },
     { "createOvershootInterpolator", "(F)J", (void*) createOvershootInterpolator },
+    { "createPathInterpolator", "([F[F)J", (void*) createPathInterpolator },
     { "createLutInterpolator", "([F)J", (void*) createLutInterpolator },
 };
 

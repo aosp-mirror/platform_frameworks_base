@@ -69,4 +69,12 @@ oneway interface IInCallAdapter {
     void putExtras(String callId, in Bundle extras);
 
     void removeExtras(String callId, in List<String> keys);
+
+    void sendRttRequest(String callId);
+
+    void respondToRttRequest(String callId, int id, boolean accept);
+
+    void stopRtt(String callId);
+
+    void setRttMode(String callId, int mode);
 }

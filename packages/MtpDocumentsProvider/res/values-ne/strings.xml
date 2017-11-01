@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--  Copyright (C) 2015 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_label" msgid="6271216747302322594">"MTP होस्ट"</string>
+    <string name="downloads_app_label" msgid="7120690641874849726">"डाउनलोडहरू"</string>
+    <string name="root_name" msgid="5819495383921089536">"<xliff:g id="DEVICE_MODEL">%1$s</xliff:g> <xliff:g id="STORAGE_NAME">%2$s</xliff:g>"</string>
+    <string name="accessing_notification_title" msgid="3030133609230917944">"<xliff:g id="DEVICE_MODEL">%1$s</xliff:g> बाट फाइलहरूमाथि पहुँच राख्दै"</string>
+    <string name="error_busy_device" msgid="3997316850357386589">"अर्को यन्त्र व्यस्त छ। त्यो यन्त्र उपलब्ध नभएसम्म तपाईं फाइल स्थानान्तरण गर्न सक्नुहुन्न।"</string>
+    <string name="error_locked_device" msgid="7557872102188356147">"कुनै फाइल भेट्टिएन। अर्को यन्त्र लक गरिएको हुन सक्छ। यदि त्यसो हो भने त्यसलाई अनलक गरेर फेरि प्रयास गर्नुहोस्।"</string>
+</resources>

@@ -30,4 +30,11 @@ public interface JobSchedulerInternal {
      * Returns a list of pending jobs scheduled by the system service.
      */
     List<JobInfo> getSystemScheduledPendingJobs();
+
+    /**
+     * These are for activity manager to communicate to use what is currently performing backups.
+     */
+    void addBackingUpUid(int uid);
+    void removeBackingUpUid(int uid);
+    void clearAllBackingUpUids();
 }

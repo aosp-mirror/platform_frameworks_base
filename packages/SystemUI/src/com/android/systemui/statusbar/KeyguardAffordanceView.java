@@ -21,7 +21,9 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ArgbEvaluator;
 import android.animation.PropertyValuesHolder;
 import android.animation.ValueAnimator;
+import android.annotation.Nullable;
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.CanvasProperty;
 import android.graphics.Color;
@@ -54,7 +56,7 @@ public class KeyguardAffordanceView extends ImageView {
 
     private final int mMinBackgroundRadius;
     private final Paint mCirclePaint;
-    private final int mInverseColor;
+    private final int mDarkIconColor;
     private final int mNormalColor;
     private final ArgbEvaluator mColorInterpolator;
     private final FlingAnimationUtils mFlingAnimationUtils;
@@ -78,6 +80,7 @@ public class KeyguardAffordanceView extends ImageView {
     private boolean mSupportHardware;
     private boolean mFinishing;
     private boolean mLaunchingAffordance;
+    private boolean mShouldTint = true;
 
     private CanvasProperty<Float> mHwCircleRadius;
     private CanvasProperty<Float> mHwCenterX;
@@ -124,17 +127,27 @@ public class KeyguardAffordanceView extends ImageView {
     public KeyguardAffordanceView(Context context, AttributeSet attrs, int defStyleAttr,
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+        TypedArray a = context.obtainStyledAttributes(attrs, android.R.styleable.ImageView);
+
         mCirclePaint = new Paint();
         mCirclePaint.setAntiAlias(true);
         mCircleColor = 0xffffffff;
         mCirclePaint.setColor(mCircleColor);
 
-        mNormalColor = 0xffffffff;
-        mInverseColor = 0xff000000;
+        mNormalColor = a.getColor(android.R.styleable.ImageView_tint, 0xffffffff);
+        mDarkIconColor = 0xff000000;
         mMinBackgroundRadius = mContext.getResources().getDimensionPixelSize(
                 R.dimen.keyguard_affordance_min_background_radius);
         mColorInterpolator = new ArgbEvaluator();
         mFlingAnimationUtils = new FlingAnimationUtils(mContext, 0.3f);
+
+        a.recycle();
+    }
+
+    public void setImageDrawable(@Nullable Drawable drawable, boolean tint) {
+        super.setImageDrawable(drawable);
+        mShouldTint = tint;
+        updateIconColor();
     }
 
     @Override
@@ -165,10 +178,11 @@ public class KeyguardAffordanceView extends ImageView {
     }
 
     private void updateIconColor() {
+        if (!mShouldTint) return;
         Drawable drawable = getDrawable().mutate();
         float alpha = mCircleRadius / mMinBackgroundRadius;
         alpha = Math.min(1.0f, alpha);
-        int color = (int) mColorInterpolator.evaluate(alpha, mNormalColor, mInverseColor);
+        int color = (int) mColorInterpolator.evaluate(alpha, mNormalColor, mDarkIconColor);
         drawable.setColorFilter(color, PorterDuff.Mode.SRC_ATOP);
     }
 

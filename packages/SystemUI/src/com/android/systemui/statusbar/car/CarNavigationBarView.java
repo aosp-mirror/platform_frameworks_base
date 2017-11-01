@@ -40,8 +40,8 @@ class CarNavigationBarView extends NavigationBarView {
 
     @Override
     public void onFinishInflate() {
-        mNavButtons = (LinearLayout) findViewById(R.id.nav_buttons);
-        mLightsOutButtons = (LinearLayout) findViewById(R.id.lights_out);
+        mNavButtons = findViewById(R.id.nav_buttons);
+        mLightsOutButtons = findViewById(R.id.lights_out);
     }
 
     public void addButton(CarNavigationButton button, CarNavigationButton lightsOutButton){

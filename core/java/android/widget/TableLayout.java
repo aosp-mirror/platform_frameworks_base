@@ -16,14 +16,15 @@
 
 package android.widget;
 
-import com.android.internal.R;
-
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.util.SparseBooleanArray;
 import android.view.View;
 import android.view.ViewGroup;
+
+import com.android.internal.R;
+
 import java.util.regex.Pattern;
 
 /**
@@ -710,6 +711,7 @@ public class TableLayout extends LinearLayout {
          */
         public LayoutParams(ViewGroup.LayoutParams p) {
             super(p);
+            width = MATCH_PARENT;
         }
 
         /**
@@ -717,6 +719,10 @@ public class TableLayout extends LinearLayout {
          */
         public LayoutParams(MarginLayoutParams source) {
             super(source);
+            width = MATCH_PARENT;
+            if (source instanceof TableLayout.LayoutParams) {
+                weight = ((TableLayout.LayoutParams) source).weight;
+            }
         }
 
         /**

@@ -16,6 +16,8 @@
 
 package android.test;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -24,40 +26,50 @@ import java.util.List;
 
 public class TestCaseUtilTest extends TestCase {
 
-    public void testGetTestCaseNamesForTestSuiteWithSuiteMethod() throws Exception {
+    @SuppressWarnings("unchecked")
+    private static List<String> getTestCaseNames(Test test) {
+        List<Test> tests = (List<Test>) TestCaseUtil.getTests(test, false);
+        List<String> testCaseNames = new ArrayList<>();
+        for (Test aTest : tests) {
+            testCaseNames.add(TestCaseUtil.getTestName(aTest));
+        }
+        return testCaseNames;
+    }
+
+    public void testGetTests_ForTestSuiteWithSuiteMethod() throws Exception {
         TestSuite testSuite = new TwoTestsInTestSuite();
 
-        List<String> testCaseNames = TestCaseUtil.getTestCaseNames(testSuite, false);
+        List<String> testCaseNames = getTestCaseNames(testSuite);
 
-        assertEquals(2, testCaseNames.size());
-        assertTrue(testCaseNames.get(0).endsWith("OneTestTestCase"));
-        assertTrue(testCaseNames.get(1).endsWith("OneTestTestSuite"));
+        assertEquals(0, testCaseNames.size());
     }
     
-    public void testGetTestCaseNamesForTestCaseWithSuiteMethod() throws Exception {
+    public void testGetTests_ForTestCaseWithSuiteMethod() throws Exception {
         TestCase testCase = new OneTestTestCaseWithSuite();
 
-        List<String> testCaseNames = TestCaseUtil.getTestCaseNames(testCase, false);
+        List<String> testCaseNames = getTestCaseNames(testCase);
 
         assertEquals(1, testCaseNames.size());
         assertTrue(testCaseNames.get(0).endsWith("testOne"));
     }
 
-    public void testCreateTestForTestCase() throws Exception {
-        Test test = TestCaseUtil.createTestSuite(OneTestTestCase.class);
-        assertEquals(1, test.countTestCases());
+    public void testInvokeSuiteMethodIfPossible_ForTestCase() throws Exception {
+        Test test = TestCaseUtil.invokeSuiteMethodIfPossible(OneTestTestCase.class, new HashSet<>());
+        assertNull(test);
     }
-    
-    public void testCreateTestForTestSuiteWithSuiteMethod() throws Exception {
-        Test test = TestCaseUtil.createTestSuite(TwoTestsInTestSuite.class);
+
+    public void testInvokeSuiteMethodIfPossible_ForTestSuiteWithSuiteMethod() throws Exception {
+        Test test = TestCaseUtil.invokeSuiteMethodIfPossible(TwoTestsInTestSuite.class, new HashSet<>());
+        assertNotNull(test);
         assertEquals(2, test.countTestCases());
     }
 
-    public void testCreateTestForTestCaseWithSuiteMethod() throws Exception {
-        Test test = TestCaseUtil.createTestSuite(OneTestTestCaseWithSuite.class);
+    public void testInvokeSuiteMethodIfPossible_ForTestCaseWithSuiteMethod() throws Exception {
+        Test test = TestCaseUtil.invokeSuiteMethodIfPossible(OneTestTestCaseWithSuite.class, new HashSet<>());
+        assertNotNull(test);
         assertEquals(1, test.countTestCases());
     }
-    
+
     public void testReturnEmptyStringForTestSuiteWithNoName() throws Exception {
         assertEquals("", TestCaseUtil.getTestName(new TestSuite()));
     }

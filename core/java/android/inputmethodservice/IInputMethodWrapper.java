@@ -61,7 +61,6 @@ class IInputMethodWrapper extends IInputMethod.Stub
     private static final int DO_SET_INPUT_CONTEXT = 20;
     private static final int DO_UNSET_INPUT_CONTEXT = 30;
     private static final int DO_START_INPUT = 32;
-    private static final int DO_RESTART_INPUT = 34;
     private static final int DO_CREATE_SESSION = 40;
     private static final int DO_SET_SESSION_ENABLED = 45;
     private static final int DO_REVOKE_SESSION = 50;
@@ -164,26 +163,17 @@ class IInputMethodWrapper extends IInputMethod.Stub
                 inputMethod.unbindInput();
                 return;
             case DO_START_INPUT: {
-                SomeArgs args = (SomeArgs)msg.obj;
-                int missingMethods = msg.arg1;
-                IInputContext inputContext = (IInputContext)args.arg1;
-                InputConnection ic = inputContext != null
+                final SomeArgs args = (SomeArgs) msg.obj;
+                final int missingMethods = msg.arg1;
+                final boolean restarting = msg.arg2 != 0;
+                final IBinder startInputToken = (IBinder) args.arg1;
+                final IInputContext inputContext = (IInputContext) args.arg2;
+                final EditorInfo info = (EditorInfo) args.arg3;
+                final InputConnection ic = inputContext != null
                         ? new InputConnectionWrapper(mTarget, inputContext, missingMethods) : null;
-                EditorInfo info = (EditorInfo)args.arg2;
                 info.makeCompatible(mTargetSdkVersion);
-                inputMethod.startInput(ic, info);
-                args.recycle();
-                return;
-            }
-            case DO_RESTART_INPUT: {
-                SomeArgs args = (SomeArgs)msg.obj;
-                int missingMethods = msg.arg1;
-                IInputContext inputContext = (IInputContext)args.arg1;
-                InputConnection ic = inputContext != null
-                        ? new InputConnectionWrapper(mTarget, inputContext, missingMethods) : null;
-                EditorInfo info = (EditorInfo)args.arg2;
-                info.makeCompatible(mTargetSdkVersion);
-                inputMethod.restartInput(ic, info);
+                inputMethod.dispatchStartInputWithToken(ic, info, restarting /* restarting */,
+                        startInputToken);
                 args.recycle();
                 return;
             }
@@ -263,19 +253,11 @@ class IInputMethodWrapper extends IInputMethod.Stub
     }
 
     @Override
-    public void startInput(IInputContext inputContext,
+    public void startInput(IBinder startInputToken, IInputContext inputContext,
             @InputConnectionInspector.MissingMethodFlags final int missingMethods,
-            EditorInfo attribute) {
-        mCaller.executeOrSendMessage(mCaller.obtainMessageIOO(DO_START_INPUT,
-                missingMethods, inputContext, attribute));
-    }
-
-    @Override
-    public void restartInput(IInputContext inputContext,
-            @InputConnectionInspector.MissingMethodFlags final int missingMethods,
-            EditorInfo attribute) {
-        mCaller.executeOrSendMessage(mCaller.obtainMessageIOO(DO_RESTART_INPUT,
-                missingMethods, inputContext, attribute));
+            EditorInfo attribute, boolean restarting) {
+        mCaller.executeOrSendMessage(mCaller.obtainMessageIIOOO(DO_START_INPUT,
+                missingMethods, restarting ? 1 : 0, startInputToken, inputContext, attribute));
     }
 
     @Override

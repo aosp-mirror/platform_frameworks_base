@@ -19,10 +19,8 @@ package android.app.admin;
 import android.annotation.IntDef;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.PersistableBundle;
 
 import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
@@ -49,25 +47,46 @@ public class SystemUpdatePolicy implements Parcelable {
      * Unknown policy type, used only internally.
      */
     private static final int TYPE_UNKNOWN = -1;
+
     /**
      * Install system update automatically as soon as one is available.
      */
     public static final int TYPE_INSTALL_AUTOMATIC = 1;
 
     /**
-     * Install system update automatically within a daily maintenance window, for a maximum of 30
-     * days. After the expiration the policy will no longer be effective and the system should
-     * revert back to its normal behavior as if no policy were set. The only exception is
-     * {@link #TYPE_INSTALL_AUTOMATIC} which should still take effect to install system update
-     * immediately.
+     * Install system update automatically within a daily maintenance window. An update can be
+     * delayed for a maximum of 30 days, after which the policy will no longer be effective and the
+     * system will revert back to its normal behavior as if no policy were set.
+     *
+     * <p>After this policy expires, resetting it to any policy other than
+     * {@link #TYPE_INSTALL_AUTOMATIC} will produce no effect, as the 30-day maximum delay has
+     * already been used up.
+     * The {@link #TYPE_INSTALL_AUTOMATIC} policy will still take effect to install the delayed
+     * system update immediately.
+     *
+     * <p>Re-applying this policy or changing it to {@link #TYPE_POSTPONE} within the 30-day period
+     * will <i>not</i> extend policy expiration.
+     * However, the expiration will be recalculated when a new system update is made available.
      */
     public static final int TYPE_INSTALL_WINDOWED = 2;
 
     /**
-     * Incoming system update will be blocked for a maximum of 30 days, after which the system
-     * should revert back to its normal behavior as if no policy were set. The only exception is
-     * {@link #TYPE_INSTALL_AUTOMATIC} which should still take effect to install system update
-     * immediately.
+     * Incoming system updates (except for security updates) will be blocked for a maximum of 30
+     * days, after which the policy will no longer be effective and the system will revert back to
+     * its normal behavior as if no policy were set.
+     *
+     * <p><b>Note:</b> security updates (e.g. monthly security patches) may <i>not</i> be affected
+     * by this policy, depending on the policy set by the device manufacturer and carrier.
+     *
+     * <p>After this policy expires, resetting it to any policy other than
+     * {@link #TYPE_INSTALL_AUTOMATIC} will produce no effect, as the 30-day maximum delay has
+     * already been used up.
+     * The {@link #TYPE_INSTALL_AUTOMATIC} policy will still take effect to install the delayed
+     * system update immediately.
+     *
+     * <p>Re-applying this policy or changing it to {@link #TYPE_INSTALL_WINDOWED} within the 30-day
+     * period will <i>not</i> extend policy expiration.
+     * However, the expiration will be recalculated when a new system update is made available.
      */
     public static final int TYPE_POSTPONE = 3;
 
@@ -105,11 +124,12 @@ public class SystemUpdatePolicy implements Parcelable {
     /**
      * Create a policy object and set it to: new system update will only be installed automatically
      * when the system clock is inside a daily maintenance window. If the start and end times are
-     * the same, the window is considered to include the WHOLE 24 hours, that is, updates can
-     * install at any time. If the given window in invalid, a {@link IllegalArgumentException} will
-     * be thrown. If start time is later than end time, the window is considered spanning midnight,
-     * i.e. end time donates a time on the next day. The maintenance window will last for 30 days,
-     * after which the system should revert back to its normal behavior as if no policy were set.
+     * the same, the window is considered to include the <i>whole 24 hours</i>. That is, updates can
+     * install at any time. If the given window in invalid, an {@link IllegalArgumentException}
+     * will be thrown. If start time is later than end time, the window is considered spanning
+     * midnight (i.e. the end time denotes a time on the next day). The maintenance window will last
+     * for 30 days, after which the system will revert back to its normal behavior as if no policy
+     * were set.
      *
      * @param startTime the start of the maintenance window, measured as the number of minutes from
      *            midnight in the device's local time. Must be in the range of [0, 1440).
@@ -131,8 +151,11 @@ public class SystemUpdatePolicy implements Parcelable {
 
     /**
      * Create a policy object and set it to block installation for a maximum period of 30 days.
-     * After expiration the system should revert back to its normal behavior as if no policy were
+     * After expiration the system will revert back to its normal behavior as if no policy were
      * set.
+     *
+     * <p><b>Note: </b> security updates (e.g. monthly security patches) will <i>not</i> be affected
+     * by this policy.
      *
      * @see #TYPE_POSTPONE
      */

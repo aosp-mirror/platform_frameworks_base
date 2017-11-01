@@ -18,7 +18,7 @@
 
 //#define LOG_NDEBUG 0
 
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 
 #include <android_runtime/AndroidRuntime.h>
 #include <utils/Log.h>
@@ -31,7 +31,7 @@
 #include "android_view_KeyEvent.h"
 #include "android_view_MotionEvent.h"
 
-#include <ScopedLocalRef.h>
+#include <nativehelper/ScopedLocalRef.h>
 
 #include "core_jni_helpers.h"
 
@@ -233,8 +233,9 @@ status_t NativeInputEventReceiver::consumeEvents(JNIEnv* env,
     for (;;) {
         uint32_t seq;
         InputEvent* inputEvent;
+        int32_t displayId;
         status_t status = mInputConsumer.consume(&mInputEventFactory,
-                consumeBatches, frameTime, &seq, &inputEvent);
+                consumeBatches, frameTime, &seq, &inputEvent, &displayId);
         if (status) {
             if (status == WOULD_BLOCK) {
                 if (!skipCallbacks && !mBatchedInputEventPending
@@ -311,7 +312,8 @@ status_t NativeInputEventReceiver::consumeEvents(JNIEnv* env,
                     ALOGD("channel '%s' ~ Dispatching input event.", getInputChannelName());
                 }
                 env->CallVoidMethod(receiverObj.get(),
-                        gInputEventReceiverClassInfo.dispatchInputEvent, seq, inputEventObj);
+                        gInputEventReceiverClassInfo.dispatchInputEvent, seq, inputEventObj,
+                        displayId);
                 if (env->ExceptionCheck()) {
                     ALOGE("Exception dispatching input event.");
                     skipCallbacks = true;
@@ -417,7 +419,7 @@ int register_android_view_InputEventReceiver(JNIEnv* env) {
 
     gInputEventReceiverClassInfo.dispatchInputEvent = GetMethodIDOrDie(env,
             gInputEventReceiverClassInfo.clazz,
-            "dispatchInputEvent", "(ILandroid/view/InputEvent;)V");
+            "dispatchInputEvent", "(ILandroid/view/InputEvent;I)V");
     gInputEventReceiverClassInfo.dispatchBatchedInputEventPending = GetMethodIDOrDie(env,
             gInputEventReceiverClassInfo.clazz, "dispatchBatchedInputEventPending", "()V");
 

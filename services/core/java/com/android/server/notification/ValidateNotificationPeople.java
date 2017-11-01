@@ -31,18 +31,21 @@ import android.provider.ContactsContract.Contacts;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.Log;
 import android.util.LruCache;
 import android.util.Slog;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
 import android.os.SystemClock;
-import com.android.internal.logging.MetricsLogger;
 
 /**
  * This {@link NotificationSignalExtractor} attempts to validate
@@ -157,7 +160,8 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
         if (context == null) {
             return NONE;
         }
-        final PeopleRankingReconsideration prr = validatePeople(context, key, extras, affinityOut);
+        final PeopleRankingReconsideration prr =
+                validatePeople(context, key, extras, null, affinityOut);
         float affinity = affinityOut[0];
 
         if (prr != null) {
@@ -207,7 +211,8 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
         final String key = record.getKey();
         final Bundle extras = record.getNotification().extras;
         final float[] affinityOut = new float[1];
-        final PeopleRankingReconsideration rr = validatePeople(context, key, extras, affinityOut);
+        final PeopleRankingReconsideration rr =
+                validatePeople(context, key, extras, record.getPeopleOverride(), affinityOut);
         final float affinity = affinityOut[0];
         record.setContactAffinity(affinity);
         if (rr == null) {
@@ -220,22 +225,22 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
     }
 
     private PeopleRankingReconsideration validatePeople(Context context, String key, Bundle extras,
-            float[] affinityOut) {
+            List<String> peopleOverride, float[] affinityOut) {
         long start = SystemClock.elapsedRealtime();
         float affinity = NONE;
         if (extras == null) {
             return null;
         }
-
-        final String[] people = getExtraPeople(extras);
-        if (people == null || people.length == 0) {
-            return null;
+        final Set<String> people = new ArraySet<>(peopleOverride);
+        final String[] notificationPeople = getExtraPeople(extras);
+        if (notificationPeople != null ) {
+            people.addAll(Arrays.asList(getExtraPeople(extras)));
         }
 
         if (VERBOSE) Slog.i(TAG, "Validating: " + key + " for " + context.getUserId());
         final LinkedList<String> pendingLookups = new LinkedList<String>();
-        for (int personIdx = 0; personIdx < people.length && personIdx < MAX_PEOPLE; personIdx++) {
-            final String handle = people[personIdx];
+        int personIdx = 0;
+        for (String handle : people) {
             if (TextUtils.isEmpty(handle)) continue;
 
             synchronized (mPeopleCache) {
@@ -250,13 +255,13 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
                     affinity = Math.max(affinity, lookupResult.getAffinity());
                 }
             }
+            if (++personIdx == MAX_PEOPLE) {
+                break;
+            }
         }
 
         // record the best available data, so far:
         affinityOut[0] = affinity;
-
-        MetricsLogger.histogram(mBaseContext, "validate_people_cache_latency",
-                (int) (SystemClock.elapsedRealtime() - start));
 
         if (pendingLookups.isEmpty()) {
             if (VERBOSE) Slog.i(TAG, "final affinity: " + affinity);
@@ -476,9 +481,6 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
                 mUsageStats.registerPeopleAffinity(mRecord, mContactAffinity > NONE,
                         mContactAffinity == STARRED_CONTACT, false /* cached */);
             }
-
-            MetricsLogger.histogram(mBaseContext, "validate_people_lookup_latency",
-                    (int) (SystemClock.elapsedRealtime() - start));
         }
 
         @Override

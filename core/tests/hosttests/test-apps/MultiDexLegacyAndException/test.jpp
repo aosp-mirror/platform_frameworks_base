@@ -1,3 +1,0 @@
-test:
-  @@com.android.jack.annotations.ForceInMainDex
-  class com.android.multidexlegacyandexception.Test

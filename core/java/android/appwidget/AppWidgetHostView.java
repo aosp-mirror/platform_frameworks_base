@@ -347,13 +347,13 @@ public class AppWidgetHostView extends FrameLayout {
     }
 
     /**
-     * Sets an executor which can be used for asynchronously inflating and applying the remoteviews.
-     * @see {@link RemoteViews#applyAsync(Context, ViewGroup, RemoteViews.OnViewAppliedListener, Executor)}
+     * Sets an executor which can be used for asynchronously inflating. CPU intensive tasks like
+     * view inflation or loading images will be performed on the executor. The updates will still
+     * be applied on the UI thread.
      *
      * @param executor the executor to use or null.
-     * @hide
      */
-    public void setAsyncExecutor(Executor executor) {
+    public void setExecutor(Executor executor) {
         if (mLastExecutionSignal != null) {
             mLastExecutionSignal.cancel();
             mLastExecutionSignal = null;
@@ -377,13 +377,13 @@ public class AppWidgetHostView extends FrameLayout {
      * AppWidget provider. Will animate into these new views as needed
      */
     public void updateAppWidget(RemoteViews remoteViews) {
-        applyRemoteViews(remoteViews);
+        applyRemoteViews(remoteViews, true);
     }
 
     /**
      * @hide
      */
-    protected void applyRemoteViews(RemoteViews remoteViews) {
+    protected void applyRemoteViews(RemoteViews remoteViews, boolean useAsyncIfPossible) {
         if (LOGD) Log.d(TAG, "updateAppWidget called mOld=" + mOld);
 
         boolean recycled = false;
@@ -423,7 +423,7 @@ public class AppWidgetHostView extends FrameLayout {
             mLayoutId = -1;
             mViewMode = VIEW_MODE_DEFAULT;
         } else {
-            if (mAsyncExecutor != null) {
+            if (mAsyncExecutor != null && useAsyncIfPossible) {
                 inflateAsync(remoteViews);
                 return;
             }
@@ -498,8 +498,13 @@ public class AppWidgetHostView extends FrameLayout {
     private void updateContentDescription(AppWidgetProviderInfo info) {
         if (info != null) {
             LauncherApps launcherApps = getContext().getSystemService(LauncherApps.class);
-            ApplicationInfo appInfo = launcherApps.getApplicationInfo(
-                    info.provider.getPackageName(), 0, info.getProfile());
+            ApplicationInfo appInfo = null;
+            try {
+                appInfo = launcherApps.getApplicationInfo(
+                        info.provider.getPackageName(), 0, info.getProfile());
+            } catch (NameNotFoundException e) {
+                // ignore -- use null.
+            }
             if (appInfo != null &&
                     (appInfo.flags & ApplicationInfo.FLAG_SUSPENDED) != 0) {
                 setContentDescription(

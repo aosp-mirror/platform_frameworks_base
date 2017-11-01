@@ -20,9 +20,9 @@ import android.content.Context;
 import android.os.UserHandle;
 
 import com.android.internal.content.PackageMonitor;
-import com.android.internal.os.BackgroundThread;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.PackagesChangedEvent;
+import com.android.systemui.recents.misc.ForegroundThread;
 
 /**
  * The package monitor listens for changes from PackageManager to update the contents of the
@@ -36,7 +36,7 @@ public class RecentsPackageMonitor extends PackageMonitor {
             // We register for events from all users, but will cross-reference them with
             // packages for the current user and any profiles they have.  Ensure that events are
             // handled in a background thread.
-            register(context, BackgroundThread.get().getLooper(), UserHandle.ALL, true);
+            register(context, ForegroundThread.get().getLooper(), UserHandle.ALL, true);
         } catch (IllegalStateException e) {
             e.printStackTrace();
         }

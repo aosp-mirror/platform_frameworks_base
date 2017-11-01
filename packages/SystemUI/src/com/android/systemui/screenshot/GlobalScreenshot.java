@@ -21,6 +21,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
+import android.app.admin.DevicePolicyManager;
 import android.app.Notification;
 import android.app.Notification.BigPictureStyle;
 import android.app.NotificationManager;
@@ -46,8 +47,10 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Process;
+import android.os.UserHandle;
 import android.provider.MediaStore;
 import android.util.DisplayMetrics;
+import android.util.Slog;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -59,8 +62,10 @@ import android.view.WindowManager;
 import android.view.animation.Interpolator;
 import android.widget.ImageView;
 
+import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
+import com.android.systemui.util.NotificationChannels;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -96,6 +101,7 @@ class SaveImageInBackgroundData {
  * An AsyncTask that saves an image to the media store in the background.
  */
 class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
+    private static final String TAG = "SaveImageInBackgroundTask";
 
     private static final String SCREENSHOTS_DIR_NAME = "Screenshots";
     private static final String SCREENSHOT_FILE_NAME_TEMPLATE = "Screenshot_%s.png";
@@ -176,18 +182,19 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
                 .bigPicture(picture.createAshmemBitmap());
 
         // The public notification will show similar info but with the actual screenshot omitted
-        mPublicNotificationBuilder = new Notification.Builder(context)
-                .setContentTitle(r.getString(R.string.screenshot_saving_title))
-                .setContentText(r.getString(R.string.screenshot_saving_text))
-                .setSmallIcon(R.drawable.stat_notify_image)
-                .setCategory(Notification.CATEGORY_PROGRESS)
-                .setWhen(now)
-                .setShowWhen(true)
-                .setColor(r.getColor(
-                        com.android.internal.R.color.system_notification_accent_color));
+        mPublicNotificationBuilder =
+                new Notification.Builder(context, NotificationChannels.SCREENSHOTS)
+                        .setContentTitle(r.getString(R.string.screenshot_saving_title))
+                        .setContentText(r.getString(R.string.screenshot_saving_text))
+                        .setSmallIcon(R.drawable.stat_notify_image)
+                        .setCategory(Notification.CATEGORY_PROGRESS)
+                        .setWhen(now)
+                        .setShowWhen(true)
+                        .setColor(r.getColor(
+                                com.android.internal.R.color.system_notification_accent_color));
         SystemUI.overrideNotificationAppName(context, mPublicNotificationBuilder);
 
-        mNotificationBuilder = new Notification.Builder(context)
+        mNotificationBuilder = new Notification.Builder(context, NotificationChannels.SCREENSHOTS)
             .setTicker(r.getString(R.string.screenshot_saving_ticker)
                     + (mTickerAddSpace ? " " : ""))
             .setContentTitle(r.getString(R.string.screenshot_saving_title))
@@ -201,7 +208,8 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
         mNotificationBuilder.setFlag(Notification.FLAG_NO_CLEAR, true);
         SystemUI.overrideNotificationAppName(context, mNotificationBuilder);
 
-        mNotificationManager.notify(R.id.notification_screenshot, mNotificationBuilder.build());
+        mNotificationManager.notify(SystemMessage.NOTE_GLOBAL_SCREENSHOT,
+                mNotificationBuilder.build());
 
         /**
          * NOTE: The following code prepares the notification builder for updating the notification
@@ -297,6 +305,7 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
         } catch (Exception e) {
             // IOException/UnsupportedOperationException may be thrown if external storage is not
             // mounted
+            Slog.e(TAG, "unable to save screenshot", e);
             mParams.clearImage();
             mParams.errorMsgResId = R.string.screenshot_failed_to_save_text;
         }
@@ -323,7 +332,8 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
             // Create the intent to show the screenshot in gallery
             Intent launchIntent = new Intent(Intent.ACTION_VIEW);
             launchIntent.setDataAndType(mParams.imageUri, "image/png");
-            launchIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            launchIntent.setFlags(
+                    Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
             final long now = System.currentTimeMillis();
 
@@ -347,7 +357,8 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
                 .setPublicVersion(mPublicNotificationBuilder.build())
                 .setFlag(Notification.FLAG_NO_CLEAR, false);
 
-            mNotificationManager.notify(R.id.notification_screenshot, mNotificationBuilder.build());
+            mNotificationManager.notify(SystemMessage.NOTE_GLOBAL_SCREENSHOT,
+                    mNotificationBuilder.build());
         }
         mParams.finisher.run();
         mParams.clearContext();
@@ -363,7 +374,7 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
         mParams.clearContext();
 
         // Cancel the posted notification
-        mNotificationManager.cancel(R.id.notification_screenshot);
+        mNotificationManager.cancel(SystemMessage.NOTE_GLOBAL_SCREENSHOT);
     }
 }
 
@@ -371,8 +382,6 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
  * An AsyncTask that deletes an image from the media store in the background.
  */
 class DeleteImageInBackgroundTask extends AsyncTask<Uri, Void, Void> {
-    private static final String TAG = "DeleteImageInBackgroundTask";
-
     private Context mContext;
 
     DeleteImageInBackgroundTask(Context context) {
@@ -570,7 +579,8 @@ class GlobalScreenshot {
         if (requiresRotation) {
             // Rotate the screenshot to the current orientation
             Bitmap ss = Bitmap.createBitmap(mDisplayMetrics.widthPixels,
-                    mDisplayMetrics.heightPixels, Bitmap.Config.ARGB_8888);
+                    mDisplayMetrics.heightPixels, Bitmap.Config.ARGB_8888,
+                    mScreenBitmap.hasAlpha(), mScreenBitmap.getColorSpace());
             Canvas c = new Canvas(ss);
             c.translate(ss.getWidth() / 2, ss.getHeight() / 2);
             c.rotate(degrees);
@@ -849,7 +859,7 @@ class GlobalScreenshot {
         String errorMsg = r.getString(msgResId);
 
         // Repurpose the existing notification to notify the user of the error
-        Notification.Builder b = new Notification.Builder(context)
+        Notification.Builder b = new Notification.Builder(context, NotificationChannels.ALERTS)
             .setTicker(r.getString(R.string.screenshot_failed_title))
             .setContentTitle(r.getString(R.string.screenshot_failed_title))
             .setContentText(errorMsg)
@@ -860,12 +870,22 @@ class GlobalScreenshot {
             .setAutoCancel(true)
             .setColor(context.getColor(
                         com.android.internal.R.color.system_notification_accent_color));
+        final DevicePolicyManager dpm = (DevicePolicyManager) context.getSystemService(
+                Context.DEVICE_POLICY_SERVICE);
+        final Intent intent = dpm.createAdminSupportIntent(
+                DevicePolicyManager.POLICY_DISABLE_SCREEN_CAPTURE);
+        if (intent != null) {
+            final PendingIntent pendingIntent = PendingIntent.getActivityAsUser(
+                    context, 0, intent, 0, null, UserHandle.CURRENT);
+            b.setContentIntent(pendingIntent);
+        }
+
         SystemUI.overrideNotificationAppName(context, b);
 
         Notification n = new Notification.BigTextStyle(b)
                 .bigText(errorMsg)
                 .build();
-        nManager.notify(R.id.notification_screenshot, n);
+        nManager.notify(SystemMessage.NOTE_GLOBAL_SCREENSHOT, n);
     }
 
     /**
@@ -877,7 +897,7 @@ class GlobalScreenshot {
             // Clear the notification
             final NotificationManager nm =
                     (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-            nm.cancel(R.id.notification_screenshot);
+            nm.cancel(SystemMessage.NOTE_GLOBAL_SCREENSHOT);
         }
     }
 
@@ -895,7 +915,7 @@ class GlobalScreenshot {
             final NotificationManager nm =
                     (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
             final Uri uri = Uri.parse(intent.getStringExtra(SCREENSHOT_URI_ID));
-            nm.cancel(R.id.notification_screenshot);
+            nm.cancel(SystemMessage.NOTE_GLOBAL_SCREENSHOT);
 
             // And delete the image from the media store
             new DeleteImageInBackgroundTask(context).execute(uri);

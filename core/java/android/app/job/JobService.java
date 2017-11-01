@@ -60,161 +60,24 @@ public abstract class JobService extends Service {
     public static final String PERMISSION_BIND =
             "android.permission.BIND_JOB_SERVICE";
 
-    /**
-     * Identifier for a message that will result in a call to
-     * {@link #onStartJob(android.app.job.JobParameters)}.
-     */
-    private static final int MSG_EXECUTE_JOB = 0;
-    /**
-     * Message that will result in a call to {@link #onStopJob(android.app.job.JobParameters)}.
-     */
-    private static final int MSG_STOP_JOB = 1;
-    /**
-     * Message that the client has completed execution of this job.
-     */
-    private static final int MSG_JOB_FINISHED = 2;
-
-    /** Lock object for {@link #mHandler}. */
-    private final Object mHandlerLock = new Object();
-
-    /**
-     * Handler we post jobs to. Responsible for calling into the client logic, and handling the
-     * callback to the system.
-     */
-    @GuardedBy("mHandlerLock")
-    JobHandler mHandler;
-
-    static final class JobInterface extends IJobService.Stub {
-        final WeakReference<JobService> mService;
-
-        JobInterface(JobService service) {
-            mService = new WeakReference<>(service);
-        }
-
-        @Override
-        public void startJob(JobParameters jobParams) throws RemoteException {
-            JobService service = mService.get();
-            if (service != null) {
-                service.ensureHandler();
-                Message m = Message.obtain(service.mHandler, MSG_EXECUTE_JOB, jobParams);
-                m.sendToTarget();
-            }
-        }
-
-        @Override
-        public void stopJob(JobParameters jobParams) throws RemoteException {
-            JobService service = mService.get();
-            if (service != null) {
-                service.ensureHandler();
-                Message m = Message.obtain(service.mHandler, MSG_STOP_JOB, jobParams);
-                m.sendToTarget();
-            }
-
-        }
-    }
-
-    IJobService mBinder;
-
-    /** @hide */
-    void ensureHandler() {
-        synchronized (mHandlerLock) {
-            if (mHandler == null) {
-                mHandler = new JobHandler(getMainLooper());
-            }
-        }
-    }
-
-    /**
-     * Runs on application's main thread - callbacks are meant to offboard work to some other
-     * (app-specified) mechanism.
-     * @hide
-     */
-    class JobHandler extends Handler {
-        JobHandler(Looper looper) {
-            super(looper);
-        }
-
-        @Override
-        public void handleMessage(Message msg) {
-            final JobParameters params = (JobParameters) msg.obj;
-            switch (msg.what) {
-                case MSG_EXECUTE_JOB:
-                    try {
-                        boolean workOngoing = JobService.this.onStartJob(params);
-                        ackStartMessage(params, workOngoing);
-                    } catch (Exception e) {
-                        Log.e(TAG, "Error while executing job: " + params.getJobId());
-                        throw new RuntimeException(e);
-                    }
-                    break;
-                case MSG_STOP_JOB:
-                    try {
-                        boolean ret = JobService.this.onStopJob(params);
-                        ackStopMessage(params, ret);
-                    } catch (Exception e) {
-                        Log.e(TAG, "Application unable to handle onStopJob.", e);
-                        throw new RuntimeException(e);
-                    }
-                    break;
-                case MSG_JOB_FINISHED:
-                    final boolean needsReschedule = (msg.arg2 == 1);
-                    IJobCallback callback = params.getCallback();
-                    if (callback != null) {
-                        try {
-                            callback.jobFinished(params.getJobId(), needsReschedule);
-                        } catch (RemoteException e) {
-                            Log.e(TAG, "Error reporting job finish to system: binder has gone" +
-                                    "away.");
-                        }
-                    } else {
-                        Log.e(TAG, "finishJob() called for a nonexistent job id.");
-                    }
-                    break;
-                default:
-                    Log.e(TAG, "Unrecognised message received.");
-                    break;
-            }
-        }
-
-        private void ackStartMessage(JobParameters params, boolean workOngoing) {
-            final IJobCallback callback = params.getCallback();
-            final int jobId = params.getJobId();
-            if (callback != null) {
-                try {
-                     callback.acknowledgeStartMessage(jobId, workOngoing);
-                } catch(RemoteException e) {
-                    Log.e(TAG, "System unreachable for starting job.");
-                }
-            } else {
-                if (Log.isLoggable(TAG, Log.DEBUG)) {
-                    Log.d(TAG, "Attempting to ack a job that has already been processed.");
-                }
-            }
-        }
-
-        private void ackStopMessage(JobParameters params, boolean reschedule) {
-            final IJobCallback callback = params.getCallback();
-            final int jobId = params.getJobId();
-            if (callback != null) {
-                try {
-                    callback.acknowledgeStopMessage(jobId, reschedule);
-                } catch(RemoteException e) {
-                    Log.e(TAG, "System unreachable for stopping job.");
-                }
-            } else {
-                if (Log.isLoggable(TAG, Log.DEBUG)) {
-                    Log.d(TAG, "Attempting to ack a job that has already been processed.");
-                }
-            }
-        }
-    }
+    private JobServiceEngine mEngine;
 
     /** @hide */
     public final IBinder onBind(Intent intent) {
-        if (mBinder == null) {
-            mBinder = new JobInterface(this);
+        if (mEngine == null) {
+            mEngine = new JobServiceEngine(this) {
+                @Override
+                public boolean onStartJob(JobParameters params) {
+                    return JobService.this.onStartJob(params);
+                }
+
+                @Override
+                public boolean onStopJob(JobParameters params) {
+                    return JobService.this.onStopJob(params);
+                }
+            };
         }
-        return mBinder.asBinder();
+        return mEngine.getBinder();
     }
 
     /**
@@ -250,7 +113,7 @@ public abstract class JobService extends Service {
     public abstract boolean onStopJob(JobParameters params);
 
     /**
-     * Callback to inform the JobManager you've finished executing. This can be called from any
+     * Call this to inform the JobManager you've finished executing. This can be called from any
      * thread, as it will ultimately be run on your application's main thread. When the system
      * receives this message it will release the wakelock being held.
      * <p>
@@ -269,9 +132,6 @@ public abstract class JobService extends Service {
      *                        criteria specified at schedule-time. False otherwise.
      */
     public final void jobFinished(JobParameters params, boolean needsReschedule) {
-        ensureHandler();
-        Message m = Message.obtain(mHandler, MSG_JOB_FINISHED, params);
-        m.arg2 = needsReschedule ? 1 : 0;
-        m.sendToTarget();
+        mEngine.jobFinished(params, needsReschedule);
     }
 }

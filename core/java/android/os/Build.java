@@ -16,7 +16,10 @@
 
 package android.os;
 
+import android.Manifest;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.content.Context;
 import android.text.TextUtils;
 import android.util.Slog;
 
@@ -98,8 +101,34 @@ public class Build {
      */
     public static final boolean IS_EMULATOR = getString("ro.kernel.qemu").equals("1");
 
-    /** A hardware serial number, if available.  Alphanumeric only, case-insensitive. */
-    public static final String SERIAL = getString("ro.serialno");
+    /**
+     * A hardware serial number, if available. Alphanumeric only, case-insensitive.
+     * For apps targeting SDK higher than {@link Build.VERSION_CODES#N_MR1} this
+     * field is set to {@link Build#UNKNOWN}.
+     *
+     * @deprecated Use {@link #getSerial()} instead.
+     **/
+    @Deprecated
+    // IMPORTANT: This field should be initialized via a function call to
+    // prevent its value being inlined in the app during compilation because
+    // we will later set it to the value based on the app's target SDK.
+    public static final String SERIAL = getString("no.such.thing");
+
+    /**
+     * Gets the hardware serial, if available.
+     * @return The serial if specified.
+     */
+    @RequiresPermission(Manifest.permission.READ_PHONE_STATE)
+    public static String getSerial() {
+        IDeviceIdentifiersPolicyService service = IDeviceIdentifiersPolicyService.Stub
+                .asInterface(ServiceManager.getService(Context.DEVICE_IDENTIFIERS_SERVICE));
+        try {
+            return service.getSerial();
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+        return UNKNOWN;
+    }
 
     /**
      * An ordered list of ABIs supported by this device. The most preferred ABI is the first
@@ -245,7 +274,7 @@ public class Build {
          * Magic version number for a current development build, which has
          * not yet turned into an official release.
          */
-        public static final int CUR_DEVELOPMENT = 10000;
+        public static final int CUR_DEVELOPMENT = VMRuntime.SDK_VERSION_CUR_DEVELOPMENT;
 
         /**
          * October 2008: The original, first, version of Android.  Yay!
@@ -725,6 +754,11 @@ public class Build {
          * N MR1: Nougat++.
          */
         public static final int N_MR1 = 25;
+
+        /**
+         * O.
+         */
+        public static final int O = 26;
     }
 
     /** The type of build, like "user" or "eng". */
@@ -773,8 +807,20 @@ public class Build {
     }
 
     /**
-     * Verifies the the current flash of the device is consistent with what
+     * True if Treble is enabled and required for this device.
+     *
+     * @hide
+     */
+    public static final boolean IS_TREBLE_ENABLED =
+        SystemProperties.getBoolean("ro.treble.enabled", false);
+
+    /**
+     * Verifies the current flash of the device is consistent with what
      * was expected at build time.
+     *
+     * Treble devices will verify the Vendor Interface (VINTF). A device
+     * launched without Treble:
+     *
      * 1) Checks that device fingerprint is defined and that it matches across
      *    various partitions.
      * 2) Verifies radio and bootloader partitions are those expected in the build.
@@ -784,6 +830,17 @@ public class Build {
     public static boolean isBuildConsistent() {
         // Don't care on eng builds.  Incremental build may trigger false negative.
         if (IS_ENG) return true;
+
+        if (IS_TREBLE_ENABLED) {
+            int result = VintfObject.verify(new String[0]);
+
+            if (result != 0) {
+                Slog.e(TAG, "Vendor interface is incompatible, error="
+                        + String.valueOf(result));
+            }
+
+            return result == 0;
+        }
 
         final String system = SystemProperties.get("ro.build.fingerprint");
         final String vendor = SystemProperties.get("ro.vendor.build.fingerprint");
@@ -848,8 +905,26 @@ public class Build {
             SystemProperties.getInt("ro.debuggable", 0) == 1;
 
     /** {@hide} */
-    public static final boolean IS_ENG =
-            "eng".equals(getString("ro.build.type"));
+    public static final boolean IS_ENG = "eng".equals(TYPE);
+    /** {@hide} */
+    public static final boolean IS_USERDEBUG = "userdebug".equals(TYPE);
+    /** {@hide} */
+    public static final boolean IS_USER = "user".equals(TYPE);
+
+    /**
+     * Whether this build is running inside a container.
+     *
+     * We should try to avoid checking this flag if possible to minimize
+     * unnecessarily diverging from non-container Android behavior.
+     * Checking this flag is acceptable when low-level resources being
+     * different, e.g. the availability of certain capabilities, access to
+     * system resources being restricted, and the fact that the host OS might
+     * handle some features for us.
+     * For higher-level behavior differences, other checks should be preferred.
+     * @hide
+     */
+    public static final boolean IS_CONTAINER =
+            SystemProperties.getBoolean("ro.boot.container", false);
 
     /**
      * Specifies whether the permissions needed by a legacy app should be
@@ -859,6 +934,7 @@ public class Build {
      * is installed.
      *
      * @hide
+     * @removed
      */
     @SystemApi
     public static final boolean PERMISSIONS_REVIEW_REQUIRED =

@@ -14,10 +14,7 @@
 
 # Warning: this is actually a product definition, to be inherited from
 
-PRODUCT_COPY_FILES := \
-    frameworks/base/data/fonts/fonts.xml:$(TARGET_COPY_OUT_SYSTEM)/etc/fonts.xml
-
 PRODUCT_PACKAGES := \
-    DroidSansFallback.ttf \
     DroidSansMono.ttf \
     AndroidClock.ttf \
+    fonts.xml

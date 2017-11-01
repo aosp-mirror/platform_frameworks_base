@@ -20,9 +20,9 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.view.ContextThemeWrapper;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.LayoutInflater;
 
 
 /**
@@ -148,7 +148,7 @@ public abstract class ResourceCursorAdapter extends CursorAdapter {
     public void setViewResource(int layout) {
         mLayout = layout;
     }
-    
+
     /**
      * <p>Sets the layout resource of the drop down views.</p>
      *

@@ -19,94 +19,91 @@
 namespace aapt {
 namespace xml {
 
-static bool wrapperOne(XmlNodeAction::ActionFunc& f, Element* el, SourcePathDiagnostics*) {
-    return f(el);
+static bool wrapper_one(XmlNodeAction::ActionFunc& f, Element* el, SourcePathDiagnostics*) {
+  return f(el);
 }
 
-static bool wrapperTwo(XmlNodeAction::ActionFuncWithDiag& f, Element* el,
-                       SourcePathDiagnostics* diag) {
-    return f(el, diag);
+static bool wrapper_two(XmlNodeAction::ActionFuncWithDiag& f, Element* el,
+                        SourcePathDiagnostics* diag) {
+  return f(el, diag);
 }
 
-void XmlNodeAction::action(XmlNodeAction::ActionFunc f) {
-    mActions.emplace_back(std::bind(wrapperOne, std::move(f),
-                                    std::placeholders::_1,
-                                    std::placeholders::_2));
+void XmlNodeAction::Action(XmlNodeAction::ActionFunc f) {
+  actions_.emplace_back(std::bind(
+      wrapper_one, std::move(f), std::placeholders::_1, std::placeholders::_2));
 }
 
-void XmlNodeAction::action(XmlNodeAction::ActionFuncWithDiag f) {
-    mActions.emplace_back(std::bind(wrapperTwo, std::move(f),
-                                    std::placeholders::_1,
-                                    std::placeholders::_2));
+void XmlNodeAction::Action(XmlNodeAction::ActionFuncWithDiag f) {
+  actions_.emplace_back(std::bind(
+      wrapper_two, std::move(f), std::placeholders::_1, std::placeholders::_2));
 }
 
-static void printElementToDiagMessage(const Element* el, DiagMessage* msg) {
-    *msg << "<";
-    if (!el->namespaceUri.empty()) {
-        *msg << el->namespaceUri << ":";
-    }
-    *msg << el->name << ">";
+static void PrintElementToDiagMessage(const Element* el, DiagMessage* msg) {
+  *msg << "<";
+  if (!el->namespace_uri.empty()) {
+    *msg << el->namespace_uri << ":";
+  }
+  *msg << el->name << ">";
 }
 
-bool XmlNodeAction::execute(XmlActionExecutorPolicy policy, SourcePathDiagnostics* diag,
+bool XmlNodeAction::Execute(XmlActionExecutorPolicy policy, SourcePathDiagnostics* diag,
                             Element* el) const {
-    bool error = false;
-    for (const ActionFuncWithDiag& action : mActions) {
-        error |= !action(el, diag);
-    }
+  bool error = false;
+  for (const ActionFuncWithDiag& action : actions_) {
+    error |= !action(el, diag);
+  }
 
-    for (Element* childEl : el->getChildElements()) {
-        if (childEl->namespaceUri.empty()) {
-            std::map<std::u16string, XmlNodeAction>::const_iterator iter =
-                    mMap.find(childEl->name);
-            if (iter != mMap.end()) {
-                error |= !iter->second.execute(policy, diag, childEl);
-                continue;
-            }
-        }
+  for (Element* child_el : el->GetChildElements()) {
+    if (child_el->namespace_uri.empty()) {
+      std::map<std::string, XmlNodeAction>::const_iterator iter = map_.find(child_el->name);
+      if (iter != map_.end()) {
+        error |= !iter->second.Execute(policy, diag, child_el);
+        continue;
+      }
 
-        if (policy == XmlActionExecutorPolicy::Whitelist) {
-            DiagMessage errorMsg(childEl->lineNumber);
-            errorMsg << "unknown element ";
-            printElementToDiagMessage(childEl, &errorMsg);
-            errorMsg << " found";
-            diag->error(errorMsg);
-            error = true;
-        }
+      if (policy == XmlActionExecutorPolicy::kWhitelist) {
+        DiagMessage error_msg(child_el->line_number);
+        error_msg << "unknown element ";
+        PrintElementToDiagMessage(child_el, &error_msg);
+        error_msg << " found";
+        diag->Error(error_msg);
+        error = true;
+      }
     }
-    return !error;
+  }
+  return !error;
 }
 
-bool XmlActionExecutor::execute(XmlActionExecutorPolicy policy, IDiagnostics* diag,
+bool XmlActionExecutor::Execute(XmlActionExecutorPolicy policy, IDiagnostics* diag,
                                 XmlResource* doc) const {
-    SourcePathDiagnostics sourceDiag(doc->file.source, diag);
+  SourcePathDiagnostics source_diag(doc->file.source, diag);
 
-    Element* el = findRootElement(doc);
-    if (!el) {
-        if (policy == XmlActionExecutorPolicy::Whitelist) {
-            sourceDiag.error(DiagMessage() << "no root XML tag found");
-            return false;
-        }
-        return true;
-    }
-
-    if (el->namespaceUri.empty()) {
-        std::map<std::u16string, XmlNodeAction>::const_iterator iter = mMap.find(el->name);
-        if (iter != mMap.end()) {
-            return iter->second.execute(policy, &sourceDiag, el);
-        }
-    }
-
-    if (policy == XmlActionExecutorPolicy::Whitelist) {
-        DiagMessage errorMsg(el->lineNumber);
-        errorMsg << "unknown element ";
-        printElementToDiagMessage(el, &errorMsg);
-        errorMsg << " found";
-        sourceDiag.error(errorMsg);
-        return false;
+  Element* el = FindRootElement(doc);
+  if (!el) {
+    if (policy == XmlActionExecutorPolicy::kWhitelist) {
+      source_diag.Error(DiagMessage() << "no root XML tag found");
+      return false;
     }
     return true;
+  }
+
+  if (el->namespace_uri.empty()) {
+    std::map<std::string, XmlNodeAction>::const_iterator iter = map_.find(el->name);
+    if (iter != map_.end()) {
+      return iter->second.Execute(policy, &source_diag, el);
+    }
+
+    if (policy == XmlActionExecutorPolicy::kWhitelist) {
+      DiagMessage error_msg(el->line_number);
+      error_msg << "unknown element ";
+      PrintElementToDiagMessage(el, &error_msg);
+      error_msg << " found";
+      source_diag.Error(error_msg);
+      return false;
+    }
+  }
+  return true;
 }
 
-} // namespace xml
-} // namespace aapt
+}  // namespace xml
+}  // namespace aapt

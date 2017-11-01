@@ -19,29 +19,40 @@ package com.android.server.connectivity;
 import android.content.Context;
 import android.net.ConnectivityMetricsEvent;
 import android.net.IIpConnectivityMetrics;
+import android.net.INetdEventCallback;
 import android.net.metrics.ApfProgramEvent;
 import android.net.metrics.IpConnectivityLog;
+import android.os.Binder;
 import android.os.IBinder;
 import android.os.Parcelable;
+import android.os.Process;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.Base64;
 import android.util.Log;
+
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.RingBuffer;
 import com.android.internal.util.TokenBucket;
+import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.connectivity.metrics.nano.IpConnectivityLogClass.IpConnectivityEvent;
+
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.function.ToIntFunction;
 
-import static com.android.server.connectivity.metrics.IpConnectivityLogClass.IpConnectivityEvent;
-
-/** {@hide} */
+/**
+ * Event buffering service for core networking and connectivity metrics.
+ *
+ * {@hide}
+ */
 final public class IpConnectivityMetrics extends SystemService {
     private static final String TAG = IpConnectivityMetrics.class.getSimpleName();
     private static final boolean DBG = false;
@@ -55,34 +66,57 @@ final public class IpConnectivityMetrics extends SystemService {
 
     private static final String SERVICE_NAME = IpConnectivityLog.SERVICE_NAME;
 
-    // Default size of the event buffer. Once the buffer is full, incoming events are dropped.
+    // Default size of the event rolling log for bug report dumps.
+    private static final int DEFAULT_LOG_SIZE = 500;
+    // Default size of the event buffer for metrics reporting.
+    // Once the buffer is full, incoming events are dropped.
     private static final int DEFAULT_BUFFER_SIZE = 2000;
     // Maximum size of the event buffer.
     private static final int MAXIMUM_BUFFER_SIZE = DEFAULT_BUFFER_SIZE * 10;
 
+    private static final int MAXIMUM_CONNECT_LATENCY_RECORDS = 20000;
+
     private static final int ERROR_RATE_LIMITED = -1;
 
-    // Lock ensuring that concurrent manipulations of the event buffer are correct.
+    // Lock ensuring that concurrent manipulations of the event buffers are correct.
     // There are three concurrent operations to synchronize:
     //  - appending events to the buffer.
     //  - iterating throught the buffer.
     //  - flushing the buffer content and replacing it by a new buffer.
     private final Object mLock = new Object();
 
+    // Implementation instance of IIpConnectivityMetrics.aidl.
     @VisibleForTesting
     public final Impl impl = new Impl();
-    private NetdEventListenerService mNetdListener;
+    // Subservice listening to Netd events via INetdEventListener.aidl.
+    @VisibleForTesting
+    NetdEventListenerService mNetdListener;
 
+    // Rolling log of the most recent events. This log is used for dumping
+    // connectivity events in bug reports.
+    @GuardedBy("mLock")
+    private final RingBuffer<ConnectivityMetricsEvent> mEventLog =
+            new RingBuffer(ConnectivityMetricsEvent.class, DEFAULT_LOG_SIZE);
+    // Buffer of connectivity events used for metrics reporting. This buffer
+    // does not rotate automatically and instead saturates when it becomes full.
+    // It is flushed at metrics reporting.
     @GuardedBy("mLock")
     private ArrayList<ConnectivityMetricsEvent> mBuffer;
+    // Total number of events dropped from mBuffer since last metrics reporting.
     @GuardedBy("mLock")
     private int mDropped;
+    // Capacity of mBuffer
     @GuardedBy("mLock")
     private int mCapacity;
+    // A list of rate limiting counters keyed by connectivity event types for
+    // metrics reporting mBuffer.
     @GuardedBy("mLock")
     private final ArrayMap<Class<?>, TokenBucket> mBuckets = makeRateLimitingBuckets();
 
     private final ToIntFunction<Context> mCapacityGetter;
+
+    @VisibleForTesting
+    final DefaultNetworkMetrics mDefaultNetworkMetrics = new DefaultNetworkMetrics();
 
     public IpConnectivityMetrics(Context ctx, ToIntFunction<Context> capacityGetter) {
         super(ctx);
@@ -107,6 +141,8 @@ final public class IpConnectivityMetrics extends SystemService {
 
             publishBinderService(SERVICE_NAME, impl);
             publishBinderService(mNetdListener.SERVICE_NAME, mNetdListener);
+
+            LocalServices.addService(Logger.class, new LoggerImpl());
         }
     }
 
@@ -126,6 +162,7 @@ final public class IpConnectivityMetrics extends SystemService {
     private int append(ConnectivityMetricsEvent event) {
         if (DBG) Log.d(TAG, "logEvent: " + event);
         synchronized (mLock) {
+            mEventLog.append(event);
             final int left = mCapacity - mBuffer.size();
             if (event == null) {
                 return left;
@@ -157,9 +194,17 @@ final public class IpConnectivityMetrics extends SystemService {
             initBuffer();
         }
 
+        final List<IpConnectivityEvent> protoEvents = IpConnectivityEventBuilder.toProto(events);
+
+        mDefaultNetworkMetrics.flushEvents(protoEvents);
+
+        if (mNetdListener != null) {
+            mNetdListener.flushStatistics(protoEvents);
+        }
+
         final byte[] data;
         try {
-            data = IpConnectivityEventBuilder.serialize(dropped, events);
+            data = IpConnectivityEventBuilder.serialize(dropped, protoEvents);
         } catch (IOException e) {
             Log.e(TAG, "could not serialize events", e);
             return "";
@@ -190,12 +235,38 @@ final public class IpConnectivityMetrics extends SystemService {
             for (IpConnectivityEvent ev : IpConnectivityEventBuilder.toProto(events)) {
                 pw.print(ev.toString());
             }
+            if (mNetdListener != null) {
+                mNetdListener.listAsProtos(pw);
+            }
+            mDefaultNetworkMetrics.listEventsAsProto(pw);
             return;
         }
 
         for (ConnectivityMetricsEvent ev : events) {
             pw.println(ev.toString());
         }
+        if (mNetdListener != null) {
+            mNetdListener.list(pw);
+        }
+        mDefaultNetworkMetrics.listEvents(pw);
+    }
+
+    /**
+     * Prints for bug reports the content of the rolling event log and the
+     * content of Netd event listener.
+     */
+    private void cmdDumpsys(FileDescriptor fd, PrintWriter pw, String[] args) {
+        final ConnectivityMetricsEvent[] events;
+        synchronized (mLock) {
+            events = mEventLog.toArray();
+        }
+        for (ConnectivityMetricsEvent ev : events) {
+            pw.println(ev.toString());
+        }
+        if (mNetdListener != null) {
+            mNetdListener.list(pw);
+        }
+        mDefaultNetworkMetrics.listEvents(pw);
     }
 
     private void cmdStats(FileDescriptor fd, PrintWriter pw, String[] args) {
@@ -240,7 +311,8 @@ final public class IpConnectivityMetrics extends SystemService {
                     cmdFlush(fd, pw, args);
                     return;
                 case CMD_DUMPSYS:
-                    // Fallthrough to CMD_LIST when dumpsys.cpp dumps services states (bug reports)
+                    cmdDumpsys(fd, pw, args);
+                    return;
                 case CMD_LIST:
                     cmdList(fd, pw, args);
                     return;
@@ -263,6 +335,33 @@ final public class IpConnectivityMetrics extends SystemService {
         private void enforcePermission(String what) {
             getContext().enforceCallingOrSelfPermission(what, "IpConnectivityMetrics");
         }
+
+        private void enforceNetdEventListeningPermission() {
+            final int uid = Binder.getCallingUid();
+            if (uid != Process.SYSTEM_UID) {
+                throw new SecurityException(String.format("Uid %d has no permission to listen for"
+                        + " netd events.", uid));
+            }
+        }
+
+        @Override
+        public boolean registerNetdEventCallback(INetdEventCallback callback) {
+            enforceNetdEventListeningPermission();
+            if (mNetdListener == null) {
+                return false;
+            }
+            return mNetdListener.registerNetdEventCallback(callback);
+        }
+
+        @Override
+        public boolean unregisterNetdEventCallback() {
+            enforceNetdEventListeningPermission();
+            if (mNetdListener == null) {
+                // if the service is null, we aren't registered anyway
+                return true;
+            }
+            return mNetdListener.unregisterNetdEventCallback();
+        }
     };
 
     private static final ToIntFunction<Context> READ_BUFFER_SIZE = (ctx) -> {
@@ -279,5 +378,16 @@ final public class IpConnectivityMetrics extends SystemService {
         // one token every minute, 50 tokens max: burst of ~50 events every hour.
         map.put(ApfProgramEvent.class, new TokenBucket((int)DateUtils.MINUTE_IN_MILLIS, 50));
         return map;
+    }
+
+    /** Direct non-Binder interface for event producer clients within the system servers. */
+    public interface Logger {
+        DefaultNetworkMetrics defaultNetworkMetrics();
+    }
+
+    private class LoggerImpl implements Logger {
+        public DefaultNetworkMetrics defaultNetworkMetrics() {
+            return mDefaultNetworkMetrics;
+        }
     }
 }

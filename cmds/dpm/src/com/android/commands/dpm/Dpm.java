@@ -16,7 +16,7 @@
 
 package com.android.commands.dpm;
 
-import android.app.ActivityManagerNative;
+import android.app.ActivityManager;
 import android.app.IActivityManager;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.IDevicePolicyManager;
@@ -117,7 +117,7 @@ public final class Dpm extends BaseCommand {
                     mUserId = parseInt(arg);
                 }
                 if (mUserId == UserHandle.USER_CURRENT) {
-                    IActivityManager activityManager = ActivityManagerNative.getDefault();
+                    IActivityManager activityManager = ActivityManager.getService();
                     try {
                         mUserId = activityManager.getCurrentUser().id;
                     } catch (RemoteException e) {

@@ -27,12 +27,17 @@ public final class SurfaceSession {
     private long mNativeClient; // SurfaceComposerClient*
 
     private static native long nativeCreate();
+    private static native long nativeCreateScoped(long surfacePtr);
     private static native void nativeDestroy(long ptr);
     private static native void nativeKill(long ptr);
 
     /** Create a new connection with the surface flinger. */
     public SurfaceSession() {
         mNativeClient = nativeCreate();
+    }
+
+    public SurfaceSession(Surface root) {
+        mNativeClient = nativeCreateScoped(root.mNativeObject);
     }
 
     /* no user serviceable parts here ... */

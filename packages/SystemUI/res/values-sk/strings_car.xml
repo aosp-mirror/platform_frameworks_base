@@ -19,6 +19,6 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="car_lockscreen_disclaimer_title" msgid="7997539137376896441">"Jazdite bezpečne"</string>
-    <string name="car_lockscreen_disclaimer_text" msgid="3061224684092952864">"Zachovajte si úplný prehľad o jazdných podmienkach a vždy dodržiavajte príslušné zákony. Trasy môžu byť nepresné, neúplné, nebezpečné, nevhodné, zakázané alebo môžu zahŕňať cestu cez rôzne správne oblasti. Obchodné informácie môžu byť tiež nepresné alebo neúplné. Údaje nie sú aktualizované v reálnom čase a presnosť polohy nemôžeme zaručiť. Počas jazdy nemanipulujte s mobilným zariadením ani nepoužívajte aplikácie, ktoré nie sú určené pre funkciu Android Auto."</string>
+    <string name="unknown_user_label" msgid="4323896111737677955">"Neznáme"</string>
+    <string name="start_driving" msgid="864023351402918991">"Začať šoférovať"</string>
 </resources>

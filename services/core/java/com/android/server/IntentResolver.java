@@ -350,8 +350,8 @@ public abstract class IntentResolver<F extends IntentFilter, R extends Object> {
         return Collections.unmodifiableSet(mFilters);
     }
 
-    public List<R> queryIntentFromList(Intent intent, String resolvedType, 
-            boolean defaultOnly, ArrayList<F[]> listCut, int userId) {
+    public List<R> queryIntentFromList(Intent intent, String resolvedType, boolean defaultOnly,
+            ArrayList<F[]> listCut, int userId) {
         ArrayList<R> resultList = new ArrayList<R>();
 
         final boolean debug = localLOGV ||
@@ -361,8 +361,8 @@ public abstract class IntentResolver<F extends IntentFilter, R extends Object> {
         final String scheme = intent.getScheme();
         int N = listCut.size();
         for (int i = 0; i < N; ++i) {
-            buildResolveList(intent, categories, debug, defaultOnly,
-                    resolvedType, scheme, listCut.get(i), resultList, userId);
+            buildResolveList(intent, categories, debug, defaultOnly, resolvedType, scheme,
+                    listCut.get(i), resultList, userId);
         }
         filterResults(resultList);
         sortResults(resultList);
@@ -443,20 +443,20 @@ public abstract class IntentResolver<F extends IntentFilter, R extends Object> {
 
         FastImmutableArraySet<String> categories = getFastIntentCategories(intent);
         if (firstTypeCut != null) {
-            buildResolveList(intent, categories, debug, defaultOnly,
-                    resolvedType, scheme, firstTypeCut, finalList, userId);
+            buildResolveList(intent, categories, debug, defaultOnly, resolvedType,
+                    scheme, firstTypeCut, finalList, userId);
         }
         if (secondTypeCut != null) {
-            buildResolveList(intent, categories, debug, defaultOnly,
-                    resolvedType, scheme, secondTypeCut, finalList, userId);
+            buildResolveList(intent, categories, debug, defaultOnly, resolvedType,
+                    scheme, secondTypeCut, finalList, userId);
         }
         if (thirdTypeCut != null) {
-            buildResolveList(intent, categories, debug, defaultOnly,
-                    resolvedType, scheme, thirdTypeCut, finalList, userId);
+            buildResolveList(intent, categories, debug, defaultOnly, resolvedType,
+                    scheme, thirdTypeCut, finalList, userId);
         }
         if (schemeCut != null) {
-            buildResolveList(intent, categories, debug, defaultOnly,
-                    resolvedType, scheme, schemeCut, finalList, userId);
+            buildResolveList(intent, categories, debug, defaultOnly, resolvedType,
+                    scheme, schemeCut, finalList, userId);
         }
         filterResults(finalList);
         sortResults(finalList);
@@ -694,8 +694,8 @@ public abstract class IntentResolver<F extends IntentFilter, R extends Object> {
     }
 
     private void buildResolveList(Intent intent, FastImmutableArraySet<String> categories,
-            boolean debug, boolean defaultOnly,
-            String resolvedType, String scheme, F[] src, List<R> dest, int userId) {
+            boolean debug, boolean defaultOnly, String resolvedType, String scheme,
+            F[] src, List<R> dest, int userId) {
         final String action = intent.getAction();
         final Uri data = intent.getData();
         final String packageName = intent.getPackage();

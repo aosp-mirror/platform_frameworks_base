@@ -183,11 +183,11 @@ final class PersistentDataStore {
 
     public int getColorMode(DisplayDevice device) {
         if (!device.hasStableUniqueId()) {
-            return Display.COLOR_MODE_DEFAULT;
+            return Display.COLOR_MODE_INVALID;
         }
         DisplayState state = getDisplayState(device.getUniqueId(), false);
         if (state == null) {
-            return Display.COLOR_MODE_DEFAULT;
+            return Display.COLOR_MODE_INVALID;
         }
         return state.getColorMode();
     }

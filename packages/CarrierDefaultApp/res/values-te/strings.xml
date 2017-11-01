@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="5247871339820894594">"CarrierDefaultApp"</string>
+    <string name="android_system_label" msgid="2797790869522345065">"మొబైల్ క్యారియర్"</string>
+    <string name="portal_notification_id" msgid="5155057562457079297">"మొబైల్ డేటాని పూర్తిగా ఉపయోగించారు"</string>
+    <string name="no_data_notification_id" msgid="668400731803969521">"మీ మొబైల్ డేటా నిష్క్రియం చేయబడింది"</string>
+    <string name="portal_notification_detail" msgid="2295729385924660881">"%s వెబ్‌సైట్‌ని సందర్శించడం కోసం నొక్కండి"</string>
+    <string name="no_data_notification_detail" msgid="3112125343857014825">"దయచేసి మీ సేవా ప్రదాత %sని సంప్రదించండి"</string>
+    <string name="no_mobile_data_connection_title" msgid="7449525772416200578">"మొబైల్ డేటా కనెక్షన్ లేదు"</string>
+    <string name="no_mobile_data_connection" msgid="544980465184147010">"%s ద్వారా డేటాను లేదా రోమింగ్ ప్లాన్‌ను జోడించండి"</string>
+    <string name="mobile_data_status_notification_channel_name" msgid="833999690121305708">"మొబైల్ డేటా స్థితి"</string>
+    <string name="action_bar_label" msgid="4290345990334377177">"మొబైల్ నెట్‌వర్క్‌కి సైన్ ఇన్ చేయి"</string>
+    <string name="ssl_error_warning" msgid="3127935140338254180">"మీరు చేరడానికి ప్రయత్నిస్తున్న నెట్‌వర్క్ భద్రతా సమస్యలను కలిగి ఉంది."</string>
+    <string name="ssl_error_example" msgid="6188711843183058764">"ఉదాహరణకు, లాగిన్ పేజీ చూపిన సంస్థకు చెందినది కాకపోవచ్చు."</string>
+    <string name="ssl_error_continue" msgid="1138548463994095584">"ఏదేమైనా బ్రౌజర్ ద్వారా కొనసాగించు"</string>
+</resources>

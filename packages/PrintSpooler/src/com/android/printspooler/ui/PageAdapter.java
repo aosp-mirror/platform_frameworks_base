@@ -16,6 +16,7 @@
 
 package com.android.printspooler.ui;
 
+import android.annotation.NonNull;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -24,8 +25,8 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.ParcelFileDescriptor;
 import android.print.PageRange;
-import android.print.PrintAttributes.MediaSize;
 import android.print.PrintAttributes.Margins;
+import android.print.PrintAttributes.MediaSize;
 import android.print.PrintDocumentInfo;
 import android.support.v7.widget.RecyclerView.Adapter;
 import android.support.v7.widget.RecyclerView.ViewHolder;
@@ -33,11 +34,12 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.MeasureSpec;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
-import android.view.View.MeasureSpec;
 import android.widget.TextView;
+
 import com.android.printspooler.R;
 import com.android.printspooler.model.OpenDocumentCallback;
 import com.android.printspooler.model.PageContentRepository;
@@ -45,6 +47,7 @@ import com.android.printspooler.model.PageContentRepository.PageContentProvider;
 import com.android.printspooler.util.PageRangeUtils;
 import com.android.printspooler.widget.PageContentView;
 import com.android.printspooler.widget.PreviewPageFrame;
+
 import dalvik.system.CloseGuard;
 
 import java.util.ArrayList;
@@ -297,7 +300,14 @@ public final class PageAdapter extends Adapter<ViewHolder> {
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View page = mLayoutInflater.inflate(R.layout.preview_page, parent, false);
+        View page;
+
+        if (viewType == 0) {
+            page = mLayoutInflater.inflate(R.layout.preview_page_selected, parent, false);
+        } else {
+            page = mLayoutInflater.inflate(R.layout.preview_page, parent, false);
+        }
+
         return new MyViewHolder(page);
     }
 
@@ -345,9 +355,9 @@ public final class PageAdapter extends Adapter<ViewHolder> {
         content.init(provider, mEmptyState, mErrorState, mMediaSize, mMinMargins);
 
         if (mConfirmedPagesInDocument.indexOfKey(pageInDocument) >= 0) {
-            page.setSelected(true, false);
+            page.setSelected(true);
         } else {
-            page.setSelected(false, false);
+            page.setSelected(false);
         }
 
         page.setContentDescription(mContext.getString(R.string.page_description_template,
@@ -362,6 +372,15 @@ public final class PageAdapter extends Adapter<ViewHolder> {
     @Override
     public int getItemCount() {
         return mSelectedPageCount;
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        if (mConfirmedPagesInDocument.indexOfKey(computePageIndexInDocument(position)) >= 0) {
+            return 0;
+        } else {
+            return 1;
+        }
     }
 
     @Override
@@ -467,6 +486,12 @@ public final class PageAdapter extends Adapter<ViewHolder> {
         loadingContent.layout(0, 0, loadingContent.getMeasuredWidth(),
                 loadingContent.getMeasuredHeight());
 
+        // To create a bitmap, height & width should be larger than 0
+        if (mPageContentHeight <= 0 || mPageContentWidth <= 0) {
+            Log.w(LOG_TAG, "Unable to create bitmap, height or width smaller than 0!");
+            return;
+        }
+
         Bitmap loadingBitmap = Bitmap.createBitmap(mPageContentWidth, mPageContentHeight,
                 Bitmap.Config.ARGB_8888);
         loadingContent.draw(new Canvas(loadingBitmap));
@@ -536,8 +561,11 @@ public final class PageAdapter extends Adapter<ViewHolder> {
     @Override
     protected void finalize() throws Throwable {
         try {
-            if (mState != STATE_DESTROYED) {
+            if (mCloseGuard != null) {
                 mCloseGuard.warnIfOpen();
+            }
+
+            if (mState != STATE_DESTROYED) {
                 destroy(null);
             }
         } finally {
@@ -778,14 +806,16 @@ public final class PageAdapter extends Adapter<ViewHolder> {
         page.setTag(null);
     }
 
-    public void startPreloadContent(PageRange pageRangeInAdapter) {
-        final int startPageInDocument = computePageIndexInDocument(pageRangeInAdapter.getStart());
-        final int startPageInFile = computePageIndexInFile(startPageInDocument);
-        final int endPageInDocument = computePageIndexInDocument(pageRangeInAdapter.getEnd());
-        final int endPageInFile = computePageIndexInFile(endPageInDocument);
-        if (startPageInDocument != INVALID_PAGE_INDEX && endPageInDocument != INVALID_PAGE_INDEX) {
-            mPageContentRepository.startPreload(startPageInFile, endPageInFile);
+    void startPreloadContent(@NonNull PageRange visiblePagesInAdapter) {
+        int startVisibleDocument = computePageIndexInDocument(visiblePagesInAdapter.getStart());
+        int endVisibleDocument = computePageIndexInDocument(visiblePagesInAdapter.getEnd());
+        if (startVisibleDocument == INVALID_PAGE_INDEX
+                || endVisibleDocument == INVALID_PAGE_INDEX) {
+            return;
         }
+
+        mPageContentRepository.startPreload(new PageRange(startVisibleDocument, endVisibleDocument),
+                mSelectedPages, mWrittenPages);
     }
 
     public void stopPreloadContent() {
@@ -821,14 +851,14 @@ public final class PageAdapter extends Adapter<ViewHolder> {
             final int pageInDocument = computePageIndexInDocument(pageInAdapter);
             if (mConfirmedPagesInDocument.indexOfKey(pageInDocument) < 0) {
                 mConfirmedPagesInDocument.put(pageInDocument, null);
-                page.setSelected(true, true);
             } else {
                 if (mConfirmedPagesInDocument.size() <= 1) {
                     return;
                 }
                 mConfirmedPagesInDocument.remove(pageInDocument);
-                page.setSelected(false, true);
             }
+
+            notifyItemChanged(pageInAdapter);
         }
     }
 }

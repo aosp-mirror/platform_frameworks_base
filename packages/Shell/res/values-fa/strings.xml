@@ -4,9 +4,9 @@
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
      You may obtain a copy of the License at
-  
+
           http://www.apache.org/licenses/LICENSE-2.0
-  
+
      Unless required by applicable law or agreed to in writing, software
      distributed under the License is distributed on an "AS IS" BASIS,
      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,12 +17,15 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"Shell"</string>
+    <string name="bugreport_notification_channel" msgid="2574150205913861141">"گزارش اشکال"</string>
     <string name="bugreport_in_progress_title" msgid="4311705936714972757">"گزارش اشکال <xliff:g id="ID">#%d</xliff:g> در حال ایجاد شدن است"</string>
     <string name="bugreport_finished_title" msgid="4429132808670114081">"گزارش اشکال <xliff:g id="ID">#%d</xliff:g> ثبت شد"</string>
     <string name="bugreport_updating_title" msgid="4423539949559634214">"اضافه کردن جزئیات به گزارش اشکال"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"لطفاً منتظر بمانید..."</string>
     <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"گزارش مشکل به‌زودی در تلفن نشان داده می‌شود"</string>
+    <string name="bugreport_finished_text" product="tv" msgid="5758325479058638893">"برای به اشتراک گذاشتن گزارش اشکالتان، انتخاب کنید"</string>
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"برای به اشتراک گذاشتن گزارش اشکال، ضربه بزنید"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="tv" msgid="2343263822812016950">"انتخاب کنید تا گزارش اشکالتان بدون عکس صفحه‌نمایش به اشتراک گذاشته شود یا منتظر بمانید گرفتن عکس از صفحه‌نمایش تمام شود"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"برای اشتراک‌گذاری گزارش مشکل بدون عکس صفحه‌نمایش، ضربه بزنید یا صبر کنید تا عکس صفحه‌نمایش گرفته شود."</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"برای اشتراک‌گذاری گزارش مشکل بدون عکس صفحه‌نمایش، ضربه بزنید یا صبر کنید تا عکس صفحه‌نمایش گرفته شود."</string>
     <string name="bugreport_confirm" msgid="5917407234515812495">"گزارش‌های اشکال حاوی داده‌هایی از فایل‌های مختلف گزارش سیستم هستند، که ممکن است حاوی داده‌های حساس شما (از قبیل داده‌های استفاده از برنامه و مکان) باشند. گزارش‌های اشکال را فقط با افراد و برنامه‌هایی که به آنها اعتماد دارید به اشتراک بگذارید."</string>
@@ -40,4 +43,5 @@
     <string name="bugreport_info_title" msgid="2306030793918239804">"عنوان اشکال"</string>
     <string name="bugreport_info_description" msgid="5072835127481627722">"خلاصه اشکال"</string>
     <string name="save" msgid="4781509040564835759">"ذخیره کردن"</string>
+    <string name="bugreport_intent_chooser_title" msgid="7605709494790894076">"اشتراک‌گذاری گزارش اشکال"</string>
 </resources>

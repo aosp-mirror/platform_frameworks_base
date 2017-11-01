@@ -16,12 +16,22 @@
 
 package android.telecom;
 
+import android.annotation.IntDef;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.ParcelFileDescriptor;
 
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.lang.String;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -114,6 +124,94 @@ public final class Call {
      * select phone accounts to (for example) place a call.
      */
     public static final String AVAILABLE_PHONE_ACCOUNTS = "selectPhoneAccountAccounts";
+
+    /**
+     * Extra key used to indicate the time (in milliseconds since midnight, January 1, 1970 UTC)
+     * when the last outgoing emergency call was made.  This is used to identify potential emergency
+     * callbacks.
+     */
+    public static final String EXTRA_LAST_EMERGENCY_CALLBACK_TIME_MILLIS =
+            "android.telecom.extra.LAST_EMERGENCY_CALLBACK_TIME_MILLIS";
+
+    /**
+     * Call event sent from a {@link Call} via {@link #sendCallEvent(String, Bundle)} to inform
+     * Telecom that the user has requested that the current {@link Call} should be handed over
+     * to another {@link ConnectionService}.
+     * <p>
+     * The caller must specify the {@link #EXTRA_HANDOVER_PHONE_ACCOUNT_HANDLE} to indicate to
+     * Telecom which {@link PhoneAccountHandle} the {@link Call} should be handed over to.
+     * @hide
+     */
+    public static final String EVENT_REQUEST_HANDOVER =
+            "android.telecom.event.REQUEST_HANDOVER";
+
+    /**
+     * Extra key used with the {@link #EVENT_REQUEST_HANDOVER} call event.  Specifies the
+     * {@link PhoneAccountHandle} to which a call should be handed over to.
+     * @hide
+     */
+    public static final String EXTRA_HANDOVER_PHONE_ACCOUNT_HANDLE =
+            "android.telecom.extra.HANDOVER_PHONE_ACCOUNT_HANDLE";
+
+    /**
+     * Integer extra key used with the {@link #EVENT_REQUEST_HANDOVER} call event.  Specifies the
+     * video state of the call when it is handed over to the new {@link PhoneAccount}.
+     * <p>
+     * Valid values: {@link VideoProfile#STATE_AUDIO_ONLY},
+     * {@link VideoProfile#STATE_BIDIRECTIONAL}, {@link VideoProfile#STATE_RX_ENABLED}, and
+     * {@link VideoProfile#STATE_TX_ENABLED}.
+     * @hide
+     */
+    public static final String EXTRA_HANDOVER_VIDEO_STATE =
+            "android.telecom.extra.HANDOVER_VIDEO_STATE";
+
+    /**
+     * Extra key used with the {@link #EVENT_REQUEST_HANDOVER} call event.  Used by the
+     * {@link InCallService} initiating a handover to provide a {@link Bundle} with extra
+     * information to the handover {@link ConnectionService} specified by
+     * {@link #EXTRA_HANDOVER_PHONE_ACCOUNT_HANDLE}.
+     * <p>
+     * This {@link Bundle} is not interpreted by Telecom, but passed as-is to the
+     * {@link ConnectionService} via the request extras when
+     * {@link ConnectionService#onCreateOutgoingConnection(PhoneAccountHandle, ConnectionRequest)}
+     * is called to initate the handover.
+     * @hide
+     */
+    public static final String EXTRA_HANDOVER_EXTRAS = "android.telecom.extra.HANDOVER_EXTRAS";
+
+    /**
+     * Call event sent from Telecom to the handover {@link ConnectionService} via
+     * {@link Connection#onCallEvent(String, Bundle)} to inform a {@link Connection} that a handover
+     * to the {@link ConnectionService} has completed successfully.
+     * <p>
+     * A handover is initiated with the {@link #EVENT_REQUEST_HANDOVER} call event.
+     * @hide
+     */
+    public static final String EVENT_HANDOVER_COMPLETE =
+            "android.telecom.event.HANDOVER_COMPLETE";
+
+    /**
+     * Call event sent from Telecom to the handover destination {@link ConnectionService} via
+     * {@link Connection#onCallEvent(String, Bundle)} to inform the handover destination that the
+     * source connection has disconnected.  The {@link Bundle} parameter for the call event will be
+     * {@code null}.
+     * <p>
+     * A handover is initiated with the {@link #EVENT_REQUEST_HANDOVER} call event.
+     * @hide
+     */
+    public static final String EVENT_HANDOVER_SOURCE_DISCONNECTED =
+            "android.telecom.event.HANDOVER_SOURCE_DISCONNECTED";
+
+    /**
+     * Call event sent from Telecom to the handover {@link ConnectionService} via
+     * {@link Connection#onCallEvent(String, Bundle)} to inform a {@link Connection} that a handover
+     * to the {@link ConnectionService} has failed.
+     * <p>
+     * A handover is initiated with the {@link #EVENT_REQUEST_HANDOVER} call event.
+     * @hide
+     */
+    public static final String EVENT_HANDOVER_FAILED =
+            "android.telecom.event.HANDOVER_FAILED";
 
     public static class Details {
 
@@ -312,8 +410,15 @@ public final class Call {
          */
         public static final int PROPERTY_HAS_CDMA_VOICE_PRIVACY = 0x00000080;
 
+        /**
+         * Indicates that the call is from a self-managed {@link ConnectionService}.
+         * <p>
+         * See also {@link Connection#PROPERTY_SELF_MANAGED}
+         */
+        public static final int PROPERTY_SELF_MANAGED = 0x00000100;
+
         //******************************************************************************************
-        // Next PROPERTY value: 0x00000100
+        // Next PROPERTY value: 0x00000200
         //******************************************************************************************
 
         private final String mTelecomCallId;
@@ -332,6 +437,7 @@ public final class Call {
         private final StatusHints mStatusHints;
         private final Bundle mExtras;
         private final Bundle mIntentExtras;
+        private final long mCreationTimeMillis;
 
         /**
          * Whether the supplied capabilities  supports the specified capability.
@@ -554,9 +660,12 @@ public final class Call {
         }
 
         /**
-         * @return The time the {@code Call} has been connected. This information is updated
-         * periodically, but user interfaces should not rely on this to display any "call time
-         * clock".
+         * Returns the time the {@link Call} connected (i.e. became active).  This information is
+         * updated periodically, but user interfaces should not rely on this to display the "call
+         * time clock".  For the time when the call was first added to Telecom, see
+         * {@link #getCreationTimeMillis()}.
+         *
+         * @return The time the {@link Call} connected in milliseconds since the epoch.
          */
         public final long getConnectTimeMillis() {
             return mConnectTimeMillis;
@@ -598,6 +707,18 @@ public final class Call {
             return mIntentExtras;
         }
 
+        /**
+         * Returns the time when the call was first created and added to Telecom.  This is the same
+         * time that is logged as the start time in the Call Log (see
+         * {@link android.provider.CallLog.Calls#DATE}).  To determine when the call was connected
+         * (became active), see {@link #getConnectTimeMillis()}.
+         *
+         * @return The creation time of the call, in millis since the epoch.
+         */
+        public long getCreationTimeMillis() {
+            return mCreationTimeMillis;
+        }
+
         @Override
         public boolean equals(Object o) {
             if (o instanceof Details) {
@@ -617,28 +738,29 @@ public final class Call {
                         Objects.equals(mVideoState, d.mVideoState) &&
                         Objects.equals(mStatusHints, d.mStatusHints) &&
                         areBundlesEqual(mExtras, d.mExtras) &&
-                        areBundlesEqual(mIntentExtras, d.mIntentExtras);
+                        areBundlesEqual(mIntentExtras, d.mIntentExtras) &&
+                        Objects.equals(mCreationTimeMillis, d.mCreationTimeMillis);
             }
             return false;
         }
 
         @Override
         public int hashCode() {
-            return
-                    Objects.hashCode(mHandle) +
-                    Objects.hashCode(mHandlePresentation) +
-                    Objects.hashCode(mCallerDisplayName) +
-                    Objects.hashCode(mCallerDisplayNamePresentation) +
-                    Objects.hashCode(mAccountHandle) +
-                    Objects.hashCode(mCallCapabilities) +
-                    Objects.hashCode(mCallProperties) +
-                    Objects.hashCode(mDisconnectCause) +
-                    Objects.hashCode(mConnectTimeMillis) +
-                    Objects.hashCode(mGatewayInfo) +
-                    Objects.hashCode(mVideoState) +
-                    Objects.hashCode(mStatusHints) +
-                    Objects.hashCode(mExtras) +
-                    Objects.hashCode(mIntentExtras);
+            return Objects.hash(mHandle,
+                            mHandlePresentation,
+                            mCallerDisplayName,
+                            mCallerDisplayNamePresentation,
+                            mAccountHandle,
+                            mCallCapabilities,
+                            mCallProperties,
+                            mDisconnectCause,
+                            mConnectTimeMillis,
+                            mGatewayInfo,
+                            mVideoState,
+                            mStatusHints,
+                            mExtras,
+                            mIntentExtras,
+                            mCreationTimeMillis);
         }
 
         /** {@hide} */
@@ -657,7 +779,8 @@ public final class Call {
                 int videoState,
                 StatusHints statusHints,
                 Bundle extras,
-                Bundle intentExtras) {
+                Bundle intentExtras,
+                long creationTimeMillis) {
             mTelecomCallId = telecomCallId;
             mHandle = handle;
             mHandlePresentation = handlePresentation;
@@ -673,6 +796,7 @@ public final class Call {
             mStatusHints = statusHints;
             mExtras = extras;
             mIntentExtras = intentExtras;
+            mCreationTimeMillis = creationTimeMillis;
         }
 
         /** {@hide} */
@@ -692,7 +816,8 @@ public final class Call {
                     parcelableCall.getVideoState(),
                     parcelableCall.getStatusHints(),
                     parcelableCall.getExtras(),
-                    parcelableCall.getIntentExtras());
+                    parcelableCall.getIntentExtras(),
+                    parcelableCall.getCreationTimeMillis());
         }
 
         @Override
@@ -828,6 +953,171 @@ public final class Call {
          * @param extras Extras associated with the connection event.
          */
         public void onConnectionEvent(Call call, String event, Bundle extras) {}
+
+        /**
+         * Invoked when the RTT mode changes for this call.
+         * @param call The call whose RTT mode has changed.
+         * @param mode the new RTT mode, one of
+         * {@link RttCall#RTT_MODE_FULL}, {@link RttCall#RTT_MODE_HCO},
+         *             or {@link RttCall#RTT_MODE_VCO}
+         */
+        public void onRttModeChanged(Call call, int mode) {}
+
+        /**
+         * Invoked when the call's RTT status changes, either from off to on or from on to off.
+         * @param call The call whose RTT status has changed.
+         * @param enabled whether RTT is now enabled or disabled
+         * @param rttCall the {@link RttCall} object to use for reading and writing if RTT is now
+         *                on, null otherwise.
+         */
+        public void onRttStatusChanged(Call call, boolean enabled, RttCall rttCall) {}
+
+        /**
+         * Invoked when the remote end of the connection has requested that an RTT communication
+         * channel be opened. A response to this should be sent via {@link #respondToRttRequest}
+         * with the same ID that this method is invoked with.
+         * @param call The call which the RTT request was placed on
+         * @param id The ID of the request.
+         */
+        public void onRttRequest(Call call, int id) {}
+
+        /**
+         * Invoked when the RTT session failed to initiate for some reason, including rejection
+         * by the remote party.
+         * @param call The call which the RTT initiation failure occurred on.
+         * @param reason One of the status codes defined in
+         *               {@link android.telecom.Connection.RttModifyStatus}, with the exception of
+         *               {@link android.telecom.Connection.RttModifyStatus#SESSION_MODIFY_REQUEST_SUCCESS}.
+         */
+        public void onRttInitiationFailure(Call call, int reason) {}
+    }
+
+    /**
+     * A class that holds the state that describes the state of the RTT channel to the remote
+     * party, if it is active.
+     */
+    public static final class RttCall {
+        /** @hide */
+        @Retention(RetentionPolicy.SOURCE)
+        @IntDef({RTT_MODE_INVALID, RTT_MODE_FULL, RTT_MODE_HCO, RTT_MODE_VCO})
+        public @interface RttAudioMode {}
+
+        /**
+         * For metrics use. Default value in the proto.
+         * @hide
+         */
+        public static final int RTT_MODE_INVALID = 0;
+
+        /**
+         * Indicates that there should be a bidirectional audio stream between the two parties
+         * on the call.
+         */
+        public static final int RTT_MODE_FULL = 1;
+
+        /**
+         * Indicates that the local user should be able to hear the audio stream from the remote
+         * user, but not vice versa. Equivalent to muting the microphone.
+         */
+        public static final int RTT_MODE_HCO = 2;
+
+        /**
+         * Indicates that the remote user should be able to hear the audio stream from the local
+         * user, but not vice versa. Equivalent to setting the volume to zero.
+         */
+        public static final int RTT_MODE_VCO = 3;
+
+        private static final int READ_BUFFER_SIZE = 1000;
+
+        private InputStreamReader mReceiveStream;
+        private OutputStreamWriter mTransmitStream;
+        private int mRttMode;
+        private final InCallAdapter mInCallAdapter;
+        private final String mTelecomCallId;
+        private char[] mReadBuffer = new char[READ_BUFFER_SIZE];
+
+        /**
+         * @hide
+         */
+        public RttCall(String telecomCallId, InputStreamReader receiveStream,
+                OutputStreamWriter transmitStream, int mode, InCallAdapter inCallAdapter) {
+            mTelecomCallId = telecomCallId;
+            mReceiveStream = receiveStream;
+            mTransmitStream = transmitStream;
+            mRttMode = mode;
+            mInCallAdapter = inCallAdapter;
+        }
+
+        /**
+         * Returns the current RTT audio mode.
+         * @return Current RTT audio mode. One of {@link #RTT_MODE_FULL}, {@link #RTT_MODE_VCO}, or
+         * {@link #RTT_MODE_HCO}.
+         */
+        public int getRttAudioMode() {
+            return mRttMode;
+        }
+
+        /**
+         * Sets the RTT audio mode. The requested mode change will be communicated through
+         * {@link Callback#onRttModeChanged(Call, int)}.
+         * @param mode The desired RTT audio mode, one of {@link #RTT_MODE_FULL},
+         * {@link #RTT_MODE_VCO}, or {@link #RTT_MODE_HCO}.
+         */
+        public void setRttMode(@RttAudioMode int mode) {
+            mInCallAdapter.setRttMode(mTelecomCallId, mode);
+        }
+
+        /**
+         * Writes the string {@param input} into the outgoing text stream for this RTT call. Since
+         * RTT transmits text in real-time, this method should be called once for each character
+         * the user enters into the device.
+         *
+         * This method is not thread-safe -- calling it from multiple threads simultaneously may
+         * lead to interleaved text.
+         * @param input The message to send to the remote user.
+         */
+        public void write(String input) throws IOException {
+            mTransmitStream.write(input);
+            mTransmitStream.flush();
+        }
+
+        /**
+         * Reads a string from the remote user, blocking if there is no data available. Returns
+         * {@code null} if the RTT conversation has been terminated and there is no further data
+         * to read.
+         *
+         * This method is not thread-safe -- calling it from multiple threads simultaneously may
+         * lead to interleaved text.
+         * @return A string containing text sent by the remote user, or {@code null} if the
+         * conversation has been terminated or if there was an error while reading.
+         */
+        public String read() {
+            try {
+                int numRead = mReceiveStream.read(mReadBuffer, 0, READ_BUFFER_SIZE);
+                if (numRead < 0) {
+                    return null;
+                }
+                return new String(mReadBuffer, 0, numRead);
+            } catch (IOException e) {
+                Log.w(this, "Exception encountered when reading from InputStreamReader: %s", e);
+            }
+            return null;
+        }
+
+        /**
+         * Non-blocking version of {@link #read()}. Returns {@code null} if there is nothing to
+         * be read.
+         * @return A string containing text entered by the user, or {@code null} if the user has
+         * not entered any new text yet.
+         * @hide
+         */
+        @TestApi
+        public String readImmediately() throws IOException {
+            if (mReceiveStream.ready()) {
+                return read();
+            } else {
+                return null;
+            }
+        }
     }
 
     /**
@@ -853,8 +1143,11 @@ public final class Call {
     private String mParentId = null;
     private int mState;
     private List<String> mCannedTextResponses = null;
+    private String mCallingPackage;
+    private int mTargetSdkVersion;
     private String mRemainingPostDialSequence;
     private VideoCallImpl mVideoCallImpl;
+    private RttCall mRttCall;
     private Details mDetails;
     private Bundle mExtras;
 
@@ -1053,6 +1346,34 @@ public final class Call {
     }
 
     /**
+     * Sends an RTT upgrade request to the remote end of the connection. Success is not
+     * guaranteed, and notification of success will be via the
+     * {@link Callback#onRttStatusChanged(Call, boolean, RttCall)} callback.
+     */
+    public void sendRttRequest() {
+        mInCallAdapter.sendRttRequest(mTelecomCallId);
+    }
+
+    /**
+     * Responds to an RTT request received via the {@link Callback#onRttRequest(Call, int)} )}
+     * callback.
+     * The ID used here should be the same as the ID that was received via the callback.
+     * @param id The request ID received via {@link Callback#onRttRequest(Call, int)}
+     * @param accept {@code true} if the RTT request should be accepted, {@code false} otherwise.
+     */
+    public void respondToRttRequest(int id, boolean accept) {
+        mInCallAdapter.respondToRttRequest(mTelecomCallId, id, accept);
+    }
+
+    /**
+     * Terminate the RTT session on this call. The resulting state change will be notified via
+     * the {@link Callback#onRttStatusChanged(Call, boolean, RttCall)} callback.
+     */
+    public void stopRtt() {
+        mInCallAdapter.stopRtt(mTelecomCallId);
+    }
+
+    /**
      * Adds some extras to this {@link Call}.  Existing keys are replaced and new ones are
      * added.
      * <p>
@@ -1232,6 +1553,23 @@ public final class Call {
     }
 
     /**
+     * Returns this call's RttCall object. The {@link RttCall} instance is used to send and
+     * receive RTT text data, as well as to change the RTT mode.
+     * @return A {@link Call.RttCall}. {@code null} if there is no active RTT connection.
+     */
+    public @Nullable RttCall getRttCall() {
+        return mRttCall;
+    }
+
+    /**
+     * Returns whether this call has an active RTT connection.
+     * @return true if there is a connection, false otherwise.
+     */
+    public boolean isRttActive() {
+        return mRttCall != null;
+    }
+
+    /**
      * Registers a callback to this {@code Call}.
      *
      * @param callback A {@code Callback}.
@@ -1340,19 +1678,25 @@ public final class Call {
     }
 
     /** {@hide} */
-    Call(Phone phone, String telecomCallId, InCallAdapter inCallAdapter) {
+    Call(Phone phone, String telecomCallId, InCallAdapter inCallAdapter, String callingPackage,
+         int targetSdkVersion) {
         mPhone = phone;
         mTelecomCallId = telecomCallId;
         mInCallAdapter = inCallAdapter;
         mState = STATE_NEW;
+        mCallingPackage = callingPackage;
+        mTargetSdkVersion = targetSdkVersion;
     }
 
     /** {@hide} */
-    Call(Phone phone, String telecomCallId, InCallAdapter inCallAdapter, int state) {
+    Call(Phone phone, String telecomCallId, InCallAdapter inCallAdapter, int state,
+            String callingPackage, int targetSdkVersion) {
         mPhone = phone;
         mTelecomCallId = telecomCallId;
         mInCallAdapter = inCallAdapter;
         mState = state;
+        mCallingPackage = callingPackage;
+        mTargetSdkVersion = targetSdkVersion;
     }
 
     /** {@hide} */
@@ -1362,6 +1706,7 @@ public final class Call {
 
     /** {@hide} */
     final void internalUpdate(ParcelableCall parcelableCall, Map<String, Call> callIdMap) {
+
         // First, we update the internal state as far as possible before firing any updates.
         Details details = Details.createFromParcelableCall(parcelableCall);
         boolean detailsChanged = !Objects.equals(mDetails, details);
@@ -1377,7 +1722,8 @@ public final class Call {
             cannedTextResponsesChanged = true;
         }
 
-        VideoCallImpl newVideoCallImpl = parcelableCall.getVideoCallImpl();
+        VideoCallImpl newVideoCallImpl = parcelableCall.getVideoCallImpl(mCallingPackage,
+                mTargetSdkVersion);
         boolean videoCallChanged = parcelableCall.isVideoCallProviderChanged() &&
                 !Objects.equals(mVideoCallImpl, newVideoCallImpl);
         if (videoCallChanged) {
@@ -1421,6 +1767,32 @@ public final class Call {
             fireConferenceableCallsChanged();
         }
 
+        boolean isRttChanged = false;
+        boolean rttModeChanged = false;
+        if (parcelableCall.getParcelableRttCall() != null && parcelableCall.getIsRttCallChanged()) {
+            ParcelableRttCall parcelableRttCall = parcelableCall.getParcelableRttCall();
+            InputStreamReader receiveStream = new InputStreamReader(
+                    new ParcelFileDescriptor.AutoCloseInputStream(
+                            parcelableRttCall.getReceiveStream()),
+                    StandardCharsets.UTF_8);
+            OutputStreamWriter transmitStream = new OutputStreamWriter(
+                    new ParcelFileDescriptor.AutoCloseOutputStream(
+                            parcelableRttCall.getTransmitStream()),
+                    StandardCharsets.UTF_8);
+            RttCall newRttCall = new Call.RttCall(mTelecomCallId,
+                    receiveStream, transmitStream, parcelableRttCall.getRttMode(), mInCallAdapter);
+            if (mRttCall == null) {
+                isRttChanged = true;
+            } else if (mRttCall.getRttAudioMode() != newRttCall.getRttAudioMode()) {
+                rttModeChanged = true;
+            }
+            mRttCall = newRttCall;
+        } else if (mRttCall != null && parcelableCall.getParcelableRttCall() == null
+                && parcelableCall.getIsRttCallChanged()) {
+            isRttChanged = true;
+            mRttCall = null;
+        }
+
         // Now we fire updates, ensuring that any client who listens to any of these notifications
         // gets the most up-to-date state.
 
@@ -1441,6 +1813,12 @@ public final class Call {
         }
         if (childrenChanged) {
             fireChildrenChanged(getChildren());
+        }
+        if (isRttChanged) {
+            fireOnIsRttChanged(mRttCall != null, mRttCall);
+        }
+        if (rttModeChanged) {
+            fireOnRttModeChanged(mRttCall.getRttAudioMode());
         }
 
         // If we have transitioned to DISCONNECTED, that means we need to notify clients and
@@ -1470,6 +1848,24 @@ public final class Call {
     /** {@hide} */
     final void internalOnConnectionEvent(String event, Bundle extras) {
         fireOnConnectionEvent(event, extras);
+    }
+
+    /** {@hide} */
+    final void internalOnRttUpgradeRequest(final int requestId) {
+        for (CallbackRecord<Callback> record : mCallbackRecords) {
+            final Call call = this;
+            final Callback callback = record.getCallback();
+            record.getHandler().post(() -> callback.onRttRequest(call, requestId));
+        }
+    }
+
+    /** @hide */
+    final void internalOnRttInitiationFailure(int reason) {
+        for (CallbackRecord<Callback> record : mCallbackRecords) {
+            final Call call = this;
+            final Callback callback = record.getCallback();
+            record.getHandler().post(() -> callback.onRttInitiationFailure(call, reason));
+        }
     }
 
     private void fireStateChanged(final int newState) {
@@ -1636,6 +2032,32 @@ public final class Call {
                     callback.onConnectionEvent(call, event, extras);
                 }
             });
+        }
+    }
+
+    /**
+     * Notifies listeners of an RTT on/off change
+     *
+     * @param enabled True if RTT is now enabled, false otherwise
+     */
+    private void fireOnIsRttChanged(final boolean enabled, final RttCall rttCall) {
+        for (CallbackRecord<Callback> record : mCallbackRecords) {
+            final Call call = this;
+            final Callback callback = record.getCallback();
+            record.getHandler().post(() -> callback.onRttStatusChanged(call, enabled, rttCall));
+        }
+    }
+
+    /**
+     * Notifies listeners of a RTT mode change
+     *
+     * @param mode The new RTT mode
+     */
+    private void fireOnRttModeChanged(final int mode) {
+        for (CallbackRecord<Callback> record : mCallbackRecords) {
+            final Call call = this;
+            final Callback callback = record.getCallback();
+            record.getHandler().post(() -> callback.onRttModeChanged(call, mode));
         }
     }
 

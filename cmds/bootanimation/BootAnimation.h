@@ -39,35 +39,6 @@ class SurfaceControl;
 class BootAnimation : public Thread, public IBinder::DeathRecipient
 {
 public:
-                BootAnimation();
-    virtual     ~BootAnimation();
-
-    sp<SurfaceComposerClient> session() const;
-
-private:
-    virtual bool        threadLoop();
-    virtual status_t    readyToRun();
-    virtual void        onFirstRef();
-    virtual void        binderDied(const wp<IBinder>& who);
-
-    bool                updateIsTimeAccurate();
-
-    class TimeCheckThread : public Thread {
-    public:
-        TimeCheckThread(BootAnimation* bootAnimation);
-        virtual ~TimeCheckThread();
-    private:
-        virtual status_t    readyToRun();
-        virtual bool        threadLoop();
-        bool                doThreadLoop();
-        void                addTimeDirWatch();
-
-        int mInotifyFd;
-        int mSystemWd;
-        int mTimeWd;
-        BootAnimation* mBootAnimation;
-    };
-
     struct Texture {
         GLint   w;
         GLint   h;
@@ -122,6 +93,49 @@ private:
         Font clockFont;
     };
 
+    // Callback will be called during initialization after we have loaded
+    // the animation and be provided with all parts in animation.
+    typedef std::function<void(const Vector<Animation::Part>& parts)> InitCallback;
+
+    // Callback will be called while animation is playing before each part is
+    // played. It will be provided with the part and play count for it.
+    // It will be provided with the partNumber for the part about to be played,
+    // as well as a reference to the part itself. It will also be provided with
+    // which play of that part is about to start, some parts are repeated
+    // multiple times.
+    typedef std::function<void(int partNumber, const Animation::Part& part, int playNumber)>
+            PlayPartCallback;
+
+    // Callbacks may be null and will be called from this class's internal
+    // thread.
+    BootAnimation(InitCallback initCallback, PlayPartCallback partCallback);
+
+    sp<SurfaceComposerClient> session() const;
+
+private:
+    virtual bool        threadLoop();
+    virtual status_t    readyToRun();
+    virtual void        onFirstRef();
+    virtual void        binderDied(const wp<IBinder>& who);
+
+    bool                updateIsTimeAccurate();
+
+    class TimeCheckThread : public Thread {
+    public:
+        TimeCheckThread(BootAnimation* bootAnimation);
+        virtual ~TimeCheckThread();
+    private:
+        virtual status_t    readyToRun();
+        virtual bool        threadLoop();
+        bool                doThreadLoop();
+        void                addTimeDirWatch();
+
+        int mInotifyFd;
+        int mSystemWd;
+        int mTimeWd;
+        BootAnimation* mBootAnimation;
+    };
+
     status_t initTexture(Texture* texture, AssetManager& asset, const char* name);
     status_t initTexture(FileMap* map, int* width, int* height);
     status_t initFont(Font* font, const char* fallback);
@@ -135,7 +149,6 @@ private:
     void releaseAnimation(Animation*) const;
     bool parseAnimationDesc(Animation&);
     bool preloadZip(Animation &animation);
-    bool playSoundsAllowed() const;
 
     void checkExit();
 
@@ -152,10 +165,13 @@ private:
     sp<Surface> mFlingerSurface;
     bool        mClockEnabled;
     bool        mTimeIsAccurate;
-    bool        mSystemBoot;
+    bool        mTimeFormat12Hour;
+    bool        mShuttingDown;
     String8     mZipFileName;
     SortedVector<String8> mLoadedFiles;
-    sp<TimeCheckThread> mTimeCheckThread;
+    sp<TimeCheckThread> mTimeCheckThread = nullptr;
+    InitCallback mInitCallback = nullptr;
+    PlayPartCallback mPlayPartCallback = nullptr;
 };
 
 // ---------------------------------------------------------------------------

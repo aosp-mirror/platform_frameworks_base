@@ -29,11 +29,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_weight="1"
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginVertical="15dp"
         android:layout_gravity="center_horizontal"
         android:textAppearance="@style/TextAppearance.Toast"
-        android:textColor="@color/bright_foreground_dark"
-        android:shadowColor="#BB000000"
-        android:shadowRadius="2.75"
+        android:textColor="@color/primary_text_default_material_light"
         />
 
 </LinearLayout>

@@ -19,6 +19,6 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="car_lockscreen_disclaimer_title" msgid="7997539137376896441">"Sicher fahren"</string>
-    <string name="car_lockscreen_disclaimer_text" msgid="3061224684092952864">"Achte stets auf die Straßenverhältnisse und halte dich an die geltenden Gesetze. Routen können unter Umständen fehlerhaft, unvollständig, gefährlich, ungeeignet oder verboten sein oder das Überqueren von Verwaltungsgrenzen erfordern. Informationen zum Unternehmen können ebenfalls fehlerhaft oder unvollständig sein. Die Datenübertragung erfolgt nicht in Echtzeit und die Genauigkeit der Standortangaben kann nicht gewährleistet werden. Bediene während der Fahrt nicht dein Mobilgerät und verwende keine Apps, die du nicht über Android Auto steuern kannst."</string>
+    <string name="unknown_user_label" msgid="4323896111737677955">"Unbekannt"</string>
+    <string name="start_driving" msgid="864023351402918991">"Losfahren"</string>
 </resources>

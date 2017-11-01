@@ -17,7 +17,7 @@
 #define LOG_TAG "FileBackupHelper_native"
 #include <utils/Log.h>
 
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 #include "core_jni_helpers.h"
 
 #include <androidfw/BackupHelpers.h>

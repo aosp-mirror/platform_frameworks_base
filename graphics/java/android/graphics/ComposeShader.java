@@ -16,61 +16,75 @@
 
 package android.graphics;
 
+
+import android.annotation.NonNull;
+
 /** A subclass of shader that returns the composition of two other shaders, combined by
     an {@link android.graphics.Xfermode} subclass.
 */
 public class ComposeShader extends Shader {
 
-    private static final int TYPE_XFERMODE = 1;
-    private static final int TYPE_PORTERDUFFMODE = 2;
+    Shader mShaderA;
+    private long mNativeInstanceShaderA;
+    Shader mShaderB;
+    private long mNativeInstanceShaderB;
+    private int mPorterDuffMode;
 
     /**
-     * Type of the ComposeShader: can be either TYPE_XFERMODE or TYPE_PORTERDUFFMODE
-     */
-    private int mType;
-
-    private Xfermode mXferMode;
-    private PorterDuff.Mode mPorterDuffMode;
-
-    /**
-     * Hold onto the shaders to avoid GC.
-     */
-    @SuppressWarnings({"UnusedDeclaration"})
-    private final Shader mShaderA;
-    @SuppressWarnings({"UnusedDeclaration"})
-    private final Shader mShaderB;
-
-    /** Create a new compose shader, given shaders A, B, and a combining mode.
-        When the mode is applied, it will be given the result from shader A as its
-        "dst", and the result from shader B as its "src".
-        @param shaderA  The colors from this shader are seen as the "dst" by the mode
-        @param shaderB  The colors from this shader are seen as the "src" by the mode
-        @param mode     The mode that combines the colors from the two shaders. If mode
-                        is null, then SRC_OVER is assumed.
+     * Create a new compose shader, given shaders A, B, and a combining mode.
+     * When the mode is applied, it will be given the result from shader A as its
+     * "dst", and the result from shader B as its "src".
+     *
+     * @param shaderA  The colors from this shader are seen as the "dst" by the mode
+     * @param shaderB  The colors from this shader are seen as the "src" by the mode
+     * @param mode     The mode that combines the colors from the two shaders. If mode
+     *                 is null, then SRC_OVER is assumed.
     */
-    public ComposeShader(Shader shaderA, Shader shaderB, Xfermode mode) {
-        mType = TYPE_XFERMODE;
-        mShaderA = shaderA;
-        mShaderB = shaderB;
-        mXferMode = mode;
-        init(nativeCreate1(shaderA.getNativeInstance(), shaderB.getNativeInstance(),
-                (mode != null) ? mode.native_instance : 0));
+    public ComposeShader(@NonNull Shader shaderA, @NonNull Shader shaderB, @NonNull Xfermode mode) {
+        this(shaderA, shaderB, mode.porterDuffMode);
     }
 
-    /** Create a new compose shader, given shaders A, B, and a combining PorterDuff mode.
-        When the mode is applied, it will be given the result from shader A as its
-        "dst", and the result from shader B as its "src".
-        @param shaderA  The colors from this shader are seen as the "dst" by the mode
-        @param shaderB  The colors from this shader are seen as the "src" by the mode
-        @param mode     The PorterDuff mode that combines the colors from the two shaders.
+    /**
+     * Create a new compose shader, given shaders A, B, and a combining PorterDuff mode.
+     * When the mode is applied, it will be given the result from shader A as its
+     * "dst", and the result from shader B as its "src".
+     *
+     * @param shaderA  The colors from this shader are seen as the "dst" by the mode
+     * @param shaderB  The colors from this shader are seen as the "src" by the mode
+     * @param mode     The PorterDuff mode that combines the colors from the two shaders.
     */
-    public ComposeShader(Shader shaderA, Shader shaderB, PorterDuff.Mode mode) {
-        mType = TYPE_PORTERDUFFMODE;
+    public ComposeShader(@NonNull Shader shaderA, @NonNull Shader shaderB,
+            @NonNull PorterDuff.Mode mode) {
+        this(shaderA, shaderB, mode.nativeInt);
+    }
+
+    private ComposeShader(Shader shaderA, Shader shaderB, int nativeMode) {
+        if (shaderA == null || shaderB == null) {
+            throw new IllegalArgumentException("Shader parameters must not be null");
+        }
+
         mShaderA = shaderA;
         mShaderB = shaderB;
-        mPorterDuffMode = mode;
-        init(nativeCreate2(shaderA.getNativeInstance(), shaderB.getNativeInstance(),
-                mode.nativeInt));
+        mPorterDuffMode = nativeMode;
+    }
+
+    @Override
+    long createNativeInstance(long nativeMatrix) {
+        mNativeInstanceShaderA = mShaderA.getNativeInstance();
+        mNativeInstanceShaderB = mShaderB.getNativeInstance();
+        return nativeCreate(nativeMatrix,
+                mShaderA.getNativeInstance(), mShaderB.getNativeInstance(), mPorterDuffMode);
+    }
+
+    /** @hide */
+    @Override
+    protected void verifyNativeInstance() {
+        if (mShaderA.getNativeInstance() != mNativeInstanceShaderA
+                || mShaderB.getNativeInstance() != mNativeInstanceShaderB) {
+            // Child shader native instance has been updated,
+            // so our cached native instance is no longer valid - discard it
+            discardNativeInstance();
+        }
     }
 
     /**
@@ -78,24 +92,12 @@ public class ComposeShader extends Shader {
      */
     @Override
     protected Shader copy() {
-        final ComposeShader copy;
-        switch (mType) {
-            case TYPE_XFERMODE:
-                copy = new ComposeShader(mShaderA.copy(), mShaderB.copy(), mXferMode);
-                break;
-            case TYPE_PORTERDUFFMODE:
-                copy = new ComposeShader(mShaderA.copy(), mShaderB.copy(), mPorterDuffMode);
-                break;
-            default:
-                throw new IllegalArgumentException(
-                        "ComposeShader should be created with either Xfermode or PorterDuffMode");
-        }
+        final ComposeShader copy = new ComposeShader(
+                mShaderA.copy(), mShaderB.copy(), mPorterDuffMode);
         copyLocalMatrix(copy);
         return copy;
     }
 
-    private static native long nativeCreate1(long native_shaderA, long native_shaderB,
-            long native_mode);
-    private static native long nativeCreate2(long native_shaderA, long native_shaderB,
-            int porterDuffMode);
+    private static native long nativeCreate(long nativeMatrix,
+            long nativeShaderA, long nativeShaderB, int porterDuffMode);
 }

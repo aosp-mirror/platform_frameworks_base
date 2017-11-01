@@ -17,6 +17,7 @@
 package android.util;
 
 import android.os.SystemClock;
+import com.android.internal.annotations.GuardedBy;
 
 import java.util.concurrent.TimeoutException;
 
@@ -29,8 +30,7 @@ import java.util.concurrent.TimeoutException;
  * the sequence number. If the response comes within the timeout
  * and its sequence number is the one sent in the method invocation,
  * then the call succeeded. If the response does not come within
- * the timeout then the call failed. Older result received when
- * waiting for the result are ignored.
+ * the timeout then the call failed.
  * <p>
  * Typical usage is:
  * </p>
@@ -66,66 +66,90 @@ public abstract class TimedRemoteCaller<T> {
 
     public static final long DEFAULT_CALL_TIMEOUT_MILLIS = 5000;
 
-    private static final int UNDEFINED_SEQUENCE = -1;
-
     private final Object mLock = new Object();
 
     private final long mCallTimeoutMillis;
 
+    /** The callbacks we are waiting for, key == sequence id, value == 1 */
+    @GuardedBy("mLock")
+    private final SparseIntArray mAwaitedCalls = new SparseIntArray(1);
+
+    /** The callbacks we received but for which the result has not yet been reported */
+    @GuardedBy("mLock")
+    private final SparseArray<T> mReceivedCalls = new SparseArray<>(1);
+
+    @GuardedBy("mLock")
     private int mSequenceCounter;
 
-    private int mReceivedSequence = UNDEFINED_SEQUENCE;
-
-    private int mAwaitedSequence = UNDEFINED_SEQUENCE;
-
-    private T mResult;
-
+    /**
+     * Create a new timed caller.
+     *
+     * @param callTimeoutMillis The time to wait in {@link #getResultTimed} before a timed call will
+     *                          be declared timed out
+     */
     public TimedRemoteCaller(long callTimeoutMillis) {
         mCallTimeoutMillis = callTimeoutMillis;
     }
 
-    public final int onBeforeRemoteCall() {
+    /**
+     * Indicate that a timed call will be made.
+     *
+     * @return The sequence id for the call
+     */
+    protected final int onBeforeRemoteCall() {
         synchronized (mLock) {
-            mAwaitedSequence = mSequenceCounter++;
-            return mAwaitedSequence;
+            int sequenceId;
+            do {
+                sequenceId = mSequenceCounter++;
+            } while (mAwaitedCalls.get(sequenceId) != 0);
+
+            mAwaitedCalls.put(sequenceId, 1);
+
+            return sequenceId;
         }
     }
 
-    public final T getResultTimed(int sequence) throws TimeoutException {
+    /**
+     * Indicate that the timed call has returned.
+     *
+     * @param result The result of the timed call
+     * @param sequence The sequence id of the call (from {@link #onBeforeRemoteCall()})
+     */
+    protected final void onRemoteMethodResult(T result, int sequence) {
         synchronized (mLock) {
-            final boolean success = waitForResultTimedLocked(sequence);
-            if (!success) {
-                throw new TimeoutException("No reponse for sequence: " + sequence);
-            }
-            T result = mResult;
-            mResult = null;
-            return result;
-        }
-    }
-
-    public final void onRemoteMethodResult(T result, int sequence) {
-        synchronized (mLock) {
-            if (sequence == mAwaitedSequence) {
-                mReceivedSequence = sequence;
-                mResult = result;
+            // Do nothing if we do not await the call anymore as it must have timed out
+            boolean containedSequenceId = mAwaitedCalls.get(sequence) != 0;
+            if (containedSequenceId) {
+                mAwaitedCalls.delete(sequence);
+                mReceivedCalls.put(sequence, result);
                 mLock.notifyAll();
             }
         }
     }
 
-    private boolean waitForResultTimedLocked(int sequence) {
+    /**
+     * Wait until the timed call has returned.
+     *
+     * @param sequence The sequence id of the call (from {@link #onBeforeRemoteCall()})
+     *
+     * @return The result of the timed call (set in {@link #onRemoteMethodResult(Object, int)})
+     */
+    protected final T getResultTimed(int sequence) throws TimeoutException {
         final long startMillis = SystemClock.uptimeMillis();
         while (true) {
             try {
-                if (mReceivedSequence == sequence) {
-                    return true;
+                synchronized (mLock) {
+                    if (mReceivedCalls.indexOfKey(sequence) >= 0) {
+                        return mReceivedCalls.removeReturnOld(sequence);
+                    }
+                    final long elapsedMillis = SystemClock.uptimeMillis() - startMillis;
+                    final long waitMillis = mCallTimeoutMillis - elapsedMillis;
+                    if (waitMillis <= 0) {
+                        mAwaitedCalls.delete(sequence);
+                        throw new TimeoutException("No response for sequence: " + sequence);
+                    }
+                    mLock.wait(waitMillis);
                 }
-                final long elapsedMillis = SystemClock.uptimeMillis() - startMillis;
-                final long waitMillis = mCallTimeoutMillis - elapsedMillis;
-                if (waitMillis <= 0) {
-                    return false;
-                }
-                mLock.wait(waitMillis);
             } catch (InterruptedException ie) {
                 /* ignore */
             }

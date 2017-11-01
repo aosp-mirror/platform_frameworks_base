@@ -36,14 +36,21 @@
     <declare-styleable name="WifiEncryptionState">
         <attr name="state_encrypted" format="boolean" />
     </declare-styleable>
-    <attr name="wifi_signal" format="reference" />
+    <declare-styleable name="WifiMeteredState">
+        <attr name="state_metered" format="boolean" />
+    </declare-styleable>
+    <declare-styleable name="WifiSavedState">
+        <attr name="state_saved" format="boolean" />
+    </declare-styleable>
 
-    <declare-styleable name="UsageView">
-        <attr name="android:colorAccent" />
-        <attr name="sideLabels" format="reference" />
-        <attr name="bottomLabels" format="reference" />
-        <attr name="textColor" format="color" />
-        <attr name="android:gravity" />
+    <attr name="wifi_signal" format="reference" />
+    <attr name="wifi_friction" format="reference" />
+
+    <attr name="footerPreferenceStyle" format="reference" />
+
+    <declare-styleable name="PreferenceImageView">
+        <attr name="maxWidth" format="dimension" />
+        <attr name="maxHeight" format="dimension" />
     </declare-styleable>
 
 </resources>

@@ -37,6 +37,7 @@ import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.util.Log;
 
+import com.android.internal.util.DumpUtils;
 import com.android.server.net.BaseNetworkObserver;
 
 /**
@@ -91,12 +92,12 @@ class CommonTimeManagementService extends Binder {
      * Internal state
      */
     private final Context mContext;
+    private final Object mLock = new Object();
     private INetworkManagementService mNetMgr;
     private CommonTimeConfig mCTConfig;
     private String mCurIface;
     private Handler mReconnectHandler = new Handler();
     private Handler mNoInterfaceHandler = new Handler();
-    private Object mLock = new Object();
     private boolean mDetectedAtStartup = false;
     private byte mEffectivePrio = BASE_SERVER_PRIO;
 
@@ -104,15 +105,19 @@ class CommonTimeManagementService extends Binder {
      * Callback handler implementations.
      */
     private INetworkManagementEventObserver mIfaceObserver = new BaseNetworkObserver() {
+        @Override
         public void interfaceStatusChanged(String iface, boolean up) {
             reevaluateServiceState();
         }
+        @Override
         public void interfaceLinkStateChanged(String iface, boolean up) {
             reevaluateServiceState();
         }
+        @Override
         public void interfaceAdded(String iface) {
             reevaluateServiceState();
         }
+        @Override
         public void interfaceRemoved(String iface) {
             reevaluateServiceState();
         }
@@ -126,19 +131,11 @@ class CommonTimeManagementService extends Binder {
     };
 
     private CommonTimeConfig.OnServerDiedListener mCTServerDiedListener =
-        new CommonTimeConfig.OnServerDiedListener() {
-            public void onServerDied() {
-                scheduleTimeConfigReconnect();
-            }
-        };
+            () -> scheduleTimeConfigReconnect();
 
-    private Runnable mReconnectRunnable = new Runnable() {
-        public void run() { connectToTimeConfig(); }
-    };
+    private Runnable mReconnectRunnable = () -> connectToTimeConfig();
 
-    private Runnable mNoInterfaceRunnable = new Runnable() {
-        public void run() { handleNoInterfaceTimeout(); }
-    };
+    private Runnable mNoInterfaceRunnable = () -> handleNoInterfaceTimeout();
 
     /*
      * Public interface (constructor, systemReady and dump)
@@ -177,13 +174,7 @@ class CommonTimeManagementService extends Binder {
 
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
-                != PackageManager.PERMISSION_GRANTED) {
-            pw.println(String.format(
-                        "Permission Denial: can't dump CommonTimeManagement service from from " +
-                        "pid=%d, uid=%d", Binder.getCallingPid(), Binder.getCallingUid()));
-            return;
-        }
+        if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
 
         if (!mDetectedAtStartup) {
             pw.println("Native Common Time service was not detected at startup.  " +

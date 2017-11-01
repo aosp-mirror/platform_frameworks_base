@@ -32,14 +32,12 @@ public class SystemVibrator extends Vibrator {
     private final Binder mToken = new Binder();
 
     public SystemVibrator() {
-        mService = IVibratorService.Stub.asInterface(
-                ServiceManager.getService("vibrator"));
+        mService = IVibratorService.Stub.asInterface(ServiceManager.getService("vibrator"));
     }
 
     public SystemVibrator(Context context) {
         super(context);
-        mService = IVibratorService.Stub.asInterface(
-                ServiceManager.getService("vibrator"));
+        mService = IVibratorService.Stub.asInterface(ServiceManager.getService("vibrator"));
     }
 
     @Override
@@ -55,44 +53,30 @@ public class SystemVibrator extends Vibrator {
         return false;
     }
 
-    /**
-     * @hide
-     */
     @Override
-    public void vibrate(int uid, String opPkg, long milliseconds, AudioAttributes attributes) {
+    public boolean hasAmplitudeControl() {
+        if (mService == null) {
+            Log.w(TAG, "Failed to check amplitude control; no vibrator service.");
+            return false;
+        }
+        try {
+            return mService.hasAmplitudeControl();
+        } catch (RemoteException e) {
+        }
+        return false;
+    }
+
+    @Override
+    public void vibrate(int uid, String opPkg,
+            VibrationEffect effect, AudioAttributes attributes) {
         if (mService == null) {
             Log.w(TAG, "Failed to vibrate; no vibrator service.");
             return;
         }
         try {
-            mService.vibrate(uid, opPkg, milliseconds, usageForAttributes(attributes), mToken);
+            mService.vibrate(uid, opPkg, effect, usageForAttributes(attributes), mToken);
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to vibrate.", e);
-        }
-    }
-
-    /**
-     * @hide
-     */
-    @Override
-    public void vibrate(int uid, String opPkg, long[] pattern, int repeat,
-            AudioAttributes attributes) {
-        if (mService == null) {
-            Log.w(TAG, "Failed to vibrate; no vibrator service.");
-            return;
-        }
-        // catch this here because the server will do nothing.  pattern may
-        // not be null, let that be checked, because the server will drop it
-        // anyway
-        if (repeat < pattern.length) {
-            try {
-                mService.vibratePattern(uid, opPkg, pattern, repeat, usageForAttributes(attributes),
-                        mToken);
-            } catch (RemoteException e) {
-                Log.w(TAG, "Failed to vibrate.", e);
-            }
-        } else {
-            throw new ArrayIndexOutOfBoundsException();
         }
     }
 

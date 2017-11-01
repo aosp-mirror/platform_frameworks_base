@@ -55,6 +55,7 @@ public:
           mCompressionMethod(0), mJunkPath(false), mOutputAPKFile(NULL),
           mManifestPackageNameOverride(NULL), mInstrumentationPackageNameOverride(NULL),
           mAutoAddOverlay(false), mGenDependencies(false), mNoVersionVectors(false),
+          mNoVersionTransitions(false),
           mCrunchedOutputDir(NULL), mProguardFile(NULL), mMainDexProguardFile(NULL),
           mAndroidManifestFile(NULL), mPublicOutputFile(NULL),
           mRClassDir(NULL), mResourceIntermediatesDir(NULL), mManifestMinSdkVersion(NULL),
@@ -219,6 +220,8 @@ public:
     void setBuildAppAsSharedLibrary(bool val) { mBuildAppAsSharedLibrary = val; }
     void setNoVersionVectors(bool val) { mNoVersionVectors = val; }
     bool getNoVersionVectors() const { return mNoVersionVectors; }
+    void setNoVersionTransitions(bool val) { mNoVersionTransitions = val; }
+    bool getNoVersionTransitions() const { return mNoVersionTransitions; }
 
     /*
      * Set and get the file specification.
@@ -299,6 +302,7 @@ private:
     bool        mAutoAddOverlay;
     bool        mGenDependencies;
     bool        mNoVersionVectors;
+    bool        mNoVersionTransitions;
     const char* mCrunchedOutputDir;
     const char* mProguardFile;
     const char* mMainDexProguardFile;

@@ -16,6 +16,8 @@
 
 package android.os;
 
+import com.android.internal.os.RoSystemProperties;
+
 /**
  * Provides support for in-place factory test functions.
  *
@@ -36,7 +38,7 @@ public final class FactoryTest {
      * or {@link #FACTORY_TEST_HIGH_LEVEL}.
      */
     public static int getMode() {
-        return SystemProperties.getInt("ro.factorytest", FACTORY_TEST_OFF);
+        return RoSystemProperties.FACTORYTEST;
     }
 
     /**

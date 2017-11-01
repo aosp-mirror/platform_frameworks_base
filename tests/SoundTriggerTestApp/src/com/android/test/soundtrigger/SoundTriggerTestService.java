@@ -100,7 +100,7 @@ public class SoundTriggerTestService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        stopAllRecognitions();
+        stopAllRecognitionsAndUnload();
         unregisterReceiver(mBroadcastReceiver);
     }
 
@@ -171,7 +171,7 @@ public class SoundTriggerTestService extends Service {
     @Override
     public void onTaskRemoved(Intent rootIntent) {
         super.onTaskRemoved(rootIntent);
-        stopAllRecognitions();
+        stopAllRecognitionsAndUnload();
         stopSelf();
     }
 
@@ -197,14 +197,22 @@ public class SoundTriggerTestService extends Service {
         }
     }
 
-    private synchronized void stopAllRecognitions() {
+    private synchronized void stopAllRecognitionsAndUnload() {
+        Log.e(TAG, "Stop all recognitions");
         for (ModelInfo modelInfo : mModelInfoMap.values()) {
+            Log.e(TAG, "Loop " + modelInfo.modelUuid);
             if (modelInfo.detector != null) {
                 Log.i(TAG, "Stopping recognition for " + modelInfo.name);
                 try {
                     modelInfo.detector.stopRecognition();
                 } catch (Exception e) {
                     Log.e(TAG, "Failed to stop recognition", e);
+                }
+                try {
+                    mSoundTriggerUtil.deleteSoundModel(modelInfo.modelUuid);
+                    modelInfo.detector = null;
+                } catch (Exception e) {
+                    Log.e(TAG, "Failed to unload sound model", e);
                 }
             }
         }
@@ -681,8 +689,20 @@ public class SoundTriggerTestService extends Service {
         AudioFormat format =  event.getCaptureAudioFormat();
         result = result + "AudioFormat: " + ((format == null) ? "null" : format.toString());
         byte[] triggerAudio = event.getTriggerAudio();
-        result = result + "TriggerAudio: " + (triggerAudio == null ? "null" : triggerAudio.length);
-        result = result + "CaptureSession: " + event.getCaptureSession();
+        result = result + ", TriggerAudio: " + (triggerAudio == null ? "null" : triggerAudio.length);
+        byte[] data = event.getData();
+        result = result + ", Data: " + (data == null ? "null" : data.length);
+        if (data != null) {
+          try {
+            String decodedData = new String(data, "UTF-8");
+            if (decodedData.chars().allMatch(c -> (c >= 32 && c < 128) || c == 0)) {
+                result = result + ", Decoded Data: '" + decodedData + "'";
+            }
+          } catch (Exception e) {
+            Log.e(TAG, "Failed to decode data");
+          }
+        }
+        result = result + ", CaptureSession: " + event.getCaptureSession();
         result += " )";
         return result;
     }

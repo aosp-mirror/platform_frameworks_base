@@ -16,15 +16,19 @@
 
 package android.net.util;
 
-import android.net.util.IpUtils;
-import android.test.suitebuilder.annotation.SmallTest;
+import static org.junit.Assert.assertEquals;
+
+import android.support.test.runner.AndroidJUnit4;
+import android.support.test.filters.SmallTest;
 
 import java.nio.ByteBuffer;
 
-import junit.framework.TestCase;
+import org.junit.runner.RunWith;
+import org.junit.Test;
 
-
-public class IpUtilsTest extends TestCase {
+@RunWith(AndroidJUnit4.class)
+@SmallTest
+public class IpUtilsTest {
 
     private static final int IPV4_HEADER_LENGTH = 20;
     private static final int IPV6_HEADER_LENGTH = 40;
@@ -67,7 +71,7 @@ public class IpUtilsTest extends TestCase {
     //           "hello")
     // print JavaPacketDefinition(str(packet))
 
-    @SmallTest
+    @Test
     public void testIpv6TcpChecksum() throws Exception {
         // packet = (scapy.IPv6(src="2001:db8::1", dst="2001:db8::2", tc=0x80) /
         //           scapy.TCP(sport=12345, dport=7,
@@ -115,7 +119,7 @@ public class IpUtilsTest extends TestCase {
         assertEquals(0, IpUtils.tcpChecksum(packet, 0, IPV6_HEADER_LENGTH, transportLen));
     }
 
-    @SmallTest
+    @Test
     public void testIpv4UdpChecksum() {
         // packet = (scapy.IP(src="192.0.2.1", dst="192.0.2.2", tos=0x40) /
         //           scapy.UDP(sport=32012, dport=4500) /

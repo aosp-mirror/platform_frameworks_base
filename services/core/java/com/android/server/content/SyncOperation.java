@@ -18,10 +18,11 @@ package com.android.server.content;
 
 import android.accounts.Account;
 import android.app.job.JobInfo;
-import android.content.pm.PackageManager;
 import android.content.ContentResolver;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.PersistableBundle;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.Slog;
 
@@ -236,6 +237,9 @@ public class SyncOperation {
      * contain a valid sync operation.
      */
     static SyncOperation maybeCreateFromJobExtras(PersistableBundle jobExtras) {
+        if (jobExtras == null) {
+            return null;
+        }
         String accountName, accountType;
         String provider;
         int userId, owningUid;
@@ -350,37 +354,46 @@ public class SyncOperation {
         return dump(null, true);
     }
 
-    String dump(PackageManager pm, boolean useOneLine) {
+    String dump(PackageManager pm, boolean shorter) {
         StringBuilder sb = new StringBuilder();
-        sb.append("JobId: ").append(jobId)
-                .append(", ")
+        sb.append("JobId=").append(jobId)
+                .append(" ")
                 .append(target.account.name)
-                .append(" u")
-                .append(target.userId).append(" (")
+                .append("/")
                 .append(target.account.type)
-                .append(")")
-                .append(", ")
+                .append(" u")
+                .append(target.userId)
+                .append(" [")
                 .append(target.provider)
-                .append(", ");
+                .append("] ");
         sb.append(SyncStorageEngine.SOURCES[syncSource]);
-        if (extras.getBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, false)) {
-            sb.append(", EXPEDITED");
+        if (expectedRuntime != 0) {
+            sb.append(" ExpectedIn=");
+            SyncManager.formatDurationHMS(sb,
+                    (expectedRuntime - SystemClock.elapsedRealtime()));
         }
-        sb.append(", reason: ");
+        if (extras.getBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, false)) {
+            sb.append(" EXPEDITED");
+        }
+        sb.append(" Reason=");
         sb.append(reasonToString(pm, reason));
         if (isPeriodic) {
-            sb.append(", period: " + periodMillis).append(", flexMillis: " + flexMillis);
+            sb.append(" (period=");
+            SyncManager.formatDurationHMS(sb, periodMillis);
+            sb.append(" flex=");
+            SyncManager.formatDurationHMS(sb, flexMillis);
+            sb.append(")");
         }
-        if (!useOneLine) {
-            sb.append("\n    ");
-            sb.append("owningUid=");
+        if (!shorter) {
+            sb.append(" Owner={");
             UserHandle.formatUid(sb, owningUid);
-            sb.append(" owningPackage=");
+            sb.append(" ");
             sb.append(owningPackage);
-        }
-        if (!useOneLine && !extras.keySet().isEmpty()) {
-            sb.append("\n    ");
-            extrasToStringBuilder(extras, sb);
+            sb.append("}");
+            if (!extras.keySet().isEmpty()) {
+                sb.append(" ");
+                extrasToStringBuilder(extras, sb);
+            }
         }
         return sb.toString();
     }
@@ -434,12 +447,22 @@ public class SyncOperation {
         return extras.getBoolean(ContentResolver.SYNC_EXTRAS_IGNORE_SETTINGS, false);
     }
 
-    private static void extrasToStringBuilder(Bundle bundle, StringBuilder sb) {
+    static void extrasToStringBuilder(Bundle bundle, StringBuilder sb) {
+        if (bundle == null) {
+            sb.append("null");
+            return;
+        }
         sb.append("[");
         for (String key : bundle.keySet()) {
             sb.append(key).append("=").append(bundle.get(key)).append(" ");
         }
         sb.append("]");
+    }
+
+    static String extrasToString(Bundle bundle) {
+        final StringBuilder sb = new StringBuilder();
+        extrasToStringBuilder(bundle, sb);
+        return sb.toString();
     }
 
     String wakeLockName() {

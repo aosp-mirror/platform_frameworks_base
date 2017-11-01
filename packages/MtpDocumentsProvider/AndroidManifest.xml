@@ -22,7 +22,6 @@
                   android:label="@string/downloads_app_label"
                   android:icon="@mipmap/ic_launcher_download"
                   android:theme="@android:style/Theme.NoDisplay"
-                  android:screenOrientation="locked"
                   android:excludeFromRecents="true">
             <intent-filter>
                 <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />

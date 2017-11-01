@@ -45,7 +45,11 @@ static void expectFillEq(Glop::Fill& expectedFill, Glop::Fill& builtFill) {
     EXPECT_EQ(expectedFill.skiaShaderData.skiaShaderType, builtFill.skiaShaderData.skiaShaderType);
     EXPECT_EQ(expectedFill.texture.clamp, builtFill.texture.clamp);
     EXPECT_EQ(expectedFill.texture.filter, builtFill.texture.filter);
-    EXPECT_EQ(expectedFill.texture.target, builtFill.texture.target);
+    EXPECT_TRUE((expectedFill.texture.texture && builtFill.texture.texture)
+            || (!expectedFill.texture.texture && !builtFill.texture.texture));
+    if (expectedFill.texture.texture) {
+        EXPECT_EQ(expectedFill.texture.texture->target(), builtFill.texture.texture->target());
+    }
     EXPECT_EQ(expectedFill.texture.textureTransform, builtFill.texture.textureTransform);
 }
 
@@ -85,9 +89,6 @@ static void expectTransformEq(Glop::Transform& expectedTransform, Glop::Transfor
 }
 
 static void expectGlopEq(Glop& expectedGlop, Glop& builtGlop) {
-#if !HWUI_NEW_OPS
-    EXPECT_EQ(expectedGlop.bounds, builtGlop.bounds);
-#endif
     expectBlendEq(expectedGlop.blend, builtGlop.blend);
     expectFillEq(expectedGlop.fill, builtGlop.fill);
     expectMeshEq(expectedGlop.mesh, builtGlop.mesh);
@@ -111,11 +112,11 @@ static std::unique_ptr<Glop> blackUnitQuadGlop(RenderState& renderState) {
     glop->fill.color.set(Color::Black);
     glop->fill.skiaShaderData.skiaShaderType = kNone_SkiaShaderType;
     glop->fill.filterMode = ProgramDescription::ColorFilterMode::None;
-    glop->fill.texture = { nullptr, GL_INVALID_ENUM, GL_INVALID_ENUM, GL_INVALID_ENUM, nullptr };
+    glop->fill.texture = { nullptr, GL_INVALID_ENUM, GL_INVALID_ENUM, nullptr };
     return glop;
 }
 
-RENDERTHREAD_TEST(GlopBuilder, rectSnapTest) {
+RENDERTHREAD_OPENGL_PIPELINE_TEST(GlopBuilder, rectSnapTest) {
     RenderState& renderState = renderThread.renderState();
     Caches& caches = Caches::getInstance();
     SkPaint paint;
@@ -138,9 +139,6 @@ RENDERTHREAD_TEST(GlopBuilder, rectSnapTest) {
     // unit quad also should be translate by additional (0.3, 0.3) to snap to exact pixels.
     goldenGlop->transform.modelView.loadTranslate(1.3, 1.3, 0);
     goldenGlop->transform.modelView.scale(99, 99, 1);
-#if !HWUI_NEW_OPS
-    goldenGlop->bounds = android::uirenderer::Rect(1.70, 1.70, 100.70, 100.70);
-#endif
     goldenGlop->transform.canvas = simpleTranslate;
     goldenGlop->fill.texture.filter = GL_NEAREST;
     expectGlopEq(*goldenGlop, glop);

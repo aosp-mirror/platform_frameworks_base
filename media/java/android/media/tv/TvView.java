@@ -25,6 +25,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.Region;
 import android.media.PlaybackParams;
 import android.media.tv.TvInputManager.Session;
@@ -776,8 +777,8 @@ public class TvView extends ViewGroup {
         mSurface = null;
         mSurfaceView = new SurfaceView(getContext(), mAttrs, mDefStyleAttr) {
             @Override
-            protected void updateWindow(boolean force, boolean redrawNeeded) {
-                super.updateWindow(force, redrawNeeded);
+            protected void updateSurface() {
+                super.updateSurface();
                 relayoutSessionOverlayView();
             }};
         // The surface view's content should be treated as secure all the time.
@@ -838,10 +839,12 @@ public class TvView extends ViewGroup {
     }
 
     private Rect getViewFrameOnScreen() {
-        int[] location = new int[2];
-        getLocationOnScreen(location);
-        return new Rect(location[0], location[1],
-                location[0] + getWidth(), location[1] + getHeight());
+        Rect frame = new Rect();
+        getGlobalVisibleRect(frame);
+        RectF frameF = new RectF(frame);
+        getMatrix().mapRect(frameF);
+        frameF.round(frame);
+        return frame;
     }
 
     /**

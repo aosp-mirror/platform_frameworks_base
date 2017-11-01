@@ -348,9 +348,7 @@ public class LegacyCameraDevice implements AutoCloseable {
 
                     Size[] sizes = streamConfigurations.getOutputSizes(surfaceType);
                     if (sizes == null) {
-                        // WAR: Override default format to IMPLEMENTATION_DEFINED for b/9487482
-                        if ((surfaceType >= LegacyMetadataMapper.HAL_PIXEL_FORMAT_RGBA_8888 &&
-                            surfaceType <= LegacyMetadataMapper.HAL_PIXEL_FORMAT_BGRA_8888)) {
+                        if (surfaceType == ImageFormat.PRIVATE) {
 
                             // YUV_420_888 is always present in LEGACY for all
                             // IMPLEMENTATION_DEFINED output sizes, and is publicly visible in the
@@ -649,7 +647,16 @@ public class LegacyCameraDevice implements AutoCloseable {
      */
     public static int detectSurfaceType(Surface surface) throws BufferQueueAbandonedException {
         checkNotNull(surface);
-        return LegacyExceptionUtils.throwOnError(nativeDetectSurfaceType(surface));
+        int surfaceType = nativeDetectSurfaceType(surface);
+
+        // TODO: remove this override since the default format should be
+        // ImageFormat.PRIVATE. b/9487482
+        if ((surfaceType >= LegacyMetadataMapper.HAL_PIXEL_FORMAT_RGBA_8888 &&
+                surfaceType <= LegacyMetadataMapper.HAL_PIXEL_FORMAT_BGRA_8888)) {
+            surfaceType = ImageFormat.PRIVATE;
+        }
+
+        return LegacyExceptionUtils.throwOnError(surfaceType);
     }
 
     /**

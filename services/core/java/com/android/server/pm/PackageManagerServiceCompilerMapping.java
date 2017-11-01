@@ -23,11 +23,10 @@ import dalvik.system.DexFile;
 /**
  * Manage (retrieve) mappings from compilation reason to compilation filter.
  */
-class PackageManagerServiceCompilerMapping {
+public class PackageManagerServiceCompilerMapping {
     // Names for compilation reasons.
     static final String REASON_STRINGS[] = {
-            "first-boot", "boot", "install", "bg-dexopt", "ab-ota", "nsys-library", "shared-apk",
-            "forced-dexopt", "core-app"
+            "first-boot", "boot", "install", "bg-dexopt", "ab-ota", "inactive"
     };
 
     // Static block to ensure the strings array is of the right length.
@@ -48,22 +47,20 @@ class PackageManagerServiceCompilerMapping {
     // Load the property for the given reason and check for validity. This will throw an
     // exception in case the reason or value are invalid.
     private static String getAndCheckValidity(int reason) {
-        String sysPropValue = SystemProperties.get(getSystemPropertyName(reason));
+        String sysPropName = getSystemPropertyName(reason);
+        String sysPropValue;
+        // TODO: This is a temporary hack to keep marlin booting on aosp/master while we
+        // figure out how to deal with these system properties that currently appear on
+        // vendor.
+        if ("pm.dexopt.inactive".equals(sysPropName)) {
+            sysPropValue = "verify";
+        } else {
+            sysPropValue = SystemProperties.get(sysPropName);
+        }
         if (sysPropValue == null || sysPropValue.isEmpty() ||
                 !DexFile.isValidCompilerFilter(sysPropValue)) {
             throw new IllegalStateException("Value \"" + sysPropValue +"\" not valid "
                     + "(reason " + REASON_STRINGS[reason] + ")");
-        }
-
-        // Ensure that some reasons are not mapped to profile-guided filters.
-        switch (reason) {
-            case PackageManagerService.REASON_SHARED_APK:
-            case PackageManagerService.REASON_FORCED_DEXOPT:
-                if (DexFile.isProfileGuidedCompilerFilter(sysPropValue)) {
-                    throw new IllegalStateException("\"" + sysPropValue + "\" is profile-guided, "
-                            + "but not allowed for " + REASON_STRINGS[reason]);
-                }
-                break;
         }
 
         return sysPropValue;
@@ -80,9 +77,7 @@ class PackageManagerServiceCompilerMapping {
             try {
                 // Check that the system property name is legal.
                 String sysPropName = getSystemPropertyName(reason);
-                if (sysPropName == null ||
-                        sysPropName.isEmpty() ||
-                        sysPropName.length() > SystemProperties.PROP_NAME_MAX) {
+                if (sysPropName == null || sysPropName.isEmpty()) {
                     throw new IllegalStateException("Reason system property name \"" +
                             sysPropName +"\" for reason " + REASON_STRINGS[reason]);
                 }
@@ -107,12 +102,12 @@ class PackageManagerServiceCompilerMapping {
     }
 
     /**
-     * Return the compiler filter for "full" compilation.
+     * Return the default compiler filter for compilation.
      *
      * We derive that from the traditional "dalvik.vm.dex2oat-filter" property and just make
      * sure this isn't profile-guided. Returns "speed" in case of invalid (or missing) values.
      */
-    public static String getFullCompilerFilter() {
+    public static String getDefaultCompilerFilter() {
         String value = SystemProperties.get("dalvik.vm.dex2oat-filter");
         if (value == null || value.isEmpty()) {
             return "speed";
@@ -124,12 +119,5 @@ class PackageManagerServiceCompilerMapping {
         }
 
         return value;
-    }
-
-    /**
-     * Return the non-profile-guided filter corresponding to the given filter.
-     */
-    public static String getNonProfileGuidedCompilerFilter(String filter) {
-        return DexFile.getNonProfileGuidedCompilerFilter(filter);
     }
 }

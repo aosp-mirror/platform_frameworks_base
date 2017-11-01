@@ -34,7 +34,7 @@ package android.media.midi;
     public static final int PACKET_TYPE_FLUSH = 2;
 
     /**
-     * Maximum size of a packet that can pass through our ParcelFileDescriptor.
+     * Maximum size of a packet that can be passed between processes.
      */
     public static final int MAX_PACKET_SIZE = 1024;
 
@@ -54,7 +54,7 @@ package android.media.midi;
     public static final int MAX_PACKET_DATA_SIZE = MAX_PACKET_SIZE - DATA_PACKET_OVERHEAD;
 
     /**
-     * Utility function for packing MIDI data to be sent through our ParcelFileDescriptor
+     * Utility function for packing MIDI data to be passed between processes
      *
      * message byte array contains variable length MIDI message.
      * messageSize is size of variable length MIDI message
@@ -84,7 +84,7 @@ package android.media.midi;
     }
 
     /**
-     * Utility function for packing a flush command to be sent through our ParcelFileDescriptor
+     * Utility function for packing a flush command to be passed between processes
      */
     public static int packFlush(byte[] dest) {
         dest[0] = PACKET_TYPE_FLUSH;
@@ -99,7 +99,7 @@ package android.media.midi;
     }
 
     /**
-     * Utility function for unpacking MIDI data received from our ParcelFileDescriptor
+     * Utility function for unpacking MIDI data received from other process
      * returns the offset of the MIDI message in packed buffer
      */
     public static int getDataOffset(byte[] buffer, int bufferLength) {
@@ -108,7 +108,7 @@ package android.media.midi;
     }
 
     /**
-     * Utility function for unpacking MIDI data received from our ParcelFileDescriptor
+     * Utility function for unpacking MIDI data received from other process
      * returns size of MIDI data in packed buffer
      */
     public static int getDataSize(byte[] buffer, int bufferLength) {
@@ -117,7 +117,7 @@ package android.media.midi;
     }
 
     /**
-     * Utility function for unpacking MIDI data received from our ParcelFileDescriptor
+     * Utility function for unpacking MIDI data received from other process
      * unpacks timestamp from packed buffer
      */
     public static long getPacketTimestamp(byte[] buffer, int bufferLength) {

@@ -51,7 +51,8 @@ public class WindowManagerDebugConfig {
     static final boolean DEBUG_APP_ORIENTATION = false;
     static final boolean DEBUG_CONFIGURATION = false;
     static final boolean DEBUG_APP_TRANSITIONS = false;
-    static final boolean DEBUG_STARTING_WINDOW = false;
+    static final boolean DEBUG_STARTING_WINDOW_VERBOSE = false;
+    static final boolean DEBUG_STARTING_WINDOW = DEBUG_STARTING_WINDOW_VERBOSE || false;
     static final boolean DEBUG_WALLPAPER = false;
     static final boolean DEBUG_WALLPAPER_LIGHT = false || DEBUG_WALLPAPER;
     static final boolean DEBUG_DRAG = false;
@@ -73,6 +74,7 @@ public class WindowManagerDebugConfig {
     static final boolean SHOW_LIGHT_TRANSACTIONS = false || SHOW_TRANSACTIONS;
     static final boolean SHOW_STACK_CRAWLS = false;
     static final boolean DEBUG_WINDOW_CROP = false;
+    static final boolean DEBUG_UNKNOWN_APP_VISIBILITY = false;
 
     static final String TAG_KEEP_SCREEN_ON = "DebugKeepScreenOn";
     static final boolean DEBUG_KEEP_SCREEN_ON = false;

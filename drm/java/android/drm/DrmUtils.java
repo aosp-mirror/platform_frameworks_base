@@ -17,6 +17,7 @@
 package android.drm;
 
 import java.io.BufferedInputStream;
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -79,23 +80,13 @@ public class DrmUtils {
         file.delete();
     }
 
-    private static void quietlyDispose(InputStream stream) {
+    private static void quietlyDispose(Closeable closable) {
         try {
-            if (null != stream) {
-                stream.close();
+            if (null != closable) {
+                closable.close();
             }
         } catch (IOException e) {
             // no need to care, at least as of now
-        }
-    }
-
-    private static void quietlyDispose(OutputStream stream) {
-        try {
-            if (null != stream) {
-                stream.close();
-            }
-        } catch (IOException e) {
-            // no need to care
         }
     }
 

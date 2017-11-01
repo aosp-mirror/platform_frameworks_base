@@ -38,7 +38,7 @@ import java.util.Set;
  * API and dispatches the event on the UI thread to the right class in the
  * Settings.
  */
-public final class BluetoothEventManager {
+public class BluetoothEventManager {
     private static final String TAG = "BluetoothEventManager";
 
     private final LocalBluetoothAdapter mLocalAdapter;
@@ -97,24 +97,26 @@ public final class BluetoothEventManager {
 
         // Pairing broadcasts
         addHandler(BluetoothDevice.ACTION_BOND_STATE_CHANGED, new BondStateChangedHandler());
-        addHandler(BluetoothDevice.ACTION_PAIRING_CANCEL, new PairingCancelHandler());
 
         // Fine-grained state broadcasts
         addHandler(BluetoothDevice.ACTION_CLASS_CHANGED, new ClassChangedHandler());
         addHandler(BluetoothDevice.ACTION_UUID, new UuidChangedHandler());
+        addHandler(BluetoothDevice.ACTION_BATTERY_LEVEL_CHANGED, new BatteryLevelChangedHandler());
 
         // Dock event broadcasts
         addHandler(Intent.ACTION_DOCK_EVENT, new DockEventHandler());
 
         mContext.registerReceiver(mBroadcastReceiver, mAdapterIntentFilter, null, mReceiverHandler);
+        mContext.registerReceiver(mProfileBroadcastReceiver, mProfileIntentFilter, null, mReceiverHandler);
     }
 
     void registerProfileIntentReceiver() {
-        mContext.registerReceiver(mBroadcastReceiver, mProfileIntentFilter, null, mReceiverHandler);
+        mContext.registerReceiver(mProfileBroadcastReceiver, mProfileIntentFilter, null, mReceiverHandler);
     }
 
     public void setReceiverHandler(android.os.Handler handler) {
         mContext.unregisterReceiver(mBroadcastReceiver);
+        mContext.unregisterReceiver(mProfileBroadcastReceiver);
         mReceiverHandler = handler;
         mContext.registerReceiver(mBroadcastReceiver, mAdapterIntentFilter, null, mReceiverHandler);
         registerProfileIntentReceiver();
@@ -148,11 +150,31 @@ public final class BluetoothEventManager {
         }
     };
 
+    private final BroadcastReceiver mProfileBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            BluetoothDevice device = intent
+                    .getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+
+            Handler handler = mHandlerMap.get(action);
+            if (handler != null) {
+                handler.onReceive(context, intent, device);
+            }
+        }
+    };
+
     private class AdapterStateChangedHandler implements Handler {
         public void onReceive(Context context, Intent intent,
                 BluetoothDevice device) {
             int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE,
                                     BluetoothAdapter.ERROR);
+            // Reregister Profile Broadcast Receiver as part of TURN OFF
+            if (state == BluetoothAdapter.STATE_OFF)
+            {
+                context.unregisterReceiver(mProfileBroadcastReceiver);
+                registerProfileIntentReceiver();
+            }
             // update local profiles and get paired devices
             mLocalAdapter.setBluetoothStateInt(state);
             // send callback to update UI and possibly start scanning
@@ -343,24 +365,6 @@ public final class BluetoothEventManager {
         }
     }
 
-    private class PairingCancelHandler implements Handler {
-        public void onReceive(Context context, Intent intent, BluetoothDevice device) {
-            if (device == null) {
-                Log.e(TAG, "ACTION_PAIRING_CANCEL with no EXTRA_DEVICE");
-                return;
-            }
-            CachedBluetoothDevice cachedDevice = mDeviceManager.findDevice(device);
-            if (cachedDevice == null) {
-                Log.e(TAG, "ACTION_PAIRING_CANCEL with no cached device");
-                return;
-            }
-            int errorMsg = R.string.bluetooth_pairing_error_message;
-            if (context != null && cachedDevice != null) {
-                Utils.showError(context, cachedDevice.getName(), errorMsg);
-            }
-        }
-    }
-
     private class DockEventHandler implements Handler {
         public void onReceive(Context context, Intent intent, BluetoothDevice device) {
             // Remove if unpair device upon undocking
@@ -376,6 +380,17 @@ public final class BluetoothEventManager {
             }
         }
     }
+
+    private class BatteryLevelChangedHandler implements Handler {
+        public void onReceive(Context context, Intent intent,
+                BluetoothDevice device) {
+            CachedBluetoothDevice cachedDevice = mDeviceManager.findDevice(device);
+            if (cachedDevice != null) {
+                cachedDevice.refresh();
+            }
+        }
+    }
+
     boolean readPairedDevices() {
         Set<BluetoothDevice> bondedDevices = mLocalAdapter.getBondedDevices();
         if (bondedDevices == null) {

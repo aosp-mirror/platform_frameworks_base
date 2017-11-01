@@ -20,12 +20,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
-import android.view.IInputFilter;
-import android.view.InputEvent;
-import android.view.InputEventConsistencyVerifier;
-import android.view.KeyEvent;
-import android.view.MotionEvent;
-import android.view.WindowManagerPolicy;
 
 /**
  * Filters input events before they are dispatched to the system.

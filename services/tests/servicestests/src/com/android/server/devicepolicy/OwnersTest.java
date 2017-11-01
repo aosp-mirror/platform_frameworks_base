@@ -20,6 +20,7 @@ import com.android.server.devicepolicy.DevicePolicyManagerServiceTestable.Owners
 
 import android.content.ComponentName;
 import android.os.UserHandle;
+import android.test.suitebuilder.annotation.SmallTest;
 
 /**
  * Tests for the DeviceOwner object that saves & loads device and policy owner information.
@@ -32,13 +33,14 @@ import android.os.UserHandle;
 
  (mmma frameworks/base/services/tests/servicestests/ for non-ninja build)
  */
+@SmallTest
 public class OwnersTest extends DpmTestBase {
     public void testUpgrade01() throws Exception {
-        getContext().addUsers(10, 11, 20, 21);
+        getServices().addUsers(10, 11, 20, 21);
 
         // First, migrate.
         {
-            final OwnersTestable owners = new OwnersTestable(getContext());
+            final OwnersTestable owners = new OwnersTestable(getServices());
 
             DpmTestUtils.writeToFile(owners.getLegacyConfigFileWithTestOverride(),
                     DpmTestUtils.readAsset(mRealTestContext, "OwnersTest/test01/input.xml"));
@@ -70,7 +72,7 @@ public class OwnersTest extends DpmTestBase {
 
         // Then re-read and check.
         {
-            final OwnersTestable owners = new OwnersTestable(getContext());
+            final OwnersTestable owners = new OwnersTestable(getServices());
             owners.load();
 
             assertFalse(owners.hasDeviceOwner());
@@ -87,11 +89,11 @@ public class OwnersTest extends DpmTestBase {
     }
 
     public void testUpgrade02() throws Exception {
-        getContext().addUsers(10, 11, 20, 21);
+        getServices().addUsers(10, 11, 20, 21);
 
         // First, migrate.
         {
-            final OwnersTestable owners = new OwnersTestable(getContext());
+            final OwnersTestable owners = new OwnersTestable(getServices());
 
             DpmTestUtils.writeToFile(owners.getLegacyConfigFileWithTestOverride(),
                     DpmTestUtils.readAsset(mRealTestContext, "OwnersTest/test02/input.xml"));
@@ -125,7 +127,7 @@ public class OwnersTest extends DpmTestBase {
 
         // Then re-read and check.
         {
-            final OwnersTestable owners = new OwnersTestable(getContext());
+            final OwnersTestable owners = new OwnersTestable(getServices());
             owners.load();
 
             assertTrue(owners.hasDeviceOwner());
@@ -145,11 +147,11 @@ public class OwnersTest extends DpmTestBase {
     }
 
     public void testUpgrade03() throws Exception {
-        getContext().addUsers(10, 11, 20, 21);
+        getServices().addUsers(10, 11, 20, 21);
 
         // First, migrate.
         {
-            final OwnersTestable owners = new OwnersTestable(getContext());
+            final OwnersTestable owners = new OwnersTestable(getServices());
 
             DpmTestUtils.writeToFile(owners.getLegacyConfigFileWithTestOverride(),
                     DpmTestUtils.readAsset(mRealTestContext, "OwnersTest/test03/input.xml"));
@@ -191,7 +193,7 @@ public class OwnersTest extends DpmTestBase {
 
         // Then re-read and check.
         {
-            final OwnersTestable owners = new OwnersTestable(getContext());
+            final OwnersTestable owners = new OwnersTestable(getServices());
             owners.load();
 
             assertFalse(owners.hasDeviceOwner());
@@ -223,11 +225,11 @@ public class OwnersTest extends DpmTestBase {
      * and {@link  Owners#setProfileOwnerUserRestrictionsMigrated(int)}.
      */
     public void testUpgrade04() throws Exception {
-        getContext().addUsers(10, 11, 20, 21);
+        getServices().addUsers(10, 11, 20, 21);
 
         // First, migrate.
         {
-            final OwnersTestable owners = new OwnersTestable(getContext());
+            final OwnersTestable owners = new OwnersTestable(getServices());
 
             DpmTestUtils.writeToFile(owners.getLegacyConfigFileWithTestOverride(),
                     DpmTestUtils.readAsset(mRealTestContext, "OwnersTest/test04/input.xml"));
@@ -273,7 +275,7 @@ public class OwnersTest extends DpmTestBase {
 
         // Then re-read and check.
         {
-            final OwnersTestable owners = new OwnersTestable(getContext());
+            final OwnersTestable owners = new OwnersTestable(getServices());
             owners.load();
 
             assertTrue(owners.hasDeviceOwner());
@@ -306,7 +308,7 @@ public class OwnersTest extends DpmTestBase {
         }
 
         {
-            final OwnersTestable owners = new OwnersTestable(getContext());
+            final OwnersTestable owners = new OwnersTestable(getServices());
             owners.load();
 
             assertFalse(owners.getDeviceOwnerUserRestrictionsNeedsMigration());
@@ -319,7 +321,7 @@ public class OwnersTest extends DpmTestBase {
         }
 
         {
-            final OwnersTestable owners = new OwnersTestable(getContext());
+            final OwnersTestable owners = new OwnersTestable(getServices());
             owners.load();
 
             assertFalse(owners.getDeviceOwnerUserRestrictionsNeedsMigration());
@@ -333,11 +335,11 @@ public class OwnersTest extends DpmTestBase {
     }
 
     public void testUpgrade05() throws Exception {
-        getContext().addUsers(10, 11, 20, 21);
+        getServices().addUsers(10, 11, 20, 21);
 
         // First, migrate.
         {
-            final OwnersTestable owners = new OwnersTestable(getContext());
+            final OwnersTestable owners = new OwnersTestable(getServices());
 
             DpmTestUtils.writeToFile(owners.getLegacyConfigFileWithTestOverride(),
                     DpmTestUtils.readAsset(mRealTestContext, "OwnersTest/test05/input.xml"));
@@ -370,7 +372,7 @@ public class OwnersTest extends DpmTestBase {
 
         // Then re-read and check.
         {
-            final OwnersTestable owners = new OwnersTestable(getContext());
+            final OwnersTestable owners = new OwnersTestable(getServices());
             owners.load();
 
             assertFalse(owners.hasDeviceOwner());
@@ -389,11 +391,11 @@ public class OwnersTest extends DpmTestBase {
     }
 
     public void testUpgrade06() throws Exception {
-        getContext().addUsers(10, 11, 20, 21);
+        getServices().addUsers(10, 11, 20, 21);
 
         // First, migrate.
         {
-            final OwnersTestable owners = new OwnersTestable(getContext());
+            final OwnersTestable owners = new OwnersTestable(getServices());
 
             DpmTestUtils.writeToFile(owners.getLegacyConfigFileWithTestOverride(),
                     DpmTestUtils.readAsset(mRealTestContext, "OwnersTest/test06/input.xml"));
@@ -425,7 +427,7 @@ public class OwnersTest extends DpmTestBase {
 
         // Then re-read and check.
         {
-            final OwnersTestable owners = new OwnersTestable(getContext());
+            final OwnersTestable owners = new OwnersTestable(getServices());
             owners.load();
 
             assertFalse(owners.hasDeviceOwner());
@@ -444,9 +446,9 @@ public class OwnersTest extends DpmTestBase {
     }
 
     public void testRemoveExistingFiles() throws Exception {
-        getContext().addUsers(10, 11, 20, 21);
+        getServices().addUsers(10, 11, 20, 21);
 
-        final OwnersTestable owners = new OwnersTestable(getContext());
+        final OwnersTestable owners = new OwnersTestable(getServices());
 
         // First, migrate to create new-style config files.
         DpmTestUtils.writeToFile(owners.getLegacyConfigFileWithTestOverride(),

@@ -86,7 +86,7 @@ public class Utilities {
     public static <T extends View> T findParent(View v, Class<T> parentClass) {
         ViewParent parent = v.getParent();
         while (parent != null) {
-            if (parent.getClass().equals(parentClass)) {
+            if (parentClass.isAssignableFrom(parent.getClass())) {
                 return (T) parent;
             }
             parent = parent.getParent();

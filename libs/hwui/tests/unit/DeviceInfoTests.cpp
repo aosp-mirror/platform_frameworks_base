@@ -17,11 +17,12 @@
 #include <DeviceInfo.h>
 
 #include <gtest/gtest.h>
+#include "tests/common/TestUtils.h"
 
 using namespace android;
 using namespace android::uirenderer;
 
-TEST(DeviceInfo, basic) {
+OPENGL_PIPELINE_TEST(DeviceInfo, basic) {
     // can't assert state before init - another test may have initialized the singleton
     DeviceInfo::initialize();
     const DeviceInfo* di = DeviceInfo::get();

@@ -15,6 +15,7 @@
  */
 package com.android.systemui.statusbar.car;
 
+import android.app.ActivityManager.StackId;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -23,66 +24,84 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.support.v4.util.SimpleArrayMap;
+import android.text.TextUtils;
+import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.View;
 import android.widget.LinearLayout;
-
 import com.android.systemui.R;
-import com.android.systemui.statusbar.phone.ActivityStarter;
 
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
  * A controller to populate data for CarNavigationBarView and handle user interactions.
- * <p/>
- * Each button inside the navigation bar is defined by data in arrays_car.xml. OEMs can customize
- * the navigation buttons by updating arrays_car.xml appropriately in an overlay.
+ *
+ * <p>Each button inside the navigation bar is defined by data in arrays_car.xml. OEMs can
+ * customize the navigation buttons by updating arrays_car.xml appropriately in an overlay.
  */
 class CarNavigationBarController {
+    private static final String TAG = "CarNavBarController";
+
     private static final String EXTRA_FACET_CATEGORIES = "categories";
     private static final String EXTRA_FACET_PACKAGES = "packages";
     private static final String EXTRA_FACET_ID = "filter_id";
     private static final String EXTRA_FACET_LAUNCH_PICKER = "launch_picker";
 
-    // Each facet of the navigation bar maps to a set of package names or categories defined in
-    // arrays_car.xml. Package names for a given facet are delimited by ";"
-    private static final String FACET_FILTER_DEMILITER = ";";
+    /**
+     * Each facet of the navigation bar maps to a set of package names or categories defined in
+     * arrays_car.xml. Package names for a given facet are delimited by ";".
+     */
+    private static final String FACET_FILTER_DELIMITER = ";";
 
-    private Context mContext;
-    private CarNavigationBarView mNavBar;
-    private ActivityStarter mActivityStarter;
+    private final Context mContext;
+    private final CarNavigationBarView mNavBar;
+    private final CarStatusBar mStatusBar;
 
-    // Set of categories each facet will filter on.
-    private List<String[]> mFacetCategories = new ArrayList<String[]>();
-    // Set of package names each facet will filter on.
-    private List<String[]> mFacetPackages = new ArrayList<String[]>();
+    /**
+     * Set of categories each facet will filter on.
+     */
+    private final List<String[]> mFacetCategories = new ArrayList<>();
 
-    private SimpleArrayMap<String, Integer> mFacetCategoryMap
-            = new SimpleArrayMap<String, Integer>();
-    private SimpleArrayMap<String, Integer> mFacetPackageMap
-            = new SimpleArrayMap<String, Integer>();
+    /**
+     * Set of package names each facet will filter on.
+     */
+    private final List<String[]> mFacetPackages = new ArrayList<>();
 
-    private List<Intent> mIntents;
-    private List<Intent> mLongPressIntents;
+    private final SimpleArrayMap<String, Integer> mFacetCategoryMap = new SimpleArrayMap<>();
+    private final SimpleArrayMap<String, Integer> mFacetPackageMap = new SimpleArrayMap<>();
 
-    private List<CarNavigationButton> mNavButtons = new ArrayList<CarNavigationButton>();
+    private final List<CarNavigationButton> mNavButtons = new ArrayList<>();
+
+    private final SparseBooleanArray mFacetHasMultipleAppsCache = new SparseBooleanArray();
 
     private int mCurrentFacetIndex;
-    private SparseBooleanArray mFacetHasMultipleAppsCache = new SparseBooleanArray();
+    private Intent mPersistentTaskIntent;
 
-    public CarNavigationBarController(Context context,
-                                      CarNavigationBarView navBar,
-                                      ActivityStarter activityStarter) {
+    public CarNavigationBarController(Context context, CarNavigationBarView navBar,
+            CarStatusBar activityStarter) {
         mContext = context;
         mNavBar = navBar;
-        mActivityStarter = activityStarter;
+        mStatusBar = activityStarter;
         bind();
+
+        if (context.getResources().getBoolean(R.bool.config_enablePersistentDockedActivity)) {
+            setupPersistentDockedTask();
+        }
     }
 
-    public void taskChanged(String packageName) {
+    private void setupPersistentDockedTask() {
+        try {
+            mPersistentTaskIntent = Intent.parseUri(
+                    mContext.getString(R.string.config_persistentDockedActivityIntentUri),
+                    Intent.URI_INTENT_SCHEME);
+        } catch (URISyntaxException e) {
+            Log.e(TAG, "Malformed persistent task intent.");
+        }
+    }
+
+    public void taskChanged(String packageName, int stackId) {
         // If the package name belongs to a filter, then highlight appropriate button in
         // the navigation bar.
         if (mFacetPackageMap.containsKey(packageName)) {
@@ -93,6 +112,12 @@ class CarNavigationBarController {
         String category = getPackageCategory(packageName);
         if (category != null) {
             setCurrentFacet(mFacetCategoryMap.get(category));
+        }
+
+        // Set up the persistent docked task if needed.
+        if (mPersistentTaskIntent != null && !mStatusBar.hasDockedTask()
+                && stackId != StackId.HOME_STACK_ID) {
+            mStatusBar.startActivityOnStack(mPersistentTaskIntent, StackId.DOCKED_STACK_ID);
         }
     }
 
@@ -111,64 +136,85 @@ class CarNavigationBarController {
         }
     }
 
+    /**
+     * Iterates through the items in arrays_car.xml and sets up the facet bar buttons to
+     * perform the task in that configuration file when clicked or long-pressed.
+     */
     private void bind() {
-        // Read up arrays_car.xml and populate the navigation bar here.
-        Resources r = mContext.getResources();
-        TypedArray icons = r.obtainTypedArray(R.array.car_facet_icons);
-        TypedArray intents = r.obtainTypedArray(R.array.car_facet_intent_uris);
-        TypedArray longpressIntents =
-                r.obtainTypedArray(R.array.car_facet_longpress_intent_uris);
-        TypedArray facetPackageNames = r.obtainTypedArray(R.array.car_facet_package_filters);
+        Resources res = mContext.getResources();
 
-        TypedArray facetCategories = r.obtainTypedArray(R.array.car_facet_category_filters);
+        TypedArray icons = res.obtainTypedArray(R.array.car_facet_icons);
+        TypedArray intents = res.obtainTypedArray(R.array.car_facet_intent_uris);
+        TypedArray longPressIntents = res.obtainTypedArray(R.array.car_facet_longpress_intent_uris);
+        TypedArray facetPackageNames = res.obtainTypedArray(R.array.car_facet_package_filters);
+        TypedArray facetCategories = res.obtainTypedArray(R.array.car_facet_category_filters);
 
-        if (icons.length() != intents.length()
-                || icons.length() != longpressIntents.length()
-                || icons.length() != facetPackageNames.length()
-                || icons.length() != facetCategories.length()) {
-            throw new RuntimeException("car_facet array lengths do not match");
-        }
-
-        mIntents = createEmptyIntentList(icons.length());
-        mLongPressIntents = createEmptyIntentList(icons.length());
-
-        for (int i = 0; i < icons.length(); i++) {
-            Drawable icon = icons.getDrawable(i);
-            try {
-                mIntents.set(i,
-                        Intent.parseUri(intents.getString(i), Intent.URI_INTENT_SCHEME));
-
-                String longpressUri = longpressIntents.getString(i);
-                boolean hasLongpress = !longpressUri.isEmpty();
-                if (hasLongpress) {
-                    mLongPressIntents.set(i,
-                            Intent.parseUri(longpressUri, Intent.URI_INTENT_SCHEME));
-                }
-
-                CarNavigationButton button = createNavButton(icon, i, hasLongpress);
-                mNavButtons.add(button);
-                mNavBar.addButton(button,
-                        createNavButton(icon, i, hasLongpress) /* lightsOutButton */);
-
-                initFacetFilterMaps(i,
-                        facetPackageNames.getString(i).split(FACET_FILTER_DEMILITER),
-                        facetCategories.getString(i).split(FACET_FILTER_DEMILITER));
-                        mFacetHasMultipleAppsCache.put(i, facetHasMultiplePackages(i));
-            } catch (URISyntaxException e) {
-                throw new RuntimeException("Malformed intent uri", e);
+        try {
+            if (icons.length() != intents.length()
+                    || icons.length() != longPressIntents.length()
+                    || icons.length() != facetPackageNames.length()
+                    || icons.length() != facetCategories.length()) {
+                throw new RuntimeException("car_facet array lengths do not match");
             }
+
+            for (int i = 0, size = icons.length(); i < size; i++) {
+                Drawable icon = icons.getDrawable(i);
+                CarNavigationButton button = createNavButton(icon);
+                initClickListeners(button, i, intents.getString(i), longPressIntents.getString(i));
+
+                mNavButtons.add(button);
+                mNavBar.addButton(button, createNavButton(icon) /* lightsOutButton */);
+
+                initFacetFilterMaps(i, facetPackageNames.getString(i).split(FACET_FILTER_DELIMITER),
+                        facetCategories.getString(i).split(FACET_FILTER_DELIMITER));
+                mFacetHasMultipleAppsCache.put(i, facetHasMultiplePackages(i));
+            }
+        } finally {
+            // Clean up all the TypedArrays.
+            icons.recycle();
+            intents.recycle();
+            longPressIntents.recycle();
+            facetPackageNames.recycle();
+            facetCategories.recycle();
+        }
+    }
+
+    /**
+     * Recreates each of the buttons on a density or font scale change. This manual process is
+     * necessary since this class is not part of an activity that automatically gets recreated.
+     */
+    public void onDensityOrFontScaleChanged() {
+        TypedArray icons = mContext.getResources().obtainTypedArray(R.array.car_facet_icons);
+
+        try {
+            int length = icons.length();
+            if (length != mNavButtons.size()) {
+                // This should not happen since the mNavButtons list is created from the length
+                // of the icons array in bind().
+                throw new RuntimeException("car_facet array lengths do not match number of "
+                        + "created buttons.");
+            }
+
+            for (int i = 0; i < length; i++) {
+                Drawable icon = icons.getDrawable(i);
+
+                // Setting a new icon will trigger a requestLayout() call if necessary.
+                mNavButtons.get(i).setResources(icon);
+            }
+        } finally {
+            icons.recycle();
         }
     }
 
     private void initFacetFilterMaps(int id, String[] packageNames, String[] categories) {
         mFacetCategories.add(categories);
-        for (int i = 0; i < categories.length; i++) {
-            mFacetCategoryMap.put(categories[i], id);
+        for (String category : categories) {
+            mFacetCategoryMap.put(category, id);
         }
 
         mFacetPackages.add(packageNames);
-        for (int i = 0; i < packageNames.length; i++) {
-            mFacetPackageMap.put(packageNames[i], id);
+        for (String packageName : packageNames) {
+            mFacetPackageMap.put(packageName, id);
         }
     }
 
@@ -197,8 +243,10 @@ class CarNavigationBarController {
     }
 
     /**
-     * Helper method to check if a given facet has multiple packages associated with it.
-     * This can be resource defined package names or package names filtered by facet category.
+     * Helper method to check if a given facet has multiple packages associated with it. This can
+     * be resource defined package names or package names filtered by facet category.
+     *
+     * @return {@code true} if the facet at the given index has more than one package.
      */
     private boolean facetHasMultiplePackages(int index) {
         PackageManager pm = mContext.getPackageManager();
@@ -233,6 +281,10 @@ class CarNavigationBarController {
         return false;
     }
 
+    /**
+     * Sets the facet at the given index to be the facet that is currently active. The button will
+     * be highlighted appropriately.
+     */
     private void setCurrentFacet(int index) {
         if (index == mCurrentFacetIndex) {
             return;
@@ -247,11 +299,16 @@ class CarNavigationBarController {
             mNavButtons.get(index).setSelected(true /* selected */,
                     mFacetHasMultipleAppsCache.get(index)  /* showMoreIcon */);
         }
+
         mCurrentFacetIndex = index;
     }
 
-    private CarNavigationButton createNavButton(Drawable icon, final int id,
-                                                boolean longClickEnabled) {
+    /**
+     * Creates the View that is used for the buttons along the navigation bar.
+     *
+     * @param icon The icon to be used for the button.
+     */
+    private CarNavigationButton createNavButton(Drawable icon) {
         CarNavigationButton button = (CarNavigationButton) View.inflate(mContext,
                 R.layout.car_navigation_button, null);
         button.setResources(icon);
@@ -259,37 +316,49 @@ class CarNavigationBarController {
                 new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1);
         button.setLayoutParams(lp);
 
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onFacetClicked(id);
-            }
-        });
-
-        if (longClickEnabled) {
-            button.setLongClickable(true);
-            button.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View v) {
-                    onFacetLongClicked(id);
-                    return true;
-                }
-            });
-        } else {
-            button.setLongClickable(false);
-        }
-
         return button;
     }
 
-    private void startActivity(Intent intent) {
-        if (mActivityStarter != null && intent != null) {
-            mActivityStarter.startActivity(intent, false);
+    /**
+     * Initializes the click and long click listeners that correspond to the given command string.
+     * The click listeners are attached to the given button.
+     */
+    private void initClickListeners(View button, int index, String clickString,
+            String longPressString) {
+        // Each button at least have an action when pressed.
+        if (TextUtils.isEmpty(clickString)) {
+            throw new RuntimeException("Facet at index " + index + " does not have click action.");
+        }
+
+        try {
+            Intent intent = Intent.parseUri(clickString, Intent.URI_INTENT_SCHEME);
+            button.setOnClickListener(v -> onFacetClicked(intent, index));
+        } catch (URISyntaxException e) {
+            throw new RuntimeException("Malformed intent uri", e);
+        }
+
+        if (TextUtils.isEmpty(longPressString)) {
+            button.setLongClickable(false);
+            return;
+        }
+
+        try {
+            Intent intent = Intent.parseUri(longPressString, Intent.URI_INTENT_SCHEME);
+            button.setOnLongClickListener(v -> {
+                onFacetLongClicked(intent, index);
+                return true;
+            });
+        } catch (URISyntaxException e) {
+            throw new RuntimeException("Malformed long-press intent uri", e);
         }
     }
 
-    private void onFacetClicked(int index) {
-        Intent intent = mIntents.get(index);
+    /**
+     * Handles a click on a facet. A click will trigger the given Intent.
+     *
+     * @param index The index of the facet that was clicked.
+     */
+    private void onFacetClicked(Intent intent, int index) {
         String packageName = intent.getPackage();
 
         if (packageName == null) {
@@ -306,16 +375,22 @@ class CarNavigationBarController {
         // rather than the "preferred/last run" app.
         intent.putExtra(EXTRA_FACET_LAUNCH_PICKER, index == mCurrentFacetIndex);
 
+        int stackId = StackId.FULLSCREEN_WORKSPACE_STACK_ID;
+        if (intent.getCategories().contains(Intent.CATEGORY_HOME)) {
+            stackId = StackId.HOME_STACK_ID;
+        }
+
         setCurrentFacet(index);
-        startActivity(intent);
+        mStatusBar.startActivityOnStack(intent, stackId);
     }
 
-    private void onFacetLongClicked(int index) {
+    /**
+     * Handles a long-press on a facet. The long-press will trigger the given Intent.
+     *
+     * @param index The index of the facet that was clicked.
+     */
+    private void onFacetLongClicked(Intent intent, int index) {
         setCurrentFacet(index);
-        startActivity(mLongPressIntents.get(index));
-    }
-
-    private List<Intent> createEmptyIntentList(int size) {
-        return Arrays.asList(new Intent[size]);
+        mStatusBar.startActivityOnStack(intent, StackId.FULLSCREEN_WORKSPACE_STACK_ID);
     }
 }

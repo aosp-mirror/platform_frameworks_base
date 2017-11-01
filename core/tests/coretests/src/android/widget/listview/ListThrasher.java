@@ -112,7 +112,7 @@ public class ListThrasher extends ListActivity implements AdapterView.OnItemSele
 
         setContentView(R.layout.list_thrasher);
 
-        mText = (TextView) findViewById(R.id.text);
+        mText = findViewById(R.id.text);
         mAdapter = new ThrashListAdapter(this);
         setListAdapter(mAdapter);
 

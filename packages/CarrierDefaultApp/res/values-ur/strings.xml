@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="5247871339820894594">"CarrierDefaultApp"</string>
+    <string name="android_system_label" msgid="2797790869522345065">"موبائل کیریئر"</string>
+    <string name="portal_notification_id" msgid="5155057562457079297">"موبائل ڈیٹا ختم ہو چکا ہے"</string>
+    <string name="no_data_notification_id" msgid="668400731803969521">"آپ کا موبائل ڈیٹا غیر فعال کر دیا گیا ہے"</string>
+    <string name="portal_notification_detail" msgid="2295729385924660881">"‏‎%s ویب سائٹ ملاحظہ کرنے کیلئے تھپتھپائیں"</string>
+    <string name="no_data_notification_detail" msgid="3112125343857014825">"‏براہ کرم اپنے خدمت کے فراہم کنندہ %s سے رابطہ کریں"</string>
+    <string name="no_mobile_data_connection_title" msgid="7449525772416200578">"کوئی موبائل ڈیٹا کنکشن نہیں ہے"</string>
+    <string name="no_mobile_data_connection" msgid="544980465184147010">"‏%s کے ذریعے ڈیٹا یا رومنگ پلان شامل کریں"</string>
+    <string name="mobile_data_status_notification_channel_name" msgid="833999690121305708">"موبائل ڈیٹا کی صورت حال"</string>
+    <string name="action_bar_label" msgid="4290345990334377177">"موبائل نیٹ ورک میں سائن ان کریں"</string>
+    <string name="ssl_error_warning" msgid="3127935140338254180">"آپ جس نیٹ ورک میں شامل ہونے کی کوشش کر رہے ہیں، اس میں سیکیورٹی کے مسائل ہیں۔"</string>
+    <string name="ssl_error_example" msgid="6188711843183058764">"مثال کے طور پر ہو سکتا ہے کہ لاگ ان صفحہ دکھائی گئی تنظیم سے تعلق نہ رکھتا ہو۔"</string>
+    <string name="ssl_error_continue" msgid="1138548463994095584">"براؤزر کے ذریعے بہرحال جاری رکھیں"</string>
+</resources>

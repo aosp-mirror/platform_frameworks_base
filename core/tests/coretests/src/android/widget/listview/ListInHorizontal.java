@@ -43,7 +43,7 @@ public class ListInHorizontal extends Activity {
             values[i] = ((Integer) i).toString();
         }
 
-        mListView = (ListView) findViewById(R.id.list);
+        mListView = findViewById(R.id.list);
         mListView.setAdapter(new ArrayAdapter<String>(this,
                 android.R.layout.simple_list_item_1, values));
 

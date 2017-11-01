@@ -47,6 +47,7 @@ public class WakeupMessageTest {
     private static final int TEST_ARG2 = 182;
     private static final Object TEST_OBJ = "hello";
 
+    @Mock Context mContext;
     @Mock AlarmManager mAlarmManager;
     WakeupMessage mMessage;
     // Make a spy so that we can verify calls to it
@@ -86,13 +87,12 @@ public class WakeupMessageTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
-        Context context = mock(Context.class);
-        when(context.getSystemService(Context.ALARM_SERVICE)).thenReturn(mAlarmManager);
+        when(mContext.getSystemService(Context.ALARM_SERVICE)).thenReturn(mAlarmManager);
         // capture the listener for each AlarmManager.setExact call
         doNothing().when(mAlarmManager).setExact(anyInt(), anyLong(), any(String.class),
                 mListenerCaptor.capture(), any(Handler.class));
 
-        mMessage = new WakeupMessage(context, mHandler, TEST_CMD_NAME, TEST_CMD, TEST_ARG1,
+        mMessage = new WakeupMessage(mContext, mHandler, TEST_CMD_NAME, TEST_CMD, TEST_ARG1,
                 TEST_ARG2, TEST_OBJ);
     }
 
@@ -166,6 +166,21 @@ public class WakeupMessageTest {
         scheduleAndVerifyAlarm(when2);
         mListenerCaptor.getValue().onAlarm();
         verifyMessageDispatchedOnce();
+    }
+
+    /**
+     * Verify that a Runnable is scheduled and dispatched.
+     */
+    @Test
+    public void scheduleRunnable() {
+        final long when = 1011;
+        final Runnable runnable = mock(Runnable.class);
+        WakeupMessage dut = new WakeupMessage(mContext, mHandler, TEST_CMD_NAME, runnable);
+        dut.schedule(when);
+        verify(mAlarmManager).setExact(eq(AlarmManager.ELAPSED_REALTIME_WAKEUP), eq(when),
+                eq(TEST_CMD_NAME), any(AlarmManager.OnAlarmListener.class), eq(mHandler));
+        mListenerCaptor.getValue().onAlarm();
+        verify(runnable, times(1)).run();
     }
 
 }

@@ -34,6 +34,7 @@ class BaseErrorDialog extends AlertDialog {
 
     public BaseErrorDialog(Context context) {
         super(context, com.android.internal.R.style.Theme_Dialog_AppError);
+        context.assertRuntimeOverlayThemable();
 
         getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM,

@@ -52,4 +52,14 @@
     <dimen name="usage_graph_dot_size">.75dp</dimen>
     <dimen name="usage_graph_dot_interval">7dp</dimen>
 
+    <dimen name="battery_height">14.5dp</dimen>
+    <dimen name="battery_width">9.5dp</dimen>
+
+    <!-- Margin on the right side of the system icon group on Keyguard. -->
+    <fraction name="battery_button_height_fraction">10.5%</fraction>
+
+    <!-- Fraction value to smooth the edges of the battery icon. The path will be inset by this
+         fraction of a pixel.-->
+    <fraction name="battery_subpixel_smoothing_left">0%</fraction>
+    <fraction name="battery_subpixel_smoothing_right">0%</fraction>
 </resources>

@@ -25,14 +25,17 @@
 
 #include <gui/GLConsumer.h>
 #include <gui/Surface.h>
+#include <gui/BufferQueue.h>
 
 #include "core_jni_helpers.h"
 
+#include <cutils/atomic.h>
 #include <utils/Log.h>
 #include <utils/misc.h>
 
 #include "jni.h"
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
+#include <nativehelper/ScopedLocalRef.h>
 
 // ----------------------------------------------------------------------------
 
@@ -283,9 +286,7 @@ static void SurfaceTexture_init(JNIEnv* env, jobject thiz, jboolean isDetached,
             createProcessUniqueId()));
 
     // If the current context is protected, inform the producer.
-    if (isProtectedContext()) {
-        consumer->setConsumerUsageBits(GRALLOC_USAGE_PROTECTED);
-    }
+    consumer->setConsumerIsProtected(isProtectedContext());
 
     SurfaceTexture_setSurfaceTexture(env, thiz, surfaceTexture);
     SurfaceTexture_setProducer(env, thiz, producer);
@@ -384,7 +385,6 @@ static jboolean SurfaceTexture_isReleased(JNIEnv* env, jobject thiz)
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gSurfaceTextureMethods[] = {
-    {"nativeClassInit",            "()V",   (void*)SurfaceTexture_classInit },
     {"nativeInit",                 "(ZIZLjava/lang/ref/WeakReference;)V", (void*)SurfaceTexture_init },
     {"nativeFinalize",             "()V",   (void*)SurfaceTexture_finalize },
     {"nativeSetDefaultBufferSize", "(II)V", (void*)SurfaceTexture_setDefaultBufferSize },
@@ -400,6 +400,10 @@ static const JNINativeMethod gSurfaceTextureMethods[] = {
 
 int register_android_graphics_SurfaceTexture(JNIEnv* env)
 {
+    // Cache some fields.
+    ScopedLocalRef<jclass> klass(env, FindClassOrDie(env, kSurfaceTextureClassPathName));
+    SurfaceTexture_classInit(env, klass.get());
+
     return RegisterMethodsOrDie(env, kSurfaceTextureClassPathName, gSurfaceTextureMethods,
                                 NELEM(gSurfaceTextureMethods));
 }

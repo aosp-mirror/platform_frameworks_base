@@ -17,7 +17,6 @@
 package com.android.server.voiceinteraction;
 
 import android.app.ActivityManager;
-import android.app.ActivityManagerNative;
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
 import android.app.assist.AssistContent;
@@ -58,6 +57,9 @@ import com.android.server.statusbar.StatusBarManagerInternal;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+
+import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.WindowManager.LayoutParams.TYPE_VOICE_INTERACTION;
 
 final class VoiceInteractionSessionConnection implements ServiceConnection {
 
@@ -179,7 +181,7 @@ final class VoiceInteractionSessionConnection implements ServiceConnection {
         mCallback = callback;
         mCallingUid = callingUid;
         mHandler = handler;
-        mAm = ActivityManagerNative.getDefault();
+        mAm = ActivityManager.getService();
         mIWindowManager = IWindowManager.Stub.asInterface(
                 ServiceManager.getService(Context.WINDOW_SERVICE));
         mAppOps = context.getSystemService(AppOpsManager.class);
@@ -198,8 +200,7 @@ final class VoiceInteractionSessionConnection implements ServiceConnection {
                         | Context.BIND_ALLOW_OOM_MANAGEMENT, new UserHandle(mUser));
         if (mBound) {
             try {
-                mIWindowManager.addWindowToken(mToken,
-                        WindowManager.LayoutParams.TYPE_VOICE_INTERACTION);
+                mIWindowManager.addWindowToken(mToken, TYPE_VOICE_INTERACTION, DEFAULT_DISPLAY);
             } catch (RemoteException e) {
                 Slog.w(TAG, "Failed adding window token", e);
             }
@@ -254,8 +255,7 @@ final class VoiceInteractionSessionConnection implements ServiceConnection {
                         && structureEnabled) {
                     mAssistData.clear();
                     final int count = activityToken != null ? 1 : topActivities.size();
-                    // Temp workaround for bug: 28348867  Revert after DP3
-                    for (int i = 0; i < count && i < 1; i++) {
+                    for (int i = 0; i < count; i++) {
                         IBinder topActivity = count == 1 ? activityToken : topActivities.get(i);
                         try {
                             MetricsLogger.count(mContext, "assist_with_context", 1);
@@ -453,6 +453,7 @@ final class VoiceInteractionSessionConnection implements ServiceConnection {
                 mShowFlags = 0;
                 mHaveAssistData = false;
                 mAssistData.clear();
+                mPendingShowCallbacks.clear();
                 if (mSession != null) {
                     try {
                         mSession.hide();
@@ -502,7 +503,7 @@ final class VoiceInteractionSessionConnection implements ServiceConnection {
             }
             mContext.unbindService(this);
             try {
-                mIWindowManager.removeWindowToken(mToken);
+                mIWindowManager.removeWindowToken(mToken, DEFAULT_DISPLAY);
             } catch (RemoteException e) {
                 Slog.w(TAG, "Failed removing window token", e);
             }
@@ -570,7 +571,9 @@ final class VoiceInteractionSessionConnection implements ServiceConnection {
     @Override
     public void onServiceDisconnected(ComponentName name) {
         mCallback.sessionConnectionGone(this);
-        mService = null;
+        synchronized (mLock) {
+            mService = null;
+        }
     }
 
     public void dump(String prefix, PrintWriter pw) {

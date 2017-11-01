@@ -37,7 +37,7 @@ public class LLOfButtons1 extends Activity {
     protected void onCreate(Bundle icicle) {
         super.onCreate(icicle);
         setContentView(R.layout.linear_layout_buttons);
-        mFirstButton = (Button) findViewById(R.id.button1);
+        mFirstButton = findViewById(R.id.button1);
 
         mFirstButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -48,7 +48,7 @@ public class LLOfButtons1 extends Activity {
     }
 
     public LinearLayout getLayout() {
-        return (LinearLayout) findViewById(R.id.layout);
+        return findViewById(R.id.layout);
     }
 
     public Button getFirstButton() {

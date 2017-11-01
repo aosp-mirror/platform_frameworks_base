@@ -18,6 +18,7 @@ package com.android.server.dreams;
 
 import static android.Manifest.permission.BIND_DREAM_SERVICE;
 
+import com.android.internal.hardware.AmbientDisplayConfiguration;
 import com.android.internal.util.DumpUtils;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
@@ -88,6 +89,8 @@ public final class DreamManagerService extends SystemService {
     private int mCurrentDreamDozeScreenState = Display.STATE_UNKNOWN;
     private int mCurrentDreamDozeScreenBrightness = PowerManager.BRIGHTNESS_DEFAULT;
 
+    private AmbientDisplayConfiguration mDozeConfig;
+
     public DreamManagerService(Context context) {
         super(context);
         mContext = context;
@@ -97,6 +100,7 @@ public final class DreamManagerService extends SystemService {
         mPowerManager = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
         mPowerManagerInternal = getLocalService(PowerManagerInternal.class);
         mDozeWakeLock = mPowerManager.newWakeLock(PowerManager.DOZE_WAKE_LOCK, TAG);
+        mDozeConfig = new AmbientDisplayConfiguration(mContext);
     }
 
     @Override
@@ -121,7 +125,7 @@ public final class DreamManagerService extends SystemService {
                 }
             }, new IntentFilter(Intent.ACTION_USER_SWITCHED), null, mHandler);
             mContext.getContentResolver().registerContentObserver(
-                    Settings.Secure.getUriFor(Settings.Secure.DOZE_ENABLED), false,
+                    Settings.Secure.getUriFor(Settings.Secure.DOZE_PULSE_ON_DOUBLE_TAP), false,
                     mDozeEnabledObserver, UserHandle.USER_ALL);
             writePulseGestureEnabled();
         }
@@ -326,19 +330,12 @@ public final class DreamManagerService extends SystemService {
     }
 
     private ComponentName getDozeComponent(int userId) {
-        // Read the component from a system property to facilitate debugging.
-        // Note that for production devices, the dream should actually be declared in
-        // a config.xml resource.
-        String name = Build.IS_DEBUGGABLE ? SystemProperties.get("debug.doze.component") : null;
-        if (TextUtils.isEmpty(name)) {
-            // Read the component from a config.xml resource.
-            // The value should be specified in a resource overlay for the product.
-            name = mContext.getResources().getString(
-                    com.android.internal.R.string.config_dozeComponent);
+        if (mDozeConfig.enabled(userId)) {
+            return ComponentName.unflattenFromString(mDozeConfig.ambientDisplayComponent());
+        } else {
+            return null;
         }
-        boolean enabled = Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                Settings.Secure.DOZE_ENABLED, 1, userId) != 0;
-        return TextUtils.isEmpty(name) || !enabled ? null : ComponentName.unflattenFromString(name);
+
     }
 
     private ServiceInfo getServiceInfo(ComponentName name) {
@@ -356,6 +353,7 @@ public final class DreamManagerService extends SystemService {
                 && mCurrentDreamIsTest == isTest
                 && mCurrentDreamCanDoze == canDoze
                 && mCurrentDreamUserId == userId) {
+            Slog.i(TAG, "Already in target dream.");
             return;
         }
 
@@ -391,6 +389,7 @@ public final class DreamManagerService extends SystemService {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
+                    Slog.i(TAG, "Performing gentle wake from dream.");
                     mController.stopDream(immediate);
                 }
             });
@@ -482,14 +481,7 @@ public final class DreamManagerService extends SystemService {
     private final class BinderService extends IDreamManager.Stub {
         @Override // Binder call
         protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-            if (mContext.checkCallingOrSelfPermission(Manifest.permission.DUMP)
-                    != PackageManager.PERMISSION_GRANTED) {
-                pw.println("Permission Denial: can't dump DreamManager from from pid="
-                        + Binder.getCallingPid()
-                        + ", uid=" + Binder.getCallingUid());
-                return;
-            }
-
+            if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
             final long ident = Binder.clearCallingIdentity();
             try {
                 dumpInternal(pw);

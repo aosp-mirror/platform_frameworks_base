@@ -334,7 +334,7 @@ public final class PrintDocumentInfo implements Parcelable {
         /**
          * Sets the content type.
          * <p>
-         * <strong>Default: </strong> {@link #CONTENT_TYPE_UNKNOWN}
+         * <strong>Default: </strong> {@link #CONTENT_TYPE_DOCUMENT}
          * </p>
          *
          * @param type The content type.

@@ -14,111 +14,119 @@
  * limitations under the License.
  */
 
-#include "Source.h"
-#include "java/AnnotationProcessor.h"
-#include "java/ClassDefinition.h"
 #include "java/ManifestClassGenerator.h"
-#include "util/Maybe.h"
-#include "xml/XmlDom.h"
 
 #include <algorithm>
 
+#include "Source.h"
+#include "java/AnnotationProcessor.h"
+#include "java/ClassDefinition.h"
+#include "util/Maybe.h"
+#include "xml/XmlDom.h"
+
+using android::StringPiece;
+
 namespace aapt {
 
-static Maybe<StringPiece16> extractJavaIdentifier(IDiagnostics* diag, const Source& source,
-                                                  const StringPiece16& value) {
-    const StringPiece16 sep = u".";
-    auto iter = std::find_end(value.begin(), value.end(), sep.begin(), sep.end());
+static Maybe<StringPiece> ExtractJavaIdentifier(IDiagnostics* diag,
+                                                const Source& source,
+                                                const StringPiece& value) {
+  const StringPiece sep = ".";
+  auto iter = std::find_end(value.begin(), value.end(), sep.begin(), sep.end());
 
-    StringPiece16 result;
-    if (iter != value.end()) {
-        result.assign(iter + sep.size(), value.end() - (iter + sep.size()));
-    } else {
-        result = value;
-    }
+  StringPiece result;
+  if (iter != value.end()) {
+    result.assign(iter + sep.size(), value.end() - (iter + sep.size()));
+  } else {
+    result = value;
+  }
 
-    if (result.empty()) {
-        diag->error(DiagMessage(source) << "empty symbol");
-        return {};
-    }
+  if (result.empty()) {
+    diag->Error(DiagMessage(source) << "empty symbol");
+    return {};
+  }
 
-    iter = util::findNonAlphaNumericAndNotInSet(result, u"_");
-    if (iter != result.end()) {
-        diag->error(DiagMessage(source)
-                    << "invalid character '" << StringPiece16(iter, 1)
-                    << "' in '" << result << "'");
-        return {};
-    }
+  iter = util::FindNonAlphaNumericAndNotInSet(result, "_");
+  if (iter != result.end()) {
+    diag->Error(DiagMessage(source) << "invalid character '"
+                                    << StringPiece(iter, 1) << "' in '"
+                                    << result << "'");
+    return {};
+  }
 
-    if (*result.begin() >= u'0' && *result.begin() <= u'9') {
-        diag->error(DiagMessage(source) << "symbol can not start with a digit");
-        return {};
-    }
+  if (*result.begin() >= '0' && *result.begin() <= '9') {
+    diag->Error(DiagMessage(source) << "symbol can not start with a digit");
+    return {};
+  }
 
-    return result;
+  return result;
 }
 
-static bool writeSymbol(const Source& source, IDiagnostics* diag, xml::Element* el,
-                        ClassDefinition* classDef) {
-    xml::Attribute* attr = el->findAttribute(xml::kSchemaAndroid, u"name");
-    if (!attr) {
-        diag->error(DiagMessage(source) << "<" << el->name << "> must define 'android:name'");
-        return false;
-    }
+static bool WriteSymbol(const Source& source, IDiagnostics* diag,
+                        xml::Element* el, ClassDefinition* class_def) {
+  xml::Attribute* attr = el->FindAttribute(xml::kSchemaAndroid, "name");
+  if (!attr) {
+    diag->Error(DiagMessage(source) << "<" << el->name
+                                    << "> must define 'android:name'");
+    return false;
+  }
 
-    Maybe<StringPiece16> result = extractJavaIdentifier(diag, source.withLine(el->lineNumber),
-                                                        attr->value);
-    if (!result) {
-        return false;
-    }
+  Maybe<StringPiece> result = ExtractJavaIdentifier(
+      diag, source.WithLine(el->line_number), attr->value);
+  if (!result) {
+    return false;
+  }
 
-    std::unique_ptr<StringMember> stringMember = util::make_unique<StringMember>(
-            util::utf16ToUtf8(result.value()), util::utf16ToUtf8(attr->value));
-    stringMember->getCommentBuilder()->appendComment(el->comment);
+  std::unique_ptr<StringMember> string_member =
+      util::make_unique<StringMember>(result.value(), attr->value);
+  string_member->GetCommentBuilder()->AppendComment(el->comment);
 
-    classDef->addMember(std::move(stringMember));
-    return true;
+  class_def->AddMember(std::move(string_member));
+  return true;
 }
 
-std::unique_ptr<ClassDefinition> generateManifestClass(IDiagnostics* diag, xml::XmlResource* res) {
-    xml::Element* el = xml::findRootElement(res->root.get());
-    if (!el) {
-        diag->error(DiagMessage(res->file.source) << "no root tag defined");
-        return {};
+std::unique_ptr<ClassDefinition> GenerateManifestClass(IDiagnostics* diag,
+                                                       xml::XmlResource* res) {
+  xml::Element* el = xml::FindRootElement(res->root.get());
+  if (!el) {
+    diag->Error(DiagMessage(res->file.source) << "no root tag defined");
+    return {};
+  }
+
+  if (el->name != "manifest" && !el->namespace_uri.empty()) {
+    diag->Error(DiagMessage(res->file.source)
+                << "no <manifest> root tag defined");
+    return {};
+  }
+
+  std::unique_ptr<ClassDefinition> permission_class =
+      util::make_unique<ClassDefinition>("permission", ClassQualifier::kStatic, false);
+  std::unique_ptr<ClassDefinition> permission_group_class =
+      util::make_unique<ClassDefinition>("permission_group", ClassQualifier::kStatic, false);
+
+  bool error = false;
+  std::vector<xml::Element*> children = el->GetChildElements();
+  for (xml::Element* child_el : children) {
+    if (child_el->namespace_uri.empty()) {
+      if (child_el->name == "permission") {
+        error |= !WriteSymbol(res->file.source, diag, child_el,
+                              permission_class.get());
+      } else if (child_el->name == "permission-group") {
+        error |= !WriteSymbol(res->file.source, diag, child_el,
+                              permission_group_class.get());
+      }
     }
+  }
 
-    if (el->name != u"manifest" && !el->namespaceUri.empty()) {
-        diag->error(DiagMessage(res->file.source) << "no <manifest> root tag defined");
-        return {};
-    }
+  if (error) {
+    return {};
+  }
 
-    std::unique_ptr<ClassDefinition> permissionClass =
-            util::make_unique<ClassDefinition>("permission", ClassQualifier::Static, false);
-    std::unique_ptr<ClassDefinition> permissionGroupClass =
-            util::make_unique<ClassDefinition>("permission_group", ClassQualifier::Static, false);
-
-    bool error = false;
-
-    std::vector<xml::Element*> children = el->getChildElements();
-    for (xml::Element* childEl : children) {
-        if (childEl->namespaceUri.empty()) {
-            if (childEl->name == u"permission") {
-                error |= !writeSymbol(res->file.source, diag, childEl, permissionClass.get());
-            } else if (childEl->name == u"permission-group") {
-                error |= !writeSymbol(res->file.source, diag, childEl, permissionGroupClass.get());
-            }
-        }
-    }
-
-    if (error) {
-        return {};
-    }
-
-    std::unique_ptr<ClassDefinition> manifestClass =
-            util::make_unique<ClassDefinition>("Manifest", ClassQualifier::None, false);
-    manifestClass->addMember(std::move(permissionClass));
-    manifestClass->addMember(std::move(permissionGroupClass));
-    return manifestClass;
+  std::unique_ptr<ClassDefinition> manifest_class =
+      util::make_unique<ClassDefinition>("Manifest", ClassQualifier::kNone, false);
+  manifest_class->AddMember(std::move(permission_class));
+  manifest_class->AddMember(std::move(permission_group_class));
+  return manifest_class;
 }
 
-} // namespace aapt
+}  // namespace aapt

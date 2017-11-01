@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="5247871339820894594">"CarrierDefaultApp"</string>
+    <string name="android_system_label" msgid="2797790869522345065">"Nhà cung cấp dịch vụ di động"</string>
+    <string name="portal_notification_id" msgid="5155057562457079297">"Dữ liệu di động đã hết"</string>
+    <string name="no_data_notification_id" msgid="668400731803969521">"Dữ liệu di động của bạn đã bị hủy kích hoạt"</string>
+    <string name="portal_notification_detail" msgid="2295729385924660881">"Nhấn để truy cập trang web %s"</string>
+    <string name="no_data_notification_detail" msgid="3112125343857014825">"Hãy liên hệ với nhà cung cấp dịch vụ của bạn %s"</string>
+    <string name="no_mobile_data_connection_title" msgid="7449525772416200578">"Không có kết nối dữ liệu di động"</string>
+    <string name="no_mobile_data_connection" msgid="544980465184147010">"Thêm gói dữ liệu hoặc gói chuyển vùng thông qua %s"</string>
+    <string name="mobile_data_status_notification_channel_name" msgid="833999690121305708">"Trạng thái dữ liệu di động"</string>
+    <string name="action_bar_label" msgid="4290345990334377177">"Đăng nhập vào mạng di động"</string>
+    <string name="ssl_error_warning" msgid="3127935140338254180">"Mạng mà bạn đang cố gắng tham gia có vấn đề về bảo mật."</string>
+    <string name="ssl_error_example" msgid="6188711843183058764">"Ví dụ: trang đăng nhập có thể không thuộc về tổ chức được hiển thị."</string>
+    <string name="ssl_error_continue" msgid="1138548463994095584">"Vẫn tiếp tục qua trình duyệt"</string>
+</resources>
