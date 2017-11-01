@@ -8012,28 +8012,40 @@ public final class Settings {
         public static final String HDMI_SYSTEM_AUDIO_CONTROL_ENABLED =
                 "hdmi_system_audio_control_enabled";
 
-       /**
-        * Whether TV will automatically turn on upon reception of the CEC command
-        * &lt;Text View On&gt; or &lt;Image View On&gt;. (0 = false, 1 = true)
-        * @hide
-        */
-       public static final String HDMI_CONTROL_AUTO_WAKEUP_ENABLED =
-               "hdmi_control_auto_wakeup_enabled";
+        /**
+         * Whether TV will automatically turn on upon reception of the CEC command
+         * &lt;Text View On&gt; or &lt;Image View On&gt;. (0 = false, 1 = true)
+         *
+         * @hide
+         */
+        public static final String HDMI_CONTROL_AUTO_WAKEUP_ENABLED =
+                "hdmi_control_auto_wakeup_enabled";
 
-       /**
-        * Whether TV will also turn off other CEC devices when it goes to standby mode.
-        * (0 = false, 1 = true)
-        * @hide
-        */
-       public static final String HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED =
-               "hdmi_control_auto_device_off_enabled";
+        /**
+         * Whether TV will also turn off other CEC devices when it goes to standby mode.
+         * (0 = false, 1 = true)
+         *
+         * @hide
+         */
+        public static final String HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED =
+                "hdmi_control_auto_device_off_enabled";
 
-       /**
-        * The interval in milliseconds at which location requests will be throttled when they are
-        * coming from the background.
-        * @hide
-        */
-       public static final String LOCATION_BACKGROUND_THROTTLE_INTERVAL_MS =
+        /**
+         * If <b>true</b>, enables out-of-the-box execution for priv apps.
+         * Default: false
+         * Values: 0 = false, 1 = true
+         *
+         * @hide
+         */
+        public static final String PRIV_APP_OOB_ENABLED = "priv_app_oob_enabled";
+
+        /**
+         * The interval in milliseconds at which location requests will be throttled when they are
+         * coming from the background.
+         *
+         * @hide
+         */
+        public static final String LOCATION_BACKGROUND_THROTTLE_INTERVAL_MS =
                 "location_background_throttle_interval_ms";
 
         /**
