@@ -30,7 +30,6 @@ import android.os.ResultReceiver;
 import android.os.ServiceManager;
 import android.os.ShellCallback;
 import android.os.storage.StorageManager;
-import android.text.TextUtils;
 import android.util.Log;
 import android.util.Slog;
 
@@ -40,7 +39,6 @@ import com.android.server.pm.Installer.InstallerException;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -261,11 +259,12 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
             public void dexopt(String apkPath, int uid, @Nullable String pkgName,
                     String instructionSet, int dexoptNeeded, @Nullable String outputPath,
                     int dexFlags, String compilerFilter, @Nullable String volumeUuid,
-                    @Nullable String sharedLibraries, @Nullable String seInfo) throws InstallerException {
+                    @Nullable String sharedLibraries, @Nullable String seInfo, boolean downgrade)
+                    throws InstallerException {
                 final StringBuilder builder = new StringBuilder();
 
-                // The version. Right now it's 2.
-                builder.append("2 ");
+                // The version. Right now it's 3.
+                builder.append("3 ");
 
                 builder.append("dexopt");
 
@@ -280,6 +279,7 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
                 encodeParameter(builder, volumeUuid);
                 encodeParameter(builder, sharedLibraries);
                 encodeParameter(builder, seInfo);
+                encodeParameter(builder, downgrade);
 
                 commands.add(builder.toString());
             }
@@ -319,12 +319,14 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
                 getCompilerFilterForReason(compilationReason),
                 null /* CompilerStats.PackageStats */,
                 mPackageManagerService.getDexManager().isUsedByOtherApps(pkg.packageName),
-                true /* bootComplete */);
+                true /* bootComplete */,
+                false /* downgrade */);
 
         mPackageManagerService.getDexManager().dexoptSecondaryDex(pkg.packageName,
                 getCompilerFilterForReason(compilationReason),
                 false /* force */,
-                false /* compileOnlySharedDex */);
+                false /* compileOnlySharedDex */,
+                false /* downgrade */);
         return commands;
     }
 
