@@ -19,6 +19,7 @@
 
 #include <unordered_map>
 
+#include <android/util/ProtoOutputStream.h>
 #include "../condition/ConditionTracker.h"
 #include "../matchers/matcher_util.h"
 #include "CountAnomalyTracker.h"
@@ -65,8 +66,10 @@ protected:
 private:
     const CountMetric mMetric;
 
-    // Save the past buckets and we can clear when the StatsLogReport is dumped.
-    std::unordered_map<HashableDimensionKey, std::vector<CountBucketInfo>> mPastBuckets;
+    std::unordered_map<HashableDimensionKey,
+        std::vector<unique_ptr<android::util::ProtoOutputStream>>> mPastBucketProtos;
+
+    size_t mByteSize;
 
     // The current bucket.
     std::unordered_map<HashableDimensionKey, int> mCurrentSlicedCounter;
@@ -74,6 +77,12 @@ private:
     vector<unique_ptr<CountAnomalyTracker>> mAnomalyTrackers;
 
     void flushCounterIfNeeded(const uint64_t newEventTime);
+
+    std::unique_ptr<android::util::ProtoOutputStream> mProto;
+
+    long long mProtoToken;
+
+    void startNewProtoOutputStream(long long timestamp);
 };
 
 }  // namespace statsd
