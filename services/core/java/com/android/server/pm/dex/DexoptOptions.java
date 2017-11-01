@@ -56,6 +56,9 @@ public final class DexoptOptions {
     // actually shared at runtime.
     public static final int DEXOPT_AS_SHARED_LIBRARY = 1 << 6;
 
+    // When set, indicates that dexopt is invoked from the background service.
+    public static final int DEXOPT_IDLE_BACKGROUND_JOB = 1 << 9;
+
     // The name of package to optimize.
     private final String mPackageName;
 
@@ -86,7 +89,8 @@ public final class DexoptOptions {
                 DEXOPT_ONLY_SECONDARY_DEX |
                 DEXOPT_ONLY_SHARED_DEX |
                 DEXOPT_DOWNGRADE |
-                DEXOPT_AS_SHARED_LIBRARY;
+                DEXOPT_AS_SHARED_LIBRARY |
+                DEXOPT_IDLE_BACKGROUND_JOB;
         if ((flags & (~validityMask)) != 0) {
             throw new IllegalArgumentException("Invalid flags : " + Integer.toHexString(flags));
         }
@@ -131,6 +135,10 @@ public final class DexoptOptions {
 
     public boolean isDexoptAsSharedLibrary() {
         return (mFlags & DEXOPT_AS_SHARED_LIBRARY) != 0;
+    }
+
+    public boolean isDexoptIdleBackgroundJob() {
+        return (mFlags & DEXOPT_IDLE_BACKGROUND_JOB) != 0;
     }
 
     public String getSplitName() {
