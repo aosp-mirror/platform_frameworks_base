@@ -51,6 +51,8 @@ import android.util.TypedValue;
 import android.util.Xml;
 import android.view.DisplayAdjustments;
 
+import com.android.internal.util.GrowingArrayUtils;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
@@ -105,6 +107,13 @@ public class ResourcesImpl {
             new ConfigurationBoundResourceCache<>();
     private final ConfigurationBoundResourceCache<StateListAnimator> mStateListAnimatorCache =
             new ConfigurationBoundResourceCache<>();
+
+    // A stack of all the resourceIds already referenced when parsing a resource. This is used to
+    // detect circular references in the xml.
+    // Using a ThreadLocal variable ensures that we have different stacks for multiple parallel
+    // calls to ResourcesImpl
+    private final ThreadLocal<LookupStack> mLookupStack =
+            ThreadLocal.withInitial(() -> new LookupStack());
 
     /** Size of the cyclical cache used to map XML files to blocks. */
     private static final int XML_BLOCK_CACHE_SIZE = 4;
@@ -751,19 +760,29 @@ public class ResourcesImpl {
         final Drawable dr;
 
         Trace.traceBegin(Trace.TRACE_TAG_RESOURCES, file);
+        LookupStack stack = mLookupStack.get();
         try {
-            if (file.endsWith(".xml")) {
-                final XmlResourceParser rp = loadXmlResourceParser(
-                        file, id, value.assetCookie, "drawable");
-                dr = Drawable.createFromXmlForDensity(wrapper, rp, density, theme);
-                rp.close();
-            } else {
-                final InputStream is = mAssets.openNonAsset(
-                        value.assetCookie, file, AssetManager.ACCESS_STREAMING);
-                dr = Drawable.createFromResourceStream(wrapper, value, is, file, null);
-                is.close();
+            // Perform a linear search to check if we have already referenced this resource before.
+            if (stack.contains(id)) {
+                throw new Exception("Recursive reference in drawable");
             }
-        } catch (Exception | StackOverflowError e) {
+            stack.push(id);
+            try {
+                if (file.endsWith(".xml")) {
+                    final XmlResourceParser rp = loadXmlResourceParser(
+                            file, id, value.assetCookie, "drawable");
+                    dr = Drawable.createFromXmlForDensity(wrapper, rp, density, theme);
+                    rp.close();
+                } else {
+                    final InputStream is = mAssets.openNonAsset(
+                            value.assetCookie, file, AssetManager.ACCESS_STREAMING);
+                    dr = Drawable.createFromResourceStream(wrapper, value, is, file, null);
+                    is.close();
+                }
+            } finally {
+                stack.pop();
+            }
+        } catch (Exception e) {
             Trace.traceEnd(Trace.TRACE_TAG_RESOURCES);
             final NotFoundException rnf = new NotFoundException(
                     "File " + file + " from drawable resource ID #0x" + Integer.toHexString(id));
@@ -1294,6 +1313,31 @@ public class ResourcesImpl {
                     AssetManager.applyThemeStyle(mTheme, resId, force);
                 }
             }
+        }
+    }
+
+    private static class LookupStack {
+
+        // Pick a reasonable default size for the array, it is grown as needed.
+        private int[] mIds = new int[4];
+        private int mSize = 0;
+
+        public void push(int id) {
+            mIds = GrowingArrayUtils.append(mIds, mSize, id);
+            mSize++;
+        }
+
+        public boolean contains(int id) {
+            for (int i = 0; i < mSize; i++) {
+                if (mIds[i] == id) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public void pop() {
+            mSize--;
         }
     }
 }
