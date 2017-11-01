@@ -27,8 +27,6 @@ namespace statsd {
 
 class SimpleConditionTracker : public virtual ConditionTracker {
 public:
-    // dimensions is a vector of vector because for one single condition, different metrics may be
-    // interested in slicing in different ways. one vector<KeyMatcher> defines one type of slicing.
     SimpleConditionTracker(const std::string& name, const int index,
                            const SimpleCondition& simpleCondition,
                            const std::unordered_map<std::string, int>& trackerNameIndexMap);
@@ -51,8 +49,6 @@ public:
                         const std::vector<sp<ConditionTracker>>& allConditions,
                         std::vector<ConditionState>& conditionCache) override;
 
-    void addDimensions(const std::vector<KeyMatcher>& keyMatchers) override;
-
 private:
     // The index of the LogEventMatcher which defines the start.
     int mStartLogMatcherIndex;
@@ -66,8 +62,11 @@ private:
     // The index of the LogEventMatcher which defines the stop all.
     int mStopAllLogMatcherIndex;
 
-    // Different metrics may subscribe to different types of slicings. So it's a vector of vector.
-    std::vector<std::vector<KeyMatcher>> mDimensionsList;
+    // The dimension defines at the atom level, how start and stop should match.
+    // e.g., APP_IN_FOREGROUND, the dimension should be the uid field. Each "start" and
+    // "stop" tells you the state change of a particular app. Without this dimension, this
+    // condition does not make sense.
+    std::vector<KeyMatcher> mDimension;
 
     // Keep the map from the internal HashableDimensionKey to std::vector<KeyValuePair>
     // that StatsLogReport wants.

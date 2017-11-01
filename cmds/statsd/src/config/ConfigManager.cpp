@@ -118,9 +118,10 @@ static StatsdConfig build_fake_config() {
     StatsdConfig config;
     config.set_config_id(12345L);
 
-    int WAKE_LOCK_TAG_ID = 11;
+    int WAKE_LOCK_TAG_ID = 1111;  // put a fake id here to make testing easier.
     int WAKE_LOCK_UID_KEY_ID = 1;
-    int WAKE_LOCK_STATE_KEY = 3;
+    int WAKE_LOCK_NAME_KEY = 3;
+    int WAKE_LOCK_STATE_KEY = 4;
     int WAKE_LOCK_ACQUIRE_VALUE = 1;
     int WAKE_LOCK_RELEASE_VALUE = 0;
 
@@ -180,24 +181,56 @@ static StatsdConfig build_fake_config() {
     link->add_key_in_main()->set_key(WAKE_LOCK_UID_KEY_ID);
     link->add_key_in_condition()->set_key(APP_USAGE_UID_KEY_ID);
 
-    // Duration of an app holding wl, while screen on and app in background
+    // Duration of an app holding any wl, while screen on and app in background, slice by uid
     DurationMetric* durationMetric = config.add_duration_metric();
     durationMetric->set_metric_id(5);
-    durationMetric->set_start("APP_GET_WL");
-    durationMetric->set_stop("APP_RELEASE_WL");
     durationMetric->mutable_bucket()->set_bucket_size_millis(30 * 1000L);
     durationMetric->set_type(DurationMetric_AggregationType_DURATION_SUM);
     keyMatcher = durationMetric->add_dimension();
     keyMatcher->set_key(WAKE_LOCK_UID_KEY_ID);
+    durationMetric->set_what("WL_STATE_PER_APP_PER_NAME");
     durationMetric->set_predicate("APP_IS_BACKGROUND_AND_SCREEN_ON");
     link = durationMetric->add_links();
     link->set_condition("APP_IS_BACKGROUND");
     link->add_key_in_main()->set_key(WAKE_LOCK_UID_KEY_ID);
     link->add_key_in_condition()->set_key(APP_USAGE_UID_KEY_ID);
 
+    // max Duration of an app holding any wl, while screen on and app in background, slice by uid
+    durationMetric = config.add_duration_metric();
+    durationMetric->set_metric_id(6);
+    durationMetric->mutable_bucket()->set_bucket_size_millis(30 * 1000L);
+    durationMetric->set_type(DurationMetric_AggregationType_DURATION_MAX_SPARSE);
+    keyMatcher = durationMetric->add_dimension();
+    keyMatcher->set_key(WAKE_LOCK_UID_KEY_ID);
+    durationMetric->set_what("WL_STATE_PER_APP_PER_NAME");
+    durationMetric->set_predicate("APP_IS_BACKGROUND_AND_SCREEN_ON");
+    link = durationMetric->add_links();
+    link->set_condition("APP_IS_BACKGROUND");
+    link->add_key_in_main()->set_key(WAKE_LOCK_UID_KEY_ID);
+    link->add_key_in_condition()->set_key(APP_USAGE_UID_KEY_ID);
+
+    // Duration of an app holding any wl, while screen on and app in background
+    durationMetric = config.add_duration_metric();
+    durationMetric->set_metric_id(7);
+    durationMetric->mutable_bucket()->set_bucket_size_millis(30 * 1000L);
+    durationMetric->set_type(DurationMetric_AggregationType_DURATION_MAX_SPARSE);
+    durationMetric->set_what("WL_STATE_PER_APP_PER_NAME");
+    durationMetric->set_predicate("APP_IS_BACKGROUND_AND_SCREEN_ON");
+    link = durationMetric->add_links();
+    link->set_condition("APP_IS_BACKGROUND");
+    link->add_key_in_main()->set_key(WAKE_LOCK_UID_KEY_ID);
+    link->add_key_in_condition()->set_key(APP_USAGE_UID_KEY_ID);
+
+    // Duration of screen on time.
+    durationMetric = config.add_duration_metric();
+    durationMetric->set_metric_id(8);
+    durationMetric->mutable_bucket()->set_bucket_size_millis(30 * 1000L);
+    durationMetric->set_type(DurationMetric_AggregationType_DURATION_SUM);
+    durationMetric->set_what("SCREEN_IS_ON");
+
     // Add an EventMetric to log process state change events.
     EventMetric* eventMetric = config.add_event_metric();
-    eventMetric->set_metric_id(6);
+    eventMetric->set_metric_id(9);
     eventMetric->set_what("SCREEN_TURNED_ON");
 
     // Event matchers............
@@ -272,6 +305,8 @@ static StatsdConfig build_fake_config() {
     simpleCondition = condition->mutable_simple_condition();
     simpleCondition->set_start("APP_GOES_BACKGROUND");
     simpleCondition->set_stop("APP_GOES_FOREGROUND");
+    KeyMatcher* condition_dimension1 = simpleCondition->add_dimension();
+    condition_dimension1->set_key(APP_USAGE_UID_KEY_ID);
 
     condition = config.add_condition();
     condition->set_name("APP_IS_BACKGROUND_AND_SCREEN_ON");
@@ -279,6 +314,16 @@ static StatsdConfig build_fake_config() {
     combination_condition->set_operation(LogicalOperation::AND);
     combination_condition->add_condition("APP_IS_BACKGROUND");
     combination_condition->add_condition("SCREEN_IS_ON");
+
+    condition = config.add_condition();
+    condition->set_name("WL_STATE_PER_APP_PER_NAME");
+    simpleCondition = condition->mutable_simple_condition();
+    simpleCondition->set_start("APP_GET_WL");
+    simpleCondition->set_stop("APP_RELEASE_WL");
+    KeyMatcher* condition_dimension = simpleCondition->add_dimension();
+    condition_dimension->set_key(WAKE_LOCK_UID_KEY_ID);
+    condition_dimension = simpleCondition->add_dimension();
+    condition_dimension->set_key(WAKE_LOCK_NAME_KEY);
 
     return config;
 }

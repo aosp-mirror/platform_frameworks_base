@@ -21,7 +21,6 @@
 #include "CountMetricProducer.h"
 #include "stats_util.h"
 
-#include <cutils/log.h>
 #include <limits.h>
 #include <stdlib.h>
 
@@ -94,7 +93,7 @@ static void addSlicedCounterToReport(StatsLogReport_CountMetricDataWrapper& wrap
     }
 }
 
-void CountMetricProducer::onSlicedConditionMayChange() {
+void CountMetricProducer::onSlicedConditionMayChange(const uint64_t eventTime) {
     VLOG("Metric %lld onSlicedConditionMayChange", mMetric.metric_id());
 }
 
@@ -128,7 +127,7 @@ StatsLogReport CountMetricProducer::onDumpReport() {
     // TODO: Clear mPastBuckets, mDimensionKeyMap once the report is dumped.
 }
 
-void CountMetricProducer::onConditionChanged(const bool conditionMet) {
+void CountMetricProducer::onConditionChanged(const bool conditionMet, const uint64_t eventTime) {
     VLOG("Metric %lld onConditionChanged", mMetric.metric_id());
     mCondition = conditionMet;
 }

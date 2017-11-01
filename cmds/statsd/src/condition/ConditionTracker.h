@@ -16,8 +16,6 @@
 
 #pragma once
 
-#include "Log.h"
-
 #include "condition/condition_util.h"
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
 #include "matchers/LogMatchingTracker.h"
@@ -102,8 +100,6 @@ public:
     virtual void setSliced(bool sliced) {
         mSliced = mSliced | sliced;
     }
-
-    virtual void addDimensions(const std::vector<KeyMatcher>& keyMatchers) = 0;
 
 protected:
     // We don't really need the string name, but having a name here makes log messages

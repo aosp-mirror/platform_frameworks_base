@@ -231,6 +231,14 @@ void StatsService::print_cmd_help(FILE* out) {
     fprintf(out, "                parameter on eng builds.  If UID is omitted the calling\n");
     fprintf(out, "                uid is used.\n");
     fprintf(out, "  NAME          The per-uid name to use\n");
+    fprintf(out, "\n");
+    fprintf(out, "\n");
+    fprintf(out, "usage: adb shell cmd stats dump-report [UID] NAME\n");
+    fprintf(out, "  Dump all metric data for a configuration.\n");
+    fprintf(out, "  UID           The uid of the configuration. It is only possible to pass\n");
+    fprintf(out, "                the UID parameter on eng builds. If UID is omitted the\n");
+    fprintf(out, "                calling uid is used.\n");
+    fprintf(out, "  NAME          The name of the configuration\n");
 }
 
 status_t StatsService::cmd_config(FILE* in, FILE* out, FILE* err, Vector<String8>& args) {
@@ -312,7 +320,7 @@ status_t StatsService::cmd_dump_report(FILE* out, FILE* err, const Vector<String
             // Automatically pick the UID
             uid = IPCThreadState::self()->getCallingUid();
             // TODO: What if this isn't a binder call? Should we fail?
-            name.assign(args[2].c_str(), args[2].size());
+            name.assign(args[1].c_str(), args[1].size());
             good = true;
         } else if (argCount == 3) {
             // If it's a userdebug or eng build, then the shell user can

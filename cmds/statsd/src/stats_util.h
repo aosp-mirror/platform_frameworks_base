@@ -40,6 +40,8 @@ const uint64_t TYPE_STRING = 9ULL << FIELD_TYPE_SHIFT;
 
 typedef std::string HashableDimensionKey;
 
+typedef std::map<std::string, HashableDimensionKey> ConditionKey;
+
 EventMetricData parse(log_msg msg);
 
 int getTagId(log_msg msg);

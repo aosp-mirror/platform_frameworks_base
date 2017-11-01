@@ -50,9 +50,9 @@ public:
     // Consume the parsed stats log entry that already matched the "what" of the metric.
     void onMatchedLogEvent(const size_t matcherIndex, const LogEvent& event);
 
-    virtual void onConditionChanged(const bool condition) = 0;
+    virtual void onConditionChanged(const bool condition, const uint64_t eventTime) = 0;
 
-    virtual void onSlicedConditionMayChange() = 0;
+    virtual void onSlicedConditionMayChange(const uint64_t eventTime) = 0;
 
     // This is called when the metric collecting is done, e.g., when there is a new configuration
     // coming. MetricProducer should do the clean up, and dump existing data to dropbox.

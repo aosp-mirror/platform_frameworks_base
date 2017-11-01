@@ -74,6 +74,13 @@ SimpleConditionTracker::SimpleConditionTracker(
         mStopAllLogMatcherIndex = -1;
     }
 
+    mDimension.insert(mDimension.begin(), simpleCondition.dimension().begin(),
+                      simpleCondition.dimension().end());
+
+    if (mDimension.size() > 0) {
+        mSliced = true;
+    }
+
     mInitialized = true;
 }
 
@@ -96,12 +103,6 @@ void print(unordered_map<HashableDimensionKey, ConditionState>& conditions, cons
     for (const auto& pair : conditions) {
         VLOG("\t%s %d", pair.first.c_str(), pair.second);
     }
-}
-
-void SimpleConditionTracker::addDimensions(const std::vector<KeyMatcher>& keyMatchers) {
-    VLOG("Added dimensions size %lu", (unsigned long)keyMatchers.size());
-    mDimensionsList.push_back(keyMatchers);
-    mSliced = true;
 }
 
 bool SimpleConditionTracker::evaluateCondition(const LogEvent& event,
@@ -157,18 +158,15 @@ bool SimpleConditionTracker::evaluateCondition(const LogEvent& event,
         // TODO: handle stop all; all dimension should be cleared.
     }
 
-    if (mDimensionsList.size() > 0) {
-        for (size_t i = 0; i < mDimensionsList.size(); i++) {
-            const auto& dim = mDimensionsList[i];
-            vector<KeyValuePair> key = getDimensionKey(event, dim);
-            HashableDimensionKey hashableKey = getHashableKey(key);
-            if (mSlicedConditionState.find(hashableKey) == mSlicedConditionState.end() ||
-                mSlicedConditionState[hashableKey] != newCondition) {
-                slicedChanged = true;
-                mSlicedConditionState[hashableKey] = newCondition;
-            }
-            VLOG("key: %s %d", hashableKey.c_str(), newCondition);
+
+    if (mDimension.size() > 0) {
+        HashableDimensionKey hashableKey = getHashableKey(getDimensionKey(event, mDimension));
+        if (mSlicedConditionState.find(hashableKey) == mSlicedConditionState.end() ||
+            mSlicedConditionState[hashableKey] != newCondition) {
+            slicedChanged = true;
+            mSlicedConditionState[hashableKey] = newCondition;
         }
+        VLOG("key: %s %d", hashableKey.c_str(), newCondition);
         // dump all dimensions for debugging
         if (DEBUG) {
             print(mSlicedConditionState, mName);

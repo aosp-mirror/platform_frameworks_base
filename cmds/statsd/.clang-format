@@ -12,3 +12,6 @@ IndentWidth: 4
 PointerAlignment: Left
 TabWidth: 4
 AccessModifierOffset: -4
+IncludeCategories:
+  - Regex:    '^"Log\.h"'
+    Priority:    -1
