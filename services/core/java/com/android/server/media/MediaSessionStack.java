@@ -75,7 +75,7 @@ class MediaSessionStack {
      */
     private final List<MediaSessionRecord> mSessions = new ArrayList<MediaSessionRecord>();
 
-    private final AudioPlayerStateMonitor mAudioPlayerStateMonitor;
+    private final AudioPlaybackMonitor mAudioPlaybackMonitor;
     private final OnMediaButtonSessionChangedListener mOnMediaButtonSessionChangedListener;
 
     /**
@@ -84,6 +84,7 @@ class MediaSessionStack {
      */
     private MediaSessionRecord mMediaButtonSession;
 
+    private MediaSessionRecord mCachedDefault;
     private MediaSessionRecord mCachedVolumeDefault;
 
     /**
@@ -92,8 +93,8 @@ class MediaSessionStack {
     private final SparseArray<ArrayList<MediaSessionRecord>> mCachedActiveLists =
             new SparseArray<>();
 
-    MediaSessionStack(AudioPlayerStateMonitor monitor, OnMediaButtonSessionChangedListener listener) {
-        mAudioPlayerStateMonitor = monitor;
+    MediaSessionStack(AudioPlaybackMonitor monitor, OnMediaButtonSessionChangedListener listener) {
+        mAudioPlaybackMonitor = monitor;
         mOnMediaButtonSessionChangedListener = listener;
     }
 
@@ -186,13 +187,13 @@ class MediaSessionStack {
         if (DEBUG) {
             Log.d(TAG, "updateMediaButtonSessionIfNeeded, callers=" + Debug.getCallers(2));
         }
-        IntArray audioPlaybackUids = mAudioPlayerStateMonitor.getSortedAudioPlaybackClientUids();
+        IntArray audioPlaybackUids = mAudioPlaybackMonitor.getSortedAudioPlaybackClientUids();
         for (int i = 0; i < audioPlaybackUids.size(); i++) {
             MediaSessionRecord mediaButtonSession =
                     findMediaButtonSession(audioPlaybackUids.get(i));
             if (mediaButtonSession != null) {
                 // Found the media button session.
-                mAudioPlayerStateMonitor.cleanUpAudioPlaybackUids(mediaButtonSession.getUid());
+                mAudioPlaybackMonitor.cleanUpAudioPlaybackUids(mediaButtonSession.getUid());
                 if (mMediaButtonSession != mediaButtonSession) {
                     updateMediaButtonSession(mediaButtonSession);
                 }
@@ -215,7 +216,7 @@ class MediaSessionStack {
         for (MediaSessionRecord session : mSessions) {
             if (uid == session.getUid()) {
                 if (session.getPlaybackState() != null && session.isPlaybackActive() ==
-                        mAudioPlayerStateMonitor.isPlaybackActive(session.getUid())) {
+                        mAudioPlaybackMonitor.isPlaybackActive(session.getUid())) {
                     // If there's a media session whose PlaybackState matches
                     // the audio playback state, return it immediately.
                     return session;
@@ -375,6 +376,7 @@ class MediaSessionStack {
     }
 
     private void clearCache(int userId) {
+        mCachedDefault = null;
         mCachedVolumeDefault = null;
         mCachedActiveLists.remove(userId);
         // mCachedActiveLists may also include the list of sessions for UserHandle.USER_ALL,
