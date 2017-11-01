@@ -436,8 +436,11 @@ public final class AccessibilityManager {
             // client using it is called through Binder from another process. Example: MMS
             // app adds a SMS notification and the NotificationManagerService calls this method
             long identityToken = Binder.clearCallingIdentity();
-            service.sendAccessibilityEvent(event, userId);
-            Binder.restoreCallingIdentity(identityToken);
+            try {
+                service.sendAccessibilityEvent(event, userId);
+            } finally {
+                Binder.restoreCallingIdentity(identityToken);
+            }
             if (DEBUG) {
                 Log.i(LOG_TAG, event + " sent");
             }
