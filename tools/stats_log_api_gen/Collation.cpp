@@ -22,6 +22,7 @@
 namespace android {
 namespace stats_log_api_gen {
 
+using google::protobuf::EnumDescriptor;
 using google::protobuf::FieldDescriptor;
 using google::protobuf::FileDescriptor;
 using google::protobuf::SourceLocation;
@@ -120,7 +121,7 @@ java_type(const FieldDescriptor* field)
         case FieldDescriptor::TYPE_UINT32:
             return JAVA_TYPE_INT;
         case FieldDescriptor::TYPE_ENUM:
-            return JAVA_TYPE_INT;
+            return JAVA_TYPE_ENUM;
         case FieldDescriptor::TYPE_SFIXED32:
             return JAVA_TYPE_INT;
         case FieldDescriptor::TYPE_SFIXED64:
@@ -208,7 +209,6 @@ collate_atoms(const Descriptor* descriptor, Atoms* atoms)
                 errorCount++;
                 continue;
             }
-
         }
 
         // Check that if there's a WorkSource, it's at position 1.
@@ -228,15 +228,26 @@ collate_atoms(const Descriptor* descriptor, Atoms* atoms)
 
         AtomDecl atomDecl(atomField->number(), atomField->name(), atom->name());
 
-        // Build the type signature
+        // Build the type signature and the atom data.
         vector<java_type_t> signature;
         for (map<int,const FieldDescriptor*>::const_iterator it = fields.begin();
                 it != fields.end(); it++) {
             const FieldDescriptor* field = it->second;
             java_type_t javaType = java_type(field);
 
-            atomDecl.fields.push_back(AtomField(field->name(), javaType));
-            signature.push_back(javaType);
+            AtomField atField(field->name(), javaType);
+            if (javaType == JAVA_TYPE_ENUM) {
+                // All enums are treated as ints when it comes to function signatures.
+                signature.push_back(JAVA_TYPE_INT);
+                const EnumDescriptor* enumDescriptor = field->enum_type();
+                for (int i = 0; i < enumDescriptor->value_count(); i++) {
+                    atField.enumValues[enumDescriptor->value(i)->number()] =
+                        enumDescriptor->value(i)->name().c_str();
+                }
+            } else {
+                signature.push_back(javaType);
+            }
+            atomDecl.fields.push_back(atField);
         }
 
         atoms->signatures.insert(signature);
@@ -261,5 +272,3 @@ collate_atoms(const Descriptor* descriptor, Atoms* atoms)
 
 }  // namespace stats_log_api_gen
 }  // namespace android
-
-
