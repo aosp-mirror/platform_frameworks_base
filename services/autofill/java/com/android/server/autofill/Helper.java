@@ -28,6 +28,7 @@ import android.view.autofill.AutofillValue;
 
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
@@ -111,5 +112,13 @@ public final class Helper {
             log.addTaggedData(MetricsEvent.FIELD_AUTOFILL_SERVICE, servicePackageName);
         }
         return log;
+    }
+
+    public static void printlnRedactedText(@NonNull PrintWriter pw, @Nullable String text) {
+        if (text == null) {
+            pw.println("null");
+        } else {
+            pw.print(text.length()); pw.println("_chars");
+        }
     }
 }
