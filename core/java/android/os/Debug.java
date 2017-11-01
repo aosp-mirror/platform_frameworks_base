@@ -16,11 +16,14 @@
 
 package android.os;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.AppGlobals;
 import android.content.Context;
 import android.util.Log;
 
 import com.android.internal.util.FastPrintWriter;
+import com.android.internal.util.Preconditions;
 import com.android.internal.util.TypedProperties;
 
 import dalvik.bytecode.OpcodeInfo;
@@ -2370,5 +2373,25 @@ public final class Debug
      */
     public static String getCaller() {
         return getCaller(Thread.currentThread().getStackTrace(), 0);
+    }
+
+    /**
+     * Attach a library as a jvmti agent to the current runtime.
+     *
+     * @param library library containing the agent
+     * @param options options passed to the agent
+     *
+     * @throws IOException If the agent could not be attached
+     */
+    public static void attachJvmtiAgent(@NonNull String library, @Nullable String options)
+            throws IOException {
+        Preconditions.checkNotNull(library);
+        Preconditions.checkArgument(!library.contains("="));
+
+        if (options == null) {
+            VMDebug.attachAgent(library);
+        } else {
+            VMDebug.attachAgent(library + "=" + options);
+        }
     }
 }
