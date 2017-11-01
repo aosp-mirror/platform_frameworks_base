@@ -4754,6 +4754,11 @@ message MetricsEvent {
     // OS: P
     DIALOG_OEM_LOCK_INFO = 1238;
 
+    // ACTION: Settings > Wi-Fi > Click one network > Auto sign in
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_WIFI_AUTO_SIGN_IN = 1239;
+
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
   }
