@@ -42,7 +42,7 @@ public class RecentsTransition {
      */
     public static ActivityOptions createAspectScaleAnimation(Context context, Handler handler,
             boolean scaleUp, AppTransitionAnimationSpecsFuture animationSpecsFuture,
-            OnAnimationStartedListener animationStartCallback) {
+            final OnAnimationStartedListener animationStartCallback) {
         final OnAnimationStartedListener animStartedListener = new OnAnimationStartedListener() {
             private boolean mHandled;
 
@@ -70,15 +70,20 @@ public class RecentsTransition {
     /**
      * Wraps a animation-start callback in a binder that can be called from window manager.
      */
-    public static IRemoteCallback wrapStartedListener(Handler handler,
-            OnAnimationStartedListener listener) {
+    public static IRemoteCallback wrapStartedListener(final Handler handler,
+            final OnAnimationStartedListener listener) {
         if (listener == null) {
             return null;
         }
         return new IRemoteCallback.Stub() {
             @Override
             public void sendResult(Bundle data) throws RemoteException {
-                handler.post(listener::onAnimationStarted);
+                handler.post(new Runnable() {
+                                 @Override
+                                 public void run() {
+                                     listener.onAnimationStarted();
+                                 }
+                             });
             }
         };
     }
@@ -87,15 +92,18 @@ public class RecentsTransition {
      * @return a {@link GraphicBuffer} with the {@param view} drawn into it. Result can be null if
      *         we were unable to allocate a hardware bitmap.
      */
-    public static GraphicBuffer drawViewIntoGraphicBuffer(int width, int height, View view,
-            float scale, int eraseColor) {
-        final Bitmap hwBitmap = createHardwareBitmap(width, height, (c) -> {
-            c.scale(scale, scale);
-            if (eraseColor != 0) {
-                c.drawColor(eraseColor);
-            }
-            if (view != null) {
-                view.draw(c);
+    public static GraphicBuffer drawViewIntoGraphicBuffer(int width, int height, final View view,
+            final float scale, final int eraseColor) {
+        final Bitmap hwBitmap = createHardwareBitmap(width, height, new Consumer<Canvas>() {
+            @Override
+            public void accept(Canvas c) {
+                c.scale(scale, scale);
+                if (eraseColor != 0) {
+                    c.drawColor(eraseColor);
+                }
+                if (view != null) {
+                    view.draw(c);
+                }
             }
         });
         return hwBitmap != null ? hwBitmap.createGraphicBufferHandle() : null;
