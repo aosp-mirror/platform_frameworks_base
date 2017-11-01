@@ -48,6 +48,7 @@ import android.net.NetworkInfo;
 import android.net.NetworkRequest;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.PowerManager.ServiceType;
 import android.os.PowerSaveState;
 import android.os.BatteryStats;
 import android.os.Binder;
@@ -84,7 +85,6 @@ import com.android.internal.location.ProviderProperties;
 import com.android.internal.location.ProviderRequest;
 
 import com.android.server.power.BatterySaverPolicy;
-import com.android.server.power.BatterySaverPolicy.ServiceType;
 
 import libcore.io.IoUtils;
 

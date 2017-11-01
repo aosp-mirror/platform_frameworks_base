@@ -71,6 +71,7 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.PowerManager;
+import android.os.PowerManager.ServiceType;
 import android.os.PowerSaveState;
 import android.os.Process;
 import android.os.RemoteException;
@@ -120,7 +121,6 @@ import com.android.server.backup.utils.AppBackupUtils;
 import com.android.server.backup.utils.BackupManagerMonitorUtils;
 import com.android.server.backup.utils.BackupObserverUtils;
 import com.android.server.backup.utils.SparseArrayUtils;
-import com.android.server.power.BatterySaverPolicy.ServiceType;
 
 import com.google.android.collect.Sets;
 

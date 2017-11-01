@@ -15,12 +15,11 @@
  */
 package com.android.server.power;
 
+import android.os.PowerManager.ServiceType;
 import android.os.PowerSaveState;
 import android.os.Handler;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
-
-import com.android.server.power.BatterySaverPolicy.ServiceType;
 
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
