@@ -74,6 +74,8 @@ public class AssistDataRequesterTest extends ActivityTestsBase {
     private static final boolean CALLER_ASSIST_SCREENSHOT_ALLOWED = true;
     private static final boolean FETCH_DATA = true;
     private static final boolean FETCH_SCREENSHOTS = true;
+    private static final boolean ALLOW_FETCH_DATA = true;
+    private static final boolean ALLOW_FETCH_SCREENSHOTS = true;
 
     private static final int TEST_UID = 0;
     private static final String TEST_PACKAGE = "";
@@ -153,7 +155,7 @@ public class AssistDataRequesterTest extends ActivityTestsBase {
                 CALLER_ASSIST_SCREENSHOT_ALLOWED);
 
         mDataRequester.requestAssistData(createActivityList(5), FETCH_DATA, FETCH_SCREENSHOTS,
-                TEST_UID, TEST_PACKAGE);
+                ALLOW_FETCH_DATA, ALLOW_FETCH_SCREENSHOTS, TEST_UID, TEST_PACKAGE);
         assertReceivedDataCount(5, 5, 1, 1);
     }
 
@@ -163,18 +165,18 @@ public class AssistDataRequesterTest extends ActivityTestsBase {
                 CALLER_ASSIST_SCREENSHOT_ALLOWED);
 
         mDataRequester.requestAssistData(createActivityList(0), FETCH_DATA, FETCH_SCREENSHOTS,
-                TEST_UID, TEST_PACKAGE);
+                ALLOW_FETCH_DATA, ALLOW_FETCH_SCREENSHOTS, TEST_UID, TEST_PACKAGE);
         assertReceivedDataCount(0, 0, 0, 0);
     }
 
     @Test
-    public void testCurrentAppDisallow_expectNoCallbacks() throws Exception {
+    public void testCurrentAppDisallow_expectNullCallbacks() throws Exception {
         setupMocks(!CURRENT_ACTIVITY_ASSIST_ALLOWED, CALLER_ASSIST_STRUCTURE_ALLOWED,
                 CALLER_ASSIST_SCREENSHOT_ALLOWED);
 
         mDataRequester.requestAssistData(createActivityList(5), FETCH_DATA, FETCH_SCREENSHOTS,
-                TEST_UID, TEST_PACKAGE);
-        assertReceivedDataCount(0, 0, 0, 0);
+                ALLOW_FETCH_DATA, ALLOW_FETCH_SCREENSHOTS, TEST_UID, TEST_PACKAGE);
+        assertReceivedDataCount(0, 1, 0, 1);
     }
 
     @Test
@@ -184,7 +186,7 @@ public class AssistDataRequesterTest extends ActivityTestsBase {
 
         mCallbacks.canHandleReceivedData = false;
         mDataRequester.requestAssistData(createActivityList(5), FETCH_DATA, FETCH_SCREENSHOTS,
-                TEST_UID, TEST_PACKAGE);
+                ALLOW_FETCH_DATA, ALLOW_FETCH_SCREENSHOTS, TEST_UID, TEST_PACKAGE);
         assertTrue(mDataRequester.getPendingDataCount() == 5);
         assertTrue(mDataRequester.getPendingScreenshotCount() == 1);
         mGate.countDown();
@@ -200,16 +202,22 @@ public class AssistDataRequesterTest extends ActivityTestsBase {
         mDataRequester.processPendingAssistData();
         assertTrue(mCallbacks.receivedData.size() == 5);
         assertTrue(mCallbacks.receivedScreenshots.size() == 1);
+
+        // Clear the state and ensure that we only process pending data once
+        mCallbacks.reset();
+        mDataRequester.processPendingAssistData();
+        assertTrue(mCallbacks.receivedData.isEmpty());
+        assertTrue(mCallbacks.receivedScreenshots.isEmpty());
     }
 
     @Test
-    public void testNoFetchData_expectNoCallbacks() throws Exception {
+    public void testNoFetchData_expectNoDataCallbacks() throws Exception {
         setupMocks(CURRENT_ACTIVITY_ASSIST_ALLOWED, CALLER_ASSIST_STRUCTURE_ALLOWED,
                 CALLER_ASSIST_SCREENSHOT_ALLOWED);
 
         mDataRequester.requestAssistData(createActivityList(5), !FETCH_DATA, FETCH_SCREENSHOTS,
-                TEST_UID, TEST_PACKAGE);
-        assertReceivedDataCount(0, 0, 0, 0);
+                ALLOW_FETCH_DATA, ALLOW_FETCH_SCREENSHOTS, TEST_UID, TEST_PACKAGE);
+        assertReceivedDataCount(0, 0, 0, 1);
     }
 
     @Test
@@ -218,9 +226,9 @@ public class AssistDataRequesterTest extends ActivityTestsBase {
                 CALLER_ASSIST_SCREENSHOT_ALLOWED);
 
         mDataRequester.requestAssistData(createActivityList(5), FETCH_DATA, FETCH_SCREENSHOTS,
-                TEST_UID, TEST_PACKAGE);
+                ALLOW_FETCH_DATA, ALLOW_FETCH_SCREENSHOTS, TEST_UID, TEST_PACKAGE);
         // Expect a single null data when the appops is denied
-        assertReceivedDataCount(0, 1, 0, 0);
+        assertReceivedDataCount(0, 1, 0, 1);
     }
 
     @Test
@@ -231,9 +239,9 @@ public class AssistDataRequesterTest extends ActivityTestsBase {
                 anyBoolean(), anyBoolean());
 
         mDataRequester.requestAssistData(createActivityList(5), FETCH_DATA, FETCH_SCREENSHOTS,
-                TEST_UID, TEST_PACKAGE);
+                ALLOW_FETCH_DATA, ALLOW_FETCH_SCREENSHOTS, TEST_UID, TEST_PACKAGE);
         // Expect a single null data when requestAssistContextExtras() fails
-        assertReceivedDataCount(0, 1, 0, 0);
+        assertReceivedDataCount(0, 1, 0, 1);
     }
 
     @Test
@@ -242,7 +250,7 @@ public class AssistDataRequesterTest extends ActivityTestsBase {
                 CALLER_ASSIST_SCREENSHOT_ALLOWED);
 
         mDataRequester.requestAssistData(createActivityList(5), FETCH_DATA, !FETCH_SCREENSHOTS,
-                TEST_UID, TEST_PACKAGE);
+                ALLOW_FETCH_DATA, ALLOW_FETCH_SCREENSHOTS, TEST_UID, TEST_PACKAGE);
         assertReceivedDataCount(5, 5, 0, 0);
     }
 
@@ -252,9 +260,33 @@ public class AssistDataRequesterTest extends ActivityTestsBase {
                 !CALLER_ASSIST_SCREENSHOT_ALLOWED);
 
         mDataRequester.requestAssistData(createActivityList(5), FETCH_DATA, FETCH_SCREENSHOTS,
-                TEST_UID, TEST_PACKAGE);
+                ALLOW_FETCH_DATA, ALLOW_FETCH_SCREENSHOTS, TEST_UID, TEST_PACKAGE);
         // Expect a single null screenshot when the appops is denied
         assertReceivedDataCount(5, 5, 0, 1);
+    }
+
+    @Test
+    public void testCanNotHandleReceivedData_expectNoCallbacks() throws Exception {
+        setupMocks(CURRENT_ACTIVITY_ASSIST_ALLOWED, !CALLER_ASSIST_STRUCTURE_ALLOWED,
+                !CALLER_ASSIST_SCREENSHOT_ALLOWED);
+
+        mCallbacks.canHandleReceivedData = false;
+        mDataRequester.requestAssistData(createActivityList(5), FETCH_DATA, FETCH_SCREENSHOTS,
+                ALLOW_FETCH_DATA, ALLOW_FETCH_SCREENSHOTS, TEST_UID, TEST_PACKAGE);
+        mGate.countDown();
+        waitForIdle(mHandler);
+        assertTrue(mCallbacks.receivedData.isEmpty());
+        assertTrue(mCallbacks.receivedScreenshots.isEmpty());
+    }
+
+    @Test
+    public void testRequestDataNoneAllowed_expectNullCallbacks() throws Exception {
+        setupMocks(CURRENT_ACTIVITY_ASSIST_ALLOWED, CALLER_ASSIST_STRUCTURE_ALLOWED,
+                CALLER_ASSIST_SCREENSHOT_ALLOWED);
+
+        mDataRequester.requestAssistData(createActivityList(5), FETCH_DATA, FETCH_SCREENSHOTS,
+                !ALLOW_FETCH_DATA, !ALLOW_FETCH_SCREENSHOTS, TEST_UID, TEST_PACKAGE);
+        assertReceivedDataCount(0, 1, 0, 1);
     }
 
     private void assertReceivedDataCount(int numPendingData, int numReceivedData,
@@ -297,6 +329,12 @@ public class AssistDataRequesterTest extends ActivityTestsBase {
         boolean canHandleReceivedData = true;
         ArrayList<Bundle> receivedData = new ArrayList<>();
         ArrayList<Bitmap> receivedScreenshots = new ArrayList<>();
+
+        void reset() {
+            canHandleReceivedData = true;
+            receivedData.clear();
+            receivedScreenshots.clear();
+        }
 
         @Override
         public boolean canHandleReceivedAssistDataLocked() {

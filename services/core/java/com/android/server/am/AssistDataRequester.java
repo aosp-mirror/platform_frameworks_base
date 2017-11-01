@@ -131,9 +131,14 @@ public class AssistDataRequester extends IAssistDataReceiver.Stub {
      * @param fetchScreenshot whether or not to fetch the screenshot, only applies if fetchData is
      *     true, the caller is allowed to fetch the assist data, and the current activity allows
      *     assist data to be fetched from it
+     * @param allowFetchData to be joined with other checks, determines whether or not the requester
+     *     is allowed to fetch the assist data
+     * @param allowFetchScreenshot to be joined with other checks, determines whether or not the
+     *     requester is allowed to fetch the assist screenshot
      */
-    public void requestAssistData(List<IBinder> activityTokens, boolean fetchData,
-            boolean fetchScreenshot, int callingUid, String callingPackage) {
+    public void requestAssistData(List<IBinder> activityTokens, final boolean fetchData,
+            final boolean fetchScreenshot, boolean allowFetchData, boolean allowFetchScreenshot,
+            int callingUid, String callingPackage) {
         // TODO: Better handle the cancel case if a request can be reused
         // TODO: Known issue, if the assist data is not allowed on the current activity, then no
         //       assist data is requested for any of the other activities
@@ -150,8 +155,8 @@ public class AssistDataRequester extends IAssistDataReceiver.Stub {
         } catch (RemoteException e) {
             // Should never happen
         }
-        fetchData &= isAssistDataAllowed;
-        fetchScreenshot &= fetchData && isAssistDataAllowed
+        allowFetchData &= isAssistDataAllowed;
+        allowFetchScreenshot &= fetchData && isAssistDataAllowed
                 && (mRequestScreenshotAppOps != OP_NONE);
 
         mCanceled = false;
@@ -162,7 +167,7 @@ public class AssistDataRequester extends IAssistDataReceiver.Stub {
 
         if (fetchData) {
             if (mAppOpsManager.checkOpNoThrow(mRequestStructureAppOps, callingUid, callingPackage)
-                    == MODE_ALLOWED) {
+                    == MODE_ALLOWED && allowFetchData) {
                 final int numActivities = activityTokens.size();
                 for (int i = 0; i < numActivities; i++) {
                     IBinder topActivity = activityTokens.get(i);
@@ -177,8 +182,12 @@ public class AssistDataRequester extends IAssistDataReceiver.Stub {
                             mPendingDataCount++;
                         } else if (i == 0) {
                             // Wasn't allowed... given that, let's not do the screenshot either.
-                            dispatchAssistDataReceived(null);
-                            fetchScreenshot = false;
+                            if (mCallbacks.canHandleReceivedAssistDataLocked()) {
+                                dispatchAssistDataReceived(null);
+                            } else {
+                                mAssistData.add(null);
+                            }
+                            allowFetchScreenshot = false;
                             break;
                         }
                     } catch (RemoteException e) {
@@ -187,14 +196,18 @@ public class AssistDataRequester extends IAssistDataReceiver.Stub {
                 }
             } else {
                 // Wasn't allowed... given that, let's not do the screenshot either.
-                dispatchAssistDataReceived(null);
-                fetchScreenshot = false;
+                if (mCallbacks.canHandleReceivedAssistDataLocked()) {
+                    dispatchAssistDataReceived(null);
+                } else {
+                    mAssistData.add(null);
+                }
+                allowFetchScreenshot = false;
             }
         }
 
         if (fetchScreenshot) {
             if (mAppOpsManager.checkOpNoThrow(mRequestScreenshotAppOps, callingUid, callingPackage)
-                    == MODE_ALLOWED) {
+                    == MODE_ALLOWED && allowFetchScreenshot) {
                 try {
                     MetricsLogger.count(mContext, "assist_with_screen", 1);
                     mPendingScreenshotCount++;
@@ -203,24 +216,30 @@ public class AssistDataRequester extends IAssistDataReceiver.Stub {
                     // Can't happen
                 }
             } else {
-                dispatchAssistScreenshotReceived(null);
+                if (mCallbacks.canHandleReceivedAssistDataLocked()) {
+                    dispatchAssistScreenshotReceived(null);
+                } else {
+                    mAssistScreenshot.add(null);
+                }
             }
         }
     }
 
     /**
      * This call should only be made when the callbacks are capable of handling the received assist
-     * data.
+     * data. The owner is also responsible for locking before calling this method.
      */
     public void processPendingAssistData() {
         final int dataCount = mAssistData.size();
         for (int i = 0; i < dataCount; i++) {
             dispatchAssistDataReceived(mAssistData.get(i));
         }
+        mAssistData.clear();
         final int screenshotsCount = mAssistScreenshot.size();
         for (int i = 0; i < screenshotsCount; i++) {
             dispatchAssistScreenshotReceived(mAssistScreenshot.get(i));
         }
+        mAssistScreenshot.clear();
     }
 
     public int getPendingDataCount() {
