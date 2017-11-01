@@ -165,10 +165,13 @@ class AudioPlayerStateMonitor extends IPlaybackConfigDispatcher.Stub {
                 }
                 // Notify the change of audio player states.
                 for (AudioPlaybackConfiguration config : configs) {
-                    Integer prevState = prevAudioPlayerStates.get(config.getPlayerInterfaceId());
-                    if (prevState == null || prevState != config.getPlayerState()) {
+                    final Integer prevState = prevAudioPlayerStates.get(config.getPlayerInterfaceId());
+                    final int prevStateInt =
+                            (prevState == null) ? AudioPlaybackConfiguration.PLAYER_STATE_UNKNOWN :
+                                prevState.intValue();
+                    if (prevStateInt != config.getPlayerState()) {
                         sendAudioPlayerStateChangedMessageLocked(
-                                config.getClientUid(), prevState, config);
+                                config.getClientUid(), prevStateInt, config);
                     }
                 }
                 for (Integer prevUid : prevAudioPlayersForUid.keySet()) {
@@ -176,9 +179,9 @@ class AudioPlayerStateMonitor extends IPlaybackConfigDispatcher.Stub {
                     // PLAYER_STATE_STARTED only when there were a player whose state was
                     // PLAYER_STATE_STARTED, otherwise any inactive state is okay to notify.
                     if (!mAudioPlayersForUid.containsKey(prevUid)) {
-                        Set<Integer> players = mAudioPlayersForUid.get(prevUid);
+                        Set<Integer> prevPlayers = prevAudioPlayersForUid.get(prevUid);
                         int prevState = AudioPlaybackConfiguration.PLAYER_STATE_UNKNOWN;
-                        for (int pii : players) {
+                        for (int pii : prevPlayers) {
                             Integer state = prevAudioPlayerStates.get(pii);
                             if (state == null) {
                                 continue;
