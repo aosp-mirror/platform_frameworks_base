@@ -21,6 +21,7 @@ import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import dalvik.system.VMRuntime;
 
+import java.util.Collections;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -249,7 +250,10 @@ public class PackageDexUsageTests {
         Map<String, Set<Integer>> packageToUsersMap = new HashMap<>();
         packageToUsersMap.put(mBarSecondary2User1.mPackageName,
                 new HashSet<>(Arrays.asList(mBarSecondary2User1.mOwnerUserId)));
-        mPackageDexUsage.syncData(packageToUsersMap);
+        Map<String, Set<String>> packageToCodePaths = new HashMap<>();
+        packageToCodePaths.put(mBarBaseUser0.mPackageName,
+                new HashSet<>(Arrays.asList(mBarBaseUser0.mDexFile)));
+        mPackageDexUsage.syncData(packageToUsersMap, packageToCodePaths);
 
         // Assert that only user 1 files are there.
         assertPackageDexUsage(mBarBaseUser0, mBarSecondary2User1);
@@ -341,8 +345,8 @@ public class PackageDexUsageTests {
         Set<String> usersExtra = new HashSet<>(Arrays.asList(
                 new String[] {"another.package.2", "another.package.3"}));
 
-        assertTrue(record(packageDexUsageRecordUsers, mFooBaseUser0, users));
-        assertTrue(record(packageDexUsageRecordUsers, mFooBaseUser0, usersExtra));
+        assertTrue(record(packageDexUsageRecordUsers, mFooSplit2UsedByOtherApps0, users));
+        assertTrue(record(packageDexUsageRecordUsers, mFooSplit2UsedByOtherApps0, usersExtra));
 
         assertTrue(record(packageDexUsageRecordUsers, mFooSecondary1User0, users));
         assertTrue(record(packageDexUsageRecordUsers, mFooSecondary1User0, usersExtra));
@@ -351,7 +355,7 @@ public class PackageDexUsageTests {
         // Verify that the users were recorded.
         Set<String> userAll = new HashSet<>(users);
         userAll.addAll(usersExtra);
-        assertPackageDexUsage(packageDexUsageRecordUsers, userAll, mFooBaseUser0,
+        assertPackageDexUsage(packageDexUsageRecordUsers, userAll, mFooSplit2UsedByOtherApps0,
                 mFooSecondary1User0);
     }
 
@@ -359,19 +363,19 @@ public class PackageDexUsageTests {
     public void testRecordDexFileUsersNotTheOwningPackage() {
         PackageDexUsage packageDexUsageRecordUsers = new PackageDexUsage();
         Set<String> users = new HashSet<>(Arrays.asList(
-                new String[] {mFooBaseUser0.mPackageName}));
+                new String[] {mFooSplit2UsedByOtherApps0.mPackageName}));
         Set<String> usersExtra = new HashSet<>(Arrays.asList(
                 new String[] {"another.package.2", "another.package.3"}));
 
-        assertTrue(record(packageDexUsageRecordUsers, mFooBaseUser0, users));
-        assertTrue(record(packageDexUsageRecordUsers, mFooBaseUser0, usersExtra));
+        assertTrue(record(packageDexUsageRecordUsers, mFooSplit2UsedByOtherApps0, users));
+        assertTrue(record(packageDexUsageRecordUsers, mFooSplit2UsedByOtherApps0, usersExtra));
 
         assertTrue(record(packageDexUsageRecordUsers, mFooSecondary1User0, users));
         assertTrue(record(packageDexUsageRecordUsers, mFooSecondary1User0, usersExtra));
 
         packageDexUsageRecordUsers = writeAndReadBack(packageDexUsageRecordUsers);
         // Verify that only the non owning packages were recorded.
-        assertPackageDexUsage(packageDexUsageRecordUsers, usersExtra, mFooBaseUser0,
+        assertPackageDexUsage(packageDexUsageRecordUsers, usersExtra, mFooSplit2UsedByOtherApps0,
                 mFooSecondary1User0);
     }
 
@@ -428,7 +432,6 @@ public class PackageDexUsageTests {
         assertPackageDexUsage(null, mFooSecondary1User0);
     }
 
-
     @Test
     public void testDexUsageClassLoaderContext() {
         final boolean isUsedByOtherApps = false;
@@ -458,6 +461,80 @@ public class PackageDexUsageTests {
         assertFalse(unknownContext.isVariableClassLoaderContext());
     }
 
+    @Test
+    public void testReadVersion1() {
+        String isa = VMRuntime.getInstructionSet(Build.SUPPORTED_ABIS[0]);
+        // Equivalent to
+        //   record(mFooSplit2UsedByOtherApps0);
+        //   record(mFooSecondary1User0);
+        //   record(mFooSecondary2UsedByOtherApps0);
+        //   record(mBarBaseUser0);
+        //   record(mBarSecondary1User0);
+        String content = "PACKAGE_MANAGER__PACKAGE_DEX_USAGE__1\n"
+                + "com.google.foo,1\n"
+                + "#/data/user/0/com.google.foo/sec-1.dex\n"
+                + "0,0," + isa + "\n"
+                + "#/data/user/0/com.google.foo/sec-2.dex\n"
+                + "0,1," + isa + "\n"
+                + "com.google.bar,0\n"
+                + "#/data/user/0/com.google.bar/sec-1.dex\n"
+                + "0,0," + isa + "\n";
+
+        PackageDexUsage packageDexUsage = new PackageDexUsage();
+        try {
+            packageDexUsage.read(new StringReader(content));
+        } catch (IOException e) {
+            fail();
+        }
+
+        // After the read we must sync the data to fill the missing information on the code paths.
+        Map<String, Set<Integer>> packageToUsersMap = new HashMap<>();
+        Map<String, Set<String>> packageToCodePaths = new HashMap<>();
+
+        // Handle foo package.
+        packageToUsersMap.put(mFooSplit2UsedByOtherApps0.mPackageName,
+            new HashSet<>(Arrays.asList(mFooSplit2UsedByOtherApps0.mOwnerUserId)));
+        packageToCodePaths.put(mFooSplit2UsedByOtherApps0.mPackageName,
+            new HashSet<>(Arrays.asList(mFooSplit2UsedByOtherApps0.mDexFile,
+                mFooSplit1User0.mDexFile, mFooBaseUser0.mDexFile)));
+        // Handle bar package.
+        packageToUsersMap.put(mBarBaseUser0.mPackageName,
+            new HashSet<>(Arrays.asList(mBarBaseUser0.mOwnerUserId)));
+        packageToCodePaths.put(mBarBaseUser0.mPackageName,
+            new HashSet<>(Arrays.asList(mBarBaseUser0.mDexFile)));
+
+        // Sync the data.
+        packageDexUsage.syncData(packageToUsersMap, packageToCodePaths);
+
+        // Update the class loaders to unknown before asserting if needed. Before version 2 we
+        // didn't have any.
+        String unknown = PackageDexUsage.UNKNOWN_CLASS_LOADER_CONTEXT;
+        TestData fooBaseUser0 = mFooBaseUser0.updateClassLoaderContext(unknown);
+        TestData fooSplit1User0 = mFooSplit1User0.updateClassLoaderContext(unknown);
+        TestData fooSplit2UsedByOtherApps0 =
+            mFooSplit2UsedByOtherApps0.updateClassLoaderContext(unknown);
+        TestData fooSecondary1User0 = mFooSecondary1User0.updateClassLoaderContext(unknown);
+        TestData fooSecondary2UsedByOtherApps0 =
+            mFooSecondary2UsedByOtherApps0.updateClassLoaderContext(unknown);
+        TestData barBaseUser0 = mBarBaseUser0.updateClassLoaderContext(unknown);
+        TestData barSecondary1User0 = mBarSecondary1User0.updateClassLoaderContext(unknown);
+
+        // Assert foo code paths. Note that we ignore the users during upgrade.
+        final Set<String> ignoredUsers = null;
+        assertPackageDexUsage(packageDexUsage, ignoredUsers,
+            fooSplit2UsedByOtherApps0, fooSecondary1User0, fooSecondary2UsedByOtherApps0);
+        // Because fooSplit2UsedByOtherApps0 is used by others, all the other code paths must
+        // share the same data.
+        assertPackageDexUsage(packageDexUsage, ignoredUsers,
+            fooSplit1User0.updateUseByOthers(true),
+            fooSecondary1User0, fooSecondary2UsedByOtherApps0);
+        assertPackageDexUsage(packageDexUsage, ignoredUsers, fooBaseUser0.updateUseByOthers(true),
+            fooSecondary1User0, fooSecondary2UsedByOtherApps0);
+
+        // Assert bar code paths. Note that we ignore the users during upgrade.
+        assertPackageDexUsage(packageDexUsage, ignoredUsers, barBaseUser0, barSecondary1User0);
+    }
+
     private void assertPackageDexUsage(TestData primary, TestData... secondaries) {
         assertPackageDexUsage(mPackageDexUsage, null, primary, secondaries);
     }
@@ -470,9 +547,11 @@ public class PackageDexUsageTests {
 
         // Check package use info
         assertNotNull(pInfo);
-        assertEquals(primaryUsedByOtherApps, pInfo.isUsedByOtherApps());
-        if (users != null) {
-            assertEquals(pInfo.getLoadingPackages(), users);
+        if (primary != null) {
+            assertEquals(primaryUsedByOtherApps, pInfo.isUsedByOtherApps(primary.mDexFile));
+            if (users != null) {
+                assertEquals(pInfo.getLoadingPackages(primary.mDexFile), users);
+            }
         }
 
         Map<String, DexUseInfo> dexUseInfoMap = pInfo.getDexUseInfoMap();
@@ -559,6 +638,11 @@ public class PackageDexUsageTests {
         private TestData updateClassLoaderContext(String newContext) {
             return new TestData(mPackageName, mDexFile, mOwnerUserId, mLoaderIsa, mUsedByOtherApps,
                     mPrimaryOrSplit, mUsedBy, newContext);
+        }
+
+        private TestData updateUseByOthers(boolean newUsedByOthers) {
+            return new TestData(mPackageName, mDexFile, mOwnerUserId, mLoaderIsa, newUsedByOthers,
+                mPrimaryOrSplit, mUsedBy, mClassLoaderContext);
         }
     }
 }
