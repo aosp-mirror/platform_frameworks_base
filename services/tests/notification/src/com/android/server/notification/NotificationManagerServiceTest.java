@@ -20,6 +20,7 @@ import static android.app.NotificationManager.IMPORTANCE_HIGH;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.app.NotificationManager.IMPORTANCE_NONE;
 import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
+import static android.content.pm.PackageManager.FEATURE_WATCH;
 import static android.content.pm.PackageManager.PERMISSION_DENIED;
 
 import static junit.framework.Assert.assertEquals;
@@ -187,6 +188,7 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
         final LightsManager mockLightsManager = mock(LightsManager.class);
         when(mockLightsManager.getLight(anyInt())).thenReturn(mock(Light.class));
         when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_NORMAL);
+        when(mPackageManagerClient.hasSystemFeature(FEATURE_WATCH)).thenReturn(false);
 
         // write to a test file; the system file isn't readable from tests
         mFile = new File(mContext.getCacheDir(), "test.xml");
@@ -1472,9 +1474,9 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
         mBinderService.setNotificationListenerAccessGranted(c, true);
 
         verify(mListeners, never()).setPackageOrComponentEnabled(
-                c.flattenToString(), 0, true, true);
+                anyString(), anyInt(), anyBoolean(), anyBoolean());
         verify(mConditionProviders, never()).setPackageOrComponentEnabled(
-                c.flattenToString(), 0, false, true);
+                anyString(), anyInt(), anyBoolean(), anyBoolean());
         verify(mAssistants, never()).setPackageOrComponentEnabled(
                 any(), anyInt(), anyBoolean(), anyBoolean());
     }
@@ -1485,11 +1487,10 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
         ComponentName c = ComponentName.unflattenFromString("package/Component");
         mBinderService.setNotificationAssistantAccessGranted(c, true);
 
-
         verify(mListeners, never()).setPackageOrComponentEnabled(
-                c.flattenToString(), 0, true, true);
+                anyString(), anyInt(), anyBoolean(), anyBoolean());
         verify(mConditionProviders, never()).setPackageOrComponentEnabled(
-                c.flattenToString(), 0, false, true);
+                anyString(), anyInt(), anyBoolean(), anyBoolean());
         verify(mAssistants, never()).setPackageOrComponentEnabled(
                 any(), anyInt(), anyBoolean(), anyBoolean());
     }
@@ -1501,9 +1502,72 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
         mBinderService.setNotificationPolicyAccessGranted(c.getPackageName(), true);
 
         verify(mListeners, never()).setPackageOrComponentEnabled(
-                c.flattenToString(), 0, true, true);
+                anyString(), anyInt(), anyBoolean(), anyBoolean());
         verify(mConditionProviders, never()).setPackageOrComponentEnabled(
+                anyString(), anyInt(), anyBoolean(), anyBoolean());
+        verify(mAssistants, never()).setPackageOrComponentEnabled(
+                any(), anyInt(), anyBoolean(), anyBoolean());
+    }
+
+    @Test
+    public void testSetListenerAccess_doesNothingOnLowRam_exceptWatch() throws Exception {
+        when(mPackageManagerClient.hasSystemFeature(FEATURE_WATCH)).thenReturn(true);
+        when(mActivityManager.isLowRamDevice()).thenReturn(true);
+        ComponentName c = ComponentName.unflattenFromString("package/Component");
+        try {
+            mBinderService.setNotificationListenerAccessGranted(c, true);
+        } catch (SecurityException e) {
+            if (!e.getMessage().contains("Permission Denial: not allowed to send broadcast")) {
+                throw e;
+            }
+        }
+
+        verify(mListeners, times(1)).setPackageOrComponentEnabled(
+                c.flattenToString(), 0, true, true);
+        verify(mConditionProviders, times(1)).setPackageOrComponentEnabled(
                 c.flattenToString(), 0, false, true);
+        verify(mAssistants, never()).setPackageOrComponentEnabled(
+                any(), anyInt(), anyBoolean(), anyBoolean());
+    }
+
+    @Test
+    public void testSetAssistantAccess_doesNothingOnLowRam_exceptWatch() throws Exception {
+        when(mPackageManagerClient.hasSystemFeature(FEATURE_WATCH)).thenReturn(true);
+        when(mActivityManager.isLowRamDevice()).thenReturn(true);
+        ComponentName c = ComponentName.unflattenFromString("package/Component");
+        try {
+            mBinderService.setNotificationAssistantAccessGranted(c, true);
+        } catch (SecurityException e) {
+            if (!e.getMessage().contains("Permission Denial: not allowed to send broadcast")) {
+                throw e;
+            }
+        }
+
+        verify(mListeners, never()).setPackageOrComponentEnabled(
+                anyString(), anyInt(), anyBoolean(), anyBoolean());
+        verify(mConditionProviders, times(1)).setPackageOrComponentEnabled(
+                c.flattenToString(), 0, false, true);
+        verify(mAssistants, times(1)).setPackageOrComponentEnabled(
+                c.flattenToString(), 0, true, true);
+    }
+
+    @Test
+    public void testSetDndAccess_doesNothingOnLowRam_exceptWatch() throws Exception {
+        when(mPackageManagerClient.hasSystemFeature(FEATURE_WATCH)).thenReturn(true);
+        when(mActivityManager.isLowRamDevice()).thenReturn(true);
+        ComponentName c = ComponentName.unflattenFromString("package/Component");
+        try {
+            mBinderService.setNotificationPolicyAccessGranted(c.getPackageName(), true);
+        } catch (SecurityException e) {
+            if (!e.getMessage().contains("Permission Denial: not allowed to send broadcast")) {
+                throw e;
+            }
+        }
+
+        verify(mListeners, never()).setPackageOrComponentEnabled(
+                anyString(), anyInt(), anyBoolean(), anyBoolean());
+        verify(mConditionProviders, times(1)).setPackageOrComponentEnabled(
+                c.getPackageName(), 0, true, true);
         verify(mAssistants, never()).setPackageOrComponentEnabled(
                 any(), anyInt(), anyBoolean(), anyBoolean());
     }
