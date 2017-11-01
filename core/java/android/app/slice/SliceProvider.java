@@ -19,15 +19,19 @@ import android.Manifest.permission;
 import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.ContentValues;
+import android.content.Intent;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.Process;
 import android.os.StrictMode;
 import android.os.StrictMode.ThreadPolicy;
+import android.os.UserHandle;
 import android.util.Log;
 
 import java.util.concurrent.CountDownLatch;
@@ -143,9 +147,13 @@ public abstract class SliceProvider extends ContentProvider {
     @Override
     public Bundle call(String method, String arg, Bundle extras) {
         if (method.equals(METHOD_SLICE)) {
-            getContext().enforceCallingPermission(permission.BIND_SLICE,
-                    "Slice binding requires the permission BIND_SLICE");
             Uri uri = extras.getParcelable(EXTRA_BIND_URI);
+            if (!UserHandle.isSameApp(Binder.getCallingUid(), Process.myUid())) {
+                getContext().enforceUriPermission(uri, permission.BIND_SLICE,
+                        permission.BIND_SLICE, Binder.getCallingPid(), Binder.getCallingUid(),
+                        Intent.FLAG_GRANT_WRITE_URI_PERMISSION,
+                        "Slice binding requires the permission BIND_SLICE");
+            }
 
             Slice s = handleBindSlice(uri);
             Bundle b = new Bundle();
