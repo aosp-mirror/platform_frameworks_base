@@ -357,8 +357,9 @@ int Diff(const std::vector<StringPiece>& args) {
     return 1;
   }
 
-  std::unique_ptr<LoadedApk> apk_a = LoadedApk::LoadApkFromPath(&context, flags.GetArgs()[0]);
-  std::unique_ptr<LoadedApk> apk_b = LoadedApk::LoadApkFromPath(&context, flags.GetArgs()[1]);
+  IDiagnostics* diag = context.GetDiagnostics();
+  std::unique_ptr<LoadedApk> apk_a = LoadedApk::LoadApkFromPath(flags.GetArgs()[0], diag);
+  std::unique_ptr<LoadedApk> apk_b = LoadedApk::LoadApkFromPath(flags.GetArgs()[1], diag);
   if (!apk_a || !apk_b) {
     return 1;
   }

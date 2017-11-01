@@ -100,11 +100,21 @@ class Element : public Node {
   Attribute* FindAttribute(const android::StringPiece& ns, const android::StringPiece& name);
   const Attribute* FindAttribute(const android::StringPiece& ns,
                                  const android::StringPiece& name) const;
+
   Element* FindChild(const android::StringPiece& ns, const android::StringPiece& name);
+  const Element* FindChild(const android::StringPiece& ns, const android::StringPiece& name) const;
+
   Element* FindChildWithAttribute(const android::StringPiece& ns, const android::StringPiece& name,
                                   const android::StringPiece& attr_ns,
                                   const android::StringPiece& attr_name,
                                   const android::StringPiece& attr_value);
+
+  const Element* FindChildWithAttribute(const android::StringPiece& ns,
+                                        const android::StringPiece& name,
+                                        const android::StringPiece& attr_ns,
+                                        const android::StringPiece& attr_name,
+                                        const android::StringPiece& attr_value) const;
+
   std::vector<Element*> GetChildElements();
 
   // Due to overriding of subtypes not working with unique_ptr, define a convenience Clone method
@@ -139,16 +149,16 @@ class XmlResource {
   StringPool string_pool;
 
   std::unique_ptr<xml::Element> root;
+
+  std::unique_ptr<XmlResource> Clone() const;
 };
 
 // Inflates an XML DOM from an InputStream, logging errors to the logger.
-// Returns the root node on success, or nullptr on failure.
 std::unique_ptr<XmlResource> Inflate(io::InputStream* in, IDiagnostics* diag, const Source& source);
 
-// Inflates an XML DOM from a binary ResXMLTree, logging errors to the logger.
-// Returns the root node on success, or nullptr on failure.
-std::unique_ptr<XmlResource> Inflate(const void* data, size_t data_len, IDiagnostics* diag,
-                                     const Source& source);
+// Inflates an XML DOM from a binary ResXMLTree.
+std::unique_ptr<XmlResource> Inflate(const void* data, size_t len,
+                                     std::string* out_error = nullptr);
 
 Element* FindRootElement(Node* node);
 

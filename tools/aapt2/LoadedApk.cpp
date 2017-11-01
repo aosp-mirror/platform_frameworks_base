@@ -21,43 +21,139 @@
 #include "format/Archive.h"
 #include "format/binary/TableFlattener.h"
 #include "format/binary/XmlFlattener.h"
+#include "format/proto/ProtoDeserialize.h"
 #include "io/BigBufferStream.h"
 #include "io/Util.h"
 #include "xml/XmlDom.h"
 
+using ::aapt::io::IFile;
+using ::aapt::io::IFileCollection;
+using ::aapt::xml::XmlResource;
+using ::android::StringPiece;
+using ::std::unique_ptr;
+
 namespace aapt {
 
-using xml::XmlResource;
-
-std::unique_ptr<LoadedApk> LoadedApk::LoadApkFromPath(IAaptContext* context,
-                                                      const android::StringPiece& path) {
+std::unique_ptr<LoadedApk> LoadedApk::LoadApkFromPath(const StringPiece& path, IDiagnostics* diag) {
   Source source(path);
   std::string error;
   std::unique_ptr<io::ZipFileCollection> apk = io::ZipFileCollection::Create(path, &error);
-  if (!apk) {
-    context->GetDiagnostics()->Error(DiagMessage(source) << error);
+  if (apk == nullptr) {
+    diag->Error(DiagMessage(path) << "failed opening zip: " << error);
     return {};
   }
 
-  io::IFile* file = apk->FindFile("resources.arsc");
-  if (!file) {
-    context->GetDiagnostics()->Error(DiagMessage(source) << "no resources.arsc found");
+  if (apk->FindFile("resources.arsc") != nullptr) {
+    return LoadBinaryApkFromFileCollection(source, std::move(apk), diag);
+  } else if (apk->FindFile("resources.pb") != nullptr) {
+    return LoadProtoApkFromFileCollection(source, std::move(apk), diag);
+  }
+  diag->Error(DiagMessage(path) << "no resource table found");
+  return {};
+}
+
+std::unique_ptr<LoadedApk> LoadedApk::LoadProtoApkFromFileCollection(
+    const Source& source, unique_ptr<io::IFileCollection> collection, IDiagnostics* diag) {
+  io::IFile* table_file = collection->FindFile(kProtoResourceTablePath);
+  if (table_file == nullptr) {
+    diag->Error(DiagMessage(source) << "failed to find " << kProtoResourceTablePath);
     return {};
   }
 
-  std::unique_ptr<io::IData> data = file->OpenAsData();
-  if (!data) {
-    context->GetDiagnostics()->Error(DiagMessage(source) << "could not open resources.arsc");
+  std::unique_ptr<io::InputStream> in = table_file->OpenInputStream();
+  if (in == nullptr) {
+    diag->Error(DiagMessage(source) << "failed to open " << kProtoResourceTablePath);
+    return {};
+  }
+
+  pb::ResourceTable pb_table;
+  io::ZeroCopyInputAdaptor adaptor(in.get());
+  if (!pb_table.ParseFromZeroCopyStream(&adaptor)) {
+    diag->Error(DiagMessage(source) << "failed to read " << kProtoResourceTablePath);
+    return {};
+  }
+
+  std::string error;
+  std::unique_ptr<ResourceTable> table = util::make_unique<ResourceTable>();
+  if (!DeserializeTableFromPb(pb_table, collection.get(), table.get(), &error)) {
+    diag->Error(DiagMessage(source)
+                << "failed to deserialize " << kProtoResourceTablePath << ": " << error);
+    return {};
+  }
+
+  io::IFile* manifest_file = collection->FindFile(kAndroidManifestPath);
+  if (manifest_file == nullptr) {
+    diag->Error(DiagMessage(source) << "failed to find " << kAndroidManifestPath);
+    return {};
+  }
+
+  std::unique_ptr<io::InputStream> manifest_in = manifest_file->OpenInputStream();
+  if (manifest_in == nullptr) {
+    diag->Error(DiagMessage(source) << "failed to open " << kAndroidManifestPath);
+    return {};
+  }
+
+  pb::XmlNode pb_node;
+  io::ZeroCopyInputAdaptor manifest_adaptor(manifest_in.get());
+  if (!pb_node.ParseFromZeroCopyStream(&manifest_adaptor)) {
+    diag->Error(DiagMessage(source) << "failed to read proto " << kAndroidManifestPath);
+    return {};
+  }
+
+  std::unique_ptr<xml::XmlResource> manifest = DeserializeXmlResourceFromPb(pb_node, &error);
+  if (manifest == nullptr) {
+    diag->Error(DiagMessage(source)
+                << "failed to deserialize proto " << kAndroidManifestPath << ": " << error);
+    return {};
+  }
+  return util::make_unique<LoadedApk>(source, std::move(collection), std::move(table),
+                                      std::move(manifest));
+}
+
+std::unique_ptr<LoadedApk> LoadedApk::LoadBinaryApkFromFileCollection(
+    const Source& source, unique_ptr<io::IFileCollection> collection, IDiagnostics* diag) {
+  io::IFile* table_file = collection->FindFile(kApkResourceTablePath);
+  if (table_file == nullptr) {
+    diag->Error(DiagMessage(source) << "failed to find " << kApkResourceTablePath);
+
+    return {};
+  }
+
+  std::unique_ptr<io::IData> data = table_file->OpenAsData();
+  if (data == nullptr) {
+    diag->Error(DiagMessage(source) << "failed to open " << kApkResourceTablePath);
     return {};
   }
 
   std::unique_ptr<ResourceTable> table = util::make_unique<ResourceTable>();
-  BinaryResourceParser parser(context, table.get(), source, data->data(), data->size(), apk.get());
+  BinaryResourceParser parser(diag, table.get(), source, data->data(), data->size(),
+                              collection.get());
   if (!parser.Parse()) {
     return {};
   }
 
-  return util::make_unique<LoadedApk>(source, std::move(apk), std::move(table));
+  io::IFile* manifest_file = collection->FindFile(kAndroidManifestPath);
+  if (manifest_file == nullptr) {
+    diag->Error(DiagMessage(source) << "failed to find " << kAndroidManifestPath);
+    return {};
+  }
+
+  std::unique_ptr<io::IData> manifest_data = manifest_file->OpenAsData();
+  if (manifest_data == nullptr) {
+    diag->Error(DiagMessage(source) << "failed to open " << kAndroidManifestPath);
+    return {};
+  }
+
+  std::string error;
+  std::unique_ptr<xml::XmlResource> manifest =
+      xml::Inflate(manifest_data->data(), manifest_data->size(), &error);
+  if (manifest == nullptr) {
+    diag->Error(DiagMessage(source)
+                << "failed to parse binary " << kAndroidManifestPath << ": " << error);
+    return {};
+  }
+  return util::make_unique<LoadedApk>(source, std::move(collection), std::move(table),
+                                      std::move(manifest));
 }
 
 bool LoadedApk::WriteToArchive(IAaptContext* context, const TableFlattenerOptions& options,
@@ -148,26 +244,4 @@ bool LoadedApk::WriteToArchive(IAaptContext* context, ResourceTable* split_table
   return true;
 }
 
-std::unique_ptr<xml::XmlResource> LoadedApk::InflateManifest(IAaptContext* context) {
-  IDiagnostics* diag = context->GetDiagnostics();
-
-  io::IFile* manifest_file = GetFileCollection()->FindFile("AndroidManifest.xml");
-  if (manifest_file == nullptr) {
-    diag->Error(DiagMessage(source_) << "no AndroidManifest.xml found");
-    return {};
-  }
-
-  std::unique_ptr<io::IData> manifest_data = manifest_file->OpenAsData();
-  if (manifest_data == nullptr) {
-    diag->Error(DiagMessage(manifest_file->GetSource()) << "could not open AndroidManifest.xml");
-    return {};
-  }
-
-  std::unique_ptr<xml::XmlResource> manifest =
-      xml::Inflate(manifest_data->data(), manifest_data->size(), diag, manifest_file->GetSource());
-  if (manifest == nullptr) {
-    diag->Error(DiagMessage() << "failed to read binary AndroidManifest.xml");
-  }
-  return manifest;
-}
 }  // namespace aapt

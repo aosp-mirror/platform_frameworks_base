@@ -78,21 +78,27 @@ ResourceTableBuilder& ResourceTableBuilder::AddString(const StringPiece& name, c
 }
 
 ResourceTableBuilder& ResourceTableBuilder::AddFileReference(const StringPiece& name,
-                                                             const StringPiece& path) {
-  return AddFileReference(name, {}, path);
+                                                             const StringPiece& path,
+                                                             io::IFile* file) {
+  return AddFileReference(name, {}, path, file);
 }
 
 ResourceTableBuilder& ResourceTableBuilder::AddFileReference(const StringPiece& name,
                                                              const ResourceId& id,
-                                                             const StringPiece& path) {
-  return AddValue(name, id, util::make_unique<FileReference>(table_->string_pool.MakeRef(path)));
+                                                             const StringPiece& path,
+                                                             io::IFile* file) {
+  auto file_ref = util::make_unique<FileReference>(table_->string_pool.MakeRef(path));
+  file_ref->file = file;
+  return AddValue(name, id, std::move(file_ref));
 }
 
 ResourceTableBuilder& ResourceTableBuilder::AddFileReference(const StringPiece& name,
                                                              const StringPiece& path,
-                                                             const ConfigDescription& config) {
-  return AddValue(name, config, {},
-                  util::make_unique<FileReference>(table_->string_pool.MakeRef(path)));
+                                                             const ConfigDescription& config,
+                                                             io::IFile* file) {
+  auto file_ref = util::make_unique<FileReference>(table_->string_pool.MakeRef(path));
+  file_ref->file = file;
+  return AddValue(name, config, {}, std::move(file_ref));
 }
 
 ResourceTableBuilder& ResourceTableBuilder::AddValue(const StringPiece& name,

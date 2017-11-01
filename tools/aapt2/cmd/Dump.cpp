@@ -78,7 +78,7 @@ static bool TryDumpFile(IAaptContext* context, const std::string& file_path) {
         return false;
       }
 
-      if (!DeserializeTableFromPb(pb_table, &table, &err)) {
+      if (!DeserializeTableFromPb(pb_table, zip.get(), &table, &err)) {
         context->GetDiagnostics()->Error(DiagMessage(file_path)
                                          << "failed to parse table: " << err);
         return false;
@@ -90,7 +90,8 @@ static bool TryDumpFile(IAaptContext* context, const std::string& file_path) {
         return false;
       }
 
-      BinaryResourceParser parser(context, &table, Source(file_path), data->data(), data->size());
+      BinaryResourceParser parser(context->GetDiagnostics(), &table, Source(file_path),
+                                  data->data(), data->size());
       if (!parser.Parse()) {
         return false;
       }
@@ -129,7 +130,7 @@ static bool TryDumpFile(IAaptContext* context, const std::string& file_path) {
 
       ResourceTable table;
       err.clear();
-      if (!DeserializeTableFromPb(pb_table, &table, &err)) {
+      if (!DeserializeTableFromPb(pb_table, nullptr /*files*/, &table, &err)) {
         context->GetDiagnostics()->Error(DiagMessage(file_path)
                                          << "failed to parse table: " << err);
         continue;

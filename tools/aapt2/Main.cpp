@@ -50,7 +50,7 @@ static void PrintVersion() {
 }
 
 static void PrintUsage() {
-  std::cerr << "\nusage: aapt2 [compile|link|dump|diff|optimize|version] ..." << std::endl;
+  std::cerr << "\nusage: aapt2 [compile|link|dump|diff|optimize|convert|version] ..." << std::endl;
 }
 
 extern int Compile(const std::vector<StringPiece>& args, IDiagnostics* diagnostics);
@@ -58,6 +58,7 @@ extern int Link(const std::vector<StringPiece>& args, IDiagnostics* diagnostics)
 extern int Dump(const std::vector<StringPiece>& args);
 extern int Diff(const std::vector<StringPiece>& args);
 extern int Optimize(const std::vector<StringPiece>& args);
+extern int Convert(const std::vector<StringPiece>& args);
 
 static int ExecuteCommand(const StringPiece& command, const std::vector<StringPiece>& args,
                           IDiagnostics* diagnostics) {
@@ -71,6 +72,8 @@ static int ExecuteCommand(const StringPiece& command, const std::vector<StringPi
     return Diff(args);
   } else if (command == "optimize") {
     return Optimize(args);
+  } else if (command == "convert") {
+    return Convert(args);
   } else if (command == "version") {
     PrintVersion();
     return 0;

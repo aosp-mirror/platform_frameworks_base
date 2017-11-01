@@ -371,7 +371,8 @@ static SymbolState DeserializeVisibilityFromPb(const pb::SymbolStatus_Visibility
 }
 
 static bool DeserializePackageFromPb(const pb::Package& pb_package, const ResStringPool& src_pool,
-                                     ResourceTable* out_table, std::string* out_error) {
+                                     io::IFileCollection* files, ResourceTable* out_table,
+                                     std::string* out_error) {
   Maybe<uint8_t> id;
   if (pb_package.has_package_id()) {
     id = static_cast<uint8_t>(pb_package.package_id().id());
@@ -444,7 +445,7 @@ static bool DeserializePackageFromPb(const pb::Package& pb_package, const ResStr
         }
 
         config_value->value = DeserializeValueFromPb(pb_config_value.value(), src_pool, config,
-                                                     &out_table->string_pool, out_error);
+                                                     &out_table->string_pool, files, out_error);
         if (config_value->value == nullptr) {
           return false;
         }
@@ -457,8 +458,8 @@ static bool DeserializePackageFromPb(const pb::Package& pb_package, const ResStr
   return true;
 }
 
-bool DeserializeTableFromPb(const pb::ResourceTable& pb_table, ResourceTable* out_table,
-                            std::string* out_error) {
+bool DeserializeTableFromPb(const pb::ResourceTable& pb_table, io::IFileCollection* files,
+                            ResourceTable* out_table, std::string* out_error) {
   // We import the android namespace because on Windows NO_ERROR is a macro, not an enum, which
   // causes errors when qualifying it with android::
   using namespace android;
@@ -474,7 +475,7 @@ bool DeserializeTableFromPb(const pb::ResourceTable& pb_table, ResourceTable* ou
   }
 
   for (const pb::Package& pb_package : pb_table.package()) {
-    if (!DeserializePackageFromPb(pb_package, source_pool, out_table, out_error)) {
+    if (!DeserializePackageFromPb(pb_package, source_pool, files, out_table, out_error)) {
       return false;
     }
   }
@@ -600,10 +601,11 @@ static size_t DeserializePluralEnumFromPb(const pb::Plural_Arity& arity) {
 std::unique_ptr<Value> DeserializeValueFromPb(const pb::Value& pb_value,
                                               const android::ResStringPool& src_pool,
                                               const ConfigDescription& config,
-                                              StringPool* value_pool, std::string* out_error) {
+                                              StringPool* value_pool, io::IFileCollection* files,
+                                              std::string* out_error) {
   std::unique_ptr<Value> value;
   if (pb_value.has_item()) {
-    value = DeserializeItemFromPb(pb_value.item(), src_pool, config, value_pool, out_error);
+    value = DeserializeItemFromPb(pb_value.item(), src_pool, config, value_pool, files, out_error);
     if (value == nullptr) {
       return {};
     }
@@ -651,8 +653,8 @@ std::unique_ptr<Value> DeserializeValueFromPb(const pb::Value& pb_value,
             return {};
           }
           DeserializeItemMetaDataFromPb(pb_entry, src_pool, &entry.key);
-          entry.value =
-              DeserializeItemFromPb(pb_entry.item(), src_pool, config, value_pool, out_error);
+          entry.value = DeserializeItemFromPb(pb_entry.item(), src_pool, config, value_pool, files,
+                                              out_error);
           if (entry.value == nullptr) {
             return {};
           }
@@ -680,8 +682,8 @@ std::unique_ptr<Value> DeserializeValueFromPb(const pb::Value& pb_value,
         const pb::Array& pb_array = pb_compound_value.array();
         std::unique_ptr<Array> array = util::make_unique<Array>();
         for (const pb::Array_Element& pb_entry : pb_array.element()) {
-          std::unique_ptr<Item> item =
-              DeserializeItemFromPb(pb_entry.item(), src_pool, config, value_pool, out_error);
+          std::unique_ptr<Item> item = DeserializeItemFromPb(pb_entry.item(), src_pool, config,
+                                                             value_pool, files, out_error);
           if (item == nullptr) {
             return {};
           }
@@ -697,8 +699,8 @@ std::unique_ptr<Value> DeserializeValueFromPb(const pb::Value& pb_value,
         std::unique_ptr<Plural> plural = util::make_unique<Plural>();
         for (const pb::Plural_Entry& pb_entry : pb_plural.entry()) {
           size_t plural_idx = DeserializePluralEnumFromPb(pb_entry.arity());
-          plural->values[plural_idx] =
-              DeserializeItemFromPb(pb_entry.item(), src_pool, config, value_pool, out_error);
+          plural->values[plural_idx] = DeserializeItemFromPb(pb_entry.item(), src_pool, config,
+                                                             value_pool, files, out_error);
           if (!plural->values[plural_idx]) {
             return {};
           }
@@ -727,7 +729,7 @@ std::unique_ptr<Value> DeserializeValueFromPb(const pb::Value& pb_value,
 std::unique_ptr<Item> DeserializeItemFromPb(const pb::Item& pb_item,
                                             const android::ResStringPool& src_pool,
                                             const ConfigDescription& config, StringPool* value_pool,
-                                            std::string* out_error) {
+                                            io::IFileCollection* files, std::string* out_error) {
   switch (pb_item.value_case()) {
     case pb::Item::kRef: {
       const pb::Reference& pb_ref = pb_item.ref();
@@ -774,6 +776,9 @@ std::unique_ptr<Item> DeserializeItemFromPb(const pb::Item& pb_item,
           util::make_unique<FileReference>(value_pool->MakeRef(
               pb_file.path(), StringPool::Context(StringPool::Context::kHighPriority, config)));
       file_ref->type = DeserializeFileReferenceTypeFromPb(pb_file.type());
+      if (files != nullptr) {
+        file_ref->file = files->FindFile(*file_ref->path);
+      }
       return std::move(file_ref);
     } break;
 
@@ -825,7 +830,7 @@ bool DeserializeXmlFromPb(const pb::XmlNode& pb_node, xml::Element* out_el, Stri
     }
     if (pb_attr.has_compiled_item()) {
       attr.compiled_value =
-          DeserializeItemFromPb(pb_attr.compiled_item(), {}, {}, value_pool, out_error);
+          DeserializeItemFromPb(pb_attr.compiled_item(), {}, {}, value_pool, nullptr, out_error);
       if (attr.compiled_value == nullptr) {
         return {};
       }

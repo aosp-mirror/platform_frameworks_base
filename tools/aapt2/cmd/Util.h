@@ -57,7 +57,8 @@ std::unique_ptr<xml::XmlResource> GenerateSplitManifest(const AppInfo& app_info,
                                                         const SplitConstraints& constraints);
 
 // Extracts relevant info from the AndroidManifest.xml.
-Maybe<AppInfo> ExtractAppInfoFromBinaryManifest(xml::XmlResource* xml_res, IDiagnostics* diag);
+Maybe<AppInfo> ExtractAppInfoFromBinaryManifest(const xml::XmlResource& xml_res,
+                                                IDiagnostics* diag);
 
 }  // namespace aapt
 

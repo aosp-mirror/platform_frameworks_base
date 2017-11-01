@@ -71,7 +71,8 @@ class TableFlattenerTest : public ::testing::Test {
       return result;
     }
 
-    BinaryResourceParser parser(context, out_table, {}, content.data(), content.size());
+    BinaryResourceParser parser(context->GetDiagnostics(), out_table, {}, content.data(),
+                                content.size());
     if (!parser.Parse()) {
       return ::testing::AssertionFailure() << "flattened ResTable is corrupt";
     }
@@ -278,7 +279,7 @@ TEST_F(TableFlattenerTest, FlattenSparseEntryWithMinSdkO) {
   // Attempt to parse the sparse contents.
 
   ResourceTable sparse_table;
-  BinaryResourceParser parser(context.get(), &sparse_table, Source("test.arsc"),
+  BinaryResourceParser parser(context->GetDiagnostics(), &sparse_table, Source("test.arsc"),
                               sparse_contents.data(), sparse_contents.size());
   ASSERT_TRUE(parser.Parse());
 

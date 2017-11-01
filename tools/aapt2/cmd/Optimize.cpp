@@ -281,15 +281,14 @@ class OptimizeCommand {
   OptimizeContext* context_;
 };
 
-bool ExtractAppDataFromManifest(OptimizeContext* context, LoadedApk* apk,
+bool ExtractAppDataFromManifest(OptimizeContext* context, const LoadedApk* apk,
                                 OptimizeOptions* out_options) {
-  std::unique_ptr<xml::XmlResource> manifest = apk->InflateManifest(context);
+  const xml::XmlResource* manifest = apk->GetManifest();
   if (manifest == nullptr) {
     return false;
   }
 
-  Maybe<AppInfo> app_info =
-      ExtractAppInfoFromBinaryManifest(manifest.get(), context->GetDiagnostics());
+  Maybe<AppInfo> app_info = ExtractAppInfoFromBinaryManifest(*manifest, context->GetDiagnostics());
   if (!app_info) {
     context->GetDiagnostics()->Error(DiagMessage()
                                      << "failed to extract data from AndroidManifest.xml");
@@ -355,7 +354,7 @@ int Optimize(const std::vector<StringPiece>& args) {
   }
 
   const std::string& apk_path = flags.GetArgs()[0];
-  std::unique_ptr<LoadedApk> apk = LoadedApk::LoadApkFromPath(&context, apk_path);
+  std::unique_ptr<LoadedApk> apk = LoadedApk::LoadApkFromPath(apk_path, context.GetDiagnostics());
   if (!apk) {
     return 1;
   }

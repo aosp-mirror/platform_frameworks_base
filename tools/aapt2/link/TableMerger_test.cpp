@@ -22,11 +22,12 @@
 
 using ::aapt::test::ValueEq;
 using ::testing::Contains;
-using ::testing::NotNull;
-using ::testing::UnorderedElementsAreArray;
-using ::testing::Pointee;
-using ::testing::Field;
 using ::testing::Eq;
+using ::testing::Field;
+using ::testing::NotNull;
+using ::testing::Pointee;
+using ::testing::StrEq;
+using ::testing::UnorderedElementsAreArray;
 
 namespace aapt {
 
@@ -67,10 +68,9 @@ TEST_F(TableMergerTest, SimpleMerge) {
 
   ResourceTable final_table;
   TableMerger merger(context_.get(), &final_table, TableMergerOptions{});
-  io::FileCollection collection;
 
   ASSERT_TRUE(merger.Merge({}, table_a.get(), false /*overlay*/));
-  ASSERT_TRUE(merger.MergeAndMangle({}, "com.app.b", table_b.get(), &collection));
+  ASSERT_TRUE(merger.MergeAndMangle({}, "com.app.b", table_b.get()));
 
   EXPECT_TRUE(merger.merged_packages().count("com.app.b") != 0);
 
@@ -122,32 +122,35 @@ TEST_F(TableMergerTest, MergeFileOverlay) {
 }
 
 TEST_F(TableMergerTest, MergeFileReferences) {
+  test::TestFile file_a("res/xml/file.xml");
+  test::TestFile file_b("res/xml/file.xml");
+
   std::unique_ptr<ResourceTable> table_a =
       test::ResourceTableBuilder()
           .SetPackageId("com.app.a", 0x7f)
-          .AddFileReference("com.app.a:xml/file", "res/xml/file.xml")
+          .AddFileReference("com.app.a:xml/file", "res/xml/file.xml", &file_a)
           .Build();
   std::unique_ptr<ResourceTable> table_b =
       test::ResourceTableBuilder()
           .SetPackageId("com.app.b", 0x7f)
-          .AddFileReference("com.app.b:xml/file", "res/xml/file.xml")
+          .AddFileReference("com.app.b:xml/file", "res/xml/file.xml", &file_b)
           .Build();
 
   ResourceTable final_table;
   TableMerger merger(context_.get(), &final_table, TableMergerOptions{});
-  io::FileCollection collection;
-  collection.InsertFile("res/xml/file.xml");
 
   ASSERT_TRUE(merger.Merge({}, table_a.get(), false /*overlay*/));
-  ASSERT_TRUE(merger.MergeAndMangle({}, "com.app.b", table_b.get(), &collection));
+  ASSERT_TRUE(merger.MergeAndMangle({}, "com.app.b", table_b.get()));
 
   FileReference* f = test::GetValue<FileReference>(&final_table, "com.app.a:xml/file");
   ASSERT_THAT(f, NotNull());
-  EXPECT_EQ(std::string("res/xml/file.xml"), *f->path);
+  EXPECT_THAT(*f->path, StrEq("res/xml/file.xml"));
+  EXPECT_THAT(f->file, Eq(&file_a));
 
   f = test::GetValue<FileReference>(&final_table, "com.app.a:xml/com.app.b$file");
   ASSERT_THAT(f, NotNull());
-  EXPECT_EQ(std::string("res/xml/com.app.b$file.xml"), *f->path);
+  EXPECT_THAT(*f->path, StrEq("res/xml/com.app.b$file.xml"));
+  EXPECT_THAT(f->file, Eq(&file_b));
 }
 
 TEST_F(TableMergerTest, OverrideResourceWithOverlay) {
