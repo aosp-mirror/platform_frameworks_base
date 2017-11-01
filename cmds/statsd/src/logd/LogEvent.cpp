@@ -29,7 +29,7 @@ using android::util::ProtoOutputStream;
 
 // We need to keep a copy of the android_log_event_list owned by this instance so that the char*
 // for strings is not cleared before we can read them.
-LogEvent::LogEvent(log_msg msg) : mList(msg) {
+LogEvent::LogEvent(log_msg& msg) : mList(msg) {
     init(msg.entry_v1.sec * NS_PER_SEC + msg.entry_v1.nsec, &mList);
 }
 
