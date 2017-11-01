@@ -19,6 +19,7 @@ package android.app;
 import android.os.FileUtils;
 import android.os.RemoteException;
 import android.os.SystemProperties;
+import android.system.ErrnoException;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
@@ -26,9 +27,10 @@ import com.android.internal.annotations.GuardedBy;
 import dalvik.system.BaseDexClassLoader;
 import dalvik.system.VMRuntime;
 
+import libcore.io.Libcore;
+
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -148,22 +150,50 @@ import java.util.Set;
             // The dex path is not a secondary dex file. Nothing to do.
             return;
         }
-        File secondaryProfile = getSecondaryProfileFile(dexPath);
+
+        File realDexPath;
         try {
-            // Create the profile if not already there.
-            // Returns true if the file was created, false if the file already exists.
-            // or throws exceptions in case of errors.
+            // Secondary dex profiles are stored in the oat directory, next to the real dex file
+            // and have the same name with 'cur.prof' appended. We use the realpath because that
+            // is what installd is using when processing the dex file.
+            // NOTE: Keep in sync with installd.
+            realDexPath = new File(Libcore.os.realpath(dexPath));
+        } catch (ErrnoException ex) {
+            Slog.e(TAG, "Failed to get the real path of secondary dex " + dexPath
+                    + ":" + ex.getMessage());
+            // Do not continue with registration if we could not retrieve the real path.
+            return;
+        }
+
+        // NOTE: Keep this in sync with installd expectations.
+        File secondaryProfileDir = new File(realDexPath.getParent(), "oat");
+        File secondaryProfile = new File(secondaryProfileDir, realDexPath.getName() + ".cur.prof");
+
+        // Create the profile if not already there.
+        // Returns true if the file was created, false if the file already exists.
+        // or throws exceptions in case of errors.
+        if (!secondaryProfileDir.exists()) {
+            if (!secondaryProfileDir.mkdir()) {
+                Slog.e(TAG, "Could not create the profile directory: " + secondaryProfile);
+                // Do not continue with registration if we could not create the oat dir.
+                return;
+            }
+        }
+
+        try {
             boolean created = secondaryProfile.createNewFile();
             if (DEBUG && created) {
                 Slog.i(TAG, "Created profile for secondary dex: " + secondaryProfile);
             }
         } catch (IOException ex) {
-            Slog.e(TAG, "Failed to create profile for secondary dex " + secondaryProfile +
-                    ":" + ex.getMessage());
-            // Don't move forward with the registration if we failed to create the profile.
+            Slog.e(TAG, "Failed to create profile for secondary dex " + dexPath
+                    + ":" + ex.getMessage());
+            // Do not continue with registration if we could not create the profile files.
             return;
         }
 
+        // If we got here, the dex paths is a secondary dex and we were able to create the profile.
+        // Register the path to the runtime.
         VMRuntime.registerAppInfo(secondaryProfile.getPath(), new String[] { dexPath });
     }
 
@@ -176,12 +206,5 @@ import java.util.Set;
             }
         }
         return false;
-    }
-
-    // Secondary dex profiles are stored next to the dex file and have the same
-    // name with '.prof' appended.
-    // NOTE: Keep in sync with installd.
-    private File getSecondaryProfileFile(String dexPath) {
-        return new File(dexPath + ".prof");
     }
 }
