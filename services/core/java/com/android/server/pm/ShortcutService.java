@@ -2262,6 +2262,10 @@ public class ShortcutService extends IShortcutService.Stub {
 
             final ShortcutUser user = getUserShortcutsLocked(userId);
 
+            if (user.hasHostPackage(packageName)) {
+                return true;
+            }
+
             // Always trust the cached component.
             final ComponentName cached = user.getCachedLauncher();
             if (cached != null) {
@@ -2358,6 +2362,16 @@ public class ShortcutService extends IShortcutService.Stub {
         } finally {
             injectRestoreCallingIdentity(token);
             logDurationStat(Stats.GET_DEFAULT_LAUNCHER, start);
+        }
+    }
+
+    public void setShortcutHostPackage(@NonNull String type, @Nullable String packageName,
+            int userId) {
+        synchronized (mLock) {
+            throwIfUserLockedL(userId);
+
+            final ShortcutUser user = getUserShortcutsLocked(userId);
+            user.setShortcutHostPackage(type, packageName);
         }
     }
 
@@ -2694,6 +2708,12 @@ public class ShortcutService extends IShortcutService.Stub {
                 @NonNull String callingPackage, int callingPid, int callingUid) {
             return ShortcutService.this.hasShortcutHostPermission(callingPackage, launcherUserId,
                     callingPid, callingUid);
+        }
+
+        @Override
+        public void setShortcutHostPackage(@NonNull String type, @Nullable String packageName,
+                int userId) {
+            ShortcutService.this.setShortcutHostPackage(type, packageName, userId);
         }
 
         @Override
