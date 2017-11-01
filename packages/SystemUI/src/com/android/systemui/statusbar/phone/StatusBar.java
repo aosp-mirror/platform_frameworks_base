@@ -5265,7 +5265,8 @@ public class StatusBar extends SystemUI implements DemoMode,
     boolean isCameraAllowedByAdmin() {
         if (mDevicePolicyManager.getCameraDisabled(null, mCurrentUserId)) {
             return false;
-        } else if (isKeyguardShowing() && isKeyguardSecure()) {
+        } else if (mStatusBarKeyguardViewManager == null ||
+                (isKeyguardShowing() && isKeyguardSecure())) {
             // Check if the admin has disabled the camera specifically for the keyguard
             return (mDevicePolicyManager.getKeyguardDisabledFeatures(null, mCurrentUserId)
                     & DevicePolicyManager.KEYGUARD_DISABLE_SECURE_CAMERA) == 0;
