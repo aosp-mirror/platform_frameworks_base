@@ -23,7 +23,6 @@ LOCAL_SRC_FILES += \
     $(LOCAL_REL_DIR)/com_android_server_input_InputManagerService.cpp \
     $(LOCAL_REL_DIR)/com_android_server_input_InputWindowHandle.cpp \
     $(LOCAL_REL_DIR)/com_android_server_lights_LightsService.cpp \
-    $(LOCAL_REL_DIR)/com_android_server_location_ContextHubService.cpp \
     $(LOCAL_REL_DIR)/com_android_server_location_GnssLocationProvider.cpp \
     $(LOCAL_REL_DIR)/com_android_server_locksettings_SyntheticPasswordManager.cpp \
     $(LOCAL_REL_DIR)/com_android_server_power_PowerManagerService.cpp \
