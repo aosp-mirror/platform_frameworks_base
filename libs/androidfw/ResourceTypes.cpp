@@ -1868,10 +1868,7 @@ void ResTable_config::swapHtoD() {
 
 /* static */ inline int compareLocales(const ResTable_config &l, const ResTable_config &r) {
     if (l.locale != r.locale) {
-        // NOTE: This is the old behaviour with respect to comparison orders.
-        // The diff value here doesn't make much sense (given our bit packing scheme)
-        // but it's stable, and that's all we need.
-        return l.locale - r.locale;
+        return (l.locale > r.locale) ? 1 : -1;
     }
 
     // The language & region are equal, so compare the scripts and variants.
@@ -1890,30 +1887,49 @@ void ResTable_config::swapHtoD() {
 }
 
 int ResTable_config::compare(const ResTable_config& o) const {
-    int32_t diff = (int32_t)(imsi - o.imsi);
-    if (diff != 0) return diff;
-    diff = compareLocales(*this, o);
-    if (diff != 0) return diff;
-    diff = (int32_t)(screenType - o.screenType);
-    if (diff != 0) return diff;
-    diff = (int32_t)(input - o.input);
-    if (diff != 0) return diff;
-    diff = (int32_t)(screenSize - o.screenSize);
-    if (diff != 0) return diff;
-    diff = (int32_t)(version - o.version);
-    if (diff != 0) return diff;
-    diff = (int32_t)(screenLayout - o.screenLayout);
-    if (diff != 0) return diff;
-    diff = (int32_t)(screenLayout2 - o.screenLayout2);
-    if (diff != 0) return diff;
-    diff = (int32_t)(colorMode - o.colorMode);
-    if (diff != 0) return diff;
-    diff = (int32_t)(uiMode - o.uiMode);
-    if (diff != 0) return diff;
-    diff = (int32_t)(smallestScreenWidthDp - o.smallestScreenWidthDp);
-    if (diff != 0) return diff;
-    diff = (int32_t)(screenSizeDp - o.screenSizeDp);
-    return (int)diff;
+    if (imsi != o.imsi) {
+        return (imsi > o.imsi) ? 1 : -1;
+    }
+
+    int32_t diff = compareLocales(*this, o);
+    if (diff < 0) {
+        return -1;
+    }
+    if (diff > 0) {
+        return 1;
+    }
+
+    if (screenType != o.screenType) {
+        return (screenType > o.screenType) ? 1 : -1;
+    }
+    if (input != o.input) {
+        return (input > o.input) ? 1 : -1;
+    }
+    if (screenSize != o.screenSize) {
+        return (screenSize > o.screenSize) ? 1 : -1;
+    }
+    if (version != o.version) {
+        return (version > o.version) ? 1 : -1;
+    }
+    if (screenLayout != o.screenLayout) {
+        return (screenLayout > o.screenLayout) ? 1 : -1;
+    }
+    if (screenLayout2 != o.screenLayout2) {
+        return (screenLayout2 > o.screenLayout2) ? 1 : -1;
+    }
+    if (colorMode != o.colorMode) {
+        return (colorMode > o.colorMode) ? 1 : -1;
+    }
+    if (uiMode != o.uiMode) {
+        return (uiMode > o.uiMode) ? 1 : -1;
+    }
+    if (smallestScreenWidthDp != o.smallestScreenWidthDp) {
+        return (smallestScreenWidthDp > o.smallestScreenWidthDp) ? 1 : -1;
+    }
+    if (screenSizeDp != o.screenSizeDp) {
+        return (screenSizeDp > o.screenSizeDp) ? 1 : -1;
+    }
+    return 0;
 }
 
 int ResTable_config::compareLogical(const ResTable_config& o) const {
