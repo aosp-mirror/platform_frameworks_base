@@ -1620,6 +1620,26 @@ public class CarrierConfigManager {
     public static final String KEY_IDENTIFY_HIGH_DEFINITION_CALLS_IN_CALL_LOG_BOOL =
             "identify_high_definition_calls_in_call_log_bool";
 
+    /**
+     * Flag specifying whether to use the {@link ServiceState} roaming status, which can be
+     * affected by other carrier configs (e.g.
+     * {@link #KEY_GSM_NONROAMING_NETWORKS_STRING_ARRAY}), when setting the SPN display.
+     * <p>
+     * If {@code true}, the SPN display uses {@link ServiceState#getRoaming}.
+     * If {@code false} the SPN display checks if the current MCC/MNC is different from the
+     * SIM card's MCC/MNC.
+     *
+     * @see KEY_GSM_ROAMING_NETWORKS_STRING_ARRAY
+     * @see KEY_GSM_NONROAMING_NETWORKS_STRING_ARRAY
+     * @see KEY_NON_ROAMING_OPERATOR_STRING_ARRAY
+     * @see KEY_ROAMING_OPERATOR_STRING_ARRAY
+     * @see KEY_FORCE_HOME_NETWORK_BOOL
+     *
+     * @hide
+     */
+    public static final String KEY_SPN_DISPLAY_RULE_USE_ROAMING_FROM_SERVICE_STATE_BOOL =
+            "spn_display_rule_use_roaming_from_service_state_bool";
+
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
 
@@ -1895,6 +1915,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_DISABLE_CHARGE_INDICATION_BOOL, false);
         sDefaults.putStringArray(KEY_FEATURE_ACCESS_CODES_STRING_ARRAY, null);
         sDefaults.putBoolean(KEY_IDENTIFY_HIGH_DEFINITION_CALLS_IN_CALL_LOG_BOOL, false);
+        sDefaults.putBoolean(KEY_SPN_DISPLAY_RULE_USE_ROAMING_FROM_SERVICE_STATE_BOOL, false);
     }
 
     /**
