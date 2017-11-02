@@ -18,6 +18,7 @@ package com.android.internal.telephony.cdma.sms;
 
 import android.util.SparseBooleanArray;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.telephony.SmsAddress;
 import com.android.internal.telephony.cdma.sms.UserData;
 import com.android.internal.util.HexDump;
@@ -113,8 +114,8 @@ public class CdmaSmsAddress extends SmsAddress {
      * share code and logic with GSM.  Also, gather all DTMF/BCD
      * processing code in one place.
      */
-
-    private static byte[] parseToDtmf(String address) {
+    @VisibleForTesting
+    public static byte[] parseToDtmf(String address) {
         int digits = address.length();
         byte[] result = new byte[digits];
         for (int i = 0; i < digits; i++) {
@@ -196,33 +197,46 @@ public class CdmaSmsAddress extends SmsAddress {
     public static CdmaSmsAddress parse(String address) {
         CdmaSmsAddress addr = new CdmaSmsAddress();
         addr.address = address;
-        addr.ton = CdmaSmsAddress.TON_UNKNOWN;
-        byte[] origBytes = null;
+        addr.ton = TON_UNKNOWN;
+        addr.digitMode = DIGIT_MODE_4BIT_DTMF;
+        addr.numberPlan = NUMBERING_PLAN_UNKNOWN;
+        addr.numberMode = NUMBER_MODE_NOT_DATA_NETWORK;
+
+        byte[] origBytes;
         String filteredAddr = filterNumericSugar(address);
-        if (filteredAddr != null) {
-            origBytes = parseToDtmf(filteredAddr);
-        }
-        if (origBytes != null) {
-            addr.digitMode = DIGIT_MODE_4BIT_DTMF;
-            addr.numberMode = NUMBER_MODE_NOT_DATA_NETWORK;
-            if (address.indexOf('+') != -1) {
-                addr.ton = TON_INTERNATIONAL_OR_IP;
-            }
-        } else {
-            filteredAddr = filterWhitespace(address);
-            origBytes = UserData.stringToAscii(filteredAddr);
-            if (origBytes == null) {
-                return null;
-            }
+        if (address.contains("+") || filteredAddr == null) {
+            // 3GPP2 C.S0015-B section 3.4.3.3 Address Parameters
+            // NUMBER_MODE should set to 1 for network address and email address.
             addr.digitMode = DIGIT_MODE_8BIT_CHAR;
             addr.numberMode = NUMBER_MODE_DATA_NETWORK;
-            if (address.indexOf('@') != -1) {
+            filteredAddr = filterWhitespace(address);
+
+            if (address.contains("@")) {
+                // This is an email address
                 addr.ton = TON_NATIONAL_OR_EMAIL;
+            } else if (address.contains("+") && filterNumericSugar(address) != null) {
+                // This is an international number
+                // 3GPP2 C.S0015-B section 3.4.3.3 Address Parameters
+                // digit mode is set to 1 and number mode is set to 0, type of number should set
+                // to the value correspond to the value in 3GPP2 C.S005-D, table2.7.1.3.2.4-2
+                addr.ton = TON_INTERNATIONAL_OR_IP;
+                addr.numberPlan = NUMBERING_PLAN_ISDN_TELEPHONY;
+                addr.numberMode = NUMBER_MODE_NOT_DATA_NETWORK;
+                filteredAddr = filterNumericSugar(address);
             }
+
+            origBytes = UserData.stringToAscii(filteredAddr);
+        } else {
+            // The address is not an international number and it only contains digit and *#
+            origBytes = parseToDtmf(filteredAddr);
         }
+
+        if (origBytes == null) {
+            return null;
+        }
+
         addr.origBytes = origBytes;
         addr.numberOfDigits = origBytes.length;
         return addr;
     }
-
 }
