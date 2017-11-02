@@ -16,11 +16,13 @@
 
 package com.android.settingslib.development;
 
+import android.app.ActivityManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.UserManager;
 import android.provider.Settings;
+import android.support.annotation.VisibleForTesting;
 import android.support.v14.preference.SwitchPreference;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.preference.Preference;
@@ -95,6 +97,10 @@ public abstract class AbstractEnableAdbPreferenceController extends
 
     @Override
     public boolean handlePreferenceTreeClick(Preference preference) {
+        if (isUserAMonkey()) {
+            return false;
+        }
+
         if (TextUtils.equals(KEY_ENABLE_ADB, preference.getKey())) {
             if (!isAdbEnabled()) {
                 showConfirmationDialog(preference);
@@ -116,5 +122,10 @@ public abstract class AbstractEnableAdbPreferenceController extends
     private void notifyStateChanged() {
         LocalBroadcastManager.getInstance(mContext)
                 .sendBroadcast(new Intent(ACTION_ENABLE_ADB_STATE_CHANGED));
+    }
+
+    @VisibleForTesting
+    boolean isUserAMonkey() {
+        return ActivityManager.isUserAMonkey();
     }
 }
