@@ -33,7 +33,7 @@ message Procrank {
 
 // Next Tag: 11
 message ProcessProto {
-    option (stream_proto.stream).enable_fields_mapping = true;
+    option (stream_proto.stream_msg).enable_fields_mapping = true;
 
     // ID of the process
     optional int32 pid = 1;

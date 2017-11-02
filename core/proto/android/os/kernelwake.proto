@@ -29,7 +29,7 @@ message KernelWakeSources {
 
 // Next Tag: 11
 message WakeupSourceProto {
-    option (stream_proto.stream).enable_fields_mapping = true;
+    option (stream_proto.stream_msg).enable_fields_mapping = true;
 
     // Name of the event which triggers application processor
     optional string name = 1;

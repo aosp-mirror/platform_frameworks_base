@@ -21,12 +21,22 @@ import "google/protobuf/descriptor.proto";
 package android.stream_proto;
 
 // This option tells streaming proto plugin to compile .proto files with extra features.
-message StreamFlags {
+message MessageOptions {
   // creates a mapping of field names of the message to its field ids
   optional bool enable_fields_mapping = 1;
 }
 
 extend google.protobuf.MessageOptions {
     // Flags used by streaming proto plugins
-    optional StreamFlags stream = 126856794;
+    optional MessageOptions stream_msg = 126856794;
+}
+
+message EnumOptions {
+  // creates a mapping of enum names to its values, strip its prefix enum type for each value
+  optional bool enable_enums_mapping = 1;
+}
+
+extend google.protobuf.EnumOptions {
+    // Flags used by streaming proto plugins
+    optional EnumOptions stream_enum = 126856794;
 }

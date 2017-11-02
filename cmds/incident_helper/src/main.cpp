@@ -16,6 +16,7 @@
 
 #define LOG_TAG "incident_helper"
 
+#include "parsers/CpuInfoParser.h"
 #include "parsers/KernelWakesParser.h"
 #include "parsers/PageTypeInfoParser.h"
 #include "parsers/ProcrankParser.h"
@@ -54,6 +55,8 @@ static TextParserBase* selectParser(int section) {
             return new PageTypeInfoParser();
         case 2002:
             return new KernelWakesParser();
+        case 2003:
+            return new CpuInfoParser();
         default:
             return NULL;
     }

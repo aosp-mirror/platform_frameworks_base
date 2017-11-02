@@ -23,8 +23,6 @@
 
 using namespace android::os;
 
-const std::string LINE_DELIMITER = ",";
-
 status_t
 PageTypeInfoParser::Parse(const int in, const int out) const
 {
@@ -44,37 +42,37 @@ PageTypeInfoParser::Parse(const int in, const int out) const
             continue;
         }
 
-        if (hasPrefix(&line, "Page block order:")) {
+        if (stripPrefix(&line, "Page block order:")) {
             pageBlockOrder = toInt(line);
             proto.write(PageTypeInfo::PAGE_BLOCK_ORDER, pageBlockOrder);
             continue;
         }
-        if (hasPrefix(&line, "Pages per block:")) {
+        if (stripPrefix(&line, "Pages per block:")) {
             proto.write(PageTypeInfo::PAGES_PER_BLOCK, toInt(line));
             continue;
         }
-        if (hasPrefix(&line, "Free pages count per migrate type at order")) {
+        if (stripPrefix(&line, "Free pages count per migrate type at order")) {
             migrateTypeSession = true;
             continue;
         }
-        if (hasPrefix(&line, "Number of blocks type")) {
+        if (stripPrefix(&line, "Number of blocks type")) {
             blockHeader = parseHeader(line);
             continue;
         }
 
-        record_t record = parseRecord(line, LINE_DELIMITER);
+        record_t record = parseRecord(line, COMMA_DELIMITER);
         if (migrateTypeSession && record.size() == 3) {
             long long token = proto.start(PageTypeInfo::MIGRATE_TYPES);
             // expect part 0 starts with "Node"
-            if (hasPrefix(&record[0], "Node")) {
+            if (stripPrefix(&record[0], "Node")) {
                 proto.write(MigrateTypeProto::NODE, toInt(record[0]));
             } else return BAD_VALUE;
             // expect part 1 starts with "zone"
-            if (hasPrefix(&record[1], "zone")) {
+            if (stripPrefix(&record[1], "zone")) {
                 proto.write(MigrateTypeProto::ZONE, record[1]);
             } else return BAD_VALUE;
             // expect part 2 starts with "type"
-            if (hasPrefix(&record[2], "type")) {
+            if (stripPrefix(&record[2], "type")) {
                 // expect the rest of part 2 has number of (pageBlockOrder + 2) parts
                 // An example looks like:
                 // header line:      type    0   1   2 3 4 5 6 7 8 9 10
@@ -94,16 +92,16 @@ PageTypeInfoParser::Parse(const int in, const int out) const
             proto.end(token);
         } else if (!blockHeader.empty() && record.size() == 2) {
             long long token = proto.start(PageTypeInfo::BLOCKS);
-            if (hasPrefix(&record[0], "Node")) {
+            if (stripPrefix(&record[0], "Node")) {
                 proto.write(BlockProto::NODE, toInt(record[0]));
             } else return BAD_VALUE;
 
-            if (hasPrefix(&record[1], "zone")) {
+            if (stripPrefix(&record[1], "zone")) {
                 record_t blockCounts = parseRecord(record[1]);
                 proto.write(BlockProto::ZONE, blockCounts[0]);
 
                 for (size_t i=0; i<blockHeader.size(); i++) {
-                    if (!table.insertField(proto, blockHeader[i], blockCounts[i+1])) {
+                    if (!table.insertField(&proto, blockHeader[i], blockCounts[i+1])) {
                         return BAD_VALUE;
                     }
                 }
