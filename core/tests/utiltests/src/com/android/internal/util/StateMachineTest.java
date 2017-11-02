@@ -24,6 +24,7 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
+import android.os.test.TestLooper;
 
 import android.test.suitebuilder.annotation.Suppress;
 import com.android.internal.util.State;
@@ -340,6 +341,100 @@ public class StateMachineTest extends TestCase {
         assertEquals(ON_QUITTING, lr.getInfo());
 
         if (smQuitNowTest.isDbg()) tlog("testStateMachineQuitNow X");
+    }
+
+    /**
+     * Tests {@link StateMachine#quitNow()} immediately after {@link StateMachine#start()}.
+     */
+    class StateMachineQuitNowAfterStartTest extends StateMachine {
+        Collection<LogRec> mLogRecs;
+
+        StateMachineQuitNowAfterStartTest(String name, Looper looper) {
+            super(name, looper);
+            mThisSm = this;
+            setDbg(DBG);
+
+            // Setup state machine with 1 state
+            addState(mS1);
+
+            // Set the initial state
+            setInitialState(mS1);
+        }
+
+        @Override
+        public void onQuitting() {
+            tlog("onQuitting");
+            addLogRec(ON_QUITTING);
+            mLogRecs = mThisSm.copyLogRecs();
+            synchronized (mThisSm) {
+                mThisSm.notifyAll();
+            }
+        }
+
+        class S1 extends State {
+            @Override
+            public void enter() {
+                tlog("S1.enter");
+                addLogRec(ENTER);
+            }
+            @Override
+            public void exit() {
+                tlog("S1.exit");
+                addLogRec(EXIT);
+            }
+            @Override
+            public boolean processMessage(Message message) {
+                switch(message.what) {
+                    // Sleep and assume the other messages will be queued up.
+                    case TEST_CMD_1: {
+                        tlog("TEST_CMD_1");
+                        sleep(500);
+                        break;
+                    }
+                    default: {
+                        tlog("default what=" + message.what);
+                        break;
+                    }
+                }
+                return HANDLED;
+            }
+        }
+
+        private StateMachineQuitNowAfterStartTest mThisSm;
+        private S1 mS1 = new S1();
+    }
+
+    /**
+     * When quitNow() is called immediately after start(), the QUIT_CMD gets processed
+     * before the INIT_CMD. This test ensures that the StateMachine can gracefully handle
+     * this sequencing of messages (QUIT before INIT).
+     */
+    @SmallTest
+    public void testStateMachineQuitNowAfterStart() throws Exception {
+        if (WAIT_FOR_DEBUGGER) Debug.waitForDebugger();
+
+        TestLooper testLooper = new TestLooper();
+        StateMachineQuitNowAfterStartTest smQuitNowAfterStartTest =
+                new StateMachineQuitNowAfterStartTest(
+                        "smQuitNowAfterStartTest", testLooper.getLooper());
+        smQuitNowAfterStartTest.start();
+        smQuitNowAfterStartTest.quitNow();
+        if (smQuitNowAfterStartTest.isDbg()) tlog("testStateMachineQuitNowAfterStart E");
+
+        testLooper.dispatchAll();
+        dumpLogRecs(smQuitNowAfterStartTest.mLogRecs);
+        assertEquals(2, smQuitNowAfterStartTest.mLogRecs.size());
+
+        LogRec lr;
+        Iterator<LogRec> itr = smQuitNowAfterStartTest.mLogRecs.iterator();
+        lr = itr.next();
+        assertEquals(EXIT, lr.getInfo());
+        assertEquals(smQuitNowAfterStartTest.mS1, lr.getState());
+
+        lr = itr.next();
+        assertEquals(ON_QUITTING, lr.getInfo());
+
+        if (smQuitNowAfterStartTest.isDbg()) tlog("testStateMachineQuitNowAfterStart X");
     }
 
     /**
