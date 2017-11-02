@@ -54,6 +54,7 @@ import static com.android.server.pm.Installer.DEXOPT_SECONDARY_DEX;
 import static com.android.server.pm.Installer.DEXOPT_FORCE;
 import static com.android.server.pm.Installer.DEXOPT_STORAGE_CE;
 import static com.android.server.pm.Installer.DEXOPT_STORAGE_DE;
+import static com.android.server.pm.Installer.DEXOPT_IDLE_BACKGROUND_JOB;
 import static com.android.server.pm.InstructionSets.getAppDexInstructionSets;
 import static com.android.server.pm.InstructionSets.getDexCodeInstructionSets;
 
@@ -611,6 +612,9 @@ public class PackageDexOptimizer {
         }
         if ((flags & DEXOPT_STORAGE_DE) == DEXOPT_STORAGE_DE) {
             flagsList.add("storage_de");
+        }
+        if ((flags & DEXOPT_IDLE_BACKGROUND_JOB) == DEXOPT_IDLE_BACKGROUND_JOB) {
+            flagsList.add("idle_background_job");
         }
 
         return String.join(",", flagsList);
