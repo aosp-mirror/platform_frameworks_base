@@ -1849,110 +1849,109 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         final long origId = Binder.clearCallingIdentity();
 
-        disposeInputChannel();
+        try {
+            disposeInputChannel();
 
-        if (DEBUG_APP_TRANSITIONS) Slog.v(TAG_WM, "Remove " + this
-                + ": mSurfaceController=" + mWinAnimator.mSurfaceController
-                + " mAnimatingExit=" + mAnimatingExit
-                + " mRemoveOnExit=" + mRemoveOnExit
-                + " mHasSurface=" + mHasSurface
-                + " surfaceShowing=" + mWinAnimator.getShown()
-                + " isAnimationSet=" + mWinAnimator.isAnimationSet()
-                + " app-animation="
-                + (mAppToken != null ? mAppToken.mAppAnimator.animation : null)
-                + " mWillReplaceWindow=" + mWillReplaceWindow
-                + " inPendingTransaction="
-                + (mAppToken != null ? mAppToken.inPendingTransaction : false)
-                + " mDisplayFrozen=" + mService.mDisplayFrozen
-                + " callers=" + Debug.getCallers(6));
+            if (DEBUG_APP_TRANSITIONS) Slog.v(TAG_WM, "Remove " + this
+                    + ": mSurfaceController=" + mWinAnimator.mSurfaceController
+                    + " mAnimatingExit=" + mAnimatingExit
+                    + " mRemoveOnExit=" + mRemoveOnExit
+                    + " mHasSurface=" + mHasSurface
+                    + " surfaceShowing=" + mWinAnimator.getShown()
+                    + " isAnimationSet=" + mWinAnimator.isAnimationSet()
+                    + " app-animation="
+                    + (mAppToken != null ? mAppToken.mAppAnimator.animation : null)
+                    + " mWillReplaceWindow=" + mWillReplaceWindow
+                    + " inPendingTransaction="
+                    + (mAppToken != null ? mAppToken.inPendingTransaction : false)
+                    + " mDisplayFrozen=" + mService.mDisplayFrozen
+                    + " callers=" + Debug.getCallers(6));
 
-        // Visibility of the removed window. Will be used later to update orientation later on.
-        boolean wasVisible = false;
+            // Visibility of the removed window. Will be used later to update orientation later on.
+            boolean wasVisible = false;
 
-        final int displayId = getDisplayId();
+            final int displayId = getDisplayId();
 
-        // First, see if we need to run an animation. If we do, we have to hold off on removing the
-        // window until the animation is done. If the display is frozen, just remove immediately,
-        // since the animation wouldn't be seen.
-        if (mHasSurface && mToken.okToAnimate()) {
-            if (mWillReplaceWindow) {
-                // This window is going to be replaced. We need to keep it around until the new one
-                // gets added, then we will get rid of this one.
-                if (DEBUG_ADD_REMOVE) Slog.v(TAG_WM,
-                        "Preserving " + this + " until the new one is " + "added");
-                // TODO: We are overloading mAnimatingExit flag to prevent the window state from
-                // been removed. We probably need another flag to indicate that window removal
-                // should be deffered vs. overloading the flag that says we are playing an exit
-                // animation.
-                mAnimatingExit = true;
-                mReplacingRemoveRequested = true;
-                Binder.restoreCallingIdentity(origId);
-                return;
-            }
-
-            // If we are not currently running the exit animation, we need to see about starting one
-            wasVisible = isWinVisibleLw();
-
-            if (keepVisibleDeadWindow) {
-                if (DEBUG_ADD_REMOVE) Slog.v(TAG_WM,
-                        "Not removing " + this + " because app died while it's visible");
-
-                mAppDied = true;
-                setDisplayLayoutNeeded();
-                mService.mWindowPlacerLocked.performSurfacePlacement();
-
-                // Set up a replacement input channel since the app is now dead.
-                // We need to catch tapping on the dead window to restart the app.
-                openInputChannel(null);
-                mService.mInputMonitor.updateInputWindowsLw(true /*force*/);
-
-                Binder.restoreCallingIdentity(origId);
-                return;
-            }
-
-            if (wasVisible) {
-                final int transit = (!startingWindow) ? TRANSIT_EXIT : TRANSIT_PREVIEW_DONE;
-
-                // Try starting an animation.
-                if (mWinAnimator.applyAnimationLocked(transit, false)) {
+            // First, see if we need to run an animation. If we do, we have to hold off on removing the
+            // window until the animation is done. If the display is frozen, just remove immediately,
+            // since the animation wouldn't be seen.
+            if (mHasSurface && mToken.okToAnimate()) {
+                if (mWillReplaceWindow) {
+                    // This window is going to be replaced. We need to keep it around until the new one
+                    // gets added, then we will get rid of this one.
+                    if (DEBUG_ADD_REMOVE) Slog.v(TAG_WM,
+                            "Preserving " + this + " until the new one is " + "added");
+                    // TODO: We are overloading mAnimatingExit flag to prevent the window state from
+                    // been removed. We probably need another flag to indicate that window removal
+                    // should be deffered vs. overloading the flag that says we are playing an exit
+                    // animation.
                     mAnimatingExit = true;
+                    mReplacingRemoveRequested = true;
+                    return;
                 }
-                //TODO (multidisplay): Magnification is supported only for the default display.
-                if (mService.mAccessibilityController != null && displayId == DEFAULT_DISPLAY) {
-                    mService.mAccessibilityController.onWindowTransitionLocked(this, transit);
-                }
-            }
-            final boolean isAnimating =
-                    mWinAnimator.isAnimationSet() && !mWinAnimator.isDummyAnimation();
-            final boolean lastWindowIsStartingWindow = startingWindow && mAppToken != null
-                    && mAppToken.isLastWindow(this);
-            // We delay the removal of a window if it has a showing surface that can be used to run
-            // exit animation and it is marked as exiting.
-            // Also, If isn't the an animating starting window that is the last window in the app.
-            // We allow the removal of the non-animating starting window now as there is no
-            // additional window or animation that will trigger its removal.
-            if (mWinAnimator.getShown() && mAnimatingExit
-                    && (!lastWindowIsStartingWindow || isAnimating)) {
-                // The exit animation is running or should run... wait for it!
-                if (DEBUG_ADD_REMOVE) Slog.v(TAG_WM,
-                        "Not removing " + this + " due to exit animation ");
-                setupWindowForRemoveOnExit();
-                if (mAppToken != null) {
-                    mAppToken.updateReportedVisibilityLocked();
-                }
-                Binder.restoreCallingIdentity(origId);
-                return;
-            }
-        }
 
-        removeImmediately();
-        // Removing a visible window will effect the computed orientation
-        // So just update orientation if needed.
-        if (wasVisible && mService.updateOrientationFromAppTokensLocked(false, displayId)) {
-            mService.mH.obtainMessage(SEND_NEW_CONFIGURATION, displayId).sendToTarget();
+                // If we are not currently running the exit animation, we need to see about starting one
+                wasVisible = isWinVisibleLw();
+
+                if (keepVisibleDeadWindow) {
+                    if (DEBUG_ADD_REMOVE) Slog.v(TAG_WM,
+                            "Not removing " + this + " because app died while it's visible");
+
+                    mAppDied = true;
+                    setDisplayLayoutNeeded();
+                    mService.mWindowPlacerLocked.performSurfacePlacement();
+
+                    // Set up a replacement input channel since the app is now dead.
+                    // We need to catch tapping on the dead window to restart the app.
+                    openInputChannel(null);
+                    mService.mInputMonitor.updateInputWindowsLw(true /*force*/);
+                    return;
+                }
+
+                if (wasVisible) {
+                    final int transit = (!startingWindow) ? TRANSIT_EXIT : TRANSIT_PREVIEW_DONE;
+
+                    // Try starting an animation.
+                    if (mWinAnimator.applyAnimationLocked(transit, false)) {
+                        mAnimatingExit = true;
+                    }
+                    //TODO (multidisplay): Magnification is supported only for the default display.
+                    if (mService.mAccessibilityController != null && displayId == DEFAULT_DISPLAY) {
+                        mService.mAccessibilityController.onWindowTransitionLocked(this, transit);
+                    }
+                }
+                final boolean isAnimating =
+                        mWinAnimator.isAnimationSet() && !mWinAnimator.isDummyAnimation();
+                final boolean lastWindowIsStartingWindow = startingWindow && mAppToken != null
+                        && mAppToken.isLastWindow(this);
+                // We delay the removal of a window if it has a showing surface that can be used to run
+                // exit animation and it is marked as exiting.
+                // Also, If isn't the an animating starting window that is the last window in the app.
+                // We allow the removal of the non-animating starting window now as there is no
+                // additional window or animation that will trigger its removal.
+                if (mWinAnimator.getShown() && mAnimatingExit
+                        && (!lastWindowIsStartingWindow || isAnimating)) {
+                    // The exit animation is running or should run... wait for it!
+                    if (DEBUG_ADD_REMOVE) Slog.v(TAG_WM,
+                            "Not removing " + this + " due to exit animation ");
+                    setupWindowForRemoveOnExit();
+                    if (mAppToken != null) {
+                        mAppToken.updateReportedVisibilityLocked();
+                    }
+                    return;
+                }
+            }
+
+            removeImmediately();
+            // Removing a visible window will effect the computed orientation
+            // So just update orientation if needed.
+            if (wasVisible && mService.updateOrientationFromAppTokensLocked(false, displayId)) {
+                mService.mH.obtainMessage(SEND_NEW_CONFIGURATION, displayId).sendToTarget();
+            }
+            mService.updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL, true /*updateInputWindows*/);
+        } finally {
+            Binder.restoreCallingIdentity(origId);
         }
-        mService.updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL, true /*updateInputWindows*/);
-        Binder.restoreCallingIdentity(origId);
     }
 
     private void setupWindowForRemoveOnExit() {
