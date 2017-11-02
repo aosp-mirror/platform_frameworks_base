@@ -48,6 +48,8 @@ static void android_server_SystemServer_startHidlServices(JNIEnv* env, jobject /
 
     status_t err;
 
+    configureRpcThreadpool(5, false /* callerWillJoin */);
+
     JavaVM *vm;
     LOG_ALWAYS_FATAL_IF(env->GetJavaVM(&vm) != JNI_OK, "Cannot get Java VM");
 

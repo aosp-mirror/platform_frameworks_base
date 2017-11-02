@@ -344,17 +344,6 @@ void JHwBinder_native_joinRpcThreadpool() {
     IPCThreadState::self()->joinThreadPool();
 }
 
-void JHwBinder_native_startRpcThreadPool(JNIEnv *, jclass,
-        jlong maxThreads, jboolean callerWillJoin) {
-    CHECK(maxThreads > 0);
-    ProcessState::self()->setThreadPoolConfiguration(maxThreads,
-                                                     callerWillJoin /* callerJoinsPool */);
-    ssize_t threadsNeeded = maxThreads - (callerWillJoin ? 0 : 1);
-    for (ssize_t i = 0; i < threadsNeeded; ++i) {
-        ProcessState::self()->spawnPooledThread(false /* isMain */);
-    }
-}
-
 static void JHwBinder_report_sysprop_change(JNIEnv * /*env*/, jclass /*clazz*/)
 {
     report_sysprop_change();
@@ -379,9 +368,6 @@ static JNINativeMethod gMethods[] = {
 
     { "joinRpcThreadpool", "()V",
         (void *)JHwBinder_native_joinRpcThreadpool },
-
-    { "startRpcThreadPool", "(JZ)V",
-        (void *)JHwBinder_native_startRpcThreadPool },
 
     { "native_report_sysprop_change", "()V",
         (void *)JHwBinder_report_sysprop_change },
