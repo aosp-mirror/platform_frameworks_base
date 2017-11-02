@@ -42,7 +42,7 @@ public:
     /**
      * Read a LogEvent from a log_msg.
      */
-    explicit LogEvent(log_msg msg);
+    explicit LogEvent(log_msg& msg);
 
     /**
      * Constructs a LogEvent with the specified tag and creates an android_log_event_list in write
