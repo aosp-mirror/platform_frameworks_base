@@ -16,17 +16,23 @@
 
 package android.os;
 
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.WeakHashMap;
-import java.util.Set;
 import android.util.Log;
 
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Set;
+import java.util.WeakHashMap;
+
 /**
- * Helper class that helps you use IBinder objects as reference counted
- * tokens.  IBinders make good tokens because we find out when they are
- * removed
+ * A TokenWatcher watches a collection of {@link IBinder}s. IBinders are added
+ * to the collection by calling {@link #acquire}, and removed by calling {@link
+ * #release}. IBinders are also implicitly removed when they become weakly
+ * reachable. Each IBinder may be added at most once.
  *
+ * The {@link #acquired} method is invoked by posting to the specified handler
+ * whenever the size of the watched collection becomes nonzero.  The {@link
+ * #released} method is invoked on the specified handler whenever the size of
+ * the watched collection becomes zero.
  */
 public abstract class TokenWatcher
 {
@@ -59,15 +65,23 @@ public abstract class TokenWatcher
      * Record that this token has been acquired.  When acquire is called, and
      * the current count is 0, the acquired method is called on the given
      * handler.
-     * 
-     * @param token An IBinder object.  If this token has already been acquired,
-     *              no action is taken.
+     *
+     * Note that the same {@code token} can only be acquired once. If this
+     * {@code token} has already been acquired, no action is taken. The first
+     * subsequent call to {@link #release} will release this {@code token}
+     * immediately.
+     *
+     * @param token An IBinder object.
      * @param tag   A string used by the {@link #dump} method for debugging,
      *              to see who has references.
      */
     public void acquire(IBinder token, String tag)
     {
         synchronized (mTokens) {
+            if (mTokens.containsKey(token)) {
+                return;
+            }
+
             // explicitly checked to avoid bogus sendNotification calls because
             // of the WeakHashMap and the GC
             int oldSize = mTokens.size();
