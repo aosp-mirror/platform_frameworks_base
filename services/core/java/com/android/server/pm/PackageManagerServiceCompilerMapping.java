@@ -59,6 +59,8 @@ public class PackageManagerServiceCompilerMapping {
         // vendor.
         if ("pm.dexopt.inactive".equals(sysPropName)) {
             sysPropValue = "verify";
+        } else if ("pm.dexopt.shared".equals(sysPropName)) {
+            sysPropValue = "speed";
         } else {
             sysPropValue = SystemProperties.get(sysPropName);
         }
