@@ -40,6 +40,7 @@ public:
         : mStartTimeNs(startTimeNs),
           mCurrentBucketStartTimeNs(startTimeNs),
           mCondition(conditionIndex >= 0 ? false : true),
+          mConditionSliced(false),
           mWizard(wizard),
           mConditionTrackerIndex(conditionIndex) {
         // reuse the same map for non-sliced metrics too. this way, we avoid too many if-else.

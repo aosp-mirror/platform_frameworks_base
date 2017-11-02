@@ -12,18 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
-
+#include "metrics_test_helper.h"
 #include "src/condition/ConditionWizard.h"
 #include "src/metrics/duration_helper/OringDurationTracker.h"
 
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 #include <stdio.h>
 #include <set>
 #include <unordered_map>
 #include <vector>
 
-using namespace android::os::statsd;
 using namespace testing;
 using android::sp;
 using std::set;
@@ -31,14 +30,9 @@ using std::unordered_map;
 using std::vector;
 
 #ifdef __ANDROID__
-
-class MockConditionWizard : public ConditionWizard {
-public:
-    MOCK_METHOD2(
-            query,
-            ConditionState(const int conditionIndex,
-                           const std::map<std::string, HashableDimensionKey>& conditionParameters));
-};
+namespace android {
+namespace os {
+namespace statsd {
 
 TEST(OringDurationTrackerTest, TestDurationOverlap) {
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
@@ -93,7 +87,9 @@ TEST(OringDurationTrackerTest, TestDurationConditionChange) {
     EXPECT_EQ(1u, buckets.size());
     EXPECT_EQ(5, buckets[0].duration_nanos());
 }
-
+}  // namespace statsd
+}  // namespace os
+}  // namespace android
 #else
 GTEST_LOG_(INFO) << "This test does nothing.\n";
 #endif

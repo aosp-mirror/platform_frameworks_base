@@ -83,28 +83,31 @@ bool ResourcePowerManagerPuller::Pull(const int tagId, vector<shared_ptr<LogEven
         return false;
     }
 
+    uint64_t timestamp = time(nullptr) * NS_PER_SEC;
+
     data->clear();
     Return<void> ret = gPowerHalV1_0->getPlatformLowPowerStats(
-            [&data](hidl_vec<PowerStatePlatformSleepState> states, Status status) {
+            [&data, timestamp](hidl_vec<PowerStatePlatformSleepState> states, Status status) {
 
                 if (status != Status::SUCCESS) return;
 
                 for (size_t i = 0; i < states.size(); i++) {
                     const PowerStatePlatformSleepState& state = states[i];
 
-                    auto statePtr = make_shared<LogEvent>(power_state_platform_sleep_state_tag);
+                    auto statePtr =
+                            make_shared<LogEvent>(power_state_platform_sleep_state_tag, timestamp);
                     auto elemList = statePtr->GetAndroidLogEventList();
                     *elemList << state.name;
                     *elemList << state.residencyInMsecSinceBoot;
                     *elemList << state.totalTransitions;
                     *elemList << state.supportedOnlyInSuspend;
+                    statePtr->init();
                     data->push_back(statePtr);
-
                     VLOG("powerstate: %s, %lld, %lld, %d", state.name.c_str(),
                          (long long)state.residencyInMsecSinceBoot,
                          (long long)state.totalTransitions, state.supportedOnlyInSuspend ? 1 : 0);
                     for (auto voter : state.voters) {
-                        auto voterPtr = make_shared<LogEvent>(power_state_voter_tag);
+                        auto voterPtr = make_shared<LogEvent>(power_state_voter_tag, timestamp);
                         auto elemList = voterPtr->GetAndroidLogEventList();
                         *elemList << state.name;
                         *elemList << voter.name;
@@ -128,7 +131,7 @@ bool ResourcePowerManagerPuller::Pull(const int tagId, vector<shared_ptr<LogEven
             android::hardware::power::V1_1::IPower::castFrom(gPowerHalV1_0);
     if (gPowerHal_1_1 != nullptr) {
         ret = gPowerHal_1_1->getSubsystemLowPowerStats(
-                [&data](hidl_vec<PowerStateSubsystem> subsystems, Status status) {
+                [&data, timestamp](hidl_vec<PowerStateSubsystem> subsystems, Status status) {
 
                     if (status != Status::SUCCESS) return;
 
@@ -137,8 +140,8 @@ bool ResourcePowerManagerPuller::Pull(const int tagId, vector<shared_ptr<LogEven
                             const PowerStateSubsystem& subsystem = subsystems[i];
                             for (size_t j = 0; j < subsystem.states.size(); j++) {
                                 const PowerStateSubsystemSleepState& state = subsystem.states[j];
-                                auto subsystemStatePtr =
-                                        make_shared<LogEvent>(power_state_subsystem_state_tag);
+                                auto subsystemStatePtr = make_shared<LogEvent>(
+                                        power_state_subsystem_state_tag, timestamp);
                                 auto elemList = subsystemStatePtr->GetAndroidLogEventList();
                                 *elemList << subsystem.name;
                                 *elemList << state.name;
@@ -146,6 +149,7 @@ bool ResourcePowerManagerPuller::Pull(const int tagId, vector<shared_ptr<LogEven
                                 *elemList << state.totalTransitions;
                                 *elemList << state.lastEntryTimestampMs;
                                 *elemList << state.supportedOnlyInSuspend;
+                                subsystemStatePtr->init();
                                 data->push_back(subsystemStatePtr);
                                 VLOG("subsystemstate: %s, %s, %lld, %lld, %lld",
                                      subsystem.name.c_str(), state.name.c_str(),

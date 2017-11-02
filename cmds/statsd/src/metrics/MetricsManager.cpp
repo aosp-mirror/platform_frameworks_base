@@ -15,17 +15,17 @@
  */
 #define DEBUG true  // STOPSHIP if true
 #include "Log.h"
-
 #include "MetricsManager.h"
-#include <log/logprint.h>
-#include "../condition/CombinationConditionTracker.h"
-#include "../condition/SimpleConditionTracker.h"
-#include "../matchers/CombinationLogMatchingTracker.h"
-#include "../matchers/SimpleLogMatchingTracker.h"
+
 #include "CountMetricProducer.h"
+#include "condition/CombinationConditionTracker.h"
+#include "condition/SimpleConditionTracker.h"
+#include "matchers/CombinationLogMatchingTracker.h"
+#include "matchers/SimpleLogMatchingTracker.h"
 #include "metrics_manager_util.h"
 #include "stats_util.h"
 
+#include <log/logprint.h>
 using std::make_unique;
 using std::set;
 using std::string;

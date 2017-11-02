@@ -28,7 +28,6 @@ namespace statsd {
 
 #define DEFAULT_DIMENSION_KEY ""
 #define MATCHER_NOT_FOUND -2
-#define NANO_SECONDS_IN_A_SECOND (1000 * 1000 * 1000)
 
 typedef std::string HashableDimensionKey;
 
