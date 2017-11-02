@@ -289,7 +289,9 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
 
     private void setWalModeFromConfiguration() {
         if (!mConfiguration.isInMemoryDb() && !mIsReadOnlyConnection) {
-            if ((mConfiguration.openFlags & SQLiteDatabase.ENABLE_WRITE_AHEAD_LOGGING) != 0) {
+            boolean walEnabled =
+                    (mConfiguration.openFlags & SQLiteDatabase.ENABLE_WRITE_AHEAD_LOGGING) != 0;
+            if (walEnabled || mConfiguration.useCompatibilityWal) {
                 setJournalMode("WAL");
                 setSyncMode(SQLiteGlobal.getWALSyncMode());
             } else {
