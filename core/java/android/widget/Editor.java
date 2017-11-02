@@ -195,6 +195,27 @@ public class Editor {
     private final boolean mHapticTextHandleEnabled;
 
     private final Magnifier mMagnifier;
+    private final Runnable mUpdateMagnifierRunnable = new Runnable() {
+        @Override
+        public void run() {
+            mMagnifier.update();
+        }
+    };
+    // Update the magnifier contents whenever anything in the view hierarchy is updated.
+    // Note: this only captures UI thread-visible changes, so it's a known issue that an animating
+    // VectorDrawable or Ripple animation will not trigger capture, since they're owned by
+    // RenderThread.
+    private final ViewTreeObserver.OnDrawListener mMagnifierOnDrawListener =
+            new ViewTreeObserver.OnDrawListener() {
+        @Override
+        public void onDraw() {
+            if (mMagnifier != null) {
+                // Posting the method will ensure that updating the magnifier contents will
+                // happen right after the rendering of the current frame.
+                mTextView.post(mUpdateMagnifierRunnable);
+            }
+        }
+    };
 
     // Used to highlight a word when it is corrected by the IME
     private CorrectionHighlighter mCorrectionHighlighter;
@@ -415,15 +436,21 @@ public class Editor {
         }
 
         final ViewTreeObserver observer = mTextView.getViewTreeObserver();
-        // No need to create the controller.
-        // The get method will add the listener on controller creation.
-        if (mInsertionPointCursorController != null) {
-            observer.addOnTouchModeChangeListener(mInsertionPointCursorController);
+        if (observer.isAlive()) {
+            // No need to create the controller.
+            // The get method will add the listener on controller creation.
+            if (mInsertionPointCursorController != null) {
+                observer.addOnTouchModeChangeListener(mInsertionPointCursorController);
+            }
+            if (mSelectionModifierCursorController != null) {
+                mSelectionModifierCursorController.resetTouchOffsets();
+                observer.addOnTouchModeChangeListener(mSelectionModifierCursorController);
+            }
+            if (FLAG_USE_MAGNIFIER) {
+                observer.addOnDrawListener(mMagnifierOnDrawListener);
+            }
         }
-        if (mSelectionModifierCursorController != null) {
-            mSelectionModifierCursorController.resetTouchOffsets();
-            observer.addOnTouchModeChangeListener(mSelectionModifierCursorController);
-        }
+
         updateSpellCheckSpans(0, mTextView.getText().length(),
                 true /* create the spell checker if needed */);
 
@@ -470,6 +497,13 @@ public class Editor {
             // Forces the creation of a new SpellChecker next time this window is created.
             // Will handle the cases where the settings has been changed in the meantime.
             mSpellChecker = null;
+        }
+
+        if (FLAG_USE_MAGNIFIER) {
+            final ViewTreeObserver observer = mTextView.getViewTreeObserver();
+            if (observer.isAlive()) {
+                observer.removeOnDrawListener(mMagnifierOnDrawListener);
+            }
         }
 
         hideCursorAndSpanControllers();
