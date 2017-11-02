@@ -29,7 +29,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import com.android.internal.annotations.GuardedBy;
 
-import com.android.internal.app.NightDisplayController;
+import com.android.internal.app.ColorDisplayController;
 import java.util.Arrays;
 
 /**
@@ -223,13 +223,13 @@ public class DisplayTransformManager {
     }
 
     public boolean setColorMode(int colorMode) {
-        if (colorMode == NightDisplayController.COLOR_MODE_NATURAL) {
+        if (colorMode == ColorDisplayController.COLOR_MODE_NATURAL) {
             applySaturation(COLOR_SATURATION_NATURAL);
             setNativeMode(false);
-        } else if (colorMode == NightDisplayController.COLOR_MODE_BOOSTED) {
+        } else if (colorMode == ColorDisplayController.COLOR_MODE_BOOSTED) {
             applySaturation(COLOR_SATURATION_BOOSTED);
             setNativeMode(false);
-        } else if (colorMode == NightDisplayController.COLOR_MODE_SATURATED) {
+        } else if (colorMode == ColorDisplayController.COLOR_MODE_SATURATED) {
             applySaturation(COLOR_SATURATION_NATURAL);
             setNativeMode(true);
         }

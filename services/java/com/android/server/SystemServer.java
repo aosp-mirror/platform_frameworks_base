@@ -37,7 +37,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.Process;
-import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.StrictMode;
 import android.os.SystemClock;
@@ -52,7 +51,7 @@ import android.util.Slog;
 import android.view.WindowManager;
 
 import com.android.internal.R;
-import com.android.internal.app.NightDisplayController;
+import com.android.internal.app.ColorDisplayController;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.BinderInternal;
@@ -69,7 +68,7 @@ import com.android.server.connectivity.IpConnectivityMetrics;
 import com.android.server.coverage.CoverageService;
 import com.android.server.devicepolicy.DevicePolicyManagerService;
 import com.android.server.display.DisplayManagerService;
-import com.android.server.display.NightDisplayService;
+import com.android.server.display.ColorDisplayService;
 import com.android.server.dreams.DreamManagerService;
 import com.android.server.emergency.EmergencyAffordanceService;
 import com.android.server.fingerprint.FingerprintService;
@@ -1277,9 +1276,9 @@ public final class SystemServer {
             mSystemServiceManager.startService(TwilightService.class);
             traceEnd();
 
-            if (NightDisplayController.isAvailable(context)) {
+            if (ColorDisplayController.isAvailable(context)) {
                 traceBeginAndSlog("StartNightDisplay");
-                mSystemServiceManager.startService(NightDisplayService.class);
+                mSystemServiceManager.startService(ColorDisplayService.class);
                 traceEnd();
             }
 
