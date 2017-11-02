@@ -47,6 +47,7 @@ import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.misc.SysUiTaskStackChangeListener;
 import com.android.systemui.recents.misc.SystemServicesProxy;
+import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.StatusBarState;
@@ -311,8 +312,8 @@ public class CarStatusBar extends StatusBar implements
     private class TaskStackListenerImpl extends SysUiTaskStackChangeListener {
         @Override
         public void onTaskStackChanged() {
-            SystemServicesProxy ssp = Recents.getSystemServices();
-            ActivityManager.RunningTaskInfo runningTaskInfo = ssp.getRunningTask();
+            ActivityManager.RunningTaskInfo runningTaskInfo =
+                    ActivityManagerWrapper.getInstance().getRunningTask();
             if (runningTaskInfo != null && runningTaskInfo.baseActivity != null) {
                 mController.taskChanged(runningTaskInfo.baseActivity.getPackageName(),
                         runningTaskInfo);

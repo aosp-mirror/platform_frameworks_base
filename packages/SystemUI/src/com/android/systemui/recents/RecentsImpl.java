@@ -138,8 +138,8 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
                 }
 
                 // Load the next task only if we aren't svelte
-                SystemServicesProxy ssp = Recents.getSystemServices();
-                ActivityManager.RunningTaskInfo runningTaskInfo = ssp.getRunningTask();
+                ActivityManager.RunningTaskInfo runningTaskInfo =
+                        ActivityManagerWrapper.getInstance().getRunningTask();
                 RecentsTaskLoader loader = Recents.getTaskLoader();
                 RecentsTaskLoadPlan plan = new RecentsTaskLoadPlan(mContext);
                 loader.preloadTasks(plan, -1);
@@ -353,7 +353,8 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
             boolean forceVisible = launchedWhileDockingTask || draggingInRecents;
             MutableBoolean isHomeStackVisible = new MutableBoolean(forceVisible);
             if (forceVisible || !ssp.isRecentsActivityVisible(isHomeStackVisible)) {
-                ActivityManager.RunningTaskInfo runningTask = ssp.getRunningTask();
+                ActivityManager.RunningTaskInfo runningTask =
+                        ActivityManagerWrapper.getInstance().getRunningTask();
                 startRecentsActivity(runningTask, isHomeStackVisible.value || fromHome, animate,
                         growTarget);
             }
@@ -444,7 +445,8 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
                 }
 
                 // Otherwise, start the recents activity
-                ActivityManager.RunningTaskInfo runningTask = ssp.getRunningTask();
+                ActivityManager.RunningTaskInfo runningTask =
+                        ActivityManagerWrapper.getInstance().getRunningTask();
                 startRecentsActivity(runningTask, isHomeStackVisible.value, true /* animate */,
                         growTarget);
 
@@ -470,7 +472,8 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         // don't block the touch feedback on the nav bar button which triggers this.
         mHandler.post(() -> {
             if (!ssp.isRecentsActivityVisible(null)) {
-                ActivityManager.RunningTaskInfo runningTask = ssp.getRunningTask();
+                ActivityManager.RunningTaskInfo runningTask =
+                        ActivityManagerWrapper.getInstance().getRunningTask();
                 if (runningTask == null) {
                     return;
                 }
@@ -524,7 +527,8 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         if (focusedStack == null || focusedStack.getTaskCount() == 0) return;
 
         // Return early if there is no running task
-        ActivityManager.RunningTaskInfo runningTask = ssp.getRunningTask();
+        ActivityManager.RunningTaskInfo runningTask =
+                ActivityManagerWrapper.getInstance().getRunningTask();
         if (runningTask == null) return;
 
         // Find the task in the recents list
@@ -561,8 +565,8 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         }
 
         // Launch the task
-        ssp.startActivityFromRecents(
-                mContext, toTask.key, toTask.title, launchOpts, null /* resultListener */);
+        ActivityManagerWrapper.getInstance().startActivityFromRecents(toTask.key, launchOpts,
+                null /* resultCallback */, null /* resultCallbackHandler */);
     }
 
     /**
@@ -579,7 +583,8 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         if (focusedStack == null || focusedStack.getTaskCount() == 0) return;
 
         // Return early if there is no running task (can't determine affiliated tasks in this case)
-        ActivityManager.RunningTaskInfo runningTask = ssp.getRunningTask();
+        ActivityManager.RunningTaskInfo runningTask =
+                ActivityManagerWrapper.getInstance().getRunningTask();
         final int activityType = runningTask.configuration.windowConfiguration.getActivityType();
         if (runningTask == null) return;
         // Return early if the running task is in the home/recents stack (optimization)
@@ -630,8 +635,8 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         MetricsLogger.count(mContext, "overview_affiliated_task_launch", 1);
 
         // Launch the task
-        ssp.startActivityFromRecents(
-                mContext, toTask.key, toTask.title, launchOpts, null /* resultListener */);
+        ActivityManagerWrapper.getInstance().startActivityFromRecents(toTask.key, launchOpts,
+                null /* resultListener */, null /* resultCallbackHandler */);
     }
 
     public void showNextAffiliatedTask() {

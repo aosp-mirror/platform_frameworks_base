@@ -147,9 +147,15 @@ public class RecentsTaskLoader {
 
     /** Preloads recents tasks using the specified plan to store the output. */
     public synchronized void preloadTasks(RecentsTaskLoadPlan plan, int runningTaskId) {
+        preloadTasks(plan, runningTaskId, ActivityManagerWrapper.getInstance().getCurrentUserId());
+    }
+
+    /** Preloads recents tasks using the specified plan to store the output. */
+    public synchronized void preloadTasks(RecentsTaskLoadPlan plan, int runningTaskId,
+            int currentUserId) {
         try {
             Trace.beginSection("preloadPlan");
-            plan.preloadPlan(this, runningTaskId);
+            plan.preloadPlan(this, runningTaskId, currentUserId);
         } finally {
             Trace.endSection();
         }

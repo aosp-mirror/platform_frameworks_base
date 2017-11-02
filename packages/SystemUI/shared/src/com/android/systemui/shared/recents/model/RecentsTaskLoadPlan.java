@@ -70,21 +70,6 @@ public class RecentsTaskLoadPlan {
     }
 
     /**
-     * An optimization to preload the raw list of tasks. The raw tasks are saved in least-recent
-     * to most-recent order.
-     *
-     * Note: Do not lock, callers should synchronize on the loader before making this call.
-     */
-    void preloadRawTasks() {
-        int currentUserId = ActivityManagerWrapper.getInstance().getCurrentUserId();
-        mRawTasks = ActivityManagerWrapper.getInstance().getRecentTasks(
-                ActivityManager.getMaxRecentTasksStatic(), currentUserId);
-
-        // Since the raw tasks are given in most-recent to least-recent order, we need to reverse it
-        Collections.reverse(mRawTasks);
-    }
-
-    /**
      * Preloads the list of recent tasks from the system. After this call, the TaskStack will
      * have a list of all the recent tasks with their metadata, not including icons or
      * thumbnails which were not cached and have to be loaded.
@@ -95,11 +80,15 @@ public class RecentsTaskLoadPlan {
      * Note: Do not lock, since this can be calling back to the loader, which separately also drives
      * this call (callers should synchronize on the loader before making this call).
      */
-    void preloadPlan(RecentsTaskLoader loader, int runningTaskId) {
+    public void preloadPlan(RecentsTaskLoader loader, int runningTaskId, int currentUserId) {
         Resources res = mContext.getResources();
         ArrayList<Task> allTasks = new ArrayList<>();
         if (mRawTasks == null) {
-            preloadRawTasks();
+            mRawTasks = ActivityManagerWrapper.getInstance().getRecentTasks(
+                    ActivityManager.getMaxRecentTasksStatic(), currentUserId);
+
+            // Since the raw tasks are given in most-recent to least-recent order, we need to reverse it
+            Collections.reverse(mRawTasks);
         }
 
         int taskCount = mRawTasks.size();
@@ -160,7 +149,7 @@ public class RecentsTaskLoadPlan {
      * Note: Do not lock, since this can be calling back to the loader, which separately also drives
      * this call (callers should synchronize on the loader before making this call).
      */
-    void executePlan(Options opts, RecentsTaskLoader loader) {
+    public void executePlan(Options opts, RecentsTaskLoader loader) {
         Resources res = mContext.getResources();
 
         // Iterate through each of the tasks and load them according to the load conditions.

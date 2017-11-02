@@ -36,6 +36,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.util.ArraySet;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.MathUtils;
 import android.view.AppTransitionAnimationSpec;
 import android.view.LayoutInflater;
@@ -1026,29 +1027,30 @@ public class RecentsView extends FrameLayout {
     private void startTaskActivity(TaskStack stack, Task task, @Nullable TaskView taskView,
             ActivityOptions opts, AppTransitionAnimationSpecsFuture transitionFuture,
             int windowingMode, int activityType) {
-        SystemServicesProxy ssp = Recents.getSystemServices();
-        ssp.startActivityFromRecents(mContext, task.key, task.title, opts, windowingMode,
-                activityType,
-                succeeded -> {
-                    if (succeeded) {
-                        // Keep track of the index of the task launch
-                        int taskIndexFromFront = 0;
-                        int taskIndex = stack.indexOfStackTask(task);
-                        if (taskIndex > -1) {
-                            taskIndexFromFront = stack.getTaskCount() - taskIndex - 1;
-                        }
-                        EventBus.getDefault().send(new LaunchTaskSucceededEvent(
-                                taskIndexFromFront));
-                    } else {
-                        // Dismiss the task if we fail to launch it
-                        if (taskView != null) {
-                            taskView.dismissTask();
-                        }
+        ActivityManagerWrapper.getInstance().startActivityFromRecents(task.key, opts, windowingMode,
+                activityType, succeeded -> {
+            if (succeeded) {
+                // Keep track of the index of the task launch
+                int taskIndexFromFront = 0;
+                int taskIndex = stack.indexOfStackTask(task);
+                if (taskIndex > -1) {
+                    taskIndexFromFront = stack.getTaskCount() - taskIndex - 1;
+                }
+                EventBus.getDefault().send(new LaunchTaskSucceededEvent(
+                        taskIndexFromFront));
+            } else {
+                Log.e(TAG, mContext.getString(R.string.recents_launch_error_message,
+                        task.title));
 
-                        // Keep track of failed launches
-                        EventBus.getDefault().send(new LaunchTaskFailedEvent());
-                    }
-                });
+                // Dismiss the task if we fail to launch it
+                if (taskView != null) {
+                    taskView.dismissTask();
+                }
+
+                // Keep track of failed launches
+                EventBus.getDefault().send(new LaunchTaskFailedEvent());
+            }
+        }, getHandler());
         if (transitionFuture != null) {
             mHandler.post(transitionFuture::composeSpecsSynchronous);
         }
