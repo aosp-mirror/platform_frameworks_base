@@ -1196,7 +1196,6 @@ public class NotificationManagerService extends SystemService {
         mAccessibilityManager = am;
     }
 
-
     // TODO: All tests should use this init instead of the one-off setters above.
     @VisibleForTesting
     void init(Looper looper, IPackageManager packageManager,
@@ -2764,19 +2763,25 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void setNotificationPolicyAccessGranted(String pkg, boolean granted)
                 throws RemoteException {
+            setNotificationPolicyAccessGrantedForUser(
+                    pkg, getCallingUserHandle().getIdentifier(), granted);
+        }
+
+        @Override
+        public void setNotificationPolicyAccessGrantedForUser(
+                String pkg, int userId, boolean granted) {
             checkCallerIsSystemOrShell();
             final long identity = Binder.clearCallingIdentity();
             try {
                 if (!mActivityManager.isLowRamDevice()) {
                     mConditionProviders.setPackageOrComponentEnabled(
-                            pkg, getCallingUserHandle().getIdentifier(), true, granted);
+                            pkg, userId, true, granted);
 
                     getContext().sendBroadcastAsUser(new Intent(
                             NotificationManager.ACTION_NOTIFICATION_POLICY_ACCESS_GRANTED_CHANGED)
                                     .setPackage(pkg)
                                     .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY),
-                            getCallingUserHandle(), null);
-
+                            UserHandle.of(userId), null);
                     savePolicyFile();
                 }
             } finally {
@@ -2871,11 +2876,10 @@ public class NotificationManagerService extends SystemService {
                             userId, true, granted);
 
                     getContext().sendBroadcastAsUser(new Intent(
-                                    NotificationManager.ACTION_NOTIFICATION_POLICY_ACCESS_GRANTED_CHANGED)
-
+                            NotificationManager.ACTION_NOTIFICATION_POLICY_ACCESS_GRANTED_CHANGED)
                                     .setPackage(listener.getPackageName())
                                     .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY),
-                            getCallingUserHandle(), null);
+                            UserHandle.of(userId), null);
 
                     savePolicyFile();
                 }
@@ -2901,7 +2905,7 @@ public class NotificationManagerService extends SystemService {
                             NotificationManager.ACTION_NOTIFICATION_POLICY_ACCESS_GRANTED_CHANGED)
                                     .setPackage(assistant.getPackageName())
                                     .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY),
-                            getCallingUserHandle(), null);
+                            UserHandle.of(userId), null);
 
                     savePolicyFile();
                 }
