@@ -23,6 +23,7 @@ import android.content.pm.PackageManager;
 import android.net.wifi.WifiActivityEnergyInfo;
 import android.os.PowerSaveState;
 import android.os.BatteryStats;
+import android.os.BatteryStatsInternal;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -177,7 +178,20 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     }
 
     public void publish() {
+        LocalServices.addService(BatteryStatsInternal.class, new LocalService());
         ServiceManager.addService(BatteryStats.SERVICE_NAME, asBinder());
+    }
+
+    private final class LocalService extends BatteryStatsInternal {
+        @Override
+        public String[] getWifiIfaces() {
+            return mStats.getWifiIfaces().clone();
+        }
+
+        @Override
+        public String[] getMobileIfaces() {
+            return mStats.getMobileIfaces().clone();
+        }
     }
 
     private static void awaitUninterruptibly(Future<?> future) {
