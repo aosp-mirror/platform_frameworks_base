@@ -187,7 +187,7 @@ public class PackageDexOptimizer {
 
             // Get the dexopt flags after getRealCompilerFilter to make sure we get the correct
             // flags.
-            final int dexoptFlags = getDexFlags(pkg, compilerFilter, options.isBootComplete());
+            final int dexoptFlags = getDexFlags(pkg, compilerFilter, options);
 
             for (String dexCodeIsa : dexCodeInstructionSets) {
                 int newResult = dexOptPath(pkg, path, dexCodeIsa, compilerFilter,
@@ -327,8 +327,7 @@ public class PackageDexOptimizer {
                 dexUseInfo.isUsedByOtherApps());
         // Get the dexopt flags after getRealCompilerFilter to make sure we get the correct flags.
         // Secondary dex files are currently not compiled at boot.
-        int dexoptFlags = getDexFlags(info, compilerFilter, /* bootComplete */ true)
-                | DEXOPT_SECONDARY_DEX;
+        int dexoptFlags = getDexFlags(info, compilerFilter, options) | DEXOPT_SECONDARY_DEX;
         // Check the app storage and add the appropriate flags.
         if (info.deviceProtectedDataDir != null &&
                 FileUtils.contains(info.deviceProtectedDataDir, path)) {
@@ -477,11 +476,11 @@ public class PackageDexOptimizer {
      * filter.
      */
     private int getDexFlags(PackageParser.Package pkg, String compilerFilter,
-            boolean bootComplete) {
-        return getDexFlags(pkg.applicationInfo, compilerFilter, bootComplete);
+            DexoptOptions options) {
+        return getDexFlags(pkg.applicationInfo, compilerFilter, options);
     }
 
-    private int getDexFlags(ApplicationInfo info, String compilerFilter, boolean bootComplete) {
+    private int getDexFlags(ApplicationInfo info, String compilerFilter, DexoptOptions options) {
         int flags = info.flags;
         boolean debuggable = (flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
         // Profile guide compiled oat files should not be public.
@@ -492,7 +491,8 @@ public class PackageDexOptimizer {
                 (isPublic ? DEXOPT_PUBLIC : 0)
                 | (debuggable ? DEXOPT_DEBUGGABLE : 0)
                 | profileFlag
-                | (bootComplete ? DEXOPT_BOOTCOMPLETE : 0);
+                | (options.isBootComplete() ? DEXOPT_BOOTCOMPLETE : 0)
+                | (options.isDexoptIdleBackgroundJob() ? DEXOPT_IDLE_BACKGROUND_JOB : 0);
         return adjustDexoptFlags(dexFlags);
     }
 
