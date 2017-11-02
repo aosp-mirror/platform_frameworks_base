@@ -50,6 +50,7 @@ public class CarQSFragment extends Fragment implements QS {
     private View mUserSwitcherContainer;
     private CarQSFooter mFooter;
     private View mFooterUserName;
+    private View mFooterExpandIcon;
     private UserGridView mUserGridView;
     private PageIndicator mPageIndicator;
     private AnimatorSet mAnimatorSet;
@@ -67,6 +68,7 @@ public class CarQSFragment extends Fragment implements QS {
         mHeader = view.findViewById(R.id.header);
         mFooter = view.findViewById(R.id.qs_footer);
         mFooterUserName = mFooter.findViewById(R.id.user_name);
+        mFooterExpandIcon = mFooter.findViewById(R.id.user_switch_expand_icon);
 
         mUserSwitcherContainer = view.findViewById(R.id.user_switcher_container);
 
@@ -260,6 +262,12 @@ public class CarQSFragment extends Fragment implements QS {
                         : R.anim.car_user_switcher_close_name_animation);
         nameAnimator.setTarget(mFooterUserName);
         allAnimators.add(nameAnimator);
+
+        Animator iconAnimator = AnimatorInflater.loadAnimator(getContext(),
+                opening ? R.anim.car_user_switcher_open_icon_animation
+                        : R.anim.car_user_switcher_close_icon_animation);
+        iconAnimator.setTarget(mFooterExpandIcon);
+        allAnimators.add(iconAnimator);
 
         Animator pageAnimator = AnimatorInflater.loadAnimator(getContext(),
                 opening ? R.anim.car_user_switcher_open_pages_animation

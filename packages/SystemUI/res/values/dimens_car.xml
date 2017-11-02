@@ -50,7 +50,8 @@
     <dimen name="car_qs_footer_padding_start">46dp</dimen>
     <dimen name="car_qs_footer_icon_width">56dp</dimen>
     <dimen name="car_qs_footer_icon_height">56dp</dimen>
-    <dimen name="car_qs_footer_user_switch_margin_right">46dp</dimen>
+    <dimen name="car_qs_footer_user_switch_icon_margin">5dp</dimen>
+    <dimen name="car_qs_footer_user_switch_icon_width">36dp</dimen>
     <dimen name="car_qs_footer_user_name_text_size">@dimen/car_body2_size</dimen>
 
     <dimen name="car_user_switcher_container_height">420dp</dimen>

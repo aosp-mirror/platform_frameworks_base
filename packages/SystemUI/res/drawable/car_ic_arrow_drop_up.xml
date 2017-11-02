@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright (C) 2017 The Android Open Source Project
+  ~ Copyright (C) 2015 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -20,5 +20,5 @@
         android:viewportHeight="48.0">
     <path
         android:fillColor="#FFFFFFFF"
-        android:pathData="M14.0,20.0l10.0,10.0 10.0,-10.0z"/>
+        android:pathData="M14 28l10-10 10 10z"/>
 </vector>
