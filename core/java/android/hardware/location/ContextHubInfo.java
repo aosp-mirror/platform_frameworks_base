@@ -16,6 +16,7 @@
 package android.hardware.location;
 
 import android.annotation.SystemApi;
+import android.hardware.contexthub.V1_0.ContextHub;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -31,19 +32,50 @@ public class ContextHubInfo {
     private String mVendor;
     private String mToolchain;
     private int mPlatformVersion;
-    private int mStaticSwVersion;
     private int mToolchainVersion;
     private float mPeakMips;
     private float mStoppedPowerDrawMw;
     private float mSleepPowerDrawMw;
     private float mPeakPowerDrawMw;
     private int mMaxPacketLengthBytes;
+    private byte mChreApiMajorVersion;
+    private byte mChreApiMinorVersion;
+    private short mChrePatchVersion;
+    private long mChrePlatformId;
 
     private int[] mSupportedSensors;
 
     private MemoryRegion[] mMemoryRegions;
 
+    /*
+     * TODO(b/66965339): Deprecate this constructor and the setter methods, and mark private fields
+     * as final when the ContextHubService JNI code is removed.
+     */
     public ContextHubInfo() {
+    }
+
+    /**
+     * @hide
+     */
+    public ContextHubInfo(ContextHub contextHub) {
+        mId = contextHub.hubId;
+        mName = contextHub.name;
+        mVendor = contextHub.vendor;
+        mToolchain = contextHub.toolchain;
+        mPlatformVersion = contextHub.platformVersion;
+        mToolchainVersion = contextHub.toolchainVersion;
+        mPeakMips = contextHub.peakMips;
+        mStoppedPowerDrawMw = contextHub.stoppedPowerDrawMw;
+        mSleepPowerDrawMw = contextHub.sleepPowerDrawMw;
+        mPeakPowerDrawMw = contextHub.peakPowerDrawMw;
+        mMaxPacketLengthBytes = contextHub.maxSupportedMsgLen;
+        mChrePlatformId = contextHub.chrePlatformId;
+        mChreApiMajorVersion = contextHub.chreApiMajorVersion;
+        mChreApiMinorVersion = contextHub.chreApiMinorVersion;
+        mChrePatchVersion = contextHub.chrePatchVersion;
+
+        mSupportedSensors = new int[0];
+        mMemoryRegions = new MemoryRegion[0];
     }
 
     /**
@@ -173,7 +205,7 @@ public class ContextHubInfo {
      * @return int - platform version number
      */
     public int getStaticSwVersion() {
-        return mStaticSwVersion;
+        return (mChreApiMajorVersion << 24) | (mChreApiMinorVersion << 16) | (mChrePatchVersion);
     }
 
     /**
@@ -183,9 +215,7 @@ public class ContextHubInfo {
      *
      * @hide
      */
-    public void setStaticSwVersion(int staticSwVersion) {
-        mStaticSwVersion = staticSwVersion;
-    }
+    public void setStaticSwVersion(int staticSwVersion) {}
 
     /**
      * get the tool chain version
@@ -345,23 +375,66 @@ public class ContextHubInfo {
         mMemoryRegions = Arrays.copyOf(memoryRegions, memoryRegions.length);
     }
 
+    /**
+     * @return the CHRE platform ID as defined in chre/version.h
+     *
+     * TODO(b/67734082): Expose as public API
+     * @hide
+     */
+    public long getChrePlatformId() {
+        return mChrePlatformId;
+    }
+
+    /**
+     * @return the CHRE API's major version as defined in chre/version.h
+     *
+     * TODO(b/67734082): Expose as public API
+     * @hide
+     */
+    public byte getChreApiMajorVersion() {
+        return mChreApiMajorVersion;
+    }
+
+    /**
+     * @return the CHRE API's minor version as defined in chre/version.h
+     *
+     * TODO(b/67734082): Expose as public API
+     * @hide
+     */
+    public byte getChreApiMinorVersion() {
+        return mChreApiMinorVersion;
+    }
+
+    /**
+     * @return the CHRE patch version as defined in chre/version.h
+     *
+     * TODO(b/67734082): Expose as public API
+     * @hide
+     */
+    public short getChrePatchVersion() {
+        return mChrePatchVersion;
+    }
+
     @Override
     public String toString() {
-      String retVal = "";
-      retVal += "Id : " + mId;
-      retVal += ", Name : " + mName;
-      retVal += "\n\tVendor : " + mVendor;
-      retVal += ", ToolChain : " + mToolchain;
-      retVal += "\n\tPlatformVersion : " + mPlatformVersion;
-      retVal += ", StaticSwVersion : " + mStaticSwVersion;
-      retVal += "\n\tPeakMips : " + mPeakMips;
-      retVal += ", StoppedPowerDraw : " + mStoppedPowerDrawMw + " mW";
-      retVal += ", PeakPowerDraw : " + mPeakPowerDrawMw + " mW";
-      retVal += ", MaxPacketLength : " + mMaxPacketLengthBytes + " Bytes";
-      retVal += "\n\tSupported sensors : " + Arrays.toString(mSupportedSensors);
-      retVal += "\n\tMemory Regions : " + Arrays.toString(mMemoryRegions);
+        String retVal = "";
+        retVal += "Id : " + mId;
+        retVal += ", Name : " + mName;
+        retVal += "\n\tVendor : " + mVendor;
+        retVal += ", Toolchain : " + mToolchain;
+        retVal += ", Toolchain version: 0x" + Integer.toHexString(mToolchainVersion);
+        retVal += "\n\tPlatformVersion : 0x" + Integer.toHexString(mPlatformVersion);
+        retVal += ", SwVersion : "
+                + mChreApiMajorVersion + "." + mChreApiMinorVersion + "." + mChrePatchVersion;
+        retVal += ", CHRE platform ID: 0x" + Long.toHexString(mChrePlatformId);
+        retVal += "\n\tPeakMips : " + mPeakMips;
+        retVal += ", StoppedPowerDraw : " + mStoppedPowerDrawMw + " mW";
+        retVal += ", PeakPowerDraw : " + mPeakPowerDrawMw + " mW";
+        retVal += ", MaxPacketLength : " + mMaxPacketLengthBytes + " Bytes";
+        retVal += "\n\tSupported sensors : " + Arrays.toString(mSupportedSensors);
+        retVal += "\n\tMemory Regions : " + Arrays.toString(mMemoryRegions);
 
-      return retVal;
+        return retVal;
     }
 
     private ContextHubInfo(Parcel in) {
@@ -371,12 +444,15 @@ public class ContextHubInfo {
         mToolchain = in.readString();
         mPlatformVersion = in.readInt();
         mToolchainVersion = in.readInt();
-        mStaticSwVersion = in.readInt();
         mPeakMips = in.readFloat();
         mStoppedPowerDrawMw = in.readFloat();
         mSleepPowerDrawMw = in.readFloat();
         mPeakPowerDrawMw = in.readFloat();
         mMaxPacketLengthBytes = in.readInt();
+        mChrePlatformId = in.readLong();
+        mChreApiMajorVersion = in.readByte();
+        mChreApiMinorVersion = in.readByte();
+        mChrePatchVersion = (short) in.readInt();
 
         int numSupportedSensors = in.readInt();
         mSupportedSensors = new int[numSupportedSensors];
@@ -395,12 +471,15 @@ public class ContextHubInfo {
         out.writeString(mToolchain);
         out.writeInt(mPlatformVersion);
         out.writeInt(mToolchainVersion);
-        out.writeInt(mStaticSwVersion);
         out.writeFloat(mPeakMips);
         out.writeFloat(mStoppedPowerDrawMw);
         out.writeFloat(mSleepPowerDrawMw);
         out.writeFloat(mPeakPowerDrawMw);
         out.writeInt(mMaxPacketLengthBytes);
+        out.writeLong(mChrePlatformId);
+        out.writeByte(mChreApiMajorVersion);
+        out.writeByte(mChreApiMinorVersion);
+        out.writeInt(mChrePatchVersion);
 
         out.writeInt(mSupportedSensors.length);
         out.writeIntArray(mSupportedSensors);
