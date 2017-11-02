@@ -6,6 +6,9 @@ namespace stream_proto {
 
 using namespace std;
 
+// Indent
+const string INDENT = "    ";
+
 /**
  * Capitalizes the string, removes underscores and makes the next letter
  * capitalized, and makes the letter following numbers capitalized.
