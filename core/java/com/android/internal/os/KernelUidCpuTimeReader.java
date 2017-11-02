@@ -16,6 +16,7 @@
 package com.android.internal.os;
 
 import android.annotation.Nullable;
+import android.os.StrictMode;
 import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.Slog;
@@ -65,6 +66,7 @@ public class KernelUidCpuTimeReader {
      *                 a fresh delta.
      */
     public void readDelta(@Nullable Callback callback) {
+        final int oldMask = StrictMode.allowThreadDiskReadsMask();
         long nowUs = SystemClock.elapsedRealtime() * 1000;
         try (BufferedReader reader = new BufferedReader(new FileReader(sProcFile))) {
             TextUtils.SimpleStringSplitter splitter = new TextUtils.SimpleStringSplitter(' ');
@@ -121,6 +123,8 @@ public class KernelUidCpuTimeReader {
             }
         } catch (IOException e) {
             Slog.e(TAG, "Failed to read uid_cputime: " + e.getMessage());
+        } finally {
+            StrictMode.setThreadPolicyMask(oldMask);
         }
         mLastTimeReadUs = nowUs;
     }
@@ -160,12 +164,15 @@ public class KernelUidCpuTimeReader {
 
     private void removeUidsFromKernelModule(int startUid, int endUid) {
         Slog.d(TAG, "Removing uids " + startUid + "-" + endUid);
+        final int oldMask = StrictMode.allowThreadDiskWritesMask();
         try (FileWriter writer = new FileWriter(sRemoveUidProcFile)) {
             writer.write(startUid + "-" + endUid);
             writer.flush();
         } catch (IOException e) {
             Slog.e(TAG, "failed to remove uids " + startUid + " - " + endUid
                     + " from uid_cputime module", e);
+        } finally {
+            StrictMode.setThreadPolicyMask(oldMask);
         }
     }
 }

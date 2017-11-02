@@ -20,6 +20,7 @@ import static com.android.internal.util.Preconditions.checkNotNull;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.os.StrictMode;
 import android.os.SystemClock;
 import android.util.IntArray;
 import android.util.Slog;
@@ -82,6 +83,7 @@ public class KernelUidCpuFreqTimeReader {
         if (!mProcFileAvailable && mReadErrorCounter >= TOTAL_READ_ERROR_COUNT) {
             return null;
         }
+        final int oldMask = StrictMode.allowThreadDiskReadsMask();
         try (BufferedReader reader = new BufferedReader(new FileReader(UID_TIMES_PROC_FILE))) {
             mProcFileAvailable = true;
             return readFreqs(reader, powerProfile);
@@ -89,6 +91,8 @@ public class KernelUidCpuFreqTimeReader {
             mReadErrorCounter++;
             Slog.e(TAG, "Failed to read " + UID_TIMES_PROC_FILE + ": " + e);
             return null;
+        } finally {
+            StrictMode.setThreadPolicyMask(oldMask);
         }
     }
 
@@ -106,12 +110,15 @@ public class KernelUidCpuFreqTimeReader {
         if (!mProcFileAvailable) {
             return;
         }
+        final int oldMask = StrictMode.allowThreadDiskReadsMask();
         try (BufferedReader reader = new BufferedReader(new FileReader(UID_TIMES_PROC_FILE))) {
             mNowTimeMs = SystemClock.elapsedRealtime();
             readDelta(reader, callback);
             mLastTimeReadMs = mNowTimeMs;
         } catch (IOException e) {
             Slog.e(TAG, "Failed to read " + UID_TIMES_PROC_FILE + ": " + e);
+        } finally {
+            StrictMode.setThreadPolicyMask(oldMask);
         }
     }
 

@@ -5533,32 +5533,8 @@ public final class ActivityThread {
         View.mDebugViewAttributes =
                 mCoreSettings.getInt(Settings.Global.DEBUG_VIEW_ATTRIBUTES, 0) != 0;
 
-        /**
-         * For system applications on userdebug/eng builds, log stack
-         * traces of disk and network access to dropbox for analysis.
-         */
-        if ((data.appInfo.flags &
-             (ApplicationInfo.FLAG_SYSTEM |
-              ApplicationInfo.FLAG_UPDATED_SYSTEM_APP)) != 0) {
-            StrictMode.conditionallyEnableDebugLogging();
-        }
-
-        /**
-         * For apps targetting Honeycomb or later, we don't allow network usage
-         * on the main event loop / UI thread. This is what ultimately throws
-         * {@link NetworkOnMainThreadException}.
-         */
-        if (data.appInfo.targetSdkVersion >= Build.VERSION_CODES.HONEYCOMB) {
-            StrictMode.enableDeathOnNetwork();
-        }
-
-        /**
-         * For apps targetting N or later, we don't allow file:// Uri exposure.
-         * This is what ultimately throws {@link FileUriExposedException}.
-         */
-        if (data.appInfo.targetSdkVersion >= Build.VERSION_CODES.N) {
-            StrictMode.enableDeathOnFileUriExposure();
-        }
+        StrictMode.initThreadDefaults(data.appInfo);
+        StrictMode.initVmDefaults(data.appInfo);
 
         // We deprecated Build.SERIAL and only apps that target pre NMR1
         // SDK can see it. Since access to the serial is now behind a
@@ -5655,7 +5631,12 @@ public final class ActivityThread {
                 mResourcesManager.getConfiguration().getLocales());
 
         if (!Process.isIsolated()) {
-            setupGraphicsSupport(appContext);
+            final int oldMask = StrictMode.allowThreadDiskWritesMask();
+            try {
+                setupGraphicsSupport(appContext);
+            } finally {
+                StrictMode.setThreadPolicyMask(oldMask);
+            }
         }
 
         // If we use profiles, setup the dex reporter to notify package manager

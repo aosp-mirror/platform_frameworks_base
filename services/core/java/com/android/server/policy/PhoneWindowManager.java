@@ -183,6 +183,7 @@ import android.os.PowerManagerInternal;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.StrictMode;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UEventObserver;
@@ -5798,6 +5799,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     void initializeHdmiState() {
+        final int oldMask = StrictMode.allowThreadDiskReadsMask();
+        try {
+            initializeHdmiStateInternal();
+        } finally {
+            StrictMode.setThreadPolicyMask(oldMask);
+        }
+    }
+
+    void initializeHdmiStateInternal() {
         boolean plugged = false;
         // watch for HDMI plug messages if the hdmi switch exists
         if (new File("/sys/devices/virtual/switch/hdmi/state").exists()) {
