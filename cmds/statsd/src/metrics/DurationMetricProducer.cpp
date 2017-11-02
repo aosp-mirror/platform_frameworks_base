@@ -168,7 +168,7 @@ void DurationMetricProducer::flushIfNeeded(uint64_t eventTime) {
 void DurationMetricProducer::onMatchedLogEventInternal(
         const size_t matcherIndex, const HashableDimensionKey& eventKey,
         const map<string, HashableDimensionKey>& conditionKeys, bool condition,
-        const LogEvent& event) {
+        const LogEvent& event, bool scheduledPull) {
     flushIfNeeded(event.GetTimestampNs());
 
     if (matcherIndex == mStopAllIndex) {

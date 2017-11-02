@@ -48,7 +48,7 @@ public:
     virtual ~MetricProducer(){};
 
     // Consume the parsed stats log entry that already matched the "what" of the metric.
-    void onMatchedLogEvent(const size_t matcherIndex, const LogEvent& event);
+    void onMatchedLogEvent(const size_t matcherIndex, const LogEvent& event, bool scheduledPull);
 
     virtual void onConditionChanged(const bool condition, const uint64_t eventTime) = 0;
 
@@ -107,7 +107,7 @@ protected:
     virtual void onMatchedLogEventInternal(
             const size_t matcherIndex, const HashableDimensionKey& eventKey,
             const std::map<std::string, HashableDimensionKey>& conditionKey, bool condition,
-            const LogEvent& event) = 0;
+            const LogEvent& event, bool scheduledPull) = 0;
 };
 
 }  // namespace statsd

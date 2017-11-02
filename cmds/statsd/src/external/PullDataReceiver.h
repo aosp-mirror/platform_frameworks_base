@@ -13,25 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #pragma once
 
-#include <android/os/StatsLogEventWrapper.h>
 #include <utils/String16.h>
-#include <vector>
-
-using android::os::StatsLogEventWrapper;
-using std::vector;
+#include <unordered_map>
+#include <utils/RefBase.h>
+#include "StatsPuller.h"
+#include "logd/LogEvent.h"
 
 namespace android {
 namespace os {
 namespace statsd {
 
-class StatsPuller {
-public:
-    virtual ~StatsPuller(){};
-
-    virtual vector<StatsLogEventWrapper> Pull() = 0;
+class PullDataReceiver : virtual public RefBase{
+ public:
+  virtual ~PullDataReceiver() {}
+  virtual void onDataPulled(const std::vector<std::shared_ptr<LogEvent>>& data) = 0;
 };
 
 }  // namespace statsd

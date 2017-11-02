@@ -112,7 +112,7 @@ void EventMetricProducer::onConditionChanged(const bool conditionMet, const uint
 void EventMetricProducer::onMatchedLogEventInternal(
         const size_t matcherIndex, const HashableDimensionKey& eventKey,
         const std::map<std::string, HashableDimensionKey>& conditionKey, bool condition,
-        const LogEvent& event) {
+        const LogEvent& event, bool scheduledPull) {
 
     if (!condition) {
         return;

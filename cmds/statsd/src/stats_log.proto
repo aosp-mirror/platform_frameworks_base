@@ -143,9 +143,11 @@ message StatsLogReport {
   message ValueMetricDataWrapper {
     repeated ValueMetricData data = 1;
   }
+
   message GaugeMetricDataWrapper {
     repeated GaugeMetricData data = 1;
   }
+
   oneof data {
     EventMetricDataWrapper event_metrics = 4;
     CountMetricDataWrapper count_metrics = 5;
