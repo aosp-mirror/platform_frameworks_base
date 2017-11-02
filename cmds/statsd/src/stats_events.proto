@@ -71,6 +71,7 @@ message StatsEvent {
         PhoneSignalStrengthChanged phone_signal_strength_changed = 40;
         SettingChanged setting_changed = 41;
         KernelWakelockPulled kernel_wakelock_pulled = 42;
+        ActivityForegroundStateChanged activity_foreground_state_changed = 43;
         // TODO: Reorder the numbering so that the most frequent occur events occur in the first 15.
     }
 }
@@ -692,4 +693,21 @@ message KernelWakelockPulled {
     optional int32 version = 2;
     optional int64 total_time = 3;
     optional string name = 4;
+}
+
+/*
+ * Logs activity going to foreground or background
+ *
+ * Logged from:
+  *   frameworks/base/services/core/java/com/android/server/am/ActivityRecord.java
+ */
+message ActivityForegroundStateChanged {
+    enum Activity {
+        MOVE_TO_BACKGROUND = 0;
+        MOVE_TO_FOREGROUND = 1;
+    }
+    optional int32 uid = 1;
+    optional string pkg_name = 2;
+    optional string class_name = 3;
+    optional Activity activity = 4;
 }

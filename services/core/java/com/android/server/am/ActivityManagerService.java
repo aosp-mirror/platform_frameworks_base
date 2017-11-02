@@ -4043,10 +4043,14 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (DEBUG_SWITCH) Slog.d(TAG_SWITCH,
                 "updateUsageStats: comp=" + component + "res=" + resumed);
         final BatteryStatsImpl stats = mBatteryStatsService.getActiveStatistics();
+        StatsLog.write(StatsLog.ACTIVITY_FOREGROUND_STATE_CHANGED,
+            component.userId, component.realActivity.getPackageName(),
+            component.realActivity.getShortClassName(), resumed ? 1 : 0);
         if (resumed) {
             if (mUsageStatsService != null) {
                 mUsageStatsService.reportEvent(component.realActivity, component.userId,
                         UsageEvents.Event.MOVE_TO_FOREGROUND);
+
             }
             synchronized (stats) {
                 stats.noteActivityResumedLocked(component.app.uid);
