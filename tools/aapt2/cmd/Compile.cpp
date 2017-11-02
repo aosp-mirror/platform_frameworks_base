@@ -674,7 +674,7 @@ int Compile(const std::vector<StringPiece>& args, IDiagnostics* diagnostics) {
 
     // Determine how to compile the file based on its type.
     auto compile_func = &CompileFile;
-    if (path_data.resource_dir == "values") {
+    if (path_data.resource_dir == "values" && path_data.extension == "xml") {
       compile_func = &CompileTable;
       // We use a different extension (not necessary anymore, but avoids altering the existing
       // build system logic).
