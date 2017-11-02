@@ -23,6 +23,7 @@ import org.junit.runner.RunWith;
 import android.app.ActivityManager.TaskDescription;
 import android.content.res.Configuration;
 import android.graphics.Rect;
+import android.os.Debug;
 import android.platform.test.annotations.Presubmit;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
@@ -339,11 +340,8 @@ public class WindowFrameTests extends WindowTestsBase {
 
         w.computeFrameLw(pf, df, of, cf, vf, dcf, sf, null);
         w.calculatePolicyCrop(policyCrop);
-        // If we were above system decor we wouldnt' get any cropping though
-        w.mLayer = sWm.mSystemDecorLayer + 1;
-        w.calculatePolicyCrop(policyCrop);
-        assertRect(policyCrop, 0, 0, logicalWidth, logicalHeight);
-        w.mLayer = 1;
+        assertRect(policyCrop, 0, cf.top, logicalWidth, cf.bottom);
+
         dcf.setEmpty();
         // Likewise with no decor frame we would get no crop
         w.computeFrameLw(pf, df, of, cf, vf, dcf, sf, null);
