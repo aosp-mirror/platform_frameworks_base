@@ -102,8 +102,11 @@ static jint android_os_VintfObject_verify(JNIEnv* env, jclass, jobjectArray pack
         cPackageInfo[i] = cString;
         env->ReleaseStringUTFChars(element, cString);
     }
+    // If we can run this code, the device should already pass AVB.
+    // So, we don't need to check AVB here.
     std::string error;
-    int32_t status = VintfObject::CheckCompatibility(cPackageInfo, &error);
+    int32_t status = VintfObject::CheckCompatibility(
+        cPackageInfo, &error, ::android::vintf::DISABLE_AVB_CHECK);
     if (status)
         LOG(WARNING) << "VintfObject.verify() returns " << status << ": " << error;
     return status;
