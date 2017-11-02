@@ -166,6 +166,8 @@ public class VrManagerService extends SystemService implements EnabledComponentC
     private boolean mUserUnlocked;
     private Vr2dDisplay mVr2dDisplay;
     private boolean mBootsToVr;
+    private boolean mStandby;
+    private boolean mUseStandbyToExitVrMode;
 
     // Handles events from the managed services (e.g. VrListenerService and any bound VR compositor
     // service).
@@ -203,7 +205,10 @@ public class VrManagerService extends SystemService implements EnabledComponentC
      *
      */
     private void updateVrModeAllowedLocked() {
-        boolean allowed = mSystemSleepFlags == FLAG_ALL && mUserUnlocked;
+        boolean ignoreSleepFlags = mBootsToVr && mUseStandbyToExitVrMode;
+        boolean disallowedByStandby = mStandby && mUseStandbyToExitVrMode;
+        boolean allowed = (mSystemSleepFlags == FLAG_ALL || ignoreSleepFlags) && mUserUnlocked
+                && !disallowedByStandby;
         if (mVrModeAllowed != allowed) {
             mVrModeAllowed = allowed;
             if (DBG) Slog.d(TAG, "VR mode is " + ((allowed) ? "allowed" : "disallowed"));
@@ -269,6 +274,17 @@ public class VrManagerService extends SystemService implements EnabledComponentC
     private void setUserUnlocked() {
         synchronized(mLock) {
             mUserUnlocked = true;
+            updateVrModeAllowedLocked();
+        }
+    }
+
+    private void setStandbyEnabled(boolean standby) {
+        synchronized(mLock) {
+            if (!mBootsToVr) {
+                Slog.e(TAG, "Attempting to set standby mode on a non-standalone device");
+                return;
+            }
+            mStandby = standby;
             updateVrModeAllowedLocked();
         }
     }
@@ -587,6 +603,12 @@ public class VrManagerService extends SystemService implements EnabledComponentC
         }
 
         @Override
+        public void setStandbyEnabled(boolean standby) {
+            enforceCallerPermissionAnyOf(Manifest.permission.ACCESS_VR_MANAGER);
+            VrManagerService.this.setStandbyEnabled(standby);
+        }
+
+        @Override
         protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
             if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
 
@@ -733,6 +755,8 @@ public class VrManagerService extends SystemService implements EnabledComponentC
         }
 
         mBootsToVr = SystemProperties.getBoolean("ro.boot.vr", false);
+        mUseStandbyToExitVrMode = mBootsToVr
+                && SystemProperties.getBoolean("persist.vr.use_standby_to_exit_vr_mode", false);
         publishLocalService(VrManagerInternal.class, new LocalService());
         publishBinderService(Context.VR_SERVICE, mVrManager.asBinder());
     }
