@@ -31,15 +31,17 @@ import android.support.v7.preference.PreferenceViewHolder;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.SparseArray;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.android.settingslib.R;
 import com.android.settingslib.TronUtils;
+import com.android.settingslib.TwoTargetPreference;
 import com.android.settingslib.Utils;
 import com.android.settingslib.wifi.AccessPoint.Speed;
 
-public class AccessPointPreference extends Preference {
+public class AccessPointPreference extends TwoTargetPreference {
 
     private static final int[] STATE_SECURED = {
             R.attr.state_encrypted
@@ -126,7 +128,6 @@ public class AccessPointPreference extends Preference {
                           int iconResId, boolean forSavedNetworks, StateListDrawable frictionSld,
                           int level, IconInjector iconInjector) {
         super(context);
-        setWidgetLayoutResource(R.layout.access_point_friction_widget);
         mBadgeCache = cache;
         mAccessPoint = accessPoint;
         mForSavedNetworks = forSavedNetworks;
@@ -165,6 +166,20 @@ public class AccessPointPreference extends Preference {
 
         ImageView frictionImageView = (ImageView) view.findViewById(R.id.friction_icon);
         bindFrictionImage(frictionImageView);
+        setDividerVisibility(view, View.GONE);
+    }
+
+    protected void setDividerVisibility(final PreferenceViewHolder view,
+            @View.Visibility int visibility) {
+        final View divider = view.findViewById(R.id.two_target_divider);
+        if (divider != null) {
+            divider.setVisibility(visibility);
+        }
+    }
+
+    @Override
+    protected int getSecondTargetResId() {
+        return R.layout.access_point_friction_widget;
     }
 
     protected void updateIcon(int level, Context context) {
