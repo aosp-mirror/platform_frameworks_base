@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#define DEBUG true  // STOPSHIP if true
 #include "logd/LogEvent.h"
 
 #include <sstream>

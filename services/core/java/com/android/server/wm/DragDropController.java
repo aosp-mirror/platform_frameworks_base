@@ -185,7 +185,7 @@ class DragDropController {
                 surfaceControl.setLayerStack(display.getLayerStack());
                 surfaceControl.show();
             } finally {
-                mService.closeSurfaceTransaction();
+                mService.closeSurfaceTransaction("performDrag");
                 if (SHOW_LIGHT_TRANSACTIONS) Slog.i(
                         TAG_WM, "<<< CLOSE TRANSACTION performDrag");
             }

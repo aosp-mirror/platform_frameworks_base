@@ -161,7 +161,9 @@ import android.os.PowerManager;
 import android.os.PowerManagerInternal;
 import android.os.PowerSaveState;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
 import android.os.ServiceManager;
+import android.os.ShellCallback;
 import android.os.StrictMode;
 import android.os.SystemClock;
 import android.os.SystemProperties;
@@ -360,6 +362,8 @@ public class WindowManagerService extends IWindowManager.Stub
     private static final int WINDOW_ANIMATION_SCALE = 0;
     private static final int TRANSITION_ANIMATION_SCALE = 1;
     private static final int ANIMATION_DURATION_SCALE = 2;
+
+    final WindowTracing mWindowTracing;
 
     final private KeyguardDisableHandler mKeyguardDisableHandler;
     boolean mKeyguardGoingAway;
@@ -820,15 +824,20 @@ public class WindowManagerService extends IWindowManager.Stub
 
     /**
      * Closes a surface transaction.
+     * @param where debug string indicating where the transaction originated
      */
-    void closeSurfaceTransaction() {
+    void closeSurfaceTransaction(String where) {
         try {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "closeSurfaceTransaction");
             synchronized (mWindowMap) {
-                if (mRoot.mSurfaceTraceEnabled) {
-                    mRoot.mRemoteEventTrace.closeSurfaceTransaction();
+                try {
+                    traceStateLocked(where);
+                } finally {
+                    if (mRoot.mSurfaceTraceEnabled) {
+                        mRoot.mRemoteEventTrace.closeSurfaceTransaction();
+                    }
+                    SurfaceControl.closeTransaction();
                 }
-                SurfaceControl.closeTransaction();
             }
         } finally {
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
@@ -929,6 +938,12 @@ public class WindowManagerService extends IWindowManager.Stub
         }, 0);
     }
 
+    @Override
+    public void onShellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
+            String[] args, ShellCallback callback, ResultReceiver result) {
+        new WindowManagerShellCommand(this).exec(this, in, out, err, args, callback, result);
+    }
+
     private WindowManagerService(Context context, InputManagerService inputManager,
             boolean haveInputMethods, boolean showBootMsgs, boolean onlyCore,
             WindowManagerPolicy policy) {
@@ -958,6 +973,8 @@ public class WindowManagerService extends IWindowManager.Stub
         mWindowPlacerLocked = new WindowSurfacePlacer(this);
         mPolicy = policy;
         mTaskSnapshotController = new TaskSnapshotController(this);
+
+        mWindowTracing = WindowTracing.createDefaultAndStartLooper(context);
 
         LocalServices.addService(WindowManagerPolicy.class, mPolicy);
 
@@ -1068,7 +1085,7 @@ public class WindowManagerService extends IWindowManager.Stub
         try {
             createWatermarkInTransaction();
         } finally {
-            closeSurfaceTransaction();
+            closeSurfaceTransaction("createWatermarkInTransaction");
         }
 
         showEmulatorDisplayOverlayIfNeeded();
@@ -3572,7 +3589,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     mCircularDisplayMask = null;
                 }
             } finally {
-                closeSurfaceTransaction();
+                closeSurfaceTransaction("showCircularMask");
                 if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG_WM,
                         "<<< CLOSE TRANSACTION showCircularMask(visible=" + visible + ")");
             }
@@ -3597,7 +3614,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 mEmulatorDisplayOverlay.setVisibility(true);
             } finally {
-                closeSurfaceTransaction();
+                closeSurfaceTransaction("showEmulatorDisplayOverlay");
                 if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG_WM,
                         "<<< CLOSE TRANSACTION showEmulatorDisplayOverlay");
             }
@@ -6320,7 +6337,7 @@ public class WindowManagerService extends IWindowManager.Stub
      * @param proto     Stream to write the WindowContainer object to.
      * @param trim      If true, reduce the amount of data written.
      */
-    private void writeToProtoLocked(ProtoOutputStream proto, boolean trim) {
+    void writeToProtoLocked(ProtoOutputStream proto, boolean trim) {
         mPolicy.writeToProto(proto, POLICY);
         mRoot.writeToProto(proto, ROOT_WINDOW_CONTAINER, trim);
         if (mCurrentFocus != null) {
@@ -6337,6 +6354,17 @@ public class WindowManagerService extends IWindowManager.Stub
         proto.write(ROTATION, defaultDisplayContent.getRotation());
         proto.write(LAST_ORIENTATION, defaultDisplayContent.getLastOrientation());
         mAppTransition.writeToProto(proto, APP_TRANSITION);
+    }
+
+    void traceStateLocked(String where) {
+        Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "traceStateLocked");
+        try {
+            mWindowTracing.traceStateLocked(where, this);
+        } catch (Exception e) {
+            Log.wtf(TAG, "Exception while tracing state", e);
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
+        }
     }
 
     private void dumpWindowsLocked(PrintWriter pw, boolean dumpAll,

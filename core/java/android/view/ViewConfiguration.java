@@ -92,7 +92,7 @@ public class ViewConfiguration {
      * Defines the duration in milliseconds a user needs to hold down the
      * appropriate button to enable the accessibility shortcut once it's configured.
      */
-    private static final int A11Y_SHORTCUT_KEY_TIMEOUT_AFTER_CONFIRMATION = 1500;
+    private static final int A11Y_SHORTCUT_KEY_TIMEOUT_AFTER_CONFIRMATION = 1000;
 
     /**
      * Defines the duration in milliseconds we will wait to see if a touch event

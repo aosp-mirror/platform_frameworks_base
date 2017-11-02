@@ -156,4 +156,27 @@ public class HidlSupport {
         // Should not reach here.
         throw new UnsupportedOperationException();
     }
+
+    /**
+     * Test that two interfaces are equal. This is the Java equivalent to C++
+     * interfacesEqual function.
+     * This essentially calls .equals on the internal binder objects (via Binder()).
+     * - If both interfaces are proxies, asBinder() returns a {@link HwRemoteBinder}
+     *   object, and they are compared in {@link HwRemoteBinder#equals}.
+     * - If both interfaces are stubs, asBinder() returns the object itself. By default,
+     *   auto-generated IFoo.Stub does not override equals(), but an implementation can
+     *   optionally override it, and {@code interfacesEqual} will use it here.
+     */
+    public static boolean interfacesEqual(IHwInterface lft, Object rgt) {
+        if (lft == rgt) {
+            return true;
+        }
+        if (lft == null || rgt == null) {
+            return false;
+        }
+        if (!(rgt instanceof IHwInterface)) {
+            return false;
+        }
+        return Objects.equals(lft.asBinder(), ((IHwInterface) rgt).asBinder());
+    }
 }

@@ -2564,51 +2564,66 @@ public class ExifInterface {
                 });
             }
 
+            String hasImage = retriever.extractMetadata(
+                    MediaMetadataRetriever.METADATA_KEY_HAS_IMAGE);
             String hasVideo = retriever.extractMetadata(
                     MediaMetadataRetriever.METADATA_KEY_HAS_VIDEO);
 
-            final String METADATA_HAS_VIDEO_VALUE_YES = "yes";
-            if (METADATA_HAS_VIDEO_VALUE_YES.equals(hasVideo)) {
-                String width = retriever.extractMetadata(
+            String width = null;
+            String height = null;
+            String rotation = null;
+            final String METADATA_VALUE_YES = "yes";
+            // If the file has both image and video, prefer image info over video info.
+            // App querying ExifInterface is most likely using the bitmap path which
+            // picks the image first.
+            if (METADATA_VALUE_YES.equals(hasImage)) {
+                width = retriever.extractMetadata(
+                        MediaMetadataRetriever.METADATA_KEY_IMAGE_WIDTH);
+                height = retriever.extractMetadata(
+                        MediaMetadataRetriever.METADATA_KEY_IMAGE_HEIGHT);
+                rotation = retriever.extractMetadata(
+                        MediaMetadataRetriever.METADATA_KEY_IMAGE_ROTATION);
+            } else if (METADATA_VALUE_YES.equals(hasVideo)) {
+                width = retriever.extractMetadata(
                         MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH);
-                String height = retriever.extractMetadata(
+                height = retriever.extractMetadata(
                         MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT);
-
-                if (width != null) {
-                    mAttributes[IFD_TYPE_PRIMARY].put(TAG_IMAGE_WIDTH,
-                            ExifAttribute.createUShort(Integer.parseInt(width), mExifByteOrder));
-                }
-
-                if (height != null) {
-                    mAttributes[IFD_TYPE_PRIMARY].put(TAG_IMAGE_LENGTH,
-                            ExifAttribute.createUShort(Integer.parseInt(height), mExifByteOrder));
-                }
-
-                String rotation = retriever.extractMetadata(
+                rotation = retriever.extractMetadata(
                         MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION);
-                if (rotation != null) {
-                    int orientation = ExifInterface.ORIENTATION_NORMAL;
+            }
 
-                    // all rotation angles in CW
-                    switch (Integer.parseInt(rotation)) {
-                        case 90:
-                            orientation = ExifInterface.ORIENTATION_ROTATE_90;
-                            break;
-                        case 180:
-                            orientation = ExifInterface.ORIENTATION_ROTATE_180;
-                            break;
-                        case 270:
-                            orientation = ExifInterface.ORIENTATION_ROTATE_270;
-                            break;
-                    }
+            if (width != null) {
+                mAttributes[IFD_TYPE_PRIMARY].put(TAG_IMAGE_WIDTH,
+                        ExifAttribute.createUShort(Integer.parseInt(width), mExifByteOrder));
+            }
 
-                    mAttributes[IFD_TYPE_PRIMARY].put(TAG_ORIENTATION,
-                            ExifAttribute.createUShort(orientation, mExifByteOrder));
+            if (height != null) {
+                mAttributes[IFD_TYPE_PRIMARY].put(TAG_IMAGE_LENGTH,
+                        ExifAttribute.createUShort(Integer.parseInt(height), mExifByteOrder));
+            }
+
+            if (rotation != null) {
+                int orientation = ExifInterface.ORIENTATION_NORMAL;
+
+                // all rotation angles in CW
+                switch (Integer.parseInt(rotation)) {
+                    case 90:
+                        orientation = ExifInterface.ORIENTATION_ROTATE_90;
+                        break;
+                    case 180:
+                        orientation = ExifInterface.ORIENTATION_ROTATE_180;
+                        break;
+                    case 270:
+                        orientation = ExifInterface.ORIENTATION_ROTATE_270;
+                        break;
                 }
 
-                if (DEBUG) {
-                    Log.d(TAG, "Heif meta: " + width + "x" + height + ", rotation " + rotation);
-                }
+                mAttributes[IFD_TYPE_PRIMARY].put(TAG_ORIENTATION,
+                        ExifAttribute.createUShort(orientation, mExifByteOrder));
+            }
+
+            if (DEBUG) {
+                Log.d(TAG, "Heif meta: " + width + "x" + height + ", rotation " + rotation);
             }
         } finally {
             retriever.release();

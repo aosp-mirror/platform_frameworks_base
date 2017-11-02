@@ -16,7 +16,9 @@
 
 #define LOG_TAG "incident_helper"
 
-#include "IncidentHelper.h"
+#include "parsers/KernelWakesParser.h"
+#include "parsers/PageTypeInfoParser.h"
+#include "parsers/ProcrankParser.h"
 
 #include <android-base/file.h>
 #include <getopt.h>

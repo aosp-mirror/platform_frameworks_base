@@ -1083,7 +1083,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             mService.mDisplayManagerInternal.performTraversalInTransactionFromWindowManager();
         } finally {
             if (!inTransaction) {
-                mService.closeSurfaceTransaction();
+                mService.closeSurfaceTransaction("setRotationUnchecked");
                 if (SHOW_LIGHT_TRANSACTIONS) {
                     Slog.i(TAG_WM, "<<< CLOSE TRANSACTION setRotationUnchecked");
                 }

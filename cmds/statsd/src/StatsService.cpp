@@ -65,7 +65,6 @@ void CompanionDeathRecipient::binderDied(const wp<IBinder>& who) {
 StatsService::StatsService(const sp<Looper>& handlerLooper)
     : mAnomalyMonitor(new AnomalyMonitor(2))  // TODO: Put this comment somewhere better
 {
-    mStatsPullerManager = new StatsPullerManager();
     mUidMap = new UidMap();
     mConfigManager = new ConfigManager();
     mProcessor = new StatsLogProcessor(mUidMap, [this](const vector<uint8_t>& log) {
@@ -231,6 +230,14 @@ void StatsService::print_cmd_help(FILE* out) {
     fprintf(out, "                parameter on eng builds.  If UID is omitted the calling\n");
     fprintf(out, "                uid is used.\n");
     fprintf(out, "  NAME          The per-uid name to use\n");
+    fprintf(out, "\n");
+    fprintf(out, "\n");
+    fprintf(out, "usage: adb shell cmd stats dump-report [UID] NAME\n");
+    fprintf(out, "  Dump all metric data for a configuration.\n");
+    fprintf(out, "  UID           The uid of the configuration. It is only possible to pass\n");
+    fprintf(out, "                the UID parameter on eng builds. If UID is omitted the\n");
+    fprintf(out, "                calling uid is used.\n");
+    fprintf(out, "  NAME          The name of the configuration\n");
 }
 
 status_t StatsService::cmd_config(FILE* in, FILE* out, FILE* err, Vector<String8>& args) {
@@ -312,7 +319,7 @@ status_t StatsService::cmd_dump_report(FILE* out, FILE* err, const Vector<String
             // Automatically pick the UID
             uid = IPCThreadState::self()->getCallingUid();
             // TODO: What if this isn't a binder call? Should we fail?
-            name.assign(args[2].c_str(), args[2].size());
+            name.assign(args[1].c_str(), args[1].size());
             good = true;
         } else if (argCount == 3) {
             // If it's a userdebug or eng build, then the shell user can
@@ -366,7 +373,7 @@ status_t StatsService::cmd_print_uid_map(FILE* out) {
 
 status_t StatsService::cmd_print_pulled_metrics(FILE* out, const Vector<String8>& args) {
     int s = atoi(args[1].c_str());
-    auto stats = mStatsPullerManager->Pull(s);
+    auto stats = m_stats_puller_manager.Pull(s, time(nullptr));
     for (const auto& it : stats) {
         fprintf(out, "Pull from %d: %s\n", s, it->ToString().c_str());
     }
@@ -433,8 +440,9 @@ Status StatsService::informPollAlarmFired() {
                                          "Only system uid can call informPollAlarmFired");
     }
 
+    m_stats_puller_manager.OnAlarmFired();
+
     if (DEBUG) ALOGD("StatsService::informPollAlarmFired succeeded");
-    // TODO: determine what services to poll and poll (or ask StatsCompanionService to poll) them.
 
     return Status::ok();
 }

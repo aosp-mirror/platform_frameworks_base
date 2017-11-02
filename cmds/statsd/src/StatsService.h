@@ -27,7 +27,6 @@
 #include <android/os/IStatsCallbacks.h>
 #include <android/os/IStatsCompanionService.h>
 #include <binder/IResultReceiver.h>
-#include <binder/IShellCallback.h>
 #include <utils/Looper.h>
 
 #include <deque>
@@ -158,7 +157,7 @@ private:
     /**
      * Fetches external metrics.
      */
-    sp<StatsPullerManager> mStatsPullerManager;
+    StatsPullerManager& m_stats_puller_manager = StatsPullerManager::GetInstance();
 
     /**
      * Tracks the configurations that have been passed to statsd.

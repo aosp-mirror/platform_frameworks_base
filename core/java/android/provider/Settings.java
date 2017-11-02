@@ -72,6 +72,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.MemoryIntArray;
+import android.util.StatsLog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.ArrayUtils;
@@ -1886,7 +1887,11 @@ public final class Settings {
                     arg.putBoolean(CALL_METHOD_MAKE_DEFAULT_KEY, true);
                 }
                 IContentProvider cp = mProviderHolder.getProvider(cr);
+                String prevValue = getStringForUser(cr, name, userHandle);
                 cp.call(cr.getPackageName(), mCallSetCommand, name, arg);
+                String newValue = getStringForUser(cr, name, userHandle);
+                StatsLog.write(StatsLog.SETTING_CHANGED, name, value, newValue, prevValue, tag,
+                        makeDefault ? 1 : 0, userHandle);
             } catch (RemoteException e) {
                 Log.w(TAG, "Can't set key " + name + " in " + mUri, e);
                 return false;

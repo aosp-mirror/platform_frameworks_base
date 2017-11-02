@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
+#define DEBUG true
 #include "Log.h"
 
 #include <android/os/IStatsCompanionService.h>
 #include <binder/IPCThreadState.h>
 #include <private/android_filesystem_config.h>
+#include "KernelWakelockPuller.h"
 #include "StatsService.h"
-#include "external/KernelWakelockPuller.h"
-#include "external/StatsPuller.h"
 
 using namespace android;
 using namespace android::base;
@@ -37,7 +37,7 @@ const int KernelWakelockPuller::PULL_CODE_KERNEL_WAKELOCKS = 20;
 
 // The reading and parsing are implemented in Java. It is not difficult to port over. But for now
 // let StatsCompanionService handle that and send the data back.
-vector<StatsLogEventWrapper> KernelWakelockPuller::pull() {
+vector<StatsLogEventWrapper> KernelWakelockPuller::Pull() {
     sp<IStatsCompanionService> statsCompanion = StatsService::getStatsCompanionService();
     vector<StatsLogEventWrapper> returned_value;
     if (statsCompanion != NULL) {

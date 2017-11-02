@@ -20,7 +20,6 @@
 #include "EventMetricProducer.h"
 #include "stats_util.h"
 
-#include <cutils/log.h>
 #include <limits.h>
 #include <stdlib.h>
 
@@ -78,7 +77,7 @@ void EventMetricProducer::startNewProtoOutputStream(long long startTime) {
 void EventMetricProducer::finish() {
 }
 
-void EventMetricProducer::onSlicedConditionMayChange() {
+void EventMetricProducer::onSlicedConditionMayChange(const uint64_t eventTime) {
 }
 
 StatsLogReport EventMetricProducer::onDumpReport() {
@@ -105,7 +104,7 @@ StatsLogReport EventMetricProducer::onDumpReport() {
     return StatsLogReport();
 }
 
-void EventMetricProducer::onConditionChanged(const bool conditionMet) {
+void EventMetricProducer::onConditionChanged(const bool conditionMet, const uint64_t eventTime) {
     VLOG("Metric %lld onConditionChanged", mMetric.metric_id());
     mCondition = conditionMet;
 }
@@ -113,7 +112,7 @@ void EventMetricProducer::onConditionChanged(const bool conditionMet) {
 void EventMetricProducer::onMatchedLogEventInternal(
         const size_t matcherIndex, const HashableDimensionKey& eventKey,
         const std::map<std::string, HashableDimensionKey>& conditionKey, bool condition,
-        const LogEvent& event) {
+        const LogEvent& event, bool scheduledPull) {
 
     if (!condition) {
         return;

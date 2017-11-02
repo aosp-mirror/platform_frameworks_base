@@ -41,20 +41,22 @@ public:
 
     void onMatchedLogEventInternal(const size_t matcherIndex, const HashableDimensionKey& eventKey,
                                    const std::map<std::string, HashableDimensionKey>& conditionKey,
-                                   bool condition, const LogEvent& event) override;
+                                   bool condition, const LogEvent& event, bool scheduledPull) override;
 
-    void onConditionChanged(const bool conditionMet) override;
+    void onConditionChanged(const bool conditionMet, const uint64_t eventTime) override;
 
     void finish() override;
 
     StatsLogReport onDumpReport() override;
 
-    void onSlicedConditionMayChange() override;
+    void onSlicedConditionMayChange(const uint64_t eventTime) override;
 
     size_t byteSize() override;
 
     // TODO: Implement this later.
     virtual void notifyAppUpgrade(const string& apk, const int uid, const int version) override{};
+    // TODO: Implement this later.
+    virtual void notifyAppRemoved(const string& apk, const int uid) override{};
 
 private:
     const EventMetric mMetric;

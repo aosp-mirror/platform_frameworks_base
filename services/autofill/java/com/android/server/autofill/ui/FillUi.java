@@ -49,6 +49,8 @@ import android.widget.RemoteViews;
 
 import com.android.internal.R;
 import com.android.server.UiThread;
+import com.android.server.autofill.Helper;
+
 import libcore.util.Objects;
 
 import java.io.PrintWriter;
@@ -466,7 +468,8 @@ final class FillUi {
         pw.print(prefix); pw.print("mCallback: "); pw.println(mCallback != null);
         pw.print(prefix); pw.print("mListView: "); pw.println(mListView);
         pw.print(prefix); pw.print("mAdapter: "); pw.println(mAdapter != null);
-        pw.print(prefix); pw.print("mFilterText: "); pw.println(mFilterText);
+        pw.print(prefix); pw.print("mFilterText: ");
+        Helper.printlnRedactedText(pw, mFilterText);
         pw.print(prefix); pw.print("mContentWidth: "); pw.println(mContentWidth);
         pw.print(prefix); pw.print("mContentHeight: "); pw.println(mContentHeight);
         pw.print(prefix); pw.print("mDestroyed: "); pw.println(mDestroyed);

@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-#ifndef STATSD_STATSPULLER_H
-#define STATSD_STATSPULLER_H
+#pragma once
 
 #include <android/os/StatsLogEventWrapper.h>
 #include <utils/String16.h>
@@ -32,11 +31,9 @@ class StatsPuller {
 public:
     virtual ~StatsPuller(){};
 
-    virtual vector<StatsLogEventWrapper> pull() = 0;
+    virtual vector<StatsLogEventWrapper> Pull() = 0;
 };
 
 }  // namespace statsd
 }  // namespace os
 }  // namespace android
-
-#endif  // STATSD_STATSPULLER_H

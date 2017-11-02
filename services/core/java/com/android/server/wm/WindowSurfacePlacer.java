@@ -429,7 +429,7 @@ class WindowSurfacePlacer {
             try {
                 mService.mAnimator.orAnimating(appAnimator.showAllWindowsLocked());
             } finally {
-                mService.closeSurfaceTransaction();
+                mService.closeSurfaceTransaction("handleAppTransitionReadyLocked");
                 if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
                         "<<< CLOSE TRANSACTION handleAppTransitionReadyLocked()");
             }

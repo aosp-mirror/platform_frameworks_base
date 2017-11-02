@@ -21,6 +21,7 @@
 #include <vector>
 
 #include "../condition/ConditionTracker.h"
+#include "../external/StatsPullerManager.h"
 #include "../matchers/LogMatchingTracker.h"
 
 namespace android {
@@ -75,6 +76,7 @@ bool initMetrics(
         const StatsdConfig& config, const std::unordered_map<std::string, int>& logTrackerMap,
         const std::unordered_map<std::string, int>& conditionTrackerMap,
         const std::unordered_map<int, std::vector<EventConditionLink>>& eventConditionLinks,
+        const vector<sp<LogMatchingTracker>>& allLogEntryMatchers,
         vector<sp<ConditionTracker>>& allConditionTrackers,
         std::vector<sp<MetricProducer>>& allMetricProducers,
         std::unordered_map<int, std::vector<int>>& conditionToMetricMap,

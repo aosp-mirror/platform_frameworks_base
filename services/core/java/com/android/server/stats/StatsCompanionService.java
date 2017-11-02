@@ -65,7 +65,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     private static final Object sStatsdLock = new Object();
 
     private final PendingIntent mAnomalyAlarmIntent;
-    private final PendingIntent mPollingAlarmIntent;
+    private final PendingIntent mPullingAlarmIntent;
     private final BroadcastReceiver mAppUpdateReceiver;
     private final BroadcastReceiver mUserUpdateReceiver;
 
@@ -76,8 +76,8 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
 
         mAnomalyAlarmIntent = PendingIntent.getBroadcast(mContext, 0,
                 new Intent(mContext, AnomalyAlarmReceiver.class), 0);
-        mPollingAlarmIntent = PendingIntent.getBroadcast(mContext, 0,
-                new Intent(mContext, PollingAlarmReceiver.class), 0);
+        mPullingAlarmIntent = PendingIntent.getBroadcast(
+            mContext, 0, new Intent(mContext, PullingAlarmReceiver.class), 0);
         mAppUpdateReceiver = new AppUpdateReceiver();
         mUserUpdateReceiver = new BroadcastReceiver() {
             @Override
@@ -144,15 +144,16 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     public final static class AppUpdateReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Slog.i(TAG, "StatsCompanionService noticed an app was updated.");
             /**
              * App updates actually consist of REMOVE, ADD, and then REPLACE broadcasts. To avoid
              * waste, we ignore the REMOVE and ADD broadcasts that contain the replacing flag.
+             * If we can't find the value for EXTRA_REPLACING, we default to false.
              */
-            if (!intent.getAction().equals(Intent.ACTION_PACKAGE_REPLACED) &&
-                    intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
+            if (!intent.getAction().equals(Intent.ACTION_PACKAGE_REPLACED)
+                    && intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
                 return; // Keep only replacing or normal add and remove.
             }
+            Slog.i(TAG, "StatsCompanionService noticed an app was updated.");
             synchronized (sStatsdLock) {
                 if (sStatsd == null) {
                     Slog.w(TAG, "Could not access statsd to inform it of anomaly alarm firing");
@@ -205,24 +206,25 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
     }
 
-    public final static class PollingAlarmReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (DEBUG) Slog.d(TAG, "Time to poll something.");
-            synchronized (sStatsdLock) {
-                if (sStatsd == null) {
-                    Slog.w(TAG, "Could not access statsd to inform it of polling alarm firing");
-                    return;
-                }
-                try {
-                    // Two-way call to statsd to retain AlarmManager wakelock
-                    sStatsd.informPollAlarmFired();
-                } catch (RemoteException e) {
-                    Slog.w(TAG, "Failed to inform statsd of polling alarm firing", e);
-                }
-            }
-            // AlarmManager releases its own wakelock here.
+    public final static class PullingAlarmReceiver extends BroadcastReceiver {
+      @Override
+      public void onReceive(Context context, Intent intent) {
+        if (DEBUG)
+          Slog.d(TAG, "Time to poll something.");
+        synchronized (sStatsdLock) {
+          if (sStatsd == null) {
+            Slog.w(TAG, "Could not access statsd to inform it of pulling alarm firing");
+            return;
+          }
+          try {
+            // Two-way call to statsd to retain AlarmManager wakelock
+            sStatsd.informPollAlarmFired();
+          } catch (RemoteException e) {
+            Slog.w(TAG, "Failed to inform statsd of pulling alarm firing", e);
+          }
         }
+        // AlarmManager releases its own wakelock here.
+      }
     }
 
     @Override // Binder call
@@ -253,32 +255,32 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     }
 
     @Override // Binder call
-    public void setPollingAlarms(long timestampMs, long intervalMs) {
-        enforceCallingPermission();
-        if (DEBUG) Slog.d(TAG, "Setting polling alarm for " + timestampMs
-                + " every " + intervalMs + "ms");
-        final long callingToken = Binder.clearCallingIdentity();
-        try {
-            // using RTC, not RTC_WAKEUP, so if device is asleep, will only fire when it awakens.
-            // This alarm is inexact, leaving its exactness completely up to the OS optimizations.
-            // TODO: totally inexact means that stats per bucket could be quite off. Is this okay?
-            mAlarmManager.setRepeating(AlarmManager.RTC, timestampMs, intervalMs,
-                    mPollingAlarmIntent);
-        } finally {
-            Binder.restoreCallingIdentity(callingToken);
-        }
+    public void setPullingAlarms(long timestampMs, long intervalMs) {
+      enforceCallingPermission();
+      if (DEBUG)
+        Slog.d(TAG, "Setting pulling alarm for " + timestampMs + " every " + intervalMs + "ms");
+      final long callingToken = Binder.clearCallingIdentity();
+      try {
+        // using RTC, not RTC_WAKEUP, so if device is asleep, will only fire when it awakens.
+        // This alarm is inexact, leaving its exactness completely up to the OS optimizations.
+        // TODO: totally inexact means that stats per bucket could be quite off. Is this okay?
+        mAlarmManager.setRepeating(AlarmManager.RTC, timestampMs, intervalMs, mPullingAlarmIntent);
+      } finally {
+        Binder.restoreCallingIdentity(callingToken);
+      }
     }
 
     @Override // Binder call
-    public void cancelPollingAlarms() {
-        enforceCallingPermission();
-        if (DEBUG) Slog.d(TAG, "Cancelling polling alarm");
-        final long callingToken = Binder.clearCallingIdentity();
-        try {
-            mAlarmManager.cancel(mPollingAlarmIntent);
-        } finally {
-            Binder.restoreCallingIdentity(callingToken);
-        }
+    public void cancelPullingAlarms() {
+      enforceCallingPermission();
+      if (DEBUG)
+        Slog.d(TAG, "Cancelling pulling alarm");
+      final long callingToken = Binder.clearCallingIdentity();
+      try {
+        mAlarmManager.cancel(mPullingAlarmIntent);
+      } finally {
+        Binder.restoreCallingIdentity(callingToken);
+      }
     }
 
     // These values must be kept in sync with cmd/statsd/StatsPullerManager.h.
@@ -303,7 +305,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                 for (Map.Entry<String, KernelWakelockStats.Entry> ent : wakelockStats.entrySet()) {
                     String name = ent.getKey();
                     KernelWakelockStats.Entry kws = ent.getValue();
-                    StatsLogEventWrapper e = new StatsLogEventWrapper(101, 4);
+                    StatsLogEventWrapper e = new StatsLogEventWrapper(41, 4);
                     e.writeInt(kws.mCount);
                     e.writeInt(kws.mVersion);
                     e.writeLong(kws.mTotalTime);
@@ -440,7 +442,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             mContext.unregisterReceiver(mAppUpdateReceiver);
             mContext.unregisterReceiver(mUserUpdateReceiver);
             cancelAnomalyAlarm();
-            cancelPollingAlarms();
+            cancelPullingAlarms();
         }
     }
 

@@ -233,7 +233,7 @@ public class WindowAnimator {
             } catch (RuntimeException e) {
                 Slog.wtf(TAG, "Unhandled exception in Window Manager", e);
             } finally {
-                mService.closeSurfaceTransaction();
+                mService.closeSurfaceTransaction("WindowAnimator");
                 if (SHOW_TRANSACTIONS) Slog.i(TAG, "<<< CLOSE TRANSACTION animate");
             }
 

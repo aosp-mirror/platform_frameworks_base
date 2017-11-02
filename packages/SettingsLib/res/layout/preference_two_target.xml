@@ -33,19 +33,17 @@
         android:background="?android:attr/selectableItemBackground"
         android:gravity="start|center_vertical"
         android:clipToPadding="false"
-        android:layout_marginStart="4dp"
         android:paddingStart="?android:attr/listPreferredItemPaddingStart"
         android:paddingEnd="?android:attr/listPreferredItemPaddingEnd">
 
         <LinearLayout
             android:id="@+id/icon_frame"
-            style="@style/preference_icon_frame"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="start|center_vertical"
+            android:minWidth="56dp"
             android:orientation="horizontal"
             android:clipToPadding="false"
-            android:paddingEnd="12dp"
             android:paddingTop="4dp"
             android:paddingBottom="4dp">
             <android.support.v7.internal.widget.PreferenceImageView

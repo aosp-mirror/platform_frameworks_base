@@ -21,6 +21,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Answers.RETURNS_DEEP_STUBS;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -119,6 +120,18 @@ public class EnableAdbPreferenceControllerTest {
     }
 
     @Test
+    public void handlePreferenceTreeClick_isMonkeyUser_shouldBeFalse() {
+        mController = spy(mController);
+        doReturn(true).when(mController).isUserAMonkey();
+        when(mUserManager.isAdminUser()).thenReturn(true);
+        mController.displayPreference(mScreen);
+
+        final boolean handled = mController.handlePreferenceTreeClick(mPreference);
+
+        assertThat(handled).isFalse();
+    }
+
+    @Test
     public void updateState_settingsOn_shouldCheck() {
         when(mUserManager.isAdminUser()).thenReturn(true);
         Settings.Secure.putInt(mContext.getContentResolver(),
@@ -161,6 +174,7 @@ public class EnableAdbPreferenceControllerTest {
         }
 
         @Override
-        public void dismissConfirmationDialog() {}
+        public void dismissConfirmationDialog() {
+        }
     }
 }

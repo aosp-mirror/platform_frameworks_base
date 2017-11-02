@@ -285,6 +285,7 @@ public final class SQLiteDatabase extends SQLiteClosable {
             }
         }
         mConfigurationLocked.idleConnectionTimeoutMs = effectiveTimeoutMs;
+        mConfigurationLocked.useCompatibilityWal = SQLiteGlobal.isCompatibilityWalSupported();
     }
 
     @Override
@@ -2070,15 +2071,21 @@ public final class SQLiteDatabase extends SQLiteClosable {
         synchronized (mLock) {
             throwIfNotOpenLocked();
 
-            if ((mConfigurationLocked.openFlags & ENABLE_WRITE_AHEAD_LOGGING) == 0) {
+            final boolean oldUseCompatibilityWal = mConfigurationLocked.useCompatibilityWal;
+            final int oldFlags = mConfigurationLocked.openFlags;
+            if (!oldUseCompatibilityWal && (oldFlags & ENABLE_WRITE_AHEAD_LOGGING) == 0) {
                 return;
             }
 
             mConfigurationLocked.openFlags &= ~ENABLE_WRITE_AHEAD_LOGGING;
+            // If an app explicitly disables WAL, do not even use compatibility mode
+            mConfigurationLocked.useCompatibilityWal = false;
+
             try {
                 mConnectionPoolLocked.reconfigure(mConfigurationLocked);
             } catch (RuntimeException ex) {
-                mConfigurationLocked.openFlags |= ENABLE_WRITE_AHEAD_LOGGING;
+                mConfigurationLocked.openFlags = oldFlags;
+                mConfigurationLocked.useCompatibilityWal = oldUseCompatibilityWal;
                 throw ex;
             }
         }
