@@ -437,7 +437,7 @@ public class PackageDexOptimizer {
             }
 
             if (useInfo.isUsedByOtherApps(path)) {
-                pw.println("used be other apps: " + useInfo.getLoadingPackages(path));
+                pw.println("used by other apps: " + useInfo.getLoadingPackages(path));
             }
 
             Map<String, PackageDexUsage.DexUseInfo> dexUseInfoMap = useInfo.getDexUseInfoMap();
@@ -453,7 +453,7 @@ public class PackageDexOptimizer {
                     // TODO(calin): get the status of the oat file (needs installd call)
                     pw.println("class loader context: " + dexUseInfo.getClassLoaderContext());
                     if (dexUseInfo.isUsedByOtherApps()) {
-                        pw.println("used be other apps: " + dexUseInfo.getLoadingPackages());
+                        pw.println("used by other apps: " + dexUseInfo.getLoadingPackages());
                     }
                     pw.decreaseIndent();
                 }
@@ -477,8 +477,9 @@ public class PackageDexOptimizer {
         }
 
         if (isProfileGuidedCompilerFilter(targetCompilerFilter) && isUsedByOtherApps) {
-            // If the dex files is used by other apps, we cannot use profile-guided compilation.
-            return getNonProfileGuidedCompilerFilter(targetCompilerFilter);
+            // If the dex files is used by other apps, apply the shared filter.
+            return PackageManagerServiceCompilerMapping.getCompilerFilterForReason(
+                    PackageManagerService.REASON_SHARED);
         }
 
         return targetCompilerFilter;
