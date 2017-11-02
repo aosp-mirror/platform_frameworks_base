@@ -47,8 +47,10 @@ class RunningTasks {
     void getTasks(int maxNum, List<RunningTaskInfo> list, @ActivityType int ignoreActivityType,
             @WindowingMode int ignoreWindowingMode, SparseArray<ActivityDisplay> activityDisplays,
             int callingUid, boolean allowed) {
-        // For each stack on each display, add the tasks into the sorted set and then pull the first
-        // {@param maxNum} from the set
+        // Return early if there are no tasks to fetch
+        if (maxNum <= 0) {
+            return;
+        }
 
         // Gather all of the tasks across all of the tasks, and add them to the sorted set
         mTmpSortedSet.clear();
