@@ -523,7 +523,7 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
         final DividerSnapAlgorithm algorithm = new DividerSnapAlgorithm(
                 mService.mContext.getResources(), displayWidth, displayHeight,
                 dividerSize, orientation == Configuration.ORIENTATION_PORTRAIT, outBounds,
-                isMinimizedDockAndHomeStackResizable());
+                getDockSide(), isMinimizedDockAndHomeStackResizable());
         final SnapTarget target = algorithm.calculateNonDismissingSnapTarget(dividerPosition);
 
         // Recalculate the bounds based on the position of the target.

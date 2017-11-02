@@ -439,7 +439,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         if (mMinimizedSnapAlgorithm == null) {
             mMinimizedSnapAlgorithm = new DividerSnapAlgorithm(getContext().getResources(),
                     mDisplayWidth, mDisplayHeight, mDividerSize, isHorizontalDivision(),
-                    mStableInsets, mDockedStackMinimized && mHomeStackResizable);
+                    mStableInsets, mDockSide, mDockedStackMinimized && mHomeStackResizable);
         }
     }
 
