@@ -984,6 +984,8 @@
         <attr name="dialogTitleDecorLayout" format="reference" />
         <!-- Preferred padding for dialog content. -->
         <attr name="dialogPreferredPadding" format="dimension" />
+        <!-- Corner radius of dialogs. -->
+        <attr name="dialogCornerRadius" format="dimension" />
 
         <!-- Theme to use for alert dialogs spawned from this theme. -->
         <attr name="alertDialogTheme" format="reference" />
