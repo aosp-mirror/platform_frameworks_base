@@ -3639,6 +3639,7 @@ public class BatteryStatsImpl extends BatteryStats {
 
     public void addIsolatedUidLocked(int isolatedUid, int appUid) {
         mIsolatedUids.put(isolatedUid, appUid);
+        StatsLog.write(StatsLog.ISOLATED_UID_CHANGED, appUid, isolatedUid, 1);
     }
 
     /**
@@ -3659,9 +3660,11 @@ public class BatteryStatsImpl extends BatteryStats {
      * @see #scheduleRemoveIsolatedUidLocked(int, int)
      */
     public void removeIsolatedUidLocked(int isolatedUid) {
-        mIsolatedUids.delete(isolatedUid);
-        mKernelUidCpuTimeReader.removeUid(isolatedUid);
-        mKernelUidCpuFreqTimeReader.removeUid(isolatedUid);
+      StatsLog.write(
+          StatsLog.ISOLATED_UID_CHANGED, mIsolatedUids.get(isolatedUid, -1), isolatedUid, 0);
+      mIsolatedUids.delete(isolatedUid);
+      mKernelUidCpuTimeReader.removeUid(isolatedUid);
+      mKernelUidCpuFreqTimeReader.removeUid(isolatedUid);
     }
 
     public int mapUid(int uid) {

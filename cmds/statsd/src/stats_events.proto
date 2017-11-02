@@ -72,7 +72,7 @@ message StatsEvent {
         PhoneSignalStrengthChanged phone_signal_strength_changed = 40;
         SettingChanged setting_changed = 41;
         ActivityForegroundStateChanged activity_foreground_state_changed = 42;
-
+        IsolatedUidChanged isolated_uid_changed = 43;
         // TODO: Reorder the numbering so that the most frequent occur events occur in the first 15.
     }
 
@@ -695,7 +695,6 @@ message SettingChanged {
     optional int32 user = 7;
 }
 
-
 /*
  * Logs activity going to foreground or background
  *
@@ -847,4 +846,23 @@ message PowerStateSubsystemSleepStatePulled {
     optional uint64 total_transitions = 4;
     optional uint64 last_entry_timestamp_ms = 5;
     optional bool supported_only_in_suspend = 6;
+}
+
+/**
+ * Logs creation or removal of an isolated uid. Isolated uid's are temporary uid's to sandbox risky
+ * behavior in its own uid. However, the metrics of these isolated uid's almost always should be
+ * attributed back to the parent (host) uid. One example is Chrome.
+ *
+ * Logged from:
+ *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+message IsolatedUidChanged {
+    // The host UID. Generally, we should attribute metrics from the isolated uid to the host uid.
+    optional int32 parent_uid = 1;
+
+    optional int32 isolated_uid = 2;
+
+    // 1 denotes we're creating an isolated uid and 0 denotes removal. We expect an isolated uid to
+    // be removed before if it's used for another parent uid.
+    optional int32 is_create = 3;
 }
