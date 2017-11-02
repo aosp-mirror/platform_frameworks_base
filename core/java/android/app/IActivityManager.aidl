@@ -232,7 +232,7 @@ interface IActivityManager {
             boolean requireFull, in String name, in String callerPackage);
     void addPackageDependency(in String packageName);
     void killApplication(in String pkg, int appId, int userId, in String reason);
-    oneway void closeSystemDialogs(in String reason);
+    void closeSystemDialogs(in String reason);
     Debug.MemoryInfo[] getProcessMemoryInfo(in int[] pids);
     void killApplicationProcess(in String processName, int uid);
     int startActivityIntentSender(in IApplicationThread caller,
