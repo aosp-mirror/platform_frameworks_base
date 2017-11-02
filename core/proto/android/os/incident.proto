@@ -27,6 +27,7 @@ import "frameworks/base/core/proto/android/os/pagetypeinfo.proto";
 import "frameworks/base/core/proto/android/os/procrank.proto";
 import "frameworks/base/core/proto/android/server/activitymanagerservice.proto";
 import "frameworks/base/core/proto/android/server/alarmmanagerservice.proto";
+import "frameworks/base/core/proto/android/server/windowmanagerservice.proto";
 import "frameworks/base/core/proto/android/server/fingerprint.proto";
 import "frameworks/base/core/proto/android/server/powermanagerservice.proto";
 import "frameworks/base/core/proto/android/service/appwidget.proto";
@@ -134,5 +135,10 @@ message IncidentProto {
     optional com.android.server.AlarmManagerServiceProto alarm = 3016 [
         (section).type = SECTION_DUMPSYS,
         (section).args = "alarm --proto"
+    ];
+
+    optional com.android.server.wm.proto.WindowManagerServiceProto window = 3017 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "window --proto"
     ];
 }

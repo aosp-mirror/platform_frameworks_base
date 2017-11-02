@@ -30,7 +30,7 @@ extern const Section* SECTION_LIST[];
  * This is the mapping of section IDs to each section's privacy policy.
  * The section IDs are guaranteed in ascending order, not NULL-terminated since size is provided.
  */
-extern const Privacy* PRIVACY_POLICY_LIST[];
+extern const Privacy** PRIVACY_POLICY_LIST;
 
 extern const int PRIVACY_POLICY_COUNT;
 

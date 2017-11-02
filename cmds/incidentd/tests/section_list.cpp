@@ -20,9 +20,11 @@ Privacy* list[] = {
 Privacy field_0 { 0, 11, list, EXPLICIT, NULL };
 Privacy field_1 { 1, 9, NULL, AUTOMATIC, NULL };
 
-const Privacy* PRIVACY_POLICY_LIST[] = {
+Privacy* final_list[] = {
     &field_0,
     &field_1
 };
+
+const Privacy** PRIVACY_POLICY_LIST = const_cast<const Privacy**>(final_list);
 
 const int PRIVACY_POLICY_COUNT = 2;
