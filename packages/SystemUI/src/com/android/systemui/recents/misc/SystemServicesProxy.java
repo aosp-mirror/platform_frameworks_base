@@ -83,6 +83,7 @@ import com.android.systemui.shared.system.TaskStackChangeListeners;
 import com.android.systemui.statusbar.policy.UserInfoController;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Acts as a shim around the real system services that we need to access data from, and provides
@@ -123,7 +124,6 @@ public class SystemServicesProxy {
     Paint mBgProtectionPaint;
     Canvas mBgProtectionCanvas;
 
-    private final Handler mHandler = new Handler();
     private final Runnable mGcRunnable = new Runnable() {
         @Override
         public void run() {
@@ -194,24 +194,6 @@ public class SystemServicesProxy {
      */
     public void gc() {
         BackgroundThread.getHandler().post(mGcRunnable);
-    }
-
-    /**
-     * Returns the top running task.
-     */
-    public ActivityManager.RunningTaskInfo getRunningTask() {
-        // Note: The set of running tasks from the system is ordered by recency
-        try {
-            List<ActivityManager.RunningTaskInfo> tasks = mIam.getFilteredTasks(1,
-                    ACTIVITY_TYPE_RECENTS /* ignoreActivityType */,
-                    WINDOWING_MODE_PINNED /* ignoreWindowingMode */);
-            if (tasks.isEmpty()) {
-                return null;
-            }
-            return tasks.get(0);
-        } catch (RemoteException e) {
-            return null;
-        }
     }
 
     /**
@@ -376,28 +358,6 @@ public class SystemServicesProxy {
         }
     }
 
-    /** Removes the task */
-    public void removeTask(final int taskId) {
-        if (mAm == null) return;
-
-        // Remove the task.
-        mUiOffloadThread.submit(() -> {
-            try {
-                mIam.removeTask(taskId);
-            } catch (RemoteException e) {
-                e.printStackTrace();
-            }
-        });
-    }
-
-    public ActivityManager.TaskDescription getTaskDescription(int taskId) {
-        try {
-            return mIam.getTaskDescription(taskId);
-        } catch (RemoteException e) {
-            return null;
-        }
-    }
-
     /**
      * Returns whether the provided {@param userId} represents the system user.
      */
@@ -518,56 +478,6 @@ public class SystemServicesProxy {
     public void startActivityAsUserAsync(Intent intent, ActivityOptions opts) {
         mUiOffloadThread.submit(() -> mContext.startActivityAsUser(intent,
                 opts != null ? opts.toBundle() : null, UserHandle.CURRENT));
-    }
-
-    public void startActivityFromRecents(Context context, Task.TaskKey taskKey, String taskName,
-            ActivityOptions options,
-            @Nullable final StartActivityFromRecentsResultListener resultListener) {
-        startActivityFromRecents(context, taskKey, taskName, options,
-                WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_UNDEFINED, resultListener);
-    }
-
-    /** Starts an activity from recents. */
-    public void startActivityFromRecents(Context context, Task.TaskKey taskKey, String taskName,
-            ActivityOptions options, int windowingMode, int activityType,
-            @Nullable final StartActivityFromRecentsResultListener resultListener) {
-        if (mIam == null) {
-            return;
-        }
-        if (taskKey.windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
-            // We show non-visible docked tasks in Recents, but we always want to launch
-            // them in the fullscreen stack.
-            if (options == null) {
-                options = ActivityOptions.makeBasic();
-            }
-            options.setLaunchWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
-        } else if (windowingMode != WINDOWING_MODE_UNDEFINED
-                || activityType != ACTIVITY_TYPE_UNDEFINED) {
-            if (options == null) {
-                options = ActivityOptions.makeBasic();
-            }
-            options.setLaunchWindowingMode(windowingMode);
-            options.setLaunchActivityType(activityType);
-        }
-        final ActivityOptions finalOptions = options;
-
-        // Execute this from another thread such that we can do other things (like caching the
-        // bitmap for the thumbnail) while AM is busy starting our activity.
-        mUiOffloadThread.submit(() -> {
-            try {
-                mIam.startActivityFromRecents(
-                        taskKey.id, finalOptions == null ? null : finalOptions.toBundle());
-                if (resultListener != null) {
-                    mHandler.post(() -> resultListener.onStartActivityResult(true));
-                }
-            } catch (Exception e) {
-                Log.e(TAG, context.getString(
-                        R.string.recents_launch_error_message, taskName), e);
-                if (resultListener != null) {
-                    mHandler.post(() -> resultListener.onStartActivityResult(false));
-                }
-            }
-        });
     }
 
     /** Starts an in-place animation on the front most application windows. */
