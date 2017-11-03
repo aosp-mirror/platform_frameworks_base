@@ -18,10 +18,10 @@ package com.android.server.connectivity;
 
 import com.android.internal.util.HexDump;
 import com.android.internal.util.IndentingPrintWriter;
-import com.android.server.connectivity.KeepalivePacketData;
 import com.android.server.connectivity.NetworkAgentInfo;
 import android.net.ConnectivityManager;
 import android.net.ConnectivityManager.PacketKeepalive;
+import android.net.KeepalivePacketData;
 import android.net.LinkAddress;
 import android.net.NetworkAgent;
 import android.net.NetworkUtils;

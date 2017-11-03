@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.connectivity;
+package android.net;
 
 import static android.net.util.NetworkConstants.IPV4_HEADER_MIN_LEN;
 import static android.net.util.NetworkConstants.UDP_HEADER_LEN;
