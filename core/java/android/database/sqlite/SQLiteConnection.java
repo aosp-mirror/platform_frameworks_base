@@ -416,7 +416,8 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
         boolean foreignKeyModeChanged = configuration.foreignKeyConstraintsEnabled
                 != mConfiguration.foreignKeyConstraintsEnabled;
         boolean walModeChanged = ((configuration.openFlags ^ mConfiguration.openFlags)
-                & SQLiteDatabase.ENABLE_WRITE_AHEAD_LOGGING) != 0;
+                & SQLiteDatabase.ENABLE_WRITE_AHEAD_LOGGING) != 0
+                || configuration.useCompatibilityWal != mConfiguration.useCompatibilityWal;
         boolean localeChanged = !configuration.locale.equals(mConfiguration.locale);
 
         // Update configuration parameters.
