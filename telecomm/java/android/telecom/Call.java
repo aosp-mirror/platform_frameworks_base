@@ -856,6 +856,39 @@ public final class Call {
      */
     public static abstract class Callback {
         /**
+         * @hide
+         */
+        @IntDef({HANDOVER_FAILURE_DEST_APP_REJECTED, HANDOVER_FAILURE_DEST_NOT_SUPPORTED,
+                HANDOVER_FAILURE_DEST_INVALID_PERM, HANDOVER_FAILURE_DEST_USER_REJECTED})
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface HandoverFailureErrors {}
+
+        /**
+         * Handover failure reason returned via {@link #onHandoverFailed(Call, int)} when the app
+         * to handover the call rejects handover.
+         */
+        public static final int HANDOVER_FAILURE_DEST_APP_REJECTED = 1;
+
+        /**
+         * Handover failure reason returned via {@link #onHandoverFailed(Call, int)} when there is
+         * an error associated with unsupported handover.
+         */
+        public static final int HANDOVER_FAILURE_DEST_NOT_SUPPORTED = 2;
+
+        /**
+         * Handover failure reason returned via {@link #onHandoverFailed(Call, int)} when there
+         * are some permission errors associated with APIs doing handover.
+         */
+        public static final int HANDOVER_FAILURE_DEST_INVALID_PERM = 3;
+
+        /**
+         * Handover failure reason returned via {@link #onHandoverFailed(Call, int)} when user
+         * rejects handover.
+         */
+        public static final int HANDOVER_FAILURE_DEST_USER_REJECTED = 4;
+
+
+        /**
          * Invoked when the state of this {@code Call} has changed. See {@link #getState()}.
          *
          * @param call The {@code Call} invoking this method.
@@ -990,6 +1023,21 @@ public final class Call {
          *               {@link android.telecom.Connection.RttModifyStatus#SESSION_MODIFY_REQUEST_SUCCESS}.
          */
         public void onRttInitiationFailure(Call call, int reason) {}
+
+        /**
+         * Invoked when Call handover from one {@link PhoneAccount} to other {@link PhoneAccount}
+         * has completed successfully.
+         * @param call The call which had initiated handover.
+         */
+        public void onHandoverComplete(Call call) {}
+
+        /**
+         * Invoked when Call handover from one {@link PhoneAccount} to other {@link PhoneAccount}
+         * has failed.
+         * @param call The call which had initiated handover.
+         * @param failureReason Error reason for failure
+         */
+        public void onHandoverFailed(Call call, @HandoverFailureErrors int failureReason) {}
     }
 
     /**
@@ -1363,6 +1411,24 @@ public final class Call {
      */
     public void respondToRttRequest(int id, boolean accept) {
         mInCallAdapter.respondToRttRequest(mTelecomCallId, id, accept);
+    }
+
+    /**
+     * Initiates a handover of this {@link Call} to the {@link ConnectionService} identified
+     * by {@code toHandle}.  The videoState specified indicates the desired video state after the
+     * handover.
+     * <p>
+     * A handover request is initiated by the user from one app to indicate a desire
+     * to handover a call to another.
+     *
+     * @param toHandle {@link PhoneAccountHandle} of the {@link ConnectionService} to handover
+     *                 this call to.
+     * @param videoState Indicates the video state desired after the handover.
+     * @param extras Bundle containing extra information to be passed to the
+     *               {@link ConnectionService}
+     */
+    public void handoverTo(PhoneAccountHandle toHandle, int videoState, Bundle extras) {
+        mInCallAdapter.handoverTo(mTelecomCallId, toHandle, videoState, extras);
     }
 
     /**
