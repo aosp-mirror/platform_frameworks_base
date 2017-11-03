@@ -1387,6 +1387,44 @@ static void android_media_MediaPlayer_releaseDrm(JNIEnv *env, jobject thiz)
 // Modular DRM end
 // ----------------------------------------------------------------------------
 
+/////////////////////////////////////////////////////////////////////////////////////
+// AudioRouting begin
+static jboolean android_media_MediaPlayer_setOutputDevice(JNIEnv *env, jobject thiz, jint device_id)
+{
+    sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
+    if (mp == NULL) {
+        return false;
+    }
+    return mp->setOutputDevice(device_id) == NO_ERROR;
+}
+
+static jint android_media_MediaPlayer_getRoutedDeviceId(JNIEnv *env, jobject thiz)
+{
+    sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
+    if (mp == NULL) {
+        return AUDIO_PORT_HANDLE_NONE;
+    }
+    return mp->getRoutedDeviceId();
+}
+
+static void android_media_MediaPlayer_enableDeviceCallback(
+        JNIEnv* env, jobject thiz, jboolean enabled)
+{
+    sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
+    if (mp == NULL) {
+        return;
+    }
+
+    status_t status = mp->enableAudioDeviceCallback(enabled);
+    if (status != NO_ERROR) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        ALOGE("enable device callback failed: %d", status);
+    }
+}
+
+// AudioRouting end
+// ----------------------------------------------------------------------------
+
 static const JNINativeMethod gMethods[] = {
     {
         "nativeSetDataSource",
@@ -1448,6 +1486,11 @@ static const JNINativeMethod gMethods[] = {
     // Modular DRM
     { "_prepareDrm", "([B[B)V",                                 (void *)android_media_MediaPlayer_prepareDrm },
     { "_releaseDrm", "()V",                                     (void *)android_media_MediaPlayer_releaseDrm },
+
+    // AudioRouting
+    {"native_setOutputDevice", "(I)Z",                          (void *)android_media_MediaPlayer_setOutputDevice},
+    {"native_getRoutedDeviceId", "()I",                         (void *)android_media_MediaPlayer_getRoutedDeviceId},
+    {"native_enableDeviceCallback", "(Z)V",                     (void *)android_media_MediaPlayer_enableDeviceCallback},
 };
 
 // This function only registers the native methods
