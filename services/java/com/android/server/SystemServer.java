@@ -658,9 +658,6 @@ public final class SystemServer {
         mSystemServiceManager.startService(DropBoxManagerService.class);
         traceEnd();
 
-        // First hwbinder call is in BatteryService.
-        android.os.HwBinder.startRpcThreadPool(5, false /* callerWillJoin */);
-
         traceBeginAndSlog("StartBatteryService");
         // Tracks the battery level.  Requires LightService.
         mSystemServiceManager.startService(BatteryService.class);

@@ -63,13 +63,6 @@ public abstract class HwBinder implements IHwBinder {
 
     public static native final void joinRpcThreadpool();
 
-    /**
-     * Call configureRpcThreadpool, then actually spawn
-     * (maxThreads - (callerWillJoin ? 0 : 1)) threads.
-     */
-    public static final native void startRpcThreadPool(
-            long maxThreads, boolean callerWillJoin);
-
     // Returns address of the "freeFunction".
     private static native final long native_init();
 
