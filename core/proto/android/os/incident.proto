@@ -164,4 +164,9 @@ message IncidentProto {
         (section).type = SECTION_DUMPSYS,
         (section).args = "window --proto"
     ];
+
+    optional com.android.server.am.proto.MemInfoProto meminfo = 3018 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "meminfo --proto"
+    ];
 }

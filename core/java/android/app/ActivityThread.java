@@ -108,6 +108,7 @@ import android.util.PrintWriterPrinter;
 import android.util.Slog;
 import android.util.SparseIntArray;
 import android.util.SuperNotCalledException;
+import android.util.proto.ProtoOutputStream;
 import android.view.ContextThemeWrapper;
 import android.view.Display;
 import android.view.ThreadedRenderer;
@@ -131,6 +132,7 @@ import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.org.conscrypt.OpenSSLSocketImpl;
 import com.android.org.conscrypt.TrustedCertificateStore;
+import com.android.server.am.proto.MemInfoProto;
 
 import dalvik.system.BaseDexClassLoader;
 import dalvik.system.CloseGuard;
@@ -2257,6 +2259,167 @@ public final class ActivityThread extends ClientTransactionHandler {
                 "TOTAL:", memInfo.getSummaryTotalPss(),
                 "TOTAL SWAP (KB):", memInfo.getSummaryTotalSwap());
         }
+    }
+
+    /**
+     * Dump heap info to proto.
+     *
+     * @param hasSwappedOutPss determines whether to use dirtySwap or dirtySwapPss
+     */
+    private static void dumpHeap(ProtoOutputStream proto, long fieldId, String name,
+            int pss, int cleanPss, int sharedDirty, int privateDirty,
+            int sharedClean, int privateClean,
+            boolean hasSwappedOutPss, int dirtySwap, int dirtySwapPss) {
+        final long token = proto.start(fieldId);
+
+        proto.write(MemInfoProto.NativeProcess.MemoryInfo.NAME, name);
+        proto.write(MemInfoProto.NativeProcess.MemoryInfo.TOTAL_PSS_KB, pss);
+        proto.write(MemInfoProto.NativeProcess.MemoryInfo.CLEAN_PSS_KB, cleanPss);
+        proto.write(MemInfoProto.NativeProcess.MemoryInfo.SHARED_DIRTY_KB, sharedDirty);
+        proto.write(MemInfoProto.NativeProcess.MemoryInfo.PRIVATE_DIRTY_KB, privateDirty);
+        proto.write(MemInfoProto.NativeProcess.MemoryInfo.SHARED_CLEAN_KB, sharedClean);
+        proto.write(MemInfoProto.NativeProcess.MemoryInfo.PRIVATE_CLEAN_KB, privateClean);
+        if (hasSwappedOutPss) {
+            proto.write(MemInfoProto.NativeProcess.MemoryInfo.DIRTY_SWAP_PSS_KB, dirtySwapPss);
+        } else {
+            proto.write(MemInfoProto.NativeProcess.MemoryInfo.DIRTY_SWAP_KB, dirtySwap);
+        }
+
+        proto.end(token);
+    }
+
+    /**
+     * Dump mem info data to proto.
+     */
+    public static void dumpMemInfoTable(ProtoOutputStream proto, Debug.MemoryInfo memInfo,
+            boolean dumpDalvik, boolean dumpSummaryOnly,
+            long nativeMax, long nativeAllocated, long nativeFree,
+            long dalvikMax, long dalvikAllocated, long dalvikFree) {
+
+        if (!dumpSummaryOnly) {
+            final long nhToken = proto.start(MemInfoProto.NativeProcess.NATIVE_HEAP);
+            dumpHeap(proto, MemInfoProto.NativeProcess.HeapInfo.MEM_INFO, "Native Heap",
+                    memInfo.nativePss, memInfo.nativeSwappablePss, memInfo.nativeSharedDirty,
+                    memInfo.nativePrivateDirty, memInfo.nativeSharedClean,
+                    memInfo.nativePrivateClean, memInfo.hasSwappedOutPss,
+                    memInfo.nativeSwappedOut, memInfo.nativeSwappedOutPss);
+            proto.write(MemInfoProto.NativeProcess.HeapInfo.HEAP_SIZE_KB, nativeMax);
+            proto.write(MemInfoProto.NativeProcess.HeapInfo.HEAP_ALLOC_KB, nativeAllocated);
+            proto.write(MemInfoProto.NativeProcess.HeapInfo.HEAP_FREE_KB, nativeFree);
+            proto.end(nhToken);
+
+            final long dvToken = proto.start(MemInfoProto.NativeProcess.DALVIK_HEAP);
+            dumpHeap(proto, MemInfoProto.NativeProcess.HeapInfo.MEM_INFO, "Dalvik Heap",
+                    memInfo.dalvikPss, memInfo.dalvikSwappablePss, memInfo.dalvikSharedDirty,
+                    memInfo.dalvikPrivateDirty, memInfo.dalvikSharedClean,
+                    memInfo.dalvikPrivateClean, memInfo.hasSwappedOutPss,
+                    memInfo.dalvikSwappedOut, memInfo.dalvikSwappedOutPss);
+            proto.write(MemInfoProto.NativeProcess.HeapInfo.HEAP_SIZE_KB, dalvikMax);
+            proto.write(MemInfoProto.NativeProcess.HeapInfo.HEAP_ALLOC_KB, dalvikAllocated);
+            proto.write(MemInfoProto.NativeProcess.HeapInfo.HEAP_FREE_KB, dalvikFree);
+            proto.end(dvToken);
+
+            int otherPss = memInfo.otherPss;
+            int otherSwappablePss = memInfo.otherSwappablePss;
+            int otherSharedDirty = memInfo.otherSharedDirty;
+            int otherPrivateDirty = memInfo.otherPrivateDirty;
+            int otherSharedClean = memInfo.otherSharedClean;
+            int otherPrivateClean = memInfo.otherPrivateClean;
+            int otherSwappedOut = memInfo.otherSwappedOut;
+            int otherSwappedOutPss = memInfo.otherSwappedOutPss;
+
+            for (int i = 0; i < Debug.MemoryInfo.NUM_OTHER_STATS; i++) {
+                final int myPss = memInfo.getOtherPss(i);
+                final int mySwappablePss = memInfo.getOtherSwappablePss(i);
+                final int mySharedDirty = memInfo.getOtherSharedDirty(i);
+                final int myPrivateDirty = memInfo.getOtherPrivateDirty(i);
+                final int mySharedClean = memInfo.getOtherSharedClean(i);
+                final int myPrivateClean = memInfo.getOtherPrivateClean(i);
+                final int mySwappedOut = memInfo.getOtherSwappedOut(i);
+                final int mySwappedOutPss = memInfo.getOtherSwappedOutPss(i);
+                if (myPss != 0 || mySharedDirty != 0 || myPrivateDirty != 0
+                        || mySharedClean != 0 || myPrivateClean != 0
+                        || (memInfo.hasSwappedOutPss ? mySwappedOutPss : mySwappedOut) != 0) {
+                    dumpHeap(proto, MemInfoProto.NativeProcess.OTHER_HEAPS,
+                            Debug.MemoryInfo.getOtherLabel(i),
+                            myPss, mySwappablePss, mySharedDirty, myPrivateDirty,
+                            mySharedClean, myPrivateClean,
+                            memInfo.hasSwappedOutPss, mySwappedOut, mySwappedOutPss);
+
+                    otherPss -= myPss;
+                    otherSwappablePss -= mySwappablePss;
+                    otherSharedDirty -= mySharedDirty;
+                    otherPrivateDirty -= myPrivateDirty;
+                    otherSharedClean -= mySharedClean;
+                    otherPrivateClean -= myPrivateClean;
+                    otherSwappedOut -= mySwappedOut;
+                    otherSwappedOutPss -= mySwappedOutPss;
+                }
+            }
+
+            dumpHeap(proto, MemInfoProto.NativeProcess.UNKNOWN_HEAP, "Unknown",
+                    otherPss, otherSwappablePss,
+                    otherSharedDirty, otherPrivateDirty, otherSharedClean, otherPrivateClean,
+                    memInfo.hasSwappedOutPss, otherSwappedOut, otherSwappedOutPss);
+            final long tToken = proto.start(MemInfoProto.NativeProcess.TOTAL_HEAP);
+            dumpHeap(proto, MemInfoProto.NativeProcess.HeapInfo.MEM_INFO, "TOTAL",
+                    memInfo.getTotalPss(), memInfo.getTotalSwappablePss(),
+                    memInfo.getTotalSharedDirty(), memInfo.getTotalPrivateDirty(),
+                    memInfo.getTotalSharedClean(), memInfo.getTotalPrivateClean(),
+                    memInfo.hasSwappedOutPss, memInfo.getTotalSwappedOut(),
+                    memInfo.getTotalSwappedOutPss());
+            proto.write(MemInfoProto.NativeProcess.HeapInfo.HEAP_SIZE_KB, nativeMax + dalvikMax);
+            proto.write(MemInfoProto.NativeProcess.HeapInfo.HEAP_ALLOC_KB,
+                    nativeAllocated + dalvikAllocated);
+            proto.write(MemInfoProto.NativeProcess.HeapInfo.HEAP_FREE_KB, nativeFree + dalvikFree);
+            proto.end(tToken);
+
+            if (dumpDalvik) {
+                for (int i = Debug.MemoryInfo.NUM_OTHER_STATS;
+                        i < Debug.MemoryInfo.NUM_OTHER_STATS + Debug.MemoryInfo.NUM_DVK_STATS;
+                        i++) {
+                    final int myPss = memInfo.getOtherPss(i);
+                    final int mySwappablePss = memInfo.getOtherSwappablePss(i);
+                    final int mySharedDirty = memInfo.getOtherSharedDirty(i);
+                    final int myPrivateDirty = memInfo.getOtherPrivateDirty(i);
+                    final int mySharedClean = memInfo.getOtherSharedClean(i);
+                    final int myPrivateClean = memInfo.getOtherPrivateClean(i);
+                    final int mySwappedOut = memInfo.getOtherSwappedOut(i);
+                    final int mySwappedOutPss = memInfo.getOtherSwappedOutPss(i);
+                    if (myPss != 0 || mySharedDirty != 0 || myPrivateDirty != 0
+                            || mySharedClean != 0 || myPrivateClean != 0
+                            || (memInfo.hasSwappedOutPss ? mySwappedOutPss : mySwappedOut) != 0) {
+                        dumpHeap(proto, MemInfoProto.NativeProcess.DALVIK_DETAILS,
+                                Debug.MemoryInfo.getOtherLabel(i),
+                                myPss, mySwappablePss, mySharedDirty, myPrivateDirty,
+                                mySharedClean, myPrivateClean,
+                                memInfo.hasSwappedOutPss, mySwappedOut, mySwappedOutPss);
+                    }
+                }
+            }
+        }
+
+        final long asToken = proto.start(MemInfoProto.NativeProcess.APP_SUMMARY);
+        proto.write(MemInfoProto.NativeProcess.AppSummary.JAVA_HEAP_PSS_KB,
+                memInfo.getSummaryJavaHeap());
+        proto.write(MemInfoProto.NativeProcess.AppSummary.NATIVE_HEAP_PSS_KB,
+                memInfo.getSummaryNativeHeap());
+        proto.write(MemInfoProto.NativeProcess.AppSummary.CODE_PSS_KB, memInfo.getSummaryCode());
+        proto.write(MemInfoProto.NativeProcess.AppSummary.STACK_PSS_KB, memInfo.getSummaryStack());
+        proto.write(MemInfoProto.NativeProcess.AppSummary.GRAPHICS_PSS_KB,
+                memInfo.getSummaryGraphics());
+        proto.write(MemInfoProto.NativeProcess.AppSummary.PRIVATE_OTHER_PSS_KB,
+                memInfo.getSummaryPrivateOther());
+        proto.write(MemInfoProto.NativeProcess.AppSummary.SYSTEM_PSS_KB,
+                memInfo.getSummarySystem());
+        if (memInfo.hasSwappedOutPss) {
+            proto.write(MemInfoProto.NativeProcess.AppSummary.TOTAL_SWAP_PSS,
+                    memInfo.getSummaryTotalSwapPss());
+        } else {
+            proto.write(MemInfoProto.NativeProcess.AppSummary.TOTAL_SWAP_PSS,
+                    memInfo.getSummaryTotalSwap());
+        }
+        proto.end(asToken);
     }
 
     public void registerOnActivityPausedListener(Activity activity,
