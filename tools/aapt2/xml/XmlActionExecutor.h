@@ -40,56 +40,46 @@ enum class XmlActionExecutorPolicy {
   kWhitelist,
 };
 
-/**
- * Contains the actions to perform at this XML node. This is a recursive data
- * structure that
- * holds XmlNodeActions for child XML nodes.
- */
+// Contains the actions to perform at this XML node. This is a recursive data structure that
+// holds XmlNodeActions for child XML nodes.
 class XmlNodeAction {
  public:
   using ActionFuncWithDiag = std::function<bool(Element*, SourcePathDiagnostics*)>;
   using ActionFunc = std::function<bool(Element*)>;
 
-  /**
-   * Find or create a child XmlNodeAction that will be performed for the child
-   * element with the name `name`.
-   */
-  XmlNodeAction& operator[](const std::string& name) { return map_[name]; }
+  // Find or create a child XmlNodeAction that will be performed for the child element with the
+  // name `name`.
+  XmlNodeAction& operator[](const std::string& name) {
+    return map_[name];
+  }
 
-  /**
-   * Add an action to be performed at this XmlNodeAction.
-   */
+  // Add an action to be performed at this XmlNodeAction.
   void Action(ActionFunc f);
   void Action(ActionFuncWithDiag);
 
  private:
   friend class XmlActionExecutor;
 
-  bool Execute(XmlActionExecutorPolicy policy, SourcePathDiagnostics* diag, Element* el) const;
+  bool Execute(XmlActionExecutorPolicy policy, std::vector<::android::StringPiece>* bread_crumb,
+               SourcePathDiagnostics* diag, Element* el) const;
 
   std::map<std::string, XmlNodeAction> map_;
   std::vector<ActionFuncWithDiag> actions_;
 };
 
-/**
- * Allows the definition of actions to execute at specific XML elements defined
- * by their
- * hierarchy.
- */
+// Allows the definition of actions to execute at specific XML elements defined by their hierarchy.
 class XmlActionExecutor {
  public:
   XmlActionExecutor() = default;
 
-  /**
-   * Find or create a root XmlNodeAction that will be performed for the root XML
-   * element with the name `name`.
-   */
-  XmlNodeAction& operator[](const std::string& name) { return map_[name]; }
+  // Find or create a root XmlNodeAction that will be performed for the root XML element with the
+  // name `name`.
+  XmlNodeAction& operator[](const std::string& name) {
+    return map_[name];
+  }
 
-  /**
-   * Execute the defined actions for this XmlResource.
-   * Returns true if all actions return true, otherwise returns false.
-   */
+  // Execute the defined actions for this XmlResource.
+  // Returns true if all actions return true, otherwise returns false.
   bool Execute(XmlActionExecutorPolicy policy, IDiagnostics* diag, XmlResource* doc) const;
 
  private:
