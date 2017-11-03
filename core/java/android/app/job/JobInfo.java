@@ -244,6 +244,13 @@ public class JobInfo implements Parcelable {
     public static final int FLAG_WILL_BE_FOREGROUND = 1 << 0;
 
     /**
+     * Allows this job to run despite doze restrictions as long as the app is in the foreground
+     * or on the temporary whitelist
+     * @hide
+     */
+    public static final int FLAG_IMPORTANT_WHILE_FOREGROUND = 1 << 1;
+
+    /**
      * @hide
      */
     public static final int CONSTRAINT_FLAG_CHARGING = 1 << 0;
@@ -1333,6 +1340,30 @@ public class JobInfo implements Parcelable {
         }
 
         /**
+         * Setting this to true indicates that this job is important while the scheduling app
+         * is in the foreground or on the temporary whitelist for background restrictions.
+         * This means that the system will relax doze restrictions on this job during this time.
+         *
+         * Apps should use this flag only for short jobs that are essential for the app to function
+         * properly in the foreground.
+         *
+         * Note that once the scheduling app is no longer whitelisted from background restrictions
+         * and in the background, or the job failed due to unsatisfied constraints,
+         * this job should be expected to behave like other jobs without this flag.
+         *
+         * @param importantWhileForeground whether to relax doze restrictions for this job when the
+         *                                 app is in the foreground. False by default.
+         */
+        public Builder setImportantWhileForeground(boolean importantWhileForeground) {
+            if (importantWhileForeground) {
+                mFlags |= FLAG_IMPORTANT_WHILE_FOREGROUND;
+            } else {
+                mFlags &= (~FLAG_IMPORTANT_WHILE_FOREGROUND);
+            }
+            return this;
+        }
+
+        /**
          * Set whether or not to persist this job across device reboots.
          *
          * @param isPersisted True to indicate that the job will be written to
@@ -1394,6 +1425,10 @@ public class JobInfo implements Parcelable {
                     throw new IllegalArgumentException("Can't call setClipData() on a " +
                             "persisted job");
                 }
+            }
+            if ((mFlags & FLAG_IMPORTANT_WHILE_FOREGROUND) != 0 && mHasEarlyConstraint) {
+                throw new IllegalArgumentException("An important while foreground job cannot "
+                        + "have a time delay");
             }
             if (mBackoffPolicySet && (mConstraintFlags & CONSTRAINT_FLAG_DEVICE_IDLE) != 0) {
                 throw new IllegalArgumentException("An idle mode job will not respect any" +

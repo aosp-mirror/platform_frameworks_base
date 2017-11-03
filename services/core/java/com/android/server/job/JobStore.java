@@ -250,7 +250,7 @@ public final class JobStore {
 
     /**
      * @param userHandle User for whom we are querying the list of jobs.
-     * @return A list of all the jobs scheduled by the provided user. Never null.
+     * @return A list of all the jobs scheduled for the provided user. Never null.
      */
     public List<JobStatus> getJobsByUser(int userHandle) {
         return mJobSet.getJobsByUser(userHandle);
@@ -285,6 +285,10 @@ public final class JobStore {
 
     public void forEachJob(int uid, JobStatusFunctor functor) {
         mJobSet.forEachJob(uid, functor);
+    }
+
+    public void forEachJobForSourceUid(int sourceUid, JobStatusFunctor functor) {
+        mJobSet.forEachJobForSourceUid(sourceUid, functor);
     }
 
     public interface JobStatusFunctor {
@@ -979,9 +983,12 @@ public final class JobStore {
     static final class JobSet {
         // Key is the getUid() originator of the jobs in each sheaf
         private SparseArray<ArraySet<JobStatus>> mJobs;
+        // Same data but with the key as getSourceUid() of the jobs in each sheaf
+        private SparseArray<ArraySet<JobStatus>> mJobsPerSourceUid;
 
         public JobSet() {
             mJobs = new SparseArray<ArraySet<JobStatus>>();
+            mJobsPerSourceUid = new SparseArray<>();
         }
 
         public List<JobStatus> getJobsByUid(int uid) {
@@ -995,10 +1002,10 @@ public final class JobStore {
 
         // By user, not by uid, so we need to traverse by key and check
         public List<JobStatus> getJobsByUser(int userId) {
-            ArrayList<JobStatus> result = new ArrayList<JobStatus>();
-            for (int i = mJobs.size() - 1; i >= 0; i--) {
-                if (UserHandle.getUserId(mJobs.keyAt(i)) == userId) {
-                    ArraySet<JobStatus> jobs = mJobs.valueAt(i);
+            final ArrayList<JobStatus> result = new ArrayList<JobStatus>();
+            for (int i = mJobsPerSourceUid.size() - 1; i >= 0; i--) {
+                if (UserHandle.getUserId(mJobsPerSourceUid.keyAt(i)) == userId) {
+                    final ArraySet<JobStatus> jobs = mJobsPerSourceUid.valueAt(i);
                     if (jobs != null) {
                         result.addAll(jobs);
                     }
@@ -1009,32 +1016,60 @@ public final class JobStore {
 
         public boolean add(JobStatus job) {
             final int uid = job.getUid();
+            final int sourceUid = job.getSourceUid();
             ArraySet<JobStatus> jobs = mJobs.get(uid);
             if (jobs == null) {
                 jobs = new ArraySet<JobStatus>();
                 mJobs.put(uid, jobs);
             }
-            return jobs.add(job);
+            ArraySet<JobStatus> jobsForSourceUid = mJobsPerSourceUid.get(sourceUid);
+            if (jobsForSourceUid == null) {
+                jobsForSourceUid = new ArraySet<>();
+                mJobsPerSourceUid.put(sourceUid, jobsForSourceUid);
+            }
+            return jobs.add(job) && jobsForSourceUid.add(job);
         }
 
         public boolean remove(JobStatus job) {
             final int uid = job.getUid();
-            ArraySet<JobStatus> jobs = mJobs.get(uid);
-            boolean didRemove = (jobs != null) ? jobs.remove(job) : false;
-            if (didRemove && jobs.size() == 0) {
-                // no more jobs for this uid; let the now-empty set object be GC'd.
-                mJobs.remove(uid);
+            final ArraySet<JobStatus> jobs = mJobs.get(uid);
+            final int sourceUid = job.getSourceUid();
+            final ArraySet<JobStatus> jobsForSourceUid = mJobsPerSourceUid.get(sourceUid);
+            boolean didRemove = jobs != null && jobs.remove(job) && jobsForSourceUid.remove(job);
+            if (didRemove) {
+                if (jobs.size() == 0) {
+                    // no more jobs for this uid; let the now-empty set object be GC'd.
+                    mJobs.remove(uid);
+                }
+                if (jobsForSourceUid.size() == 0) {
+                    mJobsPerSourceUid.remove(sourceUid);
+                }
+                return true;
             }
-            return didRemove;
+            return false;
         }
 
-        // Remove the jobs all users not specified by the whitelist of user ids
+        /**
+         * Removes the jobs of all users not specified by the whitelist of user ids.
+         * The jobs scheduled by non existent users will not be removed if they were
+         */
         public void removeJobsOfNonUsers(int[] whitelist) {
-            for (int jobIndex = mJobs.size() - 1; jobIndex >= 0; jobIndex--) {
-                int jobUserId = UserHandle.getUserId(mJobs.keyAt(jobIndex));
-                // check if job's user id is not in the whitelist
+            for (int jobSetIndex = mJobsPerSourceUid.size() - 1; jobSetIndex >= 0; jobSetIndex--) {
+                final int jobUserId = UserHandle.getUserId(mJobsPerSourceUid.keyAt(jobSetIndex));
                 if (!ArrayUtils.contains(whitelist, jobUserId)) {
-                    mJobs.removeAt(jobIndex);
+                    mJobsPerSourceUid.removeAt(jobSetIndex);
+                }
+            }
+            for (int jobSetIndex = mJobs.size() - 1; jobSetIndex >= 0; jobSetIndex--) {
+                final ArraySet<JobStatus> jobsForUid = mJobs.valueAt(jobSetIndex);
+                for (int jobIndex = jobsForUid.size() - 1; jobIndex >= 0; jobIndex--) {
+                    final int jobUserId = jobsForUid.valueAt(jobIndex).getUserId();
+                    if (!ArrayUtils.contains(whitelist, jobUserId)) {
+                        jobsForUid.removeAt(jobIndex);
+                    }
+                }
+                if (jobsForUid.size() == 0) {
+                    mJobs.removeAt(jobSetIndex);
                 }
             }
         }
@@ -1077,6 +1112,7 @@ public final class JobStore {
 
         public void clear() {
             mJobs.clear();
+            mJobsPerSourceUid.clear();
         }
 
         public int size() {
@@ -1112,8 +1148,17 @@ public final class JobStore {
             }
         }
 
-        public void forEachJob(int uid, JobStatusFunctor functor) {
-            ArraySet<JobStatus> jobs = mJobs.get(uid);
+        public void forEachJob(int callingUid, JobStatusFunctor functor) {
+            ArraySet<JobStatus> jobs = mJobs.get(callingUid);
+            if (jobs != null) {
+                for (int i = jobs.size() - 1; i >= 0; i--) {
+                    functor.process(jobs.valueAt(i));
+                }
+            }
+        }
+
+        public void forEachJobForSourceUid(int sourceUid, JobStatusFunctor functor) {
+            final ArraySet<JobStatus> jobs = mJobsPerSourceUid.get(sourceUid);
             if (jobs != null) {
                 for (int i = jobs.size() - 1; i >= 0; i--) {
                     functor.process(jobs.valueAt(i));

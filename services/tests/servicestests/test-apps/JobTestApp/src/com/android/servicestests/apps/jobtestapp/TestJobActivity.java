@@ -27,12 +27,11 @@ import android.util.Log;
 
 public class TestJobActivity extends Activity {
     private static final String TAG = TestJobActivity.class.getSimpleName();
-    public static final String EXTRA_JOB_ID_KEY =
-            "com.android.servicestests.apps.jobtestapp.extra.JOB_ID";
-    public static final String ACTION_START_JOB =
-            "com.android.servicestests.apps.jobtestapp.action.START_JOB";
-    public static final String ACTION_CANCEL_JOBS =
-            "com.android.servicestests.apps.jobtestapp.action.CANCEL_JOBS";
+    private static final String PACKAGE_NAME = "com.android.servicestests.apps.jobtestapp";
+
+    public static final String EXTRA_JOB_ID_KEY = PACKAGE_NAME + ".extra.JOB_ID";
+    public static final String ACTION_START_JOB = PACKAGE_NAME + ".action.START_JOB";
+    public static final String ACTION_CANCEL_JOBS = PACKAGE_NAME + ".action.CANCEL_JOBS";
     public static final int JOB_INITIAL_BACKOFF = 10_000;
     public static final int JOB_MINIMUM_LATENCY = 5_000;
 
@@ -59,6 +58,8 @@ public class TestJobActivity extends Activity {
                     Log.d(TAG, "Successfully scheduled job with id " + jobId);
                 }
                 break;
+            default:
+                Log.e(TAG, "Unknown action " + intent.getAction());
         }
         finish();
     }
