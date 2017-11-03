@@ -1206,56 +1206,65 @@ public class SurfaceControl {
         }
 
         public Transaction show(SurfaceControl sc) {
+            sc.checkNotReleased();
             nativeSetFlags(mNativeObject, sc.mNativeObject, 0, SURFACE_HIDDEN);
             return this;
         }
 
         public Transaction hide(SurfaceControl sc) {
+            sc.checkNotReleased();
             nativeSetFlags(mNativeObject, sc.mNativeObject, SURFACE_HIDDEN, SURFACE_HIDDEN);
             return this;
         }
 
         public Transaction setPosition(SurfaceControl sc, float x, float y) {
+            sc.checkNotReleased();
             nativeSetPosition(mNativeObject, sc.mNativeObject, x, y);
             return this;
         }
 
         public Transaction setSize(SurfaceControl sc, int w, int h) {
-            nativeSetSize(mNativeObject, sc.mNativeObject,
-                    w, h);
+            sc.checkNotReleased();
+            nativeSetSize(mNativeObject, sc.mNativeObject, w, h);
             return this;
         }
 
         public Transaction setLayer(SurfaceControl sc, int z) {
+            sc.checkNotReleased();
             nativeSetLayer(mNativeObject, sc.mNativeObject, z);
             return this;
         }
 
         public Transaction setRelativeLayer(SurfaceControl sc, SurfaceControl relativeTo, int z) {
+            sc.checkNotReleased();
             nativeSetRelativeLayer(mNativeObject, sc.mNativeObject,
                     relativeTo.getHandle(), z);
             return this;
         }
 
         public Transaction setTransparentRegionHint(SurfaceControl sc, Region transparentRegion) {
+            sc.checkNotReleased();
             nativeSetTransparentRegionHint(mNativeObject,
                     sc.mNativeObject, transparentRegion);
             return this;
         }
 
         public Transaction setAlpha(SurfaceControl sc, float alpha) {
+            sc.checkNotReleased();
             nativeSetAlpha(mNativeObject, sc.mNativeObject, alpha);
             return this;
         }
 
         public Transaction setMatrix(SurfaceControl sc,
                 float dsdx, float dtdx, float dtdy, float dsdy) {
+            sc.checkNotReleased();
             nativeSetMatrix(mNativeObject, sc.mNativeObject,
                     dsdx, dtdx, dtdy, dsdy);
             return this;
         }
 
         public Transaction setWindowCrop(SurfaceControl sc, Rect crop) {
+            sc.checkNotReleased();
             if (crop != null) {
                 nativeSetWindowCrop(mNativeObject, sc.mNativeObject,
                         crop.left, crop.top, crop.right, crop.bottom);
@@ -1267,6 +1276,7 @@ public class SurfaceControl {
         }
 
         public Transaction setFinalCrop(SurfaceControl sc, Rect crop) {
+            sc.checkNotReleased();
             if (crop != null) {
                 nativeSetFinalCrop(mNativeObject, sc.mNativeObject,
                         crop.left, crop.top, crop.right, crop.bottom);
@@ -1278,40 +1288,48 @@ public class SurfaceControl {
         }
 
         public Transaction setLayerStack(SurfaceControl sc, int layerStack) {
+            sc.checkNotReleased();
             nativeSetLayerStack(mNativeObject, sc.mNativeObject, layerStack);
             return this;
         }
 
-        public Transaction deferTransactionUntil(SurfaceControl sc, IBinder handle, long frameNumber) {
+        public Transaction deferTransactionUntil(SurfaceControl sc, IBinder handle,
+                long frameNumber) {
+            sc.checkNotReleased();
             nativeDeferTransactionUntil(mNativeObject, sc.mNativeObject, handle, frameNumber);
             return this;
         }
 
         public Transaction deferTransactionUntilSurface(SurfaceControl sc, Surface barrierSurface,
                 long frameNumber) {
+            sc.checkNotReleased();
             nativeDeferTransactionUntilSurface(mNativeObject, sc.mNativeObject,
                     barrierSurface.mNativeObject, frameNumber);
             return this;
         }
 
         public Transaction reparentChildren(SurfaceControl sc, IBinder newParentHandle) {
+            sc.checkNotReleased();
             nativeReparentChildren(mNativeObject, sc.mNativeObject, newParentHandle);
             return this;
         }
 
         /** Re-parents a specific child layer to a new parent */
         public Transaction reparent(SurfaceControl sc, IBinder newParentHandle) {
+            sc.checkNotReleased();
             nativeReparent(mNativeObject, sc.mNativeObject,
                     newParentHandle);
             return this;
         }
 
         public Transaction detachChildren(SurfaceControl sc) {
+            sc.checkNotReleased();
             nativeSeverChildren(mNativeObject, sc.mNativeObject);
             return this;
         }
 
         public Transaction setOverrideScalingMode(SurfaceControl sc, int overrideScalingMode) {
+            sc.checkNotReleased();
             nativeSetOverrideScalingMode(mNativeObject, sc.mNativeObject,
                     overrideScalingMode);
             return this;
@@ -1322,6 +1340,7 @@ public class SurfaceControl {
          * @param color A float array with three values to represent r, g, b in range [0..1]
          */
         public Transaction setColor(SurfaceControl sc, @Size(3) float[] color) {
+            sc.checkNotReleased();
             nativeSetColor(mNativeObject, sc.mNativeObject, color);
             return this;
         }
@@ -1334,6 +1353,7 @@ public class SurfaceControl {
          * (at which point the geometry influencing aspects of this transaction will then occur)
          */
         public Transaction setGeometryAppliesWithResize(SurfaceControl sc) {
+            sc.checkNotReleased();
             nativeSetGeometryAppliesWithResize(mNativeObject, sc.mNativeObject);
             return this;
         }
@@ -1343,6 +1363,7 @@ public class SurfaceControl {
          * Surface with the {@link #SECURE} flag.
          */
         Transaction setSecure(SurfaceControl sc, boolean isSecure) {
+            sc.checkNotReleased();
             if (isSecure) {
                 nativeSetFlags(mNativeObject, sc.mNativeObject, SECURE, SECURE);
             } else {
@@ -1356,6 +1377,7 @@ public class SurfaceControl {
          * Surface with the {@link #OPAQUE} flag.
          */
         public Transaction setOpaque(SurfaceControl sc, boolean isOpaque) {
+            sc.checkNotReleased();
             if (isOpaque) {
                 nativeSetFlags(mNativeObject, sc.mNativeObject, SURFACE_OPAQUE, SURFACE_OPAQUE);
             } else {
