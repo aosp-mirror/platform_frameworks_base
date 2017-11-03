@@ -164,7 +164,7 @@ public final class StrictMode {
      * {@link #initThreadDefaults(ApplicationInfo)} and
      * {@link #initVmDefaults(ApplicationInfo)}.
      */
-    private static final boolean DISABLE = true;
+    private static final boolean DISABLE = false;
 
     // Only log a duplicate stack trace to the logs every second.
     private static final long MIN_LOG_INTERVAL_MS = 1000;
