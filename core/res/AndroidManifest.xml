@@ -307,6 +307,8 @@
     <protected-broadcast android:name="android.intent.action.DREAMING_STOPPED" />
     <protected-broadcast android:name="android.intent.action.ANY_DATA_STATE" />
 
+    <protected-broadcast android:name="com.android.server.stats.action.TRIGGER_COLLECTION" />
+
     <protected-broadcast android:name="com.android.server.WifiManager.action.START_SCAN" />
     <protected-broadcast android:name="com.android.server.WifiManager.action.START_PNO" />
     <protected-broadcast android:name="com.android.server.WifiManager.action.DELAYED_DRIVER_STOP" />

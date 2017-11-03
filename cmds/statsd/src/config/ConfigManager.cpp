@@ -60,6 +60,14 @@ void ConfigManager::UpdateConfig(const ConfigKey& key, const StatsdConfig& confi
     }
 }
 
+void ConfigManager::SetConfigReceiver(const ConfigKey& key, const string& pkg, const string& cls) {
+    mConfigReceivers[key] = pair<string, string>(pkg, cls);
+}
+
+void ConfigManager::RemoveConfigReceiver(const ConfigKey& key) {
+    mConfigReceivers.erase(key);
+}
+
 void ConfigManager::RemoveConfig(const ConfigKey& key) {
     unordered_map<ConfigKey, StatsdConfig>::iterator it = mConfigs.find(key);
     if (it != mConfigs.end()) {
@@ -85,6 +93,7 @@ void ConfigManager::RemoveConfigs(int uid) {
         if (it->first.GetUid() == uid) {
             removed.push_back(it->first);
             it = mConfigs.erase(it);
+            mConfigReceivers.erase(it->first);
         } else {
             it++;
         }

@@ -4044,6 +4044,13 @@ public abstract class Context {
     public static final String STATS_COMPANION_SERVICE = "statscompanion";
 
     /**
+     * Use with {@link #getSystemService} to retrieve an {@link android.stats.StatsManager}.
+     * @hide
+     */
+    @SystemApi
+    public static final String STATS_MANAGER = "stats";
+
+    /**
      * Use with {@link #getSystemService} to retrieve a {@link
      * android.content.om.OverlayManager} for managing overlay packages.
      *
