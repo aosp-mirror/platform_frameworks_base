@@ -14373,10 +14373,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             }
             sb.append("\n");
-            if (info.hasStackTrace()) {
-                sb.append(info.getStackTrace());
-                sb.append("\n");
-            }
+            sb.append(info.getStackTrace());
+            sb.append("\n");
             if (info.getViolationDetails() != null) {
                 sb.append(info.getViolationDetails());
                 sb.append("\n");
