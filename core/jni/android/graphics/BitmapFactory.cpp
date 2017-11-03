@@ -587,8 +587,7 @@ static jobject nativeDecodeFileDescriptor(JNIEnv* env, jobject clazz, jobject fi
         return nullObjectReturn("Could not open file");
     }
 
-    std::unique_ptr<SkFILEStream> fileStream(new SkFILEStream(file,
-            SkFILEStream::kCallerPasses_Ownership));
+    std::unique_ptr<SkFILEStream> fileStream(new SkFILEStream(file));
 
     // If there is no offset for the file descriptor, we use SkFILEStream directly.
     if (::lseek(descriptor, 0, SEEK_CUR) == 0) {
