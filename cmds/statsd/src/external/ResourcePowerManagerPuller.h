@@ -16,23 +16,19 @@
 
 #pragma once
 
-#include <android/os/StatsLogEventWrapper.h>
 #include <utils/String16.h>
-#include <vector>
-#include "logd/LogEvent.h"
-
-using android::os::StatsLogEventWrapper;
-using std::vector;
+#include "StatsPuller.h"
 
 namespace android {
 namespace os {
 namespace statsd {
 
-class StatsPuller {
+/**
+ * Reads hal for sleep states
+ */
+class ResourcePowerManagerPuller : public StatsPuller {
 public:
-    virtual ~StatsPuller(){};
-
-    virtual bool Pull(const int tagId, vector<std::shared_ptr<LogEvent>>* data) = 0;
+    bool Pull(const int tagId, vector<std::shared_ptr<LogEvent>>* data) override;
 };
 
 }  // namespace statsd

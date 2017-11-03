@@ -23,12 +23,9 @@ namespace android {
 namespace os {
 namespace statsd {
 
-class KernelWakelockPuller : public StatsPuller {
+class StatsCompanionServicePuller : public StatsPuller {
 public:
-    // a number of stats need to be pulled from StatsCompanionService
-    //
-    const static int PULL_CODE_KERNEL_WAKELOCKS;
-    vector<StatsLogEventWrapper> Pull() override;
+    bool Pull(const int tagId, vector<std::shared_ptr<LogEvent> >* data) override;
 };
 
 }  // namespace statsd

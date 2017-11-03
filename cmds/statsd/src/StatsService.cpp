@@ -373,12 +373,15 @@ status_t StatsService::cmd_print_uid_map(FILE* out) {
 
 status_t StatsService::cmd_print_pulled_metrics(FILE* out, const Vector<String8>& args) {
     int s = atoi(args[1].c_str());
-    auto stats = m_stats_puller_manager.Pull(s, time(nullptr));
-    for (const auto& it : stats) {
-        fprintf(out, "Pull from %d: %s\n", s, it->ToString().c_str());
+    vector<shared_ptr<LogEvent> > stats;
+    if (mStatsPullerManager.Pull(s, &stats)) {
+        for (const auto& it : stats) {
+            fprintf(out, "Pull from %d: %s\n", s, it->ToString().c_str());
+        }
+        fprintf(out, "Pull from %d: Received %zu elements\n", s, stats.size());
+        return NO_ERROR;
     }
-    fprintf(out, "Pull from %d: Received %zu elements\n", s, stats.size());
-    return NO_ERROR;
+    return UNKNOWN_ERROR;
 }
 
 Status StatsService::informAllUidData(const vector<int32_t>& uid, const vector<int32_t>& version,
@@ -440,7 +443,7 @@ Status StatsService::informPollAlarmFired() {
                                          "Only system uid can call informPollAlarmFired");
     }
 
-    m_stats_puller_manager.OnAlarmFired();
+    mStatsPullerManager.OnAlarmFired();
 
     if (DEBUG) ALOGD("StatsService::informPollAlarmFired succeeded");
 

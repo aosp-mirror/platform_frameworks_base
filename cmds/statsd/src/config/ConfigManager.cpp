@@ -139,7 +139,7 @@ static StatsdConfig build_fake_config() {
     int UID_PROCESS_STATE_TAG_ID = 27;
     int UID_PROCESS_STATE_UID_KEY = 1;
 
-    int KERNEL_WAKELOCK_TAG_ID = 41;
+    int KERNEL_WAKELOCK_TAG_ID = 1004;
     int KERNEL_WAKELOCK_NAME_KEY = 4;
 
     // Count Screen ON events.
@@ -300,6 +300,12 @@ static StatsdConfig build_fake_config() {
     keyValueMatcher = simpleLogEntryMatcher->add_key_value_matcher();
     keyValueMatcher->mutable_key_matcher()->set_key(WAKE_LOCK_STATE_KEY);
     keyValueMatcher->set_eq_int(WAKE_LOCK_RELEASE_VALUE);
+
+    // pulled events
+    eventMatcher = config.add_log_entry_matcher();
+    eventMatcher->set_name("KERNEL_WAKELOCK");
+    simpleLogEntryMatcher = eventMatcher->mutable_simple_log_entry_matcher();
+    simpleLogEntryMatcher->set_tag(KERNEL_WAKELOCK_TAG_ID);
 
     // Conditions.............
     Condition* condition = config.add_condition();
