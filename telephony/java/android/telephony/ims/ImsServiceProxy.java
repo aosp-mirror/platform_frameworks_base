@@ -305,19 +305,6 @@ public class ImsServiceProxy extends ImsServiceProxyCompat implements IRcsFeatur
         mStatusCallback = c;
     }
 
-    /**
-     * @return Returns true if the ImsService is ready to take commands, false otherwise. If this
-     * method returns false, it doesn't mean that the Binder connection is not available (use
-     * {@link #isBinderReady()} to check that), but that the ImsService is not accepting commands
-     * at this time.
-     *
-     * For example, for DSDS devices, only one slot can be {@link ImsFeature#STATE_READY} to take
-     * commands at a time, so the other slot must stay at {@link ImsFeature#STATE_NOT_AVAILABLE}.
-     */
-    public boolean isBinderReady() {
-        return isBinderAlive() && getFeatureStatus() == ImsFeature.STATE_READY;
-    }
-
     @Override
     public boolean isBinderAlive() {
         return mIsAvailable && mBinder != null && mBinder.isBinderAlive();
