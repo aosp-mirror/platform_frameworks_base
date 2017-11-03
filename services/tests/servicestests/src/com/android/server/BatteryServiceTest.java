@@ -36,12 +36,14 @@ import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
+import org.mockito.invocation.InvocationOnMock;
 
 
 public class BatteryServiceTest extends AndroidTestCase {
 
     @Mock IServiceManager mMockedManager;
     @Mock IHealth mMockedHal;
+    @Mock IHealth mMockedHal2;
 
     @Mock BatteryService.HealthServiceWrapper.Callback mCallback;
     @Mock BatteryService.HealthServiceWrapper.IServiceManagerSupplier mManagerSupplier;
@@ -54,6 +56,12 @@ public class BatteryServiceTest extends AndroidTestCase {
     @Override
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+    }
+
+    @Override
+    public void tearDown() {
+        if (mWrapper != null)
+            mWrapper.getHandlerThread().quitSafely();
     }
 
     public static <T> ArgumentMatcher<T> isOneOf(Collection<T> collection) {
@@ -70,42 +78,64 @@ public class BatteryServiceTest extends AndroidTestCase {
     private void initForInstances(String... instanceNamesArr) throws Exception {
         final Collection<String> instanceNames = Arrays.asList(instanceNamesArr);
         doAnswer((invocation) -> {
-                Slog.e("BatteryServiceTest", "health: onRegistration " + invocation.getArguments()[2]);
-                ((IServiceNotification)invocation.getArguments()[2]).onRegistration(
-                        IHealth.kInterfaceName,
-                        (String)invocation.getArguments()[1],
-                        true /* preexisting */);
+                // technically, preexisting is ignored by
+                // BatteryService.HealthServiceWrapper.Notification, but still call it correctly.
+                sendNotification(invocation, true);
+                sendNotification(invocation, true);
+                sendNotification(invocation, false);
                 return null;
             }).when(mMockedManager).registerForNotifications(
                 eq(IHealth.kInterfaceName),
                 argThat(isOneOf(instanceNames)),
                 any(IServiceNotification.class));
 
-        doReturn(mMockedHal).when(mMockedManager)
-            .get(eq(IHealth.kInterfaceName), argThat(isOneOf(instanceNames)));
-
-        doReturn(IServiceManager.Transport.HWBINDER).when(mMockedManager)
-            .getTransport(eq(IHealth.kInterfaceName), argThat(isOneOf(instanceNames)));
-
         doReturn(mMockedManager).when(mManagerSupplier).get();
-        doReturn(mMockedHal).when(mHealthServiceSupplier)
-            .get(argThat(isOneOf(instanceNames)));
+        doReturn(mMockedHal)        // init calls this
+            .doReturn(mMockedHal)   // notification 1
+            .doReturn(mMockedHal)   // notification 2
+            .doReturn(mMockedHal2)  // notification 3
+            .doThrow(new RuntimeException("Should not call getService for more than 4 times"))
+            .when(mHealthServiceSupplier).get(argThat(isOneOf(instanceNames)));
 
         mWrapper = new BatteryService.HealthServiceWrapper();
+    }
+
+    private void waitHandlerThreadFinish() throws Exception {
+        for (int i = 0; i < 5; i++) {
+            if (!mWrapper.getHandlerThread().getThreadHandler().hasMessagesOrCallbacks()) {
+                return;
+            }
+            Thread.sleep(300);
+        }
+        assertFalse(mWrapper.getHandlerThread().getThreadHandler().hasMessagesOrCallbacks());
+    }
+
+    private static void sendNotification(InvocationOnMock invocation, boolean preexisting)
+            throws Exception {
+        ((IServiceNotification)invocation.getArguments()[2]).onRegistration(
+                IHealth.kInterfaceName,
+                (String)invocation.getArguments()[1],
+                preexisting);
     }
 
     @SmallTest
     public void testWrapPreferVendor() throws Exception {
         initForInstances(VENDOR, HEALTHD);
         mWrapper.init(mCallback, mManagerSupplier, mHealthServiceSupplier);
-        verify(mCallback).onRegistration(same(null), same(mMockedHal), eq(VENDOR));
+        waitHandlerThreadFinish();
+        verify(mCallback, times(1)).onRegistration(same(null), same(mMockedHal), eq(VENDOR));
+        verify(mCallback, never()).onRegistration(same(mMockedHal), same(mMockedHal), anyString());
+        verify(mCallback, times(1)).onRegistration(same(mMockedHal), same(mMockedHal2), eq(VENDOR));
     }
 
     @SmallTest
     public void testUseHealthd() throws Exception {
         initForInstances(HEALTHD);
         mWrapper.init(mCallback, mManagerSupplier, mHealthServiceSupplier);
-        verify(mCallback).onRegistration(same(null), same(mMockedHal), eq(HEALTHD));
+        waitHandlerThreadFinish();
+        verify(mCallback, times(1)).onRegistration(same(null), same(mMockedHal), eq(HEALTHD));
+        verify(mCallback, never()).onRegistration(same(mMockedHal), same(mMockedHal), anyString());
+        verify(mCallback, times(1)).onRegistration(same(mMockedHal), same(mMockedHal2), eq(HEALTHD));
     }
 
     @SmallTest
