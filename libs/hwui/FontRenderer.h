@@ -16,10 +16,10 @@
 
 #pragma once
 
-#include "font/FontUtil.h"
 #include "font/CacheTexture.h"
 #include "font/CachedGlyphInfo.h"
 #include "font/Font.h"
+#include "font/FontUtil.h"
 #ifdef BUGREPORT_FONT_CACHE_USAGE
 #include "font/FontCacheHistoryTracker.h"
 #endif
@@ -36,10 +36,10 @@
 
 #include "RenderScript.h"
 namespace RSC {
-    class Element;
-    class RS;
-    class ScriptIntrinsicBlur;
-    class sp;
+class Element;
+class RS;
+class ScriptIntrinsicBlur;
+class sp;
 }
 
 namespace android {
@@ -51,22 +51,18 @@ struct ClipBase;
 
 class TextDrawFunctor {
 public:
-    TextDrawFunctor(
-            BakedOpRenderer* renderer,
-            const BakedOpState* bakedState,
-            const ClipBase* clip,
-            float x, float y, bool pureTranslate,
-            int alpha, SkBlendMode mode, const SkPaint* paint)
-        : renderer(renderer)
-        , bakedState(bakedState)
-        , clip(clip)
-        , x(x)
-        , y(y)
-        , pureTranslate(pureTranslate)
-        , alpha(alpha)
-        , mode(mode)
-        , paint(paint) {
-    }
+    TextDrawFunctor(BakedOpRenderer* renderer, const BakedOpState* bakedState, const ClipBase* clip,
+                    float x, float y, bool pureTranslate, int alpha, SkBlendMode mode,
+                    const SkPaint* paint)
+            : renderer(renderer)
+            , bakedState(bakedState)
+            , clip(clip)
+            , x(x)
+            , y(y)
+            , pureTranslate(pureTranslate)
+            , alpha(alpha)
+            , mode(mode)
+            , paint(paint) {}
 
     void draw(CacheTexture& texture, bool linearFiltering);
 
@@ -91,16 +87,17 @@ public:
 
     void setFont(const SkPaint* paint, const SkMatrix& matrix);
 
-    void precache(const SkPaint* paint, const glyph_t* glyphs, int numGlyphs, const SkMatrix& matrix);
+    void precache(const SkPaint* paint, const glyph_t* glyphs, int numGlyphs,
+                  const SkMatrix& matrix);
     void endPrecaching();
 
-    bool renderPosText(const SkPaint* paint, const Rect* clip, const glyph_t* glyphs,
-            int numGlyphs, int x, int y, const float* positions,
-            Rect* outBounds, TextDrawFunctor* functor, bool forceFinish = true);
+    bool renderPosText(const SkPaint* paint, const Rect* clip, const glyph_t* glyphs, int numGlyphs,
+                       int x, int y, const float* positions, Rect* outBounds,
+                       TextDrawFunctor* functor, bool forceFinish = true);
 
     bool renderTextOnPath(const SkPaint* paint, const Rect* clip, const glyph_t* glyphs,
-            int numGlyphs, const SkPath* path,
-            float hOffset, float vOffset, Rect* outBounds, TextDrawFunctor* functor);
+                          int numGlyphs, const SkPath* path, float hOffset, float vOffset,
+                          Rect* outBounds, TextDrawFunctor* functor);
 
     struct DropShadow {
         uint32_t width;
@@ -112,12 +109,10 @@ public:
 
     // After renderDropShadow returns, the called owns the memory in DropShadow.image
     // and is responsible for releasing it when it's done with it
-    DropShadow renderDropShadow(const SkPaint* paint, const glyph_t *glyphs, int numGlyphs,
-            float radius, const float* positions);
+    DropShadow renderDropShadow(const SkPaint* paint, const glyph_t* glyphs, int numGlyphs,
+                                float radius, const float* positions);
 
-    void setTextureFiltering(bool linearFiltering) {
-        mLinearFiltering = linearFiltering;
-    }
+    void setTextureFiltering(bool linearFiltering) { mLinearFiltering = linearFiltering; }
 
     uint32_t getSize() const;
     void dumpMemoryUsage(String8& log) const;
@@ -135,10 +130,10 @@ private:
     void deallocateTextureMemory(CacheTexture* cacheTexture);
     void initTextTexture();
     CacheTexture* createCacheTexture(int width, int height, GLenum format, bool allocate);
-    void cacheBitmap(const SkGlyph& glyph, CachedGlyphInfo* cachedGlyph,
-            uint32_t *retOriginX, uint32_t *retOriginY, bool precaching);
-    CacheTexture* cacheBitmapInTexture(std::vector<CacheTexture*>& cacheTextures, const SkGlyph& glyph,
-            uint32_t* startX, uint32_t* startY);
+    void cacheBitmap(const SkGlyph& glyph, CachedGlyphInfo* cachedGlyph, uint32_t* retOriginX,
+                     uint32_t* retOriginY, bool precaching);
+    CacheTexture* cacheBitmapInTexture(std::vector<CacheTexture*>& cacheTextures,
+                                       const SkGlyph& glyph, uint32_t* startX, uint32_t* startY);
 
     void flushAllAndInvalidate();
 
@@ -148,24 +143,19 @@ private:
 
     void issueDrawCommand(std::vector<CacheTexture*>& cacheTextures);
     void issueDrawCommand();
-    void appendMeshQuadNoClip(float x1, float y1, float u1, float v1,
-            float x2, float y2, float u2, float v2,
-            float x3, float y3, float u3, float v3,
-            float x4, float y4, float u4, float v4, CacheTexture* texture);
-    void appendMeshQuad(float x1, float y1, float u1, float v1,
-            float x2, float y2, float u2, float v2,
-            float x3, float y3, float u3, float v3,
-            float x4, float y4, float u4, float v4, CacheTexture* texture);
-    void appendRotatedMeshQuad(float x1, float y1, float u1, float v1,
-            float x2, float y2, float u2, float v2,
-            float x3, float y3, float u3, float v3,
-            float x4, float y4, float u4, float v4, CacheTexture* texture);
+    void appendMeshQuadNoClip(float x1, float y1, float u1, float v1, float x2, float y2, float u2,
+                              float v2, float x3, float y3, float u3, float v3, float x4, float y4,
+                              float u4, float v4, CacheTexture* texture);
+    void appendMeshQuad(float x1, float y1, float u1, float v1, float x2, float y2, float u2,
+                        float v2, float x3, float y3, float u3, float v3, float x4, float y4,
+                        float u4, float v4, CacheTexture* texture);
+    void appendRotatedMeshQuad(float x1, float y1, float u1, float v1, float x2, float y2, float u2,
+                               float v2, float x3, float y3, float u3, float v3, float x4, float y4,
+                               float u4, float v4, CacheTexture* texture);
 
     void checkTextureUpdate();
 
-    void setTextureDirty() {
-        mUploadTexture = true;
-    }
+    void setTextureDirty() { mUploadTexture = true; }
 
     const std::vector<CacheTexture*>& cacheTexturesForFormat(GLenum format) const;
     uint32_t getCacheSize(GLenum format) const;
@@ -205,14 +195,14 @@ private:
     RSC::sp<RSC::ScriptIntrinsicBlur> mRsScript;
 
     static void computeGaussianWeights(float* weights, int32_t radius);
-    static void horizontalBlur(float* weights, int32_t radius, const uint8_t *source, uint8_t *dest,
-            int32_t width, int32_t height);
-    static void verticalBlur(float* weights, int32_t radius, const uint8_t *source, uint8_t *dest,
-            int32_t width, int32_t height);
+    static void horizontalBlur(float* weights, int32_t radius, const uint8_t* source, uint8_t* dest,
+                               int32_t width, int32_t height);
+    static void verticalBlur(float* weights, int32_t radius, const uint8_t* source, uint8_t* dest,
+                             int32_t width, int32_t height);
 
     // the input image handle may have its pointer replaced (to avoid copies)
     void blurImage(uint8_t** image, int32_t width, int32_t height, float radius);
 };
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android

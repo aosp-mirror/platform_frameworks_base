@@ -33,8 +33,8 @@ namespace uirenderer {
 // OffscreenBuffer
 ////////////////////////////////////////////////////////////////////////////////
 
-OffscreenBuffer::OffscreenBuffer(RenderState& renderState, Caches& caches,
-        uint32_t viewportWidth, uint32_t viewportHeight, bool wideColorGamut)
+OffscreenBuffer::OffscreenBuffer(RenderState& renderState, Caches& caches, uint32_t viewportWidth,
+                                 uint32_t viewportHeight, bool wideColorGamut)
         : GpuMemoryTracker(GpuObjectType::OffscreenBuffer)
         , renderState(renderState)
         , viewportWidth(viewportWidth)
@@ -45,8 +45,8 @@ OffscreenBuffer::OffscreenBuffer(RenderState& renderState, Caches& caches,
     uint32_t height = computeIdealDimension(viewportHeight);
     ATRACE_FORMAT("Allocate %ux%u HW Layer", width, height);
     caches.textureState().activateTexture(0);
-    texture.resize(width, height,
-            wideColorGamut ? GL_RGBA16F : caches.rgbaInternalFormat(), GL_RGBA);
+    texture.resize(width, height, wideColorGamut ? GL_RGBA16F : caches.rgbaInternalFormat(),
+                   GL_RGBA);
     texture.blend = true;
     texture.setWrap(GL_CLAMP_TO_EDGE);
     // not setting filter on texture, since it's set when drawing, based on transform
@@ -61,8 +61,8 @@ Rect OffscreenBuffer::getTextureCoordinates() {
 void OffscreenBuffer::dirty(Rect dirtyArea) {
     dirtyArea.doIntersect(0, 0, viewportWidth, viewportHeight);
     if (!dirtyArea.isEmpty()) {
-        region.orSelf(android::Rect(dirtyArea.left, dirtyArea.top,
-                dirtyArea.right, dirtyArea.bottom));
+        region.orSelf(
+                android::Rect(dirtyArea.left, dirtyArea.top, dirtyArea.right, dirtyArea.bottom));
     }
 }
 
@@ -78,7 +78,8 @@ void OffscreenBuffer::updateMeshFromRegion() {
     const float texX = 1.0f / float(texture.width());
     const float texY = 1.0f / float(texture.height());
 
-    FatVector<TextureVertex, 64> meshVector(count * 4); // uses heap if more than 64 vertices needed
+    FatVector<TextureVertex, 64> meshVector(count *
+                                            4);  // uses heap if more than 64 vertices needed
     TextureVertex* mesh = &meshVector[0];
     for (size_t i = 0; i < count; i++) {
         const android::Rect* r = &rects[i];
@@ -94,10 +95,9 @@ void OffscreenBuffer::updateMeshFromRegion() {
         TextureVertex::set(mesh++, r->right, r->bottom, u2, v2);
     }
     elementCount = count * 6;
-    renderState.meshState().genOrUpdateMeshBuffer(&vbo,
-            sizeof(TextureVertex) * count * 4,
-            &meshVector[0],
-            GL_DYNAMIC_DRAW); // TODO: GL_STATIC_DRAW if savelayer
+    renderState.meshState().genOrUpdateMeshBuffer(
+            &vbo, sizeof(TextureVertex) * count * 4, &meshVector[0],
+            GL_DYNAMIC_DRAW);  // TODO: GL_STATIC_DRAW if savelayer
 }
 
 uint32_t OffscreenBuffer::computeIdealDimension(uint32_t dimension) {
@@ -117,12 +117,11 @@ OffscreenBuffer::~OffscreenBuffer() {
 ///////////////////////////////////////////////////////////////////////////////
 
 OffscreenBufferPool::OffscreenBufferPool()
-     // 4 screen-sized RGBA_8888 textures
-    : mMaxSize(DeviceInfo::multiplyByResolution(4 * 4)) {
-}
+        // 4 screen-sized RGBA_8888 textures
+        : mMaxSize(DeviceInfo::multiplyByResolution(4 * 4)) {}
 
 OffscreenBufferPool::~OffscreenBufferPool() {
-    clear(); // TODO: unique_ptr?
+    clear();  // TODO: unique_ptr?
 }
 
 int OffscreenBufferPool::Entry::compare(const Entry& lhs, const Entry& rhs) {
@@ -143,8 +142,8 @@ void OffscreenBufferPool::clear() {
     mSize = 0;
 }
 
-OffscreenBuffer* OffscreenBufferPool::get(RenderState& renderState,
-        const uint32_t width, const uint32_t height, bool wideColorGamut) {
+OffscreenBuffer* OffscreenBufferPool::get(RenderState& renderState, const uint32_t width,
+                                          const uint32_t height, bool wideColorGamut) {
     OffscreenBuffer* layer = nullptr;
 
     Entry entry(width, height, wideColorGamut);
@@ -159,18 +158,18 @@ OffscreenBuffer* OffscreenBufferPool::get(RenderState& renderState,
         layer->viewportHeight = height;
         mSize -= layer->getSizeInBytes();
     } else {
-        layer = new OffscreenBuffer(renderState, Caches::getInstance(),
-                width, height, wideColorGamut);
+        layer = new OffscreenBuffer(renderState, Caches::getInstance(), width, height,
+                                    wideColorGamut);
     }
 
     return layer;
 }
 
-OffscreenBuffer* OffscreenBufferPool::resize(OffscreenBuffer* layer,
-        const uint32_t width, const uint32_t height) {
+OffscreenBuffer* OffscreenBufferPool::resize(OffscreenBuffer* layer, const uint32_t width,
+                                             const uint32_t height) {
     RenderState& renderState = layer->renderState;
-    if (layer->texture.width() == OffscreenBuffer::computeIdealDimension(width)
-            && layer->texture.height() == OffscreenBuffer::computeIdealDimension(height)) {
+    if (layer->texture.width() == OffscreenBuffer::computeIdealDimension(width) &&
+        layer->texture.height() == OffscreenBuffer::computeIdealDimension(height)) {
         // resize in place
         layer->viewportWidth = width;
         layer->viewportHeight = height;
@@ -214,5 +213,5 @@ void OffscreenBufferPool::putOrDelete(OffscreenBuffer* layer) {
     }
 }
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android

@@ -24,8 +24,9 @@ namespace uirenderer {
 
 class Barrier {
 public:
-    explicit Barrier(Condition::WakeUpType type = Condition::WAKE_UP_ALL) : mType(type), mOpened(false) { }
-    ~Barrier() { }
+    explicit Barrier(Condition::WakeUpType type = Condition::WAKE_UP_ALL)
+            : mType(type), mOpened(false) {}
+    ~Barrier() {}
 
     void open() {
         Mutex::Autolock l(mLock);
@@ -47,7 +48,7 @@ private:
     mutable Condition mCondition;
 };
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android
 
-#endif // ANDROID_HWUI_BARRIER_H
+#endif  // ANDROID_HWUI_BARRIER_H

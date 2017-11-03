@@ -136,5 +136,5 @@ void Stencil::dump() {
     ALOGD("Stencil: state %d", mState);
 }
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android

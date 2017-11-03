@@ -16,15 +16,15 @@
 
 #include "Typeface.h"
 
-#include <pthread.h>
 #include <fcntl.h>  // For tests.
-#include <sys/stat.h>  // For tests.
+#include <pthread.h>
 #include <sys/mman.h>  // For tests.
+#include <sys/stat.h>  // For tests.
 
 #include "MinikinSkia.h"
-#include "SkTypeface.h"
 #include "SkPaint.h"
 #include "SkStream.h"  // Fot tests.
+#include "SkTypeface.h"
 
 #include <minikin/FontCollection.h>
 #include <minikin/FontFamily.h>
@@ -90,8 +90,8 @@ Typeface* Typeface::createAbsolute(Typeface* base, int weight, bool italic) {
     return result;
 }
 
-Typeface* Typeface::createFromTypefaceWithVariation(Typeface* src,
-        const std::vector<minikin::FontVariation>& variations) {
+Typeface* Typeface::createFromTypefaceWithVariation(
+        Typeface* src, const std::vector<minikin::FontVariation>& variations) {
     const Typeface* resolvedFace = Typeface::resolveDefault(src);
     Typeface* result = new Typeface();
     if (result != nullptr) {
@@ -123,9 +123,8 @@ Typeface* Typeface::createWithDifferentBaseWeight(Typeface* src, int weight) {
     return result;
 }
 
-Typeface* Typeface::createFromFamilies(
-        std::vector<std::shared_ptr<minikin::FontFamily>>&& families,
-        int weight, int italic) {
+Typeface* Typeface::createFromFamilies(std::vector<std::shared_ptr<minikin::FontFamily>>&& families,
+                                       int weight, int italic) {
     Typeface* result = new Typeface;
     result->fFontCollection.reset(new minikin::FontCollection(families));
 
@@ -135,7 +134,7 @@ Typeface* Typeface::createFromFamilies(
 
         const minikin::FontStyle defaultStyle;
         const minikin::MinikinFont* mf =
-                families.empty() ?  nullptr : families[0]->getClosestMatch(defaultStyle).font;
+                families.empty() ? nullptr : families[0]->getClosestMatch(defaultStyle).font;
         if (mf != nullptr) {
             SkTypeface* skTypeface = reinterpret_cast<const MinikinFontSkia*>(mf)->GetSkTypeface();
             const SkFontStyle& style = skTypeface->fontStyle();
@@ -151,7 +150,7 @@ Typeface* Typeface::createFromFamilies(
             weight = weightFromFont;
         }
         if (italic == RESOLVE_BY_FONT_TABLE) {
-            italic = italicFromFont? 1 : 0;
+            italic = italicFromFont ? 1 : 0;
         }
     }
 
@@ -185,7 +184,7 @@ void Typeface::setRobotoTypefaceForTest() {
     std::shared_ptr<minikin::MinikinFont> font = std::make_shared<MinikinFontSkia>(
             std::move(typeface), data, st.st_size, 0, std::vector<minikin::FontVariation>());
     std::shared_ptr<minikin::FontFamily> family = std::make_shared<minikin::FontFamily>(
-            std::vector<minikin::Font>({ minikin::Font(std::move(font), minikin::FontStyle()) }));
+            std::vector<minikin::Font>({minikin::Font(std::move(font), minikin::FontStyle())}));
     std::shared_ptr<minikin::FontCollection> collection =
             std::make_shared<minikin::FontCollection>(std::move(family));
 
@@ -197,5 +196,4 @@ void Typeface::setRobotoTypefaceForTest() {
 
     Typeface::setDefault(hwTypeface);
 }
-
 }

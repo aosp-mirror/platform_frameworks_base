@@ -18,9 +18,9 @@
 
 #include "Caches.h"
 #include "Debug.h"
+#include "DeviceInfo.h"
 #include "GradientCache.h"
 #include "Properties.h"
-#include "DeviceInfo.h"
 
 #include <cutils/properties.h>
 
@@ -31,7 +31,7 @@ namespace uirenderer {
 // Functions
 ///////////////////////////////////////////////////////////////////////////////
 
-template<typename T>
+template <typename T>
 static inline T min(T a, T b) {
     return a < b ? a : b;
 }
@@ -122,8 +122,7 @@ void GradientCache::clear() {
     mCache.clear();
 }
 
-void GradientCache::getGradientInfo(const uint32_t* colors, const int count,
-        GradientInfo& info) {
+void GradientCache::getGradientInfo(const uint32_t* colors, const int count, GradientInfo& info) {
     uint32_t width = 256 * (count - 1);
 
     // If the npot extension is not supported we cannot use non-clamp
@@ -145,9 +144,8 @@ void GradientCache::getGradientInfo(const uint32_t* colors, const int count,
     info.hasAlpha = hasAlpha;
 }
 
-Texture* GradientCache::addLinearGradient(GradientCacheEntry& gradient,
-        uint32_t* colors, float* positions, int count) {
-
+Texture* GradientCache::addLinearGradient(GradientCacheEntry& gradient, uint32_t* colors,
+                                          float* positions, int count) {
     GradientInfo info;
     getGradientInfo(colors, count, info);
 
@@ -159,18 +157,19 @@ Texture* GradientCache::addLinearGradient(GradientCacheEntry& gradient,
     const uint32_t size = info.width * 2 * bytesPerPixel();
     while (getSize() + size > mMaxSize) {
         LOG_ALWAYS_FATAL_IF(!mCache.removeOldest(),
-                "Ran out of things to remove from the cache? getSize() = %" PRIu32
-                ", size = %" PRIu32 ", mMaxSize = %" PRIu32 ", width = %" PRIu32,
-                getSize(), size, mMaxSize, info.width);
+                            "Ran out of things to remove from the cache? getSize() = %" PRIu32
+                            ", size = %" PRIu32 ", mMaxSize = %" PRIu32 ", width = %" PRIu32,
+                            getSize(), size, mMaxSize, info.width);
     }
 
     generateTexture(colors, positions, info.width, 2, texture);
 
     mSize += size;
     LOG_ALWAYS_FATAL_IF((int)size != texture->objectSize(),
-            "size != texture->objectSize(), size %" PRIu32 ", objectSize %d"
-            " width = %" PRIu32 " bytesPerPixel() = %zu",
-            size, texture->objectSize(), info.width, bytesPerPixel());
+                        "size != texture->objectSize(), size %" PRIu32
+                        ", objectSize %d"
+                        " width = %" PRIu32 " bytesPerPixel() = %zu",
+                        size, texture->objectSize(), info.width, bytesPerPixel());
     mCache.put(gradient, texture);
 
     return texture;
@@ -186,8 +185,8 @@ size_t GradientCache::sourceBytesPerPixel() const {
     return 4 * (mUseFloatTexture ? sizeof(float) : sizeof(uint8_t));
 }
 
-void GradientCache::mixBytes(const FloatColor& start, const FloatColor& end,
-        float amount, uint8_t*& dst) const {
+void GradientCache::mixBytes(const FloatColor& start, const FloatColor& end, float amount,
+                             uint8_t*& dst) const {
     float oppAmount = 1.0f - amount;
     float a = start.a * oppAmount + end.a * amount;
     *dst++ = uint8_t(OECF(start.r * oppAmount + end.r * amount) * 255.0f);
@@ -196,11 +195,11 @@ void GradientCache::mixBytes(const FloatColor& start, const FloatColor& end,
     *dst++ = uint8_t(a * 255.0f);
 }
 
-void GradientCache::mixFloats(const FloatColor& start, const FloatColor& end,
-        float amount, uint8_t*& dst) const {
+void GradientCache::mixFloats(const FloatColor& start, const FloatColor& end, float amount,
+                              uint8_t*& dst) const {
     float oppAmount = 1.0f - amount;
     float a = start.a * oppAmount + end.a * amount;
-    float* d = (float*) dst;
+    float* d = (float*)dst;
 #ifdef ANDROID_ENABLE_LINEAR_BLENDING
     // We want to stay linear
     *d++ = (start.r * oppAmount + end.r * amount);
@@ -215,8 +214,8 @@ void GradientCache::mixFloats(const FloatColor& start, const FloatColor& end,
     dst += 4 * sizeof(float);
 }
 
-void GradientCache::generateTexture(uint32_t* colors, float* positions,
-        const uint32_t width, const uint32_t height, Texture* texture) {
+void GradientCache::generateTexture(uint32_t* colors, float* positions, const uint32_t width,
+                                    const uint32_t height, Texture* texture) {
     const GLsizei rowBytes = width * sourceBytesPerPixel();
     uint8_t pixels[rowBytes * height];
 
@@ -269,5 +268,5 @@ void GradientCache::generateTexture(uint32_t* colors, float* positions,
     texture->setWrap(GL_CLAMP_TO_EDGE);
 }
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android

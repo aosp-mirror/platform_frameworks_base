@@ -16,13 +16,12 @@
 
 #include "SkiaDisplayList.h"
 
-#include "renderthread/CanvasContext.h"
-#include "VectorDrawable.h"
 #include "DumpOpsCanvas.h"
 #include "SkiaPipeline.h"
+#include "VectorDrawable.h"
+#include "renderthread/CanvasContext.h"
 
 #include <SkImagePriv.h>
-
 
 namespace android {
 namespace uirenderer {
@@ -49,8 +48,8 @@ void SkiaDisplayList::updateChildren(std::function<void(RenderNode*)> updateFn) 
     }
 }
 
-bool SkiaDisplayList::prepareListAndChildren(TreeObserver& observer, TreeInfo& info,
-        bool functorsNeedLayer,
+bool SkiaDisplayList::prepareListAndChildren(
+        TreeObserver& observer, TreeInfo& info, bool functorsNeedLayer,
         std::function<void(RenderNode*, TreeObserver&, TreeInfo&, bool)> childFn) {
     // If the prepare tree is triggered by the UI thread and no previous call to
     // pinImages has failed then we must pin all mutable images in the GPU cache
@@ -64,7 +63,7 @@ bool SkiaDisplayList::prepareListAndChildren(TreeObserver& observer, TreeInfo& i
     }
 
     bool hasBackwardProjectedNodesHere = false;
-    bool hasBackwardProjectedNodesSubtree= false;
+    bool hasBackwardProjectedNodesSubtree = false;
 
     for (auto& child : mChildNodes) {
         hasBackwardProjectedNodesHere |= child.getNodeProperties().getProjectBackwards();
@@ -78,14 +77,15 @@ bool SkiaDisplayList::prepareListAndChildren(TreeObserver& observer, TreeInfo& i
         info.damageAccumulator->popTransform();
     }
 
-    //The purpose of next block of code is to reset projected display list if there are no
-    //backward projected nodes. This speeds up drawing, by avoiding an extra walk of the tree
+    // The purpose of next block of code is to reset projected display list if there are no
+    // backward projected nodes. This speeds up drawing, by avoiding an extra walk of the tree
     if (mProjectionReceiver) {
-        mProjectionReceiver->setProjectedDisplayList(hasBackwardProjectedNodesSubtree ? this : nullptr);
+        mProjectionReceiver->setProjectedDisplayList(hasBackwardProjectedNodesSubtree ? this
+                                                                                      : nullptr);
         info.hasBackwardProjectedNodes = hasBackwardProjectedNodesHere;
     } else {
-        info.hasBackwardProjectedNodes = hasBackwardProjectedNodesSubtree
-                || hasBackwardProjectedNodesHere;
+        info.hasBackwardProjectedNodes =
+                hasBackwardProjectedNodesSubtree || hasBackwardProjectedNodesHere;
     }
 
     bool isDirty = false;
@@ -94,7 +94,8 @@ bool SkiaDisplayList::prepareListAndChildren(TreeObserver& observer, TreeInfo& i
         if (vectorDrawable->isDirty()) {
             isDirty = true;
             static_cast<SkiaPipeline*>(info.canvasContext.getRenderPipeline())
-                ->getVectorDrawables()->push_back(vectorDrawable);
+                    ->getVectorDrawables()
+                    ->push_back(vectorDrawable);
         }
         vectorDrawable->setPropertyChangeWillBeConsumed(true);
     }
@@ -121,6 +122,6 @@ void SkiaDisplayList::output(std::ostream& output, uint32_t level) {
     mDisplayList.draw(&canvas);
 }
 
-}; // namespace skiapipeline
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace skiapipeline
+};  // namespace uirenderer
+};  // namespace android

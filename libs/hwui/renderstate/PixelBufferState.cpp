@@ -18,9 +18,7 @@
 namespace android {
 namespace uirenderer {
 
-PixelBufferState::PixelBufferState()
-        : mCurrentPixelBuffer(0) {
-}
+PixelBufferState::PixelBufferState() : mCurrentPixelBuffer(0) {}
 
 bool PixelBufferState::bind(GLuint buffer) {
     if (mCurrentPixelBuffer != buffer) {
@@ -42,4 +40,3 @@ bool PixelBufferState::unbind() {
 
 } /* namespace uirenderer */
 } /* namespace android */
-

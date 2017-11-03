@@ -31,7 +31,8 @@ static ThreadBase& thread() {
         sp<TestThread> ret{new TestThread};
         ret->start("TestThread");
         return ret;
-    }();
+    }
+    ();
     return *thread;
 }
 
@@ -41,9 +42,7 @@ static WorkQueue& queue() {
 
 TEST(ThreadBase, post) {
     std::atomic_bool ran(false);
-    queue().post([&ran]() {
-        ran = true;
-    });
+    queue().post([&ran]() { ran = true; });
     for (int i = 0; !ran && i < 1000; i++) {
         usleep(1);
     }
@@ -55,9 +54,7 @@ TEST(ThreadBase, postDelay) {
 
     std::promise<nsecs_t> ranAtPromise;
     auto queuedAt = clock::now();
-    queue().postDelayed(100_us, [&]() {
-        ranAtPromise.set_value(clock::now());
-    });
+    queue().postDelayed(100_us, [&]() { ranAtPromise.set_value(clock::now()); });
     auto ranAt = ranAtPromise.get_future().get();
     auto ranAfter = ranAt - queuedAt;
     ASSERT_TRUE(ranAfter > 90_us) << "Ran after " << ns2us(ranAfter) << "us <= 90us";
@@ -80,15 +77,9 @@ TEST(ThreadBase, async) {
     pid_t thisTid = gettid();
     pid_t thisPid = getpid();
 
-    auto otherTid = queue().async([]() -> auto {
-        return gettid();
-    });
-    auto otherPid = queue().async([]() -> auto {
-        return getpid();
-    });
-    auto result = queue().async([]() -> auto {
-        return 42;
-    });
+    auto otherTid = queue().async([]() -> auto { return gettid(); });
+    auto otherPid = queue().async([]() -> auto { return getpid(); });
+    auto result = queue().async([]() -> auto { return 42; });
 
     ASSERT_NE(thisTid, otherTid.get());
     ASSERT_EQ(thisPid, otherPid.get());
@@ -104,9 +95,7 @@ TEST(ThreadBase, lifecyclePerf) {
     };
 
     struct Counter {
-        Counter(EventCount* count) : mCount(count) {
-            mCount->construct++;
-        }
+        Counter(EventCount* count) : mCount(count) { mCount->construct++; }
 
         Counter(const Counter& other) : mCount(other.mCount) {
             if (mCount) mCount->copy++;
@@ -149,17 +138,13 @@ TEST(ThreadBase, lifecyclePerf) {
 }
 
 int lifecycleTestHelper(const sp<VirtualLightRefBase>& test) {
-    return queue().runSync([t = test]() -> int {
-        return t->getStrongCount();
-    });
+    return queue().runSync([t = test]()->int { return t->getStrongCount(); });
 }
 
 TEST(ThreadBase, lifecycle) {
     sp<VirtualLightRefBase> dummyObject{new VirtualLightRefBase};
     ASSERT_EQ(1, dummyObject->getStrongCount());
-    ASSERT_EQ(2, queue().runSync([dummyObject]() -> int {
-        return dummyObject->getStrongCount();
-    }));
+    ASSERT_EQ(2, queue().runSync([dummyObject]() -> int { return dummyObject->getStrongCount(); }));
     ASSERT_EQ(1, dummyObject->getStrongCount());
     ASSERT_EQ(2, lifecycleTestHelper(dummyObject));
     ASSERT_EQ(1, dummyObject->getStrongCount());

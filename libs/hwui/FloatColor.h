@@ -33,8 +33,8 @@ struct FloatColor {
     void set(uint32_t color) {
         a = ((color >> 24) & 0xff) / 255.0f;
         r = a * EOCF(((color >> 16) & 0xff) / 255.0f);
-        g = a * EOCF(((color >>  8) & 0xff) / 255.0f);
-        b = a * EOCF(((color      ) & 0xff) / 255.0f);
+        g = a * EOCF(((color >> 8) & 0xff) / 255.0f);
+        b = a * EOCF(((color)&0xff) / 255.0f);
     }
 
     // "color" is a gamma-encoded sRGB color
@@ -44,27 +44,18 @@ struct FloatColor {
     void setUnPreMultiplied(uint32_t color) {
         a = ((color >> 24) & 0xff) / 255.0f;
         r = EOCF(((color >> 16) & 0xff) / 255.0f);
-        g = EOCF(((color >>  8) & 0xff) / 255.0f);
-        b = EOCF(((color      ) & 0xff) / 255.0f);
+        g = EOCF(((color >> 8) & 0xff) / 255.0f);
+        b = EOCF(((color)&0xff) / 255.0f);
     }
 
-    bool isNotBlack() {
-        return a < 1.0f
-                || r > 0.0f
-                || g > 0.0f
-                || b > 0.0f;
-    }
+    bool isNotBlack() { return a < 1.0f || r > 0.0f || g > 0.0f || b > 0.0f; }
 
     bool operator==(const FloatColor& other) const {
-        return MathUtils::areEqual(r, other.r)
-                && MathUtils::areEqual(g, other.g)
-                && MathUtils::areEqual(b, other.b)
-                && MathUtils::areEqual(a, other.a);
+        return MathUtils::areEqual(r, other.r) && MathUtils::areEqual(g, other.g) &&
+               MathUtils::areEqual(b, other.b) && MathUtils::areEqual(a, other.a);
     }
 
-    bool operator!=(const FloatColor& other) const {
-        return !(*this == other);
-    }
+    bool operator!=(const FloatColor& other) const { return !(*this == other); }
 
     float r;
     float g;

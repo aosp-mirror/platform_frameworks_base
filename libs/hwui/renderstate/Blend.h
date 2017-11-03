@@ -28,6 +28,7 @@ namespace uirenderer {
 
 class Blend {
     friend class RenderState;
+
 public:
     // dictates whether to swap src/dst
     enum class ModeOrderSwap {
@@ -36,19 +37,18 @@ public:
     };
     void syncEnabled();
 
-    static void getFactors(SkBlendMode mode, ModeOrderSwap modeUsage,
-            GLenum* outSrc, GLenum* outDst);
+    static void getFactors(SkBlendMode mode, ModeOrderSwap modeUsage, GLenum* outSrc,
+                           GLenum* outDst);
     void setFactors(GLenum src, GLenum dst);
 
-    bool  getEnabled() {
-        return mEnabled;
-    }
+    bool getEnabled() { return mEnabled; }
     void getFactors(GLenum* src, GLenum* dst) {
         *src = mSrcMode;
         *dst = mDstMode;
     }
 
     void dump();
+
 private:
     Blend();
     void invalidate();
@@ -60,4 +60,4 @@ private:
 } /* namespace uirenderer */
 } /* namespace android */
 
-#endif // RENDERSTATE_BLEND_H
+#endif  // RENDERSTATE_BLEND_H

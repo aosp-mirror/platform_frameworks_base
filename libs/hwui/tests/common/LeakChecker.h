@@ -22,7 +22,7 @@ namespace test {
 class LeakChecker {
 public:
     static void checkForLeaks();
-}; // class TestUtils
+};  // class TestUtils
 
 } /* namespace test */
 } /* namespace uirenderer */

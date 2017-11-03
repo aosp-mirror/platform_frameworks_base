@@ -42,10 +42,7 @@ class RenderThread;
 
 class CacheManager {
 public:
-    enum class TrimMemoryMode {
-        Complete,
-        UiHidden
-    };
+    enum class TrimMemoryMode { Complete, UiHidden };
 
     void configureContext(GrContextOptions* context);
     void trimMemory(TrimMemoryMode mode);
@@ -58,11 +55,11 @@ public:
     size_t getBackgroundCacheSize() const { return mBackgroundResourceBytes; }
 
     TaskManager* getTaskManager() { return &mTaskManager; }
+
 private:
     friend class RenderThread;
 
     CacheManager(const DisplayInfo& display);
-
 
     void reset(GrContext* grContext);
     void destroy();
@@ -92,4 +89,3 @@ private:
 } /* namespace android */
 
 #endif /* CACHEMANAGER_H */
-

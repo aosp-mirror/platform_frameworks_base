@@ -32,13 +32,13 @@ namespace uirenderer {
 
 Extensions::Extensions() {
     if (Properties::getRenderPipelineType() == RenderPipelineType::SkiaVulkan) {
-        //Extensions class is used only by OpenGL and SkiaGL pipelines
-        //The code below will crash for SkiaVulkan, because OpenGL is not initialized
-        //TODO: instantiate Extensions class only for OpenGL pipeline
-        //TODO: remove the only usage of Extensions by SkiaGL in SkiaOpenGLReadback::copyImageInto
+        // Extensions class is used only by OpenGL and SkiaGL pipelines
+        // The code below will crash for SkiaVulkan, because OpenGL is not initialized
+        // TODO: instantiate Extensions class only for OpenGL pipeline
+        // TODO: remove the only usage of Extensions by SkiaGL in SkiaOpenGLReadback::copyImageInto
         return;
     }
-    const char* version = (const char*) glGetString(GL_VERSION);
+    const char* version = (const char*)glGetString(GL_VERSION);
 
     // Section 6.1.5 of the OpenGL ES specification indicates the GL version
     // string strictly follows this format:
@@ -58,7 +58,7 @@ Extensions::Extensions() {
         mVersionMinor = 0;
     }
 
-    auto extensions = StringUtils::split((const char*) glGetString(GL_EXTENSIONS));
+    auto extensions = StringUtils::split((const char*)glGetString(GL_EXTENSIONS));
     mHasNPot = extensions.has("GL_OES_texture_npot");
     mHasFramebufferFetch = extensions.has("GL_NV_shader_framebuffer_fetch");
     mHasDiscardFramebuffer = extensions.has("GL_EXT_discard_framebuffer");
@@ -83,5 +83,5 @@ Extensions::Extensions() {
 #endif
 }
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android

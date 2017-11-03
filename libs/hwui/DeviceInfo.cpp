@@ -19,8 +19,8 @@
 #include <gui/ISurfaceComposer.h>
 #include <gui/SurfaceComposerClient.h>
 
-#include <thread>
 #include <mutex>
+#include <thread>
 
 #include <log/log.h>
 
@@ -58,8 +58,7 @@ void DeviceInfo::load() {
 }
 
 void DeviceInfo::loadDisplayInfo() {
-    sp<IBinder> dtoken(SurfaceComposerClient::getBuiltInDisplay(
-            ISurfaceComposer::eDisplayIdMain));
+    sp<IBinder> dtoken(SurfaceComposerClient::getBuiltInDisplay(ISurfaceComposer::eDisplayIdMain));
     status_t status = SurfaceComposerClient::getDisplayInfo(dtoken, &mDisplayInfo);
     LOG_ALWAYS_FATAL_IF(status, "Failed to get display info, error %d", status);
 }

@@ -20,9 +20,9 @@
 #include "RenderThread.h"
 #include "renderstate/RenderState.h"
 
-#include <gui/Surface.h>
 #include <GrContextOptions.h>
 #include <SkExecutor.h>
+#include <gui/Surface.h>
 #include <math.h>
 #include <set>
 
@@ -42,9 +42,9 @@ namespace renderthread {
 #define FONT_CACHE_MIN_MB (0.5f)
 #define FONT_CACHE_MAX_MB (4.0f)
 
-CacheManager::CacheManager(const DisplayInfo& display)
-        : mMaxSurfaceArea(display.w * display.h) {
-    mVectorDrawableAtlas = new skiapipeline::VectorDrawableAtlas(mMaxSurfaceArea/2,
+CacheManager::CacheManager(const DisplayInfo& display) : mMaxSurfaceArea(display.w * display.h) {
+    mVectorDrawableAtlas = new skiapipeline::VectorDrawableAtlas(
+            mMaxSurfaceArea / 2,
             skiapipeline::VectorDrawableAtlas::StorageMode::disallowSharedSurface);
 }
 
@@ -63,8 +63,9 @@ void CacheManager::reset(GrContext* context) {
 void CacheManager::destroy() {
     // cleanup any caches here as the GrContext is about to go away...
     mGrContext.reset(nullptr);
-    mVectorDrawableAtlas = new skiapipeline::VectorDrawableAtlas(mMaxSurfaceArea/2,
-             skiapipeline::VectorDrawableAtlas::StorageMode::disallowSharedSurface);
+    mVectorDrawableAtlas = new skiapipeline::VectorDrawableAtlas(
+            mMaxSurfaceArea / 2,
+            skiapipeline::VectorDrawableAtlas::StorageMode::disallowSharedSurface);
 }
 
 void CacheManager::updateContextCacheSizes() {
@@ -137,7 +138,7 @@ void CacheManager::trimMemory(TrimMemoryMode mode) {
 
     switch (mode) {
         case TrimMemoryMode::Complete:
-            mVectorDrawableAtlas = new skiapipeline::VectorDrawableAtlas(mMaxSurfaceArea/2);
+            mVectorDrawableAtlas = new skiapipeline::VectorDrawableAtlas(mMaxSurfaceArea / 2);
             mGrContext->freeGpuResources();
             break;
         case TrimMemoryMode::UiHidden:
@@ -175,8 +176,8 @@ void CacheManager::dumpMemoryUsage(String8& log, const RenderState* renderState)
 
     log.appendFormat("Caches:\n");
     log.appendFormat("                         Current / Maximum\n");
-    log.appendFormat("  VectorDrawableAtlas  %6.2f kB / %6.2f kB (entries = %zu)\n",
-            0.0f, 0.0f, (size_t)0);
+    log.appendFormat("  VectorDrawableAtlas  %6.2f kB / %6.2f kB (entries = %zu)\n", 0.0f, 0.0f,
+                     (size_t)0);
 
     if (renderState) {
         if (renderState->mActiveLayers.size() > 0) {
@@ -185,24 +186,21 @@ void CacheManager::dumpMemoryUsage(String8& log, const RenderState* renderState)
 
         size_t layerMemoryTotal = 0;
         for (std::set<Layer*>::iterator it = renderState->mActiveLayers.begin();
-                it != renderState->mActiveLayers.end(); it++) {
+             it != renderState->mActiveLayers.end(); it++) {
             const Layer* layer = *it;
             const char* layerType = layer->getApi() == Layer::Api::OpenGL ? "GlLayer" : "VkLayer";
-            log.appendFormat("    %s size %dx%d\n", layerType,
-                    layer->getWidth(), layer->getHeight());
+            log.appendFormat("    %s size %dx%d\n", layerType, layer->getWidth(),
+                             layer->getHeight());
             layerMemoryTotal += layer->getWidth() * layer->getHeight() * 4;
         }
         log.appendFormat("  Layers Total         %6.2f kB (numLayers = %zu)\n",
                          layerMemoryTotal / 1024.0f, renderState->mActiveLayers.size());
     }
 
-
     log.appendFormat("Total memory usage:\n");
-    log.appendFormat("  %zu bytes, %.2f MB (%.2f MB is purgeable)\n",
-                     bytesCached, bytesCached / 1024.0f / 1024.0f,
+    log.appendFormat("  %zu bytes, %.2f MB (%.2f MB is purgeable)\n", bytesCached,
+                     bytesCached / 1024.0f / 1024.0f,
                      mGrContext->getResourceCachePurgeableBytes() / 1024.0f / 1024.0f);
-
-
 }
 
 } /* namespace renderthread */

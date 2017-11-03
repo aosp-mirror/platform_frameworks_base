@@ -26,8 +26,8 @@ enum class SwapBehavior {
     kSwap_discardBuffer,
 };
 
-} // namespace renderthread
-} //namespace uirenderer
-} // namespace android
+}  // namespace renderthread
+}  // namespace uirenderer
+}  // namespace android
 
-#endif //HWUI_SWAPBEHAVIOR_H
+#endif  // HWUI_SWAPBEHAVIOR_H

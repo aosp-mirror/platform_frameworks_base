@@ -21,14 +21,14 @@
 
 #include <utils/KeyedVector.h>
 
-#include <SkScalar.h>
 #include <SkPaint.h>
 #include <SkPathMeasure.h>
+#include <SkScalar.h>
 #include <SkTypeface.h>
 
-#include "FontUtil.h"
-#include "../Rect.h"
 #include "../Matrix.h"
+#include "../Rect.h"
+#include "FontUtil.h"
 
 class SkGlyphCache;
 
@@ -49,9 +49,7 @@ class FontRenderer;
  */
 class Font {
 public:
-    enum Style {
-        kFakeBold = 1
-    };
+    enum Style { kFakeBold = 1 };
 
     struct FontDescription {
         FontDescription(const SkPaint* paint, const SkMatrix& matrix);
@@ -60,13 +58,9 @@ public:
 
         hash_t hash() const;
 
-        bool operator==(const FontDescription& other) const {
-            return compare(*this, other) == 0;
-        }
+        bool operator==(const FontDescription& other) const { return compare(*this, other) == 0; }
 
-        bool operator!=(const FontDescription& other) const {
-            return compare(*this, other) != 0;
-        }
+        bool operator!=(const FontDescription& other) const { return compare(*this, other) != 0; }
 
         SkFontID mFontId;
         float mFontSize;
@@ -83,15 +77,13 @@ public:
 
     ~Font();
 
-    void render(const SkPaint* paint, const glyph_t* glyphs,
-            int numGlyphs, int x, int y, const float* positions);
+    void render(const SkPaint* paint, const glyph_t* glyphs, int numGlyphs, int x, int y,
+                const float* positions);
 
-    void render(const SkPaint* paint, const glyph_t* glyphs,
-            int numGlyphs, const SkPath* path, float hOffset, float vOffset);
+    void render(const SkPaint* paint, const glyph_t* glyphs, int numGlyphs, const SkPath* path,
+                float hOffset, float vOffset);
 
-    const Font::FontDescription& getDescription() const {
-        return mDescription;
-    }
+    const Font::FontDescription& getDescription() const { return mDescription; }
 
     /**
      * Creates a new font associated with the specified font state.
@@ -103,8 +95,8 @@ private:
 
     Font(FontRenderer* state, const Font::FontDescription& desc);
 
-    typedef void (Font::*RenderGlyph)(CachedGlyphInfo*, int, int, uint8_t*,
-            uint32_t, uint32_t, Rect*, const float*);
+    typedef void (Font::*RenderGlyph)(CachedGlyphInfo*, int, int, uint8_t*, uint32_t, uint32_t,
+                                      Rect*, const float*);
 
     enum RenderMode {
         FRAMEBUFFER,
@@ -114,36 +106,33 @@ private:
 
     void precache(const SkPaint* paint, const glyph_t* glyphs, int numGlyphs);
 
-    void render(const SkPaint* paint, const glyph_t* glyphs,
-            int numGlyphs, int x, int y, RenderMode mode, uint8_t *bitmap,
-            uint32_t bitmapW, uint32_t bitmapH, Rect *bounds, const float* positions);
+    void render(const SkPaint* paint, const glyph_t* glyphs, int numGlyphs, int x, int y,
+                RenderMode mode, uint8_t* bitmap, uint32_t bitmapW, uint32_t bitmapH, Rect* bounds,
+                const float* positions);
 
-    void measure(const SkPaint* paint, const glyph_t* glyphs,
-            int numGlyphs, Rect *bounds, const float* positions);
+    void measure(const SkPaint* paint, const glyph_t* glyphs, int numGlyphs, Rect* bounds,
+                 const float* positions);
 
     void invalidateTextureCache(CacheTexture* cacheTexture = nullptr);
 
     CachedGlyphInfo* cacheGlyph(const SkPaint* paint, glyph_t glyph, bool precaching);
     void updateGlyphCache(const SkPaint* paint, const SkGlyph& skiaGlyph,
-            SkGlyphCache* skiaGlyphCache, CachedGlyphInfo* glyph, bool precaching);
+                          SkGlyphCache* skiaGlyphCache, CachedGlyphInfo* glyph, bool precaching);
 
-    void measureCachedGlyph(CachedGlyphInfo* glyph, int x, int y,
-            uint8_t *bitmap, uint32_t bitmapW, uint32_t bitmapH,
-            Rect* bounds, const float* pos);
-    void drawCachedGlyph(CachedGlyphInfo* glyph, int x, int y,
-            uint8_t *bitmap, uint32_t bitmapW, uint32_t bitmapH,
-            Rect* bounds, const float* pos);
-    void drawCachedGlyphTransformed(CachedGlyphInfo* glyph, int x, int y,
-            uint8_t *bitmap, uint32_t bitmapW, uint32_t bitmapH,
-            Rect* bounds, const float* pos);
-    void drawCachedGlyphBitmap(CachedGlyphInfo* glyph, int x, int y,
-            uint8_t *bitmap, uint32_t bitmapW, uint32_t bitmapH,
-            Rect* bounds, const float* pos);
+    void measureCachedGlyph(CachedGlyphInfo* glyph, int x, int y, uint8_t* bitmap, uint32_t bitmapW,
+                            uint32_t bitmapH, Rect* bounds, const float* pos);
+    void drawCachedGlyph(CachedGlyphInfo* glyph, int x, int y, uint8_t* bitmap, uint32_t bitmapW,
+                         uint32_t bitmapH, Rect* bounds, const float* pos);
+    void drawCachedGlyphTransformed(CachedGlyphInfo* glyph, int x, int y, uint8_t* bitmap,
+                                    uint32_t bitmapW, uint32_t bitmapH, Rect* bounds,
+                                    const float* pos);
+    void drawCachedGlyphBitmap(CachedGlyphInfo* glyph, int x, int y, uint8_t* bitmap,
+                               uint32_t bitmapW, uint32_t bitmapH, Rect* bounds, const float* pos);
     void drawCachedGlyph(CachedGlyphInfo* glyph, float x, float hOffset, float vOffset,
-            SkPathMeasure& measure, SkPoint* position, SkVector* tangent);
+                         SkPathMeasure& measure, SkPoint* position, SkVector* tangent);
 
     CachedGlyphInfo* getCachedGlyph(const SkPaint* paint, glyph_t textUnit,
-            bool precaching = false);
+                                    bool precaching = false);
 
     FontRenderer* mState;
     FontDescription mDescription;
@@ -154,8 +143,7 @@ private:
     bool mIdentityTransform;
 };
 
-inline int strictly_order_type(const Font::FontDescription& lhs,
-        const Font::FontDescription& rhs) {
+inline int strictly_order_type(const Font::FontDescription& lhs, const Font::FontDescription& rhs) {
     return Font::FontDescription::compare(lhs, rhs) < 0;
 }
 
@@ -167,7 +155,7 @@ inline hash_t hash_type(const Font::FontDescription& entry) {
     return entry.hash();
 }
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android
 
-#endif // ANDROID_HWUI_FONT_H
+#endif  // ANDROID_HWUI_FONT_H

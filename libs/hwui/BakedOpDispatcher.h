@@ -33,21 +33,20 @@ namespace uirenderer {
  */
 class BakedOpDispatcher {
 public:
-    // Declares all "onMergedBitmapOps(...)" style methods for mergeable op types
+// Declares all "onMergedBitmapOps(...)" style methods for mergeable op types
 #define X(Type) \
-        static void onMerged##Type##s(BakedOpRenderer& renderer, const MergedBakedOpList& opList);
+    static void onMerged##Type##s(BakedOpRenderer& renderer, const MergedBakedOpList& opList);
     MAP_MERGEABLE_OPS(X)
 #undef X
 
-    // Declares all "onBitmapOp(...)" style methods for every op type
+// Declares all "onBitmapOp(...)" style methods for every op type
 #define X(Type) \
-        static void on##Type(BakedOpRenderer& renderer, const Type& op, const BakedOpState& state);
+    static void on##Type(BakedOpRenderer& renderer, const Type& op, const BakedOpState& state);
     MAP_RENDERABLE_OPS(X)
 #undef X
-
 };
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android
 
-#endif // ANDROID_HWUI_BAKED_OP_DISPATCHER_H
+#endif  // ANDROID_HWUI_BAKED_OP_DISPATCHER_H

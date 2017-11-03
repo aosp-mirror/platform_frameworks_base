@@ -56,10 +56,10 @@ public:
      * Note that unlike create, for alloc the type is purely for compile-time error
      * checking and does not affect size.
      */
-    template<class T>
+    template <class T>
     void* alloc(size_t size) {
         static_assert(std::is_trivially_destructible<T>::value,
-                "Error, type is non-trivial! did you mean to use create()?");
+                      "Error, type is non-trivial! did you mean to use create()?");
         return allocImpl(size);
     }
 
@@ -67,7 +67,7 @@ public:
      * Allocates an instance of the template type with the given construction parameters
      * and adds it to the automatic destruction list.
      */
-    template<class T, typename... Params>
+    template <class T, typename... Params>
     T* create(Params&&... params) {
         T* ret = new (allocImpl(sizeof(T))) T(std::forward<Params>(params)...);
         if (!std::is_trivially_destructible<T>::value) {
@@ -77,17 +77,17 @@ public:
         return ret;
     }
 
-    template<class T, typename... Params>
+    template <class T, typename... Params>
     T* create_trivial(Params&&... params) {
         static_assert(std::is_trivially_destructible<T>::value,
-                "Error, called create_trivial on a non-trivial type");
+                      "Error, called create_trivial on a non-trivial type");
         return new (allocImpl(sizeof(T))) T(std::forward<Params>(params)...);
     }
 
-    template<class T>
+    template <class T>
     T* create_trivial_array(int count) {
         static_assert(std::is_trivially_destructible<T>::value,
-                "Error, called create_trivial_array on a non-trivial type");
+                      "Error, called create_trivial_array on a non-trivial type");
         return reinterpret_cast<T*>(allocImpl(sizeof(T) * count));
     }
 
@@ -100,7 +100,7 @@ public:
     /**
      * Same as rewindIfLastAlloc(void*, size_t)
      */
-    template<class T>
+    template <class T>
     void rewindIfLastAlloc(T* ptr) {
         rewindIfLastAlloc((void*)ptr, sizeof(T));
     }
@@ -134,7 +134,7 @@ private:
     Page* newPage(size_t pageSize);
     bool fitsInCurrentPage(size_t size);
     void ensureNext(size_t size);
-    void* start(Page *p);
+    void* start(Page* p);
     void* end(Page* p);
 
     size_t mPageSize;
@@ -154,13 +154,11 @@ private:
 template <class T>
 class LinearStdAllocator {
 public:
-    typedef T value_type; // needed to implement std::allocator
-    typedef T* pointer; // needed to implement std::allocator
+    typedef T value_type;  // needed to implement std::allocator
+    typedef T* pointer;    // needed to implement std::allocator
 
-    explicit LinearStdAllocator(LinearAllocator& allocator)
-            : linearAllocator(allocator) {}
-    LinearStdAllocator(const LinearStdAllocator& other)
-            : linearAllocator(other.linearAllocator) {}
+    explicit LinearStdAllocator(LinearAllocator& allocator) : linearAllocator(allocator) {}
+    LinearStdAllocator(const LinearStdAllocator& other) : linearAllocator(other.linearAllocator) {}
     ~LinearStdAllocator() {}
 
     // rebind marks that allocators can be rebound to different types
@@ -188,9 +186,13 @@ public:
 
 // return that all specializations of LinearStdAllocator are interchangeable
 template <class T1, class T2>
-bool operator== (const LinearStdAllocator<T1>&, const LinearStdAllocator<T2>&) { return true; }
+bool operator==(const LinearStdAllocator<T1>&, const LinearStdAllocator<T2>&) {
+    return true;
+}
 template <class T1, class T2>
-bool operator!= (const LinearStdAllocator<T1>&, const LinearStdAllocator<T2>&) { return false; }
+bool operator!=(const LinearStdAllocator<T1>&, const LinearStdAllocator<T2>&) {
+    return false;
+}
 
 template <class T>
 class LsaVector : public std::vector<T, LinearStdAllocator<T>> {
@@ -199,7 +201,7 @@ public:
             : std::vector<T, LinearStdAllocator<T>>(allocator) {}
 };
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android
 
-#endif // ANDROID_LINEARALLOCATOR_H
+#endif  // ANDROID_LINEARALLOCATOR_H

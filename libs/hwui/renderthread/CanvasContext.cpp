@@ -14,24 +14,24 @@
  * limitations under the License.
  */
 
-#include <GpuMemoryTracker.h>
 #include "CanvasContext.h"
+#include <GpuMemoryTracker.h>
 
 #include "AnimationContext.h"
 #include "Caches.h"
 #include "EglManager.h"
 #include "Frame.h"
 #include "LayerUpdateQueue.h"
+#include "OpenGLPipeline.h"
 #include "Properties.h"
 #include "RenderThread.h"
 #include "hwui/Canvas.h"
-#include "renderstate/RenderState.h"
-#include "renderstate/Stencil.h"
-#include "protos/hwui.pb.h"
-#include "OpenGLPipeline.h"
 #include "pipeline/skia/SkiaOpenGLPipeline.h"
 #include "pipeline/skia/SkiaPipeline.h"
 #include "pipeline/skia/SkiaVulkanPipeline.h"
+#include "protos/hwui.pb.h"
+#include "renderstate/RenderState.h"
+#include "renderstate/Stencil.h"
 #include "utils/GLUtils.h"
 #include "utils/TimeUtils.h"
 
@@ -40,9 +40,9 @@
 #include <private/hwui/DrawGlInfo.h>
 #include <strings.h>
 
-#include <algorithm>
 #include <fcntl.h>
 #include <sys/stat.h>
+#include <algorithm>
 
 #include <cstdlib>
 
@@ -63,23 +63,22 @@ namespace android {
 namespace uirenderer {
 namespace renderthread {
 
-CanvasContext* CanvasContext::create(RenderThread& thread,
-        bool translucent, RenderNode* rootRenderNode, IContextFactory* contextFactory) {
-
+CanvasContext* CanvasContext::create(RenderThread& thread, bool translucent,
+                                     RenderNode* rootRenderNode, IContextFactory* contextFactory) {
     auto renderType = Properties::getRenderPipelineType();
 
     switch (renderType) {
         case RenderPipelineType::OpenGL:
             return new CanvasContext(thread, translucent, rootRenderNode, contextFactory,
-                    std::make_unique<OpenGLPipeline>(thread));
+                                     std::make_unique<OpenGLPipeline>(thread));
         case RenderPipelineType::SkiaGL:
             return new CanvasContext(thread, translucent, rootRenderNode, contextFactory,
-                    std::make_unique<skiapipeline::SkiaOpenGLPipeline>(thread));
+                                     std::make_unique<skiapipeline::SkiaOpenGLPipeline>(thread));
         case RenderPipelineType::SkiaVulkan:
             return new CanvasContext(thread, translucent, rootRenderNode, contextFactory,
-                                std::make_unique<skiapipeline::SkiaVulkanPipeline>(thread));
+                                     std::make_unique<skiapipeline::SkiaVulkanPipeline>(thread));
         default:
-            LOG_ALWAYS_FATAL("canvas context type %d not supported", (int32_t) renderType);
+            LOG_ALWAYS_FATAL("canvas context type %d not supported", (int32_t)renderType);
             break;
     }
     return nullptr;
@@ -96,7 +95,7 @@ void CanvasContext::destroyLayer(RenderNode* node) {
             skiapipeline::SkiaPipeline::destroyLayer(node);
             break;
         default:
-            LOG_ALWAYS_FATAL("canvas context type %d not supported", (int32_t) renderType);
+            LOG_ALWAYS_FATAL("canvas context type %d not supported", (int32_t)renderType);
             break;
     }
 }
@@ -115,7 +114,7 @@ void CanvasContext::invokeFunctor(const RenderThread& thread, Functor* functor) 
             skiapipeline::SkiaVulkanPipeline::invokeFunctor(thread, functor);
             break;
         default:
-            LOG_ALWAYS_FATAL("canvas context type %d not supported", (int32_t) renderType);
+            LOG_ALWAYS_FATAL("canvas context type %d not supported", (int32_t)renderType);
             break;
     }
 }
@@ -131,14 +130,14 @@ void CanvasContext::prepareToDraw(const RenderThread& thread, Bitmap* bitmap) {
             skiapipeline::SkiaPipeline::prepareToDraw(thread, bitmap);
             break;
         default:
-            LOG_ALWAYS_FATAL("canvas context type %d not supported", (int32_t) renderType);
+            LOG_ALWAYS_FATAL("canvas context type %d not supported", (int32_t)renderType);
             break;
     }
 }
 
-CanvasContext::CanvasContext(RenderThread& thread, bool translucent,
-        RenderNode* rootRenderNode, IContextFactory* contextFactory,
-        std::unique_ptr<IRenderPipeline> renderPipeline)
+CanvasContext::CanvasContext(RenderThread& thread, bool translucent, RenderNode* rootRenderNode,
+                             IContextFactory* contextFactory,
+                             std::unique_ptr<IRenderPipeline> renderPipeline)
         : mRenderThread(thread)
         , mOpaque(!translucent)
         , mAnimationContext(contextFactory->createAnimationContext(mRenderThread.timeLord()))
@@ -170,7 +169,7 @@ void CanvasContext::addRenderNode(RenderNode* node, bool placeFront) {
 void CanvasContext::removeRenderNode(RenderNode* node) {
     node->clearRoot();
     mRenderNodes.erase(std::remove(mRenderNodes.begin(), mRenderNodes.end(), node),
-            mRenderNodes.end());
+                       mRenderNodes.end());
 }
 
 void CanvasContext::destroy() {
@@ -192,10 +191,10 @@ void CanvasContext::setSurface(sp<Surface>&& surface) {
     mFrameNumber = -1;
 
     if (hasSurface) {
-         mHaveNewSurface = true;
-         mSwapHistory.clear();
+        mHaveNewSurface = true;
+        mSwapHistory.clear();
     } else {
-         mRenderThread.removeFrameCallback(this);
+        mRenderThread.removeFrameCallback(this);
     }
 }
 
@@ -219,8 +218,7 @@ void CanvasContext::setStopped(bool stopped) {
     }
 }
 
-void CanvasContext::setup(float lightRadius,
-        uint8_t ambientShadowAlpha, uint8_t spotShadowAlpha) {
+void CanvasContext::setup(float lightRadius, uint8_t ambientShadowAlpha, uint8_t spotShadowAlpha) {
     mLightGeometry.radius = lightRadius;
     mLightInfo.ambientShadowAlpha = ambientShadowAlpha;
     mLightInfo.spotShadowAlpha = spotShadowAlpha;
@@ -254,7 +252,7 @@ bool CanvasContext::makeCurrent() {
             return true;
         default:
             LOG_ALWAYS_FATAL("unexpected result %d from IRenderPipeline::makeCurrent",
-                    (int32_t) result);
+                             (int32_t)result);
     }
 
     return true;
@@ -277,8 +275,7 @@ bool CanvasContext::isSwapChainStuffed() {
 
     // Was there a happy queue & dequeue time? If so, don't
     // consider it stuffed
-    if (swapA.dequeueDuration < SLOW_THRESHOLD
-            && swapA.queueDuration < SLOW_THRESHOLD) {
+    if (swapA.dequeueDuration < SLOW_THRESHOLD && swapA.queueDuration < SLOW_THRESHOLD) {
         return false;
     }
 
@@ -293,8 +290,7 @@ bool CanvasContext::isSwapChainStuffed() {
 
         // Was there a happy queue & dequeue time? If so, don't
         // consider it stuffed
-        if (swapB.dequeueDuration < SLOW_THRESHOLD
-                && swapB.queueDuration < SLOW_THRESHOLD) {
+        if (swapB.dequeueDuration < SLOW_THRESHOLD && swapB.queueDuration < SLOW_THRESHOLD) {
             return false;
         }
 
@@ -306,8 +302,8 @@ bool CanvasContext::isSwapChainStuffed() {
     return true;
 }
 
-void CanvasContext::prepareTree(TreeInfo& info, int64_t* uiFrameInfo,
-        int64_t syncQueued, RenderNode* target) {
+void CanvasContext::prepareTree(TreeInfo& info, int64_t* uiFrameInfo, int64_t syncQueued,
+                                RenderNode* target) {
     mRenderThread.removeFrameCallback(this);
 
     // If the previous frame was dropped we don't need to hold onto it, so
@@ -358,8 +354,8 @@ void CanvasContext::prepareTree(TreeInfo& info, int64_t* uiFrameInfo,
             // Already drew for this vsync pulse, UI draw request missed
             // the deadline for RT animations
             info.out.canDrawThisFrame = false;
-        } else if (vsyncDelta >= mRenderThread.timeLord().frameIntervalNanos() * 3
-                || (latestVsync - mLastDropVsync) < 500_ms) {
+        } else if (vsyncDelta >= mRenderThread.timeLord().frameIntervalNanos() * 3 ||
+                   (latestVsync - mLastDropVsync) < 500_ms) {
             // It's been several frame intervals, assume the buffer queue is fine
             // or the last drop was too recent
             info.out.canDrawThisFrame = true;
@@ -402,10 +398,10 @@ void CanvasContext::draw() {
     mDamageAccumulator.finish(&dirty);
 
     // TODO: Re-enable after figuring out cause of b/22592975
-//    if (dirty.isEmpty() && Properties::skipEmptyFrames) {
-//        mCurrentFrameInfo->addFlag(FrameInfoFlags::SkippedFrame);
-//        return;
-//    }
+    //    if (dirty.isEmpty() && Properties::skipEmptyFrames) {
+    //        mCurrentFrameInfo->addFlag(FrameInfoFlags::SkippedFrame);
+    //        return;
+    //    }
 
     mCurrentFrameInfo->markIssueDrawCommandsStart();
 
@@ -414,18 +410,19 @@ void CanvasContext::draw() {
     SkRect windowDirty = computeDirtyRect(frame, &dirty);
 
     bool drew = mRenderPipeline->draw(frame, windowDirty, dirty, mLightGeometry, &mLayerUpdateQueue,
-            mContentDrawBounds, mOpaque, mWideColorGamut, mLightInfo, mRenderNodes, &(profiler()));
+                                      mContentDrawBounds, mOpaque, mWideColorGamut, mLightInfo,
+                                      mRenderNodes, &(profiler()));
 
     waitOnFences();
 
     bool requireSwap = false;
-    bool didSwap = mRenderPipeline->swapBuffers(frame, drew, windowDirty, mCurrentFrameInfo,
-            &requireSwap);
+    bool didSwap =
+            mRenderPipeline->swapBuffers(frame, drew, windowDirty, mCurrentFrameInfo, &requireSwap);
 
     mIsDirty = false;
 
     if (requireSwap) {
-        if (!didSwap) { //some error happened
+        if (!didSwap) {  // some error happened
             setSurface(nullptr);
         }
         SwapHistory& swap = mSwapHistory.next();
@@ -449,10 +446,8 @@ void CanvasContext::draw() {
             swap.dequeueDuration = 0;
             swap.queueDuration = 0;
         }
-        mCurrentFrameInfo->set(FrameInfoIndex::DequeueBufferDuration)
-                = swap.dequeueDuration;
-        mCurrentFrameInfo->set(FrameInfoIndex::QueueBufferDuration)
-                = swap.queueDuration;
+        mCurrentFrameInfo->set(FrameInfoIndex::DequeueBufferDuration) = swap.dequeueDuration;
+        mCurrentFrameInfo->set(FrameInfoIndex::QueueBufferDuration) = swap.queueDuration;
         mHaveNewSurface = false;
         mFrameNumber = -1;
     } else {
@@ -464,9 +459,9 @@ void CanvasContext::draw() {
     mCurrentFrameInfo->markFrameCompleted();
 
 #if LOG_FRAMETIME_MMA
-    float thisFrame = mCurrentFrameInfo->duration(
-            FrameInfoIndex::IssueDrawCommandsStart,
-            FrameInfoIndex::FrameCompleted) / NANOS_PER_MILLIS_F;
+    float thisFrame = mCurrentFrameInfo->duration(FrameInfoIndex::IssueDrawCommandsStart,
+                                                  FrameInfoIndex::FrameCompleted) /
+                      NANOS_PER_MILLIS_F;
     if (sFrameCount) {
         sBenchMma = ((9 * sBenchMma) + thisFrame) / 10;
     } else {
@@ -491,7 +486,6 @@ void CanvasContext::draw() {
         caches.fontRenderer.getFontRenderer().historyTracker().frameCompleted();
     }
 #endif
-
 }
 
 // Called by choreographer to do an RT-driven animation
@@ -505,9 +499,7 @@ void CanvasContext::prepareAndDraw(RenderNode* node) {
 
     nsecs_t vsync = mRenderThread.timeLord().computeFrameTimeNanos();
     int64_t frameInfo[UI_THREAD_FRAME_INFO_SIZE];
-    UiFrameInfoBuilder(frameInfo)
-        .addFlag(FrameInfoFlags::RTAnimation)
-        .setVsync(vsync, vsync);
+    UiFrameInfoBuilder(frameInfo).addFlag(FrameInfoFlags::RTAnimation).setVsync(vsync, vsync);
 
     TreeInfo info(TreeInfo::MODE_RT_ONLY, *this);
     prepareTree(info, frameInfo, systemTime(CLOCK_MONOTONIC), node);
@@ -529,7 +521,7 @@ void CanvasContext::freePrefetchedLayers() {
     if (mPrefetchedLayers.size()) {
         for (auto& node : mPrefetchedLayers) {
             ALOGW("Incorrectly called buildLayer on View: %s, destroying layer...",
-                    node->getName());
+                  node->getName());
             node->destroyLayers();
             node->decStrong(nullptr);
         }
@@ -555,8 +547,8 @@ void CanvasContext::buildLayer(RenderNode* node) {
     // purposes when the frame is actually drawn
     node->setPropertyFieldsDirty(RenderNode::GENERIC);
 
-    mRenderPipeline->renderLayers(mLightGeometry, &mLayerUpdateQueue,
-            mOpaque, mWideColorGamut, mLightInfo);
+    mRenderPipeline->renderLayers(mLightGeometry, &mLayerUpdateQueue, mOpaque, mWideColorGamut,
+                                  mLightInfo);
 
     node->incStrong(nullptr);
     mPrefetchedLayers.insert(node);
@@ -607,7 +599,7 @@ void CanvasContext::trimMemory(RenderThread& thread, int level) {
             break;
         }
         default:
-            LOG_ALWAYS_FATAL("canvas context type %d not supported", (int32_t) renderType);
+            LOG_ALWAYS_FATAL("canvas context type %d not supported", (int32_t)renderType);
             break;
     }
 }
@@ -634,7 +626,7 @@ void CanvasContext::serializeDisplayListTree() {
     using namespace google::protobuf::io;
     char package[128];
     // Check whether tracing is enabled for this process.
-    FILE * file = fopen("/proc/self/cmdline", "r");
+    FILE* file = fopen("/proc/self/cmdline", "r");
     if (file) {
         if (!fgets(package, 128, file)) {
             ALOGE("Error reading cmdline: %s (%d)", strerror(errno), errno);
@@ -643,8 +635,7 @@ void CanvasContext::serializeDisplayListTree() {
         }
         fclose(file);
     } else {
-        ALOGE("Error opening /proc/self/cmdline: %s (%d)", strerror(errno),
-                errno);
+        ALOGE("Error opening /proc/self/cmdline: %s (%d)", strerror(errno), errno);
         return;
     }
     char path[1024];
@@ -675,8 +666,7 @@ void CanvasContext::waitOnFences() {
 
 class CanvasContext::FuncTaskProcessor : public TaskProcessor<bool> {
 public:
-    explicit FuncTaskProcessor(TaskManager* taskManager)
-            : TaskProcessor<bool>(taskManager) {}
+    explicit FuncTaskProcessor(TaskManager* taskManager) : TaskProcessor<bool>(taskManager) {}
 
     virtual void onProcess(const sp<Task<bool> >& task) override {
         FuncTask* t = static_cast<FuncTask*>(task.get());
@@ -714,8 +704,8 @@ SkRect CanvasContext::computeDirtyRect(const Frame& frame, SkRect* dirty) {
         dirty->setEmpty();
     } else {
         if (!dirty->isEmpty() && !dirty->intersect(0, 0, frame.width(), frame.height())) {
-            ALOGW("Dirty " RECT_STRING " doesn't intersect with 0 0 %d %d ?",
-                    SK_RECT_ARGS(*dirty), frame.width(), frame.height());
+            ALOGW("Dirty " RECT_STRING " doesn't intersect with 0 0 %d %d ?", SK_RECT_ARGS(*dirty),
+                  frame.width(), frame.height());
             dirty->setEmpty();
         }
         profiler().unionDirty(dirty);
@@ -735,7 +725,7 @@ SkRect CanvasContext::computeDirtyRect(const Frame& frame, SkRect* dirty) {
     // last frame so there's nothing to union() against
     // Therefore we only care about the > 1 case.
     if (frame.bufferAge() > 1) {
-        if (frame.bufferAge() > (int) mSwapHistory.size()) {
+        if (frame.bufferAge() > (int)mSwapHistory.size()) {
             // We don't have enough history to handle this old of a buffer
             // Just do a full-draw
             dirty->set(0, 0, frame.width(), frame.height());
@@ -744,7 +734,7 @@ SkRect CanvasContext::computeDirtyRect(const Frame& frame, SkRect* dirty) {
             // to the damage history (happens below)
             // So we need to damage
             for (int i = mSwapHistory.size() - 1;
-                    i > ((int) mSwapHistory.size()) - frame.bufferAge(); i--) {
+                 i > ((int)mSwapHistory.size()) - frame.bufferAge(); i--) {
                 dirty->join(mSwapHistory[i].damage);
             }
         }

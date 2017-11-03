@@ -71,9 +71,9 @@ public:
 private:
     SortedVector<GLuint> mCache;
     uint32_t mMaxSize;
-}; // class FboCache
+};  // class FboCache
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android
 
-#endif // ANDROID_HWUI_FBO_CACHE_H
+#endif  // ANDROID_HWUI_FBO_CACHE_H

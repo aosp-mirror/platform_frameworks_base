@@ -16,10 +16,10 @@
 
 #pragma once
 
-#include "CanvasProperty.h"
-#include <utils/RefBase.h>
 #include <SkCanvas.h>
 #include <SkDrawable.h>
+#include <utils/RefBase.h>
+#include "CanvasProperty.h"
 
 namespace android {
 namespace uirenderer {
@@ -28,16 +28,12 @@ namespace skiapipeline {
 class AnimatedRoundRect : public SkDrawable {
 public:
     AnimatedRoundRect(uirenderer::CanvasPropertyPrimitive* left,
-            uirenderer::CanvasPropertyPrimitive* top, uirenderer::CanvasPropertyPrimitive* right,
-            uirenderer::CanvasPropertyPrimitive* bottom, uirenderer::CanvasPropertyPrimitive* rx,
-            uirenderer::CanvasPropertyPrimitive* ry, uirenderer::CanvasPropertyPaint* p)
-            : mLeft(left)
-            , mTop(top)
-            , mRight(right)
-            , mBottom(bottom)
-            , mRx(rx)
-            , mRy(ry)
-            , mPaint(p) {}
+                      uirenderer::CanvasPropertyPrimitive* top,
+                      uirenderer::CanvasPropertyPrimitive* right,
+                      uirenderer::CanvasPropertyPrimitive* bottom,
+                      uirenderer::CanvasPropertyPrimitive* rx,
+                      uirenderer::CanvasPropertyPrimitive* ry, uirenderer::CanvasPropertyPaint* p)
+            : mLeft(left), mTop(top), mRight(right), mBottom(bottom), mRx(rx), mRy(ry), mPaint(p) {}
 
 protected:
     virtual SkRect onGetBounds() override {
@@ -61,11 +57,9 @@ private:
 class AnimatedCircle : public SkDrawable {
 public:
     AnimatedCircle(uirenderer::CanvasPropertyPrimitive* x, uirenderer::CanvasPropertyPrimitive* y,
-            uirenderer::CanvasPropertyPrimitive* radius, uirenderer::CanvasPropertyPaint* paint)
-            : mX(x)
-            , mY(y)
-            , mRadius(radius)
-            , mPaint(paint) {}
+                   uirenderer::CanvasPropertyPrimitive* radius,
+                   uirenderer::CanvasPropertyPaint* paint)
+            : mX(x), mY(y), mRadius(radius), mPaint(paint) {}
 
 protected:
     virtual SkRect onGetBounds() override {
@@ -85,6 +79,6 @@ private:
     sp<uirenderer::CanvasPropertyPaint> mPaint;
 };
 
-}; // namespace skiapipeline
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace skiapipeline
+};  // namespace uirenderer
+};  // namespace android

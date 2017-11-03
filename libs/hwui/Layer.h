@@ -16,11 +16,11 @@
 
 #pragma once
 
-#include <utils/RefBase.h>
 #include <GpuMemoryTracker.h>
+#include <utils/RefBase.h>
 
-#include <SkPaint.h>
 #include <SkBlendMode.h>
+#include <SkPaint.h>
 
 #include "Matrix.h"
 
@@ -43,9 +43,7 @@ public:
         Vulkan = 1,
     };
 
-    Api getApi() const {
-        return mApi;
-    }
+    Api getApi() const { return mApi; }
 
     ~Layer();
 
@@ -59,44 +57,28 @@ public:
 
     virtual bool isBlend() const = 0;
 
-    inline void setForceFilter(bool forceFilter) {
-        this->forceFilter = forceFilter;
-    }
+    inline void setForceFilter(bool forceFilter) { this->forceFilter = forceFilter; }
 
-    inline bool getForceFilter() const {
-        return forceFilter;
-    }
+    inline bool getForceFilter() const { return forceFilter; }
 
-    inline void setAlpha(int alpha) {
-        this->alpha = alpha;
-    }
+    inline void setAlpha(int alpha) { this->alpha = alpha; }
 
     inline void setAlpha(int alpha, SkBlendMode mode) {
         this->alpha = alpha;
         this->mode = mode;
     }
 
-    inline int getAlpha() const {
-        return alpha;
-    }
+    inline int getAlpha() const { return alpha; }
 
-    inline SkBlendMode getMode() const {
-        return mode;
-    }
+    inline SkBlendMode getMode() const { return mode; }
 
-    inline SkColorFilter* getColorFilter() const {
-        return colorFilter;
-    }
+    inline SkColorFilter* getColorFilter() const { return colorFilter; }
 
     void setColorFilter(SkColorFilter* filter);
 
-    inline mat4& getTexTransform() {
-        return texTransform;
-    }
+    inline mat4& getTexTransform() { return texTransform; }
 
-    inline mat4& getTransform() {
-        return transform;
-    }
+    inline mat4& getTransform() { return transform; }
 
     /**
      * Posts a decStrong call to the appropriate thread.
@@ -106,7 +88,7 @@ public:
 
 protected:
     Layer(RenderState& renderState, Api api, SkColorFilter* colorFilter, int alpha,
-            SkBlendMode mode);
+          SkBlendMode mode);
 
     RenderState& mRenderState;
 
@@ -143,7 +125,7 @@ private:
      */
     mat4 transform;
 
-}; // struct Layer
+};  // struct Layer
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android

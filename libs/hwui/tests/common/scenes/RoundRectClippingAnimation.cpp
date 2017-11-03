@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 #include "TestSceneBase.h"
 
 #include <vector>
@@ -23,10 +22,9 @@ class RoundRectClippingAnimation : public TestScene {
 public:
     int mSpacing, mSize;
 
-    RoundRectClippingAnimation(int spacing, int size)
-            : mSpacing(spacing), mSize(size) {}
+    RoundRectClippingAnimation(int spacing, int size) : mSpacing(spacing), mSize(size) {}
 
-    std::vector< sp<RenderNode> > cards;
+    std::vector<sp<RenderNode> > cards;
     void createContent(int width, int height, Canvas& canvas) override {
         canvas.drawColor(0xFFFFFFFF, SkBlendMode::kSrcOver);
         canvas.insertReorderBarrier(true);
@@ -35,13 +33,13 @@ public:
         for (int x = 0; x < width; x += mSpacing) {
             for (int y = 0; y < height; y += mSpacing) {
                 auto color = BrightColors[ci++ % BrightColorsCount];
-                auto card = TestUtils::createNode(x, y, x + mSize, y + mSize,
-                        [&](RenderProperties& props, Canvas& canvas) {
-                    canvas.drawColor(color, SkBlendMode::kSrcOver);
-                    props.mutableOutline().setRoundRect(0, 0,
-                            props.getWidth(), props.getHeight(), mSize * .25, 1);
-                    props.mutableOutline().setShouldClip(true);
-                });
+                auto card = TestUtils::createNode(
+                        x, y, x + mSize, y + mSize, [&](RenderProperties& props, Canvas& canvas) {
+                            canvas.drawColor(color, SkBlendMode::kSrcOver);
+                            props.mutableOutline().setRoundRect(0, 0, props.getWidth(),
+                                                                props.getHeight(), mSize * .25, 1);
+                            props.mutableOutline().setShouldClip(true);
+                        });
                 canvas.drawRenderNode(card.get());
                 cards.push_back(card);
             }
@@ -61,17 +59,15 @@ public:
 };
 
 static TestScene::Registrar _RoundRectClippingGpu(TestScene::Info{
-    "roundRectClipping-gpu",
-    "A bunch of RenderNodes with round rect clipping outlines that's GPU limited.",
-    [](const TestScene::Options&) -> test::TestScene* {
-        return new RoundRectClippingAnimation(dp(40), dp(200));
-    }
-});
+        "roundRectClipping-gpu",
+        "A bunch of RenderNodes with round rect clipping outlines that's GPU limited.",
+        [](const TestScene::Options&) -> test::TestScene* {
+            return new RoundRectClippingAnimation(dp(40), dp(200));
+        }});
 
 static TestScene::Registrar _RoundRectClippingCpu(TestScene::Info{
-    "roundRectClipping-cpu",
-    "A bunch of RenderNodes with round rect clipping outlines that's CPU limited.",
-    [](const TestScene::Options&) -> test::TestScene* {
-        return new RoundRectClippingAnimation(dp(20), dp(20));
-    }
-});
+        "roundRectClipping-cpu",
+        "A bunch of RenderNodes with round rect clipping outlines that's CPU limited.",
+        [](const TestScene::Options&) -> test::TestScene* {
+            return new RoundRectClippingAnimation(dp(20), dp(20));
+        }});

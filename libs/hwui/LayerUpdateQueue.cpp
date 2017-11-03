@@ -39,5 +39,5 @@ void LayerUpdateQueue::enqueueLayerWithDamage(RenderNode* renderNode, Rect damag
     }
 }
 
-} // namespace uirenderer
-} // namespace android
+}  // namespace uirenderer
+}  // namespace android

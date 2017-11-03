@@ -47,7 +47,7 @@ public:
      *      layer into the canvas.
      */
     explicit RenderNodeDrawable(RenderNode* node, SkCanvas* canvas, bool composeLayer = true,
-            bool inReorderingSection = false)
+                                bool inReorderingSection = false)
             : mRenderNode(node)
             , mRecordedTransform(canvas->getTotalMatrix())
             , mComposeLayer(composeLayer)
@@ -113,13 +113,13 @@ private:
      * @param nestLevel should be always 0. Used to track how far we are from the receiver.
      */
     void drawBackwardsProjectedNodes(SkCanvas* canvas, const SkiaDisplayList& displayList,
-            int nestLevel = 0);
+                                     int nestLevel = 0);
 
     /**
      * Applies the rendering properties of a view onto a SkCanvas.
      */
     static void setViewProperties(const RenderProperties& properties, SkCanvas* canvas,
-            float* alphaMultiplier);
+                                  float* alphaMultiplier);
 
     /**
      * Stores transform on the canvas at time of recording and is used for
@@ -150,6 +150,6 @@ private:
     SkiaDisplayList* mProjectedDisplayList = nullptr;
 };
 
-}; // namespace skiapipeline
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace skiapipeline
+};  // namespace uirenderer
+};  // namespace android

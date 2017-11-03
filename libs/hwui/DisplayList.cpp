@@ -44,8 +44,7 @@ DisplayList::DisplayList()
         , regions(stdAllocator)
         , referenceHolders(stdAllocator)
         , functors(stdAllocator)
-        , vectorDrawables(stdAllocator) {
-}
+        , vectorDrawables(stdAllocator) {}
 
 DisplayList::~DisplayList() {
     cleanupResources();
@@ -105,14 +104,16 @@ void DisplayList::updateChildren(std::function<void(RenderNode*)> updateFn) {
     }
 }
 
-bool DisplayList::prepareListAndChildren(TreeObserver& observer, TreeInfo& info, bool functorsNeedLayer,
+bool DisplayList::prepareListAndChildren(
+        TreeObserver& observer, TreeInfo& info, bool functorsNeedLayer,
         std::function<void(RenderNode*, TreeObserver&, TreeInfo&, bool)> childFn) {
     info.prepareTextures = info.canvasContext.pinImages(bitmapResources);
 
     for (auto&& op : children) {
         RenderNode* childNode = op->renderNode;
         info.damageAccumulator->pushTransform(&op->localMatrix);
-        bool childFunctorsNeedLayer = functorsNeedLayer; // TODO! || op->mRecordedWithPotentialStencilClip;
+        bool childFunctorsNeedLayer =
+                functorsNeedLayer;  // TODO! || op->mRecordedWithPotentialStencilClip;
         childFn(childNode, observer, info, childFunctorsNeedLayer);
         info.damageAccumulator->popTransform();
     }
@@ -140,5 +141,5 @@ void DisplayList::output(std::ostream& output, uint32_t level) {
     }
 }
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android

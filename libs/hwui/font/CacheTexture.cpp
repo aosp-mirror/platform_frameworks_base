@@ -16,12 +16,12 @@
 
 #include <SkGlyph.h>
 
-#include "CacheTexture.h"
-#include "FontUtil.h"
 #include "../Caches.h"
 #include "../Debug.h"
 #include "../Extensions.h"
 #include "../PixelBuffer.h"
+#include "CacheTexture.h"
+#include "FontUtil.h"
 
 namespace android {
 namespace uirenderer {
@@ -37,9 +37,8 @@ namespace uirenderer {
  */
 CacheBlock* CacheBlock::insertBlock(CacheBlock* head, CacheBlock* newBlock) {
 #if DEBUG_FONT_RENDERER
-    ALOGD("insertBlock: this, x, y, w, h = %p, %d, %d, %d, %d",
-            newBlock, newBlock->mX, newBlock->mY,
-            newBlock->mWidth, newBlock->mHeight);
+    ALOGD("insertBlock: this, x, y, w, h = %p, %d, %d, %d, %d", newBlock, newBlock->mX,
+          newBlock->mY, newBlock->mWidth, newBlock->mHeight);
 #endif
 
     CacheBlock* currBlock = head;
@@ -81,9 +80,8 @@ CacheBlock* CacheBlock::insertBlock(CacheBlock* head, CacheBlock* newBlock) {
 
 CacheBlock* CacheBlock::removeBlock(CacheBlock* head, CacheBlock* blockToRemove) {
 #if DEBUG_FONT_RENDERER
-    ALOGD("removeBlock: this, x, y, w, h = %p, %d, %d, %d, %d",
-            blockToRemove, blockToRemove->mX, blockToRemove->mY,
-            blockToRemove->mWidth, blockToRemove->mHeight);
+    ALOGD("removeBlock: this, x, y, w, h = %p, %d, %d, %d, %d", blockToRemove, blockToRemove->mX,
+          blockToRemove->mY, blockToRemove->mWidth, blockToRemove->mHeight);
 #endif
 
     CacheBlock* newHead = head;
@@ -93,7 +91,7 @@ CacheBlock* CacheBlock::removeBlock(CacheBlock* head, CacheBlock* blockToRemove)
     if (prevBlock) {
         // If this doesn't hold, we have a use-after-free below.
         LOG_ALWAYS_FATAL_IF(head == blockToRemove,
-                "removeBlock: head should not have a previous block");
+                            "removeBlock: head should not have a previous block");
         prevBlock->mNext = nextBlock;
     } else {
         newHead = nextBlock;
@@ -121,8 +119,9 @@ CacheTexture::CacheTexture(uint16_t width, uint16_t height, GLenum format, uint3
         , mCaches(Caches::getInstance()) {
     mTexture.blend = true;
 
-    mCacheBlocks = new CacheBlock(TEXTURE_BORDER_SIZE, TEXTURE_BORDER_SIZE,
-            getWidth() - TEXTURE_BORDER_SIZE, getHeight() - TEXTURE_BORDER_SIZE);
+    mCacheBlocks =
+            new CacheBlock(TEXTURE_BORDER_SIZE, TEXTURE_BORDER_SIZE,
+                           getWidth() - TEXTURE_BORDER_SIZE, getHeight() - TEXTURE_BORDER_SIZE);
 
     // OpenGL ES 3.0+ lets us specify the row length for unpack operations such
     // as glTexSubImage2D(). This allows us to upload a sub-rectangle of a texture.
@@ -150,8 +149,9 @@ void CacheTexture::reset() {
 void CacheTexture::init() {
     // reset, then create a new remainder space to start again
     reset();
-    mCacheBlocks = new CacheBlock(TEXTURE_BORDER_SIZE, TEXTURE_BORDER_SIZE,
-            getWidth() - TEXTURE_BORDER_SIZE, getHeight() - TEXTURE_BORDER_SIZE);
+    mCacheBlocks =
+            new CacheBlock(TEXTURE_BORDER_SIZE, TEXTURE_BORDER_SIZE,
+                           getWidth() - TEXTURE_BORDER_SIZE, getHeight() - TEXTURE_BORDER_SIZE);
 }
 
 void CacheTexture::releaseMesh() {
@@ -233,7 +233,7 @@ bool CacheTexture::fitBitmap(const SkGlyph& glyph, uint32_t* retOriginX, uint32_
             if (mFormat != GL_ALPHA) {
 #if DEBUG_FONT_RENDERER
                 ALOGD("fitBitmap: texture format %x is inappropriate for monochromatic glyphs",
-                        mFormat);
+                      mFormat);
 #endif
                 return false;
             }
@@ -272,8 +272,8 @@ bool CacheTexture::fitBitmap(const SkGlyph& glyph, uint32_t* retOriginX, uint32_
         // it's the remainder space (mY == 0) or there's only enough height for this one glyph
         // or it's within ROUNDING_SIZE of the block width
         if (roundedUpW <= cacheBlock->mWidth && glyphH <= cacheBlock->mHeight &&
-                (cacheBlock->mY == TEXTURE_BORDER_SIZE ||
-                        (cacheBlock->mWidth - roundedUpW < CACHE_BLOCK_ROUNDING_SIZE))) {
+            (cacheBlock->mY == TEXTURE_BORDER_SIZE ||
+             (cacheBlock->mWidth - roundedUpW < CACHE_BLOCK_ROUNDING_SIZE))) {
             if (cacheBlock->mHeight - glyphH < glyphH) {
                 // Only enough space for this glyph - don't bother rounding up the width
                 roundedUpW = glyphW;
@@ -292,12 +292,13 @@ bool CacheTexture::fitBitmap(const SkGlyph& glyph, uint32_t* retOriginX, uint32_
 
                 if (getHeight() - glyphH >= glyphH) {
                     // There's enough height left over to create a new CacheBlock
-                    CacheBlock* newBlock = new CacheBlock(oldX, glyphH + TEXTURE_BORDER_SIZE,
-                            roundedUpW, getHeight() - glyphH - TEXTURE_BORDER_SIZE);
+                    CacheBlock* newBlock =
+                            new CacheBlock(oldX, glyphH + TEXTURE_BORDER_SIZE, roundedUpW,
+                                           getHeight() - glyphH - TEXTURE_BORDER_SIZE);
 #if DEBUG_FONT_RENDERER
                     ALOGD("fitBitmap: Created new block: this, x, y, w, h = %p, %d, %d, %d, %d",
-                            newBlock, newBlock->mX, newBlock->mY,
-                            newBlock->mWidth, newBlock->mHeight);
+                          newBlock, newBlock->mX, newBlock->mY, newBlock->mWidth,
+                          newBlock->mHeight);
 #endif
                     mCacheBlocks = CacheBlock::insertBlock(mCacheBlocks, newBlock);
                 }
@@ -307,8 +308,8 @@ bool CacheTexture::fitBitmap(const SkGlyph& glyph, uint32_t* retOriginX, uint32_
                 cacheBlock->mHeight -= glyphH;
 #if DEBUG_FONT_RENDERER
                 ALOGD("fitBitmap: Added to existing block: this, x, y, w, h = %p, %d, %d, %d, %d",
-                        cacheBlock, cacheBlock->mX, cacheBlock->mY,
-                        cacheBlock->mWidth, cacheBlock->mHeight);
+                      cacheBlock, cacheBlock->mX, cacheBlock->mY, cacheBlock->mWidth,
+                      cacheBlock->mHeight);
 #endif
             }
 
@@ -319,7 +320,7 @@ bool CacheTexture::fitBitmap(const SkGlyph& glyph, uint32_t* retOriginX, uint32_
 
             mDirty = true;
             const Rect r(*retOriginX - TEXTURE_BORDER_SIZE, *retOriginY - TEXTURE_BORDER_SIZE,
-                    *retOriginX + glyphW, *retOriginY + glyphH);
+                         *retOriginX + glyphW, *retOriginY + glyphH);
             mDirtyRect.unionWith(r);
             mNumGlyphs++;
 
@@ -350,5 +351,5 @@ uint32_t CacheTexture::calculateFreeMemory() const {
     return free;
 }
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android

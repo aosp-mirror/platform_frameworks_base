@@ -25,36 +25,30 @@
 namespace android {
 namespace uirenderer {
 
-class TaskBase: public RefBase {
+class TaskBase : public RefBase {
 public:
-    TaskBase() { }
-    virtual ~TaskBase() { }
+    TaskBase() {}
+    virtual ~TaskBase() {}
 };
 
-template<typename T>
-class Task: public TaskBase {
+template <typename T>
+class Task : public TaskBase {
 public:
-    Task(): mFuture(new Future<T>()) { }
-    virtual ~Task() { }
+    Task() : mFuture(new Future<T>()) {}
+    virtual ~Task() {}
 
-    T getResult() const {
-        return mFuture->get();
-    }
+    T getResult() const { return mFuture->get(); }
 
-    void setResult(T result) {
-        mFuture->produce(result);
-    }
+    void setResult(T result) { mFuture->produce(result); }
 
 protected:
-    const sp<Future<T> >& future() const {
-        return mFuture;
-    }
+    const sp<Future<T> >& future() const { return mFuture; }
 
 private:
     sp<Future<T> > mFuture;
 };
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android
 
-#endif // ANDROID_HWUI_TASK_H
+#endif  // ANDROID_HWUI_TASK_H

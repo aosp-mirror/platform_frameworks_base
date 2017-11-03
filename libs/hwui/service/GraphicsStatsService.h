@@ -44,11 +44,13 @@ public:
     };
 
     ANDROID_API static void saveBuffer(const std::string& path, const std::string& package,
-            int versionCode, int64_t startTime, int64_t endTime, const ProfileData* data);
+                                       int versionCode, int64_t startTime, int64_t endTime,
+                                       const ProfileData* data);
 
     ANDROID_API static Dump* createDump(int outFd, DumpType type);
-    ANDROID_API static void addToDump(Dump* dump, const std::string& path, const std::string& package,
-            int versionCode, int64_t startTime, int64_t endTime, const ProfileData* data);
+    ANDROID_API static void addToDump(Dump* dump, const std::string& path,
+                                      const std::string& package, int versionCode,
+                                      int64_t startTime, int64_t endTime, const ProfileData* data);
     ANDROID_API static void addToDump(Dump* dump, const std::string& path);
     ANDROID_API static void finishDump(Dump* dump);
 

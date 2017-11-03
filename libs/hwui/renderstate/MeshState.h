@@ -33,10 +33,7 @@ const uint32_t kMaxNumberOfQuads = 2048;
 // This array is never used directly but used as a memcpy source in the
 // OpenGLRenderer constructor
 const TextureVertex kUnitQuadVertices[] = {
-        { 0, 0, 0, 0 },
-        { 1, 0, 1, 0 },
-        { 0, 1, 0, 1 },
-        { 1, 1, 1, 1 },
+        {0, 0, 0, 0}, {1, 0, 1, 0}, {0, 1, 0, 1}, {1, 1, 1, 1},
 };
 
 const GLsizei kVertexStride = sizeof(Vertex);
@@ -82,15 +79,13 @@ public:
      * Binds an attrib to the specified float vertex pointer.
      * Assumes a stride of gTextureVertexStride and a size of 2.
      */
-    void bindPositionVertexPointer(const GLvoid* vertices,
-            GLsizei stride = kTextureVertexStride);
+    void bindPositionVertexPointer(const GLvoid* vertices, GLsizei stride = kTextureVertexStride);
 
     /**
      * Binds an attrib to the specified float vertex pointer.
      * Assumes a stride of gTextureVertexStride and a size of 2.
      */
-    void bindTexCoordsVertexPointer(const GLvoid* vertices,
-            GLsizei stride = kTextureVertexStride);
+    void bindTexCoordsVertexPointer(const GLvoid* vertices, GLsizei stride = kTextureVertexStride);
 
     /**
      * Resets the vertex pointers.
@@ -111,6 +106,7 @@ public:
     ///////////////////////////////////////////////////////////////////////////////
     GLuint getUnitQuadVBO() { return mUnitQuadBuffer; }
     GLuint getQuadListIBO() { return mQuadListIndices; }
+
 private:
     MeshState();
 
@@ -134,4 +130,4 @@ private:
 } /* namespace uirenderer */
 } /* namespace android */
 
-#endif // RENDERSTATE_MESHSTATE_H
+#endif  // RENDERSTATE_MESHSTATE_H

@@ -16,17 +16,17 @@
 
 #include "RenderThread.h"
 
-#include "hwui/Bitmap.h"
-#include "renderstate/RenderState.h"
-#include "renderthread/OpenGLPipeline.h"
-#include "pipeline/skia/SkiaOpenGLReadback.h"
-#include "pipeline/skia/SkiaOpenGLPipeline.h"
-#include "pipeline/skia/SkiaVulkanPipeline.h"
 #include "CanvasContext.h"
 #include "EglManager.h"
 #include "OpenGLReadback.h"
 #include "RenderProxy.h"
 #include "VulkanManager.h"
+#include "hwui/Bitmap.h"
+#include "pipeline/skia/SkiaOpenGLPipeline.h"
+#include "pipeline/skia/SkiaOpenGLReadback.h"
+#include "pipeline/skia/SkiaVulkanPipeline.h"
+#include "renderstate/RenderState.h"
+#include "renderthread/OpenGLPipeline.h"
 #include "utils/FatVector.h"
 
 #include <gui/DisplayEventReceiver.h>
@@ -64,7 +64,8 @@ RenderThread& RenderThread::getInstance() {
     return *sInstance;
 }
 
-RenderThread::RenderThread() : ThreadBase()
+RenderThread::RenderThread()
+        : ThreadBase()
         , mDisplayEventReceiver(nullptr)
         , mVsyncRequested(false)
         , mFrameCallbackTaskPending(false)
@@ -83,17 +84,18 @@ void RenderThread::initializeDisplayEventReceiver() {
     LOG_ALWAYS_FATAL_IF(mDisplayEventReceiver, "Initializing a second DisplayEventReceiver?");
     mDisplayEventReceiver = new DisplayEventReceiver();
     status_t status = mDisplayEventReceiver->initCheck();
-    LOG_ALWAYS_FATAL_IF(status != NO_ERROR, "Initialization of DisplayEventReceiver "
-            "failed with status: %d", status);
+    LOG_ALWAYS_FATAL_IF(status != NO_ERROR,
+                        "Initialization of DisplayEventReceiver "
+                        "failed with status: %d",
+                        status);
 
     // Register the FD
-    mLooper->addFd(mDisplayEventReceiver->getFd(), 0,
-            Looper::EVENT_INPUT, RenderThread::displayEventReceiverCallback, this);
+    mLooper->addFd(mDisplayEventReceiver->getFd(), 0, Looper::EVENT_INPUT,
+                   RenderThread::displayEventReceiverCallback, this);
 }
 
 void RenderThread::initThreadLocals() {
-    sp<IBinder> dtoken(SurfaceComposerClient::getBuiltInDisplay(
-            ISurfaceComposer::eDisplayIdMain));
+    sp<IBinder> dtoken(SurfaceComposerClient::getBuiltInDisplay(ISurfaceComposer::eDisplayIdMain));
     status_t status = SurfaceComposerClient::getDisplayInfo(dtoken, &mDisplayInfo);
     LOG_ALWAYS_FATAL_IF(status, "Failed to get display info\n");
     nsecs_t frameIntervalNanos = static_cast<nsecs_t>(1000000000 / mDisplayInfo.fps);
@@ -133,18 +135,17 @@ void RenderThread::dumpGraphicsMemory(int fd) {
             break;
         }
         default:
-            LOG_ALWAYS_FATAL("canvas context type %d not supported", (int32_t) renderType);
+            LOG_ALWAYS_FATAL("canvas context type %d not supported", (int32_t)renderType);
             break;
     }
 
-    FILE *file = fdopen(fd, "a");
+    FILE* file = fdopen(fd, "a");
     fprintf(file, "\n%s\n", cachesOutput.string());
     fprintf(file, "\nPipeline=%s\n", pipeline.string());
     fflush(file);
 }
 
 Readback& RenderThread::readback() {
-
     if (!mReadback) {
         auto renderType = Properties::getRenderPipelineType();
         switch (renderType) {
@@ -159,7 +160,7 @@ Readback& RenderThread::readback() {
                 mReadback = new skiapipeline::SkiaOpenGLReadback(*this);
                 break;
             default:
-                LOG_ALWAYS_FATAL("canvas context type %d not supported", (int32_t) renderType);
+                LOG_ALWAYS_FATAL("canvas context type %d not supported", (int32_t)renderType);
                 break;
         }
     }
@@ -178,19 +179,21 @@ void RenderThread::setGrContext(GrContext* context) {
 int RenderThread::displayEventReceiverCallback(int fd, int events, void* data) {
     if (events & (Looper::EVENT_ERROR | Looper::EVENT_HANGUP)) {
         ALOGE("Display event receiver pipe was closed or an error occurred.  "
-                "events=0x%x", events);
-        return 0; // remove the callback
+              "events=0x%x",
+              events);
+        return 0;  // remove the callback
     }
 
     if (!(events & Looper::EVENT_INPUT)) {
         ALOGW("Received spurious callback for unhandled poll event.  "
-                "events=0x%x", events);
-        return 1; // keep the callback
+              "events=0x%x",
+              events);
+        return 1;  // keep the callback
     }
 
     reinterpret_cast<RenderThread*>(data)->drainDisplayEventQueue();
 
-    return 1; // keep the callback
+    return 1;  // keep the callback
 }
 
 static nsecs_t latestVsyncEvent(DisplayEventReceiver* receiver) {
@@ -201,9 +204,9 @@ static nsecs_t latestVsyncEvent(DisplayEventReceiver* receiver) {
         for (ssize_t i = 0; i < n; i++) {
             const DisplayEventReceiver::Event& ev = buf[i];
             switch (ev.header.type) {
-            case DisplayEventReceiver::DISPLAY_EVENT_VSYNC:
-                latest = ev.header.timestamp;
-                break;
+                case DisplayEventReceiver::DISPLAY_EVENT_VSYNC:
+                    latest = ev.header.timestamp;
+                    break;
             }
         }
     }
@@ -222,9 +225,7 @@ void RenderThread::drainDisplayEventQueue() {
             ATRACE_NAME("queue mFrameCallbackTask");
             mFrameCallbackTaskPending = true;
             nsecs_t runAt = (vsyncEvent + DISPATCH_FRAME_CALLBACKS_DELAY);
-            queue().postAt(runAt, [this]() {
-                dispatchFrameCallbacks();
-            });
+            queue().postAt(runAt, [this]() { dispatchFrameCallbacks(); });
         }
     }
 }
@@ -240,7 +241,8 @@ void RenderThread::dispatchFrameCallbacks() {
         // Assume one of them will probably animate again so preemptively
         // request the next vsync in case it occurs mid-frame
         requestVsync();
-        for (std::set<IFrameCallback*>::iterator it = callbacks.begin(); it != callbacks.end(); it++) {
+        for (std::set<IFrameCallback*>::iterator it = callbacks.begin(); it != callbacks.end();
+             it++) {
             (*it)->doFrame();
         }
     }
@@ -250,8 +252,7 @@ void RenderThread::requestVsync() {
     if (!mVsyncRequested) {
         mVsyncRequested = true;
         status_t status = mDisplayEventReceiver->requestNextVsync();
-        LOG_ALWAYS_FATAL_IF(status != NO_ERROR,
-                "requestNextVsync failed with status: %d", status);
+        LOG_ALWAYS_FATAL_IF(status != NO_ERROR, "requestNextVsync failed with status: %d", status);
     }
 }
 
@@ -265,8 +266,8 @@ bool RenderThread::threadLoop() {
 
         if (mPendingRegistrationFrameCallbacks.size() && !mFrameCallbackTaskPending) {
             drainDisplayEventQueue();
-            mFrameCallbacks.insert(
-                    mPendingRegistrationFrameCallbacks.begin(), mPendingRegistrationFrameCallbacks.end());
+            mFrameCallbacks.insert(mPendingRegistrationFrameCallbacks.begin(),
+                                   mPendingRegistrationFrameCallbacks.end());
             mPendingRegistrationFrameCallbacks.clear();
             requestVsync();
         }
@@ -310,7 +311,7 @@ sk_sp<Bitmap> RenderThread::allocateHardwareBitmap(SkBitmap& skBitmap) {
         case RenderPipelineType::SkiaVulkan:
             return skiapipeline::SkiaVulkanPipeline::allocateHardwareBitmap(*this, skBitmap);
         default:
-            LOG_ALWAYS_FATAL("canvas context type %d not supported", (int32_t) renderType);
+            LOG_ALWAYS_FATAL("canvas context type %d not supported", (int32_t)renderType);
             break;
     }
     return nullptr;

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#include "GlLayer.h"
 #include "LayerDrawable.h"
+#include "GlLayer.h"
 #include "VkLayer.h"
 
 #include "GrBackendSurface.h"
@@ -51,9 +51,9 @@ bool LayerDrawable::DrawLayer(GrContext* context, SkCanvas* canvas, Layer* layer
         externalTexture.fTarget = glLayer->getRenderTarget();
         externalTexture.fID = glLayer->getTextureId();
         GrBackendTexture backendTexture(layerWidth, layerHeight, kRGBA_8888_GrPixelConfig,
-                externalTexture);
+                                        externalTexture);
         layerImage = SkImage::MakeFromTexture(context, backendTexture, kTopLeft_GrSurfaceOrigin,
-                kPremul_SkAlphaType, nullptr);
+                                              kPremul_SkAlphaType, nullptr);
     } else {
         SkASSERT(layer->getApi() == Layer::Api::Vulkan);
         VkLayer* vkLayer = static_cast<VkLayer*>(layer);
@@ -64,12 +64,12 @@ bool LayerDrawable::DrawLayer(GrContext* context, SkCanvas* canvas, Layer* layer
     if (layerImage) {
         SkMatrix textureMatrix;
         layer->getTexTransform().copyTo(textureMatrix);
-        //TODO: after skia bug https://bugs.chromium.org/p/skia/issues/detail?id=7075 is fixed
+        // TODO: after skia bug https://bugs.chromium.org/p/skia/issues/detail?id=7075 is fixed
         // use bottom left origin and remove flipV and invert transformations.
         SkMatrix flipV;
         flipV.setAll(1, 0, 0, 0, -1, 1, 0, 0, 1);
         textureMatrix.preConcat(flipV);
-        textureMatrix.preScale(1.0f/layerWidth, 1.0f/layerHeight);
+        textureMatrix.preScale(1.0f / layerWidth, 1.0f / layerHeight);
         textureMatrix.postScale(layerWidth, layerHeight);
         SkMatrix textureMatrixInv;
         if (!textureMatrix.invert(&textureMatrixInv)) {
@@ -98,6 +98,6 @@ bool LayerDrawable::DrawLayer(GrContext* context, SkCanvas* canvas, Layer* layer
     return layerImage;
 }
 
-}; // namespace skiapipeline
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace skiapipeline
+};  // namespace uirenderer
+};  // namespace android

@@ -16,15 +16,15 @@
 
 #pragma once
 
-#include "font/FontUtil.h"
 #include "GlLayer.h"
 #include "Matrix.h"
 #include "Rect.h"
 #include "RenderNode.h"
 #include "TessellationCache.h"
+#include "Vector.h"
+#include "font/FontUtil.h"
 #include "utils/LinearAllocator.h"
 #include "utils/PaintUtils.h"
-#include "Vector.h"
 
 #include <androidfw/ResourceTypes.h>
 
@@ -73,39 +73,40 @@ class Tree;
  * MERGEABLE - These ops can be recorded into DisplayLists and rendered individually, or merged
  *      under certain circumstances.
  */
-#define MAP_OPS_BASED_ON_TYPE(PRE_RENDER_OP_FN, RENDER_ONLY_OP_FN, UNMERGEABLE_OP_FN, MERGEABLE_OP_FN) \
-        PRE_RENDER_OP_FN(RenderNodeOp) \
-        PRE_RENDER_OP_FN(CirclePropsOp) \
-        PRE_RENDER_OP_FN(RoundRectPropsOp) \
-        PRE_RENDER_OP_FN(BeginLayerOp) \
-        PRE_RENDER_OP_FN(EndLayerOp) \
-        PRE_RENDER_OP_FN(BeginUnclippedLayerOp) \
-        PRE_RENDER_OP_FN(EndUnclippedLayerOp) \
-        PRE_RENDER_OP_FN(VectorDrawableOp) \
-        \
-        RENDER_ONLY_OP_FN(ShadowOp) \
-        RENDER_ONLY_OP_FN(LayerOp) \
-        RENDER_ONLY_OP_FN(CopyToLayerOp) \
-        RENDER_ONLY_OP_FN(CopyFromLayerOp) \
-        \
-        UNMERGEABLE_OP_FN(ArcOp) \
-        UNMERGEABLE_OP_FN(BitmapMeshOp) \
-        UNMERGEABLE_OP_FN(BitmapRectOp) \
-        UNMERGEABLE_OP_FN(ColorOp) \
-        UNMERGEABLE_OP_FN(FunctorOp) \
-        UNMERGEABLE_OP_FN(LinesOp) \
-        UNMERGEABLE_OP_FN(OvalOp) \
-        UNMERGEABLE_OP_FN(PathOp) \
-        UNMERGEABLE_OP_FN(PointsOp) \
-        UNMERGEABLE_OP_FN(RectOp) \
-        UNMERGEABLE_OP_FN(RoundRectOp) \
-        UNMERGEABLE_OP_FN(SimpleRectsOp) \
-        UNMERGEABLE_OP_FN(TextOnPathOp) \
-        UNMERGEABLE_OP_FN(TextureLayerOp) \
-        \
-        MERGEABLE_OP_FN(BitmapOp) \
-        MERGEABLE_OP_FN(PatchOp) \
-        MERGEABLE_OP_FN(TextOp)
+#define MAP_OPS_BASED_ON_TYPE(PRE_RENDER_OP_FN, RENDER_ONLY_OP_FN, UNMERGEABLE_OP_FN, \
+                              MERGEABLE_OP_FN)                                        \
+    PRE_RENDER_OP_FN(RenderNodeOp)                                                    \
+    PRE_RENDER_OP_FN(CirclePropsOp)                                                   \
+    PRE_RENDER_OP_FN(RoundRectPropsOp)                                                \
+    PRE_RENDER_OP_FN(BeginLayerOp)                                                    \
+    PRE_RENDER_OP_FN(EndLayerOp)                                                      \
+    PRE_RENDER_OP_FN(BeginUnclippedLayerOp)                                           \
+    PRE_RENDER_OP_FN(EndUnclippedLayerOp)                                             \
+    PRE_RENDER_OP_FN(VectorDrawableOp)                                                \
+                                                                                      \
+    RENDER_ONLY_OP_FN(ShadowOp)                                                       \
+    RENDER_ONLY_OP_FN(LayerOp)                                                        \
+    RENDER_ONLY_OP_FN(CopyToLayerOp)                                                  \
+    RENDER_ONLY_OP_FN(CopyFromLayerOp)                                                \
+                                                                                      \
+    UNMERGEABLE_OP_FN(ArcOp)                                                          \
+    UNMERGEABLE_OP_FN(BitmapMeshOp)                                                   \
+    UNMERGEABLE_OP_FN(BitmapRectOp)                                                   \
+    UNMERGEABLE_OP_FN(ColorOp)                                                        \
+    UNMERGEABLE_OP_FN(FunctorOp)                                                      \
+    UNMERGEABLE_OP_FN(LinesOp)                                                        \
+    UNMERGEABLE_OP_FN(OvalOp)                                                         \
+    UNMERGEABLE_OP_FN(PathOp)                                                         \
+    UNMERGEABLE_OP_FN(PointsOp)                                                       \
+    UNMERGEABLE_OP_FN(RectOp)                                                         \
+    UNMERGEABLE_OP_FN(RoundRectOp)                                                    \
+    UNMERGEABLE_OP_FN(SimpleRectsOp)                                                  \
+    UNMERGEABLE_OP_FN(TextOnPathOp)                                                   \
+    UNMERGEABLE_OP_FN(TextureLayerOp)                                                 \
+                                                                                      \
+    MERGEABLE_OP_FN(BitmapOp)                                                         \
+    MERGEABLE_OP_FN(PatchOp)                                                          \
+    MERGEABLE_OP_FN(TextOp)
 
 /**
  * LUT generators, which will insert nullptr for unsupported ops
@@ -113,16 +114,16 @@ class Tree;
 #define NULLPTR_OP_FN(Type) nullptr,
 
 #define BUILD_DEFERRABLE_OP_LUT(OP_FN) \
-        { MAP_OPS_BASED_ON_TYPE(OP_FN, NULLPTR_OP_FN, OP_FN, OP_FN) }
+    { MAP_OPS_BASED_ON_TYPE(OP_FN, NULLPTR_OP_FN, OP_FN, OP_FN) }
 
 #define BUILD_MERGEABLE_OP_LUT(OP_FN) \
-        { MAP_OPS_BASED_ON_TYPE(NULLPTR_OP_FN, NULLPTR_OP_FN, NULLPTR_OP_FN, OP_FN) }
+    { MAP_OPS_BASED_ON_TYPE(NULLPTR_OP_FN, NULLPTR_OP_FN, NULLPTR_OP_FN, OP_FN) }
 
 #define BUILD_RENDERABLE_OP_LUT(OP_FN) \
-        { MAP_OPS_BASED_ON_TYPE(NULLPTR_OP_FN, OP_FN, OP_FN, OP_FN) }
+    { MAP_OPS_BASED_ON_TYPE(NULLPTR_OP_FN, OP_FN, OP_FN, OP_FN) }
 
 #define BUILD_FULL_OP_LUT(OP_FN) \
-        { MAP_OPS_BASED_ON_TYPE(OP_FN, OP_FN, OP_FN, OP_FN) }
+    { MAP_OPS_BASED_ON_TYPE(OP_FN, OP_FN, OP_FN, OP_FN) }
 
 /**
  * Op mapping functions, which skip unsupported ops.
@@ -131,30 +132,29 @@ class Tree;
  */
 #define NULL_OP_FN(Type)
 
-#define MAP_DEFERRABLE_OPS(OP_FN) \
-        MAP_OPS_BASED_ON_TYPE(OP_FN, NULL_OP_FN, OP_FN, OP_FN)
+#define MAP_DEFERRABLE_OPS(OP_FN) MAP_OPS_BASED_ON_TYPE(OP_FN, NULL_OP_FN, OP_FN, OP_FN)
 
-#define MAP_MERGEABLE_OPS(OP_FN) \
-        MAP_OPS_BASED_ON_TYPE(NULL_OP_FN, NULL_OP_FN, NULL_OP_FN, OP_FN)
+#define MAP_MERGEABLE_OPS(OP_FN) MAP_OPS_BASED_ON_TYPE(NULL_OP_FN, NULL_OP_FN, NULL_OP_FN, OP_FN)
 
-#define MAP_RENDERABLE_OPS(OP_FN) \
-        MAP_OPS_BASED_ON_TYPE(NULL_OP_FN, OP_FN, OP_FN, OP_FN)
+#define MAP_RENDERABLE_OPS(OP_FN) MAP_OPS_BASED_ON_TYPE(NULL_OP_FN, OP_FN, OP_FN, OP_FN)
 
 // Generate OpId enum
 #define IDENTITY_FN(Type) Type,
 namespace RecordedOpId {
-    enum {
-        MAP_OPS_BASED_ON_TYPE(IDENTITY_FN, IDENTITY_FN, IDENTITY_FN, IDENTITY_FN)
-        Count,
-    };
+enum {
+    MAP_OPS_BASED_ON_TYPE(IDENTITY_FN, IDENTITY_FN, IDENTITY_FN, IDENTITY_FN) Count,
+};
 }
-static_assert(RecordedOpId::RenderNodeOp == 0,
-        "First index must be zero for LUTs to work");
+static_assert(RecordedOpId::RenderNodeOp == 0, "First index must be zero for LUTs to work");
 
-#define BASE_PARAMS const Rect& unmappedBounds, const Matrix4& localMatrix, const ClipBase* localClip, const SkPaint* paint
-#define BASE_PARAMS_PAINTLESS const Rect& unmappedBounds, const Matrix4& localMatrix, const ClipBase* localClip
+#define BASE_PARAMS                                                                    \
+    const Rect &unmappedBounds, const Matrix4 &localMatrix, const ClipBase *localClip, \
+            const SkPaint *paint
+#define BASE_PARAMS_PAINTLESS \
+    const Rect &unmappedBounds, const Matrix4 &localMatrix, const ClipBase *localClip
 #define SUPER(Type) RecordedOp(RecordedOpId::Type, unmappedBounds, localMatrix, localClip, paint)
-#define SUPER_PAINTLESS(Type) RecordedOp(RecordedOpId::Type, unmappedBounds, localMatrix, localClip, nullptr)
+#define SUPER_PAINTLESS(Type) \
+    RecordedOp(RecordedOpId::Type, unmappedBounds, localMatrix, localClip, nullptr)
 
 struct RecordedOp {
     /* ID from RecordedOpId - generally used for jumping into function tables */
@@ -171,6 +171,7 @@ struct RecordedOp {
 
     /* optional paint, stored in base object to simplify merging logic */
     const SkPaint* paint;
+
 protected:
     RecordedOp(unsigned int opId, BASE_PARAMS)
             : opId(opId)
@@ -182,9 +183,8 @@ protected:
 
 struct RenderNodeOp : RecordedOp {
     RenderNodeOp(BASE_PARAMS_PAINTLESS, RenderNode* renderNode)
-            : SUPER_PAINTLESS(RenderNodeOp)
-            , renderNode(renderNode) {}
-    RenderNode * renderNode; // not const, since drawing modifies it
+            : SUPER_PAINTLESS(RenderNodeOp), renderNode(renderNode) {}
+    RenderNode* renderNode;  // not const, since drawing modifies it
 
     /**
      * Holds the transformation between the projection surface ViewGroup and this RenderNode
@@ -204,25 +204,20 @@ struct RenderNodeOp : RecordedOp {
 
 struct ArcOp : RecordedOp {
     ArcOp(BASE_PARAMS, float startAngle, float sweepAngle, bool useCenter)
-            : SUPER(ArcOp)
-            , startAngle(startAngle)
-            , sweepAngle(sweepAngle)
-            , useCenter(useCenter) {}
+            : SUPER(ArcOp), startAngle(startAngle), sweepAngle(sweepAngle), useCenter(useCenter) {}
     const float startAngle;
     const float sweepAngle;
     const bool useCenter;
 };
 
 struct BitmapOp : RecordedOp {
-    BitmapOp(BASE_PARAMS, Bitmap* bitmap)
-            : SUPER(BitmapOp)
-            , bitmap(bitmap) {}
+    BitmapOp(BASE_PARAMS, Bitmap* bitmap) : SUPER(BitmapOp), bitmap(bitmap) {}
     Bitmap* bitmap;
 };
 
 struct BitmapMeshOp : RecordedOp {
-    BitmapMeshOp(BASE_PARAMS, Bitmap* bitmap, int meshWidth, int meshHeight,
-            const float* vertices, const int* colors)
+    BitmapMeshOp(BASE_PARAMS, Bitmap* bitmap, int meshWidth, int meshHeight, const float* vertices,
+                 const int* colors)
             : SUPER(BitmapMeshOp)
             , bitmap(bitmap)
             , meshWidth(meshWidth)
@@ -238,16 +233,14 @@ struct BitmapMeshOp : RecordedOp {
 
 struct BitmapRectOp : RecordedOp {
     BitmapRectOp(BASE_PARAMS, Bitmap* bitmap, const Rect& src)
-            : SUPER(BitmapRectOp)
-            , bitmap(bitmap)
-            , src(src) {}
+            : SUPER(BitmapRectOp), bitmap(bitmap), src(src) {}
     Bitmap* bitmap;
     const Rect src;
 };
 
 struct CirclePropsOp : RecordedOp {
     CirclePropsOp(const Matrix4& localMatrix, const ClipBase* localClip, const SkPaint* paint,
-            float* x, float* y, float* radius)
+                  float* x, float* y, float* radius)
             : RecordedOp(RecordedOpId::CirclePropsOp, Rect(), localMatrix, localClip, paint)
             , x(x)
             , y(y)
@@ -278,60 +271,47 @@ struct FunctorOp : RecordedOp {
 
 struct LinesOp : RecordedOp {
     LinesOp(BASE_PARAMS, const float* points, const int floatCount)
-            : SUPER(LinesOp)
-            , points(points)
-            , floatCount(floatCount) {}
+            : SUPER(LinesOp), points(points), floatCount(floatCount) {}
     const float* points;
     const int floatCount;
 };
 
 struct OvalOp : RecordedOp {
-    OvalOp(BASE_PARAMS)
-            : SUPER(OvalOp) {}
+    OvalOp(BASE_PARAMS) : SUPER(OvalOp) {}
 };
 
 struct PatchOp : RecordedOp {
     PatchOp(BASE_PARAMS, Bitmap* bitmap, const Res_png_9patch* patch)
-            : SUPER(PatchOp)
-            , bitmap(bitmap)
-            , patch(patch) {}
+            : SUPER(PatchOp), bitmap(bitmap), patch(patch) {}
     Bitmap* bitmap;
     const Res_png_9patch* patch;
 };
 
 struct PathOp : RecordedOp {
-    PathOp(BASE_PARAMS, const SkPath* path)
-            : SUPER(PathOp)
-            , path(path) {}
+    PathOp(BASE_PARAMS, const SkPath* path) : SUPER(PathOp), path(path) {}
     const SkPath* path;
 };
 
 struct PointsOp : RecordedOp {
     PointsOp(BASE_PARAMS, const float* points, const int floatCount)
-            : SUPER(PointsOp)
-            , points(points)
-            , floatCount(floatCount) {}
+            : SUPER(PointsOp), points(points), floatCount(floatCount) {}
     const float* points;
     const int floatCount;
 };
 
 struct RectOp : RecordedOp {
-    RectOp(BASE_PARAMS)
-            : SUPER(RectOp) {}
+    RectOp(BASE_PARAMS) : SUPER(RectOp) {}
 };
 
 struct RoundRectOp : RecordedOp {
-    RoundRectOp(BASE_PARAMS, float rx, float ry)
-            : SUPER(RoundRectOp)
-            , rx(rx)
-            , ry(ry) {}
+    RoundRectOp(BASE_PARAMS, float rx, float ry) : SUPER(RoundRectOp), rx(rx), ry(ry) {}
     const float rx;
     const float ry;
 };
 
 struct RoundRectPropsOp : RecordedOp {
     RoundRectPropsOp(const Matrix4& localMatrix, const ClipBase* localClip, const SkPaint* paint,
-            float* left, float* top, float* right, float* bottom, float *rx, float *ry)
+                     float* left, float* top, float* right, float* bottom, float* rx, float* ry)
             : RecordedOp(RecordedOpId::RoundRectPropsOp, Rect(), localMatrix, localClip, paint)
             , left(left)
             , top(top)
@@ -349,8 +329,7 @@ struct RoundRectPropsOp : RecordedOp {
 
 struct VectorDrawableOp : RecordedOp {
     VectorDrawableOp(VectorDrawable::Tree* tree, BASE_PARAMS_PAINTLESS)
-            : SUPER_PAINTLESS(VectorDrawableOp)
-            , vectorDrawable(tree) {}
+            : SUPER_PAINTLESS(VectorDrawableOp), vectorDrawable(tree) {}
     VectorDrawable::Tree* vectorDrawable;
 };
 
@@ -366,24 +345,21 @@ struct ShadowOp : RecordedOp {
     ShadowOp(sp<TessellationCache::ShadowTask>& shadowTask, float casterAlpha)
             : RecordedOp(RecordedOpId::ShadowOp, Rect(), Matrix4::identity(), nullptr, nullptr)
             , shadowTask(shadowTask)
-            , casterAlpha(casterAlpha) {
-    };
+            , casterAlpha(casterAlpha){};
     sp<TessellationCache::ShadowTask> shadowTask;
     const float casterAlpha;
 };
 
-struct SimpleRectsOp : RecordedOp { // Filled, no AA (TODO: better name?)
+struct SimpleRectsOp : RecordedOp {  // Filled, no AA (TODO: better name?)
     SimpleRectsOp(BASE_PARAMS, Vertex* vertices, size_t vertexCount)
-            : SUPER(SimpleRectsOp)
-            , vertices(vertices)
-            , vertexCount(vertexCount) {}
+            : SUPER(SimpleRectsOp), vertices(vertices), vertexCount(vertexCount) {}
     Vertex* vertices;
     const size_t vertexCount;
 };
 
 struct TextOp : RecordedOp {
-    TextOp(BASE_PARAMS, const glyph_t* glyphs, const float* positions, int glyphCount,
-            float x, float y)
+    TextOp(BASE_PARAMS, const glyph_t* glyphs, const float* positions, int glyphCount, float x,
+           float y)
             : SUPER(TextOp)
             , glyphs(glyphs)
             , positions(positions)
@@ -400,7 +376,8 @@ struct TextOp : RecordedOp {
 struct TextOnPathOp : RecordedOp {
     // TODO: explicitly define bounds
     TextOnPathOp(const Matrix4& localMatrix, const ClipBase* localClip, const SkPaint* paint,
-            const glyph_t* glyphs, int glyphCount, const SkPath* path, float hOffset, float vOffset)
+                 const glyph_t* glyphs, int glyphCount, const SkPath* path, float hOffset,
+                 float vOffset)
             : RecordedOp(RecordedOpId::TextOnPathOp, Rect(), localMatrix, localClip, paint)
             , glyphs(glyphs)
             , glyphCount(glyphCount)
@@ -417,16 +394,13 @@ struct TextOnPathOp : RecordedOp {
 
 struct TextureLayerOp : RecordedOp {
     TextureLayerOp(BASE_PARAMS_PAINTLESS, DeferredLayerUpdater* layer)
-            : SUPER_PAINTLESS(TextureLayerOp)
-            , layerHandle(layer) {}
+            : SUPER_PAINTLESS(TextureLayerOp), layerHandle(layer) {}
 
     // Copy an existing TextureLayerOp, replacing the underlying matrix
     TextureLayerOp(const TextureLayerOp& op, const Matrix4& replacementMatrix)
             : RecordedOp(RecordedOpId::TextureLayerOp, op.unmappedBounds, replacementMatrix,
-                    op.localClip, op.paint)
-            , layerHandle(op.layerHandle) {
-
-    }
+                         op.localClip, op.paint)
+            , layerHandle(op.layerHandle) {}
     DeferredLayerUpdater* layerHandle;
 };
 
@@ -439,8 +413,7 @@ struct TextureLayerOp : RecordedOp {
  * and that commands following will render into it.
  */
 struct BeginLayerOp : RecordedOp {
-    BeginLayerOp(BASE_PARAMS)
-            : SUPER(BeginLayerOp) {}
+    BeginLayerOp(BASE_PARAMS) : SUPER(BeginLayerOp) {}
 };
 
 /**
@@ -455,22 +428,20 @@ struct EndLayerOp : RecordedOp {
 };
 
 struct BeginUnclippedLayerOp : RecordedOp {
-    BeginUnclippedLayerOp(BASE_PARAMS)
-            : SUPER(BeginUnclippedLayerOp) {}
+    BeginUnclippedLayerOp(BASE_PARAMS) : SUPER(BeginUnclippedLayerOp) {}
 };
 
 struct EndUnclippedLayerOp : RecordedOp {
     EndUnclippedLayerOp()
-            : RecordedOp(RecordedOpId::EndUnclippedLayerOp, Rect(), Matrix4::identity(), nullptr, nullptr) {}
+            : RecordedOp(RecordedOpId::EndUnclippedLayerOp, Rect(), Matrix4::identity(), nullptr,
+                         nullptr) {}
 };
 
 struct CopyToLayerOp : RecordedOp {
     CopyToLayerOp(const RecordedOp& op, OffscreenBuffer** layerHandle)
-            : RecordedOp(RecordedOpId::CopyToLayerOp,
-                    op.unmappedBounds,
-                    op.localMatrix,
-                    nullptr, // clip intentionally ignored
-                    op.paint)
+            : RecordedOp(RecordedOpId::CopyToLayerOp, op.unmappedBounds, op.localMatrix,
+                         nullptr,  // clip intentionally ignored
+                         op.paint)
             , layerHandle(layerHandle) {}
 
     // Records a handle to the Layer object, since the Layer itself won't be
@@ -478,15 +449,12 @@ struct CopyToLayerOp : RecordedOp {
     OffscreenBuffer** layerHandle;
 };
 
-
 // draw the parameter layer underneath
 struct CopyFromLayerOp : RecordedOp {
     CopyFromLayerOp(const RecordedOp& op, OffscreenBuffer** layerHandle)
-            : RecordedOp(RecordedOpId::CopyFromLayerOp,
-                    op.unmappedBounds,
-                    op.localMatrix,
-                    nullptr, // clip intentionally ignored
-                    op.paint)
+            : RecordedOp(RecordedOpId::CopyFromLayerOp, op.unmappedBounds, op.localMatrix,
+                         nullptr,  // clip intentionally ignored
+                         op.paint)
             , layerHandle(layerHandle) {}
 
     // Records a handle to the Layer object, since the Layer itself won't be
@@ -510,7 +478,8 @@ struct LayerOp : RecordedOp {
             , colorFilter(paint ? paint->getColorFilter() : nullptr) {}
 
     explicit LayerOp(RenderNode& node)
-            : RecordedOp(RecordedOpId::LayerOp, Rect(node.getWidth(), node.getHeight()), Matrix4::identity(), nullptr, nullptr)
+            : RecordedOp(RecordedOpId::LayerOp, Rect(node.getWidth(), node.getHeight()),
+                         Matrix4::identity(), nullptr, nullptr)
             , layerHandle(node.getLayerHandle())
             , alpha(node.properties().layerProperties().alpha() / 255.0f)
             , mode(node.properties().layerProperties().xferMode())
@@ -527,5 +496,5 @@ struct LayerOp : RecordedOp {
     SkColorFilter* colorFilter;
 };
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android

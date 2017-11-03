@@ -26,8 +26,9 @@ namespace uirenderer {
 
 class Signal {
 public:
-    explicit Signal(Condition::WakeUpType type = Condition::WAKE_UP_ALL) : mType(type), mSignaled(false) { }
-    ~Signal() { }
+    explicit Signal(Condition::WakeUpType type = Condition::WAKE_UP_ALL)
+            : mType(type), mSignaled(false) {}
+    ~Signal() {}
 
     void signal() {
         {
@@ -52,7 +53,7 @@ private:
     mutable Condition mCondition;
 };
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android
 
-#endif // ANDROID_HWUI_SIGNAL_H
+#endif  // ANDROID_HWUI_SIGNAL_H

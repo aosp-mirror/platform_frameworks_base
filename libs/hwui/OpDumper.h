@@ -29,5 +29,5 @@ public:
     static const char* opName(const RecordedOp& op);
 };
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android

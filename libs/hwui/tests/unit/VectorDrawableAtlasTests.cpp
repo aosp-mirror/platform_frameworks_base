@@ -16,9 +16,9 @@
 
 #include <gtest/gtest.h>
 
-#include "tests/common/TestUtils.h"
 #include <GrRectanizer.h>
 #include "pipeline/skia/VectorDrawableAtlas.h"
+#include "tests/common/TestUtils.h"
 
 using namespace android;
 using namespace android::uirenderer;
@@ -26,16 +26,16 @@ using namespace android::uirenderer::renderthread;
 using namespace android::uirenderer::skiapipeline;
 
 RENDERTHREAD_SKIA_PIPELINE_TEST(VectorDrawableAtlas, addGetRemove) {
-    VectorDrawableAtlas atlas(100*100);
+    VectorDrawableAtlas atlas(100 * 100);
     atlas.prepareForDraw(renderThread.getGrContext());
-    //create 150 rects 10x10, which won't fit in the atlas (atlas can fit no more than 100 rects)
+    // create 150 rects 10x10, which won't fit in the atlas (atlas can fit no more than 100 rects)
     const int MAX_RECTS = 150;
     AtlasEntry VDRects[MAX_RECTS];
 
     sk_sp<SkSurface> atlasSurface;
 
-    //check we are able to allocate new rects
-    //check that rects in the atlas do not intersect
+    // check we are able to allocate new rects
+    // check that rects in the atlas do not intersect
     for (uint32_t i = 0; i < MAX_RECTS; i++) {
         VDRects[i] = atlas.requestNewEntry(10, 10, renderThread.getGrContext());
         if (0 == i) {
@@ -45,7 +45,7 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(VectorDrawableAtlas, addGetRemove) {
         ASSERT_TRUE(VDRects[i].surface.get() != nullptr);
         ASSERT_TRUE(VDRects[i].rect.width() == 10 && VDRects[i].rect.height() == 10);
 
-        //nothing in the atlas should intersect
+        // nothing in the atlas should intersect
         if (atlasSurface.get() == VDRects[i].surface.get()) {
             for (uint32_t j = 0; j < i; j++) {
                 if (atlasSurface.get() == VDRects[j].surface.get()) {
@@ -55,16 +55,16 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(VectorDrawableAtlas, addGetRemove) {
         }
     }
 
-    //first 1/3 rects should all be in the same surface
-    for (uint32_t i = 1; i < MAX_RECTS/3; i++) {
+    // first 1/3 rects should all be in the same surface
+    for (uint32_t i = 1; i < MAX_RECTS / 3; i++) {
         ASSERT_NE(VDRects[i].key, VDRects[0].key);
         ASSERT_EQ(VDRects[i].surface.get(), atlasSurface.get());
     }
 
-    //first rect is using atlas and last is a standalone surface
-    ASSERT_NE(VDRects[0].surface.get(), VDRects[MAX_RECTS-1].surface.get());
+    // first rect is using atlas and last is a standalone surface
+    ASSERT_NE(VDRects[0].surface.get(), VDRects[MAX_RECTS - 1].surface.get());
 
-    //check getEntry returns the same surfaces that we had created
+    // check getEntry returns the same surfaces that we had created
     for (uint32_t i = 0; i < MAX_RECTS; i++) {
         auto VDRect = atlas.getEntry(VDRects[i].key);
         ASSERT_TRUE(VDRect.key != INVALID_ATLAS_KEY);
@@ -74,9 +74,9 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(VectorDrawableAtlas, addGetRemove) {
         atlas.releaseEntry(VDRect.key);
     }
 
-    //check that any new rects will be allocated in the atlas, even that rectanizer is full.
-    //rects in the atlas should not intersect.
-    for (uint32_t i = 0; i < MAX_RECTS/3; i++) {
+    // check that any new rects will be allocated in the atlas, even that rectanizer is full.
+    // rects in the atlas should not intersect.
+    for (uint32_t i = 0; i < MAX_RECTS / 3; i++) {
         VDRects[i] = atlas.requestNewEntry(10, 10, renderThread.getGrContext());
         ASSERT_TRUE(VDRects[i].key != INVALID_ATLAS_KEY);
         ASSERT_EQ(VDRects[i].surface.get(), atlasSurface.get());
@@ -87,25 +87,24 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(VectorDrawableAtlas, addGetRemove) {
     }
 }
 
-
 RENDERTHREAD_SKIA_PIPELINE_TEST(VectorDrawableAtlas, disallowSharedSurface) {
-    VectorDrawableAtlas atlas(100*100);
-    //don't allow to use a shared surface
+    VectorDrawableAtlas atlas(100 * 100);
+    // don't allow to use a shared surface
     atlas.setStorageMode(VectorDrawableAtlas::StorageMode::disallowSharedSurface);
     atlas.prepareForDraw(renderThread.getGrContext());
-    //create 150 rects 10x10, which won't fit in the atlas (atlas can fit no more than 100 rects)
+    // create 150 rects 10x10, which won't fit in the atlas (atlas can fit no more than 100 rects)
     const int MAX_RECTS = 150;
     AtlasEntry VDRects[MAX_RECTS];
 
-    //check we are able to allocate new rects
-    //check that rects in the atlas use unique surfaces
+    // check we are able to allocate new rects
+    // check that rects in the atlas use unique surfaces
     for (uint32_t i = 0; i < MAX_RECTS; i++) {
         VDRects[i] = atlas.requestNewEntry(10, 10, renderThread.getGrContext());
         ASSERT_TRUE(VDRects[i].key != INVALID_ATLAS_KEY);
         ASSERT_TRUE(VDRects[i].surface.get() != nullptr);
         ASSERT_TRUE(VDRects[i].rect.width() == 10 && VDRects[i].rect.height() == 10);
 
-        //nothing in the atlas should use the same surface
+        // nothing in the atlas should use the same surface
         for (uint32_t j = 0; j < i; j++) {
             ASSERT_NE(VDRects[i].surface.get(), VDRects[j].surface.get());
         }
@@ -113,17 +112,17 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(VectorDrawableAtlas, disallowSharedSurface) {
 }
 
 RENDERTHREAD_SKIA_PIPELINE_TEST(VectorDrawableAtlas, repack) {
-    VectorDrawableAtlas atlas(100*100);
+    VectorDrawableAtlas atlas(100 * 100);
     ASSERT_FALSE(atlas.isFragmented());
     atlas.prepareForDraw(renderThread.getGrContext());
     ASSERT_FALSE(atlas.isFragmented());
-    //create 150 rects 10x10, which won't fit in the atlas (atlas can fit no more than 100 rects)
+    // create 150 rects 10x10, which won't fit in the atlas (atlas can fit no more than 100 rects)
     const int MAX_RECTS = 150;
     AtlasEntry VDRects[MAX_RECTS];
 
     sk_sp<SkSurface> atlasSurface;
 
-    //fill the atlas with check we are able to allocate new rects
+    // fill the atlas with check we are able to allocate new rects
     for (uint32_t i = 0; i < MAX_RECTS; i++) {
         VDRects[i] = atlas.requestNewEntry(10, 10, renderThread.getGrContext());
         if (0 == i) {
@@ -134,13 +133,13 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(VectorDrawableAtlas, repack) {
 
     ASSERT_FALSE(atlas.isFragmented());
 
-    //first 1/3 rects should all be in the same surface
-    for (uint32_t i = 1; i < MAX_RECTS/3; i++) {
+    // first 1/3 rects should all be in the same surface
+    for (uint32_t i = 1; i < MAX_RECTS / 3; i++) {
         ASSERT_NE(VDRects[i].key, VDRects[0].key);
         ASSERT_EQ(VDRects[i].surface.get(), atlasSurface.get());
     }
 
-    //release all entries
+    // release all entries
     for (uint32_t i = 0; i < MAX_RECTS; i++) {
         auto VDRect = atlas.getEntry(VDRects[i].key);
         ASSERT_TRUE(VDRect.key != INVALID_ATLAS_KEY);
@@ -149,9 +148,9 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(VectorDrawableAtlas, repack) {
 
     ASSERT_FALSE(atlas.isFragmented());
 
-    //allocate 4x4 rects, which will fragment the atlas badly, because each entry occupies a 10x10
-    //area
-    for (uint32_t i = 0; i < 4*MAX_RECTS; i++) {
+    // allocate 4x4 rects, which will fragment the atlas badly, because each entry occupies a 10x10
+    // area
+    for (uint32_t i = 0; i < 4 * MAX_RECTS; i++) {
         AtlasEntry entry = atlas.requestNewEntry(4, 4, renderThread.getGrContext());
         ASSERT_TRUE(entry.key != INVALID_ATLAS_KEY);
     }

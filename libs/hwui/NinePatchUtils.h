@@ -20,7 +20,7 @@ namespace android {
 namespace NinePatchUtils {
 
 static inline void SetLatticeDivs(SkCanvas::Lattice* lattice, const Res_png_9patch& chunk,
-        int width, int height) {
+                                  int width, int height) {
     lattice->fXCount = chunk.numXDivs;
     lattice->fYCount = chunk.numYDivs;
     lattice->fXDivs = chunk.getXDivs();
@@ -54,7 +54,7 @@ static inline int NumDistinctRects(const SkCanvas::Lattice& lattice) {
 }
 
 static inline void SetLatticeFlags(SkCanvas::Lattice* lattice, SkCanvas::Lattice::Flags* flags,
-        int numFlags, const Res_png_9patch& chunk) {
+                                   int numFlags, const Res_png_9patch& chunk) {
     lattice->fFlags = flags;
     sk_bzero(flags, numFlags * sizeof(SkCanvas::Lattice::Flags));
 
@@ -92,5 +92,5 @@ static inline void SetLatticeFlags(SkCanvas::Lattice* lattice, SkCanvas::Lattice
     }
 }
 
-}; // namespace NinePatchUtils
-}; // namespace android
+};  // namespace NinePatchUtils
+};  // namespace android

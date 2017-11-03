@@ -32,10 +32,10 @@ void ResourceCache::logCache() {
     ALOGD("ResourceCache: cacheReport:");
     for (size_t i = 0; i < mCache->size(); ++i) {
         ResourceReference* ref = mCache->valueAt(i);
-        ALOGD("  ResourceCache: mCache(%zu): resource, ref = 0x%p, 0x%p",
-                i, mCache->keyAt(i), mCache->valueAt(i));
-        ALOGD("  ResourceCache: mCache(%zu): refCount, destroyed, type = %d, %d, %d",
-                i, ref->refCount, ref->destroyed, ref->resourceType);
+        ALOGD("  ResourceCache: mCache(%zu): resource, ref = 0x%p, 0x%p", i, mCache->keyAt(i),
+              mCache->valueAt(i));
+        ALOGD("  ResourceCache: mCache(%zu): refCount, destroyed, type = %d, %d, %d", i,
+              ref->refCount, ref->destroyed, ref->resourceType);
     }
 }
 
@@ -63,7 +63,7 @@ void ResourceCache::incrementRefcount(void* resource, ResourceType resourceType)
 }
 
 void ResourceCache::incrementRefcount(const Res_png_9patch* patchResource) {
-    incrementRefcount((void*) patchResource, kNinePatch);
+    incrementRefcount((void*)patchResource, kNinePatch);
 }
 
 void ResourceCache::incrementRefcountLocked(void* resource, ResourceType resourceType) {
@@ -82,7 +82,7 @@ void ResourceCache::decrementRefcount(void* resource) {
 }
 
 void ResourceCache::decrementRefcount(const Res_png_9patch* patchResource) {
-    decrementRefcount((void*) patchResource);
+    decrementRefcount((void*)patchResource);
 }
 
 void ResourceCache::decrementRefcountLocked(void* resource) {
@@ -99,7 +99,7 @@ void ResourceCache::decrementRefcountLocked(void* resource) {
 }
 
 void ResourceCache::decrementRefcountLocked(const Res_png_9patch* patchResource) {
-    decrementRefcountLocked((void*) patchResource);
+    decrementRefcountLocked((void*)patchResource);
 }
 
 void ResourceCache::destructor(Res_png_9patch* resource) {
@@ -117,7 +117,7 @@ void ResourceCache::destructorLocked(Res_png_9patch* resource) {
         } else {
             // A Res_png_9patch is actually an array of byte that's larger
             // than sizeof(Res_png_9patch). It must be freed as an array.
-            delete[] (int8_t*) resource;
+            delete[](int8_t*) resource;
         }
         return;
     }
@@ -136,20 +136,19 @@ void ResourceCache::deleteResourceReferenceLocked(const void* resource, Resource
         switch (ref->resourceType) {
             case kNinePatch: {
                 if (Caches::hasInstance()) {
-                    Caches::getInstance().patchCache.removeDeferred((Res_png_9patch*) resource);
+                    Caches::getInstance().patchCache.removeDeferred((Res_png_9patch*)resource);
                 } else {
                     // A Res_png_9patch is actually an array of byte that's larger
                     // than sizeof(Res_png_9patch). It must be freed as an array.
-                    int8_t* patch = (int8_t*) resource;
+                    int8_t* patch = (int8_t*)resource;
                     delete[] patch;
                 }
-            }
-            break;
+            } break;
         }
     }
     mCache->removeItem(resource);
     delete ref;
 }
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android
