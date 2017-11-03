@@ -22,6 +22,7 @@ import android.util.Log;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.Arrays;
 
 /**
  * @hide
@@ -57,7 +58,7 @@ public final class NanoAppBinary implements Parcelable {
     private static final int EXPECTED_HEADER_VERSION = 1;
 
     /*
-     * The magic value expected in the header.
+     * The magic value expected in the header as defined in context_hub.h.
      */
     private static final int EXPECTED_MAGIC_VALUE =
             (((int) 'N' <<  0) | ((int) 'A' <<  8) | ((int) 'N' << 16) | ((int) 'O' << 24));
@@ -66,6 +67,17 @@ public final class NanoAppBinary implements Parcelable {
      * Byte order established in context_hub.h
      */
     private static final ByteOrder HEADER_ORDER = ByteOrder.LITTLE_ENDIAN;
+
+    /*
+     * The size of the header in bytes as defined in context_hub.h.
+     */
+    private static final int HEADER_SIZE_BYTES = 40;
+
+    /*
+     * The bit fields for mFlags as defined in context_hub.h.
+     */
+    private static final int NANOAPP_SIGNED_FLAG_BIT = 0x1;
+    private static final int NANOAPP_ENCRYPTED_FLAG_BIT = 0x2;
 
     public NanoAppBinary(byte[] appBinary) {
         mNanoAppBinary = appBinary;
@@ -111,8 +123,23 @@ public final class NanoAppBinary implements Parcelable {
     /**
      * @return the app binary byte array
      */
-    public byte[] getNanoAppBinary() {
+    public byte[] getBinary() {
         return mNanoAppBinary;
+    }
+
+    /**
+     * @return the app binary byte array without the leading header
+     *
+     * @throws IndexOutOfBoundsException if the nanoapp binary size is smaller than the header size
+     * @throws NullPointerException if the nanoapp binary is null
+     */
+    public byte[] getBinaryNoHeader() {
+        if (mNanoAppBinary.length < HEADER_SIZE_BYTES) {
+            throw new IndexOutOfBoundsException("NanoAppBinary binary byte size ("
+                + mNanoAppBinary.length + ") is less than header size (" + HEADER_SIZE_BYTES + ")");
+        }
+
+        return Arrays.copyOfRange(mNanoAppBinary, HEADER_SIZE_BYTES, mNanoAppBinary.length);
     }
 
     /**
@@ -162,6 +189,31 @@ public final class NanoAppBinary implements Parcelable {
      */
     public byte getTargetChreApiMinorVersion() {
         return mTargetChreApiMinorVersion;
+    }
+
+    /**
+     * Returns the flags for the nanoapp as defined in context_hub.h.
+     *
+     * This method is meant to be used by the Context Hub Service.
+     *
+     * @return the flags for the nanoapp
+     */
+    public int getFlags() {
+        return mFlags;
+    }
+
+    /**
+     * @return {@code true} if the nanoapp binary is signed, {@code false} otherwise
+     */
+    public boolean isSigned() {
+        return (mFlags & NANOAPP_SIGNED_FLAG_BIT) != 0;
+    }
+
+    /**
+     * @return {@code true} if the nanoapp binary is encrypted, {@code false} otherwise
+     */
+    public boolean isEncrypted() {
+        return (mFlags & NANOAPP_ENCRYPTED_FLAG_BIT) != 0;
     }
 
     private NanoAppBinary(Parcel in) {
