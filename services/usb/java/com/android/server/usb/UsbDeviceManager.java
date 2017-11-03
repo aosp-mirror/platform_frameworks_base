@@ -892,7 +892,7 @@ public class UsbDeviceManager {
                         updateCurrentAccessory();
                     }
                     if (mBootCompleted) {
-                        if (!mConnected) {
+                        if (!mConnected && !hasMessages(MSG_ACCESSORY_MODE_ENTER_TIMEOUT)) {
                             // restore defaults when USB is disconnected
                             setEnabledFunctions(null, !mAdbEnabled, false);
                         }
