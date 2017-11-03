@@ -193,6 +193,8 @@ public final class SystemServer {
             "com.google.android.clockwork.ThermalObserver";
     private static final String WEAR_CONNECTIVITY_SERVICE_CLASS =
             "com.google.android.clockwork.connectivity.WearConnectivityService";
+    private static final String WEAR_SIDEKICK_SERVICE_CLASS =
+            "com.google.android.clockwork.sidekick.SidekickService";
     private static final String WEAR_DISPLAY_SERVICE_CLASS =
             "com.google.android.clockwork.display.WearDisplayService";
     private static final String WEAR_LEFTY_SERVICE_CLASS =
@@ -557,6 +559,13 @@ public final class SystemServer {
         // Manages LEDs and display backlight so we need it to bring up the display.
         traceBeginAndSlog("StartLightsService");
         mSystemServiceManager.startService(LightsService.class);
+        traceEnd();
+
+        traceBeginAndSlog("StartSidekickService");
+        // Package manager isn't started yet; need to use SysProp not hardware feature
+        if (SystemProperties.getBoolean("config.enable_sidekick_graphics", false)) {
+            mSystemServiceManager.startService(WEAR_SIDEKICK_SERVICE_CLASS);
+        }
         traceEnd();
 
         // Display manager is needed to provide display metrics before package manager
