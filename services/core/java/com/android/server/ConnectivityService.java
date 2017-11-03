@@ -29,7 +29,10 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_FOREGROUND;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_METERED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED;
+import static android.net.NetworkCapabilities.TRANSPORT_VPN;
+
 import static com.android.internal.util.Preconditions.checkNotNull;
 
 import android.annotation.Nullable;
@@ -70,6 +73,7 @@ import android.net.ProxyInfo;
 import android.net.RouteInfo;
 import android.net.UidRange;
 import android.net.Uri;
+import android.net.VpnService;
 import android.net.metrics.IpConnectivityLog;
 import android.net.metrics.NetworkEvent;
 import android.net.util.MultinetworkPolicyTracker;
@@ -4647,10 +4651,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
             }
         }
 
-        final NetworkCapabilities prevNc = nai.networkCapabilities;
+        final NetworkCapabilities prevNc;
         synchronized (nai) {
+            prevNc = nai.networkCapabilities;
             nai.networkCapabilities = networkCapabilities;
         }
+
         if (nai.getCurrentScore() == oldScore &&
                 networkCapabilities.equalRequestableCapabilities(prevNc)) {
             // If the requestable capabilities haven't changed, and the score hasn't changed, then
@@ -4663,6 +4669,28 @@ public class ConnectivityService extends IConnectivityManager.Stub
             // called by rematchNetworkAndRequests, so it's safe to start a rematch.
             rematchAllNetworksAndRequests(nai, oldScore);
             notifyNetworkCallbacks(nai, ConnectivityManager.CALLBACK_CAP_CHANGED);
+        }
+
+        // Report changes that are interesting for network statistics tracking.
+        if (prevNc != null) {
+            final boolean meteredChanged = prevNc.hasCapability(NET_CAPABILITY_NOT_METERED) !=
+                    networkCapabilities.hasCapability(NET_CAPABILITY_NOT_METERED);
+            final boolean roamingChanged = prevNc.hasCapability(NET_CAPABILITY_NOT_ROAMING) !=
+                    networkCapabilities.hasCapability(NET_CAPABILITY_NOT_ROAMING);
+            if (meteredChanged || roamingChanged) {
+                notifyIfacesChangedForNetworkStats();
+            }
+        }
+
+        if (!networkCapabilities.hasTransport(TRANSPORT_VPN)) {
+            // Tell VPNs about updated capabilities, since they may need to
+            // bubble those changes through.
+            synchronized (mVpns) {
+                for (int i = 0; i < mVpns.size(); i++) {
+                    final Vpn vpn = mVpns.valueAt(i);
+                    vpn.updateCapabilities();
+                }
+            }
         }
     }
 
@@ -5197,14 +5225,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
         notifyLockdownVpn(networkAgent);
 
-        if (oldInfo != null && oldInfo.getState() == state) {
-            if (oldInfo.isRoaming() != newInfo.isRoaming()) {
-                if (VDBG) log("roaming status changed, notifying NetworkStatsService");
-                notifyIfacesChangedForNetworkStats();
-            } else if (VDBG) log("ignoring duplicate network state non-change");
-            // In either case, no further work should be needed.
-            return;
-        }
         if (DBG) {
             log(networkAgent.name() + " EVENT_NETWORK_INFO_CHANGED, going from " +
                     (oldInfo == null ? "null" : oldInfo.getState()) +

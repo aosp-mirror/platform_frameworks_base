@@ -16,6 +16,7 @@
 
 package android.net;
 
+import static android.net.NetworkCapabilities.LINK_BANDWIDTH_UNSPECIFIED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_CBS;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_DUN;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_EIMS;
@@ -27,13 +28,12 @@ import static android.net.NetworkCapabilities.RESTRICTED_CAPABILITIES;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 import static android.net.NetworkCapabilities.UNRESTRICTED_CAPABILITIES;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
-
-import android.net.NetworkCapabilities;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
 
@@ -167,5 +167,26 @@ public class NetworkCapabilitiesTest {
                 .setNetworkSpecifier(new StringNetworkSpecifier("specs"));
         assertNotEquals("", nc1.describeImmutableDifferences(nc2));
         assertEquals("", nc1.describeImmutableDifferences(nc1));
+    }
+
+    @Test
+    public void testLinkBandwidthUtils() {
+        assertEquals(LINK_BANDWIDTH_UNSPECIFIED, NetworkCapabilities
+                .minBandwidth(LINK_BANDWIDTH_UNSPECIFIED, LINK_BANDWIDTH_UNSPECIFIED));
+        assertEquals(10, NetworkCapabilities
+                .minBandwidth(LINK_BANDWIDTH_UNSPECIFIED, 10));
+        assertEquals(10, NetworkCapabilities
+                .minBandwidth(10, LINK_BANDWIDTH_UNSPECIFIED));
+        assertEquals(10, NetworkCapabilities
+                .minBandwidth(10, 20));
+
+        assertEquals(LINK_BANDWIDTH_UNSPECIFIED, NetworkCapabilities
+                .maxBandwidth(LINK_BANDWIDTH_UNSPECIFIED, LINK_BANDWIDTH_UNSPECIFIED));
+        assertEquals(10, NetworkCapabilities
+                .maxBandwidth(LINK_BANDWIDTH_UNSPECIFIED, 10));
+        assertEquals(10, NetworkCapabilities
+                .maxBandwidth(10, LINK_BANDWIDTH_UNSPECIFIED));
+        assertEquals(20, NetworkCapabilities
+                .maxBandwidth(10, 20));
     }
 }
