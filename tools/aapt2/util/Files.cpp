@@ -34,7 +34,7 @@
 
 #ifdef _WIN32
 // Windows includes.
-#include <direct.h>
+#include <windows.h>
 #endif
 
 using ::android::FileMap;
@@ -46,21 +46,29 @@ using ::android::base::unique_fd;
 namespace aapt {
 namespace file {
 
-FileType GetFileType(const std::string& path) {
-// TODO(adamlesinski): I'd like to move this to ::android::base::utf8 but Windows does some macro
-// trickery with 'stat' and things don't override very well.
 #ifdef _WIN32
+FileType GetFileType(const std::string& path) {
   std::wstring path_utf16;
   if (!::android::base::UTF8PathToWindowsLongPath(path.c_str(), &path_utf16)) {
     return FileType::kNonexistant;
   }
 
-  struct _stat64 sb;
-  int result = _wstat64(path_utf16.c_str(), &sb);
+  DWORD result = GetFileAttributesW(path_utf16.c_str());
+  if (result == INVALID_FILE_ATTRIBUTES) {
+    return FileType::kNonexistant;
+  }
+
+  if (result & FILE_ATTRIBUTE_DIRECTORY) {
+    return FileType::kDirectory;
+  }
+
+  // Too many types to consider, just let open fail later.
+  return FileType::kRegular;
+}
 #else
+FileType GetFileType(const std::string& path) {
   struct stat sb;
   int result = stat(path.c_str(), &sb);
-#endif
 
   if (result == -1) {
     if (errno == ENOENT || errno == ENOTDIR) {
@@ -91,6 +99,7 @@ FileType GetFileType(const std::string& path) {
     return FileType::kUnknown;
   }
 }
+#endif
 
 bool mkdirs(const std::string& path) {
   constexpr const mode_t mode = S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IXGRP;
