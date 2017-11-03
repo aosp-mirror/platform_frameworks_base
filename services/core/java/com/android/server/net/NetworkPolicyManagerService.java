@@ -142,6 +142,7 @@ import android.os.Message;
 import android.os.MessageQueue.IdleHandler;
 import android.os.PersistableBundle;
 import android.os.PowerManager;
+import android.os.PowerManager.ServiceType;
 import android.os.PowerManagerInternal;
 import android.os.PowerSaveState;
 import android.os.Process;
@@ -192,7 +193,6 @@ import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
 import com.android.server.SystemConfig;
-import com.android.server.power.BatterySaverPolicy.ServiceType;
 
 import libcore.io.IoUtils;
 

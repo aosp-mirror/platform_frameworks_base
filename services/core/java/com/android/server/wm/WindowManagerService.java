@@ -158,6 +158,7 @@ import android.os.Message;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.PowerManager;
+import android.os.PowerManager.ServiceType;
 import android.os.PowerManagerInternal;
 import android.os.PowerSaveState;
 import android.os.RemoteException;
@@ -243,7 +244,6 @@ import com.android.server.LocalServices;
 import com.android.server.UiThread;
 import com.android.server.Watchdog;
 import com.android.server.input.InputManagerService;
-import com.android.server.power.BatterySaverPolicy.ServiceType;
 import com.android.server.power.ShutdownThread;
 import com.android.server.utils.PriorityDump;
 

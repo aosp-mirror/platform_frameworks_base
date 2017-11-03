@@ -80,6 +80,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.Signature;
 import android.database.ContentObserver;
 import android.net.Uri;
+import android.os.PowerManager.ServiceType;
 import android.os.PowerSaveState;
 import android.os.Binder;
 import android.os.Build;
@@ -126,7 +127,6 @@ import com.android.server.EventLogTags;
 import com.android.server.SystemConfig;
 import com.android.server.SystemService;
 import com.android.server.backup.PackageManagerBackupAgent.Metadata;
-import com.android.server.power.BatterySaverPolicy.ServiceType;
 
 import libcore.io.IoUtils;
 

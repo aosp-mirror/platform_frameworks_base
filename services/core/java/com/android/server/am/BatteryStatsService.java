@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.net.wifi.WifiActivityEnergyInfo;
+import android.os.PowerManager.ServiceType;
 import android.os.PowerSaveState;
 import android.os.BatteryStats;
 import android.os.BatteryStatsInternal;
@@ -53,7 +54,6 @@ import com.android.internal.os.PowerProfile;
 import com.android.internal.os.RpmStats;
 import com.android.internal.util.DumpUtils;
 import com.android.server.LocalServices;
-import com.android.server.power.BatterySaverPolicy.ServiceType;
 import android.util.StatsLog;
 
 import java.io.File;
