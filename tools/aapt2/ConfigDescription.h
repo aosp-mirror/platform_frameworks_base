@@ -64,6 +64,8 @@ struct ConfigDescription : public android::ResTable_config {
   // Returns the BCP-47 language tag of this configuration's locale.
   std::string GetBcp47LanguageTag(bool canonicalize = false) const;
 
+  std::string to_string() const;
+
   /**
    * A configuration X dominates another configuration Y, if X has at least the
    * precedence of Y and X is strictly more general than Y: for any type defined

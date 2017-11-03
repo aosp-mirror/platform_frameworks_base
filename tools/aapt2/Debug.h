@@ -22,6 +22,7 @@
 
 #include "Resource.h"
 #include "ResourceTable.h"
+#include "text/Printer.h"
 #include "xml/XmlDom.h"
 
 namespace aapt {
@@ -31,9 +32,9 @@ struct DebugPrintTableOptions {
 };
 
 struct Debug {
-  static void PrintTable(const ResourceTable& table, const DebugPrintTableOptions& options = {});
-  static void PrintStyleGraph(ResourceTable* table,
-                              const ResourceName& target_style);
+  static void PrintTable(const ResourceTable& table, const DebugPrintTableOptions& options,
+                         text::Printer* printer);
+  static void PrintStyleGraph(ResourceTable* table, const ResourceName& target_style);
   static void DumpHex(const void* data, size_t len);
   static void DumpXml(const xml::XmlResource& doc);
 };

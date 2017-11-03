@@ -289,7 +289,7 @@ std::unique_ptr<SymbolTable::Symbol> AssetManagerSymbolSource::FindByName(
   const android::ResTable& table = assets_.getResources(false);
 
   const std::u16string package16 = util::Utf8ToUtf16(name.package);
-  const std::u16string type16 = util::Utf8ToUtf16(ToString(name.type));
+  const std::u16string type16 = util::Utf8ToUtf16(to_string(name.type));
   const std::u16string entry16 = util::Utf8ToUtf16(name.entry);
 
   uint32_t type_spec_flags = 0;

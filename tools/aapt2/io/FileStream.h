@@ -29,12 +29,15 @@
 namespace aapt {
 namespace io {
 
+constexpr size_t kDefaultBufferCapacity = 4096u;
+
 class FileInputStream : public InputStream {
  public:
-  explicit FileInputStream(const std::string& path, size_t buffer_capacity = 4096);
+  explicit FileInputStream(const std::string& path,
+                           size_t buffer_capacity = kDefaultBufferCapacity);
 
-  // Takes ownership of `fd`.
-  explicit FileInputStream(int fd, size_t buffer_capacity = 4096);
+  // Take ownership of `fd`.
+  explicit FileInputStream(int fd, size_t buffer_capacity = kDefaultBufferCapacity);
 
   bool Next(const void** data, size_t* size) override;
 
@@ -61,10 +64,14 @@ class FileInputStream : public InputStream {
 class FileOutputStream : public OutputStream {
  public:
   explicit FileOutputStream(const std::string& path, int mode = O_RDWR | O_CREAT | O_BINARY,
-                            size_t buffer_capacity = 4096);
+                            size_t buffer_capacity = kDefaultBufferCapacity);
+
+  // Does not take ownership of `fd`.
+  explicit FileOutputStream(int fd, size_t buffer_capacity = kDefaultBufferCapacity);
 
   // Takes ownership of `fd`.
-  explicit FileOutputStream(int fd, size_t buffer_capacity = 4096);
+  explicit FileOutputStream(android::base::unique_fd fd,
+                            size_t buffer_capacity = kDefaultBufferCapacity);
 
   ~FileOutputStream();
 
@@ -86,7 +93,8 @@ class FileOutputStream : public OutputStream {
 
   bool FlushImpl();
 
-  android::base::unique_fd fd_;
+  android::base::unique_fd owned_fd_;
+  int fd_;
   std::string error_;
   std::unique_ptr<uint8_t[]> buffer_;
   size_t buffer_capacity_;

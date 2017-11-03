@@ -472,7 +472,7 @@ class PackageFlattener {
         expected_type_id++;
       }
       expected_type_id++;
-      type_pool_.MakeRef(ToString(type->type));
+      type_pool_.MakeRef(to_string(type->type));
 
       std::vector<ResourceEntry*> sorted_entries = CollectAndSortEntries(type);
       if (sorted_entries.empty()) {
