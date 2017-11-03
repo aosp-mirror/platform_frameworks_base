@@ -61,7 +61,9 @@ bool Properties::disableVsync = false;
 bool Properties::skpCaptureEnabled = false;
 
 static int property_get_int(const char* key, int defaultValue) {
-    char buf[PROPERTY_VALUE_MAX] = {'\0',};
+    char buf[PROPERTY_VALUE_MAX] = {
+            '\0',
+    };
 
     if (property_get(key, buf, "") > 0) {
         return atoi(buf);
@@ -121,7 +123,7 @@ bool Properties::load() {
 
     showDirtyRegions = property_get_bool(PROPERTY_DEBUG_SHOW_DIRTY_REGIONS, false);
 
-    debugLevel = (DebugLevel) property_get_int(PROPERTY_DEBUG, kDebugDisabled);
+    debugLevel = (DebugLevel)property_get_int(PROPERTY_DEBUG, kDebugDisabled);
 
     skipEmptyFrames = property_get_bool(PROPERTY_SKIP_EMPTY_DAMAGE, true);
     useBufferAge = property_get_bool(PROPERTY_USE_BUFFER_AGE, true);
@@ -129,12 +131,11 @@ bool Properties::load() {
 
     filterOutTestOverhead = property_get_bool(PROPERTY_FILTER_TEST_OVERHEAD, false);
 
-    skpCaptureEnabled = property_get_bool("ro.debuggable", false)
-            && property_get_bool(PROPERTY_CAPTURE_SKP_ENABLED, false);
+    skpCaptureEnabled = property_get_bool("ro.debuggable", false) &&
+                        property_get_bool(PROPERTY_CAPTURE_SKP_ENABLED, false);
 
-    return (prevDebugLayersUpdates != debugLayersUpdates)
-            || (prevDebugOverdraw != debugOverdraw)
-            || (prevDebugStencilClip != debugStencilClip);
+    return (prevDebugLayersUpdates != debugLayersUpdates) || (prevDebugOverdraw != debugOverdraw) ||
+           (prevDebugStencilClip != debugStencilClip);
 }
 
 void Properties::overrideProperty(const char* name, const char* value) {
@@ -182,13 +183,13 @@ RenderPipelineType Properties::getRenderPipelineType() {
     }
     char prop[PROPERTY_VALUE_MAX];
     property_get(PROPERTY_RENDERER, prop, "skiagl");
-    if (!strcmp(prop, "skiagl") ) {
+    if (!strcmp(prop, "skiagl")) {
         ALOGD("Skia GL Pipeline");
         sRenderPipelineType = RenderPipelineType::SkiaGL;
-    } else if (!strcmp(prop, "skiavk") ) {
+    } else if (!strcmp(prop, "skiavk")) {
         ALOGD("Skia Vulkan Pipeline");
         sRenderPipelineType = RenderPipelineType::SkiaVulkan;
-    } else { //"opengl"
+    } else {  //"opengl"
         ALOGD("HWUI GL Pipeline");
         sRenderPipelineType = RenderPipelineType::OpenGL;
     }
@@ -203,9 +204,8 @@ void Properties::overrideRenderPipelineType(RenderPipelineType type) {
 
 bool Properties::isSkiaEnabled() {
     auto renderType = getRenderPipelineType();
-    return RenderPipelineType::SkiaGL == renderType
-            || RenderPipelineType::SkiaVulkan == renderType;
+    return RenderPipelineType::SkiaGL == renderType || RenderPipelineType::SkiaVulkan == renderType;
 }
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android

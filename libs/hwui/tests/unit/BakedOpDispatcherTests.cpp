@@ -20,8 +20,8 @@
 #include <BakedOpRenderer.h>
 #include <FrameBuilder.h>
 #include <LayerUpdateQueue.h>
-#include <hwui/Paint.h>
 #include <RecordedOp.h>
+#include <hwui/Paint.h>
 #include <tests/common/TestUtils.h>
 #include <utils/Color.h>
 
@@ -32,19 +32,20 @@
 using namespace android::uirenderer;
 
 static BakedOpRenderer::LightInfo sLightInfo;
-const FrameBuilder::LightGeometry sLightGeometry = { {100, 100, 100}, 50};
+const FrameBuilder::LightGeometry sLightGeometry = {{100, 100, 100}, 50};
 
 class ValidatingBakedOpRenderer : public BakedOpRenderer {
 public:
-    ValidatingBakedOpRenderer(RenderState& renderState, std::function<void(const Glop& glop)> validator)
+    ValidatingBakedOpRenderer(RenderState& renderState,
+                              std::function<void(const Glop& glop)> validator)
             : BakedOpRenderer(Caches::getInstance(), renderState, true, false, sLightInfo)
             , mValidator(validator) {
         mGlopReceiver = ValidatingGlopReceiver;
     }
+
 private:
     static void ValidatingGlopReceiver(BakedOpRenderer& renderer, const Rect* dirtyBounds,
-            const ClipBase* clip, const Glop& glop) {
-
+                                       const ClipBase* clip, const Glop& glop) {
         auto vbor = reinterpret_cast<ValidatingBakedOpRenderer*>(&renderer);
         vbor->mValidator(glop);
     }
@@ -54,7 +55,8 @@ private:
 typedef void (*TestBakedOpReceiver)(BakedOpRenderer&, const BakedOpState&);
 
 static void testUnmergedGlopDispatch(renderthread::RenderThread& renderThread, RecordedOp* op,
-        std::function<void(const Glop& glop)> glopVerifier, int expectedGlopCount = 1) {
+                                     std::function<void(const Glop& glop)> glopVerifier,
+                                     int expectedGlopCount = 1) {
     // Create op, and wrap with basic state.
     LinearAllocator allocator;
     auto snapshot = TestUtils::makeSnapshot(Matrix4::identity(), Rect(100, 100));
@@ -62,22 +64,22 @@ static void testUnmergedGlopDispatch(renderthread::RenderThread& renderThread, R
     ASSERT_NE(nullptr, state);
 
     int glopCount = 0;
-    auto glopReceiver = [&glopVerifier, &glopCount, &expectedGlopCount] (const Glop& glop) {
+    auto glopReceiver = [&glopVerifier, &glopCount, &expectedGlopCount](const Glop& glop) {
         ASSERT_LE(glopCount++, expectedGlopCount) << expectedGlopCount << "glop(s) expected";
         glopVerifier(glop);
     };
     ValidatingBakedOpRenderer renderer(renderThread.renderState(), glopReceiver);
 
-    // Dispatch based on op type created, similar to Frame/LayerBuilder dispatch behavior
-#define X(Type) \
-        [](BakedOpRenderer& renderer, const BakedOpState& state) { \
-            BakedOpDispatcher::on##Type(renderer, static_cast<const Type&>(*(state.op)), state); \
-        },
+// Dispatch based on op type created, similar to Frame/LayerBuilder dispatch behavior
+#define X(Type)                                                                              \
+    [](BakedOpRenderer& renderer, const BakedOpState& state) {                               \
+        BakedOpDispatcher::on##Type(renderer, static_cast<const Type&>(*(state.op)), state); \
+    },
     static TestBakedOpReceiver unmergedReceivers[] = BUILD_RENDERABLE_OP_LUT(X);
 #undef X
     unmergedReceivers[op->opId](renderer, *state);
     ASSERT_EQ(expectedGlopCount, glopCount) << "Exactly " << expectedGlopCount
-            << "Glop(s) expected";
+                                            << "Glop(s) expected";
 }
 
 RENDERTHREAD_OPENGL_PIPELINE_TEST(BakedOpDispatcher, pathTexture_positionOvalArc) {
@@ -88,7 +90,7 @@ RENDERTHREAD_OPENGL_PIPELINE_TEST(BakedOpDispatcher, pathTexture_positionOvalArc
     float intervals[] = {1.0f, 1.0f};
     strokePaint.setPathEffect(SkDashPathEffect::Make(intervals, 2, 0));
 
-    auto textureGlopVerifier = [] (const Glop& glop) {
+    auto textureGlopVerifier = [](const Glop& glop) {
         // validate glop produced by renderPathTexture (so texture, unit quad)
         auto texture = glop.fill.texture.texture;
         ASSERT_NE(nullptr, texture);
@@ -116,16 +118,15 @@ RENDERTHREAD_OPENGL_PIPELINE_TEST(BakedOpDispatcher, pathTexture_positionOvalArc
 RENDERTHREAD_OPENGL_PIPELINE_TEST(BakedOpDispatcher, onLayerOp_bufferless) {
     SkPaint layerPaint;
     layerPaint.setAlpha(128);
-    OffscreenBuffer* buffer = nullptr; // no providing a buffer, should hit rect fallback case
+    OffscreenBuffer* buffer = nullptr;  // no providing a buffer, should hit rect fallback case
     LayerOp op(Rect(10, 10), Matrix4::identity(), nullptr, &layerPaint, &buffer);
-    testUnmergedGlopDispatch(renderThread, &op, [] (const Glop& glop) {
-        ADD_FAILURE() << "Nothing should happen";
-    }, 0);
+    testUnmergedGlopDispatch(renderThread, &op,
+                             [](const Glop& glop) { ADD_FAILURE() << "Nothing should happen"; }, 0);
 }
 
 static int getGlopTransformFlags(renderthread::RenderThread& renderThread, RecordedOp* op) {
     int result = 0;
-    testUnmergedGlopDispatch(renderThread, op, [&result] (const Glop& glop) {
+    testUnmergedGlopDispatch(renderThread, op, [&result](const Glop& glop) {
         result = glop.transform.transformFlags;
     });
     return result;
@@ -144,7 +145,7 @@ RENDERTHREAD_OPENGL_PIPELINE_TEST(BakedOpDispatcher, offsetFlags) {
     const float points[4] = {0.5, 0.5, 1.0, 1.0};
     PointsOp antiAliasedPointsOp(bounds, Matrix4::identity(), nullptr, &aaPaint, points, 4);
     EXPECT_EQ(TransformFlags::None, getGlopTransformFlags(renderThread, &antiAliasedPointsOp))
-                << "Expect no offset for AA points.";
+            << "Expect no offset for AA points.";
     PointsOp pointsOp(bounds, Matrix4::identity(), nullptr, &paint, points, 4);
     EXPECT_EQ(TransformFlags::OffsetByFudgeFactor, getGlopTransformFlags(renderThread, &pointsOp))
             << "Expect an offset for non-AA points.";
@@ -158,21 +159,21 @@ RENDERTHREAD_OPENGL_PIPELINE_TEST(BakedOpDispatcher, offsetFlags) {
 }
 
 RENDERTHREAD_OPENGL_PIPELINE_TEST(BakedOpDispatcher, renderTextWithShadow) {
-    auto node = TestUtils::createNode<RecordingCanvas>(0, 0, 100, 100,
-            [](RenderProperties& props, RecordingCanvas& canvas) {
+    auto node = TestUtils::createNode<RecordingCanvas>(
+            0, 0, 100, 100, [](RenderProperties& props, RecordingCanvas& canvas) {
 
-        android::Paint shadowPaint;
-        shadowPaint.setColor(SK_ColorRED);
+                android::Paint shadowPaint;
+                shadowPaint.setColor(SK_ColorRED);
 
-        SkScalar sigma = Blur::convertRadiusToSigma(5);
-        shadowPaint.setLooper(SkBlurDrawLooper::Make(SK_ColorWHITE, sigma, 3, 3));
+                SkScalar sigma = Blur::convertRadiusToSigma(5);
+                shadowPaint.setLooper(SkBlurDrawLooper::Make(SK_ColorWHITE, sigma, 3, 3));
 
-        TestUtils::drawUtf8ToCanvas(&canvas, "A", shadowPaint, 25, 25);
-        TestUtils::drawUtf8ToCanvas(&canvas, "B", shadowPaint, 50, 50);
-    });
+                TestUtils::drawUtf8ToCanvas(&canvas, "A", shadowPaint, 25, 25);
+                TestUtils::drawUtf8ToCanvas(&canvas, "B", shadowPaint, 50, 50);
+            });
 
-    int  glopCount = 0;
-    auto glopReceiver = [&glopCount] (const Glop& glop) {
+    int glopCount = 0;
+    auto glopReceiver = [&glopCount](const Glop& glop) {
         if (glopCount < 2) {
             // two white shadows
             EXPECT_EQ(FloatColor({1, 1, 1, 1}), glop.fill.color);
@@ -185,8 +186,8 @@ RENDERTHREAD_OPENGL_PIPELINE_TEST(BakedOpDispatcher, renderTextWithShadow) {
 
     ValidatingBakedOpRenderer renderer(renderThread.renderState(), glopReceiver);
 
-    FrameBuilder frameBuilder(SkRect::MakeWH(100, 100), 100, 100,
-            sLightGeometry, Caches::getInstance());
+    FrameBuilder frameBuilder(SkRect::MakeWH(100, 100), 100, 100, sLightGeometry,
+                              Caches::getInstance());
     frameBuilder.deferRenderNode(*TestUtils::getSyncedNode(node));
 
     frameBuilder.replayBakedOps<BakedOpDispatcher>(renderer);
@@ -194,15 +195,15 @@ RENDERTHREAD_OPENGL_PIPELINE_TEST(BakedOpDispatcher, renderTextWithShadow) {
 }
 
 static void validateLayerDraw(renderthread::RenderThread& renderThread,
-        std::function<void(const Glop& glop)> validator) {
-    auto node = TestUtils::createNode<RecordingCanvas>(0, 0, 100, 100,
-            [](RenderProperties& props, RecordingCanvas& canvas) {
-        props.mutateLayerProperties().setType(LayerType::RenderLayer);
+                              std::function<void(const Glop& glop)> validator) {
+    auto node = TestUtils::createNode<RecordingCanvas>(
+            0, 0, 100, 100, [](RenderProperties& props, RecordingCanvas& canvas) {
+                props.mutateLayerProperties().setType(LayerType::RenderLayer);
 
-        // provide different blend mode, so decoration draws contrast
-        props.mutateLayerProperties().setXferMode(SkBlendMode::kSrc);
-        canvas.drawColor(Color::Black, SkBlendMode::kSrcOver);
-    });
+                // provide different blend mode, so decoration draws contrast
+                props.mutateLayerProperties().setXferMode(SkBlendMode::kSrc);
+                canvas.drawColor(Color::Black, SkBlendMode::kSrcOver);
+            });
     OffscreenBuffer** layerHandle = node->getLayerHandle();
 
     auto syncedNode = TestUtils::getSyncedNode(node);
@@ -211,12 +212,12 @@ static void validateLayerDraw(renderthread::RenderThread& renderThread,
     OffscreenBuffer layer(renderThread.renderState(), Caches::getInstance(), 100, 100);
     *layerHandle = &layer;
     {
-        LayerUpdateQueue layerUpdateQueue; // Note: enqueue damage post-sync, so bounds are valid
+        LayerUpdateQueue layerUpdateQueue;  // Note: enqueue damage post-sync, so bounds are valid
         layerUpdateQueue.enqueueLayerWithDamage(node.get(), Rect(0, 0, 100, 100));
 
         ValidatingBakedOpRenderer renderer(renderThread.renderState(), validator);
-        FrameBuilder frameBuilder(SkRect::MakeWH(100, 100), 100, 100,
-                sLightGeometry, Caches::getInstance());
+        FrameBuilder frameBuilder(SkRect::MakeWH(100, 100), 100, 100, sLightGeometry,
+                                  Caches::getInstance());
         frameBuilder.deferLayers(layerUpdateQueue);
         frameBuilder.deferRenderNode(*syncedNode);
         frameBuilder.replayBakedOps<BakedOpDispatcher>(renderer);
@@ -233,8 +234,8 @@ static FloatColor makeFloatColor(uint32_t color) {
 }
 
 RENDERTHREAD_OPENGL_PIPELINE_TEST(BakedOpDispatcher, layerUpdateProperties) {
-    for (bool debugOverdraw : { false, true }) {
-        for (bool debugLayersUpdates : { false, true }) {
+    for (bool debugOverdraw : {false, true}) {
+        for (bool debugLayersUpdates : {false, true}) {
             ScopedProperty<bool> ovdProp(Properties::debugOverdraw, debugOverdraw);
             ScopedProperty<bool> lupProp(Properties::debugLayersUpdates, debugLayersUpdates);
 
@@ -253,8 +254,8 @@ RENDERTHREAD_OPENGL_PIPELINE_TEST(BakedOpDispatcher, layerUpdateProperties) {
                     // blend srcover, different from that of layer
                     EXPECT_EQ(GLenum(GL_ONE), glop.blend.src);
                     EXPECT_EQ(GLenum(GL_ONE_MINUS_SRC_ALPHA), glop.blend.dst);
-                    EXPECT_EQ(makeFloatColor(debugLayersUpdates ? 0x7f00ff00 : 0),
-                            glop.fill.color) << "Should be transparent green if debugLayersUpdates";
+                    EXPECT_EQ(makeFloatColor(debugLayersUpdates ? 0x7f00ff00 : 0), glop.fill.color)
+                            << "Should be transparent green if debugLayersUpdates";
                 } else if (glopCount < 7) {
                     // 3 - 6 - overdraw indicator overlays, if present
                     EXPECT_TRUE(glop.fill.colorEnabled);
@@ -279,7 +280,7 @@ RENDERTHREAD_OPENGL_PIPELINE_TEST(BakedOpDispatcher, pathTextureSnapping) {
     SkPath path;
     path.addRect(SkRect::MakeXYWH(1.5, 3.8, 100, 90));
     PathOp op(bounds, Matrix4::identity(), nullptr, &paint, &path);
-    testUnmergedGlopDispatch(renderThread, &op, [] (const Glop& glop) {
+    testUnmergedGlopDispatch(renderThread, &op, [](const Glop& glop) {
         auto texture = glop.fill.texture.texture;
         ASSERT_NE(nullptr, texture);
         EXPECT_EQ(1, reinterpret_cast<PathTexture*>(texture)->left);

@@ -35,7 +35,8 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(CacheManager, trimMemory) {
     GrContext* grContext = renderThread.getGrContext();
     ASSERT_TRUE(grContext != nullptr);
 
-    // create pairs of offscreen render targets and images until we exceed the backgroundCacheSizeLimit
+    // create pairs of offscreen render targets and images until we exceed the
+    // backgroundCacheSizeLimit
     std::vector<sk_sp<SkSurface>> surfaces;
 
     while (getCacheUsage(grContext) <= renderThread.cacheManager().getBackgroundCacheSize()) {

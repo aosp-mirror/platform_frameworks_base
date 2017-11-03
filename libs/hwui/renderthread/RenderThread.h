@@ -25,16 +25,16 @@
 #include "thread/ThreadBase.h"
 
 #include <GrContext.h>
-#include <cutils/compiler.h>
 #include <SkBitmap.h>
+#include <cutils/compiler.h>
 #include <ui/DisplayInfo.h>
 #include <utils/Looper.h>
 #include <utils/Thread.h>
 
+#include <thread/ThreadBase.h>
 #include <memory>
 #include <mutex>
 #include <set>
-#include <thread/ThreadBase.h>
 
 namespace android {
 
@@ -65,8 +65,8 @@ protected:
 
 class RenderThread : private ThreadBase {
     PREVENT_COPY_AND_ASSIGN(RenderThread);
-public:
 
+public:
     WorkQueue& queue() { return ThreadBase::queue(); }
 
     // Mimics android.view.Choreographer

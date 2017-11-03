@@ -18,26 +18,33 @@
 
 namespace android {
 
-Paint::Paint() :
-        SkPaint(), mLetterSpacing(0), mWordSpacing(0), mFontFeatureSettings(),
-        mMinikinLangListId(0), mFontVariant(minikin::VARIANT_DEFAULT) {
-}
+Paint::Paint()
+        : SkPaint()
+        , mLetterSpacing(0)
+        , mWordSpacing(0)
+        , mFontFeatureSettings()
+        , mMinikinLangListId(0)
+        , mFontVariant(minikin::VARIANT_DEFAULT) {}
 
-Paint::Paint(const Paint& paint) : SkPaint(paint),
-        mLetterSpacing(paint.mLetterSpacing), mWordSpacing(paint.mWordSpacing),
-        mFontFeatureSettings(paint.mFontFeatureSettings),
-        mMinikinLangListId(paint.mMinikinLangListId), mFontVariant(paint.mFontVariant),
-        mHyphenEdit(paint.mHyphenEdit),
-        mTypeface(paint.mTypeface) {
-}
+Paint::Paint(const Paint& paint)
+        : SkPaint(paint)
+        , mLetterSpacing(paint.mLetterSpacing)
+        , mWordSpacing(paint.mWordSpacing)
+        , mFontFeatureSettings(paint.mFontFeatureSettings)
+        , mMinikinLangListId(paint.mMinikinLangListId)
+        , mFontVariant(paint.mFontVariant)
+        , mHyphenEdit(paint.mHyphenEdit)
+        , mTypeface(paint.mTypeface) {}
 
-Paint::Paint(const SkPaint& paint) : SkPaint(paint),
-        mLetterSpacing(0), mWordSpacing(0), mFontFeatureSettings(), mMinikinLangListId(0),
-        mFontVariant(minikin::VARIANT_DEFAULT) {
-}
+Paint::Paint(const SkPaint& paint)
+        : SkPaint(paint)
+        , mLetterSpacing(0)
+        , mWordSpacing(0)
+        , mFontFeatureSettings()
+        , mMinikinLangListId(0)
+        , mFontVariant(minikin::VARIANT_DEFAULT) {}
 
-Paint::~Paint() {
-}
+Paint::~Paint() {}
 
 Paint& Paint::operator=(const Paint& other) {
     SkPaint::operator=(other);
@@ -52,14 +59,10 @@ Paint& Paint::operator=(const Paint& other) {
 }
 
 bool operator==(const Paint& a, const Paint& b) {
-    return static_cast<const SkPaint&>(a) == static_cast<const SkPaint&>(b)
-            && a.mLetterSpacing == b.mLetterSpacing
-            && a.mWordSpacing == b.mWordSpacing
-            && a.mFontFeatureSettings == b.mFontFeatureSettings
-            && a.mMinikinLangListId == b.mMinikinLangListId
-            && a.mFontVariant == b.mFontVariant
-            && a.mHyphenEdit == b.mHyphenEdit
-            && a.mTypeface == b.mTypeface;
+    return static_cast<const SkPaint&>(a) == static_cast<const SkPaint&>(b) &&
+           a.mLetterSpacing == b.mLetterSpacing && a.mWordSpacing == b.mWordSpacing &&
+           a.mFontFeatureSettings == b.mFontFeatureSettings &&
+           a.mMinikinLangListId == b.mMinikinLangListId && a.mFontVariant == b.mFontVariant &&
+           a.mHyphenEdit == b.mHyphenEdit && a.mTypeface == b.mTypeface;
 }
-
 }

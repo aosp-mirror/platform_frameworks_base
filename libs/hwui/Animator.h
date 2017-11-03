@@ -16,11 +16,11 @@
 #ifndef ANIMATOR_H
 #define ANIMATOR_H
 
-#include <memory>
 #include <cutils/compiler.h>
 #include <utils/RefBase.h>
 #include <utils/StrongPointer.h>
 #include <utils/Timers.h>
+#include <memory>
 
 #include "utils/Macros.h"
 
@@ -40,6 +40,7 @@ class RenderProperties;
 class AnimationListener : public VirtualLightRefBase {
 public:
     ANDROID_API virtual void onAnimationFinished(BaseRenderNodeAnimator*) = 0;
+
 protected:
     ANDROID_API virtual ~AnimationListener() {}
 };
@@ -52,6 +53,7 @@ enum class RepeatMode {
 
 class BaseRenderNodeAnimator : public VirtualLightRefBase {
     PREVENT_COPY_AND_ASSIGN(BaseRenderNodeAnimator);
+
 public:
     ANDROID_API void setStartValue(float value);
     ANDROID_API void setInterpolator(Interpolator* interpolator);
@@ -59,13 +61,9 @@ public:
     ANDROID_API nsecs_t duration() { return mDuration; }
     ANDROID_API void setStartDelay(nsecs_t startDelayInMs);
     ANDROID_API nsecs_t startDelay() { return mStartDelay; }
-    ANDROID_API void setListener(AnimationListener* listener) {
-        mListener = listener;
-    }
+    ANDROID_API void setListener(AnimationListener* listener) { mListener = listener; }
     AnimationListener* listener() { return mListener.get(); }
-    ANDROID_API void setAllowRunningAsync(bool mayRunAsync) {
-        mMayRunAsync = mayRunAsync;
-    }
+    ANDROID_API void setAllowRunningAsync(bool mayRunAsync) { mMayRunAsync = mayRunAsync; }
     bool mayRunAsync() { return mMayRunAsync; }
     ANDROID_API void start();
     ANDROID_API virtual void reset();
@@ -86,8 +84,9 @@ public:
     // an animation on RenderThread.
     ANDROID_API nsecs_t getRemainingPlayTime();
 
-    bool isRunning() { return mPlayState == PlayState::Running
-            || mPlayState == PlayState::Reversing; }
+    bool isRunning() {
+        return mPlayState == PlayState::Running || mPlayState == PlayState::Reversing;
+    }
     bool isFinished() { return mPlayState == PlayState::Finished; }
     float finalValue() { return mFinalValue; }
 
@@ -158,13 +157,7 @@ protected:
     sp<AnimationListener> mListener;
 
 private:
-    enum class Request {
-        Start,
-        Reverse,
-        Reset,
-        Cancel,
-        End
-    };
+    enum class Request { Start, Reverse, Reset, Cancel, End };
 
     // Defines different actions upon finish.
     enum class Action {
@@ -229,13 +222,14 @@ private:
 class CanvasPropertyPrimitiveAnimator : public BaseRenderNodeAnimator {
 public:
     ANDROID_API CanvasPropertyPrimitiveAnimator(CanvasPropertyPrimitive* property,
-            float finalValue);
+                                                float finalValue);
 
     ANDROID_API virtual uint32_t dirtyMask();
 
 protected:
     virtual float getValue(RenderNode* target) const override;
     virtual void setValue(RenderNode* target, float value) override;
+
 private:
     sp<CanvasPropertyPrimitive> mProperty;
 };
@@ -247,14 +241,15 @@ public:
         ALPHA,
     };
 
-    ANDROID_API CanvasPropertyPaintAnimator(CanvasPropertyPaint* property,
-            PaintField field, float finalValue);
+    ANDROID_API CanvasPropertyPaintAnimator(CanvasPropertyPaint* property, PaintField field,
+                                            float finalValue);
 
     ANDROID_API virtual uint32_t dirtyMask();
 
 protected:
     virtual float getValue(RenderNode* target) const override;
     virtual void setValue(RenderNode* target, float value) override;
+
 private:
     sp<CanvasPropertyPaint> mProperty;
     PaintField mField;
@@ -262,8 +257,7 @@ private:
 
 class RevealAnimator : public BaseRenderNodeAnimator {
 public:
-    ANDROID_API RevealAnimator(int centerX, int centerY,
-            float startValue, float finalValue);
+    ANDROID_API RevealAnimator(int centerX, int centerY, float startValue, float finalValue);
 
     ANDROID_API virtual uint32_t dirtyMask();
 

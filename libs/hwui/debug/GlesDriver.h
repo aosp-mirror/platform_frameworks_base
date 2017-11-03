@@ -43,13 +43,13 @@ public:
     virtual sk_sp<const GrGLInterface> getSkiaInterface();
 
 #define GL_ENTRY(ret, api, ...) virtual ret api##_(__VA_ARGS__) = 0;
-    #include "gles_decls.in"
+#include "gles_decls.in"
 #undef GL_ENTRY
 
     static GlesDriver* get();
     static std::unique_ptr<GlesDriver> replace(std::unique_ptr<GlesDriver>&& driver);
 };
 
-} // namespace debug
-} // namespace uirenderer
-} // namespace android
+}  // namespace debug
+}  // namespace uirenderer
+}  // namespace android

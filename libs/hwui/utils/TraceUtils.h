@@ -18,11 +18,11 @@
 
 #include <utils/Trace.h>
 
-#define ATRACE_FORMAT(fmt, ...) \
-    TraceUtils::TraceEnder __traceEnder = (TraceUtils::atraceFormatBegin(fmt, ##__VA_ARGS__), TraceUtils::TraceEnder())
+#define ATRACE_FORMAT(fmt, ...)           \
+    TraceUtils::TraceEnder __traceEnder = \
+            (TraceUtils::atraceFormatBegin(fmt, ##__VA_ARGS__), TraceUtils::TraceEnder())
 
-#define ATRACE_FORMAT_BEGIN(fmt, ...) \
-    TraceUtils::atraceFormatBegin(fmt, ##__VA_ARGS__)
+#define ATRACE_FORMAT_BEGIN(fmt, ...) TraceUtils::atraceFormatBegin(fmt, ##__VA_ARGS__)
 
 namespace android {
 namespace uirenderer {
@@ -48,7 +48,7 @@ public:
         ATRACE_BEGIN(buf);
     }
 
-}; // class TraceUtils
+};  // class TraceUtils
 
 } /* namespace uirenderer */
 } /* namespace android */

@@ -25,10 +25,10 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <inttypes.h>
+#include <sys/mman.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
-#include <sys/mman.h>
 
 namespace android {
 namespace uirenderer {
@@ -42,8 +42,8 @@ static_assert(sizeof(sCurrentFileVersion) == sHeaderSize, "Header size is wrong"
 constexpr int sHistogramSize = ProfileData::HistogramSize();
 
 static bool mergeProfileDataIntoProto(service::GraphicsStatsProto* proto,
-        const std::string& package, int versionCode, int64_t startTime, int64_t endTime,
-        const ProfileData* data);
+                                      const std::string& package, int versionCode,
+                                      int64_t startTime, int64_t endTime, const ProfileData* data);
 static void dumpAsTextToFd(service::GraphicsStatsProto* proto, int outFd);
 
 class FileDescriptor {
@@ -57,6 +57,7 @@ public:
     }
     bool valid() { return mFd != -1; }
     operator int() { return mFd; }
+
 private:
     int mFd;
 };
@@ -68,21 +69,13 @@ public:
 
     int GetErrno() { return mCopyAdapter.mErrno; }
 
-    virtual bool Next(void** data, int* size) override {
-        return mImpl.Next(data, size);
-    }
+    virtual bool Next(void** data, int* size) override { return mImpl.Next(data, size); }
 
-    virtual void BackUp(int count) override {
-        mImpl.BackUp(count);
-    }
+    virtual void BackUp(int count) override { mImpl.BackUp(count); }
 
-    virtual int64 ByteCount() const override {
-        return mImpl.ByteCount();
-    }
+    virtual int64 ByteCount() const override { return mImpl.ByteCount(); }
 
-    bool Flush() {
-        return mImpl.Flush();
-    }
+    bool Flush() { return mImpl.Flush(); }
 
 private:
     struct FDAdapter : public io::CopyingOutputStream {
@@ -95,7 +88,7 @@ private:
         virtual bool Write(const void* buffer, int size) override {
             int ret;
             while (size) {
-                ret = TEMP_FAILURE_RETRY( write(mFd, buffer, size) );
+                ret = TEMP_FAILURE_RETRY(write(mFd, buffer, size));
                 if (ret <= 0) {
                     mErrno = errno;
                     return false;
@@ -110,8 +103,8 @@ private:
     io::CopyingOutputStreamAdaptor mImpl;
 };
 
-bool GraphicsStatsService::parseFromFile(const std::string& path, service::GraphicsStatsProto* output) {
-
+bool GraphicsStatsService::parseFromFile(const std::string& path,
+                                         service::GraphicsStatsProto* output) {
     FileDescriptor fd{open(path.c_str(), O_RDONLY)};
     if (!fd.valid()) {
         int err = errno;
@@ -129,7 +122,7 @@ bool GraphicsStatsService::parseFromFile(const std::string& path, service::Graph
         // we get an unexpected error
         if (err != ENOENT) {
             ALOGW("Failed to fstat '%s', errno=%d (%s) (st_size %d)", path.c_str(), err,
-                    strerror(err), (int) sb.st_size);
+                  strerror(err), (int)sb.st_size);
         }
         return false;
     }
@@ -154,14 +147,15 @@ bool GraphicsStatsService::parseFromFile(const std::string& path, service::Graph
     io::ArrayInputStream input{data, dataSize};
     bool success = output->ParseFromZeroCopyStream(&input);
     if (!success) {
-        ALOGW("Parse failed on '%s' error='%s'",
-                path.c_str(), output->InitializationErrorString().c_str());
+        ALOGW("Parse failed on '%s' error='%s'", path.c_str(),
+              output->InitializationErrorString().c_str());
     }
     return success;
 }
 
 bool mergeProfileDataIntoProto(service::GraphicsStatsProto* proto, const std::string& package,
-        int versionCode, int64_t startTime, int64_t endTime, const ProfileData* data) {
+                               int versionCode, int64_t startTime, int64_t endTime,
+                               const ProfileData* data) {
     if (proto->stats_start() == 0 || proto->stats_start() > startTime) {
         proto->set_stats_start(startTime);
     }
@@ -173,24 +167,23 @@ bool mergeProfileDataIntoProto(service::GraphicsStatsProto* proto, const std::st
     auto summary = proto->mutable_summary();
     summary->set_total_frames(summary->total_frames() + data->totalFrameCount());
     summary->set_janky_frames(summary->janky_frames() + data->jankFrameCount());
-    summary->set_missed_vsync_count(
-            summary->missed_vsync_count() + data->jankTypeCount(kMissedVsync));
-    summary->set_high_input_latency_count(
-            summary->high_input_latency_count() + data->jankTypeCount(kHighInputLatency));
-    summary->set_slow_ui_thread_count(
-            summary->slow_ui_thread_count() + data->jankTypeCount(kSlowUI));
-    summary->set_slow_bitmap_upload_count(
-            summary->slow_bitmap_upload_count() + data->jankTypeCount(kSlowSync));
-    summary->set_slow_draw_count(
-            summary->slow_draw_count() + data->jankTypeCount(kSlowRT));
+    summary->set_missed_vsync_count(summary->missed_vsync_count() +
+                                    data->jankTypeCount(kMissedVsync));
+    summary->set_high_input_latency_count(summary->high_input_latency_count() +
+                                          data->jankTypeCount(kHighInputLatency));
+    summary->set_slow_ui_thread_count(summary->slow_ui_thread_count() +
+                                      data->jankTypeCount(kSlowUI));
+    summary->set_slow_bitmap_upload_count(summary->slow_bitmap_upload_count() +
+                                          data->jankTypeCount(kSlowSync));
+    summary->set_slow_draw_count(summary->slow_draw_count() + data->jankTypeCount(kSlowRT));
 
     bool creatingHistogram = false;
     if (proto->histogram_size() == 0) {
         proto->mutable_histogram()->Reserve(sHistogramSize);
         creatingHistogram = true;
     } else if (proto->histogram_size() != sHistogramSize) {
-        ALOGE("Histogram size mismatch, proto is %d expected %d",
-                proto->histogram_size(), sHistogramSize);
+        ALOGE("Histogram size mismatch, proto is %d expected %d", proto->histogram_size(),
+              sHistogramSize);
         return false;
     }
     int index = 0;
@@ -205,7 +198,8 @@ bool mergeProfileDataIntoProto(service::GraphicsStatsProto* proto, const std::st
         } else {
             bucket = proto->mutable_histogram(index);
             if (bucket->render_millis() != static_cast<int32_t>(entry.renderTimeMs)) {
-                ALOGW("Frame time mistmatch %d vs. %u", bucket->render_millis(), entry.renderTimeMs);
+                ALOGW("Frame time mistmatch %d vs. %u", bucket->render_millis(),
+                      entry.renderTimeMs);
                 hitMergeError = true;
                 return;
             }
@@ -232,7 +226,7 @@ void dumpAsTextToFd(service::GraphicsStatsProto* proto, int fd) {
     // This isn't a full validation, just enough that we can deref at will
     if (proto->package_name().empty() || !proto->has_summary()) {
         ALOGW("Skipping dump, invalid package_name() '%s' or summary %d",
-                proto->package_name().c_str(), proto->has_summary());
+              proto->package_name().c_str(), proto->has_summary());
         return;
     }
     dprintf(fd, "\nPackage: %s", proto->package_name().c_str());
@@ -242,7 +236,7 @@ void dumpAsTextToFd(service::GraphicsStatsProto* proto, int fd) {
     auto summary = proto->summary();
     dprintf(fd, "\nTotal frames rendered: %d", summary.total_frames());
     dprintf(fd, "\nJanky frames: %d (%.2f%%)", summary.janky_frames(),
-            (float) summary.janky_frames() / (float) summary.total_frames() * 100.0f);
+            (float)summary.janky_frames() / (float)summary.total_frames() * 100.0f);
     dprintf(fd, "\n50th percentile: %dms", findPercentile(proto, 50));
     dprintf(fd, "\n90th percentile: %dms", findPercentile(proto, 90));
     dprintf(fd, "\n95th percentile: %dms", findPercentile(proto, 95));
@@ -260,7 +254,8 @@ void dumpAsTextToFd(service::GraphicsStatsProto* proto, int fd) {
 }
 
 void GraphicsStatsService::saveBuffer(const std::string& path, const std::string& package,
-        int versionCode, int64_t startTime, int64_t endTime, const ProfileData* data) {
+                                      int versionCode, int64_t startTime, int64_t endTime,
+                                      const ProfileData* data) {
     service::GraphicsStatsProto statsProto;
     if (!parseFromFile(path, &statsProto)) {
         statsProto.Clear();
@@ -275,8 +270,8 @@ void GraphicsStatsService::saveBuffer(const std::string& path, const std::string
         return;
     }
     if (statsProto.package_name().empty() || !statsProto.has_summary()) {
-        ALOGE("missing package_name() '%s' summary %d",
-                statsProto.package_name().c_str(), statsProto.has_summary());
+        ALOGE("missing package_name() '%s' summary %d", statsProto.package_name().c_str(),
+              statsProto.has_summary());
         return;
     }
     int outFd = open(path.c_str(), O_CREAT | O_RDWR | O_TRUNC, 0660);
@@ -288,8 +283,8 @@ void GraphicsStatsService::saveBuffer(const std::string& path, const std::string
     int wrote = write(outFd, &sCurrentFileVersion, sHeaderSize);
     if (wrote != sHeaderSize) {
         int err = errno;
-        ALOGW("Failed to write header to '%s', returned=%d errno=%d (%s)",
-                path.c_str(), wrote, err, strerror(err));
+        ALOGW("Failed to write header to '%s', returned=%d errno=%d (%s)", path.c_str(), wrote, err,
+              strerror(err));
         close(outFd);
         return;
     }
@@ -297,8 +292,8 @@ void GraphicsStatsService::saveBuffer(const std::string& path, const std::string
         FileOutputStreamLite output(outFd);
         bool success = statsProto.SerializeToZeroCopyStream(&output) && output.Flush();
         if (output.GetErrno() != 0) {
-            ALOGW("Error writing to fd=%d, path='%s' err=%d (%s)",
-                    outFd, path.c_str(), output.GetErrno(), strerror(output.GetErrno()));
+            ALOGW("Error writing to fd=%d, path='%s' err=%d (%s)", outFd, path.c_str(),
+                  output.GetErrno(), strerror(output.GetErrno()));
             success = false;
         } else if (!success) {
             ALOGW("Serialize failed on '%s' unknown error", path.c_str());
@@ -313,6 +308,7 @@ public:
     int fd() { return mFd; }
     DumpType type() { return mType; }
     service::GraphicsStatsServiceDumpProto& proto() { return mProto; }
+
 private:
     int mFd;
     DumpType mType;
@@ -323,19 +319,20 @@ GraphicsStatsService::Dump* GraphicsStatsService::createDump(int outFd, DumpType
     return new Dump(outFd, type);
 }
 
-void GraphicsStatsService::addToDump(Dump* dump, const std::string& path, const std::string& package,
-        int versionCode, int64_t startTime, int64_t endTime, const ProfileData* data) {
+void GraphicsStatsService::addToDump(Dump* dump, const std::string& path,
+                                     const std::string& package, int versionCode, int64_t startTime,
+                                     int64_t endTime, const ProfileData* data) {
     service::GraphicsStatsProto statsProto;
     if (!path.empty() && !parseFromFile(path, &statsProto)) {
         statsProto.Clear();
     }
-    if (data && !mergeProfileDataIntoProto(
-            &statsProto, package, versionCode, startTime, endTime, data)) {
+    if (data &&
+        !mergeProfileDataIntoProto(&statsProto, package, versionCode, startTime, endTime, data)) {
         return;
     }
     if (!statsProto.IsInitialized()) {
         ALOGW("Failed to load profile data from path '%s' and data %p",
-                path.empty() ? "<empty>" : path.c_str(), data);
+              path.empty() ? "<empty>" : path.c_str(), data);
         return;
     }
 

@@ -19,9 +19,9 @@
 #include "jni.h"
 
 #include <errno.h>
+#include <stdlib.h>
 #include <utils/Log.h>
 #include <sstream>
-#include <stdlib.h>
 #include <string>
 #include <vector>
 
@@ -36,8 +36,8 @@ static size_t nextStart(const char* s, size_t length, size_t startIndex) {
         // used for floating point numbers' scientific notation.
         // Therefore, when searching for next command, we should ignore 'e'
         // and 'E'.
-        if ((((c - 'A') * (c - 'Z') <= 0) || ((c - 'a') * (c - 'z') <= 0))
-                && c != 'e' && c != 'E') {
+        if ((((c - 'A') * (c - 'Z') <= 0) || ((c - 'a') * (c - 'z') <= 0)) && c != 'e' &&
+            c != 'E') {
             return index;
         }
         index++;
@@ -52,7 +52,8 @@ static size_t nextStart(const char* s, size_t length, size_t startIndex) {
  * @param result the result of the extraction, including the position of the
  * the starting position of next number, whether it is ending with a '-'.
  */
-static void extract(int* outEndPosition, bool* outEndWithNegOrDot, const char* s, int start, int end) {
+static void extract(int* outEndPosition, bool* outEndWithNegOrDot, const char* s, int start,
+                    int end) {
     // Now looking for ' ', ',', '.' or '-' from the start.
     int currentIndex = start;
     bool foundSeparator = false;
@@ -64,30 +65,30 @@ static void extract(int* outEndPosition, bool* outEndWithNegOrDot, const char* s
         isExponential = false;
         char currentChar = s[currentIndex];
         switch (currentChar) {
-        case ' ':
-        case ',':
-            foundSeparator = true;
-            break;
-        case '-':
-            // The negative sign following a 'e' or 'E' is not a separator.
-            if (currentIndex != start && !isPrevExponential) {
+            case ' ':
+            case ',':
                 foundSeparator = true;
-                *outEndWithNegOrDot = true;
-            }
-            break;
-        case '.':
-            if (!secondDot) {
-                secondDot = true;
-            } else {
-                // This is the second dot, and it is considered as a separator.
-                foundSeparator = true;
-                *outEndWithNegOrDot = true;
-            }
-            break;
-        case 'e':
-        case 'E':
-            isExponential = true;
-            break;
+                break;
+            case '-':
+                // The negative sign following a 'e' or 'E' is not a separator.
+                if (currentIndex != start && !isPrevExponential) {
+                    foundSeparator = true;
+                    *outEndWithNegOrDot = true;
+                }
+                break;
+            case '.':
+                if (!secondDot) {
+                    secondDot = true;
+                } else {
+                    // This is the second dot, and it is considered as a separator.
+                    foundSeparator = true;
+                    *outEndWithNegOrDot = true;
+                }
+                break;
+            case 'e':
+            case 'E':
+                isExponential = true;
+                break;
         }
         if (foundSeparator) {
             break;
@@ -98,7 +99,8 @@ static void extract(int* outEndPosition, bool* outEndWithNegOrDot, const char* s
     *outEndPosition = currentIndex;
 }
 
-static float parseFloat(PathParser::ParseResult* result, const char* startPtr, size_t expectedLength) {
+static float parseFloat(PathParser::ParseResult* result, const char* startPtr,
+                        size_t expectedLength) {
     char* endPtr = NULL;
     float currentValue = strtof(startPtr, &endPtr);
     if ((currentValue == HUGE_VALF || currentValue == -HUGE_VALF) && errno == ERANGE) {
@@ -122,8 +124,7 @@ static float parseFloat(PathParser::ParseResult* result, const char* startPtr, s
  * @return true on success
  */
 static void getFloats(std::vector<float>* outPoints, PathParser::ParseResult* result,
-        const char* pathStr, int start, int end) {
-
+                      const char* pathStr, int start, int end) {
     if (pathStr[start] == 'z' || pathStr[start] == 'Z') {
         return;
     }
@@ -138,8 +139,7 @@ static void getFloats(std::vector<float>* outPoints, PathParser::ParseResult* re
         extract(&endPosition, &endWithNegOrDot, pathStr, startPosition, end);
 
         if (startPosition < endPosition) {
-            float currentValue = parseFloat(result, &pathStr[startPosition],
-                    end - startPosition);
+            float currentValue = parseFloat(result, &pathStr[startPosition], end - startPosition);
             if (result->failureOccurred) {
                 return;
             }
@@ -158,12 +158,12 @@ static void getFloats(std::vector<float>* outPoints, PathParser::ParseResult* re
 
 bool PathParser::isVerbValid(char verb) {
     verb = tolower(verb);
-    return verb == 'a' || verb == 'c' || verb == 'h' || verb == 'l' || verb == 'm' || verb == 'q'
-            || verb == 's' || verb == 't' || verb == 'v' || verb == 'z';
+    return verb == 'a' || verb == 'c' || verb == 'h' || verb == 'l' || verb == 'm' || verb == 'q' ||
+           verb == 's' || verb == 't' || verb == 'v' || verb == 'z';
 }
 
 void PathParser::getPathDataFromAsciiString(PathData* data, ParseResult* result,
-        const char* pathStr, size_t strLen) {
+                                            const char* pathStr, size_t strLen) {
     if (pathStr == NULL) {
         result->failureOccurred = true;
         result->failureMessage = "Path string cannot be NULL.";
@@ -188,8 +188,8 @@ void PathParser::getPathDataFromAsciiString(PathData* data, ParseResult* result,
         getFloats(&points, result, pathStr, start, end);
         if (!isVerbValid(pathStr[start])) {
             result->failureOccurred = true;
-            result->failureMessage = "Invalid pathData. Failure occurred at position "
-                    + std::to_string(start) + " of path: " + pathStr;
+            result->failureMessage = "Invalid pathData. Failure occurred at position " +
+                                     std::to_string(start) + " of path: " + pathStr;
         }
         // If either verb or points is not valid, return immediately.
         if (result->failureOccurred) {
@@ -205,8 +205,8 @@ void PathParser::getPathDataFromAsciiString(PathData* data, ParseResult* result,
     if ((end - start) == 1 && start < strLen) {
         if (!isVerbValid(pathStr[start])) {
             result->failureOccurred = true;
-            result->failureMessage = "Invalid pathData. Failure occurred at position "
-                    + std::to_string(start) + " of path: " + pathStr;
+            result->failureMessage = "Invalid pathData. Failure occurred at position " +
+                                     std::to_string(start) + " of path: " + pathStr;
             return;
         }
         data->verbs.push_back(pathStr[start]);
@@ -235,7 +235,8 @@ void PathParser::dump(const PathData& data) {
     ALOGD("points are : %s", os.str().c_str());
 }
 
-void PathParser::parseAsciiStringForSkPath(SkPath* skPath, ParseResult* result, const char* pathStr, size_t strLen) {
+void PathParser::parseAsciiStringForSkPath(SkPath* skPath, ParseResult* result, const char* pathStr,
+                                           size_t strLen) {
     PathData pathData;
     getPathDataFromAsciiString(&pathData, result, pathStr, strLen);
     if (result->failureOccurred) {
@@ -252,5 +253,5 @@ void PathParser::parseAsciiStringForSkPath(SkPath* skPath, ParseResult* result, 
     return;
 }
 
-}; // namespace uirenderer
-}; //namespace android
+};  // namespace uirenderer
+};  // namespace android

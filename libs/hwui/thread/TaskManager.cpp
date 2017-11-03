@@ -17,8 +17,8 @@
 #include <sys/resource.h>
 #include <sys/sysinfo.h>
 
-#include "TaskManager.h"
 #include "Task.h"
+#include "TaskManager.h"
 #include "TaskProcessor.h"
 #include "utils/MathUtils.h"
 
@@ -129,5 +129,5 @@ void TaskManager::WorkerThread::exit() {
     mSignal.signal();
 }
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android

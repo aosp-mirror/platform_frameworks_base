@@ -41,9 +41,10 @@ enum ResourceType {
 
 class ResourceReference {
 public:
-
     explicit ResourceReference(ResourceType type) {
-        refCount = 0; destroyed = false; resourceType = type;
+        refCount = 0;
+        destroyed = false;
+        resourceType = type;
     }
 
     int refCount;
@@ -51,14 +52,13 @@ public:
     ResourceType resourceType;
 };
 
-class ANDROID_API ResourceCache: public Singleton<ResourceCache> {
+class ANDROID_API ResourceCache : public Singleton<ResourceCache> {
     ResourceCache();
     ~ResourceCache();
 
     friend class Singleton<ResourceCache>;
 
 public:
-
     /**
      * When using these two methods, make sure to only invoke the *Locked()
      * variants of increment/decrementRefcount(), recyle() and destructor()
@@ -97,7 +97,7 @@ private:
     KeyedVector<const void*, ResourceReference*>* mCache;
 };
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android
 
-#endif // ANDROID_HWUI_RESOURCE_CACHE_H
+#endif  // ANDROID_HWUI_RESOURCE_CACHE_H

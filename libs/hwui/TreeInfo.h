@@ -37,6 +37,7 @@ class RenderState;
 class ErrorHandler {
 public:
     virtual void onError(const std::string& message) = 0;
+
 protected:
     ~ErrorHandler() {}
 };
@@ -48,6 +49,7 @@ public:
     // is finished it is possible that the node was "resurrected" and has
     // a non-zero parent count.
     virtual void onMaybeRemovedFromTree(RenderNode* node) = 0;
+
 protected:
     virtual ~TreeObserver() {}
 };
@@ -55,6 +57,7 @@ protected:
 // This would be a struct, but we want to PREVENT_COPY_AND_ASSIGN
 class TreeInfo {
     PREVENT_COPY_AND_ASSIGN(TreeInfo);
+
 public:
     enum TraversalMode {
         // The full monty - sync, push, run animators, etc... Used by DrawFrameTask
@@ -68,10 +71,7 @@ public:
     };
 
     TreeInfo(TraversalMode mode, renderthread::CanvasContext& canvasContext)
-            : mode(mode)
-            , prepareTextures(mode == MODE_FULL)
-            , canvasContext(canvasContext)
-    {}
+            : mode(mode), prepareTextures(mode == MODE_FULL), canvasContext(canvasContext) {}
 
     TraversalMode mode;
     // TODO: Remove this? Currently this is used to signal to stop preparing

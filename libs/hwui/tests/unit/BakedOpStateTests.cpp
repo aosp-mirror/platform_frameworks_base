@@ -38,7 +38,7 @@ TEST(ResolvedRenderState, construct) {
         ResolvedRenderState state(allocator, *parentSnapshot, recordedOp, false, false);
         EXPECT_MATRIX_APPROX_EQ(state.transform, translate10x20);
         EXPECT_EQ(Rect(100, 200), state.clipRect());
-        EXPECT_EQ(Rect(40, 60, 100, 200), state.clippedBounds); // translated and also clipped
+        EXPECT_EQ(Rect(40, 60, 100, 200), state.clippedBounds);  // translated and also clipped
         EXPECT_EQ(OpClipSideFlags::Right | OpClipSideFlags::Bottom, state.clipSideFlags);
     }
     {
@@ -72,14 +72,14 @@ TEST(ResolvedRenderState, computeLocalSpaceClip) {
         auto parentSnapshot = TestUtils::makeSnapshot(Matrix4::identity(), Rect(100, 200));
         ResolvedRenderState state(allocator, *parentSnapshot, recordedOp, false, false);
         EXPECT_EQ(Rect(-10, -20, 90, 180), state.computeLocalSpaceClip())
-            << "Local clip rect should be 100x200, offset by -10,-20";
+                << "Local clip rect should be 100x200, offset by -10,-20";
     }
     {
         // recorded with transform + parent transform
         auto parentSnapshot = TestUtils::makeSnapshot(translate10x20, Rect(100, 200));
         ResolvedRenderState state(allocator, *parentSnapshot, recordedOp, false, false);
         EXPECT_EQ(Rect(-10, -20, 80, 160), state.computeLocalSpaceClip())
-            << "Local clip rect should be 90x190, offset by -10,-20";
+                << "Local clip rect should be 90x190, offset by -10,-20";
     }
 }
 
@@ -96,62 +96,51 @@ struct StrokeTestCase {
 };
 
 const static StrokeTestCase sStrokeTestCases[] = {
-    {
-        1, HAIRLINE, [](const ResolvedRenderState& state) {
-            EXPECT_EQ(Rect(49.5f, 49.5f, 150.5f, 150.5f), state.clippedBounds);
-        }
-    },
-    {
-        1, SEMI_HAIRLINE, [](const ResolvedRenderState& state) {
-            EXPECT_TRUE(state.clippedBounds.contains(49.5f, 49.5f, 150.5f, 150.5f));
-            EXPECT_TRUE(Rect(49, 49, 151, 151).contains(state.clippedBounds));
-        }
-    },
-    {
-        1, 20, [](const ResolvedRenderState& state) {
-            EXPECT_EQ(Rect(40, 40, 160, 160), state.clippedBounds);
-        }
-    },
+        {1, HAIRLINE,
+         [](const ResolvedRenderState& state) {
+             EXPECT_EQ(Rect(49.5f, 49.5f, 150.5f, 150.5f), state.clippedBounds);
+         }},
+        {1, SEMI_HAIRLINE,
+         [](const ResolvedRenderState& state) {
+             EXPECT_TRUE(state.clippedBounds.contains(49.5f, 49.5f, 150.5f, 150.5f));
+             EXPECT_TRUE(Rect(49, 49, 151, 151).contains(state.clippedBounds));
+         }},
+        {1, 20,
+         [](const ResolvedRenderState& state) {
+             EXPECT_EQ(Rect(40, 40, 160, 160), state.clippedBounds);
+         }},
 
-    // 3x3 scale:
-    {
-        3, HAIRLINE, [](const ResolvedRenderState& state) {
-            EXPECT_EQ(Rect(149.5f, 149.5f, 200, 200), state.clippedBounds);
-            EXPECT_EQ(OpClipSideFlags::Right | OpClipSideFlags::Bottom, state.clipSideFlags);
-        }
-    },
-    {
-        3, SEMI_HAIRLINE, [](const ResolvedRenderState& state) {
-            EXPECT_TRUE(state.clippedBounds.contains(149.5f, 149.5f, 200, 200));
-            EXPECT_TRUE(Rect(149, 149, 200, 200).contains(state.clippedBounds));
-        }
-    },
-    {
-        3, 20, [](const ResolvedRenderState& state) {
-            EXPECT_TRUE(state.clippedBounds.contains(120, 120, 200, 200));
-            EXPECT_TRUE(Rect(119, 119, 200, 200).contains(state.clippedBounds));
-        }
-    },
+        // 3x3 scale:
+        {3, HAIRLINE,
+         [](const ResolvedRenderState& state) {
+             EXPECT_EQ(Rect(149.5f, 149.5f, 200, 200), state.clippedBounds);
+             EXPECT_EQ(OpClipSideFlags::Right | OpClipSideFlags::Bottom, state.clipSideFlags);
+         }},
+        {3, SEMI_HAIRLINE,
+         [](const ResolvedRenderState& state) {
+             EXPECT_TRUE(state.clippedBounds.contains(149.5f, 149.5f, 200, 200));
+             EXPECT_TRUE(Rect(149, 149, 200, 200).contains(state.clippedBounds));
+         }},
+        {3, 20,
+         [](const ResolvedRenderState& state) {
+             EXPECT_TRUE(state.clippedBounds.contains(120, 120, 200, 200));
+             EXPECT_TRUE(Rect(119, 119, 200, 200).contains(state.clippedBounds));
+         }},
 
-    // 0.5f x 0.5f scale
-    {
-        0.5f, HAIRLINE, [](const ResolvedRenderState& state) {
-            EXPECT_EQ(Rect(24.5f, 24.5f, 75.5f, 75.5f), state.clippedBounds);
-        }
-    },
-    {
-        0.5f, SEMI_HAIRLINE, [](const ResolvedRenderState& state) {
-            EXPECT_TRUE(state.clippedBounds.contains(24.5f, 24.5f, 75.5f, 75.5f));
-            EXPECT_TRUE(Rect(24, 24, 76, 76).contains(state.clippedBounds));
-        }
-    },
-    {
-        0.5f, 20, [](const ResolvedRenderState& state) {
-            EXPECT_TRUE(state.clippedBounds.contains(19.5f, 19.5f, 80.5f, 80.5f));
-            EXPECT_TRUE(Rect(19, 19, 81, 81).contains(state.clippedBounds));
-        }
-    }
-};
+        // 0.5f x 0.5f scale
+        {0.5f, HAIRLINE,
+         [](const ResolvedRenderState& state) {
+             EXPECT_EQ(Rect(24.5f, 24.5f, 75.5f, 75.5f), state.clippedBounds);
+         }},
+        {0.5f, SEMI_HAIRLINE,
+         [](const ResolvedRenderState& state) {
+             EXPECT_TRUE(state.clippedBounds.contains(24.5f, 24.5f, 75.5f, 75.5f));
+             EXPECT_TRUE(Rect(24, 24, 76, 76).contains(state.clippedBounds));
+         }},
+        {0.5f, 20, [](const ResolvedRenderState& state) {
+             EXPECT_TRUE(state.clippedBounds.contains(19.5f, 19.5f, 80.5f, 80.5f));
+             EXPECT_TRUE(Rect(19, 19, 81, 81).contains(state.clippedBounds));
+         }}};
 
 TEST(ResolvedRenderState, construct_expandForStroke) {
     LinearAllocator allocator;
@@ -163,8 +152,7 @@ TEST(ResolvedRenderState, construct_expandForStroke) {
         strokedPaint.setStrokeWidth(testCase.strokeWidth);
 
         ClipRect clip(Rect(200, 200));
-        RectOp recordedOp(Rect(50, 50, 150, 150),
-                Matrix4::identity(), &clip, &strokedPaint);
+        RectOp recordedOp(Rect(50, 50, 150, 150), Matrix4::identity(), &clip, &strokedPaint);
 
         Matrix4 snapshotMatrix;
         snapshotMatrix.loadScale(testCase.scale, testCase.scale, 1);
@@ -204,16 +192,18 @@ TEST(BakedOpState, tryShadowOpConstruct) {
 
     LinearAllocator allocator;
     {
-        auto snapshot = TestUtils::makeSnapshot(translate10x20, Rect()); // Note: empty clip
-        BakedOpState* bakedState = BakedOpState::tryShadowOpConstruct(allocator, *snapshot, (ShadowOp*)0x1234);
+        auto snapshot = TestUtils::makeSnapshot(translate10x20, Rect());  // Note: empty clip
+        BakedOpState* bakedState =
+                BakedOpState::tryShadowOpConstruct(allocator, *snapshot, (ShadowOp*)0x1234);
 
         EXPECT_EQ(nullptr, bakedState) << "op should be rejected by clip, so not constructed";
         EXPECT_EQ(0u, allocator.usedSize()) << "no serialization, even for clip,"
-                "since op is quick rejected based on snapshot clip";
+                                               "since op is quick rejected based on snapshot clip";
     }
     {
         auto snapshot = TestUtils::makeSnapshot(translate10x20, Rect(100, 200));
-        BakedOpState* bakedState = BakedOpState::tryShadowOpConstruct(allocator, *snapshot, (ShadowOp*)0x1234);
+        BakedOpState* bakedState =
+                BakedOpState::tryShadowOpConstruct(allocator, *snapshot, (ShadowOp*)0x1234);
 
         ASSERT_NE(nullptr, bakedState) << "NOT rejected by clip, so op should be constructed";
         EXPECT_LE(64u, allocator.usedSize()) << "relatively large alloc for non-rejected op";
@@ -232,12 +222,13 @@ TEST(BakedOpState, tryStrokeableOpConstruct) {
         paint.setStrokeWidth(0.0f);
         ClipRect clip(Rect(100, 200));
         RectOp rejectOp(Rect(100, 200), Matrix4::identity(), &clip, &paint);
-        auto snapshot = TestUtils::makeSnapshot(Matrix4::identity(), Rect()); // Note: empty clip
-        auto bakedState = BakedOpState::tryStrokeableOpConstruct(allocator, *snapshot, rejectOp,
-                BakedOpState::StrokeBehavior::StyleDefined, false);
+        auto snapshot = TestUtils::makeSnapshot(Matrix4::identity(), Rect());  // Note: empty clip
+        auto bakedState = BakedOpState::tryStrokeableOpConstruct(
+                allocator, *snapshot, rejectOp, BakedOpState::StrokeBehavior::StyleDefined, false);
 
         EXPECT_EQ(nullptr, bakedState);
-        EXPECT_GT(8u, allocator.usedSize()); // no significant allocation space used for rejected op
+        EXPECT_GT(8u,
+                  allocator.usedSize());  // no significant allocation space used for rejected op
     }
     {
         // check simple unscaled expansion
@@ -247,8 +238,8 @@ TEST(BakedOpState, tryStrokeableOpConstruct) {
         ClipRect clip(Rect(200, 200));
         RectOp rejectOp(Rect(50, 50, 150, 150), Matrix4::identity(), &clip, &paint);
         auto snapshot = TestUtils::makeSnapshot(Matrix4::identity(), Rect(200, 200));
-        auto bakedState = BakedOpState::tryStrokeableOpConstruct(allocator, *snapshot, rejectOp,
-                BakedOpState::StrokeBehavior::StyleDefined, false);
+        auto bakedState = BakedOpState::tryStrokeableOpConstruct(
+                allocator, *snapshot, rejectOp, BakedOpState::StrokeBehavior::StyleDefined, false);
 
         ASSERT_NE(nullptr, bakedState);
         EXPECT_EQ(Rect(45, 45, 155, 155), bakedState->computedState.clippedBounds);
@@ -262,8 +253,8 @@ TEST(BakedOpState, tryStrokeableOpConstruct) {
         ClipRect clip(Rect(200, 200));
         RectOp rejectOp(Rect(50, 50, 150, 150), Matrix4::identity(), &clip, &paint);
         auto snapshot = TestUtils::makeSnapshot(Matrix4::identity(), Rect(200, 200));
-        auto bakedState = BakedOpState::tryStrokeableOpConstruct(allocator, *snapshot, rejectOp,
-                BakedOpState::StrokeBehavior::Forced, false);
+        auto bakedState = BakedOpState::tryStrokeableOpConstruct(
+                allocator, *snapshot, rejectOp, BakedOpState::StrokeBehavior::Forced, false);
 
         ASSERT_NE(nullptr, bakedState);
         EXPECT_EQ(Rect(45, 45, 155, 155), bakedState->computedState.clippedBounds);
@@ -271,5 +262,5 @@ TEST(BakedOpState, tryStrokeableOpConstruct) {
     }
 }
 
-} // namespace uirenderer
-} // namespace android
+}  // namespace uirenderer
+}  // namespace android

@@ -16,12 +16,12 @@
 
 #pragma once
 
-#include <map>
 #include <SkSurface.h>
 #include <utils/FatVector.h>
 #include <utils/RefBase.h>
 #include <utils/Thread.h>
 #include <list>
+#include <map>
 
 class GrRectanizer;
 
@@ -55,18 +55,15 @@ struct AtlasEntry {
  * When a VectorDrawable is deleted, it invokes VectorDrawableAtlas::releaseEntry, which is keeping
  * track of free spaces and allow to reuse the surface for another VD.
  */
- //TODO: Check if not using atlas for AnimatedVD is more efficient.
- //TODO: For low memory situations, when there are no paint effects in VD, we may render without an
- //TODO: offscreen surface.
+// TODO: Check if not using atlas for AnimatedVD is more efficient.
+// TODO: For low memory situations, when there are no paint effects in VD, we may render without an
+// TODO: offscreen surface.
 class VectorDrawableAtlas : public virtual RefBase {
 public:
-    enum class StorageMode {
-        allowSharedSurface,
-        disallowSharedSurface
-    };
+    enum class StorageMode { allowSharedSurface, disallowSharedSurface };
 
     VectorDrawableAtlas(size_t surfaceArea,
-            StorageMode storageMode = StorageMode::allowSharedSurface);
+                        StorageMode storageMode = StorageMode::allowSharedSurface);
 
     /**
      * "prepareForDraw" may allocate a new surface if needed. It may schedule to repack the
@@ -120,10 +117,8 @@ public:
 private:
     struct CacheEntry {
         CacheEntry(const SkRect& newVDrect, const SkRect& newRect,
-                const sk_sp<SkSurface>& newSurface)
-                : VDrect(newVDrect)
-                , rect(newRect)
-                , surface(newSurface) { }
+                   const sk_sp<SkSurface>& newSurface)
+                : VDrect(newVDrect), rect(newRect), surface(newSurface) {}
 
         /**
          * size and position of VectorDrawable into the atlas or in "this.surface"
@@ -204,7 +199,7 @@ private:
     sk_sp<SkSurface> createSurface(int width, int height, GrContext* context);
 
     inline bool fitInAtlas(int width, int height) {
-        return 2*width < mWidth && 2*height < mHeight;
+        return 2 * width < mWidth && 2 * height < mHeight;
     }
 
     void repack(GrContext* context);

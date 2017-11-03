@@ -26,11 +26,11 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifdef TEXTURE_BORDER_SIZE
-  #if TEXTURE_BORDER_SIZE != 1
-    #error TEXTURE_BORDER_SIZE other than 1 is not currently supported
-  #endif
+#if TEXTURE_BORDER_SIZE != 1
+#error TEXTURE_BORDER_SIZE other than 1 is not currently supported
+#endif
 #else
-  #define TEXTURE_BORDER_SIZE 1
+#define TEXTURE_BORDER_SIZE 1
 #endif
 
 #define CACHE_BLOCK_ROUNDING_SIZE 4
@@ -43,4 +43,4 @@ typedef uint16_t glyph_t;
 // [-1, 1]. Result is an integral float.
 #define AUTO_KERN(prev, next) static_cast<float>(((next) - (prev) + 32) >> 6)
 
-#endif // ANDROID_HWUI_FONT_UTIL_H
+#endif  // ANDROID_HWUI_FONT_UTIL_H

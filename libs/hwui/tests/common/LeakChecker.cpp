@@ -19,10 +19,10 @@
 #include "Caches.h"
 #include "TestUtils.h"
 
-#include <cstdio>
-#include <iostream>
 #include <memunreachable/memunreachable.h>
 #include <unistd.h>
+#include <cstdio>
+#include <iostream>
 #include <unordered_set>
 
 using namespace std;
@@ -45,12 +45,12 @@ static void logUnreachable(initializer_list<UnreachableMemoryInfo> infolist) {
         merged.allocation_bytes = max(merged.allocation_bytes, info.allocation_bytes);
         merged.num_allocations = max(merged.num_allocations, info.num_allocations);
         for (auto& leak : info.leaks) {
-             if (addrs.find(leak.begin) == addrs.end()) {
-                 merged.leaks.push_back(leak);
-                 merged.num_leaks++;
-                 merged.leak_bytes += leak.size;
-                 addrs.insert(leak.begin);
-             }
+            if (addrs.find(leak.begin) == addrs.end()) {
+                merged.leaks.push_back(leak);
+                merged.num_leaks++;
+                merged.leak_bytes += leak.size;
+                addrs.insert(leak.begin);
+            }
         }
     }
 
@@ -59,7 +59,7 @@ static void logUnreachable(initializer_list<UnreachableMemoryInfo> infolist) {
         cout << endl << "Leaked memory!" << endl;
         if (!merged.leaks[0].backtrace.num_frames) {
             cout << "Re-run with 'export LIBC_DEBUG_MALLOC_OPTIONS=backtrace' to get backtraces"
-                    << endl;
+                 << endl;
         }
         cout << merged.ToString(false);
     }

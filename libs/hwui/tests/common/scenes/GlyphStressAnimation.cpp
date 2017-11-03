@@ -25,30 +25,28 @@
 class GlyphStressAnimation;
 
 static TestScene::Registrar _GlyphStress(TestScene::Info{
-    "glyphstress",
-    "A stress test for both the glyph cache, and glyph rendering.",
-    TestScene::simpleCreateScene<GlyphStressAnimation>
-});
+        "glyphstress", "A stress test for both the glyph cache, and glyph rendering.",
+        TestScene::simpleCreateScene<GlyphStressAnimation>});
 
 class GlyphStressAnimation : public TestScene {
 public:
     sp<RenderNode> container;
     void createContent(int width, int height, Canvas& canvas) override {
         container = TestUtils::createNode(0, 0, width, height, nullptr);
-        doFrame(0); // update container
+        doFrame(0);  // update container
 
         canvas.drawColor(Color::White, SkBlendMode::kSrcOver);
         canvas.drawRenderNode(container.get());
     }
 
     void doFrame(int frameNr) override {
-        std::unique_ptr<uint16_t[]> text = TestUtils::asciiToUtf16(
-                "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ");
+        std::unique_ptr<uint16_t[]> text =
+                TestUtils::asciiToUtf16("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ");
         ssize_t textLength = 26 * 2;
 
-        std::unique_ptr<Canvas> canvas(Canvas::create_recording_canvas(
-                container->stagingProperties().getWidth(),
-                container->stagingProperties().getHeight()));
+        std::unique_ptr<Canvas> canvas(
+                Canvas::create_recording_canvas(container->stagingProperties().getWidth(),
+                                                container->stagingProperties().getHeight()));
 
         Paint paint;
         paint.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
@@ -56,8 +54,8 @@ public:
         paint.setColor(Color::Black);
         for (int i = 0; i < 5; i++) {
             paint.setTextSize(10 + (frameNr % 20) + i * 20);
-            canvas->drawText(text.get(), 0, textLength, textLength,
-                    0, 100 * (i + 2), minikin::Bidi::FORCE_LTR, paint, nullptr);
+            canvas->drawText(text.get(), 0, textLength, textLength, 0, 100 * (i + 2),
+                             minikin::Bidi::FORCE_LTR, paint, nullptr);
         }
 
         container->setStagingDisplayList(canvas->finishRecording());

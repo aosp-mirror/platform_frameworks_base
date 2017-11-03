@@ -17,16 +17,16 @@
 #ifndef RENDERPROXY_H_
 #define RENDERPROXY_H_
 
-#include <cutils/compiler.h>
 #include <SkBitmap.h>
-#include <utils/Functor.h>
+#include <cutils/compiler.h>
 #include <gui/Surface.h>
+#include <utils/Functor.h>
 
 #include "../FrameMetricsObserver.h"
 #include "../IContextFactory.h"
-#include "hwui/Bitmap.h"
 #include "DrawFrameTask.h"
 #include "SwapBehavior.h"
+#include "hwui/Bitmap.h"
 
 namespace android {
 class GraphicBuffer;
@@ -44,11 +44,11 @@ class RenderThread;
 class RenderProxyBridge;
 
 namespace DumpFlags {
-    enum {
-        FrameStats = 1 << 0,
-        Reset      = 1 << 1,
-        JankStats  = 1 << 2,
-    };
+enum {
+    FrameStats = 1 << 0,
+    Reset = 1 << 1,
+    JankStats = 1 << 2,
+};
 };
 
 /*
@@ -73,8 +73,7 @@ public:
     ANDROID_API void updateSurface(const sp<Surface>& surface);
     ANDROID_API bool pauseSurface(const sp<Surface>& surface);
     ANDROID_API void setStopped(bool stopped);
-    ANDROID_API void setup(float lightRadius,
-            uint8_t ambientShadowAlpha, uint8_t spotShadowAlpha);
+    ANDROID_API void setup(float lightRadius, uint8_t ambientShadowAlpha, uint8_t spotShadowAlpha);
     ANDROID_API void setLightCenter(const Vector3& lightCenter);
     ANDROID_API void setOpaque(bool opaque);
     ANDROID_API void setWideGamut(bool wideGamut);
@@ -121,8 +120,8 @@ public:
     ANDROID_API void removeFrameMetricsObserver(FrameMetricsObserver* observer);
     ANDROID_API long getDroppedFrameReportCount();
 
-    ANDROID_API static int copySurfaceInto(sp<Surface>& surface,
-            int left, int top, int right, int bottom, SkBitmap* bitmap);
+    ANDROID_API static int copySurfaceInto(sp<Surface>& surface, int left, int top, int right,
+                                           int bottom, SkBitmap* bitmap);
     ANDROID_API static void prepareToDraw(Bitmap& bitmap);
 
     static sk_sp<Bitmap> allocateHardwareBitmap(SkBitmap& bitmap);

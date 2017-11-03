@@ -63,9 +63,9 @@ private:
 
     int mVersionMajor;
     int mVersionMinor;
-}; // class Extensions
+};  // class Extensions
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android
 
-#endif // ANDROID_HWUI_EXTENSIONS_H
+#endif  // ANDROID_HWUI_EXTENSIONS_H

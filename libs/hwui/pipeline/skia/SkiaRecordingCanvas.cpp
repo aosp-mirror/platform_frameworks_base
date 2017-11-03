@@ -16,12 +16,12 @@
 
 #include "SkiaRecordingCanvas.h"
 
+#include <SkImagePriv.h>
 #include "Layer.h"
-#include "RenderNode.h"
 #include "LayerDrawable.h"
 #include "NinePatchUtils.h"
+#include "RenderNode.h"
 #include "pipeline/skia/AnimatedDrawables.h"
-#include <SkImagePriv.h>
 
 namespace android {
 namespace uirenderer {
@@ -32,7 +32,7 @@ namespace skiapipeline {
 // ----------------------------------------------------------------------------
 
 void SkiaRecordingCanvas::initDisplayList(uirenderer::RenderNode* renderNode, int width,
-        int height) {
+                                          int height) {
     mCurrentBarrier = nullptr;
     SkASSERT(mDisplayList.get() == nullptr);
 
@@ -59,17 +59,21 @@ uirenderer::DisplayList* SkiaRecordingCanvas::finishRecording() {
 // ----------------------------------------------------------------------------
 
 void SkiaRecordingCanvas::drawRoundRect(uirenderer::CanvasPropertyPrimitive* left,
-        uirenderer::CanvasPropertyPrimitive* top, uirenderer::CanvasPropertyPrimitive* right,
-        uirenderer::CanvasPropertyPrimitive* bottom, uirenderer::CanvasPropertyPrimitive* rx,
-        uirenderer::CanvasPropertyPrimitive* ry, uirenderer::CanvasPropertyPaint* paint) {
+                                        uirenderer::CanvasPropertyPrimitive* top,
+                                        uirenderer::CanvasPropertyPrimitive* right,
+                                        uirenderer::CanvasPropertyPrimitive* bottom,
+                                        uirenderer::CanvasPropertyPrimitive* rx,
+                                        uirenderer::CanvasPropertyPrimitive* ry,
+                                        uirenderer::CanvasPropertyPaint* paint) {
     // Destructor of drawables created with allocateDrawable, will be invoked by ~LinearAllocator.
-    drawDrawable(mDisplayList->allocateDrawable<AnimatedRoundRect>(left, top, right, bottom,
-            rx, ry, paint));
+    drawDrawable(mDisplayList->allocateDrawable<AnimatedRoundRect>(left, top, right, bottom, rx, ry,
+                                                                   paint));
 }
 
 void SkiaRecordingCanvas::drawCircle(uirenderer::CanvasPropertyPrimitive* x,
-        uirenderer::CanvasPropertyPrimitive* y, uirenderer::CanvasPropertyPrimitive* radius,
-        uirenderer::CanvasPropertyPaint* paint) {
+                                     uirenderer::CanvasPropertyPrimitive* y,
+                                     uirenderer::CanvasPropertyPrimitive* radius,
+                                     uirenderer::CanvasPropertyPaint* paint) {
     drawDrawable(mDisplayList->allocateDrawable<AnimatedCircle>(x, y, radius, paint));
 }
 
@@ -77,15 +81,14 @@ void SkiaRecordingCanvas::insertReorderBarrier(bool enableReorder) {
     if (nullptr != mCurrentBarrier) {
         // finish off the existing chunk
         SkDrawable* drawable =
-                mDisplayList->allocateDrawable<EndReorderBarrierDrawable>(
-                mCurrentBarrier);
+                mDisplayList->allocateDrawable<EndReorderBarrierDrawable>(mCurrentBarrier);
         mCurrentBarrier = nullptr;
         drawDrawable(drawable);
     }
     if (enableReorder) {
         mCurrentBarrier = (StartReorderBarrierDrawable*)
-                mDisplayList->allocateDrawable<StartReorderBarrierDrawable>(
-                mDisplayList.get());
+                                  mDisplayList->allocateDrawable<StartReorderBarrierDrawable>(
+                                          mDisplayList.get());
         drawDrawable(mCurrentBarrier);
     }
 }
@@ -113,25 +116,21 @@ void SkiaRecordingCanvas::drawRenderNode(uirenderer::RenderNode* renderNode) {
 }
 
 void SkiaRecordingCanvas::callDrawGLFunction(Functor* functor,
-        uirenderer::GlFunctorLifecycleListener* listener) {
+                                             uirenderer::GlFunctorLifecycleListener* listener) {
     // Drawable dtor will be invoked when mChildFunctors deque is cleared.
     mDisplayList->mChildFunctors.emplace_back(functor, listener, asSkCanvas());
     drawDrawable(&mDisplayList->mChildFunctors.back());
 }
 
 class VectorDrawable : public SkDrawable {
- public:
+public:
     VectorDrawable(VectorDrawableRoot* tree) : mRoot(tree) {}
 
- protected:
-     virtual SkRect onGetBounds() override {
-         return SkRect::MakeLargest();
-     }
-     virtual void onDraw(SkCanvas* canvas) override {
-         mRoot->draw(canvas);
-     }
+protected:
+    virtual SkRect onGetBounds() override { return SkRect::MakeLargest(); }
+    virtual void onDraw(SkCanvas* canvas) override { mRoot->draw(canvas); }
 
- private:
+private:
     sp<VectorDrawableRoot> mRoot;
 };
 
@@ -145,7 +144,7 @@ void SkiaRecordingCanvas::drawVectorDrawable(VectorDrawableRoot* tree) {
 // ----------------------------------------------------------------------------
 
 inline static const SkPaint* bitmapPaint(const SkPaint* origPaint, SkPaint* tmpPaint,
-        sk_sp<SkColorFilter> colorFilter) {
+                                         sk_sp<SkColorFilter> colorFilter) {
     if ((origPaint && origPaint->isAntiAlias()) || colorFilter) {
         if (origPaint) {
             *tmpPaint = *origPaint;
@@ -180,8 +179,7 @@ void SkiaRecordingCanvas::drawBitmap(Bitmap& bitmap, float left, float top, cons
     }
 }
 
-void SkiaRecordingCanvas::drawBitmap(Bitmap& bitmap, const SkMatrix& matrix,
-        const SkPaint* paint) {
+void SkiaRecordingCanvas::drawBitmap(Bitmap& bitmap, const SkMatrix& matrix, const SkPaint* paint) {
     SkAutoCanvasRestore acr(&mRecorder, true);
     concat(matrix);
 
@@ -194,9 +192,9 @@ void SkiaRecordingCanvas::drawBitmap(Bitmap& bitmap, const SkMatrix& matrix,
     }
 }
 
-void SkiaRecordingCanvas::drawBitmap(Bitmap& bitmap, float srcLeft, float srcTop,
-        float srcRight, float srcBottom, float dstLeft, float dstTop, float dstRight,
-        float dstBottom, const SkPaint* paint) {
+void SkiaRecordingCanvas::drawBitmap(Bitmap& bitmap, float srcLeft, float srcTop, float srcRight,
+                                     float srcBottom, float dstLeft, float dstTop, float dstRight,
+                                     float dstBottom, const SkPaint* paint) {
     SkRect srcRect = SkRect::MakeLTRB(srcLeft, srcTop, srcRight, srcBottom);
     SkRect dstRect = SkRect::MakeLTRB(dstLeft, dstTop, dstRight, dstBottom);
 
@@ -204,15 +202,16 @@ void SkiaRecordingCanvas::drawBitmap(Bitmap& bitmap, float srcLeft, float srcTop
     sk_sp<SkColorFilter> colorFilter;
     sk_sp<SkImage> image = bitmap.makeImage(&colorFilter);
     mRecorder.drawImageRect(image, srcRect, dstRect, bitmapPaint(paint, &tmpPaint, colorFilter),
-            SkCanvas::kFast_SrcRectConstraint);
-    if (!bitmap.isImmutable() && image.get() && !image->unique() && !srcRect.isEmpty()
-            && !dstRect.isEmpty()) {
+                            SkCanvas::kFast_SrcRectConstraint);
+    if (!bitmap.isImmutable() && image.get() && !image->unique() && !srcRect.isEmpty() &&
+        !dstRect.isEmpty()) {
         mDisplayList->mMutableImages.push_back(image.get());
     }
 }
 
-void SkiaRecordingCanvas::drawNinePatch(Bitmap& bitmap, const Res_png_9patch& chunk,
-        float dstLeft, float dstTop, float dstRight, float dstBottom, const SkPaint* paint) {
+void SkiaRecordingCanvas::drawNinePatch(Bitmap& bitmap, const Res_png_9patch& chunk, float dstLeft,
+                                        float dstTop, float dstRight, float dstBottom,
+                                        const SkPaint* paint) {
     SkCanvas::Lattice lattice;
     NinePatchUtils::SetLatticeDivs(&lattice, chunk, bitmap.width(), bitmap.height());
 
@@ -236,12 +235,12 @@ void SkiaRecordingCanvas::drawNinePatch(Bitmap& bitmap, const Res_png_9patch& ch
     sk_sp<SkColorFilter> colorFilter;
     sk_sp<SkImage> image = bitmap.makeImage(&colorFilter);
     mRecorder.drawImageLattice(image.get(), lattice, dst,
-            bitmapPaint(paint, &tmpPaint, colorFilter));
+                               bitmapPaint(paint, &tmpPaint, colorFilter));
     if (!bitmap.isImmutable() && image.get() && !image->unique() && !dst.isEmpty()) {
         mDisplayList->mMutableImages.push_back(image.get());
     }
 }
 
-}; // namespace skiapipeline
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace skiapipeline
+};  // namespace uirenderer
+};  // namespace android

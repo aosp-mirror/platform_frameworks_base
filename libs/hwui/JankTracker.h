@@ -70,7 +70,8 @@ public:
 private:
     void setFrameInterval(nsecs_t frameIntervalNanos);
 
-    static void dumpData(int fd, const ProfileDataDescription* description, const ProfileData* data);
+    static void dumpData(int fd, const ProfileDataDescription* description,
+                         const ProfileData* data);
 
     std::array<int64_t, NUM_BUCKETS> mThresholds;
     int64_t mFrameInterval;

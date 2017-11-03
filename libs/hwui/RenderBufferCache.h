@@ -74,28 +74,22 @@ public:
 
 private:
     struct RenderBufferEntry {
-        RenderBufferEntry():
-            mBuffer(nullptr), mWidth(0), mHeight(0) {
-        }
+        RenderBufferEntry() : mBuffer(nullptr), mWidth(0), mHeight(0) {}
 
-        RenderBufferEntry(GLenum format, const uint32_t width, const uint32_t height):
-            mBuffer(nullptr), mFormat(format), mWidth(width), mHeight(height) {
-        }
+        RenderBufferEntry(GLenum format, const uint32_t width, const uint32_t height)
+                : mBuffer(nullptr), mFormat(format), mWidth(width), mHeight(height) {}
 
-        explicit RenderBufferEntry(RenderBuffer* buffer):
-            mBuffer(buffer), mFormat(buffer->getFormat()),
-            mWidth(buffer->getWidth()), mHeight(buffer->getHeight()) {
-        }
+        explicit RenderBufferEntry(RenderBuffer* buffer)
+                : mBuffer(buffer)
+                , mFormat(buffer->getFormat())
+                , mWidth(buffer->getWidth())
+                , mHeight(buffer->getHeight()) {}
 
         static int compare(const RenderBufferEntry& lhs, const RenderBufferEntry& rhs);
 
-        bool operator==(const RenderBufferEntry& other) const {
-            return compare(*this, other) == 0;
-        }
+        bool operator==(const RenderBufferEntry& other) const { return compare(*this, other) == 0; }
 
-        bool operator!=(const RenderBufferEntry& other) const {
-            return compare(*this, other) != 0;
-        }
+        bool operator!=(const RenderBufferEntry& other) const { return compare(*this, other) != 0; }
 
         bool operator<(const RenderBufferEntry& other) const {
             return RenderBufferEntry::compare(*this, other) < 0;
@@ -105,7 +99,7 @@ private:
         GLenum mFormat;
         uint32_t mWidth;
         uint32_t mHeight;
-    }; // struct RenderBufferEntry
+    };  // struct RenderBufferEntry
 
     void deleteBuffer(RenderBuffer* buffer);
 
@@ -113,9 +107,9 @@ private:
 
     uint32_t mSize;
     uint32_t mMaxSize;
-}; // class RenderBufferCache
+};  // class RenderBufferCache
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android
 
-#endif // ANDROID_HWUI_RENDER_BUFFER_CACHE_H
+#endif  // ANDROID_HWUI_RENDER_BUFFER_CACHE_H

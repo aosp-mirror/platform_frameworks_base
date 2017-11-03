@@ -33,15 +33,14 @@ public:
      * Using this constructor is equivalent to not using any mapping at all.
      * UV coordinates in the [0..1] range remain in the [0..1] range.
      */
-    UvMapper(): mIdentity(true), mMinU(0.0f), mMaxU(1.0f), mMinV(0.0f), mMaxV(1.0f) {
-    }
+    UvMapper() : mIdentity(true), mMinU(0.0f), mMaxU(1.0f), mMinV(0.0f), mMaxV(1.0f) {}
 
     /**
      * Creates a new mapper with the specified ranges for U and V coordinates.
      * The parameter minU must be < maxU and minV must be < maxV.
      */
-    UvMapper(float minU, float maxU, float minV, float maxV):
-        mMinU(minU), mMaxU(maxU), mMinV(minV), mMaxV(maxV) {
+    UvMapper(float minU, float maxU, float minV, float maxV)
+            : mMinU(minU), mMaxU(maxU), mMinV(minV), mMaxV(maxV) {
         checkIdentity();
     }
 
@@ -49,9 +48,7 @@ public:
      * Returns true if calling the map*() methods has no effect (that is,
      * texture coordinates remain in the 0..1 range.)
      */
-    bool isIdentity() const {
-        return mIdentity;
-    }
+    bool isIdentity() const { return mIdentity; }
 
     /**
      * Changes the U and V mapping ranges.
@@ -127,7 +124,7 @@ private:
     float mMaxV;
 };
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android
 
-#endif // ANDROID_HWUI_UV_MAPPER_H
+#endif  // ANDROID_HWUI_UV_MAPPER_H

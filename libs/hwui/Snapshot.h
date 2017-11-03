@@ -19,9 +19,9 @@
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 
+#include <ui/Region.h>
 #include <utils/LinearAllocator.h>
 #include <utils/RefBase.h>
-#include <ui/Region.h>
 
 #include <SkClipOp.h>
 #include <SkRegion.h>
@@ -50,10 +50,8 @@ public:
     }
 
     bool areaRequiresRoundRectClip(const Rect& rect) const {
-        return rect.intersects(dangerRects[0])
-                || rect.intersects(dangerRects[1])
-                || rect.intersects(dangerRects[2])
-                || rect.intersects(dangerRects[3]);
+        return rect.intersects(dangerRects[0]) || rect.intersects(dangerRects[1]) ||
+               rect.intersects(dangerRects[2]) || rect.intersects(dangerRects[3]);
     }
 
     bool highPriority;
@@ -74,7 +72,6 @@ public:
  */
 class Snapshot {
 public:
-
     Snapshot();
     Snapshot(Snapshot* s, int saveFlags);
 
@@ -147,8 +144,9 @@ public:
     const ClipArea& getClipArea() const { return *mClipArea; }
     ClipArea& mutateClipArea() { return *mClipArea; }
 
-    WARN_UNUSED_RESULT const ClipBase* serializeIntersectedClip(LinearAllocator& allocator,
-            const ClipBase* recordedClip, const Matrix4& recordedClipTransform);
+    WARN_UNUSED_RESULT const ClipBase* serializeIntersectedClip(
+            LinearAllocator& allocator, const ClipBase* recordedClip,
+            const Matrix4& recordedClipTransform);
     void applyClip(const ClipBase* clip, const Matrix4& transform);
 
     /**
@@ -173,8 +171,8 @@ public:
      *
      * If the current round rect clip is high priority, the incoming clip is ignored.
      */
-    void setClippingRoundRect(LinearAllocator& allocator, const Rect& bounds,
-            float radius, bool highPriority);
+    void setClippingRoundRect(LinearAllocator& allocator, const Rect& bounds, float radius,
+                              bool highPriority);
 
     /**
      * Sets (and replaces) the current projection mask
@@ -275,7 +273,7 @@ private:
     ViewportData mViewportData;
     Vector3 mRelativeLightCenter;
 
-}; // class Snapshot
+};  // class Snapshot
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android

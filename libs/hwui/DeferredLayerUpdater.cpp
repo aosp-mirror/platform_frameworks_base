@@ -26,7 +26,7 @@ namespace android {
 namespace uirenderer {
 
 DeferredLayerUpdater::DeferredLayerUpdater(RenderState& renderState, CreateLayerFn createLayerFn,
-        Layer::Api layerApi)
+                                           Layer::Api layerApi)
         : mRenderState(renderState)
         , mBlend(false)
         , mSurfaceTexture(nullptr)
@@ -110,8 +110,8 @@ void DeferredLayerUpdater::apply() {
 
 void DeferredLayerUpdater::doUpdateTexImage() {
     LOG_ALWAYS_FATAL_IF(mLayer->getApi() != Layer::Api::OpenGL,
-                        "doUpdateTexImage non GL backend %x, GL %x, VK %x",
-                        mLayer->getApi(), Layer::Api::OpenGL, Layer::Api::Vulkan);
+                        "doUpdateTexImage non GL backend %x, GL %x, VK %x", mLayer->getApi(),
+                        Layer::Api::OpenGL, Layer::Api::Vulkan);
     if (mSurfaceTexture->updateTexImage() == NO_ERROR) {
         float transform[16];
 
@@ -132,15 +132,15 @@ void DeferredLayerUpdater::doUpdateTexImage() {
         sp<GraphicBuffer> buffer = mSurfaceTexture->getCurrentBuffer();
         if (buffer != nullptr) {
             // force filtration if buffer size != layer size
-            forceFilter = mWidth != static_cast<int>(buffer->getWidth())
-                    || mHeight != static_cast<int>(buffer->getHeight());
+            forceFilter = mWidth != static_cast<int>(buffer->getWidth()) ||
+                          mHeight != static_cast<int>(buffer->getHeight());
         }
 
-        #if DEBUG_RENDERER
+#if DEBUG_RENDERER
         if (dropCounter > 0) {
             RENDERER_LOGD("Dropped %d frames on texture layer update", dropCounter);
         }
-        #endif
+#endif
         mSurfaceTexture->getTransformMatrix(transform);
 
         updateLayer(forceFilter, transform);
@@ -149,8 +149,8 @@ void DeferredLayerUpdater::doUpdateTexImage() {
 
 void DeferredLayerUpdater::doUpdateVkTexImage() {
     LOG_ALWAYS_FATAL_IF(mLayer->getApi() != Layer::Api::Vulkan,
-                        "updateLayer non Vulkan backend %x, GL %x, VK %x",
-                        mLayer->getApi(), Layer::Api::OpenGL, Layer::Api::Vulkan);
+                        "updateLayer non Vulkan backend %x, GL %x, VK %x", mLayer->getApi(),
+                        Layer::Api::OpenGL, Layer::Api::Vulkan);
 
     static const mat4 identityMatrix;
     updateLayer(false, identityMatrix.data);

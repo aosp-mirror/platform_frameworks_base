@@ -27,20 +27,21 @@
 namespace android {
 
 minikin::FontStyle MinikinUtils::prepareMinikinPaint(minikin::MinikinPaint* minikinPaint,
-        const Paint* paint, const Typeface* typeface) {
+                                                     const Paint* paint, const Typeface* typeface) {
     const Typeface* resolvedFace = Typeface::resolveDefault(typeface);
     minikin::FontStyle resolved = resolvedFace->fStyle;
 
     /* Prepare minikin FontStyle */
-    minikin::FontVariant minikinVariant = (paint->getFontVariant() == minikin::VARIANT_ELEGANT) ?
-            minikin::VARIANT_ELEGANT : minikin::VARIANT_COMPACT;
+    minikin::FontVariant minikinVariant = (paint->getFontVariant() == minikin::VARIANT_ELEGANT)
+                                                  ? minikin::VARIANT_ELEGANT
+                                                  : minikin::VARIANT_COMPACT;
     const uint32_t langListId = paint->getMinikinLangListId();
     minikin::FontStyle minikinStyle(langListId, minikinVariant, resolved.getWeight(),
-            resolved.getItalic());
+                                    resolved.getItalic());
 
     /* Prepare minikin Paint */
-    minikinPaint->size = paint->isLinearText() ?
-            paint->getTextSize() : static_cast<int>(paint->getTextSize());
+    minikinPaint->size =
+            paint->isLinearText() ? paint->getTextSize() : static_cast<int>(paint->getTextSize());
     minikinPaint->scaleX = paint->getTextScaleX();
     minikinPaint->skewX = paint->getTextSkewX();
     minikinPaint->letterSpacing = paint->getLetterSpacing();
@@ -52,24 +53,25 @@ minikin::FontStyle MinikinUtils::prepareMinikinPaint(minikin::MinikinPaint* mini
 }
 
 minikin::Layout MinikinUtils::doLayout(const Paint* paint, minikin::Bidi bidiFlags,
-        const Typeface* typeface, const uint16_t* buf, size_t start, size_t count, size_t bufSize) {
+                                       const Typeface* typeface, const uint16_t* buf, size_t start,
+                                       size_t count, size_t bufSize) {
     minikin::MinikinPaint minikinPaint;
     minikin::FontStyle minikinStyle = prepareMinikinPaint(&minikinPaint, paint, typeface);
     minikin::Layout layout;
     layout.doLayout(buf, start, count, bufSize, bidiFlags, minikinStyle, minikinPaint,
-            Typeface::resolveDefault(typeface)->fFontCollection);
+                    Typeface::resolveDefault(typeface)->fFontCollection);
     return layout;
 }
 
 float MinikinUtils::measureText(const Paint* paint, minikin::Bidi bidiFlags,
-        const Typeface* typeface, const uint16_t* buf, size_t start, size_t count, size_t bufSize,
-        float *advances) {
+                                const Typeface* typeface, const uint16_t* buf, size_t start,
+                                size_t count, size_t bufSize, float* advances) {
     minikin::MinikinPaint minikinPaint;
     minikin::FontStyle minikinStyle = prepareMinikinPaint(&minikinPaint, paint, typeface);
     const Typeface* resolvedTypeface = Typeface::resolveDefault(typeface);
     return minikin::Layout::measureText(buf, start, count, bufSize, bidiFlags, minikinStyle,
-            minikinPaint, resolvedTypeface->fFontCollection, advances, nullptr /* extent */,
-            nullptr /* overhangs */);
+                                        minikinPaint, resolvedTypeface->fFontCollection, advances,
+                                        nullptr /* extent */, nullptr /* overhangs */);
 }
 
 bool MinikinUtils::hasVariationSelector(const Typeface* typeface, uint32_t codepoint, uint32_t vs) {
@@ -92,7 +94,7 @@ float MinikinUtils::xOffsetForTextAlign(Paint* paint, const minikin::Layout& lay
 }
 
 float MinikinUtils::hOffsetForTextAlign(Paint* paint, const minikin::Layout& layout,
-        const SkPath& path) {
+                                        const SkPath& path) {
     float align = 0;
     switch (paint->getTextAlign()) {
         case Paint::kCenter_Align:
@@ -107,5 +109,4 @@ float MinikinUtils::hOffsetForTextAlign(Paint* paint, const minikin::Layout& lay
     SkPathMeasure measure(path, false);
     return align * (layout.getAdvance() - measure.getLength());
 }
-
 }

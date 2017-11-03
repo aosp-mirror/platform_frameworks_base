@@ -15,19 +15,19 @@
  */
 
 #include "GLFunctorDrawable.h"
+#include <GrContext.h>
+#include <private/hwui/DrawGlInfo.h>
 #include "GlFunctorLifecycleListener.h"
 #include "RenderNode.h"
 #include "SkAndroidFrameworkUtils.h"
 #include "SkClipStack.h"
-#include <private/hwui/DrawGlInfo.h>
-#include <GrContext.h>
 
 namespace android {
 namespace uirenderer {
 namespace skiapipeline {
 
 GLFunctorDrawable::~GLFunctorDrawable() {
-    if(mListener.get() != nullptr) {
+    if (mListener.get() != nullptr) {
         mListener->onGlFunctorReleased(mFunctor);
     }
 }
@@ -73,7 +73,7 @@ void GLFunctorDrawable::onDraw(SkCanvas* canvas) {
 
     bool clearStencilAfterFunctor = false;
 
-    //apply a simple clip with a scissor or a complex clip with a stencil
+    // apply a simple clip with a scissor or a complex clip with a stencil
     SkRegion clipRegion;
     canvas->temporary_internal_getRgnClip(&clipRegion);
     if (CC_UNLIKELY(clipRegion.isComplex())) {
@@ -106,7 +106,7 @@ void GLFunctorDrawable::onDraw(SkCanvas* canvas) {
     (*mFunctor)(DrawGlInfo::kModeDraw, &info);
 
     if (clearStencilAfterFunctor) {
-        //clear stencil buffer as it may be used by Skia
+        // clear stencil buffer as it may be used by Skia
         glDisable(GL_SCISSOR_TEST);
         glDisable(GL_STENCIL_TEST);
         glStencilMask(0x1);
@@ -115,8 +115,8 @@ void GLFunctorDrawable::onDraw(SkCanvas* canvas) {
     }
 
     canvas->getGrContext()->resetContext();
- }
+}
 
-}; // namespace skiapipeline
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace skiapipeline
+};  // namespace uirenderer
+};  // namespace android

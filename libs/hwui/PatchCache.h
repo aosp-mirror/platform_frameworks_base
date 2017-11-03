@@ -36,9 +36,9 @@ class Patch;
 
 // Debug
 #if DEBUG_PATCHES
-    #define PATCH_LOGD(...) ALOGD(__VA_ARGS__)
+#define PATCH_LOGD(...) ALOGD(__VA_ARGS__)
 #else
-    #define PATCH_LOGD(...)
+#define PATCH_LOGD(...)
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -54,20 +54,14 @@ public:
     ~PatchCache();
 
     const Patch* get(const uint32_t bitmapWidth, const uint32_t bitmapHeight,
-            const float pixelWidth, const float pixelHeight, const Res_png_9patch* patch);
+                     const float pixelWidth, const float pixelHeight, const Res_png_9patch* patch);
     void clear();
 
-    uint32_t getSize() const {
-        return mSize;
-    }
+    uint32_t getSize() const { return mSize; }
 
-    uint32_t getMaxSize() const {
-        return mMaxSize;
-    }
+    uint32_t getMaxSize() const { return mMaxSize; }
 
-    GLuint getMeshBuffer() const {
-        return mMeshBuffer;
-    }
+    GLuint getMeshBuffer() const { return mMeshBuffer; }
 
     /**
      * Removes the entries associated with the specified 9-patch. This is meant
@@ -81,18 +75,23 @@ public:
      */
     void clearGarbage();
 
-
 private:
     struct PatchDescription {
-        PatchDescription(): mPatch(nullptr), mBitmapWidth(0), mBitmapHeight(0),
-                mPixelWidth(0), mPixelHeight(0) {
-        }
+        PatchDescription()
+                : mPatch(nullptr)
+                , mBitmapWidth(0)
+                , mBitmapHeight(0)
+                , mPixelWidth(0)
+                , mPixelHeight(0) {}
 
         PatchDescription(const uint32_t bitmapWidth, const uint32_t bitmapHeight,
-                const float pixelWidth, const float pixelHeight, const Res_png_9patch* patch):
-                mPatch(patch), mBitmapWidth(bitmapWidth), mBitmapHeight(bitmapHeight),
-                mPixelWidth(pixelWidth), mPixelHeight(pixelHeight) {
-        }
+                         const float pixelWidth, const float pixelHeight,
+                         const Res_png_9patch* patch)
+                : mPatch(patch)
+                , mBitmapWidth(bitmapWidth)
+                , mBitmapHeight(bitmapHeight)
+                , mPixelWidth(pixelWidth)
+                , mPixelHeight(pixelHeight) {}
 
         hash_t hash() const;
 
@@ -100,27 +99,20 @@ private:
 
         static int compare(const PatchDescription& lhs, const PatchDescription& rhs);
 
-        bool operator==(const PatchDescription& other) const {
-            return compare(*this, other) == 0;
-        }
+        bool operator==(const PatchDescription& other) const { return compare(*this, other) == 0; }
 
-        bool operator!=(const PatchDescription& other) const {
-            return compare(*this, other) != 0;
-        }
+        bool operator!=(const PatchDescription& other) const { return compare(*this, other) != 0; }
 
         friend inline int strictly_order_type(const PatchDescription& lhs,
-                const PatchDescription& rhs) {
+                                              const PatchDescription& rhs) {
             return PatchDescription::compare(lhs, rhs) < 0;
         }
 
-        friend inline int compare_type(const PatchDescription& lhs,
-                const PatchDescription& rhs) {
+        friend inline int compare_type(const PatchDescription& lhs, const PatchDescription& rhs) {
             return PatchDescription::compare(lhs, rhs);
         }
 
-        friend inline hash_t hash_type(const PatchDescription& entry) {
-            return entry.hash();
-        }
+        friend inline hash_t hash_type(const PatchDescription& entry) { return entry.hash(); }
 
     private:
         const Res_png_9patch* mPatch;
@@ -129,7 +121,7 @@ private:
         float mPixelWidth;
         float mPixelHeight;
 
-    }; // struct PatchDescription
+    };  // struct PatchDescription
 
     /**
      * A buffer block represents an empty range in the mesh buffer
@@ -139,14 +131,13 @@ private:
      * to track available regions of memory in the VBO.
      */
     struct BufferBlock {
-        BufferBlock(uint32_t offset, uint32_t size): offset(offset), size(size), next(nullptr) {
-        }
+        BufferBlock(uint32_t offset, uint32_t size) : offset(offset), size(size), next(nullptr) {}
 
         uint32_t offset;
         uint32_t size;
 
         BufferBlock* next;
-    }; // struct BufferBlock
+    };  // struct BufferBlock
 
     typedef Pair<const PatchDescription*, Patch*> patch_pair_t;
 
@@ -174,7 +165,7 @@ private:
     // Garbage tracking, required to handle GC events on the VM side
     Vector<Res_png_9patch*> mGarbage;
     mutable Mutex mLock;
-}; // class PatchCache
+};  // class PatchCache
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android

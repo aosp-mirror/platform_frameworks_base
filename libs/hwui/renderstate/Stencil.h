@@ -78,36 +78,26 @@ public:
     /**
      * Indicates whether either test or write is enabled.
      */
-    bool isEnabled() {
-        return mState != StencilState::Disabled;
-    }
+    bool isEnabled() { return mState != StencilState::Disabled; }
 
     /**
      * Indicates whether testing only is enabled.
      */
-    bool isTestEnabled() {
-        return mState == StencilState::Test;
-    }
+    bool isTestEnabled() { return mState == StencilState::Test; }
 
-    bool isWriteEnabled() {
-        return mState == StencilState::Write;
-    }
+    bool isWriteEnabled() { return mState == StencilState::Write; }
 
     void dump();
 
 private:
-    enum class StencilState {
-        Disabled,
-        Test,
-        Write
-    };
+    enum class StencilState { Disabled, Test, Write };
 
     void enable();
     StencilState mState = StencilState::Disabled;
 
-}; // class Stencil
+};  // class Stencil
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android
 
-#endif // ANDROID_HWUI_STENCIL_H
+#endif  // ANDROID_HWUI_STENCIL_H

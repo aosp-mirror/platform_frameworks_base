@@ -37,6 +37,7 @@ struct MonotonicClock {
 
 class WorkQueue {
     PREVENT_COPY_AND_ASSIGN(WorkQueue);
+
 public:
     using clock = MonotonicClock;
 
@@ -57,8 +58,7 @@ private:
 
 public:
     WorkQueue(std::function<void()>&& wakeFunc, std::mutex& lock)
-            : mWakeFunc(move(wakeFunc))
-            , mLock(lock) {}
+            : mWakeFunc(move(wakeFunc)), mLock(lock) {}
 
     void process() {
         auto now = clock::now();
@@ -68,9 +68,7 @@ public:
             if (mWorkQueue.empty()) return;
             toProcess = std::move(mWorkQueue);
             auto moveBack = find_if(std::begin(toProcess), std::end(toProcess),
-                    [&now](WorkItem& item) {
-                        return item.runAt > now;
-                    });
+                                    [&now](WorkItem& item) { return item.runAt > now; });
             if (moveBack != std::end(toProcess)) {
                 mWorkQueue.reserve(std::distance(moveBack, std::end(toProcess)) + 5);
                 std::move(moveBack, std::end(toProcess), std::back_inserter(mWorkQueue));
@@ -82,22 +80,22 @@ public:
         }
     }
 
-    template<class F>
+    template <class F>
     void postAt(nsecs_t time, F&& func) {
         enqueue(WorkItem{time, std::function<void()>(std::forward<F>(func))});
     }
 
-    template<class F>
+    template <class F>
     void postDelayed(nsecs_t delay, F&& func) {
         enqueue(WorkItem{clock::now() + delay, std::function<void()>(std::forward<F>(func))});
     }
 
-    template<class F>
+    template <class F>
     void post(F&& func) {
         postAt(0, std::forward<F>(func));
     }
 
-    template<class F>
+    template <class F>
     auto async(F&& func) -> std::future<decltype(func())> {
         typedef std::packaged_task<decltype(func())()> task_t;
         auto task = std::make_shared<task_t>(std::forward<F>(func));
@@ -105,14 +103,14 @@ public:
         return task->get_future();
     }
 
-    template<class F>
+    template <class F>
     auto runSync(F&& func) -> decltype(func()) {
         std::packaged_task<decltype(func())()> task{std::forward<F>(func)};
         post([&task]() { std::invoke(task); });
         return task.get_future().get();
     };
 
-    nsecs_t nextWakeup(std::unique_lock<std::mutex> &lock) {
+    nsecs_t nextWakeup(std::unique_lock<std::mutex>& lock) {
         if (mWorkQueue.empty()) {
             return std::numeric_limits<nsecs_t>::max();
         } else {
@@ -125,10 +123,9 @@ private:
         bool needsWakeup;
         {
             std::unique_lock _lock{mLock};
-            auto insertAt = std::find_if(std::begin(mWorkQueue), std::end(mWorkQueue),
-                    [time = item.runAt](WorkItem& item) {
-                        return item.runAt > time;
-                    });
+            auto insertAt = std::find_if(
+                    std::begin(mWorkQueue), std::end(mWorkQueue),
+                    [time = item.runAt](WorkItem & item) { return item.runAt > time; });
             needsWakeup = std::begin(mWorkQueue) == insertAt;
             mWorkQueue.emplace(insertAt, std::move(item));
         }
@@ -143,6 +140,6 @@ private:
     std::vector<WorkItem> mWorkQueue;
 };
 
-} // namespace android::uirenderer
+}  // namespace android::uirenderer
 
-#endif //HWUI_WORKQUEUE_H
+#endif  // HWUI_WORKQUEUE_H

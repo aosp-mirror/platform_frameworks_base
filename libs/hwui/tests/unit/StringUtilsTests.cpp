@@ -34,7 +34,7 @@ TEST(StringUtils, advancedBuildSet) {
     auto collection = StringUtils::split("GL_ext1 GL_ext2 GL_ext3");
 
     EXPECT_TRUE(collection.has("GL_ext1"));
-    EXPECT_FALSE(collection.has("GL_ext")); // string present, but not in list
+    EXPECT_FALSE(collection.has("GL_ext"));  // string present, but not in list
 }
 
 TEST(StringUtils, sizePrinter) {

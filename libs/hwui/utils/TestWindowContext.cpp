@@ -36,13 +36,13 @@ namespace {
  */
 class ContextFactory : public android::uirenderer::IContextFactory {
 public:
-    android::uirenderer::AnimationContext* createAnimationContext
-        (android::uirenderer::renderthread::TimeLord& clock) override {
+    android::uirenderer::AnimationContext* createAnimationContext(
+            android::uirenderer::renderthread::TimeLord& clock) override {
         return new android::uirenderer::AnimationContext(clock);
     }
 };
 
-} // anonymous namespace
+}  // anonymous namespace
 
 namespace android {
 namespace uirenderer {
@@ -54,45 +54,38 @@ namespace uirenderer {
 */
 
 class TestWindowContext::TestWindowData {
-
 public:
-
     explicit TestWindowData(SkISize size) : mSize(size) {
         android::BufferQueue::createBufferQueue(&mProducer, &mConsumer);
         mCpuConsumer = new android::CpuConsumer(mConsumer, 1);
         mCpuConsumer->setName(android::String8("TestWindowContext"));
         mCpuConsumer->setDefaultBufferSize(mSize.width(), mSize.height());
         mAndroidSurface = new android::Surface(mProducer);
-        native_window_set_buffers_dimensions(mAndroidSurface.get(),
-                                             mSize.width(), mSize.height());
-        native_window_set_buffers_format(mAndroidSurface.get(),
-                                         android::PIXEL_FORMAT_RGBA_8888);
-        native_window_set_usage(mAndroidSurface.get(),
-                                GRALLOC_USAGE_SW_READ_OFTEN |
-                                GRALLOC_USAGE_SW_WRITE_NEVER |
-                                GRALLOC_USAGE_HW_RENDER);
+        native_window_set_buffers_dimensions(mAndroidSurface.get(), mSize.width(), mSize.height());
+        native_window_set_buffers_format(mAndroidSurface.get(), android::PIXEL_FORMAT_RGBA_8888);
+        native_window_set_usage(mAndroidSurface.get(), GRALLOC_USAGE_SW_READ_OFTEN |
+                                                               GRALLOC_USAGE_SW_WRITE_NEVER |
+                                                               GRALLOC_USAGE_HW_RENDER);
         mRootNode.reset(new android::uirenderer::RenderNode());
         mRootNode->incStrong(nullptr);
-        mRootNode->mutateStagingProperties().setLeftTopRightBottom
-            (0, 0, mSize.width(), mSize.height());
+        mRootNode->mutateStagingProperties().setLeftTopRightBottom(0, 0, mSize.width(),
+                                                                   mSize.height());
         mRootNode->mutateStagingProperties().setClipToBounds(false);
         mRootNode->setPropertyFieldsDirty(android::uirenderer::RenderNode::GENERIC);
         ContextFactory factory;
-        mProxy.reset
-            (new android::uirenderer::renderthread::RenderProxy(false,
-                                                                mRootNode.get(),
-                                                                &factory));
+        mProxy.reset(new android::uirenderer::renderthread::RenderProxy(false, mRootNode.get(),
+                                                                        &factory));
         mProxy->loadSystemProperties();
         mProxy->initialize(mAndroidSurface.get());
         float lightX = mSize.width() / 2.0f;
-        android::uirenderer::Vector3 lightVector { lightX, -200.0f, 800.0f };
+        android::uirenderer::Vector3 lightVector{lightX, -200.0f, 800.0f};
         mProxy->setup(800.0f, 255 * 0.075f, 255 * 0.15f);
         mProxy->setLightCenter(lightVector);
         mCanvas.reset(new android::uirenderer::RecordingCanvas(mSize.width(), mSize.height()));
     }
 
     SkCanvas* prepareToDraw() {
-        //mCanvas->reset(mSize.width(), mSize.height());
+        // mCanvas->reset(mSize.width(), mSize.height());
         mCanvas->clipRect(0, 0, mSize.width(), mSize.height(), SkClipOp::kReplace_deprecated);
         return mCanvas->asSkCanvas();
     }
@@ -104,17 +97,15 @@ public:
         // the timings we record.
     }
 
-    void fence() {
-        mProxy->fence();
-    }
+    void fence() { mProxy->fence(); }
 
     bool capturePixels(SkBitmap* bmp) {
         sk_sp<SkColorSpace> colorSpace = SkColorSpace::MakeSRGB();
         SkImageInfo destinationConfig =
-            SkImageInfo::Make(mSize.width(), mSize.height(),
-                              kRGBA_8888_SkColorType, kPremul_SkAlphaType, colorSpace);
+                SkImageInfo::Make(mSize.width(), mSize.height(), kRGBA_8888_SkColorType,
+                                  kPremul_SkAlphaType, colorSpace);
         bmp->allocPixels(destinationConfig);
-        android_memset32((uint32_t*) bmp->getPixels(), SK_ColorRED,
+        android_memset32((uint32_t*)bmp->getPixels(), SK_ColorRED,
                          mSize.width() * mSize.height() * 4);
 
         android::CpuConsumer::LockedBuffer nativeBuffer;
@@ -135,14 +126,13 @@ public:
 
         LOG_ALWAYS_FATAL_IF(nativeBuffer.format != android::PIXEL_FORMAT_RGBA_8888,
                             "Native buffer not RGBA!");
-        SkImageInfo nativeConfig =
-            SkImageInfo::Make(nativeBuffer.width, nativeBuffer.height,
-                              kRGBA_8888_SkColorType, kPremul_SkAlphaType);
+        SkImageInfo nativeConfig = SkImageInfo::Make(nativeBuffer.width, nativeBuffer.height,
+                                                     kRGBA_8888_SkColorType, kPremul_SkAlphaType);
 
         // Android stride is in pixels, Skia stride is in bytes
         SkBitmap nativeWrapper;
-        bool success =
-            nativeWrapper.installPixels(nativeConfig, nativeBuffer.data, nativeBuffer.stride * 4);
+        bool success = nativeWrapper.installPixels(nativeConfig, nativeBuffer.data,
+                                                   nativeBuffer.stride * 4);
         if (!success) {
             SkDebugf("Failed to wrap HWUI buffer in a SkBitmap");
             return false;
@@ -150,8 +140,8 @@ public:
 
         LOG_ALWAYS_FATAL_IF(bmp->colorType() != kRGBA_8888_SkColorType,
                             "Destination buffer not RGBA!");
-        success =
-            nativeWrapper.readPixels(destinationConfig, bmp->getPixels(), bmp->rowBytes(), 0, 0);
+        success = nativeWrapper.readPixels(destinationConfig, bmp->getPixels(), bmp->rowBytes(), 0,
+                                           0);
         if (!success) {
             SkDebugf("Failed to extract pixels from HWUI buffer");
             return false;
@@ -163,7 +153,6 @@ public:
     }
 
 private:
-
     std::unique_ptr<android::uirenderer::RenderNode> mRootNode;
     std::unique_ptr<android::uirenderer::renderthread::RenderProxy> mProxy;
     std::unique_ptr<android::uirenderer::RecordingCanvas> mCanvas;
@@ -174,15 +163,13 @@ private:
     SkISize mSize;
 };
 
-
-TestWindowContext::TestWindowContext() :
-    mData (nullptr) { }
+TestWindowContext::TestWindowContext() : mData(nullptr) {}
 
 TestWindowContext::~TestWindowContext() {
     delete mData;
 }
 
-void TestWindowContext::initialize(int width, int height)  {
+void TestWindowContext::initialize(int width, int height) {
     mData = new TestWindowData(SkISize::Make(width, height));
 }
 
@@ -206,6 +193,5 @@ bool TestWindowContext::capturePixels(SkBitmap* bmp) {
     return mData ? mData->capturePixels(bmp) : false;
 }
 
-} // namespace uirenderer
-} // namespace android
-
+}  // namespace uirenderer
+}  // namespace android

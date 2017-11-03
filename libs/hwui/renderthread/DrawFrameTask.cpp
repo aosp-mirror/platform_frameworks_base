@@ -33,21 +33,20 @@ DrawFrameTask::DrawFrameTask()
         : mRenderThread(nullptr)
         , mContext(nullptr)
         , mContentDrawBounds(0, 0, 0, 0)
-        , mSyncResult(SyncResult::OK) {
-}
+        , mSyncResult(SyncResult::OK) {}
 
-DrawFrameTask::~DrawFrameTask() {
-}
+DrawFrameTask::~DrawFrameTask() {}
 
 void DrawFrameTask::setContext(RenderThread* thread, CanvasContext* context,
-        RenderNode* targetNode) {
+                               RenderNode* targetNode) {
     mRenderThread = thread;
     mContext = context;
     mTargetNode = targetNode;
 }
 
 void DrawFrameTask::pushLayerUpdate(DeferredLayerUpdater* layer) {
-    LOG_ALWAYS_FATAL_IF(!mContext, "Lifecycle violation, there's no context to pushLayerUpdate with!");
+    LOG_ALWAYS_FATAL_IF(!mContext,
+                        "Lifecycle violation, there's no context to pushLayerUpdate with!");
 
     for (size_t i = 0; i < mLayers.size(); i++) {
         if (mLayers[i].get() == layer) {

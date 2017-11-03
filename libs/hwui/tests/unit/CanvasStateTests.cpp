@@ -21,14 +21,14 @@
 #include "hwui/Canvas.h"
 #include "utils/LinearAllocator.h"
 
-#include <gtest/gtest.h>
-#include <SkPath.h>
 #include <SkClipOp.h>
+#include <SkPath.h>
+#include <gtest/gtest.h>
 
 namespace android {
 namespace uirenderer {
 
-class NullClient: public CanvasStateClient {
+class NullClient : public CanvasStateClient {
     void onViewportInitialized() override {}
     void onSnapshotRestored(const Snapshot& removed, const Snapshot& restored) {}
     GLuint getTargetFbo() const override { return 0; }
@@ -47,8 +47,7 @@ static bool approxEqual(const Matrix4& a, const Matrix4& b) {
 
 TEST(CanvasState, gettersAndSetters) {
     CanvasState state(sNullClient);
-    state.initializeSaveStack(200, 200,
-            0, 0, 200, 200, Vector3());
+    state.initializeSaveStack(200, 200, 0, 0, 200, 200, Vector3());
 
     ASSERT_EQ(state.getWidth(), 200);
     ASSERT_EQ(state.getHeight(), 200);
@@ -65,8 +64,7 @@ TEST(CanvasState, gettersAndSetters) {
 
 TEST(CanvasState, simpleClipping) {
     CanvasState state(sNullClient);
-    state.initializeSaveStack(200, 200,
-            0, 0, 200, 200, Vector3());
+    state.initializeSaveStack(200, 200, 0, 0, 200, 200, Vector3());
 
     state.clipRect(0, 0, 100, 100, SkClipOp::kIntersect);
     ASSERT_EQ(state.getRenderTargetClipBounds(), Rect(100, 100));
@@ -80,8 +78,7 @@ TEST(CanvasState, simpleClipping) {
 
 TEST(CanvasState, complexClipping) {
     CanvasState state(sNullClient);
-    state.initializeSaveStack(200, 200,
-            0, 0, 200, 200, Vector3());
+    state.initializeSaveStack(200, 200, 0, 0, 200, 200, Vector3());
 
     state.save(SaveFlags::MatrixClip);
     {
@@ -116,8 +113,7 @@ TEST(CanvasState, complexClipping) {
 
 TEST(CanvasState, saveAndRestore) {
     CanvasState state(sNullClient);
-    state.initializeSaveStack(200, 200,
-            0, 0, 200, 200, Vector3());
+    state.initializeSaveStack(200, 200, 0, 0, 200, 200, Vector3());
 
     state.save(SaveFlags::Clip);
     {
@@ -125,7 +121,7 @@ TEST(CanvasState, saveAndRestore) {
         ASSERT_EQ(state.getRenderTargetClipBounds(), Rect(10, 10));
     }
     state.restore();
-    ASSERT_EQ(state.getRenderTargetClipBounds(), Rect(200, 200)); // verify restore
+    ASSERT_EQ(state.getRenderTargetClipBounds(), Rect(200, 200));  // verify restore
 
     Matrix4 simpleTranslate;
     simpleTranslate.loadTranslate(10, 10, 0);
@@ -140,27 +136,25 @@ TEST(CanvasState, saveAndRestore) {
 
 TEST(CanvasState, saveAndRestoreButNotTooMuch) {
     CanvasState state(sNullClient);
-    state.initializeSaveStack(200, 200,
-            0, 0, 200, 200, Vector3());
+    state.initializeSaveStack(200, 200, 0, 0, 200, 200, Vector3());
 
-    state.save(SaveFlags::Matrix); // NOTE: clip not saved
+    state.save(SaveFlags::Matrix);  // NOTE: clip not saved
     {
         state.clipRect(0, 0, 10, 10, SkClipOp::kIntersect);
         ASSERT_EQ(state.getRenderTargetClipBounds(), Rect(10, 10));
     }
     state.restore();
-    ASSERT_EQ(state.getRenderTargetClipBounds(), Rect(10, 10)); // verify not restored
+    ASSERT_EQ(state.getRenderTargetClipBounds(), Rect(10, 10));  // verify not restored
 
     Matrix4 simpleTranslate;
     simpleTranslate.loadTranslate(10, 10, 0);
-    state.save(SaveFlags::Clip); // NOTE: matrix not saved
+    state.save(SaveFlags::Clip);  // NOTE: matrix not saved
     {
         state.translate(10, 10, 0);
         EXPECT_TRUE(approxEqual(*state.currentTransform(), simpleTranslate));
     }
     state.restore();
-    EXPECT_TRUE(approxEqual(*state.currentTransform(), simpleTranslate)); // verify not restored
+    EXPECT_TRUE(approxEqual(*state.currentTransform(), simpleTranslate));  // verify not restored
 }
-
 }
 }

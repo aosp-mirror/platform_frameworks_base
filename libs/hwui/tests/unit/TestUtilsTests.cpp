@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#include "tests/common/TestUtils.h"
 #include "Properties.h"
+#include "tests/common/TestUtils.h"
 
 #include <gtest/gtest.h>
 

@@ -38,12 +38,12 @@ MeshState::MeshState()
     for (uint32_t i = 0; i < kMaxNumberOfQuads; i++) {
         uint16_t quad = i * 4;
         int index = i * 6;
-        regionIndices[index    ] = quad;       // top-left
-        regionIndices[index + 1] = quad + 1;   // top-right
-        regionIndices[index + 2] = quad + 2;   // bottom-left
-        regionIndices[index + 3] = quad + 2;   // bottom-left
-        regionIndices[index + 4] = quad + 1;   // top-right
-        regionIndices[index + 5] = quad + 3;   // bottom-right
+        regionIndices[index] = quad;          // top-left
+        regionIndices[index + 1] = quad + 1;  // top-right
+        regionIndices[index + 2] = quad + 2;  // bottom-left
+        regionIndices[index + 3] = quad + 2;  // bottom-left
+        regionIndices[index + 4] = quad + 1;  // top-right
+        regionIndices[index + 5] = quad + 3;  // bottom-right
     }
     glGenBuffers(1, &mQuadListIndices);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mQuadListIndices);
@@ -65,10 +65,10 @@ MeshState::~MeshState() {
 void MeshState::dump() {
     ALOGD("MeshState VBOs: unitQuad %d, current %d", mUnitQuadBuffer, mCurrentBuffer);
     ALOGD("MeshState IBOs: quadList %d, current %d", mQuadListIndices, mCurrentIndicesBuffer);
-    ALOGD("MeshState vertices: vertex data %p, stride %d",
-            mCurrentPositionPointer, mCurrentPositionStride);
-    ALOGD("MeshState texCoord: data %p, stride %d",
-            mCurrentTexCoordsPointer, mCurrentTexCoordsStride);
+    ALOGD("MeshState vertices: vertex data %p, stride %d", mCurrentPositionPointer,
+          mCurrentPositionStride);
+    ALOGD("MeshState texCoord: data %p, stride %d", mCurrentTexCoordsPointer,
+          mCurrentTexCoordsStride);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -89,8 +89,8 @@ void MeshState::unbindMeshBuffer() {
     return bindMeshBuffer(0);
 }
 
-void MeshState::genOrUpdateMeshBuffer(GLuint* buffer, GLsizeiptr size,
-        const void* data, GLenum usage) {
+void MeshState::genOrUpdateMeshBuffer(GLuint* buffer, GLsizeiptr size, const void* data,
+                                      GLenum usage) {
     if (!*buffer) {
         glGenBuffers(1, buffer);
     }
@@ -98,8 +98,8 @@ void MeshState::genOrUpdateMeshBuffer(GLuint* buffer, GLsizeiptr size,
     glBufferData(GL_ARRAY_BUFFER, size, data, usage);
 }
 
-void MeshState::updateMeshBufferSubData(GLuint buffer, GLintptr offset,
-        GLsizeiptr size, const void* data) {
+void MeshState::updateMeshBufferSubData(GLuint buffer, GLintptr offset, GLsizeiptr size,
+                                        const void* data) {
     bindMeshBuffer(buffer);
     glBufferSubData(GL_ARRAY_BUFFER, offset, size, data);
 }
@@ -119,9 +119,8 @@ void MeshState::deleteMeshBuffer(GLuint buffer) {
 
 void MeshState::bindPositionVertexPointer(const GLvoid* vertices, GLsizei stride) {
     // update pos coords if !current vbo, since vertices may point into mutable memory (e.g. stack)
-    if (mCurrentBuffer == 0
-            || vertices != mCurrentPositionPointer
-            || stride != mCurrentPositionStride) {
+    if (mCurrentBuffer == 0 || vertices != mCurrentPositionPointer ||
+        stride != mCurrentPositionStride) {
         glVertexAttribPointer(Program::kBindingPosition, 2, GL_FLOAT, GL_FALSE, stride, vertices);
         mCurrentPositionPointer = vertices;
         mCurrentPositionStride = stride;
@@ -130,9 +129,8 @@ void MeshState::bindPositionVertexPointer(const GLvoid* vertices, GLsizei stride
 
 void MeshState::bindTexCoordsVertexPointer(const GLvoid* vertices, GLsizei stride) {
     // update tex coords if !current vbo, since vertices may point into mutable memory (e.g. stack)
-    if (mCurrentBuffer == 0
-            || vertices != mCurrentTexCoordsPointer
-            || stride != mCurrentTexCoordsStride) {
+    if (mCurrentBuffer == 0 || vertices != mCurrentTexCoordsPointer ||
+        stride != mCurrentTexCoordsStride) {
         glVertexAttribPointer(Program::kBindingTexCoords, 2, GL_FLOAT, GL_FALSE, stride, vertices);
         mCurrentTexCoordsPointer = vertices;
         mCurrentTexCoordsStride = stride;
@@ -179,4 +177,3 @@ void MeshState::unbindIndicesBuffer() {
 
 } /* namespace uirenderer */
 } /* namespace android */
-

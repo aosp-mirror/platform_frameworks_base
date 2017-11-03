@@ -106,25 +106,23 @@ void JankTracker::setFrameInterval(nsecs_t frameInterval) {
     mThresholds[kSlowUI] = static_cast<int64_t>(.5 * frameInterval);
     mThresholds[kSlowSync] = static_cast<int64_t>(.2 * frameInterval);
     mThresholds[kSlowRT] = static_cast<int64_t>(.75 * frameInterval);
-
 }
 
 void JankTracker::finishFrame(const FrameInfo& frame) {
     // Fast-path for jank-free frames
     int64_t totalDuration = frame.duration(sFrameStart, FrameInfoIndex::FrameCompleted);
-    if (mDequeueTimeForgiveness
-            && frame[FrameInfoIndex::DequeueBufferDuration] > 500_us) {
-        nsecs_t expectedDequeueDuration =
-                mDequeueTimeForgiveness + frame[FrameInfoIndex::Vsync]
-                - frame[FrameInfoIndex::IssueDrawCommandsStart];
+    if (mDequeueTimeForgiveness && frame[FrameInfoIndex::DequeueBufferDuration] > 500_us) {
+        nsecs_t expectedDequeueDuration = mDequeueTimeForgiveness + frame[FrameInfoIndex::Vsync] -
+                                          frame[FrameInfoIndex::IssueDrawCommandsStart];
         if (expectedDequeueDuration > 0) {
             // Forgive only up to the expected amount, but not more than
             // the actual time spent blocked.
-            nsecs_t forgiveAmount = std::min(expectedDequeueDuration,
-                    frame[FrameInfoIndex::DequeueBufferDuration]);
+            nsecs_t forgiveAmount =
+                    std::min(expectedDequeueDuration, frame[FrameInfoIndex::DequeueBufferDuration]);
             LOG_ALWAYS_FATAL_IF(forgiveAmount >= totalDuration,
-                    "Impossible dequeue duration! dequeue duration reported %" PRId64
-                    ", total duration %" PRId64, forgiveAmount, totalDuration);
+                                "Impossible dequeue duration! dequeue duration reported %" PRId64
+                                ", total duration %" PRId64,
+                                forgiveAmount, totalDuration);
             totalDuration -= forgiveAmount;
         }
     }
@@ -148,13 +146,14 @@ void JankTracker::finishFrame(const FrameInfo& frame) {
     for (int i = 0; i < NUM_BUCKETS; i++) {
         int64_t delta = frame.duration(COMPARISONS[i].start, COMPARISONS[i].end);
         if (delta >= mThresholds[i] && delta < IGNORE_EXCEEDING) {
-            mData->reportJankType((JankType) i);
-            (*mGlobalData)->reportJankType((JankType) i);
+            mData->reportJankType((JankType)i);
+            (*mGlobalData)->reportJankType((JankType)i);
         }
     }
 }
 
-void JankTracker::dumpData(int fd, const ProfileDataDescription* description, const ProfileData* data) {
+void JankTracker::dumpData(int fd, const ProfileDataDescription* description,
+                           const ProfileData* data) {
     if (description) {
         switch (description->type) {
             case JankTrackerType::Generic:
@@ -199,9 +198,8 @@ void JankTracker::reset() {
     mFrames.clear();
     mData->reset();
     (*mGlobalData)->reset();
-    sFrameStart = Properties::filterOutTestOverhead
-            ? FrameInfoIndex::HandleInputStart
-            : FrameInfoIndex::IntendedVsync;
+    sFrameStart = Properties::filterOutTestOverhead ? FrameInfoIndex::HandleInputStart
+                                                    : FrameInfoIndex::IntendedVsync;
 }
 
 } /* namespace uirenderer */

@@ -29,21 +29,21 @@ namespace skiapipeline {
  * Draws a layer backed by an OpenGL texture into a SkCanvas.
  */
 class LayerDrawable : public SkDrawable {
- public:
-    explicit LayerDrawable(DeferredLayerUpdater* layerUpdater)
-            : mLayerUpdater(layerUpdater) {}
+public:
+    explicit LayerDrawable(DeferredLayerUpdater* layerUpdater) : mLayerUpdater(layerUpdater) {}
 
     static bool DrawLayer(GrContext* context, SkCanvas* canvas, Layer* layer);
- protected:
-     virtual SkRect onGetBounds() override {
-         return SkRect::MakeWH(mLayerUpdater->getWidth(), mLayerUpdater->getHeight());
-     }
-     virtual void onDraw(SkCanvas* canvas) override;
+
+protected:
+    virtual SkRect onGetBounds() override {
+        return SkRect::MakeWH(mLayerUpdater->getWidth(), mLayerUpdater->getHeight());
+    }
+    virtual void onDraw(SkCanvas* canvas) override;
 
 private:
     sp<DeferredLayerUpdater> mLayerUpdater;
 };
 
-}; // namespace skiapipeline
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace skiapipeline
+};  // namespace uirenderer
+};  // namespace android

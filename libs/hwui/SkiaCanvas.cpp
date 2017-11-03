@@ -26,9 +26,9 @@
 #include <SkCanvasStateUtils.h>
 #include <SkColorFilter.h>
 #include <SkColorSpaceXformCanvas.h>
-#include <SkDrawable.h>
 #include <SkDeque.h>
 #include <SkDrawFilter.h>
+#include <SkDrawable.h>
 #include <SkGraphics.h>
 #include <SkImage.h>
 #include <SkImagePriv.h>
@@ -60,8 +60,9 @@ SkiaCanvas::SkiaCanvas(const SkBitmap& bitmap) {
     mCanvasOwned =
             std::unique_ptr<SkCanvas>(new SkCanvas(bitmap, SkCanvas::ColorBehavior::kLegacy));
     if (cs.get() == nullptr || cs->isSRGB()) {
-        if(!uirenderer::Properties::isSkiaEnabled()) {
-            mCanvasWrapper = SkCreateColorSpaceXformCanvas(mCanvasOwned.get(), SkColorSpace::MakeSRGB());
+        if (!uirenderer::Properties::isSkiaEnabled()) {
+            mCanvasWrapper =
+                    SkCreateColorSpaceXformCanvas(mCanvasOwned.get(), SkColorSpace::MakeSRGB());
             mCanvas = mCanvasWrapper.get();
         } else {
             mCanvas = mCanvasOwned.get();
@@ -98,8 +99,7 @@ void SkiaCanvas::setBitmap(const SkBitmap& bitmap) {
     std::unique_ptr<SkCanvas> newCanvasWrapper;
     if (cs.get() != nullptr && !cs->isSRGB()) {
         newCanvasWrapper = SkCreateColorSpaceXformCanvas(newCanvas.get(), std::move(cs));
-    }
-    else if(!uirenderer::Properties::isSkiaEnabled()) {
+    } else if (!uirenderer::Properties::isSkiaEnabled()) {
         newCanvasWrapper = SkCreateColorSpaceXformCanvas(newCanvas.get(), SkColorSpace::MakeSRGB());
     }
 
@@ -155,7 +155,7 @@ void SkiaCanvas::restore() {
     }
 
     bool preserveMatrix = !(rec->saveFlags & SaveFlags::Matrix);
-    bool preserveClip   = !(rec->saveFlags & SaveFlags::Clip);
+    bool preserveClip = !(rec->saveFlags & SaveFlags::Clip);
 
     SkMatrix savedMatrix;
     if (preserveMatrix) {
@@ -197,16 +197,16 @@ static inline SkCanvas::SaveLayerFlags layerFlags(SaveFlags::Flags flags) {
     return layerFlags;
 }
 
-int SkiaCanvas::saveLayer(float left, float top, float right, float bottom,
-            const SkPaint* paint, SaveFlags::Flags flags) {
+int SkiaCanvas::saveLayer(float left, float top, float right, float bottom, const SkPaint* paint,
+                          SaveFlags::Flags flags) {
     const SkRect bounds = SkRect::MakeLTRB(left, top, right, bottom);
     const SkCanvas::SaveLayerRec rec(&bounds, paint, layerFlags(flags));
 
     return mCanvas->saveLayer(rec);
 }
 
-int SkiaCanvas::saveLayerAlpha(float left, float top, float right, float bottom,
-        int alpha, SaveFlags::Flags flags) {
+int SkiaCanvas::saveLayerAlpha(float left, float top, float right, float bottom, int alpha,
+                               SaveFlags::Flags flags) {
     if (static_cast<unsigned>(alpha) < 0xFF) {
         SkPaint alphaPaint;
         alphaPaint.setAlpha(alpha);
@@ -218,24 +218,24 @@ int SkiaCanvas::saveLayerAlpha(float left, float top, float right, float bottom,
 class SkiaCanvas::Clip {
 public:
     Clip(const SkRect& rect, SkClipOp op, const SkMatrix& m)
-        : mType(Type::Rect), mOp(op), mMatrix(m), mRRect(SkRRect::MakeRect(rect)) {}
+            : mType(Type::Rect), mOp(op), mMatrix(m), mRRect(SkRRect::MakeRect(rect)) {}
     Clip(const SkRRect& rrect, SkClipOp op, const SkMatrix& m)
-        : mType(Type::RRect), mOp(op), mMatrix(m), mRRect(rrect) {}
+            : mType(Type::RRect), mOp(op), mMatrix(m), mRRect(rrect) {}
     Clip(const SkPath& path, SkClipOp op, const SkMatrix& m)
-        : mType(Type::Path), mOp(op), mMatrix(m), mPath(&path) {}
+            : mType(Type::Path), mOp(op), mMatrix(m), mPath(&path) {}
 
     void apply(SkCanvas* canvas) const {
         canvas->setMatrix(mMatrix);
         switch (mType) {
-        case Type::Rect:
-            canvas->clipRect(mRRect.rect(), mOp);
-            break;
-        case Type::RRect:
-            canvas->clipRRect(mRRect, mOp);
-            break;
-        case Type::Path:
-            canvas->clipPath(*mPath.get(), mOp);
-            break;
+            case Type::Rect:
+                canvas->clipRect(mRRect.rect(), mOp);
+                break;
+            case Type::RRect:
+                canvas->clipRRect(mRRect, mOp);
+                break;
+            case Type::Path:
+                canvas->clipPath(*mPath.get(), mOp);
+                break;
         }
     }
 
@@ -246,19 +246,17 @@ private:
         Path,
     };
 
-    Type        mType;
-    SkClipOp    mOp;
-    SkMatrix    mMatrix;
+    Type mType;
+    SkClipOp mOp;
+    SkMatrix mMatrix;
 
     // These are logically a union (tracked separately due to non-POD path).
     SkTLazy<SkPath> mPath;
-    SkRRect         mRRect;
+    SkRRect mRRect;
 };
 
 const SkiaCanvas::SaveRec* SkiaCanvas::currentSaveRec() const {
-    const SaveRec* rec = mSaveStack
-        ? static_cast<const SaveRec*>(mSaveStack->back())
-        : nullptr;
+    const SaveRec* rec = mSaveStack ? static_cast<const SaveRec*>(mSaveStack->back()) : nullptr;
     int currentSaveCount = mCanvas->getSaveCount();
     SkASSERT(!rec || currentSaveCount >= rec->saveCount);
 
@@ -436,10 +434,9 @@ SkCanvasState* SkiaCanvas::captureCanvasState() const {
     // translate & scale transforms, and a simple rectangular clip.
     // (This also avoids significant wasted time in calling
     // SkCanvasStateUtils::CaptureCanvasState when the clip is complex).
-    if (!canvas->isClipRect() ||
-        (canvas->getTotalMatrix().getType() &
-                  ~(SkMatrix::kTranslate_Mask | SkMatrix::kScale_Mask))) {
-      return nullptr;
+    if (!canvas->isClipRect() || (canvas->getTotalMatrix().getType() &
+                                  ~(SkMatrix::kTranslate_Mask | SkMatrix::kScale_Mask))) {
+        return nullptr;
     }
 
     return SkCanvasStateUtils::CaptureCanvasState(canvas);
@@ -465,7 +462,7 @@ void SkiaCanvas::drawPoints(const float* points, int count, const SkPaint& paint
                             SkCanvas::PointMode mode) {
     if (CC_UNLIKELY(count < 2 || paint.nothingToDraw())) return;
     // convert the floats into SkPoints
-    count >>= 1;    // now it is the number of points
+    count >>= 1;  // now it is the number of points
     std::unique_ptr<SkPoint[]> pts(new SkPoint[count]);
     for (int i = 0; i < count; i++) {
         pts[i].set(points[0], points[1]);
@@ -473,7 +470,6 @@ void SkiaCanvas::drawPoints(const float* points, int count, const SkPaint& paint
     }
     mCanvas->drawPoints(mode, count, pts.get(), paint);
 }
-
 
 void SkiaCanvas::drawPoint(float x, float y, const SkPaint& paint) {
     mCanvas->drawPoint(x, y, paint);
@@ -493,11 +489,9 @@ void SkiaCanvas::drawLines(const float* points, int count, const SkPaint& paint)
     this->drawPoints(points, count, paint, SkCanvas::kLines_PointMode);
 }
 
-void SkiaCanvas::drawRect(float left, float top, float right, float bottom,
-        const SkPaint& paint) {
+void SkiaCanvas::drawRect(float left, float top, float right, float bottom, const SkPaint& paint) {
     if (CC_UNLIKELY(paint.nothingToDraw())) return;
     mCanvas->drawRect({left, top, right, bottom}, paint);
-
 }
 
 void SkiaCanvas::drawRegion(const SkRegion& region, const SkPaint& paint) {
@@ -505,8 +499,8 @@ void SkiaCanvas::drawRegion(const SkRegion& region, const SkPaint& paint) {
     mCanvas->drawRegion(region, paint);
 }
 
-void SkiaCanvas::drawRoundRect(float left, float top, float right, float bottom,
-        float rx, float ry, const SkPaint& paint) {
+void SkiaCanvas::drawRoundRect(float left, float top, float right, float bottom, float rx, float ry,
+                               const SkPaint& paint) {
     if (CC_UNLIKELY(paint.nothingToDraw())) return;
     SkRect rect = SkRect::MakeLTRB(left, top, right, bottom);
     mCanvas->drawRoundRect(rect, rx, ry, paint);
@@ -523,8 +517,8 @@ void SkiaCanvas::drawOval(float left, float top, float right, float bottom, cons
     mCanvas->drawOval(oval, paint);
 }
 
-void SkiaCanvas::drawArc(float left, float top, float right, float bottom,
-        float startAngle, float sweepAngle, bool useCenter, const SkPaint& paint) {
+void SkiaCanvas::drawArc(float left, float top, float right, float bottom, float startAngle,
+                         float sweepAngle, bool useCenter, const SkPaint& paint) {
     if (CC_UNLIKELY(paint.nothingToDraw())) return;
     SkRect arc = SkRect::MakeLTRB(left, top, right, bottom);
     mCanvas->drawArc(arc, startAngle, sweepAngle, useCenter, paint);
@@ -547,7 +541,7 @@ void SkiaCanvas::drawVertices(const SkVertices* vertices, SkBlendMode mode, cons
 // ----------------------------------------------------------------------------
 
 const SkPaint* SkiaCanvas::addFilter(const SkPaint* origPaint, SkPaint* tmpPaint,
-        sk_sp<SkColorFilter> colorSpaceFilter) {
+                                     sk_sp<SkColorFilter> colorSpaceFilter) {
     /* We don't apply the colorSpace filter if this canvas is already wrapped with
      * a SkColorSpaceXformCanvas since it already takes care of converting the
      * contents of the bitmap into the appropriate colorspace.  The mCanvasWrapper
@@ -560,8 +554,8 @@ const SkPaint* SkiaCanvas::addFilter(const SkPaint* origPaint, SkPaint* tmpPaint
         }
 
         if (tmpPaint->getColorFilter()) {
-            tmpPaint->setColorFilter(SkColorFilter::MakeComposeFilter(
-                    tmpPaint->refColorFilter(), colorSpaceFilter));
+            tmpPaint->setColorFilter(
+                    SkColorFilter::MakeComposeFilter(tmpPaint->refColorFilter(), colorSpaceFilter));
             LOG_ALWAYS_FATAL_IF(!tmpPaint->getColorFilter());
         } else {
             tmpPaint->setColorFilter(colorSpaceFilter);
@@ -590,9 +584,9 @@ void SkiaCanvas::drawBitmap(Bitmap& bitmap, const SkMatrix& matrix, const SkPain
     mCanvas->drawImage(image, 0, 0, addFilter(paint, &tmpPaint, colorFilter));
 }
 
-void SkiaCanvas::drawBitmap(Bitmap& bitmap, float srcLeft, float srcTop,
-                            float srcRight, float srcBottom, float dstLeft, float dstTop,
-                            float dstRight, float dstBottom, const SkPaint* paint) {
+void SkiaCanvas::drawBitmap(Bitmap& bitmap, float srcLeft, float srcTop, float srcRight,
+                            float srcBottom, float dstLeft, float dstTop, float dstRight,
+                            float dstBottom, const SkPaint* paint) {
     SkRect srcRect = SkRect::MakeLTRB(srcLeft, srcTop, srcRight, srcBottom);
     SkRect dstRect = SkRect::MakeLTRB(dstLeft, dstTop, dstRight, dstBottom);
 
@@ -600,11 +594,11 @@ void SkiaCanvas::drawBitmap(Bitmap& bitmap, float srcLeft, float srcTop,
     sk_sp<SkColorFilter> colorFilter;
     sk_sp<SkImage> image = bitmap.makeImage(&colorFilter);
     mCanvas->drawImageRect(image, srcRect, dstRect, addFilter(paint, &tmpPaint, colorFilter),
-            SkCanvas::kFast_SrcRectConstraint);
+                           SkCanvas::kFast_SrcRectConstraint);
 }
 
 void SkiaCanvas::drawBitmapMesh(Bitmap& bitmap, int meshWidth, int meshHeight,
-        const float* vertices, const int* colors, const SkPaint* paint) {
+                                const float* vertices, const int* colors, const SkPaint* paint) {
     const int ptCount = (meshWidth + 1) * (meshHeight + 1);
     const int indexCount = meshWidth * meshHeight * 6;
     uint32_t flags = SkVertices::kHasTexCoords_BuilderFlag;
@@ -668,7 +662,7 @@ void SkiaCanvas::drawBitmapMesh(Bitmap& bitmap, int meshWidth, int meshHeight,
         SkASSERT(indexPtr - indices == indexCount);
     }
 
-    // double-check that we have legal indices
+// double-check that we have legal indices
 #ifdef SK_DEBUG
     {
         for (int i = 0; i < indexCount; i++) {
@@ -685,8 +679,9 @@ void SkiaCanvas::drawBitmapMesh(Bitmap& bitmap, int meshWidth, int meshHeight,
 
     sk_sp<SkColorFilter> colorFilter;
     sk_sp<SkImage> image = bitmap.makeImage(&colorFilter);
-    sk_sp<SkShader> shader = image->makeShader(SkShader::kClamp_TileMode, SkShader::kClamp_TileMode);
-    if(colorFilter) {
+    sk_sp<SkShader> shader =
+            image->makeShader(SkShader::kClamp_TileMode, SkShader::kClamp_TileMode);
+    if (colorFilter) {
         shader = shader->makeWithColorFilter(colorFilter);
     }
     tmpPaint.setShader(shader);
@@ -694,9 +689,9 @@ void SkiaCanvas::drawBitmapMesh(Bitmap& bitmap, int meshWidth, int meshHeight,
     mCanvas->drawVertices(builder.detach(), SkBlendMode::kModulate, tmpPaint);
 }
 
-void SkiaCanvas::drawNinePatch(Bitmap& bitmap, const Res_png_9patch& chunk,
-        float dstLeft, float dstTop, float dstRight, float dstBottom, const SkPaint* paint) {
-
+void SkiaCanvas::drawNinePatch(Bitmap& bitmap, const Res_png_9patch& chunk, float dstLeft,
+                               float dstTop, float dstRight, float dstBottom,
+                               const SkPaint* paint) {
     SkCanvas::Lattice lattice;
     NinePatchUtils::SetLatticeDivs(&lattice, chunk, bitmap.width(), bitmap.height());
 
@@ -731,8 +726,8 @@ void SkiaCanvas::drawVectorDrawable(VectorDrawableRoot* vectorDrawable) {
 // ----------------------------------------------------------------------------
 
 void SkiaCanvas::drawGlyphs(ReadGlyphFunc glyphFunc, int count, const SkPaint& paint, float x,
-        float y, float boundsLeft, float boundsTop, float boundsRight, float boundsBottom,
-        float totalAdvance) {
+                            float y, float boundsLeft, float boundsTop, float boundsRight,
+                            float boundsBottom, float totalAdvance) {
     if (count <= 0 || paint.nothingToDraw()) return;
     // Set align to left for drawing, as we don't want individual
     // glyphs centered or right-aligned; the offset above takes
@@ -740,8 +735,8 @@ void SkiaCanvas::drawGlyphs(ReadGlyphFunc glyphFunc, int count, const SkPaint& p
     SkPaint paintCopy(paint);
     paintCopy.setTextAlign(SkPaint::kLeft_Align);
 
-    SkRect bounds = SkRect::MakeLTRB(boundsLeft + x, boundsTop + y,
-                                     boundsRight + x, boundsBottom + y);
+    SkRect bounds =
+            SkRect::MakeLTRB(boundsLeft + x, boundsTop + y, boundsRight + x, boundsBottom + y);
 
     SkTextBlobBuilder builder;
     const SkTextBlobBuilder::RunBuffer& buffer = builder.allocRunPos(paintCopy, count, &bounds);
@@ -753,7 +748,8 @@ void SkiaCanvas::drawGlyphs(ReadGlyphFunc glyphFunc, int count, const SkPaint& p
 }
 
 void SkiaCanvas::drawLayoutOnPath(const minikin::Layout& layout, float hOffset, float vOffset,
-        const SkPaint& paint, const SkPath& path, size_t start, size_t end) {
+                                  const SkPaint& paint, const SkPath& path, size_t start,
+                                  size_t end) {
     const int N = end - start;
     SkAutoSTMalloc<1024, uint8_t> storage(N * (sizeof(uint16_t) + sizeof(SkRSXform)));
     SkRSXform* xform = (SkRSXform*)storage.get();
@@ -773,8 +769,8 @@ void SkiaCanvas::drawLayoutOnPath(const minikin::Layout& layout, float hOffset, 
         }
         xform[i - start].fSCos = tan.x();
         xform[i - start].fSSin = tan.y();
-        xform[i - start].fTx   = pos.x() - tan.y() * y;
-        xform[i - start].fTy   = pos.y() + tan.x() * y;
+        xform[i - start].fTx = pos.x() - tan.y() * y;
+        xform[i - start].fTy = pos.y() + tan.x() * y;
     }
 
     this->asSkCanvas()->drawTextRSXform(glyphs, sizeof(uint16_t) * N, xform, nullptr, paint);
@@ -785,17 +781,24 @@ void SkiaCanvas::drawLayoutOnPath(const minikin::Layout& layout, float hOffset, 
 // ----------------------------------------------------------------------------
 
 void SkiaCanvas::drawRoundRect(uirenderer::CanvasPropertyPrimitive* left,
-        uirenderer::CanvasPropertyPrimitive* top, uirenderer::CanvasPropertyPrimitive* right,
-        uirenderer::CanvasPropertyPrimitive* bottom, uirenderer::CanvasPropertyPrimitive* rx,
-        uirenderer::CanvasPropertyPrimitive* ry, uirenderer::CanvasPropertyPaint* paint) {
+                               uirenderer::CanvasPropertyPrimitive* top,
+                               uirenderer::CanvasPropertyPrimitive* right,
+                               uirenderer::CanvasPropertyPrimitive* bottom,
+                               uirenderer::CanvasPropertyPrimitive* rx,
+                               uirenderer::CanvasPropertyPrimitive* ry,
+                               uirenderer::CanvasPropertyPaint* paint) {
     sk_sp<uirenderer::skiapipeline::AnimatedRoundRect> drawable(
-            new uirenderer::skiapipeline::AnimatedRoundRect(left, top, right, bottom, rx, ry, paint));
+            new uirenderer::skiapipeline::AnimatedRoundRect(left, top, right, bottom, rx, ry,
+                                                            paint));
     mCanvas->drawDrawable(drawable.get());
 }
 
-void SkiaCanvas::drawCircle(uirenderer::CanvasPropertyPrimitive* x, uirenderer::CanvasPropertyPrimitive* y,
-        uirenderer::CanvasPropertyPrimitive* radius, uirenderer::CanvasPropertyPaint* paint) {
-    sk_sp<uirenderer::skiapipeline::AnimatedCircle> drawable(new uirenderer::skiapipeline::AnimatedCircle(x, y, radius, paint));
+void SkiaCanvas::drawCircle(uirenderer::CanvasPropertyPrimitive* x,
+                            uirenderer::CanvasPropertyPrimitive* y,
+                            uirenderer::CanvasPropertyPrimitive* radius,
+                            uirenderer::CanvasPropertyPaint* paint) {
+    sk_sp<uirenderer::skiapipeline::AnimatedCircle> drawable(
+            new uirenderer::skiapipeline::AnimatedCircle(x, y, radius, paint));
     mCanvas->drawDrawable(drawable.get());
 }
 
@@ -812,8 +815,8 @@ void SkiaCanvas::drawRenderNode(uirenderer::RenderNode* renderNode) {
 }
 
 void SkiaCanvas::callDrawGLFunction(Functor* functor,
-        uirenderer::GlFunctorLifecycleListener* listener) {
+                                    uirenderer::GlFunctorLifecycleListener* listener) {
     LOG_ALWAYS_FATAL("SkiaCanvas can't directly draw GL Content");
 }
 
-} // namespace android
+}  // namespace android

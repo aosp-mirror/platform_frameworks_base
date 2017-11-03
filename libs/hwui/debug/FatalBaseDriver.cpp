@@ -25,9 +25,9 @@ namespace debug {
 // Generate the proxy
 #define API_ENTRY(x) FatalBaseDriver::x##_
 #define CALL_GL_API(x, ...) LOG_ALWAYS_FATAL("Not Implemented");
-#define CALL_GL_API_RETURN(x, ...) \
-        LOG_ALWAYS_FATAL("Not Implemented"); \
-        return static_cast<decltype(x(__VA_ARGS__))>(0);
+#define CALL_GL_API_RETURN(x, ...)       \
+    LOG_ALWAYS_FATAL("Not Implemented"); \
+    return static_cast<decltype(x(__VA_ARGS__))>(0);
 
 #include "gles_stubs.in"
 
@@ -35,6 +35,6 @@ namespace debug {
 #undef CALL_GL_API
 #undef CALL_GL_API_RETURN
 
-} // namespace debug
-} // namespace uirenderer
-} // namespace android
+}  // namespace debug
+}  // namespace uirenderer
+}  // namespace android

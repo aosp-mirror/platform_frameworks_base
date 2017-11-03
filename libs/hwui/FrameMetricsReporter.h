@@ -16,8 +16,8 @@
 
 #pragma once
 
-#include <utils/RefBase.h>
 #include <utils/Log.h>
+#include <utils/RefBase.h>
 
 #include "FrameInfo.h"
 #include "FrameMetricsObserver.h"
@@ -32,9 +32,7 @@ class FrameMetricsReporter {
 public:
     FrameMetricsReporter() {}
 
-    void addObserver(FrameMetricsObserver* observer) {
-        mObservers.push_back(observer);
-    }
+    void addObserver(FrameMetricsObserver* observer) { mObservers.push_back(observer); }
 
     bool removeObserver(FrameMetricsObserver* observer) {
         for (size_t i = 0; i < mObservers.size(); i++) {
@@ -46,9 +44,7 @@ public:
         return false;
     }
 
-    bool hasObservers() {
-        return mObservers.size() > 0;
-    }
+    bool hasObservers() { return mObservers.size() > 0; }
 
     void reportFrameMetrics(const int64_t* stats) {
         for (size_t i = 0; i < mObservers.size(); i++) {
@@ -57,9 +53,8 @@ public:
     }
 
 private:
-    std::vector< sp<FrameMetricsObserver> > mObservers;
+    std::vector<sp<FrameMetricsObserver> > mObservers;
 };
 
-}; // namespace uirenderer
-}; // namespace android
-
+};  // namespace uirenderer
+};  // namespace android

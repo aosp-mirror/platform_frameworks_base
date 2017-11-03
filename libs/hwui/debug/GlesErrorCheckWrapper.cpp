@@ -29,38 +29,39 @@ void GlesErrorCheckWrapper::assertNoErrors(const char* apicall) {
     while ((status = mBase.glGetError_()) != GL_NO_ERROR) {
         lastError = status;
         switch (status) {
-        case GL_INVALID_ENUM:
-            ALOGE("GL error:  GL_INVALID_ENUM");
-            lastErrorName = "GL_INVALID_ENUM";
-            break;
-        case GL_INVALID_VALUE:
-            ALOGE("GL error:  GL_INVALID_VALUE");
-            lastErrorName = "GL_INVALID_VALUE";
-            break;
-        case GL_INVALID_OPERATION:
-            ALOGE("GL error:  GL_INVALID_OPERATION");
-            lastErrorName = "GL_INVALID_OPERATION";
-            break;
-        case GL_OUT_OF_MEMORY:
-            ALOGE("GL error:  Out of memory!");
-            lastErrorName = "GL_OUT_OF_MEMORY";
-            break;
-        default:
-            ALOGE("GL error: 0x%x", status);
-            lastErrorName = "UNKNOWN";
+            case GL_INVALID_ENUM:
+                ALOGE("GL error:  GL_INVALID_ENUM");
+                lastErrorName = "GL_INVALID_ENUM";
+                break;
+            case GL_INVALID_VALUE:
+                ALOGE("GL error:  GL_INVALID_VALUE");
+                lastErrorName = "GL_INVALID_VALUE";
+                break;
+            case GL_INVALID_OPERATION:
+                ALOGE("GL error:  GL_INVALID_OPERATION");
+                lastErrorName = "GL_INVALID_OPERATION";
+                break;
+            case GL_OUT_OF_MEMORY:
+                ALOGE("GL error:  Out of memory!");
+                lastErrorName = "GL_OUT_OF_MEMORY";
+                break;
+            default:
+                ALOGE("GL error: 0x%x", status);
+                lastErrorName = "UNKNOWN";
         }
     }
-    LOG_ALWAYS_FATAL_IF(lastError != GL_NO_ERROR,
-            "%s error! %s (0x%x)", apicall, lastErrorName, lastError);
+    LOG_ALWAYS_FATAL_IF(lastError != GL_NO_ERROR, "%s error! %s (0x%x)", apicall, lastErrorName,
+                        lastError);
 }
 
 #define API_ENTRY(x) GlesErrorCheckWrapper::x##_
-#define CALL_GL_API(x, ...) \
-    mBase.x##_(__VA_ARGS__); assertNoErrors(#x)
+#define CALL_GL_API(x, ...)  \
+    mBase.x##_(__VA_ARGS__); \
+    assertNoErrors(#x)
 
-#define CALL_GL_API_RETURN(x, ...) \
+#define CALL_GL_API_RETURN(x, ...)      \
     auto ret = mBase.x##_(__VA_ARGS__); \
-    assertNoErrors(#x); \
+    assertNoErrors(#x);                 \
     return ret
 
 #include "gles_stubs.in"
@@ -69,6 +70,6 @@ void GlesErrorCheckWrapper::assertNoErrors(const char* apicall) {
 #undef CALL_GL_API
 #undef CALL_GL_API_RETURN
 
-} // namespace debug
-} // namespace uirenderer
-} // namespace android
+}  // namespace debug
+}  // namespace uirenderer
+}  // namespace android
