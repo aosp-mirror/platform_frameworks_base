@@ -172,6 +172,7 @@ std::unique_ptr<std::vector<uint8_t>> ValueMetricProducer::onDumpReport() {
 }
 
 void ValueMetricProducer::onConditionChanged(const bool condition, const uint64_t eventTime) {
+    AutoMutex _l(mLock);
     mCondition = condition;
 
     if (mPullTagId != -1) {
@@ -187,7 +188,6 @@ void ValueMetricProducer::onConditionChanged(const bool condition, const uint64_
             if (allData.size() == 0) {
                 return;
             }
-            AutoMutex _l(mLock);
             for (const auto& data : allData) {
                 onMatchedLogEvent(0, *data, false);
             }
@@ -198,8 +198,8 @@ void ValueMetricProducer::onConditionChanged(const bool condition, const uint64_
 }
 
 void ValueMetricProducer::onDataPulled(const std::vector<std::shared_ptr<LogEvent>>& allData) {
+    AutoMutex _l(mLock);
     if (mCondition == ConditionState::kTrue || !mMetric.has_condition()) {
-        AutoMutex _l(mLock);
         if (allData.size() == 0) {
             return;
         }

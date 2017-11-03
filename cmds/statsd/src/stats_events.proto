@@ -86,6 +86,7 @@ message StatsEvent {
         PowerStatePlatformSleepStatePulled power_state_platform_sleep_state_pulled = 1005;
         PowerStateVoterPulled power_state_voter_pulled = 1006;
         PowerStateSubsystemSleepStatePulled power_state_subsystem_sleep_state_pulled = 1007;
+        CpuTimePerFreqPulled cpu_time_per_freq_pulled = 1008;
     }
 }
 
@@ -849,6 +850,7 @@ message PowerStateSubsystemSleepStatePulled {
 }
 
 /**
+<<<<<<< HEAD
  * Logs creation or removal of an isolated uid. Isolated uid's are temporary uid's to sandbox risky
  * behavior in its own uid. However, the metrics of these isolated uid's almost always should be
  * attributed back to the parent (host) uid. One example is Chrome.
@@ -865,4 +867,21 @@ message IsolatedUidChanged {
     // 1 denotes we're creating an isolated uid and 0 denotes removal. We expect an isolated uid to
     // be removed before if it's used for another parent uid.
     optional int32 is_create = 3;
+}
+
+/*
+ * Pulls Cpu time per frequency.
+ * Note: this should be pulled for gauge metric only, without condition.
+ * The puller keeps internal state of last values. It should not be pulled by
+ * different metrics.
+ * The pulled data is delta of cpu time from last pull, calculated as
+ * following:
+ * if current time is larger than last value, take delta between the two.
+ * if current time is smaller than last value, there must be a cpu
+ * hotplug event, and the current time is taken as delta.
+ */
+message CpuTimePerFreqPulled {
+    optional uint32 cluster = 1;
+    optional uint32 freq_index = 2;
+    optional uint64 time = 3;
 }
