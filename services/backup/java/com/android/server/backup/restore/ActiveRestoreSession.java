@@ -158,16 +158,19 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
                             MSG_RESTORE_SESSION_TIMEOUT);
 
                     long oldId = Binder.clearCallingIdentity();
-                    backupManagerService.getWakelock().acquire();
-                    if (MORE_DEBUG) {
-                        Slog.d(TAG, "restoreAll() kicking off");
+                    try {
+                        backupManagerService.getWakelock().acquire();
+                        if (MORE_DEBUG) {
+                            Slog.d(TAG, "restoreAll() kicking off");
+                        }
+                        Message msg = backupManagerService.getBackupHandler().obtainMessage(
+                                MSG_RUN_RESTORE);
+                        msg.obj = new RestoreParams(mRestoreTransport, dirName,
+                                observer, monitor, token);
+                        backupManagerService.getBackupHandler().sendMessage(msg);
+                    } finally {
+                        Binder.restoreCallingIdentity(oldId);
                     }
-                    Message msg = backupManagerService.getBackupHandler().obtainMessage(
-                            MSG_RUN_RESTORE);
-                    msg.obj = new RestoreParams(mRestoreTransport, dirName,
-                            observer, monitor, token);
-                    backupManagerService.getBackupHandler().sendMessage(msg);
-                    Binder.restoreCallingIdentity(oldId);
                     return 0;
                 }
             }
