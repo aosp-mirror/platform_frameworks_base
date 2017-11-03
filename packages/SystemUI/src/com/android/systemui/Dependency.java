@@ -308,6 +308,8 @@ public class Dependency extends SystemUI {
 
         mProviders.put(IWindowManager.class, () -> WindowManagerGlobal.getWindowManagerService());
 
+        mProviders.put(OverviewProxyService.class, () -> new OverviewProxyService(mContext));
+
         // Put all dependencies above here so the factory can override them if it wants.
         SystemUIFactory.getInstance().injectDependencies(mProviders, mContext);
     }
