@@ -210,11 +210,15 @@ public class SliceView extends ViewGroup {
         validate(sliceUri);
         Slice s = Slice.bindSlice(mContext.getContentResolver(), sliceUri);
         if (s != null) {
+            if (mObserver != null) {
+                getContext().getContentResolver().unregisterContentObserver(mObserver);
+            }
             mObserver = new SliceObserver(new Handler(Looper.getMainLooper()));
             if (isAttachedToWindow()) {
                 registerSlice(sliceUri);
             }
-            showSlice(s);
+            mCurrentSlice = s;
+            reinflate();
         }
         return s != null;
     }
