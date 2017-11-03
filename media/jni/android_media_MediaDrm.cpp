@@ -282,7 +282,7 @@ static bool throwExceptionAsNecessary(
         drmMessage = "Decrypt error";
         break;
     case ERROR_DRM_CANNOT_HANDLE:
-        drmMessage = "Unsupported scheme or data format";
+        drmMessage = "Invalid parameter or data format";
         break;
     case ERROR_DRM_TAMPER_DETECTED:
         drmMessage = "Invalid state";
@@ -297,7 +297,7 @@ static bool throwExceptionAsNecessary(
         drmMessage = vendorMessage.string();
     }
 
-    if (err == BAD_VALUE) {
+    if (err == BAD_VALUE || err == ERROR_DRM_CANNOT_HANDLE) {
         jniThrowException(env, "java/lang/IllegalArgumentException", msg);
         return true;
     } else if (err == ERROR_DRM_NOT_PROVISIONED) {
