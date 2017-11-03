@@ -16,8 +16,6 @@
 
 package android.app;
 
-import static android.os.Build.VERSION_CODES.O_MR1;
-
 import static java.lang.Character.MIN_VALUE;
 
 import android.annotation.CallSuper;
@@ -990,18 +988,6 @@ public class Activity extends ContextThemeWrapper
     @CallSuper
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         if (DEBUG_LIFECYCLE) Slog.v(TAG, "onCreate " + this + ": " + savedInstanceState);
-
-        if (getApplicationInfo().targetSdkVersion >= O_MR1 && mActivityInfo.isFixedOrientation()) {
-            final TypedArray ta = obtainStyledAttributes(com.android.internal.R.styleable.Window);
-            final boolean isTranslucentOrFloating = ActivityInfo.isTranslucentOrFloating(ta);
-            ta.recycle();
-
-            if (isTranslucentOrFloating) {
-                throw new IllegalStateException(
-                        "Only fullscreen opaque activities can request orientation");
-            }
-        }
-
         if (mLastNonConfigurationInstances != null) {
             mFragments.restoreLoaderNonConfig(mLastNonConfigurationInstances.loaders);
         }
