@@ -23,21 +23,44 @@ import static android.net.ConnectivityManager.TYPE_MOBILE_FOTA;
 import static android.net.ConnectivityManager.TYPE_MOBILE_MMS;
 import static android.net.ConnectivityManager.TYPE_NONE;
 import static android.net.ConnectivityManager.TYPE_WIFI;
-import static android.net.ConnectivityManager.getNetworkTypeName;
-import static android.net.NetworkCapabilities.*;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_CAPTIVE_PORTAL;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_CBS;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_DUN;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_EIMS;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_FOREGROUND;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_FOTA;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_IA;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_IMS;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_MMS;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_METERED;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_VPN;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_RCS;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_SUPL;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_TRUSTED;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_WIFI_P2P;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_XCAP;
+import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
+import static android.net.NetworkCapabilities.TRANSPORT_ETHERNET;
+import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
+import static android.net.NetworkCapabilities.TRANSPORT_WIFI_AWARE;
+
+import static com.android.internal.util.TestUtils.waitForIdleHandler;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static com.android.internal.util.TestUtils.waitForIdleHandler;
-import static org.mockito.Mockito.anyBoolean;
-import static org.mockito.Mockito.anyInt;
-import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.NotificationManager;
@@ -45,7 +68,6 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
@@ -64,7 +86,6 @@ import android.net.MatchAllNetworkSpecifier;
 import android.net.Network;
 import android.net.NetworkAgent;
 import android.net.NetworkCapabilities;
-import android.net.NetworkConfig;
 import android.net.NetworkFactory;
 import android.net.NetworkInfo;
 import android.net.NetworkInfo.DetailedState;
@@ -79,13 +100,9 @@ import android.net.util.MultinetworkPolicyTracker;
 import android.os.ConditionVariable;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.os.IBinder;
 import android.os.INetworkManagementService;
 import android.os.Looper;
 import android.os.Message;
-import android.os.MessageQueue;
-import android.os.Messenger;
-import android.os.MessageQueue.IdleHandler;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.Process;
@@ -96,10 +113,8 @@ import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.mock.MockContentResolver;
-import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Log;
-import android.util.LogPrinter;
 
 import com.android.internal.util.WakeupMessage;
 import com.android.internal.util.test.BroadcastInterceptingContext;
@@ -109,7 +124,6 @@ import com.android.server.connectivity.IpConnectivityMetrics;
 import com.android.server.connectivity.MockableSystemProperties;
 import com.android.server.connectivity.NetworkAgentInfo;
 import com.android.server.connectivity.NetworkMonitor;
-import com.android.server.connectivity.NetworkMonitor.CaptivePortalProbeResult;
 import com.android.server.net.NetworkPinner;
 import com.android.server.net.NetworkPolicyManagerInternal;
 
@@ -160,6 +174,7 @@ public class ConnectivityServiceTest {
 
     @Mock IpConnectivityMetrics.Logger mMetricsService;
     @Mock DefaultNetworkMetrics mDefaultNetworkMetrics;
+    @Mock INetworkStatsService mStatsService;
 
     // This class exists to test bindProcessToNetwork and getBoundNetworkForProcess. These methods
     // do not go through ConnectivityService but talk to netd directly, so they don't automatically
@@ -858,7 +873,7 @@ public class ConnectivityServiceTest {
                 NetworkPolicyManagerInternal.class, mock(NetworkPolicyManagerInternal.class));
         mService = new WrappedConnectivityService(mServiceContext,
                 mock(INetworkManagementService.class),
-                mock(INetworkStatsService.class),
+                mStatsService,
                 mock(INetworkPolicyManager.class),
                 mock(IpConnectivityLog.class));
 
@@ -3438,6 +3453,40 @@ public class ConnectivityServiceTest {
                 Arrays.asList(myIpv4Address, myIpv6Address1, myIpv6Address2),
                 Arrays.asList(myIpv4DefaultRoute));
         mCm.unregisterNetworkCallback(networkCallback);
+    }
+
+    @Test
+    public void testStatsIfacesChanged() throws Exception {
+        mCellNetworkAgent = new MockNetworkAgent(TRANSPORT_CELLULAR);
+
+        // Simple connection should have updated ifaces
+        mCellNetworkAgent.connect(false);
+        waitForIdle();
+        verify(mStatsService, atLeastOnce()).forceUpdateIfaces();
+        reset(mStatsService);
+
+        // Metered change should update ifaces
+        mCellNetworkAgent.addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED);
+        waitForIdle();
+        verify(mStatsService, atLeastOnce()).forceUpdateIfaces();
+        reset(mStatsService);
+
+        mCellNetworkAgent.removeCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED);
+        waitForIdle();
+        verify(mStatsService, atLeastOnce()).forceUpdateIfaces();
+        reset(mStatsService);
+
+        // Captive portal change shouldn't update ifaces
+        mCellNetworkAgent.addCapability(NetworkCapabilities.NET_CAPABILITY_CAPTIVE_PORTAL);
+        waitForIdle();
+        verify(mStatsService, never()).forceUpdateIfaces();
+        reset(mStatsService);
+
+        // Roaming change should update ifaces
+        mCellNetworkAgent.addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING);
+        waitForIdle();
+        verify(mStatsService, atLeastOnce()).forceUpdateIfaces();
+        reset(mStatsService);
     }
 
     private void checkDirectlyConnectedRoutes(Object callbackObj,
