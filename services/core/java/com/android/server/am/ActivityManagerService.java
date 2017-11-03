@@ -20777,9 +20777,10 @@ public class ActivityManagerService extends IActivityManager.Stub
     // the current [or imminent] receiver on.
     private boolean isReceivingBroadcastLocked(ProcessRecord app,
             ArraySet<BroadcastQueue> receivingQueues) {
-        if (!app.curReceivers.isEmpty()) {
-            for (BroadcastRecord r : app.curReceivers) {
-                receivingQueues.add(r.queue);
+        final int N = app.curReceivers.size();
+        if (N > 0) {
+            for (int i = 0; i < N; i++) {
+                receivingQueues.add(app.curReceivers.valueAt(i).queue);
             }
             return true;
         }
