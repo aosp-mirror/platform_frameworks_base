@@ -14708,7 +14708,12 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (process == null) {
             // If process is null, we are being called from some internal code
             // and may be about to die -- run this synchronously.
-            worker.run();
+            final int oldMask = StrictMode.allowThreadDiskWritesMask();
+            try {
+                worker.run();
+            } finally {
+                StrictMode.setThreadPolicyMask(oldMask);
+            }
         } else {
             worker.start();
         }

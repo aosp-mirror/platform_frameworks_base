@@ -20,11 +20,13 @@ import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
+import android.app.ApplicationErrorReport;
 import android.app.IActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.ApplicationInfo;
 import android.net.TrafficStats;
 import android.net.Uri;
 import android.os.strictmode.CleartextNetworkViolation;
@@ -156,6 +158,13 @@ public final class StrictMode {
      * VmPolicy.Builder#detectCleartextNetwork()}.
      */
     private static final String CLEARTEXT_PROPERTY = "persist.sys.strictmode.clear";
+
+    /**
+     * Quick feature-flag that can be used to disable the defaults provided by
+     * {@link #initThreadDefaults(ApplicationInfo)} and
+     * {@link #initVmDefaults(ApplicationInfo)}.
+     */
+    private static final boolean DISABLE = false;
 
     // Only log a duplicate stack trace to the logs every second.
     private static final long MIN_LOG_INTERVAL_MS = 1000;
@@ -713,6 +722,11 @@ public final class StrictMode {
                 return enable(DETECT_VM_ACTIVITY_LEAKS);
             }
 
+            /** @hide */
+            public Builder permitActivityLeaks() {
+                return disable(DETECT_VM_ACTIVITY_LEAKS);
+            }
+
             /**
              * Detect everything that's potentially suspect.
              *
@@ -846,6 +860,11 @@ public final class StrictMode {
                 return enable(DETECT_VM_UNTAGGED_SOCKET);
             }
 
+            /** @hide */
+            public Builder permitUntaggedSockets() {
+                return disable(DETECT_VM_UNTAGGED_SOCKET);
+            }
+
             /**
              * Crashes the whole process on violation. This penalty runs at the end of all enabled
              * penalties so you'll still get your logging or other violations before the process
@@ -953,7 +972,8 @@ public final class StrictMode {
         setThreadPolicyMask(policy.mask);
     }
 
-    private static void setThreadPolicyMask(final int policyMask) {
+    /** @hide */
+    public static void setThreadPolicyMask(final int policyMask) {
         // In addition to the Java-level thread-local in Dalvik's
         // BlockGuard, we also need to keep a native thread-local in
         // Binder in order to propagate the value across Binder calls,
@@ -1019,12 +1039,17 @@ public final class StrictMode {
      *     end of a block
      */
     public static ThreadPolicy allowThreadDiskWrites() {
+        return new ThreadPolicy(allowThreadDiskWritesMask());
+    }
+
+    /** @hide */
+    public static int allowThreadDiskWritesMask() {
         int oldPolicyMask = getThreadPolicyMask();
         int newPolicyMask = oldPolicyMask & ~(DETECT_DISK_WRITE | DETECT_DISK_READ);
         if (newPolicyMask != oldPolicyMask) {
             setThreadPolicyMask(newPolicyMask);
         }
-        return new ThreadPolicy(oldPolicyMask);
+        return oldPolicyMask;
     }
 
     /**
@@ -1035,31 +1060,52 @@ public final class StrictMode {
      * @return the old policy, to be passed to setThreadPolicy to restore the policy.
      */
     public static ThreadPolicy allowThreadDiskReads() {
+        return new ThreadPolicy(allowThreadDiskReadsMask());
+    }
+
+    /** @hide */
+    public static int allowThreadDiskReadsMask() {
         int oldPolicyMask = getThreadPolicyMask();
         int newPolicyMask = oldPolicyMask & ~(DETECT_DISK_READ);
         if (newPolicyMask != oldPolicyMask) {
             setThreadPolicyMask(newPolicyMask);
         }
-        return new ThreadPolicy(oldPolicyMask);
+        return oldPolicyMask;
     }
 
-    // We don't want to flash the screen red in the system server
-    // process, nor do we want to modify all the call sites of
-    // conditionallyEnableDebugLogging() in the system server,
-    // so instead we use this to determine if we are the system server.
-    private static boolean amTheSystemServerProcess() {
-        // Fast path.  Most apps don't have the system server's UID.
-        if (Process.myUid() != Process.SYSTEM_UID) {
-            return false;
-        }
+    /**
+     * Determine if the given app is "bundled" as part of the system image.
+     * These bundled apps are developed in lock-step with the OS, and they
+     * aren't updated outside of an OTA, so we want to chase any
+     * {@link StrictMode} regressions by enabling detection when running on
+     * {@link Build#IS_USERDEBUG} or {@link Build#IS_ENG} builds.
+     * <p>
+     * Unbundled apps included in the system image are expected to detect and
+     * triage their own {@link StrictMode} issues separate from the OS release
+     * process, which is why we don't enable them here.
+     *
+     * @hide
+     */
+    public static boolean isBundledSystemApp(ApplicationInfo ai) {
+        if (ai == null || ai.packageName == null) {
+            // Probably system server
+            return true;
+        } else if (ai.isSystemApp()) {
+            // Ignore unbundled apps living in the wrong namespace
+            if (ai.packageName.equals("com.android.vending")
+                    || ai.packageName.equals("com.android.chrome")) {
+                return false;
+            }
 
-        // The settings app, though, has the system server's UID so
-        // look up our stack to see if we came from the system server.
-        Throwable stack = new Throwable();
-        stack.fillInStackTrace();
-        for (StackTraceElement ste : stack.getStackTrace()) {
-            String clsName = ste.getClassName();
-            if (clsName != null && clsName.startsWith("com.android.server.")) {
+            // Ignore bundled apps that are way too spammy
+            // STOPSHIP: burn this list down to zero
+            if (ai.packageName.equals("com.android.phone")) {
+                return false;
+            }
+
+            if (ai.packageName.equals("android")
+                    || ai.packageName.startsWith("android.")
+                    || ai.packageName.startsWith("com.android.")) {
                 return true;
             }
         }
@@ -1067,81 +1113,81 @@ public final class StrictMode {
     }
 
     /**
-     * Enable DropBox logging for debug phone builds.
+     * Initialize default {@link ThreadPolicy} for the current thread.
      *
      * @hide
      */
-    public static boolean conditionallyEnableDebugLogging() {
-        boolean doFlashes =
-                SystemProperties.getBoolean(VISUAL_PROPERTY, false) && !amTheSystemServerProcess();
-        final boolean suppress = SystemProperties.getBoolean(DISABLE_PROPERTY, false);
+    public static void initThreadDefaults(ApplicationInfo ai) {
+        final ThreadPolicy.Builder builder = new ThreadPolicy.Builder();
+        final int targetSdkVersion = (ai != null) ? ai.targetSdkVersion
+                : Build.VERSION_CODES.CUR_DEVELOPMENT;
 
-        // For debug builds, log event loop stalls to dropbox for analysis.
-        // Similar logic also appears in ActivityThread.java for system apps.
-        if (!doFlashes && (Build.IS_USER || suppress)) {
-            setCloseGuardEnabled(false);
-            return false;
+        // Starting in HC, we don't allow network usage on the main thread
+        if (targetSdkVersion >= Build.VERSION_CODES.HONEYCOMB) {
+            builder.detectNetwork();
+            builder.penaltyDeathOnNetwork();
         }
 
-        // Eng builds have flashes on all the time.  The suppression property
-        // overrides this, so we force the behavior only after the short-circuit
-        // check above.
-        if (Build.IS_ENG) {
-            doFlashes = true;
-        }
-
-        // Thread policy controls BlockGuard.
-        int threadPolicyMask =
-                StrictMode.DETECT_DISK_WRITE
-                        | StrictMode.DETECT_DISK_READ
-                        | StrictMode.DETECT_NETWORK;
-
-        if (!Build.IS_USER) {
-            threadPolicyMask |= StrictMode.PENALTY_DROPBOX;
-        }
-        if (doFlashes) {
-            threadPolicyMask |= StrictMode.PENALTY_FLASH;
-        }
-
-        StrictMode.setThreadPolicyMask(threadPolicyMask);
-
-        // VM Policy controls CloseGuard, detection of Activity leaks,
-        // and instance counting.
-        if (Build.IS_USER) {
-            setCloseGuardEnabled(false);
-        } else {
-            VmPolicy.Builder policyBuilder = new VmPolicy.Builder().detectAll();
-            if (!Build.IS_ENG) {
-                // Activity leak detection causes too much slowdown for userdebug because of the
-                // GCs.
-                policyBuilder = policyBuilder.disable(DETECT_VM_ACTIVITY_LEAKS);
+        if (Build.IS_USER || DISABLE || SystemProperties.getBoolean(DISABLE_PROPERTY, false)) {
+            // Detect nothing extra
+        } else if (Build.IS_USERDEBUG) {
+            // Detect everything in bundled apps
+            if (isBundledSystemApp(ai)) {
+                builder.detectAll();
+                builder.penaltyDropBox();
+                if (SystemProperties.getBoolean(VISUAL_PROPERTY, false)) {
+                    builder.penaltyFlashScreen();
+                }
             }
-            policyBuilder = policyBuilder.penaltyDropBox();
-            if (Build.IS_ENG) {
-                policyBuilder.penaltyLog();
+        } else if (Build.IS_ENG) {
+            // Detect everything in bundled apps
+            if (isBundledSystemApp(ai)) {
+                builder.detectAll();
+                builder.penaltyDropBox();
+                builder.penaltyLog();
+                builder.penaltyFlashScreen();
             }
-            // All core system components need to tag their sockets to aid
-            // system health investigations
-            if (android.os.Process.myUid() < android.os.Process.FIRST_APPLICATION_UID) {
-                policyBuilder.enable(DETECT_VM_UNTAGGED_SOCKET);
-            } else {
-                policyBuilder.disable(DETECT_VM_UNTAGGED_SOCKET);
-            }
-            setVmPolicy(policyBuilder.build());
-            setCloseGuardEnabled(vmClosableObjectLeaksEnabled());
         }
-        return true;
+
+        setThreadPolicy(builder.build());
     }
 
     /**
-     * Used by the framework to make network usage on the main thread a fatal error.
+     * Initialize default {@link VmPolicy} for the current VM.
      *
      * @hide
      */
-    public static void enableDeathOnNetwork() {
-        int oldPolicy = getThreadPolicyMask();
-        int newPolicy = oldPolicy | DETECT_NETWORK | PENALTY_DEATH_ON_NETWORK;
-        setThreadPolicyMask(newPolicy);
+    public static void initVmDefaults(ApplicationInfo ai) {
+        final VmPolicy.Builder builder = new VmPolicy.Builder();
+        final int targetSdkVersion = (ai != null) ? ai.targetSdkVersion
+                : Build.VERSION_CODES.CUR_DEVELOPMENT;
+
+        // Starting in N, we don't allow file:// Uri exposure
+        if (targetSdkVersion >= Build.VERSION_CODES.N) {
+            builder.detectFileUriExposure();
+            builder.penaltyDeathOnFileUriExposure();
+        }
+
+        if (Build.IS_USER || DISABLE || SystemProperties.getBoolean(DISABLE_PROPERTY, false)) {
+            // Detect nothing extra
+        } else if (Build.IS_USERDEBUG) {
+            // Detect everything in bundled apps (except activity leaks, which
+            // are expensive to track)
+            if (isBundledSystemApp(ai)) {
+                builder.detectAll();
+                builder.permitActivityLeaks();
+                builder.penaltyDropBox();
+            }
+        } else if (Build.IS_ENG) {
+            // Detect everything in bundled apps
+            if (isBundledSystemApp(ai)) {
+                builder.detectAll();
+                builder.penaltyDropBox();
+                builder.penaltyLog();
+            }
+        }
+
+        setVmPolicy(builder.build());
     }
 
     /**
