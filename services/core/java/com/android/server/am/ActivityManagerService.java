@@ -4741,7 +4741,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                             mWindowManager, appOpsManager, proxy, this,
                             OP_ASSIST_STRUCTURE, OP_NONE);
                     requester.requestAssistData(mStackSupervisor.getTopVisibleActivities(),
-                            true, false /* fetchScreenshots */, recentsUid, recentsPackage);
+                            true /* fetchData */, false /* fetchScreenshots */,
+                            true /* allowFetchData */, false /* alloweFetchScreenshots */,
+                            recentsUid, recentsPackage);
                 }
 
                 final Intent intent = new Intent();

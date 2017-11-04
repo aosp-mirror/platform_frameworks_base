@@ -198,7 +198,10 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
             mShowArgs = args;
             mShowFlags = flags;
 
+            disabledContext |= getUserDisabledShowContextLocked();
             mAssistDataRequester.requestAssistData(topActivities,
+                    (flags & VoiceInteractionSession.SHOW_WITH_ASSIST) != 0,
+                    (flags & VoiceInteractionSession.SHOW_WITH_SCREENSHOT) != 0,
                     (disabledContext & VoiceInteractionSession.SHOW_WITH_ASSIST) == 0,
                     (disabledContext & VoiceInteractionSession.SHOW_WITH_SCREENSHOT) == 0,
                     mCallingUid, mSessionComponentName.getPackageName());
@@ -215,6 +218,7 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
                     mShowFlags = 0;
                 } catch (RemoteException e) {
                 }
+                mAssistDataRequester.processPendingAssistData();
             } else if (showCallback != null) {
                 mPendingShowCallbacks.add(showCallback);
             }
@@ -237,11 +241,16 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
 
     @Override
     public void onAssistDataReceivedLocked(Bundle data, int activityIndex, int activityCount) {
+        // Return early if we have no session
+        if (mSession == null) {
+            return;
+        }
+
         if (data == null) {
             try {
                 mSession.handleAssist(null, null, null, 0, 0);
             } catch (RemoteException e) {
-                // Can't happen
+                // Ignore
             }
         } else {
             final Bundle assistData = data.getBundle(ASSIST_KEY_DATA);
@@ -267,17 +276,22 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
                 mSession.handleAssist(assistData, structure, content, activityIndex,
                         activityCount);
             } catch (RemoteException e) {
-                // Can't happen
+                // Ignore
             }
         }
     }
 
     @Override
     public void onAssistScreenshotReceivedLocked(Bitmap screenshot) {
+        // Return early if we have no session
+        if (mSession == null) {
+            return;
+        }
+
         try {
             mSession.handleScreenshot(screenshot);
         } catch (RemoteException e) {
-            // Can't happen
+            // Ignore
         }
     }
 

@@ -94,6 +94,17 @@ public class AssistDataRequester extends IAssistDataReceiver.Stub {
          */
         @GuardedBy("mCallbacksLock")
         void onAssistScreenshotReceivedLocked(Bitmap screenshot);
+
+        /**
+         * Called when there is no more pending assist data or screenshots for the last request.
+         * If the request was canceled, then this callback will not be made. In addition, the
+         * callback will be made with the {@param mCallbacksLock} held, and only if
+         * {@link #canHandleReceivedAssistDataLocked()} is true.
+         */
+        @GuardedBy("mCallbacksLock")
+        default void onAssistRequestCompleted() {
+            // Do nothing
+        }
     }
 
     /**
@@ -131,15 +142,21 @@ public class AssistDataRequester extends IAssistDataReceiver.Stub {
      * @param fetchScreenshot whether or not to fetch the screenshot, only applies if fetchData is
      *     true, the caller is allowed to fetch the assist data, and the current activity allows
      *     assist data to be fetched from it
+     * @param allowFetchData to be joined with other checks, determines whether or not the requester
+     *     is allowed to fetch the assist data
+     * @param allowFetchScreenshot to be joined with other checks, determines whether or not the
+     *     requester is allowed to fetch the assist screenshot
      */
-    public void requestAssistData(List<IBinder> activityTokens, boolean fetchData,
-            boolean fetchScreenshot, int callingUid, String callingPackage) {
-        // TODO: Better handle the cancel case if a request can be reused
-        // TODO: Known issue, if the assist data is not allowed on the current activity, then no
-        //       assist data is requested for any of the other activities
+    public void requestAssistData(List<IBinder> activityTokens, final boolean fetchData,
+            final boolean fetchScreenshot, boolean allowFetchData, boolean allowFetchScreenshot,
+            int callingUid, String callingPackage) {
+        // TODO(b/34090158): Known issue, if the assist data is not allowed on the current activity,
+        //                   then no assist data is requested for any of the other activities
 
         // Early exit if there are no activity to fetch for
         if (activityTokens.isEmpty()) {
+            // No activities, just dispatch request-complete
+            tryDispatchRequestComplete();
             return;
         }
 
@@ -150,8 +167,8 @@ public class AssistDataRequester extends IAssistDataReceiver.Stub {
         } catch (RemoteException e) {
             // Should never happen
         }
-        fetchData &= isAssistDataAllowed;
-        fetchScreenshot &= fetchData && isAssistDataAllowed
+        allowFetchData &= isAssistDataAllowed;
+        allowFetchScreenshot &= fetchData && isAssistDataAllowed
                 && (mRequestScreenshotAppOps != OP_NONE);
 
         mCanceled = false;
@@ -162,7 +179,7 @@ public class AssistDataRequester extends IAssistDataReceiver.Stub {
 
         if (fetchData) {
             if (mAppOpsManager.checkOpNoThrow(mRequestStructureAppOps, callingUid, callingPackage)
-                    == MODE_ALLOWED) {
+                    == MODE_ALLOWED && allowFetchData) {
                 final int numActivities = activityTokens.size();
                 for (int i = 0; i < numActivities; i++) {
                     IBinder topActivity = activityTokens.get(i);
@@ -177,8 +194,12 @@ public class AssistDataRequester extends IAssistDataReceiver.Stub {
                             mPendingDataCount++;
                         } else if (i == 0) {
                             // Wasn't allowed... given that, let's not do the screenshot either.
-                            dispatchAssistDataReceived(null);
-                            fetchScreenshot = false;
+                            if (mCallbacks.canHandleReceivedAssistDataLocked()) {
+                                dispatchAssistDataReceived(null);
+                            } else {
+                                mAssistData.add(null);
+                            }
+                            allowFetchScreenshot = false;
                             break;
                         }
                     } catch (RemoteException e) {
@@ -187,14 +208,18 @@ public class AssistDataRequester extends IAssistDataReceiver.Stub {
                 }
             } else {
                 // Wasn't allowed... given that, let's not do the screenshot either.
-                dispatchAssistDataReceived(null);
-                fetchScreenshot = false;
+                if (mCallbacks.canHandleReceivedAssistDataLocked()) {
+                    dispatchAssistDataReceived(null);
+                } else {
+                    mAssistData.add(null);
+                }
+                allowFetchScreenshot = false;
             }
         }
 
         if (fetchScreenshot) {
             if (mAppOpsManager.checkOpNoThrow(mRequestScreenshotAppOps, callingUid, callingPackage)
-                    == MODE_ALLOWED) {
+                    == MODE_ALLOWED && allowFetchScreenshot) {
                 try {
                     MetricsLogger.count(mContext, "assist_with_screen", 1);
                     mPendingScreenshotCount++;
@@ -203,24 +228,38 @@ public class AssistDataRequester extends IAssistDataReceiver.Stub {
                     // Can't happen
                 }
             } else {
-                dispatchAssistScreenshotReceived(null);
+                if (mCallbacks.canHandleReceivedAssistDataLocked()) {
+                    dispatchAssistScreenshotReceived(null);
+                } else {
+                    mAssistScreenshot.add(null);
+                }
             }
         }
+        // For the cases where we dispatch null data/screenshot due to permissions, just dispatch
+        // request-complete after those are made
+        tryDispatchRequestComplete();
     }
 
     /**
      * This call should only be made when the callbacks are capable of handling the received assist
-     * data.
+     * data. The owner is also responsible for locking before calling this method.
      */
     public void processPendingAssistData() {
+        flushPendingAssistData();
+        tryDispatchRequestComplete();
+    }
+
+    private void flushPendingAssistData() {
         final int dataCount = mAssistData.size();
         for (int i = 0; i < dataCount; i++) {
             dispatchAssistDataReceived(mAssistData.get(i));
         }
+        mAssistData.clear();
         final int screenshotsCount = mAssistScreenshot.size();
         for (int i = 0; i < screenshotsCount; i++) {
             dispatchAssistScreenshotReceived(mAssistScreenshot.get(i));
         }
+        mAssistScreenshot.clear();
     }
 
     public int getPendingDataCount() {
@@ -254,8 +293,9 @@ public class AssistDataRequester extends IAssistDataReceiver.Stub {
 
             if (mCallbacks.canHandleReceivedAssistDataLocked()) {
                 // Process any pending data and dispatch the new data as well
-                processPendingAssistData();
+                flushPendingAssistData();
                 dispatchAssistDataReceived(data);
+                tryDispatchRequestComplete();
             } else {
                 // Queue up the data for processing later
                 mAssistData.add(data);
@@ -273,8 +313,9 @@ public class AssistDataRequester extends IAssistDataReceiver.Stub {
 
             if (mCallbacks.canHandleReceivedAssistDataLocked()) {
                 // Process any pending data and dispatch the new data as well
-                processPendingAssistData();
+                flushPendingAssistData();
                 dispatchAssistScreenshotReceived(screenshot);
+                tryDispatchRequestComplete();
             } else {
                 // Queue up the data for processing later
                 mAssistScreenshot.add(screenshot);
@@ -296,6 +337,13 @@ public class AssistDataRequester extends IAssistDataReceiver.Stub {
 
     private void dispatchAssistScreenshotReceived(Bitmap screenshot) {
         mCallbacks.onAssistScreenshotReceivedLocked(screenshot);
+    }
+
+    private void tryDispatchRequestComplete() {
+        if (mPendingDataCount == 0 && mPendingScreenshotCount == 0 &&
+                mAssistData.isEmpty() && mAssistScreenshot.isEmpty()) {
+            mCallbacks.onAssistRequestCompleted();
+        }
     }
 
     public void dump(String prefix, PrintWriter pw) {
