@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.annotation.StringDef;
 import android.app.PendingIntent;
 import android.app.RemoteInput;
+import android.app.slice.widget.SliceView;
 import android.content.ContentResolver;
 import android.content.IContentProvider;
 import android.graphics.drawable.Icon;
@@ -54,7 +55,12 @@ public final class Slice implements Parcelable {
     public @interface SliceHint{ }
 
     /**
-     * Hint that this content is a title of other content in the slice.
+     * Hint that this content is a title of other content in the slice. This can also indicate that
+     * the content should be used in the shortcut representation of the slice (icon, label, action),
+     * normally this should be indicated by adding the hint on the action containing that content.
+     *
+     * @see SliceView#MODE_SHORTCUT
+     * @see SliceItem#TYPE_ACTION
      */
     public static final String HINT_TITLE       = "title";
     /**
@@ -99,6 +105,13 @@ public final class Slice implements Parcelable {
      * Hint to indicate that this content should not be tinted.
      */
     public static final String HINT_NO_TINT     = "no_tint";
+    /**
+     * Hint to indicate that this content should not be shown in the {@link SliceView#MODE_SMALL}
+     * and {@link SliceView#MODE_LARGE} modes of SliceView. This content may be used to populate
+     * the {@link SliceView#MODE_SHORTCUT} format of the slice.
+     * @hide
+     */
+    public static final String HINT_HIDDEN = "hidden";
     /**
      * Hint to indicate that this slice is incomplete and an update will be sent once
      * loading is complete. Slices which contain HINT_PARTIAL will not be cached by the
