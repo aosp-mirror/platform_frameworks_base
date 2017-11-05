@@ -401,6 +401,7 @@ import com.android.server.AppOpsService;
 import com.android.server.AttributeCache;
 import com.android.server.DeviceIdleController;
 import com.android.server.IntentResolver;
+import com.android.server.IoThread;
 import com.android.server.LocalServices;
 import com.android.server.LockGuard;
 import com.android.server.NetworkManagementInternal;
@@ -1009,15 +1010,6 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     private final HashSet<Integer> mAlreadyLoggedViolatedStacks = new HashSet<Integer>();
     private static final int MAX_DUP_SUPPRESSED_STACKS = 5000;
-
-    /**
-     * Strict Mode background batched logging state.
-     *
-     * The string buffer is guarded by itself, and its lock is also
-     * used to determine if another batched write is already
-     * in-flight.
-     */
-    private final StringBuilder mStrictModeBuffer = new StringBuilder();
 
     /**
      * Keeps track of all IIntentReceivers that have been registered for broadcasts.
@@ -14273,10 +14265,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             IBinder app,
             int violationMask,
             StrictMode.ViolationInfo info) {
-        ProcessRecord r = findAppProcess(app, "StrictMode");
-        if (r == null) {
-            return;
-        }
+        // We're okay if the ProcessRecord is missing; it probably means that
+        // we're reporting a violation from the system process itself.
+        final ProcessRecord r = findAppProcess(app, "StrictMode");
 
         if ((violationMask & StrictMode.PENALTY_DROPBOX) != 0) {
             Integer stackFingerprint = info.hashCode();
@@ -14338,18 +14329,15 @@ public class ActivityManagerService extends IActivityManager.Stub
                 (process.info.flags & (ApplicationInfo.FLAG_SYSTEM |
                                        ApplicationInfo.FLAG_UPDATED_SYSTEM_APP)) != 0;
         final String processName = process == null ? "unknown" : process.processName;
-        final String dropboxTag = isSystemApp ? "system_app_strictmode" : "data_app_strictmode";
         final DropBoxManager dbox = (DropBoxManager)
                 mContext.getSystemService(Context.DROPBOX_SERVICE);
 
         // Exit early if the dropbox isn't configured to accept this report type.
+        final String dropboxTag = processClass(process) + "_strictmode";
         if (dbox == null || !dbox.isTagEnabled(dropboxTag)) return;
 
-        boolean bufferWasEmpty;
-        boolean needsFlush;
-        final StringBuilder sb = isSystemApp ? mStrictModeBuffer : new StringBuilder(1024);
+        final StringBuilder sb = new StringBuilder(1024);
         synchronized (sb) {
-            bufferWasEmpty = sb.length() == 0;
             appendDropBoxProcessHeaders(process, processName, sb);
             sb.append("Build: ").append(Build.FINGERPRINT).append("\n");
             sb.append("System-App: ").append(isSystemApp).append("\n");
@@ -14381,67 +14369,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                 sb.append(info.getViolationDetails());
                 sb.append("\n");
             }
-
-            // Only buffer up to ~64k.  Various logging bits truncate
-            // things at 128k.
-            needsFlush = (sb.length() > 64 * 1024);
         }
 
-        // Flush immediately if the buffer's grown too large, or this
-        // is a non-system app.  Non-system apps are isolated with a
-        // different tag & policy and not batched.
-        //
-        // Batching is useful during internal testing with
-        // StrictMode settings turned up high.  Without batching,
-        // thousands of separate files could be created on boot.
-        if (!isSystemApp || needsFlush) {
-            new Thread("Error dump: " + dropboxTag) {
-                @Override
-                public void run() {
-                    String report;
-                    synchronized (sb) {
-                        report = sb.toString();
-                        sb.delete(0, sb.length());
-                        sb.trimToSize();
-                    }
-                    if (report.length() != 0) {
-                        dbox.addText(dropboxTag, report);
-                    }
-                }
-            }.start();
-            return;
-        }
-
-        // System app batching:
-        if (!bufferWasEmpty) {
-            // An existing dropbox-writing thread is outstanding, so
-            // we don't need to start it up.  The existing thread will
-            // catch the buffer appends we just did.
-            return;
-        }
-
-        // Worker thread to both batch writes and to avoid blocking the caller on I/O.
-        // (After this point, we shouldn't access AMS internal data structures.)
-        new Thread("Error dump: " + dropboxTag) {
-            @Override
-            public void run() {
-                // 5 second sleep to let stacks arrive and be batched together
-                try {
-                    Thread.sleep(5000);  // 5 seconds
-                } catch (InterruptedException e) {}
-
-                String errorReport;
-                synchronized (mStrictModeBuffer) {
-                    errorReport = mStrictModeBuffer.toString();
-                    if (errorReport.length() == 0) {
-                        return;
-                    }
-                    mStrictModeBuffer.delete(0, mStrictModeBuffer.length());
-                    mStrictModeBuffer.trimToSize();
-                }
-                dbox.addText(dropboxTag, errorReport);
-            }
-        }.start();
+        final String res = sb.toString();
+        IoThread.getHandler().post(() -> {
+            dbox.addText(dropboxTag, res);
+        });
     }
 
     /**
