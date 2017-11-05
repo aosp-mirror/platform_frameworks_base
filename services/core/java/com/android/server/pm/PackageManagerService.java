@@ -3463,7 +3463,7 @@ public class PackageManagerService extends IPackageManager.Stub
         final int N = list.size();
         for (int i = 0; i < N; i++) {
             ResolveInfo info = list.get(i);
-            if (packageName.equals(info.activityInfo.packageName)) {
+            if (info.priority >= 0 && packageName.equals(info.activityInfo.packageName)) {
                 return true;
             }
         }
