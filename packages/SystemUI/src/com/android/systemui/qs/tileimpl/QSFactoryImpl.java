@@ -41,6 +41,7 @@ import com.android.systemui.qs.tiles.FlashlightTile;
 import com.android.systemui.qs.tiles.HeadsUpTile;
 import com.android.systemui.qs.tiles.HotspotTile;
 import com.android.systemui.qs.tiles.IntentTile;
+import com.android.systemui.qs.tiles.LiveDisplayTile;
 import com.android.systemui.qs.tiles.LocationTile;
 import com.android.systemui.qs.tiles.NfcTile;
 import com.android.systemui.qs.tiles.NightDisplayTile;
@@ -90,6 +91,7 @@ public class QSFactoryImpl implements QSFactory {
     private final Provider<VolumeTile> mVolumeTileProvider;
     private final Provider<AmbientDisplayTile> mAmbientDisplayTileProvider;
     private final Provider<VpnTile> mVpnTileProvider;
+    private final Provider<LiveDisplayTile> mLiveDisplayTileProvider;
 
     private QSTileHost mHost;
 
@@ -119,7 +121,8 @@ public class QSFactoryImpl implements QSFactory {
             Provider<SyncTile> syncTileProvider,
             Provider<UsbTetherTile> usbTetherTileProvider,
             Provider<VolumeTile> volumeTileProvider,
-            Provider<VpnTile> vpnTileProvider) {
+            Provider<VpnTile> vpnTileProvider,
+            Provider<LiveDisplayTile> liveDisplayTileProvider) {
         mWifiTileProvider = wifiTileProvider;
         mBluetoothTileProvider = bluetoothTileProvider;
         mCellularTileProvider = cellularTileProvider;
@@ -146,6 +149,7 @@ public class QSFactoryImpl implements QSFactory {
         mUsbTetherTileProvider = usbTetherTileProvider;
         mVolumeTileProvider = volumeTileProvider;
         mVpnTileProvider = vpnTileProvider;
+        mLiveDisplayTileProvider = liveDisplayTileProvider;
     }
 
     public void setHost(QSTileHost host) {
@@ -214,6 +218,8 @@ public class QSFactoryImpl implements QSFactory {
                 return mVolumeTileProvider.get();
             case "vpn":
                 return mVpnTileProvider.get();
+            case "livedisplay":
+                return mLiveDisplayTileProvider.get();
         }
 
         // Intent tiles.
