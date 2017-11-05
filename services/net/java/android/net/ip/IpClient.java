@@ -310,12 +310,12 @@ public class IpClient extends StateMachine {
                 return this;
             }
 
-            public Builder withIPv6AddrGenModeEUI64() {
+            public Builder withRandomMacAddress() {
                 mConfig.mIPv6AddrGenMode = INetd.IPV6_ADDR_GEN_MODE_EUI64;
                 return this;
             }
 
-            public Builder withIPv6AddrGenModeStablePrivacy() {
+            public Builder withStableMacAddress() {
                 mConfig.mIPv6AddrGenMode = INetd.IPV6_ADDR_GEN_MODE_STABLE_PRIVACY;
                 return this;
             }
