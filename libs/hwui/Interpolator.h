@@ -44,8 +44,9 @@ public:
 
 class ANDROID_API AccelerateInterpolator : public Interpolator {
 public:
-    explicit AccelerateInterpolator(float factor) : mFactor(factor), mDoubleFactor(factor*2) {}
+    explicit AccelerateInterpolator(float factor) : mFactor(factor), mDoubleFactor(factor * 2) {}
     virtual float interpolate(float input) override;
+
 private:
     const float mFactor;
     const float mDoubleFactor;
@@ -55,6 +56,7 @@ class ANDROID_API AnticipateInterpolator : public Interpolator {
 public:
     explicit AnticipateInterpolator(float tension) : mTension(tension) {}
     virtual float interpolate(float input) override;
+
 private:
     const float mTension;
 };
@@ -63,6 +65,7 @@ class ANDROID_API AnticipateOvershootInterpolator : public Interpolator {
 public:
     explicit AnticipateOvershootInterpolator(float tension) : mTension(tension) {}
     virtual float interpolate(float input) override;
+
 private:
     const float mTension;
 };
@@ -76,6 +79,7 @@ class ANDROID_API CycleInterpolator : public Interpolator {
 public:
     explicit CycleInterpolator(float cycles) : mCycles(cycles) {}
     virtual float interpolate(float input) override;
+
 private:
     const float mCycles;
 };
@@ -84,6 +88,7 @@ class ANDROID_API DecelerateInterpolator : public Interpolator {
 public:
     explicit DecelerateInterpolator(float factor) : mFactor(factor) {}
     virtual float interpolate(float input) override;
+
 private:
     const float mFactor;
 };
@@ -97,15 +102,16 @@ class ANDROID_API OvershootInterpolator : public Interpolator {
 public:
     explicit OvershootInterpolator(float tension) : mTension(tension) {}
     virtual float interpolate(float input) override;
+
 private:
     const float mTension;
 };
 
 class ANDROID_API PathInterpolator : public Interpolator {
 public:
-    explicit PathInterpolator(std::vector<float>&& x, std::vector<float>&& y)
-            : mX (x), mY(y) {}
+    explicit PathInterpolator(std::vector<float>&& x, std::vector<float>&& y) : mX(x), mY(y) {}
     virtual float interpolate(float input) override;
+
 private:
     std::vector<float> mX;
     std::vector<float> mY;

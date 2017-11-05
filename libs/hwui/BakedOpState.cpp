@@ -31,7 +31,8 @@ static int computeClipSideFlags(const Rect& clip, const Rect& bounds) {
 }
 
 ResolvedRenderState::ResolvedRenderState(LinearAllocator& allocator, Snapshot& snapshot,
-        const RecordedOp& recordedOp, bool expandForStroke, bool expandForPathTexture) {
+                                         const RecordedOp& recordedOp, bool expandForStroke,
+                                         bool expandForPathTexture) {
     // resolvedMatrix = parentMatrix * localMatrix
     transform.loadMultiply(*snapshot.transform, recordedOp.localMatrix);
 
@@ -44,16 +45,16 @@ ResolvedRenderState::ResolvedRenderState(LinearAllocator& allocator, Snapshot& s
         clippedBounds.outset(1);
     }
     transform.mapRect(clippedBounds);
-    if (CC_UNLIKELY(expandForStroke
-            && (!transform.isPureTranslate() || recordedOp.paint->getStrokeWidth() < 1.0f))) {
+    if (CC_UNLIKELY(expandForStroke &&
+                    (!transform.isPureTranslate() || recordedOp.paint->getStrokeWidth() < 1.0f))) {
         // account for hairline stroke when stroke may be < 1 scaled pixel
         // Non translate || strokeWidth < 1 is conservative, but will cover all cases
         clippedBounds.outset(0.5f);
     }
 
     // resolvedClipRect = intersect(parentMatrix * localClip, parentClip)
-    clipState = snapshot.serializeIntersectedClip(allocator,
-            recordedOp.localClip, *(snapshot.transform));
+    clipState = snapshot.serializeIntersectedClip(allocator, recordedOp.localClip,
+                                                  *(snapshot.transform));
     LOG_ALWAYS_FATAL_IF(!clipState, "must clip!");
 
     const Rect& clipRect = clipState->rect;
@@ -85,7 +86,7 @@ ResolvedRenderState::ResolvedRenderState(LinearAllocator& allocator, Snapshot& s
 }
 
 ResolvedRenderState::ResolvedRenderState(LinearAllocator& allocator, Snapshot& snapshot,
-        const Matrix4& localTransform, const ClipBase* localClip) {
+                                         const Matrix4& localTransform, const ClipBase* localClip) {
     transform.loadMultiply(*snapshot.transform, localTransform);
     clipState = snapshot.serializeIntersectedClip(allocator, localClip, *(snapshot.transform));
     clippedBounds = clipState->rect;
@@ -109,11 +110,11 @@ ResolvedRenderState::ResolvedRenderState(const ClipRect* clipRect, const Rect& d
     clippedBounds.doIntersect(clipRect->rect);
 }
 
-BakedOpState* BakedOpState::tryConstruct(LinearAllocator& allocator,
-        Snapshot& snapshot, const RecordedOp& recordedOp) {
+BakedOpState* BakedOpState::tryConstruct(LinearAllocator& allocator, Snapshot& snapshot,
+                                         const RecordedOp& recordedOp) {
     if (CC_UNLIKELY(snapshot.getRenderTargetClip().isEmpty())) return nullptr;
-    BakedOpState* bakedState = allocator.create_trivial<BakedOpState>(
-            allocator, snapshot, recordedOp, false, false);
+    BakedOpState* bakedState =
+            allocator.create_trivial<BakedOpState>(allocator, snapshot, recordedOp, false, false);
     if (bakedState->computedState.clippedBounds.isEmpty()) {
         // bounds are empty, so op is rejected
         allocator.rewindIfLastAlloc(bakedState);
@@ -122,21 +123,23 @@ BakedOpState* BakedOpState::tryConstruct(LinearAllocator& allocator,
     return bakedState;
 }
 
-BakedOpState* BakedOpState::tryConstructUnbounded(LinearAllocator& allocator,
-        Snapshot& snapshot, const RecordedOp& recordedOp) {
+BakedOpState* BakedOpState::tryConstructUnbounded(LinearAllocator& allocator, Snapshot& snapshot,
+                                                  const RecordedOp& recordedOp) {
     if (CC_UNLIKELY(snapshot.getRenderTargetClip().isEmpty())) return nullptr;
     return allocator.create_trivial<BakedOpState>(allocator, snapshot, recordedOp);
 }
 
-BakedOpState* BakedOpState::tryStrokeableOpConstruct(LinearAllocator& allocator,
-        Snapshot& snapshot, const RecordedOp& recordedOp, StrokeBehavior strokeBehavior,
-        bool expandForPathTexture) {
+BakedOpState* BakedOpState::tryStrokeableOpConstruct(LinearAllocator& allocator, Snapshot& snapshot,
+                                                     const RecordedOp& recordedOp,
+                                                     StrokeBehavior strokeBehavior,
+                                                     bool expandForPathTexture) {
     if (CC_UNLIKELY(snapshot.getRenderTargetClip().isEmpty())) return nullptr;
-    bool expandForStroke = (strokeBehavior == StrokeBehavior::Forced
-            || (recordedOp.paint && recordedOp.paint->getStyle() != SkPaint::kFill_Style));
+    bool expandForStroke =
+            (strokeBehavior == StrokeBehavior::Forced ||
+             (recordedOp.paint && recordedOp.paint->getStyle() != SkPaint::kFill_Style));
 
     BakedOpState* bakedState = allocator.create_trivial<BakedOpState>(
-           allocator, snapshot, recordedOp, expandForStroke, expandForPathTexture);
+            allocator, snapshot, recordedOp, expandForStroke, expandForPathTexture);
     if (bakedState->computedState.clippedBounds.isEmpty()) {
         // bounds are empty, so op is rejected
         // NOTE: this won't succeed if a clip was allocated
@@ -146,26 +149,25 @@ BakedOpState* BakedOpState::tryStrokeableOpConstruct(LinearAllocator& allocator,
     return bakedState;
 }
 
-BakedOpState* BakedOpState::tryShadowOpConstruct(LinearAllocator& allocator,
-        Snapshot& snapshot, const ShadowOp* shadowOpPtr) {
+BakedOpState* BakedOpState::tryShadowOpConstruct(LinearAllocator& allocator, Snapshot& snapshot,
+                                                 const ShadowOp* shadowOpPtr) {
     if (CC_UNLIKELY(snapshot.getRenderTargetClip().isEmpty())) return nullptr;
 
     // clip isn't empty, so construct the op
     return allocator.create_trivial<BakedOpState>(allocator, snapshot, shadowOpPtr);
 }
 
-BakedOpState* BakedOpState::directConstruct(LinearAllocator& allocator,
-        const ClipRect* clip, const Rect& dstRect, const RecordedOp& recordedOp) {
+BakedOpState* BakedOpState::directConstruct(LinearAllocator& allocator, const ClipRect* clip,
+                                            const Rect& dstRect, const RecordedOp& recordedOp) {
     return allocator.create_trivial<BakedOpState>(clip, dstRect, recordedOp);
 }
 
 void BakedOpState::setupOpacity(const SkPaint* paint) {
-    computedState.opaqueOverClippedBounds = computedState.transform.isSimple()
-            && computedState.clipState->mode == ClipMode::Rectangle
-            && MathUtils::areEqual(alpha, 1.0f)
-            && !roundRectClipState
-            && PaintUtils::isOpaquePaint(paint);
+    computedState.opaqueOverClippedBounds = computedState.transform.isSimple() &&
+                                            computedState.clipState->mode == ClipMode::Rectangle &&
+                                            MathUtils::areEqual(alpha, 1.0f) &&
+                                            !roundRectClipState && PaintUtils::isOpaquePaint(paint);
 }
 
-} // namespace uirenderer
-} // namespace android
+}  // namespace uirenderer
+}  // namespace android

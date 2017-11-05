@@ -23,8 +23,8 @@
     android:paddingStart="@dimen/notification_extra_margin_ambient"
     android:paddingEnd="@dimen/notification_extra_margin_ambient"
     >
-    <include layout="@layout/notification_template_header"
-        android:theme="@style/Theme.Material.Notification.Ambient" />
+    <include layout="@layout/notification_template_ambient_header"
+             android:theme="@style/Theme.Material.Notification.Ambient" />
 
     <LinearLayout
             android:id="@+id/notification_action_list_margin_target"
@@ -53,6 +53,7 @@
                 android:textAppearance="@style/TextAppearance.Material.Notification.Title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:gravity="top|center_horizontal"
                 android:singleLine="true"
                 android:ellipsize="marquee"
                 android:fadingEdge="horizontal"
@@ -65,7 +66,7 @@
                 android:textAppearance="@style/TextAppearance.Material.Notification"
                 android:singleLine="false"
                 android:layout_weight="1"
-                android:gravity="top"
+                android:gravity="top|center_horizontal"
                 android:visibility="gone"
                 android:textSize="16sp"
                 android:textColor="#eeffffff"
@@ -75,5 +76,19 @@
             />
         </LinearLayout>
     </LinearLayout>
-    <include layout="@layout/notification_material_action_list" />
+    <FrameLayout android:id="@+id/actions_container"
+                 android:layout_width="match_parent"
+                 android:layout_height="wrap_content"
+                 android:layout_gravity="bottom">
+        <com.android.internal.widget.NotificationActionListLayout
+            android:id="@+id/actions"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/notification_action_list_height"
+            android:paddingEnd="4dp"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:visibility="gone"
+            android:background="@color/notification_action_list"
+        />
+    </FrameLayout>
 </FrameLayout>

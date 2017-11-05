@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 #ifndef _ANDROID_GRAPHICS_TYPEFACE_IMPL_H_
 #define _ANDROID_GRAPHICS_TYPEFACE_IMPL_H_
 
@@ -22,8 +21,8 @@
 
 #include <cutils/compiler.h>
 #include <minikin/FontCollection.h>
-#include <vector>
 #include <memory>
+#include <vector>
 
 namespace android {
 
@@ -32,19 +31,14 @@ namespace android {
 constexpr int RESOLVE_BY_FONT_TABLE = -1;
 
 struct ANDROID_API Typeface {
- public:
+public:
     std::shared_ptr<minikin::FontCollection> fFontCollection;
 
     // resolved style actually used for rendering
     minikin::FontStyle fStyle;
 
     // style used in the API
-    enum Style : uint8_t {
-        kNormal = 0,
-        kBold   = 0x01,
-        kItalic = 0x02,
-        kBoldItalic = 0x03
-    };
+    enum Style : uint8_t { kNormal = 0, kBold = 0x01, kItalic = 0x02, kBoldItalic = 0x03 };
     Style fAPIStyle;
 
     static const Typeface* resolveDefault(const Typeface* src);
@@ -77,23 +71,21 @@ struct ANDROID_API Typeface {
     static Typeface* createRelative(Typeface* src, Style desiredStyle);
     static Typeface* createAbsolute(Typeface* base, int weight, bool italic);
 
-    static Typeface* createFromTypefaceWithVariation(Typeface* src,
-            const std::vector<minikin::FontVariation>& variations);
+    static Typeface* createFromTypefaceWithVariation(
+            Typeface* src, const std::vector<minikin::FontVariation>& variations);
 
     static Typeface* createFromFamilies(
-            std::vector<std::shared_ptr<minikin::FontFamily>>&& families,
-            int weight, int italic);
+            std::vector<std::shared_ptr<minikin::FontFamily>>&& families, int weight, int italic);
 
     static void setDefault(const Typeface* face);
 
     // Sets roboto font as the default typeface for testing purpose.
     static void setRobotoTypefaceForTest();
- private:
+
+private:
     // base weight in CSS-style units, 1..1000
     int fBaseWeight;
-
 };
-
 }
 
 #endif  // _ANDROID_GRAPHICS_TYPEFACE_IMPL_H_

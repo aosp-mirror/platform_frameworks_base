@@ -158,6 +158,7 @@ import com.android.systemui.Dependency;
 import com.android.systemui.EventLogTags;
 import com.android.systemui.ForegroundServiceController;
 import com.android.systemui.Interpolators;
+import com.android.systemui.OverviewProxyService;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.RecentsComponent;
@@ -875,6 +876,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         filter.addAction(Intent.ACTION_USER_SWITCHED);
         filter.addAction(Intent.ACTION_USER_ADDED);
         filter.addAction(Intent.ACTION_USER_PRESENT);
+        filter.addAction(Intent.ACTION_USER_UNLOCKED);
         mContext.registerReceiver(mBaseBroadcastReceiver, filter);
 
         IntentFilter internalFilter = new IntentFilter();
@@ -5266,7 +5268,8 @@ public class StatusBar extends SystemUI implements DemoMode,
     boolean isCameraAllowedByAdmin() {
         if (mDevicePolicyManager.getCameraDisabled(null, mCurrentUserId)) {
             return false;
-        } else if (isKeyguardShowing() && isKeyguardSecure()) {
+        } else if (mStatusBarKeyguardViewManager == null ||
+                (isKeyguardShowing() && isKeyguardSecure())) {
             // Check if the admin has disabled the camera specifically for the keyguard
             return (mDevicePolicyManager.getKeyguardDisabledFeatures(null, mCurrentUserId)
                     & DevicePolicyManager.KEYGUARD_DISABLE_SECURE_CAMERA) == 0;
@@ -5883,6 +5886,9 @@ public class StatusBar extends SystemUI implements DemoMode,
                 userSwitched(mCurrentUserId);
             } else if (Intent.ACTION_USER_ADDED.equals(action)) {
                 updateCurrentProfilesCache();
+            } else if (Intent.ACTION_USER_UNLOCKED.equals(action)) {
+                // Start the overview connection to the launcher service
+                Dependency.get(OverviewProxyService.class).startConnectionToCurrentUser();
             } else if (Intent.ACTION_USER_PRESENT.equals(action)) {
                 List<ActivityManager.RecentTaskInfo> recentTask = null;
                 try {

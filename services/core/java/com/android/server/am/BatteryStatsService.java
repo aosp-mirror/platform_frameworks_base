@@ -21,8 +21,10 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.net.wifi.WifiActivityEnergyInfo;
+import android.os.PowerManager.ServiceType;
 import android.os.PowerSaveState;
 import android.os.BatteryStats;
+import android.os.BatteryStatsInternal;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -52,7 +54,6 @@ import com.android.internal.os.PowerProfile;
 import com.android.internal.os.RpmStats;
 import com.android.internal.util.DumpUtils;
 import com.android.server.LocalServices;
-import com.android.server.power.BatterySaverPolicy.ServiceType;
 import android.util.StatsLog;
 
 import java.io.File;
@@ -177,7 +178,20 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     }
 
     public void publish() {
+        LocalServices.addService(BatteryStatsInternal.class, new LocalService());
         ServiceManager.addService(BatteryStats.SERVICE_NAME, asBinder());
+    }
+
+    private final class LocalService extends BatteryStatsInternal {
+        @Override
+        public String[] getWifiIfaces() {
+            return mStats.getWifiIfaces().clone();
+        }
+
+        @Override
+        public String[] getMobileIfaces() {
+            return mStats.getMobileIfaces().clone();
+        }
     }
 
     private static void awaitUninterruptibly(Future<?> future) {

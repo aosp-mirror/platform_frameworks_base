@@ -16,16 +16,16 @@
 
 #include "SkiaOpenGLReadback.h"
 
+#include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
+#include <GrBackendSurface.h>
+#include <SkCanvas.h>
+#include <SkSurface.h>
+#include <gl/GrGLInterface.h>
+#include <gl/GrGLTypes.h>
 #include "DeviceInfo.h"
 #include "Matrix.h"
 #include "Properties.h"
-#include <SkCanvas.h>
-#include <SkSurface.h>
-#include <GrBackendSurface.h>
-#include <gl/GrGLInterface.h>
-#include <gl/GrGLTypes.h>
-#include <GLES2/gl2.h>
-#include <GLES2/gl2ext.h>
 
 using namespace android::uirenderer::renderthread;
 
@@ -34,8 +34,8 @@ namespace uirenderer {
 namespace skiapipeline {
 
 CopyResult SkiaOpenGLReadback::copyImageInto(EGLImageKHR eglImage, const Matrix4& imgTransform,
-        int imgWidth, int imgHeight, const Rect& srcRect, SkBitmap* bitmap) {
-
+                                             int imgWidth, int imgHeight, const Rect& srcRect,
+                                             SkBitmap* bitmap) {
     GLuint sourceTexId;
     glGenTextures(1, &sourceTexId);
     glBindTexture(GL_TEXTURE_EXTERNAL_OES, sourceTexId);
@@ -46,7 +46,7 @@ CopyResult SkiaOpenGLReadback::copyImageInto(EGLImageKHR eglImage, const Matrix4
         sk_sp<const GrGLInterface> glInterface(GrGLCreateNativeInterface());
         LOG_ALWAYS_FATAL_IF(!glInterface.get());
         grContext.reset(GrContext::Create(GrBackend::kOpenGL_GrBackend,
-                (GrBackendContext)glInterface.get()));
+                                          (GrBackendContext)glInterface.get()));
     } else {
         grContext->resetContext();
     }
@@ -57,13 +57,13 @@ CopyResult SkiaOpenGLReadback::copyImageInto(EGLImageKHR eglImage, const Matrix4
 
     GrPixelConfig pixelConfig;
     switch (bitmap->colorType()) {
-    case kRGBA_F16_SkColorType:
-        pixelConfig = kRGBA_half_GrPixelConfig;
-        break;
-    case kN32_SkColorType:
-    default:
-        pixelConfig = kRGBA_8888_GrPixelConfig;
-        break;
+        case kRGBA_F16_SkColorType:
+            pixelConfig = kRGBA_half_GrPixelConfig;
+            break;
+        case kN32_SkColorType:
+        default:
+            pixelConfig = kRGBA_8888_GrPixelConfig;
+            break;
     }
 
     /* Ideally, we would call grContext->caps()->isConfigRenderable(...). We
@@ -73,7 +73,7 @@ CopyResult SkiaOpenGLReadback::copyImageInto(EGLImageKHR eglImage, const Matrix4
      * for reading back float buffers (skbug.com/6945).
      */
     if (pixelConfig == kRGBA_half_GrPixelConfig &&
-            !DeviceInfo::get()->extensions().hasRenderableFloatTextures()) {
+        !DeviceInfo::get()->extensions().hasRenderableFloatTextures()) {
         ALOGW("Can't copy surface into bitmap, RGBA_F16 config is not supported");
         return CopyResult::DestinationInvalid;
     }
@@ -82,7 +82,7 @@ CopyResult SkiaOpenGLReadback::copyImageInto(EGLImageKHR eglImage, const Matrix4
 
     CopyResult copyResult = CopyResult::UnknownError;
     sk_sp<SkImage> image(SkImage::MakeFromAdoptedTexture(grContext.get(), backendTexture,
-            kTopLeft_GrSurfaceOrigin));
+                                                         kTopLeft_GrSurfaceOrigin));
     if (image) {
         int displayedWidth = imgWidth, displayedHeight = imgHeight;
         // If this is a 90 or 270 degree rotation we need to swap width/height to get the device
@@ -100,12 +100,12 @@ CopyResult SkiaOpenGLReadback::copyImageInto(EGLImageKHR eglImage, const Matrix4
         if (srcNotEmpty) {
             SkMatrix textureMatrixInv;
             imgTransform.copyTo(textureMatrixInv);
-            //TODO: after skia bug https://bugs.chromium.org/p/skia/issues/detail?id=7075 is fixed
+            // TODO: after skia bug https://bugs.chromium.org/p/skia/issues/detail?id=7075 is fixed
             // use bottom left origin and remove flipV and invert transformations.
             SkMatrix flipV;
             flipV.setAll(1, 0, 0, 0, -1, 1, 0, 0, 1);
             textureMatrixInv.preConcat(flipV);
-            textureMatrixInv.preScale(1.0f/displayedWidth, 1.0f/displayedHeight);
+            textureMatrixInv.preScale(1.0f / displayedWidth, 1.0f / displayedHeight);
             textureMatrixInv.postScale(imgWidth, imgHeight);
             SkMatrix textureMatrix;
             if (!textureMatrixInv.invert(&textureMatrix)) {
@@ -117,20 +117,20 @@ CopyResult SkiaOpenGLReadback::copyImageInto(EGLImageKHR eglImage, const Matrix4
 
             // we render in an offscreen buffer to scale and to avoid an issue b/62262733
             // with reading incorrect data from EGLImage backed SkImage (likely a driver bug)
-            sk_sp<SkSurface> scaledSurface = SkSurface::MakeRenderTarget(
-                    grContext.get(), SkBudgeted::kYes, bitmap->info());
+            sk_sp<SkSurface> scaledSurface =
+                    SkSurface::MakeRenderTarget(grContext.get(), SkBudgeted::kYes, bitmap->info());
             SkPaint paint;
             paint.setBlendMode(SkBlendMode::kSrc);
             // Apply a filter, which is matching OpenGL pipeline readback behaviour. Filter usage
             // is codified by tests using golden images like DecodeAccuracyTest.
-            if (skiaSrcRect.width() != bitmap->width()
-                    || skiaSrcRect.height() != bitmap->height()) {
-                //TODO: apply filter always, but check if tests will be fine
+            if (skiaSrcRect.width() != bitmap->width() ||
+                skiaSrcRect.height() != bitmap->height()) {
+                // TODO: apply filter always, but check if tests will be fine
                 paint.setFilterQuality(kLow_SkFilterQuality);
             }
             scaledSurface->getCanvas()->concat(textureMatrix);
             scaledSurface->getCanvas()->drawImageRect(image, skiaSrcRect, skiaDestRect, &paint,
-                    SkCanvas::kFast_SrcRectConstraint);
+                                                      SkCanvas::kFast_SrcRectConstraint);
 
             image = scaledSurface->makeImageSnapshot();
 

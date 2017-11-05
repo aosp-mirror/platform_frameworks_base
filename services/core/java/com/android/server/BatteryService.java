@@ -56,6 +56,7 @@ import android.os.DropBoxManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
+import android.os.Trace;
 import android.os.UEventObserver;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -246,6 +247,7 @@ public final class BatteryService extends SystemService {
     }
 
     private void registerHealthCallback() {
+        traceBegin("HealthInitWrapper");
         mHealthServiceWrapper = new HealthServiceWrapper();
         mHealthHalCallback = new HealthHalCallback();
         // IHealth is lazily retrieved.
@@ -259,8 +261,11 @@ public final class BatteryService extends SystemService {
         } catch (NoSuchElementException ex) {
             Slog.e(TAG, "health: cannot register callback. (no supported health HAL service)");
             throw ex;
+        } finally {
+            traceEnd();
         }
 
+        traceBegin("HealthInitWaitUpdate");
         // init register for new service notifications, and IServiceManager should return the
         // existing service in a near future. Wait for this.update() to instantiate
         // the initial mHealthInfo.
@@ -280,6 +285,7 @@ public final class BatteryService extends SystemService {
 
         Slog.i(TAG, "health: Waited " + (SystemClock.uptimeMillis() - beforeWait)
                 + "ms and received the update.");
+        traceEnd();
     }
 
     private void updateBatteryWarningLevelLocked() {
@@ -375,6 +381,7 @@ public final class BatteryService extends SystemService {
     }
 
     private void update(HealthInfo info) {
+        traceBegin("HealthInfoUpdate");
         synchronized (mLock) {
             if (!mUpdatesStopped) {
                 mHealthInfo = info;
@@ -385,6 +392,7 @@ public final class BatteryService extends SystemService {
                 copy(mLastHealthInfo, info);
             }
         }
+        traceEnd();
     }
 
     private static void copy(HealthInfo dst, HealthInfo src) {
@@ -932,6 +940,14 @@ public final class BatteryService extends SystemService {
         proto.flush();
     }
 
+    private static void traceBegin(String name) {
+        Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, name);
+    }
+
+    private static void traceEnd() {
+        Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
+    }
+
     private final class Led {
         private final Light mBatteryLight;
 
@@ -997,6 +1013,7 @@ public final class BatteryService extends SystemService {
                 String instance) {
             if (newService == null) return;
 
+            traceBegin("HealthUnregisterCallback");
             try {
                 if (oldService != null) {
                     int r = oldService.unregisterCallback(this);
@@ -1008,8 +1025,11 @@ public final class BatteryService extends SystemService {
             } catch (RemoteException ex) {
                 Slog.w(TAG, "health: cannot unregister previous callback (transaction error): "
                             + ex.getMessage());
+            } finally {
+                traceEnd();
             }
 
+            traceBegin("HealthRegisterCallback");
             try {
                 int r = newService.registerCallback(this);
                 if (r != Result.SUCCESS) {
@@ -1022,6 +1042,8 @@ public final class BatteryService extends SystemService {
             } catch (RemoteException ex) {
                 Slog.e(TAG, "health: cannot register callback (transaction error): "
                         + ex.getMessage());
+            } finally {
+                traceEnd();
             }
         }
     }
@@ -1054,53 +1076,63 @@ public final class BatteryService extends SystemService {
             Slog.e(TAG, "health: must not call unregisterListener on battery properties");
         }
         public int getProperty(int id, final BatteryProperty prop) throws RemoteException {
-            IHealth service = mHealthServiceWrapper.getLastService();
-            if (service == null) throw new RemoteException("no health service");
-            final MutableInt outResult = new MutableInt(Result.NOT_SUPPORTED);
-            switch(id) {
-                case BatteryManager.BATTERY_PROPERTY_CHARGE_COUNTER:
-                    service.getChargeCounter((int result, int value) -> {
-                        outResult.value = result;
-                        if (result == Result.SUCCESS) prop.setLong(value);
-                    });
-                    break;
-                case BatteryManager.BATTERY_PROPERTY_CURRENT_NOW:
-                    service.getCurrentNow((int result, int value) -> {
-                        outResult.value = result;
-                        if (result == Result.SUCCESS) prop.setLong(value);
-                    });
-                    break;
-                case BatteryManager.BATTERY_PROPERTY_CURRENT_AVERAGE:
-                    service.getCurrentAverage((int result, int value) -> {
-                        outResult.value = result;
-                        if (result == Result.SUCCESS) prop.setLong(value);
-                    });
-                    break;
-                case BatteryManager.BATTERY_PROPERTY_CAPACITY:
-                    service.getCapacity((int result, int value) -> {
-                        outResult.value = result;
-                        if (result == Result.SUCCESS) prop.setLong(value);
-                    });
-                    break;
-                case BatteryManager.BATTERY_PROPERTY_STATUS:
-                    service.getChargeStatus((int result, int value) -> {
-                        outResult.value = result;
-                        if (result == Result.SUCCESS) prop.setLong(value);
-                    });
-                    break;
-                case BatteryManager.BATTERY_PROPERTY_ENERGY_COUNTER:
-                    service.getEnergyCounter((int result, long value) -> {
-                        outResult.value = result;
-                        if (result == Result.SUCCESS) prop.setLong(value);
-                    });
-                    break;
+            traceBegin("HealthGetProperty");
+            try {
+                IHealth service = mHealthServiceWrapper.getLastService();
+                if (service == null) throw new RemoteException("no health service");
+                final MutableInt outResult = new MutableInt(Result.NOT_SUPPORTED);
+                switch(id) {
+                    case BatteryManager.BATTERY_PROPERTY_CHARGE_COUNTER:
+                        service.getChargeCounter((int result, int value) -> {
+                            outResult.value = result;
+                            if (result == Result.SUCCESS) prop.setLong(value);
+                        });
+                        break;
+                    case BatteryManager.BATTERY_PROPERTY_CURRENT_NOW:
+                        service.getCurrentNow((int result, int value) -> {
+                            outResult.value = result;
+                            if (result == Result.SUCCESS) prop.setLong(value);
+                        });
+                        break;
+                    case BatteryManager.BATTERY_PROPERTY_CURRENT_AVERAGE:
+                        service.getCurrentAverage((int result, int value) -> {
+                            outResult.value = result;
+                            if (result == Result.SUCCESS) prop.setLong(value);
+                        });
+                        break;
+                    case BatteryManager.BATTERY_PROPERTY_CAPACITY:
+                        service.getCapacity((int result, int value) -> {
+                            outResult.value = result;
+                            if (result == Result.SUCCESS) prop.setLong(value);
+                        });
+                        break;
+                    case BatteryManager.BATTERY_PROPERTY_STATUS:
+                        service.getChargeStatus((int result, int value) -> {
+                            outResult.value = result;
+                            if (result == Result.SUCCESS) prop.setLong(value);
+                        });
+                        break;
+                    case BatteryManager.BATTERY_PROPERTY_ENERGY_COUNTER:
+                        service.getEnergyCounter((int result, long value) -> {
+                            outResult.value = result;
+                            if (result == Result.SUCCESS) prop.setLong(value);
+                        });
+                        break;
+                }
+                return outResult.value;
+            } finally {
+                traceEnd();
             }
-            return outResult.value;
         }
         public void scheduleUpdate() throws RemoteException {
-            IHealth service = mHealthServiceWrapper.getLastService();
-            if (service == null) throw new RemoteException("no health service");
-            service.update();
+            traceBegin("HealthScheduleUpdate");
+            try {
+                IHealth service = mHealthServiceWrapper.getLastService();
+                if (service == null) throw new RemoteException("no health service");
+                service.update();
+            } finally {
+                traceEnd();
+            }
         }
     }
 
@@ -1203,15 +1235,27 @@ public final class BatteryService extends SystemService {
             if (callback == null || managerSupplier == null || healthSupplier == null)
                 throw new NullPointerException();
 
+            IServiceManager manager;
+
             mCallback = callback;
             mHealthSupplier = healthSupplier;
 
-            IServiceManager manager = managerSupplier.get();
+            traceBegin("HealthInitGetManager");
+            try {
+                manager = managerSupplier.get();
+            } finally {
+                traceEnd();
+            }
             for (String name : sAllInstances) {
-                if (manager.getTransport(IHealth.kInterfaceName, name) !=
-                        IServiceManager.Transport.EMPTY) {
-                    mInstanceName = name;
-                    break;
+                traceBegin("HealthInitGetTransport_" + name);
+                try {
+                    if (manager.getTransport(IHealth.kInterfaceName, name) !=
+                            IServiceManager.Transport.EMPTY) {
+                        mInstanceName = name;
+                        break;
+                    }
+                } finally {
+                    traceEnd();
                 }
             }
 
@@ -1221,7 +1265,12 @@ public final class BatteryService extends SystemService {
                         sAllInstances.toString()));
             }
 
-            manager.registerForNotifications(IHealth.kInterfaceName, mInstanceName, mNotification);
+            traceBegin("HealthInitRegisterNotification");
+            try {
+                manager.registerForNotifications(IHealth.kInterfaceName, mInstanceName, mNotification);
+            } finally {
+                traceEnd();
+            }
             Slog.i(TAG, "health: HealthServiceWrapper listening to instance " + mInstanceName);
         }
 

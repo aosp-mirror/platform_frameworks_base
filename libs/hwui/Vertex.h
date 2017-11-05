@@ -45,15 +45,13 @@ struct Vertex {
         vertex->y = y;
     }
 
-    static inline void set(Vertex* vertex, Vector2 val) {
-        set(vertex, val.x, val.y);
-    }
+    static inline void set(Vertex* vertex, Vector2 val) { set(vertex, val.x, val.y); }
 
     static inline void copyWithOffset(Vertex* vertex, const Vertex& src, float x, float y) {
         set(vertex, src.x + x, src.y + y);
     }
 
-}; // struct Vertex
+};  // struct Vertex
 
 REQUIRE_COMPATIBLE_LAYOUT(Vertex);
 
@@ -65,14 +63,14 @@ struct TextureVertex {
     float u, v;
 
     static inline void set(TextureVertex* vertex, float x, float y, float u, float v) {
-        *vertex = { x, y, u, v };
+        *vertex = {x, y, u, v};
     }
 
     static inline void setUV(TextureVertex* vertex, float u, float v) {
         vertex[0].u = u;
         vertex[0].v = v;
     }
-}; // struct TextureVertex
+};  // struct TextureVertex
 
 REQUIRE_COMPATIBLE_LAYOUT(TextureVertex);
 
@@ -83,15 +81,15 @@ REQUIRE_COMPATIBLE_LAYOUT(TextureVertex);
 struct ColorTextureVertex {
     float x, y;
     float u, v;
-    float r, g, b, a; // pre-multiplied linear
+    float r, g, b, a;  // pre-multiplied linear
 
-    static inline void set(ColorTextureVertex* vertex, float x, float y,
-            float u, float v, uint32_t color) {
+    static inline void set(ColorTextureVertex* vertex, float x, float y, float u, float v,
+                           uint32_t color) {
         FloatColor c;
         c.set(color);
-        *vertex = { x, y, u, v, c.r, c.g, c.b, c.a };
+        *vertex = {x, y, u, v, c.r, c.g, c.b, c.a};
     }
-}; // struct ColorTextureVertex
+};  // struct ColorTextureVertex
 
 REQUIRE_COMPATIBLE_LAYOUT(ColorTextureVertex);
 
@@ -103,22 +101,20 @@ struct AlphaVertex {
     float alpha;
 
     static inline void set(AlphaVertex* vertex, float x, float y, float alpha) {
-        *vertex = { x, y, alpha };
+        *vertex = {x, y, alpha};
     }
 
-    static inline void copyWithOffset(AlphaVertex* vertex, const AlphaVertex& src,
-            float x, float y) {
+    static inline void copyWithOffset(AlphaVertex* vertex, const AlphaVertex& src, float x,
+                                      float y) {
         AlphaVertex::set(vertex, src.x + x, src.y + y, src.alpha);
     }
 
-    static inline void setColor(AlphaVertex* vertex, float alpha) {
-        vertex[0].alpha = alpha;
-    }
-}; // struct AlphaVertex
+    static inline void setColor(AlphaVertex* vertex, float alpha) { vertex[0].alpha = alpha; }
+};  // struct AlphaVertex
 
 REQUIRE_COMPATIBLE_LAYOUT(AlphaVertex);
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android
 
-#endif // ANDROID_HWUI_VERTEX_H
+#endif  // ANDROID_HWUI_VERTEX_H

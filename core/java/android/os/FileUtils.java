@@ -320,8 +320,17 @@ public class FileUtils {
      * is {@code filename}.
      */
     public static void bytesToFile(String filename, byte[] content) throws IOException {
-        try (FileOutputStream fos = new FileOutputStream(filename)) {
-            fos.write(content);
+        if (filename.startsWith("/proc/")) {
+            final int oldMask = StrictMode.allowThreadDiskWritesMask();
+            try (FileOutputStream fos = new FileOutputStream(filename)) {
+                fos.write(content);
+            } finally {
+                StrictMode.setThreadPolicyMask(oldMask);
+            }
+        } else {
+            try (FileOutputStream fos = new FileOutputStream(filename)) {
+                fos.write(content);
+            }
         }
     }
 

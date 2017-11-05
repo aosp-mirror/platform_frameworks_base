@@ -17,38 +17,37 @@
 
 #include "Caches.h"
 #include "renderthread/EglManager.h"
-#include "renderthread/RenderThread.h"
 #include "renderthread/RenderProxy.h"
+#include "renderthread/RenderThread.h"
 #include "utils/Color.h"
 
 #include <sys/mman.h>
 
-#include <log/log.h>
 #include <cutils/ashmem.h>
+#include <log/log.h>
 
-#include <private/gui/ComposerService.h>
 #include <binder/IServiceManager.h>
+#include <private/gui/ComposerService.h>
 #include <ui/PixelFormat.h>
 
 #include <SkCanvas.h>
-#include <SkToSRGBColorFilter.h>
 #include <SkImagePriv.h>
+#include <SkToSRGBColorFilter.h>
 
 namespace android {
 
 static bool computeAllocationSize(size_t rowBytes, int height, size_t* size) {
     int32_t rowBytes32 = SkToS32(rowBytes);
-    int64_t bigSize = (int64_t) height * rowBytes32;
+    int64_t bigSize = (int64_t)height * rowBytes32;
     if (rowBytes32 < 0 || !sk_64_isS32(bigSize)) {
-        return false; // allocation will be too large
+        return false;  // allocation will be too large
     }
 
     *size = sk_64_asS32(bigSize);
     return true;
 }
 
-typedef sk_sp<Bitmap> (*AllocPixelRef)(size_t allocSize, const SkImageInfo& info,
-        size_t rowBytes);
+typedef sk_sp<Bitmap> (*AllocPixelRef)(size_t allocSize, const SkImageInfo& info, size_t rowBytes);
 
 static sk_sp<Bitmap> allocateBitmap(SkBitmap* bitmap, AllocPixelRef alloc) {
     const SkImageInfo& info = bitmap->info();
@@ -74,7 +73,7 @@ static sk_sp<Bitmap> allocateBitmap(SkBitmap* bitmap, AllocPixelRef alloc) {
 }
 
 sk_sp<Bitmap> Bitmap::allocateAshmemBitmap(SkBitmap* bitmap) {
-   return allocateBitmap(bitmap, &Bitmap::allocateAshmemBitmap);
+    return allocateBitmap(bitmap, &Bitmap::allocateAshmemBitmap);
 }
 
 static sk_sp<Bitmap> allocateHeapBitmap(size_t size, const SkImageInfo& info, size_t rowBytes) {
@@ -90,7 +89,7 @@ sk_sp<Bitmap> Bitmap::allocateHardwareBitmap(SkBitmap& bitmap) {
 }
 
 sk_sp<Bitmap> Bitmap::allocateHeapBitmap(SkBitmap* bitmap) {
-   return allocateBitmap(bitmap, &android::allocateHeapBitmap);
+    return allocateBitmap(bitmap, &android::allocateHeapBitmap);
 }
 
 sk_sp<Bitmap> Bitmap::allocateHeapBitmap(const SkImageInfo& info) {
@@ -102,8 +101,7 @@ sk_sp<Bitmap> Bitmap::allocateHeapBitmap(const SkImageInfo& info) {
     return android::allocateHeapBitmap(size, info, info.minRowBytes());
 }
 
-sk_sp<Bitmap> Bitmap::allocateAshmemBitmap(size_t size, const SkImageInfo& info,
-        size_t rowBytes) {
+sk_sp<Bitmap> Bitmap::allocateAshmemBitmap(size_t size, const SkImageInfo& info, size_t rowBytes) {
     // Create new ashmem region with read/write priv
     int fd = ashmem_create_region("bitmap", size);
     if (fd < 0) {
@@ -125,25 +123,25 @@ sk_sp<Bitmap> Bitmap::allocateAshmemBitmap(size_t size, const SkImageInfo& info,
 }
 
 void FreePixelRef(void* addr, void* context) {
-    auto pixelRef = (SkPixelRef*) context;
+    auto pixelRef = (SkPixelRef*)context;
     pixelRef->unref();
 }
 
 sk_sp<Bitmap> Bitmap::createFrom(const SkImageInfo& info, SkPixelRef& pixelRef) {
     pixelRef.ref();
-    return sk_sp<Bitmap>(new Bitmap((void*) pixelRef.pixels(), (void*) &pixelRef, FreePixelRef,
-            info, pixelRef.rowBytes()));
+    return sk_sp<Bitmap>(new Bitmap((void*)pixelRef.pixels(), (void*)&pixelRef, FreePixelRef, info,
+                                    pixelRef.rowBytes()));
 }
 
 sk_sp<Bitmap> Bitmap::createFrom(sp<GraphicBuffer> graphicBuffer) {
     PixelFormat format = graphicBuffer->getPixelFormat();
     if (!graphicBuffer.get() ||
-            (format != PIXEL_FORMAT_RGBA_8888 && format != PIXEL_FORMAT_RGBA_FP16)) {
+        (format != PIXEL_FORMAT_RGBA_8888 && format != PIXEL_FORMAT_RGBA_FP16)) {
         return nullptr;
     }
     SkImageInfo info = SkImageInfo::Make(graphicBuffer->getWidth(), graphicBuffer->getHeight(),
-            kRGBA_8888_SkColorType, kPremul_SkAlphaType,
-            SkColorSpace::MakeSRGB());
+                                         kRGBA_8888_SkColorType, kPremul_SkAlphaType,
+                                         SkColorSpace::MakeSRGB());
     return sk_sp<Bitmap>(new Bitmap(graphicBuffer.get(), info));
 }
 
@@ -155,8 +153,8 @@ static SkImageInfo validateAlpha(const SkImageInfo& info) {
     // Need to validate the alpha type to filter against the color type
     // to prevent things like a non-opaque RGB565 bitmap
     SkAlphaType alphaType;
-    LOG_ALWAYS_FATAL_IF(!SkColorTypeValidateAlphaType(
-            info.colorType(), info.alphaType(), &alphaType),
+    LOG_ALWAYS_FATAL_IF(
+            !SkColorTypeValidateAlphaType(info.colorType(), info.alphaType(), &alphaType),
             "Failed to validate alpha type!");
     return info.makeAlphaType(alphaType);
 }
@@ -173,28 +171,27 @@ void Bitmap::reconfigure(const SkImageInfo& newInfo, size_t rowBytes) {
 }
 
 Bitmap::Bitmap(void* address, size_t size, const SkImageInfo& info, size_t rowBytes)
-            : SkPixelRef(info.width(), info.height(), address, rowBytes)
-            , mInfo(validateAlpha(info))
-            , mPixelStorageType(PixelStorageType::Heap) {
+        : SkPixelRef(info.width(), info.height(), address, rowBytes)
+        , mInfo(validateAlpha(info))
+        , mPixelStorageType(PixelStorageType::Heap) {
     mPixelStorage.heap.address = address;
     mPixelStorage.heap.size = size;
 }
 
-Bitmap::Bitmap(void* address, void* context, FreeFunc freeFunc,
-                const SkImageInfo& info, size_t rowBytes)
-            : SkPixelRef(info.width(), info.height(), address, rowBytes)
-            , mInfo(validateAlpha(info))
-            , mPixelStorageType(PixelStorageType::External) {
+Bitmap::Bitmap(void* address, void* context, FreeFunc freeFunc, const SkImageInfo& info,
+               size_t rowBytes)
+        : SkPixelRef(info.width(), info.height(), address, rowBytes)
+        , mInfo(validateAlpha(info))
+        , mPixelStorageType(PixelStorageType::External) {
     mPixelStorage.external.address = address;
     mPixelStorage.external.context = context;
     mPixelStorage.external.freeFunc = freeFunc;
 }
 
-Bitmap::Bitmap(void* address, int fd, size_t mappedSize,
-                const SkImageInfo& info, size_t rowBytes)
-            : SkPixelRef(info.width(), info.height(), address, rowBytes)
-            , mInfo(validateAlpha(info))
-            , mPixelStorageType(PixelStorageType::Ashmem) {
+Bitmap::Bitmap(void* address, int fd, size_t mappedSize, const SkImageInfo& info, size_t rowBytes)
+        : SkPixelRef(info.width(), info.height(), address, rowBytes)
+        , mInfo(validateAlpha(info))
+        , mPixelStorageType(PixelStorageType::Ashmem) {
     mPixelStorage.ashmem.address = address;
     mPixelStorage.ashmem.fd = fd;
     mPixelStorage.ashmem.size = mappedSize;
@@ -207,32 +204,31 @@ Bitmap::Bitmap(GraphicBuffer* buffer, const SkImageInfo& info)
         , mPixelStorageType(PixelStorageType::Hardware) {
     mPixelStorage.hardware.buffer = buffer;
     buffer->incStrong(buffer);
-    setImmutable(); // HW bitmaps are always immutable
+    setImmutable();  // HW bitmaps are always immutable
     if (uirenderer::Properties::isSkiaEnabled()) {
         mImage = SkImage::MakeFromAHardwareBuffer(reinterpret_cast<AHardwareBuffer*>(buffer),
-                mInfo.alphaType(), mInfo.refColorSpace());
+                                                  mInfo.alphaType(), mInfo.refColorSpace());
     }
 }
 
 Bitmap::~Bitmap() {
     switch (mPixelStorageType) {
-    case PixelStorageType::External:
-        mPixelStorage.external.freeFunc(mPixelStorage.external.address,
-                mPixelStorage.external.context);
-        break;
-    case PixelStorageType::Ashmem:
-        munmap(mPixelStorage.ashmem.address, mPixelStorage.ashmem.size);
-        close(mPixelStorage.ashmem.fd);
-        break;
-    case PixelStorageType::Heap:
-        free(mPixelStorage.heap.address);
-        break;
-    case PixelStorageType::Hardware:
-        auto buffer = mPixelStorage.hardware.buffer;
-        buffer->decStrong(buffer);
-        mPixelStorage.hardware.buffer = nullptr;
-        break;
-
+        case PixelStorageType::External:
+            mPixelStorage.external.freeFunc(mPixelStorage.external.address,
+                                            mPixelStorage.external.context);
+            break;
+        case PixelStorageType::Ashmem:
+            munmap(mPixelStorage.ashmem.address, mPixelStorage.ashmem.size);
+            close(mPixelStorage.ashmem.fd);
+            break;
+        case PixelStorageType::Heap:
+            free(mPixelStorage.heap.address);
+            break;
+        case PixelStorageType::Hardware:
+            auto buffer = mPixelStorage.hardware.buffer;
+            buffer->decStrong(buffer);
+            mPixelStorage.hardware.buffer = nullptr;
+            break;
     }
 
     android::uirenderer::renderthread::RenderProxy::onBitmapDestroyed(getStableID());
@@ -248,32 +244,32 @@ void Bitmap::setHasHardwareMipMap(bool hasMipMap) {
 
 void* Bitmap::getStorage() const {
     switch (mPixelStorageType) {
-    case PixelStorageType::External:
-        return mPixelStorage.external.address;
-    case PixelStorageType::Ashmem:
-        return mPixelStorage.ashmem.address;
-    case PixelStorageType::Heap:
-        return mPixelStorage.heap.address;
-    case PixelStorageType::Hardware:
-        return nullptr;
+        case PixelStorageType::External:
+            return mPixelStorage.external.address;
+        case PixelStorageType::Ashmem:
+            return mPixelStorage.ashmem.address;
+        case PixelStorageType::Heap:
+            return mPixelStorage.heap.address;
+        case PixelStorageType::Hardware:
+            return nullptr;
     }
 }
 
 int Bitmap::getAshmemFd() const {
     switch (mPixelStorageType) {
-    case PixelStorageType::Ashmem:
-        return mPixelStorage.ashmem.fd;
-    default:
-        return -1;
+        case PixelStorageType::Ashmem:
+            return mPixelStorage.ashmem.fd;
+        default:
+            return -1;
     }
 }
 
 size_t Bitmap::getAllocationByteCount() const {
     switch (mPixelStorageType) {
-    case PixelStorageType::Heap:
-        return mPixelStorage.heap.size;
-    default:
-        return rowBytes() * height();
+        case PixelStorageType::Heap:
+            return mPixelStorage.heap.size;
+        default:
+            return rowBytes() * height();
     }
 }
 
@@ -294,7 +290,8 @@ void Bitmap::getSkBitmap(SkBitmap* outBitmap) {
     if (isHardware()) {
         if (uirenderer::Properties::isSkiaEnabled()) {
             outBitmap->allocPixels(SkImageInfo::Make(info().width(), info().height(),
-                    info().colorType(), info().alphaType(), nullptr));
+                                                     info().colorType(), info().alphaType(),
+                                                     nullptr));
         } else {
             outBitmap->allocPixels(info());
         }
@@ -330,11 +327,11 @@ sk_sp<SkImage> Bitmap::makeImage(sk_sp<SkColorFilter>* outputColorFilter) {
         // TODO: refactor Bitmap to not derive from SkPixelRef, which would allow caching here.
         image = SkMakeImageFromRasterBitmap(skiaBitmap, kNever_SkCopyPixelsMode);
     }
-    if(uirenderer::Properties::isSkiaEnabled() && image->colorSpace() != nullptr
-            && !image->colorSpace()->isSRGB()) {
+    if (uirenderer::Properties::isSkiaEnabled() && image->colorSpace() != nullptr &&
+        !image->colorSpace()->isSRGB()) {
         *outputColorFilter = SkToSRGBColorFilter::Make(image->refColorSpace());
     }
     return image;
 }
 
-} // namespace android
+}  // namespace android

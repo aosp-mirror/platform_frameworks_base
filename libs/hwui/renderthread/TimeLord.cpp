@@ -19,10 +19,7 @@ namespace android {
 namespace uirenderer {
 namespace renderthread {
 
-TimeLord::TimeLord()
-        : mFrameIntervalNanos(milliseconds_to_nanoseconds(16))
-        , mFrameTimeNanos(0) {
-}
+TimeLord::TimeLord() : mFrameIntervalNanos(milliseconds_to_nanoseconds(16)), mFrameTimeNanos(0) {}
 
 bool TimeLord::vsyncReceived(nsecs_t vsync) {
     if (vsync > mFrameTimeNanos) {

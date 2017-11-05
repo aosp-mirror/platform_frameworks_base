@@ -24,8 +24,8 @@
 #include <utils/LruCache.h>
 #include <utils/String16.h>
 
-#include "font/Font.h"
 #include "Texture.h"
+#include "font/Font.h"
 
 namespace android {
 namespace uirenderer {
@@ -34,13 +34,20 @@ class Caches;
 class FontRenderer;
 
 struct ShadowText {
-    ShadowText(): glyphCount(0), radius(0.0f), textSize(0.0f), typeface(nullptr),
-            flags(0), italicStyle(0.0f), scaleX(0), glyphs(nullptr), positions(nullptr) {
-    }
+    ShadowText()
+            : glyphCount(0)
+            , radius(0.0f)
+            , textSize(0.0f)
+            , typeface(nullptr)
+            , flags(0)
+            , italicStyle(0.0f)
+            , scaleX(0)
+            , glyphs(nullptr)
+            , positions(nullptr) {}
 
     // len is the number of bytes in text
     ShadowText(const SkPaint* paint, float radius, uint32_t glyphCount, const glyph_t* srcGlyphs,
-            const float* positions)
+               const float* positions)
             : glyphCount(glyphCount)
             , radius(radius)
             , textSize(paint->getTextSize())
@@ -49,23 +56,17 @@ struct ShadowText {
             , italicStyle(paint->getTextSkewX())
             , scaleX(paint->getTextScaleX())
             , glyphs(srcGlyphs)
-            , positions(positions) {
-    }
+            , positions(positions) {}
 
-    ~ShadowText() {
-    }
+    ~ShadowText() {}
 
     hash_t hash() const;
 
     static int compare(const ShadowText& lhs, const ShadowText& rhs);
 
-    bool operator==(const ShadowText& other) const {
-        return compare(*this, other) == 0;
-    }
+    bool operator==(const ShadowText& other) const { return compare(*this, other) == 0; }
 
-    bool operator!=(const ShadowText& other) const {
-        return compare(*this, other) != 0;
-    }
+    bool operator!=(const ShadowText& other) const { return compare(*this, other) != 0; }
 
     void copyTextLocally() {
         str.setTo(reinterpret_cast<const char16_t*>(glyphs), glyphCount);
@@ -91,7 +92,7 @@ struct ShadowText {
     String16 str;
     Vector<float> positionsCopy;
 
-}; // struct ShadowText
+};  // struct ShadowText
 
 // Caching support
 
@@ -110,15 +111,14 @@ inline hash_t hash_type(const ShadowText& entry) {
 /**
  * Alpha texture used to represent a shadow.
  */
-struct ShadowTexture: public Texture {
-    explicit ShadowTexture(Caches& caches): Texture(caches) {
-    }
+struct ShadowTexture : public Texture {
+    explicit ShadowTexture(Caches& caches) : Texture(caches) {}
 
     float left;
     float top;
-}; // struct ShadowTexture
+};  // struct ShadowTexture
 
-class TextDropShadowCache: public OnEntryRemoved<ShadowText, ShadowTexture*> {
+class TextDropShadowCache : public OnEntryRemoved<ShadowText, ShadowTexture*> {
 public:
     TextDropShadowCache();
     explicit TextDropShadowCache(uint32_t maxByteSize);
@@ -130,17 +130,15 @@ public:
      */
     void operator()(ShadowText& text, ShadowTexture*& texture) override;
 
-    ShadowTexture* get(const SkPaint* paint, const glyph_t* text,
-            int numGlyphs, float radius, const float* positions);
+    ShadowTexture* get(const SkPaint* paint, const glyph_t* text, int numGlyphs, float radius,
+                       const float* positions);
 
     /**
      * Clears the cache. This causes all textures to be deleted.
      */
     void clear();
 
-    void setFontRenderer(FontRenderer& fontRenderer) {
-        mRenderer = &fontRenderer;
-    }
+    void setFontRenderer(FontRenderer& fontRenderer) { mRenderer = &fontRenderer; }
 
     /**
      * Returns the maximum size of the cache in bytes.
@@ -158,9 +156,9 @@ private:
     const uint32_t mMaxSize;
     FontRenderer* mRenderer = nullptr;
     bool mDebugEnabled;
-}; // class TextDropShadowCache
+};  // class TextDropShadowCache
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android
 
-#endif // ANDROID_HWUI_TEXT_DROP_SHADOW_CACHE_H
+#endif  // ANDROID_HWUI_TEXT_DROP_SHADOW_CACHE_H

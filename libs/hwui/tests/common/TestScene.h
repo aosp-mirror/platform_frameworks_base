@@ -52,9 +52,8 @@ public:
 
     class Registrar {
     public:
-        explicit Registrar(const TestScene::Info& info) {
-            TestScene::registerScene(info);
-        }
+        explicit Registrar(const TestScene::Info& info) { TestScene::registerScene(info); }
+
     private:
         Registrar() = delete;
         Registrar(const Registrar&) = delete;
@@ -69,6 +68,6 @@ public:
     static void registerScene(const Info& info);
 };
 
-} // namespace test
-} // namespace uirenderer
-} // namespace android
+}  // namespace test
+}  // namespace uirenderer
+}  // namespace android

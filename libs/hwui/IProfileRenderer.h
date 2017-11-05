@@ -22,7 +22,7 @@ namespace uirenderer {
 class IProfileRenderer {
 public:
     virtual void drawRect(float left, float top, float right, float bottom,
-            const SkPaint& paint) = 0;
+                          const SkPaint& paint) = 0;
     virtual void drawRects(const float* rects, int count, const SkPaint& paint) = 0;
     virtual uint32_t getViewportWidth() = 0;
     virtual uint32_t getViewportHeight() = 0;

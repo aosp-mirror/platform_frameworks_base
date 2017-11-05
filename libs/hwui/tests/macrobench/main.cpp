@@ -17,24 +17,24 @@
 #include "tests/common/LeakChecker.h"
 #include "tests/common/TestScene.h"
 
+#include "Properties.h"
 #include "hwui/Typeface.h"
 #include "protos/hwui.pb.h"
-#include "Properties.h"
 
-#include <benchmark/benchmark.h>
 #include <../src/sysinfo.h>
+#include <benchmark/benchmark.h>
 #include <getopt.h>
+#include <pthread.h>
 #include <stdio.h>
-#include <string>
 #include <unistd.h>
+#include <string>
 #include <unordered_map>
 #include <vector>
-#include <pthread.h>
 
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
 #include <errno.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 using namespace android;
 using namespace android::uirenderer;
@@ -46,7 +46,7 @@ static TestScene::Options gOpts;
 std::unique_ptr<benchmark::BenchmarkReporter> gBenchmarkReporter;
 
 void run(const TestScene::Info& info, const TestScene::Options& opts,
-        benchmark::BenchmarkReporter* reporter);
+         benchmark::BenchmarkReporter* reporter);
 
 static void printHelp() {
     printf(R"(
@@ -82,7 +82,7 @@ static void listTests() {
         do {
             int toPrint = dlen;
             if (toPrint > 50) {
-                char* found = (char*) memrchr(col2, ' ', 50);
+                char* found = (char*)memrchr(col2, ' ', 50);
                 if (found) {
                     toPrint = found - col2;
                 } else {
@@ -94,7 +94,8 @@ static void listTests() {
             col2 += toPrint;
             dlen -= toPrint;
             while (*col2 == ' ') {
-                col2++; dlen--;
+                col2++;
+                dlen--;
             }
         } while (dlen > 0);
         printf("\n");
@@ -120,7 +121,7 @@ static void moveToCpuSet(const char* cpusetName) {
     }
     pid_t pid = getpid();
 
-    int towrite = snprintf(buffer, BUF_SIZE, "%ld", (long) pid);
+    int towrite = snprintf(buffer, BUF_SIZE, "%ld", (long)pid);
     if (towrite >= BUF_SIZE) {
         fprintf(stderr, "Buffer wasn't large enough?\n");
     } else {
@@ -161,18 +162,17 @@ enum {
 }
 
 static const struct option LONG_OPTIONS[] = {
-    { "frames", required_argument, nullptr, 'f' },
-    { "repeat", required_argument, nullptr, 'r' },
-    { "help", no_argument, nullptr, 'h' },
-    { "list", no_argument, nullptr, LongOpts::List },
-    { "wait-for-gpu", no_argument, nullptr, LongOpts::WaitForGpu },
-    { "report-frametime", optional_argument, nullptr, LongOpts::ReportFrametime },
-    { "cpuset", required_argument, nullptr, LongOpts::CpuSet },
-    { "benchmark_format", required_argument, nullptr, LongOpts::BenchmarkFormat },
-    { "onscreen", no_argument, nullptr, LongOpts::Onscreen },
-    { "offscreen", no_argument, nullptr, LongOpts::Offscreen },
-    { 0, 0, 0, 0 }
-};
+        {"frames", required_argument, nullptr, 'f'},
+        {"repeat", required_argument, nullptr, 'r'},
+        {"help", no_argument, nullptr, 'h'},
+        {"list", no_argument, nullptr, LongOpts::List},
+        {"wait-for-gpu", no_argument, nullptr, LongOpts::WaitForGpu},
+        {"report-frametime", optional_argument, nullptr, LongOpts::ReportFrametime},
+        {"cpuset", required_argument, nullptr, LongOpts::CpuSet},
+        {"benchmark_format", required_argument, nullptr, LongOpts::BenchmarkFormat},
+        {"onscreen", no_argument, nullptr, LongOpts::Onscreen},
+        {"offscreen", no_argument, nullptr, LongOpts::Offscreen},
+        {0, 0, 0, 0}};
 
 static const char* SHORT_OPTIONS = "c:r:h";
 
@@ -182,97 +182,95 @@ void parseOptions(int argc, char* argv[]) {
     opterr = 0;
 
     while (true) {
-
         /* getopt_long stores the option index here. */
         int option_index = 0;
 
         c = getopt_long(argc, argv, SHORT_OPTIONS, LONG_OPTIONS, &option_index);
 
-        if (c == -1)
-            break;
+        if (c == -1) break;
 
         switch (c) {
-        case 0:
-            // Option set a flag, don't need to do anything
-            // (although none of the current LONG_OPTIONS do this...)
-            break;
+            case 0:
+                // Option set a flag, don't need to do anything
+                // (although none of the current LONG_OPTIONS do this...)
+                break;
 
-        case LongOpts::List:
-            listTests();
-            exit(EXIT_SUCCESS);
-            break;
+            case LongOpts::List:
+                listTests();
+                exit(EXIT_SUCCESS);
+                break;
 
-        case 'c':
-            gOpts.count = atoi(optarg);
-            if (!gOpts.count) {
-                fprintf(stderr, "Invalid frames argument '%s'\n", optarg);
-                error = true;
-            }
-            break;
-
-        case 'r':
-            gRepeatCount = atoi(optarg);
-            if (!gRepeatCount) {
-                fprintf(stderr, "Invalid repeat argument '%s'\n", optarg);
-                error = true;
-            } else {
-                gRepeatCount = (gRepeatCount > 0 ? gRepeatCount : INT_MAX);
-            }
-            break;
-
-        case LongOpts::ReportFrametime:
-            if (optarg) {
-                gOpts.reportFrametimeWeight = atoi(optarg);
-                if (!gOpts.reportFrametimeWeight) {
-                    fprintf(stderr, "Invalid report frametime weight '%s'\n", optarg);
+            case 'c':
+                gOpts.count = atoi(optarg);
+                if (!gOpts.count) {
+                    fprintf(stderr, "Invalid frames argument '%s'\n", optarg);
                     error = true;
                 }
-            } else {
-                gOpts.reportFrametimeWeight = 10;
-            }
-            break;
-
-        case LongOpts::WaitForGpu:
-            Properties::waitForGpuCompletion = true;
-            break;
-
-        case LongOpts::CpuSet:
-            if (!optarg) {
-                error = true;
                 break;
-            }
-            moveToCpuSet(optarg);
-            break;
 
-        case LongOpts::BenchmarkFormat:
-            if (!optarg) {
-                error = true;
+            case 'r':
+                gRepeatCount = atoi(optarg);
+                if (!gRepeatCount) {
+                    fprintf(stderr, "Invalid repeat argument '%s'\n", optarg);
+                    error = true;
+                } else {
+                    gRepeatCount = (gRepeatCount > 0 ? gRepeatCount : INT_MAX);
+                }
                 break;
-            }
-            if (!setBenchmarkFormat(optarg)) {
-                error = true;
-            }
-            break;
 
-        case LongOpts::Onscreen:
-            gOpts.renderOffscreen = false;
-            break;
+            case LongOpts::ReportFrametime:
+                if (optarg) {
+                    gOpts.reportFrametimeWeight = atoi(optarg);
+                    if (!gOpts.reportFrametimeWeight) {
+                        fprintf(stderr, "Invalid report frametime weight '%s'\n", optarg);
+                        error = true;
+                    }
+                } else {
+                    gOpts.reportFrametimeWeight = 10;
+                }
+                break;
 
-        case LongOpts::Offscreen:
-            gOpts.renderOffscreen = true;
-            break;
+            case LongOpts::WaitForGpu:
+                Properties::waitForGpuCompletion = true;
+                break;
 
-        case 'h':
-            printHelp();
-            exit(EXIT_SUCCESS);
-            break;
+            case LongOpts::CpuSet:
+                if (!optarg) {
+                    error = true;
+                    break;
+                }
+                moveToCpuSet(optarg);
+                break;
 
-        case '?':
-            fprintf(stderr, "Unrecognized option '%s'\n", argv[optind - 1]);
+            case LongOpts::BenchmarkFormat:
+                if (!optarg) {
+                    error = true;
+                    break;
+                }
+                if (!setBenchmarkFormat(optarg)) {
+                    error = true;
+                }
+                break;
+
+            case LongOpts::Onscreen:
+                gOpts.renderOffscreen = false;
+                break;
+
+            case LongOpts::Offscreen:
+                gOpts.renderOffscreen = true;
+                break;
+
+            case 'h':
+                printHelp();
+                exit(EXIT_SUCCESS);
+                break;
+
+            case '?':
+                fprintf(stderr, "Unrecognized option '%s'\n", argv[optind - 1]);
             // fall-through
-        default:
-            error = true;
-            break;
+            default:
+                error = true;
+                break;
         }
     }
 

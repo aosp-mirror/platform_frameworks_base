@@ -411,12 +411,12 @@ public class Recents extends SystemUI
         }
 
         int currentUser = sSystemServicesProxy.getCurrentUser();
-        SystemServicesProxy ssp = Recents.getSystemServices();
-        ActivityManager.RunningTaskInfo runningTask = ssp.getRunningTask();
+        ActivityManager.RunningTaskInfo runningTask =
+                ActivityManagerWrapper.getInstance().getRunningTask();
         final int activityType = runningTask != null
                 ? runningTask.configuration.windowConfiguration.getActivityType()
                 : ACTIVITY_TYPE_UNDEFINED;
-        boolean screenPinningActive = ssp.isScreenPinningActive();
+        boolean screenPinningActive = sSystemServicesProxy.isScreenPinningActive();
         boolean isRunningTaskInHomeOrRecentsStack =
                 activityType == ACTIVITY_TYPE_HOME || activityType == ACTIVITY_TYPE_RECENTS;
         if (runningTask != null && !isRunningTaskInHomeOrRecentsStack && !screenPinningActive) {

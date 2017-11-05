@@ -81,9 +81,9 @@ struct DrawGlInfo {
         // commands are issued.
         kStatusDrew = 0x4
     };
-}; // struct DrawGlInfo
+};  // struct DrawGlInfo
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android
 
-#endif // ANDROID_HWUI_DRAW_GL_INFO_H
+#endif  // ANDROID_HWUI_DRAW_GL_INFO_H

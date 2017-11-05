@@ -4043,10 +4043,14 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (DEBUG_SWITCH) Slog.d(TAG_SWITCH,
                 "updateUsageStats: comp=" + component + "res=" + resumed);
         final BatteryStatsImpl stats = mBatteryStatsService.getActiveStatistics();
+        StatsLog.write(StatsLog.ACTIVITY_FOREGROUND_STATE_CHANGED,
+            component.userId, component.realActivity.getPackageName(),
+            component.realActivity.getShortClassName(), resumed ? 1 : 0);
         if (resumed) {
             if (mUsageStatsService != null) {
                 mUsageStatsService.reportEvent(component.realActivity, component.userId,
                         UsageEvents.Event.MOVE_TO_FOREGROUND);
+
             }
             synchronized (stats) {
                 stats.noteActivityResumedLocked(component.app.uid);
@@ -4737,7 +4741,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                             mWindowManager, appOpsManager, proxy, this,
                             OP_ASSIST_STRUCTURE, OP_NONE);
                     requester.requestAssistData(mStackSupervisor.getTopVisibleActivities(),
-                            true, false /* fetchScreenshots */, recentsUid, recentsPackage);
+                            true /* fetchData */, false /* fetchScreenshots */,
+                            true /* allowFetchData */, false /* alloweFetchScreenshots */,
+                            recentsUid, recentsPackage);
                 }
 
                 final Intent intent = new Intent();
@@ -14369,10 +14375,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             }
             sb.append("\n");
-            if (info.hasStackTrace()) {
-                sb.append(info.getStackTrace());
-                sb.append("\n");
-            }
+            sb.append(info.getStackTrace());
+            sb.append("\n");
             if (info.getViolationDetails() != null) {
                 sb.append(info.getViolationDetails());
                 sb.append("\n");
@@ -14704,7 +14708,12 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (process == null) {
             // If process is null, we are being called from some internal code
             // and may be about to die -- run this synchronously.
-            worker.run();
+            final int oldMask = StrictMode.allowThreadDiskWritesMask();
+            try {
+                worker.run();
+            } finally {
+                StrictMode.setThreadPolicyMask(oldMask);
+            }
         } else {
             worker.start();
         }
@@ -20775,9 +20784,10 @@ public class ActivityManagerService extends IActivityManager.Stub
     // the current [or imminent] receiver on.
     private boolean isReceivingBroadcastLocked(ProcessRecord app,
             ArraySet<BroadcastQueue> receivingQueues) {
-        if (!app.curReceivers.isEmpty()) {
-            for (BroadcastRecord r : app.curReceivers) {
-                receivingQueues.add(r.queue);
+        final int N = app.curReceivers.size();
+        if (N > 0) {
+            for (int i = 0; i < N; i++) {
+                receivingQueues.add(app.curReceivers.valueAt(i).queue);
             }
             return true;
         }

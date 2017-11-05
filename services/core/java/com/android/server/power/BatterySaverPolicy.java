@@ -20,6 +20,8 @@ import android.content.ContentResolver;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Handler;
+import android.os.PowerManager;
+import android.os.PowerManager.ServiceType;
 import android.provider.Settings;
 import android.util.KeyValueListParser;
 import android.util.Slog;
@@ -34,31 +36,6 @@ import java.lang.annotation.RetentionPolicy;
  * Class to decide whether to turn on battery saver mode for specific service
  */
 public class BatterySaverPolicy extends ContentObserver {
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef({ServiceType.GPS,
-            ServiceType.VIBRATION,
-            ServiceType.ANIMATION,
-            ServiceType.FULL_BACKUP,
-            ServiceType.KEYVALUE_BACKUP,
-            ServiceType.NETWORK_FIREWALL,
-            ServiceType.SCREEN_BRIGHTNESS,
-            ServiceType.SOUND,
-            ServiceType.BATTERY_STATS,
-            ServiceType.DATA_SAVER})
-    public @interface ServiceType {
-        int NULL = 0;
-        int GPS = 1;
-        int VIBRATION = 2;
-        int ANIMATION = 3;
-        int FULL_BACKUP = 4;
-        int KEYVALUE_BACKUP = 5;
-        int NETWORK_FIREWALL = 6;
-        int SCREEN_BRIGHTNESS = 7;
-        int SOUND = 8;
-        int BATTERY_STATS = 9;
-        int DATA_SAVER = 10;
-    }
-
     private static final String TAG = "BatterySaverPolicy";
 
     // Value of batterySaverGpsMode such that GPS isn't affected by battery saver mode.

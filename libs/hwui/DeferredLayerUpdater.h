@@ -16,10 +16,10 @@
 
 #pragma once
 
-#include <cutils/compiler.h>
-#include <gui/GLConsumer.h>
 #include <SkColorFilter.h>
 #include <SkMatrix.h>
+#include <cutils/compiler.h>
+#include <gui/GLConsumer.h>
 #include <utils/StrongPointer.h>
 
 #include <GLES2/gl2.h>
@@ -41,10 +41,11 @@ public:
     // Note that DeferredLayerUpdater assumes it is taking ownership of the layer
     // and will not call incrementRef on it as a result.
     typedef std::function<Layer*(RenderState& renderState, uint32_t layerWidth,
-            uint32_t layerHeight, SkColorFilter* colorFilter, int alpha,
-            SkBlendMode mode, bool blend)> CreateLayerFn;
-    ANDROID_API explicit DeferredLayerUpdater(RenderState& renderState,
-            CreateLayerFn createLayerFn, Layer::Api layerApi);
+                                 uint32_t layerHeight, SkColorFilter* colorFilter, int alpha,
+                                 SkBlendMode mode, bool blend)>
+            CreateLayerFn;
+    ANDROID_API explicit DeferredLayerUpdater(RenderState& renderState, CreateLayerFn createLayerFn,
+                                              Layer::Api layerApi);
 
     ANDROID_API ~DeferredLayerUpdater();
 
@@ -74,30 +75,24 @@ public:
 
             GLenum target = texture->getCurrentTextureTarget();
             LOG_ALWAYS_FATAL_IF(target != GL_TEXTURE_2D && target != GL_TEXTURE_EXTERNAL_OES,
-                    "set unsupported GLConsumer with target %x", target);
+                                "set unsupported GLConsumer with target %x", target);
         }
     }
 
-    ANDROID_API void updateTexImage() {
-        mUpdateTexImage = true;
-    }
+    ANDROID_API void updateTexImage() { mUpdateTexImage = true; }
 
     ANDROID_API void setTransform(const SkMatrix* matrix) {
         delete mTransform;
         mTransform = matrix ? new SkMatrix(*matrix) : nullptr;
     }
 
-    SkMatrix* getTransform() {
-        return mTransform;
-    }
+    SkMatrix* getTransform() { return mTransform; }
 
     ANDROID_API void setPaint(const SkPaint* paint);
 
     void apply();
 
-    Layer* backingLayer() {
-        return mLayer;
-    }
+    Layer* backingLayer() { return mLayer; }
 
     void detachSurfaceTexture();
 
@@ -105,9 +100,7 @@ public:
 
     void destroyLayer();
 
-    Layer::Api getBackingLayerApi() {
-        return mLayerApi;
-    }
+    Layer::Api getBackingLayerApi() { return mLayerApi; }
 
 private:
     RenderState& mRenderState;

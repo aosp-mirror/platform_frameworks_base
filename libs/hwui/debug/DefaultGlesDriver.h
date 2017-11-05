@@ -25,11 +25,10 @@ namespace debug {
 class DefaultGlesDriver : public GlesDriver {
 public:
 #define GL_ENTRY(ret, api, ...) virtual ret api##_(__VA_ARGS__) override;
-    #include "gles_decls.in"
+#include "gles_decls.in"
 #undef GL_ENTRY
-
 };
 
-} // namespace debug
-} // namespace uirenderer
-} // namespace android
+}  // namespace debug
+}  // namespace uirenderer
+}  // namespace android

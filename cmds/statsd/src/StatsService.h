@@ -157,7 +157,7 @@ private:
     /**
      * Fetches external metrics.
      */
-    StatsPullerManager& m_stats_puller_manager = StatsPullerManager::GetInstance();
+    StatsPullerManager& mStatsPullerManager = StatsPullerManager::GetInstance();
 
     /**
      * Tracks the configurations that have been passed to statsd.

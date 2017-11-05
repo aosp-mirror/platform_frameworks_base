@@ -23,8 +23,8 @@
 #include "RecordedOp.h"
 #include "utils/GLUtils.h"
 
-#include <vector>
 #include <unordered_map>
+#include <vector>
 
 struct SkRect;
 
@@ -60,12 +60,11 @@ public:
         float radius;
     };
 
-    FrameBuilder(const SkRect& clip,
-            uint32_t viewportWidth, uint32_t viewportHeight,
-            const LightGeometry& lightGeometry, Caches& caches);
+    FrameBuilder(const SkRect& clip, uint32_t viewportWidth, uint32_t viewportHeight,
+                 const LightGeometry& lightGeometry, Caches& caches);
 
-    FrameBuilder(const LayerUpdateQueue& layerUpdateQueue,
-            const LightGeometry& lightGeometry, Caches& caches);
+    FrameBuilder(const LayerUpdateQueue& layerUpdateQueue, const LightGeometry& lightGeometry,
+                 Caches& caches);
 
     void deferLayers(const LayerUpdateQueue& layers);
 
@@ -73,8 +72,8 @@ public:
 
     void deferRenderNode(float tx, float ty, Rect clipRect, RenderNode& renderNode);
 
-    void deferRenderNodeScene(const std::vector< sp<RenderNode> >& nodes,
-            const Rect& contentDrawBounds);
+    void deferRenderNodeScene(const std::vector<sp<RenderNode> >& nodes,
+                              const Rect& contentDrawBounds);
 
     virtual ~FrameBuilder() {}
 
@@ -88,32 +87,32 @@ public:
     void replayBakedOps(Renderer& renderer) {
         std::vector<OffscreenBuffer*> temporaryLayers;
         finishDefer();
-        /**
-         * Defines a LUT of lambdas which allow a recorded BakedOpState to use state->op->opId to
-         * dispatch the op via a method on a static dispatcher when the op is replayed.
-         *
-         * For example a BitmapOp would resolve, via the lambda lookup, to calling:
-         *
-         * StaticDispatcher::onBitmapOp(Renderer& renderer, const BitmapOp& op, const BakedOpState& state);
-         */
-        #define X(Type) \
-                [](void* renderer, const BakedOpState& state) { \
-                    StaticDispatcher::on##Type(*(static_cast<Renderer*>(renderer)), \
-                            static_cast<const Type&>(*(state.op)), state); \
-                },
+/**
+ * Defines a LUT of lambdas which allow a recorded BakedOpState to use state->op->opId to
+ * dispatch the op via a method on a static dispatcher when the op is replayed.
+ *
+ * For example a BitmapOp would resolve, via the lambda lookup, to calling:
+ *
+ * StaticDispatcher::onBitmapOp(Renderer& renderer, const BitmapOp& op, const BakedOpState& state);
+ */
+#define X(Type)                                                                   \
+    [](void* renderer, const BakedOpState& state) {                               \
+        StaticDispatcher::on##Type(*(static_cast<Renderer*>(renderer)),           \
+                                   static_cast<const Type&>(*(state.op)), state); \
+    },
         static BakedOpReceiver unmergedReceivers[] = BUILD_RENDERABLE_OP_LUT(X);
-        #undef X
+#undef X
 
-        /**
-         * Defines a LUT of lambdas which allow merged arrays of BakedOpState* to be passed to a
-         * static dispatcher when the group of merged ops is replayed.
-         */
-        #define X(Type) \
-                [](void* renderer, const MergedBakedOpList& opList) { \
-                    StaticDispatcher::onMerged##Type##s(*(static_cast<Renderer*>(renderer)), opList); \
-                },
+/**
+ * Defines a LUT of lambdas which allow merged arrays of BakedOpState* to be passed to a
+ * static dispatcher when the group of merged ops is replayed.
+ */
+#define X(Type)                                                                           \
+    [](void* renderer, const MergedBakedOpList& opList) {                                 \
+        StaticDispatcher::onMerged##Type##s(*(static_cast<Renderer*>(renderer)), opList); \
+    },
         static MergedOpReceiver mergedReceivers[] = BUILD_MERGEABLE_OP_LUT(X);
-        #undef X
+#undef X
 
         // Relay through layers in reverse order, since layers
         // later in the list will be drawn by earlier ones
@@ -168,15 +167,10 @@ public:
 
 private:
     void finishDefer();
-    enum class ChildrenSelectMode {
-        Negative,
-        Positive
-    };
-    void saveForLayer(uint32_t layerWidth, uint32_t layerHeight,
-            float contentTranslateX, float contentTranslateY,
-            const Rect& repaintRect,
-            const Vector3& lightCenter,
-            const BeginLayerOp* beginLayerOp, RenderNode* renderNode);
+    enum class ChildrenSelectMode { Negative, Positive };
+    void saveForLayer(uint32_t layerWidth, uint32_t layerHeight, float contentTranslateX,
+                      float contentTranslateY, const Rect& repaintRect, const Vector3& lightCenter,
+                      const BeginLayerOp* beginLayerOp, RenderNode* renderNode);
     void restoreForLayer();
 
     LayerBuilder& currentLayer() { return *(mLayerBuilders[mLayerStack.back()]); }
@@ -185,16 +179,16 @@ private:
         return BakedOpState::tryConstruct(mAllocator, *mCanvasState.writableSnapshot(), recordedOp);
     }
     BakedOpState* tryBakeUnboundedOpState(const RecordedOp& recordedOp) {
-        return BakedOpState::tryConstructUnbounded(mAllocator, *mCanvasState.writableSnapshot(), recordedOp);
+        return BakedOpState::tryConstructUnbounded(mAllocator, *mCanvasState.writableSnapshot(),
+                                                   recordedOp);
     }
-
 
     // should always be surrounded by a save/restore pair, and not called if DisplayList is null
     void deferNodePropsAndOps(RenderNode& node);
 
     template <typename V>
     void defer3dChildren(const ClipBase* reorderClip, ChildrenSelectMode mode,
-            const V& zTranslatedNodes);
+                         const V& zTranslatedNodes);
 
     void deferShadow(const ClipBase* reorderClip, const RenderNodeOp& casterOp);
 
@@ -206,20 +200,19 @@ private:
 
     void replayBakedOpsImpl(void* arg, BakedOpReceiver* receivers);
 
-    SkPath* createFrameAllocatedPath() {
-        return mAllocator.create<SkPath>();
-    }
+    SkPath* createFrameAllocatedPath() { return mAllocator.create<SkPath>(); }
 
     BakedOpState* deferStrokeableOp(const RecordedOp& op, batchid_t batchId,
-            BakedOpState::StrokeBehavior strokeBehavior = BakedOpState::StrokeBehavior::StyleDefined,
-            bool expandForPathTexture = false);
+                                    BakedOpState::StrokeBehavior strokeBehavior =
+                                            BakedOpState::StrokeBehavior::StyleDefined,
+                                    bool expandForPathTexture = false);
 
-    /**
-     * Declares all FrameBuilder::deferXXXXOp() methods for every RecordedOp type.
-     *
-     * These private methods are called from within deferImpl to defer each individual op
-     * type differently.
-     */
+/**
+ * Declares all FrameBuilder::deferXXXXOp() methods for every RecordedOp type.
+ *
+ * These private methods are called from within deferImpl to defer each individual op
+ * type differently.
+ */
 #define X(Type) void defer##Type(const Type& op);
     MAP_DEFERRABLE_OPS(X)
 #undef X
@@ -254,5 +247,5 @@ private:
     const bool mDrawFbo0;
 };
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android

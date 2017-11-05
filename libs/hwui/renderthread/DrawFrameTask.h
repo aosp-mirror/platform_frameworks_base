@@ -24,8 +24,8 @@
 
 #include "RenderTask.h"
 
-#include "../Rect.h"
 #include "../FrameInfo.h"
+#include "../Rect.h"
 #include "../TreeInfo.h"
 
 namespace android {
@@ -90,7 +90,7 @@ private:
     /*********************************************
      *  Single frame data
      *********************************************/
-    std::vector< sp<DeferredLayerUpdater> > mLayers;
+    std::vector<sp<DeferredLayerUpdater> > mLayers;
 
     int mSyncResult;
     int64_t mSyncQueued;

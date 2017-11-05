@@ -126,6 +126,9 @@ public class GridView extends LinearLayout implements SliceListView {
      * Returns true if this item is just an image.
      */
     private boolean addItem(SliceItem item) {
+        if (item.hasHint(Slice.HINT_HIDDEN)) {
+            return false;
+        }
         if (item.getType() == SliceItem.TYPE_IMAGE) {
             ImageView v = new ImageView(getContext());
             v.setImageIcon(item.getIcon());
@@ -145,6 +148,9 @@ public class GridView extends LinearLayout implements SliceListView {
                 items.addAll(item.getSlice().getItems());
             }
             items.forEach(i -> {
+                if (i.hasHint(Slice.HINT_HIDDEN)) {
+                    return;
+                }
                 Context context = getContext();
                 switch (i.getType()) {
                     case SliceItem.TYPE_TEXT:

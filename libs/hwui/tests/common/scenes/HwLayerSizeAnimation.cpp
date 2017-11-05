@@ -19,29 +19,27 @@
 class HwLayerSizeAnimation;
 
 static TestScene::Registrar _HwLayerSize(TestScene::Info{
-    "hwlayersize",
-    "A nested pair of nodes with LayerType::RenderLayer(hardware) set on the child and "
-    "LayerType::None on the parent. "
-    "Tests animating the size of a hardware layer.",
-    TestScene::simpleCreateScene<HwLayerSizeAnimation>
-});
+        "hwlayersize",
+        "A nested pair of nodes with LayerType::RenderLayer(hardware) set on the child and "
+        "LayerType::None on the parent. "
+        "Tests animating the size of a hardware layer.",
+        TestScene::simpleCreateScene<HwLayerSizeAnimation>});
 
 class HwLayerSizeAnimation : public TestScene {
 public:
     sp<RenderNode> card;
     void createContent(int width, int height, Canvas& canvas) override {
-        card = TestUtils::createNode(0, 0, 200, 200,
-                [](RenderProperties& props, Canvas& canvas) {
+        card = TestUtils::createNode(0, 0, 200, 200, [](RenderProperties& props, Canvas& canvas) {
             props.mutateLayerProperties().setType(LayerType::RenderLayer);
             canvas.drawColor(0xFF0000FF, SkBlendMode::kSrcOver);
         });
-        canvas.drawColor(0xFFFFFFFF, SkBlendMode::kSrcOver); // background
+        canvas.drawColor(0xFFFFFFFF, SkBlendMode::kSrcOver);  // background
         canvas.drawRenderNode(card.get());
     }
     void doFrame(int frameNr) override {
         int curFrame = frameNr % 150;
-        //we animate left and top coordinates, which in turn animates width and
-        //height (bottom/right coordinates are fixed)
+        // we animate left and top coordinates, which in turn animates width and
+        // height (bottom/right coordinates are fixed)
         card->mutateStagingProperties().setLeftTop(curFrame, curFrame);
         card->setPropertyFieldsDirty(RenderNode::X | RenderNode::Y);
     }

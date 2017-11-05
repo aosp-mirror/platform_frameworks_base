@@ -3340,14 +3340,8 @@ android.os.StrictMode$9
 android.os.StrictMode$AndroidBlockGuardPolicy
 android.os.StrictMode$AndroidBlockGuardPolicy$1
 android.os.StrictMode$AndroidCloseGuardReporter
-android.os.StrictMode$InstanceCountViolation
 android.os.StrictMode$InstanceTracker
-android.os.StrictMode$LogStackTrace
 android.os.StrictMode$Span
-android.os.StrictMode$StrictModeCustomViolation
-android.os.StrictMode$StrictModeDiskReadViolation
-android.os.StrictMode$StrictModeDiskWriteViolation
-android.os.StrictMode$StrictModeViolation
 android.os.StrictMode$ThreadPolicy
 android.os.StrictMode$ThreadPolicy$Builder
 android.os.StrictMode$ThreadSpanState

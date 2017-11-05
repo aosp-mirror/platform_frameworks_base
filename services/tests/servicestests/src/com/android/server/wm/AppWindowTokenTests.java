@@ -46,11 +46,13 @@ import static org.junit.Assert.assertTrue;
  *  bit FrameworksServicesTests:com.android.server.wm.AppWindowTokenTests
  */
 @SmallTest
-@Presubmit
+// TODO: b/68267650
+// @Presubmit
 @RunWith(AndroidJUnit4.class)
 public class AppWindowTokenTests extends WindowTestsBase {
 
     @Test
+    @Presubmit
     public void testAddWindow_Order() throws Exception {
         final WindowTestUtils.TestAppWindowToken token =
                 new WindowTestUtils.TestAppWindowToken(mDisplayContent);
@@ -79,6 +81,7 @@ public class AppWindowTokenTests extends WindowTestsBase {
     }
 
     @Test
+    @Presubmit
     public void testFindMainWindow() throws Exception {
         final WindowTestUtils.TestAppWindowToken token =
                 new WindowTestUtils.TestAppWindowToken(mDisplayContent);
@@ -97,6 +100,7 @@ public class AppWindowTokenTests extends WindowTestsBase {
     }
 
     @Test
+    @Presubmit
     public void testGetTopFullscreenWindow() throws Exception {
         final WindowTestUtils.TestAppWindowToken token =
                 new WindowTestUtils.TestAppWindowToken(mDisplayContent);
@@ -187,6 +191,7 @@ public class AppWindowTokenTests extends WindowTestsBase {
     }
 
     @Test
+    @Presubmit
     public void testGetOrientation() throws Exception {
         final WindowTestUtils.TestAppWindowToken token =
                 new WindowTestUtils.TestAppWindowToken(mDisplayContent);
@@ -211,6 +216,7 @@ public class AppWindowTokenTests extends WindowTestsBase {
     }
 
     @Test
+    @Presubmit
     public void testKeyguardFlagsDuringRelaunch() throws Exception {
         final WindowTestUtils.TestAppWindowToken token =
                 new WindowTestUtils.TestAppWindowToken(mDisplayContent);

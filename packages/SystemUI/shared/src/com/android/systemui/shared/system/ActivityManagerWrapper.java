@@ -17,10 +17,17 @@
 package com.android.systemui.shared.system;
 
 import static android.app.ActivityManager.RECENT_IGNORE_UNAVAILABLE;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
+import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 
 import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RecentTaskInfo;
+import android.app.ActivityOptions;
 import android.app.AppGlobals;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
@@ -32,15 +39,19 @@ import android.content.res.Resources.NotFoundException;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.IconDrawableFactory;
 import android.util.Log;
 
+import com.android.systemui.shared.recents.model.Task;
+import com.android.systemui.shared.recents.model.Task.TaskKey;
 import com.android.systemui.shared.recents.model.ThumbnailData;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class ActivityManagerWrapper {
 
@@ -73,6 +84,25 @@ public class ActivityManagerWrapper {
             return ui != null ? ui.id : 0;
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @return the top running task (can be {@code null}).
+     */
+    public ActivityManager.RunningTaskInfo getRunningTask() {
+        // Note: The set of running tasks from the system is ordered by recency
+        try {
+            List<ActivityManager.RunningTaskInfo> tasks =
+                    ActivityManager.getService().getFilteredTasks(1,
+                            ACTIVITY_TYPE_RECENTS /* ignoreActivityType */,
+                            WINDOWING_MODE_PINNED /* ignoreWindowingMode */);
+            if (tasks.isEmpty()) {
+                return null;
+            }
+            return tasks.get(0);
+        } catch (RemoteException e) {
+            return null;
         }
     }
 
@@ -199,6 +229,60 @@ public class ActivityManagerWrapper {
             label = mPackageManager.getUserBadgedLabel(label, new UserHandle(userId)).toString();
         }
         return label;
+    }
+
+    /**
+     * Starts a task from Recents.
+     *
+     * @see {@link #startActivityFromRecents(TaskKey, ActivityOptions, int, int, Consumer, Handler)}
+     */
+    public void startActivityFromRecents(Task.TaskKey taskKey, ActivityOptions options,
+            Consumer<Boolean> resultCallback, Handler resultCallbackHandler) {
+        startActivityFromRecents(taskKey, options, WINDOWING_MODE_UNDEFINED,
+                ACTIVITY_TYPE_UNDEFINED, resultCallback, resultCallbackHandler);
+    }
+
+    /**
+     * Starts a task from Recents.
+     *
+     * @param resultCallback The result success callback
+     * @param resultCallbackHandler The handler to receive the result callback
+     */
+    public void startActivityFromRecents(Task.TaskKey taskKey, ActivityOptions options,
+            int windowingMode, int activityType, Consumer<Boolean> resultCallback,
+            Handler resultCallbackHandler) {
+        if (taskKey.windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
+            // We show non-visible docked tasks in Recents, but we always want to launch
+            // them in the fullscreen stack.
+            if (options == null) {
+                options = ActivityOptions.makeBasic();
+            }
+            options.setLaunchWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
+        } else if (windowingMode != WINDOWING_MODE_UNDEFINED
+                || activityType != ACTIVITY_TYPE_UNDEFINED) {
+            if (options == null) {
+                options = ActivityOptions.makeBasic();
+            }
+            options.setLaunchWindowingMode(windowingMode);
+            options.setLaunchActivityType(activityType);
+        }
+        final ActivityOptions finalOptions = options;
+
+        // Execute this from another thread such that we can do other things (like caching the
+        // bitmap for the thumbnail) while AM is busy starting our activity.
+        mBackgroundExecutor.submit(() -> {
+            try {
+                ActivityManager.getService().startActivityFromRecents(taskKey.id,
+                        finalOptions == null ? null : finalOptions.toBundle());
+                if (resultCallback != null) {
+                    resultCallbackHandler.post(() -> resultCallback.accept(true));
+                }
+            } catch (Exception e) {
+                if (resultCallback != null) {
+                    resultCallbackHandler.post(() -> resultCallback.accept(false));
+                }
+            }
+        });
     }
 
     /**

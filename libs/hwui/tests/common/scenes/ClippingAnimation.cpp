@@ -19,19 +19,17 @@
 class ClippingAnimation;
 
 static TestScene::Registrar _RectGrid(TestScene::Info{
-    "clip",
-    "Complex clip cases"
-    "Low CPU/GPU load.",
-    TestScene::simpleCreateScene<ClippingAnimation>
-});
+        "clip",
+        "Complex clip cases"
+        "Low CPU/GPU load.",
+        TestScene::simpleCreateScene<ClippingAnimation>});
 
 class ClippingAnimation : public TestScene {
 public:
     sp<RenderNode> card;
     void createContent(int width, int height, Canvas& canvas) override {
         canvas.drawColor(Color::White, SkBlendMode::kSrcOver);
-        card = TestUtils::createNode(0, 0, 200, 400,
-                [](RenderProperties& props, Canvas& canvas) {
+        card = TestUtils::createNode(0, 0, 200, 400, [](RenderProperties& props, Canvas& canvas) {
             canvas.save(SaveFlags::MatrixClip);
             {
                 canvas.clipRect(0, 0, 200, 200, SkClipOp::kIntersect);

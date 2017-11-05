@@ -73,6 +73,9 @@ public abstract class ShortcutServiceInternal {
     public abstract boolean hasShortcutHostPermission(int launcherUserId,
             @NonNull String callingPackage, int callingPid, int callingUid);
 
+    public abstract void setShortcutHostPackage(@NonNull String type, @Nullable String packageName,
+            int userId);
+
     public abstract boolean requestPinAppWidget(@NonNull String callingPackage,
             @NonNull AppWidgetProviderInfo appWidget, @Nullable Bundle extras,
             @Nullable IntentSender resultIntent, int userId);

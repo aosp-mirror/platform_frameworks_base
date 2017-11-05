@@ -16,11 +16,16 @@
 package android.hardware.location;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.os.Handler;
+import android.os.Looper;
+import android.util.Log;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * A class describing a request sent to the Context Hub Service.
@@ -29,17 +34,15 @@ import java.util.concurrent.TimeUnit;
  * through the ContextHubManager APIs. The caller can either retrieve the result
  * synchronously through a blocking call ({@link #waitForResponse(long, TimeUnit)}) or
  * asynchronously through a user-defined callback
- * ({@link #onComplete(ContextHubTransaction.Callback<T>, Handler)}).
- *
- * A transaction can be invalidated if the caller of the transaction is no longer active
- * and the reference to this object is lost, or if timeout period has passed in
- * {@link #waitForResponse(long, TimeUnit)}.
+ * ({@link #setCallbackOnComplete(ContextHubTransaction.Callback, Handler)}).
  *
  * @param <T> the type of the contents in the transaction response
  *
  * @hide
  */
 public class ContextHubTransaction<T> {
+    private static final String TAG = "ContextHubTransaction";
+
     /**
      * Constants describing the type of a transaction through the Context Hub Service.
      */
@@ -68,7 +71,8 @@ public class ContextHubTransaction<T> {
             TRANSACTION_FAILED_UNINITIALIZED,
             TRANSACTION_FAILED_PENDING,
             TRANSACTION_FAILED_AT_HUB,
-            TRANSACTION_FAILED_TIMEOUT})
+            TRANSACTION_FAILED_TIMEOUT,
+            TRANSACTION_FAILED_SERVICE_INTERNAL_FAILURE})
     public @interface Result {}
     public static final int TRANSACTION_SUCCESS = 0;
     /**
@@ -95,6 +99,10 @@ public class ContextHubTransaction<T> {
      * Failure mode when the transaction has timed out.
      */
     public static final int TRANSACTION_FAILED_TIMEOUT = 6;
+    /**
+     * Failure mode when the transaction has failed internally at the service.
+     */
+    public static final int TRANSACTION_FAILED_SERVICE_INTERNAL_FAILURE = 7;
 
     /**
      * A class describing the response for a ContextHubTransaction.
@@ -146,11 +154,6 @@ public class ContextHubTransaction<T> {
     }
 
     /*
-     * The unique identifier representing the transaction.
-     */
-    private int mTransactionId;
-
-    /*
      * The type of the transaction.
      */
     @Type
@@ -171,8 +174,17 @@ public class ContextHubTransaction<T> {
      */
     private ContextHubTransaction.Callback<T> mCallback = null;
 
-    ContextHubTransaction(int id, @Type int type) {
-        mTransactionId = id;
+    /*
+     * Synchronization latch used to block on response.
+     */
+    private final CountDownLatch mDoneSignal = new CountDownLatch(1);
+
+    /*
+     * true if the response has been set throught setResponse, false otherwise.
+     */
+    private boolean mIsResponseSet = false;
+
+    ContextHubTransaction(@Type int type) {
         mTransactionType = type;
     }
 
@@ -191,17 +203,26 @@ public class ContextHubTransaction<T> {
      * for the transaction represented by this object by the Context Hub, or a
      * specified timeout period has elapsed.
      *
-     * If the specified timeout has passed, the transaction represented by this object
-     * is invalidated by the Context Hub Service (resulting in a timeout failure in the
-     * response).
+     * If the specified timeout has passed, a TimeoutException will be thrown and the caller may
+     * retry the invocation of this method at a later time.
      *
      * @param timeout the timeout duration
      * @param unit the unit of the timeout
      *
      * @return the transaction response
+     *
+     * @throws InterruptedException if the current thread is interrupted while waiting for response
+     * @throws TimeoutException if the timeout period has passed
      */
-    public ContextHubTransaction.Response<T> waitForResponse(long timeout, TimeUnit unit) {
-        throw new UnsupportedOperationException("TODO: Implement this");
+    public ContextHubTransaction.Response<T> waitForResponse(
+            long timeout, TimeUnit unit) throws InterruptedException, TimeoutException {
+        boolean success = mDoneSignal.await(timeout, unit);
+
+        if (!success) {
+            throw new TimeoutException("Timed out while waiting for transaction");
+        }
+
+        return mResponse;
     }
 
     /**
@@ -215,15 +236,100 @@ public class ContextHubTransaction<T> {
      * will be immediately posted by the handler. If the transaction has been invalidated,
      * the callback will never be invoked.
      *
+     * A transaction can be invalidated if the process owning the transaction is no longer active
+     * and the reference to this object is lost.
+     *
+     * This method or {@link #setCallbackOnCompletecan(ContextHubTransaction.Callback)} can only be
+     * invoked once, or an IllegalStateException will be thrown.
+     *
      * @param callback the callback to be invoked upon completion
      * @param handler the handler to post the callback
+     *
+     * @throws IllegalStateException if this method is called multiple times
+     * @throws NullPointerException if the callback or handler is null
      */
-    public void onComplete(ContextHubTransaction.Callback<T> callback, Handler handler) {
-        throw new UnsupportedOperationException("TODO: Implement this");
+    public void setCallbackOnComplete(
+            @NonNull ContextHubTransaction.Callback<T> callback, @NonNull Handler handler) {
+        synchronized (this) {
+            if (callback == null) {
+                throw new NullPointerException("Callback cannot be null");
+            }
+            if (handler == null) {
+                throw new NullPointerException("Handler cannot be null");
+            }
+            if (mCallback != null) {
+                throw new IllegalStateException(
+                        "Cannot set ContextHubTransaction callback multiple times");
+            }
+
+            mCallback = callback;
+            mHandler = handler;
+
+            if (mDoneSignal.getCount() == 0) {
+                boolean callbackPosted = mHandler.post(() -> {
+                    mCallback.onComplete(this, mResponse);
+                });
+
+                if (!callbackPosted) {
+                    Log.e(TAG, "Failed to post callback to Handler");
+                }
+            }
+        }
     }
 
-    private void setResponse(ContextHubTransaction.Response<T> response) {
-        mResponse = response;
-        throw new UnsupportedOperationException("TODO: Unblock waitForResponse");
+    /**
+     * Sets a callback to be invoked when the transaction completes.
+     *
+     * Equivalent to {@link #setCallbackOnComplete(ContextHubTransaction.Callback, Handler)}
+     * with the handler being that of the main thread's Looper.
+     *
+     * This method or {@link #setCallbackOnComplete(ContextHubTransaction.Callback, Handler)}
+     * can only be invoked once, or an IllegalStateException will be thrown.
+     *
+     * @param callback the callback to be invoked upon completion
+     *
+     * @throws IllegalStateException if this method is called multiple times
+     * @throws NullPointerException if the callback is null
+     */
+    public void setCallbackOnComplete(@NonNull ContextHubTransaction.Callback<T> callback) {
+        setCallbackOnComplete(callback, new Handler(Looper.getMainLooper()));
+    }
+
+    /**
+     * Sets the response of the transaction.
+     *
+     * This method should only be invoked by ContextHubManager as a result of a callback from
+     * the Context Hub Service indicating the response from a transaction. This method should not be
+     * invoked more than once.
+     *
+     * @param response the response to set
+     *
+     * @throws IllegalStateException if this method is invoked multiple times
+     * @throws NullPointerException if the response is null
+     */
+    void setResponse(ContextHubTransaction.Response<T> response) {
+        synchronized (this) {
+            if (response == null) {
+                throw new NullPointerException("Response cannot be null");
+            }
+            if (mIsResponseSet) {
+                throw new IllegalStateException(
+                        "Cannot set response of ContextHubTransaction multiple times");
+            }
+
+            mResponse = response;
+            mIsResponseSet = true;
+
+            mDoneSignal.countDown();
+            if (mCallback != null) {
+                boolean callbackPosted = mHandler.post(() -> {
+                    mCallback.onComplete(this, mResponse);
+                });
+
+                if (!callbackPosted) {
+                    Log.e(TAG, "Failed to post callback to Handler");
+                }
+            }
+        }
     }
 }

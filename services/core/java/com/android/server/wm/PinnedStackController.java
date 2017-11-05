@@ -149,6 +149,9 @@ class PinnedStackController {
         @Override
         public void binderDied() {
             // Clean up the state if the listener dies
+            if (mPinnedStackListener != null) {
+                mPinnedStackListener.asBinder().unlinkToDeath(mPinnedStackListenerDeathHandler, 0);
+            }
             mPinnedStackListener = null;
         }
     }

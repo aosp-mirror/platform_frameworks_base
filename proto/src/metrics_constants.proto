@@ -2799,420 +2799,316 @@ message MetricsEvent {
     // OS: O
     TEXT_LONGPRESS = 629;
 
-    // ACTION: An app requested an unknown permission
-    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE
     ACTION_PERMISSION_REQUEST_UNKNOWN = 630;
 
-    // ACTION: An app was granted an unknown permission
-    // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE
     ACTION_PERMISSION_GRANT_UNKNOWN = 631;
 
-    // ACTION: An app requested an unknown permission and the request was denied
-    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE
     ACTION_PERMISSION_DENIED_UNKNOWN = 632;
 
-    // ACTION: An unknown permission was revoked for an app
-    // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE
     ACTION_PERMISSION_REVOKE_UNKNOWN = 633;
 
-    // ACTION: An app requested the permission READ_CALENDAR
-    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE
     ACTION_PERMISSION_REQUEST_READ_CALENDAR = 634;
 
-    // ACTION: An app was granted the permission READ_CALENDAR
-    // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE
     ACTION_PERMISSION_GRANT_READ_CALENDAR = 635;
 
-    // ACTION: An app requested the permission READ_CALENDAR and the request was denied
-    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE
     ACTION_PERMISSION_DENIED_READ_CALENDAR = 636;
 
-    // ACTION: The permission READ_CALENDAR was revoked for an app
-    // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE
     ACTION_PERMISSION_REVOKE_READ_CALENDAR = 637;
 
-    // ACTION: An app requested the permission WRITE_CALENDAR
-    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE
     ACTION_PERMISSION_REQUEST_WRITE_CALENDAR = 638;
 
-    // ACTION: An app was granted the permission WRITE_CALENDAR
-    // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE
     ACTION_PERMISSION_GRANT_WRITE_CALENDAR = 639;
 
-    // ACTION: An app requested the permission WRITE_CALENDAR and the request was denied
-    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE
     ACTION_PERMISSION_DENIED_WRITE_CALENDAR = 640;
 
-    // ACTION: The permission WRITE_CALENDAR was revoked for an app
-    // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE
     ACTION_PERMISSION_REVOKE_WRITE_CALENDAR = 641;
 
-    // ACTION: An app requested the permission CAMERA
-    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE
     ACTION_PERMISSION_REQUEST_CAMERA = 642;
 
-    // ACTION: An app was granted the permission CAMERA
-    // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE
     ACTION_PERMISSION_GRANT_CAMERA = 643;
 
-    // ACTION: An app requested the permission CAMERA and the request was denied
-    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE
     ACTION_PERMISSION_DENIED_CAMERA = 644;
 
-    // ACTION: The permission CAMERA was revoked for an app
-    // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE
     ACTION_PERMISSION_REVOKE_CAMERA = 645;
 
-    // ACTION: An app requested the permission READ_CONTACTS
-    // PACKAGE: The package name of the app requesting the permission
+    // AOBSOLETE
     ACTION_PERMISSION_REQUEST_READ_CONTACTS = 646;
 
-    // ACTION: An app was granted the permission READ_CONTACTS
-    // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE
     ACTION_PERMISSION_GRANT_READ_CONTACTS = 647;
 
-    // ACTION: An app requested the permission READ_CONTACTS and the request was denied
-    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE
     ACTION_PERMISSION_DENIED_READ_CONTACTS = 648;
 
-    // ACTION: The permission READ_CONTACTS was revoked for an app
-    // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE
     ACTION_PERMISSION_REVOKE_READ_CONTACTS = 649;
 
-    // ACTION: An app requested the permission WRITE_CONTACTS
-    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE
     ACTION_PERMISSION_REQUEST_WRITE_CONTACTS = 650;
 
-    // ACTION: An app was granted the permission WRITE_CONTACTS
-    // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE
     ACTION_PERMISSION_GRANT_WRITE_CONTACTS = 651;
 
-    // ACTION: An app requested the permission WRITE_CONTACTS and the request was denied
-    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE
     ACTION_PERMISSION_DENIED_WRITE_CONTACTS = 652;
 
-    // ACTION: The permission WRITE_CONTACTS was revoked for an app
-    // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE
     ACTION_PERMISSION_REVOKE_WRITE_CONTACTS = 653;
 
-    // ACTION: An app requested the permission GET_ACCOUNTS
-    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE
     ACTION_PERMISSION_REQUEST_GET_ACCOUNTS = 654;
 
-    // ACTION: An app was granted the permission GET_ACCOUNTS
-    // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE
     ACTION_PERMISSION_GRANT_GET_ACCOUNTS = 655;
 
-    // ACTION: An app requested the permission GET_ACCOUNTS and the request was denied
-    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE
     ACTION_PERMISSION_DENIED_GET_ACCOUNTS = 656;
 
-    // ACTION: The permission GET_ACCOUNTS was revoked for an app
-    // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE
     ACTION_PERMISSION_REVOKE_GET_ACCOUNTS = 657;
 
-    // ACTION: An app requested the permission ACCESS_FINE_LOCATION
-    // PACKAGE: The package name of the app requesting the permission
+    // AOBSOLETE
     ACTION_PERMISSION_REQUEST_ACCESS_FINE_LOCATION = 658;
 
-    // ACTION: An app was granted the permission ACCESS_FINE_LOCATION
-    // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE
     ACTION_PERMISSION_GRANT_ACCESS_FINE_LOCATION = 659;
 
-    // ACTION: An app requested the permission ACCESS_FINE_LOCATION and the request was denied
-    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE
     ACTION_PERMISSION_DENIED_ACCESS_FINE_LOCATION = 660;
 
-    // ACTION: The permission ACCESS_FINE_LOCATION was revoked for an app
-    // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE
     ACTION_PERMISSION_REVOKE_ACCESS_FINE_LOCATION = 661;
 
-    // ACTION: An app requested the permission ACCESS_COARSE_LOCATION
-    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE
     ACTION_PERMISSION_REQUEST_ACCESS_COARSE_LOCATION = 662;
 
-    // ACTION: An app was granted the permission ACCESS_COARSE_LOCATION
-    // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE
     ACTION_PERMISSION_GRANT_ACCESS_COARSE_LOCATION = 663;
 
-    // ACTION: An app requested the permission ACCESS_COARSE_LOCATION and the request was denied
-    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE
     ACTION_PERMISSION_DENIED_ACCESS_COARSE_LOCATION = 664;
 
-    // ACTION: The permission ACCESS_COARSE_LOCATION was revoked for an app
-    // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE
     ACTION_PERMISSION_REVOKE_ACCESS_COARSE_LOCATION = 665;
 
-    // ACTION: An app requested the permission RECORD_AUDIO
-    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE
     ACTION_PERMISSION_REQUEST_RECORD_AUDIO = 666;
 
-    // ACTION: An app was granted the permission RECORD_AUDIO
-    // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE
     ACTION_PERMISSION_GRANT_RECORD_AUDIO = 667;
 
-    // ACTION: An app requested the permission RECORD_AUDIO and the request was denied
-    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE
     ACTION_PERMISSION_DENIED_RECORD_AUDIO = 668;
 
-    // ACTION: The permission RECORD_AUDIO was revoked for an app
-    // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE
     ACTION_PERMISSION_REVOKE_RECORD_AUDIO = 669;
 
-    // ACTION: An app requested the permission READ_PHONE_STATE
-    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE
     ACTION_PERMISSION_REQUEST_READ_PHONE_STATE = 670;
 
-    // ACTION: An app was granted the permission READ_PHONE_STATE
-    // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE
     ACTION_PERMISSION_GRANT_READ_PHONE_STATE = 671;
 
-    // ACTION: An app requested the permission READ_PHONE_STATE and the request was denied
-    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE
     ACTION_PERMISSION_DENIED_READ_PHONE_STATE = 672;
 
-    // ACTION: The permission READ_PHONE_STATE was revoked for an app
-    // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE
     ACTION_PERMISSION_REVOKE_READ_PHONE_STATE = 673;
 
-    // ACTION: An app requested the permission CALL_PHONE
-    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE
     ACTION_PERMISSION_REQUEST_CALL_PHONE = 674;
 
-    // ACTION: An app was granted the permission CALL_PHONE
-    // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE
     ACTION_PERMISSION_GRANT_CALL_PHONE = 675;
 
-    // ACTION: An app requested the permission CALL_PHONE and the request was denied
-    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE
     ACTION_PERMISSION_DENIED_CALL_PHONE = 676;
 
-    // ACTION: The permission CALL_PHONE was revoked for an app
-    // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE
     ACTION_PERMISSION_REVOKE_CALL_PHONE = 677;
 
-    // ACTION: An app requested the permission READ_CALL_LOG
-    // PACKAGE: The package name of the app requesting the permission
+    // AOBSOLETE
     ACTION_PERMISSION_REQUEST_READ_CALL_LOG = 678;
 
-    // ACTION: An app was granted the permission READ_CALL_LOG
-    // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE
     ACTION_PERMISSION_GRANT_READ_CALL_LOG = 679;
 
-    // ACTION: An app requested the permission READ_CALL_LOG and the request was denied
-    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE
     ACTION_PERMISSION_DENIED_READ_CALL_LOG = 680;
 
-    // ACTION: The permission READ_CALL_LOG was revoked for an app
-    // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE
     ACTION_PERMISSION_REVOKE_READ_CALL_LOG = 681;
 
-    // ACTION: An app requested the permission WRITE_CALL_LOG
-    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE
     ACTION_PERMISSION_REQUEST_WRITE_CALL_LOG = 682;
 
-    // ACTION: An app was granted the permission WRITE_CALL_LOG
-    // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE
     ACTION_PERMISSION_GRANT_WRITE_CALL_LOG = 683;
 
-    // ACTION: An app requested the permission WRITE_CALL_LOG and the request was denied
-    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE
     ACTION_PERMISSION_DENIED_WRITE_CALL_LOG = 684;
 
-    // ACTION: The permission WRITE_CALL_LOG was revoked for an app
-    // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE
     ACTION_PERMISSION_REVOKE_WRITE_CALL_LOG = 685;
 
-    // ACTION: An app requested the permission ADD_VOICEMAIL
-    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE
     ACTION_PERMISSION_REQUEST_ADD_VOICEMAIL = 686;
 
-    // ACTION: An app was granted the permission ADD_VOICEMAIL
-    // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE
     ACTION_PERMISSION_GRANT_ADD_VOICEMAIL = 687;
 
-    // ACTION: An app requested the permission ADD_VOICEMAIL and the request was denied
-    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE
     ACTION_PERMISSION_DENIED_ADD_VOICEMAIL = 688;
 
-    // ACTION: The permission ADD_VOICEMAIL was revoked for an app
-    // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE
     ACTION_PERMISSION_REVOKE_ADD_VOICEMAIL = 689;
 
-    // ACTION: An app requested the permission USE_SIP
-    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE
     ACTION_PERMISSION_REQUEST_USE_SIP = 690;
 
-    // ACTION: An app was granted the permission USE_SIP
-    // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE
     ACTION_PERMISSION_GRANT_USE_SIP = 691;
 
-    // ACTION: An app requested the permission USE_SIP and the request was denied
-    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE
     ACTION_PERMISSION_DENIED_USE_SIP = 692;
 
-    // ACTION: The permission USE_SIP was revoked for an app
-    // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE
     ACTION_PERMISSION_REVOKE_USE_SIP = 693;
 
-    // ACTION: An app requested the permission PROCESS_OUTGOING_CALLS
-    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE
     ACTION_PERMISSION_REQUEST_PROCESS_OUTGOING_CALLS = 694;
 
-    // ACTION: An app was granted the permission PROCESS_OUTGOING_CALLS
-    // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE
     ACTION_PERMISSION_GRANT_PROCESS_OUTGOING_CALLS = 695;
 
-    // ACTION: An app requested the permission PROCESS_OUTGOING_CALLS and the request was denied
-    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE
     ACTION_PERMISSION_DENIED_PROCESS_OUTGOING_CALLS = 696;
 
-    // ACTION: The permission PROCESS_OUTGOING_CALLS was revoked for an app
-    // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE
     ACTION_PERMISSION_REVOKE_PROCESS_OUTGOING_CALLS = 697;
 
-    // ACTION: An app requested the permission READ_CELL_BROADCASTS
-    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE
     ACTION_PERMISSION_REQUEST_READ_CELL_BROADCASTS = 698;
 
-    // ACTION: An app was granted the permission READ_CELL_BROADCASTS
-    // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE
     ACTION_PERMISSION_GRANT_READ_CELL_BROADCASTS = 699;
 
-    // ACTION: An app requested the permission READ_CELL_BROADCASTS and the request was denied
-    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE
     ACTION_PERMISSION_DENIED_READ_CELL_BROADCASTS = 700;
 
-    // ACTION: The permission READ_CELL_BROADCASTS was revoked for an app
-    // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE
     ACTION_PERMISSION_REVOKE_READ_CELL_BROADCASTS = 701;
 
-    // ACTION: An app requested the permission BODY_SENSORS
-    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE
     ACTION_PERMISSION_REQUEST_BODY_SENSORS = 702;
 
-    // ACTION: An app was granted the permission BODY_SENSORS
-    // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE
     ACTION_PERMISSION_GRANT_BODY_SENSORS = 703;
 
-    // ACTION: An app requested the permission BODY_SENSORS and the request was denied
-    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE
     ACTION_PERMISSION_DENIED_BODY_SENSORS = 704;
 
-    // ACTION: The permission BODY_SENSORS was revoked for an app
-    // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE
     ACTION_PERMISSION_REVOKE_BODY_SENSORS = 705;
 
-    // ACTION: An app requested the permission SEND_SMS
-    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE
     ACTION_PERMISSION_REQUEST_SEND_SMS = 706;
 
-    // ACTION: An app was granted the permission SEND_SMS
-    // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE
     ACTION_PERMISSION_GRANT_SEND_SMS = 707;
 
-    // ACTION: An app requested the permission SEND_SMS and the request was denied
-    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE
     ACTION_PERMISSION_DENIED_SEND_SMS = 708;
 
-    // ACTION: The permission SEND_SMS was revoked for an app
-    // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE
     ACTION_PERMISSION_REVOKE_SEND_SMS = 709;
 
-    // ACTION: An app requested the permission RECEIVE_SMS
-    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE
     ACTION_PERMISSION_REQUEST_RECEIVE_SMS = 710;
 
-    // ACTION: An app was granted the permission RECEIVE_SMS
-    // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE
     ACTION_PERMISSION_GRANT_RECEIVE_SMS = 711;
 
-    // ACTION: An app requested the permission RECEIVE_SMS and the request was denied
-    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE
     ACTION_PERMISSION_DENIED_RECEIVE_SMS = 712;
 
-    // ACTION: The permission RECEIVE_SMS was revoked for an app
-    // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE
     ACTION_PERMISSION_REVOKE_RECEIVE_SMS = 713;
 
-    // ACTION: An app requested the permission READ_SMS
-    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE
     ACTION_PERMISSION_REQUEST_READ_SMS = 714;
 
-    // ACTION: An app was granted the permission READ_SMS
-    // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE
     ACTION_PERMISSION_GRANT_READ_SMS = 715;
 
-    // ACTION: An app requested the permission READ_SMS and the request was denied
-    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE
     ACTION_PERMISSION_DENIED_READ_SMS = 716;
 
-    // ACTION: The permission READ_SMS was revoked for an app
-    // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE
     ACTION_PERMISSION_REVOKE_READ_SMS = 717;
 
-    // ACTION: An app requested the permission RECEIVE_WAP_PUSH
-    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE
     ACTION_PERMISSION_REQUEST_RECEIVE_WAP_PUSH = 718;
 
-    // ACTION: An app was granted the permission RECEIVE_WAP_PUSH
-    // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE
     ACTION_PERMISSION_GRANT_RECEIVE_WAP_PUSH = 719;
 
-    // ACTION: An app requested the permission RECEIVE_WAP_PUSH and the request was denied
-    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE
     ACTION_PERMISSION_DENIED_RECEIVE_WAP_PUSH = 720;
 
-    // ACTION: The permission RECEIVE_WAP_PUSH was revoked for an app
-    // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE
     ACTION_PERMISSION_REVOKE_RECEIVE_WAP_PUSH = 721;
 
-    // ACTION: An app requested the permission RECEIVE_MMS
-    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE
     ACTION_PERMISSION_REQUEST_RECEIVE_MMS = 722;
 
-    // ACTION: An app was granted the permission RECEIVE_MMS
-    // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE
     ACTION_PERMISSION_GRANT_RECEIVE_MMS = 723;
 
-    // ACTION: An app requested the permission RECEIVE_MMS and the request was denied
-    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE
     ACTION_PERMISSION_DENIED_RECEIVE_MMS = 724;
 
-    // ACTION: The permission RECEIVE_MMS was revoked for an app
-    // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE
     ACTION_PERMISSION_REVOKE_RECEIVE_MMS = 725;
 
-    // ACTION: An app requested the permission READ_EXTERNAL_STORAGE
-    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE
     ACTION_PERMISSION_REQUEST_READ_EXTERNAL_STORAGE = 726;
 
-    // ACTION: An app was granted the permission READ_EXTERNAL_STORAGE
-    // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE
     ACTION_PERMISSION_GRANT_READ_EXTERNAL_STORAGE = 727;
 
-    // ACTION: An app requested the permission READ_EXTERNAL_STORAGE and the request was denied
-    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE
     ACTION_PERMISSION_DENIED_READ_EXTERNAL_STORAGE = 728;
 
-    // ACTION: The permission READ_EXTERNAL_STORAGE was revoked for an app
-    // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE
     ACTION_PERMISSION_REVOKE_READ_EXTERNAL_STORAGE = 729;
 
-    // ACTION: An app requested the permission WRITE_EXTERNAL_STORAGE
-    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE
     ACTION_PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE = 730;
 
-    // ACTION: An app was granted the permission WRITE_EXTERNAL_STORAGE
-    // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE
     ACTION_PERMISSION_GRANT_WRITE_EXTERNAL_STORAGE = 731;
 
-    // ACTION: An app requested the permission WRITE_EXTERNAL_STORAGE and the request was denied
-    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE
     ACTION_PERMISSION_DENIED_WRITE_EXTERNAL_STORAGE = 732;
 
-    // ACTION: The permission WRITE_EXTERNAL_STORAGE was revoked for an app
-    // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE
     ACTION_PERMISSION_REVOKE_WRITE_EXTERNAL_STORAGE = 733;
 
     // ACTION: Logged when a provisioning session has started
@@ -3221,20 +3117,16 @@ message MetricsEvent {
     // ACTION: Logged when a provisioning session has completed
     PROVISIONING_SESSION_COMPLETED = 735;
 
-    // ACTION: An app requested the permission READ_PHONE_NUMBERS
-    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE
     ACTION_PERMISSION_REQUEST_READ_PHONE_NUMBERS = 736;
 
-    // ACTION: An app was granted the permission READ_PHONE_NUMBERS
-    // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE
     ACTION_PERMISSION_GRANT_READ_PHONE_NUMBERS = 737;
 
-    // ACTION: An app requested the permission READ_PHONE_NUMBERS and the request was denied
-    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE
     ACTION_PERMISSION_DENIED_READ_PHONE_NUMBERS = 738;
 
-    // ACTION: The permission READ_PHONE_NUMBERS was revoked for an app
-    // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE
     ACTION_PERMISSION_REVOKE_READ_PHONE_NUMBERS = 739;
 
     // ACTION: QS Brightness Slider (with auto brightness disabled, and VR enabled)
@@ -3726,68 +3618,52 @@ message MetricsEvent {
     // CATEGORY: SETTINGS
     SETTINGS_LOCK_SCREEN_PREFERENCES = 882;
 
-    // ACTION: An app requested the app-op permission ACCESS_NOTIFICATIONS
-    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE
     ACTION_APPOP_REQUEST_ACCESS_NOTIFICATIONS = 883;
 
-    // ACTION: An app was granted the app-op permission ACCESS_NOTIFICATIONS
-    // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE
     ACTION_APPOP_GRANT_ACCESS_NOTIFICATIONS = 884;
 
-    // ACTION: An app requested the app-op permission ACCESS_NOTIFICATIONS and the request was denied
-    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE
     ACTION_APPOP_DENIED_ACCESS_NOTIFICATIONS = 885;
 
-    // ACTION: The app-op permission ACCESS_NOTIFICATIONS was revoked for an app
-    // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE
     ACTION_APPOP_REVOKE_ACCESS_NOTIFICATIONS = 886;
 
-    // ACTION: An app requested the app-op permission SYSTEM_ALERT_WINDOW
-    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE
     ACTION_APPOP_REQUEST_SYSTEM_ALERT_WINDOW = 887;
 
-    // ACTION: An app was granted the app-op permission SYSTEM_ALERT_WINDOW
-    // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE
     ACTION_APPOP_GRANT_SYSTEM_ALERT_WINDOW = 888;
 
-    // ACTION: An app requested the app-op permission SYSTEM_ALERT_WINDOW and the request was denied
-    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE
     ACTION_APPOP_DENIED_SYSTEM_ALERT_WINDOW = 889;
 
-    // ACTION: The app-op permission SYSTEM_ALERT_WINDOW was revoked for an app
-    // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE
     ACTION_APPOP_REVOKE_SYSTEM_ALERT_WINDOW = 890;
 
-    // ACTION: An app requested the app-op permission REQUEST_WRITE_SETTINGS
-    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE
     ACTION_APPOP_REQUEST_WRITE_SETTINGS = 891;
 
-    // ACTION: An app was granted the app-op permission REQUEST_WRITE_SETTINGS
-    // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE
     ACTION_APPOP_GRANT_WRITE_SETTINGS = 892;
 
-    // ACTION: An app requested the app-op permission REQUEST_WRITE_SETTINGS and the request was denied
-    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE
     ACTION_APPOP_DENIED_WRITE_SETTINGS = 893;
 
-    // ACTION: The app-op permission REQUEST_WRITE_SETTINGS was revoked for an app
-    // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE
     ACTION_APPOP_REVOKE_WRITE_SETTINGS = 894;
 
-    // ACTION: An app requested the app-op permission REQUEST_INSTALL_PACKAGES
-    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE
     ACTION_APPOP_REQUEST_REQUEST_INSTALL_PACKAGES = 895;
 
-    // ACTION: An app was granted the app-op permission REQUEST_INSTALL_PACKAGES
-    // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE
     ACTION_APPOP_GRANT_REQUEST_INSTALL_PACKAGES = 896;
 
-    // ACTION: An app requested the app-op permission REQUEST_INSTALL_PACKAGES and the request was denied
-    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE
     ACTION_APPOP_DENIED_REQUEST_INSTALL_PACKAGES = 897;
 
-    // ACTION: The app-op permission REQUEST_INSTALL_PACKAGES was revoked for an app
-    // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE
     ACTION_APPOP_REVOKE_REQUEST_INSTALL_PACKAGES = 898;
 
     // ACTION: Phase 1 of instant application resolution occurred
@@ -4753,6 +4629,52 @@ message MetricsEvent {
     // Open: Settings > Dev options > Oem unlock > lock it > warning dialog.
     // OS: P
     DIALOG_OEM_LOCK_INFO = 1238;
+
+    // ACTION: Settings > Wi-Fi > Click one network > Auto sign in
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_WIFI_AUTO_SIGN_IN = 1239;
+
+    // Open: Settings > System > About phone > IMEI
+    // CATEGORY: SETTINGS
+    // OS: P
+    DIALOG_IMEI_INFO = 1240;
+
+    // In permission action fields tagged like this reference the permission affected
+    FIELD_PERMISSION = 1241;
+
+    // ACTION: An app requested a permission and we asked to user to approve the request
+    // PACKAGE: The package name of the app requesting the permission
+    // Tag FIELD_PERMISSION: Name of the permission requested
+    ACTION_PERMISSION_REQUESTED = 1242;
+
+    // ACTION: An app was granted the a permission. This can happen after a user approved a request
+    //         or automatically. In the second case there will not be an
+    //         ACTION_PERMISSION_REQUESTED.
+    // PACKAGE: The package name of the app that was granted the permission
+    // Tag FIELD_PERMISSION: Name of the permission granted
+    ACTION_PERMISSION_GRANTED = 1243;
+
+    // ACTION: An app requested the a permission and the request was denied by the user or a device
+    //         policy
+    // PACKAGE: The package name of the app requesting the permission
+    // Tag FIELD_PERMISSION: Name of the permission denied
+    ACTION_PERMISSION_DENIED = 1244;
+
+    // ACTION: A permission was revoked
+    // PACKAGE: The package name of the app the permission was revoked for
+    // Tag FIELD_PERMISSION: Name of the permission revoked
+    ACTION_PERMISSION_REVOKED = 1245;
+
+    // OPEN: Settings > System > About Phone > Sim status
+    // CATEGORY: SETTINGS
+    // OS: P
+    DIALOG_SIM_STATUS = 1246;
+
+    // OPEN: Settings > System > About Phone > Android Version
+    // CATEGORY: SETTINGS
+    // OS: P
+    DIALOG_FIRMWARE_VERSION = 1247;
 
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS

@@ -170,11 +170,10 @@ enum DebugLevel {
  */
 #define PROPERTY_CAPTURE_SKP_ENABLED "debug.hwui.capture_skp_enabled"
 
-
 /**
  * Defines how many frames in a sequence to capture.
  */
-#define PROPERTY_CAPTURE_SKP_FRAMES  "debug.hwui.capture_skp_frames"
+#define PROPERTY_CAPTURE_SKP_FRAMES "debug.hwui.capture_skp_frames"
 
 /**
  * File name and location, where a SKP recording will be saved.
@@ -186,33 +185,17 @@ enum DebugLevel {
 ///////////////////////////////////////////////////////////////////////////////
 
 // Converts a number of mega-bytes into bytes
-#define MB(s) ((s) * 1024 * 1024)
+#define MB(s) ((s)*1024 * 1024)
 // Converts a number of kilo-bytes into bytes
-#define KB(s) ((s) * 1024)
+#define KB(s) ((s)*1024)
 
-enum class ProfileType {
-    None,
-    Console,
-    Bars
-};
+enum class ProfileType { None, Console, Bars };
 
-enum class OverdrawColorSet {
-    Default = 0,
-    Deuteranomaly
-};
+enum class OverdrawColorSet { Default = 0, Deuteranomaly };
 
-enum class StencilClipDebug {
-    Hide,
-    ShowHighlight,
-    ShowRegion
-};
+enum class StencilClipDebug { Hide, ShowHighlight, ShowRegion };
 
-enum class RenderPipelineType {
-    OpenGL = 0,
-    SkiaGL,
-    SkiaVulkan,
-    NotInitialized = 128
-};
+enum class RenderPipelineType { OpenGL = 0, SkiaGL, SkiaVulkan, NotInitialized = 128 };
 
 /**
  * Renderthread-only singleton which manages several static rendering properties. Most of these
@@ -272,7 +255,7 @@ public:
 
     static bool skpCaptureEnabled;
 
-    // Used for testing only to change the render pipeline.
+// Used for testing only to change the render pipeline.
 #ifdef HWUI_GLES_WRAP_ENABLED
     static void overrideRenderPipelineType(RenderPipelineType);
 #endif
@@ -281,9 +264,9 @@ private:
     static ProfileType sProfileType;
     static bool sDisableProfileBars;
     static RenderPipelineType sRenderPipelineType;
-}; // class Caches
+};  // class Caches
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android
 
-#endif // ANDROID_HWUI_PROPERTIES_H
+#endif  // ANDROID_HWUI_PROPERTIES_H

@@ -17,8 +17,8 @@
 
 #include <algorithm>
 
-#include "Animator.h"
 #include "AnimationContext.h"
+#include "Animator.h"
 #include "DamageAccumulator.h"
 #include "RenderNode.h"
 
@@ -31,10 +31,7 @@ static void detach(sp<BaseRenderNodeAnimator>& animator) {
     animator->detach();
 }
 
-AnimatorManager::AnimatorManager(RenderNode& parent)
-        : mParent(parent)
-        , mAnimationHandle(nullptr) {
-}
+AnimatorManager::AnimatorManager(RenderNode& parent) : mParent(parent), mAnimationHandle(nullptr) {}
 
 AnimatorManager::~AnimatorManager() {
     for_each(mNewAnimators.begin(), mNewAnimators.end(), detach);
@@ -58,22 +55,22 @@ void AnimatorManager::addAnimator(const sp<BaseRenderNodeAnimator>& animator) {
 
 void AnimatorManager::removeAnimator(const sp<BaseRenderNodeAnimator>& animator) {
     mNewAnimators.erase(std::remove(mNewAnimators.begin(), mNewAnimators.end(), animator),
-            mNewAnimators.end());
+                        mNewAnimators.end());
 }
 
 void AnimatorManager::setAnimationHandle(AnimationHandle* handle) {
     LOG_ALWAYS_FATAL_IF(mAnimationHandle && handle, "Already have an AnimationHandle!");
     mAnimationHandle = handle;
     LOG_ALWAYS_FATAL_IF(!mAnimationHandle && mAnimators.size(),
-            "Lost animation handle on %p (%s) with outstanding animators!",
-            &mParent, mParent.getName());
+                        "Lost animation handle on %p (%s) with outstanding animators!", &mParent,
+                        mParent.getName());
 }
 
 void AnimatorManager::pushStaging() {
     if (mNewAnimators.size()) {
         if (CC_UNLIKELY(!mAnimationHandle)) {
-            ALOGW("Trying to start new animators on %p (%s) without an animation handle!",
-                    &mParent, mParent.getName());
+            ALOGW("Trying to start new animators on %p (%s) without an animation handle!", &mParent,
+                  mParent.getName());
             return;
         }
 
@@ -100,7 +97,7 @@ public:
     AnimateFunctor(TreeInfo& info, AnimationContext& context, uint32_t* outDirtyMask)
             : mInfo(info), mContext(context), mDirtyMask(outDirtyMask) {}
 
-    bool operator() (sp<BaseRenderNodeAnimator>& animator) {
+    bool operator()(sp<BaseRenderNodeAnimator>& animator) {
         *mDirtyMask |= animator->dirtyMask();
         bool remove = animator->animate(mContext);
         if (remove) {
@@ -172,17 +169,15 @@ class EndActiveAnimatorsFunctor {
 public:
     explicit EndActiveAnimatorsFunctor(AnimationContext& context) : mContext(context) {}
 
-    void operator() (sp<BaseRenderNodeAnimator>& animator) {
-        animator->forceEndNow(mContext);
-    }
+    void operator()(sp<BaseRenderNodeAnimator>& animator) { animator->forceEndNow(mContext); }
 
 private:
     AnimationContext& mContext;
 };
 
 void AnimatorManager::endAllActiveAnimators() {
-    ALOGD("endAllActiveAnimators on %p (%s) with handle %p",
-            &mParent, mParent.getName(), mAnimationHandle);
+    ALOGD("endAllActiveAnimators on %p (%s) with handle %p", &mParent, mParent.getName(),
+          mAnimationHandle);
     EndActiveAnimatorsFunctor functor(mAnimationHandle->context());
     for_each(mAnimators.begin(), mAnimators.end(), functor);
     mAnimators.clear();

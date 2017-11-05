@@ -18,10 +18,10 @@
 #define ANDROID_HWUI_OFFSCREEN_BUFFER_POOL_H
 
 #include <GpuMemoryTracker.h>
+#include <ui/Region.h>
 #include "Caches.h"
 #include "Texture.h"
 #include "utils/Macros.h"
-#include <ui/Region.h>
 
 #include <set>
 
@@ -42,8 +42,8 @@ class RenderState;
  */
 class OffscreenBuffer : GpuMemoryTracker {
 public:
-    OffscreenBuffer(RenderState& renderState, Caches& caches,
-            uint32_t viewportWidth, uint32_t viewportHeight, bool wideColorGamut = false);
+    OffscreenBuffer(RenderState& renderState, Caches& caches, uint32_t viewportWidth,
+                    uint32_t viewportHeight, bool wideColorGamut = false);
     ~OffscreenBuffer();
 
     Rect getTextureCoordinates();
@@ -91,11 +91,11 @@ public:
     OffscreenBufferPool();
     ~OffscreenBufferPool();
 
-    WARN_UNUSED_RESULT OffscreenBuffer* get(RenderState& renderState,
-            const uint32_t width, const uint32_t height, bool wideColorGamut = false);
+    WARN_UNUSED_RESULT OffscreenBuffer* get(RenderState& renderState, const uint32_t width,
+                                            const uint32_t height, bool wideColorGamut = false);
 
-    WARN_UNUSED_RESULT OffscreenBuffer* resize(OffscreenBuffer* layer,
-            const uint32_t width, const uint32_t height);
+    WARN_UNUSED_RESULT OffscreenBuffer* resize(OffscreenBuffer* layer, const uint32_t width,
+                                               const uint32_t height);
 
     void putOrDelete(OffscreenBuffer* layer);
 
@@ -120,6 +120,7 @@ public:
      * Prints out the content of the pool.
      */
     void dump();
+
 private:
     struct Entry {
         Entry() {}
@@ -133,36 +134,29 @@ private:
                 : layer(layer)
                 , width(layer->texture.width())
                 , height(layer->texture.height())
-                , wideColorGamut(layer->wideColorGamut) {
-        }
+                , wideColorGamut(layer->wideColorGamut) {}
 
         static int compare(const Entry& lhs, const Entry& rhs);
 
-        bool operator==(const Entry& other) const {
-            return compare(*this, other) == 0;
-        }
+        bool operator==(const Entry& other) const { return compare(*this, other) == 0; }
 
-        bool operator!=(const Entry& other) const {
-            return compare(*this, other) != 0;
-        }
+        bool operator!=(const Entry& other) const { return compare(*this, other) != 0; }
 
-        bool operator<(const Entry& other) const {
-            return Entry::compare(*this, other) < 0;
-        }
+        bool operator<(const Entry& other) const { return Entry::compare(*this, other) < 0; }
 
         OffscreenBuffer* layer = nullptr;
         uint32_t width = 0;
         uint32_t height = 0;
         bool wideColorGamut = false;
-    }; // struct Entry
+    };  // struct Entry
 
     std::multiset<Entry> mPool;
 
     uint32_t mSize = 0;
     uint32_t mMaxSize;
-}; // class OffscreenBufferCache
+};  // class OffscreenBufferCache
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android
 
-#endif // ANDROID_HWUI_OFFSCREEN_BUFFER_POOL_H
+#endif  // ANDROID_HWUI_OFFSCREEN_BUFFER_POOL_H

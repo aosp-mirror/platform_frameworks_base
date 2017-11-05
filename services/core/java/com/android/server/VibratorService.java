@@ -27,6 +27,7 @@ import android.database.ContentObserver;
 import android.hardware.input.InputManager;
 import android.hardware.vibrator.V1_0.Constants.EffectStrength;
 import android.media.AudioManager;
+import android.os.PowerManager.ServiceType;
 import android.os.PowerSaveState;
 import android.os.BatteryStats;
 import android.os.Handler;
@@ -56,7 +57,6 @@ import android.media.AudioAttributes;
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.util.DumpUtils;
-import com.android.server.power.BatterySaverPolicy.ServiceType;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;

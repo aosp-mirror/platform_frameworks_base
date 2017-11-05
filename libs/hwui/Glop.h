@@ -41,34 +41,34 @@ class Texture;
  */
 
 namespace VertexAttribFlags {
-    enum {
-        // Mesh is pure x,y vertex pairs
-        None = 0,
-        // Mesh has texture coordinates embedded. Note that texture can exist without this flag
-        // being set, if coordinates passed to sampler are determined another way.
-        TextureCoord = 1 << 0,
-        // Mesh has color embedded (to export to varying)
-        Color = 1 << 1,
-        // Mesh has alpha embedded (to export to varying)
-        Alpha = 1 << 2,
-    };
+enum {
+    // Mesh is pure x,y vertex pairs
+    None = 0,
+    // Mesh has texture coordinates embedded. Note that texture can exist without this flag
+    // being set, if coordinates passed to sampler are determined another way.
+    TextureCoord = 1 << 0,
+    // Mesh has color embedded (to export to varying)
+    Color = 1 << 1,
+    // Mesh has alpha embedded (to export to varying)
+    Alpha = 1 << 2,
+};
 };
 
 /*
  * Enumerates transform features
  */
 namespace TransformFlags {
-    enum {
-        None = 0,
+enum {
+    None = 0,
 
-        // offset the eventual drawing matrix by a tiny amount to
-        // disambiguate sampling patterns with non-AA rendering
-        OffsetByFudgeFactor = 1 << 0,
+    // offset the eventual drawing matrix by a tiny amount to
+    // disambiguate sampling patterns with non-AA rendering
+    OffsetByFudgeFactor = 1 << 0,
 
-        // Canvas transform isn't applied to the mesh at draw time,
-        // since it's already built in.
-        MeshIgnoresCanvasTransform = 1 << 1, // TODO: remove for HWUI_NEW_OPS
-    };
+    // Canvas transform isn't applied to the mesh at draw time,
+    // since it's already built in.
+    MeshIgnoresCanvasTransform = 1 << 1,  // TODO: remove for HWUI_NEW_OPS
+};
 };
 
 /**
@@ -86,10 +86,11 @@ namespace TransformFlags {
  */
 struct Glop {
     PREVENT_COPY_AND_ASSIGN(Glop);
+
 public:
-    Glop() { }
+    Glop() {}
     struct Mesh {
-        GLuint primitiveMode; // GL_TRIANGLES and GL_TRIANGLE_STRIP supported
+        GLuint primitiveMode;  // GL_TRIANGLES and GL_TRIANGLE_STRIP supported
 
         // buffer object and void* are mutually exclusive.
         // Only GL_UNSIGNED_SHORT supported.
@@ -110,7 +111,7 @@ public:
         } vertices;
 
         int elementCount;
-        int vertexCount; // only used for meshes (for glDrawRangeElements)
+        int vertexCount;  // only used for meshes (for glDrawRangeElements)
         TextureVertex mappedVertices[4];
     } mesh;
 
@@ -148,10 +149,11 @@ public:
         Matrix4 canvas;
         int transformFlags;
 
-       const Matrix4& meshTransform() const {
-           return (transformFlags & TransformFlags::MeshIgnoresCanvasTransform)
-                   ? Matrix4::identity() : canvas;
-       }
+        const Matrix4& meshTransform() const {
+            return (transformFlags & TransformFlags::MeshIgnoresCanvasTransform)
+                           ? Matrix4::identity()
+                           : canvas;
+        }
     } transform;
 
     const RoundRectClipState* roundRectClipState = nullptr;

@@ -41,18 +41,17 @@ bool transferFunctionCloseToSRGB(const SkColorSpace* colorSpace) {
         const float sRGBParamG = 2.4f;
 
         // This comparison will catch Display P3
-        return
-                almostEqual(sRGBParamA, transferFunction.fA)
-             && almostEqual(sRGBParamB, transferFunction.fB)
-             && almostEqual(sRGBParamC, transferFunction.fC)
-             && almostEqual(sRGBParamD, transferFunction.fD)
-             && almostEqual(sRGBParamE, transferFunction.fE)
-             && almostEqual(sRGBParamF, transferFunction.fF)
-             && almostEqual(sRGBParamG, transferFunction.fG);
+        return almostEqual(sRGBParamA, transferFunction.fA) &&
+               almostEqual(sRGBParamB, transferFunction.fB) &&
+               almostEqual(sRGBParamC, transferFunction.fC) &&
+               almostEqual(sRGBParamD, transferFunction.fD) &&
+               almostEqual(sRGBParamE, transferFunction.fE) &&
+               almostEqual(sRGBParamF, transferFunction.fF) &&
+               almostEqual(sRGBParamG, transferFunction.fG);
     }
 
     return false;
 }
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android

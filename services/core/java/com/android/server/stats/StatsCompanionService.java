@@ -24,7 +24,8 @@ import android.content.IntentFilter;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
-import android.content.IntentFilter;
+import android.net.NetworkStats;
+import android.os.BatteryStatsInternal;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -37,15 +38,17 @@ import android.os.StatsLogEventWrapper;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Slog;
+import android.util.StatsLog;
+
+import com.android.internal.annotations.GuardedBy;
+import com.android.internal.net.NetworkStatsFactory;
+import com.android.internal.os.KernelWakelockReader;
+import com.android.internal.os.KernelWakelockStats;
+import com.android.server.LocalServices;
+import com.android.server.SystemService;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import com.android.internal.annotations.GuardedBy;
-import com.android.internal.os.KernelWakelockReader;
-import com.android.internal.os.KernelWakelockStats;
-import com.android.server.SystemService;
-
 import java.util.Map;
 
 /**
@@ -283,42 +286,171 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
       }
     }
 
-    // These values must be kept in sync with cmd/statsd/StatsPullerManager.h.
-    // TODO: pull the constant from stats_events.proto instead
-    private static final int PULL_CODE_KERNEL_WAKELOCKS = 20;
-
     private final KernelWakelockReader mKernelWakelockReader = new KernelWakelockReader();
     private final KernelWakelockStats mTmpWakelockStats = new KernelWakelockStats();
 
-    @Override // Binder call
-    public StatsLogEventWrapper[] pullData(int pullCode) {
-        enforceCallingPermission();
-        if (DEBUG) {
-            Slog.d(TAG, "Pulling " + pullCode);
-        }
-
+    private StatsLogEventWrapper[] addNetworkStats(int tag, NetworkStats stats, boolean withFGBG) {
         List<StatsLogEventWrapper> ret = new ArrayList<>();
-        switch (pullCode) {
-            case PULL_CODE_KERNEL_WAKELOCKS: {
-                final KernelWakelockStats wakelockStats =
-                        mKernelWakelockReader.readKernelWakelockStats(mTmpWakelockStats);
-                for (Map.Entry<String, KernelWakelockStats.Entry> ent : wakelockStats.entrySet()) {
-                    String name = ent.getKey();
-                    KernelWakelockStats.Entry kws = ent.getValue();
-                    StatsLogEventWrapper e = new StatsLogEventWrapper(41, 4);
-                    e.writeInt(kws.mCount);
-                    e.writeInt(kws.mVersion);
-                    e.writeLong(kws.mTotalTime);
-                    e.writeString(name);
-                    ret.add(e);
+        int size = stats.size();
+        NetworkStats.Entry entry = new NetworkStats.Entry(); // For recycling
+        for (int j = 0; j < size; j++) {
+            stats.getValues(j, entry);
+            StatsLogEventWrapper e = new StatsLogEventWrapper(tag, withFGBG ? 6 : 5);
+            e.writeInt(entry.uid);
+            if (withFGBG) {
+                e.writeInt(entry.set);
+            }
+            e.writeLong(entry.rxBytes);
+            e.writeLong(entry.rxPackets);
+            e.writeLong(entry.txBytes);
+            e.writeLong(entry.txPackets);
+            ret.add(e);
+        }
+        return ret.toArray(new StatsLogEventWrapper[ret.size()]);
+    }
+
+    /**
+     * Allows rollups per UID but keeping the set (foreground/background) slicing.
+     * Adapted from groupedByUid in frameworks/base/core/java/android/net/NetworkStats.java
+     */
+    private NetworkStats rollupNetworkStatsByFGBG(NetworkStats stats) {
+        final NetworkStats ret = new NetworkStats(stats.getElapsedRealtime(), 1);
+
+        final NetworkStats.Entry entry = new NetworkStats.Entry();
+        entry.iface = NetworkStats.IFACE_ALL;
+        entry.tag = NetworkStats.TAG_NONE;
+        entry.metered = NetworkStats.METERED_ALL;
+        entry.roaming = NetworkStats.ROAMING_ALL;
+
+        int size = stats.size();
+        NetworkStats.Entry recycle = new NetworkStats.Entry(); // Used for retrieving values
+        for (int i = 0; i < size; i++) {
+            stats.getValues(i, recycle);
+
+            // Skip specific tags, since already counted in TAG_NONE
+            if (recycle.tag != NetworkStats.TAG_NONE) continue;
+
+            entry.set = recycle.set; // Allows slicing by background/foreground
+            entry.uid = recycle.uid;
+            entry.rxBytes = recycle.rxBytes;
+            entry.rxPackets = recycle.rxPackets;
+            entry.txBytes = recycle.txBytes;
+            entry.txPackets = recycle.txPackets;
+            // Operations purposefully omitted since we don't use them for statsd.
+            ret.combineValues(entry);
+        }
+        return ret;
+    }
+
+    @Override // Binder call
+    public StatsLogEventWrapper[] pullData(int tagId) {
+        enforceCallingPermission();
+        if (DEBUG)
+            Slog.d(TAG, "Pulling " + tagId);
+
+        switch (tagId) {
+            case StatsLog.WIFI_BYTES_TRANSFERRED: {
+                long token = Binder.clearCallingIdentity();
+                try {
+                    // TODO: Consider caching the following call to get BatteryStatsInternal.
+                    BatteryStatsInternal bs = LocalServices.getService(BatteryStatsInternal.class);
+                    String[] ifaces = bs.getWifiIfaces();
+                    if (ifaces.length == 0) {
+                        return null;
+                    }
+                    NetworkStatsFactory nsf = new NetworkStatsFactory();
+                    // Combine all the metrics per Uid into one record.
+                    NetworkStats stats = nsf.readNetworkStatsDetail(NetworkStats.UID_ALL, ifaces,
+                            NetworkStats.TAG_NONE, null).groupedByUid();
+                    return addNetworkStats(tagId, stats, false);
+                } catch (java.io.IOException e) {
+                    Slog.e(TAG, "Pulling netstats for wifi bytes has error", e);
+                } finally {
+                    Binder.restoreCallingIdentity(token);
                 }
                 break;
             }
+            case StatsLog.MOBILE_BYTES_TRANSFERRED: {
+                long token = Binder.clearCallingIdentity();
+                try {
+                    BatteryStatsInternal bs = LocalServices.getService(BatteryStatsInternal.class);
+                    String[] ifaces = bs.getMobileIfaces();
+                    if (ifaces.length == 0) {
+                        return null;
+                    }
+                    NetworkStatsFactory nsf = new NetworkStatsFactory();
+                    // Combine all the metrics per Uid into one record.
+                    NetworkStats stats = nsf.readNetworkStatsDetail(NetworkStats.UID_ALL, ifaces,
+                        NetworkStats.TAG_NONE, null).groupedByUid();
+                    return addNetworkStats(tagId, stats, false);
+                } catch (java.io.IOException e) {
+                    Slog.e(TAG, "Pulling netstats for mobile bytes has error", e);
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                }
+                break;
+            }
+            case StatsLog.WIFI_BYTES_TRANSFERRED_BY_FG_BG: {
+                long token = Binder.clearCallingIdentity();
+                try {
+                    BatteryStatsInternal bs = LocalServices.getService(BatteryStatsInternal.class);
+                    String[] ifaces = bs.getWifiIfaces();
+                    if (ifaces.length == 0) {
+                        return null;
+                    }
+                    NetworkStatsFactory nsf = new NetworkStatsFactory();
+                    NetworkStats stats = rollupNetworkStatsByFGBG(
+                            nsf.readNetworkStatsDetail(NetworkStats.UID_ALL, ifaces,
+                            NetworkStats.TAG_NONE, null));
+                    return addNetworkStats(tagId, stats, true);
+                } catch (java.io.IOException e) {
+                    Slog.e(TAG, "Pulling netstats for wifi bytes w/ fg/bg has error", e);
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                }
+                break;
+            }
+            case StatsLog.MOBILE_BYTES_TRANSFERRED_BY_FG_BG: {
+                long token = Binder.clearCallingIdentity();
+                try {
+                    BatteryStatsInternal bs = LocalServices.getService(BatteryStatsInternal.class);
+                    String[] ifaces = bs.getMobileIfaces();
+                    if (ifaces.length == 0) {
+                        return null;
+                    }
+                    NetworkStatsFactory nsf = new NetworkStatsFactory();
+                    NetworkStats stats = rollupNetworkStatsByFGBG(
+                            nsf.readNetworkStatsDetail(NetworkStats.UID_ALL, ifaces,
+                            NetworkStats.TAG_NONE, null));
+                    return addNetworkStats(tagId, stats, true);
+                } catch (java.io.IOException e) {
+                    Slog.e(TAG, "Pulling netstats for mobile bytes w/ fg/bg has error", e);
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                }
+                break;
+            }
+            case StatsLog.KERNEL_WAKELOCK_PULLED: {
+                final KernelWakelockStats wakelockStats =
+                        mKernelWakelockReader.readKernelWakelockStats(mTmpWakelockStats);
+                List<StatsLogEventWrapper> ret = new ArrayList();
+                for (Map.Entry<String, KernelWakelockStats.Entry> ent : wakelockStats.entrySet()) {
+                    String name = ent.getKey();
+                    KernelWakelockStats.Entry kws = ent.getValue();
+                    StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, 4);
+                    e.writeString(name);
+                    e.writeInt(kws.mCount);
+                    e.writeInt(kws.mVersion);
+                    e.writeLong(kws.mTotalTime);
+                    ret.add(e);
+                }
+                return ret.toArray(new StatsLogEventWrapper[ret.size()]);
+            }
             default:
-                Slog.w(TAG, "No such pollable data as " + pullCode);
+                Slog.w(TAG, "No such tagId data as " + tagId);
                 return null;
         }
-        return ret.toArray(new StatsLogEventWrapper[ret.size()]);
+        return null;
     }
 
     @Override // Binder call

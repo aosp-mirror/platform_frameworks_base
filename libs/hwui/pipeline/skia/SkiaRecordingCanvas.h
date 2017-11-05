@@ -15,10 +15,10 @@
  */
 #pragma once
 
+#include <SkLiteRecorder.h>
+#include "ReorderBarrierDrawables.h"
 #include "SkiaCanvas.h"
 #include "SkiaDisplayList.h"
-#include "ReorderBarrierDrawables.h"
-#include <SkLiteRecorder.h>
 
 namespace android {
 namespace uirenderer {
@@ -29,7 +29,7 @@ namespace skiapipeline {
  * SkLiteRecorder and a SkiaDisplayList.
  */
 class SkiaRecordingCanvas : public SkiaCanvas {
- public:
+public:
     explicit SkiaRecordingCanvas(uirenderer::RenderNode* renderNode, int width, int height) {
         initDisplayList(renderNode, width, height);
     }
@@ -39,31 +39,32 @@ class SkiaRecordingCanvas : public SkiaCanvas {
     }
 
     virtual void resetRecording(int width, int height,
-            uirenderer::RenderNode* renderNode) override {
+                                uirenderer::RenderNode* renderNode) override {
         initDisplayList(renderNode, width, height);
     }
 
     virtual uirenderer::DisplayList* finishRecording() override;
 
-    virtual void drawBitmap(Bitmap& bitmap, float left, float top,
-            const SkPaint* paint) override;
-    virtual void drawBitmap(Bitmap& bitmap, const SkMatrix& matrix,
-            const SkPaint* paint) override;
-    virtual void drawBitmap(Bitmap& bitmap, float srcLeft, float srcTop,
-            float srcRight, float srcBottom, float dstLeft, float dstTop,
-            float dstRight, float dstBottom, const SkPaint* paint) override;
+    virtual void drawBitmap(Bitmap& bitmap, float left, float top, const SkPaint* paint) override;
+    virtual void drawBitmap(Bitmap& bitmap, const SkMatrix& matrix, const SkPaint* paint) override;
+    virtual void drawBitmap(Bitmap& bitmap, float srcLeft, float srcTop, float srcRight,
+                            float srcBottom, float dstLeft, float dstTop, float dstRight,
+                            float dstBottom, const SkPaint* paint) override;
     virtual void drawNinePatch(Bitmap& hwuiBitmap, const android::Res_png_9patch& chunk,
-            float dstLeft, float dstTop, float dstRight, float dstBottom,
-            const SkPaint* paint) override;
+                               float dstLeft, float dstTop, float dstRight, float dstBottom,
+                               const SkPaint* paint) override;
 
     virtual void drawRoundRect(uirenderer::CanvasPropertyPrimitive* left,
-            uirenderer::CanvasPropertyPrimitive* top, uirenderer::CanvasPropertyPrimitive* right,
-            uirenderer::CanvasPropertyPrimitive* bottom, uirenderer::CanvasPropertyPrimitive* rx,
-            uirenderer::CanvasPropertyPrimitive* ry,
-            uirenderer::CanvasPropertyPaint* paint) override;
+                               uirenderer::CanvasPropertyPrimitive* top,
+                               uirenderer::CanvasPropertyPrimitive* right,
+                               uirenderer::CanvasPropertyPrimitive* bottom,
+                               uirenderer::CanvasPropertyPrimitive* rx,
+                               uirenderer::CanvasPropertyPrimitive* ry,
+                               uirenderer::CanvasPropertyPaint* paint) override;
     virtual void drawCircle(uirenderer::CanvasPropertyPrimitive* x,
-            uirenderer::CanvasPropertyPrimitive* y, uirenderer::CanvasPropertyPrimitive* radius,
-            uirenderer::CanvasPropertyPaint* paint) override;
+                            uirenderer::CanvasPropertyPrimitive* y,
+                            uirenderer::CanvasPropertyPrimitive* radius,
+                            uirenderer::CanvasPropertyPaint* paint) override;
 
     virtual void drawVectorDrawable(VectorDrawableRoot* vectorDrawable) override;
 
@@ -88,6 +89,6 @@ private:
     void initDisplayList(uirenderer::RenderNode* renderNode, int width, int height);
 };
 
-}; // namespace skiapipeline
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace skiapipeline
+};  // namespace uirenderer
+};  // namespace android

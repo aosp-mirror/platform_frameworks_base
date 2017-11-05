@@ -16,12 +16,12 @@
 
 #include "tests/common/TestUtils.h"
 
-#include <gtest/gtest.h>
 #include <RecordingCanvas.h>
 #include <SkBlurDrawLooper.h>
 #include <SkCanvasStateUtils.h>
 #include <SkPicture.h>
 #include <SkPictureRecorder.h>
+#include <gtest/gtest.h>
 
 using namespace android;
 using namespace android::uirenderer;
@@ -88,7 +88,7 @@ TEST(SkiaCanvas, colorSpaceXform) {
     sk_sp<Bitmap> adobeBitmap = Bitmap::allocateHeapBitmap(adobeInfo);
     SkBitmap adobeSkBitmap;
     adobeBitmap->getSkBitmap(&adobeSkBitmap);
-    *adobeSkBitmap.getAddr32(0, 0) = 0xFF0000F0; // Opaque, almost fully-red
+    *adobeSkBitmap.getAddr32(0, 0) = 0xFF0000F0;  // Opaque, almost fully-red
 
     SkImageInfo info = adobeInfo.makeColorSpace(nullptr);
     sk_sp<Bitmap> bitmap = Bitmap::allocateHeapBitmap(info);

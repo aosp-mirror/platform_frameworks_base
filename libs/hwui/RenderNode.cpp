@@ -21,16 +21,16 @@
 #include "Debug.h"
 #include "RecordedOp.h"
 #include "TreeInfo.h"
+#include "VectorDrawable.h"
+#include "renderstate/RenderState.h"
+#include "renderthread/CanvasContext.h"
 #include "utils/FatVector.h"
 #include "utils/MathUtils.h"
 #include "utils/StringUtils.h"
 #include "utils/TraceUtils.h"
-#include "VectorDrawable.h"
-#include "renderstate/RenderState.h"
-#include "renderthread/CanvasContext.h"
 
-#include "protos/hwui.pb.h"
 #include "protos/ProtoHelpers.h"
+#include "protos/hwui.pb.h"
 
 #include <SkPathOps.h>
 #include <algorithm>
@@ -46,9 +46,7 @@ class ImmediateRemoved : public TreeObserver {
 public:
     explicit ImmediateRemoved(TreeInfo* info) : mTreeInfo(info) {}
 
-    void onMaybeRemovedFromTree(RenderNode* node) override {
-        node->onRemovedFromTree(mTreeInfo);
-    }
+    void onMaybeRemovedFromTree(RenderNode* node) override { node->onRemovedFromTree(mTreeInfo); }
 
 private:
     TreeInfo* mTreeInfo;
@@ -60,8 +58,7 @@ RenderNode::RenderNode()
         , mDisplayList(nullptr)
         , mStagingDisplayList(nullptr)
         , mAnimatorManager(*this)
-        , mParentCount(0) {
-}
+        , mParentCount(0) {}
 
 RenderNode::~RenderNode() {
     ImmediateRemoved observer(nullptr);
@@ -89,12 +86,11 @@ void RenderNode::output() {
 
 void RenderNode::output(std::ostream& output, uint32_t level) {
     output << "  (" << getName() << " " << this
-            << (MathUtils::isZero(properties().getAlpha()) ? ", zero alpha" : "")
-            << (properties().hasShadow() ? ", casting shadow" : "")
-            << (isRenderable() ? "" : ", empty")
-            << (properties().getProjectBackwards() ? ", projected" : "")
-            << (hasLayer() ? ", on HW Layer" : "")
-            << ")" << std::endl;
+           << (MathUtils::isZero(properties().getAlpha()) ? ", zero alpha" : "")
+           << (properties().hasShadow() ? ", casting shadow" : "")
+           << (isRenderable() ? "" : ", empty")
+           << (properties().getProjectBackwards() ? ", projected" : "")
+           << (hasLayer() ? ", on HW Layer" : "") << ")" << std::endl;
 
     properties().debugOutputProperties(output, level + 1);
 
@@ -105,9 +101,8 @@ void RenderNode::output(std::ostream& output, uint32_t level) {
     output << std::endl;
 }
 
-void RenderNode::copyTo(proto::RenderNode *pnode) {
-    pnode->set_id(static_cast<uint64_t>(
-            reinterpret_cast<uintptr_t>(this)));
+void RenderNode::copyTo(proto::RenderNode* pnode) {
+    pnode->set_id(static_cast<uint64_t>(reinterpret_cast<uintptr_t>(this)));
     pnode->set_name(mName.string(), mName.length());
 
     proto::RenderProperties* pprops = pnode->mutable_properties();
@@ -239,18 +234,16 @@ void RenderNode::pushLayerUpdate(TreeInfo& info) {
     LayerType layerType = properties().effectiveLayerType();
     // If we are not a layer OR we cannot be rendered (eg, view was detached)
     // we need to destroy any Layers we may have had previously
-    if (CC_LIKELY(layerType != LayerType::RenderLayer)
-            || CC_UNLIKELY(!isRenderable())
-            || CC_UNLIKELY(properties().getWidth() == 0)
-            || CC_UNLIKELY(properties().getHeight() == 0)
-            || CC_UNLIKELY(!properties().fitsOnLayer())) {
+    if (CC_LIKELY(layerType != LayerType::RenderLayer) || CC_UNLIKELY(!isRenderable()) ||
+        CC_UNLIKELY(properties().getWidth() == 0) || CC_UNLIKELY(properties().getHeight() == 0) ||
+        CC_UNLIKELY(!properties().fitsOnLayer())) {
         if (CC_UNLIKELY(hasLayer())) {
             renderthread::CanvasContext::destroyLayer(this);
         }
         return;
     }
 
-    if(info.canvasContext.createOrUpdateLayer(this, *info.damageAccumulator)) {
+    if (info.canvasContext.createOrUpdateLayer(this, *info.damageAccumulator)) {
         damageSelf(info);
     }
 
@@ -261,8 +254,8 @@ void RenderNode::pushLayerUpdate(TreeInfo& info) {
             err << "Unable to create layer for " << getName();
             const int maxTextureSize = Caches::getInstance().maxTextureSize;
             if (getWidth() > maxTextureSize || getHeight() > maxTextureSize) {
-                err << ", size " << getWidth() << "x" << getHeight()
-                        << " exceeds max size " << maxTextureSize;
+                err << ", size " << getWidth() << "x" << getHeight() << " exceeds max size "
+                    << maxTextureSize;
             } else {
                 err << ", see logcat for more info";
             }
@@ -306,8 +299,8 @@ void RenderNode::prepareTreeImpl(TreeObserver& observer, TreeInfo& info, bool fu
     } else if (mDisplayList) {
         willHaveFunctor = mDisplayList->hasFunctor();
     }
-    bool childFunctorsNeedLayer = mProperties.prepareForFunctorPresence(
-            willHaveFunctor, functorsNeedLayer);
+    bool childFunctorsNeedLayer =
+            mProperties.prepareForFunctorPresence(willHaveFunctor, functorsNeedLayer);
 
     if (CC_UNLIKELY(mPositionListener.get())) {
         mPositionListener->onPositionUpdated(*this, info);
@@ -320,10 +313,12 @@ void RenderNode::prepareTreeImpl(TreeObserver& observer, TreeInfo& info, bool fu
 
     if (mDisplayList) {
         info.out.hasFunctors |= mDisplayList->hasFunctor();
-        bool isDirty = mDisplayList->prepareListAndChildren(observer, info, childFunctorsNeedLayer,
-                [](RenderNode* child, TreeObserver& observer, TreeInfo& info, bool functorsNeedLayer) {
-            child->prepareTreeImpl(observer, info, functorsNeedLayer);
-        });
+        bool isDirty = mDisplayList->prepareListAndChildren(
+                observer, info, childFunctorsNeedLayer,
+                [](RenderNode* child, TreeObserver& observer, TreeInfo& info,
+                   bool functorsNeedLayer) {
+                    child->prepareTreeImpl(observer, info, functorsNeedLayer);
+                });
         if (isDirty) {
             damageSelf(info);
         }
@@ -363,9 +358,7 @@ void RenderNode::syncDisplayList(TreeObserver& observer, TreeInfo* info) {
     // Make sure we inc first so that we don't fluctuate between 0 and 1,
     // which would thrash the layer cache
     if (mStagingDisplayList) {
-        mStagingDisplayList->updateChildren([](RenderNode* child) {
-            child->incParentRefCount();
-        });
+        mStagingDisplayList->updateChildren([](RenderNode* child) { child->incParentRefCount(); });
     }
     deleteDisplayList(observer, info);
     mDisplayList = mStagingDisplayList;
@@ -388,9 +381,8 @@ void RenderNode::pushStagingDisplayListChanges(TreeObserver& observer, TreeInfo&
 
 void RenderNode::deleteDisplayList(TreeObserver& observer, TreeInfo* info) {
     if (mDisplayList) {
-        mDisplayList->updateChildren([&observer, info](RenderNode* child) {
-            child->decParentRefCount(observer, info);
-        });
+        mDisplayList->updateChildren(
+                [&observer, info](RenderNode* child) { child->decParentRefCount(observer, info); });
         if (!mDisplayList->reuseDisplayList(this, info ? &info->canvasContext : nullptr)) {
             delete mDisplayList;
         }
@@ -413,9 +405,7 @@ void RenderNode::destroyLayers() {
         renderthread::CanvasContext::destroyLayer(this);
     }
     if (mDisplayList) {
-        mDisplayList->updateChildren([](RenderNode* child) {
-            child->destroyLayers();
-        });
+        mDisplayList->updateChildren([](RenderNode* child) { child->destroyLayers(); });
     }
 }
 
@@ -461,16 +451,15 @@ void RenderNode::applyViewPropertyTransforms(mat4& matrix, bool true3dTransform)
     if (properties().hasTransformMatrix() || applyTranslationZ) {
         if (properties().isTransformTranslateOnly()) {
             matrix.translate(properties().getTranslationX(), properties().getTranslationY(),
-                    true3dTransform ? properties().getZ() : 0.0f);
+                             true3dTransform ? properties().getZ() : 0.0f);
         } else {
             if (!true3dTransform) {
                 matrix.multiply(*properties().getTransformMatrix());
             } else {
                 mat4 true3dMat;
-                true3dMat.loadTranslate(
-                        properties().getPivotX() + properties().getTranslationX(),
-                        properties().getPivotY() + properties().getTranslationY(),
-                        properties().getZ());
+                true3dMat.loadTranslate(properties().getPivotX() + properties().getTranslationX(),
+                                        properties().getPivotY() + properties().getTranslationY(),
+                                        properties().getZ());
                 true3dMat.rotate(properties().getRotationX(), 1, 0, 0);
                 true3dMat.rotate(properties().getRotationY(), 0, 1, 0);
                 true3dMat.rotate(properties().getRotation(), 0, 0, 1);
@@ -505,8 +494,7 @@ void RenderNode::computeOrdering() {
 }
 
 void RenderNode::computeOrderingImpl(
-        RenderNodeOp* opState,
-        std::vector<RenderNodeOp*>* compositedChildrenOfProjectionSurface,
+        RenderNodeOp* opState, std::vector<RenderNodeOp*>* compositedChildrenOfProjectionSurface,
         const mat4* transformFromProjectionSurface) {
     mProjectedNodes.clear();
     if (mDisplayList == nullptr || mDisplayList->isEmpty()) return;
@@ -569,7 +557,6 @@ const SkPath* RenderNode::getClippedOutline(const SkRect& clipRect) const {
         SkPath clipPath;
         clipPath.addRect(clipRect);
         Op(*outlinePath, clipPath, kIntersect_SkPathOp, &mClippedOutlineCache.clippedOutline);
-
     }
     return &mClippedOutlineCache.clippedOutline;
 }

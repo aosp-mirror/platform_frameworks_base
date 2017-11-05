@@ -271,6 +271,59 @@ public final class ContextHubManager {
         throw new UnsupportedOperationException("TODO: Implement this");
     }
 
+    /*
+     * Helper function to generate a stub for a non-query transaction callback.
+     *
+     * @param transaction the transaction to unblock when complete
+     *
+     * @return the callback
+     *
+     * @hide
+     */
+    private IContextHubTransactionCallback createTransactionCallback(
+            ContextHubTransaction<Void> transaction) {
+        return new IContextHubTransactionCallback.Stub() {
+            @Override
+            public void onQueryResponse(int result, List<NanoAppState> nanoappList) {
+                Log.e(TAG, "Received a query callback on a non-query request");
+                transaction.setResponse(new ContextHubTransaction.Response<Void>(
+                        ContextHubTransaction.TRANSACTION_FAILED_SERVICE_INTERNAL_FAILURE, null));
+            }
+
+            @Override
+            public void onTransactionComplete(int result) {
+                transaction.setResponse(new ContextHubTransaction.Response<Void>(result, null));
+            }
+        };
+    }
+
+   /*
+    * Helper function to generate a stub for a query transaction callback.
+    *
+    * @param transaction the transaction to unblock when complete
+    *
+    * @return the callback
+    *
+    * @hide
+    */
+    private IContextHubTransactionCallback createQueryCallback(
+            ContextHubTransaction<List<NanoAppState>> transaction) {
+        return new IContextHubTransactionCallback.Stub() {
+            @Override
+            public void onQueryResponse(int result, List<NanoAppState> nanoappList) {
+                transaction.setResponse(new ContextHubTransaction.Response<List<NanoAppState>>(
+                        result, nanoappList));
+            }
+
+            @Override
+            public void onTransactionComplete(int result) {
+                Log.e(TAG, "Received a non-query callback on a query request");
+                transaction.setResponse(new ContextHubTransaction.Response<List<NanoAppState>>(
+                        ContextHubTransaction.TRANSACTION_FAILED_SERVICE_INTERNAL_FAILURE, null));
+            }
+        };
+    }
+
     /**
      * Loads a nanoapp at the specified Context Hub.
      *
@@ -411,7 +464,7 @@ public final class ContextHubManager {
      *
      * @param callback the notification callback to register
      * @param hubInfo the hub to attach this client to
-     * @param handler the handler to invoke the callback, if null uses the current thread Looper
+     * @param handler the handler to invoke the callback, if null uses the main thread's Looper
      *
      * @return the registered client object
      *

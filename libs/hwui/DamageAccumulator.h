@@ -26,7 +26,7 @@
 
 // Smaller than INT_MIN/INT_MAX because we offset these values
 // and thus don't want to be adding offsets to INT_MAX, that's bad
-#define DIRTY_MIN (-0x7ffffff-1)
+#define DIRTY_MIN (-0x7ffffff - 1)
 #define DIRTY_MAX (0x7ffffff)
 
 namespace android {
@@ -38,6 +38,7 @@ class Matrix4;
 
 class DamageAccumulator {
     PREVENT_COPY_AND_ASSIGN(DamageAccumulator);
+
 public:
     DamageAccumulator();
     // mAllocator will clean everything up for us, no need for a dtor

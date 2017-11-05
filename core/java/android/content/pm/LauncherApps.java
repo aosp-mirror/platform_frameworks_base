@@ -671,9 +671,13 @@ public class LauncherApps {
     }
 
     /**
-     * Returns whether the caller can access the shortcut information.
+     * Returns whether the caller can access the shortcut information.  Access is currently
+     * available to:
      *
-     * <p>Only the default launcher can access the shortcut information.
+     * <ul>
+     *     <li>The current launcher (or default launcher if there is no set current launcher).</li>
+     *     <li>The currently active voice interaction service.</li>
+     * </ul>
      *
      * <p>Note when this method returns {@code false}, it may be a temporary situation because
      * the user is trying a new launcher application.  The user may decide to change the default

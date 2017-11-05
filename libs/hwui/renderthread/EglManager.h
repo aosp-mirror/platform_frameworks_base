@@ -16,9 +16,9 @@
 #ifndef EGLMANAGER_H
 #define EGLMANAGER_H
 
-#include <cutils/compiler.h>
 #include <EGL/egl.h>
 #include <SkRect.h>
+#include <cutils/compiler.h>
 #include <ui/GraphicBuffer.h>
 #include <utils/StrongPointer.h>
 

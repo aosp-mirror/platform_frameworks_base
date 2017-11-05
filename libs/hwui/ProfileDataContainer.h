@@ -24,6 +24,7 @@ namespace uirenderer {
 
 class ProfileDataContainer {
     PREVENT_COPY_AND_ASSIGN(ProfileDataContainer);
+
 public:
     explicit ProfileDataContainer() {}
 

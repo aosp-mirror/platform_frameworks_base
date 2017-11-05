@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "RenderNode.h"
 #include "SkiaDisplayList.h"
 
 namespace android {
@@ -32,8 +33,7 @@ public:
             : mOutput(output)
             , mLevel(level)
             , mDisplayList(displayList)
-            , mIdent((level + 1) * 2, ' ') {
-    }
+            , mIdent((level + 1) * 2, ' ') {}
 
 protected:
     void onClipRect(const SkRect& rect, SkClipOp, ClipEdgeStyle) override {
@@ -52,9 +52,7 @@ protected:
         mOutput << mIdent << "clipRegion" << std::endl;
     }
 
-    void onDrawPaint(const SkPaint&) override {
-        mOutput << mIdent << "drawPaint" << std::endl;
-    }
+    void onDrawPaint(const SkPaint&) override { mOutput << mIdent << "drawPaint" << std::endl; }
 
     void onDrawPath(const SkPath&, const SkPaint&) override {
         mOutput << mIdent << "drawPath" << std::endl;
@@ -92,22 +90,21 @@ protected:
         mOutput << mIdent << "drawPosText" << std::endl;
     }
 
-    void onDrawPosTextH(const void*, size_t, const SkScalar[], SkScalar,
-            const SkPaint&) override {
+    void onDrawPosTextH(const void*, size_t, const SkScalar[], SkScalar, const SkPaint&) override {
         mOutput << mIdent << "drawPosTextH" << std::endl;
     }
 
     void onDrawTextOnPath(const void*, size_t, const SkPath&, const SkMatrix*,
-            const SkPaint&) override {
+                          const SkPaint&) override {
         mOutput << mIdent << "drawTextOnPath" << std::endl;
     }
 
     void onDrawTextRSXform(const void*, size_t, const SkRSXform[], const SkRect*,
-            const SkPaint&) override {
+                           const SkPaint&) override {
         mOutput << mIdent << "drawTextRSXform" << std::endl;
     }
 
-    void onDrawTextBlob(const SkTextBlob*, SkScalar,SkScalar, const SkPaint&) override {
+    void onDrawTextBlob(const SkTextBlob*, SkScalar, SkScalar, const SkPaint&) override {
         mOutput << mIdent << "drawTextBlob" << std::endl;
     }
 
@@ -116,17 +113,17 @@ protected:
     }
 
     void onDrawImageNine(const SkImage*, const SkIRect& center, const SkRect& dst,
-            const SkPaint*) override {
+                         const SkPaint*) override {
         mOutput << mIdent << "drawImageNine" << std::endl;
     }
 
     void onDrawImageRect(const SkImage*, const SkRect*, const SkRect&, const SkPaint*,
-            SrcRectConstraint) override {
+                         SrcRectConstraint) override {
         mOutput << mIdent << "drawImageRect" << std::endl;
     }
 
     void onDrawImageLattice(const SkImage*, const Lattice& lattice, const SkRect& dst,
-            const SkPaint*) override {
+                            const SkPaint*) override {
         mOutput << mIdent << "drawImageLattice" << std::endl;
     }
 
@@ -157,21 +154,21 @@ protected:
 
 private:
     RenderNodeDrawable* getRenderNodeDrawable(SkDrawable* drawable) {
-         for (auto& child : mDisplayList.mChildNodes) {
+        for (auto& child : mDisplayList.mChildNodes) {
             if (drawable == &child) {
                 return &child;
             }
-         }
-         return nullptr;
+        }
+        return nullptr;
     }
 
     GLFunctorDrawable* getGLFunctorDrawable(SkDrawable* drawable) {
-         for (auto& child : mDisplayList.mChildFunctors) {
+        for (auto& child : mDisplayList.mChildFunctors) {
             if (drawable == &child) {
                 return &child;
             }
-         }
-         return nullptr;
+        }
+        return nullptr;
     }
 
     std::ostream& mOutput;
@@ -180,6 +177,6 @@ private:
     std::string mIdent;
 };
 
-}; // namespace skiapipeline
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace skiapipeline
+};  // namespace uirenderer
+};  // namespace android

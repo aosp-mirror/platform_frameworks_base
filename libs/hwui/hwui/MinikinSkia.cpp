@@ -16,37 +16,41 @@
 
 #include "MinikinSkia.h"
 
-#include <log/log.h>
 #include <SkFontDescriptor.h>
 #include <SkFontMgr.h>
 #include <SkPaint.h>
 #include <SkTypeface.h>
+#include <log/log.h>
 
 namespace android {
 
 MinikinFontSkia::MinikinFontSkia(sk_sp<SkTypeface> typeface, const void* fontData, size_t fontSize,
-        int ttcIndex, const std::vector<minikin::FontVariation>& axes) :
-    minikin::MinikinFont(typeface->uniqueID()), mTypeface(std::move(typeface)), mFontData(fontData),
-    mFontSize(fontSize), mTtcIndex(ttcIndex), mAxes(axes) {
-}
+                                 int ttcIndex, const std::vector<minikin::FontVariation>& axes)
+        : minikin::MinikinFont(typeface->uniqueID())
+        , mTypeface(std::move(typeface))
+        , mFontData(fontData)
+        , mFontSize(fontSize)
+        , mTtcIndex(ttcIndex)
+        , mAxes(axes) {}
 
 static void MinikinFontSkia_SetSkiaPaint(const minikin::MinikinFont* font, SkPaint* skPaint,
-        const minikin::MinikinPaint& paint) {
+                                         const minikin::MinikinPaint& paint,
+                                         const minikin::FontFakery& fakery) {
     skPaint->setTextEncoding(SkPaint::kGlyphID_TextEncoding);
     skPaint->setTextSize(paint.size);
     skPaint->setTextScaleX(paint.scaleX);
     skPaint->setTextSkewX(paint.skewX);
     MinikinFontSkia::unpackPaintFlags(skPaint, paint.paintFlags);
     // Apply font fakery on top of user-supplied flags.
-    MinikinFontSkia::populateSkPaint(skPaint, font, paint.fakery);
+    MinikinFontSkia::populateSkPaint(skPaint, font, fakery);
 }
 
-float MinikinFontSkia::GetHorizontalAdvance(uint32_t glyph_id,
-        const minikin::MinikinPaint &paint) const {
+float MinikinFontSkia::GetHorizontalAdvance(uint32_t glyph_id, const minikin::MinikinPaint& paint,
+                                            const minikin::FontFakery& fakery) const {
     SkPaint skPaint;
     uint16_t glyph16 = glyph_id;
     SkScalar skWidth;
-    MinikinFontSkia_SetSkiaPaint(this, &skPaint, paint);
+    MinikinFontSkia_SetSkiaPaint(this, &skPaint, paint, fakery);
     skPaint.getTextWidths(&glyph16, sizeof(glyph16), &skWidth, NULL);
 #ifdef VERBOSE
     ALOGD("width for typeface %d glyph %d = %f", mTypeface->uniqueID(), glyph_id, skWidth);
@@ -55,11 +59,12 @@ float MinikinFontSkia::GetHorizontalAdvance(uint32_t glyph_id,
 }
 
 void MinikinFontSkia::GetBounds(minikin::MinikinRect* bounds, uint32_t glyph_id,
-        const minikin::MinikinPaint& paint) const {
+                                const minikin::MinikinPaint& paint,
+                                const minikin::FontFakery& fakery) const {
     SkPaint skPaint;
     uint16_t glyph16 = glyph_id;
     SkRect skBounds;
-    MinikinFontSkia_SetSkiaPaint(this, &skPaint, paint);
+    MinikinFontSkia_SetSkiaPaint(this, &skPaint, paint, fakery);
     skPaint.getTextWidths(&glyph16, sizeof(glyph16), NULL, &skBounds);
     bounds->mLeft = skBounds.fLeft;
     bounds->mTop = skBounds.fTop;
@@ -68,9 +73,10 @@ void MinikinFontSkia::GetBounds(minikin::MinikinRect* bounds, uint32_t glyph_id,
 }
 
 void MinikinFontSkia::GetFontExtent(minikin::MinikinExtent* extent,
-        const minikin::MinikinPaint& paint) const {
+                                    const minikin::MinikinPaint& paint,
+                                    const minikin::FontFakery& fakery) const {
     SkPaint skPaint;
-    MinikinFontSkia_SetSkiaPaint(this, &skPaint, paint);
+    MinikinFontSkia_SetSkiaPaint(this, &skPaint, paint, fakery);
     SkPaint::FontMetrics metrics;
     skPaint.getFontMetrics(&metrics);
     extent->ascent = metrics.fAscent;
@@ -78,7 +84,7 @@ void MinikinFontSkia::GetFontExtent(minikin::MinikinExtent* extent,
     extent->line_gap = metrics.fLeading;
 }
 
-SkTypeface *MinikinFontSkia::GetSkTypeface() const {
+SkTypeface* MinikinFontSkia::GetSkTypeface() const {
     return mTypeface.get();
 }
 
@@ -122,7 +128,7 @@ std::shared_ptr<minikin::MinikinFont> MinikinFontSkia::createFontWithVariation(
     sk_sp<SkTypeface> face(fm->makeFromStream(std::move(stream), params));
 
     return std::make_shared<MinikinFontSkia>(std::move(face), mFontData, mFontSize, ttcIndex,
-            variations);
+                                             variations);
 }
 
 uint32_t MinikinFontSkia::packPaintFlags(const SkPaint* paint) {
@@ -130,9 +136,9 @@ uint32_t MinikinFontSkia::packPaintFlags(const SkPaint* paint) {
     SkPaint::Hinting hinting = paint->getHinting();
     // select only flags that might affect text layout
     flags &= (SkPaint::kAntiAlias_Flag | SkPaint::kFakeBoldText_Flag | SkPaint::kLinearText_Flag |
-            SkPaint::kSubpixelText_Flag | SkPaint::kDevKernText_Flag |
-            SkPaint::kEmbeddedBitmapText_Flag | SkPaint::kAutoHinting_Flag |
-            SkPaint::kVerticalText_Flag);
+              SkPaint::kSubpixelText_Flag | SkPaint::kDevKernText_Flag |
+              SkPaint::kEmbeddedBitmapText_Flag | SkPaint::kAutoHinting_Flag |
+              SkPaint::kVerticalText_Flag);
     flags |= (hinting << 16);
     return flags;
 }
@@ -143,12 +149,11 @@ void MinikinFontSkia::unpackPaintFlags(SkPaint* paint, uint32_t paintFlags) {
 }
 
 void MinikinFontSkia::populateSkPaint(SkPaint* paint, const MinikinFont* font,
-        minikin::FontFakery fakery) {
+                                      minikin::FontFakery fakery) {
     paint->setTypeface(reinterpret_cast<const MinikinFontSkia*>(font)->RefSkTypeface());
     paint->setFakeBoldText(paint->isFakeBoldText() || fakery.isFakeBold());
     if (fakery.isFakeItalic()) {
         paint->setTextSkewX(paint->getTextSkewX() - 0.25f);
     }
 }
-
 }

@@ -32,8 +32,8 @@ class ANDROID_API Paint : public SkPaint {
 public:
     // Default values for underlined and strikethrough text,
     // as defined by Skia in SkTextFormatParams.h.
-    constexpr static float kStdStrikeThru_Offset   = (-6.0f / 21.0f);
-    constexpr static float kStdUnderline_Offset    = (1.0f / 9.0f);
+    constexpr static float kStdStrikeThru_Offset = (-6.0f / 21.0f);
+    constexpr static float kStdUnderline_Offset = (1.0f / 9.0f);
     constexpr static float kStdUnderline_Thickness = (1.0f / 18.0f);
 
     constexpr static float kStdUnderline_Top =
@@ -51,65 +51,39 @@ public:
     Paint& operator=(const Paint& other);
 
     friend bool operator==(const Paint& a, const Paint& b);
-    friend bool operator!=(const Paint& a, const Paint& b) {
-        return !(a == b);
-    }
+    friend bool operator!=(const Paint& a, const Paint& b) { return !(a == b); }
 
-    void setLetterSpacing(float letterSpacing) {
-        mLetterSpacing = letterSpacing;
-    }
+    void setLetterSpacing(float letterSpacing) { mLetterSpacing = letterSpacing; }
 
-    float getLetterSpacing() const {
-        return mLetterSpacing;
-    }
+    float getLetterSpacing() const { return mLetterSpacing; }
 
-    void setWordSpacing(float wordSpacing) {
-        mWordSpacing = wordSpacing;
-    }
+    void setWordSpacing(float wordSpacing) { mWordSpacing = wordSpacing; }
 
-    float getWordSpacing() const {
-        return mWordSpacing;
-    }
+    float getWordSpacing() const { return mWordSpacing; }
 
     void setFontFeatureSettings(const std::string& fontFeatureSettings) {
         mFontFeatureSettings = fontFeatureSettings;
     }
 
-    std::string getFontFeatureSettings() const {
-        return mFontFeatureSettings;
-    }
+    std::string getFontFeatureSettings() const { return mFontFeatureSettings; }
 
     void setMinikinLangListId(uint32_t minikinLangListId) {
         mMinikinLangListId = minikinLangListId;
     }
 
-    uint32_t getMinikinLangListId() const {
-        return mMinikinLangListId;
-    }
+    uint32_t getMinikinLangListId() const { return mMinikinLangListId; }
 
-    void setFontVariant(minikin::FontVariant variant) {
-        mFontVariant = variant;
-    }
+    void setFontVariant(minikin::FontVariant variant) { mFontVariant = variant; }
 
-    minikin::FontVariant getFontVariant() const {
-        return mFontVariant;
-    }
+    minikin::FontVariant getFontVariant() const { return mFontVariant; }
 
-    void setHyphenEdit(uint32_t hyphen) {
-        mHyphenEdit = hyphen;
-    }
+    void setHyphenEdit(uint32_t hyphen) { mHyphenEdit = hyphen; }
 
-    uint32_t getHyphenEdit() const {
-        return mHyphenEdit;
-    }
+    uint32_t getHyphenEdit() const { return mHyphenEdit; }
 
-    void setAndroidTypeface(Typeface* typeface) {
-        mTypeface = typeface;
-    }
+    void setAndroidTypeface(Typeface* typeface) { mTypeface = typeface; }
 
-    const Typeface* getAndroidTypeface() const {
-        return mTypeface;
-    }
+    const Typeface* getAndroidTypeface() const { return mTypeface; }
 
 private:
     float mLetterSpacing = 0;
@@ -126,4 +100,4 @@ private:
 
 }  // namespace android
 
-#endif // ANDROID_GRAPHICS_PAINT_H_
+#endif  // ANDROID_GRAPHICS_PAINT_H_

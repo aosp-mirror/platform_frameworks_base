@@ -115,7 +115,9 @@ public class SliceView extends ViewGroup {
      */
     public static final String MODE_LARGE       = "SLICE_LARGE";
     /**
-     * Mode indicating this slice should be presented as an icon.
+     * Mode indicating this slice should be presented as an icon. A shortcut requires an intent,
+     * icon, and label. This can be indicated by using {@link Slice#HINT_TITLE} on an action in a
+     * slice.
      */
     public static final String MODE_SHORTCUT    = "SLICE_ICON";
 

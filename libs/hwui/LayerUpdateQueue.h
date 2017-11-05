@@ -17,12 +17,12 @@
 #ifndef ANDROID_HWUI_LAYER_UPDATE_QUEUE_H
 #define ANDROID_HWUI_LAYER_UPDATE_QUEUE_H
 
+#include <utils/StrongPointer.h>
 #include "Rect.h"
 #include "utils/Macros.h"
-#include <utils/StrongPointer.h>
 
-#include <vector>
 #include <unordered_map>
+#include <vector>
 
 namespace android {
 namespace uirenderer {
@@ -31,11 +31,11 @@ class RenderNode;
 
 class LayerUpdateQueue {
     PREVENT_COPY_AND_ASSIGN(LayerUpdateQueue);
+
 public:
     struct Entry {
         Entry(RenderNode* renderNode, const Rect& damage)
-                : renderNode(renderNode)
-                , damage(damage) {}
+                : renderNode(renderNode), damage(damage) {}
         sp<RenderNode> renderNode;
         Rect damage;
     };
@@ -44,11 +44,12 @@ public:
     void enqueueLayerWithDamage(RenderNode* renderNode, Rect dirty);
     void clear();
     const std::vector<Entry>& entries() const { return mEntries; }
+
 private:
     std::vector<Entry> mEntries;
 };
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android
 
-#endif // ANDROID_HWUI_LAYER_UPDATE_QUEUE_H
+#endif  // ANDROID_HWUI_LAYER_UPDATE_QUEUE_H

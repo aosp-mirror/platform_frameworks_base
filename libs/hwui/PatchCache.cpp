@@ -56,7 +56,7 @@ hash_t PatchCache::PatchDescription::hash() const {
 }
 
 int PatchCache::PatchDescription::compare(const PatchCache::PatchDescription& lhs,
-            const PatchCache::PatchDescription& rhs) {
+                                          const PatchCache::PatchDescription& rhs) {
     return memcmp(&lhs, &rhs, sizeof(PatchDescription));
 }
 
@@ -115,7 +115,7 @@ void PatchCache::removeDeferred(Res_png_9patch* patch) {
 void PatchCache::clearGarbage() {
     Vector<patch_pair_t> patchesToRemove;
 
-    { // scope for the mutex
+    {  // scope for the mutex
         Mutex::Autolock _l(mLock);
         size_t count = mGarbage.size();
         for (size_t i = 0; i < count; i++) {
@@ -123,7 +123,7 @@ void PatchCache::clearGarbage() {
             remove(patchesToRemove, patch);
             // A Res_png_9patch is actually an array of byte that's larger
             // than sizeof(Res_png_9patch). It must be freed as an array.
-            delete[] (int8_t*) patch;
+            delete[](int8_t*) patch;
         }
         mGarbage.clear();
     }
@@ -153,8 +153,8 @@ void PatchCache::clearGarbage() {
 }
 
 void PatchCache::createVertexBuffer() {
-    mRenderState.meshState().genOrUpdateMeshBuffer(&mMeshBuffer,
-        mMaxSize, nullptr, GL_DYNAMIC_DRAW);
+    mRenderState.meshState().genOrUpdateMeshBuffer(&mMeshBuffer, mMaxSize, nullptr,
+                                                   GL_DYNAMIC_DRAW);
     mSize = 0;
     mFreeBlocks = new BufferBlock(0, mMaxSize);
 }
@@ -198,11 +198,11 @@ void PatchCache::setupMesh(Patch* newMesh) {
     }
 
     // Copy the 9patch mesh in the VBO
-    newMesh->positionOffset = (GLintptr) (block->offset);
+    newMesh->positionOffset = (GLintptr)(block->offset);
     newMesh->textureOffset = newMesh->positionOffset + kMeshTextureOffset;
 
     mRenderState.meshState().updateMeshBufferSubData(mMeshBuffer, newMesh->positionOffset, size,
-            newMesh->vertices.get());
+                                                     newMesh->vertices.get());
 
     // Remove the block since we've used it entirely
     if (block->size == size) {
@@ -223,15 +223,15 @@ void PatchCache::setupMesh(Patch* newMesh) {
 
 static const UvMapper sIdentity;
 
-const Patch* PatchCache::get( const uint32_t bitmapWidth, const uint32_t bitmapHeight,
-        const float pixelWidth, const float pixelHeight, const Res_png_9patch* patch) {
-
+const Patch* PatchCache::get(const uint32_t bitmapWidth, const uint32_t bitmapHeight,
+                             const float pixelWidth, const float pixelHeight,
+                             const Res_png_9patch* patch) {
     const PatchDescription description(bitmapWidth, bitmapHeight, pixelWidth, pixelHeight, patch);
     const Patch* mesh = mCache.get(description);
 
     if (!mesh) {
-        Patch* newMesh = new Patch(bitmapWidth, bitmapHeight,
-                pixelWidth, pixelHeight, sIdentity, patch);
+        Patch* newMesh =
+                new Patch(bitmapWidth, bitmapHeight, pixelWidth, pixelHeight, sIdentity, patch);
 
         if (newMesh->vertices) {
             setupMesh(newMesh);
@@ -260,5 +260,5 @@ void PatchCache::dumpFreeBlocks(const char* prefix) {
 }
 #endif
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android

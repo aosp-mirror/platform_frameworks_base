@@ -24,7 +24,7 @@ namespace android {
 namespace uirenderer {
 
 Layer::Layer(RenderState& renderState, Api api, SkColorFilter* colorFilter, int alpha,
-        SkBlendMode mode)
+             SkBlendMode mode)
         : GpuMemoryTracker(GpuObjectType::Layer)
         , mRenderState(renderState)
         , mApi(api)
@@ -52,5 +52,5 @@ void Layer::postDecStrong() {
     mRenderState.postDecStrong(this);
 }
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android

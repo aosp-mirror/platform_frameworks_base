@@ -15,8 +15,13 @@
  */
 package com.android.server.usb.descriptors;
 
+import android.hardware.usb.UsbConfiguration;
+import android.hardware.usb.UsbDevice;
+
 import com.android.server.usb.descriptors.report.ReportCanvas;
 import com.android.server.usb.descriptors.report.UsbStrings;
+
+import java.util.ArrayList;
 
 /**
  * @hide
@@ -43,6 +48,9 @@ public final class UsbDeviceDescriptor extends UsbDescriptor {
     private byte mProductIndex; // 15:1 Index of Product String Descriptor
     private byte mSerialNum;    // 16:1 Index of Serial Number String Descriptor
     private byte mNumConfigs;   // 17:1 Number of Possible Configurations
+
+    private ArrayList<UsbConfigDescriptor> mConfigDescriptors =
+            new ArrayList<UsbConfigDescriptor>();
 
     UsbDeviceDescriptor(int length, byte type) {
         super(length, type);
@@ -97,6 +105,35 @@ public final class UsbDeviceDescriptor extends UsbDescriptor {
         return mNumConfigs;
     }
 
+    void addConfigDescriptor(UsbConfigDescriptor config) {
+        mConfigDescriptors.add(config);
+    }
+
+    /**
+     * @hide
+     */
+    public UsbDevice toAndroid(UsbDescriptorParser parser) {
+        String mfgName = parser.getDescriptorString(mMfgIndex);
+        String prodName = parser.getDescriptorString(mProductIndex);
+
+        // Create version string in "%.%" format
+        String versionString =
+                Integer.toString(mDeviceRelease >> 8) + "." + (mDeviceRelease & 0xFF);
+        String serialStr = parser.getDescriptorString(mSerialNum);
+
+        UsbDevice device = new UsbDevice(parser.getDeviceAddr(), mVendorID, mProductID,
+                mDevClass, mDevSubClass,
+                mProtocol, mfgName, prodName,
+                versionString, serialStr);
+        UsbConfiguration[] configs = new UsbConfiguration[mConfigDescriptors.size()];
+        for (int index = 0; index < mConfigDescriptors.size(); index++) {
+            configs[index] = mConfigDescriptors.get(index).toAndroid(parser);
+        }
+        device.setConfigurations(configs);
+
+        return device;
+    }
+
     @Override
     public int parseRawDescriptors(ByteStream stream) {
         mSpec = stream.unpackUsbShort();
@@ -134,12 +171,11 @@ public final class UsbDeviceDescriptor extends UsbDescriptor {
                 + " Product ID: " + ReportCanvas.getHexString(getProductID())
                 + " Product Release: " + ReportCanvas.getBCDString(getDeviceRelease()));
 
+        UsbDescriptorParser parser = canvas.getParser();
         byte mfgIndex = getMfgIndex();
-        String manufacturer =
-                UsbDescriptor.getUsbDescriptorString(canvas.getConnection(), mfgIndex);
+        String manufacturer = parser.getDescriptorString(mfgIndex);
         byte productIndex = getProductIndex();
-        String product =
-                UsbDescriptor.getUsbDescriptorString(canvas.getConnection(), productIndex);
+        String product = parser.getDescriptorString(productIndex);
 
         canvas.writeListItem("Manufacturer " + mfgIndex + ": " + manufacturer
                 + " Product " + productIndex + ": " + product);

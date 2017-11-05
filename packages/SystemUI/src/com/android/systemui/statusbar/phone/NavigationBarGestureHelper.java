@@ -20,6 +20,8 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Rect;
+import android.os.RemoteException;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
@@ -29,9 +31,11 @@ import android.view.ViewConfiguration;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.policy.DividerSnapAlgorithm.SnapTarget;
 import com.android.systemui.Dependency;
+import com.android.systemui.OverviewProxyService;
 import com.android.systemui.R;
 import com.android.systemui.RecentsComponent;
 import com.android.systemui.plugins.statusbar.phone.NavGesture.GestureHelper;
+import com.android.systemui.shared.recents.model.IOverviewProxy;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.tuner.TunerService;
 
@@ -45,6 +49,7 @@ import static android.view.WindowManager.DOCKED_TOP;
 public class NavigationBarGestureHelper extends GestureDetector.SimpleOnGestureListener
         implements TunerService.Tunable, GestureHelper {
 
+    private static final String TAG = "NavBarGestureHelper";
     private static final String KEY_DOCK_WINDOW_GESTURE = "overview_nav_bar_gesture";
     /**
      * When dragging from the navigation bar, we drag in recents.
@@ -75,6 +80,7 @@ public class NavigationBarGestureHelper extends GestureDetector.SimpleOnGestureL
     private int mTouchDownY;
     private boolean mDownOnRecents;
     private VelocityTracker mVelocityTracker;
+    private OverviewProxyService mOverviewEventSender = Dependency.get(OverviewProxyService.class);
 
     private boolean mDockWindowEnabled;
     private boolean mDockWindowTouchSlopExceeded;
@@ -107,6 +113,16 @@ public class NavigationBarGestureHelper extends GestureDetector.SimpleOnGestureL
     }
 
     public boolean onInterceptTouchEvent(MotionEvent event) {
+        final IOverviewProxy overviewProxy = mOverviewEventSender.getProxy();
+        if (overviewProxy != null) {
+            mNavigationBarView.requestUnbufferedDispatch(event);
+            try {
+                overviewProxy.onMotionEvent(event);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Callback failed", e);
+            }
+        }
+
         // If we move more than a fixed amount, then start capturing for the
         // task switcher detector
         mTaskSwitcherDetector.onTouchEvent(event);
@@ -122,9 +138,8 @@ public class NavigationBarGestureHelper extends GestureDetector.SimpleOnGestureL
                 int y = (int) event.getY();
                 int xDiff = Math.abs(x - mTouchDownX);
                 int yDiff = Math.abs(y - mTouchDownY);
-                boolean exceededTouchSlop = !mIsVertical
-                        ? xDiff > mScrollTouchSlop && xDiff > yDiff
-                        : yDiff > mScrollTouchSlop && yDiff > xDiff;
+                boolean exceededTouchSlop = xDiff > mScrollTouchSlop && xDiff > yDiff
+                        || yDiff > mScrollTouchSlop && yDiff > xDiff;
                 if (exceededTouchSlop) {
                     return true;
                 }

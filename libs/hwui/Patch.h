@@ -39,9 +39,8 @@ struct TextureVertex;
 
 class Patch {
 public:
-    Patch(const float bitmapWidth, const float bitmapHeight,
-            float width, float height,
-            const UvMapper& mapper, const Res_png_9patch* patch);
+    Patch(const float bitmapWidth, const float bitmapHeight, float width, float height,
+          const UvMapper& mapper, const Res_png_9patch* patch);
 
     /**
      * Returns the size of this patch's mesh in bytes.
@@ -58,17 +57,17 @@ public:
     GLintptr textureOffset = 0;
 
 private:
-    void generateRow(const int32_t* xDivs, uint32_t xCount, TextureVertex*& vertex,
-            float y1, float y2, float v1, float v2, float stretchX, float rescaleX,
-            float width, float bitmapWidth, uint32_t& quadCount);
-    void generateQuad(TextureVertex*& vertex, float x1, float y1, float x2, float y2,
-            float u1, float v1, float u2, float v2, uint32_t& quadCount);
+    void generateRow(const int32_t* xDivs, uint32_t xCount, TextureVertex*& vertex, float y1,
+                     float y2, float v1, float v2, float stretchX, float rescaleX, float width,
+                     float bitmapWidth, uint32_t& quadCount);
+    void generateQuad(TextureVertex*& vertex, float x1, float y1, float x2, float y2, float u1,
+                      float v1, float u2, float v2, uint32_t& quadCount);
 
     const uint32_t* mColors;
     UvMapper mUvMapper;
-}; // struct Patch
+};  // struct Patch
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android
 
-#endif // ANDROID_HWUI_PATCH_H
+#endif  // ANDROID_HWUI_PATCH_H

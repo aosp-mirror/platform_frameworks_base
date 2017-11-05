@@ -20,7 +20,7 @@ namespace android {
 namespace uirenderer {
 
 void SkiaProfileRenderer::drawRect(float left, float top, float right, float bottom,
-        const SkPaint& paint) {
+                                   const SkPaint& paint) {
     SkRect rect = SkRect::MakeLTRB(left, top, right, bottom);
     mCanvas->drawRect(rect, paint);
 }
@@ -28,7 +28,7 @@ void SkiaProfileRenderer::drawRect(float left, float top, float right, float bot
 void SkiaProfileRenderer::drawRects(const float* rects, int count, const SkPaint& paint) {
     for (int index = 0; index + 4 <= count; index += 4) {
         SkRect rect = SkRect::MakeLTRB(rects[index + 0], rects[index + 1], rects[index + 2],
-                rects[index + 3]);
+                                       rects[index + 3]);
         mCanvas->drawRect(rect, paint);
     }
 }

@@ -20,10 +20,10 @@
 
 #include <frameworks/base/core/proto/android/service/graphicsstats.pb.h>
 
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <unistd.h>
 
 using namespace android;
@@ -35,8 +35,8 @@ std::string findRootPath() {
     // < 1023 because we need room for the null terminator
     if (r <= 0 || r > 1023) {
         int err = errno;
-        fprintf(stderr, "Failed to read from /proc/self/exe; r=%zd, err=%d (%s)\n",
-                r, err, strerror(err));
+        fprintf(stderr, "Failed to read from /proc/self/exe; r=%zd, err=%d (%s)\n", r, err,
+                strerror(err));
         exit(EXIT_FAILURE);
     }
     while (--r > 0) {
@@ -88,8 +88,8 @@ TEST(GraphicsStats, saveLoad) {
     EXPECT_EQ(20, loadedProto.summary().janky_frames());
     EXPECT_EQ(100, loadedProto.summary().total_frames());
     EXPECT_EQ(mockData.editFrameCounts().size() + mockData.editSlowFrameCounts().size(),
-            (size_t) loadedProto.histogram_size());
-    for (size_t i = 0; i < (size_t) loadedProto.histogram_size(); i++) {
+              (size_t)loadedProto.histogram_size());
+    for (size_t i = 0; i < (size_t)loadedProto.histogram_size(); i++) {
         int expectedCount, expectedBucket;
         if (i < mockData.editFrameCounts().size()) {
             expectedCount = ((i % 10) + 1) * 2;
@@ -144,8 +144,8 @@ TEST(GraphicsStats, merge) {
     EXPECT_EQ(20 + 50, loadedProto.summary().janky_frames());
     EXPECT_EQ(100 + 500, loadedProto.summary().total_frames());
     EXPECT_EQ(mockData.editFrameCounts().size() + mockData.editSlowFrameCounts().size(),
-            (size_t) loadedProto.histogram_size());
-    for (size_t i = 0; i < (size_t) loadedProto.histogram_size(); i++) {
+              (size_t)loadedProto.histogram_size());
+    for (size_t i = 0; i < (size_t)loadedProto.histogram_size(); i++) {
         int expectedCount, expectedBucket;
         if (i < mockData.editFrameCounts().size()) {
             expectedCount = ((i % 10) + 1) * 2;

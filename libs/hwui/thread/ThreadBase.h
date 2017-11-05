@@ -31,10 +31,7 @@ class ThreadBase : protected Thread {
     PREVENT_COPY_AND_ASSIGN(ThreadBase);
 
 public:
-    ThreadBase()
-            : mLooper(new Looper(false))
-            , mQueue([this](){ mLooper->wake(); }, mLock)
-    {}
+    ThreadBase() : mLooper(new Looper(false)), mQueue([this]() { mLooper->wake(); }, mLock) {}
 
     WorkQueue& queue() { return mQueue; }
 
@@ -43,13 +40,9 @@ public:
         mLooper->wake();
     }
 
-    void start(const char* name = "ThreadBase") {
-        Thread::run(name);
-    }
+    void start(const char* name = "ThreadBase") { Thread::run(name); }
 
-    void join() {
-        Thread::join();
-    }
+    void join() { Thread::join(); }
 
 protected:
     void waitForWork() {
@@ -64,13 +57,10 @@ protected:
             if (timeout < 0) timeout = 0;
         }
         int result = mLooper->pollOnce(timeout);
-        LOG_ALWAYS_FATAL_IF(result == Looper::POLL_ERROR,
-                "RenderThread Looper POLL_ERROR!");
+        LOG_ALWAYS_FATAL_IF(result == Looper::POLL_ERROR, "RenderThread Looper POLL_ERROR!");
     }
 
-    void processQueue() {
-        mQueue.process();
-    }
+    void processQueue() { mQueue.process(); }
 
     virtual bool threadLoop() override {
         while (!exitPending()) {
@@ -87,7 +77,6 @@ private:
     std::mutex mLock;
 };
 
-} // namespace android::uirenderer
+}  // namespace android::uirenderer
 
-
-#endif //HWUI_THREADBASE_H
+#endif  // HWUI_THREADBASE_H

@@ -16,7 +16,10 @@
 
 package com.android.internal.widget;
 
+import android.annotation.Nullable;
 import android.content.Context;
+import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.Pair;
@@ -37,6 +40,7 @@ import java.util.Comparator;
 @RemoteViews.RemoteView
 public class NotificationActionListLayout extends LinearLayout {
 
+    private final int mGravity;
     private int mTotalWidth = 0;
     private ArrayList<Pair<Integer, TextView>> mMeasureOrderTextViews = new ArrayList<>();
     private ArrayList<View> mMeasureOrderOther = new ArrayList<>();
@@ -45,7 +49,20 @@ public class NotificationActionListLayout extends LinearLayout {
     private Drawable mDefaultBackground;
 
     public NotificationActionListLayout(Context context, AttributeSet attrs) {
-        super(context, attrs);
+        this(context, attrs, 0);
+    }
+
+    public NotificationActionListLayout(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
+    }
+
+    public NotificationActionListLayout(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
+
+        int[] attrIds = { android.R.attr.gravity };
+        TypedArray ta = context.obtainStyledAttributes(attrs, attrIds, defStyleAttr, defStyleRes);
+        mGravity = ta.getInt(0, 0);
+        ta.recycle();
     }
 
     @Override
@@ -95,6 +112,7 @@ public class NotificationActionListLayout extends LinearLayout {
 
         final boolean constrained =
                 MeasureSpec.getMode(widthMeasureSpec) != MeasureSpec.UNSPECIFIED;
+        final boolean centerAligned = (mGravity & Gravity.CENTER_HORIZONTAL) != 0;
 
         final int innerWidth = MeasureSpec.getSize(widthMeasureSpec) - mPaddingLeft - mPaddingRight;
         final int otherSize = mMeasureOrderOther.size();
@@ -137,7 +155,7 @@ public class NotificationActionListLayout extends LinearLayout {
 
         // Make sure to measure the last child full-width if we didn't use up the entire width,
         // or we didn't measure yet because there's just one child.
-        if (lastNotGoneChild != null && (constrained && usedWidth < innerWidth
+        if (lastNotGoneChild != null && !centerAligned && (constrained && usedWidth < innerWidth
                 || notGoneChildren == 1)) {
             MarginLayoutParams lp = (MarginLayoutParams) lastNotGoneChild.getLayoutParams();
             if (notGoneChildren > 1) {
@@ -201,9 +219,10 @@ public class NotificationActionListLayout extends LinearLayout {
         }
         final boolean isLayoutRtl = isLayoutRtl();
         final int paddingTop = mPaddingTop;
+        final boolean centerAligned = (mGravity & Gravity.CENTER_HORIZONTAL) != 0;
 
         int childTop;
-        int childLeft;
+        int childLeft = centerAligned ? left + (right - left) / 2 - mTotalWidth / 2 : 0;
 
         // Where bottom of child should go
         final int height = bottom - top;
@@ -216,13 +235,12 @@ public class NotificationActionListLayout extends LinearLayout {
         final int layoutDirection = getLayoutDirection();
         switch (Gravity.getAbsoluteGravity(Gravity.START, layoutDirection)) {
             case Gravity.RIGHT:
-                // mTotalWidth contains the padding already
-                childLeft = mPaddingLeft + right - left - mTotalWidth;
+                childLeft += mPaddingLeft + right - left - mTotalWidth;
                 break;
 
             case Gravity.LEFT:
             default:
-                childLeft = mPaddingLeft;
+                childLeft += mPaddingLeft;
                 break;
         }
 

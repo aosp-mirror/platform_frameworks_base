@@ -13,24 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package android.os.strictmode;
 
-#pragma once
+import android.net.Uri;
 
-#include <utils/String16.h>
-#include "StatsPuller.h"
-
-namespace android {
-namespace os {
-namespace statsd {
-
-class KernelWakelockPuller : public StatsPuller {
-public:
-    // a number of stats need to be pulled from StatsCompanionService
-    //
-    const static int PULL_CODE_KERNEL_WAKELOCKS;
-    vector<StatsLogEventWrapper> Pull() override;
-};
-
-}  // namespace statsd
-}  // namespace os
-}  // namespace android
+/** @hide */
+public final class ContentUriWithoutPermissionViolation extends Violation {
+    public ContentUriWithoutPermissionViolation(Uri uri, String location) {
+        super(
+                uri
+                        + " exposed beyond app through "
+                        + location
+                        + " without permission grant flags; did you forget"
+                        + " FLAG_GRANT_READ_URI_PERMISSION?");
+    }
+}

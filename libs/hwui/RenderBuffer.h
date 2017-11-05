@@ -32,9 +32,8 @@ struct RenderBuffer {
      * Creates a new render buffer in the specified format and dimensions.
      * The format must be one of the formats allowed by glRenderbufferStorage().
      */
-    RenderBuffer(GLenum format, uint32_t width, uint32_t height):
-        mFormat(format), mWidth(width), mHeight(height), mAllocated(false) {
-
+    RenderBuffer(GLenum format, uint32_t width, uint32_t height)
+            : mFormat(format), mWidth(width), mHeight(height), mAllocated(false) {
         glGenRenderbuffers(1, &mName);
     }
 
@@ -47,31 +46,23 @@ struct RenderBuffer {
     /**
      * Returns the GL name of this render buffer.
      */
-    GLuint getName() const {
-        return mName;
-    }
+    GLuint getName() const { return mName; }
 
     /**
      * Returns the format of this render buffer.
      */
-    GLenum getFormat() const {
-        return mFormat;
-    }
+    GLenum getFormat() const { return mFormat; }
 
     /**
      * Binds this render buffer to the current GL context.
      */
-    void bind() const {
-        glBindRenderbuffer(GL_RENDERBUFFER, mName);
-    }
+    void bind() const { glBindRenderbuffer(GL_RENDERBUFFER, mName); }
 
     /**
      * Indicates whether this render buffer has allocated its
      * storage. See allocate() and resize().
      */
-    bool isAllocated() const {
-        return mAllocated;
-    }
+    bool isAllocated() const { return mAllocated; }
 
     /**
      * Allocates this render buffer's storage if needed.
@@ -101,23 +92,19 @@ struct RenderBuffer {
     /**
      * Returns the width of the render buffer in pixels.
      */
-    uint32_t getWidth() const {
-        return mWidth;
-    }
+    uint32_t getWidth() const { return mWidth; }
 
     /**
      * Returns the height of the render buffer in pixels.
      */
-    uint32_t getHeight() const {
-        return mHeight;
-    }
+    uint32_t getHeight() const { return mHeight; }
 
     /**
      * Returns the size of this render buffer in bytes.
      */
     uint32_t getSize() const {
         // Round to the nearest byte
-        return (uint32_t) ((mWidth * mHeight * formatSize(mFormat)) / 8.0f + 0.5f);
+        return (uint32_t)((mWidth * mHeight * formatSize(mFormat)) / 8.0f + 0.5f);
     }
 
     /**
@@ -186,9 +173,9 @@ private:
     bool mAllocated;
 
     GLuint mName;
-}; // struct RenderBuffer
+};  // struct RenderBuffer
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android
 
-#endif // ANDROID_HWUI_RENDER_BUFFER_H
+#endif  // ANDROID_HWUI_RENDER_BUFFER_H

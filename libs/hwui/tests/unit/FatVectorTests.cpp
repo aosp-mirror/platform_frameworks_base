@@ -22,12 +22,11 @@
 using namespace android;
 using namespace android::uirenderer;
 
-template<class VectorType>
+template <class VectorType>
 static bool allocationIsInternal(VectorType& v) {
     // allocation array (from &v[0] to &v[0] + v.capacity) is
     // located within the vector object itself
-    return (char*)(&v) <= (char*)(&v[0])
-            && (char*)(&v + 1) >= (char*)(&v[0] + v.capacity());
+    return (char*)(&v) <= (char*)(&v[0]) && (char*)(&v + 1) >= (char*)(&v[0] + v.capacity());
 }
 
 TEST(FatVector, baseline) {

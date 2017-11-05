@@ -23,6 +23,7 @@
 #include <limits.h>
 #include <stdlib.h>
 
+using namespace android::util;
 using android::util::ProtoOutputStream;
 using std::map;
 using std::string;
@@ -36,13 +37,13 @@ namespace statsd {
 // for StatsLogReport
 const int FIELD_ID_METRIC_ID = 1;
 const int FIELD_ID_START_REPORT_NANOS = 2;
-const int FIELD_ID_END_REPORT_NANOS = 2;
+const int FIELD_ID_END_REPORT_NANOS = 3;
 const int FIELD_ID_EVENT_METRICS = 4;
+// for EventMetricDataWrapper
+const int FIELD_ID_DATA = 1;
 // for EventMetricData
 const int FIELD_ID_TIMESTAMP_NANOS = 1;
 const int FIELD_ID_STATS_EVENTS = 2;
-// for CountMetricDataWrapper
-const int FIELD_ID_DATA = 1;
 
 EventMetricProducer::EventMetricProducer(const EventMetric& metric, const int conditionIndex,
                                          const sp<ConditionWizard>& wizard)
@@ -69,9 +70,9 @@ void EventMetricProducer::startNewProtoOutputStream(long long startTime) {
     mProto = std::make_unique<ProtoOutputStream>();
     // TODO: We need to auto-generate the field IDs for StatsLogReport, EventMetricData,
     // and StatsEvent.
-    mProto->write(TYPE_INT32 + FIELD_ID_METRIC_ID, mMetric.metric_id());
-    mProto->write(TYPE_INT64 + FIELD_ID_START_REPORT_NANOS, startTime);
-    mProtoToken = mProto->start(TYPE_MESSAGE + FIELD_ID_EVENT_METRICS);
+    mProto->write(FIELD_TYPE_INT32 | FIELD_ID_METRIC_ID, mMetric.metric_id());
+    mProto->write(FIELD_TYPE_INT64 | FIELD_ID_START_REPORT_NANOS, startTime);
+    mProtoToken = mProto->start(FIELD_TYPE_MESSAGE | FIELD_ID_EVENT_METRICS);
 }
 
 void EventMetricProducer::finish() {
@@ -83,7 +84,7 @@ void EventMetricProducer::onSlicedConditionMayChange(const uint64_t eventTime) {
 StatsLogReport EventMetricProducer::onDumpReport() {
     long long endTime = time(nullptr) * NANO_SECONDS_IN_A_SECOND;
     mProto->end(mProtoToken);
-    mProto->write(TYPE_INT64 + FIELD_ID_END_REPORT_NANOS, endTime);
+    mProto->write(FIELD_TYPE_INT64 | FIELD_ID_END_REPORT_NANOS, endTime);
 
     size_t bufferSize = mProto->size();
     VLOG("metric %lld dump report now... proto size: %zu ", mMetric.metric_id(), bufferSize);
@@ -118,9 +119,9 @@ void EventMetricProducer::onMatchedLogEventInternal(
         return;
     }
 
-    long long wrapperToken = mProto->start(TYPE_MESSAGE + FIELD_ID_DATA);
-    mProto->write(TYPE_INT64 + FIELD_ID_TIMESTAMP_NANOS, (long long)event.GetTimestampNs());
-    long long eventToken = mProto->start(TYPE_MESSAGE + FIELD_ID_STATS_EVENTS);
+    long long wrapperToken = mProto->start(FIELD_TYPE_MESSAGE | FIELD_ID_DATA);
+    mProto->write(FIELD_TYPE_INT64 | FIELD_ID_TIMESTAMP_NANOS, (long long)event.GetTimestampNs());
+    long long eventToken = mProto->start(FIELD_TYPE_MESSAGE | FIELD_ID_STATS_EVENTS);
     event.ToProto(*mProto);
     mProto->end(eventToken);
     mProto->end(wrapperToken);

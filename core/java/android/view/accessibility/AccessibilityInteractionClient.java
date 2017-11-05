@@ -187,8 +187,11 @@ public final class AccessibilityInteractionClient
                     Log.i(LOG_TAG, "Window cache miss");
                 }
                 final long identityToken = Binder.clearCallingIdentity();
-                window = connection.getWindow(accessibilityWindowId);
-                Binder.restoreCallingIdentity(identityToken);
+                try {
+                    window = connection.getWindow(accessibilityWindowId);
+                } finally {
+                    Binder.restoreCallingIdentity(identityToken);
+                }
                 if (window != null) {
                     sAccessibilityCache.addWindow(window);
                     return window;
@@ -225,8 +228,11 @@ public final class AccessibilityInteractionClient
                     Log.i(LOG_TAG, "Windows cache miss");
                 }
                 final long identityToken = Binder.clearCallingIdentity();
-                windows = connection.getWindows();
-                Binder.restoreCallingIdentity(identityToken);
+                try {
+                    windows = connection.getWindows();
+                } finally {
+                    Binder.restoreCallingIdentity(identityToken);
+                }
                 if (windows != null) {
                     sAccessibilityCache.setWindows(windows);
                     return windows;
@@ -283,10 +289,14 @@ public final class AccessibilityInteractionClient
                 }
                 final int interactionId = mInteractionIdCounter.getAndIncrement();
                 final long identityToken = Binder.clearCallingIdentity();
-                final boolean success = connection.findAccessibilityNodeInfoByAccessibilityId(
-                        accessibilityWindowId, accessibilityNodeId, interactionId, this,
-                        prefetchFlags, Thread.currentThread().getId(), arguments);
-                Binder.restoreCallingIdentity(identityToken);
+                final boolean success;
+                try {
+                    success = connection.findAccessibilityNodeInfoByAccessibilityId(
+                            accessibilityWindowId, accessibilityNodeId, interactionId, this,
+                            prefetchFlags, Thread.currentThread().getId(), arguments);
+                } finally {
+                    Binder.restoreCallingIdentity(identityToken);
+                }
                 if (success) {
                     List<AccessibilityNodeInfo> infos = getFindAccessibilityNodeInfosResultAndClear(
                             interactionId);
@@ -333,10 +343,15 @@ public final class AccessibilityInteractionClient
             if (connection != null) {
                 final int interactionId = mInteractionIdCounter.getAndIncrement();
                 final long identityToken = Binder.clearCallingIdentity();
-                final boolean success = connection.findAccessibilityNodeInfosByViewId(
-                        accessibilityWindowId, accessibilityNodeId, viewId, interactionId, this,
-                        Thread.currentThread().getId());
-                Binder.restoreCallingIdentity(identityToken);
+                final boolean success;
+                try {
+                    success = connection.findAccessibilityNodeInfosByViewId(
+                            accessibilityWindowId, accessibilityNodeId, viewId, interactionId, this,
+                            Thread.currentThread().getId());
+                } finally {
+                    Binder.restoreCallingIdentity(identityToken);
+                }
+
                 if (success) {
                     List<AccessibilityNodeInfo> infos = getFindAccessibilityNodeInfosResultAndClear(
                             interactionId);
@@ -381,10 +396,15 @@ public final class AccessibilityInteractionClient
             if (connection != null) {
                 final int interactionId = mInteractionIdCounter.getAndIncrement();
                 final long identityToken = Binder.clearCallingIdentity();
-                final boolean success = connection.findAccessibilityNodeInfosByText(
-                        accessibilityWindowId, accessibilityNodeId, text, interactionId, this,
-                        Thread.currentThread().getId());
-                Binder.restoreCallingIdentity(identityToken);
+                final boolean success;
+                try {
+                    success = connection.findAccessibilityNodeInfosByText(
+                            accessibilityWindowId, accessibilityNodeId, text, interactionId, this,
+                            Thread.currentThread().getId());
+                } finally {
+                    Binder.restoreCallingIdentity(identityToken);
+                }
+
                 if (success) {
                     List<AccessibilityNodeInfo> infos = getFindAccessibilityNodeInfosResultAndClear(
                             interactionId);
@@ -428,10 +448,15 @@ public final class AccessibilityInteractionClient
             if (connection != null) {
                 final int interactionId = mInteractionIdCounter.getAndIncrement();
                 final long identityToken = Binder.clearCallingIdentity();
-                final boolean success = connection.findFocus(accessibilityWindowId,
-                        accessibilityNodeId, focusType, interactionId, this,
-                        Thread.currentThread().getId());
-                Binder.restoreCallingIdentity(identityToken);
+                final boolean success;
+                try {
+                    success = connection.findFocus(accessibilityWindowId,
+                            accessibilityNodeId, focusType, interactionId, this,
+                            Thread.currentThread().getId());
+                } finally {
+                    Binder.restoreCallingIdentity(identityToken);
+                }
+
                 if (success) {
                     AccessibilityNodeInfo info = getFindAccessibilityNodeInfoResultAndClear(
                             interactionId);
@@ -472,10 +497,15 @@ public final class AccessibilityInteractionClient
             if (connection != null) {
                 final int interactionId = mInteractionIdCounter.getAndIncrement();
                 final long identityToken = Binder.clearCallingIdentity();
-                final boolean success = connection.focusSearch(accessibilityWindowId,
-                        accessibilityNodeId, direction, interactionId, this,
-                        Thread.currentThread().getId());
-                Binder.restoreCallingIdentity(identityToken);
+                final boolean success;
+                try {
+                    success = connection.focusSearch(accessibilityWindowId,
+                            accessibilityNodeId, direction, interactionId, this,
+                            Thread.currentThread().getId());
+                } finally {
+                    Binder.restoreCallingIdentity(identityToken);
+                }
+
                 if (success) {
                     AccessibilityNodeInfo info = getFindAccessibilityNodeInfoResultAndClear(
                             interactionId);
@@ -515,10 +545,15 @@ public final class AccessibilityInteractionClient
             if (connection != null) {
                 final int interactionId = mInteractionIdCounter.getAndIncrement();
                 final long identityToken = Binder.clearCallingIdentity();
-                final boolean success = connection.performAccessibilityAction(
-                        accessibilityWindowId, accessibilityNodeId, action, arguments,
-                        interactionId, this, Thread.currentThread().getId());
-                Binder.restoreCallingIdentity(identityToken);
+                final boolean success;
+                try {
+                    success = connection.performAccessibilityAction(
+                            accessibilityWindowId, accessibilityNodeId, action, arguments,
+                            interactionId, this, Thread.currentThread().getId());
+                } finally {
+                    Binder.restoreCallingIdentity(identityToken);
+                }
+
                 if (success) {
                     return getPerformAccessibilityActionResultAndClear(interactionId);
                 }

@@ -20,7 +20,7 @@ namespace android {
 namespace uirenderer {
 
 void ProfileRenderer::drawRect(float left, float top, float right, float bottom,
-        const SkPaint& paint) {
+                               const SkPaint& paint) {
     mRenderer.drawRect(left, top, right, bottom, &paint);
 }
 

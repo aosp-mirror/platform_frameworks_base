@@ -37,13 +37,14 @@ public:
 private:
     friend class VulkanManager;
     struct BackbufferInfo {
-        uint32_t        mImageIndex;          // image this is associated with
-        VkSemaphore     mAcquireSemaphore;    // we signal on this for acquisition of image
-        VkSemaphore     mRenderSemaphore;     // we wait on this for rendering to be done
-        VkCommandBuffer mTransitionCmdBuffers[2]; // to transition layout between present and render
+        uint32_t mImageIndex;           // image this is associated with
+        VkSemaphore mAcquireSemaphore;  // we signal on this for acquisition of image
+        VkSemaphore mRenderSemaphore;   // we wait on this for rendering to be done
+        VkCommandBuffer
+                mTransitionCmdBuffers[2];  // to transition layout between present and render
         // We use these fences to make sure the above Command buffers have finished their work
         // before attempting to reuse them or destroy them.
-        VkFence         mUsageFences[2];
+        VkFence mUsageFences[2];
     };
 
     struct ImageInfo {
@@ -118,11 +119,16 @@ private:
     VulkanSurface::BackbufferInfo* getAvailableBackbuffer(VulkanSurface* surface);
 
     // simple wrapper class that exists only to initialize a pointer to NULL
-    template <typename FNPTR_TYPE> class VkPtr {
+    template <typename FNPTR_TYPE>
+    class VkPtr {
     public:
         VkPtr() : fPtr(NULL) {}
-        VkPtr operator=(FNPTR_TYPE ptr) { fPtr = ptr; return *this; }
+        VkPtr operator=(FNPTR_TYPE ptr) {
+            fPtr = ptr;
+            return *this;
+        }
         operator FNPTR_TYPE() const { return fPtr; }
+
     private:
         FNPTR_TYPE fPtr;
     };
@@ -183,4 +189,3 @@ private:
 } /* namespace android */
 
 #endif /* VULKANMANAGER_H */
-

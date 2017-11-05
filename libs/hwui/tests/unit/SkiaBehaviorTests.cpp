@@ -16,13 +16,13 @@
 
 #include "tests/common/TestUtils.h"
 
-#include <gtest/gtest.h>
 #include <SkBlurDrawLooper.h>
 #include <SkColorMatrixFilter.h>
 #include <SkColorSpace.h>
 #include <SkImagePriv.h>
 #include <SkPathOps.h>
 #include <SkShader.h>
+#include <gtest/gtest.h>
 
 using namespace android;
 using namespace android::uirenderer;
@@ -42,15 +42,13 @@ SkBitmap createSkBitmap(int width, int height) {
 TEST(SkiaBehavior, CreateBitmapShader1x1) {
     SkBitmap origBitmap = createSkBitmap(1, 1);
     sk_sp<SkImage> image = SkMakeImageFromRasterBitmap(origBitmap, kNever_SkCopyPixelsMode);
-    sk_sp<SkShader> s = image->makeShader(
-            SkShader::kClamp_TileMode,
-            SkShader::kRepeat_TileMode,
-            nullptr);
+    sk_sp<SkShader> s =
+            image->makeShader(SkShader::kClamp_TileMode, SkShader::kRepeat_TileMode, nullptr);
 
     SkBitmap bitmap;
     SkShader::TileMode xy[2];
     ASSERT_TRUE(s->isABitmap(&bitmap, nullptr, xy))
-        << "1x1 bitmap shader must query as bitmap shader";
+            << "1x1 bitmap shader must query as bitmap shader";
     EXPECT_EQ(origBitmap.pixelRef(), bitmap.pixelRef());
 }
 
@@ -63,8 +61,7 @@ TEST(SkiaBehavior, genIds) {
 
 TEST(SkiaBehavior, lightingColorFilter_simplify) {
     {
-        sk_sp<SkColorFilter> filter(
-                SkColorMatrixFilter::MakeLightingFilter(0x11223344, 0));
+        sk_sp<SkColorFilter> filter(SkColorMatrixFilter::MakeLightingFilter(0x11223344, 0));
 
         SkColor observedColor;
         SkBlendMode observedMode;
@@ -74,8 +71,7 @@ TEST(SkiaBehavior, lightingColorFilter_simplify) {
     }
 
     {
-        sk_sp<SkColorFilter> failFilter(
-                SkColorMatrixFilter::MakeLightingFilter(0x11223344, 0x1));
+        sk_sp<SkColorFilter> failFilter(SkColorMatrixFilter::MakeLightingFilter(0x11223344, 0x1));
         EXPECT_FALSE(failFilter->asColorMode(nullptr, nullptr));
     }
 }

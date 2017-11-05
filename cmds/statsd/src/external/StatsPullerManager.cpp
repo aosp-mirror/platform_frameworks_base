@@ -21,89 +21,69 @@
 #include <cutils/log.h>
 #include <algorithm>
 #include <climits>
-#include "KernelWakelockPuller.h"
+#include "ResourcePowerManagerPuller.h"
+#include "StatsCompanionServicePuller.h"
 #include "StatsPullerManager.h"
 #include "StatsService.h"
 #include "logd/LogEvent.h"
+#include "statslog.h"
 
 #include <iostream>
 
+using std::map;
 using std::string;
 using std::vector;
+using std::make_shared;
+using std::shared_ptr;
 
 namespace android {
 namespace os {
 namespace statsd {
 
-const int kernel_wakelock = 1;
-const unordered_map<string, int> StatsPullerManager::kPullCodes({{"KERNEL_WAKELOCK",
-                                                                  kernel_wakelock}});
-
 StatsPullerManager::StatsPullerManager()
     : mCurrentPullingInterval(LONG_MAX), mPullStartTimeMs(get_pull_start_time_ms()) {
-    mPullers.insert({kernel_wakelock, make_unique<KernelWakelockPuller>()});
-    mStatsCompanionService = get_stats_companion_service();
-    if (mStatsCompanionService != nullptr) {
-        mStatsCompanionService->cancelPullingAlarms();
-    } else {
-        VLOG("Failed to update pulling interval");
-    }
+    shared_ptr<StatsPuller> statsCompanionServicePuller = make_shared<StatsCompanionServicePuller>();
+    shared_ptr <StatsPuller>
+        resourcePowerManagerPuller = make_shared<ResourcePowerManagerPuller>();
+
+    mPullers.insert({android::util::KERNEL_WAKELOCK_PULLED,
+                     statsCompanionServicePuller});
+    mPullers.insert({android::util::WIFI_BYTES_TRANSFERRED,
+                     statsCompanionServicePuller});
+    mPullers.insert({android::util::MOBILE_BYTES_TRANSFERRED,
+                     statsCompanionServicePuller});
+    mPullers.insert({android::util::WIFI_BYTES_TRANSFERRED_BY_FG_BG,
+                     statsCompanionServicePuller});
+    mPullers.insert({android::util::MOBILE_BYTES_TRANSFERRED_BY_FG_BG,
+                     statsCompanionServicePuller});
+    mPullers.insert({android::util::POWER_STATE_PLATFORM_SLEEP_STATE_PULLED,
+                     resourcePowerManagerPuller});
+    mPullers.insert({android::util::POWER_STATE_VOTER_PULLED,
+                     resourcePowerManagerPuller});
+    mPullers.insert({android::util::POWER_STATE_SUBSYSTEM_SLEEP_STATE_PULLED,
+                     resourcePowerManagerPuller});
+
+    mStatsCompanionService = StatsService::getStatsCompanionService();
 }
 
-static const int log_msg_header_size = 28;
+        bool StatsPullerManager::Pull(int tagId, vector<shared_ptr<LogEvent>>* data) {
+            if (DEBUG) ALOGD("Initiating pulling %d", tagId);
 
-vector<shared_ptr<LogEvent>> StatsPullerManager::Pull(int pullCode, uint64_t timestampSec) {
-    if (DEBUG) ALOGD("Initiating pulling %d", pullCode);
-
-    vector<shared_ptr<LogEvent>> ret;
-    auto itr = mPullers.find(pullCode);
-    if (itr != mPullers.end()) {
-        vector<StatsLogEventWrapper> outputs = itr->second->Pull();
-        for (const StatsLogEventWrapper& it : outputs) {
-            log_msg tmp;
-            tmp.entry_v1.sec = timestampSec;
-            tmp.entry_v1.nsec = 0;
-            tmp.entry_v1.len = it.bytes.size();
-            // Manually set the header size to 28 bytes to match the pushed log events.
-            tmp.entry.hdr_size = log_msg_header_size;
-            // And set the received bytes starting after the 28 bytes reserved for header.
-            copy(it.bytes.begin(), it.bytes.end(), tmp.buf + log_msg_header_size);
-            shared_ptr<LogEvent> evt = make_shared<LogEvent>(tmp);
-            ret.push_back(evt);
+            if (mPullers.find(tagId) != mPullers.end()) {
+                return mPullers.find(tagId)->second->Pull(tagId, data);
+            } else {
+                ALOGD("Unknown tagId %d", tagId);
+                return false;  // Return early since we don't know what to pull.
+            }
         }
-        return ret;
-    } else {
-        ALOGD("Unknown pull code %d", pullCode);
-        return ret;  // Return early since we don't know what to pull.
-    }
-}
-
-sp<IStatsCompanionService> StatsPullerManager::get_stats_companion_service() {
-    sp<IStatsCompanionService> statsCompanion = nullptr;
-    // Get statscompanion service from service manager
-    const sp<IServiceManager> sm(defaultServiceManager());
-    if (sm != nullptr) {
-        const String16 name("statscompanion");
-        statsCompanion = interface_cast<IStatsCompanionService>(sm->checkService(name));
-        if (statsCompanion == nullptr) {
-            ALOGW("statscompanion service unavailable!");
-            return nullptr;
-        }
-    }
-    return statsCompanion;
-}
 
 StatsPullerManager& StatsPullerManager::GetInstance() {
     static StatsPullerManager instance;
     return instance;
 }
 
-int StatsPullerManager::GetPullCode(string atomName) {
-    if (kPullCodes.find(atomName) != kPullCodes.end()) {
-        return kPullCodes.find(atomName)->second;
-    } else {
-        return -1;
-    }
+bool StatsPullerManager::PullerForMatcherExists(int tagId) {
+    return mPullers.find(tagId) != mPullers.end();
 }
 
 long StatsPullerManager::get_pull_start_time_ms() {
@@ -111,9 +91,9 @@ long StatsPullerManager::get_pull_start_time_ms() {
     return time(nullptr) * 1000;
 }
 
-void StatsPullerManager::RegisterReceiver(int pullCode, sp<PullDataReceiver> receiver, long intervalMs) {
+void StatsPullerManager::RegisterReceiver(int tagId, sp<PullDataReceiver> receiver, long intervalMs) {
     AutoMutex _l(mReceiversLock);
-    vector<ReceiverInfo>& receivers = mReceivers[pullCode];
+    vector<ReceiverInfo>& receivers = mReceivers[tagId];
     for (auto it = receivers.begin(); it != receivers.end(); it++) {
         if (it->receiver.get() == receiver.get()) {
             VLOG("Receiver already registered of %d", (int)receivers.size());
@@ -135,20 +115,20 @@ void StatsPullerManager::RegisterReceiver(int pullCode, sp<PullDataReceiver> rec
             VLOG("Failed to update pulling interval");
         }
     }
-    VLOG("Puller for pullcode %d registered of %d", pullCode, (int)receivers.size());
+    VLOG("Puller for tagId %d registered of %d", tagId, (int)receivers.size());
 }
 
-void StatsPullerManager::UnRegisterReceiver(int pullCode, sp<PullDataReceiver> receiver) {
+void StatsPullerManager::UnRegisterReceiver(int tagId, sp<PullDataReceiver> receiver) {
     AutoMutex _l(mReceiversLock);
-    if (mReceivers.find(pullCode) == mReceivers.end()) {
-        VLOG("Unknown pull code or no receivers: %d", pullCode);
+    if (mReceivers.find(tagId) == mReceivers.end()) {
+        VLOG("Unknown pull code or no receivers: %d", tagId);
         return;
     }
-    auto& receivers = mReceivers.find(pullCode)->second;
+    auto& receivers = mReceivers.find(tagId)->second;
     for (auto it = receivers.begin(); it != receivers.end(); it++) {
         if (receiver.get() == it->receiver.get()) {
             receivers.erase(it);
-            VLOG("Puller for pullcode %d unregistered of %d", pullCode, (int)receivers.size());
+            VLOG("Puller for tagId %d unregistered of %d", tagId, (int)receivers.size());
             return;
         }
     }
@@ -176,10 +156,12 @@ void StatsPullerManager::OnAlarmFired() {
     }
 
     for (const auto& pullInfo : needToPull) {
-        const vector<shared_ptr<LogEvent>>& data = Pull(pullInfo.first, currentTimeMs/1000);
-        for(const auto& receiverInfo : pullInfo.second) {
-            receiverInfo->receiver->onDataPulled(data);
-            receiverInfo->timeInfo.second = currentTimeMs;
+        vector<shared_ptr<LogEvent>> data;
+        if (Pull(pullInfo.first, &data)) {
+            for (const auto& receiverInfo : pullInfo.second) {
+                receiverInfo->receiver->onDataPulled(data);
+                receiverInfo->timeInfo.second = currentTimeMs;
+            }
         }
     }
 }

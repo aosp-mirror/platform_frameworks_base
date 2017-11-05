@@ -33,6 +33,7 @@ import static org.mockito.Mockito.when;
 import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.os.UserManager;
 
@@ -56,6 +57,8 @@ public class RestrictedLockUtilsTest {
     private DevicePolicyManager mDevicePolicyManager;
     @Mock
     private UserManager mUserManager;
+    @Mock
+    private PackageManager mPackageManager;
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private RestrictedLockUtils.Proxy mProxy;
 
@@ -72,8 +75,29 @@ public class RestrictedLockUtilsTest {
                 .thenReturn(mDevicePolicyManager);
         when(mContext.getSystemService(Context.USER_SERVICE))
                 .thenReturn(mUserManager);
+        when(mContext.getPackageManager())
+                .thenReturn(mPackageManager);
 
         RestrictedLockUtils.sProxy = mProxy;
+    }
+
+    @Test
+    public void checkIfDevicePolicyServiceDisabled_noEnforceAdminForManagedProfile() {
+        when(mContext.getSystemService(Context.DEVICE_POLICY_SERVICE)).thenReturn(null);
+        final EnforcedAdmin enforcedAdmin = RestrictedLockUtils.checkIfAccountManagementDisabled(
+                mContext, "account_type", mUserId);
+
+        assertThat(enforcedAdmin).isEqualTo(null);
+    }
+
+    @Test
+    public void checkIfDeviceAdminFeatureDisabled_noEnforceAdminForManagedProfile() {
+        when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_DEVICE_ADMIN))
+                .thenReturn(false);
+        final EnforcedAdmin enforcedAdmin = RestrictedLockUtils.checkIfAccountManagementDisabled(
+                mContext, "account_type", mUserId);
+
+        assertThat(enforcedAdmin).isEqualTo(null);
     }
 
     @Test

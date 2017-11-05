@@ -35,7 +35,8 @@ option java_outer_classname = "StatsEventProto";
  * in the format defined here and in stats_log.proto.
  */
 message StatsEvent {
-    oneof event {
+    // Pushed events start at 2.
+    oneof pushed {
         // For StatsLog reasons, 1 is illegal and will not work. Must start at 2.
         BleScanStateChanged ble_scan_state_changed = 2;
         BleUnoptimizedScanStateChanged ble_unoptimized_scan_state_changed = 3;
@@ -70,8 +71,21 @@ message StatsEvent {
         WifiScanStateChanged wifi_scan_state_changed = 39;
         PhoneSignalStrengthChanged phone_signal_strength_changed = 40;
         SettingChanged setting_changed = 41;
-        KernelWakelockPulled kernel_wakelock_pulled = 42;
+        ActivityForegroundStateChanged activity_foreground_state_changed = 42;
+
         // TODO: Reorder the numbering so that the most frequent occur events occur in the first 15.
+    }
+
+    // Pulled events will start at field 1000.
+    oneof pulled {
+        WifiBytesTransferred wifi_bytes_transferred = 1000;
+        WifiBytesTransferredByFgBg wifi_bytes_transferred_by_fg_bg = 1001;
+        MobileBytesTransferred mobile_bytes_transferred = 1002;
+        MobileBytesTransferredByFgBg mobile_bytes_transferred_by_fg_bg = 1003;
+        KernelWakelockPulled kernel_wakelock_pulled = 1004;
+        PowerStatePlatformSleepStatePulled power_state_platform_sleep_state_pulled = 1005;
+        PowerStateVoterPulled power_state_voter_pulled = 1006;
+        PowerStateSubsystemSleepStatePulled power_state_subsystem_sleep_state_pulled = 1007;
     }
 }
 
@@ -681,15 +695,156 @@ message SettingChanged {
     optional int32 user = 7;
 }
 
+
 /*
- * Pulls kernel wakelock changes.
+ * Logs activity going to foreground or background
+ *
+ * Logged from:
+  *   frameworks/base/services/core/java/com/android/server/am/ActivityRecord.java
+ */
+message ActivityForegroundStateChanged {
+    enum Activity {
+        MOVE_TO_BACKGROUND = 0;
+        MOVE_TO_FOREGROUND = 1;
+    }
+    optional int32 uid = 1;
+    optional string pkg_name = 2;
+    optional string class_name = 3;
+    optional Activity activity = 4;
+}
+
+/**
+ * Pulls bytes transferred via wifi (Sum of foreground and background usage).
  *
  * Pulled from:
-  *   frameworks/base/services/core/java/com/android/server/stats/StatsCompanionService.java
+ *   StatsCompanionService (using BatteryStats to get which interfaces are wifi)
+ */
+message WifiBytesTransferred {
+    optional int32 uid = 1;
+
+    optional int64 rx_bytes = 2;
+
+    optional int64 rx_packets = 3;
+
+    optional int64 tx_bytes = 4;
+
+    optional int64 tx_packets = 5;
+}
+
+/**
+ * Pulls bytes transferred via wifi (separated by foreground and background usage).
+ *
+ * Pulled from:
+ *   StatsCompanionService (using BatteryStats to get which interfaces are wifi)
+ */
+message WifiBytesTransferredByFgBg {
+    optional int32 uid = 1;
+
+    // 1 denotes foreground and 0 denotes background. This is called Set in NetworkStats.
+    optional int32 is_foreground = 2;
+
+    optional int64 rx_bytes = 3;
+
+    optional int64 rx_packets = 4;
+
+    optional int64 tx_bytes = 5;
+
+    optional int64 tx_packets = 6;
+}
+
+/**
+ * Pulls bytes transferred via mobile networks (Sum of foreground and background usage).
+ *
+ * Pulled from:
+ *   StatsCompanionService (using BatteryStats to get which interfaces are mobile data)
+ */
+message MobileBytesTransferred {
+    optional int32 uid = 1;
+
+    optional int64 rx_bytes = 2;
+
+    optional int64 rx_packets = 3;
+
+    optional int64 tx_bytes = 4;
+
+    optional int64 tx_packets = 5;
+}
+
+/**
+ * Pulls bytes transferred via mobile networks (separated by foreground and background usage).
+ *
+ * Pulled from:
+ *   StatsCompanionService (using BatteryStats to get which interfaces are mobile data)
+ */
+message MobileBytesTransferredByFgBg {
+    optional int32 uid = 1;
+
+    // 1 denotes foreground and 0 denotes background. This is called Set in NetworkStats.
+    optional int32 is_foreground = 2;
+
+    optional int64 rx_bytes = 3;
+
+    optional int64 rx_packets = 4;
+
+    optional int64 tx_bytes = 5;
+
+    optional int64 tx_packets = 6;
+}
+
+/**
+ * Pulls the kernel wakelock durations. This atom is adapted from
+ * android/internal/os/KernelWakelockStats.java
+ *
+ * Pulled from:
+ *   StatsCompanionService using KernelWakelockReader.
  */
 message KernelWakelockPulled {
-    optional int32 count = 1;
-    optional int32 version = 2;
-    optional int64 total_time = 3;
-    optional string name = 4;
+    optional string name = 1;
+
+    optional int32 count = 2;
+
+    optional int32 version = 3;
+
+    optional int64 time = 4;
+}
+
+/*
+ * Pulls PowerStatePlatformSleepState.
+ *
+ * Definition here:
+ *   hardware/interfaces/power/1.0/types.hal
+ */
+message PowerStatePlatformSleepStatePulled {
+    optional string name = 1;
+    optional uint64 residency_in_msec_since_boot = 2;
+    optional uint64 total_transitions = 3;
+    optional bool supported_only_in_suspend = 4;
+}
+
+/**
+ * Pulls PowerStateVoter.
+ *
+ * Definition here:
+ *   hardware/interfaces/power/1.0/types.hal
+ */
+message PowerStateVoterPulled {
+    optional string power_state_platform_sleep_state_name = 1;
+    optional string power_state_voter_name = 2;
+    optional uint64 total_time_in_msec_voted_for_since_boot = 3;
+    optional uint64 total_number_of_times_voted_since_boot = 4;
+}
+
+/**
+ * Pulls PowerStateSubsystemSleepState.
+ *
+ * Definition here:
+ *   hardware/interfaces/power/1.1/types.hal
+ */
+message PowerStateSubsystemSleepStatePulled {
+    optional string power_state_subsystem_name = 1;
+    optional string power_state_subsystem_sleep_state_name = 2;
+    optional uint64 residency_in_msec_since_boot = 3;
+    optional uint64 total_transitions = 4;
+    optional uint64 last_entry_timestamp_ms = 5;
+    optional bool supported_only_in_suspend = 6;
 }

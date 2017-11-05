@@ -20,6 +20,7 @@ import android.annotation.Nullable;
 import android.app.Notification;
 import android.content.Context;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Outline;
 import android.graphics.Rect;
@@ -43,6 +44,7 @@ public class NotificationHeaderView extends ViewGroup {
     public static final int NO_COLOR = Notification.COLOR_INVALID;
     private final int mChildMinWidth;
     private final int mContentEndMargin;
+    private final int mGravity;
     private View mAppName;
     private View mHeaderText;
     private OnClickListener mExpandClickListener;
@@ -50,7 +52,6 @@ public class NotificationHeaderView extends ViewGroup {
     private ImageView mExpandButton;
     private CachingIconView mIcon;
     private View mProfileBadge;
-    private View mInfo;
     private int mIconColor;
     private int mOriginalNotificationColor;
     private boolean mExpanded;
@@ -61,6 +62,7 @@ public class NotificationHeaderView extends ViewGroup {
     private boolean mEntireHeaderClickable;
     private boolean mExpandOnlyOnButton;
     private boolean mAcceptAllTouches;
+    private int mTotalWidth;
 
     ViewOutlineProvider mProvider = new ViewOutlineProvider() {
         @Override
@@ -92,6 +94,11 @@ public class NotificationHeaderView extends ViewGroup {
         mHeaderBackgroundHeight = res.getDimensionPixelSize(
                 R.dimen.notification_header_background_height);
         mEntireHeaderClickable = res.getBoolean(R.bool.config_notificationHeaderClickableForExpand);
+
+        int[] attrIds = { android.R.attr.gravity };
+        TypedArray ta = context.obtainStyledAttributes(attrs, attrIds, defStyleAttr, defStyleRes);
+        mGravity = ta.getInt(0, 0);
+        ta.recycle();
     }
 
     @Override
@@ -146,6 +153,7 @@ public class NotificationHeaderView extends ViewGroup {
                 mHeaderText.measure(childWidthSpec, wrapContentHeightSpec);
             }
         }
+        mTotalWidth = Math.min(totalWidth, givenWidth);
         setMeasuredDimension(givenWidth, givenHeight);
     }
 
@@ -153,6 +161,10 @@ public class NotificationHeaderView extends ViewGroup {
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         int left = getPaddingStart();
         int end = getMeasuredWidth();
+        final boolean centerAligned = (mGravity & Gravity.CENTER_HORIZONTAL) != 0;
+        if (centerAligned) {
+            left += getMeasuredWidth() / 2 - mTotalWidth / 2;
+        }
         int childCount = getChildCount();
         int ownHeight = getMeasuredHeight() - getPaddingTop() - getPaddingBottom();
         for (int i = 0; i < childCount; i++) {

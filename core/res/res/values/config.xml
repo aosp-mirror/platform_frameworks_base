@@ -2524,7 +2524,13 @@
 
     <bool name="config_networkSamplingWakesDevice">true</bool>
 
-    <string-array translatable="false" name="config_cdma_home_system" />
+    <!-- Home (non-roaming) values for CDMA roaming indicator.
+         Carriers can override this table by resource overlay. If not,
+         the default values come from 3GPP2 C.R1001 table
+         8.1-1. Enhanced Roaming Indicator Number Assignments -->
+    <string-array translatable="false" name="config_cdma_home_system">
+        <item>1</item>
+    </string-array>
 
     <!--From SmsMessage-->
     <!--Support decoding the user data payload as pack GSM 8-bit (a GSM alphabet
@@ -3152,4 +3158,7 @@
 
     <!-- Component name of media projection permission dialog -->
     <string name="config_mediaProjectionPermissionDialogComponent" translateable="false">com.android.systemui/com.android.systemui.media.MediaProjectionPermissionActivity</string>
+
+    <!-- Corner radius of system dialogs -->
+    <dimen name="config_dialogCornerRadius">2dp</dimen>
 </resources>

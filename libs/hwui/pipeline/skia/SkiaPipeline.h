@@ -16,10 +16,10 @@
 
 #pragma once
 
-#include "renderthread/CanvasContext.h"
-#include "FrameBuilder.h"
-#include "renderthread/IRenderPipeline.h"
 #include <SkSurface.h>
+#include "FrameBuilder.h"
+#include "renderthread/CanvasContext.h"
+#include "renderthread/IRenderPipeline.h"
 
 class SkPictureRecorder;
 
@@ -42,15 +42,15 @@ public:
     void onPrepareTree() override;
 
     void renderLayers(const FrameBuilder::LightGeometry& lightGeometry,
-            LayerUpdateQueue* layerUpdateQueue, bool opaque, bool wideColorGamut,
-            const BakedOpRenderer::LightInfo& lightInfo) override;
+                      LayerUpdateQueue* layerUpdateQueue, bool opaque, bool wideColorGamut,
+                      const BakedOpRenderer::LightInfo& lightInfo) override;
 
-    bool createOrUpdateLayer(RenderNode* node,
-            const DamageAccumulator& damageAccumulator, bool wideColorGamut) override;
+    bool createOrUpdateLayer(RenderNode* node, const DamageAccumulator& damageAccumulator,
+                             bool wideColorGamut) override;
 
     void renderFrame(const LayerUpdateQueue& layers, const SkRect& clip,
-            const std::vector< sp<RenderNode> >& nodes, bool opaque, bool wideColorGamut,
-            const Rect &contentDrawBounds, sk_sp<SkSurface> surface);
+                     const std::vector<sp<RenderNode>>& nodes, bool opaque, bool wideColorGamut,
+                     const Rect& contentDrawBounds, sk_sp<SkSurface> surface);
 
     std::vector<VectorDrawableRoot*>* getVectorDrawables() { return &mVectorDrawables; }
 
@@ -86,7 +86,7 @@ public:
             Vector3 adjustedLightCenter = mLightCenter;
             if (CC_UNLIKELY(Properties::overrideLightPosY > 0)) {
                 // negated since this shifts up
-                adjustedLightCenter.y = - Properties::overrideLightPosY;
+                adjustedLightCenter.y = -Properties::overrideLightPosY;
             }
             if (CC_UNLIKELY(Properties::overrideLightPosZ > 0)) {
                 adjustedLightCenter.z = Properties::overrideLightPosZ;
@@ -97,7 +97,7 @@ public:
     }
 
     static void updateLighting(const FrameBuilder::LightGeometry& lightGeometry,
-            const BakedOpRenderer::LightInfo& lightInfo) {
+                               const BakedOpRenderer::LightInfo& lightInfo) {
         mLightRadius = lightGeometry.radius;
         mAmbientShadowAlpha = lightInfo.ambientShadowAlpha;
         mSpotShadowAlpha = lightInfo.spotShadowAlpha;
@@ -111,16 +111,16 @@ protected:
 
 private:
     void renderFrameImpl(const LayerUpdateQueue& layers, const SkRect& clip,
-            const std::vector< sp<RenderNode> >& nodes, bool opaque, bool wideColorGamut,
-            const Rect &contentDrawBounds, SkCanvas* canvas);
+                         const std::vector<sp<RenderNode>>& nodes, bool opaque, bool wideColorGamut,
+                         const Rect& contentDrawBounds, SkCanvas* canvas);
 
     /**
      *  Debugging feature.  Draws a semi-transparent overlay on each pixel, indicating
      *  how many times it has been drawn.
      */
     void renderOverdraw(const LayerUpdateQueue& layers, const SkRect& clip,
-            const std::vector< sp<RenderNode> >& nodes, const Rect &contentDrawBounds,
-            sk_sp<SkSurface>);
+                        const std::vector<sp<RenderNode>>& nodes, const Rect& contentDrawBounds,
+                        sk_sp<SkSurface>);
 
     /**
      *  Render mVectorDrawables into offscreen buffers.
@@ -136,7 +136,6 @@ private:
      *  populated by prepareTree with dirty VDs
      */
     std::vector<VectorDrawableRoot*> mVectorDrawables;
-
 
     // Block of properties used only for debugging to record a SkPicture and save it in a file.
     /**

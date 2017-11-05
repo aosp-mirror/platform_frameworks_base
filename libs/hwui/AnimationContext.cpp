@@ -26,11 +26,9 @@ AnimationContext::AnimationContext(renderthread::TimeLord& clock)
         : mClock(clock)
         , mCurrentFrameAnimations(*this)
         , mNextFrameAnimations(*this)
-        , mFrameTimeMs(0) {
-}
+        , mFrameTimeMs(0) {}
 
-AnimationContext::~AnimationContext() {
-}
+AnimationContext::~AnimationContext() {}
 
 void AnimationContext::destroy() {
     startFrame(TreeInfo::MODE_RT_ONLY);
@@ -39,7 +37,7 @@ void AnimationContext::destroy() {
         AnimatorManager& animators = current->mRenderNode->animators();
         animators.endAllActiveAnimators();
         LOG_ALWAYS_FATAL_IF(mCurrentFrameAnimations.mNextHandle == current,
-                "endAllAnimators failed to remove from current frame list!");
+                            "endAllAnimators failed to remove from current frame list!");
     }
 }
 
@@ -56,7 +54,7 @@ void AnimationContext::addAnimationHandle(AnimationHandle* handle) {
 
 void AnimationContext::startFrame(TreeInfo::TraversalMode mode) {
     LOG_ALWAYS_FATAL_IF(mCurrentFrameAnimations.mNextHandle,
-            "Missed running animations last frame!");
+                        "Missed running animations last frame!");
     AnimationHandle* head = mNextFrameAnimations.mNextHandle;
     if (head) {
         mNextFrameAnimations.mNextHandle = nullptr;
@@ -73,20 +71,17 @@ void AnimationContext::runRemainingAnimations(TreeInfo& info) {
         animators.pushStaging();
         animators.animateNoDamage(info);
         LOG_ALWAYS_FATAL_IF(mCurrentFrameAnimations.mNextHandle == current,
-                "Animate failed to remove from current frame list!");
+                            "Animate failed to remove from current frame list!");
     }
 }
 
 void AnimationContext::callOnFinished(BaseRenderNodeAnimator* animator,
-        AnimationListener* listener) {
+                                      AnimationListener* listener) {
     listener->onAnimationFinished(animator);
 }
 
 AnimationHandle::AnimationHandle(AnimationContext& context)
-        : mContext(context)
-        , mPreviousHandle(nullptr)
-        , mNextHandle(nullptr) {
-}
+        : mContext(context), mPreviousHandle(nullptr), mNextHandle(nullptr) {}
 
 AnimationHandle::AnimationHandle(RenderNode& animatingNode, AnimationContext& context)
         : mRenderNode(&animatingNode)
@@ -98,7 +93,7 @@ AnimationHandle::AnimationHandle(RenderNode& animatingNode, AnimationContext& co
 
 AnimationHandle::~AnimationHandle() {
     LOG_ALWAYS_FATAL_IF(mPreviousHandle || mNextHandle,
-            "AnimationHandle destroyed while still animating!");
+                        "AnimationHandle destroyed while still animating!");
 }
 
 void AnimationHandle::notifyAnimationsRan() {
@@ -112,7 +107,7 @@ void AnimationHandle::notifyAnimationsRan() {
 
 void AnimationHandle::release() {
     LOG_ALWAYS_FATAL_IF(mRenderNode->animators().hasAnimators(),
-            "Releasing the handle for an RenderNode with outstanding animators!");
+                        "Releasing the handle for an RenderNode with outstanding animators!");
     removeFromList();
     mRenderNode->animators().setAnimationHandle(nullptr);
     delete this;

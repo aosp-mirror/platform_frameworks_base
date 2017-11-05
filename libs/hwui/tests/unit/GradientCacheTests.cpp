@@ -28,12 +28,12 @@ RENDERTHREAD_OPENGL_PIPELINE_TEST(GradientCache, addRemove) {
     GradientCache cache(extensions);
     ASSERT_LT(1000u, cache.getMaxSize()) << "Expect non-trivial size";
 
-    SkColor colors[] = { 0xFF00FF00, 0xFFFF0000, 0xFF0000FF };
-    float positions[] = { 1, 2, 3 };
+    SkColor colors[] = {0xFF00FF00, 0xFFFF0000, 0xFF0000FF};
+    float positions[] = {1, 2, 3};
     Texture* texture = cache.get(colors, positions, 3);
     ASSERT_TRUE(texture);
     ASSERT_FALSE(texture->cleanup);
-    ASSERT_EQ((uint32_t) texture->objectSize(), cache.getSize());
+    ASSERT_EQ((uint32_t)texture->objectSize(), cache.getSize());
     ASSERT_TRUE(cache.getSize());
     cache.clear();
     ASSERT_EQ(cache.getSize(), 0u);

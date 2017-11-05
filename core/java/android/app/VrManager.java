@@ -198,4 +198,20 @@ public class VrManager {
             e.rethrowFromSystemServer();
         }
     }
+
+    /**
+     * Sets the current standby status of the VR device. Standby mode is only used on standalone vr
+     * devices. Standby mode is a deep sleep state where it's appropriate to turn off vr mode.
+     *
+     * @param standby True if the device is entering standby, false if it's exiting standby.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.ACCESS_VR_MANAGER)
+    public void setStandbyEnabled(boolean standby) {
+        try {
+            mService.setStandbyEnabled(standby);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
 }

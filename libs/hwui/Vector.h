@@ -32,13 +32,9 @@ struct Vector2 {
     float x;
     float y;
 
-    float lengthSquared() const {
-        return x * x + y * y;
-    }
+    float lengthSquared() const { return x * x + y * y; }
 
-    float length() const {
-        return sqrt(x * x + y * y);
-    }
+    float length() const { return sqrt(x * x + y * y); }
 
     void operator+=(const Vector2& v) {
         x += v.x;
@@ -70,21 +66,13 @@ struct Vector2 {
         y *= s;
     }
 
-    Vector2 operator+(const Vector2& v) const {
-        return (Vector2){x + v.x, y + v.y};
-    }
+    Vector2 operator+(const Vector2& v) const { return (Vector2){x + v.x, y + v.y}; }
 
-    Vector2 operator-(const Vector2& v) const {
-        return (Vector2){x - v.x, y - v.y};
-    }
+    Vector2 operator-(const Vector2& v) const { return (Vector2){x - v.x, y - v.y}; }
 
-    Vector2 operator/(float s) const {
-        return (Vector2){x / s, y / s};
-    }
+    Vector2 operator/(float s) const { return (Vector2){x / s, y / s}; }
 
-    Vector2 operator*(float s) const {
-        return (Vector2){x * s, y * s};
-    }
+    Vector2 operator*(float s) const { return (Vector2){x * s, y * s}; }
 
     void normalize() {
         float s = 1.0f / length();
@@ -98,18 +86,12 @@ struct Vector2 {
         return v;
     }
 
-    float dot(const Vector2& v) const {
-        return x * v.x + y * v.y;
-    }
+    float dot(const Vector2& v) const { return x * v.x + y * v.y; }
 
-    float cross(const Vector2& v) const {
-        return x * v.y - y * v.x;
-    }
+    float cross(const Vector2& v) const { return x * v.y - y * v.x; }
 
-    void dump() {
-        ALOGD("Vector2[%.2f, %.2f]", x, y);
-    }
-}; // class Vector2
+    void dump() { ALOGD("Vector2[%.2f, %.2f]", x, y); }
+};  // class Vector2
 
 // MUST BE A POD - this means no ctor or dtor!
 class Vector3 {
@@ -118,29 +100,20 @@ public:
     float y;
     float z;
 
-    Vector3 operator+(const Vector3& v) const {
-        return (Vector3){x + v.x, y + v.y, z + v.z};
-    }
+    Vector3 operator+(const Vector3& v) const { return (Vector3){x + v.x, y + v.y, z + v.z}; }
 
-    Vector3 operator-(const Vector3& v) const {
-        return (Vector3){x - v.x, y - v.y, z - v.z};
-    }
+    Vector3 operator-(const Vector3& v) const { return (Vector3){x - v.x, y - v.y, z - v.z}; }
 
-    Vector3 operator/(float s) const {
-        return (Vector3){x / s, y / s, z / s};
-    }
+    Vector3 operator/(float s) const { return (Vector3){x / s, y / s, z / s}; }
 
-    Vector3 operator*(float s) const {
-        return (Vector3){x * s, y * s, z * s};
-    }
-
+    Vector3 operator*(float s) const { return (Vector3){x * s, y * s, z * s}; }
 
     void dump(const char* label = "Vector3") const {
         ALOGD("%s[%.2f, %.2f, %.2f]", label, x, y, z);
     }
 };
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android
 
-#endif // ANDROID_HWUI_VECTOR_H
+#endif  // ANDROID_HWUI_VECTOR_H

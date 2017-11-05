@@ -35,6 +35,7 @@ public:
     void frameCompleted();
 
     void dump(String8& log) const;
+
 private:
     struct CachedGlyph {
         void* texture;
@@ -60,5 +61,5 @@ private:
     uint16_t generation = 0;
 };
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android

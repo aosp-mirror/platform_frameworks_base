@@ -85,9 +85,14 @@ public class LargeTemplateView extends SliceModeView {
             addList(slice, items);
         } else {
             slice.getItems().forEach(item -> {
-                if (item.hasHint(Slice.HINT_ACTIONS)) {
+                if (item.hasHint(Slice.HINT_HIDDEN)) {
+                    // If it's hidden we don't show it
+                    return;
+                } else if (item.hasHint(Slice.HINT_ACTIONS)) {
+                    // Action groups don't show in lists
                     return;
                 } else if (item.getType() == SliceItem.TYPE_COLOR) {
+                    // A color is not a list item
                     return;
                 } else if (item.getType() == SliceItem.TYPE_SLICE
                         && item.hasHint(Slice.HINT_LIST)) {
@@ -108,8 +113,12 @@ public class LargeTemplateView extends SliceModeView {
 
     private void addList(Slice slice, List<SliceItem> items) {
         List<SliceItem> sliceItems = slice.getItems();
-        sliceItems.forEach(i -> i.addHint(Slice.HINT_LIST_ITEM));
-        items.addAll(sliceItems);
+        sliceItems.forEach(i -> {
+            if (!i.hasHint(Slice.HINT_HIDDEN) && i.getType() != SliceItem.TYPE_COLOR) {
+                i.addHint(Slice.HINT_LIST_ITEM);
+                items.add(i);
+            }
+        });
     }
 
     /**

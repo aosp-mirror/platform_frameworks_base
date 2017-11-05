@@ -19,6 +19,7 @@
 #include <android/os/StatsLogEventWrapper.h>
 #include <utils/String16.h>
 #include <vector>
+#include "logd/LogEvent.h"
 
 using android::os::StatsLogEventWrapper;
 using std::vector;
@@ -31,7 +32,7 @@ class StatsPuller {
 public:
     virtual ~StatsPuller(){};
 
-    virtual vector<StatsLogEventWrapper> Pull() = 0;
+    virtual bool Pull(const int tagId, vector<std::shared_ptr<LogEvent>>* data) = 0;
 };
 
 }  // namespace statsd

@@ -58,7 +58,7 @@ private:
     template <typename T>
     friend class TaskProcessor;
 
-    template<typename T>
+    template <typename T>
     bool addTask(const sp<Task<T> >& task, const sp<TaskProcessor<T> >& processor) {
         return addTaskBase(sp<TaskBase>(task), sp<TaskProcessorBase>(processor));
     }
@@ -66,19 +66,18 @@ private:
     bool addTaskBase(const sp<TaskBase>& task, const sp<TaskProcessorBase>& processor);
 
     struct TaskWrapper {
-        TaskWrapper(): mTask(), mProcessor() { }
+        TaskWrapper() : mTask(), mProcessor() {}
 
-        TaskWrapper(const sp<TaskBase>& task, const sp<TaskProcessorBase>& processor):
-            mTask(task), mProcessor(processor) {
-        }
+        TaskWrapper(const sp<TaskBase>& task, const sp<TaskProcessorBase>& processor)
+                : mTask(task), mProcessor(processor) {}
 
         sp<TaskBase> mTask;
         sp<TaskProcessorBase> mProcessor;
     };
 
-    class WorkerThread: public Thread {
+    class WorkerThread : public Thread {
     public:
-        explicit WorkerThread(const String8& name): mSignal(Condition::WAKE_UP_ONE), mName(name) { }
+        explicit WorkerThread(const String8& name) : mSignal(Condition::WAKE_UP_ONE), mName(name) {}
 
         bool addTask(const TaskWrapper& task);
         size_t getTaskCount() const;
@@ -102,7 +101,7 @@ private:
     std::vector<sp<WorkerThread> > mThreads;
 };
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android
 
-#endif // ANDROID_HWUI_TASK_MANAGER_H
+#endif  // ANDROID_HWUI_TASK_MANAGER_H

@@ -28,6 +28,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.IPackageManager;
+import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.graphics.drawable.Drawable;
 import android.os.RemoteException;
@@ -343,7 +344,8 @@ public class RestrictedLockUtils {
         }
         DevicePolicyManager dpm = (DevicePolicyManager) context.getSystemService(
                 Context.DEVICE_POLICY_SERVICE);
-        if (dpm == null) {
+        PackageManager pm = context.getPackageManager();
+        if (!pm.hasSystemFeature(PackageManager.FEATURE_DEVICE_ADMIN) || dpm == null) {
             return null;
         }
         boolean isAccountTypeDisabled = false;

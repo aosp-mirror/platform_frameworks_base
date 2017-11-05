@@ -24,13 +24,14 @@ namespace android {
 namespace os {
 namespace statsd {
 
+using namespace android::util;
 using std::ostringstream;
 using std::string;
 using android::util::ProtoOutputStream;
 
 // We need to keep a copy of the android_log_event_list owned by this instance so that the char*
 // for strings is not cleared before we can read them.
-LogEvent::LogEvent(log_msg msg) : mList(msg) {
+LogEvent::LogEvent(log_msg& msg) : mList(msg) {
     init(msg.entry_v1.sec * NS_PER_SEC + msg.entry_v1.nsec, &mList);
 }
 
@@ -207,20 +208,20 @@ string LogEvent::ToString() const {
 }
 
 void LogEvent::ToProto(ProtoOutputStream& proto) const {
-    long long atomToken = proto.start(TYPE_MESSAGE + mTagId);
+    long long atomToken = proto.start(FIELD_TYPE_MESSAGE | mTagId);
     const size_t N = mElements.size();
     for (size_t i=0; i<N; i++) {
         const int key = i + 1;
 
         const android_log_list_element& elem = mElements[i];
         if (elem.type == EVENT_TYPE_INT) {
-            proto.write(TYPE_INT32 + key, elem.data.int32);
+            proto.write(FIELD_TYPE_INT32 | key, elem.data.int32);
         } else if (elem.type == EVENT_TYPE_LONG) {
-            proto.write(TYPE_INT64 + key, (long long)elem.data.int64);
+            proto.write(FIELD_TYPE_INT64 | key, (long long)elem.data.int64);
         } else if (elem.type == EVENT_TYPE_FLOAT) {
-            proto.write(TYPE_FLOAT + key, elem.data.float32);
+            proto.write(FIELD_TYPE_FLOAT | key, elem.data.float32);
         } else if (elem.type == EVENT_TYPE_STRING) {
-            proto.write(TYPE_STRING + key, elem.data.string);
+            proto.write(FIELD_TYPE_STRING | key, elem.data.string);
         }
     }
     proto.end(atomToken);

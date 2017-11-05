@@ -66,7 +66,7 @@ public class PowerManagerServiceTest extends AndroidTestCase {
                 .setBrightnessFactor(BRIGHTNESS_FACTOR)
                 .build();
         when(mBatterySaverPolicy.getBatterySaverPolicy(
-                eq(BatterySaverPolicy.ServiceType.SCREEN_BRIGHTNESS), anyBoolean()))
+                eq(PowerManager.ServiceType.SCREEN_BRIGHTNESS), anyBoolean()))
                 .thenReturn(mPowerSaveState);
         mDisplayPowerRequest = new DisplayPowerRequest();
         mService = new PowerManagerService(getContext(), mBatterySaverPolicy);

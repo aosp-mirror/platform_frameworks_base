@@ -37,8 +37,8 @@ void BM_FontRenderer_precache_cachehits(benchmark::State& state) {
         std::vector<float> positions;
         float totalAdvance;
         uirenderer::Rect bounds;
-        TestUtils::layoutTextUnscaled(paint, "This is a test",
-                &glyphs, &positions, &totalAdvance, &bounds);
+        TestUtils::layoutTextUnscaled(paint, "This is a test", &glyphs, &positions, &totalAdvance,
+                                      &bounds);
 
         fontRenderer.precache(&paint, glyphs.data(), glyphs.size(), SkMatrix::I());
 

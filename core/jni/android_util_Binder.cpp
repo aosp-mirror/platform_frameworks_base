@@ -171,6 +171,7 @@ static std::atomic<uint32_t> gCollectedAtRefs(0);
 // Garbage collect if we've allocated at least GC_INTERVAL refs since the last time.
 // TODO: Consider removing this completely. We should no longer be generating GlobalRefs
 // that are reclaimed as a result of GC action.
+__attribute__((no_sanitize("unsigned-integer-overflow")))
 static void gcIfManyNewRefs(JNIEnv* env)
 {
     uint32_t totalRefs = gNumLocalRefsCreated.load(std::memory_order_relaxed)

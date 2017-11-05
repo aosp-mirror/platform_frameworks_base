@@ -50,7 +50,6 @@ RENDERTHREAD_TEST(DeferredLayerUpdater, updateLayer) {
         glLayer->setRenderTarget(GL_TEXTURE_EXTERNAL_OES);
     }
 
-
     // the backing layer should now have all the properties applied.
     if (layerUpdater->backingLayer()->getApi() == Layer::Api::OpenGL) {
         GlLayer* glLayer = static_cast<GlLayer*>(layerUpdater->backingLayer());

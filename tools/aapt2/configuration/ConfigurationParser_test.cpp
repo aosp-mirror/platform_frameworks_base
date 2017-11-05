@@ -423,11 +423,11 @@ TEST_F(ConfigurationParserTest, AndroidSdkGroupAction) {
 
 TEST_F(ConfigurationParserTest, AndroidSdkGroupAction_NonNumeric) {
   static constexpr const char* xml = R"xml(
-    <android-sdk-group label="O">
+    <android-sdk-group label="P">
       <android-sdk
           minSdkVersion="M"
-          targetSdkVersion="O"
-          maxSdkVersion="O">
+          targetSdkVersion="P"
+          maxSdkVersion="P">
       </android-sdk>
     </android-sdk-group>)xml";
 
@@ -438,14 +438,14 @@ TEST_F(ConfigurationParserTest, AndroidSdkGroupAction_NonNumeric) {
   ASSERT_TRUE(ok);
 
   ASSERT_EQ(1ul, config.android_sdk_groups.size());
-  ASSERT_EQ(1u, config.android_sdk_groups.count("O"));
+  ASSERT_EQ(1u, config.android_sdk_groups.count("P"));
 
-  auto& out = config.android_sdk_groups["O"];
+  auto& out = config.android_sdk_groups["P"];
 
   AndroidSdk sdk;
   sdk.min_sdk_version = {};  // Only the latest development version is supported.
-  sdk.target_sdk_version = 26;
-  sdk.max_sdk_version = 26;
+  sdk.target_sdk_version = 28;
+  sdk.max_sdk_version = 28;
 
   ASSERT_EQ(sdk, out);
 }

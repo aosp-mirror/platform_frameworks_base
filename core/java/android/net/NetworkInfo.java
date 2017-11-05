@@ -305,11 +305,17 @@ public class NetworkInfo implements Parcelable {
     }
 
     /**
-     * Indicates whether the device is currently roaming on this network.
-     * When {@code true}, it suggests that use of data on this network
-     * may incur extra costs.
+     * Indicates whether the device is currently roaming on this network. When
+     * {@code true}, it suggests that use of data on this network may incur
+     * extra costs.
+     *
      * @return {@code true} if roaming is in effect, {@code false} otherwise.
+     * @deprecated Callers should switch to checking
+     *             {@link NetworkCapabilities#NET_CAPABILITY_NOT_ROAMING}
+     *             instead, since that handles more complex situations, such as
+     *             VPNs.
      */
+    @Deprecated
     public boolean isRoaming() {
         synchronized (this) {
             return mIsRoaming;
@@ -318,6 +324,7 @@ public class NetworkInfo implements Parcelable {
 
     /** {@hide} */
     @VisibleForTesting
+    @Deprecated
     public void setRoaming(boolean isRoaming) {
         synchronized (this) {
             mIsRoaming = isRoaming;

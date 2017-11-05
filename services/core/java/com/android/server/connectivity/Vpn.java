@@ -18,6 +18,8 @@ package com.android.server.connectivity;
 
 import static android.Manifest.permission.BIND_VPN_SERVICE;
 import static android.net.ConnectivityManager.NETID_UNSET;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_METERED;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING;
 import static android.net.RouteInfo.RTN_THROW;
 import static android.net.RouteInfo.RTN_UNREACHABLE;
 
@@ -90,6 +92,8 @@ import com.android.internal.net.VpnConfig;
 import com.android.internal.net.VpnInfo;
 import com.android.internal.net.VpnProfile;
 import com.android.internal.notification.SystemNotificationChannels;
+import com.android.internal.util.ArrayUtils;
+import com.android.server.ConnectivityService;
 import com.android.server.DeviceIdleController;
 import com.android.server.LocalServices;
 import com.android.server.net.BaseNetworkObserver;
@@ -245,10 +249,10 @@ public class Vpn {
         }
 
         mNetworkInfo = new NetworkInfo(ConnectivityManager.TYPE_VPN, 0, NETWORKTYPE, "");
-        // TODO: Copy metered attribute and bandwidths from physical transport, b/16207332
         mNetworkCapabilities = new NetworkCapabilities();
         mNetworkCapabilities.addTransportType(NetworkCapabilities.TRANSPORT_VPN);
         mNetworkCapabilities.removeCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN);
+        updateCapabilities();
 
         loadAlwaysOnPackage();
     }
@@ -273,6 +277,62 @@ public class Vpn {
             mNetworkAgent.sendNetworkInfo(mNetworkInfo);
         }
         updateAlwaysOnNotification(detailedState);
+    }
+
+    public void updateCapabilities() {
+        final Network[] underlyingNetworks = (mConfig != null) ? mConfig.underlyingNetworks : null;
+        updateCapabilities(mContext.getSystemService(ConnectivityManager.class), underlyingNetworks,
+                mNetworkCapabilities);
+
+        if (mNetworkAgent != null) {
+            mNetworkAgent.sendNetworkCapabilities(mNetworkCapabilities);
+        }
+    }
+
+    @VisibleForTesting
+    public static void updateCapabilities(ConnectivityManager cm, Network[] underlyingNetworks,
+            NetworkCapabilities caps) {
+        int[] transportTypes = new int[] { NetworkCapabilities.TRANSPORT_VPN };
+        int downKbps = NetworkCapabilities.LINK_BANDWIDTH_UNSPECIFIED;
+        int upKbps = NetworkCapabilities.LINK_BANDWIDTH_UNSPECIFIED;
+        boolean metered = false;
+        boolean roaming = false;
+
+        if (ArrayUtils.isEmpty(underlyingNetworks)) {
+            // No idea what the underlying networks are; assume sane defaults
+            metered = true;
+            roaming = false;
+        } else {
+            for (Network underlying : underlyingNetworks) {
+                final NetworkCapabilities underlyingCaps = cm.getNetworkCapabilities(underlying);
+                for (int underlyingType : underlyingCaps.getTransportTypes()) {
+                    transportTypes = ArrayUtils.appendInt(transportTypes, underlyingType);
+                }
+
+                // When we have multiple networks, we have to assume the
+                // worst-case link speed and restrictions.
+                downKbps = NetworkCapabilities.minBandwidth(downKbps,
+                        underlyingCaps.getLinkDownstreamBandwidthKbps());
+                upKbps = NetworkCapabilities.minBandwidth(upKbps,
+                        underlyingCaps.getLinkUpstreamBandwidthKbps());
+                metered |= !underlyingCaps.hasCapability(NET_CAPABILITY_NOT_METERED);
+                roaming |= !underlyingCaps.hasCapability(NET_CAPABILITY_NOT_ROAMING);
+            }
+        }
+
+        caps.setTransportTypes(transportTypes);
+        caps.setLinkDownstreamBandwidthKbps(downKbps);
+        caps.setLinkUpstreamBandwidthKbps(upKbps);
+        if (metered) {
+            caps.removeCapability(NET_CAPABILITY_NOT_METERED);
+        } else {
+            caps.addCapability(NET_CAPABILITY_NOT_METERED);
+        }
+        if (roaming) {
+            caps.removeCapability(NET_CAPABILITY_NOT_ROAMING);
+        } else {
+            caps.addCapability(NET_CAPABILITY_NOT_ROAMING);
+        }
     }
 
     /**
@@ -1344,6 +1404,7 @@ public class Vpn {
                 }
             }
         }
+        updateCapabilities();
         return true;
     }
 

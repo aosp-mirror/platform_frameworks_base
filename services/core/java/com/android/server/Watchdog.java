@@ -60,9 +60,6 @@ public class Watchdog extends Thread {
     // Set this to true to use debug default values.
     static final boolean DB = false;
 
-    // Set this to true to have the watchdog record kernel thread stacks when it fires
-    static final boolean RECORD_KERNEL_THREADS = true;
-
     // Note 1: Do not lower this value below thirty seconds without tightening the invoke-with
     //         timeout in com.android.internal.os.ZygoteConnection, or wrapped applications
     //         can trigger the watchdog.
@@ -509,11 +506,6 @@ public class Watchdog extends Thread {
             // The system's been hanging for a minute, another second or two won't hurt much.
             SystemClock.sleep(2000);
 
-            // Pull our own kernel thread stacks as well if we're configured for that
-            if (RECORD_KERNEL_THREADS) {
-                dumpKernelStackTraces();
-            }
-
             // Trigger the kernel to dump all blocked threads, and backtraces on all CPUs to the kernel log
             doSysRq('w');
             doSysRq('l');
@@ -590,18 +582,6 @@ public class Watchdog extends Thread {
             Slog.w(TAG, "Failed to write to /proc/sysrq-trigger", e);
         }
     }
-
-    private File dumpKernelStackTraces() {
-        String tracesPath = SystemProperties.get("dalvik.vm.stack-trace-file", null);
-        if (tracesPath == null || tracesPath.length() == 0) {
-            return null;
-        }
-
-        native_dumpKernelStacks(tracesPath);
-        return new File(tracesPath);
-    }
-
-    private native void native_dumpKernelStacks(String tracesPath);
 
     public static final class OpenFdMonitor {
         /**

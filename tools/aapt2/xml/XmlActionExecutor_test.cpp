@@ -56,9 +56,13 @@ TEST(XmlActionExecutorTest, FailsWhenUndefinedHierarchyExists) {
   XmlActionExecutor executor;
   executor["manifest"]["application"];
 
-  std::unique_ptr<XmlResource> doc =
-      test::BuildXmlDom("<manifest><application /><activity /></manifest>");
+  std::unique_ptr<XmlResource> doc;
   StdErrDiagnostics diag;
+
+  doc = test::BuildXmlDom("<manifest><application /><activity /></manifest>");
+  ASSERT_FALSE(executor.Execute(XmlActionExecutorPolicy::kWhitelist, &diag, doc.get()));
+
+  doc = test::BuildXmlDom("<manifest><application><activity /></application></manifest>");
   ASSERT_FALSE(executor.Execute(XmlActionExecutorPolicy::kWhitelist, &diag, doc.get()));
 }
 

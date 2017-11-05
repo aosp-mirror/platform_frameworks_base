@@ -22,11 +22,11 @@
 
 using namespace android::uirenderer;
 
-const BakedOpRenderer::LightInfo sLightInfo = { 128, 128 };
+const BakedOpRenderer::LightInfo sLightInfo = {128, 128};
 
 RENDERTHREAD_OPENGL_PIPELINE_TEST(BakedOpRenderer, startRepaintLayer_clear) {
-    BakedOpRenderer renderer(Caches::getInstance(), renderThread.renderState(),
-            true, false, sLightInfo);
+    BakedOpRenderer renderer(Caches::getInstance(), renderThread.renderState(), true, false,
+                             sLightInfo);
     OffscreenBuffer layer(renderThread.renderState(), Caches::getInstance(), 200u, 200u);
 
     layer.dirty(Rect(200, 200));
@@ -38,9 +38,9 @@ RENDERTHREAD_OPENGL_PIPELINE_TEST(BakedOpRenderer, startRepaintLayer_clear) {
 
     layer.dirty(Rect(200, 200));
     {
-        renderer.startRepaintLayer(&layer, Rect(100, 200)); // repainting left side
+        renderer.startRepaintLayer(&layer, Rect(100, 200));  // repainting left side
         EXPECT_TRUE(layer.region.isRect());
-        //ALOGD("bounds %d %d %d %d", RECT_ARGS(layer.region.getBounds()));
+        // ALOGD("bounds %d %d %d %d", RECT_ARGS(layer.region.getBounds()));
         EXPECT_EQ(android::Rect(100, 0, 200, 200), layer.region.getBounds())
                 << "Left side being repainted, so right side should be clear";
         renderer.endLayer();
@@ -48,7 +48,7 @@ RENDERTHREAD_OPENGL_PIPELINE_TEST(BakedOpRenderer, startRepaintLayer_clear) {
 
     // right side is now only dirty portion
     {
-        renderer.startRepaintLayer(&layer, Rect(100, 0, 200, 200)); // repainting right side
+        renderer.startRepaintLayer(&layer, Rect(100, 0, 200, 200));  // repainting right side
         EXPECT_TRUE(layer.region.isEmpty())
                 << "Now right side being repainted, so region should be entirely clear";
         renderer.endLayer();

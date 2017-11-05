@@ -22,6 +22,7 @@ import android.view.AppTransitionAnimationSpec;
 import android.view.IAppTransitionAnimationSpecsFuture;
 
 import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
 
 /**
@@ -31,11 +32,13 @@ import java.util.concurrent.FutureTask;
 public abstract class AppTransitionAnimationSpecsFuture {
 
     private final Handler mHandler;
-    private FutureTask<List<AppTransitionAnimationSpec>> mComposeTask = new FutureTask<>(() -> {
-        synchronized (AppTransitionAnimationSpecsFuture.this) {
-            return composeSpecs();
-        }
-    });
+    private FutureTask<List<AppTransitionAnimationSpec>> mComposeTask = new FutureTask<>(
+            new Callable<List<AppTransitionAnimationSpec>>() {
+                @Override
+                public List<AppTransitionAnimationSpec> call() throws Exception {
+                    return composeSpecs();
+                }
+            });
 
     private final IAppTransitionAnimationSpecsFuture mFuture =
             new IAppTransitionAnimationSpecsFuture.Stub() {
