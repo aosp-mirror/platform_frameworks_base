@@ -55,6 +55,8 @@
     <uses-permission android:name="android.permission.DEVICE_POWER" />
     <uses-permission android:name="android.permission.FORCE_STOP_PACKAGES" />
     <uses-permission android:name="android.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.STATUS_BAR_SERVICE" />
 
     <!-- Uses API introduced in O (26) -->
     <uses-sdk android:minSdkVersion="1"
@@ -131,6 +133,8 @@
         <activity android:name="com.android.server.pm.BaseShortcutManagerTest$ShortcutActivity" />
         <activity android:name="com.android.server.pm.BaseShortcutManagerTest$ShortcutActivity2" />
         <activity android:name="com.android.server.pm.BaseShortcutManagerTest$ShortcutActivity3" />
+
+        <activity android:name="com.android.server.wm.ScreenDecorWindowTests$TestActivity" />
 
         <activity android:name="com.android.server.pm.ShortcutTestActivity"
                  android:enabled="true" android:exported="true" />

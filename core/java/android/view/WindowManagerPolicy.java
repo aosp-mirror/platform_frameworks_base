@@ -758,7 +758,8 @@ public interface WindowManagerPolicy {
      * @param attrs The window layout parameters to be modified.  These values
      * are modified in-place.
      */
-    public void adjustWindowParamsLw(WindowManager.LayoutParams attrs);
+    public void adjustWindowParamsLw(WindowState win, WindowManager.LayoutParams attrs,
+            boolean hasStatusBarServicePermission);
 
     /**
      * After the window manager has computed the current configuration based
@@ -1172,13 +1173,13 @@ public interface WindowManagerPolicy {
     /**
      * Called when layout of the windows is about to start.
      *
-     * @param isDefaultDisplay true if window is on {@link Display#DEFAULT_DISPLAY}.
+     * @param displayId Id of the display we are doing layout on.
      * @param displayWidth The current full width of the screen.
      * @param displayHeight The current full height of the screen.
      * @param displayRotation The current rotation being applied to the base window.
      * @param uiMode The current uiMode in configuration.
      */
-    public void beginLayoutLw(boolean isDefaultDisplay, int displayWidth, int displayHeight,
+    public void beginLayoutLw(int displayId, int displayWidth, int displayHeight,
                               int displayRotation, int uiMode);
 
     /**

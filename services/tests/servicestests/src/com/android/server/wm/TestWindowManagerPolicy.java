@@ -148,8 +148,8 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public void adjustWindowParamsLw(WindowManager.LayoutParams attrs) {
-
+    public void adjustWindowParamsLw(WindowState win, WindowManager.LayoutParams attrs,
+            boolean hasStatusBarServicePermission) {
     }
 
     @Override
@@ -290,7 +290,7 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public void beginLayoutLw(boolean isDefaultDisplay, int displayWidth, int displayHeight,
+    public void beginLayoutLw(int displayId, int displayWidth, int displayHeight,
             int displayRotation, int uiMode) {
 
     }

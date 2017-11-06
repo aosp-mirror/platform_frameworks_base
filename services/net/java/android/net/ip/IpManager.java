@@ -88,16 +88,6 @@ public class IpManager extends IpClient {
                 return this;
             }
             @Override
-            public Builder withIPv6AddrGenModeEUI64() {
-                super.withIPv6AddrGenModeEUI64();
-                return this;
-            }
-            @Override
-            public Builder withIPv6AddrGenModeStablePrivacy() {
-                super.withIPv6AddrGenModeStablePrivacy();
-                return this;
-            }
-            @Override
             public Builder withNetwork(Network network) {
                 super.withNetwork(network);
                 return this;
