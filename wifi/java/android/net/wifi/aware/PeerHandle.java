@@ -33,7 +33,6 @@ public class PeerHandle {
     /** @hide */
     public int peerId;
 
-    /** @hide RTT_API */
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -47,7 +46,6 @@ public class PeerHandle {
         return peerId == ((PeerHandle) o).peerId;
     }
 
-    /** @hide RTT_API */
     @Override
     public int hashCode() {
         return peerId;
