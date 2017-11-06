@@ -1320,7 +1320,10 @@ public class WindowManagerService extends IWindowManager.Stub
                 return WindowManagerGlobal.ADD_INVALID_DISPLAY;
             }
 
-            mPolicy.adjustWindowParamsLw(win.mAttrs);
+            final boolean hasStatusBarServicePermission =
+                    mContext.checkCallingOrSelfPermission(permission.STATUS_BAR_SERVICE)
+                            == PackageManager.PERMISSION_GRANTED;
+            mPolicy.adjustWindowParamsLw(win, win.mAttrs, hasStatusBarServicePermission);
             win.setShowToOwnerOnlyLocked(mPolicy.checkShowToOwnerOnly(attrs));
 
             res = mPolicy.prepareAddWindowLw(win, attrs);
@@ -1846,8 +1849,11 @@ public class WindowManagerService extends IWindowManager.Stub
             MergedConfiguration mergedConfiguration, Surface outSurface) {
         int result = 0;
         boolean configChanged;
-        boolean hasStatusBarPermission =
-                mContext.checkCallingOrSelfPermission(android.Manifest.permission.STATUS_BAR)
+        final boolean hasStatusBarPermission =
+                mContext.checkCallingOrSelfPermission(permission.STATUS_BAR)
+                        == PackageManager.PERMISSION_GRANTED;
+        final boolean hasStatusBarServicePermission =
+                mContext.checkCallingOrSelfPermission(permission.STATUS_BAR_SERVICE)
                         == PackageManager.PERMISSION_GRANTED;
 
         long origId = Binder.clearCallingIdentity();
@@ -1867,7 +1873,7 @@ public class WindowManagerService extends IWindowManager.Stub
             int attrChanges = 0;
             int flagChanges = 0;
             if (attrs != null) {
-                mPolicy.adjustWindowParamsLw(attrs);
+                mPolicy.adjustWindowParamsLw(win, attrs, hasStatusBarServicePermission);
                 // if they don't have the permission, mask out the status bar bits
                 if (seq == win.mSeq) {
                     int systemUiVisibility = attrs.systemUiVisibility

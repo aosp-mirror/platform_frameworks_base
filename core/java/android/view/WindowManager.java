@@ -1422,7 +1422,7 @@ public interface WindowManager extends ViewManager {
          * this window is visible.
          * @hide
          */
-        @RequiresPermission(android.Manifest.permission.HIDE_NON_SYSTEM_OVERLAY_WINDOWS)
+        @RequiresPermission(permission.HIDE_NON_SYSTEM_OVERLAY_WINDOWS)
         public static final int PRIVATE_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS = 0x00080000;
 
         /**
@@ -1441,6 +1441,15 @@ public interface WindowManager extends ViewManager {
          */
         @RequiresPermission(permission.DEVICE_POWER)
         public static final int PRIVATE_FLAG_ACQUIRES_SLEEP_TOKEN = 0x00200000;
+
+        /**
+         * Flag to indicate that this window should be considered a screen decoration similar to the
+         * nav bar and status bar. This will cause this window to affect the window insets reported
+         * to other windows when it is visible.
+         * @hide
+         */
+        @RequiresPermission(permission.STATUS_BAR_SERVICE)
+        public static final int PRIVATE_FLAG_IS_SCREEN_DECOR = 0x00400000;
 
         /**
          * Control flags that are private to the platform.
@@ -1526,7 +1535,11 @@ public interface WindowManager extends ViewManager {
                 @ViewDebug.FlagToString(
                         mask = PRIVATE_FLAG_ACQUIRES_SLEEP_TOKEN,
                         equals = PRIVATE_FLAG_ACQUIRES_SLEEP_TOKEN,
-                        name = "ACQUIRES_SLEEP_TOKEN")
+                        name = "ACQUIRES_SLEEP_TOKEN"),
+                @ViewDebug.FlagToString(
+                        mask = PRIVATE_FLAG_IS_SCREEN_DECOR,
+                        equals = PRIVATE_FLAG_IS_SCREEN_DECOR,
+                        name = "IS_SCREEN_DECOR")
         })
         @TestApi
         public int privateFlags;
