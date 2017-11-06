@@ -521,7 +521,11 @@ void SkiaCanvas::drawArc(float left, float top, float right, float bottom, float
                          float sweepAngle, bool useCenter, const SkPaint& paint) {
     if (CC_UNLIKELY(paint.nothingToDraw())) return;
     SkRect arc = SkRect::MakeLTRB(left, top, right, bottom);
-    mCanvas->drawArc(arc, startAngle, sweepAngle, useCenter, paint);
+    if (fabs(sweepAngle) >= 360.0f) {
+        mCanvas->drawOval(arc, paint);
+    } else {
+        mCanvas->drawArc(arc, startAngle, sweepAngle, useCenter, paint);
+    }
 }
 
 void SkiaCanvas::drawPath(const SkPath& path, const SkPaint& paint) {
