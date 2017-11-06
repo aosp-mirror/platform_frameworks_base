@@ -58,7 +58,7 @@ public class FontResourcesParserTest {
 
     @Test
     public void testParse() throws XmlPullParserException, IOException {
-        XmlResourceParser parser = mResources.getXml(R.font.samplexmlfont);
+        XmlResourceParser parser = mResources.getXml(R.font.samplexmlfontforparsing);
 
         FamilyResourceEntry result = FontResourcesParser.parse(parser, mResources);
 
@@ -76,7 +76,7 @@ public class FontResourcesParserTest {
         assertEquals(400, font2.getWeight());
         assertEquals(1, font2.getItalic());
         assertEquals(1, font2.getTtcIndex());
-        assertEquals("'contrast' 0.5", font2.getVariationSettings());
+        assertEquals("'cntr' 0.5", font2.getVariationSettings());
         assertEquals("res/font/samplefont2.ttf", font2.getFileName());
         FontFileResourceEntry font3 = fileEntries[2];
         assertEquals(800, font3.getWeight());
