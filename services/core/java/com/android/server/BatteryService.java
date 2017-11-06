@@ -38,7 +38,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.hidl.manager.V1_0.IServiceManager;
 import android.hidl.manager.V1_0.IServiceNotification;
-import android.hardware.health.V2_0.HealthInfo;
+import android.hardware.health.V1_0.HealthInfo;
 import android.hardware.health.V2_0.IHealthInfoCallback;
 import android.hardware.health.V2_0.IHealth;
 import android.hardware.health.V2_0.Result;
@@ -302,16 +302,16 @@ public final class BatteryService extends SystemService {
     private boolean isPoweredLocked(int plugTypeSet) {
         // assume we are powered if battery state is unknown so
         // the "stay on while plugged in" option will work.
-        if (mHealthInfo.legacy.batteryStatus == BatteryManager.BATTERY_STATUS_UNKNOWN) {
+        if (mHealthInfo.batteryStatus == BatteryManager.BATTERY_STATUS_UNKNOWN) {
             return true;
         }
-        if ((plugTypeSet & BatteryManager.BATTERY_PLUGGED_AC) != 0 && mHealthInfo.legacy.chargerAcOnline) {
+        if ((plugTypeSet & BatteryManager.BATTERY_PLUGGED_AC) != 0 && mHealthInfo.chargerAcOnline) {
             return true;
         }
-        if ((plugTypeSet & BatteryManager.BATTERY_PLUGGED_USB) != 0 && mHealthInfo.legacy.chargerUsbOnline) {
+        if ((plugTypeSet & BatteryManager.BATTERY_PLUGGED_USB) != 0 && mHealthInfo.chargerUsbOnline) {
             return true;
         }
-        if ((plugTypeSet & BatteryManager.BATTERY_PLUGGED_WIRELESS) != 0 && mHealthInfo.legacy.chargerWirelessOnline) {
+        if ((plugTypeSet & BatteryManager.BATTERY_PLUGGED_WIRELESS) != 0 && mHealthInfo.chargerWirelessOnline) {
             return true;
         }
         return false;
@@ -328,15 +328,15 @@ public final class BatteryService extends SystemService {
          *   (becomes <= mLowBatteryWarningLevel).
          */
         return !plugged
-                && mHealthInfo.legacy.batteryStatus != BatteryManager.BATTERY_STATUS_UNKNOWN
-                && mHealthInfo.legacy.batteryLevel <= mLowBatteryWarningLevel
+                && mHealthInfo.batteryStatus != BatteryManager.BATTERY_STATUS_UNKNOWN
+                && mHealthInfo.batteryLevel <= mLowBatteryWarningLevel
                 && (oldPlugged || mLastBatteryLevel > mLowBatteryWarningLevel);
     }
 
     private void shutdownIfNoPowerLocked() {
         // shut down gracefully if our battery is critically low and we are not powered.
         // wait until the system has booted before attempting to display the shutdown dialog.
-        if (mHealthInfo.legacy.batteryLevel == 0 && !isPoweredLocked(BatteryManager.BATTERY_PLUGGED_ANY)) {
+        if (mHealthInfo.batteryLevel == 0 && !isPoweredLocked(BatteryManager.BATTERY_PLUGGED_ANY)) {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
@@ -357,7 +357,7 @@ public final class BatteryService extends SystemService {
         // shut down gracefully if temperature is too high (> 68.0C by default)
         // wait until the system has booted before attempting to display the
         // shutdown dialog.
-        if (mHealthInfo.legacy.batteryTemperature > mShutdownBatteryTemperature) {
+        if (mHealthInfo.batteryTemperature > mShutdownBatteryTemperature) {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
@@ -388,37 +388,34 @@ public final class BatteryService extends SystemService {
     }
 
     private static void copy(HealthInfo dst, HealthInfo src) {
-        dst.legacy.chargerAcOnline = src.legacy.chargerAcOnline;
-        dst.legacy.chargerUsbOnline = src.legacy.chargerUsbOnline;
-        dst.legacy.chargerWirelessOnline = src.legacy.chargerWirelessOnline;
-        dst.legacy.maxChargingCurrent = src.legacy.maxChargingCurrent;
-        dst.legacy.maxChargingVoltage = src.legacy.maxChargingVoltage;
-        dst.legacy.batteryStatus = src.legacy.batteryStatus;
-        dst.legacy.batteryHealth = src.legacy.batteryHealth;
-        dst.legacy.batteryPresent = src.legacy.batteryPresent;
-        dst.legacy.batteryLevel = src.legacy.batteryLevel;
-        dst.legacy.batteryVoltage = src.legacy.batteryVoltage;
-        dst.legacy.batteryTemperature = src.legacy.batteryTemperature;
-        dst.legacy.batteryCurrent = src.legacy.batteryCurrent;
-        dst.legacy.batteryCycleCount = src.legacy.batteryCycleCount;
-        dst.legacy.batteryFullCharge = src.legacy.batteryFullCharge;
-        dst.legacy.batteryChargeCounter = src.legacy.batteryChargeCounter;
-        dst.legacy.batteryTechnology = src.legacy.batteryTechnology;
-        dst.batteryCurrentAverage = src.batteryCurrentAverage;
-        dst.batteryCapacity = src.batteryCapacity;
-        dst.energyCounter = src.energyCounter;
+        dst.chargerAcOnline = src.chargerAcOnline;
+        dst.chargerUsbOnline = src.chargerUsbOnline;
+        dst.chargerWirelessOnline = src.chargerWirelessOnline;
+        dst.maxChargingCurrent = src.maxChargingCurrent;
+        dst.maxChargingVoltage = src.maxChargingVoltage;
+        dst.batteryStatus = src.batteryStatus;
+        dst.batteryHealth = src.batteryHealth;
+        dst.batteryPresent = src.batteryPresent;
+        dst.batteryLevel = src.batteryLevel;
+        dst.batteryVoltage = src.batteryVoltage;
+        dst.batteryTemperature = src.batteryTemperature;
+        dst.batteryCurrent = src.batteryCurrent;
+        dst.batteryCycleCount = src.batteryCycleCount;
+        dst.batteryFullCharge = src.batteryFullCharge;
+        dst.batteryChargeCounter = src.batteryChargeCounter;
+        dst.batteryTechnology = src.batteryTechnology;
     }
 
     private void processValuesLocked(boolean force) {
         boolean logOutlier = false;
         long dischargeDuration = 0;
 
-        mBatteryLevelCritical = (mHealthInfo.legacy.batteryLevel <= mCriticalBatteryLevel);
-        if (mHealthInfo.legacy.chargerAcOnline) {
+        mBatteryLevelCritical = (mHealthInfo.batteryLevel <= mCriticalBatteryLevel);
+        if (mHealthInfo.chargerAcOnline) {
             mPlugType = BatteryManager.BATTERY_PLUGGED_AC;
-        } else if (mHealthInfo.legacy.chargerUsbOnline) {
+        } else if (mHealthInfo.chargerUsbOnline) {
             mPlugType = BatteryManager.BATTERY_PLUGGED_USB;
-        } else if (mHealthInfo.legacy.chargerWirelessOnline) {
+        } else if (mHealthInfo.chargerWirelessOnline) {
             mPlugType = BatteryManager.BATTERY_PLUGGED_WIRELESS;
         } else {
             mPlugType = BATTERY_PLUGGED_NONE;
@@ -433,10 +430,10 @@ public final class BatteryService extends SystemService {
 
         // Let the battery stats keep track of the current level.
         try {
-            mBatteryStats.setBatteryState(mHealthInfo.legacy.batteryStatus, mHealthInfo.legacy.batteryHealth,
-                    mPlugType, mHealthInfo.legacy.batteryLevel, mHealthInfo.legacy.batteryTemperature,
-                    mHealthInfo.legacy.batteryVoltage, mHealthInfo.legacy.batteryChargeCounter,
-                    mHealthInfo.legacy.batteryFullCharge);
+            mBatteryStats.setBatteryState(mHealthInfo.batteryStatus, mHealthInfo.batteryHealth,
+                    mPlugType, mHealthInfo.batteryLevel, mHealthInfo.batteryTemperature,
+                    mHealthInfo.batteryVoltage, mHealthInfo.batteryChargeCounter,
+                    mHealthInfo.batteryFullCharge);
         } catch (RemoteException e) {
             // Should never happen.
         }
@@ -444,16 +441,16 @@ public final class BatteryService extends SystemService {
         shutdownIfNoPowerLocked();
         shutdownIfOverTempLocked();
 
-        if (force || (mHealthInfo.legacy.batteryStatus != mLastBatteryStatus ||
-                mHealthInfo.legacy.batteryHealth != mLastBatteryHealth ||
-                mHealthInfo.legacy.batteryPresent != mLastBatteryPresent ||
-                mHealthInfo.legacy.batteryLevel != mLastBatteryLevel ||
+        if (force || (mHealthInfo.batteryStatus != mLastBatteryStatus ||
+                mHealthInfo.batteryHealth != mLastBatteryHealth ||
+                mHealthInfo.batteryPresent != mLastBatteryPresent ||
+                mHealthInfo.batteryLevel != mLastBatteryLevel ||
                 mPlugType != mLastPlugType ||
-                mHealthInfo.legacy.batteryVoltage != mLastBatteryVoltage ||
-                mHealthInfo.legacy.batteryTemperature != mLastBatteryTemperature ||
-                mHealthInfo.legacy.maxChargingCurrent != mLastMaxChargingCurrent ||
-                mHealthInfo.legacy.maxChargingVoltage != mLastMaxChargingVoltage ||
-                mHealthInfo.legacy.batteryChargeCounter != mLastChargeCounter ||
+                mHealthInfo.batteryVoltage != mLastBatteryVoltage ||
+                mHealthInfo.batteryTemperature != mLastBatteryTemperature ||
+                mHealthInfo.maxChargingCurrent != mLastMaxChargingCurrent ||
+                mHealthInfo.maxChargingVoltage != mLastMaxChargingVoltage ||
+                mHealthInfo.batteryChargeCounter != mLastChargeCounter ||
                 mInvalidCharger != mLastInvalidCharger)) {
 
             if (mPlugType != mLastPlugType) {
@@ -462,33 +459,33 @@ public final class BatteryService extends SystemService {
 
                     // There's no value in this data unless we've discharged at least once and the
                     // battery level has changed; so don't log until it does.
-                    if (mDischargeStartTime != 0 && mDischargeStartLevel != mHealthInfo.legacy.batteryLevel) {
+                    if (mDischargeStartTime != 0 && mDischargeStartLevel != mHealthInfo.batteryLevel) {
                         dischargeDuration = SystemClock.elapsedRealtime() - mDischargeStartTime;
                         logOutlier = true;
                         EventLog.writeEvent(EventLogTags.BATTERY_DISCHARGE, dischargeDuration,
-                                mDischargeStartLevel, mHealthInfo.legacy.batteryLevel);
+                                mDischargeStartLevel, mHealthInfo.batteryLevel);
                         // make sure we see a discharge event before logging again
                         mDischargeStartTime = 0;
                     }
                 } else if (mPlugType == BATTERY_PLUGGED_NONE) {
                     // charging -> discharging or we just powered up
                     mDischargeStartTime = SystemClock.elapsedRealtime();
-                    mDischargeStartLevel = mHealthInfo.legacy.batteryLevel;
+                    mDischargeStartLevel = mHealthInfo.batteryLevel;
                 }
             }
-            if (mHealthInfo.legacy.batteryStatus != mLastBatteryStatus ||
-                    mHealthInfo.legacy.batteryHealth != mLastBatteryHealth ||
-                    mHealthInfo.legacy.batteryPresent != mLastBatteryPresent ||
+            if (mHealthInfo.batteryStatus != mLastBatteryStatus ||
+                    mHealthInfo.batteryHealth != mLastBatteryHealth ||
+                    mHealthInfo.batteryPresent != mLastBatteryPresent ||
                     mPlugType != mLastPlugType) {
                 EventLog.writeEvent(EventLogTags.BATTERY_STATUS,
-                        mHealthInfo.legacy.batteryStatus, mHealthInfo.legacy.batteryHealth, mHealthInfo.legacy.batteryPresent ? 1 : 0,
-                        mPlugType, mHealthInfo.legacy.batteryTechnology);
+                        mHealthInfo.batteryStatus, mHealthInfo.batteryHealth, mHealthInfo.batteryPresent ? 1 : 0,
+                        mPlugType, mHealthInfo.batteryTechnology);
             }
-            if (mHealthInfo.legacy.batteryLevel != mLastBatteryLevel) {
+            if (mHealthInfo.batteryLevel != mLastBatteryLevel) {
                 // Don't do this just from voltage or temperature changes, that is
                 // too noisy.
                 EventLog.writeEvent(EventLogTags.BATTERY_LEVEL,
-                        mHealthInfo.legacy.batteryLevel, mHealthInfo.legacy.batteryVoltage, mHealthInfo.legacy.batteryTemperature);
+                        mHealthInfo.batteryLevel, mHealthInfo.batteryVoltage, mHealthInfo.batteryTemperature);
             }
             if (mBatteryLevelCritical && !mLastBatteryLevelCritical &&
                     mPlugType == BATTERY_PLUGGED_NONE) {
@@ -501,16 +498,16 @@ public final class BatteryService extends SystemService {
             if (!mBatteryLevelLow) {
                 // Should we now switch in to low battery mode?
                 if (mPlugType == BATTERY_PLUGGED_NONE
-                        && mHealthInfo.legacy.batteryLevel <= mLowBatteryWarningLevel) {
+                        && mHealthInfo.batteryLevel <= mLowBatteryWarningLevel) {
                     mBatteryLevelLow = true;
                 }
             } else {
                 // Should we now switch out of low battery mode?
                 if (mPlugType != BATTERY_PLUGGED_NONE) {
                     mBatteryLevelLow = false;
-                } else if (mHealthInfo.legacy.batteryLevel >= mLowBatteryCloseWarningLevel)  {
+                } else if (mHealthInfo.batteryLevel >= mLowBatteryCloseWarningLevel)  {
                     mBatteryLevelLow = false;
-                } else if (force && mHealthInfo.legacy.batteryLevel >= mLowBatteryWarningLevel) {
+                } else if (force && mHealthInfo.batteryLevel >= mLowBatteryWarningLevel) {
                     // If being forced, the previous state doesn't matter, we will just
                     // absolutely check to see if we are now above the warning level.
                     mBatteryLevelLow = false;
@@ -557,7 +554,7 @@ public final class BatteryService extends SystemService {
                     }
                 });
             } else if (mSentLowBatteryBroadcast &&
-                    mHealthInfo.legacy.batteryLevel >= mLowBatteryCloseWarningLevel) {
+                    mHealthInfo.batteryLevel >= mLowBatteryCloseWarningLevel) {
                 mSentLowBatteryBroadcast = false;
                 final Intent statusIntent = new Intent(Intent.ACTION_BATTERY_OKAY);
                 statusIntent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
@@ -583,16 +580,16 @@ public final class BatteryService extends SystemService {
                 logOutlierLocked(dischargeDuration);
             }
 
-            mLastBatteryStatus = mHealthInfo.legacy.batteryStatus;
-            mLastBatteryHealth = mHealthInfo.legacy.batteryHealth;
-            mLastBatteryPresent = mHealthInfo.legacy.batteryPresent;
-            mLastBatteryLevel = mHealthInfo.legacy.batteryLevel;
+            mLastBatteryStatus = mHealthInfo.batteryStatus;
+            mLastBatteryHealth = mHealthInfo.batteryHealth;
+            mLastBatteryPresent = mHealthInfo.batteryPresent;
+            mLastBatteryLevel = mHealthInfo.batteryLevel;
             mLastPlugType = mPlugType;
-            mLastBatteryVoltage = mHealthInfo.legacy.batteryVoltage;
-            mLastBatteryTemperature = mHealthInfo.legacy.batteryTemperature;
-            mLastMaxChargingCurrent = mHealthInfo.legacy.maxChargingCurrent;
-            mLastMaxChargingVoltage = mHealthInfo.legacy.maxChargingVoltage;
-            mLastChargeCounter = mHealthInfo.legacy.batteryChargeCounter;
+            mLastBatteryVoltage = mHealthInfo.batteryVoltage;
+            mLastBatteryTemperature = mHealthInfo.batteryTemperature;
+            mLastMaxChargingCurrent = mHealthInfo.maxChargingCurrent;
+            mLastMaxChargingVoltage = mHealthInfo.maxChargingVoltage;
+            mLastChargeCounter = mHealthInfo.batteryChargeCounter;
             mLastBatteryLevelCritical = mBatteryLevelCritical;
             mLastInvalidCharger = mInvalidCharger;
         }
@@ -604,23 +601,23 @@ public final class BatteryService extends SystemService {
         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY
                 | Intent.FLAG_RECEIVER_REPLACE_PENDING);
 
-        int icon = getIconLocked(mHealthInfo.legacy.batteryLevel);
+        int icon = getIconLocked(mHealthInfo.batteryLevel);
 
         intent.putExtra(BatteryManager.EXTRA_SEQUENCE, mSequence);
-        intent.putExtra(BatteryManager.EXTRA_STATUS, mHealthInfo.legacy.batteryStatus);
-        intent.putExtra(BatteryManager.EXTRA_HEALTH, mHealthInfo.legacy.batteryHealth);
-        intent.putExtra(BatteryManager.EXTRA_PRESENT, mHealthInfo.legacy.batteryPresent);
-        intent.putExtra(BatteryManager.EXTRA_LEVEL, mHealthInfo.legacy.batteryLevel);
+        intent.putExtra(BatteryManager.EXTRA_STATUS, mHealthInfo.batteryStatus);
+        intent.putExtra(BatteryManager.EXTRA_HEALTH, mHealthInfo.batteryHealth);
+        intent.putExtra(BatteryManager.EXTRA_PRESENT, mHealthInfo.batteryPresent);
+        intent.putExtra(BatteryManager.EXTRA_LEVEL, mHealthInfo.batteryLevel);
         intent.putExtra(BatteryManager.EXTRA_SCALE, BATTERY_SCALE);
         intent.putExtra(BatteryManager.EXTRA_ICON_SMALL, icon);
         intent.putExtra(BatteryManager.EXTRA_PLUGGED, mPlugType);
-        intent.putExtra(BatteryManager.EXTRA_VOLTAGE, mHealthInfo.legacy.batteryVoltage);
-        intent.putExtra(BatteryManager.EXTRA_TEMPERATURE, mHealthInfo.legacy.batteryTemperature);
-        intent.putExtra(BatteryManager.EXTRA_TECHNOLOGY, mHealthInfo.legacy.batteryTechnology);
+        intent.putExtra(BatteryManager.EXTRA_VOLTAGE, mHealthInfo.batteryVoltage);
+        intent.putExtra(BatteryManager.EXTRA_TEMPERATURE, mHealthInfo.batteryTemperature);
+        intent.putExtra(BatteryManager.EXTRA_TECHNOLOGY, mHealthInfo.batteryTechnology);
         intent.putExtra(BatteryManager.EXTRA_INVALID_CHARGER, mInvalidCharger);
-        intent.putExtra(BatteryManager.EXTRA_MAX_CHARGING_CURRENT, mHealthInfo.legacy.maxChargingCurrent);
-        intent.putExtra(BatteryManager.EXTRA_MAX_CHARGING_VOLTAGE, mHealthInfo.legacy.maxChargingVoltage);
-        intent.putExtra(BatteryManager.EXTRA_CHARGE_COUNTER, mHealthInfo.legacy.batteryChargeCounter);
+        intent.putExtra(BatteryManager.EXTRA_MAX_CHARGING_CURRENT, mHealthInfo.maxChargingCurrent);
+        intent.putExtra(BatteryManager.EXTRA_MAX_CHARGING_VOLTAGE, mHealthInfo.maxChargingVoltage);
+        intent.putExtra(BatteryManager.EXTRA_CHARGE_COUNTER, mHealthInfo.batteryChargeCounter);
         if (DEBUG) {
             Slog.d(TAG, "Sending ACTION_BATTERY_CHANGED. scale:" + BATTERY_SCALE
                     + ", info:" + mHealthInfo.toString());
@@ -684,14 +681,14 @@ public final class BatteryService extends SystemService {
                 long durationThreshold = Long.parseLong(durationThresholdString);
                 int dischargeThreshold = Integer.parseInt(dischargeThresholdString);
                 if (duration <= durationThreshold &&
-                        mDischargeStartLevel - mHealthInfo.legacy.batteryLevel >= dischargeThreshold) {
+                        mDischargeStartLevel - mHealthInfo.batteryLevel >= dischargeThreshold) {
                     // If the discharge cycle is bad enough we want to know about it.
                     logBatteryStatsLocked();
                 }
                 if (DEBUG) Slog.v(TAG, "duration threshold: " + durationThreshold +
                         " discharge threshold: " + dischargeThreshold);
                 if (DEBUG) Slog.v(TAG, "duration: " + duration + " discharge: " +
-                        (mDischargeStartLevel - mHealthInfo.legacy.batteryLevel));
+                        (mDischargeStartLevel - mHealthInfo.batteryLevel));
             } catch (NumberFormatException e) {
                 Slog.e(TAG, "Invalid DischargeThresholds GService string: " +
                         durationThresholdString + " or " + dischargeThresholdString);
@@ -700,14 +697,14 @@ public final class BatteryService extends SystemService {
     }
 
     private int getIconLocked(int level) {
-        if (mHealthInfo.legacy.batteryStatus == BatteryManager.BATTERY_STATUS_CHARGING) {
+        if (mHealthInfo.batteryStatus == BatteryManager.BATTERY_STATUS_CHARGING) {
             return com.android.internal.R.drawable.stat_sys_battery_charge;
-        } else if (mHealthInfo.legacy.batteryStatus == BatteryManager.BATTERY_STATUS_DISCHARGING) {
+        } else if (mHealthInfo.batteryStatus == BatteryManager.BATTERY_STATUS_DISCHARGING) {
             return com.android.internal.R.drawable.stat_sys_battery;
-        } else if (mHealthInfo.legacy.batteryStatus == BatteryManager.BATTERY_STATUS_NOT_CHARGING
-                || mHealthInfo.legacy.batteryStatus == BatteryManager.BATTERY_STATUS_FULL) {
+        } else if (mHealthInfo.batteryStatus == BatteryManager.BATTERY_STATUS_NOT_CHARGING
+                || mHealthInfo.batteryStatus == BatteryManager.BATTERY_STATUS_FULL) {
             if (isPoweredLocked(BatteryManager.BATTERY_PLUGGED_ANY)
-                    && mHealthInfo.legacy.batteryLevel >= 100) {
+                    && mHealthInfo.batteryLevel >= 100) {
                 return com.android.internal.R.drawable.stat_sys_battery_charge;
             } else {
                 return com.android.internal.R.drawable.stat_sys_battery;
@@ -771,9 +768,9 @@ public final class BatteryService extends SystemService {
                 if (!mUpdatesStopped) {
                     copy(mLastHealthInfo, mHealthInfo);
                 }
-                mHealthInfo.legacy.chargerAcOnline = false;
-                mHealthInfo.legacy.chargerUsbOnline = false;
-                mHealthInfo.legacy.chargerWirelessOnline = false;
+                mHealthInfo.chargerAcOnline = false;
+                mHealthInfo.chargerUsbOnline = false;
+                mHealthInfo.chargerWirelessOnline = false;
                 long ident = Binder.clearCallingIdentity();
                 try {
                     mUpdatesStopped = true;
@@ -805,25 +802,25 @@ public final class BatteryService extends SystemService {
                     boolean update = true;
                     switch (key) {
                         case "present":
-                            mHealthInfo.legacy.batteryPresent = Integer.parseInt(value) != 0;
+                            mHealthInfo.batteryPresent = Integer.parseInt(value) != 0;
                             break;
                         case "ac":
-                            mHealthInfo.legacy.chargerAcOnline = Integer.parseInt(value) != 0;
+                            mHealthInfo.chargerAcOnline = Integer.parseInt(value) != 0;
                             break;
                         case "usb":
-                            mHealthInfo.legacy.chargerUsbOnline = Integer.parseInt(value) != 0;
+                            mHealthInfo.chargerUsbOnline = Integer.parseInt(value) != 0;
                             break;
                         case "wireless":
-                            mHealthInfo.legacy.chargerWirelessOnline = Integer.parseInt(value) != 0;
+                            mHealthInfo.chargerWirelessOnline = Integer.parseInt(value) != 0;
                             break;
                         case "status":
-                            mHealthInfo.legacy.batteryStatus = Integer.parseInt(value);
+                            mHealthInfo.batteryStatus = Integer.parseInt(value);
                             break;
                         case "level":
-                            mHealthInfo.legacy.batteryLevel = Integer.parseInt(value);
+                            mHealthInfo.batteryLevel = Integer.parseInt(value);
                             break;
                         case "temp":
-                            mHealthInfo.legacy.batteryTemperature = Integer.parseInt(value);
+                            mHealthInfo.batteryTemperature = Integer.parseInt(value);
                             break;
                         case "invalid":
                             mInvalidCharger = Integer.parseInt(value);
@@ -882,20 +879,20 @@ public final class BatteryService extends SystemService {
                 if (mUpdatesStopped) {
                     pw.println("  (UPDATES STOPPED -- use 'reset' to restart)");
                 }
-                pw.println("  AC powered: " + mHealthInfo.legacy.chargerAcOnline);
-                pw.println("  USB powered: " + mHealthInfo.legacy.chargerUsbOnline);
-                pw.println("  Wireless powered: " + mHealthInfo.legacy.chargerWirelessOnline);
-                pw.println("  Max charging current: " + mHealthInfo.legacy.maxChargingCurrent);
-                pw.println("  Max charging voltage: " + mHealthInfo.legacy.maxChargingVoltage);
-                pw.println("  Charge counter: " + mHealthInfo.legacy.batteryChargeCounter);
-                pw.println("  status: " + mHealthInfo.legacy.batteryStatus);
-                pw.println("  health: " + mHealthInfo.legacy.batteryHealth);
-                pw.println("  present: " + mHealthInfo.legacy.batteryPresent);
-                pw.println("  level: " + mHealthInfo.legacy.batteryLevel);
+                pw.println("  AC powered: " + mHealthInfo.chargerAcOnline);
+                pw.println("  USB powered: " + mHealthInfo.chargerUsbOnline);
+                pw.println("  Wireless powered: " + mHealthInfo.chargerWirelessOnline);
+                pw.println("  Max charging current: " + mHealthInfo.maxChargingCurrent);
+                pw.println("  Max charging voltage: " + mHealthInfo.maxChargingVoltage);
+                pw.println("  Charge counter: " + mHealthInfo.batteryChargeCounter);
+                pw.println("  status: " + mHealthInfo.batteryStatus);
+                pw.println("  health: " + mHealthInfo.batteryHealth);
+                pw.println("  present: " + mHealthInfo.batteryPresent);
+                pw.println("  level: " + mHealthInfo.batteryLevel);
                 pw.println("  scale: " + BATTERY_SCALE);
-                pw.println("  voltage: " + mHealthInfo.legacy.batteryVoltage);
-                pw.println("  temperature: " + mHealthInfo.legacy.batteryTemperature);
-                pw.println("  technology: " + mHealthInfo.legacy.batteryTechnology);
+                pw.println("  voltage: " + mHealthInfo.batteryVoltage);
+                pw.println("  temperature: " + mHealthInfo.batteryTemperature);
+                pw.println("  technology: " + mHealthInfo.batteryTechnology);
             } else {
                 Shell shell = new Shell();
                 shell.exec(mBinderService, null, fd, null, args, null, new ResultReceiver(null));
@@ -909,25 +906,25 @@ public final class BatteryService extends SystemService {
         synchronized (mLock) {
             proto.write(BatteryServiceDumpProto.ARE_UPDATES_STOPPED, mUpdatesStopped);
             int batteryPluggedValue = BatteryManagerProto.PLUG_TYPE_NONE;
-            if (mHealthInfo.legacy.chargerAcOnline) {
+            if (mHealthInfo.chargerAcOnline) {
                 batteryPluggedValue = BatteryManagerProto.PLUG_TYPE_AC;
-            } else if (mHealthInfo.legacy.chargerUsbOnline) {
+            } else if (mHealthInfo.chargerUsbOnline) {
                 batteryPluggedValue = BatteryManagerProto.PLUG_TYPE_USB;
-            } else if (mHealthInfo.legacy.chargerWirelessOnline) {
+            } else if (mHealthInfo.chargerWirelessOnline) {
                 batteryPluggedValue = BatteryManagerProto.PLUG_TYPE_WIRELESS;
             }
             proto.write(BatteryServiceDumpProto.PLUGGED, batteryPluggedValue);
-            proto.write(BatteryServiceDumpProto.MAX_CHARGING_CURRENT, mHealthInfo.legacy.maxChargingCurrent);
-            proto.write(BatteryServiceDumpProto.MAX_CHARGING_VOLTAGE, mHealthInfo.legacy.maxChargingVoltage);
-            proto.write(BatteryServiceDumpProto.CHARGE_COUNTER, mHealthInfo.legacy.batteryChargeCounter);
-            proto.write(BatteryServiceDumpProto.STATUS, mHealthInfo.legacy.batteryStatus);
-            proto.write(BatteryServiceDumpProto.HEALTH, mHealthInfo.legacy.batteryHealth);
-            proto.write(BatteryServiceDumpProto.IS_PRESENT, mHealthInfo.legacy.batteryPresent);
-            proto.write(BatteryServiceDumpProto.LEVEL, mHealthInfo.legacy.batteryLevel);
+            proto.write(BatteryServiceDumpProto.MAX_CHARGING_CURRENT, mHealthInfo.maxChargingCurrent);
+            proto.write(BatteryServiceDumpProto.MAX_CHARGING_VOLTAGE, mHealthInfo.maxChargingVoltage);
+            proto.write(BatteryServiceDumpProto.CHARGE_COUNTER, mHealthInfo.batteryChargeCounter);
+            proto.write(BatteryServiceDumpProto.STATUS, mHealthInfo.batteryStatus);
+            proto.write(BatteryServiceDumpProto.HEALTH, mHealthInfo.batteryHealth);
+            proto.write(BatteryServiceDumpProto.IS_PRESENT, mHealthInfo.batteryPresent);
+            proto.write(BatteryServiceDumpProto.LEVEL, mHealthInfo.batteryLevel);
             proto.write(BatteryServiceDumpProto.SCALE, BATTERY_SCALE);
-            proto.write(BatteryServiceDumpProto.VOLTAGE, mHealthInfo.legacy.batteryVoltage);
-            proto.write(BatteryServiceDumpProto.TEMPERATURE, mHealthInfo.legacy.batteryTemperature);
-            proto.write(BatteryServiceDumpProto.TECHNOLOGY, mHealthInfo.legacy.batteryTechnology);
+            proto.write(BatteryServiceDumpProto.VOLTAGE, mHealthInfo.batteryVoltage);
+            proto.write(BatteryServiceDumpProto.TEMPERATURE, mHealthInfo.batteryTemperature);
+            proto.write(BatteryServiceDumpProto.TECHNOLOGY, mHealthInfo.batteryTechnology);
         }
         proto.flush();
     }
@@ -960,8 +957,8 @@ public final class BatteryService extends SystemService {
          * Synchronize on BatteryService.
          */
         public void updateLightsLocked() {
-            final int level = mHealthInfo.legacy.batteryLevel;
-            final int status = mHealthInfo.legacy.batteryStatus;
+            final int level = mHealthInfo.batteryLevel;
+            final int status = mHealthInfo.batteryStatus;
             if (level < mLowBatteryWarningLevel) {
                 if (status == BatteryManager.BATTERY_STATUS_CHARGING) {
                     // Solid red when battery is charging
@@ -1122,7 +1119,7 @@ public final class BatteryService extends SystemService {
         @Override
         public int getBatteryLevel() {
             synchronized (mLock) {
-                return mHealthInfo.legacy.batteryLevel;
+                return mHealthInfo.batteryLevel;
             }
         }
 
