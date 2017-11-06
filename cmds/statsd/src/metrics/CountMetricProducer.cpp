@@ -248,8 +248,8 @@ void CountMetricProducer::flushCounterIfNeeded(const uint64_t eventTimeNs) {
         proto->write(FIELD_TYPE_INT64 | FIELD_ID_COUNT, (long long)counter.second);
 
         auto& bucketList = mPastBucketProtos[counter.first];
-        bucketList.push_back(std::move(proto));
         mByteSize += proto->size();
+        bucketList.push_back(std::move(proto));
 
         VLOG("metric %lld, dump key value: %s -> %d", mMetric.metric_id(), counter.first.c_str(),
              counter.second);
