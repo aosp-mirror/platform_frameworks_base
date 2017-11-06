@@ -29,6 +29,8 @@ import android.content.ServiceConnection;
 import android.content.pm.ApplicationInfo;
 import android.net.TrafficStats;
 import android.net.Uri;
+import android.os.StrictMode.ThreadPolicy;
+import android.os.StrictMode.VmPolicy;
 import android.os.strictmode.CleartextNetworkViolation;
 import android.os.strictmode.ContentUriWithoutPermissionViolation;
 import android.os.strictmode.CustomViolation;
@@ -54,6 +56,7 @@ import android.util.Slog;
 import android.view.IWindowManager;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.RuntimeInit;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.HexDump;
@@ -1533,7 +1536,6 @@ public final class StrictMode {
 
             if (violationMaskSubset != 0) {
                 violationMaskSubset |= info.getViolationBit();
-                final int savedPolicyMask = getThreadPolicyMask();
 
                 final boolean justDropBox = (info.mPolicy & THREAD_PENALTY_MASK) == PENALTY_DROPBOX;
                 if (justDropBox) {
@@ -1544,29 +1546,8 @@ public final class StrictMode {
                     // isn't always super fast, despite the implementation
                     // in the ActivityManager trying to be mostly async.
                     dropboxViolationAsync(violationMaskSubset, info);
-                    return;
-                }
-
-                // Normal synchronous call to the ActivityManager.
-                try {
-                    // First, remove any policy before we call into the Activity Manager,
-                    // otherwise we'll infinite recurse as we try to log policy violations
-                    // to disk, thus violating policy, thus requiring logging, etc...
-                    // We restore the current policy below, in the finally block.
-                    setThreadPolicyMask(0);
-
-                    ActivityManager.getService()
-                            .handleApplicationStrictModeViolation(
-                                    RuntimeInit.getApplicationObject(), violationMaskSubset, info);
-                } catch (RemoteException e) {
-                    if (e instanceof DeadObjectException) {
-                        // System process is dead; ignore
-                    } else {
-                        Log.e(TAG, "RemoteException trying to handle StrictMode violation", e);
-                    }
-                } finally {
-                    // Restore the policy.
-                    setThreadPolicyMask(savedPolicyMask);
+                } else {
+                    handleApplicationStrictModeViolation(violationMaskSubset, info);
                 }
             }
 
@@ -1598,28 +1579,39 @@ public final class StrictMode {
 
         if (LOG_V) Log.d(TAG, "Dropboxing async; in-flight=" + outstanding);
 
-        new Thread("callActivityManagerForStrictModeDropbox") {
-            public void run() {
-                Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-                try {
-                    IActivityManager am = ActivityManager.getService();
-                    if (am == null) {
-                        Log.d(TAG, "No activity manager; failed to Dropbox violation.");
-                    } else {
-                        am.handleApplicationStrictModeViolation(
-                                RuntimeInit.getApplicationObject(), violationMaskSubset, info);
-                    }
-                } catch (RemoteException e) {
-                    if (e instanceof DeadObjectException) {
-                        // System process is dead; ignore
-                    } else {
-                        Log.e(TAG, "RemoteException handling StrictMode violation", e);
-                    }
-                }
-                int outstanding = sDropboxCallsInFlight.decrementAndGet();
-                if (LOG_V) Log.d(TAG, "Dropbox complete; in-flight=" + outstanding);
+        BackgroundThread.getHandler().post(() -> {
+            handleApplicationStrictModeViolation(violationMaskSubset, info);
+            int outstandingInner = sDropboxCallsInFlight.decrementAndGet();
+            if (LOG_V) Log.d(TAG, "Dropbox complete; in-flight=" + outstandingInner);
+        });
+    }
+
+    private static void handleApplicationStrictModeViolation(int violationMaskSubset,
+            ViolationInfo info) {
+        final int oldMask = getThreadPolicyMask();
+        try {
+            // First, remove any policy before we call into the Activity Manager,
+            // otherwise we'll infinite recurse as we try to log policy violations
+            // to disk, thus violating policy, thus requiring logging, etc...
+            // We restore the current policy below, in the finally block.
+            setThreadPolicyMask(0);
+
+            IActivityManager am = ActivityManager.getService();
+            if (am == null) {
+                Log.w(TAG, "No activity manager; failed to Dropbox violation.");
+            } else {
+                am.handleApplicationStrictModeViolation(
+                        RuntimeInit.getApplicationObject(), violationMaskSubset, info);
             }
-        }.start();
+        } catch (RemoteException e) {
+            if (e instanceof DeadObjectException) {
+                // System process is dead; ignore
+            } else {
+                Log.e(TAG, "RemoteException handling StrictMode violation", e);
+            }
+        } finally {
+            setThreadPolicyMask(oldMask);
+        }
     }
 
     private static class AndroidCloseGuardReporter implements CloseGuard.Reporter {
@@ -1908,31 +1900,7 @@ public final class StrictMode {
         }
 
         if (penaltyDropbox && lastViolationTime == 0) {
-            // The violationMask, passed to ActivityManager, is a
-            // subset of the original StrictMode policy bitmask, with
-            // only the bit violated and penalty bits to be executed
-            // by the ActivityManagerService remaining set.
-            final int savedPolicyMask = getThreadPolicyMask();
-            try {
-                // First, remove any policy before we call into the Activity Manager,
-                // otherwise we'll infinite recurse as we try to log policy violations
-                // to disk, thus violating policy, thus requiring logging, etc...
-                // We restore the current policy below, in the finally block.
-                setThreadPolicyMask(0);
-
-                ActivityManager.getService()
-                        .handleApplicationStrictModeViolation(
-                                RuntimeInit.getApplicationObject(), violationMaskSubset, info);
-            } catch (RemoteException e) {
-                if (e instanceof DeadObjectException) {
-                    // System process is dead; ignore
-                } else {
-                    Log.e(TAG, "RemoteException trying to handle StrictMode violation", e);
-                }
-            } finally {
-                // Restore the policy.
-                setThreadPolicyMask(savedPolicyMask);
-            }
+            handleApplicationStrictModeViolation(violationMaskSubset, info);
         }
 
         if (penaltyDeath) {
