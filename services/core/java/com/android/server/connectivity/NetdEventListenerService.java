@@ -243,24 +243,21 @@ public class NetdEventListenerService extends INetdEventListener.Stub {
         mWakeupStats.clear();
     }
 
-    public synchronized void dump(PrintWriter writer) {
-        IndentingPrintWriter pw = new IndentingPrintWriter(writer, "  ");
-        pw.println(TAG + ":");
-        pw.increaseIndent();
-        list(pw);
-        pw.decreaseIndent();
-    }
-
     public synchronized void list(PrintWriter pw) {
+        pw.println("dns/connect events:");
         for (int i = 0; i < mNetworkMetrics.size(); i++) {
             pw.println(mNetworkMetrics.valueAt(i).connectMetrics);
         }
         for (int i = 0; i < mNetworkMetrics.size(); i++) {
             pw.println(mNetworkMetrics.valueAt(i).dnsMetrics);
         }
+        pw.println("");
+        pw.println("network statistics:");
         for (NetworkMetricsSnapshot s : getNetworkMetricsSnapshots()) {
             pw.println(s);
         }
+        pw.println("");
+        pw.println("packet wakeup events:");
         for (int i = 0; i < mWakeupStats.size(); i++) {
             pw.println(mWakeupStats.valueAt(i));
         }
