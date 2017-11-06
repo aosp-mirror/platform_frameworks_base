@@ -25,7 +25,7 @@ namespace statsd {
 
 MaxDurationTracker::MaxDurationTracker(sp<ConditionWizard> wizard, int conditionIndex,
                                        uint64_t currentBucketStartNs, uint64_t bucketSizeNs,
-                                       std::vector<DurationBucketInfo>& bucket)
+                                       std::vector<DurationBucket>& bucket)
     : DurationTracker(wizard, conditionIndex, currentBucketStartNs, bucketSizeNs, bucket) {
 }
 
@@ -106,10 +106,12 @@ bool MaxDurationTracker::flushIfNeeded(uint64_t eventTime) {
     // adjust the bucket start time
     int numBucketsForward = (eventTime - mCurrentBucketStartTimeNs) / mBucketSizeNs;
 
-    DurationBucketInfo info;
     uint64_t endTime = mCurrentBucketStartTimeNs + mBucketSizeNs;
-    info.set_start_bucket_nanos(mCurrentBucketStartTimeNs);
-    info.set_end_bucket_nanos(endTime);
+
+    DurationBucket info;
+    info.mBucketStartNs = mCurrentBucketStartTimeNs;
+    info.mBucketEndNs = endTime;
+
 
     uint64_t oldBucketStartTimeNs = mCurrentBucketStartTimeNs;
     mCurrentBucketStartTimeNs += (numBucketsForward)*mBucketSizeNs;
@@ -150,7 +152,7 @@ bool MaxDurationTracker::flushIfNeeded(uint64_t eventTime) {
     }
 
     if (mDuration != 0) {
-        info.set_duration_nanos(mDuration);
+        info.mDuration = mDuration;
         mBucket.push_back(info);
         VLOG("  final duration for last bucket: %lld", (long long)mDuration);
     }
@@ -158,10 +160,10 @@ bool MaxDurationTracker::flushIfNeeded(uint64_t eventTime) {
     mDuration = 0;
     if (hasOnGoingStartedEvent) {
         for (int i = 1; i < numBucketsForward; i++) {
-            DurationBucketInfo info;
-            info.set_start_bucket_nanos(oldBucketStartTimeNs + mBucketSizeNs * i);
-            info.set_end_bucket_nanos(endTime + mBucketSizeNs * i);
-            info.set_duration_nanos(mBucketSizeNs);
+            DurationBucket info;
+            info.mBucketStartNs = oldBucketStartTimeNs + mBucketSizeNs * i;
+            info.mBucketEndNs = endTime + mBucketSizeNs * i;
+            info.mDuration = mBucketSizeNs;
             mBucket.push_back(info);
             VLOG("  filling gap bucket with duration %lld", (long long)mBucketSizeNs);
         }

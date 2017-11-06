@@ -18,6 +18,7 @@
 
 #include <unordered_map>
 
+#include <android/util/ProtoOutputStream.h>
 #include "../condition/ConditionTracker.h"
 #include "../external/PullDataReceiver.h"
 #include "../external/StatsPullerManager.h"
@@ -30,6 +31,12 @@
 namespace android {
 namespace os {
 namespace statsd {
+
+struct GaugeBucket {
+    int64_t mBucketStartNs;
+    int64_t mBucketEndNs;
+    int64_t mGauge;
+};
 
 // This gauge metric producer first register the puller to automatically pull the gauge at the
 // beginning of each bucket. If the condition is met, insert it to the bucket info. Otherwise
@@ -52,12 +59,10 @@ public:
 
     void finish() override;
 
+    // TODO: Pass a timestamp as a parameter in onDumpReport.
     StatsLogReport onDumpReport() override;
 
-    // TODO: implements it when supporting proto stream.
-    size_t byteSize() override {
-        return 0;
-    };
+    size_t byteSize() override;
 
     // TODO: Implement this later.
     virtual void notifyAppUpgrade(const string& apk, const int uid, const int version) override{};
@@ -69,6 +74,8 @@ protected:
                                    const std::map<std::string, HashableDimensionKey>& conditionKey,
                                    bool condition, const LogEvent& event,
                                    bool scheduledPull) override;
+
+    void startNewProtoOutputStream(long long timestamp) override;
 
 private:
     // The default bucket size for gauge metric is 1 second.
@@ -82,7 +89,8 @@ private:
     Mutex mLock;
 
     // Save the past buckets and we can clear when the StatsLogReport is dumped.
-    std::unordered_map<HashableDimensionKey, std::vector<GaugeBucketInfo>> mPastBuckets;
+    // TODO: Add a lock to mPastBuckets.
+    std::unordered_map<HashableDimensionKey, std::vector<GaugeBucket>> mPastBuckets;
 
     // The current bucket.
     std::unordered_map<HashableDimensionKey, long> mCurrentSlicedBucket;
@@ -90,6 +98,8 @@ private:
     void flushGaugeIfNeededLocked(const uint64_t newEventTime);
 
     long getGauge(const LogEvent& event);
+
+    size_t mByteSize;
 };
 
 }  // namespace statsd
