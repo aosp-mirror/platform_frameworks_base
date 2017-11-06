@@ -16,6 +16,7 @@ java_library_static {
         ":installd_aidl",
         ":storaged_aidl",
         ":vold_aidl",
+        ":mediaupdateservice_aidl",
         "java/com/android/server/EventLogTags.logtags",
         "java/com/android/server/am/EventLogTags.logtags",
     ],
