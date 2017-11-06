@@ -56,23 +56,7 @@ public interface TextClassifier {
      * No-op TextClassifier.
      * This may be used to turn off TextClassifier features.
      */
-    TextClassifier NO_OP = new TextClassifier() {
-
-        @Override
-        public TextSelection suggestSelection(
-                CharSequence text,
-                int selectionStartIndex,
-                int selectionEndIndex,
-                LocaleList defaultLocales) {
-            return new TextSelection.Builder(selectionStartIndex, selectionEndIndex).build();
-        }
-
-        @Override
-        public TextClassification classifyText(
-                CharSequence text, int startIndex, int endIndex, LocaleList defaultLocales) {
-            return TextClassification.EMPTY;
-        }
-    };
+    TextClassifier NO_OP = new TextClassifier() {};
 
     /**
      * Returns suggested text selection start and end indices, recognized entity types, and their
@@ -82,21 +66,34 @@ public interface TextClassifier {
      *      by the sub sequence starting at selectionStartIndex and ending at selectionEndIndex)
      * @param selectionStartIndex start index of the selected part of text
      * @param selectionEndIndex end index of the selected part of text
-     * @param defaultLocales ordered list of locale preferences that can be used to disambiguate
-     *      the provided text. If no locale preferences exist, set this to null or an empty locale
-     *      list in which case the classifier will decide whether to use no locale information, use
-     *      a default locale, or use the system default.
+     * @param options optional input parameters
      *
      * @throws IllegalArgumentException if text is null; selectionStartIndex is negative;
      *      selectionEndIndex is greater than text.length() or not greater than selectionStartIndex
      */
     @WorkerThread
     @NonNull
-    TextSelection suggestSelection(
+    default TextSelection suggestSelection(
             @NonNull CharSequence text,
             @IntRange(from = 0) int selectionStartIndex,
             @IntRange(from = 0) int selectionEndIndex,
-            @Nullable LocaleList defaultLocales);
+            @Nullable TextSelection.Options options) {
+        return new TextSelection.Builder(selectionStartIndex, selectionEndIndex).build();
+    }
+
+    /**
+     * @see #suggestSelection(CharSequence, int, int, TextSelection.Options)
+     */
+    // TODO: Consider deprecating (b/68846316)
+    @WorkerThread
+    @NonNull
+    default TextSelection suggestSelection(
+            @NonNull CharSequence text,
+            @IntRange(from = 0) int selectionStartIndex,
+            @IntRange(from = 0) int selectionEndIndex,
+            @Nullable LocaleList defaultLocales) {
+        return new TextSelection.Builder(selectionStartIndex, selectionEndIndex).build();
+    }
 
     /**
      * Classifies the specified text and returns a {@link TextClassification} object that can be
@@ -106,21 +103,34 @@ public interface TextClassifier {
      *      by the sub sequence starting at startIndex and ending at endIndex)
      * @param startIndex start index of the text to classify
      * @param endIndex end index of the text to classify
-     * @param defaultLocales ordered list of locale preferences that can be used to disambiguate
-     *      the provided text. If no locale preferences exist, set this to null or an empty locale
-     *      list in which case the classifier will decide whether to use no locale information, use
-     *      a default locale, or use the system default.
+     * @param options optional input parameters
      *
      * @throws IllegalArgumentException if text is null; startIndex is negative;
      *      endIndex is greater than text.length() or not greater than startIndex
      */
     @WorkerThread
     @NonNull
-    TextClassification classifyText(
+    default TextClassification classifyText(
             @NonNull CharSequence text,
             @IntRange(from = 0) int startIndex,
             @IntRange(from = 0) int endIndex,
-            @Nullable LocaleList defaultLocales);
+            @Nullable TextClassification.Options options) {
+        return TextClassification.EMPTY;
+    }
+
+    /**
+     * @see #classifyText(CharSequence, int, int, TextClassification.Options)
+     */
+    // TODO: Consider deprecating (b/68846316)
+    @WorkerThread
+    @NonNull
+    default TextClassification classifyText(
+            @NonNull CharSequence text,
+            @IntRange(from = 0) int startIndex,
+            @IntRange(from = 0) int endIndex,
+            @Nullable LocaleList defaultLocales) {
+        return TextClassification.EMPTY;
+    }
 
     /**
      * Returns a {@link LinksInfo} that may be applied to the text to annotate it with links

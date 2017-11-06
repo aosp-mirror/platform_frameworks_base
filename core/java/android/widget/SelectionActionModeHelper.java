@@ -20,10 +20,12 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UiThread;
 import android.annotation.WorkerThread;
+import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.PointF;
 import android.graphics.RectF;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.LocaleList;
 import android.text.Layout;
 import android.text.Selection;
@@ -81,6 +83,7 @@ public final class SelectionActionModeHelper {
         mEditor = Preconditions.checkNotNull(editor);
         mTextView = mEditor.getTextView();
         mTextClassificationHelper = new TextClassificationHelper(
+                mTextView.getContext(),
                 mTextView.getTextClassifier(),
                 getText(mTextView),
                 0, 1, mTextView.getTextLocales());
@@ -385,6 +388,7 @@ public final class SelectionActionModeHelper {
 
     private void resetTextClassificationHelper() {
         mTextClassificationHelper.init(
+                mTextView.getContext(),
                 mTextView.getTextClassifier(),
                 getText(mTextView),
                 mTextView.getSelectionStart(), mTextView.getSelectionEnd(),
@@ -787,6 +791,7 @@ public final class SelectionActionModeHelper {
 
         private static final int TRIM_DELTA = 120;  // characters
 
+        private Context mContext;
         private TextClassifier mTextClassifier;
 
         /** The original TextView text. **/
@@ -795,7 +800,10 @@ public final class SelectionActionModeHelper {
         private int mSelectionStart;
         /** End index relative to mText. */
         private int mSelectionEnd;
-        private LocaleList mLocales;
+
+        private final TextSelection.Options mSelectionOptions = new TextSelection.Options();
+        private final TextClassification.Options mClassificationOptions =
+                new TextClassification.Options();
 
         /** Trimmed text starting from mTrimStart in mText. */
         private CharSequence mTrimmedText;
@@ -816,21 +824,24 @@ public final class SelectionActionModeHelper {
         /** Whether the TextClassifier has been initialized. */
         private boolean mHot;
 
-        TextClassificationHelper(TextClassifier textClassifier,
+        TextClassificationHelper(Context context, TextClassifier textClassifier,
                 CharSequence text, int selectionStart, int selectionEnd, LocaleList locales) {
-            init(textClassifier, text, selectionStart, selectionEnd, locales);
+            init(context, textClassifier, text, selectionStart, selectionEnd, locales);
         }
 
         @UiThread
-        public void init(TextClassifier textClassifier,
+        public void init(Context context, TextClassifier textClassifier,
                 CharSequence text, int selectionStart, int selectionEnd, LocaleList locales) {
+            mContext = Preconditions.checkNotNull(context);
             mTextClassifier = Preconditions.checkNotNull(textClassifier);
             mText = Preconditions.checkNotNull(text).toString();
             mLastClassificationText = null; // invalidate.
             Preconditions.checkArgument(selectionEnd > selectionStart);
             mSelectionStart = selectionStart;
             mSelectionEnd = selectionEnd;
-            mLocales = locales;
+            mClassificationOptions.setDefaultLocales(locales);
+            mSelectionOptions.setDefaultLocales(locales)
+                    .setDarkLaunchAllowed(true);
         }
 
         @WorkerThread
@@ -843,8 +854,16 @@ public final class SelectionActionModeHelper {
         public SelectionResult suggestSelection() {
             mHot = true;
             trimText();
-            final TextSelection selection = mTextClassifier.suggestSelection(
-                    mTrimmedText, mRelativeStart, mRelativeEnd, mLocales);
+            final TextSelection selection;
+            if (mContext.getApplicationInfo().targetSdkVersion > Build.VERSION_CODES.O_MR1) {
+                selection = mTextClassifier.suggestSelection(
+                        mTrimmedText, mRelativeStart, mRelativeEnd, mSelectionOptions);
+            } else {
+                // Use old APIs.
+                selection = mTextClassifier.suggestSelection(
+                        mTrimmedText, mRelativeStart, mRelativeEnd,
+                        mSelectionOptions.getDefaultLocales());
+            }
             // Do not classify new selection boundaries if TextClassifier should be dark launched.
             if (!mTextClassifier.getSettings().isDarkLaunch()) {
                 mSelectionStart = Math.max(0, selection.getSelectionStartIndex() + mTrimStart);
@@ -874,20 +893,28 @@ public final class SelectionActionModeHelper {
             if (!Objects.equals(mText, mLastClassificationText)
                     || mSelectionStart != mLastClassificationSelectionStart
                     || mSelectionEnd != mLastClassificationSelectionEnd
-                    || !Objects.equals(mLocales, mLastClassificationLocales)) {
+                    || !Objects.equals(
+                            mClassificationOptions.getDefaultLocales(),
+                            mLastClassificationLocales)) {
 
                 mLastClassificationText = mText;
                 mLastClassificationSelectionStart = mSelectionStart;
                 mLastClassificationSelectionEnd = mSelectionEnd;
-                mLastClassificationLocales = mLocales;
+                mLastClassificationLocales = mClassificationOptions.getDefaultLocales();
 
                 trimText();
+                final TextClassification classification;
+                if (mContext.getApplicationInfo().targetSdkVersion > Build.VERSION_CODES.O_MR1) {
+                    classification = mTextClassifier.classifyText(
+                            mTrimmedText, mRelativeStart, mRelativeEnd, mClassificationOptions);
+                } else {
+                    // Use old APIs.
+                    classification = mTextClassifier.classifyText(
+                            mTrimmedText, mRelativeStart, mRelativeEnd,
+                            mClassificationOptions.getDefaultLocales());
+                }
                 mLastClassificationResult = new SelectionResult(
-                        mSelectionStart,
-                        mSelectionEnd,
-                        mTextClassifier.classifyText(
-                                mTrimmedText, mRelativeStart, mRelativeEnd, mLocales),
-                        selection);
+                        mSelectionStart, mSelectionEnd, classification, selection);
 
             }
             return mLastClassificationResult;
