@@ -234,7 +234,7 @@ public:
     static int overrideSpotShadowStrength;
 
     static ProfileType getProfileType();
-    static RenderPipelineType getRenderPipelineType();
+    ANDROID_API static RenderPipelineType getRenderPipelineType();
     static bool isSkiaEnabled();
 
     ANDROID_API static bool enableHighContrastText;
