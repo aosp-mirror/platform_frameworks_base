@@ -25,6 +25,7 @@ import static android.net.NetworkCapabilities.TRANSPORT_VPN;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI_AWARE;
 
+import android.net.ConnectivityManager;
 import android.net.ConnectivityMetricsEvent;
 import android.net.metrics.ApfProgramEvent;
 import android.net.metrics.ApfStats;
@@ -135,11 +136,17 @@ final public class IpConnectivityEventBuilder {
     public static IpConnectivityEvent toProto(DefaultNetworkEvent in) {
         IpConnectivityLogClass.DefaultNetworkEvent ev =
                 new IpConnectivityLogClass.DefaultNetworkEvent();
-        ev.networkId = netIdOf(in.netId);
-        ev.previousNetworkId = netIdOf(in.prevNetId);
-        ev.transportTypes = in.transportTypes;
-        ev.previousNetworkIpSupport = ipSupportOf(in);
-        final IpConnectivityEvent out = buildEvent(in.netId, 0, null);
+        ev.finalScore = in.finalScore;
+        ev.initialScore = in.initialScore;
+        ev.ipSupport = ipSupportOf(in);
+        ev.defaultNetworkDurationMs = in.durationMs;
+        ev.validationDurationMs = in.validatedMs;
+        ev.previousDefaultNetworkLinkLayer = transportsToLinkLayer(in.previousTransports);
+        final IpConnectivityEvent out = buildEvent(in.netId, in.transports, null);
+        if (in.transports == 0) {
+            // Set link layer to NONE for events representing the absence of a default network.
+            out.linkLayer = IpConnectivityLogClass.NONE;
+        }
         out.setDefaultNetworkEvent(ev);
         return out;
     }
@@ -321,13 +328,13 @@ final public class IpConnectivityEventBuilder {
     }
 
     private static int ipSupportOf(DefaultNetworkEvent in) {
-        if (in.prevIPv4 && in.prevIPv6) {
+        if (in.ipv4 && in.ipv6) {
             return IpConnectivityLogClass.DefaultNetworkEvent.DUAL;
         }
-        if (in.prevIPv6) {
+        if (in.ipv6) {
             return IpConnectivityLogClass.DefaultNetworkEvent.IPV6;
         }
-        if (in.prevIPv4) {
+        if (in.ipv4) {
             return IpConnectivityLogClass.DefaultNetworkEvent.IPV4;
         }
         return IpConnectivityLogClass.DefaultNetworkEvent.NONE;
