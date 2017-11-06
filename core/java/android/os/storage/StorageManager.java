@@ -42,10 +42,12 @@ import android.os.Environment;
 import android.os.FileUtils;
 import android.os.Handler;
 import android.os.IVold;
+import android.os.IVoldTaskListener;
 import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.ParcelableException;
+import android.os.PersistableBundle;
 import android.os.ProxyFileDescriptorCallback;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -87,7 +89,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -884,9 +888,32 @@ public class StorageManager {
     }
 
     /** {@hide} */
+    @Deprecated
     public long benchmark(String volId) {
+        final CompletableFuture<PersistableBundle> result = new CompletableFuture<>();
+        benchmark(volId, new IVoldTaskListener.Stub() {
+            @Override
+            public void onStatus(int status, PersistableBundle extras) {
+                // Ignored
+            }
+
+            @Override
+            public void onFinished(int status, PersistableBundle extras) {
+                result.complete(extras);
+            }
+        });
         try {
-            return mStorageManager.benchmark(volId);
+            // Convert ms to ns
+            return result.get(3, TimeUnit.MINUTES).getLong("run", Long.MAX_VALUE) * 1000000;
+        } catch (Exception e) {
+            return Long.MAX_VALUE;
+        }
+    }
+
+    /** {@hide} */
+    public void benchmark(String volId, IVoldTaskListener listener) {
+        try {
+            mStorageManager.benchmark(volId, listener);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
