@@ -22,6 +22,7 @@
 #include "CountMetricProducer.h"
 #include "DurationMetricProducer.h"
 #include "EventMetricProducer.h"
+#include "GaugeMetricProducer.h"
 #include "ValueMetricProducer.h"
 #include "stats_util.h"
 
@@ -308,7 +309,6 @@ bool initMetrics(const StatsdConfig& config, const unordered_map<string, int>& l
         }
 
         sp<MetricProducer> eventMetric = new EventMetricProducer(metric, conditionIndex, wizard);
-
         allMetricProducers.push_back(eventMetric);
     }
 
@@ -351,6 +351,46 @@ bool initMetrics(const StatsdConfig& config, const unordered_map<string, int>& l
                 new ValueMetricProducer(metric, conditionIndex, wizard, pullTagId);
         allMetricProducers.push_back(valueProducer);
     }
+
+    // Gauge metrics.
+    for (int i = 0; i < config.gauge_metric_size(); i++) {
+        const GaugeMetric& metric = config.gauge_metric(i);
+        if (!metric.has_what()) {
+            ALOGW("cannot find what in ValueMetric %lld", metric.metric_id());
+            return false;
+        }
+
+        int metricIndex = allMetricProducers.size();
+        int trackerIndex;
+        if (!handleMetricWithLogTrackers(metric.what(), metricIndex, metric.dimension_size() > 0,
+                                         allLogEntryMatchers, logTrackerMap, trackerToMetricMap,
+                                         trackerIndex)) {
+            return false;
+        }
+
+        sp<LogMatchingTracker> atomMatcher = allLogEntryMatchers.at(trackerIndex);
+        // If it is pulled atom, it should be simple matcher with one tagId.
+        int pullTagId = -1;
+        for (int tagId : atomMatcher->getTagIds()) {
+            if (statsPullerManager.PullerForMatcherExists(tagId)) {
+                if (atomMatcher->getTagIds().size() != 1) {
+                    return false;
+                }
+                pullTagId = tagId;
+            }
+        }
+
+        int conditionIndex = -1;
+        if (metric.has_condition()) {
+            handleMetricWithConditions(metric.condition(), metricIndex, conditionTrackerMap,
+                                       metric.links(), allConditionTrackers, conditionIndex,
+                                       conditionToMetricMap);
+        }
+
+        sp<MetricProducer> gaugeProducer =
+                new GaugeMetricProducer(metric, conditionIndex, wizard, pullTagId);
+        allMetricProducers.push_back(gaugeProducer);
+    }
     return true;
 }
 
@@ -368,6 +408,7 @@ bool initStatsdConfig(const StatsdConfig& config, set<int>& allTagIds,
         ALOGE("initLogMatchingTrackers failed");
         return false;
     }
+    ALOGD("initLogMatchingTrackers succeed...");
 
     if (!initConditions(config, logTrackerMap, conditionTrackerMap, allConditionTrackers,
                         trackerToConditionMap)) {

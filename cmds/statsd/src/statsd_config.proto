@@ -230,7 +230,9 @@ message StatsdConfig {
 
   repeated DurationMetric duration_metric = 5;
 
-  repeated LogEntryMatcher log_entry_matcher = 6;
+  repeated GaugeMetric gauge_metric = 6;
 
-  repeated Condition condition = 7;
+  repeated LogEntryMatcher log_entry_matcher = 7;
+
+  repeated Condition condition = 8;
 }
