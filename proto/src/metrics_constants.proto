@@ -171,6 +171,12 @@ message MetricsEvent {
     TEXT_CLASSIFIER_TYPE_URL = 6;
   }
 
+  // Selection invocation methods. Used as sub-type for TEXT_SELECTION_SESSION events.
+  enum TextSelectionInvocationMethod {
+    TEXT_SELECTION_INVOCATION_MANUAL = 1;
+    TEXT_SELECTION_INVOCATION_LINK = 2;
+  }
+
   // Known visual elements: views or controls.
   enum View {
     // Unknown view
@@ -4689,6 +4695,43 @@ message MetricsEvent {
     // CATEGORY: SETTINGS
     // OS: P
     ACTION_PRIVATE_DNS_MODE = 1249;
+
+    // FIELD: text select start offset in words (as defined by the ICU BreakIterator).
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: P
+    FIELD_SELECTION_RANGE_START = 1250;
+
+    // FIELD: text select end offset in words (as defined by the ICU BreakIterator).
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: P
+    FIELD_SELECTION_RANGE_END = 1251;
+
+    // FIELD: smart text selection start offset in words (as defined by the ICU BreakIterator),
+    //        stored as two packed 16bit integers. (start in MSBs, end in LSBs)
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: P
+    FIELD_SELECTION_SMART_RANGE_START = 1252;
+
+    // FIELD: smart text selection end offset in words (as defined by the ICU BreakIterator),
+    //        stored as two packed 16bit integers. (start in MSBs, end in LSBs)
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: P
+    FIELD_SELECTION_SMART_RANGE_END = 1253;
+
+    // FIELD: the entity type of the text currently selected.
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: P
+    FIELD_SELECTION_ENTITY_TYPE = 1254;
+
+    // FIELD: the type of widget the selection was made in.
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: P
+    FIELD_SELECTION_WIDGET_TYPE = 1255;
+
+    // FIELD: the name of the text classifier model used.
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: P
+    FIELD_TEXTCLASSIFIER_MODEL = 1256;
 
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
