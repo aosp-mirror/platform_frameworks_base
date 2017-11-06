@@ -637,6 +637,41 @@ public class TextViewActivityTest {
     }
 
     @Test
+    public void testSelectionHandles_visibleEvenWithEmptyMenu() {
+        ((TextView) mActivity.findViewById(R.id.textview)).setCustomSelectionActionModeCallback(
+                new ActionMode.Callback() {
+                    @Override
+                    public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+                        menu.clear();
+                        return true;
+                    }
+
+                    @Override
+                    public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+                        menu.clear();
+                        return true;
+                    }
+
+                    @Override
+                    public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+                        return false;
+                    }
+
+                    @Override
+                    public void onDestroyActionMode(ActionMode mode) {}
+                });
+        final String text = "abcd efg hijk lmn";
+        onView(withId(R.id.textview)).perform(replaceText(text));
+
+        onView(withId(R.id.textview)).perform(longPressOnTextAtIndex(text.indexOf('f')));
+
+        onHandleView(com.android.internal.R.id.selection_start_handle)
+                .check(matches(isDisplayed()));
+        onHandleView(com.android.internal.R.id.selection_end_handle)
+                .check(matches(isDisplayed()));
+    }
+
+    @Test
     public void testSetSelectionAndActionMode() throws Throwable {
         final TextView textView = mActivity.findViewById(R.id.textview);
         final ActionMode.Callback amCallback = mock(ActionMode.Callback.class);
