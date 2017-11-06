@@ -1,3 +1,4 @@
+#!/system/bin/sh
 # Script to start "pm" on the device, which has a very rudimentary
 # shell.
 #
