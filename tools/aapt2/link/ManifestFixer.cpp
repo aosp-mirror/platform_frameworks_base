@@ -127,9 +127,9 @@ static bool VerifyManifest(xml::Element* el, SourcePathDiagnostics* diag) {
     diag->Error(DiagMessage(el->line_number)
                 << "attribute 'package' in <manifest> tag must not be a reference");
     return false;
-  } else if (!util::IsJavaPackageName(attr->value)) {
+  } else if (!util::IsAndroidPackageName(attr->value)) {
     diag->Error(DiagMessage(el->line_number)
-                << "attribute 'package' in <manifest> tag is not a valid Java package name: '"
+                << "attribute 'package' in <manifest> tag is not a valid Android package name: '"
                 << attr->value << "'");
     return false;
   }
