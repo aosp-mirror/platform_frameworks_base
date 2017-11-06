@@ -1516,66 +1516,13 @@ public class AudioRecord implements AudioRouting
     }
 
     /**
-     * Helper class to handle the forwarding of native events to the appropriate listener
-     * (potentially) handled in a different thread
-     */
-    private class NativeRoutingEventHandlerDelegate {
-        private final Handler mHandler;
-
-        NativeRoutingEventHandlerDelegate(final AudioRecord record,
-                                   final AudioRouting.OnRoutingChangedListener listener,
-                                   Handler handler) {
-            // find the looper for our new event handler
-            Looper looper;
-            if (handler != null) {
-                looper = handler.getLooper();
-            } else {
-                // no given handler, use the looper the AudioRecord was created in
-                looper = mInitializationLooper;
-            }
-
-            // construct the event handler with this looper
-            if (looper != null) {
-                // implement the event handler delegate
-                mHandler = new Handler(looper) {
-                    @Override
-                    public void handleMessage(Message msg) {
-                        if (record == null) {
-                            return;
-                        }
-                        switch(msg.what) {
-                        case AudioSystem.NATIVE_EVENT_ROUTING_CHANGE:
-                            if (listener != null) {
-                                listener.onRoutingChanged(record);
-                            }
-                            break;
-                        default:
-                            loge("Unknown native event type: " + msg.what);
-                            break;
-                        }
-                    }
-                };
-            } else {
-                mHandler = null;
-            }
-        }
-
-        Handler getHandler() {
-            return mHandler;
-        }
-    }
-
-    /**
      * Sends device list change notification to all listeners.
      */
     private void broadcastRoutingChange() {
         AudioManager.resetAudioPortGeneration();
         synchronized (mRoutingChangeListeners) {
             for (NativeRoutingEventHandlerDelegate delegate : mRoutingChangeListeners.values()) {
-                Handler handler = delegate.getHandler();
-                if (handler != null) {
-                    handler.sendEmptyMessage(AudioSystem.NATIVE_EVENT_ROUTING_CHANGE);
-                }
+                delegate.notifyClient();
             }
         }
     }
