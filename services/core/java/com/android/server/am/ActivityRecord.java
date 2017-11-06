@@ -1585,7 +1585,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
 
     void setVisibility(boolean visible) {
         mWindowContainerController.setVisibility(visible, mDeferHidingClient);
-        mStackSupervisor.mActivityMetricsLogger.notifyVisibilityChanged(this, visible);
+        mStackSupervisor.mActivityMetricsLogger.notifyVisibilityChanged(this);
     }
 
     // TODO: Look into merging with #setVisibility()

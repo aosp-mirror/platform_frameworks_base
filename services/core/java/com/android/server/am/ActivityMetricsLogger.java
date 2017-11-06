@@ -12,6 +12,7 @@ import static android.app.ActivityManagerInternal.APP_TRANSITION_TIMEOUT;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.APP_TRANSITION;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.APP_TRANSITION_BIND_APPLICATION_DELAY_MS;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.APP_TRANSITION_CALLING_PACKAGE_NAME;
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.APP_TRANSITION_CANCELLED;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.APP_TRANSITION_DELAY_MS;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.APP_TRANSITION_DEVICE_UPTIME_SECONDS;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.APP_TRANSITION_IS_EPHEMERAL;
@@ -27,6 +28,7 @@ import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.TYPE_T
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.TYPE_TRANSITION_REPORTED_DRAWN_NO_BUNDLE;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.TYPE_TRANSITION_REPORTED_DRAWN_WITH_BUNDLE;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.TYPE_TRANSITION_WARM_LAUNCH;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_METRICS;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.ActivityStack.STACK_INVISIBLE;
@@ -34,12 +36,16 @@ import static com.android.server.am.ActivityStack.STACK_INVISIBLE;
 import android.app.ActivityManager.StackId;
 import android.content.Context;
 import android.metrics.LogMaker;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.os.SystemClock;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.os.SomeArgs;
 
 import java.util.ArrayList;
 
@@ -59,6 +65,8 @@ class ActivityMetricsLogger {
     private static final int WINDOW_STATE_INVALID = -1;
 
     private static final long INVALID_START_TIME = -1;
+
+    private static final int MSG_CHECK_VISIBILITY = 0;
 
     // Preallocated strings we are sending to tron, so we don't have to allocate a new one every
     // time we log.
@@ -80,6 +88,23 @@ class ActivityMetricsLogger {
 
     private final SparseArray<StackTransitionInfo> mStackTransitionInfo = new SparseArray<>();
     private final SparseArray<StackTransitionInfo> mLastStackTransitionInfo = new SparseArray<>();
+    private final H mHandler;
+    private final class H extends Handler {
+
+        public H(Looper looper) {
+            super(looper);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case MSG_CHECK_VISIBILITY:
+                    final SomeArgs args = (SomeArgs) msg.obj;
+                    checkVisibility((TaskRecord) args.arg1, (ActivityRecord) args.arg2);
+                    break;
+            }
+        }
+    };
 
     private final class StackTransitionInfo {
         private ActivityRecord launchedActivity;
@@ -93,10 +118,11 @@ class ActivityMetricsLogger {
         private boolean loggedStartingWindowDrawn;
     }
 
-    ActivityMetricsLogger(ActivityStackSupervisor supervisor, Context context) {
+    ActivityMetricsLogger(ActivityStackSupervisor supervisor, Context context, Looper looper) {
         mLastLogTimeSecs = SystemClock.elapsedRealtime() / 1000;
         mSupervisor = supervisor;
         mContext = context;
+        mHandler = new H(looper);
     }
 
     void logWindowState() {
@@ -142,6 +168,7 @@ class ActivityMetricsLogger {
      */
     void notifyActivityLaunching() {
         if (!isAnyTransitionActive()) {
+            if (DEBUG_METRICS) Slog.i(TAG, "notifyActivityLaunching");
             mCurrentTransitionStartTime = SystemClock.uptimeMillis();
             mLastTransitionStartTime = mCurrentTransitionStartTime;
         }
@@ -199,6 +226,12 @@ class ActivityMetricsLogger {
     private void notifyActivityLaunched(int resultCode, ActivityRecord launchedActivity,
             boolean processRunning, boolean processSwitch) {
 
+        if (DEBUG_METRICS) Slog.i(TAG, "notifyActivityLaunched"
+                + " resultCode=" + resultCode
+                + " launchedActivity=" + launchedActivity
+                + " processRunning=" + processRunning
+                + " processSwitch=" + processSwitch);
+
         // If we are already in an existing transition, only update the activity name, but not the
         // other attributes.
         final int stackId = launchedActivity != null && launchedActivity.getStack() != null
@@ -227,6 +260,8 @@ class ActivityMetricsLogger {
             return;
         }
 
+        if (DEBUG_METRICS) Slog.i(TAG, "notifyActivityLaunched successful");
+
         final StackTransitionInfo newInfo = new StackTransitionInfo();
         newInfo.launchedActivity = launchedActivity;
         newInfo.currentTransitionProcessRunning = processRunning;
@@ -240,6 +275,8 @@ class ActivityMetricsLogger {
      * Notifies the tracker that all windows of the app have been drawn.
      */
     void notifyWindowsDrawn(int stackId, long timestamp) {
+        if (DEBUG_METRICS) Slog.i(TAG, "notifyWindowsDrawn stackId=" + stackId);
+
         final StackTransitionInfo info = mStackTransitionInfo.get(stackId);
         if (info == null || info.loggedWindowsDrawn) {
             return;
@@ -273,6 +310,7 @@ class ActivityMetricsLogger {
         if (!isAnyTransitionActive() || mLoggedTransitionStarting) {
             return;
         }
+        if (DEBUG_METRICS) Slog.i(TAG, "notifyTransitionStarting");
         mCurrentTransitionDelayMs = calculateDelay(timestamp);
         mLoggedTransitionStarting = true;
         for (int index = stackIdReasons.size() - 1; index >= 0; index--) {
@@ -292,17 +330,37 @@ class ActivityMetricsLogger {
      * Notifies the tracker that the visibility of an app is changing.
      *
      * @param activityRecord the app that is changing its visibility
-     * @param visible whether it's going to be visible or not
      */
-    void notifyVisibilityChanged(ActivityRecord activityRecord, boolean visible) {
+    void notifyVisibilityChanged(ActivityRecord activityRecord) {
         final StackTransitionInfo info = mStackTransitionInfo.get(activityRecord.getStackId());
+        if (info == null) {
+            return;
+        }
+        if (info.launchedActivity != activityRecord) {
+            return;
+        }
+        final TaskRecord t = activityRecord.getTask();
+        final SomeArgs args = SomeArgs.obtain();
+        args.arg1 = t;
+        args.arg2 = activityRecord;
+        mHandler.obtainMessage(MSG_CHECK_VISIBILITY, args).sendToTarget();
+    }
 
-        // If we have an active transition that's waiting on a certain activity that will be
-        // invisible now, we'll never get onWindowsDrawn, so abort the transition if necessary.
-        if (info != null && !visible && info.launchedActivity == activityRecord) {
-            mStackTransitionInfo.remove(activityRecord.getStackId());
-            if (mStackTransitionInfo.size() == 0) {
-                reset(true /* abort */);
+    private void checkVisibility(TaskRecord t, ActivityRecord r) {
+        synchronized (mSupervisor.mService) {
+
+            final StackTransitionInfo info = mStackTransitionInfo.get(r.getStackId());
+
+            // If we have an active transition that's waiting on a certain activity that will be
+            // invisible now, we'll never get onWindowsDrawn, so abort the transition if necessary.
+            if (info != null && !t.isVisible()) {
+                if (DEBUG_METRICS) Slog.i(TAG, "notifyVisibilityChanged to invisible"
+                        + " activity=" + r);
+                logAppTransitionCancel(info);
+                mStackTransitionInfo.remove(r.getStackId());
+                if (mStackTransitionInfo.size() == 0) {
+                    reset(true /* abort */);
+                }
             }
         }
     }
@@ -338,6 +396,7 @@ class ActivityMetricsLogger {
     }
 
     private void reset(boolean abort) {
+        if (DEBUG_METRICS) Slog.i(TAG, "reset abort=" + abort);
         if (!abort && isAnyTransitionActive()) {
             logAppTransitionMultiEvents();
         }
@@ -358,7 +417,20 @@ class ActivityMetricsLogger {
         return (int) (timestamp - mCurrentTransitionStartTime);
     }
 
+    private void logAppTransitionCancel(StackTransitionInfo info) {
+        final int type = getTransitionType(info);
+        if (type == -1) {
+            return;
+        }
+        final LogMaker builder = new LogMaker(APP_TRANSITION_CANCELLED);
+        builder.setPackageName(info.launchedActivity.packageName);
+        builder.setType(type);
+        builder.addTaggedData(FIELD_CLASS_NAME, info.launchedActivity.info.name);
+        mMetricsLogger.write(builder);
+    }
+
     private void logAppTransitionMultiEvents() {
+        if (DEBUG_METRICS) Slog.i(TAG, "logging transition events");
         for (int index = mStackTransitionInfo.size() - 1; index >= 0; index--) {
             final StackTransitionInfo info = mStackTransitionInfo.valueAt(index);
             final int type = getTransitionType(info);
