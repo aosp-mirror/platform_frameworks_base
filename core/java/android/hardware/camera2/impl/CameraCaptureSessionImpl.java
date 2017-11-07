@@ -800,7 +800,8 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession
                 try {
                     // begin transition to unconfigured
                     mDeviceImpl.configureStreamsChecked(/*inputConfig*/null, /*outputs*/null,
-                            /*operatingMode*/ ICameraDeviceUser.NORMAL_MODE);
+                            /*operatingMode*/ ICameraDeviceUser.NORMAL_MODE,
+                            /*sessionParams*/ null);
                 } catch (CameraAccessException e) {
                     // OK: do not throw checked exceptions.
                     Log.e(TAG, mIdString + "Exception while unconfiguring outputs: ", e);

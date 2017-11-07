@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.hardware.camera2.impl.CameraMetadataNative;
 import android.hardware.camera2.impl.PublicKey;
 import android.hardware.camera2.impl.SyntheticKey;
+import android.hardware.camera2.params.SessionConfiguration;
 import android.hardware.camera2.utils.TypeReference;
 import android.util.Rational;
 
@@ -169,6 +170,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     private final CameraMetadataNative mProperties;
     private List<CameraCharacteristics.Key<?>> mKeys;
     private List<CaptureRequest.Key<?>> mAvailableRequestKeys;
+    private List<CaptureRequest.Key<?>> mAvailableSessionKeys;
     private List<CaptureResult.Key<?>> mAvailableResultKeys;
 
     /**
@@ -248,6 +250,67 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
         mKeys = Collections.unmodifiableList(
                 getKeys(getClass(), getKeyClass(), this, filterTags));
         return mKeys;
+    }
+
+    /**
+     * <p>Returns a subset of {@link #getAvailableCaptureRequestKeys} keys that the
+     * camera device can pass as part of the capture session initialization.</p>
+     *
+     * <p>This list includes keys that are difficult to apply per-frame and
+     * can result in unexpected delays when modified during the capture session
+     * lifetime. Typical examples include parameters that require a
+     * time-consuming hardware re-configuration or internal camera pipeline
+     * change. For performance reasons we suggest clients to pass their initial
+     * values as part of {@link SessionConfiguration#setSessionParameters}. Once
+     * the camera capture session is enabled it is also recommended to avoid
+     * changing them from their initial values set in
+     * {@link SessionConfiguration#setSessionParameters }.
+     * Control over session parameters can still be exerted in capture requests
+     * but clients should be aware and expect delays during their application.
+     * An example usage scenario could look like this:</p>
+     * <ul>
+     * <li>The camera client starts by quering the session parameter key list via
+     *   {@link android.hardware.camera2.CameraCharacteristics#getAvailableSessionKeys }.</li>
+     * <li>Before triggering the capture session create sequence, a capture request
+     *   must be built via {@link CameraDevice#createCaptureRequest } using an
+     *   appropriate template matching the particular use case.</li>
+     * <li>The client should go over the list of session parameters and check
+     *   whether some of the keys listed matches with the parameters that
+     *   they intend to modify as part of the first capture request.</li>
+     * <li>If there is no such match, the capture request can be  passed
+     *   unmodified to {@link SessionConfiguration#setSessionParameters }.</li>
+     * <li>If matches do exist, the client should update the respective values
+     *   and pass the request to {@link SessionConfiguration#setSessionParameters }.</li>
+     * <li>After the capture session initialization completes the session parameter
+     *   key list can continue to serve as reference when posting or updating
+     *   further requests. As mentioned above further changes to session
+     *   parameters should ideally be avoided, if updates are necessary
+     *   however clients could expect a delay/glitch during the
+     *   parameter switch.</li>
+     * </ul>
+     *
+     * <p>The list returned is not modifiable, so any attempts to modify it will throw
+     * a {@code UnsupportedOperationException}.</p>
+     *
+     * <p>Each key is only listed once in the list. The order of the keys is undefined.</p>
+     *
+     * @return List of keys that can be passed during capture session initialization. In case the
+     * camera device doesn't support such keys the list can be null.
+     */
+    @SuppressWarnings({"unchecked"})
+    public List<CaptureRequest.Key<?>> getAvailableSessionKeys() {
+        if (mAvailableSessionKeys == null) {
+            Object crKey = CaptureRequest.Key.class;
+            Class<CaptureRequest.Key<?>> crKeyTyped = (Class<CaptureRequest.Key<?>>)crKey;
+
+            int[] filterTags = get(REQUEST_AVAILABLE_SESSION_KEYS);
+            if (filterTags == null) {
+                return null;
+            }
+            mAvailableSessionKeys =
+                    getAvailableKeyList(CaptureRequest.class, crKeyTyped, filterTags);
+        }
+        return mAvailableSessionKeys;
     }
 
     /**
@@ -1569,6 +1632,48 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      */
     public static final Key<int[]> REQUEST_AVAILABLE_CHARACTERISTICS_KEYS =
             new Key<int[]>("android.request.availableCharacteristicsKeys", int[].class);
+
+    /**
+     * <p>A subset of the available request keys that the camera device
+     * can pass as part of the capture session initialization.</p>
+     * <p>This is a subset of android.request.availableRequestKeys which
+     * contains a list of keys that are difficult to apply per-frame and
+     * can result in unexpected delays when modified during the capture session
+     * lifetime. Typical examples include parameters that require a
+     * time-consuming hardware re-configuration or internal camera pipeline
+     * change. For performance reasons we advise clients to pass their initial
+     * values as part of {@link SessionConfiguration#setSessionParameters }. Once
+     * the camera capture session is enabled it is also recommended to avoid
+     * changing them from their initial values set in
+     * {@link SessionConfiguration#setSessionParameters }.
+     * Control over session parameters can still be exerted in capture requests
+     * but clients should be aware and expect delays during their application.
+     * An example usage scenario could look like this:</p>
+     * <ul>
+     * <li>The camera client starts by quering the session parameter key list via
+     *   {@link android.hardware.camera2.CameraCharacteristics#getAvailableSessionKeys }.</li>
+     * <li>Before triggering the capture session create sequence, a capture request
+     *   must be built via {@link CameraDevice#createCaptureRequest } using an
+     *   appropriate template matching the particular use case.</li>
+     * <li>The client should go over the list of session parameters and check
+     *   whether some of the keys listed matches with the parameters that
+     *   they intend to modify as part of the first capture request.</li>
+     * <li>If there is no such match, the capture request can be  passed
+     *   unmodified to {@link SessionConfiguration#setSessionParameters }.</li>
+     * <li>If matches do exist, the client should update the respective values
+     *   and pass the request to {@link SessionConfiguration#setSessionParameters }.</li>
+     * <li>After the capture session initialization completes the session parameter
+     *   key list can continue to serve as reference when posting or updating
+     *   further requests. As mentioned above further changes to session
+     *   parameters should ideally be avoided, if updates are necessary
+     *   however clients could expect a delay/glitch during the
+     *   parameter switch.</li>
+     * </ul>
+     * <p>This key is available on all devices.</p>
+     * @hide
+     */
+    public static final Key<int[]> REQUEST_AVAILABLE_SESSION_KEYS =
+            new Key<int[]>("android.request.availableSessionKeys", int[].class);
 
     /**
      * <p>The list of image formats that are supported by this

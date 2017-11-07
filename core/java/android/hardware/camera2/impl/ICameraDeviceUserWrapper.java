@@ -106,9 +106,11 @@ public class ICameraDeviceUserWrapper {
         }
     }
 
-    public void endConfigure(int operatingMode) throws CameraAccessException {
+    public void endConfigure(int operatingMode, CameraMetadataNative sessionParams)
+           throws CameraAccessException {
         try {
-            mRemoteDevice.endConfigure(operatingMode);
+            mRemoteDevice.endConfigure(operatingMode, (sessionParams == null) ?
+                    new CameraMetadataNative() : sessionParams);
         } catch (Throwable t) {
             CameraManager.throwAsPublicException(t);
             throw new UnsupportedOperationException("Unexpected exception", t);

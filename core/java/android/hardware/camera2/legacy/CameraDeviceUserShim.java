@@ -498,7 +498,7 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
     }
 
     @Override
-    public void endConfigure(int operatingMode) {
+    public void endConfigure(int operatingMode, CameraMetadataNative sessionParams) {
         if (DEBUG) {
             Log.d(TAG, "endConfigure called.");
         }
