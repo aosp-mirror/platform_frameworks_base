@@ -41,7 +41,7 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
     private ProgressBar mProgressBar;
     private TextView mTitle;
     private TextView mText;
-    private View mActionsContainer;
+    protected View mActionsContainer;
     private View mReplyAction;
     private Rect mTmpRect = new Rect();
 

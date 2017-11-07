@@ -190,4 +190,8 @@ public abstract class NotificationViewWrapper implements TransformableView {
     public boolean disallowSingleClick(float x, float y) {
         return false;
     }
+
+    public int getMinLayoutHeight() {
+        return 0;
+    }
 }

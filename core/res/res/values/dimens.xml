@@ -605,6 +605,8 @@
     <!-- The size of the right icon image when on low ram -->
     <dimen name="notification_right_icon_size_low_ram">40dp</dimen>
 
+    <dimen name="messaging_avatar_size">24dp</dimen>
+
     <!-- Max width/height of the autofill data set picker as a fraction of the screen width/height -->
     <dimen name="autofill_dataset_picker_max_size">90%</dimen>
 

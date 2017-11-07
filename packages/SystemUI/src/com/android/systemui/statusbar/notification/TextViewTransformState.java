@@ -33,8 +33,8 @@ public class TextViewTransformState extends TransformState {
     private TextView mText;
 
     @Override
-    public void initFrom(View view) {
-        super.initFrom(view);
+    public void initFrom(View view, TransformInfo transformInfo) {
+        super.initFrom(view, transformInfo);
         if (view instanceof TextView) {
             mText = (TextView) view;
         }
