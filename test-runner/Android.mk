@@ -50,6 +50,9 @@ LOCAL_MODULE:= repackaged.android.test.runner
 
 include $(BUILD_STATIC_JAVA_LIBRARY)
 
+# For unbundled build we'll use the prebuilt jar from prebuilts/sdk.
+ifeq (,$(TARGET_BUILD_APPS)$(filter true,$(TARGET_BUILD_PDK)))
+
 # Generate the stub source files for android.test.runner.stubs
 # ============================================================
 include $(CLEAR_VARS)
@@ -149,6 +152,8 @@ update-android-test-runner-api: $(ANDROID_TEST_RUNNER_OUTPUT_API_FILE) | $(ACP)
 	@echo Copying removed.txt
 	$(hide) $(ACP) $(ANDROID_TEST_RUNNER_OUTPUT_REMOVED_API_FILE) $(ANDROID_TEST_RUNNER_REMOVED_API_FILE)
 
+endif  # not TARGET_BUILD_APPS not TARGET_BUILD_PDK=true
+
 # Build the android.test.mock library
 # ===================================
 include $(CLEAR_VARS)
@@ -160,6 +165,9 @@ LOCAL_JAVA_LIBRARIES := core-oj core-libart framework
 LOCAL_MODULE:= android.test.mock
 
 include $(BUILD_JAVA_LIBRARY)
+
+# For unbundled build we'll use the prebuilt jar from prebuilts/sdk.
+ifeq (,$(TARGET_BUILD_APPS)$(filter true,$(TARGET_BUILD_PDK)))
 
 # Generate the stub source files for android.test.mock.stubs
 # ==========================================================
@@ -257,3 +265,5 @@ include $(BUILD_STATIC_JAVA_LIBRARY)
 
 # additionally, build unit tests in a separate .apk
 include $(call all-makefiles-under,$(LOCAL_PATH))
+
+endif  # not TARGET_BUILD_APPS not TARGET_BUILD_PDK=true
