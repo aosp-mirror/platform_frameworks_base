@@ -7113,7 +7113,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mAllowLockscreenRemoteInput = allowLockscreenRemoteInput;
     }
 
-    private void updateLockscreenNotificationSetting() {
+    protected void updateLockscreenNotificationSetting() {
         final boolean show = Settings.Secure.getIntForUser(mContext.getContentResolver(),
                 Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS,
                 1,
