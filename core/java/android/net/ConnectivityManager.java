@@ -619,6 +619,35 @@ public class ConnectivityManager {
      */
     public static final int NETID_UNSET = 0;
 
+    /**
+     * Private DNS Mode values.
+     *
+     * The "private_dns_mode" global setting stores a String value which is
+     * expected to be one of the following.
+     */
+
+    /**
+     * @hide
+     */
+    public static final String PRIVATE_DNS_MODE_OFF = "off";
+    /**
+     * @hide
+     */
+    public static final String PRIVATE_DNS_MODE_OPPORTUNISTIC = "opportunistic";
+    /**
+     * @hide
+     */
+    public static final String PRIVATE_DNS_MODE_PROVIDER_HOSTNAME = "hostname";
+    /**
+     * The default Private DNS mode.
+     *
+     * This may change from release to release or may become dependent upon
+     * the capabilities of the underlying platform.
+     *
+     * @hide
+     */
+    public static final String PRIVATE_DNS_DEFAULT_MODE = PRIVATE_DNS_MODE_OPPORTUNISTIC;
+
     private final IConnectivityManager mService;
     /**
      * A kludge to facilitate static access where a Context pointer isn't available, like in the
