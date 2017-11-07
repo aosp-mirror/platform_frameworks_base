@@ -16,6 +16,9 @@
 
 LOCAL_PATH:= $(call my-dir)
 
+# For unbundled build we'll use the prebuilt jar from prebuilts/sdk.
+ifeq (,$(TARGET_BUILD_APPS)$(filter true,$(TARGET_BUILD_PDK)))
+
 # Generate the stub source files for android.test.runner.stubs
 # ============================================================
 include $(CLEAR_VARS)
@@ -111,3 +114,5 @@ update-android-test-runner-api: $(ANDROID_TEST_RUNNER_OUTPUT_API_FILE) | $(ACP)
 	$(hide) $(ACP) $(ANDROID_TEST_RUNNER_OUTPUT_API_FILE) $(ANDROID_TEST_RUNNER_API_FILE)
 	@echo Copying removed.txt
 	$(hide) $(ACP) $(ANDROID_TEST_RUNNER_OUTPUT_REMOVED_API_FILE) $(ANDROID_TEST_RUNNER_REMOVED_API_FILE)
+
+endif  # not TARGET_BUILD_APPS not TARGET_BUILD_PDK=true
