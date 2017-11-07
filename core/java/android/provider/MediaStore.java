@@ -678,8 +678,8 @@ public final class MediaStore {
             // Log.v(TAG, "getThumbnail: origId="+origId+", kind="+kind+", isVideo="+isVideo);
             // If the magic is non-zero, we simply return thumbnail if it does exist.
             // querying MediaProvider and simply return thumbnail.
-            MiniThumbFile thumbFile = new MiniThumbFile(isVideo ? Video.Media.EXTERNAL_CONTENT_URI
-                    : Images.Media.EXTERNAL_CONTENT_URI);
+            MiniThumbFile thumbFile = MiniThumbFile.instance(
+                    isVideo ? Video.Media.EXTERNAL_CONTENT_URI : Images.Media.EXTERNAL_CONTENT_URI);
             Cursor c = null;
             try {
                 long magic = thumbFile.getMagic(origId);
