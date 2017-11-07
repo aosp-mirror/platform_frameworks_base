@@ -201,6 +201,8 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     private static final String TAG_STATES = TAG + POSTFIX_STATES;
     private static final String TAG_SWITCH = TAG + POSTFIX_SWITCH;
     private static final String TAG_VISIBILITY = TAG + POSTFIX_VISIBILITY;
+    // TODO(b/67864419): Remove once recents component is overridden
+    private static final String LEGACY_RECENTS_PACKAGE_NAME = "com.android.systemui.recents";
 
     private static final boolean SHOW_ACTIVITY_START_TIME = true;
 
@@ -1057,7 +1059,8 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
                 // We only allow home activities to be resizeable if they explicitly requested it.
                 info.resizeMode = RESIZE_MODE_UNRESIZEABLE;
             }
-        } else if (service.getRecentTasks().isRecentsComponent(realActivity, appInfo.uid)) {
+        } else if (realActivity.getClassName().contains(LEGACY_RECENTS_PACKAGE_NAME) ||
+                service.getRecentTasks().isRecentsComponent(realActivity, appInfo.uid)) {
             activityType = ACTIVITY_TYPE_RECENTS;
         } else if (options != null && options.getLaunchActivityType() == ACTIVITY_TYPE_ASSISTANT
                 && canLaunchAssistActivity(launchedFromPackage)) {

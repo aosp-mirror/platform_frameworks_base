@@ -23,6 +23,7 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.MessageQueue;
+import android.os.ParcelFileDescriptor;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 import android.testing.LeakCheck;
@@ -34,6 +35,8 @@ import org.junit.Rule;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -82,6 +85,16 @@ public abstract class SysuiTestCase {
 
     public Context getContext() {
         return mContext;
+    }
+
+    protected void runShellCommand(String command) throws IOException {
+        ParcelFileDescriptor pfd = mRealInstrumentation.getUiAutomation()
+                .executeShellCommand(command);
+
+        // Read the input stream fully.
+        FileInputStream fis = new ParcelFileDescriptor.AutoCloseInputStream(pfd);
+        while (fis.read() != -1);
+        fis.close();
     }
 
     protected void waitForIdleSync() {
