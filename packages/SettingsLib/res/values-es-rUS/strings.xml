@@ -99,6 +99,13 @@
     <string name="bluetooth_pairing_pin_error_message" msgid="8337234855188925274">"No se pudo sincronizar con <xliff:g id="DEVICE_NAME">%1$s</xliff:g> debido a que el PIN o la clave de acceso son incorrectos."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="7870998403045801381">"No se puede establecer la comunicación con <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="1648157108520832454">"Vínculo rechazado por <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="bluetooth_talkback_computer" msgid="4875089335641234463">"Computadora"</string>
+    <string name="bluetooth_talkback_headset" msgid="5140152177885220949">"Auriculares"</string>
+    <string name="bluetooth_talkback_phone" msgid="4260255181240622896">"Teléfono"</string>
+    <string name="bluetooth_talkback_imaging" msgid="551146170554589119">"Imágenes"</string>
+    <string name="bluetooth_talkback_headphone" msgid="26580326066627664">"Auriculares"</string>
+    <string name="bluetooth_talkback_input_peripheral" msgid="5165842622743212268">"Periférico de entrada"</string>
+    <string name="bluetooth_talkback_bluetooth" msgid="5615463912185280812">"Bluetooth"</string>
     <string name="accessibility_wifi_off" msgid="1166761729660614716">"Wi-Fi inhabilitado"</string>
     <string name="accessibility_no_wifi" msgid="8834610636137374508">"Wi-Fi desconectado"</string>
     <string name="accessibility_wifi_one_bar" msgid="4869376278894301820">"Una barra de Wi-Fi"</string>
