@@ -16,13 +16,14 @@
 
 package com.android.server.job.controllers;
 
+import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.BatteryManager;
 import android.os.BatteryManagerInternal;
-import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.ArraySet;
 import android.util.Slog;
@@ -203,7 +204,7 @@ public final class BatteryController extends StateController {
                 if (Intent.ACTION_BATTERY_LOW.equals(action)) {
                     if (DEBUG) {
                         Slog.d(TAG, "Battery life too low to do work. @ "
-                                + SystemClock.elapsedRealtime());
+                                + sElapsedRealtimeClock.millis());
                     }
                     // If we get this action, the battery is discharging => it isn't plugged in so
                     // there's no work to cancel. We track this variable for the case where it is
@@ -213,14 +214,14 @@ public final class BatteryController extends StateController {
                 } else if (Intent.ACTION_BATTERY_OKAY.equals(action)) {
                     if (DEBUG) {
                         Slog.d(TAG, "Battery life healthy enough to do work. @ "
-                                + SystemClock.elapsedRealtime());
+                                + sElapsedRealtimeClock.millis());
                     }
                     mBatteryHealthy = true;
                     maybeReportNewChargingStateLocked();
                 } else if (BatteryManager.ACTION_CHARGING.equals(action)) {
                     if (DEBUG) {
                         Slog.d(TAG, "Received charging intent, fired @ "
-                                + SystemClock.elapsedRealtime());
+                                + sElapsedRealtimeClock.millis());
                     }
                     mCharging = true;
                     maybeReportNewChargingStateLocked();

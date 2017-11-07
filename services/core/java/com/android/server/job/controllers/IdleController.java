@@ -16,7 +16,7 @@
 
 package com.android.server.job.controllers;
 
-import java.io.PrintWriter;
+import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
@@ -24,7 +24,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.ArraySet;
 import android.util.Slog;
@@ -32,6 +31,8 @@ import android.util.Slog;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.job.JobSchedulerService;
 import com.android.server.job.StateChangedListener;
+
+import java.io.PrintWriter;
 
 public final class IdleController extends StateController {
     private static final String TAG = "IdleController";
@@ -169,7 +170,7 @@ public final class IdleController extends StateController {
                 // when the screen goes off or dreaming starts, we schedule the
                 // alarm that will tell us when we have decided the device is
                 // truly idle.
-                final long nowElapsed = SystemClock.elapsedRealtime();
+                final long nowElapsed = sElapsedRealtimeClock.millis();
                 final long when = nowElapsed + mInactivityIdleThreshold;
                 if (DEBUG) {
                     Slog.v(TAG, "Scheduling idle : " + action + " now:" + nowElapsed + " when="
@@ -182,7 +183,7 @@ public final class IdleController extends StateController {
                 // idle time starts now. Do not set mIdle if screen is on.
                 if (!mIdle && !mScreenOn) {
                     if (DEBUG) {
-                        Slog.v(TAG, "Idle trigger fired @ " + SystemClock.elapsedRealtime());
+                        Slog.v(TAG, "Idle trigger fired @ " + sElapsedRealtimeClock.millis());
                     }
                     mIdle = true;
                     reportNewIdleState(mIdle);

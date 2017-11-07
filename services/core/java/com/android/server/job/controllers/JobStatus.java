@@ -16,6 +16,8 @@
 
 package com.android.server.job.controllers;
 
+import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
+
 import android.app.AppGlobals;
 import android.app.IActivityManager;
 import android.app.job.JobInfo;
@@ -25,7 +27,6 @@ import android.content.ComponentName;
 import android.net.Network;
 import android.net.Uri;
 import android.os.RemoteException;
-import android.os.SystemClock;
 import android.os.UserHandle;
 import android.text.format.Time;
 import android.util.ArraySet;
@@ -64,18 +65,11 @@ public final class JobStatus {
     static final int CONSTRAINT_STORAGE_NOT_LOW = JobInfo.CONSTRAINT_FLAG_STORAGE_NOT_LOW;
     static final int CONSTRAINT_TIMING_DELAY = 1<<31;
     static final int CONSTRAINT_DEADLINE = 1<<30;
-    static final int CONSTRAINT_UNMETERED = 1<<29;
     static final int CONSTRAINT_CONNECTIVITY = 1<<28;
     static final int CONSTRAINT_APP_NOT_IDLE = 1<<27;
     static final int CONSTRAINT_CONTENT_TRIGGER = 1<<26;
     static final int CONSTRAINT_DEVICE_NOT_DOZING = 1<<25;
-    static final int CONSTRAINT_NOT_ROAMING = 1<<24;
-    static final int CONSTRAINT_METERED = 1<<23;
     static final int CONSTRAINT_BACKGROUND_NOT_RESTRICTED = 1<<22;
-
-    static final int CONNECTIVITY_MASK =
-            CONSTRAINT_UNMETERED | CONSTRAINT_CONNECTIVITY |
-            CONSTRAINT_NOT_ROAMING | CONSTRAINT_METERED;
 
     // Soft override: ignore constraints like time that don't affect API availability
     public static final int OVERRIDE_SOFT = 1;
@@ -264,27 +258,9 @@ public final class JobStatus {
 
         int requiredConstraints = job.getConstraintFlags();
 
-        switch (job.getNetworkType()) {
-            case JobInfo.NETWORK_TYPE_NONE:
-                // No constraint.
-                break;
-            case JobInfo.NETWORK_TYPE_ANY:
-                requiredConstraints |= CONSTRAINT_CONNECTIVITY;
-                break;
-            case JobInfo.NETWORK_TYPE_UNMETERED:
-                requiredConstraints |= CONSTRAINT_UNMETERED;
-                break;
-            case JobInfo.NETWORK_TYPE_NOT_ROAMING:
-                requiredConstraints |= CONSTRAINT_NOT_ROAMING;
-                break;
-            case JobInfo.NETWORK_TYPE_METERED:
-                requiredConstraints |= CONSTRAINT_METERED;
-                break;
-            default:
-                Slog.w(TAG, "Unrecognized networking constraint " + job.getNetworkType());
-                break;
+        if (job.getRequiredNetwork() != null) {
+            requiredConstraints |= CONSTRAINT_CONNECTIVITY;
         }
-
         if (earliestRunTimeElapsedMillis != NO_EARLIEST_RUNTIME) {
             requiredConstraints |= CONSTRAINT_TIMING_DELAY;
         }
@@ -365,7 +341,7 @@ public final class JobStatus {
      */
     public static JobStatus createFromJobInfo(JobInfo job, int callingUid, String sourcePackageName,
             int sourceUserId, String tag) {
-        final long elapsedNow = SystemClock.elapsedRealtime();
+        final long elapsedNow = sElapsedRealtimeClock.millis();
         final long earliestRunTimeElapsedMillis, latestRunTimeElapsedMillis;
         if (job.isPeriodic()) {
             latestRunTimeElapsedMillis = elapsedNow + job.getIntervalMillis();
@@ -610,23 +586,7 @@ public final class JobStatus {
 
     /** Does this job have any sort of networking constraint? */
     public boolean hasConnectivityConstraint() {
-        return (requiredConstraints&CONNECTIVITY_MASK) != 0;
-    }
-
-    public boolean needsAnyConnectivity() {
         return (requiredConstraints&CONSTRAINT_CONNECTIVITY) != 0;
-    }
-
-    public boolean needsUnmeteredConnectivity() {
-        return (requiredConstraints&CONSTRAINT_UNMETERED) != 0;
-    }
-
-    public boolean needsMeteredConnectivity() {
-        return (requiredConstraints&CONSTRAINT_METERED) != 0;
-    }
-
-    public boolean needsNonRoamingConnectivity() {
-        return (requiredConstraints&CONSTRAINT_NOT_ROAMING) != 0;
     }
 
     public boolean hasChargingConstraint() {
@@ -725,18 +685,6 @@ public final class JobStatus {
         return setConstraintSatisfied(CONSTRAINT_CONNECTIVITY, state);
     }
 
-    boolean setUnmeteredConstraintSatisfied(boolean state) {
-        return setConstraintSatisfied(CONSTRAINT_UNMETERED, state);
-    }
-
-    boolean setMeteredConstraintSatisfied(boolean state) {
-        return setConstraintSatisfied(CONSTRAINT_METERED, state);
-    }
-
-    boolean setNotRoamingConstraintSatisfied(boolean state) {
-        return setConstraintSatisfied(CONSTRAINT_NOT_ROAMING, state);
-    }
-
     boolean setAppNotIdleConstraintSatisfied(boolean state) {
         return setConstraintSatisfied(CONSTRAINT_APP_NOT_IDLE, state);
     }
@@ -817,12 +765,9 @@ public final class JobStatus {
                 && notRestrictedInBg;
     }
 
-    static final int CONSTRAINTS_OF_INTEREST =
-            CONSTRAINT_CHARGING | CONSTRAINT_BATTERY_NOT_LOW | CONSTRAINT_STORAGE_NOT_LOW |
-            CONSTRAINT_TIMING_DELAY |
-            CONSTRAINT_CONNECTIVITY | CONSTRAINT_UNMETERED |
-            CONSTRAINT_NOT_ROAMING | CONSTRAINT_METERED |
-            CONSTRAINT_IDLE | CONSTRAINT_CONTENT_TRIGGER;
+    static final int CONSTRAINTS_OF_INTEREST = CONSTRAINT_CHARGING | CONSTRAINT_BATTERY_NOT_LOW
+            | CONSTRAINT_STORAGE_NOT_LOW | CONSTRAINT_TIMING_DELAY | CONSTRAINT_CONNECTIVITY
+            | CONSTRAINT_IDLE | CONSTRAINT_CONTENT_TRIGGER;
 
     // Soft override covers all non-"functional" constraints
     static final int SOFT_OVERRIDE_CONSTRAINTS =
@@ -870,15 +815,14 @@ public final class JobStatus {
         sb.append(getSourceUid());
         if (earliestRunTimeElapsedMillis != NO_EARLIEST_RUNTIME
                 || latestRunTimeElapsedMillis != NO_LATEST_RUNTIME) {
-            long now = SystemClock.elapsedRealtime();
+            long now = sElapsedRealtimeClock.millis();
             sb.append(" TIME=");
             formatRunTime(sb, earliestRunTimeElapsedMillis, NO_EARLIEST_RUNTIME, now);
             sb.append(":");
             formatRunTime(sb, latestRunTimeElapsedMillis, NO_LATEST_RUNTIME, now);
         }
-        if (job.getNetworkType() != JobInfo.NETWORK_TYPE_NONE) {
-            sb.append(" NET=");
-            sb.append(job.getNetworkType());
+        if (job.getRequiredNetwork() != null) {
+            sb.append(" NET");
         }
         if (job.isRequireCharging()) {
             sb.append(" CHARGING");
@@ -985,15 +929,6 @@ public final class JobStatus {
         if ((constraints&CONSTRAINT_CONNECTIVITY) != 0) {
             pw.print(" CONNECTIVITY");
         }
-        if ((constraints&CONSTRAINT_UNMETERED) != 0) {
-            pw.print(" UNMETERED");
-        }
-        if ((constraints&CONSTRAINT_NOT_ROAMING) != 0) {
-            pw.print(" NOT_ROAMING");
-        }
-        if ((constraints&CONSTRAINT_METERED) != 0) {
-            pw.print(" METERED");
-        }
         if ((constraints&CONSTRAINT_APP_NOT_IDLE) != 0) {
             pw.print(" APP_NOT_IDLE");
         }
@@ -1084,11 +1019,13 @@ public final class JobStatus {
                 pw.print(prefix); pw.println("  Granted URI permissions:");
                 uriPerms.dump(pw, prefix + "  ");
             }
-            if (job.getNetworkType() != JobInfo.NETWORK_TYPE_NONE) {
-                pw.print(prefix); pw.print("  Network type: "); pw.println(job.getNetworkType());
+            if (job.getRequiredNetwork() != null) {
+                pw.print(prefix); pw.print("  Network type: ");
+                pw.println(job.getRequiredNetwork());
             }
             if (totalNetworkBytes != JobInfo.NETWORK_BYTES_UNKNOWN) {
-                pw.print(prefix); pw.print("  Network bytes: "); pw.println(totalNetworkBytes);
+                pw.print(prefix); pw.print("  Network bytes: ");
+                pw.println(totalNetworkBytes);
             }
             if (job.getMinLatencyMillis() != 0) {
                 pw.print(prefix); pw.print("  Minimum latency: ");

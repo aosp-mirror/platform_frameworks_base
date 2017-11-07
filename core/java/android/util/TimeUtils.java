@@ -340,6 +340,14 @@ public class TimeUtils {
     }
 
     /** @hide Just for debugging; not internationalized. */
+    public static String formatDuration(long duration) {
+        synchronized (sFormatSync) {
+            int len = formatDurationLocked(duration, 0);
+            return new String(sFormatStr, 0, len);
+        }
+    }
+
+    /** @hide Just for debugging; not internationalized. */
     public static void formatDuration(long duration, PrintWriter pw) {
         formatDuration(duration, pw, 0);
     }

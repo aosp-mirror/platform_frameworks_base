@@ -16,15 +16,19 @@
 
 package com.android.server.job;
 
+import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
+import static com.android.server.job.JobSchedulerService.sSystemClock;
+import static com.android.server.job.JobSchedulerService.sUptimeMillisClock;
+
 import android.app.job.JobInfo;
 import android.app.job.JobParameters;
-import android.os.SystemClock;
 import android.os.UserHandle;
 import android.text.format.DateFormat;
 import android.util.ArrayMap;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.util.TimeUtils;
+
 import com.android.internal.util.RingBufferIndices;
 import com.android.server.job.controllers.JobStatus;
 
@@ -57,7 +61,7 @@ public final class JobPackageTracker {
     public void addEvent(int cmd, int uid, String tag, int jobId, int stopReason) {
         int index = mEventIndices.add();
         mEventCmds[index] = cmd | ((stopReason<<EVENT_STOP_REASON_SHIFT) & EVENT_STOP_REASON_MASK);
-        mEventTimes[index] = SystemClock.elapsedRealtime();
+        mEventTimes[index] = sElapsedRealtimeClock.millis();
         mEventUids[index] = uid;
         mEventTags[index] = tag;
         mEventJobIds[index] = jobId;
@@ -125,9 +129,9 @@ public final class JobPackageTracker {
         }
 
         public DataSet() {
-            mStartUptimeTime = SystemClock.uptimeMillis();
-            mStartElapsedTime = SystemClock.elapsedRealtime();
-            mStartClockTime = System.currentTimeMillis();
+            mStartUptimeTime = sUptimeMillisClock.millis();
+            mStartElapsedTime = sElapsedRealtimeClock.millis();
+            mStartClockTime = sSystemClock.millis();
         }
 
         private PackageEntry getOrCreateEntry(int uid, String pkg) {
@@ -376,20 +380,20 @@ public final class JobPackageTracker {
     }
 
     public void notePending(JobStatus job) {
-        final long now = SystemClock.uptimeMillis();
+        final long now = sUptimeMillisClock.millis();
         job.madePending = now;
         rebatchIfNeeded(now);
         mCurDataSet.incPending(job.getSourceUid(), job.getSourcePackageName(), now);
     }
 
     public void noteNonpending(JobStatus job) {
-        final long now = SystemClock.uptimeMillis();
+        final long now = sUptimeMillisClock.millis();
         mCurDataSet.decPending(job.getSourceUid(), job.getSourcePackageName(), now);
         rebatchIfNeeded(now);
     }
 
     public void noteActive(JobStatus job) {
-        final long now = SystemClock.uptimeMillis();
+        final long now = sUptimeMillisClock.millis();
         job.madeActive = now;
         rebatchIfNeeded(now);
         if (job.lastEvaluatedPriority >= JobInfo.PRIORITY_TOP_APP) {
@@ -402,7 +406,7 @@ public final class JobPackageTracker {
     }
 
     public void noteInactive(JobStatus job, int stopReason) {
-        final long now = SystemClock.uptimeMillis();
+        final long now = sUptimeMillisClock.millis();
         if (job.lastEvaluatedPriority >= JobInfo.PRIORITY_TOP_APP) {
             mCurDataSet.decActiveTop(job.getSourceUid(), job.getSourcePackageName(), now,
                     stopReason);
@@ -431,7 +435,7 @@ public final class JobPackageTracker {
         if (cur == null && last == null) {
             return 0;
         }
-        final long now = SystemClock.uptimeMillis();
+        final long now = sUptimeMillisClock.millis();
         long time = 0;
         if (cur != null) {
             time += cur.getActiveTime(now) + cur.getPendingTime(now);
@@ -445,8 +449,8 @@ public final class JobPackageTracker {
     }
 
     public void dump(PrintWriter pw, String prefix, int filterUid) {
-        final long now = SystemClock.uptimeMillis();
-        final long nowEllapsed = SystemClock.elapsedRealtime();
+        final long now = sUptimeMillisClock.millis();
+        final long nowEllapsed = sElapsedRealtimeClock.millis();
         final DataSet total;
         if (mLastDataSets[0] != null) {
             total = new DataSet(mLastDataSets[0]);
@@ -470,7 +474,7 @@ public final class JobPackageTracker {
             return false;
         }
         pw.println("  Job history:");
-        final long now = SystemClock.elapsedRealtime();
+        final long now = sElapsedRealtimeClock.millis();
         for (int i=0; i<size; i++) {
             final int index = mEventIndices.indexOf(i);
             final int uid = mEventUids[index];

@@ -16,11 +16,17 @@
 
 package android.os;
 
+import android.annotation.NonNull;
 import android.app.IAlarmManager;
 import android.content.Context;
 import android.util.Slog;
 
 import dalvik.annotation.optimization.CriticalNative;
+
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 
 /**
  * Core timekeeping facilities.
@@ -168,12 +174,62 @@ public final class SystemClock {
     native public static long uptimeMillis();
 
     /**
+     * Return {@link Clock} that starts at system boot, not counting time spent
+     * in deep sleep.
+     */
+    public static @NonNull Clock uptimeMillisClock() {
+        return new Clock() {
+            @Override
+            public ZoneId getZone() {
+                return ZoneOffset.UTC;
+            }
+            @Override
+            public Clock withZone(ZoneId zone) {
+                throw new UnsupportedOperationException();
+            }
+            @Override
+            public long millis() {
+                return SystemClock.uptimeMillis();
+            }
+            @Override
+            public Instant instant() {
+                return Instant.ofEpochMilli(millis());
+            }
+        };
+    }
+
+    /**
      * Returns milliseconds since boot, including time spent in sleep.
      *
      * @return elapsed milliseconds since boot.
      */
     @CriticalNative
     native public static long elapsedRealtime();
+
+    /**
+     * Return {@link Clock} that starts at system boot, including time spent in
+     * sleep.
+     */
+    public static @NonNull Clock elapsedRealtimeClock() {
+        return new Clock() {
+            @Override
+            public ZoneId getZone() {
+                return ZoneOffset.UTC;
+            }
+            @Override
+            public Clock withZone(ZoneId zone) {
+                throw new UnsupportedOperationException();
+            }
+            @Override
+            public long millis() {
+                return SystemClock.elapsedRealtime();
+            }
+            @Override
+            public Instant instant() {
+                return Instant.ofEpochMilli(millis());
+            }
+        };
+    }
 
     /**
      * Returns nanoseconds since boot, including time spent in sleep.
