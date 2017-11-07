@@ -3246,6 +3246,7 @@ public class DevicePolicyManager {
      *             that uses {@link DeviceAdminInfo#USES_POLICY_WIPE_DATA}
      */
     public void wipeData(int flags) {
+        throwIfParentInstance("wipeData");
         final String wipeReasonForUser = mContext.getString(
                 R.string.work_profile_deleted_description_dpm_wipe);
         wipeDataInternal(flags, wipeReasonForUser);
@@ -3270,6 +3271,7 @@ public class DevicePolicyManager {
      * @throws IllegalArgumentException if the input reason string is null or empty.
      */
     public void wipeDataWithReason(int flags, @NonNull CharSequence reason) {
+        throwIfParentInstance("wipeDataWithReason");
         Preconditions.checkNotNull(reason, "CharSequence is null");
         wipeDataInternal(flags, reason.toString());
     }
@@ -3283,7 +3285,6 @@ public class DevicePolicyManager {
      * @hide
      */
     private void wipeDataInternal(int flags, @NonNull String wipeReasonForUser) {
-        throwIfParentInstance("wipeDataWithReason");
         if (mService != null) {
             try {
                 mService.wipeDataWithReason(flags, wipeReasonForUser);
