@@ -19,12 +19,14 @@ package com.android.server.media;
 import com.android.internal.util.DumpUtils;
 import com.android.server.Watchdog;
 
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.media.AudioPlaybackConfiguration;
 import android.media.AudioRoutesInfo;
 import android.media.AudioSystem;
 import android.media.IAudioRoutesObserver;
@@ -96,7 +98,8 @@ public final class MediaRouterService extends IMediaRouterService.Stub
     private int mCurrentUserId = -1;
     private boolean mGlobalBluetoothA2dpOn = false;
     private final IAudioService mAudioService;
-    private final AudioPlaybackMonitor mAudioPlaybackMonitor;
+    private final AudioPlayerStateMonitor mAudioPlayerStateMonitor;
+    private final Handler mHandler = new Handler();
     private final AudioRoutesInfo mCurAudioRoutesInfo = new AudioRoutesInfo();
 
     public MediaRouterService(Context context) {
@@ -106,31 +109,57 @@ public final class MediaRouterService extends IMediaRouterService.Stub
         mAudioService = IAudioService.Stub.asInterface(
                 ServiceManager.getService(Context.AUDIO_SERVICE));
 
-        mAudioPlaybackMonitor = AudioPlaybackMonitor.getInstance(context, mAudioService);
-        mAudioPlaybackMonitor.registerOnAudioPlayerActiveStateChangedListener(
-                new AudioPlaybackMonitor.OnAudioPlayerActiveStateChangedListener() {
+        mAudioPlayerStateMonitor = AudioPlayerStateMonitor.getInstance();
+        mAudioPlayerStateMonitor.registerListener(
+                new AudioPlayerStateMonitor.OnAudioPlayerStateChangedListener() {
+            static final long WAIT_MS = 500;
+            final Runnable mRestoreBluetoothA2dpRunnable = new Runnable() {
+                @Override
+                public void run() {
+                    restoreBluetoothA2dp();
+                }
+            };
+
             @Override
-            public void onAudioPlayerActiveStateChanged(int uid, boolean active) {
+            public void onAudioPlayerStateChanged(
+                    int uid, int prevState, @Nullable AudioPlaybackConfiguration config) {
+                int restoreUid = -1;
+                boolean active = config == null ? false : config.isActive();
                 if (active) {
-                    restoreRoute(uid);
+                    restoreUid = uid;
+                } else if (prevState != AudioPlaybackConfiguration.PLAYER_STATE_STARTED) {
+                    // Noting to do if the prev state is not an active state.
+                    return;
                 } else {
                     IntArray sortedAudioPlaybackClientUids =
-                            mAudioPlaybackMonitor.getSortedAudioPlaybackClientUids();
-                    boolean restored = false;
-                    for (int i = 0; i < sortedAudioPlaybackClientUids.size(); i++) {
-                        if (mAudioPlaybackMonitor.isPlaybackActive(
+                            mAudioPlayerStateMonitor.getSortedAudioPlaybackClientUids();
+                    for (int i = 0; i < sortedAudioPlaybackClientUids.size(); ++i) {
+                        if (mAudioPlayerStateMonitor.isPlaybackActive(
                                 sortedAudioPlaybackClientUids.get(i))) {
-                            restoreRoute(sortedAudioPlaybackClientUids.get(i));
-                            restored = true;
+                            restoreUid = sortedAudioPlaybackClientUids.get(i);
                             break;
                         }
                     }
-                    if (!restored) {
-                        restoreBluetoothA2dp();
+                }
+
+                mHandler.removeCallbacks(mRestoreBluetoothA2dpRunnable);
+                if (restoreUid >= 0) {
+                    restoreRoute(restoreUid);
+                    if (DEBUG) {
+                        Slog.d(TAG, "onAudioPlayerStateChanged: " + "uid " + uid
+                                + " active " + active + " restoring " + restoreUid);
+                    }
+                } else {
+                    mHandler.postDelayed(mRestoreBluetoothA2dpRunnable, WAIT_MS);
+                    if (DEBUG) {
+                        Slog.d(TAG, "onAudioPlayerStateChanged: " + "uid " + uid
+                                + " active " + active + " delaying");
                     }
                 }
             }
-        });
+        }, mHandler);
+        mAudioPlayerStateMonitor.registerSelfIntoAudioServiceIfNeeded(mAudioService);
+
         AudioRoutesInfo audioRoutes = null;
         try {
             audioRoutes = mAudioService.startWatchingRoutes(new IAudioRoutesObserver.Stub() {
@@ -261,9 +290,14 @@ public final class MediaRouterService extends IMediaRouterService.Stub
 
         final long token = Binder.clearCallingIdentity();
         try {
+            ClientRecord clientRecord;
             synchronized (mLock) {
-                return isPlaybackActiveLocked(client);
+                clientRecord = mAllClientRecords.get(client.asBinder());
             }
+            if (clientRecord != null) {
+                return mAudioPlayerStateMonitor.isPlaybackActive(clientRecord.mUid);
+            }
+            return false;
         } finally {
             Binder.restoreCallingIdentity(token);
         }
@@ -478,14 +512,6 @@ public final class MediaRouterService extends IMediaRouterService.Stub
             return clientRecord.getState();
         }
         return null;
-    }
-
-    private boolean isPlaybackActiveLocked(IMediaRouterClient client) {
-        ClientRecord clientRecord = mAllClientRecords.get(client.asBinder());
-        if (clientRecord != null) {
-            return mAudioPlaybackMonitor.isPlaybackActive(clientRecord.mUid);
-        }
-        return false;
     }
 
     private void setDiscoveryRequestLocked(IMediaRouterClient client,
