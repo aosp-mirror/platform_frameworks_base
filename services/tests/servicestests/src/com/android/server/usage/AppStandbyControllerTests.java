@@ -16,11 +16,7 @@
 
 package com.android.server.usage;
 
-import static android.app.usage.AppStandby.STANDBY_BUCKET_ACTIVE;
-import static android.app.usage.AppStandby.STANDBY_BUCKET_FREQUENT;
-import static android.app.usage.AppStandby.STANDBY_BUCKET_RARE;
-import static android.app.usage.AppStandby.STANDBY_BUCKET_WORKING_SET;
-
+import static android.app.usage.AppStandby.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
@@ -251,9 +247,21 @@ public class AppStandbyControllerTests {
                         false));
     }
 
+    private void reportEvent(AppStandbyController controller, long elapsedTime) {
+        // Back to ACTIVE on event
+        UsageEvents.Event ev = new UsageEvents.Event();
+        ev.mPackage = PACKAGE_1;
+        ev.mEventType = UsageEvents.Event.USER_INTERACTION;
+        controller.reportEvent(ev, elapsedTime, USER_ID);
+    }
+
     @Test
     public void testBuckets() throws Exception {
         AppStandbyController controller = setupController();
+
+        assertTimeout(controller, 0, STANDBY_BUCKET_NEVER);
+
+        reportEvent(controller, 0);
 
         // ACTIVE bucket
         assertTimeout(controller, 11 * HOUR_MS, STANDBY_BUCKET_ACTIVE);
@@ -270,11 +278,7 @@ public class AppStandbyControllerTests {
         // RARE bucket
         assertTimeout(controller, 9 * DAY_MS, STANDBY_BUCKET_RARE);
 
-        // Back to ACTIVE on event
-        UsageEvents.Event ev = new UsageEvents.Event();
-        ev.mPackage = PACKAGE_1;
-        ev.mEventType = UsageEvents.Event.USER_INTERACTION;
-        controller.reportEvent(ev, mInjector.mElapsedRealtime, USER_ID);
+        reportEvent(controller, 9 * DAY_MS);
 
         assertTimeout(controller, 9 * DAY_MS, STANDBY_BUCKET_ACTIVE);
 
@@ -286,6 +290,10 @@ public class AppStandbyControllerTests {
     public void testScreenTimeAndBuckets() throws Exception {
         AppStandbyController controller = setupController();
         mInjector.setDisplayOn(false);
+
+        assertTimeout(controller, 0, STANDBY_BUCKET_NEVER);
+
+        reportEvent(controller, 0);
 
         // ACTIVE bucket
         assertTimeout(controller, 11 * HOUR_MS, STANDBY_BUCKET_ACTIVE);
