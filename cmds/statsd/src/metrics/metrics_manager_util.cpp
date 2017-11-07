@@ -192,10 +192,11 @@ bool initMetrics(const StatsdConfig& config, const unordered_map<string, int>& l
                  unordered_map<int, std::vector<int>>& conditionToMetricMap,
                  unordered_map<int, std::vector<int>>& trackerToMetricMap) {
     sp<ConditionWizard> wizard = new ConditionWizard(allConditionTrackers);
-    const int allMetricsCount =
-            config.count_metric_size() + config.duration_metric_size() + config.event_metric_size() + config.value_metric_size();
+    const int allMetricsCount = config.count_metric_size() + config.duration_metric_size() +
+                                config.event_metric_size() + config.value_metric_size();
     allMetricProducers.reserve(allMetricsCount);
     StatsPullerManager& statsPullerManager = StatsPullerManager::GetInstance();
+    uint64_t startTimeNs = time(nullptr) * NS_PER_SEC;
 
     // Build MetricProducers for each metric defined in config.
     // build CountMetricProducer
@@ -221,7 +222,8 @@ bool initMetrics(const StatsdConfig& config, const unordered_map<string, int>& l
                                        conditionToMetricMap);
         }
 
-        sp<MetricProducer> countProducer = new CountMetricProducer(metric, conditionIndex, wizard);
+        sp<MetricProducer> countProducer =
+                new CountMetricProducer(metric, conditionIndex, wizard, startTimeNs);
         allMetricProducers.push_back(countProducer);
     }
 
@@ -282,7 +284,7 @@ bool initMetrics(const StatsdConfig& config, const unordered_map<string, int>& l
 
         sp<MetricProducer> durationMetric = new DurationMetricProducer(
                 metric, conditionIndex, trackerIndices[0], trackerIndices[1], trackerIndices[2],
-                wizard, internalDimension);
+                wizard, internalDimension, startTimeNs);
 
         allMetricProducers.push_back(durationMetric);
     }
@@ -308,7 +310,9 @@ bool initMetrics(const StatsdConfig& config, const unordered_map<string, int>& l
                                        conditionToMetricMap);
         }
 
-        sp<MetricProducer> eventMetric = new EventMetricProducer(metric, conditionIndex, wizard);
+        sp<MetricProducer> eventMetric =
+                new EventMetricProducer(metric, conditionIndex, wizard, startTimeNs);
+
         allMetricProducers.push_back(eventMetric);
     }
 
@@ -348,7 +352,7 @@ bool initMetrics(const StatsdConfig& config, const unordered_map<string, int>& l
         }
 
         sp<MetricProducer> valueProducer =
-                new ValueMetricProducer(metric, conditionIndex, wizard, pullTagId);
+                new ValueMetricProducer(metric, conditionIndex, wizard, pullTagId, startTimeNs);
         allMetricProducers.push_back(valueProducer);
     }
 

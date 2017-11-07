@@ -89,7 +89,7 @@ ConfigMetricsReport StatsLogProcessor::onDumpReport(const ConfigKey& key) {
         *dest = m;
     }
     auto temp = mUidMap->getOutput(key);
-    report.set_allocated_uid_map(&temp);
+    report.mutable_uid_map()->Swap(&temp);
     return report;
 }
 

@@ -46,10 +46,9 @@ const int FIELD_ID_TIMESTAMP_NANOS = 1;
 const int FIELD_ID_STATS_EVENTS = 2;
 
 EventMetricProducer::EventMetricProducer(const EventMetric& metric, const int conditionIndex,
-                                         const sp<ConditionWizard>& wizard)
-    // TODO: Pass in the start time from MetricsManager, instead of calling time() here.
-    : MetricProducer((time(nullptr) * NANO_SECONDS_IN_A_SECOND), conditionIndex, wizard),
-      mMetric(metric) {
+                                         const sp<ConditionWizard>& wizard,
+                                         const uint64_t startTimeNs)
+    : MetricProducer(startTimeNs, conditionIndex, wizard), mMetric(metric) {
     if (metric.links().size() > 0) {
         mConditionLinks.insert(mConditionLinks.begin(), metric.links().begin(),
                                metric.links().end());
@@ -82,7 +81,7 @@ void EventMetricProducer::onSlicedConditionMayChange(const uint64_t eventTime) {
 }
 
 StatsLogReport EventMetricProducer::onDumpReport() {
-    long long endTime = time(nullptr) * NANO_SECONDS_IN_A_SECOND;
+    long long endTime = time(nullptr) * NS_PER_SEC;
     mProto->end(mProtoToken);
     mProto->write(FIELD_TYPE_INT64 | FIELD_ID_END_REPORT_NANOS, endTime);
 
@@ -114,7 +113,6 @@ void EventMetricProducer::onMatchedLogEventInternal(
         const size_t matcherIndex, const HashableDimensionKey& eventKey,
         const std::map<std::string, HashableDimensionKey>& conditionKey, bool condition,
         const LogEvent& event, bool scheduledPull) {
-
     if (!condition) {
         return;
     }
@@ -128,7 +126,7 @@ void EventMetricProducer::onMatchedLogEventInternal(
 }
 
 size_t EventMetricProducer::byteSize() {
-  return mProto->size();
+    return mProto->size();
 }
 
 }  // namespace statsd

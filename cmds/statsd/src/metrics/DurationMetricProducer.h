@@ -40,7 +40,7 @@ public:
     DurationMetricProducer(const DurationMetric& durationMetric, const int conditionIndex,
                            const size_t startIndex, const size_t stopIndex,
                            const size_t stopAllIndex, const sp<ConditionWizard>& wizard,
-                           const vector<KeyMatcher>& internalDimension);
+                           const vector<KeyMatcher>& internalDimension, const uint64_t startTimeNs);
 
     virtual ~DurationMetricProducer();
 

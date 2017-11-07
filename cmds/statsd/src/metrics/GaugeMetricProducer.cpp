@@ -35,7 +35,7 @@ namespace statsd {
 
 GaugeMetricProducer::GaugeMetricProducer(const GaugeMetric& metric, const int conditionIndex,
                                          const sp<ConditionWizard>& wizard, const int pullTagId)
-    : MetricProducer((time(nullptr) * NANO_SECONDS_IN_A_SECOND), conditionIndex, wizard),
+    : MetricProducer((time(nullptr) * NS_PER_SEC), conditionIndex, wizard),
       mMetric(metric),
       mPullTagId(pullTagId) {
     if (metric.has_bucket() && metric.bucket().has_bucket_size_millis()) {
@@ -94,7 +94,7 @@ StatsLogReport GaugeMetricProducer::onDumpReport() {
     // Dump current bucket if it's stale.
     // If current bucket is still on-going, don't force dump current bucket.
     // In finish(), We can force dump current bucket.
-    flushGaugeIfNeededLocked(time(nullptr) * NANO_SECONDS_IN_A_SECOND);
+    flushGaugeIfNeededLocked(time(nullptr) * NS_PER_SEC);
     report.set_end_report_nanos(mCurrentBucketStartTimeNs);
 
     StatsLogReport_GaugeMetricDataWrapper* wrapper = report.mutable_gauge_metrics();

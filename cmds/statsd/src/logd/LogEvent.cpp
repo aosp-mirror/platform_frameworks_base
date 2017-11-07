@@ -35,7 +35,7 @@ LogEvent::LogEvent(log_msg& msg) : mList(msg) {
     init(msg.entry_v1.sec * NS_PER_SEC + msg.entry_v1.nsec, &mList);
 }
 
-LogEvent::LogEvent(int tag) : mList(tag) {
+LogEvent::LogEvent(int tag, uint64_t timestampNs) : mList(tag), mTimestampNs(timestampNs) {
 }
 
 LogEvent::~LogEvent() {

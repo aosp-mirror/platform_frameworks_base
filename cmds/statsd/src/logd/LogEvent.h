@@ -50,7 +50,7 @@ public:
      * any of the values. This constructor is useful for unit-testing since we can't pass in an
      * android_log_event_list since there is no copy constructor or assignment operator available.
      */
-    explicit LogEvent(int tag);
+    explicit LogEvent(int tag, uint64_t timestampNs);
 
     ~LogEvent();
 
@@ -123,7 +123,9 @@ private:
     vector<android_log_list_element> mElements;
     // Need a copy of the android_log_event_list so the strings are not cleared.
     android_log_event_list mList;
-    long mTimestampNs;
+
+    uint64_t mTimestampNs;
+
     int mTagId;
 };
 

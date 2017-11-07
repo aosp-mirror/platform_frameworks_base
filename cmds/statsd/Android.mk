@@ -157,8 +157,10 @@ LOCAL_SRC_FILES := \
     tests/LogReader_test.cpp \
     tests/MetricsManager_test.cpp \
     tests/UidMap_test.cpp \
-    tests/OringDurationTracker_test.cpp \
-    tests/MaxDurationTracker_test.cpp
+    tests/metrics/OringDurationTracker_test.cpp \
+    tests/metrics/MaxDurationTracker_test.cpp \
+    tests/metrics/CountMetricProducer_test.cpp \
+    tests/metrics/EventMetricProducer_test.cpp
 
 
 LOCAL_STATIC_LIBRARIES := \

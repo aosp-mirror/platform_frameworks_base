@@ -58,10 +58,9 @@ const int FIELD_ID_COUNT = 3;
 
 // TODO: add back AnomalyTracker.
 CountMetricProducer::CountMetricProducer(const CountMetric& metric, const int conditionIndex,
-                                         const sp<ConditionWizard>& wizard)
-    // TODO: Pass in the start time from MetricsManager, instead of calling time() here.
-    : MetricProducer((time(nullptr) * NANO_SECONDS_IN_A_SECOND), conditionIndex, wizard),
-      mMetric(metric) {
+                                         const sp<ConditionWizard>& wizard,
+                                         const uint64_t startTimeNs)
+    : MetricProducer(startTimeNs, conditionIndex, wizard), mMetric(metric) {
     // TODO: evaluate initial conditions. and set mConditionMet.
     if (metric.has_bucket() && metric.bucket().has_bucket_size_millis()) {
         mBucketSizeNs = metric.bucket().bucket_size_millis() * 1000 * 1000;
@@ -114,15 +113,17 @@ void CountMetricProducer::onSlicedConditionMayChange(const uint64_t eventTime) {
 }
 
 StatsLogReport CountMetricProducer::onDumpReport() {
-    long long endTime = time(nullptr) * NANO_SECONDS_IN_A_SECOND;
+    long long endTime = time(nullptr) * NS_PER_SEC;
 
     // Dump current bucket if it's stale.
     // If current bucket is still on-going, don't force dump current bucket.
     // In finish(), We can force dump current bucket.
     flushCounterIfNeeded(endTime);
+    VLOG("metric %lld dump report now...", mMetric.metric_id());
 
-    for (const auto& counter : mPastBucketProtos) {
+    for (const auto& counter : mPastBuckets) {
         const HashableDimensionKey& hashableKey = counter.first;
+        VLOG("  dimension key %s", hashableKey.c_str());
         auto it = mDimensionKeyMap.find(hashableKey);
         if (it == mDimensionKeyMap.end()) {
             ALOGE("Dimension key %s not found?!?! skip...", hashableKey.c_str());
@@ -147,20 +148,17 @@ StatsLogReport CountMetricProducer::onDumpReport() {
         }
 
         // Then fill bucket_info (CountBucketInfo).
-        for (const auto& proto : counter.second) {
-            size_t bufferSize = proto->size();
-            char* buffer(new char[bufferSize]);
-            size_t pos = 0;
-            auto it = proto->data();
-            while (it.readBuffer() != NULL) {
-                size_t toRead = it.currentToRead();
-                std::memcpy(&buffer[pos], it.readBuffer(), toRead);
-                pos += toRead;
-                it.rp()->move(toRead);
-            }
-            mProto->write(FIELD_TYPE_MESSAGE | FIELD_ID_DIMENSION, buffer, bufferSize);
+        for (const auto& bucket : counter.second) {
+            long long bucketInfoToken = mProto->start(FIELD_TYPE_MESSAGE | FIELD_ID_BUCKET_INFO);
+            mProto->write(FIELD_TYPE_INT64 | FIELD_ID_START_BUCKET_NANOS,
+                          (long long)bucket.mBucketStartNs);
+            mProto->write(FIELD_TYPE_INT64 | FIELD_ID_END_BUCKET_NANOS,
+                          (long long)bucket.mBucketEndNs);
+            mProto->write(FIELD_TYPE_INT64 | FIELD_ID_COUNT, (long long)bucket.mCount);
+            mProto->end(bucketInfoToken);
+            VLOG("\t bucket [%lld - %lld] count: %lld", (long long)bucket.mBucketStartNs,
+                 (long long)bucket.mBucketEndNs, (long long)bucket.mCount);
         }
-
         mProto->end(wrapperToken);
     }
 
@@ -169,8 +167,8 @@ StatsLogReport CountMetricProducer::onDumpReport() {
                   (long long)mCurrentBucketStartTimeNs);
 
     size_t bufferSize = mProto->size();
-    VLOG("metric %lld dump report now...", mMetric.metric_id());
     std::unique_ptr<uint8_t[]> buffer(new uint8_t[bufferSize]);
+
     size_t pos = 0;
     auto it = mProto->data();
     while (it.readBuffer() != NULL) {
@@ -181,7 +179,7 @@ StatsLogReport CountMetricProducer::onDumpReport() {
     }
 
     startNewProtoOutputStream(endTime);
-    mPastBucketProtos.clear();
+    mPastBuckets.clear();
     mByteSize = 0;
 
     // TODO: Once we migrate all MetricProducers to use ProtoOutputStream, we should return this:
@@ -239,20 +237,16 @@ void CountMetricProducer::flushCounterIfNeeded(const uint64_t eventTimeNs) {
     // adjust the bucket start time
     int64_t numBucketsForward = (eventTimeNs - mCurrentBucketStartTimeNs) / mBucketSizeNs;
 
+    CountBucket info;
+    info.mBucketStartNs = mCurrentBucketStartTimeNs;
+    info.mBucketEndNs = mCurrentBucketStartTimeNs + mBucketSizeNs;
     for (const auto& counter : mCurrentSlicedCounter) {
-        unique_ptr<ProtoOutputStream> proto = make_unique<ProtoOutputStream>();
-        proto->write(FIELD_TYPE_INT64 | FIELD_ID_START_BUCKET_NANOS,
-                     (long long)mCurrentBucketStartTimeNs);
-        proto->write(FIELD_TYPE_INT64 | FIELD_ID_END_BUCKET_NANOS,
-                      (long long)mCurrentBucketStartTimeNs + mBucketSizeNs);
-        proto->write(FIELD_TYPE_INT64 | FIELD_ID_COUNT, (long long)counter.second);
-
-        auto& bucketList = mPastBucketProtos[counter.first];
-        mByteSize += proto->size();
-        bucketList.push_back(std::move(proto));
-
+        info.mCount = counter.second;
+        auto& bucketList = mPastBuckets[counter.first];
+        bucketList.push_back(info);
         VLOG("metric %lld, dump key value: %s -> %d", mMetric.metric_id(), counter.first.c_str(),
              counter.second);
+        mByteSize += sizeof(info);
     }
 
     // TODO: Re-add anomaly detection (similar to):

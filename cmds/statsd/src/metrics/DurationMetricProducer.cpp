@@ -35,9 +35,9 @@ DurationMetricProducer::DurationMetricProducer(const DurationMetric& metric,
                                                const int conditionIndex, const size_t startIndex,
                                                const size_t stopIndex, const size_t stopAllIndex,
                                                const sp<ConditionWizard>& wizard,
-                                               const vector<KeyMatcher>& internalDimension)
-    // TODO: Pass in the start time from MetricsManager, instead of calling time() here.
-    : MetricProducer(time(nullptr) * NANO_SECONDS_IN_A_SECOND, conditionIndex, wizard),
+                                               const vector<KeyMatcher>& internalDimension,
+                                               const uint64_t startTimeNs)
+    : MetricProducer(startTimeNs, conditionIndex, wizard),
       mMetric(metric),
       mStartIndex(startIndex),
       mStopIndex(stopIndex),
@@ -131,7 +131,7 @@ StatsLogReport DurationMetricProducer::onDumpReport() {
     // Dump current bucket if it's stale.
     // If current bucket is still on-going, don't force dump current bucket.
     // In finish(), We can force dump current bucket.
-    flushIfNeeded(time(nullptr) * NANO_SECONDS_IN_A_SECOND);
+    flushIfNeeded(time(nullptr) * NS_PER_SEC);
     report.set_end_report_nanos(mCurrentBucketStartTimeNs);
 
     StatsLogReport_DurationMetricDataWrapper* wrapper = report.mutable_duration_metrics();
@@ -195,10 +195,10 @@ void DurationMetricProducer::onMatchedLogEventInternal(
 }
 
 size_t DurationMetricProducer::byteSize() {
-// TODO: return actual proto size when ProtoOutputStream is ready for use for
-// DurationMetricsProducer.
-//    return mProto->size();
-  return 0;
+    // TODO: return actual proto size when ProtoOutputStream is ready for use for
+    // DurationMetricsProducer.
+    //    return mProto->size();
+    return 0;
 }
 
 }  // namespace statsd

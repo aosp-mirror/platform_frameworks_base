@@ -20,6 +20,7 @@
 #include <unordered_map>
 
 #include <android/util/ProtoOutputStream.h>
+
 #include "../condition/ConditionTracker.h"
 #include "../matchers/matcher_util.h"
 #include "MetricProducer.h"
@@ -35,13 +36,14 @@ class EventMetricProducer : public MetricProducer {
 public:
     // TODO: Pass in the start time from MetricsManager, it should be consistent for all metrics.
     EventMetricProducer(const EventMetric& eventMetric, const int conditionIndex,
-                        const sp<ConditionWizard>& wizard);
+                        const sp<ConditionWizard>& wizard, const uint64_t startTimeNs);
 
     virtual ~EventMetricProducer();
 
     void onMatchedLogEventInternal(const size_t matcherIndex, const HashableDimensionKey& eventKey,
                                    const std::map<std::string, HashableDimensionKey>& conditionKey,
-                                   bool condition, const LogEvent& event, bool scheduledPull) override;
+                                   bool condition, const LogEvent& event,
+                                   bool scheduledPull) override;
 
     void onConditionChanged(const bool conditionMet, const uint64_t eventTime) override;
 
