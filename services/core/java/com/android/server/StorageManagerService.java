@@ -56,6 +56,7 @@ import android.os.FileUtils;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
+import android.os.IProgressListener;
 import android.os.IStoraged;
 import android.os.IVold;
 import android.os.IVoldListener;
@@ -570,7 +571,7 @@ class StorageManagerService extends IStorageManager.Stub implements Watchdog.Mon
                     }
 
                     // TODO: Reintroduce shouldBenchmark() test
-                    fstrim(0);
+                    fstrim(0, null);
 
                     // invoke the completion callback, if any
                     // TODO: fstrim is non-blocking, so remove this useless callback
@@ -1576,21 +1577,19 @@ class StorageManagerService extends IStorageManager.Stub implements Watchdog.Mon
     }
 
     @Override
-    public long benchmark(String volId) {
+    public void benchmark(String volId, IVoldTaskListener listener) {
         enforcePermission(android.Manifest.permission.MOUNT_FORMAT_FILESYSTEMS);
 
-        // TODO: refactor for callers to provide a listener
         try {
-            final CompletableFuture<PersistableBundle> result = new CompletableFuture<>();
             mVold.benchmark(volId, new IVoldTaskListener.Stub() {
                 @Override
                 public void onStatus(int status, PersistableBundle extras) {
-                    // Not currently used
+                    dispatchOnStatus(listener, status, extras);
                 }
 
                 @Override
                 public void onFinished(int status, PersistableBundle extras) {
-                    result.complete(extras);
+                    dispatchOnFinished(listener, status, extras);
 
                     final String path = extras.getString("path");
                     final String ident = extras.getString("ident");
@@ -1611,10 +1610,8 @@ class StorageManagerService extends IStorageManager.Stub implements Watchdog.Mon
                     }
                 }
             });
-            return result.get(3, TimeUnit.MINUTES).getLong("run", Long.MAX_VALUE);
-        } catch (Exception e) {
-            Slog.wtf(TAG, e);
-            return Long.MAX_VALUE;
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
         }
     }
 
@@ -1742,13 +1739,15 @@ class StorageManagerService extends IStorageManager.Stub implements Watchdog.Mon
     }
 
     @Override
-    public void fstrim(int flags) {
+    public void fstrim(int flags, IVoldTaskListener listener) {
         enforcePermission(android.Manifest.permission.MOUNT_FORMAT_FILESYSTEMS);
 
         try {
             mVold.fstrim(flags, new IVoldTaskListener.Stub() {
                 @Override
                 public void onStatus(int status, PersistableBundle extras) {
+                    dispatchOnStatus(listener, status, extras);
+
                     // Ignore trim failures
                     if (status != 0) return;
 
@@ -1770,12 +1769,13 @@ class StorageManagerService extends IStorageManager.Stub implements Watchdog.Mon
 
                 @Override
                 public void onFinished(int status, PersistableBundle extras) {
-                    // Not currently used
+                    dispatchOnFinished(listener, status, extras);
+
                     // TODO: benchmark when desired
                 }
             });
-        } catch (Exception e) {
-            Slog.wtf(TAG, e);
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
         }
     }
 
@@ -3236,6 +3236,26 @@ class StorageManagerService extends IStorageManager.Stub implements Watchdog.Mon
             sb.append(mForceUnmount);
             sb.append('}');
             return sb.toString();
+        }
+    }
+
+    private void dispatchOnStatus(IVoldTaskListener listener, int status,
+            PersistableBundle extras) {
+        if (listener != null) {
+            try {
+                listener.onStatus(status, extras);
+            } catch (RemoteException ignored) {
+            }
+        }
+    }
+
+    private void dispatchOnFinished(IVoldTaskListener listener, int status,
+            PersistableBundle extras) {
+        if (listener != null) {
+            try {
+                listener.onFinished(status, extras);
+            } catch (RemoteException ignored) {
+            }
         }
     }
 
