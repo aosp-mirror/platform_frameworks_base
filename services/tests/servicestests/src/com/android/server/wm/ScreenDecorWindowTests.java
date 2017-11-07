@@ -67,7 +67,8 @@ import java.util.ArrayList;
 // TODO: Test non-Activity windows.
 // TODO: Test secondary display.
 @SmallTest
-@Presubmit
+// TODO(b/68957554)
+//@Presubmit
 @RunWith(AndroidJUnit4.class)
 public class ScreenDecorWindowTests {
 
