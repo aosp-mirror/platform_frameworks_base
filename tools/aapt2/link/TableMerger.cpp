@@ -37,17 +37,14 @@ TableMerger::TableMerger(IAaptContext* context, ResourceTable* out_table,
   CHECK(master_package_ != nullptr) << "package name or ID already taken";
 }
 
-bool TableMerger::Merge(const Source& src, ResourceTable* table, bool overlay,
-                        io::IFileCollection* collection) {
+bool TableMerger::Merge(const Source& src, ResourceTable* table, bool overlay) {
   // We allow adding new resources if this is not an overlay, or if the options allow overlays
   // to add new resources.
-  return MergeImpl(src, table, collection, overlay,
-                   options_.auto_add_overlay || !overlay /*allow_new*/);
+  return MergeImpl(src, table, overlay, options_.auto_add_overlay || !overlay /*allow_new*/);
 }
 
 // This will merge packages with the same package name (or no package name).
-bool TableMerger::MergeImpl(const Source& src, ResourceTable* table,
-                            io::IFileCollection* collection, bool overlay, bool allow_new) {
+bool TableMerger::MergeImpl(const Source& src, ResourceTable* table, bool overlay, bool allow_new) {
   bool error = false;
   for (auto& package : table->packages) {
     // Only merge an empty package or the package we're building.
@@ -55,37 +52,20 @@ bool TableMerger::MergeImpl(const Source& src, ResourceTable* table,
     // This is because at compile time it is unknown if the attributes are
     // simply uses of the attribute or definitions.
     if (package->name.empty() || context_->GetCompilationPackage() == package->name) {
-      FileMergeCallback callback;
-      if (collection) {
-        callback = [&](const ResourceNameRef& name, const ConfigDescription& config,
-                       FileReference* new_file, FileReference* old_file) -> bool {
-          // The old file's path points inside the APK, so we can use it as is.
-          io::IFile* f = collection->FindFile(*old_file->path);
-          if (!f) {
-            context_->GetDiagnostics()->Error(DiagMessage(src)
-                                              << "file '" << *old_file->path << "' not found");
-            return false;
-          }
-
-          new_file->file = f;
-          return true;
-        };
-      }
-
       // Merge here. Once the entries are merged and mangled, any references to them are still
       // valid. This is because un-mangled references are mangled, then looked up at resolution
       // time. Also, when linking, we convert references with no package name to use the compilation
       // package name.
-      error |=
-          !DoMerge(src, table, package.get(), false /* mangle */, overlay, allow_new, callback);
+      error |= !DoMerge(src, table, package.get(), false /*mangle*/, overlay, allow_new);
     }
   }
   return !error;
 }
 
-// This will merge and mangle resources from a static library.
+// This will merge and mangle resources from a static library. It is assumed that all FileReferences
+// have correctly set their io::IFile*.
 bool TableMerger::MergeAndMangle(const Source& src, const StringPiece& package_name,
-                                 ResourceTable* table, io::IFileCollection* collection) {
+                                 ResourceTable* table) {
   bool error = false;
   for (auto& package : table->packages) {
     // Warn of packages with an unrelated ID.
@@ -96,23 +76,7 @@ bool TableMerger::MergeAndMangle(const Source& src, const StringPiece& package_n
 
     bool mangle = package_name != context_->GetCompilationPackage();
     merged_packages_.insert(package->name);
-
-    auto callback = [&](const ResourceNameRef& name, const ConfigDescription& config,
-                        FileReference* new_file, FileReference* old_file) -> bool {
-      // The old file's path points inside the APK, so we can use it as is.
-      io::IFile* f = collection->FindFile(*old_file->path);
-      if (!f) {
-        context_->GetDiagnostics()->Error(DiagMessage(src)
-                                          << "file '" << *old_file->path << "' not found");
-        return false;
-      }
-
-      new_file->file = f;
-      return true;
-    };
-
-    error |= !DoMerge(src, table, package.get(), mangle, false /*overlay*/, true /*allow_new*/,
-                      callback);
+    error |= !DoMerge(src, table, package.get(), mangle, false /*overlay*/, true /*allow_new*/);
   }
   return !error;
 }
@@ -187,7 +151,7 @@ static ResourceTable::CollisionResult ResolveMergeCollision(Value* existing, Val
 
 static ResourceTable::CollisionResult MergeConfigValue(IAaptContext* context,
                                                        const ResourceNameRef& res_name,
-                                                       const bool overlay,
+                                                       bool overlay,
                                                        ResourceConfigValue* dst_config_value,
                                                        ResourceConfigValue* src_config_value,
                                                        StringPool* pool) {
@@ -220,10 +184,8 @@ static ResourceTable::CollisionResult MergeConfigValue(IAaptContext* context,
 }
 
 bool TableMerger::DoMerge(const Source& src, ResourceTable* src_table,
-                          ResourceTablePackage* src_package,
-                          const bool mangle_package, const bool overlay,
-                          const bool allow_new_resources,
-                          const FileMergeCallback& callback) {
+                          ResourceTablePackage* src_package, bool mangle_package, bool overlay,
+                          bool allow_new_resources) {
   bool error = false;
 
   for (auto& src_type : src_package->types) {
@@ -292,13 +254,6 @@ bool TableMerger::DoMerge(const Source& src, ResourceTable* src_table,
           } else {
             new_file_ref = std::unique_ptr<FileReference>(f->Clone(&master_table_->string_pool));
           }
-
-          if (callback) {
-            if (!callback(res_name, src_config_value->config, new_file_ref.get(), f)) {
-              error = true;
-              continue;
-            }
-          }
           dst_config_value->value = std::move(new_file_ref);
 
         } else {
@@ -343,8 +298,8 @@ bool TableMerger::MergeFile(const ResourceFile& file_desc, bool overlay, io::IFi
       ->FindOrCreateValue(file_desc.config, {})
       ->value = std::move(file_ref);
 
-  return DoMerge(file->GetSource(), &table, pkg, false /* mangle */, overlay /* overlay */,
-                 true /* allow_new */, {});
+  return DoMerge(file->GetSource(), &table, pkg, false /*mangle*/, overlay /*overlay*/,
+                 true /*allow_new*/);
 }
 
 }  // namespace aapt

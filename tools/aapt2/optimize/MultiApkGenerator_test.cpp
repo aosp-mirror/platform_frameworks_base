@@ -106,7 +106,7 @@ class MultiApkGeneratorTest : public ::testing::Test {
 TEST_F(MultiApkGeneratorTest, VersionFilterNewerVersion) {
   std::unique_ptr<ResourceTable> table = BuildTable();
 
-  LoadedApk apk = {{"test.apk"}, {}, std::move(table)};
+  LoadedApk apk = {{"test.apk"}, {}, std::move(table), {}};
   std::unique_ptr<IAaptContext> ctx = test::ContextBuilder().SetMinSdkVersion(19).Build();
   PostProcessingConfiguration empty_config;
   TableFlattenerOptions table_flattener_options;
@@ -147,7 +147,7 @@ TEST_F(MultiApkGeneratorTest, VersionFilterNewerVersion) {
 TEST_F(MultiApkGeneratorTest, VersionFilterOlderVersion) {
   std::unique_ptr<ResourceTable> table = BuildTable();
 
-  LoadedApk apk = {{"test.apk"}, {}, std::move(table)};
+  LoadedApk apk = {{"test.apk"}, {}, std::move(table), {}};
   std::unique_ptr<IAaptContext> ctx = test::ContextBuilder().SetMinSdkVersion(1).Build();
   PostProcessingConfiguration empty_config;
   TableFlattenerOptions table_flattener_options;
@@ -186,7 +186,7 @@ TEST_F(MultiApkGeneratorTest, VersionFilterOlderVersion) {
 TEST_F(MultiApkGeneratorTest, VersionFilterNoVersion) {
   std::unique_ptr<ResourceTable> table = BuildTable();
 
-  LoadedApk apk = {{"test.apk"}, {}, std::move(table)};
+  LoadedApk apk = {{"test.apk"}, {}, std::move(table), {}};
   std::unique_ptr<IAaptContext> ctx = test::ContextBuilder().SetMinSdkVersion(1).Build();
   PostProcessingConfiguration empty_config;
   TableFlattenerOptions table_flattener_options;

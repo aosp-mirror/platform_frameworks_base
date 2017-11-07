@@ -39,7 +39,7 @@ class BinaryResourceParser {
  public:
   // Creates a parser, which will read `len` bytes from `data`, and add any resources parsed to
   // `table`. `source` is for logging purposes.
-  BinaryResourceParser(IAaptContext* context, ResourceTable* table, const Source& source,
+  BinaryResourceParser(IDiagnostics* diag, ResourceTable* table, const Source& source,
                        const void* data, size_t data_len, io::IFileCollection* files = nullptr);
 
   // Parses the binary resource table and returns true if successful.
@@ -80,7 +80,7 @@ class BinaryResourceParser {
    */
   bool CollectMetaData(const android::ResTable_map& map_entry, Value* value);
 
-  IAaptContext* context_;
+  IDiagnostics* diag_;
   ResourceTable* table_;
 
   const Source source_;

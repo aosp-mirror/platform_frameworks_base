@@ -29,6 +29,12 @@ using ::testing::StrEq;
 
 namespace aapt {
 
+class MockFileCollection : public io::IFileCollection {
+ public:
+  MOCK_METHOD1(FindFile, io::IFile*(const StringPiece& path));
+  MOCK_METHOD0(Iterator, std::unique_ptr<io::IFileCollectionIterator>());
+};
+
 TEST(ProtoSerializeTest, SerializeSinglePackage) {
   std::unique_ptr<IAaptContext> context = test::ContextBuilder().Build();
   std::unique_ptr<ResourceTable> table =
@@ -86,9 +92,14 @@ TEST(ProtoSerializeTest, SerializeSinglePackage) {
   pb::ResourceTable pb_table;
   SerializeTableToPb(*table, &pb_table);
 
+  test::TestFile file_a("res/layout/main.xml");
+  MockFileCollection files;
+  EXPECT_CALL(files, FindFile(Eq("res/layout/main.xml")))
+      .WillRepeatedly(::testing::Return(&file_a));
+
   ResourceTable new_table;
   std::string error;
-  ASSERT_TRUE(DeserializeTableFromPb(pb_table, &new_table, &error));
+  ASSERT_TRUE(DeserializeTableFromPb(pb_table, &files, &new_table, &error));
   EXPECT_THAT(error, IsEmpty());
 
   Id* new_id = test::GetValue<Id>(&new_table, "com.app.a:id/foo");
@@ -123,6 +134,11 @@ TEST(ProtoSerializeTest, SerializeSinglePackage) {
   ASSERT_TRUE(actual_ref->name);
   ASSERT_TRUE(actual_ref->id);
   EXPECT_THAT(*actual_ref, Eq(expected_ref));
+
+  FileReference* actual_file_ref =
+      test::GetValue<FileReference>(&new_table, "com.app.a:layout/main");
+  ASSERT_THAT(actual_file_ref, NotNull());
+  EXPECT_THAT(actual_file_ref->file, Eq(&file_a));
 
   StyledString* actual_styled_str =
       test::GetValue<StyledString>(&new_table, "com.app.a:string/styled");

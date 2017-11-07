@@ -258,8 +258,7 @@ static void CopyAttributes(Element* el, android::ResXMLParser* parser, StringPoo
   }
 }
 
-std::unique_ptr<XmlResource> Inflate(const void* data, size_t data_len, IDiagnostics* diag,
-                                     const Source& source) {
+std::unique_ptr<XmlResource> Inflate(const void* data, size_t len, std::string* out_error) {
   // We import the android namespace because on Windows NO_ERROR is a macro, not
   // an enum, which causes errors when qualifying it with android::
   using namespace android;
@@ -270,7 +269,10 @@ std::unique_ptr<XmlResource> Inflate(const void* data, size_t data_len, IDiagnos
   std::unique_ptr<Element> pending_element;
 
   ResXMLTree tree;
-  if (tree.setTo(data, data_len) != NO_ERROR) {
+  if (tree.setTo(data, len) != NO_ERROR) {
+    if (out_error != nullptr) {
+      *out_error = "failed to initialize ResXMLTree";
+    }
     return {};
   }
 
@@ -361,6 +363,27 @@ std::unique_ptr<XmlResource> Inflate(const void* data, size_t data_len, IDiagnos
   return util::make_unique<XmlResource>(ResourceFile{}, std::move(string_pool), std::move(root));
 }
 
+std::unique_ptr<XmlResource> XmlResource::Clone() const {
+  std::unique_ptr<XmlResource> cloned = util::make_unique<XmlResource>(file);
+  if (root != nullptr) {
+    cloned->root = root->CloneElement([&](const xml::Element& src, xml::Element* dst) {
+      dst->attributes.reserve(src.attributes.size());
+      for (const xml::Attribute& attr : src.attributes) {
+        xml::Attribute cloned_attr;
+        cloned_attr.name = attr.name;
+        cloned_attr.namespace_uri = attr.namespace_uri;
+        cloned_attr.value = attr.value;
+        cloned_attr.compiled_attribute = attr.compiled_attribute;
+        if (attr.compiled_value != nullptr) {
+          cloned_attr.compiled_value.reset(attr.compiled_value->Clone(&cloned->string_pool));
+        }
+        dst->attributes.push_back(std::move(cloned_attr));
+      }
+    });
+  }
+  return cloned;
+}
+
 Element* FindRootElement(Node* node) {
   if (node == nullptr) {
     return nullptr;
@@ -383,12 +406,7 @@ void Element::InsertChild(size_t index, std::unique_ptr<Node> child) {
 }
 
 Attribute* Element::FindAttribute(const StringPiece& ns, const StringPiece& name) {
-  for (auto& attr : attributes) {
-    if (ns == attr.namespace_uri && name == attr.name) {
-      return &attr;
-    }
-  }
-  return nullptr;
+  return const_cast<Attribute*>(static_cast<const Element*>(this)->FindAttribute(ns, name));
 }
 
 const Attribute* Element::FindAttribute(const StringPiece& ns, const StringPiece& name) const {
@@ -404,17 +422,29 @@ Element* Element::FindChild(const StringPiece& ns, const StringPiece& name) {
   return FindChildWithAttribute(ns, name, {}, {}, {});
 }
 
+const Element* Element::FindChild(const StringPiece& ns, const StringPiece& name) const {
+  return FindChildWithAttribute(ns, name, {}, {}, {});
+}
+
 Element* Element::FindChildWithAttribute(const StringPiece& ns, const StringPiece& name,
                                          const StringPiece& attr_ns, const StringPiece& attr_name,
                                          const StringPiece& attr_value) {
-  for (auto& child : children) {
-    if (Element* el = NodeCast<Element>(child.get())) {
+  return const_cast<Element*>(static_cast<const Element*>(this)->FindChildWithAttribute(
+      ns, name, attr_ns, attr_name, attr_value));
+}
+
+const Element* Element::FindChildWithAttribute(const StringPiece& ns, const StringPiece& name,
+                                               const StringPiece& attr_ns,
+                                               const StringPiece& attr_name,
+                                               const StringPiece& attr_value) const {
+  for (const auto& child : children) {
+    if (const Element* el = NodeCast<Element>(child.get())) {
       if (ns == el->namespace_uri && name == el->name) {
         if (attr_ns.empty() && attr_name.empty()) {
           return el;
         }
 
-        Attribute* attr = el->FindAttribute(attr_ns, attr_name);
+        const Attribute* attr = el->FindAttribute(attr_ns, attr_name);
         if (attr && attr_value == attr->value) {
           return el;
         }

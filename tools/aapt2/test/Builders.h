@@ -52,12 +52,15 @@ class ResourceTableBuilder {
   ResourceTableBuilder& AddString(const android::StringPiece& name, const ResourceId& id,
                                   const ConfigDescription& config, const android::StringPiece& str);
   ResourceTableBuilder& AddFileReference(const android::StringPiece& name,
-                                         const android::StringPiece& path);
+                                         const android::StringPiece& path,
+                                         io::IFile* file = nullptr);
   ResourceTableBuilder& AddFileReference(const android::StringPiece& name, const ResourceId& id,
-                                         const android::StringPiece& path);
+                                         const android::StringPiece& path,
+                                         io::IFile* file = nullptr);
   ResourceTableBuilder& AddFileReference(const android::StringPiece& name,
                                          const android::StringPiece& path,
-                                         const ConfigDescription& config);
+                                         const ConfigDescription& config,
+                                         io::IFile* file = nullptr);
   ResourceTableBuilder& AddValue(const android::StringPiece& name, std::unique_ptr<Value> value);
   ResourceTableBuilder& AddValue(const android::StringPiece& name, const ResourceId& id,
                                  std::unique_ptr<Value> value);
