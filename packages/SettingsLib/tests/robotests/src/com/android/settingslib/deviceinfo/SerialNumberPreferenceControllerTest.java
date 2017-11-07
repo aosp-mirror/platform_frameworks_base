@@ -17,13 +17,6 @@
 package com.android.settingslib.deviceinfo;
 
 import static com.google.common.truth.Truth.assertThat;
-
-import static org.mockito.Answers.RETURNS_DEEP_STUBS;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
@@ -38,68 +31,67 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 @RunWith(SettingsLibRobolectricTestRunner.class)
 @Config(manifest = TestConfig.MANIFEST_PATH, sdk = TestConfig.SDK_VERSION)
 public class SerialNumberPreferenceControllerTest {
 
-    @Mock(answer = RETURNS_DEEP_STUBS)
-    private Context mContext;
-    @Mock(answer = RETURNS_DEEP_STUBS)
+    @Mock
     private PreferenceScreen mScreen;
 
+    private Context mContext;
+    private Preference mPreference;
     private AbstractSerialNumberPreferenceController mController;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        mContext = RuntimeEnvironment.application;
+        mPreference = new Preference(mContext);
+        mPreference.setKey(AbstractSerialNumberPreferenceController.KEY_SERIAL_NUMBER);
+        when(mScreen.findPreference(mPreference.getKey())).thenReturn(mPreference);
     }
 
     @Test
     public void testIsAvaiable_noSerial_shouldReturnFalse() {
-        mController = new ConcreteSerialNumberPreferenceController(mContext, null);
+        mController = new TestPreferenceController(mContext, null);
 
         assertThat(mController.isAvailable()).isFalse();
     }
 
     @Test
-    public void testIsAvaiable_hasSerial_shouldReturnTrue() {
-        mController = new ConcreteSerialNumberPreferenceController(mContext, "123");
+    public void testIsAvailable_hasSerial_shouldReturnTrue() {
+        mController = new TestPreferenceController(mContext, "123");
 
         assertThat(mController.isAvailable()).isTrue();
     }
 
     @Test
     public void testDisplay_noSerial_shouldHidePreference() {
-        final Preference preference = mock(Preference.class);
-        when(mScreen.getPreferenceCount()).thenReturn(1);
-        when(mScreen.getPreference(0)).thenReturn(preference);
-        mController = new ConcreteSerialNumberPreferenceController(mContext, null);
-        when(preference.getKey()).thenReturn(mController.getPreferenceKey());
+        mController = new TestPreferenceController(mContext, null);
 
         mController.displayPreference(mScreen);
 
-        verify(mScreen).removePreference(any(Preference.class));
+        assertThat(mPreference.isVisible()).isFalse();
     }
 
     @Test
     public void testDisplay_hasSerial_shouldSetSummary() {
         final String serial = "123";
-        final Preference preference = mock(Preference.class);
-        when(mScreen.findPreference(anyString())).thenReturn(preference);
 
-        mController = new ConcreteSerialNumberPreferenceController(mContext, serial);
+        mController = new TestPreferenceController(mContext, serial);
         mController.displayPreference(mScreen);
 
-        verify(mScreen, never()).removePreference(any(Preference.class));
-        verify(preference).setSummary(serial);
+        assertThat(mPreference.isVisible()).isTrue();
+        assertThat(mPreference.getSummary()).isEqualTo(serial);
     }
 
-    private static class ConcreteSerialNumberPreferenceController
+    private static class TestPreferenceController
             extends AbstractSerialNumberPreferenceController {
 
-        ConcreteSerialNumberPreferenceController(Context context, String serialNumber) {
+        TestPreferenceController(Context context, String serialNumber) {
             super(context, serialNumber);
         }
     }

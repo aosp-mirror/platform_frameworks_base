@@ -18,18 +18,20 @@ package com.android.settingslib.deviceinfo;
 
 import android.content.Context;
 import android.os.Build;
+import android.support.annotation.VisibleForTesting;
 import android.support.v7.preference.Preference;
 import android.support.v7.preference.PreferenceScreen;
 import android.text.TextUtils;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.settingslib.core.AbstractPreferenceController;
 
 /**
  * Preference controller for displaying device serial number. Wraps {@link Build#getSerial()}.
  */
 public class AbstractSerialNumberPreferenceController extends AbstractPreferenceController {
-    private static final String KEY_SERIAL_NUMBER = "serial_number";
+
+    @VisibleForTesting
+    static final String KEY_SERIAL_NUMBER = "serial_number";
 
     private final String mSerialNumber;
 
