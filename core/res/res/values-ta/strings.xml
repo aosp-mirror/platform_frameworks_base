@@ -282,7 +282,7 @@
     <string name="permgrouprequest_camera" msgid="810824326507258410">"படங்களை எடுக்கவும் வீடியோவைப் பதிவுசெய்யவும், &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;க்கு அணுகல் வழங்கவும்"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"ஃபோன்"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"யாரையும் தொலைபேசியில் அழைக்கலாம்"</string>
-    <string name="permgrouprequest_phone" msgid="7084161459732093690">"மொபைல் அழைப்புகளைச் செய்யவும், அவற்றை நிர்வகிக்கவும், &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;க்கு அனுமதி வழங்கவும்"</string>
+    <string name="permgrouprequest_phone" msgid="7084161459732093690">"மொபைல் அழைப்புகளைச் செய்யவும், அவற்றை நிர்வகிக்கவும், &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;க்கு அனுமதி வழங்கவா"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"உடல் சென்சார்கள்"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"உங்கள் உடல் இயக்கம் பற்றி உணர்விகள் கூறும் தகவலைப் பார்க்கலாம்"</string>
     <string name="permgrouprequest_sensors" msgid="8631146669524259656">"உடலியக்கக் குறிகள் பற்றிய உணர்வித் தரவை அணுக, &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;க்கு அனுமதி வழங்கவும்"</string>
