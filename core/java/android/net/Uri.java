@@ -1065,7 +1065,7 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
                 return null;
             }
 
-            int end = authority.indexOf('@');
+            int end = authority.lastIndexOf('@');
             return end == NOT_FOUND ? null : authority.substring(0, end);
         }
 
@@ -1089,7 +1089,7 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
             }
 
             // Parse out user info and then port.
-            int userInfoSeparator = authority.indexOf('@');
+            int userInfoSeparator = authority.lastIndexOf('@');
             int portSeparator = authority.indexOf(':', userInfoSeparator);
 
             String encodedHost = portSeparator == NOT_FOUND
@@ -1115,7 +1115,7 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
 
             // Make sure we look for the port separtor *after* the user info
             // separator. We have URLs with a ':' in the user info.
-            int userInfoSeparator = authority.indexOf('@');
+            int userInfoSeparator = authority.lastIndexOf('@');
             int portSeparator = authority.indexOf(':', userInfoSeparator);
 
             if (portSeparator == NOT_FOUND) {
