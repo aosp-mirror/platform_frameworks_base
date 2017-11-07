@@ -146,7 +146,7 @@
     <string name="httpErrorConnect" msgid="8714273236364640549">"Tidak dapat tersambung ke server."</string>
     <string name="httpErrorIO" msgid="2340558197489302188">"Tidak dapat berkomunikasi dengan server. Coba lagi nanti."</string>
     <string name="httpErrorTimeout" msgid="4743403703762883954">"Sambungan ke server terputus."</string>
-    <string name="httpErrorRedirectLoop" msgid="8679596090392779516">"Laman ini berisi terlalu banyak pengalihan server."</string>
+    <string name="httpErrorRedirectLoop" msgid="8679596090392779516">"Halaman ini berisi terlalu banyak pengalihan server."</string>
     <string name="httpErrorUnsupportedScheme" msgid="5015730812906192208">"Protokol tidak didukung."</string>
     <string name="httpErrorFailedSslHandshake" msgid="96549606000658641">"Tidak dapat membuat sambungan aman."</string>
     <string name="httpErrorBadUrl" msgid="3636929722728881972">"Tidak dapat membuka halaman karena URL tidak valid."</string>
@@ -284,7 +284,7 @@
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Mengontrol perbesaran layar"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Mengontrol tingkat zoom dan pemosisian layar."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Melakukan isyarat"</string>
-    <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Dapat mengetuk, menggesek, mencubit, dan melakukan isyarat lainnya."</string>
+    <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Dapat mengetuk, menggeser, mencubit, dan melakukan isyarat lainnya."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"Gestur sidik jari"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="7102111919385702482">"Dapat merekam gestur yang dilakukan di sensor sidik jari perangkat."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"nonaktifkan atau ubah bilah status"</string>
@@ -307,8 +307,8 @@
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Memungkinkan aplikasi menerima dan memproses pesan MMS. Ini artinya aplikasi dapat memantau atau menghapus pesan yang dikirim ke perangkat Anda tanpa menunjukkannya kepada Anda."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"membaca pesan siaran seluler"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Mengizinkan aplikasi membaca pesan siaran seluler yang diterima perangkat Anda. Notifikasi siaran seluler dikirimkan di beberapa lokasi untuk memperingatkan Anda tentang situasi darurat. Aplikasi berbahaya dapat mengganggu kinerja atau operasi perangkat Anda saat siaran seluler darurat diterima."</string>
-    <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"baca umpan langganan"</string>
-    <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Mengizinkan apl mendapatkan detail tentang umpan yang saat ini sedang disinkronkan."</string>
+    <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"baca feed langganan"</string>
+    <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Mengizinkan apl mendapatkan detail tentang feed yang saat ini sedang disinkronkan."</string>
     <string name="permlab_sendSms" msgid="7544599214260982981">"mengirim dan melihat pesan SMS"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Memungkinkan aplikasi mengirim pesan SMS. Izin ini dapat mengakibatkan biaya tak terduga. Aplikasi berbahaya dapat membebankan biaya kepada Anda dengan mengirim pesan tanpa konfirmasi dari Anda."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"membaca pesan teks (SMS atau MMS) Anda"</string>
@@ -791,11 +791,11 @@
     <string name="factorytest_not_system" msgid="4435201656767276723">"Tindakan FACTORY_TEST hanya didukung untuk paket yang terpasang pada /system/app."</string>
     <string name="factorytest_no_action" msgid="872991874799998561">"Tidak ada paket yang memberikan tindakan FACTORY_TEST."</string>
     <string name="factorytest_reboot" msgid="6320168203050791643">"Mulai ulang"</string>
-    <string name="js_dialog_title" msgid="1987483977834603872">"Laman pada \"<xliff:g id="TITLE">%s</xliff:g>\" menyatakan:"</string>
+    <string name="js_dialog_title" msgid="1987483977834603872">"Halaman pada \"<xliff:g id="TITLE">%s</xliff:g>\" menyatakan:"</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
     <string name="js_dialog_before_unload_title" msgid="2619376555525116593">"Konfirmasi Navigasi"</string>
-    <string name="js_dialog_before_unload_positive_button" msgid="3112752010600484130">"Keluar dari Laman ini"</string>
-    <string name="js_dialog_before_unload_negative_button" msgid="5614861293026099715">"Tetap di Laman ini"</string>
+    <string name="js_dialog_before_unload_positive_button" msgid="3112752010600484130">"Keluar dari Halaman ini"</string>
+    <string name="js_dialog_before_unload_negative_button" msgid="5614861293026099715">"Tetap di Halaman ini"</string>
     <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nYakin ingin beranjak dari halaman ini?"</string>
     <string name="save_password_label" msgid="6860261758665825069">"Konfirmasi"</string>
     <string name="double_tap_toast" msgid="4595046515400268881">"Kiat: Ketuk dua kali untuk memperbesar dan memperkecil."</string>
@@ -1028,7 +1028,7 @@
     <string name="force_close" msgid="8346072094521265605">"Oke"</string>
     <string name="report" msgid="4060218260984795706">"Laporkan"</string>
     <string name="wait" msgid="7147118217226317732">"Tunggu"</string>
-    <string name="webpage_unresponsive" msgid="3272758351138122503">"Laman ini tidak menanggapi.\n\nApakah Anda ingin menutupnya?"</string>
+    <string name="webpage_unresponsive" msgid="3272758351138122503">"Halaman ini tidak menanggapi.\n\nApakah Anda ingin menutupnya?"</string>
     <string name="launch_warning_title" msgid="1547997780506713581">"Apl dialihkan"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"<xliff:g id="APP_NAME">%1$s</xliff:g> sedang berjalan."</string>
     <string name="launch_warning_original" msgid="188102023021668683">"<xliff:g id="APP_NAME">%1$s</xliff:g> telah diluncurkan aslinya."</string>
@@ -1355,7 +1355,7 @@
     <string name="shareactionprovider_share_with" msgid="806688056141131819">"Berbagi dengan"</string>
     <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Berbagi dengan <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="content_description_sliding_handle" msgid="415975056159262248">"Gagang geser. Sentuh &amp; tahan."</string>
-    <string name="description_target_unlock_tablet" msgid="3833195335629795055">"Gesek untuk membuka kunci."</string>
+    <string name="description_target_unlock_tablet" msgid="3833195335629795055">"Geser untuk membuka kunci."</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"Navigasi ke beranda"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Navigasi naik"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Opsi lainnya"</string>
@@ -1616,8 +1616,8 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Diupdate oleh admin Anda"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Dihapus oleh admin Anda"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Untuk membantu meningkatkan masa pakai baterai, penghemat baterai mengurangi kinerja perangkat dan membatasi getaran, layanan lokasi, dan sebagian besar data latar belakang. Email, pesan, dan aplikasi lain yang mengandalkan sinkronisasi mungkin tidak diperbarui kecuali jika dibuka.\n\nPenghemat baterai otomatis nonaktif jika perangkat diisi dayanya."</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"Untuk membantu mengurangi penggunaan data, Penghemat Data mencegah beberapa aplikasi mengirim atau menerima data di latar belakang. Aplikasi yang sedang digunakan dapat mengakses data, tetapi frekuensinya agak lebih jarang. Misalnya saja, gambar hanya akan ditampilkan setelah disentuh."</string>
-    <string name="data_saver_enable_title" msgid="4674073932722787417">"Aktifkan Penghemat Data?"</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"Untuk membantu mengurangi penggunaan data, Penghemat Kuota Internet mencegah beberapa aplikasi mengirim atau menerima data di latar belakang. Aplikasi yang sedang digunakan dapat mengakses data, tetapi frekuensinya agak lebih jarang. Misalnya saja, gambar hanya akan ditampilkan setelah disentuh."</string>
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"Aktifkan Penghemat Kuota Internet?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Aktifkan"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">Selama %1$d menit (hingga <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
