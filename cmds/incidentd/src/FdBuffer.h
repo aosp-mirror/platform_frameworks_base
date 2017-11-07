@@ -47,8 +47,10 @@ public:
      * and stores the processed data from 'fromFd' in memory for later usage.
      * This function behaves in a streaming fashion in order to save memory usage.
      * Returns NO_ERROR if there were no errors or if we timed out.
+     *
+     * Poll will return POLLERR if fd is from sysfs, handle this edge case.
      */
-    status_t readProcessedDataInStream(int fd, int toFd, int fromFd, int64_t timeoutMs);
+    status_t readProcessedDataInStream(int fd, int toFd, int fromFd, int64_t timeoutMs, const bool isSysfs=false);
 
     /**
      * Whether we timed out.

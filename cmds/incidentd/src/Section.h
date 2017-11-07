@@ -69,6 +69,7 @@ public:
 
 private:
     const char* mFilename;
+    bool mIsSysfs; // sysfs files are pollable but return POLLERR by default, handle it separately
 };
 
 /**

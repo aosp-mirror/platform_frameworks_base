@@ -20,6 +20,7 @@ option java_outer_classname = "IncidentProtoMetadata";
 
 import "frameworks/base/libs/incident/proto/android/privacy.proto";
 import "frameworks/base/libs/incident/proto/android/section.proto";
+import "frameworks/base/core/proto/android/os/cpufreq.proto";
 import "frameworks/base/core/proto/android/os/cpuinfo.proto";
 import "frameworks/base/core/proto/android/os/incidentheader.proto";
 import "frameworks/base/core/proto/android/os/kernelwake.proto";
@@ -74,6 +75,10 @@ message IncidentProto {
         (section).args = "/system/bin/top -b -n 1 -H -s 6 -o pid,tid,user,pr,ni,%cpu,s,virt,res,pcy,cmd,name"
     ];
 
+    optional CpuFreq cpu_freq = 2004 [
+        (section).type = SECTION_FILE,
+        (section).args = "/sys/devices/system/cpu/cpufreq/all_time_in_state"
+    ];
 
     // System Services
     optional com.android.server.fingerprint.FingerprintServiceDumpProto fingerprint = 3000 [
