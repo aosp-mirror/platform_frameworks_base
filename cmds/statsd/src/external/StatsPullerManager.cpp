@@ -30,11 +30,11 @@
 
 #include <iostream>
 
+using std::make_shared;
 using std::map;
+using std::shared_ptr;
 using std::string;
 using std::vector;
-using std::make_shared;
-using std::shared_ptr;
 
 namespace android {
 namespace os {
@@ -42,40 +42,35 @@ namespace statsd {
 
 StatsPullerManager::StatsPullerManager()
     : mCurrentPullingInterval(LONG_MAX), mPullStartTimeMs(get_pull_start_time_ms()) {
-    shared_ptr<StatsPuller> statsCompanionServicePuller = make_shared<StatsCompanionServicePuller>();
-    shared_ptr <StatsPuller>
-        resourcePowerManagerPuller = make_shared<ResourcePowerManagerPuller>();
+    shared_ptr<StatsPuller> statsCompanionServicePuller =
+            make_shared<StatsCompanionServicePuller>();
+    shared_ptr<StatsPuller> resourcePowerManagerPuller = make_shared<ResourcePowerManagerPuller>();
 
-    mPullers.insert({android::util::KERNEL_WAKELOCK_PULLED,
-                     statsCompanionServicePuller});
-    mPullers.insert({android::util::WIFI_BYTES_TRANSFERRED,
-                     statsCompanionServicePuller});
-    mPullers.insert({android::util::MOBILE_BYTES_TRANSFERRED,
-                     statsCompanionServicePuller});
-    mPullers.insert({android::util::WIFI_BYTES_TRANSFERRED_BY_FG_BG,
-                     statsCompanionServicePuller});
-    mPullers.insert({android::util::MOBILE_BYTES_TRANSFERRED_BY_FG_BG,
-                     statsCompanionServicePuller});
-    mPullers.insert({android::util::POWER_STATE_PLATFORM_SLEEP_STATE_PULLED,
-                     resourcePowerManagerPuller});
-    mPullers.insert({android::util::POWER_STATE_VOTER_PULLED,
-                     resourcePowerManagerPuller});
-    mPullers.insert({android::util::POWER_STATE_SUBSYSTEM_SLEEP_STATE_PULLED,
-                     resourcePowerManagerPuller});
+    mPullers.insert({android::util::KERNEL_WAKELOCK_PULLED, statsCompanionServicePuller});
+    mPullers.insert({android::util::WIFI_BYTES_TRANSFERRED, statsCompanionServicePuller});
+    mPullers.insert({android::util::MOBILE_BYTES_TRANSFERRED, statsCompanionServicePuller});
+    mPullers.insert({android::util::WIFI_BYTES_TRANSFERRED_BY_FG_BG, statsCompanionServicePuller});
+    mPullers.insert(
+            {android::util::MOBILE_BYTES_TRANSFERRED_BY_FG_BG, statsCompanionServicePuller});
+    mPullers.insert(
+            {android::util::POWER_STATE_PLATFORM_SLEEP_STATE_PULLED, resourcePowerManagerPuller});
+    mPullers.insert({android::util::POWER_STATE_VOTER_PULLED, resourcePowerManagerPuller});
+    mPullers.insert(
+            {android::util::POWER_STATE_SUBSYSTEM_SLEEP_STATE_PULLED, resourcePowerManagerPuller});
 
     mStatsCompanionService = StatsService::getStatsCompanionService();
 }
 
-        bool StatsPullerManager::Pull(int tagId, vector<shared_ptr<LogEvent>>* data) {
-            if (DEBUG) ALOGD("Initiating pulling %d", tagId);
+bool StatsPullerManager::Pull(int tagId, vector<shared_ptr<LogEvent>>* data) {
+    if (DEBUG) ALOGD("Initiating pulling %d", tagId);
 
-            if (mPullers.find(tagId) != mPullers.end()) {
-                return mPullers.find(tagId)->second->Pull(tagId, data);
-            } else {
-                ALOGD("Unknown tagId %d", tagId);
-                return false;  // Return early since we don't know what to pull.
-            }
-        }
+    if (mPullers.find(tagId) != mPullers.end()) {
+        return mPullers.find(tagId)->second->Pull(tagId, data);
+    } else {
+        ALOGD("Unknown tagId %d", tagId);
+        return false;  // Return early since we don't know what to pull.
+    }
+}
 
 StatsPullerManager& StatsPullerManager::GetInstance() {
     static StatsPullerManager instance;
@@ -91,7 +86,8 @@ long StatsPullerManager::get_pull_start_time_ms() {
     return time(nullptr) * 1000;
 }
 
-void StatsPullerManager::RegisterReceiver(int tagId, sp<PullDataReceiver> receiver, long intervalMs) {
+void StatsPullerManager::RegisterReceiver(int tagId, sp<PullDataReceiver> receiver,
+                                          long intervalMs) {
     AutoMutex _l(mReceiversLock);
     vector<ReceiverInfo>& receivers = mReceivers[tagId];
     for (auto it = receivers.begin(); it != receivers.end(); it++) {
@@ -143,8 +139,8 @@ void StatsPullerManager::OnAlarmFired() {
             vector<pair<int, vector<ReceiverInfo*>>>();
     for (auto& pair : mReceivers) {
         vector<ReceiverInfo*> receivers = vector<ReceiverInfo*>();
-        if (pair.second.size() != 0){
-            for(auto& receiverInfo : pair.second) {
+        if (pair.second.size() != 0) {
+            for (auto& receiverInfo : pair.second) {
                 if (receiverInfo.timeInfo.first + receiverInfo.timeInfo.second > currentTimeMs) {
                     receivers.push_back(&receiverInfo);
                 }

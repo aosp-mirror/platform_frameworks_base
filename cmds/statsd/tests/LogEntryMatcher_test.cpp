@@ -42,7 +42,7 @@ TEST(LogEntryMatcherTest, TestSimpleMatcher) {
     auto simpleMatcher = matcher.mutable_simple_log_entry_matcher();
     simpleMatcher->set_tag(TAG_ID);
 
-    LogEvent event(TAG_ID);
+    LogEvent event(TAG_ID, 0);
 
     // Convert to a LogEvent
     event.init();
@@ -62,7 +62,7 @@ TEST(LogEntryMatcherTest, TestBoolMatcher) {
     keyValue2->mutable_key_matcher()->set_key(FIELD_ID_2);
 
     // Set up the event
-    LogEvent event(TAG_ID);
+    LogEvent event(TAG_ID, 0);
     auto list = event.GetAndroidLogEventList();
     *list << true;
     *list << false;
@@ -98,7 +98,7 @@ TEST(LogEntryMatcherTest, TestStringMatcher) {
     keyValue->set_eq_string("some value");
 
     // Set up the event
-    LogEvent event(TAG_ID);
+    LogEvent event(TAG_ID, 0);
     auto list = event.GetAndroidLogEventList();
     *list << "some value";
 
@@ -119,7 +119,7 @@ TEST(LogEntryMatcherTest, TestIntComparisonMatcher) {
     keyValue->mutable_key_matcher()->set_key(FIELD_ID_1);
 
     // Set up the event
-    LogEvent event(TAG_ID);
+    LogEvent event(TAG_ID, 0);
     auto list = event.GetAndroidLogEventList();
     *list << 11;
 

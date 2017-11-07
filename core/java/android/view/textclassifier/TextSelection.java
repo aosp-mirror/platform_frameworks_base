@@ -19,6 +19,8 @@ package android.view.textclassifier;
 import android.annotation.FloatRange;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.os.LocaleList;
 import android.view.textclassifier.TextClassifier.EntityType;
 
 import com.android.internal.util.Preconditions;
@@ -179,6 +181,57 @@ public final class TextSelection {
         public TextSelection build() {
             return new TextSelection(
                     mStartIndex, mEndIndex, mEntityConfidence, mLogSource, mVersionInfo);
+        }
+    }
+
+    /**
+     * TextSelection optional input parameters.
+     */
+    public static final class Options {
+
+        private LocaleList mDefaultLocales;
+        private boolean mDarkLaunchAllowed;
+
+        /**
+         * @param defaultLocales ordered list of locale preferences that may be used to disambiguate
+         *      the provided text. If no locale preferences exist, set this to null or an empty
+         *      locale list.
+         */
+        public Options setDefaultLocales(@Nullable LocaleList defaultLocales) {
+            mDefaultLocales = defaultLocales;
+            return this;
+        }
+
+        /**
+         * @return ordered list of locale preferences that can be used to disambiguate
+         *      the provided text.
+         */
+        @Nullable
+        public LocaleList getDefaultLocales() {
+            return mDefaultLocales;
+        }
+
+        /**
+         * @param allowed whether or not the TextClassifier should return selection suggestions
+         *      when "dark launched". When a TextClassifier is dark launched, it can suggest
+         *      selection changes that should not be used to actually change the user's selection.
+         *      Instead, the suggested selection is logged, compared with the user's selection
+         *      interaction, and used to generate quality metrics for the TextClassifier.
+         *
+         * @hide
+         */
+        public void setDarkLaunchAllowed(boolean allowed) {
+            mDarkLaunchAllowed = allowed;
+        }
+
+        /**
+         * Returns true if the TextClassifier should return selection suggestions when
+         * "dark launched". Otherwise, returns false.
+         *
+         * @hide
+         */
+        public boolean isDarkLaunchAllowed() {
+            return mDarkLaunchAllowed;
         }
     }
 }

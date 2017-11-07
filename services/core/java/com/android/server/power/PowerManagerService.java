@@ -2364,9 +2364,13 @@ public final class PowerManagerService extends SystemService
 
             if (mDisplayPowerRequest.policy == DisplayPowerRequest.POLICY_DOZE) {
                 mDisplayPowerRequest.dozeScreenState = mDozeScreenStateOverrideFromDreamManager;
-                if (mDisplayPowerRequest.dozeScreenState == Display.STATE_DOZE_SUSPEND
-                        && (mWakeLockSummary & WAKE_LOCK_DRAW) != 0) {
-                    mDisplayPowerRequest.dozeScreenState = Display.STATE_DOZE;
+                if ((mWakeLockSummary & WAKE_LOCK_DRAW) != 0) {
+                    if (mDisplayPowerRequest.dozeScreenState == Display.STATE_DOZE_SUSPEND) {
+                        mDisplayPowerRequest.dozeScreenState = Display.STATE_DOZE;
+                    }
+                    if (mDisplayPowerRequest.dozeScreenState == Display.STATE_ON_SUSPEND) {
+                        mDisplayPowerRequest.dozeScreenState = Display.STATE_ON;
+                    }
                 }
                 mDisplayPowerRequest.dozeScreenBrightness =
                         mDozeScreenBrightnessOverrideFromDreamManager;
@@ -4676,6 +4680,7 @@ public final class PowerManagerService extends SystemService
                 case Display.STATE_OFF:
                 case Display.STATE_DOZE:
                 case Display.STATE_DOZE_SUSPEND:
+                case Display.STATE_ON_SUSPEND:
                 case Display.STATE_ON:
                 case Display.STATE_VR:
                     break;

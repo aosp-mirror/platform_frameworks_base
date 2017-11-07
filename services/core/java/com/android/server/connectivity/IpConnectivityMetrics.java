@@ -45,6 +45,7 @@ import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.ToIntFunction;
 
@@ -214,86 +215,66 @@ final public class IpConnectivityMetrics extends SystemService {
     }
 
     /**
-     * Clears the event buffer and prints its content as a protobuf serialized byte array
+     * Clear the event buffer and prints its content as a protobuf serialized byte array
      * inside a base64 encoded string.
      */
-    private void cmdFlush(FileDescriptor fd, PrintWriter pw, String[] args) {
+    private void cmdFlush(PrintWriter pw) {
         pw.print(flushEncodedOutput());
     }
 
     /**
-     * Prints the content of the event buffer, either using the events ASCII representation
-     * or using protobuf text format.
+     * Print the content of the rolling event buffer in human readable format.
+     * Also print network dns/connect statistics and recent default network events.
      */
-    private void cmdList(FileDescriptor fd, PrintWriter pw, String[] args) {
-        final ArrayList<ConnectivityMetricsEvent> events;
-        synchronized (mLock) {
-            events = new ArrayList(mBuffer);
-        }
-
-        if (args.length > 1 && args[1].equals("proto")) {
-            for (IpConnectivityEvent ev : IpConnectivityEventBuilder.toProto(events)) {
-                pw.print(ev.toString());
-            }
-            if (mNetdListener != null) {
-                mNetdListener.listAsProtos(pw);
-            }
-            mDefaultNetworkMetrics.listEventsAsProto(pw);
-            return;
-        }
-
+    private void cmdList(PrintWriter pw) {
+        pw.println("metrics events:");
+        final List<ConnectivityMetricsEvent> events = getEvents();
         for (ConnectivityMetricsEvent ev : events) {
             pw.println(ev.toString());
         }
+        pw.println("");
         if (mNetdListener != null) {
             mNetdListener.list(pw);
         }
+        pw.println("");
         mDefaultNetworkMetrics.listEvents(pw);
     }
 
-    /**
-     * Prints for bug reports the content of the rolling event log and the
-     * content of Netd event listener.
+    /*
+     * Print the content of the rolling event buffer in text proto format.
      */
-    private void cmdDumpsys(FileDescriptor fd, PrintWriter pw, String[] args) {
-        final ConnectivityMetricsEvent[] events;
-        synchronized (mLock) {
-            events = mEventLog.toArray();
-        }
-        for (ConnectivityMetricsEvent ev : events) {
-            pw.println(ev.toString());
+    private void cmdListAsProto(PrintWriter pw) {
+        final List<ConnectivityMetricsEvent> events = getEvents();
+        for (IpConnectivityEvent ev : IpConnectivityEventBuilder.toProto(events)) {
+            pw.print(ev.toString());
         }
         if (mNetdListener != null) {
-            mNetdListener.list(pw);
+            mNetdListener.listAsProtos(pw);
         }
-        mDefaultNetworkMetrics.listEvents(pw);
+        mDefaultNetworkMetrics.listEventsAsProto(pw);
     }
 
-    private void cmdStats(FileDescriptor fd, PrintWriter pw, String[] args) {
+    /*
+     * Return a copy of metrics events stored in buffer for metrics uploading.
+     */
+    private List<ConnectivityMetricsEvent> getEvents() {
         synchronized (mLock) {
-            pw.println("Buffered events: " + mBuffer.size());
-            pw.println("Buffer capacity: " + mCapacity);
-            pw.println("Dropped events: " + mDropped);
+            return Arrays.asList(mEventLog.toArray());
         }
-        if (mNetdListener != null) {
-            mNetdListener.dump(pw);
-        }
-    }
-
-    private void cmdDefault(FileDescriptor fd, PrintWriter pw, String[] args) {
-        if (args.length == 0) {
-            pw.println("No command");
-            return;
-        }
-        pw.println("Unknown command " + TextUtils.join(" ", args));
     }
 
     public final class Impl extends IIpConnectivityMetrics.Stub {
-        static final String CMD_FLUSH   = "flush";
-        static final String CMD_LIST    = "list";
-        static final String CMD_STATS   = "stats";
-        static final String CMD_DUMPSYS = "-a"; // dumpsys.cpp dumps services with "-a" as arguments
-        static final String CMD_DEFAULT = CMD_STATS;
+        // Dump and flushes the metrics event buffer in base64 encoded serialized proto output.
+        static final String CMD_FLUSH = "flush";
+        // Dump the rolling buffer of metrics event in human readable proto text format.
+        static final String CMD_PROTO = "proto";
+        // Dump the rolling buffer of metrics event and pretty print events using a human readable
+        // format. Also print network dns/connect statistics and default network event time series.
+        static final String CMD_LIST = "list";
+        // By default any other argument will fall into the default case which is remapped to the
+        // "list" command. This includes most notably bug reports collected by dumpsys.cpp with
+        // the "-a" argument.
+        static final String CMD_DEFAULT = CMD_LIST;
 
         @Override
         public int logEvent(ConnectivityMetricsEvent event) {
@@ -308,19 +289,15 @@ final public class IpConnectivityMetrics extends SystemService {
             final String cmd = (args.length > 0) ? args[0] : CMD_DEFAULT;
             switch (cmd) {
                 case CMD_FLUSH:
-                    cmdFlush(fd, pw, args);
+                    cmdFlush(pw);
                     return;
-                case CMD_DUMPSYS:
-                    cmdDumpsys(fd, pw, args);
+                case CMD_PROTO:
+                    cmdListAsProto(pw);
                     return;
-                case CMD_LIST:
-                    cmdList(fd, pw, args);
-                    return;
-                case CMD_STATS:
-                    cmdStats(fd, pw, args);
-                    return;
+                case CMD_LIST: // fallthrough
                 default:
-                    cmdDefault(fd, pw, args);
+                    cmdList(pw);
+                    return;
             }
         }
 

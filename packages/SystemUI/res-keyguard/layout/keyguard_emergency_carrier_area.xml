@@ -33,8 +33,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         style="@style/Keyguard.TextView"
+        android:singleLine="true"
         android:ellipsize="marquee"
         android:visibility="gone"
+        android:gravity="center"
         androidprv:allCaps="@bool/kg_use_all_caps" />
 
     <com.android.keyguard.EmergencyButton

@@ -25,6 +25,7 @@
     android:layout_marginStart="4dp"
     android:textColor="@color/notification_default_color"
     android:singleLine="true"
+    android:textAlignment="viewStart"
     android:ellipsize="end"
     android:background="@drawable/notification_material_action_background"
     />

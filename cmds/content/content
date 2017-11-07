@@ -1,3 +1,4 @@
+#!/system/bin/sh
 # Script to start "content" on the device, which has a very rudimentary shell.
 base=/system
 export CLASSPATH=$base/framework/content.jar

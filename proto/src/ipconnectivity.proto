@@ -50,9 +50,10 @@ message Pair {
   optional int32 value = 2;
 };
 
-// An event record when the system default network disconnects or the system
-// switches to a new default network.
-// Next tag: 10.
+// An event recorded when the system default network disconnects or the system
+// switches to a new default network. An event is also recorded to cover gaps
+// without a default network.
+// Next tag: 12
 message DefaultNetworkEvent {
 
   // Reason why this network stopped being the default.
@@ -72,26 +73,34 @@ message DefaultNetworkEvent {
   };
 
   // Duration in milliseconds when this network was the default.
-  // Since version 4
+  // Since P.
   optional int64 default_network_duration_ms = 5;
 
-  // Duration in milliseconds without a default network before this network
-  // became the default.
-  // Since version 4
-  optional int64 no_default_network_duration_ms = 6;
+  // Duration in milliseconds when this default network Internet access was
+  // validated. This field is equal to 0 for DefaultNetworkEvents representing
+  // lack of a default network.
+  // Since P.
+  optional int64 validation_duration_ms = 11;
 
   // Network score of this network when it became the default network.
-  // Since version 4
+  // Or 0 if this event represents a period without a default network.
+  // Since P.
   optional int64 initial_score = 7;
 
   // Network score of this network when it stopped being the default network.
-  // Since version 4
+  // Or 0 if this event represents a period without a default network.
+  // Since P.
   optional int64 final_score = 8;
 
   // Best available information about IP support of this default network.
-  // Since version 4
+  // Or NONE if this event represents a period without a default network.
+  // Since P.
   optional IPSupport ip_support = 9;
 
+  // LinkLayer of the previous default network. Ignores any previous period
+  // without a default network.
+  // Since P
+  optional LinkLayer previous_default_network_link_layer = 10;
 
   // Deprecated fields
 
@@ -112,6 +121,11 @@ message DefaultNetworkEvent {
   // TRANSPORT_* constants as defined in NetworkCapabilities.
   // Deprecated since version 3. Replaced by top-level transports field.
   repeated int32 transport_types = 4 [deprecated = true];
+
+  // Duration in milliseconds without a default network. This field is non-zero
+  // only for DefaultNetworkEvents representing lack of a default network.
+  // Since P.
+  optional int64 no_default_network_duration_ms = 6 [deprecated = true];
 };
 
 // Logs IpReachabilityMonitor probe events and NUD_FAILED events.

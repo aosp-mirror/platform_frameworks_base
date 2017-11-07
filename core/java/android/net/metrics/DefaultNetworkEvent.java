@@ -20,44 +20,72 @@ import static android.net.ConnectivityManager.NETID_UNSET;
 
 import android.net.NetworkCapabilities;
 
+import com.android.internal.util.BitUtils;
+
+import java.util.StringJoiner;
+
 /**
  * An event recorded by ConnectivityService when there is a change in the default network.
  * {@hide}
  */
 public class DefaultNetworkEvent {
 
-    // The ID of the network that has become the new default or NETID_UNSET if none.
+    // The creation time in milliseconds of this DefaultNetworkEvent.
+    public final long creationTimeMs;
+    // The network ID of the network or NETID_UNSET if none.
     public int netId = NETID_UNSET;
-    // The list of transport types of the new default network, for example TRANSPORT_WIFI, as
-    // defined in NetworkCapabilities.java.
-    public int[] transportTypes = new int[0];
-    // The ID of the network that was the default before or NETID_UNSET if none.
-    public int prevNetId = NETID_UNSET;
-    // Whether the previous network had IPv4/IPv6 connectivity.
-    public boolean prevIPv4;
-    public boolean prevIPv6;
+    // The list of transport types, as defined in NetworkCapabilities.java.
+    public int transports;
+    // The list of transport types of the last previous default network.
+    public int previousTransports;
+    // Whether the network has IPv4/IPv6 connectivity.
+    public boolean ipv4;
+    public boolean ipv6;
+    // The initial network score when this network became the default network.
+    public int initialScore;
+    // The initial network score when this network stopped being the default network.
+    public int finalScore;
+    // The total duration in milliseconds this network was the default network.
+    public long durationMs;
+    // The total duration in milliseconds this network was the default network and was validated.
+    public long validatedMs;
+
+    public DefaultNetworkEvent(long timeMs) {
+        creationTimeMs = timeMs;
+    }
+
+    /** Update the durationMs of this DefaultNetworkEvent for the given current time. */
+    public void updateDuration(long timeMs) {
+        durationMs = timeMs - creationTimeMs;
+    }
 
     @Override
     public String toString() {
-        String prevNetwork = String.valueOf(prevNetId);
-        String newNetwork = String.valueOf(netId);
-        if (prevNetId != 0) {
-            prevNetwork += ":" + ipSupport();
+        StringJoiner j = new StringJoiner(", ", "DefaultNetworkEvent(", ")");
+        j.add("netId=" + netId);
+        for (int t : BitUtils.unpackBits(transports)) {
+            j.add(NetworkCapabilities.transportNameOf(t));
         }
-        if (netId != 0) {
-            newNetwork += ":" + NetworkCapabilities.transportNamesOf(transportTypes);
+        j.add("ip=" + ipSupport());
+        if (initialScore > 0) {
+            j.add("initial_score=" + initialScore);
         }
-        return String.format("DefaultNetworkEvent(%s -> %s)", prevNetwork, newNetwork);
+        if (finalScore > 0) {
+            j.add("final_score=" + finalScore);
+        }
+        j.add(String.format("duration=%.0fs", durationMs / 1000.0));
+        j.add(String.format("validation=%4.1f%%", (validatedMs * 100.0) / durationMs));
+        return j.toString();
     }
 
     private String ipSupport() {
-        if (prevIPv4 && prevIPv6) {
+        if (ipv4 && ipv6) {
             return "IPv4v6";
         }
-        if (prevIPv6) {
+        if (ipv6) {
             return "IPv6";
         }
-        if (prevIPv4) {
+        if (ipv4) {
             return "IPv4";
         }
         return "NONE";

@@ -32,6 +32,7 @@
             android:id="@+id/keyguard_sim"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:tint="@color/background_protected"
             android:src="@drawable/ic_lockscreen_sim"/>
 
     <include layout="@layout/keyguard_message_area"

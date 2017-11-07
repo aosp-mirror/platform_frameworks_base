@@ -68,13 +68,6 @@ public final class ConfigUpdate {
             = "android.intent.action.UPDATE_CT_LOGS";
 
     /**
-     * Update system wide timezone data.
-     * @hide
-     */
-    @SystemApi
-    public static final String ACTION_UPDATE_TZDATA = "android.intent.action.UPDATE_TZDATA";
-
-    /**
      * Update language detection model file.
      * @hide
      */

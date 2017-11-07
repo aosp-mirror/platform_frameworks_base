@@ -16,6 +16,8 @@
 
 package com.android.server.pm;
 
+import static com.android.server.pm.PackageManagerServiceUtils.logCriticalInfo;
+
 import android.content.Context;
 import android.content.pm.UserInfo;
 import android.os.Environment;
@@ -39,8 +41,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-
-import static com.android.server.pm.PackageManagerService.logCriticalInfo;
 
 /**
  * Helper class for preparing and destroying user storage

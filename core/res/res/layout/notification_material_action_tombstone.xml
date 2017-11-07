@@ -26,6 +26,7 @@
     android:textColor="#555555"
     android:singleLine="true"
     android:ellipsize="end"
+    android:textAlignment="viewStart"
     android:alpha="0.5"
     android:enabled="false"
     android:background="@drawable/notification_material_action_background"

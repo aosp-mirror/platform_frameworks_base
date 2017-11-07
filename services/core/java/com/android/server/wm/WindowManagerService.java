@@ -7087,7 +7087,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         synchronized (mWindowMap) {
-            if (mDragDropController.mDragState != null) {
+            if (mDragDropController.dragDropActiveLocked()) {
                 // Drag cursor overrides the app cursor.
                 return;
             }

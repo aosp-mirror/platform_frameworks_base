@@ -1009,10 +1009,10 @@ Slog.e(TAG, "TODD: Packages: " + Arrays.toString(packages));
                 PackageManagerInternal.PACKAGE_SYSTEM, UserHandle.USER_SYSTEM);
         final PackageParser.Package systemPackage =
                 mPackageManagerInt.getPackage(systemPackageName);
-        boolean allowed = (PackageManagerService.compareSignatures(
+        boolean allowed = (PackageManagerServiceUtils.compareSignatures(
                                 bp.getSourceSignatures(), pkg.mSignatures)
                         == PackageManager.SIGNATURE_MATCH)
-                || (PackageManagerService.compareSignatures(
+                || (PackageManagerServiceUtils.compareSignatures(
                                 systemPackage.mSignatures, pkg.mSignatures)
                         == PackageManager.SIGNATURE_MATCH);
         if (!allowed && (privilegedPermission || oemPermission)) {

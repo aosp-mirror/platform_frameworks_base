@@ -33,7 +33,8 @@ namespace statsd {
 class ValueMetricProducer : public virtual MetricProducer, public virtual PullDataReceiver {
 public:
     ValueMetricProducer(const ValueMetric& valueMetric, const int conditionIndex,
-                        const sp<ConditionWizard>& wizard, const int pullTagId);
+                        const sp<ConditionWizard>& wizard, const int pullTagId,
+                        const uint64_t startTimeNs);
 
     virtual ~ValueMetricProducer();
 
@@ -47,7 +48,9 @@ public:
 
     void onDataPulled(const std::vector<std::shared_ptr<LogEvent>>& data) override;
     // TODO: Implement this later.
-    size_t byteSize() override{return 0;};
+    size_t byteSize() override {
+        return 0;
+    };
 
     // TODO: Implement this later.
     virtual void notifyAppUpgrade(const string& apk, const int uid, const int version) override{};

@@ -102,6 +102,15 @@ import static com.android.server.pm.InstructionSets.getPreferredInstructionSet;
 import static com.android.server.pm.InstructionSets.getPrimaryInstructionSet;
 import static com.android.server.pm.PackageManagerServiceCompilerMapping.getCompilerFilterForReason;
 import static com.android.server.pm.PackageManagerServiceCompilerMapping.getDefaultCompilerFilter;
+import static com.android.server.pm.PackageManagerServiceUtils.compareSignatures;
+import static com.android.server.pm.PackageManagerServiceUtils.compressedFileExists;
+import static com.android.server.pm.PackageManagerServiceUtils.decompressFile;
+import static com.android.server.pm.PackageManagerServiceUtils.deriveAbiOverride;
+import static com.android.server.pm.PackageManagerServiceUtils.dumpCriticalInfo;
+import static com.android.server.pm.PackageManagerServiceUtils.getCompressedFiles;
+import static com.android.server.pm.PackageManagerServiceUtils.getLastModifiedTime;
+import static com.android.server.pm.PackageManagerServiceUtils.logCriticalInfo;
+import static com.android.server.pm.PackageManagerServiceUtils.verifySignatures;
 import static com.android.server.pm.permission.PermissionsState.PERMISSION_OPERATION_FAILURE;
 import static com.android.server.pm.permission.PermissionsState.PERMISSION_OPERATION_SUCCESS;
 import static com.android.server.pm.permission.PermissionsState.PERMISSION_OPERATION_SUCCESS_GIDS_CHANGED;
@@ -408,7 +417,7 @@ public class PackageManagerService extends IPackageManager.Stub
     private static final boolean DEBUG_FILTERS = false;
     public static final boolean DEBUG_PERMISSIONS = false;
     private static final boolean DEBUG_SHARED_LIBRARIES = false;
-    private static final boolean DEBUG_COMPRESSION = Build.IS_DEBUGGABLE;
+    public static final boolean DEBUG_COMPRESSION = Build.IS_DEBUGGABLE;
 
     // Debug output for dexopting. This is shared between PackageManagerService, OtaDexoptService
     // and PackageDexOptimizer. All these classes have their own flag to allow switching a single
@@ -462,9 +471,9 @@ public class PackageManagerService extends IPackageManager.Stub
 
     private static final String STATIC_SHARED_LIB_DELIMITER = "_";
     /** Extension of the compressed packages */
-    private final static String COMPRESSED_EXTENSION = ".gz";
+    public final static String COMPRESSED_EXTENSION = ".gz";
     /** Suffix of stub packages on the system partition */
-    private final static String STUB_SUFFIX = "-Stub";
+    public final static String STUB_SUFFIX = "-Stub";
 
     private static final int[] EMPTY_INT_ARRAY = new int[0];
 
@@ -3076,75 +3085,6 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    private int decompressFile(File srcFile, File dstFile) throws ErrnoException {
-        if (DEBUG_COMPRESSION) {
-            Slog.i(TAG, "Decompress file"
-                    + "; src: " + srcFile.getAbsolutePath()
-                    + ", dst: " + dstFile.getAbsolutePath());
-        }
-        try (
-                InputStream fileIn = new GZIPInputStream(new FileInputStream(srcFile));
-                OutputStream fileOut = new FileOutputStream(dstFile, false /*append*/);
-        ) {
-            Streams.copy(fileIn, fileOut);
-            Os.chmod(dstFile.getAbsolutePath(), 0644);
-            return PackageManager.INSTALL_SUCCEEDED;
-        } catch (IOException e) {
-            logCriticalInfo(Log.ERROR, "Failed to decompress file"
-                    + "; src: " + srcFile.getAbsolutePath()
-                    + ", dst: " + dstFile.getAbsolutePath());
-        }
-        return PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
-    }
-
-    private File[] getCompressedFiles(String codePath) {
-        final File stubCodePath = new File(codePath);
-        final String stubName = stubCodePath.getName();
-
-        // The layout of a compressed package on a given partition is as follows :
-        //
-        // Compressed artifacts:
-        //
-        // /partition/ModuleName/foo.gz
-        // /partation/ModuleName/bar.gz
-        //
-        // Stub artifact:
-        //
-        // /partition/ModuleName-Stub/ModuleName-Stub.apk
-        //
-        // In other words, stub is on the same partition as the compressed artifacts
-        // and in a directory that's suffixed with "-Stub".
-        int idx = stubName.lastIndexOf(STUB_SUFFIX);
-        if (idx < 0 || (stubName.length() != (idx + STUB_SUFFIX.length()))) {
-            return null;
-        }
-
-        final File stubParentDir = stubCodePath.getParentFile();
-        if (stubParentDir == null) {
-            Slog.e(TAG, "Unable to determine stub parent dir for codePath: " + codePath);
-            return null;
-        }
-
-        final File compressedPath = new File(stubParentDir, stubName.substring(0, idx));
-        final File[] files = compressedPath.listFiles(new FilenameFilter() {
-            @Override
-            public boolean accept(File dir, String name) {
-                return name.toLowerCase().endsWith(COMPRESSED_EXTENSION);
-            }
-        });
-
-        if (DEBUG_COMPRESSION && files != null && files.length > 0) {
-            Slog.i(TAG, "getCompressedFiles[" + codePath + "]: " + Arrays.toString(files));
-        }
-
-        return files;
-    }
-
-    private boolean compressedFileExists(String codePath) {
-        final File[] compressedFiles = getCompressedFiles(codePath);
-        return compressedFiles != null && compressedFiles.length > 0;
-    }
-
     /**
      * Decompresses the given package on the system image onto
      * the /data partition.
@@ -5385,56 +5325,6 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     /**
-     * Compares two sets of signatures. Returns:
-     * <br />
-     * {@link PackageManager#SIGNATURE_NEITHER_SIGNED}: if both signature sets are null,
-     * <br />
-     * {@link PackageManager#SIGNATURE_FIRST_NOT_SIGNED}: if the first signature set is null,
-     * <br />
-     * {@link PackageManager#SIGNATURE_SECOND_NOT_SIGNED}: if the second signature set is null,
-     * <br />
-     * {@link PackageManager#SIGNATURE_MATCH}: if the two signature sets are identical,
-     * <br />
-     * {@link PackageManager#SIGNATURE_NO_MATCH}: if the two signature sets differ.
-     */
-    public static int compareSignatures(Signature[] s1, Signature[] s2) {
-        if (s1 == null) {
-            return s2 == null
-                    ? PackageManager.SIGNATURE_NEITHER_SIGNED
-                    : PackageManager.SIGNATURE_FIRST_NOT_SIGNED;
-        }
-
-        if (s2 == null) {
-            return PackageManager.SIGNATURE_SECOND_NOT_SIGNED;
-        }
-
-        if (s1.length != s2.length) {
-            return PackageManager.SIGNATURE_NO_MATCH;
-        }
-
-        // Since both signature sets are of size 1, we can compare without HashSets.
-        if (s1.length == 1) {
-            return s1[0].equals(s2[0]) ?
-                    PackageManager.SIGNATURE_MATCH :
-                    PackageManager.SIGNATURE_NO_MATCH;
-        }
-
-        ArraySet<Signature> set1 = new ArraySet<Signature>();
-        for (Signature sig : s1) {
-            set1.add(sig);
-        }
-        ArraySet<Signature> set2 = new ArraySet<Signature>();
-        for (Signature sig : s2) {
-            set2.add(sig);
-        }
-        // Make sure s2 contains all signatures in s1.
-        if (set1.equals(set2)) {
-            return PackageManager.SIGNATURE_MATCH;
-        }
-        return PackageManager.SIGNATURE_NO_MATCH;
-    }
-
-    /**
      * If the database version for this type of package (internal storage or
      * external storage) is less than the version where package signatures
      * were updated, return true.
@@ -5444,74 +5334,9 @@ public class PackageManagerService extends IPackageManager.Stub
         return ver.databaseVersion < DatabaseVersion.SIGNATURE_END_ENTITY;
     }
 
-    /**
-     * Used for backward compatibility to make sure any packages with
-     * certificate chains get upgraded to the new style. {@code existingSigs}
-     * will be in the old format (since they were stored on disk from before the
-     * system upgrade) and {@code scannedSigs} will be in the newer format.
-     */
-    private int compareSignaturesCompat(PackageSignatures existingSigs,
-            PackageParser.Package scannedPkg) {
-        if (!isCompatSignatureUpdateNeeded(scannedPkg)) {
-            return PackageManager.SIGNATURE_NO_MATCH;
-        }
-
-        ArraySet<Signature> existingSet = new ArraySet<Signature>();
-        for (Signature sig : existingSigs.mSignatures) {
-            existingSet.add(sig);
-        }
-        ArraySet<Signature> scannedCompatSet = new ArraySet<Signature>();
-        for (Signature sig : scannedPkg.mSignatures) {
-            try {
-                Signature[] chainSignatures = sig.getChainSignatures();
-                for (Signature chainSig : chainSignatures) {
-                    scannedCompatSet.add(chainSig);
-                }
-            } catch (CertificateEncodingException e) {
-                scannedCompatSet.add(sig);
-            }
-        }
-        /*
-         * Make sure the expanded scanned set contains all signatures in the
-         * existing one.
-         */
-        if (scannedCompatSet.equals(existingSet)) {
-            // Migrate the old signatures to the new scheme.
-            existingSigs.assignSignatures(scannedPkg.mSignatures);
-            // The new KeySets will be re-added later in the scanning process.
-            synchronized (mPackages) {
-                mSettings.mKeySetManagerService.removeAppKeySetDataLPw(scannedPkg.packageName);
-            }
-            return PackageManager.SIGNATURE_MATCH;
-        }
-        return PackageManager.SIGNATURE_NO_MATCH;
-    }
-
     private boolean isRecoverSignatureUpdateNeeded(PackageParser.Package scannedPkg) {
         final VersionInfo ver = getSettingsVersionForPackage(scannedPkg);
         return ver.databaseVersion < DatabaseVersion.SIGNATURE_MALFORMED_RECOVER;
-    }
-
-    private int compareSignaturesRecover(PackageSignatures existingSigs,
-            PackageParser.Package scannedPkg) {
-        if (!isRecoverSignatureUpdateNeeded(scannedPkg)) {
-            return PackageManager.SIGNATURE_NO_MATCH;
-        }
-
-        String msg = null;
-        try {
-            if (Signature.areEffectiveMatch(existingSigs.mSignatures, scannedPkg.mSignatures)) {
-                logCriticalInfo(Log.INFO, "Recovered effectively matching certificates for "
-                        + scannedPkg.packageName);
-                return PackageManager.SIGNATURE_MATCH;
-            }
-        } catch (CertificateException e) {
-            msg = e.getMessage();
-        }
-
-        logCriticalInfo(Log.INFO,
-                "Failed to recover certificates for " + scannedPkg.packageName + ": " + msg);
-        return PackageManager.SIGNATURE_NO_MATCH;
     }
 
     @Override
@@ -8237,49 +8062,8 @@ public class PackageManagerService extends IPackageManager.Stub
         parallelPackageParser.close();
     }
 
-    private static File getSettingsProblemFile() {
-        File dataDir = Environment.getDataDirectory();
-        File systemDir = new File(dataDir, "system");
-        File fname = new File(systemDir, "uiderrors.txt");
-        return fname;
-    }
-
     public static void reportSettingsProblem(int priority, String msg) {
         logCriticalInfo(priority, msg);
-    }
-
-    public static void logCriticalInfo(int priority, String msg) {
-        Slog.println(priority, TAG, msg);
-        EventLogTags.writePmCriticalInfo(msg);
-        try {
-            File fname = getSettingsProblemFile();
-            FileOutputStream out = new FileOutputStream(fname, true);
-            PrintWriter pw = new FastPrintWriter(out);
-            SimpleDateFormat formatter = new SimpleDateFormat();
-            String dateString = formatter.format(new Date(System.currentTimeMillis()));
-            pw.println(dateString + ": " + msg);
-            pw.close();
-            FileUtils.setPermissions(
-                    fname.toString(),
-                    FileUtils.S_IRWXU|FileUtils.S_IRWXG|FileUtils.S_IROTH,
-                    -1, -1);
-        } catch (java.io.IOException e) {
-        }
-    }
-
-    private long getLastModifiedTime(PackageParser.Package pkg, File srcFile) {
-        if (srcFile.isDirectory()) {
-            final File baseFile = new File(pkg.baseCodePath);
-            long maxModifiedTime = baseFile.lastModified();
-            if (pkg.splitCodePaths != null) {
-                for (int i = pkg.splitCodePaths.length - 1; i >=0; --i) {
-                    final File splitFile = new File(pkg.splitCodePaths[i]);
-                    maxModifiedTime = Math.max(maxModifiedTime, splitFile.lastModified());
-                }
-            }
-            return maxModifiedTime;
-        }
-        return srcFile.lastModified();
     }
 
     private void collectCertificatesLI(PackageSetting ps, PackageParser.Package pkg, File srcFile,
@@ -8294,7 +8078,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 && !isCompatSignatureUpdateNeeded(pkg)
                 && !isRecoverSignatureUpdateNeeded(pkg)) {
             long mSigningKeySetId = ps.keySetData.getProperSigningKeySet();
-            KeySetManagerService ksms = mSettings.mKeySetManagerService;
+            final KeySetManagerService ksms = mSettings.mKeySetManagerService;
             ArraySet<PublicKey> signingKs;
             synchronized (mPackages) {
                 signingKs = ksms.getPublicKeysFromKeySetLPr(mSigningKeySetId);
@@ -8710,7 +8494,7 @@ public class PackageManagerService extends IPackageManager.Stub
         return scannedPkg;
     }
 
-    private void renameStaticSharedLibraryPackage(PackageParser.Package pkg) {
+    private static void renameStaticSharedLibraryPackage(PackageParser.Package pkg) {
         // Derive the new package synthetic package name
         pkg.setPackageName(pkg.packageName + STATIC_SHARED_LIB_DELIMITER
                 + pkg.staticSharedLibVersion);
@@ -8722,49 +8506,6 @@ public class PackageManagerService extends IPackageManager.Stub
             return defProcessName;
         }
         return processName;
-    }
-
-    private void verifySignaturesLP(PackageSetting pkgSetting, PackageParser.Package pkg)
-            throws PackageManagerException {
-        if (pkgSetting.signatures.mSignatures != null) {
-            // Already existing package. Make sure signatures match
-            boolean match = compareSignatures(pkgSetting.signatures.mSignatures, pkg.mSignatures)
-                    == PackageManager.SIGNATURE_MATCH;
-            if (!match) {
-                match = compareSignaturesCompat(pkgSetting.signatures, pkg)
-                        == PackageManager.SIGNATURE_MATCH;
-            }
-            if (!match) {
-                match = compareSignaturesRecover(pkgSetting.signatures, pkg)
-                        == PackageManager.SIGNATURE_MATCH;
-            }
-            if (!match) {
-                throw new PackageManagerException(INSTALL_FAILED_UPDATE_INCOMPATIBLE, "Package "
-                        + pkg.packageName + " signatures do not match the "
-                        + "previously installed version; ignoring!");
-            }
-        }
-
-        // Check for shared user signatures
-        if (pkgSetting.sharedUser != null && pkgSetting.sharedUser.signatures.mSignatures != null) {
-            // Already existing package. Make sure signatures match
-            boolean match = compareSignatures(pkgSetting.sharedUser.signatures.mSignatures,
-                    pkg.mSignatures) == PackageManager.SIGNATURE_MATCH;
-            if (!match) {
-                match = compareSignaturesCompat(pkgSetting.sharedUser.signatures, pkg)
-                        == PackageManager.SIGNATURE_MATCH;
-            }
-            if (!match) {
-                match = compareSignaturesRecover(pkgSetting.sharedUser.signatures, pkg)
-                        == PackageManager.SIGNATURE_MATCH;
-            }
-            if (!match) {
-                throw new PackageManagerException(INSTALL_FAILED_SHARED_USER_INCOMPATIBLE,
-                        "Package " + pkg.packageName
-                        + " has no signatures that match those in shared user "
-                        + pkgSetting.sharedUser.name + "; ignoring!");
-            }
-        }
     }
 
     /**
@@ -9737,24 +9478,6 @@ public class PackageManagerService extends IPackageManager.Stub
         return res;
     }
 
-    /**
-     * Derive the value of the {@code cpuAbiOverride} based on the provided
-     * value and an optional stored value from the package settings.
-     */
-    private static String deriveAbiOverride(String abiOverride, PackageSetting settings) {
-        String cpuAbiOverride = null;
-
-        if (NativeLibraryHelper.CLEAR_ABI_OVERRIDE.equals(abiOverride)) {
-            cpuAbiOverride = null;
-        } else if (abiOverride != null) {
-            cpuAbiOverride = abiOverride;
-        } else if (settings != null) {
-            cpuAbiOverride = settings.cpuAbiOverrideString;
-        }
-
-        return cpuAbiOverride;
-    }
-
     private PackageParser.Package scanPackageTracedLI(PackageParser.Package pkg,
             final int policyFlags, int scanFlags, long currentTime, @Nullable UserHandle user)
                     throws PackageManagerException {
@@ -10102,8 +9825,9 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
             }
 
-            if (shouldCheckUpgradeKeySetLP(signatureCheckPs, scanFlags)) {
-                if (checkUpgradeKeySetLP(signatureCheckPs, pkg)) {
+            final KeySetManagerService ksms = mSettings.mKeySetManagerService;
+            if (ksms.shouldCheckUpgradeKeySetLocked(signatureCheckPs, scanFlags)) {
+                if (ksms.checkUpgradeKeySetLocked(signatureCheckPs, pkg)) {
                     // We just determined the app is signed correctly, so bring
                     // over the latest parsed certs.
                     pkgSetting.signatures.mSignatures = pkg.mSignatures;
@@ -10121,8 +9845,16 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
             } else {
                 try {
-                    // SIDE EFFECTS; compareSignaturesCompat() changes KeysetManagerService
-                    verifySignaturesLP(signatureCheckPs, pkg);
+                    final boolean compareCompat = isCompatSignatureUpdateNeeded(pkg);
+                    final boolean compareRecover = isRecoverSignatureUpdateNeeded(pkg);
+                    final boolean compatMatch = verifySignatures(signatureCheckPs, pkg.mSignatures,
+                            compareCompat, compareRecover);
+                    // The new KeySets will be re-added later in the scanning process.
+                    if (compatMatch) {
+                        synchronized (mPackages) {
+                            ksms.removeAppKeySetDataLPw(pkg.packageName);
+                        }
+                    }
                     // We just determined the app is signed correctly, so bring
                     // over the latest parsed certs.
                     pkgSetting.signatures.mSignatures = pkg.mSignatures;
@@ -10410,7 +10142,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         // Make sure we're not adding any bogus keyset info
-        KeySetManagerService ksms = mSettings.mKeySetManagerService;
+        final KeySetManagerService ksms = mSettings.mKeySetManagerService;
         ksms.assertScannedPackageValid(pkg);
 
         synchronized (mPackages) {
@@ -15566,42 +15298,6 @@ public class PackageManagerService extends IPackageManager.Stub
         Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
     }
 
-    private boolean shouldCheckUpgradeKeySetLP(PackageSettingBase oldPs, int scanFlags) {
-        // Can't rotate keys during boot or if sharedUser.
-        if (oldPs == null || (scanFlags&SCAN_INITIAL) != 0 || oldPs.isSharedUser()
-                || !oldPs.keySetData.isUsingUpgradeKeySets()) {
-            return false;
-        }
-        // app is using upgradeKeySets; make sure all are valid
-        KeySetManagerService ksms = mSettings.mKeySetManagerService;
-        long[] upgradeKeySets = oldPs.keySetData.getUpgradeKeySets();
-        for (int i = 0; i < upgradeKeySets.length; i++) {
-            if (!ksms.isIdValidKeySetId(upgradeKeySets[i])) {
-                Slog.wtf(TAG, "Package "
-                         + (oldPs.name != null ? oldPs.name : "<null>")
-                         + " contains upgrade-key-set reference to unknown key-set: "
-                         + upgradeKeySets[i]
-                         + " reverting to signatures check.");
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private boolean checkUpgradeKeySetLP(PackageSettingBase oldPS, PackageParser.Package newPkg) {
-        // Upgrade keysets are being used.  Determine if new package has a superset of the
-        // required keys.
-        long[] upgradeKeySets = oldPS.keySetData.getUpgradeKeySets();
-        KeySetManagerService ksms = mSettings.mKeySetManagerService;
-        for (int i = 0; i < upgradeKeySets.length; i++) {
-            Set<PublicKey> upgradeSet = ksms.getPublicKeysFromKeySetLPr(upgradeKeySets[i]);
-            if (upgradeSet != null && newPkg.mSigningKeys.containsAll(upgradeSet)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     private static void updateDigest(MessageDigest digest, File file) throws IOException {
         try (DigestInputStream digestStream =
                 new DigestInputStream(new FileInputStream(file), digest)) {
@@ -15640,8 +15336,9 @@ public class PackageManagerService extends IPackageManager.Stub
             ps = mSettings.mPackages.get(pkgName);
 
             // verify signatures are valid
-            if (shouldCheckUpgradeKeySetLP(ps, scanFlags)) {
-                if (!checkUpgradeKeySetLP(ps, pkg)) {
+            final KeySetManagerService ksms = mSettings.mKeySetManagerService;
+            if (ksms.shouldCheckUpgradeKeySetLocked(ps, scanFlags)) {
+                if (!ksms.checkUpgradeKeySetLocked(ps, pkg)) {
                     res.setError(INSTALL_FAILED_UPDATE_INCOMPATIBLE,
                             "New package not signed by keys specified by upgrade-keysets: "
                                     + pkgName);
@@ -16542,8 +16239,9 @@ public class PackageManagerService extends IPackageManager.Stub
                 // Quick sanity check that we're signed correctly if updating;
                 // we'll check this again later when scanning, but we want to
                 // bail early here before tripping over redefined permissions.
-                if (shouldCheckUpgradeKeySetLP(signatureCheckPs, scanFlags)) {
-                    if (!checkUpgradeKeySetLP(signatureCheckPs, pkg)) {
+                final KeySetManagerService ksms = mSettings.mKeySetManagerService;
+                if (ksms.shouldCheckUpgradeKeySetLocked(signatureCheckPs, scanFlags)) {
+                    if (!ksms.checkUpgradeKeySetLocked(signatureCheckPs, pkg)) {
                         res.setError(INSTALL_FAILED_UPDATE_INCOMPATIBLE, "Package "
                                 + pkg.packageName + " upgrade keys do not match the "
                                 + "previously installed version");
@@ -16551,7 +16249,16 @@ public class PackageManagerService extends IPackageManager.Stub
                     }
                 } else {
                     try {
-                        verifySignaturesLP(signatureCheckPs, pkg);
+                        final boolean compareCompat = isCompatSignatureUpdateNeeded(pkg);
+                        final boolean compareRecover = isRecoverSignatureUpdateNeeded(pkg);
+                        final boolean compatMatch = verifySignatures(
+                                signatureCheckPs, pkg.mSignatures, compareCompat, compareRecover);
+                        // The new KeySets will be re-added later in the scanning process.
+                        if (compatMatch) {
+                            synchronized (mPackages) {
+                                ksms.removeAppKeySetDataLPw(pkg.packageName);
+                            }
+                        }
                     } catch (PackageManagerException e) {
                         res.setError(e.error, e.getMessage());
                         return;
@@ -16589,10 +16296,11 @@ public class PackageManagerService extends IPackageManager.Stub
                     final boolean sigsOk;
                     final String sourcePackageName = bp.getSourcePackageName();
                     final PackageSettingBase sourcePackageSetting = bp.getSourcePackageSetting();
+                    final KeySetManagerService ksms = mSettings.mKeySetManagerService;
                     if (sourcePackageName.equals(pkg.packageName)
-                            && (shouldCheckUpgradeKeySetLP(sourcePackageSetting,
-                                    scanFlags))) {
-                        sigsOk = checkUpgradeKeySetLP(sourcePackageSetting, pkg);
+                            && (ksms.shouldCheckUpgradeKeySetLocked(
+                                    sourcePackageSetting, scanFlags))) {
+                        sigsOk = ksms.checkUpgradeKeySetLocked(sourcePackageSetting, pkg);
                     } else {
                         sigsOk = compareSignatures(sourcePackageSetting.signatures.mSignatures,
                                 pkg.mSignatures) == PackageManager.SIGNATURE_MATCH;
@@ -20938,34 +20646,11 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
 
                 pw.println();
                 pw.println("Package warning messages:");
-                BufferedReader in = null;
-                String line = null;
-                try {
-                    in = new BufferedReader(new FileReader(getSettingsProblemFile()));
-                    while ((line = in.readLine()) != null) {
-                        if (line.contains("ignored: updated version")) continue;
-                        pw.println(line);
-                    }
-                } catch (IOException ignored) {
-                } finally {
-                    IoUtils.closeQuietly(in);
-                }
+                dumpCriticalInfo(pw, null);
             }
 
             if (checkin && dumpState.isDumping(DumpState.DUMP_MESSAGES)) {
-                BufferedReader in = null;
-                String line = null;
-                try {
-                    in = new BufferedReader(new FileReader(getSettingsProblemFile()));
-                    while ((line = in.readLine()) != null) {
-                        if (line.contains("ignored: updated version")) continue;
-                        pw.print("msg,");
-                        pw.println(line);
-                    }
-                } catch (IOException ignored) {
-                } finally {
-                    IoUtils.closeQuietly(in);
-                }
+                dumpCriticalInfo(pw, "msg,");
             }
         }
 
@@ -21011,24 +20696,9 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
             dumpFeaturesProto(proto);
             mSettings.dumpPackagesProto(proto);
             mSettings.dumpSharedUsersProto(proto);
-            dumpMessagesProto(proto);
+            dumpCriticalInfo(proto);
         }
         proto.flush();
-    }
-
-    private void dumpMessagesProto(ProtoOutputStream proto) {
-        BufferedReader in = null;
-        String line = null;
-        try {
-            in = new BufferedReader(new FileReader(getSettingsProblemFile()));
-            while ((line = in.readLine()) != null) {
-                if (line.contains("ignored: updated version")) continue;
-                proto.write(PackageServiceDumpProto.MESSAGES, line);
-            }
-        } catch (IOException ignored) {
-        } finally {
-            IoUtils.closeQuietly(in);
-        }
     }
 
     private void dumpFeaturesProto(ProtoOutputStream proto) {
@@ -22439,7 +22109,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                 Slog.w(TAG, "KeySet requested for filtered package: " + packageName);
                 throw new IllegalArgumentException("Unknown package: " + packageName);
             }
-            KeySetManagerService ksms = mSettings.mKeySetManagerService;
+            final KeySetManagerService ksms = mSettings.mKeySetManagerService;
             return new KeySet(ksms.getKeySetByAliasAndPackageNameLPr(packageName, alias));
         }
     }
@@ -22468,7 +22138,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                     && Process.SYSTEM_UID != callingUid) {
                 throw new SecurityException("May not access signing KeySet of other apps.");
             }
-            KeySetManagerService ksms = mSettings.mKeySetManagerService;
+            final KeySetManagerService ksms = mSettings.mKeySetManagerService;
             return new KeySet(ksms.getSigningKeySetByPackageNameLPr(packageName));
         }
     }
@@ -22492,7 +22162,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
             }
             IBinder ksh = ks.getToken();
             if (ksh instanceof KeySetHandle) {
-                KeySetManagerService ksms = mSettings.mKeySetManagerService;
+                final KeySetManagerService ksms = mSettings.mKeySetManagerService;
                 return ksms.packageIsSignedByLPr(packageName, (KeySetHandle) ksh);
             }
             return false;
@@ -22518,7 +22188,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
             }
             IBinder ksh = ks.getToken();
             if (ksh instanceof KeySetHandle) {
-                KeySetManagerService ksms = mSettings.mKeySetManagerService;
+                final KeySetManagerService ksms = mSettings.mKeySetManagerService;
                 return ksms.packageIsSignedByExactlyLPr(packageName, (KeySetHandle) ksh);
             }
             return false;

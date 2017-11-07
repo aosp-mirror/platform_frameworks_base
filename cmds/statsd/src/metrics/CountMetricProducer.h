@@ -20,6 +20,7 @@
 #include <unordered_map>
 
 #include <android/util/ProtoOutputStream.h>
+#include <gtest/gtest_prod.h>
 #include "../condition/ConditionTracker.h"
 #include "../matchers/matcher_util.h"
 #include "CountAnomalyTracker.h"
@@ -34,11 +35,17 @@ namespace android {
 namespace os {
 namespace statsd {
 
+struct CountBucket {
+    int64_t mBucketStartNs;
+    int64_t mBucketEndNs;
+    int64_t mCount;
+};
+
 class CountMetricProducer : public MetricProducer {
 public:
     // TODO: Pass in the start time from MetricsManager, it should be consistent for all metrics.
     CountMetricProducer(const CountMetric& countMetric, const int conditionIndex,
-                        const sp<ConditionWizard>& wizard);
+                        const sp<ConditionWizard>& wizard, const uint64_t startTimeNs);
 
     virtual ~CountMetricProducer();
 
@@ -66,8 +73,7 @@ protected:
 private:
     const CountMetric mMetric;
 
-    std::unordered_map<HashableDimensionKey,
-        std::vector<unique_ptr<android::util::ProtoOutputStream>>> mPastBucketProtos;
+    std::unordered_map<HashableDimensionKey, std::vector<CountBucket>> mPastBuckets;
 
     size_t mByteSize;
 
@@ -83,6 +89,10 @@ private:
     long long mProtoToken;
 
     void startNewProtoOutputStream(long long timestamp);
+
+    FRIEND_TEST(CountMetricProducerTest, TestNonDimensionalEvents);
+    FRIEND_TEST(CountMetricProducerTest, TestEventsWithNonSlicedCondition);
+    FRIEND_TEST(CountMetricProducerTest, TestEventsWithSlicedCondition);
 };
 
 }  // namespace statsd

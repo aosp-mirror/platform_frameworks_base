@@ -23,6 +23,7 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.os.LocaleList;
 import android.view.View.OnClickListener;
 import android.view.textclassifier.TextClassifier.EntityType;
 
@@ -436,6 +437,33 @@ public final class TextClassification {
             return new TextClassification(
                     mText, mIcons, mLabels, mIntents, mOnClickListeners, mEntityConfidence,
                     mLogType, mVersionInfo);
+        }
+    }
+
+    /**
+     * TextClassification optional input parameters.
+     */
+    public static final class Options {
+
+        private LocaleList mDefaultLocales;
+
+        /**
+         * @param defaultLocales ordered list of locale preferences that may be used to disambiguate
+         *      the provided text. If no locale preferences exist, set this to null or an empty
+         *      locale list.
+         */
+        public Options setDefaultLocales(@Nullable LocaleList defaultLocales) {
+            mDefaultLocales = defaultLocales;
+            return this;
+        }
+
+        /**
+         * @return ordered list of locale preferences that can be used to disambiguate
+         *      the provided text.
+         */
+        @Nullable
+        public LocaleList getDefaultLocales() {
+            return mDefaultLocales;
         }
     }
 }

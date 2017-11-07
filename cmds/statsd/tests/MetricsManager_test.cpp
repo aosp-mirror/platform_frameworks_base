@@ -17,6 +17,7 @@
 #include "src/condition/ConditionTracker.h"
 #include "src/matchers/LogMatchingTracker.h"
 #include "src/metrics/CountMetricProducer.h"
+#include "src/metrics/GaugeMetricProducer.h"
 #include "src/metrics/MetricProducer.h"
 #include "src/metrics/ValueMetricProducer.h"
 #include "src/metrics/metrics_manager_util.h"

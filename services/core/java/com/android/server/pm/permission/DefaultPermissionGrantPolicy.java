@@ -16,6 +16,8 @@
 
 package com.android.server.pm.permission;
 
+import static com.android.server.pm.PackageManagerServiceUtils.compareSignatures;
+
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -1110,8 +1112,8 @@ public final class DefaultPermissionGrantPolicy {
         final String systemPackageName = mServiceInternal.getKnownPackageName(
                 PackageManagerInternal.PACKAGE_SYSTEM, UserHandle.USER_SYSTEM);
         final PackageParser.Package systemPackage = getPackage(systemPackageName);
-        return PackageManagerService.compareSignatures(systemPackage.mSignatures,
-                pkg.mSignatures) == PackageManager.SIGNATURE_MATCH;
+        return compareSignatures(systemPackage.mSignatures, pkg.mSignatures)
+                == PackageManager.SIGNATURE_MATCH;
     }
 
     private void grantDefaultPermissionExceptions(int userId) {
