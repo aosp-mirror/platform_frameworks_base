@@ -358,12 +358,12 @@
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Notifikasi kurang darurat di bawah"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Tap lagi untuk membuka"</string>
-    <string name="keyguard_unlock" msgid="8043466894212841998">"Gesek ke atas untuk membuka kunci"</string>
+    <string name="keyguard_unlock" msgid="8043466894212841998">"Geser ke atas untuk membuka kunci"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"Perangkat ini dikelola oleh organisasi"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"Perangkat ini dikelola oleh <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
-    <string name="phone_hint" msgid="4872890986869209950">"Gesek dari ikon untuk telepon"</string>
-    <string name="voice_hint" msgid="8939888732119726665">"Gesek dari ikon untuk mengaktifkan bantuan suara"</string>
-    <string name="camera_hint" msgid="7939688436797157483">"Gesek dari ikon untuk kamera"</string>
+    <string name="phone_hint" msgid="4872890986869209950">"Geser dari ikon untuk telepon"</string>
+    <string name="voice_hint" msgid="8939888732119726665">"Geser dari ikon untuk bantuan suara"</string>
+    <string name="camera_hint" msgid="7939688436797157483">"Geser dari ikon untuk kamera"</string>
     <string name="interruption_level_none_with_warning" msgid="5114872171614161084">"Senyap total. Tindakan ini juga akan mensenyapkan pembaca layar."</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"Senyap total"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"Hanya untuk prioritas"</string>
@@ -499,7 +499,7 @@
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Ketuk untuk membisukan. Layanan aksesibilitas mungkin dibisukan."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s. Tap untuk menyetel agar bergetar."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. Tap untuk menonaktifkan."</string>
-    <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"Kontrol volume %s ditampilkan. Gesek ke atas untuk menutup."</string>
+    <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"Kontrol volume %s ditampilkan. Geser ke atas untuk menutup."</string>
     <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"Kontrol volume disembunyikan"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"Penyetel Antarmuka Pengguna Sistem"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Tampilkan persentase baterai yang tersemat"</string>
