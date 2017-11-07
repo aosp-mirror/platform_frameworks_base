@@ -1213,6 +1213,18 @@
   <java-symbol type="array" name="config_telephonyHardware" />
   <java-symbol type="array" name="config_keySystemUuidMapping" />
   <java-symbol type="array" name="config_gpsParameters" />
+  <java-symbol type="array" name="required_apps_managed_user" />
+  <java-symbol type="array" name="required_apps_managed_profile" />
+  <java-symbol type="array" name="required_apps_managed_device" />
+  <java-symbol type="array" name="disallowed_apps_managed_user" />
+  <java-symbol type="array" name="disallowed_apps_managed_profile" />
+  <java-symbol type="array" name="disallowed_apps_managed_device" />
+  <java-symbol type="array" name="vendor_required_apps_managed_user" />
+  <java-symbol type="array" name="vendor_required_apps_managed_profile" />
+  <java-symbol type="array" name="vendor_required_apps_managed_device" />
+  <java-symbol type="array" name="vendor_disallowed_apps_managed_user" />
+  <java-symbol type="array" name="vendor_disallowed_apps_managed_profile" />
+  <java-symbol type="array" name="vendor_disallowed_apps_managed_device" />
 
   <java-symbol type="drawable" name="default_wallpaper" />
   <java-symbol type="drawable" name="default_lock_wallpaper" />
