@@ -49,6 +49,7 @@ import android.os.BatteryProperty;
 import android.os.Binder;
 import android.os.FileUtils;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.IBatteryPropertiesListener;
 import android.os.IBatteryPropertiesRegistrar;
 import android.os.IBinder;
@@ -75,6 +76,7 @@ import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -176,6 +178,7 @@ public final class BatteryService extends SystemService {
     private HealthServiceWrapper mHealthServiceWrapper;
     private HealthHalCallback mHealthHalCallback;
     private BatteryPropertiesRegistrar mBatteryPropertiesRegistrar;
+    private HandlerThread mHandlerThread;
 
     public BatteryService(Context context) {
         super(context);
@@ -1195,14 +1198,13 @@ public final class BatteryService extends SystemService {
                 Arrays.asList(INSTANCE_VENDOR, INSTANCE_HEALTHD);
 
         private final IServiceNotification mNotification = new Notification();
+        private final HandlerThread mHandlerThread = new HandlerThread("HealthServiceRefresh");
         // These variables are fixed after init.
         private Callback mCallback;
         private IHealthSupplier mHealthSupplier;
         private String mInstanceName;
 
-        private final Object mLastServiceSetLock = new Object();
         // Last IHealth service received.
-        // set must be also be guarded with mLastServiceSetLock to ensure ordering.
         private final AtomicReference<IHealth> mLastService = new AtomicReference<>();
 
         /**
@@ -1220,6 +1222,10 @@ public final class BatteryService extends SystemService {
          * Start monitoring registration of new IHealth services. Only instances that are in
          * {@code sAllInstances} and in device / framework manifest are used. This function should
          * only be called once.
+         *
+         * mCallback.onRegistration() is called synchronously (aka in init thread) before
+         * this method returns.
+         *
          * @throws RemoteException transaction error when talking to IServiceManager
          * @throws NoSuchElementException if one of the following cases:
          *         - No service manager;
@@ -1240,38 +1246,46 @@ public final class BatteryService extends SystemService {
             mCallback = callback;
             mHealthSupplier = healthSupplier;
 
-            traceBegin("HealthInitGetManager");
-            try {
-                manager = managerSupplier.get();
-            } finally {
-                traceEnd();
-            }
+            // Initialize mLastService and call callback for the first time (in init thread)
+            IHealth newService = null;
             for (String name : sAllInstances) {
-                traceBegin("HealthInitGetTransport_" + name);
+                traceBegin("HealthInitGetService_" + name);
                 try {
-                    if (manager.getTransport(IHealth.kInterfaceName, name) !=
-                            IServiceManager.Transport.EMPTY) {
-                        mInstanceName = name;
-                        break;
-                    }
+                    newService = healthSupplier.get(name);
+                } catch (NoSuchElementException ex) {
+                    /* ignored, handled below */
                 } finally {
                     traceEnd();
                 }
+                if (newService != null) {
+                    mInstanceName = name;
+                    mLastService.set(newService);
+                    break;
+                }
             }
 
-            if (mInstanceName == null) {
+            if (mInstanceName == null || newService == null) {
                 throw new NoSuchElementException(String.format(
                         "No IHealth service instance among %s is available. Perhaps no permission?",
                         sAllInstances.toString()));
             }
+            mCallback.onRegistration(null, newService, mInstanceName);
 
+            // Register for future service registrations
             traceBegin("HealthInitRegisterNotification");
+            mHandlerThread.start();
             try {
-                manager.registerForNotifications(IHealth.kInterfaceName, mInstanceName, mNotification);
+                managerSupplier.get().registerForNotifications(
+                        IHealth.kInterfaceName, mInstanceName, mNotification);
             } finally {
                 traceEnd();
             }
             Slog.i(TAG, "health: HealthServiceWrapper listening to instance " + mInstanceName);
+        }
+
+        @VisibleForTesting
+        HandlerThread getHandlerThread() {
+            return mHandlerThread;
         }
 
         interface Callback {
@@ -1302,7 +1316,7 @@ public final class BatteryService extends SystemService {
          */
         interface IHealthSupplier {
             default IHealth get(String name) throws NoSuchElementException, RemoteException {
-                return IHealth.getService(name);
+                return IHealth.getService(name, true /* retry */);
             }
         }
 
@@ -1312,18 +1326,27 @@ public final class BatteryService extends SystemService {
                     boolean preexisting) {
                 if (!IHealth.kInterfaceName.equals(interfaceName)) return;
                 if (!mInstanceName.equals(instanceName)) return;
-                try {
-                    // ensures the order of multiple onRegistration on different threads.
-                    synchronized (mLastServiceSetLock) {
-                        IHealth newService = mHealthSupplier.get(instanceName);
-                        IHealth oldService = mLastService.getAndSet(newService);
-                        Slog.i(TAG, "health: new instance registered " + instanceName);
-                        mCallback.onRegistration(oldService, newService, instanceName);
+
+                // This runnable only runs on mHandlerThread and ordering is ensured, hence
+                // no locking is needed inside the runnable.
+                mHandlerThread.getThreadHandler().post(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            IHealth newService = mHealthSupplier.get(mInstanceName);
+                            IHealth oldService = mLastService.getAndSet(newService);
+
+                            // preexisting may be inaccurate (race). Check for equality here.
+                            if (Objects.equals(newService, oldService)) return;
+
+                            Slog.i(TAG, "health: new instance registered " + mInstanceName);
+                            mCallback.onRegistration(oldService, newService, mInstanceName);
+                        } catch (NoSuchElementException | RemoteException ex) {
+                            Slog.e(TAG, "health: Cannot get instance '" + mInstanceName
+                                    + "': " + ex.getMessage() + ". Perhaps no permission?");
+                        }
                     }
-                } catch (NoSuchElementException | RemoteException ex) {
-                    Slog.e(TAG, "health: Cannot get instance '" + instanceName + "': " +
-                           ex.getMessage() + ". Perhaps no permission?");
-                }
+                });
             }
         }
     }
