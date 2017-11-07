@@ -48,6 +48,7 @@ public final class SomeArgs {
     public Object arg6;
     public Object arg7;
     public Object arg8;
+    public Object arg9;
     public int argi1;
     public int argi2;
     public int argi3;

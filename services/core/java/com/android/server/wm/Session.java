@@ -23,9 +23,8 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.isSystemAlertWindowType;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_DRAG;
+
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TASK_POSITIONING;
-import static com.android.server.wm.WindowManagerDebugConfig.SHOW_LIGHT_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
@@ -45,13 +44,13 @@ import android.os.UserHandle;
 import android.util.MergedConfiguration;
 import android.util.Slog;
 import android.view.Display;
+import android.view.DisplayCutout;
 import android.view.IWindow;
 import android.view.IWindowId;
 import android.view.IWindowSession;
 import android.view.IWindowSessionCallback;
 import android.view.InputChannel;
 import android.view.Surface;
-import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.view.WindowManager;
 
@@ -192,15 +191,17 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
             int viewVisibility, Rect outContentInsets, Rect outStableInsets,
             InputChannel outInputChannel) {
         return addToDisplay(window, seq, attrs, viewVisibility, Display.DEFAULT_DISPLAY,
-                outContentInsets, outStableInsets, null /* outOutsets */, outInputChannel);
+                outContentInsets, outStableInsets, null /* outOutsets */, null /* cutout */,
+                outInputChannel);
     }
 
     @Override
     public int addToDisplay(IWindow window, int seq, WindowManager.LayoutParams attrs,
             int viewVisibility, int displayId, Rect outContentInsets, Rect outStableInsets,
-            Rect outOutsets, InputChannel outInputChannel) {
+            Rect outOutsets, DisplayCutout.ParcelableWrapper outDisplayCutout,
+            InputChannel outInputChannel) {
         return mService.addWindow(this, window, seq, attrs, viewVisibility, displayId,
-                outContentInsets, outStableInsets, outOutsets, outInputChannel);
+                outContentInsets, outStableInsets, outOutsets, outDisplayCutout, outInputChannel);
     }
 
     @Override
@@ -214,7 +215,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     public int addToDisplayWithoutInputChannel(IWindow window, int seq, WindowManager.LayoutParams attrs,
             int viewVisibility, int displayId, Rect outContentInsets, Rect outStableInsets) {
         return mService.addWindow(this, window, seq, attrs, viewVisibility, displayId,
-            outContentInsets, outStableInsets, null /* outOutsets */, null);
+            outContentInsets, outStableInsets, null /* outOutsets */, null /* cutout */, null);
     }
 
     @Override
@@ -232,6 +233,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
             int requestedWidth, int requestedHeight, int viewFlags,
             int flags, Rect outFrame, Rect outOverscanInsets, Rect outContentInsets,
             Rect outVisibleInsets, Rect outStableInsets, Rect outsets, Rect outBackdropFrame,
+            DisplayCutout.ParcelableWrapper cutout,
             MergedConfiguration mergedConfiguration, Surface outSurface) {
         if (false) Slog.d(TAG_WM, ">>>>>> ENTERED relayout from "
                 + Binder.getCallingPid());
@@ -239,7 +241,8 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
         int res = mService.relayoutWindow(this, window, seq, attrs,
                 requestedWidth, requestedHeight, viewFlags, flags,
                 outFrame, outOverscanInsets, outContentInsets, outVisibleInsets,
-                outStableInsets, outsets, outBackdropFrame, mergedConfiguration, outSurface);
+                outStableInsets, outsets, outBackdropFrame, cutout,
+                mergedConfiguration, outSurface);
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         if (false) Slog.d(TAG_WM, "<<<<<< EXITING relayout to "
                 + Binder.getCallingPid());

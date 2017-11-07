@@ -42,6 +42,7 @@ import android.os.SystemClock;
 import android.util.Log;
 import android.util.MergedConfiguration;
 import android.view.Display;
+import android.view.DisplayCutout;
 import android.view.Gravity;
 import android.view.IWindowSession;
 import android.view.InputChannel;
@@ -176,6 +177,9 @@ public abstract class WallpaperService extends Service {
         final Rect mFinalSystemInsets = new Rect();
         final Rect mFinalStableInsets = new Rect();
         final Rect mBackdropFrame = new Rect();
+        final DisplayCutout.ParcelableWrapper mDisplayCutout =
+                new DisplayCutout.ParcelableWrapper();
+        DisplayCutout mDispatchedDisplayCutout = DisplayCutout.NO_CUTOUT;
         final MergedConfiguration mMergedConfiguration = new MergedConfiguration();
 
         final WindowManager.LayoutParams mLayout
@@ -302,7 +306,8 @@ public abstract class WallpaperService extends Service {
             public void resized(Rect frame, Rect overscanInsets, Rect contentInsets,
                     Rect visibleInsets, Rect stableInsets, Rect outsets, boolean reportDraw,
                     MergedConfiguration mergedConfiguration, Rect backDropRect, boolean forceLayout,
-                    boolean alwaysConsumeNavBar, int displayId) {
+                    boolean alwaysConsumeNavBar, int displayId,
+                    DisplayCutout.ParcelableWrapper displayCutout) {
                 Message msg = mCaller.obtainMessageIO(MSG_WINDOW_RESIZED,
                         reportDraw ? 1 : 0, outsets);
                 mCaller.sendMessage(msg);
@@ -750,7 +755,7 @@ public abstract class WallpaperService extends Service {
                         mInputChannel = new InputChannel();
                         if (mSession.addToDisplay(mWindow, mWindow.mSeq, mLayout, View.VISIBLE,
                             Display.DEFAULT_DISPLAY, mContentInsets, mStableInsets, mOutsets,
-                                mInputChannel) < 0) {
+                                mDisplayCutout, mInputChannel) < 0) {
                             Log.w(TAG, "Failed to add window while updating wallpaper surface.");
                             return;
                         }
@@ -776,7 +781,7 @@ public abstract class WallpaperService extends Service {
                         mWindow, mWindow.mSeq, mLayout, mWidth, mHeight,
                             View.VISIBLE, 0, mWinFrame, mOverscanInsets, mContentInsets,
                             mVisibleInsets, mStableInsets, mOutsets, mBackdropFrame,
-                            mMergedConfiguration, mSurfaceHolder.mSurface);
+                            mDisplayCutout, mMergedConfiguration, mSurfaceHolder.mSurface);
 
                     if (DEBUG) Log.v(TAG, "New surface: " + mSurfaceHolder.mSurface
                             + ", frame=" + mWinFrame);
@@ -800,6 +805,8 @@ public abstract class WallpaperService extends Service {
                         mStableInsets.top += padding.top;
                         mStableInsets.right += padding.right;
                         mStableInsets.bottom += padding.bottom;
+                        mDisplayCutout.set(mDisplayCutout.get().inset(-padding.left, -padding.top,
+                                -padding.right, -padding.bottom));
                     }
 
                     if (mCurWidth != w) {
@@ -819,6 +826,7 @@ public abstract class WallpaperService extends Service {
                     insetsChanged |= !mDispatchedContentInsets.equals(mContentInsets);
                     insetsChanged |= !mDispatchedStableInsets.equals(mStableInsets);
                     insetsChanged |= !mDispatchedOutsets.equals(mOutsets);
+                    insetsChanged |= !mDispatchedDisplayCutout.equals(mDisplayCutout.get());
 
                     mSurfaceHolder.setSurfaceFrameSize(w, h);
                     mSurfaceHolder.mSurfaceLock.unlock();
@@ -885,12 +893,13 @@ public abstract class WallpaperService extends Service {
                             mDispatchedContentInsets.set(mContentInsets);
                             mDispatchedStableInsets.set(mStableInsets);
                             mDispatchedOutsets.set(mOutsets);
+                            mDispatchedDisplayCutout = mDisplayCutout.get();
                             mFinalSystemInsets.set(mDispatchedOverscanInsets);
                             mFinalStableInsets.set(mDispatchedStableInsets);
                             WindowInsets insets = new WindowInsets(mFinalSystemInsets,
                                     null, mFinalStableInsets,
                                     getResources().getConfiguration().isScreenRound(), false,
-                                    null /* displayCutout */);
+                                    mDispatchedDisplayCutout);
                             if (DEBUG) {
                                 Log.v(TAG, "dispatching insets=" + insets);
                             }

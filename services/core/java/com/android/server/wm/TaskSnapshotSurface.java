@@ -57,6 +57,7 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.MergedConfiguration;
 import android.util.Slog;
+import android.view.DisplayCutout;
 import android.view.IWindowSession;
 import android.view.Surface;
 import android.view.SurfaceControl;
@@ -134,6 +135,7 @@ class TaskSnapshotSurface implements StartingSurface {
         window.setSession(session);
         final Surface surface = new Surface();
         final Rect tmpRect = new Rect();
+        final DisplayCutout.ParcelableWrapper tmpCutout = new DisplayCutout.ParcelableWrapper();
         final Rect tmpFrame = new Rect();
         final Rect taskBounds;
         final Rect tmpContentInsets = new Rect();
@@ -196,7 +198,7 @@ class TaskSnapshotSurface implements StartingSurface {
         try {
             final int res = session.addToDisplay(window, window.mSeq, layoutParams,
                     View.VISIBLE, token.getDisplayContent().getDisplayId(), tmpRect, tmpRect,
-                    tmpRect, null);
+                    tmpRect, tmpCutout, null);
             if (res < 0) {
                 Slog.w(TAG, "Failed to add snapshot starting window res=" + res);
                 return null;
@@ -212,7 +214,7 @@ class TaskSnapshotSurface implements StartingSurface {
         try {
             session.relayout(window, window.mSeq, layoutParams, -1, -1, View.VISIBLE, 0, tmpFrame,
                     tmpRect, tmpContentInsets, tmpRect, tmpStableInsets, tmpRect, tmpRect,
-                    tmpMergedConfiguration, surface);
+                    tmpCutout, tmpMergedConfiguration, surface);
         } catch (RemoteException e) {
             // Local call.
         }
@@ -437,7 +439,8 @@ class TaskSnapshotSurface implements StartingSurface {
         public void resized(Rect frame, Rect overscanInsets, Rect contentInsets, Rect visibleInsets,
                 Rect stableInsets, Rect outsets, boolean reportDraw,
                 MergedConfiguration mergedConfiguration, Rect backDropFrame, boolean forceLayout,
-                boolean alwaysConsumeNavBar, int displayId) {
+                boolean alwaysConsumeNavBar, int displayId,
+                DisplayCutout.ParcelableWrapper displayCutout) {
             if (mergedConfiguration != null && mOuter != null
                     && mOuter.mOrientationOnCreation
                             != mergedConfiguration.getMergedConfiguration().orientation) {

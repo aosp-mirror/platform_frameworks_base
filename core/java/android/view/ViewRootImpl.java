@@ -384,12 +384,15 @@ public final class ViewRootImpl implements ViewParent,
     final Rect mPendingContentInsets = new Rect();
     final Rect mPendingOutsets = new Rect();
     final Rect mPendingBackDropFrame = new Rect();
+    final DisplayCutout.ParcelableWrapper mPendingDisplayCutout =
+            new DisplayCutout.ParcelableWrapper(DisplayCutout.NO_CUTOUT);
     boolean mPendingAlwaysConsumeNavBar;
     final ViewTreeObserver.InternalInsetsInfo mLastGivenInsets
             = new ViewTreeObserver.InternalInsetsInfo();
 
     final Rect mDispatchContentInsets = new Rect();
     final Rect mDispatchStableInsets = new Rect();
+    DisplayCutout mDispatchDisplayCutout = DisplayCutout.NO_CUTOUT;
 
     private WindowInsets mLastWindowInsets;
 
@@ -730,7 +733,7 @@ public final class ViewRootImpl implements ViewParent,
                     res = mWindowSession.addToDisplay(mWindow, mSeq, mWindowAttributes,
                             getHostVisibility(), mDisplay.getDisplayId(),
                             mAttachInfo.mContentInsets, mAttachInfo.mStableInsets,
-                            mAttachInfo.mOutsets, mInputChannel);
+                            mAttachInfo.mOutsets, mAttachInfo.mDisplayCutout, mInputChannel);
                 } catch (RemoteException e) {
                     mAdded = false;
                     mView = null;
@@ -752,6 +755,7 @@ public final class ViewRootImpl implements ViewParent,
                 mPendingOverscanInsets.set(0, 0, 0, 0);
                 mPendingContentInsets.set(mAttachInfo.mContentInsets);
                 mPendingStableInsets.set(mAttachInfo.mStableInsets);
+                mPendingDisplayCutout.set(mAttachInfo.mDisplayCutout);
                 mPendingVisibleInsets.set(0, 0, 0, 0);
                 mAttachInfo.mAlwaysConsumeNavBar =
                         (res & WindowManagerGlobal.ADD_FLAG_ALWAYS_CONSUME_NAV_BAR) != 0;
@@ -1544,15 +1548,20 @@ public final class ViewRootImpl implements ViewParent,
         if (mLastWindowInsets == null || forceConstruct) {
             mDispatchContentInsets.set(mAttachInfo.mContentInsets);
             mDispatchStableInsets.set(mAttachInfo.mStableInsets);
+            mDispatchDisplayCutout = mAttachInfo.mDisplayCutout.get();
+
             Rect contentInsets = mDispatchContentInsets;
             Rect stableInsets = mDispatchStableInsets;
+            DisplayCutout displayCutout = mDispatchDisplayCutout;
             // For dispatch we preserve old logic, but for direct requests from Views we allow to
             // immediately use pending insets.
             if (!forceConstruct
                     && (!mPendingContentInsets.equals(contentInsets) ||
-                        !mPendingStableInsets.equals(stableInsets))) {
+                        !mPendingStableInsets.equals(stableInsets) ||
+                        !mPendingDisplayCutout.get().equals(displayCutout))) {
                 contentInsets = mPendingContentInsets;
                 stableInsets = mPendingStableInsets;
+                displayCutout = mPendingDisplayCutout.get();
             }
             Rect outsets = mAttachInfo.mOutsets;
             if (outsets.left > 0 || outsets.top > 0 || outsets.right > 0 || outsets.bottom > 0) {
@@ -1563,7 +1572,7 @@ public final class ViewRootImpl implements ViewParent,
             mLastWindowInsets = new WindowInsets(contentInsets,
                     null /* windowDecorInsets */, stableInsets,
                     mContext.getResources().getConfiguration().isScreenRound(),
-                    mAttachInfo.mAlwaysConsumeNavBar, null /* displayCutout */);
+                    mAttachInfo.mAlwaysConsumeNavBar, displayCutout);
         }
         return mLastWindowInsets;
     }
@@ -1728,6 +1737,9 @@ public final class ViewRootImpl implements ViewParent,
                     insetsChanged = true;
                 }
                 if (!mPendingStableInsets.equals(mAttachInfo.mStableInsets)) {
+                    insetsChanged = true;
+                }
+                if (!mPendingDisplayCutout.equals(mAttachInfo.mDisplayCutout)) {
                     insetsChanged = true;
                 }
                 if (!mPendingVisibleInsets.equals(mAttachInfo.mVisibleInsets)) {
@@ -1906,7 +1918,8 @@ public final class ViewRootImpl implements ViewParent,
                         + " overscan=" + mPendingOverscanInsets.toShortString()
                         + " content=" + mPendingContentInsets.toShortString()
                         + " visible=" + mPendingVisibleInsets.toShortString()
-                        + " visible=" + mPendingStableInsets.toShortString()
+                        + " stable=" + mPendingStableInsets.toShortString()
+                        + " cutout=" + mPendingDisplayCutout.get().toString()
                         + " outsets=" + mPendingOutsets.toShortString()
                         + " surface=" + mSurface);
 
@@ -1931,6 +1944,8 @@ public final class ViewRootImpl implements ViewParent,
                         mAttachInfo.mVisibleInsets);
                 final boolean stableInsetsChanged = !mPendingStableInsets.equals(
                         mAttachInfo.mStableInsets);
+                final boolean cutoutChanged = !mPendingDisplayCutout.equals(
+                        mAttachInfo.mDisplayCutout);
                 final boolean outsetsChanged = !mPendingOutsets.equals(mAttachInfo.mOutsets);
                 final boolean surfaceSizeChanged = (relayoutResult
                         & WindowManagerGlobal.RELAYOUT_RES_SURFACE_RESIZED) != 0;
@@ -1952,6 +1967,14 @@ public final class ViewRootImpl implements ViewParent,
                     mAttachInfo.mStableInsets.set(mPendingStableInsets);
                     if (DEBUG_LAYOUT) Log.v(mTag, "Decor insets changing to: "
                             + mAttachInfo.mStableInsets);
+                    // Need to relayout with content insets.
+                    contentInsetsChanged = true;
+                }
+                if (cutoutChanged) {
+                    mAttachInfo.mDisplayCutout.set(mPendingDisplayCutout);
+                    if (DEBUG_LAYOUT) {
+                        Log.v(mTag, "DisplayCutout changing to: " + mAttachInfo.mDisplayCutout);
+                    }
                     // Need to relayout with content insets.
                     contentInsetsChanged = true;
                 }
@@ -2056,6 +2079,7 @@ public final class ViewRootImpl implements ViewParent,
                         mResizeMode = freeformResizing
                                 ? RESIZE_MODE_FREEFORM
                                 : RESIZE_MODE_DOCKED_DIVIDER;
+                        // TODO: Need cutout?
                         startDragResizing(mPendingBackDropFrame,
                                 mWinFrame.equals(mPendingBackDropFrame), mPendingVisibleInsets,
                                 mPendingStableInsets, mResizeMode);
@@ -3776,6 +3800,7 @@ public final class ViewRootImpl implements ViewParent,
                             && mPendingOverscanInsets.equals(args.arg5)
                             && mPendingContentInsets.equals(args.arg2)
                             && mPendingStableInsets.equals(args.arg6)
+                            && mPendingDisplayCutout.get().equals(args.arg9)
                             && mPendingVisibleInsets.equals(args.arg3)
                             && mPendingOutsets.equals(args.arg7)
                             && mPendingBackDropFrame.equals(args.arg8)
@@ -3808,6 +3833,7 @@ public final class ViewRootImpl implements ViewParent,
                                 || !mPendingOverscanInsets.equals(args.arg5)
                                 || !mPendingContentInsets.equals(args.arg2)
                                 || !mPendingStableInsets.equals(args.arg6)
+                                || !mPendingDisplayCutout.get().equals(args.arg9)
                                 || !mPendingVisibleInsets.equals(args.arg3)
                                 || !mPendingOutsets.equals(args.arg7);
 
@@ -3815,6 +3841,7 @@ public final class ViewRootImpl implements ViewParent,
                         mPendingOverscanInsets.set((Rect) args.arg5);
                         mPendingContentInsets.set((Rect) args.arg2);
                         mPendingStableInsets.set((Rect) args.arg6);
+                        mPendingDisplayCutout.set((DisplayCutout) args.arg9);
                         mPendingVisibleInsets.set((Rect) args.arg3);
                         mPendingOutsets.set((Rect) args.arg7);
                         mPendingBackDropFrame.set((Rect) args.arg8);
@@ -6258,7 +6285,7 @@ public final class ViewRootImpl implements ViewParent,
                 (int) (mView.getMeasuredHeight() * appScale + 0.5f),
                 viewVisibility, insetsPending ? WindowManagerGlobal.RELAYOUT_INSETS_PENDING : 0,
                 mWinFrame, mPendingOverscanInsets, mPendingContentInsets, mPendingVisibleInsets,
-                mPendingStableInsets, mPendingOutsets, mPendingBackDropFrame,
+                mPendingStableInsets, mPendingOutsets, mPendingBackDropFrame, mPendingDisplayCutout,
                 mPendingMergedConfiguration, mSurface);
 
         mPendingAlwaysConsumeNavBar =
@@ -6541,7 +6568,8 @@ public final class ViewRootImpl implements ViewParent,
     private void dispatchResized(Rect frame, Rect overscanInsets, Rect contentInsets,
             Rect visibleInsets, Rect stableInsets, Rect outsets, boolean reportDraw,
             MergedConfiguration mergedConfiguration, Rect backDropFrame, boolean forceLayout,
-            boolean alwaysConsumeNavBar, int displayId) {
+            boolean alwaysConsumeNavBar, int displayId,
+            DisplayCutout.ParcelableWrapper displayCutout) {
         if (DEBUG_LAYOUT) Log.v(mTag, "Resizing " + this + ": frame=" + frame.toShortString()
                 + " contentInsets=" + contentInsets.toShortString()
                 + " visibleInsets=" + visibleInsets.toShortString()
@@ -6578,6 +6606,7 @@ public final class ViewRootImpl implements ViewParent,
         args.arg6 = sameProcessCall ? new Rect(stableInsets) : stableInsets;
         args.arg7 = sameProcessCall ? new Rect(outsets) : outsets;
         args.arg8 = sameProcessCall ? new Rect(backDropFrame) : backDropFrame;
+        args.arg9 = displayCutout.get(); // DisplayCutout is immutable.
         args.argi1 = forceLayout ? 1 : 0;
         args.argi2 = alwaysConsumeNavBar ? 1 : 0;
         args.argi3 = displayId;
@@ -7610,12 +7639,13 @@ public final class ViewRootImpl implements ViewParent,
         public void resized(Rect frame, Rect overscanInsets, Rect contentInsets,
                 Rect visibleInsets, Rect stableInsets, Rect outsets, boolean reportDraw,
                 MergedConfiguration mergedConfiguration, Rect backDropFrame, boolean forceLayout,
-                boolean alwaysConsumeNavBar, int displayId) {
+                boolean alwaysConsumeNavBar, int displayId,
+                DisplayCutout.ParcelableWrapper displayCutout) {
             final ViewRootImpl viewAncestor = mViewAncestor.get();
             if (viewAncestor != null) {
                 viewAncestor.dispatchResized(frame, overscanInsets, contentInsets,
                         visibleInsets, stableInsets, outsets, reportDraw, mergedConfiguration,
-                        backDropFrame, forceLayout, alwaysConsumeNavBar, displayId);
+                        backDropFrame, forceLayout, alwaysConsumeNavBar, displayId, displayCutout);
             }
         }
 

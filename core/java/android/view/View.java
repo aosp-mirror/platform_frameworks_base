@@ -25721,6 +25721,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          */
         final Rect mStableInsets = new Rect();
 
+        final DisplayCutout.ParcelableWrapper mDisplayCutout =
+                new DisplayCutout.ParcelableWrapper(DisplayCutout.NO_CUTOUT);
+
         /**
          * For windows that include areas that are not covered by real surface these are the outsets
          * for real surface.
