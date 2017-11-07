@@ -15,22 +15,7 @@
  */
 package com.android.settingslib.core;
 
-import android.content.Context;
-import android.support.v7.preference.Preference;
-import android.support.v7.preference.PreferenceGroup;
-import android.support.v7.preference.PreferenceManager;
-import android.support.v7.preference.PreferenceScreen;
-import com.android.settingslib.TestConfig;
-import com.android.settingslib.core.AbstractPreferenceController;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.robolectric.annotation.Config;
-import org.robolectric.shadows.ShadowApplication;
-import org.robolectric.RobolectricTestRunner;
-
+import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -38,22 +23,41 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.content.Context;
+import android.support.v7.preference.Preference;
+import android.support.v7.preference.PreferenceGroup;
+import android.support.v7.preference.PreferenceManager;
+import android.support.v7.preference.PreferenceScreen;
+
+import com.android.settingslib.TestConfig;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
+import org.robolectric.annotation.Config;
+import org.robolectric.shadows.ShadowApplication;
+
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = TestConfig.MANIFEST_PATH, sdk = TestConfig.SDK_VERSION)
-public class PreferenceControllerTest {
+public class AbstractPreferenceControllerTest {
 
     @Mock
     private Context mContext;
     @Mock
     private PreferenceScreen mScreen;
-    @Mock
-    private Preference mPreference;
 
+    private Preference mPreference;
     private TestPrefController mTestPrefController;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        mPreference = new Preference(RuntimeEnvironment.application);
+        mPreference.setKey(TestPrefController.KEY_PREF);
         mTestPrefController = new TestPrefController(mContext);
     }
 
@@ -61,7 +65,6 @@ public class PreferenceControllerTest {
     public void removeExistingPref_shouldBeRemoved() {
         when(mScreen.getPreferenceCount()).thenReturn(1);
         when(mScreen.getPreference(0)).thenReturn(mPreference);
-        when(mPreference.getKey()).thenReturn(TestPrefController.KEY_PREF);
 
         mTestPrefController.removePreference(mScreen, TestPrefController.KEY_PREF);
 
@@ -85,10 +88,25 @@ public class PreferenceControllerTest {
     }
 
     @Test
+    public void setVisible_prefIsVisible_shouldSetToVisible() {
+        when(mScreen.findPreference(TestPrefController.KEY_PREF)).thenReturn(mPreference);
+
+        mTestPrefController.setVisible(mScreen, TestPrefController.KEY_PREF, true /* visible */);
+        assertThat(mPreference.isVisible()).isTrue();
+    }
+
+    @Test
+    public void setVisible_prefNotVisible_shouldSetToInvisible() {
+        when(mScreen.findPreference(TestPrefController.KEY_PREF)).thenReturn(mPreference);
+
+        mTestPrefController.setVisible(mScreen, TestPrefController.KEY_PREF, false /* visible */);
+        assertThat(mPreference.isVisible()).isFalse();
+    }
+
+    @Test
     public void doNotDisplayPref_ifNotAvailable() {
         when(mScreen.getPreferenceCount()).thenReturn(1);
         when(mScreen.getPreference(0)).thenReturn(mPreference);
-        when(mPreference.getKey()).thenReturn(TestPrefController.KEY_PREF);
         mTestPrefController.isAvailable = false;
 
         mTestPrefController.displayPreference(mScreen);
