@@ -323,7 +323,6 @@ public class MediaScanner implements AutoCloseable {
     private final Uri mAudioUri;
     private final Uri mVideoUri;
     private final Uri mImagesUri;
-    private final Uri mThumbsUri;
     private final Uri mPlaylistsUri;
     private final Uri mFilesUri;
     private final Uri mFilesUriNoNotify;
@@ -419,7 +418,6 @@ public class MediaScanner implements AutoCloseable {
         mAudioUri = Audio.Media.getContentUri(volumeName);
         mVideoUri = Video.Media.getContentUri(volumeName);
         mImagesUri = Images.Media.getContentUri(volumeName);
-        mThumbsUri = Images.Thumbnails.getContentUri(volumeName);
         mFilesUri = Files.getContentUri(volumeName);
         mFilesUriNoNotify = mFilesUri.buildUpon().appendQueryParameter("nonotify", "1").build();
 
@@ -1283,53 +1281,6 @@ public class MediaScanner implements AutoCloseable {
         }
     }
 
-    private void pruneDeadThumbnailFiles() {
-        HashSet<String> existingFiles = new HashSet<String>();
-        String directory = "/sdcard/DCIM/.thumbnails";
-        String [] files = (new File(directory)).list();
-        Cursor c = null;
-        if (files == null)
-            files = new String[0];
-
-        for (int i = 0; i < files.length; i++) {
-            String fullPathString = directory + "/" + files[i];
-            existingFiles.add(fullPathString);
-        }
-
-        try {
-            c = mMediaProvider.query(
-                    mThumbsUri,
-                    new String [] { "_data" },
-                    null,
-                    null,
-                    null, null);
-            Log.v(TAG, "pruneDeadThumbnailFiles... " + c);
-            if (c != null && c.moveToFirst()) {
-                do {
-                    String fullPathString = c.getString(0);
-                    existingFiles.remove(fullPathString);
-                } while (c.moveToNext());
-            }
-
-            for (String fileToDelete : existingFiles) {
-                if (false)
-                    Log.v(TAG, "fileToDelete is " + fileToDelete);
-                try {
-                    (new File(fileToDelete)).delete();
-                } catch (SecurityException ex) {
-                }
-            }
-
-            Log.v(TAG, "/pruneDeadThumbnailFiles... " + c);
-        } catch (RemoteException e) {
-            // We will soon be killed...
-        } finally {
-            if (c != null) {
-                c.close();
-            }
-        }
-    }
-
     static class MediaBulkDeleter {
         StringBuilder whereClause = new StringBuilder();
         ArrayList<String> whereArgs = new ArrayList<String>(100);
@@ -1372,9 +1323,6 @@ public class MediaScanner implements AutoCloseable {
         if (mProcessPlaylists) {
             processPlayLists();
         }
-
-        if (mOriginalCount == 0 && mImagesUri.equals(Images.Media.getContentUri("external")))
-            pruneDeadThumbnailFiles();
 
         // allow GC to clean up
         mPlayLists.clear();
