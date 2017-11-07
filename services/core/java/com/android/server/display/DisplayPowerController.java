@@ -1120,6 +1120,27 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             // Dismiss the black surface without fanfare.
             mPowerState.setColorFadeLevel(1.0f);
             mPowerState.dismissColorFade();
+        } else if (target == Display.STATE_ON_SUSPEND) {
+            // Want screen full-power and suspended.
+            // Wait for brightness animation to complete beforehand unless already
+            // suspended because we may not be able to change it after suspension.
+            if (mScreenBrightnessRampAnimator.isAnimating()
+                    && mPowerState.getScreenState() != Display.STATE_ON_SUSPEND) {
+                return;
+            }
+
+            // If not already suspending, temporarily set the state to on until the
+            // screen on is unblocked, then suspend.
+            if (mPowerState.getScreenState() != Display.STATE_ON_SUSPEND) {
+                if (!setScreenState(Display.STATE_ON)) {
+                    return;
+                }
+                setScreenState(Display.STATE_ON_SUSPEND);
+            }
+
+            // Dismiss the black surface without fanfare.
+            mPowerState.setColorFadeLevel(1.0f);
+            mPowerState.dismissColorFade();
         } else {
             // Want screen off.
             mPendingScreenOff = true;

@@ -680,8 +680,8 @@ public class DreamService extends Service implements Window.Callback {
      *
      * @return The screen state to use while dozing, such as {@link Display#STATE_ON},
      * {@link Display#STATE_DOZE}, {@link Display#STATE_DOZE_SUSPEND},
-     * or {@link Display#STATE_OFF}, or {@link Display#STATE_UNKNOWN} for the default
-     * behavior.
+     * {@link Display#STATE_ON_SUSPEND}, {@link Display#STATE_OFF}, or {@link Display#STATE_UNKNOWN}
+     * for the default behavior.
      *
      * @see #setDozeScreenState
      * @hide For use by system UI components only.
@@ -700,12 +700,18 @@ public class DreamService extends Service implements Window.Callback {
      * perform transitions between states while dozing to conserve power and
      * achieve various effects.
      * </p><p>
-     * It is recommended that the state be set to {@link Display#STATE_DOZE_SUSPEND}
-     * once the dream has completely finished drawing and before it releases its wakelock
-     * to allow the display hardware to be fully suspended.  While suspended, the
-     * display will preserve its on-screen contents or hand off control to dedicated
-     * doze hardware if the devices supports it.  If the doze suspend state is
-     * used, the dream must make sure to set the mode back
+     * Some devices will have dedicated hardware ("Sidekick") to animate
+     * the display content while the CPU sleeps. If the dream and the hardware support
+     * this, {@link Display#STATE_ON_SUSPEND} or {@link Display#STATE_DOZE_SUSPEND}
+     * will switch control to the Sidekick.
+     * </p><p>
+     * If not using Sidekick, it is recommended that the state be set to
+     * {@link Display#STATE_DOZE_SUSPEND} once the dream has completely
+     * finished drawing and before it releases its wakelock
+     * to allow the display hardware to be fully suspended.  While suspended,
+     * the display will preserve its on-screen contents.
+     * </p><p>
+     * If the doze suspend state is used, the dream must make sure to set the mode back
      * to {@link Display#STATE_DOZE} or {@link Display#STATE_ON} before drawing again
      * since the display updates may be ignored and not seen by the user otherwise.
      * </p><p>
@@ -716,8 +722,8 @@ public class DreamService extends Service implements Window.Callback {
      *
      * @param state The screen state to use while dozing, such as {@link Display#STATE_ON},
      * {@link Display#STATE_DOZE}, {@link Display#STATE_DOZE_SUSPEND},
-     * or {@link Display#STATE_OFF}, or {@link Display#STATE_UNKNOWN} for the default
-     * behavior.
+     * {@link Display#STATE_ON_SUSPEND}, {@link Display#STATE_OFF}, or {@link Display#STATE_UNKNOWN}
+     * for the default behavior.
      *
      * @hide For use by system UI components only.
      */
