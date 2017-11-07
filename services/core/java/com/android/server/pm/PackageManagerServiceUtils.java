@@ -295,19 +295,20 @@ public class PackageManagerServiceUtils {
         return false;
     }
 
-    public static long getLastModifiedTime(PackageParser.Package pkg, File srcFile) {
-        if (srcFile.isDirectory()) {
-            final File baseFile = new File(pkg.baseCodePath);
-            long maxModifiedTime = baseFile.lastModified();
-            if (pkg.splitCodePaths != null) {
-                for (int i = pkg.splitCodePaths.length - 1; i >=0; --i) {
-                    final File splitFile = new File(pkg.splitCodePaths[i]);
-                    maxModifiedTime = Math.max(maxModifiedTime, splitFile.lastModified());
-                }
-            }
-            return maxModifiedTime;
+    public static long getLastModifiedTime(PackageParser.Package pkg) {
+        final File srcFile = new File(pkg.codePath);
+        if (!srcFile.isDirectory()) {
+            return srcFile.lastModified();
         }
-        return srcFile.lastModified();
+        final File baseFile = new File(pkg.baseCodePath);
+        long maxModifiedTime = baseFile.lastModified();
+        if (pkg.splitCodePaths != null) {
+            for (int i = pkg.splitCodePaths.length - 1; i >=0; --i) {
+                final File splitFile = new File(pkg.splitCodePaths[i]);
+                maxModifiedTime = Math.max(maxModifiedTime, splitFile.lastModified());
+            }
+        }
+        return maxModifiedTime;
     }
 
     /**

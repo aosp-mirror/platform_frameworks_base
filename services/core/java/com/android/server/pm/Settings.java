@@ -3572,11 +3572,10 @@ public final class Settings {
         int pkgFlags = 0;
         int pkgPrivateFlags = 0;
         pkgFlags |= ApplicationInfo.FLAG_SYSTEM;
-        final File codePathFile = new File(codePathStr);
-        if (PackageManagerService.locationIsPrivileged(codePathFile)) {
+        if (PackageManagerService.locationIsPrivileged(codePathStr)) {
             pkgPrivateFlags |= ApplicationInfo.PRIVATE_FLAG_PRIVILEGED;
         }
-        PackageSetting ps = new PackageSetting(name, realName, codePathFile,
+        PackageSetting ps = new PackageSetting(name, realName, new File(codePathStr),
                 new File(resourcePathStr), legacyNativeLibraryPathStr, primaryCpuAbiStr,
                 secondaryCpuAbiStr, cpuAbiOverrideStr, versionCode, pkgFlags, pkgPrivateFlags,
                 parentPackageName, null /*childPackageNames*/, 0 /*sharedUserId*/, null, null);
