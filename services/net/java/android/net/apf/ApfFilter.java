@@ -86,6 +86,14 @@ import libcore.io.IoBridge;
  */
 public class ApfFilter {
 
+    // Helper class for specifying functional filter parameters.
+    public static class ApfConfiguration {
+        public ApfCapabilities apfCapabilities;
+        public boolean multicastFilter;
+        public boolean ieee802_3Filter;
+        public int[] ethTypeBlackList;
+    }
+
     // Enums describing the outcome of receiving an RA packet.
     private static enum ProcessRaResult {
         MATCH,          // Received RA matched a known RA
@@ -261,17 +269,16 @@ public class ApfFilter {
     private int mIPv4PrefixLength;
 
     @VisibleForTesting
-    ApfFilter(ApfCapabilities apfCapabilities, NetworkInterface networkInterface,
-            IpClient.Callback ipClientCallback, boolean multicastFilter,
-            boolean ieee802_3Filter, int[] ethTypeBlackList, IpConnectivityLog log) {
-        mApfCapabilities = apfCapabilities;
+    ApfFilter(ApfConfiguration config, NetworkInterface networkInterface,
+            IpClient.Callback ipClientCallback, IpConnectivityLog log) {
+        mApfCapabilities = config.apfCapabilities;
         mIpClientCallback = ipClientCallback;
         mNetworkInterface = networkInterface;
-        mMulticastFilter = multicastFilter;
-        mDrop802_3Frames = ieee802_3Filter;
+        mMulticastFilter = config.multicastFilter;
+        mDrop802_3Frames = config.ieee802_3Filter;
 
         // Now fill the black list from the passed array
-        mEthTypeBlackList = filterEthTypeBlackList(ethTypeBlackList);
+        mEthTypeBlackList = filterEthTypeBlackList(config.ethTypeBlackList);
 
         mMetricsLog = log;
 
@@ -1160,9 +1167,10 @@ public class ApfFilter {
      * Create an {@link ApfFilter} if {@code apfCapabilities} indicates support for packet
      * filtering using APF programs.
      */
-    public static ApfFilter maybeCreate(ApfCapabilities apfCapabilities,
-            NetworkInterface networkInterface, IpClient.Callback ipClientCallback,
-            boolean multicastFilter, boolean ieee802_3Filter, int[] ethTypeBlackList) {
+    public static ApfFilter maybeCreate(ApfConfiguration config,
+            NetworkInterface networkInterface, IpClient.Callback ipClientCallback) {
+        if (config == null) return null;
+        ApfCapabilities apfCapabilities =  config.apfCapabilities;
         if (apfCapabilities == null || networkInterface == null) return null;
         if (apfCapabilities.apfVersionSupported == 0) return null;
         if (apfCapabilities.maximumApfProgramSize < 512) {
@@ -1178,8 +1186,7 @@ public class ApfFilter {
             Log.e(TAG, "Unsupported APF version: " + apfCapabilities.apfVersionSupported);
             return null;
         }
-        return new ApfFilter(apfCapabilities, networkInterface, ipClientCallback,
-                multicastFilter, ieee802_3Filter, ethTypeBlackList, new IpConnectivityLog());
+        return new ApfFilter(config, networkInterface, ipClientCallback, new IpConnectivityLog());
     }
 
     public synchronized void shutdown() {
