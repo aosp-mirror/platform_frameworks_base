@@ -9234,11 +9234,20 @@ public final class Settings {
         public static final String DEFAULT_DNS_SERVER = "default_dns_server";
 
         /**
-         * Whether to disable DNS over TLS (boolean)
+         * The requested Private DNS mode (string), and an accompanying specifier (string).
+         *
+         * Currently, the specifier holds the chosen provider name when the mode requests
+         * a specific provider. It may be used to store the provider name even when the
+         * mode changes so that temporarily disabling and re-enabling the specific
+         * provider mode does not necessitate retyping the provider hostname.
          *
          * @hide
          */
-        public static final String DNS_TLS_DISABLED = "dns_tls_disabled";
+        public static final String PRIVATE_DNS_MODE = "private_dns_mode";
+        /**
+         * @hide
+         */
+        public static final String PRIVATE_DNS_SPECIFIER = "private_dns_specifier";
 
         /** {@hide} */
         public static final String
@@ -10334,7 +10343,9 @@ public final class Settings {
             DOCK_AUDIO_MEDIA_ENABLED,
             ENCODED_SURROUND_OUTPUT,
             LOW_POWER_MODE_TRIGGER_LEVEL,
-            BLUETOOTH_ON
+            BLUETOOTH_ON,
+            PRIVATE_DNS_MODE,
+            PRIVATE_DNS_SPECIFIER
         };
 
         /** @hide */
