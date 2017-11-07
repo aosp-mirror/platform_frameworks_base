@@ -31,7 +31,7 @@ write_enum(stringstream& text, const EnumDescriptorProto& enu, const string& ind
     text << indent << "// enum " << enu.name() << endl;
     for (int i=0; i<N; i++) {
         const EnumValueDescriptorProto& value = enu.value(i);
-        text << indent << "const uint32_t "
+        text << indent << "const int "
                 << make_constant_name(value.name())
                 << " = " << value.number() << ";" << endl;
     }
@@ -45,7 +45,7 @@ write_enum(stringstream& text, const EnumDescriptorProto& enu, const string& ind
             text << indent << INDENT << "\"" << stripPrefix(enu.value(i).name(), prefix) << "\"," << endl;
         }
         text << indent << "};" << endl;
-        text << indent << "const uint32_t _ENUM_" << name << "_VALUES[" << N << "] = {" << endl;
+        text << indent << "const int _ENUM_" << name << "_VALUES[" << N << "] = {" << endl;
         for (int i=0; i<N; i++) {
             text << indent << INDENT << make_constant_name(enu.value(i).name()) << "," << endl;
         }

@@ -25,6 +25,7 @@ import "frameworks/base/core/proto/android/os/incidentheader.proto";
 import "frameworks/base/core/proto/android/os/kernelwake.proto";
 import "frameworks/base/core/proto/android/os/pagetypeinfo.proto";
 import "frameworks/base/core/proto/android/os/procrank.proto";
+import "frameworks/base/core/proto/android/os/system_properties.proto";
 import "frameworks/base/core/proto/android/providers/settings.proto";
 import "frameworks/base/core/proto/android/server/activitymanagerservice.proto";
 import "frameworks/base/core/proto/android/server/alarmmanagerservice.proto";
@@ -51,7 +52,10 @@ message IncidentProto {
     repeated IncidentHeaderProto header = 1;
 
     // Device information
-    //SystemProperties system_properties = 1000;
+    optional SystemPropertiesProto system_properties = 1000 [
+        (section).type = SECTION_COMMAND,
+        (section).args = "/system/bin/getprop"
+    ];
 
     // Linux services
     optional Procrank procrank = 2000 [
