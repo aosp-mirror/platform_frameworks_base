@@ -78,7 +78,6 @@ public class OverviewProxyService {
 
             @Override
             public void onUserSwitched() {
-                disconnectFromLauncherService();
                 mConnectionBackoffAttempts = 0;
                 startConnectionToCurrentUser();
             }
@@ -100,8 +99,10 @@ public class OverviewProxyService {
     }
 
     public void startConnectionToCurrentUser() {
+        disconnectFromLauncherService();
+
         // If user has not setup yet or already connected, do not try to connect
-        if (!mDeviceProvisionedController.isCurrentUserSetup() || mOverviewProxy != null) {
+        if (!mDeviceProvisionedController.isCurrentUserSetup()) {
             return;
         }
         mHandler.removeCallbacks(mConnectionRunnable);
@@ -124,7 +125,9 @@ public class OverviewProxyService {
     }
 
     private void disconnectFromLauncherService() {
-        mContext.unbindService(mOverviewServiceConnection);
-        mOverviewProxy = null;
+        if (mOverviewProxy != null) {
+            mContext.unbindService(mOverviewServiceConnection);
+            mOverviewProxy = null;
+        }
     }
 }
