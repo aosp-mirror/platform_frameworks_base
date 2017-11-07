@@ -35,6 +35,7 @@ import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.view.View;
+import com.android.server.input.InputWindowHandle;
 
 /**
  * Managing drag and drop operations initiated by View#startDragAndDrop.
@@ -49,7 +50,12 @@ class DragDropController {
     static final int MSG_TEAR_DOWN_DRAG_AND_DROP_INPUT = 2;
     static final int MSG_ANIMATION_END = 3;
 
-    DragState mDragState;
+    /**
+     * Drag state per operation.
+     * The variable is cleared by {@code #onDragStateClosedLocked} which is invoked by DragState
+     * itself, thus the variable can be null after calling DragState's methods.
+     */
+    private DragState mDragState;
 
     private WindowManagerService mService;
     private final Handler mHandler;
@@ -58,9 +64,17 @@ class DragDropController {
         return mDragState != null;
     }
 
+    InputWindowHandle getInputWindowHandleLocked() {
+        return mDragState.getInputWindowHandle();
+    }
+
     DragDropController(WindowManagerService service, Looper looper) {
         mService = service;
         mHandler = new DragHandler(service, looper);
+    }
+
+    void sendDragStartedIfNeededLocked(WindowState window) {
+        mDragState.sendDragStartedIfNeededLocked(window);
     }
 
     IBinder prepareDrag(SurfaceSession session, int callerPid,
@@ -158,9 +172,7 @@ class DragDropController {
             if (!mService.mInputManager.transferTouchFocus(callingWin.mInputChannel,
                     mDragState.getInputChannel())) {
                 Slog.e(TAG_WM, "Unable to transfer touch focus");
-                mDragState.unregister();
-                mDragState.reset();
-                mDragState = null;
+                mDragState.closeLocked();
                 return false;
             }
 
@@ -254,6 +266,30 @@ class DragDropController {
         }
     }
 
+    /**
+     * Handles motion events.
+     * @param keepHandling Whether if the drag operation is continuing or this is the last motion
+     *          event.
+     * @param newX X coordinate value in dp in the screen coordinate
+     * @param newY Y coordinate value in dp in the screen coordinate
+     */
+    void handleMotionEvent(boolean keepHandling, float newX, float newY) {
+        synchronized (mService.mWindowMap) {
+            if (!dragDropActiveLocked()) {
+                // The drag has ended but the clean-up message has not been processed by
+                // window manager. Drop events that occur after this until window manager
+                // has a chance to clean-up the input handle.
+                return;
+            }
+
+            if (keepHandling) {
+                mDragState.notifyMoveLocked(newX, newY);
+            } else {
+                mDragState.notifyDropLocked(newX, newY);
+            }
+        }
+    }
+
     void dragRecipientEntered(IWindow window) {
         if (DEBUG_DRAG) {
             Slog.d(TAG_WM, "Drag into new candidate view @ " + window.asBinder());
@@ -282,6 +318,17 @@ class DragDropController {
         mHandler.sendMessageDelayed(msg, DRAG_TIMEOUT_MS);
     }
 
+    /**
+     * Notifies the current drag state is closed.
+     */
+    void onDragStateClosedLocked(DragState dragState) {
+        if (mDragState != dragState) {
+            Slog.wtf(TAG_WM, "Unknown drag state is closed");
+            return;
+        }
+        mDragState = null;
+    }
+
     private class DragHandler extends Handler {
         /**
          * Lock for window manager.
@@ -304,9 +351,7 @@ class DragDropController {
                     synchronized (mService.mWindowMap) {
                         // !!! TODO: ANR the app that has failed to start the drag in time
                         if (mDragState != null) {
-                            mDragState.unregister();
-                            mDragState.reset();
-                            mDragState = null;
+                            mDragState.closeLocked();
                         }
                     }
                     break;
@@ -346,7 +391,7 @@ class DragDropController {
                                     "plyaing animation");
                             return;
                         }
-                        mDragState.onAnimationEndLocked();
+                        mDragState.closeLocked();
                     }
                     break;
                 }
