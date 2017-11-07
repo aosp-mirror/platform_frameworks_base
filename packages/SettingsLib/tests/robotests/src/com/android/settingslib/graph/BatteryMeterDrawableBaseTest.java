@@ -18,6 +18,7 @@ package com.android.settingslib.graph;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
 import android.content.Context;
@@ -35,11 +36,13 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
+import org.robolectric.util.ReflectionHelpers;
 
 @RunWith(SettingsLibRobolectricTestRunner.class)
 @Config(manifest = TestConfig.MANIFEST_PATH, sdk = TestConfig.SDK_VERSION,
         shadows = SettingsLibShadowResources.class)
 public class BatteryMeterDrawableBaseTest {
+    private static final int CRITICAL_LEVEL = 5;
     private static final int PADDING = 5;
     private static final int HEIGHT = 80;
     private static final int WIDTH = 40;
@@ -53,7 +56,8 @@ public class BatteryMeterDrawableBaseTest {
         MockitoAnnotations.initMocks(this);
 
         mContext = RuntimeEnvironment.application;
-        mBatteryMeterDrawableBase = new BatteryMeterDrawableBase(mContext, 0 /* frameColor */);
+        mBatteryMeterDrawableBase = spy(new BatteryMeterDrawableBase(mContext, 0 /* frameColor */));
+        ReflectionHelpers.setField(mBatteryMeterDrawableBase, "mCriticalLevel", CRITICAL_LEVEL);
     }
 
     @Test
