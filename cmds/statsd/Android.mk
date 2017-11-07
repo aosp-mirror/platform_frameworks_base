@@ -31,6 +31,8 @@ statsd_common_src := \
     src/config/ConfigManager.cpp \
     src/external/StatsCompanionServicePuller.cpp \
     src/external/ResourcePowerManagerPuller.cpp \
+    src/external/CpuTimePerUidPuller.cpp \
+    src/external/CpuTimePerUidFreqPuller.cpp \
     src/external/StatsPullerManager.cpp \
     src/logd/LogEvent.cpp \
     src/logd/LogListener.cpp \

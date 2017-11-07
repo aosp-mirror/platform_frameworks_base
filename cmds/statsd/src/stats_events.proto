@@ -87,6 +87,8 @@ message StatsEvent {
         PowerStateVoterPulled power_state_voter_pulled = 1006;
         PowerStateSubsystemSleepStatePulled power_state_subsystem_sleep_state_pulled = 1007;
         CpuTimePerFreqPulled cpu_time_per_freq_pulled = 1008;
+        CpuTimePerUidPulled cpu_time_per_uid_pulled = 1009;
+        CpuTimePerUidFreqPulled cpu_time_per_uid_freq_pulled = 1010;
     }
 }
 
@@ -870,6 +872,7 @@ message IsolatedUidChanged {
 }
 
 /*
+<<<<<<< HEAD
  * Pulls Cpu time per frequency.
  * Note: this should be pulled for gauge metric only, without condition.
  * The puller keeps internal state of last values. It should not be pulled by
@@ -884,4 +887,25 @@ message CpuTimePerFreqPulled {
     optional uint32 cluster = 1;
     optional uint32 freq_index = 2;
     optional uint64 time = 3;
+}
+
+/*
+ * Pulls Cpu Time Per Uid.
+ * Note that isolated process uid time should be attributed to host uids.
+ */
+message CpuTimePerUidPulled {
+    optional uint64 uid = 1;
+    optional uint64 user_time_ms = 2;
+    optional uint64 sys_time_ms = 3;
+}
+
+/**
+ * Pulls Cpu Time Per Uid per frequency.
+ * Note that isolated process uid time should be attributed to host uids.
+ * For each uid, we order the time by descending frequencies.
+ */
+message CpuTimePerUidFreqPulled {
+    optional uint64 uid = 1;
+    optional uint64 freq_idx = 2;
+    optional uint64 time_ms = 3;
 }
