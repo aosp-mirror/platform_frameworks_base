@@ -49,6 +49,11 @@ import static junit.framework.Assert.assertTrue;
 
 import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.app.Activity;
 import android.app.Instrumentation;
@@ -633,15 +638,21 @@ public class TextViewActivityTest {
 
     @Test
     public void testSetSelectionAndActionMode() throws Throwable {
+        final TextView textView = mActivity.findViewById(R.id.textview);
+        final ActionMode.Callback amCallback = mock(ActionMode.Callback.class);
+        when(amCallback.onCreateActionMode(any(ActionMode.class), any(Menu.class)))
+                .thenReturn(true);
+        when(amCallback.onPrepareActionMode(any(ActionMode.class), any(Menu.class)))
+                .thenReturn(true);
+        textView.setCustomSelectionActionModeCallback(amCallback);
+
         final String text = "abc def";
         onView(withId(R.id.textview)).perform(replaceText(text));
-
-        final TextView textView = mActivity.findViewById(R.id.textview);
         mActivityRule.runOnUiThread(
                 () -> Selection.setSelection((Spannable) textView.getText(), 0, 3));
         mInstrumentation.waitForIdleSync();
         // Don't automatically start action mode.
-        // TODO: Implement assertActionModeNotStarted()
+        verify(amCallback, never()).onCreateActionMode(any(ActionMode.class), any(Menu.class));
         // Make sure that "Select All" is included in the selection action mode when the entire text
         // is not selected.
         onView(withId(R.id.textview)).perform(longPressOnTextAtIndex(text.indexOf('e')));
