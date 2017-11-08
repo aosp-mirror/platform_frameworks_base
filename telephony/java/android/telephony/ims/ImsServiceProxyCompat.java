@@ -40,16 +40,12 @@ import com.android.ims.internal.IImsUt;
  * @hide
  */
 
-public class ImsServiceProxyCompat implements IMMTelFeature {
+public class ImsServiceProxyCompat extends ImsServiceProxy {
 
     private static final int SERVICE_ID = ImsFeature.MMTEL;
 
-    protected final int mSlotId;
-    protected IBinder mBinder;
-
     public ImsServiceProxyCompat(int slotId, IBinder binder) {
-        mSlotId = slotId;
-        mBinder = binder;
+        super(slotId, binder, SERVICE_ID);
     }
 
     @Override
@@ -156,41 +152,17 @@ public class ImsServiceProxyCompat implements IMMTelFeature {
         checkBinderConnection();
         return getServiceInterface(mBinder).getMultiEndpointInterface(SERVICE_ID);
     }
-
-    /**
-     * Base implementation, always returns READY for compatibility with old ImsService.
-     */
+    @Override
     public int getFeatureStatus() {
         return ImsFeature.STATE_READY;
     }
 
-    /**
-     * @return false if the binder connection is no longer alive.
-     */
+    @Override
     public boolean isBinderAlive() {
         return mBinder != null && mBinder.isBinderAlive();
     }
 
-    /**
-     * @return Returns true if the ImsService is ready to take commands, false otherwise. If this
-     * method returns false, it doesn't mean that the Binder connection is not available (use
-     * {@link #isBinderReady()} to check that), but that the ImsService is not accepting commands
-     * at this time.
-     *
-     * For example, for DSDS devices, only one slot can be {@link ImsFeature#STATE_READY} to take
-     * commands at a time, so the other slot must stay at {@link ImsFeature#STATE_NOT_AVAILABLE}.
-     */
-    public boolean isBinderReady() {
-        return isBinderAlive() && getFeatureStatus() == ImsFeature.STATE_READY;
-    }
-
     private IImsService getServiceInterface(IBinder b) {
         return IImsService.Stub.asInterface(b);
-    }
-
-    protected void checkBinderConnection() throws RemoteException {
-        if (!isBinderAlive()) {
-            throw new RemoteException("ImsServiceProxy is not available for that feature.");
-        }
     }
 }
