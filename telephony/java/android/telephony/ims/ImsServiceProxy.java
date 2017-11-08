@@ -20,6 +20,7 @@ import android.app.PendingIntent;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.RemoteException;
+import android.telephony.ims.feature.IMMTelFeature;
 import android.telephony.ims.feature.IRcsFeature;
 import android.telephony.ims.feature.ImsFeature;
 import android.util.Log;
@@ -41,9 +42,11 @@ import com.android.ims.internal.IImsUt;
  * @hide
  */
 
-public class ImsServiceProxy extends ImsServiceProxyCompat implements IRcsFeature {
+public class ImsServiceProxy implements IMMTelFeature, IRcsFeature {
 
     protected String LOG_TAG = "ImsServiceProxy";
+    protected final int mSlotId;
+    protected IBinder mBinder;
     private final int mSupportedFeature;
 
     // Start by assuming the proxy is available for usage.
@@ -99,13 +102,13 @@ public class ImsServiceProxy extends ImsServiceProxyCompat implements IRcsFeatur
     };
 
     public ImsServiceProxy(int slotId, IBinder binder, int featureType) {
-        super(slotId, binder);
+        mSlotId = slotId;
+        mBinder = binder;
         mSupportedFeature = featureType;
     }
 
     public ImsServiceProxy(int slotId, int featureType) {
-        super(slotId, null /*IBinder*/);
-        mSupportedFeature = featureType;
+        this(slotId, null, featureType);
     }
 
     public IImsServiceFeatureListener getListener() {
@@ -263,7 +266,10 @@ public class ImsServiceProxy extends ImsServiceProxyCompat implements IRcsFeatur
         }
     }
 
-    @Override
+    /**
+     * @return an integer describing the current Feature Status, defined in
+     * {@link ImsFeature.ImsState}.
+     */
     public int getFeatureStatus() {
         synchronized (mLock) {
             if (isBinderAlive() && mFeatureStatusCached != null) {
@@ -305,7 +311,22 @@ public class ImsServiceProxy extends ImsServiceProxyCompat implements IRcsFeatur
         mStatusCallback = c;
     }
 
-    @Override
+    /**
+     * @return Returns true if the ImsService is ready to take commands, false otherwise. If this
+     * method returns false, it doesn't mean that the Binder connection is not available (use
+     * {@link #isBinderReady()} to check that), but that the ImsService is not accepting commands
+     * at this time.
+     *
+     * For example, for DSDS devices, only one slot can be {@link ImsFeature#STATE_READY} to take
+     * commands at a time, so the other slot must stay at {@link ImsFeature#STATE_NOT_AVAILABLE}.
+     */
+    public boolean isBinderReady() {
+        return isBinderAlive() && getFeatureStatus() == ImsFeature.STATE_READY;
+    }
+
+    /**
+     * @return false if the binder connection is no longer alive.
+     */
     public boolean isBinderAlive() {
         return mIsAvailable && mBinder != null && mBinder.isBinderAlive();
     }
@@ -318,5 +339,11 @@ public class ImsServiceProxy extends ImsServiceProxyCompat implements IRcsFeatur
 
     private IImsServiceController getServiceInterface(IBinder b) {
         return IImsServiceController.Stub.asInterface(b);
+    }
+
+    protected void checkBinderConnection() throws RemoteException {
+        if (!isBinderAlive()) {
+            throw new RemoteException("ImsServiceProxy is not available for that feature.");
+        }
     }
 }
