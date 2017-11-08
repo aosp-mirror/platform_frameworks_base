@@ -136,7 +136,7 @@ public final class IpSecManager {
         }
 
         @Override
-        protected void finalize() {
+        protected void finalize() throws Throwable {
             if (mCloseGuard != null) {
                 mCloseGuard.warnIfOpen();
             }
