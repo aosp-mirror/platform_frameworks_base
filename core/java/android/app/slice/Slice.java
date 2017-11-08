@@ -113,6 +113,14 @@ public final class Slice implements Parcelable {
      */
     public static final String HINT_HIDDEN = "hidden";
     /**
+     * Hint to indicate that this content has a toggle action associated with it. To indicate that
+     * the toggle is on, use {@link #HINT_SELECTED}. When the toggle state changes, the intent
+     * associated with it will be sent along with an extra {@link #EXTRA_TOGGLE_STATE} which can be
+     * retrieved to see the new state of the toggle.
+     * @hide
+     */
+    public static final String HINT_TOGGLE = "toggle";
+    /**
      * Hint to indicate that this slice is incomplete and an update will be sent once
      * loading is complete. Slices which contain HINT_PARTIAL will not be cached by the
      * OS and should not be cached by apps.
@@ -125,6 +133,11 @@ public final class Slice implements Parcelable {
      * @hide
      */
     public static final String HINT_ALT         = "alt";
+    /**
+     * Key to retrieve an extra added to an intent when a control is changed.
+     * @hide
+     */
+    public static final String EXTRA_TOGGLE_STATE = "android.app.slice.extra.TOGGLE_STATE";
 
     private final SliceItem[] mItems;
     private final @SliceHint String[] mHints;
