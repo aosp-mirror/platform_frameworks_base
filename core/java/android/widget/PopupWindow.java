@@ -1354,6 +1354,7 @@ public class PopupWindow {
         }
 
         mDecorView = createDecorView(mBackgroundView);
+        mDecorView.setIsRootNamespace(true);
 
         // The background owner should be elevated so that it casts a shadow.
         mBackgroundView.setElevation(mElevation);
