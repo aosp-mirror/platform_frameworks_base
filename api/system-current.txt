@@ -126,6 +126,7 @@ package android {
     field public static final java.lang.String READ_PRINT_SERVICES = "android.permission.READ_PRINT_SERVICES";
     field public static final java.lang.String READ_PRINT_SERVICE_RECOMMENDATIONS = "android.permission.READ_PRINT_SERVICE_RECOMMENDATIONS";
     field public static final java.lang.String READ_PRIVILEGED_PHONE_STATE = "android.permission.READ_PRIVILEGED_PHONE_STATE";
+    field public static final java.lang.String READ_RUNTIME_PROFILES = "android.permission.READ_RUNTIME_PROFILES";
     field public static final java.lang.String READ_SEARCH_INDEXABLES = "android.permission.READ_SEARCH_INDEXABLES";
     field public static final java.lang.String READ_WALLPAPER_INTERNAL = "android.permission.READ_WALLPAPER_INTERNAL";
     field public static final java.lang.String READ_WIFI_CREDENTIAL = "android.permission.READ_WIFI_CREDENTIAL";
@@ -847,6 +848,7 @@ package android.content.pm {
   public abstract class PackageManager {
     method public abstract void addOnPermissionsChangeListener(android.content.pm.PackageManager.OnPermissionsChangedListener);
     method public abstract java.util.List<android.content.IntentFilter> getAllIntentFilters(java.lang.String);
+    method public android.content.pm.dex.ArtManager getArtManager();
     method public abstract java.lang.String getDefaultBrowserPackageNameAsUser(int);
     method public abstract java.util.List<android.content.pm.PackageInfo> getInstalledPackagesAsUser(int, int);
     method public abstract android.graphics.drawable.Drawable getInstantAppIcon(java.lang.String);
@@ -944,6 +946,24 @@ package android.content.pm {
 
   public class PermissionInfo extends android.content.pm.PackageItemInfo implements android.os.Parcelable {
     field public static final int FLAG_REMOVED = 2; // 0x2
+  }
+
+}
+
+package android.content.pm.dex {
+
+  public class ArtManager {
+    method public boolean isRuntimeProfilingEnabled();
+    method public void snapshotRuntimeProfile(java.lang.String, java.lang.String, android.content.pm.dex.ArtManager.SnapshotRuntimeProfileCallback, android.os.Handler);
+    field public static final int SNAPSHOT_FAILED_CODE_PATH_NOT_FOUND = 1; // 0x1
+    field public static final int SNAPSHOT_FAILED_INTERNAL_ERROR = 2; // 0x2
+    field public static final int SNAPSHOT_FAILED_PACKAGE_NOT_FOUND = 0; // 0x0
+  }
+
+  public static abstract class ArtManager.SnapshotRuntimeProfileCallback {
+    ctor public ArtManager.SnapshotRuntimeProfileCallback();
+    method public abstract void onError(int);
+    method public abstract void onSuccess(android.os.ParcelFileDescriptor);
   }
 
 }

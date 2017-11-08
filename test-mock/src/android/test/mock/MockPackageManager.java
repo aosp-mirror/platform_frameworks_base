@@ -47,6 +47,7 @@ import android.content.pm.ServiceInfo;
 import android.content.pm.SharedLibraryInfo;
 import android.content.pm.VerifierDeviceIdentity;
 import android.content.pm.VersionedPackage;
+import android.content.pm.dex.ArtManager;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.graphics.Rect;
@@ -1182,6 +1183,14 @@ public class MockPackageManager extends PackageManager {
     @Override
     public void registerDexModule(String dexModulePath,
             @Nullable DexModuleRegisterCallback callback) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public ArtManager getArtManager() {
         throw new UnsupportedOperationException();
     }
 }

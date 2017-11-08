@@ -106,8 +106,6 @@ import static com.android.server.pm.PermissionsState.PERMISSION_OPERATION_FAILUR
 import static com.android.server.pm.PermissionsState.PERMISSION_OPERATION_SUCCESS;
 import static com.android.server.pm.PermissionsState.PERMISSION_OPERATION_SUCCESS_GIDS_CHANGED;
 
-import static dalvik.system.DexFile.getNonProfileGuidedCompilerFilter;
-
 import android.Manifest;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -179,6 +177,7 @@ import android.content.pm.UserInfo;
 import android.content.pm.VerifierDeviceIdentity;
 import android.content.pm.VerifierInfo;
 import android.content.pm.VersionedPackage;
+import android.content.pm.dex.IArtManager;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.graphics.Bitmap;
@@ -285,6 +284,7 @@ import com.android.server.pm.Installer.InstallerException;
 import com.android.server.pm.PermissionsState.PermissionState;
 import com.android.server.pm.Settings.DatabaseVersion;
 import com.android.server.pm.Settings.VersionInfo;
+import com.android.server.pm.dex.ArtManagerService;
 import com.android.server.pm.dex.DexLogger;
 import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.dex.DexoptOptions;
@@ -292,7 +292,6 @@ import com.android.server.pm.dex.PackageDexUsage;
 import com.android.server.storage.DeviceStorageMonitorInternal;
 
 import dalvik.system.CloseGuard;
-import dalvik.system.DexFile;
 import dalvik.system.VMRuntime;
 
 import libcore.io.IoUtils;
@@ -960,6 +959,8 @@ public class PackageManagerService extends IPackageManager.Stub
     final ArrayMap<String, ArraySet<String>> mAppOpPermissionPackages = new ArrayMap<>();
 
     final PackageInstallerService mInstallerService;
+
+    final ArtManagerService mArtManagerService;
 
     private final PackageDexOptimizer mPackageDexOptimizer;
     // DexManager handles the usage of dex files (e.g. secondary files, whether or not a package
@@ -3063,6 +3064,7 @@ public class PackageManagerService extends IPackageManager.Stub
             }
 
             mInstallerService = new PackageInstallerService(context, this);
+            mArtManagerService = new ArtManagerService(this);
             final Pair<ComponentName, String> instantAppResolverComponent =
                     getInstantAppResolverLPr();
             if (instantAppResolverComponent != null) {
@@ -24909,6 +24911,11 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
             return null;
         }
         return mInstallerService;
+    }
+
+    @Override
+    public IArtManager getArtManager() {
+        return mArtManagerService;
     }
 
     private boolean userNeedsBadging(int userId) {
