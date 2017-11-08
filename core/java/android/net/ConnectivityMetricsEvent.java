@@ -18,6 +18,7 @@ package android.net;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+
 import com.android.internal.util.BitUtils;
 
 /**
@@ -80,7 +81,7 @@ public final class ConnectivityMetricsEvent implements Parcelable {
         StringBuilder buffer = new StringBuilder("ConnectivityMetricsEvent(");
         buffer.append(String.format("%tT.%tL", timestamp, timestamp));
         if (netId != 0) {
-            buffer.append(", ").append(netId);
+            buffer.append(", ").append("netId=").append(netId);
         }
         if (ifname != null) {
             buffer.append(", ").append(ifname);
