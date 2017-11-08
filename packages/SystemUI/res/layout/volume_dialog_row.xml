@@ -19,8 +19,8 @@
     android:layout_height="@dimen/volume_row_height"
     android:clipChildren="false"
     android:clipToPadding="false"
-    android:orientation="vertical"
-    android:paddingBottom="@dimen/volume_row_padding_bottom" >
+    android:theme="@style/qs_theme"
+    android:orientation="vertical" >
 
     <TextView
         android:id="@+id/volume_row_header"
@@ -28,7 +28,8 @@
         android:layout_height="wrap_content"
         android:ellipsize="end"
         android:maxLines="1"
-        android:textAppearance="@style/TextAppearance.Volume.Header"
+        android:textColor="?android:attr/colorControlNormal"
+        android:textAppearance="?android:attr/textAppearanceSmall"
         android:paddingStart="@dimen/volume_row_header_padding_start" />
 
     <LinearLayout
@@ -52,5 +53,10 @@
                 android:focusableInTouchMode="true"
                 android:paddingStart="@dimen/volume_row_slider_padding_start"/>
     </LinearLayout>
+
+    <Space
+        android:id="@+id/spacer"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/volume_row_padding_bottom"/>
 
 </LinearLayout>

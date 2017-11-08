@@ -62,7 +62,6 @@ public class VolumeDialogComponent implements VolumeComponent, TunerService.Tuna
     private final InterestingConfigChanges mConfigChanges = new InterestingConfigChanges(
             ActivityInfo.CONFIG_FONT_SCALE | ActivityInfo.CONFIG_LOCALE
             | ActivityInfo.CONFIG_ASSETS_PATHS);
-    private final Extension mExtension;
     private VolumeDialog mDialog;
     private VolumePolicy mVolumePolicy = new VolumePolicy(
             DEFAULT_VOLUME_DOWN_TO_ENTER_SILENT,  // volumeDownToEnterSilent
@@ -79,7 +78,7 @@ public class VolumeDialogComponent implements VolumeComponent, TunerService.Tuna
         // Allow plugins to reference the VolumeDialogController.
         Dependency.get(PluginDependencyProvider.class)
                 .allowPluginDependency(VolumeDialogController.class);
-        mExtension = Dependency.get(ExtensionController.class).newExtension(VolumeDialog.class)
+        Dependency.get(ExtensionController.class).newExtension(VolumeDialog.class)
                 .withPlugin(VolumeDialog.class)
                 .withDefault(this::createDefault)
                 .withCallback(dialog -> {
@@ -151,7 +150,7 @@ public class VolumeDialogComponent implements VolumeComponent, TunerService.Tuna
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         if (mConfigChanges.applyNewConfig(mContext.getResources())) {
-            mExtension.reload();
+            mController.mCallbacks.onConfigurationChanged();
         }
     }
 
