@@ -23,7 +23,11 @@
 #include <limits.h>
 #include <stdlib.h>
 
-using namespace android::util;
+using android::util::FIELD_TYPE_BOOL;
+using android::util::FIELD_TYPE_FLOAT;
+using android::util::FIELD_TYPE_INT32;
+using android::util::FIELD_TYPE_INT64;
+using android::util::FIELD_TYPE_MESSAGE;
 using android::util::ProtoOutputStream;
 using std::map;
 using std::string;
@@ -87,15 +91,7 @@ StatsLogReport EventMetricProducer::onDumpReport() {
 
     size_t bufferSize = mProto->size();
     VLOG("metric %lld dump report now... proto size: %zu ", mMetric.metric_id(), bufferSize);
-    std::unique_ptr<uint8_t[]> buffer(new uint8_t[bufferSize]);
-    size_t pos = 0;
-    auto it = mProto->data();
-    while (it.readBuffer() != NULL) {
-        size_t toRead = it.currentToRead();
-        std::memcpy(&buffer[pos], it.readBuffer(), toRead);
-        pos += toRead;
-        it.rp()->move(toRead);
-    }
+    std::unique_ptr<uint8_t[]> buffer = serializeProto();
 
     startNewProtoOutputStream(endTime);
 

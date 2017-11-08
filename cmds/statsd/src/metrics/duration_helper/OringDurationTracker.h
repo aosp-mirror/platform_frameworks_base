@@ -29,7 +29,7 @@ class OringDurationTracker : public DurationTracker {
 public:
     OringDurationTracker(sp<ConditionWizard> wizard, int conditionIndex,
                          uint64_t currentBucketStartNs, uint64_t bucketSizeNs,
-                         std::vector<DurationBucketInfo>& bucket);
+                         std::vector<DurationBucket>& bucket);
     void noteStart(const HashableDimensionKey& key, bool condition, const uint64_t eventTime,
                    const ConditionKey& conditionKey) override;
     void noteStop(const HashableDimensionKey& key, const uint64_t eventTime) override;

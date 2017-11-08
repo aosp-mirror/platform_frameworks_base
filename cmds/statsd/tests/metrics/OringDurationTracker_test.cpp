@@ -40,7 +40,7 @@ TEST(OringDurationTrackerTest, TestDurationOverlap) {
     ConditionKey key1;
     key1["APP_BACKGROUND"] = "1:maps|";
 
-    vector<DurationBucketInfo> buckets;
+    vector<DurationBucket> buckets;
 
     uint64_t bucketStartTimeNs = 10000000000;
     uint64_t eventStartTimeNs = bucketStartTimeNs + 1;
@@ -56,7 +56,7 @@ TEST(OringDurationTrackerTest, TestDurationOverlap) {
 
     tracker.flushIfNeeded(bucketStartTimeNs + bucketSizeNs + 1);
     EXPECT_EQ(1u, buckets.size());
-    EXPECT_EQ(durationTimeNs, buckets[0].duration_nanos());
+    EXPECT_EQ(durationTimeNs, buckets[0].mDuration);
 }
 
 TEST(OringDurationTrackerTest, TestDurationConditionChange) {
@@ -68,7 +68,7 @@ TEST(OringDurationTrackerTest, TestDurationConditionChange) {
     EXPECT_CALL(*wizard, query(_, key1))  // #4
             .WillOnce(Return(ConditionState::kFalse));
 
-    vector<DurationBucketInfo> buckets;
+    vector<DurationBucket> buckets;
 
     uint64_t bucketStartTimeNs = 10000000000;
     uint64_t eventStartTimeNs = bucketStartTimeNs + 1;
@@ -85,7 +85,7 @@ TEST(OringDurationTrackerTest, TestDurationConditionChange) {
 
     tracker.flushIfNeeded(bucketStartTimeNs + bucketSizeNs + 1);
     EXPECT_EQ(1u, buckets.size());
-    EXPECT_EQ(5, buckets[0].duration_nanos());
+    EXPECT_EQ(5, buckets[0].mDuration);
 }
 }  // namespace statsd
 }  // namespace os

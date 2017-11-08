@@ -24,6 +24,12 @@
 #include <limits.h>
 #include <stdlib.h>
 
+using android::util::FIELD_TYPE_BOOL;
+using android::util::FIELD_TYPE_FLOAT;
+using android::util::FIELD_TYPE_INT32;
+using android::util::FIELD_TYPE_INT64;
+using android::util::FIELD_TYPE_MESSAGE;
+using android::util::ProtoOutputStream;
 using std::map;
 using std::string;
 using std::unordered_map;
@@ -32,6 +38,27 @@ using std::vector;
 namespace android {
 namespace os {
 namespace statsd {
+
+// for StatsLogReport
+const int FIELD_ID_METRIC_ID = 1;
+const int FIELD_ID_START_REPORT_NANOS = 2;
+const int FIELD_ID_END_REPORT_NANOS = 3;
+const int FIELD_ID_GAUGE_METRICS = 8;
+// for GaugeMetricDataWrapper
+const int FIELD_ID_DATA = 1;
+// for GaugeMetricData
+const int FIELD_ID_DIMENSION = 1;
+const int FIELD_ID_BUCKET_INFO = 2;
+// for KeyValuePair
+const int FIELD_ID_KEY = 1;
+const int FIELD_ID_VALUE_STR = 2;
+const int FIELD_ID_VALUE_INT = 3;
+const int FIELD_ID_VALUE_BOOL = 4;
+const int FIELD_ID_VALUE_FLOAT = 5;
+// for GaugeBucketInfo
+const int FIELD_ID_START_BUCKET_NANOS = 1;
+const int FIELD_ID_END_BUCKET_NANOS = 2;
+const int FIELD_ID_GAUGE = 3;
 
 GaugeMetricProducer::GaugeMetricProducer(const GaugeMetric& metric, const int conditionIndex,
                                          const sp<ConditionWizard>& wizard, const int pullTagId)
@@ -59,6 +86,8 @@ GaugeMetricProducer::GaugeMetricProducer(const GaugeMetric& metric, const int co
                                              metric.bucket().bucket_size_millis());
     }
 
+    startNewProtoOutputStream(mStartTimeNs);
+
     VLOG("metric %lld created. bucket size %lld start_time: %lld", metric.metric_id(),
          (long long)mBucketSizeNs, (long long)mStartTimeNs);
 }
@@ -67,37 +96,23 @@ GaugeMetricProducer::~GaugeMetricProducer() {
     VLOG("~GaugeMetricProducer() called");
 }
 
-void GaugeMetricProducer::finish() {
+void GaugeMetricProducer::startNewProtoOutputStream(long long startTime) {
+    mProto = std::make_unique<ProtoOutputStream>();
+    mProto->write(FIELD_TYPE_INT32 | FIELD_ID_METRIC_ID, mMetric.metric_id());
+    mProto->write(FIELD_TYPE_INT64 | FIELD_ID_START_REPORT_NANOS, startTime);
+    mProtoToken = mProto->start(FIELD_TYPE_MESSAGE | FIELD_ID_GAUGE_METRICS);
 }
 
-static void addSlicedGaugeToReport(const vector<KeyValuePair>& key,
-                                   const vector<GaugeBucketInfo>& buckets,
-                                   StatsLogReport_GaugeMetricDataWrapper& wrapper) {
-    GaugeMetricData* data = wrapper.add_data();
-    for (const auto& kv : key) {
-        data->add_dimension()->CopyFrom(kv);
-    }
-    for (const auto& bucket : buckets) {
-        data->add_bucket_info()->CopyFrom(bucket);
-        VLOG("\t bucket [%lld - %lld] gauge: %lld", bucket.start_bucket_nanos(),
-             bucket.end_bucket_nanos(), bucket.gauge());
-    }
+void GaugeMetricProducer::finish() {
 }
 
 StatsLogReport GaugeMetricProducer::onDumpReport() {
     VLOG("gauge metric %lld dump report now...", mMetric.metric_id());
 
-    StatsLogReport report;
-    report.set_metric_id(mMetric.metric_id());
-    report.set_start_report_nanos(mStartTimeNs);
-
     // Dump current bucket if it's stale.
     // If current bucket is still on-going, don't force dump current bucket.
     // In finish(), We can force dump current bucket.
     flushGaugeIfNeededLocked(time(nullptr) * NS_PER_SEC);
-    report.set_end_report_nanos(mCurrentBucketStartTimeNs);
-
-    StatsLogReport_GaugeMetricDataWrapper* wrapper = report.mutable_gauge_metrics();
 
     for (const auto& pair : mPastBuckets) {
         const HashableDimensionKey& hashableKey = pair.first;
@@ -108,10 +123,53 @@ StatsLogReport GaugeMetricProducer::onDumpReport() {
         }
 
         VLOG("  dimension key %s", hashableKey.c_str());
-        addSlicedGaugeToReport(it->second, pair.second, *wrapper);
+        long long wrapperToken = mProto->start(FIELD_TYPE_MESSAGE | FIELD_ID_DATA);
+
+        // First fill dimension (KeyValuePairs).
+        for (const auto& kv : it->second) {
+            long long dimensionToken = mProto->start(FIELD_TYPE_MESSAGE | FIELD_ID_DIMENSION);
+            mProto->write(FIELD_TYPE_INT32 | FIELD_ID_KEY, kv.key());
+            if (kv.has_value_str()) {
+                mProto->write(FIELD_TYPE_INT32 | FIELD_ID_VALUE_STR, kv.value_str());
+            } else if (kv.has_value_int()) {
+                mProto->write(FIELD_TYPE_INT64 | FIELD_ID_VALUE_INT, kv.value_int());
+            } else if (kv.has_value_bool()) {
+                mProto->write(FIELD_TYPE_BOOL | FIELD_ID_VALUE_BOOL, kv.value_bool());
+            } else if (kv.has_value_float()) {
+                mProto->write(FIELD_TYPE_FLOAT | FIELD_ID_VALUE_FLOAT, kv.value_float());
+            }
+            mProto->end(dimensionToken);
+        }
+
+        // Then fill bucket_info (GaugeBucketInfo).
+        for (const auto& bucket : pair.second) {
+            long long bucketInfoToken = mProto->start(FIELD_TYPE_MESSAGE | FIELD_ID_BUCKET_INFO);
+            mProto->write(FIELD_TYPE_INT64 | FIELD_ID_START_BUCKET_NANOS,
+                          (long long)bucket.mBucketStartNs);
+            mProto->write(FIELD_TYPE_INT64 | FIELD_ID_END_BUCKET_NANOS,
+                          (long long)bucket.mBucketEndNs);
+            mProto->write(FIELD_TYPE_INT64 | FIELD_ID_GAUGE, (long long)bucket.mGauge);
+            mProto->end(bucketInfoToken);
+            VLOG("\t bucket [%lld - %lld] count: %lld", (long long)bucket.mBucketStartNs,
+                 (long long)bucket.mBucketEndNs, (long long)bucket.mGauge);
+        }
+        mProto->end(wrapperToken);
     }
-    return report;
-    // TODO: Clear mPastBuckets, mDimensionKeyMap once the report is dumped.
+    mProto->end(mProtoToken);
+    mProto->write(FIELD_TYPE_INT64 | FIELD_ID_END_REPORT_NANOS,
+                  (long long)mCurrentBucketStartTimeNs);
+
+    std::unique_ptr<uint8_t[]> buffer = serializeProto();
+
+    startNewProtoOutputStream(time(nullptr) * NS_PER_SEC);
+    mPastBuckets.clear();
+    mByteSize = 0;
+
+    // TODO: Once we migrate all MetricProducers to use ProtoOutputStream, we should return this:
+    // return std::move(buffer);
+    return StatsLogReport();
+
+    // TODO: Clear mDimensionKeyMap once the report is dumped.
 }
 
 void GaugeMetricProducer::onConditionChanged(const bool conditionMet, const uint64_t eventTime) {
@@ -207,14 +265,15 @@ void GaugeMetricProducer::flushGaugeIfNeededLocked(const uint64_t eventTimeNs) {
     // Adjusts the bucket start time
     int64_t numBucketsForward = (eventTimeNs - mCurrentBucketStartTimeNs) / mBucketSizeNs;
 
-    GaugeBucketInfo info;
-    info.set_start_bucket_nanos(mCurrentBucketStartTimeNs);
-    info.set_end_bucket_nanos(mCurrentBucketStartTimeNs + mBucketSizeNs);
+    GaugeBucket info;
+    info.mBucketStartNs = mCurrentBucketStartTimeNs;
+    info.mBucketEndNs = mCurrentBucketStartTimeNs + mBucketSizeNs;
 
     for (const auto& slice : mCurrentSlicedBucket) {
-        info.set_gauge(slice.second);
+        info.mGauge = slice.second;
         auto& bucketList = mPastBuckets[slice.first];
         bucketList.push_back(info);
+        mByteSize += sizeof(info);
 
         VLOG("gauge metric %lld, dump key value: %s -> %ld", mMetric.metric_id(),
              slice.first.c_str(), slice.second);
@@ -225,6 +284,10 @@ void GaugeMetricProducer::flushGaugeIfNeededLocked(const uint64_t eventTimeNs) {
     mCurrentBucketStartTimeNs = mCurrentBucketStartTimeNs + numBucketsForward * mBucketSizeNs;
     VLOG("metric %lld: new bucket start time: %lld", mMetric.metric_id(),
          (long long)mCurrentBucketStartTimeNs);
+}
+
+size_t GaugeMetricProducer::byteSize() {
+    return mByteSize;
 }
 
 }  // namespace statsd
