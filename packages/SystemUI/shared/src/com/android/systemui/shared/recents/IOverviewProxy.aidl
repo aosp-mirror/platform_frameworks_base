@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-package com.android.systemui.shared.recents.model;
+package com.android.systemui.shared.recents;
 
 import android.view.MotionEvent;
+import com.android.systemui.shared.recents.ISystemUiProxy;
 
 oneway interface IOverviewProxy {
+    void onBind(in ISystemUiProxy sysUiProxy);
     void onMotionEvent(in MotionEvent event);
 }
