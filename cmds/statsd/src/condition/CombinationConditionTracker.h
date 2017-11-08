@@ -35,12 +35,11 @@ public:
               const std::unordered_map<std::string, int>& conditionNameIndexMap,
               std::vector<bool>& stack) override;
 
-    bool evaluateCondition(const LogEvent& event,
+    void evaluateCondition(const LogEvent& event,
                            const std::vector<MatchingState>& eventMatcherValues,
                            const std::vector<sp<ConditionTracker>>& mAllConditions,
                            std::vector<ConditionState>& conditionCache,
-                           std::vector<bool>& changedCache,
-                           std::vector<bool>& slicedConditionMayChanged) override;
+                           std::vector<bool>& changedCache) override;
 
     void isConditionMet(const std::map<std::string, HashableDimensionKey>& conditionParameters,
                         const std::vector<sp<ConditionTracker>>& allConditions,

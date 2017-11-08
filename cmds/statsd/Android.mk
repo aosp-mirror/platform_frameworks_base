@@ -151,18 +151,18 @@ LOCAL_SRC_FILES := \
     $(statsd_common_src) \
     tests/AnomalyMonitor_test.cpp \
     tests/anomaly/AnomalyTracker_test.cpp \
-    tests/ConditionTracker_test.cpp \
     tests/ConfigManager_test.cpp \
     tests/indexed_priority_queue_test.cpp \
     tests/LogEntryMatcher_test.cpp \
     tests/LogReader_test.cpp \
     tests/MetricsManager_test.cpp \
     tests/UidMap_test.cpp \
+    tests/condition/CombinationConditionTracker_test.cpp \
+    tests/condition/SimpleConditionTracker_test.cpp \
     tests/metrics/OringDurationTracker_test.cpp \
     tests/metrics/MaxDurationTracker_test.cpp \
     tests/metrics/CountMetricProducer_test.cpp \
     tests/metrics/EventMetricProducer_test.cpp
-
 
 LOCAL_STATIC_LIBRARIES := \
     libgmock
