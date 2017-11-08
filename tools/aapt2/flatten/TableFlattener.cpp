@@ -23,6 +23,7 @@
 
 #include "android-base/logging.h"
 #include "android-base/macros.h"
+#include "android-base/stringprintf.h"
 
 #include "ResourceTable.h"
 #include "ResourceValues.h"
@@ -572,14 +573,6 @@ bool TableFlattener::Consume(IAaptContext* context, ResourceTable* table) {
   ResTable_header* table_header = table_writer.StartChunk<ResTable_header>(RES_TABLE_TYPE);
   table_header->packageCount = util::HostToDevice32(table->packages.size());
 
-  // Write a self mapping entry for this package if the ID is non-standard (0x7f).
-  if (context->GetPackageType() == PackageType::kApp) {
-    const uint8_t package_id = context->GetPackageId();
-    if (package_id != kFrameworkPackageId && package_id != kAppPackageId) {
-      table->included_packages_[package_id] = context->GetCompilationPackage();
-    }
-  }
-
   // Flatten the values string pool.
   StringPool::FlattenUtf8(table_writer.buffer(), table->string_pool);
 
@@ -587,6 +580,22 @@ bool TableFlattener::Consume(IAaptContext* context, ResourceTable* table) {
 
   // Flatten each package.
   for (auto& package : table->packages) {
+    if (context->GetPackageType() == PackageType::kApp) {
+      // Write a self mapping entry for this package if the ID is non-standard (0x7f).
+      const uint8_t package_id = package->id.value();
+      if (package_id != kFrameworkPackageId && package_id != kAppPackageId) {
+        auto result = table->included_packages_.insert({package_id, package->name});
+        if (!result.second && result.first->second != package->name) {
+          // A mapping for this package ID already exists, and is a different package. Error!
+          context->GetDiagnostics()->Error(
+              DiagMessage() << android::base::StringPrintf(
+                  "can't map package ID %02x to '%s'. Already mapped to '%s'", package_id,
+                  package->name.c_str(), result.first->second.c_str()));
+          return false;
+        }
+      }
+    }
+
     PackageFlattener flattener(context, package.get(), &table->included_packages_,
                                options_.use_sparse_entries);
     if (!flattener.FlattenPackage(&package_buffer)) {
