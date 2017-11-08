@@ -87,10 +87,8 @@ TEST(FileOutputStreamTest, NextAndBackup) {
   const std::string input = "this is a cool string";
 
   TemporaryFile file;
-  int fd = file.release();
 
-  // FileOutputStream takes ownership.
-  FileOutputStream out(fd, 10u);
+  FileOutputStream out(file.fd, 10u);
   ASSERT_FALSE(out.HadError());
   EXPECT_THAT(out.ByteCount(), Eq(0u));
 
@@ -118,10 +116,10 @@ TEST(FileOutputStreamTest, NextAndBackup) {
 
   ASSERT_TRUE(out.Flush());
 
-  lseek64(fd, 0, SEEK_SET);
+  lseek64(file.fd, 0, SEEK_SET);
 
   std::string actual;
-  ASSERT_TRUE(android::base::ReadFdToString(fd, &actual));
+  ASSERT_TRUE(android::base::ReadFdToString(file.fd, &actual));
   EXPECT_THAT(actual, StrEq(input));
 }
 

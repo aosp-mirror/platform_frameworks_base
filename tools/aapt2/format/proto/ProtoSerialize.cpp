@@ -284,7 +284,7 @@ void SerializeTableToPb(const ResourceTable& table, pb::ResourceTable* out_table
       if (type->id) {
         pb_type->mutable_type_id()->set_id(type->id.value());
       }
-      pb_type->set_name(ToString(type->type).to_string());
+      pb_type->set_name(to_string(type->type).to_string());
 
       for (const std::unique_ptr<ResourceEntry>& entry : type->entries) {
         pb::Entry* pb_entry = pb_type->add_entry();
@@ -328,7 +328,7 @@ static void SerializeReferenceToPb(const Reference& ref, pb::Reference* pb_ref) 
   pb_ref->set_id(ref.id.value_or_default(ResourceId(0x0)).id);
 
   if (ref.name) {
-    pb_ref->set_name(ref.name.value().ToString());
+    pb_ref->set_name(ref.name.value().to_string());
   }
 
   pb_ref->set_private_(ref.private_reference);
@@ -523,14 +523,14 @@ void SerializeItemToPb(const Item& item, pb::Item* out_item) {
 }
 
 void SerializeCompiledFileToPb(const ResourceFile& file, pb::internal::CompiledFile* out_file) {
-  out_file->set_resource_name(file.name.ToString());
+  out_file->set_resource_name(file.name.to_string());
   out_file->set_source_path(file.source.path);
   out_file->set_type(SerializeFileReferenceTypeToPb(file.type));
   SerializeConfig(file.config, out_file->mutable_config());
 
   for (const SourcedResourceName& exported : file.exported_symbols) {
     pb::internal::CompiledFile_Symbol* pb_symbol = out_file->add_exported_symbol();
-    pb_symbol->set_resource_name(exported.name.ToString());
+    pb_symbol->set_resource_name(exported.name.to_string());
     pb_symbol->mutable_source()->set_line_number(exported.line);
   }
 }

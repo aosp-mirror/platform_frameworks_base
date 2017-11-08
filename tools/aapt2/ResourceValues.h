@@ -29,6 +29,7 @@
 #include "Resource.h"
 #include "StringPool.h"
 #include "io/File.h"
+#include "text/Printer.h"
 #include "util/Maybe.h"
 
 namespace aapt {
@@ -106,6 +107,10 @@ class Value {
   // Human readable printout of this value.
   virtual void Print(std::ostream* out) const = 0;
 
+  // Human readable printout of this value that may omit some information for the sake
+  // of brevity and readability. Default implementation just calls Print().
+  virtual void PrettyPrint(text::Printer* printer) const;
+
   friend std::ostream& operator<<(std::ostream& out, const Value& value);
 
  protected:
@@ -162,6 +167,10 @@ struct Reference : public BaseItem<Reference> {
   bool Flatten(android::Res_value* out_value) const override;
   Reference* Clone(StringPool* new_pool) const override;
   void Print(std::ostream* out) const override;
+  void PrettyPrint(text::Printer* printer) const override;
+
+  // Prints the reference without a package name if the package name matches the one given.
+  void PrettyPrint(const android::StringPiece& package, text::Printer* printer) const;
 };
 
 bool operator<(const Reference&, const Reference&);
@@ -224,6 +233,7 @@ struct String : public BaseItem<String> {
   bool Flatten(android::Res_value* out_value) const override;
   String* Clone(StringPool* new_pool) const override;
   void Print(std::ostream* out) const override;
+  void PrettyPrint(text::Printer* printer) const override;
 };
 
 struct StyledString : public BaseItem<StyledString> {
@@ -274,6 +284,7 @@ struct BinaryPrimitive : public BaseItem<BinaryPrimitive> {
   bool Flatten(android::Res_value* out_value) const override;
   BinaryPrimitive* Clone(StringPool* new_pool) const override;
   void Print(std::ostream* out) const override;
+  void PrettyPrint(text::Printer* printer) const override;
 };
 
 struct Attribute : public BaseValue<Attribute> {
@@ -294,7 +305,7 @@ struct Attribute : public BaseValue<Attribute> {
 
   bool Equals(const Value* value) const override;
   Attribute* Clone(StringPool* new_pool) const override;
-  void PrintMask(std::ostream* out) const;
+  std::string MaskString() const;
   void Print(std::ostream* out) const override;
   bool Matches(const Item& item, DiagMessage* out_msg = nullptr) const;
 };

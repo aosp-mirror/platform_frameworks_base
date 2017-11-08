@@ -42,6 +42,7 @@ bool CopyProtoToArchive(IAaptContext* context, ::google::protobuf::MessageLite* 
 // Copies the data from in to out. Returns false if there was an error.
 // If there was an error, check the individual streams' HadError/GetError methods.
 bool Copy(OutputStream* out, InputStream* in);
+bool Copy(OutputStream* out, const ::android::StringPiece& in);
 bool Copy(::google::protobuf::io::ZeroCopyOutputStream* out, InputStream* in);
 
 class OutputStreamAdaptor : public io::OutputStream {

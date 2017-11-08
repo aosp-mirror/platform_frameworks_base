@@ -424,7 +424,7 @@ std::unique_ptr<Value> BinaryResourceParser::ParseMapEntry(const ResourceNameRef
       // We can ignore the value here.
       return util::make_unique<Id>();
     default:
-      diag_->Error(DiagMessage() << "illegal map type '" << ToString(name.type) << "' ("
+      diag_->Error(DiagMessage() << "illegal map type '" << to_string(name.type) << "' ("
                                  << (int)name.type << ")");
       break;
   }
