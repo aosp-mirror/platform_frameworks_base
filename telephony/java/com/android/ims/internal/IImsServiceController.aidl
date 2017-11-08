@@ -31,7 +31,7 @@ import com.android.ims.internal.IImsUt;
 import android.os.Message;
 
 /**
- * See ImsService and IMMTelFeature for more information.
+ * See ImsService and MMTelFeature for more information.
  * {@hide}
  */
 interface IImsServiceController {
