@@ -63,7 +63,7 @@ public class KeyguardSliceProviderTest extends SysuiTestCase {
     @Test
     public void returnsValidSlice() {
         Slice slice = mProvider.onBindSlice(Uri.parse(KeyguardSliceProvider.KEYGUARD_SLICE_URI));
-        SliceItem text = SliceQuery.find(slice, SliceItem.TYPE_TEXT, Slice.HINT_TITLE,
+        SliceItem text = SliceQuery.find(slice, SliceItem.FORMAT_TEXT, Slice.HINT_TITLE,
                 null /* nonHints */);
         Assert.assertNotNull("Slice must provide a title.", text);
     }

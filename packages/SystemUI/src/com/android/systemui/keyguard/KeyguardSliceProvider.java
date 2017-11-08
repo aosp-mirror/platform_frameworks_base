@@ -84,7 +84,7 @@ public class KeyguardSliceProvider extends SliceProvider {
 
     @Override
     public Slice onBindSlice(Uri sliceUri) {
-        return new Slice.Builder(sliceUri).addText(mLastText, Slice.HINT_TITLE).build();
+        return new Slice.Builder(sliceUri).addText(mLastText, null, Slice.HINT_TITLE).build();
     }
 
     @Override
