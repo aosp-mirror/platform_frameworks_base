@@ -34,44 +34,9 @@
             android:id="@+id/volume_dialog_rows"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingEnd="@dimen/volume_button_size"
             android:orientation="vertical" >
             <!-- volume rows added and removed here! :-) -->
         </LinearLayout>
-
-        <include layout="@layout/volume_zen_footer" />
-
-        <!-- Only shown from Tuner setting -->
-        <include layout="@layout/tuner_zen_mode_panel" />
     </LinearLayout>
 
-    <LinearLayout
-        android:id="@+id/volume_dialog_content"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginEnd="@dimen/volume_expander_margin_end" >
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:textAppearance="@style/TextAppearance.Volume.Header" />
-        <com.android.keyguard.AlphaOptimizedImageButton
-            xmlns:android="http://schemas.android.com/apk/res/android"
-            xmlns:tools="http://schemas.android.com/tools"
-            android:id="@+id/volume_expand_button"
-            style="@style/VolumeButtons"
-            android:layout_width="@dimen/volume_button_size"
-            android:layout_height="@dimen/volume_button_size"
-            android:clickable="true"
-            android:soundEffectsEnabled="false"
-            android:src="@drawable/ic_volume_collapse_animation"
-            android:background="@drawable/ripple_drawable"
-            tools:ignore="RtlHardcoded"
-            />
-
-    </LinearLayout>
 </RelativeLayout>
