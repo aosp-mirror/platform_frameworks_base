@@ -64,6 +64,13 @@ public class IpSecServiceParameterizedTest {
         return Arrays.asList(new Object[][] {{"8.8.4.4"}, {"2601::10"}});
     }
 
+    private static final byte[] AEAD_KEY = {
+        0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
+        0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,
+        0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17,
+        0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F,
+        0x73, 0x61, 0x6C, 0x74
+    };
     private static final byte[] CRYPT_KEY = {
         0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
         0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,
@@ -87,7 +94,7 @@ public class IpSecServiceParameterizedTest {
     private static final IpSecAlgorithm CRYPT_ALGO =
             new IpSecAlgorithm(IpSecAlgorithm.CRYPT_AES_CBC, CRYPT_KEY);
     private static final IpSecAlgorithm AEAD_ALGO =
-            new IpSecAlgorithm(IpSecAlgorithm.AUTH_CRYPT_AES_GCM, CRYPT_KEY, CRYPT_KEY.length * 4);
+            new IpSecAlgorithm(IpSecAlgorithm.AUTH_CRYPT_AES_GCM, AEAD_KEY, 128);
 
     private static final int[] DIRECTIONS =
             new int[] {IpSecTransform.DIRECTION_IN, IpSecTransform.DIRECTION_OUT};
@@ -262,7 +269,7 @@ public class IpSecServiceParameterizedTest {
                         eq(new byte[] {}),
                         eq(0),
                         eq(IpSecAlgorithm.AUTH_CRYPT_AES_GCM),
-                        eq(CRYPT_KEY),
+                        eq(AEAD_KEY),
                         anyInt(),
                         anyInt(),
                         anyInt(),
@@ -283,7 +290,7 @@ public class IpSecServiceParameterizedTest {
                         eq(new byte[] {}),
                         eq(0),
                         eq(IpSecAlgorithm.AUTH_CRYPT_AES_GCM),
-                        eq(CRYPT_KEY),
+                        eq(AEAD_KEY),
                         anyInt(),
                         anyInt(),
                         anyInt(),
