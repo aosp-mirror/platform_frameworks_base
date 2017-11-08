@@ -999,6 +999,7 @@ public class TelecomManager {
      */
     @SystemApi
     @SuppressLint("Doclava125")
+    @Deprecated
     public void clearAccounts() {
         try {
             if (isServiceConnected()) {
@@ -1031,6 +1032,7 @@ public class TelecomManager {
      */
     @SystemApi
     @SuppressLint("Doclava125")
+    @Deprecated
     public ComponentName getDefaultPhoneApp() {
         try {
             if (isServiceConnected()) {

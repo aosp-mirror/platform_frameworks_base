@@ -188,6 +188,7 @@ public class TelephonyManager {
 
     /** @hide
     /* @deprecated - use getSystemService as described above */
+    @Deprecated
     public static TelephonyManager getDefault() {
         return sInstance;
     }

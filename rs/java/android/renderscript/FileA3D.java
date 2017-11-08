@@ -89,6 +89,7 @@ public class FileA3D extends BaseObj {
         * describes
         *
         */
+    @Deprecated
         public String getName() {
             return mName;
         }
@@ -100,6 +101,7 @@ public class FileA3D extends BaseObj {
         * @return type of a renderscript object the index entry
         *         describes
         */
+    @Deprecated
         public EntryType getEntryType() {
             return mEntryType;
         }
@@ -109,6 +111,7 @@ public class FileA3D extends BaseObj {
         * Used to load the object described by the index entry
         * @return base renderscript object described by the entry
         */
+    @Deprecated
         public BaseObj getObject() {
             mRS.validate();
             BaseObj obj = internalCreate(mRS, this);
@@ -122,6 +125,7 @@ public class FileA3D extends BaseObj {
         *
         * @return renderscript mesh object described by the entry
         */
+        @Deprecated
         public Mesh getMesh() {
             return (Mesh)getObject();
         }

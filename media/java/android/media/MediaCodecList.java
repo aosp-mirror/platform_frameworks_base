@@ -39,6 +39,7 @@ final public class MediaCodecList {
      *
      * @see #REGULAR_CODECS
      */
+    @Deprecated
     public static final int getCodecCount() {
         initCodecList();
         return sRegularCodecInfos.length;

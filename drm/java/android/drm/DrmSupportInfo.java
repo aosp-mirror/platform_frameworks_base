@@ -108,6 +108,7 @@ public class DrmSupportInfo {
      * @deprecated The method name is mis-spelled, and it is replaced by
      * {@link #getDescription()}.
      */
+    @Deprecated
     public String getDescriprition() {
         return mDescription;
     }
@@ -185,4 +186,3 @@ public class DrmSupportInfo {
         return mFileSuffixList.contains(fileSuffix);
     }
 }
-

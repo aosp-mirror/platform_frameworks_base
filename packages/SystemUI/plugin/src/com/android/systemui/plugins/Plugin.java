@@ -116,6 +116,7 @@ public interface Plugin {
      * @deprecated
      * @see Requires
      */
+    @Deprecated
     default int getVersion() {
         // Default of -1 indicates the plugin supports the new Requires model.
         return -1;

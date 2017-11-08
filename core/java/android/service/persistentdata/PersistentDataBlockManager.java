@@ -159,6 +159,7 @@ public class PersistentDataBlockManager {
      * @deprecated use {@link OemLockManager#setOemUnlockAllowedByUser(boolean)} instead.
      */
     @RequiresPermission(android.Manifest.permission.OEM_UNLOCK_STATE)
+    @Deprecated
     public void setOemUnlockEnabled(boolean enabled) {
         try {
             sService.setOemUnlockEnabled(enabled);
@@ -176,6 +177,7 @@ public class PersistentDataBlockManager {
             android.Manifest.permission.READ_OEM_UNLOCK_STATE,
             android.Manifest.permission.OEM_UNLOCK_STATE
     })
+    @Deprecated
     public boolean getOemUnlockEnabled() {
         try {
             return sService.getOemUnlockEnabled();

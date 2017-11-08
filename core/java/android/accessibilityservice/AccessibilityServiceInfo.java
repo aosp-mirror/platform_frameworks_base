@@ -626,6 +626,7 @@ public class AccessibilityServiceInfo implements Parcelable {
      *
      * @deprecated Use {@link #getCapabilities()}.
      */
+    @Deprecated
     public boolean getCanRetrieveWindowContent() {
         return (mCapabilities & CAPABILITY_CAN_RETRIEVE_WINDOW_CONTENT) != 0;
     }
@@ -696,6 +697,7 @@ public class AccessibilityServiceInfo implements Parcelable {
      *
      * @deprecated Use {@link #loadDescription(PackageManager)}.
      */
+    @Deprecated
     public String getDescription() {
         return mNonLocalizedDescription;
     }

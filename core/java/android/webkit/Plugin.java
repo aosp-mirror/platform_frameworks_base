@@ -43,6 +43,7 @@ public class Plugin {
          * @deprecated This interface was intended to be used by Gears. Since Gears was
          * deprecated, so is this class.
          */
+    @Deprecated
         public void handleClickEvent(Context context);
     }
 

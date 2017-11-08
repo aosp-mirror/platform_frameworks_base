@@ -403,6 +403,7 @@ public class Canvas extends BaseCanvas {
      *                  to save/restore
      * @return The value to pass to restoreToCount() to balance this save()
      */
+    @Deprecated
     public int save(@Saveflags int saveFlags) {
         return nSave(mNativeCanvasWrapper, saveFlags);
     }
@@ -438,6 +439,7 @@ public class Canvas extends BaseCanvas {
      *               for performance reasons.
      * @return       value to pass to restoreToCount() to balance this save()
      */
+    @Deprecated
     public int saveLayer(@Nullable RectF bounds, @Nullable Paint paint, @Saveflags int saveFlags) {
         if (bounds == null) {
             bounds = new RectF(getClipBounds());
@@ -480,6 +482,7 @@ public class Canvas extends BaseCanvas {
      *
      * @deprecated Use {@link #saveLayer(float, float, float, float, Paint)} instead.
      */
+    @Deprecated
     public int saveLayer(float left, float top, float right, float bottom, @Nullable Paint paint,
             @Saveflags int saveFlags) {
         return nSaveLayer(mNativeCanvasWrapper, left, top, right, bottom,
@@ -524,6 +527,7 @@ public class Canvas extends BaseCanvas {
      *                  for performance reasons.
      * @return          value to pass to restoreToCount() to balance this call
      */
+    @Deprecated
     public int saveLayerAlpha(@Nullable RectF bounds, int alpha, @Saveflags int saveFlags) {
         if (bounds == null) {
             bounds = new RectF(getClipBounds());
@@ -549,6 +553,7 @@ public class Canvas extends BaseCanvas {
      *
      * @deprecated Use {@link #saveLayerAlpha(float, float, float, float, int)} instead.
      */
+    @Deprecated
     public int saveLayerAlpha(float left, float top, float right, float bottom, int alpha,
             @Saveflags int saveFlags) {
         alpha = Math.min(255, Math.max(0, alpha));

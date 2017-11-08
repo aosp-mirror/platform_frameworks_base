@@ -426,6 +426,7 @@ public class BitmapFactory {
          *  or if inJustDecodeBounds is true, will set outWidth/outHeight
          *  to -1
          */
+    @Deprecated
         public void requestCancelDecode() {
             mCancel = true;
         }
