@@ -252,6 +252,7 @@ abstract class ApkVerityBuilder {
         byte[] rootHash = new byte[DIGEST_SIZE_BYTES];
         BufferedDigester digester = new BufferedDigester(salt, ByteBuffer.wrap(rootHash));
         digester.consume(slice(output, 0, CHUNK_SIZE_BYTES));
+        digester.finish();
         return rootHash;
     }
 
