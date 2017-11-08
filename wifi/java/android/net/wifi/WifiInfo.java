@@ -348,6 +348,9 @@ public class WifiInfo implements Parcelable {
      * quotation marks. Otherwise, it is returned as a string of hex digits. The
      * SSID may be &lt;unknown ssid&gt; if there is no network currently connected,
      * or if the caller has insufficient permissions to access the SSID.
+     *
+     * Prior to {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR1}, this method
+     * always returned the SSID with no quotes around it.
      * @return the SSID
      */
     public String getSSID() {
