@@ -1661,14 +1661,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     private long getAccessibilityShortcutTimeout() {
         ViewConfiguration config = ViewConfiguration.get(mContext);
-        try {
-            return Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                    Settings.Secure.ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN, mCurrentUserId) == 0
-                    ? config.getAccessibilityShortcutKeyTimeout()
-                    : config.getAccessibilityShortcutKeyTimeoutAfterConfirmation();
-        } catch (Settings.SettingNotFoundException e) {
-            throw new RuntimeException(e);
-        }
+        return Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN, 0, mCurrentUserId) == 0
+                ? config.getAccessibilityShortcutKeyTimeout()
+                : config.getAccessibilityShortcutKeyTimeoutAfterConfirmation();
     }
 
     private long getScreenshotChordLongPressDelay() {
