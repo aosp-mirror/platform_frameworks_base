@@ -4489,9 +4489,12 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                         "startActivityFromRecents: Task " + taskId + " not found.");
             }
 
-            // We always want to return to the home activity instead of the recents activity from
-            // whatever is started from the recents activity, so move the home stack forward.
-            moveHomeStackToFront("startActivityFromRecents");
+            if (windowingMode != WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
+                // We always want to return to the home activity instead of the recents activity
+                // from whatever is started from the recents activity, so move the home stack
+                // forward.
+                moveHomeStackToFront("startActivityFromRecents");
+            }
 
             // If the user must confirm credentials (e.g. when first launching a work app and the
             // Work Challenge is present) let startActivityInPackage handle the intercepting.
