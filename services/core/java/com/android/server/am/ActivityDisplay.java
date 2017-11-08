@@ -404,8 +404,8 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
 
         if (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
                 || windowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY) {
-            return supportsSplitScreen && WindowConfiguration.supportSplitScreenWindowingMode(
-                    windowingMode, activityType);
+            return supportsSplitScreen
+                    && WindowConfiguration.supportSplitScreenWindowingMode(activityType);
         }
 
         if (!supportsFreeform && windowingMode == WINDOWING_MODE_FREEFORM) {

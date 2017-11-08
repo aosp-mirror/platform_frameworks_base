@@ -2441,7 +2441,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "am.resizeStack_" + stack.mStackId);
         mWindowManager.deferSurfaceLayout();
         try {
-            if (stack.supportsSplitScreenWindowingMode()) {
+            if (stack.affectedBySplitScreenResize()) {
                 if (bounds == null && stack.inSplitScreenWindowingMode()) {
                     // null bounds = fullscreen windowing mode...at least for now.
                     stack.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
@@ -2541,8 +2541,6 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                                 null, mTmpOptions, task, task.getActivityType(), onTop);
 
                     if (onTop) {
-                        final int returnToType =
-                                toDisplay.getTopVisibleStackActivityType(WINDOWING_MODE_PINNED);
                         final boolean isTopTask = i == (size - 1);
                         // Defer resume until all the tasks have been moved to the fullscreen stack
                         task.reparent(toStack, ON_TOP, REPARENT_MOVE_STACK_TO_FRONT,
@@ -2631,7 +2629,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                     if (current.getWindowingMode() == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
                         continue;
                     }
-                    if (!current.supportsSplitScreenWindowingMode()) {
+                    if (!current.affectedBySplitScreenResize()) {
                         continue;
                     }
                     // Need to set windowing mode here before we try to get the dock bounds.
@@ -4177,8 +4175,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         }
 
         // Handle incorrect launch/move to secondary display if needed.
-        final boolean launchOnSecondaryDisplayFailed;
         if (isSecondaryDisplayPreferred) {
+            final boolean launchOnSecondaryDisplayFailed;
             final int actualDisplayId = task.getStack().mDisplayId;
             if (!task.canBeLaunchedOnDisplay(actualDisplayId)) {
                 // The task landed on an inappropriate display somehow, move it to the default
@@ -4193,34 +4191,34 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                         || (preferredDisplayId != INVALID_DISPLAY
                             && preferredDisplayId != actualDisplayId);
             }
-        } else {
-            // The task wasn't requested to be on a secondary display.
-            launchOnSecondaryDisplayFailed = false;
-        }
-
-        final ActivityRecord topActivity = task.getTopActivity();
-        if (launchOnSecondaryDisplayFailed
-                || !task.supportsSplitScreenWindowingMode() || forceNonResizable) {
             if (launchOnSecondaryDisplayFailed) {
                 // Display a warning toast that we tried to put a non-resizeable task on a secondary
                 // display with config different from global config.
                 mService.mTaskChangeNotificationController
                         .notifyActivityLaunchOnSecondaryDisplayFailed();
-            } else {
-                // Display a warning toast that we tried to put a non-dockable task in the docked
-                // stack.
-                mService.mTaskChangeNotificationController.notifyActivityDismissingDockedStack();
+                return;
             }
+        }
+
+        final ActivityRecord topActivity = task.getTopActivity();
+        if (!task.supportsSplitScreenWindowingMode() || forceNonResizable) {
+            // Display a warning toast that we tried to put a non-dockable task in the docked
+            // stack.
+            mService.mTaskChangeNotificationController.notifyActivityDismissingDockedStack();
 
             // Dismiss docked stack. If task appeared to be in docked stack but is not resizable -
             // we need to move it to top of fullscreen stack, otherwise it will be covered.
 
-            final ActivityStack dockedStack = task.getStack().getDisplay().getSplitScreenPrimaryStack();
+            final ActivityStack dockedStack =
+                    task.getStack().getDisplay().getSplitScreenPrimaryStack();
             if (dockedStack != null) {
                 moveTasksToFullscreenStackLocked(dockedStack, actualStack == dockedStack);
             }
-        } else if (topActivity != null && topActivity.isNonResizableOrForcedResizable()
-                && !topActivity.noDisplay) {
+            return;
+        }
+
+        if (topActivity != null && topActivity.isNonResizableOrForcedResizable()
+            && !topActivity.noDisplay) {
             final String packageName = topActivity.appInfo.packageName;
             final int reason = isSecondaryDisplayPreferred
                     ? FORCED_RESIZEABLE_REASON_SECONDARY_DISPLAY
