@@ -16,7 +16,6 @@
 
 package com.android.settingslib.graph;
 
-import android.animation.ArgbEvaluator;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Resources;
@@ -100,7 +99,7 @@ public class BatteryMeterDrawableBase extends Drawable {
 
         final int N = levels.length();
         mColors = new int[2 * N];
-        for (int i=0; i < N; i++) {
+        for (int i = 0; i < N; i++) {
             mColors[2 * i] = levels.getInt(i, 0);
             if (colors.getType(i) == TypedValue.TYPE_ATTRIBUTE) {
                 mColors[2 * i + 1] = Utils.getColorAttr(context, colors.getThemeAttributeId(i, 0));

@@ -16,8 +16,10 @@
 
 package com.android.settingslib;
 
+import android.os.Build;
+
 public class TestConfig {
-    public static final int SDK_VERSION = 25;
+    public static final int SDK_VERSION = Build.VERSION_CODES.O;
     public static final String MANIFEST_PATH =
             "frameworks/base/packages/SettingsLib/tests/robotests/AndroidManifest.xml";
 }
