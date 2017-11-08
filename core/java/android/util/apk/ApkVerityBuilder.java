@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.security.DigestException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -66,7 +67,7 @@ abstract class ApkVerityBuilder {
      */
     static ApkVerityResult generateApkVerity(RandomAccessFile apk,
             SignatureInfo signatureInfo, ByteBufferFactory bufferFactory)
-            throws IOException, SecurityException, NoSuchAlgorithmException {
+            throws IOException, SecurityException, NoSuchAlgorithmException, DigestException {
         assertSigningBlockAlignedAndHasFullPages(signatureInfo);
 
         long signingBlockSize =
@@ -112,6 +113,7 @@ abstract class ApkVerityBuilder {
         private final ByteBuffer mOutput;
 
         private final MessageDigest mMd;
+        private final byte[] mDigestBuffer = new byte[DIGEST_SIZE_BYTES];
         private final byte[] mSalt;
 
         private BufferedDigester(byte[] salt, ByteBuffer output) throws NoSuchAlgorithmException {
@@ -129,21 +131,22 @@ abstract class ApkVerityBuilder {
          * consumption will continuous from there.
          */
         @Override
-        public void consume(ByteBuffer buffer) {
+        public void consume(ByteBuffer buffer) throws DigestException {
             int offset = buffer.position();
             int remaining = buffer.remaining();
             while (remaining > 0) {
                 int allowance = (int) Math.min(remaining, BUFFER_SIZE - mBytesDigestedSinceReset);
-                mMd.update(slice(buffer, offset, offset + allowance));
+                // Optimization: set the buffer limit to avoid allocating a new ByteBuffer object.
+                buffer.limit(buffer.position() + allowance);
+                mMd.update(buffer);
                 offset += allowance;
                 remaining -= allowance;
                 mBytesDigestedSinceReset += allowance;
 
                 if (mBytesDigestedSinceReset == BUFFER_SIZE) {
-                    byte[] digest = mMd.digest();
-                    mOutput.put(digest);
-
-                    mMd.reset();
+                    mMd.digest(mDigestBuffer, 0, mDigestBuffer.length);
+                    mOutput.put(mDigestBuffer);
+                    // After digest, MessageDigest resets automatically, so no need to reset again.
                     mMd.update(mSalt);
                     mBytesDigestedSinceReset = 0;
                 }
@@ -152,12 +155,12 @@ abstract class ApkVerityBuilder {
 
         /** Finish the current digestion if any. */
         @Override
-        public void finish() {
+        public void finish() throws DigestException {
             if (mBytesDigestedSinceReset == 0) {
                 return;
             }
-            byte[] digest = mMd.digest();
-            mOutput.put(digest);
+            mMd.digest(mDigestBuffer, 0, mDigestBuffer.length);
+            mOutput.put(mDigestBuffer);
         }
 
         private void fillUpLastOutputChunk() {
@@ -174,7 +177,7 @@ abstract class ApkVerityBuilder {
      * digest the remaining.
      */
     private static void consumeByChunk(DataDigester digester, DataSource source, int chunkSize)
-            throws IOException {
+            throws IOException, DigestException {
         long inputRemaining = source.size();
         long inputOffset = 0;
         while (inputRemaining > 0) {
@@ -191,7 +194,7 @@ abstract class ApkVerityBuilder {
 
     private static void generateApkVerityDigestAtLeafLevel(RandomAccessFile apk,
             SignatureInfo signatureInfo, byte[] salt, ByteBuffer output)
-            throws IOException, NoSuchAlgorithmException {
+            throws IOException, NoSuchAlgorithmException, DigestException {
         BufferedDigester digester = new BufferedDigester(salt, output);
 
         // 1. Digest from the beginning of the file, until APK Signing Block is reached.
@@ -230,7 +233,7 @@ abstract class ApkVerityBuilder {
 
     private static byte[] generateApkVerityTree(RandomAccessFile apk, SignatureInfo signatureInfo,
             byte[] salt, int[] levelOffset, ByteBuffer output)
-            throws IOException, NoSuchAlgorithmException {
+            throws IOException, NoSuchAlgorithmException, DigestException {
         // 1. Digest the apk to generate the leaf level hashes.
         generateApkVerityDigestAtLeafLevel(apk, signatureInfo, salt, slice(output,
                     levelOffset[levelOffset.length - 2], levelOffset[levelOffset.length - 1]));
