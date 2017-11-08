@@ -2828,6 +2828,26 @@ public final class Telephony {
          *  @hide
          */
         public static final int CARRIER_DELETED_BUT_PRESENT_IN_XML = 6;
+
+        /**
+         * The owner of the APN.
+         * <p>Type: INTEGER</p>
+         * @hide
+         */
+        public static final String OWNED_BY = "owned_by";
+
+        /**
+         * Possible value for the OWNED_BY field.
+         * APN is owned by DPC.
+         * @hide
+         */
+        public static final int OWNED_BY_DPC = 0;
+        /**
+         * Possible value for the OWNED_BY field.
+         * APN is owned by other sources.
+         * @hide
+         */
+        public static final int OWNED_BY_OTHERS = 1;
     }
 
     /**
