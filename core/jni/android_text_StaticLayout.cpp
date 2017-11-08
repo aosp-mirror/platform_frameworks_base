@@ -67,6 +67,18 @@ class JNILineBreakerLineWidth : public minikin::LineBreaker::LineWidthDelegate {
             return width - get(mIndents, lineNo);
         }
 
+        float getMinLineWidth() override {
+            // A simpler algorithm would have been simply looping until the larger of
+            // mFirstLineCount and mIndents.size()-mOffset, but that does unnecessary calculations
+            // when mFirstLineCount is large. Instead, we measure the first line, all the lines that
+            // have an indent, and the first line after firstWidth ends and restWidth starts.
+            float minWidth = std::min(getLineWidth(0), getLineWidth(mFirstLineCount));
+            for (size_t lineNo = 1; lineNo + mOffset < mIndents.size(); lineNo++) {
+                minWidth = std::min(minWidth, getLineWidth(lineNo));
+            }
+            return minWidth;
+        }
+
         float getLeftPadding(size_t lineNo) override {
             return get(mLeftPaddings, lineNo);
         }
