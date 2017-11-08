@@ -26,6 +26,6 @@ LOCAL_APK_LIBRARIES := FeatureSplitBase
 LOCAL_RES_LIBRARIES := FeatureSplitBase
 
 LOCAL_AAPT_FLAGS += --package-id 0x81
-LOCAL_AAPT_FLAGS += --rename-manifest-package com.android.test.split.feature
+LOCAL_AAPT_FLAGS += --custom-package com.android.test.split.feature.two
 
 include $(BUILD_PACKAGE)
