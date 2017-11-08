@@ -71,6 +71,8 @@ import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 import android.view.Display;
 import android.view.WindowManagerPolicy;
+import android.widget.Toast;
+
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.IBatteryStats;
@@ -1022,6 +1024,13 @@ public final class PowerManagerService extends SystemService
                     intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
                     mContext.sendBroadcastAsUser(intent, UserHandle.ALL,
                             Manifest.permission.DEVICE_POWER);
+
+                    // STOPSHIP Remove the toast.
+                    if (mLowPowerModeEnabled) {
+                        Toast.makeText(mContext,
+                                com.android.internal.R.string.battery_saver_warning,
+                                Toast.LENGTH_LONG).show();
+                    }
                 }
             });
         }

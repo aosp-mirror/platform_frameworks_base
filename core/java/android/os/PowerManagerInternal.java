@@ -18,6 +18,8 @@ package android.os;
 
 import android.view.Display;
 
+import java.util.function.Consumer;
+
 /**
  * Power manager local system service interface.
  *
@@ -124,6 +126,23 @@ public abstract class PowerManagerInternal {
     public abstract PowerSaveState getLowPowerState(int serviceType);
 
     public abstract void registerLowPowerModeObserver(LowPowerModeListener listener);
+
+    /**
+     * Same as {@link #registerLowPowerModeObserver} but can take a lambda.
+     */
+    public void registerLowPowerModeObserver(int serviceType, Consumer<PowerSaveState> listener) {
+        registerLowPowerModeObserver(new LowPowerModeListener() {
+            @Override
+            public int getServiceType() {
+                return serviceType;
+            }
+
+            @Override
+            public void onLowPowerModeChanged(PowerSaveState state) {
+                listener.accept(state);
+            }
+        });
+    }
 
     public interface LowPowerModeListener {
         int getServiceType();
