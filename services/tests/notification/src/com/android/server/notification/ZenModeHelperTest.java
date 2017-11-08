@@ -17,7 +17,7 @@
 package com.android.server.notification;
 
 import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertTrue;
+import static junit.framework.TestCase.assertTrue;
 
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -100,5 +100,34 @@ public class ZenModeHelperTest extends NotificationTestCase {
                 AudioAttributes.USAGE_GAME);
         verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(true,
                 AudioAttributes.USAGE_ASSISTANCE_SONIFICATION);
+        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(true,
+                AudioAttributes.USAGE_UNKNOWN);
+    }
+
+    @Test
+    public void testZenAllCannotBypass() {
+        // Only audio attributes with SUPPRESIBLE_NEVER can bypass
+        mZenModeHelperSpy.mZenMode = Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+        mZenModeHelperSpy.mConfig.allowAlarms = false;
+        mZenModeHelperSpy.mConfig.allowMediaSystemOther = false;
+        mZenModeHelperSpy.mConfig.allowReminders = false;
+        mZenModeHelperSpy.mConfig.allowCalls = false;
+        mZenModeHelperSpy.mConfig.allowMessages = false;
+        mZenModeHelperSpy.mConfig.allowEvents = false;
+        mZenModeHelperSpy.mConfig.allowRepeatCallers= false;
+        assertFalse(mZenModeHelperSpy.mConfig.allowAlarms);
+        assertFalse(mZenModeHelperSpy.mConfig.allowMediaSystemOther);
+        assertFalse(mZenModeHelperSpy.mConfig.allowReminders);
+        assertFalse(mZenModeHelperSpy.mConfig.allowCalls);
+        assertFalse(mZenModeHelperSpy.mConfig.allowMessages);
+        assertFalse(mZenModeHelperSpy.mConfig.allowEvents);
+        assertFalse(mZenModeHelperSpy.mConfig.allowRepeatCallers);
+        mZenModeHelperSpy.applyRestrictions();
+
+        for (int usage : AudioAttributes.SDK_USAGES) {
+            boolean shouldMute = AudioAttributes.SUPPRESSIBLE_USAGES.get(usage)
+                    != AudioAttributes.SUPPRESSIBLE_NEVER;
+            verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(shouldMute, usage);
+        }
     }
 }
