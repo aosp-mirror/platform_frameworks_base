@@ -36,6 +36,7 @@
 #include <hwui/Typeface.h>
 #include <utils/FatVector.h>
 #include <minikin/FontFamily.h>
+#include <minikin/LocaleList.h>
 
 #include <memory>
 
@@ -43,9 +44,10 @@ namespace android {
 
 struct NativeFamilyBuilder {
     NativeFamilyBuilder(uint32_t langId, int variant)
-        : langId(langId), variant(variant), allowUnsupportedFont(false) {}
+        : langId(langId), variant(static_cast<minikin::FontVariant>(variant)),
+          allowUnsupportedFont(false) {}
     uint32_t langId;
-    int variant;
+    minikin::FontVariant variant;
     bool allowUnsupportedFont;
     std::vector<minikin::Font> fonts;
     std::vector<minikin::FontVariation> axes;
@@ -55,10 +57,9 @@ static jlong FontFamily_initBuilder(JNIEnv* env, jobject clazz, jstring langs, j
     NativeFamilyBuilder* builder;
     if (langs != nullptr) {
         ScopedUtfChars str(env, langs);
-        builder = new NativeFamilyBuilder(
-                minikin::FontStyle::registerLocaleList(str.c_str()), variant);
+        builder = new NativeFamilyBuilder(minikin::registerLocaleList(str.c_str()), variant);
     } else {
-        builder = new NativeFamilyBuilder(minikin::FontStyle::registerLocaleList(""), variant);
+        builder = new NativeFamilyBuilder(minikin::registerLocaleList(""), variant);
     }
     return reinterpret_cast<jlong>(builder);
 }
@@ -121,14 +122,14 @@ static bool addSkTypeface(NativeFamilyBuilder* builder, sk_sp<SkData>&& data, in
             std::make_shared<MinikinFontSkia>(std::move(face), fontPtr, fontSize, ttcIndex,
                     builder->axes);
 
-    int weight = givenWeight / 100;
+    int weight = givenWeight;
     bool italic = givenItalic == 1;
     if (givenWeight == RESOLVE_BY_FONT_TABLE || givenItalic == RESOLVE_BY_FONT_TABLE) {
         int os2Weight;
         bool os2Italic;
         if (!minikin::FontFamily::analyzeStyle(minikinFont, &os2Weight, &os2Italic)) {
             ALOGE("analyzeStyle failed. Using default style");
-            os2Weight = 4;
+            os2Weight = 400;
             os2Italic = false;
         }
         if (givenWeight == RESOLVE_BY_FONT_TABLE) {
@@ -139,7 +140,8 @@ static bool addSkTypeface(NativeFamilyBuilder* builder, sk_sp<SkData>&& data, in
         }
     }
 
-    builder->fonts.push_back(minikin::Font(minikinFont, minikin::FontStyle(weight, italic)));
+    builder->fonts.push_back(minikin::Font(minikinFont,
+            minikin::FontStyle(weight, static_cast<minikin::FontSlant>(italic))));
     builder->axes.clear();
     return true;
 }

@@ -41,6 +41,7 @@
 #include <hwui/Paint.h>
 #include <hwui/Typeface.h>
 #include <minikin/GraphemeBreak.h>
+#include <minikin/LocaleList.h>
 #include <minikin/Measurement.h>
 #include <unicode/utf16.h>
 
@@ -546,9 +547,9 @@ namespace PaintGlue {
     static jint setTextLocales(JNIEnv* env, jobject clazz, jlong objHandle, jstring locales) {
         Paint* obj = reinterpret_cast<Paint*>(objHandle);
         ScopedUtfChars localesChars(env, locales);
-        jint minikinLangListId = minikin::FontStyle::registerLocaleList(localesChars.c_str());
-        obj->setMinikinLangListId(minikinLangListId);
-        return minikinLangListId;
+        jint minikinLocaleListId = minikin::registerLocaleList(localesChars.c_str());
+        obj->setMinikinLocaleListId(minikinLocaleListId);
+        return minikinLocaleListId;
     }
 
     static void setFontFeatureSettings(JNIEnv* env, jobject clazz, jlong paintHandle, jstring settings) {
@@ -580,7 +581,7 @@ namespace PaintGlue {
         // restore the original settings.
         paint->setTextSkewX(saveSkewX);
         paint->setFakeBoldText(savefakeBold);
-        if (paint->getFontVariant() == minikin::VARIANT_ELEGANT) {
+        if (paint->getFontVariant() == minikin::FontVariant::ELEGANT) {
             SkScalar size = paint->getTextSize();
             metrics->fTop = -size * kElegantTop / 2048;
             metrics->fBottom = -size * kElegantBottom / 2048;
@@ -871,20 +872,20 @@ namespace PaintGlue {
         obj->setTextAlign(align);
     }
 
-    static void setTextLocalesByMinikinLangListId(jlong objHandle,
-            jint minikinLangListId) {
+    static void setTextLocalesByMinikinLocaleListId(jlong objHandle,
+            jint minikinLocaleListId) {
         Paint* obj = reinterpret_cast<Paint*>(objHandle);
-        obj->setMinikinLangListId(minikinLangListId);
+        obj->setMinikinLocaleListId(minikinLocaleListId);
     }
 
     static jboolean isElegantTextHeight(jlong paintHandle) {
         Paint* obj = reinterpret_cast<Paint*>(paintHandle);
-        return obj->getFontVariant() == minikin::VARIANT_ELEGANT;
+        return obj->getFontVariant() == minikin::FontVariant::ELEGANT;
     }
 
     static void setElegantTextHeight(jlong paintHandle, jboolean aa) {
         Paint* obj = reinterpret_cast<Paint*>(paintHandle);
-        obj->setFontVariant(aa ? minikin::VARIANT_ELEGANT : minikin::VARIANT_DEFAULT);
+        obj->setFontVariant(aa ? minikin::FontVariant::ELEGANT : minikin::FontVariant::DEFAULT);
     }
 
     static jfloat getTextSize(jlong paintHandle) {
@@ -1080,8 +1081,8 @@ static const JNINativeMethod methods[] = {
     {"nSetTypeface","(JJ)V", (void*) PaintGlue::setTypeface},
     {"nGetTextAlign","(J)I", (void*) PaintGlue::getTextAlign},
     {"nSetTextAlign","(JI)V", (void*) PaintGlue::setTextAlign},
-    {"nSetTextLocalesByMinikinLangListId","(JI)V",
-            (void*) PaintGlue::setTextLocalesByMinikinLangListId},
+    {"nSetTextLocalesByMinikinLocaleListId","(JI)V",
+            (void*) PaintGlue::setTextLocalesByMinikinLocaleListId},
     {"nIsElegantTextHeight","(J)Z", (void*) PaintGlue::isElegantTextHeight},
     {"nSetElegantTextHeight","(JZ)V", (void*) PaintGlue::setElegantTextHeight},
     {"nGetTextSize","(J)F", (void*) PaintGlue::getTextSize},
