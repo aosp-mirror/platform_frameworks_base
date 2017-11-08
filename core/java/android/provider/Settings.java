@@ -211,8 +211,13 @@ public final class Settings {
 
     /** @hide */
     public static final String EXTRA_NETWORK_TEMPLATE = "network_template";
-    /** @hide */
-    public static final String EXTRA_SUB_ID = "sub_id";
+
+    /**
+     * An int extra specifying a subscription ID.
+     *
+     * @see android.telephony.SubscriptionInfo#getSubscriptionId
+     */
+    public static final String EXTRA_SUB_ID = "android.provider.extra.SUB_ID";
 
     /**
      * Activity Action: Modify Airplane mode settings using a voice command.
@@ -915,6 +920,9 @@ public final class Settings {
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you
      * safeguard against this.
+     * <p>
+     * The subscription ID of the subscription for which available network operators should be
+     * displayed may be optionally specified with {@link #EXTRA_SUB_ID}.
      * <p>
      * Input: Nothing.
      * <p>

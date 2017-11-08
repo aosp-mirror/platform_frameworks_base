@@ -40,6 +40,9 @@ struct TableMergerOptions {
 // TableMerger takes resource tables and merges all packages within the tables that have the same
 // package ID.
 //
+// It is assumed that any FileReference values have their io::IFile pointer set to point to the
+// file they represent.
+//
 // If a package has a different name, all the entries in that table have their names mangled
 // to include the package name. This way there are no collisions. In order to do this correctly,
 // the TableMerger needs to also mangle any FileReference paths. Once these are mangled, the
@@ -60,14 +63,11 @@ class TableMerger {
 
   // Merges resources from the same or empty package. This is for local sources.
   // If overlay is true, the resources are treated as overlays.
-  // An io::IFileCollection is optional and used to find the referenced Files and process them.
-  bool Merge(const Source& src, ResourceTable* table, bool overlay,
-             io::IFileCollection* collection = nullptr);
+  bool Merge(const Source& src, ResourceTable* table, bool overlay);
 
   // Merges resources from the given package, mangling the name. This is for static libraries.
-  // An io::IFileCollection is needed in order to find the referenced Files and process them.
-  bool MergeAndMangle(const Source& src, const android::StringPiece& package, ResourceTable* table,
-                      io::IFileCollection* collection);
+  // All FileReference values must have their io::IFile set.
+  bool MergeAndMangle(const Source& src, const android::StringPiece& package, ResourceTable* table);
 
   // Merges a compiled file that belongs to this same or empty package.
   bool MergeFile(const ResourceFile& fileDesc, bool overlay, io::IFile* file);
@@ -75,23 +75,16 @@ class TableMerger {
  private:
   DISALLOW_COPY_AND_ASSIGN(TableMerger);
 
-  using FileMergeCallback = std::function<bool(const ResourceNameRef&,
-                                               const ConfigDescription& config,
-                                               FileReference*, FileReference*)>;
-
   IAaptContext* context_;
   ResourceTable* master_table_;
   TableMergerOptions options_;
   ResourceTablePackage* master_package_;
   std::set<std::string> merged_packages_;
 
-  bool MergeImpl(const Source& src, ResourceTable* src_table,
-                 io::IFileCollection* collection, bool overlay, bool allow_new);
+  bool MergeImpl(const Source& src, ResourceTable* src_table, bool overlay, bool allow_new);
 
-  bool DoMerge(const Source& src, ResourceTable* src_table,
-               ResourceTablePackage* src_package, const bool mangle_package,
-               const bool overlay, const bool allow_new_resources,
-               const FileMergeCallback& callback);
+  bool DoMerge(const Source& src, ResourceTable* src_table, ResourceTablePackage* src_package,
+               bool mangle_package, bool overlay, bool allow_new_resources);
 
   std::unique_ptr<FileReference> CloneAndMangleFile(const std::string& package,
                                                     const FileReference& value);

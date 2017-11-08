@@ -95,6 +95,10 @@
     <!-- Height of a heads up notification in the status bar -->
     <dimen name="notification_max_heads_up_height_increased">188dp</dimen>
 
+    <!-- Height of a messaging notifications with actions at least. Not that this is an upper bound
+         and the notification won't use this much, but is measured with wrap_content -->
+    <dimen name="notification_messaging_actions_min_height">196dp</dimen>
+
     <!-- a threshold in dp per second that is considered fast scrolling -->
     <dimen name="scroll_fast_threshold">1500dp</dimen>
 

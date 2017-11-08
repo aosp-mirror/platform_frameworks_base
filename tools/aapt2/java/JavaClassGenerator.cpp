@@ -461,7 +461,7 @@ void JavaClassGenerator::ProcessResource(const ResourceNameRef& name, const Reso
   }
 
   if (out_rewrite_method != nullptr) {
-    const StringPiece& type_str = ToString(name.type);
+    const StringPiece& type_str = to_string(name.type);
     out_rewrite_method->AppendStatement(StringPrintf("%s.%s = (%s.%s & 0x00ffffff) | (p << 24);",
                                                      type_str.data(), field_name.data(),
                                                      type_str.data(), field_name.data()));
@@ -584,7 +584,7 @@ bool JavaClassGenerator::Generate(const StringPiece& package_name_to_generate,
           (options_.types == JavaClassGeneratorOptions::SymbolTypes::kPublic);
 
       std::unique_ptr<ClassDefinition> class_def = util::make_unique<ClassDefinition>(
-          ToString(type->type), ClassQualifier::kStatic, force_creation_if_empty);
+          to_string(type->type), ClassQualifier::kStatic, force_creation_if_empty);
       if (!ProcessType(package_name_to_generate, *package, *type, class_def.get(),
                        rewrite_method.get(), out_r_txt)) {
         return false;

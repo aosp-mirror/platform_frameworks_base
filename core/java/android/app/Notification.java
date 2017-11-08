@@ -22,6 +22,7 @@ import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
@@ -3900,7 +3901,7 @@ public class Notification implements Parcelable
             final Bundle ex = mN.extras;
             updateBackgroundColor(contentView);
             bindNotificationHeader(contentView, p.ambient);
-            bindLargeIcon(contentView);
+            bindLargeIcon(contentView, p.hideLargeIcon, p.alwaysShowReply);
             boolean showProgress = handleProgressBar(p.hasProgress, contentView, ex);
             if (p.title != null) {
                 contentView.setViewVisibility(R.id.title, View.VISIBLE);
@@ -4110,11 +4111,13 @@ public class Notification implements Parcelable
             }
         }
 
-        private void bindLargeIcon(RemoteViews contentView) {
+        private void bindLargeIcon(RemoteViews contentView, boolean hideLargeIcon,
+                boolean alwaysShowReply) {
             if (mN.mLargeIcon == null && mN.largeIcon != null) {
                 mN.mLargeIcon = Icon.createWithBitmap(mN.largeIcon);
             }
-            if (mN.mLargeIcon != null) {
+            boolean showLargeIcon = mN.mLargeIcon != null && !hideLargeIcon;
+            if (showLargeIcon) {
                 contentView.setViewVisibility(R.id.right_icon, View.VISIBLE);
                 contentView.setImageViewIcon(R.id.right_icon, mN.mLargeIcon);
                 processLargeLegacyIcon(mN.mLargeIcon, contentView);
@@ -4122,32 +4125,45 @@ public class Notification implements Parcelable
                 contentView.setViewLayoutMarginEndDimen(R.id.line1, endMargin);
                 contentView.setViewLayoutMarginEndDimen(R.id.text, endMargin);
                 contentView.setViewLayoutMarginEndDimen(R.id.progress, endMargin);
-                // Bind the reply action
-                Action action = findReplyAction();
-                contentView.setViewVisibility(R.id.reply_icon_action, action != null
-                        ? View.VISIBLE
-                        : View.GONE);
+            }
+            // Bind the reply action
+            Action action = findReplyAction();
 
-                if (action != null) {
-                    int contrastColor = resolveContrastColor();
+            boolean actionVisible = action != null && (showLargeIcon || alwaysShowReply);
+            int replyId = showLargeIcon ? R.id.reply_icon_action : R.id.right_icon;
+            if (actionVisible) {
+                // We're only showing the icon as big if we're hiding the large icon
+                int contrastColor = resolveContrastColor();
+                int iconColor;
+                if (showLargeIcon) {
                     contentView.setDrawableTint(R.id.reply_icon_action,
                             true /* targetBackground */,
                             contrastColor, PorterDuff.Mode.SRC_ATOP);
-                    int iconColor = NotificationColorUtil.isColorLight(contrastColor)
-                            ? Color.BLACK : Color.WHITE;
-                    contentView.setDrawableTint(R.id.reply_icon_action,
-                            false /* targetBackground */,
-                            iconColor, PorterDuff.Mode.SRC_ATOP);
                     contentView.setOnClickPendingIntent(R.id.right_icon,
                             action.actionIntent);
-                    contentView.setOnClickPendingIntent(R.id.reply_icon_action,
-                            action.actionIntent);
                     contentView.setRemoteInputs(R.id.right_icon, action.mRemoteInputs);
-                    contentView.setRemoteInputs(R.id.reply_icon_action, action.mRemoteInputs);
-
+                    iconColor = NotificationColorUtil.isColorLight(contrastColor)
+                            ? Color.BLACK : Color.WHITE;
+                } else {
+                    contentView.setImageViewResource(R.id.right_icon,
+                            R.drawable.ic_reply_notification_large);
+                    contentView.setViewVisibility(R.id.right_icon, View.VISIBLE);
+                    iconColor = contrastColor;
                 }
+                contentView.setDrawableTint(replyId,
+                        false /* targetBackground */,
+                        iconColor,
+                        PorterDuff.Mode.SRC_ATOP);
+                contentView.setOnClickPendingIntent(replyId,
+                        action.actionIntent);
+                contentView.setRemoteInputs(replyId, action.mRemoteInputs);
+            } else {
+                contentView.setRemoteInputs(R.id.right_icon, null);
             }
-            contentView.setViewVisibility(R.id.right_icon_container, mN.mLargeIcon != null
+            contentView.setViewVisibility(R.id.reply_icon_action, actionVisible && showLargeIcon
+                    ? View.VISIBLE
+                    : View.GONE);
+            contentView.setViewVisibility(R.id.right_icon_container, actionVisible || showLargeIcon
                     ? View.VISIBLE
                     : View.GONE);
         }
@@ -6055,18 +6071,12 @@ public class Notification implements Parcelable
         protected void restoreFromExtras(Bundle extras) {
             super.restoreFromExtras(extras);
 
-            mMessages.clear();
-            mHistoricMessages.clear();
             mUserDisplayName = extras.getCharSequence(EXTRA_SELF_DISPLAY_NAME);
             mConversationTitle = extras.getCharSequence(EXTRA_CONVERSATION_TITLE);
             Parcelable[] messages = extras.getParcelableArray(EXTRA_MESSAGES);
-            if (messages != null && messages instanceof Parcelable[]) {
-                mMessages = Message.getMessagesFromBundleArray(messages);
-            }
+            mMessages = Message.getMessagesFromBundleArray(messages);
             Parcelable[] histMessages = extras.getParcelableArray(EXTRA_HISTORIC_MESSAGES);
-            if (histMessages != null && histMessages instanceof Parcelable[]) {
-                mHistoricMessages = Message.getMessagesFromBundleArray(histMessages);
-            }
+            mHistoricMessages = Message.getMessagesFromBundleArray(histMessages);
         }
 
         /**
@@ -6074,38 +6084,34 @@ public class Notification implements Parcelable
          */
         @Override
         public RemoteViews makeContentView(boolean increasedHeight) {
-            if (!increasedHeight) {
-                Message m = findLatestIncomingMessage();
-                CharSequence title = mConversationTitle != null
-                        ? mConversationTitle
-                        : (m == null) ? null : m.mSender;
-                CharSequence text = (m == null)
-                        ? null
-                        : mConversationTitle != null ? makeMessageLine(m, mBuilder) : m.mText;
-
-                return mBuilder.applyStandardTemplate(mBuilder.getBaseLayoutResource(),
-                        mBuilder.mParams.reset().hasProgress(false).title(title).text(text));
-            } else {
-                mBuilder.mOriginalActions = mBuilder.mActions;
-                mBuilder.mActions = new ArrayList<>();
-                RemoteViews remoteViews = makeBigContentView();
-                mBuilder.mActions = mBuilder.mOriginalActions;
-                mBuilder.mOriginalActions = null;
-                return remoteViews;
-            }
+            mBuilder.mOriginalActions = mBuilder.mActions;
+            mBuilder.mActions = new ArrayList<>();
+            RemoteViews remoteViews = makeBigContentView();
+            mBuilder.mActions = mBuilder.mOriginalActions;
+            mBuilder.mOriginalActions = null;
+            return remoteViews;
         }
 
         private Message findLatestIncomingMessage() {
-            for (int i = mMessages.size() - 1; i >= 0; i--) {
-                Message m = mMessages.get(i);
+            return findLatestIncomingMessage(mMessages);
+        }
+
+        /**
+         * @hide
+         */
+        @Nullable
+        public static Message findLatestIncomingMessage(
+                List<Message> messages) {
+            for (int i = messages.size() - 1; i >= 0; i--) {
+                Message m = messages.get(i);
                 // Incoming messages have a non-empty sender.
                 if (!TextUtils.isEmpty(m.mSender)) {
                     return m;
                 }
             }
-            if (!mMessages.isEmpty()) {
+            if (!messages.isEmpty()) {
                 // No incoming messages, fall back to outgoing message
-                return mMessages.get(mMessages.size() - 1);
+                return messages.get(messages.size() - 1);
             }
             return null;
         }
@@ -6115,118 +6121,82 @@ public class Notification implements Parcelable
          */
         @Override
         public RemoteViews makeBigContentView() {
-            CharSequence title = !TextUtils.isEmpty(super.mBigContentTitle)
+            CharSequence conversationTitle = !TextUtils.isEmpty(super.mBigContentTitle)
                     ? super.mBigContentTitle
                     : mConversationTitle;
-            boolean hasTitle = !TextUtils.isEmpty(title);
-
-            if (mMessages.size() == 1) {
-                // Special case for a single message: Use the big text style
-                // so the collapsed and expanded versions match nicely.
-                CharSequence bigTitle;
-                CharSequence text;
-                if (hasTitle) {
-                    bigTitle = title;
-                    text = makeMessageLine(mMessages.get(0), mBuilder);
-                } else {
-                    bigTitle = mMessages.get(0).mSender;
-                    text = mMessages.get(0).mText;
-                }
-                RemoteViews contentView = mBuilder.applyStandardTemplateWithActions(
-                        mBuilder.getBigTextLayoutResource(),
-                        mBuilder.mParams.reset().hasProgress(false).title(bigTitle).text(null));
-                BigTextStyle.applyBigTextContentView(mBuilder, contentView, text);
-                return contentView;
+            boolean isOneToOne = TextUtils.isEmpty(conversationTitle);
+            if (isOneToOne) {
+                // Let's add the conversationTitle in case we didn't have one before and all
+                // messages are from the same sender
+                conversationTitle = createConversationTitleFromMessages();
+            } else if (hasOnlyWhiteSpaceSenders()) {
+                isOneToOne = true;
             }
-
+            boolean hasTitle = !TextUtils.isEmpty(conversationTitle);
             RemoteViews contentView = mBuilder.applyStandardTemplateWithActions(
                     mBuilder.getMessagingLayoutResource(),
-                    mBuilder.mParams.reset().hasProgress(false).title(title).text(null));
-
-            int[] rowIds = {R.id.inbox_text0, R.id.inbox_text1, R.id.inbox_text2, R.id.inbox_text3,
-                    R.id.inbox_text4, R.id.inbox_text5, R.id.inbox_text6};
-
-            // Make sure all rows are gone in case we reuse a view.
-            for (int rowId : rowIds) {
-                contentView.setViewVisibility(rowId, View.GONE);
-            }
-
-            int i=0;
-            contentView.setViewLayoutMarginBottomDimen(R.id.line1,
-                    hasTitle ? R.dimen.notification_messaging_spacing : 0);
-            contentView.setInt(R.id.notification_messaging, "setNumIndentLines",
-                    !mBuilder.mN.hasLargeIcon() ? 0 : (hasTitle ? 1 : 2));
-
-            int contractedChildId = View.NO_ID;
-            Message contractedMessage = findLatestIncomingMessage();
-            int firstHistoricMessage = Math.max(0, mHistoricMessages.size()
-                    - (rowIds.length - mMessages.size()));
-            while (firstHistoricMessage + i < mHistoricMessages.size() && i < rowIds.length) {
-                Message m = mHistoricMessages.get(firstHistoricMessage + i);
-                int rowId = rowIds[i];
-
-                contentView.setTextViewText(rowId, makeMessageLine(m, mBuilder));
-
-                if (contractedMessage == m) {
-                    contractedChildId = rowId;
-                }
-
-                i++;
-            }
-
-            int firstMessage = Math.max(0, mMessages.size() - rowIds.length);
-            while (firstMessage + i < mMessages.size() && i < rowIds.length) {
-                Message m = mMessages.get(firstMessage + i);
-                int rowId = rowIds[i];
-
-                contentView.setViewVisibility(rowId, View.VISIBLE);
-                contentView.setTextViewText(rowId, mBuilder.processTextSpans(
-                        makeMessageLine(m, mBuilder)));
-                mBuilder.setTextViewColorSecondary(contentView, rowId);
-
-                if (contractedMessage == m) {
-                    contractedChildId = rowId;
-                }
-
-                i++;
-            }
-            // Clear the remaining views for reapply. Ensures that historic message views can
-            // reliably be identified as being GONE and having non-null text.
-            while (i < rowIds.length) {
-                int rowId = rowIds[i];
-                contentView.setTextViewText(rowId, null);
-                i++;
-            }
-
-            // Record this here to allow transformation between the contracted and expanded views.
-            contentView.setInt(R.id.notification_messaging, "setContractedChildId",
-                    contractedChildId);
+                    mBuilder.mParams.reset().hasProgress(false).title(conversationTitle).text(null)
+                            .hideLargeIcon(isOneToOne).alwaysShowReply(true));
+            addExtras(mBuilder.mN.extras);
+            contentView.setInt(R.id.status_bar_latest_event_content, "setLayoutColor",
+                    mBuilder.resolveContrastColor());
+            contentView.setIcon(R.id.status_bar_latest_event_content, "setLargeIcon",
+                    mBuilder.mN.mLargeIcon);
+            contentView.setBoolean(R.id.status_bar_latest_event_content, "setIsOneToOne",
+                    isOneToOne);
+            contentView.setBundle(R.id.status_bar_latest_event_content, "setData",
+                    mBuilder.mN.extras);
             return contentView;
         }
 
-        private CharSequence makeMessageLine(Message m, Builder builder) {
-            BidiFormatter bidi = BidiFormatter.getInstance();
-            SpannableStringBuilder sb = new SpannableStringBuilder();
-            boolean colorize = builder.isColorized();
-            TextAppearanceSpan colorSpan;
-            CharSequence messageName;
-            if (TextUtils.isEmpty(m.mSender)) {
-                CharSequence replyName = mUserDisplayName == null ? "" : mUserDisplayName;
-                sb.append(bidi.unicodeWrap(replyName),
-                        makeFontColorSpan(colorize
-                                ? builder.getPrimaryTextColor()
-                                : mBuilder.resolveContrastColor()),
-                        0 /* flags */);
-            } else {
-                sb.append(bidi.unicodeWrap(m.mSender),
-                        makeFontColorSpan(colorize
-                                ? builder.getPrimaryTextColor()
-                                : Color.BLACK),
-                        0 /* flags */);
+        private boolean hasOnlyWhiteSpaceSenders() {
+            for (int i = 0; i < mMessages.size(); i++) {
+                Message m = mMessages.get(i);
+                CharSequence sender = m.getSender();
+                if (!isWhiteSpace(sender)) {
+                    return false;
+                }
             }
-            CharSequence text = m.mText == null ? "" : m.mText;
-            sb.append("  ").append(bidi.unicodeWrap(text));
-            return sb;
+            return true;
+        }
+
+        private boolean isWhiteSpace(CharSequence sender) {
+            if (TextUtils.isEmpty(sender)) {
+                return true;
+            }
+            if (sender.toString().matches("^\\s*$")) {
+                return true;
+            }
+            // Let's check if we only have 0 whitespace chars. Some apps did this as a workaround
+            // For the presentation that we had.
+            for (int i = 0; i < sender.length(); i++) {
+                char c = sender.charAt(i);
+                if (c != '\u200B') {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        private CharSequence createConversationTitleFromMessages() {
+            ArraySet<CharSequence> names = new ArraySet<>();
+            for (int i = 0; i < mMessages.size(); i++) {
+                Message m = mMessages.get(i);
+                CharSequence sender = m.getSender();
+                if (sender != null) {
+                    names.add(sender);
+                }
+            }
+            SpannableStringBuilder title = new SpannableStringBuilder();
+            int size = names.size();
+            for (int i = 0; i < size; i++) {
+                CharSequence name = names.valueAt(i);
+                if (!TextUtils.isEmpty(title)) {
+                    title.append(", ");
+                }
+                title.append(BidiFormatter.getInstance().unicodeWrap(name));
+            }
+            return title;
         }
 
         /**
@@ -6234,19 +6204,9 @@ public class Notification implements Parcelable
          */
         @Override
         public RemoteViews makeHeadsUpContentView(boolean increasedHeight) {
-            if (increasedHeight) {
-                return makeBigContentView();
-            }
-            Message m = findLatestIncomingMessage();
-            CharSequence title = mConversationTitle != null
-                    ? mConversationTitle
-                    : (m == null) ? null : m.mSender;
-            CharSequence text = (m == null)
-                    ? null
-                    : mConversationTitle != null ? makeMessageLine(m, mBuilder) : m.mText;
-
-            return mBuilder.applyStandardTemplateWithActions(mBuilder.getBigBaseLayoutResource(),
-                    mBuilder.mParams.reset().hasProgress(false).title(title).text(text));
+            RemoteViews remoteViews = makeBigContentView();
+            remoteViews.setInt(R.id.notification_messaging, "setMaxDisplayedLines", 1);
+            return remoteViews;
         }
 
         private static TextAppearanceSpan makeFontColorSpan(int color) {
@@ -6394,7 +6354,15 @@ public class Notification implements Parcelable
                 return bundles;
             }
 
-            static List<Message> getMessagesFromBundleArray(Parcelable[] bundles) {
+            /**
+             * @return A list of messages read from the bundles.
+             *
+             * @hide
+             */
+            public static List<Message> getMessagesFromBundleArray(Parcelable[] bundles) {
+                if (bundles == null) {
+                    return new ArrayList<>();
+                }
                 List<Message> messages = new ArrayList<>(bundles.length);
                 for (int i = 0; i < bundles.length; i++) {
                     if (bundles[i] instanceof Bundle) {
@@ -8487,6 +8455,8 @@ public class Notification implements Parcelable
         boolean ambient = false;
         CharSequence title;
         CharSequence text;
+        boolean hideLargeIcon;
+        public boolean alwaysShowReply;
 
         final StandardTemplateParams reset() {
             hasProgress = true;
@@ -8511,6 +8481,16 @@ public class Notification implements Parcelable
             return this;
         }
 
+        final StandardTemplateParams alwaysShowReply(boolean alwaysShowReply) {
+            this.alwaysShowReply = alwaysShowReply;
+            return this;
+        }
+
+        final StandardTemplateParams hideLargeIcon(boolean hideLargeIcon) {
+            this.hideLargeIcon = hideLargeIcon;
+            return this;
+        }
+
         final StandardTemplateParams ambient(boolean ambient) {
             Preconditions.checkState(title == null && text == null, "must set ambient before text");
             this.ambient = ambient;
@@ -8527,7 +8507,6 @@ public class Notification implements Parcelable
                 text = extras.getCharSequence(EXTRA_TEXT);
             }
             this.text = b.processLegacyText(text, ambient);
-
             return this;
         }
     }

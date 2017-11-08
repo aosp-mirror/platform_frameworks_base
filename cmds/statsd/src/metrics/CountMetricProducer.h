@@ -53,6 +53,7 @@ public:
 
     void finish() override;
 
+    // TODO: Pass a timestamp as a parameter in onDumpReport.
     StatsLogReport onDumpReport() override;
 
     void onSlicedConditionMayChange(const uint64_t eventTime) override;
@@ -70,9 +71,12 @@ protected:
                                    bool condition, const LogEvent& event,
                                    bool scheduledPull) override;
 
+    void startNewProtoOutputStream(long long timestamp) override;
+
 private:
     const CountMetric mMetric;
 
+    // TODO: Add a lock to mPastBuckets.
     std::unordered_map<HashableDimensionKey, std::vector<CountBucket>> mPastBuckets;
 
     size_t mByteSize;
@@ -83,12 +87,6 @@ private:
     vector<unique_ptr<CountAnomalyTracker>> mAnomalyTrackers;
 
     void flushCounterIfNeeded(const uint64_t newEventTime);
-
-    std::unique_ptr<android::util::ProtoOutputStream> mProto;
-
-    long long mProtoToken;
-
-    void startNewProtoOutputStream(long long timestamp);
 
     FRIEND_TEST(CountMetricProducerTest, TestNonDimensionalEvents);
     FRIEND_TEST(CountMetricProducerTest, TestEventsWithNonSlicedCondition);

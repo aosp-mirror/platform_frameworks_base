@@ -26,6 +26,7 @@
 #include "android-base/utf8.h"
 
 using ::android::base::SystemErrorCodeToString;
+using ::android::base::unique_fd;
 
 namespace aapt {
 namespace io {
@@ -100,7 +101,13 @@ std::string FileInputStream::GetError() const {
 }
 
 FileOutputStream::FileOutputStream(const std::string& path, int mode, size_t buffer_capacity)
-    : FileOutputStream(::android::base::utf8::open(path.c_str(), mode), buffer_capacity) {
+    : FileOutputStream(unique_fd(::android::base::utf8::open(path.c_str(), mode)),
+                       buffer_capacity) {
+}
+
+FileOutputStream::FileOutputStream(unique_fd fd, size_t buffer_capacity)
+    : FileOutputStream(fd.get(), buffer_capacity) {
+  owned_fd_ = std::move(fd);
 }
 
 FileOutputStream::FileOutputStream(int fd, size_t buffer_capacity)
@@ -118,7 +125,7 @@ FileOutputStream::~FileOutputStream() {
 }
 
 bool FileOutputStream::Next(void** data, size_t* size) {
-  if (fd_ == -1 || HadError()) {
+  if (HadError()) {
     return false;
   }
 
@@ -159,7 +166,8 @@ bool FileOutputStream::FlushImpl() {
   ssize_t n = TEMP_FAILURE_RETRY(write(fd_, buffer_.get(), buffer_offset_));
   if (n < 0) {
     error_ = SystemErrorCodeToString(errno);
-    fd_.reset();
+    owned_fd_.reset();
+    fd_ = -1;
     buffer_.reset();
     return false;
   }

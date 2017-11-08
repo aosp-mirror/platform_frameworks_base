@@ -29,18 +29,39 @@
 
 namespace aapt {
 
+constexpr static const char kApkResourceTablePath[] = "resources.arsc";
+constexpr static const char kProtoResourceTablePath[] = "resources.pb";
+constexpr static const char kAndroidManifestPath[] = "AndroidManifest.xml";
+
 // Info about an APK loaded in memory.
 class LoadedApk {
  public:
-  LoadedApk(
-      const Source& source,
-      std::unique_ptr<io::IFileCollection> apk,
-      std::unique_ptr<ResourceTable> table)
-      : source_(source), apk_(std::move(apk)), table_(std::move(table)) {}
-  virtual ~LoadedApk() = default;
+  // Loads both binary and proto APKs from disk.
+  static std::unique_ptr<LoadedApk> LoadApkFromPath(const ::android::StringPiece& path,
+                                                    IDiagnostics* diag);
+
+  // Loads a proto APK from the given file collection.
+  static std::unique_ptr<LoadedApk> LoadProtoApkFromFileCollection(
+      const Source& source, std::unique_ptr<io::IFileCollection> collection, IDiagnostics* diag);
+
+  // Loads a binary APK from the given file collection.
+  static std::unique_ptr<LoadedApk> LoadBinaryApkFromFileCollection(
+      const Source& source, std::unique_ptr<io::IFileCollection> collection, IDiagnostics* diag);
+
+  LoadedApk(const Source& source, std::unique_ptr<io::IFileCollection> apk,
+            std::unique_ptr<ResourceTable> table, std::unique_ptr<xml::XmlResource> manifest)
+      : source_(source),
+        apk_(std::move(apk)),
+        table_(std::move(table)),
+        manifest_(std::move(manifest)) {
+  }
 
   io::IFileCollection* GetFileCollection() {
     return apk_.get();
+  }
+
+  const ResourceTable* GetResourceTable() const {
+    return table_.get();
   }
 
   ResourceTable* GetResourceTable() {
@@ -49,6 +70,10 @@ class LoadedApk {
 
   const Source& GetSource() {
     return source_;
+  }
+
+  const xml::XmlResource* GetManifest() const {
+    return manifest_.get();
   }
 
   /**
@@ -71,11 +96,6 @@ class LoadedApk {
                               const TableFlattenerOptions& options, FilterChain* filters,
                               IArchiveWriter* writer, xml::XmlResource* manifest = nullptr);
 
-  /** Inflates the AndroidManifest.xml file from the APK. */
-  std::unique_ptr<xml::XmlResource> InflateManifest(IAaptContext* context);
-
-  static std::unique_ptr<LoadedApk> LoadApkFromPath(IAaptContext* context,
-                                                    const android::StringPiece& path);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(LoadedApk);
@@ -83,6 +103,7 @@ class LoadedApk {
   Source source_;
   std::unique_ptr<io::IFileCollection> apk_;
   std::unique_ptr<ResourceTable> table_;
+  std::unique_ptr<xml::XmlResource> manifest_;
 };
 
 }  // namespace aapt

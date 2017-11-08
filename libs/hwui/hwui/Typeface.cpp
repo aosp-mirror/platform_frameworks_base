@@ -44,9 +44,8 @@ static Typeface::Style computeAPIStyle(int weight, bool italic) {
 }
 
 static minikin::FontStyle computeMinikinStyle(int weight, bool italic) {
-    // TODO: Better to use raw base weight value for font selection instead of dividing by 100.
-    const int minikinWeight = uirenderer::MathUtils::clamp((weight + 50) / 100, 1, 10);
-    return minikin::FontStyle(minikinWeight, italic);
+    return minikin::FontStyle(uirenderer::MathUtils::clamp(weight, 1, 1000),
+                              static_cast<minikin::FontSlant>(italic));
 }
 
 // Resolve the relative weight from the baseWeight and target style.
@@ -192,8 +191,8 @@ void Typeface::setRobotoTypefaceForTest() {
     hwTypeface->fFontCollection = collection;
     hwTypeface->fAPIStyle = Typeface::kNormal;
     hwTypeface->fBaseWeight = SkFontStyle::kNormal_Weight;
-    hwTypeface->fStyle = minikin::FontStyle(4 /* weight */, false /* italic */);
+    hwTypeface->fStyle = minikin::FontStyle();
 
     Typeface::setDefault(hwTypeface);
 }
-}
+}  // namespace android

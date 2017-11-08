@@ -92,6 +92,15 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".TrivialAnimationActivityWideGamut"
+            android:label="General/Trivial Animation (Wide Gamut)"
+            android:colorMode="wideColorGamut">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
+            </intent-filter>
+        </activity>
+        <activity
             android:name=".TrivialListActivity"
             android:label="General/Trivial ListView" >
             <intent-filter>

@@ -49,6 +49,7 @@ public:
 
     void finish() override;
 
+    // TODO: Pass a timestamp as a parameter in onDumpReport.
     StatsLogReport onDumpReport() override;
 
     void onSlicedConditionMayChange(const uint64_t eventTime) override;
@@ -60,14 +61,11 @@ public:
     // TODO: Implement this later.
     virtual void notifyAppRemoved(const string& apk, const int uid) override{};
 
+protected:
+    void startNewProtoOutputStream(long long timestamp) override;
+
 private:
     const EventMetric mMetric;
-
-    std::unique_ptr<android::util::ProtoOutputStream> mProto;
-
-    long long mProtoToken;
-
-    void startNewProtoOutputStream(long long timestamp);
 };
 
 }  // namespace statsd

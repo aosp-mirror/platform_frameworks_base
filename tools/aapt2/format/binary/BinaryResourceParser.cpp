@@ -73,29 +73,22 @@ class ReferenceIdToNameVisitor : public DescendingValueVisitor {
 
 }  // namespace
 
-BinaryResourceParser::BinaryResourceParser(IAaptContext* context, ResourceTable* table,
+BinaryResourceParser::BinaryResourceParser(IDiagnostics* diag, ResourceTable* table,
                                            const Source& source, const void* data, size_t len,
                                            io::IFileCollection* files)
-    : context_(context),
-      table_(table),
-      source_(source),
-      data_(data),
-      data_len_(len),
-      files_(files) {
+    : diag_(diag), table_(table), source_(source), data_(data), data_len_(len), files_(files) {
 }
 
 bool BinaryResourceParser::Parse() {
   ResChunkPullParser parser(data_, data_len_);
 
   if (!ResChunkPullParser::IsGoodEvent(parser.Next())) {
-    context_->GetDiagnostics()->Error(DiagMessage(source_)
-                                      << "corrupt resources.arsc: " << parser.error());
+    diag_->Error(DiagMessage(source_) << "corrupt resources.arsc: " << parser.error());
     return false;
   }
 
   if (parser.chunk()->type != android::RES_TABLE_TYPE) {
-    context_->GetDiagnostics()->Error(DiagMessage(source_)
-                                      << StringPrintf("unknown chunk of type 0x%02x",
+    diag_->Error(DiagMessage(source_) << StringPrintf("unknown chunk of type 0x%02x",
                                                       static_cast<int>(parser.chunk()->type)));
     return false;
   }
@@ -106,13 +99,12 @@ bool BinaryResourceParser::Parse() {
 
   if (parser.Next() != ResChunkPullParser::Event::kEndDocument) {
     if (parser.event() == ResChunkPullParser::Event::kBadDocument) {
-      context_->GetDiagnostics()->Warn(
-          DiagMessage(source_) << "invalid chunk trailing RES_TABLE_TYPE: " << parser.error());
+      diag_->Warn(DiagMessage(source_)
+                  << "invalid chunk trailing RES_TABLE_TYPE: " << parser.error());
     } else {
-      context_->GetDiagnostics()->Warn(
-          DiagMessage(source_) << StringPrintf(
-              "unexpected chunk of type 0x%02x trailing RES_TABLE_TYPE",
-              static_cast<int>(parser.chunk()->type)));
+      diag_->Warn(DiagMessage(source_)
+                  << StringPrintf("unexpected chunk of type 0x%02x trailing RES_TABLE_TYPE",
+                                  static_cast<int>(parser.chunk()->type)));
     }
   }
   return true;
@@ -122,7 +114,7 @@ bool BinaryResourceParser::Parse() {
 bool BinaryResourceParser::ParseTable(const ResChunk_header* chunk) {
   const ResTable_header* table_header = ConvertTo<ResTable_header>(chunk);
   if (!table_header) {
-    context_->GetDiagnostics()->Error(DiagMessage(source_) << "corrupt ResTable_header chunk");
+    diag_->Error(DiagMessage(source_) << "corrupt ResTable_header chunk");
     return false;
   }
 
@@ -135,17 +127,15 @@ bool BinaryResourceParser::ParseTable(const ResChunk_header* chunk) {
           status_t err =
               value_pool_.setTo(parser.chunk(), util::DeviceToHost32(parser.chunk()->size));
           if (err != NO_ERROR) {
-            context_->GetDiagnostics()->Error(DiagMessage(source_)
-                                              << "corrupt string pool in ResTable: "
-                                              << value_pool_.getError());
+            diag_->Error(DiagMessage(source_)
+                         << "corrupt string pool in ResTable: " << value_pool_.getError());
             return false;
           }
 
           // Reserve some space for the strings we are going to add.
           table_->string_pool.HintWillAdd(value_pool_.size(), value_pool_.styleCount());
         } else {
-          context_->GetDiagnostics()->Warn(DiagMessage(source_)
-                                           << "unexpected string pool in ResTable");
+          diag_->Warn(DiagMessage(source_) << "unexpected string pool in ResTable");
         }
         break;
 
@@ -156,16 +146,15 @@ bool BinaryResourceParser::ParseTable(const ResChunk_header* chunk) {
         break;
 
       default:
-        context_->GetDiagnostics()->Warn(
-            DiagMessage(source_) << "unexpected chunk type "
-                                 << static_cast<int>(util::DeviceToHost16(parser.chunk()->type)));
+        diag_->Warn(DiagMessage(source_)
+                    << "unexpected chunk type "
+                    << static_cast<int>(util::DeviceToHost16(parser.chunk()->type)));
         break;
     }
   }
 
   if (parser.event() == ResChunkPullParser::Event::kBadDocument) {
-    context_->GetDiagnostics()->Error(DiagMessage(source_)
-                                      << "corrupt resource table: " << parser.error());
+    diag_->Error(DiagMessage(source_) << "corrupt resource table: " << parser.error());
     return false;
   }
   return true;
@@ -176,14 +165,13 @@ bool BinaryResourceParser::ParsePackage(const ResChunk_header* chunk) {
       sizeof(ResTable_package) - sizeof(ResTable_package::typeIdOffset);
   const ResTable_package* package_header = ConvertTo<ResTable_package, kMinPackageSize>(chunk);
   if (!package_header) {
-    context_->GetDiagnostics()->Error(DiagMessage(source_) << "corrupt ResTable_package chunk");
+    diag_->Error(DiagMessage(source_) << "corrupt ResTable_package chunk");
     return false;
   }
 
   uint32_t package_id = util::DeviceToHost32(package_header->id);
   if (package_id > std::numeric_limits<uint8_t>::max()) {
-    context_->GetDiagnostics()->Error(DiagMessage(source_)
-                                      << "package ID is too big (" << package_id << ")");
+    diag_->Error(DiagMessage(source_) << "package ID is too big (" << package_id << ")");
     return false;
   }
 
@@ -198,9 +186,8 @@ bool BinaryResourceParser::ParsePackage(const ResChunk_header* chunk) {
   ResourceTablePackage* package =
       table_->CreatePackage(util::Utf16ToUtf8(package_name), static_cast<uint8_t>(package_id));
   if (!package) {
-    context_->GetDiagnostics()->Error(DiagMessage(source_)
-                                      << "incompatible package '" << package_name << "' with ID "
-                                      << package_id);
+    diag_->Error(DiagMessage(source_)
+                 << "incompatible package '" << package_name << "' with ID " << package_id);
     return false;
   }
 
@@ -218,8 +205,7 @@ bool BinaryResourceParser::ParsePackage(const ResChunk_header* chunk) {
           status_t err =
               type_pool_.setTo(parser.chunk(), util::DeviceToHost32(parser.chunk()->size));
           if (err != NO_ERROR) {
-            context_->GetDiagnostics()->Error(DiagMessage(source_)
-                                              << "corrupt type string pool in "
+            diag_->Error(DiagMessage(source_) << "corrupt type string pool in "
                                               << "ResTable_package: " << type_pool_.getError());
             return false;
           }
@@ -227,13 +213,12 @@ bool BinaryResourceParser::ParsePackage(const ResChunk_header* chunk) {
           status_t err =
               key_pool_.setTo(parser.chunk(), util::DeviceToHost32(parser.chunk()->size));
           if (err != NO_ERROR) {
-            context_->GetDiagnostics()->Error(DiagMessage(source_)
-                                              << "corrupt key string pool in "
+            diag_->Error(DiagMessage(source_) << "corrupt key string pool in "
                                               << "ResTable_package: " << key_pool_.getError());
             return false;
           }
         } else {
-          context_->GetDiagnostics()->Warn(DiagMessage(source_) << "unexpected string pool");
+          diag_->Warn(DiagMessage(source_) << "unexpected string pool");
         }
         break;
 
@@ -256,16 +241,15 @@ bool BinaryResourceParser::ParsePackage(const ResChunk_header* chunk) {
         break;
 
       default:
-        context_->GetDiagnostics()->Warn(
-            DiagMessage(source_) << "unexpected chunk type "
-                                 << static_cast<int>(util::DeviceToHost16(parser.chunk()->type)));
+        diag_->Warn(DiagMessage(source_)
+                    << "unexpected chunk type "
+                    << static_cast<int>(util::DeviceToHost16(parser.chunk()->type)));
         break;
     }
   }
 
   if (parser.event() == ResChunkPullParser::Event::kBadDocument) {
-    context_->GetDiagnostics()->Error(DiagMessage(source_)
-                                      << "corrupt ResTable_package: " << parser.error());
+    diag_->Error(DiagMessage(source_) << "corrupt ResTable_package: " << parser.error());
     return false;
   }
 
@@ -278,19 +262,18 @@ bool BinaryResourceParser::ParsePackage(const ResChunk_header* chunk) {
 
 bool BinaryResourceParser::ParseTypeSpec(const ResChunk_header* chunk) {
   if (type_pool_.getError() != NO_ERROR) {
-    context_->GetDiagnostics()->Error(DiagMessage(source_) << "missing type string pool");
+    diag_->Error(DiagMessage(source_) << "missing type string pool");
     return false;
   }
 
   const ResTable_typeSpec* type_spec = ConvertTo<ResTable_typeSpec>(chunk);
   if (!type_spec) {
-    context_->GetDiagnostics()->Error(DiagMessage(source_) << "corrupt ResTable_typeSpec chunk");
+    diag_->Error(DiagMessage(source_) << "corrupt ResTable_typeSpec chunk");
     return false;
   }
 
   if (type_spec->id == 0) {
-    context_->GetDiagnostics()->Error(DiagMessage(source_)
-                                      << "ResTable_typeSpec has invalid id: " << type_spec->id);
+    diag_->Error(DiagMessage(source_) << "ResTable_typeSpec has invalid id: " << type_spec->id);
     return false;
   }
   return true;
@@ -299,12 +282,12 @@ bool BinaryResourceParser::ParseTypeSpec(const ResChunk_header* chunk) {
 bool BinaryResourceParser::ParseType(const ResourceTablePackage* package,
                                      const ResChunk_header* chunk) {
   if (type_pool_.getError() != NO_ERROR) {
-    context_->GetDiagnostics()->Error(DiagMessage(source_) << "missing type string pool");
+    diag_->Error(DiagMessage(source_) << "missing type string pool");
     return false;
   }
 
   if (key_pool_.getError() != NO_ERROR) {
-    context_->GetDiagnostics()->Error(DiagMessage(source_) << "missing key string pool");
+    diag_->Error(DiagMessage(source_) << "missing key string pool");
     return false;
   }
 
@@ -312,13 +295,12 @@ bool BinaryResourceParser::ParseType(const ResourceTablePackage* package,
   // a lot and has its own code to handle variable size.
   const ResTable_type* type = ConvertTo<ResTable_type, kResTableTypeMinSize>(chunk);
   if (!type) {
-    context_->GetDiagnostics()->Error(DiagMessage(source_) << "corrupt ResTable_type chunk");
+    diag_->Error(DiagMessage(source_) << "corrupt ResTable_type chunk");
     return false;
   }
 
   if (type->id == 0) {
-    context_->GetDiagnostics()->Error(DiagMessage(source_)
-                                      << "ResTable_type has invalid id: " << (int)type->id);
+    diag_->Error(DiagMessage(source_) << "ResTable_type has invalid id: " << (int)type->id);
     return false;
   }
 
@@ -329,9 +311,8 @@ bool BinaryResourceParser::ParseType(const ResourceTablePackage* package,
 
   const ResourceType* parsed_type = ParseResourceType(type_str);
   if (!parsed_type) {
-    context_->GetDiagnostics()->Error(DiagMessage(source_)
-                                      << "invalid type name '" << type_str << "' for type with ID "
-                                      << (int)type->id);
+    diag_->Error(DiagMessage(source_)
+                 << "invalid type name '" << type_str << "' for type with ID " << (int)type->id);
     return false;
   }
 
@@ -360,14 +341,13 @@ bool BinaryResourceParser::ParseType(const ResourceTablePackage* package,
     }
 
     if (!resource_value) {
-      context_->GetDiagnostics()->Error(DiagMessage(source_)
-                                        << "failed to parse value for resource " << name << " ("
+      diag_->Error(DiagMessage(source_) << "failed to parse value for resource " << name << " ("
                                         << res_id << ") with configuration '" << config << "'");
       return false;
     }
 
     if (!table_->AddResourceAllowMangled(name, res_id, config, {}, std::move(resource_value),
-                                         context_->GetDiagnostics())) {
+                                         diag_)) {
       return false;
     }
 
@@ -375,7 +355,7 @@ bool BinaryResourceParser::ParseType(const ResourceTablePackage* package,
       Symbol symbol;
       symbol.state = SymbolState::kPublic;
       symbol.source = source_.WithLine(0);
-      if (!table_->SetSymbolStateAllowMangled(name, res_id, symbol, context_->GetDiagnostics())) {
+      if (!table_->SetSymbolStateAllowMangled(name, res_id, symbol, diag_)) {
         return false;
       }
     }
@@ -410,15 +390,14 @@ std::unique_ptr<Item> BinaryResourceParser::ParseValue(const ResourceNameRef& na
                                                        const android::Res_value& value) {
   std::unique_ptr<Item> item = ResourceUtils::ParseBinaryResValue(name.type, config, value_pool_,
                                                                   value, &table_->string_pool);
-  if (files_ != nullptr && item != nullptr) {
+  if (files_ != nullptr) {
     FileReference* file_ref = ValueCast<FileReference>(item.get());
     if (file_ref != nullptr) {
       file_ref->file = files_->FindFile(*file_ref->path);
       if (file_ref->file == nullptr) {
-        context_->GetDiagnostics()->Warn(DiagMessage()
-                                         << "resource " << name << " for config '" << config
-                                         << "' is a file reference to '" << *file_ref->path
-                                         << "' but no such path exists");
+        diag_->Warn(DiagMessage() << "resource " << name << " for config '" << config
+                                  << "' is a file reference to '" << *file_ref->path
+                                  << "' but no such path exists");
       }
     }
   }
@@ -432,7 +411,7 @@ std::unique_ptr<Value> BinaryResourceParser::ParseMapEntry(const ResourceNameRef
     case ResourceType::kStyle:
       return ParseStyle(name, config, map);
     case ResourceType::kAttrPrivate:
-    // fallthrough
+      // fallthrough
     case ResourceType::kAttr:
       return ParseAttr(name, config, map);
     case ResourceType::kArray:
@@ -445,8 +424,8 @@ std::unique_ptr<Value> BinaryResourceParser::ParseMapEntry(const ResourceNameRef
       // We can ignore the value here.
       return util::make_unique<Id>();
     default:
-      context_->GetDiagnostics()->Error(DiagMessage() << "illegal map type '" << ToString(name.type)
-                                                      << "' (" << (int)name.type << ")");
+      diag_->Error(DiagMessage() << "illegal map type '" << to_string(name.type) << "' ("
+                                 << (int)name.type << ")");
       break;
   }
   return {};

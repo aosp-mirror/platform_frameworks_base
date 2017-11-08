@@ -70,8 +70,7 @@ TEST(XmlDomTest, BinaryInflate) {
   ASSERT_TRUE(flattener.Consume(context.get(), doc.get()));
 
   auto block = util::Copy(buffer);
-  std::unique_ptr<XmlResource> new_doc =
-      Inflate(block.get(), buffer.size(), context->GetDiagnostics(), Source("test.xml"));
+  std::unique_ptr<XmlResource> new_doc = Inflate(block.get(), buffer.size(), nullptr);
   ASSERT_THAT(new_doc, NotNull());
 
   EXPECT_THAT(new_doc->root->name, StrEq("Layout"));

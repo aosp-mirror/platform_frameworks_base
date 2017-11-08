@@ -47,10 +47,16 @@ struct DurationInfo {
     DurationInfo() : state(kStopped), lastStartTime(0), lastDuration(0){};
 };
 
+struct DurationBucket {
+    int64_t mBucketStartNs;
+    int64_t mBucketEndNs;
+    int64_t mDuration;
+};
+
 class DurationTracker {
 public:
     DurationTracker(sp<ConditionWizard> wizard, int conditionIndex, uint64_t currentBucketStartNs,
-                    uint64_t bucketSizeNs, std::vector<DurationBucketInfo>& bucket)
+                    uint64_t bucketSizeNs, std::vector<DurationBucket>& bucket)
         : mWizard(wizard),
           mConditionTrackerIndex(conditionIndex),
           mCurrentBucketStartTimeNs(currentBucketStartNs),
@@ -77,7 +83,7 @@ protected:
 
     int64_t mBucketSizeNs;
 
-    std::vector<DurationBucketInfo>& mBucket;  // where to write output
+    std::vector<DurationBucket>& mBucket;  // where to write output
 
     int64_t mDuration;  // current recorded duration result
 };

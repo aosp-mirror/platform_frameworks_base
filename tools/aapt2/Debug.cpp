@@ -17,7 +17,6 @@
 #include "Debug.h"
 
 #include <algorithm>
-#include <iostream>
 #include <map>
 #include <memory>
 #include <queue>
@@ -25,120 +24,244 @@
 #include <vector>
 
 #include "android-base/logging.h"
+#include "android-base/stringprintf.h"
 
 #include "ResourceTable.h"
 #include "ResourceValues.h"
 #include "ValueVisitor.h"
+#include "text/Printer.h"
 #include "util/Util.h"
+
+using ::aapt::text::Printer;
+using ::android::StringPiece;
+using ::android::base::StringPrintf;
 
 namespace aapt {
 
 namespace {
 
-class PrintVisitor : public ConstValueVisitor {
+class ValueHeadlinePrinter : public ConstValueVisitor {
  public:
   using ConstValueVisitor::Visit;
 
+  explicit ValueHeadlinePrinter(const std::string& package, Printer* printer)
+      : package_(package), printer_(printer) {
+  }
+
   void Visit(const Attribute* attr) override {
-    std::cout << "(attr) type=";
-    attr->PrintMask(&std::cout);
-    static constexpr uint32_t kMask =
-        android::ResTable_map::TYPE_ENUM | android::ResTable_map::TYPE_FLAGS;
+    printer_->Print("(attr) type=");
+    printer_->Print(attr->MaskString());
+    if (!attr->symbols.empty()) {
+      printer_->Print(StringPrintf(" size=%zd", attr->symbols.size()));
+    }
+  }
+
+  void Visit(const Style* style) override {
+    printer_->Print(StringPrintf("(style) size=%zd", style->entries.size()));
+    if (style->parent) {
+      printer_->Print(" parent=");
+
+      const Reference& parent_ref = style->parent.value();
+      if (parent_ref.name) {
+        if (parent_ref.private_reference) {
+          printer_->Print("*");
+        }
+
+        const ResourceName& parent_name = parent_ref.name.value();
+        if (package_ != parent_name.package) {
+          printer_->Print(parent_name.package);
+          printer_->Print(":");
+        }
+        printer_->Print(to_string(parent_name.type));
+        printer_->Print("/");
+        printer_->Print(parent_name.entry);
+        if (parent_ref.id) {
+          printer_->Print(" (");
+          printer_->Print(parent_ref.id.value().to_string());
+          printer_->Print(")");
+        }
+      } else if (parent_ref.id) {
+        printer_->Print(parent_ref.id.value().to_string());
+      } else {
+        printer_->Print("???");
+      }
+    }
+  }
+
+  void Visit(const Array* array) override {
+    printer_->Print(StringPrintf("(array) size=%zd", array->elements.size()));
+  }
+
+  void Visit(const Plural* plural) override {
+    size_t count = std::count_if(plural->values.begin(), plural->values.end(),
+                                 [](const std::unique_ptr<Item>& v) { return v != nullptr; });
+    printer_->Print(StringPrintf("(plurals) size=%zd", count));
+  }
+
+  void Visit(const Styleable* styleable) override {
+    printer_->Println(StringPrintf("(styleable) size=%zd", styleable->entries.size()));
+  }
+
+  void VisitItem(const Item* item) override {
+    // Pretty much guaranteed to be one line.
+    if (const Reference* ref = ValueCast<Reference>(item)) {
+      // Special case Reference so that we can print local resources without a package name.
+      ref->PrettyPrint(package_, printer_);
+    } else {
+      item->PrettyPrint(printer_);
+    }
+  }
+
+ private:
+  std::string package_;
+  Printer* printer_;
+};
+
+class ValueBodyPrinter : public ConstValueVisitor {
+ public:
+  using ConstValueVisitor::Visit;
+
+  explicit ValueBodyPrinter(const std::string& package, Printer* printer)
+      : package_(package), printer_(printer) {
+  }
+
+  void Visit(const Attribute* attr) override {
+    constexpr uint32_t kMask = android::ResTable_map::TYPE_ENUM | android::ResTable_map::TYPE_FLAGS;
     if (attr->type_mask & kMask) {
       for (const auto& symbol : attr->symbols) {
-        std::cout << "\n        " << symbol.symbol.name.value().entry;
+        printer_->Print(symbol.symbol.name.value().entry);
         if (symbol.symbol.id) {
-          std::cout << " (" << symbol.symbol.id.value() << ")";
+          printer_->Print("(");
+          printer_->Print(symbol.symbol.id.value().to_string());
+          printer_->Print(")");
         }
-        std::cout << " = " << symbol.value;
+        printer_->Println(StringPrintf("=0x%08x", symbol.value));
       }
     }
   }
 
   void Visit(const Style* style) override {
-    std::cout << "(style)";
-    if (style->parent) {
-      const Reference& parent_ref = style->parent.value();
-      std::cout << " parent=";
-      if (parent_ref.name) {
-        if (parent_ref.private_reference) {
-          std::cout << "*";
-        }
-        std::cout << parent_ref.name.value() << " ";
-      }
-
-      if (parent_ref.id) {
-        std::cout << parent_ref.id.value();
-      }
-    }
-
     for (const auto& entry : style->entries) {
-      std::cout << "\n        ";
       if (entry.key.name) {
         const ResourceName& name = entry.key.name.value();
-        if (!name.package.empty()) {
-          std::cout << name.package << ":";
+        if (!name.package.empty() && name.package != package_) {
+          printer_->Print(name.package);
+          printer_->Print(":");
         }
-        std::cout << name.entry;
+        printer_->Print(name.entry);
+
+        if (entry.key.id) {
+          printer_->Print("(");
+          printer_->Print(entry.key.id.value().to_string());
+          printer_->Print(")");
+        }
+      } else if (entry.key.id) {
+        printer_->Print(entry.key.id.value().to_string());
+      } else {
+        printer_->Print("???");
       }
 
-      if (entry.key.id) {
-        std::cout << "(" << entry.key.id.value() << ")";
-      }
-
-      std::cout << "=" << *entry.value;
+      printer_->Print("=");
+      PrintItem(*entry.value);
+      printer_->Println();
     }
   }
 
   void Visit(const Array* array) override {
-    array->Print(&std::cout);
+    const size_t count = array->elements.size();
+    printer_->Print("[");
+    if (count > 0) {
+      for (size_t i = 0u; i < count; i++) {
+        if (i != 0u && i % 4u == 0u) {
+          printer_->Println();
+          printer_->Print(" ");
+        }
+        PrintItem(*array->elements[i]);
+        if (i != count - 1) {
+          printer_->Print(", ");
+        }
+      }
+      printer_->Println("]");
+    }
   }
 
   void Visit(const Plural* plural) override {
-    plural->Print(&std::cout);
+    constexpr std::array<const char*, Plural::Count> kPluralNames = {
+        {"zero", "one", "two", "few", "many", "other"}};
+
+    for (size_t i = 0; i < Plural::Count; i++) {
+      if (plural->values[i] != nullptr) {
+        printer_->Print(StringPrintf("%s=", kPluralNames[i]));
+        PrintItem(*plural->values[i]);
+        printer_->Println();
+      }
+    }
   }
 
   void Visit(const Styleable* styleable) override {
-    std::cout << "(styleable)";
     for (const auto& attr : styleable->entries) {
-      std::cout << "\n        ";
       if (attr.name) {
         const ResourceName& name = attr.name.value();
-        if (!name.package.empty()) {
-          std::cout << name.package << ":";
+        if (!name.package.empty() && name.package != package_) {
+          printer_->Print(name.package);
+          printer_->Print(":");
         }
-        std::cout << name.entry;
+        printer_->Print(name.entry);
+
+        if (attr.id) {
+          printer_->Print("(");
+          printer_->Print(attr.id.value().to_string());
+          printer_->Print(")");
+        }
       }
 
       if (attr.id) {
-        std::cout << "(" << attr.id.value() << ")";
+        printer_->Print(attr.id.value().to_string());
       }
     }
   }
 
   void VisitItem(const Item* item) override {
-    item->Print(&std::cout);
+    // Intentionally left empty, we already printed the Items.
   }
+
+ private:
+  void PrintItem(const Item& item) {
+    if (const Reference* ref = ValueCast<Reference>(&item)) {
+      // Special case Reference so that we can print local resources without a package name.
+      ref->PrettyPrint(package_, printer_);
+    } else {
+      item.PrettyPrint(printer_);
+    }
+  }
+
+  std::string package_;
+  Printer* printer_;
 };
 
 }  // namespace
 
-void Debug::PrintTable(const ResourceTable& table, const DebugPrintTableOptions& options) {
-  PrintVisitor visitor;
-
+void Debug::PrintTable(const ResourceTable& table, const DebugPrintTableOptions& options,
+                       Printer* printer) {
   for (const auto& package : table.packages) {
-    std::cout << "Package name=" << package->name;
-    if (package->id) {
-      std::cout << " id=" << std::hex << (int)package->id.value() << std::dec;
-    }
-    std::cout << std::endl;
+    ValueHeadlinePrinter headline_printer(package->name, printer);
+    ValueBodyPrinter body_printer(package->name, printer);
 
+    printer->Print("Package name=");
+    printer->Print(package->name);
+    if (package->id) {
+      printer->Print(StringPrintf(" id=%02x", package->id.value()));
+    }
+    printer->Println();
+
+    printer->Indent();
     for (const auto& type : package->types) {
-      std::cout << "\n  type " << type->type;
+      printer->Print("type ");
+      printer->Print(to_string(type->type));
       if (type->id) {
-        std::cout << " id=" << std::hex << (int)type->id.value() << std::dec;
+        printer->Print(StringPrintf(" id=%02x", type->id.value()));
       }
-      std::cout << " entryCount=" << type->entries.size() << std::endl;
+      printer->Println(StringPrintf(" entryCount=%zd", type->entries.size()));
 
       std::vector<const ResourceEntry*> sorted_entries;
       for (const auto& entry : type->entries) {
@@ -156,35 +279,54 @@ void Debug::PrintTable(const ResourceTable& table, const DebugPrintTableOptions&
         sorted_entries.insert(iter, entry.get());
       }
 
+      printer->Indent();
       for (const ResourceEntry* entry : sorted_entries) {
         const ResourceId id(package->id.value_or_default(0), type->id.value_or_default(0),
                             entry->id.value_or_default(0));
-        const ResourceName name(package->name, type->type, entry->name);
 
-        std::cout << "    spec resource " << id << " " << name;
+        printer->Print("resource ");
+        printer->Print(id.to_string());
+        printer->Print(" ");
+
+        // Write the name without the package (this is obvious and too verbose).
+        printer->Print(to_string(type->type));
+        printer->Print("/");
+        printer->Print(entry->name);
+
         switch (entry->symbol_status.state) {
           case SymbolState::kPublic:
-            std::cout << " PUBLIC";
+            printer->Print(" PUBLIC");
             break;
           case SymbolState::kPrivate:
-            std::cout << " _PRIVATE_";
+            printer->Print(" _PRIVATE_");
             break;
-          default:
+          case SymbolState::kUndefined:
+            // Print nothing.
             break;
         }
 
-        std::cout << std::endl;
+        printer->Println();
 
+        printer->Indent();
         for (const auto& value : entry->values) {
-          std::cout << "      (" << value->config << ") ";
-          value->value->Accept(&visitor);
+          printer->Print("(");
+          printer->Print(value->config.to_string());
+          printer->Print(") ");
+          value->value->Accept(&headline_printer);
           if (options.show_sources && !value->value->GetSource().path.empty()) {
-            std::cout << " src=" << value->value->GetSource();
+            printer->Print(" src=");
+            printer->Print(value->value->GetSource().to_string());
           }
-          std::cout << std::endl;
+          printer->Println();
+          printer->Indent();
+          value->value->Accept(&body_printer);
+          printer->Undent();
         }
+        printer->Undent();
       }
+      printer->Undent();
     }
+    printer->Undent();
   }
 }
 

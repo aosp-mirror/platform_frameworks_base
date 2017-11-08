@@ -16,7 +16,9 @@
 
 package com.android.systemui.statusbar.notification;
 
+import com.android.internal.widget.MessagingLayout;
 import com.android.internal.widget.MessagingLinearLayout;
+import com.android.systemui.R;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.TransformableView;
 
@@ -32,41 +34,20 @@ import java.util.ArrayList;
  */
 public class NotificationMessagingTemplateViewWrapper extends NotificationTemplateViewWrapper {
 
-    private View mContractedMessage;
-    private ArrayList<View> mHistoricMessages = new ArrayList<View>();
+    private final int mMinHeightWithActions;
+    private MessagingLayout mMessagingLayout;
+    private MessagingLinearLayout mMessagingLinearLayout;
 
     protected NotificationMessagingTemplateViewWrapper(Context ctx, View view,
             ExpandableNotificationRow row) {
         super(ctx, view, row);
+        mMessagingLayout = (MessagingLayout) view;
+        mMinHeightWithActions = NotificationUtils.getFontScaledHeight(ctx,
+                R.dimen.notification_messaging_actions_min_height);
     }
 
     private void resolveViews() {
-        mContractedMessage = null;
-
-        View container = mView.findViewById(com.android.internal.R.id.notification_messaging);
-        if (container instanceof MessagingLinearLayout
-                && ((MessagingLinearLayout) container).getChildCount() > 0) {
-            MessagingLinearLayout messagingContainer = (MessagingLinearLayout) container;
-
-            int childCount = messagingContainer.getChildCount();
-            for (int i = 0; i < childCount; i++) {
-                View child = messagingContainer.getChildAt(i);
-
-                if (child.getVisibility() == View.GONE
-                        && child instanceof TextView
-                        && !TextUtils.isEmpty(((TextView) child).getText())) {
-                    mHistoricMessages.add(child);
-                }
-
-                // Only consider the first visible child - transforming to a position other than the
-                // first looks bad because we have to move across other messages that are fading in.
-                if (child.getId() == messagingContainer.getContractedChildId()) {
-                    mContractedMessage = child;
-                } else if (child.getVisibility() == View.VISIBLE) {
-                    break;
-                }
-            }
-        }
+        mMessagingLinearLayout = mMessagingLayout.getMessagingLinearLayout();
     }
 
     @Override
@@ -81,16 +62,22 @@ public class NotificationMessagingTemplateViewWrapper extends NotificationTempla
     protected void updateTransformedTypes() {
         // This also clears the existing types
         super.updateTransformedTypes();
-        if (mContractedMessage != null) {
-            mTransformationHelper.addTransformedView(TransformableView.TRANSFORMING_VIEW_TEXT,
-                    mContractedMessage);
+        if (mMessagingLinearLayout != null) {
+            mTransformationHelper.addTransformedView(mMessagingLinearLayout.getId(),
+                    mMessagingLinearLayout);
         }
     }
 
     @Override
     public void setRemoteInputVisible(boolean visible) {
-        for (int i = 0; i < mHistoricMessages.size(); i++) {
-            mHistoricMessages.get(i).setVisibility(visible ? View.VISIBLE : View.GONE);
+        mMessagingLayout.showHistoricMessages(visible);
+    }
+
+    @Override
+    public int getMinLayoutHeight() {
+        if (mActionsContainer != null && mActionsContainer.getVisibility() != View.GONE) {
+            return mMinHeightWithActions;
         }
+        return super.getMinLayoutHeight();
     }
 }

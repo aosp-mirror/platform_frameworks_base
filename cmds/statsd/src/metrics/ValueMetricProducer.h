@@ -30,6 +30,12 @@ namespace android {
 namespace os {
 namespace statsd {
 
+struct ValueBucket {
+    int64_t mBucketStartNs;
+    int64_t mBucketEndNs;
+    int64_t mValue;
+};
+
 class ValueMetricProducer : public virtual MetricProducer, public virtual PullDataReceiver {
 public:
     ValueMetricProducer(const ValueMetric& valueMetric, const int conditionIndex,
@@ -42,15 +48,14 @@ public:
 
     void finish() override;
 
+    // TODO: Pass a timestamp as a parameter in onDumpReport.
     StatsLogReport onDumpReport() override;
 
     void onSlicedConditionMayChange(const uint64_t eventTime);
 
     void onDataPulled(const std::vector<std::shared_ptr<LogEvent>>& data) override;
-    // TODO: Implement this later.
-    size_t byteSize() override {
-        return 0;
-    };
+
+    size_t byteSize() override;
 
     // TODO: Implement this later.
     virtual void notifyAppUpgrade(const string& apk, const int uid, const int version) override{};
@@ -62,6 +67,8 @@ protected:
                                    const std::map<std::string, HashableDimensionKey>& conditionKey,
                                    bool condition, const LogEvent& event,
                                    bool scheduledPull) override;
+
+    void startNewProtoOutputStream(long long timestamp) override;
 
 private:
     const ValueMetric mMetric;
@@ -84,11 +91,14 @@ private:
     std::unordered_map<HashableDimensionKey, Interval> mNextSlicedBucket;
 
     // Save the past buckets and we can clear when the StatsLogReport is dumped.
-    std::unordered_map<HashableDimensionKey, std::vector<ValueBucketInfo>> mPastBuckets;
+    // TODO: Add a lock to mPastBuckets.
+    std::unordered_map<HashableDimensionKey, std::vector<ValueBucket>> mPastBuckets;
 
     long get_value(const LogEvent& event);
 
     void flush_if_needed(const uint64_t eventTimeNs);
+
+    size_t mByteSize;
 };
 
 }  // namespace statsd

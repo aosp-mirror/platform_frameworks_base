@@ -70,7 +70,7 @@ public class OverviewProxyService {
     private final DeviceProvisionedListener mDeviceProvisionedCallback =
                 new DeviceProvisionedListener() {
             @Override
-            public void onDeviceProvisionedChanged() {
+            public void onUserSetupChanged() {
                 if (mDeviceProvisionedController.isCurrentUserSetup()) {
                     startConnectionToCurrentUser();
                 }

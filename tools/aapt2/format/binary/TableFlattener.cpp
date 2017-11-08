@@ -472,7 +472,7 @@ class PackageFlattener {
         expected_type_id++;
       }
       expected_type_id++;
-      type_pool_.MakeRef(ToString(type->type));
+      type_pool_.MakeRef(to_string(type->type));
 
       std::vector<ResourceEntry*> sorted_entries = CollectAndSortEntries(type);
       if (sorted_entries.empty()) {
@@ -568,14 +568,6 @@ bool TableFlattener::Consume(IAaptContext* context, ResourceTable* table) {
   ResTable_header* table_header = table_writer.StartChunk<ResTable_header>(RES_TABLE_TYPE);
   table_header->packageCount = util::HostToDevice32(table->packages.size());
 
-  // Write a self mapping entry for this package if the ID is non-standard (0x7f).
-  if (context->GetPackageType() == PackageType::kApp) {
-    const uint8_t package_id = context->GetPackageId();
-    if (package_id != kFrameworkPackageId && package_id != kAppPackageId) {
-      table->included_packages_[package_id] = context->GetCompilationPackage();
-    }
-  }
-
   // Flatten the values string pool.
   StringPool::FlattenUtf8(table_writer.buffer(), table->string_pool);
 
@@ -583,6 +575,14 @@ bool TableFlattener::Consume(IAaptContext* context, ResourceTable* table) {
 
   // Flatten each package.
   for (auto& package : table->packages) {
+    if (context->GetPackageType() == PackageType::kApp) {
+      // Write a self mapping entry for this package if the ID is non-standard (0x7f).
+      const uint8_t package_id = package->id.value();
+      if (package_id != kFrameworkPackageId && package_id != kAppPackageId) {
+        table->included_packages_[package_id] = package->name;
+      }
+    }
+
     PackageFlattener flattener(context, package.get(), &table->included_packages_,
                                options_.use_sparse_entries);
     if (!flattener.FlattenPackage(&package_buffer)) {

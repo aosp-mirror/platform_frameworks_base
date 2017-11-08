@@ -16,22 +16,19 @@
 
 package com.android.settingslib.drawable;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.support.test.InstrumentationRegistry;
+import android.support.test.runner.AndroidJUnit4;
 
 import com.android.settingslib.R;
-import com.android.settingslib.SettingsLibRobolectricTestRunner;
-import com.android.settingslib.TestConfig;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.RuntimeEnvironment;
-import org.robolectric.annotation.Config;
 
-import static com.google.common.truth.Truth.assertThat;
-
-@RunWith(SettingsLibRobolectricTestRunner.class)
-@Config(manifest = TestConfig.MANIFEST_PATH, sdk = TestConfig.SDK_VERSION)
+@RunWith(AndroidJUnit4.class)
 public class UserIconDrawableTest {
 
     private UserIconDrawable mDrawable;
@@ -39,7 +36,7 @@ public class UserIconDrawableTest {
     @Test
     public void getConstantState_shouldNotBeNull() {
         final Bitmap b = BitmapFactory.decodeResource(
-                RuntimeEnvironment.application.getResources(),
+                InstrumentationRegistry.getTargetContext().getResources(),
                 R.drawable.home);
         mDrawable = new UserIconDrawable(100 /* size */).setIcon(b).bake();
 

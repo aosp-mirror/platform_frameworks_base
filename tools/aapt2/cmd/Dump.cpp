@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
+#include <cinttypes>
 #include <vector>
 
+#include "android-base/stringprintf.h"
 #include "androidfw/StringPiece.h"
 
 #include "Debug.h"
@@ -27,9 +29,12 @@
 #include "io/FileStream.h"
 #include "io/ZipArchive.h"
 #include "process/IResourceTableConsumer.h"
+#include "text/Printer.h"
 #include "util/Files.h"
 
+using ::aapt::text::Printer;
 using ::android::StringPiece;
+using ::android::base::StringPrintf;
 
 namespace aapt {
 
@@ -48,16 +53,28 @@ static const char* ResourceFileTypeToString(const ResourceFile::Type& type) {
 }
 
 static void DumpCompiledFile(const ResourceFile& file, const Source& source, off64_t offset,
-                             size_t len) {
-  std::cout << "Resource: " << file.name << "\n"
-            << "Config:   " << file.config << "\n"
-            << "Source:   " << file.source << "\n"
-            << "Type:     " << ResourceFileTypeToString(file.type) << "\n"
-            << "DataOff:  " << offset << "\n"
-            << "DataLen:  " << len << "\n";
+                             size_t len, Printer* printer) {
+  printer->Print("Resource: ");
+  printer->Println(file.name.to_string());
+
+  printer->Print("Config:   ");
+  printer->Println(file.config.to_string());
+
+  printer->Print("Source:   ");
+  printer->Println(file.source.to_string());
+
+  printer->Print("Type:     ");
+  printer->Println(ResourceFileTypeToString(file.type));
+
+  printer->Println(StringPrintf("Data:     offset=%" PRIi64 " length=%zd", offset, len));
 }
 
 static bool TryDumpFile(IAaptContext* context, const std::string& file_path) {
+  // Use a smaller buffer so that there is less latency for dumping to stdout.
+  constexpr size_t kStdOutBufferSize = 1024u;
+  io::FileOutputStream fout(STDOUT_FILENO, kStdOutBufferSize);
+  Printer printer(&fout);
+
   DebugPrintTableOptions print_options;
   print_options.show_sources = true;
 
@@ -78,11 +95,13 @@ static bool TryDumpFile(IAaptContext* context, const std::string& file_path) {
         return false;
       }
 
-      if (!DeserializeTableFromPb(pb_table, &table, &err)) {
+      if (!DeserializeTableFromPb(pb_table, zip.get(), &table, &err)) {
         context->GetDiagnostics()->Error(DiagMessage(file_path)
                                          << "failed to parse table: " << err);
         return false;
       }
+
+      printer.Println("Proto APK");
     } else if (io::IFile* file = zip->FindFile("resources.arsc")) {
       std::unique_ptr<io::IData> data = file->OpenAsData();
       if (!data) {
@@ -90,13 +109,16 @@ static bool TryDumpFile(IAaptContext* context, const std::string& file_path) {
         return false;
       }
 
-      BinaryResourceParser parser(context, &table, Source(file_path), data->data(), data->size());
+      BinaryResourceParser parser(context->GetDiagnostics(), &table, Source(file_path),
+                                  data->data(), data->size());
       if (!parser.Parse()) {
         return false;
       }
+
+      printer.Println("Binary APK");
     }
 
-    Debug::PrintTable(table, print_options);
+    Debug::PrintTable(table, print_options, &printer);
     return true;
   }
 
@@ -117,9 +139,12 @@ static bool TryDumpFile(IAaptContext* context, const std::string& file_path) {
     return false;
   }
 
+  printer.Println("AAPT2 Container (APC)");
   ContainerReaderEntry* entry;
   while ((entry = reader.Next()) != nullptr) {
     if (entry->Type() == ContainerEntryType::kResTable) {
+      printer.Println("kResTable");
+
       pb::ResourceTable pb_table;
       if (!entry->GetResTable(&pb_table)) {
         context->GetDiagnostics()->Error(DiagMessage(file_path)
@@ -129,14 +154,17 @@ static bool TryDumpFile(IAaptContext* context, const std::string& file_path) {
 
       ResourceTable table;
       err.clear();
-      if (!DeserializeTableFromPb(pb_table, &table, &err)) {
+      if (!DeserializeTableFromPb(pb_table, nullptr /*files*/, &table, &err)) {
         context->GetDiagnostics()->Error(DiagMessage(file_path)
                                          << "failed to parse table: " << err);
         continue;
       }
 
-      Debug::PrintTable(table, print_options);
+      printer.Indent();
+      Debug::PrintTable(table, print_options, &printer);
+      printer.Undent();
     } else if (entry->Type() == ContainerEntryType::kResFile) {
+      printer.Println("kResFile");
       pb::internal::CompiledFile pb_compiled_file;
       off64_t offset;
       size_t length;
@@ -154,7 +182,9 @@ static bool TryDumpFile(IAaptContext* context, const std::string& file_path) {
         continue;
       }
 
-      DumpCompiledFile(file, Source(file_path), offset, length);
+      printer.Indent();
+      DumpCompiledFile(file, Source(file_path), offset, length, &printer);
+      printer.Undent();
     }
   }
   return true;

@@ -505,8 +505,17 @@ please see styles_device_defaults.xml.
         <item name="layout_width">match_parent</item>
         <item name="layout_height">wrap_content</item>
         <item name="ellipsize">end</item>
-        <item name="visibility">gone</item>
         <item name="textAppearance">@style/TextAppearance.Material.Notification</item>
+        <item name="background">@drawable/messaging_message_background</item>
+    </style>
+
+    <style name="Widget.Material.Notification.MessagingName" parent="Widget.Material.Light.TextView">
+        <item name="layout_width">wrap_content</item>
+        <item name="layout_height">wrap_content</item>
+        <item name="ellipsize">end</item>
+        <item name="textAppearance">@style/TextAppearance.Material.Notification</item>
+        <item name="textColor">@color/notification_primary_text_color_light</item>
+        <item name="textSize">12sp</item>
     </style>
 
     <!-- Widget Styles -->

@@ -25,5 +25,4 @@ LOCAL_SRC_FILES := $(call all-java-files-under,src)
 LOCAL_STATIC_ANDROID_LIBRARIES := \
     AaptTestNamespace_LibOne \
     AaptTestNamespace_LibTwo
-LOCAL_AAPT_FLAGS := -v
 include $(BUILD_PACKAGE)

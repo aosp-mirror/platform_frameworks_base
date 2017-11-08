@@ -19,6 +19,7 @@
 
 #include <unordered_map>
 
+#include <android/util/ProtoOutputStream.h>
 #include "../condition/ConditionTracker.h"
 #include "../matchers/matcher_util.h"
 #include "MetricProducer.h"
@@ -48,6 +49,7 @@ public:
 
     void finish() override;
 
+    // TODO: Pass a timestamp as a parameter in onDumpReport.
     StatsLogReport onDumpReport() override;
 
     void onSlicedConditionMayChange(const uint64_t eventTime) override;
@@ -65,6 +67,8 @@ protected:
                                    bool condition, const LogEvent& event,
                                    bool scheduledPull) override;
 
+    void startNewProtoOutputStream(long long timestamp) override;
+
 private:
     const DurationMetric mMetric;
 
@@ -81,7 +85,8 @@ private:
     const vector<KeyMatcher> mInternalDimension;
 
     // Save the past buckets and we can clear when the StatsLogReport is dumped.
-    std::unordered_map<HashableDimensionKey, std::vector<DurationBucketInfo>> mPastBuckets;
+    // TODO: Add a lock to mPastBuckets.
+    std::unordered_map<HashableDimensionKey, std::vector<DurationBucket>> mPastBuckets;
 
     // The current bucket.
     std::unordered_map<HashableDimensionKey, std::unique_ptr<DurationTracker>>
@@ -89,9 +94,11 @@ private:
 
     void flushDurationIfNeeded(const uint64_t newEventTime);
 
-    std::unique_ptr<DurationTracker> createDurationTracker(std::vector<DurationBucketInfo>& bucket);
+    std::unique_ptr<DurationTracker> createDurationTracker(std::vector<DurationBucket>& bucket);
 
     void flushIfNeeded(uint64_t timestamp);
+
+    static const size_t kBucketSize = sizeof(DurationBucket{});
 };
 
 }  // namespace statsd

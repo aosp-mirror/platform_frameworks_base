@@ -59,6 +59,8 @@ public:
     // coming. MetricProducer should do the clean up, and dump existing data to dropbox.
     virtual void finish() = 0;
 
+    // TODO: Pass a timestamp as a parameter in onDumpReport and update all its
+    // implementations.
     virtual StatsLogReport onDumpReport() = 0;
 
     virtual bool isConditionSliced() const {
@@ -109,6 +111,14 @@ protected:
             const size_t matcherIndex, const HashableDimensionKey& eventKey,
             const std::map<std::string, HashableDimensionKey>& conditionKey, bool condition,
             const LogEvent& event, bool scheduledPull) = 0;
+
+    std::unique_ptr<android::util::ProtoOutputStream> mProto;
+
+    long long mProtoToken;
+
+    virtual void startNewProtoOutputStream(long long timestamp) = 0;
+
+    std::unique_ptr<uint8_t[]> serializeProto();
 };
 
 }  // namespace statsd

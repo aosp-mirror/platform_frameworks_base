@@ -265,11 +265,13 @@ bool MultiApkGenerator::UpdateManifest(const Artifact& artifact,
                                        const PostProcessingConfiguration& config,
                                        std::unique_ptr<XmlResource>* updated_manifest,
                                        IDiagnostics* diag) {
-  *updated_manifest = apk_->InflateManifest(context_);
-  XmlResource* manifest = updated_manifest->get();
-  if (manifest == nullptr) {
+  const xml::XmlResource* apk_manifest = apk_->GetManifest();
+  if (apk_manifest == nullptr) {
     return false;
   }
+
+  *updated_manifest = apk_manifest->Clone();
+  XmlResource* manifest = updated_manifest->get();
 
   // Make sure the first element is <manifest> with package attribute.
   xml::Element* manifest_el = manifest->root.get();

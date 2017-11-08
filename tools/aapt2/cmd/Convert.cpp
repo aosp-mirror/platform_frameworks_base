@@ -1,0 +1,228 @@
+/*
+ * Copyright (C) 2017 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include <vector>
+
+#include "android-base/macros.h"
+#include "androidfw/StringPiece.h"
+
+#include "Flags.h"
+#include "LoadedApk.h"
+#include "ValueVisitor.h"
+#include "cmd/Util.h"
+#include "format/binary/TableFlattener.h"
+#include "format/binary/XmlFlattener.h"
+#include "format/proto/ProtoDeserialize.h"
+#include "io/BigBufferStream.h"
+#include "io/Util.h"
+#include "process/IResourceTableConsumer.h"
+#include "process/SymbolTable.h"
+
+using ::android::StringPiece;
+using ::std::unique_ptr;
+using ::std::vector;
+
+namespace aapt {
+
+static bool FlattenXml(IAaptContext* context, const xml::XmlResource& xml,
+                       const std::string& entry_path, bool utf16, IArchiveWriter* writer) {
+  BigBuffer buffer(4096);
+  XmlFlattenerOptions options = {};
+  options.use_utf16 = utf16;
+  XmlFlattener flattener(&buffer, options);
+  if (!flattener.Consume(context, &xml)) {
+    return false;
+  }
+  io::BigBufferInputStream input_stream(&buffer);
+  return io::CopyInputStreamToArchive(context, &input_stream, entry_path, ArchiveEntry::kCompress,
+                                      writer);
+}
+
+bool ConvertProtoApkToBinaryApk(IAaptContext* context, unique_ptr<LoadedApk> apk,
+                                const TableFlattenerOptions& options, IArchiveWriter* writer) {
+  if (!FlattenXml(context, *apk->GetManifest(), kAndroidManifestPath, true /*utf16*/, writer)) {
+    return false;
+  }
+
+  BigBuffer buffer(4096);
+  TableFlattener table_flattener(options, &buffer);
+  if (!table_flattener.Consume(context, apk->GetResourceTable())) {
+    return false;
+  }
+
+  io::BigBufferInputStream input_stream(&buffer);
+  if (!io::CopyInputStreamToArchive(context, &input_stream, kApkResourceTablePath,
+                                    ArchiveEntry::kAlign, writer)) {
+    return false;
+  }
+
+  for (const auto& package : apk->GetResourceTable()->packages) {
+    for (const auto& type : package->types) {
+      for (const auto& entry : type->entries) {
+        for (const auto& config_value : entry->values) {
+          const FileReference* file = ValueCast<FileReference>(config_value->value.get());
+          if (file != nullptr) {
+            if (file->file == nullptr) {
+              context->GetDiagnostics()->Warn(DiagMessage(apk->GetSource())
+                                              << "no file associated with " << *file);
+              return false;
+            }
+
+            if (file->type == ResourceFile::Type::kProtoXml) {
+              unique_ptr<io::InputStream> in = file->file->OpenInputStream();
+              if (in == nullptr) {
+                context->GetDiagnostics()->Error(DiagMessage(apk->GetSource())
+                                                 << "failed to open file " << *file->path);
+                return false;
+              }
+
+              pb::XmlNode pb_node;
+              io::ZeroCopyInputAdaptor adaptor(in.get());
+              if (!pb_node.ParseFromZeroCopyStream(&adaptor)) {
+                context->GetDiagnostics()->Error(DiagMessage(apk->GetSource())
+                                                 << "failed to parse proto XML " << *file->path);
+                return false;
+              }
+
+              std::string error;
+              unique_ptr<xml::XmlResource> xml = DeserializeXmlResourceFromPb(pb_node, &error);
+              if (xml == nullptr) {
+                context->GetDiagnostics()->Error(DiagMessage(apk->GetSource())
+                                                 << "failed to deserialize proto XML "
+                                                 << *file->path << ": " << error);
+                return false;
+              }
+
+              if (!FlattenXml(context, *xml, *file->path, false /*utf16*/, writer)) {
+                context->GetDiagnostics()->Error(DiagMessage(apk->GetSource())
+                                                 << "failed to serialize XML " << *file->path);
+                return false;
+              }
+            } else {
+              if (!io::CopyFileToArchive(context, file->file, *file->path,
+                                         file->file->WasCompressed() ? ArchiveEntry::kCompress : 0u,
+                                         writer)) {
+                context->GetDiagnostics()->Error(DiagMessage(apk->GetSource())
+                                                 << "failed to copy file " << *file->path);
+                return false;
+              }
+            }
+
+          } // file
+        } // config_value
+      } // entry
+    } // type
+  } // package
+  return true;
+}
+
+class Context : public IAaptContext {
+ public:
+  Context() : mangler_({}), symbols_(&mangler_) {
+  }
+
+  PackageType GetPackageType() override {
+    return PackageType::kApp;
+  }
+
+  SymbolTable* GetExternalSymbols() override {
+    return &symbols_;
+  }
+
+  IDiagnostics* GetDiagnostics() override {
+    return &diag_;
+  }
+
+  const std::string& GetCompilationPackage() override {
+    return package_;
+  }
+
+  uint8_t GetPackageId() override {
+    // Nothing should call this.
+    UNIMPLEMENTED(FATAL) << "PackageID should not be necessary";
+    return 0;
+  }
+
+  NameMangler* GetNameMangler() override {
+    UNIMPLEMENTED(FATAL);
+    return nullptr;
+  }
+
+  bool IsVerbose() override {
+    return verbose_;
+  }
+
+  int GetMinSdkVersion() override {
+    return 0u;
+  }
+
+  bool verbose_ = false;
+  std::string package_;
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(Context);
+
+  NameMangler mangler_;
+  SymbolTable symbols_;
+  StdErrDiagnostics diag_;
+};
+
+int Convert(const vector<StringPiece>& args) {
+  Context context;
+  std::string output_path;
+  TableFlattenerOptions options;
+  Flags flags =
+      Flags()
+          .RequiredFlag("-o", "Output path", &output_path)
+          .OptionalSwitch("--enable-sparse-encoding",
+                          "Enables encoding sparse entries using a binary search tree.\n"
+                          "This decreases APK size at the cost of resource retrieval performance.",
+                          &options.use_sparse_entries)
+          .OptionalSwitch("-v", "Enables verbose logging", &context.verbose_);
+  if (!flags.Parse("aapt2 convert", args, &std::cerr)) {
+    return 1;
+  }
+
+  if (flags.GetArgs().size() != 1) {
+    std::cerr << "must supply a single proto APK\n";
+    flags.Usage("aapt2 convert", &std::cerr);
+    return 1;
+  }
+
+  const StringPiece& path = flags.GetArgs()[0];
+  unique_ptr<LoadedApk> apk = LoadedApk::LoadApkFromPath(path, context.GetDiagnostics());
+  if (apk == nullptr) {
+    context.GetDiagnostics()->Error(DiagMessage(path) << "failed to load APK");
+    return 1;
+  }
+
+  Maybe<AppInfo> app_info =
+      ExtractAppInfoFromBinaryManifest(*apk->GetManifest(), context.GetDiagnostics());
+  if (!app_info) {
+    return 1;
+  }
+
+  context.package_ = app_info.value().package;
+
+  unique_ptr<IArchiveWriter> writer =
+      CreateZipFileArchiveWriter(context.GetDiagnostics(), output_path);
+  if (writer == nullptr) {
+    return 1;
+  }
+  return ConvertProtoApkToBinaryApk(&context, std::move(apk), options, writer.get()) ? 0 : 1;
+}
+
+}  // namespace aapt

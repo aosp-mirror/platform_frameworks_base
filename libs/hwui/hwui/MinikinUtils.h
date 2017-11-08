@@ -34,9 +34,8 @@ namespace android {
 
 class MinikinUtils {
 public:
-    ANDROID_API static minikin::FontStyle prepareMinikinPaint(minikin::MinikinPaint* minikinPaint,
-                                                              const Paint* paint,
-                                                              const Typeface* typeface);
+    ANDROID_API static minikin::MinikinPaint prepareMinikinPaint(const Paint* paint,
+                                                                 const Typeface* typeface);
 
     ANDROID_API static minikin::Layout doLayout(const Paint* paint, minikin::Bidi bidiFlags,
                                                 const Typeface* typeface, const uint16_t* buf,

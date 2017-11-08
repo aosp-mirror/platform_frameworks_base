@@ -29,6 +29,7 @@
 #include "AppInfo.h"
 #include "Debug.h"
 #include "Flags.h"
+#include "LoadedApk.h"
 #include "Locale.h"
 #include "NameMangler.h"
 #include "ResourceUtils.h"
@@ -39,7 +40,6 @@
 #include "filter/ConfigFilter.h"
 #include "format/Archive.h"
 #include "format/Container.h"
-#include "format/binary/BinaryResourceParser.h"
 #include "format/binary/TableFlattener.h"
 #include "format/binary/XmlFlattener.h"
 #include "format/proto/ProtoDeserialize.h"
@@ -70,9 +70,6 @@ using ::android::StringPiece;
 using ::android::base::StringPrintf;
 
 namespace aapt {
-
-constexpr static const char kApkResourceTablePath[] = "resources.arsc";
-constexpr static const char kProtoResourceTablePath[] = "resources.pb";
 
 enum class OutputFormat {
   kApk,
@@ -296,23 +293,6 @@ static bool FlattenXml(IAaptContext* context, const xml::XmlResource& xml_res,
     } break;
   }
   return false;
-}
-
-static std::unique_ptr<ResourceTable> LoadTableFromPb(const Source& source, const void* data,
-                                                      size_t len, IDiagnostics* diag) {
-  pb::ResourceTable pb_table;
-  if (!pb_table.ParseFromArray(data, len)) {
-    diag->Error(DiagMessage(source) << "invalid compiled table");
-    return {};
-  }
-
-  std::unique_ptr<ResourceTable> table = util::make_unique<ResourceTable>();
-  std::string error;
-  if (!DeserializeTableFromPb(pb_table, table.get(), &error)) {
-    diag->Error(DiagMessage(source) << "invalid compiled table: " << error);
-    return {};
-  }
-  return table;
 }
 
 // Inflates an XML file from the source path.
@@ -587,7 +567,7 @@ bool ResourceFileFlattener::Flatten(ResourceTable* table, IArchiveWriter* archiv
               pb::XmlNode pb_xml_node;
               if (!pb_xml_node.ParseFromArray(data->data(), static_cast<int>(data->size()))) {
                 context_->GetDiagnostics()->Error(DiagMessage(file->GetSource())
-                                                  << "failed to parse proto xml");
+                                                  << "failed to parse proto XML");
                 return false;
               }
 
@@ -595,13 +575,15 @@ bool ResourceFileFlattener::Flatten(ResourceTable* table, IArchiveWriter* archiv
               file_op.xml_to_flatten = DeserializeXmlResourceFromPb(pb_xml_node, &error);
               if (file_op.xml_to_flatten == nullptr) {
                 context_->GetDiagnostics()->Error(DiagMessage(file->GetSource())
-                                                  << "failed to deserialize proto xml: " << error);
+                                                  << "failed to deserialize proto XML: " << error);
                 return false;
               }
             } else {
-              file_op.xml_to_flatten = xml::Inflate(data->data(), data->size(),
-                                                    context_->GetDiagnostics(), file->GetSource());
+              std::string error_str;
+              file_op.xml_to_flatten = xml::Inflate(data->data(), data->size(), &error_str);
               if (file_op.xml_to_flatten == nullptr) {
+                context_->GetDiagnostics()->Error(DiagMessage(file->GetSource())
+                                                  << "failed to parse binary XML: " << error_str);
                 return false;
               }
             }
@@ -748,22 +730,29 @@ class LinkCommand {
         file_collection_(util::make_unique<io::FileCollection>()) {
   }
 
-  /**
-   * Creates a SymbolTable that loads symbols from the various APKs and caches
-   * the results for faster lookup.
-   */
+  // Creates a SymbolTable that loads symbols from the various APKs.
   bool LoadSymbolsFromIncludePaths() {
-    std::unique_ptr<AssetManagerSymbolSource> asset_source =
-        util::make_unique<AssetManagerSymbolSource>();
+    auto asset_source = util::make_unique<AssetManagerSymbolSource>();
     for (const std::string& path : options_.include_paths) {
       if (context_->IsVerbose()) {
         context_->GetDiagnostics()->Note(DiagMessage() << "including " << path);
       }
 
-      // First try to load the file as a static lib.
-      std::string error_str;
-      std::unique_ptr<ResourceTable> include_static = LoadStaticLibrary(path, &error_str);
-      if (include_static) {
+      std::string error;
+      auto zip_collection = io::ZipFileCollection::Create(path, &error);
+      if (zip_collection == nullptr) {
+        context_->GetDiagnostics()->Error(DiagMessage() << "failed to open APK: " << error);
+        return false;
+      }
+
+      if (zip_collection->FindFile(kProtoResourceTablePath) != nullptr) {
+        // Load this as a static library include.
+        std::unique_ptr<LoadedApk> static_apk = LoadedApk::LoadProtoApkFromFileCollection(
+            Source(path), std::move(zip_collection), context_->GetDiagnostics());
+        if (static_apk == nullptr) {
+          return false;
+        }
+
         if (context_->GetPackageType() != PackageType::kStaticLib) {
           // Can't include static libraries when not building a static library (they have no IDs
           // assigned).
@@ -772,13 +761,15 @@ class LinkCommand {
           return false;
         }
 
-        // If we are using --no-static-lib-packages, we need to rename the
-        // package of this table to our compilation package.
+        ResourceTable* table = static_apk->GetResourceTable();
+
+        // If we are using --no-static-lib-packages, we need to rename the package of this table to
+        // our compilation package.
         if (options_.no_static_lib_packages) {
           // Since package names can differ, and multiple packages can exist in a ResourceTable,
           // we place the requirement that all static libraries are built with the package
           // ID 0x7f. So if one is not found, this is an error.
-          if (ResourceTablePackage* pkg = include_static->FindPackageById(kAppPackageId)) {
+          if (ResourceTablePackage* pkg = table->FindPackageById(kAppPackageId)) {
             pkg->name = context_->GetCompilationPackage();
           } else {
             context_->GetDiagnostics()->Error(DiagMessage(path)
@@ -788,19 +779,14 @@ class LinkCommand {
         }
 
         context_->GetExternalSymbols()->AppendSource(
-            util::make_unique<ResourceTableSymbolSource>(include_static.get()));
-
-        static_table_includes_.push_back(std::move(include_static));
-
-      } else if (!error_str.empty()) {
-        // We had an error with reading, so fail.
-        context_->GetDiagnostics()->Error(DiagMessage(path) << error_str);
-        return false;
-      }
-
-      if (!asset_source->AddAssetPath(path)) {
-        context_->GetDiagnostics()->Error(DiagMessage(path) << "failed to load include path");
-        return false;
+            util::make_unique<ResourceTableSymbolSource>(table));
+        static_library_includes_.push_back(std::move(static_apk));
+      } else {
+        if (!asset_source->AddAssetPath(path)) {
+          context_->GetDiagnostics()->Error(DiagMessage()
+                                            << "failed to load include path " << path);
+          return false;
+        }
       }
     }
 
@@ -1194,46 +1180,18 @@ class LinkCommand {
     return true;
   }
 
-  std::unique_ptr<ResourceTable> LoadStaticLibrary(const std::string& input,
-                                                   std::string* out_error) {
-    std::unique_ptr<io::ZipFileCollection> collection =
-        io::ZipFileCollection::Create(input, out_error);
-    if (!collection) {
-      return {};
-    }
-    return LoadTablePbFromCollection(collection.get());
-  }
-
-  std::unique_ptr<ResourceTable> LoadTablePbFromCollection(io::IFileCollection* collection) {
-    io::IFile* file = collection->FindFile(kProtoResourceTablePath);
-    if (!file) {
-      return {};
-    }
-
-    std::unique_ptr<io::IData> data = file->OpenAsData();
-    return LoadTableFromPb(file->GetSource(), data->data(), data->size(),
-                           context_->GetDiagnostics());
-  }
-
   bool MergeStaticLibrary(const std::string& input, bool override) {
     if (context_->IsVerbose()) {
       context_->GetDiagnostics()->Note(DiagMessage() << "merging static library " << input);
     }
 
-    std::string error_str;
-    std::unique_ptr<io::ZipFileCollection> collection =
-        io::ZipFileCollection::Create(input, &error_str);
-    if (!collection) {
-      context_->GetDiagnostics()->Error(DiagMessage(input) << error_str);
-      return false;
-    }
-
-    std::unique_ptr<ResourceTable> table = LoadTablePbFromCollection(collection.get());
-    if (!table) {
+    std::unique_ptr<LoadedApk> apk = LoadedApk::LoadApkFromPath(input, context_->GetDiagnostics());
+    if (apk == nullptr) {
       context_->GetDiagnostics()->Error(DiagMessage(input) << "invalid static library");
       return false;
     }
 
+    ResourceTable* table = apk->GetResourceTable();
     ResourceTablePackage* pkg = table->FindPackageById(kAppPackageId);
     if (!pkg) {
       context_->GetDiagnostics()->Error(DiagMessage(input) << "static library has no package");
@@ -1254,13 +1212,12 @@ class LinkCommand {
       // Clear the package name, so as to make the resources look like they are coming from the
       // local package.
       pkg->name = "";
-      result = table_merger_->Merge(Source(input), table.get(), override, collection.get());
+      result = table_merger_->Merge(Source(input), table, override);
 
     } else {
       // This is the proper way to merge libraries, where the package name is
       // preserved and resource names are mangled.
-      result =
-          table_merger_->MergeAndMangle(Source(input), pkg->name, table.get(), collection.get());
+      result = table_merger_->MergeAndMangle(Source(input), pkg->name, table);
     }
 
     if (!result) {
@@ -1268,29 +1225,8 @@ class LinkCommand {
     }
 
     // Make sure to move the collection into the set of IFileCollections.
-    collections_.push_back(std::move(collection));
+    merged_apks_.push_back(std::move(apk));
     return true;
-  }
-
-  bool MergeResourceTable(io::IFile* file, bool override) {
-    if (context_->IsVerbose()) {
-      context_->GetDiagnostics()->Note(DiagMessage() << "merging resource table "
-                                                     << file->GetSource());
-    }
-
-    std::unique_ptr<io::IData> data = file->OpenAsData();
-    if (!data) {
-      context_->GetDiagnostics()->Error(DiagMessage(file->GetSource()) << "failed to open file");
-      return false;
-    }
-
-    std::unique_ptr<ResourceTable> table =
-        LoadTableFromPb(file->GetSource(), data->data(), data->size(), context_->GetDiagnostics());
-    if (!table) {
-      return false;
-    }
-
-    return table_merger_->Merge(file->GetSource(), table.get(), override);
   }
 
   bool MergeCompiledFile(const ResourceFile& compiled_file, io::IFile* file, bool override) {
@@ -1423,7 +1359,7 @@ class LinkCommand {
 
         ResourceTable table;
         std::string error;
-        if (!DeserializeTableFromPb(pb_table, &table, &error)) {
+        if (!DeserializeTableFromPb(pb_table, nullptr /*files*/, &table, &error)) {
           context_->GetDiagnostics()->Error(DiagMessage(src)
                                             << "failed to deserialize resource table: " << error);
           return false;
@@ -1868,13 +1804,15 @@ class LinkCommand {
   // A pointer to the FileCollection representing the filesystem (not archives).
   std::unique_ptr<io::FileCollection> file_collection_;
 
-  // A vector of IFileCollections. This is mainly here to keep ownership of the
+  // A vector of IFileCollections. This is mainly here to retain ownership of the
   // collections.
   std::vector<std::unique_ptr<io::IFileCollection>> collections_;
 
-  // A vector of ResourceTables. This is here to retain ownership, so that the
-  // SymbolTable can use these.
-  std::vector<std::unique_ptr<ResourceTable>> static_table_includes_;
+  // The set of merged APKs. This is mainly here to retain ownership of the APKs.
+  std::vector<std::unique_ptr<LoadedApk>> merged_apks_;
+
+  // The set of included APKs (not merged). This is mainly here to retain ownership of the APKs.
+  std::vector<std::unique_ptr<LoadedApk>> static_library_includes_;
 
   // The set of shared libraries being used, mapping their assigned package ID to package name.
   std::map<size_t, std::string> shared_libs_;

@@ -164,7 +164,7 @@ bool InlineXmlFormatParser::Consume(IAaptContext* context, xml::XmlResource* doc
 
     // Add the inline attribute to the parent.
     parent_el->attributes.push_back(xml::Attribute{decl.attr_namespace_uri, decl.attr_name,
-                                                   "@" + new_doc->file.name.ToString()});
+                                                   "@" + new_doc->file.name.to_string()});
 
     // Delete the subtree.
     for (auto iter = parent_el->children.begin(); iter != parent_el->children.end(); ++iter) {

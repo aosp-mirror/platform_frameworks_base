@@ -88,7 +88,7 @@ public class Paint {
      * A map from a string representation of the LocaleList to Minikin's language list ID.
      */
     @GuardedBy("sCacheLock")
-    private static final HashMap<String, Integer> sMinikinLangListIdCache = new HashMap<>();
+    private static final HashMap<String, Integer> sMinikinLocaleListIdCache = new HashMap<>();
 
     /**
      * @hide
@@ -1445,16 +1445,16 @@ public class Paint {
 
     private void syncTextLocalesWithMinikin() {
         final String languageTags = mLocales.toLanguageTags();
-        final Integer minikinLangListId;
+        final Integer minikinLocaleListId;
         synchronized (sCacheLock) {
-            minikinLangListId = sMinikinLangListIdCache.get(languageTags);
-            if (minikinLangListId == null) {
+            minikinLocaleListId = sMinikinLocaleListIdCache.get(languageTags);
+            if (minikinLocaleListId == null) {
                 final int newID = nSetTextLocales(mNativePaint, languageTags);
-                sMinikinLangListIdCache.put(languageTags, newID);
+                sMinikinLocaleListIdCache.put(languageTags, newID);
                 return;
             }
         }
-        nSetTextLocalesByMinikinLangListId(mNativePaint, minikinLangListId.intValue());
+        nSetTextLocalesByMinikinLocaleListId(mNativePaint, minikinLocaleListId.intValue());
     }
 
     /**
@@ -2918,8 +2918,8 @@ public class Paint {
     @CriticalNative
     private static native void nSetTextAlign(long paintPtr, int align);
     @CriticalNative
-    private static native void nSetTextLocalesByMinikinLangListId(long paintPtr,
-            int mMinikinLangListId);
+    private static native void nSetTextLocalesByMinikinLocaleListId(long paintPtr,
+            int mMinikinLocaleListId);
     @CriticalNative
     private static native void nSetShadowLayer(long paintPtr,
             float radius, float dx, float dy, int color);

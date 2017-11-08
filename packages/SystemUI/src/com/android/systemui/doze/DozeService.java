@@ -92,6 +92,7 @@ public class DozeService extends DreamService
 
     @Override
     protected void dumpOnHandler(FileDescriptor fd, PrintWriter pw, String[] args) {
+        super.dumpOnHandler(fd, pw, args);
         if (mDozeMachine != null) {
             mDozeMachine.dump(pw);
         }

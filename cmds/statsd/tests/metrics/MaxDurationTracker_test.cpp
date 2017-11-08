@@ -39,7 +39,7 @@ namespace statsd {
 TEST(MaxDurationTrackerTest, TestSimpleMaxDuration) {
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
 
-    vector<DurationBucketInfo> buckets;
+    vector<DurationBucket> buckets;
     ConditionKey key1;
 
     uint64_t bucketStartTimeNs = 10000000000;
@@ -55,13 +55,13 @@ TEST(MaxDurationTrackerTest, TestSimpleMaxDuration) {
 
     tracker.flushIfNeeded(bucketStartTimeNs + bucketSizeNs + 1);
     EXPECT_EQ(1u, buckets.size());
-    EXPECT_EQ(20, buckets[0].duration_nanos());
+    EXPECT_EQ(20, buckets[0].mDuration);
 }
 
 TEST(MaxDurationTrackerTest, TestCrossBucketBoundary) {
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
 
-    vector<DurationBucketInfo> buckets;
+    vector<DurationBucket> buckets;
     ConditionKey key1;
 
     uint64_t bucketStartTimeNs = 10000000000;
@@ -73,8 +73,8 @@ TEST(MaxDurationTrackerTest, TestCrossBucketBoundary) {
     tracker.flushIfNeeded(bucketStartTimeNs + (2 * bucketSizeNs) + 1);
 
     EXPECT_EQ(2u, buckets.size());
-    EXPECT_EQ((long long)(bucketSizeNs - 1), buckets[0].duration_nanos());
-    EXPECT_EQ((long long)bucketSizeNs, buckets[1].duration_nanos());
+    EXPECT_EQ((long long)(bucketSizeNs - 1), buckets[0].mDuration);
+    EXPECT_EQ((long long)bucketSizeNs, buckets[1].mDuration);
 }
 
 TEST(MaxDurationTrackerTest, TestMaxDurationWithCondition) {
@@ -86,7 +86,7 @@ TEST(MaxDurationTrackerTest, TestMaxDurationWithCondition) {
     EXPECT_CALL(*wizard, query(_, key1))  // #4
             .WillOnce(Return(ConditionState::kFalse));
 
-    vector<DurationBucketInfo> buckets;
+    vector<DurationBucket> buckets;
 
     uint64_t bucketStartTimeNs = 10000000000;
     uint64_t eventStartTimeNs = bucketStartTimeNs + 1;
@@ -103,7 +103,7 @@ TEST(MaxDurationTrackerTest, TestMaxDurationWithCondition) {
 
     tracker.flushIfNeeded(bucketStartTimeNs + bucketSizeNs + 1);
     EXPECT_EQ(1u, buckets.size());
-    EXPECT_EQ(5, buckets[0].duration_nanos());
+    EXPECT_EQ(5, buckets[0].mDuration);
 }
 
 }  // namespace statsd

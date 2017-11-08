@@ -882,6 +882,11 @@ std::string ConfigDescription::GetBcp47LanguageTag(bool canonicalize) const {
   return std::string(locale);
 }
 
+std::string ConfigDescription::to_string() const {
+  const android::String8 str = toString();
+  return std::string(str.string(), str.size());
+}
+
 bool ConfigDescription::Dominates(const ConfigDescription& o) const {
   if (*this == o) {
     return true;

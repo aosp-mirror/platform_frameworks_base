@@ -175,9 +175,8 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
     private boolean isLight(int vis, int barMode, int flag) {
         boolean isTransparentBar = (barMode == MODE_TRANSPARENT
                 || barMode == MODE_LIGHTS_OUT_TRANSPARENT);
-        boolean allowLight = isTransparentBar && !mBatteryController.isPowerSave();
         boolean light = (vis & flag) != 0;
-        return allowLight && light;
+        return isTransparentBar && light;
     }
 
     private boolean animateChange() {

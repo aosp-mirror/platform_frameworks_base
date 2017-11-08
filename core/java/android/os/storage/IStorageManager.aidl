@@ -17,6 +17,7 @@
 package android.os.storage;
 
 import android.content.pm.IPackageMoveObserver;
+import android.os.IVoldTaskListener;
 import android.os.ParcelFileDescriptor;
 import android.os.storage.DiskInfo;
 import android.os.storage.IStorageEventListener;
@@ -165,7 +166,7 @@ interface IStorageManager {
     void forgetAllVolumes() = 56;
     String getPrimaryStorageUuid() = 57;
     void setPrimaryStorageUuid(in String volumeUuid, IPackageMoveObserver callback) = 58;
-    long benchmark(in String volId) = 59;
+    void benchmark(in String volId, IVoldTaskListener listener) = 59;
     void setDebugFlags(int flags, int mask) = 60;
     void createUserKey(int userId, int serialNumber, boolean ephemeral) = 61;
     void destroyUserKey(int userId) = 62;
@@ -177,7 +178,7 @@ interface IStorageManager {
     boolean isConvertibleToFBE() = 68;
     void addUserKeyAuth(int userId, int serialNumber, in byte[] token, in byte[] secret) = 70;
     void fixateNewestUserKeyAuth(int userId) = 71;
-    void fstrim(int flags) = 72;
+    void fstrim(int flags, IVoldTaskListener listener) = 72;
     AppFuseMount mountProxyFileDescriptorBridge() = 73;
     ParcelFileDescriptor openProxyFileDescriptor(int mountPointId, int fileId, int mode) = 74;
     long getCacheQuotaBytes(String volumeUuid, int uid) = 75;

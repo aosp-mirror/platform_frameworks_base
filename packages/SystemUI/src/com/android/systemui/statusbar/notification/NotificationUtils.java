@@ -66,4 +66,14 @@ public class NotificationUtils {
                 Settings.System.HAPTIC_FEEDBACK_ENABLED, 0, UserHandle.USER_CURRENT) == 0;
     }
 
+    /**
+     * @param dimenId the dimen to look up
+     * @return the font scaled dimen as if it were in sp but doesn't shrink sizes below dp
+     */
+    public static int getFontScaledHeight(Context context, int dimenId) {
+        int dimensionPixelSize = context.getResources().getDimensionPixelSize(dimenId);
+        float factor = Math.max(1.0f, context.getResources().getDisplayMetrics().scaledDensity /
+                context.getResources().getDisplayMetrics().density);
+        return (int) (dimensionPixelSize * factor);
+    }
 }

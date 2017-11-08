@@ -27,6 +27,7 @@
 #include "Resources.pb.h"
 #include "ResourcesInternal.pb.h"
 #include "StringPool.h"
+#include "io/File.h"
 #include "xml/XmlDom.h"
 
 namespace aapt {
@@ -34,12 +35,13 @@ namespace aapt {
 std::unique_ptr<Value> DeserializeValueFromPb(const pb::Value& pb_value,
                                               const android::ResStringPool& src_pool,
                                               const ConfigDescription& config,
-                                              StringPool* value_pool, std::string* out_error);
+                                              StringPool* value_pool, io::IFileCollection* files,
+                                              std::string* out_error);
 
 std::unique_ptr<Item> DeserializeItemFromPb(const pb::Item& pb_item,
                                             const android::ResStringPool& src_pool,
                                             const ConfigDescription& config, StringPool* value_pool,
-                                            std::string* out_error);
+                                            io::IFileCollection* files, std::string* out_error);
 
 std::unique_ptr<xml::XmlResource> DeserializeXmlResourceFromPb(const pb::XmlNode& pb_node,
                                                                std::string* out_error);
@@ -50,8 +52,9 @@ bool DeserializeXmlFromPb(const pb::XmlNode& pb_node, xml::Element* out_el, Stri
 bool DeserializeConfigFromPb(const pb::Configuration& pb_config, ConfigDescription* out_config,
                              std::string* out_error);
 
-bool DeserializeTableFromPb(const pb::ResourceTable& pb_table, ResourceTable* out_table,
-                            std::string* out_error);
+// Optional io::IFileCollection used to lookup references to files in the ResourceTable.
+bool DeserializeTableFromPb(const pb::ResourceTable& pb_table, io::IFileCollection* files,
+                            ResourceTable* out_table, std::string* out_error);
 
 bool DeserializeCompiledFileFromPb(const pb::internal::CompiledFile& pb_file,
                                    ResourceFile* out_file, std::string* out_error);

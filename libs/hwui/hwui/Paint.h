@@ -67,11 +67,11 @@ public:
 
     std::string getFontFeatureSettings() const { return mFontFeatureSettings; }
 
-    void setMinikinLangListId(uint32_t minikinLangListId) {
-        mMinikinLangListId = minikinLangListId;
+    void setMinikinLocaleListId(uint32_t minikinLocaleListId) {
+        mMinikinLocaleListId = minikinLocaleListId;
     }
 
-    uint32_t getMinikinLangListId() const { return mMinikinLangListId; }
+    uint32_t getMinikinLocaleListId() const { return mMinikinLocaleListId; }
 
     void setFontVariant(minikin::FontVariant variant) { mFontVariant = variant; }
 
@@ -89,12 +89,13 @@ private:
     float mLetterSpacing = 0;
     float mWordSpacing = 0;
     std::string mFontFeatureSettings;
-    uint32_t mMinikinLangListId;
+    uint32_t mMinikinLocaleListId;
     minikin::FontVariant mFontVariant;
     uint32_t mHyphenEdit = 0;
-    // The native Typeface object has the same lifetime of the Java Typeface object. The Java Paint
-    // object holds a strong reference to the Java Typeface object. Thus, following pointer can
-    // never be a dangling pointer. Note that nullptr is valid: it means the default typeface.
+    // The native Typeface object has the same lifetime of the Java Typeface
+    // object. The Java Paint object holds a strong reference to the Java Typeface
+    // object. Thus, following pointer can never be a dangling pointer. Note that
+    // nullptr is valid: it means the default typeface.
     const Typeface* mTypeface = nullptr;
 };
 

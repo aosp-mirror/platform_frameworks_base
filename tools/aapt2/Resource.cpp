@@ -17,13 +17,34 @@
 #include "Resource.h"
 
 #include <map>
+#include <sstream>
 #include <string>
 
-using android::StringPiece;
+#include "android-base/stringprintf.h"
+
+using ::android::StringPiece;
+using ::android::base::StringPrintf;
 
 namespace aapt {
 
-StringPiece ToString(ResourceType type) {
+std::string ResourceId::to_string() const {
+  return StringPrintf("0x%08x", id);
+}
+
+std::string ResourceName::to_string() const {
+  return ResourceNameRef(*this).to_string();
+}
+
+std::string ResourceNameRef::to_string() const {
+  std::ostringstream str_stream;
+  if (!package.empty()) {
+    str_stream << package << ":";
+  }
+  str_stream << type << "/" << entry;
+  return str_stream.str();
+}
+
+StringPiece to_string(ResourceType type) {
   switch (type) {
     case ResourceType::kAnim:
       return "anim";

@@ -146,6 +146,8 @@ import com.android.internal.statusbar.NotificationVisibility;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.util.NotificationMessagingUtil;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.internal.widget.MessagingGroup;
+import com.android.internal.widget.MessagingMessage;
 import com.android.keyguard.KeyguardHostView.OnDismissAction;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
@@ -273,7 +275,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     public static final boolean ENABLE_CHILD_NOTIFICATIONS
             = SystemProperties.getBoolean("debug.child_notifs", true);
     public static final boolean FORCE_REMOTE_INPUT_HISTORY =
-            SystemProperties.getBoolean("debug.force_remoteinput_history", false);
+            SystemProperties.getBoolean("debug.force_remoteinput_history", true);
     private static final boolean ENABLE_LOCK_SCREEN_ALLOW_REMOTE_INPUT = false;
 
     protected static final int MSG_HIDE_RECENT_APPS = 1020;
@@ -1232,6 +1234,8 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     public void onDensityOrFontScaleChanged() {
+        MessagingMessage.dropCache();
+        MessagingGroup.dropCache();
         // start old BaseStatusBar.onDensityOrFontScaleChanged().
         if (!KeyguardUpdateMonitor.getInstance(mContext).isSwitchingUser()) {
             updateNotificationsOnDensityOrFontScaleChanged();
@@ -1685,8 +1689,9 @@ public class StatusBar extends SystemUI implements DemoMode,
             clearCurrentMediaNotification();
             updateMediaMetaData(true, true);
         }
-        if (FORCE_REMOTE_INPUT_HISTORY && mRemoteInputController.isSpinning(key)) {
-            Entry entry = mNotificationData.get(key);
+        Entry entry = mNotificationData.get(key);
+        if (FORCE_REMOTE_INPUT_HISTORY && mRemoteInputController.isSpinning(key)
+                && entry.row != null && !entry.row.isDismissed()) {
             StatusBarNotification sbn = entry.notification;
 
             Notification.Builder b = Notification.Builder
@@ -1722,6 +1727,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 deferRemoval = false;
             }
             if (updated) {
+                Log.w(TAG, "Keeping notification around after sending remote input "+ entry.key);
                 mKeysKeptForRemoteInput.add(entry.key);
                 return;
             }
@@ -1731,7 +1737,6 @@ public class StatusBar extends SystemUI implements DemoMode,
             mHeadsUpEntriesToRemoveOnSwitch.add(mHeadsUpManager.getEntry(key));
             return;
         }
-        Entry entry = mNotificationData.get(key);
 
         if (entry != null && mRemoteInputController.isRemoteInputActive(entry)
                 && (entry.row != null && !entry.row.isDismissed())) {
@@ -3278,12 +3283,8 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     void checkBarMode(int mode, int windowState, BarTransitions transitions) {
-        final boolean powerSave = mBatteryController.isPowerSave();
         final boolean anim = !mNoAnimationOnNextBarModeChange && mDeviceInteractive
-                && windowState != WINDOW_STATE_HIDDEN && !powerSave;
-        if (powerSave && getBarState() == StatusBarState.SHADE) {
-            mode = MODE_WARNING;
-        }
+                && windowState != WINDOW_STATE_HIDDEN;
         transitions.transitionTo(mode, anim);
     }
 
@@ -7117,7 +7118,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mAllowLockscreenRemoteInput = allowLockscreenRemoteInput;
     }
 
-    private void updateLockscreenNotificationSetting() {
+    protected void updateLockscreenNotificationSetting() {
         final boolean show = Settings.Secure.getIntForUser(mContext.getContentResolver(),
                 Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS,
                 1,

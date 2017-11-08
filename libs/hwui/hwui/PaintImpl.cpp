@@ -23,15 +23,15 @@ Paint::Paint()
         , mLetterSpacing(0)
         , mWordSpacing(0)
         , mFontFeatureSettings()
-        , mMinikinLangListId(0)
-        , mFontVariant(minikin::VARIANT_DEFAULT) {}
+        , mMinikinLocaleListId(0)
+        , mFontVariant(minikin::FontVariant::DEFAULT) {}
 
 Paint::Paint(const Paint& paint)
         : SkPaint(paint)
         , mLetterSpacing(paint.mLetterSpacing)
         , mWordSpacing(paint.mWordSpacing)
         , mFontFeatureSettings(paint.mFontFeatureSettings)
-        , mMinikinLangListId(paint.mMinikinLangListId)
+        , mMinikinLocaleListId(paint.mMinikinLocaleListId)
         , mFontVariant(paint.mFontVariant)
         , mHyphenEdit(paint.mHyphenEdit)
         , mTypeface(paint.mTypeface) {}
@@ -41,8 +41,8 @@ Paint::Paint(const SkPaint& paint)
         , mLetterSpacing(0)
         , mWordSpacing(0)
         , mFontFeatureSettings()
-        , mMinikinLangListId(0)
-        , mFontVariant(minikin::VARIANT_DEFAULT) {}
+        , mMinikinLocaleListId(0)
+        , mFontVariant(minikin::FontVariant::DEFAULT) {}
 
 Paint::~Paint() {}
 
@@ -51,7 +51,7 @@ Paint& Paint::operator=(const Paint& other) {
     mLetterSpacing = other.mLetterSpacing;
     mWordSpacing = other.mWordSpacing;
     mFontFeatureSettings = other.mFontFeatureSettings;
-    mMinikinLangListId = other.mMinikinLangListId;
+    mMinikinLocaleListId = other.mMinikinLocaleListId;
     mFontVariant = other.mFontVariant;
     mHyphenEdit = other.mHyphenEdit;
     mTypeface = other.mTypeface;
@@ -62,7 +62,7 @@ bool operator==(const Paint& a, const Paint& b) {
     return static_cast<const SkPaint&>(a) == static_cast<const SkPaint&>(b) &&
            a.mLetterSpacing == b.mLetterSpacing && a.mWordSpacing == b.mWordSpacing &&
            a.mFontFeatureSettings == b.mFontFeatureSettings &&
-           a.mMinikinLangListId == b.mMinikinLangListId && a.mFontVariant == b.mFontVariant &&
+           a.mMinikinLocaleListId == b.mMinikinLocaleListId && a.mFontVariant == b.mFontVariant &&
            a.mHyphenEdit == b.mHyphenEdit && a.mTypeface == b.mTypeface;
 }
-}
+}  // namespace android
