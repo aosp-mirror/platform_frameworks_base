@@ -154,6 +154,21 @@ public interface TextClassifier {
     }
 
     /**
+     * Returns a {@link TextLinks} that may be applied to the text to annotate it with links
+     * information.
+     *
+     * @param text the text to generate annotations for
+     * @param options configuration for link generation. If null, defaults will be used.
+     *
+     * @throws IllegalArgumentException if text is null
+     */
+    @WorkerThread
+    default TextLinks generateLinks(
+            @NonNull CharSequence text, @Nullable TextLinks.Options options) {
+        return new TextLinks.Builder(text.toString()).build();
+    }
+
+    /**
      * Logs a TextClassifier event.
      *
      * @param source the text classifier used to generate this event
