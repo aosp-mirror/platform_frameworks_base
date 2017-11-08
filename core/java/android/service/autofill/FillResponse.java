@@ -22,6 +22,7 @@ import static android.view.autofill.Helper.sDebug;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.app.Activity;
 import android.content.IntentSender;
 import android.content.pm.ParceledListSlice;
@@ -75,6 +76,7 @@ public final class FillResponse implements Parcelable {
     private final @Nullable AutofillId[] mAuthenticationIds;
     private final @Nullable AutofillId[] mIgnoredIds;
     private final long mDisableDuration;
+    private final @Nullable FieldsDetection mFieldsDetection;
     private final int mFlags;
     private int mRequestId;
 
@@ -87,6 +89,7 @@ public final class FillResponse implements Parcelable {
         mAuthenticationIds = builder.mAuthenticationIds;
         mIgnoredIds = builder.mIgnoredIds;
         mDisableDuration = builder.mDisableDuration;
+        mFieldsDetection = builder.mFieldsDetection;
         mFlags = builder.mFlags;
         mRequestId = INVALID_REQUEST_ID;
     }
@@ -132,6 +135,11 @@ public final class FillResponse implements Parcelable {
     }
 
     /** @hide */
+    public @Nullable FieldsDetection getFieldsDetection() {
+        return mFieldsDetection;
+    }
+
+    /** @hide */
     public int getFlags() {
         return mFlags;
     }
@@ -167,6 +175,7 @@ public final class FillResponse implements Parcelable {
         private AutofillId[] mAuthenticationIds;
         private AutofillId[] mIgnoredIds;
         private long mDisableDuration;
+        private FieldsDetection mFieldsDetection;
         private int mFlags;
         private boolean mDestroyed;
 
@@ -315,6 +324,25 @@ public final class FillResponse implements Parcelable {
         }
 
         /**
+         * TODO(b/67867469):
+         *  - javadoc it
+         *  - javadoc how to check results
+         *  - unhide
+         *  - unhide / remove testApi
+         *  - throw exception (and document) if response has datasets or saveinfo
+         *  - throw exception (and document) if id on fieldsDetection is ignored
+         *
+         * @hide
+         */
+        @TestApi
+        public Builder setFieldsDetection(@NonNull FieldsDetection fieldsDetection) {
+            throwIfDestroyed();
+            throwIfDisableAutofillCalled();
+            mFieldsDetection = Preconditions.checkNotNull(fieldsDetection);
+            return this;
+        }
+
+        /**
          * Sets flags changing the response behavior.
          *
          * @param flags a combination of {@link #FLAG_TRACK_CONTEXT_COMMITED} and
@@ -365,7 +393,8 @@ public final class FillResponse implements Parcelable {
             if (duration <= 0) {
                 throw new IllegalArgumentException("duration must be greater than 0");
             }
-            if (mAuthentication != null || mDatasets != null || mSaveInfo != null) {
+            if (mAuthentication != null || mDatasets != null || mSaveInfo != null
+                    || mFieldsDetection != null) {
                 throw new IllegalStateException("disableAutofill() must be the only method called");
             }
 
@@ -388,11 +417,11 @@ public final class FillResponse implements Parcelable {
          */
         public FillResponse build() {
             throwIfDestroyed();
-
             if (mAuthentication == null && mDatasets == null && mSaveInfo == null
-                    && mDisableDuration == 0) {
-                throw new IllegalStateException("need to provide at least one DataSet or a "
-                        + "SaveInfo or an authentication with a presentation or disable autofill");
+                    && mDisableDuration == 0 && mFieldsDetection == null) {
+                throw new IllegalStateException("need to provide: at least one DataSet, or a "
+                        + "SaveInfo, or an authentication with a presentation, "
+                        + "or a FieldsDetection, or disable autofill");
             }
             mDestroyed = true;
             return new FillResponse(this);
@@ -430,6 +459,7 @@ public final class FillResponse implements Parcelable {
                 .append(", ignoredIds=").append(Arrays.toString(mIgnoredIds))
                 .append(", disableDuration=").append(mDisableDuration)
                 .append(", flags=").append(mFlags)
+                .append(", fieldDetection=").append(mFieldsDetection)
                 .append("]")
                 .toString();
     }
@@ -453,6 +483,7 @@ public final class FillResponse implements Parcelable {
         parcel.writeParcelable(mPresentation, flags);
         parcel.writeParcelableArray(mIgnoredIds, flags);
         parcel.writeLong(mDisableDuration);
+        parcel.writeParcelable(mFieldsDetection, flags);
         parcel.writeInt(mFlags);
         parcel.writeInt(mRequestId);
     }
@@ -487,6 +518,10 @@ public final class FillResponse implements Parcelable {
             final long disableDuration = parcel.readLong();
             if (disableDuration > 0) {
                 builder.disableAutofill(disableDuration);
+            }
+            final FieldsDetection fieldsDetection = parcel.readParcelable(null);
+            if (fieldsDetection != null) {
+                builder.setFieldsDetection(fieldsDetection);
             }
             builder.setFlags(parcel.readInt());
 

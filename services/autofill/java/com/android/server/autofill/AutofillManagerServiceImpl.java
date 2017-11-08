@@ -602,7 +602,7 @@ final class AutofillManagerServiceImpl {
             if (isValidEventLocked("setAuthenticationSelected()", sessionId)) {
                 mEventHistory.addEvent(
                         new Event(Event.TYPE_AUTHENTICATION_SELECTED, null, clientState, null, null,
-                                null, null, null, null));
+                                null, null, null, null, null, -1));
             }
         }
     }
@@ -616,7 +616,7 @@ final class AutofillManagerServiceImpl {
             if (isValidEventLocked("logDatasetAuthenticationSelected()", sessionId)) {
                 mEventHistory.addEvent(
                         new Event(Event.TYPE_DATASET_AUTHENTICATION_SELECTED, selectedDataset,
-                                clientState, null, null, null, null, null, null));
+                                clientState, null, null, null, null, null, null, null, -1));
             }
         }
     }
@@ -628,7 +628,7 @@ final class AutofillManagerServiceImpl {
         synchronized (mLock) {
             if (isValidEventLocked("logSaveShown()", sessionId)) {
                 mEventHistory.addEvent(new Event(Event.TYPE_SAVE_SHOWN, null, clientState, null,
-                        null, null, null, null, null));
+                        null, null, null, null, null, null, -1));
             }
         }
     }
@@ -642,7 +642,7 @@ final class AutofillManagerServiceImpl {
             if (isValidEventLocked("logDatasetSelected()", sessionId)) {
                 mEventHistory.addEvent(
                         new Event(Event.TYPE_DATASET_SELECTED, selectedDataset, clientState, null,
-                                null, null, null, null, null));
+                                null, null, null, null, null, null, -1));
             }
         }
     }
@@ -656,13 +656,15 @@ final class AutofillManagerServiceImpl {
             @Nullable ArrayList<AutofillId> changedFieldIds,
             @Nullable ArrayList<String> changedDatasetIds,
             @Nullable ArrayList<AutofillId> manuallyFilledFieldIds,
-            @Nullable ArrayList<ArrayList<String>> manuallyFilledDatasetIds) {
+            @Nullable ArrayList<ArrayList<String>> manuallyFilledDatasetIds,
+            @Nullable String detectedRemoteId, int detectedFieldScore) {
         synchronized (mLock) {
             if (isValidEventLocked("logDatasetNotSelected()", sessionId)) {
                 mEventHistory.addEvent(new Event(Event.TYPE_CONTEXT_COMMITTED, null,
                         clientState, selectedDatasets, ignoredDatasets,
                         changedFieldIds, changedDatasetIds,
-                        manuallyFilledFieldIds, manuallyFilledDatasetIds));
+                        manuallyFilledFieldIds, manuallyFilledDatasetIds,
+                        detectedRemoteId, detectedFieldScore));
             }
         }
     }
@@ -695,6 +697,7 @@ final class AutofillManagerServiceImpl {
         pw.print(prefix); pw.print("Default component: ");
             pw.println(mContext.getString(R.string.config_defaultAutofillService));
         pw.print(prefix); pw.print("Disabled: "); pw.println(mDisabled);
+        pw.print(prefix); pw.print("Field detection: "); pw.println(isFieldDetectionEnabled());
         pw.print(prefix); pw.print("Setup complete: "); pw.println(mSetupComplete);
         pw.print(prefix); pw.print("Last prune: "); pw.println(mLastPrune);
 
@@ -933,6 +936,13 @@ final class AutofillManagerServiceImpl {
         if (sVerbose)  Slog.v(TAG, "Removing " + packageName + " from disabled list");
         mDisabledApps.remove(packageName);
         return false;
+    }
+
+    // TODO(b/67867469): remove once feature is finished
+    boolean isFieldDetectionEnabled() {
+        return Settings.Secure.getIntForUser(
+                mContext.getContentResolver(), Settings.Secure.AUTOFILL_FEATURE_FIELD_DETECTION, 0,
+                mUserId) == 1;
     }
 
     @Override
