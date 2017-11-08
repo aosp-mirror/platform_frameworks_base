@@ -14218,6 +14218,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public void setScaleX(float scaleX) {
         if (scaleX != getScaleX()) {
+            requireIsFinite(scaleX, "scaleX");
             invalidateViewProperty(true, false);
             mRenderNode.setScaleX(scaleX);
             invalidateViewProperty(false, true);
@@ -14254,6 +14255,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public void setScaleY(float scaleY) {
         if (scaleY != getScaleY()) {
+            requireIsFinite(scaleY, "scaleY");
             invalidateViewProperty(true, false);
             mRenderNode.setScaleY(scaleY);
             invalidateViewProperty(false, true);
@@ -14803,6 +14805,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
     }
 
+    private static void requireIsFinite(float transform, String propertyName) {
+        if (Float.isNaN(transform)) {
+            throw new IllegalArgumentException("Cannot set '" + propertyName + "' to Float.NaN");
+        }
+        if (Float.isInfinite(transform)) {
+            throw new IllegalArgumentException("Cannot set '" + propertyName + "' to infinity");
+        }
+    }
+
     /**
      * The visual x position of this view, in pixels. This is equivalent to the
      * {@link #setTranslationX(float) translationX} property plus the current
@@ -14889,6 +14900,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public void setElevation(float elevation) {
         if (elevation != getElevation()) {
+            requireIsFinite(elevation, "elevation");
             invalidateViewProperty(true, false);
             mRenderNode.setElevation(elevation);
             invalidateViewProperty(false, true);
@@ -14981,6 +14993,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public void setTranslationZ(float translationZ) {
         if (translationZ != getTranslationZ()) {
+            requireIsFinite(translationZ, "translationZ");
             invalidateViewProperty(true, false);
             mRenderNode.setTranslationZ(translationZ);
             invalidateViewProperty(false, true);
