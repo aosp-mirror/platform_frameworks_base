@@ -2102,7 +2102,7 @@ public class ActivityManager {
      * is no longer available to third party
      * applications: the introduction of document-centric recents means
      * it can leak person information to the caller.  For backwards compatibility,
-     * it will still retu rn a small subset of its data: at least the caller's
+     * it will still return a small subset of its data: at least the caller's
      * own tasks, and possibly some other tasks
      * such as home that are known to not be sensitive.
      *
