@@ -18,6 +18,7 @@ package android.util.apk;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.security.DigestException;
 
 /**
  * {@link DataSource} which provides data from a {@link ByteBuffer}.
@@ -42,7 +43,7 @@ class ByteBufferDataSource implements DataSource {
 
     @Override
     public void feedIntoDataDigester(DataDigester md, long offset, int size)
-            throws IOException {
+            throws IOException, DigestException {
         // There's no way to tell MessageDigest to read data from ByteBuffer from a position
         // other than the buffer's current position. We thus need to change the buffer's
         // position to match the requested offset.

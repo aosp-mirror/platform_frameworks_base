@@ -17,6 +17,7 @@
 package android.util.apk;
 
 import java.io.IOException;
+import java.security.DigestException;
 
 /** Source of data to be digested. */
 interface DataSource {
@@ -32,5 +33,6 @@ interface DataSource {
      * @param offset offset of the region inside this data source.
      * @param size size (in bytes) of the region.
      */
-    void feedIntoDataDigester(DataDigester md, long offset, int size) throws IOException;
+    void feedIntoDataDigester(DataDigester md, long offset, int size)
+            throws IOException, DigestException;
 }

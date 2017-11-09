@@ -3943,9 +3943,6 @@ android.telephony.VisualVoicemailSmsFilterSettings
 android.telephony.VoLteServiceState
 android.telephony.VoLteServiceState$1
 android.telephony.gsm.GsmCellLocation
-android.telephony.ims.ImsServiceProxy$INotifyStatusChanged
-android.telephony.ims.ImsServiceProxyCompat
-android.telephony.ims.feature.IMMTelFeature
 android.telephony.ims.stub.ImsConfigImplBase
 android.telephony.ims.stub.ImsEcbmImplBase
 android.telephony.ims.stub.ImsUtImplBase

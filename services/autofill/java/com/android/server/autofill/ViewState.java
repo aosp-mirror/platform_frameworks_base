@@ -134,7 +134,11 @@ final class ViewState {
     }
 
     String getStateAsString() {
-        return DebugUtils.flagsToString(ViewState.class, "STATE_", mState);
+        return getStateAsString(mState);
+    }
+
+    static String getStateAsString(int state) {
+        return DebugUtils.flagsToString(ViewState.class, "STATE_", state);
     }
 
     void setState(int state) {

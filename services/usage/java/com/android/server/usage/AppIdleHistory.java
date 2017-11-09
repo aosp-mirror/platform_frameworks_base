@@ -103,7 +103,7 @@ public class AppIdleHistory {
         long lastUsedScreenTime;
         @StandbyBuckets int currentBucket;
         String bucketingReason;
-        int lastInformedState;
+        int lastInformedBucket;
     }
 
     AppIdleHistory(File storageDir, long elapsedRealtime) {
@@ -333,13 +333,12 @@ public class AppIdleHistory {
     }
 
     boolean shouldInformListeners(String packageName, int userId,
-            long elapsedRealtime, boolean isIdle) {
+            long elapsedRealtime, int bucket) {
         ArrayMap<String, AppUsageHistory> userHistory = getUserHistory(userId);
         AppUsageHistory appUsageHistory = getPackageHistory(userHistory, packageName,
                 elapsedRealtime, true);
-        int targetState = isIdle? STATE_IDLE : STATE_ACTIVE;
-        if (appUsageHistory.lastInformedState != (isIdle ? STATE_IDLE : STATE_ACTIVE)) {
-            appUsageHistory.lastInformedState = targetState;
+        if (appUsageHistory.lastInformedBucket != bucket) {
+            appUsageHistory.lastInformedBucket = bucket;
             return true;
         }
         return false;

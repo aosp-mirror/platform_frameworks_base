@@ -19,6 +19,7 @@ package android.service.autofill;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.content.IntentSender;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -164,6 +165,10 @@ public final class FillEventHistory implements Parcelable {
                         dest.writeStringList(event.mManuallyFilledDatasetIds.get(j));
                     }
                 }
+                dest.writeString(event.mDetectedRemoteId);
+                if (event.mDetectedRemoteId != null) {
+                    dest.writeInt(event.mDetectedFieldScore);
+                }
             }
         }
     }
@@ -226,6 +231,7 @@ public final class FillEventHistory implements Parcelable {
          * <p>See {@link android.view.autofill.AutofillManager} for more information about autofill
          * contexts.
          */
+        // TODO(b/67867469): update with field detection behavior
         public static final int TYPE_CONTEXT_COMMITTED = 4;
 
         /** @hide */
@@ -252,6 +258,9 @@ public final class FillEventHistory implements Parcelable {
 
         @Nullable private final ArrayList<AutofillId> mManuallyFilledFieldIds;
         @Nullable private final ArrayList<ArrayList<String>> mManuallyFilledDatasetIds;
+
+        @Nullable private final String mDetectedRemoteId;
+        private final int mDetectedFieldScore;
 
         /**
          * Returns the type of the event.
@@ -355,6 +364,39 @@ public final class FillEventHistory implements Parcelable {
         }
 
         /**
+         * Gets the results of the last {@link FieldsDetection} request.
+         *
+         * @return map of edit-distance match ({@code 0} means full match,
+         * {@code 1} means 1 character different, etc...) by remote id (as set in the
+         * {@link FieldsDetection} constructor), or {@code null} if none of the user-input values
+         * matched the requested detection.
+         *
+         * <p><b>Note: </b>Only set on events of type {@link #TYPE_CONTEXT_COMMITTED}, when the
+         * service requested {@link FillResponse.Builder#setFieldsDetection(FieldsDetection) fields
+         * detection}.
+         *
+         * TODO(b/67867469):
+         *  - improve javadoc
+         *  - refine score meaning (for example, should 1 be different of -1?)
+         *  - mention when it's set
+         *  - unhide
+         *  - unhide / remove testApi
+         *  - add @NonNull / check it / add unit tests
+         *
+         * @hide
+         */
+        @TestApi
+        @NonNull public Map<String, Integer> getDetectedFields() {
+            if (mDetectedRemoteId == null || mDetectedFieldScore == -1) {
+                return Collections.emptyMap();
+            }
+
+            final ArrayMap<String, Integer> map = new ArrayMap<>(1);
+            map.put(mDetectedRemoteId, mDetectedFieldScore);
+            return map;
+        }
+
+        /**
          * Returns which fields were available on datasets provided by the service but manually
          * entered by the user.
          *
@@ -430,7 +472,6 @@ public final class FillEventHistory implements Parcelable {
          * and belonged to datasets.
          * @param manuallyFilledDatasetIds The ids of datasets that had values matching the
          * respective entry on {@code manuallyFilledFieldIds}.
-         *
          * @throws IllegalArgumentException If the length of {@code changedFieldIds} and
          * {@code changedDatasetIds} doesn't match.
          * @throws IllegalArgumentException If the length of {@code manuallyFilledFieldIds} and
@@ -438,13 +479,15 @@ public final class FillEventHistory implements Parcelable {
          *
          * @hide
          */
+        // TODO(b/67867469): document detection field parameters once stable
         public Event(int eventType, @Nullable String datasetId, @Nullable Bundle clientState,
                 @Nullable List<String> selectedDatasetIds,
                 @Nullable ArraySet<String> ignoredDatasetIds,
                 @Nullable ArrayList<AutofillId> changedFieldIds,
                 @Nullable ArrayList<String> changedDatasetIds,
                 @Nullable ArrayList<AutofillId> manuallyFilledFieldIds,
-                @Nullable ArrayList<ArrayList<String>> manuallyFilledDatasetIds) {
+                @Nullable ArrayList<ArrayList<String>> manuallyFilledDatasetIds,
+                @Nullable String detectedRemoteId, int detectedFieldScore) {
             mEventType = Preconditions.checkArgumentInRange(eventType, 0, TYPE_CONTEXT_COMMITTED,
                     "eventType");
             mDatasetId = datasetId;
@@ -467,6 +510,8 @@ public final class FillEventHistory implements Parcelable {
             }
             mManuallyFilledFieldIds = manuallyFilledFieldIds;
             mManuallyFilledDatasetIds = manuallyFilledDatasetIds;
+            mDetectedRemoteId = detectedRemoteId;
+            mDetectedFieldScore = detectedFieldScore;
         }
 
         @Override
@@ -479,6 +524,8 @@ public final class FillEventHistory implements Parcelable {
                     + ", changedDatasetsIds=" + mChangedDatasetIds
                     + ", manuallyFilledFieldIds=" + mManuallyFilledFieldIds
                     + ", manuallyFilledDatasetIds=" + mManuallyFilledDatasetIds
+                    + ", detectedRemoteId=" + mDetectedRemoteId
+                    + ", detectedFieldScore=" + mDetectedFieldScore
                     + "]";
         }
     }
@@ -514,11 +561,15 @@ public final class FillEventHistory implements Parcelable {
                         } else {
                             manuallyFilledDatasetIds = null;
                         }
+                        final String detectedRemoteId = parcel.readString();
+                        final int detectedFieldScore = detectedRemoteId == null ? -1
+                                : parcel.readInt();
 
                         selection.addEvent(new Event(eventType, datasetId, clientState,
                                 selectedDatasetIds, ignoredDatasets,
                                 changedFieldIds, changedDatasetIds,
-                                manuallyFilledFieldIds, manuallyFilledDatasetIds));
+                                manuallyFilledFieldIds, manuallyFilledDatasetIds,
+                                detectedRemoteId, detectedFieldScore));
                     }
                     return selection;
                 }

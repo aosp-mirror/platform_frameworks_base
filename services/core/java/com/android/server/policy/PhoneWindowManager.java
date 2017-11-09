@@ -1172,14 +1172,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 + ", mOrientationSensorEnabled=" + mOrientationSensorEnabled
                 + ", mKeyguardDrawComplete=" + mKeyguardDrawComplete
                 + ", mWindowManagerDrawComplete=" + mWindowManagerDrawComplete);
-        final boolean keyguardGoingAway = mWindowManagerInternal.isKeyguardGoingAway();
 
         boolean disable = true;
         // Note: We postpone the rotating of the screen until the keyguard as well as the
         // window manager have reported a draw complete or the keyguard is going away in dismiss
         // mode.
-        if (mScreenOnEarly && mAwake && ((mKeyguardDrawComplete && mWindowManagerDrawComplete)
-                || keyguardGoingAway)) {
+        if (mScreenOnEarly && mAwake && ((mKeyguardDrawComplete && mWindowManagerDrawComplete))) {
             if (needSensorRunningLp()) {
                 disable = false;
                 //enable listener if not already enabled
@@ -1190,7 +1188,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     // the sensor reading was cleared which can cause it to relaunch the app that
                     // will show in the wrong orientation first before correcting leading to app
                     // launch delays.
-                    mOrientationListener.enable(!keyguardGoingAway /* clearCurrentRotation */);
+                    mOrientationListener.enable(true /* clearCurrentRotation */);
                     if(localLOGV) Slog.v(TAG, "Enabling listeners");
                     mOrientationSensorEnabled = true;
                 }
@@ -8086,22 +8084,28 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private int updateLightNavigationBarLw(int vis, WindowState opaque,
             WindowState opaqueOrDimming) {
         final WindowState imeWin = mWindowManagerFuncs.getInputMethodWindowLw();
-
-        final WindowState navColorWin;
-        if (imeWin != null && imeWin.isVisibleLw() && mNavigationBarPosition == NAV_BAR_BOTTOM) {
-            navColorWin = imeWin;
-        } else {
-            navColorWin = opaqueOrDimming;
+        final boolean isImeShownWithBottomNavBar =
+                imeWin != null && imeWin.isVisibleLw() && mNavigationBarPosition == NAV_BAR_BOTTOM;
+        if (isImeShownWithBottomNavBar) {
+            final int winFlags = PolicyControl.getWindowFlags(imeWin, null);
+            if ((winFlags & WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0) {
+                // If the IME window is visible and explicitly requesting custom nav bar background
+                // rendering, respect its light flag.
+                vis &= ~View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+                vis |= PolicyControl.getSystemUiVisibility(imeWin, null)
+                        & View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+                return vis;
+            }
         }
 
-        if (navColorWin != null) {
-            if (navColorWin == opaque) {
-                // If the top fullscreen-or-dimming window is also the top fullscreen, respect
-                // its light flag.
+        if (opaqueOrDimming != null) {
+            if (opaqueOrDimming == opaque) {
+                // If the top fullscreen-or-dimming window is also the top fullscreen window,
+                // respect its light flag.
                 vis &= ~View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
-                vis |= PolicyControl.getSystemUiVisibility(navColorWin, null)
+                vis |= PolicyControl.getSystemUiVisibility(opaqueOrDimming, null)
                         & View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
-            } else if (navColorWin.isDimming() || navColorWin == imeWin) {
+            } else if (opaqueOrDimming.isDimming() || isImeShownWithBottomNavBar) {
                 // Otherwise if it's dimming or it's the IME window, clear the light flag.
                 vis &= ~View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
             }

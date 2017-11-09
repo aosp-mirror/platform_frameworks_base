@@ -5317,6 +5317,15 @@ public final class Settings {
         public static final String AUTOFILL_SERVICE = "autofill_service";
 
         /**
+         * Experimental autofill feature.
+         *
+         * <p>TODO(b/67867469): remove once feature is finished
+         * @hide
+         */
+        @TestApi
+        public static final String AUTOFILL_FEATURE_FIELD_DETECTION = "autofill_field_detection";
+
+        /**
          * @deprecated Use {@link android.provider.Settings.Global#DEVICE_PROVISIONED} instead
          */
         @Deprecated

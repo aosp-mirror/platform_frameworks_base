@@ -54,6 +54,7 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.service.autofill.AutofillService;
 import android.service.autofill.Dataset;
+import android.service.autofill.FieldsDetection;
 import android.service.autofill.FillContext;
 import android.service.autofill.FillRequest;
 import android.service.autofill.FillResponse;
@@ -492,6 +493,13 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             }
         }
 
+        // TODO(b/67867469): remove once feature is finished
+        if (response.getFieldsDetection() != null && !mService.isFieldDetectionEnabled()) {
+            Slog.w(TAG, "Ignoring " + response + " because field detection is disabled");
+            processNullResponseLocked(requestFlags);
+            return;
+        }
+
         mService.setLastResponse(serviceUid, id, response);
 
         int sessionFinishedState = 0;
@@ -913,10 +921,28 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 }
             }
         }
-        if (!hasAtLeastOneDataset) {
-            if (sVerbose) Slog.v(TAG, "logContextCommittedLocked(): skipped (no datasets)");
+        final FieldsDetection fieldsDetection = lastResponse.getFieldsDetection();
+
+        if (!hasAtLeastOneDataset && fieldsDetection == null) {
+            if (sVerbose) {
+                Slog.v(TAG, "logContextCommittedLocked(): skipped (no datasets nor fields "
+                        + "detection)");
+            }
             return;
         }
+
+        final AutofillId detectableFieldId;
+        final String detectableRemoteId;
+        String detectedRemoteId = null;
+        if (fieldsDetection == null) {
+            detectableFieldId = null;
+            detectableRemoteId = null;
+        } else {
+            detectableFieldId = fieldsDetection.getFieldId();
+            detectableRemoteId = fieldsDetection.getRemoteId();
+        }
+
+        int detectedFieldScore = -1;
 
         for (int i = 0; i < mViewStates.size(); i++) {
             final ViewState viewState = mViewStates.valueAt(i);
@@ -926,7 +952,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             // - autofilled -> changedDatasetIds
             // - not autofilled but matches a dataset value -> manuallyFilledIds
             if ((state & ViewState.STATE_CHANGED) != 0) {
-
                 // Check if autofilled value was changed
                 if ((state & ViewState.STATE_AUTOFILLED) != 0) {
                     final String datasetId = viewState.getDatasetId();
@@ -958,7 +983,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     changedFieldIds.add(viewState.id);
                     changedDatasetIds.add(datasetId);
                 } else {
-                    // Check if value match a dataset.
                     final AutofillValue currentValue = viewState.getCurrentValue();
                     if (currentValue == null) {
                         if (sDebug) {
@@ -967,58 +991,78 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                         }
                         continue;
                     }
-                    for (int j = 0; j < responseCount; j++) {
-                        final FillResponse response = mResponses.valueAt(j);
-                        final List<Dataset> datasets = response.getDatasets();
-                        if (datasets == null || datasets.isEmpty()) {
-                            if (sVerbose) Slog.v(TAG,  "logContextCommitted() no datasets at " + j);
-                        } else {
-                            for (int k = 0; k < datasets.size(); k++) {
-                                final Dataset dataset = datasets.get(k);
-                                final String datasetId = dataset.getId();
-                                if (datasetId == null) {
-                                    if (sVerbose) {
-                                        Slog.v(TAG, "logContextCommitted() skipping idless dataset "
-                                                + dataset);
-                                    }
-                                } else {
-                                    final ArrayList<AutofillValue> values = dataset.getFieldValues();
-                                    for (int l = 0; l < values.size(); l++) {
-                                        final AutofillValue candidate = values.get(l);
-                                        if (currentValue.equals(candidate)) {
-                                            if (sDebug) {
-                                                Slog.d(TAG, "field " + viewState.id
-                                                        + " was manually filled with value set by "
-                                                        + "dataset " + datasetId);
-                                            }
-                                            if (manuallyFilledIds == null) {
-                                                manuallyFilledIds = new ArrayMap<>();
-                                            }
-                                            ArraySet<String> datasetIds =
-                                                    manuallyFilledIds.get(viewState.id);
-                                            if (datasetIds == null) {
-                                                datasetIds = new ArraySet<>(1);
-                                                manuallyFilledIds.put(viewState.id, datasetIds);
-                                            }
-                                            datasetIds.add(datasetId);
-                                        }
-                                    }
-                                    if (mSelectedDatasetIds == null
-                                            || !mSelectedDatasetIds.contains(datasetId)) {
-                                        if (sVerbose) {
-                                            Slog.v(TAG, "adding ignored dataset " + datasetId);
-                                        }
-                                        if (ignoredDatasets == null) {
-                                            ignoredDatasets = new ArraySet<>();
-                                        }
-                                        ignoredDatasets.add(datasetId);
-                                    }
+                    // Check if value match a dataset.
+                    if (hasAtLeastOneDataset) {
+                        for (int j = 0; j < responseCount; j++) {
+                            final FillResponse response = mResponses.valueAt(j);
+                            final List<Dataset> datasets = response.getDatasets();
+                            if (datasets == null || datasets.isEmpty()) {
+                                if (sVerbose) {
+                                    Slog.v(TAG,  "logContextCommitted() no datasets at " + j);
                                 }
-                            }
-                        }
+                            } else {
+                                for (int k = 0; k < datasets.size(); k++) {
+                                    final Dataset dataset = datasets.get(k);
+                                    final String datasetId = dataset.getId();
+                                    if (datasetId == null) {
+                                        if (sVerbose) {
+                                            Slog.v(TAG, "logContextCommitted() skipping idless "
+                                                    + "dataset " + dataset);
+                                        }
+                                    } else {
+                                        final ArrayList<AutofillValue> values =
+                                                dataset.getFieldValues();
+                                        for (int l = 0; l < values.size(); l++) {
+                                            final AutofillValue candidate = values.get(l);
+                                            if (currentValue.equals(candidate)) {
+                                                if (sDebug) {
+                                                    Slog.d(TAG, "field " + viewState.id + " was "
+                                                            + "manually filled with value set by "
+                                                            + "dataset " + datasetId);
+                                                }
+                                                if (manuallyFilledIds == null) {
+                                                    manuallyFilledIds = new ArrayMap<>();
+                                                }
+                                                ArraySet<String> datasetIds =
+                                                        manuallyFilledIds.get(viewState.id);
+                                                if (datasetIds == null) {
+                                                    datasetIds = new ArraySet<>(1);
+                                                    manuallyFilledIds.put(viewState.id, datasetIds);
+                                                }
+                                                datasetIds.add(datasetId);
+                                            }
+                                        } // for l
+                                        if (mSelectedDatasetIds == null
+                                                || !mSelectedDatasetIds.contains(datasetId)) {
+                                            if (sVerbose) {
+                                                Slog.v(TAG, "adding ignored dataset " + datasetId);
+                                            }
+                                            if (ignoredDatasets == null) {
+                                                ignoredDatasets = new ArraySet<>();
+                                            }
+                                            ignoredDatasets.add(datasetId);
+                                        } // if
+                                    } // if
+                                } // for k
+                            } // else
+                        } // for j
                     }
-                }
-            }
+
+                    // Check if detectable field changed.
+                    if (detectableFieldId != null && detectableFieldId.equals(viewState.id)
+                            && currentValue.isText() && currentValue.getTextValue() != null) {
+                        final String actualValue = currentValue.getTextValue().toString();
+                        final String expectedValue = fieldsDetection.getValue();
+                        if (actualValue.equalsIgnoreCase(expectedValue)) {
+                            detectedRemoteId = detectableRemoteId;
+                            detectedFieldScore = 0;
+                        } else if (sVerbose) {
+                            Slog.v(TAG, "Detection mismatch for field " + detectableFieldId);
+                        }
+                        // TODO(b/67867469): set score on partial hits
+                    }
+                } // else
+            } // else
         }
 
         if (sVerbose) {
@@ -1027,7 +1071,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     + ", ignoredDatasetIds=" + ignoredDatasets
                     + ", changedAutofillIds=" + changedFieldIds
                     + ", changedDatasetIds=" + changedDatasetIds
-                    + ", manuallyFilledIds=" + manuallyFilledIds);
+                    + ", manuallyFilledIds=" + manuallyFilledIds
+                    + ", detectableFieldId=" + detectableFieldId
+                    + ", detectedFieldScore=" + detectedFieldScore
+                    );
         }
 
         ArrayList<AutofillId> manuallyFilledFieldIds = null;
@@ -1045,9 +1092,11 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 manuallyFilledDatasetIds.add(new ArrayList<>(datasetIds));
             }
         }
+
         mService.logContextCommitted(id, mClientState, mSelectedDatasetIds, ignoredDatasets,
                 changedFieldIds, changedDatasetIds,
-                manuallyFilledFieldIds, manuallyFilledDatasetIds);
+                manuallyFilledFieldIds, manuallyFilledDatasetIds,
+                detectedRemoteId, detectedFieldScore);
     }
 
     /**
@@ -1535,6 +1584,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 viewState = new ViewState(this, id, this,
                         isIgnored ? ViewState.STATE_IGNORED : ViewState.STATE_INITIAL);
                 mViewStates.put(id, viewState);
+
+                // TODO(b/67867469): for optimization purposes, should also ignore if change is
+                // detectable, and batch-send them when the session is finished (but that will
+                // require tracking detectable fields on AutofillManager)
                 if (isIgnored) {
                     if (sDebug) Slog.d(TAG, "updateLocked(): ignoring view " + id);
                     return;

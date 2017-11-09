@@ -52,18 +52,7 @@ public class PackageManagerServiceCompilerMapping {
     // Load the property for the given reason and check for validity. This will throw an
     // exception in case the reason or value are invalid.
     private static String getAndCheckValidity(int reason) {
-        String sysPropName = getSystemPropertyName(reason);
-        String sysPropValue;
-        // TODO: This is a temporary hack to keep marlin booting on aosp/master while we
-        // figure out how to deal with these system properties that currently appear on
-        // vendor.
-        if ("pm.dexopt.inactive".equals(sysPropName)) {
-            sysPropValue = "verify";
-        } else if ("pm.dexopt.shared".equals(sysPropName)) {
-            sysPropValue = "speed";
-        } else {
-            sysPropValue = SystemProperties.get(sysPropName);
-        }
+        String sysPropValue = SystemProperties.get(getSystemPropertyName(reason));
         if (sysPropValue == null || sysPropValue.isEmpty() ||
                 !DexFile.isValidCompilerFilter(sysPropValue)) {
             throw new IllegalStateException("Value \"" + sysPropValue +"\" not valid "

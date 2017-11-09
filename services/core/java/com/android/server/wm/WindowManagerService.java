@@ -125,6 +125,7 @@ import android.app.ActivityThread;
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
 import android.content.BroadcastReceiver;
+import android.content.ClipData;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -2916,10 +2917,9 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     public void setKeyguardGoingAway(boolean keyguardGoingAway) {
-// TODO: Use of this can be removed. Revert ag/I8369723d6a77f2c602f1ef080371fa7cd9ee094e
-//        synchronized (mWindowMap) {
-//            mKeyguardGoingAway = keyguardGoingAway;
-//        }
+        synchronized (mWindowMap) {
+            mKeyguardGoingAway = keyguardGoingAway;
+        }
     }
 
     // -------------------------------------------------------------
@@ -7278,11 +7278,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
-        public boolean isKeyguardGoingAway() {
-            return WindowManagerService.this.mKeyguardGoingAway;
-        }
-
-        @Override
         public boolean isKeyguardShowingAndNotOccluded() {
             return WindowManagerService.this.isKeyguardShowingAndNotOccluded();
         }
@@ -7446,6 +7441,11 @@ public class WindowManagerService extends IWindowManager.Stub
             synchronized (WindowManagerService.this) {
                 mVr2dDisplayId = vr2dDisplayId;
             }
+        }
+
+        @Override
+        public void registerDragDropControllerCallback(IDragDropCallback callback) {
+            mDragDropController.registerCallback(callback);
         }
     }
 

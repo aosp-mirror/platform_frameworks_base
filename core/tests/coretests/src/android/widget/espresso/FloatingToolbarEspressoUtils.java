@@ -48,6 +48,7 @@ import org.hamcrest.TypeSafeMatcher;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 
 /**
  * Espresso utility methods for the floating toolbar.
@@ -175,31 +176,10 @@ public class FloatingToolbarEspressoUtils {
      * @throws AssertionError if the assertion fails
      */
     public static void assertFloatingToolbarDoesNotContainItem(String itemLabel) {
-        onFloatingToolBar().check(matches(new TypeSafeMatcher<View>() {
-            @Override
-            public boolean matchesSafely(View view) {
-                return doesNotContainItem(view);
-            }
-
-            @Override
-            public void describeTo(Description description) {}
-
-            private boolean doesNotContainItem(View view) {
-                if (view.getTag() instanceof MenuItem) {
-                    if (itemLabel.equals(((MenuItem) view.getTag()).getTitle().toString())) {
-                        return false;
-                    }
-                } else if (view instanceof ViewGroup) {
-                    ViewGroup viewGroup = (ViewGroup) view;
-                    for (int i = 0; i < viewGroup.getChildCount(); i++) {
-                        if (doesNotContainItem(viewGroup.getChildAt(i))) {
-                            return false;
-                        }
-                    }
-                }
-                return true;
-            }
-        }));
+        final Predicate<View> hasMenuItemLabel = view ->
+                view.getTag() instanceof MenuItem
+                        && itemLabel.equals(((MenuItem) view.getTag()).getTitle().toString());
+        assertFloatingToolbarMenuItem(hasMenuItemLabel, false);
     }
 
     /**
@@ -209,23 +189,30 @@ public class FloatingToolbarEspressoUtils {
      * @throws AssertionError if the assertion fails
      */
     public static void assertFloatingToolbarDoesNotContainItem(final int menuItemId) {
+        final Predicate<View> hasMenuItemId = view ->
+                view.getTag() instanceof MenuItem
+                        && ((MenuItem) view.getTag()).getItemId() == menuItemId;
+        assertFloatingToolbarMenuItem(hasMenuItemId, false);
+    }
+
+    private static void assertFloatingToolbarMenuItem(
+            final Predicate<View> predicate, final boolean positiveAssertion) {
         onFloatingToolBar().check(matches(new TypeSafeMatcher<View>() {
             @Override
             public boolean matchesSafely(View view) {
-                return !hasMenuItemWithSpecifiedId(view);
+                return positiveAssertion == containsItem(view);
             }
 
             @Override
             public void describeTo(Description description) {}
 
-            private boolean hasMenuItemWithSpecifiedId(View view) {
-                if (view.getTag() instanceof MenuItem
-                        && ((MenuItem) view.getTag()).getItemId() == menuItemId) {
+            private boolean containsItem(View view) {
+                if (predicate.test(view)) {
                     return true;
                 } else if (view instanceof ViewGroup) {
                     ViewGroup viewGroup = (ViewGroup) view;
                     for (int i = 0; i < viewGroup.getChildCount(); i++) {
-                        if (hasMenuItemWithSpecifiedId(viewGroup.getChildAt(i))) {
+                        if (containsItem(viewGroup.getChildAt(i))) {
                             return true;
                         }
                     }

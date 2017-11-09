@@ -201,6 +201,8 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     private static final String TAG_STATES = TAG + POSTFIX_STATES;
     private static final String TAG_SWITCH = TAG + POSTFIX_SWITCH;
     private static final String TAG_VISIBILITY = TAG + POSTFIX_VISIBILITY;
+    // TODO(b/67864419): Remove once recents component is overridden
+    private static final String LEGACY_RECENTS_PACKAGE_NAME = "com.android.systemui.recents";
 
     private static final boolean SHOW_ACTIVITY_START_TIME = true;
 
@@ -1057,7 +1059,8 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
                 // We only allow home activities to be resizeable if they explicitly requested it.
                 info.resizeMode = RESIZE_MODE_UNRESIZEABLE;
             }
-        } else if (service.getRecentTasks().isRecentsComponent(realActivity, appInfo.uid)) {
+        } else if (realActivity.getClassName().contains(LEGACY_RECENTS_PACKAGE_NAME) ||
+                service.getRecentTasks().isRecentsComponent(realActivity, appInfo.uid)) {
             activityType = ACTIVITY_TYPE_RECENTS;
         } else if (options != null && options.getLaunchActivityType() == ACTIVITY_TYPE_ASSISTANT
                 && canLaunchAssistActivity(launchedFromPackage)) {
@@ -2179,26 +2182,6 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         mTmpConfig.unset();
         computeBounds(mTmpBounds);
         if (mTmpBounds.equals(mBounds)) {
-            final ActivityStack stack = getStack();
-            if (!mBounds.isEmpty() || task == null || stack == null || !task.mFullscreen) {
-                // We don't want to influence the override configuration here if our task is in
-                // multi-window mode or there is a bounds specified to calculate the override
-                // config. In both of this cases the app should be compatible with whatever the
-                // current configuration is or will be.
-                return;
-            }
-
-            // Currently limited to the top activity for now to avoid situations where non-top
-            // visible activity and top might have conflicting requests putting the non-top activity
-            // windows in an odd state.
-            final ActivityRecord top = mStackSupervisor.topRunningActivityLocked();
-            final Configuration parentConfig = getParent().getConfiguration();
-            if (top != this || isConfigurationCompatible(parentConfig)) {
-                onOverrideConfigurationChanged(mTmpConfig);
-            } else if (isConfigurationCompatible(
-                    mLastReportedConfiguration.getMergedConfiguration())) {
-                onOverrideConfigurationChanged(mLastReportedConfiguration.getMergedConfiguration());
-            }
             return;
         }
 

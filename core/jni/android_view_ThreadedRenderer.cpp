@@ -54,6 +54,7 @@
 #include <renderthread/RenderProxy.h>
 #include <renderthread/RenderTask.h>
 #include <renderthread/RenderThread.h>
+#include <pipeline/skia/ShaderCache.h>
 
 namespace android {
 
@@ -970,10 +971,14 @@ static void android_view_ThreadedRenderer_removeFrameMetricsObserver(JNIEnv* env
 // ----------------------------------------------------------------------------
 
 static void android_view_ThreadedRenderer_setupShadersDiskCache(JNIEnv* env, jobject clazz,
-        jstring diskCachePath) {
+        jstring diskCachePath, jstring skiaDiskCachePath) {
     const char* cacheArray = env->GetStringUTFChars(diskCachePath, NULL);
     android::egl_set_cache_filename(cacheArray);
     env->ReleaseStringUTFChars(diskCachePath, cacheArray);
+
+    const char* skiaCacheArray = env->GetStringUTFChars(skiaDiskCachePath, NULL);
+    uirenderer::skiapipeline::ShaderCache::get().setFilename(skiaCacheArray);
+    env->ReleaseStringUTFChars(skiaDiskCachePath, skiaCacheArray);
 }
 
 // ----------------------------------------------------------------------------
@@ -1018,7 +1023,7 @@ static const JNINativeMethod gMethods[] = {
     { "nNotifyFramePending", "(J)V", (void*) android_view_ThreadedRenderer_notifyFramePending },
     { "nSerializeDisplayListTree", "(J)V", (void*) android_view_ThreadedRenderer_serializeDisplayListTree },
     { "nDumpProfileInfo", "(JLjava/io/FileDescriptor;I)V", (void*) android_view_ThreadedRenderer_dumpProfileInfo },
-    { "setupShadersDiskCache", "(Ljava/lang/String;)V",
+    { "setupShadersDiskCache", "(Ljava/lang/String;Ljava/lang/String;)V",
                 (void*) android_view_ThreadedRenderer_setupShadersDiskCache },
     { "nAddRenderNode", "(JJZ)V", (void*) android_view_ThreadedRenderer_addRenderNode},
     { "nRemoveRenderNode", "(JJ)V", (void*) android_view_ThreadedRenderer_removeRenderNode},

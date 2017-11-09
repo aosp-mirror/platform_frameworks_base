@@ -83,7 +83,6 @@ public final class SQLiteGlobal {
     /**
      * Returns true if compatibility WAL mode is supported. In this mode, only
      * database journal mode is changed. Connection pool will use at most one connection.
-     * @hide
      */
     public static boolean isCompatibilityWalSupported() {
         return SystemProperties.getBoolean("debug.sqlite.compatibility_wal_supported",

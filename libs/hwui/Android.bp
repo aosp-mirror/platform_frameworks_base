@@ -68,6 +68,7 @@ cc_defaults {
     ],
     static_libs: [
         "libplatformprotos",
+        "libEGL_blobCache",
     ],
 }
 
@@ -131,6 +132,7 @@ cc_defaults {
         "pipeline/skia/LayerDrawable.cpp",
         "pipeline/skia/RenderNodeDrawable.cpp",
         "pipeline/skia/ReorderBarrierDrawables.cpp",
+        "pipeline/skia/ShaderCache.cpp",
         "pipeline/skia/SkiaDisplayList.cpp",
         "pipeline/skia/SkiaOpenGLPipeline.cpp",
         "pipeline/skia/SkiaOpenGLReadback.cpp",
@@ -346,6 +348,7 @@ cc_test {
         "tests/unit/RecordingCanvasTests.cpp",
         "tests/unit/RenderNodeTests.cpp",
         "tests/unit/RenderPropertiesTests.cpp",
+        "tests/unit/ShaderCacheTests.cpp",
         "tests/unit/SkiaBehaviorTests.cpp",
         "tests/unit/SkiaDisplayListTests.cpp",
         "tests/unit/SkiaPipelineTests.cpp",

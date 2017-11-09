@@ -18,6 +18,8 @@ package android.view.textclassifier;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 
 import android.os.LocaleList;
@@ -31,6 +33,8 @@ import org.hamcrest.Matcher;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.util.Collection;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -174,6 +178,23 @@ public class TextClassificationManagerTest {
     }
 
     @Test
+    public void testGenerateLinks() {
+        if (isTextClassifierDisabled()) return;
+
+        checkGenerateLinksFindsLink(
+                "The number is +12122537077. See you tonight!",
+                "+12122537077",
+                TextClassifier.TYPE_PHONE);
+
+        checkGenerateLinksFindsLink(
+                "The address is 1600 Amphitheater Parkway, Mountain View, CA. See you tonight!",
+                "1600 Amphitheater Parkway, Mountain View, CA",
+                TextClassifier.TYPE_ADDRESS);
+
+        // TODO: Add more entity types when the model supports them.
+    }
+
+    @Test
     public void testSetTextClassifier() {
         TextClassifier classifier = mock(TextClassifier.class);
         mTcm.setTextClassifier(classifier);
@@ -182,6 +203,24 @@ public class TextClassificationManagerTest {
 
     private boolean isTextClassifierDisabled() {
         return mClassifier == TextClassifier.NO_OP;
+    }
+
+    private void checkGenerateLinksFindsLink(String text, String classifiedText, String type) {
+        assertTrue(text.contains(classifiedText));
+        int startIndex = text.indexOf(classifiedText);
+        int endIndex = startIndex + classifiedText.length();
+
+        Collection<TextLinks.TextLink> links = mClassifier.generateLinks(text, null).getLinks();
+        for (TextLinks.TextLink link : links) {
+            if (text.subSequence(link.getStart(), link.getEnd()).equals(classifiedText)) {
+                assertEquals(type, link.getEntity(0));
+                assertEquals(startIndex, link.getStart());
+                assertEquals(endIndex, link.getEnd());
+                assertTrue(link.getConfidenceScore(type) > .9);
+                return;
+            }
+        }
+        fail(); // Subsequence was not identified.
     }
 
     private static Matcher<TextSelection> isTextSelection(

@@ -16,6 +16,7 @@
 
 #include "RenderThread.h"
 
+#include "pipeline/skia/ShaderCache.h"
 #include "CanvasContext.h"
 #include "EglManager.h"
 #include "OpenGLReadback.h"
@@ -105,6 +106,7 @@ void RenderThread::initThreadLocals() {
     mRenderState = new RenderState(*this);
     mVkManager = new VulkanManager(*this);
     mCacheManager = new CacheManager(mDisplayInfo);
+    uirenderer::skiapipeline::ShaderCache::get().initShaderDiskCache();
 }
 
 void RenderThread::dumpGraphicsMemory(int fd) {

@@ -174,7 +174,7 @@ public final class AppIdleController extends StateController {
     private final class AppIdleStateChangeListener
             extends UsageStatsManagerInternal.AppIdleStateChangeListener {
         @Override
-        public void onAppIdleStateChanged(String packageName, int userId, boolean idle) {
+        public void onAppIdleStateChanged(String packageName, int userId, boolean idle, int bucket) {
             boolean changed = false;
             synchronized (mLock) {
                 if (mAppIdleParoleOn) {

@@ -118,7 +118,15 @@ public abstract class UsageStatsManagerInternal {
             AppIdleStateChangeListener listener);
 
     public static abstract class AppIdleStateChangeListener {
-        public abstract void onAppIdleStateChanged(String packageName, int userId, boolean idle);
+
+        /** Callback to inform listeners that the idle state has changed to a new bucket. */
+        public abstract void onAppIdleStateChanged(String packageName, int userId, boolean idle,
+                                                   int bucket);
+
+        /**
+         * Callback to inform listeners that the parole state has changed. This means apps are
+         * allowed to do work even if they're idle or in a low bucket.
+         */
         public abstract void onParoleStateChanged(boolean isParoleOn);
     }
 

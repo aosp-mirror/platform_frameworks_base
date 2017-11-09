@@ -1184,10 +1184,10 @@ public class PackageInstaller {
         }
 
         /**
-         * Sets the UID that initiated package installation. This is informational
+         * Sets the UID that initiated the package installation. This is informational
          * and may be used as a signal for anti-malware purposes.
          *
-         * @see PackageManager#EXTRA_VERIFICATION_INSTALLER_UID
+         * @see Intent#EXTRA_ORIGINATING_UID
          */
         public void setOriginatingUid(int originatingUid) {
             this.originatingUid = originatingUid;

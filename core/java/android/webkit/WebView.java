@@ -308,10 +308,15 @@ import java.util.Map;
  * WebView may upload anonymous diagnostic data to Google when the user has consented. This data
  * helps Google improve WebView. Data is collected on a per-app basis for each app which has
  * instantiated a WebView. An individual app can opt out of this feature by putting the following
- * tag in its manifest:
+ * tag in its manifest's {@code <application>} element:
  * <pre>
- * &lt;meta-data android:name="android.webkit.WebView.MetricsOptOut"
- *            android:value="true" /&gt;
+ * &lt;manifest&gt;
+ *     &lt;application&gt;
+ *         ...
+ *         &lt;meta-data android:name=&quot;android.webkit.WebView.MetricsOptOut&quot;
+ *             android:value=&quot;true&quot; /&gt;
+ *     &lt;/application&gt;
+ * &lt;/manifest&gt;
  * </pre>
  * <p>
  * Data will only be uploaded for a given app if the user has consented AND the app has not opted
@@ -323,11 +328,17 @@ import java.util.Map;
  * If Safe Browsing is enabled, WebView will block malicious URLs and present a warning UI to the
  * user to allow them to navigate back safely or proceed to the malicious page.
  * <p>
- * The recommended way for apps to enable the feature is putting the following tag in the manifest:
+ * The recommended way for apps to enable the feature is putting the following tag in the manifest's
+ * {@code <application>} element:
  * <p>
  * <pre>
- * &lt;meta-data android:name="android.webkit.WebView.EnableSafeBrowsing"
- *            android:value="true" /&gt;
+ * &lt;manifest&gt;
+ *     &lt;application&gt;
+ *         ...
+ *         &lt;meta-data android:name=&quot;android.webkit.WebView.EnableSafeBrowsing&quot;
+ *             android:value=&quot;true&quot; /&gt;
+ *     &lt;/application&gt;
+ * &lt;/manifest&gt;
  * </pre>
  *
  */

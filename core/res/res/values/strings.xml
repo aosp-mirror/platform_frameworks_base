@@ -4744,4 +4744,7 @@
     A toast message shown when an app shortcut that wasn't restored due to an unknown issue is clicked,
     -->
     <string name="shortcut_restore_unknown_issue">Couldn\u2019t restore shortcut</string>
+
+    <!--Battery saver warning. STOPSHIP: Remove it eventually. -->
+    <string name="battery_saver_warning" translatable="false">Battery saver activated.\n\nSee go/extreme-battery-saver.\n\nThis contains aggressive experimental changes for P and may affect background app behavior.\n</string>
 </resources>

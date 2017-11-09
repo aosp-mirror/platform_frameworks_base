@@ -16,15 +16,13 @@
 
 package com.android.server.usage;
 
-import static android.app.usage.AppStandby.REASON_TIMEOUT;
-import static android.app.usage.AppStandby.STANDBY_BUCKET_ACTIVE;
-import static android.app.usage.AppStandby.STANDBY_BUCKET_RARE;
-
 import android.app.usage.AppStandby;
 import android.os.FileUtils;
 import android.test.AndroidTestCase;
 
 import java.io.File;
+
+import static android.app.usage.AppStandby.*;
 
 public class AppIdleHistoryTests extends AndroidTestCase {
 
@@ -111,5 +109,9 @@ public class AppIdleHistoryTests extends AndroidTestCase {
         assertEquals(aih.getAppStandbyBucket(PACKAGE_1, USER_ID, 5000), STANDBY_BUCKET_RARE);
         assertEquals(aih.getAppStandbyBucket(PACKAGE_2, USER_ID, 5000), STANDBY_BUCKET_ACTIVE);
         assertEquals(aih.getAppStandbyReason(PACKAGE_1, USER_ID, 5000), REASON_TIMEOUT);
+
+        assertTrue(aih.shouldInformListeners(PACKAGE_1, USER_ID, 5000, STANDBY_BUCKET_RARE));
+        assertFalse(aih.shouldInformListeners(PACKAGE_1, USER_ID, 5000, STANDBY_BUCKET_RARE));
+        assertTrue(aih.shouldInformListeners(PACKAGE_1, USER_ID, 5000, STANDBY_BUCKET_FREQUENT));
     }
 }

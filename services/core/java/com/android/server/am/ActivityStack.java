@@ -20,6 +20,7 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
@@ -1776,6 +1777,15 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
      */
     boolean resizeStackWithLaunchBounds() {
         return inPinnedWindowingMode();
+    }
+
+    /** @return True if the resizing of the primary-split-screen stack affects this stack size. */
+    boolean affectedBySplitScreenResize() {
+        if (!supportsSplitScreenWindowingMode()) {
+            return false;
+        }
+        final int windowingMode = getWindowingMode();
+        return windowingMode != WINDOWING_MODE_FREEFORM && windowingMode != WINDOWING_MODE_PINNED;
     }
 
     /**

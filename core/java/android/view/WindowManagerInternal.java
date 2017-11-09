@@ -18,6 +18,7 @@ package android.view;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.ClipData;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.hardware.display.DisplayManagerInternal;
@@ -140,6 +141,30 @@ public abstract class WindowManagerInternal {
     }
 
     /**
+     * An interface to customize drag and drop behaviors.
+     */
+    public interface IDragDropCallback {
+        /**
+         * Called when drag operation is started.
+         */
+        default boolean performDrag(IWindow window, IBinder dragToken,
+                int touchSource, float touchX, float touchY, float thumbCenterX, float thumbCenterY,
+                ClipData data) {
+            return true;
+        }
+
+        /**
+         * Called when drop result is reported.
+         */
+        default void reportDropResult(IWindow window, boolean consumed) {}
+
+        /**
+         * Called when drag operation is cancelled.
+         */
+        default void cancelDragAndDrop(IBinder dragToken) {}
+    }
+
+    /**
      * Request that the window manager call
      * {@link DisplayManagerInternal#performTraversalInTransactionFromWindowManager}
      * within a surface transaction at a later time.
@@ -224,9 +249,6 @@ public abstract class WindowManagerInternal {
      * @return Whether the keyguard is engaged.
      */
     public abstract boolean isKeyguardLocked();
-
-    /** @return {@code true} if the keyguard is going away. */
-    public abstract boolean isKeyguardGoingAway();
 
     /**
     * @return Whether the keyguard is showing and not occluded.
@@ -354,4 +376,9 @@ public abstract class WindowManagerInternal {
      * {@param vr2dDisplayId}.
      */
     public abstract void setVr2dDisplayId(int vr2dDisplayId);
+
+    /**
+     * Sets callback to DragDropController.
+     */
+    public abstract void registerDragDropControllerCallback(IDragDropCallback callback);
 }
