@@ -1324,6 +1324,7 @@
   <java-symbol type="drawable" name="cling_button" />
   <java-symbol type="drawable" name="cling_arrow_up" />
   <java-symbol type="drawable" name="cling_bg" />
+  <java-symbol type="drawable" name="ic_corp_badge" />
   <java-symbol type="drawable" name="ic_corp_badge_color" />
   <java-symbol type="drawable" name="ic_corp_badge_case" />
   <java-symbol type="drawable" name="ic_corp_icon" />

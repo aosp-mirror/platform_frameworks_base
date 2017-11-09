@@ -94,7 +94,7 @@ public class Utils {
     public static Drawable getUserIcon(Context context, UserManager um, UserInfo user) {
         final int iconSize = UserIconDrawable.getSizeForList(context);
         if (user.isManagedProfile()) {
-            Drawable drawable = context.getDrawable(com.android.internal.R.drawable.ic_corp_icon);
+            Drawable drawable = context.getDrawable(com.android.internal.R.drawable.ic_corp_badge);
             drawable.setBounds(0, 0, iconSize, iconSize);
             return drawable;
         }

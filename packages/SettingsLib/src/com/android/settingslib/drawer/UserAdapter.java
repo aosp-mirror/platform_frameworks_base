@@ -57,7 +57,7 @@ public class UserAdapter implements SpinnerAdapter, ListAdapter {
             if (userInfo.isManagedProfile()) {
                 mName = context.getString(R.string.managed_user_title);
                 icon = context.getDrawable(
-                    com.android.internal.R.drawable.ic_corp_icon);
+                    com.android.internal.R.drawable.ic_corp_badge);
             } else {
                 mName = userInfo.name;
                 final int userId = userInfo.id;
