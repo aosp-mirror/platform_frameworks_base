@@ -39,6 +39,7 @@ import android.content.res.Resources.NotFoundException;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -232,6 +233,41 @@ public class ActivityManagerWrapper {
     }
 
     /**
+     * Starts the recents activity.
+     */
+    public void startRecentsActivity(AssistDataReceiver assistDataReceiver, Bundle options,
+            ActivityOptions opts, int userId, Consumer<Boolean> resultCallback,
+            Handler resultCallbackHandler) {
+        Bundle activityOptions = opts != null ? opts.toBundle() : null;
+        mBackgroundExecutor.submit(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    ActivityManager.getService().startRecentsActivity(assistDataReceiver, options,
+                            activityOptions, userId);
+                    if (resultCallback != null) {
+                        resultCallbackHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                resultCallback.accept(true);
+                            }
+                        });
+                    }
+                } catch (Exception e) {
+                    if (resultCallback != null) {
+                        resultCallbackHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                resultCallback.accept(false);
+                            }
+                        });
+                    }
+                }
+            }
+        });
+    }
+
+    /**
      * Starts a task from Recents.
      *
      * @see {@link #startActivityFromRecents(TaskKey, ActivityOptions, int, int, Consumer, Handler)}
@@ -270,16 +306,29 @@ public class ActivityManagerWrapper {
 
         // Execute this from another thread such that we can do other things (like caching the
         // bitmap for the thumbnail) while AM is busy starting our activity.
-        mBackgroundExecutor.submit(() -> {
-            try {
-                ActivityManager.getService().startActivityFromRecents(taskKey.id,
-                        finalOptions == null ? null : finalOptions.toBundle());
-                if (resultCallback != null) {
-                    resultCallbackHandler.post(() -> resultCallback.accept(true));
-                }
-            } catch (Exception e) {
-                if (resultCallback != null) {
-                    resultCallbackHandler.post(() -> resultCallback.accept(false));
+        mBackgroundExecutor.submit(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    ActivityManager.getService().startActivityFromRecents(taskKey.id,
+                            finalOptions == null ? null : finalOptions.toBundle());
+                    if (resultCallback != null) {
+                        resultCallbackHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                resultCallback.accept(true);
+                            }
+                        });
+                    }
+                } catch (Exception e) {
+                    if (resultCallback != null) {
+                        resultCallbackHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                resultCallback.accept(false);
+                            }
+                        });
+                    }
                 }
             }
         });
@@ -289,11 +338,14 @@ public class ActivityManagerWrapper {
      * Requests that the system close any open system windows (including other SystemUI).
      */
     public void closeSystemWindows(String reason) {
-        mBackgroundExecutor.submit(() -> {
-            try {
-                ActivityManager.getService().closeSystemDialogs(reason);
-            } catch (RemoteException e) {
-                Log.w(TAG, "Failed to close system windows", e);
+        mBackgroundExecutor.submit(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    ActivityManager.getService().closeSystemDialogs(reason);
+                } catch (RemoteException e) {
+                    Log.w(TAG, "Failed to close system windows", e);
+                }
             }
         });
     }
@@ -302,11 +354,14 @@ public class ActivityManagerWrapper {
      * Removes a task by id.
      */
     public void removeTask(int taskId) {
-        mBackgroundExecutor.submit(() -> {
-            try {
-                ActivityManager.getService().removeTask(taskId);
-            } catch (RemoteException e) {
-                Log.w(TAG, "Failed to remove task=" + taskId, e);
+        mBackgroundExecutor.submit(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    ActivityManager.getService().removeTask(taskId);
+                } catch (RemoteException e) {
+                    Log.w(TAG, "Failed to remove task=" + taskId, e);
+                }
             }
         });
     }
