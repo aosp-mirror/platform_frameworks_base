@@ -54,6 +54,7 @@ import android.testing.TestableLooper;
 import android.testing.TestableLooper.MessageHandler;
 import android.testing.TestableLooper.RunWithLooper;
 import android.util.DisplayMetrics;
+import android.util.SparseArray;
 import android.view.ViewGroup.LayoutParams;
 
 import com.android.internal.logging.MetricsLogger;
@@ -71,6 +72,7 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.NotificationData.Entry;
+import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
@@ -524,6 +526,9 @@ public class StatusBarTest extends SysuiTestCase {
         mStatusBar.mState = StatusBarState.KEYGUARD;
         mStatusBar.mDozeScrimController = mock(DozeScrimController.class);
         mStatusBar.mNotificationIconAreaController = mock(NotificationIconAreaController.class);
+        mStatusBar.mLockscreenUserManager = mock(NotificationLockscreenUserManager.class);
+        when(mStatusBar.mLockscreenUserManager.getCurrentProfiles()).thenReturn(
+                new SparseArray<>());
         mStatusBar.updateKeyguardState(false, false);
     }
 
