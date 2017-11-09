@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
+import android.app.ActivityManager;
 import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.Notification.Builder;
@@ -82,6 +83,8 @@ import java.util.List;
  * method is the <i>only</i> one that is safe to call before {@link #onListenerConnected()}
  * or after {@link #onListenerDisconnected()}.
  * </p>
+ * <p> Notification listeners cannot get notification access or be bound by the system on
+ * {@link ActivityManager#isLowRamDevice() low ram} devices</p>
  */
 public abstract class NotificationListenerService extends Service {
 
