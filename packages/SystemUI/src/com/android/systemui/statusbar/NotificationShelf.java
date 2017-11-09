@@ -22,6 +22,7 @@ import static com.android.systemui.statusbar.phone.NotificationIconContainer.OVE
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.Path;
 import android.graphics.Rect;
 import android.os.SystemProperties;
 import android.util.AttributeSet;
@@ -85,6 +86,9 @@ public class NotificationShelf extends ActivatableNotificationView implements
     private boolean mVibrationOnAnimation;
     private boolean mUserTouchingScreen;
     private boolean mTouchActive;
+    private boolean mContentNeedsClipping;
+    private int mCustomClipTop;
+    private float mFirstElementTopRoundness;
 
     public NotificationShelf(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -107,6 +111,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
         mViewInvertHelper = new ViewInvertHelper(mShelfIcons,
                 NotificationPanelView.DOZE_ANIMATION_DURATION);
         mShelfState = new ShelfState();
+        setBottomRoundNess(1.0f);
         initDimens();
     }
 
@@ -252,6 +257,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
         boolean expandingAnimated = mAmbientState.isExpansionChanging()
                 && !mAmbientState.isPanelTracking();
         int baseZHeight = mAmbientState.getBaseZHeight();
+        boolean contentNeedsClipping = false;
         while (notificationIndex < mHostLayout.getChildCount()) {
             ExpandableView child = (ExpandableView) mHostLayout.getChildAt(notificationIndex);
             notificationIndex++;
@@ -302,9 +308,20 @@ public class NotificationShelf extends ActivatableNotificationView implements
             if (notGoneIndex != 0 || !aboveShelf) {
                 row.setAboveShelf(false);
             }
+            if (notGoneIndex == 0) {
+                StatusBarIconView icon = row.getEntry().expandedIcon;
+                NotificationIconContainer.IconState iconState = getIconState(icon);
+                if (iconState.clampedAppearAmount == 1.0f) {
+                    // only if the first icon is fully in the shelf we want to clip to it!
+                    mCustomClipTop = (int) (row.getTranslationY() - getTranslationY());
+                    mFirstElementTopRoundness = row.getBackgroundRadiusTop();
+                    contentNeedsClipping = true;
+                }
+            }
             notGoneIndex++;
             previousColor = ownColorUntinted;
         }
+        setContentNeedsClipping(contentNeedsClipping);
         mShelfIcons.setSpeedBumpIndex(mAmbientState.getSpeedBumpIndex());
         mShelfIcons.calculateIconTranslations();
         mShelfIcons.applyIconStates();
@@ -323,6 +340,28 @@ public class NotificationShelf extends ActivatableNotificationView implements
         if (mNotGoneIndex == -1) {
             mNotGoneIndex = notGoneIndex;
         }
+    }
+
+    private void setContentNeedsClipping(boolean contentNeedsClipping) {
+        boolean changed = mContentNeedsClipping != contentNeedsClipping;
+        mContentNeedsClipping = contentNeedsClipping;
+        if (changed || contentNeedsClipping) {
+            invalidate();
+        }
+    }
+
+    @Override
+    public Path getCustomClipPath() {
+        if (!mContentNeedsClipping) {
+            return null;
+        }
+        return getRoundedRectPath(0, mCustomClipTop, getWidth(), getHeight(),
+                mFirstElementTopRoundness, getBackgroundRadiusBottom());
+    }
+
+    @Override
+    protected boolean needsContentClipping() {
+        return mContentNeedsClipping;
     }
 
     private void updateIconClipAmount(ExpandableNotificationRow row) {

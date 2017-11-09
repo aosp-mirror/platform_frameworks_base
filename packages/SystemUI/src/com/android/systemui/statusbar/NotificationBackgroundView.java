@@ -19,26 +19,35 @@ package com.android.systemui.statusbar;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Canvas;
-import android.graphics.ColorFilter;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.LayerDrawable;
 import android.graphics.drawable.RippleDrawable;
 import android.util.AttributeSet;
 import android.view.View;
+
+import com.android.systemui.R;
 
 /**
  * A view that can be used for both the dimmed and normal background of an notification.
  */
 public class NotificationBackgroundView extends View {
 
+    private final boolean mDontModifyCorners;
     private Drawable mBackground;
     private int mClipTopAmount;
     private int mActualHeight;
     private int mClipBottomAmount;
     private int mTintColor;
+    private float mTopRoundness;
+    private float mBottomRoundness;
+    private float[] mCornerRadii = new float[8];
 
     public NotificationBackgroundView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        mDontModifyCorners = getResources().getBoolean(
+                R.bool.config_clipNotificationsToOutline);
     }
 
     @Override
@@ -87,6 +96,7 @@ public class NotificationBackgroundView extends View {
             unscheduleDrawable(mBackground);
         }
         mBackground = background;
+        mBackground.mutate();
         if (mBackground != null) {
             mBackground.setCallback(this);
             setTint(mTintColor);
@@ -94,6 +104,7 @@ public class NotificationBackgroundView extends View {
         if (mBackground instanceof RippleDrawable) {
             ((RippleDrawable) mBackground).setForceSoftware(true);
         }
+        updateBackgroundRadii();
         invalidate();
     }
 
@@ -152,4 +163,29 @@ public class NotificationBackgroundView extends View {
     public void setDrawableAlpha(int drawableAlpha) {
         mBackground.setAlpha(drawableAlpha);
     }
+
+    public void setRoundness(float topRoundness, float bottomRoundNess) {
+        mCornerRadii[0] = topRoundness;
+        mCornerRadii[1] = topRoundness;
+        mCornerRadii[2] = topRoundness;
+        mCornerRadii[3] = topRoundness;
+        mCornerRadii[4] = bottomRoundNess;
+        mCornerRadii[5] = bottomRoundNess;
+        mCornerRadii[6] = bottomRoundNess;
+        mCornerRadii[7] = bottomRoundNess;
+        updateBackgroundRadii();
+    }
+
+
+    private void updateBackgroundRadii() {
+        if (mDontModifyCorners) {
+            return;
+        }
+        if (mBackground instanceof LayerDrawable) {
+            GradientDrawable gradientDrawable =
+                    (GradientDrawable) ((LayerDrawable) mBackground).getDrawable(0);
+            gradientDrawable.setCornerRadii(mCornerRadii);
+        }
+    }
+
 }

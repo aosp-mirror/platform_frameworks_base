@@ -18,12 +18,16 @@ package com.android.systemui.statusbar;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Canvas;
 import android.graphics.Outline;
+import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewOutlineProvider;
+
+import com.android.settingslib.Utils;
 import com.android.systemui.R;
 
 /**
@@ -35,6 +39,11 @@ public abstract class ExpandableOutlineView extends ExpandableView {
     private boolean mCustomOutline;
     private float mOutlineAlpha = -1f;
     private float mOutlineRadius;
+    private boolean mAlwaysRoundBothCorners;
+    private Path mTmpPath = new Path();
+    private Path mTmpPath2 = new Path();
+    private float mTopRoundness;
+    private float mBottomRoundNess;
 
     /**
      * {@code true} if the children views of the {@link ExpandableOutlineView} are translated when
@@ -45,19 +54,100 @@ public abstract class ExpandableOutlineView extends ExpandableView {
     private final ViewOutlineProvider mProvider = new ViewOutlineProvider() {
         @Override
         public void getOutline(View view, Outline outline) {
-            int translation = mShouldTranslateContents ? (int) getTranslation() : 0;
-            if (!mCustomOutline) {
-                outline.setRoundRect(translation,
-                        mClipTopAmount,
-                        getWidth() + translation,
-                        Math.max(getActualHeight() - mClipBottomAmount, mClipTopAmount),
-                        mOutlineRadius);
-            } else {
-                outline.setRoundRect(mOutlineRect, mOutlineRadius);
+            Path clipPath = getClipPath();
+            if (clipPath != null && clipPath.isConvex()) {
+                // The path might not be convex in border cases where the view is small and clipped
+                outline.setConvexPath(clipPath);
             }
             outline.setAlpha(mOutlineAlpha);
         }
     };
+
+    private Path getClipPath() {
+        int left;
+        int top;
+        int right;
+        int bottom;
+        int height;
+        Path intersectPath = null;
+        if (!mCustomOutline) {
+            left = mShouldTranslateContents ? (int) getTranslation() : 0;
+            top = mClipTopAmount;
+            right = getWidth() + Math.min(left, 0);
+            left = Math.max(left, 0);
+            bottom = Math.max(getActualHeight(), top);
+            int intersectBottom = Math.max(getActualHeight() - mClipBottomAmount, top);
+            if (bottom != intersectBottom) {
+                getRoundedRectPath(left, top, right,
+                        intersectBottom, 0.0f,
+                        0.0f, mTmpPath2);
+                intersectPath = mTmpPath2;
+            }
+        } else {
+            left = mOutlineRect.left;
+            top = mOutlineRect.top;
+            right = mOutlineRect.right;
+            bottom = mOutlineRect.bottom;
+        }
+        height = bottom - top;
+        if (height == 0) {
+            return null;
+        }
+        float topRoundness = mAlwaysRoundBothCorners
+                ? mOutlineRadius : mTopRoundness * mOutlineRadius;
+        float bottomRoundness = mAlwaysRoundBothCorners
+                ? mOutlineRadius : mBottomRoundNess * mOutlineRadius;
+        if (topRoundness + bottomRoundness > height) {
+            float overShoot = topRoundness + bottomRoundness - height;
+            topRoundness -= overShoot * mTopRoundness
+                    / (mTopRoundness + mBottomRoundNess);
+            bottomRoundness -= overShoot * mBottomRoundNess
+                    / (mTopRoundness + mBottomRoundNess);
+        }
+        getRoundedRectPath(left, top, right, bottom, topRoundness,
+                bottomRoundness, mTmpPath);
+        Path roundedRectPath = mTmpPath;
+        if (intersectPath != null) {
+            roundedRectPath.op(intersectPath, Path.Op.INTERSECT);
+        }
+        return roundedRectPath;
+    }
+
+    protected Path getRoundedRectPath(int left, int top, int right, int bottom, float topRoundness,
+            float bottomRoundness) {
+        getRoundedRectPath(left, top, right, bottom, topRoundness, bottomRoundness,
+                mTmpPath);
+        return mTmpPath;
+    }
+
+    private void getRoundedRectPath(int left, int top, int right, int bottom, float topRoundness,
+            float bottomRoundness, Path outPath) {
+        outPath.reset();
+        int width = right - left;
+        float topRoundnessX = topRoundness;
+        float bottomRoundnessX = bottomRoundness;
+        topRoundnessX = Math.min(width / 2, topRoundnessX);
+        bottomRoundnessX = Math.min(width / 2, bottomRoundnessX);
+        if (topRoundness > 0.0f) {
+            outPath.moveTo(left, top + topRoundness);
+            outPath.quadTo(left, top, left + topRoundnessX, top);
+            outPath.lineTo(right - topRoundnessX, top);
+            outPath.quadTo(right, top, right, top + topRoundness);
+        } else {
+            outPath.moveTo(left, top);
+            outPath.lineTo(right, top);
+        }
+        if (bottomRoundness > 0.0f) {
+            outPath.lineTo(right, bottom - bottomRoundness);
+            outPath.quadTo(right, bottom, right - bottomRoundnessX, bottom);
+            outPath.lineTo(left + bottomRoundnessX, bottom);
+            outPath.quadTo(left, bottom, left, bottom - bottomRoundness);
+        } else {
+            outPath.lineTo(right, bottom);
+            outPath.lineTo(left, bottom);
+        }
+        outPath.close();
+    }
 
     public ExpandableOutlineView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -65,41 +155,107 @@ public abstract class ExpandableOutlineView extends ExpandableView {
         initDimens();
     }
 
+    @Override
+    protected void dispatchDraw(Canvas canvas) {
+        canvas.save();
+        if (needsContentClipping() && (mAlwaysRoundBothCorners || mTopRoundness > 0
+                || mBottomRoundNess > 0 || mCustomOutline)) {
+            Path clipPath = getCustomClipPath();
+            if (clipPath == null) {
+                clipPath = getClipPath();
+            }
+            if (clipPath != null) {
+                canvas.clipPath(clipPath);
+            }
+        }
+        super.dispatchDraw(canvas);
+        canvas.restore();
+    }
+
+    protected boolean needsContentClipping() {
+        return false;
+    }
+
     private void initDimens() {
         Resources res = getResources();
         mShouldTranslateContents =
                 res.getBoolean(R.bool.config_translateNotificationContentsOnSwipe);
         mOutlineRadius = res.getDimension(R.dimen.notification_shadow_radius);
-        setClipToOutline(res.getBoolean(R.bool.config_clipNotificationsToOutline));
+        mAlwaysRoundBothCorners = res.getBoolean(R.bool.config_clipNotificationsToOutline);
+        if (!mAlwaysRoundBothCorners) {
+            mOutlineRadius = res.getDimensionPixelSize(
+                    Utils.getThemeAttr(mContext, android.R.attr.dialogCornerRadius));
+        }
+        setClipToOutline(mAlwaysRoundBothCorners);
+    }
+
+    public void setTopRoundness(float topRoundness) {
+        if (mTopRoundness != topRoundness) {
+            mTopRoundness = topRoundness;
+            applyRoundness();
+        }
+    }
+
+    protected void applyRoundness() {
+        invalidateOutline();
+        invalidate();
+    }
+
+    protected float getBackgroundRadiusTop() {
+        return mTopRoundness * mOutlineRadius;
+    }
+
+    protected float getTopRoundness() {
+        return mTopRoundness;
+    }
+
+    protected float getBackgroundRadiusBottom() {
+        return mBottomRoundNess * mOutlineRadius;
+    }
+
+    public void setBottomRoundNess(float bottomRoundness) {
+        if (mBottomRoundNess != bottomRoundness) {
+            mBottomRoundNess = bottomRoundness;
+            applyRoundness();
+        }
     }
 
     public void onDensityOrFontScaleChanged() {
         initDimens();
-        invalidateOutline();
+        applyRoundness();
     }
 
     @Override
     public void setActualHeight(int actualHeight, boolean notifyListeners) {
+        int previousHeight = getActualHeight();
         super.setActualHeight(actualHeight, notifyListeners);
-        invalidateOutline();
+        if (previousHeight != actualHeight) {
+            applyRoundness();
+        }
     }
 
     @Override
     public void setClipTopAmount(int clipTopAmount) {
+        int previousAmount = getClipTopAmount();
         super.setClipTopAmount(clipTopAmount);
-        invalidateOutline();
+        if (previousAmount != clipTopAmount) {
+            applyRoundness();
+        }
     }
 
     @Override
     public void setClipBottomAmount(int clipBottomAmount) {
+        int previousAmount = getClipBottomAmount();
         super.setClipBottomAmount(clipBottomAmount);
-        invalidateOutline();
+        if (previousAmount != clipBottomAmount) {
+            applyRoundness();
+        }
     }
 
     protected void setOutlineAlpha(float alpha) {
         if (alpha != mOutlineAlpha) {
             mOutlineAlpha = alpha;
-            invalidateOutline();
+            applyRoundness();
         }
     }
 
@@ -113,8 +269,7 @@ public abstract class ExpandableOutlineView extends ExpandableView {
             setOutlineRect(rect.left, rect.top, rect.right, rect.bottom);
         } else {
             mCustomOutline = false;
-            setClipToOutline(false);
-            invalidateOutline();
+            applyRoundness();
         }
     }
 
@@ -151,15 +306,16 @@ public abstract class ExpandableOutlineView extends ExpandableView {
 
     protected void setOutlineRect(float left, float top, float right, float bottom) {
         mCustomOutline = true;
-        setClipToOutline(true);
 
         mOutlineRect.set((int) left, (int) top, (int) right, (int) bottom);
 
         // Outlines need to be at least 1 dp
         mOutlineRect.bottom = (int) Math.max(top, mOutlineRect.bottom);
         mOutlineRect.right = (int) Math.max(left, mOutlineRect.right);
-
-        invalidateOutline();
+        applyRoundness();
     }
 
+    public Path getCustomClipPath() {
+        return null;
+    }
 }

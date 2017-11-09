@@ -901,6 +901,17 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         contentView.setAlpha(contentAlpha);
     }
 
+    @Override
+    protected void applyRoundness() {
+        super.applyRoundness();
+        applyBackgroundRoundness(getBackgroundRadiusTop(), getBackgroundRadiusBottom());
+    }
+
+    protected void applyBackgroundRoundness(float topRadius, float bottomRadius) {
+        mBackgroundDimmed.setRoundness(topRadius, bottomRadius);
+        mBackgroundNormal.setRoundness(topRadius, bottomRadius);
+    }
+
     protected abstract View getContentView();
 
     public int calculateBgColor() {

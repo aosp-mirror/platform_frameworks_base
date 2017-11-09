@@ -383,6 +383,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private int mCachedBackgroundColor;
     private boolean mHeadsUpGoingAwayAnimationsAllowed = true;
     private Runnable mAnimateScroll = this::animateScroll;
+    private int mCornerRadius;
 
     public NotificationStackScrollLayout(Context context) {
         this(context, null);
@@ -466,8 +467,8 @@ public class NotificationStackScrollLayout extends ViewGroup
     protected void onDraw(Canvas canvas) {
         if (mShouldDrawNotificationBackground && !mAmbientState.isDark()
                 && mCurrentBounds.top < mCurrentBounds.bottom) {
-            canvas.drawRect(0, mCurrentBounds.top, getWidth(), mCurrentBounds.bottom,
-                    mBackgroundPaint);
+            canvas.drawRoundRect(0, mCurrentBounds.top, getWidth(), mCurrentBounds.bottom,
+                    mCornerRadius, mCornerRadius, mBackgroundPaint);
         }
 
         if (DEBUG) {
@@ -522,6 +523,8 @@ public class NotificationStackScrollLayout extends ViewGroup
         mBottomMargin = res.getDimensionPixelSize(R.dimen.notification_panel_margin_bottom);
         mMinInteractionHeight = res.getDimensionPixelSize(
                 R.dimen.notification_min_interaction_height);
+        mCornerRadius = res.getDimensionPixelSize(
+                Utils.getThemeAttr(mContext, android.R.attr.dialogCornerRadius));
     }
 
     public void setDrawBackgroundAsSrc(boolean asSrc) {
@@ -2819,15 +2822,29 @@ public class NotificationStackScrollLayout extends ViewGroup
     private void updateFirstAndLastBackgroundViews() {
         ActivatableNotificationView firstChild = getFirstChildWithBackground();
         ActivatableNotificationView lastChild = getLastChildWithBackground();
+        boolean firstChanged = firstChild != mFirstVisibleBackgroundChild;
+        boolean lastChanged = lastChild != mLastVisibleBackgroundChild;
         if (mAnimationsEnabled && mIsExpanded) {
-            mAnimateNextBackgroundTop = firstChild != mFirstVisibleBackgroundChild;
-            mAnimateNextBackgroundBottom = lastChild != mLastVisibleBackgroundChild;
+            mAnimateNextBackgroundTop = firstChanged;
+            mAnimateNextBackgroundBottom = lastChanged;
         } else {
             mAnimateNextBackgroundTop = false;
             mAnimateNextBackgroundBottom = false;
         }
+        if (firstChanged && mFirstVisibleBackgroundChild != null) {
+            mFirstVisibleBackgroundChild.setTopRoundness(0.0f);
+        }
+        if (lastChanged && mLastVisibleBackgroundChild != null) {
+            mLastVisibleBackgroundChild.setBottomRoundNess(0.0f);
+        }
         mFirstVisibleBackgroundChild = firstChild;
         mLastVisibleBackgroundChild = lastChild;
+        if (mFirstVisibleBackgroundChild != null) {
+            mFirstVisibleBackgroundChild.setTopRoundness(1.0f);
+        }
+        if (mLastVisibleBackgroundChild != null) {
+            mLastVisibleBackgroundChild.setBottomRoundNess(1.0f);
+        }
         mAmbientState.setLastVisibleBackgroundChild(lastChild);
     }
 

@@ -97,7 +97,7 @@ public class ScrimViewTest extends LeakCheckedTest {
         Canvas canvas = mock(Canvas.class);
         mView.onDraw(canvas);
         // One time for each rect side
-        verify(canvas, times(4)).clipRect(anyInt(), anyInt(), anyInt(), anyInt());
+        verify(canvas, times(8)).clipRect(anyInt(), anyInt(), anyInt(), anyInt());
     }
 
     @Test

@@ -2332,6 +2332,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         }
     }
 
+    @Override
+    protected boolean needsContentClipping() {
+        return true;
+    }
+
     public boolean isShowingAmbient() {
         return mShowAmbient;
     }
