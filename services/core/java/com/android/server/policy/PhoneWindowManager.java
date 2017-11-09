@@ -8090,28 +8090,22 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private int updateLightNavigationBarLw(int vis, WindowState opaque,
             WindowState opaqueOrDimming) {
         final WindowState imeWin = mWindowManagerFuncs.getInputMethodWindowLw();
-        final boolean isImeShownWithBottomNavBar =
-                imeWin != null && imeWin.isVisibleLw() && mNavigationBarPosition == NAV_BAR_BOTTOM;
-        if (isImeShownWithBottomNavBar) {
-            final int winFlags = PolicyControl.getWindowFlags(imeWin, null);
-            if ((winFlags & WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0) {
-                // If the IME window is visible and explicitly requesting custom nav bar background
-                // rendering, respect its light flag.
-                vis &= ~View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
-                vis |= PolicyControl.getSystemUiVisibility(imeWin, null)
-                        & View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
-                return vis;
-            }
+
+        final WindowState navColorWin;
+        if (imeWin != null && imeWin.isVisibleLw() && mNavigationBarPosition == NAV_BAR_BOTTOM) {
+            navColorWin = imeWin;
+        } else {
+            navColorWin = opaqueOrDimming;
         }
 
-        if (opaqueOrDimming != null) {
-            if (opaqueOrDimming == opaque) {
-                // If the top fullscreen-or-dimming window is also the top fullscreen window,
-                // respect its light flag.
+        if (navColorWin != null) {
+            if (navColorWin == opaque) {
+                // If the top fullscreen-or-dimming window is also the top fullscreen, respect
+                // its light flag.
                 vis &= ~View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
-                vis |= PolicyControl.getSystemUiVisibility(opaqueOrDimming, null)
+                vis |= PolicyControl.getSystemUiVisibility(navColorWin, null)
                         & View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
-            } else if (opaqueOrDimming.isDimming() || isImeShownWithBottomNavBar) {
+            } else if (navColorWin.isDimming() || navColorWin == imeWin) {
                 // Otherwise if it's dimming or it's the IME window, clear the light flag.
                 vis &= ~View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
             }
