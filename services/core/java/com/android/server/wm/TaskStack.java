@@ -603,6 +603,14 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
         } else {
             maxPosition = computeMaxPosition(maxPosition);
         }
+
+        // preserve POSITION_BOTTOM/POSITION_TOP positions if they are still valid.
+        if (targetPosition == POSITION_BOTTOM && minPosition == 0) {
+            return POSITION_BOTTOM;
+        } else if (targetPosition == POSITION_TOP
+                && maxPosition == (addingNew ? stackSize : stackSize - 1)) {
+            return POSITION_TOP;
+        }
         // Reset position based on minimum/maximum possible positions.
         return Math.min(Math.max(targetPosition, minPosition), maxPosition);
     }
