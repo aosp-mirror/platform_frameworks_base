@@ -133,27 +133,6 @@ public interface TextClassifier {
     }
 
     /**
-     * Returns a {@link LinksInfo} that may be applied to the text to annotate it with links
-     * information.
-     *
-     * @param text the text to generate annotations for
-     * @param linkMask See {@link android.text.util.Linkify} for a list of linkMasks that may be
-     *      specified. Subclasses of this interface may specify additional linkMasks
-     * @param defaultLocales  ordered list of locale preferences that can be used to disambiguate
-     *      the provided text. If no locale preferences exist, set this to null or an empty locale
-     *      list in which case the classifier will decide whether to use no locale information, use
-     *      a default locale, or use the system default.
-     *
-     * @throws IllegalArgumentException if text is null
-     * @hide
-     */
-    @WorkerThread
-    default LinksInfo getLinks(
-            @NonNull CharSequence text, int linkMask, @Nullable LocaleList defaultLocales) {
-        return LinksInfo.NO_OP;
-    }
-
-    /**
      * Returns a {@link TextLinks} that may be applied to the text to annotate it with links
      * information.
      *
