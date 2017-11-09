@@ -79,6 +79,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/app/IAlarmManager.aidl \
 	core/java/android/app/IAppTask.aidl \
 	core/java/android/app/IApplicationThread.aidl \
+	core/java/android/app/IAssistDataReceiver.aidl \
 	core/java/android/app/ITaskStackListener.aidl \
 	core/java/android/app/IBackupAgent.aidl \
 	core/java/android/app/IEphemeralResolver.aidl \
@@ -383,7 +384,6 @@ LOCAL_SRC_FILES += \
 	core/java/android/speech/tts/ITextToSpeechService.aidl \
 	core/java/com/android/internal/app/IAppOpsCallback.aidl \
 	core/java/com/android/internal/app/IAppOpsService.aidl \
-	core/java/com/android/internal/app/IAssistDataReceiver.aidl \
 	core/java/com/android/internal/app/IBatteryStats.aidl \
 	core/java/com/android/internal/app/ISoundTriggerService.aidl \
 	core/java/com/android/internal/app/IVoiceInteractionManagerService.aidl \

@@ -222,6 +222,7 @@ import android.app.Dialog;
 import android.app.IActivityController;
 import android.app.IActivityManager;
 import android.app.IApplicationThread;
+import android.app.IAssistDataReceiver;
 import android.app.IInstrumentationWatcher;
 import android.app.INotificationManager;
 import android.app.IProcessObserver;
@@ -373,7 +374,6 @@ import com.android.internal.app.AssistUtils;
 import com.android.internal.app.DumpHeapActivity;
 import com.android.internal.app.IAppOpsCallback;
 import com.android.internal.app.IAppOpsService;
-import com.android.internal.app.IAssistDataReceiver;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.app.ProcessMap;
 import com.android.internal.app.SystemUserHomeActivity;
@@ -4710,8 +4710,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public int startRecentsActivity(IAssistDataReceiver assistDataReceiver, Bundle bOptions,
-            int userId) {
+    public int startRecentsActivity(IAssistDataReceiver assistDataReceiver, Bundle options,
+            Bundle activityOptions, int userId) {
         if (!mRecentTasks.isCallerRecents(Binder.getCallingUid())) {
             String msg = "Permission Denial: startRecentsActivity() from pid="
                     + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid()
@@ -4745,8 +4745,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                 final Intent intent = new Intent();
                 intent.setFlags(FLAG_ACTIVITY_NEW_TASK);
                 intent.setComponent(recentsComponent);
+                intent.putExtras(options);
                 return mActivityStarter.startActivityMayWait(null, recentsUid, recentsPackage,
-                        intent, null, null, null, null, null, 0, 0, null, null, null, bOptions,
+                        intent, null, null, null, null, null, 0, 0, null, null, null, activityOptions,
                         false, userId, null, "startRecentsActivity");
             }
         } finally {

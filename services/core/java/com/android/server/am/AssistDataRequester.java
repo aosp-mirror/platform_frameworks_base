@@ -23,6 +23,7 @@ import static android.app.AppOpsManager.OP_NONE;
 
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
+import android.app.IAssistDataReceiver;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Bundle;
@@ -31,7 +32,6 @@ import android.os.RemoteException;
 import android.view.IWindowManager;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.app.IAssistDataReceiver;
 import com.android.internal.logging.MetricsLogger;
 
 import java.io.PrintWriter;
