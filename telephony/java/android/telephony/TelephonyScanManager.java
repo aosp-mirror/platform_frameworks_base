@@ -73,8 +73,8 @@ public final class TelephonyScanManager {
         /**
          * Informs the user that there is some error about the scan.
          *
-         * This callback will be called whenever there is any error about the scan, but the scan
-         * won't stop unless the onComplete() callback is called.
+         * This callback will be called whenever there is any error about the scan, and the scan
+         * will be terminated. onComplete() will NOT be called.
          */
         public void onError(int error) {}
     }
