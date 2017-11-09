@@ -24,6 +24,7 @@ import java.io.FileDescriptor;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.DirectByteBuffer;
+import java.security.DigestException;
 
 /**
  * {@link DataSource} which provides data from a file descriptor by memory-mapping the sections
@@ -55,7 +56,7 @@ class MemoryMappedFileDataSource implements DataSource {
 
     @Override
     public void feedIntoDataDigester(DataDigester md, long offset, int size)
-            throws IOException {
+            throws IOException, DigestException {
         // IMPLEMENTATION NOTE: After a lot of experimentation, the implementation of this
         // method was settled on a straightforward mmap with prefaulting.
         //
