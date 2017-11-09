@@ -2028,12 +2028,9 @@ public class KeyguardViewMediator extends SystemUI {
     }
 
     public StatusBarKeyguardViewManager registerStatusBar(StatusBar statusBar,
-            ViewGroup container,
-            ScrimController scrimController,
-            FingerprintUnlockController fingerprintUnlockController) {
+            ViewGroup container, FingerprintUnlockController fingerprintUnlockController) {
         mStatusBarKeyguardViewManager.registerStatusBar(statusBar, container,
-                scrimController, fingerprintUnlockController,
-                mDismissCallbackRegistry);
+                fingerprintUnlockController, mDismissCallbackRegistry);
         return mStatusBarKeyguardViewManager;
     }
 

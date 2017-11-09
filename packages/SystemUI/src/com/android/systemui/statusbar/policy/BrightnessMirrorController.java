@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.policy;
 
+import android.annotation.NonNull;
 import android.util.ArraySet;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
@@ -26,9 +27,10 @@ import android.widget.FrameLayout;
 import com.android.internal.util.Preconditions;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
-import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.StatusBarWindowView;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
+
+import java.util.function.Consumer;
 
 /**
  * Controls showing and hiding of the brightness mirror.
@@ -36,36 +38,36 @@ import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 public class BrightnessMirrorController
         implements CallbackController<BrightnessMirrorController.BrightnessMirrorListener> {
 
-    private final NotificationStackScrollLayout mStackScroller;
-    public long TRANSITION_DURATION_OUT = 150;
-    public long TRANSITION_DURATION_IN = 200;
+    private final static long TRANSITION_DURATION_OUT = 150;
+    private final static long TRANSITION_DURATION_IN = 200;
 
     private final StatusBarWindowView mStatusBarWindow;
-    private final ScrimController mScrimController;
+    private final NotificationStackScrollLayout mStackScroller;
+    private final Consumer<Boolean> mVisibilityCallback;
     private final View mNotificationPanel;
     private final ArraySet<BrightnessMirrorListener> mBrightnessMirrorListeners = new ArraySet<>();
     private final int[] mInt2Cache = new int[2];
     private View mBrightnessMirror;
 
     public BrightnessMirrorController(StatusBarWindowView statusBarWindow,
-            ScrimController scrimController) {
+            @NonNull Consumer<Boolean> visibilityCallback) {
         mStatusBarWindow = statusBarWindow;
         mBrightnessMirror = statusBarWindow.findViewById(R.id.brightness_mirror);
         mNotificationPanel = statusBarWindow.findViewById(R.id.notification_panel);
         mStackScroller = statusBarWindow.findViewById(R.id.notification_stack_scroller);
-        mScrimController = scrimController;
+        mVisibilityCallback = visibilityCallback;
     }
 
     public void showMirror() {
         mBrightnessMirror.setVisibility(View.VISIBLE);
         mStackScroller.setFadingOut(true);
-        mScrimController.forceHideScrims(true /* hide */, true /* animated */);
+        mVisibilityCallback.accept(true);
         outAnimation(mNotificationPanel.animate())
                 .withLayer();
     }
 
     public void hideMirror() {
-        mScrimController.forceHideScrims(false /* hide */, true /* animated */);
+        mVisibilityCallback.accept(false);
         inAnimation(mNotificationPanel.animate())
                 .withLayer()
                 .withEndAction(() -> {
