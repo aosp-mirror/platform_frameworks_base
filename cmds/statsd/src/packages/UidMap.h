@@ -84,6 +84,12 @@ public:
     // Informs uid map that a config is removed. Used for keeping mConfigKeys up to date.
     void OnConfigRemoved(const ConfigKey& key);
 
+    void assignIsolatedUid(int isolatedUid, int parentUid);
+    void removeIsolatedUid(int isolatedUid, int parentUid);
+
+    // Returns the parent uid if it exists. Otherwise, returns the same uid that was passed-in.
+    int getParentUidOrSelf(int uid);
+
     // Gets the output. If every config key has received the output, then the output is cleared.
     UidMapping getOutput(const ConfigKey& key);
 
@@ -105,10 +111,15 @@ private:
 
     // TODO: Use shared_mutex for improved read-locking if a library can be found in Android.
     mutable mutex mMutex;
+    mutable mutex mIsolatedMutex;
 
     // Maps uid to application data. This must be multimap since there is a feature in Android for
     // multiple apps to share the same uid.
     std::unordered_multimap<int, AppData> mMap;
+
+    // Maps isolated uid to the parent uid. Any metrics for an isolated uid will instead contribute
+    // to the parent uid.
+    std::unordered_map<int, int> mIsolatedUidMap;
 
     // We prepare the output proto as apps are updated, so that we can grab the current output.
     UidMapping mOutput;

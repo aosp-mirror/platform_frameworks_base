@@ -13,7 +13,10 @@
 // limitations under the License.
 
 #include "packages/UidMap.h"
+#include "StatsLogProcessor.h"
 #include "config/ConfigKey.h"
+#include "logd/LogEvent.h"
+#include "statslog.h"
 
 #include <gtest/gtest.h>
 
@@ -28,6 +31,31 @@ namespace statsd {
 #ifdef __ANDROID__
 const string kApp1 = "app1.sharing.1";
 const string kApp2 = "app2.sharing.1";
+
+TEST(UidMapTest, TestIsolatedUID) {
+    sp<UidMap> m = new UidMap();
+    StatsLogProcessor p(m, nullptr);
+    LogEvent addEvent(android::util::ISOLATED_UID_CHANGED, 1);
+    android_log_event_list* list = addEvent.GetAndroidLogEventList();
+    *list << 100;  // parent UID
+    *list << 101;  // isolated UID
+    *list << 1;    // Indicates creation.
+    addEvent.init();
+
+    EXPECT_EQ(101, m->getParentUidOrSelf(101));
+
+    p.OnLogEvent(addEvent);
+    EXPECT_EQ(100, m->getParentUidOrSelf(101));
+
+    LogEvent removeEvent(android::util::ISOLATED_UID_CHANGED, 1);
+    list = removeEvent.GetAndroidLogEventList();
+    *list << 100;  // parent UID
+    *list << 101;  // isolated UID
+    *list << 0;    // Indicates removal.
+    removeEvent.init();
+    p.OnLogEvent(removeEvent);
+    EXPECT_EQ(101, m->getParentUidOrSelf(101));
+}
 
 TEST(UidMapTest, TestMatching) {
     UidMap m;

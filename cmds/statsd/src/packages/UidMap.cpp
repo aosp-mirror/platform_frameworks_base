@@ -150,6 +150,31 @@ void UidMap::removeListener(sp<PackageInfoListener> producer) {
     mSubscribers.erase(producer);
 }
 
+void UidMap::assignIsolatedUid(int isolatedUid, int parentUid) {
+    lock_guard<mutex> lock(mIsolatedMutex);
+
+    mIsolatedUidMap[isolatedUid] = parentUid;
+}
+
+void UidMap::removeIsolatedUid(int isolatedUid, int parentUid) {
+    lock_guard<mutex> lock(mIsolatedMutex);
+
+    auto it = mIsolatedUidMap.find(isolatedUid);
+    if (it != mIsolatedUidMap.end()) {
+        mIsolatedUidMap.erase(it);
+    }
+}
+
+int UidMap::getParentUidOrSelf(int uid) {
+    lock_guard<mutex> lock(mIsolatedMutex);
+
+    auto it = mIsolatedUidMap.find(uid);
+    if (it != mIsolatedUidMap.end()) {
+        return it->second;
+    }
+    return uid;
+}
+
 void UidMap::clearOutput() {
     mOutput.Clear();
 

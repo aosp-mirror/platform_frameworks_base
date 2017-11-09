@@ -15,6 +15,7 @@
  */
 
 #include "Log.h"
+#include "statslog.h"
 
 #include "StatsLogProcessor.h"
 #include "metrics/CountMetricProducer.h"
@@ -61,6 +62,22 @@ void StatsLogProcessor::OnLogEvent(const LogEvent& msg) {
     for (auto& pair : mMetricsManagers) {
         pair.second->onLogEvent(msg);
         flushIfNecessary(msg.GetTimestampNs(), pair.first, pair.second);
+    }
+
+    // Hard-coded logic to update the isolated uid's in the uid-map.
+    // The field numbers need to be currently updated by hand with stats_events.proto
+    if (msg.GetTagId() == android::util::ISOLATED_UID_CHANGED) {
+        status_t err = NO_ERROR, err2 = NO_ERROR, err3 = NO_ERROR;
+        bool is_create = msg.GetBool(3, &err);
+        auto parent_uid = int(msg.GetLong(1, &err2));
+        auto isolated_uid = int(msg.GetLong(2, &err3));
+        if (err == NO_ERROR && err2 == NO_ERROR && err3 == NO_ERROR) {
+            if (is_create) {
+                mUidMap->assignIsolatedUid(isolated_uid, parent_uid);
+            } else {
+                mUidMap->removeIsolatedUid(isolated_uid, parent_uid);
+            }
+        }
     }
 }
 
