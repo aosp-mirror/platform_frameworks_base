@@ -5205,6 +5205,8 @@ com.android.internal.app.AlertController$AlertParams$4
 com.android.internal.app.AlertController$ButtonHandler
 com.android.internal.app.AlertController$RecycleListView
 com.android.internal.app.AssistUtils
+com.android.internal.app.ColorDisplayController
+com.android.internal.app.ColorDisplayController$Callback
 com.android.internal.app.IAppOpsCallback
 com.android.internal.app.IAppOpsCallback$Stub
 com.android.internal.app.IAppOpsCallback$Stub$Proxy
@@ -5230,8 +5232,6 @@ com.android.internal.app.IVoiceInteractionSessionShowCallback
 com.android.internal.app.IVoiceInteractionSessionShowCallback$Stub
 com.android.internal.app.IVoiceInteractor
 com.android.internal.app.IVoiceInteractor$Stub
-com.android.internal.app.NightDisplayController
-com.android.internal.app.NightDisplayController$Callback
 com.android.internal.app.ProcessMap
 com.android.internal.app.ResolverActivity
 com.android.internal.app.ToolbarActionBar

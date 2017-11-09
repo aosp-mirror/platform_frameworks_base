@@ -29,10 +29,10 @@ import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.mock.MockContentResolver;
 
-import com.android.internal.app.NightDisplayController;
+import com.android.internal.app.ColorDisplayController;
 import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.server.display.DisplayTransformManager;
-import com.android.server.display.NightDisplayService;
+import com.android.server.display.ColorDisplayService;
 import com.android.server.twilight.TwilightListener;
 import com.android.server.twilight.TwilightManager;
 import com.android.server.twilight.TwilightState;
@@ -55,15 +55,15 @@ import static com.google.common.truth.Truth.assertWithMessage;
 import static org.mockito.Mockito.doReturn;
 
 @RunWith(AndroidJUnit4.class)
-public class NightDisplayServiceTest {
+public class ColorDisplayServiceTest {
 
     private Context mContext;
     private int mUserId;
 
     private MockTwilightManager mTwilightManager;
 
-    private NightDisplayController mNightDisplayController;
-    private NightDisplayService mNightDisplayService;
+    private ColorDisplayController mColorDisplayController;
+    private ColorDisplayService mColorDisplayService;
 
     @Before
     public void setUp() {
@@ -85,8 +85,8 @@ public class NightDisplayServiceTest {
         mTwilightManager = new MockTwilightManager();
         LocalServices.addService(TwilightManager.class, mTwilightManager);
 
-        mNightDisplayController = new NightDisplayController(mContext, mUserId);
-        mNightDisplayService = new NightDisplayService(mContext);
+        mColorDisplayController = new ColorDisplayController(mContext, mUserId);
+        mColorDisplayService = new ColorDisplayService(mContext);
     }
 
     @After
@@ -94,8 +94,8 @@ public class NightDisplayServiceTest {
         LocalServices.removeServiceForTest(DisplayTransformManager.class);
         LocalServices.removeServiceForTest(TwilightManager.class);
 
-        mNightDisplayService = null;
-        mNightDisplayController = null;
+        mColorDisplayService = null;
+        mColorDisplayController = null;
 
         mTwilightManager = null;
 
@@ -902,9 +902,9 @@ public class NightDisplayServiceTest {
      * @param endTimeOffset the offset relative to now to deactivate Night display (in minutes)
      */
     private void setAutoModeCustom(int startTimeOffset, int endTimeOffset) {
-        mNightDisplayController.setAutoMode(NightDisplayController.AUTO_MODE_CUSTOM);
-        mNightDisplayController.setCustomStartTime(getLocalTimeRelativeToNow(startTimeOffset));
-        mNightDisplayController.setCustomEndTime(getLocalTimeRelativeToNow(endTimeOffset));
+        mColorDisplayController.setAutoMode(ColorDisplayController.AUTO_MODE_CUSTOM);
+        mColorDisplayController.setCustomStartTime(getLocalTimeRelativeToNow(startTimeOffset));
+        mColorDisplayController.setCustomEndTime(getLocalTimeRelativeToNow(endTimeOffset));
     }
 
     /**
@@ -914,7 +914,7 @@ public class NightDisplayServiceTest {
      * @param sunriseOffset the offset relative to now for sunrise (in minutes)
      */
     private void setAutoModeTwilight(int sunsetOffset, int sunriseOffset) {
-        mNightDisplayController.setAutoMode(NightDisplayController.AUTO_MODE_TWILIGHT);
+        mColorDisplayController.setAutoMode(ColorDisplayController.AUTO_MODE_TWILIGHT);
         mTwilightManager.setTwilightState(
                 getTwilightStateRelativeToNow(sunsetOffset, sunriseOffset));
     }
@@ -927,7 +927,7 @@ public class NightDisplayServiceTest {
      * activated (in minutes)
      */
     private void setActivated(boolean activated, int lastActivatedTimeOffset) {
-        mNightDisplayController.setActivated(activated);
+        mColorDisplayController.setActivated(activated);
         Secure.putStringForUser(mContext.getContentResolver(),
                 Secure.NIGHT_DISPLAY_LAST_ACTIVATED_TIME,
                 LocalDateTime.now().plusMinutes(lastActivatedTimeOffset).toString(),
@@ -935,7 +935,7 @@ public class NightDisplayServiceTest {
     }
 
     /**
-     * Convenience method to start {@link #mNightDisplayService}.
+     * Convenience method to start {@link #mColorDisplayService}.
      */
     private void startService() {
         Secure.putIntForUser(mContext.getContentResolver(), Secure.USER_SETUP_COMPLETE, 1, mUserId);
@@ -943,9 +943,9 @@ public class NightDisplayServiceTest {
         InstrumentationRegistry.getInstrumentation().runOnMainSync(new Runnable() {
             @Override
             public void run() {
-                mNightDisplayService.onStart();
-                mNightDisplayService.onBootPhase(SystemService.PHASE_BOOT_COMPLETED);
-                mNightDisplayService.onStartUser(mUserId);
+                mColorDisplayService.onStart();
+                mColorDisplayService.onBootPhase(SystemService.PHASE_BOOT_COMPLETED);
+                mColorDisplayService.onStartUser(mUserId);
             }
         });
     }
@@ -957,7 +957,7 @@ public class NightDisplayServiceTest {
      */
     private void assertActivated(boolean activated) {
         assertWithMessage("Invalid Night display activated state")
-                .that(mNightDisplayController.isActivated())
+                .that(mColorDisplayController.isActivated())
                 .isEqualTo(activated);
     }
 
@@ -988,21 +988,21 @@ public class NightDisplayServiceTest {
         final LocalDateTime now = LocalDateTime.now();
         final ZoneId zoneId = ZoneId.systemDefault();
 
-        long sunsetMillis = NightDisplayService.getDateTimeBefore(sunset, now)
+        long sunsetMillis = ColorDisplayService.getDateTimeBefore(sunset, now)
                 .atZone(zoneId)
                 .toInstant()
                 .toEpochMilli();
-        long sunriseMillis = NightDisplayService.getDateTimeBefore(sunrise, now)
+        long sunriseMillis = ColorDisplayService.getDateTimeBefore(sunrise, now)
                 .atZone(zoneId)
                 .toInstant()
                 .toEpochMilli();
         if (sunsetMillis < sunriseMillis) {
-            sunsetMillis = NightDisplayService.getDateTimeAfter(sunset, now)
+            sunsetMillis = ColorDisplayService.getDateTimeAfter(sunset, now)
                     .atZone(zoneId)
                     .toInstant()
                     .toEpochMilli();
         } else {
-            sunriseMillis = NightDisplayService.getDateTimeAfter(sunrise, now)
+            sunriseMillis = ColorDisplayService.getDateTimeAfter(sunrise, now)
                     .atZone(zoneId)
                     .toInstant()
                     .toEpochMilli();

@@ -20,7 +20,7 @@ import android.os.Looper;
 import android.provider.Settings.Secure;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.app.NightDisplayController;
+import com.android.internal.app.ColorDisplayController;
 import com.android.systemui.Dependency;
 import com.android.systemui.Prefs;
 import com.android.systemui.Prefs.Key;
@@ -78,8 +78,8 @@ public class AutoTileManager {
         }
 
         if (!mAutoTracker.isAdded(NIGHT)
-                && NightDisplayController.isAvailable(mContext)) {
-            Dependency.get(NightDisplayController.class).setListener(mNightDisplayCallback);
+                && ColorDisplayController.isAvailable(mContext)) {
+            Dependency.get(ColorDisplayController.class).setListener(mColorDisplayCallback);
         }
     }
 
@@ -89,7 +89,7 @@ public class AutoTileManager {
         Dependency.get(HotspotController.class).removeCallback(mHotspotCallback);
         Dependency.get(DataSaverController.class).removeCallback(mDataSaverListener);
         Dependency.get(ManagedProfileController.class).removeCallback(mProfileCallback);
-        Dependency.get(NightDisplayController.class).setListener(null);
+        Dependency.get(ColorDisplayController.class).setListener(null);
     }
 
     private final ManagedProfileController.Callback mProfileCallback =
@@ -139,8 +139,8 @@ public class AutoTileManager {
     };
 
     @VisibleForTesting
-    final NightDisplayController.Callback mNightDisplayCallback =
-            new NightDisplayController.Callback() {
+    final ColorDisplayController.Callback mColorDisplayCallback =
+            new ColorDisplayController.Callback() {
         @Override
         public void onActivated(boolean activated) {
             if (activated) {
@@ -150,8 +150,8 @@ public class AutoTileManager {
 
         @Override
         public void onAutoModeChanged(int autoMode) {
-            if (autoMode == NightDisplayController.AUTO_MODE_CUSTOM
-                    || autoMode == NightDisplayController.AUTO_MODE_TWILIGHT) {
+            if (autoMode == ColorDisplayController.AUTO_MODE_CUSTOM
+                    || autoMode == ColorDisplayController.AUTO_MODE_TWILIGHT) {
                 addNightTile();
             }
         }
@@ -160,7 +160,7 @@ public class AutoTileManager {
             if (mAutoTracker.isAdded(NIGHT)) return;
             mHost.addTile(NIGHT);
             mAutoTracker.setTileAdded(NIGHT);
-            mHandler.post(() -> Dependency.get(NightDisplayController.class)
+            mHandler.post(() -> Dependency.get(ColorDisplayController.class)
                     .setListener(null));
         }
     };

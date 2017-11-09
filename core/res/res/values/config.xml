@@ -876,7 +876,7 @@
     <bool name="config_nightDisplayAvailable">@bool/config_setColorTransformAccelerated</bool>
 
     <!-- Default mode to control how Night display is automatically activated.
-         One of the following values (see NightDisplayController.java):
+         One of the following values (see ColorDisplayController.java):
              0 - AUTO_MODE_DISABLED
              1 - AUTO_MODE_CUSTOM
              2 - AUTO_MODE_TWILIGHT

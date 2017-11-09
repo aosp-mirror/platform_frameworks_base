@@ -2768,6 +2768,7 @@ com.android.i18n.phonenumbers.ShortNumbersRegionCodeSet
 com.android.ims.ImsException
 com.android.internal.R$styleable
 com.android.internal.app.AlertController$AlertParams
+com.android.internal.app.ColorDisplayController
 com.android.internal.app.IAppOpsCallback
 com.android.internal.app.IAppOpsCallback$Stub
 com.android.internal.app.IAppOpsService
@@ -2780,7 +2781,6 @@ com.android.internal.app.IVoiceInteractionManagerService
 com.android.internal.app.IVoiceInteractionManagerService$Stub
 com.android.internal.app.IVoiceInteractor
 com.android.internal.app.IVoiceInteractor$Stub
-com.android.internal.app.NightDisplayController
 com.android.internal.appwidget.IAppWidgetService
 com.android.internal.appwidget.IAppWidgetService$Stub
 com.android.internal.appwidget.IAppWidgetService$Stub$Proxy

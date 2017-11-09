@@ -42,7 +42,7 @@ import android.util.MathUtils;
 import android.util.Slog;
 import android.view.animation.AnimationUtils;
 
-import com.android.internal.app.NightDisplayController;
+import com.android.internal.app.ColorDisplayController;
 import com.android.server.SystemService;
 import com.android.server.twilight.TwilightListener;
 import com.android.server.twilight.TwilightManager;
@@ -60,10 +60,10 @@ import static com.android.server.display.DisplayTransformManager.LEVEL_COLOR_MAT
 /**
  * Tints the display at night.
  */
-public final class NightDisplayService extends SystemService
-        implements NightDisplayController.Callback {
+public final class ColorDisplayService extends SystemService
+        implements ColorDisplayController.Callback {
 
-    private static final String TAG = "NightDisplayService";
+    private static final String TAG = "ColorDisplayService";
 
     /**
      * The transition time, in milliseconds, for Night Display to turn on/off.
@@ -119,12 +119,12 @@ public final class NightDisplayService extends SystemService
     private ContentObserver mUserSetupObserver;
     private boolean mBootCompleted;
 
-    private NightDisplayController mController;
+    private ColorDisplayController mController;
     private ValueAnimator mColorMatrixAnimator;
     private Boolean mIsActivated;
     private AutoMode mAutoMode;
 
-    public NightDisplayService(Context context) {
+    public ColorDisplayService(Context context) {
         super(context);
         mHandler = new Handler(Looper.getMainLooper());
     }
@@ -228,7 +228,7 @@ public final class NightDisplayService extends SystemService
         Slog.d(TAG, "setUp: currentUser=" + mCurrentUser);
 
         // Create a new controller for the current user and start listening for changes.
-        mController = new NightDisplayController(getContext(), mCurrentUser);
+        mController = new ColorDisplayController(getContext(), mCurrentUser);
         mController.setListener(this);
 
         setCoefficientMatrix(getContext());
@@ -293,9 +293,9 @@ public final class NightDisplayService extends SystemService
             mAutoMode = null;
         }
 
-        if (autoMode == NightDisplayController.AUTO_MODE_CUSTOM) {
+        if (autoMode == ColorDisplayController.AUTO_MODE_CUSTOM) {
             mAutoMode = new CustomAutoMode();
-        } else if (autoMode == NightDisplayController.AUTO_MODE_TWILIGHT) {
+        } else if (autoMode == ColorDisplayController.AUTO_MODE_TWILIGHT) {
             mAutoMode = new TwilightAutoMode();
         }
 
@@ -463,7 +463,7 @@ public final class NightDisplayService extends SystemService
         return ldt.isBefore(compareTime) ? ldt.plusDays(1) : ldt;
     }
 
-    private abstract class AutoMode implements NightDisplayController.Callback {
+    private abstract class AutoMode implements ColorDisplayController.Callback {
         public abstract void onStart();
 
         public abstract void onStop();

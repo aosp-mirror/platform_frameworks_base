@@ -22,8 +22,7 @@ import android.provider.Settings;
 import android.service.quicksettings.Tile;
 import android.widget.Switch;
 
-import com.android.internal.app.NightDisplayController;
-import com.android.internal.logging.MetricsLogger;
+import com.android.internal.app.ColorDisplayController;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSHost;
@@ -31,19 +30,19 @@ import com.android.systemui.plugins.qs.QSTile.BooleanState;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 
 public class NightDisplayTile extends QSTileImpl<BooleanState>
-        implements NightDisplayController.Callback {
+        implements ColorDisplayController.Callback {
 
-    private NightDisplayController mController;
+    private ColorDisplayController mController;
     private boolean mIsListening;
 
     public NightDisplayTile(QSHost host) {
         super(host);
-        mController = new NightDisplayController(mContext, ActivityManager.getCurrentUser());
+        mController = new ColorDisplayController(mContext, ActivityManager.getCurrentUser());
     }
 
     @Override
     public boolean isAvailable() {
-        return NightDisplayController.isAvailable(mContext);
+        return ColorDisplayController.isAvailable(mContext);
     }
 
     @Override
@@ -65,7 +64,7 @@ public class NightDisplayTile extends QSTileImpl<BooleanState>
         }
 
         // Make a new controller for the new user.
-        mController = new NightDisplayController(mContext, newUserId);
+        mController = new ColorDisplayController(mContext, newUserId);
         if (mIsListening) {
             mController.setListener(this);
         }
