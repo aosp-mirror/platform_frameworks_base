@@ -396,6 +396,11 @@ public class ActivityTestsBase {
         static final int IS_TRANSLUCENT_TRUE = 2;
         private int mIsTranslucent = IS_TRANSLUCENT_UNSET;
 
+        static final int SUPPORTS_SPLIT_SCREEN_UNSET = 0;
+        static final int SUPPORTS_SPLIT_SCREEN_FALSE = 1;
+        static final int SUPPORTS_SPLIT_SCREEN_TRUE = 2;
+        private int mSupportsSplitScreen = SUPPORTS_SPLIT_SCREEN_UNSET;
+
         TestActivityStack(ActivityDisplay display, int stackId, ActivityStackSupervisor supervisor,
                 int windowingMode, int activityType, boolean onTop) {
             super(display, stackId, supervisor, windowingMode, activityType, onTop);
@@ -437,6 +442,24 @@ public class ActivityTestsBase {
                 case IS_TRANSLUCENT_UNSET:
                 default:
                     return super.isStackTranslucent(starting);
+            }
+        }
+
+        void setSupportsSplitScreen(boolean supportsSplitScreen) {
+            mSupportsSplitScreen = supportsSplitScreen
+                    ? SUPPORTS_SPLIT_SCREEN_TRUE : SUPPORTS_SPLIT_SCREEN_FALSE;
+        }
+
+        @Override
+        public boolean supportsSplitScreenWindowingMode() {
+            switch (mSupportsSplitScreen) {
+                case SUPPORTS_SPLIT_SCREEN_TRUE:
+                    return true;
+                case SUPPORTS_SPLIT_SCREEN_FALSE:
+                    return false;
+                case SUPPORTS_SPLIT_SCREEN_UNSET:
+                default:
+                    return super.supportsSplitScreenWindowingMode();
             }
         }
     }

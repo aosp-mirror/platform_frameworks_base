@@ -4755,7 +4755,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             throws RemoteException {
         Slog.i(TAG, "Activity tried to startVoiceInteraction");
         synchronized (this) {
-            ActivityRecord activity = getFocusedStack().topActivity();
+            ActivityRecord activity = getFocusedStack().getTopActivity();
             if (ActivityRecord.forTokenLocked(callingActivity) != activity) {
                 throw new SecurityException("Only focused activity can call startVoiceInteraction");
             }
@@ -10431,13 +10431,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                             "exitFreeformMode: You can only go fullscreen from freeform.");
                 }
 
-                final ActivityStack fullscreenStack = stack.getDisplay().getOrCreateStack(
-                        WINDOWING_MODE_FULLSCREEN, stack.getActivityType(), ON_TOP);
-
-                if (DEBUG_STACK) Slog.d(TAG_STACK, "exitFreeformMode: " + r);
-                // TODO: Should just change windowing mode vs. re-parenting...
-                r.getTask().reparent(fullscreenStack, ON_TOP,
-                        REPARENT_KEEP_STACK_AT_FRONT, ANIMATE, !DEFER_RESUME, "exitFreeformMode");
+                stack.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -10446,6 +10440,11 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public void setTaskWindowingMode(int taskId, int windowingMode, boolean toTop) {
+        if (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
+            setTaskWindowingModeSplitScreenPrimary(taskId, SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT,
+                    toTop, ANIMATE, null /* initialBounds */);
+            return;
+        }
         enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS, "setTaskWindowingMode()");
         synchronized (this) {
             final long ident = Binder.clearCallingIdentity();
@@ -10458,22 +10457,67 @@ public class ActivityManagerService extends IActivityManager.Stub
 
                 if (DEBUG_STACK) Slog.d(TAG_STACK, "setTaskWindowingMode: moving task=" + taskId
                         + " to windowingMode=" + windowingMode + " toTop=" + toTop);
-                if (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
-                    mWindowManager.setDockedStackCreateState(SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT,
-                            null /* initialBounds */);
-                }
 
                 if (!task.isActivityTypeStandardOrUndefined()) {
-                    throw new IllegalArgumentException("setTaskWindowingMode: Attempt to move task "
-                            + taskId + " to non-standard windowin mode=" + windowingMode);
+                    throw new IllegalArgumentException("setTaskWindowingMode: Attempt to move"
+                            + " non-standard task " + taskId + " to windowing mode="
+                            + windowingMode);
                 }
                 final ActivityDisplay display = task.getStack().getDisplay();
                 final ActivityStack stack = display.getOrCreateStack(windowingMode,
                         task.getStack().getActivityType(), toTop);
-                // TODO: We should just change the windowing mode for the task vs. creating and
-                // moving it to a stack.
+                // TODO: Use ActivityStack.setWindowingMode instead of re-parenting.
                 task.reparent(stack, toTop, REPARENT_KEEP_STACK_AT_FRONT, ANIMATE, !DEFER_RESUME,
                         "moveTaskToStack");
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+    }
+
+    /**
+     * Moves the specified task to the primary-split-screen stack.
+     *
+     * @param taskId Id of task to move.
+     * @param createMode The mode the primary split screen stack should be created in if it doesn't
+     *                   exist already. See
+     *                   {@link android.app.ActivityManager#SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT}
+     *                   and
+     *                   {@link android.app.ActivityManager#SPLIT_SCREEN_CREATE_MODE_BOTTOM_OR_RIGHT}
+     * @param toTop If the task and stack should be moved to the top.
+     * @param animate Whether we should play an animation for the moving the task.
+     * @param initialBounds If the primary stack gets created, it will use these bounds for the
+     *                      stack. Pass {@code null} to use default bounds.
+     */
+    @Override
+    public boolean setTaskWindowingModeSplitScreenPrimary(int taskId, int createMode, boolean toTop,
+            boolean animate, Rect initialBounds) {
+        enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS,
+                "setTaskWindowingModeSplitScreenPrimary()");
+        synchronized (this) {
+            long ident = Binder.clearCallingIdentity();
+            try {
+                final TaskRecord task = mStackSupervisor.anyTaskForIdLocked(taskId);
+                if (task == null) {
+                    Slog.w(TAG, "setTaskWindowingModeSplitScreenPrimary: No task for id=" + taskId);
+                    return false;
+                }
+                if (DEBUG_STACK) Slog.d(TAG_STACK,
+                        "setTaskWindowingModeSplitScreenPrimary: moving task=" + taskId
+                        + " to createMode=" + createMode + " toTop=" + toTop);
+                if (!task.isActivityTypeStandardOrUndefined()) {
+                    throw new IllegalArgumentException("setTaskWindowingMode: Attempt to move"
+                            + " non-standard task " + taskId + " to split-screen windowing mode");
+                }
+
+                mWindowManager.setDockedStackCreateState(createMode, initialBounds);
+                final int windowingMode = task.getWindowingMode();
+                final ActivityStack stack = task.getStack();
+                if (toTop) {
+                    stack.moveToFront("setTaskWindowingModeSplitScreenPrimary", task);
+                }
+                stack.setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, animate);
+                return windowingMode != task.getWindowingMode();
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -10517,58 +10561,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     /**
-     * Moves the input task to the primary-split-screen stack.
-     *
-     * @param taskId Id of task to move.
-     * @param createMode The mode the primary split screen stack should be created in if it doesn't
-     *                   exist already. See
-     *                   {@link android.app.ActivityManager#SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT}
-     *                   and
-     *                   {@link android.app.ActivityManager#SPLIT_SCREEN_CREATE_MODE_BOTTOM_OR_RIGHT}
-     * @param toTop If the task and stack should be moved to the top.
-     * @param animate Whether we should play an animation for the moving the task
-     * @param initialBounds If the primary stack gets created, it will use these bounds for the
-     *                      stack. Pass {@code null} to use default bounds.
-     */
-    @Override
-    public boolean setTaskWindowingModeSplitScreenPrimary(int taskId, int createMode, boolean toTop,
-            boolean animate, Rect initialBounds) {
-        enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS,
-                "setTaskWindowingModeSplitScreenPrimary()");
-        synchronized (this) {
-            long ident = Binder.clearCallingIdentity();
-            try {
-                final TaskRecord task = mStackSupervisor.anyTaskForIdLocked(taskId);
-                if (task == null) {
-                    Slog.w(TAG, "setTaskWindowingModeSplitScreenPrimary: No task for id=" + taskId);
-                    return false;
-                }
-                if (DEBUG_STACK) Slog.d(TAG_STACK,
-                        "setTaskWindowingModeSplitScreenPrimary: moving task=" + taskId
-                        + " to createMode=" + createMode + " toTop=" + toTop);
-                mWindowManager.setDockedStackCreateState(createMode, initialBounds);
-
-                final ActivityDisplay display = task.getStack().getDisplay();
-                final ActivityStack stack = display.getOrCreateStack(
-                        WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, task.getStack().getActivityType(),
-                        toTop);
-
-                // Defer resuming until we move the home stack to the front below
-                // TODO: Should just change windowing mode vs. re-parenting...
-                final boolean moved = task.reparent(stack, toTop,
-                        REPARENT_KEEP_STACK_AT_FRONT, animate, !DEFER_RESUME,
-                        "setTaskWindowingModeSplitScreenPrimary");
-                if (moved) {
-                    mStackSupervisor.ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
-                }
-                return moved;
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-            }
-        }
-    }
-
-    /**
      * Dismisses split-screen multi-window mode.
      * @param toTop If true the current primary split-screen stack will be placed or left on top.
      */
@@ -10584,14 +10576,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                     Slog.w(TAG, "dismissSplitScreenMode: primary split-screen stack not found.");
                     return;
                 }
+
                 if (toTop) {
-                    mStackSupervisor.resizeStackLocked(stack, null /* destBounds */,
-                            null /* tempTaskBounds */, null /* tempTaskInsetBounds */,
-                            true /* preserveWindows */, true /* allowResizeInDockedMode */,
-                            !DEFER_RESUME);
-                } else {
-                    mStackSupervisor.moveTasksToFullscreenStackLocked(stack, false /* onTop */);
+                    stack.moveToFront("dismissSplitScreenMode");
                 }
+                stack.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -12947,7 +12936,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 return false;
             }
 
-            final ActivityRecord activity = focusedStack.topActivity();
+            final ActivityRecord activity = focusedStack.getTopActivity();
             if (activity == null) {
                 return false;
             }
@@ -12964,7 +12953,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         try {
             synchronized (this) {
                 ActivityRecord caller = ActivityRecord.forTokenLocked(token);
-                ActivityRecord top = getFocusedStack().topActivity();
+                ActivityRecord top = getFocusedStack().getTopActivity();
                 if (top != caller) {
                     Slog.w(TAG, "showAssistFromActivity failed: caller " + caller
                             + " is not current top " + top);
@@ -13007,7 +12996,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 "enqueueAssistContext()");
 
         synchronized (this) {
-            ActivityRecord activity = getFocusedStack().topActivity();
+            ActivityRecord activity = getFocusedStack().getTopActivity();
             if (activity == null) {
                 Slog.w(TAG, "getAssistContextExtras failed: no top activity");
                 return null;

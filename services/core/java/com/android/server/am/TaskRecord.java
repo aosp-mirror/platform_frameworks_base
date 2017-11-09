@@ -606,9 +606,8 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         final int toStackWindowingMode = toStack.getWindowingMode();
         final ActivityRecord topActivity = getTopActivity();
 
-        final boolean mightReplaceWindow =
-                replaceWindowsOnTaskMove(getWindowingMode(), toStackWindowingMode)
-                        && topActivity != null;
+        final boolean mightReplaceWindow = topActivity != null
+                && replaceWindowsOnTaskMove(getWindowingMode(), toStackWindowingMode);
         if (mightReplaceWindow) {
             // We are about to relaunch the activity because its configuration changed due to
             // being maximized, i.e. size change. The activity will first remove the old window
@@ -722,7 +721,6 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         }
 
         // TODO: Handle incorrect request to move before the actual move, not after.
-        final boolean inSplitScreenMode = supervisor.getDefaultDisplay().hasSplitScreenPrimaryStack();
         supervisor.handleNonResizableTaskIfNeeded(this, preferredStack.getWindowingMode(),
                 DEFAULT_DISPLAY, toStack);
 
@@ -735,10 +733,9 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
     }
 
     /**
-     * Returns true if the windows of tasks being moved to the target stack from the source
-     * stack should be replaced, meaning that window manager will keep the old window around
-     * until the new is ready.
-     * @hide
+     * @return True if the windows of tasks being moved to the target stack from the source stack
+     * should be replaced, meaning that window manager will keep the old window around until the new
+     * is ready.
      */
     private static boolean replaceWindowsOnTaskMove(
             int sourceWindowingMode, int targetWindowingMode) {
@@ -2062,11 +2059,8 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
     }
 
     static Rect validateBounds(Rect bounds) {
-        if (bounds != null && bounds.isEmpty()) {
-            Slog.wtf(TAG, "Received strange task bounds: " + bounds, new Throwable());
-            return null;
-        }
-        return bounds;
+        // TODO: Not needed once we have bounds in WindowConfiguration.
+        return (bounds != null && bounds.isEmpty()) ? null : bounds;
     }
 
     /** Updates the task's bounds and override configuration to match what is expected for the
@@ -2095,7 +2089,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
     }
 
     /** Returns the bounds that should be used to launch this task. */
-    private Rect getLaunchBounds() {
+    Rect getLaunchBounds() {
         if (mStack == null) {
             return null;
         }

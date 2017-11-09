@@ -1119,7 +1119,7 @@ class ActivityStarter {
         // If the activity being launched is the same as the one currently at the top, then
         // we need to check if it should only be launched once.
         final ActivityStack topStack = mSupervisor.mFocusedStack;
-        final ActivityRecord topFocused = topStack.topActivity();
+        final ActivityRecord topFocused = topStack.getTopActivity();
         final ActivityRecord top = topStack.topRunningNonDelayedActivityLocked(mNotTop);
         final boolean dontStart = top != null && mStartActivity.resultTo == null
                 && top.realActivity.equals(mStartActivity.realActivity)
@@ -1565,8 +1565,8 @@ class ActivityStarter {
                 && (topTask != intentActivity.getTask() || topTask != focusStack.topTask())
                 && !mAvoidMoveToFront) {
             mStartActivity.intent.addFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
-            if (mSourceRecord == null || (mSourceStack.topActivity() != null &&
-                    mSourceStack.topActivity().getTask() == mSourceRecord.getTask())) {
+            if (mSourceRecord == null || (mSourceStack.getTopActivity() != null &&
+                    mSourceStack.getTopActivity().getTask() == mSourceRecord.getTask())) {
                 // We really do want to push this one into the user's face, right now.
                 if (mLaunchTaskBehind && mSourceRecord != null) {
                     intentActivity.setTaskToAffiliateWith(mSourceRecord.getTask());
@@ -1956,7 +1956,7 @@ class ActivityStarter {
         if (mDoResume) {
             mTargetStack.moveToFront("addingToTopTask");
         }
-        final ActivityRecord prev = mTargetStack.topActivity();
+        final ActivityRecord prev = mTargetStack.getTopActivity();
         final TaskRecord task = (prev != null) ? prev.getTask() : mTargetStack.createTaskRecord(
                 mSupervisor.getNextTaskIdForUserLocked(mStartActivity.userId), mStartActivity.info,
                 mIntent, null, null, true);

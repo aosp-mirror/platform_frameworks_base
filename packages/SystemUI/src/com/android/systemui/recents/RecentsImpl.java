@@ -736,7 +736,10 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         // However, the window bounds include the insets, so we need to subtract them here to make
         // them identical.
         if (ssp.hasDockedTask()) {
-            windowRect.bottom -= systemInsets.bottom;
+            if (systemInsets.bottom < windowRect.height()) {
+                // Only apply inset if it isn't going to cause the rect height to go negative.
+                windowRect.bottom -= systemInsets.bottom;
+            }
             systemInsets.bottom = 0;
         }
         calculateWindowStableInsets(systemInsets, windowRect, displayRect);
