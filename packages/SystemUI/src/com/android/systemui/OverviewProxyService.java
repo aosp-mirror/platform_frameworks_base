@@ -20,12 +20,18 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.Bitmap;
+import android.graphics.Rect;
+import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Log;
-import com.android.systemui.shared.recents.model.IOverviewProxy;
+import android.view.SurfaceControl;
+
+import com.android.systemui.shared.recents.IOverviewProxy;
+import com.android.systemui.shared.recents.ISystemUiProxy;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceProvisionedListener;
 
@@ -46,6 +52,19 @@ public class OverviewProxyService {
     private IOverviewProxy mOverviewProxy;
     private int mConnectionBackoffAttempts;
 
+    private ISystemUiProxy mSysUiProxy = new ISystemUiProxy.Stub() {
+        public Bitmap screenshot(Rect sourceCrop, int width, int height, int minLayer, int maxLayer,
+                boolean useIdentityTransform, int rotation) {
+            long token = Binder.clearCallingIdentity();
+            try {
+                return SurfaceControl.screenshot(sourceCrop, width, height, minLayer, maxLayer,
+                        useIdentityTransform, rotation);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+    };
+
     private final ServiceConnection mOverviewServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
@@ -57,6 +76,11 @@ public class OverviewProxyService {
                     service.linkToDeath(mOverviewServiceDeathRcpt, 0);
                 } catch (RemoteException e) {
                     Log.e(TAG, "Lost connection to launcher service", e);
+                }
+                try {
+                    mOverviewProxy.onBind(mSysUiProxy);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Failed to call onBind()", e);
                 }
             }
         }

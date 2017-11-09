@@ -35,7 +35,7 @@ import com.android.systemui.OverviewProxyService;
 import com.android.systemui.R;
 import com.android.systemui.RecentsComponent;
 import com.android.systemui.plugins.statusbar.phone.NavGesture.GestureHelper;
-import com.android.systemui.shared.recents.model.IOverviewProxy;
+import com.android.systemui.shared.recents.IOverviewProxy;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.tuner.TunerService;
 
