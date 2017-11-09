@@ -84,20 +84,18 @@ void EventMetricProducer::finish() {
 void EventMetricProducer::onSlicedConditionMayChange(const uint64_t eventTime) {
 }
 
-StatsLogReport EventMetricProducer::onDumpReport() {
+std::unique_ptr<std::vector<uint8_t>> EventMetricProducer::onDumpReport() {
     long long endTime = time(nullptr) * NS_PER_SEC;
     mProto->end(mProtoToken);
     mProto->write(FIELD_TYPE_INT64 | FIELD_ID_END_REPORT_NANOS, endTime);
 
     size_t bufferSize = mProto->size();
     VLOG("metric %lld dump report now... proto size: %zu ", mMetric.metric_id(), bufferSize);
-    std::unique_ptr<uint8_t[]> buffer = serializeProto();
+    std::unique_ptr<std::vector<uint8_t>> buffer = serializeProto();
 
     startNewProtoOutputStream(endTime);
 
-    // TODO: Once we migrate all MetricProducers to use ProtoOutputStream, we should return this:
-    // return std::move(buffer);
-    return StatsLogReport();
+    return buffer;
 }
 
 void EventMetricProducer::onConditionChanged(const bool conditionMet, const uint64_t eventTime) {

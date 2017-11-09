@@ -24,7 +24,6 @@
 #include "../external/StatsPullerManager.h"
 #include "../matchers/matcher_util.h"
 #include "MetricProducer.h"
-#include "frameworks/base/cmds/statsd/src/stats_log.pb.h"
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
 #include "stats_util.h"
 
@@ -60,7 +59,7 @@ public:
     void finish() override;
 
     // TODO: Pass a timestamp as a parameter in onDumpReport.
-    StatsLogReport onDumpReport() override;
+    std::unique_ptr<std::vector<uint8_t>> onDumpReport() override;
 
     size_t byteSize() override;
 

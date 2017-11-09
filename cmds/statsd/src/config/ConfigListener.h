@@ -16,7 +16,6 @@
 
 #pragma once
 
-#include <frameworks/base/cmds/statsd/src/stats_log.pb.h>
 #include "config/ConfigKey.h"
 
 #include <utils/RefBase.h>

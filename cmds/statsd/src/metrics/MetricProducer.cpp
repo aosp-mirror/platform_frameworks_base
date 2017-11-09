@@ -64,16 +64,16 @@ void MetricProducer::onMatchedLogEvent(const size_t matcherIndex, const LogEvent
                               scheduledPull);
 }
 
-std::unique_ptr<uint8_t[]> MetricProducer::serializeProto() {
+std::unique_ptr<std::vector<uint8_t>> MetricProducer::serializeProto() {
     size_t bufferSize = mProto->size();
 
-    std::unique_ptr<uint8_t[]> buffer(new uint8_t[bufferSize]);
+    std::unique_ptr<std::vector<uint8_t>> buffer(new std::vector<uint8_t>(bufferSize));
 
     size_t pos = 0;
     auto it = mProto->data();
     while (it.readBuffer() != NULL) {
         size_t toRead = it.currentToRead();
-        std::memcpy(&buffer[pos], it.readBuffer(), toRead);
+        std::memcpy(&buffer.get()[pos], it.readBuffer(), toRead);
         pos += toRead;
         it.rp()->move(toRead);
     }

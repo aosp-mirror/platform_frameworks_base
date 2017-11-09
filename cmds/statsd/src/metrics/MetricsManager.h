@@ -44,7 +44,7 @@ public:
     void finish();
 
     // Config source owner can call onDumpReport() to get all the metrics collected.
-    std::vector<StatsLogReport> onDumpReport();
+    std::vector<std::unique_ptr<std::vector<uint8_t>>> onDumpReport();
 
     size_t byteSize();
 

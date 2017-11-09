@@ -108,7 +108,7 @@ void ValueMetricProducer::onSlicedConditionMayChange(const uint64_t eventTime) {
     VLOG("Metric %lld onSlicedConditionMayChange", mMetric.metric_id());
 }
 
-StatsLogReport ValueMetricProducer::onDumpReport() {
+std::unique_ptr<std::vector<uint8_t>> ValueMetricProducer::onDumpReport() {
     VLOG("metric %lld dump report now...", mMetric.metric_id());
 
     for (const auto& pair : mPastBuckets) {
@@ -156,15 +156,13 @@ StatsLogReport ValueMetricProducer::onDumpReport() {
                   (long long)mCurrentBucketStartTimeNs);
 
     VLOG("metric %lld dump report now...", mMetric.metric_id());
-    std::unique_ptr<uint8_t[]> buffer = serializeProto();
+    std::unique_ptr<std::vector<uint8_t>> buffer = serializeProto();
 
     startNewProtoOutputStream(time(nullptr) * NS_PER_SEC);
     mPastBuckets.clear();
     mByteSize = 0;
 
-    // TODO: Once we migrate all MetricProducers to use ProtoOutputStream, we should return this:
-    // return std::move(buffer);
-    return StatsLogReport();
+    return buffer;
 
     // TODO: Clear mDimensionKeyMap once the report is dumped.
 }
