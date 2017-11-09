@@ -112,7 +112,7 @@ include $(BUILD_PREBUILT)
 # Run sanity tests on fonts on checkbuild
 checkbuild: fontchain_lint
 
-FONTCHAIN_LINTER := frameworks/base/tools/fonts/fontchain_lint.py
+FONTCHAIN_LINTER := $(HOST_OUT_EXECUTABLES)/fontchain_linter
 ifeq ($(MINIMAL_FONT_FOOTPRINT),true)
 CHECK_EMOJI := false
 else
@@ -121,5 +121,4 @@ endif
 
 .PHONY: fontchain_lint
 fontchain_lint: $(FONTCHAIN_LINTER) $(TARGET_OUT)/etc/fonts.xml $(PRODUCT_OUT)/system.img
-	PYTHONPATH=$$PYTHONPATH:external/fonttools/Lib \
-	python $(FONTCHAIN_LINTER) $(TARGET_OUT) $(CHECK_EMOJI) external/unicode
+	$(FONTCHAIN_LINTER) $(TARGET_OUT) $(CHECK_EMOJI) external/unicode
