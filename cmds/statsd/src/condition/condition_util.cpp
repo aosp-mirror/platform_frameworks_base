@@ -25,7 +25,6 @@
 #include <unordered_map>
 #include "../matchers/matcher_util.h"
 #include "ConditionTracker.h"
-#include "frameworks/base/cmds/statsd/src/stats_log.pb.h"
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
 #include "stats_util.h"
 

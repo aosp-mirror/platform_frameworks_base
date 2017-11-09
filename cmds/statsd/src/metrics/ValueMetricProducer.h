@@ -22,7 +22,6 @@
 #include "../external/PullDataReceiver.h"
 #include "../external/StatsPullerManager.h"
 #include "MetricProducer.h"
-#include "frameworks/base/cmds/statsd/src/stats_log.pb.h"
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
 
 namespace android {
@@ -48,7 +47,7 @@ public:
     void finish() override;
 
     // TODO: Pass a timestamp as a parameter in onDumpReport.
-    StatsLogReport onDumpReport() override;
+    std::unique_ptr<std::vector<uint8_t>> onDumpReport() override;
 
     void onSlicedConditionMayChange(const uint64_t eventTime);
 

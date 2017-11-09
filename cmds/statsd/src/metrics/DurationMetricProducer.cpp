@@ -159,7 +159,7 @@ static void addDurationBucketsToReport(StatsLogReport_DurationMetricDataWrapper&
     }
 }
 
-StatsLogReport DurationMetricProducer::onDumpReport() {
+std::unique_ptr<std::vector<uint8_t>> DurationMetricProducer::onDumpReport() {
     long long endTime = time(nullptr) * NS_PER_SEC;
 
     // Dump current bucket if it's stale.
@@ -214,14 +214,12 @@ StatsLogReport DurationMetricProducer::onDumpReport() {
     mProto->write(FIELD_TYPE_INT64 | FIELD_ID_END_REPORT_NANOS,
                   (long long)mCurrentBucketStartTimeNs);
 
-    std::unique_ptr<uint8_t[]> buffer = serializeProto();
+    std::unique_ptr<std::vector<uint8_t>> buffer = serializeProto();
 
     startNewProtoOutputStream(endTime);
     mPastBuckets.clear();
 
-    // TODO: Once we migrate all MetricProducers to use ProtoOutputStream, we should return this:
-    // return std::move(buffer);
-    return StatsLogReport();
+    return buffer;
 }
 
 void DurationMetricProducer::flushIfNeeded(uint64_t eventTime) {

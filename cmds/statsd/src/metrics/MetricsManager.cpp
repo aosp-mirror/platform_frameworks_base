@@ -56,10 +56,10 @@ void MetricsManager::finish() {
     }
 }
 
-vector<StatsLogReport> MetricsManager::onDumpReport() {
+vector<std::unique_ptr<vector<uint8_t>>> MetricsManager::onDumpReport() {
     VLOG("=========================Metric Reports Start==========================");
     // one StatsLogReport per MetricProduer
-    vector<StatsLogReport> reportList;
+    vector<std::unique_ptr<vector<uint8_t>>> reportList;
     for (auto& metric : mAllMetricProducers) {
         reportList.push_back(metric->onDumpReport());
     }

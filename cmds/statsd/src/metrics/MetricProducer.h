@@ -23,7 +23,6 @@
 
 #include <log/logprint.h>
 #include <utils/RefBase.h>
-#include "frameworks/base/cmds/statsd/src/stats_log.pb.h"
 
 namespace android {
 namespace os {
@@ -62,7 +61,7 @@ public:
 
     // TODO: Pass a timestamp as a parameter in onDumpReport and update all its
     // implementations.
-    virtual StatsLogReport onDumpReport() = 0;
+    virtual std::unique_ptr<std::vector<uint8_t>> onDumpReport() = 0;
 
     virtual bool isConditionSliced() const {
         return mConditionSliced;
@@ -121,7 +120,7 @@ protected:
 
     virtual void startNewProtoOutputStream(long long timestamp) = 0;
 
-    std::unique_ptr<uint8_t[]> serializeProto();
+    std::unique_ptr<std::vector<uint8_t>> serializeProto();
 };
 
 }  // namespace statsd
