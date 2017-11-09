@@ -4110,6 +4110,7 @@ package android.telephony {
     method public int getCurrentPhoneType(int);
     method public deprecated boolean getDataEnabled();
     method public deprecated boolean getDataEnabled(int);
+    method public boolean getEmergencyCallbackMode();
     method public java.util.List<android.telephony.TelephonyHistogram> getTelephonyHistograms();
     method public android.os.Bundle getVisualVoicemailSettings();
     method public boolean handlePinMmi(java.lang.String);
