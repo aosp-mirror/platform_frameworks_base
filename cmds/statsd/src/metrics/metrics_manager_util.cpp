@@ -195,7 +195,7 @@ bool initMetrics(const StatsdConfig& config, const unordered_map<string, int>& l
     const int allMetricsCount = config.count_metric_size() + config.duration_metric_size() +
                                 config.event_metric_size() + config.value_metric_size();
     allMetricProducers.reserve(allMetricsCount);
-    StatsPullerManager& statsPullerManager = StatsPullerManager::GetInstance();
+    StatsPullerManager statsPullerManager;
     uint64_t startTimeNs = time(nullptr) * NS_PER_SEC;
 
     // Build MetricProducers for each metric defined in config.

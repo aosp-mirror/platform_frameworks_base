@@ -16,71 +16,39 @@
 
 #pragma once
 
-#include <android/os/IStatsCompanionService.h>
-#include <binder/IServiceManager.h>
-#include <utils/RefBase.h>
-#include <utils/String16.h>
-#include <utils/String8.h>
-#include <utils/threads.h>
-#include <string>
-#include <unordered_map>
-#include <vector>
-#include "PullDataReceiver.h"
-#include "StatsPuller.h"
-#include "logd/LogEvent.h"
+#include "StatsPullerManagerImpl.h"
 
 namespace android {
 namespace os {
 namespace statsd {
 
-class StatsPullerManager : public virtual RefBase {
-public:
-    static StatsPullerManager& GetInstance();
+class StatsPullerManager{
+ public:
+  virtual ~StatsPullerManager() {}
 
-    void RegisterReceiver(int tagId, sp<PullDataReceiver> receiver, long intervalMs);
+  virtual void RegisterReceiver(int tagId, wp<PullDataReceiver> receiver, long intervalMs) {
+    mPullerManager.RegisterReceiver(tagId, receiver, intervalMs);
+  };
 
-    void UnRegisterReceiver(int tagId, sp<PullDataReceiver> receiver);
+  virtual void UnRegisterReceiver(int tagId, wp<PullDataReceiver> receiver) {
+    mPullerManager.UnRegisterReceiver(tagId, receiver);
+  };
 
-    // Verify if we know how to pull for this matcher
-    bool PullerForMatcherExists(int tagId);
+  // Verify if we know how to pull for this matcher
+  bool PullerForMatcherExists(int tagId) {
+    return mPullerManager.PullerForMatcherExists(tagId);
+  }
 
-    void OnAlarmFired();
+  void OnAlarmFired() {
+    mPullerManager.OnAlarmFired();
+  }
 
-    bool Pull(const int pullCode, vector<std::shared_ptr<LogEvent>>* data);
+  virtual bool Pull(const int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+    return mPullerManager.Pull(tagId, data);
+  }
 
-private:
-    StatsPullerManager();
-
-    // use this to update alarm
-    sp<IStatsCompanionService> mStatsCompanionService = nullptr;
-
-    sp<IStatsCompanionService> get_stats_companion_service();
-
-    // mapping from simple matcher tagId to puller
-    std::map<int, std::shared_ptr<StatsPuller>> mPullers;
-
-      typedef struct {
-        // pull_interval_sec : last_pull_time_sec
-        std::pair<uint64_t, uint64_t> timeInfo;
-        sp<PullDataReceiver> receiver;
-      } ReceiverInfo;
-
-    // mapping from simple matcher tagId to receivers
-    std::map<int, std::vector<ReceiverInfo>> mReceivers;
-
-    Mutex mReceiversLock;
-
-    long mCurrentPullingInterval;
-
-    // for pulled metrics, it is important for the buckets to be aligned to multiple of smallest
-    // bucket size. All pulled metrics start pulling based on this time, so that they can be
-    // correctly attributed to the correct buckets. Pulled data attach a timestamp which is the
-    // request time.
-    const long mPullStartTimeMs;
-
-    long get_pull_start_time_ms();
-
-    LogEvent parse_pulled_data(String16 data);
+ private:
+  StatsPullerManagerImpl& mPullerManager = StatsPullerManagerImpl::GetInstance();
 };
 
 }  // namespace statsd

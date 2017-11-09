@@ -21,7 +21,7 @@
 #include <vector>
 
 #include "../condition/ConditionTracker.h"
-#include "../external/StatsPullerManager.h"
+#include "../external/StatsPullerManagerImpl.h"
 #include "../matchers/LogMatchingTracker.h"
 
 namespace android {
