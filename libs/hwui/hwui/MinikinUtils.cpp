@@ -30,46 +30,43 @@ minikin::MinikinPaint MinikinUtils::prepareMinikinPaint(const Paint* paint,
                                                         const Typeface* typeface) {
     const Typeface* resolvedFace = Typeface::resolveDefault(typeface);
     minikin::FontStyle resolved = resolvedFace->fStyle;
-
     const minikin::FontVariant minikinVariant =
             (paint->getFontVariant() == minikin::FontVariant::ELEGANT)
                     ? minikin::FontVariant::ELEGANT
                     : minikin::FontVariant::COMPACT;
-
-    minikin::MinikinPaint minikinPaint;
-    /* Prepare minikin Paint */
-    minikinPaint.size =
-            paint->isLinearText() ? paint->getTextSize() : static_cast<int>(paint->getTextSize());
-    minikinPaint.scaleX = paint->getTextScaleX();
-    minikinPaint.skewX = paint->getTextSkewX();
-    minikinPaint.letterSpacing = paint->getLetterSpacing();
-    minikinPaint.wordSpacing = paint->getWordSpacing();
-    minikinPaint.paintFlags = MinikinFontSkia::packPaintFlags(paint);
-    minikinPaint.localeListId = paint->getMinikinLocaleListId();
-    minikinPaint.fontStyle = minikin::FontStyle(minikinVariant, resolved.weight, resolved.slant);
-    minikinPaint.fontFeatureSettings = paint->getFontFeatureSettings();
-    minikinPaint.hyphenEdit = minikin::HyphenEdit(paint->getHyphenEdit());
-    return minikinPaint;
+    float textSize = paint->getTextSize();
+    if (!paint->isLinearText()) {
+        // If linear text is not specified, truncate the value.
+        textSize = trunc(textSize);
+    }
+    return minikin::MinikinPaint(
+            textSize,
+            paint->getTextScaleX(),
+            paint->getTextSkewX(),
+            paint->getLetterSpacing(),
+            paint->getWordSpacing(),
+            MinikinFontSkia::packPaintFlags(paint),
+            paint->getMinikinLocaleListId(),
+            minikin::FontStyle(minikinVariant, resolved.weight, resolved.slant),
+            minikin::HyphenEdit(paint->getHyphenEdit()),
+            paint->getFontFeatureSettings(),
+            resolvedFace->fFontCollection);
 }
 
 minikin::Layout MinikinUtils::doLayout(const Paint* paint, minikin::Bidi bidiFlags,
                                        const Typeface* typeface, const uint16_t* buf, size_t start,
                                        size_t count, size_t bufSize) {
-    minikin::MinikinPaint minikinPaint = prepareMinikinPaint(paint, typeface);
     minikin::Layout layout;
-    layout.doLayout(buf, start, count, bufSize, bidiFlags, minikinPaint,
-                    Typeface::resolveDefault(typeface)->fFontCollection);
+    layout.doLayout(buf, start, count, bufSize, bidiFlags, prepareMinikinPaint(paint, typeface));
     return layout;
 }
 
 float MinikinUtils::measureText(const Paint* paint, minikin::Bidi bidiFlags,
                                 const Typeface* typeface, const uint16_t* buf, size_t start,
                                 size_t count, size_t bufSize, float* advances) {
-    minikin::MinikinPaint minikinPaint = prepareMinikinPaint(paint, typeface);
-    const Typeface* resolvedTypeface = Typeface::resolveDefault(typeface);
-    return minikin::Layout::measureText(buf, start, count, bufSize, bidiFlags, minikinPaint,
-                                        resolvedTypeface->fFontCollection, advances,
-                                        nullptr /* extent */, nullptr /* overhangs */);
+    return minikin::Layout::measureText(
+            buf, start, count, bufSize, bidiFlags, prepareMinikinPaint(paint, typeface), advances,
+            nullptr /* extent */, nullptr /* overhangs */);
 }
 
 bool MinikinUtils::hasVariationSelector(const Typeface* typeface, uint32_t codepoint, uint32_t vs) {

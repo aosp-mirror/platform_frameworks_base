@@ -137,18 +137,15 @@ class Run {
 
 class StyleRun : public Run {
     public:
-        StyleRun(int32_t start, int32_t end, minikin::MinikinPaint&& paint,
-                std::shared_ptr<minikin::FontCollection>&& collection, bool isRtl)
-            : Run(start, end), mPaint(std::move(paint)), mCollection(std::move(collection)),
-              mIsRtl(isRtl) {}
+        StyleRun(int32_t start, int32_t end, minikin::MinikinPaint&& paint, bool isRtl)
+            : Run(start, end), mPaint(std::move(paint)), mIsRtl(isRtl) {}
 
         void addTo(minikin::LineBreaker* lineBreaker) override {
-            lineBreaker->addStyleRun(&mPaint, mCollection, mStart, mEnd, mIsRtl);
+            lineBreaker->addStyleRun(&mPaint, mStart, mEnd, mIsRtl);
         }
 
     private:
         minikin::MinikinPaint mPaint;
-        std::shared_ptr<minikin::FontCollection> mCollection;
         const bool mIsRtl;
 };
 
@@ -176,10 +173,8 @@ class StaticLayoutNative {
               mIndents(std::move(indents)), mLeftPaddings(std::move(leftPaddings)),
               mRightPaddings(std::move(rightPaddings)) {}
 
-        void addStyleRun(int32_t start, int32_t end, minikin::MinikinPaint&& paint,
-                         std::shared_ptr<minikin::FontCollection> collection, bool isRtl) {
-            mRuns.emplace_back(std::make_unique<StyleRun>(
-                    start, end, std::move(paint), std::move(collection), isRtl));
+        void addStyleRun(int32_t start, int32_t end, minikin::MinikinPaint&& paint, bool isRtl) {
+            mRuns.emplace_back(std::make_unique<StyleRun>(start, end, std::move(paint), isRtl));
         }
 
         void addReplacementRun(int32_t start, int32_t end, float width, uint32_t localeListId) {
@@ -334,7 +329,7 @@ static void nAddStyleRun(jlong nativePtr, jlong nativePaint, jint start, jint en
     Paint* paint = reinterpret_cast<Paint*>(nativePaint);
     const Typeface* typeface = Typeface::resolveDefault(paint->getAndroidTypeface());
     minikin::MinikinPaint minikinPaint = MinikinUtils::prepareMinikinPaint(paint, typeface);
-    builder->addStyleRun(start, end, std::move(minikinPaint), typeface->fFontCollection, isRtl);
+    builder->addStyleRun(start, end, std::move(minikinPaint), isRtl);
 }
 
 // CriticalNative
