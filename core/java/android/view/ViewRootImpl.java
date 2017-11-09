@@ -513,7 +513,7 @@ public final class ViewRootImpl implements ViewParent,
         mDisplayManager = (DisplayManager)context.getSystemService(Context.DISPLAY_SERVICE);
 
         if (!sCompatibilityDone) {
-            sAlwaysAssignFocus = mTargetSdkVersion < Build.VERSION_CODES.P;
+            sAlwaysAssignFocus = true;
 
             sCompatibilityDone = true;
         }
