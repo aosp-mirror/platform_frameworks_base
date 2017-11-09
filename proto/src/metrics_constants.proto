@@ -4680,6 +4680,16 @@ message MetricsEvent {
     // OS: P
     DIALOG_FIRMWARE_VERSION = 1247;
 
+    // OPEN: Settings > Network & internet > Menu > Private DNS
+    // CATEGORY: SETTINGS
+    // OS: P
+    DIALOG_PRIVATE_DNS = 1248;
+
+    // ACTION: A private dns mode been selected by user
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_PRIVATE_DNS_MODE = 1249;
+
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
   }
