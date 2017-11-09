@@ -39,6 +39,7 @@ public:
                    const sp<ConditionWizard>& wizard)
         : mStartTimeNs(startTimeNs),
           mCurrentBucketStartTimeNs(startTimeNs),
+          mCurrentBucketNum(0),
           mCondition(conditionIndex >= 0 ? false : true),
           mConditionSliced(false),
           mWizard(wizard),
@@ -73,6 +74,8 @@ protected:
     const uint64_t mStartTimeNs;
 
     uint64_t mCurrentBucketStartTimeNs;
+
+    uint64_t mCurrentBucketNum;
 
     int64_t mBucketSizeNs;
 

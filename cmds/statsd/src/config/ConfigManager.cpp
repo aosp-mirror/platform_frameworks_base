@@ -165,6 +165,12 @@ static StatsdConfig build_fake_config() {
     KeyMatcher* keyMatcher = metric->add_dimension();
     keyMatcher->set_key(UID_PROCESS_STATE_UID_KEY);
 
+    // Anomaly threshold for background count.
+    alert = metric->add_alerts();
+    alert->set_number_of_buckets(4);
+    alert->set_trigger_if_sum_gt(30);
+    alert->set_refractory_period_secs(20);
+
     // Count process state changes, slice by uid, while SCREEN_IS_OFF
     metric = config.add_count_metric();
     metric->set_metric_id(3);

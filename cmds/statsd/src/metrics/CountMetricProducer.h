@@ -23,13 +23,11 @@
 #include <gtest/gtest_prod.h>
 #include "../condition/ConditionTracker.h"
 #include "../matchers/matcher_util.h"
-#include "CountAnomalyTracker.h"
+#include "../anomaly/DiscreteAnomalyTracker.h"
 #include "MetricProducer.h"
 #include "frameworks/base/cmds/statsd/src/stats_log.pb.h"
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
 #include "stats_util.h"
-
-using namespace std;
 
 namespace android {
 namespace os {
@@ -82,9 +80,9 @@ private:
     size_t mByteSize;
 
     // The current bucket.
-    std::unordered_map<HashableDimensionKey, int> mCurrentSlicedCounter;
+    std::shared_ptr<DimToValMap> mCurrentSlicedCounter = std::make_shared<DimToValMap>();
 
-    vector<unique_ptr<CountAnomalyTracker>> mAnomalyTrackers;
+    vector<std::unique_ptr<DiscreteAnomalyTracker>> mAnomalyTrackers;
 
     void flushCounterIfNeeded(const uint64_t newEventTime);
 

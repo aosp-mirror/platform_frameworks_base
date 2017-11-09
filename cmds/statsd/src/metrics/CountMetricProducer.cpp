@@ -17,7 +17,7 @@
 #define DEBUG true  // STOPSHIP if true
 #include "Log.h"
 
-#include "CountAnomalyTracker.h"
+#include "../anomaly/DiscreteAnomalyTracker.h"
 #include "CountMetricProducer.h"
 #include "stats_util.h"
 
@@ -61,6 +61,7 @@ const int FIELD_ID_END_BUCKET_NANOS = 2;
 const int FIELD_ID_COUNT = 3;
 
 // TODO: add back AnomalyTracker.
+
 CountMetricProducer::CountMetricProducer(const CountMetric& metric, const int conditionIndex,
                                          const sp<ConditionWizard>& wizard,
                                          const uint64_t startTimeNs)
@@ -76,7 +77,7 @@ CountMetricProducer::CountMetricProducer(const CountMetric& metric, const int co
     for (int i = 0; i < metric.alerts_size(); i++) {
         const Alert& alert = metric.alerts(i);
         if (alert.trigger_if_sum_gt() > 0 && alert.number_of_buckets() > 0) {
-            mAnomalyTrackers.push_back(std::make_unique<CountAnomalyTracker>(alert));
+            mAnomalyTrackers.push_back(std::make_unique<DiscreteAnomalyTracker>(alert));
         } else {
             ALOGW("Ignoring invalid count metric alert: threshold=%lld num_buckets= %d",
                   alert.trigger_if_sum_gt(), alert.number_of_buckets());
@@ -201,25 +202,19 @@ void CountMetricProducer::onMatchedLogEventInternal(
         return;
     }
 
-    auto it = mCurrentSlicedCounter.find(eventKey);
+    auto it = mCurrentSlicedCounter->find(eventKey);
 
-    if (it == mCurrentSlicedCounter.end()) {
+    if (it == mCurrentSlicedCounter->end()) {
         // create a counter for the new key
-        mCurrentSlicedCounter[eventKey] = 1;
-
+        (*mCurrentSlicedCounter)[eventKey] = 1;
     } else {
         // increment the existing value
         auto& count = it->second;
         count++;
     }
 
-    // TODO: Re-add anomaly detection (similar to):
-    // for (auto& tracker : mAnomalyTrackers) {
-    //     tracker->checkAnomaly(mCounter);
-    // }
-
     VLOG("metric %lld %s->%d", mMetric.metric_id(), eventKey.c_str(),
-         mCurrentSlicedCounter[eventKey]);
+         (*mCurrentSlicedCounter)[eventKey]);
 }
 
 // When a new matched event comes in, we check if event falls into the current
@@ -230,12 +225,13 @@ void CountMetricProducer::flushCounterIfNeeded(const uint64_t eventTimeNs) {
     }
 
     // adjust the bucket start time
-    int64_t numBucketsForward = (eventTimeNs - mCurrentBucketStartTimeNs) / mBucketSizeNs;
+    // TODO: This (and addPastBucket to which it goes) doesn't really need to be an int64.
+    uint64_t numBucketsForward = (eventTimeNs - mCurrentBucketStartTimeNs) / mBucketSizeNs;
 
     CountBucket info;
     info.mBucketStartNs = mCurrentBucketStartTimeNs;
     info.mBucketEndNs = mCurrentBucketStartTimeNs + mBucketSizeNs;
-    for (const auto& counter : mCurrentSlicedCounter) {
+    for (const auto& counter : *mCurrentSlicedCounter) {
         info.mCount = counter.second;
         auto& bucketList = mPastBuckets[counter.first];
         bucketList.push_back(info);
@@ -244,15 +240,16 @@ void CountMetricProducer::flushCounterIfNeeded(const uint64_t eventTimeNs) {
         mByteSize += sizeof(info);
     }
 
-    // TODO: Re-add anomaly detection (similar to):
-    // for (auto& tracker : mAnomalyTrackers) {
-    //     tracker->addPastBucket(mCounter, numBucketsForward);
-    //}
+    for (auto& tracker : mAnomalyTrackers) {
+        tracker->addOrUpdateBucket(mCurrentSlicedCounter, mCurrentBucketNum);
+        tracker->declareAndDeclareAnomaly();
+    }
 
-    // Reset counters
-    mCurrentSlicedCounter.clear();
+    // Reset counters (do not clear, since the old one is still referenced in mAnomalyTrackers).
+    mCurrentSlicedCounter = std::make_shared<DimToValMap>();
 
     mCurrentBucketStartTimeNs = mCurrentBucketStartTimeNs + numBucketsForward * mBucketSizeNs;
+    mCurrentBucketNum += numBucketsForward;
     VLOG("metric %lld: new bucket start time: %lld", mMetric.metric_id(),
          (long long)mCurrentBucketStartTimeNs);
 }

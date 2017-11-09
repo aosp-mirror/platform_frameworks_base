@@ -13,14 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef STATS_UTIL_H
-#define STATS_UTIL_H
+
+#pragma once
 
 #include "logd/LogReader.h"
 #include "storage/DropboxWriter.h"
 
 #include <log/logprint.h>
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
+
+#include <unordered_map>
 
 namespace android {
 namespace os {
@@ -33,6 +35,10 @@ typedef std::string HashableDimensionKey;
 
 typedef std::map<std::string, HashableDimensionKey> ConditionKey;
 
+// TODO: For P, change int to int64_t.
+// TODO: Should HashableDimensionKey be marked here as const?
+typedef std::unordered_map<HashableDimensionKey, int> DimToValMap;
+
 EventMetricData parse(log_msg msg);
 
 int getTagId(log_msg msg);
@@ -41,5 +47,3 @@ std::string getHashableKey(std::vector<KeyValuePair> key);
 }  // namespace statsd
 }  // namespace os
 }  // namespace android
-
-#endif  // STATS_UTIL_H
