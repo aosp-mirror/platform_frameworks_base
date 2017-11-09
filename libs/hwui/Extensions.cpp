@@ -31,11 +31,7 @@ namespace android {
 namespace uirenderer {
 
 Extensions::Extensions() {
-    if (Properties::getRenderPipelineType() == RenderPipelineType::SkiaVulkan) {
-        // Extensions class is used only by OpenGL and SkiaGL pipelines
-        // The code below will crash for SkiaVulkan, because OpenGL is not initialized
-        // TODO: instantiate Extensions class only for OpenGL pipeline
-        // TODO: remove the only usage of Extensions by SkiaGL in SkiaOpenGLReadback::copyImageInto
+    if (Properties::isSkiaEnabled()) {
         return;
     }
     const char* version = (const char*)glGetString(GL_VERSION);

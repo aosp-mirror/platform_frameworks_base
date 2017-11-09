@@ -66,14 +66,8 @@ CopyResult SkiaOpenGLReadback::copyImageInto(EGLImageKHR eglImage, const Matrix4
             break;
     }
 
-    /* Ideally, we would call grContext->caps()->isConfigRenderable(...). We
-     * currently can't do that since some devices (i.e. SwiftShader) supports all
-     * the appropriate half float extensions, but only allow the buffer to be read
-     * back as full floats.  We can relax this extension if Skia implements support
-     * for reading back float buffers (skbug.com/6945).
-     */
     if (pixelConfig == kRGBA_half_GrPixelConfig &&
-        !DeviceInfo::get()->extensions().hasRenderableFloatTextures()) {
+            !grContext->caps()->isConfigRenderable(kRGBA_half_GrPixelConfig, false)) {
         ALOGW("Can't copy surface into bitmap, RGBA_F16 config is not supported");
         return CopyResult::DestinationInvalid;
     }
