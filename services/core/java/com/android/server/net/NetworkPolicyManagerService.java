@@ -3746,7 +3746,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             extends UsageStatsManagerInternal.AppIdleStateChangeListener {
 
         @Override
-        public void onAppIdleStateChanged(String packageName, int userId, boolean idle) {
+        public void onAppIdleStateChanged(String packageName, int userId, boolean idle, int bucket) {
             try {
                 final int uid = mContext.getPackageManager().getPackageUidAsUser(packageName,
                         PackageManager.MATCH_UNINSTALLED_PACKAGES, userId);

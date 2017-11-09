@@ -160,7 +160,6 @@ public class AppStandbyController {
     private final Context mContext;
 
     // TODO: Provide a mechanism to set an external bucketing service
-    private boolean mUseInternalBucketingHeuristics = true;
 
     private AppWidgetManager mAppWidgetManager;
     private PowerManager mPowerManager;
@@ -367,29 +366,33 @@ public class AppStandbyController {
                     Slog.d(TAG, "   Checking idle state for " + packageName);
                 }
                 if (isSpecial) {
-                    maybeInformListeners(packageName, userId, elapsedRealtime, false);
-                } else if (mUseInternalBucketingHeuristics) {
+                    maybeInformListeners(packageName, userId, elapsedRealtime,
+                            AppStandby.STANDBY_BUCKET_ACTIVE);
+                } else {
                     synchronized (mAppIdleLock) {
-                        int oldBucket = mAppIdleHistory.getAppStandbyBucket(packageName, userId,
-                                elapsedRealtime);
                         String bucketingReason = mAppIdleHistory.getAppStandbyReason(packageName,
                                 userId, elapsedRealtime);
-                        if (bucketingReason != null
-                                && (bucketingReason.equals(AppStandby.REASON_FORCED)
-                                    || bucketingReason.startsWith(AppStandby.REASON_PREDICTED))) {
+                        // If the bucket was forced by the developer, leave it alone
+                        if (AppStandby.REASON_FORCED.equals(bucketingReason)) {
                             continue;
                         }
-                        int newBucket = getBucketForLocked(packageName, userId,
-                                            elapsedRealtime);
-                        if (DEBUG) {
-                            Slog.d(TAG, "     Old bucket=" + oldBucket
-                                    + ", newBucket=" + newBucket);
-                        }
-                        if (oldBucket != newBucket) {
-                            mAppIdleHistory.setAppStandbyBucket(packageName, userId,
-                                    elapsedRealtime, newBucket, AppStandby.REASON_TIMEOUT);
-                            maybeInformListeners(packageName, userId, elapsedRealtime,
-                                    newBucket >= AppStandby.STANDBY_BUCKET_RARE);
+                        // If the bucket was moved up due to usage, let the timeouts apply.
+                        if (AppStandby.REASON_USAGE.equals(bucketingReason)
+                                || AppStandby.REASON_TIMEOUT.equals(bucketingReason)) {
+                            int oldBucket = mAppIdleHistory.getAppStandbyBucket(packageName, userId,
+                                    elapsedRealtime);
+                            int newBucket = getBucketForLocked(packageName, userId,
+                                    elapsedRealtime);
+                            if (DEBUG) {
+                                Slog.d(TAG, "     Old bucket=" + oldBucket
+                                        + ", newBucket=" + newBucket);
+                            }
+                            if (oldBucket < newBucket) {
+                                mAppIdleHistory.setAppStandbyBucket(packageName, userId,
+                                        elapsedRealtime, newBucket, AppStandby.REASON_TIMEOUT);
+                                maybeInformListeners(packageName, userId, elapsedRealtime,
+                                        newBucket);
+                            }
                         }
                     }
                 }
@@ -403,12 +406,12 @@ public class AppStandbyController {
     }
 
     private void maybeInformListeners(String packageName, int userId,
-            long elapsedRealtime, boolean isIdle) {
+            long elapsedRealtime, int bucket) {
         synchronized (mAppIdleLock) {
             if (mAppIdleHistory.shouldInformListeners(packageName, userId,
-                    elapsedRealtime, isIdle)) {
+                    elapsedRealtime, bucket)) {
                 mHandler.sendMessage(mHandler.obtainMessage(MSG_INFORM_LISTENERS,
-                        userId, isIdle ? 1 : 0, packageName));
+                        userId, bucket, packageName));
             }
         }
     }
@@ -461,11 +464,13 @@ public class AppStandbyController {
         if (DEBUG) Slog.i(TAG, "DeviceIdleMode changed to " + deviceIdle);
         boolean paroled = false;
         synchronized (mAppIdleLock) {
-            final long timeSinceLastParole = mInjector.currentTimeMillis() - mLastAppIdleParoledTime;
+            final long timeSinceLastParole =
+                    mInjector.currentTimeMillis() - mLastAppIdleParoledTime;
             if (!deviceIdle
                     && timeSinceLastParole >= mAppIdleParoleIntervalMillis) {
                 if (DEBUG) {
-                    Slog.i(TAG, "Bringing idle apps out of inactive state due to deviceIdleMode=false");
+                    Slog.i(TAG,
+                            "Bringing idle apps out of inactive state due to deviceIdleMode=false");
                 }
                 paroled = true;
             } else if (deviceIdle) {
@@ -491,7 +496,8 @@ public class AppStandbyController {
                     || event.mEventType == UsageEvents.Event.USER_INTERACTION)) {
                 mAppIdleHistory.reportUsage(event.mPackage, userId, elapsedRealtime);
                 if (previouslyIdle) {
-                    maybeInformListeners(event.mPackage, userId, elapsedRealtime, false);
+                    maybeInformListeners(event.mPackage, userId, elapsedRealtime,
+                            AppStandby.STANDBY_BUCKET_ACTIVE);
                     notifyBatteryStats(event.mPackage, userId, false);
                 }
             }
@@ -729,7 +735,8 @@ public class AppStandbyController {
 
     void setAppStandbyBucket(String packageName, int userId, @StandbyBuckets int newBucket,
             String reason, long elapsedRealtime) {
-        mAppIdleHistory.setAppStandbyBucket(packageName, userId, elapsedRealtime, newBucket, reason);
+        mAppIdleHistory.setAppStandbyBucket(packageName, userId, elapsedRealtime, newBucket,
+                reason);
     }
 
     private boolean isActiveDeviceAdmin(String packageName, int userId) {
@@ -786,9 +793,10 @@ public class AppStandbyController {
         return packageName != null && packageName.equals(activeScorer);
     }
 
-    void informListeners(String packageName, int userId, boolean isIdle) {
+    void informListeners(String packageName, int userId, int bucket) {
+        final boolean idle = bucket >= AppStandby.STANDBY_BUCKET_RARE;
         for (AppIdleStateChangeListener listener : mPackageAccessListeners) {
-            listener.onAppIdleStateChanged(packageName, userId, isIdle);
+            listener.onAppIdleStateChanged(packageName, userId, idle, bucket);
         }
     }
 
@@ -1037,7 +1045,7 @@ public class AppStandbyController {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case MSG_INFORM_LISTENERS:
-                    informListeners((String) msg.obj, msg.arg1, msg.arg2 == 1);
+                    informListeners((String) msg.obj, msg.arg1, msg.arg2);
                     break;
 
                 case MSG_FORCE_IDLE_STATE:
@@ -1187,7 +1195,8 @@ public class AppStandbyController {
                 mAppStandbyScreenThresholds = parseLongArray(screenThresholdsValue,
                         SCREEN_TIME_THRESHOLDS);
 
-                String elapsedThresholdsValue = mParser.getString(KEY_ELAPSED_TIME_THRESHOLDS, null);
+                String elapsedThresholdsValue = mParser.getString(KEY_ELAPSED_TIME_THRESHOLDS,
+                        null);
                 mAppStandbyElapsedThresholds = parseLongArray(elapsedThresholdsValue,
                         ELAPSED_TIME_THRESHOLDS);
             }
