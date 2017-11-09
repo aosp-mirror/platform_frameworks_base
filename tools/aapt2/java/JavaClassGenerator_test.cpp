@@ -16,12 +16,13 @@
 
 #include "java/JavaClassGenerator.h"
 
-#include <sstream>
 #include <string>
 
+#include "io/StringStream.h"
 #include "test/Test.h"
 #include "util/Util.h"
 
+using ::aapt::io::StringOutputStream;
 using ::android::StringPiece;
 using ::testing::HasSubstr;
 using ::testing::Lt;
@@ -45,7 +46,8 @@ TEST(JavaClassGeneratorTest, FailWhenEntryIsJavaKeyword) {
           .Build();
   JavaClassGenerator generator(context.get(), table.get(), {});
 
-  std::stringstream out;
+  std::string result;
+  StringOutputStream out(&result);
   EXPECT_FALSE(generator.Generate("android", &out));
 }
 
@@ -69,10 +71,10 @@ TEST(JavaClassGeneratorTest, TransformInvalidJavaIdentifierCharacter) {
           .Build();
   JavaClassGenerator generator(context.get(), table.get(), {});
 
-  std::stringstream out;
+  std::string output;
+  StringOutputStream out(&output);
   EXPECT_TRUE(generator.Generate("android", &out));
-
-  std::string output = out.str();
+  out.Flush();
 
   EXPECT_THAT(output, HasSubstr("public static final int hey_man=0x01020000;"));
   EXPECT_THAT(output, HasSubstr("public static final int[] hey_dude={"));
@@ -93,10 +95,12 @@ TEST(JavaClassGeneratorTest, CorrectPackageNameIsUsed) {
           .SetNameManglerPolicy(NameManglerPolicy{"android"})
           .Build();
   JavaClassGenerator generator(context.get(), table.get(), {});
-  std::stringstream out;
-  ASSERT_TRUE(generator.Generate("android", "com.android.internal", &out));
 
-  std::string output = out.str();
+  std::string output;
+  StringOutputStream out(&output);
+  ASSERT_TRUE(generator.Generate("android", "com.android.internal", &out));
+  out.Flush();
+
   EXPECT_THAT(output, HasSubstr("package com.android.internal;"));
   EXPECT_THAT(output, HasSubstr("public static final int one=0x01020000;"));
   EXPECT_THAT(output, Not(HasSubstr("two")));
@@ -117,10 +121,12 @@ TEST(JavaClassGeneratorTest, AttrPrivateIsWrittenAsAttr) {
           .SetNameManglerPolicy(NameManglerPolicy{"android"})
           .Build();
   JavaClassGenerator generator(context.get(), table.get(), {});
-  std::stringstream out;
-  ASSERT_TRUE(generator.Generate("android", &out));
 
-  std::string output = out.str();
+  std::string output;
+  StringOutputStream out(&output);
+  ASSERT_TRUE(generator.Generate("android", &out));
+  out.Flush();
+
   EXPECT_THAT(output, HasSubstr("public static final class attr"));
   EXPECT_THAT(output, Not(HasSubstr("public static final class ^attr-private")));
 }
@@ -147,9 +153,11 @@ TEST(JavaClassGeneratorTest, OnlyWritePublicResources) {
   options.types = JavaClassGeneratorOptions::SymbolTypes::kPublic;
   {
     JavaClassGenerator generator(context.get(), table.get(), options);
-    std::stringstream out;
+    std::string output;
+    StringOutputStream out(&output);
     ASSERT_TRUE(generator.Generate("android", &out));
-    std::string output = out.str();
+    out.Flush();
+
     EXPECT_THAT(output, HasSubstr("public static final int one=0x01020000;"));
     EXPECT_THAT(output, Not(HasSubstr("two")));
     EXPECT_THAT(output, Not(HasSubstr("three")));
@@ -158,9 +166,11 @@ TEST(JavaClassGeneratorTest, OnlyWritePublicResources) {
   options.types = JavaClassGeneratorOptions::SymbolTypes::kPublicPrivate;
   {
     JavaClassGenerator generator(context.get(), table.get(), options);
-    std::stringstream out;
+    std::string output;
+    StringOutputStream out(&output);
     ASSERT_TRUE(generator.Generate("android", &out));
-    std::string output = out.str();
+    out.Flush();
+
     EXPECT_THAT(output, HasSubstr("public static final int one=0x01020000;"));
     EXPECT_THAT(output, HasSubstr("public static final int two=0x01020001;"));
     EXPECT_THAT(output, Not(HasSubstr("three")));
@@ -169,9 +179,11 @@ TEST(JavaClassGeneratorTest, OnlyWritePublicResources) {
   options.types = JavaClassGeneratorOptions::SymbolTypes::kAll;
   {
     JavaClassGenerator generator(context.get(), table.get(), options);
-    std::stringstream out;
+    std::string output;
+    StringOutputStream out(&output);
     ASSERT_TRUE(generator.Generate("android", &out));
-    std::string output = out.str();
+    out.Flush();
+
     EXPECT_THAT(output, HasSubstr("public static final int one=0x01020000;"));
     EXPECT_THAT(output, HasSubstr("public static final int two=0x01020001;"));
     EXPECT_THAT(output, HasSubstr("public static final int three=0x01020002;"));
@@ -235,10 +247,11 @@ TEST(JavaClassGeneratorTest, EmitOtherPackagesAttributesInStyleable) {
           .Build();
   JavaClassGenerator generator(context.get(), table.get(), {});
 
-  std::stringstream out;
+  std::string output;
+  StringOutputStream out(&output);
   EXPECT_TRUE(generator.Generate("android", &out));
+  out.Flush();
 
-  std::string output = out.str();
   EXPECT_THAT(output, HasSubstr("int foo_bar="));
   EXPECT_THAT(output, HasSubstr("int foo_com_lib_bar="));
 }
@@ -258,9 +271,11 @@ TEST(JavaClassGeneratorTest, CommentsForSimpleResourcesArePresent) {
           .SetNameManglerPolicy(NameManglerPolicy{"android"})
           .Build();
   JavaClassGenerator generator(context.get(), table.get(), {});
-  std::stringstream out;
+
+  std::string output;
+  StringOutputStream out(&output);
   ASSERT_TRUE(generator.Generate("android", &out));
-  std::string output = out.str();
+  out.Flush();
 
   const char* expected_text =
       R"EOF(/**
@@ -298,9 +313,11 @@ TEST(JavaClassGeneratorTest, CommentsForStyleablesAndNestedAttributesArePresent)
   JavaClassGeneratorOptions options;
   options.use_final = false;
   JavaClassGenerator generator(context.get(), table.get(), options);
-  std::stringstream out;
+
+  std::string output;
+  StringOutputStream out(&output);
   ASSERT_TRUE(generator.Generate("android", &out));
-  std::string output = out.str();
+  out.Flush();
 
   EXPECT_THAT(output, HasSubstr("attr name android:one"));
   EXPECT_THAT(output, HasSubstr("attr description"));
@@ -332,9 +349,11 @@ TEST(JavaClassGeneratorTest, StyleableAndIndicesAreColocated) {
 
   JavaClassGeneratorOptions options;
   JavaClassGenerator generator(context.get(), table.get(), {});
-  std::stringstream out;
+
+  std::string output;
+  StringOutputStream out(&output);
   ASSERT_TRUE(generator.Generate("android", &out));
-  std::string output = out.str();
+  out.Flush();
 
   std::string::size_type actionbar_pos = output.find("int[] ActionBar");
   ASSERT_THAT(actionbar_pos, Ne(std::string::npos));
@@ -373,9 +392,11 @@ TEST(JavaClassGeneratorTest, CommentsForRemovedAttributesAreNotPresentInClass) {
   JavaClassGeneratorOptions options;
   options.use_final = false;
   JavaClassGenerator generator(context.get(), table.get(), options);
-  std::stringstream out;
+
+  std::string output;
+  StringOutputStream out(&output);
   ASSERT_TRUE(generator.Generate("android", &out));
-  std::string output = out.str();
+  out.Flush();
 
   EXPECT_THAT(output, Not(HasSubstr("@attr name android:one")));
   EXPECT_THAT(output, Not(HasSubstr("@attr description")));
@@ -409,10 +430,10 @@ TEST(JavaClassGeneratorTest, GenerateOnResourcesLoadedCallbackForSharedLibrary) 
   options.rewrite_callback_options = OnResourcesLoadedCallbackOptions{{"com.foo", "com.boo"}};
   JavaClassGenerator generator(context.get(), table.get(), options);
 
-  std::stringstream out;
+  std::string output;
+  StringOutputStream out(&output);
   ASSERT_TRUE(generator.Generate("android", &out));
-
-  std::string output = out.str();
+  out.Flush();
 
   EXPECT_THAT(output, HasSubstr("void onResourcesLoaded"));
   EXPECT_THAT(output, HasSubstr("com.foo.R.onResourcesLoaded"));

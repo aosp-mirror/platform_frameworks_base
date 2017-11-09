@@ -16,8 +16,10 @@
 
 #include "java/ManifestClassGenerator.h"
 
+#include "io/StringStream.h"
 #include "test/Test.h"
 
+using ::aapt::io::StringOutputStream;
 using ::testing::HasSubstr;
 using ::testing::Not;
 
@@ -144,12 +146,9 @@ static ::testing::AssertionResult GetManifestClassText(IAaptContext* context, xm
     return ::testing::AssertionFailure() << "manifest_class == nullptr";
   }
 
-  std::stringstream out;
-  if (!manifest_class->WriteJavaFile(manifest_class.get(), "android", true, &out)) {
-    return ::testing::AssertionFailure() << "failed to write java file";
-  }
-
-  *out_str = out.str();
+  StringOutputStream out(out_str);
+  manifest_class->WriteJavaFile(manifest_class.get(), "android", true, &out);
+  out.Flush();
   return ::testing::AssertionSuccess();
 }
 

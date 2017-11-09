@@ -23,6 +23,7 @@
 #include "text/Utf8Iterator.h"
 #include "util/Util.h"
 
+using ::aapt::text::Printer;
 using ::aapt::text::Utf8Iterator;
 using ::android::StringPiece;
 
@@ -109,23 +110,22 @@ void AnnotationProcessor::AppendNewLine() {
   }
 }
 
-void AnnotationProcessor::WriteToStream(const StringPiece& prefix, std::ostream* out) const {
+void AnnotationProcessor::Print(Printer* printer) const {
   if (has_comments_) {
     std::string result = comment_.str();
     for (StringPiece line : util::Tokenize(result, '\n')) {
-      *out << prefix << line << "\n";
+      printer->Println(line);
     }
-    *out << prefix << " */"
-         << "\n";
+    printer->Println(" */");
   }
 
   if (annotation_bit_mask_ & AnnotationRule::kDeprecated) {
-    *out << prefix << "@Deprecated\n";
+    printer->Println("@Deprecated");
   }
 
   for (const AnnotationRule& rule : sAnnotationRules) {
     if (annotation_bit_mask_ & rule.bit_mask) {
-      *out << prefix << rule.annotation << "\n";
+      printer->Println(rule.annotation);
     }
   }
 }

@@ -22,7 +22,6 @@
 #include <memory>
 #include <string>
 
-#include "android-base/file.h"  // for O_BINARY
 #include "android-base/macros.h"
 #include "android-base/unique_fd.h"
 
@@ -55,15 +54,15 @@ class FileInputStream : public InputStream {
   android::base::unique_fd fd_;
   std::string error_;
   std::unique_ptr<uint8_t[]> buffer_;
-  size_t buffer_capacity_;
-  size_t buffer_offset_;
-  size_t buffer_size_;
-  size_t total_byte_count_;
+  size_t buffer_capacity_ = 0u;
+  size_t buffer_offset_ = 0u;
+  size_t buffer_size_ = 0u;
+  size_t total_byte_count_ = 0u;
 };
 
 class FileOutputStream : public OutputStream {
  public:
-  explicit FileOutputStream(const std::string& path, int mode = O_RDWR | O_CREAT | O_BINARY,
+  explicit FileOutputStream(const std::string& path,
                             size_t buffer_capacity = kDefaultBufferCapacity);
 
   // Does not take ownership of `fd`.
@@ -97,9 +96,9 @@ class FileOutputStream : public OutputStream {
   int fd_;
   std::string error_;
   std::unique_ptr<uint8_t[]> buffer_;
-  size_t buffer_capacity_;
-  size_t buffer_offset_;
-  size_t total_byte_count_;
+  size_t buffer_capacity_ = 0u;
+  size_t buffer_offset_ = 0u;
+  size_t total_byte_count_ = 0u;
 };
 
 }  // namespace io
