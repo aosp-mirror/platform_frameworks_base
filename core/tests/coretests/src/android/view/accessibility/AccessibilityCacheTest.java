@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 The Android Open Source Project
+ * Copyright 2016 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,26 +14,23 @@
  * limitations under the License.
  */
 
-package com.android.server.accessibility;
+package android.view.accessibility;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
+
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.support.test.runner.AndroidJUnit4;
-import android.view.accessibility.AccessibilityCache;
-import android.view.accessibility.AccessibilityEvent;
-import android.view.accessibility.AccessibilityInteractionClient;
-import android.view.accessibility.AccessibilityNodeInfo;
-import android.view.accessibility.AccessibilityWindowInfo;
 import android.view.View;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -48,27 +45,27 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @RunWith(AndroidJUnit4.class)
 public class AccessibilityCacheTest {
-    private static int WINDOW_ID_1 = 0xBEEF;
-    private static int WINDOW_ID_2 = 0xFACE;
-    private static int SINGLE_VIEW_ID = 0xCAFE;
-    private static int OTHER_VIEW_ID = 0xCAB2;
-    private static int PARENT_VIEW_ID = 0xFED4;
-    private static int CHILD_VIEW_ID = 0xFEED;
-    private static int OTHER_CHILD_VIEW_ID = 0xACE2;
-    private static int MOCK_CONNECTION_ID = 1;
+    private static final int WINDOW_ID_1 = 0xBEEF;
+    private static final int WINDOW_ID_2 = 0xFACE;
+    private static final int SINGLE_VIEW_ID = 0xCAFE;
+    private static final int OTHER_VIEW_ID = 0xCAB2;
+    private static final int PARENT_VIEW_ID = 0xFED4;
+    private static final int CHILD_VIEW_ID = 0xFEED;
+    private static final int OTHER_CHILD_VIEW_ID = 0xACE2;
+    private static final int MOCK_CONNECTION_ID = 1;
 
     AccessibilityCache mAccessibilityCache;
     AccessibilityCache.AccessibilityNodeRefresher mAccessibilityNodeRefresher;
-    AtomicInteger numA11yNodeInfosInUse = new AtomicInteger(0);
-    AtomicInteger numA11yWinInfosInUse = new AtomicInteger(0);
+    AtomicInteger mNumA11yNodeInfosInUse = new AtomicInteger(0);
+    AtomicInteger mNumA11yWinInfosInUse = new AtomicInteger(0);
 
     @Before
     public void setUp() {
         mAccessibilityNodeRefresher = mock(AccessibilityCache.AccessibilityNodeRefresher.class);
         when(mAccessibilityNodeRefresher.refreshNode(anyObject(), anyBoolean())).thenReturn(true);
         mAccessibilityCache = new AccessibilityCache(mAccessibilityNodeRefresher);
-        AccessibilityNodeInfo.setNumInstancesInUseCounter(numA11yNodeInfosInUse);
-        AccessibilityWindowInfo.setNumInstancesInUseCounter(numA11yWinInfosInUse);
+        AccessibilityNodeInfo.setNumInstancesInUseCounter(mNumA11yNodeInfosInUse);
+        AccessibilityWindowInfo.setNumInstancesInUseCounter(mNumA11yWinInfosInUse);
     }
 
     @After
@@ -76,7 +73,8 @@ public class AccessibilityCacheTest {
         // Make sure we're recycling all of our window and node infos
         mAccessibilityCache.clear();
         AccessibilityInteractionClient.getInstance().clearCache();
-        assertEquals(0, numA11yWinInfosInUse.get());
+        assertEquals(0, mNumA11yWinInfosInUse.get());
+        assertEquals(0, mNumA11yNodeInfosInUse.get());
     }
 
     @Test
