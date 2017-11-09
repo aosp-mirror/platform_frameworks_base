@@ -56,6 +56,9 @@ public class BatterySaverPolicy extends ContentObserver {
     private static final String KEY_ADJUST_BRIGHTNESS_FACTOR = "adjust_brightness_factor";
     private static final String KEY_FULLBACKUP_DEFERRED = "fullbackup_deferred";
     private static final String KEY_KEYVALUE_DEFERRED = "keyvaluebackup_deferred";
+    private static final String KEY_FORCE_ALL_APPS_STANDBY_JOBS = "force_all_apps_standby_jobs";
+    private static final String KEY_FORCE_ALL_APPS_STANDBY_ALARMS = "force_all_apps_standby_alarms";
+    private static final String KEY_OPTIONAL_SENSORS_DISABLED = "optional_sensors_disabled";
 
     private final KeyValueListParser mParser = new KeyValueListParser(',');
 
@@ -141,6 +144,21 @@ public class BatterySaverPolicy extends ContentObserver {
      */
     private float mAdjustBrightnessFactor;
 
+    /**
+     * Whether to put all apps in the stand-by mode or not for job scheduler.
+     */
+    private boolean mForceAllAppsStandbyJobs;
+
+    /**
+     * Whether to put all apps in the stand-by mode or not for alarms.
+     */
+    private boolean mForceAllAppsStandbyAlarms;
+
+    /**
+     * Weather to show non-essential sensors (e.g. edge sensors) or not.
+     */
+    private boolean mOptionalSensorsDisabled;
+
     private ContentResolver mContentResolver;
 
     public BatterySaverPolicy(Handler handler) {
@@ -180,10 +198,14 @@ public class BatterySaverPolicy extends ContentObserver {
             mAdjustBrightnessDisabled = mParser.getBoolean(KEY_ADJUST_BRIGHTNESS_DISABLED, false);
             mAdjustBrightnessFactor = mParser.getFloat(KEY_ADJUST_BRIGHTNESS_FACTOR, 0.5f);
             mDataSaverDisabled = mParser.getBoolean(KEY_DATASAVER_DISABLED, true);
+            mForceAllAppsStandbyJobs = mParser.getBoolean(KEY_FORCE_ALL_APPS_STANDBY_JOBS, true);
+            mForceAllAppsStandbyAlarms =
+                    mParser.getBoolean(KEY_FORCE_ALL_APPS_STANDBY_ALARMS, true);
+            mOptionalSensorsDisabled = mParser.getBoolean(KEY_OPTIONAL_SENSORS_DISABLED, true);
 
             // Get default value from Settings.Secure
             final int defaultGpsMode = Settings.Secure.getInt(mContentResolver, SECURE_KEY_GPS_MODE,
-                    GPS_MODE_DISABLED_WHEN_SCREEN_OFF);
+                    GPS_MODE_NO_CHANGE);
             mGpsMode = mParser.getInt(KEY_GPS_MODE, defaultGpsMode);
         }
     }
@@ -235,6 +257,15 @@ public class BatterySaverPolicy extends ContentObserver {
                 case ServiceType.VIBRATION:
                     return builder.setBatterySaverEnabled(mVibrationDisabled)
                             .build();
+                case ServiceType.FORCE_ALL_APPS_STANDBY_JOBS:
+                    return builder.setBatterySaverEnabled(mForceAllAppsStandbyJobs)
+                            .build();
+                case ServiceType.FORCE_ALL_APPS_STANDBY_ALARMS:
+                    return builder.setBatterySaverEnabled(mForceAllAppsStandbyAlarms)
+                            .build();
+                case ServiceType.OPTIONAL_SENSORS:
+                    return builder.setBatterySaverEnabled(mOptionalSensorsDisabled)
+                            .build();
                 default:
                     return builder.setBatterySaverEnabled(realMode)
                             .build();
@@ -259,6 +290,8 @@ public class BatterySaverPolicy extends ContentObserver {
         pw.println("  " + KEY_ADJUST_BRIGHTNESS_DISABLED + "=" + mAdjustBrightnessDisabled);
         pw.println("  " + KEY_ADJUST_BRIGHTNESS_FACTOR + "=" + mAdjustBrightnessFactor);
         pw.println("  " + KEY_GPS_MODE + "=" + mGpsMode);
-
+        pw.println("  " + KEY_FORCE_ALL_APPS_STANDBY_JOBS + "=" + mForceAllAppsStandbyJobs);
+        pw.println("  " + KEY_FORCE_ALL_APPS_STANDBY_ALARMS + "=" + mForceAllAppsStandbyAlarms);
+        pw.println("  " + KEY_OPTIONAL_SENSORS_DISABLED + "=" + mOptionalSensorsDisabled);
     }
 }
