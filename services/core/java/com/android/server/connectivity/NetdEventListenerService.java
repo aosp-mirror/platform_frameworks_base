@@ -98,19 +98,53 @@ public class NetdEventListenerService extends INetdEventListener.Stub {
     @GuardedBy("this")
     private final TokenBucket mConnectTb =
             new TokenBucket(CONNECT_LATENCY_FILL_RATE, CONNECT_LATENCY_BURST_LIMIT);
-    // Callback should only be registered/unregistered when logging is being enabled/disabled in DPM
-    // by the device owner. It's DevicePolicyManager's responsibility to ensure that.
-    @GuardedBy("this")
-    private INetdEventCallback mNetdEventCallback;
 
-    public synchronized boolean registerNetdEventCallback(INetdEventCallback callback) {
-        mNetdEventCallback = callback;
+
+    /**
+     * There are only 2 possible callbacks.
+     *
+     * mNetdEventCallbackList[CALLBACK_CALLER_DEVICE_POLICY].
+     * Callback registered/unregistered when logging is being enabled/disabled in DPM
+     * by the device owner. It's DevicePolicyManager's responsibility to ensure that.
+     *
+     * mNetdEventCallbackList[CALLBACK_CALLER_NETWORK_WATCHLIST]
+     * Callback registered/unregistered by NetworkWatchlistService.
+     */
+    @GuardedBy("this")
+    private static final int[] ALLOWED_CALLBACK_TYPES = {
+        INetdEventCallback.CALLBACK_CALLER_DEVICE_POLICY,
+        INetdEventCallback.CALLBACK_CALLER_NETWORK_WATCHLIST
+    };
+
+    @GuardedBy("this")
+    private INetdEventCallback[] mNetdEventCallbackList =
+            new INetdEventCallback[ALLOWED_CALLBACK_TYPES.length];
+
+    public synchronized boolean addNetdEventCallback(int callerType, INetdEventCallback callback) {
+        if (!isValidCallerType(callerType)) {
+            Log.e(TAG, "Invalid caller type: " + callerType);
+            return false;
+        }
+        mNetdEventCallbackList[callerType] = callback;
         return true;
     }
 
-    public synchronized boolean unregisterNetdEventCallback() {
-        mNetdEventCallback = null;
+    public synchronized boolean removeNetdEventCallback(int callerType) {
+        if (!isValidCallerType(callerType)) {
+            Log.e(TAG, "Invalid caller type: " + callerType);
+            return false;
+        }
+        mNetdEventCallbackList[callerType] = null;
         return true;
+    }
+
+    private static boolean isValidCallerType(int callerType) {
+        for (int i = 0; i < ALLOWED_CALLBACK_TYPES.length; i++) {
+            if (callerType == ALLOWED_CALLBACK_TYPES[i]) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public NetdEventListenerService(Context context) {
@@ -169,8 +203,10 @@ public class NetdEventListenerService extends INetdEventListener.Stub {
         long timestamp = System.currentTimeMillis();
         getMetricsForNetwork(timestamp, netId).addDnsResult(eventType, returnCode, latencyMs);
 
-        if (mNetdEventCallback != null) {
-            mNetdEventCallback.onDnsEvent(hostname, ipAddresses, ipAddressesCount, timestamp, uid);
+        for (INetdEventCallback callback : mNetdEventCallbackList) {
+            if (callback != null) {
+                callback.onDnsEvent(hostname, ipAddresses, ipAddressesCount, timestamp, uid);
+            }
         }
     }
 
@@ -184,8 +220,14 @@ public class NetdEventListenerService extends INetdEventListener.Stub {
         long timestamp = System.currentTimeMillis();
         getMetricsForNetwork(timestamp, netId).addConnectResult(error, latencyMs, ipAddr);
 
-        if (mNetdEventCallback != null) {
-            mNetdEventCallback.onConnectEvent(ipAddr, port, timestamp, uid);
+        for (INetdEventCallback callback : mNetdEventCallbackList) {
+            if (callback != null) {
+                // TODO(rickywai): Remove this checking to collect ip in watchlist.
+                if (callback ==
+                        mNetdEventCallbackList[INetdEventCallback.CALLBACK_CALLER_DEVICE_POLICY]) {
+                    callback.onConnectEvent(ipAddr, port, timestamp, uid);
+                }
+            }
         }
     }
 

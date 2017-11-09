@@ -26,7 +26,6 @@ import static java.lang.reflect.Modifier.isFinal;
 import static java.lang.reflect.Modifier.isPublic;
 import static java.lang.reflect.Modifier.isStatic;
 
-import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
@@ -264,6 +263,7 @@ public class SettingsBackupTest {
                     Settings.Global.NETSTATS_UID_TAG_ROTATE_AGE,
                     Settings.Global.NETWORK_AVOID_BAD_WIFI,
                     Settings.Global.NETWORK_METERED_MULTIPATH_PREFERENCE,
+                    Settings.Global.NETWORK_WATCHLIST_LAST_REPORT_TIME,
                     Settings.Global.NETWORK_PREFERENCE,
                     Settings.Global.NETWORK_RECOMMENDATIONS_PACKAGE,
                     Settings.Global.NETWORK_RECOMMENDATION_REQUEST_TIMEOUT_MS,
