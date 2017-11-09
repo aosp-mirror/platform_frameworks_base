@@ -17,7 +17,6 @@ package android.app.slice;
 
 import android.Manifest.permission;
 import android.annotation.NonNull;
-import android.app.slice.widget.SliceView;
 import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.ContentValues;
@@ -132,7 +131,6 @@ public abstract class SliceProvider extends ContentProvider {
      *
      * @return Uri representing the slice associated with the provided intent.
      * @see {@link Slice}
-     * @see {@link SliceView#setSlice(Intent)}
      */
     public @NonNull Uri onMapIntentToUri(Intent intent) {
         throw new UnsupportedOperationException(
