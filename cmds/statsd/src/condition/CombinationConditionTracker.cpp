@@ -115,49 +115,47 @@ void CombinationConditionTracker::isConditionMet(
             evaluateCombinationCondition(mChildren, mLogicalOperation, conditionCache);
 }
 
-bool CombinationConditionTracker::evaluateCondition(
+void CombinationConditionTracker::evaluateCondition(
         const LogEvent& event, const std::vector<MatchingState>& eventMatcherValues,
         const std::vector<sp<ConditionTracker>>& mAllConditions,
         std::vector<ConditionState>& nonSlicedConditionCache,
-        std::vector<bool>& nonSlicedChangedCache, vector<bool>& slicedConditionChanged) {
+        std::vector<bool>& conditionChangedCache) {
     // value is up to date.
     if (nonSlicedConditionCache[mIndex] != ConditionState::kNotEvaluated) {
-        return false;
+        return;
     }
 
     for (const int childIndex : mChildren) {
         if (nonSlicedConditionCache[childIndex] == ConditionState::kNotEvaluated) {
             const sp<ConditionTracker>& child = mAllConditions[childIndex];
             child->evaluateCondition(event, eventMatcherValues, mAllConditions,
-                                     nonSlicedConditionCache, nonSlicedChangedCache,
-                                     slicedConditionChanged);
+                                     nonSlicedConditionCache, conditionChangedCache);
         }
     }
 
-    ConditionState newCondition =
-            evaluateCombinationCondition(mChildren, mLogicalOperation, nonSlicedConditionCache);
+    if (!mSliced) {
+        ConditionState newCondition =
+                evaluateCombinationCondition(mChildren, mLogicalOperation, nonSlicedConditionCache);
 
-    bool nonSlicedChanged = (mNonSlicedConditionState != newCondition);
-    mNonSlicedConditionState = newCondition;
+        bool nonSlicedChanged = (mNonSlicedConditionState != newCondition);
+        mNonSlicedConditionState = newCondition;
 
-    nonSlicedConditionCache[mIndex] = mNonSlicedConditionState;
+        nonSlicedConditionCache[mIndex] = mNonSlicedConditionState;
 
-    nonSlicedChangedCache[mIndex] = nonSlicedChanged;
-
-    if (mSliced) {
+        conditionChangedCache[mIndex] = nonSlicedChanged;
+    } else {
         for (const int childIndex : mChildren) {
             // If any of the sliced condition in children condition changes, the combination
             // condition may be changed too.
-            if (slicedConditionChanged[childIndex]) {
-                slicedConditionChanged[mIndex] = true;
+            if (conditionChangedCache[childIndex]) {
+                conditionChangedCache[mIndex] = true;
                 break;
             }
         }
+        nonSlicedConditionCache[mIndex] = ConditionState::kUnknown;
         ALOGD("CombinationCondition %s sliced may changed? %d", mName.c_str(),
-              slicedConditionChanged[mIndex] == true);
+              conditionChangedCache[mIndex] == true);
     }
-
-    return nonSlicedChanged;
 }
 
 }  // namespace statsd

@@ -83,7 +83,13 @@ message SimpleCondition {
 
   optional string stop_all = 4;
 
-  repeated KeyMatcher dimension = 5;
+  enum InitialValue {
+    UNKNOWN = 0;
+    FALSE = 1;
+  }
+  optional InitialValue initial_value = 5 [default = UNKNOWN];
+
+  repeated KeyMatcher dimension = 6;
 }
 
 message Condition {

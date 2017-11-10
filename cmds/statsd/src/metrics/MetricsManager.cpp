@@ -104,18 +104,17 @@ void MetricsManager::onLogEvent(const LogEvent& event) {
                                           ConditionState::kNotEvaluated);
     // A bitmap to track if a condition has changed value.
     vector<bool> changedCache(mAllConditionTrackers.size(), false);
-    vector<bool> slicedChangedCache(mAllConditionTrackers.size(), false);
     for (size_t i = 0; i < mAllConditionTrackers.size(); i++) {
         if (conditionToBeEvaluated[i] == false) {
             continue;
         }
         sp<ConditionTracker>& condition = mAllConditionTrackers[i];
         condition->evaluateCondition(event, matcherCache, mAllConditionTrackers, conditionCache,
-                                     changedCache, slicedChangedCache);
+                                     changedCache);
     }
 
     for (size_t i = 0; i < mAllConditionTrackers.size(); i++) {
-        if (changedCache[i] == false && slicedChangedCache[i] == false) {
+        if (changedCache[i] == false) {
             continue;
         }
         auto pair = mConditionToMetricMap.find(i);
@@ -124,14 +123,13 @@ void MetricsManager::onLogEvent(const LogEvent& event) {
             for (auto metricIndex : metricList) {
                 // metric cares about non sliced condition, and it's changed.
                 // Push the new condition to it directly.
-                if (!mAllMetricProducers[metricIndex]->isConditionSliced() && changedCache[i]) {
+                if (!mAllMetricProducers[metricIndex]->isConditionSliced()) {
                     mAllMetricProducers[metricIndex]->onConditionChanged(conditionCache[i],
                                                                          eventTime);
                     // metric cares about sliced conditions, and it may have changed. Send
                     // notification, and the metric can query the sliced conditions that are
                     // interesting to it.
-                } else if (mAllMetricProducers[metricIndex]->isConditionSliced() &&
-                           slicedChangedCache[i]) {
+                } else if (mAllMetricProducers[metricIndex]->isConditionSliced()) {
                     mAllMetricProducers[metricIndex]->onSlicedConditionMayChange(eventTime);
                 }
             }
