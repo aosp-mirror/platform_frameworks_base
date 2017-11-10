@@ -1280,11 +1280,11 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <ul>
      * <li>Processed (but stalling): any non-RAW format with a stallDurations &gt; 0.
      *   Typically {@link android.graphics.ImageFormat#JPEG JPEG format}.</li>
-     * <li>Raw formats: {@link android.graphics.ImageFormat#RAW_SENSOR RAW_SENSOR}, {@link android.graphics.ImageFormat#RAW10 RAW10}, or {@link android.graphics.ImageFormat#RAW12 RAW12}.</li>
-     * <li>Processed (but not-stalling): any non-RAW format without a stall duration.
-     *   Typically {@link android.graphics.ImageFormat#YUV_420_888 YUV_420_888},
-     *   {@link android.graphics.ImageFormat#NV21 NV21}, or
-     *   {@link android.graphics.ImageFormat#YV12 YV12}.</li>
+     * <li>Raw formats: {@link android.graphics.ImageFormat#RAW_SENSOR RAW_SENSOR}, {@link android.graphics.ImageFormat#RAW10 RAW10}, or
+     *   {@link android.graphics.ImageFormat#RAW12 RAW12}.</li>
+     * <li>Processed (but not-stalling): any non-RAW format without a stall duration.  Typically
+     *   {@link android.graphics.ImageFormat#YUV_420_888 YUV_420_888},
+     *   {@link android.graphics.ImageFormat#NV21 NV21}, or {@link android.graphics.ImageFormat#YV12 YV12}.</li>
      * </ul>
      * <p><b>Range of valid values:</b><br></p>
      * <p>For processed (and stalling) format streams, &gt;= 1.</p>
@@ -1376,8 +1376,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * CPU resources that will consume more power. The image format for this kind of an output stream can
      * be any non-<code>RAW</code> and supported format provided by {@link CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP android.scaler.streamConfigurationMap}.</p>
      * <p>A processed and stalling format is defined as any non-RAW format with a stallDurations
-     * &gt; 0.  Typically only the {@link android.graphics.ImageFormat#JPEG JPEG format} is a
-     * stalling format.</p>
+     * &gt; 0.  Typically only the {@link android.graphics.ImageFormat#JPEG JPEG format} is a stalling format.</p>
      * <p>For full guarantees, query {@link android.hardware.camera2.params.StreamConfigurationMap#getOutputStallDuration } with a
      * processed format -- it will return a non-0 value for a stalling stream.</p>
      * <p>LEGACY devices will support up to 1 processing/stalling stream.</p>
@@ -1535,8 +1534,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
             new Key<int[]>("android.request.availableRequestKeys", int[].class);
 
     /**
-     * <p>A list of all keys that the camera device has available
-     * to use with {@link android.hardware.camera2.CaptureResult }.</p>
+     * <p>A list of all keys that the camera device has available to use with {@link android.hardware.camera2.CaptureResult }.</p>
      * <p>Attempting to get a key from a CaptureResult that is not
      * listed here will always return a <code>null</code> value. Getting a key from
      * a CaptureResult that is listed here will generally never return a <code>null</code>
@@ -1561,8 +1559,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
             new Key<int[]>("android.request.availableResultKeys", int[].class);
 
     /**
-     * <p>A list of all keys that the camera device has available
-     * to use with {@link android.hardware.camera2.CameraCharacteristics }.</p>
+     * <p>A list of all keys that the camera device has available to use with {@link android.hardware.camera2.CameraCharacteristics }.</p>
      * <p>This entry follows the same rules as
      * android.request.availableResultKeys (except that it applies for
      * CameraCharacteristics instead of CaptureResult). See above for more
@@ -1843,8 +1840,6 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>See {@link CaptureRequest#SENSOR_FRAME_DURATION android.sensor.frameDuration} and
      * android.scaler.availableStallDurations for more details about
      * calculating the max frame rate.</p>
-     * <p>(Keep in sync with
-     * {@link android.hardware.camera2.params.StreamConfigurationMap#getOutputMinFrameDuration })</p>
      * <p><b>Units</b>: (format, width, height, ns) x n</p>
      * <p>This key is available on all devices.</p>
      *
@@ -1905,14 +1900,13 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <ul>
      * <li>{@link android.graphics.ImageFormat#YUV_420_888 }</li>
      * <li>{@link android.graphics.ImageFormat#RAW10 }</li>
+     * <li>{@link android.graphics.ImageFormat#RAW12 }</li>
      * </ul>
      * <p>All other formats may or may not have an allowed stall duration on
      * a per-capability basis; refer to {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities}
      * for more details.</p>
      * <p>See {@link CaptureRequest#SENSOR_FRAME_DURATION android.sensor.frameDuration} for more information about
      * calculating the max frame rate (absent stalls).</p>
-     * <p>(Keep up to date with
-     * {@link android.hardware.camera2.params.StreamConfigurationMap#getOutputStallDuration } )</p>
      * <p><b>Units</b>: (format, width, height, ns) x n</p>
      * <p>This key is available on all devices.</p>
      *
@@ -2195,9 +2189,9 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * the raw buffers produced by this sensor.</p>
      * <p>If a camera device supports raw sensor formats, either this or
      * {@link CameraCharacteristics#SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE android.sensor.info.preCorrectionActiveArraySize} is the maximum dimensions for the raw
-     * output formats listed in {@link CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP android.scaler.streamConfigurationMap} (this depends on
-     * whether or not the image sensor returns buffers containing pixels that are not
-     * part of the active array region for blacklevel calibration or other purposes).</p>
+     * output formats listed in {@link android.hardware.camera2.params.StreamConfigurationMap }
+     * (this depends on whether or not the image sensor returns buffers containing pixels that
+     * are not part of the active array region for blacklevel calibration or other purposes).</p>
      * <p>Some parts of the full pixel array may not receive light from the scene,
      * or be otherwise inactive.  The {@link CameraCharacteristics#SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE android.sensor.info.preCorrectionActiveArraySize} key
      * defines the rectangle of active pixels that will be included in processed image
@@ -2205,7 +2199,6 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p><b>Units</b>: Pixels</p>
      * <p>This key is available on all devices.</p>
      *
-     * @see CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP
      * @see CameraCharacteristics#SENSOR_INFO_PHYSICAL_SIZE
      * @see CameraCharacteristics#SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE
      */
@@ -2838,7 +2831,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>See the individual level enums for full descriptions of the supported capabilities.  The
      * {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities} entry describes the device's capabilities at a
      * finer-grain level, if needed. In addition, many controls have their available settings or
-     * ranges defined in individual {@link android.hardware.camera2.CameraCharacteristics } entries.</p>
+     * ranges defined in individual entries from {@link android.hardware.camera2.CameraCharacteristics }.</p>
      * <p>Some features are not part of any particular hardware level or capability and must be
      * queried separately. These include:</p>
      * <ul>
@@ -2973,7 +2966,6 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>See {@link CaptureRequest#SENSOR_FRAME_DURATION android.sensor.frameDuration} and
      * android.scaler.availableStallDurations for more details about
      * calculating the max frame rate.</p>
-     * <p>(Keep in sync with {@link android.hardware.camera2.params.StreamConfigurationMap#getOutputMinFrameDuration })</p>
      * <p><b>Units</b>: (format, width, height, ns) x n</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      * <p><b>Limited capability</b> -
