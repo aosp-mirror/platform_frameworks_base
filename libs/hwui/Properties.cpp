@@ -178,7 +178,7 @@ ProfileType Properties::getProfileType() {
 }
 
 RenderPipelineType Properties::getRenderPipelineType() {
-    if (RenderPipelineType::NotInitialized != sRenderPipelineType) {
+    if (sRenderPipelineType != RenderPipelineType::NotInitialized) {
         return sRenderPipelineType;
     }
     char prop[PROPERTY_VALUE_MAX];
@@ -196,11 +196,17 @@ RenderPipelineType Properties::getRenderPipelineType() {
     return sRenderPipelineType;
 }
 
-#ifdef HWUI_GLES_WRAP_ENABLED
 void Properties::overrideRenderPipelineType(RenderPipelineType type) {
+#if !defined(HWUI_GLES_WRAP_ENABLED)
+    // If we're doing actual rendering then we can't change the renderer after it's been set.
+    // Unit tests can freely change this as often as it wants, though, as there's no actual
+    // GL rendering happening
+    if (sRenderPipelineType != RenderPipelineType::NotInitialized) {
+        return;
+    }
+#endif
     sRenderPipelineType = type;
 }
-#endif
 
 bool Properties::isSkiaEnabled() {
     auto renderType = getRenderPipelineType();
