@@ -244,6 +244,7 @@ public final class AudioAttributes implements Parcelable {
         SUPPRESSIBLE_USAGES.put(USAGE_GAME,                              SUPPRESSIBLE_MEDIA_SYSTEM_OTHER);
         SUPPRESSIBLE_USAGES.put(USAGE_VOICE_COMMUNICATION_SIGNALLING,    SUPPRESSIBLE_MEDIA_SYSTEM_OTHER);
         SUPPRESSIBLE_USAGES.put(USAGE_ASSISTANT,                         SUPPRESSIBLE_MEDIA_SYSTEM_OTHER);
+        SUPPRESSIBLE_USAGES.put(USAGE_UNKNOWN,                           SUPPRESSIBLE_MEDIA_SYSTEM_OTHER);
     }
 
     /**

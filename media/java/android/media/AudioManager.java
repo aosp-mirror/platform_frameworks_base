@@ -43,17 +43,16 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
-import android.os.SystemClock;
 import android.os.ServiceManager;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.ArrayMap;
 import android.util.Log;
-import android.util.Pair;
+import android.util.Slog;
 import android.view.KeyEvent;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -1966,9 +1965,28 @@ public class AudioManager {
      */
     private boolean querySoundEffectsEnabled(int user) {
         return Settings.System.getIntForUser(getContext().getContentResolver(),
-                Settings.System.SOUND_EFFECTS_ENABLED, 0, user) != 0;
+                Settings.System.SOUND_EFFECTS_ENABLED, 0, user) != 0
+                && !areSystemSoundsZenModeBlocked(getContext());
     }
 
+    private boolean areSystemSoundsZenModeBlocked(Context context) {
+        int zenMode = Settings.Global.getInt(context.getContentResolver(),
+                Settings.Global.ZEN_MODE, 0);
+
+        switch (zenMode) {
+            case Settings.Global.ZEN_MODE_NO_INTERRUPTIONS:
+            case Settings.Global.ZEN_MODE_ALARMS:
+                return true;
+            case Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS:
+                final NotificationManager noMan = (NotificationManager) context
+                        .getSystemService(Context.NOTIFICATION_SERVICE);
+                return (noMan.getNotificationPolicy().priorityCategories
+                        & NotificationManager.Policy.PRIORITY_CATEGORY_MEDIA_SYSTEM_OTHER) == 0;
+            case Settings.Global.ZEN_MODE_OFF:
+            default:
+                return false;
+        }
+    }
 
     /**
      *  Load Sound effects.
