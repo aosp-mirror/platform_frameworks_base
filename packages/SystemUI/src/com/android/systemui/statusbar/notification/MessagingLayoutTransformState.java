@@ -383,6 +383,12 @@ public class MessagingLayoutTransformState extends TransformState {
         }
     }
 
+    @Override
+    public void prepareFadeIn() {
+        super.prepareFadeIn();
+        setVisible(true /* visible */, false /* force */);
+    }
+
     private void resetTransformedView(View child) {
         TransformState ownState = TransformState.createFrom(child, mTransformInfo);
         ownState.resetTransformedView();
