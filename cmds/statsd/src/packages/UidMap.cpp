@@ -52,7 +52,7 @@ int UidMap::getAppVersion(int uid, const string& packageName) const {
 
 void UidMap::updateMap(const vector<int32_t>& uid, const vector<int32_t>& versionCode,
                        const vector<String16>& packageName) {
-    updateMap(time(nullptr) * 1000000000, uid, versionCode, packageName);
+    updateMap(time(nullptr) * NS_PER_SEC, uid, versionCode, packageName);
 }
 
 void UidMap::updateMap(const int64_t& timestamp, const vector<int32_t>& uid,
@@ -76,7 +76,7 @@ void UidMap::updateMap(const int64_t& timestamp, const vector<int32_t>& uid,
 }
 
 void UidMap::updateApp(const String16& app_16, const int32_t& uid, const int32_t& versionCode) {
-    updateApp(time(nullptr) * 1000000000, app_16, uid, versionCode);
+    updateApp(time(nullptr) * NS_PER_SEC, app_16, uid, versionCode);
 }
 
 void UidMap::updateApp(const int64_t& timestamp, const String16& app_16, const int32_t& uid,
@@ -112,7 +112,7 @@ void UidMap::updateApp(const int64_t& timestamp, const String16& app_16, const i
 }
 
 void UidMap::removeApp(const String16& app_16, const int32_t& uid) {
-    removeApp(time(nullptr) * 1000000000, app_16, uid);
+    removeApp(time(nullptr) * NS_PER_SEC, app_16, uid);
 }
 void UidMap::removeApp(const int64_t& timestamp, const String16& app_16, const int32_t& uid) {
     lock_guard<mutex> lock(mMutex);
@@ -202,7 +202,7 @@ int64_t UidMap::getMinimumTimestampNs() {
 }
 
 UidMapping UidMap::getOutput(const ConfigKey& key) {
-    return getOutput(time(nullptr) * 1000000000, key);
+    return getOutput(time(nullptr) * NS_PER_SEC, key);
 }
 
 UidMapping UidMap::getOutput(const int64_t& timestamp, const ConfigKey& key) {

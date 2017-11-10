@@ -65,6 +65,8 @@ protected:
 
 private:
     const EventMetric mMetric;
+
+    size_t mByteSize;
 };
 
 }  // namespace statsd

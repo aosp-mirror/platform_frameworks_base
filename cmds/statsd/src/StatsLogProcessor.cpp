@@ -25,6 +25,7 @@
 #include <utils/Errors.h>
 
 using namespace android;
+using android::util::FIELD_COUNT_REPEATED;
 using android::util::FIELD_TYPE_BOOL;
 using android::util::FIELD_TYPE_FLOAT;
 using android::util::FIELD_TYPE_INT32;
@@ -46,7 +47,7 @@ const int FIELD_ID_METRICS = 2;
 const int FIELD_ID_UID_MAP = 3;
 // for ConfigKey
 const int FIELD_ID_UID = 1;
-const int FIELD_ID_NAME = 1;
+const int FIELD_ID_NAME = 2;
 
 StatsLogProcessor::StatsLogProcessor(const sp<UidMap>& uidMap,
                                      const std::function<void(const vector<uint8_t>&)>& pushLog)
@@ -119,8 +120,8 @@ vector<uint8_t> StatsLogProcessor::onDumpReport(const ConfigKey& key) {
     // Fill in StatsLogReport's.
     for (auto& m : it->second->onDumpReport()) {
         // Add each vector of StatsLogReport into a repeated field.
-        proto.write(FIELD_TYPE_MESSAGE | FIELD_ID_METRICS, reinterpret_cast<char*>(m.get()->data()),
-                    m.get()->size());
+        proto.write(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_METRICS,
+                    reinterpret_cast<char*>(m.get()->data()), m.get()->size());
     }
 
     // Fill in UidMap.
