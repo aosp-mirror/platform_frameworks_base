@@ -754,6 +754,9 @@ class LinkCommand {
     for (auto& entry : asset_source->GetAssignedPackageIds()) {
       if (entry.first > kFrameworkPackageId && entry.first < kAppPackageId) {
         final_table_.included_packages_[entry.first] = entry.second;
+      } else if (entry.first == kAppPackageId) {
+        // Capture the included base feature package.
+        included_feature_base_ = entry.second;
       }
     }
 
@@ -1408,17 +1411,53 @@ class LinkCommand {
       return false;
     }
 
-    if (context_->GetPackageType() == PackageType::kStaticLib) {
-      if (!FlattenTableToPb(table, writer)) {
-        return false;
-      }
-    } else {
-      if (!FlattenTable(table, writer)) {
-        context_->GetDiagnostics()->Error(DiagMessage() << "failed to write resources.arsc");
-        return false;
+    // Hack to fix b/68820737.
+    // We need to modify the ResourceTable's package name, but that should NOT affect
+    // anything else being generated, which includes the Java classes.
+    // If required, the package name is modifed before flattening, and then modified back
+    // to its original name.
+    ResourceTablePackage* package_to_rewrite = nullptr;
+    if (context_->GetPackageId() > kAppPackageId &&
+        included_feature_base_ == make_value(context_->GetCompilationPackage())) {
+      // The base APK is included, and this is a feature split. If the base package is
+      // the same as this package, then we are building an old style Android Instant Apps feature
+      // split and must apply this workaround to avoid requiring namespaces support.
+      package_to_rewrite = table->FindPackage(context_->GetCompilationPackage());
+      if (package_to_rewrite != nullptr) {
+        CHECK_EQ(1u, table->packages.size()) << "can't change name of package when > 1 package";
+
+        std::string new_package_name =
+            StringPrintf("%s.%s", package_to_rewrite->name.c_str(),
+                         app_info_.split_name.value_or_default("feature").c_str());
+
+        if (context_->IsVerbose()) {
+          context_->GetDiagnostics()->Note(
+              DiagMessage() << "rewriting resource package name for feature split to '"
+                            << new_package_name << "'");
+        }
+        package_to_rewrite->name = new_package_name;
       }
     }
-    return true;
+
+    bool success;
+    if (context_->GetPackageType() == PackageType::kStaticLib) {
+      success = FlattenTableToPb(table, writer);
+    } else {
+      success = FlattenTable(table, writer);
+    }
+
+    if (package_to_rewrite != nullptr) {
+      // Change the name back.
+      package_to_rewrite->name = context_->GetCompilationPackage();
+      if (package_to_rewrite->id) {
+        table->included_packages_.erase(package_to_rewrite->id.value());
+      }
+    }
+
+    if (!success) {
+      context_->GetDiagnostics()->Error(DiagMessage() << "failed to write resource table");
+    }
+    return success;
   }
 
   int Run(const std::vector<std::string>& input_files) {
@@ -1447,8 +1486,8 @@ class LinkCommand {
       return 1;
     }
 
-    const AppInfo& app_info = maybe_app_info.value();
-    context_->SetMinSdkVersion(app_info.min_sdk_version.value_or_default(0));
+    app_info_ = maybe_app_info.value();
+    context_->SetMinSdkVersion(app_info_.min_sdk_version.value_or_default(0));
 
     context_->SetNameManglerPolicy(NameManglerPolicy{context_->GetCompilationPackage()});
 
@@ -1647,7 +1686,7 @@ class LinkCommand {
 
         // Generate an AndroidManifest.xml for each split.
         std::unique_ptr<xml::XmlResource> split_manifest =
-            GenerateSplitManifest(app_info, *split_constraints_iter);
+            GenerateSplitManifest(app_info_, *split_constraints_iter);
 
         XmlReferenceLinker linker;
         if (!linker.Consume(context_, split_manifest.get())) {
@@ -1815,6 +1854,8 @@ class LinkCommand {
   LinkContext* context_;
   ResourceTable final_table_;
 
+  AppInfo app_info_;
+
   std::unique_ptr<TableMerger> table_merger_;
 
   // A pointer to the FileCollection representing the filesystem (not archives).
@@ -1830,6 +1871,9 @@ class LinkCommand {
 
   // The set of shared libraries being used, mapping their assigned package ID to package name.
   std::map<size_t, std::string> shared_libs_;
+
+  // The package name of the base application, if it is included.
+  Maybe<std::string> included_feature_base_;
 };
 
 int Link(const std::vector<StringPiece>& args, IDiagnostics* diagnostics) {
