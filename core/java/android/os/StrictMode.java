@@ -29,8 +29,6 @@ import android.content.ServiceConnection;
 import android.content.pm.ApplicationInfo;
 import android.net.TrafficStats;
 import android.net.Uri;
-import android.os.StrictMode.ThreadPolicy;
-import android.os.StrictMode.VmPolicy;
 import android.os.strictmode.CleartextNetworkViolation;
 import android.os.strictmode.ContentUriWithoutPermissionViolation;
 import android.os.strictmode.CustomViolation;
@@ -44,7 +42,7 @@ import android.os.strictmode.NetworkViolation;
 import android.os.strictmode.ResourceMismatchViolation;
 import android.os.strictmode.ServiceConnectionLeakedViolation;
 import android.os.strictmode.SqliteObjectLeakedViolation;
-import android.os.strictmode.UnbufferedIOViolation;
+import android.os.strictmode.UnbufferedIoViolation;
 import android.os.strictmode.UntaggedSocketViolation;
 import android.os.strictmode.Violation;
 import android.os.strictmode.WebViewMethodCalledOnWrongThreadViolation;
@@ -385,8 +383,6 @@ public final class StrictMode {
     /**
      * When #{@link ThreadPolicy.Builder#penaltyListener} is enabled, the listener is called on the
      * provided executor when a Thread violation occurs.
-     *
-     * @hide
      */
     public interface OnThreadViolationListener {
         /** Called on a thread policy violation. */
@@ -396,8 +392,6 @@ public final class StrictMode {
     /**
      * When #{@link VmPolicy.Builder#penaltyListener} is enabled, the listener is called on the
      * provided executor when a VM violation occurs.
-     *
-     * @hide
      */
     public interface OnVmViolationListener {
         /** Called on a VM policy violation. */
@@ -640,8 +634,6 @@ public final class StrictMode {
             /**
              * Call #{@link OnThreadViolationListener#onThreadViolation(Violation)} on specified
              * executor every violation.
-             *
-             * @hide
              */
             public Builder penaltyListener(
                     @NonNull OnThreadViolationListener listener, @NonNull Executor executor) {
@@ -977,8 +969,6 @@ public final class StrictMode {
 
             /**
              * Call #{@link OnVmViolationListener#onVmViolation(Violation)} on every violation.
-             *
-             * @hide
              */
             public Builder penaltyListener(
                     @NonNull OnVmViolationListener listener, @NonNull Executor executor) {
@@ -1449,7 +1439,7 @@ public final class StrictMode {
             if (tooManyViolationsThisLoop()) {
                 return;
             }
-            startHandlingViolationException(new UnbufferedIOViolation());
+            startHandlingViolationException(new UnbufferedIoViolation());
         }
 
         // Part of BlockGuard.Policy interface:
@@ -2552,7 +2542,7 @@ public final class StrictMode {
                 return DETECT_CUSTOM;
             } else if (mViolation instanceof ResourceMismatchViolation) {
                 return DETECT_RESOURCE_MISMATCH;
-            } else if (mViolation instanceof UnbufferedIOViolation) {
+            } else if (mViolation instanceof UnbufferedIoViolation) {
                 return DETECT_UNBUFFERED_IO;
             } else if (mViolation instanceof SqliteObjectLeakedViolation) {
                 return DETECT_VM_CURSOR_LEAKS;

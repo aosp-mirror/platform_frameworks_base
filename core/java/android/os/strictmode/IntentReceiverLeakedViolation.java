@@ -15,8 +15,8 @@
  */
 package android.os.strictmode;
 
-/** @hide */
 public final class IntentReceiverLeakedViolation extends Violation {
+    /** @hide */
     public IntentReceiverLeakedViolation(Throwable originStack) {
         super(null);
         setStackTrace(originStack.getStackTrace());

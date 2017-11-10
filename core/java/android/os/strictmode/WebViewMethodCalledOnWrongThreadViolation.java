@@ -15,8 +15,8 @@
  */
 package android.os.strictmode;
 
-/** @hide */
 public final class WebViewMethodCalledOnWrongThreadViolation extends Violation {
+    /** @hide */
     public WebViewMethodCalledOnWrongThreadViolation(Throwable originStack) {
         super(null);
         setStackTrace(originStack.getStackTrace());

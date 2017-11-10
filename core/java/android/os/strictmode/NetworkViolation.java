@@ -15,8 +15,8 @@
  */
 package android.os.strictmode;
 
-/** @hide */
 public final class NetworkViolation extends Violation {
+    /** @hide */
     public NetworkViolation() {
         super(null);
     }

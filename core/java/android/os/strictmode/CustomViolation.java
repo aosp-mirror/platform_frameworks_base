@@ -15,8 +15,8 @@
  */
 package android.os.strictmode;
 
-/** @hide */
 public final class CustomViolation extends Violation {
+    /** @hide */
     public CustomViolation(String name) {
         super(name);
     }

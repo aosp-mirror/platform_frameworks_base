@@ -15,8 +15,8 @@
  */
 package android.os.strictmode;
 
-/** @hide */
 public final class ServiceConnectionLeakedViolation extends Violation {
+    /** @hide */
     public ServiceConnectionLeakedViolation(Throwable originStack) {
         super(null);
         setStackTrace(originStack.getStackTrace());
