@@ -16,6 +16,7 @@
 
 package android.telecom;
 
+import android.bluetooth.BluetoothDevice;
 import android.os.Bundle;
 import android.os.RemoteException;
 
@@ -128,7 +129,22 @@ public final class InCallAdapter {
      */
     public void setAudioRoute(int route) {
         try {
-            mAdapter.setAudioRoute(route);
+            mAdapter.setAudioRoute(route, null);
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
+     * Request audio routing to a specific bluetooth device. Calling this method may result in
+     * the device routing audio to a different bluetooth device than the one specified. A list of
+     * available devices can be obtained via {@link CallAudioState#getSupportedBluetoothDevices()}
+     *
+     * @param bluetoothAddress The address of the bluetooth device to connect to, as returned by
+     * {@link BluetoothDevice#getAddress()}, or {@code null} if no device is preferred.
+     */
+    public void requestBluetoothAudio(String bluetoothAddress) {
+        try {
+            mAdapter.setAudioRoute(CallAudioState.ROUTE_BLUETOOTH, bluetoothAddress);
         } catch (RemoteException e) {
         }
     }
