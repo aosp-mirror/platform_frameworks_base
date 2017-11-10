@@ -59,11 +59,11 @@ private:
     VkSurfaceKHR mVkSurface = VK_NULL_HANDLE;
     VkSwapchainKHR mSwapchain = VK_NULL_HANDLE;
 
-    BackbufferInfo* mBackbuffers;
+    BackbufferInfo* mBackbuffers = nullptr;
     uint32_t mCurrentBackbufferIndex;
 
     uint32_t mImageCount;
-    VkImage* mImages;
+    VkImage* mImages = nullptr;
     ImageInfo* mImageInfos;
     uint16_t mCurrentTime = 0;
 };
