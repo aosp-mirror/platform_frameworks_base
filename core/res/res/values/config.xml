@@ -565,6 +565,12 @@
     <integer translatable="false" name="config_wifi_framework_wifi_score_good_link_speed_24">24</integer>
     <integer translatable="false" name="config_wifi_framework_wifi_score_good_link_speed_5">36</integer>
 
+    <!-- Integer delay in milliseconds before shutting down soft AP when there
+         are no connected devices. Framework will enforce a minimum limit on
+         this value and this setting will be overridden if the provided value is
+         smaller than the limit. -->
+    <integer translatable="false" name="config_wifi_framework_soft_ap_timeout_delay">600000</integer>
+
     <string  translatable="false" name="config_wifi_random_mac_oui">DA-A1-19</string>
     <string  translatable="false" name="config_wifi_framework_sap_2G_channel_list">1,6,11</string>
 
