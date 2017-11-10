@@ -9598,7 +9598,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         if (Build.IS_DEBUGGABLE &&
                 pkg.isPrivileged() &&
-                !SystemProperties.getBoolean("pm.dexopt.priv-apps", true)) {
+                SystemProperties.getBoolean("pm.dexopt.priv-apps-oob", false)) {
             PackageManagerServiceUtils.logPackageHasUncompressedCode(pkg);
         }
 
