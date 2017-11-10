@@ -25,6 +25,7 @@ import android.graphics.Rect;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Log;
@@ -49,7 +50,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
 
     private final Context mContext;
     private final Handler mHandler;
-    private final Runnable mConnectionRunnable = this::startConnectionToCurrentUser;
+    private final Runnable mConnectionRunnable = this::internalConnectToCurrentUser;
     private final DeviceProvisionedController mDeviceProvisionedController
             = Dependency.get(DeviceProvisionedController.class);
     private final List<OverviewProxyListener> mConnectionCallbacks = new ArrayList<>();
@@ -102,14 +103,14 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             @Override
             public void onUserSetupChanged() {
                 if (mDeviceProvisionedController.isCurrentUserSetup()) {
-                    startConnectionToCurrentUser();
+                    internalConnectToCurrentUser();
                 }
             }
 
             @Override
             public void onUserSwitched() {
                 mConnectionBackoffAttempts = 0;
-                startConnectionToCurrentUser();
+                internalConnectToCurrentUser();
             }
         };
 
@@ -129,6 +130,14 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     }
 
     public void startConnectionToCurrentUser() {
+        if (mHandler.getLooper() != Looper.myLooper()) {
+            mHandler.post(mConnectionRunnable);
+        } else {
+            internalConnectToCurrentUser();
+        }
+    }
+
+    private void internalConnectToCurrentUser() {
         disconnectFromLauncherService();
 
         // If user has not setup yet or already connected, do not try to connect
