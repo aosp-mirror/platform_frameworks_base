@@ -84,7 +84,7 @@ protected:
 
 TEST_F(FdBufferTest, ReadAndWrite) {
     std::string testdata = "FdBuffer test string";
-    ASSERT_TRUE(WriteStringToFile(testdata, tf.path, false));
+    ASSERT_TRUE(WriteStringToFile(testdata, tf.path));
     ASSERT_EQ(NO_ERROR, buffer.read(tf.fd, READ_TIMEOUT));
     AssertBufferReadSuccessful(testdata.size());
     AssertBufferContent(testdata.c_str());
@@ -97,7 +97,7 @@ TEST_F(FdBufferTest, IterateEmpty) {
 
 TEST_F(FdBufferTest, ReadAndIterate) {
     std::string testdata = "FdBuffer test string";
-    ASSERT_TRUE(WriteStringToFile(testdata, tf.path, false));
+    ASSERT_TRUE(WriteStringToFile(testdata, tf.path));
     ASSERT_EQ(NO_ERROR, buffer.read(tf.fd, READ_TIMEOUT));
 
     int i=0;
@@ -137,7 +137,7 @@ TEST_F(FdBufferTest, ReadTimeout) {
 TEST_F(FdBufferTest, ReadInStreamAndWrite) {
     std::string testdata = "simply test read in stream";
     std::string expected = HEAD + testdata;
-    ASSERT_TRUE(WriteStringToFile(testdata, tf.path, false));
+    ASSERT_TRUE(WriteStringToFile(testdata, tf.path));
 
     int pid = fork();
     ASSERT_TRUE(pid != -1);
@@ -166,7 +166,7 @@ TEST_F(FdBufferTest, ReadInStreamAndWrite) {
 TEST_F(FdBufferTest, ReadInStreamAndWriteAllAtOnce) {
     std::string testdata = "child process flushes only after all data are read.";
     std::string expected = HEAD + testdata;
-    ASSERT_TRUE(WriteStringToFile(testdata, tf.path, false));
+    ASSERT_TRUE(WriteStringToFile(testdata, tf.path));
 
     int pid = fork();
     ASSERT_TRUE(pid != -1);
@@ -196,7 +196,7 @@ TEST_F(FdBufferTest, ReadInStreamAndWriteAllAtOnce) {
 }
 
 TEST_F(FdBufferTest, ReadInStreamEmpty) {
-    ASSERT_TRUE(WriteStringToFile("", tf.path, false));
+    ASSERT_TRUE(WriteStringToFile("", tf.path));
 
     int pid = fork();
     ASSERT_TRUE(pid != -1);
@@ -260,7 +260,7 @@ TEST_F(FdBufferTest, ReadInStreamMoreThan4MB) {
 
 TEST_F(FdBufferTest, ReadInStreamTimeOut) {
     std::string testdata = "timeout test";
-    ASSERT_TRUE(WriteStringToFile(testdata, tf.path, false));
+    ASSERT_TRUE(WriteStringToFile(testdata, tf.path));
 
     int pid = fork();
     ASSERT_TRUE(pid != -1);

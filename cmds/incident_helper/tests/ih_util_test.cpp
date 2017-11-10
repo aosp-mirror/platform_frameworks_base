@@ -65,7 +65,7 @@ TEST(IhUtilTest, ParseRecord) {
 TEST(IhUtilTest, Reader) {
     TemporaryFile tf;
     ASSERT_NE(tf.fd, -1);
-    ASSERT_TRUE(WriteStringToFile("test string\nsecond\nooo\n", tf.path, false));
+    ASSERT_TRUE(WriteStringToFile("test string\nsecond\nooo\n", tf.path));
 
     Reader r(tf.fd);
     string line;
@@ -82,7 +82,7 @@ TEST(IhUtilTest, Reader) {
 TEST(IhUtilTest, ReaderSmallBufSize) {
     TemporaryFile tf;
     ASSERT_NE(tf.fd, -1);
-    ASSERT_TRUE(WriteStringToFile("test string\nsecond\nooiecccojreo", tf.path, false));
+    ASSERT_TRUE(WriteStringToFile("test string\nsecond\nooiecccojreo", tf.path));
 
     Reader r(tf.fd, 5);
     string line;
@@ -99,7 +99,7 @@ TEST(IhUtilTest, ReaderSmallBufSize) {
 TEST(IhUtilTest, ReaderEmpty) {
     TemporaryFile tf;
     ASSERT_NE(tf.fd, -1);
-    ASSERT_TRUE(WriteStringToFile("", tf.path, false));
+    ASSERT_TRUE(WriteStringToFile("", tf.path));
 
     Reader r(tf.fd);
     string line;
@@ -112,7 +112,7 @@ TEST(IhUtilTest, ReaderEmpty) {
 TEST(IhUtilTest, ReaderMultipleEmptyLines) {
     TemporaryFile tf;
     ASSERT_NE(tf.fd, -1);
-    ASSERT_TRUE(WriteStringToFile("\n\n", tf.path, false));
+    ASSERT_TRUE(WriteStringToFile("\n\n", tf.path));
 
     Reader r(tf.fd);
     string line;
