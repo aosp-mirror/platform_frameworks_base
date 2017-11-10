@@ -229,6 +229,7 @@ public class AppStandbyController {
         // Get sync adapters for the authority
         String[] packages = ContentResolver.getSyncAdapterPackagesForAuthorityAsUser(
                 authority, userId);
+        final long elapsedRealtime = SystemClock.elapsedRealtime();
         for (String packageName: packages) {
             // Only force the sync adapters to active if the provider is not in the same package and
             // the sync adapter is a system package.
@@ -239,7 +240,12 @@ public class AppStandbyController {
                     continue;
                 }
                 if (!packageName.equals(providerPkgName)) {
-                    setAppIdleAsync(packageName, false, userId);
+                    synchronized (mAppIdleLock) {
+                        int newBucket = mAppIdleHistory.reportMildUsage(packageName, userId,
+                                    elapsedRealtime);
+                        maybeInformListeners(packageName, userId, elapsedRealtime,
+                                newBucket);
+                    }
                 }
             } catch (PackageManager.NameNotFoundException e) {
                 // Shouldn't happen
@@ -493,11 +499,21 @@ public class AppStandbyController {
             if ((event.mEventType == UsageEvents.Event.MOVE_TO_FOREGROUND
                     || event.mEventType == UsageEvents.Event.MOVE_TO_BACKGROUND
                     || event.mEventType == UsageEvents.Event.SYSTEM_INTERACTION
-                    || event.mEventType == UsageEvents.Event.USER_INTERACTION)) {
-                mAppIdleHistory.reportUsage(event.mPackage, userId, elapsedRealtime);
+                    || event.mEventType == UsageEvents.Event.USER_INTERACTION
+                    || event.mEventType == UsageEvents.Event.NOTIFICATION_SEEN)) {
+
+                final int newBucket;
+                if (event.mEventType == UsageEvents.Event.NOTIFICATION_SEEN) {
+                    newBucket = mAppIdleHistory.reportMildUsage(event.mPackage, userId,
+                            elapsedRealtime);
+                } else {
+                    newBucket = mAppIdleHistory.reportUsage(event.mPackage, userId,
+                            elapsedRealtime);
+                }
+
+                maybeInformListeners(event.mPackage, userId, elapsedRealtime,
+                        newBucket);
                 if (previouslyIdle) {
-                    maybeInformListeners(event.mPackage, userId, elapsedRealtime,
-                            AppStandby.STANDBY_BUCKET_ACTIVE);
                     notifyBatteryStats(event.mPackage, userId, false);
                 }
             }
