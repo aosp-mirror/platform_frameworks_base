@@ -15,6 +15,10 @@
  */
 package com.android.settingslib.core.lifecycle;
 
+import static android.arch.lifecycle.Lifecycle.Event.ON_START;
+
+import static com.google.common.truth.Truth.assertThat;
+
 import android.content.Context;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -32,6 +36,7 @@ import com.android.settingslib.core.lifecycle.events.OnResume;
 import com.android.settingslib.core.lifecycle.events.OnStart;
 import com.android.settingslib.core.lifecycle.events.OnStop;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
@@ -39,11 +44,11 @@ import org.robolectric.android.controller.ActivityController;
 import org.robolectric.android.controller.FragmentController;
 import org.robolectric.annotation.Config;
 
-import static com.google.common.truth.Truth.assertThat;
-
 @RunWith(SettingsLibRobolectricTestRunner.class)
 @Config(manifest = TestConfig.MANIFEST_PATH, sdk = TestConfig.SDK_VERSION)
 public class LifecycleTest {
+
+    private Lifecycle mLifecycle;
 
     public static class TestDialogFragment extends ObservableDialogFragment {
 
@@ -139,6 +144,11 @@ public class LifecycleTest {
         }
     }
 
+    @Before
+    public void setUp() {
+        mLifecycle = new Lifecycle(() -> mLifecycle);
+    }
+
     @Test
     public void runThroughActivityLifecycles_shouldObserveEverything() {
         ActivityController<TestActivity> ac = Robolectric.buildActivity(TestActivity.class);
@@ -212,9 +222,8 @@ public class LifecycleTest {
 
     @Test
     public void addObserverDuringObserve_shoudNotCrash() {
-        Lifecycle lifecycle = new Lifecycle();
-        lifecycle.addObserver(new OnStartObserver(lifecycle));
-        lifecycle.onStart();
+        mLifecycle.addObserver(new OnStartObserver(mLifecycle));
+        mLifecycle.handleLifecycleEvent(ON_START);
     }
 
     private static class OptionItemAccepter implements LifecycleObserver, OnOptionsItemSelected {

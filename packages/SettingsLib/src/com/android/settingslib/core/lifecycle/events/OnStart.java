@@ -15,7 +15,13 @@
  */
 package com.android.settingslib.core.lifecycle.events;
 
-public interface OnStart {
+import android.arch.lifecycle.Lifecycle;
+import android.arch.lifecycle.OnLifecycleEvent;
 
+/**
+ * @deprecated use {@link OnLifecycleEvent(Lifecycle.Event) }
+ */
+@Deprecated
+public interface OnStart {
     void onStart();
 }
