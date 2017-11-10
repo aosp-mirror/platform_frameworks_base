@@ -17,6 +17,7 @@
 
 package android.view;
 
+import android.annotation.NonNull;
 import android.graphics.Rect;
 
 /**
@@ -36,6 +37,7 @@ public final class WindowInsets {
     private Rect mStableInsets;
     private Rect mTempRect;
     private boolean mIsRound;
+    private DisplayCutout mDisplayCutout;
 
     /**
      * In multi-window we force show the navigation bar. Because we don't want that the surface size
@@ -47,6 +49,7 @@ public final class WindowInsets {
     private boolean mSystemWindowInsetsConsumed = false;
     private boolean mWindowDecorInsetsConsumed = false;
     private boolean mStableInsetsConsumed = false;
+    private boolean mCutoutConsumed = false;
 
     private static final Rect EMPTY_RECT = new Rect(0, 0, 0, 0);
 
@@ -59,12 +62,12 @@ public final class WindowInsets {
     public static final WindowInsets CONSUMED;
 
     static {
-        CONSUMED = new WindowInsets(null, null, null, false, false);
+        CONSUMED = new WindowInsets(null, null, null, false, false, null);
     }
 
     /** @hide */
     public WindowInsets(Rect systemWindowInsets, Rect windowDecorInsets, Rect stableInsets,
-            boolean isRound, boolean alwaysConsumeNavBar) {
+            boolean isRound, boolean alwaysConsumeNavBar, DisplayCutout displayCutout) {
         mSystemWindowInsetsConsumed = systemWindowInsets == null;
         mSystemWindowInsets = mSystemWindowInsetsConsumed ? EMPTY_RECT : systemWindowInsets;
 
@@ -76,6 +79,9 @@ public final class WindowInsets {
 
         mIsRound = isRound;
         mAlwaysConsumeNavBar = alwaysConsumeNavBar;
+
+        mCutoutConsumed = displayCutout == null;
+        mDisplayCutout = mCutoutConsumed ? DisplayCutout.NO_CUTOUT : displayCutout;
     }
 
     /**
@@ -92,11 +98,13 @@ public final class WindowInsets {
         mStableInsetsConsumed = src.mStableInsetsConsumed;
         mIsRound = src.mIsRound;
         mAlwaysConsumeNavBar = src.mAlwaysConsumeNavBar;
+        mDisplayCutout = src.mDisplayCutout;
+        mCutoutConsumed = src.mCutoutConsumed;
     }
 
     /** @hide */
     public WindowInsets(Rect systemWindowInsets) {
-        this(systemWindowInsets, null, null, false, false);
+        this(systemWindowInsets, null, null, false, false, null);
     }
 
     /**
@@ -260,8 +268,33 @@ public final class WindowInsets {
      * @return true if any inset values are nonzero
      */
     public boolean hasInsets() {
-        return hasSystemWindowInsets() || hasWindowDecorInsets() || hasStableInsets();
+        return hasSystemWindowInsets() || hasWindowDecorInsets() || hasStableInsets()
+                || mDisplayCutout.hasCutout();
     }
+
+    /**
+     * @return the display cutout
+     * @see DisplayCutout
+     * @hide pending API
+     */
+    @NonNull
+    public DisplayCutout getDisplayCutout() {
+        return mDisplayCutout;
+    }
+
+    /**
+     * Returns a copy of this WindowInsets with the cutout fully consumed.
+     *
+     * @return A modified copy of this WindowInsets
+     * @hide pending API
+     */
+    public WindowInsets consumeCutout() {
+        final WindowInsets result = new WindowInsets(this);
+        result.mDisplayCutout = DisplayCutout.NO_CUTOUT;
+        result.mCutoutConsumed = true;
+        return result;
+    }
+
 
     /**
      * Check if these insets have been fully consumed.
@@ -277,7 +310,8 @@ public final class WindowInsets {
      * @return true if the insets have been fully consumed.
      */
     public boolean isConsumed() {
-        return mSystemWindowInsetsConsumed && mWindowDecorInsetsConsumed && mStableInsetsConsumed;
+        return mSystemWindowInsetsConsumed && mWindowDecorInsetsConsumed && mStableInsetsConsumed
+                && mCutoutConsumed;
     }
 
     /**
@@ -495,7 +529,9 @@ public final class WindowInsets {
     public String toString() {
         return "WindowInsets{systemWindowInsets=" + mSystemWindowInsets
                 + " windowDecorInsets=" + mWindowDecorInsets
-                + " stableInsets=" + mStableInsets +
-                (isRound() ? " round}" : "}");
+                + " stableInsets=" + mStableInsets
+                + (mDisplayCutout.hasCutout() ? " cutout=" + mDisplayCutout : "")
+                + (isRound() ? " round" : "")
+                + "}";
     }
 }
