@@ -85,7 +85,8 @@ bool IsJavaIdentifier(const StringPiece& str) {
     return false;
   }
 
-  if (!IsXidStart(iter.Next())) {
+  const char32_t first_codepoint = iter.Next();
+  if (!IsXidStart(first_codepoint) && first_codepoint != U'_' && first_codepoint != U'$') {
     return false;
   }
 
