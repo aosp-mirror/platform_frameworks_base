@@ -60,7 +60,7 @@ public:
     }
 
     void writeToFdBuffer(string str) {
-        ASSERT_TRUE(WriteStringToFile(str, tf.path, false));
+        ASSERT_TRUE(WriteStringToFile(str, tf.path));
         ASSERT_EQ(NO_ERROR, buffer.read(tf.fd, 10000));
         ASSERT_EQ(str.size(), buffer.size());
     }
