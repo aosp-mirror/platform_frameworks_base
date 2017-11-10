@@ -417,7 +417,7 @@ public final class BluetoothSocket implements Closeable {
             return -1;
         }
         try {
-            mPfd = bluetoothProxy.createSocketChannel(mType, mServiceName,
+            mPfd = bluetoothProxy.getSocketManager().createSocketChannel(mType, mServiceName,
                     mUuid, mPort, getSecurityFlags());
         } catch (RemoteException e) {
             Log.e(TAG, Log.getStackTraceString(new Throwable()));
