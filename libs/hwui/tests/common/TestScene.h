@@ -16,6 +16,9 @@
 
 #pragma once
 
+#include <gui/Surface.h>
+#include <utils/StrongPointer.h>
+
 #include <string>
 #include <unordered_map>
 
@@ -66,6 +69,8 @@ public:
 
     static std::unordered_map<std::string, Info>& testMap();
     static void registerScene(const Info& info);
+
+    sp<Surface> renderTarget;
 };
 
 }  // namespace test

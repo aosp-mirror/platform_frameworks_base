@@ -15,7 +15,6 @@
  */
 
 #include "TestSceneBase.h"
-#include "utils/Color.h"
 
 class TextAnimation;
 

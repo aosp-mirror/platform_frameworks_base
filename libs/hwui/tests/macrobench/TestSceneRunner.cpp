@@ -111,8 +111,6 @@ void run(const TestScene::Info& info, const TestScene::Options& opts,
     // Switch to the real display
     gDisplay = getBuiltInDisplay();
 
-    std::unique_ptr<TestScene> scene(info.createScene(opts));
-
     Properties::forceDrawFrame = true;
     TestContext testContext;
     testContext.setRenderOffscreen(opts.renderOffscreen);
@@ -121,6 +119,9 @@ void run(const TestScene::Info& info, const TestScene::Options& opts,
     const int width = gDisplay.w;
     const int height = gDisplay.h;
     sp<Surface> surface = testContext.surface();
+
+    std::unique_ptr<TestScene> scene(info.createScene(opts));
+    scene->renderTarget = surface;
 
     sp<RenderNode> rootNode = TestUtils::createNode(
             0, 0, width, height, [&scene, width, height](RenderProperties& props, Canvas& canvas) {
