@@ -117,7 +117,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     private final IBinder.DeathRecipient mOverviewServiceDeathRcpt = new IBinder.DeathRecipient() {
         @Override
         public void binderDied() {
-            mOverviewProxy = null;
+            startConnectionToCurrentUser();
         }
     };
 
@@ -167,6 +167,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
 
     private void disconnectFromLauncherService() {
         if (mOverviewProxy != null) {
+            mOverviewProxy.asBinder().unlinkToDeath(mOverviewServiceDeathRcpt, 0);
             mContext.unbindService(mOverviewServiceConnection);
             mOverviewProxy = null;
             notifyConnectionChanged();
