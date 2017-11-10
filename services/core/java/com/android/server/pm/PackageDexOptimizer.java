@@ -110,9 +110,9 @@ public class PackageDexOptimizer {
             return false;
         }
 
-        // We do not dexopt a priv-app package when pm.dexopt.priv-apps is false.
+        // We do not dexopt a priv-app package when pm.dexopt.priv-apps-oob is true.
         if (pkg.isPrivilegedApp()) {
-            return SystemProperties.getBoolean("pm.dexopt.priv-apps", true);
+            return !SystemProperties.getBoolean("pm.dexopt.priv-apps-oob", false);
         }
 
         return true;
