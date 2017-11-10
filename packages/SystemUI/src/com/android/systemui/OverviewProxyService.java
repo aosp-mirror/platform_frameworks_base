@@ -32,13 +32,17 @@ import android.view.SurfaceControl;
 
 import com.android.systemui.shared.recents.IOverviewProxy;
 import com.android.systemui.shared.recents.ISystemUiProxy;
+import com.android.systemui.OverviewProxyService.OverviewProxyListener;
+import com.android.systemui.statusbar.policy.CallbackController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceProvisionedListener;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Class to send information from overview to launcher with a binder.
  */
-public class OverviewProxyService {
+public class OverviewProxyService implements CallbackController<OverviewProxyListener> {
 
     private static final String TAG = "OverviewProxyService";
     private static final long BACKOFF_MILLIS = 5000;
@@ -48,6 +52,7 @@ public class OverviewProxyService {
     private final Runnable mConnectionRunnable = this::startConnectionToCurrentUser;
     private final DeviceProvisionedController mDeviceProvisionedController
             = Dependency.get(DeviceProvisionedController.class);
+    private final List<OverviewProxyListener> mConnectionCallbacks = new ArrayList<>();
 
     private IOverviewProxy mOverviewProxy;
     private int mConnectionBackoffAttempts;
@@ -82,6 +87,7 @@ public class OverviewProxyService {
                 } catch (RemoteException e) {
                     Log.e(TAG, "Failed to call onBind()", e);
                 }
+                notifyConnectionChanged();
             }
         }
 
@@ -144,6 +150,17 @@ public class OverviewProxyService {
         }
     }
 
+    @Override
+    public void addCallback(OverviewProxyListener listener) {
+        mConnectionCallbacks.add(listener);
+        listener.onConnectionChanged(mOverviewProxy != null);
+    }
+
+    @Override
+    public void removeCallback(OverviewProxyListener listener) {
+        mConnectionCallbacks.remove(listener);
+    }
+
     public IOverviewProxy getProxy() {
         return mOverviewProxy;
     }
@@ -152,6 +169,17 @@ public class OverviewProxyService {
         if (mOverviewProxy != null) {
             mContext.unbindService(mOverviewServiceConnection);
             mOverviewProxy = null;
+            notifyConnectionChanged();
         }
+    }
+
+    private void notifyConnectionChanged() {
+        for (int i = mConnectionCallbacks.size() - 1; i >= 0; --i) {
+            mConnectionCallbacks.get(i).onConnectionChanged(mOverviewProxy != null);
+        }
+    }
+
+    public interface OverviewProxyListener {
+        void onConnectionChanged(boolean isConnected);
     }
 }

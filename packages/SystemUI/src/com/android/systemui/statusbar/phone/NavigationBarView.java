@@ -47,6 +47,8 @@ import android.widget.FrameLayout;
 import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
 import com.android.systemui.DockedStackExistsListener;
+import com.android.systemui.OverviewProxyService;
+import com.android.systemui.OverviewProxyService.OverviewProxyListener;
 import com.android.systemui.R;
 import com.android.systemui.RecentsComponent;
 import com.android.systemui.plugins.PluginListener;
@@ -195,6 +197,9 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
             }
         }
     }
+
+    private final OverviewProxyListener mOverviewProxyListener =
+            isConnected -> setSlippery(!isConnected);
 
     public NavigationBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -531,6 +536,24 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         }
     }
 
+    private void setSlippery(boolean slippery) {
+        boolean changed = false;
+        final ViewGroup navbarView = ((ViewGroup) getParent());
+        final WindowManager.LayoutParams lp = (WindowManager.LayoutParams) navbarView
+                .getLayoutParams();
+        if (slippery && (lp.flags & WindowManager.LayoutParams.FLAG_SLIPPERY) == 0) {
+            lp.flags |= WindowManager.LayoutParams.FLAG_SLIPPERY;
+            changed = true;
+        } else if (!slippery && (lp.flags & WindowManager.LayoutParams.FLAG_SLIPPERY) != 0) {
+            lp.flags &= ~WindowManager.LayoutParams.FLAG_SLIPPERY;
+            changed = true;
+        }
+        if (changed) {
+            WindowManager wm = (WindowManager)getContext().getSystemService(Context.WINDOW_SERVICE);
+            wm.updateViewLayout(navbarView, lp);
+        }
+    }
+
     public void setMenuVisibility(final boolean show) {
         setMenuVisibility(show, false);
     }
@@ -756,6 +779,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         onPluginDisconnected(null); // Create default gesture helper
         Dependency.get(PluginManager.class).addPluginListener(this,
                 NavGesture.class, false /* Only one */);
+        Dependency.get(OverviewProxyService.class).addCallback(mOverviewProxyListener);
     }
 
     @Override
@@ -765,6 +789,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         if (mGestureHelper != null) {
             mGestureHelper.destroy();
         }
+        Dependency.get(OverviewProxyService.class).removeCallback(mOverviewProxyListener);
     }
 
     @Override
