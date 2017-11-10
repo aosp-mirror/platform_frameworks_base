@@ -123,6 +123,9 @@
          be sent during a change to the audio output device. -->
     <bool name="config_sendAudioBecomingNoisy">true</bool>
 
+    <!-- Flag to disable all transition animations -->
+    <bool name="config_disableTransitionAnimation">false</bool>
+
     <!-- The duration (in milliseconds) of a short animation. -->
     <integer name="config_shortAnimTime">200</integer>
 

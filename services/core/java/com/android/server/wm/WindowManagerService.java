@@ -569,6 +569,8 @@ public class WindowManagerService extends IWindowManager.Stub
     boolean mForceResizableTasks = false;
     boolean mSupportsPictureInPicture = false;
 
+    private boolean mDisableTransitionAnimation = false;
+
     int getDragLayerLocked() {
         return mPolicy.getWindowLayerFromTypeLw(TYPE_DRAG) * TYPE_LAYER_MULTIPLIER + TYPE_LAYER_OFFSET;
     }
@@ -966,6 +968,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 com.android.internal.R.bool.config_allowAnimationsInLowPowerMode);
         mMaxUiWidth = context.getResources().getInteger(
                 com.android.internal.R.integer.config_maxUiWidth);
+        mDisableTransitionAnimation = context.getResources().getBoolean(
+                com.android.internal.R.bool.config_disableTransitionAnimation);
         mInputManager = inputManager; // Must be before createDisplayContentLocked.
         mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
         mDisplaySettings = new DisplaySettings();
@@ -2279,6 +2283,14 @@ public class WindowManagerService extends IWindowManager.Stub
 
     boolean applyAnimationLocked(AppWindowToken atoken, WindowManager.LayoutParams lp,
             int transit, boolean enter, boolean isVoiceInteraction) {
+        if (mDisableTransitionAnimation) {
+            if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) {
+                Slog.v(TAG_WM,
+                        "applyAnimation: transition animation is disabled. atoken=" + atoken);
+            }
+            atoken.mAppAnimator.clearAnimation();
+            return false;
+        }
         // Only apply an animation if the display isn't frozen.  If it is
         // frozen, there is no reason to animate and it can cause strange
         // artifacts when we unfreeze the display if some different animation
