@@ -39,7 +39,7 @@ oneway interface IInCallAdapter {
 
     void mute(boolean shouldMute);
 
-    void setAudioRoute(int route);
+    void setAudioRoute(int route, String bluetoothAddress);
 
     void playDtmfTone(String callId, char digit);
 
