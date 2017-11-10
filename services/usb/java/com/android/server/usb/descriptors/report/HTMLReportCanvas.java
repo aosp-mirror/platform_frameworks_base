@@ -15,7 +15,7 @@
  */
 package com.android.server.usb.descriptors.report;
 
-import com.android.server.usb.descriptors.UsbDescriptorParser;
+import android.hardware.usb.UsbDeviceConnection;
 
 /**
  * @hide
@@ -32,8 +32,8 @@ public final class HTMLReportCanvas extends ReportCanvas {
      * from the USB device.
      * @param stringBuilder Generated output gets written into this object.
      */
-    public HTMLReportCanvas(UsbDescriptorParser parser, StringBuilder stringBuilder) {
-        super(parser);
+    public HTMLReportCanvas(UsbDeviceConnection connection, StringBuilder stringBuilder) {
+        super(connection);
 
         mStringBuilder = stringBuilder;
     }

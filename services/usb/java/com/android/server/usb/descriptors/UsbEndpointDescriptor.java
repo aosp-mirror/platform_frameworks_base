@@ -15,8 +15,6 @@
  */
 package com.android.server.usb.descriptors;
 
-import android.hardware.usb.UsbEndpoint;
-
 import com.android.server.usb.descriptors.report.ReportCanvas;
 
 /**
@@ -105,10 +103,6 @@ public class UsbEndpointDescriptor extends UsbDescriptor {
 
     public byte getSyncAddress() {
         return mSyncAddress;
-    }
-
-    /* package */ UsbEndpoint toAndroid(UsbDescriptorParser parser) {
-        return new UsbEndpoint(mEndpointAddress, mAttributes, mPacketSize, mInterval);
     }
 
     @Override
