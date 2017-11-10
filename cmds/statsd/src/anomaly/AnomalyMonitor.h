@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-#ifndef ANOMALY_MONITOR_H
-#define ANOMALY_MONITOR_H
+#pragma once
 
 #include "anomaly/indexed_priority_queue.h"
 
@@ -23,6 +22,8 @@
 #include <utils/RefBase.h>
 
 #include <queue>
+#include <set>
+#include <unordered_map>
 #include <unordered_set>
 #include <vector>
 
@@ -114,6 +115,8 @@ public:
         return mRegisteredAlarmTimeSec;
     }
 
+    unordered_set<sp<const AnomalyAlarm>, SpHash<AnomalyAlarm>> onAlarmFired(uint64_t timestampNs);
+
 private:
     std::mutex mLock;
 
@@ -154,5 +157,3 @@ private:
 }  // namespace statsd
 }  // namespace os
 }  // namespace android
-
-#endif  // ANOMALY_MONITOR_H

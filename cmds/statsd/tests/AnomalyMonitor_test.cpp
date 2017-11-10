@@ -20,6 +20,8 @@ using namespace android::os::statsd;
 
 #ifdef __ANDROID__
 TEST(AnomalyMonitor, popSoonerThan) {
+    std::string emptyMetricId;
+    std::string emptyDimensionId;
     unordered_set<sp<const AnomalyAlarm>, SpHash<AnomalyAlarm>> set;
     AnomalyMonitor am(2);
 

@@ -188,7 +188,6 @@ std::unique_ptr<std::vector<uint8_t>> ValueMetricProducer::onDumpReport() {
 
     startNewProtoOutputStream(time(nullptr) * NS_PER_SEC);
     mPastBuckets.clear();
-    mByteSize = 0;
 
     return buffer;
 
@@ -215,7 +214,7 @@ void ValueMetricProducer::onConditionChanged(const bool condition, const uint64_
             for (const auto& data : allData) {
                 onMatchedLogEvent(0, *data, false);
             }
-            flush_if_needed(eventTime);
+            flushIfNeeded(eventTime);
         }
         return;
     }
@@ -230,12 +229,12 @@ void ValueMetricProducer::onDataPulled(const std::vector<std::shared_ptr<LogEven
         uint64_t eventTime = allData.at(0)->GetTimestampNs();
         // alarm is not accurate and might drift.
         if (eventTime > mCurrentBucketStartTimeNs + mBucketSizeNs * 3 / 2) {
-            flush_if_needed(eventTime);
+            flushIfNeeded(eventTime);
         }
         for (const auto& data : allData) {
             onMatchedLogEvent(0, *data, true);
         }
-        flush_if_needed(eventTime);
+        flushIfNeeded(eventTime);
     }
 }
 
@@ -282,7 +281,7 @@ void ValueMetricProducer::onMatchedLogEventInternal(
             }
         }
     } else {
-        flush_if_needed(eventTimeNs);
+        flushIfNeeded(eventTimeNs);
         interval.raw.push_back(make_pair(value, 0));
     }
 }
@@ -298,18 +297,18 @@ long ValueMetricProducer::get_value(const LogEvent& event) {
     }
 }
 
-void ValueMetricProducer::flush_if_needed(const uint64_t eventTimeNs) {
+void ValueMetricProducer::flushIfNeeded(const uint64_t eventTimeNs) {
     if (mCurrentBucketStartTimeNs + mBucketSizeNs > eventTimeNs) {
         VLOG("eventTime is %lld, less than next bucket start time %lld", (long long)eventTimeNs,
              (long long)(mCurrentBucketStartTimeNs + mBucketSizeNs));
         return;
     }
-
     VLOG("finalizing bucket for %ld, dumping %d slices", (long)mCurrentBucketStartTimeNs,
          (int)mCurrentSlicedBucket.size());
     ValueBucket info;
     info.mBucketStartNs = mCurrentBucketStartTimeNs;
     info.mBucketEndNs = mCurrentBucketStartTimeNs + mBucketSizeNs;
+    info.mBucketNum = mCurrentBucketNum;
 
     int tainted = 0;
     for (const auto& slice : mCurrentSlicedBucket) {
@@ -329,23 +328,29 @@ void ValueMetricProducer::flush_if_needed(const uint64_t eventTimeNs) {
         // it will auto create new vector of ValuebucketInfo if the key is not found.
         auto& bucketList = mPastBuckets[slice.first];
         bucketList.push_back(info);
-        mByteSize += sizeof(info);
     }
 
     // Reset counters
     mCurrentSlicedBucket.swap(mNextSlicedBucket);
     mNextSlicedBucket.clear();
+
     int64_t numBucketsForward = (eventTimeNs - mCurrentBucketStartTimeNs) / mBucketSizeNs;
+    mCurrentBucketStartTimeNs = mCurrentBucketStartTimeNs + numBucketsForward * mBucketSizeNs;
+    mCurrentBucketNum += numBucketsForward;
+
     if (numBucketsForward > 1) {
         VLOG("Skipping forward %lld buckets", (long long)numBucketsForward);
     }
-    mCurrentBucketStartTimeNs = mCurrentBucketStartTimeNs + numBucketsForward * mBucketSizeNs;
     VLOG("metric %s: new bucket start time: %lld", mMetric.name().c_str(),
          (long long)mCurrentBucketStartTimeNs);
 }
 
 size_t ValueMetricProducer::byteSize() {
-    return mByteSize;
+    size_t totalSize = 0;
+    for (const auto& pair : mPastBuckets) {
+        totalSize += pair.second.size() * kBucketSize;
+    }
+    return totalSize;
 }
 
 }  // namespace statsd

@@ -21,9 +21,9 @@
 
 #include <android/util/ProtoOutputStream.h>
 #include <gtest/gtest_prod.h>
+#include "../anomaly/AnomalyTracker.h"
 #include "../condition/ConditionTracker.h"
 #include "../matchers/matcher_util.h"
-#include "../anomaly/DiscreteAnomalyTracker.h"
 #include "MetricProducer.h"
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
 #include "stats_util.h"
@@ -36,6 +36,7 @@ struct CountBucket {
     int64_t mBucketStartNs;
     int64_t mBucketEndNs;
     int64_t mCount;
+    uint64_t mBucketNum;
 };
 
 class CountMetricProducer : public MetricProducer {
@@ -49,6 +50,8 @@ public:
     void onConditionChanged(const bool conditionMet, const uint64_t eventTime) override;
 
     void finish() override;
+
+    void flushIfNeeded(const uint64_t newEventTime) override;
 
     // TODO: Pass a timestamp as a parameter in onDumpReport.
     std::unique_ptr<std::vector<uint8_t>> onDumpReport() override;
@@ -76,18 +79,15 @@ private:
     // TODO: Add a lock to mPastBuckets.
     std::unordered_map<HashableDimensionKey, std::vector<CountBucket>> mPastBuckets;
 
-    size_t mByteSize;
-
     // The current bucket.
     std::shared_ptr<DimToValMap> mCurrentSlicedCounter = std::make_shared<DimToValMap>();
 
-    vector<std::unique_ptr<DiscreteAnomalyTracker>> mAnomalyTrackers;
-
-    void flushCounterIfNeeded(const uint64_t newEventTime);
+    static const size_t kBucketSize = sizeof(CountBucket{});
 
     FRIEND_TEST(CountMetricProducerTest, TestNonDimensionalEvents);
     FRIEND_TEST(CountMetricProducerTest, TestEventsWithNonSlicedCondition);
     FRIEND_TEST(CountMetricProducerTest, TestEventsWithSlicedCondition);
+    FRIEND_TEST(CountMetricProducerTest, TestAnomalyDetection);
 };
 
 }  // namespace statsd

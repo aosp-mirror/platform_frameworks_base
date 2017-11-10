@@ -50,11 +50,22 @@ const int FIELD_ID_UID = 1;
 const int FIELD_ID_NAME = 2;
 
 StatsLogProcessor::StatsLogProcessor(const sp<UidMap>& uidMap,
+                                     const sp<AnomalyMonitor>& anomalyMonitor,
                                      const std::function<void(const ConfigKey&)>& sendBroadcast)
-    : mUidMap(uidMap), mSendBroadcast(sendBroadcast) {
+    : mUidMap(uidMap), mAnomalyMonitor(anomalyMonitor), mSendBroadcast(sendBroadcast) {
 }
 
 StatsLogProcessor::~StatsLogProcessor() {
+}
+
+void StatsLogProcessor::onAnomalyAlarmFired(
+        const uint64_t timestampNs,
+        unordered_set<sp<const AnomalyAlarm>, SpHash<AnomalyAlarm>> anomalySet) {
+    for (const auto& anomaly : anomalySet) {
+        for (const auto& itr : mMetricsManagers) {
+            itr.second->onAnomalyAlarmFired(timestampNs, anomaly);
+        }
+    }
 }
 
 // TODO: what if statsd service restarts? How do we know what logs are already processed before?
@@ -93,6 +104,7 @@ void StatsLogProcessor::OnConfigUpdated(const ConfigKey& key, const StatsdConfig
     unique_ptr<MetricsManager> newMetricsManager = std::make_unique<MetricsManager>(config);
     if (newMetricsManager->isConfigValid()) {
         mUidMap->OnConfigUpdated(key);
+        newMetricsManager->setAnomalyMonitor(mAnomalyMonitor);
         mMetricsManagers[key] = std::move(newMetricsManager);
         // Why doesn't this work? mMetricsManagers.insert({key, std::move(newMetricsManager)});
         ALOGD("StatsdConfig valid");

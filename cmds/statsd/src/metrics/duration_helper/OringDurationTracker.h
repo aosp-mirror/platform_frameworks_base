@@ -27,8 +27,10 @@ namespace statsd {
 // Tracks the "Or'd" duration -- if 2 durations are overlapping, they won't be double counted.
 class OringDurationTracker : public DurationTracker {
 public:
-    OringDurationTracker(sp<ConditionWizard> wizard, int conditionIndex, bool nesting,
-                         uint64_t currentBucketStartNs, uint64_t bucketSizeNs,
+    OringDurationTracker(const HashableDimensionKey& eventKey, sp<ConditionWizard> wizard,
+                         int conditionIndex, bool nesting, uint64_t currentBucketStartNs,
+                         uint64_t bucketSizeNs,
+                         const std::vector<sp<AnomalyTracker>>& anomalyTrackers,
                          std::vector<DurationBucket>& bucket);
     void noteStart(const HashableDimensionKey& key, bool condition, const uint64_t eventTime,
                    const ConditionKey& conditionKey) override;
@@ -38,6 +40,9 @@ public:
     void onSlicedConditionMayChange(const uint64_t timestamp) override;
     void onConditionChanged(bool condition, const uint64_t timestamp) override;
     bool flushIfNeeded(uint64_t timestampNs) override;
+
+    int64_t predictAnomalyTimestampNs(const AnomalyTracker& anomalyTracker,
+                                      const uint64_t currentTimestamp) const override;
 
 private:
     // We don't need to keep track of individual durations. The information that's needed is:
@@ -49,6 +54,12 @@ private:
     std::map<HashableDimensionKey, int> mPaused;
     int64_t mLastStartTime;
     std::map<HashableDimensionKey, ConditionKey> mConditionKeyMap;
+
+    FRIEND_TEST(OringDurationTrackerTest, TestDurationOverlap);
+    FRIEND_TEST(OringDurationTrackerTest, TestCrossBucketBoundary);
+    FRIEND_TEST(OringDurationTrackerTest, TestDurationConditionChange);
+    FRIEND_TEST(OringDurationTrackerTest, TestPredictAnomalyTimestamp);
+    FRIEND_TEST(OringDurationTrackerTest, TestAnomalyDetection);
 };
 
 }  // namespace statsd

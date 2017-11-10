@@ -28,8 +28,10 @@ namespace statsd {
 // they stop or bucket expires.
 class MaxDurationTracker : public DurationTracker {
 public:
-    MaxDurationTracker(sp<ConditionWizard> wizard, int conditionIndex, bool nesting,
-                       uint64_t currentBucketStartNs, uint64_t bucketSizeNs,
+    MaxDurationTracker(const HashableDimensionKey& eventKey, sp<ConditionWizard> wizard,
+                       int conditionIndex, bool nesting, uint64_t currentBucketStartNs,
+                       uint64_t bucketSizeNs,
+                       const std::vector<sp<AnomalyTracker>>& anomalyTrackers,
                        std::vector<DurationBucket>& bucket);
     void noteStart(const HashableDimensionKey& key, bool condition, const uint64_t eventTime,
                    const ConditionKey& conditionKey) override;
@@ -40,11 +42,20 @@ public:
     void onSlicedConditionMayChange(const uint64_t timestamp) override;
     void onConditionChanged(bool condition, const uint64_t timestamp) override;
 
+    int64_t predictAnomalyTimestampNs(const AnomalyTracker& anomalyTracker,
+                                      const uint64_t currentTimestamp) const override;
+
 private:
     std::map<HashableDimensionKey, DurationInfo> mInfos;
 
     void noteConditionChanged(const HashableDimensionKey& key, bool conditionMet,
                               const uint64_t timestamp);
+
+    FRIEND_TEST(MaxDurationTrackerTest, TestSimpleMaxDuration);
+    FRIEND_TEST(MaxDurationTrackerTest, TestCrossBucketBoundary);
+    FRIEND_TEST(MaxDurationTrackerTest, TestMaxDurationWithCondition);
+    FRIEND_TEST(MaxDurationTrackerTest, TestStopAll);
+    FRIEND_TEST(MaxDurationTrackerTest, TestAnomalyDetection);
 };
 
 }  // namespace statsd

@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include "anomaly/AnomalyMonitor.h"
+#include "anomaly/AnomalyTracker.h"
 #include "condition/ConditionTracker.h"
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
 #include "logd/LogEvent.h"
@@ -43,6 +45,10 @@ public:
     // Called when everything should wrap up. We are about to finish (e.g., new config comes).
     void finish();
 
+    void onAnomalyAlarmFired(const uint64_t timestampNs, sp<const AnomalyAlarm> anomaly);
+
+    void setAnomalyMonitor(const sp<AnomalyMonitor>& anomalyMonitor);
+
     // Config source owner can call onDumpReport() to get all the metrics collected.
     std::vector<std::unique_ptr<std::vector<uint8_t>>> onDumpReport();
 
@@ -69,6 +75,9 @@ private:
 
     // Hold all metrics from the config.
     std::vector<sp<MetricProducer>> mAllMetricProducers;
+
+    // Hold all alert trackers.
+    std::vector<sp<AnomalyTracker>> mAllAnomalyTrackers;
 
     // To make the log processing more efficient, we want to do as much filtering as possible
     // before we go into individual trackers and conditions to match.

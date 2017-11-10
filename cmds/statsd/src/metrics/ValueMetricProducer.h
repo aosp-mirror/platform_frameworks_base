@@ -33,6 +33,7 @@ struct ValueBucket {
     int64_t mBucketStartNs;
     int64_t mBucketEndNs;
     int64_t mValue;
+    uint64_t mBucketNum;
 };
 
 class ValueMetricProducer : public virtual MetricProducer, public virtual PullDataReceiver {
@@ -46,6 +47,7 @@ public:
     void onConditionChanged(const bool condition, const uint64_t eventTime) override;
 
     void finish() override;
+    void flushIfNeeded(const uint64_t eventTimeNs) override;
 
     // TODO: Pass a timestamp as a parameter in onDumpReport.
     std::unique_ptr<std::vector<uint8_t>> onDumpReport() override;
@@ -102,9 +104,7 @@ private:
 
     long get_value(const LogEvent& event);
 
-    void flush_if_needed(const uint64_t eventTimeNs);
-
-    size_t mByteSize;
+    static const size_t kBucketSize = sizeof(ValueBucket{});
 
     FRIEND_TEST(ValueMetricProducerTest, TestNonDimensionalEvents);
     FRIEND_TEST(ValueMetricProducerTest, TestEventsWithNonSlicedCondition);

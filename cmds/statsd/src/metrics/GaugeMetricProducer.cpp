@@ -63,8 +63,9 @@ const int FIELD_ID_END_BUCKET_NANOS = 2;
 const int FIELD_ID_GAUGE = 3;
 
 GaugeMetricProducer::GaugeMetricProducer(const GaugeMetric& metric, const int conditionIndex,
-                                         const sp<ConditionWizard>& wizard, const int pullTagId)
-    : MetricProducer((time(nullptr) * NS_PER_SEC), conditionIndex, wizard),
+                                         const sp<ConditionWizard>& wizard, const int pullTagId,
+                                         const int64_t startTimeNs)
+    : MetricProducer(startTimeNs, conditionIndex, wizard),
       mMetric(metric),
       mPullTagId(pullTagId) {
     if (metric.has_bucket() && metric.bucket().has_bucket_size_millis()) {
@@ -114,7 +115,7 @@ std::unique_ptr<std::vector<uint8_t>> GaugeMetricProducer::onDumpReport() {
     // Dump current bucket if it's stale.
     // If current bucket is still on-going, don't force dump current bucket.
     // In finish(), We can force dump current bucket.
-    flushGaugeIfNeededLocked(time(nullptr) * NS_PER_SEC);
+    flushIfNeeded(time(nullptr) * NS_PER_SEC);
 
     for (const auto& pair : mPastBuckets) {
         const HashableDimensionKey& hashableKey = pair.first;
@@ -168,7 +169,6 @@ std::unique_ptr<std::vector<uint8_t>> GaugeMetricProducer::onDumpReport() {
 
     startNewProtoOutputStream(time(nullptr) * NS_PER_SEC);
     mPastBuckets.clear();
-    mByteSize = 0;
 
     return buffer;
 
@@ -178,15 +178,18 @@ std::unique_ptr<std::vector<uint8_t>> GaugeMetricProducer::onDumpReport() {
 void GaugeMetricProducer::onConditionChanged(const bool conditionMet, const uint64_t eventTime) {
     AutoMutex _l(mLock);
     VLOG("Metric %s onConditionChanged", mMetric.name().c_str());
+    flushIfNeeded(eventTime);
     mCondition = conditionMet;
 
-    // Push mode. Nothing to do.
+    // Push mode. No need to proactively pull the gauge data.
     if (mPullTagId == -1) {
         return;
     }
-    // If (1) the condition is not met or (2) we already pulled the gauge metric in the current
-    // bucket, do not pull gauge again.
-    if (!mCondition || mCurrentSlicedBucket.size() > 0) {
+    if (!mCondition) {
+        return;
+    }
+    // Already have gauge metric for the current bucket, do not do it again.
+    if (mCurrentSlicedBucket->size() > 0) {
         return;
     }
     vector<std::shared_ptr<LogEvent>> allData;
@@ -197,16 +200,16 @@ void GaugeMetricProducer::onConditionChanged(const bool conditionMet, const uint
     for (const auto& data : allData) {
         onMatchedLogEvent(0, *data, false /*scheduledPull*/);
     }
-    flushGaugeIfNeededLocked(eventTime);
+    flushIfNeeded(eventTime);
 }
 
 void GaugeMetricProducer::onSlicedConditionMayChange(const uint64_t eventTime) {
     VLOG("Metric %s onSlicedConditionMayChange", mMetric.name().c_str());
 }
 
-long GaugeMetricProducer::getGauge(const LogEvent& event) {
+int64_t GaugeMetricProducer::getGauge(const LogEvent& event) {
     status_t err = NO_ERROR;
-    long val = event.GetLong(mMetric.gauge_field(), &err);
+    int64_t val = event.GetLong(mMetric.gauge_field(), &err);
     if (err == NO_ERROR) {
         return val;
     } else {
@@ -217,14 +220,9 @@ long GaugeMetricProducer::getGauge(const LogEvent& event) {
 
 void GaugeMetricProducer::onDataPulled(const std::vector<std::shared_ptr<LogEvent>>& allData) {
     AutoMutex mutex(mLock);
-    if (allData.size() == 0) {
-        return;
-    }
     for (const auto& data : allData) {
         onMatchedLogEvent(0, *data, true /*scheduledPull*/);
     }
-    uint64_t eventTime = allData.at(0)->GetTimestampNs();
-    flushGaugeIfNeededLocked(eventTime);
 }
 
 void GaugeMetricProducer::onMatchedLogEventInternal(
@@ -241,15 +239,21 @@ void GaugeMetricProducer::onMatchedLogEventInternal(
         return;
     }
 
-    // For gauge metric, we just simply use the latest guage in the given bucket.
-    const long gauge = getGauge(event);
-    if (gauge < 0) {
-        VLOG("Invalid gauge at event Time: %lld", (long long)eventTimeNs);
+    // When the event happens in a new bucket, flush the old buckets.
+    if (eventTimeNs >= mCurrentBucketStartTimeNs + mBucketSizeNs) {
+        flushIfNeeded(eventTimeNs);
+    }
+
+    // For gauge metric, we just simply use the first guage in the given bucket.
+    if (!mCurrentSlicedBucket->empty()) {
         return;
     }
-    mCurrentSlicedBucket[eventKey] = gauge;
-    if (mPullTagId < 0) {
-        flushGaugeIfNeededLocked(eventTimeNs);
+    const long gauge = getGauge(event);
+    if (gauge >= 0) {
+        (*mCurrentSlicedBucket)[eventKey] = gauge;
+    }
+    for (auto& tracker : mAnomalyTrackers) {
+        tracker->detectAndDeclareAnomaly(eventTimeNs, mCurrentBucketNum, eventKey, gauge);
     }
 }
 
@@ -258,39 +262,45 @@ void GaugeMetricProducer::onMatchedLogEventInternal(
 // bucket.
 // if data is pushed, onMatchedLogEvent will only be called through onConditionChanged() inside
 // the GaugeMetricProducer while holding the lock.
-void GaugeMetricProducer::flushGaugeIfNeededLocked(const uint64_t eventTimeNs) {
-    if (mCurrentBucketStartTimeNs + mBucketSizeNs > eventTimeNs) {
-        VLOG("event time is %lld, less than next bucket start time %lld", (long long)eventTimeNs,
-             (long long)(mCurrentBucketStartTimeNs + mBucketSizeNs));
+void GaugeMetricProducer::flushIfNeeded(const uint64_t eventTimeNs) {
+    if (eventTimeNs < mCurrentBucketStartTimeNs + mBucketSizeNs) {
         return;
     }
-
-    // Adjusts the bucket start time
-    int64_t numBucketsForward = (eventTimeNs - mCurrentBucketStartTimeNs) / mBucketSizeNs;
 
     GaugeBucket info;
     info.mBucketStartNs = mCurrentBucketStartTimeNs;
     info.mBucketEndNs = mCurrentBucketStartTimeNs + mBucketSizeNs;
+    info.mBucketNum = mCurrentBucketNum;
 
-    for (const auto& slice : mCurrentSlicedBucket) {
+    for (const auto& slice : *mCurrentSlicedBucket) {
         info.mGauge = slice.second;
         auto& bucketList = mPastBuckets[slice.first];
         bucketList.push_back(info);
-        mByteSize += sizeof(info);
-
-        VLOG("gauge metric %s, dump key value: %s -> %ld", mMetric.name().c_str(),
-             slice.first.c_str(), slice.second);
+        VLOG("gauge metric %s, dump key value: %s -> %lld", mMetric.name().c_str(),
+             slice.first.c_str(), (long long)slice.second);
     }
-    // Reset counters
-    mCurrentSlicedBucket.clear();
 
+    // Reset counters
+    for (auto& tracker : mAnomalyTrackers) {
+        tracker->addPastBucket(mCurrentSlicedBucket, mCurrentBucketNum);
+    }
+
+    mCurrentSlicedBucket = std::make_shared<DimToValMap>();
+
+    // Adjusts the bucket start time
+    int64_t numBucketsForward = (eventTimeNs - mCurrentBucketStartTimeNs) / mBucketSizeNs;
     mCurrentBucketStartTimeNs = mCurrentBucketStartTimeNs + numBucketsForward * mBucketSizeNs;
+    mCurrentBucketNum += numBucketsForward;
     VLOG("metric %s: new bucket start time: %lld", mMetric.name().c_str(),
          (long long)mCurrentBucketStartTimeNs);
 }
 
 size_t GaugeMetricProducer::byteSize() {
-    return mByteSize;
+    size_t totalSize = 0;
+    for (const auto& pair : mPastBuckets) {
+        totalSize += pair.second.size() * kBucketSize;
+    }
+    return totalSize;
 }
 
 }  // namespace statsd

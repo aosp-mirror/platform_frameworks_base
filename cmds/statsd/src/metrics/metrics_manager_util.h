@@ -88,6 +88,7 @@ bool initStatsdConfig(const StatsdConfig& config, std::set<int>& allTagIds,
                       std::vector<sp<LogMatchingTracker>>& allLogEntryMatchers,
                       std::vector<sp<ConditionTracker>>& allConditionTrackers,
                       std::vector<sp<MetricProducer>>& allMetricProducers,
+                      vector<sp<AnomalyTracker>>& allAnomalyTrackers,
                       std::unordered_map<int, std::vector<int>>& conditionToMetricMap,
                       std::unordered_map<int, std::vector<int>>& trackerToMetricMap,
                       std::unordered_map<int, std::vector<int>>& trackerToConditionMap);
