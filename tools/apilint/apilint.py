@@ -1371,7 +1371,9 @@ if __name__ == "__main__":
             print
         """
 
-    print "%s API style issues %s\n" % ((format(fg=WHITE, bg=BLUE, bold=True), format(reset=True)))
-    for f in sorted(cur_fail):
-        print cur_fail[f]
-        print
+    if len(cur_fail) != 0:
+        print "%s API style issues %s\n" % ((format(fg=WHITE, bg=BLUE, bold=True), format(reset=True)))
+        for f in sorted(cur_fail):
+            print cur_fail[f]
+            print
+        sys.exit(77)
