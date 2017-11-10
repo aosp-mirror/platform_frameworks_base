@@ -23,6 +23,7 @@ import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
 import static android.view.WindowManager.DOCKED_BOTTOM;
+import static android.view.WindowManager.DOCKED_INVALID;
 import static android.view.WindowManager.DOCKED_LEFT;
 import static android.view.WindowManager.DOCKED_RIGHT;
 import static android.view.WindowManager.DOCKED_TOP;
@@ -116,6 +117,7 @@ public class DockedStackDividerController implements DimLayerUser {
     private final DimLayer mDimLayer;
 
     private boolean mMinimizedDock;
+    private int mOriginalDockedSide = DOCKED_INVALID;
     private boolean mAnimatingForMinimizedDockedStack;
     private boolean mAnimationStarted;
     private long mAnimationStartTime;
@@ -408,6 +410,31 @@ public class DockedStackDividerController implements DimLayerUser {
         mDockedStackListeners.finishBroadcast();
     }
 
+    /**
+     * Checks if the primary stack is allowed to dock to a specific side based on its original dock
+     * side.
+     *
+     * @param dockSide the side to see if it is valid
+     * @return true if the side provided is valid
+     */
+    boolean canPrimaryStackDockTo(int dockSide) {
+        if (mService.mPolicy.isDockSideAllowed(dockSide)) {
+            // Side is the same as original side
+            if (dockSide == mOriginalDockedSide) {
+                return true;
+            }
+            // Special rule that the top in portrait is always valid
+            if (dockSide == DOCKED_TOP) {
+                return true;
+            }
+            // Only if original docked side was top in portrait will allow left side for landscape
+            if (dockSide == DOCKED_LEFT && mOriginalDockedSide == DOCKED_TOP) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     void notifyDockedStackExistsChanged(boolean exists) {
         // TODO(multi-display): Perform all actions only for current display.
         final int size = mDockedStackListeners.beginBroadcast();
@@ -430,8 +457,11 @@ public class DockedStackDividerController implements DimLayerUser {
                 inputMethodManagerInternal.hideCurrentInputMethod();
                 mImeHideRequested = true;
             }
+            final TaskStack stack = mDisplayContent.getSplitScreenPrimaryStackIgnoringVisibility();
+            mOriginalDockedSide = stack.getDockSide();
             return;
         }
+        mOriginalDockedSide = DOCKED_INVALID;
         setMinimizedDockedStack(false /* minimizedDock */, false /* animate */);
     }
 
