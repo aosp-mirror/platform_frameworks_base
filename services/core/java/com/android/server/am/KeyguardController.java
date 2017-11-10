@@ -41,10 +41,8 @@ import android.os.RemoteException;
 import android.os.Trace;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
-
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.server.wm.WindowManagerService;
-
 import java.io.PrintWriter;
 
 /**
@@ -236,24 +234,33 @@ class KeyguardController {
         final ActivityRecord lastDismissingKeyguardActivity = mDismissingKeyguardActivity;
         mOccluded = false;
         mDismissingKeyguardActivity = null;
-        final ActivityDisplay display = mStackSupervisor.getDefaultDisplay();
-        for (int stackNdx = display.getChildCount() - 1; stackNdx >= 0; --stackNdx) {
-            final ActivityStack stack = display.getChildAt(stackNdx);
 
-            // Only the focused stack top activity may control occluded state
-            if (mStackSupervisor.isFocusedStack(stack)) {
+        for (int displayNdx = mStackSupervisor.getChildCount() - 1; displayNdx >= 0; displayNdx--) {
+            final ActivityDisplay display = mStackSupervisor.getChildAt(displayNdx);
+            for (int stackNdx = display.getChildCount() - 1; stackNdx >= 0; --stackNdx) {
+                final ActivityStack stack = display.getChildAt(stackNdx);
 
-                // A dismissing activity occludes Keyguard in the insecure case for legacy reasons.
-                final ActivityRecord topDismissing = stack.getTopDismissingKeyguardActivity();
-                mOccluded = stack.topActivityOccludesKeyguard()
-                        || (topDismissing != null
-                                && stack.topRunningActivityLocked() == topDismissing
-                                && canShowWhileOccluded(true /* dismissKeyguard */,
-                                        false /* showWhenLocked */));
-            }
-            if (mDismissingKeyguardActivity == null
-                    && stack.getTopDismissingKeyguardActivity() != null) {
-                mDismissingKeyguardActivity = stack.getTopDismissingKeyguardActivity();
+                // Only the top activity of the focused stack on the default display may control
+                // occluded state.
+                if (display.mDisplayId == DEFAULT_DISPLAY
+                        && mStackSupervisor.isFocusedStack(stack)) {
+
+                    // A dismissing activity occludes Keyguard in the insecure case for legacy
+                    // reasons.
+                    final ActivityRecord topDismissing = stack.getTopDismissingKeyguardActivity();
+                    mOccluded =
+                            stack.topActivityOccludesKeyguard()
+                                    || (topDismissing != null
+                                            && stack.topRunningActivityLocked() == topDismissing
+                                            && canShowWhileOccluded(
+                                                    true /* dismissKeyguard */,
+                                                    false /* showWhenLocked */));
+                }
+
+                if (mDismissingKeyguardActivity == null
+                        && stack.getTopDismissingKeyguardActivity() != null) {
+                    mDismissingKeyguardActivity = stack.getTopDismissingKeyguardActivity();
+                }
             }
         }
         mOccluded |= mWindowManager.isShowingDream();
