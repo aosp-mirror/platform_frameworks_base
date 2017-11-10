@@ -15,7 +15,6 @@
  */
 package android.os.strictmode;
 
-/** @hide */
 public class InstanceCountViolation extends Violation {
     private final long mInstances;
 
@@ -24,6 +23,7 @@ public class InstanceCountViolation extends Violation {
                 "android.os.StrictMode", "setClassInstanceLimit", "StrictMode.java", 1)
     };
 
+    /** @hide */
     public InstanceCountViolation(Class klass, long instances, int limit) {
         super(klass.toString() + "; instances=" + instances + "; limit=" + limit);
         setStackTrace(FAKE_STACK);

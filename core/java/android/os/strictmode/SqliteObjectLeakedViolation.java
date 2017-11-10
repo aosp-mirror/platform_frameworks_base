@@ -15,9 +15,9 @@
  */
 package android.os.strictmode;
 
-/** @hide */
 public final class SqliteObjectLeakedViolation extends Violation {
 
+    /** @hide */
     public SqliteObjectLeakedViolation(String message, Throwable originStack) {
         super(message);
         initCause(originStack);

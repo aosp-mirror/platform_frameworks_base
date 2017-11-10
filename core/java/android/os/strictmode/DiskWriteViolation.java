@@ -15,8 +15,8 @@
  */
 package android.os.strictmode;
 
-/** @hide */
 public final class DiskWriteViolation extends Violation {
+    /** @hide */
     public DiskWriteViolation() {
         super(null);
     }

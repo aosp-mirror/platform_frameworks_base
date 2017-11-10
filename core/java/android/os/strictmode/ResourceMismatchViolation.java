@@ -15,8 +15,8 @@
  */
 package android.os.strictmode;
 
-/** @hide */
 public final class ResourceMismatchViolation extends Violation {
+    /** @hide */
     public ResourceMismatchViolation(Object tag) {
         super(tag.toString());
     }

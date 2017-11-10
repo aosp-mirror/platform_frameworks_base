@@ -15,8 +15,8 @@
  */
 package android.os.strictmode;
 
-/** @hide */
 public final class CleartextNetworkViolation extends Violation {
+    /** @hide */
     public CleartextNetworkViolation(String msg) {
         super(msg);
     }

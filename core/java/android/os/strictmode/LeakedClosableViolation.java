@@ -15,8 +15,8 @@
  */
 package android.os.strictmode;
 
-/** @hide */
 public final class LeakedClosableViolation extends Violation {
+    /** @hide */
     public LeakedClosableViolation(String message, Throwable allocationSite) {
         super(message);
         initCause(allocationSite);

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 The Android Open Source Project
+ * Copyright 2017 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,14 @@
  */
 package android.os.strictmode;
 
-/** @hide */
-public final class UnbufferedIOViolation extends Violation {
-    public UnbufferedIOViolation() {
+import android.os.StrictMode.ThreadPolicy.Builder;
+
+/**
+ * See #{@link Builder#detectUnbufferedIo()}
+ */
+public final class UnbufferedIoViolation extends Violation {
+    /** @hide */
+    public UnbufferedIoViolation() {
         super(null);
     }
 }
