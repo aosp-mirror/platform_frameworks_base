@@ -25,6 +25,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN_OR_SPLIT
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_ASLEEP;
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_AWAKE;
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_WAKING;
+import static com.android.systemui.statusbar.NotificationMediaManager.DEBUG_MEDIA;
 import static com.android.systemui.statusbar.notification.NotificationInflater.InflationCallback;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT_TRANSPARENT;
@@ -78,10 +79,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.AudioAttributes;
 import android.media.MediaMetadata;
-import android.media.session.MediaController;
-import android.media.session.MediaSession;
 import android.media.session.MediaSessionManager;
-import android.media.session.PlaybackState;
 import android.metrics.LogMaker;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -202,9 +200,10 @@ import com.android.systemui.statusbar.KeyboardShortcuts;
 import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.NotificationData.Entry;
-import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationGutsManager;
 import com.android.systemui.statusbar.NotificationInfo;
+import com.android.systemui.statusbar.NotificationMediaManager;
+import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.ScrimView;
@@ -297,7 +296,6 @@ public class StatusBar extends SystemUI implements DemoMode,
     public static final boolean SPEW = false;
     public static final boolean DUMPTRUCK = true; // extra dumpsys info
     public static final boolean DEBUG_GESTURES = false;
-    public static final boolean DEBUG_MEDIA = false;
     public static final boolean DEBUG_MEDIA_FAKE_ARTWORK = false;
     public static final boolean DEBUG_CAMERA_LIFT = false;
 
@@ -544,31 +542,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     protected final PorterDuffXfermode mSrcOverXferMode =
             new PorterDuffXfermode(PorterDuff.Mode.SRC_OVER);
 
-    private MediaSessionManager mMediaSessionManager;
-    private MediaController mMediaController;
-    private String mMediaNotificationKey;
-    private MediaMetadata mMediaMetadata;
-    private final MediaController.Callback mMediaListener = new MediaController.Callback() {
-        @Override
-        public void onPlaybackStateChanged(PlaybackState state) {
-            super.onPlaybackStateChanged(state);
-            if (DEBUG_MEDIA) Log.v(TAG, "DEBUG_MEDIA: onPlaybackStateChanged: " + state);
-            if (state != null) {
-                if (!isPlaybackActive(state.getState())) {
-                    clearCurrentMediaNotification();
-                    updateMediaMetaData(true, true);
-                }
-            }
-        }
-
-        @Override
-        public void onMetadataChanged(MediaMetadata metadata) {
-            super.onMetadataChanged(metadata);
-            if (DEBUG_MEDIA) Log.v(TAG, "DEBUG_MEDIA: onMetadataChanged: " + metadata);
-            mMediaMetadata = metadata;
-            updateMediaMetaData(true, true);
-        }
-    };
+    private NotificationMediaManager mMediaManager;
 
     /** Keys of notifications currently visible to the user. */
     private final ArraySet<NotificationVisibility> mCurrentlyVisibleNotifications =
@@ -807,6 +781,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         mKeyguardManager = (KeyguardManager) mContext.getSystemService(Context.KEYGUARD_SERVICE);
         mLockPatternUtils = new LockPatternUtils(mContext);
 
+        mMediaManager = new NotificationMediaManager(this, mContext);
+
         // Connect in to the status bar manager service
         mCommandQueue = getComponent(CommandQueue.class);
         mCommandQueue.addCallbacks(this);
@@ -894,11 +870,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
 
         // end old BaseStatusBar.start().
-
-        mMediaSessionManager
-                = (MediaSessionManager) mContext.getSystemService(Context.MEDIA_SESSION_SERVICE);
-        // TODO: use MediaSessionManager.SessionListener to hook us up to future updates
-        // in session state
 
         // Lastly, call to the icon policy to install/update all the icons.
         mIconPolicy = new PhoneStatusBarPolicy(mContext, mIconController);
@@ -1675,10 +1646,8 @@ public class StatusBar extends SystemUI implements DemoMode,
                     || !mVisualStabilityManager.isReorderingAllowed();
             deferRemoval = !mHeadsUpManager.removeNotification(key,  ignoreEarliestRemovalTime);
         }
-        if (key.equals(mMediaNotificationKey)) {
-            clearCurrentMediaNotification();
-            updateMediaMetaData(true, true);
-        }
+        mMediaManager.onNotificationRemoved(key);
+
         Entry entry = mNotificationData.get(key);
         if (FORCE_REMOTE_INPUT_HISTORY && mRemoteInputController.isSpinning(key)
                 && entry.row != null && !entry.row.isDismissed()) {
@@ -2132,7 +2101,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         return entry.row.getParent() instanceof NotificationStackScrollLayout;
     }
 
-    protected void updateNotifications() {
+    @Override
+    public void updateNotifications() {
         mNotificationData.filterAndSort();
 
         updateNotificationShade();
@@ -2174,136 +2144,9 @@ public class StatusBar extends SystemUI implements DemoMode,
             }
         }
 
-        findAndUpdateMediaNotifications();
+        mMediaManager.findAndUpdateMediaNotifications();
     }
 
-    public void findAndUpdateMediaNotifications() {
-        boolean metaDataChanged = false;
-
-        synchronized (mNotificationData) {
-            ArrayList<Entry> activeNotifications = mNotificationData.getActiveNotifications();
-            final int N = activeNotifications.size();
-
-            // Promote the media notification with a controller in 'playing' state, if any.
-            Entry mediaNotification = null;
-            MediaController controller = null;
-            for (int i = 0; i < N; i++) {
-                final Entry entry = activeNotifications.get(i);
-
-                if (isMediaNotification(entry)) {
-                    final MediaSession.Token token =
-                            entry.notification.getNotification().extras.getParcelable(
-                                    Notification.EXTRA_MEDIA_SESSION);
-                    if (token != null) {
-                        MediaController aController = new MediaController(mContext, token);
-                        if (PlaybackState.STATE_PLAYING ==
-                                getMediaControllerPlaybackState(aController)) {
-                            if (DEBUG_MEDIA) {
-                                Log.v(TAG, "DEBUG_MEDIA: found mediastyle controller matching "
-                                        + entry.notification.getKey());
-                            }
-                            mediaNotification = entry;
-                            controller = aController;
-                            break;
-                        }
-                    }
-                }
-            }
-            if (mediaNotification == null) {
-                // Still nothing? OK, let's just look for live media sessions and see if they match
-                // one of our notifications. This will catch apps that aren't (yet!) using media
-                // notifications.
-
-                if (mMediaSessionManager != null) {
-                    final List<MediaController> sessions
-                            = mMediaSessionManager.getActiveSessionsForUser(
-                                    null,
-                                    UserHandle.USER_ALL);
-
-                    for (MediaController aController : sessions) {
-                        if (PlaybackState.STATE_PLAYING ==
-                                getMediaControllerPlaybackState(aController)) {
-                            // now to see if we have one like this
-                            final String pkg = aController.getPackageName();
-
-                            for (int i = 0; i < N; i++) {
-                                final Entry entry = activeNotifications.get(i);
-                                if (entry.notification.getPackageName().equals(pkg)) {
-                                    if (DEBUG_MEDIA) {
-                                        Log.v(TAG, "DEBUG_MEDIA: found controller matching "
-                                                + entry.notification.getKey());
-                                    }
-                                    controller = aController;
-                                    mediaNotification = entry;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            if (controller != null && !sameSessions(mMediaController, controller)) {
-                // We have a new media session
-                clearCurrentMediaNotification();
-                mMediaController = controller;
-                mMediaController.registerCallback(mMediaListener);
-                mMediaMetadata = mMediaController.getMetadata();
-                if (DEBUG_MEDIA) {
-                    Log.v(TAG, "DEBUG_MEDIA: insert listener, receive metadata: "
-                            + mMediaMetadata);
-                }
-
-                if (mediaNotification != null) {
-                    mMediaNotificationKey = mediaNotification.notification.getKey();
-                    if (DEBUG_MEDIA) {
-                        Log.v(TAG, "DEBUG_MEDIA: Found new media notification: key="
-                                + mMediaNotificationKey + " controller=" + mMediaController);
-                    }
-                }
-                metaDataChanged = true;
-            }
-        }
-
-        if (metaDataChanged) {
-            updateNotifications();
-        }
-        updateMediaMetaData(metaDataChanged, true);
-    }
-
-    private int getMediaControllerPlaybackState(MediaController controller) {
-        if (controller != null) {
-            final PlaybackState playbackState = controller.getPlaybackState();
-            if (playbackState != null) {
-                return playbackState.getState();
-            }
-        }
-        return PlaybackState.STATE_NONE;
-    }
-
-    private boolean isPlaybackActive(int state) {
-        return state != PlaybackState.STATE_STOPPED && state != PlaybackState.STATE_ERROR
-                && state != PlaybackState.STATE_NONE;
-    }
-
-    private void clearCurrentMediaNotification() {
-        mMediaNotificationKey = null;
-        mMediaMetadata = null;
-        if (mMediaController != null) {
-            if (DEBUG_MEDIA) {
-                Log.v(TAG, "DEBUG_MEDIA: Disconnecting from old controller: "
-                        + mMediaController.getPackageName());
-            }
-            mMediaController.unregisterCallback(mMediaListener);
-        }
-        mMediaController = null;
-    }
-
-    private boolean sameSessions(MediaController a, MediaController b) {
-        if (a == b) return true;
-        if (a == null) return false;
-        return a.controlsSameSession(b);
-    }
 
     /**
      * Hide the album artwork that is fading out and release its bitmap.
@@ -2320,9 +2163,11 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
     };
 
+    // TODO: Move this to NotificationMediaManager.
     /**
      * Refresh or remove lockscreen artwork from media metadata or the lockscreen wallpaper.
      */
+    @Override
     public void updateMediaMetaData(boolean metaDataChanged, boolean allowEnterAnimation) {
         Trace.beginSection("StatusBar#updateMediaMetaData");
         if (!SHOW_LOCKSCREEN_MEDIA_ARTWORK) {
@@ -2341,19 +2186,22 @@ public class StatusBar extends SystemUI implements DemoMode,
             return;
         }
 
+        MediaMetadata mediaMetadata = mMediaManager.getMediaMetadata();
+
         if (DEBUG_MEDIA) {
-            Log.v(TAG, "DEBUG_MEDIA: updating album art for notification " + mMediaNotificationKey
-                    + " metadata=" + mMediaMetadata
+            Log.v(TAG, "DEBUG_MEDIA: updating album art for notification "
+                    + mMediaManager.getMediaNotificationKey()
+                    + " metadata=" + mediaMetadata
                     + " metaDataChanged=" + metaDataChanged
                     + " state=" + mState);
         }
 
         Drawable artworkDrawable = null;
-        if (mMediaMetadata != null) {
+        if (mediaMetadata != null) {
             Bitmap artworkBitmap = null;
-            artworkBitmap = mMediaMetadata.getBitmap(MediaMetadata.METADATA_KEY_ART);
+            artworkBitmap = mediaMetadata.getBitmap(MediaMetadata.METADATA_KEY_ART);
             if (artworkBitmap == null) {
-                artworkBitmap = mMediaMetadata.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART);
+                artworkBitmap = mediaMetadata.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART);
                 // might still be null
             }
             if (artworkBitmap != null) {
@@ -2626,7 +2474,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     @Override  // NotificationData.Environment
     public String getCurrentMediaNotificationKey() {
-        return mMediaNotificationKey;
+        return mMediaManager.getMediaNotificationKey();
     }
 
     public boolean isScrimSrcModeEnabled() {
@@ -3447,22 +3295,10 @@ public class StatusBar extends SystemUI implements DemoMode,
             dumpBarTransitions(pw, "mStatusBarView", mStatusBarView.getBarTransitions());
         }
 
-        pw.print("  mMediaSessionManager=");
-        pw.println(mMediaSessionManager);
-        pw.print("  mMediaNotificationKey=");
-        pw.println(mMediaNotificationKey);
-        pw.print("  mMediaController=");
-        pw.print(mMediaController);
-        if (mMediaController != null) {
-            pw.print(" state=" + mMediaController.getPlaybackState());
+        pw.println("  mMediaManager: ");
+        if (mMediaManager != null) {
+            mMediaManager.dump(fd, pw, args);
         }
-        pw.println();
-        pw.print("  mMediaMetadata=");
-        pw.print(mMediaMetadata);
-        if (mMediaMetadata != null) {
-            pw.print(" title=" + mMediaMetadata.getText(MediaMetadata.METADATA_KEY_TITLE));
-        }
-        pw.println();
 
         pw.println("  Panels: ");
         if (mNotificationPanel != null) {
@@ -3784,7 +3620,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             mReinflateNotificationsOnUserSwitched = false;
         }
         updateNotificationShade();
-        clearCurrentMediaNotification();
+        mMediaManager.clearCurrentMediaNotification();
         setLockscreenUser(newUserId);
     }
 
@@ -6134,13 +5970,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         return mGroupManager;
     }
 
-    public boolean isMediaNotification(NotificationData.Entry entry) {
-        // TODO: confirm that there's a valid media key
-        return entry.getExpandedContentView() != null &&
-               entry.getExpandedContentView()
-                       .findViewById(com.android.internal.R.id.media_actions) != null;
-    }
-
     @Override
     public void startNotificationGutsIntent(final Intent intent, final int appUid) {
         dismissKeyguardThenExecute(() -> {
@@ -7121,6 +6950,11 @@ public class StatusBar extends SystemUI implements DemoMode,
     @Override
     public int getCurrentUserId() {
         return mCurrentUserId;
+    }
+
+    @Override
+    public NotificationData getNotificationData() {
+        return mNotificationData;
     }
 
     @Override

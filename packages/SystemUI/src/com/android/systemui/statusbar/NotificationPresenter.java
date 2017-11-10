@@ -49,6 +49,22 @@ public interface NotificationPresenter {
      */
     void startNotificationGutsIntent(Intent intent, int appUid);
 
+    /**
+     * Returns NotificationData.
+     */
+    NotificationData getNotificationData();
+
+    // TODO: Create NotificationEntryManager and move this method to there.
+    /**
+     * Signals that some notifications have changed, and NotificationPresenter should update itself.
+     */
+    void updateNotifications();
+
+    /**
+     * Refresh or remove lockscreen artwork from media metadata or the lockscreen wallpaper.
+     */
+    void updateMediaMetaData(boolean metaDataChanged, boolean allowEnterAnimation);
+
     // TODO: Create NotificationUpdateHandler and move this method to there.
     /**
      * Removes a notification.
