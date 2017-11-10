@@ -527,8 +527,7 @@ public final class PowerManager {
             ServiceType.SOUND,
             ServiceType.BATTERY_STATS,
             ServiceType.DATA_SAVER,
-            ServiceType.FORCE_ALL_APPS_STANDBY_JOBS,
-            ServiceType.FORCE_ALL_APPS_STANDBY_ALARMS,
+            ServiceType.FORCE_ALL_APPS_STANDBY,
             ServiceType.OPTIONAL_SENSORS,
     })
     public @interface ServiceType {
@@ -545,14 +544,9 @@ public final class PowerManager {
         int DATA_SAVER = 10;
 
         /**
-         * Whether the job scheduler should force app standby on all apps on battery saver or not.
+         * Whether to enable force-app-standby on all apps or not.
          */
-        int FORCE_ALL_APPS_STANDBY_JOBS = 11;
-
-        /**
-         * Whether the alarm manager should force app standby on all apps on battery saver or not.
-         */
-        int FORCE_ALL_APPS_STANDBY_ALARMS = 12;
+        int FORCE_ALL_APPS_STANDBY = 11;
 
         /**
          * Whether to disable non-essential sensors. (e.g. edge sensors.)

@@ -37,7 +37,6 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
-import android.provider.Settings;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.LargeTest;
 import android.support.test.runner.AndroidJUnit4;
@@ -57,10 +56,10 @@ import org.junit.runner.RunWith;
  * To run this test from root of checkout:
  * <pre>
  *  mmm -j32 frameworks/base/services/tests/servicestests/
- *  adb install out/target/product/marlin/data/app/JobTestApp/JobTestApp.apk
- *  adb install out/target/product/marlin/data/app/FrameworksServicesTests/FrameworksServicesTests.apk
+ *  adb install -r $OUT/data/app/JobTestApp/JobTestApp.apk
+ *  adb install -r $OUT/data/app/FrameworksServicesTests/FrameworksServicesTests.apk
  *  adb  shell am instrument -e class 'com.android.server.job.BackgroundRestrictionsTest' -w \
- *  'com.android.frameworks.servicestests/android.support.test.runner.AndroidJUnitRunner'
+    com.android.frameworks.servicestests
  * </pre>
  */
 @RunWith(AndroidJUnit4.class)
