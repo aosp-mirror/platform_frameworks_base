@@ -24,15 +24,16 @@ namespace aapt {
 
 TEST(UtilTest, SplitNamesAreSanitized) {
     AppInfo app_info{"com.pkg"};
-    SplitConstraints split_constraints{{test::ParseConfigOrDie("en-rUS-land")}};
+    SplitConstraints split_constraints{
+        {test::ParseConfigOrDie("en-rUS-land"), test::ParseConfigOrDie("b+sr+Latn")}};
 
     const auto doc = GenerateSplitManifest(app_info, split_constraints);
     const auto &root = doc->root;
     EXPECT_EQ(root->name, "manifest");
-    // split names cannot contain hyphens
-    EXPECT_EQ(root->FindAttribute("", "split")->value, "config.en_rUS_land");
+    // split names cannot contain hyphens or plus signs.
+    EXPECT_EQ(root->FindAttribute("", "split")->value, "config.b_sr_Latn_en_rUS_land");
     // but we should use resource qualifiers verbatim in 'targetConfig'.
-    EXPECT_EQ(root->FindAttribute("", "targetConfig")->value, "en-rUS-land");
+    EXPECT_EQ(root->FindAttribute("", "targetConfig")->value, "b+sr+Latn,en-rUS-land");
 }
 
 }  // namespace aapt
