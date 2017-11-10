@@ -50,24 +50,4 @@ public class RecentsActivityLaunchState {
         launchedViaDragGesture = false;
         launchedViaDockGesture = false;
     }
-
-    /**
-     * Returns the task to focus given the current launch state.
-     */
-    public int getInitialFocusTaskIndex(int numTasks, boolean useGridLayout) {
-        RecentsDebugFlags debugFlags = Recents.getDebugFlags();
-        RecentsActivityLaunchState launchState = Recents.getConfiguration().getLaunchState();
-        if (launchedFromApp) {
-            if (useGridLayout) {
-                // If coming from another app to the grid layout, focus the front most task
-                return numTasks - 1;
-            }
-
-            // If coming from another app, focus the next task
-            return Math.max(0, numTasks - 2);
-        } else {
-            // If coming from home, focus the front most task
-            return numTasks - 1;
-        }
-    }
 }

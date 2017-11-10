@@ -446,7 +446,7 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
         TaskView tv = (TaskView) v;
         Task task = tv.getTask();
         return !mSwipeHelperAnimations.containsKey(v) &&
-                (mSv.getStack().indexOfStackTask(task) != -1);
+                (mSv.getStack().indexOfTask(task) != -1);
     }
 
     /**
@@ -476,7 +476,7 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
         mSv.addIgnoreTask(tv.getTask());
 
         // Determine if we are animating the other tasks while dismissing this task
-        mCurrentTasks = new ArrayList<Task>(mSv.getStack().getStackTasks());
+        mCurrentTasks = new ArrayList<Task>(mSv.getStack().getTasks());
         MutableBoolean isFrontMostTask = new MutableBoolean(false);
         Task anchorTask = mSv.findAnchorTask(mCurrentTasks, isFrontMostTask);
         TaskStackLayoutAlgorithm layoutAlgorithm = mSv.getStackAlgorithm();
@@ -673,7 +673,7 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
 
     /** Returns the view at the specified coordinates */
     private TaskView findViewAtPoint(int x, int y) {
-        List<Task> tasks = mSv.getStack().getStackTasks();
+        List<Task> tasks = mSv.getStack().getTasks();
         int taskCount = tasks.size();
         for (int i = taskCount - 1; i >= 0; i--) {
             TaskView tv = mSv.getChildViewForTask(tasks.get(i));

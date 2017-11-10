@@ -55,6 +55,7 @@ import com.android.systemui.shared.recents.utilities.AnimationProps;
 import com.android.systemui.shared.recents.utilities.Utilities;
 import com.android.systemui.shared.recents.model.Task;
 import com.android.systemui.shared.recents.model.ThumbnailData;
+import com.android.systemui.shared.recents.view.AnimateableViewBounds;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -683,7 +684,7 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
         }
         SystemServicesProxy ssp = Recents.getSystemServices();
         boolean inBounds = false;
-        Rect clipBounds = new Rect(mViewBounds.mClipBounds);
+        Rect clipBounds = new Rect(mViewBounds.getClipBounds());
         if (!clipBounds.isEmpty()) {
             // If we are clipping the view to the bounds, manually do the hit test.
             clipBounds.scale(getScaleX());

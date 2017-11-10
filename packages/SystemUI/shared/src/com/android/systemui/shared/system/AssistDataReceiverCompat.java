@@ -16,14 +16,13 @@
 
 package com.android.systemui.shared.system;
 
-import android.app.IAssistDataReceiver;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 
 /**
  * Abstract class for assist data receivers.
  */
-public abstract class AssistDataReceiver extends IAssistDataReceiver.Stub {
+public abstract class AssistDataReceiverCompat {
     public abstract void onHandleAssistData(Bundle resultData);
     public abstract void onHandleAssistScreenshot(Bitmap screenshot);
 }

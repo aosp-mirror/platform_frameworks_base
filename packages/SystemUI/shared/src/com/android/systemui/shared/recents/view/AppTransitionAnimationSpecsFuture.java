@@ -32,10 +32,10 @@ import java.util.concurrent.FutureTask;
 public abstract class AppTransitionAnimationSpecsFuture {
 
     private final Handler mHandler;
-    private FutureTask<List<AppTransitionAnimationSpec>> mComposeTask = new FutureTask<>(
-            new Callable<List<AppTransitionAnimationSpec>>() {
+    private FutureTask<List<AppTransitionAnimationSpecCompat>> mComposeTask = new FutureTask<>(
+            new Callable<List<AppTransitionAnimationSpecCompat>>() {
                 @Override
-                public List<AppTransitionAnimationSpec> call() throws Exception {
+                public List<AppTransitionAnimationSpecCompat> call() throws Exception {
                     return composeSpecs();
                 }
             });
@@ -48,13 +48,15 @@ public abstract class AppTransitionAnimationSpecsFuture {
                 if (!mComposeTask.isDone()) {
                     mHandler.post(mComposeTask);
                 }
-                List<AppTransitionAnimationSpec> specs = mComposeTask.get();
+                List<AppTransitionAnimationSpecCompat> specs = mComposeTask.get();
                 if (specs == null) {
                     return null;
                 }
 
                 AppTransitionAnimationSpec[] arr = new AppTransitionAnimationSpec[specs.size()];
-                specs.toArray(arr);
+                for (int i = 0; i < specs.size(); i++) {
+                    arr[i] = specs.get(i).toAppTransitionAnimationSpec();
+                }
                 return arr;
             } catch (Exception e) {
                 return null;
@@ -83,5 +85,5 @@ public abstract class AppTransitionAnimationSpecsFuture {
         mComposeTask.run();
     }
 
-    public abstract List<AppTransitionAnimationSpec> composeSpecs();
+    public abstract List<AppTransitionAnimationSpecCompat> composeSpecs();
 }

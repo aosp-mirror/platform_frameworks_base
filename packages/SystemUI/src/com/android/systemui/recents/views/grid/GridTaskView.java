@@ -19,7 +19,7 @@ package com.android.systemui.recents.views.grid;
 import android.content.Context;
 import android.util.AttributeSet;
 import com.android.systemui.R;
-import com.android.systemui.recents.views.AnimateableViewBounds;
+import com.android.systemui.shared.recents.view.AnimateableViewBounds;
 import com.android.systemui.recents.views.TaskView;
 
 public class GridTaskView extends TaskView {

@@ -114,7 +114,6 @@ public class SystemServicesProxy {
     UserManager mUm;
     Display mDisplay;
     String mRecentsPackage;
-    private TaskStackChangeListeners mTaskStackChangeListeners;
     private int mCurrentUserId;
 
     boolean mIsSafeMode;
@@ -156,7 +155,6 @@ public class SystemServicesProxy {
         mRecentsPackage = context.getPackageName();
         mIsSafeMode = mPm.isSafeMode();
         mCurrentUserId = mAm.getCurrentUser();
-        mTaskStackChangeListeners = new TaskStackChangeListeners(Looper.getMainLooper());
 
         // Get the dummy thumbnail width/heights
         Resources res = context.getResources();
@@ -491,18 +489,6 @@ public class SystemServicesProxy {
                     opts == null ? null : opts.toBundle());
         } catch (Exception e) {
             e.printStackTrace();
-        }
-    }
-
-    /**
-     * Registers a task stack listener with the system.
-     * This should be called on the main thread.
-     */
-    public void registerTaskStackListener(SysUiTaskStackChangeListener listener) {
-        if (mIam == null) return;
-
-        synchronized (mTaskStackChangeListeners) {
-            mTaskStackChangeListeners.addListener(mIam, listener);
         }
     }
 

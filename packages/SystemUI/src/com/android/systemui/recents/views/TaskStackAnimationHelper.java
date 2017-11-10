@@ -449,7 +449,7 @@ public class TaskStackAnimationHelper {
 
         // Get the current set of task transforms
         int taskViewCount = mStackView.getTaskViews().size();
-        ArrayList<Task> stackTasks = stack.getStackTasks();
+        ArrayList<Task> stackTasks = stack.getTasks();
         mStackView.getCurrentTaskTransforms(stackTasks, mTmpCurrentTaskTransforms);
 
         // Pick up the newly visible views after the scroll
@@ -541,7 +541,7 @@ public class TaskStackAnimationHelper {
         TaskStackViewScroller stackScroller = mStackView.getScroller();
 
         // Get the current set of task transforms
-        ArrayList<Task> stackTasks = newStack.getStackTasks();
+        ArrayList<Task> stackTasks = newStack.getTasks();
         mStackView.getCurrentTaskTransforms(stackTasks, mTmpCurrentTaskTransforms);
 
         // Update the stack
@@ -563,7 +563,7 @@ public class TaskStackAnimationHelper {
                 false /* ignoreTaskOverrides */, mTmpFinalTaskTransforms);
 
         // Hide the front most task view until the scroll is complete
-        Task frontMostTask = newStack.getStackFrontMostTask();
+        Task frontMostTask = newStack.getFrontMostTask();
         final TaskView frontMostTaskView = mStackView.getChildViewForTask(frontMostTask);
         final TaskViewTransform frontMostTransform = mTmpFinalTaskTransforms.get(
                 stackTasks.indexOf(frontMostTask));

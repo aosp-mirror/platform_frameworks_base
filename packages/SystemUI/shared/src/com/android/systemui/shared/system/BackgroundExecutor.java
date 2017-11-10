@@ -42,4 +42,12 @@ public class BackgroundExecutor {
     public Future<?> submit(Runnable runnable) {
         return mExecutorService.submit(runnable);
     }
+
+    /**
+     * Runs the given {@param runnable} on one of the background executor threads. Return
+     * {@param result} when the future is resolved.
+     */
+    public <T> Future<T> submit(Runnable runnable, T result) {
+        return mExecutorService.submit(runnable, result);
+    }
 }

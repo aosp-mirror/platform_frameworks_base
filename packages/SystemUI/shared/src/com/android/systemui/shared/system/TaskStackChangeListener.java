@@ -20,6 +20,8 @@ import android.app.ActivityManager.TaskSnapshot;
 import android.os.UserHandle;
 import android.util.Log;
 
+import com.android.systemui.shared.recents.model.ThumbnailData;
+
 /**
  * An interface to track task stack changes. Classes should implement this instead of
  * {@link android.app.ITaskStackListener} to reduce IPC calls from system services.
@@ -31,7 +33,7 @@ public abstract class TaskStackChangeListener {
 
     // Main thread callbacks
     public void onTaskStackChanged() { }
-    public void onTaskSnapshotChanged(int taskId, TaskSnapshot snapshot) { }
+    public void onTaskSnapshotChanged(int taskId, ThumbnailData snapshot) { }
     public void onActivityPinned(String packageName, int userId, int taskId, int stackId) { }
     public void onActivityUnpinned() { }
     public void onPinnedActivityRestartAttempt(boolean clearedTask) { }

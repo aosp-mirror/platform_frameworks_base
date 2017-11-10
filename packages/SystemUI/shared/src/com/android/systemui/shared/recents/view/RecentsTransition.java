@@ -42,7 +42,7 @@ public class RecentsTransition {
      */
     public static ActivityOptions createAspectScaleAnimation(Context context, Handler handler,
             boolean scaleUp, AppTransitionAnimationSpecsFuture animationSpecsFuture,
-            final OnAnimationStartedListener animationStartCallback) {
+            final Runnable animationStartCallback) {
         final OnAnimationStartedListener animStartedListener = new OnAnimationStartedListener() {
             private boolean mHandled;
 
@@ -56,7 +56,7 @@ public class RecentsTransition {
                 mHandled = true;
 
                 if (animationStartCallback != null) {
-                    animationStartCallback.onAnimationStarted();
+                    animationStartCallback.run();
                 }
             }
         };
@@ -71,19 +71,14 @@ public class RecentsTransition {
      * Wraps a animation-start callback in a binder that can be called from window manager.
      */
     public static IRemoteCallback wrapStartedListener(final Handler handler,
-            final OnAnimationStartedListener listener) {
-        if (listener == null) {
+            final Runnable animationStartCallback) {
+        if (animationStartCallback == null) {
             return null;
         }
         return new IRemoteCallback.Stub() {
             @Override
             public void sendResult(Bundle data) throws RemoteException {
-                handler.post(new Runnable() {
-                                 @Override
-                                 public void run() {
-                                     listener.onAnimationStarted();
-                                 }
-                             });
+                handler.post(animationStartCallback);
             }
         };
     }
@@ -92,9 +87,9 @@ public class RecentsTransition {
      * @return a {@link GraphicBuffer} with the {@param view} drawn into it. Result can be null if
      *         we were unable to allocate a hardware bitmap.
      */
-    public static GraphicBuffer drawViewIntoGraphicBuffer(int width, int height, final View view,
+    public static Bitmap drawViewIntoHardwareBitmap(int width, int height, final View view,
             final float scale, final int eraseColor) {
-        final Bitmap hwBitmap = createHardwareBitmap(width, height, new Consumer<Canvas>() {
+        return createHardwareBitmap(width, height, new Consumer<Canvas>() {
             @Override
             public void accept(Canvas c) {
                 c.scale(scale, scale);
@@ -106,7 +101,6 @@ public class RecentsTransition {
                 }
             }
         });
-        return hwBitmap != null ? hwBitmap.createGraphicBufferHandle() : null;
     }
 
     /**
