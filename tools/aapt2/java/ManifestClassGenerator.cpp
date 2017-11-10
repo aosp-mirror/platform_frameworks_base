@@ -21,24 +21,21 @@
 #include "Source.h"
 #include "java/AnnotationProcessor.h"
 #include "java/ClassDefinition.h"
+#include "text/Unicode.h"
 #include "util/Maybe.h"
 #include "xml/XmlDom.h"
 
 using android::StringPiece;
+using ::aapt::text::IsJavaIdentifier;
 
 namespace aapt {
 
-static Maybe<StringPiece> ExtractJavaIdentifier(IDiagnostics* diag,
-                                                const Source& source,
-                                                const StringPiece& value) {
-  const StringPiece sep = ".";
-  auto iter = std::find_end(value.begin(), value.end(), sep.begin(), sep.end());
-
-  StringPiece result;
-  if (iter != value.end()) {
-    result.assign(iter + sep.size(), value.end() - (iter + sep.size()));
-  } else {
-    result = value;
+static Maybe<StringPiece> ExtractJavaIdentifier(IDiagnostics* diag, const Source& source,
+                                                const std::string& value) {
+  StringPiece result = value;
+  size_t pos = value.rfind('.');
+  if (pos != std::string::npos) {
+    result = result.substr(pos + 1);
   }
 
   if (result.empty()) {
@@ -46,19 +43,10 @@ static Maybe<StringPiece> ExtractJavaIdentifier(IDiagnostics* diag,
     return {};
   }
 
-  iter = util::FindNonAlphaNumericAndNotInSet(result, "_");
-  if (iter != result.end()) {
-    diag->Error(DiagMessage(source) << "invalid character '"
-                                    << StringPiece(iter, 1) << "' in '"
-                                    << result << "'");
+  if (!IsJavaIdentifier(result)) {
+    diag->Error(DiagMessage(source) << "invalid Java identifier '" << result << "'");
     return {};
   }
-
-  if (*result.begin() >= '0' && *result.begin() <= '9') {
-    diag->Error(DiagMessage(source) << "symbol can not start with a digit");
-    return {};
-  }
-
   return result;
 }
 

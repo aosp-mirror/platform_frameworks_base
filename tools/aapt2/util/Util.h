@@ -53,48 +53,40 @@ struct Range {
 std::vector<std::string> Split(const android::StringPiece& str, char sep);
 std::vector<std::string> SplitAndLowercase(const android::StringPiece& str, char sep);
 
-/**
- * Returns true if the string starts with prefix.
- */
+// Returns true if the string starts with prefix.
 bool StartsWith(const android::StringPiece& str, const android::StringPiece& prefix);
 
-/**
- * Returns true if the string ends with suffix.
- */
+// Returns true if the string ends with suffix.
 bool EndsWith(const android::StringPiece& str, const android::StringPiece& suffix);
 
-/**
- * Creates a new StringPiece16 that points to a substring
- * of the original string without leading or trailing whitespace.
- */
+// Creates a new StringPiece16 that points to a substring of the original string without leading or
+// trailing whitespace.
 android::StringPiece TrimWhitespace(const android::StringPiece& str);
 
-/**
- * Returns an iterator to the first character that is not alpha-numeric and that
- * is not in the allowedChars set.
- */
-android::StringPiece::const_iterator FindNonAlphaNumericAndNotInSet(
-    const android::StringPiece& str, const android::StringPiece& allowed_chars);
-
-/**
- * Tests that the string is a valid Java class name.
- */
+// Tests that the string is a valid Java class name.
 bool IsJavaClassName(const android::StringPiece& str);
 
-/**
- * Tests that the string is a valid Java package name.
- */
+// Tests that the string is a valid Java package name.
 bool IsJavaPackageName(const android::StringPiece& str);
 
-/**
- * Converts the class name to a fully qualified class name from the given
- * `package`. Ex:
- *
- * asdf         --> package.asdf
- * .asdf        --> package.asdf
- * .a.b         --> package.a.b
- * asdf.adsf    --> asdf.adsf
- */
+// Tests that the string is a valid Android package name. More strict than a Java package name.
+// - First character of each component (separated by '.') must be an ASCII letter.
+// - Subsequent characters of a component can be ASCII alphanumeric or an underscore.
+// - Package must contain at least two components, unless it is 'android'.
+bool IsAndroidPackageName(const android::StringPiece& str);
+
+// Tests that the string is a valid Android split name.
+// - First character of each component (separated by '.') must be an ASCII letter.
+// - Subsequent characters of a component can be ASCII alphanumeric or an underscore.
+bool IsAndroidSplitName(const android::StringPiece& str);
+
+// Converts the class name to a fully qualified class name from the given
+// `package`. Ex:
+//
+// asdf         --> package.asdf
+// .asdf        --> package.asdf
+// .a.b         --> package.a.b
+// asdf.adsf    --> asdf.adsf
 Maybe<std::string> GetFullyQualifiedClassName(const android::StringPiece& package,
                                               const android::StringPiece& class_name);
 
@@ -108,23 +100,17 @@ typename std::enable_if<std::is_arithmetic<T>::value, int>::type compare(const T
   return 0;
 }
 
-/**
- * Makes a std::unique_ptr<> with the template parameter inferred by the compiler.
- * This will be present in C++14 and can be removed then.
- */
+// Makes a std::unique_ptr<> with the template parameter inferred by the compiler.
+// This will be present in C++14 and can be removed then.
 template <typename T, class... Args>
 std::unique_ptr<T> make_unique(Args&&... args) {
   return std::unique_ptr<T>(new T{std::forward<Args>(args)...});
 }
 
-/**
- * Writes a set of items to the std::ostream, joining the times with the
- * provided
- * separator.
- */
+// Writes a set of items to the std::ostream, joining the times with the provided separator.
 template <typename Container>
-::std::function<::std::ostream&(::std::ostream&)> Joiner(
-    const Container& container, const char* sep) {
+::std::function<::std::ostream&(::std::ostream&)> Joiner(const Container& container,
+                                                         const char* sep) {
   using std::begin;
   using std::end;
   const auto begin_iter = begin(container);
@@ -140,32 +126,19 @@ template <typename Container>
   };
 }
 
-/**
- * Helper method to extract a UTF-16 string from a StringPool. If the string is
- * stored as UTF-8,
- * the conversion to UTF-16 happens within ResStringPool.
- */
+// Helper method to extract a UTF-16 string from a StringPool. If the string is stored as UTF-8,
+// the conversion to UTF-16 happens within ResStringPool.
 android::StringPiece16 GetString16(const android::ResStringPool& pool, size_t idx);
 
-/**
- * Helper method to extract a UTF-8 string from a StringPool. If the string is
- * stored as UTF-16,
- * the conversion from UTF-16 to UTF-8 does not happen in ResStringPool and is
- * done by this method,
- * which maintains no state or cache. This means we must return an std::string
- * copy.
- */
+// Helper method to extract a UTF-8 string from a StringPool. If the string is stored as UTF-16,
+// the conversion from UTF-16 to UTF-8 does not happen in ResStringPool and is done by this method,
+// which maintains no state or cache. This means we must return an std::string copy.
 std::string GetString(const android::ResStringPool& pool, size_t idx);
 
-/**
- * Checks that the Java string format contains no non-positional arguments
- * (arguments without
- * explicitly specifying an index) when there are more than one argument. This
- * is an error
- * because translations may rearrange the order of the arguments in the string,
- * which will
- * break the string interpolation.
- */
+// Checks that the Java string format contains no non-positional arguments (arguments without
+// explicitly specifying an index) when there are more than one argument. This is an error
+// because translations may rearrange the order of the arguments in the string, which will
+// break the string interpolation.
 bool VerifyJavaStringFormat(const android::StringPiece& str);
 
 class StringBuilder {
@@ -194,36 +167,38 @@ class StringBuilder {
   std::string error_;
 };
 
-inline const std::string& StringBuilder::ToString() const { return str_; }
+inline const std::string& StringBuilder::ToString() const {
+  return str_;
+}
 
-inline const std::string& StringBuilder::Error() const { return error_; }
+inline const std::string& StringBuilder::Error() const {
+  return error_;
+}
 
-inline bool StringBuilder::IsEmpty() const { return str_.empty(); }
+inline bool StringBuilder::IsEmpty() const {
+  return str_.empty();
+}
 
-inline size_t StringBuilder::Utf16Len() const { return utf16_len_; }
+inline size_t StringBuilder::Utf16Len() const {
+  return utf16_len_;
+}
 
-inline StringBuilder::operator bool() const { return error_.empty(); }
+inline StringBuilder::operator bool() const {
+  return error_.empty();
+}
 
-/**
- * Converts a UTF8 string to a UTF16 string.
- */
+// Converts a UTF8 string to a UTF16 string.
 std::u16string Utf8ToUtf16(const android::StringPiece& utf8);
 std::string Utf16ToUtf8(const android::StringPiece16& utf16);
 
-/**
- * Writes the entire BigBuffer to the output stream.
- */
+// Writes the entire BigBuffer to the output stream.
 bool WriteAll(std::ostream& out, const BigBuffer& buffer);
 
-/*
- * Copies the entire BigBuffer into a single buffer.
- */
+// Copies the entire BigBuffer into a single buffer.
 std::unique_ptr<uint8_t[]> Copy(const BigBuffer& buffer);
 
-/**
- * A Tokenizer implemented as an iterable collection. It does not allocate
- * any memory on the heap nor use standard containers.
- */
+// A Tokenizer implemented as an iterable collection. It does not allocate any memory on the heap
+// nor use standard containers.
 class Tokenizer {
  public:
   class iterator {
@@ -269,38 +244,42 @@ class Tokenizer {
   const iterator end_;
 };
 
-inline Tokenizer Tokenize(const android::StringPiece& str, char sep) { return Tokenizer(str, sep); }
+inline Tokenizer Tokenize(const android::StringPiece& str, char sep) {
+  return Tokenizer(str, sep);
+}
 
-inline uint16_t HostToDevice16(uint16_t value) { return htods(value); }
+inline uint16_t HostToDevice16(uint16_t value) {
+  return htods(value);
+}
 
-inline uint32_t HostToDevice32(uint32_t value) { return htodl(value); }
+inline uint32_t HostToDevice32(uint32_t value) {
+  return htodl(value);
+}
 
-inline uint16_t DeviceToHost16(uint16_t value) { return dtohs(value); }
+inline uint16_t DeviceToHost16(uint16_t value) {
+  return dtohs(value);
+}
 
-inline uint32_t DeviceToHost32(uint32_t value) { return dtohl(value); }
+inline uint32_t DeviceToHost32(uint32_t value) {
+  return dtohl(value);
+}
 
-/**
- * Given a path like: res/xml-sw600dp/foo.xml
- *
- * Extracts "res/xml-sw600dp/" into outPrefix.
- * Extracts "foo" into outEntry.
- * Extracts ".xml" into outSuffix.
- *
- * Returns true if successful.
- */
+// Given a path like: res/xml-sw600dp/foo.xml
+//
+// Extracts "res/xml-sw600dp/" into outPrefix.
+// Extracts "foo" into outEntry.
+// Extracts ".xml" into outSuffix.
+//
+// Returns true if successful.
 bool ExtractResFilePathParts(const android::StringPiece& path, android::StringPiece* out_prefix,
                              android::StringPiece* out_entry, android::StringPiece* out_suffix);
 
 }  // namespace util
 
-/**
- * Stream operator for functions. Calls the function with the stream as an
- * argument.
- * In the aapt namespace for lookup.
- */
-inline ::std::ostream& operator<<(
-    ::std::ostream& out,
-    const ::std::function<::std::ostream&(::std::ostream&)>& f) {
+// Stream operator for functions. Calls the function with the stream as an argument.
+// In the aapt namespace for lookup.
+inline ::std::ostream& operator<<(::std::ostream& out,
+                                  const ::std::function<::std::ostream&(::std::ostream&)>& f) {
   return f(out);
 }
 
