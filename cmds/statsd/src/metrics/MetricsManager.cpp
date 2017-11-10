@@ -80,8 +80,6 @@ void MetricsManager::onLogEvent(const LogEvent& event) {
         return;
     }
 
-    // Since at least one of the metrics is interested in this event, we parse it now.
-    ALOGD("%s", event.ToString().c_str());
     vector<MatchingState> matcherCache(mAllLogEntryMatchers.size(), MatchingState::kNotComputed);
 
     for (auto& matcher : mAllLogEntryMatchers) {
