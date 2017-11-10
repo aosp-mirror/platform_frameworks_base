@@ -23,6 +23,7 @@
 
 #include "android-base/logging.h"
 #include "android-base/macros.h"
+#include "android-base/stringprintf.h"
 
 #include "ResourceTable.h"
 #include "ResourceValues.h"
@@ -579,7 +580,15 @@ bool TableFlattener::Consume(IAaptContext* context, ResourceTable* table) {
       // Write a self mapping entry for this package if the ID is non-standard (0x7f).
       const uint8_t package_id = package->id.value();
       if (package_id != kFrameworkPackageId && package_id != kAppPackageId) {
-        table->included_packages_[package_id] = package->name;
+        auto result = table->included_packages_.insert({package_id, package->name});
+        if (!result.second && result.first->second != package->name) {
+          // A mapping for this package ID already exists, and is a different package. Error!
+          context->GetDiagnostics()->Error(
+              DiagMessage() << android::base::StringPrintf(
+                  "can't map package ID %02x to '%s'. Already mapped to '%s'", package_id,
+                  package->name.c_str(), result.first->second.c_str()));
+          return false;
+        }
       }
     }
 
