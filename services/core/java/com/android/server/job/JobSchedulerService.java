@@ -19,24 +19,15 @@ package com.android.server.job;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER;
 
-import java.io.FileDescriptor;
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.List;
-
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.AppGlobals;
 import android.app.IUidObserver;
+import android.app.job.IJobScheduler;
 import android.app.job.JobInfo;
 import android.app.job.JobParameters;
 import android.app.job.JobScheduler;
 import android.app.job.JobService;
-import android.app.job.IJobScheduler;
 import android.app.job.JobWorkItem;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -46,8 +37,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
-import android.content.pm.ServiceInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.ServiceInfo;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.BatteryStats;
@@ -55,8 +46,8 @@ import android.os.Binder;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.os.Process;
 import android.os.PowerManager;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
@@ -71,6 +62,7 @@ import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.util.TimeUtils;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.app.procstats.ProcessStats;
 import com.android.internal.util.ArrayUtils;
@@ -92,6 +84,16 @@ import com.android.server.job.controllers.StorageController;
 import com.android.server.job.controllers.TimeController;
 
 import libcore.util.EmptyArray;
+
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+import java.time.Clock;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * Responsible for taking jobs representing work to be performed by a client app, and determining
@@ -117,6 +119,12 @@ public final class JobSchedulerService extends com.android.server.SystemService
     /** The maximum number of jobs that we allow an unprivileged app to schedule */
     private static final int MAX_JOBS_PER_APP = 100;
 
+    @VisibleForTesting
+    public static Clock sSystemClock = Clock.systemUTC();
+    @VisibleForTesting
+    public static Clock sUptimeMillisClock = SystemClock.uptimeMillisClock();
+    @VisibleForTesting
+    public static Clock sElapsedRealtimeClock = SystemClock.elapsedRealtimeClock();
 
     /** Global local for all job scheduler state. */
     final Object mLock = new Object();
@@ -960,7 +968,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
             if (Intent.ACTION_TIME_CHANGED.equals(intent.getAction())) {
                 // When we reach clock sanity, recalculate the temporal windows
                 // of all affected jobs.
-                if (mJobs.clockNowValidToInflate(System.currentTimeMillis())) {
+                if (mJobs.clockNowValidToInflate(sSystemClock.millis())) {
                     Slog.i(TAG, "RTC now valid; recalculating persisted job windows");
 
                     // We've done our job now, so stop watching the time.
@@ -1068,7 +1076,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
         if (!jobStatus.isPreparedLocked()) {
             Slog.wtf(TAG, "Not yet prepared when started tracking: " + jobStatus);
         }
-        jobStatus.enqueueTime = SystemClock.elapsedRealtime();
+        jobStatus.enqueueTime = sElapsedRealtimeClock.millis();
         final boolean update = mJobs.add(jobStatus);
         if (mReadyToRock) {
             for (int i = 0; i < mControllers.size(); i++) {
@@ -1156,7 +1164,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
      * @see #maybeQueueReadyJobsForExecutionLocked
      */
     private JobStatus getRescheduleJobForFailureLocked(JobStatus failureToReschedule) {
-        final long elapsedNowMillis = SystemClock.elapsedRealtime();
+        final long elapsedNowMillis = sElapsedRealtimeClock.millis();
         final JobInfo job = failureToReschedule.getJob();
 
         final long initialBackoffMillis = job.getInitialBackoffMillis();
@@ -1200,7 +1208,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
                 Math.min(delayMillis, JobInfo.MAX_BACKOFF_DELAY_MILLIS);
         JobStatus newJob = new JobStatus(failureToReschedule, elapsedNowMillis + delayMillis,
                 JobStatus.NO_LATEST_RUNTIME, backoffAttempts,
-                failureToReschedule.getLastSuccessfulRunTime(), System.currentTimeMillis());
+                failureToReschedule.getLastSuccessfulRunTime(), sSystemClock.millis());
         for (int ic=0; ic<mControllers.size(); ic++) {
             StateController controller = mControllers.get(ic);
             controller.rescheduleForFailureLocked(newJob, failureToReschedule);
@@ -1220,7 +1228,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
      * recurring job.
      */
     private JobStatus getRescheduleJobForPeriodic(JobStatus periodicToReschedule) {
-        final long elapsedNow = SystemClock.elapsedRealtime();
+        final long elapsedNow = sElapsedRealtimeClock.millis();
         // Compute how much of the period is remaining.
         long runEarly = 0L;
 
@@ -1239,7 +1247,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
         }
         return new JobStatus(periodicToReschedule, newEarliestRunTimeElapsed,
                 newLatestRuntimeElapsed, 0 /* backoffAttempt */,
-                System.currentTimeMillis() /* lastSuccessfulRunTime */,
+                sSystemClock.millis() /* lastSuccessfulRunTime */,
                 periodicToReschedule.getLastFailedRunTime());
     }
 
@@ -2367,8 +2375,8 @@ public final class JobSchedulerService extends com.android.server.SystemService
         }
 
         final int filterUidFinal = UserHandle.getAppId(filterUid);
-        final long nowElapsed = SystemClock.elapsedRealtime();
-        final long nowUptime = SystemClock.uptimeMillis();
+        final long nowElapsed = sElapsedRealtimeClock.millis();
+        final long nowUptime = sUptimeMillisClock.millis();
         synchronized (mLock) {
             mConstants.dump(pw);
             pw.println();

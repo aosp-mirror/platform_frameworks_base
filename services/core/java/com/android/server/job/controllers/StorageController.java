@@ -16,11 +16,12 @@
 
 package com.android.server.job.controllers;
 
+import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.ArraySet;
 import android.util.Slog;
@@ -154,13 +155,13 @@ public final class StorageController extends StateController {
             if (Intent.ACTION_DEVICE_STORAGE_LOW.equals(action)) {
                 if (DEBUG) {
                     Slog.d(TAG, "Available storage too low to do work. @ "
-                            + SystemClock.elapsedRealtime());
+                            + sElapsedRealtimeClock.millis());
                 }
                 mStorageLow = true;
             } else if (Intent.ACTION_DEVICE_STORAGE_OK.equals(action)) {
                 if (DEBUG) {
                     Slog.d(TAG, "Available stoage high enough to do work. @ "
-                            + SystemClock.elapsedRealtime());
+                            + sElapsedRealtimeClock.millis());
                 }
                 mStorageLow = false;
                 maybeReportNewStorageState();
