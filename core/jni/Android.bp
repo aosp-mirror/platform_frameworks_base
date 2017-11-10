@@ -18,10 +18,6 @@ cc_library_shared {
         "-Wunused",
         "-Wunreachable-code",
 
-        // necessary for Clang as the GL bindings need to turn
-        // off a GCC warning that Clang doesn't know.
-        "-Wno-unknown-pragmas",
-
         // TODO: Linear blending should be enabled by default, but we are
         // TODO: making it an opt-in while it's a work in progress
         //"-DANDROID_ENABLE_LINEAR_BLENDING",
