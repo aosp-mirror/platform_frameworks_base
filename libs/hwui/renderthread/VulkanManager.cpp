@@ -602,6 +602,7 @@ void VulkanManager::swapBuffers(VulkanSurface* surface) {
         mDeviceWaitIdle(mBackendContext->fDevice);
     }
 
+    SkASSERT(surface->mBackbuffers);
     VulkanSurface::BackbufferInfo* backbuffer =
             surface->mBackbuffers + surface->mCurrentBackbufferIndex;
     GrVkImageInfo* imageInfo;
@@ -683,6 +684,7 @@ void VulkanManager::swapBuffers(VulkanSurface* surface) {
 }
 
 int VulkanManager::getAge(VulkanSurface* surface) {
+    SkASSERT(surface->mBackbuffers);
     VulkanSurface::BackbufferInfo* backbuffer =
             surface->mBackbuffers + surface->mCurrentBackbufferIndex;
     if (mSwapBehavior == SwapBehavior::Discard ||
