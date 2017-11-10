@@ -894,9 +894,10 @@ struct ResTable_package
 // - a 8 char variant code prefixed by a 'v'
 //
 // each separated by a single char separator, which sums up to a total of 24
-// chars, (25 include the string terminator) rounded up to 28 to be 4 byte
-// aligned.
-#define RESTABLE_MAX_LOCALE_LEN 28
+// chars, (25 include the string terminator). Numbering system specificator,
+// if present, can add up to 14 bytes (-u-nu-xxxxxxxx), giving 39 bytes,
+// or 40 bytes to make it 4 bytes aligned.
+#define RESTABLE_MAX_LOCALE_LEN 40
 
 
 /**
@@ -1302,6 +1303,9 @@ struct ResTable_config
     // with respect to their locales, a negative integer if |o| is more specific
     // and 0 if they're equally specific.
     int isLocaleMoreSpecificThan(const ResTable_config &o) const;
+
+    // Returns an integer representng the imporance score of the configuration locale.
+    int getImportanceScoreOfLocale() const;
 
     // Return true if 'this' is a better locale match than 'o' for the
     // 'requested' configuration. Similar to isBetterThan(), this assumes that

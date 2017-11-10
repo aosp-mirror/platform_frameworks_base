@@ -1877,19 +1877,27 @@ void ResTable_config::swapHtoD() {
         return (l.locale > r.locale) ? 1 : -1;
     }
 
-    // The language & region are equal, so compare the scripts and variants.
+    // The language & region are equal, so compare the scripts, variants and
+    // numbering systms in this order. Comparison of variants and numbering
+    // systems should happen very infrequently (if at all.)
+    // The comparison code relies on memcmp low-level optimizations that make it
+    // more efficient than strncmp.
     const char emptyScript[sizeof(l.localeScript)] = {'\0', '\0', '\0', '\0'};
     const char *lScript = l.localeScriptWasComputed ? emptyScript : l.localeScript;
     const char *rScript = r.localeScriptWasComputed ? emptyScript : r.localeScript;
+
     int script = memcmp(lScript, rScript, sizeof(l.localeScript));
     if (script) {
         return script;
     }
 
-    // The language, region and script are equal, so compare variants.
-    //
-    // This should happen very infrequently (if at all.)
-    return memcmp(l.localeVariant, r.localeVariant, sizeof(l.localeVariant));
+    int variant = memcmp(l.localeVariant, r.localeVariant, sizeof(l.localeVariant));
+    if (variant) {
+        return variant;
+    }
+
+    return memcmp(l.localeNumberingSystem, r.localeNumberingSystem,
+                  sizeof(l.localeNumberingSystem));
 }
 
 int ResTable_config::compare(const ResTable_config& o) const {
@@ -2030,6 +2038,22 @@ int ResTable_config::diff(const ResTable_config& o) const {
     return diffs;
 }
 
+// There isn't a well specified "importance" order between variants and
+// scripts. We can't easily tell whether, say "en-Latn-US" is more or less
+// specific than "en-US-POSIX".
+//
+// We therefore arbitrarily decide to give priority to variants over
+// scripts since it seems more useful to do so. We will consider
+// "en-US-POSIX" to be more specific than "en-Latn-US".
+//
+// Unicode extension keywords are considered to be less important than
+// scripts and variants.
+inline int ResTable_config::getImportanceScoreOfLocale() const {
+  return (localeVariant[0] ? 4 : 0)
+      + (localeScript[0] && !localeScriptWasComputed ? 2: 0)
+      + (localeNumberingSystem[0] ? 1: 0);
+}
+
 int ResTable_config::isLocaleMoreSpecificThan(const ResTable_config& o) const {
     if (locale || o.locale) {
         if (language[0] != o.language[0]) {
@@ -2043,21 +2067,7 @@ int ResTable_config::isLocaleMoreSpecificThan(const ResTable_config& o) const {
         }
     }
 
-    // There isn't a well specified "importance" order between variants and
-    // scripts. We can't easily tell whether, say "en-Latn-US" is more or less
-    // specific than "en-US-POSIX".
-    //
-    // We therefore arbitrarily decide to give priority to variants over
-    // scripts since it seems more useful to do so. We will consider
-    // "en-US-POSIX" to be more specific than "en-Latn-US".
-
-    const int score = ((localeScript[0] != '\0' && !localeScriptWasComputed) ? 1 : 0) +
-        ((localeVariant[0] != '\0') ? 2 : 0);
-
-    const int oScore = (o.localeScript[0] != '\0' && !o.localeScriptWasComputed ? 1 : 0) +
-        ((o.localeVariant[0] != '\0') ? 2 : 0);
-
-    return score - oScore;
+    return getImportanceScoreOfLocale() - o.getImportanceScoreOfLocale();
 }
 
 bool ResTable_config::isMoreSpecificThan(const ResTable_config& o) const {
@@ -2312,6 +2322,17 @@ bool ResTable_config::isLocaleBetterThan(const ResTable_config& o,
             o.localeVariant, requested->localeVariant, sizeof(localeVariant)) == 0;
     if (localeMatches != otherMatches) {
         return localeMatches;
+    }
+
+    // The variants are the same, try numbering system.
+    const bool localeNumsysMatches = strncmp(localeNumberingSystem,
+                                             requested->localeNumberingSystem,
+                                             sizeof(localeNumberingSystem)) == 0;
+    const bool otherNumsysMatches = strncmp(o.localeNumberingSystem,
+                                            requested->localeNumberingSystem,
+                                            sizeof(localeNumberingSystem)) == 0;
+    if (localeNumsysMatches != otherNumsysMatches) {
+        return localeNumsysMatches;
     }
 
     // Finally, the languages, although equivalent, may still be different
@@ -2781,7 +2802,7 @@ void ResTable_config::appendDirLocale(String8& out) const {
         return;
     }
     const bool scriptWasProvided = localeScript[0] != '\0' && !localeScriptWasComputed;
-    if (!scriptWasProvided && !localeVariant[0]) {
+    if (!scriptWasProvided && !localeVariant[0] && !localeNumberingSystem[0]) {
         // Legacy format.
         if (out.size() > 0) {
             out.append("-");
@@ -2826,6 +2847,12 @@ void ResTable_config::appendDirLocale(String8& out) const {
         out.append("+");
         out.append(localeVariant, strnlen(localeVariant, sizeof(localeVariant)));
     }
+
+    if (localeNumberingSystem[0]) {
+        out.append("+u+nu+");
+        out.append(localeNumberingSystem,
+                   strnlen(localeNumberingSystem, sizeof(localeNumberingSystem)));
+    }
 }
 
 void ResTable_config::getBcp47Locale(char str[RESTABLE_MAX_LOCALE_LEN], bool canonicalize) const {
@@ -2868,10 +2895,17 @@ void ResTable_config::getBcp47Locale(char str[RESTABLE_MAX_LOCALE_LEN], bool can
             str[charsWritten++] = '-';
         }
         memcpy(str + charsWritten, localeVariant, sizeof(localeVariant));
+        charsWritten += strnlen(str + charsWritten, sizeof(localeVariant));
     }
 
-    /* TODO: Add BCP47 extension. It requires RESTABLE_MAX_LOCALE_LEN
-     * increase from 28 to 42 bytes (-u-nu-xxxxxxxx) */
+    // Add Unicode extension only if at least one other locale component is present
+    if (localeNumberingSystem[0] != '\0' && charsWritten > 0) {
+        static constexpr char NU_PREFIX[] = "-u-nu-";
+        static constexpr size_t NU_PREFIX_LEN = sizeof(NU_PREFIX) - 1;
+        memcpy(str + charsWritten, NU_PREFIX, NU_PREFIX_LEN);
+        charsWritten += NU_PREFIX_LEN;
+        memcpy(str + charsWritten, localeNumberingSystem, sizeof(localeNumberingSystem));
+    }
 }
 
 struct LocaleParserState {
@@ -3004,10 +3038,7 @@ struct LocaleParserState {
 }
 
 void ResTable_config::setBcp47Locale(const char* in) {
-    locale = 0;
-    memset(localeScript, 0, sizeof(localeScript));
-    memset(localeVariant, 0, sizeof(localeVariant));
-    memset(localeNumberingSystem, 0, sizeof(localeNumberingSystem));
+    clearLocale();
 
     const char* start = in;
     LocaleParserState state;
