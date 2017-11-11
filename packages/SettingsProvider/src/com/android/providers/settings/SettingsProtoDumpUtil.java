@@ -881,6 +881,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Global.GPU_DEBUG_LAYERS,
                 GlobalSettingsProto.GPU_DEBUG_LAYERS);
+        dumpSetting(s, p,
+                Settings.Global.ENABLE_GNSS_RAW_MEAS_FULL_TRACKING,
+                GlobalSettingsProto.ENABLE_GNSS_RAW_MEAS_FULL_TRACKING);
         // Settings.Global.SHOW_PROCESSES intentionally excluded since it's deprecated.
         dumpSetting(s, p,
                 Settings.Global.LOW_POWER_MODE,

@@ -18,8 +18,11 @@
 
 #define LOG_NDEBUG 0
 
+#include <android/hardware/gnss/1.0/IGnss.h>
 #include <android/hardware/gnss/1.1/IGnss.h>
 
+#include <android/hardware/gnss/1.0/IGnssMeasurement.h>
+#include <android/hardware/gnss/1.1/IGnssMeasurement.h>
 #include <nativehelper/JNIHelp.h>
 #include "jni.h"
 #include "hardware_legacy/power.h"
@@ -77,23 +80,23 @@ using android::hardware::Void;
 using android::hardware::hidl_vec;
 using android::hardware::hidl_death_recipient;
 using android::hidl::base::V1_0::IBase;
-
 using android::hardware::gnss::V1_0::GnssLocation;
 using android::hardware::gnss::V1_0::GnssLocationFlags;
-
+using IGnss_V1_1 = android::hardware::gnss::V1_1::IGnss;
+using IGnssMeasurement_V1_0 = android::hardware::gnss::V1_0::IGnssMeasurement;
+using IGnssMeasurement_V1_1 = android::hardware::gnss::V1_1::IGnssMeasurement;
+using android::hardware::gnss::V1_0::IGnss;
 using android::hardware::gnss::V1_0::IAGnss;
 using android::hardware::gnss::V1_0::IAGnssCallback;
 using android::hardware::gnss::V1_0::IAGnssCallback;
 using android::hardware::gnss::V1_0::IAGnssRil;
 using android::hardware::gnss::V1_0::IAGnssRilCallback;
-using android::hardware::gnss::V1_0::IGnss;
 using android::hardware::gnss::V1_0::IGnssBatching;
 using android::hardware::gnss::V1_0::IGnssBatchingCallback;
 using android::hardware::gnss::V1_0::IGnssConfiguration;
 using android::hardware::gnss::V1_0::IGnssDebug;
 using android::hardware::gnss::V1_0::IGnssGeofenceCallback;
 using android::hardware::gnss::V1_0::IGnssGeofencing;
-using android::hardware::gnss::V1_0::IGnssMeasurement;
 using android::hardware::gnss::V1_0::IGnssMeasurementCallback;
 using android::hardware::gnss::V1_0::IGnssNavigationMessage;
 using android::hardware::gnss::V1_0::IGnssNavigationMessageCallback;
@@ -101,8 +104,6 @@ using android::hardware::gnss::V1_0::IGnssNi;
 using android::hardware::gnss::V1_0::IGnssNiCallback;
 using android::hardware::gnss::V1_0::IGnssXtra;
 using android::hardware::gnss::V1_0::IGnssXtraCallback;
-
-using IGnssV1_1 = android::hardware::gnss::V1_1::IGnss;
 using android::hardware::gnss::V1_1::IGnssCallback;
 
 struct GnssDeathRecipient : virtual public hidl_death_recipient
@@ -118,7 +119,7 @@ struct GnssDeathRecipient : virtual public hidl_death_recipient
 
 sp<GnssDeathRecipient> gnssHalDeathRecipient = nullptr;
 sp<IGnss> gnssHal = nullptr;
-sp<IGnssV1_1> gnssHalV1_1 = nullptr;
+sp<IGnss_V1_1> gnssHal_V1_1 = nullptr;
 sp<IGnssXtra> gnssXtraIface = nullptr;
 sp<IAGnssRil> agnssRilIface = nullptr;
 sp<IGnssGeofencing> gnssGeofencingIface = nullptr;
@@ -127,7 +128,8 @@ sp<IGnssBatching> gnssBatchingIface = nullptr;
 sp<IGnssDebug> gnssDebugIface = nullptr;
 sp<IGnssConfiguration> gnssConfigurationIface = nullptr;
 sp<IGnssNi> gnssNiIface = nullptr;
-sp<IGnssMeasurement> gnssMeasurementIface = nullptr;
+sp<IGnssMeasurement_V1_0> gnssMeasurementIface = nullptr;
+sp<IGnssMeasurement_V1_1> gnssMeasurementIface_V1_1 = nullptr;
 sp<IGnssNavigationMessage> gnssNavigationMessageIface = nullptr;
 
 #define WAKE_LOCK_NAME  "GPS"
@@ -1068,11 +1070,13 @@ static void android_location_GnssLocationProvider_class_init_native(JNIEnv* env,
         LOG_ALWAYS_FATAL("Unable to get Java VM. Error: %d", jvmStatus);
     }
 
-    gnssHal = gnssHalV1_1 = IGnssV1_1::getService();
-
-    if (gnssHal == nullptr) {
+    // TODO(b/31632518)
+    gnssHal_V1_1 = IGnss_V1_1::getService();
+    if (gnssHal_V1_1 == nullptr) {
         ALOGD("gnssHal 1.1 was null, trying 1.0");
         gnssHal = IGnss::getService();
+    } else {
+        gnssHal = gnssHal_V1_1;
     }
 
     if (gnssHal != nullptr) {
@@ -1116,11 +1120,21 @@ static void android_location_GnssLocationProvider_class_init_native(JNIEnv* env,
             gnssNavigationMessageIface = gnssNavigationMessage;
         }
 
-        auto gnssMeasurement = gnssHal->getExtensionGnssMeasurement();
-        if (!gnssMeasurement.isOk()) {
-            ALOGD("Unable to get a handle to GnssMeasurement");
+        if (gnssHal_V1_1 != nullptr) {
+             auto gnssMeasurement = gnssHal_V1_1->getExtensionGnssMeasurement_1_1();
+             if (!gnssMeasurement.isOk()) {
+                 ALOGD("Unable to get a handle to GnssMeasurement");
+             } else {
+                 gnssMeasurementIface_V1_1 = gnssMeasurement;
+                 gnssMeasurementIface = gnssMeasurementIface_V1_1;
+             }
         } else {
-            gnssMeasurementIface = gnssMeasurement;
+             auto gnssMeasurement_V1_0 = gnssHal->getExtensionGnssMeasurement();
+             if (!gnssMeasurement_V1_0.isOk()) {
+                 ALOGD("Unable to get a handle to GnssMeasurement");
+             } else {
+                 gnssMeasurementIface = gnssMeasurement_V1_0;
+             }
         }
 
         auto gnssDebug = gnssHal->getExtensionGnssDebug();
@@ -1195,8 +1209,8 @@ static jboolean android_location_GnssLocationProvider_init(JNIEnv* env, jobject 
     sp<IGnssCallback> gnssCbIface = new GnssCallback();
 
     Return<bool> result = false;
-    if (gnssHalV1_1 != nullptr) {
-        result = gnssHalV1_1->setCallback_1_1(gnssCbIface);
+    if (gnssHal_V1_1 != nullptr) {
+        result = gnssHal_V1_1->setCallback_1_1(gnssCbIface);
     } else {
         result = gnssHal->setCallback(gnssCbIface);
     }
@@ -1255,21 +1269,27 @@ static void android_location_GnssLocationProvider_cleanup(JNIEnv* /* env */, job
 
 static jboolean android_location_GnssLocationProvider_set_position_mode(JNIEnv* /* env */,
         jobject /* obj */, jint mode, jint recurrence, jint min_interval, jint preferred_accuracy,
-        jint preferred_time) {
-    if (gnssHal != nullptr) {
-        auto result = gnssHal->setPositionMode(static_cast<IGnss::GnssPositionMode>(mode),
-                                     static_cast<IGnss::GnssPositionRecurrence>(recurrence),
-                                     min_interval,
-                                     preferred_accuracy,
-                                     preferred_time);
-        if (!result.isOk()) {
-            ALOGE("%s: GNSS setPositionMode failed\n", __func__);
-            return JNI_FALSE;
-        } else {
-            return result;
-        }
+        jint preferred_time, jboolean low_power_mode) {
+    Return<bool> result = false;
+    if (gnssHal_V1_1 != nullptr) {
+         result = gnssHal_V1_1->setPositionMode_1_1(static_cast<IGnss::GnssPositionMode>(mode),
+                                                             static_cast<IGnss::GnssPositionRecurrence>(recurrence),
+                                                             min_interval,
+                                                             preferred_accuracy,
+                                                             preferred_time,
+                                                             low_power_mode);
+     } else if (gnssHal != nullptr) {
+         result = gnssHal->setPositionMode(static_cast<IGnss::GnssPositionMode>(mode),
+                                                                      static_cast<IGnss::GnssPositionRecurrence>(recurrence),
+                                                                      min_interval,
+                                                                      preferred_accuracy,
+                                                                      preferred_time);
+    }
+    if (!result.isOk()) {
+       ALOGE("%s: GNSS setPositionMode failed\n", __func__);
+       return JNI_FALSE;
     } else {
-        return JNI_FALSE;
+       return result;
     }
 }
 
@@ -1679,16 +1699,29 @@ static jboolean android_location_GnssLocationProvider_is_measurement_supported(
 }
 
 static jboolean android_location_GnssLocationProvider_start_measurement_collection(
-        JNIEnv* env,
-        jobject obj) {
+        JNIEnv* /* env */,
+        jobject /* obj */,
+        jboolean enableFullTracking) {
     if (gnssMeasurementIface == nullptr) {
         ALOGE("GNSS Measurement interface is not available.");
         return JNI_FALSE;
     }
 
     sp<GnssMeasurementCallback> cbIface = new GnssMeasurementCallback();
-    IGnssMeasurement::GnssMeasurementStatus result = gnssMeasurementIface->setCallback(cbIface);
-    if (result != IGnssMeasurement::GnssMeasurementStatus::SUCCESS) {
+    IGnssMeasurement_V1_0::GnssMeasurementStatus result =
+                    IGnssMeasurement_V1_0::GnssMeasurementStatus::ERROR_GENERIC;;
+    if (gnssMeasurementIface_V1_1 != nullptr) {
+         result = gnssMeasurementIface_V1_1->setCallback_1_1(cbIface,
+                        enableFullTracking);
+    } else {
+        if (enableFullTracking == JNI_TRUE) {
+            // full tracking mode not supported in 1.0 HAL
+            return JNI_FALSE;
+        }
+        result = gnssMeasurementIface->setCallback(cbIface);
+    }
+
+    if (result != IGnssMeasurement_V1_0::GnssMeasurementStatus::SUCCESS) {
         ALOGE("An error has been found on GnssMeasurementInterface::init, status=%d",
               static_cast<int32_t>(result));
         return JNI_FALSE;
@@ -1941,8 +1974,8 @@ static const JNINativeMethod sMethods[] = {
     {"native_cleanup", "()V", reinterpret_cast<void *>(
             android_location_GnssLocationProvider_cleanup)},
     {"native_set_position_mode",
-            "(IIIII)Z",
-            reinterpret_cast<void*>(android_location_GnssLocationProvider_set_position_mode)},
+                "(IIIIIZ)Z",
+                reinterpret_cast<void*>(android_location_GnssLocationProvider_set_position_mode)},
     {"native_start", "()Z", reinterpret_cast<void*>(android_location_GnssLocationProvider_start)},
     {"native_stop", "()Z", reinterpret_cast<void*>(android_location_GnssLocationProvider_stop)},
     {"native_delete_aiding_data",
@@ -2010,7 +2043,7 @@ static const JNINativeMethod sMethods[] = {
             reinterpret_cast<void *>(
                     android_location_GnssLocationProvider_is_measurement_supported)},
     {"native_start_measurement_collection",
-            "()Z",
+             "(Z)Z",
             reinterpret_cast<void *>(
                     android_location_GnssLocationProvider_start_measurement_collection)},
     {"native_stop_measurement_collection",
