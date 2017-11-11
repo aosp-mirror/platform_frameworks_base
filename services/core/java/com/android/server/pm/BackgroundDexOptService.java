@@ -336,7 +336,8 @@ public class BackgroundDexOptService extends JobService {
             int dexoptFlags =
                     DexoptOptions.DEXOPT_CHECK_FOR_PROFILES_UPDATES |
                     DexoptOptions.DEXOPT_BOOT_COMPLETE |
-                    (downgrade ? DexoptOptions.DEXOPT_DOWNGRADE : 0);
+                    (downgrade ? DexoptOptions.DEXOPT_DOWNGRADE : 0) |
+                    DexoptOptions.DEXOPT_IDLE_BACKGROUND_JOB;
             if (is_for_primary_dex) {
                 int result = pm.performDexOptWithStatus(new DexoptOptions(pkg,
                         PackageManagerService.REASON_BACKGROUND_DEXOPT,

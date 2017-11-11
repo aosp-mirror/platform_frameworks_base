@@ -310,12 +310,12 @@ public class IpClient extends StateMachine {
                 return this;
             }
 
-            public Builder withIPv6AddrGenModeEUI64() {
+            public Builder withRandomMacAddress() {
                 mConfig.mIPv6AddrGenMode = INetd.IPV6_ADDR_GEN_MODE_EUI64;
                 return this;
             }
 
-            public Builder withIPv6AddrGenModeStablePrivacy() {
+            public Builder withStableMacAddress() {
                 mConfig.mIPv6AddrGenMode = INetd.IPV6_ADDR_GEN_MODE_STABLE_PRIVACY;
                 return this;
             }
@@ -1429,15 +1429,15 @@ public class IpClient extends StateMachine {
 
         @Override
         public void enter() {
+            ApfFilter.ApfConfiguration apfConfig = new ApfFilter.ApfConfiguration();
+            apfConfig.apfCapabilities = mConfiguration.mApfCapabilities;
+            apfConfig.multicastFilter = mMulticastFiltering;
             // Get the Configuration for ApfFilter from Context
-            final boolean filter802_3Frames =
+            apfConfig.ieee802_3Filter =
                     mContext.getResources().getBoolean(R.bool.config_apfDrop802_3Frames);
-
-            final int[] ethTypeBlackList = mContext.getResources().getIntArray(
-                    R.array.config_apfEthTypeBlackList);
-
-            mApfFilter = ApfFilter.maybeCreate(mConfiguration.mApfCapabilities, mNetworkInterface,
-                    mCallback, mMulticastFiltering, filter802_3Frames, ethTypeBlackList);
+            apfConfig.ethTypeBlackList =
+                    mContext.getResources().getIntArray(R.array.config_apfEthTypeBlackList);
+            mApfFilter = ApfFilter.maybeCreate(apfConfig, mNetworkInterface, mCallback);
             // TODO: investigate the effects of any multicast filtering racing/interfering with the
             // rest of this IP configuration startup.
             if (mApfFilter == null) {

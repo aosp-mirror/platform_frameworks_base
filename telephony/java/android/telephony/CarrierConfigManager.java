@@ -209,6 +209,12 @@ public class CarrierConfigManager {
     public static final String KEY_SUPPORT_SWAP_AFTER_MERGE_BOOL = "support_swap_after_merge_bool";
 
     /**
+     * Determine whether user can edit voicemail number in Settings.
+     */
+    public static final String KEY_EDITABLE_VOICEMAIL_NUMBER_SETTING_BOOL =
+            "editable_voicemail_number_setting_bool";
+
+    /**
      * Since the default voicemail number is empty, if a SIM card does not have a voicemail number
      * available the user cannot use voicemail. This flag allows the user to edit the voicemail
      * number in such cases, and is false by default.
@@ -1607,6 +1613,33 @@ public class CarrierConfigManager {
     public static final String KEY_FEATURE_ACCESS_CODES_STRING_ARRAY =
             "feature_access_codes_string_array";
 
+    /**
+     * Determines if the carrier wants to identify high definition calls in the call log.
+     * @hide
+     */
+    public static final String KEY_IDENTIFY_HIGH_DEFINITION_CALLS_IN_CALL_LOG_BOOL =
+            "identify_high_definition_calls_in_call_log_bool";
+
+    /**
+     * Flag specifying whether to use the {@link ServiceState} roaming status, which can be
+     * affected by other carrier configs (e.g.
+     * {@link #KEY_GSM_NONROAMING_NETWORKS_STRING_ARRAY}), when setting the SPN display.
+     * <p>
+     * If {@code true}, the SPN display uses {@link ServiceState#getRoaming}.
+     * If {@code false} the SPN display checks if the current MCC/MNC is different from the
+     * SIM card's MCC/MNC.
+     *
+     * @see KEY_GSM_ROAMING_NETWORKS_STRING_ARRAY
+     * @see KEY_GSM_NONROAMING_NETWORKS_STRING_ARRAY
+     * @see KEY_NON_ROAMING_OPERATOR_STRING_ARRAY
+     * @see KEY_ROAMING_OPERATOR_STRING_ARRAY
+     * @see KEY_FORCE_HOME_NETWORK_BOOL
+     *
+     * @hide
+     */
+    public static final String KEY_SPN_DISPLAY_RULE_USE_ROAMING_FROM_SERVICE_STATE_BOOL =
+            "spn_display_rule_use_roaming_from_service_state_bool";
+
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
 
@@ -1666,6 +1699,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_SUPPORT_PAUSE_IMS_VIDEO_CALLS_BOOL, false);
         sDefaults.putBoolean(KEY_SUPPORT_SWAP_AFTER_MERGE_BOOL, true);
         sDefaults.putBoolean(KEY_USE_HFA_FOR_PROVISIONING_BOOL, false);
+        sDefaults.putBoolean(KEY_EDITABLE_VOICEMAIL_NUMBER_SETTING_BOOL, true);
         sDefaults.putBoolean(KEY_EDITABLE_VOICEMAIL_NUMBER_BOOL, false);
         sDefaults.putBoolean(KEY_USE_OTASP_FOR_PROVISIONING_BOOL, false);
         sDefaults.putBoolean(KEY_VOICEMAIL_NOTIFICATION_PERSISTENT_BOOL, false);
@@ -1880,6 +1914,8 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_SHOW_IMS_REGISTRATION_STATUS_BOOL, false);
         sDefaults.putBoolean(KEY_DISABLE_CHARGE_INDICATION_BOOL, false);
         sDefaults.putStringArray(KEY_FEATURE_ACCESS_CODES_STRING_ARRAY, null);
+        sDefaults.putBoolean(KEY_IDENTIFY_HIGH_DEFINITION_CALLS_IN_CALL_LOG_BOOL, false);
+        sDefaults.putBoolean(KEY_SPN_DISPLAY_RULE_USE_ROAMING_FROM_SERVICE_STATE_BOOL, false);
     }
 
     /**

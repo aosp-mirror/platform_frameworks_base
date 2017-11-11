@@ -138,6 +138,7 @@ LOCAL_SRC_FILES += \
 	../../system/bt/binder/android/bluetooth/IBluetoothPbap.aidl \
 	../../system/bt/binder/android/bluetooth/IBluetoothPbapClient.aidl \
 	../../system/bt/binder/android/bluetooth/IBluetoothSap.aidl \
+	../../system/bt/binder/android/bluetooth/IBluetoothSocketManager.aidl \
 	../../system/bt/binder/android/bluetooth/IBluetoothStateChangeCallback.aidl \
 	../../system/bt/binder/android/bluetooth/IBluetoothHeadsetClient.aidl \
 	../../system/bt/binder/android/bluetooth/IBluetoothHidDevice.aidl \

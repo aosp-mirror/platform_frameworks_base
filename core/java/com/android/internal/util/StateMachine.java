@@ -804,7 +804,7 @@ public class StateMachine {
 
                 /** State that processed the message */
                 State msgProcessedState = null;
-                if (mIsConstructionCompleted) {
+                if (mIsConstructionCompleted || (mMsg.what == SM_QUIT_CMD)) {
                     /** Normal path */
                     msgProcessedState = processMsg(msg);
                 } else if (!mIsConstructionCompleted && (mMsg.what == SM_INIT_CMD)

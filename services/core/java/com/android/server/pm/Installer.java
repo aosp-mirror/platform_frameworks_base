@@ -56,6 +56,8 @@ public class Installer extends SystemService {
     public static final int DEXOPT_STORAGE_CE     = 1 << 7;
     /** Indicates that the dex file passed to dexopt in on DE storage. */
     public static final int DEXOPT_STORAGE_DE     = 1 << 8;
+    /** Indicates that dexopt is invoked from the background service. */
+    public static final int DEXOPT_IDLE_BACKGROUND_JOB = 1 << 9;
 
     // NOTE: keep in sync with installd
     public static final int FLAG_CLEAR_CACHE_ONLY = 1 << 8;

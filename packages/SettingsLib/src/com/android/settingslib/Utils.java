@@ -19,6 +19,7 @@ import android.graphics.drawable.LayerDrawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkBadging;
 import android.os.BatteryManager;
+import android.os.UserHandle;
 import android.os.UserManager;
 import android.print.PrintManager;
 import android.provider.Settings;
@@ -30,6 +31,12 @@ import com.android.settingslib.drawable.UserIconDrawable;
 import java.text.NumberFormat;
 
 public class Utils {
+    /** Broadcast intent action when the location mode is about to change. */
+    private static final String MODE_CHANGING_ACTION =
+            "com.android.settings.location.MODE_CHANGING";
+    private static final String CURRENT_MODE_KEY = "CURRENT_MODE";
+    private static final String NEW_MODE_KEY = "NEW_MODE";
+
     private static Signature[] sSystemSignature;
     private static String sPermissionControllerPackageName;
     private static String sServicesSystemSharedLibPackageName;
@@ -42,6 +49,18 @@ public class Utils {
           com.android.internal.R.drawable.ic_signal_wifi_badged_3_bars,
           com.android.internal.R.drawable.ic_signal_wifi_badged_4_bars
     };
+
+    public static boolean updateLocationMode(Context context, int oldMode, int newMode,
+            int userId) {
+        Intent intent = new Intent(MODE_CHANGING_ACTION);
+        intent.putExtra(CURRENT_MODE_KEY, oldMode);
+        intent.putExtra(NEW_MODE_KEY, newMode);
+        intent.addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
+        context.sendBroadcastAsUser(intent, UserHandle.of(userId),
+                android.Manifest.permission.WRITE_SECURE_SETTINGS);
+        return Settings.Secure.putIntForUser(context.getContentResolver(),
+                Settings.Secure.LOCATION_MODE, newMode, userId);
+    }
 
     /**
      * Return string resource that best describes combination of tethering

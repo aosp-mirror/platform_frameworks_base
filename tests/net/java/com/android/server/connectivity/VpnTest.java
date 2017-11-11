@@ -20,11 +20,30 @@ import static android.content.pm.UserInfo.FLAG_ADMIN;
 import static android.content.pm.UserInfo.FLAG_MANAGED_PROFILE;
 import static android.content.pm.UserInfo.FLAG_PRIMARY;
 import static android.content.pm.UserInfo.FLAG_RESTRICTED;
+import static android.net.NetworkCapabilities.LINK_BANDWIDTH_UNSPECIFIED;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_METERED;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING;
+import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
+import static android.net.NetworkCapabilities.TRANSPORT_VPN;
+import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.AdditionalMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.AdditionalMatchers.aryEq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.annotation.UserIdInt;
 import android.app.AppOpsManager;
@@ -36,6 +55,9 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkCapabilities;
 import android.net.NetworkInfo.DetailedState;
 import android.net.UidRange;
 import android.net.VpnService;
@@ -45,17 +67,17 @@ import android.os.INetworkManagementService;
 import android.os.Looper;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.support.test.runner.AndroidJUnit4;
 import android.support.test.filters.SmallTest;
+import android.support.test.runner.AndroidJUnit4;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 
 import com.android.internal.R;
 import com.android.internal.net.VpnConfig;
 
-import org.junit.runner.RunWith;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Answers;
 import org.mockito.InOrder;
 import org.mockito.Mock;
@@ -64,6 +86,7 @@ import org.mockito.MockitoAnnotations;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -114,6 +137,7 @@ public class VpnTest {
     @Mock private AppOpsManager mAppOps;
     @Mock private NotificationManager mNotificationManager;
     @Mock private Vpn.SystemServices mSystemServices;
+    @Mock private ConnectivityManager mConnectivityManager;
 
     @Before
     public void setUp() throws Exception {
@@ -127,6 +151,8 @@ public class VpnTest {
         when(mContext.getSystemService(eq(Context.APP_OPS_SERVICE))).thenReturn(mAppOps);
         when(mContext.getSystemService(eq(Context.NOTIFICATION_SERVICE)))
                 .thenReturn(mNotificationManager);
+        when(mContext.getSystemService(eq(Context.CONNECTIVITY_SERVICE)))
+                .thenReturn(mConnectivityManager);
         when(mContext.getString(R.string.config_customVpnAlwaysOnDisconnectedDialogComponent))
                 .thenReturn(Resources.getSystem().getString(
                         R.string.config_customVpnAlwaysOnDisconnectedDialogComponent));
@@ -397,6 +423,66 @@ public class VpnTest {
         order.verify(mNotificationManager).cancelAsUser(anyString(), anyInt(), eq(userHandle));
     }
 
+    @Test
+    public void testCapabilities() {
+        final Vpn vpn = createVpn(primaryUser.id);
+        setMockedUsers(primaryUser);
+
+        final Network mobile = new Network(1);
+        final Network wifi = new Network(2);
+
+        final Map<Network, NetworkCapabilities> networks = new HashMap<>();
+        networks.put(mobile, new NetworkCapabilities()
+                .addTransportType(TRANSPORT_CELLULAR)
+                .addCapability(NET_CAPABILITY_INTERNET)
+                .addCapability(NET_CAPABILITY_NOT_METERED)
+                .setLinkDownstreamBandwidthKbps(10));
+        networks.put(wifi, new NetworkCapabilities()
+                .addTransportType(TRANSPORT_WIFI)
+                .addCapability(NET_CAPABILITY_INTERNET)
+                .addCapability(NET_CAPABILITY_NOT_ROAMING)
+                .setLinkUpstreamBandwidthKbps(20));
+        setMockedNetworks(networks);
+
+        final NetworkCapabilities caps = new NetworkCapabilities();
+
+        Vpn.updateCapabilities(mConnectivityManager, new Network[] { }, caps);
+        assertTrue(caps.hasTransport(TRANSPORT_VPN));
+        assertFalse(caps.hasTransport(TRANSPORT_CELLULAR));
+        assertFalse(caps.hasTransport(TRANSPORT_WIFI));
+        assertEquals(LINK_BANDWIDTH_UNSPECIFIED, caps.getLinkDownstreamBandwidthKbps());
+        assertEquals(LINK_BANDWIDTH_UNSPECIFIED, caps.getLinkUpstreamBandwidthKbps());
+        assertFalse(caps.hasCapability(NET_CAPABILITY_NOT_METERED));
+        assertTrue(caps.hasCapability(NET_CAPABILITY_NOT_ROAMING));
+
+        Vpn.updateCapabilities(mConnectivityManager, new Network[] { mobile }, caps);
+        assertTrue(caps.hasTransport(TRANSPORT_VPN));
+        assertTrue(caps.hasTransport(TRANSPORT_CELLULAR));
+        assertFalse(caps.hasTransport(TRANSPORT_WIFI));
+        assertEquals(10, caps.getLinkDownstreamBandwidthKbps());
+        assertEquals(LINK_BANDWIDTH_UNSPECIFIED, caps.getLinkUpstreamBandwidthKbps());
+        assertTrue(caps.hasCapability(NET_CAPABILITY_NOT_METERED));
+        assertFalse(caps.hasCapability(NET_CAPABILITY_NOT_ROAMING));
+
+        Vpn.updateCapabilities(mConnectivityManager, new Network[] { wifi }, caps);
+        assertTrue(caps.hasTransport(TRANSPORT_VPN));
+        assertFalse(caps.hasTransport(TRANSPORT_CELLULAR));
+        assertTrue(caps.hasTransport(TRANSPORT_WIFI));
+        assertEquals(LINK_BANDWIDTH_UNSPECIFIED, caps.getLinkDownstreamBandwidthKbps());
+        assertEquals(20, caps.getLinkUpstreamBandwidthKbps());
+        assertFalse(caps.hasCapability(NET_CAPABILITY_NOT_METERED));
+        assertTrue(caps.hasCapability(NET_CAPABILITY_NOT_ROAMING));
+
+        Vpn.updateCapabilities(mConnectivityManager, new Network[] { mobile, wifi }, caps);
+        assertTrue(caps.hasTransport(TRANSPORT_VPN));
+        assertTrue(caps.hasTransport(TRANSPORT_CELLULAR));
+        assertTrue(caps.hasTransport(TRANSPORT_WIFI));
+        assertEquals(10, caps.getLinkDownstreamBandwidthKbps());
+        assertEquals(20, caps.getLinkUpstreamBandwidthKbps());
+        assertFalse(caps.hasCapability(NET_CAPABILITY_NOT_METERED));
+        assertFalse(caps.hasCapability(NET_CAPABILITY_NOT_ROAMING));
+    }
+
     /**
      * Mock some methods of vpn object.
      */
@@ -462,5 +548,12 @@ public class VpnTest {
             }).when(mPackageManager).getPackageUidAsUser(anyString(), anyInt());
         } catch (Exception e) {
         }
+    }
+
+    private void setMockedNetworks(final Map<Network, NetworkCapabilities> networks) {
+        doAnswer(invocation -> {
+            final Network network = (Network) invocation.getArguments()[0];
+            return networks.get(network);
+        }).when(mConnectivityManager).getNetworkCapabilities(any());
     }
 }

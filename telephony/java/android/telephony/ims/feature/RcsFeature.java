@@ -18,11 +18,11 @@ package android.telephony.ims.feature;
 
 /**
  * Base implementation of the RcsFeature APIs. Any ImsService wishing to support RCS should extend
- * this class and provide implementations of the IRcsFeature methods that they support.
+ * this class and provide implementations of the RcsFeature methods that they support.
  * @hide
  */
 
-public class RcsFeature extends ImsFeature implements IRcsFeature {
+public class RcsFeature extends ImsFeature {
 
     public RcsFeature() {
         super();

@@ -17,6 +17,7 @@
 package android.telephony.mbms;
 
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -35,6 +36,7 @@ public final class FileServiceInfo extends ServiceInfo implements Parcelable {
 
     /** @hide */
     @SystemApi
+    @TestApi
     public FileServiceInfo(Map<Locale, String> newNames, String newClassName,
             List<Locale> newLocales, String newServiceId, Date start, Date end,
             List<FileInfo> newFiles) {

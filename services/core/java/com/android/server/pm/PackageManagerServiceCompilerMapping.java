@@ -26,13 +26,18 @@ import dalvik.system.DexFile;
 public class PackageManagerServiceCompilerMapping {
     // Names for compilation reasons.
     static final String REASON_STRINGS[] = {
-            "first-boot", "boot", "install", "bg-dexopt", "ab-ota", "inactive"
+            "first-boot", "boot", "install", "bg-dexopt", "ab-ota", "inactive", "shared"
     };
+
+    static final int REASON_SHARED_INDEX = 6;
 
     // Static block to ensure the strings array is of the right length.
     static {
         if (PackageManagerService.REASON_LAST + 1 != REASON_STRINGS.length) {
             throw new IllegalStateException("REASON_STRINGS not correct");
+        }
+        if (!"shared".equals(REASON_STRINGS[REASON_SHARED_INDEX])) {
+            throw new IllegalStateException("REASON_STRINGS not correct because of shared index");
         }
     }
 
@@ -47,23 +52,21 @@ public class PackageManagerServiceCompilerMapping {
     // Load the property for the given reason and check for validity. This will throw an
     // exception in case the reason or value are invalid.
     private static String getAndCheckValidity(int reason) {
-        String sysPropName = getSystemPropertyName(reason);
-        String sysPropValue;
-        // TODO: This is a temporary hack to keep marlin booting on aosp/master while we
-        // figure out how to deal with these system properties that currently appear on
-        // vendor.
-        if ("pm.dexopt.inactive".equals(sysPropName)) {
-            sysPropValue = "verify";
-        } else {
-            sysPropValue = SystemProperties.get(sysPropName);
-        }
+        String sysPropValue = SystemProperties.get(getSystemPropertyName(reason));
         if (sysPropValue == null || sysPropValue.isEmpty() ||
                 !DexFile.isValidCompilerFilter(sysPropValue)) {
             throw new IllegalStateException("Value \"" + sysPropValue +"\" not valid "
                     + "(reason " + REASON_STRINGS[reason] + ")");
+        } else if (!isFilterAllowedForReason(reason, sysPropValue)) {
+            throw new IllegalStateException("Value \"" + sysPropValue +"\" not allowed "
+                    + "(reason " + REASON_STRINGS[reason] + ")");
         }
 
         return sysPropValue;
+    }
+
+    private static boolean isFilterAllowedForReason(int reason, String filter) {
+        return reason != REASON_SHARED_INDEX || !DexFile.isProfileGuidedCompilerFilter(filter);
     }
 
     // Check that the properties are set and valid.

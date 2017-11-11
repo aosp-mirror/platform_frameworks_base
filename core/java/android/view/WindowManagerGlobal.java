@@ -605,9 +605,10 @@ public final class WindowManagerGlobal {
     public void setStoppedState(IBinder token, boolean stopped) {
         synchronized (mLock) {
             int count = mViews.size();
-            for (int i = 0; i < count; i++) {
+            for (int i = count - 1; i >= 0; i--) {
                 if (token == null || mParams.get(i).token == token) {
                     ViewRootImpl root = mRoots.get(i);
+                    // Client might remove the view by "stopped" event.
                     root.setWindowStopped(stopped);
                 }
             }

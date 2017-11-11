@@ -567,4 +567,12 @@ public class IccUtils {
         } while (valueIndex < endIndex);
         return result;
     }
+
+    public static String getDecimalSubstring(String iccId) {
+        int position;
+        for (position = 0; position < iccId.length(); position ++) {
+            if (!Character.isDigit(iccId.charAt(position))) break;
+        }
+        return iccId.substring( 0, position );
+    }
 }

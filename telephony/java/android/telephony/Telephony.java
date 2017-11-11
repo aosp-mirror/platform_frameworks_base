@@ -2805,6 +2805,26 @@ public final class Telephony {
          *  @hide
          */
         public static final int CARRIER_DELETED_BUT_PRESENT_IN_XML = 6;
+
+        /**
+         * The owner of the APN.
+         * <p>Type: INTEGER</p>
+         * @hide
+         */
+        public static final String OWNED_BY = "owned_by";
+
+        /**
+         * Possible value for the OWNED_BY field.
+         * APN is owned by DPC.
+         * @hide
+         */
+        public static final int OWNED_BY_DPC = 0;
+        /**
+         * Possible value for the OWNED_BY field.
+         * APN is owned by other sources.
+         * @hide
+         */
+        public static final int OWNED_BY_OTHERS = 1;
     }
 
     /**
@@ -3249,5 +3269,70 @@ public final class Telephony {
          * @hide
          */
         public static final String IS_USING_CARRIER_AGGREGATION = "is_using_carrier_aggregation";
+    }
+
+    /**
+     * Contains carrier identification information.
+     * @hide
+     */
+    public static final class CarrierIdentification implements BaseColumns {
+        /**
+         * Numeric operator ID (as String). {@code MCC + MNC}
+         * <P>Type: TEXT </P>
+         */
+        public static final String MCCMNC = "mccmnc";
+
+        /**
+         * Group id level 1 (as String).
+         * <P>Type: TEXT </P>
+         */
+        public static final String GID1 = "gid1";
+
+        /**
+         * Group id level 2 (as String).
+         * <P>Type: TEXT </P>
+         */
+        public static final String GID2 = "gid2";
+
+        /**
+         * Public Land Mobile Network name.
+         * <P>Type: TEXT </P>
+         */
+        public static final String PLMN = "plmn";
+
+        /**
+         * Prefix xpattern of IMSI (International Mobile Subscriber Identity).
+         * <P>Type: TEXT </P>
+         */
+        public static final String IMSI_PREFIX_XPATTERN = "imsi_prefix_xpattern";
+
+        /**
+         * Service Provider Name.
+         * <P>Type: TEXT </P>
+         */
+        public static final String SPN = "spn";
+
+        /**
+         * Prefer APN name.
+         * <P>Type: TEXT </P>
+         */
+        public static final String APN = "apn";
+
+        /**
+         * User facing carrier name.
+         * <P>Type: TEXT </P>
+         */
+        public static final String NAME = "carrier_name";
+
+        /**
+         * A unique carrier id
+         * <P>Type: INTEGER </P>
+         */
+        public static final String CID = "carrier_id";
+
+        /**
+         * The {@code content://} URI for this table.
+         */
+        public static final Uri CONTENT_URI = Uri.parse("content://carrier_identification");
     }
 }
