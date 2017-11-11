@@ -15,7 +15,7 @@
  */
 package com.android.server.usb.descriptors.report;
 
-import com.android.server.usb.descriptors.UsbDescriptorParser;
+import android.hardware.usb.UsbDeviceConnection;
 
 /**
  * @hide
@@ -24,19 +24,22 @@ import com.android.server.usb.descriptors.UsbDescriptorParser;
 public abstract class ReportCanvas {
     private static final String TAG = "ReportCanvas";
 
-    private final UsbDescriptorParser mParser;
+    private final UsbDeviceConnection mConnection;
 
     /**
      * Constructor.
      * @param connection    The USB connection object used to retrieve strings
      * from the USB device.
      */
-    public ReportCanvas(UsbDescriptorParser parser) {
-        mParser = parser;
+    public ReportCanvas(UsbDeviceConnection connection) {
+        mConnection = connection;
     }
 
-    public UsbDescriptorParser getParser() {
-        return mParser;
+    /**
+     * @returns the UsbDeviceConnection member (mConnection).
+     */
+    public UsbDeviceConnection getConnection() {
+        return mConnection;
     }
 
     /**
