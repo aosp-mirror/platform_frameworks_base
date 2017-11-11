@@ -21,6 +21,7 @@ option java_outer_classname = "IncidentProtoMetadata";
 import "frameworks/base/libs/incident/proto/android/privacy.proto";
 import "frameworks/base/libs/incident/proto/android/section.proto";
 import "frameworks/base/core/proto/android/providers/settings.proto";
+import "frameworks/base/core/proto/android/os/cpuinfo.proto";
 import "frameworks/base/core/proto/android/os/incidentheader.proto";
 import "frameworks/base/core/proto/android/os/kernelwake.proto";
 import "frameworks/base/core/proto/android/os/pagetypeinfo.proto";
@@ -66,6 +67,11 @@ message IncidentProto {
     optional KernelWakeSources kernel_wake_sources = 2002 [
         (section).type = SECTION_FILE,
         (section).args = "/d/wakeup_sources"
+    ];
+
+    optional CpuInfo cpu_info = 2003 [
+        (section).type = SECTION_COMMAND,
+        (section).args = "/system/bin/top -b -n 1 -H -s 6 -o pid,tid,user,pr,ni,%cpu,s,virt,res,pcy,cmd,name"
     ];
 
 

@@ -63,7 +63,7 @@ message MigrateTypeProto {
 
 // Next tag: 9
 message BlockProto {
-    option (stream_proto.stream).enable_fields_mapping = true;
+    option (stream_proto.stream_msg).enable_fields_mapping = true;
 
     optional int32 node = 1;
 

@@ -58,6 +58,7 @@ cc_library {
             // runtime, as well as the only protos that are actually
             // needed by the device.
             srcs: [
+                "core/proto/android/os/cpuinfo.proto",
                 "core/proto/android/os/kernelwake.proto",
                 "core/proto/android/os/pagetypeinfo.proto",
                 "core/proto/android/os/procrank.proto",
@@ -81,6 +82,7 @@ gensrcs {
     ],
 
     srcs: [
+        "core/proto/android/os/cpuinfo.proto",
         "core/proto/android/os/kernelwake.proto",
         "core/proto/android/os/pagetypeinfo.proto",
         "core/proto/android/os/procrank.proto",

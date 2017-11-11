@@ -108,6 +108,17 @@ split(const string& str, const char delimiter)
     return result;
 }
 
+string
+stripPrefix(const string& str, const string& prefix)
+{
+    if (str.size() <= prefix.size()) return str;
+    size_t i = 0, len = prefix.size();
+    for (; i<len; i++) {
+        if (str[i] != prefix[i]) return str;
+    }
+    return str.substr(i);
+}
+
 } // namespace stream_proto
 } // namespace android
 

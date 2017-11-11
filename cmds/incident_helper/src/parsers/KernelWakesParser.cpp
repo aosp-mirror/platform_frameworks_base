@@ -23,8 +23,6 @@
 
 using namespace android::os;
 
-const std::string LINE_DELIMITER = "\t";
-
 status_t
 KernelWakesParser::Parse(const int in, const int out) const
 {
@@ -42,12 +40,12 @@ KernelWakesParser::Parse(const int in, const int out) const
         if (line.empty()) continue;
         // parse head line
         if (nline++ == 0) {
-            header = parseHeader(line, LINE_DELIMITER);
+            header = parseHeader(line, TAB_DELIMITER);
             continue;
         }
 
         // parse for each record, the line delimiter is \t only!
-        record = parseRecord(line, LINE_DELIMITER);
+        record = parseRecord(line, TAB_DELIMITER);
 
         if (record.size() != header.size()) {
             // TODO: log this to incident report!
@@ -57,7 +55,7 @@ KernelWakesParser::Parse(const int in, const int out) const
 
         long long token = proto.start(KernelWakeSources::WAKEUP_SOURCES);
         for (int i=0; i<(int)record.size(); i++) {
-            if (!table.insertField(proto, header[i], record[i])) {
+            if (!table.insertField(&proto, header[i], record[i])) {
                 fprintf(stderr, "[%s]Line %d has bad value %s of %s\n",
                         this->name.string(), nline, header[i].c_str(), record[i].c_str());
             }
