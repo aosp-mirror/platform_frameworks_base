@@ -77,6 +77,14 @@
     <item type="id" name="action_move_tl_30" />
     <item type="id" name="action_move_rb_full" />
 
+    <item type="id" name="bottom_roundess_animator_tag"/>
+    <item type="id" name="bottom_roundess_animator_start_tag"/>
+    <item type="id" name="bottom_roundess_animator_end_tag"/>
+
+    <item type="id" name="top_roundess_animator_tag"/>
+    <item type="id" name="top_roundess_animator_start_tag"/>
+    <item type="id" name="top_roundess_animator_end_tag"/>
+
     <!-- Accessibility actions for the notification menu -->
     <item type="id" name="action_snooze_undo"/>
     <item type="id" name="action_snooze_shorter"/>

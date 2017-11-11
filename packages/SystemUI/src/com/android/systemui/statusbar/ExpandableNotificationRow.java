@@ -1025,6 +1025,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         mKeepInParent = keepInParent;
     }
 
+    @Override
     public boolean isRemoved() {
         return mRemoved;
     }

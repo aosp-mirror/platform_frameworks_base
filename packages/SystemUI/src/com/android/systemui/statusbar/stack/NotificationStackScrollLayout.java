@@ -2831,21 +2831,34 @@ public class NotificationStackScrollLayout extends ViewGroup
             mAnimateNextBackgroundTop = false;
             mAnimateNextBackgroundBottom = false;
         }
-        if (firstChanged && mFirstVisibleBackgroundChild != null) {
-            mFirstVisibleBackgroundChild.setTopRoundness(0.0f);
+        if (firstChanged && mFirstVisibleBackgroundChild != null
+                && !mFirstVisibleBackgroundChild.isRemoved()) {
+            mFirstVisibleBackgroundChild.setTopRoundness(0.0f,
+                    mFirstVisibleBackgroundChild.isShown());
         }
-        if (lastChanged && mLastVisibleBackgroundChild != null) {
-            mLastVisibleBackgroundChild.setBottomRoundNess(0.0f);
+        if (lastChanged && mLastVisibleBackgroundChild != null
+                && !mLastVisibleBackgroundChild.isRemoved()) {
+            mLastVisibleBackgroundChild.setBottomRoundNess(0.0f,
+                    mLastVisibleBackgroundChild.isShown());
         }
         mFirstVisibleBackgroundChild = firstChild;
         mLastVisibleBackgroundChild = lastChild;
+        applyRoundedNess();
+        mAmbientState.setLastVisibleBackgroundChild(lastChild);
+    }
+
+    private void applyRoundedNess() {
         if (mFirstVisibleBackgroundChild != null) {
-            mFirstVisibleBackgroundChild.setTopRoundness(1.0f);
+            mFirstVisibleBackgroundChild.setTopRoundness(
+                    mStatusBarState == StatusBarState.KEYGUARD ? 1.0f : 0.0f,
+                    mFirstVisibleBackgroundChild.isShown()
+                            && !mChildrenToAddAnimated.contains(mFirstVisibleBackgroundChild));
         }
         if (mLastVisibleBackgroundChild != null) {
-            mLastVisibleBackgroundChild.setBottomRoundNess(1.0f);
+            mLastVisibleBackgroundChild.setBottomRoundNess(1.0f,
+                    mLastVisibleBackgroundChild.isShown()
+                            && !mChildrenToAddAnimated.contains(mLastVisibleBackgroundChild));
         }
-        mAmbientState.setLastVisibleBackgroundChild(lastChild);
     }
 
     private void onViewAddedInternal(View child) {
@@ -4300,6 +4313,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     public void setStatusBarState(int statusBarState) {
         mStatusBarState = statusBarState;
         mAmbientState.setStatusBarState(statusBarState);
+        applyRoundedNess();
     }
 
     public void setExpandingVelocity(float expandingVelocity) {

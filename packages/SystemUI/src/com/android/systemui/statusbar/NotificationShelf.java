@@ -111,7 +111,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
         mViewInvertHelper = new ViewInvertHelper(mShelfIcons,
                 NotificationPanelView.DOZE_ANIMATION_DURATION);
         mShelfState = new ShelfState();
-        setBottomRoundNess(1.0f);
+        setBottomRoundNess(1.0f, false /* animate */);
         initDimens();
     }
 
@@ -314,7 +314,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
                 if (iconState.clampedAppearAmount == 1.0f) {
                     // only if the first icon is fully in the shelf we want to clip to it!
                     mCustomClipTop = (int) (row.getTranslationY() - getTranslationY());
-                    mFirstElementTopRoundness = row.getBackgroundRadiusTop();
+                    mFirstElementTopRoundness = row.getCurrentBackgroundRadiusTop();
                     contentNeedsClipping = true;
                 }
             }
@@ -356,7 +356,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
             return null;
         }
         return getRoundedRectPath(0, mCustomClipTop, getWidth(), getHeight(),
-                mFirstElementTopRoundness, getBackgroundRadiusBottom());
+                mFirstElementTopRoundness, getCurrentBackgroundRadiusBottom());
     }
 
     @Override

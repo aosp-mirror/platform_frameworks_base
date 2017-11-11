@@ -904,7 +904,8 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     @Override
     protected void applyRoundness() {
         super.applyRoundness();
-        applyBackgroundRoundness(getBackgroundRadiusTop(), getBackgroundRadiusBottom());
+        applyBackgroundRoundness(getCurrentBackgroundRadiusTop(),
+                getCurrentBackgroundRadiusBottom());
     }
 
     protected void applyBackgroundRoundness(float topRadius, float bottomRadius) {
