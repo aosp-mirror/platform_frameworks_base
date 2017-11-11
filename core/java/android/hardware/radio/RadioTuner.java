@@ -309,6 +309,58 @@ public abstract class RadioTuner {
     public abstract void setAnalogForced(boolean isForced);
 
     /**
+     * Generic method for setting vendor-specific parameter values.
+     * The framework does not interpret the parameters, they are passed
+     * in an opaque manner between a vendor application and HAL.
+     *
+     * Framework does not make any assumptions on the keys or values, other than
+     * ones stated in VendorKeyValue documentation (a requirement of key
+     * prefixes).
+     *
+     * For each pair in the result map, the key will be one of the keys
+     * contained in the input (possibly with wildcards expanded), and the value
+     * will be a vendor-specific result status (such as "OK" or an error code).
+     * The implementation may choose to return an empty map, or only return
+     * a status for a subset of the provided inputs, at its discretion.
+     *
+     * Application and HAL must not use keys with unknown prefix. In particular,
+     * it must not place a key-value pair in results vector for unknown key from
+     * parameters vector - instead, an unknown key should simply be ignored.
+     * In other words, results vector may contain a subset of parameter keys
+     * (however, the framework doesn't enforce a strict subset - the only
+     * formal requirement is vendor domain prefix for keys).
+     *
+     * @param parameters Vendor-specific key-value pairs.
+     * @return Operation completion status for parameters being set.
+     * @hide FutureFeature
+     */
+    public abstract @NonNull Map<String, String>
+            setParameters(@NonNull Map<String, String> parameters);
+
+    /**
+     * Generic method for retrieving vendor-specific parameter values.
+     * The framework does not interpret the parameters, they are passed
+     * in an opaque manner between a vendor application and HAL.
+     *
+     * Framework does not cache set/get requests, so it's possible for
+     * getParameter to return a different value than previous setParameter call.
+     *
+     * The syntax and semantics of keys are up to the vendor (as long as prefix
+     * rules are obeyed). For instance, vendors may include some form of
+     * wildcard support. In such case, result vector may be of different size
+     * than requested keys vector. However, wildcards are not recognized by
+     * framework and they are passed as-is to the HAL implementation.
+     *
+     * Unknown keys must be ignored and not placed into results vector.
+     *
+     * @param keys Parameter keys to fetch.
+     * @return Vendor-specific key-value pairs.
+     * @hide FutureFeature
+     */
+    public abstract @NonNull Map<String, String>
+            getParameters(@NonNull List<String> keys);
+
+    /**
      * Get current antenna connection state for current configuration.
      * Only valid if a configuration has been applied.
      * @return {@code true} if the antenna is connected, {@code false} otherwise.
@@ -429,6 +481,22 @@ public abstract class RadioTuner {
          * Use {@link RadioTuner#getProgramList(String)} to get an actual list.
          */
         public void onProgramListChanged() {}
+
+        /**
+         * Generic callback for passing updates to vendor-specific parameter values.
+         * The framework does not interpret the parameters, they are passed
+         * in an opaque manner between a vendor application and HAL.
+         *
+         * It's up to the HAL implementation if and how to implement this callback,
+         * as long as it obeys the prefix rule. In particular, only selected keys
+         * may be notified this way. However, setParameters must not trigger
+         * this callback, while an internal event can change parameters
+         * asynchronously.
+         *
+         * @param parameters Vendor-specific key-value pairs.
+         * @hide FutureFeature
+         */
+        public void onParametersUpdated(@NonNull Map<String, String> parameters) {}
     }
 
 }
