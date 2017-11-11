@@ -73,7 +73,7 @@ std::unique_ptr<std::vector<uint8_t>> MetricProducer::serializeProto() {
     auto it = mProto->data();
     while (it.readBuffer() != NULL) {
         size_t toRead = it.currentToRead();
-        std::memcpy(&buffer.get()[pos], it.readBuffer(), toRead);
+        std::memcpy(&((*buffer)[pos]), it.readBuffer(), toRead);
         pos += toRead;
         it.rp()->move(toRead);
     }
