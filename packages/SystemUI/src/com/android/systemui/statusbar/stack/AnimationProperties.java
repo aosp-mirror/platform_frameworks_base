@@ -36,7 +36,12 @@ public class AnimationProperties {
      * @return an animation filter for this animation.
      */
     public AnimationFilter getAnimationFilter() {
-        return new AnimationFilter();
+        return new AnimationFilter() {
+            @Override
+            public boolean shouldAnimateProperty(Property property) {
+                return true;
+            }
+        };
     }
 
     /**
