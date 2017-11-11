@@ -111,6 +111,7 @@ DEFINE_ALLOC_VECTOR_METHODS(Double,jdouble,Double)
                 break;                                                         \
             }
 
+__attribute__((no_sanitize("unsigned-integer-overflow")))
 void EphemeralStorage::release(JNIEnv *env) {
     for (size_t i = mItems.size(); i--;) {
         const Item &item = mItems[i];

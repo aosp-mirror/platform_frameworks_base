@@ -119,7 +119,8 @@ public class ConnectStats {
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder("ConnectStats(").append(netId).append(", ");
+        StringBuilder builder =
+                new StringBuilder("ConnectStats(").append("netId=").append(netId).append(", ");
         for (int t : BitUtils.unpackBits(transports)) {
             builder.append(NetworkCapabilities.transportNameOf(t)).append(", ");
         }

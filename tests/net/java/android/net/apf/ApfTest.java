@@ -29,9 +29,7 @@ import static org.mockito.Mockito.verify;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.NetworkUtils;
-import android.net.apf.ApfCapabilities;
-import android.net.apf.ApfFilter;
-import android.net.apf.ApfGenerator;
+import android.net.apf.ApfFilter.ApfConfiguration;
 import android.net.apf.ApfGenerator.IllegalInstructionException;
 import android.net.apf.ApfGenerator.Register;
 import android.net.ip.IpManager;
@@ -99,11 +97,23 @@ public class ApfTest {
     // least the minimum packet size.
     private final static int MIN_PKT_SIZE = 15;
 
+    private static final ApfCapabilities MOCK_APF_CAPABILITIES =
+      new ApfCapabilities(2, 1700, ARPHRD_ETHER);
+
     private final static boolean DROP_MULTICAST = true;
     private final static boolean ALLOW_MULTICAST = false;
 
     private final static boolean DROP_802_3_FRAMES = true;
     private final static boolean ALLOW_802_3_FRAMES = false;
+
+    private static ApfConfiguration getDefaultConfig() {
+        ApfFilter.ApfConfiguration config = new ApfConfiguration();
+        config.apfCapabilities = MOCK_APF_CAPABILITIES;
+        config.multicastFilter = ALLOW_MULTICAST;
+        config.ieee802_3Filter = ALLOW_802_3_FRAMES;
+        config.ethTypeBlackList = new int[0];
+        return config;
+    }
 
     private static String label(int code) {
         switch (code) {
@@ -619,15 +629,13 @@ public class ApfTest {
 
     private static class TestApfFilter extends ApfFilter {
         public final static byte[] MOCK_MAC_ADDR = {1,2,3,4,5,6};
-        private FileDescriptor mWriteSocket;
 
+        private FileDescriptor mWriteSocket;
         private final long mFixedTimeMs = SystemClock.elapsedRealtime();
 
-        public TestApfFilter(IpManager.Callback ipManagerCallback, boolean multicastFilter,
-                boolean ieee802_3Filter, int[] ethTypeBlackList,
+        public TestApfFilter(ApfConfiguration config, IpManager.Callback ipManagerCallback,
                 IpConnectivityLog log) throws Exception {
-            super(new ApfCapabilities(2, 1700, ARPHRD_ETHER), NetworkInterface.getByName("lo"),
-                    ipManagerCallback, multicastFilter, ieee802_3Filter, ethTypeBlackList, log);
+            super(config, NetworkInterface.getByName("lo"), ipManagerCallback, log);
         }
 
         // Pretend an RA packet has been received and show it to ApfFilter.
@@ -755,10 +763,10 @@ public class ApfTest {
         LinkAddress link = new LinkAddress(InetAddress.getByAddress(MOCK_IPV4_ADDR), 19);
         LinkProperties lp = new LinkProperties();
         lp.addLinkAddress(link);
-        final int[] ethTypeBlackList = {};
 
-        ApfFilter apfFilter = new TestApfFilter(ipManagerCallback, DROP_MULTICAST,
-                ALLOW_802_3_FRAMES, ethTypeBlackList, mLog);
+        ApfConfiguration config = getDefaultConfig();
+        config.multicastFilter = DROP_MULTICAST;
+        TestApfFilter apfFilter = new TestApfFilter(config, ipManagerCallback, mLog);
         apfFilter.setLinkProperties(lp);
 
         byte[] program = ipManagerCallback.getApfProgram();
@@ -808,10 +816,9 @@ public class ApfTest {
 
     @Test
     public void testApfFilterIPv6() throws Exception {
-        final int[] ethTypeBlackList = {};
         MockIpManagerCallback ipManagerCallback = new MockIpManagerCallback();
-        ApfFilter apfFilter = new TestApfFilter(ipManagerCallback, ALLOW_MULTICAST,
-                ALLOW_802_3_FRAMES, ethTypeBlackList, mLog);
+        ApfConfiguration config = getDefaultConfig();
+        TestApfFilter apfFilter = new TestApfFilter(config, ipManagerCallback, mLog);
         byte[] program = ipManagerCallback.getApfProgram();
 
         // Verify empty IPv6 packet is passed
@@ -846,15 +853,15 @@ public class ApfTest {
         final byte[] broadcastIpv4Addr = {(byte)192,0,2,(byte)255};
         final byte[] multicastIpv4Addr = {(byte)224,0,0,1};
         final byte[] multicastIpv6Addr = {(byte)0xff,2,0,0,0,0,0,0,0,0,0,0,0,0,0,(byte)0xfb};
-        final int[] ethTypeBlackList = {};
 
         MockIpManagerCallback ipManagerCallback = new MockIpManagerCallback();
         LinkAddress link = new LinkAddress(InetAddress.getByAddress(unicastIpv4Addr), 24);
         LinkProperties lp = new LinkProperties();
         lp.addLinkAddress(link);
 
-        ApfFilter apfFilter = new TestApfFilter(ipManagerCallback, ALLOW_MULTICAST,
-                DROP_802_3_FRAMES, ethTypeBlackList, mLog);
+        ApfConfiguration config = getDefaultConfig();
+        config.ieee802_3Filter = DROP_802_3_FRAMES;
+        TestApfFilter apfFilter = new TestApfFilter(config, ipManagerCallback, mLog);
         apfFilter.setLinkProperties(lp);
 
         byte[] program = ipManagerCallback.getApfProgram();
@@ -916,8 +923,9 @@ public class ApfTest {
         // Verify it can be initialized to on
         ipManagerCallback.resetApfProgramWait();
         apfFilter.shutdown();
-        apfFilter = new TestApfFilter(ipManagerCallback, DROP_MULTICAST,
-                DROP_802_3_FRAMES, ethTypeBlackList, mLog);
+        config.multicastFilter = DROP_MULTICAST;
+        config.ieee802_3Filter = DROP_802_3_FRAMES;
+        apfFilter = new TestApfFilter(config, ipManagerCallback, mLog);
         apfFilter.setLinkProperties(lp);
         program = ipManagerCallback.getApfProgram();
         assertDrop(program, mcastv4packet.array());
@@ -938,10 +946,9 @@ public class ApfTest {
         LinkAddress link = new LinkAddress(InetAddress.getByAddress(MOCK_IPV4_ADDR), 19);
         LinkProperties lp = new LinkProperties();
         lp.addLinkAddress(link);
-        final int[] ethTypeBlackList = {};
 
-        ApfFilter apfFilter = new TestApfFilter(ipManagerCallback, ALLOW_MULTICAST,
-                ALLOW_802_3_FRAMES, ethTypeBlackList, mLog);
+        ApfConfiguration config = getDefaultConfig();
+        TestApfFilter apfFilter = new TestApfFilter(config, ipManagerCallback, mLog);
         apfFilter.setLinkProperties(lp);
 
         byte[] program = ipManagerCallback.getApfProgram();
@@ -962,8 +969,8 @@ public class ApfTest {
         // Now turn on the filter
         ipManagerCallback.resetApfProgramWait();
         apfFilter.shutdown();
-        apfFilter = new TestApfFilter(ipManagerCallback, ALLOW_MULTICAST,
-                DROP_802_3_FRAMES, ethTypeBlackList, mLog);
+        config.ieee802_3Filter = DROP_802_3_FRAMES;
+        apfFilter = new TestApfFilter(config, ipManagerCallback, mLog);
         apfFilter.setLinkProperties(lp);
         program = ipManagerCallback.getApfProgram();
 
@@ -993,8 +1000,8 @@ public class ApfTest {
         final int[] ipv4BlackList = {ETH_P_IP};
         final int[] ipv4Ipv6BlackList = {ETH_P_IP, ETH_P_IPV6};
 
-        ApfFilter apfFilter = new TestApfFilter(ipManagerCallback, ALLOW_MULTICAST,
-                ALLOW_802_3_FRAMES, emptyBlackList, mLog);
+        ApfConfiguration config = getDefaultConfig();
+        TestApfFilter apfFilter = new TestApfFilter(config, ipManagerCallback, mLog);
         apfFilter.setLinkProperties(lp);
 
         byte[] program = ipManagerCallback.getApfProgram();
@@ -1015,8 +1022,8 @@ public class ApfTest {
         // Now add IPv4 to the black list
         ipManagerCallback.resetApfProgramWait();
         apfFilter.shutdown();
-        apfFilter = new TestApfFilter(ipManagerCallback, ALLOW_MULTICAST,
-                ALLOW_802_3_FRAMES, ipv4BlackList, mLog);
+        config.ethTypeBlackList = ipv4BlackList;
+        apfFilter = new TestApfFilter(config, ipManagerCallback, mLog);
         apfFilter.setLinkProperties(lp);
         program = ipManagerCallback.getApfProgram();
 
@@ -1031,8 +1038,8 @@ public class ApfTest {
         // Now let us have both IPv4 and IPv6 in the black list
         ipManagerCallback.resetApfProgramWait();
         apfFilter.shutdown();
-        apfFilter = new TestApfFilter(ipManagerCallback, ALLOW_MULTICAST,
-                ALLOW_802_3_FRAMES, ipv4Ipv6BlackList, mLog);
+        config.ethTypeBlackList = ipv4Ipv6BlackList;
+        apfFilter = new TestApfFilter(config, ipManagerCallback, mLog);
         apfFilter.setLinkProperties(lp);
         program = ipManagerCallback.getApfProgram();
 
@@ -1070,10 +1077,11 @@ public class ApfTest {
 
     @Test
     public void testApfFilterArp() throws Exception {
-        final int[] ethTypeBlackList = {};
         MockIpManagerCallback ipManagerCallback = new MockIpManagerCallback();
-        ApfFilter apfFilter = new TestApfFilter(ipManagerCallback, ALLOW_MULTICAST,
-                DROP_802_3_FRAMES, ethTypeBlackList, mLog);
+        ApfConfiguration config = getDefaultConfig();
+        config.multicastFilter = DROP_MULTICAST;
+        config.ieee802_3Filter = DROP_802_3_FRAMES;
+        TestApfFilter apfFilter = new TestApfFilter(config, ipManagerCallback, mLog);
 
         // Verify initially ARP request filter is off, and GARP filter is on.
         verifyArpFilter(ipManagerCallback.getApfProgram(), PASS);
@@ -1194,9 +1202,10 @@ public class ApfTest {
     @Test
     public void testApfFilterRa() throws Exception {
         MockIpManagerCallback ipManagerCallback = new MockIpManagerCallback();
-        final int[] ethTypeBlackList = {};
-        TestApfFilter apfFilter = new TestApfFilter(ipManagerCallback, DROP_MULTICAST,
-                DROP_802_3_FRAMES, ethTypeBlackList, mLog);
+        ApfConfiguration config = getDefaultConfig();
+        config.multicastFilter = DROP_MULTICAST;
+        config.ieee802_3Filter = DROP_802_3_FRAMES;
+        TestApfFilter apfFilter = new TestApfFilter(config, ipManagerCallback, mLog);
         byte[] program = ipManagerCallback.getApfProgram();
 
         final int ROUTER_LIFETIME = 1000;
@@ -1338,10 +1347,11 @@ public class ApfTest {
     public void testRaParsing() throws Exception {
         final int maxRandomPacketSize = 512;
         final Random r = new Random();
-        final int[] ethTypeBlackList = {};
         MockIpManagerCallback cb = new MockIpManagerCallback();
-        TestApfFilter apfFilter = new TestApfFilter(cb, DROP_MULTICAST,
-                DROP_802_3_FRAMES, ethTypeBlackList, mLog);
+        ApfConfiguration config = getDefaultConfig();
+        config.multicastFilter = DROP_MULTICAST;
+        config.ieee802_3Filter = DROP_802_3_FRAMES;
+        TestApfFilter apfFilter = new TestApfFilter(config, cb, mLog);
         for (int i = 0; i < 1000; i++) {
             byte[] packet = new byte[r.nextInt(maxRandomPacketSize + 1)];
             r.nextBytes(packet);
@@ -1358,10 +1368,11 @@ public class ApfTest {
     public void testRaProcessing() throws Exception {
         final int maxRandomPacketSize = 512;
         final Random r = new Random();
-        final int[] ethTypeBlackList = {};
         MockIpManagerCallback cb = new MockIpManagerCallback();
-        TestApfFilter apfFilter = new TestApfFilter(cb, DROP_MULTICAST,
-                DROP_802_3_FRAMES, ethTypeBlackList, mLog);
+        ApfConfiguration config = getDefaultConfig();
+        config.multicastFilter = DROP_MULTICAST;
+        config.ieee802_3Filter = DROP_802_3_FRAMES;
+        TestApfFilter apfFilter = new TestApfFilter(config, cb, mLog);
         for (int i = 0; i < 1000; i++) {
             byte[] packet = new byte[r.nextInt(maxRandomPacketSize + 1)];
             r.nextBytes(packet);

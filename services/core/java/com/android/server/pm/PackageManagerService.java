@@ -562,8 +562,9 @@ public class PackageManagerService extends IPackageManager.Stub
     public static final int REASON_BACKGROUND_DEXOPT = 3;
     public static final int REASON_AB_OTA = 4;
     public static final int REASON_INACTIVE_PACKAGE_DOWNGRADE = 5;
+    public static final int REASON_SHARED = 6;
 
-    public static final int REASON_LAST = REASON_INACTIVE_PACKAGE_DOWNGRADE;
+    public static final int REASON_LAST = REASON_SHARED;
 
     /** All dangerous permission names in the same order as the events in MetricsEvent */
     private static final List<String> ALL_DANGEROUS_PERMISSIONS = Arrays.asList(
@@ -9461,7 +9462,8 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     @Override
-    public void notifyDexLoad(String loadingPackageName, List<String> dexPaths, String loaderIsa) {
+    public void notifyDexLoad(String loadingPackageName, List<String> classLoaderNames,
+            List<String> classPaths, String loaderIsa) {
         int userId = UserHandle.getCallingUserId();
         ApplicationInfo ai = getApplicationInfo(loadingPackageName, /*flags*/ 0, userId);
         if (ai == null) {
@@ -9469,7 +9471,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 + loadingPackageName + ", user=" + userId);
             return;
         }
-        mDexManager.notifyDexLoad(ai, dexPaths, loaderIsa, userId);
+        mDexManager.notifyDexLoad(ai, classLoaderNames, classPaths, loaderIsa, userId);
     }
 
     @Override
@@ -9619,17 +9621,19 @@ public class PackageManagerService extends IPackageManager.Stub
         Collection<PackageParser.Package> deps = findSharedNonSystemLibraries(p);
         final String[] instructionSets = getAppDexInstructionSets(p.applicationInfo);
         if (!deps.isEmpty()) {
+            DexoptOptions libraryOptions = new DexoptOptions(options.getPackageName(),
+                    options.getCompilerFilter(), options.getSplitName(),
+                    options.getFlags() | DexoptOptions.DEXOPT_AS_SHARED_LIBRARY);
             for (PackageParser.Package depPackage : deps) {
                 // TODO: Analyze and investigate if we (should) profile libraries.
                 pdo.performDexOpt(depPackage, null /* sharedLibraries */, instructionSets,
                         getOrCreateCompilerPackageStats(depPackage),
-                        true /* isUsedByOtherApps */,
-                        options);
+                    mDexManager.getPackageUseInfoOrDefault(depPackage.packageName), libraryOptions);
             }
         }
         return pdo.performDexOpt(p, p.usesLibraryFiles, instructionSets,
                 getOrCreateCompilerPackageStats(p),
-                mDexManager.isUsedByOtherApps(p.packageName), options);
+                mDexManager.getPackageUseInfoOrDefault(p.packageName), options);
     }
 
     /**
@@ -9755,6 +9759,7 @@ public class PackageManagerService extends IPackageManager.Stub
     public void shutdown() {
         mPackageUsage.writeNow(mPackages);
         mCompilerStats.writeNow();
+        mDexManager.writePackageDexUsageNow();
     }
 
     @Override
@@ -10265,7 +10270,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         if (Build.IS_DEBUGGABLE &&
                 pkg.isPrivilegedApp() &&
-                !SystemProperties.getBoolean("pm.dexopt.priv-apps", true)) {
+                SystemProperties.getBoolean("pm.dexopt.priv-apps-oob", false)) {
             PackageManagerServiceUtils.logPackageHasUncompressedCode(pkg);
         }
 
@@ -18259,42 +18264,56 @@ public class PackageManagerService extends IPackageManager.Stub
                     Slog.e(TAG, "updateAllSharedLibrariesLPw failed: " + e.getMessage());
                 }
             }
-
-            // dexopt can take some time to complete, so, for instant apps, we skip this
-            // step during installation. Instead, we'll take extra time the first time the
-            // instant app starts. It's preferred to do it this way to provide continuous
-            // progress to the user instead of mysteriously blocking somewhere in the
-            // middle of running an instant app. The default behaviour can be overridden
-            // via gservices.
-            if (!instantApp || Global.getInt(
-                        mContext.getContentResolver(), Global.INSTANT_APP_DEXOPT_ENABLED, 0) != 0) {
-                Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dexopt");
-                // Do not run PackageDexOptimizer through the local performDexOpt
-                // method because `pkg` may not be in `mPackages` yet.
-                //
-                // Also, don't fail application installs if the dexopt step fails.
-                DexoptOptions dexoptOptions = new DexoptOptions(pkg.packageName,
-                        REASON_INSTALL,
-                        DexoptOptions.DEXOPT_BOOT_COMPLETE);
-                mPackageDexOptimizer.performDexOpt(pkg, pkg.usesLibraryFiles,
-                        null /* instructionSets */,
-                        getOrCreateCompilerPackageStats(pkg),
-                        mDexManager.isUsedByOtherApps(pkg.packageName),
-                        dexoptOptions);
-                Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
-            }
-
-            // Notify BackgroundDexOptService that the package has been changed.
-            // If this is an update of a package which used to fail to compile,
-            // BDOS will remove it from its blacklist.
-            // TODO: Layering violation
-            BackgroundDexOptService.notifyPackageChanged(pkg.packageName);
         }
 
         if (!args.doRename(res.returnCode, pkg, oldCodePath)) {
             res.setError(INSTALL_FAILED_INSUFFICIENT_STORAGE, "Failed rename");
             return;
         }
+
+        // Verify if we need to dexopt the app.
+        //
+        // NOTE: it is *important* to call dexopt after doRename which will sync the
+        // package data from PackageParser.Package and its corresponding ApplicationInfo.
+        //
+        // We only need to dexopt if the package meets ALL of the following conditions:
+        //   1) it is not forward locked.
+        //   2) it is not on on an external ASEC container.
+        //   3) it is not an instant app or if it is then dexopt is enabled via gservices.
+        //
+        // Note that we do not dexopt instant apps by default. dexopt can take some time to
+        // complete, so we skip this step during installation. Instead, we'll take extra time
+        // the first time the instant app starts. It's preferred to do it this way to provide
+        // continuous progress to the useur instead of mysteriously blocking somewhere in the
+        // middle of running an instant app. The default behaviour can be overridden
+        // via gservices.
+        final boolean performDexopt = !forwardLocked
+            && !pkg.applicationInfo.isExternalAsec()
+            && (!instantApp || Global.getInt(mContext.getContentResolver(),
+                    Global.INSTANT_APP_DEXOPT_ENABLED, 0) != 0);
+
+        if (performDexopt) {
+            Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dexopt");
+            // Do not run PackageDexOptimizer through the local performDexOpt
+            // method because `pkg` may not be in `mPackages` yet.
+            //
+            // Also, don't fail application installs if the dexopt step fails.
+            DexoptOptions dexoptOptions = new DexoptOptions(pkg.packageName,
+                REASON_INSTALL,
+                DexoptOptions.DEXOPT_BOOT_COMPLETE);
+            mPackageDexOptimizer.performDexOpt(pkg, pkg.usesLibraryFiles,
+                null /* instructionSets */,
+                getOrCreateCompilerPackageStats(pkg),
+                mDexManager.getPackageUseInfoOrDefault(pkg.packageName),
+                dexoptOptions);
+            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+        }
+
+        // Notify BackgroundDexOptService that the package has been changed.
+        // If this is an update of a package which used to fail to compile,
+        // BackgroundDexOptService will remove it from its blacklist.
+        // TODO: Layering violation
+        BackgroundDexOptService.notifyPackageChanged(pkg.packageName);
 
         startIntentFilterVerifications(args.user.getIdentifier(), replace, pkg);
 
@@ -22551,7 +22570,8 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         for (PackageParser.Package pkg : packages) {
             ipw.println("[" + pkg.packageName + "]");
             ipw.increaseIndent();
-            mPackageDexOptimizer.dumpDexoptState(ipw, pkg);
+            mPackageDexOptimizer.dumpDexoptState(ipw, pkg,
+                    mDexManager.getPackageUseInfoOrDefault(pkg.packageName));
             ipw.decreaseIndent();
         }
     }
@@ -25064,8 +25084,8 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                 if (ps == null) {
                     continue;
                 }
-                PackageDexUsage.PackageUseInfo packageUseInfo = getDexManager().getPackageUseInfo(
-                        pkg.packageName);
+                PackageDexUsage.PackageUseInfo packageUseInfo =
+                      getDexManager().getPackageUseInfoOrDefault(pkg.packageName);
                 if (PackageManagerServiceUtils
                         .isUnusedSinceTimeInMillis(ps.firstInstallTime, currentTimeInMillis,
                                 downgradeTimeThresholdMillis, packageUseInfo,

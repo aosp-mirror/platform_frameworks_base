@@ -40,7 +40,7 @@ public:
         long compressedLen);
     static bool inflateToBuffer(int fd, void* buf, long uncompressedLen,
         long compressedLen);
-    static bool inflateToBuffer(void *in, void* buf, long uncompressedLen,
+    static bool inflateToBuffer(const void *in, void* buf, long uncompressedLen,
         long compressedLen);
 
     /*

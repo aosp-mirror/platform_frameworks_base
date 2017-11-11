@@ -198,37 +198,33 @@ public class IpConnectivityEventBuilderTest {
 
     @Test
     public void testDefaultNetworkEventSerialization() {
-        DefaultNetworkEvent ev = new DefaultNetworkEvent();
+        DefaultNetworkEvent ev = new DefaultNetworkEvent(1001);
         ev.netId = 102;
-        ev.prevNetId = 101;
-        ev.transportTypes = new int[]{1, 2, 3};
-        ev.prevIPv4 = true;
-        ev.prevIPv6 = true;
+        ev.transports = 2;
+        ev.previousTransports = 4;
+        ev.ipv4 = true;
+        ev.initialScore = 20;
+        ev.finalScore = 60;
+        ev.durationMs = 54;
+        ev.validatedMs = 27;
 
         String want = String.join("\n",
                 "dropped_events: 0",
                 "events <",
                 "  if_name: \"\"",
-                "  link_layer: 0",
+                "  link_layer: 4",
                 "  network_id: 102",
                 "  time_ms: 0",
-                "  transports: 0",
+                "  transports: 2",
                 "  default_network_event <",
-                "    default_network_duration_ms: 0",
-                "    final_score: 0",
-                "    initial_score: 0",
-                "    ip_support: 0",
-                "    network_id <",
-                "      network_id: 102",
-                "    >",
+                "    default_network_duration_ms: 54",
+                "    final_score: 60",
+                "    initial_score: 20",
+                "    ip_support: 1",
                 "    no_default_network_duration_ms: 0",
-                "    previous_network_id <",
-                "      network_id: 101",
-                "    >",
-                "    previous_network_ip_support: 3",
-                "    transport_types: 1",
-                "    transport_types: 2",
-                "    transport_types: 3",
+                "    previous_default_network_link_layer: 1",
+                "    previous_network_ip_support: 0",
+                "    validation_duration_ms: 27",
                 "  >",
                 ">",
                 "version: 2\n");

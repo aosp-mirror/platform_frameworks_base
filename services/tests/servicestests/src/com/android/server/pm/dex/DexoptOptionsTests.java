@@ -52,6 +52,7 @@ public class DexoptOptionsTests {
         assertFalse(opt.isDexoptOnlySharedDex());
         assertFalse(opt.isDowngrade());
         assertFalse(opt.isForce());
+        assertFalse(opt.isDexoptIdleBackgroundJob());
     }
 
     @Test
@@ -62,7 +63,9 @@ public class DexoptOptionsTests {
                 DexoptOptions.DEXOPT_CHECK_FOR_PROFILES_UPDATES |
                 DexoptOptions.DEXOPT_ONLY_SECONDARY_DEX |
                 DexoptOptions.DEXOPT_ONLY_SHARED_DEX |
-                DexoptOptions.DEXOPT_DOWNGRADE;
+                DexoptOptions.DEXOPT_DOWNGRADE  |
+                DexoptOptions.DEXOPT_AS_SHARED_LIBRARY |
+                DexoptOptions.DEXOPT_IDLE_BACKGROUND_JOB;
 
         DexoptOptions opt = new DexoptOptions(mPackageName, mCompilerFilter, flags);
         assertEquals(mPackageName, opt.getPackageName());
@@ -74,6 +77,8 @@ public class DexoptOptionsTests {
         assertTrue(opt.isDexoptOnlySharedDex());
         assertTrue(opt.isDowngrade());
         assertTrue(opt.isForce());
+        assertTrue(opt.isDexoptAsSharedLibrary());
+        assertTrue(opt.isDexoptIdleBackgroundJob());
     }
 
     @Test
@@ -89,7 +94,7 @@ public class DexoptOptionsTests {
                 PackageManagerService.REASON_INSTALL,
                 PackageManagerService.REASON_BACKGROUND_DEXOPT,
                 PackageManagerService.REASON_AB_OTA,
-                PackageManagerService.REASON_INACTIVE_PACKAGE_DOWNGRADE};
+                PackageManagerService.REASON_INACTIVE_PACKAGE_DOWNGRADE,};
 
         for (int reason : reasons) {
             DexoptOptions opt = new DexoptOptions(mPackageName, reason, flags);
@@ -102,6 +107,7 @@ public class DexoptOptionsTests {
             assertFalse(opt.isDexoptOnlySharedDex());
             assertFalse(opt.isDowngrade());
             assertTrue(opt.isForce());
+            assertFalse(opt.isDexoptAsSharedLibrary());
         }
     }
 
@@ -119,6 +125,7 @@ public class DexoptOptionsTests {
         assertFalse(opt.isDexoptOnlySharedDex());
         assertFalse(opt.isDowngrade());
         assertTrue(opt.isForce());
+        assertFalse(opt.isDexoptAsSharedLibrary());
     }
 
     @Test

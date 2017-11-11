@@ -38,7 +38,7 @@ public class DownloadStateCallback {
      * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({ALL_UPDATES, PROGRESS_UPDATES, STATE_UPDATES})
+    @IntDef(flag = true, value = {ALL_UPDATES, PROGRESS_UPDATES, STATE_UPDATES})
     public @interface FilterFlag {}
 
     /**

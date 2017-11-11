@@ -165,15 +165,15 @@ public class MbmsDownloadReceiver extends BroadcastReceiver {
                 Log.w(LOG_TAG, "Download result did not include a result code. Ignoring.");
                 return false;
             }
+            if (!intent.hasExtra(MbmsDownloadSession.EXTRA_MBMS_DOWNLOAD_REQUEST)) {
+                Log.w(LOG_TAG, "Download result did not include the associated request. Ignoring.");
+                return false;
+            }
             // We do not need to verify below extras if the result is not success.
             if (MbmsDownloadSession.RESULT_SUCCESSFUL !=
                     intent.getIntExtra(MbmsDownloadSession.EXTRA_MBMS_DOWNLOAD_RESULT,
                     MbmsDownloadSession.RESULT_CANCELLED)) {
                 return true;
-            }
-            if (!intent.hasExtra(MbmsDownloadSession.EXTRA_MBMS_DOWNLOAD_REQUEST)) {
-                Log.w(LOG_TAG, "Download result did not include the associated request. Ignoring.");
-                return false;
             }
             if (!intent.hasExtra(VendorUtils.EXTRA_TEMP_FILE_ROOT)) {
                 Log.w(LOG_TAG, "Download result did not include the temp file root. Ignoring.");
@@ -242,10 +242,12 @@ public class MbmsDownloadReceiver extends BroadcastReceiver {
         int result = intent.getIntExtra(MbmsDownloadSession.EXTRA_MBMS_DOWNLOAD_RESULT,
                 MbmsDownloadSession.RESULT_CANCELLED);
         intentForApp.putExtra(MbmsDownloadSession.EXTRA_MBMS_DOWNLOAD_RESULT, result);
+        intentForApp.putExtra(MbmsDownloadSession.EXTRA_MBMS_DOWNLOAD_REQUEST, request);
 
         if (result != MbmsDownloadSession.RESULT_SUCCESSFUL) {
             Log.i(LOG_TAG, "Download request indicated a failed download. Aborting.");
             context.sendBroadcast(intentForApp);
+            setResultCode(RESULT_OK);
             return;
         }
 
@@ -273,7 +275,6 @@ public class MbmsDownloadReceiver extends BroadcastReceiver {
         intentForApp.putExtra(MbmsDownloadSession.EXTRA_MBMS_COMPLETED_FILE_URI,
                 stagedFileLocation);
         intentForApp.putExtra(MbmsDownloadSession.EXTRA_MBMS_FILE_INFO, completedFileInfo);
-        intentForApp.putExtra(MbmsDownloadSession.EXTRA_MBMS_DOWNLOAD_REQUEST, request);
 
         context.sendBroadcast(intentForApp);
         setResultCode(RESULT_OK);

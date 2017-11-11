@@ -45,7 +45,6 @@ oneway interface IPhoneStateListener {
     void onVoLteServiceStateChanged(in VoLteServiceState lteState);
     void onVoiceActivationStateChanged(int activationState);
     void onDataActivationStateChanged(int activationState);
-    void onOemHookRawEvent(in byte[] rawData);
     void onCarrierNetworkChange(in boolean active);
 }
 

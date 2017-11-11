@@ -375,7 +375,7 @@ public final class BluetoothSocket implements Closeable {
             IBluetooth bluetoothProxy =
                     BluetoothAdapter.getDefaultAdapter().getBluetoothService(null);
             if (bluetoothProxy == null) throw new IOException("Bluetooth is off");
-            mPfd = bluetoothProxy.connectSocket(mDevice, mType,
+            mPfd = bluetoothProxy.getSocketManager().connectSocket(mDevice, mType,
                     mUuid, mPort, getSecurityFlags());
             synchronized (this) {
                 if (DBG) Log.d(TAG, "connect(), SocketState: " + mSocketState + ", mPfd: " + mPfd);
@@ -417,7 +417,7 @@ public final class BluetoothSocket implements Closeable {
             return -1;
         }
         try {
-            mPfd = bluetoothProxy.createSocketChannel(mType, mServiceName,
+            mPfd = bluetoothProxy.getSocketManager().createSocketChannel(mType, mServiceName,
                     mUuid, mPort, getSecurityFlags());
         } catch (RemoteException e) {
             Log.e(TAG, Log.getStackTraceString(new Throwable()));

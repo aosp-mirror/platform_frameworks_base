@@ -31,7 +31,7 @@ import libcore.io.Libcore;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -116,13 +116,18 @@ import java.util.Set;
         registerSecondaryDexForProfiling(dexPathsForRegistration);
     }
 
-    private void notifyPackageManager(List<BaseDexClassLoader> ignored,
+    private void notifyPackageManager(List<BaseDexClassLoader> classLoadersChain,
             List<String> classPaths) {
+        // Get the class loader names for the binder call.
+        List<String> classLoadersNames = new ArrayList<>(classPaths.size());
+        for (BaseDexClassLoader bdc : classLoadersChain) {
+            classLoadersNames.add(bdc.getClass().getName());
+        }
         String packageName = ActivityThread.currentPackageName();
         try {
             // Notify only the paths of the first class loader for now.
             ActivityThread.getPackageManager().notifyDexLoad(
-                    packageName, Arrays.asList(classPaths.get(0).split(File.pathSeparator)),
+                    packageName, classLoadersNames, classPaths,
                     VMRuntime.getRuntime().vmInstructionSet());
         } catch (RemoteException re) {
             Slog.e(TAG, "Failed to notify PM about dex load for package " + packageName, re);

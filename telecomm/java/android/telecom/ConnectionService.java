@@ -1294,10 +1294,10 @@ public abstract class ConnectionService extends Service {
         }
 
         @Override
-        public void onAudioRouteChanged(Connection c, int audioRoute) {
+        public void onAudioRouteChanged(Connection c, int audioRoute, String bluetoothAddress) {
             String id = mIdByConnection.get(c);
             if (id != null) {
-                mAdapter.setAudioRoute(id, audioRoute);
+                mAdapter.setAudioRoute(id, audioRoute, bluetoothAddress);
             }
         }
 
