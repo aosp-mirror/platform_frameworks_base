@@ -41,8 +41,10 @@ public abstract class AbstractPreferenceController {
             setVisible(screen, prefKey, true /* visible */);
             if (this instanceof Preference.OnPreferenceChangeListener) {
                 final Preference preference = screen.findPreference(prefKey);
-                preference.setOnPreferenceChangeListener(
+                if (preference != null) {
+                    preference.setOnPreferenceChangeListener(
                         (Preference.OnPreferenceChangeListener) this);
+                }
             }
         } else {
             setVisible(screen, prefKey, false /* visible */);
