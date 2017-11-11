@@ -3691,9 +3691,8 @@ public class WindowManagerService extends IWindowManager.Stub
         }
         try {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "screenshotWallpaper");
-            return screenshotApplications(null /* appToken */, DEFAULT_DISPLAY, -1 /* width */,
-                    -1 /* height */, true /* includeFullDisplay */, 1f /* frameScale */,
-                    Bitmap.Config.ARGB_8888, true /* wallpaperOnly */, false /* includeDecor */);
+            return screenshotApplications(DEFAULT_DISPLAY, Bitmap.Config.ARGB_8888,
+                    true /* wallpaperOnly */);
         } finally {
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
@@ -3712,10 +3711,8 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         FgThread.getHandler().post(() -> {
-            Bitmap bm = screenshotApplications(null /* appToken */, DEFAULT_DISPLAY,
-                    -1 /* width */, -1 /* height */, true /* includeFullDisplay */,
-                    1f /* frameScale */, Bitmap.Config.ARGB_8888, false /* wallpaperOnly */,
-                    false /* includeDecor */);
+            Bitmap bm = screenshotApplications(DEFAULT_DISPLAY, Bitmap.Config.ARGB_8888,
+                    false /* wallpaperOnly */);
             try {
                 receiver.onHandleAssistScreenshot(bm);
             } catch (RemoteException e) {
@@ -3749,29 +3746,21 @@ public class WindowManagerService extends IWindowManager.Stub
      * In portrait mode, it grabs the full screenshot.
      *
      * @param displayId the Display to take a screenshot of.
-     * @param width the width of the target bitmap
-     * @param height the height of the target bitmap
-     * @param includeFullDisplay true if the screen should not be cropped before capture
-     * @param frameScale the scale to apply to the frame, only used when width = -1 and height = -1
      * @param config of the output bitmap
      * @param wallpaperOnly true if only the wallpaper layer should be included in the screenshot
-     * @param includeDecor whether to include window decors, like the status or navigation bar
-     *                     background of the window
      */
-    private Bitmap screenshotApplications(IBinder appToken, int displayId, int width,
-            int height, boolean includeFullDisplay, float frameScale, Bitmap.Config config,
-            boolean wallpaperOnly, boolean includeDecor) {
+    private Bitmap screenshotApplications(int displayId, Bitmap.Config config,
+            boolean wallpaperOnly) {
         final DisplayContent displayContent;
         synchronized(mWindowMap) {
             displayContent = mRoot.getDisplayContentOrCreate(displayId);
             if (displayContent == null) {
-                if (DEBUG_SCREENSHOT) Slog.i(TAG_WM, "Screenshot of " + appToken
-                        + ": returning null. No Display for displayId=" + displayId);
+                if (DEBUG_SCREENSHOT) Slog.i(TAG_WM, "Screenshot returning null. No Display for "
+                        + "displayId=" + displayId);
                 return null;
             }
         }
-        return displayContent.screenshotApplications(appToken, width, height,
-                includeFullDisplay, frameScale, config, wallpaperOnly, includeDecor);
+        return displayContent.screenshotDisplay(config, wallpaperOnly);
     }
 
     /**

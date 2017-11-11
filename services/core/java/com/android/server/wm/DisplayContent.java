@@ -2969,227 +2969,30 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * Takes a snapshot of the display.  In landscape mode this grabs the whole screen.
      * In portrait mode, it grabs the full screenshot.
      *
-     * @param width the width of the target bitmap
-     * @param height the height of the target bitmap
-     * @param includeFullDisplay true if the screen should not be cropped before capture
-     * @param frameScale the scale to apply to the frame, only used when width = -1 and height = -1
      * @param config of the output bitmap
      * @param wallpaperOnly true if only the wallpaper layer should be included in the screenshot
-     * @param includeDecor whether to include window decors, like the status or navigation bar
-     *                     background of the window
      */
-    Bitmap screenshotApplications(IBinder appToken, int width, int height,
-            boolean includeFullDisplay, float frameScale, Bitmap.Config config,
-            boolean wallpaperOnly, boolean includeDecor) {
-        Bitmap bitmap = screenshotApplications(appToken, width, height, includeFullDisplay,
-                frameScale, wallpaperOnly, includeDecor, SurfaceControl::screenshot);
-        if (bitmap == null) {
-            return null;
-        }
-
-        if (DEBUG_SCREENSHOT) {
-            // TEST IF IT's ALL BLACK
-            int[] buffer = new int[bitmap.getWidth() * bitmap.getHeight()];
-            bitmap.getPixels(buffer, 0, bitmap.getWidth(), 0, 0, bitmap.getWidth(),
-                    bitmap.getHeight());
-            boolean allBlack = true;
-            final int firstColor = buffer[0];
-            for (int i = 0; i < buffer.length; i++) {
-                if (buffer[i] != firstColor) {
-                    allBlack = false;
-                    break;
-                }
-            }
-            if (allBlack) {
-                final WindowState appWin = mScreenshotApplicationState.appWin;
-                final int maxLayer = mScreenshotApplicationState.maxLayer;
-                final int minLayer = mScreenshotApplicationState.minLayer;
-                Slog.i(TAG_WM, "Screenshot " + appWin + " was monochrome(" +
-                        Integer.toHexString(firstColor) + ")! mSurfaceLayer=" +
-                        (appWin != null ?
-                                appWin.mWinAnimator.mSurfaceController.getLayer() : "null") +
-                        " minLayer=" + minLayer + " maxLayer=" + maxLayer);
-            }
-        }
-
-        // Create a copy of the screenshot that is immutable and backed in ashmem.
-        // This greatly reduces the overhead of passing the bitmap between processes.
-        Bitmap ret = bitmap.createAshmemBitmap(config);
-        bitmap.recycle();
-        return ret;
-    }
-
-    GraphicBuffer screenshotApplicationsToBuffer(IBinder appToken, int width, int height,
-            boolean includeFullDisplay, float frameScale, boolean wallpaperOnly,
-            boolean includeDecor) {
-        return screenshotApplications(appToken, width, height, includeFullDisplay, frameScale,
-                wallpaperOnly, includeDecor, SurfaceControl::screenshotToBuffer);
-    }
-
-    private <E> E screenshotApplications(IBinder appToken, int width, int height,
-            boolean includeFullDisplay, float frameScale, boolean wallpaperOnly,
-            boolean includeDecor, Screenshoter<E> screenshoter) {
-        int dw = mDisplayInfo.logicalWidth;
-        int dh = mDisplayInfo.logicalHeight;
-        if (dw == 0 || dh == 0) {
-            if (DEBUG_SCREENSHOT) Slog.i(TAG_WM, "Screenshot of " + appToken
-                    + ": returning null. logical widthxheight=" + dw + "x" + dh);
-            return null;
-        }
-
-        E bitmap;
-
-        mScreenshotApplicationState.reset(appToken == null && !wallpaperOnly);
-        final Rect frame = new Rect();
-        final Rect stackBounds = new Rect();
-
-        final int aboveAppLayer = (mService.mPolicy.getWindowLayerFromTypeLw(TYPE_APPLICATION) + 1)
-                * TYPE_LAYER_MULTIPLIER + TYPE_LAYER_OFFSET;
-        final MutableBoolean mutableIncludeFullDisplay = new MutableBoolean(includeFullDisplay);
-        synchronized(mService.mWindowMap) {
+    Bitmap screenshotDisplay(Bitmap.Config config, boolean wallpaperOnly) {
+        synchronized (mService.mWindowMap) {
             if (!mService.mPolicy.isScreenOn()) {
-                if (DEBUG_SCREENSHOT) Slog.i(TAG_WM, "Attempted to take screenshot while display"
-                        + " was off.");
-                return null;
-            }
-            // Figure out the part of the screen that is actually the app.
-            mScreenshotApplicationState.appWin = null;
-            forAllWindows(w -> {
-                if (!w.mHasSurface) {
-                    return false;
+                if (DEBUG_SCREENSHOT) {
+                    Slog.i(TAG_WM, "Attempted to take screenshot while display was off.");
                 }
-                if (w.mLayer >= aboveAppLayer) {
-                    return false;
-                }
-                if (wallpaperOnly && !w.mIsWallpaper) {
-                    return false;
-                }
-                if (w.mIsImWindow) {
-                    return false;
-                } else if (w.mIsWallpaper) {
-                    // If this is the wallpaper layer and we're only looking for the wallpaper layer
-                    // then the target window state is this one.
-                    if (wallpaperOnly) {
-                        mScreenshotApplicationState.appWin = w;
-                    }
-
-                    if (mScreenshotApplicationState.appWin == null) {
-                        // We have not ran across the target window yet, so it is probably behind
-                        // the wallpaper. This can happen when the keyguard is up and all windows
-                        // are moved behind the wallpaper. We don't want to include the wallpaper
-                        // layer in the screenshot as it will cover-up the layer of the target
-                        // window.
-                        return false;
-                    }
-                    // Fall through. The target window is in front of the wallpaper. For this
-                    // case we want to include the wallpaper layer in the screenshot because
-                    // the target window might have some transparent areas.
-                } else if (appToken != null) {
-                    if (w.mAppToken == null || w.mAppToken.token != appToken) {
-                        // This app window is of no interest if it is not associated with the
-                        // screenshot app.
-                        return false;
-                    }
-                    mScreenshotApplicationState.appWin = w;
-                }
-
-                // Include this window.
-
-                final WindowStateAnimator winAnim = w.mWinAnimator;
-
-                // Don't include wallpaper in bounds calculation
-                if (!w.mIsWallpaper && !mutableIncludeFullDisplay.value) {
-                    if (includeDecor) {
-                        final Task task = w.getTask();
-                        if (task != null) {
-                            task.getBounds(frame);
-                        } else {
-
-                            // No task bounds? Too bad! Ain't no screenshot then.
-                            return true;
-                        }
-                    } else {
-                        final Rect wf = w.mFrame;
-                        final Rect cr = w.mContentInsets;
-                        int left = wf.left + cr.left;
-                        int top = wf.top + cr.top;
-                        int right = wf.right - cr.right;
-                        int bottom = wf.bottom - cr.bottom;
-                        frame.union(left, top, right, bottom);
-                        w.getVisibleBounds(stackBounds);
-                        if (!Rect.intersects(frame, stackBounds)) {
-                            // Set frame empty if there's no intersection.
-                            frame.setEmpty();
-                        }
-                    }
-                }
-
-                final boolean foundTargetWs =
-                        (w.mAppToken != null && w.mAppToken.token == appToken)
-                                || (mScreenshotApplicationState.appWin != null && wallpaperOnly);
-                if (foundTargetWs && winAnim.getShown() && winAnim.mLastAlpha > 0f) {
-                    mScreenshotApplicationState.screenshotReady = true;
-                }
-
-                if (w.isObscuringDisplay()){
-                    return true;
-                }
-                return false;
-            }, true /* traverseTopToBottom */);
-
-            final WindowState appWin = mScreenshotApplicationState.appWin;
-            final boolean screenshotReady = mScreenshotApplicationState.screenshotReady;
-
-            if (appToken != null && appWin == null) {
-                // Can't find a window to snapshot.
-                if (DEBUG_SCREENSHOT) Slog.i(TAG_WM,
-                        "Screenshot: Couldn't find a surface matching " + appToken);
                 return null;
             }
 
-            if (!screenshotReady) {
-                Slog.i(TAG_WM, "Failed to capture screenshot of " + appToken +
-                        " appWin=" + (appWin == null ? "null" : (appWin + " drawState=" +
-                        appWin.mWinAnimator.mDrawState)));
+            if (wallpaperOnly && !shouldScreenshotWallpaper()) {
                 return null;
             }
 
-            // Screenshot is ready to be taken. Everything from here below will continue
-            // through the bottom of the loop and return a value. We only stay in the loop
-            // because we don't want to release the mWindowMap lock until the screenshot is
-            // taken.
+            int dw = mDisplayInfo.logicalWidth;
+            int dh = mDisplayInfo.logicalHeight;
 
-
-            if (!mutableIncludeFullDisplay.value) {
-                // Constrain frame to the screen size.
-                if (!frame.intersect(0, 0, dw, dh)) {
-                    frame.setEmpty();
-                }
-            } else {
-                // Caller just wants entire display.
-                frame.set(0, 0, dw, dh);
-            }
-            if (frame.isEmpty()) {
+            if (dw <= 0 || dh <= 0) {
                 return null;
             }
 
-            if (width < 0) {
-                width = (int) (frame.width() * frameScale);
-            }
-            if (height < 0) {
-                height = (int) (frame.height() * frameScale);
-            }
-
-            // Tell surface flinger what part of the image to crop. Take the top
-            // right part of the application, and crop the larger dimension to fit.
-            Rect crop = new Rect(frame);
-            if (width / (float) frame.width() < height / (float) frame.height()) {
-                int cropWidth = (int)((float)width / (float)height * frame.height());
-                crop.right = crop.left + cropWidth;
-            } else {
-                int cropHeight = (int)((float)height / (float)width * frame.width());
-                crop.bottom = crop.top + cropHeight;
-            }
+            final Rect frame = new Rect(0, 0, dw, dh);
 
             // The screenshot API does not apply the current screen rotation.
             int rot = mDisplay.getRotation();
@@ -3198,43 +3001,52 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 rot = (rot == ROTATION_90) ? ROTATION_270 : ROTATION_90;
             }
 
-            // Surfaceflinger is not aware of orientation, so convert our logical
-            // crop to surfaceflinger's portrait orientation.
-            convertCropForSurfaceFlinger(crop, rot, dw, dh);
-
-            if (DEBUG_SCREENSHOT) {
-                forAllWindows(w -> {
-                    final WindowSurfaceController controller = w.mWinAnimator.mSurfaceController;
-                    Slog.i(TAG_WM, w + ": " + w.mLayer
-                            + " animLayer=" + w.mWinAnimator.mAnimLayer
-                            + " surfaceLayer=" + ((controller == null)
-                            ? "null" : controller.getLayer()));
-                }, false /* traverseTopToBottom */);
-            }
+            // SurfaceFlinger is not aware of orientation, so convert our logical
+            // crop to SurfaceFlinger's portrait orientation.
+            convertCropForSurfaceFlinger(frame, rot, dw, dh);
 
             final ScreenRotationAnimation screenRotationAnimation =
                     mService.mAnimator.getScreenRotationAnimationLocked(DEFAULT_DISPLAY);
             final boolean inRotation = screenRotationAnimation != null &&
                     screenRotationAnimation.isAnimating();
-            if (DEBUG_SCREENSHOT && inRotation) Slog.v(TAG_WM,
-                    "Taking screenshot while rotating");
-
-            // We force pending transactions to flush before taking
-            // the screenshot by pushing an empty synchronous transaction.
-            SurfaceControl.openTransaction();
-            SurfaceControl.closeTransactionSync();
+            if (DEBUG_SCREENSHOT && inRotation) Slog.v(TAG_WM, "Taking screenshot while rotating");
 
             // TODO(b/68392460): We should screenshot Task controls directly
             // but it's difficult at the moment as the Task doesn't have the
             // correct size set.
-            bitmap = screenshoter.screenshot(crop, width, height, 0, 1,
-                    inRotation, rot);
+            final Bitmap bitmap = SurfaceControl.screenshot(frame, dw, dh, 0, 1, inRotation, rot);
             if (bitmap == null) {
                 Slog.w(TAG_WM, "Failed to take screenshot");
                 return null;
             }
+
+            // Create a copy of the screenshot that is immutable and backed in ashmem.
+            // This greatly reduces the overhead of passing the bitmap between processes.
+            final Bitmap ret = bitmap.createAshmemBitmap(config);
+            bitmap.recycle();
+            return ret;
         }
-        return bitmap;
+    }
+
+    private boolean shouldScreenshotWallpaper() {
+        MutableBoolean screenshotReady = new MutableBoolean(false);
+
+        forAllWindows(w -> {
+            if (!w.mIsWallpaper) {
+                return false;
+            }
+
+            // Found the wallpaper window
+            final WindowStateAnimator winAnim = w.mWinAnimator;
+
+            if (winAnim.getShown() && winAnim.mLastAlpha > 0f) {
+                screenshotReady.value = true;
+            }
+
+            return true;
+        }, true /* traverseTopToBottom */);
+
+        return screenshotReady.value;
     }
 
     // TODO: Can this use createRotationMatrix()?
@@ -3846,15 +3658,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         String getName() {
             return mName;
         }
-    }
-
-    /**
-     * Interface to screenshot into various types, i.e. {@link Bitmap} and {@link GraphicBuffer}.
-     */
-    @FunctionalInterface
-    private interface Screenshoter<E> {
-        E screenshot(Rect sourceCrop, int width, int height, int minLayer, int maxLayer,
-                boolean useIdentityTransform, int rotation);
     }
 
     SurfaceControl.Builder makeSurface(SurfaceSession s) {

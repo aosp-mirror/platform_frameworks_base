@@ -56,7 +56,9 @@ public class SurfaceControl {
             Rect sourceCrop, int width, int height, int minLayer, int maxLayer,
             boolean allLayers, boolean useIdentityTransform);
     private static native void nativeCaptureLayers(IBinder layerHandleToken, Surface consumer,
-            int rotation);
+            Rect sourceCrop, float frameScale);
+    private static native GraphicBuffer nativeCaptureLayers(IBinder layerHandleToken,
+            Rect sourceCrop, float frameScale);
 
     private static native long nativeCreateTransaction();
     private static native long nativeGetNativeTransactionFinalizer();
@@ -1177,14 +1179,24 @@ public class SurfaceControl {
      * Captures a layer and its children into the provided {@link Surface}.
      *
      * @param layerHandleToken The root layer to capture.
-     * @param consumer The {@link Surface} to capture the layer into.
-     * @param rotation Apply a custom clockwise rotation to the screenshot, i.e.
-     *                 Surface.ROTATION_0,90,180,270. Surfaceflinger will always capture in its
-     *                 native portrait orientation by default, so this is useful for returning
-     *                 captures that are independent of device orientation.
+     * @param consumer         The {@link Surface} to capture the layer into.
+     * @param sourceCrop       The portion of the root surface to capture; caller may pass in 'new
+     *                         Rect()' or null if no cropping is desired.
+     * @param frameScale       The desired scale of the returned buffer; the raw
+     *                         screen will be scaled up/down.
      */
-    public static void captureLayers(IBinder layerHandleToken, Surface consumer, int rotation) {
-        nativeCaptureLayers(layerHandleToken, consumer, rotation);
+    public static void captureLayers(IBinder layerHandleToken, Surface consumer, Rect sourceCrop,
+            float frameScale) {
+        nativeCaptureLayers(layerHandleToken, consumer, sourceCrop, frameScale);
+    }
+
+    /**
+     * Same as {@link #captureLayers(IBinder, Surface, Rect, float)} except this
+     * captures to a {@link GraphicBuffer} instead of a {@link Surface}.
+     */
+    public static GraphicBuffer captureLayersToBuffer(IBinder layerHandleToken, Rect sourceCrop,
+            float frameScale) {
+        return nativeCaptureLayers(layerHandleToken, sourceCrop, frameScale);
     }
 
     public static class Transaction implements Closeable {
