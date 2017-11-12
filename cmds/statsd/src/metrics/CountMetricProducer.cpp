@@ -17,13 +17,14 @@
 #define DEBUG true  // STOPSHIP if true
 #include "Log.h"
 
-#include "CountAnomalyTracker.h"
+#include "../anomaly/DiscreteAnomalyTracker.h"
 #include "CountMetricProducer.h"
 #include "stats_util.h"
 
 #include <limits.h>
 #include <stdlib.h>
 
+using android::util::FIELD_COUNT_REPEATED;
 using android::util::FIELD_TYPE_BOOL;
 using android::util::FIELD_TYPE_FLOAT;
 using android::util::FIELD_TYPE_INT32;
@@ -61,6 +62,7 @@ const int FIELD_ID_END_BUCKET_NANOS = 2;
 const int FIELD_ID_COUNT = 3;
 
 // TODO: add back AnomalyTracker.
+
 CountMetricProducer::CountMetricProducer(const CountMetric& metric, const int conditionIndex,
                                          const sp<ConditionWizard>& wizard,
                                          const uint64_t startTimeNs)
@@ -76,7 +78,7 @@ CountMetricProducer::CountMetricProducer(const CountMetric& metric, const int co
     for (int i = 0; i < metric.alerts_size(); i++) {
         const Alert& alert = metric.alerts(i);
         if (alert.trigger_if_sum_gt() > 0 && alert.number_of_buckets() > 0) {
-            mAnomalyTrackers.push_back(std::make_unique<CountAnomalyTracker>(alert));
+            mAnomalyTrackers.push_back(std::make_unique<DiscreteAnomalyTracker>(alert));
         } else {
             ALOGW("Ignoring invalid count metric alert: threshold=%lld num_buckets= %d",
                   alert.trigger_if_sum_gt(), alert.number_of_buckets());
@@ -116,7 +118,7 @@ void CountMetricProducer::onSlicedConditionMayChange(const uint64_t eventTime) {
     VLOG("Metric %lld onSlicedConditionMayChange", mMetric.metric_id());
 }
 
-StatsLogReport CountMetricProducer::onDumpReport() {
+std::unique_ptr<std::vector<uint8_t>> CountMetricProducer::onDumpReport() {
     long long endTime = time(nullptr) * NS_PER_SEC;
 
     // Dump current bucket if it's stale.
@@ -133,11 +135,13 @@ StatsLogReport CountMetricProducer::onDumpReport() {
             ALOGE("Dimension key %s not found?!?! skip...", hashableKey.c_str());
             continue;
         }
-        long long wrapperToken = mProto->start(FIELD_TYPE_MESSAGE | FIELD_ID_DATA);
+        long long wrapperToken =
+                mProto->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_DATA);
 
         // First fill dimension (KeyValuePairs).
         for (const auto& kv : it->second) {
-            long long dimensionToken = mProto->start(FIELD_TYPE_MESSAGE | FIELD_ID_DIMENSION);
+            long long dimensionToken =
+                    mProto->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_DIMENSION);
             mProto->write(FIELD_TYPE_INT32 | FIELD_ID_KEY, kv.key());
             if (kv.has_value_str()) {
                 mProto->write(FIELD_TYPE_INT32 | FIELD_ID_VALUE_STR, kv.value_str());
@@ -153,7 +157,8 @@ StatsLogReport CountMetricProducer::onDumpReport() {
 
         // Then fill bucket_info (CountBucketInfo).
         for (const auto& bucket : counter.second) {
-            long long bucketInfoToken = mProto->start(FIELD_TYPE_MESSAGE | FIELD_ID_BUCKET_INFO);
+            long long bucketInfoToken =
+                    mProto->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_BUCKET_INFO);
             mProto->write(FIELD_TYPE_INT64 | FIELD_ID_START_BUCKET_NANOS,
                           (long long)bucket.mBucketStartNs);
             mProto->write(FIELD_TYPE_INT64 | FIELD_ID_END_BUCKET_NANOS,
@@ -171,15 +176,13 @@ StatsLogReport CountMetricProducer::onDumpReport() {
                   (long long)mCurrentBucketStartTimeNs);
 
     VLOG("metric %lld dump report now...", mMetric.metric_id());
-    std::unique_ptr<uint8_t[]> buffer = serializeProto();
+    std::unique_ptr<std::vector<uint8_t>> buffer = serializeProto();
 
     startNewProtoOutputStream(endTime);
     mPastBuckets.clear();
     mByteSize = 0;
 
-    // TODO: Once we migrate all MetricProducers to use ProtoOutputStream, we should return this:
-    // return std::move(buffer);
-    return StatsLogReport();
+    return buffer;
 
     // TODO: Clear mDimensionKeyMap once the report is dumped.
 }
@@ -201,25 +204,19 @@ void CountMetricProducer::onMatchedLogEventInternal(
         return;
     }
 
-    auto it = mCurrentSlicedCounter.find(eventKey);
+    auto it = mCurrentSlicedCounter->find(eventKey);
 
-    if (it == mCurrentSlicedCounter.end()) {
+    if (it == mCurrentSlicedCounter->end()) {
         // create a counter for the new key
-        mCurrentSlicedCounter[eventKey] = 1;
-
+        (*mCurrentSlicedCounter)[eventKey] = 1;
     } else {
         // increment the existing value
         auto& count = it->second;
         count++;
     }
 
-    // TODO: Re-add anomaly detection (similar to):
-    // for (auto& tracker : mAnomalyTrackers) {
-    //     tracker->checkAnomaly(mCounter);
-    // }
-
     VLOG("metric %lld %s->%d", mMetric.metric_id(), eventKey.c_str(),
-         mCurrentSlicedCounter[eventKey]);
+         (*mCurrentSlicedCounter)[eventKey]);
 }
 
 // When a new matched event comes in, we check if event falls into the current
@@ -230,12 +227,13 @@ void CountMetricProducer::flushCounterIfNeeded(const uint64_t eventTimeNs) {
     }
 
     // adjust the bucket start time
-    int64_t numBucketsForward = (eventTimeNs - mCurrentBucketStartTimeNs) / mBucketSizeNs;
+    // TODO: This (and addPastBucket to which it goes) doesn't really need to be an int64.
+    uint64_t numBucketsForward = (eventTimeNs - mCurrentBucketStartTimeNs) / mBucketSizeNs;
 
     CountBucket info;
     info.mBucketStartNs = mCurrentBucketStartTimeNs;
     info.mBucketEndNs = mCurrentBucketStartTimeNs + mBucketSizeNs;
-    for (const auto& counter : mCurrentSlicedCounter) {
+    for (const auto& counter : *mCurrentSlicedCounter) {
         info.mCount = counter.second;
         auto& bucketList = mPastBuckets[counter.first];
         bucketList.push_back(info);
@@ -244,15 +242,16 @@ void CountMetricProducer::flushCounterIfNeeded(const uint64_t eventTimeNs) {
         mByteSize += sizeof(info);
     }
 
-    // TODO: Re-add anomaly detection (similar to):
-    // for (auto& tracker : mAnomalyTrackers) {
-    //     tracker->addPastBucket(mCounter, numBucketsForward);
-    //}
+    for (auto& tracker : mAnomalyTrackers) {
+        tracker->addOrUpdateBucket(mCurrentSlicedCounter, mCurrentBucketNum);
+        tracker->declareAndDeclareAnomaly();
+    }
 
-    // Reset counters
-    mCurrentSlicedCounter.clear();
+    // Reset counters (do not clear, since the old one is still referenced in mAnomalyTrackers).
+    mCurrentSlicedCounter = std::make_shared<DimToValMap>();
 
     mCurrentBucketStartTimeNs = mCurrentBucketStartTimeNs + numBucketsForward * mBucketSizeNs;
+    mCurrentBucketNum += numBucketsForward;
     VLOG("metric %lld: new bucket start time: %lld", mMetric.metric_id(),
          (long long)mCurrentBucketStartTimeNs);
 }

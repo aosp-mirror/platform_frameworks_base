@@ -745,7 +745,7 @@ public class NotificationInfoTest extends SysuiTestCase {
         mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
                 TEST_PACKAGE_NAME, Arrays.asList(mNotificationChannel),
                 mNotificationChannel.getImportance(), mSbn, null, null, null,
-                (Runnable saveImportance) -> {
+                (Runnable saveImportance, StatusBarNotification sbn) -> {
                 },
                 Collections.singleton(TEST_PACKAGE_NAME));
 
@@ -762,7 +762,7 @@ public class NotificationInfoTest extends SysuiTestCase {
         mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
                 TEST_PACKAGE_NAME, Arrays.asList(mNotificationChannel),
                 mNotificationChannel.getImportance(), mSbn, null, null, null,
-                (Runnable saveImportance) -> {
+                (Runnable saveImportance, StatusBarNotification sbn) -> {
                     saveImportance.run();
                 },
                 Collections.singleton(TEST_PACKAGE_NAME));

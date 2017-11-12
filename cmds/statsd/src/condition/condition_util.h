@@ -19,7 +19,6 @@
 
 #include <vector>
 #include "../matchers/matcher_util.h"
-#include "frameworks/base/cmds/statsd/src/stats_log.pb.h"
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
 
 namespace android {

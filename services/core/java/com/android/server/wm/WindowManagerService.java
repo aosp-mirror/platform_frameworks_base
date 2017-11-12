@@ -245,6 +245,7 @@ import com.android.server.LocalServices;
 import com.android.server.UiThread;
 import com.android.server.Watchdog;
 import com.android.server.input.InputManagerService;
+import android.view.DisplayFrames;
 import com.android.server.power.ShutdownThread;
 import com.android.server.utils.PriorityDump;
 
@@ -568,6 +569,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
     boolean mForceResizableTasks = false;
     boolean mSupportsPictureInPicture = false;
+
+    private boolean mDisableTransitionAnimation = false;
 
     int getDragLayerLocked() {
         return mPolicy.getWindowLayerFromTypeLw(TYPE_DRAG) * TYPE_LAYER_MULTIPLIER + TYPE_LAYER_OFFSET;
@@ -966,6 +969,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 com.android.internal.R.bool.config_allowAnimationsInLowPowerMode);
         mMaxUiWidth = context.getResources().getInteger(
                 com.android.internal.R.integer.config_maxUiWidth);
+        mDisableTransitionAnimation = context.getResources().getBoolean(
+                com.android.internal.R.bool.config_disableTransitionAnimation);
         mInputManager = inputManager; // Must be before createDisplayContentLocked.
         mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
         mDisplaySettings = new DisplaySettings();
@@ -1448,23 +1453,19 @@ public class WindowManagerService extends IWindowManager.Stub
                 prepareNoneTransitionForRelaunching(atoken);
             }
 
-            if (displayContent.isDefaultDisplay) {
-                final DisplayInfo displayInfo = displayContent.getDisplayInfo();
-                final Rect taskBounds;
-                if (atoken != null && atoken.getTask() != null) {
-                    taskBounds = mTmpRect;
-                    atoken.getTask().getBounds(mTmpRect);
-                } else {
-                    taskBounds = null;
-                }
-                if (mPolicy.getInsetHintLw(win.mAttrs, taskBounds, displayInfo.rotation,
-                        displayInfo.logicalWidth, displayInfo.logicalHeight, outContentInsets,
-                        outStableInsets, outOutsets)) {
-                    res |= WindowManagerGlobal.ADD_FLAG_ALWAYS_CONSUME_NAV_BAR;
-                }
+            final DisplayFrames displayFrames = displayContent.mDisplayFrames;
+            // TODO: Not sure if onDisplayInfoUpdated() call is needed.
+            displayFrames.onDisplayInfoUpdated(displayContent.getDisplayInfo());
+            final Rect taskBounds;
+            if (atoken != null && atoken.getTask() != null) {
+                taskBounds = mTmpRect;
+                atoken.getTask().getBounds(mTmpRect);
             } else {
-                outContentInsets.setEmpty();
-                outStableInsets.setEmpty();
+                taskBounds = null;
+            }
+            if (mPolicy.getInsetHintLw(win.mAttrs, taskBounds, displayFrames, outContentInsets,
+                    outStableInsets, outOutsets)) {
+                res |= WindowManagerGlobal.ADD_FLAG_ALWAYS_CONSUME_NAV_BAR;
             }
 
             if (mInTouchMode) {
@@ -2279,6 +2280,14 @@ public class WindowManagerService extends IWindowManager.Stub
 
     boolean applyAnimationLocked(AppWindowToken atoken, WindowManager.LayoutParams lp,
             int transit, boolean enter, boolean isVoiceInteraction) {
+        if (mDisableTransitionAnimation) {
+            if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) {
+                Slog.v(TAG_WM,
+                        "applyAnimation: transition animation is disabled. atoken=" + atoken);
+            }
+            atoken.mAppAnimator.clearAnimation();
+            return false;
+        }
         // Only apply an animation if the display isn't frozen.  If it is
         // frozen, there is no reason to animate and it can cause strange
         // artifacts when we unfreeze the display if some different animation
@@ -4656,7 +4665,7 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized(mWindowMap) {
             mIsTouchDevice = mContext.getPackageManager().hasSystemFeature(
                     PackageManager.FEATURE_TOUCHSCREEN);
-            configureDisplayPolicyLocked(getDefaultDisplayContentLocked());
+            getDefaultDisplayContentLocked().configureDisplayPolicy();
         }
 
         try {
@@ -5513,7 +5522,7 @@ public class WindowManagerService extends IWindowManager.Stub
         if (!mDisplayReady) {
             return;
         }
-        configureDisplayPolicyLocked(displayContent);
+        displayContent.configureDisplayPolicy();
         displayContent.setLayoutNeeded();
 
         final int displayId = displayContent.getDisplayId();
@@ -5532,18 +5541,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         mWindowPlacerLocked.performSurfacePlacement();
-    }
-
-    void configureDisplayPolicyLocked(DisplayContent displayContent) {
-        mPolicy.setInitialDisplaySize(displayContent.getDisplay(),
-                displayContent.mBaseDisplayWidth,
-                displayContent.mBaseDisplayHeight,
-                displayContent.mBaseDisplayDensity);
-
-        DisplayInfo displayInfo = displayContent.getDisplayInfo();
-        mPolicy.setDisplayOverscan(displayContent.getDisplay(),
-                displayInfo.overscanLeft, displayInfo.overscanTop,
-                displayInfo.overscanRight, displayInfo.overscanBottom);
     }
 
     /**
@@ -7358,7 +7355,9 @@ public class WindowManagerService extends IWindowManager.Stub
         @Override
         public int getInputMethodWindowVisibleHeight() {
             synchronized (mWindowMap) {
-                return mPolicy.getInputMethodWindowVisibleHeightLw();
+                // TODO(multi-display): Have caller pass in the display they are interested in.
+                final DisplayContent dc = getDefaultDisplayContentLocked();
+                return dc.mDisplayFrames.getInputMethodWindowVisibleHeight();
             }
         }
 

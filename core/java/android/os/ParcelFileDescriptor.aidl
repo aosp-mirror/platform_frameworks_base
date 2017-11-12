@@ -17,4 +17,4 @@
 
 package android.os;
 
-parcelable ParcelFileDescriptor;
+parcelable ParcelFileDescriptor cpp_header "android/os/parcel_file_descriptor.h";

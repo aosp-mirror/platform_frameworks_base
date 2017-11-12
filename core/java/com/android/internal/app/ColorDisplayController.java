@@ -42,14 +42,14 @@ import java.time.ZoneId;
 import java.time.format.DateTimeParseException;
 
 /**
- * Controller for managing Night display settings.
+ * Controller for managing night display and color mode settings.
  * <p/>
  * Night display tints your screen red at night. This makes it easier to look at your screen in
  * dim light and may help you fall asleep more easily.
  */
-public final class NightDisplayController {
+public final class ColorDisplayController {
 
-    private static final String TAG = "NightDisplayController";
+    private static final String TAG = "ColorDisplayController";
     private static final boolean DEBUG = false;
 
     @Retention(RetentionPolicy.SOURCE)
@@ -114,11 +114,11 @@ public final class NightDisplayController {
 
     private Callback mCallback;
 
-    public NightDisplayController(@NonNull Context context) {
+    public ColorDisplayController(@NonNull Context context) {
         this(context, ActivityManager.getCurrentUser());
     }
 
-    public NightDisplayController(@NonNull Context context, int userId) {
+    public ColorDisplayController(@NonNull Context context, int userId) {
         mContext = context.getApplicationContext();
         mUserId = userId;
 

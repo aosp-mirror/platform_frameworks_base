@@ -54,7 +54,6 @@ public final class ConnectivityController extends StateController implements
     private final ConnectivityManager mConnManager;
     private final NetworkPolicyManager mNetPolicyManager;
     private boolean mConnected;
-    private boolean mValidated;
 
     @GuardedBy("mLock")
     private final ArraySet<JobStatus> mTrackedJobs = new ArraySet<>();
@@ -79,7 +78,7 @@ public final class ConnectivityController extends StateController implements
         mConnManager = mContext.getSystemService(ConnectivityManager.class);
         mNetPolicyManager = mContext.getSystemService(NetworkPolicyManager.class);
 
-        mConnected = mValidated = false;
+        mConnected = false;
 
         mConnManager.registerDefaultNetworkCallback(mNetworkCallback);
         mNetPolicyManager.registerListener(mNetPolicyListener);
@@ -149,32 +148,21 @@ public final class ConnectivityController extends StateController implements
     }
 
     private boolean updateConstraintsSatisfied(JobStatus jobStatus) {
+        // TODO: consider matching against non-active networks
+
         final int jobUid = jobStatus.getSourceUid();
         final boolean ignoreBlocked = (jobStatus.getFlags() & JobInfo.FLAG_WILL_BE_FOREGROUND) != 0;
         final Network network = mConnManager.getActiveNetworkForUid(jobUid, ignoreBlocked);
         final NetworkInfo info = mConnManager.getNetworkInfoForUid(network, jobUid, ignoreBlocked);
-
-        final NetworkCapabilities capabilities = (network != null)
-                ? mConnManager.getNetworkCapabilities(network) : null;
+        final NetworkCapabilities capabilities = mConnManager.getNetworkCapabilities(network);
 
         final boolean connected = (info != null) && info.isConnected();
-        final boolean validated = (capabilities != null)
-                && capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED);
+        final boolean satisfied = jobStatus.getJob().getRequiredNetwork().networkCapabilities
+                .satisfiedByNetworkCapabilities(capabilities);
         final boolean sane = isSane(jobStatus, capabilities);
-        final boolean connectionUsable = connected && validated && sane;
 
-        final boolean metered = connected && (capabilities != null)
-                && !capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED);
-        final boolean unmetered = connected && (capabilities != null)
-                && capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED);
-        final boolean notRoaming = connected && (info != null)
-                && !info.isRoaming();
-
-        boolean changed = false;
-        changed |= jobStatus.setConnectivityConstraintSatisfied(connectionUsable);
-        changed |= jobStatus.setMeteredConstraintSatisfied(metered);
-        changed |= jobStatus.setUnmeteredConstraintSatisfied(unmetered);
-        changed |= jobStatus.setNotRoamingConstraintSatisfied(notRoaming);
+        final boolean changed = jobStatus
+                .setConnectivityConstraintSatisfied(connected && satisfied && sane);
 
         // Pass along the evaluated network for job to use; prevents race
         // conditions as default routes change over time, and opens the door to
@@ -185,17 +173,13 @@ public final class ConnectivityController extends StateController implements
         // overall state of connectivity constraint satisfiability.
         if (jobUid == Process.SYSTEM_UID) {
             mConnected = connected;
-            mValidated = validated;
         }
 
         if (DEBUG) {
             Slog.i(TAG, "Connectivity " + (changed ? "CHANGED" : "unchanged")
-                    + " for " + jobStatus + ": usable=" + connectionUsable
-                    + " connected=" + connected
-                    + " validated=" + validated
-                    + " metered=" + metered
-                    + " unmetered=" + unmetered
-                    + " notRoaming=" + notRoaming);
+                    + " for " + jobStatus + ": connected=" + connected
+                    + " satisfied=" + satisfied
+                    + " sane=" + sane);
         }
         return changed;
     }
@@ -292,8 +276,6 @@ public final class ConnectivityController extends StateController implements
     public void dumpControllerStateLocked(PrintWriter pw, int filterUid) {
         pw.print("Connectivity: connected=");
         pw.print(mConnected);
-        pw.print(" validated=");
-        pw.println(mValidated);
         pw.print("Tracking ");
         pw.print(mTrackedJobs.size());
         pw.println(":");
@@ -304,10 +286,7 @@ public final class ConnectivityController extends StateController implements
                 js.printUniqueId(pw);
                 pw.print(" from ");
                 UserHandle.formatUid(pw, js.getSourceUid());
-                pw.print(": C="); pw.print(js.needsAnyConnectivity());
-                pw.print(": M="); pw.print(js.needsMeteredConnectivity());
-                pw.print(": UM="); pw.print(js.needsUnmeteredConnectivity());
-                pw.print(": NR="); pw.println(js.needsNonRoamingConnectivity());
+                pw.print(": "); pw.print(js.getJob().getRequiredNetwork());
             }
         }
     }

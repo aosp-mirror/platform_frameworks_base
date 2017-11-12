@@ -21,6 +21,8 @@
 #include <cutils/log.h>
 #include <algorithm>
 #include <climits>
+#include "CpuTimePerUidFreqPuller.h"
+#include "CpuTimePerUidPuller.h"
 #include "ResourcePowerManagerPuller.h"
 #include "StatsCompanionServicePuller.h"
 #include "StatsPullerManager.h"
@@ -42,21 +44,29 @@ namespace statsd {
 
 StatsPullerManager::StatsPullerManager()
     : mCurrentPullingInterval(LONG_MAX), mPullStartTimeMs(get_pull_start_time_ms()) {
-    shared_ptr<StatsPuller> statsCompanionServicePuller =
-            make_shared<StatsCompanionServicePuller>();
+    shared_ptr<StatsPuller> statsCompanionServicePuller = make_shared<StatsCompanionServicePuller>();
     shared_ptr<StatsPuller> resourcePowerManagerPuller = make_shared<ResourcePowerManagerPuller>();
+    shared_ptr<StatsPuller> cpuTimePerUidPuller = make_shared<CpuTimePerUidPuller>();
+    shared_ptr<StatsPuller> cpuTimePerUidFreqPuller = make_shared<CpuTimePerUidFreqPuller>();
 
-    mPullers.insert({android::util::KERNEL_WAKELOCK_PULLED, statsCompanionServicePuller});
-    mPullers.insert({android::util::WIFI_BYTES_TRANSFERRED, statsCompanionServicePuller});
-    mPullers.insert({android::util::MOBILE_BYTES_TRANSFERRED, statsCompanionServicePuller});
-    mPullers.insert({android::util::WIFI_BYTES_TRANSFERRED_BY_FG_BG, statsCompanionServicePuller});
-    mPullers.insert(
-            {android::util::MOBILE_BYTES_TRANSFERRED_BY_FG_BG, statsCompanionServicePuller});
-    mPullers.insert(
-            {android::util::POWER_STATE_PLATFORM_SLEEP_STATE_PULLED, resourcePowerManagerPuller});
-    mPullers.insert({android::util::POWER_STATE_VOTER_PULLED, resourcePowerManagerPuller});
-    mPullers.insert(
-            {android::util::POWER_STATE_SUBSYSTEM_SLEEP_STATE_PULLED, resourcePowerManagerPuller});
+    mPullers.insert({android::util::KERNEL_WAKELOCK_PULLED,
+                     statsCompanionServicePuller});
+    mPullers.insert({android::util::WIFI_BYTES_TRANSFERRED,
+                     statsCompanionServicePuller});
+    mPullers.insert({android::util::MOBILE_BYTES_TRANSFERRED,
+                     statsCompanionServicePuller});
+    mPullers.insert({android::util::WIFI_BYTES_TRANSFERRED_BY_FG_BG,
+                     statsCompanionServicePuller});
+    mPullers.insert({android::util::MOBILE_BYTES_TRANSFERRED_BY_FG_BG,
+                     statsCompanionServicePuller});
+    mPullers.insert({android::util::POWER_STATE_PLATFORM_SLEEP_STATE_PULLED,
+                     resourcePowerManagerPuller});
+    mPullers.insert({android::util::POWER_STATE_VOTER_PULLED,
+                     resourcePowerManagerPuller});
+    mPullers.insert({android::util::POWER_STATE_SUBSYSTEM_SLEEP_STATE_PULLED,
+                     resourcePowerManagerPuller});
+    mPullers.insert({android::util::CPU_TIME_PER_UID_PULLED, cpuTimePerUidPuller});
+    mPullers.insert({android::util::CPU_TIME_PER_UID_FREQ_PULLED, cpuTimePerUidFreqPuller});
 
     mStatsCompanionService = StatsService::getStatsCompanionService();
 }

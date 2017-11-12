@@ -56,25 +56,20 @@ public:
                       std::vector<bool>& stack) = 0;
 
     // evaluate current condition given the new event.
-    // return true if the condition state changed, false if the condition state is not changed.
     // event: the new log event
     // eventMatcherValues: the results of the LogMatcherTrackers. LogMatcherTrackers always process
     //                     event before ConditionTrackers, because ConditionTracker depends on
     //                     LogMatchingTrackers.
     // mAllConditions: the list of all ConditionTracker
     // conditionCache: the cached non-sliced condition of the ConditionTrackers for this new event.
-    // nonSlicedConditionChanged: the bit map to record whether non-sliced condition has changed.
-    // slicedConditionMayChanged: the bit map to record whether sliced condition may have changed.
-    //      Because sliced condition needs parameters to determine the value. So the sliced
-    //      condition is not pushed to metrics. We only inform the relevant metrics that the sliced
-    //      condition may have changed, and metrics should pull the conditions that they are
-    //      interested in.
-    virtual bool evaluateCondition(const LogEvent& event,
+    // conditionChanged: the bit map to record whether the condition has changed.
+    //                   If the condition has dimension, then any sub condition changes will report
+    //                   conditionChanged.
+    virtual void evaluateCondition(const LogEvent& event,
                                    const std::vector<MatchingState>& eventMatcherValues,
                                    const std::vector<sp<ConditionTracker>>& mAllConditions,
                                    std::vector<ConditionState>& conditionCache,
-                                   std::vector<bool>& nonSlicedConditionChanged,
-                                   std::vector<bool>& slicedConditionMayChanged) = 0;
+                                   std::vector<bool>& conditionChanged) = 0;
 
     // Return the current condition state.
     virtual ConditionState isConditionMet() {

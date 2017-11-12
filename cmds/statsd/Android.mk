@@ -31,6 +31,8 @@ statsd_common_src := \
     src/config/ConfigManager.cpp \
     src/external/StatsCompanionServicePuller.cpp \
     src/external/ResourcePowerManagerPuller.cpp \
+    src/external/CpuTimePerUidPuller.cpp \
+    src/external/CpuTimePerUidFreqPuller.cpp \
     src/external/StatsPullerManager.cpp \
     src/logd/LogEvent.cpp \
     src/logd/LogListener.cpp \
@@ -38,7 +40,7 @@ statsd_common_src := \
     src/matchers/CombinationLogMatchingTracker.cpp \
     src/matchers/matcher_util.cpp \
     src/matchers/SimpleLogMatchingTracker.cpp \
-    src/metrics/CountAnomalyTracker.cpp \
+    src/anomaly/DiscreteAnomalyTracker.cpp \
     src/metrics/MetricProducer.cpp \
     src/metrics/EventMetricProducer.cpp \
     src/metrics/CountMetricProducer.cpp \
@@ -150,18 +152,19 @@ LOCAL_CFLAGS += \
 LOCAL_SRC_FILES := \
     $(statsd_common_src) \
     tests/AnomalyMonitor_test.cpp \
-    tests/ConditionTracker_test.cpp \
+    tests/anomaly/AnomalyTracker_test.cpp \
     tests/ConfigManager_test.cpp \
     tests/indexed_priority_queue_test.cpp \
     tests/LogEntryMatcher_test.cpp \
     tests/LogReader_test.cpp \
     tests/MetricsManager_test.cpp \
     tests/UidMap_test.cpp \
+    tests/condition/CombinationConditionTracker_test.cpp \
+    tests/condition/SimpleConditionTracker_test.cpp \
     tests/metrics/OringDurationTracker_test.cpp \
     tests/metrics/MaxDurationTracker_test.cpp \
     tests/metrics/CountMetricProducer_test.cpp \
     tests/metrics/EventMetricProducer_test.cpp
-
 
 LOCAL_STATIC_LIBRARIES := \
     libgmock

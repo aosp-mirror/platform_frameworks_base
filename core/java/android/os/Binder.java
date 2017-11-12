@@ -193,6 +193,19 @@ public class Binder implements IBinder {
     }
 
     /**
+     * Reset the given interface back to the default blocking behavior,
+     * reverting any changes made by {@link #allowBlocking(IBinder)}.
+     *
+     * @hide
+     */
+    public static IBinder defaultBlocking(IBinder binder) {
+        if (binder instanceof BinderProxy) {
+            ((BinderProxy) binder).mWarnOnBlocking = sWarnOnBlocking;
+        }
+        return binder;
+    }
+
+    /**
      * Inherit the current {@link #allowBlocking(IBinder)} value from one given
      * interface to another.
      *

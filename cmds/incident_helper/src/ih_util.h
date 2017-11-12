@@ -17,9 +17,9 @@
 #ifndef INCIDENT_HELPER_UTIL_H
 #define INCIDENT_HELPER_UTIL_H
 
+#include <map>
 #include <string>
 #include <vector>
-#include <sstream>
 
 #include <android/util/ProtoOutputStream.h>
 
@@ -29,8 +29,13 @@ typedef std::vector<std::string> header_t;
 typedef std::vector<std::string> record_t;
 typedef std::string (*trans_func) (const std::string&);
 
-const char DEFAULT_NEWLINE = '\n';
 const std::string DEFAULT_WHITESPACE = " \t";
+const std::string DEFAULT_NEWLINE = "\r\n";
+const std::string TAB_DELIMITER = "\t";
+const std::string COMMA_DELIMITER = ",";
+
+// returns true if c is a-zA-Z0-9 or underscore _
+bool isValidChar(char c);
 
 /**
  * When a text has a table format like this
@@ -47,19 +52,33 @@ header_t parseHeader(const std::string& line, const std::string& delimiters = DE
 record_t parseRecord(const std::string& line, const std::string& delimiters = DEFAULT_WHITESPACE);
 
 /**
- * When the line starts with the given key, the function returns true
- * as well as the line argument is changed to the rest part of the original.
+ * When a text-format table aligns by its vertical position, it is not possible to split them by purely delimiters.
+ * This function allows to parse record by its header's column position' indices, must in ascending order.
+ * At the same time, it still looks at the char at index, if it doesn't belong to delimiters, moves forward to find the delimiters.
+ */
+record_t parseRecordByColumns(const std::string& line, const std::vector<int>& indices, const std::string& delimiters = DEFAULT_WHITESPACE);
+
+/**
+ * When the line starts/ends with the given key, the function returns true
+ * as well as the line argument is changed to the rest trimmed part of the original.
  * e.g. "ZRAM: 6828K physical used for 31076K in swap (524284K total swap)" becomes
  * "6828K physical used for 31076K in swap (524284K total swap)" when given key "ZRAM:",
  * otherwise the line is not changed.
+ *
+ * In order to prevent two values have same prefix which cause entering to incorrect conditions,
+ * stripPrefix and stripSuffix can turn on a flag that requires the ending char in the line must not be a valid
+ * character or digits, this feature is off by default.
+ * i.e. ABC%some value, ABCD%other value
  */
-bool hasPrefix(std::string* line, const char* key);
+bool stripPrefix(std::string* line, const char* key, bool endAtDelimiter = false);
+bool stripSuffix(std::string* line, const char* key, bool endAtDelimiter = false);
 
 /**
  * Converts string to the desired type
  */
 int toInt(const std::string& s);
 long long toLongLong(const std::string& s);
+double toDouble(const std::string& s);
 
 /**
  * Reader class reads data from given fd in streaming fashion.
@@ -69,23 +88,29 @@ class Reader
 {
 public:
     Reader(const int fd);
-    Reader(const int fd, const size_t capacity);
     ~Reader();
 
-    bool readLine(std::string* line, const char newline = DEFAULT_NEWLINE);
+    bool readLine(std::string* line);
     bool ok(std::string* error);
 
 private:
-    int mFd; // set mFd to -1 when read EOF()
-    const size_t mMaxSize;
-    size_t mBufSize;
-    char* mBuf; // implements a circular buffer
-
-    int mRead;
-    int mFlushed;
+    FILE* mFile;
     std::string mStatus;
-    // end of read
-    inline bool EOR() { return mFd == -1 && mBufSize == 0; };
+};
+
+class EnumTypeMap
+{
+public:
+    EnumTypeMap() {};
+    EnumTypeMap(const char* enumNames[], const uint32_t enumValues[], const int enumCount);
+    ~EnumTypeMap();
+
+    int parseValue(const std::string& value);
+
+private:
+    const char** mEnumNames;
+    const uint32_t* mEnumValues;
+    int mEnumCount;
 };
 
 /**
@@ -98,12 +123,15 @@ public:
     Table(const char* names[], const uint64_t ids[], const int count);
     ~Table();
 
-    bool insertField(ProtoOutputStream& proto, const std::string& name, const std::string& value);
+    // Add enum names to values for parsing purpose.
+    void addEnumTypeMap(const char* field, const char* enumNames[], const uint32_t enumValues[], const int enumSize);
 
+    bool insertField(ProtoOutputStream* proto, const std::string& name, const std::string& value);
 private:
     const char** mFieldNames;
     const uint64_t* mFieldIds;
     const int mFieldCount;
+    map<int, EnumTypeMap> mEnums;
 };
 
 #endif  // INCIDENT_HELPER_UTIL_H

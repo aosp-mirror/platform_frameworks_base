@@ -112,20 +112,26 @@ public class NavigationBarGestureHelper extends GestureDetector.SimpleOnGestureL
         mIsRTL = isRTL;
     }
 
-    public boolean onInterceptTouchEvent(MotionEvent event) {
+    private boolean proxyMotionEvents(MotionEvent event) {
         final IOverviewProxy overviewProxy = mOverviewEventSender.getProxy();
         if (overviewProxy != null) {
             mNavigationBarView.requestUnbufferedDispatch(event);
             try {
                 overviewProxy.onMotionEvent(event);
+                return true;
             } catch (RemoteException e) {
                 Log.e(TAG, "Callback failed", e);
             }
         }
+        return false;
+    }
 
-        // If we move more than a fixed amount, then start capturing for the
-        // task switcher detector
-        mTaskSwitcherDetector.onTouchEvent(event);
+    public boolean onInterceptTouchEvent(MotionEvent event) {
+        if (!proxyMotionEvents(event)) {
+            // If we move more than a fixed amount, then start capturing for the
+            // task switcher detector, disabled when proxying motion events to launcher service
+            mTaskSwitcherDetector.onTouchEvent(event);
+        }
         int action = event.getAction();
         switch (action & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_DOWN: {
@@ -289,7 +295,7 @@ public class NavigationBarGestureHelper extends GestureDetector.SimpleOnGestureL
     }
 
     public boolean onTouchEvent(MotionEvent event) {
-        boolean result = mTaskSwitcherDetector.onTouchEvent(event);
+        boolean result = proxyMotionEvents(event) || mTaskSwitcherDetector.onTouchEvent(event);
         if (mDockWindowEnabled) {
             result |= handleDockWindowEvent(event);
         }

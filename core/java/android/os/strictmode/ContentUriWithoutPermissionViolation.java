@@ -17,8 +17,8 @@ package android.os.strictmode;
 
 import android.net.Uri;
 
-/** @hide */
 public final class ContentUriWithoutPermissionViolation extends Violation {
+    /** @hide */
     public ContentUriWithoutPermissionViolation(Uri uri, String location) {
         super(
                 uri

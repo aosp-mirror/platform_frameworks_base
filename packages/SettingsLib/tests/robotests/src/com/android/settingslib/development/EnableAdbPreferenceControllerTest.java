@@ -17,14 +17,9 @@
 package com.android.settingslib.development;
 
 import static com.google.common.truth.Truth.assertThat;
-
 import static org.mockito.Answers.RETURNS_DEEP_STUBS;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
@@ -67,21 +62,19 @@ public class EnableAdbPreferenceControllerTest {
         shadowContext.setSystemService(Context.USER_SERVICE, mUserManager);
         mContext = spy(shadowContext.getApplicationContext());
         when(mContext.getPackageManager()).thenReturn(mPackageManager);
-        mPreference = new SwitchPreference(mContext);
-        when(mScreen.findPreference(anyString())).thenReturn(mPreference);
         mController = new ConcreteEnableAdbPreferenceController(mContext);
+        mPreference = new SwitchPreference(mContext);
         mPreference.setKey(mController.getPreferenceKey());
+        when(mScreen.findPreference(mPreference.getKey())).thenReturn(mPreference);
     }
 
     @Test
     public void displayPreference_isNotAdmin_shouldRemovePreference() {
         when(mUserManager.isAdminUser()).thenReturn(false);
-        when(mScreen.getPreferenceCount()).thenReturn(1);
-        when(mScreen.getPreference(0)).thenReturn(mPreference);
 
         mController.displayPreference(mScreen);
 
-        verify(mScreen).removePreference(any(Preference.class));
+        assertThat(mPreference.isVisible()).isFalse();
     }
 
     @Test
@@ -90,7 +83,7 @@ public class EnableAdbPreferenceControllerTest {
 
         mController.displayPreference(mScreen);
 
-        verify(mScreen, never()).removePreference(any(Preference.class));
+        assertThat(mPreference.isVisible()).isTrue();
     }
 
 

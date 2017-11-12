@@ -20,14 +20,16 @@ public abstract class AbstractPreferenceController {
      * Displays preference in this controller.
      */
     public void displayPreference(PreferenceScreen screen) {
+        final String prefKey = getPreferenceKey();
         if (isAvailable()) {
+            setVisible(screen, prefKey, true /* visible */);
             if (this instanceof Preference.OnPreferenceChangeListener) {
-                final Preference preference = screen.findPreference(getPreferenceKey());
+                final Preference preference = screen.findPreference(prefKey);
                 preference.setOnPreferenceChangeListener(
                         (Preference.OnPreferenceChangeListener) this);
             }
         } else {
-            removePreference(screen, getPreferenceKey());
+            setVisible(screen, prefKey, false /* visible */);
         }
     }
 
@@ -59,13 +61,6 @@ public abstract class AbstractPreferenceController {
     public abstract String getPreferenceKey();
 
     /**
-     * Removes preference from screen.
-     */
-    protected final void removePreference(PreferenceScreen screen, String key) {
-        findAndRemovePreference(screen, key);
-    }
-
-    /**
      * Show/hide a preference.
      */
     protected final void setVisible(PreferenceGroup group, String key, boolean isVisible) {
@@ -74,25 +69,4 @@ public abstract class AbstractPreferenceController {
             pref.setVisible(isVisible);
         }
     }
-
-    // finds the preference recursively and removes it from its parent
-    private boolean findAndRemovePreference(PreferenceGroup prefGroup, String key) {
-        final int preferenceCount = prefGroup.getPreferenceCount();
-        for (int i = 0; i < preferenceCount; i++) {
-            final Preference preference = prefGroup.getPreference(i);
-            final String curKey = preference.getKey();
-
-            if (curKey != null && curKey.equals(key)) {
-                return prefGroup.removePreference(preference);
-            }
-
-            if (preference instanceof PreferenceGroup) {
-                if (findAndRemovePreference((PreferenceGroup) preference, key)) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
 }

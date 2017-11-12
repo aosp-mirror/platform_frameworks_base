@@ -46,11 +46,11 @@ ProcrankParser::Parse(const int in, const int out) const
             continue;
         }
 
-        if (hasPrefix(&line, "ZRAM:")) {
+        if (stripPrefix(&line, "ZRAM:")) {
             zram = line;
             continue;
         }
-        if (hasPrefix(&line, "RAM:")) {
+        if (stripPrefix(&line, "RAM:")) {
             ram = line;
             continue;
         }
@@ -68,7 +68,7 @@ ProcrankParser::Parse(const int in, const int out) const
 
         long long token = proto.start(Procrank::PROCESSES);
         for (int i=0; i<(int)record.size(); i++) {
-            if (!table.insertField(proto, header[i], record[i])) {
+            if (!table.insertField(&proto, header[i], record[i])) {
                 fprintf(stderr, "[%s]Line %d has bad value %s of %s\n",
                         this->name.string(), nline, header[i].c_str(), record[i].c_str());
             }
@@ -82,7 +82,7 @@ ProcrankParser::Parse(const int in, const int out) const
         record = parseRecord(total);
         long long token = proto.start(SummaryProto::TOTAL);
         for (int i=(int)record.size(); i>0; i--) {
-            table.insertField(proto, header[header.size() - i].c_str(), record[record.size() - i].c_str());
+            table.insertField(&proto, header[header.size() - i].c_str(), record[record.size() - i].c_str());
         }
         proto.end(token);
     }

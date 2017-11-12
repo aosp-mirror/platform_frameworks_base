@@ -26,14 +26,19 @@ string make_constant_name(const string& str);
 string file_base_name(const string& str);
 
 /**
- * Replace all occurances of 'replace' with 'with'.
+ * Replaces all occurances of 'replace' with 'with'.
  */
 string replace_string(const string& str, const char replace, const char with);
 
 /**
- * Split a string to parts by delimiter.
+ * Splits a string to parts by delimiter.
  */
 vector<string> split(const string& str, const char delimiter);
+
+/**
+ * Returns the rest of str if it has prefix, otherwise return all.
+ */
+string stripPrefix(const string& str, const string& prefix);
 
 } // namespace stream_proto
 } // namespace android

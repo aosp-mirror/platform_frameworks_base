@@ -16,7 +16,6 @@
 
 package android.widget.touchmode;
 
-import android.widget.layout.linear.LLOfButtons1;
 import static android.util.TouchModeFlexibleAsserts.assertInTouchModeAfterClick;
 import static android.util.TouchModeFlexibleAsserts.assertInTouchModeAfterTap;
 import static android.util.TouchModeFlexibleAsserts.assertNotInTouchModeAfterKey;
@@ -25,6 +24,8 @@ import android.test.ActivityInstrumentationTestCase;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.view.KeyEvent;
 import android.widget.Button;
+import android.widget.layout.linear.LLOfButtons1;
+
 
 /**
  * Make sure focus isn't kept by buttons when entering touch mode.
@@ -52,7 +53,6 @@ public class TouchModeFocusChangeTest extends ActivityInstrumentationTestCase<LL
     @MediumTest
     public void testPreconditions() {
         assertFalse("we should not be in touch mode", mActivity.isInTouchMode());
-        assertTrue("top button should have focus", mFirstButton.isFocused());
     }
 
     @MediumTest

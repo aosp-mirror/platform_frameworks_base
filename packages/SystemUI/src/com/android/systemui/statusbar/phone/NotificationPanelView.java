@@ -596,7 +596,7 @@ public class NotificationPanelView extends PanelView implements
             mLastCameraLaunchSource = KeyguardBottomAreaView.CAMERA_LAUNCH_SOURCE_AFFORDANCE;
         }
         closeQs();
-        mStatusBar.closeAndSaveGuts(true /* leavebehind */, true /* force */,
+        mStatusBar.getGutsManager().closeAndSaveGuts(true /* leavebehind */, true /* force */,
                 true /* controls */, -1 /* x */, -1 /* y */, true /* resetMenu */);
         mNotificationStackScroller.setOverScrollAmount(0f, true /* onTop */, false /* animate */,
                 true /* cancelAnimators */);

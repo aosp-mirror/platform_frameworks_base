@@ -30,13 +30,8 @@ import android.os.ParcelFileDescriptor;
 import android.provider.Browser;
 import android.provider.ContactsContract;
 import android.provider.Settings;
-import android.text.Spannable;
-import android.text.TextUtils;
-import android.text.method.WordIterator;
-import android.text.style.ClickableSpan;
 import android.text.util.Linkify;
 import android.util.Patterns;
-import android.view.View;
 import android.widget.TextViewMetrics;
 
 import com.android.internal.annotations.GuardedBy;
@@ -46,13 +41,8 @@ import com.android.internal.util.Preconditions;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.text.BreakIterator;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -191,21 +181,6 @@ final class TextClassifierImpl implements TextClassifier {
             @Nullable LocaleList defaultLocales) {
         return classifyText(text, startIndex, endIndex,
                 new TextClassification.Options().setDefaultLocales(defaultLocales));
-    }
-
-    @Override
-    public LinksInfo getLinks(
-            @NonNull CharSequence text, int linkMask, @Nullable LocaleList defaultLocales) {
-        Preconditions.checkArgument(text != null);
-        try {
-            return LinksInfoFactory.create(
-                    mContext, getSmartSelection(defaultLocales), text.toString(), linkMask);
-        } catch (Throwable t) {
-            // Avoid throwing from this method. Log the error.
-            Log.e(LOG_TAG, "Error getting links info.", t);
-        }
-        // Getting here means something went wrong, return a NO_OP result.
-        return TextClassifier.NO_OP.getLinks(text, linkMask, defaultLocales);
     }
 
     @Override
@@ -513,180 +488,6 @@ final class TextClassifierImpl implements TextClassifier {
         Preconditions.checkArgument(startIndex >= 0);
         Preconditions.checkArgument(endIndex <= text.length());
         Preconditions.checkArgument(endIndex > startIndex);
-    }
-
-    /**
-     * Detects and creates links for specified text.
-     */
-    private static final class LinksInfoFactory {
-
-        private LinksInfoFactory() {}
-
-        public static LinksInfo create(
-                Context context, SmartSelection smartSelection, String text, int linkMask) {
-            final WordIterator wordIterator = new WordIterator();
-            wordIterator.setCharSequence(text, 0, text.length());
-            final List<SpanSpec> spans = new ArrayList<>();
-            int start = 0;
-            int end;
-            while ((end = wordIterator.nextBoundary(start)) != BreakIterator.DONE) {
-                final String token = text.substring(start, end);
-                if (TextUtils.isEmpty(token)) {
-                    continue;
-                }
-
-                final int[] selection = smartSelection.suggest(text, start, end);
-                final int selectionStart = selection[0];
-                final int selectionEnd = selection[1];
-                if (selectionStart >= 0 && selectionEnd <= text.length()
-                        && selectionStart <= selectionEnd) {
-                    final SmartSelection.ClassificationResult[] results =
-                            smartSelection.classifyText(
-                                    text, selectionStart, selectionEnd,
-                                    getHintFlags(text, selectionStart, selectionEnd));
-                    if (results.length > 0) {
-                        final String type = getHighestScoringType(results);
-                        if (matches(type, linkMask)) {
-                            // For links without disambiguation, we simply use the default intent.
-                            final List<Intent> intents = IntentFactory.create(
-                                    context, type, text.substring(selectionStart, selectionEnd));
-                            if (!intents.isEmpty() && hasActivityHandler(context, intents.get(0))) {
-                                final ClickableSpan span = createSpan(context, intents.get(0));
-                                spans.add(new SpanSpec(selectionStart, selectionEnd, span));
-                            }
-                        }
-                    }
-                }
-                start = end;
-            }
-            return new LinksInfoImpl(text, avoidOverlaps(spans, text));
-        }
-
-        /**
-         * Returns true if the classification type matches the specified linkMask.
-         */
-        private static boolean matches(String type, int linkMask) {
-            type = type.trim().toLowerCase(Locale.ENGLISH);
-            if ((linkMask & Linkify.PHONE_NUMBERS) != 0
-                    && TextClassifier.TYPE_PHONE.equals(type)) {
-                return true;
-            }
-            if ((linkMask & Linkify.EMAIL_ADDRESSES) != 0
-                    && TextClassifier.TYPE_EMAIL.equals(type)) {
-                return true;
-            }
-            if ((linkMask & Linkify.MAP_ADDRESSES) != 0
-                    && TextClassifier.TYPE_ADDRESS.equals(type)) {
-                return true;
-            }
-            if ((linkMask & Linkify.WEB_URLS) != 0
-                    && TextClassifier.TYPE_URL.equals(type)) {
-                return true;
-            }
-            return false;
-        }
-
-        /**
-         * Trim the number of spans so that no two spans overlap.
-         *
-         * This algorithm first ensures that there is only one span per start index, then it
-         * makes sure that no two spans overlap.
-         */
-        private static List<SpanSpec> avoidOverlaps(List<SpanSpec> spans, String text) {
-            Collections.sort(spans, Comparator.comparingInt(span -> span.mStart));
-            // Group spans by start index. Take the longest span.
-            final Map<Integer, SpanSpec> reps = new LinkedHashMap<>();  // order matters.
-            final int size = spans.size();
-            for (int i = 0; i < size; i++) {
-                final SpanSpec span = spans.get(i);
-                final LinksInfoFactory.SpanSpec rep = reps.get(span.mStart);
-                if (rep == null || rep.mEnd < span.mEnd) {
-                    reps.put(span.mStart, span);
-                }
-            }
-            // Avoid span intersections. Take the longer span.
-            final LinkedList<SpanSpec> result = new LinkedList<>();
-            for (SpanSpec rep : reps.values()) {
-                if (result.isEmpty()) {
-                    result.add(rep);
-                    continue;
-                }
-
-                final SpanSpec last = result.getLast();
-                if (rep.mStart < last.mEnd) {
-                    // Spans intersect. Use the one with characters.
-                    if ((rep.mEnd - rep.mStart) > (last.mEnd - last.mStart)) {
-                        result.set(result.size() - 1, rep);
-                    }
-                } else {
-                    result.add(rep);
-                }
-            }
-            return result;
-        }
-
-        private static ClickableSpan createSpan(final Context context, final Intent intent) {
-            return new ClickableSpan() {
-                // TODO: Style this span.
-                @Override
-                public void onClick(View widget) {
-                    context.startActivity(intent);
-                }
-            };
-        }
-
-        private static boolean hasActivityHandler(Context context, Intent intent) {
-            if (intent == null) {
-                return false;
-            }
-            final ResolveInfo resolveInfo = context.getPackageManager().resolveActivity(intent, 0);
-            return resolveInfo != null && resolveInfo.activityInfo != null;
-        }
-
-        /**
-         * Implementation of LinksInfo that adds ClickableSpans to the specified text.
-         */
-        private static final class LinksInfoImpl implements LinksInfo {
-
-            private final CharSequence mOriginalText;
-            private final List<SpanSpec> mSpans;
-
-            LinksInfoImpl(CharSequence originalText, List<SpanSpec> spans) {
-                mOriginalText = originalText;
-                mSpans = spans;
-            }
-
-            @Override
-            public boolean apply(@NonNull CharSequence text) {
-                Preconditions.checkArgument(text != null);
-                if (text instanceof Spannable && mOriginalText.toString().equals(text.toString())) {
-                    Spannable spannable = (Spannable) text;
-                    final int size = mSpans.size();
-                    for (int i = 0; i < size; i++) {
-                        final SpanSpec span = mSpans.get(i);
-                        spannable.setSpan(span.mSpan, span.mStart, span.mEnd, 0);
-                    }
-                    return true;
-                }
-                return false;
-            }
-        }
-
-        /**
-         * Span plus its start and end index.
-         */
-        private static final class SpanSpec {
-
-            private final int mStart;
-            private final int mEnd;
-            private final ClickableSpan mSpan;
-
-            SpanSpec(int start, int end, ClickableSpan span) {
-                mStart = start;
-                mEnd = end;
-                mSpan = span;
-            }
-        }
     }
 
     /**

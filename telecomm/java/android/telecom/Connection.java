@@ -25,6 +25,7 @@ import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.app.Notification;
+import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.hardware.camera2.CameraManager;
 import android.net.Uri;
@@ -819,7 +820,7 @@ public abstract class Connection extends Conferenceable {
         public void onConnectionEvent(Connection c, String event, Bundle extras) {}
         /** @hide */
         public void onConferenceSupportedChanged(Connection c, boolean isConferenceSupported) {}
-        public void onAudioRouteChanged(Connection c, int audioRoute) {}
+        public void onAudioRouteChanged(Connection c, int audioRoute, String bluetoothAddress) {}
         public void onRttInitiationSuccess(Connection c) {}
         public void onRttInitiationFailure(Connection c, int reason) {}
         public void onRttSessionRemotelyTerminated(Connection c) {}
@@ -2576,7 +2577,29 @@ public abstract class Connection extends Conferenceable {
      */
     public final void setAudioRoute(int route) {
         for (Listener l : mListeners) {
-            l.onAudioRouteChanged(this, route);
+            l.onAudioRouteChanged(this, route, null);
+        }
+    }
+
+    /**
+     *
+     * Request audio routing to a specific bluetooth device. Calling this method may result in
+     * the device routing audio to a different bluetooth device than the one specified if the
+     * bluetooth stack is unable to route audio to the requested device.
+     * A list of available devices can be obtained via
+     * {@link CallAudioState#getSupportedBluetoothDevices()}
+     *
+     * <p>
+     * Used by self-managed {@link ConnectionService}s which wish to use bluetooth audio for a
+     * self-managed {@link Connection} (see {@link PhoneAccount#CAPABILITY_SELF_MANAGED}.)
+     * <p>
+     * See also {@link InCallService#requestBluetoothAudio(String)}
+     * @param bluetoothAddress The address of the bluetooth device to connect to, as returned by
+     *                         {@link BluetoothDevice#getAddress()}.
+     */
+    public void requestBluetoothAudio(@NonNull String bluetoothAddress) {
+        for (Listener l : mListeners) {
+            l.onAudioRouteChanged(this, CallAudioState.ROUTE_BLUETOOTH, bluetoothAddress);
         }
     }
 

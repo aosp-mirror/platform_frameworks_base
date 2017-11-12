@@ -23,7 +23,6 @@
 
 #include <log/logprint.h>
 #include <utils/RefBase.h>
-#include "frameworks/base/cmds/statsd/src/stats_log.pb.h"
 
 namespace android {
 namespace os {
@@ -39,6 +38,7 @@ public:
                    const sp<ConditionWizard>& wizard)
         : mStartTimeNs(startTimeNs),
           mCurrentBucketStartTimeNs(startTimeNs),
+          mCurrentBucketNum(0),
           mCondition(conditionIndex >= 0 ? false : true),
           mConditionSliced(false),
           mWizard(wizard),
@@ -61,7 +61,7 @@ public:
 
     // TODO: Pass a timestamp as a parameter in onDumpReport and update all its
     // implementations.
-    virtual StatsLogReport onDumpReport() = 0;
+    virtual std::unique_ptr<std::vector<uint8_t>> onDumpReport() = 0;
 
     virtual bool isConditionSliced() const {
         return mConditionSliced;
@@ -73,6 +73,8 @@ protected:
     const uint64_t mStartTimeNs;
 
     uint64_t mCurrentBucketStartTimeNs;
+
+    uint64_t mCurrentBucketNum;
 
     int64_t mBucketSizeNs;
 
@@ -118,7 +120,7 @@ protected:
 
     virtual void startNewProtoOutputStream(long long timestamp) = 0;
 
-    std::unique_ptr<uint8_t[]> serializeProto();
+    std::unique_ptr<std::vector<uint8_t>> serializeProto();
 };
 
 }  // namespace statsd

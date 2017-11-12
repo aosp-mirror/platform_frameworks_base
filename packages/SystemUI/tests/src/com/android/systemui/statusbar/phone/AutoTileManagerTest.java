@@ -24,7 +24,7 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 
-import com.android.internal.app.NightDisplayController;
+import com.android.internal.app.ColorDisplayController;
 import com.android.systemui.Dependency;
 import com.android.systemui.Prefs;
 import com.android.systemui.Prefs.Key;
@@ -61,49 +61,49 @@ public class AutoTileManagerTest extends SysuiTestCase {
 
     @Test
     public void nightTileAdded_whenActivated() {
-        if (!NightDisplayController.isAvailable(mContext)) {
+        if (!ColorDisplayController.isAvailable(mContext)) {
             return;
         }
-        mAutoTileManager.mNightDisplayCallback.onActivated(true);
+        mAutoTileManager.mColorDisplayCallback.onActivated(true);
         verify(mQsTileHost).addTile("night");
     }
 
     @Test
     public void nightTileNotAdded_whenDeactivated() {
-        if (!NightDisplayController.isAvailable(mContext)) {
+        if (!ColorDisplayController.isAvailable(mContext)) {
             return;
         }
-        mAutoTileManager.mNightDisplayCallback.onActivated(false);
+        mAutoTileManager.mColorDisplayCallback.onActivated(false);
         verify(mQsTileHost, never()).addTile("night");
     }
 
     @Test
     public void nightTileAdded_whenNightModeTwilight() {
-        if (!NightDisplayController.isAvailable(mContext)) {
+        if (!ColorDisplayController.isAvailable(mContext)) {
             return;
         }
-        mAutoTileManager.mNightDisplayCallback.onAutoModeChanged(
-                NightDisplayController.AUTO_MODE_TWILIGHT);
+        mAutoTileManager.mColorDisplayCallback.onAutoModeChanged(
+                ColorDisplayController.AUTO_MODE_TWILIGHT);
         verify(mQsTileHost).addTile("night");
     }
 
     @Test
     public void nightTileAdded_whenNightModeCustom() {
-        if (!NightDisplayController.isAvailable(mContext)) {
+        if (!ColorDisplayController.isAvailable(mContext)) {
             return;
         }
-        mAutoTileManager.mNightDisplayCallback.onAutoModeChanged(
-                NightDisplayController.AUTO_MODE_CUSTOM);
+        mAutoTileManager.mColorDisplayCallback.onAutoModeChanged(
+                ColorDisplayController.AUTO_MODE_CUSTOM);
         verify(mQsTileHost).addTile("night");
     }
 
     @Test
     public void nightTileNotAdded_whenNightModeDisabled() {
-        if (!NightDisplayController.isAvailable(mContext)) {
+        if (!ColorDisplayController.isAvailable(mContext)) {
             return;
         }
-        mAutoTileManager.mNightDisplayCallback.onAutoModeChanged(
-                NightDisplayController.AUTO_MODE_DISABLED);
+        mAutoTileManager.mColorDisplayCallback.onAutoModeChanged(
+                ColorDisplayController.AUTO_MODE_DISABLED);
         verify(mQsTileHost, never()).addTile("night");
     }
 }

@@ -20,8 +20,6 @@
 #include "condition/ConditionWizard.h"
 #include "stats_util.h"
 
-#include "frameworks/base/cmds/statsd/src/stats_log.pb.h"
-
 namespace android {
 namespace os {
 namespace statsd {

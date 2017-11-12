@@ -23,6 +23,7 @@
 #include <limits.h>
 #include <stdlib.h>
 
+using android::util::FIELD_COUNT_REPEATED;
 using android::util::FIELD_TYPE_BOOL;
 using android::util::FIELD_TYPE_FLOAT;
 using android::util::FIELD_TYPE_INT32;
@@ -84,20 +85,19 @@ void EventMetricProducer::finish() {
 void EventMetricProducer::onSlicedConditionMayChange(const uint64_t eventTime) {
 }
 
-StatsLogReport EventMetricProducer::onDumpReport() {
+std::unique_ptr<std::vector<uint8_t>> EventMetricProducer::onDumpReport() {
     long long endTime = time(nullptr) * NS_PER_SEC;
     mProto->end(mProtoToken);
     mProto->write(FIELD_TYPE_INT64 | FIELD_ID_END_REPORT_NANOS, endTime);
 
     size_t bufferSize = mProto->size();
     VLOG("metric %lld dump report now... proto size: %zu ", mMetric.metric_id(), bufferSize);
-    std::unique_ptr<uint8_t[]> buffer = serializeProto();
+    std::unique_ptr<std::vector<uint8_t>> buffer = serializeProto();
 
     startNewProtoOutputStream(endTime);
+    mByteSize = 0;
 
-    // TODO: Once we migrate all MetricProducers to use ProtoOutputStream, we should return this:
-    // return std::move(buffer);
-    return StatsLogReport();
+    return buffer;
 }
 
 void EventMetricProducer::onConditionChanged(const bool conditionMet, const uint64_t eventTime) {
@@ -113,16 +113,18 @@ void EventMetricProducer::onMatchedLogEventInternal(
         return;
     }
 
-    long long wrapperToken = mProto->start(FIELD_TYPE_MESSAGE | FIELD_ID_DATA);
+    long long wrapperToken =
+            mProto->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_DATA);
     mProto->write(FIELD_TYPE_INT64 | FIELD_ID_TIMESTAMP_NANOS, (long long)event.GetTimestampNs());
     long long eventToken = mProto->start(FIELD_TYPE_MESSAGE | FIELD_ID_STATS_EVENTS);
     event.ToProto(*mProto);
     mProto->end(eventToken);
     mProto->end(wrapperToken);
+    // TODO: Find a proper way to derive the size of incoming LogEvent.
 }
 
 size_t EventMetricProducer::byteSize() {
-    return mProto->size();
+    return mByteSize;
 }
 
 }  // namespace statsd

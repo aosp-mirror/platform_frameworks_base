@@ -13,11 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.os.strictmode;
 
-/** @hide */
-public final class UnbufferedIOViolation extends Violation {
-    public UnbufferedIOViolation() {
-        super(null);
-    }
+package com.android.internal.net;
+
+import android.os.SharedMemory;
+
+/** {@hide} */
+interface INetworkWatchlistManager {
+    boolean startWatchlistLogging();
+    boolean stopWatchlistLogging();
+    void reportWatchlistIfNecessary();
 }

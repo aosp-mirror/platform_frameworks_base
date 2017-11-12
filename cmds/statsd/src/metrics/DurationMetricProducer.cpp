@@ -23,6 +23,7 @@
 #include <limits.h>
 #include <stdlib.h>
 
+using android::util::FIELD_COUNT_REPEATED;
 using android::util::FIELD_TYPE_BOOL;
 using android::util::FIELD_TYPE_FLOAT;
 using android::util::FIELD_TYPE_INT32;
@@ -159,7 +160,7 @@ static void addDurationBucketsToReport(StatsLogReport_DurationMetricDataWrapper&
     }
 }
 
-StatsLogReport DurationMetricProducer::onDumpReport() {
+std::unique_ptr<std::vector<uint8_t>> DurationMetricProducer::onDumpReport() {
     long long endTime = time(nullptr) * NS_PER_SEC;
 
     // Dump current bucket if it's stale.
@@ -176,11 +177,13 @@ StatsLogReport DurationMetricProducer::onDumpReport() {
             ALOGW("Dimension key %s not found?!?! skip...", hashableKey.c_str());
             continue;
         }
-        long long wrapperToken = mProto->start(FIELD_TYPE_MESSAGE | FIELD_ID_DATA);
+        long long wrapperToken =
+                mProto->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_DATA);
 
         // First fill dimension (KeyValuePairs).
         for (const auto& kv : it->second) {
-            long long dimensionToken = mProto->start(FIELD_TYPE_MESSAGE | FIELD_ID_DIMENSION);
+            long long dimensionToken =
+                    mProto->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_DIMENSION);
             mProto->write(FIELD_TYPE_INT32 | FIELD_ID_KEY, kv.key());
             if (kv.has_value_str()) {
                 mProto->write(FIELD_TYPE_INT32 | FIELD_ID_VALUE_STR, kv.value_str());
@@ -196,7 +199,8 @@ StatsLogReport DurationMetricProducer::onDumpReport() {
 
         // Then fill bucket_info (DurationBucketInfo).
         for (const auto& bucket : pair.second) {
-            long long bucketInfoToken = mProto->start(FIELD_TYPE_MESSAGE | FIELD_ID_BUCKET_INFO);
+            long long bucketInfoToken =
+                    mProto->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_BUCKET_INFO);
             mProto->write(FIELD_TYPE_INT64 | FIELD_ID_START_BUCKET_NANOS,
                           (long long)bucket.mBucketStartNs);
             mProto->write(FIELD_TYPE_INT64 | FIELD_ID_END_BUCKET_NANOS,
@@ -214,14 +218,12 @@ StatsLogReport DurationMetricProducer::onDumpReport() {
     mProto->write(FIELD_TYPE_INT64 | FIELD_ID_END_REPORT_NANOS,
                   (long long)mCurrentBucketStartTimeNs);
 
-    std::unique_ptr<uint8_t[]> buffer = serializeProto();
+    std::unique_ptr<std::vector<uint8_t>> buffer = serializeProto();
 
     startNewProtoOutputStream(endTime);
     mPastBuckets.clear();
 
-    // TODO: Once we migrate all MetricProducers to use ProtoOutputStream, we should return this:
-    // return std::move(buffer);
-    return StatsLogReport();
+    return buffer;
 }
 
 void DurationMetricProducer::flushIfNeeded(uint64_t eventTime) {

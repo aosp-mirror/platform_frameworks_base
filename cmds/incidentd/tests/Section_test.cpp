@@ -99,7 +99,7 @@ TEST(SectionTest, FileSection) {
     ReportRequestSet requests;
 
     ASSERT_TRUE(tf.fd != -1);
-    ASSERT_TRUE(WriteStringToFile("iamtestdata", tf.path, false));
+    ASSERT_TRUE(WriteStringToFile("iamtestdata", tf.path));
 
     requests.setMainFd(STDOUT_FILENO);
 
@@ -173,7 +173,7 @@ TEST(SectionTest, TestFilterPiiTaggedFields) {
     ReportRequestSet requests;
 
     ASSERT_TRUE(tf.fd != -1);
-    ASSERT_TRUE(WriteStringToFile(VARINT_FIELD_1 + STRING_FIELD_2 + FIX64_FIELD_3, tf.path, false));
+    ASSERT_TRUE(WriteStringToFile(VARINT_FIELD_1 + STRING_FIELD_2 + FIX64_FIELD_3, tf.path));
 
     requests.setMainFd(STDOUT_FILENO);
 
@@ -186,7 +186,7 @@ TEST(SectionTest, TestBadFdRequest) {
     TemporaryFile input;
     FileSection fs(NOOP_PARSER, input.path);
     ReportRequestSet requests;
-    ASSERT_TRUE(WriteStringToFile(VARINT_FIELD_1 + STRING_FIELD_2 + FIX64_FIELD_3, input.path, false));
+    ASSERT_TRUE(WriteStringToFile(VARINT_FIELD_1 + STRING_FIELD_2 + FIX64_FIELD_3, input.path));
 
     IncidentReportArgs args;
     args.setAll(true);
@@ -205,7 +205,7 @@ TEST(SectionTest, TestBadRequests) {
     TemporaryFile input;
     FileSection fs(NOOP_PARSER, input.path);
     ReportRequestSet requests;
-    ASSERT_TRUE(WriteStringToFile(VARINT_FIELD_1 + STRING_FIELD_2 + FIX64_FIELD_3, input.path, false));
+    ASSERT_TRUE(WriteStringToFile(VARINT_FIELD_1 + STRING_FIELD_2 + FIX64_FIELD_3, input.path));
 
     IncidentReportArgs args;
     args.setAll(true);
@@ -223,7 +223,7 @@ TEST(SectionTest, TestMultipleRequests) {
     ASSERT_TRUE(output1.fd != -1);
     ASSERT_TRUE(output2.fd != -1);
     ASSERT_TRUE(output3.fd != -1);
-    ASSERT_TRUE(WriteStringToFile(VARINT_FIELD_1 + STRING_FIELD_2 + FIX64_FIELD_3, input.path, false));
+    ASSERT_TRUE(WriteStringToFile(VARINT_FIELD_1 + STRING_FIELD_2 + FIX64_FIELD_3, input.path));
 
     IncidentReportArgs args1, args2, args3;
     args1.setAll(true);
@@ -265,7 +265,7 @@ TEST(SectionTest, TestMultipleRequestsBySpec) {
     ASSERT_TRUE(output2.fd != -1);
     ASSERT_TRUE(output3.fd != -1);
 
-    ASSERT_TRUE(WriteStringToFile(VARINT_FIELD_1 + STRING_FIELD_2 + FIX64_FIELD_3, input.path, false));
+    ASSERT_TRUE(WriteStringToFile(VARINT_FIELD_1 + STRING_FIELD_2 + FIX64_FIELD_3, input.path));
 
     IncidentReportArgs args1, args2, args3, args4;
     args1.setAll(true);

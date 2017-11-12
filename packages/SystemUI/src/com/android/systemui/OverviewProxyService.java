@@ -25,6 +25,7 @@ import android.graphics.Rect;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Log;
@@ -32,22 +33,27 @@ import android.view.SurfaceControl;
 
 import com.android.systemui.shared.recents.IOverviewProxy;
 import com.android.systemui.shared.recents.ISystemUiProxy;
+import com.android.systemui.OverviewProxyService.OverviewProxyListener;
+import com.android.systemui.statusbar.policy.CallbackController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceProvisionedListener;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Class to send information from overview to launcher with a binder.
  */
-public class OverviewProxyService {
+public class OverviewProxyService implements CallbackController<OverviewProxyListener> {
 
     private static final String TAG = "OverviewProxyService";
     private static final long BACKOFF_MILLIS = 5000;
 
     private final Context mContext;
     private final Handler mHandler;
-    private final Runnable mConnectionRunnable = this::startConnectionToCurrentUser;
+    private final Runnable mConnectionRunnable = this::internalConnectToCurrentUser;
     private final DeviceProvisionedController mDeviceProvisionedController
             = Dependency.get(DeviceProvisionedController.class);
+    private final List<OverviewProxyListener> mConnectionCallbacks = new ArrayList<>();
 
     private IOverviewProxy mOverviewProxy;
     private int mConnectionBackoffAttempts;
@@ -82,6 +88,7 @@ public class OverviewProxyService {
                 } catch (RemoteException e) {
                     Log.e(TAG, "Failed to call onBind()", e);
                 }
+                notifyConnectionChanged();
             }
         }
 
@@ -96,14 +103,14 @@ public class OverviewProxyService {
             @Override
             public void onUserSetupChanged() {
                 if (mDeviceProvisionedController.isCurrentUserSetup()) {
-                    startConnectionToCurrentUser();
+                    internalConnectToCurrentUser();
                 }
             }
 
             @Override
             public void onUserSwitched() {
                 mConnectionBackoffAttempts = 0;
-                startConnectionToCurrentUser();
+                internalConnectToCurrentUser();
             }
         };
 
@@ -111,7 +118,7 @@ public class OverviewProxyService {
     private final IBinder.DeathRecipient mOverviewServiceDeathRcpt = new IBinder.DeathRecipient() {
         @Override
         public void binderDied() {
-            mOverviewProxy = null;
+            startConnectionToCurrentUser();
         }
     };
 
@@ -123,6 +130,14 @@ public class OverviewProxyService {
     }
 
     public void startConnectionToCurrentUser() {
+        if (mHandler.getLooper() != Looper.myLooper()) {
+            mHandler.post(mConnectionRunnable);
+        } else {
+            internalConnectToCurrentUser();
+        }
+    }
+
+    private void internalConnectToCurrentUser() {
         disconnectFromLauncherService();
 
         // If user has not setup yet or already connected, do not try to connect
@@ -144,14 +159,37 @@ public class OverviewProxyService {
         }
     }
 
+    @Override
+    public void addCallback(OverviewProxyListener listener) {
+        mConnectionCallbacks.add(listener);
+        listener.onConnectionChanged(mOverviewProxy != null);
+    }
+
+    @Override
+    public void removeCallback(OverviewProxyListener listener) {
+        mConnectionCallbacks.remove(listener);
+    }
+
     public IOverviewProxy getProxy() {
         return mOverviewProxy;
     }
 
     private void disconnectFromLauncherService() {
         if (mOverviewProxy != null) {
+            mOverviewProxy.asBinder().unlinkToDeath(mOverviewServiceDeathRcpt, 0);
             mContext.unbindService(mOverviewServiceConnection);
             mOverviewProxy = null;
+            notifyConnectionChanged();
         }
+    }
+
+    private void notifyConnectionChanged() {
+        for (int i = mConnectionCallbacks.size() - 1; i >= 0; --i) {
+            mConnectionCallbacks.get(i).onConnectionChanged(mOverviewProxy != null);
+        }
+    }
+
+    public interface OverviewProxyListener {
+        void onConnectionChanged(boolean isConnected);
     }
 }

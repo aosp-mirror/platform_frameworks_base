@@ -20,11 +20,12 @@ import static android.app.StatusBarManager.DISABLE2_NOTIFICATION_SHADE;
 import static android.app.StatusBarManager.WINDOW_STATE_HIDDEN;
 import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
 import static android.app.StatusBarManager.windowStateToString;
-
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY;
+
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_ASLEEP;
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_AWAKE;
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_WAKING;
+import static com.android.systemui.statusbar.NotificationMediaManager.DEBUG_MEDIA;
 import static com.android.systemui.statusbar.notification.NotificationInflater.InflationCallback;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT_TRANSPARENT;
@@ -40,10 +41,8 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
-import android.app.INotificationManager;
 import android.app.KeyguardManager;
 import android.app.Notification;
-import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.RemoteInput;
@@ -80,10 +79,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.AudioAttributes;
 import android.media.MediaMetadata;
-import android.media.session.MediaController;
-import android.media.session.MediaSession;
 import android.media.session.MediaSessionManager;
-import android.media.session.PlaybackState;
 import android.metrics.LogMaker;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -115,14 +111,12 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.view.Display;
-import android.view.HapticFeedbackConstants;
 import android.view.IWindowManager;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.ThreadedRenderer;
 import android.view.View;
-import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.view.ViewTreeObserver;
@@ -181,7 +175,6 @@ import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.QS;
-import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin.MenuItem;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper.SnoozeOption;
 import com.android.systemui.qs.QSFragment;
 import com.android.systemui.qs.QSPanel;
@@ -207,10 +200,11 @@ import com.android.systemui.statusbar.KeyboardShortcuts;
 import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.NotificationData.Entry;
-import com.android.systemui.statusbar.NotificationGuts;
+import com.android.systemui.statusbar.NotificationGutsManager;
 import com.android.systemui.statusbar.NotificationInfo;
+import com.android.systemui.statusbar.NotificationMediaManager;
+import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationShelf;
-import com.android.systemui.statusbar.NotificationSnooze;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.ScrimView;
 import com.android.systemui.statusbar.SignalClusterView;
@@ -243,7 +237,6 @@ import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout
         .OnChildLocationsChangedListener;
-import com.android.systemui.statusbar.stack.StackStateAnimator;
 import com.android.systemui.util.NotificationChannels;
 import com.android.systemui.util.leak.LeakDetector;
 import com.android.systemui.volume.VolumeComponent;
@@ -255,10 +248,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Stack;
 
 public class StatusBar extends SystemUI implements DemoMode,
@@ -267,7 +258,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         ActivatableNotificationView.OnActivatedListener,
         ExpandableNotificationRow.ExpansionLogger, NotificationData.Environment,
         ExpandableNotificationRow.OnExpandClickListener, InflationCallback,
-        ColorExtractor.OnColorsChangedListener, ConfigurationListener {
+        ColorExtractor.OnColorsChangedListener, ConfigurationListener, NotificationPresenter {
     public static final boolean MULTIUSER_DEBUG = false;
 
     public static final boolean ENABLE_REMOTE_INPUT =
@@ -287,9 +278,6 @@ public class StatusBar extends SystemUI implements DemoMode,
     protected static final boolean ENABLE_HEADS_UP = true;
     protected static final String SETTING_HEADS_UP_TICKER = "ticker_gets_heads_up";
 
-    // Must match constant in Settings. Used to highlight preferences when linking to Settings.
-    private static final String EXTRA_FRAGMENT_ARG_KEY = ":settings:fragment_args_key";
-
     private static final String PERMISSION_SELF = "com.android.systemui.permission.SELF";
 
     // Should match the values in PhoneWindowManager
@@ -308,7 +296,6 @@ public class StatusBar extends SystemUI implements DemoMode,
     public static final boolean SPEW = false;
     public static final boolean DUMPTRUCK = true; // extra dumpsys info
     public static final boolean DEBUG_GESTURES = false;
-    public static final boolean DEBUG_MEDIA = false;
     public static final boolean DEBUG_MEDIA_FAKE_ARTWORK = false;
     public static final boolean DEBUG_CAMERA_LIFT = false;
 
@@ -458,6 +445,8 @@ public class StatusBar extends SystemUI implements DemoMode,
     private final int[] mAbsPos = new int[2];
     private final ArrayList<Runnable> mPostCollapseRunnables = new ArrayList<>();
 
+    private NotificationGutsManager mGutsManager;
+
     // for disabling the status bar
     private int mDisabled1 = 0;
     private int mDisabled2 = 0;
@@ -553,31 +542,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     protected final PorterDuffXfermode mSrcOverXferMode =
             new PorterDuffXfermode(PorterDuff.Mode.SRC_OVER);
 
-    private MediaSessionManager mMediaSessionManager;
-    private MediaController mMediaController;
-    private String mMediaNotificationKey;
-    private MediaMetadata mMediaMetadata;
-    private final MediaController.Callback mMediaListener = new MediaController.Callback() {
-        @Override
-        public void onPlaybackStateChanged(PlaybackState state) {
-            super.onPlaybackStateChanged(state);
-            if (DEBUG_MEDIA) Log.v(TAG, "DEBUG_MEDIA: onPlaybackStateChanged: " + state);
-            if (state != null) {
-                if (!isPlaybackActive(state.getState())) {
-                    clearCurrentMediaNotification();
-                    updateMediaMetaData(true, true);
-                }
-            }
-        }
-
-        @Override
-        public void onMetadataChanged(MediaMetadata metadata) {
-            super.onMetadataChanged(metadata);
-            if (DEBUG_MEDIA) Log.v(TAG, "DEBUG_MEDIA: onMetadataChanged: " + metadata);
-            mMediaMetadata = metadata;
-            updateMediaMetaData(true, true);
-        }
-    };
+    private NotificationMediaManager mMediaManager;
 
     /** Keys of notifications currently visible to the user. */
     private final ArraySet<NotificationVisibility> mCurrentlyVisibleNotifications =
@@ -700,7 +665,6 @@ public class StatusBar extends SystemUI implements DemoMode,
     private final HashMap<String, Entry> mPendingNotifications = new HashMap<>();
     private boolean mClearAllEnabled;
     @Nullable private View mAmbientIndicationContainer;
-    private String mKeyToRemoveOnGutsClosed;
     private SysuiColorExtractor mColorExtractor;
     private ForegroundServiceController mForegroundServiceController;
     private ScreenLifecycle mScreenLifecycle;
@@ -817,6 +781,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         mKeyguardManager = (KeyguardManager) mContext.getSystemService(Context.KEYGUARD_SERVICE);
         mLockPatternUtils = new LockPatternUtils(mContext);
 
+        mMediaManager = new NotificationMediaManager(this, mContext);
+
         // Connect in to the status bar manager service
         mCommandQueue = getComponent(CommandQueue.class);
         mCommandQueue.addCallbacks(this);
@@ -903,15 +869,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             Slog.e(TAG, "Failed to register VR mode state listener: " + e);
         }
 
-        mNonBlockablePkgs = new HashSet<>();
-        Collections.addAll(mNonBlockablePkgs, res.getStringArray(
-                com.android.internal.R.array.config_nonBlockableNotificationPackages));
         // end old BaseStatusBar.start().
-
-        mMediaSessionManager
-                = (MediaSessionManager) mContext.getSystemService(Context.MEDIA_SESSION_SERVICE);
-        // TODO: use MediaSessionManager.SessionListener to hook us up to future updates
-        // in session state
 
         // Lastly, call to the icon policy to install/update all the icons.
         mIconPolicy = new PhoneStatusBarPolicy(mContext, mIconController);
@@ -960,6 +918,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         // into fragments, but the rest here, it leaves some awkward lifecycle and whatnot.
         mNotificationPanel = mStatusBarWindow.findViewById(R.id.notification_panel);
         mStackScroller = mStatusBarWindow.findViewById(R.id.notification_stack_scroller);
+        mGutsManager = new NotificationGutsManager(this, mStackScroller,
+                mCheckSaveListener, mContext);
         mNotificationPanel.setStatusBar(this);
         mNotificationPanel.setGroupManager(mGroupManager);
         mAboveShelfObserver = new AboveShelfObserver(mStackScroller);
@@ -1302,12 +1262,12 @@ public class StatusBar extends SystemUI implements DemoMode,
         ArrayList<Entry> activeNotifications = mNotificationData.getActiveNotifications();
         for (int i = 0; i < activeNotifications.size(); i++) {
             Entry entry = activeNotifications.get(i);
-            boolean exposedGuts = mNotificationGutsExposed != null
-                    && entry.row.getGuts() == mNotificationGutsExposed;
+            boolean exposedGuts = mGutsManager.getExposedGuts() != null
+                    && entry.row.getGuts() == mGutsManager.getExposedGuts();
             entry.row.onDensityOrFontScaleChanged();
             if (exposedGuts) {
-                mNotificationGutsExposed = entry.row.getGuts();
-                bindGuts(entry.row, mGutsMenuItem);
+                mGutsManager.setExposedGuts(entry.row.getGuts());
+                mGutsManager.bindGuts(entry.row);
             }
         }
     }
@@ -1672,6 +1632,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         updateNotifications();
     }
 
+    @Override
     public void removeNotification(String key, RankingMap ranking) {
         boolean deferRemoval = false;
         abortExistingInflation(key);
@@ -1685,10 +1646,8 @@ public class StatusBar extends SystemUI implements DemoMode,
                     || !mVisualStabilityManager.isReorderingAllowed();
             deferRemoval = !mHeadsUpManager.removeNotification(key,  ignoreEarliestRemovalTime);
         }
-        if (key.equals(mMediaNotificationKey)) {
-            clearCurrentMediaNotification();
-            updateMediaMetaData(true, true);
-        }
+        mMediaManager.onNotificationRemoved(key);
+
         Entry entry = mNotificationData.get(key);
         if (FORCE_REMOTE_INPUT_HISTORY && mRemoteInputController.isSpinning(key)
                 && entry.row != null && !entry.row.isDismissed()) {
@@ -1744,12 +1703,12 @@ public class StatusBar extends SystemUI implements DemoMode,
             mRemoteInputEntriesToRemoveOnCollapse.add(entry);
             return;
         }
-        if (entry != null && mNotificationGutsExposed != null
-                && mNotificationGutsExposed == entry.row.getGuts() && entry.row.getGuts() != null
-                && !entry.row.getGuts().isLeavebehind()) {
+        if (entry != null && mGutsManager.getExposedGuts() != null
+                && mGutsManager.getExposedGuts() == entry.row.getGuts()
+                && entry.row.getGuts() != null && !entry.row.getGuts().isLeavebehind()) {
             Log.w(TAG, "Keeping notification because it's showing guts. " + key);
             mLatestRankingMap = ranking;
-            mKeyToRemoveOnGutsClosed = key;
+            mGutsManager.setKeyToRemoveOnGutsClosed(key);
             return;
         }
 
@@ -2142,7 +2101,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         return entry.row.getParent() instanceof NotificationStackScrollLayout;
     }
 
-    protected void updateNotifications() {
+    @Override
+    public void updateNotifications() {
         mNotificationData.filterAndSort();
 
         updateNotificationShade();
@@ -2184,136 +2144,9 @@ public class StatusBar extends SystemUI implements DemoMode,
             }
         }
 
-        findAndUpdateMediaNotifications();
+        mMediaManager.findAndUpdateMediaNotifications();
     }
 
-    public void findAndUpdateMediaNotifications() {
-        boolean metaDataChanged = false;
-
-        synchronized (mNotificationData) {
-            ArrayList<Entry> activeNotifications = mNotificationData.getActiveNotifications();
-            final int N = activeNotifications.size();
-
-            // Promote the media notification with a controller in 'playing' state, if any.
-            Entry mediaNotification = null;
-            MediaController controller = null;
-            for (int i = 0; i < N; i++) {
-                final Entry entry = activeNotifications.get(i);
-
-                if (isMediaNotification(entry)) {
-                    final MediaSession.Token token =
-                            entry.notification.getNotification().extras.getParcelable(
-                                    Notification.EXTRA_MEDIA_SESSION);
-                    if (token != null) {
-                        MediaController aController = new MediaController(mContext, token);
-                        if (PlaybackState.STATE_PLAYING ==
-                                getMediaControllerPlaybackState(aController)) {
-                            if (DEBUG_MEDIA) {
-                                Log.v(TAG, "DEBUG_MEDIA: found mediastyle controller matching "
-                                        + entry.notification.getKey());
-                            }
-                            mediaNotification = entry;
-                            controller = aController;
-                            break;
-                        }
-                    }
-                }
-            }
-            if (mediaNotification == null) {
-                // Still nothing? OK, let's just look for live media sessions and see if they match
-                // one of our notifications. This will catch apps that aren't (yet!) using media
-                // notifications.
-
-                if (mMediaSessionManager != null) {
-                    final List<MediaController> sessions
-                            = mMediaSessionManager.getActiveSessionsForUser(
-                                    null,
-                                    UserHandle.USER_ALL);
-
-                    for (MediaController aController : sessions) {
-                        if (PlaybackState.STATE_PLAYING ==
-                                getMediaControllerPlaybackState(aController)) {
-                            // now to see if we have one like this
-                            final String pkg = aController.getPackageName();
-
-                            for (int i = 0; i < N; i++) {
-                                final Entry entry = activeNotifications.get(i);
-                                if (entry.notification.getPackageName().equals(pkg)) {
-                                    if (DEBUG_MEDIA) {
-                                        Log.v(TAG, "DEBUG_MEDIA: found controller matching "
-                                                + entry.notification.getKey());
-                                    }
-                                    controller = aController;
-                                    mediaNotification = entry;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            if (controller != null && !sameSessions(mMediaController, controller)) {
-                // We have a new media session
-                clearCurrentMediaNotification();
-                mMediaController = controller;
-                mMediaController.registerCallback(mMediaListener);
-                mMediaMetadata = mMediaController.getMetadata();
-                if (DEBUG_MEDIA) {
-                    Log.v(TAG, "DEBUG_MEDIA: insert listener, receive metadata: "
-                            + mMediaMetadata);
-                }
-
-                if (mediaNotification != null) {
-                    mMediaNotificationKey = mediaNotification.notification.getKey();
-                    if (DEBUG_MEDIA) {
-                        Log.v(TAG, "DEBUG_MEDIA: Found new media notification: key="
-                                + mMediaNotificationKey + " controller=" + mMediaController);
-                    }
-                }
-                metaDataChanged = true;
-            }
-        }
-
-        if (metaDataChanged) {
-            updateNotifications();
-        }
-        updateMediaMetaData(metaDataChanged, true);
-    }
-
-    private int getMediaControllerPlaybackState(MediaController controller) {
-        if (controller != null) {
-            final PlaybackState playbackState = controller.getPlaybackState();
-            if (playbackState != null) {
-                return playbackState.getState();
-            }
-        }
-        return PlaybackState.STATE_NONE;
-    }
-
-    private boolean isPlaybackActive(int state) {
-        return state != PlaybackState.STATE_STOPPED && state != PlaybackState.STATE_ERROR
-                && state != PlaybackState.STATE_NONE;
-    }
-
-    private void clearCurrentMediaNotification() {
-        mMediaNotificationKey = null;
-        mMediaMetadata = null;
-        if (mMediaController != null) {
-            if (DEBUG_MEDIA) {
-                Log.v(TAG, "DEBUG_MEDIA: Disconnecting from old controller: "
-                        + mMediaController.getPackageName());
-            }
-            mMediaController.unregisterCallback(mMediaListener);
-        }
-        mMediaController = null;
-    }
-
-    private boolean sameSessions(MediaController a, MediaController b) {
-        if (a == b) return true;
-        if (a == null) return false;
-        return a.controlsSameSession(b);
-    }
 
     /**
      * Hide the album artwork that is fading out and release its bitmap.
@@ -2330,9 +2163,11 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
     };
 
+    // TODO: Move this to NotificationMediaManager.
     /**
      * Refresh or remove lockscreen artwork from media metadata or the lockscreen wallpaper.
      */
+    @Override
     public void updateMediaMetaData(boolean metaDataChanged, boolean allowEnterAnimation) {
         Trace.beginSection("StatusBar#updateMediaMetaData");
         if (!SHOW_LOCKSCREEN_MEDIA_ARTWORK) {
@@ -2351,19 +2186,22 @@ public class StatusBar extends SystemUI implements DemoMode,
             return;
         }
 
+        MediaMetadata mediaMetadata = mMediaManager.getMediaMetadata();
+
         if (DEBUG_MEDIA) {
-            Log.v(TAG, "DEBUG_MEDIA: updating album art for notification " + mMediaNotificationKey
-                    + " metadata=" + mMediaMetadata
+            Log.v(TAG, "DEBUG_MEDIA: updating album art for notification "
+                    + mMediaManager.getMediaNotificationKey()
+                    + " metadata=" + mediaMetadata
                     + " metaDataChanged=" + metaDataChanged
                     + " state=" + mState);
         }
 
         Drawable artworkDrawable = null;
-        if (mMediaMetadata != null) {
+        if (mediaMetadata != null) {
             Bitmap artworkBitmap = null;
-            artworkBitmap = mMediaMetadata.getBitmap(MediaMetadata.METADATA_KEY_ART);
+            artworkBitmap = mediaMetadata.getBitmap(MediaMetadata.METADATA_KEY_ART);
             if (artworkBitmap == null) {
-                artworkBitmap = mMediaMetadata.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART);
+                artworkBitmap = mediaMetadata.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART);
                 // might still be null
             }
             if (artworkBitmap != null) {
@@ -2636,7 +2474,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     @Override  // NotificationData.Environment
     public String getCurrentMediaNotificationKey() {
-        return mMediaNotificationKey;
+        return mMediaManager.getMediaNotificationKey();
     }
 
     public boolean isScrimSrcModeEnabled() {
@@ -3101,8 +2939,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         mStatusBarWindowManager.setForceStatusBarVisible(false);
 
         // Close any guts that might be visible
-        closeAndSaveGuts(true /* removeLeavebehind */, true /* force */, true /* removeControls */,
-                -1 /* x */, -1 /* y */, true /* resetMenu */);
+        mGutsManager.closeAndSaveGuts(true /* removeLeavebehind */, true /* force */,
+                true /* removeControls */, -1 /* x */, -1 /* y */, true /* resetMenu */);
 
         runPostCollapseRunnables();
         setInteracting(StatusBarManager.WINDOW_STATUS_BAR, false);
@@ -3449,28 +3287,18 @@ public class StatusBar extends SystemUI implements DemoMode,
         pw.println(Settings.Global.zenModeToString(mZenMode));
         pw.print("  mUseHeadsUp=");
         pw.println(mUseHeadsUp);
-        pw.print("  mKeyToRemoveOnGutsClosed=");
-        pw.println(mKeyToRemoveOnGutsClosed);
+        pw.print("  mGutsManager: ");
+        if (mGutsManager != null) {
+            mGutsManager.dump(fd, pw, args);
+        }
         if (mStatusBarView != null) {
             dumpBarTransitions(pw, "mStatusBarView", mStatusBarView.getBarTransitions());
         }
 
-        pw.print("  mMediaSessionManager=");
-        pw.println(mMediaSessionManager);
-        pw.print("  mMediaNotificationKey=");
-        pw.println(mMediaNotificationKey);
-        pw.print("  mMediaController=");
-        pw.print(mMediaController);
-        if (mMediaController != null) {
-            pw.print(" state=" + mMediaController.getPlaybackState());
+        pw.println("  mMediaManager: ");
+        if (mMediaManager != null) {
+            mMediaManager.dump(fd, pw, args);
         }
-        pw.println();
-        pw.print("  mMediaMetadata=");
-        pw.print(mMediaMetadata);
-        if (mMediaMetadata != null) {
-            pw.print(" title=" + mMediaMetadata.getText(MediaMetadata.METADATA_KEY_TITLE));
-        }
-        pw.println();
 
         pw.println("  Panels: ");
         if (mNotificationPanel != null) {
@@ -3792,7 +3620,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             mReinflateNotificationsOnUserSwitched = false;
         }
         updateNotificationShade();
-        clearCurrentMediaNotification();
+        mMediaManager.clearCurrentMediaNotification();
         setLockscreenUser(newUserId);
     }
 
@@ -3872,10 +3700,10 @@ public class StatusBar extends SystemUI implements DemoMode,
             if (visibleToUser) {
                 boolean pinnedHeadsUp = mHeadsUpManager.hasPinnedHeadsUp();
                 boolean clearNotificationEffects =
-                        !isPanelFullyCollapsed() &&
+                        !isPresenterFullyCollapsed() &&
                         (mState == StatusBarState.SHADE || mState == StatusBarState.SHADE_LOCKED);
                 int notificationLoad = mNotificationData.getActiveNotifications().size();
-                if (pinnedHeadsUp && isPanelFullyCollapsed())  {
+                if (pinnedHeadsUp && isPresenterFullyCollapsed())  {
                     notificationLoad = 1;
                 }
                 mBarService.onPanelRevealed(clearNotificationEffects, notificationLoad);
@@ -4152,7 +3980,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         return mState;
     }
 
-    public boolean isPanelFullyCollapsed() {
+    @Override
+    public boolean isPresenterFullyCollapsed() {
         return mNotificationPanel.isFullyCollapsed();
     }
 
@@ -4735,7 +4564,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     public void onClosingFinished() {
         runPostCollapseRunnables();
-        if (!isPanelFullyCollapsed()) {
+        if (!isPresenterFullyCollapsed()) {
             // if we set it not to be focusable when collapsing, we have to undo it when we aborted
             // the closing
             mStatusBarWindowManager.setStatusBarFocusable(true);
@@ -5600,10 +5429,6 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     protected int mZenMode;
 
-    // which notification is currently being longpress-examined by the user
-    private NotificationGuts mNotificationGutsExposed;
-    private MenuItem mGutsMenuItem;
-
     protected NotificationShelf mNotificationShelf;
     protected DismissView mDismissView;
     protected EmptyShadeView mEmptyShadeView;
@@ -5613,8 +5438,6 @@ public class StatusBar extends SystemUI implements DemoMode,
     protected AssistManager mAssistManager;
 
     protected boolean mVrMode;
-
-    private Set<String> mNonBlockablePkgs;
 
     public boolean isDeviceInteractive() {
         return mDeviceInteractive;
@@ -6147,26 +5970,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         return mGroupManager;
     }
 
-    public boolean isMediaNotification(NotificationData.Entry entry) {
-        // TODO: confirm that there's a valid media key
-        return entry.getExpandedContentView() != null &&
-               entry.getExpandedContentView()
-                       .findViewById(com.android.internal.R.id.media_actions) != null;
-    }
-
-    // The button in the guts that links to the system notification settings for that app
-    private void startAppNotificationSettingsActivity(String packageName, final int appUid,
-            final NotificationChannel channel) {
-        final Intent intent = new Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS);
-        intent.putExtra(Settings.EXTRA_APP_PACKAGE, packageName);
-        intent.putExtra(Settings.EXTRA_APP_UID, appUid);
-        if (channel != null) {
-            intent.putExtra(EXTRA_FRAGMENT_ARG_KEY, channel.getId());
-        }
-        startNotificationGutsIntent(intent, appUid);
-    }
-
-    private void startNotificationGutsIntent(final Intent intent, final int appUid) {
+    @Override
+    public void startNotificationGutsIntent(final Intent intent, final int appUid) {
         dismissKeyguardThenExecute(() -> {
             AsyncTask.execute(() -> {
                 TaskStackBuilder.create(mContext)
@@ -6189,231 +5994,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
     }
 
-    private void bindGuts(final ExpandableNotificationRow row, MenuItem item) {
-        row.inflateGuts();
-        row.setGutsView(item);
-        final StatusBarNotification sbn = row.getStatusBarNotification();
-        row.setTag(sbn.getPackageName());
-        final NotificationGuts guts = row.getGuts();
-        guts.setClosedListener((NotificationGuts g) -> {
-            if (!g.willBeRemoved() && !row.isRemoved()) {
-                mStackScroller.onHeightChanged(row, !isPanelFullyCollapsed() /* needsAnimation */);
-            }
-            if (mNotificationGutsExposed == g) {
-                mNotificationGutsExposed = null;
-                mGutsMenuItem = null;
-            }
-            String key = sbn.getKey();
-            if (key.equals(mKeyToRemoveOnGutsClosed)) {
-                mKeyToRemoveOnGutsClosed = null;
-                removeNotification(key, mLatestRankingMap);
-            }
-        });
-
-        View gutsView = item.getGutsView();
-        if (gutsView instanceof NotificationSnooze) {
-            NotificationSnooze snoozeGuts = (NotificationSnooze) gutsView;
-            snoozeGuts.setSnoozeListener(mStackScroller.getSwipeActionHelper());
-            snoozeGuts.setStatusBarNotification(sbn);
-            snoozeGuts.setSnoozeOptions(row.getEntry().snoozeCriteria);
-            guts.setHeightChangedListener((NotificationGuts g) -> {
-                mStackScroller.onHeightChanged(row, row.isShown() /* needsAnimation */);
-            });
-        }
-
-        if (gutsView instanceof NotificationInfo) {
-            final UserHandle userHandle = sbn.getUser();
-            PackageManager pmUser = getPackageManagerForUser(mContext,
-                    userHandle.getIdentifier());
-            final INotificationManager iNotificationManager = INotificationManager.Stub.asInterface(
-                    ServiceManager.getService(Context.NOTIFICATION_SERVICE));
-            final String pkg = sbn.getPackageName();
-            NotificationInfo info = (NotificationInfo) gutsView;
-            // Settings link is only valid for notifications that specify a user, unless this is the
-            // system user.
-            NotificationInfo.OnSettingsClickListener onSettingsClick = null;
-            if (!userHandle.equals(UserHandle.ALL) || mCurrentUserId == UserHandle.USER_SYSTEM) {
-                onSettingsClick = (View v, NotificationChannel channel, int appUid) -> {
-                    mMetricsLogger.action(MetricsEvent.ACTION_NOTE_INFO);
-                    guts.resetFalsingCheck();
-                    startAppNotificationSettingsActivity(pkg, appUid, channel);
-                };
-            }
-            final NotificationInfo.OnAppSettingsClickListener onAppSettingsClick = (View v,
-                    Intent intent) -> {
-                mMetricsLogger.action(MetricsEvent.ACTION_APP_NOTE_SETTINGS);
-                guts.resetFalsingCheck();
-                startNotificationGutsIntent(intent, sbn.getUid());
-            };
-            final View.OnClickListener onDoneClick = (View v) -> {
-                saveAndCloseNotificationMenu(row, guts, v);
-            };
-            final NotificationInfo.CheckSaveListener checkSaveListener =
-                    (Runnable saveImportance) -> {
-                // If the user has security enabled, show challenge if the setting is changed.
-                if (isLockscreenPublicMode(userHandle.getIdentifier())
-                        && (mState == StatusBarState.KEYGUARD
-                                || mState == StatusBarState.SHADE_LOCKED)) {
-                    onLockedNotificationImportanceChange(() -> {
-                        saveImportance.run();
-                        return true;
-                    });
-                } else {
-                    saveImportance.run();
-                }
-            };
-
-            ArraySet<NotificationChannel> channels = new ArraySet<>();
-            channels.add(row.getEntry().channel);
-            if (row.isSummaryWithChildren()) {
-                // If this is a summary, then add in the children notification channels for the
-                // same user and pkg.
-                final List<ExpandableNotificationRow> childrenRows = row.getNotificationChildren();
-                final int numChildren = childrenRows.size();
-                for (int i = 0; i < numChildren; i++) {
-                    final ExpandableNotificationRow childRow = childrenRows.get(i);
-                    final NotificationChannel childChannel = childRow.getEntry().channel;
-                    final StatusBarNotification childSbn = childRow.getStatusBarNotification();
-                    if (childSbn.getUser().equals(userHandle) &&
-                            childSbn.getPackageName().equals(pkg)) {
-                        channels.add(childChannel);
-                    }
-                }
-            }
-            try {
-                info.bindNotification(pmUser, iNotificationManager, pkg, new ArrayList(channels),
-                        row.getEntry().channel.getImportance(), sbn, onSettingsClick,
-                        onAppSettingsClick, onDoneClick, checkSaveListener,
-                        mNonBlockablePkgs);
-            } catch (RemoteException e) {
-                Log.e(TAG, e.toString());
-            }
-        }
-    }
-
-    private void saveAndCloseNotificationMenu(
-            ExpandableNotificationRow row, NotificationGuts guts, View done) {
-        guts.resetFalsingCheck();
-        int[] rowLocation = new int[2];
-        int[] doneLocation = new int[2];
-        row.getLocationOnScreen(rowLocation);
-        done.getLocationOnScreen(doneLocation);
-
-        final int centerX = done.getWidth() / 2;
-        final int centerY = done.getHeight() / 2;
-        final int x = doneLocation[0] - rowLocation[0] + centerX;
-        final int y = doneLocation[1] - rowLocation[1] + centerY;
-        closeAndSaveGuts(false /* removeLeavebehind */, false /* force */,
-                true /* removeControls */, x, y, true /* resetMenu */);
-    }
-
     protected ExpandableNotificationRow.LongPressListener getNotificationLongClicker() {
-        return new ExpandableNotificationRow.LongPressListener() {
-            @Override
-            public boolean onLongPress(View v, final int x, final int y,
-                    MenuItem item) {
-                if (!(v instanceof ExpandableNotificationRow)) {
-                    return false;
-                }
-
-                if (v.getWindowToken() == null) {
-                    Log.e(TAG, "Trying to show notification guts, but not attached to window");
-                    return false;
-                }
-
-                final ExpandableNotificationRow row = (ExpandableNotificationRow) v;
-                if (row.isDark()) {
-                    return false;
-                }
-                v.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
-                if (row.areGutsExposed()) {
-                    closeAndSaveGuts(false /* removeLeavebehind */, false /* force */,
-                            true /* removeControls */, -1 /* x */, -1 /* y */,
-                            true /* resetMenu */);
-                    return true;
-                }
-                bindGuts(row, item);
-                NotificationGuts guts = row.getGuts();
-
-                // Assume we are a status_bar_notification_row
-                if (guts == null) {
-                    // This view has no guts. Examples are the more card or the dismiss all view
-                    return false;
-                }
-
-                mMetricsLogger.action(MetricsEvent.ACTION_NOTE_CONTROLS);
-
-                // ensure that it's laid but not visible until actually laid out
-                guts.setVisibility(View.INVISIBLE);
-                // Post to ensure the the guts are properly laid out.
-                guts.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (row.getWindowToken() == null) {
-                            Log.e(TAG, "Trying to show notification guts, but not attached to "
-                                    + "window");
-                            return;
-                        }
-                        closeAndSaveGuts(true /* removeLeavebehind */, true /* force */,
-                                true /* removeControls */, -1 /* x */, -1 /* y */,
-                                false /* resetMenu */);
-                        guts.setVisibility(View.VISIBLE);
-                        final double horz = Math.max(guts.getWidth() - x, x);
-                        final double vert = Math.max(guts.getHeight() - y, y);
-                        final float r = (float) Math.hypot(horz, vert);
-                        final Animator a
-                                = ViewAnimationUtils.createCircularReveal(guts, x, y, 0, r);
-                        a.setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
-                        a.setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN);
-                        a.addListener(new AnimatorListenerAdapter() {
-                            @Override
-                            public void onAnimationEnd(Animator animation) {
-                                super.onAnimationEnd(animation);
-                                // Move the notification view back over the menu
-                                row.resetTranslation();
-                            }
-                        });
-                        a.start();
-                        final boolean needsFalsingProtection =
-                                (mState == StatusBarState.KEYGUARD &&
-                                !mAccessibilityManager.isTouchExplorationEnabled());
-                        guts.setExposed(true /* exposed */, needsFalsingProtection);
-                        row.closeRemoteInput();
-                        mStackScroller.onHeightChanged(row, true /* needsAnimation */);
-                        mNotificationGutsExposed = guts;
-                        mGutsMenuItem = item;
-                    }
-                });
-                return true;
-            }
-        };
-    }
-
-    /**
-     * Returns the exposed NotificationGuts or null if none are exposed.
-     */
-    public NotificationGuts getExposedGuts() {
-        return mNotificationGutsExposed;
-    }
-
-    /**
-     * Closes guts or notification menus that might be visible and saves any changes.
-     *
-     * @param removeLeavebehinds true if leavebehinds (e.g. snooze) should be closed.
-     * @param force true if guts should be closed regardless of state (used for snooze only).
-     * @param removeControls true if controls (e.g. info) should be closed.
-     * @param x if closed based on touch location, this is the x touch location.
-     * @param y if closed based on touch location, this is the y touch location.
-     * @param resetMenu if any notification menus that might be revealed should be closed.
-     */
-    public void closeAndSaveGuts(boolean removeLeavebehinds, boolean force, boolean removeControls,
-            int x, int y, boolean resetMenu) {
-        if (mNotificationGutsExposed != null) {
-            mNotificationGutsExposed.closeControls(removeLeavebehinds, removeControls, x, y, force);
-        }
-        if (resetMenu) {
-            mStackScroller.resetExposedMenuView(false /* animate */, true /* force */);
-        }
+        return (v, x, y, item) -> mGutsManager.openGuts(v, x, y, item);
     }
 
     @Override
@@ -6802,7 +6384,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 if (mHeadsUpManager != null && mHeadsUpManager.isHeadsUp(notificationKey)) {
                     // Release the HUN notification to the shade.
 
-                    if (isPanelFullyCollapsed()) {
+                    if (isPresenterFullyCollapsed()) {
                         HeadsUpManager.setIsClickedNotification(row, true);
                     }
                     //
@@ -6934,7 +6516,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         if (mVisible != visible) {
             mVisible = visible;
             if (!visible) {
-                closeAndSaveGuts(true /* removeLeavebehind */, true /* force */,
+                mGutsManager.closeAndSaveGuts(true /* removeLeavebehind */, true /* force */,
                         true /* removeControls */, -1 /* x */, -1 /* y */, true /* resetMenu */);
             }
         }
@@ -7156,8 +6738,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
         mHeadsUpEntriesToRemoveOnSwitch.remove(entry);
         mRemoteInputEntriesToRemoveOnCollapse.remove(entry);
-        if (key.equals(mKeyToRemoveOnGutsClosed)) {
-            mKeyToRemoveOnGutsClosed = null;
+        if (key.equals(mGutsManager.getKeyToRemoveOnGutsClosed())) {
+            mGutsManager.setKeyToRemoveOnGutsClosed(null);
             Log.w(TAG, "Notification that was kept for guts was updated. " + key);
         }
 
@@ -7355,4 +6937,43 @@ public class StatusBar extends SystemUI implements DemoMode,
             mNavigationBar.getBarTransitions().setAutoDim(true);
         }
     };
+
+    public NotificationGutsManager getGutsManager() {
+        return mGutsManager;
+    }
+
+    @Override
+    public boolean isPresenterLocked() {
+        return mState == StatusBarState.KEYGUARD;
+    }
+
+    @Override
+    public int getCurrentUserId() {
+        return mCurrentUserId;
+    }
+
+    @Override
+    public NotificationData getNotificationData() {
+        return mNotificationData;
+    }
+
+    @Override
+    public RankingMap getLatestRankingMap() {
+        return mLatestRankingMap;
+    }
+
+    final NotificationInfo.CheckSaveListener mCheckSaveListener =
+            (Runnable saveImportance, StatusBarNotification sbn) -> {
+                // If the user has security enabled, show challenge if the setting is changed.
+                if (isLockscreenPublicMode(sbn.getUser().getIdentifier()) && (
+                        mState == StatusBarState.KEYGUARD
+                                || mState == StatusBarState.SHADE_LOCKED)) {
+                    onLockedNotificationImportanceChange(() -> {
+                        saveImportance.run();
+                        return true;
+                    });
+                } else {
+                    saveImportance.run();
+                }
+            };
 }

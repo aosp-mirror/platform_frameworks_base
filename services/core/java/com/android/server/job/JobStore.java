@@ -16,20 +16,23 @@
 
 package com.android.server.job;
 
+import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
+import static com.android.server.job.JobSchedulerService.sSystemClock;
+
 import android.app.ActivityManager;
 import android.app.IActivityManager;
-import android.content.ComponentName;
 import android.app.job.JobInfo;
+import android.content.ComponentName;
 import android.content.Context;
+import android.net.NetworkRequest;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.PersistableBundle;
 import android.os.Process;
-import android.os.SystemClock;
 import android.os.UserHandle;
 import android.text.format.DateUtils;
-import android.util.AtomicFile;
 import android.util.ArraySet;
+import android.util.AtomicFile;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -37,10 +40,15 @@ import android.util.Xml;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.BitUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.server.IoThread;
 import com.android.server.job.JobSchedulerInternal.JobStorePersistStats;
 import com.android.server.job.controllers.JobStatus;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -52,10 +60,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 /**
  * Maintains the master list of jobs that the job scheduler is tracking. These jobs are compared by
@@ -141,7 +145,7 @@ public final class JobStore {
         // a *correct* timestamp, see a bunch of overdue jobs, and run them; then
         // settle into normal operation.
         mXmlTimestamp = mJobsFile.getLastModifiedTime();
-        mRtcGood = (System.currentTimeMillis() > mXmlTimestamp);
+        mRtcGood = (sSystemClock.millis() > mXmlTimestamp);
 
         readJobMapFromDisk(mJobSet, mRtcGood);
     }
@@ -161,7 +165,7 @@ public final class JobStore {
      */
     public void getRtcCorrectedJobsLocked(final ArrayList<JobStatus> toAdd,
             final ArrayList<JobStatus> toRemove) {
-        final long elapsedNow = SystemClock.elapsedRealtime();
+        final long elapsedNow = sElapsedRealtimeClock.millis();
 
         // Find the jobs that need to be fixed up, collecting them for post-iteration
         // replacement with their new versions
@@ -323,7 +327,7 @@ public final class JobStore {
     private final Runnable mWriteRunnable = new Runnable() {
         @Override
         public void run() {
-            final long startElapsed = SystemClock.elapsedRealtime();
+            final long startElapsed = sElapsedRealtimeClock.millis();
             final List<JobStatus> storeCopy = new ArrayList<JobStatus>();
             synchronized (mLock) {
                 // Clone the jobs so we can release the lock before writing.
@@ -338,7 +342,7 @@ public final class JobStore {
             }
             writeJobsMapImpl(storeCopy);
             if (DEBUG) {
-                Slog.v(TAG, "Finished writing, took " + (SystemClock.elapsedRealtime()
+                Slog.v(TAG, "Finished writing, took " + (sElapsedRealtimeClock.millis()
                         - startElapsed) + "ms");
             }
         }
@@ -454,17 +458,12 @@ public final class JobStore {
          */
         private void writeConstraintsToXml(XmlSerializer out, JobStatus jobStatus) throws IOException {
             out.startTag(null, XML_TAG_PARAMS_CONSTRAINTS);
-            if (jobStatus.needsAnyConnectivity()) {
-                out.attribute(null, "connectivity", Boolean.toString(true));
-            }
-            if (jobStatus.needsMeteredConnectivity()) {
-                out.attribute(null, "metered", Boolean.toString(true));
-            }
-            if (jobStatus.needsUnmeteredConnectivity()) {
-                out.attribute(null, "unmetered", Boolean.toString(true));
-            }
-            if (jobStatus.needsNonRoamingConnectivity()) {
-                out.attribute(null, "not-roaming", Boolean.toString(true));
+            if (jobStatus.hasConnectivityConstraint()) {
+                final NetworkRequest network = jobStatus.getJob().getRequiredNetwork();
+                out.attribute(null, "net-capabilities", Long.toString(
+                        BitUtils.packBits(network.networkCapabilities.getCapabilities())));
+                out.attribute(null, "net-transport-types", Long.toString(
+                        BitUtils.packBits(network.networkCapabilities.getTransportTypes())));
             }
             if (jobStatus.hasIdleConstraint()) {
                 out.attribute(null, "idle", Boolean.toString(true));
@@ -497,8 +496,8 @@ public final class JobStore {
                 Slog.i(TAG, "storing original UTC timestamps for " + jobStatus);
             }
 
-            final long nowRTC = System.currentTimeMillis();
-            final long nowElapsed = SystemClock.elapsedRealtime();
+            final long nowRTC = sSystemClock.millis();
+            final long nowElapsed = sElapsedRealtimeClock.millis();
             if (jobStatus.hasDeadlineConstraint()) {
                 // Wall clock deadline.
                 final long deadlineWallclock = (utcJobTimes == null)
@@ -538,7 +537,7 @@ public final class JobStore {
      */
     private static Pair<Long, Long> convertRtcBoundsToElapsed(Pair<Long, Long> rtcTimes,
             long nowElapsed) {
-        final long nowWallclock = System.currentTimeMillis();
+        final long nowWallclock = sSystemClock.millis();
         final long earliest = (rtcTimes.first > JobStatus.NO_EARLIEST_RUNTIME)
                 ? nowElapsed + Math.max(rtcTimes.first - nowWallclock, 0)
                 : JobStatus.NO_EARLIEST_RUNTIME;
@@ -581,7 +580,7 @@ public final class JobStore {
                 synchronized (mLock) {
                     jobs = readJobMapImpl(fis, rtcGood);
                     if (jobs != null) {
-                        long now = SystemClock.elapsedRealtime();
+                        long now = sElapsedRealtimeClock.millis();
                         IActivityManager am = ActivityManager.getService();
                         for (int i=0; i<jobs.size(); i++) {
                             JobStatus js = jobs.get(i);
@@ -754,7 +753,7 @@ public final class JobStore {
                 return null;
             }
 
-            final long elapsedNow = SystemClock.elapsedRealtime();
+            final long elapsedNow = sElapsedRealtimeClock.millis();
             Pair<Long, Long> elapsedRuntimes = convertRtcBoundsToElapsed(rtcRuntimes, elapsedNow);
 
             if (XML_TAG_PERIODIC.equals(parser.getName())) {
@@ -862,22 +861,38 @@ public final class JobStore {
         }
 
         private void buildConstraintsFromXml(JobInfo.Builder jobBuilder, XmlPullParser parser) {
-            String val = parser.getAttributeValue(null, "connectivity");
-            if (val != null) {
-                jobBuilder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY);
+            String val;
+
+            final String netCapabilities = parser.getAttributeValue(null, "net-capabilities");
+            final String netTransportTypes = parser.getAttributeValue(null, "net-transport-types");
+            if (netCapabilities != null && netTransportTypes != null) {
+                final NetworkRequest request = new NetworkRequest.Builder().build();
+                // We're okay throwing NFE here; caught by caller
+                request.networkCapabilities.setCapabilities(
+                        BitUtils.unpackBits(Long.parseLong(netCapabilities)));
+                request.networkCapabilities.setTransportTypes(
+                        BitUtils.unpackBits(Long.parseLong(netTransportTypes)));
+                jobBuilder.setRequiredNetwork(request);
+            } else {
+                // Read legacy values
+                val = parser.getAttributeValue(null, "connectivity");
+                if (val != null) {
+                    jobBuilder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY);
+                }
+                val = parser.getAttributeValue(null, "metered");
+                if (val != null) {
+                    jobBuilder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_METERED);
+                }
+                val = parser.getAttributeValue(null, "unmetered");
+                if (val != null) {
+                    jobBuilder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED);
+                }
+                val = parser.getAttributeValue(null, "not-roaming");
+                if (val != null) {
+                    jobBuilder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_NOT_ROAMING);
+                }
             }
-            val = parser.getAttributeValue(null, "metered");
-            if (val != null) {
-                jobBuilder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_METERED);
-            }
-            val = parser.getAttributeValue(null, "unmetered");
-            if (val != null) {
-                jobBuilder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED);
-            }
-            val = parser.getAttributeValue(null, "not-roaming");
-            if (val != null) {
-                jobBuilder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_NOT_ROAMING);
-            }
+
             val = parser.getAttributeValue(null, "idle");
             if (val != null) {
                 jobBuilder.setRequiresDeviceIdle(true);
@@ -937,8 +952,8 @@ public final class JobStore {
         private Pair<Long, Long> buildExecutionTimesFromXml(XmlPullParser parser)
                 throws NumberFormatException {
             // Pull out execution time data.
-            final long nowWallclock = System.currentTimeMillis();
-            final long nowElapsed = SystemClock.elapsedRealtime();
+            final long nowWallclock = sSystemClock.millis();
+            final long nowElapsed = sElapsedRealtimeClock.millis();
 
             long earliestRunTimeElapsed = JobStatus.NO_EARLIEST_RUNTIME;
             long latestRunTimeElapsed = JobStatus.NO_LATEST_RUNTIME;

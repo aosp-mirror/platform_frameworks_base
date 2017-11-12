@@ -835,7 +835,8 @@ public class ZenModeHelper {
         // alarm restrictions
         final boolean muteMediaAndSystemSounds = zen && !mConfig.allowMediaSystemOther;
         // total silence restrictions
-        final boolean muteEverything = mZenMode == Global.ZEN_MODE_NO_INTERRUPTIONS;
+        final boolean muteEverything = mZenMode == Global.ZEN_MODE_NO_INTERRUPTIONS
+                || areAllBehaviorSoundsMuted();
 
         for (int usage : AudioAttributes.SDK_USAGES) {
             final int suppressionBehavior = AudioAttributes.SUPPRESSIBLE_USAGES.get(usage);
@@ -855,15 +856,23 @@ public class ZenModeHelper {
         }
     }
 
+
     @VisibleForTesting
     protected void applyRestrictions(boolean mute, int usage) {
         final String[] exceptionPackages = null; // none (for now)
+
         mAppOps.setRestriction(AppOpsManager.OP_VIBRATE, usage,
                 mute ? AppOpsManager.MODE_IGNORED : AppOpsManager.MODE_ALLOWED,
                 exceptionPackages);
         mAppOps.setRestriction(AppOpsManager.OP_PLAY_AUDIO, usage,
                 mute ? AppOpsManager.MODE_IGNORED : AppOpsManager.MODE_ALLOWED,
                 exceptionPackages);
+    }
+
+    private boolean areAllBehaviorSoundsMuted() {
+        return !mConfig.allowAlarms  && !mConfig.allowMediaSystemOther && !mConfig.allowReminders
+                && !mConfig.allowCalls && !mConfig.allowMessages && !mConfig.allowEvents
+                && !mConfig.allowRepeatCallers;
     }
 
     private void applyZenToRingerMode() {

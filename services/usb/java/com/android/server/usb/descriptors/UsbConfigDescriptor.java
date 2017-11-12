@@ -15,12 +15,7 @@
  */
 package com.android.server.usb.descriptors;
 
-import android.hardware.usb.UsbConfiguration;
-import android.hardware.usb.UsbInterface;
-
 import com.android.server.usb.descriptors.report.ReportCanvas;
-
-import java.util.ArrayList;
 
 /**
  * @hide
@@ -39,9 +34,6 @@ public final class UsbConfigDescriptor extends UsbDescriptor {
                                 //     D5 Remote Wakeup
                                 //     D4..0 Reserved, set to 0.
     private byte mMaxPower;     // 8:1 Maximum Power Consumption in 2mA units
-
-    private ArrayList<UsbInterfaceDescriptor> mInterfaceDescriptors =
-            new ArrayList<UsbInterfaceDescriptor>();
 
     UsbConfigDescriptor(int length, byte type) {
         super(length, type);
@@ -70,22 +62,6 @@ public final class UsbConfigDescriptor extends UsbDescriptor {
 
     public byte getMaxPower() {
         return mMaxPower;
-    }
-
-    void addInterfaceDescriptor(UsbInterfaceDescriptor interfaceDesc) {
-        mInterfaceDescriptors.add(interfaceDesc);
-    }
-
-    UsbConfiguration toAndroid(UsbDescriptorParser parser) {
-        String name = parser.getDescriptorString(mConfigIndex);
-        UsbConfiguration config = new
-                UsbConfiguration(mConfigValue, name, mAttribs, mMaxPower);
-        UsbInterface[] interfaces = new UsbInterface[mInterfaceDescriptors.size()];
-        for (int index = 0; index < mInterfaceDescriptors.size(); index++) {
-            interfaces[index] = mInterfaceDescriptors.get(index).toAndroid(parser);
-        }
-        config.setInterfaces(interfaces);
-        return config;
     }
 
     @Override

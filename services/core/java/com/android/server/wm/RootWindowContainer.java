@@ -247,7 +247,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
         if (mService.mDisplayManagerInternal != null) {
             mService.mDisplayManagerInternal.setDisplayInfoOverrideFromWindowManager(
                     displayId, displayInfo);
-            mService.configureDisplayPolicyLocked(dc);
+            dc.configureDisplayPolicy();
 
             // Tap Listeners are supported for:
             // 1. All physical displays (multi-display).

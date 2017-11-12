@@ -252,6 +252,7 @@
   <java-symbol type="bool" name="config_bluetooth_hfp_inband_ringing_support" />
   <java-symbol type="bool" name="config_cellBroadcastAppLinks" />
   <java-symbol type="bool" name="config_duplicate_port_omadm_wappush" />
+  <java-symbol type="bool" name="config_disableTransitionAnimation" />
   <java-symbol type="bool" name="config_enableAutoPowerModes" />
   <java-symbol type="integer" name="config_autoPowerModeThresholdAngle" />
   <java-symbol type="integer" name="config_autoPowerModeAnyMotionSensor" />
@@ -1324,6 +1325,7 @@
   <java-symbol type="drawable" name="cling_button" />
   <java-symbol type="drawable" name="cling_arrow_up" />
   <java-symbol type="drawable" name="cling_bg" />
+  <java-symbol type="drawable" name="ic_corp_badge" />
   <java-symbol type="drawable" name="ic_corp_badge_color" />
   <java-symbol type="drawable" name="ic_corp_badge_case" />
   <java-symbol type="drawable" name="ic_corp_icon" />

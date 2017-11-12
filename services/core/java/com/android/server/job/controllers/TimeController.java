@@ -16,10 +16,11 @@
 
 package com.android.server.job.controllers;
 
+import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
+
 import android.app.AlarmManager;
 import android.app.AlarmManager.OnAlarmListener;
 import android.content.Context;
-import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.WorkSource;
 import android.util.Slog;
@@ -84,7 +85,7 @@ public final class TimeController extends StateController {
             // pattern of having a job with a 0 deadline constraint ("run immediately").
             // Unlike most controllers, once one of our constraints has been satisfied, it
             // will never be unsatisfied (our time base can not go backwards).
-            final long nowElapsedMillis = SystemClock.elapsedRealtime();
+            final long nowElapsedMillis = sElapsedRealtimeClock.millis();
             if (job.hasDeadlineConstraint() && evaluateDeadlineConstraint(job, nowElapsedMillis)) {
                 return;
             } else if (job.hasTimingDelayConstraint() && evaluateTimingDelayConstraint(job,
@@ -157,7 +158,7 @@ public final class TimeController extends StateController {
             long nextExpiryTime = Long.MAX_VALUE;
             int nextExpiryUid = 0;
             String nextExpiryPackageName = null;
-            final long nowElapsedMillis = SystemClock.elapsedRealtime();
+            final long nowElapsedMillis = sElapsedRealtimeClock.millis();
 
             Iterator<JobStatus> it = mTrackedJobs.iterator();
             while (it.hasNext()) {
@@ -201,7 +202,7 @@ public final class TimeController extends StateController {
      */
     private void checkExpiredDelaysAndResetAlarm() {
         synchronized (mLock) {
-            final long nowElapsedMillis = SystemClock.elapsedRealtime();
+            final long nowElapsedMillis = sElapsedRealtimeClock.millis();
             long nextDelayTime = Long.MAX_VALUE;
             int nextDelayUid = 0;
             String nextDelayPackageName = null;
@@ -283,7 +284,7 @@ public final class TimeController extends StateController {
     }
 
     private long maybeAdjustAlarmTime(long proposedAlarmTimeElapsedMillis) {
-        final long earliestWakeupTimeElapsed = SystemClock.elapsedRealtime();
+        final long earliestWakeupTimeElapsed = sElapsedRealtimeClock.millis();
         if (proposedAlarmTimeElapsedMillis < earliestWakeupTimeElapsed) {
             return earliestWakeupTimeElapsed;
         }
@@ -328,9 +329,9 @@ public final class TimeController extends StateController {
 
     @Override
     public void dumpControllerStateLocked(PrintWriter pw, int filterUid) {
-        final long nowElapsed = SystemClock.elapsedRealtime();
+        final long nowElapsed = sElapsedRealtimeClock.millis();
         pw.print("Alarms: now=");
-        pw.print(SystemClock.elapsedRealtime());
+        pw.print(sElapsedRealtimeClock.millis());
         pw.println();
         pw.print("Next delay alarm in ");
         TimeUtils.formatDuration(mNextDelayExpiredElapsedMillis, nowElapsed, pw);

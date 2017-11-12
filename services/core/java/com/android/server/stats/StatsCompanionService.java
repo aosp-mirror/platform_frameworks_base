@@ -44,6 +44,8 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.net.NetworkStatsFactory;
 import com.android.internal.os.KernelWakelockReader;
 import com.android.internal.os.KernelWakelockStats;
+import com.android.internal.os.KernelCpuSpeedReader;
+import com.android.internal.os.PowerProfile;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 
@@ -71,6 +73,9 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     private final PendingIntent mPullingAlarmIntent;
     private final BroadcastReceiver mAppUpdateReceiver;
     private final BroadcastReceiver mUserUpdateReceiver;
+    private final KernelWakelockReader mKernelWakelockReader = new KernelWakelockReader();
+    private final KernelWakelockStats mTmpWakelockStats = new KernelWakelockStats();
+    private final KernelCpuSpeedReader[] mKernelCpuSpeedReaders;
 
     public StatsCompanionService(Context context) {
         super();
@@ -103,6 +108,16 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             }
         };
         Slog.w(TAG, "Registered receiver for ACTION_PACKAGE_REPLACE AND ADDED.");
+        PowerProfile powerProfile = new PowerProfile(context);
+        final int numClusters = powerProfile.getNumCpuClusters();
+        mKernelCpuSpeedReaders = new KernelCpuSpeedReader[numClusters];
+        int firstCpuOfCluster = 0;
+        for (int i = 0; i < numClusters; i++) {
+            final int numSpeedSteps = powerProfile.getNumSpeedStepsInCpuCluster(i);
+            mKernelCpuSpeedReaders[i] = new KernelCpuSpeedReader(firstCpuOfCluster,
+                            numSpeedSteps);
+            firstCpuOfCluster += powerProfile.getNumCoresInCpuCluster(i);
+        }
     }
 
     private final static int[] toIntArray(List<Integer> list) {
@@ -286,9 +301,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
       }
     }
 
-    private final KernelWakelockReader mKernelWakelockReader = new KernelWakelockReader();
-    private final KernelWakelockStats mTmpWakelockStats = new KernelWakelockStats();
-
     private StatsLogEventWrapper[] addNetworkStats(int tag, NetworkStats stats, boolean withFGBG) {
         List<StatsLogEventWrapper> ret = new ArrayList<>();
         int size = stats.size();
@@ -443,6 +455,22 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                     e.writeInt(kws.mVersion);
                     e.writeLong(kws.mTotalTime);
                     ret.add(e);
+                }
+                return ret.toArray(new StatsLogEventWrapper[ret.size()]);
+            }
+            case StatsLog.CPU_TIME_PER_FREQ_PULLED: {
+                List<StatsLogEventWrapper> ret = new ArrayList();
+                for (int cluster = 0; cluster < mKernelCpuSpeedReaders.length; cluster++) {
+                    long[] clusterTimeMs = mKernelCpuSpeedReaders[cluster].readDelta();
+                    if (clusterTimeMs != null) {
+                        for (int speed = clusterTimeMs.length - 1; speed >= 0; --speed) {
+                            StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, 3);
+                            e.writeInt(tagId);
+                            e.writeInt(speed);
+                            e.writeLong(clusterTimeMs[speed]);
+                            ret.add(e);
+                        }
+                    }
                 }
                 return ret.toArray(new StatsLogEventWrapper[ret.size()]);
             }

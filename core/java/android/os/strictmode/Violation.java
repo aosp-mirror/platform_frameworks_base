@@ -16,13 +16,9 @@
 
 package android.os.strictmode;
 
-/**
- * Root class for all StrictMode violations.
- *
- * @hide
- */
+/** Root class for all StrictMode violations. */
 public abstract class Violation extends Throwable {
-    protected Violation(String message) {
+    Violation(String message) {
         super(message);
     }
 }

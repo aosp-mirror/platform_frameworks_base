@@ -26,13 +26,8 @@ LOCAL_MODULE_TAGS := optional
 LOCAL_PRIVILEGED_MODULE := true
 
 LOCAL_STATIC_JAVA_LIBRARIES := \
-    frameworks-base-testutils \
     services.backup \
-    services.core \
-    android-support-test \
-    mockito-target-minus-junit4 \
-    platform-test-annotations \
-    truth-prebuilt
+    services.core
 
 include $(BUILD_PACKAGE)
 
@@ -45,6 +40,9 @@ LOCAL_SRC_FILES := $(call all-java-files-under, src)
 
 # Include the testing libraries (JUnit4 + Robolectric libs).
 LOCAL_STATIC_JAVA_LIBRARIES := \
+    android-support-test \
+    mockito-robolectric-prebuilt \
+    platform-test-annotations \
     truth-prebuilt
 
 LOCAL_JAVA_LIBRARIES := \

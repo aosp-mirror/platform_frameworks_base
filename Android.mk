@@ -137,6 +137,7 @@ LOCAL_SRC_FILES += \
 	../../system/bt/binder/android/bluetooth/IBluetoothPbap.aidl \
 	../../system/bt/binder/android/bluetooth/IBluetoothPbapClient.aidl \
 	../../system/bt/binder/android/bluetooth/IBluetoothSap.aidl \
+	../../system/bt/binder/android/bluetooth/IBluetoothSocketManager.aidl \
 	../../system/bt/binder/android/bluetooth/IBluetoothStateChangeCallback.aidl \
 	../../system/bt/binder/android/bluetooth/IBluetoothHeadsetClient.aidl \
 	../../system/bt/binder/android/bluetooth/IBluetoothHidDevice.aidl \
@@ -398,6 +399,7 @@ LOCAL_SRC_FILES += \
 	core/java/com/android/internal/backup/IObbBackupService.aidl \
 	core/java/com/android/internal/car/ICarServiceHelper.aidl \
 	core/java/com/android/internal/inputmethod/IInputContentUriToken.aidl \
+	core/java/com/android/internal/net/INetworkWatchlistManager.aidl \
 	core/java/com/android/internal/policy/IKeyguardDrawnCallback.aidl \
 	core/java/com/android/internal/policy/IKeyguardDismissCallback.aidl \
 	core/java/com/android/internal/policy/IKeyguardExitCallback.aidl \

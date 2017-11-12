@@ -16,4 +16,4 @@
 
 package android.os;
 
-parcelable ParcelUuid;
+parcelable ParcelUuid cpp_header "android/os/parcel_uuid.h";

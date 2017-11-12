@@ -3657,7 +3657,7 @@
         </activity-alias>
         <activity-alias android:name="com.android.internal.app.ForwardIntentToManagedProfile"
                 android:targetActivity="com.android.internal.app.IntentForwarderActivity"
-                android:icon="@drawable/ic_corp_icon"
+                android:icon="@drawable/ic_corp_badge"
                 android:exported="true"
                 android:label="@string/managed_profile_label">
         </activity-alias>
@@ -3942,6 +3942,10 @@
         </service>
 
         <service android:name="com.android.server.timezone.TimeZoneUpdateIdler"
+                 android:permission="android.permission.BIND_JOB_SERVICE" >
+        </service>
+
+        <service android:name="com.android.server.net.watchlist.ReportWatchlistJobService"
                  android:permission="android.permission.BIND_JOB_SERVICE" >
         </service>
     </application>

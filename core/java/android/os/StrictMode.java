@@ -16,11 +16,11 @@
 package android.os;
 
 import android.animation.ValueAnimator;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
-import android.app.ApplicationErrorReport;
 import android.app.IActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -29,8 +29,6 @@ import android.content.ServiceConnection;
 import android.content.pm.ApplicationInfo;
 import android.net.TrafficStats;
 import android.net.Uri;
-import android.os.StrictMode.ThreadPolicy;
-import android.os.StrictMode.VmPolicy;
 import android.os.strictmode.CleartextNetworkViolation;
 import android.os.strictmode.ContentUriWithoutPermissionViolation;
 import android.os.strictmode.CustomViolation;
@@ -44,7 +42,7 @@ import android.os.strictmode.NetworkViolation;
 import android.os.strictmode.ResourceMismatchViolation;
 import android.os.strictmode.ServiceConnectionLeakedViolation;
 import android.os.strictmode.SqliteObjectLeakedViolation;
-import android.os.strictmode.UnbufferedIOViolation;
+import android.os.strictmode.UnbufferedIoViolation;
 import android.os.strictmode.UntaggedSocketViolation;
 import android.os.strictmode.Violation;
 import android.os.strictmode.WebViewMethodCalledOnWrongThreadViolation;
@@ -75,6 +73,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Deque;
 import java.util.HashMap;
+import java.util.concurrent.Executor;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -163,11 +163,13 @@ public final class StrictMode {
     private static final String CLEARTEXT_PROPERTY = "persist.sys.strictmode.clear";
 
     /**
-     * Quick feature-flag that can be used to disable the defaults provided by
-     * {@link #initThreadDefaults(ApplicationInfo)} and
-     * {@link #initVmDefaults(ApplicationInfo)}.
+     * Quick feature-flag that can be used to disable the defaults provided by {@link
+     * #initThreadDefaults(ApplicationInfo)} and {@link #initVmDefaults(ApplicationInfo)}.
      */
     private static final boolean DISABLE = false;
+
+    // Only apply VM penalties for the same violation at this interval.
+    private static final long MIN_VM_INTERVAL_MS = 1000;
 
     // Only log a duplicate stack trace to the logs every second.
     private static final long MIN_LOG_INTERVAL_MS = 1000;
@@ -374,6 +376,28 @@ public final class StrictMode {
 
     private static volatile ViolationLogger sLogger = LOGCAT_LOGGER;
 
+    private static final ThreadLocal<OnThreadViolationListener> sThreadViolationListener =
+            new ThreadLocal<>();
+    private static final ThreadLocal<Executor> sThreadViolationExecutor = new ThreadLocal<>();
+
+    /**
+     * When #{@link ThreadPolicy.Builder#penaltyListener} is enabled, the listener is called on the
+     * provided executor when a Thread violation occurs.
+     */
+    public interface OnThreadViolationListener {
+        /** Called on a thread policy violation. */
+        void onThreadViolation(Violation v);
+    }
+
+    /**
+     * When #{@link VmPolicy.Builder#penaltyListener} is enabled, the listener is called on the
+     * provided executor when a VM violation occurs.
+     */
+    public interface OnVmViolationListener {
+        /** Called on a VM policy violation. */
+        void onVmViolation(Violation v);
+    }
+
     /** {@hide} */
     @TestApi
     public static void setViolationLogger(ViolationLogger listener) {
@@ -403,12 +427,16 @@ public final class StrictMode {
      */
     public static final class ThreadPolicy {
         /** The default, lax policy which doesn't catch anything. */
-        public static final ThreadPolicy LAX = new ThreadPolicy(0);
+        public static final ThreadPolicy LAX = new ThreadPolicy(0, null, null);
 
         final int mask;
+        final OnThreadViolationListener mListener;
+        final Executor mCallbackExecutor;
 
-        private ThreadPolicy(int mask) {
+        private ThreadPolicy(int mask, OnThreadViolationListener listener, Executor executor) {
             this.mask = mask;
+            mListener = listener;
+            mCallbackExecutor = executor;
         }
 
         @Override
@@ -436,6 +464,8 @@ public final class StrictMode {
          */
         public static final class Builder {
             private int mMask = 0;
+            private OnThreadViolationListener mListener;
+            private Executor mExecutor;
 
             /**
              * Create a Builder that detects nothing and has no violations. (but note that {@link
@@ -601,6 +631,20 @@ public final class StrictMode {
                 return enable(PENALTY_DROPBOX);
             }
 
+            /**
+             * Call #{@link OnThreadViolationListener#onThreadViolation(Violation)} on specified
+             * executor every violation.
+             */
+            public Builder penaltyListener(
+                    @NonNull OnThreadViolationListener listener, @NonNull Executor executor) {
+                if (executor == null) {
+                    throw new NullPointerException("executor must not be null");
+                }
+                mListener = listener;
+                mExecutor = executor;
+                return this;
+            }
+
             private Builder enable(int bit) {
                 mMask |= bit;
                 return this;
@@ -620,7 +664,8 @@ public final class StrictMode {
             public ThreadPolicy build() {
                 // If there are detection bits set but no violation bits
                 // set, enable simple logging.
-                if (mMask != 0
+                if (mListener == null
+                        && mMask != 0
                         && (mMask
                                         & (PENALTY_DEATH
                                                 | PENALTY_LOG
@@ -629,7 +674,7 @@ public final class StrictMode {
                                 == 0) {
                     penaltyLog();
                 }
-                return new ThreadPolicy(mMask);
+                return new ThreadPolicy(mMask, mListener, mExecutor);
             }
         }
     }
@@ -641,19 +686,27 @@ public final class StrictMode {
      */
     public static final class VmPolicy {
         /** The default, lax policy which doesn't catch anything. */
-        public static final VmPolicy LAX = new VmPolicy(0, EMPTY_CLASS_LIMIT_MAP);
+        public static final VmPolicy LAX = new VmPolicy(0, EMPTY_CLASS_LIMIT_MAP, null, null);
 
         final int mask;
+        final OnVmViolationListener mListener;
+        final Executor mCallbackExecutor;
 
         // Map from class to max number of allowed instances in memory.
         final HashMap<Class, Integer> classInstanceLimit;
 
-        private VmPolicy(int mask, HashMap<Class, Integer> classInstanceLimit) {
+        private VmPolicy(
+                int mask,
+                HashMap<Class, Integer> classInstanceLimit,
+                OnVmViolationListener listener,
+                Executor executor) {
             if (classInstanceLimit == null) {
                 throw new NullPointerException("classInstanceLimit == null");
             }
             this.mask = mask;
             this.classInstanceLimit = classInstanceLimit;
+            mListener = listener;
+            mCallbackExecutor = executor;
         }
 
         @Override
@@ -681,6 +734,8 @@ public final class StrictMode {
          */
         public static final class Builder {
             private int mMask;
+            private OnVmViolationListener mListener;
+            private Executor mExecutor;
 
             private HashMap<Class, Integer> mClassInstanceLimit; // null until needed
             private boolean mClassInstanceLimitNeedCow = false; // need copy-on-write
@@ -694,6 +749,8 @@ public final class StrictMode {
                 mMask = base.mask;
                 mClassInstanceLimitNeedCow = true;
                 mClassInstanceLimit = base.classInstanceLimit;
+                mListener = base.mListener;
+                mExecutor = base.mCallbackExecutor;
             }
 
             /**
@@ -910,6 +967,19 @@ public final class StrictMode {
                 return enable(PENALTY_DROPBOX);
             }
 
+            /**
+             * Call #{@link OnVmViolationListener#onVmViolation(Violation)} on every violation.
+             */
+            public Builder penaltyListener(
+                    @NonNull OnVmViolationListener listener, @NonNull Executor executor) {
+                if (executor == null) {
+                    throw new NullPointerException("executor must not be null");
+                }
+                mListener = listener;
+                mExecutor = executor;
+                return this;
+            }
+
             private Builder enable(int bit) {
                 mMask |= bit;
                 return this;
@@ -929,7 +999,8 @@ public final class StrictMode {
             public VmPolicy build() {
                 // If there are detection bits set but no violation bits
                 // set, enable simple logging.
-                if (mMask != 0
+                if (mListener == null
+                        && mMask != 0
                         && (mMask
                                         & (PENALTY_DEATH
                                                 | PENALTY_LOG
@@ -940,7 +1011,9 @@ public final class StrictMode {
                 }
                 return new VmPolicy(
                         mMask,
-                        mClassInstanceLimit != null ? mClassInstanceLimit : EMPTY_CLASS_LIMIT_MAP);
+                        mClassInstanceLimit != null ? mClassInstanceLimit : EMPTY_CLASS_LIMIT_MAP,
+                        mListener,
+                        mExecutor);
             }
         }
     }
@@ -973,6 +1046,8 @@ public final class StrictMode {
      */
     public static void setThreadPolicy(final ThreadPolicy policy) {
         setThreadPolicyMask(policy.mask);
+        sThreadViolationListener.set(policy.mListener);
+        sThreadViolationExecutor.set(policy.mCallbackExecutor);
     }
 
     /** @hide */
@@ -1029,7 +1104,10 @@ public final class StrictMode {
         // introduce VmPolicy cleanly) but this isn't particularly
         // optimal for users who might call this method often.  This
         // should be in a thread-local and not allocate on each call.
-        return new ThreadPolicy(getThreadPolicyMask());
+        return new ThreadPolicy(
+                getThreadPolicyMask(),
+                sThreadViolationListener.get(),
+                sThreadViolationExecutor.get());
     }
 
     /**
@@ -1042,7 +1120,10 @@ public final class StrictMode {
      *     end of a block
      */
     public static ThreadPolicy allowThreadDiskWrites() {
-        return new ThreadPolicy(allowThreadDiskWritesMask());
+        return new ThreadPolicy(
+                allowThreadDiskWritesMask(),
+                sThreadViolationListener.get(),
+                sThreadViolationExecutor.get());
     }
 
     /** @hide */
@@ -1063,7 +1144,10 @@ public final class StrictMode {
      * @return the old policy, to be passed to setThreadPolicy to restore the policy.
      */
     public static ThreadPolicy allowThreadDiskReads() {
-        return new ThreadPolicy(allowThreadDiskReadsMask());
+        return new ThreadPolicy(
+                allowThreadDiskReadsMask(),
+                sThreadViolationListener.get(),
+                sThreadViolationExecutor.get());
     }
 
     /** @hide */
@@ -1076,16 +1160,27 @@ public final class StrictMode {
         return oldPolicyMask;
     }
 
+    private static ThreadPolicy allowThreadViolations() {
+        ThreadPolicy oldPolicy = getThreadPolicy();
+        setThreadPolicyMask(0);
+        return oldPolicy;
+    }
+
+    private static VmPolicy allowVmViolations() {
+        VmPolicy oldPolicy = getVmPolicy();
+        sVmPolicy = VmPolicy.LAX;
+        return oldPolicy;
+    }
+
     /**
-     * Determine if the given app is "bundled" as part of the system image.
-     * These bundled apps are developed in lock-step with the OS, and they
-     * aren't updated outside of an OTA, so we want to chase any
-     * {@link StrictMode} regressions by enabling detection when running on
-     * {@link Build#IS_USERDEBUG} or {@link Build#IS_ENG} builds.
-     * <p>
-     * Unbundled apps included in the system image are expected to detect and
-     * triage their own {@link StrictMode} issues separate from the OS release
-     * process, which is why we don't enable them here.
+     * Determine if the given app is "bundled" as part of the system image. These bundled apps are
+     * developed in lock-step with the OS, and they aren't updated outside of an OTA, so we want to
+     * chase any {@link StrictMode} regressions by enabling detection when running on {@link
+     * Build#IS_USERDEBUG} or {@link Build#IS_ENG} builds.
+     *
+     * <p>Unbundled apps included in the system image are expected to detect and triage their own
+     * {@link StrictMode} issues separate from the OS release process, which is why we don't enable
+     * them here.
      *
      * @hide
      */
@@ -1122,8 +1217,8 @@ public final class StrictMode {
      */
     public static void initThreadDefaults(ApplicationInfo ai) {
         final ThreadPolicy.Builder builder = new ThreadPolicy.Builder();
-        final int targetSdkVersion = (ai != null) ? ai.targetSdkVersion
-                : Build.VERSION_CODES.CUR_DEVELOPMENT;
+        final int targetSdkVersion =
+                (ai != null) ? ai.targetSdkVersion : Build.VERSION_CODES.CUR_DEVELOPMENT;
 
         // Starting in HC, we don't allow network usage on the main thread
         if (targetSdkVersion >= Build.VERSION_CODES.HONEYCOMB) {
@@ -1162,8 +1257,8 @@ public final class StrictMode {
      */
     public static void initVmDefaults(ApplicationInfo ai) {
         final VmPolicy.Builder builder = new VmPolicy.Builder();
-        final int targetSdkVersion = (ai != null) ? ai.targetSdkVersion
-                : Build.VERSION_CODES.CUR_DEVELOPMENT;
+        final int targetSdkVersion =
+                (ai != null) ? ai.targetSdkVersion : Build.VERSION_CODES.CUR_DEVELOPMENT;
 
         // Starting in N, we don't allow file:// Uri exposure
         if (targetSdkVersion >= Build.VERSION_CODES.N) {
@@ -1204,7 +1299,9 @@ public final class StrictMode {
                         sVmPolicy.mask
                                 | DETECT_VM_FILE_URI_EXPOSURE
                                 | PENALTY_DEATH_ON_FILE_URI_EXPOSURE,
-                        sVmPolicy.classInstanceLimit);
+                        sVmPolicy.classInstanceLimit,
+                        sVmPolicy.mListener,
+                        sVmPolicy.mCallbackExecutor);
     }
 
     /**
@@ -1219,7 +1316,9 @@ public final class StrictMode {
                         sVmPolicy.mask
                                 & ~(DETECT_VM_FILE_URI_EXPOSURE
                                         | PENALTY_DEATH_ON_FILE_URI_EXPOSURE),
-                        sVmPolicy.classInstanceLimit);
+                        sVmPolicy.classInstanceLimit,
+                        sVmPolicy.mListener,
+                        sVmPolicy.mCallbackExecutor);
     }
 
     /**
@@ -1340,7 +1439,7 @@ public final class StrictMode {
             if (tooManyViolationsThisLoop()) {
                 return;
             }
-            startHandlingViolationException(new UnbufferedIOViolation());
+            startHandlingViolationException(new UnbufferedIoViolation());
         }
 
         // Part of BlockGuard.Policy interface:
@@ -1409,7 +1508,7 @@ public final class StrictMode {
             //       go into this immediate mode?
             if (looper == null || (info.mPolicy & THREAD_PENALTY_MASK) == PENALTY_DEATH) {
                 info.durationMillis = -1; // unknown (redundant, already set)
-                handleViolation(info);
+                onThreadPolicyViolation(info);
                 return;
             }
 
@@ -1447,30 +1546,28 @@ public final class StrictMode {
             THREAD_HANDLER
                     .get()
                     .postAtFrontOfQueue(
-                            new Runnable() {
-                                public void run() {
-                                    long loopFinishTime = SystemClock.uptimeMillis();
+                            () -> {
+                                long loopFinishTime = SystemClock.uptimeMillis();
 
-                                    // Note: we do this early, before handling the
-                                    // violation below, as handling the violation
-                                    // may include PENALTY_DEATH and we don't want
-                                    // to keep the red border on.
-                                    if (windowManager != null) {
-                                        try {
-                                            windowManager.showStrictModeViolation(false);
-                                        } catch (RemoteException unused) {
-                                        }
+                                // Note: we do this early, before handling the
+                                // violation below, as handling the violation
+                                // may include PENALTY_DEATH and we don't want
+                                // to keep the red border on.
+                                if (windowManager != null) {
+                                    try {
+                                        windowManager.showStrictModeViolation(false);
+                                    } catch (RemoteException unused) {
                                     }
-
-                                    for (int n = 0; n < records.size(); ++n) {
-                                        ViolationInfo v = records.get(n);
-                                        v.violationNumThisLoop = n + 1;
-                                        v.durationMillis =
-                                                (int) (loopFinishTime - v.violationUptimeMillis);
-                                        handleViolation(v);
-                                    }
-                                    records.clear();
                                 }
+
+                                for (int n = 0; n < records.size(); ++n) {
+                                    ViolationInfo v = records.get(n);
+                                    v.violationNumThisLoop = n + 1;
+                                    v.durationMillis =
+                                            (int) (loopFinishTime - v.violationUptimeMillis);
+                                    onThreadPolicyViolation(v);
+                                }
+                                records.clear();
                             });
         }
 
@@ -1479,13 +1576,13 @@ public final class StrictMode {
         // violation fired and now (after the violating code ran) due
         // to people who push/pop temporary policy in regions of code,
         // hence the policy being passed around.
-        void handleViolation(final ViolationInfo info) {
-            if (LOG_V) Log.d(TAG, "handleViolation; policy=" + info.mPolicy);
+        void onThreadPolicyViolation(final ViolationInfo info) {
+            if (LOG_V) Log.d(TAG, "onThreadPolicyViolation; policy=" + info.mPolicy);
 
             if (info.penaltyEnabled(PENALTY_GATHER)) {
                 ArrayList<ViolationInfo> violations = gatheredViolations.get();
                 if (violations == null) {
-                    violations = new ArrayList<ViolationInfo>(1);
+                    violations = new ArrayList<>(1);
                     gatheredViolations.set(violations);
                 }
                 for (ViolationInfo previous : violations) {
@@ -1518,6 +1615,8 @@ public final class StrictMode {
                     && timeSinceLastViolationMillis > MIN_LOG_INTERVAL_MS) {
                 sLogger.log(info);
             }
+
+            final Violation violation = info.mViolation;
 
             // The violationMaskSubset, passed to ActivityManager, is a
             // subset of the original StrictMode policy bitmask, with
@@ -1552,13 +1651,30 @@ public final class StrictMode {
             }
 
             if ((info.getPolicyMask() & PENALTY_DEATH) != 0) {
-                executeDeathPenalty(info);
+                throw new RuntimeException("StrictMode ThreadPolicy violation", violation);
+            }
+
+            // penaltyDeath will cause penaltyCallback to no-op since we cannot guarantee the
+            // executor finishes before crashing.
+            final OnThreadViolationListener listener = sThreadViolationListener.get();
+            final Executor executor = sThreadViolationExecutor.get();
+            if (listener != null && executor != null) {
+                try {
+                    executor.execute(
+                            () -> {
+                                // Lift violated policy to prevent infinite recursion.
+                                ThreadPolicy oldPolicy = allowThreadViolations();
+                                try {
+                                    listener.onThreadViolation(violation);
+                                } finally {
+                                    setThreadPolicy(oldPolicy);
+                                }
+                            });
+                } catch (RejectedExecutionException e) {
+                    Log.e(TAG, "ThreadPolicy penaltyCallback failed", e);
+                }
             }
         }
-    }
-
-    private static void executeDeathPenalty(ViolationInfo info) {
-        throw new RuntimeException("StrictMode death penalty", info.mViolation);
     }
 
     /**
@@ -1736,9 +1852,8 @@ public final class StrictMode {
      * #setThreadPolicy}.
      */
     public static void enableDefaults() {
-        StrictMode.setThreadPolicy(
-                new StrictMode.ThreadPolicy.Builder().detectAll().penaltyLog().build());
-        StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder().detectAll().penaltyLog().build());
+        setThreadPolicy(new StrictMode.ThreadPolicy.Builder().detectAll().penaltyLog().build());
+        setVmPolicy(new StrictMode.VmPolicy.Builder().detectAll().penaltyLog().build());
     }
 
     /** @hide */
@@ -1857,11 +1972,11 @@ public final class StrictMode {
     }
 
     /** @hide */
-    public static void onVmPolicyViolation(Violation originStack, boolean forceDeath) {
+    public static void onVmPolicyViolation(Violation violation, boolean forceDeath) {
         final boolean penaltyDropbox = (sVmPolicy.mask & PENALTY_DROPBOX) != 0;
         final boolean penaltyDeath = ((sVmPolicy.mask & PENALTY_DEATH) != 0) || forceDeath;
         final boolean penaltyLog = (sVmPolicy.mask & PENALTY_LOG) != 0;
-        final ViolationInfo info = new ViolationInfo(originStack, sVmPolicy.mask);
+        final ViolationInfo info = new ViolationInfo(violation, sVmPolicy.mask);
 
         // Erase stuff not relevant for process-wide violations
         info.numAnimationsRunning = 0;
@@ -1870,43 +1985,63 @@ public final class StrictMode {
 
         final Integer fingerprint = info.hashCode();
         final long now = SystemClock.uptimeMillis();
-        long lastViolationTime = 0;
+        long lastViolationTime;
         long timeSinceLastViolationMillis = Long.MAX_VALUE;
         synchronized (sLastVmViolationTime) {
             if (sLastVmViolationTime.containsKey(fingerprint)) {
                 lastViolationTime = sLastVmViolationTime.get(fingerprint);
                 timeSinceLastViolationMillis = now - lastViolationTime;
             }
-            if (timeSinceLastViolationMillis > MIN_LOG_INTERVAL_MS) {
+            if (timeSinceLastViolationMillis > MIN_VM_INTERVAL_MS) {
                 sLastVmViolationTime.put(fingerprint, now);
             }
         }
-
-        if (penaltyLog && sLogger != null) {
-            sLogger.log(info);
+        if (timeSinceLastViolationMillis <= MIN_VM_INTERVAL_MS) {
+            // Rate limit all penalties.
+            return;
         }
-        if (penaltyLog && timeSinceLastViolationMillis > MIN_LOG_INTERVAL_MS) {
+
+        if (penaltyLog && sLogger != null && timeSinceLastViolationMillis > MIN_LOG_INTERVAL_MS) {
             sLogger.log(info);
         }
 
         int violationMaskSubset = PENALTY_DROPBOX | (ALL_VM_DETECT_BITS & sVmPolicy.mask);
 
-        if (penaltyDropbox && !penaltyDeath) {
-            // Common case for userdebug/eng builds.  If no death and
-            // just dropboxing, we can do the ActivityManager call
-            // asynchronously.
-            dropboxViolationAsync(violationMaskSubset, info);
-            return;
-        }
-
-        if (penaltyDropbox && lastViolationTime == 0) {
-            handleApplicationStrictModeViolation(violationMaskSubset, info);
+        if (penaltyDropbox) {
+            if (penaltyDeath) {
+                handleApplicationStrictModeViolation(violationMaskSubset, info);
+            } else {
+                // Common case for userdebug/eng builds.  If no death and
+                // just dropboxing, we can do the ActivityManager call
+                // asynchronously.
+                dropboxViolationAsync(violationMaskSubset, info);
+            }
         }
 
         if (penaltyDeath) {
             System.err.println("StrictMode VmPolicy violation with POLICY_DEATH; shutting down.");
             Process.killProcess(Process.myPid());
             System.exit(10);
+        }
+
+        // If penaltyDeath, we can't guarantee this callback finishes before the process dies for
+        // all executors. penaltyDeath supersedes penaltyCallback.
+        if (sVmPolicy.mListener != null && sVmPolicy.mCallbackExecutor != null) {
+            final OnVmViolationListener listener = sVmPolicy.mListener;
+            try {
+                sVmPolicy.mCallbackExecutor.execute(
+                        () -> {
+                            // Lift violated policy to prevent infinite recursion.
+                            VmPolicy oldPolicy = allowVmViolations();
+                            try {
+                                listener.onVmViolation(violation);
+                            } finally {
+                                setVmPolicy(oldPolicy);
+                            }
+                        });
+            } catch (RejectedExecutionException e) {
+                Log.e(TAG, "VmPolicy penaltyCallback failed", e);
+            }
         }
     }
 
@@ -2407,7 +2542,7 @@ public final class StrictMode {
                 return DETECT_CUSTOM;
             } else if (mViolation instanceof ResourceMismatchViolation) {
                 return DETECT_RESOURCE_MISMATCH;
-            } else if (mViolation instanceof UnbufferedIOViolation) {
+            } else if (mViolation instanceof UnbufferedIoViolation) {
                 return DETECT_UNBUFFERED_IO;
             } else if (mViolation instanceof SqliteObjectLeakedViolation) {
                 return DETECT_VM_CURSOR_LEAKS;

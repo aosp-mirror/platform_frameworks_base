@@ -98,6 +98,9 @@ cc_library {
             enabled: true,
         },
     },
+    sanitize: {
+        blacklist: "libandroidfw_blacklist.txt",
+    },
 }
 
 common_test_libs = [

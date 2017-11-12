@@ -23,7 +23,6 @@
 #include <unordered_map>
 #include <vector>
 #include "LogMatchingTracker.h"
-#include "frameworks/base/cmds/statsd/src/stats_log.pb.h"
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
 
 namespace android {

@@ -871,6 +871,29 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         }
     }
 
+    /**
+     * @param reason The reason for moving the stack to the back.
+     * @param task If non-null, the task will be moved to the bottom of the stack.
+     **/
+    void moveToBack(String reason, TaskRecord task) {
+        if (!isAttached()) {
+            return;
+        }
+
+        getDisplay().positionChildAtBottom(this);
+        mStackSupervisor.setFocusStackUnchecked(reason, getDisplay().getTopStack());
+        if (task != null) {
+            insertTaskAtBottom(task);
+            return;
+        } else {
+            task = bottomTask();
+            if (task != null) {
+                mWindowContainerController.positionChildAtBottom(
+                        task.getWindowContainerController(), true /* includingParents */);
+            }
+        }
+    }
+
     boolean isFocusable() {
         if (getWindowConfiguration().canReceiveKeys()) {
             return true;
@@ -2591,6 +2614,9 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         if (position >= mTaskHistory.size()) {
             insertTaskAtTop(task, null);
             return;
+        } else if (position <= 0) {
+            insertTaskAtBottom(task);
+            return;
         }
         position = getAdjustedPositionForTask(task, position, null /* starting */);
         mTaskHistory.remove(task);
@@ -2608,6 +2634,16 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         mTaskHistory.add(position, task);
         updateTaskMovement(task, true);
         mWindowContainerController.positionChildAtTop(task.getWindowContainerController(),
+                true /* includingParents */);
+    }
+
+    private void insertTaskAtBottom(TaskRecord task) {
+        // Unlike insertTaskAtPosition, this will also position parents of the windowcontroller.
+        mTaskHistory.remove(task);
+        final int position = getAdjustedPositionForTask(task, 0, null);
+        mTaskHistory.add(position, task);
+        updateTaskMovement(task, true);
+        mWindowContainerController.positionChildAtBottom(task.getWindowContainerController(),
                 true /* includingParents */);
     }
 
@@ -4380,8 +4416,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         updateTaskMovement(tr, false);
 
         mWindowManager.prepareAppTransition(TRANSIT_TASK_TO_BACK, false);
-        mWindowContainerController.positionChildAtBottom(tr.getWindowContainerController(),
-                true /* includingParents */);
+        moveToBack("moveTaskToBackLocked", tr);
 
         if (inPinnedWindowingMode()) {
             mStackSupervisor.removeStack(this);

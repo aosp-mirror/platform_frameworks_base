@@ -15,8 +15,8 @@
  */
 package android.os.strictmode;
 
-/** @hide */
 public final class FileUriExposedViolation extends Violation {
+    /** @hide */
     public FileUriExposedViolation(String msg) {
         super(msg);
     }

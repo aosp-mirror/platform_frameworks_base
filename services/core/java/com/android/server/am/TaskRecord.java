@@ -1139,6 +1139,9 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
 
         mActivities.remove(newTop);
         mActivities.add(newTop);
+
+        // Make sure window manager is aware of the position change.
+        mWindowContainerController.positionChildAtTop(newTop.mWindowContainerController);
         updateEffectiveIntent();
 
         setFrontOfTask();

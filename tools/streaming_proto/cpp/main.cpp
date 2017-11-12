@@ -18,6 +18,12 @@ make_filename(const FileDescriptorProto& file_descriptor)
     return file_descriptor.name() + ".h";
 }
 
+static inline bool
+should_generate_enums_mapping(const EnumDescriptorProto& enu)
+{
+    return enu.options().GetExtension(stream_enum).enable_enums_mapping();
+}
+
 static void
 write_enum(stringstream& text, const EnumDescriptorProto& enu, const string& indent)
 {
@@ -29,6 +35,23 @@ write_enum(stringstream& text, const EnumDescriptorProto& enu, const string& ind
                 << make_constant_name(value.name())
                 << " = " << value.number() << ";" << endl;
     }
+
+    if (should_generate_enums_mapping(enu)) {
+        string name = make_constant_name(enu.name());
+        string prefix = name + "_";
+        text << indent << "const int _ENUM_" << name << "_COUNT = " << N << ";" << endl;
+        text << indent << "const char* _ENUM_" << name << "_NAMES[" << N << "] = {" << endl;
+        for (int i=0; i<N; i++) {
+            text << indent << INDENT << "\"" << stripPrefix(enu.value(i).name(), prefix) << "\"," << endl;
+        }
+        text << indent << "};" << endl;
+        text << indent << "const uint32_t _ENUM_" << name << "_VALUES[" << N << "] = {" << endl;
+        for (int i=0; i<N; i++) {
+            text << indent << INDENT << make_constant_name(enu.value(i).name()) << "," << endl;
+        }
+        text << indent << "};" << endl;
+    }
+
     text << endl;
 }
 
@@ -59,7 +82,7 @@ write_field(stringstream& text, const FieldDescriptorProto& field, const string&
 static inline bool
 should_generate_fields_mapping(const DescriptorProto& message)
 {
-    return message.options().GetExtension(stream).enable_fields_mapping();
+    return message.options().GetExtension(stream_msg).enable_fields_mapping();
 }
 
 static void

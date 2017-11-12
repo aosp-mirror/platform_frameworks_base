@@ -2105,6 +2105,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
                 break;
             case DENSITY_DPI_NONE:
                 parts.add("nodpi");
+                break;
             default:
                 parts.add(config.densityDpi + "dpi");
                 break;

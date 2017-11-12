@@ -15,9 +15,9 @@
  */
 
 #include "Log.h"
+#include "statslog.h"
 
 #include "StatsLogProcessor.h"
-#include "frameworks/base/cmds/statsd/src/stats_log.pb.h"
 #include "metrics/CountMetricProducer.h"
 #include "stats_util.h"
 
@@ -25,6 +25,14 @@
 #include <utils/Errors.h>
 
 using namespace android;
+using android::util::FIELD_COUNT_REPEATED;
+using android::util::FIELD_TYPE_BOOL;
+using android::util::FIELD_TYPE_FLOAT;
+using android::util::FIELD_TYPE_INT32;
+using android::util::FIELD_TYPE_INT64;
+using android::util::FIELD_TYPE_MESSAGE;
+using android::util::FIELD_TYPE_STRING;
+using android::util::ProtoOutputStream;
 using std::make_unique;
 using std::unique_ptr;
 using std::vector;
@@ -32,6 +40,14 @@ using std::vector;
 namespace android {
 namespace os {
 namespace statsd {
+
+// for ConfigMetricsReport
+const int FIELD_ID_CONFIG_KEY = 1;
+const int FIELD_ID_METRICS = 2;
+const int FIELD_ID_UID_MAP = 3;
+// for ConfigKey
+const int FIELD_ID_UID = 1;
+const int FIELD_ID_NAME = 2;
 
 StatsLogProcessor::StatsLogProcessor(const sp<UidMap>& uidMap,
                                      const std::function<void(const vector<uint8_t>&)>& pushLog)
@@ -47,6 +63,22 @@ void StatsLogProcessor::OnLogEvent(const LogEvent& msg) {
     for (auto& pair : mMetricsManagers) {
         pair.second->onLogEvent(msg);
         flushIfNecessary(msg.GetTimestampNs(), pair.first, pair.second);
+    }
+
+    // Hard-coded logic to update the isolated uid's in the uid-map.
+    // The field numbers need to be currently updated by hand with stats_events.proto
+    if (msg.GetTagId() == android::util::ISOLATED_UID_CHANGED) {
+        status_t err = NO_ERROR, err2 = NO_ERROR, err3 = NO_ERROR;
+        bool is_create = msg.GetBool(3, &err);
+        auto parent_uid = int(msg.GetLong(1, &err2));
+        auto isolated_uid = int(msg.GetLong(2, &err3));
+        if (err == NO_ERROR && err2 == NO_ERROR && err3 == NO_ERROR) {
+            if (is_create) {
+                mUidMap->assignIsolatedUid(isolated_uid, parent_uid);
+            } else {
+                mUidMap->removeIsolatedUid(isolated_uid, parent_uid);
+            }
+        }
     }
 }
 
@@ -70,27 +102,46 @@ void StatsLogProcessor::OnConfigUpdated(const ConfigKey& key, const StatsdConfig
     }
 }
 
-ConfigMetricsReport StatsLogProcessor::onDumpReport(const ConfigKey& key) {
-    ConfigMetricsReport report;
-
+vector<uint8_t> StatsLogProcessor::onDumpReport(const ConfigKey& key) {
     auto it = mMetricsManagers.find(key);
     if (it == mMetricsManagers.end()) {
         ALOGW("Config source %s does not exist", key.ToString().c_str());
-        return report;
+        return vector<uint8_t>();
     }
 
-    auto set_key = report.mutable_config_key();
-    set_key->set_uid(key.GetUid());
-    set_key->set_name(key.GetName());
-    for (auto m : it->second->onDumpReport()) {
-        // Transfer the vector of StatsLogReport into a field
-        // TODO: perhaps we just have bytes being returned from onDumpReport and transfer bytes
-        auto dest = report.add_metrics();
-        *dest = m;
+    ProtoOutputStream proto;
+
+    // Fill in ConfigKey.
+    long long configKeyToken = proto.start(FIELD_TYPE_MESSAGE | FIELD_ID_CONFIG_KEY);
+    proto.write(FIELD_TYPE_INT32 | FIELD_ID_UID, key.GetUid());
+    proto.write(FIELD_TYPE_STRING | FIELD_ID_NAME, key.GetName());
+    proto.end(configKeyToken);
+
+    // Fill in StatsLogReport's.
+    for (auto& m : it->second->onDumpReport()) {
+        // Add each vector of StatsLogReport into a repeated field.
+        proto.write(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_METRICS,
+                    reinterpret_cast<char*>(m.get()->data()), m.get()->size());
     }
-    auto temp = mUidMap->getOutput(key);
-    report.mutable_uid_map()->Swap(&temp);
-    return report;
+
+    // Fill in UidMap.
+    auto uidMap = mUidMap->getOutput(key);
+    const int uidMapSize = uidMap.ByteSize();
+    char uidMapBuffer[uidMapSize];
+    uidMap.SerializeToArray(&uidMapBuffer[0], uidMapSize);
+    proto.write(FIELD_TYPE_MESSAGE | FIELD_ID_UID_MAP, uidMapBuffer, uidMapSize);
+
+    vector<uint8_t> buffer(proto.size());
+    size_t pos = 0;
+    auto iter = proto.data();
+    while (iter.readBuffer() != NULL) {
+        size_t toRead = iter.currentToRead();
+        std::memcpy(&buffer[pos], iter.readBuffer(), toRead);
+        pos += toRead;
+        iter.rp()->move(toRead);
+    }
+
+    return buffer;
 }
 
 void StatsLogProcessor::OnConfigRemoved(const ConfigKey& key) {

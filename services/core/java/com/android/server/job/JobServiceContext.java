@@ -16,11 +16,13 @@
 
 package com.android.server.job;
 
+import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
+
 import android.app.ActivityManager;
-import android.app.job.JobInfo;
-import android.app.job.JobParameters;
 import android.app.job.IJobCallback;
 import android.app.job.IJobService;
+import android.app.job.JobInfo;
+import android.app.job.JobParameters;
 import android.app.job.JobWorkItem;
 import android.content.ComponentName;
 import android.content.Context;
@@ -34,7 +36,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.RemoteException;
-import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.WorkSource;
 import android.util.Slog;
@@ -202,7 +203,7 @@ public final class JobServiceContext implements ServiceConnection {
             mRunningCallback = new JobCallback();
             final boolean isDeadlineExpired =
                     job.hasDeadlineConstraint() &&
-                            (job.getLatestRunTimeElapsed() < SystemClock.elapsedRealtime());
+                            (job.getLatestRunTimeElapsed() < sElapsedRealtimeClock.millis());
             Uri[] triggeredUris = null;
             if (job.changedUris != null) {
                 triggeredUris = new Uri[job.changedUris.size()];
@@ -217,7 +218,7 @@ public final class JobServiceContext implements ServiceConnection {
             mParams = new JobParameters(mRunningCallback, job.getJobId(), ji.getExtras(),
                     ji.getTransientExtras(), ji.getClipData(), ji.getClipGrantFlags(),
                     isDeadlineExpired, triggeredUris, triggeredAuthorities, job.network);
-            mExecutionStartTimeElapsed = SystemClock.elapsedRealtime();
+            mExecutionStartTimeElapsed = sElapsedRealtimeClock.millis();
 
             // Once we'e begun executing a job, we by definition no longer care whether
             // it was inflated from disk with not-yet-coherent delay/deadline bounds.
@@ -428,7 +429,7 @@ public final class JobServiceContext implements ServiceConnection {
             sb.append("Caller no longer running");
             if (cb.mStoppedReason != null) {
                 sb.append(", last stopped ");
-                TimeUtils.formatDuration(SystemClock.elapsedRealtime() - cb.mStoppedTime, sb);
+                TimeUtils.formatDuration(sElapsedRealtimeClock.millis() - cb.mStoppedTime, sb);
                 sb.append(" because: ");
                 sb.append(cb.mStoppedReason);
             }
@@ -457,7 +458,7 @@ public final class JobServiceContext implements ServiceConnection {
                             sb.append("Ignoring timeout of no longer active job");
                             if (jc.mStoppedReason != null) {
                                 sb.append(", stopped ");
-                                TimeUtils.formatDuration(SystemClock.elapsedRealtime()
+                                TimeUtils.formatDuration(sElapsedRealtimeClock.millis()
                                         - jc.mStoppedTime, sb);
                                 sb.append(" because: ");
                                 sb.append(jc.mStoppedReason);
@@ -740,7 +741,7 @@ public final class JobServiceContext implements ServiceConnection {
     private void applyStoppedReasonLocked(String reason) {
         if (reason != null && mStoppedReason == null) {
             mStoppedReason = reason;
-            mStoppedTime = SystemClock.elapsedRealtime();
+            mStoppedTime = sElapsedRealtimeClock.millis();
             if (mRunningCallback != null) {
                 mRunningCallback.mStoppedReason = mStoppedReason;
                 mRunningCallback.mStoppedTime = mStoppedTime;
@@ -777,7 +778,7 @@ public final class JobServiceContext implements ServiceConnection {
         }
         Message m = mCallbackHandler.obtainMessage(MSG_TIMEOUT, mRunningCallback);
         mCallbackHandler.sendMessageDelayed(m, timeoutMillis);
-        mTimeoutElapsed = SystemClock.elapsedRealtime() + timeoutMillis;
+        mTimeoutElapsed = sElapsedRealtimeClock.millis() + timeoutMillis;
     }
 
 

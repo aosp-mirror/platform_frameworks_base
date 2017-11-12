@@ -23,6 +23,7 @@
 #include <limits.h>
 #include <stdlib.h>
 
+using android::util::FIELD_COUNT_REPEATED;
 using android::util::FIELD_TYPE_BOOL;
 using android::util::FIELD_TYPE_FLOAT;
 using android::util::FIELD_TYPE_INT32;
@@ -108,7 +109,7 @@ void ValueMetricProducer::onSlicedConditionMayChange(const uint64_t eventTime) {
     VLOG("Metric %lld onSlicedConditionMayChange", mMetric.metric_id());
 }
 
-StatsLogReport ValueMetricProducer::onDumpReport() {
+std::unique_ptr<std::vector<uint8_t>> ValueMetricProducer::onDumpReport() {
     VLOG("metric %lld dump report now...", mMetric.metric_id());
 
     for (const auto& pair : mPastBuckets) {
@@ -119,11 +120,13 @@ StatsLogReport ValueMetricProducer::onDumpReport() {
             ALOGE("Dimension key %s not found?!?! skip...", hashableKey.c_str());
             continue;
         }
-        long long wrapperToken = mProto->start(FIELD_TYPE_MESSAGE | FIELD_ID_DATA);
+        long long wrapperToken =
+                mProto->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_DATA);
 
         // First fill dimension (KeyValuePairs).
         for (const auto& kv : it->second) {
-            long long dimensionToken = mProto->start(FIELD_TYPE_MESSAGE | FIELD_ID_DIMENSION);
+            long long dimensionToken =
+                    mProto->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_DIMENSION);
             mProto->write(FIELD_TYPE_INT32 | FIELD_ID_KEY, kv.key());
             if (kv.has_value_str()) {
                 mProto->write(FIELD_TYPE_INT32 | FIELD_ID_VALUE_STR, kv.value_str());
@@ -139,7 +142,8 @@ StatsLogReport ValueMetricProducer::onDumpReport() {
 
         // Then fill bucket_info (ValueBucketInfo).
         for (const auto& bucket : pair.second) {
-            long long bucketInfoToken = mProto->start(FIELD_TYPE_MESSAGE | FIELD_ID_BUCKET_INFO);
+            long long bucketInfoToken =
+                    mProto->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_BUCKET_INFO);
             mProto->write(FIELD_TYPE_INT64 | FIELD_ID_START_BUCKET_NANOS,
                           (long long)bucket.mBucketStartNs);
             mProto->write(FIELD_TYPE_INT64 | FIELD_ID_END_BUCKET_NANOS,
@@ -156,20 +160,19 @@ StatsLogReport ValueMetricProducer::onDumpReport() {
                   (long long)mCurrentBucketStartTimeNs);
 
     VLOG("metric %lld dump report now...", mMetric.metric_id());
-    std::unique_ptr<uint8_t[]> buffer = serializeProto();
+    std::unique_ptr<std::vector<uint8_t>> buffer = serializeProto();
 
     startNewProtoOutputStream(time(nullptr) * NS_PER_SEC);
     mPastBuckets.clear();
     mByteSize = 0;
 
-    // TODO: Once we migrate all MetricProducers to use ProtoOutputStream, we should return this:
-    // return std::move(buffer);
-    return StatsLogReport();
+    return buffer;
 
     // TODO: Clear mDimensionKeyMap once the report is dumped.
 }
 
 void ValueMetricProducer::onConditionChanged(const bool condition, const uint64_t eventTime) {
+    AutoMutex _l(mLock);
     mCondition = condition;
 
     if (mPullTagId != -1) {
@@ -185,7 +188,6 @@ void ValueMetricProducer::onConditionChanged(const bool condition, const uint64_
             if (allData.size() == 0) {
                 return;
             }
-            AutoMutex _l(mLock);
             for (const auto& data : allData) {
                 onMatchedLogEvent(0, *data, false);
             }
@@ -196,8 +198,8 @@ void ValueMetricProducer::onConditionChanged(const bool condition, const uint64_
 }
 
 void ValueMetricProducer::onDataPulled(const std::vector<std::shared_ptr<LogEvent>>& allData) {
+    AutoMutex _l(mLock);
     if (mCondition == ConditionState::kTrue || !mMetric.has_condition()) {
-        AutoMutex _l(mLock);
         if (allData.size() == 0) {
             return;
         }

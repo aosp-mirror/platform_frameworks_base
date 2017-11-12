@@ -62,10 +62,63 @@ TEST(IhUtilTest, ParseRecord) {
     EXPECT_EQ(expected, result);
 }
 
+TEST(IhUtilTest, ParseRecordByColumns) {
+    record_t result, expected;
+    std::vector<int> indices = { 3, 10 };
+
+    result = parseRecordByColumns("12345", indices);
+    expected = {};
+    EXPECT_EQ(expected, result);
+
+    result = parseRecordByColumns("abc \t2345  6789 ", indices);
+    expected = { "abc", "2345", "6789" };
+    EXPECT_EQ(expected, result);
+
+    result = parseRecordByColumns("abc \t23456789 bob", indices);
+    expected = { "abc", "23456789", "bob" };
+    EXPECT_EQ(expected, result);
+}
+
+TEST(IhUtilTest, stripPrefix) {
+    string data1 = "Swap: abc ";
+    EXPECT_TRUE(stripPrefix(&data1, "Swap:"));
+    EXPECT_THAT(data1, StrEq("abc"));
+
+    string data2 = "Swap: abc ";
+    EXPECT_FALSE(stripPrefix(&data2, "Total:"));
+    EXPECT_THAT(data2, StrEq("Swap: abc "));
+
+    string data3 = "Swap: abc ";
+    EXPECT_TRUE(stripPrefix(&data3, "Swa"));
+    EXPECT_THAT(data3, StrEq("p: abc"));
+
+    string data4 = "Swap: abc ";
+    EXPECT_FALSE(stripPrefix(&data4, "Swa", true));
+    EXPECT_THAT(data4, StrEq("Swap: abc "));
+}
+
+TEST(IhUtilTest, stripSuffix) {
+    string data1 = " 243%abc";
+    EXPECT_TRUE(stripSuffix(&data1, "abc"));
+    EXPECT_THAT(data1, StrEq("243%"));
+
+    string data2 = " 243%abc";
+    EXPECT_FALSE(stripSuffix(&data2, "Not right"));
+    EXPECT_THAT(data2, StrEq(" 243%abc"));
+
+    string data3 = " 243%abc";
+    EXPECT_TRUE(stripSuffix(&data3, "bc"));
+    EXPECT_THAT(data3, StrEq("243%a"));
+
+    string data4 = " 243%abc";
+    EXPECT_FALSE(stripSuffix(&data4, "bc", true));
+    EXPECT_THAT(data4, StrEq(" 243%abc"));
+}
+
 TEST(IhUtilTest, Reader) {
     TemporaryFile tf;
     ASSERT_NE(tf.fd, -1);
-    ASSERT_TRUE(WriteStringToFile("test string\nsecond\nooo\n", tf.path, false));
+    ASSERT_TRUE(WriteStringToFile("test string\nsecond\nooo\n", tf.path));
 
     Reader r(tf.fd);
     string line;
@@ -79,40 +132,22 @@ TEST(IhUtilTest, Reader) {
     ASSERT_TRUE(r.ok(&line));
 }
 
-TEST(IhUtilTest, ReaderSmallBufSize) {
-    TemporaryFile tf;
-    ASSERT_NE(tf.fd, -1);
-    ASSERT_TRUE(WriteStringToFile("test string\nsecond\nooiecccojreo", tf.path, false));
-
-    Reader r(tf.fd, 5);
-    string line;
-    ASSERT_TRUE(r.readLine(&line));
-    EXPECT_THAT(line, StrEq("test string"));
-    ASSERT_TRUE(r.readLine(&line));
-    EXPECT_THAT(line, StrEq("second"));
-    ASSERT_TRUE(r.readLine(&line));
-    EXPECT_THAT(line, StrEq("ooiecccojreo"));
-    ASSERT_FALSE(r.readLine(&line));
-    ASSERT_TRUE(r.ok(&line));
-}
-
 TEST(IhUtilTest, ReaderEmpty) {
     TemporaryFile tf;
     ASSERT_NE(tf.fd, -1);
-    ASSERT_TRUE(WriteStringToFile("", tf.path, false));
+    ASSERT_TRUE(WriteStringToFile("", tf.path));
 
     Reader r(tf.fd);
     string line;
-    ASSERT_TRUE(r.readLine(&line));
-    EXPECT_THAT(line, StrEq(""));
     ASSERT_FALSE(r.readLine(&line));
+    EXPECT_THAT(line, StrEq(""));
     ASSERT_TRUE(r.ok(&line));
 }
 
 TEST(IhUtilTest, ReaderMultipleEmptyLines) {
     TemporaryFile tf;
     ASSERT_NE(tf.fd, -1);
-    ASSERT_TRUE(WriteStringToFile("\n\n", tf.path, false));
+    ASSERT_TRUE(WriteStringToFile("\n\n", tf.path));
 
     Reader r(tf.fd);
     string line;
@@ -130,15 +165,7 @@ TEST(IhUtilTest, ReaderFailedNegativeFd) {
     string line;
     EXPECT_FALSE(r.readLine(&line));
     EXPECT_FALSE(r.ok(&line));
-    EXPECT_THAT(line, StrEq("Negative fd"));
-}
-
-TEST(IhUtilTest, ReaderFailedZeroBufferSize) {
-    Reader r(23, 0);
-    string line;
-    EXPECT_FALSE(r.readLine(&line));
-    EXPECT_FALSE(r.ok(&line));
-    EXPECT_THAT(line, StrEq("Zero buffer capacity"));
+    EXPECT_THAT(line, StrEq("Invalid fd -123"));
 }
 
 TEST(IhUtilTest, ReaderFailedBadFd) {
@@ -146,5 +173,5 @@ TEST(IhUtilTest, ReaderFailedBadFd) {
     string line;
     EXPECT_FALSE(r.readLine(&line));
     EXPECT_FALSE(r.ok(&line));
-    EXPECT_THAT(line, StrEq("Fail to read from fd"));
+    EXPECT_THAT(line, StrEq("Invalid fd 1231432"));
 }
