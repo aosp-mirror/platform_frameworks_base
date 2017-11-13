@@ -1207,6 +1207,13 @@ static jboolean android_location_GnssLocationProvider_init(JNIEnv* env, jobject 
         ALOGE("Unable to initialize GNSS NI interface\n");
     }
 
+    sp<IAGnssRilCallback> aGnssRilCbIface = new AGnssRilCallback();
+    if (agnssRilIface != nullptr) {
+        agnssRilIface->setCallback(aGnssRilCbIface);
+    } else {
+        ALOGI("Unable to Initialize AGnss Ril interface\n");
+    }
+
     return JNI_TRUE;
 }
 
