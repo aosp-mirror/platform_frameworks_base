@@ -136,7 +136,10 @@ import java.io.PrintWriter;
  *
  * {@sample development/samples/ApiDemos/src/com/example/android/apis/app/FragmentDialogOrActivity.java
  *      embed}
+ *
+ * @deprecated Use {@link android.support.v4.app.DialogFragment}
  */
+@Deprecated
 public class DialogFragment extends Fragment
         implements DialogInterface.OnCancelListener, DialogInterface.OnDismissListener {
 

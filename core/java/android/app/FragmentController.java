@@ -37,7 +37,10 @@ import java.util.List;
  * <p>
  * It is the responsibility of the host to take care of the Fragment's lifecycle.
  * The methods provided by {@link FragmentController} are for that purpose.
+ *
+ * @deprecated Use {@link android.support.v4.app.FragmentController}
  */
+@Deprecated
 public class FragmentController {
     private final FragmentHostCallback<?> mHost;
 
