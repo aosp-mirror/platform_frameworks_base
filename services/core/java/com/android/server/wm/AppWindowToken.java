@@ -72,8 +72,6 @@ import java.io.PrintWriter;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 
-import static android.os.Build.VERSION_CODES.O;
-
 class AppTokenList extends ArrayList<AppWindowToken> {
 }
 
@@ -1293,15 +1291,6 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
      */
     @Override
     int getOrientation(int candidate) {
-        // We do not allow non-fullscreen apps to influence orientation beyond O. While we do
-        // throw an exception in {@link Activity#onCreate} and
-        // {@link Activity#setRequestedOrientation}, we also ignore the orientation here so that
-        // other calculations aren't affected.
-        if (!fillsParent() && mTargetSdk > O) {
-            // Can't specify orientation if app doesn't fill parent.
-            return SCREEN_ORIENTATION_UNSET;
-        }
-
         if (candidate == SCREEN_ORIENTATION_BEHIND) {
             // Allow app to specify orientation regardless of its visibility state if the current
             // candidate want us to use orientation behind. I.e. the visible app on-top of this one
