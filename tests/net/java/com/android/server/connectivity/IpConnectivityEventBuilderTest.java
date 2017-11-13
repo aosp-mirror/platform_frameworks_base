@@ -337,7 +337,6 @@ public class IpConnectivityEventBuilderTest {
     public void testNetworkEventSerialization() {
         ConnectivityMetricsEvent ev = describeIpEvent(
                 aType(NetworkEvent.class),
-                anInt(100),
                 anInt(5),
                 aLong(20410));
 
@@ -352,9 +351,6 @@ public class IpConnectivityEventBuilderTest {
                 "  network_event <",
                 "    event_type: 5",
                 "    latency_ms: 20410",
-                "    network_id <",
-                "      network_id: 100",
-                "    >",
                 "  >",
                 ">",
                 "version: 2\n");
