@@ -22,6 +22,7 @@ import android.bluetooth.BluetoothActivityEnergyInfo;
 import android.net.wifi.WifiActivityEnergyInfo;
 import android.os.ParcelFileDescriptor;
 import android.os.WorkSource;
+import android.os.connectivity.CellularBatteryStats;
 import android.os.health.HealthStatsParceler;
 import android.telephony.DataConnectionRealTimeInfo;
 import android.telephony.ModemActivityInfo;
@@ -133,6 +134,9 @@ interface IBatteryStats {
     void noteBleScanStopped(in WorkSource ws, boolean isUnoptimized);
     void noteResetBleScan();
     void noteBleScanResults(in WorkSource ws, int numNewResults);
+
+    /** {@hide} */
+    CellularBatteryStats getCellularBatteryStats();
 
     HealthStatsParceler takeUidSnapshot(int uid);
     HealthStatsParceler[] takeUidSnapshots(in int[] uid);
