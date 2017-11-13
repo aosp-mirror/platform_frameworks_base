@@ -124,16 +124,16 @@
     <string name="status_bar_use_physical_keyboard">Physical keyboard</string>
 
     <!-- Prompt for the USB device permission dialog [CHAR LIMIT=80] -->
-    <string name="usb_device_permission_prompt">Allow the app <xliff:g id="application">%1$s</xliff:g> to access the USB device?</string>
+    <string name="usb_device_permission_prompt">Allow <xliff:g id="application">%1$s</xliff:g> to access <xliff:g id="usb_device">%2$s</xliff:g>?</string>
 
     <!-- Prompt for the USB accessory permission dialog [CHAR LIMIT=80] -->
-    <string name="usb_accessory_permission_prompt">Allow the app <xliff:g id="application">%1$s</xliff:g> to access the USB accessory?</string>
+    <string name="usb_accessory_permission_prompt">Allow <xliff:g id="application">%1$s</xliff:g> to access <xliff:g id="usb_accessory">%2$s</xliff:g>?</string>
 
     <!-- Prompt for the USB device confirm dialog [CHAR LIMIT=80] -->
-    <string name="usb_device_confirm_prompt">Open <xliff:g id="activity">%1$s</xliff:g> when this USB device is connected?</string>
+    <string name="usb_device_confirm_prompt">Open <xliff:g id="application">%1$s</xliff:g> to handle <xliff:g id="usb_device">%2$s</xliff:g>?</string>
 
     <!-- Prompt for the USB accessory confirm dialog [CHAR LIMIT=80] -->
-    <string name="usb_accessory_confirm_prompt">Open <xliff:g id="activity">%1$s</xliff:g> when this USB accessory is connected?</string>
+    <string name="usb_accessory_confirm_prompt">Open <xliff:g id="application">%1$s</xliff:g> to handle <xliff:g id="usb_accessory">%2$s</xliff:g>?</string>
 
     <!-- Prompt for the USB accessory URI dialog [CHAR LIMIT=80] -->
     <string name="usb_accessory_uri_prompt">No installed apps work with this USB accessory. Learn more about this accessory at <xliff:g id="url">%1$s</xliff:g></string>
@@ -145,10 +145,10 @@
     <string name="label_view">View</string>
 
     <!-- Checkbox label for USB device dialogs.  [CHAR LIMIT=50] -->
-    <string name="always_use_device">Use by default for this USB device</string>
+    <string name="always_use_device">Always open <xliff:g id="application">%1$s</xliff:g> when <xliff:g id="usb_device">%2$s</xliff:g> is connected</string>
 
-    <!-- Checkbox label for USB accessory dialogs.  [CHAR LIMIT=50] -->
-    <string name="always_use_accessory">Use by default for this USB accessory</string>
+    <!-- Checkbox label for USB accessory dialogs.  [CHAR LIMIT=50]-->
+    <string name="always_use_accessory">Always open <xliff:g id="application">%1$s</xliff:g> when <xliff:g id="usb_accessory">%2$s</xliff:g> is connected</string>
 
     <!-- Title of confirmation dialog for USB debugging -->
     <string name="usb_debugging_title">Allow USB debugging?</string>
