@@ -35,6 +35,7 @@ import android.os.FileUtils;
 import android.os.IIncidentManager;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Parcel;
 import android.os.PowerManager;
 import android.os.Process;
 import android.os.ServiceManager;
@@ -359,6 +360,9 @@ public final class SystemServer {
             // Within the system server, any incoming Bundles should be defused
             // to avoid throwing BadParcelableException.
             BaseBundle.setShouldDefuse(true);
+
+            // Within the system server, when parceling exceptions, include the stack trace
+            Parcel.setStackTraceParceling(true);
 
             // Ensure binder calls into the system always run at foreground priority.
             BinderInternal.disableBackgroundScheduling(true);
