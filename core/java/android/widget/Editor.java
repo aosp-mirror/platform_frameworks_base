@@ -488,7 +488,8 @@ public class Editor {
         chooseSize(mErrorPopup, mError, tv);
         tv.setText(mError);
 
-        mErrorPopup.showAsDropDown(mTextView, getErrorX(), getErrorY());
+        mErrorPopup.showAsDropDown(mTextView, getErrorX(), getErrorY(),
+                Gravity.TOP | Gravity.LEFT);
         mErrorPopup.fixDirection(mErrorPopup.isAboveAnchor());
     }
 
