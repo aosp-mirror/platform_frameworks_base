@@ -16,12 +16,8 @@
 
 package com.android.server.wm;
 
-import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.graphics.Color.BLUE;
 import static android.graphics.Color.RED;
-import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY;
-import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_PRESENTATION;
-import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Gravity.BOTTOM;
 import static android.view.Gravity.LEFT;
 import static android.view.Gravity.RIGHT;
@@ -37,23 +33,16 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 import static org.junit.Assert.assertEquals;
 
 import android.app.Activity;
-import android.app.ActivityOptions;
 import android.app.Instrumentation;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
-import android.hardware.display.DisplayManager;
-import android.hardware.display.VirtualDisplay;
-import android.media.ImageReader;
 import android.os.Handler;
 import android.platform.test.annotations.Presubmit;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
+import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
-import android.util.Pair;
-import android.view.Display;
-import android.view.DisplayInfo;
 import android.view.View;
 import android.view.WindowInsets;
 import android.view.WindowManager;
@@ -62,6 +51,7 @@ import android.widget.TextView;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -75,6 +65,7 @@ import java.util.ArrayList;
  */
 // TODO: Add test for FLAG_FULLSCREEN which hides the status bar and also other flags.
 // TODO: Test non-Activity windows.
+// TODO: Test secondary display.
 @SmallTest
 // TODO(b/68957554)
 //@Presubmit
@@ -87,26 +78,22 @@ public class ScreenDecorWindowTests {
     private WindowManager mWm;
     private ArrayList<View> mWindows = new ArrayList<>();
 
+    @Rule
+    public ActivityTestRule<TestActivity> mTestActivityRule = new ActivityTestRule<>(
+            TestActivity.class, false /* initialTouchMode */, false /* launchActivity */);
     private Activity mTestActivity;
-    private VirtualDisplay mDisplay;
-    private ImageReader mImageReader;
 
     private int mDecorThickness;
     private int mHalfDecorThickness;
 
     @Before
     public void setUp() {
-        final Pair<VirtualDisplay, ImageReader> result = createDisplay();
-        mDisplay = result.first;
-        mImageReader = result.second;
-        final Display display = mDisplay.getDisplay();
-        final Context dContext = mContext.createDisplayContext(display);
-        mWm = dContext.getSystemService(WindowManager.class);
-        mTestActivity = startActivityOnDisplay(TestActivity.class, display.getDisplayId());
+        mWm = mContext.getSystemService(WindowManager.class);
         final Point size = new Point();
-        mDisplay.getDisplay().getRealSize(size);
+        mWm.getDefaultDisplay().getSize(size);
         mDecorThickness = Math.min(size.x, size.y) / 3;
         mHalfDecorThickness = mDecorThickness / 2;
+        mTestActivity = launchActivity(mTestActivityRule);
     }
 
     @After
@@ -114,9 +101,7 @@ public class ScreenDecorWindowTests {
         while (!mWindows.isEmpty()) {
             removeWindow(mWindows.get(0));
         }
-        finishActivity(mTestActivity);
-        mDisplay.release();
-        mImageReader.close();
+        finishActivity(mTestActivityRule);
     }
 
     @Test
@@ -274,46 +259,21 @@ public class ScreenDecorWindowTests {
         Assert.assertTrue("Excepted " + first + " >= " + second, first >= second);
     }
 
-    private void finishActivity(Activity a) {
-        if (a == null) {
-            return;
-        }
-        a.finish();
+    private Activity launchActivity(ActivityTestRule activityRule) {
+        final Activity activity = activityRule.launchActivity(null);
         waitForIdle();
+        return activity;
+    }
+
+    private void finishActivity(ActivityTestRule activityRule) {
+        final Activity activity = activityRule.getActivity();
+        if (activity != null) {
+            activity.finish();
+        }
     }
 
     private void waitForIdle() {
         mInstrumentation.waitForIdleSync();
-    }
-
-    private Activity startActivityOnDisplay(Class<?> cls, int displayId) {
-        final Intent intent = new Intent(mContext, cls);
-        intent.addFlags(FLAG_ACTIVITY_NEW_TASK);
-        final ActivityOptions options = ActivityOptions.makeBasic();
-        options.setLaunchDisplayId(displayId);
-        final Activity activity = mInstrumentation.startActivitySync(intent, options.toBundle());
-        waitForIdle();
-
-        assertEquals(displayId, activity.getDisplay().getDisplayId());
-        return activity;
-    }
-
-    private Pair<VirtualDisplay, ImageReader> createDisplay() {
-        final DisplayManager dm = mContext.getSystemService(DisplayManager.class);
-        final DisplayInfo displayInfo = new DisplayInfo();
-        final Display defaultDisplay = dm.getDisplay(DEFAULT_DISPLAY);
-        defaultDisplay.getDisplayInfo(displayInfo);
-        final String name = "ScreenDecorWindowTests";
-        int flags = VIRTUAL_DISPLAY_FLAG_PRESENTATION | VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY;
-
-        final ImageReader imageReader = ImageReader.newInstance(
-                displayInfo.logicalWidth, displayInfo.logicalHeight, PixelFormat.RGBA_8888, 2);
-
-        final VirtualDisplay display = dm.createVirtualDisplay(name, displayInfo.logicalWidth,
-                displayInfo.logicalHeight, displayInfo.logicalDensityDpi, imageReader.getSurface(),
-                flags);
-
-        return Pair.create(display, imageReader);
     }
 
     public static class TestActivity extends Activity {

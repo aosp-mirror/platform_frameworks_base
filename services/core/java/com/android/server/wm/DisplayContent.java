@@ -104,7 +104,6 @@ import static com.android.server.wm.WindowStateAnimator.READY_TO_SHOW;
 import static com.android.server.wm.WindowSurfacePlacer.SET_WALLPAPER_MAY_CHANGE;
 import static com.android.server.wm.proto.DisplayProto.ABOVE_APP_WINDOWS;
 import static com.android.server.wm.proto.DisplayProto.BELOW_APP_WINDOWS;
-import static com.android.server.wm.proto.DisplayProto.DISPLAY_FRAMES;
 import static com.android.server.wm.proto.DisplayProto.DISPLAY_INFO;
 import static com.android.server.wm.proto.DisplayProto.DOCKED_STACK_DIVIDER_CONTROLLER;
 import static com.android.server.wm.proto.DisplayProto.DPI;
@@ -148,7 +147,6 @@ import android.view.WindowManagerPolicy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ToBooleanFunction;
 import com.android.internal.view.IInputMethodClient;
-import android.view.DisplayFrames;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -224,8 +222,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     private final DisplayInfo mDisplayInfo = new DisplayInfo();
     private final Display mDisplay;
     private final DisplayMetrics mDisplayMetrics = new DisplayMetrics();
-    DisplayFrames mDisplayFrames;
-
     /**
      * For default display it contains real metrics, empty for others.
      * @see WindowManagerService#createWatermarkInTransaction()
@@ -289,6 +285,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     private boolean mLastWallpaperVisible = false;
 
     private Rect mBaseDisplayRect = new Rect();
+    private Rect mContentRect = new Rect();
 
     // Accessed directly by all users.
     private boolean mLayoutNeeded;
@@ -548,7 +545,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 w.mLayoutNeeded = false;
                 w.prelayout();
                 final boolean firstLayout = !w.isLaidOut();
-                mService.mPolicy.layoutWindowLw(w, null, mDisplayFrames);
+                mService.mPolicy.layoutWindowLw(w, null);
                 w.mLayoutSeq = mService.mLayoutSeq;
 
                 // If this is the first layout, we need to initialize the last inset values as
@@ -589,7 +586,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 }
                 w.mLayoutNeeded = false;
                 w.prelayout();
-                mService.mPolicy.layoutWindowLw(w, w.getParentWindow(), mDisplayFrames);
+                mService.mPolicy.layoutWindowLw(w, w.getParentWindow());
                 w.mLayoutSeq = mService.mLayoutSeq;
                 if (DEBUG_LAYOUT) Slog.v(TAG, " LAYOUT: mFrame=" + w.mFrame
                         + " mContainingFrame=" + w.mContainingFrame
@@ -761,7 +758,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         display.getMetrics(mDisplayMetrics);
         isDefaultDisplay = mDisplayId == DEFAULT_DISPLAY;
         mService = service;
-        mDisplayFrames = new DisplayFrames(mDisplayId, mDisplayInfo);
         initializeDisplayBaseInfo();
         mDividerControllerLocked = new DockedStackDividerController(service, this);
         mPinnedStackControllerLocked = new PinnedStackController(service, this);
@@ -1131,13 +1127,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
 
         return true;
-    }
-
-    void configureDisplayPolicy() {
-        mService.mPolicy.setInitialDisplaySize(getDisplay(),
-                mBaseDisplayWidth, mBaseDisplayHeight, mBaseDisplayDensity);
-
-        mDisplayFrames.onDisplayInfoUpdated(mDisplayInfo);
     }
 
     /**
@@ -1755,7 +1744,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     void getContentRect(Rect out) {
-        out.set(mDisplayFrames.mContent);
+        out.set(mContentRect);
     }
 
     TaskStack createStack(int stackId, boolean onTop, StackWindowController controller) {
@@ -1858,8 +1847,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             mTmpRect2.setEmpty();
             for (int stackNdx = mTaskStackContainers.getChildCount() - 1; stackNdx >= 0; --stackNdx) {
                 final TaskStack stack = mTaskStackContainers.getChildAt(stackNdx);
-                stack.setTouchExcludeRegion(focusedTask, delta, mTouchExcludeRegion,
-                        mDisplayFrames.mContent, mTmpRect2);
+                stack.setTouchExcludeRegion(
+                        focusedTask, delta, mTouchExcludeRegion, mContentRect, mTmpRect2);
             }
             // If we removed the focused task above, add it back and only leave its
             // outside touch area in the exclusion. TapDectector is not interested in
@@ -2036,7 +2025,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         final boolean imeOnTop = (imeDockSide == DOCKED_TOP);
         final boolean imeOnBottom = (imeDockSide == DOCKED_BOTTOM);
         final boolean dockMinimized = mDividerControllerLocked.isMinimizedDock();
-        final int imeHeight = mDisplayFrames.getInputMethodWindowVisibleHeight();
+        final int imeHeight = mService.mPolicy.getInputMethodWindowVisibleHeightLw();
         final boolean imeHeightChanged = imeVisible &&
                 imeHeight != mDividerControllerLocked.getImeHeightAdjustedFor();
 
@@ -2178,7 +2167,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         if (screenRotationAnimation != null) {
             screenRotationAnimation.writeToProto(proto, SCREEN_ROTATION_ANIMATION);
         }
-        mDisplayFrames.writeToProto(proto, DISPLAY_FRAMES);
         proto.end(token);
     }
 
@@ -2258,9 +2246,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             pw.println(subPrefix
                     + "mInputMethodAnimLayerAdjustment=" + mInputMethodAnimLayerAdjustment);
         }
-
-        pw.println();
-        mDisplayFrames.dump(prefix, pw);
     }
 
     @Override
@@ -2886,21 +2871,20 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         final int dw = mDisplayInfo.logicalWidth;
         final int dh = mDisplayInfo.logicalHeight;
+
         if (DEBUG_LAYOUT) {
             Slog.v(TAG, "-------------------------------------");
             Slog.v(TAG, "performLayout: needed=" + isLayoutNeeded() + " dw=" + dw + " dh=" + dh);
         }
 
-        mDisplayFrames.onDisplayInfoUpdated(mDisplayInfo);
-        // TODO: Not sure if we really need to set the rotation here since we are updating from the
-        // display info above...
-        mDisplayFrames.mRotation = mRotation;
-        mService.mPolicy.beginLayoutLw(mDisplayFrames, getConfiguration().uiMode);
+        mService.mPolicy.beginLayoutLw(mDisplayId, dw, dh, mRotation, getConfiguration().uiMode);
         if (isDefaultDisplay) {
             // Not needed on non-default displays.
             mService.mSystemDecorLayer = mService.mPolicy.getSystemDecorLayerLw();
             mService.mScreenRect.set(0, 0, dw, dh);
         }
+
+        mService.mPolicy.getContentRectLw(mContentRect);
 
         int seq = mService.mLayoutSeq + 1;
         if (seq < 0) seq = 0;
@@ -2931,6 +2915,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             mService.mInputMonitor.updateInputWindowsLw(false /*force*/);
         }
 
+        mService.mPolicy.finishLayoutLw();
         mService.mH.sendEmptyMessage(UPDATE_DOCKED_STACK_DIVIDER);
     }
 
