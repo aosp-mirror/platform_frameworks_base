@@ -1345,8 +1345,9 @@ public class AudioService extends IAudioService.Stub
         } else {
             final int maybeActiveStreamType = getActiveStreamType(suggestedStreamType);
             final boolean activeForReal;
-            if (maybeActiveStreamType == AudioSystem.STREAM_MUSIC) {
-                activeForReal = isAfMusicActiveRecently(0);
+            if (maybeActiveStreamType == AudioSystem.STREAM_RING
+                    || maybeActiveStreamType == AudioSystem.STREAM_NOTIFICATION) {
+                activeForReal = wasStreamActiveRecently(maybeActiveStreamType, 0);
             } else {
                 activeForReal = AudioSystem.isStreamActive(maybeActiveStreamType, 0);
             }
@@ -3883,13 +3884,13 @@ public class AudioService extends IAudioService.Stub
 
     /**
      * For code clarity for getActiveStreamType(int)
-     * @param delay_ms max time since last STREAM_MUSIC activity to consider
-     * @return true if STREAM_MUSIC is active in streams handled by AudioFlinger now or
+     * @param delay_ms max time since last stream activity to consider
+     * @return true if stream is active in streams handled by AudioFlinger now or
      *     in the last "delay_ms" ms.
      */
-    private boolean isAfMusicActiveRecently(int delay_ms) {
-        return AudioSystem.isStreamActive(AudioSystem.STREAM_MUSIC, delay_ms)
-                || AudioSystem.isStreamActiveRemotely(AudioSystem.STREAM_MUSIC, delay_ms);
+    private boolean wasStreamActiveRecently(int stream, int delay_ms) {
+        return AudioSystem.isStreamActive(stream, delay_ms)
+                || AudioSystem.isStreamActiveRemotely(stream, delay_ms);
     }
 
     private int getActiveStreamType(int suggestedStreamType) {
@@ -3910,21 +3911,30 @@ public class AudioService extends IAudioService.Stub
                     return AudioSystem.STREAM_VOICE_CALL;
                 }
             } else if (suggestedStreamType == AudioManager.USE_DEFAULT_STREAM_TYPE) {
-                if (isAfMusicActiveRecently(sStreamOverrideDelayMs)) {
+                if (wasStreamActiveRecently(AudioSystem.STREAM_RING, sStreamOverrideDelayMs)) {
                     if (DEBUG_VOL)
-                        Log.v(TAG, "getActiveStreamType: Forcing STREAM_MUSIC stream active");
+                        Log.v(TAG, "getActiveStreamType: Forcing STREAM_RING stream active");
+                    return AudioSystem.STREAM_RING;
+                } else if (wasStreamActiveRecently(
+                        AudioSystem.STREAM_NOTIFICATION, sStreamOverrideDelayMs)) {
+                    if (DEBUG_VOL)
+                        Log.v(TAG, "getActiveStreamType: Forcing STREAM_NOTIFICATION stream active");
+                    return AudioSystem.STREAM_NOTIFICATION;
+                } else {
+                    if (DEBUG_VOL)
+                        Log.v(TAG, "getActiveStreamType: Forcing STREAM_MUSIC b/c default");
                     return AudioSystem.STREAM_MUSIC;
-                    } else {
-                        if (DEBUG_VOL)
-                            Log.v(TAG, "getActiveStreamType: Forcing STREAM_RING b/c default");
-                        return AudioSystem.STREAM_RING;
                 }
-            } else if (isAfMusicActiveRecently(0)) {
+            } else if (
+                    wasStreamActiveRecently(AudioSystem.STREAM_NOTIFICATION, sStreamOverrideDelayMs)) {
                 if (DEBUG_VOL)
-                    Log.v(TAG, "getActiveStreamType: Forcing STREAM_MUSIC stream active");
-                return AudioSystem.STREAM_MUSIC;
+                    Log.v(TAG, "getActiveStreamType: Forcing STREAM_NOTIFICATION stream active");
+                return AudioSystem.STREAM_NOTIFICATION;
+            } else if (wasStreamActiveRecently(AudioSystem.STREAM_RING, sStreamOverrideDelayMs)) {
+                if (DEBUG_VOL)
+                    Log.v(TAG, "getActiveStreamType: Forcing STREAM_RING stream active");
+                return AudioSystem.STREAM_RING;
             }
-            break;
         default:
             if (isInCommunication()) {
                 if (AudioSystem.getForceUse(AudioSystem.FOR_COMMUNICATION)
@@ -3935,20 +3945,26 @@ public class AudioService extends IAudioService.Stub
                     if (DEBUG_VOL)  Log.v(TAG, "getActiveStreamType: Forcing STREAM_VOICE_CALL");
                     return AudioSystem.STREAM_VOICE_CALL;
                 }
-            } else if (AudioSystem.isStreamActive(AudioSystem.STREAM_NOTIFICATION,
-                    sStreamOverrideDelayMs) ||
-                    AudioSystem.isStreamActive(AudioSystem.STREAM_RING,
-                            sStreamOverrideDelayMs)) {
+            } else if (AudioSystem.isStreamActive(
+                    AudioSystem.STREAM_NOTIFICATION, sStreamOverrideDelayMs)) {
                 if (DEBUG_VOL) Log.v(TAG, "getActiveStreamType: Forcing STREAM_NOTIFICATION");
                 return AudioSystem.STREAM_NOTIFICATION;
+            } else if (AudioSystem.isStreamActive(
+                    AudioSystem.STREAM_RING, sStreamOverrideDelayMs)) {
+                if (DEBUG_VOL) Log.v(TAG, "getActiveStreamType: Forcing STREAM_RING");
+                return AudioSystem.STREAM_RING;
             } else if (suggestedStreamType == AudioManager.USE_DEFAULT_STREAM_TYPE) {
-                if (isAfMusicActiveRecently(sStreamOverrideDelayMs)) {
-                    if (DEBUG_VOL) Log.v(TAG, "getActiveStreamType: forcing STREAM_MUSIC");
-                    return AudioSystem.STREAM_MUSIC;
-                } else {
-                    if (DEBUG_VOL) Log.v(TAG,
-                            "getActiveStreamType: using STREAM_NOTIFICATION as default");
+                if (AudioSystem.isStreamActive(
+                        AudioSystem.STREAM_NOTIFICATION, sStreamOverrideDelayMs)) {
+                    if (DEBUG_VOL) Log.v(TAG, "getActiveStreamType: Forcing STREAM_NOTIFICATION");
                     return AudioSystem.STREAM_NOTIFICATION;
+                } else if (AudioSystem.isStreamActive(
+                        AudioSystem.STREAM_RING, sStreamOverrideDelayMs)) {
+                    if (DEBUG_VOL) Log.v(TAG, "getActiveStreamType: Forcing STREAM_RING");
+                    return AudioSystem.STREAM_RING;
+                } else {
+                    if (DEBUG_VOL) Log.v(TAG, "getActiveStreamType: using STREAM_MUSIC as default");
+                    return AudioSystem.STREAM_MUSIC;
                 }
             }
             break;
@@ -6349,10 +6365,10 @@ public class AudioService extends IAudioService.Stub
     //   stream override timeout when adjusting volume
     //---------------------------------------------------------------------------------
 
-    // AudioService.getActiveStreamType() will return:
     // - STREAM_NOTIFICATION on tablets during this period after a notification stopped
-    // - STREAM_MUSIC on phones during this period after music or talkback/voice search prompt
-    // stopped
+    // - STREAM_RING on phones during this period after a notification stopped
+    // - STREAM_MUSIC otherwise
+
     private static final int DEFAULT_STREAM_TYPE_OVERRIDE_DELAY_MS = 0;
     private static final int TOUCH_EXPLORE_STREAM_TYPE_OVERRIDE_DELAY_MS = 1000;
 
