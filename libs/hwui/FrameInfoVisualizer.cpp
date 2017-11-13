@@ -245,22 +245,19 @@ void FrameInfoVisualizer::dumpData(int fd) {
     // last call to dumpData(). In other words if there's a dumpData(), draw frame,
     // dumpData(), the last dumpData() should only log 1 frame.
 
-    FILE* file = fdopen(fd, "a");
-    fprintf(file, "\n\tDraw\tPrepare\tProcess\tExecute\n");
+    dprintf(fd, "\n\tDraw\tPrepare\tProcess\tExecute\n");
 
     for (size_t i = 0; i < mFrameSource.size(); i++) {
         if (mFrameSource[i][FrameInfoIndex::IntendedVsync] <= mLastFrameLogged) {
             continue;
         }
         mLastFrameLogged = mFrameSource[i][FrameInfoIndex::IntendedVsync];
-        fprintf(file, "\t%3.2f\t%3.2f\t%3.2f\t%3.2f\n",
+        dprintf(fd, "\t%3.2f\t%3.2f\t%3.2f\t%3.2f\n",
                 durationMS(i, FrameInfoIndex::IntendedVsync, FrameInfoIndex::SyncStart),
                 durationMS(i, FrameInfoIndex::SyncStart, FrameInfoIndex::IssueDrawCommandsStart),
                 durationMS(i, FrameInfoIndex::IssueDrawCommandsStart, FrameInfoIndex::SwapBuffers),
                 durationMS(i, FrameInfoIndex::SwapBuffers, FrameInfoIndex::FrameCompleted));
     }
-
-    fflush(file);
 }
 
 } /* namespace uirenderer */
