@@ -256,10 +256,8 @@ class OptimizeCommand {
 
         for (auto& entry : config_sorted_files) {
           FileReference* file_ref = entry.second;
-          uint32_t compression_flags =
-              file_ref->file->WasCompressed() ? ArchiveEntry::kCompress : 0u;
-          if (!io::CopyFileToArchive(context_, file_ref->file, *file_ref->path, compression_flags,
-                                     writer)) {
+          if (!io::CopyFileToArchivePreserveCompression(context_, file_ref->file, *file_ref->path,
+                                                        writer)) {
             return false;
           }
         }

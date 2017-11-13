@@ -235,8 +235,7 @@ bool LoadedApk::WriteToArchive(IAaptContext* context, ResourceTable* split_table
         return false;
       }
     } else {
-      uint32_t compression_flags = file->WasCompressed() ? ArchiveEntry::kCompress : 0u;
-      if (!io::CopyFileToArchive(context, file, path, compression_flags, writer)) {
+      if (!io::CopyFileToArchivePreserveCompression(context, file, path, writer)) {
         return false;
       }
     }
