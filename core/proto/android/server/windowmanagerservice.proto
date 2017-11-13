@@ -48,6 +48,7 @@ message RootWindowContainerProto {
 
 /* represents PhoneWindowManager */
 message WindowManagerPolicyProto {
+  optional .android.graphics.RectProto stable_bounds = 1;
 }
 
 /* represents AppTransition */
@@ -100,13 +101,8 @@ message DisplayProto {
   optional .android.view.DisplayInfoProto display_info = 10;
   optional int32 rotation = 11;
   optional ScreenRotationAnimationProto screen_rotation_animation = 12;
-  optional DisplayFramesProto display_frames = 13;
 }
 
-/* represents DisplayFrames */
-message DisplayFramesProto {
-  optional .android.graphics.RectProto stable_bounds = 1;
-}
 
 /* represents DockedStackDividerController */
 message DockedStackDividerControllerProto {
