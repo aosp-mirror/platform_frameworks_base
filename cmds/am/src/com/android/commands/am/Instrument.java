@@ -47,6 +47,16 @@ import java.util.Locale;
 
 /**
  * Runs the am instrument command
+ *
+ * Test Result Code:
+ * 1 - Test running
+ * 0 - Test passed
+ * -2 - assertion failure
+ * -1 - other exceptions
+ *
+ * Session Result Code:
+ * -1: Success
+ * other: Failure
  */
 public class Instrument {
     public static final String DEFAULT_LOG_DIR = "instrument-logs";
