@@ -78,6 +78,9 @@ public class IpConnectivityMetricsTest {
     private static final String EXAMPLE_IPV4 = "192.0.2.1";
     private static final String EXAMPLE_IPV6 = "2001:db8:1200::2:1";
 
+    private static final byte[] MAC_ADDR =
+            {(byte)0x84, (byte)0xc9, (byte)0xb2, (byte)0x6a, (byte)0xed, (byte)0x4b};
+
     @Mock Context mCtx;
     @Mock IIpConnectivityMetrics mMockService;
     @Mock ConnectivityManager mCm;
@@ -351,13 +354,21 @@ public class IpConnectivityMetricsTest {
         dnsEvent(101, EVENT_GETHOSTBYNAME, 0, 34);
 
         // iface, uid
-        wakeupEvent("wlan0", 1000);
-        wakeupEvent("rmnet0", 10123);
-        wakeupEvent("wlan0", 1000);
-        wakeupEvent("rmnet0", 10008);
-        wakeupEvent("wlan0", -1);
-        wakeupEvent("wlan0", 10008);
-        wakeupEvent("rmnet0", 1000);
+        final byte[] mac = {0x48, 0x7c, 0x2b, 0x6a, 0x3e, 0x4b};
+        final String srcIp = "192.168.2.1";
+        final String dstIp = "192.168.2.23";
+        final int sport = 2356;
+        final int dport = 13489;
+        final long now = 1001L;
+        final int v4 = 0x800;
+        final int tcp = 6;
+        final int udp = 17;
+        wakeupEvent("wlan0", 1000, v4, tcp, mac, srcIp, dstIp, sport, dport, 1001L);
+        wakeupEvent("wlan0", 10123, v4, tcp, mac, srcIp, dstIp, sport, dport, 1001L);
+        wakeupEvent("wlan0", 1000, v4, udp, mac, srcIp, dstIp, sport, dport, 1001L);
+        wakeupEvent("wlan0", 10008, v4, udp, mac, srcIp, dstIp, sport, dport, 1001L);
+        wakeupEvent("wlan0", -1, v4, udp, mac, srcIp, dstIp, sport, dport, 1001L);
+        wakeupEvent("wlan0", 10008, v4, tcp, mac, srcIp, dstIp, sport, dport, 1001L);
 
         long timeMs = mService.mDefaultNetworkMetrics.creationTimeMs;
         final long cell = BitUtils.packBits(new int[]{NetworkCapabilities.TRANSPORT_CELLULAR});
@@ -560,34 +571,33 @@ public class IpConnectivityMetricsTest {
                 ">",
                 "events <",
                 "  if_name: \"\"",
-                "  link_layer: 2",
-                "  network_id: 0",
-                "  time_ms: 0",
-                "  transports: 0",
-                "  wakeup_stats <",
-                "    application_wakeups: 2",
-                "    duration_sec: 0",
-                "    no_uid_wakeups: 0",
-                "    non_application_wakeups: 0",
-                "    root_wakeups: 0",
-                "    system_wakeups: 1",
-                "    total_wakeups: 3",
-                "  >",
-                ">",
-                "events <",
-                "  if_name: \"\"",
                 "  link_layer: 4",
                 "  network_id: 0",
                 "  time_ms: 0",
                 "  transports: 0",
                 "  wakeup_stats <",
-                "    application_wakeups: 1",
+                "    application_wakeups: 3",
                 "    duration_sec: 0",
+                "    ethertype_counts <",
+                "      key: 2048",
+                "      value: 6",
+                "    >",
+                "    ip_next_header_counts <",
+                "      key: 6",
+                "      value: 3",
+                "    >",
+                "    ip_next_header_counts <",
+                "      key: 17",
+                "      value: 3",
+                "    >",
+                "    l2_broadcast_count: 0",
+                "    l2_multicast_count: 0",
+                "    l2_unicast_count: 6",
                 "    no_uid_wakeups: 1",
                 "    non_application_wakeups: 0",
                 "    root_wakeups: 0",
                 "    system_wakeups: 2",
-                "    total_wakeups: 4",
+                "    total_wakeups: 6",
                 "  >",
                 ">",
                 "version: 2\n");
@@ -610,9 +620,10 @@ public class IpConnectivityMetricsTest {
         mNetdListener.onDnsEvent(netId, type, result, latency, "", null, 0, 0);
     }
 
-    void wakeupEvent(String iface, int uid) throws Exception {
+    void wakeupEvent(String iface, int uid, int ether, int ip, byte[] mac, String srcIp,
+            String dstIp, int sport, int dport, long now) throws Exception {
         String prefix = NetdEventListenerService.WAKEUP_EVENT_IFACE_PREFIX + iface;
-        mNetdListener.onWakeupEvent(prefix, uid, uid, 0);
+        mNetdListener.onWakeupEvent(prefix, uid, ether, ip, mac, srcIp, dstIp, sport, dport, now);
     }
 
     NetworkAgentInfo makeNai(int netId, int score, boolean ipv4, boolean ipv6, long transports) {
