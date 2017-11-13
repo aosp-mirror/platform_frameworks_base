@@ -21,7 +21,10 @@ import java.lang.annotation.RetentionPolicy;
  * <a href="{@docRoot}guide/components/fragments.html">Fragments</a> developer
  * guide.</p>
  * </div>
+ *
+ * @deprecated Use {@link android.support.v4.app.FragmentTransaction}
  */
+@Deprecated
 public abstract class FragmentTransaction {
     /**
      * Calls {@link #add(int, Fragment, String)} with a 0 containerViewId.

@@ -38,7 +38,10 @@ import java.util.Arrays;
  * in the desired paramters with {@link #setUri(Uri)}, {@link #setSelection(String)},
  * {@link #setSelectionArgs(String[])}, {@link #setSortOrder(String)},
  * and {@link #setProjection(String[])}.
+ *
+ * @deprecated Use {@link android.support.v4.content.CursorLoader}
  */
+@Deprecated
 public class CursorLoader extends AsyncTaskLoader<Cursor> {
     final ForceLoadContentObserver mObserver;
 

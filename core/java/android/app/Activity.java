@@ -193,10 +193,13 @@ import java.util.List;
  * <a name="Fragments"></a>
  * <h3>Fragments</h3>
  *
- * <p>Starting with {@link android.os.Build.VERSION_CODES#HONEYCOMB}, Activity
- * implementations can make use of the {@link Fragment} class to better
+ * <p>The {@link android.support.v4.app.FragmentActivity} subclass
+ * can make use of the {@link android.support.v4.app.Fragment} class to better
  * modularize their code, build more sophisticated user interfaces for larger
- * screens, and help scale their application between small and large screens.
+ * screens, and help scale their application between small and large screens.</p>
+ *
+ * <p>For more information about using fragments, read the
+ * <a href="{@docRoot}guide/components/fragments.html">Fragments</a> developer guide.</p>
  *
  * <a name="ActivityLifecycle"></a>
  * <h3>Activity Lifecycle</h3>
@@ -915,7 +918,10 @@ public class Activity extends ContextThemeWrapper
 
     /**
      * Return the LoaderManager for this activity, creating it if needed.
+     *
+     * @deprecated Use {@link android.support.v4.app.FragmentActivity#getSupportLoaderManager()}
      */
+    @Deprecated
     public LoaderManager getLoaderManager() {
         return mFragments.getLoaderManager();
     }
@@ -2395,7 +2401,10 @@ public class Activity extends ContextThemeWrapper
     /**
      * Return the FragmentManager for interacting with fragments associated
      * with this activity.
+     *
+     * @deprecated Use {@link android.support.v4.app.FragmentActivity#getSupportFragmentManager()}
      */
+    @Deprecated
     public FragmentManager getFragmentManager() {
         return mFragments.getFragmentManager();
     }
@@ -2404,7 +2413,11 @@ public class Activity extends ContextThemeWrapper
      * Called when a Fragment is being attached to this activity, immediately
      * after the call to its {@link Fragment#onAttach Fragment.onAttach()}
      * method and before {@link Fragment#onCreate Fragment.onCreate()}.
+     *
+     * @deprecated Use {@link
+     * android.support.v4.app.FragmentActivity#onAttachFragment(android.support.v4.app.Fragment)}
      */
+    @Deprecated
     public void onAttachFragment(Fragment fragment) {
     }
 
@@ -5106,7 +5119,11 @@ public class Activity extends ContextThemeWrapper
      *
      * @see Fragment#startActivity
      * @see Fragment#startActivityForResult
+     *
+     * @deprecated Use {@link android.support.v4.app.FragmentActivity#startActivityFromFragment(
+     * android.support.v4.app.Fragment,Intent,int)}
      */
+    @Deprecated
     public void startActivityFromFragment(@NonNull Fragment fragment,
             @RequiresPermission Intent intent, int requestCode) {
         startActivityFromFragment(fragment, intent, requestCode, null);
@@ -5131,7 +5148,11 @@ public class Activity extends ContextThemeWrapper
      *
      * @see Fragment#startActivity
      * @see Fragment#startActivityForResult
+     *
+     * @deprecated Use {@link android.support.v4.app.FragmentActivity#startActivityFromFragment(
+     * android.support.v4.app.Fragment,Intent,int,Bundle)}
      */
+    @Deprecated
     public void startActivityFromFragment(@NonNull Fragment fragment,
             @RequiresPermission Intent intent, int requestCode, @Nullable Bundle options) {
         startActivityForResult(fragment.mWho, intent, requestCode, options);

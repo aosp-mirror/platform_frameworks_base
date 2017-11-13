@@ -24,7 +24,10 @@ import android.view.View;
 
 /**
  * Callbacks to a {@link Fragment}'s container.
+ *
+ * @deprecated Use {@link android.support.v4.app.FragmentContainer}
  */
+@Deprecated
 public abstract class FragmentContainer {
     /**
      * Return the view with the given resource ID. May return {@code null} if the

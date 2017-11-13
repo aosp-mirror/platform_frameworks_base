@@ -54,11 +54,17 @@ import java.lang.reflect.Modifier;
  * <p>For more information about using loaders, read the
  * <a href="{@docRoot}guide/topics/fundamentals/loaders.html">Loaders</a> developer guide.</p>
  * </div>
+ *
+ * @deprecated Use {@link android.support.v4.app.LoaderManager}
  */
+@Deprecated
 public abstract class LoaderManager {
     /**
      * Callback interface for a client to interact with the manager.
+     *
+     * @deprecated Use {@link android.support.v4.app.LoaderManager.LoaderCallbacks}
      */
+    @Deprecated
     public interface LoaderCallbacks<D> {
         /**
          * Instantiate and return a new Loader for the given ID.
