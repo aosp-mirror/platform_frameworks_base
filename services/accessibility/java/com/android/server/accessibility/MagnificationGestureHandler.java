@@ -17,6 +17,7 @@
 package com.android.server.accessibility;
 
 import static android.view.InputDevice.SOURCE_TOUCHSCREEN;
+import static android.view.MotionEvent.ACTION_CANCEL;
 import static android.view.MotionEvent.ACTION_DOWN;
 import static android.view.MotionEvent.ACTION_MOVE;
 import static android.view.MotionEvent.ACTION_POINTER_DOWN;
@@ -364,7 +365,7 @@ class MagnificationGestureHandler extends BaseEventStreamTransformation {
 
                 persistScaleAndTransitionTo(mViewportDraggingState);
 
-            } else if (action == ACTION_UP) {
+            } else if (action == ACTION_UP || action == ACTION_CANCEL) {
 
                 persistScaleAndTransitionTo(mDetectingState);
 
@@ -496,7 +497,9 @@ class MagnificationGestureHandler extends BaseEventStreamTransformation {
                     }
                 }
                 break;
-                case ACTION_UP: {
+
+                case ACTION_UP:
+                case ACTION_CANCEL: {
                     if (!mZoomedInBeforeDrag) zoomOff();
                     clear();
                     transitionTo(mDetectingState);
@@ -533,12 +536,15 @@ class MagnificationGestureHandler extends BaseEventStreamTransformation {
 
         @Override
         public void onMotionEvent(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
-            if (event.getActionMasked() == ACTION_UP) {
-                transitionTo(mDetectingState);
-            }
+            switch (event.getActionMasked()) {
+                case ACTION_UP:
+                case ACTION_CANCEL: {
+                    transitionTo(mDetectingState);
+                } break;
 
-            if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
-                mLastDelegatedDownEventTime = event.getDownTime();
+                case ACTION_DOWN: {
+                    mLastDelegatedDownEventTime = event.getDownTime();
+                } break;
             }
             if (getNext() != null) {
                 // We cache some events to see if the user wants to trigger magnification.
