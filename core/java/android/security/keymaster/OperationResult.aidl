@@ -17,4 +17,4 @@
 package android.security.keymaster;
 
 /* @hide */
-parcelable OperationResult;
+parcelable OperationResult cpp_header "keystore/OperationResult.h";

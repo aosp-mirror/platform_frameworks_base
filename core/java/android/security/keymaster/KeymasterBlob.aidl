@@ -17,4 +17,4 @@
 package android.security.keymaster;
 
 /* @hide */
-parcelable KeymasterBlob;
+parcelable KeymasterBlob cpp_header "keystore/KeymasterBlob.h";
