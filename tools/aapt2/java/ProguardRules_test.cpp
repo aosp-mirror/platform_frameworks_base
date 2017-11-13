@@ -130,7 +130,7 @@ TEST(ProguardRulesTest, IncludedLayoutRulesAreConditional) {
   ASSERT_TRUE(proguard::WriteKeepSet(&out, set));
 
   std::string actual = out.str();
-  EXPECT_THAT(actual, HasSubstr("ifused class **.R$layout"));
+  EXPECT_THAT(actual, HasSubstr("-if class **.R$layout"));
   EXPECT_THAT(actual, HasSubstr("int foo"));
   EXPECT_THAT(actual, HasSubstr("int bar"));
   EXPECT_THAT(actual, HasSubstr("com.foo.Bar"));
@@ -152,7 +152,7 @@ TEST(ProguardRulesTest, AliasedLayoutRulesAreConditional) {
   ASSERT_TRUE(proguard::WriteKeepSet(&out, set));
 
   std::string actual = out.str();
-  EXPECT_THAT(actual, HasSubstr("ifused class **.R$layout"));
+  EXPECT_THAT(actual, HasSubstr("-if class **.R$layout"));
   EXPECT_THAT(actual, HasSubstr("int foo"));
   EXPECT_THAT(actual, HasSubstr("int bar"));
   EXPECT_THAT(actual, HasSubstr("com.foo.Bar"));
@@ -174,7 +174,7 @@ TEST(ProguardRulesTest, NonLayoutReferencesAreUnconditional) {
   ASSERT_TRUE(proguard::WriteKeepSet(&out, set));
 
   std::string actual = out.str();
-  EXPECT_THAT(actual, Not(HasSubstr("ifused")));
+  EXPECT_THAT(actual, Not(HasSubstr("-if")));
 }
 
 TEST(ProguardRulesTest, ViewOnClickRuleIsEmitted) {
