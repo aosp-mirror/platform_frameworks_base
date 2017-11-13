@@ -45,6 +45,7 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
     platform-test-annotations \
     truth-prebuilt
 
+# TODO(b/69254249): Migrate to Robolectric 3.4.2
 LOCAL_JAVA_LIBRARIES := \
     junit \
     platform-robolectric-prebuilt
@@ -72,4 +73,5 @@ LOCAL_TEST_PACKAGE := FrameworksServicesLib
 
 LOCAL_INSTRUMENT_SOURCE_DIRS := $(dir $(LOCAL_PATH))backup/java
 
-include prebuilts/misc/common/robolectric/run_robotests.mk
+# TODO(b/69254249): Migrate to Robolectric 3.4.2
+include prebuilts/misc/common/robolectric/3.1.1/run_robotests.mk
