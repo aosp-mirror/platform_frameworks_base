@@ -23,6 +23,7 @@ import android.content.Context;
 import android.hardware.location.IFusedLocationHardware;
 import android.location.IFusedProvider;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -112,17 +113,18 @@ public final class FusedProxy {
      * @param locationHardware  The FusedLocationHardware instance to use for the binding operation.
      */
     private void bindProvider(IFusedLocationHardware locationHardware) {
-        IFusedProvider provider = IFusedProvider.Stub.asInterface(mServiceWatcher.getBinder());
-
-        if (provider == null) {
+        if (!mServiceWatcher.runOnBinder(new ServiceWatcher.BinderRunner() {
+            @Override
+            public void run(IBinder binder) {
+                IFusedProvider provider = IFusedProvider.Stub.asInterface(binder);
+                try {
+                    provider.onFusedLocationHardwareChange(locationHardware);
+                } catch (RemoteException e) {
+                    Log.e(TAG, e.toString());
+                }
+            }
+        })) {
             Log.e(TAG, "No instance of FusedProvider found on FusedLocationHardware connected.");
-            return;
-        }
-
-        try {
-            provider.onFusedLocationHardwareChange(locationHardware);
-        } catch (RemoteException e) {
-            Log.e(TAG, e.toString());
         }
     }
 }
