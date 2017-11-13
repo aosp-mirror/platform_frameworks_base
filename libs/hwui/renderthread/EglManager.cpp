@@ -423,10 +423,14 @@ bool EglManager::swapBuffers(const Frame& frame, const SkRect& screenDirty) {
         fence();
     }
 
+#if 0
     EGLint rects[4];
     frame.map(screenDirty, rects);
     eglSwapBuffersWithDamageKHR(mEglDisplay, frame.mSurface, rects,
             screenDirty.isEmpty() ? 0 : 1);
+#else
+    eglSwapBuffers(mEglDisplay, frame.mSurface);
+#endif
 
     EGLint err = eglGetError();
     if (CC_LIKELY(err == EGL_SUCCESS)) {
