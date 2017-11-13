@@ -66,6 +66,7 @@ import static android.view.WindowManager.LayoutParams.isSystemAlertWindowType;
 import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.app.ActivityManager.StackId;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.CompatibilityInfo;
@@ -721,6 +722,12 @@ public interface WindowManagerPolicy {
     public void setInitialDisplaySize(Display display, int width, int height, int density);
 
     /**
+     * Called by window manager to set the overscan region that should be used for the
+     * given display.
+     */
+    public void setDisplayOverscan(Display display, int left, int top, int right, int bottom);
+
+    /**
      * Check permissions when adding a window.
      *
      * @param attrs The window's LayoutParams.
@@ -1166,10 +1173,14 @@ public interface WindowManagerPolicy {
     /**
      * Called when layout of the windows is about to start.
      *
-     * @param displayFrames frames of the display we are doing layout on.
+     * @param displayId Id of the display we are doing layout on.
+     * @param displayWidth The current full width of the screen.
+     * @param displayHeight The current full height of the screen.
+     * @param displayRotation The current rotation being applied to the base window.
      * @param uiMode The current uiMode in configuration.
      */
-    default void beginLayoutLw(DisplayFrames displayFrames, int uiMode) {}
+    public void beginLayoutLw(int displayId, int displayWidth, int displayHeight,
+                              int displayRotation, int uiMode);
 
     /**
      * Returns the bottom-most layer of the system decor, above which no policy decor should
@@ -1178,28 +1189,37 @@ public interface WindowManagerPolicy {
     public int getSystemDecorLayerLw();
 
     /**
-     * Called for each window attached to the window manager as layout is proceeding. The
-     * implementation of this function must take care of setting the window's frame, either here or
-     * in finishLayout().
+     * Return the rectangle of the screen that is available for applications to run in.
+     * This will be called immediately after {@link #beginLayoutLw}.
+     *
+     * @param r The rectangle to be filled with the boundaries available to applications.
+     */
+    public void getContentRectLw(Rect r);
+
+    /**
+     * Called for each window attached to the window manager as layout is
+     * proceeding.  The implementation of this function must take care of
+     * setting the window's frame, either here or in finishLayout().
      *
      * @param win The window being positioned.
      * @param attached For sub-windows, the window it is attached to; this
      *                 window will already have had layoutWindow() called on it
      *                 so you can use its Rect.  Otherwise null.
-     * @param displayFrames The display frames.
      */
-    default void layoutWindowLw(
-            WindowState win, WindowState attached, DisplayFrames displayFrames) {}
+    public void layoutWindowLw(WindowState win, WindowState attached);
 
 
     /**
-     * Return the insets for the areas covered by system windows. These values are computed on the
-     * most recent layout, so they are not guaranteed to be correct.
+     * Return the insets for the areas covered by system windows. These values
+     * are computed on the most recent layout, so they are not guaranteed to
+     * be correct.
      *
      * @param attrs The LayoutParams of the window.
      * @param taskBounds The bounds of the task this window is on or {@code null} if no task is
      *                   associated with the window.
-     * @param displayFrames display frames.
+     * @param displayRotation Rotation of the display.
+     * @param displayWidth The width of the display.
+     * @param displayHeight The height of the display.
      * @param outContentInsets The areas covered by system windows, expressed as positive insets.
      * @param outStableInsets The areas covered by stable system windows irrespective of their
      *                        current visibility. Expressed as positive insets.
@@ -1207,11 +1227,16 @@ public interface WindowManagerPolicy {
      * @return Whether to always consume the navigation bar.
      *         See {@link #isNavBarForcedShownLw(WindowState)}.
      */
-    default boolean getInsetHintLw(WindowManager.LayoutParams attrs, Rect taskBounds,
-            DisplayFrames displayFrames, Rect outContentInsets, Rect outStableInsets,
-            Rect outOutsets) {
-        return false;
-    }
+    public boolean getInsetHintLw(WindowManager.LayoutParams attrs, Rect taskBounds,
+            int displayRotation, int displayWidth, int displayHeight, Rect outContentInsets,
+            Rect outStableInsets, Rect outOutsets);
+
+    /**
+     * Called when layout of the windows is finished.  After this function has
+     * returned, all windows given to layoutWindow() <em>must</em> have had a
+     * frame assigned.
+     */
+    public void finishLayoutLw();
 
     /** Layout state may have changed (so another layout will be performed) */
     static final int FINISH_LAYOUT_REDO_LAYOUT = 0x0001;
@@ -1626,6 +1651,11 @@ public interface WindowManagerPolicy {
      * @hide
      */
     public void showGlobalActions();
+
+    /**
+     * @return The current height of the input method window.
+     */
+    public int getInputMethodWindowVisibleHeightLw();
 
     /**
      * Called when the current user changes. Guaranteed to be called before the broadcast
