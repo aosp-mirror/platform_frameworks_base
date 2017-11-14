@@ -22,6 +22,7 @@ import com.android.internal.logging.nano.MetricsProto;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
 
+import android.annotation.NonNull;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationChannelGroup;
@@ -915,21 +916,21 @@ public class RankingHelper implements RankingConfig {
         }
     }
 
-    public void dump(PrintWriter pw, String prefix, NotificationManagerService.DumpFilter filter) {
-        if (filter == null) {
-            final int N = mSignalExtractors.length;
+    public void dump(PrintWriter pw, String prefix,
+            @NonNull NotificationManagerService.DumpFilter filter) {
+        final int N = mSignalExtractors.length;
+        pw.print(prefix);
+        pw.print("mSignalExtractors.length = ");
+        pw.println(N);
+        for (int i = 0; i < N; i++) {
             pw.print(prefix);
-            pw.print("mSignalExtractors.length = ");
-            pw.println(N);
-            for (int i = 0; i < N; i++) {
-                pw.print(prefix);
-                pw.print("  ");
-                pw.println(mSignalExtractors[i]);
-            }
-
-            pw.print(prefix);
-            pw.println("per-package config:");
+            pw.print("  ");
+            pw.println(mSignalExtractors[i].getClass().getSimpleName());
         }
+
+        pw.print(prefix);
+        pw.println("per-package config:");
+
         pw.println("Records:");
         synchronized (mRecords) {
             dumpRecords(pw, prefix, filter, mRecords);
@@ -938,7 +939,8 @@ public class RankingHelper implements RankingConfig {
         dumpRecords(pw, prefix, filter, mRestoredWithoutUids);
     }
 
-    public void dump(ProtoOutputStream proto, NotificationManagerService.DumpFilter filter) {
+    public void dump(ProtoOutputStream proto,
+            @NonNull NotificationManagerService.DumpFilter filter) {
         final int N = mSignalExtractors.length;
         for (int i = 0; i < N; i++) {
             proto.write(RankingHelperProto.NOTIFICATION_SIGNAL_EXTRACTORS,
@@ -952,12 +954,13 @@ public class RankingHelper implements RankingConfig {
     }
 
     private static void dumpRecords(ProtoOutputStream proto, long fieldId,
-            NotificationManagerService.DumpFilter filter, ArrayMap<String, Record> records) {
+            @NonNull NotificationManagerService.DumpFilter filter,
+            ArrayMap<String, Record> records) {
         final int N = records.size();
         long fToken;
         for (int i = 0; i < N; i++) {
             final Record r = records.valueAt(i);
-            if (filter == null || filter.matches(r.pkg)) {
+            if (filter.matches(r.pkg)) {
                 fToken = proto.start(fieldId);
 
                 proto.write(RecordProto.PACKAGE, r.pkg);
@@ -985,11 +988,12 @@ public class RankingHelper implements RankingConfig {
     }
 
     private static void dumpRecords(PrintWriter pw, String prefix,
-            NotificationManagerService.DumpFilter filter, ArrayMap<String, Record> records) {
+            @NonNull NotificationManagerService.DumpFilter filter,
+            ArrayMap<String, Record> records) {
         final int N = records.size();
         for (int i = 0; i < N; i++) {
             final Record r = records.valueAt(i);
-            if (filter == null || filter.matches(r.pkg)) {
+            if (filter.matches(r.pkg)) {
                 pw.print(prefix);
                 pw.print("  AppSettings: ");
                 pw.print(r.pkg);
