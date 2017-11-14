@@ -689,7 +689,15 @@ public class PackageParser {
         pi.requiredAccountType = p.mRequiredAccountType;
         pi.overlayTarget = p.mOverlayTarget;
         pi.overlayPriority = p.mOverlayPriority;
-        pi.isStaticOverlay = p.mIsStaticOverlay;
+
+        if (p.mIsStaticOverlay) {
+            pi.mOverlayFlags |= PackageInfo.FLAG_OVERLAY_STATIC;
+        }
+
+        if (p.mTrustedOverlay) {
+            pi.mOverlayFlags |= PackageInfo.FLAG_OVERLAY_TRUSTED;
+        }
+
         pi.compileSdkVersion = p.mCompileSdkVersion;
         pi.compileSdkVersionCodename = p.mCompileSdkVersionCodename;
         pi.firstInstallTime = firstInstallTime;
