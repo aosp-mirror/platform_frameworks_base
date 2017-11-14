@@ -152,6 +152,9 @@ public class TimePickerDialog extends AlertDialog implements OnClickListener,
             public void onClick(View view) {
                 if (mTimePicker.validateInput()) {
                     TimePickerDialog.this.onClick(TimePickerDialog.this, BUTTON_POSITIVE);
+                    // Clearing focus forces the dialog to commit any pending
+                    // changes, e.g. typed text in a NumberPicker.
+                    mTimePicker.clearFocus();
                     dismiss();
                 }
             }
