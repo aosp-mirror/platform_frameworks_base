@@ -17,9 +17,12 @@
 package android.telephony.mbms;
 
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import java.util.Objects;
 
 /**
  * Describes a single file that is available over MBMS.
@@ -47,6 +50,7 @@ public final class FileInfo implements Parcelable {
      * @hide
      */
     @SystemApi
+    @TestApi
     public FileInfo(Uri uri, String mimeType) {
         this.uri = uri;
         this.mimeType = mimeType;
@@ -81,5 +85,24 @@ public final class FileInfo implements Parcelable {
      */
     public String getMimeType() {
         return mimeType;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        FileInfo fileInfo = (FileInfo) o;
+        return Objects.equals(uri, fileInfo.uri) &&
+                Objects.equals(mimeType, fileInfo.mimeType);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(uri, mimeType);
     }
 }
