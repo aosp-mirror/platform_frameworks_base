@@ -106,7 +106,7 @@ public class PinnedStackWindowController extends StackWindowController {
                 } else {
                     // Otherwise, use the display bounds
                     toBounds = new Rect();
-                    mContainer.getDisplayContent().getLogicalDisplayRect(toBounds);
+                    mContainer.getDisplayContent().getBounds(toBounds);
                 }
             } else if (fromFullscreen) {
                 schedulePipModeChangedState = SCHEDULE_PIP_MODE_CHANGED_ON_END;

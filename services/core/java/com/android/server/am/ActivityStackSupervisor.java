@@ -2118,7 +2118,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         }
 
         if (task.isResizeable() && canUseActivityOptionsLaunchBounds(options)) {
-            final Rect bounds = TaskRecord.validateBounds(options.getLaunchBounds());
+            final Rect bounds = options.getLaunchBounds();
             task.updateOverrideConfiguration(bounds);
 
             ActivityStack stack = getLaunchStack(null, options, task, ON_TOP);
@@ -2626,7 +2626,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
             // TODO: Checking for isAttached might not be needed as if the user passes in null
             // dockedBounds then they want the docked stack to be dismissed.
-            if (stack.mFullscreen || (dockedBounds == null && !stack.isAttached())) {
+            if (stack.getWindowingMode() == WINDOWING_MODE_FULLSCREEN
+                    || (dockedBounds == null && !stack.isAttached())) {
                 // The dock stack either was dismissed or went fullscreen, which is kinda the same.
                 // In this case we make all other static stacks fullscreen and move all
                 // docked stack tasks to the fullscreen stack.
@@ -3058,7 +3059,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             // Resize the pinned stack to match the current size of the task the activity we are
             // going to be moving is currently contained in. We do this to have the right starting
             // animation bounds for the pinned stack to the desired bounds the caller wants.
-            resizeStackLocked(stack, task.mBounds, null /* tempTaskBounds */,
+            resizeStackLocked(stack, task.getOverrideBounds(), null /* tempTaskBounds */,
                     null /* tempTaskInsetBounds */, !PRESERVE_WINDOWS,
                     true /* allowResizeInDockedMode */, !DEFER_RESUME);
 
@@ -3782,9 +3783,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 pw.println("  Stack #" + stack.mStackId
                         + ": type=" + activityTypeToString(stack.getActivityType())
                         + " mode=" + windowingModeToString(stack.getWindowingMode()));
-                pw.println("  mFullscreen=" + stack.mFullscreen);
                 pw.println("  isSleeping=" + stack.shouldSleepActivities());
-                pw.println("  mBounds=" + stack.mBounds);
+                pw.println("  mBounds=" + stack.getOverrideBounds());
 
                 printed |= stack.dumpActivitiesLocked(fd, pw, dumpAll, dumpClient, dumpPackage,
                         needSep);
@@ -4054,6 +4054,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     private void handleDisplayChanged(int displayId) {
         synchronized (mService) {
             ActivityDisplay activityDisplay = mActivityDisplays.get(displayId);
+            // TODO: The following code block should be moved into {@link ActivityDisplay}.
             if (activityDisplay != null) {
                 // The window policy is responsible for stopping activities on the default display
                 if (displayId != Display.DEFAULT_DISPLAY) {
@@ -4067,7 +4068,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                         activityDisplay.mOffToken = null;
                     }
                 }
-                // TODO: Update the bounds.
+
+                activityDisplay.updateBounds();
             }
             mWindowManager.onDisplayChanged(displayId);
         }
@@ -4289,7 +4291,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             return;
         }
 
-        scheduleUpdatePictureInPictureModeIfNeeded(task, stack.mBounds);
+        scheduleUpdatePictureInPictureModeIfNeeded(task, stack.getOverrideBounds());
     }
 
     void scheduleUpdatePictureInPictureModeIfNeeded(TaskRecord task, Rect targetStackBounds) {

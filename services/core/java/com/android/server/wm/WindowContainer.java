@@ -318,10 +318,23 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      * @see #mFullConfiguration
      */
     @Override
-    final public void onOverrideConfigurationChanged(Configuration overrideConfiguration) {
+    public void onOverrideConfigurationChanged(Configuration overrideConfiguration) {
+        // We must diff before the configuration is applied so that we can capture the change
+        // against the existing bounds.
+        final int diff = diffOverrideBounds(overrideConfiguration.windowConfiguration.getBounds());
         super.onOverrideConfigurationChanged(overrideConfiguration);
         if (mParent != null) {
             mParent.onDescendantOverrideConfigurationChanged();
+        }
+
+        if (diff == BOUNDS_CHANGE_NONE) {
+            return;
+        }
+
+        if ((diff & BOUNDS_CHANGE_SIZE) == BOUNDS_CHANGE_SIZE) {
+            onResize();
+        } else {
+            onMovedByResize();
         }
     }
 

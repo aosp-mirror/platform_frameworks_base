@@ -21,7 +21,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import android.app.ActivityManager.TaskDescription;
-import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 import android.support.test.InstrumentationRegistry;
@@ -75,11 +75,23 @@ public class WindowFrameTests extends WindowTestsBase {
         final Rect mInsetBounds = new Rect();
         boolean mFullscreenForTest = true;
         TaskWithBounds(Rect bounds) {
-            super(0, mStubStack, 0, sWm, null, 0, false, new TaskDescription(), null);
+            super(0, mStubStack, 0, sWm, 0, false, new TaskDescription(), null);
             mBounds = bounds;
+            setBounds(bounds);
         }
+
         @Override
-        void getBounds(Rect outBounds) {
+        public Rect getBounds() {
+            return mBounds;
+        }
+
+        @Override
+        public void getBounds(Rect out) {
+            out.set(mBounds);
+        }
+
+        @Override
+        public void getOverrideBounds(Rect outBounds) {
             outBounds.set(mBounds);
         }
         @Override
@@ -395,7 +407,9 @@ public class WindowFrameTests extends WindowTestsBase {
         final int xInset = logicalWidth / 10;
         final int yInset = logicalWidth / 10;
         final Rect cf = new Rect(xInset, yInset, logicalWidth - xInset, logicalHeight - yInset);
-        w.mAppToken.onOverrideConfigurationChanged(w.mAppToken.getOverrideConfiguration(), cf);
+        Configuration config = new Configuration(w.mAppToken.getOverrideConfiguration());
+        config.windowConfiguration.setBounds(cf);
+        w.mAppToken.onOverrideConfigurationChanged(config);
         pf.set(0, 0, logicalWidth, logicalHeight);
         task.mFullscreenForTest = true;
 

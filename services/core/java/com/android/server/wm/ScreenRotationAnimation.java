@@ -28,7 +28,6 @@ import static com.android.server.wm.proto.ScreenRotationAnimationProto.STARTED;
 
 import android.content.Context;
 import android.graphics.Matrix;
-import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
@@ -230,7 +229,7 @@ class ScreenRotationAnimation {
         mService = service;
         mContext = context;
         mDisplayContent = displayContent;
-        displayContent.getLogicalDisplayRect(mOriginalDisplayRect);
+        displayContent.getBounds(mOriginalDisplayRect);
 
         // Screenshot does NOT include rotation!
         final Display display = displayContent.getDisplay();
@@ -312,7 +311,7 @@ class ScreenRotationAnimation {
             float x = mTmpFloats[Matrix.MTRANS_X];
             float y = mTmpFloats[Matrix.MTRANS_Y];
             if (mForceDefaultOrientation) {
-                mDisplayContent.getLogicalDisplayRect(mCurrentDisplayRect);
+                mDisplayContent.getBounds(mCurrentDisplayRect);
                 x -= mCurrentDisplayRect.left;
                 y -= mCurrentDisplayRect.top;
             }
