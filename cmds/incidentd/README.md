@@ -5,13 +5,19 @@
 For the first time, build the test and create an empty directly on device:
 
 ```
-root$ make -j incidentd_test && adb shell mkdir /data/nativetest64/incidentd_test
+root$ make -j incidentd_test && adb shell mkdir /data/nativetest/incidentd_test
 ```
 
-Run the test on a device
+Run the test on a device manually
 
 ```
 root$ mmm -j frameworks/base/cmds/incidentd && \
-adb push $OUT/data/nativetest64/incidentd_test/* /data/nativetest64/incidentd_test/ && \
-adb shell /data/nativetest64/incidentd_test/incidentd_test 2>/dev/null
+adb push $OUT/data/nativetest/incidentd_test/* /data/nativetest/incidentd_test/ && \
+adb shell /data/nativetest/incidentd_test/incidentd_test 2>/dev/null
+```
+
+Run the test via AndroidTest.xml
+
+```
+root$ atest incidentd_test
 ```

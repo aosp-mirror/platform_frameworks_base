@@ -120,14 +120,6 @@ LOCAL_SHARED_LIBRARIES := \
     libservices \
     libutils \
 
-relative_path_prefix := nativetest64/incidentd_test
-testdata_files := $(call find-subdir-files, testdata/*)
-
-GEN := $(addprefix $(TARGET_OUT_DATA)/$(relative_path_prefix)/, $(testdata_files))
-$(GEN): PRIVATE_PATH := $(LOCAL_PATH)
-$(GEN): PRIVATE_CUSTOM_TOOL = cp $< $@
-$(GEN): $(TARGET_OUT_DATA)/$(relative_path_prefix)/testdata/% : $(LOCAL_PATH)/testdata/%
-	$(transform-generated-source)
-LOCAL_GENERATED_SOURCES += $(GEN)
+LOCAL_TEST_DATA := $(call find-test-data-in-subdirs, $(LOCAL_PATH), *, testdata)
 
 include $(BUILD_NATIVE_TEST)
