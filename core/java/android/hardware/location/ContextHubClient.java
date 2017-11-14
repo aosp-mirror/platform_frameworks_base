@@ -16,7 +16,7 @@
 package android.hardware.location;
 
 import android.annotation.RequiresPermission;
-import android.os.Handler;
+import android.os.RemoteException;
 
 import java.io.Closeable;
 
@@ -29,29 +29,25 @@ import java.io.Closeable;
  */
 public class ContextHubClient implements Closeable {
     /*
-     * The ContextHubClient interface associated with this client.
+     * The proxy to the client interface at the service.
      */
-    // TODO: Implement this interface and associate with ContextHubClient object
-    // private final IContextHubClient mClientInterface;
+    private final IContextHubClient mClientProxy;
 
     /*
-     * The listening callback associated with this client.
+     * The callback interface associated with this client.
      */
-    private ContextHubClientCallback mCallback;
+    private final IContextHubClientCallback mCallbackInterface;
 
     /*
      * The Context Hub that this client is attached to.
      */
-    private ContextHubInfo mAttachedHub;
+    private final ContextHubInfo mAttachedHub;
 
-    /*
-     * The handler to invoke mCallback.
-     */
-    private Handler mCallbackHandler;
-
-    ContextHubClient(ContextHubClientCallback callback, Handler handler, ContextHubInfo hubInfo) {
-        mCallback = callback;
-        mCallbackHandler = handler;
+    /* package */ ContextHubClient(
+            IContextHubClient clientProxy, IContextHubClientCallback callback,
+            ContextHubInfo hubInfo) {
+        mClientProxy = clientProxy;
+        mCallbackInterface = callback;
         mAttachedHub = hubInfo;
     }
 
@@ -90,6 +86,10 @@ public class ContextHubClient implements Closeable {
     @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
     @ContextHubTransaction.Result
     public int sendMessageToNanoApp(NanoAppMessage message) {
-        throw new UnsupportedOperationException("TODO: Implement this");
+        try {
+            return mClientProxy.sendMessageToNanoApp(message);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 }

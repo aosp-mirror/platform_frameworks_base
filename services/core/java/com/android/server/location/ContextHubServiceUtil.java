@@ -16,11 +16,15 @@
 
 package com.android.server.location;
 
+import android.Manifest;
+import android.content.Context;
 import android.hardware.contexthub.V1_0.ContextHub;
 import android.hardware.contexthub.V1_0.ContextHubMsg;
 import android.hardware.contexthub.V1_0.HostEndPoint;
 import android.hardware.contexthub.V1_0.HubAppInfo;
+import android.hardware.contexthub.V1_0.Result;
 import android.hardware.location.ContextHubInfo;
+import android.hardware.location.ContextHubTransaction;
 import android.hardware.location.NanoAppBinary;
 import android.hardware.location.NanoAppMessage;
 import android.hardware.location.NanoAppState;
@@ -34,6 +38,9 @@ import java.util.ArrayList;
  */
 /* package */ class ContextHubServiceUtil {
     private static final String TAG = "ContextHubServiceUtil";
+    private static final String HARDWARE_PERMISSION = Manifest.permission.LOCATION_HARDWARE;
+    private static final String ENFORCE_HW_PERMISSION_MESSAGE = "Permission '"
+            + HARDWARE_PERMISSION + "' not granted to access ContextHub Hardware";
 
     /**
      * Creates a ContextHubInfo array from an ArrayList of HIDL ContextHub objects.
@@ -164,5 +171,41 @@ import java.util.ArrayList;
         return NanoAppMessage.createMessageFromNanoApp(
                 message.appName, message.msgType, messageArray,
                 message.hostEndPoint == HostEndPoint.BROADCAST);
+    }
+
+    /**
+     * Checks for location hardware permissions.
+     *
+     * @param context the context of the service
+     */
+    /* package */
+    static void checkPermissions(Context context) {
+        context.enforceCallingPermission(HARDWARE_PERMISSION, ENFORCE_HW_PERMISSION_MESSAGE);
+    }
+
+    /**
+     * Helper function to convert from the HAL Result enum error code to the
+     * ContextHubTransaction.Result type.
+     *
+     * @param halResult the Result enum error code
+     * @return the ContextHubTransaction.Result equivalent
+     */
+    @ContextHubTransaction.Result
+    /* package */
+    static int toTransactionResult(int halResult) {
+        switch (halResult) {
+            case Result.OK:
+                return ContextHubTransaction.TRANSACTION_SUCCESS;
+            case Result.BAD_PARAMS:
+                return ContextHubTransaction.TRANSACTION_FAILED_BAD_PARAMS;
+            case Result.NOT_INIT:
+                return ContextHubTransaction.TRANSACTION_FAILED_UNINITIALIZED;
+            case Result.TRANSACTION_PENDING:
+                return ContextHubTransaction.TRANSACTION_FAILED_PENDING;
+            case Result.TRANSACTION_FAILED:
+            case Result.UNKNOWN_FAILURE:
+            default: /* fall through */
+                return ContextHubTransaction.TRANSACTION_FAILED_UNKNOWN;
+        }
     }
 }
