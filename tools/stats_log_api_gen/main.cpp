@@ -107,6 +107,8 @@ write_stats_log_cpp(FILE* out, const Atoms& atoms)
 
     fprintf(out, "namespace android {\n");
     fprintf(out, "namespace util {\n");
+    fprintf(out, "// the single event tag id for all stats logs\n");
+    fprintf(out, "const static int kStatsEventTag = 1937006964;\n");
 
     // Print write methods
     fprintf(out, "\n");
@@ -115,7 +117,7 @@ write_stats_log_cpp(FILE* out, const Atoms& atoms)
         int argIndex;
 
         fprintf(out, "void\n");
-        fprintf(out, "stats_write(int code");
+        fprintf(out, "stats_write(int32_t code");
         argIndex = 1;
         for (vector<java_type_t>::const_iterator arg = signature->begin();
                 arg != signature->end(); arg++) {
@@ -126,7 +128,8 @@ write_stats_log_cpp(FILE* out, const Atoms& atoms)
 
         fprintf(out, "{\n");
         argIndex = 1;
-        fprintf(out, "    android_log_event_list event(code);\n");
+        fprintf(out, "    android_log_event_list event(kStatsEventTag);\n");
+        fprintf(out, "    event << code;\n");
         for (vector<java_type_t>::const_iterator arg = signature->begin();
                 arg != signature->end(); arg++) {
             if (*arg == JAVA_TYPE_STRING) {
@@ -204,8 +207,7 @@ write_stats_log_header(FILE* out, const Atoms& atoms)
     fprintf(out, "//\n");
     for (set<vector<java_type_t>>::const_iterator signature = atoms.signatures.begin();
             signature != atoms.signatures.end(); signature++) {
-
-        fprintf(out, "void stats_write(int code");
+        fprintf(out, "void stats_write(int32_t code ");
         int argIndex = 1;
         for (vector<java_type_t>::const_iterator arg = signature->begin();
                 arg != signature->end(); arg++) {

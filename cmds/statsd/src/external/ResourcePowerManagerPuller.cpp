@@ -93,11 +93,10 @@ bool ResourcePowerManagerPuller::Pull(const int tagId, vector<shared_ptr<LogEven
 
                     auto statePtr = make_shared<LogEvent>(
                             android::util::POWER_STATE_PLATFORM_SLEEP_STATE_PULLED, timestamp);
-                    auto elemList = statePtr->GetAndroidLogEventList();
-                    *elemList << state.name;
-                    *elemList << state.residencyInMsecSinceBoot;
-                    *elemList << state.totalTransitions;
-                    *elemList << state.supportedOnlyInSuspend;
+                    statePtr->write(state.name);
+                    statePtr->write(state.residencyInMsecSinceBoot);
+                    statePtr->write(state.totalTransitions);
+                    statePtr->write(state.supportedOnlyInSuspend);
                     statePtr->init();
                     data->push_back(statePtr);
                     VLOG("powerstate: %s, %lld, %lld, %d", state.name.c_str(),
@@ -106,11 +105,10 @@ bool ResourcePowerManagerPuller::Pull(const int tagId, vector<shared_ptr<LogEven
                     for (auto voter : state.voters) {
                         auto voterPtr =
                                 make_shared<LogEvent>(android::util::POWER_STATE_VOTER_PULLED, timestamp);
-                        auto elemList = voterPtr->GetAndroidLogEventList();
-                        *elemList << state.name;
-                        *elemList << voter.name;
-                        *elemList << voter.totalTimeInMsecVotedForSinceBoot;
-                        *elemList << voter.totalNumberOfTimesVotedSinceBoot;
+                        voterPtr->write(state.name);
+                        voterPtr->write(voter.name);
+                        voterPtr->write(voter.totalTimeInMsecVotedForSinceBoot);
+                        voterPtr->write(voter.totalNumberOfTimesVotedSinceBoot);
                         voterPtr->init();
                         data->push_back(voterPtr);
                         VLOG("powerstatevoter: %s, %s, %lld, %lld", state.name.c_str(),
@@ -141,13 +139,12 @@ bool ResourcePowerManagerPuller::Pull(const int tagId, vector<shared_ptr<LogEven
                                 const PowerStateSubsystemSleepState& state = subsystem.states[j];
                                 auto subsystemStatePtr = make_shared<LogEvent>(
                                         android::util::POWER_STATE_SUBSYSTEM_SLEEP_STATE_PULLED, timestamp);
-                                auto elemList = subsystemStatePtr->GetAndroidLogEventList();
-                                *elemList << subsystem.name;
-                                *elemList << state.name;
-                                *elemList << state.residencyInMsecSinceBoot;
-                                *elemList << state.totalTransitions;
-                                *elemList << state.lastEntryTimestampMs;
-                                *elemList << state.supportedOnlyInSuspend;
+                                subsystemStatePtr->write(subsystem.name);
+                                subsystemStatePtr->write(state.name);
+                                subsystemStatePtr->write(state.residencyInMsecSinceBoot);
+                                subsystemStatePtr->write(state.totalTransitions);
+                                subsystemStatePtr->write(state.lastEntryTimestampMs);
+                                subsystemStatePtr->write(state.supportedOnlyInSuspend);
                                 subsystemStatePtr->init();
                                 data->push_back(subsystemStatePtr);
                                 VLOG("subsystemstate: %s, %s, %lld, %lld, %lld",

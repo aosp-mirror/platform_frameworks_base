@@ -165,15 +165,15 @@ bool matchesSimple(const SimpleLogEntryMatcher& simpleMatcher, const LogEvent& e
                    matcherCase == KeyValueMatcher::ValueMatcherCase::kGtFloat) {
             // Float fields
             status_t err = NO_ERROR;
-            bool val = event.GetFloat(key, &err);
+            float val = event.GetFloat(key, &err);
             if (err == NO_ERROR) {
                 if (matcherCase == KeyValueMatcher::ValueMatcherCase::kLtFloat) {
-                    if (!(cur.lt_float() <= val)) {
+                    if (!(val < cur.lt_float())) {
                         allMatched = false;
                         break;
                     }
                 } else if (matcherCase == KeyValueMatcher::ValueMatcherCase::kGtFloat) {
-                    if (!(cur.gt_float() >= val)) {
+                    if (!(val > cur.gt_float())) {
                         allMatched = false;
                         break;
                     }
