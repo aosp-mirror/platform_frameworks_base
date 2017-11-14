@@ -3174,6 +3174,10 @@
 
     <!-- Corner radius of system dialogs -->
     <dimen name="config_dialogCornerRadius">2dp</dimen>
+    <!-- Controls whether system buttons use all caps for text -->
+    <bool name="config_buttonTextAllCaps">true</bool>
+    <!-- Name of the font family used for system buttons -->
+    <string name="config_fontFamilyButton">@string/font_family_button_material</string>
 
     <string translatable="false" name="config_batterySaverDeviceSpecificConfig"></string>
 </resources>
