@@ -16,6 +16,8 @@
 
 package android.net.wifi.rtt;
 
+import android.os.WorkSource;
+
 import android.net.wifi.rtt.IRttCallback;
 import android.net.wifi.rtt.RangingRequest;
 
@@ -25,6 +27,7 @@ import android.net.wifi.rtt.RangingRequest;
 interface IWifiRttManager
 {
     boolean isAvailable();
-    void startRanging(in IBinder binder, in String callingPackage, in RangingRequest request,
-            in IRttCallback callback);
+    void startRanging(in IBinder binder, in String callingPackage, in WorkSource workSource,
+            in RangingRequest request, in IRttCallback callback);
+    void cancelRanging(in WorkSource workSource);
 }
