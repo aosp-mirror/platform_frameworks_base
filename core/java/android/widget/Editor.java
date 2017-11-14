@@ -3842,14 +3842,10 @@ public class Editor {
                 mProcessTextIntentActionsHandler.onInitializeMenu(menu);
             }
 
-            if (menu.hasVisibleItems() || mode.getCustomView() != null) {
-                if (mHasSelection && !mTextView.hasTransientState()) {
-                    mTextView.setHasTransientState(true);
-                }
-                return true;
-            } else {
-                return false;
+            if (mHasSelection && !mTextView.hasTransientState()) {
+                mTextView.setHasTransientState(true);
             }
+            return true;
         }
 
         private Callback getCustomCallback() {
