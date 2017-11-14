@@ -83,37 +83,6 @@ static void BM_AssetManagerLoadFrameworkAssetsOld(benchmark::State& state) {
 }
 BENCHMARK(BM_AssetManagerLoadFrameworkAssetsOld);
 
-static void GetResourceBenchmark(const std::vector<std::string>& paths,
-                                 const ResTable_config* config, uint32_t resid,
-                                 benchmark::State& state) {
-  std::vector<std::unique_ptr<const ApkAssets>> apk_assets;
-  std::vector<const ApkAssets*> apk_assets_ptrs;
-  for (const std::string& path : paths) {
-    std::unique_ptr<const ApkAssets> apk = ApkAssets::Load(path);
-    if (apk == nullptr) {
-      state.SkipWithError(base::StringPrintf("Failed to load assets %s", path.c_str()).c_str());
-      return;
-    }
-    apk_assets_ptrs.push_back(apk.get());
-    apk_assets.push_back(std::move(apk));
-  }
-
-  AssetManager2 assetmanager;
-  assetmanager.SetApkAssets(apk_assets_ptrs);
-  if (config != nullptr) {
-    assetmanager.SetConfiguration(*config);
-  }
-
-  Res_value value;
-  ResTable_config selected_config;
-  uint32_t flags;
-
-  while (state.KeepRunning()) {
-    assetmanager.GetResource(resid, false /* may_be_bag */, 0u /* density_override */, &value,
-                             &selected_config, &flags);
-  }
-}
-
 static void BM_AssetManagerGetResource(benchmark::State& state) {
   GetResourceBenchmark({GetTestDataPath() + "/basic/basic.apk"}, nullptr /*config*/,
                        basic::R::integer::number1, state);

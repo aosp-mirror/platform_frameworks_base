@@ -18,6 +18,7 @@
 
 #include "androidfw/LoadedArsc.h"
 
+#include <algorithm>
 #include <cstddef>
 #include <limits>
 
@@ -244,31 +245,63 @@ bool LoadedPackage::FindEntry(const TypeSpecPtr& type_spec_ptr, uint16_t entry_i
 
   for (uint32_t i = 0; i < type_spec_ptr->type_count; i++) {
     const Type* type = &type_spec_ptr->types[i];
+    const ResTable_type* type_chunk = type->type;
 
     if (type->configuration.match(config) &&
         (best_config == nullptr || type->configuration.isBetterThan(*best_config, &config))) {
       // The configuration matches and is better than the previous selection.
       // Find the entry value if it exists for this configuration.
-      const size_t entry_count = dtohl(type->type->entryCount);
-      const size_t offsets_offset = dtohs(type->type->header.headerSize);
-      if (entry_idx < entry_count) {
-        // If the package hasn't been verified, do bounds checking.
-        if (!Verified) {
-          if (!VerifyResTableType(type->type)) {
-            continue;
-          }
+      const size_t entry_count = dtohl(type_chunk->entryCount);
+      const size_t offsets_offset = dtohs(type_chunk->header.headerSize);
+
+      // If the package hasn't been verified, do bounds checking.
+      if (!Verified) {
+        if (!VerifyResTableType(type_chunk)) {
+          continue;
+        }
+      }
+
+      // Check if there is the desired entry in this type.
+
+      if (type_chunk->flags & ResTable_type::FLAG_SPARSE) {
+        // This is encoded as a sparse map, so perform a binary search.
+        const ResTable_sparseTypeEntry* sparse_indices =
+            reinterpret_cast<const ResTable_sparseTypeEntry*>(
+                reinterpret_cast<const uint8_t*>(type_chunk) + offsets_offset);
+        const ResTable_sparseTypeEntry* sparse_indices_end = sparse_indices + entry_count;
+        const ResTable_sparseTypeEntry* result =
+            std::lower_bound(sparse_indices, sparse_indices_end, entry_idx,
+                             [](const ResTable_sparseTypeEntry& entry, uint16_t entry_idx) {
+                               return dtohs(entry.idx) < entry_idx;
+                             });
+
+        if (result == sparse_indices_end || dtohs(result->idx) != entry_idx) {
+          // No entry found.
+          continue;
+        }
+
+        // Extract the offset from the entry. Each offset must be a multiple of 4 so we store it as
+        // the real offset divided by 4.
+        best_offset = dtohs(result->offset) * 4u;
+      } else {
+        if (entry_idx >= entry_count) {
+          // This entry cannot be here.
+          continue;
         }
 
         const uint32_t* entry_offsets = reinterpret_cast<const uint32_t*>(
-            reinterpret_cast<const uint8_t*>(type->type) + offsets_offset);
+            reinterpret_cast<const uint8_t*>(type_chunk) + offsets_offset);
         const uint32_t offset = dtohl(entry_offsets[entry_idx]);
-        if (offset != ResTable_type::NO_ENTRY) {
-          // There is an entry for this resource, record it.
-          best_config = &type->configuration;
-          best_type = type->type;
-          best_offset = offset;
+        if (offset == ResTable_type::NO_ENTRY) {
+          continue;
         }
+
+        // There is an entry for this resource, record it.
+        best_offset = offset;
       }
+
+      best_config = &type->configuration;
+      best_type = type_chunk;
     }
   }
 
@@ -335,14 +368,27 @@ static bool VerifyType(const Chunk& chunk) {
   const size_t entry_count = dtohl(header->entryCount);
   const size_t offsets_offset = chunk.header_size();
 
-  // Check each entry offset.
-  const uint32_t* offsets =
-      reinterpret_cast<const uint32_t*>(reinterpret_cast<const uint8_t*>(header) + offsets_offset);
-  for (size_t i = 0; i < entry_count; i++) {
-    uint32_t offset = dtohl(offsets[i]);
-    if (offset != ResTable_type::NO_ENTRY) {
+  if (header->flags & ResTable_type::FLAG_SPARSE) {
+    // This is encoded as a sparse map, so perform a binary search.
+    const ResTable_sparseTypeEntry* sparse_indices =
+        reinterpret_cast<const ResTable_sparseTypeEntry*>(reinterpret_cast<const uint8_t*>(header) +
+                                                          offsets_offset);
+    for (size_t i = 0; i < entry_count; i++) {
+      const uint32_t offset = uint32_t{dtohs(sparse_indices[i].offset)} * 4u;
       if (!VerifyResTableEntry(header, offset, i)) {
         return false;
+      }
+    }
+  } else {
+    // Check each entry offset.
+    const uint32_t* offsets = reinterpret_cast<const uint32_t*>(
+        reinterpret_cast<const uint8_t*>(header) + offsets_offset);
+    for (size_t i = 0; i < entry_count; i++) {
+      uint32_t offset = dtohl(offsets[i]);
+      if (offset != ResTable_type::NO_ENTRY) {
+        if (!VerifyResTableEntry(header, offset, i)) {
+          return false;
+        }
       }
     }
   }
