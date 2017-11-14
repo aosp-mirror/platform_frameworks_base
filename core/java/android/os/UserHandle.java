@@ -27,6 +27,8 @@ import java.io.PrintWriter;
  * Representation of a user on the device.
  */
 public final class UserHandle implements Parcelable {
+    // NOTE: keep logic in sync with system/core/libcutils/multiuser.c
+
     /**
      * @hide Range of uids allocated for a user.
      */
@@ -87,6 +89,19 @@ public final class UserHandle implements Parcelable {
      * there are problems with single user use-cases.
      */
     public static final boolean MU_ENABLED = true;
+
+    /** @hide */
+    public static final int ERR_GID = -1;
+    /** @hide */
+    public static final int AID_ROOT = android.os.Process.ROOT_UID;
+    /** @hide */
+    public static final int AID_APP_START = android.os.Process.FIRST_APPLICATION_UID;
+    /** @hide */
+    public static final int AID_APP_END = android.os.Process.LAST_APPLICATION_UID;
+    /** @hide */
+    public static final int AID_SHARED_GID_START = android.os.Process.FIRST_SHARED_APPLICATION_GID;
+    /** @hide */
+    public static final int AID_CACHE_GID_START = android.os.Process.FIRST_APPLICATION_CACHE_GID;
 
     final int mHandle;
 
@@ -197,13 +212,20 @@ public final class UserHandle implements Parcelable {
         return getUid(userId, Process.SHARED_USER_GID);
     }
 
-    /**
-     * Returns the shared app gid for a given uid or appId.
-     * @hide
-     */
-    public static int getSharedAppGid(int id) {
-        return Process.FIRST_SHARED_APPLICATION_GID + (id % PER_USER_RANGE)
-                - Process.FIRST_APPLICATION_UID;
+    /** @hide */
+    public static int getSharedAppGid(int uid) {
+        return getSharedAppGid(getUserId(uid), getAppId(uid));
+    }
+
+    /** @hide */
+    public static int getSharedAppGid(int userId, int appId) {
+        if (appId >= AID_APP_START && appId <= AID_APP_END) {
+            return (appId - AID_APP_START) + AID_SHARED_GID_START;
+        } else if (appId >= AID_ROOT && appId <= AID_APP_START) {
+            return appId;
+        } else {
+            return -1;
+        }
     }
 
     /**
@@ -219,13 +241,18 @@ public final class UserHandle implements Parcelable {
         return appId;
     }
 
-    /**
-     * Returns the cache GID for a given UID or appId.
-     * @hide
-     */
-    public static int getCacheAppGid(int id) {
-        return Process.FIRST_APPLICATION_CACHE_GID + (id % PER_USER_RANGE)
-                - Process.FIRST_APPLICATION_UID;
+    /** @hide */
+    public static int getCacheAppGid(int uid) {
+        return getCacheAppGid(getUserId(uid), getAppId(uid));
+    }
+
+    /** @hide */
+    public static int getCacheAppGid(int userId, int appId) {
+        if (appId >= AID_APP_START && appId <= AID_APP_END) {
+            return getUid(userId, (appId - AID_APP_START) + AID_CACHE_GID_START);
+        } else {
+            return -1;
+        }
     }
 
     /**
