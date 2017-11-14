@@ -1865,14 +1865,25 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
     }
 
     @Test
-    public void testStats_updatedOnExpansion() throws Exception {
-        final NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
+    public void testStats_updatedOnUserExpansion() throws Exception {
+        NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
         mService.addNotification(r);
 
         mService.mNotificationDelegate.onNotificationExpansionChanged(r.getKey(), true, true);
         assertTrue(mService.getNotificationRecord(r.getKey()).getStats().hasExpanded());
         mService.mNotificationDelegate.onNotificationExpansionChanged(r.getKey(), true, false);
         assertTrue(mService.getNotificationRecord(r.getKey()).getStats().hasExpanded());
+    }
+
+    @Test
+    public void testStats_notUpdatedOnAutoExpansion() throws Exception {
+        NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
+        mService.addNotification(r);
+
+        mService.mNotificationDelegate.onNotificationExpansionChanged(r.getKey(), false, true);
+        assertFalse(mService.getNotificationRecord(r.getKey()).getStats().hasExpanded());
+        mService.mNotificationDelegate.onNotificationExpansionChanged(r.getKey(), false, false);
+        assertFalse(mService.getNotificationRecord(r.getKey()).getStats().hasExpanded());
     }
 
     @Test
