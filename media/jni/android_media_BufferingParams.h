@@ -29,14 +29,8 @@ struct BufferingParams {
         jclass      clazz;
         jmethodID   constructID;
 
-        jfieldID    initial_buffering_mode;
-        jfieldID    rebuffering_mode;
-        jfieldID    initial_watermark_ms;
-        jfieldID    initial_watermark_kb;
-        jfieldID    rebuffering_watermark_low_ms;
-        jfieldID    rebuffering_watermark_high_ms;
-        jfieldID    rebuffering_watermark_low_kb;
-        jfieldID    rebuffering_watermark_high_kb;
+        jfieldID    initial_mark_ms;
+        jfieldID    resume_playback_mark_ms;
 
         void init(JNIEnv *env) {
             jclass lclazz = env->FindClass("android/media/BufferingParams");
@@ -51,14 +45,8 @@ struct BufferingParams {
 
             constructID = env->GetMethodID(clazz, "<init>", "()V");
 
-            initial_buffering_mode = env->GetFieldID(clazz, "mInitialBufferingMode", "I");
-            rebuffering_mode = env->GetFieldID(clazz, "mRebufferingMode", "I");
-            initial_watermark_ms = env->GetFieldID(clazz, "mInitialWatermarkMs", "I");
-            initial_watermark_kb = env->GetFieldID(clazz, "mInitialWatermarkKB", "I");
-            rebuffering_watermark_low_ms = env->GetFieldID(clazz, "mRebufferingWatermarkLowMs", "I");
-            rebuffering_watermark_high_ms = env->GetFieldID(clazz, "mRebufferingWatermarkHighMs", "I");
-            rebuffering_watermark_low_kb = env->GetFieldID(clazz, "mRebufferingWatermarkLowKB", "I");
-            rebuffering_watermark_high_kb = env->GetFieldID(clazz, "mRebufferingWatermarkHighKB", "I");
+            initial_mark_ms = env->GetFieldID(clazz, "mInitialMarkMs", "I");
+            resume_playback_mark_ms = env->GetFieldID(clazz, "mResumePlaybackMarkMs", "I");
 
             env->DeleteLocalRef(lclazz);
         }
@@ -70,22 +58,10 @@ struct BufferingParams {
     };
 
     void fillFromJobject(JNIEnv *env, const fields_t& fields, jobject params) {
-        settings.mInitialBufferingMode =
-            (BufferingMode)env->GetIntField(params, fields.initial_buffering_mode);
-        settings.mRebufferingMode =
-            (BufferingMode)env->GetIntField(params, fields.rebuffering_mode);
-        settings.mInitialWatermarkMs =
-            env->GetIntField(params, fields.initial_watermark_ms);
-        settings.mInitialWatermarkKB =
-            env->GetIntField(params, fields.initial_watermark_kb);
-        settings.mRebufferingWatermarkLowMs =
-            env->GetIntField(params, fields.rebuffering_watermark_low_ms);
-        settings.mRebufferingWatermarkHighMs =
-            env->GetIntField(params, fields.rebuffering_watermark_high_ms);
-        settings.mRebufferingWatermarkLowKB =
-            env->GetIntField(params, fields.rebuffering_watermark_low_kb);
-        settings.mRebufferingWatermarkHighKB =
-            env->GetIntField(params, fields.rebuffering_watermark_high_kb);
+        settings.mInitialMarkMs =
+            env->GetIntField(params, fields.initial_mark_ms);
+        settings.mResumePlaybackMarkMs =
+            env->GetIntField(params, fields.resume_playback_mark_ms);
     }
 
     jobject asJobject(JNIEnv *env, const fields_t& fields) {
@@ -93,14 +69,8 @@ struct BufferingParams {
         if (params == NULL) {
             return NULL;
         }
-        env->SetIntField(params, fields.initial_buffering_mode, (jint)settings.mInitialBufferingMode);
-        env->SetIntField(params, fields.rebuffering_mode, (jint)settings.mRebufferingMode);
-        env->SetIntField(params, fields.initial_watermark_ms, (jint)settings.mInitialWatermarkMs);
-        env->SetIntField(params, fields.initial_watermark_kb, (jint)settings.mInitialWatermarkKB);
-        env->SetIntField(params, fields.rebuffering_watermark_low_ms, (jint)settings.mRebufferingWatermarkLowMs);
-        env->SetIntField(params, fields.rebuffering_watermark_high_ms, (jint)settings.mRebufferingWatermarkHighMs);
-        env->SetIntField(params, fields.rebuffering_watermark_low_kb, (jint)settings.mRebufferingWatermarkLowKB);
-        env->SetIntField(params, fields.rebuffering_watermark_high_kb, (jint)settings.mRebufferingWatermarkHighKB);
+        env->SetIntField(params, fields.initial_mark_ms, (jint)settings.mInitialMarkMs);
+        env->SetIntField(params, fields.resume_playback_mark_ms, (jint)settings.mResumePlaybackMarkMs);
 
         return params;
     }
