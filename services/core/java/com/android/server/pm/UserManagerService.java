@@ -1010,6 +1010,23 @@ public class UserManagerService extends IUserManager.Stub {
         }
     }
 
+    @Override
+    public boolean hasRestrictedProfiles() {
+        checkManageUsersPermission("hasRestrictedProfiles");
+        final int callingUserId = UserHandle.getCallingUserId();
+        synchronized (mUsersLock) {
+            final int userSize = mUsers.size();
+            for (int i = 0; i < userSize; i++) {
+                UserInfo profile = mUsers.valueAt(i).info;
+                if (callingUserId != profile.id
+                        && profile.restrictedProfileParentId == callingUserId) {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+
     /*
      * Should be locked on mUsers before calling this.
      */
