@@ -360,6 +360,42 @@ public class SubscriptionManager {
     public static final String CB_OPT_OUT_DIALOG = "show_cmas_opt_out_dialog";
 
     /**
+     * TelephonyProvider column name for enable Volte.
+     *@hide
+     */
+    public static final String ENHANCED_4G_MODE_ENABLED = "volte_vt_enabled";
+
+    /**
+     * TelephonyProvider column name for enable VT (Video Telephony over IMS)
+     *@hide
+     */
+    public static final String VT_IMS_ENABLED = "vt_ims_enabled";
+
+    /**
+     * TelephonyProvider column name for enable Wifi calling
+     *@hide
+     */
+    public static final String WFC_IMS_ENABLED = "wfc_ims_enabled";
+
+    /**
+     * TelephonyProvider column name for Wifi calling mode
+     *@hide
+     */
+    public static final String WFC_IMS_MODE = "wfc_ims_mode";
+
+    /**
+     * TelephonyProvider column name for Wifi calling mode in roaming
+     *@hide
+     */
+    public static final String WFC_IMS_ROAMING_MODE = "wfc_ims_roaming_mode";
+
+    /**
+     * TelephonyProvider column name for enable Wifi calling in roaming
+     *@hide
+     */
+    public static final String WFC_IMS_ROAMING_ENABLED = "wfc_ims_roaming_enabled";
+
+    /**
      * Broadcast Action: The user has changed one of the default subs related to
      * data, phone calls, or sms</p>
      *
