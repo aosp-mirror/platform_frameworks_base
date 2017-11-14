@@ -24,6 +24,7 @@
 #include "TestHelpers.h"
 #include "data/basic/R.h"
 
+using ::android::base::unique_fd;
 using ::com::android::basic::R;
 
 namespace android {
@@ -31,6 +32,26 @@ namespace android {
 TEST(ApkAssetsTest, LoadApk) {
   std::unique_ptr<const ApkAssets> loaded_apk =
       ApkAssets::Load(GetTestDataPath() + "/basic/basic.apk");
+  ASSERT_NE(nullptr, loaded_apk);
+
+  const LoadedArsc* loaded_arsc = loaded_apk->GetLoadedArsc();
+  ASSERT_NE(nullptr, loaded_arsc);
+
+  const LoadedPackage* loaded_package = loaded_arsc->GetPackageForId(0x7f010000);
+  ASSERT_NE(nullptr, loaded_package);
+  EXPECT_TRUE(loaded_package->IsVerified());
+
+  std::unique_ptr<Asset> asset = loaded_apk->Open("res/layout/main.xml");
+  ASSERT_NE(nullptr, asset);
+}
+
+TEST(ApkAssetsTest, LoadApkFromFd) {
+  const std::string path = GetTestDataPath() + "/basic/basic.apk";
+  unique_fd fd(::open(path.c_str(), O_RDONLY | O_BINARY));
+  ASSERT_GE(fd.get(), 0);
+
+  std::unique_ptr<const ApkAssets> loaded_apk =
+      ApkAssets::LoadFromFd(std::move(fd), path, false /*system*/, false /*force_shared_lib*/);
   ASSERT_NE(nullptr, loaded_apk);
 
   const LoadedArsc* loaded_arsc = loaded_apk->GetLoadedArsc();
@@ -132,7 +153,7 @@ TEST(ApkAssetsTest, OpenUncompressedAssetFd) {
   ASSERT_NE(nullptr, asset);
 
   off64_t start, length;
-  base::unique_fd fd(asset->openFileDescriptor(&start, &length));
+  unique_fd fd(asset->openFileDescriptor(&start, &length));
   EXPECT_GE(fd.get(), 0);
 
   lseek64(fd.get(), start, SEEK_SET);
