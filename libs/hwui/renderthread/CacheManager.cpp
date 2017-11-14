@@ -18,7 +18,6 @@
 
 #include "Layer.h"
 #include "RenderThread.h"
-#include "pipeline/skia/ShaderCache.h"
 #include "renderstate/RenderState.h"
 
 #include <GrContextOptions.h>
@@ -128,8 +127,6 @@ void CacheManager::configureContext(GrContextOptions* contextOptions) {
         }
         contextOptions->fExecutor = mTaskProcessor.get();
     }
-
-    contextOptions->fPersistentCache = &skiapipeline::ShaderCache::get();
 }
 
 void CacheManager::trimMemory(TrimMemoryMode mode) {
