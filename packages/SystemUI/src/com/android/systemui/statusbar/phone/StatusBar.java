@@ -6838,6 +6838,15 @@ public class StatusBar extends SystemUI implements DemoMode,
             return false;
         }
 
+        if (mIsOccluded && !isDozing()) {
+            boolean devicePublic = isLockscreenPublicMode(mCurrentUserId);
+            boolean userPublic = devicePublic || isLockscreenPublicMode(sbn.getUserId());
+            boolean needsRedaction = needsRedaction(entry);
+            if (userPublic && needsRedaction) {
+                return false;
+            }
+        }
+
         if (sbn.getNotification().fullScreenIntent != null) {
             if (mAccessibilityManager.isTouchExplorationEnabled()) {
                 if (DEBUG) Log.d(TAG, "No peeking: accessible fullscreen: " + sbn.getKey());
