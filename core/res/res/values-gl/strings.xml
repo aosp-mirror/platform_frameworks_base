@@ -1626,7 +1626,6 @@
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"2.º <xliff:g id="LABEL">%1$s</xliff:g> do traballo"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"3.º <xliff:g id="LABEL">%1$s</xliff:g> do traballo"</string>
     <string name="lock_to_app_toast" msgid="6820571533009838261">"Para soltar a pantalla, mantén premidos os botóns Volver e Visión xeral."</string>
-    <string name="lock_to_app_toast_locked" msgid="7849470948648628704">"Esta aplicación non se pode soltar"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Pantalla fixada"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Pantalla desactivada"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Solicitar un PIN antes de soltar a pantalla"</string>
@@ -1782,14 +1781,10 @@
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"Proba de mensaxes de urxencia"</string>
     <string name="notification_reply_button_accessibility" msgid="3621714652387814344">"Responder"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
-    <!-- no translation found for mmcc_authentication_reject (5767701075994754356) -->
-    <skip />
-    <!-- no translation found for mmcc_imsi_unknown_in_hlr (5316658473301462825) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_ms (807334478177362062) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_me (1950705155760872972) -->
-    <skip />
+    <string name="mmcc_authentication_reject" msgid="5767701075994754356">"Non se permite a tarxeta SIM para as accións de voz"</string>
+    <string name="mmcc_imsi_unknown_in_hlr" msgid="5316658473301462825">"Non se introduciu ningunha tarxeta SIM para as accións de voz"</string>
+    <string name="mmcc_illegal_ms" msgid="807334478177362062">"Non se permite a tarxeta SIM para as accións de voz"</string>
+    <string name="mmcc_illegal_me" msgid="1950705155760872972">"Non se permite o teléfono para as accións de voz"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"Ventá emerxente"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"<xliff:g id="NUMBER">%1$d</xliff:g> máis"</string>
     <string name="shortcut_restored_on_lower_version" msgid="5270675146351613828">"Para utilizar este atallo, necesítase a versión máis recente da aplicación"</string>

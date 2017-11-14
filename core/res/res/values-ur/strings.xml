@@ -1626,7 +1626,6 @@
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"دوسرا کام <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"تیسرا کام <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="6820571533009838261">"اس اسکرین سے پن ہٹانے کیلئے، ٹچ کریں اور مجموعی جائزہ اور واپس جائیں بٹنز کو دبائے رکھیں"</string>
-    <string name="lock_to_app_toast_locked" msgid="7849470948648628704">"اس ایپ سے پن ہٹایا نہیں جا سکتا"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"اسکرین کو پن کر دیا گیا"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"اسکرین کا پن ہٹا دیا گیا"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"‏پن ہٹانے سے پہلے PIN طلب کریں"</string>
@@ -1782,18 +1781,14 @@
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"ایمرجنسی پیغامات کی جانچ"</string>
     <string name="notification_reply_button_accessibility" msgid="3621714652387814344">"جواب دیں"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
-    <!-- no translation found for mmcc_authentication_reject (5767701075994754356) -->
-    <skip />
-    <!-- no translation found for mmcc_imsi_unknown_in_hlr (5316658473301462825) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_ms (807334478177362062) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_me (1950705155760872972) -->
-    <skip />
+    <string name="mmcc_authentication_reject" msgid="5767701075994754356">"‏آواز کیلئے SIM کو اجازت نہیں ہے"</string>
+    <string name="mmcc_imsi_unknown_in_hlr" msgid="5316658473301462825">"‏SIM میں آواز کیلئے سہولت نہیں ہے"</string>
+    <string name="mmcc_illegal_ms" msgid="807334478177362062">"‏آواز کیلئے SIM کو اجازت نہیں ہے"</string>
+    <string name="mmcc_illegal_me" msgid="1950705155760872972">"آواز کیلئے فون کو اجازت نہیں ہے"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"پاپ اپ ونڈو"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"‎‎‎‎‎+ <xliff:g id="NUMBER">%1$d</xliff:g>‎‎"</string>
     <string name="shortcut_restored_on_lower_version" msgid="5270675146351613828">"اس شارٹ کٹ کیلئے جدید ترین ایپ درکار ہے"</string>
     <string name="shortcut_restore_not_supported" msgid="5028808567940014190">"شارٹ کٹ کو بحال نہیں کیا جا سکا، کیونکہ ایپ بیک اپ اور بحالی کو سپورٹ نہیں کرتی ہے"</string>
-    <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"ایپ کی دستخط کے غیر مماثل ہونے کی وجہ سے شارٹ کٹ کو بحال نہیں کیا جا سکا"</string>
+    <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"ایپ دستخط غیر مماثل ہونے کی وجہ سے شارٹ کٹ کو بحال نہیں کیا جا سکا"</string>
     <string name="shortcut_restore_unknown_issue" msgid="8703738064603262597">"شارٹ کٹ کو بحال نہیں کیا جا سکا"</string>
 </resources>
