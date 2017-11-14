@@ -20,7 +20,7 @@ statsd_common_src := \
     ../../core/java/android/os/IStatsManager.aidl \
     src/stats_log.proto \
     src/statsd_config.proto \
-    src/stats_events_copy.proto \
+    src/atoms_copy.proto \
     src/anomaly/AnomalyMonitor.cpp \
     src/condition/CombinationConditionTracker.cpp \
     src/condition/condition_util.cpp \

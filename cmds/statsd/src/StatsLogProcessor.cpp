@@ -66,7 +66,7 @@ void StatsLogProcessor::OnLogEvent(const LogEvent& msg) {
     }
 
     // Hard-coded logic to update the isolated uid's in the uid-map.
-    // The field numbers need to be currently updated by hand with stats_events.proto
+    // The field numbers need to be currently updated by hand with atoms.proto
     if (msg.GetTagId() == android::util::ISOLATED_UID_CHANGED) {
         status_t err = NO_ERROR, err2 = NO_ERROR, err3 = NO_ERROR;
         bool is_create = msg.GetBool(3, &err);

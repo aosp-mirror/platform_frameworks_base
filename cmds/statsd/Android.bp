@@ -20,7 +20,7 @@
 cc_library_host_shared {
     name: "libstats_proto_host",
     srcs: [
-        "src/stats_events.proto",
+        "src/atoms.proto",
     ],
 
     shared_libs: [

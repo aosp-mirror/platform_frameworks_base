@@ -22,7 +22,7 @@ package android.os.statsd;
 option java_package = "com.android.os";
 option java_outer_classname = "StatsLog";
 
-import "frameworks/base/cmds/statsd/src/stats_events_copy.proto";
+import "frameworks/base/cmds/statsd/src/atoms_copy.proto";
 
 message KeyValuePair {
   optional int32 key = 1;
@@ -38,7 +38,7 @@ message KeyValuePair {
 message EventMetricData {
   optional int64 timestamp_nanos = 1;
 
-  optional StatsEvent stats_events = 2;
+  optional Atom atom = 2;
 }
 
 message CountBucketInfo {
