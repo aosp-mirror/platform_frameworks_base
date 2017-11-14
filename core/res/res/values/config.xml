@@ -3161,4 +3161,6 @@
 
     <!-- Corner radius of system dialogs -->
     <dimen name="config_dialogCornerRadius">2dp</dimen>
+
+    <string translatable="false" name="config_batterySaverDeviceSpecificConfig"></string>
 </resources>

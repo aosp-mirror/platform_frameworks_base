@@ -3149,4 +3149,5 @@
 
   <!-- From media projection -->
   <java-symbol type="string" name="config_mediaProjectionPermissionDialogComponent" />
+  <java-symbol type="string" name="config_batterySaverDeviceSpecificConfig" />
 </resources>

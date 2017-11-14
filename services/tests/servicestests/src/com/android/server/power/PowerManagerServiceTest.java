@@ -16,31 +16,27 @@
 
 package com.android.server.power;
 
-import android.content.Context;
+import static android.os.PowerManagerInternal.WAKEFULNESS_ASLEEP;
+import static android.os.PowerManagerInternal.WAKEFULNESS_AWAKE;
+
+import static com.google.common.truth.Truth.assertThat;
+
+import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.when;
+
 import android.hardware.display.DisplayManagerInternal.DisplayPowerRequest;
 import android.os.PowerManager;
 import android.os.PowerSaveState;
 import android.os.SystemProperties;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
-import android.text.TextUtils;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
+
+import com.android.server.power.batterysaver.BatterySaverController;
+
 import org.junit.Rule;
-import org.junit.rules.TemporaryFolder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
-import static android.os.PowerManagerInternal.WAKEFULNESS_ASLEEP;
-import static android.os.PowerManagerInternal.WAKEFULNESS_AWAKE;
-import static android.os.PowerManagerInternal.WAKEFULNESS_DOZING;
-import static android.os.PowerManagerInternal.WAKEFULNESS_DREAMING;
-import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.when;
 
 /**
  * Tests for {@link com.android.server.power.PowerManagerService}

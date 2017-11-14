@@ -147,4 +147,18 @@ public class KeyValueListParser {
         }
         return def;
     }
+
+    /**
+     * @return the number of keys.
+     */
+    public int size() {
+        return mValues.size();
+    }
+
+    /**
+     * @return the key at {@code index}. Use with {@link #size()} to enumerate all key-value pairs.
+     */
+    public String keyAt(int index) {
+        return mValues.keyAt(index);
+    }
 }
