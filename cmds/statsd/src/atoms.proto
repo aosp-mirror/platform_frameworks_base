@@ -19,10 +19,10 @@ syntax = "proto2";
 // TODO: Not the right package and class name
 package android.os.statsd;
 option java_package = "com.android.os";
-option java_outer_classname = "StatsEventProto";
+option java_outer_classname = "AtomsProto";
 
 /**
- * The master event class. This message defines all of the available
+ * The master atom class. This message defines all of the available
  * raw stats log events from the Android system, also known as "atoms."
  *
  * This field contains a single oneof with all of the available messages.
@@ -30,12 +30,12 @@ option java_outer_classname = "StatsEventProto";
  * generates the android.util.StatsLog class, which contains the constants
  * and methods that Android uses to log.
  *
- * This StatsEvent class is not actually built into the Android system.
+ * This Atom class is not actually built into the Android system.
  * Instead, statsd on Android constructs these messages synthetically,
  * in the format defined here and in stats_log.proto.
  */
-message StatsEvent {
-    // Pushed events start at 2.
+message Atom {
+    // Pushed atoms start at 2.
     oneof pushed {
         // For StatsLog reasons, 1 is illegal and will not work. Must start at 2.
         BleScanStateChanged ble_scan_state_changed = 2;
@@ -114,7 +114,7 @@ message WorkSource {
  *   - The types must be built-in protocol buffer types, namely, no sub-messages
  *     are allowed (yet).  The bytes type is also not allowed.
  *   - The CamelCase name of the message type should match the
- *     underscore_separated name as defined in StatsEvent.
+ *     underscore_separated name as defined in Atom.
  *   - If an atom represents work that can be attributed to an app, there can
  *     be exactly one WorkSource field. It must be field number 1.
  *   - A field that is a uid should be a string field, tagged with the [xxx]
@@ -397,7 +397,7 @@ message WakelockStateChanged {
         FULL = 1;
         WINDOW = 2;
     }
-    optional int32 type = 2;
+    optional Type type = 2;
 
     // The wakelock tag (Called tag in the Java API, sometimes name elsewhere).
     optional string tag = 3;
@@ -425,7 +425,7 @@ message UidWakelockStateChanged {
         FULL = 1;
         WINDOW = 2;
     }
-    optional int32 type = 2;
+    optional Type type = 2;
 
     enum State {
         OFF = 0;
@@ -852,7 +852,6 @@ message PowerStateSubsystemSleepStatePulled {
 }
 
 /**
-<<<<<<< HEAD
  * Logs creation or removal of an isolated uid. Isolated uid's are temporary uid's to sandbox risky
  * behavior in its own uid. However, the metrics of these isolated uid's almost always should be
  * attributed back to the parent (host) uid. One example is Chrome.
@@ -872,7 +871,6 @@ message IsolatedUidChanged {
 }
 
 /*
-<<<<<<< HEAD
  * Pulls Cpu time per frequency.
  * Note: this should be pulled for gauge metric only, without condition.
  * The puller keeps internal state of last values. It should not be pulled by

@@ -1,0 +1,911 @@
+/*
+ * Copyright (C) 2017 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+option optimize_for = LITE_RUNTIME;
+
+
+// TODO: Not the right package and class name
+package android.os.statsd;
+option java_package = "com.android.os";
+option java_outer_classname = "AtomsProto";
+
+/**
+ * The master atom class. This message defines all of the available
+ * raw stats log events from the Android system, also known as "atoms."
+ *
+ * This field contains a single oneof with all of the available messages.
+ * The stats-log-api-gen tool runs as part of the Android build and
+ * generates the android.util.StatsLog class, which contains the constants
+ * and methods that Android uses to log.
+ *
+ * This Atom class is not actually built into the Android system.
+ * Instead, statsd on Android constructs these messages synthetically,
+ * in the format defined here and in stats_log.proto.
+ */
+message Atom {
+    // Pushed atoms start at 2.
+    oneof pushed {
+        // For StatsLog reasons, 1 is illegal and will not work. Must start at 2.
+        BleScanStateChanged ble_scan_state_changed = 2;
+        BleUnoptimizedScanStateChanged ble_unoptimized_scan_state_changed = 3;
+        BleScanResultReceived ble_scan_result_received = 4;
+        SensorStateChanged sensor_state_changed = 5;
+        GpsScanStateChanged gps_scan_state_changed = 6; // TODO: untested
+        SyncStateChanged sync_state_changed = 7;
+        ScheduledJobStateChanged scheduled_job_state_changed = 8;
+        ScreenBrightnessChanged screen_brightness_changed = 9;
+        // 10-20 are temporarily reserved for wakelocks etc.
+        WakelockStateChanged wakelock_state_changed = 10;
+        UidWakelockStateChanged uid_wakelock_state_changed = 11;
+        LongPartialWakelockStateChanged long_partial_wakelock_state_changed = 12;
+        BatterySaverModeStateChanged battery_saver_mode_state_changed = 21;
+        DeviceIdleModeStateChanged device_idle_mode_state_changed = 22;
+        AudioStateChanged audio_state_changed = 23;
+        MediaCodecActivityChanged media_codec_activity_changed = 24;
+        CameraStateChanged camera_state_changed = 25;
+        FlashlightStateChanged flashlight_state_changed = 26;
+        UidProcessStateChanged uid_process_state_changed = 27;
+        ProcessLifeCycleStateChanged process_life_cycle_state_changed = 28;
+        ScreenStateChanged screen_state_changed = 29;
+        BatteryLevelChanged battery_level_changed = 30;
+        ChargingStateChanged charging_state_changed = 31;
+        PluggedStateChanged plugged_state_changed = 32;
+        DeviceTemperatureReported device_temperature_reported = 33;
+        DeviceOnStatusChanged device_on_status_changed = 34;
+        WakeupAlarmOccurred wakeup_alarm_occurred = 35;
+        KernelWakeupReported kernel_wakeup_reported = 36;
+        WifiLockStateChanged wifi_lock_state_changed = 37;
+        WifiSignalStrengthChanged wifi_signal_strength_changed = 38;
+        WifiScanStateChanged wifi_scan_state_changed = 39;
+        PhoneSignalStrengthChanged phone_signal_strength_changed = 40;
+        SettingChanged setting_changed = 41;
+        ActivityForegroundStateChanged activity_foreground_state_changed = 42;
+        IsolatedUidChanged isolated_uid_changed = 43;
+        // TODO: Reorder the numbering so that the most frequent occur events occur in the first 15.
+    }
+
+    // Pulled events will start at field 1000.
+    oneof pulled {
+        WifiBytesTransferred wifi_bytes_transferred = 1000;
+        WifiBytesTransferredByFgBg wifi_bytes_transferred_by_fg_bg = 1001;
+        MobileBytesTransferred mobile_bytes_transferred = 1002;
+        MobileBytesTransferredByFgBg mobile_bytes_transferred_by_fg_bg = 1003;
+        KernelWakelockPulled kernel_wakelock_pulled = 1004;
+        PowerStatePlatformSleepStatePulled power_state_platform_sleep_state_pulled = 1005;
+        PowerStateVoterPulled power_state_voter_pulled = 1006;
+        PowerStateSubsystemSleepStatePulled power_state_subsystem_sleep_state_pulled = 1007;
+        CpuTimePerFreqPulled cpu_time_per_freq_pulled = 1008;
+        CpuTimePerUidPulled cpu_time_per_uid_pulled = 1009;
+        CpuTimePerUidFreqPulled cpu_time_per_uid_freq_pulled = 1010;
+    }
+}
+
+/**
+ * A WorkSource represents the chained attribution of applications that
+ * resulted in a particular bit of work being done.
+ */
+message WorkSource {
+    // TODO
+}
+
+/*
+ * *****************************************************************************
+ * Below are all of the individual atoms that are logged by Android via statsd
+ * and Westworld.
+ *
+ * RULES:
+ *   - The field ids for each atom must start at 1, and count upwards by 1.
+ *     Skipping field ids is not allowed.
+ *   - These form an API, so renaming, renumbering or removing fields is
+ *     not allowed between android releases.  (This is not currently enforced,
+ *     but there will be a tool to enforce this restriction).
+ *   - The types must be built-in protocol buffer types, namely, no sub-messages
+ *     are allowed (yet).  The bytes type is also not allowed.
+ *   - The CamelCase name of the message type should match the
+ *     underscore_separated name as defined in Atom.
+ *   - If an atom represents work that can be attributed to an app, there can
+ *     be exactly one WorkSource field. It must be field number 1.
+ *   - A field that is a uid should be a string field, tagged with the [xxx]
+ *     annotation. The generated code on android will be represented by UIDs,
+ *     and those UIDs will be translated in xxx to those strings.
+ *
+ * CONVENTIONS:
+ *   - Events are past tense. e.g. ScreenStateChanged, not ScreenStateChange.
+ *   - If there is a UID, it goes first. Think in an object-oriented fashion.
+ * *****************************************************************************
+ */
+
+/**
+ * Logs when the screen state changes.
+ *
+ * Logged from:
+ *   frameworks/base/services/core/java/com/android/server/am/BatteryStatsService.java
+ */
+message ScreenStateChanged {
+    // TODO: Use the real screen state.
+    enum State {
+        STATE_UNKNOWN = 0;
+        STATE_OFF = 1;
+        STATE_ON = 2;
+        STATE_DOZE = 3;
+        STATE_DOZE_SUSPEND = 4;
+        STATE_VR = 5;
+    }
+    // New screen state.
+    optional State display_state = 1;
+}
+
+/**
+ * Logs that the state of a process state, as per the activity manager, has changed.
+ *
+ * Logged from:
+ *   frameworks/base/services/core/java/com/android/server/am/BatteryStatsService.java
+ */
+message UidProcessStateChanged {
+    optional int32 uid = 1; // TODO: should be a string tagged w/ uid annotation
+
+    // The state.
+    // TODO: Use the real (mapped) process states.
+    optional int32 state = 2;
+}
+
+/**
+ * Logs that a process started, finished, crashed, or ANRed.
+ *
+ * Logged from:
+ *   frameworks/base/services/core/java/com/android/server/am/BatteryStatsService.java
+ */
+message ProcessLifeCycleStateChanged {
+    // TODO: Use the real (mapped) process states.
+    optional int32 uid = 1; // TODO: should be a string tagged w/ uid annotation
+
+    // TODO: What is this?
+    optional string name = 2;
+
+    // The state.
+    // TODO: Use an enum.
+    optional int32 event = 3;
+}
+
+
+
+/**
+ * Logs when the ble scan state changes.
+ *
+ * Logged from:
+ *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+message BleScanStateChanged {
+    // TODO: Add attribution instead of uid.
+    optional int32 uid = 1;
+
+    enum State {
+        OFF = 0;
+        ON = 1;
+    }
+    optional State state = 2;
+}
+
+/**
+ * Logs when an unoptimized ble scan state changes.
+ *
+ * Logged from:
+ *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+// TODO: Consider changing to tracking per-scanner-id (log from AppScanStats).
+message BleUnoptimizedScanStateChanged {
+    // TODO: Add attribution instead of uid.
+    optional int32 uid = 1;
+
+    enum State {
+        OFF = 0;
+        ON = 1;
+    }
+    optional State state = 2;
+}
+
+/**
+ * Logs reporting of a ble scan finding results.
+ *
+ * Logged from:
+ *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+// TODO: Consider changing to tracking per-scanner-id (log from AppScanStats).
+message BleScanResultReceived {
+    // TODO: Add attribution instead of uid.
+    optional int32 uid = 1;
+
+    // Number of ble scan results returned.
+    optional int32 num_of_results = 2;
+}
+
+/**
+ * Logs when a sensor state changes.
+ *
+ * Logged from:
+ *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+message SensorStateChanged {
+    // TODO: Add attribution instead of uid.
+    optional int32 uid = 1;
+
+    // TODO: Is there a way to get the actual name of the sensor?
+    // The id (int) of the sensor.
+    optional int32 sensor_id = 2;
+
+    enum State {
+        OFF = 0;
+        ON = 1;
+    }
+    optional State state = 3;
+}
+
+
+/**
+ * Logs when GPS state changes.
+ *
+ * Logged from:
+ *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+message GpsScanStateChanged {
+    // TODO: Add attribution instead of uid.
+    optional int32 uid = 1;
+
+    enum State {
+        OFF = 0;
+        ON = 1;
+    }
+    optional State state = 2;
+}
+
+
+/**
+ * Logs when a sync manager sync state changes.
+ *
+ * Logged from:
+ *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+message SyncStateChanged {
+    // TODO: Add attribution instead of uid.
+    optional int32 uid = 1;
+
+    // Name of the sync (as named in the app)
+    optional string name = 2;
+
+    enum State {
+        OFF = 0;
+        ON = 1;
+    }
+    optional State state = 3;
+}
+
+/**
+ * Logs when a job scheduler job state changes.
+ *
+ * Logged from:
+ *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+message ScheduledJobStateChanged {
+    // TODO: Add attribution instead of uid.
+    optional int32 uid = 1;
+
+    // Name of the job (as named in the app)
+    optional string name = 2;
+
+    enum State {
+        OFF = 0;
+        ON = 1;
+    }
+    optional State state = 3;
+
+    // TODO: Consider adding the stopReason (int)
+}
+
+/**
+ * Logs when the audio state changes.
+ *
+ * Logged from:
+ *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+message AudioStateChanged {
+    // TODO: Add attribution instead of uid.
+    optional int32 uid = 1;
+
+    enum State {
+        OFF = 0;
+        ON = 1;
+    }
+    optional State state = 2;
+}
+
+/**
+ * Logs when the video codec state changes.
+ *
+ * Logged from:
+ *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+message MediaCodecActivityChanged {
+    // TODO: Add attribution instead of uid.
+    optional int32 uid = 1;
+
+    enum State {
+        OFF = 0;
+        ON = 1;
+    }
+    optional State state = 2;
+}
+
+/**
+ * Logs when the flashlight state changes.
+ *
+ * Logged from:
+ *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+message FlashlightStateChanged {
+    // TODO: Add attribution instead of uid.
+    optional int32 uid = 1;
+
+    enum State {
+        OFF = 0;
+        ON = 1;
+    }
+    optional State state = 2;
+}
+
+/**
+ * Logs when the camera state changes.
+ *
+ * Logged from:
+ *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+message CameraStateChanged {
+    // TODO: Add attribution instead of uid.
+    optional int32 uid = 1;
+
+    enum State {
+        OFF = 0;
+        ON = 1;
+    }
+    optional State state = 2;
+}
+
+/**
+ * Logs that the state of a wakelock (per app and per wakelock name) has changed.
+ *
+ * Logged from:
+ *   TODO
+ */
+message WakelockStateChanged {
+    // TODO: Add attribution instead of uid.
+    optional int32 uid = 1;
+
+    // Type of wakelock.
+    enum Type {
+        PARTIAL = 0;
+        FULL = 1;
+        WINDOW = 2;
+    }
+    optional Type type = 2;
+
+    // The wakelock tag (Called tag in the Java API, sometimes name elsewhere).
+    optional string tag = 3;
+
+    enum State {
+        OFF = 0;
+        ON = 1;
+    }
+    optional State state = 4;
+}
+
+/**
+ * Logs when an app is holding a wakelock, regardless of the wakelock's name.
+ *
+ * Logged from:
+ *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+message UidWakelockStateChanged {
+    // TODO: Add attribution instead of uid.
+    optional int32 uid = 1;
+
+    // Type of wakelock.
+    enum Type {
+        PARTIAL = 0;
+        FULL = 1;
+        WINDOW = 2;
+    }
+    optional Type type = 2;
+
+    enum State {
+        OFF = 0;
+        ON = 1;
+    }
+    optional State state = 3;
+}
+
+/**
+ * Logs when a partial wakelock is considered 'long' (over 1 min).
+ *
+ * Logged from:
+ *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+message LongPartialWakelockStateChanged {
+    // TODO: Add attribution instead of uid?
+    optional int32 uid = 1;
+
+    // The wakelock tag (Called tag in the Java API, sometimes name elsewhere).
+    optional string tag = 2;
+
+    // TODO: I have no idea what this is.
+    optional string history_tag = 3;
+
+    enum State {
+        OFF = 0;
+        ON = 1;
+    }
+    optional State state = 4;
+}
+
+/**
+ * Logs Battery Saver state change.
+ *
+ * Logged from:
+ *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+message BatterySaverModeStateChanged {
+    enum State {
+        OFF = 0;
+        ON = 1;
+    }
+    optional State state = 1;
+}
+
+/**
+ * Logs Doze mode state change.
+ *
+ * Logged from:
+ *   frameworks/base/services/core/java/com/android/server/am/BatteryStatsService.java
+ */
+message DeviceIdleModeStateChanged {
+    // TODO: Use the enum matching BatteryStats.DEVICE_IDLE_MODE_.
+    optional int32 state = 1;
+}
+
+/**
+ * Logs screen brightness level.
+ *
+ * Logged from:
+ *   frameworks/base/services/core/java/com/android/server/am/BatteryStatsService.java
+ */
+message ScreenBrightnessChanged {
+    // Screen brightness level. Should be in [-1, 255] according to PowerManager.java.
+    optional int32 level = 1;
+}
+
+/**
+ * Logs battery level (percent full, from 0 to 100).
+ *
+ * Logged from:
+ *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+message BatteryLevelChanged {
+    // Battery level. Should be in [0, 100].
+    optional int32 battery_level = 1;
+}
+
+/**
+ * Logs change in charging status of the device.
+ *
+ * Logged from:
+ *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+message ChargingStateChanged {
+    // TODO: Link directly to BatteryManager.java's constants (via a proto).
+    enum State {
+        BATTERY_STATUS_UNKNOWN = 1;
+        BATTERY_STATUS_CHARGING = 2;
+        BATTERY_STATUS_DISCHARGING = 3;
+        BATTERY_STATUS_NOT_CHARGING = 4;
+        BATTERY_STATUS_FULL = 5;
+    }
+    optional State charging_state = 1;
+}
+
+/**
+ * Logs whether the device is plugged in, and what power source it is using.
+ *
+ * Logged from:
+ *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+message PluggedStateChanged {
+    // TODO: Link directly to BatteryManager.java's constants (via a proto).
+    enum State {
+        // Note that NONE is not in BatteryManager.java's constants.
+        BATTERY_PLUGGED_NONE = 0;
+        // Power source is an AC charger.
+        BATTERY_PLUGGED_AC = 1;
+        // Power source is a USB port.
+        BATTERY_PLUGGED_USB = 2;
+        // Power source is wireless.
+        BATTERY_PLUGGED_WIRELESS = 4;
+    }
+    optional State plugged_state = 1;
+}
+
+/**
+ * Logs the temperature of the device, in tenths of a degree Celsius.
+ *
+ * Logged from:
+ *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+message DeviceTemperatureReported {
+    // Temperature in tenths of a degree C.
+    optional int32 temperature = 1;
+}
+
+// TODO: Define this more precisely.
+// TODO: Log the ON state somewhere. It isn't currently logged anywhere.
+/**
+ * Logs when the device turns off or on.
+ *
+ * Logged from:
+ *   frameworks/base/services/core/java/com/android/server/am/ActivityManagerService.java
+ */
+message DeviceOnStatusChanged {
+    enum State {
+        OFF = 0;
+        ON = 1;
+    }
+    optional State state = 1;
+}
+
+/**
+ * Logs when an app's wakeup alarm fires.
+ *
+ * Logged from:
+ *   frameworks/base/services/core/java/com/android/server/am/ActivityManagerService.java
+ */
+message WakeupAlarmOccurred {
+    // TODO: Add attribution instead of uid?
+    optional int32 uid = 1;
+}
+
+/**
+ * Logs kernel wakeup reasons and aborts.
+ *
+ * Logged from:
+ *   frameworks/base/services/core/java/com/android/server/am/BatteryStatsService.java
+ */
+message KernelWakeupReported {
+    // Name of the kernel wakeup reason (or abort).
+    optional string wakeup_reason_name = 1;
+
+    // Duration (in microseconds) for the wake-up interrupt to be serviced.
+    optional int64 duration_usec = 2;
+}
+
+/**
+ * Logs wifi locks held by an app.
+ *
+ * Logged from:
+ *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+message WifiLockStateChanged {
+    // TODO: Add attribution instead of uid.
+    optional int32 uid = 1;
+
+    enum State {
+        OFF = 0;
+        ON = 1;
+    }
+    optional State state = 2;
+}
+
+/**
+ * Logs wifi signal strength changes.
+ *
+ * Logged from:
+ *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+message WifiSignalStrengthChanged {
+    // TODO: Reference the actual telephony/java/android/telephony/SignalStrength.java states.
+    enum SignalStrength {
+        SIGNAL_STRENGTH_NONE_OR_UNKNOWN = 0;
+        SIGNAL_STRENGTH_POOR = 1;
+        SIGNAL_STRENGTH_MODERATE = 2;
+        SIGNAL_STRENGTH_GOOD = 3;
+        SIGNAL_STRENGTH_GREAT = 4;
+    }
+    optional SignalStrength signal_strength = 1;
+}
+
+/**
+ * Logs wifi scans performed by an app.
+ *
+ * Logged from:
+ *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+message WifiScanStateChanged {
+    // TODO: Add attribution instead of uid.
+    optional int32 uid = 1;
+
+    enum State {
+        OFF = 0;
+        ON = 1;
+    }
+    optional State state = 2;
+}
+
+/**
+ * Logs phone signal strength changes.
+ *
+ * Logged from:
+ *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+message PhoneSignalStrengthChanged {
+    // TODO: Reference the actual telephony/java/android/telephony/SignalStrength.java states.
+    enum SignalStrength {
+        SIGNAL_STRENGTH_NONE_OR_UNKNOWN = 0;
+        SIGNAL_STRENGTH_POOR = 1;
+        SIGNAL_STRENGTH_MODERATE = 2;
+        SIGNAL_STRENGTH_GOOD = 3;
+        SIGNAL_STRENGTH_GREAT = 4;
+    }
+    optional SignalStrength signal_strength = 1;
+}
+
+/**
+ * Logs that a setting was updated.
+ * Logged from:
+ *   frameworks/base/core/java/android/provider/Settings.java
+ * The tag and is_default allow resetting of settings to default values based on the specified
+ * tag. See Settings#putString(ContentResolver, String, String, String, boolean) for more details.
+ */
+message SettingChanged {
+    // The name of the setting.
+    optional string setting = 1;
+
+    // The change being imposed on this setting. May represent a number, eg "3".
+    optional string value = 2;
+
+    // The new value of this setting. For most settings, this is same as value. For some settings,
+    // value is +X or -X where X represents an element in a set. For example, if the previous value
+    // is A,B,C and value is -B, then new_value is A,C and prev_value is A,B,C.
+    // The +/- feature is currently only used for location_providers_allowed.
+    optional string new_value = 3;
+
+    // The previous value of this setting.
+    optional string prev_value = 4;
+
+    // The tag used with the is_default for resetting sets of settings. This is generally null.
+    optional string tag = 5;
+
+    // 1 indicates that this setting with tag should be resettable.
+    optional int32 is_default = 6;
+
+    // The user ID associated. Defined in android/os/UserHandle.java
+    optional int32 user = 7;
+}
+
+/*
+ * Logs activity going to foreground or background
+ *
+ * Logged from:
+  *   frameworks/base/services/core/java/com/android/server/am/ActivityRecord.java
+ */
+message ActivityForegroundStateChanged {
+    enum Activity {
+        MOVE_TO_BACKGROUND = 0;
+        MOVE_TO_FOREGROUND = 1;
+    }
+    optional int32 uid = 1;
+    optional string pkg_name = 2;
+    optional string class_name = 3;
+    optional Activity activity = 4;
+}
+
+/**
+ * Pulls bytes transferred via wifi (Sum of foreground and background usage).
+ *
+ * Pulled from:
+ *   StatsCompanionService (using BatteryStats to get which interfaces are wifi)
+ */
+message WifiBytesTransferred {
+    optional int32 uid = 1;
+
+    optional int64 rx_bytes = 2;
+
+    optional int64 rx_packets = 3;
+
+    optional int64 tx_bytes = 4;
+
+    optional int64 tx_packets = 5;
+}
+
+/**
+ * Pulls bytes transferred via wifi (separated by foreground and background usage).
+ *
+ * Pulled from:
+ *   StatsCompanionService (using BatteryStats to get which interfaces are wifi)
+ */
+message WifiBytesTransferredByFgBg {
+    optional int32 uid = 1;
+
+    // 1 denotes foreground and 0 denotes background. This is called Set in NetworkStats.
+    optional int32 is_foreground = 2;
+
+    optional int64 rx_bytes = 3;
+
+    optional int64 rx_packets = 4;
+
+    optional int64 tx_bytes = 5;
+
+    optional int64 tx_packets = 6;
+}
+
+/**
+ * Pulls bytes transferred via mobile networks (Sum of foreground and background usage).
+ *
+ * Pulled from:
+ *   StatsCompanionService (using BatteryStats to get which interfaces are mobile data)
+ */
+message MobileBytesTransferred {
+    optional int32 uid = 1;
+
+    optional int64 rx_bytes = 2;
+
+    optional int64 rx_packets = 3;
+
+    optional int64 tx_bytes = 4;
+
+    optional int64 tx_packets = 5;
+}
+
+/**
+ * Pulls bytes transferred via mobile networks (separated by foreground and background usage).
+ *
+ * Pulled from:
+ *   StatsCompanionService (using BatteryStats to get which interfaces are mobile data)
+ */
+message MobileBytesTransferredByFgBg {
+    optional int32 uid = 1;
+
+    // 1 denotes foreground and 0 denotes background. This is called Set in NetworkStats.
+    optional int32 is_foreground = 2;
+
+    optional int64 rx_bytes = 3;
+
+    optional int64 rx_packets = 4;
+
+    optional int64 tx_bytes = 5;
+
+    optional int64 tx_packets = 6;
+}
+
+/**
+ * Pulls the kernel wakelock durations. This atom is adapted from
+ * android/internal/os/KernelWakelockStats.java
+ *
+ * Pulled from:
+ *   StatsCompanionService using KernelWakelockReader.
+ */
+message KernelWakelockPulled {
+    optional string name = 1;
+
+    optional int32 count = 2;
+
+    optional int32 version = 3;
+
+    optional int64 time = 4;
+}
+
+/*
+ * Pulls PowerStatePlatformSleepState.
+ *
+ * Definition here:
+ *   hardware/interfaces/power/1.0/types.hal
+ */
+message PowerStatePlatformSleepStatePulled {
+    optional string name = 1;
+    optional uint64 residency_in_msec_since_boot = 2;
+    optional uint64 total_transitions = 3;
+    optional bool supported_only_in_suspend = 4;
+}
+
+/**
+ * Pulls PowerStateVoter.
+ *
+ * Definition here:
+ *   hardware/interfaces/power/1.0/types.hal
+ */
+message PowerStateVoterPulled {
+    optional string power_state_platform_sleep_state_name = 1;
+    optional string power_state_voter_name = 2;
+    optional uint64 total_time_in_msec_voted_for_since_boot = 3;
+    optional uint64 total_number_of_times_voted_since_boot = 4;
+}
+
+/**
+ * Pulls PowerStateSubsystemSleepState.
+ *
+ * Definition here:
+ *   hardware/interfaces/power/1.1/types.hal
+ */
+message PowerStateSubsystemSleepStatePulled {
+    optional string power_state_subsystem_name = 1;
+    optional string power_state_subsystem_sleep_state_name = 2;
+    optional uint64 residency_in_msec_since_boot = 3;
+    optional uint64 total_transitions = 4;
+    optional uint64 last_entry_timestamp_ms = 5;
+    optional bool supported_only_in_suspend = 6;
+}
+
+/**
+ * Logs creation or removal of an isolated uid. Isolated uid's are temporary uid's to sandbox risky
+ * behavior in its own uid. However, the metrics of these isolated uid's almost always should be
+ * attributed back to the parent (host) uid. One example is Chrome.
+ *
+ * Logged from:
+ *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+message IsolatedUidChanged {
+    // The host UID. Generally, we should attribute metrics from the isolated uid to the host uid.
+    optional int32 parent_uid = 1;
+
+    optional int32 isolated_uid = 2;
+
+    // 1 denotes we're creating an isolated uid and 0 denotes removal. We expect an isolated uid to
+    // be removed before if it's used for another parent uid.
+    optional int32 is_create = 3;
+}
+
+/*
+ * Pulls Cpu time per frequency.
+ * Note: this should be pulled for gauge metric only, without condition.
+ * The puller keeps internal state of last values. It should not be pulled by
+ * different metrics.
+ * The pulled data is delta of cpu time from last pull, calculated as
+ * following:
+ * if current time is larger than last value, take delta between the two.
+ * if current time is smaller than last value, there must be a cpu
+ * hotplug event, and the current time is taken as delta.
+ */
+message CpuTimePerFreqPulled {
+    optional uint32 cluster = 1;
+    optional uint32 freq_index = 2;
+    optional uint64 time = 3;
+}
+
+/*
+ * Pulls Cpu Time Per Uid.
+ * Note that isolated process uid time should be attributed to host uids.
+ */
+message CpuTimePerUidPulled {
+    optional uint64 uid = 1;
+    optional uint64 user_time_ms = 2;
+    optional uint64 sys_time_ms = 3;
+}
+
+/**
+ * Pulls Cpu Time Per Uid per frequency.
+ * Note that isolated process uid time should be attributed to host uids.
+ * For each uid, we order the time by descending frequencies.
+ */
+message CpuTimePerUidFreqPulled {
+    optional uint64 uid = 1;
+    optional uint64 freq_idx = 2;
+    optional uint64 time_ms = 3;
+}

@@ -49,7 +49,7 @@ const int FIELD_ID_EVENT_METRICS = 4;
 const int FIELD_ID_DATA = 1;
 // for EventMetricData
 const int FIELD_ID_TIMESTAMP_NANOS = 1;
-const int FIELD_ID_STATS_EVENTS = 2;
+const int FIELD_ID_ATOMS = 2;
 
 EventMetricProducer::EventMetricProducer(const EventMetric& metric, const int conditionIndex,
                                          const sp<ConditionWizard>& wizard,
@@ -117,7 +117,7 @@ void EventMetricProducer::onMatchedLogEventInternal(
     long long wrapperToken =
             mProto->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_DATA);
     mProto->write(FIELD_TYPE_INT64 | FIELD_ID_TIMESTAMP_NANOS, (long long)event.GetTimestampNs());
-    long long eventToken = mProto->start(FIELD_TYPE_MESSAGE | FIELD_ID_STATS_EVENTS);
+    long long eventToken = mProto->start(FIELD_TYPE_MESSAGE | FIELD_ID_ATOMS);
     event.ToProto(*mProto);
     mProto->end(eventToken);
     mProto->end(wrapperToken);
