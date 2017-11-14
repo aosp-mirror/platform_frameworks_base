@@ -3147,7 +3147,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         // setUp() adds a secondary user for CALLER_USER_HANDLE. Remove it as otherwise the
         // feature is disabled because there are non-affiliated secondary users.
         getServices().removeUser(DpmMockContext.CALLER_USER_HANDLE);
-        when(getServices().iipConnectivityMetrics.registerNetdEventCallback(anyObject()))
+        when(getServices().iipConnectivityMetrics.addNetdEventCallback(anyInt(), anyObject()))
                 .thenReturn(true);
 
         // No logs were retrieved so far.
