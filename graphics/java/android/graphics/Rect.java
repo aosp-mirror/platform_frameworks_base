@@ -475,6 +475,19 @@ public final class Rect implements Parcelable {
     }
 
     /**
+     * If the specified rectangle intersects this rectangle, set this rectangle to that
+     * intersection, otherwise set this rectangle to the empty rectangle.
+     * @see #inset(int, int, int, int) but without checking if the rects overlap.
+     * @hide
+     */
+    public void intersectUnchecked(Rect other) {
+        left = Math.max(left, other.left);
+        top = Math.max(top, other.top);
+        right = Math.min(right, other.right);
+        bottom = Math.min(bottom, other.bottom);
+    }
+
+    /**
      * If rectangles a and b intersect, return true and set this rectangle to
      * that intersection, otherwise return false and do not change this
      * rectangle. No check is performed to see if either rectangle is empty.

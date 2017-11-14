@@ -245,6 +245,7 @@ import com.android.server.LocalServices;
 import com.android.server.UiThread;
 import com.android.server.Watchdog;
 import com.android.server.input.InputManagerService;
+import android.view.DisplayFrames;
 import com.android.server.power.ShutdownThread;
 import com.android.server.utils.PriorityDump;
 
@@ -1452,23 +1453,19 @@ public class WindowManagerService extends IWindowManager.Stub
                 prepareNoneTransitionForRelaunching(atoken);
             }
 
-            if (displayContent.isDefaultDisplay) {
-                final DisplayInfo displayInfo = displayContent.getDisplayInfo();
-                final Rect taskBounds;
-                if (atoken != null && atoken.getTask() != null) {
-                    taskBounds = mTmpRect;
-                    atoken.getTask().getBounds(mTmpRect);
-                } else {
-                    taskBounds = null;
-                }
-                if (mPolicy.getInsetHintLw(win.mAttrs, taskBounds, displayInfo.rotation,
-                        displayInfo.logicalWidth, displayInfo.logicalHeight, outContentInsets,
-                        outStableInsets, outOutsets)) {
-                    res |= WindowManagerGlobal.ADD_FLAG_ALWAYS_CONSUME_NAV_BAR;
-                }
+            final DisplayFrames displayFrames = displayContent.mDisplayFrames;
+            // TODO: Not sure if onDisplayInfoUpdated() call is needed.
+            displayFrames.onDisplayInfoUpdated(displayContent.getDisplayInfo());
+            final Rect taskBounds;
+            if (atoken != null && atoken.getTask() != null) {
+                taskBounds = mTmpRect;
+                atoken.getTask().getBounds(mTmpRect);
             } else {
-                outContentInsets.setEmpty();
-                outStableInsets.setEmpty();
+                taskBounds = null;
+            }
+            if (mPolicy.getInsetHintLw(win.mAttrs, taskBounds, displayFrames, outContentInsets,
+                    outStableInsets, outOutsets)) {
+                res |= WindowManagerGlobal.ADD_FLAG_ALWAYS_CONSUME_NAV_BAR;
             }
 
             if (mInTouchMode) {
@@ -4668,7 +4665,7 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized(mWindowMap) {
             mIsTouchDevice = mContext.getPackageManager().hasSystemFeature(
                     PackageManager.FEATURE_TOUCHSCREEN);
-            configureDisplayPolicyLocked(getDefaultDisplayContentLocked());
+            getDefaultDisplayContentLocked().configureDisplayPolicy();
         }
 
         try {
@@ -5525,7 +5522,7 @@ public class WindowManagerService extends IWindowManager.Stub
         if (!mDisplayReady) {
             return;
         }
-        configureDisplayPolicyLocked(displayContent);
+        displayContent.configureDisplayPolicy();
         displayContent.setLayoutNeeded();
 
         final int displayId = displayContent.getDisplayId();
@@ -5544,18 +5541,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         mWindowPlacerLocked.performSurfacePlacement();
-    }
-
-    void configureDisplayPolicyLocked(DisplayContent displayContent) {
-        mPolicy.setInitialDisplaySize(displayContent.getDisplay(),
-                displayContent.mBaseDisplayWidth,
-                displayContent.mBaseDisplayHeight,
-                displayContent.mBaseDisplayDensity);
-
-        DisplayInfo displayInfo = displayContent.getDisplayInfo();
-        mPolicy.setDisplayOverscan(displayContent.getDisplay(),
-                displayInfo.overscanLeft, displayInfo.overscanTop,
-                displayInfo.overscanRight, displayInfo.overscanBottom);
     }
 
     /**
@@ -7370,7 +7355,9 @@ public class WindowManagerService extends IWindowManager.Stub
         @Override
         public int getInputMethodWindowVisibleHeight() {
             synchronized (mWindowMap) {
-                return mPolicy.getInputMethodWindowVisibleHeightLw();
+                // TODO(multi-display): Have caller pass in the display they are interested in.
+                final DisplayContent dc = getDefaultDisplayContentLocked();
+                return dc.mDisplayFrames.getInputMethodWindowVisibleHeight();
             }
         }
 
