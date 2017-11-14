@@ -2113,6 +2113,9 @@ public final class Settings {
      * functions for accessing individual settings entries.
      */
     public static final class System extends NameValueTable {
+        // NOTE: If you add new settings here, be sure to add them to
+        // com.android.providers.settings.SettingsProtoDumpUtil#dumpProtoSystemSettingsLocked.
+
         private static final float DEFAULT_FONT_SCALE = 1.0f;
 
         /** @hide */
@@ -4562,6 +4565,9 @@ public final class Settings {
      * APIs for those values, not modified directly by applications.
      */
     public static final class Secure extends NameValueTable {
+        // NOTE: If you add new settings here, be sure to add them to
+        // com.android.providers.settings.SettingsProtoDumpUtil#dumpProtoSecureSettingsLocked.
+
         /**
          * The content:// style URL for this table
          */
@@ -7564,6 +7570,9 @@ public final class Settings {
      * explicitly modify through the system UI or specialized APIs for those values.
      */
     public static final class Global extends NameValueTable {
+        // NOTE: If you add new settings here, be sure to add them to
+        // com.android.providers.settings.SettingsProtoDumpUtil#dumpProtoGlobalSettingsLocked.
+
         /**
          * The content:// style URL for global secure settings items.  Not public.
          */
@@ -10875,7 +10884,7 @@ public final class Settings {
 
         /** User preferred subscriptions setting.
           * This holds the details of the user selected subscription from the card and
-          * the activation status. Each settings string have the coma separated values
+          * the activation status. Each settings string have the comma separated values
           * iccId,appType,appId,activationStatus,3gppIndex,3gpp2Index
           * @hide
          */

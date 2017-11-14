@@ -434,8 +434,9 @@ final class SettingsState {
      * Dump historical operations as a proto buf.
      *
      * @param proto The proto buf stream to dump to
+     * @param fieldId The repeated field ID to use to save an operation to.
      */
-    void dumpProtoHistoricalOperations(@NonNull ProtoOutputStream proto) {
+    void dumpHistoricalOperations(@NonNull ProtoOutputStream proto, long fieldId) {
         synchronized (mLock) {
             if (mHistoricalOperations == null) {
                 return;
@@ -448,7 +449,8 @@ final class SettingsState {
                     index = operationCount + index;
                 }
                 HistoricalOperation operation = mHistoricalOperations.get(index);
-                long settingsOperationToken = proto.start(GlobalSettingsProto.HISTORICAL_OP);
+
+                final long token = proto.start(fieldId);
                 proto.write(SettingsOperationProto.TIMESTAMP, operation.mTimestamp);
                 proto.write(SettingsOperationProto.OPERATION, operation.mOperation);
                 if (operation.mSetting != null) {
@@ -457,7 +459,7 @@ final class SettingsState {
                     // add is what the current data is).
                     proto.write(SettingsOperationProto.SETTING, operation.mSetting.getName());
                 }
-                proto.end(settingsOperationToken);
+                proto.end(token);
             }
         }
     }
