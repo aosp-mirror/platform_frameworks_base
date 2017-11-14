@@ -22,11 +22,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
-import android.graphics.Bitmap;
 import android.graphics.Rect;
-import android.net.Uri;
 import android.os.Binder;
-import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -36,12 +33,14 @@ import android.os.UserHandle;
 import android.util.Log;
 import android.view.SurfaceControl;
 
+import com.android.systemui.OverviewProxyService.OverviewProxyListener;
 import com.android.systemui.shared.recents.IOverviewProxy;
 import com.android.systemui.shared.recents.ISystemUiProxy;
-import com.android.systemui.OverviewProxyService.OverviewProxyListener;
+import com.android.systemui.shared.system.GraphicBufferCompat;
 import com.android.systemui.statusbar.policy.CallbackController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceProvisionedListener;
+
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -67,12 +66,12 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     private int mConnectionBackoffAttempts;
 
     private ISystemUiProxy mSysUiProxy = new ISystemUiProxy.Stub() {
-        public Bitmap screenshot(Rect sourceCrop, int width, int height, int minLayer, int maxLayer,
-                boolean useIdentityTransform, int rotation) {
+        public GraphicBufferCompat screenshot(Rect sourceCrop, int width, int height, int minLayer,
+                int maxLayer, boolean useIdentityTransform, int rotation) {
             long token = Binder.clearCallingIdentity();
             try {
-                return SurfaceControl.screenshot(sourceCrop, width, height, minLayer, maxLayer,
-                        useIdentityTransform, rotation);
+                return new GraphicBufferCompat(SurfaceControl.screenshotToBuffer(sourceCrop, width,
+                        height, minLayer, maxLayer, useIdentityTransform, rotation));
             } finally {
                 Binder.restoreCallingIdentity(token);
             }

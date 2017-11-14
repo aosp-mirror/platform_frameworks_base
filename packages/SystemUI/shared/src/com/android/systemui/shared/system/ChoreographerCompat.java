@@ -13,20 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.android.systemui.shared.system;
 
-package com.android.systemui.shared.recents;
+import static android.view.Choreographer.CALLBACK_INPUT;
 
-import android.graphics.Rect;
-import com.android.systemui.shared.system.GraphicBufferCompat;
+import android.graphics.Bitmap;
+import android.graphics.GraphicBuffer;
+import android.os.Parcel;
+import android.os.Parcelable;
+import android.view.Choreographer;
 
 /**
- * Temporary callbacks into SystemUI.
+ * Wraps the internal choreographer.
  */
-interface ISystemUiProxy {
+public class ChoreographerCompat {
 
     /**
-     * Proxies SurfaceControl.screenshotToBuffer().
+     * Posts an input callback to the choreographer.
      */
-    GraphicBufferCompat screenshot(in Rect sourceCrop, int width, int height, int minLayer,
-            int maxLayer, boolean useIdentityTransform, int rotation);
+    public static void postInputFrame(Runnable runnable) {
+        Choreographer.getInstance().postCallback(CALLBACK_INPUT, runnable, null);
+    }
 }

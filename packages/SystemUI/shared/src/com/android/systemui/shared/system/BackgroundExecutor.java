@@ -16,6 +16,7 @@
 
 package com.android.systemui.shared.system;
 
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -34,6 +35,13 @@ public class BackgroundExecutor {
      */
     public static BackgroundExecutor get() {
         return sInstance;
+    }
+
+    /**
+     * Runs the given {@param callable} on one of the background executor threads.
+     */
+    public <T> Future<T> submit(Callable<T> callable) {
+        return mExecutorService.submit(callable);
     }
 
     /**

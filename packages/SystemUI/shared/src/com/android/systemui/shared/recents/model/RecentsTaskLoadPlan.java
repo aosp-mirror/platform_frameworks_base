@@ -45,6 +45,11 @@ import java.util.List;
  */
 public class RecentsTaskLoadPlan {
 
+    /** The set of conditions to preload tasks. */
+    public static class PreloadOptions {
+        public boolean loadTitles = true;
+    }
+
     /** The set of conditions to load tasks. */
     public static class Options {
         public int runningTaskId = -1;
@@ -80,7 +85,8 @@ public class RecentsTaskLoadPlan {
      * Note: Do not lock, since this can be calling back to the loader, which separately also drives
      * this call (callers should synchronize on the loader before making this call).
      */
-    public void preloadPlan(RecentsTaskLoader loader, int runningTaskId, int currentUserId) {
+    public void preloadPlan(PreloadOptions opts, RecentsTaskLoader loader, int runningTaskId,
+            int currentUserId) {
         Resources res = mContext.getResources();
         ArrayList<Task> allTasks = new ArrayList<>();
         if (mRawTasks == null) {
@@ -110,9 +116,12 @@ public class RecentsTaskLoadPlan {
             }
 
             // Load the title, icon, and color
-            String title = loader.getAndUpdateActivityTitle(taskKey, t.taskDescription);
-            String titleDescription = loader.getAndUpdateContentDescription(taskKey,
-                    t.taskDescription);
+            String title = opts.loadTitles
+                    ? loader.getAndUpdateActivityTitle(taskKey, t.taskDescription)
+                    : "";
+            String titleDescription = opts.loadTitles
+                    ? loader.getAndUpdateContentDescription(taskKey, t.taskDescription)
+                    : "";
             Drawable icon = isStackTask
                     ? loader.getAndUpdateActivityIcon(taskKey, t.taskDescription, res, false)
                     : null;
