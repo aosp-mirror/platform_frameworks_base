@@ -1170,7 +1170,7 @@
     <string name="no_permissions" msgid="7283357728219338112">"அனுமதிகள் தேவையில்லை"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"இதனால் நீங்கள் கட்டணம் செலுத்த வேண்டியிருக்கலாம்"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"சரி"</string>
-    <string name="usb_charging_notification_title" msgid="6895185153353640787">"இந்தச் சாதனத்தை USB சார்ஜ் செய்கிறது"</string>
+    <string name="usb_charging_notification_title" msgid="6895185153353640787">"சாதனம் USB சார்ஜிங் செய்யப்படுகிறது"</string>
     <string name="usb_supplying_notification_title" msgid="5310642257296510271">"இணைத்துள்ள சாதனத்திற்கு USB சக்தி அளிக்கிறது"</string>
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"USB, கோப்புப் பரிமாற்றத்துக்கு மட்டும்"</string>
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"USB, படப் பரிமாற்றத்துக்கு மட்டும்"</string>

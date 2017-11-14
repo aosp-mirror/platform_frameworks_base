@@ -514,7 +514,7 @@
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"नेटवर्क उपयोग हिसाब बदलें"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"ऐप्स  को यह संशोधित करने देता है कि ऐप्स की तुलना में नेटवर्क उपयोग का मूल्यांकन कैसे किया जाता है. सामान्‍य ऐप्स द्वारा उपयोग करने के लिए नहीं."</string>
     <string name="permlab_accessNotifications" msgid="7673416487873432268">"सूचना तक पहुंचें"</string>
-    <string name="permdesc_accessNotifications" msgid="458457742683431387">"ऐप को सूचना पाने, जांच करने और साफ़ करने देता है, जिनमें अन्य ऐप के ज़रिए पोस्ट की गई सूचनाएं भी शामिल हैं."</string>
+    <string name="permdesc_accessNotifications" msgid="458457742683431387">"ऐप को सूचना पाने, जाँच करने और साफ़ करने देता है, जिनमें अन्य ऐप के ज़रिए पोस्ट की गई सूचनाएं भी शामिल हैं."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"सूचना श्रवणकर्ता सेवा से जुड़ें"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"उपयोगकर्ता को सूचना सुनने वाली सेवा के सबसे बेहतर इंटरफ़ेस से जुड़ने देती है. सामान्य ऐप के लिए कभी भी इसकी ज़रुरत नहीं होगी."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"किसी शर्तें लागू करने वाली (कंडीशन प्रोवाइडर) सेवा से जुड़ें"</string>
@@ -749,7 +749,7 @@
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"साइन इन करें"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"उपयोगकर्ता नाम या पासवर्ड गलत है."</string>
     <string name="lockscreen_glogin_account_recovery_hint" msgid="1696924763690379073">"अपना उपयोगकर्ता नाम या पासवर्ड भूल गए?\n "<b>"google.com/accounts/recovery"</b>" पर जाएं."</string>
-    <string name="lockscreen_glogin_checking_password" msgid="7114627351286933867">"जांच रहा है…"</string>
+    <string name="lockscreen_glogin_checking_password" msgid="7114627351286933867">"जाँच रहा है…"</string>
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"अनलॉक करें"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"ध्‍वनि चालू करें"</string>
     <string name="lockscreen_sound_off_label" msgid="996822825154319026">"ध्वनि बंद"</string>
@@ -1201,7 +1201,7 @@
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"अगर आप नहीं चाहते कि <xliff:g id="NAME">%s</xliff:g> इस सुविधा का उपयोग करे, तो सेटिंग खोलने और उसे बंद करने के लिए टैप करें."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"बंद करें"</string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"<xliff:g id="NAME">%s</xliff:g> को तैयार किया जा रहा है"</string>
-    <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"त्रुटियों की जांच कर रहा है"</string>
+    <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"त्रुटियों की जाँच कर रहा है"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"नए <xliff:g id="NAME">%s</xliff:g> का पता लगा"</string>
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"फ़ोटो और मीडिया ट्रांसफर करने के लिए"</string>
     <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"दूषित <xliff:g id="NAME">%s</xliff:g>"</string>
@@ -1229,7 +1229,7 @@
     <string name="ext_media_move_failure_message" msgid="1978096440816403360">"डेटा शुरुआती जगह पर छूट गया है"</string>
     <string name="ext_media_status_removed" msgid="6576172423185918739">"निकाल दिया गया"</string>
     <string name="ext_media_status_unmounted" msgid="2551560878416417752">"निकाला गया"</string>
-    <string name="ext_media_status_checking" msgid="6193921557423194949">"जांच की जा रही है..."</string>
+    <string name="ext_media_status_checking" msgid="6193921557423194949">"जाँच की जा रही है..."</string>
     <string name="ext_media_status_mounted" msgid="7253821726503179202">"तैयार"</string>
     <string name="ext_media_status_mounted_ro" msgid="8020978752406021015">"केवल-पढ़ने के लिए"</string>
     <string name="ext_media_status_bad_removal" msgid="8395398567890329422">"असुरक्षित रूप से निकाला गया"</string>
@@ -1455,7 +1455,7 @@
     <string name="kg_login_submit_button" msgid="5355904582674054702">"साइन इन करें"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"उपयोगकर्ता नाम या पासवर्ड गलत है"</string>
     <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"अपना उपयोगकर्ता नाम या पासवर्ड भूल गए?\n "<b>"google.com/accounts/recovery"</b>" पर जाएं."</string>
-    <string name="kg_login_checking_password" msgid="1052685197710252395">"खाते की जांच की जा रही है…"</string>
+    <string name="kg_login_checking_password" msgid="1052685197710252395">"खाते की जाँच की जा रही है…"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"आप अपना PIN <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत तरीके से लिख चुके हैं. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> सेकंड में पुन: प्रयास करें."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"आप अपना पासवर्ड <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत तरीके से लिख चुके हैं. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> सेकंड में पुन: प्रयास करें."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"आपने अपना अनलॉक आकार <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत तरीके से आरेखित किया है. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> सेकंड में पुन: प्रयास करें."</string>

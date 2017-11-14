@@ -827,8 +827,8 @@
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Permet que l\'aplicació defineixi una alarma en una aplicació de despertador instal·lada. És possible que algunes aplicacions de despertador no incorporin aquesta funció."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"afegeix bústia de veu"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Permet que l\'aplicació afegeixi missatges a la safata d\'entrada de la bústia de veu."</string>
-    <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"Modifica els permisos d\'ubicació geogràfica del navegador"</string>
-    <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Permet que l\'aplicació modifiqui els permisos d\'ubicació geogràfica del navegador. Les aplicacions malicioses poden utilitzar-ho per enviar la informació d\'ubicació a llocs web arbitraris."</string>
+    <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"Modifica els permisos d\'ubicació del navegador"</string>
+    <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Permet que l\'aplicació modifiqui els permisos d\'ubicació del navegador. Les aplicacions malicioses poden utilitzar-ho per enviar la informació d\'ubicació a llocs web arbitraris."</string>
     <string name="save_password_message" msgid="767344687139195790">"Voleu que el navegador recordi aquesta contrasenya?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Ara no"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Recorda-ho"</string>
@@ -1189,7 +1189,7 @@
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"COMPARTEIX"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"REBUTJA"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Canvia el teclat"</string>
-    <string name="show_ime" msgid="2506087537466597099">"Mantén-lo a la pantalla mentre el teclat físic està actiu"</string>
+    <string name="show_ime" msgid="2506087537466597099">"Mantén-lo en pantalla mentre el teclat físic està actiu"</string>
     <string name="hardware" msgid="194658061510127999">"Mostra el teclat virtual"</string>
     <string name="select_keyboard_layout_notification_title" msgid="597189518763083494">"Configura el teclat físic"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Toca per seleccionar l\'idioma i el disseny"</string>
@@ -1275,7 +1275,7 @@
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Fons de pantalla"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Canvia el fons de pantalla"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"Oient de notificacions"</string>
-    <string name="vr_listener_binding_label" msgid="4316591939343607306">"Processador d\'RV"</string>
+    <string name="vr_listener_binding_label" msgid="4316591939343607306">"Processador de RV"</string>
     <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"Proveïdor de condicions"</string>
     <string name="notification_ranker_binding_label" msgid="774540592299064747">"Servei de classificació de notificacions"</string>
     <string name="vpn_title" msgid="19615213552042827">"VPN activada"</string>

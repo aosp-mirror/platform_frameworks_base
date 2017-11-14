@@ -968,7 +968,7 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"পাঠ্য ক্রিয়াগুলি"</string>
     <string name="email" msgid="4560673117055050403">"ইমেল"</string>
     <string name="dial" msgid="4204975095406423102">"ফোন করুন"</string>
-    <string name="map" msgid="6068210738233985748">"মানচিত্র"</string>
+    <string name="map" msgid="6068210738233985748">"ম্যাপ"</string>
     <string name="browse" msgid="6993590095938149861">"ব্রাউজার"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"স্টোরেজ পূর্ণ হতে চলেছে"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"কিছু কিছু সিস্টেম ক্রিয়াকলাপ কাজ নাও করতে পারে"</string>
@@ -1726,7 +1726,7 @@
     <string name="app_category_image" msgid="4867854544519846048">"ফটো ও ছবিগুলি"</string>
     <string name="app_category_social" msgid="5842783057834965912">"সামাজিক ও যোগাযোগ"</string>
     <string name="app_category_news" msgid="7496506240743986873">"খবর ও পত্রিকাগুলি"</string>
-    <string name="app_category_maps" msgid="5878491404538024367">"মানচিত্র ও নেভিগেশান"</string>
+    <string name="app_category_maps" msgid="5878491404538024367">"ম্যাপ ও নেভিগেশান"</string>
     <string name="app_category_productivity" msgid="3742083261781538852">"উৎপাদনশীলতা"</string>
     <string name="device_storage_monitor_notification_channel" msgid="3295871267414816228">"ডিভাইসের স্টোরেজ"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="5537766997350092316">"USB ডিবাগিং"</string>
