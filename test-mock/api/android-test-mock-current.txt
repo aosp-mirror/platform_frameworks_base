@@ -344,7 +344,6 @@ package android.test.mock {
     method public int installExistingPackage(java.lang.String) throws android.content.pm.PackageManager.NameNotFoundException;
     method public int installExistingPackage(java.lang.String, int) throws android.content.pm.PackageManager.NameNotFoundException;
     method public int installExistingPackageAsUser(java.lang.String, int) throws android.content.pm.PackageManager.NameNotFoundException;
-    method public void installPackage(android.net.Uri, android.content.pm.IPackageInstallObserver, int, java.lang.String);
     method public void installPackage(android.net.Uri, android.app.PackageInstallObserver, int, java.lang.String);
     method public boolean isInstantApp();
     method public boolean isInstantApp(java.lang.String);

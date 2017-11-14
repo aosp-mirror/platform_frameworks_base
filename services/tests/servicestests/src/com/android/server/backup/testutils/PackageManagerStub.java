@@ -11,7 +11,6 @@ import android.content.pm.ChangedPackages;
 import android.content.pm.FeatureInfo;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageDeleteObserver;
-import android.content.pm.IPackageInstallObserver;
 import android.content.pm.IPackageStatsObserver;
 import android.content.pm.InstantAppInfo;
 import android.content.pm.InstrumentationInfo;
@@ -620,12 +619,6 @@ public class PackageManagerStub extends PackageManager {
     public Resources getResourcesForApplicationAsUser(String appPackageName, int userId)
             throws NameNotFoundException {
         return null;
-    }
-
-    @Override
-    public void installPackage(Uri packageURI, IPackageInstallObserver observer, int flags,
-            String installerPackageName) {
-
     }
 
     @Override
