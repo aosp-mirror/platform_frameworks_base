@@ -19,14 +19,30 @@ import static android.os.BatteryStats.STATS_SINCE_CHARGED;
 import static android.os.BatteryStats.WAKE_TYPE_PARTIAL;
 
 import android.app.ActivityManager;
+import android.os.BatteryManager;
 import android.os.BatteryStats;
 import android.os.WorkSource;
 import android.support.test.filters.SmallTest;
+import android.view.Display;
 
 import junit.framework.TestCase;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 /**
  * Test various BatteryStatsImpl noteStart methods.
+ *
+ * Build/Install/Run: bit FrameworksCoreTests:com.android.internal.os.BatteryStatsNoteTest
+ *
+ * Alternatively,
+ * Build: m FrameworksCoreTests
+ * Install: adb install -r \
+ *      ${ANDROID_PRODUCT_OUT}/data/app/FrameworksCoreTests/FrameworksCoreTests.apk
+ * Run: adb shell am instrument -e class com.android.internal.os.BatteryStatsNoteTest -w \
+ *      com.android.frameworks.coretests/android.support.test.runner.AndroidJUnitRunner
  */
 public class BatteryStatsNoteTest extends TestCase{
     private static final int UID = 10500;
@@ -36,7 +52,7 @@ public class BatteryStatsNoteTest extends TestCase{
     @SmallTest
     public void testNoteBluetoothScanResultLocked() throws Exception {
         MockBatteryStatsImpl bi = new MockBatteryStatsImpl(new MockClocks());
-        bi.updateTimeBasesLocked(true, true, 0, 0);
+        bi.updateTimeBasesLocked(true, Display.STATE_OFF, 0, 0);
         bi.noteUidProcessStateLocked(UID, ActivityManager.PROCESS_STATE_TOP);
 
         bi.noteBluetoothScanResultsFromSourceLocked(WS, 1);
@@ -68,7 +84,7 @@ public class BatteryStatsNoteTest extends TestCase{
         int pid = 10;
         String name = "name";
 
-        bi.updateTimeBasesLocked(true, true, 0, 0);
+        bi.updateTimeBasesLocked(true, Display.STATE_OFF, 0, 0);
         bi.noteUidProcessStateLocked(UID, ActivityManager.PROCESS_STATE_TOP);
         bi.getUidStatsLocked(UID).noteStartWakeLocked(pid, name, WAKE_TYPE_PARTIAL, clocks.realtime);
 
@@ -84,4 +100,137 @@ public class BatteryStatsNoteTest extends TestCase{
         assertEquals(220_000, actualTime);
         assertEquals(120_000, bgTime);
     }
+
+
+    /** Test BatteryStatsImpl.noteUidProcessStateLocked. */
+    @SmallTest
+    public void testNoteUidProcessStateLocked() throws Exception {
+        final MockClocks clocks = new MockClocks();
+        MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
+
+        // map of ActivityManager process states and how long to simulate run time in each state
+        Map<Integer, Integer> stateRuntimeMap = new HashMap<Integer, Integer>();
+        stateRuntimeMap.put(ActivityManager.PROCESS_STATE_TOP, 1111);
+        stateRuntimeMap.put(ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE, 1234);
+        stateRuntimeMap.put(ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE, 2468);
+        stateRuntimeMap.put(ActivityManager.PROCESS_STATE_TOP_SLEEPING, 7531);
+        stateRuntimeMap.put(ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND, 4455);
+        stateRuntimeMap.put(ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND, 1337);
+        stateRuntimeMap.put(ActivityManager.PROCESS_STATE_BACKUP, 90210);
+        stateRuntimeMap.put(ActivityManager.PROCESS_STATE_HEAVY_WEIGHT, 911);
+        stateRuntimeMap.put(ActivityManager.PROCESS_STATE_SERVICE, 404);
+        stateRuntimeMap.put(ActivityManager.PROCESS_STATE_RECEIVER, 31459);
+        stateRuntimeMap.put(ActivityManager.PROCESS_STATE_HOME, 1123);
+        stateRuntimeMap.put(ActivityManager.PROCESS_STATE_LAST_ACTIVITY, 5813);
+        stateRuntimeMap.put(ActivityManager.PROCESS_STATE_CACHED_ACTIVITY, 867);
+        stateRuntimeMap.put(ActivityManager.PROCESS_STATE_CACHED_ACTIVITY_CLIENT, 5309);
+        stateRuntimeMap.put(ActivityManager.PROCESS_STATE_CACHED_EMPTY, 42);
+
+        bi.updateTimeBasesLocked(true, Display.STATE_ON, 0, 0);
+
+        for (Map.Entry<Integer, Integer> entry : stateRuntimeMap.entrySet()) {
+            bi.noteUidProcessStateLocked(UID, entry.getKey());
+            clocks.realtime += entry.getValue();
+            clocks.uptime = clocks.realtime;
+        }
+
+        long actualRunTimeUs;
+        long expectedRunTimeMs;
+        long elapsedTimeUs = clocks.realtime * 1000;
+        BatteryStats.Uid uid = bi.getUidStats().get(UID);
+
+        // compare runtime of process states to the Uid process states they map to
+        actualRunTimeUs = uid.getProcessStateTime(BatteryStats.Uid.PROCESS_STATE_TOP, elapsedTimeUs,
+                STATS_SINCE_CHARGED);
+        expectedRunTimeMs = stateRuntimeMap.get(ActivityManager.PROCESS_STATE_TOP);
+        assertEquals(expectedRunTimeMs * 1000, actualRunTimeUs);
+
+
+        actualRunTimeUs = uid.getProcessStateTime(BatteryStats.Uid.PROCESS_STATE_FOREGROUND_SERVICE,
+                elapsedTimeUs, STATS_SINCE_CHARGED);
+        expectedRunTimeMs = stateRuntimeMap.get(
+                ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE)
+                + stateRuntimeMap.get(ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE);
+        assertEquals(expectedRunTimeMs * 1000, actualRunTimeUs);
+
+
+        actualRunTimeUs = uid.getProcessStateTime(BatteryStats.Uid.PROCESS_STATE_TOP_SLEEPING,
+                elapsedTimeUs, STATS_SINCE_CHARGED);
+        expectedRunTimeMs = stateRuntimeMap.get(ActivityManager.PROCESS_STATE_TOP_SLEEPING);
+        assertEquals(expectedRunTimeMs * 1000, actualRunTimeUs);
+
+
+        actualRunTimeUs = uid.getProcessStateTime(BatteryStats.Uid.PROCESS_STATE_FOREGROUND,
+                elapsedTimeUs, STATS_SINCE_CHARGED);
+        expectedRunTimeMs = stateRuntimeMap.get(ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND);
+        assertEquals(expectedRunTimeMs * 1000, actualRunTimeUs);
+
+
+        actualRunTimeUs = uid.getProcessStateTime(BatteryStats.Uid.PROCESS_STATE_BACKGROUND,
+                elapsedTimeUs, STATS_SINCE_CHARGED);
+        expectedRunTimeMs = stateRuntimeMap.get(ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND)
+                + stateRuntimeMap.get(ActivityManager.PROCESS_STATE_BACKUP)
+                + stateRuntimeMap.get(ActivityManager.PROCESS_STATE_HEAVY_WEIGHT)
+                + stateRuntimeMap.get(ActivityManager.PROCESS_STATE_SERVICE)
+                + stateRuntimeMap.get(ActivityManager.PROCESS_STATE_RECEIVER);
+        assertEquals(expectedRunTimeMs * 1000, actualRunTimeUs);
+
+
+        actualRunTimeUs = uid.getProcessStateTime(BatteryStats.Uid.PROCESS_STATE_CACHED,
+                elapsedTimeUs, STATS_SINCE_CHARGED);
+        expectedRunTimeMs = stateRuntimeMap.get(ActivityManager.PROCESS_STATE_HOME)
+                + stateRuntimeMap.get(ActivityManager.PROCESS_STATE_LAST_ACTIVITY)
+                + stateRuntimeMap.get(ActivityManager.PROCESS_STATE_CACHED_ACTIVITY)
+                + stateRuntimeMap.get(ActivityManager.PROCESS_STATE_CACHED_ACTIVITY_CLIENT)
+                + stateRuntimeMap.get(ActivityManager.PROCESS_STATE_CACHED_EMPTY);
+        assertEquals(expectedRunTimeMs * 1000, actualRunTimeUs);
+
+        // Special check for foreground service timer
+        actualRunTimeUs = uid.getForegroundServiceTimer().getTotalTimeLocked(elapsedTimeUs,
+                STATS_SINCE_CHARGED);
+        expectedRunTimeMs = stateRuntimeMap.get(ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE);
+        assertEquals(expectedRunTimeMs * 1000, actualRunTimeUs);
+    }
+
+    /** Test BatteryStatsImpl.updateTimeBasesLocked. */
+    @SmallTest
+    public void testUpdateTimeBasesLocked() throws Exception {
+        final MockClocks clocks = new MockClocks(); // holds realtime and uptime in ms
+        MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
+
+        bi.updateTimeBasesLocked(false, Display.STATE_OFF, 0, 0);
+        assertFalse(bi.getOnBatteryTimeBase().isRunning());
+        bi.updateTimeBasesLocked(false, Display.STATE_DOZE, 10, 10);
+        assertFalse(bi.getOnBatteryTimeBase().isRunning());
+        bi.updateTimeBasesLocked(false, Display.STATE_ON, 20, 20);
+        assertFalse(bi.getOnBatteryTimeBase().isRunning());
+
+        bi.updateTimeBasesLocked(true, Display.STATE_ON, 30, 30);
+        assertTrue(bi.getOnBatteryTimeBase().isRunning());
+        assertFalse(bi.getOnBatteryScreenOffTimeBase().isRunning());
+        bi.updateTimeBasesLocked(true, Display.STATE_DOZE, 40, 40);
+        assertTrue(bi.getOnBatteryScreenOffTimeBase().isRunning());
+        bi.updateTimeBasesLocked(true, Display.STATE_OFF, 40, 40);
+        assertTrue(bi.getOnBatteryScreenOffTimeBase().isRunning());
+    }
+
+    /** Test BatteryStatsImpl.noteScreenStateLocked. */
+    @SmallTest
+    public void testNoteScreenStateLocked() throws Exception {
+        final MockClocks clocks = new MockClocks(); // holds realtime and uptime in ms
+        MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
+
+        bi.updateTimeBasesLocked(true, Display.STATE_ON, 0, 0);
+        bi.noteScreenStateLocked(Display.STATE_ON);
+        bi.noteScreenStateLocked(Display.STATE_DOZE);
+        assertTrue(bi.getOnBatteryScreenOffTimeBase().isRunning());
+        assertEquals(bi.getScreenState(), Display.STATE_DOZE);
+        bi.noteScreenStateLocked(Display.STATE_ON);
+        assertFalse(bi.getOnBatteryScreenOffTimeBase().isRunning());
+        assertEquals(bi.getScreenState(), Display.STATE_ON);
+        bi.noteScreenStateLocked(Display.STATE_OFF);
+        assertTrue(bi.getOnBatteryScreenOffTimeBase().isRunning());
+        assertEquals(bi.getScreenState(), Display.STATE_OFF);
+    }
+
 }

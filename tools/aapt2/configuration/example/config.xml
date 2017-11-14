@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<post-process xmlns="http://schemas.android.com/tools/aapt2">
+<post-process xmlns="http://schemas.android.com/tools/aapt">
   <groups>
     <abi-group label="arm">
       <abi>armeabi-v7a</abi>

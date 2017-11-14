@@ -1334,6 +1334,10 @@ public class PopupWindow {
                     + "calling setContentView() before attempting to show the popup.");
         }
 
+        if (p.accessibilityTitle == null) {
+            p.accessibilityTitle = mContext.getString(R.string.popup_window_default_title);
+        }
+
         // The old decor view may be transitioning out. Make sure it finishes
         // and cleans up before we try to create another one.
         if (mDecorView != null) {
@@ -2292,8 +2296,8 @@ public class PopupWindow {
     }
 
     /** @hide */
-    protected final void detachFromAnchor() {
-        final View anchor = mAnchor != null ? mAnchor.get() : null;
+    protected void detachFromAnchor() {
+        final View anchor = getAnchor();
         if (anchor != null) {
             final ViewTreeObserver vto = anchor.getViewTreeObserver();
             vto.removeOnScrollChangedListener(mOnScrollChangedListener);
@@ -2312,7 +2316,7 @@ public class PopupWindow {
     }
 
     /** @hide */
-    protected final void attachToAnchor(View anchor, int xoff, int yoff, int gravity) {
+    protected void attachToAnchor(View anchor, int xoff, int yoff, int gravity) {
         detachFromAnchor();
 
         final ViewTreeObserver vto = anchor.getViewTreeObserver();
@@ -2333,6 +2337,11 @@ public class PopupWindow {
         mAnchorXoff = xoff;
         mAnchorYoff = yoff;
         mAnchoredGravity = gravity;
+    }
+
+    /** @hide */
+    protected @Nullable View getAnchor() {
+        return mAnchor != null ? mAnchor.get() : null;
     }
 
     private void alignToAnchor() {

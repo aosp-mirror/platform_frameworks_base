@@ -195,7 +195,7 @@ public class DownloadManagerStressTest extends DownloadManagerBaseTest {
 
             // try to download 1MB file into /cache - and it should succeed
             byte[] blobData = generateData(DOWNLOAD_FILE_SIZE, DataType.TEXT);
-            long dlRequest = doBasicDownload(blobData, DOWNLOAD_TO_SYSTEM_CACHE);
+            long dlRequest = doBasicDownload(blobData);
             verifyAndCleanupSingleFileDownload(dlRequest, blobData);
         } finally {
             if (outFile != null) {

@@ -1,0 +1,29 @@
+<HTML>
+<BODY>
+<p>@SystemApi</p>
+<!-- @hide -->
+<p>Provides classes to manage Low-power Wireless Personal Area Network (LoWPAN) functionality on the device.
+Examples of such network technologies include <a href="http://threadgroup.org/">Thread</a> and
+<a href="http://www.zigbee.org/zigbee-for-developers/network-specifications/zigbeeip/">ZigBee IP</a>.</p>
+<p>The LoWPAN APIs provide a means by which applications can communicate
+with the lower-level wireless stack that provides LoWPAN network access.</p>
+
+<p>Some APIs may require the following user permissions:</p>
+<ul>
+  <li>{@link android.Manifest.permission#ACCESS_LOWPAN_STATE}</li>
+  <li>{@link android.Manifest.permission#CHANGE_LOWPAN_STATE}</li>
+  <li>TBD</li>
+</ul>
+
+<p class="note"><strong>Note:</strong> Not all Android-powered devices provide LoWPAN functionality.
+If your application uses these APIs, declare so with a <a
+href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code <uses-feature>}</a>
+element in the manifest file:</p>
+<pre>
+&lt;manifest ...>
+    &lt;uses-feature android:name="android.hardware.lowpan" />
+    ...
+&lt;/manifest>
+</pre>
+</BODY>
+</HTML>

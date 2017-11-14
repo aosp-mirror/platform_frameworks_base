@@ -21,6 +21,8 @@ import android.net.ConnectivityManager;
 import android.net.NetworkCapabilities;
 import android.net.wifi.WifiManager;
 import android.os.Looper;
+import android.provider.Settings;
+import android.provider.Settings.Global;
 import android.telephony.PhoneStateListener;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
@@ -44,8 +46,6 @@ import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -105,6 +105,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
 
     @Before
     public void setUp() throws Exception {
+        Settings.Global.putInt(mContext.getContentResolver(), Global.AIRPLANE_MODE_ON, 0);
         mMockWm = mock(WifiManager.class);
         mMockTm = mock(TelephonyManager.class);
         mMockSm = mock(SubscriptionManager.class);
@@ -289,10 +290,8 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
     }
 
     protected void verifyHasNoSims(boolean hasNoSimsVisible) {
-        ArgumentCaptor<Boolean> hasNoSimsArg = ArgumentCaptor.forClass(Boolean.class);
-
-        Mockito.verify(mCallbackHandler, Mockito.atLeastOnce()).setNoSims(hasNoSimsArg.capture());
-        assertEquals("No sims", hasNoSimsVisible, (boolean) hasNoSimsArg.getValue());
+        Mockito.verify(mCallbackHandler, Mockito.atLeastOnce()).setNoSims(
+                eq(hasNoSimsVisible), eq(false));
     }
 
     protected void verifyLastQsMobileDataIndicators(boolean visible, int icon, int typeIcon,

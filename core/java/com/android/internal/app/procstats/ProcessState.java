@@ -196,7 +196,6 @@ public final class ProcessState {
         ProcessState pnew = new ProcessState(this, mPackage, mUid, mVersion, mName, now);
         pnew.mDurations.addDurations(mDurations);
         pnew.mPssTable.copyFrom(mPssTable, PSS_COUNT);
-        pnew.mNumExcessiveWake = mNumExcessiveWake;
         pnew.mNumExcessiveCpu = mNumExcessiveCpu;
         pnew.mNumCachedKill = mNumCachedKill;
         pnew.mMinCachedKillPss = mMinCachedKillPss;
@@ -250,7 +249,6 @@ public final class ProcessState {
     public void add(ProcessState other) {
         mDurations.addDurations(other.mDurations);
         mPssTable.mergeStats(other.mPssTable);
-        mNumExcessiveWake += other.mNumExcessiveWake;
         mNumExcessiveCpu += other.mNumExcessiveCpu;
         if (other.mNumCachedKill > 0) {
             addCachedKill(other.mNumCachedKill, other.mMinCachedKillPss,
@@ -264,7 +262,6 @@ public final class ProcessState {
         mStartTime = now;
         mLastPssState = STATE_NOTHING;
         mLastPssTime = 0;
-        mNumExcessiveWake = 0;
         mNumExcessiveCpu = 0;
         mNumCachedKill = 0;
         mMinCachedKillPss = mAvgCachedKillPss = mMaxCachedKillPss = 0;
@@ -286,7 +283,7 @@ public final class ProcessState {
         out.writeInt(mMultiPackage ? 1 : 0);
         mDurations.writeToParcel(out);
         mPssTable.writeToParcel(out);
-        out.writeInt(mNumExcessiveWake);
+        out.writeInt(0);  // was mNumExcessiveWake
         out.writeInt(mNumExcessiveCpu);
         out.writeInt(mNumCachedKill);
         if (mNumCachedKill > 0) {
@@ -309,7 +306,7 @@ public final class ProcessState {
         if (!mPssTable.readFromParcel(in)) {
             return false;
         }
-        mNumExcessiveWake = in.readInt();
+        in.readInt(); // was mNumExcessiveWake
         mNumExcessiveCpu = in.readInt();
         mNumCachedKill = in.readInt();
         if (mNumCachedKill > 0) {
@@ -490,18 +487,6 @@ public final class ProcessState {
                             pss, pss, pss, uss, uss, uss);
                 }
             }
-        }
-    }
-
-    public void reportExcessiveWake(ArrayMap<String, ProcessStateHolder> pkgList) {
-        ensureNotDead();
-        mCommonProcess.mNumExcessiveWake++;
-        if (!mCommonProcess.mMultiPackage) {
-            return;
-        }
-
-        for (int ip=pkgList.size()-1; ip>=0; ip--) {
-            pullFixedProc(pkgList, ip).mNumExcessiveWake++;
         }
     }
 
@@ -895,10 +880,6 @@ public final class ProcessState {
                 }
             }
         }
-        if (mNumExcessiveWake != 0) {
-            pw.print(prefix); pw.print("Killed for excessive wake locks: ");
-                    pw.print(mNumExcessiveWake); pw.println(" times");
-        }
         if (mNumExcessiveCpu != 0) {
             pw.print(prefix); pw.print("Killed for excessive CPU use: ");
                     pw.print(mNumExcessiveCpu); pw.println(" times");
@@ -1072,7 +1053,7 @@ public final class ProcessState {
             dumpAllPssCheckin(pw);
             pw.println();
         }
-        if (mNumExcessiveWake > 0 || mNumExcessiveCpu > 0 || mNumCachedKill > 0) {
+        if (mNumExcessiveCpu > 0 || mNumCachedKill > 0) {
             pw.print("pkgkills,");
             pw.print(pkgName);
             pw.print(",");
@@ -1082,7 +1063,7 @@ public final class ProcessState {
             pw.print(",");
             pw.print(DumpUtils.collapseString(pkgName, itemName));
             pw.print(",");
-            pw.print(mNumExcessiveWake);
+            pw.print("0"); // was mNumExcessiveWake
             pw.print(",");
             pw.print(mNumExcessiveCpu);
             pw.print(",");
@@ -1114,13 +1095,13 @@ public final class ProcessState {
             dumpAllPssCheckin(pw);
             pw.println();
         }
-        if (mNumExcessiveWake > 0 || mNumExcessiveCpu > 0 || mNumCachedKill > 0) {
+        if (mNumExcessiveCpu > 0 || mNumCachedKill > 0) {
             pw.print("kills,");
             pw.print(procName);
             pw.print(",");
             pw.print(uid);
             pw.print(",");
-            pw.print(mNumExcessiveWake);
+            pw.print("0"); // was mNumExcessiveWake
             pw.print(",");
             pw.print(mNumExcessiveCpu);
             pw.print(",");

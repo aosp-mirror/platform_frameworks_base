@@ -97,7 +97,6 @@ public final class LoadedApk {
     private String mAppDir;
     private String mResDir;
     private String[] mOverlayDirs;
-    private String[] mSharedLibraries;
     private String mDataDir;
     private String mLibDir;
     private File mDataDirFile;
@@ -116,6 +115,7 @@ public final class LoadedApk {
     private String[] mSplitNames;
     private String[] mSplitAppDirs;
     private String[] mSplitResDirs;
+    private String[] mSplitClassLoaderNames;
 
     private final ArrayMap<Context, ArrayMap<BroadcastReceiver, ReceiverDispatcher>> mReceivers
         = new ArrayMap<>();
@@ -125,8 +125,6 @@ public final class LoadedApk {
         = new ArrayMap<>();
     private final ArrayMap<Context, ArrayMap<ServiceConnection, LoadedApk.ServiceDispatcher>> mUnboundServices
         = new ArrayMap<>();
-
-    int mClientCount = 0;
 
     Application getApplication() {
         return mApplication;
@@ -192,8 +190,8 @@ public final class LoadedApk {
         mResDir = null;
         mSplitAppDirs = null;
         mSplitResDirs = null;
+        mSplitClassLoaderNames = null;
         mOverlayDirs = null;
-        mSharedLibraries = null;
         mDataDir = null;
         mDataDirFile = null;
         mDeviceProtectedDataDirFile = null;
@@ -324,7 +322,6 @@ public final class LoadedApk {
         mAppDir = aInfo.sourceDir;
         mResDir = aInfo.uid == myUid ? aInfo.sourceDir : aInfo.publicSourceDir;
         mOverlayDirs = aInfo.resourceDirs;
-        mSharedLibraries = aInfo.sharedLibraryFiles;
         mDataDir = aInfo.dataDir;
         mLibDir = aInfo.nativeLibraryDir;
         mDataDirFile = FileUtils.newFileOrNull(aInfo.dataDir);
@@ -334,6 +331,7 @@ public final class LoadedApk {
         mSplitNames = aInfo.splitNames;
         mSplitAppDirs = aInfo.splitSourceDirs;
         mSplitResDirs = aInfo.uid == myUid ? aInfo.splitSourceDirs : aInfo.splitPublicSourceDirs;
+        mSplitClassLoaderNames = aInfo.splitClassLoaderNames;
 
         if (aInfo.requestsIsolatedSplitLoading() && !ArrayUtils.isEmpty(mSplitNames)) {
             mSplitLoader = new SplitDependencyLoaderImpl(aInfo.splitDependencies);
@@ -530,7 +528,8 @@ public final class LoadedApk {
             // Since we handled the special base case above, parentSplitIdx is always valid.
             final ClassLoader parent = mCachedClassLoaders[parentSplitIdx];
             mCachedClassLoaders[splitIdx] = ApplicationLoaders.getDefault().getClassLoader(
-                    mSplitAppDirs[splitIdx - 1], getTargetSdkVersion(), false, null, null, parent);
+                    mSplitAppDirs[splitIdx - 1], getTargetSdkVersion(), false, null, null, parent,
+                    mSplitClassLoaderNames[splitIdx - 1]);
 
             Collections.addAll(splitPaths, mCachedResourcePaths[parentSplitIdx]);
             splitPaths.add(mSplitResDirs[splitIdx - 1]);
@@ -626,8 +625,23 @@ public final class LoadedApk {
         final List<String> zipPaths = new ArrayList<>(10);
         final List<String> libPaths = new ArrayList<>(10);
 
-        final boolean isBundledApp = mApplicationInfo.isSystemApp()
+        boolean isBundledApp = mApplicationInfo.isSystemApp()
                 && !mApplicationInfo.isUpdatedSystemApp();
+
+        // Vendor apks are treated as bundled only when /vendor/lib is in the default search
+        // paths. If not, they are treated as unbundled; access to system libs is limited.
+        // Having /vendor/lib in the default search paths means that all system processes
+        // are allowed to use any vendor library, which in turn means that system is dependent
+        // on vendor partition. In the contrary, not having /vendor/lib in the default search
+        // paths mean that the two partitions are separated and thus we can treat vendor apks
+        // as unbundled.
+        final String defaultSearchPaths = System.getProperty("java.library.path");
+        final boolean treatVendorApkAsUnbundled = !defaultSearchPaths.contains("/vendor/lib");
+        if (mApplicationInfo.getCodePath() != null
+                && mApplicationInfo.getCodePath().startsWith("/vendor/")
+                && treatVendorApkAsUnbundled) {
+            isBundledApp = false;
+        }
 
         makePaths(mActivityThread, isBundledApp, mApplicationInfo, zipPaths, libPaths);
 
@@ -635,8 +649,7 @@ public final class LoadedApk {
         if (isBundledApp) {
             // This is necessary to grant bundled apps access to
             // libraries located in subdirectories of /system/lib
-            libraryPermittedPath += File.pathSeparator +
-                                    System.getProperty("java.library.path");
+            libraryPermittedPath += File.pathSeparator + defaultSearchPaths;
         }
 
         final String librarySearchPath = TextUtils.join(File.pathSeparator, libPaths);
@@ -650,8 +663,9 @@ public final class LoadedApk {
             if (mClassLoader == null) {
                 StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskReads();
                 mClassLoader = ApplicationLoaders.getDefault().getClassLoader(
-                    "" /* codePath */, mApplicationInfo.targetSdkVersion, isBundledApp,
-                    librarySearchPath, libraryPermittedPath, mBaseClassLoader);
+                        "" /* codePath */, mApplicationInfo.targetSdkVersion, isBundledApp,
+                        librarySearchPath, libraryPermittedPath, mBaseClassLoader,
+                        null /* classLoaderName */);
                 StrictMode.setThreadPolicy(oldPolicy);
             }
 
@@ -678,7 +692,8 @@ public final class LoadedApk {
 
             mClassLoader = ApplicationLoaders.getDefault().getClassLoader(zip,
                     mApplicationInfo.targetSdkVersion, isBundledApp, librarySearchPath,
-                    libraryPermittedPath, mBaseClassLoader);
+                    libraryPermittedPath, mBaseClassLoader,
+                    mApplicationInfo.classLoaderName);
 
             StrictMode.setThreadPolicy(oldPolicy);
             // Setup the class loader paths for profiling.

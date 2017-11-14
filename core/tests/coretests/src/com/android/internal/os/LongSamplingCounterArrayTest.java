@@ -114,7 +114,7 @@ public class LongSamplingCounterArrayTest {
     public void testOnTimeStarted() {
         initializeCounterArrayWithDefaultValues();
         mCounterArray.onTimeStarted(0, 0, 0);
-        assertArrayEquals(PLUGGED_COUNTS, mCounterArray.mCounts, "Unexpected counts");
+        assertArrayEquals(COUNTS, mCounterArray.mCounts, "Unexpected counts");
         assertArrayEquals(LOADED_COUNTS, mCounterArray.mLoadedCounts, "Unexpected loadedCounts");
         assertArrayEquals(PLUGGED_COUNTS, mCounterArray.mPluggedCounts, "Unexpected pluggedCounts");
         assertArrayEquals(PLUGGED_COUNTS, mCounterArray.mUnpluggedCounts,
@@ -150,6 +150,7 @@ public class LongSamplingCounterArrayTest {
     @Test
     public void testAddCountLocked() {
         final long[] deltas = {123, 234, 345, 456};
+        when(mTimeBase.isRunning()).thenReturn(true);
         mCounterArray.addCountLocked(deltas);
         assertArrayEquals(deltas, mCounterArray.mCounts, "Unexpected counts");
         assertArrayEquals(null, mCounterArray.mLoadedCounts, "Unexpected loadedCounts");

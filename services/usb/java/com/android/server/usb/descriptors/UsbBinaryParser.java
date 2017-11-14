@@ -25,7 +25,7 @@ import com.android.server.usb.descriptors.report.UsbStrings;
  * A class that just walks the descriptors and does a hex dump of the contained values.
  * Usefull as a debugging tool.
  */
-public class UsbBinaryParser {
+public final class UsbBinaryParser {
     private static final String TAG = "UsbBinaryParser";
     private static final boolean LOGGING = false;
 
@@ -33,7 +33,7 @@ public class UsbBinaryParser {
 
         // Log
         if (LOGGING) {
-            Log.i(TAG, "l:" + length + " t:" + Integer.toHexString(type) + " "
+            Log.i(TAG, "l: " + length + " t: " + Integer.toHexString(type) + " "
                     + UsbStrings.getDescriptorName(type));
             StringBuilder sb = new StringBuilder();
             for (int index = 2; index < length; index++) {
@@ -43,7 +43,7 @@ public class UsbBinaryParser {
         } else {
             // Screen Dump
             builder.append("<p>");
-            builder.append("<b> l:" + length
+            builder.append("<b> l: " + length
                     + " t:0x" + Integer.toHexString(type) + " "
                     + UsbStrings.getDescriptorName(type) + "</b><br>");
             for (int index = 2; index < length; index++) {

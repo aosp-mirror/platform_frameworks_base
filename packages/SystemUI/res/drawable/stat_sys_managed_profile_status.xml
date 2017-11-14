@@ -1,42 +1,12 @@
-<!--
-Copyright (C) 2015 The Android Open Source Project
-
-   Licensed under the Apache License, Version 2.0 (the "License");
-    you may not use this file except in compliance with the License.
-    You may obtain a copy of the License at
-
-         http://www.apache.org/licenses/LICENSE-2.0
-
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and
-    limitations under the License.
--->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="23dp"
-    android:height="18dp"
-    android:viewportWidth="23"
-    android:viewportHeight="18">
-<!--
-    The asset contains a briefcase symbol of 15.26dp x 13.6dp in the center.
--->
+        android:width="23dp"
+        android:height="18dp"
+        android:viewportWidth="23.0"
+        android:viewportHeight="18.0">
+    <!--
+       The asset contains a briefcase symbol of 14.551dp x 13.824dp in the center.
+   -->
     <path
-        android:fillColor="#ff000000"
-        android:pathData="M15.0815,4.5903 L15.0815,3.43636 L13.9276,2.2 L9.14696,2.2 L7.99302,3.43636
-L7.99302,4.5903 L9.14696,4.5903 L9.14696,3.43636 L13.9276,3.43636
-L13.9276,4.5903 Z" />
-    <path
-        android:fillColor="#ff000000"
-        android:pathData="M18.0488,4.5903 L5.02575,4.5903 C4.36635,4.5903,3.87181,5.08485,3.87181,5.74424
-L3.87181,9.28848 C3.87181,9.94788,4.36635,10.4424,5.02575,10.4424
-L9.72393,10.4424 L9.72393,9.28848 L13.2682,9.28848 L13.2682,10.4424
-L17.9664,10.4424 C18.6257,10.4424,19.1203,9.94788,19.1203,9.28848
-L19.1203,5.74424 C19.2027,5.08485,18.6257,4.5903,18.0488,4.5903 Z" />
-    <path
-        android:fillColor="#ff000000"
-        android:pathData="M9.80635,12.8327 L9.80635,11.6788 L4.44878,11.6788 L4.44878,14.6461
-C4.44878,15.3055,4.94332,15.8,5.60272,15.8 L17.3894,15.8
-C18.0488,15.8,18.5433,15.3055,18.5433,14.6461 L18.5433,11.6788 L13.2682,11.6788
-L13.2682,12.8327 L9.80635,12.8327 Z" />
+        android:pathData="M17.32,5.06h-2.91V3.6c0,-0.81 -0.65,-1.46 -1.46,-1.46h-2.91c-0.81,0 -1.46,0.65 -1.46,1.46v1.46H5.68c-0.81,0 -1.45,0.65 -1.45,1.46l-0.01,8c0,0.81 0.65,1.46 1.46,1.46h11.64c0.81,0 1.46,-0.65 1.46,-1.46v-8C18.78,5.7 18.13,5.06 17.32,5.06zM11.5,11.6c-0.8,0 -1.46,-0.65 -1.46,-1.46c0,-0.8 0.65,-1.46 1.46,-1.46s1.46,0.65 1.46,1.46C12.96,10.95 12.3,11.6 11.5,11.6zM12.96,5.06h-2.91V3.6h2.91V5.06z"
+        android:fillColor="#FF000000"/>
 </vector>

@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -136,6 +137,29 @@ public class TaskSnapshotPersisterLoaderTest extends TaskSnapshotPersisterTestBa
         assertEquals(12, removeObsoleteFilesQueueItem.getTaskId("12.proto"));
         assertEquals(1, removeObsoleteFilesQueueItem.getTaskId("1.jpg"));
         assertEquals(1, removeObsoleteFilesQueueItem.getTaskId("1_reduced.jpg"));
+    }
+
+    @Test
+    public void testLowResolutionPersistAndLoadSnapshot() {
+        TaskSnapshot a = createSnapshot(0.5f /* reducedResolution */);
+        assertTrue(a.isReducedResolution());
+        mPersister.persistSnapshot(1 , mTestUserId, a);
+        mPersister.waitForQueueEmpty();
+        final File[] files = new File[] { new File(sFilesDir.getPath() + "/snapshots/1.proto"),
+                new File(sFilesDir.getPath() + "/snapshots/1_reduced.jpg")};
+        final File[] nonExistsFiles = new File[] {
+                new File(sFilesDir.getPath() + "/snapshots/1.jpg"),
+        };
+        assertTrueForFiles(files, File::exists, " must exist");
+        assertTrueForFiles(nonExistsFiles, file -> !file.exists(), " must not exist");
+        final TaskSnapshot snapshot = mLoader.loadTask(1, mTestUserId, true /* reduced */);
+        assertNotNull(snapshot);
+        assertEquals(TEST_INSETS, snapshot.getContentInsets());
+        assertNotNull(snapshot.getSnapshot());
+        assertEquals(Configuration.ORIENTATION_PORTRAIT, snapshot.getOrientation());
+
+        final TaskSnapshot snapshotNotExist = mLoader.loadTask(1, mTestUserId, false /* reduced */);
+        assertNull(snapshotNotExist);
     }
 
     @Test

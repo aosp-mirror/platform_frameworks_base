@@ -21,6 +21,7 @@ import android.Manifest;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
+import android.app.INotificationManager;
 import android.app.Vr2dDisplayProperties;
 import android.app.NotificationManager;
 import android.annotation.NonNull;
@@ -42,6 +43,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -64,6 +66,8 @@ import com.android.server.LocalServices;
 import com.android.server.SystemConfig;
 import com.android.server.SystemService;
 import com.android.server.utils.ManagedApplicationService.PendingEvent;
+import com.android.server.utils.ManagedApplicationService.LogEvent;
+import com.android.server.utils.ManagedApplicationService.LogFormattable;
 import com.android.server.vr.EnabledComponentsObserver.EnabledComponentChangeListener;
 import com.android.server.utils.ManagedApplicationService;
 import com.android.server.utils.ManagedApplicationService.BinderChecker;
@@ -72,10 +76,12 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.StringBuilder;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -104,16 +110,18 @@ public class VrManagerService extends SystemService implements EnabledComponentC
     static final boolean DBG = false;
 
     private static final int PENDING_STATE_DELAY_MS = 300;
-    private static final int EVENT_LOG_SIZE = 32;
+    private static final int EVENT_LOG_SIZE = 64;
     private static final int INVALID_APPOPS_MODE = -1;
     /** Null set of sleep sleep flags. */
     private static final int FLAG_NONE = 0;
     /** Flag set when the device is not sleeping. */
-    private static final int FLAG_AWAKE = 1;
+    private static final int FLAG_AWAKE = 1 << 0;
     /** Flag set when the screen has been turned on. */
-    private static final int FLAG_SCREEN_ON = 2;
+    private static final int FLAG_SCREEN_ON = 1 << 1;
+    /** Flag set when the keyguard is not active. */
+    private static final int FLAG_KEYGUARD_UNLOCKED = 1 << 2;
     /** Flag indicating that all system sleep flags have been set.*/
-    private static final int FLAG_ALL = FLAG_AWAKE | FLAG_SCREEN_ON;
+    private static final int FLAG_ALL = FLAG_AWAKE | FLAG_SCREEN_ON | FLAG_KEYGUARD_UNLOCKED;
 
     private static native void initializeNative();
     private static native void setVrModeNative(boolean enabled);
@@ -130,6 +138,7 @@ public class VrManagerService extends SystemService implements EnabledComponentC
     private int mVrAppProcessId;
     private EnabledComponentsObserver mComponentObserver;
     private ManagedApplicationService mCurrentVrService;
+    private ManagedApplicationService mCurrentVrCompositorService;
     private ComponentName mDefaultVrService;
     private Context mContext;
     private ComponentName mCurrentVrModeComponent;
@@ -143,17 +152,44 @@ public class VrManagerService extends SystemService implements EnabledComponentC
     private int mPreviousCoarseLocationMode = INVALID_APPOPS_MODE;
     private int mPreviousManageOverlayMode = INVALID_APPOPS_MODE;
     private VrState mPendingState;
-    private final ArrayDeque<VrState> mLoggingDeque = new ArrayDeque<>(EVENT_LOG_SIZE);
+    private boolean mLogLimitHit;
+    private final ArrayDeque<LogFormattable> mLoggingDeque = new ArrayDeque<>(EVENT_LOG_SIZE);
     private final NotificationAccessManager mNotifAccessManager = new NotificationAccessManager();
+    private INotificationManager mNotificationManager;
     /** Tracks the state of the screen and keyguard UI.*/
-    private int mSystemSleepFlags = FLAG_AWAKE;
+    private int mSystemSleepFlags = FLAG_AWAKE | FLAG_KEYGUARD_UNLOCKED;
     /**
      * Set when ACTION_USER_UNLOCKED is fired. We shouldn't try to bind to the
-     * vr service before then.
+     * vr service before then. This gets set only once the first time the user unlocks the device
+     * and stays true thereafter.
      */
     private boolean mUserUnlocked;
     private Vr2dDisplay mVr2dDisplay;
     private boolean mBootsToVr;
+
+    // Handles events from the managed services (e.g. VrListenerService and any bound VR compositor
+    // service).
+    private final ManagedApplicationService.EventCallback mEventCallback
+                = new ManagedApplicationService.EventCallback() {
+        @Override
+        public void onServiceEvent(LogEvent event) {
+            logEvent(event);
+
+            ComponentName component = null;
+            synchronized (mLock) {
+                component = ((mCurrentVrService == null) ? null : mCurrentVrService.getComponent());
+            }
+
+            // If not on an AIO device and we permanently stopped trying to connect to the
+            // VrListenerService (or don't have one bound), leave persistent VR mode and VR mode.
+            if (!mBootsToVr && event.event == LogEvent.EVENT_STOPPED_PERMANENTLY &&
+                    (component == null || component.equals(event.component))) {
+                Slog.e(TAG, "VrListenerSevice has died permanently, leaving system VR mode.");
+                // We're not a native VR device.  Leave VR + persistent mode.
+                setPersistentVrModeEnabled(false);
+            }
+        }
+    };
 
     private static final int MSG_VR_STATE_CHANGE = 0;
     private static final int MSG_PENDING_VR_STATE_CHANGE = 1;
@@ -175,7 +211,6 @@ public class VrManagerService extends SystemService implements EnabledComponentC
                 if (mBootsToVr) {
                     setPersistentVrModeEnabled(true);
                 }
-                consumeAndApplyPendingStateLocked();
                 if (mBootsToVr && !mVrModeEnabled) {
                   setVrMode(true, mDefaultVrService, 0, -1, null);
                 }
@@ -197,27 +232,38 @@ public class VrManagerService extends SystemService implements EnabledComponentC
     }
 
     private void setSleepState(boolean isAsleep) {
-        synchronized(mLock) {
-
-            if (!isAsleep) {
-                mSystemSleepFlags |= FLAG_AWAKE;
-            } else {
-                mSystemSleepFlags &= ~FLAG_AWAKE;
-            }
-
-            updateVrModeAllowedLocked();
-        }
+        setSystemState(FLAG_AWAKE, !isAsleep);
     }
 
     private void setScreenOn(boolean isScreenOn) {
+        setSystemState(FLAG_SCREEN_ON, isScreenOn);
+    }
+
+    private void setKeyguardShowing(boolean isShowing) {
+        setSystemState(FLAG_KEYGUARD_UNLOCKED, !isShowing);
+    }
+
+    private void setSystemState(int flags, boolean isOn) {
         synchronized(mLock) {
-            if (isScreenOn) {
-                mSystemSleepFlags |= FLAG_SCREEN_ON;
+            int oldState = mSystemSleepFlags;
+            if (isOn) {
+                mSystemSleepFlags |= flags;
             } else {
-                mSystemSleepFlags &= ~FLAG_SCREEN_ON;
+                mSystemSleepFlags &= ~flags;
             }
-            updateVrModeAllowedLocked();
+            if (oldState != mSystemSleepFlags) {
+                if (DBG) Slog.d(TAG, "System state: " + getStateAsString());
+                updateVrModeAllowedLocked();
+            }
         }
+    }
+
+    private String getStateAsString() {
+        return new StringBuilder()
+                .append((mSystemSleepFlags & FLAG_AWAKE) != 0 ? "awake, " : "")
+                .append((mSystemSleepFlags & FLAG_SCREEN_ON) != 0 ? "screen_on, " : "")
+                .append((mSystemSleepFlags & FLAG_KEYGUARD_UNLOCKED) != 0 ? "keyguard_off" : "")
+                .toString();
     }
 
     private void setUserUnlocked() {
@@ -271,7 +317,24 @@ public class VrManagerService extends SystemService implements EnabledComponentC
         }
     };
 
-    private static class VrState {
+    // Event used to log when settings are changed for dumpsys logs.
+    private static class SettingEvent implements LogFormattable {
+        public final long timestamp;
+        public final String what;
+
+        SettingEvent(String what) {
+            this.timestamp = System.currentTimeMillis();
+            this.what = what;
+        }
+
+        @Override
+        public String toLogString(SimpleDateFormat dateFormat) {
+            return dateFormat.format(new Date(timestamp)) + "   " + what;
+        }
+    }
+
+    // Event used to track changes of the primary on-screen VR activity.
+    private static class VrState implements LogFormattable {
         final boolean enabled;
         final boolean running2dInVr;
         final int userId;
@@ -280,7 +343,6 @@ public class VrManagerService extends SystemService implements EnabledComponentC
         final ComponentName callingPackage;
         final long timestamp;
         final boolean defaultPermissionsGranted;
-
 
         VrState(boolean enabled, boolean running2dInVr, ComponentName targetPackageName, int userId,
                 int processId, ComponentName callingPackage) {
@@ -304,6 +366,39 @@ public class VrManagerService extends SystemService implements EnabledComponentC
             this.callingPackage = callingPackage;
             this.defaultPermissionsGranted = defaultPermissionsGranted;
             this.timestamp = System.currentTimeMillis();
+        }
+
+        @Override
+        public String toLogString(SimpleDateFormat dateFormat) {
+            String tab = "  ";
+            String newLine = "\n";
+            StringBuilder sb = new StringBuilder(dateFormat.format(new Date(timestamp)));
+            sb.append(tab);
+            sb.append("State changed to:");
+            sb.append(tab);
+            sb.append((enabled) ? "ENABLED" : "DISABLED");
+            sb.append(newLine);
+            if (enabled) {
+                sb.append(tab);
+                sb.append("User=");
+                sb.append(userId);
+                sb.append(newLine);
+                sb.append(tab);
+                sb.append("Current VR Activity=");
+                sb.append((callingPackage == null) ? "None" : callingPackage.flattenToString());
+                sb.append(newLine);
+                sb.append(tab);
+                sb.append("Bound VrListenerService=");
+                sb.append((targetPackageName == null) ? "None"
+                        : targetPackageName.flattenToString());
+                sb.append(newLine);
+                if (defaultPermissionsGranted) {
+                    sb.append(tab);
+                    sb.append("Default permissions granted to the bound VrListenerService.");
+                    sb.append(newLine);
+                }
+            }
+            return sb.toString();
         }
     }
 
@@ -410,7 +505,8 @@ public class VrManagerService extends SystemService implements EnabledComponentC
 
         @Override
         public void registerListener(IVrStateCallbacks cb) {
-            enforceCallerPermission(Manifest.permission.ACCESS_VR_MANAGER);
+            enforceCallerPermissionAnyOf(Manifest.permission.ACCESS_VR_MANAGER,
+                    Manifest.permission.ACCESS_VR_STATE);
             if (cb == null) {
                 throw new IllegalArgumentException("Callback binder object is null.");
             }
@@ -420,7 +516,8 @@ public class VrManagerService extends SystemService implements EnabledComponentC
 
         @Override
         public void unregisterListener(IVrStateCallbacks cb) {
-            enforceCallerPermission(Manifest.permission.ACCESS_VR_MANAGER);
+            enforceCallerPermissionAnyOf(Manifest.permission.ACCESS_VR_MANAGER,
+                    Manifest.permission.ACCESS_VR_STATE);
             if (cb == null) {
                 throw new IllegalArgumentException("Callback binder object is null.");
             }
@@ -430,7 +527,8 @@ public class VrManagerService extends SystemService implements EnabledComponentC
 
         @Override
         public void registerPersistentVrStateListener(IPersistentVrStateCallbacks cb) {
-            enforceCallerPermission(Manifest.permission.ACCESS_VR_MANAGER);
+            enforceCallerPermissionAnyOf(Manifest.permission.ACCESS_VR_MANAGER,
+                    Manifest.permission.ACCESS_VR_STATE);
             if (cb == null) {
                 throw new IllegalArgumentException("Callback binder object is null.");
             }
@@ -440,7 +538,8 @@ public class VrManagerService extends SystemService implements EnabledComponentC
 
         @Override
         public void unregisterPersistentVrStateListener(IPersistentVrStateCallbacks cb) {
-            enforceCallerPermission(Manifest.permission.ACCESS_VR_MANAGER);
+            enforceCallerPermissionAnyOf(Manifest.permission.ACCESS_VR_MANAGER,
+                    Manifest.permission.ACCESS_VR_STATE);
             if (cb == null) {
                 throw new IllegalArgumentException("Callback binder object is null.");
             }
@@ -450,25 +549,41 @@ public class VrManagerService extends SystemService implements EnabledComponentC
 
         @Override
         public boolean getVrModeState() {
+            enforceCallerPermissionAnyOf(Manifest.permission.ACCESS_VR_MANAGER,
+                    Manifest.permission.ACCESS_VR_STATE);
             return VrManagerService.this.getVrMode();
         }
 
         @Override
+        public boolean getPersistentVrModeEnabled() {
+            enforceCallerPermissionAnyOf(Manifest.permission.ACCESS_VR_MANAGER,
+                    Manifest.permission.ACCESS_VR_STATE);
+            return VrManagerService.this.getPersistentVrMode();
+        }
+
+        @Override
         public void setPersistentVrModeEnabled(boolean enabled) {
-            enforceCallerPermission(Manifest.permission.RESTRICTED_VR_ACCESS);
+            enforceCallerPermissionAnyOf(Manifest.permission.RESTRICTED_VR_ACCESS);
             VrManagerService.this.setPersistentVrModeEnabled(enabled);
         }
 
         @Override
         public void setVr2dDisplayProperties(
                 Vr2dDisplayProperties vr2dDisplayProp) {
-            enforceCallerPermission(Manifest.permission.RESTRICTED_VR_ACCESS);
+            enforceCallerPermissionAnyOf(Manifest.permission.RESTRICTED_VR_ACCESS);
             VrManagerService.this.setVr2dDisplayProperties(vr2dDisplayProp);
         }
 
         @Override
         public int getVr2dDisplayId() {
             return VrManagerService.this.getVr2dDisplayId();
+        }
+
+        @Override
+        public void setAndBindCompositor(String componentName) {
+            enforceCallerPermissionAnyOf(Manifest.permission.RESTRICTED_VR_ACCESS);
+            VrManagerService.this.setAndBindCompositor(
+                (componentName == null) ? null : ComponentName.unflattenFromString(componentName));
         }
 
         @Override
@@ -479,6 +594,12 @@ public class VrManagerService extends SystemService implements EnabledComponentC
             pw.println("VR mode is currently: " + ((mVrModeAllowed) ? "allowed" : "disallowed"));
             pw.println("Persistent VR mode is currently: " +
                     ((mPersistentVrModeEnabled) ? "enabled" : "disabled"));
+            pw.println("Currently bound VR listener service: "
+                    + ((mCurrentVrCompositorService == null)
+                    ? "None" : mCurrentVrCompositorService.getComponent().flattenToString()));
+            pw.println("Currently bound VR compositor service: "
+                    + ((mCurrentVrCompositorService == null)
+                    ? "None" : mCurrentVrCompositorService.getComponent().flattenToString()));
             pw.println("Previous state transitions:\n");
             String tab = "  ";
             dumpStateTransitions(pw);
@@ -526,11 +647,21 @@ public class VrManagerService extends SystemService implements EnabledComponentC
 
     };
 
-    private void enforceCallerPermission(String permission) {
-        if (mContext.checkCallingOrSelfPermission(permission)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Caller does not hold the permission " + permission);
+    /**
+     * Enforces that at lease one of the specified permissions is held by the caller.
+     * Throws SecurityException if none of the specified permissions are held.
+     *
+     * @param permissions One or more permissions to check against.
+     */
+    private void enforceCallerPermissionAnyOf(String... permissions) {
+        for (String permission : permissions) {
+            if (mContext.checkCallingOrSelfPermission(permission)
+                    == PackageManager.PERMISSION_GRANTED) {
+                return;
+            }
         }
+        throw new SecurityException("Caller does not hold at least one of the permissions: "
+                + Arrays.toString(permissions));
     }
 
     /**
@@ -551,6 +682,11 @@ public class VrManagerService extends SystemService implements EnabledComponentC
         @Override
         public void onScreenStateChanged(boolean isScreenOn) {
             VrManagerService.this.setScreenOn(isScreenOn);
+        }
+
+        @Override
+        public void onKeyguardStateChanged(boolean isShowing) {
+            VrManagerService.this.setKeyguardShowing(isShowing);
         }
 
         @Override
@@ -604,6 +740,8 @@ public class VrManagerService extends SystemService implements EnabledComponentC
     @Override
     public void onBootPhase(int phase) {
         if (phase == SystemService.PHASE_SYSTEM_SERVICES_READY) {
+            mNotificationManager = INotificationManager.Stub.asInterface(
+                    ServiceManager.getService(Context.NOTIFICATION_SERVICE));
             synchronized (mLock) {
                 Looper looper = Looper.getMainLooper();
                 Handler handler = new Handler(looper);
@@ -755,6 +893,7 @@ public class VrManagerService extends SystemService implements EnabledComponentC
                         + mCurrentVrService.getComponent() + " for user "
                         + mCurrentVrService.getUserId());
                     mCurrentVrService.disconnect();
+                    updateCompositorServiceLocked(UserHandle.USER_NULL, null);
                     mCurrentVrService = null;
                 } else {
                     nothingChanged = true;
@@ -768,6 +907,7 @@ public class VrManagerService extends SystemService implements EnabledComponentC
                         Slog.i(TAG, "VR mode component changed to " + component
                             + ", disconnecting " + mCurrentVrService.getComponent()
                             + " for user " + mCurrentVrService.getUserId());
+                        updateCompositorServiceLocked(UserHandle.USER_NULL, null);
                         createAndConnectService(component, userId);
                         sendUpdatedCaller = true;
                     } else {
@@ -857,50 +997,28 @@ public class VrManagerService extends SystemService implements EnabledComponentC
     }
 
     private void grantNotificationListenerAccess(String pkg, int userId) {
+        NotificationManager nm = mContext.getSystemService(NotificationManager.class);
         PackageManager pm = mContext.getPackageManager();
         ArraySet<ComponentName> possibleServices = EnabledComponentsObserver.loadComponentNames(pm,
                 userId, NotificationListenerService.SERVICE_INTERFACE,
                 android.Manifest.permission.BIND_NOTIFICATION_LISTENER_SERVICE);
-        ContentResolver resolver = mContext.getContentResolver();
-
-        ArraySet<String> current = getNotificationListeners(resolver, userId);
 
         for (ComponentName c : possibleServices) {
-            String flatName = c.flattenToString();
-            if (Objects.equals(c.getPackageName(), pkg)
-                    && !current.contains(flatName)) {
-                current.add(flatName);
+            if (Objects.equals(c.getPackageName(), pkg)) {
+                nm.setNotificationListenerAccessGrantedForUser(c, userId, true);
             }
-        }
-
-        if (current.size() > 0) {
-            String flatSettings = formatSettings(current);
-            Settings.Secure.putStringForUser(resolver,
-                    Settings.Secure.ENABLED_NOTIFICATION_LISTENERS,
-                    flatSettings, userId);
         }
     }
 
     private void revokeNotificationListenerAccess(String pkg, int userId) {
-        ContentResolver resolver = mContext.getContentResolver();
+        NotificationManager nm = mContext.getSystemService(NotificationManager.class);
+        List<ComponentName> current = nm.getEnabledNotificationListeners(userId);
 
-        ArraySet<String> current = getNotificationListeners(resolver, userId);
-
-        ArrayList<String> toRemove = new ArrayList<>();
-
-        for (String c : current) {
-            ComponentName component = ComponentName.unflattenFromString(c);
+        for (ComponentName component : current) {
             if (component != null && component.getPackageName().equals(pkg)) {
-                toRemove.add(c);
+                nm.setNotificationListenerAccessGrantedForUser(component, userId, false);
             }
         }
-
-        current.removeAll(toRemove);
-
-        String flatSettings = formatSettings(current);
-        Settings.Secure.putStringForUser(resolver,
-                Settings.Secure.ENABLED_NOTIFICATION_LISTENERS,
-                flatSettings, userId);
     }
 
     private void grantCoarseLocationPermissionIfNeeded(String pkg, int userId) {
@@ -977,7 +1095,7 @@ public class VrManagerService extends SystemService implements EnabledComponentC
 
 
     private void createAndConnectService(@NonNull ComponentName component, int userId) {
-        mCurrentVrService = VrManagerService.create(mContext, component, userId);
+        mCurrentVrService = createVrListenerService(component, userId);
         mCurrentVrService.connect();
         Slog.i(TAG, "Connecting " + component + " for user " + userId);
     }
@@ -1012,13 +1130,27 @@ public class VrManagerService extends SystemService implements EnabledComponentC
     }
 
     /**
-     * Helper function for making ManagedApplicationService instances.
+     * Helper function for making ManagedApplicationService for VrListenerService instances.
      */
-    private static ManagedApplicationService create(@NonNull Context context,
-            @NonNull ComponentName component, int userId) {
-        return ManagedApplicationService.build(context, component, userId,
+    private ManagedApplicationService createVrListenerService(@NonNull ComponentName component,
+            int userId) {
+        int retryType = (mBootsToVr) ? ManagedApplicationService.RETRY_FOREVER
+                : ManagedApplicationService.RETRY_NEVER;
+        return ManagedApplicationService.build(mContext, component, userId,
                 R.string.vr_listener_binding_label, Settings.ACTION_VR_LISTENER_SETTINGS,
-                sBinderChecker);
+                sBinderChecker, /*isImportant*/true, retryType, mHandler, mEventCallback);
+    }
+
+    /**
+     * Helper function for making ManagedApplicationService for VR Compositor instances.
+     */
+    private ManagedApplicationService createVrCompositorService(@NonNull ComponentName component,
+            int userId) {
+        int retryType = (mBootsToVr) ? ManagedApplicationService.RETRY_FOREVER
+                : ManagedApplicationService.RETRY_BEST_EFFORT;
+        return ManagedApplicationService.build(mContext, component, userId, /*clientLabel*/0,
+                /*settingsAction*/null, /*binderChecker*/null, /*isImportant*/true, retryType,
+                mHandler, /*disconnectCallback*/mEventCallback);
     }
 
     /**
@@ -1049,44 +1181,35 @@ public class VrManagerService extends SystemService implements EnabledComponentC
 
     private void logStateLocked() {
         ComponentName currentBoundService = (mCurrentVrService == null) ? null :
-            mCurrentVrService.getComponent();
-        VrState current = new VrState(mVrModeEnabled, mRunning2dInVr, currentBoundService,
-            mCurrentVrModeUser, mVrAppProcessId, mCurrentVrModeComponent, mWasDefaultGranted);
-        if (mLoggingDeque.size() == EVENT_LOG_SIZE) {
-            mLoggingDeque.removeFirst();
+                mCurrentVrService.getComponent();
+        logEvent(new VrState(mVrModeEnabled, mRunning2dInVr, currentBoundService,
+                mCurrentVrModeUser, mVrAppProcessId, mCurrentVrModeComponent, mWasDefaultGranted));
+    }
+
+    private void logEvent(LogFormattable event) {
+        synchronized (mLoggingDeque) {
+            if (mLoggingDeque.size() == EVENT_LOG_SIZE) {
+                mLoggingDeque.removeFirst();
+                mLogLimitHit = true;
+            }
+            mLoggingDeque.add(event);
         }
-        mLoggingDeque.add(current);
     }
 
     private void dumpStateTransitions(PrintWriter pw) {
         SimpleDateFormat d = new SimpleDateFormat("MM-dd HH:mm:ss.SSS");
-        String tab = "  ";
-        if (mLoggingDeque.size() == 0) {
-            pw.print(tab);
-            pw.println("None");
-        }
-        for (VrState state : mLoggingDeque) {
-            pw.print(d.format(new Date(state.timestamp)));
-            pw.print(tab);
-            pw.print("State changed to:");
-            pw.print(tab);
-            pw.println((state.enabled) ? "ENABLED" : "DISABLED");
-            if (state.enabled) {
-                pw.print(tab);
-                pw.print("User=");
-                pw.println(state.userId);
-                pw.print(tab);
-                pw.print("Current VR Activity=");
-                pw.println((state.callingPackage == null) ?
-                    "None" : state.callingPackage.flattenToString());
-                pw.print(tab);
-                pw.print("Bound VrListenerService=");
-                pw.println((state.targetPackageName == null) ?
-                    "None" : state.targetPackageName.flattenToString());
-                if (state.defaultPermissionsGranted) {
-                    pw.print(tab);
-                    pw.println("Default permissions granted to the bound VrListenerService.");
-                }
+        synchronized (mLoggingDeque) {
+            if (mLoggingDeque.size() == 0) {
+                pw.print("  ");
+                pw.println("None");
+            }
+
+            if (mLogLimitHit) {
+                pw.println("..."); // Indicates log overflow
+            }
+
+            for (LogFormattable event : mLoggingDeque) {
+                pw.println(event.toLogString(d));
             }
         }
     }
@@ -1169,10 +1292,41 @@ public class VrManagerService extends SystemService implements EnabledComponentC
         return INVALID_DISPLAY;
     }
 
+    private void setAndBindCompositor(ComponentName componentName) {
+        final int userId = UserHandle.getCallingUserId();
+        final long token = Binder.clearCallingIdentity();
+        synchronized (mLock) {
+            updateCompositorServiceLocked(userId, componentName);
+        }
+        Binder.restoreCallingIdentity(token);
+    }
+
+    private void updateCompositorServiceLocked(int userId, ComponentName componentName) {
+        if (mCurrentVrCompositorService != null
+                && mCurrentVrCompositorService.disconnectIfNotMatching(componentName, userId)) {
+            Slog.i(TAG, "Disconnecting compositor service: "
+                    + mCurrentVrCompositorService.getComponent());
+            // Check if existing service matches the requested one, if not (or if the requested
+            // component is null) disconnect it.
+            mCurrentVrCompositorService = null;
+        }
+
+        if (componentName != null && mCurrentVrCompositorService == null) {
+            // We don't have an existing service matching the requested component, so attempt to
+            // connect one.
+            Slog.i(TAG, "Connecting compositor service: " + componentName);
+            mCurrentVrCompositorService = createVrCompositorService(componentName, userId);
+            mCurrentVrCompositorService.connect();
+        }
+    }
+
     private void setPersistentModeAndNotifyListenersLocked(boolean enabled) {
         if (mPersistentVrModeEnabled == enabled) {
             return;
         }
+        String eventName = "Persistent VR mode " + ((enabled) ? "enabled" : "disabled");
+        Slog.i(TAG, eventName);
+        logEvent(new SettingEvent(eventName));
         mPersistentVrModeEnabled = enabled;
 
         mHandler.sendMessage(mHandler.obtainMessage(MSG_PERSISTENT_VR_MODE_STATE_CHANGE,
@@ -1218,6 +1372,12 @@ public class VrManagerService extends SystemService implements EnabledComponentC
     private boolean getVrMode() {
         synchronized (mLock) {
             return mVrModeEnabled;
+        }
+    }
+
+    private boolean getPersistentVrMode() {
+        synchronized (mLock) {
+            return mPersistentVrModeEnabled;
         }
     }
 }

@@ -15,6 +15,7 @@ package android.app {
 
   public class Notification implements android.os.Parcelable {
     method public deprecated java.lang.String getChannel();
+    method public static java.lang.Class<? extends android.app.Notification.Style> getNotificationStyleClass(java.lang.String);
     method public deprecated long getTimeout();
     method public deprecated void setLatestEventInfo(android.content.Context, java.lang.CharSequence, java.lang.CharSequence, android.app.PendingIntent);
   }
@@ -24,30 +25,9 @@ package android.app {
     method public deprecated android.app.Notification.Builder setTimeout(long);
   }
 
-  public static final class Notification.TvExtender implements android.app.Notification.Extender {
-    method public deprecated java.lang.String getChannel();
-  }
-
   public final deprecated class PictureInPictureArgs implements android.os.Parcelable {
-    ctor public deprecated PictureInPictureArgs();
-    ctor public deprecated PictureInPictureArgs(float, java.util.List<android.app.RemoteAction>);
     method public static android.app.PictureInPictureArgs convert(android.app.PictureInPictureParams);
     method public static android.app.PictureInPictureParams convert(android.app.PictureInPictureArgs);
-    method public void copyOnlySet(android.app.PictureInPictureArgs);
-    method public java.util.List<android.app.RemoteAction> getActions();
-    method public float getAspectRatio();
-    method public android.util.Rational getAspectRatioRational();
-    method public android.graphics.Rect getSourceRectHint();
-    method public android.graphics.Rect getSourceRectHintInsets();
-    method public boolean hasSetActions();
-    method public boolean hasSetAspectRatio();
-    method public boolean hasSourceBoundsHint();
-    method public boolean hasSourceBoundsHintInsets();
-    method public deprecated void setActions(java.util.List<android.app.RemoteAction>);
-    method public deprecated void setAspectRatio(float);
-    method public deprecated void setSourceRectHint(android.graphics.Rect);
-    method public deprecated void setSourceRectHintInsets(android.graphics.Rect);
-    method public void truncateActions(int);
     field public static final android.os.Parcelable.Creator<android.app.PictureInPictureArgs> CREATOR;
   }
 
@@ -59,10 +39,6 @@ package android.app {
     method public android.app.PictureInPictureArgs.Builder setSourceRectHint(android.graphics.Rect);
   }
 
-  public final class RecoverableSecurityException extends java.lang.SecurityException implements android.os.Parcelable {
-    method public deprecated void showAsNotification(android.content.Context);
-  }
-
 }
 
 package android.app.admin {
@@ -70,8 +46,6 @@ package android.app.admin {
   public class DevicePolicyManager {
     method public deprecated android.os.UserHandle createAndInitializeUser(android.content.ComponentName, java.lang.String, java.lang.String, android.content.ComponentName, android.os.Bundle);
     method public deprecated android.os.UserHandle createUser(android.content.ComponentName, java.lang.String);
-    method public deprecated java.lang.String getDeviceInitializerApp();
-    method public deprecated android.content.ComponentName getDeviceInitializerComponent();
   }
 
 }
@@ -272,10 +246,6 @@ package android.os {
     ctor public BatteryManager();
   }
 
-  public class Build {
-    field public static final boolean PERMISSIONS_REVIEW_REQUIRED;
-  }
-
   public final class PowerManager {
     method public void goToSleep(long);
     method public deprecated void userActivity(long, boolean);
@@ -301,18 +271,8 @@ package android.os {
 package android.os.storage {
 
   public class StorageManager {
-    method public deprecated void allocateBytes(java.io.File, long, int) throws java.io.IOException;
-    method public deprecated long getAllocatableBytes(java.io.File, int) throws java.io.IOException;
-    method public deprecated long getCacheQuotaBytes(java.io.File) throws java.io.IOException;
-    method public deprecated long getCacheQuotaBytes() throws java.io.IOException;
-    method public deprecated long getCacheSizeBytes(java.io.File) throws java.io.IOException;
-    method public deprecated long getCacheSizeBytes() throws java.io.IOException;
-    method public deprecated long getExternalCacheQuotaBytes() throws java.io.IOException;
-    method public deprecated long getExternalCacheSizeBytes() throws java.io.IOException;
     method public android.os.storage.StorageVolume getPrimaryVolume();
     method public android.os.storage.StorageVolume[] getVolumeList();
-    method public deprecated boolean isCacheBehaviorAtomic(java.io.File) throws java.io.IOException;
-    method public deprecated void setCacheBehaviorAtomic(java.io.File, boolean) throws java.io.IOException;
   }
 
 }
@@ -356,11 +316,8 @@ package android.provider {
     field public static final java.lang.String CREATED = "created";
     field public static final java.lang.String DATE = "date";
     field public static final java.lang.String FAVICON = "favicon";
-    field public static final java.lang.String THUMBNAIL = "thumbnail";
     field public static final java.lang.String TITLE = "title";
-    field public static final java.lang.String TOUCH_ICON = "touch_icon";
     field public static final java.lang.String URL = "url";
-    field public static final java.lang.String USER_ENTERED = "user_entered";
     field public static final java.lang.String VISITS = "visits";
   }
 

@@ -18,7 +18,6 @@
 <!-- Extends RelativeLayout -->
 <com.android.systemui.qs.QuickStatusBarHeader
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:systemui="http://schemas.android.com/apk/res-auto"
     android:id="@+id/header"
     android:layout_width="match_parent"
     android:layout_height="@dimen/status_bar_header_height"
@@ -31,46 +30,7 @@
     android:paddingEnd="0dp"
     android:paddingStart="0dp">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:layout_alignParentEnd="true"
-        android:clipChildren="false"
-        android:clipToPadding="false"
-        android:gravity="center"
-        android:paddingStart="8dp"
-        android:paddingEnd="8dp"
-        android:orientation="horizontal">
-
-
-        <com.android.keyguard.CarrierText
-            android:id="@+id/qs_carrier_text"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="center_vertical|start"
-            android:ellipsize="marquee"
-            android:textAppearance="?android:attr/textAppearanceSmall"
-            android:textColor="?android:attr/textColorPrimary"
-            android:singleLine="true" />
-
-        <com.android.systemui.BatteryMeterView android:id="@+id/battery"
-            android:layout_height="match_parent"
-            android:layout_width="wrap_content"
-            />
-
-        <com.android.systemui.statusbar.policy.Clock
-            android:id="@+id/clock"
-            android:textAppearance="@style/TextAppearance.StatusBar.Clock"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:singleLine="true"
-            android:paddingStart="@dimen/status_bar_clock_starting_padding"
-            android:paddingEnd="@dimen/status_bar_clock_end_padding"
-            android:gravity="center_vertical|start"
-            systemui:showDark="false"
-            />
-    </LinearLayout>
+    <include layout="@layout/quick_status_bar_header_system_icons" />
 
     <com.android.systemui.qs.QuickQSPanel
         android:id="@+id/quick_qs_panel"

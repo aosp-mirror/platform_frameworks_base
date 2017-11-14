@@ -491,7 +491,8 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
                 boolean isManagedProfile = mUserManager.isManagedProfile(userId);
                 mHandler.post(() -> {
                     final boolean showIcon;
-                    if (isManagedProfile && !mKeyguardMonitor.isShowing()) {
+                    if (isManagedProfile &&
+                            (!mKeyguardMonitor.isShowing() || mKeyguardMonitor.isOccluded())) {
                         showIcon = true;
                         mIconController.setIcon(mSlotManagedProfile,
                                 R.drawable.stat_sys_managed_profile_status,

@@ -22,6 +22,7 @@
 #include "renderstate/RenderState.h"
 #include "utils/FatVector.h"
 
+#include <GrBackendSurface.h>
 #include <GrContext.h>
 #include <GrTypes.h>
 #include <vk/GrVkTypes.h>
@@ -297,13 +298,9 @@ void VulkanManager::createBuffers(VulkanSurface* surface, VkFormat format, VkExt
 
     SkSurfaceProps props(0, kUnknown_SkPixelGeometry);
 
-    bool wantSRGB = VK_FORMAT_R8G8B8A8_SRGB == format;
-    GrPixelConfig config = wantSRGB ? kSRGBA_8888_GrPixelConfig : kRGBA_8888_GrPixelConfig;
-
     // set up initial image layouts and create surfaces
     surface->mImageInfos = new VulkanSurface::ImageInfo[surface->mImageCount];
     for (uint32_t i = 0; i < surface->mImageCount; ++i) {
-        GrBackendRenderTargetDesc desc;
         GrVkImageInfo info;
         info.fImage = surface->mImages[i];
         info.fAlloc = { VK_NULL_HANDLE, 0, 0, 0 };
@@ -312,17 +309,11 @@ void VulkanManager::createBuffers(VulkanSurface* surface, VkFormat format, VkExt
         info.fFormat = format;
         info.fLevelCount = 1;
 
-        desc.fWidth = extent.width;
-        desc.fHeight = extent.height;
-        desc.fConfig = config;
-        desc.fOrigin = kTopLeft_GrSurfaceOrigin;
-        desc.fSampleCnt = 0;
-        desc.fStencilBits = 0;
-        desc.fRenderTargetHandle = (GrBackendObject) &info;
+        GrBackendRenderTarget backendRT(extent.width, extent.height, 0, 0, info);
 
         VulkanSurface::ImageInfo& imageInfo = surface->mImageInfos[i];
         imageInfo.mSurface = SkSurface::MakeFromBackendRenderTarget(mRenderThread.getGrContext(),
-                desc, &props);
+                backendRT, kTopLeft_GrSurfaceOrigin, nullptr, &props);
     }
 
     SkASSERT(mCommandPool != VK_NULL_HANDLE);

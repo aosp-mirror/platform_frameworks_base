@@ -16,12 +16,16 @@
 package com.android.server.usb.descriptors.report;
 
 /**
- * Declares the interface for classes that provide reporting functionality.
- * (This is the double-indirection aspect of the "Visitor" pattern.
+ * @hide
  */
 public interface Reporting {
     /**
-     * Declares the report method that UsbDescriptor subclasses call.
+     * TBD
      */
-    void report(Reporter reporter);
+    void report(ReportCanvas canvas);
+
+    /**
+     * TBD
+     */
+    void shortReport(ReportCanvas canvas);
 }

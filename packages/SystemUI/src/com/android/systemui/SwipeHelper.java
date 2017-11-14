@@ -25,6 +25,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.RectF;
 import android.os.Handler;
+import android.util.ArrayMap;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
@@ -36,8 +37,6 @@ import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin.MenuItem;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.FlingAnimationUtils;
-
-import java.util.HashMap;
 
 public class SwipeHelper implements Gefingerpoken {
     static final String TAG = "com.android.systemui.SwipeHelper";
@@ -51,10 +50,10 @@ public class SwipeHelper implements Gefingerpoken {
     public static final int X = 0;
     public static final int Y = 1;
 
-    private float SWIPE_ESCAPE_VELOCITY = 500f; // dp/sec
-    private int DEFAULT_ESCAPE_ANIMATION_DURATION = 200; // ms
-    private int MAX_ESCAPE_ANIMATION_DURATION = 400; // ms
-    private int MAX_DISMISS_VELOCITY = 4000; // dp/sec
+    private static final float SWIPE_ESCAPE_VELOCITY = 500f; // dp/sec
+    private static final int DEFAULT_ESCAPE_ANIMATION_DURATION = 200; // ms
+    private static final int MAX_ESCAPE_ANIMATION_DURATION = 400; // ms
+    private static final int MAX_DISMISS_VELOCITY = 4000; // dp/sec
     private static final int SNAP_ANIM_LEN = SLOW_ANIMATIONS ? 1000 : 150; // ms
 
     static final float SWIPE_PROGRESS_FADE_END = 0.5f; // fraction of thumbnail width
@@ -65,13 +64,13 @@ public class SwipeHelper implements Gefingerpoken {
     private float mMinSwipeProgress = 0f;
     private float mMaxSwipeProgress = 1f;
 
-    private FlingAnimationUtils mFlingAnimationUtils;
+    private final FlingAnimationUtils mFlingAnimationUtils;
     private float mPagingTouchSlop;
-    private Callback mCallback;
-    private Handler mHandler;
-    private int mSwipeDirection;
-    private VelocityTracker mVelocityTracker;
-    private FalsingManager mFalsingManager;
+    private final Callback mCallback;
+    private final Handler mHandler;
+    private final int mSwipeDirection;
+    private final VelocityTracker mVelocityTracker;
+    private final FalsingManager mFalsingManager;
 
     private float mInitialTouchPos;
     private float mPerpendicularInitialTouchPos;
@@ -86,16 +85,16 @@ public class SwipeHelper implements Gefingerpoken {
     private boolean mLongPressSent;
     private LongPressListener mLongPressListener;
     private Runnable mWatchLongPress;
-    private long mLongPressTimeout;
+    private final long mLongPressTimeout;
 
     final private int[] mTmpPos = new int[2];
-    private int mFalsingThreshold;
+    private final int mFalsingThreshold;
     private boolean mTouchAboveFalsingThreshold;
     private boolean mDisableHwLayers;
-    private boolean mFadeDependingOnAmountSwiped;
-    private Context mContext;
+    private final boolean mFadeDependingOnAmountSwiped;
+    private final Context mContext;
 
-    private HashMap<View, Animator> mDismissPendingMap = new HashMap<>();
+    private final ArrayMap<View, Animator> mDismissPendingMap = new ArrayMap<>();
 
     public SwipeHelper(int swipeDirection, Callback callback, Context context) {
         mContext = context;
@@ -204,7 +203,7 @@ public class SwipeHelper implements Gefingerpoken {
             return Math.max(1 - progress, 0);
         }
 
-        return Math.min(0, Math.max(1, progress / SWIPE_PROGRESS_FADE_END));
+        return 1f - Math.max(0, Math.min(1, progress / SWIPE_PROGRESS_FADE_END));
     }
 
     private void updateSwipeProgressFromOffset(View animView, boolean dismissable) {
@@ -440,7 +439,12 @@ public class SwipeHelper implements Gefingerpoken {
             public void onAnimationEnd(Animator animation) {
                 updateSwipeProgressFromOffset(animView, canBeDismissed);
                 mDismissPendingMap.remove(animView);
-                if (!mCancelled) {
+                boolean wasRemoved = false;
+                if (animView instanceof ExpandableNotificationRow) {
+                    ExpandableNotificationRow row = (ExpandableNotificationRow) animView;
+                    wasRemoved = row.isRemoved();
+                }
+                if (!mCancelled || wasRemoved) {
                     mCallback.onChildDismissed(animView);
                 }
                 if (endAction != null) {

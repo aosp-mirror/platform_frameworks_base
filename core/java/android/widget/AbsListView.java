@@ -913,14 +913,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 mCheckedIdStates = new LongSparseArray<Integer>();
             }
         }
-
-        if (mCheckStates != null) {
-            mCheckStates.clear();
-        }
-
-        if (mCheckedIdStates != null) {
-            mCheckedIdStates.clear();
-        }
+        clearChoices();
     }
 
     /**

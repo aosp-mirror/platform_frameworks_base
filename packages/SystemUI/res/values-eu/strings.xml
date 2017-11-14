@@ -242,7 +242,7 @@
     <string name="accessibility_ambient_display_charging" msgid="9084521679384069087">"Kargatzen"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G-3G datuen erabilera eten da"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G datuen erabilera eten da"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="6801382439018099779">"Datu-konexioa pausatu egin da"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="6801382439018099779">"Datu mugikorrak pausatu egin dira"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Datuen erabilera eten da"</string>
     <string name="data_usage_disabled_dialog" msgid="4919541636934603816">"Iritsi zara ezarri zenuen datu-mugara. Datu mugikorrak erabiltzeari utzi diozu.\n\nDatu mugikorrak erabiltzeari berrekiten badiozu, datuen erabileragatiko gastuak izango dituzu."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Jarraitu erabiltzen"</string>
@@ -300,7 +300,7 @@
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi konexioa desaktibatuta"</string>
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Aktibatuta dago Wi-Fi konexioa"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Ez dago Wi-Fi sarerik erabilgarri"</string>
-    <string name="quick_settings_cast_title" msgid="7709016546426454729">"Cast"</string>
+    <string name="quick_settings_cast_title" msgid="7709016546426454729">"Igorri"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Igortzen"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Izenik gabeko gailua"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"Igortzeko prest"</string>
@@ -342,9 +342,9 @@
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Zatitze horizontala"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Zatitze bertikala"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Zatitze pertsonalizatua"</string>
-    <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"Zatitu pantaila eta ezarri goian"</string>
-    <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"Zatitu pantaila eta ezarri ezkerrean"</string>
-    <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"Zatitu pantaila eta ezarri eskuinean"</string>
+    <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"Banandu pantaila eta ezarri goian"</string>
+    <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"Banandu pantaila eta ezarri ezkerrean"</string>
+    <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"Banandu pantaila eta ezarri eskuinean"</string>
   <string-array name="recents_blacklist_array">
   </string-array>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Kargatuta"</string>
@@ -355,10 +355,10 @@
     <string name="description_target_search" msgid="3091587249776033139">"Bilatu"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Lerratu gora hau egiteko: <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Lerratu ezkerrera hau egiteko: <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="zen_priority_introduction" msgid="7577965386868311310">"Gailuak ez du egingo ez soinurik ez dardararik, baina alarmak, gertaeren abisu-tonuak eta aukeratzen dituzun deitzaileen dei-tonuak joko ditu. Bestalde, zuk erreproduzitutako guztia entzungo duzu, besteak beste, musika, bideoak eta jokoak."</string>
-    <string name="zen_alarms_introduction" msgid="7034415210361973827">"Gailuak ez du egingo ez soinurik ez dardararik, baina alarmak joko ditu. Hala ere, zuk erreproduzitutako guztia entzun ahal izango duzu, besteak beste, musika, bideoak eta jokoak."</string>
+    <string name="zen_priority_introduction" msgid="1149025108714420281">"Gailuak ez du egingo ez soinurik ez dardararik, baina alarmak, gertaera eta abisuen tonuak, eta aukeratzen dituzun deitzaileen dei-tonuak joko ditu. Bestalde, zuk erreproduzitutako guztia entzungo duzu, besteak beste, musika, bideoak eta jokoak."</string>
+    <string name="zen_alarms_introduction" msgid="4934328096749380201">"Gailuak ez du egingo ez soinurik ez dardararik, baina alarmak joko ditu. Hala ere, zuk erreproduzitutako guztia entzun ahal izango duzu, besteak beste, musika, bideoak eta jokoak."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Pertsonalizatu"</string>
-    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Soinu eta dardara GUZTIAK blokeatuko dira, besteak beste, alarmak, musika, bideoak eta jokoak. Telefono-deiak egiteko aukera izaten jarraituko duzu."</string>
+    <string name="zen_silence_introduction_voice" msgid="3948778066295728085">"Soinu eta dardara GUZTIAK blokeatuko dira, besteak beste, alarmak, musika, bideoak eta jokoak. Telefono-deiak egiteko aukera izaten jarraituko duzu."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"Soinu eta dardara GUZTIAK blokeatuko dira, besteak beste, alarmak, musika, bideoak eta jokoak."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Horren premiazkoak ez diren jakinarazpenak daude behean"</string>
@@ -730,7 +730,7 @@
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Baztertzeko, arrastatu behera"</string>
     <string name="pip_menu_title" msgid="3328510504196964712">"Pantaila txiki gainjarriaren menua"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"Pantaila txiki gainjarrian dago <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="pip_notification_message" msgid="4171698133469539591">"Ez baduzu nahi <xliff:g id="NAME">%s</xliff:g> zerbitzuak eginbide hori erabiltzea, sakatu hau ezarpenak ireki eta aukera desaktibatzeko."</string>
+    <string name="pip_notification_message" msgid="5619512781514343311">"Ez baduzu nahi <xliff:g id="NAME">%s</xliff:g> zerbitzuak eginbide hori erabiltzea, sakatu hau ezarpenak ireki eta aukera desaktibatzeko."</string>
     <string name="pip_play" msgid="1417176722760265888">"Erreproduzitu"</string>
     <string name="pip_pause" msgid="8881063404466476571">"Pausatu"</string>
     <string name="pip_skip_to_next" msgid="1948440006726306284">"Saltatu hurrengora"</string>
@@ -775,5 +775,4 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Ordeztu"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"Aplikazioak exekutatzen ari dira atzeko planoan"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Sakatu bateria eta datuen erabilerari buruzko xehetasunak ikusteko"</string>
-    <string name="data_usage_disable_mobile" msgid="5116269981510015864">"Datu-konexioa desaktibatu nahi duzu?"</string>
 </resources>

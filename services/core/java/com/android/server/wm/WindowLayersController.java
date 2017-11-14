@@ -30,6 +30,7 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYERS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
+import static com.android.server.wm.WindowManagerService.TYPE_LAYER_OFFSET;
 import static com.android.server.wm.WindowManagerService.WINDOW_LAYER_MULTIPLIER;
 
 /**
@@ -198,7 +199,7 @@ class WindowLayersController {
 
     private void adjustSpecialWindows() {
         // The following adjustments are beyond the highest docked-affected layer
-        int layer = mHighestDockedAffectedLayer +  WINDOW_LAYER_MULTIPLIER;
+        int layer = mHighestDockedAffectedLayer +  TYPE_LAYER_OFFSET;
 
         // Adjust the docked stack windows and dock divider above only the windows that are affected
         // by the docked stack. When this happens, also boost the assistant window layers, otherwise

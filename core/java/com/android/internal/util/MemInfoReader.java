@@ -82,7 +82,7 @@ public final class MemInfoReader {
      * that are mapped in to processes.
      */
     public long getCachedSizeKb() {
-        return mInfos[Debug.MEMINFO_BUFFERS]
+        return mInfos[Debug.MEMINFO_BUFFERS] + mInfos[Debug.MEMINFO_SLAB_RECLAIMABLE]
                 + mInfos[Debug.MEMINFO_CACHED] - mInfos[Debug.MEMINFO_MAPPED];
     }
 
@@ -90,7 +90,7 @@ public final class MemInfoReader {
      * Amount of RAM that is in use by the kernel for actual allocations.
      */
     public long getKernelUsedSizeKb() {
-        return mInfos[Debug.MEMINFO_SHMEM] + mInfos[Debug.MEMINFO_SLAB]
+        return mInfos[Debug.MEMINFO_SHMEM] + mInfos[Debug.MEMINFO_SLAB_UNRECLAIMABLE]
                 + mInfos[Debug.MEMINFO_VM_ALLOC_USED] + mInfos[Debug.MEMINFO_PAGE_TABLES]
                 + mInfos[Debug.MEMINFO_KERNEL_STACK];
     }

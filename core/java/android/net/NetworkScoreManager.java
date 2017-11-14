@@ -38,7 +38,8 @@ import java.util.List;
  *
  * <p>A network scorer is any application which:
  * <ul>
- * <li>Declares the {@link permission#SCORE_NETWORKS} permission.
+ * <li>Is granted the {@link permission#SCORE_NETWORKS} permission.
+ * <li>Is granted the {@link permission#ACCESS_COARSE_LOCATION} permission.
  * <li>Include a Service for the {@link #ACTION_RECOMMEND_NETWORKS} action
  *     protected by the {@link permission#BIND_NETWORK_RECOMMENDATION_SERVICE}
  *     permission.
@@ -226,6 +227,8 @@ public class NetworkScoreManager {
      * @return the full package name of the current active scorer, or null if there is no active
      *         scorer.
      */
+    @RequiresPermission(anyOf = {android.Manifest.permission.SCORE_NETWORKS,
+                                 android.Manifest.permission.REQUEST_NETWORK_SCORES})
     public String getActiveScorerPackage() {
         try {
             return mService.getActiveScorerPackage();

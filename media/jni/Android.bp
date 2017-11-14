@@ -50,6 +50,12 @@ cc_library_shared {
         "libexif",
         "libpiex",
         "libandroidfw",
+        "libhidlbase",
+        "libhidltransport",
+        "android.hardware.cas@1.0",
+        "android.hardware.cas.native@1.0",
+        "android.hidl.memory@1.0",
+        "android.hidl.token@1.0-utils",
     ],
 
     header_libs: ["libhardware_headers"],

@@ -39,7 +39,6 @@ import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.IBinder;
 import android.os.ICancellationSignal;
-import android.os.OperationCanceledException;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
@@ -47,7 +46,6 @@ import android.os.UserHandle;
 import android.os.storage.StorageManager;
 import android.text.TextUtils;
 import android.util.Log;
-import android.util.MathUtils;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -1047,7 +1045,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      * @param sortOrder How the rows in the cursor should be sorted.
      *      If {@code null} then the provider is free to define the sort order.
      * @param cancellationSignal A signal to cancel the operation in progress, or {@code null} if none.
-     * If the operation is canceled, then {@link OperationCanceledException} will be thrown
+     * If the operation is canceled, then {@link android.os.OperationCanceledException} will be thrown
      * when the query is executed.
      * @return a Cursor or {@code null}.
      */

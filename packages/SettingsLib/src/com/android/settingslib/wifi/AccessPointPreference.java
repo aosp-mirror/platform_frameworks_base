@@ -25,6 +25,7 @@ import android.net.NetworkBadging;
 import android.net.wifi.WifiConfiguration;
 import android.os.Looper;
 import android.os.UserHandle;
+import android.support.annotation.VisibleForTesting;
 import android.support.v7.preference.Preference;
 import android.support.v7.preference.PreferenceViewHolder;
 import android.text.TextUtils;
@@ -47,7 +48,17 @@ public class AccessPointPreference extends Preference {
             R.attr.state_metered
     };
 
-    private static final int[] wifi_friction_attributes = { R.attr.wifi_friction };
+    private static final int[] FRICTION_ATTRS = {
+            R.attr.wifi_friction
+    };
+
+    private static final int[] WIFI_CONNECTION_STRENGTH = {
+            R.string.accessibility_no_wifi,
+            R.string.accessibility_wifi_one_bar,
+            R.string.accessibility_wifi_two_bars,
+            R.string.accessibility_wifi_three_bars,
+            R.string.accessibility_wifi_signal_full
+    };
 
     private final StateListDrawable mFrictionSld;
     private final int mBadgePadding;
@@ -62,21 +73,13 @@ public class AccessPointPreference extends Preference {
     private int mDefaultIconResId;
     private int mWifiSpeed = NetworkBadging.BADGING_NONE;
 
-    static final int[] WIFI_CONNECTION_STRENGTH = {
-            R.string.accessibility_no_wifi,
-            R.string.accessibility_wifi_one_bar,
-            R.string.accessibility_wifi_two_bars,
-            R.string.accessibility_wifi_three_bars,
-            R.string.accessibility_wifi_signal_full
-    };
-
     public static String generatePreferenceKey(AccessPoint accessPoint) {
         StringBuilder builder = new StringBuilder();
 
-        if (TextUtils.isEmpty(accessPoint.getBssid())) {
-            builder.append(accessPoint.getSsidStr());
-        } else {
+        if (TextUtils.isEmpty(accessPoint.getSsidStr())) {
             builder.append(accessPoint.getBssid());
+        } else {
+            builder.append(accessPoint.getSsidStr());
         }
 
         builder.append(',').append(accessPoint.getSecurity());
@@ -103,7 +106,7 @@ public class AccessPointPreference extends Preference {
 
         TypedArray frictionSld;
         try {
-            frictionSld = context.getTheme().obtainStyledAttributes(wifi_friction_attributes);
+            frictionSld = context.getTheme().obtainStyledAttributes(FRICTION_ATTRS);
         } catch (Resources.NotFoundException e) {
             // Fallback for platforms that do not need friction icon resources.
             frictionSld = null;
@@ -129,7 +132,7 @@ public class AccessPointPreference extends Preference {
 
         TypedArray frictionSld;
         try {
-            frictionSld = context.getTheme().obtainStyledAttributes(wifi_friction_attributes);
+            frictionSld = context.getTheme().obtainStyledAttributes(FRICTION_ATTRS);
         } catch (Resources.NotFoundException e) {
             // Fallback for platforms that do not need friction icon resources.
             frictionSld = null;
@@ -157,7 +160,7 @@ public class AccessPointPreference extends Preference {
             drawable.setLevel(mLevel);
         }
 
-        mTitleView = (TextView) view.findViewById(com.android.internal.R.id.title);
+        mTitleView = (TextView) view.findViewById(android.R.id.title);
         if (mTitleView != null) {
             // Attach to the end of the title view
             mTitleView.setCompoundDrawablesRelativeWithIntrinsicBounds(null, null, mBadge, null);
@@ -228,12 +231,7 @@ public class AccessPointPreference extends Preference {
      * Updates the title and summary; may indirectly call notifyChanged().
      */
     public void refresh() {
-        if (mForSavedNetworks) {
-            setTitle(mAccessPoint.getConfigName());
-        } else {
-            setTitle(mAccessPoint.getSsid());
-        }
-
+        setTitle(this, mAccessPoint, mForSavedNetworks);
         final Context context = getContext();
         int level = mAccessPoint.getLevel();
         int wifiSpeed = mAccessPoint.getSpeed();
@@ -249,14 +247,7 @@ public class AccessPointPreference extends Preference {
         setSummary(mForSavedNetworks ? mAccessPoint.getSavedNetworkSummary()
                 : mAccessPoint.getSettingsSummary());
 
-        mContentDescription = getTitle();
-        if (getSummary() != null) {
-            mContentDescription = TextUtils.concat(mContentDescription, ",", getSummary());
-        }
-        if (level >= 0 && level < WIFI_CONNECTION_STRENGTH.length) {
-            mContentDescription = TextUtils.concat(mContentDescription, ",",
-                    getContext().getString(WIFI_CONNECTION_STRENGTH[level]));
-        }
+        mContentDescription = buildContentDescription(getContext(), this /* pref */, mAccessPoint);
     }
 
     @Override
@@ -267,6 +258,36 @@ public class AccessPointPreference extends Preference {
         } else {
             super.notifyChanged();
         }
+    }
+
+    @VisibleForTesting
+    static void setTitle(AccessPointPreference preference, AccessPoint ap, boolean savedNetworks) {
+        if (savedNetworks) {
+            preference.setTitle(ap.getConfigName());
+        } else {
+            preference.setTitle(ap.getSsidStr());
+        }
+    }
+
+    /**
+     * Helper method to generate content description string.
+     */
+    @VisibleForTesting
+    static CharSequence buildContentDescription(Context context, Preference pref, AccessPoint ap) {
+        CharSequence contentDescription = pref.getTitle();
+        final CharSequence summary = pref.getSummary();
+        if (!TextUtils.isEmpty(summary)) {
+            contentDescription = TextUtils.concat(contentDescription, ",", summary);
+        }
+        int level = ap.getLevel();
+        if (level >= 0 && level < WIFI_CONNECTION_STRENGTH.length) {
+            contentDescription = TextUtils.concat(contentDescription, ",",
+                    context.getString(WIFI_CONNECTION_STRENGTH[level]));
+        }
+        return TextUtils.concat(contentDescription, ",",
+                ap.getSecurity() == AccessPoint.SECURITY_NONE
+                        ? context.getString(R.string.accessibility_wifi_security_type_none)
+                        : context.getString(R.string.accessibility_wifi_security_type_secured));
     }
 
     public void onLevelChanged() {

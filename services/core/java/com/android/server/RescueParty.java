@@ -55,6 +55,7 @@ public class RescueParty {
     private static final String PROP_RESCUE_LEVEL = "sys.rescue_level";
     private static final String PROP_RESCUE_BOOT_COUNT = "sys.rescue_boot_count";
     private static final String PROP_RESCUE_BOOT_START = "sys.rescue_boot_start";
+    private static final String PROP_VIRTUAL_DEVICE = "ro.hardware.virtual_device";
 
     private static final int LEVEL_NONE = 0;
     private static final int LEVEL_RESET_SETTINGS_UNTRUSTED_DEFAULTS = 1;
@@ -336,6 +337,10 @@ public class RescueParty {
      * a good proxy for someone doing local development work.
      */
     private static boolean isUsbActive() {
+        if (SystemProperties.getBoolean(PROP_VIRTUAL_DEVICE, false)) {
+            Slog.v(TAG, "Assuming virtual device is connected over USB");
+            return true;
+        }
         try {
             final String state = FileUtils
                     .readTextFile(new File("/sys/class/android_usb/android0/state"), 128, "");

@@ -42,6 +42,7 @@
     <uses-permission android:name="android.permission.TRUST_LISTENER" />
     <uses-permission android:name="android.permission.USE_FINGERPRINT" />
     <uses-permission android:name="android.permission.DEVICE_POWER" />
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
 
     <application>
         <uses-library android:name="android.test.runner" />

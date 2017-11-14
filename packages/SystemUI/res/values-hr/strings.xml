@@ -235,8 +235,8 @@
     <string name="accessibility_quick_settings_work_mode_on" msgid="7650588553988014341">"Način rada uključen."</string>
     <string name="accessibility_quick_settings_work_mode_changed_off" msgid="5605534876107300711">"Način rada isključen."</string>
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="249840330756998612">"Način rada uključen."</string>
-    <string name="accessibility_quick_settings_data_saver_changed_off" msgid="650231949881093289">"Štednja podatkovnog prometa isključena."</string>
-    <string name="accessibility_quick_settings_data_saver_changed_on" msgid="4218725402373934151">"Štednja podatkovnog prometa uključena."</string>
+    <string name="accessibility_quick_settings_data_saver_changed_off" msgid="650231949881093289">"Ušteda podataka isključena."</string>
+    <string name="accessibility_quick_settings_data_saver_changed_on" msgid="4218725402373934151">"Ušteda podataka uključena."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"Svjetlina zaslona"</string>
     <string name="accessibility_ambient_display_charging" msgid="9084521679384069087">"Punjenje"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G – 3G podaci pauzirani"</string>
@@ -355,10 +355,10 @@
     <string name="description_target_search" msgid="3091587249776033139">"Pretraživanje"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Kliznite prema gore za <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Kliznite lijevo za <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="zen_priority_introduction" msgid="7577965386868311310">"Neće vas ometati zvukovi i vibracije, osim alarma, podsjetnika, događaja i pozivatelja koje navedete. I dalje ćete čuti sve što želite reproducirati, uključujući glazbu, videozapise i igre."</string>
-    <string name="zen_alarms_introduction" msgid="7034415210361973827">"Neće vas ometati zvukovi i vibracije, osim alarma. I dalje ćete čuti sve što želite reproducirati, uključujući glazbu, videozapise i igre."</string>
+    <string name="zen_priority_introduction" msgid="1149025108714420281">"Neće vas ometati zvukovi i vibracije, osim alarma, podsjetnika, događaja i pozivatelja koje navedete. I dalje ćete čuti sve što želite reproducirati, uključujući glazbu, videozapise i igre."</string>
+    <string name="zen_alarms_introduction" msgid="4934328096749380201">"Neće vas ometati zvukovi i vibracije, osim alarma. I dalje ćete čuti sve što želite reproducirati, uključujući glazbu, videozapise i igre."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Prilagodi"</string>
-    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"To blokira SVE zvukove i vibracije, uključujući alarme, glazbu, videozapise i igre. I dalje ćete moći telefonirati."</string>
+    <string name="zen_silence_introduction_voice" msgid="3948778066295728085">"To blokira SVE zvukove i vibracije, uključujući alarme, glazbu, videozapise i igre. I dalje ćete moći telefonirati."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"To blokira SVE zvukove i vibracije, uključujući alarme, glazbu, videozapise i igre."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Manje hitne obavijesti pri dnu"</string>
@@ -637,17 +637,17 @@
     <string name="keyboard_shortcut_group_applications_youtube" msgid="6555453761294723317">"YouTube"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="9043614299194991263">"Kalendar"</string>
     <string name="tuner_full_zen_title" msgid="4540823317772234308">"Prikaži s kontrolama glasnoće"</string>
-    <string name="volume_and_do_not_disturb" msgid="3373784330208603030">"Ne ometaj"</string>
+    <string name="volume_and_do_not_disturb" msgid="3373784330208603030">"Ne uznemiravaj"</string>
     <string name="volume_dnd_silent" msgid="4363882330723050727">"Prečac tipki za glasnoću"</string>
-    <string name="volume_up_silent" msgid="7141255269783588286">"Zaustavi \"Ne ometaj\" kada je zvuk pojačan"</string>
+    <string name="volume_up_silent" msgid="7141255269783588286">"Zaustavi \"Ne uznemiravaj\" kada je zvuk pojačan"</string>
     <string name="battery" msgid="7498329822413202973">"Baterija"</string>
     <string name="clock" msgid="7416090374234785905">"Sat"</string>
     <string name="headset" msgid="4534219457597457353">"Slušalice"</string>
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"Slušalice su povezane"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"Slušalice su povezane"</string>
-    <string name="data_saver" msgid="5037565123367048522">"Štednja podatkovnog prometa"</string>
-    <string name="accessibility_data_saver_on" msgid="8454111686783887148">"Štednja podatkovnog prometa je uključena"</string>
-    <string name="accessibility_data_saver_off" msgid="8841582529453005337">"Štednja podatkovnog prometa je isključena"</string>
+    <string name="data_saver" msgid="5037565123367048522">"Ušteda podataka"</string>
+    <string name="accessibility_data_saver_on" msgid="8454111686783887148">"Ušteda podataka je uključena"</string>
+    <string name="accessibility_data_saver_off" msgid="8841582529453005337">"Ušteda podataka je isključena"</string>
     <string name="switch_bar_on" msgid="1142437840752794229">"Uključeno"</string>
     <string name="switch_bar_off" msgid="8803270596930432874">"Isključeno"</string>
     <string name="nav_bar" msgid="1993221402773877607">"Navigacijska traka"</string>
@@ -734,7 +734,7 @@
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Povucite prema dolje da biste odbacili"</string>
     <string name="pip_menu_title" msgid="3328510504196964712">"Izbornik slike u slici"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> jest na slici u slici"</string>
-    <string name="pip_notification_message" msgid="4171698133469539591">"Ako ne želite da aplikacija <xliff:g id="NAME">%s</xliff:g> upotrebljava tu značajku, dodirnite da biste otvorili postavke i isključili je."</string>
+    <string name="pip_notification_message" msgid="5619512781514343311">"Ako ne želite da aplikacija <xliff:g id="NAME">%s</xliff:g> upotrebljava tu značajku, dodirnite da biste otvorili postavke i isključili je."</string>
     <string name="pip_play" msgid="1417176722760265888">"Reproduciraj"</string>
     <string name="pip_pause" msgid="8881063404466476571">"Pauziraj"</string>
     <string name="pip_skip_to_next" msgid="1948440006726306284">"Preskoči na sljedeće"</string>
@@ -770,14 +770,13 @@
     <string name="mobile_data" msgid="7094582042819250762">"Mobilni podaci"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"Wi-Fi je isključen"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"Bluetooth je isključen"</string>
-    <string name="dnd_is_off" msgid="6167780215212497572">"Način Ne ometaj isključen"</string>
-    <string name="qs_dnd_prompt_auto_rule" msgid="862559028345233052">"Način Ne ometaj uključilo je automatsko pravilo (<xliff:g id="ID_1">%s</xliff:g>)."</string>
-    <string name="qs_dnd_prompt_app" msgid="7978037419334156034">"Način Ne ometaj uključila je aplikacija (<xliff:g id="ID_1">%s</xliff:g>)."</string>
-    <string name="qs_dnd_prompt_auto_rule_app" msgid="2599343675391111951">"Način Ne ometaj uključilo je automatsko pravilo ili aplikacija."</string>
+    <string name="dnd_is_off" msgid="6167780215212497572">"Način Ne uznemiravaj isključen"</string>
+    <string name="qs_dnd_prompt_auto_rule" msgid="862559028345233052">"Način Ne uznemiravaj uključilo je automatsko pravilo (<xliff:g id="ID_1">%s</xliff:g>)."</string>
+    <string name="qs_dnd_prompt_app" msgid="7978037419334156034">"Način Ne uznemiravaj uključila je aplikacija (<xliff:g id="ID_1">%s</xliff:g>)."</string>
+    <string name="qs_dnd_prompt_auto_rule_app" msgid="2599343675391111951">"Način Ne uznemiravaj uključilo je automatsko pravilo ili aplikacija."</string>
     <string name="qs_dnd_until" msgid="3469471136280079874">"Do <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="qs_dnd_keep" msgid="1825009164681928736">"Zadrži"</string>
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Zamijeni"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"Izvođenje aplikacija u pozadini"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Dodirnite da biste vidjeli pojedinosti o potrošnji baterije i podatkovnom prometu"</string>
-    <string name="data_usage_disable_mobile" msgid="5116269981510015864">"Isključiti mobilne podatke?"</string>
 </resources>

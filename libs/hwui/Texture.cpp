@@ -217,9 +217,8 @@ void Texture::colorTypeToGlFormatAndType(const Caches& caches, SkColorType color
             *outType = GL_UNSIGNED_SHORT_5_6_5;
         }
         break;
-    // ARGB_4444 and Index_8 are both upconverted to RGBA_8888
+    // ARGB_4444 is upconverted to RGBA_8888
     case kARGB_4444_SkColorType:
-    case kIndex_8_SkColorType:
     case kN32_SkColorType:
         *outFormat = GL_RGBA;
         *outInternalFormat = caches.rgbaInternalFormat(needSRGB);
@@ -270,7 +269,6 @@ SkBitmap Texture::uploadToN32(const SkBitmap& bitmap, bool hasLinearBlending,
 
 bool Texture::hasUnsupportedColorType(const SkImageInfo& info, bool hasLinearBlending) {
     return info.colorType() == kARGB_4444_SkColorType
-        || info.colorType() == kIndex_8_SkColorType
         || (info.colorType() == kRGB_565_SkColorType
                 && hasLinearBlending
                 && info.colorSpace()->isSRGB())
@@ -279,11 +277,6 @@ bool Texture::hasUnsupportedColorType(const SkImageInfo& info, bool hasLinearBle
 }
 
 void Texture::upload(Bitmap& bitmap) {
-    if (!bitmap.readyToDraw()) {
-        ALOGE("Cannot generate texture from bitmap");
-        return;
-    }
-
     ATRACE_FORMAT("Upload %ux%u Texture", bitmap.width(), bitmap.height());
 
     // We could also enable mipmapping if both bitmap dimensions are powers

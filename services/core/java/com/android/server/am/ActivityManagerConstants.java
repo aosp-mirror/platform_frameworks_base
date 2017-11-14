@@ -32,6 +32,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_POWER_QUICK
  * Settings constants that can modify the activity manager's behavior.
  */
 final class ActivityManagerConstants extends ContentObserver {
+
     // Key names stored in the settings value.
     private static final String KEY_MAX_CACHED_PROCESSES = "max_cached_processes";
     private static final String KEY_BACKGROUND_SETTLE_TIME = "background_settle_time";
@@ -48,9 +49,11 @@ final class ActivityManagerConstants extends ContentObserver {
     private static final String KEY_GC_MIN_INTERVAL = "gc_min_interval";
     private static final String KEY_FULL_PSS_MIN_INTERVAL = "full_pss_min_interval";
     private static final String KEY_FULL_PSS_LOWERED_INTERVAL = "full_pss_lowered_interval";
-    private static final String KEY_POWER_CHECK_DELAY = "power_check_delay";
-    private static final String KEY_WAKE_LOCK_MIN_CHECK_DURATION = "wake_lock_min_check_duration";
-    private static final String KEY_CPU_MIN_CHECK_DURATION = "cpu_min_check_duration";
+    private static final String KEY_POWER_CHECK_INTERVAL = "power_check_interval";
+    private static final String KEY_POWER_CHECK_MAX_CPU_1 = "power_check_max_cpu_1";
+    private static final String KEY_POWER_CHECK_MAX_CPU_2 = "power_check_max_cpu_2";
+    private static final String KEY_POWER_CHECK_MAX_CPU_3 = "power_check_max_cpu_3";
+    private static final String KEY_POWER_CHECK_MAX_CPU_4 = "power_check_max_cpu_4";
     private static final String KEY_SERVICE_USAGE_INTERACTION_TIME
             = "service_usage_interaction_time";
     private static final String KEY_USAGE_STATS_INTERACTION_INTERVAL
@@ -61,6 +64,8 @@ final class ActivityManagerConstants extends ContentObserver {
     static final String KEY_SERVICE_MIN_RESTART_TIME_BETWEEN = "service_min_restart_time_between";
     static final String KEY_MAX_SERVICE_INACTIVITY = "service_max_inactivity";
     static final String KEY_BG_START_TIMEOUT = "service_bg_start_timeout";
+    static final String KEY_BOUND_SERVICE_CRASH_RESTART_DURATION = "service_crash_restart_duration";
+    static final String KEY_BOUND_SERVICE_CRASH_MAX_RETRY = "service_crash_max_retry";
 
     private static final int DEFAULT_MAX_CACHED_PROCESSES = 32;
     private static final long DEFAULT_BACKGROUND_SETTLE_TIME = 60*1000;
@@ -73,11 +78,11 @@ final class ActivityManagerConstants extends ContentObserver {
     private static final long DEFAULT_GC_MIN_INTERVAL = 60*1000;
     private static final long DEFAULT_FULL_PSS_MIN_INTERVAL = 10*60*1000;
     private static final long DEFAULT_FULL_PSS_LOWERED_INTERVAL = 2*60*1000;
-    private static final long DEFAULT_POWER_CHECK_DELAY = (DEBUG_POWER_QUICK ? 2 : 15) * 60*1000;
-    private static final long DEFAULT_WAKE_LOCK_MIN_CHECK_DURATION
-            = (DEBUG_POWER_QUICK ? 1 : 5) * 60*1000;
-    private static final long DEFAULT_CPU_MIN_CHECK_DURATION
-            = (DEBUG_POWER_QUICK ? 1 : 5) * 60*1000;
+    private static final long DEFAULT_POWER_CHECK_INTERVAL = (DEBUG_POWER_QUICK ? 1 : 5) * 60*1000;
+    private static final int DEFAULT_POWER_CHECK_MAX_CPU_1 = 25;
+    private static final int DEFAULT_POWER_CHECK_MAX_CPU_2 = 25;
+    private static final int DEFAULT_POWER_CHECK_MAX_CPU_3 = 10;
+    private static final int DEFAULT_POWER_CHECK_MAX_CPU_4 = 2;
     private static final long DEFAULT_SERVICE_USAGE_INTERACTION_TIME = 30*60*1000;
     private static final long DEFAULT_USAGE_STATS_INTERACTION_INTERVAL = 24*60*60*1000L;
     private static final long DEFAULT_SERVICE_RESTART_DURATION = 1*1000;
@@ -86,6 +91,9 @@ final class ActivityManagerConstants extends ContentObserver {
     private static final long DEFAULT_SERVICE_MIN_RESTART_TIME_BETWEEN = 10*1000;
     private static final long DEFAULT_MAX_SERVICE_INACTIVITY = 30*60*1000;
     private static final long DEFAULT_BG_START_TIMEOUT = 15*1000;
+    private static final long DEFAULT_BOUND_SERVICE_CRASH_RESTART_DURATION = 30*60_000;
+    private static final int DEFAULT_BOUND_SERVICE_CRASH_MAX_RETRY = 16;
+
 
     // Maximum number of cached processes we will allow.
     public int MAX_CACHED_PROCESSES = DEFAULT_MAX_CACHED_PROCESSES;
@@ -133,16 +141,26 @@ final class ActivityManagerConstants extends ContentObserver {
     // when the request is due to the memory state being lowered.
     long FULL_PSS_LOWERED_INTERVAL = DEFAULT_FULL_PSS_LOWERED_INTERVAL;
 
-    // The rate at which we check for apps using excessive power -- 15 mins.
-    long POWER_CHECK_DELAY = DEFAULT_POWER_CHECK_DELAY;
-
-    // The minimum sample duration we will allow before deciding we have
-    // enough data on wake locks to start killing things.
-    long WAKE_LOCK_MIN_CHECK_DURATION = DEFAULT_WAKE_LOCK_MIN_CHECK_DURATION;
-
     // The minimum sample duration we will allow before deciding we have
     // enough data on CPU usage to start killing things.
-    long CPU_MIN_CHECK_DURATION = DEFAULT_CPU_MIN_CHECK_DURATION;
+    long POWER_CHECK_INTERVAL = DEFAULT_POWER_CHECK_INTERVAL;
+
+    // The maximum CPU (as a percentage) a process is allowed to use over the first
+    // power check interval that it is cached.
+    int POWER_CHECK_MAX_CPU_1 = DEFAULT_POWER_CHECK_MAX_CPU_1;
+
+    // The maximum CPU (as a percentage) a process is allowed to use over the second
+    // power check interval that it is cached.  The home app will never check for less
+    // CPU than this (it will not test against the 3 or 4 levels).
+    int POWER_CHECK_MAX_CPU_2 = DEFAULT_POWER_CHECK_MAX_CPU_2;
+
+    // The maximum CPU (as a percentage) a process is allowed to use over the third
+    // power check interval that it is cached.
+    int POWER_CHECK_MAX_CPU_3 = DEFAULT_POWER_CHECK_MAX_CPU_3;
+
+    // The maximum CPU (as a percentage) a process is allowed to use over the fourth
+    // power check interval that it is cached.
+    int POWER_CHECK_MAX_CPU_4 = DEFAULT_POWER_CHECK_MAX_CPU_4;
 
     // This is the amount of time an app needs to be running a foreground service before
     // we will consider it to be doing interaction for usage stats.
@@ -177,6 +195,12 @@ final class ActivityManagerConstants extends ContentObserver {
     // How long we wait for a background started service to stop itself before
     // allowing the next pending start to run.
     public long BG_START_TIMEOUT = DEFAULT_BG_START_TIMEOUT;
+
+    // Initial backoff delay for retrying bound foreground services
+    public long BOUND_SERVICE_CRASH_RESTART_DURATION = DEFAULT_BOUND_SERVICE_CRASH_RESTART_DURATION;
+
+    // Maximum number of retries for bound foreground services that crash soon after start
+    public long BOUND_SERVICE_MAX_CRASH_RETRY = DEFAULT_BOUND_SERVICE_CRASH_MAX_RETRY;
 
     private final ActivityManagerService mService;
     private ContentResolver mResolver;
@@ -270,12 +294,16 @@ final class ActivityManagerConstants extends ContentObserver {
                     DEFAULT_FULL_PSS_MIN_INTERVAL);
             FULL_PSS_LOWERED_INTERVAL = mParser.getLong(KEY_FULL_PSS_LOWERED_INTERVAL,
                     DEFAULT_FULL_PSS_LOWERED_INTERVAL);
-            POWER_CHECK_DELAY = mParser.getLong(KEY_POWER_CHECK_DELAY,
-                    DEFAULT_POWER_CHECK_DELAY);
-            WAKE_LOCK_MIN_CHECK_DURATION = mParser.getLong(KEY_WAKE_LOCK_MIN_CHECK_DURATION,
-                    DEFAULT_WAKE_LOCK_MIN_CHECK_DURATION);
-            CPU_MIN_CHECK_DURATION = mParser.getLong(KEY_CPU_MIN_CHECK_DURATION,
-                    DEFAULT_CPU_MIN_CHECK_DURATION);
+            POWER_CHECK_INTERVAL = mParser.getLong(KEY_POWER_CHECK_INTERVAL,
+                    DEFAULT_POWER_CHECK_INTERVAL);
+            POWER_CHECK_MAX_CPU_1 = mParser.getInt(KEY_POWER_CHECK_MAX_CPU_1,
+                    DEFAULT_POWER_CHECK_MAX_CPU_1);
+            POWER_CHECK_MAX_CPU_2 = mParser.getInt(KEY_POWER_CHECK_MAX_CPU_2,
+                    DEFAULT_POWER_CHECK_MAX_CPU_2);
+            POWER_CHECK_MAX_CPU_3 = mParser.getInt(KEY_POWER_CHECK_MAX_CPU_3,
+                    DEFAULT_POWER_CHECK_MAX_CPU_3);
+            POWER_CHECK_MAX_CPU_4 = mParser.getInt(KEY_POWER_CHECK_MAX_CPU_4,
+                    DEFAULT_POWER_CHECK_MAX_CPU_4);
             SERVICE_USAGE_INTERACTION_TIME = mParser.getLong(KEY_SERVICE_USAGE_INTERACTION_TIME,
                     DEFAULT_SERVICE_USAGE_INTERACTION_TIME);
             USAGE_STATS_INTERACTION_INTERVAL = mParser.getLong(KEY_USAGE_STATS_INTERACTION_INTERVAL,
@@ -292,6 +320,12 @@ final class ActivityManagerConstants extends ContentObserver {
                     DEFAULT_MAX_SERVICE_INACTIVITY);
             BG_START_TIMEOUT = mParser.getLong(KEY_BG_START_TIMEOUT,
                     DEFAULT_BG_START_TIMEOUT);
+            BOUND_SERVICE_CRASH_RESTART_DURATION = mParser.getLong(
+                KEY_BOUND_SERVICE_CRASH_RESTART_DURATION,
+                DEFAULT_BOUND_SERVICE_CRASH_RESTART_DURATION);
+            BOUND_SERVICE_MAX_CRASH_RETRY = mParser.getInt(KEY_BOUND_SERVICE_CRASH_MAX_RETRY,
+                DEFAULT_BOUND_SERVICE_CRASH_MAX_RETRY);
+
             updateMaxCachedProcesses();
         }
     }
@@ -335,12 +369,16 @@ final class ActivityManagerConstants extends ContentObserver {
         pw.println(FULL_PSS_MIN_INTERVAL);
         pw.print("  "); pw.print(KEY_FULL_PSS_LOWERED_INTERVAL); pw.print("=");
         pw.println(FULL_PSS_LOWERED_INTERVAL);
-        pw.print("  "); pw.print(KEY_POWER_CHECK_DELAY); pw.print("=");
-        pw.println(POWER_CHECK_DELAY);
-        pw.print("  "); pw.print(KEY_WAKE_LOCK_MIN_CHECK_DURATION); pw.print("=");
-        pw.println(WAKE_LOCK_MIN_CHECK_DURATION);
-        pw.print("  "); pw.print(KEY_CPU_MIN_CHECK_DURATION); pw.print("=");
-        pw.println(CPU_MIN_CHECK_DURATION);
+        pw.print("  "); pw.print(KEY_POWER_CHECK_INTERVAL); pw.print("=");
+        pw.println(POWER_CHECK_INTERVAL);
+        pw.print("  "); pw.print(KEY_POWER_CHECK_MAX_CPU_1); pw.print("=");
+        pw.println(POWER_CHECK_MAX_CPU_1);
+        pw.print("  "); pw.print(KEY_POWER_CHECK_MAX_CPU_2); pw.print("=");
+        pw.println(POWER_CHECK_MAX_CPU_2);
+        pw.print("  "); pw.print(KEY_POWER_CHECK_MAX_CPU_3); pw.print("=");
+        pw.println(POWER_CHECK_MAX_CPU_3);
+        pw.print("  "); pw.print(KEY_POWER_CHECK_MAX_CPU_4); pw.print("=");
+        pw.println(POWER_CHECK_MAX_CPU_4);
         pw.print("  "); pw.print(KEY_SERVICE_USAGE_INTERACTION_TIME); pw.print("=");
         pw.println(SERVICE_USAGE_INTERACTION_TIME);
         pw.print("  "); pw.print(KEY_USAGE_STATS_INTERACTION_INTERVAL); pw.print("=");

@@ -48,7 +48,7 @@
     <string name="speed_label_very_fast" msgid="2265363430784523409">"とても速い"</string>
     <string name="bluetooth_disconnected" msgid="6557104142667339895">"切断"</string>
     <string name="bluetooth_disconnecting" msgid="8913264760027764974">"切断中..."</string>
-    <string name="bluetooth_connecting" msgid="8555009514614320497">"接続処理中..."</string>
+    <string name="bluetooth_connecting" msgid="8555009514614320497">"接続中..."</string>
     <string name="bluetooth_connected" msgid="6038755206916626419">"接続"</string>
     <string name="bluetooth_pairing" msgid="1426882272690346242">"ペアとして設定中..."</string>
     <string name="bluetooth_connected_no_headset" msgid="2866994875046035609">"接続済み（電話を除く）"</string>
@@ -104,7 +104,7 @@
     <string name="process_kernel_label" msgid="3916858646836739323">"Android OS"</string>
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"削除したアプリケーション"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"削除されたアプリとユーザー"</string>
-    <string name="tether_settings_title_usb" msgid="6688416425801386511">"USB テザリング"</string>
+    <string name="tether_settings_title_usb" msgid="6688416425801386511">"USBテザリング"</string>
     <string name="tether_settings_title_wifi" msgid="3277144155960302049">"ポータブルアクセスポイント"</string>
     <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Bluetoothテザリング"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"テザリング"</string>
@@ -113,7 +113,7 @@
     <string name="user_guest" msgid="8475274842845401871">"ゲスト"</string>
     <string name="unknown" msgid="1592123443519355854">"不明"</string>
     <string name="running_process_item_user_label" msgid="3129887865552025943">"ユーザー: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
-    <string name="launch_defaults_some" msgid="313159469856372621">"一部デフォルトで設定"</string>
+    <string name="launch_defaults_some" msgid="313159469856372621">"一部デフォルトを設定"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"デフォルトの設定なし"</string>
     <string name="tts_settings" msgid="8186971894801348327">"テキスト読み上げの設定"</string>
     <string name="tts_settings_title" msgid="1237820681016639683">"テキスト読み上げの出力"</string>

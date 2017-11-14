@@ -35,6 +35,13 @@ Canvas* Canvas::create_recording_canvas(int width, int height, uirenderer::Rende
     return new uirenderer::RecordingCanvas(width, height);
 }
 
+static inline void drawStroke(SkScalar left, SkScalar right, SkScalar top, SkScalar thickness,
+        const SkPaint& paint, Canvas* canvas) {
+    const SkScalar strokeWidth = fmax(thickness, 1.0f);
+    const SkScalar bottom = top + strokeWidth;
+    canvas->drawRect(left, top, right, bottom, paint);
+}
+
 void Canvas::drawTextDecorations(float x, float y, float length, const SkPaint& paint) {
     uint32_t flags;
     SkDrawFilter* drawFilter = getDrawFilter();
@@ -46,24 +53,28 @@ void Canvas::drawTextDecorations(float x, float y, float length, const SkPaint& 
         flags = paint.getFlags();
     }
     if (flags & (SkPaint::kUnderlineText_ReserveFlag | SkPaint::kStrikeThruText_ReserveFlag)) {
-        // Same values used by Skia
-        const float kStdStrikeThru_Offset   = (-6.0f / 21.0f);
-        const float kStdUnderline_Offset    = (1.0f / 9.0f);
-        const float kStdUnderline_Thickness = (1.0f / 18.0f);
-
-        SkScalar left = x;
-        SkScalar right = x + length;
-        float textSize = paint.getTextSize();
-        float strokeWidth = fmax(textSize * kStdUnderline_Thickness, 1.0f);
+        const SkScalar left = x;
+        const SkScalar right = x + length;
         if (flags & SkPaint::kUnderlineText_ReserveFlag) {
-            SkScalar top = y + textSize * kStdUnderline_Offset - 0.5f * strokeWidth;
-            SkScalar bottom = y + textSize * kStdUnderline_Offset + 0.5f * strokeWidth;
-            drawRect(left, top, right, bottom, paint);
+            Paint::FontMetrics metrics;
+            paint.getFontMetrics(&metrics);
+            SkScalar position;
+            if (!metrics.hasUnderlinePosition(&position)) {
+                position = paint.getTextSize() * Paint::kStdUnderline_Top;
+            }
+            SkScalar thickness;
+            if (!metrics.hasUnderlineThickness(&thickness)) {
+                thickness = paint.getTextSize() * Paint::kStdUnderline_Thickness;
+            }
+            const SkScalar top = y + position;
+            drawStroke(left, right, top, thickness, paint, this);
         }
         if (flags & SkPaint::kStrikeThruText_ReserveFlag) {
-            SkScalar top = y + textSize * kStdStrikeThru_Offset - 0.5f * strokeWidth;
-            SkScalar bottom = y + textSize * kStdStrikeThru_Offset + 0.5f * strokeWidth;
-            drawRect(left, top, right, bottom, paint);
+            const float textSize = paint.getTextSize();
+            const float position = textSize * Paint::kStdStrikeThru_Top;
+            const SkScalar thickness = textSize * Paint::kStdStrikeThru_Thickness;
+            const SkScalar top = y + position;
+            drawStroke(left, right, top, thickness, paint, this);
         }
     }
 }

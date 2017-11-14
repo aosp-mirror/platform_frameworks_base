@@ -25,6 +25,7 @@
     <style name="Pop">
         <item name="custom">@android:drawable/btn_default</item>
         <item name="android:focusable">true</item>
+        <item name="android:numColumns">auto_fit</item>
     </style>
     <string name="yo">@string/wow</string>
 

@@ -853,6 +853,7 @@ MtpResponseCode MyMtpDatabase::getObjectInfo(MtpObjectHandle handle,
     // read EXIF data for thumbnail information
     switch (info.mFormat) {
         case MTP_FORMAT_EXIF_JPEG:
+        case MTP_FORMAT_HEIF:
         case MTP_FORMAT_JFIF: {
             ExifData *exifdata = exif_data_new_from_file(path);
             if (exifdata) {
@@ -910,6 +911,7 @@ void* MyMtpDatabase::getThumbnail(MtpObjectHandle handle, size_t& outThumbSize) 
     if (getObjectFilePath(handle, path, length, format) == MTP_RESPONSE_OK) {
         switch (format) {
             case MTP_FORMAT_EXIF_JPEG:
+            case MTP_FORMAT_HEIF:
             case MTP_FORMAT_JFIF: {
                 ExifData *exifdata = exif_data_new_from_file(path);
                 if (exifdata) {

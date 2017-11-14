@@ -32,6 +32,7 @@ namespace renderthread {
 DrawFrameTask::DrawFrameTask()
         : mRenderThread(nullptr)
         , mContext(nullptr)
+        , mContentDrawBounds(0, 0, 0, 0)
         , mSyncResult(SyncResult::OK) {
 }
 
@@ -123,6 +124,7 @@ bool DrawFrameTask::syncFrameState(TreeInfo& info) {
         mLayers[i]->apply();
     }
     mLayers.clear();
+    mContext->setContentDrawBounds(mContentDrawBounds);
     mContext->prepareTree(info, mFrameInfo, mSyncQueued, mTargetNode);
 
     // This is after the prepareTree so that any pending operations

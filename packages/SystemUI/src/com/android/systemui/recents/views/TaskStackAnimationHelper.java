@@ -33,9 +33,13 @@ import com.android.systemui.R;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsActivityLaunchState;
 import com.android.systemui.recents.RecentsConfiguration;
+import com.android.systemui.recents.RecentsDebugFlags;
+import com.android.systemui.recents.events.EventBus;
+import com.android.systemui.recents.events.component.SetWaitingForTransitionStartEvent;
 import com.android.systemui.recents.misc.ReferenceCountedTrigger;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
+import com.android.systemui.recents.views.lowram.TaskStackLowRamLayoutAlgorithm;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -144,6 +148,14 @@ public class TaskStackAnimationHelper {
         boolean isLandscape = appResources.getConfiguration().orientation
                 == Configuration.ORIENTATION_LANDSCAPE;
 
+        float top = 0;
+        final boolean isLowRamDevice = Recents.getConfiguration().isLowRamDevice;
+        if (isLowRamDevice && launchState.launchedFromApp && !launchState.launchedViaDockGesture) {
+            stackLayout.getStackTransform(launchTargetTask, stackScroller.getStackScroll(),
+                    mTmpTransform, null /* frontTransform */);
+            top = mTmpTransform.rect.top;
+        }
+
         // Prepare each of the task views for their enter animation from front to back
         List<TaskView> taskViews = mStackView.getTaskViews();
         for (int i = taskViews.size() - 1; i >= 0; i--) {
@@ -165,6 +177,24 @@ public class TaskStackAnimationHelper {
             } else if (launchState.launchedFromApp && !launchState.launchedViaDockGesture) {
                 if (task.isLaunchTarget) {
                     tv.onPrepareLaunchTargetForEnterAnimation();
+                } else if (isLowRamDevice && i >= taskViews.size() -
+                            (TaskStackLowRamLayoutAlgorithm.MAX_LAYOUT_TASK_COUNT + 1)
+                        && !RecentsDebugFlags.Static.DisableRecentsLowRamEnterExitAnimation) {
+                    // Move the last 2nd and 3rd last tasks in-app animation to match the motion of
+                    // the last task's app transition
+                    stackLayout.getStackTransform(task, stackScroller.getStackScroll(),
+                            mTmpTransform, null);
+                    mTmpTransform.rect.offset(0, -top);
+                    mTmpTransform.alpha = 0f;
+                    mStackView.updateTaskViewToTransform(tv, mTmpTransform,
+                            AnimationProps.IMMEDIATE);
+                    stackLayout.getStackTransform(task, stackScroller.getStackScroll(),
+                            mTmpTransform, null);
+                    mTmpTransform.alpha = 1f;
+                    // Duration see {@link
+                    // com.android.server.wm.AppTransition#DEFAULT_APP_TRANSITION_DURATION}
+                    mStackView.updateTaskViewToTransform(tv, mTmpTransform,
+                            new AnimationProps(336, Interpolators.FAST_OUT_SLOW_IN));
                 } else if (currentTaskOccludesLaunchTarget) {
                     // Move the task view slightly lower so we can animate it in
                     mTmpTransform.rect.offset(0, taskViewAffiliateGroupEnterOffset);
@@ -174,8 +204,12 @@ public class TaskStackAnimationHelper {
                     tv.setClipViewInStack(false);
                 }
             } else if (launchState.launchedFromHome) {
-                // Move the task view off screen (below) so we can animate it in
-                mTmpTransform.rect.offset(0, offscreenYOffset);
+                if (isLowRamDevice) {
+                    mTmpTransform.rect.offset(0, stackLayout.getTaskRect().height() / 4);
+                } else {
+                    // Move the task view off screen (below) so we can animate it in
+                    mTmpTransform.rect.offset(0, offscreenYOffset);
+                }
                 mTmpTransform.alpha = 0f;
                 mStackView.updateTaskViewToTransform(tv, mTmpTransform, AnimationProps.IMMEDIATE);
             } else if (launchState.launchedViaDockGesture) {
@@ -209,12 +243,20 @@ public class TaskStackAnimationHelper {
             return;
         }
 
+        final boolean isLowRamDevice = Recents.getConfiguration().isLowRamDevice;
         int taskViewEnterFromAppDuration = res.getInteger(
                 R.integer.recents_task_enter_from_app_duration);
         int taskViewEnterFromAffiliatedAppDuration = res.getInteger(
                 R.integer.recents_task_enter_from_affiliated_app_duration);
         int dockGestureAnimDuration = appRes.getInteger(
                 R.integer.long_press_dock_anim_duration);
+
+        // Since low ram devices have an animation when entering app -> recents, do not allow
+        // toggle until the animation is complete
+        if (launchState.launchedFromApp && !launchState.launchedViaDockGesture && isLowRamDevice) {
+            postAnimationTrigger.addLastDecrementRunnable(() -> EventBus.getDefault()
+                .send(new SetWaitingForTransitionStartEvent(false)));
+        }
 
         // Create enter animations for each of the views from front to back
         List<TaskView> taskViews = mStackView.getTaskViews();
@@ -262,16 +304,23 @@ public class TaskStackAnimationHelper {
                         taskIndexFromFront) * mEnterAndExitFromHomeTranslationOffset) /
                         ENTER_FROM_HOME_TRANSLATION_DURATION;
                 AnimationProps taskAnimation = new AnimationProps()
-                        .setStartDelay(AnimationProps.ALPHA,
-                                Math.min(ENTER_EXIT_NUM_ANIMATING_TASKS, taskIndexFromFront) *
-                                        FRAME_OFFSET_MS)
-                        .setDuration(AnimationProps.BOUNDS, ENTER_FROM_HOME_TRANSLATION_DURATION)
-                        .setDuration(AnimationProps.ALPHA, ENTER_FROM_HOME_ALPHA_DURATION)
-                        .setInterpolator(AnimationProps.BOUNDS,
-                                new RecentsEntrancePathInterpolator(0f, 0f, 0.2f, 1f,
-                                        startOffsetFraction))
                         .setInterpolator(AnimationProps.ALPHA, ENTER_FROM_HOME_ALPHA_INTERPOLATOR)
                         .setListener(postAnimationTrigger.decrementOnAnimationEnd());
+                if (isLowRamDevice) {
+                    taskAnimation.setInterpolator(AnimationProps.BOUNDS,
+                            Interpolators.FAST_OUT_SLOW_IN)
+                            .setDuration(AnimationProps.BOUNDS, 150)
+                            .setDuration(AnimationProps.ALPHA, 150);
+                } else {
+                    taskAnimation.setStartDelay(AnimationProps.ALPHA,
+                                Math.min(ENTER_EXIT_NUM_ANIMATING_TASKS, taskIndexFromFront) *
+                                        FRAME_OFFSET_MS)
+                            .setInterpolator(AnimationProps.BOUNDS,
+                                new RecentsEntrancePathInterpolator(0f, 0f, 0.2f, 1f,
+                                        startOffsetFraction))
+                            .setDuration(AnimationProps.BOUNDS, ENTER_FROM_HOME_TRANSLATION_DURATION)
+                            .setDuration(AnimationProps.ALPHA, ENTER_FROM_HOME_ALPHA_DURATION);
+                }
                 postAnimationTrigger.increment();
                 mStackView.updateTaskViewToTransform(tv, mTmpTransform, taskAnimation);
                 if (i == taskViewCount - 1) {
@@ -325,18 +374,32 @@ public class TaskStackAnimationHelper {
                 int delay = Math.min(ENTER_EXIT_NUM_ANIMATING_TASKS , taskIndexFromFront) *
                         mEnterAndExitFromHomeTranslationOffset;
                 taskAnimation = new AnimationProps()
-                        .setStartDelay(AnimationProps.BOUNDS, delay)
                         .setDuration(AnimationProps.BOUNDS, EXIT_TO_HOME_TRANSLATION_DURATION)
-                        .setInterpolator(AnimationProps.BOUNDS,
-                                EXIT_TO_HOME_TRANSLATION_INTERPOLATOR)
                         .setListener(postAnimationTrigger.decrementOnAnimationEnd());
+                if (Recents.getConfiguration().isLowRamDevice) {
+                    taskAnimation.setInterpolator(AnimationProps.BOUNDS,
+                            Interpolators.FAST_OUT_SLOW_IN);
+                } else {
+                    taskAnimation.setStartDelay(AnimationProps.BOUNDS, delay)
+                            .setInterpolator(AnimationProps.BOUNDS,
+                                    EXIT_TO_HOME_TRANSLATION_INTERPOLATOR);
+                }
                 postAnimationTrigger.increment();
             } else {
                 taskAnimation = AnimationProps.IMMEDIATE;
             }
 
             mTmpTransform.fillIn(tv);
-            mTmpTransform.rect.offset(0, offscreenYOffset);
+            if (Recents.getConfiguration().isLowRamDevice) {
+                taskAnimation.setInterpolator(AnimationProps.ALPHA,
+                                EXIT_TO_HOME_TRANSLATION_INTERPOLATOR)
+                        .setDuration(AnimationProps.ALPHA, EXIT_TO_HOME_TRANSLATION_DURATION);
+                mTmpTransform.rect.offset(0, stackLayout.mTaskStackLowRamLayoutAlgorithm
+                        .getTaskRect().height() / 4);
+                mTmpTransform.alpha = 0f;
+            } else {
+                mTmpTransform.rect.offset(0, offscreenYOffset);
+            }
             mStackView.updateTaskViewToTransform(tv, mTmpTransform, taskAnimation);
         }
     }

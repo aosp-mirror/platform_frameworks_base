@@ -31,13 +31,13 @@ import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.os.storage.StorageManager;
 import android.provider.Downloads;
+import android.text.TextUtils;
 import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.Xml;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
-import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.XmlUtils;
 
@@ -105,6 +105,11 @@ public class BootReceiver extends BroadcastReceiver {
     private static final String LAST_SHUTDOWN_TIME_PATTERN =
             "powerctl_shutdown_time_ms:([0-9]+):([0-9]+)";
     private static final int UMOUNT_STATUS_NOT_AVAILABLE = 4; // should match with init/reboot.h
+
+    // Location of file with metrics recorded during shutdown
+    private static final String SHUTDOWN_METRICS_FILE = "/data/system/shutdown-metrics.txt";
+
+    private static final String SHUTDOWN_TRON_METRICS_PREFIX = "shutdown_";
 
     @Override
     public void onReceive(final Context context, Intent intent) {
@@ -232,6 +237,7 @@ public class BootReceiver extends BroadcastReceiver {
         logFsShutdownTime();
         logFsMountTime();
         addFsckErrorsToDropBoxAndLogFsStat(db, timestamps, headers, -LOG_SIZE, "SYSTEM_FSCK");
+        logSystemServerShutdownTimeMetrics();
 
         // Scan existing tombstones (in case any new ones appeared)
         File[] tombstoneFiles = TOMBSTONE_DIR.listFiles();
@@ -377,6 +383,47 @@ public class BootReceiver extends BroadcastReceiver {
             if (duration != 0) {
                 MetricsLogger.histogram(null, "boot_mount_all_duration_" + propPostfix, duration);
             }
+        }
+    }
+
+    // TODO b/64815357 Move to bootstat.cpp and log AbsoluteRebootTime
+    private static void logSystemServerShutdownTimeMetrics() {
+        File metricsFile = new File(SHUTDOWN_METRICS_FILE);
+        String metricsStr = null;
+        if (metricsFile.exists()) {
+            try {
+                metricsStr = FileUtils.readTextFile(metricsFile, 0, null);
+            } catch (IOException e) {
+                Slog.e(TAG, "Problem reading " + metricsFile, e);
+            }
+        }
+        if (!TextUtils.isEmpty(metricsStr)) {
+            String[] array = metricsStr.split(",");
+            for (String keyValueStr : array) {
+                String[] keyValue = keyValueStr.split(":");
+                if (keyValue.length != 2) {
+                    Slog.e(TAG, "Wrong format of shutdown metrics - " + metricsStr);
+                    continue;
+                }
+                // Ignore keys that are not indended for tron
+                if (keyValue[0].startsWith(SHUTDOWN_TRON_METRICS_PREFIX)) {
+                    logTronShutdownMetric(keyValue[0], keyValue[1]);
+                }
+            }
+        }
+        metricsFile.delete();
+    }
+
+    private static void logTronShutdownMetric(String metricName, String valueStr) {
+        int value;
+        try {
+            value = Integer.parseInt(valueStr);
+        } catch (NumberFormatException e) {
+            Slog.e(TAG, "Cannot parse metric " + metricName + " int value - " + valueStr);
+            return;
+        }
+        if (value >= 0) {
+            MetricsLogger.histogram(null, metricName, value);
         }
     }
 

@@ -28,4 +28,12 @@ public class ObjectUtils {
     public static <T> T firstNotNull(@Nullable T a, @NonNull T b) {
         return a != null ? a : Preconditions.checkNotNull(b);
     }
+
+    public static <T extends Comparable> int compare(@Nullable T a, @Nullable T b) {
+        if (a != null) {
+            return (b != null) ? a.compareTo(b) : 1;
+        } else {
+            return (b != null) ? -1 : 0;
+        }
+    }
 }

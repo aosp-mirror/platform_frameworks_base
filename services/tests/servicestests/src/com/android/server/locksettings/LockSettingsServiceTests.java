@@ -26,12 +26,13 @@ import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PASSW
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PATTERN;
 
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.service.gatekeeper.GateKeeperResponse;
 
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.VerifyCredentialResponse;
 import com.android.server.locksettings.LockSettingsStorage.CredentialHash;
-import com.android.server.locksettings.MockGateKeeperService.VerifyHandle;
+import com.android.server.locksettings.FakeGateKeeperService.VerifyHandle;
 
 /**
  * runtest frameworks-services -c com.android.server.locksettings.LockSettingsServiceTests
@@ -80,13 +81,6 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
         } catch (RemoteException expected) {
             assertTrue(expected.getMessage().equals(FAILED_MESSAGE));
         }
-        try {
-            mService.setLockCredential("newpwd", CREDENTIAL_TYPE_PASSWORD, null,
-                    PASSWORD_QUALITY_UNSPECIFIED, PRIMARY_USER_ID);
-            fail("Did not fail when enrolling using incorrect credential");
-        } catch (RemoteException expected) {
-            assertTrue(expected.getMessage().equals(FAILED_MESSAGE));
-        }
         assertVerifyCredentials(PRIMARY_USER_ID, "password", CREDENTIAL_TYPE_PASSWORD, sid);
     }
 
@@ -101,9 +95,10 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
     }
 
     public void testManagedProfileUnifiedChallenge() throws RemoteException {
-        final String UnifiedPassword = "testManagedProfileUnifiedChallenge-pwd";
-        mService.setLockCredential(UnifiedPassword, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, null,
-                PASSWORD_QUALITY_COMPLEX, PRIMARY_USER_ID);
+        final String firstUnifiedPassword = "testManagedProfileUnifiedChallenge-pwd-1";
+        final String secondUnifiedPassword = "testManagedProfileUnifiedChallenge-pwd-2";
+        mService.setLockCredential(firstUnifiedPassword, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD,
+                null, PASSWORD_QUALITY_COMPLEX, PRIMARY_USER_ID);
         mService.setSeparateProfileChallengeEnabled(MANAGED_PROFILE_USER_ID, false, null);
         final long primarySid = mGateKeeperService.getSecureUserId(PRIMARY_USER_ID);
         final long profileSid = mGateKeeperService.getSecureUserId(MANAGED_PROFILE_USER_ID);
@@ -121,7 +116,7 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
         mGateKeeperService.clearAuthToken(TURNED_OFF_PROFILE_USER_ID);
         // verify credential
         assertEquals(VerifyCredentialResponse.RESPONSE_OK, mService.verifyCredential(
-                UnifiedPassword, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, 0, PRIMARY_USER_ID)
+                firstUnifiedPassword, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, 0, PRIMARY_USER_ID)
                 .getResponseCode());
 
         // Verify that we have a new auth token for the profile
@@ -137,15 +132,15 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
          */
         mStorageManager.setIgnoreBadUnlock(true);
         // Change primary password and verify that profile SID remains
-        mService.setLockCredential("pwd", LockPatternUtils.CREDENTIAL_TYPE_PASSWORD,
-                UnifiedPassword, PASSWORD_QUALITY_ALPHABETIC, PRIMARY_USER_ID);
+        mService.setLockCredential(secondUnifiedPassword, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD,
+                firstUnifiedPassword, PASSWORD_QUALITY_ALPHABETIC, PRIMARY_USER_ID);
         mStorageManager.setIgnoreBadUnlock(false);
         assertEquals(profileSid, mGateKeeperService.getSecureUserId(MANAGED_PROFILE_USER_ID));
         assertNull(mGateKeeperService.getAuthToken(TURNED_OFF_PROFILE_USER_ID));
 
         // Clear unified challenge
-        mService.setLockCredential(null, LockPatternUtils.CREDENTIAL_TYPE_NONE, UnifiedPassword,
-                PASSWORD_QUALITY_UNSPECIFIED, PRIMARY_USER_ID);
+        mService.setLockCredential(null, LockPatternUtils.CREDENTIAL_TYPE_NONE,
+                secondUnifiedPassword, PASSWORD_QUALITY_UNSPECIFIED, PRIMARY_USER_ID);
         assertEquals(0, mGateKeeperService.getSecureUserId(PRIMARY_USER_ID));
         assertEquals(0, mGateKeeperService.getSecureUserId(MANAGED_PROFILE_USER_ID));
         assertEquals(0, mGateKeeperService.getSecureUserId(TURNED_OFF_PROFILE_USER_ID));
@@ -241,14 +236,21 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
                 type, challenge, userId).getResponseCode());
     }
 
-    private void initializeStorageWithCredential(int userId, String credential, int type, long sid) {
+    private void initializeStorageWithCredential(int userId, String credential, int type, long sid)
+            throws RemoteException {
         byte[] oldHash = new VerifyHandle(credential.getBytes(), sid).toBytes();
-        if (type == LockPatternUtils.CREDENTIAL_TYPE_PASSWORD) {
-            mStorage.writeCredentialHash(CredentialHash.create(oldHash,
-                    LockPatternUtils.CREDENTIAL_TYPE_PASSWORD), userId);
+        if (mService.shouldMigrateToSyntheticPasswordLocked(userId)) {
+            mService.initializeSyntheticPasswordLocked(oldHash, credential, type,
+                    type == LockPatternUtils.CREDENTIAL_TYPE_PASSWORD ? PASSWORD_QUALITY_ALPHABETIC
+                            : PASSWORD_QUALITY_SOMETHING, userId);
         } else {
-            mStorage.writeCredentialHash(CredentialHash.create(oldHash,
-                    LockPatternUtils.CREDENTIAL_TYPE_PATTERN), userId);
+            if (type == LockPatternUtils.CREDENTIAL_TYPE_PASSWORD) {
+                mStorage.writeCredentialHash(CredentialHash.create(oldHash,
+                        LockPatternUtils.CREDENTIAL_TYPE_PASSWORD), userId);
+            } else {
+                mStorage.writeCredentialHash(CredentialHash.create(oldHash,
+                        LockPatternUtils.CREDENTIAL_TYPE_PATTERN), userId);
+            }
         }
     }
 }

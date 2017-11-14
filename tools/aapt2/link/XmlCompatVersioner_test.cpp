@@ -19,6 +19,12 @@
 #include "Linkers.h"
 #include "test/Test.h"
 
+using ::aapt::test::ValueEq;
+using ::testing::Eq;
+using ::testing::IsNull;
+using ::testing::NotNull;
+using ::testing::SizeIs;
+
 namespace aapt {
 
 constexpr auto TYPE_DIMENSION = android::ResTable_map::TYPE_DIMENSION;
@@ -68,12 +74,12 @@ class XmlCompatVersionerTest : public ::testing::Test {
 };
 
 TEST_F(XmlCompatVersionerTest, NoRulesOnlyStripsAndCopies) {
-  auto doc = test::BuildXmlDomForPackageName(context_.get(), R"EOF(
+  auto doc = test::BuildXmlDomForPackageName(context_.get(), R"(
       <View xmlns:android="http://schemas.android.com/apk/res/android"
           xmlns:app="http://schemas.android.com/apk/res-auto"
           android:paddingHorizontal="24dp"
           app:foo="16dp"
-          foo="bar"/>)EOF");
+          foo="bar"/>)");
 
   XmlReferenceLinker linker;
   ASSERT_TRUE(linker.Consume(context_.get(), doc.get()));
@@ -84,35 +90,35 @@ TEST_F(XmlCompatVersionerTest, NoRulesOnlyStripsAndCopies) {
   XmlCompatVersioner versioner(&rules);
   std::vector<std::unique_ptr<xml::XmlResource>> versioned_docs =
       versioner.Process(context_.get(), doc.get(), api_range);
-  ASSERT_EQ(2u, versioned_docs.size());
+  ASSERT_THAT(versioned_docs, SizeIs(2u));
 
   xml::Element* el;
 
   // Source XML file's sdkVersion == 0, so the first one must also have the same sdkVersion.
-  EXPECT_EQ(static_cast<uint16_t>(0), versioned_docs[0]->file.config.sdkVersion);
-  el = xml::FindRootElement(versioned_docs[0].get());
-  ASSERT_NE(nullptr, el);
-  EXPECT_EQ(2u, el->attributes.size());
-  EXPECT_EQ(nullptr, el->FindAttribute(xml::kSchemaAndroid, "paddingHorizontal"));
-  EXPECT_NE(nullptr, el->FindAttribute(xml::kSchemaAuto, "foo"));
-  EXPECT_NE(nullptr, el->FindAttribute({}, "foo"));
+  EXPECT_THAT(versioned_docs[0]->file.config.sdkVersion, Eq(0u));
+  el = versioned_docs[0]->root.get();
+  ASSERT_THAT(el, NotNull());
+  EXPECT_THAT(el->attributes, SizeIs(2u));
+  EXPECT_THAT(el->FindAttribute(xml::kSchemaAndroid, "paddingHorizontal"), IsNull());
+  EXPECT_THAT(el->FindAttribute(xml::kSchemaAuto, "foo"), NotNull());
+  EXPECT_THAT(el->FindAttribute({}, "foo"), NotNull());
 
-  EXPECT_EQ(static_cast<uint16_t>(SDK_LOLLIPOP_MR1), versioned_docs[1]->file.config.sdkVersion);
-  el = xml::FindRootElement(versioned_docs[1].get());
-  ASSERT_NE(nullptr, el);
-  EXPECT_EQ(3u, el->attributes.size());
-  EXPECT_NE(nullptr, el->FindAttribute(xml::kSchemaAndroid, "paddingHorizontal"));
-  EXPECT_NE(nullptr, el->FindAttribute(xml::kSchemaAuto, "foo"));
-  EXPECT_NE(nullptr, el->FindAttribute({}, "foo"));
+  EXPECT_THAT(versioned_docs[1]->file.config.sdkVersion, Eq(SDK_LOLLIPOP_MR1));
+  el = versioned_docs[1]->root.get();
+  ASSERT_THAT(el, NotNull());
+  EXPECT_THAT(el->attributes, SizeIs(3u));
+  EXPECT_THAT(el->FindAttribute(xml::kSchemaAndroid, "paddingHorizontal"), NotNull());
+  EXPECT_THAT(el->FindAttribute(xml::kSchemaAuto, "foo"), NotNull());
+  EXPECT_THAT(el->FindAttribute({}, "foo"), NotNull());
 }
 
 TEST_F(XmlCompatVersionerTest, SingleRule) {
-  auto doc = test::BuildXmlDomForPackageName(context_.get(), R"EOF(
+  auto doc = test::BuildXmlDomForPackageName(context_.get(), R"(
       <View xmlns:android="http://schemas.android.com/apk/res/android"
           xmlns:app="http://schemas.android.com/apk/res-auto"
           android:paddingHorizontal="24dp"
           app:foo="16dp"
-          foo="bar"/>)EOF");
+          foo="bar"/>)");
 
   XmlReferenceLinker linker;
   ASSERT_TRUE(linker.Consume(context_.get(), doc.get()));
@@ -129,51 +135,51 @@ TEST_F(XmlCompatVersionerTest, SingleRule) {
   XmlCompatVersioner versioner(&rules);
   std::vector<std::unique_ptr<xml::XmlResource>> versioned_docs =
       versioner.Process(context_.get(), doc.get(), api_range);
-  ASSERT_EQ(2u, versioned_docs.size());
+  ASSERT_THAT(versioned_docs, SizeIs(2u));
 
   xml::Element* el;
 
-  EXPECT_EQ(static_cast<uint16_t>(0), versioned_docs[0]->file.config.sdkVersion);
-  el = xml::FindRootElement(versioned_docs[0].get());
-  ASSERT_NE(nullptr, el);
-  EXPECT_EQ(4u, el->attributes.size());
-  EXPECT_EQ(nullptr, el->FindAttribute(xml::kSchemaAndroid, "paddingHorizontal"));
-  EXPECT_NE(nullptr, el->FindAttribute(xml::kSchemaAuto, "foo"));
-  EXPECT_NE(nullptr, el->FindAttribute({}, "foo"));
+  EXPECT_THAT(versioned_docs[0]->file.config.sdkVersion, Eq(0u));
+  el = versioned_docs[0]->root.get();
+  ASSERT_THAT(el, NotNull());
+  EXPECT_THAT(el->attributes, SizeIs(4u));
+  EXPECT_THAT(el->FindAttribute(xml::kSchemaAndroid, "paddingHorizontal"), IsNull());
+  EXPECT_THAT(el->FindAttribute(xml::kSchemaAuto, "foo"), NotNull());
+  EXPECT_THAT(el->FindAttribute({}, "foo"), NotNull());
 
   xml::Attribute* attr = el->FindAttribute(xml::kSchemaAndroid, "paddingLeft");
-  ASSERT_NE(nullptr, attr);
-  ASSERT_NE(nullptr, attr->compiled_value);
+  ASSERT_THAT(attr, NotNull());
+  ASSERT_THAT(attr->compiled_value, NotNull());
   ASSERT_TRUE(attr->compiled_attribute);
 
   attr = el->FindAttribute(xml::kSchemaAndroid, "paddingRight");
-  ASSERT_NE(nullptr, attr);
-  ASSERT_NE(nullptr, attr->compiled_value);
+  ASSERT_THAT(attr, NotNull());
+  ASSERT_THAT(attr->compiled_value, NotNull());
   ASSERT_TRUE(attr->compiled_attribute);
 
-  EXPECT_EQ(static_cast<uint16_t>(SDK_LOLLIPOP_MR1), versioned_docs[1]->file.config.sdkVersion);
-  el = xml::FindRootElement(versioned_docs[1].get());
-  ASSERT_NE(nullptr, el);
-  EXPECT_EQ(5u, el->attributes.size());
-  EXPECT_NE(nullptr, el->FindAttribute(xml::kSchemaAndroid, "paddingHorizontal"));
-  EXPECT_NE(nullptr, el->FindAttribute(xml::kSchemaAuto, "foo"));
-  EXPECT_NE(nullptr, el->FindAttribute({}, "foo"));
+  EXPECT_THAT(versioned_docs[1]->file.config.sdkVersion, Eq(SDK_LOLLIPOP_MR1));
+  el = versioned_docs[1]->root.get();
+  ASSERT_THAT(el, NotNull());
+  EXPECT_THAT(el->attributes, SizeIs(5u));
+  EXPECT_THAT(el->FindAttribute(xml::kSchemaAndroid, "paddingHorizontal"), NotNull());
+  EXPECT_THAT(el->FindAttribute(xml::kSchemaAuto, "foo"), NotNull());
+  EXPECT_THAT(el->FindAttribute({}, "foo"), NotNull());
 
   attr = el->FindAttribute(xml::kSchemaAndroid, "paddingLeft");
-  ASSERT_NE(nullptr, attr);
-  ASSERT_NE(nullptr, attr->compiled_value);
+  ASSERT_THAT(attr, NotNull());
+  ASSERT_THAT(attr->compiled_value, NotNull());
   ASSERT_TRUE(attr->compiled_attribute);
 
   attr = el->FindAttribute(xml::kSchemaAndroid, "paddingRight");
-  ASSERT_NE(nullptr, attr);
-  ASSERT_NE(nullptr, attr->compiled_value);
+  ASSERT_THAT(attr, NotNull());
+  ASSERT_THAT(attr->compiled_value, NotNull());
   ASSERT_TRUE(attr->compiled_attribute);
 }
 
 TEST_F(XmlCompatVersionerTest, ChainedRule) {
-  auto doc = test::BuildXmlDomForPackageName(context_.get(), R"EOF(
+  auto doc = test::BuildXmlDomForPackageName(context_.get(), R"(
       <View xmlns:android="http://schemas.android.com/apk/res/android"
-          android:paddingHorizontal="24dp" />)EOF");
+          android:paddingHorizontal="24dp" />)");
 
   XmlReferenceLinker linker;
   ASSERT_TRUE(linker.Consume(context_.get(), doc.get()));
@@ -193,71 +199,70 @@ TEST_F(XmlCompatVersionerTest, ChainedRule) {
   XmlCompatVersioner versioner(&rules);
   std::vector<std::unique_ptr<xml::XmlResource>> versioned_docs =
       versioner.Process(context_.get(), doc.get(), api_range);
-  ASSERT_EQ(3u, versioned_docs.size());
+  ASSERT_THAT(versioned_docs, SizeIs(3u));
 
   xml::Element* el;
 
-  EXPECT_EQ(static_cast<uint16_t>(0), versioned_docs[0]->file.config.sdkVersion);
-  el = xml::FindRootElement(versioned_docs[0].get());
-  ASSERT_NE(nullptr, el);
-  EXPECT_EQ(2u, el->attributes.size());
-  EXPECT_EQ(nullptr, el->FindAttribute(xml::kSchemaAndroid, "paddingHorizontal"));
+  EXPECT_THAT(versioned_docs[0]->file.config.sdkVersion, Eq(0u));
+  el = versioned_docs[0]->root.get();
+  ASSERT_THAT(el, NotNull());
+  EXPECT_THAT(el->attributes, SizeIs(2u));
+  EXPECT_THAT(el->FindAttribute(xml::kSchemaAndroid, "paddingHorizontal"), IsNull());
 
   xml::Attribute* attr = el->FindAttribute(xml::kSchemaAndroid, "paddingLeft");
-  ASSERT_NE(nullptr, attr);
-  ASSERT_NE(nullptr, attr->compiled_value);
+  ASSERT_THAT(attr, NotNull());
+  ASSERT_THAT(attr->compiled_value, NotNull());
   ASSERT_TRUE(attr->compiled_attribute);
 
   attr = el->FindAttribute(xml::kSchemaAndroid, "paddingRight");
-  ASSERT_NE(nullptr, attr);
-  ASSERT_NE(nullptr, attr->compiled_value);
+  ASSERT_THAT(attr, NotNull());
+  ASSERT_THAT(attr->compiled_value, NotNull());
   ASSERT_TRUE(attr->compiled_attribute);
 
-  EXPECT_EQ(static_cast<uint16_t>(SDK_HONEYCOMB), versioned_docs[1]->file.config.sdkVersion);
-  el = xml::FindRootElement(versioned_docs[1].get());
-  ASSERT_NE(nullptr, el);
-  EXPECT_EQ(1u, el->attributes.size());
-  EXPECT_EQ(nullptr, el->FindAttribute(xml::kSchemaAndroid, "paddingHorizontal"));
-  EXPECT_EQ(nullptr, el->FindAttribute(xml::kSchemaAndroid, "paddingLeft"));
-  EXPECT_EQ(nullptr, el->FindAttribute(xml::kSchemaAndroid, "paddingRight"));
+  EXPECT_THAT(versioned_docs[1]->file.config.sdkVersion, Eq(SDK_HONEYCOMB));
+  el = versioned_docs[1]->root.get();
+  ASSERT_THAT(el, NotNull());
+  EXPECT_THAT(el->attributes, SizeIs(1u));
+  EXPECT_THAT(el->FindAttribute(xml::kSchemaAndroid, "paddingHorizontal"), IsNull());
+  EXPECT_THAT(el->FindAttribute(xml::kSchemaAndroid, "paddingLeft"), IsNull());
+  EXPECT_THAT(el->FindAttribute(xml::kSchemaAndroid, "paddingRight"), IsNull());
 
   attr = el->FindAttribute(xml::kSchemaAndroid, "progressBarPadding");
-  ASSERT_NE(nullptr, attr);
-  ASSERT_NE(nullptr, attr->compiled_value);
+  ASSERT_THAT(attr, NotNull());
+  ASSERT_THAT(attr->compiled_value, NotNull());
   ASSERT_TRUE(attr->compiled_attribute);
 
-  EXPECT_EQ(static_cast<uint16_t>(SDK_LOLLIPOP_MR1), versioned_docs[2]->file.config.sdkVersion);
-  el = xml::FindRootElement(versioned_docs[2].get());
-  ASSERT_NE(nullptr, el);
-  EXPECT_EQ(2u, el->attributes.size());
-  EXPECT_EQ(nullptr, el->FindAttribute(xml::kSchemaAndroid, "paddingLeft"));
-  EXPECT_EQ(nullptr, el->FindAttribute(xml::kSchemaAndroid, "paddingRight"));
+  EXPECT_THAT(versioned_docs[2]->file.config.sdkVersion, Eq(SDK_LOLLIPOP_MR1));
+  el = versioned_docs[2]->root.get();
+  ASSERT_THAT(el, NotNull());
+  EXPECT_THAT(el->attributes, SizeIs(2u));
+  EXPECT_THAT(el->FindAttribute(xml::kSchemaAndroid, "paddingLeft"), IsNull());
+  EXPECT_THAT(el->FindAttribute(xml::kSchemaAndroid, "paddingRight"), IsNull());
 
   attr = el->FindAttribute(xml::kSchemaAndroid, "paddingHorizontal");
-  ASSERT_NE(nullptr, attr);
-  ASSERT_NE(nullptr, attr->compiled_value);
+  ASSERT_THAT(attr, NotNull());
+  ASSERT_THAT(attr->compiled_value, NotNull());
   ASSERT_TRUE(attr->compiled_attribute);
 
   attr = el->FindAttribute(xml::kSchemaAndroid, "progressBarPadding");
-  ASSERT_NE(nullptr, attr);
-  ASSERT_NE(nullptr, attr->compiled_value);
+  ASSERT_THAT(attr, NotNull());
+  ASSERT_THAT(attr->compiled_value, NotNull());
   ASSERT_TRUE(attr->compiled_attribute);
 }
 
 TEST_F(XmlCompatVersionerTest, DegradeRuleOverridesExistingAttribute) {
-  auto doc = test::BuildXmlDomForPackageName(context_.get(), R"EOF(
+  auto doc = test::BuildXmlDomForPackageName(context_.get(), R"(
       <View xmlns:android="http://schemas.android.com/apk/res/android"
           android:paddingHorizontal="24dp"
           android:paddingLeft="16dp"
-          android:paddingRight="16dp"/>)EOF");
+          android:paddingRight="16dp"/>)");
 
   XmlReferenceLinker linker;
   ASSERT_TRUE(linker.Consume(context_.get(), doc.get()));
 
-  Item* padding_horizontal_value = xml::FindRootElement(doc.get())
-                                       ->FindAttribute(xml::kSchemaAndroid, "paddingHorizontal")
-                                       ->compiled_value.get();
-  ASSERT_NE(nullptr, padding_horizontal_value);
+  Item* padding_horizontal_value =
+      doc->root->FindAttribute(xml::kSchemaAndroid, "paddingHorizontal")->compiled_value.get();
+  ASSERT_THAT(padding_horizontal_value, NotNull());
 
   XmlCompatVersioner::Rules rules;
   rules[R::attr::paddingHorizontal] =
@@ -271,50 +276,50 @@ TEST_F(XmlCompatVersionerTest, DegradeRuleOverridesExistingAttribute) {
   XmlCompatVersioner versioner(&rules);
   std::vector<std::unique_ptr<xml::XmlResource>> versioned_docs =
       versioner.Process(context_.get(), doc.get(), api_range);
-  ASSERT_EQ(2u, versioned_docs.size());
+  ASSERT_THAT(versioned_docs, SizeIs(2u));
 
   xml::Element* el;
 
-  EXPECT_EQ(static_cast<uint16_t>(0), versioned_docs[0]->file.config.sdkVersion);
-  el = xml::FindRootElement(versioned_docs[0].get());
-  ASSERT_NE(nullptr, el);
-  EXPECT_EQ(2u, el->attributes.size());
-  EXPECT_EQ(nullptr, el->FindAttribute(xml::kSchemaAndroid, "paddingHorizontal"));
+  EXPECT_THAT(versioned_docs[0]->file.config.sdkVersion, Eq(0u));
+  el = versioned_docs[0]->root.get();
+  ASSERT_THAT(el, NotNull());
+  EXPECT_THAT(el->attributes, SizeIs(2u));
+  EXPECT_THAT(el->FindAttribute(xml::kSchemaAndroid, "paddingHorizontal"), IsNull());
 
   xml::Attribute* attr = el->FindAttribute(xml::kSchemaAndroid, "paddingLeft");
-  ASSERT_NE(nullptr, attr);
-  ASSERT_NE(nullptr, attr->compiled_value);
-  ASSERT_TRUE(padding_horizontal_value->Equals(attr->compiled_value.get()));
+  ASSERT_THAT(attr, NotNull());
+  ASSERT_THAT(attr->compiled_value, NotNull());
   ASSERT_TRUE(attr->compiled_attribute);
+  ASSERT_THAT(*attr->compiled_value, ValueEq(padding_horizontal_value));
 
   attr = el->FindAttribute(xml::kSchemaAndroid, "paddingRight");
-  ASSERT_NE(nullptr, attr);
-  ASSERT_NE(nullptr, attr->compiled_value);
-  ASSERT_TRUE(padding_horizontal_value->Equals(attr->compiled_value.get()));
+  ASSERT_THAT(attr, NotNull());
+  ASSERT_THAT(attr->compiled_value, NotNull());
   ASSERT_TRUE(attr->compiled_attribute);
+  ASSERT_THAT(*attr->compiled_value, ValueEq(padding_horizontal_value));
 
-  EXPECT_EQ(static_cast<uint16_t>(SDK_LOLLIPOP_MR1), versioned_docs[1]->file.config.sdkVersion);
-  el = xml::FindRootElement(versioned_docs[1].get());
-  ASSERT_NE(nullptr, el);
-  EXPECT_EQ(3u, el->attributes.size());
+  EXPECT_THAT(versioned_docs[1]->file.config.sdkVersion, Eq(SDK_LOLLIPOP_MR1));
+  el = versioned_docs[1]->root.get();
+  ASSERT_THAT(el, NotNull());
+  EXPECT_THAT(el->attributes, SizeIs(3u));
 
   attr = el->FindAttribute(xml::kSchemaAndroid, "paddingHorizontal");
-  ASSERT_NE(nullptr, attr);
-  ASSERT_NE(nullptr, attr->compiled_value);
-  ASSERT_TRUE(padding_horizontal_value->Equals(attr->compiled_value.get()));
+  ASSERT_THAT(attr, NotNull());
+  ASSERT_THAT(attr->compiled_value, NotNull());
   ASSERT_TRUE(attr->compiled_attribute);
+  ASSERT_THAT(*attr->compiled_value, ValueEq(padding_horizontal_value));
 
   attr = el->FindAttribute(xml::kSchemaAndroid, "paddingLeft");
-  ASSERT_NE(nullptr, attr);
-  ASSERT_NE(nullptr, attr->compiled_value);
-  ASSERT_TRUE(padding_horizontal_value->Equals(attr->compiled_value.get()));
+  ASSERT_THAT(attr, NotNull());
+  ASSERT_THAT(attr->compiled_value, NotNull());
   ASSERT_TRUE(attr->compiled_attribute);
+  ASSERT_THAT(*attr->compiled_value, ValueEq(padding_horizontal_value));
 
   attr = el->FindAttribute(xml::kSchemaAndroid, "paddingRight");
-  ASSERT_NE(nullptr, attr);
-  ASSERT_NE(nullptr, attr->compiled_value);
-  ASSERT_TRUE(padding_horizontal_value->Equals(attr->compiled_value.get()));
+  ASSERT_THAT(attr, NotNull());
+  ASSERT_THAT(attr->compiled_value, NotNull());
   ASSERT_TRUE(attr->compiled_attribute);
+  ASSERT_THAT(*attr->compiled_value, ValueEq(padding_horizontal_value));
 }
 
 }  // namespace aapt

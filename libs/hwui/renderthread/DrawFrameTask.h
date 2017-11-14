@@ -61,6 +61,9 @@ public:
     virtual ~DrawFrameTask();
 
     void setContext(RenderThread* thread, CanvasContext* context, RenderNode* targetNode);
+    void setContentDrawBounds(int left, int top, int right, int bottom) {
+        mContentDrawBounds.set(left, top, right, bottom);
+    }
 
     void pushLayerUpdate(DeferredLayerUpdater* layer);
     void removeLayerUpdate(DeferredLayerUpdater* layer);
@@ -82,6 +85,7 @@ private:
     RenderThread* mRenderThread;
     CanvasContext* mContext;
     RenderNode* mTargetNode = nullptr;
+    Rect mContentDrawBounds;
 
     /*********************************************
      *  Single frame data

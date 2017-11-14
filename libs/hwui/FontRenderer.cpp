@@ -32,7 +32,6 @@
 #include "utils/Timing.h"
 
 #include <algorithm>
-#include <cutils/properties.h>
 #include <RenderScript.h>
 #include <SkGlyph.h>
 #include <SkUtils.h>
@@ -99,22 +98,23 @@ FontRenderer::FontRenderer(const uint8_t* gammaTable)
         INIT_LOGD("Creating FontRenderer");
     }
 
-    mSmallCacheWidth = property_get_int32(PROPERTY_TEXT_SMALL_CACHE_WIDTH,
-            DEFAULT_TEXT_SMALL_CACHE_WIDTH);
-    mSmallCacheHeight = property_get_int32(PROPERTY_TEXT_SMALL_CACHE_HEIGHT,
-            DEFAULT_TEXT_SMALL_CACHE_HEIGHT);
+    auto deviceInfo = DeviceInfo::get();
+    auto displayInfo = deviceInfo->displayInfo();
+    int maxTextureSize = deviceInfo->maxTextureSize();
 
-    mLargeCacheWidth = property_get_int32(PROPERTY_TEXT_LARGE_CACHE_WIDTH,
-            DEFAULT_TEXT_LARGE_CACHE_WIDTH);
-    mLargeCacheHeight = property_get_int32(PROPERTY_TEXT_LARGE_CACHE_HEIGHT,
-            DEFAULT_TEXT_LARGE_CACHE_HEIGHT);
+    // Adjust cache size based on Pixel's desnsity.
+    constexpr float PIXEL_DENSITY = 2.6;
+    const float densityRatio = displayInfo.density / PIXEL_DENSITY;
 
-    uint32_t maxTextureSize = (uint32_t) Caches::getInstance().maxTextureSize;
-
-    mSmallCacheWidth = std::min(mSmallCacheWidth, maxTextureSize);
-    mSmallCacheHeight = std::min(mSmallCacheHeight, maxTextureSize);
-    mLargeCacheWidth = std::min(mLargeCacheWidth, maxTextureSize);
-    mLargeCacheHeight = std::min(mLargeCacheHeight, maxTextureSize);
+    // TODO: Most devices are hardcoded with this configuration, does it need to be dynamic?
+    mSmallCacheWidth =
+            OffscreenBuffer::computeIdealDimension(std::min(1024, maxTextureSize) * densityRatio);
+    mSmallCacheHeight =
+            OffscreenBuffer::computeIdealDimension(std::min(1024, maxTextureSize) * densityRatio);
+    mLargeCacheWidth =
+            OffscreenBuffer::computeIdealDimension(std::min(2048, maxTextureSize) * densityRatio);
+    mLargeCacheHeight =
+            OffscreenBuffer::computeIdealDimension(std::min(1024, maxTextureSize) * densityRatio);
 
     if (sLogFontRendererCreate) {
         INIT_LOGD("  Text cache sizes, in pixels: %i x %i, %i x %i, %i x %i, %i x %i",

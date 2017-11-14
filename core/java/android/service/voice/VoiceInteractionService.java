@@ -262,8 +262,7 @@ public class VoiceInteractionService extends Service {
      * @param keyphrase The keyphrase that's being used, for example "Hello Android".
      * @param locale The locale for which the enrollment needs to be performed.
      * @param callback The callback to notify of detection events.
-     * @return An always-on hotword detector for the given keyphrase and locale. Is null if the
-     * keyphrase and locale is not supported.
+     * @return An always-on hotword detector for the given keyphrase and locale.
      */
     public final AlwaysOnHotwordDetector createAlwaysOnHotwordDetector(
             String keyphrase, Locale locale, AlwaysOnHotwordDetector.Callback callback) {
@@ -273,10 +272,8 @@ public class VoiceInteractionService extends Service {
         synchronized (mLock) {
             // Allow only one concurrent recognition via the APIs.
             safelyShutdownHotwordDetector();
-            if (isKeyphraseAndLocaleSupportedForHotword(keyphrase, locale)) {
-                mHotwordDetector = new AlwaysOnHotwordDetector(keyphrase, locale, callback,
-                        mKeyphraseEnrollmentInfo, mInterface, mSystemService);
-            }
+            mHotwordDetector = new AlwaysOnHotwordDetector(keyphrase, locale, callback,
+                    mKeyphraseEnrollmentInfo, mInterface, mSystemService);
         }
         return mHotwordDetector;
     }

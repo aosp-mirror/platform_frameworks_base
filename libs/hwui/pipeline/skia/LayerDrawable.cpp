@@ -18,6 +18,7 @@
 #include "LayerDrawable.h"
 #include "VkLayer.h"
 
+#include "GrBackendSurface.h"
 #include "SkColorFilter.h"
 #include "SkSurface.h"
 #include "gl/GrGLTypes.h"
@@ -46,13 +47,10 @@ bool LayerDrawable::DrawLayer(GrContext* context, SkCanvas* canvas, Layer* layer
         GrGLTextureInfo externalTexture;
         externalTexture.fTarget = glLayer->getRenderTarget();
         externalTexture.fID = glLayer->getTextureId();
-        GrBackendTextureDesc textureDescription;
-        textureDescription.fWidth = glLayer->getWidth();
-        textureDescription.fHeight = glLayer->getHeight();
-        textureDescription.fConfig = kRGBA_8888_GrPixelConfig;
-        textureDescription.fOrigin = kTopLeft_GrSurfaceOrigin;
-        textureDescription.fTextureHandle = reinterpret_cast<GrBackendObject>(&externalTexture);
-        layerImage = SkImage::MakeFromTexture(context, textureDescription);
+        GrBackendTexture backendTexture(glLayer->getWidth(), glLayer->getHeight(),
+                kRGBA_8888_GrPixelConfig, externalTexture);
+        layerImage = SkImage::MakeFromTexture(context, backendTexture, kTopLeft_GrSurfaceOrigin,
+                kPremul_SkAlphaType, nullptr);
     } else {
         SkASSERT(layer->getApi() == Layer::Api::Vulkan);
         VkLayer* vkLayer = static_cast<VkLayer*>(layer);

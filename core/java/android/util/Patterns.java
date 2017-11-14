@@ -406,7 +406,7 @@ public class Patterns {
      * the local part to be at most 64 octets.
      */
     private static final String EMAIL_ADDRESS_LOCAL_PART =
-            "[" + EMAIL_CHAR + "]" + "(?:[" + EMAIL_CHAR + "\\.]{1,62}[" + EMAIL_CHAR + "])?";
+            "[" + EMAIL_CHAR + "]" + "(?:[" + EMAIL_CHAR + "\\.]{0,62}[" + EMAIL_CHAR + "])?";
 
     /**
      * Regular expression for the domain part of an email address. RFC5321 section 4.5.3.1.2 limits

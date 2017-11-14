@@ -24,6 +24,8 @@
 #include <ostream>
 #include <string>
 
+using ::testing::NotNull;
+
 namespace aapt {
 
 TEST(ResourceTableTest, FailToAddResourceWithBadName) {
@@ -56,7 +58,7 @@ TEST(ResourceTableTest, AddOneResource) {
       test::ValueBuilder<Id>().SetSource("test/path/file.xml", 23u).Build(),
       test::GetDiagnostics()));
 
-  ASSERT_NE(nullptr, test::GetValue<Id>(&table, "android:attr/id"));
+  EXPECT_THAT(test::GetValue<Id>(&table, "android:attr/id"), NotNull());
 }
 
 TEST(ResourceTableTest, AddMultipleResources) {
@@ -88,11 +90,10 @@ TEST(ResourceTableTest, AddMultipleResources) {
           .Build(),
       test::GetDiagnostics()));
 
-  ASSERT_NE(nullptr, test::GetValue<Id>(&table, "android:attr/layout_width"));
-  ASSERT_NE(nullptr, test::GetValue<Id>(&table, "android:attr/id"));
-  ASSERT_NE(nullptr, test::GetValue<Id>(&table, "android:string/ok"));
-  ASSERT_NE(nullptr, test::GetValueForConfig<BinaryPrimitive>(
-                         &table, "android:string/ok", language_config));
+  EXPECT_THAT(test::GetValue<Id>(&table, "android:attr/layout_width"), NotNull());
+  EXPECT_THAT(test::GetValue<Id>(&table, "android:attr/id"), NotNull());
+  EXPECT_THAT(test::GetValue<Id>(&table, "android:string/ok"), NotNull());
+  EXPECT_THAT(test::GetValueForConfig<BinaryPrimitive>(&table, "android:string/ok", language_config), NotNull());
 }
 
 TEST(ResourceTableTest, OverrideWeakResourceValue) {
@@ -103,7 +104,7 @@ TEST(ResourceTableTest, OverrideWeakResourceValue) {
       util::make_unique<Attribute>(true), test::GetDiagnostics()));
 
   Attribute* attr = test::GetValue<Attribute>(&table, "android:attr/foo");
-  ASSERT_NE(nullptr, attr);
+  ASSERT_THAT(attr, NotNull());
   EXPECT_TRUE(attr->IsWeak());
 
   ASSERT_TRUE(table.AddResource(
@@ -111,7 +112,7 @@ TEST(ResourceTableTest, OverrideWeakResourceValue) {
       util::make_unique<Attribute>(false), test::GetDiagnostics()));
 
   attr = test::GetValue<Attribute>(&table, "android:attr/foo");
-  ASSERT_NE(nullptr, attr);
+  ASSERT_THAT(attr, NotNull());
   EXPECT_FALSE(attr->IsWeak());
 }
 
@@ -127,16 +128,12 @@ TEST(ResourceTableTest, ProductVaryingValues) {
                                 util::make_unique<Id>(),
                                 test::GetDiagnostics()));
 
-  EXPECT_NE(nullptr, test::GetValueForConfigAndProduct<Id>(
-                         &table, "android:string/foo",
-                         test::ParseConfigOrDie("land"), "tablet"));
-  EXPECT_NE(nullptr, test::GetValueForConfigAndProduct<Id>(
-                         &table, "android:string/foo",
-                         test::ParseConfigOrDie("land"), "phone"));
+  EXPECT_THAT(test::GetValueForConfigAndProduct<Id>(&table, "android:string/foo",test::ParseConfigOrDie("land"), "tablet"), NotNull());
+  EXPECT_THAT(test::GetValueForConfigAndProduct<Id>(&table, "android:string/foo",test::ParseConfigOrDie("land"), "phone"), NotNull());
 
   Maybe<ResourceTable::SearchResult> sr =
       table.FindResource(test::ParseNameOrDie("android:string/foo"));
-  AAPT_ASSERT_TRUE(sr);
+  ASSERT_TRUE(sr);
   std::vector<ResourceConfigValue*> values =
       sr.value().entry->FindAllValues(test::ParseConfigOrDie("land"));
   ASSERT_EQ(2u, values.size());

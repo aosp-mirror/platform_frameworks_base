@@ -16,7 +16,6 @@
 
 package com.android.systemui;
 
-import android.app.Activity;
 import android.app.ActivityThread;
 import android.app.Application;
 import android.content.BroadcastReceiver;
@@ -27,11 +26,12 @@ import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
 import android.os.Process;
 import android.os.SystemProperties;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.util.ArraySet;
+import android.util.TimingsTraceLog;
 import android.util.Log;
 
-import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.globalactions.GlobalActionsComponent;
 import com.android.systemui.keyboard.KeyboardUI;
 import com.android.systemui.keyguard.KeyguardViewMediator;
@@ -40,7 +40,6 @@ import com.android.systemui.pip.PipUI;
 import com.android.systemui.plugins.GlobalActions;
 import com.android.systemui.plugins.OverlayPlugin;
 import com.android.systemui.plugins.Plugin;
-import com.android.systemui.plugins.PluginActivityManager;
 import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.power.PowerUI;
@@ -50,7 +49,6 @@ import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarWindowManager;
-import com.android.systemui.tuner.TunerService;
 import com.android.systemui.usb.StorageNotification;
 import com.android.systemui.util.NotificationChannels;
 import com.android.systemui.util.leak.GarbageMonitor;
@@ -192,11 +190,17 @@ public class SystemUIApplication extends Application implements SysUiServiceProv
 
         Log.v(TAG, "Starting SystemUI services for user " +
                 Process.myUserHandle().getIdentifier() + ".");
+        TimingsTraceLog log = new TimingsTraceLog("SystemUIBootTiming",
+                Trace.TRACE_TAG_APP);
+        log.traceBegin("StartServices");
         final int N = services.length;
         for (int i = 0; i < N; i++) {
             Class<?> cl = services[i];
             if (DEBUG) Log.d(TAG, "loading: " + cl);
+            log.traceBegin("StartServices" + cl.getSimpleName());
+            long ti = System.currentTimeMillis();
             try {
+
                 Object newService = SystemUIFactory.getInstance().createInstance(cl);
                 mServices[i] = (SystemUI) ((newService == null) ? cl.newInstance() : newService);
             } catch (IllegalAccessException ex) {
@@ -209,11 +213,18 @@ public class SystemUIApplication extends Application implements SysUiServiceProv
             mServices[i].mComponents = mComponents;
             if (DEBUG) Log.d(TAG, "running: " + mServices[i]);
             mServices[i].start();
+            log.traceEnd();
 
+            // Warn if initialization of component takes too long
+            ti = System.currentTimeMillis() - ti;
+            if (ti > 1000) {
+                Log.w(TAG, "Initialization of " + cl.getName() + " took " + ti + " ms");
+            }
             if (mBootCompleted) {
                 mServices[i].onBootCompleted();
             }
         }
+        log.traceEnd();
         Dependency.get(PluginManager.class).addPluginListener(
                 new PluginListener<OverlayPlugin>() {
                     private ArraySet<OverlayPlugin> mOverlays;
@@ -267,11 +278,5 @@ public class SystemUIApplication extends Application implements SysUiServiceProv
 
     public SystemUI[] getServices() {
         return mServices;
-    }
-
-    @Override
-    public Activity instantiateActivity(ClassLoader cl, String className, Intent intent) {
-        if (!mServicesStarted) return null;
-        return Dependency.get(PluginActivityManager.class).instantiate(cl, className, intent);
     }
 }

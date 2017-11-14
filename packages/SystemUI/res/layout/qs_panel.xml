@@ -32,8 +32,7 @@
 
     <include layout="@layout/quick_status_bar_expanded_header" />
 
-    <include android:id="@+id/qs_footer"
-        layout="@layout/qs_footer" />
+    <include layout="@layout/qs_footer_impl" />
 
     <include android:id="@+id/qs_detail" layout="@layout/qs_detail" />
 

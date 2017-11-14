@@ -572,7 +572,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public static final int PRIVATE_FLAG_STATIC_SHARED_LIBRARY = 1 << 14;
 
     /**
-     * Value for {@linl #privateFlags}: When set, the application will only have its splits loaded
+     * Value for {@link #privateFlags}: When set, the application will only have its splits loaded
      * if they are required to load a component. Splits can be loaded on demand using the
      * {@link Context#createContextForSplit(String)} API.
      * @hide
@@ -580,10 +580,40 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public static final int PRIVATE_FLAG_ISOLATED_SPLIT_LOADING = 1 << 15;
 
     /**
-     * Private/hidden flags. See {@code PRIVATE_FLAG_...} constants.
-     * {@hide}
+     * Value for {@link #privateFlags}: When set, the application was installed as
+     * a virtual preload.
+     * @hide
      */
-    public int privateFlags;
+    public static final int PRIVATE_FLAG_VIRTUAL_PRELOAD = 1 << 16;
+
+    /** @hide */
+    @IntDef(flag = true, prefix = { "PRIVATE_FLAG_" }, value = {
+            PRIVATE_FLAG_HIDDEN,
+            PRIVATE_FLAG_CANT_SAVE_STATE,
+            PRIVATE_FLAG_FORWARD_LOCK,
+            PRIVATE_FLAG_PRIVILEGED,
+            PRIVATE_FLAG_HAS_DOMAIN_URLS,
+            PRIVATE_FLAG_DEFAULT_TO_DEVICE_PROTECTED_STORAGE,
+            PRIVATE_FLAG_DIRECT_BOOT_AWARE,
+            PRIVATE_FLAG_INSTANT,
+            PRIVATE_FLAG_PARTIALLY_DIRECT_BOOT_AWARE,
+            PRIVATE_FLAG_REQUIRED_FOR_SYSTEM_USER,
+            PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_RESIZEABLE,
+            PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_UNRESIZEABLE,
+            PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION,
+            PRIVATE_FLAG_BACKUP_IN_FOREGROUND,
+            PRIVATE_FLAG_STATIC_SHARED_LIBRARY,
+            PRIVATE_FLAG_ISOLATED_SPLIT_LOADING,
+            PRIVATE_FLAG_VIRTUAL_PRELOAD,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ApplicationInfoPrivateFlags {}
+
+    /**
+     * Private/hidden flags. See {@code PRIVATE_FLAG_...} constants.
+     * @hide
+     */
+    public @ApplicationInfoPrivateFlags int privateFlags;
 
     /**
      * @hide
@@ -1009,27 +1039,33 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         }
     }
 
+    /** @hide */
+    public String classLoaderName;
+
+    /** @hide */
+    public String[] splitClassLoaderNames;
+
     public void dump(Printer pw, String prefix) {
         dump(pw, prefix, DUMP_FLAG_ALL);
     }
 
     /** @hide */
-    public void dump(Printer pw, String prefix, int flags) {
+    public void dump(Printer pw, String prefix, int dumpFlags) {
         super.dumpFront(pw, prefix);
-        if ((flags&DUMP_FLAG_DETAILS) != 0 && className != null) {
+        if ((dumpFlags & DUMP_FLAG_DETAILS) != 0 && className != null) {
             pw.println(prefix + "className=" + className);
         }
         if (permission != null) {
             pw.println(prefix + "permission=" + permission);
         }
         pw.println(prefix + "processName=" + processName);
-        if ((flags&DUMP_FLAG_DETAILS) != 0) {
+        if ((dumpFlags & DUMP_FLAG_DETAILS) != 0) {
             pw.println(prefix + "taskAffinity=" + taskAffinity);
         }
         pw.println(prefix + "uid=" + uid + " flags=0x" + Integer.toHexString(flags)
                 + " privateFlags=0x" + Integer.toHexString(privateFlags)
                 + " theme=0x" + Integer.toHexString(theme));
-        if ((flags&DUMP_FLAG_DETAILS) != 0) {
+        if ((dumpFlags & DUMP_FLAG_DETAILS) != 0) {
             pw.println(prefix + "requiresSmallestWidthDp=" + requiresSmallestWidthDp
                     + " compatibleWidthLimitDp=" + compatibleWidthLimitDp
                     + " largestWidthLimitDp=" + largestWidthLimitDp);
@@ -1048,24 +1084,31 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         if (resourceDirs != null) {
             pw.println(prefix + "resourceDirs=" + Arrays.toString(resourceDirs));
         }
-        if ((flags&DUMP_FLAG_DETAILS) != 0 && seInfo != null) {
+        if ((dumpFlags & DUMP_FLAG_DETAILS) != 0 && seInfo != null) {
             pw.println(prefix + "seinfo=" + seInfo);
             pw.println(prefix + "seinfoUser=" + seInfoUser);
         }
         pw.println(prefix + "dataDir=" + dataDir);
-        if ((flags&DUMP_FLAG_DETAILS) != 0) {
+        if ((dumpFlags & DUMP_FLAG_DETAILS) != 0) {
             pw.println(prefix + "deviceProtectedDataDir=" + deviceProtectedDataDir);
             pw.println(prefix + "credentialProtectedDataDir=" + credentialProtectedDataDir);
             if (sharedLibraryFiles != null) {
                 pw.println(prefix + "sharedLibraryFiles=" + Arrays.toString(sharedLibraryFiles));
             }
         }
+        if (classLoaderName != null) {
+            pw.println(prefix + "classLoaderName=" + classLoaderName);
+        }
+        if (!ArrayUtils.isEmpty(splitClassLoaderNames)) {
+            pw.println(prefix + "splitClassLoaderNames=" + Arrays.toString(splitClassLoaderNames));
+        }
+
         pw.println(prefix + "enabled=" + enabled
                 + " minSdkVersion=" + minSdkVersion
                 + " targetSdkVersion=" + targetSdkVersion
                 + " versionCode=" + versionCode
                 + " targetSandboxVersion=" + targetSandboxVersion);
-        if ((flags&DUMP_FLAG_DETAILS) != 0) {
+        if ((dumpFlags & DUMP_FLAG_DETAILS) != 0) {
             if (manageSpaceActivityName != null) {
                 pw.println(prefix + "manageSpaceActivityName=" + manageSpaceActivityName);
             }
@@ -1182,6 +1225,8 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         networkSecurityConfigRes = orig.networkSecurityConfigRes;
         category = orig.category;
         targetSandboxVersion = orig.targetSandboxVersion;
+        classLoaderName = orig.classLoaderName;
+        splitClassLoaderNames = orig.splitClassLoaderNames;
     }
 
     public String toString() {
@@ -1250,6 +1295,8 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         dest.writeInt(networkSecurityConfigRes);
         dest.writeInt(category);
         dest.writeInt(targetSandboxVersion);
+        dest.writeString(classLoaderName);
+        dest.writeStringArray(splitClassLoaderNames);
     }
 
     public static final Parcelable.Creator<ApplicationInfo> CREATOR
@@ -1315,6 +1362,8 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         networkSecurityConfigRes = source.readInt();
         category = source.readInt();
         targetSandboxVersion = source.readInt();
+        classLoaderName = source.readString();
+        splitClassLoaderNames = source.readStringArray();
     }
 
     /**
@@ -1463,6 +1512,11 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         return (privateFlags & ApplicationInfo.PRIVATE_FLAG_PARTIALLY_DIRECT_BOOT_AWARE) != 0;
     }
 
+    /** @hide */
+    public boolean isEncryptionAware() {
+        return isDirectBootAware() || isPartiallyDirectBootAware();
+    }
+
     /**
      * @hide
      */
@@ -1491,6 +1545,13 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      */
     public boolean isStaticSharedLibrary() {
         return (privateFlags & ApplicationInfo.PRIVATE_FLAG_STATIC_SHARED_LIBRARY) != 0;
+    }
+
+    /**
+     * Returns whether or not this application was installed as a virtual preload.
+     */
+    public boolean isVirtualPreload() {
+        return (privateFlags & PRIVATE_FLAG_VIRTUAL_PRELOAD) != 0;
     }
 
     /**

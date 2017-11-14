@@ -20,6 +20,9 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 import org.robolectric.manifest.AndroidManifest;
 import org.robolectric.res.Fs;
+import org.robolectric.res.ResourcePath;
+
+import java.util.List;
 
 public class SettingLibRobolectricTestRunner extends RobolectricTestRunner {
 
@@ -36,10 +39,31 @@ public class SettingLibRobolectricTestRunner extends RobolectricTestRunner {
         final String assetsDir = appRoot + config.assetDir();
 
         final AndroidManifest manifest = new AndroidManifest(Fs.fileFromPath(manifestPath),
-                Fs.fileFromPath(resDir), Fs.fileFromPath(assetsDir));
-
+                Fs.fileFromPath(resDir), Fs.fileFromPath(assetsDir)) {
+            @Override
+            public List<ResourcePath> getIncludedResourcePaths() {
+                List<ResourcePath> paths = super.getIncludedResourcePaths();
+                SettingLibRobolectricTestRunner.getIncludedResourcePaths(getPackageName(), paths);
+                return paths;
+            }
+        };
         manifest.setPackageName("com.android.settingslib");
         return manifest;
+    }
+
+    static void getIncludedResourcePaths(String packageName, List<ResourcePath> paths) {
+        paths.add(new ResourcePath(
+                packageName,
+                Fs.fileFromPath("./frameworks/base/packages/SettingsLib/res"),
+                null));
+        paths.add(new ResourcePath(
+                packageName,
+                Fs.fileFromPath("./frameworks/base/core/res/res"),
+                null));
+        paths.add(new ResourcePath(
+                packageName,
+                Fs.fileFromPath("./frameworks/support/v7/appcompat/res"),
+                null));
     }
 
 }

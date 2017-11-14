@@ -16,12 +16,16 @@
 
 package android.webkit;
 
+import android.annotation.IntDef;
 import android.graphics.Bitmap;
 import android.net.http.SslError;
 import android.os.Message;
 import android.view.InputEvent;
 import android.view.KeyEvent;
 import android.view.ViewRootImpl;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 public class WebViewClient {
 
@@ -150,6 +154,10 @@ public class WebViewClient {
      * other than the UI thread so clients should exercise caution
      * when accessing private data or the view system.
      *
+     * <p>Note: when Safe Browsing is enabled, these URLs still undergo Safe Browsing checks. If
+     * this is undesired, whitelist the URL with {@link WebView#setSafeBrowsingWhitelist} or ignore
+     * the warning with {@link #onSafeBrowsingHit}.
+     *
      * @param view The {@link android.webkit.WebView} that is requesting the
      *             resource.
      * @param url The raw url of the resource.
@@ -172,6 +180,10 @@ public class WebViewClient {
      * response and data will be used.  NOTE: This method is called on a thread
      * other than the UI thread so clients should exercise caution
      * when accessing private data or the view system.
+     *
+     * <p>Note: when Safe Browsing is enabled, these URLs still undergo Safe Browsing checks. If
+     * this is undesired, whitelist the URL with {@link WebView#setSafeBrowsingWhitelist} or ignore
+     * the warning with {@link #onSafeBrowsingHit}.
      *
      * @param view The {@link android.webkit.WebView} that is requesting the
      *             resource.
@@ -236,6 +248,25 @@ public class WebViewClient {
     public static final int ERROR_TOO_MANY_REQUESTS = -15;
     /** Resource load was cancelled by Safe Browsing */
     public static final int ERROR_UNSAFE_RESOURCE = -16;
+
+    /** @hide */
+    @IntDef({
+        SAFE_BROWSING_THREAT_UNKNOWN,
+        SAFE_BROWSING_THREAT_MALWARE,
+        SAFE_BROWSING_THREAT_PHISHING,
+        SAFE_BROWSING_THREAT_UNWANTED_SOFTWARE
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SafeBrowsingThreat {}
+
+    /** The resource was blocked for an unknown reason */
+    public static final int SAFE_BROWSING_THREAT_UNKNOWN = 0;
+    /** The resource was blocked because it contains malware */
+    public static final int SAFE_BROWSING_THREAT_MALWARE = 1;
+    /** The resource was blocked because it contains deceptive content */
+    public static final int SAFE_BROWSING_THREAT_PHISHING = 2;
+    /** The resource was blocked because it contains unwanted software */
+    public static final int SAFE_BROWSING_THREAT_UNWANTED_SOFTWARE = 3;
 
     /**
      * Report an error to the host application. These errors are unrecoverable
@@ -495,5 +526,25 @@ public class WebViewClient {
      */
     public boolean onRenderProcessGone(WebView view, RenderProcessGoneDetail detail) {
         return false;
+    }
+
+    /**
+     * Notify the host application that a loading URL has been flagged by Safe Browsing.
+     *
+     * The application must invoke the callback to indicate the preferred response. The default
+     * behavior is to show an interstitial to the user, with the reporting checkbox visible.
+     *
+     * If the application needs to show its own custom interstitial UI, the callback can be invoked
+     * asynchronously with backToSafety() or proceed(), depending on user response.
+     *
+     * @param view The WebView that hit the malicious resource.
+     * @param request Object containing the details of the request.
+     * @param threatType The reason the resource was caught by Safe Browsing, corresponding to a
+     *                   SAFE_BROWSING_THREAT_* value.
+     * @param callback Applications must invoke one of the callback methods.
+     */
+    public void onSafeBrowsingHit(WebView view, WebResourceRequest request,
+            @SafeBrowsingThreat int threatType, SafeBrowsingResponse callback) {
+        callback.showInterstitial(/* allowReporting */ true);
     }
 }

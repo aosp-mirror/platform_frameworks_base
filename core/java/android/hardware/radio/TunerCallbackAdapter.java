@@ -20,11 +20,14 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 
 /**
  * Implements the ITunerCallback interface by forwarding calls to RadioTuner.Callback.
  */
 class TunerCallbackAdapter extends ITunerCallback.Stub {
+    private static final String TAG = "BroadcastRadio.TunerCallbackAdapter";
+
     @NonNull private final RadioTuner.Callback mCallback;
     @NonNull private final Handler mHandler;
 
@@ -48,7 +51,47 @@ class TunerCallbackAdapter extends ITunerCallback.Stub {
     }
 
     @Override
-    public void onProgramInfoChanged(RadioManager.ProgramInfo info) {
-        mHandler.post(() -> mCallback.onProgramInfoChanged(info));
+    public void onCurrentProgramInfoChanged(RadioManager.ProgramInfo info) {
+        if (info == null) {
+            Log.e(TAG, "ProgramInfo must not be null");
+            return;
+        }
+
+        mHandler.post(() -> {
+            mCallback.onProgramInfoChanged(info);
+
+            RadioMetadata metadata = info.getMetadata();
+            if (metadata != null) mCallback.onMetadataChanged(metadata);
+        });
+    }
+
+    @Override
+    public void onTrafficAnnouncement(boolean active) {
+        mHandler.post(() -> mCallback.onTrafficAnnouncement(active));
+    }
+
+    @Override
+    public void onEmergencyAnnouncement(boolean active) {
+        mHandler.post(() -> mCallback.onEmergencyAnnouncement(active));
+    }
+
+    @Override
+    public void onAntennaState(boolean connected) {
+        mHandler.post(() -> mCallback.onAntennaState(connected));
+    }
+
+    @Override
+    public void onBackgroundScanAvailabilityChange(boolean isAvailable) {
+        mHandler.post(() -> mCallback.onBackgroundScanAvailabilityChange(isAvailable));
+    }
+
+    @Override
+    public void onBackgroundScanComplete() {
+        mHandler.post(() -> mCallback.onBackgroundScanComplete());
+    }
+
+    @Override
+    public void onProgramListChanged() {
+        mHandler.post(() -> mCallback.onProgramListChanged());
     }
 }

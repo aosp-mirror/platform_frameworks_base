@@ -57,6 +57,15 @@ interface IBackupManager {
     void clearBackupData(String transportName, String packageName);
 
     /**
+     * Run an initialize operation on the given transports.  This will wipe all data from
+     * the backing data store and establish a clean starting point for all backup
+     * operations.
+     *
+     * <p>Callers must hold the android.permission.BACKUP permission to use this method.
+     */
+    void initializeTransports(in String[] transportNames, IBackupObserver observer);
+
+    /**
      * Notifies the Backup Manager Service that an agent has become available.  This
      * method is only invoked by the Activity Manager.
      */

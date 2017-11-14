@@ -84,6 +84,8 @@ public final class InputMethodSubtype implements Parcelable {
     private final String mSubtypeLanguageTag;
     private final String mSubtypeMode;
     private final String mSubtypeExtraValue;
+    private final Object mLock = new Object();
+    private volatile Locale mCachedLocaleObj;
     private volatile HashMap<String, String> mExtraValueHashMapCache;
 
     /**
@@ -372,10 +374,20 @@ public final class InputMethodSubtype implements Parcelable {
      */
     @Nullable
     public Locale getLocaleObject() {
-        if (!TextUtils.isEmpty(mSubtypeLanguageTag)) {
-            return Locale.forLanguageTag(mSubtypeLanguageTag);
+        if (mCachedLocaleObj != null) {
+            return mCachedLocaleObj;
         }
-        return InputMethodUtils.constructLocaleFromString(mSubtypeLocale);
+        synchronized (mLock) {
+            if (mCachedLocaleObj != null) {
+                return mCachedLocaleObj;
+            }
+            if (!TextUtils.isEmpty(mSubtypeLanguageTag)) {
+                mCachedLocaleObj = Locale.forLanguageTag(mSubtypeLanguageTag);
+            } else {
+                mCachedLocaleObj = InputMethodUtils.constructLocaleFromString(mSubtypeLocale);
+            }
+            return mCachedLocaleObj;
+        }
     }
 
     /**

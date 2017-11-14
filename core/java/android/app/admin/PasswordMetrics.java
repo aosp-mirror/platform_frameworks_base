@@ -18,13 +18,11 @@ package android.app.admin;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
-import android.app.admin.DevicePolicyManager;
-import android.os.Parcelable;
 import android.os.Parcel;
+import android.os.Parcelable;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.io.IOException;
 
 /**
  * A class that represents the metrics of a password that are used to decide whether or not a
@@ -157,6 +155,22 @@ public class PasswordMetrics implements Parcelable {
 
         return new PasswordMetrics(
                 quality, length, letters, upperCase, lowerCase, numeric, symbols, nonLetter);
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (!(other instanceof PasswordMetrics)) {
+            return false;
+        }
+        PasswordMetrics o = (PasswordMetrics) other;
+        return this.quality == o.quality
+                && this.length == o.length
+                && this.letters == o.letters
+                && this.upperCase == o.upperCase
+                && this.lowerCase == o.lowerCase
+                && this.numeric == o.numeric
+                && this.symbols == o.symbols
+                && this.nonLetter == o.nonLetter;
     }
 
     /*

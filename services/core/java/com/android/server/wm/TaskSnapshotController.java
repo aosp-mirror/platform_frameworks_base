@@ -18,6 +18,8 @@ package com.android.server.wm;
 
 import static android.app.ActivityManager.ENABLE_TASK_SNAPSHOTS;
 
+import static com.android.server.wm.TaskSnapshotPersister.DISABLE_FULL_SIZED_BITMAPS;
+import static com.android.server.wm.TaskSnapshotPersister.REDUCED_SCALE;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
@@ -97,11 +99,25 @@ class TaskSnapshotController {
      */
     private final boolean mIsRunningOnTv;
 
+    /**
+     * Flag indicating whether we are running on an IoT device.
+     */
+    private final boolean mIsRunningOnIoT;
+
+    /**
+     * Flag indicating whether we are running on an Android Wear device.
+     */
+    private final boolean mIsRunningOnWear;
+
     TaskSnapshotController(WindowManagerService service) {
         mService = service;
         mCache = new TaskSnapshotCache(mService, mLoader);
         mIsRunningOnTv = mService.mContext.getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_LEANBACK);
+        mIsRunningOnIoT = mService.mContext.getPackageManager().hasSystemFeature(
+                PackageManager.FEATURE_EMBEDDED);
+        mIsRunningOnWear = mService.mContext.getPackageManager().hasSystemFeature(
+            PackageManager.FEATURE_WATCH);
     }
 
     void systemReady() {
@@ -174,7 +190,8 @@ class TaskSnapshotController {
      */
     @Nullable TaskSnapshot getSnapshot(int taskId, int userId, boolean restoreFromDisk,
             boolean reducedResolution) {
-        return mCache.getSnapshot(taskId, userId, restoreFromDisk, reducedResolution);
+        return mCache.getSnapshot(taskId, userId, restoreFromDisk, reducedResolution
+                || DISABLE_FULL_SIZED_BITMAPS);
     }
 
     /**
@@ -195,18 +212,20 @@ class TaskSnapshotController {
         if (mainWindow == null) {
             return null;
         }
+        final boolean isLowRamDevice = ActivityManager.isLowRamDeviceStatic();
+        final float scaleFraction = isLowRamDevice ? REDUCED_SCALE : 1f;
         final GraphicBuffer buffer = top.mDisplayContent.screenshotApplicationsToBuffer(top.token,
-                -1, -1, false, 1.0f, false, true);
-        if (buffer == null) {
+                -1, -1, false, scaleFraction, false, true);
+        if (buffer == null || buffer.getWidth() <= 1 || buffer.getHeight() <= 1) {
             return null;
         }
         return new TaskSnapshot(buffer, top.getConfiguration().orientation,
-                minRect(mainWindow.mContentInsets, mainWindow.mStableInsets), false /* reduced */,
-                1f /* scale */);
+                minRect(mainWindow.mContentInsets, mainWindow.mStableInsets),
+                isLowRamDevice /* reduced */, scaleFraction /* scale */);
     }
 
     private boolean shouldDisableSnapshots() {
-        return !ENABLE_TASK_SNAPSHOTS || ActivityManager.isLowRamDeviceStatic() || mIsRunningOnTv;
+        return !ENABLE_TASK_SNAPSHOTS || mIsRunningOnWear || mIsRunningOnTv || mIsRunningOnIoT;
     }
 
     private Rect minRect(Rect rect1, Rect rect2) {
@@ -277,10 +296,12 @@ class TaskSnapshotController {
         decorPainter.drawDecors(c, null /* statusBarExcludeFrame */);
         node.end(c);
         final Bitmap hwBitmap = ThreadedRenderer.createHardwareBitmap(node, width, height);
-
+        if (hwBitmap == null) {
+            return null;
+        }
         return new TaskSnapshot(hwBitmap.createGraphicBufferHandle(),
                 topChild.getConfiguration().orientation, mainWindow.mStableInsets,
-                false /* reduced */, 1.0f /* scale */);
+                ActivityManager.isLowRamDeviceStatic() /* reduced */, 1.0f /* scale */);
     }
 
     /**

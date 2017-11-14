@@ -71,8 +71,6 @@ LOCAL_SRC_FILES += \
 	core/java/android/accounts/IAccountManagerResponse.aidl \
 	core/java/android/accounts/IAccountAuthenticator.aidl \
 	core/java/android/accounts/IAccountAuthenticatorResponse.aidl \
-	core/java/android/app/IActivityContainer.aidl \
-	core/java/android/app/IActivityContainerCallback.aidl \
 	core/java/android/app/IActivityController.aidl \
 	core/java/android/app/IActivityManager.aidl \
 	core/java/android/app/IActivityPendingResult.aidl \
@@ -84,6 +82,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/app/ITaskStackListener.aidl \
 	core/java/android/app/IBackupAgent.aidl \
 	core/java/android/app/IEphemeralResolver.aidl \
+	core/java/android/app/IInputForwarder.aidl \
 	core/java/android/app/IInstantAppResolver.aidl \
 	core/java/android/app/IInstrumentationWatcher.aidl \
 	core/java/android/app/INotificationManager.aidl \
@@ -174,6 +173,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/content/pm/IPackageInstallerCallback.aidl \
 	core/java/android/content/pm/IPackageInstallerSession.aidl \
 	core/java/android/content/pm/IPackageManager.aidl \
+	../native/libs/binder/aidl/android/content/pm/IPackageManagerNative.aidl \
 	core/java/android/content/pm/IPackageMoveObserver.aidl \
 	core/java/android/content/pm/IPackageStatsObserver.aidl \
 	core/java/android/content/pm/IPinItemRequest.aidl \
@@ -271,6 +271,8 @@ LOCAL_SRC_FILES += \
 	core/java/android/os/IRecoverySystemProgressListener.aidl \
 	core/java/android/os/IRemoteCallback.aidl \
 	core/java/android/os/ISchedulingPolicyService.aidl \
+	core/java/android/os/IThermalEventListener.aidl \
+	core/java/android/os/IThermalService.aidl \
 	core/java/android/os/IUpdateLock.aidl \
 	core/java/android/os/IUserManager.aidl \
 	core/java/android/os/IVibratorService.aidl \
@@ -441,10 +443,6 @@ LOCAL_SRC_FILES += \
 	location/java/android/location/INetInitiatedListener.aidl \
 	location/java/com/android/internal/location/ILocationProvider.aidl \
 	media/java/android/media/IAudioService.aidl \
-	../av/drm/libmediadrm/aidl/android/media/ICas.aidl \
-	../av/drm/libmediadrm/aidl/android/media/ICasListener.aidl \
-	../av/drm/libmediadrm/aidl/android/media/IDescrambler.aidl \
-	../av/drm/libmediadrm/aidl/android/media/IMediaCasService.aidl \
 	media/java/android/media/IAudioFocusDispatcher.aidl \
 	media/java/android/media/IAudioRoutesObserver.aidl \
 	media/java/android/media/IMediaHTTPConnection.aidl \
@@ -572,6 +570,15 @@ LOCAL_SRC_FILES += \
 
 LOCAL_AIDL_INCLUDES += system/update_engine/binder_bindings
 
+LOCAL_AIDL_INCLUDES += frameworks/base/lowpan/java
+LOCAL_SRC_FILES += \
+	lowpan/java/android/net/lowpan/ILowpanEnergyScanCallback.aidl \
+	lowpan/java/android/net/lowpan/ILowpanNetScanCallback.aidl \
+	lowpan/java/android/net/lowpan/ILowpanInterfaceListener.aidl \
+	lowpan/java/android/net/lowpan/ILowpanInterface.aidl \
+	lowpan/java/android/net/lowpan/ILowpanManagerListener.aidl \
+	lowpan/java/android/net/lowpan/ILowpanManager.aidl
+
 # FRAMEWORKS_BASE_JAVA_SRC_DIRS comes from build/core/pathmap.mk
 LOCAL_AIDL_INCLUDES += \
       $(FRAMEWORKS_BASE_JAVA_SRC_DIRS) \
@@ -608,6 +615,8 @@ LOCAL_STATIC_JAVA_LIBRARIES :=                          \
     android.hardware.vibrator-V1.0-java-constants        \
     android.hardware.vibrator-V1.1-java-constants        \
     android.hardware.wifi-V1.0-java-constants            \
+
+include hardware/interfaces/cas/1.0/CasHal.mk
 
 # Loaded with System.loadLibrary by android.view.textclassifier
 LOCAL_REQUIRED_MODULES += libtextclassifier
@@ -710,7 +719,9 @@ aidl_files := \
 	frameworks/base/core/java/android/print/PrinterInfo.aidl \
 	frameworks/base/core/java/android/print/PrintJobId.aidl \
 	frameworks/base/core/java/android/printservice/recommendation/RecommendationInfo.aidl \
+	frameworks/base/core/java/android/hardware/radio/ProgramSelector.aidl \
 	frameworks/base/core/java/android/hardware/radio/RadioManager.aidl \
+	frameworks/base/core/java/android/hardware/radio/RadioMetadata.aidl \
 	frameworks/base/core/java/android/hardware/usb/UsbDevice.aidl \
 	frameworks/base/core/java/android/hardware/usb/UsbInterface.aidl \
 	frameworks/base/core/java/android/hardware/usb/UsbEndpoint.aidl \
@@ -726,6 +737,7 @@ aidl_files := \
 	frameworks/base/core/java/android/os/DropBoxManager.aidl \
 	frameworks/base/core/java/android/os/Bundle.aidl \
 	frameworks/base/core/java/android/os/Debug.aidl \
+	frameworks/base/core/java/android/os/SharedMemory.aidl \
 	frameworks/base/core/java/android/os/StrictMode.aidl \
 	frameworks/base/core/java/android/accessibilityservice/AccessibilityServiceInfo.aidl \
 	frameworks/base/core/java/android/net/Network.aidl \
@@ -870,7 +882,6 @@ packages_to_document := \
 # The result will be relative to frameworks/base.
 fwbase_dirs_to_document := \
 	legacy-test/src \
-	test-runner/src \
 	$(patsubst $(LOCAL_PATH)/%,%, \
 	  $(wildcard \
 	    $(foreach dir, $(FRAMEWORKS_BASE_JAVA_SRC_DIRS), \
@@ -887,6 +898,12 @@ non_base_dirs := \
 	../opt/telephony/src/java/android/telephony/gsm \
 	../opt/net/voip/src/java/android/net/rtp \
 	../opt/net/voip/src/java/android/net/sip
+
+framework_base_android_test_mock_src_files := \
+	$(call all-java-files-under, test-runner/src/android/test/mock)
+
+framework_base_android_test_runner_excluding_mock_src_files := \
+	$(filter-out $(framework_base_android_test_mock_src_files), $(call all-java-files-under, test-runner/src))
 
 # These are relative to frameworks/base
 dirs_to_check_apis := \
@@ -907,6 +924,7 @@ endef
 # FRAMEWORKS_BASE_SUBDIRS comes from build/core/pathmap.mk
 dirs_to_document := \
 	$(dirs_to_check_apis) \
+	test-runner/src \
 	$(addprefix ../../, $(FRAMEWORKS_DATA_BINDING_JAVA_SRC_DIRS))
 
 patterns_to_not_document := \
@@ -929,7 +947,9 @@ framework_docs_LOCAL_SRC_FILES := \
 
 # These are relative to frameworks/base
 framework_docs_LOCAL_API_CHECK_SRC_FILES := \
-	$(call find-other-java-files, $(dirs_to_check_apis)) \
+	$(framework_base_android_test_mock_src_files) \
+	$(framework_base_android_test_runner_excluding_mock_src_files) \
+	$(call all-java-files-under, $(dirs_to_check_apis)) \
 	$(common_src_files)
 
 # This is used by ide.mk as the list of source files that are
@@ -954,7 +974,8 @@ framework_docs_LOCAL_API_CHECK_JAVA_LIBRARIES := \
 	ext \
 	icu4j \
 	framework \
-	voip-common
+	voip-common \
+	android.test.mock \
 
 # Platform docs can refer to Support Library APIs, but we don't actually build
 # them as part of the docs target, so we need to include them on the classpath.
@@ -1001,7 +1022,8 @@ framework_docs_LOCAL_DROIDDOC_OPTIONS := \
     -since $(SRC_API_DIR)/24.txt 24 \
     -since $(SRC_API_DIR)/25.txt 25 \
     -since $(SRC_API_DIR)/26.txt 26 \
-    -werror -hide 111 -hide 113 -hide 121 \
+    -since $(SRC_API_DIR)/27.txt 27 \
+    -werror -lerror -hide 111 -hide 113 -hide 121 -hide 125 -hide 126 -hide 127 -hide 128 \
     -overview $(LOCAL_PATH)/core/java/overview.html \
 
 framework_docs_LOCAL_API_CHECK_ADDITIONAL_JAVA_DIR:= \

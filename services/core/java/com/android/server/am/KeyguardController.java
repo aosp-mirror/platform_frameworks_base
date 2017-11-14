@@ -18,6 +18,8 @@ package com.android.server.am;
 
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
+import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManagerPolicy.KEYGUARD_GOING_AWAY_FLAG_NO_WINDOW_ANIMATIONS;
 import static android.view.WindowManagerPolicy.KEYGUARD_GOING_AWAY_FLAG_TO_SHADE;
 import static android.view.WindowManagerPolicy.KEYGUARD_GOING_AWAY_FLAG_WITH_WALLPAPER;
@@ -30,9 +32,9 @@ import static com.android.server.wm.AppTransition.TRANSIT_FLAG_KEYGUARD_GOING_AW
 import static com.android.server.wm.AppTransition.TRANSIT_KEYGUARD_GOING_AWAY;
 import static com.android.server.wm.AppTransition.TRANSIT_KEYGUARD_OCCLUDE;
 import static com.android.server.wm.AppTransition.TRANSIT_KEYGUARD_UNOCCLUDE;
-import static com.android.server.wm.AppTransition.TRANSIT_NONE;
 import static com.android.server.wm.AppTransition.TRANSIT_UNSET;
 
+import android.app.ActivityManagerInternal.SleepToken;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.Trace;
@@ -64,6 +66,8 @@ class KeyguardController {
     private ActivityRecord mDismissingKeyguardActivity;
     private int mBeforeUnoccludeTransit;
     private int mVisibilityTransactionDepth;
+    private SleepToken mSleepToken;
+    private int mSecondaryDisplayShowing = INVALID_DISPLAY;
 
     KeyguardController(ActivityManagerService service,
             ActivityStackSupervisor stackSupervisor) {
@@ -76,10 +80,12 @@ class KeyguardController {
     }
 
     /**
-     * @return true if Keyguard is showing, not going away, and not being occluded, false otherwise
+     * @return true if Keyguard is showing, not going away, and not being occluded on the given
+     *         display, false otherwise
      */
-    boolean isKeyguardShowing() {
-        return mKeyguardShowing && !mKeyguardGoingAway && !mOccluded;
+    boolean isKeyguardShowing(int displayId) {
+        return mKeyguardShowing && !mKeyguardGoingAway &&
+                (displayId == DEFAULT_DISPLAY ? !mOccluded : displayId == mSecondaryDisplayShowing);
     }
 
     /**
@@ -92,18 +98,22 @@ class KeyguardController {
     /**
      * Update the Keyguard showing state.
      */
-    void setKeyguardShown(boolean showing) {
-        if (showing == mKeyguardShowing) {
+    void setKeyguardShown(boolean showing, int secondaryDisplayShowing) {
+        boolean showingChanged = showing != mKeyguardShowing;
+        if (!showingChanged && secondaryDisplayShowing == mSecondaryDisplayShowing) {
             return;
         }
         mKeyguardShowing = showing;
-        dismissDockedStackIfNeeded();
-        if (showing) {
-            setKeyguardGoingAway(false);
-            mDismissalRequested = false;
+        mSecondaryDisplayShowing = secondaryDisplayShowing;
+        if (showingChanged) {
+            dismissDockedStackIfNeeded();
+            if (showing) {
+                setKeyguardGoingAway(false);
+                mDismissalRequested = false;
+            }
         }
         mStackSupervisor.ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
-        mService.updateSleepIfNeededLocked();
+        updateKeyguardSleepToken();
     }
 
     /**
@@ -123,7 +133,7 @@ class KeyguardController {
             mWindowManager.prepareAppTransition(TRANSIT_KEYGUARD_GOING_AWAY,
                     false /* alwaysKeepCurrent */, convertTransitFlags(flags),
                     false /* forceOverride */);
-            mService.updateSleepIfNeededLocked();
+            updateKeyguardSleepToken();
 
             // Some stack visibility might change (e.g. docked stack)
             mStackSupervisor.ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
@@ -145,6 +155,13 @@ class KeyguardController {
             return;
         }
         Slog.i(TAG, "Activity requesting to dismiss Keyguard: " + activityRecord);
+
+        // If the client has requested to dismiss the keyguard and the Activity has the flag to
+        // turn the screen on, wakeup the screen if it's the top Activity.
+        if (activityRecord.getTurnScreenOnFlag() && activityRecord.isTopRunningActivity()) {
+            mStackSupervisor.wakeUp("dismissKeyguard");
+        }
+
         mWindowManager.dismissKeyguard(callback);
     }
 
@@ -257,7 +274,7 @@ class KeyguardController {
             try {
                 mWindowManager.prepareAppTransition(resolveOccludeTransit(),
                         false /* alwaysKeepCurrent */, 0 /* flags */, true /* forceOverride */);
-                mService.updateSleepIfNeededLocked();
+                updateKeyguardSleepToken();
                 mStackSupervisor.ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
                 mWindowManager.executeAppTransition();
             } finally {
@@ -324,6 +341,15 @@ class KeyguardController {
             // of the lock screen in the right fullscreen configuration.
             mStackSupervisor.moveTasksToFullscreenStackLocked(DOCKED_STACK_ID,
                     mStackSupervisor.mFocusedStack.getStackId() == DOCKED_STACK_ID);
+        }
+    }
+
+    private void updateKeyguardSleepToken() {
+        if (mSleepToken == null && isKeyguardShowing(DEFAULT_DISPLAY)) {
+            mSleepToken = mService.acquireSleepToken("Keyguard", DEFAULT_DISPLAY);
+        } else if (mSleepToken != null && !isKeyguardShowing(DEFAULT_DISPLAY)) {
+            mSleepToken.release();
+            mSleepToken = null;
         }
     }
 

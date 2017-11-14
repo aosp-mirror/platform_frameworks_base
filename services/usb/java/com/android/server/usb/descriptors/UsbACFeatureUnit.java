@@ -20,8 +20,8 @@ package com.android.server.usb.descriptors;
  * An audio class-specific Feature Unit Interface
  * see audio10.pdf section 3.5.5
  */
-public class UsbACFeatureUnit extends UsbACInterface {
-    private static final String TAG = "ACFeatureUnit";
+public final class UsbACFeatureUnit extends UsbACInterface {
+    private static final String TAG = "UsbACFeatureUnit";
 
     // audio10.pdf section 4.3.2.5
     public static final int CONTROL_MASK_MUTE =    0x0001;

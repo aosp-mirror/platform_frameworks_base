@@ -122,7 +122,6 @@ import java.util.Set;
         }
         String packageName = ActivityThread.currentPackageName();
         try {
-            // Notify only the paths of the first class loader for now.
             ActivityThread.getPackageManager().notifyDexLoad(
                     packageName, classLoadersNames, classPaths,
                     VMRuntime.getRuntime().vmInstructionSet());

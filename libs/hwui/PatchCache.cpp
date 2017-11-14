@@ -32,7 +32,7 @@ namespace uirenderer {
 
 PatchCache::PatchCache(RenderState& renderState)
         : mRenderState(renderState)
-        , mMaxSize(Properties::patchCacheSize)
+        , mMaxSize(KB(128))
         , mSize(0)
         , mCache(LruCache<PatchDescription, Patch*>::kUnlimitedCapacity)
         , mMeshBuffer(0)

@@ -21,6 +21,7 @@ import android.annotation.ColorInt;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Size;
+import android.content.res.ResourcesImpl;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.StrictMode;
@@ -82,6 +83,12 @@ public final class Bitmap implements Parcelable {
 
     private static volatile int sDefaultDensity = -1;
 
+    /** @hide Used only when ResourcesImpl.TRACE_FOR_DETAILED_PRELOAD is true. */
+    public static volatile int sPreloadTracingNumInstantiatedBitmaps;
+
+    /** @hide Used only when ResourcesImpl.TRACE_FOR_DETAILED_PRELOAD is true. */
+    public static volatile long sPreloadTracingTotalBitmapsSize;
+
     /**
      * For backwards compatibility, allows the app layer to change the default
      * density when running old apps.
@@ -128,6 +135,11 @@ public final class Bitmap implements Parcelable {
         NativeAllocationRegistry registry = new NativeAllocationRegistry(
             Bitmap.class.getClassLoader(), nativeGetNativeFinalizer(), nativeSize);
         registry.registerNativeAllocation(this, nativeBitmap);
+
+        if (ResourcesImpl.TRACE_FOR_DETAILED_PRELOAD) {
+            sPreloadTracingNumInstantiatedBitmaps++;
+            sPreloadTracingTotalBitmapsSize += nativeSize;
+        }
     }
 
     /**

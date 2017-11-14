@@ -114,7 +114,7 @@ void EglManager::initialize() {
         // An Adreno driver bug is causing rendering problems for SkiaGL with
         // buffer age swap behavior (b/31957043).  To temporarily workaround,
         // we will use preserved swap behavior.
-        if (Properties::useBufferAge && EglExtensions.bufferAge && !Properties::isSkiaEnabled()) {
+        if (Properties::useBufferAge && EglExtensions.bufferAge) {
             mSwapBehavior = SwapBehavior::BufferAge;
         } else {
             mSwapBehavior = SwapBehavior::Preserved;

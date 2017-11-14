@@ -242,10 +242,13 @@ public class AccountManager {
     public static final String KEY_LAST_AUTHENTICATED_TIME = "lastAuthenticatedTime";
 
     /**
-     * Authenticators using 'customTokens' option will also get the UID of the
-     * caller
+     * The UID of caller app.
      */
     public static final String KEY_CALLER_UID = "callerUid";
+
+    /**
+     * The process id of caller app.
+     */
     public static final String KEY_CALLER_PID = "callerPid";
 
     /**
@@ -392,7 +395,7 @@ public class AccountManager {
 
     /**
      * Key to set default visibility for applications which don't satisfy conditions in
-     * {@link PACKAGE_NAME_KEY_LEGACY_VISIBLE}. If the value was not set by authenticator
+     * {@link #PACKAGE_NAME_KEY_LEGACY_VISIBLE}. If the value was not set by authenticator
      * {@link #VISIBILITY_USER_MANAGED_NOT_VISIBLE} is used.
      */
     public static final String PACKAGE_NAME_KEY_LEGACY_NOT_VISIBLE =
@@ -613,7 +616,7 @@ public class AccountManager {
      * not authorized to view all accounts. This method can only be called by system apps and
      * authenticators managing the type.
      * Beginning API level {@link android.os.Build.VERSION_CODES#O} it also return accounts
-     * which user can make visible to the application (see {@link VISIBILITY_USER_MANAGED_VISIBLE}).
+     * which user can make visible to the application (see {@link #VISIBILITY_USER_MANAGED_VISIBLE}).
      *
      * @param type The type of accounts to return, null to retrieve all accounts
      * @param packageName The package name of the app for which the accounts are to be returned
@@ -651,7 +654,7 @@ public class AccountManager {
      * of accounts made visible to it by user
      * (see {@link #newChooseAccountIntent(Account, List, String[], String,
      * String, String[], Bundle)}) or AbstractAcccountAuthenticator
-     * using {@link setAccountVisibility}.
+     * using {@link #setAccountVisibility}.
      * {@link android.Manifest.permission#GET_ACCOUNTS} permission is not used.
      *
      * <p>
@@ -797,7 +800,7 @@ public class AccountManager {
      * of accounts made visible to it by user
      * (see {@link #newChooseAccountIntent(Account, List, String[], String,
      * String, String[], Bundle)}) or AbstractAcccountAuthenticator
-     * using {@link setAccountVisibility}.
+     * using {@link #setAccountVisibility}.
      * {@link android.Manifest.permission#GET_ACCOUNTS} permission is not used.
      *
      * <p>
@@ -2717,7 +2720,7 @@ public class AccountManager {
      * On success the activity returns a Bundle with the account name and type specified using
      * keys {@link #KEY_ACCOUNT_NAME} and {@link #KEY_ACCOUNT_TYPE}.
      * Chosen account is marked as {@link #VISIBILITY_USER_MANAGED_VISIBLE} to the caller
-     * (see {@link setAccountVisibility}) and will be returned to it in consequent
+     * (see {@link #setAccountVisibility}) and will be returned to it in consequent
      * {@link #getAccountsByType}) calls.
      * <p>
      * The most common case is to call this with one account type, e.g.:
@@ -2772,7 +2775,7 @@ public class AccountManager {
      * On success the activity returns a Bundle with the account name and type specified using
      * keys {@link #KEY_ACCOUNT_NAME} and {@link #KEY_ACCOUNT_TYPE}.
      * Chosen account is marked as {@link #VISIBILITY_USER_MANAGED_VISIBLE} to the caller
-     * (see {@link setAccountVisibility}) and will be returned to it in consequent
+     * (see {@link #setAccountVisibility}) and will be returned to it in consequent
      * {@link #getAccountsByType}) calls.
      * <p>
      * The most common case is to call this with one account type, e.g.:

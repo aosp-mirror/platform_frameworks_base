@@ -17,6 +17,7 @@
 package com.android.server.accessibility;
 
 import android.content.Context;
+import android.os.Handler;
 import android.os.PowerManager;
 import android.util.Pools.SimplePool;
 import android.util.Slog;
@@ -29,6 +30,8 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.WindowManagerPolicy;
 import android.view.accessibility.AccessibilityEvent;
+
+import com.android.server.LocalServices;
 
 /**
  * This class is an input filter for implementing accessibility features such
@@ -425,7 +428,8 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
         }
 
         if ((mEnabledFeatures & FLAG_FEATURE_FILTER_KEY_EVENTS) != 0) {
-            mKeyboardInterceptor = new KeyboardInterceptor(mAms);
+            mKeyboardInterceptor = new KeyboardInterceptor(mAms,
+                    LocalServices.getService(WindowManagerPolicy.class));
             addFirstEventHandler(mKeyboardInterceptor);
         }
     }

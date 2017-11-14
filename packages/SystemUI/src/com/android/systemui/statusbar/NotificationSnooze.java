@@ -16,8 +16,13 @@ package com.android.systemui.statusbar;
  */
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper.SnoozeOption;
 
@@ -28,12 +33,15 @@ import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Typeface;
+import android.metrics.LogMaker;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.service.notification.SnoozeCriterion;
 import android.service.notification.StatusBarNotification;
 import android.text.SpannableString;
 import android.text.style.StyleSpan;
 import android.util.AttributeSet;
+import android.util.KeyValueListParser;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -51,11 +59,23 @@ import com.android.systemui.R;
 public class NotificationSnooze extends LinearLayout
         implements NotificationGuts.GutsContent, View.OnClickListener {
 
+    private static final String TAG = "NotificationSnooze";
     /**
      * If this changes more number increases, more assistant action resId's should be defined for
      * accessibility purposes, see {@link #setSnoozeOptions(List)}
      */
     private static final int MAX_ASSISTANT_SUGGESTIONS = 1;
+    private static final String KEY_DEFAULT_SNOOZE = "default";
+    private static final String KEY_OPTIONS = "options_array";
+    private static final LogMaker OPTIONS_OPEN_LOG =
+            new LogMaker(MetricsEvent.NOTIFICATION_SNOOZE_OPTIONS)
+                    .setType(MetricsEvent.TYPE_OPEN);
+    private static final LogMaker OPTIONS_CLOSE_LOG =
+            new LogMaker(MetricsEvent.NOTIFICATION_SNOOZE_OPTIONS)
+                    .setType(MetricsEvent.TYPE_CLOSE);
+    private static final LogMaker UNDO_LOG =
+            new LogMaker(MetricsEvent.NOTIFICATION_UNDO_SNOOZE)
+                    .setType(MetricsEvent.TYPE_ACTION);
     private NotificationGuts mGutsContainer;
     private NotificationSwipeActionHelper mSnoozeListener;
     private StatusBarNotification mSbn;
@@ -72,9 +92,31 @@ public class NotificationSnooze extends LinearLayout
     private boolean mSnoozing;
     private boolean mExpanded;
     private AnimatorSet mExpandAnimation;
+    private KeyValueListParser mParser;
+
+    private final static int[] sAccessibilityActions = {
+            R.id.action_snooze_shorter,
+            R.id.action_snooze_short,
+            R.id.action_snooze_long,
+            R.id.action_snooze_longer,
+    };
+
+    private MetricsLogger mMetricsLogger = new MetricsLogger();
 
     public NotificationSnooze(Context context, AttributeSet attrs) {
         super(context, attrs);
+        mParser = new KeyValueListParser(',');
+    }
+
+    @VisibleForTesting
+    SnoozeOption getDefaultOption()
+    {
+        return mDefaultOption;
+    }
+
+    @VisibleForTesting
+    void setKeyValueListParser(KeyValueListParser parser) {
+        mParser = parser;
     }
 
     @Override
@@ -96,7 +138,13 @@ public class NotificationSnooze extends LinearLayout
         mSnoozeOptions = getDefaultSnoozeOptions();
         createOptionViews();
 
-        setSelected(mDefaultOption);
+        setSelected(mDefaultOption, false);
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        logOptionSelection(MetricsEvent.NOTIFICATION_SNOOZE_CLICKED, mDefaultOption);
     }
 
     @Override
@@ -136,7 +184,7 @@ public class NotificationSnooze extends LinearLayout
             SnoozeOption so = mSnoozeOptions.get(i);
             if (so.getAccessibilityAction() != null
                     && so.getAccessibilityAction().getId() == action) {
-                setSelected(so);
+                setSelected(so, true);
                 return true;
             }
         }
@@ -172,15 +220,47 @@ public class NotificationSnooze extends LinearLayout
         mSbn = sbn;
     }
 
-    private ArrayList<SnoozeOption> getDefaultSnoozeOptions() {
+    @VisibleForTesting
+    ArrayList<SnoozeOption> getDefaultSnoozeOptions() {
+        final Resources resources = getContext().getResources();
         ArrayList<SnoozeOption> options = new ArrayList<>();
+        try {
+            final String config = Settings.Global.getString(getContext().getContentResolver(),
+                    Settings.Global.NOTIFICATION_SNOOZE_OPTIONS);
+            mParser.setString(config);
+        } catch (IllegalArgumentException e) {
+            Log.e(TAG, "Bad snooze constants");
+        }
 
-        options.add(createOption(15 /* minutes */, R.id.action_snooze_15_min));
-        options.add(createOption(30 /* minutes */, R.id.action_snooze_30_min));
-        mDefaultOption = createOption(60 /* minutes */, R.id.action_snooze_1_hour);
-        options.add(mDefaultOption);
-        options.add(createOption(60 * 2 /* minutes */, R.id.action_snooze_2_hours));
+        final int defaultSnooze = mParser.getInt(KEY_DEFAULT_SNOOZE,
+                resources.getInteger(R.integer.config_notification_snooze_time_default));
+        final int[] snoozeTimes = parseIntArray(KEY_OPTIONS,
+                resources.getIntArray(R.array.config_notification_snooze_times));
+
+        for (int i = 0; i < snoozeTimes.length && i < sAccessibilityActions.length; i++) {
+            int snoozeTime = snoozeTimes[i];
+            SnoozeOption option = createOption(snoozeTime, sAccessibilityActions[i]);
+            if (i == 0 || snoozeTime == defaultSnooze) {
+                mDefaultOption = option;
+            }
+            options.add(option);
+        }
         return options;
+    }
+
+    @VisibleForTesting
+    int[] parseIntArray(final String key, final int[] defaultArray) {
+        final String value = mParser.getString(key, null);
+        if (value != null) {
+            try {
+                return Arrays.stream(value.split(":")).map(String::trim).mapToInt(
+                        Integer::parseInt).toArray();
+            } catch (NumberFormatException e) {
+                return defaultArray;
+            }
+        } else {
+            return defaultArray;
+        }
     }
 
     private SnoozeOption createOption(int minutes, int accessibilityActionId) {
@@ -268,12 +348,24 @@ public class NotificationSnooze extends LinearLayout
         mExpandAnimation.start();
     }
 
-    private void setSelected(SnoozeOption option) {
+    private void setSelected(SnoozeOption option, boolean userAction) {
         mSelectedOption = option;
         mSelectedOptionText.setText(option.getConfirmation());
         showSnoozeOptions(false);
         hideSelectedOption();
         sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
+        if (userAction) {
+            logOptionSelection(MetricsEvent.NOTIFICATION_SELECT_SNOOZE, option);
+        }
+    }
+
+    private void logOptionSelection(int category, SnoozeOption option) {
+        int index = mSnoozeOptions.indexOf(option);
+        long duration = TimeUnit.MINUTES.toMillis(option.getMinutesToSnoozeFor());
+        mMetricsLogger.write(new LogMaker(category)
+                .setType(MetricsEvent.TYPE_ACTION)
+                .addTaggedData(MetricsEvent.FIELD_NOTIFICATION_SNOOZE_INDEX, index)
+                .addTaggedData(MetricsEvent.FIELD_NOTIFICATION_SNOOZE_DURATION_MS, duration));
     }
 
     @Override
@@ -284,13 +376,15 @@ public class NotificationSnooze extends LinearLayout
         final int id = v.getId();
         final SnoozeOption tag = (SnoozeOption) v.getTag();
         if (tag != null) {
-            setSelected(tag);
+            setSelected(tag, true);
         } else if (id == R.id.notification_snooze) {
             // Toggle snooze options
             showSnoozeOptions(!mExpanded);
+            mMetricsLogger.write(!mExpanded ? OPTIONS_OPEN_LOG : OPTIONS_CLOSE_LOG);
         } else {
             // Undo snooze was selected
             undoSnooze(v);
+            mMetricsLogger.write(UNDO_LOG);
         }
     }
 
@@ -321,7 +415,7 @@ public class NotificationSnooze extends LinearLayout
     @Override
     public View getContentView() {
         // Reset the view before use
-        setSelected(mDefaultOption);
+        setSelected(mDefaultOption, false);
         return this;
     }
 
@@ -343,7 +437,7 @@ public class NotificationSnooze extends LinearLayout
             return true;
         } else {
             // The view should actually be closed
-            setSelected(mSnoozeOptions.get(0));
+            setSelected(mSnoozeOptions.get(0), false);
             return false; // Return false here so that guts handles closing the view
         }
     }

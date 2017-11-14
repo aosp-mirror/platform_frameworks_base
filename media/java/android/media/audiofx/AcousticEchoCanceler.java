@@ -20,7 +20,7 @@ import android.util.Log;
 
 /**
  * Acoustic Echo Canceler (AEC).
- * <p>Acoustic Echo Canceler (AEC) is an audio pre-processing which removes the contribution of the
+ * <p>Acoustic Echo Canceler (AEC) is an audio pre-processor which removes the contribution of the
  * signal received from the remote party from the captured audio signal.
  * <p>AEC is used by voice communication applications (voice chat, video conferencing, SIP calls)
  * where the presence of echo with significant delay in the signal received from the remote party

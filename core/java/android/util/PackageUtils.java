@@ -18,12 +18,13 @@ package android.util;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.content.pm.Signature;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 
 /**
  * Helper functions applicable to packages.
@@ -36,32 +37,67 @@ public final class PackageUtils {
     }
 
     /**
-     * Computes the SHA256 digest of the signing cert for a package.
-     * @param packageManager The package manager.
-     * @param packageName The package for which to generate the digest.
-     * @param userId The user for which to generate the digest.
-     * @return The digest or null if the package does not exist for this user.
+     * Computes the SHA256 digests of a list of signatures. Items in the
+     * resulting array of hashes correspond to the signatures in the
+     * input array.
+     * @param signatures The signatures.
+     * @return The digest array.
      */
-    public static @Nullable String computePackageCertSha256Digest(
-            @NonNull PackageManager packageManager,
-            @NonNull String packageName, int userId) {
-        final PackageInfo packageInfo;
-        try {
-            packageInfo = packageManager.getPackageInfoAsUser(packageName,
-                    PackageManager.GET_SIGNATURES, userId);
-        } catch (PackageManager.NameNotFoundException e) {
-            return null;
+    public static @NonNull String[] computeSignaturesSha256Digests(
+            @NonNull Signature[] signatures) {
+        final int signatureCount = signatures.length;
+        final String[] digests = new String[signatureCount];
+        for (int i = 0; i < signatureCount; i++) {
+            digests[i] = computeSha256Digest(signatures[i].toByteArray());
         }
-        return computeCertSha256Digest(packageInfo.signatures[0]);
+        return digests;
+    }
+    /**
+     * Computes a SHA256 digest of the signatures' SHA256 digests. First,
+     * individual hashes for each signature is derived in a hexademical
+     * form, then these strings are sorted based the natural ordering, and
+     * finally a hash is derived from these strings' bytes.
+     * @param signatures The signatures.
+     * @return The digest.
+     */
+    public static @NonNull String computeSignaturesSha256Digest(
+            @NonNull Signature[] signatures) {
+        // Shortcut for optimization - most apps singed by a single cert
+        if (signatures.length == 1) {
+            return computeSha256Digest(signatures[0].toByteArray());
+        }
+
+        // Make sure these are sorted to handle reversed certificates
+        final String[] sha256Digests = computeSignaturesSha256Digests(signatures);
+        return computeSignaturesSha256Digest(sha256Digests);
     }
 
     /**
-     * Computes the SHA256 digest of a cert.
-     * @param signature The signature.
-     * @return The digest or null if an error occurs.
+     * Computes a SHA256 digest in of the signatures SHA256 digests. First,
+     * the strings are sorted based the natural ordering, and then a hash is
+     * derived from these strings' bytes.
+     * @param sha256Digests Signature SHA256 hashes in hexademical form.
+     * @return The digest.
      */
-    public static @Nullable String computeCertSha256Digest(@NonNull Signature signature) {
-        return computeSha256Digest(signature.toByteArray());
+    public static @NonNull String computeSignaturesSha256Digest(
+            @NonNull String[] sha256Digests) {
+        // Shortcut for optimization - most apps singed by a single cert
+        if (sha256Digests.length == 1) {
+            return sha256Digests[0];
+        }
+
+        // Make sure these are sorted to handle reversed certificates
+        Arrays.sort(sha256Digests);
+
+        final ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        for (String sha256Digest : sha256Digests) {
+            try {
+                bytes.write(sha256Digest.getBytes());
+            } catch (IOException e) {
+                /* ignore - can't happen */
+            }
+        }
+        return computeSha256Digest(bytes.toByteArray());
     }
 
     /**

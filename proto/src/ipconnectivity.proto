@@ -632,6 +632,6 @@ message IpConnectivityLog {
   //  nyc-mr1: not populated, implicitly 1.
   //  nyc-mr2: 2.
   //  oc:      3.
-  //  oc-dr1:  4.
+  //  oc-dr1:  4. (sailfish, marlin, walleye, taimen)
   optional int32 version = 3;
 };

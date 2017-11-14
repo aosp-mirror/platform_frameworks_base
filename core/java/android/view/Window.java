@@ -1139,11 +1139,18 @@ public abstract class Window {
     }
 
     /**
-     * <p>Set the color mode of the window. Setting the color mode might
+     * <p>Sets the requested color mode of the window. The requested the color mode might
      * override the window's pixel {@link WindowManager.LayoutParams#format format}.</p>
      *
-     * <p>The color mode must be one of {@link ActivityInfo#COLOR_MODE_DEFAULT},
+     * <p>The requested color mode must be one of {@link ActivityInfo#COLOR_MODE_DEFAULT},
      * {@link ActivityInfo#COLOR_MODE_WIDE_COLOR_GAMUT} or {@link ActivityInfo#COLOR_MODE_HDR}.</p>
+     *
+     * <p>The requested color mode is not guaranteed to be honored. Please refer to
+     * {@link #getColorMode()} for more information.</p>
+     *
+     * @see #getColorMode()
+     * @see Display#isWideColorGamut()
+     * @see Configuration#isScreenWideColorGamut()
      */
     public void setColorMode(@ActivityInfo.ColorMode int colorMode) {
         final WindowManager.LayoutParams attrs = getAttributes();
@@ -1152,12 +1159,32 @@ public abstract class Window {
     }
 
     /**
-     * Returns the color mode of the window, one of {@link ActivityInfo#COLOR_MODE_DEFAULT},
-     * {@link ActivityInfo#COLOR_MODE_WIDE_COLOR_GAMUT} or {@link ActivityInfo#COLOR_MODE_HDR}.
+     * Returns the requested color mode of the window, one of
+     * {@link ActivityInfo#COLOR_MODE_DEFAULT}, {@link ActivityInfo#COLOR_MODE_WIDE_COLOR_GAMUT}
+     * or {@link ActivityInfo#COLOR_MODE_HDR}. If {@link ActivityInfo#COLOR_MODE_WIDE_COLOR_GAMUT}
+     * was requested it is possible the window will not be put in wide color gamut mode depending
+     * on device and display support for that mode. Use {@link #isWideColorGamut} to determine
+     * if the window is currently in wide color gamut mode.
+     *
+     * @see #setColorMode(int)
+     * @see Display#isWideColorGamut()
+     * @see Configuration#isScreenWideColorGamut()
      */
     @ActivityInfo.ColorMode
     public int getColorMode() {
         return getAttributes().getColorMode();
+    }
+
+    /**
+     * Returns true if this window's color mode is {@link ActivityInfo#COLOR_MODE_WIDE_COLOR_GAMUT},
+     * the display has a wide color gamut and this device supports wide color gamut rendering.
+     *
+     * @see Display#isWideColorGamut()
+     * @see Configuration#isScreenWideColorGamut()
+     */
+    public boolean isWideColorGamut() {
+        return getColorMode() == ActivityInfo.COLOR_MODE_WIDE_COLOR_GAMUT
+                && getContext().getResources().getConfiguration().isScreenWideColorGamut();
     }
 
     /**
@@ -1242,8 +1269,10 @@ public abstract class Window {
 
     /** @hide */
     public boolean shouldCloseOnTouch(Context context, MotionEvent event) {
-        if (mCloseOnTouchOutside && event.getAction() == MotionEvent.ACTION_DOWN
-                && isOutOfBounds(context, event) && peekDecorView() != null) {
+        final boolean isOutside =
+                event.getAction() == MotionEvent.ACTION_DOWN && isOutOfBounds(context, event)
+                || event.getAction() == MotionEvent.ACTION_OUTSIDE;
+        if (mCloseOnTouchOutside && peekDecorView() != null && isOutside) {
             return true;
         }
         return false;

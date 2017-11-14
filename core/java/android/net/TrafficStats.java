@@ -109,25 +109,26 @@ public class TrafficStats {
      */
     public static final int TAG_SYSTEM_RESTORE = 0xFFFFFF04;
 
-    /** @hide */
-    public static final int TAG_SYSTEM_DHCP = 0xFFFFFF05;
-    /** @hide */
-    public static final int TAG_SYSTEM_NTP = 0xFFFFFF06;
-    /** @hide */
-    public static final int TAG_SYSTEM_PROBE = 0xFFFFFF07;
-    /** @hide */
-    public static final int TAG_SYSTEM_NEIGHBOR = 0xFFFFFF08;
-    /** @hide */
-    public static final int TAG_SYSTEM_GPS = 0xFFFFFF09;
-    /** @hide */
-    public static final int TAG_SYSTEM_PAC = 0xFFFFFF0A;
-
     /**
-     * Sockets that are strictly local on device; never hits network.
+     * Default tag value for code (typically APKs) downloaded by an app store on
+     * behalf of the app, such as updates.
      *
      * @hide
      */
-    public static final int TAG_SYSTEM_LOCAL = 0xFFFFFFAA;
+    public static final int TAG_SYSTEM_APP = 0xFFFFFF05;
+
+    /** @hide */
+    public static final int TAG_SYSTEM_DHCP = 0xFFFFFF40;
+    /** @hide */
+    public static final int TAG_SYSTEM_NTP = 0xFFFFFF41;
+    /** @hide */
+    public static final int TAG_SYSTEM_PROBE = 0xFFFFFF42;
+    /** @hide */
+    public static final int TAG_SYSTEM_NEIGHBOR = 0xFFFFFF43;
+    /** @hide */
+    public static final int TAG_SYSTEM_GPS = 0xFFFFFF44;
+    /** @hide */
+    public static final int TAG_SYSTEM_PAC = 0xFFFFFF45;
 
     private static INetworkStatsService sStatsService;
 
@@ -207,6 +208,19 @@ public class TrafficStats {
     @SystemApi
     public static void setThreadStatsTagRestore() {
         setThreadStatsTag(TAG_SYSTEM_RESTORE);
+    }
+
+    /**
+     * Set active tag to use when accounting {@link Socket} traffic originating
+     * from the current thread. The tag used internally is well-defined to
+     * distinguish all code (typically APKs) downloaded by an app store on
+     * behalf of the app, such as updates.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static void setThreadStatsTagApp() {
+        setThreadStatsTag(TAG_SYSTEM_APP);
     }
 
     /**

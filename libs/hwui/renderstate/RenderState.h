@@ -106,14 +106,14 @@ public:
     // more thinking...
     void postDecStrong(VirtualLightRefBase* object);
 
-    void render(const Glop& glop, const Matrix4& orthoMatrix);
+    void render(const Glop& glop, const Matrix4& orthoMatrix, bool overrideDisableBlending);
 
     Blend& blend() { return *mBlend; }
     MeshState& meshState() { return *mMeshState; }
     Scissor& scissor() { return *mScissor; }
     Stencil& stencil() { return *mStencil; }
 
-    OffscreenBufferPool& layerPool() { return mLayerPool; }
+    OffscreenBufferPool& layerPool() { return *mLayerPool; }
 
     GrContext* getGrContext() const;
 
@@ -136,7 +136,7 @@ private:
     Scissor* mScissor = nullptr;
     Stencil* mStencil = nullptr;
 
-    OffscreenBufferPool mLayerPool;
+    OffscreenBufferPool* mLayerPool = nullptr;
 
     std::set<Layer*> mActiveLayers;
     std::set<DeferredLayerUpdater*> mActiveLayerUpdaters;

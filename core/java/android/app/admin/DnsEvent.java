@@ -26,7 +26,10 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * A class that represents a DNS lookup event.
+ * A class that represents a DNS lookup event initiated through the standard network stack.
+ *
+ * <p>It contains information about the originating app as well as the DNS hostname and resolved
+ * IP addresses.
  */
 public final class DnsEvent extends NetworkEvent implements Parcelable {
 

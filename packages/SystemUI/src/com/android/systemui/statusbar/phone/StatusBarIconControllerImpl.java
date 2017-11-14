@@ -20,12 +20,8 @@ import android.content.Context;
 import android.graphics.drawable.Icon;
 import android.os.Bundle;
 import android.os.UserHandle;
-import android.text.TextUtils;
 import android.util.ArraySet;
-import android.view.Gravity;
-import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import com.android.internal.statusbar.StatusBarIcon;
@@ -38,6 +34,7 @@ import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
 import com.android.systemui.statusbar.policy.DarkIconDispatcher;
+import com.android.systemui.statusbar.policy.IconLogger;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
 
@@ -61,6 +58,7 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
     private final ArrayList<IconManager> mIconGroups = new ArrayList<>();
 
     private final ArraySet<String> mIconBlacklist = new ArraySet<>();
+    private final IconLogger mIconLogger = Dependency.get(IconLogger.class);
 
     public StatusBarIconControllerImpl(Context context) {
         super(context.getResources().getStringArray(
@@ -122,6 +120,7 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
         int viewIndex = getViewIndex(index);
         boolean blocked = mIconBlacklist.contains(slot);
 
+        mIconLogger.onIconVisibility(getSlot(index), icon.visible);
         mIconGroups.forEach(l -> l.onIconAdded(viewIndex, slot, blocked, icon));
     }
 
@@ -174,6 +173,7 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
         if (getIcon(index) == null) {
             return;
         }
+        mIconLogger.onIconHidden(getSlot(index));
         super.removeIcon(index);
         int viewIndex = getViewIndex(index);
         mIconGroups.forEach(l -> l.onRemoveIcon(viewIndex));
@@ -196,6 +196,7 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
 
     private void handleSet(int index, StatusBarIcon icon) {
         int viewIndex = getViewIndex(index);
+        mIconLogger.onIconVisibility(getSlot(index), icon.visible);
         mIconGroups.forEach(l -> l.onSetIcon(viewIndex, icon));
     }
 

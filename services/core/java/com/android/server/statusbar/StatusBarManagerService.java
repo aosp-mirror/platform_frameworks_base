@@ -20,7 +20,6 @@ import android.app.ActivityThread;
 import android.app.StatusBarManager;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.graphics.Rect;
 import android.os.Binder;
 import android.os.Bundle;
@@ -332,6 +331,15 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
         }
 
         @Override
+        public void setTopAppHidesStatusBar(boolean hidesStatusBar) {
+            if (mBar != null) {
+                try {
+                    mBar.setTopAppHidesStatusBar(hidesStatusBar);
+                } catch (RemoteException ex) {}
+            }
+        }
+
+        @Override
         public boolean showShutdownUi(boolean isReboot, String reason) {
             if (!mContext.getResources().getBoolean(R.bool.config_showSysuiShutdown)) {
                 return false;
@@ -368,6 +376,18 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
         if (mBar != null) {
             try {
                 mBar.animateCollapsePanels();
+            } catch (RemoteException ex) {
+            }
+        }
+    }
+
+    @Override
+    public void togglePanel() {
+        enforceExpandStatusBar();
+
+        if (mBar != null) {
+            try {
+                mBar.togglePanel();
             } catch (RemoteException ex) {
             }
         }
@@ -934,6 +954,10 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
             String[] args, ShellCallback callback, ResultReceiver resultReceiver) {
         (new StatusBarShellCommand(this)).exec(
                 this, in, out, err, args, callback, resultReceiver);
+    }
+
+    public String[] getStatusBarIcons() {
+        return mContext.getResources().getStringArray(R.array.config_statusBarIcons);
     }
 
     // ================================================================================

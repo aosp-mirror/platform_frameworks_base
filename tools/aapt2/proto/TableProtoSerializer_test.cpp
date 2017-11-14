@@ -20,6 +20,9 @@
 #include "test/Test.h"
 
 using ::google::protobuf::io::StringOutputStream;
+using ::testing::Eq;
+using ::testing::NotNull;
+using ::testing::SizeIs;
 
 namespace aapt {
 
@@ -37,20 +40,28 @@ TEST(TableProtoSerializer, SerializeSinglePackage) {
 
   Symbol public_symbol;
   public_symbol.state = SymbolState::kPublic;
-  ASSERT_TRUE(table->SetSymbolState(
-      test::ParseNameOrDie("com.app.a:layout/main"), ResourceId(0x7f020000),
-      public_symbol, context->GetDiagnostics()));
+  ASSERT_TRUE(table->SetSymbolState(test::ParseNameOrDie("com.app.a:layout/main"),
+                                    ResourceId(0x7f020000), public_symbol,
+                                    context->GetDiagnostics()));
 
   Id* id = test::GetValue<Id>(table.get(), "com.app.a:id/foo");
-  ASSERT_NE(nullptr, id);
+  ASSERT_THAT(id, NotNull());
 
   // Make a plural.
   std::unique_ptr<Plural> plural = util::make_unique<Plural>();
-  plural->values[Plural::One] =
-      util::make_unique<String>(table->string_pool.MakeRef("one"));
+  plural->values[Plural::One] = util::make_unique<String>(table->string_pool.MakeRef("one"));
   ASSERT_TRUE(table->AddResource(test::ParseNameOrDie("com.app.a:plurals/hey"),
                                  ConfigDescription{}, {}, std::move(plural),
                                  context->GetDiagnostics()));
+
+  // Make a styled string.
+  StyleString style_string;
+  style_string.str = "hello";
+  style_string.spans.push_back(Span{"b", 0u, 4u});
+  ASSERT_TRUE(
+      table->AddResource(test::ParseNameOrDie("com.app.a:string/styled"), ConfigDescription{}, {},
+                         util::make_unique<StyledString>(table->string_pool.MakeRef(style_string)),
+                         context->GetDiagnostics()));
 
   // Make a resource with different products.
   ASSERT_TRUE(table->AddResource(
@@ -65,9 +76,8 @@ TEST(TableProtoSerializer, SerializeSinglePackage) {
       context->GetDiagnostics()));
 
   // Make a reference with both resource name and resource ID.
-  // The reference should point to a resource outside of this table to test that
-  // both
-  // name and id get serialized.
+  // The reference should point to a resource outside of this table to test that both name and id
+  // get serialized.
   Reference expected_ref;
   expected_ref.name = test::ParseNameOrDie("android:layout/main");
   expected_ref.id = ResourceId(0x01020000);
@@ -77,44 +87,53 @@ TEST(TableProtoSerializer, SerializeSinglePackage) {
                                  context->GetDiagnostics()));
 
   std::unique_ptr<pb::ResourceTable> pb_table = SerializeTableToPb(table.get());
-  ASSERT_NE(nullptr, pb_table);
+  ASSERT_THAT(pb_table, NotNull());
 
   std::unique_ptr<ResourceTable> new_table = DeserializeTableFromPb(
       *pb_table, Source{"test"}, context->GetDiagnostics());
-  ASSERT_NE(nullptr, new_table);
+  ASSERT_THAT(new_table, NotNull());
 
   Id* new_id = test::GetValue<Id>(new_table.get(), "com.app.a:id/foo");
-  ASSERT_NE(nullptr, new_id);
-  EXPECT_EQ(id->IsWeak(), new_id->IsWeak());
+  ASSERT_THAT(new_id, NotNull());
+  EXPECT_THAT(new_id->IsWeak(), Eq(id->IsWeak()));
 
   Maybe<ResourceTable::SearchResult> result =
       new_table->FindResource(test::ParseNameOrDie("com.app.a:layout/main"));
-  AAPT_ASSERT_TRUE(result);
-  EXPECT_EQ(SymbolState::kPublic, result.value().type->symbol_status.state);
-  EXPECT_EQ(SymbolState::kPublic, result.value().entry->symbol_status.state);
+  ASSERT_TRUE(result);
+
+  EXPECT_THAT(result.value().type->symbol_status.state, Eq(SymbolState::kPublic));
+  EXPECT_THAT(result.value().entry->symbol_status.state, Eq(SymbolState::kPublic));
 
   result = new_table->FindResource(test::ParseNameOrDie("com.app.a:bool/foo"));
   ASSERT_TRUE(result);
-  EXPECT_EQ(SymbolState::kUndefined, result.value().entry->symbol_status.state);
+  EXPECT_THAT(result.value().entry->symbol_status.state, Eq(SymbolState::kUndefined));
   EXPECT_TRUE(result.value().entry->symbol_status.allow_new);
 
   // Find the product-dependent values
   BinaryPrimitive* prim = test::GetValueForConfigAndProduct<BinaryPrimitive>(
       new_table.get(), "com.app.a:integer/one", test::ParseConfigOrDie("land"), "");
-  ASSERT_NE(nullptr, prim);
-  EXPECT_EQ(123u, prim->value.data);
+  ASSERT_THAT(prim, NotNull());
+  EXPECT_THAT(prim->value.data, Eq(123u));
 
   prim = test::GetValueForConfigAndProduct<BinaryPrimitive>(
       new_table.get(), "com.app.a:integer/one", test::ParseConfigOrDie("land"), "tablet");
-  ASSERT_NE(nullptr, prim);
-  EXPECT_EQ(321u, prim->value.data);
+  ASSERT_THAT(prim, NotNull());
+  EXPECT_THAT(prim->value.data, Eq(321u));
 
   Reference* actual_ref = test::GetValue<Reference>(new_table.get(), "com.app.a:layout/abc");
-  ASSERT_NE(nullptr, actual_ref);
-  AAPT_ASSERT_TRUE(actual_ref->name);
-  AAPT_ASSERT_TRUE(actual_ref->id);
-  EXPECT_EQ(expected_ref.name.value(), actual_ref->name.value());
-  EXPECT_EQ(expected_ref.id.value(), actual_ref->id.value());
+  ASSERT_THAT(actual_ref, NotNull());
+  ASSERT_TRUE(actual_ref->name);
+  ASSERT_TRUE(actual_ref->id);
+  EXPECT_THAT(*actual_ref, Eq(expected_ref));
+
+  StyledString* actual_styled_str =
+      test::GetValue<StyledString>(new_table.get(), "com.app.a:string/styled");
+  ASSERT_THAT(actual_styled_str, NotNull());
+  EXPECT_THAT(actual_styled_str->value->value, Eq("hello"));
+  ASSERT_THAT(actual_styled_str->value->spans, SizeIs(1u));
+  EXPECT_THAT(*actual_styled_str->value->spans[0].name, Eq("b"));
+  EXPECT_THAT(actual_styled_str->value->spans[0].first_char, Eq(0u));
+  EXPECT_THAT(actual_styled_str->value->spans[0].last_char, Eq(4u));
 }
 
 TEST(TableProtoSerializer, SerializeFileHeader) {
@@ -132,10 +151,10 @@ TEST(TableProtoSerializer, SerializeFileHeader) {
 
   std::string output_str;
   {
-    std::unique_ptr<pb::CompiledFile> pb_file1 = SerializeCompiledFileToPb(f);
+    std::unique_ptr<pb::internal::CompiledFile> pb_file1 = SerializeCompiledFileToPb(f);
 
     f.name.entry = "__" + f.name.entry + "$0";
-    std::unique_ptr<pb::CompiledFile> pb_file2 = SerializeCompiledFileToPb(f);
+    std::unique_ptr<pb::internal::CompiledFile> pb_file2 = SerializeCompiledFileToPb(f);
 
     StringOutputStream out_stream(&output_str);
     CompiledFileOutputStream out_file_stream(&out_stream);
@@ -154,12 +173,12 @@ TEST(TableProtoSerializer, SerializeFileHeader) {
 
   // Read the first compiled file.
 
-  pb::CompiledFile new_pb_file;
+  pb::internal::CompiledFile new_pb_file;
   ASSERT_TRUE(in_file_stream.ReadCompiledFile(&new_pb_file));
 
   std::unique_ptr<ResourceFile> file = DeserializeCompiledFileFromPb(
       new_pb_file, Source("test"), context->GetDiagnostics());
-  ASSERT_NE(nullptr, file);
+  ASSERT_THAT(file, NotNull());
 
   uint64_t offset, len;
   ASSERT_TRUE(in_file_stream.ReadDataMetaData(&offset, &len));
@@ -171,16 +190,14 @@ TEST(TableProtoSerializer, SerializeFileHeader) {
   EXPECT_EQ(0u, offset & 0x03);
 
   ASSERT_EQ(1u, file->exported_symbols.size());
-  EXPECT_EQ(test::ParseNameOrDie("id/unchecked"),
-            file->exported_symbols[0].name);
+  EXPECT_EQ(test::ParseNameOrDie("id/unchecked"), file->exported_symbols[0].name);
 
   // Read the second compiled file.
 
   ASSERT_TRUE(in_file_stream.ReadCompiledFile(&new_pb_file));
 
-  file = DeserializeCompiledFileFromPb(new_pb_file, Source("test"),
-                                       context->GetDiagnostics());
-  ASSERT_NE(nullptr, file);
+  file = DeserializeCompiledFileFromPb(new_pb_file, Source("test"), context->GetDiagnostics());
+  ASSERT_THAT(file, NotNull());
 
   ASSERT_TRUE(in_file_stream.ReadDataMetaData(&offset, &len));
 
@@ -193,7 +210,7 @@ TEST(TableProtoSerializer, SerializeFileHeader) {
 
 TEST(TableProtoSerializer, DeserializeCorruptHeaderSafely) {
   ResourceFile f;
-  std::unique_ptr<pb::CompiledFile> pb_file = SerializeCompiledFileToPb(f);
+  std::unique_ptr<pb::internal::CompiledFile> pb_file = SerializeCompiledFileToPb(f);
 
   const std::string expected_data = "1234";
 
@@ -215,7 +232,7 @@ TEST(TableProtoSerializer, DeserializeCorruptHeaderSafely) {
   EXPECT_TRUE(in_file_stream.ReadLittleEndian32(&num_files));
   EXPECT_EQ(1u, num_files);
 
-  pb::CompiledFile new_pb_file;
+  pb::internal::CompiledFile new_pb_file;
   EXPECT_FALSE(in_file_stream.ReadCompiledFile(&new_pb_file));
 
   uint64_t offset, len;

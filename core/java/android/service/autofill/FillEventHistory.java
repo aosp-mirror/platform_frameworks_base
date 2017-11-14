@@ -22,8 +22,7 @@ import android.content.IntentSender;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.view.autofill.AutofillId;
-import android.widget.RemoteViews;
+import android.view.autofill.AutofillManager;
 
 import com.android.internal.util.Preconditions;
 
@@ -81,7 +80,7 @@ public final class FillEventHistory implements Parcelable {
     /**
      * Returns the client state set in the previous {@link FillResponse}.
      *
-     * <p><b>NOTE: </b>the state is associated with the app that was autofilled in the previous
+     * <p><b>Note: </b>the state is associated with the app that was autofilled in the previous
      * {@link AutofillService#onFillRequest(FillRequest, android.os.CancellationSignal, FillCallback)}
      * , which is not necessary the same app being autofilled now.
      */
@@ -148,6 +147,14 @@ public final class FillEventHistory implements Parcelable {
     public static final class Event {
         /**
          * A dataset was selected. The dataset selected can be read from {@link #getDatasetId()}.
+         *
+         * <p><b>Note: </b>on Android {@link android.os.Build.VERSION_CODES#O}, this event was also
+         * incorrectly reported after a
+         * {@link Dataset.Builder#setAuthentication(IntentSender) dataset authentication} was
+         * selected and the service returned a dataset in the
+         * {@link AutofillManager#EXTRA_AUTHENTICATION_RESULT} of the activity launched from that
+         * {@link IntentSender}. This behavior was fixed on Android
+         * {@link android.os.Build.VERSION_CODES#O_MR1}.
          */
         public static final int TYPE_DATASET_SELECTED = 0;
 
@@ -158,8 +165,8 @@ public final class FillEventHistory implements Parcelable {
         public static final int TYPE_DATASET_AUTHENTICATION_SELECTED = 1;
 
         /**
-         * A {@link FillResponse.Builder#setAuthentication(AutofillId[], IntentSender, RemoteViews)
-         * fill response authentication} was selected.
+         * A {@link FillResponse.Builder#setAuthentication(android.view.autofill.AutofillId[],
+         * IntentSender, android.widget.RemoteViews) fill response authentication} was selected.
          */
         public static final int TYPE_AUTHENTICATION_SELECTED = 2;
 

@@ -35,7 +35,7 @@
     -->
     <integer name="config_mobile_mtu">1410</integer>
 
-    <!-- Values for GPS configuration (Rogers) -->
+  <!-- Values for GPS configuration (Rogers) -->
     <string-array translatable="false" name="config_gpsParameters">
         <item>SUPL_HOST=supl.google.com</item>
         <item>SUPL_PORT=7275</item>

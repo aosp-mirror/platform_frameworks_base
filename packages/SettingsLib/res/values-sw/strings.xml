@@ -116,7 +116,7 @@
     <string name="launch_defaults_some" msgid="313159469856372621">"Baadhi ya chaguo-msingi zimewekwa"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"Hakuna chaguo-misingi zilizowekwa"</string>
     <string name="tts_settings" msgid="8186971894801348327">"Mipangilio ya kusoma maandishi kwa sauti"</string>
-    <string name="tts_settings_title" msgid="1237820681016639683">"Kusoma maandishi kwa sauti"</string>
+    <string name="tts_settings_title" msgid="1237820681016639683">"Kipengele cha kusoma maandishi kwa sauti"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"Kasi ya kutamka"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"Kasi ya kutamkwa kwa maneno"</string>
     <string name="tts_default_pitch_title" msgid="6135942113172488671">"Uzito wa sauti"</string>
@@ -358,7 +358,7 @@
     <string name="disabled" msgid="9206776641295849915">"Imezimwa"</string>
     <string name="external_source_trusted" msgid="2707996266575928037">"Imeruhusiwa"</string>
     <string name="external_source_untrusted" msgid="2677442511837596726">"Hairuhusiwi"</string>
-    <string name="install_other_apps" msgid="6986686991775883017">"Kuweka programu zisizojulikana"</string>
+    <string name="install_other_apps" msgid="6986686991775883017">"Sakinisha programu ambazo hazijulikani"</string>
     <string name="home" msgid="3256884684164448244">"Ukurasa wa Kwanza wa Mipangilio"</string>
   <string-array name="battery_labels">
     <item msgid="8494684293649631252">"0%"</item>

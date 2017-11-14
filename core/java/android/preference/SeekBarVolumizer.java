@@ -206,8 +206,7 @@ public class SeekBarVolumizer implements OnSeekBarChangeListener, Handler.Callba
                     try {
                         mRingtone.setAudioAttributes(new AudioAttributes.Builder(mRingtone
                                 .getAudioAttributes())
-                                .setFlags(AudioAttributes.FLAG_BYPASS_INTERRUPTION_POLICY |
-                                        AudioAttributes.FLAG_BYPASS_MUTE)
+                                .setFlags(AudioAttributes.FLAG_BYPASS_MUTE)
                                 .build());
                         mRingtone.play();
                     } catch (Throwable e) {

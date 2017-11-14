@@ -18,6 +18,10 @@
 
 #include "test/Test.h"
 
+using ::testing::Eq;
+using ::testing::HasSubstr;
+using ::testing::Not;
+
 namespace aapt {
 
 TEST(AnnotationProcessorTest, EmitsDeprecated) {
@@ -33,7 +37,7 @@ TEST(AnnotationProcessorTest, EmitsDeprecated) {
   processor.WriteToStream(&result, "");
   std::string annotations = result.str();
 
-  EXPECT_NE(std::string::npos, annotations.find("@Deprecated"));
+  EXPECT_THAT(annotations, HasSubstr("@Deprecated"));
 }
 
 TEST(AnnotationProcessorTest, EmitsSystemApiAnnotationAndRemovesFromComment) {
@@ -44,10 +48,20 @@ TEST(AnnotationProcessorTest, EmitsSystemApiAnnotationAndRemovesFromComment) {
   processor.WriteToStream(&result, "");
   std::string annotations = result.str();
 
-  EXPECT_NE(std::string::npos,
-            annotations.find("@android.annotation.SystemApi"));
-  EXPECT_EQ(std::string::npos, annotations.find("@SystemApi"));
-  EXPECT_NE(std::string::npos, annotations.find("This is a system API"));
+  EXPECT_THAT(annotations, HasSubstr("@android.annotation.SystemApi"));
+  EXPECT_THAT(annotations, Not(HasSubstr("@SystemApi")));
+  EXPECT_THAT(annotations, HasSubstr("This is a system API"));
+}
+
+TEST(AnnotationProcessor, ExtractsFirstSentence) {
+  EXPECT_THAT(AnnotationProcessor::ExtractFirstSentence("This is the only sentence"),
+              Eq("This is the only sentence"));
+  EXPECT_THAT(AnnotationProcessor::ExtractFirstSentence(
+                  "This is the\n  first sentence.  This is the rest of the paragraph."),
+              Eq("This is the\n  first sentence."));
+  EXPECT_THAT(AnnotationProcessor::ExtractFirstSentence(
+                  "This is the first sentence with a {@link android.R.styleable.Theme}."),
+              Eq("This is the first sentence with a {@link android.R.styleable.Theme}."));
 }
 
 }  // namespace aapt

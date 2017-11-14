@@ -106,13 +106,17 @@ public class FingerprintManager {
 
    /**
      * The operation was canceled because the API is locked out due to too many attempts.
+     * This occurs after 5 failed attempts, and lasts for 30 seconds.
      */
     public static final int FINGERPRINT_ERROR_LOCKOUT = 7;
 
     /**
      * Hardware vendors may extend this list if there are conditions that do not fall under one of
      * the above categories. Vendors are responsible for providing error strings for these errors.
-     * @hide
+     * These messages are typically reserved for internal operations such as enrollment, but may be
+     * used to express vendor errors not covered by the ones in fingerprint.h. Applications are
+     * expected to show the error message string if they happen, but are advised not to rely on the
+     * message id since they will be device and vendor-specific
      */
     public static final int FINGERPRINT_ERROR_VENDOR = 8;
 
@@ -120,9 +124,15 @@ public class FingerprintManager {
      * The operation was canceled because FINGERPRINT_ERROR_LOCKOUT occurred too many times.
      * Fingerprint authentication is disabled until the user unlocks with strong authentication
      * (PIN/Pattern/Password)
-     * @hide
      */
     public static final int FINGERPRINT_ERROR_LOCKOUT_PERMANENT = 9;
+
+    /**
+     * The user canceled the operation. Upon receiving this, applications should use alternate
+     * authentication (e.g. a password). The application should also provide the means to return
+     * to fingerprint authentication, such as a "use fingerprint" button.
+     */
+    public static final int FINGERPRINT_ERROR_USER_CANCELED = 10;
 
     /**
      * @hide

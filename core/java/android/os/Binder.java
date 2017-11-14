@@ -460,6 +460,11 @@ public class Binder implements IBinder {
      *
      * <p>If you want to call this, call transact().
      *
+     * <p>Implementations that are returning a result should generally use
+     * {@link Parcel#writeNoException() Parcel.writeNoException} and
+     * {@link Parcel#writeException(Exception) Parcel.writeException} to propagate
+     * exceptions back to the caller.</p>
+     *
      * @param code The action to perform.  This should
      * be a number between {@link #FIRST_CALL_TRANSACTION} and
      * {@link #LAST_CALL_TRANSACTION}.
@@ -715,13 +720,6 @@ public class Binder implements IBinder {
                 reply.setDataPosition(0);
                 reply.writeException(e);
             }
-            res = true;
-        } catch (OutOfMemoryError e) {
-            // Unconditionally log this, since this is generally unrecoverable.
-            Log.e(TAG, "Caught an OutOfMemoryError from the binder stub implementation.", e);
-            RuntimeException re = new RuntimeException("Out of memory", e);
-            reply.setDataPosition(0);
-            reply.writeException(re);
             res = true;
         } finally {
             if (tracingEnabled) {

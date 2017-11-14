@@ -27,6 +27,8 @@ import android.app.AlarmManager.OnAlarmListener;
 import android.app.admin.DevicePolicyManager;
 import android.app.trust.IStrongAuthTracker;
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.hardware.fingerprint.FingerprintManager;
 import android.os.Binder;
 import android.os.DeadObjectException;
 import android.os.Handler;
@@ -64,11 +66,19 @@ public class LockSettingsStrongAuth {
     private final Context mContext;
 
     private AlarmManager mAlarmManager;
+    private FingerprintManager mFingerprintManager;
 
     public LockSettingsStrongAuth(Context context) {
         mContext = context;
         mDefaultStrongAuthFlags = StrongAuthTracker.getDefaultFlags(context);
         mAlarmManager = context.getSystemService(AlarmManager.class);
+    }
+
+    public void systemReady() {
+        final PackageManager pm = mContext.getPackageManager();
+        if (pm.hasSystemFeature(PackageManager.FEATURE_FINGERPRINT)) {
+            mFingerprintManager = mContext.getSystemService(FingerprintManager.class);
+        }
     }
 
     private void handleAddStrongAuthTracker(IStrongAuthTracker tracker) {
@@ -188,6 +198,11 @@ public class LockSettingsStrongAuth {
     }
 
     public void reportSuccessfulStrongAuthUnlock(int userId) {
+        if (mFingerprintManager != null) {
+            byte[] token = null; /* TODO: pass real auth token once fp HAL supports it */
+            mFingerprintManager.resetTimeout(token);
+        }
+
         final int argNotUsed = 0;
         mHandler.obtainMessage(MSG_SCHEDULE_STRONG_AUTH_TIMEOUT, userId, argNotUsed).sendToTarget();
     }

@@ -25,9 +25,6 @@ import android.app.Instrumentation;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.Looper;
-import android.os.Parcelable;
-import android.os.PerformanceCollector;
-import android.os.PerformanceCollector.PerformanceResultsWriter;
 import android.test.suitebuilder.TestMethod;
 import android.test.suitebuilder.TestPredicates;
 import android.test.suitebuilder.TestSuiteBuilder;
@@ -398,7 +395,6 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
             WatcherResultPrinter resultPrinter = new WatcherResultPrinter(mTestCount);
             mTestRunner.addTestListener(new TestPrinter("TestRunner", false));
             mTestRunner.addTestListener(resultPrinter);
-            mTestRunner.setPerformanceResultsWriter(resultPrinter);
         }
         start();
     }
@@ -751,15 +747,12 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
     /**
      * This class sends status reports back to the IInstrumentationWatcher
      */
-    private class WatcherResultPrinter implements TestListener, PerformanceResultsWriter {
+    private class WatcherResultPrinter implements TestListener {
         private final Bundle mResultTemplate;
         Bundle mTestResult;
         int mTestNum = 0;
         int mTestResultCode = 0;
         String mTestClass = null;
-        PerformanceCollector mPerfCollector = new PerformanceCollector();
-        boolean mIsTimedTest = false;
-        boolean mIncludeDetailedStats = false;
 
         public WatcherResultPrinter(int numTests) {
             mResultTemplate = new Bundle();
@@ -814,30 +807,6 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
 
             sendStatus(REPORT_VALUE_RESULT_START, mTestResult);
             mTestResultCode = 0;
-
-            mIsTimedTest = false;
-            mIncludeDetailedStats = false;
-            try {
-                // Look for TimedTest annotation on both test class and test method
-                if (testMethod != null && testMethod.isAnnotationPresent(TimedTest.class)) {
-                    mIsTimedTest = true;
-                    mIncludeDetailedStats = testMethod.getAnnotation(
-                            TimedTest.class).includeDetailedStats();
-                } else if (test.getClass().isAnnotationPresent(TimedTest.class)) {
-                    mIsTimedTest = true;
-                    mIncludeDetailedStats = test.getClass().getAnnotation(
-                            TimedTest.class).includeDetailedStats();
-                }
-            } catch (SecurityException e) {
-                // ignore - the test with given name cannot be accessed. Will be handled during
-                // test execution
-            }
-
-            if (mIsTimedTest && mIncludeDetailedStats) {
-                mPerfCollector.beginSnapshot("");
-            } else if (mIsTimedTest) {
-                mPerfCollector.startTiming("");
-            }
         }
 
         /**
@@ -868,12 +837,6 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
          * @see junit.framework.TestListener#endTest(Test)
          */
         public void endTest(Test test) {
-            if (mIsTimedTest && mIncludeDetailedStats) {
-                mTestResult.putAll(mPerfCollector.endSnapshot());
-            } else if (mIsTimedTest) {
-                writeStopTiming(mPerfCollector.stopTiming(""));
-            }
-
             if (mTestResultCode == 0) {
                 mTestResult.putString(Instrumentation.REPORT_KEY_STREAMRESULT, ".");
             }
@@ -884,50 +847,6 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
             } catch (InterruptedException e) {
                 throw new IllegalStateException(e);
             }
-        }
-
-        public void writeBeginSnapshot(String label) {
-            // Do nothing
-        }
-
-        public void writeEndSnapshot(Bundle results) {
-            // Copy all snapshot data fields into mResults, which is outputted
-            // via Instrumentation.finish
-            mResults.putAll(results);
-        }
-
-        public void writeStartTiming(String label) {
-            // Do nothing
-        }
-
-        public void writeStopTiming(Bundle results) {
-            // Copy results into mTestResult by flattening list of iterations,
-            // which is outputted via WatcherResultPrinter.endTest
-            int i = 0;
-            for (Parcelable p :
-                    results.getParcelableArrayList(PerformanceCollector.METRIC_KEY_ITERATIONS)) {
-                Bundle iteration = (Bundle)p;
-                String index = "iteration" + i + ".";
-                mTestResult.putString(index + PerformanceCollector.METRIC_KEY_LABEL,
-                        iteration.getString(PerformanceCollector.METRIC_KEY_LABEL));
-                mTestResult.putLong(index + PerformanceCollector.METRIC_KEY_CPU_TIME,
-                        iteration.getLong(PerformanceCollector.METRIC_KEY_CPU_TIME));
-                mTestResult.putLong(index + PerformanceCollector.METRIC_KEY_EXECUTION_TIME,
-                        iteration.getLong(PerformanceCollector.METRIC_KEY_EXECUTION_TIME));
-                i++;
-            }
-        }
-
-        public void writeMeasurement(String label, long value) {
-            mTestResult.putLong(label, value);
-        }
-
-        public void writeMeasurement(String label, float value) {
-            mTestResult.putFloat(label, value);
-        }
-
-        public void writeMeasurement(String label, String value) {
-            mTestResult.putString(label, value);
         }
 
         // TODO report the end of the cycle

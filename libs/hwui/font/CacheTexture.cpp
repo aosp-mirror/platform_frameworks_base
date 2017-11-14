@@ -91,6 +91,9 @@ CacheBlock* CacheBlock::removeBlock(CacheBlock* head, CacheBlock* blockToRemove)
     CacheBlock* prevBlock = blockToRemove->mPrev;
 
     if (prevBlock) {
+        // If this doesn't hold, we have a use-after-free below.
+        LOG_ALWAYS_FATAL_IF(head == blockToRemove,
+                "removeBlock: head should not have a previous block");
         prevBlock->mNext = nextBlock;
     } else {
         newHead = nextBlock;

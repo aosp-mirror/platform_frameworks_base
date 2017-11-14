@@ -110,12 +110,22 @@ public abstract class MediaBrowserService extends Service {
     /**
      * All the info about a connection.
      */
-    private class ConnectionRecord {
+    private class ConnectionRecord implements IBinder.DeathRecipient {
         String pkg;
         Bundle rootHints;
         IMediaBrowserServiceCallbacks callbacks;
         BrowserRoot root;
         HashMap<String, List<Pair<IBinder, Bundle>>> subscriptions = new HashMap<>();
+
+        @Override
+        public void binderDied() {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mConnections.remove(callbacks.asBinder());
+                }
+            });
+        }
     }
 
     /**
@@ -207,7 +217,6 @@ public abstract class MediaBrowserService extends Service {
                         connection.pkg = pkg;
                         connection.rootHints = rootHints;
                         connection.callbacks = callbacks;
-
                         connection.root = MediaBrowserService.this.onGetRoot(pkg, uid, rootHints);
 
                         // If they didn't return something, don't allow this client.
@@ -223,6 +232,7 @@ public abstract class MediaBrowserService extends Service {
                         } else {
                             try {
                                 mConnections.put(b, connection);
+                                b.linkToDeath(connection, 0);
                                 if (mSession != null) {
                                     callbacks.onConnect(connection.root.getRootId(),
                                             mSession, connection.root.getExtras());
@@ -248,6 +258,7 @@ public abstract class MediaBrowserService extends Service {
                         final ConnectionRecord old = mConnections.remove(b);
                         if (old != null) {
                             // TODO
+                            old.callbacks.asBinder().unlinkToDeath(old, 0);
                         }
                     }
                 });
@@ -700,6 +711,13 @@ public abstract class MediaBrowserService extends Service {
                 new Result<MediaBrowser.MediaItem>(itemId) {
             @Override
             void onResultSent(MediaBrowser.MediaItem item, @ResultFlags int flag) {
+                if (mConnections.get(connection.callbacks.asBinder()) != connection) {
+                    if (DBG) {
+                        Log.d(TAG, "Not sending onLoadItem result for connection that has"
+                                + " been disconnected. pkg=" + connection.pkg + " id=" + itemId);
+                    }
+                    return;
+                }
                 if ((flag & RESULT_FLAG_ON_LOAD_ITEM_NOT_IMPLEMENTED) != 0) {
                     receiver.send(RESULT_ERROR, null);
                     return;

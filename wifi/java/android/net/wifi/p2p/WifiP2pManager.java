@@ -41,6 +41,8 @@ import android.util.Log;
 import com.android.internal.util.AsyncChannel;
 import com.android.internal.util.Protocol;
 
+import dalvik.system.CloseGuard;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -668,15 +670,21 @@ public class WifiP2pManager {
      * Most p2p operations require a Channel as an argument. An instance of Channel is obtained
      * by doing a call on {@link #initialize}
      */
-    public static class Channel {
-        Channel(Context context, Looper looper, ChannelListener l, Binder binder) {
+    public static class Channel implements AutoCloseable {
+        /** @hide */
+        public Channel(Context context, Looper looper, ChannelListener l, Binder binder,
+                WifiP2pManager p2pManager) {
             mAsyncChannel = new AsyncChannel();
             mHandler = new P2pHandler(looper);
             mChannelListener = l;
             mContext = context;
             mBinder = binder;
+            mP2pManager = p2pManager;
+
+            mCloseGuard.open("close");
         }
         private final static int INVALID_LISTENER_KEY = 0;
+        private final WifiP2pManager mP2pManager;
         private ChannelListener mChannelListener;
         private ServiceResponseListener mServRspListener;
         private DnsSdServiceResponseListener mDnsSdServRspListener;
@@ -685,6 +693,41 @@ public class WifiP2pManager {
         private HashMap<Integer, Object> mListenerMap = new HashMap<Integer, Object>();
         private final Object mListenerMapLock = new Object();
         private int mListenerKey = 0;
+
+        private final CloseGuard mCloseGuard = CloseGuard.get();
+
+        /**
+         * Close the current P2P connection and indicate to the P2P service that connections
+         * created by the app can be removed.
+         */
+        public void close() {
+            if (mP2pManager == null) {
+                Log.w(TAG, "Channel.close(): Null mP2pManager!?");
+            } else {
+                try {
+                    mP2pManager.mService.close(mBinder);
+                } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
+                }
+            }
+
+            mAsyncChannel.disconnect();
+            mCloseGuard.close();
+        }
+
+        /** @hide */
+        @Override
+        protected void finalize() throws Throwable {
+            try {
+                if (mCloseGuard != null) {
+                    mCloseGuard.warnIfOpen();
+                }
+
+                close();
+            } finally {
+                super.finalize();
+            }
+        }
 
         /* package */ final Binder mBinder;
 
@@ -913,11 +956,12 @@ public class WifiP2pManager {
                                      Messenger messenger, Binder binder) {
         if (messenger == null) return null;
 
-        Channel c = new Channel(srcContext, srcLooper, listener, binder);
+        Channel c = new Channel(srcContext, srcLooper, listener, binder, this);
         if (c.mAsyncChannel.connectSync(srcContext, c.mHandler, messenger)
                 == AsyncChannel.STATUS_SUCCESSFUL) {
             return c;
         } else {
+            c.close();
             return null;
         }
     }
@@ -1416,24 +1460,6 @@ public class WifiP2pManager {
     public Messenger getP2pStateMachineMessenger() {
         try {
             return mService.getP2pStateMachineMessenger();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Close the current P2P connection and clean-up any configuration requested by the
-     * current app. Takes same action as taken when the app dies.
-     *
-     * @param c is the channel created at {@link #initialize}
-     *
-     * @hide
-     */
-    public void close(Channel c) {
-        try {
-            if (c != null) {
-                mService.close(c.mBinder);
-            }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

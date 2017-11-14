@@ -60,6 +60,11 @@
     <!-- The background color for the freeform workspace. -->
     <color name="recents_freeform_workspace_bg_color">#33FFFFFF</color>
 
+    <!-- The background color for clear all button on light backgrounds if not transparent. -->
+    <color name="recents_clear_all_button_bg_light_color">#CCFFFFFF</color>
+    <!-- The background color for clear all button on dark backgrounds if not transparent. -->
+    <color name="recents_clear_all_button_bg_dark_color">#CC000000</color>
+
     <color name="keyguard_affordance">#ffffffff</color>
 
     <!-- The color of the legacy notification background -->

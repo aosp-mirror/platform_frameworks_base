@@ -242,9 +242,9 @@
     <string name="accessibility_ambient_display_charging" msgid="9084521679384069087">"충전 중"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G-3G 데이터 사용 중지됨"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G 데이터 사용 중지됨"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="6801382439018099779">"모바일 데이터가 일시중지됨"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="6801382439018099779">"모바일 데이터가 일시 중지됨"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"데이터 사용 중지됨"</string>
-    <string name="data_usage_disabled_dialog" msgid="4919541636934603816">"설정한 데이터 한도에 도달했습니다. 더 이상 모바일 데이터를 사용하지 않습니다.\n\n계속하면 데이터 사용량에 따라 요금이 부과될 수 있습니다."</string>
+    <string name="data_usage_disabled_dialog" msgid="4919541636934603816">"설정한 데이터 한도에 도달했습니다. 더 이상 모바일 데이터를 사용하지 않습니다.\n\n계속하면 데이터 사용량에 따른 요금이 부과될 수 있습니다."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"재개"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"인터넷에 연결되지 않음"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi 연결됨"</string>
@@ -355,10 +355,10 @@
     <string name="description_target_search" msgid="3091587249776033139">"검색"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>하려면 위로 슬라이드"</string>
     <string name="description_direction_left" msgid="7207478719805562165">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>하려면 왼쪽으로 슬라이드"</string>
-    <string name="zen_priority_introduction" msgid="7577965386868311310">"알람, 알림, 일정 및 지정한 발신자부터 받은 연락을 제외하고 소리와 진동을 끕니다. 음악, 동영상, 게임 등에서 재생하도록 선택한 소리는 정상적으로 들립니다."</string>
-    <string name="zen_alarms_introduction" msgid="7034415210361973827">"알람을 제외하고 소리와 진동을 끕니다. 음악, 동영상, 게임 등에서 재생하도록 선택한 소리는 정상적으로 들립니다."</string>
+    <string name="zen_priority_introduction" msgid="1149025108714420281">"알람, 알림, 일정 및 지정한 발신자로부터 받은 전화를 제외한 소리와 진동을 끕니다. 음악, 동영상, 게임 등 재생하도록 선택한 소리는 정상적으로 들립니다."</string>
+    <string name="zen_alarms_introduction" msgid="4934328096749380201">"알람을 제외한 소리와 진동을 끕니다. 음악, 동영상, 게임 등 재생하도록 선택한 소리는 정상적으로 들립니다."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"맞춤설정"</string>
-    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"알람, 음악, 동영상, 게임을 포함하여 모든 소리와 진동을 끕니다. 전화는 걸 수 있습니다."</string>
+    <string name="zen_silence_introduction_voice" msgid="3948778066295728085">"알람, 음악, 동영상, 게임을 비롯한 모든 소리와 진동을 끕니다. 이 경우에도 전화는 걸 수 있습니다."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"알람, 음악, 동영상, 게임을 포함하여 모든 소리와 진동을 끕니다."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"아래에 덜 급한 알림 표시"</string>
@@ -674,7 +674,7 @@
     <string name="left_icon" msgid="3096287125959387541">"왼쪽 아이콘"</string>
     <string name="right_icon" msgid="3952104823293824311">"오른쪽 아이콘"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"드래그하여 타일 추가"</string>
-    <string name="drag_to_remove_tiles" msgid="3361212377437088062">"여기로 드래그하여 삭제"</string>
+    <string name="drag_to_remove_tiles" msgid="3361212377437088062">"삭제하려면 여기를 드래그"</string>
     <string name="qs_edit" msgid="2232596095725105230">"수정"</string>
     <string name="tuner_time" msgid="6572217313285536011">"시간"</string>
   <string-array name="clock_options">
@@ -730,7 +730,7 @@
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"아래로 드래그하여 닫기"</string>
     <string name="pip_menu_title" msgid="3328510504196964712">"PIP 메뉴"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g>에서 PIP 사용 중"</string>
-    <string name="pip_notification_message" msgid="4171698133469539591">"<xliff:g id="NAME">%s</xliff:g>에서 이 기능이 사용되는 것을 원하지 않는 경우 탭하여 설정을 열고 기능을 사용 중지하세요."</string>
+    <string name="pip_notification_message" msgid="5619512781514343311">"<xliff:g id="NAME">%s</xliff:g>에서 이 기능이 사용되는 것을 원하지 않는 경우 탭하여 설정을 열고 기능을 사용 중지하세요."</string>
     <string name="pip_play" msgid="1417176722760265888">"재생"</string>
     <string name="pip_pause" msgid="8881063404466476571">"일시중지"</string>
     <string name="pip_skip_to_next" msgid="1948440006726306284">"다음으로 건너뛰기"</string>
@@ -758,7 +758,7 @@
     <string name="notification_channel_alerts" msgid="4496839309318519037">"알림"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"스크린샷"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"일반 메시지"</string>
-    <string name="notification_channel_storage" msgid="3077205683020695313">"저장공간"</string>
+    <string name="notification_channel_storage" msgid="3077205683020695313">"저장소"</string>
     <string name="instant_apps" msgid="6647570248119804907">"인스턴트 앱"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"인스턴트 앱은 설치가 필요하지 않습니다."</string>
     <string name="app_info" msgid="6856026610594615344">"앱 정보"</string>
@@ -775,5 +775,4 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"바꾸기"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"백그라운드에서 실행 중인 앱"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"탭하여 배터리 및 데이터 사용량 확인"</string>
-    <string name="data_usage_disable_mobile" msgid="5116269981510015864">"모바일 데이터를 사용 중지하시겠습니까?"</string>
 </resources>

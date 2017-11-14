@@ -31,7 +31,6 @@ import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
-import android.graphics.RectF;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.util.Log;
@@ -47,10 +46,8 @@ import android.view.accessibility.AccessibilityWindowInfo;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.policy.PipSnapAlgorithm;
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.FlingAnimationUtils;
-import com.android.systemui.tuner.TunerService;
 
 import java.io.PrintWriter;
 
@@ -90,6 +87,8 @@ public class PipTouchHandler {
     // The current movement bounds
     private Rect mMovementBounds = new Rect();
 
+    // The reference inset bounds, used to determine the dismiss fraction
+    private Rect mInsetBounds = new Rect();
     // The reference bounds used to calculate the normal/expanded target bounds
     private Rect mNormalBounds = new Rect();
     private Rect mNormalMovementBounds = new Rect();
@@ -171,7 +170,7 @@ public class PipTouchHandler {
         @Override
         public void onPipShowMenu() {
             mMenuController.showMenu(MENU_STATE_FULL, mMotionHelper.getBounds(),
-                    mMovementBounds, true /* allowMenuTimeout */);
+                    mMovementBounds, true /* allowMenuTimeout */, willResizeMenu());
         }
     }
 
@@ -188,13 +187,15 @@ public class PipTouchHandler {
         mMenuController.addListener(mMenuListener);
         mDismissViewController = new PipDismissViewController(context);
         mSnapAlgorithm = new PipSnapAlgorithm(mContext);
-        mTouchState = new PipTouchState(mViewConfig);
         mFlingAnimationUtils = new FlingAnimationUtils(context, 2.5f);
         mGestures = new PipTouchGesture[] {
                 mDefaultMovementGesture
         };
         mMotionHelper = new PipMotionHelper(mContext, mActivityManager, mMenuController,
                 mSnapAlgorithm, mFlingAnimationUtils);
+        mTouchState = new PipTouchState(mViewConfig, mHandler,
+                () -> mMenuController.showMenu(MENU_STATE_FULL, mMotionHelper.getBounds(),
+                        mMovementBounds, true /* allowMenuTimeout */, willResizeMenu()));
 
         Resources res = context.getResources();
         mExpandedShortestEdgeSize = res.getDimensionPixelSize(
@@ -215,7 +216,7 @@ public class PipTouchHandler {
         // Only show the menu if the user isn't currently interacting with the PiP
         if (!mTouchState.isUserInteracting()) {
             mMenuController.showMenu(MENU_STATE_FULL, mMotionHelper.getBounds(),
-                    mMovementBounds, false /* allowMenuTimeout */);
+                    mMovementBounds, false /* allowMenuTimeout */, willResizeMenu());
         }
     }
 
@@ -237,7 +238,7 @@ public class PipTouchHandler {
 
         if (mShowPipMenuOnAnimationEnd) {
             mMenuController.showMenu(MENU_STATE_CLOSE, mMotionHelper.getBounds(),
-                    mMovementBounds, true /* allowMenuTimeout */);
+                    mMovementBounds, true /* allowMenuTimeout */, false /* willResizeMenu */);
             mShowPipMenuOnAnimationEnd = false;
         }
     }
@@ -311,6 +312,7 @@ public class PipTouchHandler {
         mNormalMovementBounds = normalMovementBounds;
         mExpandedMovementBounds = expandedMovementBounds;
         mDisplayRotation = displayRotation;
+        mInsetBounds.set(insetBounds);
         updateMovementBounds(mMenuState);
 
         // If we have a deferred resize, apply it now
@@ -337,7 +339,7 @@ public class PipTouchHandler {
 
     private void onAccessibilityShowMenu() {
         mMenuController.showMenu(MENU_STATE_FULL, mMotionHelper.getBounds(),
-                mMovementBounds, false /* allowMenuTimeout */);
+                mMovementBounds, false /* allowMenuTimeout */, willResizeMenu());
     }
 
     private boolean handleTouchEvent(MotionEvent ev) {
@@ -385,7 +387,7 @@ public class PipTouchHandler {
             }
             case MotionEvent.ACTION_HOVER_ENTER:
             case MotionEvent.ACTION_HOVER_MOVE: {
-                if (!mSendingHoverAccessibilityEvents) {
+                if (mAccessibilityManager.isEnabled() && !mSendingHoverAccessibilityEvents) {
                     AccessibilityEvent event = AccessibilityEvent.obtain(
                             AccessibilityEvent.TYPE_VIEW_HOVER_ENTER);
                     event.setImportantForAccessibility(true);
@@ -398,7 +400,7 @@ public class PipTouchHandler {
                 break;
             }
             case MotionEvent.ACTION_HOVER_EXIT: {
-                if (mSendingHoverAccessibilityEvents) {
+                if (mAccessibilityManager.isEnabled() && mSendingHoverAccessibilityEvents) {
                     AccessibilityEvent event = AccessibilityEvent.obtain(
                             AccessibilityEvent.TYPE_VIEW_HOVER_EXIT);
                     event.setImportantForAccessibility(true);
@@ -418,15 +420,18 @@ public class PipTouchHandler {
      * Updates the appearance of the menu and scrim on top of the PiP while dismissing.
      */
     private void updateDismissFraction() {
-        if (mMenuController != null) {
+        // Skip updating the dismiss fraction when the IME is showing. This is to work around an
+        // issue where starting the menu activity for the dismiss overlay will steal the window
+        // focus, which closes the IME.
+        if (mMenuController != null && !mIsImeShowing) {
             Rect bounds = mMotionHelper.getBounds();
-            final float target = mMovementBounds.bottom + bounds.height();
+            final float target = mInsetBounds.bottom;
             float fraction = 0f;
             if (bounds.bottom > target) {
                 final float distance = bounds.bottom - target;
                 fraction = Math.min(distance / bounds.height(), 1f);
             }
-            if (Float.compare(fraction, 0f) != 0 || mMenuState != MENU_STATE_NONE) {
+            if (Float.compare(fraction, 0f) != 0 || mMenuController.isMenuActivityVisible()) {
                 // Update if the fraction > 0, or if fraction == 0 and the menu was already visible
                 mMenuController.setDismissFraction(fraction);
             }
@@ -701,7 +706,7 @@ public class PipTouchHandler {
                     // If the menu is still visible, and we aren't minimized, then just poke the
                     // menu so that it will timeout after the user stops touching it
                     mMenuController.showMenu(mMenuState, mMotionHelper.getBounds(),
-                            mMovementBounds, true /* allowMenuTimeout */);
+                            mMovementBounds, true /* allowMenuTimeout */, willResizeMenu());
                 } else {
                     // If the menu is not visible, then we can still be showing the activity for the
                     // dismiss overlay, so just finish it after the animation completes
@@ -727,8 +732,20 @@ public class PipTouchHandler {
                         null /* animatorListener */);
                 setMinimizedStateInternal(false);
             } else if (mMenuState != MENU_STATE_FULL) {
-                mMenuController.showMenu(MENU_STATE_FULL, mMotionHelper.getBounds(),
-                        mMovementBounds, true /* allowMenuTimeout */);
+                if (mTouchState.isDoubleTap()) {
+                    // Expand to fullscreen if this is a double tap
+                    mMotionHelper.expandPip();
+                } else if (!mTouchState.isWaitingForDoubleTap()) {
+                    // User has stalled long enough for this not to be a drag or a double tap, just
+                    // expand the menu
+                    mMenuController.showMenu(MENU_STATE_FULL, mMotionHelper.getBounds(),
+                            mMovementBounds, true /* allowMenuTimeout */, willResizeMenu());
+                } else {
+                    // Next touch event _may_ be the second tap for the double-tap, schedule a
+                    // fallback runnable to trigger the menu if no touch event occurs before the
+                    // next tap
+                    mTouchState.scheduleDoubleTapTimeoutCallback();
+                }
             } else {
                 mMenuController.hideMenu();
                 mMotionHelper.expandPip();
@@ -768,6 +785,14 @@ public class PipTouchHandler {
             setMinimizedStateInternal(false);
         }
         cleanUpDismissTarget();
+    }
+
+    /**
+     * @return whether the menu will resize as a part of showing the full menu.
+     */
+    private boolean willResizeMenu() {
+        return mExpandedBounds.width() != mNormalBounds.width() ||
+                mExpandedBounds.height() != mNormalBounds.height();
     }
 
     public void dump(PrintWriter pw, String prefix) {

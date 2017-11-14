@@ -268,8 +268,7 @@ bool ResourceParser::Parse(xml::XmlPullParser* parser) {
       continue;
     }
 
-    if (!parser->element_namespace().empty() ||
-        parser->element_name() != "resources") {
+    if (!parser->element_namespace().empty() || parser->element_name() != "resources") {
       diag_->Error(DiagMessage(source_.WithLine(parser->line_number()))
                    << "root element must be <resources>");
       return false;
@@ -328,8 +327,7 @@ bool ResourceParser::ParseResources(xml::XmlPullParser* parser) {
     parsed_resource.comment = std::move(comment);
 
     // Extract the product name if it exists.
-    if (Maybe<StringPiece> maybe_product =
-            xml::FindNonEmptyAttribute(parser, "product")) {
+    if (Maybe<StringPiece> maybe_product = xml::FindNonEmptyAttribute(parser, "product")) {
       parsed_resource.product = maybe_product.value().to_string();
     }
 
@@ -348,10 +346,8 @@ bool ResourceParser::ParseResources(xml::XmlPullParser* parser) {
   for (const ResourceName& stripped_resource : stripped_resources) {
     if (!table_->FindResource(stripped_resource)) {
       // Failed to find the resource.
-      diag_->Error(DiagMessage(source_)
-                   << "resource '" << stripped_resource
-                   << "' "
-                      "was filtered out but no product variant remains");
+      diag_->Error(DiagMessage(source_) << "resource '" << stripped_resource
+                                        << "' was filtered out but no product variant remains");
       error = true;
     }
   }
@@ -589,7 +585,7 @@ std::unique_ptr<Item> ResourceParser::ParseXml(xml::XmlPullParser* parser,
     // This can only be a StyledString.
     std::unique_ptr<StyledString> styled_string =
         util::make_unique<StyledString>(table_->string_pool.MakeRef(
-            style_string, StringPool::Context(StringPool::Context::kStylePriority, config_)));
+            style_string, StringPool::Context(StringPool::Context::kNormalPriority, config_)));
     styled_string->untranslatable_sections = std::move(untranslatable_sections);
     return std::move(styled_string);
   }
@@ -1223,7 +1219,7 @@ bool ResourceParser::ParseArrayImpl(xml::XmlPullParser* parser,
         continue;
       }
       item->SetSource(item_source);
-      array->items.emplace_back(std::move(item));
+      array->elements.emplace_back(std::move(item));
 
     } else if (!ShouldIgnoreElement(element_namespace, element_name)) {
       diag_->Error(DiagMessage(source_.WithLine(parser->line_number()))

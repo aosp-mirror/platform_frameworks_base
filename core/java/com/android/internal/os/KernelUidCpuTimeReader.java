@@ -130,17 +130,42 @@ public class KernelUidCpuTimeReader {
      * @param uid The UID to remove.
      */
     public void removeUid(int uid) {
-        int index = mLastUserTimeUs.indexOfKey(uid);
+        final int index = mLastSystemTimeUs.indexOfKey(uid);
         if (index >= 0) {
-            mLastUserTimeUs.removeAt(index);
             mLastSystemTimeUs.removeAt(index);
+            mLastUserTimeUs.removeAt(index);
         }
+        removeUidsFromKernelModule(uid, uid);
+    }
 
+    /**
+     * Removes UIDs in a given range from the kernel module and internal accounting data.
+     * @param startUid the first uid to remove
+     * @param endUid the last uid to remove
+     */
+    public void removeUidsInRange(int startUid, int endUid) {
+        if (endUid < startUid) {
+            return;
+        }
+        mLastSystemTimeUs.put(startUid, 0);
+        mLastUserTimeUs.put(startUid, 0);
+        mLastSystemTimeUs.put(endUid, 0);
+        mLastUserTimeUs.put(endUid, 0);
+        final int startIndex = mLastSystemTimeUs.indexOfKey(startUid);
+        final int endIndex = mLastSystemTimeUs.indexOfKey(endUid);
+        mLastSystemTimeUs.removeAtRange(startIndex, endIndex - startIndex + 1);
+        mLastUserTimeUs.removeAtRange(startIndex, endIndex - startIndex + 1);
+        removeUidsFromKernelModule(startUid, endUid);
+    }
+
+    private void removeUidsFromKernelModule(int startUid, int endUid) {
+        Slog.d(TAG, "Removing uids " + startUid + "-" + endUid);
         try (FileWriter writer = new FileWriter(sRemoveUidProcFile)) {
-            writer.write(Integer.toString(uid) + "-" + Integer.toString(uid));
+            writer.write(startUid + "-" + endUid);
             writer.flush();
         } catch (IOException e) {
-            Slog.e(TAG, "failed to remove uid from uid_cputime module", e);
+            Slog.e(TAG, "failed to remove uids " + startUid + " - " + endUid
+                    + " from uid_cputime module", e);
         }
     }
 }

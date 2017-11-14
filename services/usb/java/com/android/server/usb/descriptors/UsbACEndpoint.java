@@ -23,7 +23,7 @@ import android.util.Log;
  * see audio10.pdf section 4.4.1.2
  */
 abstract class UsbACEndpoint extends UsbDescriptor {
-    private static final String TAG = "ACEndpoint";
+    private static final String TAG = "UsbACEndpoint";
 
     protected final byte mSubclass; // from the mSubclass member of the "enclosing"
                                     // Interface Descriptor, not the stream.
@@ -50,7 +50,7 @@ abstract class UsbACEndpoint extends UsbDescriptor {
     }
 
     public static UsbDescriptor allocDescriptor(UsbDescriptorParser parser,
-            int length, byte type) {
+                                                int length, byte type) {
         UsbInterfaceDescriptor interfaceDesc = parser.getCurInterface();
         byte subClass = interfaceDesc.getUsbSubclass();
         switch (subClass) {

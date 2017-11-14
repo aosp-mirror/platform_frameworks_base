@@ -30,6 +30,7 @@ import android.graphics.Rect;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.util.Log;
+import android.util.Pair;
 import android.view.IPinnedStackController;
 import android.view.IPinnedStackListener;
 import android.view.IWindowManager;
@@ -70,11 +71,11 @@ public class PipManager implements BasePipManager {
      */
     TaskStackListener mTaskStackListener = new TaskStackListener() {
         @Override
-        public void onActivityPinned(String packageName, int taskId) {
+        public void onActivityPinned(String packageName, int userId, int taskId) {
             mTouchHandler.onActivityPinned();
             mMediaController.onActivityPinned();
             mMenuController.onActivityPinned();
-            mNotificationController.onActivityPinned(packageName,
+            mNotificationController.onActivityPinned(packageName, userId,
                     true /* deferUntilAnimationEnds */);
 
             SystemServicesProxy.getInstance(mContext).setPipVisibility(true);
@@ -82,13 +83,15 @@ public class PipManager implements BasePipManager {
 
         @Override
         public void onActivityUnpinned() {
-            ComponentName topPipActivity = PipUtils.getTopPinnedActivity(mContext,
-                    mActivityManager);
-            mMenuController.onActivityUnpinned(topPipActivity);
-            mTouchHandler.onActivityUnpinned(topPipActivity);
-            mNotificationController.onActivityUnpinned(topPipActivity);
+            final Pair<ComponentName, Integer> topPipActivityInfo = PipUtils.getTopPinnedActivity(
+                    mContext, mActivityManager);
+            final ComponentName topActivity = topPipActivityInfo.first;
+            final int userId = topActivity != null ? topPipActivityInfo.second : 0;
+            mMenuController.onActivityUnpinned();
+            mTouchHandler.onActivityUnpinned(topActivity);
+            mNotificationController.onActivityUnpinned(topActivity, userId);
 
-            SystemServicesProxy.getInstance(mContext).setPipVisibility(topPipActivity != null);
+            SystemServicesProxy.getInstance(mContext).setPipVisibility(topActivity != null);
         }
 
         @Override

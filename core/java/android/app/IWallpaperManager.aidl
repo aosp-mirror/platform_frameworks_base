@@ -60,7 +60,7 @@ interface IWallpaperManager {
     /**
      * Get the wallpaper for a given user.
      */
-    ParcelFileDescriptor getWallpaper(IWallpaperManagerCallback cb, int which,
+    ParcelFileDescriptor getWallpaper(String callingPkg, IWallpaperManagerCallback cb, int which,
             out Bundle outParams, int userId);
 
     /**

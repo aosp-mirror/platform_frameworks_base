@@ -1,0 +1,14 @@
+android.icu.impl.coll.CollationRoot
+android.icu.impl.IDNA2003
+android.icu.impl.number.Parse
+android.icu.util.TimeZone
+android.media.ImageReader
+android.media.MediaCodecList
+android.media.MediaPlayer
+android.media.SoundPool
+android.text.format.Formatter
+android.text.Html$HtmlParser
+android.util.Log$PreloadHolder
+com.android.org.conscrypt.TrustedCertificateStore
+org.ccil.cowan.tagsoup.HTMLScanner
+sun.security.jca.Providers

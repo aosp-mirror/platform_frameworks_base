@@ -64,12 +64,12 @@ TEST(IdAssignerTest, AssignIdsWithReservedIds) {
   // Expect to fill in the gaps between 0x0101XXXX and 0x0104XXXX.
 
   maybe_result = table->FindResource(test::ParseNameOrDie("android:dimen/two"));
-  AAPT_ASSERT_TRUE(maybe_result);
+  ASSERT_TRUE(maybe_result);
   EXPECT_EQ(make_value<uint8_t>(2), maybe_result.value().type->id);
 
   maybe_result =
       table->FindResource(test::ParseNameOrDie("android:integer/three"));
-  AAPT_ASSERT_TRUE(maybe_result);
+  ASSERT_TRUE(maybe_result);
   EXPECT_EQ(make_value<uint8_t>(3), maybe_result.value().type->id);
 
   // Expect to bypass the reserved 0x0104XXXX IDs and use the next 0x0105XXXX
@@ -77,17 +77,17 @@ TEST(IdAssignerTest, AssignIdsWithReservedIds) {
 
   maybe_result =
       table->FindResource(test::ParseNameOrDie("android:string/five"));
-  AAPT_ASSERT_TRUE(maybe_result);
+  ASSERT_TRUE(maybe_result);
   EXPECT_EQ(make_value<uint8_t>(5), maybe_result.value().type->id);
 
   // Expect to fill in the gaps between 0x01040000 and 0x01040006.
 
   maybe_result = table->FindResource(test::ParseNameOrDie("android:attr/bar"));
-  AAPT_ASSERT_TRUE(maybe_result);
+  ASSERT_TRUE(maybe_result);
   EXPECT_EQ(make_value<uint16_t>(1), maybe_result.value().entry->id);
 
   maybe_result = table->FindResource(test::ParseNameOrDie("android:attr/baz"));
-  AAPT_ASSERT_TRUE(maybe_result);
+  ASSERT_TRUE(maybe_result);
   EXPECT_EQ(make_value<uint16_t>(2), maybe_result.value().entry->id);
 }
 
@@ -121,7 +121,7 @@ TEST(IdAssignerTest, AssignIdsWithIdMap) {
   ASSERT_TRUE(VerifyIds(table.get()));
   Maybe<ResourceTable::SearchResult> result =
       table->FindResource(test::ParseNameOrDie("android:attr/foo"));
-  AAPT_ASSERT_TRUE(result);
+  ASSERT_TRUE(result);
 
   const ResourceTable::SearchResult& search_result = result.value();
   EXPECT_EQ(make_value<uint8_t>(0x01), search_result.package->id);

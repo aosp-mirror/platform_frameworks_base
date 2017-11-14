@@ -15,36 +15,38 @@
  */
 package com.android.server.usb.descriptors;
 
+import com.android.server.usb.descriptors.report.ReportCanvas;
+
 /**
  * @hide
  * A Usb Endpoint Descriptor.
  * see usb11.pdf section 9.6.4
  */
 public class UsbEndpointDescriptor extends UsbDescriptor {
-    private static final String TAG = "EndPoint";
+    private static final String TAG = "UsbEndpointDescriptor";
 
-    public static final byte MASK_ENDPOINT_ADDRESS     = 0b0001111;
-    public static final byte MASK_ENDPOINT_DIRECTION   = (byte) 0b10000000;
-    public static final byte DIRECTION_OUTPUT          = 0x00;
-    public static final byte DIRECTION_INPUT           = (byte) 0x80;
+    public static final byte MASK_ENDPOINT_ADDRESS = 0b0001111;
+    public static final byte MASK_ENDPOINT_DIRECTION = (byte) 0b10000000;
+    public static final byte DIRECTION_OUTPUT = 0x00;
+    public static final byte DIRECTION_INPUT = (byte) 0x80;
 
     public static final byte MASK_ATTRIBS_TRANSTYPE = 0b00000011;
-    public static final byte TRANSTYPE_CONTROL     = 0x00;
-    public static final byte TRANSTYPE_ISO         = 0x01;
-    public static final byte TRANSTYPE_BULK        = 0x02;
-    public static final byte TRANSTYPE_INTERRUPT   = 0x03;
+    public static final byte TRANSTYPE_CONTROL = 0x00;
+    public static final byte TRANSTYPE_ISO = 0x01;
+    public static final byte TRANSTYPE_BULK = 0x02;
+    public static final byte TRANSTYPE_INTERRUPT = 0x03;
 
-    public static final byte MASK_ATTRIBS_SYNCTYPE  = 0b00001100;
-    public static final byte SYNCTYPE_NONE          = 0b00000000;
-    public static final byte SYNCTYPE_ASYNC         = 0b00000100;
-    public static final byte SYNCTYPE_ADAPTSYNC     = 0b00001000;
-    public static final byte SYNCTYPE_RESERVED      = 0b00001100;
+    public static final byte MASK_ATTRIBS_SYNCTYPE = 0b00001100;
+    public static final byte SYNCTYPE_NONE = 0b00000000;
+    public static final byte SYNCTYPE_ASYNC = 0b00000100;
+    public static final byte SYNCTYPE_ADAPTSYNC = 0b00001000;
+    public static final byte SYNCTYPE_RESERVED = 0b00001100;
 
-    public static final byte MASK_ATTRIBS_USEAGE    = 0b00110000;
-    public static final byte USEAGE_DATA            = 0b00000000;
-    public static final byte USEAGE_FEEDBACK        = 0b00010000;
-    public static final byte USEAGE_EXPLICIT        = 0b00100000;
-    public static final byte USEAGE_RESERVED        = 0b00110000;
+    public static final byte MASK_ATTRIBS_USEAGE = 0b00110000;
+    public static final byte USEAGE_DATA = 0b00000000;
+    public static final byte USEAGE_FEEDBACK = 0b00010000;
+    public static final byte USEAGE_EXPLICIT = 0b00100000;
+    public static final byte USEAGE_RESERVED = 0b00110000;
 
     private byte mEndpointAddress;  // 2:1 Endpoint Address
                                     // Bits 0..3b Endpoint Number.
@@ -76,6 +78,7 @@ public class UsbEndpointDescriptor extends UsbDescriptor {
 
     public UsbEndpointDescriptor(int length, byte type) {
         super(length, type);
+        mHierarchyLevel = 4;
     }
 
     public byte getEndpointAddress() {
@@ -106,12 +109,84 @@ public class UsbEndpointDescriptor extends UsbDescriptor {
     public int parseRawDescriptors(ByteStream stream) {
         mEndpointAddress = stream.getByte();
         mAttributes = stream.getByte();
-        mPacketSize = stream.unpackUsbWord();
+        mPacketSize = stream.unpackUsbShort();
         mInterval = stream.getByte();
         if (mLength == 9) {
             mRefresh = stream.getByte();
             mSyncAddress = stream.getByte();
         }
         return mLength;
+    }
+
+    @Override
+    public void report(ReportCanvas canvas) {
+        super.report(canvas);
+
+        canvas.openList();
+
+        byte address = getEndpointAddress();
+        canvas.writeListItem("Address: "
+                + ReportCanvas.getHexString(address & UsbEndpointDescriptor.MASK_ENDPOINT_ADDRESS)
+                + ((address & UsbEndpointDescriptor.MASK_ENDPOINT_DIRECTION)
+                == UsbEndpointDescriptor.DIRECTION_OUTPUT ? " [out]" : " [in]"));
+
+        byte attributes = getAttributes();
+        canvas.openListItem();
+        canvas.write("Attributes: " + ReportCanvas.getHexString(attributes) + " ");
+        switch (attributes & UsbEndpointDescriptor.MASK_ATTRIBS_TRANSTYPE) {
+            case UsbEndpointDescriptor.TRANSTYPE_CONTROL:
+                canvas.write("Control");
+                break;
+            case UsbEndpointDescriptor.TRANSTYPE_ISO:
+                canvas.write("Iso");
+                break;
+            case UsbEndpointDescriptor.TRANSTYPE_BULK:
+                canvas.write("Bulk");
+                break;
+            case UsbEndpointDescriptor.TRANSTYPE_INTERRUPT:
+                canvas.write("Interrupt");
+                break;
+        }
+        canvas.closeListItem();
+
+        // These flags are only relevant for ISO transfer type
+        if ((attributes & UsbEndpointDescriptor.MASK_ATTRIBS_TRANSTYPE)
+                == UsbEndpointDescriptor.TRANSTYPE_ISO) {
+            canvas.openListItem();
+            canvas.write("Aync: ");
+            switch (attributes & UsbEndpointDescriptor.MASK_ATTRIBS_SYNCTYPE) {
+                case UsbEndpointDescriptor.SYNCTYPE_NONE:
+                    canvas.write("NONE");
+                    break;
+                case UsbEndpointDescriptor.SYNCTYPE_ASYNC:
+                    canvas.write("ASYNC");
+                    break;
+                case UsbEndpointDescriptor.SYNCTYPE_ADAPTSYNC:
+                    canvas.write("ADAPTIVE ASYNC");
+                    break;
+            }
+            canvas.closeListItem();
+
+            canvas.openListItem();
+            canvas.write("Useage: ");
+            switch (attributes & UsbEndpointDescriptor.MASK_ATTRIBS_USEAGE) {
+                case UsbEndpointDescriptor.USEAGE_DATA:
+                    canvas.write("DATA");
+                    break;
+                case UsbEndpointDescriptor.USEAGE_FEEDBACK:
+                    canvas.write("FEEDBACK");
+                    break;
+                case UsbEndpointDescriptor.USEAGE_EXPLICIT:
+                    canvas.write("EXPLICIT FEEDBACK");
+                    break;
+                case UsbEndpointDescriptor.USEAGE_RESERVED:
+                    canvas.write("RESERVED");
+                    break;
+            }
+            canvas.closeListItem();
+        }
+        canvas.writeListItem("Package Size: " + getPacketSize());
+        canvas.writeListItem("Interval: " + getInterval());
+        canvas.closeList();
     }
 }

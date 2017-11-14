@@ -18,7 +18,8 @@
 
 #include "test/Test.h"
 
-using android::StringPiece;
+using ::android::StringPiece;
+using ::testing::NotNull;
 
 namespace aapt {
 
@@ -121,7 +122,7 @@ TEST_F(ManifestFixerTest, UseDefaultSdkVersionsIfNonePresent) {
   xml::Element* el;
   xml::Attribute* attr;
 
-  el = xml::FindRootElement(doc.get());
+  el = doc->root.get();
   ASSERT_NE(nullptr, el);
   el = el->FindChild({}, "uses-sdk");
   ASSERT_NE(nullptr, el);
@@ -140,7 +141,7 @@ TEST_F(ManifestFixerTest, UseDefaultSdkVersionsIfNonePresent) {
                           options);
   ASSERT_NE(nullptr, doc);
 
-  el = xml::FindRootElement(doc.get());
+  el = doc->root.get();
   ASSERT_NE(nullptr, el);
   el = el->FindChild({}, "uses-sdk");
   ASSERT_NE(nullptr, el);
@@ -159,7 +160,7 @@ TEST_F(ManifestFixerTest, UseDefaultSdkVersionsIfNonePresent) {
                           options);
   ASSERT_NE(nullptr, doc);
 
-  el = xml::FindRootElement(doc.get());
+  el = doc->root.get();
   ASSERT_NE(nullptr, el);
   el = el->FindChild({}, "uses-sdk");
   ASSERT_NE(nullptr, el);
@@ -176,7 +177,7 @@ TEST_F(ManifestFixerTest, UseDefaultSdkVersionsIfNonePresent) {
                           options);
   ASSERT_NE(nullptr, doc);
 
-  el = xml::FindRootElement(doc.get());
+  el = doc->root.get();
   ASSERT_NE(nullptr, el);
   el = el->FindChild({}, "uses-sdk");
   ASSERT_NE(nullptr, el);
@@ -198,7 +199,7 @@ TEST_F(ManifestFixerTest, UsesSdkMustComeBeforeApplication) {
                                                             options);
   ASSERT_NE(nullptr, doc);
 
-  xml::Element* manifest_el = xml::FindRootElement(doc.get());
+  xml::Element* manifest_el = doc->root.get();
   ASSERT_NE(nullptr, manifest_el);
   ASSERT_EQ("manifest", manifest_el->name);
 
@@ -247,7 +248,7 @@ TEST_F(ManifestFixerTest, RenameManifestPackageAndFullyQualifyClasses) {
                                                             options);
   ASSERT_NE(nullptr, doc);
 
-  xml::Element* manifestEl = xml::FindRootElement(doc.get());
+  xml::Element* manifestEl = doc->root.get();
   ASSERT_NE(nullptr, manifestEl);
 
   xml::Attribute* attr = nullptr;
@@ -296,7 +297,7 @@ TEST_F(ManifestFixerTest,
                                                             options);
   ASSERT_NE(nullptr, doc);
 
-  xml::Element* manifest_el = xml::FindRootElement(doc.get());
+  xml::Element* manifest_el = doc->root.get();
   ASSERT_NE(nullptr, manifest_el);
 
   xml::Element* instrumentation_el =
@@ -320,7 +321,7 @@ TEST_F(ManifestFixerTest, UseDefaultVersionNameAndCode) {
                                                             options);
   ASSERT_NE(nullptr, doc);
 
-  xml::Element* manifest_el = xml::FindRootElement(doc.get());
+  xml::Element* manifest_el = doc->root.get();
   ASSERT_NE(nullptr, manifest_el);
 
   xml::Attribute* attr =
@@ -343,7 +344,7 @@ TEST_F(ManifestFixerTest, EnsureManifestAttributesAreTyped) {
       Verify("<manifest package=\"android\" coreApp=\"true\" />");
   ASSERT_NE(nullptr, doc);
 
-  xml::Element* el = xml::FindRootElement(doc.get());
+  xml::Element* el = doc->root.get();
   ASSERT_NE(nullptr, el);
 
   EXPECT_EQ("manifest", el->name);
@@ -418,6 +419,24 @@ TEST_F(ManifestFixerTest, DoNotIgnoreNonNamespacedElements) {
         <tag whoo="true" />
       </manifest>)EOF";
   EXPECT_EQ(nullptr, Verify(input));
+}
+
+TEST_F(ManifestFixerTest, SupportKeySets) {
+  std::string input = R"(
+      <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="android">
+        <key-sets>
+          <key-set android:name="old-set">
+            <public-key android:name="old-key" android:value="some+old+key" />
+          </key-set>
+          <key-set android:name="new-set">
+            <public-key android:name="new-key" android:value="some+new+key" />
+          </key-set>
+          <upgrade-key-set android:name="old-set" />
+          <upgrade-key-set android:name="new-set" />
+        </key-sets>
+      </manifest>)";
+  EXPECT_THAT(Verify(input), NotNull());
 }
 
 }  // namespace aapt

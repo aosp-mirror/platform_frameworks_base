@@ -97,12 +97,12 @@ public final class NetworkStats implements AutoCloseable {
     private NetworkStatsHistory.Entry mRecycledHistoryEntry = null;
 
     /** @hide */
-    NetworkStats(Context context, NetworkTemplate template, long startTimestamp,
+    NetworkStats(Context context, NetworkTemplate template, int flags, long startTimestamp,
             long endTimestamp) throws RemoteException, SecurityException {
         final INetworkStatsService statsService = INetworkStatsService.Stub.asInterface(
                 ServiceManager.getService(Context.NETWORK_STATS_SERVICE));
         // Open network stats session
-        mSession = statsService.openSessionForUsageStats(context.getOpPackageName());
+        mSession = statsService.openSessionForUsageStats(flags, context.getOpPackageName());
         mCloseGuard.open("close");
         mTemplate = template;
         mStartTimeStamp = startTimestamp;

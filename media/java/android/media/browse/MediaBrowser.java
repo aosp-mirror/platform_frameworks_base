@@ -256,7 +256,13 @@ public final class MediaBrowser {
      */
     private void forceCloseConnection() {
         if (mServiceConnection != null) {
-            mContext.unbindService(mServiceConnection);
+            try {
+                mContext.unbindService(mServiceConnection);
+            } catch (IllegalArgumentException e) {
+                if (DBG) {
+                    Log.d(TAG, "unbindService failed", e);
+                }
+            }
         }
         mState = CONNECT_STATE_DISCONNECTED;
         mServiceConnection = null;
@@ -445,6 +451,9 @@ public final class MediaBrowser {
         ResultReceiver receiver = new ResultReceiver(mHandler) {
             @Override
             protected void onReceiveResult(int resultCode, Bundle resultData) {
+                if (!isConnected()) {
+                    return;
+                }
                 if (resultCode != 0 || resultData == null
                         || !resultData.containsKey(MediaBrowserService.KEY_MEDIA_ITEM)) {
                     cb.onError(mediaId);

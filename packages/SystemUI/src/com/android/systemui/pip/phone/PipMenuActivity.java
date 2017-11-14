@@ -19,6 +19,7 @@ package com.android.systemui.pip.phone;
 import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_ACTIONS;
 import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_ALLOW_TIMEOUT;
 import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_CONTROLLER_MESSENGER;
+import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_WILL_RESIZE_MENU;
 import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_DISMISS_FRACTION;
 import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_MOVEMENT_BOUNDS;
 import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_MENU_STATE;
@@ -54,6 +55,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnTouchListener;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.WindowManager.LayoutParams;
@@ -118,6 +120,7 @@ public class PipMenuActivity extends Activity {
                 }
             };
 
+    private PipTouchState mTouchState;
     private PointF mDownPosition = new PointF();
     private PointF mDownDelta = new PointF();
     private ViewConfiguration mViewConfig;
@@ -132,7 +135,8 @@ public class PipMenuActivity extends Activity {
                     showMenu(data.getInt(EXTRA_MENU_STATE),
                             data.getParcelable(EXTRA_STACK_BOUNDS),
                             data.getParcelable(EXTRA_MOVEMENT_BOUNDS),
-                            data.getBoolean(EXTRA_ALLOW_TIMEOUT));
+                            data.getBoolean(EXTRA_ALLOW_TIMEOUT),
+                            data.getBoolean(EXTRA_WILL_RESIZE_MENU));
                     break;
                 }
                 case MESSAGE_POKE_MENU:
@@ -173,6 +177,13 @@ public class PipMenuActivity extends Activity {
         // Set the flags to allow us to watch for outside touches and also hide the menu and start
         // manipulating the PIP in the same touch gesture
         mViewConfig = ViewConfiguration.get(this);
+        mTouchState = new PipTouchState(mViewConfig, mHandler, () -> {
+            if (mMenuState == MENU_STATE_CLOSE) {
+                showPipMenu();
+            } else {
+                expandPip();
+            }
+        });
         getWindow().addFlags(LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH | LayoutParams.FLAG_SLIPPERY);
 
         super.onCreate(savedInstanceState);
@@ -184,12 +195,28 @@ public class PipMenuActivity extends Activity {
         mViewRoot.setBackground(mBackgroundDrawable);
         mMenuContainer = findViewById(R.id.menu_container);
         mMenuContainer.setAlpha(0);
-        mMenuContainer.setOnClickListener((v) -> {
-            if (mMenuState == MENU_STATE_CLOSE) {
-                showPipMenu();
-            } else {
-                expandPip();
+        mMenuContainer.setOnTouchListener((v, event) -> {
+            mTouchState.onTouchEvent(event);
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_UP:
+                    if (mTouchState.isDoubleTap() || mMenuState == MENU_STATE_FULL) {
+                        // Expand to fullscreen if this is a double tap or we are already expanded
+                        expandPip();
+                    } else if (!mTouchState.isWaitingForDoubleTap()) {
+                        // User has stalled long enough for this not to be a drag or a double tap,
+                        // just expand the menu if necessary
+                        if (mMenuState == MENU_STATE_CLOSE) {
+                            showPipMenu();
+                        }
+                    } else {
+                        // Next touch event _may_ be the second tap for the double-tap, schedule a
+                        // fallback runnable to trigger the menu if no touch event occurs before the
+                        // next tap
+                        mTouchState.scheduleDoubleTapTimeoutCallback();
+                    }
+                    break;
             }
+            return true;
         });
         mDismissButton = findViewById(R.id.dismiss);
         mDismissButton.setAlpha(0);
@@ -307,12 +334,14 @@ public class PipMenuActivity extends Activity {
     }
 
     private void showMenu(int menuState, Rect stackBounds, Rect movementBounds,
-            boolean allowMenuTimeout) {
+            boolean allowMenuTimeout, boolean resizeMenuOnShow) {
         mAllowMenuTimeout = allowMenuTimeout;
         if (mMenuState != menuState) {
-            boolean deferTouchesUntilAnimationEnds = (mMenuState == MENU_STATE_FULL) ||
-                    (menuState == MENU_STATE_FULL);
-            mAllowTouches = !deferTouchesUntilAnimationEnds;
+            // Disallow touches if the menu needs to resize while showing, and we are transitioning
+            // to/from a full menu state.
+            boolean disallowTouchesUntilAnimationEnd = resizeMenuOnShow &&
+                    (mMenuState == MENU_STATE_FULL || menuState == MENU_STATE_FULL);
+            mAllowTouches = !disallowTouchesUntilAnimationEnd;
             cancelDelayedFinish();
             updateActionViews(stackBounds);
             if (mMenuContainerAnimator != null) {
@@ -388,6 +417,11 @@ public class PipMenuActivity extends Activity {
 
     private void updateFromIntent(Intent intent) {
         mToControllerMessenger = intent.getParcelableExtra(EXTRA_CONTROLLER_MESSENGER);
+        if (mToControllerMessenger == null) {
+            Log.w(TAG, "Controller messenger is null. Stopping.");
+            finish();
+            return;
+        }
         notifyActivityCallback(mMessenger);
 
         // Register for HidePipMenuEvents once we notify the controller of this activity
@@ -404,7 +438,8 @@ public class PipMenuActivity extends Activity {
             Rect stackBounds = intent.getParcelableExtra(EXTRA_STACK_BOUNDS);
             Rect movementBounds = intent.getParcelableExtra(EXTRA_MOVEMENT_BOUNDS);
             boolean allowMenuTimeout = intent.getBooleanExtra(EXTRA_ALLOW_TIMEOUT, true);
-            showMenu(menuState, stackBounds, movementBounds, allowMenuTimeout);
+            boolean willResizeMenu = intent.getBooleanExtra(EXTRA_WILL_RESIZE_MENU, false);
+            showMenu(menuState, stackBounds, movementBounds, allowMenuTimeout, willResizeMenu);
         }
     }
 
@@ -567,6 +602,9 @@ public class PipMenuActivity extends Activity {
     }
 
     private void sendMessage(Message m, String errorMsg) {
+        if (mToControllerMessenger == null) {
+            return;
+        }
         try {
             mToControllerMessenger.send(m);
         } catch (RemoteException e) {

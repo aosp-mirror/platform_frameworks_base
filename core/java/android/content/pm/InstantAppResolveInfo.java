@@ -37,7 +37,7 @@ import java.util.Locale;
 @SystemApi
 public final class InstantAppResolveInfo implements Parcelable {
     /** Algorithm that will be used to generate the domain digest */
-    public static final String SHA_ALGORITHM = "SHA-256";
+    private static final String SHA_ALGORITHM = "SHA-256";
 
     private final InstantAppDigest mDigest;
     private final String mPackageName;

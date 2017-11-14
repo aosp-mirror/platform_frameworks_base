@@ -17,8 +17,10 @@
 package com.android.internal.os;
 
 import android.annotation.Nullable;
+import android.os.SystemClock;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.TimeUtils;
 
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -40,6 +42,7 @@ import java.io.IOException;
  * delta.
  */
 public class KernelUidCpuFreqTimeReader {
+    private static final boolean DEBUG = false;
     private static final String TAG = "KernelUidCpuFreqTimeReader";
     private static final String UID_TIMES_PROC_FILE = "/proc/uid_time_in_state";
 
@@ -50,6 +53,8 @@ public class KernelUidCpuFreqTimeReader {
 
     private long[] mCpuFreqs;
     private int mCpuFreqsCount;
+    private long mLastTimeReadMs;
+    private long mNowTimeMs;
 
     private SparseArray<long[]> mLastUidCpuFreqTimeMs = new SparseArray<>();
 
@@ -64,7 +69,9 @@ public class KernelUidCpuFreqTimeReader {
             return;
         }
         try (BufferedReader reader = new BufferedReader(new FileReader(UID_TIMES_PROC_FILE))) {
+            mNowTimeMs = SystemClock.elapsedRealtime();
             readDelta(reader, callback);
+            mLastTimeReadMs = mNowTimeMs;
             mProcFileAvailable = true;
         } catch (IOException e) {
             mReadErrorCounter++;
@@ -74,6 +81,17 @@ public class KernelUidCpuFreqTimeReader {
 
     public void removeUid(int uid) {
         mLastUidCpuFreqTimeMs.delete(uid);
+    }
+
+    public void removeUidsInRange(int startUid, int endUid) {
+        if (endUid < startUid) {
+            return;
+        }
+        mLastUidCpuFreqTimeMs.put(startUid, null);
+        mLastUidCpuFreqTimeMs.put(endUid, null);
+        final int firstIndex = mLastUidCpuFreqTimeMs.indexOfKey(startUid);
+        final int lastIndex = mLastUidCpuFreqTimeMs.indexOfKey(endUid);
+        mLastUidCpuFreqTimeMs.removeAtRange(firstIndex, lastIndex - firstIndex + 1);
     }
 
     @VisibleForTesting
@@ -104,14 +122,37 @@ public class KernelUidCpuFreqTimeReader {
             return;
         }
         final long[] deltaUidTimeMs = new long[size];
+        final long[] curUidTimeMs = new long[size];
+        boolean notify = false;
         for (int i = 0; i < size; ++i) {
             // Times read will be in units of 10ms
             final long totalTimeMs = Long.parseLong(timesStr[i], 10) * 10;
             deltaUidTimeMs[i] = totalTimeMs - uidTimeMs[i];
-            uidTimeMs[i] = totalTimeMs;
+            // If there is malformed data for any uid, then we just log about it and ignore
+            // the data for that uid.
+            if (deltaUidTimeMs[i] < 0 || totalTimeMs < 0) {
+                if (DEBUG) {
+                    final StringBuilder sb = new StringBuilder("Malformed cpu freq data for UID=")
+                            .append(uid).append("\n");
+                    sb.append("data=").append("(").append(uidTimeMs[i]).append(",")
+                            .append(totalTimeMs).append(")").append("\n");
+                    sb.append("times=").append("(");
+                    TimeUtils.formatDuration(mLastTimeReadMs, sb);
+                    sb.append(",");
+                    TimeUtils.formatDuration(mNowTimeMs, sb);
+                    sb.append(")");
+                    Slog.e(TAG, sb.toString());
+                }
+                return;
+            }
+            curUidTimeMs[i] = totalTimeMs;
+            notify = notify || (deltaUidTimeMs[i] > 0);
         }
-        if (callback != null) {
-            callback.onUidCpuFreqTime(uid, deltaUidTimeMs);
+        if (notify) {
+            System.arraycopy(curUidTimeMs, 0, uidTimeMs, 0, size);
+            if (callback != null) {
+                callback.onUidCpuFreqTime(uid, deltaUidTimeMs);
+            }
         }
     }
 

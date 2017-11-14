@@ -38,20 +38,17 @@ namespace aapt {
 
 using namespace android;
 
-using android::base::StringPrintf;
+using ::android::base::StringPrintf;
 
 namespace {
 
-/*
- * Visitor that converts a reference's resource ID to a resource name,
- * given a mapping from resource ID to resource name.
- */
+// Visitor that converts a reference's resource ID to a resource name, given a mapping from
+// resource ID to resource name.
 class ReferenceIdToNameVisitor : public ValueVisitor {
  public:
   using ValueVisitor::Visit;
 
-  explicit ReferenceIdToNameVisitor(
-      const std::map<ResourceId, ResourceName>* mapping)
+  explicit ReferenceIdToNameVisitor(const std::map<ResourceId, ResourceName>* mapping)
       : mapping_(mapping) {
     CHECK(mapping_ != nullptr);
   }
@@ -99,7 +96,7 @@ bool BinaryResourceParser::Parse() {
   if (parser.chunk()->type != android::RES_TABLE_TYPE) {
     context_->GetDiagnostics()->Error(DiagMessage(source_)
                                       << StringPrintf("unknown chunk of type 0x%02x",
-                                                      (int)parser.chunk()->type));
+                                                      static_cast<int>(parser.chunk()->type)));
     return false;
   }
 
@@ -115,7 +112,7 @@ bool BinaryResourceParser::Parse() {
       context_->GetDiagnostics()->Warn(
           DiagMessage(source_) << StringPrintf(
               "unexpected chunk of type 0x%02x trailing RES_TABLE_TYPE",
-              (int)parser.chunk()->type));
+              static_cast<int>(parser.chunk()->type)));
     }
   }
   return true;
@@ -165,9 +162,8 @@ bool BinaryResourceParser::ParseTable(const ResChunk_header* chunk) {
 
       default:
         context_->GetDiagnostics()->Warn(
-            DiagMessage(source_)
-            << "unexpected chunk type "
-            << (int)util::DeviceToHost16(parser.chunk()->type));
+            DiagMessage(source_) << "unexpected chunk type "
+                                 << static_cast<int>(util::DeviceToHost16(parser.chunk()->type)));
         break;
     }
   }
@@ -245,8 +241,7 @@ bool BinaryResourceParser::ParsePackage(const ResChunk_header* chunk) {
             return false;
           }
         } else {
-          context_->GetDiagnostics()->Warn(DiagMessage(source_)
-                                           << "unexpected string pool");
+          context_->GetDiagnostics()->Warn(DiagMessage(source_) << "unexpected string pool");
         }
         break;
 
@@ -270,9 +265,8 @@ bool BinaryResourceParser::ParsePackage(const ResChunk_header* chunk) {
 
       default:
         context_->GetDiagnostics()->Warn(
-            DiagMessage(source_)
-            << "unexpected chunk type "
-            << (int)util::DeviceToHost16(parser.chunk()->type));
+            DiagMessage(source_) << "unexpected chunk type "
+                                 << static_cast<int>(util::DeviceToHost16(parser.chunk()->type)));
         break;
     }
   }
@@ -550,7 +544,7 @@ std::unique_ptr<Array> BinaryResourceParser::ParseArray(
     const ResTable_map_entry* map) {
   std::unique_ptr<Array> array = util::make_unique<Array>();
   for (const ResTable_map& map_entry : map) {
-    array->items.push_back(ParseValue(name, config, map_entry.value));
+    array->elements.push_back(ParseValue(name, config, map_entry.value));
   }
   return array;
 }

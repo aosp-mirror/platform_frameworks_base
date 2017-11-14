@@ -17,13 +17,16 @@ package com.android.server.usb.descriptors;
 
 import android.util.Log;
 
+import com.android.server.usb.descriptors.report.ReportCanvas;
+import com.android.server.usb.descriptors.report.UsbStrings;
+
 /**
  * @hide
  * An audio class-specific Interface.
  * see audio10.pdf section 4.3.2
  */
 public abstract class UsbACInterface extends UsbDescriptor {
-    private static final String TAG = "ACInterface";
+    private static final String TAG = "UsbACInterface";
 
     // Audio Control Subtypes
     public static final byte ACI_UNDEFINED = 0;
@@ -35,6 +38,11 @@ public abstract class UsbACInterface extends UsbDescriptor {
     public static final byte ACI_FEATURE_UNIT = 6;
     public static final byte ACI_PROCESSING_UNIT = 7;
     public static final byte ACI_EXTENSION_UNIT = 8;
+    // Not handled yet
+    public static final byte ACI_CLOCK_SOURCE = 0x0A;
+    public static final byte ACI_CLOCK_SELECTOR = 0x0B;
+    public static final byte ACI_CLOCK_MULTIPLIER = 0x0C;
+    public static final byte ACI_SAMPLE_RATE_CONVERTER =  0x0D;
 
     // Audio Streaming Subtypes
     public static final byte ASI_UNDEFINED = 0;
@@ -87,17 +95,39 @@ public abstract class UsbACInterface extends UsbDescriptor {
         return mSubclass;
     }
 
-    private static UsbDescriptor allocAudioControlDescriptor(ByteStream stream,
-            int length, byte type, byte subtype, byte subClass) {
+    private static UsbDescriptor allocAudioControlDescriptor(UsbDescriptorParser parser,
+            ByteStream stream, int length, byte type, byte subtype, byte subClass) {
         switch (subtype) {
             case ACI_HEADER:
-                return new UsbACHeader(length, type, subtype, subClass);
+            {
+                int acInterfaceSpec = stream.unpackUsbShort();
+                parser.setACInterfaceSpec(acInterfaceSpec);
+                if (acInterfaceSpec == UsbDeviceDescriptor.USBSPEC_2_0) {
+                    return new Usb20ACHeader(length, type, subtype, subClass, acInterfaceSpec);
+                } else {
+                    return new Usb10ACHeader(length, type, subtype, subClass, acInterfaceSpec);
+                }
+            }
 
             case ACI_INPUT_TERMINAL:
-                return new UsbACInputTerminal(length, type, subtype, subClass);
+            {
+                int acInterfaceSpec = parser.getACInterfaceSpec();
+                if (acInterfaceSpec == UsbDeviceDescriptor.USBSPEC_2_0) {
+                    return new Usb20ACInputTerminal(length, type, subtype, subClass);
+                } else {
+                    return new Usb10ACInputTerminal(length, type, subtype, subClass);
+                }
+            }
 
             case ACI_OUTPUT_TERMINAL:
-                return new UsbACOutputTerminal(length, type, subtype, subClass);
+            {
+                int acInterfaceSpec = parser.getACInterfaceSpec();
+                if (acInterfaceSpec == UsbDeviceDescriptor.USBSPEC_2_0) {
+                    return new Usb20ACOutputTerminal(length, type, subtype, subClass);
+                } else {
+                    return new Usb10ACOutputTerminal(length, type, subtype, subClass);
+                }
+            }
 
             case ACI_SELECTOR_UNIT:
                 return new UsbACSelectorUnit(length, type, subtype, subClass);
@@ -106,7 +136,14 @@ public abstract class UsbACInterface extends UsbDescriptor {
                 return new UsbACFeatureUnit(length, type, subtype, subClass);
 
             case ACI_MIXER_UNIT:
-                return new UsbACMixerUnit(length, type, subtype, subClass);
+            {
+                int acInterfaceSpec = parser.getACInterfaceSpec();
+                if (acInterfaceSpec == UsbDeviceDescriptor.USBSPEC_2_0) {
+                    return new Usb20ACMixerUnit(length, type, subtype, subClass);
+                } else {
+                    return new Usb10ACMixerUnit(length, type, subtype, subClass);
+                }
+            }
 
             case ACI_PROCESSING_UNIT:
             case ACI_EXTENSION_UNIT:
@@ -115,18 +152,24 @@ public abstract class UsbACInterface extends UsbDescriptor {
             default:
                 Log.w(TAG, "Unknown Audio Class Interface subtype:0x"
                         + Integer.toHexString(subtype));
-                return null;
+                return new UsbACInterfaceUnparsed(length, type, subtype, subClass);
         }
     }
 
-    private static UsbDescriptor allocAudioStreamingDescriptor(ByteStream stream,
-            int length, byte type, byte subtype, byte subClass) {
+    private static UsbDescriptor allocAudioStreamingDescriptor(UsbDescriptorParser parser,
+            ByteStream stream, int length, byte type, byte subtype, byte subClass) {
+        //int spec = parser.getUsbSpec();
+        int acInterfaceSpec = parser.getACInterfaceSpec();
         switch (subtype) {
             case ASI_GENERAL:
-                return new UsbASGeneral(length, type, subtype, subClass);
+                if (acInterfaceSpec == UsbDeviceDescriptor.USBSPEC_2_0) {
+                    return new Usb20ASGeneral(length, type, subtype, subClass);
+                } else {
+                    return new Usb10ASGeneral(length, type, subtype, subClass);
+                }
 
             case ASI_FORMAT_TYPE:
-                return UsbASFormat.allocDescriptor(stream, length, type, subtype, subClass);
+                return UsbASFormat.allocDescriptor(parser, stream, length, type, subtype, subClass);
 
             case ASI_FORMAT_SPECIFIC:
             case ASI_UNDEFINED:
@@ -155,7 +198,6 @@ public abstract class UsbACInterface extends UsbDescriptor {
                 // Fall through until we implement that descriptor
 
             case MSI_UNDEFINED:
-                // break; Fall through until we implement this descriptor
             default:
                 Log.w(TAG, "Unknown MIDI Streaming Interface subtype:0x"
                         + Integer.toHexString(subtype));
@@ -173,10 +215,12 @@ public abstract class UsbACInterface extends UsbDescriptor {
         byte subClass = interfaceDesc.getUsbSubclass();
         switch (subClass) {
             case AUDIO_AUDIOCONTROL:
-                return allocAudioControlDescriptor(stream, length, type, subtype, subClass);
+                return allocAudioControlDescriptor(
+                        parser, stream, length, type, subtype, subClass);
 
             case AUDIO_AUDIOSTREAMING:
-                return allocAudioStreamingDescriptor(stream, length, type, subtype, subClass);
+                return allocAudioStreamingDescriptor(
+                        parser, stream, length, type, subtype, subClass);
 
             case AUDIO_MIDISTREAMING:
                 return allocMidiStreamingDescriptor(length, type, subtype, subClass);
@@ -186,5 +230,22 @@ public abstract class UsbACInterface extends UsbDescriptor {
                         + Integer.toHexString(subClass));
                 return null;
         }
+    }
+
+    @Override
+    public void report(ReportCanvas canvas) {
+        super.report(canvas);
+
+        byte subClass = getSubclass();
+        String subClassName = UsbStrings.getACInterfaceSubclassName(subClass);
+
+        byte subtype = getSubtype();
+        String subTypeName = UsbStrings.getACControlInterfaceName(subtype);
+
+        canvas.openList();
+        canvas.writeListItem("Subclass: " + ReportCanvas.getHexString(subClass)
+                + " " + subClassName);
+        canvas.writeListItem("Subtype: " + ReportCanvas.getHexString(subtype) + " " + subTypeName);
+        canvas.closeList();
     }
 }

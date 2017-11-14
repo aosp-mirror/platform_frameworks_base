@@ -18,12 +18,14 @@
 
 #include "test/Test.h"
 
+using ::testing::NotNull;
+
 namespace aapt {
 
 TEST(BigBufferTest, AllocateSingleBlock) {
   BigBuffer buffer(4);
 
-  EXPECT_NE(nullptr, buffer.NextBlock<char>(2));
+  EXPECT_THAT(buffer.NextBlock<char>(2), NotNull());
   EXPECT_EQ(2u, buffer.size());
 }
 
@@ -31,10 +33,10 @@ TEST(BigBufferTest, ReturnSameBlockIfNextAllocationFits) {
   BigBuffer buffer(16);
 
   char* b1 = buffer.NextBlock<char>(8);
-  EXPECT_NE(nullptr, b1);
+  EXPECT_THAT(b1, NotNull());
 
   char* b2 = buffer.NextBlock<char>(4);
-  EXPECT_NE(nullptr, b2);
+  EXPECT_THAT(b2, NotNull());
 
   EXPECT_EQ(b1 + 8, b2);
 }
@@ -42,7 +44,7 @@ TEST(BigBufferTest, ReturnSameBlockIfNextAllocationFits) {
 TEST(BigBufferTest, AllocateExactSizeBlockIfLargerThanBlockSize) {
   BigBuffer buffer(16);
 
-  EXPECT_NE(nullptr, buffer.NextBlock<char>(32));
+  EXPECT_THAT(buffer.NextBlock<char>(32), NotNull());
   EXPECT_EQ(32u, buffer.size());
 }
 
@@ -50,13 +52,13 @@ TEST(BigBufferTest, AppendAndMoveBlock) {
   BigBuffer buffer(16);
 
   uint32_t* b1 = buffer.NextBlock<uint32_t>();
-  ASSERT_NE(nullptr, b1);
+  ASSERT_THAT(b1, NotNull());
   *b1 = 33;
 
   {
     BigBuffer buffer2(16);
     b1 = buffer2.NextBlock<uint32_t>();
-    ASSERT_NE(nullptr, b1);
+    ASSERT_THAT(b1, NotNull());
     *b1 = 44;
 
     buffer.AppendBuffer(std::move(buffer2));
@@ -83,7 +85,7 @@ TEST(BigBufferTest, AppendAndMoveBlock) {
 TEST(BigBufferTest, PadAndAlignProperly) {
   BigBuffer buffer(16);
 
-  ASSERT_NE(buffer.NextBlock<char>(2), nullptr);
+  ASSERT_THAT(buffer.NextBlock<char>(2), NotNull());
   ASSERT_EQ(2u, buffer.size());
   buffer.Pad(2);
   ASSERT_EQ(4u, buffer.size());

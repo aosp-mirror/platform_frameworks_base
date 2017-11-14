@@ -19,6 +19,7 @@ package com.android.systemui.statusbar;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Canvas;
+import android.graphics.ColorFilter;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.RippleDrawable;
@@ -34,6 +35,7 @@ public class NotificationBackgroundView extends View {
     private int mClipTopAmount;
     private int mActualHeight;
     private int mClipBottomAmount;
+    private int mTintColor;
 
     public NotificationBackgroundView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -87,6 +89,7 @@ public class NotificationBackgroundView extends View {
         mBackground = background;
         if (mBackground != null) {
             mBackground.setCallback(this);
+            setTint(mTintColor);
         }
         if (mBackground instanceof RippleDrawable) {
             ((RippleDrawable) mBackground).setForceSoftware(true);
@@ -105,6 +108,7 @@ public class NotificationBackgroundView extends View {
         } else {
             mBackground.clearColorFilter();
         }
+        mTintColor = tintColor;
         invalidate();
     }
 

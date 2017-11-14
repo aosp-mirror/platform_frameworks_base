@@ -19,10 +19,10 @@ package com.android.server.am;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.AppGlobals;
-import android.app.IActivityContainer;
 import android.app.IActivityController;
 import android.app.IActivityManager;
 import android.app.IStopUserCallback;
+import android.app.IUidObserver;
 import android.app.ProfilerInfo;
 import android.app.WaitResult;
 import android.app.usage.ConfigurationStats;
@@ -55,7 +55,6 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.DebugUtils;
 import android.util.DisplayMetrics;
-import android.view.IWindowManager;
 
 import com.android.internal.util.HexDump;
 import com.android.internal.util.Preconditions;
@@ -114,6 +113,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
     private int mSamplingInterval;
     private boolean mAutoStop;
     private boolean mStreaming;   // Streaming the profiling output to a file.
+    private String mAgent;  // Agent to attach on startup.
     private int mDisplayId;
     private int mStackId;
     private int mTaskId;
@@ -183,6 +183,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     return runMakeIdle(pw);
                 case "monitor":
                     return runMonitor(pw);
+                case "watch-uids":
+                    return runWatchUids(pw);
                 case "hang":
                     return runHang(pw);
                 case "restart":
@@ -292,6 +294,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     mSamplingInterval = Integer.parseInt(getNextArgRequired());
                 } else if (opt.equals("--streaming")) {
                     mStreaming = true;
+                } else if (opt.equals("--attach-agent")) {
+                    mAgent = getNextArgRequired();
                 } else if (opt.equals("-R")) {
                     mRepeat = Integer.parseInt(getNextArgRequired());
                 } else if (opt.equals("-S")) {
@@ -368,13 +372,16 @@ final class ActivityManagerShellCommand extends ShellCommand {
 
             ProfilerInfo profilerInfo = null;
 
-            if (mProfileFile != null) {
-                ParcelFileDescriptor fd = openOutputFileForSystem(mProfileFile);
-                if (fd == null) {
-                    return 1;
+            if (mProfileFile != null || mAgent != null) {
+                ParcelFileDescriptor fd = null;
+                if (mProfileFile != null) {
+                    fd = openOutputFileForSystem(mProfileFile);
+                    if (fd == null) {
+                        return 1;
+                    }
                 }
                 profilerInfo = new ProfilerInfo(mProfileFile, fd, mSamplingInterval, mAutoStop,
-                                                mStreaming);
+                        mStreaming, mAgent);
             }
 
             pw.println("Starting: " + intent);
@@ -747,7 +754,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
             if (fd == null) {
                 return -1;
             }
-            profilerInfo = new ProfilerInfo(profileFile, fd, mSamplingInterval, false, mStreaming);
+            profilerInfo = new ProfilerInfo(profileFile, fd, mSamplingInterval, false, mStreaming,
+                    null);
         }
 
         try {
@@ -777,7 +785,9 @@ final class ActivityManagerShellCommand extends ShellCommand {
     int runDumpHeap(PrintWriter pw) throws RemoteException {
         final PrintWriter err = getErrPrintWriter();
         boolean managed = true;
+        boolean mallocInfo = false;
         int userId = UserHandle.USER_CURRENT;
+        boolean runGc = false;
 
         String opt;
         while ((opt=getNextOption()) != null) {
@@ -789,6 +799,11 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 }
             } else if (opt.equals("-n")) {
                 managed = false;
+            } else if (opt.equals("-g")) {
+                runGc = true;
+            } else if (opt.equals("-m")) {
+                managed = false;
+                mallocInfo = true;
             } else {
                 err.println("Error: Unknown option: " + opt);
                 return -1;
@@ -804,7 +819,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             return -1;
         }
 
-        if (!mInterface.dumpHeap(process, userId, managed, heapFile, fd)) {
+        if (!mInterface.dumpHeap(process, userId, managed, mallocInfo, runGc, heapFile, fd)) {
             err.println("HEAP DUMP FAILED on process " + process);
             return -1;
         }
@@ -1280,6 +1295,167 @@ final class ActivityManagerShellCommand extends ShellCommand {
         return 0;
     }
 
+    static final class MyUidObserver extends IUidObserver.Stub
+            implements ActivityManagerService.OomAdjObserver {
+        final IActivityManager mInterface;
+        final ActivityManagerService mInternal;
+        final PrintWriter mPw;
+        final InputStream mInput;
+        final int mUid;
+
+        static final int STATE_NORMAL = 0;
+
+        int mState;
+
+        MyUidObserver(ActivityManagerService service, PrintWriter pw, InputStream input, int uid) {
+            mInterface = service;
+            mInternal = service;
+            mPw = pw;
+            mInput = input;
+            mUid = uid;
+        }
+
+        @Override
+        public void onUidStateChanged(int uid, int procState, long procStateSeq) throws RemoteException {
+            synchronized (this) {
+                mPw.print(uid);
+                mPw.print(" procstate ");
+                mPw.print(ProcessList.makeProcStateString(procState));
+                mPw.print(" seq ");
+                mPw.println(procStateSeq);
+                mPw.flush();
+            }
+        }
+
+        @Override
+        public void onUidGone(int uid, boolean disabled) throws RemoteException {
+            synchronized (this) {
+                mPw.print(uid);
+                mPw.print(" gone");
+                if (disabled) {
+                    mPw.print(" disabled");
+                }
+                mPw.println();
+                mPw.flush();
+            }
+        }
+
+        @Override
+        public void onUidActive(int uid) throws RemoteException {
+            synchronized (this) {
+                mPw.print(uid);
+                mPw.println(" active");
+                mPw.flush();
+            }
+        }
+
+        @Override
+        public void onUidIdle(int uid, boolean disabled) throws RemoteException {
+            synchronized (this) {
+                mPw.print(uid);
+                mPw.print(" idle");
+                if (disabled) {
+                    mPw.print(" disabled");
+                }
+                mPw.println();
+                mPw.flush();
+            }
+        }
+
+        @Override
+        public void onUidCachedChanged(int uid, boolean cached) throws RemoteException {
+            synchronized (this) {
+                mPw.print(uid);
+                mPw.println(cached ? " cached" : " uncached");
+                mPw.flush();
+            }
+        }
+
+        @Override
+        public void onOomAdjMessage(String msg) {
+            synchronized (this) {
+                mPw.print("# ");
+                mPw.println(msg);
+                mPw.flush();
+            }
+        }
+
+        void printMessageForState() {
+            switch (mState) {
+                case STATE_NORMAL:
+                    mPw.println("Watching uid states...  available commands:");
+                    break;
+            }
+            mPw.println("(q)uit: finish watching");
+        }
+
+        void run() throws RemoteException {
+            try {
+                printMessageForState();
+                mPw.flush();
+
+                mInterface.registerUidObserver(this, ActivityManager.UID_OBSERVER_ACTIVE
+                        | ActivityManager.UID_OBSERVER_GONE | ActivityManager.UID_OBSERVER_PROCSTATE
+                        | ActivityManager.UID_OBSERVER_IDLE | ActivityManager.UID_OBSERVER_CACHED,
+                        ActivityManager.PROCESS_STATE_UNKNOWN, null);
+                if (mUid >= 0) {
+                    mInternal.setOomAdjObserver(mUid, this);
+                }
+                mState = STATE_NORMAL;
+
+                InputStreamReader converter = new InputStreamReader(mInput);
+                BufferedReader in = new BufferedReader(converter);
+                String line;
+
+                while ((line = in.readLine()) != null) {
+                    boolean addNewline = true;
+                    if (line.length() <= 0) {
+                        addNewline = false;
+                    } else if ("q".equals(line) || "quit".equals(line)) {
+                        break;
+                    } else {
+                        mPw.println("Invalid command: " + line);
+                    }
+
+                    synchronized (this) {
+                        if (addNewline) {
+                            mPw.println("");
+                        }
+                        printMessageForState();
+                        mPw.flush();
+                    }
+                }
+
+            } catch (IOException e) {
+                e.printStackTrace(mPw);
+                mPw.flush();
+            } finally {
+                if (mUid >= 0) {
+                    mInternal.clearOomAdjObserver();
+                }
+                mInterface.unregisterUidObserver(this);
+            }
+        }
+    }
+
+    int runWatchUids(PrintWriter pw) throws RemoteException {
+        String opt;
+        int uid = -1;
+        while ((opt=getNextOption()) != null) {
+            if (opt.equals("--oom")) {
+                uid = Integer.parseInt(getNextArgRequired());
+            } else {
+                getErrPrintWriter().println("Error: Unknown option: " + opt);
+                return -1;
+
+            }
+        }
+
+        MyUidObserver controller = new MyUidObserver(mInternal, pw, getRawInputStream(), uid);
+        controller.run();
+        return 0;
+    }
+
     int runHang(PrintWriter pw) throws RemoteException {
         String opt;
         boolean allowRestart = false;
@@ -1707,8 +1883,12 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 level = ComponentCallbacks2.TRIM_MEMORY_COMPLETE;
                 break;
             default:
-                getErrPrintWriter().println("Error: Unknown level option: " + levelArg);
-                return -1;
+                try {
+                    level = Integer.parseInt(levelArg);
+                } catch (NumberFormatException e) {
+                    getErrPrintWriter().println("Error: Unknown level option: " + levelArg);
+                    return -1;
+                }
         }
         if (!mInterface.setProcessMemoryTrimLevel(proc, userId, level)) {
             getErrPrintWriter().println("Unknown error: failed to set trim level");
@@ -1807,9 +1987,17 @@ final class ActivityManagerShellCommand extends ShellCommand {
             throw new RuntimeException(e.getMessage(), e);
         }
 
-        IActivityContainer container = mInterface.createStackOnDisplay(displayId);
-        if (container != null) {
-            container.startActivity(intent);
+        final int stackId = mInterface.createStackOnDisplay(displayId);
+        if (stackId != INVALID_STACK_ID) {
+            // TODO: Need proper support if this is used by test...
+//            container.startActivity(intent);
+//            ActivityOptions options = ActivityOptions.makeBasic();
+//            options.setLaunchDisplayId(displayId);
+//            options.setLaunchStackId(stackId);
+//            mInterface.startAct
+//            mInterface.startActivityAsUser(null, null, intent, mimeType,
+//                    null, null, 0, mStartFlags, profilerInfo,
+//                    options != null ? options.toBundle() : null, mUserId);
         }
         return 0;
     }
@@ -2490,6 +2678,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      --streaming: stream the profiling output to the specified file");
             pw.println("          (use with --start-profiler)");
             pw.println("      -P <FILE>: like above, but profiling stops when app goes idle");
+            pw.println("      --attach-agent <agent>: attach the given agent before binding");
             pw.println("      -R: repeat the activity launch <COUNT> times.  Prior to each repeat,");
             pw.println("          the top activity will be finished.");
             pw.println("      -S: force stop the target app before starting the activity");
@@ -2547,10 +2736,11 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      --sampling INTERVAL: use sample profiling with INTERVAL microseconds");
             pw.println("          between samples");
             pw.println("      --streaming: stream the profiling output to the specified file");
-            pw.println("  dumpheap [--user <USER_ID> current] [-n] <PROCESS> <FILE>");
+            pw.println("  dumpheap [--user <USER_ID> current] [-n] [-g] <PROCESS> <FILE>");
             pw.println("      Dump the heap of a process.  The given <PROCESS> argument may");
             pw.println("        be either a process name or pid.  Options are:");
             pw.println("      -n: dump native heap instead of managed heap");
+            pw.println("      -g: force GC before dumping the heap");
             pw.println("      --user <USER_ID> | current: When supplying a process name,");
             pw.println("          specify user of process to dump; uses current user if not specified.");
             pw.println("  set-debug-app [-w] [--persistent] <PACKAGE>");
@@ -2583,6 +2773,9 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("  monitor [--gdb <port>]");
             pw.println("      Start monitoring for crashes or ANRs.");
             pw.println("      --gdb: start gdbserv on the given port at crash/ANR");
+            pw.println("  watch-uids [--oom <uid>");
+            pw.println("      Start watching for and reporting uid state changes.");
+            pw.println("      --oom: specify a uid for which to report detailed change messages.");
             pw.println("  hang [--allow-restart]");
             pw.println("      Hang the system.");
             pw.println("      --allow-restart: allow watchdog to perform normal system restart");
@@ -2641,7 +2834,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      Returns the inactive state of an app.");
             pw.println("  send-trim-memory [--user <USER_ID>] <PROCESS>");
             pw.println("          [HIDDEN|RUNNING_MODERATE|BACKGROUND|RUNNING_LOW|MODERATE|RUNNING_CRITICAL|COMPLETE]");
-            pw.println("      Send a memory trim event to a <PROCESS>.");
+            pw.println("      Send a memory trim event to a <PROCESS>.  May also supply a raw trim int level.");
             pw.println("  display [COMMAND] [...]: sub-commands for operating on displays.");
             pw.println("       move-stack <STACK_ID> <DISPLAY_ID>");
             pw.println("           Move <STACK_ID> from its current display to <DISPLAY_ID>.");

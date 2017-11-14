@@ -120,8 +120,10 @@ public final class FloatingToolbar {
     /**
      * Initializes a floating toolbar.
      */
-    public FloatingToolbar(Context context, Window window) {
-        mContext = applyDefaultTheme(Preconditions.checkNotNull(context));
+    public FloatingToolbar(Window window) {
+        // TODO(b/65172902): Pass context in constructor when DecorView (and other callers)
+        // supports multi-display.
+        mContext = applyDefaultTheme(window.getContext());
         mWindow = Preconditions.checkNotNull(window);
         mPopup = new FloatingToolbarPopup(mContext, window.getDecorView());
     }

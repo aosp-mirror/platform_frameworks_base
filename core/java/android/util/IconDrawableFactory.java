@@ -21,7 +21,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageItemInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
-import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -68,8 +67,7 @@ public class IconDrawableFactory {
             return icon;
         }
 
-        // Before badging, add shadow to adaptive icon if needed.
-        icon = mLauncherIcons.wrapIconDrawableWithShadow(icon);
+        icon = getShadowedIcon(icon);
         if (appInfo.isInstantApp()) {
             int badgeColor = Resources.getSystem().getColor(
                     com.android.internal.R.color.instant_app_badge, null);
@@ -83,6 +81,13 @@ public class IconDrawableFactory {
                     getUserBadgeColor(mUm, userId));
         }
         return icon;
+    }
+
+    /**
+     * Add shadow to the icon if {@link AdaptiveIconDrawable}
+     */
+    public Drawable getShadowedIcon(Drawable icon) {
+        return mLauncherIcons.wrapIconDrawableWithShadow(icon);
     }
 
     // Should have enough colors to cope with UserManagerService.getMaxManagedProfiles()

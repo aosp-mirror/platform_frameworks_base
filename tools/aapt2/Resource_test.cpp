@@ -93,6 +93,10 @@ TEST(ResourceTypeTest, ParseResourceTypes) {
   ASSERT_NE(type, nullptr);
   EXPECT_EQ(*type, ResourceType::kMipmap);
 
+  type = ParseResourceType("navigation");
+  ASSERT_NE(type, nullptr);
+  EXPECT_EQ(*type, ResourceType::kNavigation);
+
   type = ParseResourceType("plurals");
   ASSERT_NE(type, nullptr);
   EXPECT_EQ(*type, ResourceType::kPlurals);

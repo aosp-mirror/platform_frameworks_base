@@ -22,10 +22,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import android.graphics.Paint.FontMetricsInt;
+import android.os.LocaleList;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.text.Layout.Alignment;
 import android.text.method.EditorState;
+import android.text.style.LocaleSpan;
 import android.util.Log;
 
 import org.junit.Before;
@@ -35,6 +37,7 @@ import org.junit.runner.RunWith;
 import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Tests StaticLayout vertical metrics behavior.
@@ -670,5 +673,88 @@ public class StaticLayoutTest {
             assertEquals(testLabel, 3, layout.getOffsetToRightOf(4));
             assertEquals(testLabel, 4, layout.getOffsetToRightOf(5));
         }
+    }
+
+    @Test
+    public void testLocaleSpanAffectsHyphenation() {
+        TextPaint paint = new TextPaint();
+        paint.setTextLocale(Locale.US);
+        // Private use language, with no hyphenation rules.
+        final Locale privateLocale = Locale.forLanguageTag("qaa");
+
+        final String longWord = "philanthropic";
+        final float wordWidth = paint.measureText(longWord);
+        // Wide enough that words get hyphenated by default.
+        final int paraWidth = Math.round(wordWidth * 1.8f);
+        final String sentence = longWord + " " + longWord + " " + longWord + " " + longWord + " "
+                + longWord + " " + longWord;
+
+        final int numEnglishLines = StaticLayout.Builder
+                .obtain(sentence, 0, sentence.length(), paint, paraWidth)
+                .setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_FULL)
+                .setBreakStrategy(Layout.BREAK_STRATEGY_HIGH_QUALITY)
+                .build()
+                .getLineCount();
+
+        {
+            final SpannableString text = new SpannableString(sentence);
+            text.setSpan(new LocaleSpan(privateLocale), 0, text.length(),
+                    Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+            final int numPrivateLocaleLines = StaticLayout.Builder
+                    .obtain(text, 0, text.length(), paint, paraWidth)
+                    .setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_FULL)
+                    .setBreakStrategy(Layout.BREAK_STRATEGY_HIGH_QUALITY)
+                    .build()
+                    .getLineCount();
+
+            // Since the paragraph set to English gets hyphenated, the number of lines would be
+            // smaller than the number of lines when there is a span setting a language that
+            // doesn't get hyphenated.
+            assertTrue(numEnglishLines < numPrivateLocaleLines);
+        }
+        {
+            // Same as the above test, except that the locale span now uses a locale list starting
+            // with the private non-hyphenating locale.
+            final SpannableString text = new SpannableString(sentence);
+            final LocaleList locales = new LocaleList(privateLocale, Locale.US);
+            text.setSpan(new LocaleSpan(locales), 0, text.length(),
+                    Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+            final int numPrivateLocaleLines = StaticLayout.Builder
+                    .obtain(text, 0, text.length(), paint, paraWidth)
+                    .setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_FULL)
+                    .setBreakStrategy(Layout.BREAK_STRATEGY_HIGH_QUALITY)
+                    .build()
+                    .getLineCount();
+
+            assertTrue(numEnglishLines < numPrivateLocaleLines);
+        }
+        {
+            final SpannableString text = new SpannableString(sentence);
+            // Apply the private LocaleSpan only to the first word, which is not getting hyphenated
+            // anyway.
+            text.setSpan(new LocaleSpan(privateLocale), 0, longWord.length(),
+                    Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+            final int numPrivateLocaleLines = StaticLayout.Builder
+                    .obtain(text, 0, text.length(), paint, paraWidth)
+                    .setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_FULL)
+                    .setBreakStrategy(Layout.BREAK_STRATEGY_HIGH_QUALITY)
+                    .build()
+                    .getLineCount();
+
+            // Since the first word is not hyphenated anyway (there's enough width), the LocaleSpan
+            // should not affect the layout.
+            assertEquals(numEnglishLines, numPrivateLocaleLines);
+        }
+    }
+
+    @Test
+    public void testGetHeight_zeroMaxLines() {
+        final String text = "a\nb";
+        final TextPaint paint = new TextPaint();
+        final StaticLayout layout = StaticLayout.Builder.obtain(text, 0, text.length(), paint,
+                Integer.MAX_VALUE).setMaxLines(0).build();
+
+        assertEquals(0, layout.getHeight(true));
+        assertEquals(2, layout.getLineCount());
     }
 }

@@ -136,7 +136,6 @@ public final class SharedLibraryInfo implements Parcelable {
     }
 
     /**
-     * @hide
      * @removed
      */
     public boolean isBuiltin() {
@@ -144,7 +143,6 @@ public final class SharedLibraryInfo implements Parcelable {
     }
 
     /**
-     * @hide
      * @removed
      */
     public boolean isDynamic() {
@@ -152,7 +150,6 @@ public final class SharedLibraryInfo implements Parcelable {
     }
 
     /**
-     * @hide
      * @removed
      */
     public boolean isStatic() {

@@ -80,7 +80,7 @@ public class ColorExtractor implements WallpaperManager.OnColorsChangedListener 
         if (wallpaperManager == null) {
             Log.w(TAG, "Can't listen to color changes!");
         } else {
-            wallpaperManager.addOnColorsChangedListener(this);
+            wallpaperManager.addOnColorsChangedListener(this, null /* handler */);
 
             // Initialize all gradients with the current colors
             Trace.beginSection("ColorExtractor#getWallpaperColors");

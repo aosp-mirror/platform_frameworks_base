@@ -100,6 +100,10 @@ public class BackgroundDexOptService extends JobService {
             getDowngradeUnusedAppsThresholdInMillis();
 
     public static void schedule(Context context) {
+        if (isBackgroundDexoptDisabled()) {
+            return;
+        }
+
         JobScheduler js = (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
 
         // Schedule a one-off job which scans installed packages and updates
@@ -348,8 +352,7 @@ public class BackgroundDexOptService extends JobService {
                 }
             } else {
                 success = pm.performDexOpt(new DexoptOptions(pkg,
-                        PackageManagerService.REASON_BACKGROUND_DEXOPT,
-                        dexoptFlags | DexoptOptions.DEXOPT_ONLY_SECONDARY_DEX));
+                        reason, dexoptFlags | DexoptOptions.DEXOPT_ONLY_SECONDARY_DEX));
             }
             if (success) {
                 // Dexopt succeeded, remove package from the list of failing ones.
@@ -476,5 +479,10 @@ public class BackgroundDexOptService extends JobService {
             return Long.MAX_VALUE;
         }
         return TimeUnit.DAYS.toMillis(Long.parseLong(sysPropValue));
+    }
+
+    private static boolean isBackgroundDexoptDisabled() {
+        return SystemProperties.getBoolean("pm.dexopt.disable_bg_dexopt" /* key */,
+                false /* default */);
     }
 }

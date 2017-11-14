@@ -28,6 +28,8 @@ import static android.net.NetworkStats.UID_ALL;
 import static android.net.TrafficStats.UID_REMOVED;
 import static android.text.format.DateUtils.WEEK_IN_MILLIS;
 
+import static com.android.server.net.NetworkStatsService.TAG;
+
 import android.net.NetworkIdentity;
 import android.net.NetworkStats;
 import android.net.NetworkStatsHistory;
@@ -37,19 +39,23 @@ import android.os.Binder;
 import android.service.NetworkStatsCollectionKeyProto;
 import android.service.NetworkStatsCollectionProto;
 import android.service.NetworkStatsCollectionStatsProto;
+import android.telephony.SubscriptionPlan;
 import android.util.ArrayMap;
 import android.util.AtomicFile;
 import android.util.IntArray;
+import android.util.Pair;
+import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FileRotator;
 import com.android.internal.util.IndentingPrintWriter;
 
+import libcore.io.IoUtils;
+
 import com.google.android.collect.Lists;
 import com.google.android.collect.Maps;
-
-import libcore.io.IoUtils;
 
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
@@ -60,9 +66,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.ProtocolException;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Objects;
 
 /**
@@ -140,6 +148,63 @@ public class NetworkStatsCollection implements FileRotator.Reader {
         return mStartMillis == Long.MAX_VALUE && mEndMillis == Long.MIN_VALUE;
     }
 
+    @VisibleForTesting
+    public long roundUp(long time) {
+        if (time == Long.MIN_VALUE || time == Long.MAX_VALUE
+                || time == SubscriptionPlan.TIME_UNKNOWN) {
+            return time;
+        } else {
+            final long mod = time % mBucketDuration;
+            if (mod > 0) {
+                time -= mod;
+                time += mBucketDuration;
+            }
+            return time;
+        }
+    }
+
+    @VisibleForTesting
+    public long roundDown(long time) {
+        if (time == Long.MIN_VALUE || time == Long.MAX_VALUE
+                || time == SubscriptionPlan.TIME_UNKNOWN) {
+            return time;
+        } else {
+            final long mod = time % mBucketDuration;
+            if (mod > 0) {
+                time -= mod;
+            }
+            return time;
+        }
+    }
+
+    /**
+     * Safely multiple a value by a rational.
+     * <p>
+     * Internally it uses integer-based math whenever possible, but switches
+     * over to double-based math if values would overflow.
+     */
+    @VisibleForTesting
+    public static long multiplySafe(long value, long num, long den) {
+        long x = value;
+        long y = num;
+
+        // Logic shamelessly borrowed from Math.multiplyExact()
+        long r = x * y;
+        long ax = Math.abs(x);
+        long ay = Math.abs(y);
+        if (((ax | ay) >>> 31 != 0)) {
+            // Some bits greater than 2^31 that might cause overflow
+            // Check the result using the divide operator
+            // and check for the special case of Long.MIN_VALUE * -1
+            if (((y != 0) && (r / y != x)) ||
+                    (x == Long.MIN_VALUE && y == -1)) {
+                // Use double math to avoid overflowing
+                return (long) (((double) num / den) * value);
+            }
+        }
+        return r / den;
+    }
+
     public int[] getRelevantUids(@NetworkStatsAccess.Level int accessLevel) {
         return getRelevantUids(accessLevel, Binder.getCallingUid());
     }
@@ -165,60 +230,110 @@ public class NetworkStatsCollection implements FileRotator.Reader {
      * Combine all {@link NetworkStatsHistory} in this collection which match
      * the requested parameters.
      */
-    public NetworkStatsHistory getHistory(
-            NetworkTemplate template, int uid, int set, int tag, int fields,
-            @NetworkStatsAccess.Level int accessLevel) {
-        return getHistory(template, uid, set, tag, fields, Long.MIN_VALUE, Long.MAX_VALUE,
-                accessLevel);
-    }
-
-    /**
-     * Combine all {@link NetworkStatsHistory} in this collection which match
-     * the requested parameters.
-     */
-    public NetworkStatsHistory getHistory(
-            NetworkTemplate template, int uid, int set, int tag, int fields, long start, long end,
-            @NetworkStatsAccess.Level int accessLevel) {
-        return getHistory(template, uid, set, tag, fields, start, end, accessLevel,
-                Binder.getCallingUid());
-    }
-
-    /**
-     * Combine all {@link NetworkStatsHistory} in this collection which match
-     * the requested parameters.
-     */
-    public NetworkStatsHistory getHistory(
-            NetworkTemplate template, int uid, int set, int tag, int fields, long start, long end,
+    public NetworkStatsHistory getHistory(NetworkTemplate template, SubscriptionPlan augmentPlan,
+            int uid, int set, int tag, int fields, long start, long end,
             @NetworkStatsAccess.Level int accessLevel, int callerUid) {
         if (!NetworkStatsAccess.isAccessibleToUser(uid, callerUid, accessLevel)) {
             throw new SecurityException("Network stats history of uid " + uid
                     + " is forbidden for caller " + callerUid);
         }
 
+        final int bucketEstimate = (int) ((end - start) / mBucketDuration);
         final NetworkStatsHistory combined = new NetworkStatsHistory(
-                mBucketDuration, start == end ? 1 : estimateBuckets(), fields);
+                mBucketDuration, bucketEstimate, fields);
 
         // shortcut when we know stats will be empty
         if (start == end) return combined;
+
+        // Figure out the window of time that we should be augmenting (if any)
+        long augmentStart = SubscriptionPlan.TIME_UNKNOWN;
+        long augmentEnd = (augmentPlan != null) ? augmentPlan.getDataUsageTime()
+                : SubscriptionPlan.TIME_UNKNOWN;
+        // And if augmenting, we might need to collect more data to adjust with
+        long collectStart = start;
+        long collectEnd = end;
+
+        if (augmentEnd != SubscriptionPlan.TIME_UNKNOWN) {
+            final Iterator<Pair<ZonedDateTime, ZonedDateTime>> it = augmentPlan.cycleIterator();
+            while (it.hasNext()) {
+                final Pair<ZonedDateTime, ZonedDateTime> cycle = it.next();
+                final long cycleStart = cycle.first.toInstant().toEpochMilli();
+                final long cycleEnd = cycle.second.toInstant().toEpochMilli();
+                if (cycleStart <= augmentEnd && augmentEnd < cycleEnd) {
+                    augmentStart = cycleStart;
+                    collectStart = Long.min(collectStart, augmentStart);
+                    collectEnd = Long.max(collectEnd, augmentEnd);
+                    break;
+                }
+            }
+        }
+
+        if (augmentStart != SubscriptionPlan.TIME_UNKNOWN) {
+            // Shrink augmentation window so we don't risk undercounting.
+            augmentStart = roundUp(augmentStart);
+            augmentEnd = roundDown(augmentEnd);
+            // Grow collection window so we get all the stats needed.
+            collectStart = roundDown(collectStart);
+            collectEnd = roundUp(collectEnd);
+        }
 
         for (int i = 0; i < mStats.size(); i++) {
             final Key key = mStats.keyAt(i);
             if (key.uid == uid && NetworkStats.setMatches(set, key.set) && key.tag == tag
                     && templateMatches(template, key.ident)) {
                 final NetworkStatsHistory value = mStats.valueAt(i);
-                combined.recordHistory(value, start, end);
+                combined.recordHistory(value, collectStart, collectEnd);
             }
         }
-        return combined;
-    }
 
-    /**
-     * Summarize all {@link NetworkStatsHistory} in this collection which match
-     * the requested parameters.
-     */
-    public NetworkStats getSummary(NetworkTemplate template, long start, long end,
-            @NetworkStatsAccess.Level int accessLevel) {
-        return getSummary(template, start, end, accessLevel, Binder.getCallingUid());
+        if (augmentStart != SubscriptionPlan.TIME_UNKNOWN) {
+            final NetworkStatsHistory.Entry entry = combined.getValues(
+                    augmentStart, augmentEnd, null);
+
+            // If we don't have any recorded data for this time period, give
+            // ourselves something to scale with.
+            if (entry.rxBytes == 0 || entry.txBytes == 0) {
+                combined.recordData(augmentStart, augmentEnd,
+                        new NetworkStats.Entry(1, 0, 1, 0, 0));
+                combined.getValues(augmentStart, augmentEnd, entry);
+            }
+
+            final long rawBytes = entry.rxBytes + entry.txBytes;
+            final long rawRxBytes = entry.rxBytes;
+            final long rawTxBytes = entry.txBytes;
+            final long targetBytes = augmentPlan.getDataUsageBytes();
+            final long targetRxBytes = multiplySafe(targetBytes, rawRxBytes, rawBytes);
+            final long targetTxBytes = multiplySafe(targetBytes, rawTxBytes, rawBytes);
+
+            // Scale all matching buckets to reach anchor target
+            final long beforeTotal = combined.getTotalBytes();
+            for (int i = 0; i < combined.size(); i++) {
+                combined.getValues(i, entry);
+                if (entry.bucketStart >= augmentStart
+                        && entry.bucketStart + entry.bucketDuration <= augmentEnd) {
+                    entry.rxBytes = multiplySafe(targetRxBytes, entry.rxBytes, rawRxBytes);
+                    entry.txBytes = multiplySafe(targetTxBytes, entry.txBytes, rawTxBytes);
+                    // We purposefully clear out packet counters to indicate
+                    // that this data has been augmented.
+                    entry.rxPackets = 0;
+                    entry.txPackets = 0;
+                    combined.setValues(i, entry);
+                }
+            }
+
+            final long deltaTotal = combined.getTotalBytes() - beforeTotal;
+            if (deltaTotal != 0) {
+                Slog.d(TAG, "Augmented network usage by " + deltaTotal + " bytes");
+            }
+
+            // Finally we can slice data as originally requested
+            final NetworkStatsHistory sliced = new NetworkStatsHistory(
+                    mBucketDuration, bucketEstimate, fields);
+            sliced.recordHistory(combined, start, end);
+            return sliced;
+        } else {
+            return combined;
+        }
     }
 
     /**
@@ -230,6 +345,7 @@ public class NetworkStatsCollection implements FileRotator.Reader {
         final long now = System.currentTimeMillis();
 
         final NetworkStats stats = new NetworkStats(end - start, 24);
+
         // shortcut when we know stats will be empty
         if (start == end) return stats;
 
