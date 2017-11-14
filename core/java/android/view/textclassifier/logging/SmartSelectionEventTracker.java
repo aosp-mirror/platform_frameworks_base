@@ -60,19 +60,27 @@ public final class SmartSelectionEventTracker {
     private static final String ZERO = "0";
     private static final String TEXTVIEW = "textview";
     private static final String EDITTEXT = "edittext";
+    private static final String UNSELECTABLE_TEXTVIEW = "nosel-textview";
     private static final String WEBVIEW = "webview";
     private static final String EDIT_WEBVIEW = "edit-webview";
+    private static final String CUSTOM_TEXTVIEW = "customview";
+    private static final String CUSTOM_EDITTEXT = "customedit";
+    private static final String CUSTOM_UNSELECTABLE_TEXTVIEW = "nosel-customview";
     private static final String UNKNOWN = "unknown";
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({WidgetType.UNSPECIFIED, WidgetType.TEXTVIEW, WidgetType.WEBVIEW,
             WidgetType.EDITTEXT, WidgetType.EDIT_WEBVIEW})
     public @interface WidgetType {
-    int UNSPECIFIED = 0;
-    int TEXTVIEW = 1;
-    int WEBVIEW = 2;
-    int EDITTEXT = 3;
-    int EDIT_WEBVIEW = 4;
+        int UNSPECIFIED = 0;
+        int TEXTVIEW = 1;
+        int WEBVIEW = 2;
+        int EDITTEXT = 3;
+        int EDIT_WEBVIEW = 4;
+        int UNSELECTABLE_TEXTVIEW = 5;
+        int CUSTOM_TEXTVIEW = 6;
+        int CUSTOM_EDITTEXT = 7;
+        int CUSTOM_UNSELECTABLE_TEXTVIEW = 8;
     }
 
     private final MetricsLogger mMetricsLogger = new MetricsLogger();
@@ -277,6 +285,14 @@ public final class SmartSelectionEventTracker {
                 return EDITTEXT;
             case WidgetType.EDIT_WEBVIEW:
                 return EDIT_WEBVIEW;
+            case WidgetType.UNSELECTABLE_TEXTVIEW:
+                return UNSELECTABLE_TEXTVIEW;
+            case WidgetType.CUSTOM_TEXTVIEW:
+                return CUSTOM_TEXTVIEW;
+            case WidgetType.CUSTOM_EDITTEXT:
+                return CUSTOM_EDITTEXT;
+            case WidgetType.CUSTOM_UNSELECTABLE_TEXTVIEW:
+                return CUSTOM_UNSELECTABLE_TEXTVIEW;
             default:
                 return UNKNOWN;
         }
