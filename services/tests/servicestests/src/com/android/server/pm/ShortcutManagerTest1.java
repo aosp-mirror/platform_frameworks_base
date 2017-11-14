@@ -1918,7 +1918,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
             // Make sure FLAG_MATCH_ALL_PINNED will be ignored.
             assertWith(mLauncherApps.getShortcuts(buildQuery(/* time =*/ 0, CALLING_PACKAGE_2,
                     /* activity =*/ null, ShortcutQuery.FLAG_MATCH_PINNED
-                            | ShortcutQuery.FLAG_MATCH_ALL_PINNED), getCallingUser()))
+                            | ShortcutQuery.FLAG_MATCH_PINNED_BY_ANY_LAUNCHER), getCallingUser()))
                     .isEmpty();
 
             // Make sure the special permission works.
@@ -1928,13 +1928,17 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
 
             assertWith(mLauncherApps.getShortcuts(buildQuery(/* time =*/ 0, CALLING_PACKAGE_2,
                     /* activity =*/ null, ShortcutQuery.FLAG_MATCH_PINNED
-                            | ShortcutQuery.FLAG_MATCH_ALL_PINNED), getCallingUser()))
+                            | ShortcutQuery.FLAG_MATCH_PINNED_BY_ANY_LAUNCHER), getCallingUser()))
                     .haveIds("s1", "s2");
             assertWith(mLauncherApps.getShortcuts(buildQuery(/* time =*/ 0, CALLING_PACKAGE_2,
                     /* activity =*/ null, ShortcutQuery.FLAG_MATCH_PINNED), getCallingUser()))
                     .isEmpty();
 
+            assertShortcutLaunchable(CALLING_PACKAGE_2, "s1", getCallingUser().getIdentifier());
+
             mInjectCheckAccessShortcutsPermission = false;
+
+            assertShortcutNotLaunched(CALLING_PACKAGE_2, "s1", getCallingUser().getIdentifier());
 
             assertShortcutIds(assertAllDynamic(
                     mLauncherApps.getShortcuts(buildQuery(/* time =*/ 0, CALLING_PACKAGE_1,
@@ -2103,6 +2107,62 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
             assertEquals(0, mManager.getDynamicShortcuts().size());
             assertEquals(0, mManager.getPinnedShortcuts().size());
+        });
+    }
+
+    public void testPinShortcutAndGetPinnedShortcuts_assistant() {
+        // Create some shortcuts.
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            assertTrue(mManager.setDynamicShortcuts(list(
+                    makeShortcut("s1"), makeShortcut("s2"), makeShortcut("s3"))));
+        });
+
+        // Pin some.
+        runWithCaller(LAUNCHER_1, USER_0, () -> {
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_1,
+                    list("s3", "s4"), getCallingUser());
+        });
+
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            assertTrue(mManager.setDynamicShortcuts(list(
+                    makeShortcut("s1"))));
+        });
+
+        runWithCaller(LAUNCHER_2, USER_0, () -> {
+            final ShortcutQuery allPinned = new ShortcutQuery().setQueryFlags(
+                    ShortcutQuery.FLAG_MATCH_PINNED_BY_ANY_LAUNCHER);
+
+            assertWith(mLauncherApps.getShortcuts(allPinned, HANDLE_USER_0))
+                    .isEmpty();
+
+            assertShortcutLaunchable(CALLING_PACKAGE_1, "s1", USER_0);
+            assertShortcutNotLaunched(CALLING_PACKAGE_1, "s3", USER_0);
+            assertShortcutNotLaunched(CALLING_PACKAGE_1, "s4", USER_0);
+
+            // Make it the assistant app.
+            mInternal.setShortcutHostPackage("assistant", LAUNCHER_2, USER_0);
+            assertWith(mLauncherApps.getShortcuts(allPinned, HANDLE_USER_0))
+                    .haveIds("s3");
+
+            assertShortcutLaunchable(CALLING_PACKAGE_1, "s1", USER_0);
+            assertShortcutLaunchable(CALLING_PACKAGE_1, "s3", USER_0);
+            assertShortcutNotLaunched(CALLING_PACKAGE_1, "s4", USER_0);
+
+            mInternal.setShortcutHostPackage("another-type", LAUNCHER_3, USER_0);
+            assertWith(mLauncherApps.getShortcuts(allPinned, HANDLE_USER_0))
+                    .haveIds("s3");
+
+            mInternal.setShortcutHostPackage("assistant", null, USER_0);
+            assertWith(mLauncherApps.getShortcuts(allPinned, HANDLE_USER_0))
+                    .isEmpty();
+
+            mInternal.setShortcutHostPackage("assistant", LAUNCHER_2, USER_0);
+            assertWith(mLauncherApps.getShortcuts(allPinned, HANDLE_USER_0))
+                    .haveIds("s3");
+
+            mInternal.setShortcutHostPackage("assistant", LAUNCHER_1, USER_0);
+            assertWith(mLauncherApps.getShortcuts(allPinned, HANDLE_USER_0))
+                    .isEmpty();
         });
     }
 

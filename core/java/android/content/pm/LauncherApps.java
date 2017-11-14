@@ -282,13 +282,13 @@ public class LauncherApps {
         public static final int FLAG_GET_MANIFEST = FLAG_MATCH_MANIFEST;
 
         /**
-         * @hide include all pinned shortcuts by any launchers, not just by the caller,
+         * Include all pinned shortcuts by any launchers, not just by the caller,
          * in the result.
-         * If the caller doesn't havve the {@link android.Manifest.permission#ACCESS_SHORTCUTS}
-         * permission, this flag will be ignored.
+         *
+         * The caller must be the selected assistant app to use this flag, or have the system
+         * {@code ACCESS_SHORTCUTS} permission.
          */
-        @TestApi
-        public static final int FLAG_MATCH_ALL_PINNED = 1 << 10;
+        public static final int FLAG_MATCH_PINNED_BY_ANY_LAUNCHER = 1 << 10;
 
         /**
          * FLAG_MATCH_DYNAMIC | FLAG_MATCH_PINNED | FLAG_MATCH_MANIFEST
@@ -302,7 +302,7 @@ public class LauncherApps {
          * @hide
          */
         public static final int FLAG_MATCH_ALL_KINDS_WITH_ALL_PINNED =
-                FLAG_MATCH_ALL_KINDS | FLAG_MATCH_ALL_PINNED;
+                FLAG_MATCH_ALL_KINDS | FLAG_MATCH_PINNED_BY_ANY_LAUNCHER;
 
         /** @hide kept for unit tests */
         @Deprecated
