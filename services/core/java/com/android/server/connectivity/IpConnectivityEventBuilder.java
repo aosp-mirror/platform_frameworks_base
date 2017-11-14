@@ -46,7 +46,6 @@ import android.util.SparseIntArray;
 import com.android.server.connectivity.metrics.nano.IpConnectivityLogClass;
 import com.android.server.connectivity.metrics.nano.IpConnectivityLogClass.IpConnectivityEvent;
 import com.android.server.connectivity.metrics.nano.IpConnectivityLogClass.IpConnectivityLog;
-import com.android.server.connectivity.metrics.nano.IpConnectivityLogClass.NetworkId;
 import com.android.server.connectivity.metrics.nano.IpConnectivityLogClass.Pair;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -247,7 +246,6 @@ final public class IpConnectivityEventBuilder {
     private static void setNetworkEvent(IpConnectivityEvent out, NetworkEvent in) {
         IpConnectivityLogClass.NetworkEvent networkEvent =
                 new IpConnectivityLogClass.NetworkEvent();
-        networkEvent.networkId = netIdOf(in.netId);
         networkEvent.eventType = in.eventType;
         networkEvent.latencyMs = (int) in.durationMs;
         out.setNetworkEvent(networkEvent);
@@ -324,12 +322,6 @@ final public class IpConnectivityEventBuilder {
             pairs[i] = p;
         }
         return pairs;
-    }
-
-    private static NetworkId netIdOf(int netid) {
-        final NetworkId ni = new NetworkId();
-        ni.networkId = netid;
-        return ni;
     }
 
     private static int ipSupportOf(DefaultNetworkEvent in) {
