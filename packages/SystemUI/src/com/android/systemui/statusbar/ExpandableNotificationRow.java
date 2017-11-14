@@ -102,7 +102,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private int mIconTransformContentShift;
     private int mIconTransformContentShiftNoIcon;
     private int mNotificationMinHeightLegacy;
+    private int mNotificationMinHeightBeforeP;
     private int mMaxHeadsUpHeightLegacy;
+    private int mMaxHeadsUpHeightBeforeP;
     private int mMaxHeadsUpHeight;
     private int mMaxHeadsUpHeightIncreased;
     private int mNotificationMinHeight;
@@ -435,9 +437,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         boolean customView = layout.getContractedChild().getId()
                 != com.android.internal.R.id.status_bar_latest_event_content;
         boolean beforeN = mEntry.targetSdk < Build.VERSION_CODES.N;
+        boolean beforeP = mEntry.targetSdk < Build.VERSION_CODES.P;
         int minHeight;
-        if (customView && beforeN && !mIsSummaryWithChildren) {
-            minHeight = mNotificationMinHeightLegacy;
+        if (customView && beforeP && !mIsSummaryWithChildren) {
+            minHeight = beforeN ? mNotificationMinHeightLegacy : mNotificationMinHeightBeforeP;
         } else if (mUseIncreasedCollapsedHeight && layout == mPrivateLayout) {
             minHeight = mNotificationMinHeightLarge;
         } else {
@@ -447,8 +450,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 layout.getHeadsUpChild().getId()
                         != com.android.internal.R.id.status_bar_latest_event_content;
         int headsUpheight;
-        if (headsUpCustom && beforeN) {
-            headsUpheight = mMaxHeadsUpHeightLegacy;
+        if (headsUpCustom && beforeP) {
+            headsUpheight = beforeN ? mMaxHeadsUpHeightLegacy : mMaxHeadsUpHeightBeforeP;
         } else if (mUseIncreasedHeadsUpHeight && layout == mPrivateLayout) {
             headsUpheight = mMaxHeadsUpHeightIncreased;
         } else {
@@ -916,6 +919,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             addView(mMenuRow.getMenuView(), menuIndex);
         }
         for (NotificationContentView l : mLayouts) {
+            l.initView();
             l.reInflateViews();
         }
         mNotificationInflater.onDensityOrFontScaleChanged();
@@ -1265,6 +1269,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private void initDimens() {
         mNotificationMinHeightLegacy = NotificationUtils.getFontScaledHeight(mContext,
                 R.dimen.notification_min_height_legacy);
+        mNotificationMinHeightBeforeP = NotificationUtils.getFontScaledHeight(mContext,
+                R.dimen.notification_min_height_before_p);
         mNotificationMinHeight = NotificationUtils.getFontScaledHeight(mContext,
                 R.dimen.notification_min_height);
         mNotificationMinHeightLarge = NotificationUtils.getFontScaledHeight(mContext,
@@ -1275,6 +1281,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 R.dimen.notification_ambient_height);
         mMaxHeadsUpHeightLegacy = NotificationUtils.getFontScaledHeight(mContext,
                 R.dimen.notification_max_heads_up_height_legacy);
+        mMaxHeadsUpHeightBeforeP = NotificationUtils.getFontScaledHeight(mContext,
+                R.dimen.notification_max_heads_up_height_before_p);
         mMaxHeadsUpHeight = NotificationUtils.getFontScaledHeight(mContext,
                 R.dimen.notification_max_heads_up_height);
         mMaxHeadsUpHeightIncreased = NotificationUtils.getFontScaledHeight(mContext,
