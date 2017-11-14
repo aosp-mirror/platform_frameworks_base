@@ -14,8 +14,10 @@
 #
 
 ifeq ($(LOCAL_USE_AAPT2),true)
+LOCAL_STATIC_JAVA_LIBRARIES += \
+    android-support-annotations
+
 LOCAL_STATIC_ANDROID_LIBRARIES += \
-    android-support-annotations \
     android-support-v4 \
     SettingsLib
 else
