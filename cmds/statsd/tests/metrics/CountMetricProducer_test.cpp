@@ -40,7 +40,7 @@ TEST(CountMetricProducerTest, TestNonDimensionalEvents) {
     int tagId = 1;
 
     CountMetric metric;
-    metric.set_metric_id(1);
+    metric.set_name("1");
     metric.mutable_bucket()->set_bucket_size_millis(bucketSizeNs / 1000000);
 
     LogEvent event1(tagId, bucketStartTimeNs + 1);
@@ -92,7 +92,7 @@ TEST(CountMetricProducerTest, TestEventsWithNonSlicedCondition) {
     int64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
 
     CountMetric metric;
-    metric.set_metric_id(1);
+    metric.set_name("1");
     metric.mutable_bucket()->set_bucket_size_millis(bucketSizeNs / 1000000);
     metric.set_condition("SCREEN_ON");
 
@@ -129,7 +129,7 @@ TEST(CountMetricProducerTest, TestEventsWithSlicedCondition) {
     int64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
 
     CountMetric metric;
-    metric.set_metric_id(1);
+    metric.set_name("1");
     metric.mutable_bucket()->set_bucket_size_millis(bucketSizeNs / 1000000);
     metric.set_condition("APP_IN_BACKGROUND_PER_UID_AND_SCREEN_ON");
     EventConditionLink* link = metric.add_links();

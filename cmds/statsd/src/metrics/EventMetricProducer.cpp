@@ -28,6 +28,7 @@ using android::util::FIELD_TYPE_BOOL;
 using android::util::FIELD_TYPE_FLOAT;
 using android::util::FIELD_TYPE_INT32;
 using android::util::FIELD_TYPE_INT64;
+using android::util::FIELD_TYPE_STRING;
 using android::util::FIELD_TYPE_MESSAGE;
 using android::util::ProtoOutputStream;
 using std::map;
@@ -40,7 +41,7 @@ namespace os {
 namespace statsd {
 
 // for StatsLogReport
-const int FIELD_ID_METRIC_ID = 1;
+const int FIELD_ID_NAME = 1;
 const int FIELD_ID_START_REPORT_NANOS = 2;
 const int FIELD_ID_END_REPORT_NANOS = 3;
 const int FIELD_ID_EVENT_METRICS = 4;
@@ -62,7 +63,7 @@ EventMetricProducer::EventMetricProducer(const EventMetric& metric, const int co
 
     startNewProtoOutputStream(mStartTimeNs);
 
-    VLOG("metric %lld created. bucket size %lld start_time: %lld", metric.metric_id(),
+    VLOG("metric %s created. bucket size %lld start_time: %lld", metric.name().c_str(),
          (long long)mBucketSizeNs, (long long)mStartTimeNs);
 }
 
@@ -74,7 +75,7 @@ void EventMetricProducer::startNewProtoOutputStream(long long startTime) {
     mProto = std::make_unique<ProtoOutputStream>();
     // TODO: We need to auto-generate the field IDs for StatsLogReport, EventMetricData,
     // and StatsEvent.
-    mProto->write(FIELD_TYPE_INT32 | FIELD_ID_METRIC_ID, mMetric.metric_id());
+    mProto->write(FIELD_TYPE_STRING | FIELD_ID_NAME, mMetric.name());
     mProto->write(FIELD_TYPE_INT64 | FIELD_ID_START_REPORT_NANOS, startTime);
     mProtoToken = mProto->start(FIELD_TYPE_MESSAGE | FIELD_ID_EVENT_METRICS);
 }
@@ -91,7 +92,7 @@ std::unique_ptr<std::vector<uint8_t>> EventMetricProducer::onDumpReport() {
     mProto->write(FIELD_TYPE_INT64 | FIELD_ID_END_REPORT_NANOS, endTime);
 
     size_t bufferSize = mProto->size();
-    VLOG("metric %lld dump report now... proto size: %zu ", mMetric.metric_id(), bufferSize);
+    VLOG("metric %s dump report now... proto size: %zu ", mMetric.name().c_str(), bufferSize);
     std::unique_ptr<std::vector<uint8_t>> buffer = serializeProto();
 
     startNewProtoOutputStream(endTime);
@@ -101,7 +102,7 @@ std::unique_ptr<std::vector<uint8_t>> EventMetricProducer::onDumpReport() {
 }
 
 void EventMetricProducer::onConditionChanged(const bool conditionMet, const uint64_t eventTime) {
-    VLOG("Metric %lld onConditionChanged", mMetric.metric_id());
+    VLOG("Metric %s onConditionChanged", mMetric.name().c_str());
     mCondition = conditionMet;
 }
 

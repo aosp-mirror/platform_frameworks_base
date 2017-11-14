@@ -112,58 +112,59 @@ message Bucket {
 }
 
 message Alert {
-  message IncidentdDetails {
-    optional string alert_name = 1;
-    repeated int32 incidentd_sections = 2;
+    optional string name = 1;
+
+    optional string metric_name = 2;
+
+    message IncidentdDetails {
+        repeated int32 section = 1;
   }
-  optional IncidentdDetails incidentd_details = 1;
+  optional IncidentdDetails incidentd_details = 3;
 
-  optional int32 number_of_buckets = 3;
+  optional int32 number_of_buckets = 4;
 
-  optional int32 refractory_period_secs = 4;
+  optional int32 refractory_period_secs = 5;
 
-  optional int64 trigger_if_sum_gt = 5;
+  optional int64 trigger_if_sum_gt = 6;
 
-  optional int32 refractory_period_in_buckets = 6;
+  optional int32 refractory_period_in_buckets = 7;
 }
 
 message EventMetric {
-  optional int64 metric_id = 1;
+    optional string name = 1;
 
-  optional string what = 2;
+    optional string what = 2;
 
-  optional string condition = 3;
+    optional string condition = 3;
 
-  repeated EventConditionLink links = 4;
+    repeated EventConditionLink links = 4;
 }
 
 message CountMetric {
-  optional int64 metric_id = 1;
+    optional string name = 1;
 
-  optional string what = 2;
+    optional string what = 2;
 
-  optional string condition = 3;
+    optional string condition = 3;
 
-  repeated KeyMatcher dimension = 4;
+    repeated KeyMatcher dimension = 4;
 
-  optional Bucket bucket = 5;
+    optional Bucket bucket = 5;
 
-  repeated Alert alerts = 6;
+    optional bool include_in_output = 6;
 
-  optional bool include_in_output = 7;
-
-  repeated EventConditionLink links = 8;
+    repeated EventConditionLink links = 7;
 }
 
 message DurationMetric {
-  optional int64 metric_id = 1;
+    optional string name = 1;
 
-  optional string what = 2;
+    optional string what = 2;
 
-  enum AggregationType {
-    DURATION_SUM = 1;
+    enum AggregationType {
+        DURATION_SUM = 1;
 
-    DURATION_MAX_SPARSE = 2;
+        DURATION_MAX_SPARSE = 2;
   }
   optional AggregationType type = 3;
 
@@ -173,50 +174,42 @@ message DurationMetric {
 
   optional Bucket bucket = 6;
 
-  repeated Alert alerts = 7;
-
-  repeated EventConditionLink links = 8;
+  repeated EventConditionLink links = 7;
 }
 
 message GaugeMetric {
-  optional int64 metric_id = 1;
+    optional string name = 1;
 
-  optional string what = 2;
+    optional string what = 2;
 
-  optional int32 gauge_field = 3;
+    optional int32 gauge_field = 3;
 
-  optional string condition = 4;
+    optional string condition = 4;
 
-  repeated KeyMatcher dimension = 5;
+    repeated KeyMatcher dimension = 5;
 
-  optional Bucket bucket = 6;
+    optional Bucket bucket = 6;
 
-  repeated Alert alerts = 7;
-
-  repeated EventConditionLink links = 8;
+    repeated EventConditionLink links = 7;
 }
 
 message ValueMetric {
-  optional int64 metric_id = 1;
+    optional string name = 1;
 
-  optional string what = 2;
+    optional string what = 2;
 
-  optional int32 value_field = 3;
+    optional int32 value_field = 3;
 
-  optional string condition = 4;
+    optional string condition = 4;
 
-  repeated KeyMatcher dimension = 5;
+    repeated KeyMatcher dimension = 5;
 
-  optional Bucket bucket = 6;
+    optional Bucket bucket = 6;
 
-  repeated Alert alerts = 7;
+    repeated EventConditionLink links = 7;
 
-  repeated EventConditionLink links = 8;
-
-  enum Operation {
-    SUM = 1;
-  }
-  optional Operation operation = 9 [default = SUM];
+    enum Operation { SUM = 1; }
+    optional Operation operation = 9 [default = SUM];
 }
 
 message EventConditionLink {
@@ -227,21 +220,21 @@ message EventConditionLink {
 };
 
 message StatsdConfig {
-  optional int64 config_id = 1;
+    optional string name = 1;
 
-  repeated EventMetric event_metric = 2;
+    repeated EventMetric event_metric = 2;
 
-  repeated CountMetric count_metric = 3;
+    repeated CountMetric count_metric = 3;
 
-  repeated ValueMetric value_metric = 4;
+    repeated ValueMetric value_metric = 4;
 
-  repeated DurationMetric duration_metric = 5;
+    repeated GaugeMetric gauge_metric = 5;
 
-  repeated GaugeMetric gauge_metric = 6;
+    repeated DurationMetric duration_metric = 6;
 
-  repeated LogEntryMatcher log_entry_matcher = 7;
+    repeated LogEntryMatcher log_entry_matcher = 7;
 
-  repeated Condition condition = 8;
+    repeated Condition condition = 8;
 
-  repeated Alert alerts = 9;
+    repeated Alert alerts = 9;
 }
