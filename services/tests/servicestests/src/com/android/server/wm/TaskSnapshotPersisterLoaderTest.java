@@ -31,7 +31,6 @@ import android.support.test.filters.MediumTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.util.ArraySet;
 
-import com.android.internal.util.Predicate;
 import com.android.server.wm.TaskSnapshotPersister.RemoveObsoleteFilesQueueItem;
 
 import org.junit.Test;
@@ -175,5 +174,17 @@ public class TaskSnapshotPersisterLoaderTest extends TaskSnapshotPersisterTestBa
                 new File(sFilesDir.getPath() + "/snapshots/2.jpg"),
                 new File(sFilesDir.getPath() + "/snapshots/2_reduced.jpg")};
         assertTrueForFiles(existsFiles, File::exists, " must exist");
+    }
+
+    /**
+     * Private predicate definition.
+     *
+     * This is needed because com.android.internal.util.Predicate is deprecated
+     * and can only be used with classes fron android.test.runner. This cannot
+     * use java.util.function.Predicate because that is not present on all API
+     * versions that this test must run on.
+     */
+    private interface Predicate<T> {
+        boolean apply(T t);
     }
 }
