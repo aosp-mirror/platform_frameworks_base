@@ -262,7 +262,8 @@ public final class SQLiteDatabase extends SQLiteClosable {
 
     private SQLiteDatabase(final String path, final int openFlags,
             CursorFactory cursorFactory, DatabaseErrorHandler errorHandler,
-            int lookasideSlotSize, int lookasideSlotCount, long idleConnectionTimeoutMs) {
+            int lookasideSlotSize, int lookasideSlotCount, long idleConnectionTimeoutMs,
+            String journalMode, String syncMode) {
         mCursorFactory = cursorFactory;
         mErrorHandler = errorHandler != null ? errorHandler : new DefaultDatabaseErrorHandler();
         mConfigurationLocked = new SQLiteDatabaseConfiguration(path, openFlags);
@@ -285,6 +286,8 @@ public final class SQLiteDatabase extends SQLiteClosable {
             }
         }
         mConfigurationLocked.idleConnectionTimeoutMs = effectiveTimeoutMs;
+        mConfigurationLocked.journalMode = journalMode;
+        mConfigurationLocked.syncMode = syncMode;
         mConfigurationLocked.useCompatibilityWal = SQLiteGlobal.isCompatibilityWalSupported();
     }
 
@@ -721,7 +724,7 @@ public final class SQLiteDatabase extends SQLiteClosable {
         SQLiteDatabase db = new SQLiteDatabase(path, openParams.mOpenFlags,
                 openParams.mCursorFactory, openParams.mErrorHandler,
                 openParams.mLookasideSlotSize, openParams.mLookasideSlotCount,
-                openParams.mIdleConnectionTimeout);
+                openParams.mIdleConnectionTimeout, openParams.mJournalMode, openParams.mSyncMode);
         db.open();
         return db;
     }
@@ -747,7 +750,8 @@ public final class SQLiteDatabase extends SQLiteClosable {
      */
     public static SQLiteDatabase openDatabase(@NonNull String path, @Nullable CursorFactory factory,
             @DatabaseOpenFlags int flags, @Nullable DatabaseErrorHandler errorHandler) {
-        SQLiteDatabase db = new SQLiteDatabase(path, flags, factory, errorHandler, -1, -1, -1);
+        SQLiteDatabase db = new SQLiteDatabase(path, flags, factory, errorHandler, -1, -1, -1, null,
+                null);
         db.open();
         return db;
     }
@@ -2302,17 +2306,21 @@ public final class SQLiteDatabase extends SQLiteClosable {
         private final DatabaseErrorHandler mErrorHandler;
         private final int mLookasideSlotSize;
         private final int mLookasideSlotCount;
-        private long mIdleConnectionTimeout;
+        private final long mIdleConnectionTimeout;
+        private final String mJournalMode;
+        private final String mSyncMode;
 
         private OpenParams(int openFlags, CursorFactory cursorFactory,
                 DatabaseErrorHandler errorHandler, int lookasideSlotSize, int lookasideSlotCount,
-                long idleConnectionTimeout) {
+                long idleConnectionTimeout, String journalMode, String syncMode) {
             mOpenFlags = openFlags;
             mCursorFactory = cursorFactory;
             mErrorHandler = errorHandler;
             mLookasideSlotSize = lookasideSlotSize;
             mLookasideSlotCount = lookasideSlotCount;
             mIdleConnectionTimeout = idleConnectionTimeout;
+            mJournalMode = journalMode;
+            mSyncMode = syncMode;
         }
 
         /**
@@ -2379,6 +2387,28 @@ public final class SQLiteDatabase extends SQLiteClosable {
         }
 
         /**
+         * Returns <a href="https://sqlite.org/pragma.html#pragma_journal_mode">journal mode</a>.
+         * This journal mode will only be used if {@link SQLiteDatabase#ENABLE_WRITE_AHEAD_LOGGING}
+         * flag is not set, otherwise a platform will use "WAL" journal mode.
+         * @see Builder#setJournalMode(String)
+         */
+        @Nullable
+        public String getJournalMode() {
+            return mJournalMode;
+        }
+
+        /**
+         * Returns <a href="https://sqlite.org/pragma.html#pragma_synchronous">synchronous mode</a>.
+         * This value will only be used when {@link SQLiteDatabase#ENABLE_WRITE_AHEAD_LOGGING} flag
+         * is not set, otherwise a system wide default will be used.
+         * @see Builder#setSynchronousMode(String)
+         */
+        @Nullable
+        public String getSynchronousMode() {
+            return mSyncMode;
+        }
+
+        /**
          * Creates a new instance of builder {@link Builder#Builder(OpenParams) initialized} with
          * {@code this} parameters.
          * @hide
@@ -2398,6 +2428,8 @@ public final class SQLiteDatabase extends SQLiteClosable {
             private int mOpenFlags;
             private CursorFactory mCursorFactory;
             private DatabaseErrorHandler mErrorHandler;
+            private String mJournalMode;
+            private String mSyncMode;
 
             public Builder() {
             }
@@ -2408,6 +2440,8 @@ public final class SQLiteDatabase extends SQLiteClosable {
                 mOpenFlags = params.mOpenFlags;
                 mCursorFactory = params.mCursorFactory;
                 mErrorHandler = params.mErrorHandler;
+                mJournalMode = params.mJournalMode;
+                mSyncMode = params.mSyncMode;
             }
 
             /**
@@ -2539,6 +2573,30 @@ public final class SQLiteDatabase extends SQLiteClosable {
                 return this;
             }
 
+
+            /**
+             * Sets <a href="https://sqlite.org/pragma.html#pragma_journal_mode">journal mode</a>
+             * to use when {@link SQLiteDatabase#ENABLE_WRITE_AHEAD_LOGGING} flag is not set.
+             */
+            @NonNull
+            public Builder setJournalMode(@NonNull  String journalMode) {
+                Preconditions.checkNotNull(journalMode);
+                mJournalMode = journalMode;
+                return this;
+            }
+
+            /**
+             * Sets <a href="https://sqlite.org/pragma.html#pragma_synchronous">synchronous mode</a>
+             * to use when {@link SQLiteDatabase#ENABLE_WRITE_AHEAD_LOGGING} flag is not set.
+             * @return
+             */
+            @NonNull
+            public Builder setSynchronousMode(@NonNull String syncMode) {
+                Preconditions.checkNotNull(syncMode);
+                mSyncMode = syncMode;
+                return this;
+            }
+
             /**
              * Creates an instance of {@link OpenParams} with the options that were previously set
              * on this builder
@@ -2546,7 +2604,7 @@ public final class SQLiteDatabase extends SQLiteClosable {
             @NonNull
             public OpenParams build() {
                 return new OpenParams(mOpenFlags, mCursorFactory, mErrorHandler, mLookasideSlotSize,
-                        mLookasideSlotCount, mIdleConnectionTimeout);
+                        mLookasideSlotCount, mIdleConnectionTimeout, mJournalMode, mSyncMode);
             }
         }
     }
@@ -2561,4 +2619,6 @@ public final class SQLiteDatabase extends SQLiteClosable {
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface DatabaseOpenFlags {}
+
 }
+

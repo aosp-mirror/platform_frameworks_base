@@ -120,6 +120,18 @@ public final class SQLiteDatabaseConfiguration {
     public boolean useCompatibilityWal;
 
     /**
+     * Journal mode to use when {@link SQLiteDatabase#ENABLE_WRITE_AHEAD_LOGGING} is not set.
+     * <p>Default is returned by {@link SQLiteGlobal#getDefaultJournalMode()}
+     */
+    public String journalMode;
+
+    /**
+     * Synchronous mode to use when {@link SQLiteDatabase#ENABLE_WRITE_AHEAD_LOGGING} is not set.
+     * <p>Default is returned by {@link SQLiteGlobal#getDefaultSyncMode()}
+     */
+    public String syncMode;
+
+    /**
      * Creates a database configuration with the required parameters for opening a
      * database and default values for all other parameters.
      *
@@ -180,6 +192,8 @@ public final class SQLiteDatabaseConfiguration {
         lookasideSlotCount = other.lookasideSlotCount;
         idleConnectionTimeoutMs = other.idleConnectionTimeoutMs;
         useCompatibilityWal = other.useCompatibilityWal;
+        journalMode = other.journalMode;
+        syncMode = other.syncMode;
     }
 
     /**

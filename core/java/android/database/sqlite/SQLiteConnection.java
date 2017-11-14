@@ -289,14 +289,19 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
 
     private void setWalModeFromConfiguration() {
         if (!mConfiguration.isInMemoryDb() && !mIsReadOnlyConnection) {
-            boolean walEnabled =
+            final boolean walEnabled =
                     (mConfiguration.openFlags & SQLiteDatabase.ENABLE_WRITE_AHEAD_LOGGING) != 0;
-            if (walEnabled || mConfiguration.useCompatibilityWal) {
+            // Use compatibility WAL unless an app explicitly set journal/synchronous mode
+            final boolean useCompatibilityWal = mConfiguration.journalMode == null
+                    && mConfiguration.syncMode == null && mConfiguration.useCompatibilityWal;
+            if (walEnabled || useCompatibilityWal) {
                 setJournalMode("WAL");
                 setSyncMode(SQLiteGlobal.getWALSyncMode());
             } else {
-                setJournalMode(SQLiteGlobal.getDefaultJournalMode());
-                setSyncMode(SQLiteGlobal.getDefaultSyncMode());
+                setJournalMode(mConfiguration.journalMode == null
+                        ? SQLiteGlobal.getDefaultJournalMode() : mConfiguration.journalMode);
+                setSyncMode(mConfiguration.syncMode == null
+                        ? SQLiteGlobal.getDefaultSyncMode() : mConfiguration.syncMode);
             }
         }
     }
@@ -310,12 +315,10 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
     }
 
     private static String canonicalizeSyncMode(String value) {
-        if (value.equals("0")) {
-            return "OFF";
-        } else if (value.equals("1")) {
-            return "NORMAL";
-        } else if (value.equals("2")) {
-            return "FULL";
+        switch (value) {
+            case "0": return "OFF";
+            case "1": return "NORMAL";
+            case "2": return "FULL";
         }
         return value;
     }
