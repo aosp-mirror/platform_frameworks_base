@@ -48,6 +48,12 @@ bool CopyFileToArchive(IAaptContext* context, io::IFile* file, const std::string
   return CopyInputStreamToArchive(context, data.get(), out_path, compression_flags, writer);
 }
 
+bool CopyFileToArchivePreserveCompression(IAaptContext* context, io::IFile* file,
+                                          const std::string& out_path, IArchiveWriter* writer) {
+  uint32_t compression_flags = file->WasCompressed() ? ArchiveEntry::kCompress : 0u;
+  return CopyFileToArchive(context, file, out_path, compression_flags, writer);
+}
+
 bool CopyProtoToArchive(IAaptContext* context, ::google::protobuf::MessageLite* proto_msg,
                         const std::string& out_path, uint32_t compression_flags,
                         IArchiveWriter* writer) {

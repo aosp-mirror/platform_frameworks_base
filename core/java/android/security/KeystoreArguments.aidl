@@ -17,4 +17,4 @@
 package android.security;
 
 /* @hide */
-parcelable KeystoreArguments;
+parcelable KeystoreArguments cpp_header "keystore/KeystoreArguments.h";

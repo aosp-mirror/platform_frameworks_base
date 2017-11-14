@@ -33,7 +33,7 @@ statsd_common_src := \
     src/external/ResourcePowerManagerPuller.cpp \
     src/external/CpuTimePerUidPuller.cpp \
     src/external/CpuTimePerUidFreqPuller.cpp \
-    src/external/StatsPullerManager.cpp \
+    src/external/StatsPullerManagerImpl.cpp \
     src/logd/LogEvent.cpp \
     src/logd/LogListener.cpp \
     src/logd/LogReader.cpp \
@@ -164,7 +164,8 @@ LOCAL_SRC_FILES := \
     tests/metrics/OringDurationTracker_test.cpp \
     tests/metrics/MaxDurationTracker_test.cpp \
     tests/metrics/CountMetricProducer_test.cpp \
-    tests/metrics/EventMetricProducer_test.cpp
+    tests/metrics/EventMetricProducer_test.cpp \
+    tests/metrics/ValueMetricProducer_test.cpp
 
 LOCAL_STATIC_LIBRARIES := \
     libgmock

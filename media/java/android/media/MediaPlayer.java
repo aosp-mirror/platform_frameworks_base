@@ -1698,21 +1698,9 @@ public class MediaPlayer extends PlayerBase
     public native boolean isPlaying();
 
     /**
-     * Gets the default buffering management params.
-     * Calling it only after {@code setDataSource} has been called.
-     * Each type of data source might have different set of default params.
-     *
-     * @return the default buffering management params supported by the source component.
-     * @throws IllegalStateException if the internal player engine has not been
-     * initialized, or {@code setDataSource} has not been called.
-     * @hide
-     */
-    @NonNull
-    public native BufferingParams getDefaultBufferingParams();
-
-    /**
      * Gets the current buffering management params used by the source component.
      * Calling it only after {@code setDataSource} has been called.
+     * Each type of data source might have different set of default params.
      *
      * @return the current buffering management params used by the source component.
      * @throws IllegalStateException if the internal player engine has not been
@@ -1727,8 +1715,7 @@ public class MediaPlayer extends PlayerBase
      * The object sets its internal BufferingParams to the input, except that the input is
      * invalid or not supported.
      * Call it only after {@code setDataSource} has been called.
-     * Users should only use supported mode returned by {@link #getDefaultBufferingParams()}
-     * or its downsized version as described in {@link BufferingParams}.
+     * The input is a hint to MediaPlayer.
      *
      * @param params the buffering management params.
      *

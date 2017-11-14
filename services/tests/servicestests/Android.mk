@@ -25,7 +25,8 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
     mockito-target-minus-junit4 \
     platform-test-annotations \
     ShortcutManagerTestUtils \
-    truth-prebuilt
+    truth-prebuilt \
+    testng
 
 LOCAL_AIDL_INCLUDES := $(LOCAL_PATH)/aidl
 

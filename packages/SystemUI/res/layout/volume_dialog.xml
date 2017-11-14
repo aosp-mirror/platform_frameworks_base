@@ -13,30 +13,36 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<RelativeLayout
+<com.android.systemui.HardwareUiLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/volume_dialog"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_marginBottom="@dimen/volume_dialog_margin_bottom"
-    android:background="@drawable/volume_dialog_background"
-    android:paddingTop="@dimen/volume_dialog_padding_top"
+    android:layout_height="match_parent"
     android:theme="@style/qs_theme"
-    android:translationZ="4dp" >
-
-    <LinearLayout
-        android:id="@+id/volume_dialog_content"
-        android:layout_width="match_parent"
+    android:clipChildren="false" >
+    <RelativeLayout
+        android:id="@+id/volume_dialog"
+        android:layout_width="@dimen/volume_dialog_panel_width"
         android:layout_height="wrap_content"
-        android:orientation="vertical" >
+        android:layout_gravity="center_vertical|end"
+        android:paddingTop="@dimen/volume_row_padding_bottom"
+        android:layout_margin="12dp"
+        android:background="?android:attr/actionBarItemBackground"
+        android:translationZ="8dp" >
 
         <LinearLayout
-            android:id="@+id/volume_dialog_rows"
+            android:id="@+id/volume_dialog_content"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical" >
-            <!-- volume rows added and removed here! :-) -->
-        </LinearLayout>
-    </LinearLayout>
 
-</RelativeLayout>
+            <LinearLayout
+                android:id="@+id/volume_dialog_rows"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" >
+                <!-- volume rows added and removed here! :-) -->
+            </LinearLayout>
+        </LinearLayout>
+
+    </RelativeLayout>
+</com.android.systemui.HardwareUiLayout>

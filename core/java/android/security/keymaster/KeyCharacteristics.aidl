@@ -17,4 +17,4 @@
 package android.security.keymaster;
 
 /* @hide */
-parcelable KeyCharacteristics;
+parcelable KeyCharacteristics cpp_header "keystore/KeyCharacteristics.h";

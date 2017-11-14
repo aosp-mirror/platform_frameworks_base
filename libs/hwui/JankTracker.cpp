@@ -174,24 +174,22 @@ void JankTracker::dumpData(int fd, const ProfileDataDescription* description,
 }
 
 void JankTracker::dumpFrames(int fd) {
-    FILE* file = fdopen(fd, "a");
-    fprintf(file, "\n\n---PROFILEDATA---\n");
+    dprintf(fd, "\n\n---PROFILEDATA---\n");
     for (size_t i = 0; i < static_cast<size_t>(FrameInfoIndex::NumIndexes); i++) {
-        fprintf(file, "%s", FrameInfoNames[i].c_str());
-        fprintf(file, ",");
+        dprintf(fd, "%s", FrameInfoNames[i].c_str());
+        dprintf(fd, ",");
     }
     for (size_t i = 0; i < mFrames.size(); i++) {
         FrameInfo& frame = mFrames[i];
         if (frame[FrameInfoIndex::SyncStart] == 0) {
             continue;
         }
-        fprintf(file, "\n");
+        dprintf(fd, "\n");
         for (int i = 0; i < static_cast<int>(FrameInfoIndex::NumIndexes); i++) {
-            fprintf(file, "%" PRId64 ",", frame[i]);
+            dprintf(fd, "%" PRId64 ",", frame[i]);
         }
     }
-    fprintf(file, "\n---PROFILEDATA---\n\n");
-    fflush(file);
+    dprintf(fd, "\n---PROFILEDATA---\n\n");
 }
 
 void JankTracker::reset() {

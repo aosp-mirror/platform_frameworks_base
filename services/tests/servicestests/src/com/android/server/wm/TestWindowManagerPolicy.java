@@ -133,11 +133,6 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public void setDisplayOverscan(Display display, int left, int top, int right, int bottom) {
-
-    }
-
-    @Override
     public int checkAddPermission(WindowManager.LayoutParams attrs, int[] outAppOp) {
         return 0;
     }
@@ -290,37 +285,8 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public void beginLayoutLw(int displayId, int displayWidth, int displayHeight,
-            int displayRotation, int uiMode) {
-
-    }
-
-    @Override
     public int getSystemDecorLayerLw() {
         return 0;
-    }
-
-    @Override
-    public void getContentRectLw(Rect r) {
-
-    }
-
-    @Override
-    public void layoutWindowLw(WindowState win,
-            WindowState attached) {
-
-    }
-
-    @Override
-    public boolean getInsetHintLw(WindowManager.LayoutParams attrs, Rect taskBounds,
-            int displayRotation, int displayWidth, int displayHeight, Rect outContentInsets,
-            Rect outStableInsets, Rect outOutsets) {
-        return false;
-    }
-
-    @Override
-    public void finishLayoutLw() {
-
     }
 
     @Override
@@ -579,11 +545,6 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     @Override
     public void showGlobalActions() {
 
-    }
-
-    @Override
-    public int getInputMethodWindowVisibleHeightLw() {
-        return 0;
     }
 
     @Override

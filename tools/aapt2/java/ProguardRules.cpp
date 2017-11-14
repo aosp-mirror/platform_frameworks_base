@@ -345,15 +345,14 @@ bool WriteKeepSet(std::ostream* out, const KeepSet& keep_set) {
       *out << "# Referenced at " << location.source << "\n";
     }
     if (keep_set.conditional_keep_rules_ && can_be_conditional) {
-      *out << "-keep class " << entry.first << " {\n  ifused class **.R$layout {\n";
+      *out << "-if class **.R$layout {\n";
       for (const UsageLocation& location : locations) {
         auto transformed_name = JavaClassGenerator::TransformToFieldName(location.name.entry);
-        *out << "    int " << transformed_name << ";\n";
+        *out << "  int " << transformed_name << ";\n";
       }
-      *out << "  };\n  <init>(...);\n}\n" << std::endl;
-    } else {
-      *out << "-keep class " << entry.first << " { <init>(...); }\n" << std::endl;
+      *out << "}\n";
     }
+    *out << "-keep class " << entry.first << " { <init>(...); }\n" << std::endl;
   }
 
   for (const auto& entry : keep_set.method_set_) {

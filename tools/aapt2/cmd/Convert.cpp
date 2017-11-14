@@ -46,17 +46,6 @@ class ISerializer {
   virtual bool SerializeTable(ResourceTable* table, IArchiveWriter* writer) = 0;
   virtual bool SerializeFile(const FileReference* file, IArchiveWriter* writer) = 0;
 
-  bool CopyFileToArchive(const FileReference* file, IArchiveWriter* writer) {
-    uint32_t compression_flags = file->file->WasCompressed() ? ArchiveEntry::kCompress : 0u;
-    if (!io::CopyFileToArchive(context_, file->file, *file->path, compression_flags, writer)) {
-      context_->GetDiagnostics()->Error(DiagMessage(source_)
-                                        << "failed to copy file " << *file->path);
-      return false;
-    }
-
-    return true;
-  }
-
   virtual ~ISerializer() = default;
 
  protected:
@@ -66,18 +55,21 @@ class ISerializer {
 
 bool ConvertProtoApkToBinaryApk(IAaptContext* context, unique_ptr<LoadedApk> apk,
                                 ISerializer* serializer, IArchiveWriter* writer) {
+  // AndroidManifest.xml
   if (!serializer->SerializeXml(apk->GetManifest(), kAndroidManifestPath, true /*utf16*/, writer)) {
     context->GetDiagnostics()->Error(DiagMessage(apk->GetSource())
                                      << "failed to serialize AndroidManifest.xml");
     return false;
   }
 
+  // Resource table
   if (!serializer->SerializeTable(apk->GetResourceTable(), writer)) {
     context->GetDiagnostics()->Error(DiagMessage(apk->GetSource())
                                      << "failed to serialize the resource table");
     return false;
   }
 
+  // Resources
   for (const auto& package : apk->GetResourceTable()->packages) {
     for (const auto& type : package->types) {
       for (const auto& entry : type->entries) {
@@ -100,6 +92,31 @@ bool ConvertProtoApkToBinaryApk(IAaptContext* context, unique_ptr<LoadedApk> apk
       } // entry
     } // type
   } // package
+
+  // Other files
+  std::unique_ptr<io::IFileCollectionIterator> iterator = apk->GetFileCollection()->Iterator();
+  while (iterator->HasNext()) {
+    io::IFile* file = iterator->Next();
+
+    std::string path = file->GetSource().path;
+    // The name of the path has the format "<zip-file-name>@<path-to-file>".
+    path = path.substr(path.find('@') + 1);
+
+    // Manifest, resource table and resources have already been taken care of.
+    if (path == kAndroidManifestPath ||
+        path == kApkResourceTablePath ||
+        path == kProtoResourceTablePath ||
+        path.find("res/") == 0) {
+      continue;
+    }
+
+    if (!io::CopyFileToArchivePreserveCompression(context, file, path, writer)) {
+      context->GetDiagnostics()->Error(DiagMessage(apk->GetSource())
+                                       << "failed to copy file " << path);
+      return false;
+    }
+  }
+
   return true;
 }
 
@@ -169,7 +186,11 @@ class BinarySerializer : public ISerializer {
         return false;
       }
     } else {
-      return CopyFileToArchive(file, writer);
+      if (!io::CopyFileToArchivePreserveCompression(context_, file->file, *file->path, writer)) {
+        context_->GetDiagnostics()->Error(DiagMessage(source_)
+                                          << "failed to copy file " << *file->path);
+        return false;
+      }
     }
 
     return true;

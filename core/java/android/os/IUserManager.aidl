@@ -94,4 +94,5 @@ interface IUserManager {
     boolean isUserUnlocked(int userId);
     boolean isUserRunning(int userId);
     boolean isUserNameSet(int userHandle);
+    boolean hasRestrictedProfiles();
 }

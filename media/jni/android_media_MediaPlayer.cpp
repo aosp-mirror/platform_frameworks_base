@@ -371,25 +371,6 @@ android_media_MediaPlayer_setVideoSurface(JNIEnv *env, jobject thiz, jobject jsu
 }
 
 static jobject
-android_media_MediaPlayer_getDefaultBufferingParams(JNIEnv *env, jobject thiz)
-{
-    sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
-    if (mp == NULL) {
-        jniThrowException(env, "java/lang/IllegalStateException", NULL);
-        return NULL;
-    }
-
-    BufferingParams bp;
-    BufferingSettings &settings = bp.settings;
-    process_media_player_call(
-            env, thiz, mp->getDefaultBufferingSettings(&settings),
-            "java/lang/IllegalStateException", "unexpected error");
-    ALOGV("getDefaultBufferingSettings:{%s}", settings.toString().string());
-
-    return bp.asJobject(env, gBufferingParamsFields);
-}
-
-static jobject
 android_media_MediaPlayer_getBufferingParams(JNIEnv *env, jobject thiz)
 {
     sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
@@ -1436,7 +1417,6 @@ static const JNINativeMethod gMethods[] = {
     {"_setDataSource",      "(Ljava/io/FileDescriptor;JJ)V",    (void *)android_media_MediaPlayer_setDataSourceFD},
     {"_setDataSource",      "(Landroid/media/MediaDataSource;)V",(void *)android_media_MediaPlayer_setDataSourceCallback },
     {"_setVideoSurface",    "(Landroid/view/Surface;)V",        (void *)android_media_MediaPlayer_setVideoSurface},
-    {"getDefaultBufferingParams", "()Landroid/media/BufferingParams;", (void *)android_media_MediaPlayer_getDefaultBufferingParams},
     {"getBufferingParams", "()Landroid/media/BufferingParams;", (void *)android_media_MediaPlayer_getBufferingParams},
     {"setBufferingParams", "(Landroid/media/BufferingParams;)V", (void *)android_media_MediaPlayer_setBufferingParams},
     {"_prepare",            "()V",                              (void *)android_media_MediaPlayer_prepare},

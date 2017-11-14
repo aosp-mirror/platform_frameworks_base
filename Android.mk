@@ -159,6 +159,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/content/ISyncServiceAdapter.aidl \
 	core/java/android/content/ISyncStatusObserver.aidl \
 	core/java/android/content/om/IOverlayManager.aidl \
+	core/java/android/content/pm/crossprofile/ICrossProfileApps.aidl \
 	core/java/android/content/pm/IDexModuleRegisterCallback.aidl \
 	core/java/android/content/pm/ILauncherApps.aidl \
 	core/java/android/content/pm/IOnAppsChangedListener.aidl \
@@ -1557,6 +1558,7 @@ LOCAL_PROTOC_FLAGS := \
 LOCAL_SOURCE_FILES_ALL_GENERATED := true
 LOCAL_SRC_FILES := \
     tools/streaming_proto/stream.proto \
+    cmds/am/proto/instrumentation_data.proto \
     $(call all-proto-files-under, core/proto) \
     $(call all-proto-files-under, libs/incident/proto)
 include $(BUILD_HOST_JAVA_LIBRARY)

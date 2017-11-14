@@ -7075,10 +7075,12 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
 
             // We deprecated Build.SERIAL and it is not accessible to
-            // apps that target the v2 security sandbox. Since access to
-            // the serial is now behind a permission we push down the value.
-            String buildSerial = appInfo.targetSandboxVersion < 2
-                    ? sTheRealBuildSerial : Build.UNKNOWN;
+            // apps that target the v2 security sandbox and to apps that
+            // target APIs higher than O MR1. Since access to the serial
+            // is now behind a permission we push down the value.
+            final String buildSerial = (appInfo.targetSandboxVersion < 2
+                    && appInfo.targetSdkVersion <= Build.VERSION_CODES.O_MR1)
+                            ? sTheRealBuildSerial : Build.UNKNOWN;
 
             // Check if this is a secondary process that should be incorporated into some
             // currently active instrumentation.  (Note we do this AFTER all of the profiling

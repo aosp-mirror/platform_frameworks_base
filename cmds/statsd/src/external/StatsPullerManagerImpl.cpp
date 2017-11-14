@@ -25,7 +25,7 @@
 #include "CpuTimePerUidPuller.h"
 #include "ResourcePowerManagerPuller.h"
 #include "StatsCompanionServicePuller.h"
-#include "StatsPullerManager.h"
+#include "StatsPullerManagerImpl.h"
 #include "StatsService.h"
 #include "logd/LogEvent.h"
 #include "statslog.h"
@@ -37,12 +37,13 @@ using std::map;
 using std::shared_ptr;
 using std::string;
 using std::vector;
+using std::list;
 
 namespace android {
 namespace os {
 namespace statsd {
 
-StatsPullerManager::StatsPullerManager()
+StatsPullerManagerImpl::StatsPullerManagerImpl()
     : mCurrentPullingInterval(LONG_MAX), mPullStartTimeMs(get_pull_start_time_ms()) {
     shared_ptr<StatsPuller> statsCompanionServicePuller = make_shared<StatsCompanionServicePuller>();
     shared_ptr<StatsPuller> resourcePowerManagerPuller = make_shared<ResourcePowerManagerPuller>();
@@ -71,7 +72,7 @@ StatsPullerManager::StatsPullerManager()
     mStatsCompanionService = StatsService::getStatsCompanionService();
 }
 
-bool StatsPullerManager::Pull(int tagId, vector<shared_ptr<LogEvent>>* data) {
+bool StatsPullerManagerImpl::Pull(int tagId, vector<shared_ptr<LogEvent>>* data) {
     if (DEBUG) ALOGD("Initiating pulling %d", tagId);
 
     if (mPullers.find(tagId) != mPullers.end()) {
@@ -82,26 +83,26 @@ bool StatsPullerManager::Pull(int tagId, vector<shared_ptr<LogEvent>>* data) {
     }
 }
 
-StatsPullerManager& StatsPullerManager::GetInstance() {
-    static StatsPullerManager instance;
+StatsPullerManagerImpl& StatsPullerManagerImpl::GetInstance() {
+    static StatsPullerManagerImpl instance;
     return instance;
 }
 
-bool StatsPullerManager::PullerForMatcherExists(int tagId) {
+bool StatsPullerManagerImpl::PullerForMatcherExists(int tagId) {
     return mPullers.find(tagId) != mPullers.end();
 }
 
-long StatsPullerManager::get_pull_start_time_ms() {
+long StatsPullerManagerImpl::get_pull_start_time_ms() {
     // TODO: limit and align pull intervals to 10min boundaries if this turns out to be a problem
     return time(nullptr) * 1000;
 }
 
-void StatsPullerManager::RegisterReceiver(int tagId, sp<PullDataReceiver> receiver,
-                                          long intervalMs) {
+void StatsPullerManagerImpl::RegisterReceiver(int tagId, wp<PullDataReceiver> receiver,
+                                              long intervalMs) {
     AutoMutex _l(mReceiversLock);
-    vector<ReceiverInfo>& receivers = mReceivers[tagId];
+    auto& receivers = mReceivers[tagId];
     for (auto it = receivers.begin(); it != receivers.end(); it++) {
-        if (it->receiver.get() == receiver.get()) {
+        if (it->receiver == receiver) {
             VLOG("Receiver already registered of %d", (int)receivers.size());
             return;
         }
@@ -124,7 +125,7 @@ void StatsPullerManager::RegisterReceiver(int tagId, sp<PullDataReceiver> receiv
     VLOG("Puller for tagId %d registered of %d", tagId, (int)receivers.size());
 }
 
-void StatsPullerManager::UnRegisterReceiver(int tagId, sp<PullDataReceiver> receiver) {
+void StatsPullerManagerImpl::UnRegisterReceiver(int tagId, wp<PullDataReceiver> receiver) {
     AutoMutex _l(mReceiversLock);
     if (mReceivers.find(tagId) == mReceivers.end()) {
         VLOG("Unknown pull code or no receivers: %d", tagId);
@@ -132,7 +133,7 @@ void StatsPullerManager::UnRegisterReceiver(int tagId, sp<PullDataReceiver> rece
     }
     auto& receivers = mReceivers.find(tagId)->second;
     for (auto it = receivers.begin(); it != receivers.end(); it++) {
-        if (receiver.get() == it->receiver.get()) {
+        if (receiver == it->receiver) {
             receivers.erase(it);
             VLOG("Puller for tagId %d unregistered of %d", tagId, (int)receivers.size());
             return;
@@ -140,7 +141,7 @@ void StatsPullerManager::UnRegisterReceiver(int tagId, sp<PullDataReceiver> rece
     }
 }
 
-void StatsPullerManager::OnAlarmFired() {
+void StatsPullerManagerImpl::OnAlarmFired() {
     AutoMutex _l(mReceiversLock);
 
     uint64_t currentTimeMs = time(nullptr) * 1000;
@@ -165,8 +166,13 @@ void StatsPullerManager::OnAlarmFired() {
         vector<shared_ptr<LogEvent>> data;
         if (Pull(pullInfo.first, &data)) {
             for (const auto& receiverInfo : pullInfo.second) {
-                receiverInfo->receiver->onDataPulled(data);
-                receiverInfo->timeInfo.second = currentTimeMs;
+                sp<PullDataReceiver> receiverPtr = receiverInfo->receiver.promote();
+                if (receiverPtr != nullptr) {
+                    receiverPtr->onDataPulled(data);
+                    receiverInfo->timeInfo.second = currentTimeMs;
+                } else {
+                    VLOG("receiver already gone.");
+                }
             }
         }
     }

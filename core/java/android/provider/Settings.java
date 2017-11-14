@@ -66,6 +66,7 @@ import android.os.ResultReceiver;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.speech.tts.TextToSpeech;
+import android.telephony.SubscriptionManager;
 import android.text.TextUtils;
 import android.util.AndroidException;
 import android.util.ArrayMap;
@@ -2113,6 +2114,9 @@ public final class Settings {
      * functions for accessing individual settings entries.
      */
     public static final class System extends NameValueTable {
+        // NOTE: If you add new settings here, be sure to add them to
+        // com.android.providers.settings.SettingsProtoDumpUtil#dumpProtoSystemSettingsLocked.
+
         private static final float DEFAULT_FONT_SCALE = 1.0f;
 
         /** @hide */
@@ -4562,6 +4566,9 @@ public final class Settings {
      * APIs for those values, not modified directly by applications.
      */
     public static final class Secure extends NameValueTable {
+        // NOTE: If you add new settings here, be sure to add them to
+        // com.android.providers.settings.SettingsProtoDumpUtil#dumpProtoSecureSettingsLocked.
+
         /**
          * The content:// style URL for this table
          */
@@ -7564,6 +7571,9 @@ public final class Settings {
      * explicitly modify through the system UI or specialized APIs for those values.
      */
     public static final class Global extends NameValueTable {
+        // NOTE: If you add new settings here, be sure to add them to
+        // com.android.providers.settings.SettingsProtoDumpUtil#dumpProtoGlobalSettingsLocked.
+
         /**
          * The content:// style URL for global secure settings items.  Not public.
          */
@@ -10148,8 +10158,12 @@ public final class Settings {
          * <p>
          * Type: int (0 for false, 1 for true)
          * @hide
+         * @deprecated Use {@link android.telephony.SubscriptionManager#ENHANCED_4G_MODE_ENABLED}
+         * instead.
          */
-        public static final String ENHANCED_4G_MODE_ENABLED = "volte_vt_enabled";
+        @Deprecated
+        public static final String ENHANCED_4G_MODE_ENABLED =
+                SubscriptionManager.ENHANCED_4G_MODE_ENABLED;
 
         /**
          * Whether VT (Video Telephony over IMS) is enabled
@@ -10157,8 +10171,10 @@ public final class Settings {
          * Type: int (0 for false, 1 for true)
          *
          * @hide
+         * @deprecated Use {@link android.telephony.SubscriptionManager#VT_IMS_ENABLED} instead.
          */
-        public static final String VT_IMS_ENABLED = "vt_ims_enabled";
+        @Deprecated
+        public static final String VT_IMS_ENABLED = SubscriptionManager.VT_IMS_ENABLED;
 
         /**
          * Whether WFC is enabled
@@ -10166,8 +10182,10 @@ public final class Settings {
          * Type: int (0 for false, 1 for true)
          *
          * @hide
+         * @deprecated Use {@link android.telephony.SubscriptionManager#WFC_IMS_ENABLED} instead.
          */
-        public static final String WFC_IMS_ENABLED = "wfc_ims_enabled";
+        @Deprecated
+        public static final String WFC_IMS_ENABLED = SubscriptionManager.WFC_IMS_ENABLED;
 
         /**
          * WFC mode on home/non-roaming network.
@@ -10175,8 +10193,10 @@ public final class Settings {
          * Type: int - 2=Wi-Fi preferred, 1=Cellular preferred, 0=Wi-Fi only
          *
          * @hide
+         * @deprecated Use {@link android.telephony.SubscriptionManager#WFC_IMS_MODE} instead.
          */
-        public static final String WFC_IMS_MODE = "wfc_ims_mode";
+        @Deprecated
+        public static final String WFC_IMS_MODE = SubscriptionManager.WFC_IMS_MODE;
 
         /**
          * WFC mode on roaming network.
@@ -10184,8 +10204,11 @@ public final class Settings {
          * Type: int - see {@link #WFC_IMS_MODE} for values
          *
          * @hide
+         * @deprecated Use {@link android.telephony.SubscriptionManager#WFC_IMS_ROAMING_MODE}
+         * instead.
          */
-        public static final String WFC_IMS_ROAMING_MODE = "wfc_ims_roaming_mode";
+        @Deprecated
+        public static final String WFC_IMS_ROAMING_MODE = SubscriptionManager.WFC_IMS_ROAMING_MODE;
 
         /**
          * Whether WFC roaming is enabled
@@ -10193,8 +10216,12 @@ public final class Settings {
          * Type: int (0 for false, 1 for true)
          *
          * @hide
+         * @deprecated Use {@link android.telephony.SubscriptionManager#WFC_IMS_ROAMING_ENABLED}
+         * instead
          */
-        public static final String WFC_IMS_ROAMING_ENABLED = "wfc_ims_roaming_enabled";
+        @Deprecated
+        public static final String WFC_IMS_ROAMING_ENABLED =
+                SubscriptionManager.WFC_IMS_ROAMING_ENABLED;
 
         /**
          * Whether user can enable/disable LTE as a preferred network. A carrier might control
@@ -10875,7 +10902,7 @@ public final class Settings {
 
         /** User preferred subscriptions setting.
           * This holds the details of the user selected subscription from the card and
-          * the activation status. Each settings string have the coma separated values
+          * the activation status. Each settings string have the comma separated values
           * iccId,appType,appId,activationStatus,3gppIndex,3gpp2Index
           * @hide
          */

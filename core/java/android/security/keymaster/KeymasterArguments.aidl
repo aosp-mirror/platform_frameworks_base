@@ -17,4 +17,4 @@
 package android.security.keymaster;
 
 /* @hide */
-parcelable KeymasterArguments;
+parcelable KeymasterArguments cpp_header "keystore/KeymasterArguments.h";

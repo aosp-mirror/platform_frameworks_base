@@ -2,3 +2,8 @@ filegroup {
     name: "IKeyAttestationApplicationIdProvider.aidl",
     srcs: ["android/security/keymaster/IKeyAttestationApplicationIdProvider.aidl"],
 }
+
+filegroup {
+    name: "IKeystoreService.aidl",
+    srcs: ["android/security/IKeystoreService.aidl"],
+}

@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <gtest/gtest_prod.h>
 #include <utils/threads.h>
 #include <list>
 #include "../condition/ConditionTracker.h"
@@ -71,7 +72,13 @@ protected:
 private:
     const ValueMetric mMetric;
 
-    StatsPullerManager& mStatsPullerManager = StatsPullerManager::GetInstance();
+    std::shared_ptr<StatsPullerManager> mStatsPullerManager;
+
+    // for testing
+    ValueMetricProducer(const ValueMetric& valueMetric, const int conditionIndex,
+                        const sp<ConditionWizard>& wizard, const int pullTagId,
+                        const uint64_t startTimeNs,
+                        std::shared_ptr<StatsPullerManager> statsPullerManager);
 
     Mutex mLock;
 
@@ -81,6 +88,7 @@ private:
     // internal state of a bucket.
     typedef struct {
         std::vector<std::pair<long, long>> raw;
+        bool tainted;
     } Interval;
 
     std::unordered_map<HashableDimensionKey, Interval> mCurrentSlicedBucket;
@@ -97,6 +105,10 @@ private:
     void flush_if_needed(const uint64_t eventTimeNs);
 
     size_t mByteSize;
+
+    FRIEND_TEST(ValueMetricProducerTest, TestNonDimensionalEvents);
+    FRIEND_TEST(ValueMetricProducerTest, TestEventsWithNonSlicedCondition);
+    FRIEND_TEST(ValueMetricProducerTest, TestPushedEventsWithoutCondition);
 };
 
 }  // namespace statsd
