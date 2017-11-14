@@ -17,6 +17,7 @@
 package android.hardware.display;
 
 import android.content.Context;
+import android.content.pm.ParceledListSlice;
 import android.content.res.Resources;
 import android.graphics.Point;
 import android.hardware.display.DisplayManager.DisplayListener;
@@ -37,6 +38,8 @@ import android.view.DisplayInfo;
 import android.view.Surface;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Manager communication with the display manager service on behalf of
@@ -451,6 +454,33 @@ public final class DisplayManagerGlobal {
     public Point getStableDisplaySize() {
         try {
             return mDm.getStableDisplaySize();
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Retrieves brightness change events.
+     */
+    public List<BrightnessChangeEvent> getBrightnessEvents() {
+        try {
+            ParceledListSlice<BrightnessChangeEvent> events = mDm.getBrightnessEvents();
+            if (events == null) {
+                return Collections.emptyList();
+            }
+            return events.getList();
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Set brightness but don't add a BrightnessChangeEvent
+     * STOPSHIP remove when adaptive brightness accepts curves.
+     */
+    public void setBrightness(int brightness) {
+        try {
+            mDm.setBrightness(brightness);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }

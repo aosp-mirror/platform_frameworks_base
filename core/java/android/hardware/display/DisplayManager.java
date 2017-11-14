@@ -30,6 +30,7 @@ import android.view.Surface;
 import android.view.WindowManagerPolicy;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Manages the properties of attached displays.
@@ -612,6 +613,21 @@ public final class DisplayManager {
     @SystemApi
     public Point getStableDisplaySize() {
         return mGlobal.getStableDisplaySize();
+    }
+
+    /**
+     * Fetch {@link BrightnessChangeEvent}s.
+     * @hide until we make it a system api.
+     */
+    public List<BrightnessChangeEvent> getBrightnessEvents() {
+        return mGlobal.getBrightnessEvents();
+    }
+
+    /**
+     * @hide STOPSHIP - remove when adaptive brightness accepts curves.
+     */
+    public void setBrightness(int brightness) {
+        mGlobal.setBrightness(brightness);
     }
 
     /**

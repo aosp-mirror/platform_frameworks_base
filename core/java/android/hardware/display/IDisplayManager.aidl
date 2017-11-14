@@ -16,6 +16,7 @@
 
 package android.hardware.display;
 
+import android.content.pm.ParceledListSlice;
 import android.graphics.Point;
 import android.hardware.display.IDisplayManagerCallback;
 import android.hardware.display.IVirtualDisplayCallback;
@@ -81,4 +82,11 @@ interface IDisplayManager {
 
     // Get a stable metric for the device's display size. No permissions required.
     Point getStableDisplaySize();
+
+    // Requires BRIGHTNESS_SLIDER_USAGE permission.
+    ParceledListSlice getBrightnessEvents();
+
+    // STOPSHIP remove when adaptive brightness code is updated to accept curves.
+    // Requires BRIGHTNESS_SLIDER_USAGE permission.
+    void setBrightness(int brightness);
 }

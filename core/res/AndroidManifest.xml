@@ -2907,6 +2907,13 @@
     <permission android:name="android.permission.CONFIGURE_DISPLAY_COLOR_MODE"
         android:protectionLevel="signature" />
 
+    <!-- Allows an application to collect usage infomation about brightness slider changes.
+         <p>Not for use by third-party applications.</p>
+         TODO: make a System API
+         @hide -->
+    <permission android:name="android.permission.BRIGHTNESS_SLIDER_USAGE"
+        android:protectionLevel="signature|privileged" />
+
     <!-- @SystemApi Allows an application to control VPN.
          <p>Not for use by third-party applications.</p>
          @hide -->
