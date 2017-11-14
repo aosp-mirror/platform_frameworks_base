@@ -17,8 +17,14 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.android.coretests.apps.bstatstestapp">
 
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+
+    <uses-sdk android:minSdkVersion="19" android:targetSdkVersion="25"/>
+
     <application>
         <activity android:name=".TestActivity"
+                  android:exported="true" />
+        <service android:name=".TestService"
                   android:exported="true" />
         <service android:name=".IsolatedTestService"
                  android:exported="true"

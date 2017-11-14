@@ -116,6 +116,50 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
         return scheduleSyncLocked("remove-uid", UPDATE_CPU);
     }
 
+    @Override
+    public Future<?> scheduleReadProcStateCpuTimes() {
+        synchronized (mStats) {
+            if (!mStats.mPerProcStateCpuTimesAvailable) {
+                return null;
+            }
+        }
+        synchronized (BatteryExternalStatsWorker.this) {
+            if (!mExecutorService.isShutdown()) {
+                return mExecutorService.submit(mReadProcStateCpuTimesTask);
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public Future<?> scheduleCopyFromAllUidsCpuTimes() {
+        synchronized (mStats) {
+            if (!mStats.mPerProcStateCpuTimesAvailable) {
+                return null;
+            }
+        }
+        synchronized (BatteryExternalStatsWorker.this) {
+            if (!mExecutorService.isShutdown()) {
+                return mExecutorService.submit(mCopyFromAllUidsCpuTimesTask);
+            }
+        }
+        return null;
+    }
+
+    private final Runnable mReadProcStateCpuTimesTask = new Runnable() {
+        @Override
+        public void run() {
+            mStats.updateProcStateCpuTimes();
+        }
+    };
+
+    private final Runnable mCopyFromAllUidsCpuTimesTask = new Runnable() {
+        @Override
+        public void run() {
+            mStats.copyFromAllUidsCpuTimes();
+        }
+    };
+
     public synchronized Future<?> scheduleWrite() {
         if (mExecutorService.isShutdown()) {
             return CompletableFuture.failedFuture(new IllegalStateException("worker shutdown"));
@@ -183,6 +227,10 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
                         Slog.d(TAG, "end updateExternalStatsSync");
                     }
                 }
+            }
+
+            if ((updateFlags & UPDATE_CPU) != 0) {
+                mStats.copyFromAllUidsCpuTimes();
             }
 
             // Clean up any UIDs if necessary.
