@@ -3955,6 +3955,10 @@
         <service android:name="com.android.server.net.watchlist.ReportWatchlistJobService"
                  android:permission="android.permission.BIND_JOB_SERVICE" >
         </service>
-    </application>
+
+        <service android:name="com.android.server.display.BrightnessIdleJob"
+                 android:permission="android.permission.BIND_JOB_SERVICE" >
+        </service>
+</application>
 
 </manifest>

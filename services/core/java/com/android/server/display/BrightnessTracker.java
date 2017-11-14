@@ -61,12 +61,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 
 import java.util.Deque;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -75,8 +75,8 @@ import java.util.concurrent.TimeUnit;
  */
 public class BrightnessTracker {
 
-    private static final String TAG = "BrightnessTracker";
-    private static final boolean DEBUG = false;
+    static final String TAG = "BrightnessTracker";
+    static final boolean DEBUG = false;
 
     private static final String EVENTS_FILE = "brightness_events.xml";
     private static final int MAX_EVENTS = 100;
@@ -103,6 +103,8 @@ public class BrightnessTracker {
     @GuardedBy("mEventsLock")
     private RingBuffer<BrightnessChangeEvent> mEvents
             = new RingBuffer<>(BrightnessChangeEvent.class, MAX_EVENTS);
+    @GuardedBy("mEventsLock")
+    private boolean mEventsDirty;
     private final Runnable mEventsWriter = () -> writeEvents();
     private volatile boolean mWriteEventsScheduled;
 
@@ -170,6 +172,8 @@ public class BrightnessTracker {
         intentFilter.addAction(Intent.ACTION_BATTERY_CHANGED);
         mBroadcastReceiver = new Receiver();
         mInjector.registerReceiver(mContext, mBroadcastReceiver, intentFilter);
+
+        mInjector.scheduleIdleJob(mContext);
     }
 
     /** Stop listening for events */
@@ -181,6 +185,7 @@ public class BrightnessTracker {
         mInjector.unregisterSensorListener(mContext, mSensorListener);
         mInjector.unregisterReceiver(mContext, mBroadcastReceiver);
         mInjector.unregisterBrightnessObserver(mContext, mSettingsObserver);
+        mInjector.cancelIdleJob(mContext);
     }
 
     /**
@@ -209,6 +214,10 @@ public class BrightnessTracker {
         }
         mInjector.putSystemIntForUser(mContentResolver, Settings.System.SCREEN_BRIGHTNESS,
                 brightness, userId);
+    }
+
+    public void persistEvents() {
+        scheduleWriteEvents();
     }
 
     private void handleBrightnessChanged() {
@@ -278,6 +287,7 @@ public class BrightnessTracker {
             Slog.d(TAG, "Event " + event.brightness + " " + event.packageName);
         }
         synchronized (mEventsLock) {
+            mEventsDirty = true;
             mEvents.append(event);
         }
     }
@@ -291,8 +301,12 @@ public class BrightnessTracker {
 
     private void writeEvents() {
         mWriteEventsScheduled = false;
-        // TODO kick off write on handler thread e.g. every 24 hours.
         synchronized (mEventsLock) {
+            if (!mEventsDirty) {
+                // Nothing to write
+                return;
+            }
+
             final AtomicFile writeTo = mInjector.getFile();
             if (writeTo == null) {
                 return;
@@ -301,12 +315,14 @@ public class BrightnessTracker {
                 if (writeTo.exists()) {
                     writeTo.delete();
                 }
+                mEventsDirty = false;
             } else {
                 FileOutputStream output = null;
                 try {
                     output = writeTo.startWrite();
                     writeEventsLocked(output);
                     writeTo.finishWrite(output);
+                    mEventsDirty = false;
                 } catch (IOException e) {
                     writeTo.failWrite(output);
                     Slog.e(TAG, "Failed to write change mEvents.", e);
@@ -317,6 +333,8 @@ public class BrightnessTracker {
 
     private void readEvents() {
         synchronized (mEventsLock) {
+            // Read might prune events so mark as dirty.
+            mEventsDirty = true;
             mEvents.clear();
             final AtomicFile readFrom = mInjector.getFile();
             if (readFrom != null && readFrom.exists()) {
@@ -344,13 +362,16 @@ public class BrightnessTracker {
 
         out.startTag(null, TAG_EVENTS);
         BrightnessChangeEvent[] toWrite = mEvents.toArray();
+        // Clear events, code below will add back the ones that are still within the time window.
+        mEvents.clear();
         if (DEBUG) {
             Slog.d(TAG, "Writing events " + toWrite.length);
         }
-        final long timeCutOff = System.currentTimeMillis() - MAX_EVENT_AGE;
+        final long timeCutOff = mInjector.currentTimeMillis() - MAX_EVENT_AGE;
         for (int i = 0; i < toWrite.length; ++i) {
             int userSerialNo = mInjector.getUserSerialNumber(mUserManager, toWrite[i].userId);
             if (userSerialNo != -1 && toWrite[i].timeStamp > timeCutOff) {
+                mEvents.append(toWrite[i]);
                 out.startTag(null, TAG_EVENT);
                 out.attribute(null, ATTR_BRIGHTNESS, Integer.toString(toWrite[i].brightness));
                 out.attribute(null, ATTR_TIMESTAMP, Long.toString(toWrite[i].timeStamp));
@@ -462,6 +483,17 @@ public class BrightnessTracker {
             Slog.e(TAG, "Failed to parse brightness event", e);
             // Re-throw so we will delete the bad file.
             throw new IOException("failed to parse file", e);
+        }
+    }
+
+    public void dump(PrintWriter pw) {
+        synchronized (mEventsLock) {
+            pw.println("BrightnessTracker state:");
+            pw.println("  mEvents.size=" + mEvents.size());
+            pw.println("  mEventsDirty=" + mEventsDirty);
+        }
+        synchronized (mDataCollectionLock) {
+            pw.println("  mLastSensorReadings.size=" + mLastSensorReadings.size());
         }
     }
 
@@ -634,6 +666,14 @@ public class BrightnessTracker {
 
         public ActivityManager.StackInfo getFocusedStack() throws RemoteException {
             return ActivityManager.getService().getFocusedStackInfo();
+        }
+
+        public void scheduleIdleJob(Context context) {
+            BrightnessIdleJob.scheduleJob(context);
+        }
+
+        public void cancelIdleJob(Context context) {
+            BrightnessIdleJob.cancelJob(context);
         }
     }
 }

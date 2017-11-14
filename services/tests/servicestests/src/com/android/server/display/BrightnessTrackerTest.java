@@ -99,10 +99,12 @@ public class BrightnessTrackerTest {
         assertNotNull(mInjector.mSensorListener);
         assertNotNull(mInjector.mSettingsObserver);
         assertNotNull(mInjector.mBroadcastReceiver);
+        assertTrue(mInjector.mIdleScheduled);
         mTracker.stop();
         assertNull(mInjector.mSensorListener);
         assertNull(mInjector.mSettingsObserver);
         assertNull(mInjector.mBroadcastReceiver);
+        assertFalse(mInjector.mIdleScheduled);
     }
 
     @Test
@@ -399,6 +401,52 @@ public class BrightnessTrackerTest {
     }
 
     @Test
+    public void testWritePrunesOldEvents() throws Exception {
+        final int brightness = 20;
+
+        mInjector.mSystemIntSettings.put(Settings.System.SCREEN_BRIGHTNESS, brightness);
+        mInjector.mSecureIntSettings.put(Settings.Secure.NIGHT_DISPLAY_ACTIVATED, 1);
+        mInjector.mSecureIntSettings.put(Settings.Secure.NIGHT_DISPLAY_COLOR_TEMPERATURE, 3339);
+
+        startTracker(mTracker);
+        mInjector.mBroadcastReceiver.onReceive(InstrumentationRegistry.getContext(),
+                batteryChangeEvent(30, 100));
+        mInjector.mSensorListener.onSensorChanged(createSensorEvent(1000.0f));
+        mInjector.incrementTime(TimeUnit.SECONDS.toMillis(1));
+        mInjector.mSensorListener.onSensorChanged(createSensorEvent(2000.0f));
+        final long sensorTime = mInjector.currentTimeMillis();
+        mInjector.mSettingsObserver.onChange(false, Settings.System.getUriFor(
+                Settings.System.SCREEN_BRIGHTNESS));
+
+        // 31 days later
+        mInjector.incrementTime(TimeUnit.DAYS.toMillis(31));
+        mInjector.mSensorListener.onSensorChanged(createSensorEvent(3000.0f));
+        mInjector.mSettingsObserver.onChange(false, Settings.System.getUriFor(
+                Settings.System.SCREEN_BRIGHTNESS));
+        final long eventTime = mInjector.currentTimeMillis();
+
+        List<BrightnessChangeEvent> events = mTracker.getEvents(0).getList();
+        assertEquals(2, events.size());
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        mTracker.writeEventsLocked(baos);
+        events = mTracker.getEvents(0).getList();
+        mTracker.stop();
+
+        assertEquals(1, events.size());
+        BrightnessChangeEvent event = events.get(0);
+        assertEquals(eventTime, event.timeStamp);
+
+        // We will keep one of the old sensor events because we keep 1 event outside the window.
+        assertArrayEquals(new float[] {2000.0f, 3000.0f}, event.luxValues, 0.01f);
+        assertArrayEquals(new long[] {sensorTime, eventTime}, event.luxTimestamps);
+        assertEquals(brightness, event.brightness);
+        assertEquals(0.3, event.batteryLevel, 0.01f);
+        assertTrue(event.nightMode);
+        assertEquals(3339, event.colorTemperature);
+    }
+
+    @Test
     public void testParcelUnParcel() {
         Parcel parcel = Parcel.obtain();
         BrightnessChangeEvent event = new BrightnessChangeEvent();
@@ -516,6 +564,7 @@ public class BrightnessTrackerTest {
         long mCurrentTimeMillis = System.currentTimeMillis();
         long mElapsedRealtimeNanos = SystemClock.elapsedRealtimeNanos();
         Handler mHandler;
+        boolean mIdleScheduled;
 
         public TestInjector(Handler handler) {
             mHandler = handler;
@@ -635,6 +684,15 @@ public class BrightnessTrackerTest {
             focusedStack.userId = 0;
             focusedStack.topActivity = new ComponentName("a.package", "a.class");
             return focusedStack;
+        }
+
+        public void scheduleIdleJob(Context context) {
+            // Don't actually schedule jobs during unit tests.
+            mIdleScheduled = true;
+        }
+
+        public void cancelIdleJob(Context context) {
+            mIdleScheduled = false;
         }
     }
 }
