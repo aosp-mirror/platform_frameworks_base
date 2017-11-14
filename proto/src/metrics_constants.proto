@@ -4733,6 +4733,31 @@ message MetricsEvent {
     // OS: P
     FIELD_TEXTCLASSIFIER_MODEL = 1256;
 
+    // OPEN: Settings > Sound & notification > Do Not Disturb > Behavior > Messages
+    // CATEGORY: SETTINGS
+    // OS: P
+    NOTIFICATION_ZEN_MODE_MESSAGES = 1257;
+
+    // OPEN: Settings > Sound & notification > Do Not Disturb > Behavior > Calls
+    // CATEGORY: SETTINGS
+    // OS: P
+    NOTIFICATION_ZEN_MODE_CALLS = 1258;
+
+    // OPEN: Settings > Sound & notification > Do Not Disturb > TURN ON -> Until you turn off
+    // CATEGORY: SETTINGS
+    // OS: P
+    NOTIFICATION_ZEN_MODE_TOGGLE_ON_FOREVER = 1259;
+
+    // OPEN: Settings > Sound & notification > Do Not Disturb > TURN ON -> Time countdown manual rule (ie: for one hour)
+    // CATEGORY: SETTINGS
+    // OS: P
+    NOTIFICATION_ZEN_MODE_TOGGLE_ON_COUNTDOWN = 1260;
+
+    // OPEN: Settings > Sound & notification > Do Not Disturb > TURN ON -> Next Alarm (ie: Until Tue 7:20 AM)
+    // CATEGORY: SETTINGS
+    // OS: P
+    NOTIFICATION_ZEN_MODE_TOGGLE_ON_ALARM = 1261;
+
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
   }
