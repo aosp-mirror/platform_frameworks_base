@@ -44,7 +44,7 @@ import org.robolectric.annotation.Config;
         shadows = SystemPropertiesTestImpl.class)
 public class LogpersistPreferenceControllerTest {
 
-    private Lifecycle mLifecycle = new Lifecycle();
+    private Lifecycle mLifecycle;
 
     @Mock
     private ListPreference mListPreference;
@@ -57,6 +57,7 @@ public class LogpersistPreferenceControllerTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         SystemProperties.set("ro.debuggable", "1");
+        mLifecycle = new Lifecycle(() -> mLifecycle);
         mController = new AbstractLogpersistPreferenceController(RuntimeEnvironment.application,
                 mLifecycle) {
             @Override

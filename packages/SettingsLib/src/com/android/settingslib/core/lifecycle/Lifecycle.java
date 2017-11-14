@@ -15,11 +15,18 @@
  */
 package com.android.settingslib.core.lifecycle;
 
+import static android.arch.lifecycle.Lifecycle.Event.ON_ANY;
+
 import android.annotation.UiThread;
+import android.arch.lifecycle.LifecycleOwner;
+import android.arch.lifecycle.LifecycleRegistry;
+import android.arch.lifecycle.OnLifecycleEvent;
 import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.preference.PreferenceScreen;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -44,18 +51,46 @@ import java.util.List;
 /**
  * Dispatcher for lifecycle events.
  */
-public class Lifecycle {
+public class Lifecycle extends LifecycleRegistry {
+    private static final String TAG = "LifecycleObserver";
 
-    protected final List<LifecycleObserver> mObservers = new ArrayList<>();
+    private final List<LifecycleObserver> mObservers = new ArrayList<>();
+    private final LifecycleProxy mProxy = new LifecycleProxy();
+
+    /**
+     * Creates a new LifecycleRegistry for the given provider.
+     * <p>
+     * You should usually create this inside your LifecycleOwner class's constructor and hold
+     * onto the same instance.
+     *
+     * @param provider The owner LifecycleOwner
+     */
+    public Lifecycle(@NonNull LifecycleOwner provider) {
+        super(provider);
+        addObserver(mProxy);
+    }
 
     /**
      * Registers a new observer of lifecycle events.
      */
     @UiThread
-    public <T extends LifecycleObserver> T addObserver(T observer) {
+    @Override
+    public void addObserver(android.arch.lifecycle.LifecycleObserver observer) {
         ThreadUtils.ensureMainThread();
-        mObservers.add(observer);
-        return observer;
+        super.addObserver(observer);
+        if (observer instanceof LifecycleObserver) {
+            mObservers.add((LifecycleObserver) observer);
+        }
+    }
+
+    @UiThread
+    @Override
+    public void removeObserver(android.arch.lifecycle.LifecycleObserver observer) {
+        ThreadUtils.ensureMainThread();
+        super.removeObserver(observer);
+        if (observer instanceof LifecycleObserver) {
+            mObservers.remove(observer);
+        }
     }
 
     public void onAttach(Context context) {
@@ -67,6 +102,8 @@ public class Lifecycle {
         }
     }
 
+    // This method is not called from the proxy because it does not have access to the
+    // savedInstanceState
     public void onCreate(Bundle savedInstanceState) {
         for (int i = 0, size = mObservers.size(); i < size; i++) {
             final LifecycleObserver observer = mObservers.get(i);
@@ -76,7 +113,7 @@ public class Lifecycle {
         }
     }
 
-    public void onStart() {
+    private void onStart() {
         for (int i = 0, size = mObservers.size(); i < size; i++) {
             final LifecycleObserver observer = mObservers.get(i);
             if (observer instanceof OnStart) {
@@ -94,7 +131,7 @@ public class Lifecycle {
         }
     }
 
-    public void onResume() {
+    private void onResume() {
         for (int i = 0, size = mObservers.size(); i < size; i++) {
             final LifecycleObserver observer = mObservers.get(i);
             if (observer instanceof OnResume) {
@@ -103,7 +140,7 @@ public class Lifecycle {
         }
     }
 
-    public void onPause() {
+    private void onPause() {
         for (int i = 0, size = mObservers.size(); i < size; i++) {
             final LifecycleObserver observer = mObservers.get(i);
             if (observer instanceof OnPause) {
@@ -121,7 +158,7 @@ public class Lifecycle {
         }
     }
 
-    public void onStop() {
+    private void onStop() {
         for (int i = 0, size = mObservers.size(); i < size; i++) {
             final LifecycleObserver observer = mObservers.get(i);
             if (observer instanceof OnStop) {
@@ -130,7 +167,7 @@ public class Lifecycle {
         }
     }
 
-    public void onDestroy() {
+    private void onDestroy() {
         for (int i = 0, size = mObservers.size(); i < size; i++) {
             final LifecycleObserver observer = mObservers.get(i);
             if (observer instanceof OnDestroy) {
@@ -167,5 +204,35 @@ public class Lifecycle {
             }
         }
         return false;
+    }
+
+    private class LifecycleProxy
+            implements android.arch.lifecycle.LifecycleObserver {
+        @OnLifecycleEvent(ON_ANY)
+        public void onLifecycleEvent(LifecycleOwner owner, Event event) {
+            switch (event) {
+                case ON_CREATE:
+                    // onCreate is called directly since we don't have savedInstanceState here
+                    break;
+                case ON_START:
+                    onStart();
+                    break;
+                case ON_RESUME:
+                    onResume();
+                    break;
+                case ON_PAUSE:
+                    onPause();
+                    break;
+                case ON_STOP:
+                    onStop();
+                    break;
+                case ON_DESTROY:
+                    onDestroy();
+                    break;
+                case ON_ANY:
+                    Log.wtf(TAG, "Should not receive an 'ANY' event!");
+                    break;
+            }
+        }
     }
 }
