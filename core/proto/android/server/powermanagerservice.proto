@@ -145,7 +145,7 @@ message PowerManagerServiceDumpProto {
     optional bool is_holding_display_suspend_blocker = 39;
     // Settings and configuration
     optional PowerServiceSettingsAndConfigurationDumpProto settings_and_configuration = 40;
-    // Sleep timeout in ms
+    // Sleep timeout in ms. This can be -1.
     optional sint32 sleep_timeout_ms = 41;
     // Screen off timeout in ms
     optional int32 screen_off_timeout_ms = 42;
@@ -263,7 +263,7 @@ message PowerServiceSettingsAndConfigurationDumpProto {
     optional float maximum_screen_dim_ratio_config = 24;
     // The screen off timeout setting value in milliseconds.
     optional int32 screen_off_timeout_setting_ms = 25;
-    // The sleep timeout setting value in milliseconds.
+    // The sleep timeout setting value in milliseconds. Default value is -1.
     optional sint32 sleep_timeout_setting_ms = 26;
     // The maximum allowable screen off timeout according to the device administration policy.
     optional int32 maximum_screen_off_timeout_from_device_admin_ms = 27;
