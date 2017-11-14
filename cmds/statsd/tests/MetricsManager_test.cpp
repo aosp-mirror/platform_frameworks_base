@@ -41,7 +41,7 @@ using std::vector;
 
 StatsdConfig buildGoodConfig() {
     StatsdConfig config;
-    config.set_config_id(12345L);
+    config.set_name("12345");
 
     LogEntryMatcher* eventMatcher = config.add_log_entry_matcher();
     eventMatcher->set_name("SCREEN_IS_ON");
@@ -76,7 +76,7 @@ StatsdConfig buildGoodConfig() {
 
 StatsdConfig buildCircleMatchers() {
     StatsdConfig config;
-    config.set_config_id(12345L);
+    config.set_name("12345");
 
     LogEntryMatcher* eventMatcher = config.add_log_entry_matcher();
     eventMatcher->set_name("SCREEN_IS_ON");
@@ -102,7 +102,7 @@ StatsdConfig buildCircleMatchers() {
 
 StatsdConfig buildMissingMatchers() {
     StatsdConfig config;
-    config.set_config_id(12345L);
+    config.set_name("12345");
 
     LogEntryMatcher* eventMatcher = config.add_log_entry_matcher();
     eventMatcher->set_name("SCREEN_IS_ON");
@@ -128,7 +128,7 @@ StatsdConfig buildMissingMatchers() {
 
 StatsdConfig buildDimensionMetricsWithMultiTags() {
     StatsdConfig config;
-    config.set_config_id(12345L);
+    config.set_name("12345");
 
     LogEntryMatcher* eventMatcher = config.add_log_entry_matcher();
     eventMatcher->set_name("BATTERY_VERY_LOW");
@@ -150,7 +150,7 @@ StatsdConfig buildDimensionMetricsWithMultiTags() {
 
     // Count process state changes, slice by uid, while SCREEN_IS_OFF
     CountMetric* metric = config.add_count_metric();
-    metric->set_metric_id(3);
+    metric->set_name("3");
     metric->set_what("BATTERY_LOW");
     metric->mutable_bucket()->set_bucket_size_millis(30 * 1000L);
     KeyMatcher* keyMatcher = metric->add_dimension();
@@ -161,7 +161,7 @@ StatsdConfig buildDimensionMetricsWithMultiTags() {
 
 StatsdConfig buildCircleConditions() {
     StatsdConfig config;
-    config.set_config_id(12345L);
+    config.set_name("12345");
 
     LogEntryMatcher* eventMatcher = config.add_log_entry_matcher();
     eventMatcher->set_name("SCREEN_IS_ON");

@@ -203,7 +203,7 @@ bool initMetrics(const StatsdConfig& config, const unordered_map<string, int>& l
     for (int i = 0; i < config.count_metric_size(); i++) {
         const CountMetric& metric = config.count_metric(i);
         if (!metric.has_what()) {
-            ALOGW("cannot find what in CountMetric %lld", metric.metric_id());
+            ALOGW("cannot find what in CountMetric %s", metric.name().c_str());
             return false;
         }
 
@@ -293,8 +293,8 @@ bool initMetrics(const StatsdConfig& config, const unordered_map<string, int>& l
     for (int i = 0; i < config.event_metric_size(); i++) {
         int metricIndex = allMetricProducers.size();
         const EventMetric& metric = config.event_metric(i);
-        if (!metric.has_metric_id() || !metric.has_what()) {
-            ALOGW("cannot find the metric id or what in config");
+        if (!metric.has_name() || !metric.has_what()) {
+            ALOGW("cannot find the metric name or what in config");
             return false;
         }
         int trackerIndex;
@@ -320,7 +320,7 @@ bool initMetrics(const StatsdConfig& config, const unordered_map<string, int>& l
     for (int i = 0; i < config.value_metric_size(); i++) {
         const ValueMetric& metric = config.value_metric(i);
         if (!metric.has_what()) {
-            ALOGW("cannot find what in ValueMetric %lld", metric.metric_id());
+            ALOGW("cannot find what in ValueMetric %s", metric.name().c_str());
             return false;
         }
 
@@ -360,7 +360,7 @@ bool initMetrics(const StatsdConfig& config, const unordered_map<string, int>& l
     for (int i = 0; i < config.gauge_metric_size(); i++) {
         const GaugeMetric& metric = config.gauge_metric(i);
         if (!metric.has_what()) {
-            ALOGW("cannot find what in ValueMetric %lld", metric.metric_id());
+            ALOGW("cannot find what in ValueMetric %s", metric.name().c_str());
             return false;
         }
 

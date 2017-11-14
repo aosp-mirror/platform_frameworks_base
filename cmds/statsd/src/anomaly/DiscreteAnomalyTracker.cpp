@@ -140,14 +140,8 @@ void DiscreteAnomalyTracker::declareAnomaly() {
     mLastAlarmAtBucketIndex = mCurrentBucketIndex;
 
     if (mAlert.has_incidentd_details()) {
-        const Alert_IncidentdDetails& incident = mAlert.incidentd_details();
-        if (incident.has_alert_name()) {
-            ALOGW("An anomaly (%s) has occurred! Informing incidentd.",
-                  incident.alert_name().c_str());
-        } else {
-            // TODO: Can construct a name based on the criteria (and/or relay the criteria).
-            ALOGW("An anomaly (nameless) has occurred! Informing incidentd.");
-        }
+        // TODO: Can construct a name based on the criteria (and/or relay the criteria).
+        ALOGW("An anomaly (nameless) has occurred! Informing incidentd.");
         // TODO: Send incidentd_details.name and incidentd_details.incidentd_sections to incidentd
     } else {
         ALOGW("An anomaly has occurred! (But informing incidentd not requested.)");

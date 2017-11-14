@@ -38,7 +38,7 @@ TEST(EventMetricProducerTest, TestNoCondition) {
     uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
 
     EventMetric metric;
-    metric.set_metric_id(1);
+    metric.set_name("1");
 
     LogEvent event1(1 /*tag id*/, bucketStartTimeNs + 1);
     LogEvent event2(1 /*tag id*/, bucketStartTimeNs + 2);
@@ -61,7 +61,7 @@ TEST(EventMetricProducerTest, TestEventsWithNonSlicedCondition) {
     uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
 
     EventMetric metric;
-    metric.set_metric_id(1);
+    metric.set_name("1");
     metric.set_condition("SCREEN_ON");
 
     LogEvent event1(1, bucketStartTimeNs + 1);
@@ -87,7 +87,7 @@ TEST(EventMetricProducerTest, TestEventsWithSlicedCondition) {
     uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
 
     EventMetric metric;
-    metric.set_metric_id(1);
+    metric.set_name("1");
     metric.set_condition("APP_IN_BACKGROUND_PER_UID_AND_SCREEN_ON");
     EventConditionLink* link = metric.add_links();
     link->set_condition("APP_IN_BACKGROUND_PER_UID");
