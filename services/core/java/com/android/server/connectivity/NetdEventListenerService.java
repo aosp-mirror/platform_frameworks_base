@@ -21,6 +21,7 @@ import static android.util.TimeUtils.NANOS_PER_MS;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.INetdEventCallback;
+import android.net.MacAddress;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.metrics.ConnectStats;
@@ -35,6 +36,7 @@ import android.text.format.DateUtils;
 import android.util.Log;
 import android.util.ArrayMap;
 import android.util.SparseArray;
+import android.util.StatsLog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -242,13 +244,17 @@ public class NetdEventListenerService extends INetdEventListener.Stub {
         event.timestampMs = timestampMs;
         event.uid = uid;
         event.ethertype = ethertype;
-        event.dstHwAddr = dstHw;
+        event.dstHwAddr = new MacAddress(dstHw);
         event.srcIp = srcIp;
         event.dstIp = dstIp;
         event.ipNextHeader = ipNextHeader;
         event.srcPort = srcPort;
         event.dstPort = dstPort;
         addWakeupEvent(event);
+
+        String dstMac = event.dstHwAddr.toString();
+        StatsLog.write(StatsLog.PACKET_WAKEUP_OCCURRED,
+                uid, iface, ethertype, dstMac, srcIp, dstIp, ipNextHeader, srcPort, dstPort);
     }
 
     private void addWakeupEvent(WakeupEvent event) {

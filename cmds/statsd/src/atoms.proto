@@ -73,6 +73,7 @@ message Atom {
         SettingChanged setting_changed = 41;
         ActivityForegroundStateChanged activity_foreground_state_changed = 42;
         IsolatedUidChanged isolated_uid_changed = 43;
+        PacketWakeupOccurred packet_wakeup_occurred = 44;
         // TODO: Reorder the numbering so that the most frequent occur events occur in the first 15.
     }
 
@@ -905,4 +906,33 @@ message CpuTimePerUidFreqPulled {
     optional uint64 uid = 1;
     optional uint64 freq_idx = 2;
     optional uint64 time_ms = 3;
+}
+
+/*
+ * Logs the reception of an incoming network packet causing the main system to wake up for
+ * processing that packet. These events are notified by the kernel via Netlink NFLOG to Netd
+ * and processed by WakeupController.cpp.
+ */
+message PacketWakeupOccurred {
+    // The uid owning the socket into which the packet was delivered, or -1 if the packet was
+    // delivered nowhere.
+    optional int32 uid = 1;
+    // The interface name on which the packet was received.
+    optional string iface = 2;
+    // The ethertype value of the packet.
+    optional int32 ethertype = 3;
+    // String representation of the destination MAC address of the packet.
+    optional string destination_hardware_address = 4;
+    // String representation of the source address of the packet if this was an IP packet.
+    optional string source_ip = 5;
+    // String representation of the destination address of the packet if this was an IP packet.
+    optional string destination_ip = 6;
+    // The value of the protocol field if this was an IPv4 packet or the value of the Next Header
+    // field if this was an IPv6 packet. The range of possible values is the same for both IP
+    // families.
+    optional int32 ip_next_header = 7;
+    // The source port if this was a TCP or UDP packet.
+    optional int32 source_port = 8;
+    // The destination port if this was a TCP or UDP packet.
+    optional int32 destination_port = 9;
 }
