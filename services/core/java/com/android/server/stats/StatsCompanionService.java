@@ -62,6 +62,8 @@ import java.util.Map;
 public class StatsCompanionService extends IStatsCompanionService.Stub {
     static final String TAG = "StatsCompanionService";
     static final boolean DEBUG = true;
+    public static final String ACTION_TRIGGER_COLLECTION =
+        "com.android.server.stats.action.TRIGGER_COLLECTION";
 
     private final Context mContext;
     private final AlarmManager mAlarmManager;
@@ -118,6 +120,12 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                             numSpeedSteps);
             firstCpuOfCluster += powerProfile.getNumCoresInCpuCluster(i);
         }
+    }
+
+    @Override
+    public void sendBroadcast(String pkg, String cls) {
+        mContext.sendBroadcastAsUser(new Intent(ACTION_TRIGGER_COLLECTION).setClassName(pkg, cls),
+                UserHandle.SYSTEM);
     }
 
     private final static int[] toIntArray(List<Integer> list) {

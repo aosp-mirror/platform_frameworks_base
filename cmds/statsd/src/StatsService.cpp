@@ -18,6 +18,8 @@
 #include "Log.h"
 
 #include "StatsService.h"
+#include "config/ConfigKey.h"
+#include "config/ConfigManager.h"
 #include "storage/DropboxReader.h"
 
 #include <android-base/file.h>
@@ -38,6 +40,8 @@ using namespace android;
 namespace android {
 namespace os {
 namespace statsd {
+
+constexpr const char* kPermissionDump = "android.permission.DUMP";
 
 // ======================================================================
 /**
@@ -67,8 +71,8 @@ StatsService::StatsService(const sp<Looper>& handlerLooper)
 {
     mUidMap = new UidMap();
     mConfigManager = new ConfigManager();
-    mProcessor = new StatsLogProcessor(mUidMap, [this](const vector<uint8_t>& log) {
-      pushLog(log);
+    mProcessor = new StatsLogProcessor(mUidMap, [](const vector<uint8_t>& log) {
+        // TODO: Update how we send data out of StatsD.
     });
 
     mConfigManager->AddListener(mProcessor);
@@ -198,6 +202,10 @@ status_t StatsService::command(FILE* in, FILE* out, FILE* err, Vector<String8>& 
         if (!args[0].compare(String8("pull-source")) && args.size() > 1) {
             return cmd_print_pulled_metrics(out, args);
         }
+
+        if (!args[0].compare(String8("send-broadcast"))) {
+            return cmd_trigger_broadcast(args);
+        }
     }
 
     print_cmd_help(out);
@@ -238,6 +246,19 @@ void StatsService::print_cmd_help(FILE* out) {
     fprintf(out, "                the UID parameter on eng builds. If UID is omitted the\n");
     fprintf(out, "                calling uid is used.\n");
     fprintf(out, "  NAME          The name of the configuration\n");
+    fprintf(out, "\n");
+    fprintf(out, "\n");
+    fprintf(out, "usage: adb shell cmd stats send-broadcast PACKAGE CLASS\n");
+    fprintf(out, "  Send a broadcast that triggers one subscriber to fetch metrics.\n");
+    fprintf(out, "  PACKAGE        The name of the package to receive the broadcast.\n");
+    fprintf(out, "  CLASS          The name of the class to receive the broadcast.\n");
+}
+
+status_t StatsService::cmd_trigger_broadcast(Vector<String8>& args) {
+    auto sc = getStatsCompanionService();
+    sc->sendBroadcast(String16(args[1]), String16(args[2]));
+    ALOGD("StatsService::trigger broadcast succeeded");
+    return NO_ERROR;
 }
 
 status_t StatsService::cmd_config(FILE* in, FILE* out, FILE* err, Vector<String8>& args) {
@@ -520,29 +541,51 @@ void StatsService::OnLogEvent(const LogEvent& event) {
     mProcessor->OnLogEvent(event);
 }
 
-Status StatsService::requestPush() {
-    mProcessor->flush();
-    return Status::ok();
+Status StatsService::getData(const String16& key, vector<uint8_t>* output) {
+    IPCThreadState* ipc = IPCThreadState::self();
+    if (checkCallingPermission(String16(kPermissionDump),
+                               reinterpret_cast<int32_t*>(ipc->getCallingPid()),
+                               reinterpret_cast<int32_t*>(ipc->getCallingUid()))) {
+        // TODO: Implement this.
+        return Status::ok();
+    } else {
+        return Status::fromExceptionCode(binder::Status::EX_SECURITY);
+    }
 }
 
-Status StatsService::pushLog(const vector<uint8_t>& log) {
-    std::lock_guard<std::mutex> lock(mLock);
-    for (size_t i = 0; i < mCallbacks.size(); i++) {
-        mCallbacks[i]->onReceiveLogs((vector<uint8_t>*)&log);
+Status StatsService::addConfiguration(const String16& key,
+                                      const vector <uint8_t>& config,
+                                      const String16& package, const String16& cls,
+                                      bool* success) {
+    IPCThreadState* ipc = IPCThreadState::self();
+    int32_t* uid = reinterpret_cast<int32_t*>(ipc->getCallingUid());
+    if (checkCallingPermission(String16(kPermissionDump),
+                               reinterpret_cast<int32_t*>(ipc->getCallingPid()), uid)) {
+        string keyString = string(String8(key).string());
+        ConfigKey configKey(*uid, keyString);
+        StatsdConfig cfg;
+        cfg.ParseFromArray(&config[0], config.size());
+        mConfigManager->UpdateConfig(configKey, cfg);
+        mConfigManager->SetConfigReceiver(configKey, string(String8(package).string()),
+                                          string(String8(cls).string()));
+        *success = true;
+        return Status::ok();
+    } else {
+        return Status::fromExceptionCode(binder::Status::EX_SECURITY);
     }
-    return Status::ok();
 }
 
-Status StatsService::subscribeStatsLog(const sp<IStatsCallbacks>& callback) {
-    std::lock_guard<std::mutex> lock(mLock);
-    for (size_t i = 0; i < mCallbacks.size(); i++) {
-        if (mCallbacks[i] == callback) {
-           return Status::fromStatusT(-errno);
-        }
+Status StatsService::removeConfiguration(const String16& key, bool* success) {
+    IPCThreadState* ipc = IPCThreadState::self();
+    if (checkCallingPermission(String16(kPermissionDump),
+                               reinterpret_cast<int32_t*>(ipc->getCallingPid()),
+                               reinterpret_cast<int32_t*>(ipc->getCallingUid()))) {
+        // TODO: Implement this.
+        return Status::ok();
+    } else {
+        *success = false;
+        return Status::fromExceptionCode(binder::Status::EX_SECURITY);
     }
-    mCallbacks.add(callback);
-    IInterface::asBinder(callback)->linkToDeath(this);
-    return Status::ok();
 }
 
 void StatsService::binderDied(const wp<IBinder>& who) {

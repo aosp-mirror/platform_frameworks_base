@@ -32,6 +32,7 @@ using android::RefBase;
 using std::string;
 using std::unordered_map;
 using std::vector;
+using std::pair;
 
 /**
  * Keeps track of which configurations have been set from various sources.
@@ -64,6 +65,16 @@ public:
     void UpdateConfig(const ConfigKey& key, const StatsdConfig& data);
 
     /**
+     * Sets the broadcast receiver for a configuration key.
+     */
+    void SetConfigReceiver(const ConfigKey& key, const string& pkg, const string& cls);
+
+    /**
+     * Erase any broadcast receiver associated with this config key.
+     */
+    void RemoveConfigReceiver(const ConfigKey& key);
+
+    /**
      * A configuration was removed.
      *
      * Reports this to listeners.
@@ -87,9 +98,15 @@ private:
     void update_saved_configs();
 
     /**
-     * The Configs that have been set
+     * The Configs that have been set. Each config should
      */
     unordered_map<ConfigKey, StatsdConfig> mConfigs;
+
+    /**
+     * Each config key can be subscribed by up to one receiver, specified as the package name and
+     * class name.
+     */
+    unordered_map<ConfigKey, pair<string, string>> mConfigReceivers;
 
     /**
      * The ConfigListeners that will be told about changes.

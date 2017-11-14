@@ -137,6 +137,7 @@ import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.telephony.euicc.EuiccManager;
 import android.util.Log;
+import android.util.StatsManager;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.WindowManager;
@@ -451,6 +452,13 @@ final class SystemServiceRegistry {
                 return new SystemSensorManager(ctx.getOuterContext(),
                   ctx.mMainThread.getHandler().getLooper());
             }});
+
+        registerService(Context.STATS_MANAGER, StatsManager.class,
+                new StaticServiceFetcher<StatsManager>() {
+                    @Override
+                    public StatsManager createService() throws ServiceNotFoundException {
+                        return new StatsManager();
+                    }});
 
         registerService(Context.STATUS_BAR_SERVICE, StatusBarManager.class,
                 new CachedServiceFetcher<StatusBarManager>() {
