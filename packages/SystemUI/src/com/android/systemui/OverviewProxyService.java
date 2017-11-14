@@ -16,16 +16,21 @@
 
 package com.android.systemui;
 
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
+import android.net.Uri;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.PatternMatcher;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Log;
@@ -51,6 +56,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     private final Context mContext;
     private final Handler mHandler;
     private final Runnable mConnectionRunnable = this::internalConnectToCurrentUser;
+    private final ComponentName mLauncherComponentName;
     private final DeviceProvisionedController mDeviceProvisionedController
             = Dependency.get(DeviceProvisionedController.class);
     private final List<OverviewProxyListener> mConnectionCallbacks = new ArrayList<>();
@@ -68,6 +74,14 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
+        }
+    };
+
+    private final BroadcastReceiver mLauncherAddedReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // Reconnect immediately, instead of waiting for resume to arrive.
+            startConnectionToCurrentUser();
         }
     };
 
@@ -115,18 +129,23 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         };
 
     // This is the death handler for the binder from the launcher service
-    private final IBinder.DeathRecipient mOverviewServiceDeathRcpt = new IBinder.DeathRecipient() {
-        @Override
-        public void binderDied() {
-            startConnectionToCurrentUser();
-        }
-    };
+    private final IBinder.DeathRecipient mOverviewServiceDeathRcpt
+            = this::startConnectionToCurrentUser;
 
     public OverviewProxyService(Context context) {
         mContext = context;
         mHandler = new Handler();
         mConnectionBackoffAttempts = 0;
+        mLauncherComponentName = ComponentName
+                .unflattenFromString(context.getString(R.string.config_overviewServiceComponent));
         mDeviceProvisionedController.addCallback(mDeviceProvisionedCallback);
+
+        // Listen for the package update changes.
+        IntentFilter filter = new IntentFilter(Intent.ACTION_PACKAGE_ADDED);
+        filter.addDataScheme("package");
+        filter.addDataSchemeSpecificPart(mLauncherComponentName.getPackageName(),
+                PatternMatcher.PATTERN_LITERAL);
+        mContext.registerReceiver(mLauncherAddedReceiver, filter);
     }
 
     public void startConnectionToCurrentUser() {
@@ -146,8 +165,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         }
         mHandler.removeCallbacks(mConnectionRunnable);
         Intent launcherServiceIntent = new Intent();
-        launcherServiceIntent.setComponent(ComponentName.unflattenFromString(
-                mContext.getString(R.string.config_overviewServiceComponent)));
+        launcherServiceIntent.setComponent(mLauncherComponentName);
         boolean bound = mContext.bindServiceAsUser(launcherServiceIntent,
                 mOverviewServiceConnection, Context.BIND_AUTO_CREATE,
                 UserHandle.getUserHandleForUid(mDeviceProvisionedController.getCurrentUser()));
