@@ -81,7 +81,7 @@ private:
     static const uint64_t kDefaultGaugemBucketSizeNs = 1000 * 1000 * 1000;
     const GaugeMetric mMetric;
 
-    StatsPullerManager& mStatsPullerManager = StatsPullerManager::GetInstance();
+    StatsPullerManager mStatsPullerManager;
     // tagId for pulled data. -1 if this is not pulled
     const int mPullTagId;
 
