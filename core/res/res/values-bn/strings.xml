@@ -1745,7 +1745,7 @@
     <string name="app_category_image" msgid="4867854544519846048">"ফটো ও ছবিগুলি"</string>
     <string name="app_category_social" msgid="5842783057834965912">"সামাজিক ও যোগাযোগ"</string>
     <string name="app_category_news" msgid="7496506240743986873">"খবর ও পত্রিকাগুলি"</string>
-    <string name="app_category_maps" msgid="5878491404538024367">"মানচিত্র ও নেভিগেশান"</string>
+    <string name="app_category_maps" msgid="5878491404538024367">"ম্যাপ ও নেভিগেশান"</string>
     <string name="app_category_productivity" msgid="3742083261781538852">"উৎপাদনশীলতা"</string>
     <string name="device_storage_monitor_notification_channel" msgid="3295871267414816228">"ডিভাইসের স্টোরেজ"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="5537766997350092316">"USB ডিবাগিং"</string>

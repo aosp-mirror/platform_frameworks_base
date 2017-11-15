@@ -173,7 +173,6 @@ bool MaxDurationTracker::flushIfNeeded(uint64_t eventTime) {
 }
 
 void MaxDurationTracker::onSlicedConditionMayChange(const uint64_t timestamp) {
-    //  VLOG("Metric %lld onSlicedConditionMayChange", mMetric.metric_id());
     // Now for each of the on-going event, check if the condition has changed for them.
     for (auto& pair : mInfos) {
         if (pair.second.state == kStopped) {

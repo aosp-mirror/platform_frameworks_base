@@ -60,29 +60,25 @@ public final class NetworkEvent implements Parcelable {
     @Retention(RetentionPolicy.SOURCE)
     public @interface EventType {}
 
-    public final int netId;
     public final @EventType int eventType;
     public final long durationMs;
 
-    public NetworkEvent(int netId, @EventType int eventType, long durationMs) {
-        this.netId = netId;
+    public NetworkEvent(@EventType int eventType, long durationMs) {
         this.eventType = eventType;
         this.durationMs = durationMs;
     }
 
-    public NetworkEvent(int netId, @EventType int eventType) {
-        this(netId, eventType, 0);
+    public NetworkEvent(@EventType int eventType) {
+        this(eventType, 0);
     }
 
     private NetworkEvent(Parcel in) {
-        netId = in.readInt();
         eventType = in.readInt();
         durationMs = in.readLong();
     }
 
     @Override
     public void writeToParcel(Parcel out, int flags) {
-        out.writeInt(netId);
         out.writeInt(eventType);
         out.writeLong(durationMs);
     }
@@ -105,8 +101,8 @@ public final class NetworkEvent implements Parcelable {
 
     @Override
     public String toString() {
-        return String.format("NetworkEvent(%d, %s, %dms)",
-                netId, Decoder.constants.get(eventType), durationMs);
+        return String.format("NetworkEvent(%s, %dms)",
+                Decoder.constants.get(eventType), durationMs);
     }
 
     final static class Decoder {

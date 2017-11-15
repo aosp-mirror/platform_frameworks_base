@@ -1728,6 +1728,9 @@ public class Intent implements Parcelable, Cloneable {
      * <p>
      * Output: If {@link #EXTRA_RETURN_RESULT}, returns whether the install
      * succeeded.
+     * <p>
+     * Requires {@link android.Manifest.permission#REQUEST_DELETE_PACKAGES}
+     * since {@link Build.VERSION_CODES#P}.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_UNINSTALL_PACKAGE = "android.intent.action.UNINSTALL_PACKAGE";

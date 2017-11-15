@@ -16,10 +16,13 @@
 package android.app.slice;
 
 import android.Manifest.permission;
+import android.annotation.NonNull;
+import android.app.slice.widget.SliceView;
 import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
@@ -37,29 +40,45 @@ import android.util.Log;
 import java.util.concurrent.CountDownLatch;
 
 /**
- * A SliceProvider allows app to provide content to be displayed in system
- * spaces. This content is templated and can contain actions, and the behavior
- * of how it is surfaced is specific to the system surface.
+ * A SliceProvider allows an app to provide content to be displayed in system spaces. This content
+ * is templated and can contain actions, and the behavior of how it is surfaced is specific to the
+ * system surface.
+ * <p>
+ * Slices are not currently live content. They are bound once and shown to the user. If the content
+ * changes due to a callback from user interaction, then
+ * {@link ContentResolver#notifyChange(Uri, ContentObserver)} should be used to notify the system.
+ * </p>
+ * <p>
+ * The provider needs to be declared in the manifest to provide the authority for the app. The
+ * authority for most slices is expected to match the package of the application.
+ * </p>
  *
- * <p>Slices are not currently live content. They are bound once and shown to the
- * user. If the content changes due to a callback from user interaction, then
- * {@link ContentResolver#notifyChange(Uri, ContentObserver)}
- * should be used to notify the system.</p>
- *
- * <p>The provider needs to be declared in the manifest to provide the authority
- * for the app. The authority for most slices is expected to match the package
- * of the application.</p>
  * <pre class="prettyprint">
  * {@literal
  * <provider
  *     android:name="com.android.mypkg.MySliceProvider"
  *     android:authorities="com.android.mypkg" />}
  * </pre>
+ * <p>
+ * Slices can be identified by a Uri or by an Intent. To link an Intent with a slice, the provider
+ * must have an {@link IntentFilter} matching the slice intent. When a slice is being requested via
+ * an intent, {@link #onMapIntentToUri(Intent)} can be called and is expected to return an
+ * appropriate Uri representing the slice.
+ *
+ * <pre class="prettyprint">
+ * {@literal
+ * <provider
+ *     android:name="com.android.mypkg.MySliceProvider"
+ *     android:authorities="com.android.mypkg">
+ *     <intent-filter>
+ *         <action android:name="android.intent.action.MY_SLICE_INTENT" />
+ *     </intent-filter>
+ * </provider>}
+ * </pre>
  *
  * @see Slice
  */
 public abstract class SliceProvider extends ContentProvider {
-
     /**
      * This is the Android platform's MIME type for a slice: URI
      * containing a slice implemented through {@link SliceProvider}.
@@ -75,6 +94,14 @@ public abstract class SliceProvider extends ContentProvider {
      * @hide
      */
     public static final String METHOD_SLICE = "bind_slice";
+    /**
+     * @hide
+     */
+    public static final String METHOD_MAP_INTENT = "map_slice";
+    /**
+     * @hide
+     */
+    public static final String EXTRA_INTENT = "slice_intent";
     /**
      * @hide
      */
@@ -97,6 +124,20 @@ public abstract class SliceProvider extends ContentProvider {
      */
     // TODO: Provide alternate notifyChange that takes in the slice (i.e. notifyChange(Uri, Slice)).
     public abstract Slice onBindSlice(Uri sliceUri);
+
+    /**
+     * This method must be overridden if an {@link IntentFilter} is specified on the SliceProvider.
+     * In that case, this method can be called and is expected to return a non-null Uri representing
+     * a slice. Otherwise this will throw {@link UnsupportedOperationException}.
+     *
+     * @return Uri representing the slice associated with the provided intent.
+     * @see {@link Slice}
+     * @see {@link SliceView#setSlice(Intent)}
+     */
+    public @NonNull Uri onMapIntentToUri(Intent intent) {
+        throw new UnsupportedOperationException(
+                "This provider has not implemented intent to uri mapping");
+    }
 
     @Override
     public final int update(Uri uri, ContentValues values, String selection,
@@ -158,6 +199,19 @@ public abstract class SliceProvider extends ContentProvider {
             Slice s = handleBindSlice(uri);
             Bundle b = new Bundle();
             b.putParcelable(EXTRA_SLICE, s);
+            return b;
+        } else if (method.equals(METHOD_MAP_INTENT)) {
+            getContext().enforceCallingPermission(permission.BIND_SLICE,
+                    "Slice binding requires the permission BIND_SLICE");
+            Intent intent = extras.getParcelable(EXTRA_INTENT);
+            Uri uri = onMapIntentToUri(intent);
+            Bundle b = new Bundle();
+            if (uri != null) {
+                Slice s = handleBindSlice(uri);
+                b.putParcelable(EXTRA_SLICE, s);
+            } else {
+                b.putParcelable(EXTRA_SLICE, null);
+            }
             return b;
         }
         return super.call(method, arg, extras);

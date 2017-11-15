@@ -453,7 +453,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         }
 
         @Override
-        boolean injectCheckAccessShortcutsPermission(int callingPid, int callingUid) {
+        boolean injectHasAccessShortcutsPermission(int callingPid, int callingUid) {
             return mInjectCheckAccessShortcutsPermission;
         }
 
@@ -1648,7 +1648,6 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
     protected void assertShortcutLaunchable(@NonNull String packageName, @NonNull String shortcutId,
             int userId) {
         assertNotNull(launchShortcutAndGetIntent(packageName, shortcutId, userId));
-        assertNotNull(launchShortcutAndGetIntent_withShortcutInfo(packageName, shortcutId, userId));
     }
 
     protected void assertShortcutNotLaunched(@NonNull String packageName,

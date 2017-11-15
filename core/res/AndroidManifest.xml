@@ -307,6 +307,8 @@
     <protected-broadcast android:name="android.intent.action.DREAMING_STOPPED" />
     <protected-broadcast android:name="android.intent.action.ANY_DATA_STATE" />
 
+    <protected-broadcast android:name="com.android.server.stats.action.TRIGGER_COLLECTION" />
+
     <protected-broadcast android:name="com.android.server.WifiManager.action.START_SCAN" />
     <protected-broadcast android:name="com.android.server.WifiManager.action.START_PNO" />
     <protected-broadcast android:name="com.android.server.WifiManager.action.DELAYED_DRIVER_STOP" />
@@ -2776,8 +2778,9 @@
         android:protectionLevel="signature|appop" />
 
     <!-- Allows an application to request deleting packages. Apps
-         targeting APIs greater than 25 must hold this permission in
-         order to use {@link android.content.Intent#ACTION_UNINSTALL_PACKAGE}.
+         targeting APIs {@link android.os.Build.VERSION_CODES#P} or greater must hold this
+         permission in order to use {@link android.content.Intent#ACTION_UNINSTALL_PACKAGE} or
+         {@link android.content.pm.PackageInstaller#uninstall}.
          <p>Protection level: normal
     -->
     <permission android:name="android.permission.REQUEST_DELETE_PACKAGES"
@@ -2906,6 +2909,13 @@
          @hide -->
     <permission android:name="android.permission.CONFIGURE_DISPLAY_COLOR_MODE"
         android:protectionLevel="signature" />
+
+    <!-- Allows an application to collect usage infomation about brightness slider changes.
+         <p>Not for use by third-party applications.</p>
+         TODO: make a System API
+         @hide -->
+    <permission android:name="android.permission.BRIGHTNESS_SLIDER_USAGE"
+        android:protectionLevel="signature|privileged" />
 
     <!-- @SystemApi Allows an application to control VPN.
          <p>Not for use by third-party applications.</p>

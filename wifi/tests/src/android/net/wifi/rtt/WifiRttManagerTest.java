@@ -85,8 +85,8 @@ public class WifiRttManagerTest {
 
         // verify ranging request passed to service
         mDut.startRanging(request, callbackMock, mMockLooperHandler);
-        verify(mockRttService).startRanging(any(IBinder.class), eq(packageName), eq(request),
-                callbackCaptor.capture());
+        verify(mockRttService).startRanging(any(IBinder.class), eq(packageName), eq(null),
+                eq(request), callbackCaptor.capture());
 
         // service calls back with success
         callbackCaptor.getValue().onRangingResults(results);
@@ -109,8 +109,8 @@ public class WifiRttManagerTest {
 
         // verify ranging request passed to service
         mDut.startRanging(request, callbackMock, mMockLooperHandler);
-        verify(mockRttService).startRanging(any(IBinder.class), eq(packageName), eq(request),
-                callbackCaptor.capture());
+        verify(mockRttService).startRanging(any(IBinder.class), eq(packageName), eq(null),
+                eq(request), callbackCaptor.capture());
 
         // service calls back with failure code
         callbackCaptor.getValue().onRangingFailure(failureCode);

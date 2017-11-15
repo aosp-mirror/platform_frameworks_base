@@ -646,6 +646,11 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
     }
 
     @Override
+    public void updateOutputConfiguration(int streamId, OutputConfiguration config) {
+        // TODO: b/63912484 implement updateOutputConfiguration.
+    }
+
+    @Override
     public void waitUntilIdle() throws RemoteException {
         if (DEBUG) {
             Log.d(TAG, "waitUntilIdle called.");

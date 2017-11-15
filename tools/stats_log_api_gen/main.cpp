@@ -2,7 +2,7 @@
 
 #include "Collation.h"
 
-#include "frameworks/base/cmds/statsd/src/stats_events.pb.h"
+#include "frameworks/base/cmds/statsd/src/atoms.pb.h"
 
 #include <set>
 #include <vector>
@@ -18,7 +18,7 @@ using namespace std;
 namespace android {
 namespace stats_log_api_gen {
 
-using android::os::statsd::StatsEvent;
+using android::os::statsd::Atom;
 
 // TODO: Support WorkSources
 
@@ -582,7 +582,7 @@ run(int argc, char const*const* argv)
 
     // Collate the parameters
     Atoms atoms;
-    int errorCount = collate_atoms(StatsEvent::descriptor(), &atoms);
+    int errorCount = collate_atoms(Atom::descriptor(), &atoms);
     if (errorCount != 0) {
         return 1;
     }

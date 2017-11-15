@@ -1626,7 +1626,6 @@
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"2 ನೇ ಕೆಲಸದ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"3 ನೇ ಕೆಲಸದ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="6820571533009838261">"ಈ ಪರದೆಯನ್ನು ಅನ್‌ಪಿನ್ ಮಾಡಲು, ಹಿಂದಕ್ಕೆ ಮತ್ತು ಸಮಗ್ರ ನೋಟ ಬಟನ್‌ಗಳನ್ನು ಸ್ಪರ್ಶಿಸಿ ಒತ್ತಿಹಿಡಿಯಿರಿ"</string>
-    <string name="lock_to_app_toast_locked" msgid="7849470948648628704">"ಈ ಅಪ್ಲಿಕೇಶನ್ ಅನ್ನು ಅನ್‌ಪಿನ್ ಮಾಡಲಾಗುವುದಿಲ್ಲ"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"ಸ್ಕ್ರೀನ್‌ ಪಿನ್‌ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"ಸ್ಕ್ರೀನ್‌ ಅನ್‌ಪಿನ್‌ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"ಅನ್‌ಪಿನ್ ಮಾಡಲು ಪಿನ್‌ ಕೇಳು"</string>
@@ -1782,14 +1781,10 @@
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"ತುರ್ತು ಸಂದೇಶಗಳ ಪರೀಕ್ಷೆ"</string>
     <string name="notification_reply_button_accessibility" msgid="3621714652387814344">"ಪ್ರತ್ಯುತ್ತರ"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
-    <!-- no translation found for mmcc_authentication_reject (5767701075994754356) -->
-    <skip />
-    <!-- no translation found for mmcc_imsi_unknown_in_hlr (5316658473301462825) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_ms (807334478177362062) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_me (1950705155760872972) -->
-    <skip />
+    <string name="mmcc_authentication_reject" msgid="5767701075994754356">"ಧ್ವನಿಗಾಗಿ ಸಿಮ್ ಅನ್ನು ಅನುಮತಿಸುವುದಿಲ್ಲ"</string>
+    <string name="mmcc_imsi_unknown_in_hlr" msgid="5316658473301462825">"ಧ್ವನಿಗಾಗಿ ಸಿಮ್ ಸಿದ್ಧವಾಗಿಲ್ಲ"</string>
+    <string name="mmcc_illegal_ms" msgid="807334478177362062">"ಧ್ವನಿಗಾಗಿ ಸಿಮ್ ಅನ್ನು ಅನುಮತಿಸುವುದಿಲ್ಲ"</string>
+    <string name="mmcc_illegal_me" msgid="1950705155760872972">"ಧ್ವನಿಗಾಗಿ ಫೋನ್ ಅನ್ನು ಅನುಮತಿಸುವುದಿಲ್ಲ"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"ಪಾಪ್‌ಅಪ್ ವಿಂಡೋ"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="shortcut_restored_on_lower_version" msgid="5270675146351613828">"ಈ ಶಾರ್ಟ್‌ಕಟ್‌ಗೆ ಇತ್ತೀಚಿನ ಅಪ್ಲಿಕೇಶನ್‌ ಅಗತ್ಯವಿದೆ"</string>

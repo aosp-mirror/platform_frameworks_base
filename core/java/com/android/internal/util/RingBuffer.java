@@ -45,6 +45,17 @@ public class RingBuffer<T> {
         return (int) Math.min(mBuffer.length, (long) mCursor);
     }
 
+    public boolean isEmpty() {
+        return size() == 0;
+    }
+
+    public void clear() {
+        for (int i = 0; i < size(); ++i) {
+            mBuffer[i] = null;
+        }
+        mCursor = 0;
+    }
+
     public void append(T t) {
         mBuffer[indexOf(mCursor++)] = t;
     }

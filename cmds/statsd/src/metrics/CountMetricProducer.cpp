@@ -30,6 +30,7 @@ using android::util::FIELD_TYPE_FLOAT;
 using android::util::FIELD_TYPE_INT32;
 using android::util::FIELD_TYPE_INT64;
 using android::util::FIELD_TYPE_MESSAGE;
+using android::util::FIELD_TYPE_STRING;
 using android::util::ProtoOutputStream;
 using std::map;
 using std::string;
@@ -41,7 +42,7 @@ namespace os {
 namespace statsd {
 
 // for StatsLogReport
-const int FIELD_ID_METRIC_ID = 1;
+const int FIELD_ID_NAME = 1;
 const int FIELD_ID_START_REPORT_NANOS = 2;
 const int FIELD_ID_END_REPORT_NANOS = 3;
 const int FIELD_ID_COUNT_METRICS = 5;
@@ -74,17 +75,6 @@ CountMetricProducer::CountMetricProducer(const CountMetric& metric, const int co
         mBucketSizeNs = LLONG_MAX;
     }
 
-    mAnomalyTrackers.reserve(metric.alerts_size());
-    for (int i = 0; i < metric.alerts_size(); i++) {
-        const Alert& alert = metric.alerts(i);
-        if (alert.trigger_if_sum_gt() > 0 && alert.number_of_buckets() > 0) {
-            mAnomalyTrackers.push_back(std::make_unique<DiscreteAnomalyTracker>(alert));
-        } else {
-            ALOGW("Ignoring invalid count metric alert: threshold=%lld num_buckets= %d",
-                  alert.trigger_if_sum_gt(), alert.number_of_buckets());
-        }
-    }
-
     // TODO: use UidMap if uid->pkg_name is required
     mDimension.insert(mDimension.begin(), metric.dimension().begin(), metric.dimension().end());
 
@@ -96,7 +86,7 @@ CountMetricProducer::CountMetricProducer(const CountMetric& metric, const int co
 
     startNewProtoOutputStream(mStartTimeNs);
 
-    VLOG("metric %lld created. bucket size %lld start_time: %lld", metric.metric_id(),
+    VLOG("metric %s created. bucket size %lld start_time: %lld", metric.name().c_str(),
          (long long)mBucketSizeNs, (long long)mStartTimeNs);
 }
 
@@ -106,7 +96,7 @@ CountMetricProducer::~CountMetricProducer() {
 
 void CountMetricProducer::startNewProtoOutputStream(long long startTime) {
     mProto = std::make_unique<ProtoOutputStream>();
-    mProto->write(FIELD_TYPE_INT32 | FIELD_ID_METRIC_ID, mMetric.metric_id());
+    mProto->write(FIELD_TYPE_STRING | FIELD_ID_NAME, mMetric.name());
     mProto->write(FIELD_TYPE_INT64 | FIELD_ID_START_REPORT_NANOS, startTime);
     mProtoToken = mProto->start(FIELD_TYPE_MESSAGE | FIELD_ID_COUNT_METRICS);
 }
@@ -115,7 +105,7 @@ void CountMetricProducer::finish() {
 }
 
 void CountMetricProducer::onSlicedConditionMayChange(const uint64_t eventTime) {
-    VLOG("Metric %lld onSlicedConditionMayChange", mMetric.metric_id());
+    VLOG("Metric %s onSlicedConditionMayChange", mMetric.name().c_str());
 }
 
 std::unique_ptr<std::vector<uint8_t>> CountMetricProducer::onDumpReport() {
@@ -125,7 +115,7 @@ std::unique_ptr<std::vector<uint8_t>> CountMetricProducer::onDumpReport() {
     // If current bucket is still on-going, don't force dump current bucket.
     // In finish(), We can force dump current bucket.
     flushCounterIfNeeded(endTime);
-    VLOG("metric %lld dump report now...", mMetric.metric_id());
+    VLOG("metric %s dump report now...", mMetric.name().c_str());
 
     for (const auto& counter : mPastBuckets) {
         const HashableDimensionKey& hashableKey = counter.first;
@@ -175,7 +165,7 @@ std::unique_ptr<std::vector<uint8_t>> CountMetricProducer::onDumpReport() {
     mProto->write(FIELD_TYPE_INT64 | FIELD_ID_END_REPORT_NANOS,
                   (long long)mCurrentBucketStartTimeNs);
 
-    VLOG("metric %lld dump report now...", mMetric.metric_id());
+    VLOG("metric %s dump report now...", mMetric.name().c_str());
     std::unique_ptr<std::vector<uint8_t>> buffer = serializeProto();
 
     startNewProtoOutputStream(endTime);
@@ -188,7 +178,7 @@ std::unique_ptr<std::vector<uint8_t>> CountMetricProducer::onDumpReport() {
 }
 
 void CountMetricProducer::onConditionChanged(const bool conditionMet, const uint64_t eventTime) {
-    VLOG("Metric %lld onConditionChanged", mMetric.metric_id());
+    VLOG("Metric %s onConditionChanged", mMetric.name().c_str());
     mCondition = conditionMet;
 }
 
@@ -215,7 +205,7 @@ void CountMetricProducer::onMatchedLogEventInternal(
         count++;
     }
 
-    VLOG("metric %lld %s->%d", mMetric.metric_id(), eventKey.c_str(),
+    VLOG("metric %s %s->%d", mMetric.name().c_str(), eventKey.c_str(),
          (*mCurrentSlicedCounter)[eventKey]);
 }
 
@@ -237,7 +227,7 @@ void CountMetricProducer::flushCounterIfNeeded(const uint64_t eventTimeNs) {
         info.mCount = counter.second;
         auto& bucketList = mPastBuckets[counter.first];
         bucketList.push_back(info);
-        VLOG("metric %lld, dump key value: %s -> %d", mMetric.metric_id(), counter.first.c_str(),
+        VLOG("metric %s, dump key value: %s -> %d", mMetric.name().c_str(), counter.first.c_str(),
              counter.second);
         mByteSize += sizeof(info);
     }
@@ -252,7 +242,7 @@ void CountMetricProducer::flushCounterIfNeeded(const uint64_t eventTimeNs) {
 
     mCurrentBucketStartTimeNs = mCurrentBucketStartTimeNs + numBucketsForward * mBucketSizeNs;
     mCurrentBucketNum += numBucketsForward;
-    VLOG("metric %lld: new bucket start time: %lld", mMetric.metric_id(),
+    VLOG("metric %s: new bucket start time: %lld", mMetric.name().c_str(),
          (long long)mCurrentBucketStartTimeNs);
 }
 

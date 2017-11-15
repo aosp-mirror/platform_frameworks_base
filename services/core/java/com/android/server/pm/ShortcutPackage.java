@@ -615,10 +615,16 @@ class ShortcutPackage extends ShortcutPackageItem {
 
             // Fix up isPinned for the caller.  Note we need to do it before the "test" callback,
             // since it may check isPinned.
-            if (!isPinnedByCaller) {
-                clone.clearFlags(ShortcutInfo.FLAG_PINNED);
+            // However, if getPinnedByAnyLauncher is set, we do it after the test.
+            if (!getPinnedByAnyLauncher) {
+                if (!isPinnedByCaller) {
+                    clone.clearFlags(ShortcutInfo.FLAG_PINNED);
+                }
             }
             if (query == null || query.test(clone)) {
+                if (!isPinnedByCaller) {
+                    clone.clearFlags(ShortcutInfo.FLAG_PINNED);
+                }
                 result.add(clone);
             }
         }

@@ -597,6 +597,7 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks,
                 PrintJobStateChangeListenerRecord record =
                         mPrintJobStateChangeListenerRecords.get(i);
                 if (record.listener.asBinder().equals(listener.asBinder())) {
+                    record.destroy();
                     mPrintJobStateChangeListenerRecords.remove(i);
                     break;
                 }
@@ -639,6 +640,7 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks,
                 ListenerRecord<IPrintServicesChangeListener> record =
                         mPrintServicesChangeListenerRecords.get(i);
                 if (record.listener.asBinder().equals(listener.asBinder())) {
+                    record.destroy();
                     mPrintServicesChangeListenerRecords.remove(i);
                     break;
                 }
@@ -686,6 +688,7 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks,
                 ListenerRecord<IRecommendationsChangeListener> record =
                         mPrintServiceRecommendationsChangeListenerRecords.get(i);
                 if (record.listener.asBinder().equals(listener.asBinder())) {
+                    record.destroy();
                     mPrintServiceRecommendationsChangeListenerRecords.remove(i);
                     break;
                 }
@@ -1285,6 +1288,10 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks,
             listener.asBinder().linkToDeath(this, 0);
         }
 
+        public void destroy() {
+            listener.asBinder().unlinkToDeath(this, 0);
+        }
+
         @Override
         public void binderDied() {
             listener.asBinder().unlinkToDeath(this, 0);
@@ -1300,6 +1307,10 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks,
         public ListenerRecord(@NonNull T listener) throws RemoteException {
             this.listener = listener;
             listener.asBinder().linkToDeath(this, 0);
+        }
+
+        public void destroy() {
+            listener.asBinder().unlinkToDeath(this, 0);
         }
 
         @Override

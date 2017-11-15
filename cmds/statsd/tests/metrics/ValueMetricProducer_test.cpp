@@ -45,7 +45,7 @@ TEST(ValueMetricProducerTest, TestNonDimensionalEvents) {
     int64_t bucket3StartTimeNs = bucketStartTimeNs + 2*bucketSizeNs;
 
     ValueMetric metric;
-    metric.set_metric_id(1);
+    metric.set_name("1");
     metric.mutable_bucket()->set_bucket_size_millis(bucketSizeNs / 1000000);
     metric.set_value_field(2);
 
@@ -139,7 +139,7 @@ TEST(ValueMetricProducerTest, TestEventsWithNonSlicedCondition) {
     int64_t bucket3StartTimeNs = bucketStartTimeNs + 2 * bucketSizeNs;
 
     ValueMetric metric;
-    metric.set_metric_id(1);
+    metric.set_name("1");
     metric.mutable_bucket()->set_bucket_size_millis(bucketSizeNs / 1000000);
     metric.set_value_field(2);
     metric.set_condition("SCREEN_ON");
@@ -240,7 +240,7 @@ TEST(ValueMetricProducerTest, TestPushedEventsWithoutCondition) {
     int64_t bucket3StartTimeNs = bucketStartTimeNs + 2 * bucketSizeNs;
 
     ValueMetric metric;
-    metric.set_metric_id(1);
+    metric.set_name("1");
     metric.mutable_bucket()->set_bucket_size_millis(bucketSizeNs / 1000000);
     metric.set_value_field(2);
 

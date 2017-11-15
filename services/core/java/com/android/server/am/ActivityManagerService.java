@@ -3840,6 +3840,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                 gids[0] = UserHandle.getSharedAppGid(UserHandle.getAppId(uid));
                 gids[1] = UserHandle.getCacheAppGid(UserHandle.getAppId(uid));
                 gids[2] = UserHandle.getUserGid(UserHandle.getUserId(uid));
+
+                // Replace any invalid GIDs
+                if (gids[0] == UserHandle.ERR_GID) gids[0] = gids[2];
+                if (gids[1] == UserHandle.ERR_GID) gids[1] = gids[2];
             }
             checkTime(startTime, "startProcess: building args");
             if (mFactoryTest != FactoryTest.FACTORY_TEST_OFF) {

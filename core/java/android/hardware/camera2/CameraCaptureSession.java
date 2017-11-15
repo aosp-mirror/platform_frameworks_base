@@ -249,7 +249,7 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      * <p>This function can also be called in case where multiple surfaces share the same
      * OutputConfiguration, and one of the surfaces becomes available after the {@link
      * CameraCaptureSession} is created. In that case, the application must first create the
-     * OutputConfiguration with the available Surface, then enable furture surface sharing via
+     * OutputConfiguration with the available Surface, then enable further surface sharing via
      * {@link OutputConfiguration#enableSurfaceSharing}, before creating the CameraCaptureSession.
      * After the CameraCaptureSession is created, and once the extra Surface becomes available, the
      * application must then call {@link OutputConfiguration#addSurface} before finalizing the
@@ -643,6 +643,44 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      */
     @Nullable
     public abstract Surface getInputSurface();
+
+    /**
+     * Update {@link OutputConfiguration} after configuration finalization see
+     * {@link #finalizeOutputConfigurations}.
+     *
+     * <p>Any {@link OutputConfiguration} that has been modified via calls to
+     * {@link OutputConfiguration#addSurface} or {@link OutputConfiguration#removeSurface} must be
+     * updated. After the update call returns without throwing exceptions any newly added surfaces
+     * can be referenced in subsequent capture requests.</p>
+     *
+     * <p>Surfaces that get removed must not be part of any active repeating or single/burst
+     * request or have any pending results. Consider updating any repeating requests first via
+     * {@link #setRepeatingRequest} or {@link #setRepeatingBurst} and then wait for the last frame
+     * number when the sequence completes {@link CaptureCallback#onCaptureSequenceCompleted}
+     * before calling updateOutputConfiguration to remove a previously active Surface.</p>
+     *
+     * <p>Surfaces that get added must not be part of any other registered
+     * {@link OutputConfiguration}.</p>
+     *
+     * @param config Modified output configuration.
+     *
+     * @throws CameraAccessException if the camera device is no longer connected or has
+     *                               encountered a fatal error.
+     * @throws IllegalArgumentException if an attempt was made to add a {@link Surface} already
+     *                               in use by another buffer-producing API, such as MediaCodec or
+     *                               a different camera device or {@link OutputConfiguration}; or
+     *                               new surfaces are not compatible (see
+     *                               {@link OutputConfiguration#enableSurfaceSharing}); or a
+     *                               {@link Surface} that was removed from the modified
+     *                               {@link OutputConfiguration} still has pending requests.
+     * @throws IllegalStateException if this session is no longer active, either because the session
+     *                               was explicitly closed, a new session has been created
+     *                               or the camera device has been closed.
+     */
+    public void updateOutputConfiguration(OutputConfiguration config)
+        throws CameraAccessException {
+        throw new UnsupportedOperationException("Subclasses must override this method");
+    }
 
     /**
      * Close this capture session asynchronously.

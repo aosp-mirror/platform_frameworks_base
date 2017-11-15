@@ -71,20 +71,22 @@ public:
     virtual void OnLogEvent(const LogEvent& event);
 
     /**
-     * Binder call to force trigger pushLog. This would be called by callback
-     * clients.
+     * Binder call for clients to request data for this configuration key.
      */
-    virtual Status requestPush() override;
+    virtual Status getData(const String16& key, vector<uint8_t>* output) override;
 
     /**
-     * Pushes stats log entries from statsd to callback clients.
+     * Binder call to let clients send a configuration and indicate they're interested when they
+     * should requestData for this configuration.
      */
-    Status pushLog(const vector<uint8_t>& log);
+    virtual Status addConfiguration(const String16& key, const vector <uint8_t>& config,
+                                   const String16& package, const String16& cls, bool* success)
+    override;
 
     /**
-     * Binder call to listen to statsd to send stats log entries.
+     * Binder call to allow clients to remove the specified configuration.
      */
-    virtual Status subscribeStatsLog(const sp<IStatsCallbacks>& callbacks) override;
+    virtual Status removeConfiguration(const String16& key, bool* success) override;
 
     // TODO: public for testing since statsd doesn't run when system starts. Change to private
     // later.
@@ -118,6 +120,11 @@ private:
      * Print usage information for the commands
      */
     void print_cmd_help(FILE* out);
+
+    /**
+     * Trigger a broadcast.
+     */
+    status_t cmd_trigger_broadcast(Vector<String8>& args);
 
     /**
      * Handle the config sub-command.

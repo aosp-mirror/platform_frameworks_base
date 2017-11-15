@@ -122,7 +122,7 @@ public final class SelectPrinterActivity extends Activity implements
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getActionBar().setIcon(R.drawable.ic_print);
+        getActionBar().setIcon(com.android.internal.R.drawable.ic_print);
 
         setContentView(R.layout.select_printer_activity);
 

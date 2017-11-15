@@ -215,6 +215,16 @@ public class ICameraDeviceUserWrapper {
         }
     }
 
+    public void updateOutputConfiguration(int streamId, OutputConfiguration config)
+            throws CameraAccessException {
+        try {
+            mRemoteDevice.updateOutputConfiguration(streamId, config);
+        } catch (Throwable t) {
+            CameraManager.throwAsPublicException(t);
+            throw new UnsupportedOperationException("Unexpected exception", t);
+        }
+    }
+
     public void finalizeOutputConfigurations(int streamId, OutputConfiguration deferredConfig)
             throws CameraAccessException {
         try {

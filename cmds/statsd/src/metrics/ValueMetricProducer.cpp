@@ -29,6 +29,7 @@ using android::util::FIELD_TYPE_FLOAT;
 using android::util::FIELD_TYPE_INT32;
 using android::util::FIELD_TYPE_INT64;
 using android::util::FIELD_TYPE_MESSAGE;
+using android::util::FIELD_TYPE_STRING;
 using android::util::ProtoOutputStream;
 using std::list;
 using std::make_pair;
@@ -43,7 +44,7 @@ namespace os {
 namespace statsd {
 
 // for StatsLogReport
-const int FIELD_ID_METRIC_ID = 1;
+const int FIELD_ID_NAME = 1;
 const int FIELD_ID_START_REPORT_NANOS = 2;
 const int FIELD_ID_END_REPORT_NANOS = 3;
 const int FIELD_ID_VALUE_METRICS = 7;
@@ -97,7 +98,7 @@ ValueMetricProducer::ValueMetricProducer(const ValueMetric& metric, const int co
 
     startNewProtoOutputStream(mStartTimeNs);
 
-    VLOG("value metric %lld created. bucket size %lld start_time: %lld", metric.metric_id(),
+    VLOG("value metric %s created. bucket size %lld start_time: %lld", metric.name().c_str(),
          (long long)mBucketSizeNs, (long long)mStartTimeNs);
 }
 
@@ -118,7 +119,7 @@ ValueMetricProducer::~ValueMetricProducer() {
 
 void ValueMetricProducer::startNewProtoOutputStream(long long startTime) {
     mProto = std::make_unique<ProtoOutputStream>();
-    mProto->write(FIELD_TYPE_INT32 | FIELD_ID_METRIC_ID, mMetric.metric_id());
+    mProto->write(FIELD_TYPE_STRING | FIELD_ID_NAME, mMetric.name());
     mProto->write(FIELD_TYPE_INT64 | FIELD_ID_START_REPORT_NANOS, startTime);
     mProtoToken = mProto->start(FIELD_TYPE_MESSAGE | FIELD_ID_VALUE_METRICS);
 }
@@ -129,11 +130,11 @@ void ValueMetricProducer::finish() {
 }
 
 void ValueMetricProducer::onSlicedConditionMayChange(const uint64_t eventTime) {
-    VLOG("Metric %lld onSlicedConditionMayChange", mMetric.metric_id());
+    VLOG("Metric %s onSlicedConditionMayChange", mMetric.name().c_str());
 }
 
 std::unique_ptr<std::vector<uint8_t>> ValueMetricProducer::onDumpReport() {
-    VLOG("metric %lld dump report now...", mMetric.metric_id());
+    VLOG("metric %s dump report now...", mMetric.name().c_str());
 
     for (const auto& pair : mPastBuckets) {
         const HashableDimensionKey& hashableKey = pair.first;
@@ -182,7 +183,7 @@ std::unique_ptr<std::vector<uint8_t>> ValueMetricProducer::onDumpReport() {
     mProto->write(FIELD_TYPE_INT64 | FIELD_ID_END_REPORT_NANOS,
                   (long long)mCurrentBucketStartTimeNs);
 
-    VLOG("metric %lld dump report now...", mMetric.metric_id());
+    VLOG("metric %s dump report now...", mMetric.name().c_str());
     std::unique_ptr<std::vector<uint8_t>> buffer = serializeProto();
 
     startNewProtoOutputStream(time(nullptr) * NS_PER_SEC);
@@ -339,7 +340,7 @@ void ValueMetricProducer::flush_if_needed(const uint64_t eventTimeNs) {
         VLOG("Skipping forward %lld buckets", (long long)numBucketsForward);
     }
     mCurrentBucketStartTimeNs = mCurrentBucketStartTimeNs + numBucketsForward * mBucketSizeNs;
-    VLOG("metric %lld: new bucket start time: %lld", mMetric.metric_id(),
+    VLOG("metric %s: new bucket start time: %lld", mMetric.name().c_str(),
          (long long)mCurrentBucketStartTimeNs);
 }
 

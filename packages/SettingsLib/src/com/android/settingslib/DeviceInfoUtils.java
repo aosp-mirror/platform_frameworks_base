@@ -22,12 +22,15 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Build;
+import android.system.Os;
+import android.system.StructUtsname;
 import android.telephony.PhoneNumberUtils;
 import android.telephony.SubscriptionInfo;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.util.Log;
+import android.support.annotation.VisibleForTesting;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -45,7 +48,6 @@ import static android.content.Context.TELEPHONY_SERVICE;
 public class DeviceInfoUtils {
     private static final String TAG = "DeviceInfoUtils";
 
-    private static final String FILENAME_PROC_VERSION = "/proc/version";
     private static final String FILENAME_MSV = "/sys/board_properties/soc/msv";
 
     /**
@@ -63,43 +65,36 @@ public class DeviceInfoUtils {
         }
     }
 
-    public static String getFormattedKernelVersion() {
-        try {
-            return formatKernelVersion(readLine(FILENAME_PROC_VERSION));
-        } catch (IOException e) {
-            Log.e(TAG, "IO Exception when getting kernel version for Device Info screen",
-                    e);
-
-            return "Unavailable";
-        }
+    public static String getFormattedKernelVersion(Context context) {
+            return formatKernelVersion(context, Os.uname());
     }
 
-    public static String formatKernelVersion(String rawKernelVersion) {
-        // Example (see tests for more):
-        // Linux version 4.9.29-g958411d (android-build@xyz) (Android clang version 3.8.256229 \
-        //       (based on LLVM 3.8.256229)) #1 SMP PREEMPT Wed Jun 7 00:06:03 CST 2017
-        // Linux version 4.9.29-geb63318482a7 (android-build@xyz) (gcc version 4.9.x 20150123 \
-        //       (prerelease) (GCC) ) #1 SMP PREEMPT Thu Jun 1 03:41:57 UTC 2017
-        final String PROC_VERSION_REGEX =
-                "Linux version (\\S+) " + /* group 1: "3.0.31-g6fb96c9" */
-                "\\((\\S+?)\\) " +        /* group 2: "(x@y.com) " */
-                "\\((.+?)\\) " +          /* group 3:  kernel toolchain version information */
-                "(#\\d+) " +              /* group 4: "#1" */
-                "(?:.*?)?" +              /* ignore: optional SMP, PREEMPT, and any CONFIG_FLAGS */
-                "((Sun|Mon|Tue|Wed|Thu|Fri|Sat).+)"; /* group 5: "Thu Jun 28 11:02:39 PDT 2012" */
-
-        Matcher m = Pattern.compile(PROC_VERSION_REGEX).matcher(rawKernelVersion);
-        if (!m.matches()) {
-            Log.e(TAG, "Regex did not match on /proc/version: " + rawKernelVersion);
-            return "Unavailable";
-        } else if (m.groupCount() < 4) {
-            Log.e(TAG, "Regex match on /proc/version only returned " + m.groupCount()
-                    + " groups");
-            return "Unavailable";
+    @VisibleForTesting
+    static String formatKernelVersion(Context context, StructUtsname uname) {
+        if (uname == null) {
+            return context.getString(R.string.status_unavailable);
         }
-        return m.group(1) + " ("+ m.group(3) + ")\n" +   // 3.0.31-g6fb96c9 (toolchain version)
-                m.group(2) + " " + m.group(4) + "\n" +   // x@y.com #1
-                m.group(5);                              // Thu Jun 28 11:02:39 PDT 2012
+        // Example:
+        // 4.9.29-g958411d
+        // #1 SMP PREEMPT Wed Jun 7 00:06:03 CST 2017
+        final String VERSION_REGEX =
+                "(#\\d+) " +              /* group 1: "#1" */
+                "(?:.*?)?" +              /* ignore: optional SMP, PREEMPT, and any CONFIG_FLAGS */
+                "((Sun|Mon|Tue|Wed|Thu|Fri|Sat).+)"; /* group 2: "Thu Jun 28 11:02:39 PDT 2012" */
+        Matcher m = Pattern.compile(VERSION_REGEX).matcher(uname.version);
+        if (!m.matches()) {
+            Log.e(TAG, "Regex did not match on uname version " + uname.version);
+            return context.getString(R.string.status_unavailable);
+        }
+
+        // Example output:
+        // 4.9.29-g958411d
+        // #1 Wed Jun 7 00:06:03 CST 2017
+        return new StringBuilder().append(uname.release)
+                .append("\n")
+                .append(m.group(1))
+                .append(" ")
+                .append(m.group(2)).toString();
     }
 
     /**

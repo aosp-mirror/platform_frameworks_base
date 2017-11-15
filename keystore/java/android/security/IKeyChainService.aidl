@@ -28,6 +28,8 @@ interface IKeyChainService {
     String requestPrivateKey(String alias);
     byte[] getCertificate(String alias);
     byte[] getCaCertificates(String alias);
+    boolean isUserSelectable(String alias);
+    void setUserSelectable(String alias, boolean isUserSelectable);
 
     // APIs used by CertInstaller and DevicePolicyManager
     String installCaCertificate(in byte[] caCertificate);

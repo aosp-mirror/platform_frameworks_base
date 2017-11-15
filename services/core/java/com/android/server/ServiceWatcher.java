@@ -16,6 +16,7 @@
 
 package com.android.server;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -397,9 +398,29 @@ public class ServiceWatcher implements ServiceConnection {
         }
     }
 
-    public @Nullable IBinder getBinder() {
+    /**
+     * The runner that runs on the binder retrieved from {@link ServiceWatcher}.
+     */
+    public interface BinderRunner {
+        /**
+         * Runs on the retrieved binder.
+         * @param binder the binder retrieved from the {@link ServiceWatcher}.
+         */
+        public void run(@NonNull IBinder binder);
+    }
+
+    /**
+     * Retrieves the binder from {@link ServiceWatcher} and runs it.
+     * @return whether a valid service exists.
+     */
+    public boolean runOnBinder(@NonNull BinderRunner runner) {
         synchronized (mLock) {
-            return mBoundService;
+            if (mBoundService == null) {
+                return false;
+            } else {
+                runner.run(mBoundService);
+                return true;
+            }
         }
     }
 

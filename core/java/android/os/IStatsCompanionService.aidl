@@ -53,4 +53,7 @@ interface IStatsCompanionService {
 
     /** Pull the specified data. Results will be sent to statsd when complete. */
     StatsLogEventWrapper[] pullData(int pullCode);
+
+    /** Send a broadcast to the specified pkg and class that it should getData now. */
+    oneway void sendBroadcast(String pkg, String cls);
 }

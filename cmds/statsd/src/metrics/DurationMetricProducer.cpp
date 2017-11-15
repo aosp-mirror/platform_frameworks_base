@@ -29,6 +29,7 @@ using android::util::FIELD_TYPE_FLOAT;
 using android::util::FIELD_TYPE_INT32;
 using android::util::FIELD_TYPE_INT64;
 using android::util::FIELD_TYPE_MESSAGE;
+using android::util::FIELD_TYPE_STRING;
 using android::util::ProtoOutputStream;
 using std::string;
 using std::unordered_map;
@@ -39,7 +40,7 @@ namespace os {
 namespace statsd {
 
 // for StatsLogReport
-const int FIELD_ID_METRIC_ID = 1;
+const int FIELD_ID_NAME = 1;
 const int FIELD_ID_START_REPORT_NANOS = 2;
 const int FIELD_ID_END_REPORT_NANOS = 3;
 const int FIELD_ID_DURATION_METRICS = 6;
@@ -91,7 +92,7 @@ DurationMetricProducer::DurationMetricProducer(const DurationMetric& metric,
 
     startNewProtoOutputStream(mStartTimeNs);
 
-    VLOG("metric %lld created. bucket size %lld start_time: %lld", metric.metric_id(),
+    VLOG("metric %s created. bucket size %lld start_time: %lld", metric.name().c_str(),
          (long long)mBucketSizeNs, (long long)mStartTimeNs);
 }
 
@@ -101,7 +102,7 @@ DurationMetricProducer::~DurationMetricProducer() {
 
 void DurationMetricProducer::startNewProtoOutputStream(long long startTime) {
     mProto = std::make_unique<ProtoOutputStream>();
-    mProto->write(FIELD_TYPE_INT32 | FIELD_ID_METRIC_ID, mMetric.metric_id());
+    mProto->write(FIELD_TYPE_STRING | FIELD_ID_NAME, mMetric.name());
     mProto->write(FIELD_TYPE_INT64 | FIELD_ID_START_REPORT_NANOS, startTime);
     mProtoToken = mProto->start(FIELD_TYPE_MESSAGE | FIELD_ID_DURATION_METRICS);
 }
@@ -126,7 +127,7 @@ void DurationMetricProducer::finish() {
 }
 
 void DurationMetricProducer::onSlicedConditionMayChange(const uint64_t eventTime) {
-    VLOG("Metric %lld onSlicedConditionMayChange", mMetric.metric_id());
+    VLOG("Metric %s onSlicedConditionMayChange", mMetric.name().c_str());
     // Now for each of the on-going event, check if the condition has changed for them.
     flushIfNeeded(eventTime);
     for (auto& pair : mCurrentSlicedDuration) {
@@ -135,7 +136,7 @@ void DurationMetricProducer::onSlicedConditionMayChange(const uint64_t eventTime
 }
 
 void DurationMetricProducer::onConditionChanged(const bool conditionMet, const uint64_t eventTime) {
-    VLOG("Metric %lld onConditionChanged", mMetric.metric_id());
+    VLOG("Metric %s onConditionChanged", mMetric.name().c_str());
     mCondition = conditionMet;
     // TODO: need to populate the condition change time from the event which triggers the condition
     // change, instead of using current time.
@@ -167,7 +168,7 @@ std::unique_ptr<std::vector<uint8_t>> DurationMetricProducer::onDumpReport() {
     // If current bucket is still on-going, don't force dump current bucket.
     // In finish(), We can force dump current bucket.
     flushIfNeeded(endTime);
-    VLOG("metric %lld dump report now...", mMetric.metric_id());
+    VLOG("metric %s dump report now...", mMetric.name().c_str());
 
     for (const auto& pair : mPastBuckets) {
         const HashableDimensionKey& hashableKey = pair.first;

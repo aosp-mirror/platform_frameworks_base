@@ -30,6 +30,7 @@ using android::util::FIELD_TYPE_FLOAT;
 using android::util::FIELD_TYPE_INT32;
 using android::util::FIELD_TYPE_INT64;
 using android::util::FIELD_TYPE_MESSAGE;
+using android::util::FIELD_TYPE_STRING;
 using android::util::ProtoOutputStream;
 using std::map;
 using std::string;
@@ -41,7 +42,7 @@ namespace os {
 namespace statsd {
 
 // for StatsLogReport
-const int FIELD_ID_METRIC_ID = 1;
+const int FIELD_ID_NAME = 1;
 const int FIELD_ID_START_REPORT_NANOS = 2;
 const int FIELD_ID_END_REPORT_NANOS = 3;
 const int FIELD_ID_GAUGE_METRICS = 8;
@@ -89,7 +90,7 @@ GaugeMetricProducer::GaugeMetricProducer(const GaugeMetric& metric, const int co
 
     startNewProtoOutputStream(mStartTimeNs);
 
-    VLOG("metric %lld created. bucket size %lld start_time: %lld", metric.metric_id(),
+    VLOG("metric %s created. bucket size %lld start_time: %lld", metric.name().c_str(),
          (long long)mBucketSizeNs, (long long)mStartTimeNs);
 }
 
@@ -99,7 +100,7 @@ GaugeMetricProducer::~GaugeMetricProducer() {
 
 void GaugeMetricProducer::startNewProtoOutputStream(long long startTime) {
     mProto = std::make_unique<ProtoOutputStream>();
-    mProto->write(FIELD_TYPE_INT32 | FIELD_ID_METRIC_ID, mMetric.metric_id());
+    mProto->write(FIELD_TYPE_STRING | FIELD_ID_NAME, mMetric.name());
     mProto->write(FIELD_TYPE_INT64 | FIELD_ID_START_REPORT_NANOS, startTime);
     mProtoToken = mProto->start(FIELD_TYPE_MESSAGE | FIELD_ID_GAUGE_METRICS);
 }
@@ -108,7 +109,7 @@ void GaugeMetricProducer::finish() {
 }
 
 std::unique_ptr<std::vector<uint8_t>> GaugeMetricProducer::onDumpReport() {
-    VLOG("gauge metric %lld dump report now...", mMetric.metric_id());
+    VLOG("gauge metric %s dump report now...", mMetric.name().c_str());
 
     // Dump current bucket if it's stale.
     // If current bucket is still on-going, don't force dump current bucket.
@@ -176,7 +177,7 @@ std::unique_ptr<std::vector<uint8_t>> GaugeMetricProducer::onDumpReport() {
 
 void GaugeMetricProducer::onConditionChanged(const bool conditionMet, const uint64_t eventTime) {
     AutoMutex _l(mLock);
-    VLOG("Metric %lld onConditionChanged", mMetric.metric_id());
+    VLOG("Metric %s onConditionChanged", mMetric.name().c_str());
     mCondition = conditionMet;
 
     // Push mode. Nothing to do.
@@ -200,7 +201,7 @@ void GaugeMetricProducer::onConditionChanged(const bool conditionMet, const uint
 }
 
 void GaugeMetricProducer::onSlicedConditionMayChange(const uint64_t eventTime) {
-    VLOG("Metric %lld onSlicedConditionMayChange", mMetric.metric_id());
+    VLOG("Metric %s onSlicedConditionMayChange", mMetric.name().c_str());
 }
 
 long GaugeMetricProducer::getGauge(const LogEvent& event) {
@@ -277,14 +278,14 @@ void GaugeMetricProducer::flushGaugeIfNeededLocked(const uint64_t eventTimeNs) {
         bucketList.push_back(info);
         mByteSize += sizeof(info);
 
-        VLOG("gauge metric %lld, dump key value: %s -> %ld", mMetric.metric_id(),
+        VLOG("gauge metric %s, dump key value: %s -> %ld", mMetric.name().c_str(),
              slice.first.c_str(), slice.second);
     }
     // Reset counters
     mCurrentSlicedBucket.clear();
 
     mCurrentBucketStartTimeNs = mCurrentBucketStartTimeNs + numBucketsForward * mBucketSizeNs;
-    VLOG("metric %lld: new bucket start time: %lld", mMetric.metric_id(),
+    VLOG("metric %s: new bucket start time: %lld", mMetric.name().c_str(),
          (long long)mCurrentBucketStartTimeNs);
 }
 

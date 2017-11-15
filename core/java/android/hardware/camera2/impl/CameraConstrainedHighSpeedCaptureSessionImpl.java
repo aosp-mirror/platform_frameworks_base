@@ -235,6 +235,13 @@ public class CameraConstrainedHighSpeedCaptureSessionImpl
     }
 
     @Override
+    public void updateOutputConfiguration(OutputConfiguration config)
+            throws CameraAccessException {
+        throw new UnsupportedOperationException("Constrained high speed session doesn't support"
+                + " this method");
+    }
+
+    @Override
     public void close() {
         mSessionImpl.close();
     }
