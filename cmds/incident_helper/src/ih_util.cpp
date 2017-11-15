@@ -30,22 +30,26 @@ bool isValidChar(char c) {
         || (v == (uint8_t)'_');
 }
 
-static std::string trim(const std::string& s, const std::string& chars) {
-    const auto head = s.find_first_not_of(chars);
+std::string trim(const std::string& s, const std::string& charset) {
+    const auto head = s.find_first_not_of(charset);
     if (head == std::string::npos) return "";
 
-    const auto tail = s.find_last_not_of(chars);
+    const auto tail = s.find_last_not_of(charset);
     return s.substr(head, tail - head + 1);
 }
 
-static std::string trimDefault(const std::string& s) {
+static inline std::string toLowerStr(const std::string& s) {
+    std::string res(s);
+    std::transform(res.begin(), res.end(), res.begin(), ::tolower);
+    return res;
+}
+
+static inline std::string trimDefault(const std::string& s) {
     return trim(s, DEFAULT_WHITESPACE);
 }
 
-static std::string trimHeader(const std::string& s) {
-    std::string res = trimDefault(s);
-    std::transform(res.begin(), res.end(), res.begin(), ::tolower);
-    return res;
+static inline std::string trimHeader(const std::string& s) {
+    return toLowerStr(trimDefault(s));
 }
 
 // This is similiar to Split in android-base/file.h, but it won't add empty string
@@ -188,42 +192,15 @@ bool Reader::ok(std::string* error) {
 }
 
 // ==============================================================================
-static int
-lookupName(const char** names, const int size, const char* name)
-{
-    for (int i=0; i<size; i++) {
-        if (strcmp(name, names[i]) == 0) {
-            return i;
-        }
-    }
-    return -1;
-}
-
-EnumTypeMap::EnumTypeMap(const char* enumNames[], const uint32_t enumValues[], const int enumCount)
-        :mEnumNames(enumNames),
-         mEnumValues(enumValues),
-         mEnumCount(enumCount)
-{
-}
-
-EnumTypeMap::~EnumTypeMap()
-{
-}
-
-int
-EnumTypeMap::parseValue(const std::string& value)
-{
-    int index = lookupName(mEnumNames, mEnumCount, value.c_str());
-    if (index < 0) return mEnumValues[0]; // Assume value 0 is default
-    return mEnumValues[index];
-}
-
 Table::Table(const char* names[], const uint64_t ids[], const int count)
-        :mFieldNames(names),
-         mFieldIds(ids),
-         mFieldCount(count),
-         mEnums()
+        :mEnums(),
+         mEnumValuesByName()
 {
+    map<std::string, uint64_t> fields;
+    for (int i = 0; i < count; i++) {
+        fields[names[i]] = ids[i];
+    }
+    mFields = fields;
 }
 
 Table::~Table()
@@ -231,53 +208,89 @@ Table::~Table()
 }
 
 void
-Table::addEnumTypeMap(const char* field, const char* enumNames[], const uint32_t enumValues[], const int enumSize)
+Table::addEnumTypeMap(const char* field, const char* enumNames[], const int enumValues[], const int enumSize)
 {
-    int index = lookupName(mFieldNames, mFieldCount, field);
-    if (index < 0) return;
+    if (mFields.find(field) == mFields.end()) return;
 
-    EnumTypeMap enu(enumNames, enumValues, enumSize);
-    mEnums[index] = enu;
+    map<std::string, int> enu;
+    for (int i = 0; i < enumSize; i++) {
+        enu[enumNames[i]] = enumValues[i];
+    }
+    mEnums[field] = enu;
+}
+
+void
+Table::addEnumNameToValue(const char* enumName, const int enumValue)
+{
+    mEnumValuesByName[enumName] = enumValue;
 }
 
 bool
 Table::insertField(ProtoOutputStream* proto, const std::string& name, const std::string& value)
 {
-    int index = lookupName(mFieldNames, mFieldCount, name.c_str());
-    if (index < 0) return false;
+    if (mFields.find(name) == mFields.end()) return false;
 
-    uint64_t found = mFieldIds[index];
-    switch (found & FIELD_TYPE_MASK) {
-        case FIELD_TYPE_DOUBLE:
-        case FIELD_TYPE_FLOAT:
+    uint64_t found = mFields[name];
+    record_t repeats; // used for repeated fields
+    switch ((found & FIELD_COUNT_MASK) | (found & FIELD_TYPE_MASK)) {
+        case FIELD_COUNT_SINGLE | FIELD_TYPE_DOUBLE:
+        case FIELD_COUNT_SINGLE | FIELD_TYPE_FLOAT:
             proto->write(found, toDouble(value));
             break;
-        case FIELD_TYPE_STRING:
-        case FIELD_TYPE_BYTES:
+        case FIELD_COUNT_SINGLE | FIELD_TYPE_STRING:
+        case FIELD_COUNT_SINGLE | FIELD_TYPE_BYTES:
             proto->write(found, value);
             break;
-        case FIELD_TYPE_INT64:
-        case FIELD_TYPE_SINT64:
-        case FIELD_TYPE_UINT64:
-        case FIELD_TYPE_FIXED64:
-        case FIELD_TYPE_SFIXED64:
+        case FIELD_COUNT_SINGLE | FIELD_TYPE_INT64:
+        case FIELD_COUNT_SINGLE | FIELD_TYPE_SINT64:
+        case FIELD_COUNT_SINGLE | FIELD_TYPE_UINT64:
+        case FIELD_COUNT_SINGLE | FIELD_TYPE_FIXED64:
+        case FIELD_COUNT_SINGLE | FIELD_TYPE_SFIXED64:
             proto->write(found, toLongLong(value));
             break;
-        case FIELD_TYPE_BOOL:
+        case FIELD_COUNT_SINGLE | FIELD_TYPE_BOOL:
+            if (strcmp(toLowerStr(value).c_str(), "true") == 0 || strcmp(value.c_str(), "1") == 0) {
+                proto->write(found, true);
+                break;
+            }
+            if (strcmp(toLowerStr(value).c_str(), "false") == 0 || strcmp(value.c_str(), "0") == 0) {
+                proto->write(found, false);
+                break;
+            }
             return false;
-        case FIELD_TYPE_ENUM:
-            if (mEnums.find(index) == mEnums.end()) {
-                // forget to add enum type mapping
+        case FIELD_COUNT_SINGLE | FIELD_TYPE_ENUM:
+            // if the field has its own enum mapping, use this, otherwise use general name to value mapping.
+            if (mEnums.find(name) != mEnums.end()) {
+                if (mEnums[name].find(value) != mEnums[name].end()) {
+                    proto->write(found, mEnums[name][value]);
+                } else {
+                    proto->write(found, 0); // TODO: should get the default enum value (Unknown)
+                }
+            } else if (mEnumValuesByName.find(value) != mEnumValuesByName.end()) {
+                proto->write(found, mEnumValuesByName[value]);
+            } else {
                 return false;
             }
-            proto->write(found, mEnums[index].parseValue(value));
             break;
-        case FIELD_TYPE_INT32:
-        case FIELD_TYPE_SINT32:
-        case FIELD_TYPE_UINT32:
-        case FIELD_TYPE_FIXED32:
-        case FIELD_TYPE_SFIXED32:
+        case FIELD_COUNT_SINGLE | FIELD_TYPE_INT32:
+        case FIELD_COUNT_SINGLE | FIELD_TYPE_SINT32:
+        case FIELD_COUNT_SINGLE | FIELD_TYPE_UINT32:
+        case FIELD_COUNT_SINGLE | FIELD_TYPE_FIXED32:
+        case FIELD_COUNT_SINGLE | FIELD_TYPE_SFIXED32:
             proto->write(found, toInt(value));
+            break;
+        // REPEATED TYPE below:
+        case FIELD_COUNT_REPEATED | FIELD_TYPE_INT32:
+            repeats = parseRecord(value, COMMA_DELIMITER);
+            for (size_t i=0; i<repeats.size(); i++) {
+                proto->write(found, toInt(repeats[i]));
+            }
+            break;
+        case FIELD_COUNT_REPEATED | FIELD_TYPE_STRING:
+            repeats = parseRecord(value, COMMA_DELIMITER);
+            for (size_t i=0; i<repeats.size(); i++) {
+                proto->write(found, repeats[i]);
+            }
             break;
         default:
             return false;

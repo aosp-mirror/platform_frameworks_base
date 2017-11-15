@@ -37,6 +37,9 @@ const std::string COMMA_DELIMITER = ",";
 // returns true if c is a-zA-Z0-9 or underscore _
 bool isValidChar(char c);
 
+// trim the string with the given charset
+std::string trim(const std::string& s, const std::string& charset);
+
 /**
  * When a text has a table format like this
  * line 1: HeadA HeadB HeadC
@@ -98,21 +101,6 @@ private:
     std::string mStatus;
 };
 
-class EnumTypeMap
-{
-public:
-    EnumTypeMap() {};
-    EnumTypeMap(const char* enumNames[], const uint32_t enumValues[], const int enumCount);
-    ~EnumTypeMap();
-
-    int parseValue(const std::string& value);
-
-private:
-    const char** mEnumNames;
-    const uint32_t* mEnumValues;
-    int mEnumCount;
-};
-
 /**
  * The class contains a mapping between table headers to its field ids.
  * And allow users to insert the field values to proto based on its header name.
@@ -124,14 +112,16 @@ public:
     ~Table();
 
     // Add enum names to values for parsing purpose.
-    void addEnumTypeMap(const char* field, const char* enumNames[], const uint32_t enumValues[], const int enumSize);
+    void addEnumTypeMap(const char* field, const char* enumNames[], const int enumValues[], const int enumSize);
+
+    // manually add enum names to values mapping, useful when an Enum type is used by a lot of fields, and there are no name conflicts
+    void addEnumNameToValue(const char* enumName, const int enumValue);
 
     bool insertField(ProtoOutputStream* proto, const std::string& name, const std::string& value);
 private:
-    const char** mFieldNames;
-    const uint64_t* mFieldIds;
-    const int mFieldCount;
-    map<int, EnumTypeMap> mEnums;
+    map<std::string, uint64_t> mFields;
+    map<std::string, map<std::string, int>> mEnums;
+    map<std::string, int> mEnumValuesByName;
 };
 
 #endif  // INCIDENT_HELPER_UTIL_H

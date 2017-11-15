@@ -1,0 +1,657 @@
+/*
+ * Copyright (C) 2017 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+
+option java_multiple_files = true;
+option java_outer_classname = "SystemPropertiesProtoMetadata";
+
+import "frameworks/base/tools/streaming_proto/stream.proto";
+
+package android.os;
+
+// System Properties from getprop
+message SystemPropertiesProto {
+    option (stream_proto.stream_msg).enable_fields_mapping = true;
+
+    // Properties that are not specified below are appended here.
+    message Property {
+        optional string name = 1;
+        optional string value = 2;
+    }
+    repeated Property extra_properties = 1;
+
+    optional int32 aaudio_hw_burst_min_usec = 2;
+    optional int32 aaudio_mmap_exclusive_policy = 3;
+    optional int32 aaudio_mmap_policy = 4;
+
+    optional int32 af_fast_track_multiplier = 5;
+
+    optional int32 audio_adm_buffering_ms = 6;
+    optional int32 audio_hal_period_size = 7;
+
+    optional string dalvik_vm_appimageformat = 8;
+    optional string dalvik_vm_dex2oat_Xms = 9;
+    optional string dalvik_vm_dex2oat_Xmx = 10;
+    optional bool   dalvik_vm_dexopt_secondary = 11;
+    optional string dalvik_vm_heapgrowthlimit = 12;
+    optional string dalvik_vm_heapmaxfree = 13;
+    optional string dalvik_vm_heapminfree = 14;
+    optional string dalvik_vm_heapsize = 15;
+    optional string dalvik_vm_heapstartsize = 16;
+    optional float  dalvik_vm_heaptargetutilization = 17;
+    optional string dalvik_vm_image_dex2oat_Xms = 18;
+    optional string dalvik_vm_image_dex2oat_Xmx = 19;
+    optional string dalvik_vm_image_dex2oat_filter = 20;
+    optional string dalvik_vm_isa_arm_features = 21;
+    optional string dalvik_vm_isa_arm_variant = 22;
+    optional string dalvik_vm_isa_arm64_features = 23;
+    optional string dalvik_vm_isa_arm64_variant = 24;
+    optional int32  dalvik_vm_lockprof_threshold = 25;
+    optional string dalvik_vm_stack_trace_dir = 26;
+    optional bool   dalvik_vm_usejit = 27;
+    optional bool   dalvik_vm_usejitprofiles = 28;
+
+    optional int32 debug_atrace_tags_enableflags = 29;
+    optional int32 debug_force_rtl = 30;
+    optional string debug_htc_hrdump = 31;
+
+    optional int32 dev_bootcomplete = 32;
+
+    optional bool drm_service_enabled = 33;
+
+    optional int32 fmas_hdph_sgain = 34;
+
+    optional int32 gsm_current_phone_type = 35;
+    optional string gsm_network_type = 36;
+    optional string gsm_operator_alpha = 37;
+    optional string gsm_operator_iso_country = 38;
+    optional bool gsm_operator_isroaming = 39;
+    optional string gsm_operator_numeric = 40;
+    optional string gsm_sim_operator_alpha = 41;
+    optional string gsm_sim_operator_iso_country = 42;
+    optional int32 gsm_sim_operator_numeric = 43;
+    optional string gsm_sim_state = 44;
+    optional string gsm_version_baseband = 45;
+    optional string gsm_version_ril_impl = 46;
+
+    optional sint32 htc_camera_sensor_inf = 47;
+
+    optional bool hwservicemanager_ready = 48;
+
+    // Enum values for a lot of system properties
+    enum Status {
+        STATUS_UNKNOWN = 0;
+        STATUS_RUNNING = 1;
+        STATUS_STOPPED = 2;
+    }
+    optional Status init_svc_adbd = 49;
+    optional Status init_svc_audioserver = 50;
+    optional Status init_svc_bootanim = 51;
+    optional Status init_svc_bufferhubd = 52;
+    optional Status init_svc_cameraserver = 53;
+    optional Status init_svc_clear_bcb = 54;
+    optional Status init_svc_drm = 55;
+    optional Status init_svc_gatekeeperd = 56;
+    optional Status init_svc_healthd = 57;
+    optional Status init_svc_hidl_memory = 58;
+    optional Status init_svc_hostapd = 59;
+    optional Status init_svc_hwservicemanager = 60;
+    optional Status init_svc_installd = 61;
+    optional Status init_svc_keystore = 62;
+    optional Status init_svc_lmkd = 63;
+    optional Status init_svc_logd = 64;
+    optional Status init_svc_logd_reinit = 65;
+    optional Status init_svc_media = 66;
+    optional Status init_svc_mediadrm = 67;
+    optional Status init_svc_mediaextractor = 68;
+    optional Status init_svc_mediametrics = 69;
+    optional Status init_svc_netd = 70;
+    optional Status init_svc_performanced = 71;
+    optional Status init_svc_ril_daemon = 72;
+    optional Status init_svc_servicemanager = 73;
+    optional Status init_svc_storaged = 74;
+    optional Status init_svc_surfaceflinger = 75;
+    optional Status init_svc_thermalservice = 76;
+    optional Status init_svc_tombstoned = 77;
+    optional Status init_svc_ueventd = 78;
+    optional Status init_svc_update_engine = 79;
+    optional Status init_svc_update_verifier_nonencrypted = 80;
+    optional Status init_svc_vendor_adsprpcd = 81;
+    optional Status init_svc_vendor_atfwd = 82;
+    optional Status init_svc_vendor_audio_hal_2_0 = 83;
+    optional Status init_svc_vendor_bluetooth_1_0 = 84;
+    optional Status init_svc_vendor_boot_hal_1_0 = 85;
+    optional Status init_svc_vendor_camera_provider_2_4 = 86;
+    optional Status init_svc_vendor_cas_hal_1_0 = 87;
+    optional Status init_svc_vendor_cnd = 88;
+    optional Status init_svc_vendor_cnss_daemon = 89;
+    optional Status init_svc_vendor_cnss_diag = 90;
+    optional Status init_svc_vendor_configstore_hal = 91;
+    optional Status init_svc_vendor_contexthub_hal_1_0 = 92;
+    optional Status init_svc_vendor_devstart_sh = 93;
+    optional Status init_svc_vendor_drm_hal_1_0 = 94;
+    optional Status init_svc_vendor_drm_widevine_hal_1_0 = 95;
+    optional Status init_svc_vendor_dumpstate_1_0 = 96;
+    optional Status init_svc_vendor_flash_nanohub_fw = 97;
+    optional Status init_svc_vendor_foreground_sh = 98;
+    optional Status init_svc_vendor_fps_hal = 99;
+    optional Status init_svc_vendor_gatekeeper_1_0 = 100;
+    optional Status init_svc_vendor_gnss_service = 101;
+    optional Status init_svc_vendor_gralloc_2_0 = 102;
+    optional Status init_svc_vendor_hci_filter_root = 103;
+    optional Status init_svc_vendor_hwcomposer_2_1 = 104;
+    optional Status init_svc_vendor_imsdatadaemon = 105;
+    optional Status init_svc_vendor_imsqmidaemon = 106;
+    optional Status init_svc_vendor_init_radio_sh = 107;
+    optional Status init_svc_vendor_irsc_util = 108;
+    optional Status init_svc_vendor_keymaster_3_0 = 109;
+    optional Status init_svc_vendor_light_hal_2_0 = 110;
+    optional Status init_svc_vendor_loc_launcher = 111;
+    optional Status init_svc_vendor_media_omx = 112;
+    optional Status init_svc_vendor_memtrack_hal_1_0 = 113;
+    optional Status init_svc_vendor_mid_sh = 114;
+    optional Status init_svc_vendor_msm_irqbalance = 115;
+    optional Status init_svc_vendor_nanohub_slpi = 116;
+    optional Status init_svc_vendor_netmgrd = 117;
+    optional Status init_svc_vendor_nfc_hal_service = 118;
+    optional Status init_svc_vendor_per_mgr = 119;
+    optional Status init_svc_vendor_per_proxy = 120;
+    optional Status init_svc_vendor_perfd = 121;
+    optional Status init_svc_vendor_port_bridge = 122;
+    optional Status init_svc_vendor_power_hal_1_1 = 123;
+    optional Status init_svc_vendor_power_sh = 124;
+    optional Status init_svc_vendor_qseecomd = 125;
+    optional Status init_svc_vendor_ramdump_auto = 126;
+    optional Status init_svc_vendor_rmt_storage = 127;
+    optional Status init_svc_vendor_sensors_hal_1_0 = 128;
+    optional Status init_svc_vendor_ss_ramdump = 129;
+    optional Status init_svc_vendor_ssr_setup = 130;
+    optional Status init_svc_vendor_thermal_engine = 131;
+    optional Status init_svc_vendor_time_daemon = 132;
+    optional Status init_svc_vendor_usb_hal_1_1 = 133;
+    optional Status init_svc_vendor_vibrator_1_0 = 134;
+    optional Status init_svc_vendor_vr_1_0 = 135;
+    optional Status init_svc_vendor_wifi_hal_legacy = 136;
+    optional Status init_svc_virtual_touchpad = 137;
+    optional Status init_svc_vndservicemanager = 138;
+    optional Status init_svc_vold = 139;
+    optional Status init_svc_vr_hwc = 140;
+    optional Status init_svc_webview_zygote32 = 141;
+    optional Status init_svc_wificond = 142;
+    optional Status init_svc_wpa_supplicant = 143;
+    optional Status init_svc_zygote = 144;
+    optional Status init_svc_zygote_secondary = 145;
+
+    optional bool keyguard_no_require_sim = 146;
+
+    optional string log_tag_WifiHAL = 147;
+
+    optional bool logd_logpersistd_enable = 148;
+
+    optional bool media_mediadrmservice_enable = 149;
+    optional bool media_recorder_show_manufacturer_and_model = 150;
+
+    optional string net_bt_name = 151;
+    optional string net_dns1 = 152;
+    optional string net_dns2 = 153;
+    optional string net_dns3 = 154;
+    optional string net_dns4 = 155;
+    optional bool net_lte_ims_data_enabled = 156;
+    optional int32 net_qtaguid_enabled = 157;
+    optional int32 net_tcp_2g_init_rwnd = 158;
+    repeated int32 net_tcp_buffersize_default = 159;
+    repeated int32 net_tcp_buffersize_edge = 160;
+    repeated int32 net_tcp_buffersize_evdo = 161;
+    repeated int32 net_tcp_buffersize_gprs = 162;
+    repeated int32 net_tcp_buffersize_hsdpa = 163;
+    repeated int32 net_tcp_buffersize_hspa = 164;
+    repeated int32 net_tcp_buffersize_hspap = 165;
+    repeated int32 net_tcp_buffersize_hsupa = 166;
+    repeated int32 net_tcp_buffersize_lte = 167;
+    repeated int32 net_tcp_buffersize_umts = 168;
+    repeated int32 net_tcp_buffersize_wifi = 169;
+    optional int32 net_tcp_default_init_rwnd = 170;
+
+    optional bool nfc_initialized = 171;
+
+    optional bool persist_audio_fluence_speaker = 172;
+    optional bool persist_audio_fluence_voicecall = 173;
+    optional bool persist_audio_fluence_voicecomm = 174;
+    optional bool persist_audio_fluence_voicerec = 175;
+
+    optional int32 persist_camera_debug_logfile = 176;
+    optional int32 persist_camera_eis_enable = 177;
+    optional int32 persist_camera_gyro_android = 178;
+    optional int32 persist_camera_is_type = 179;
+    optional int32 persist_camera_tnr_preview = 180;
+    optional int32 persist_camera_tnr_video = 181;
+    optional int32 persist_camera_tof_direct = 182;
+
+    optional int32 persist_cne_feature = 183;
+
+    optional bool persist_data_iwlan_enable = 184;
+    optional string persist_data_mode = 185;
+
+    optional int32 persist_radio_RATE_ADAPT_ENABLE = 186;
+    optional int32 persist_radio_ROTATION_ENABLE = 187;
+    optional int32 persist_radio_VT_ENABLE = 188;
+    optional int32 persist_radio_VT_HYBRID_ENABLE = 189;
+    optional int32 persist_radio_adb_log_on = 190;
+    optional int32 persist_radio_airplane_mode_on = 191;
+    optional int32 persist_radio_apm_sim_not_pwdn = 192;
+    optional int32 persist_radio_custom_ecc = 193;
+    optional bool persist_radio_data_con_rprt = 194;
+    optional int32 persist_radio_data_ltd_sys_ind = 195;
+    optional string persist_radio_enable_tel_mon = 196;
+    optional bool persist_radio_eons_enabled = 197;
+    optional bool persist_radio_is_wps_enabled = 198;
+    optional int32 persist_radio_pwropt_modepref_0 = 199;
+    optional int32 persist_radio_ril_payload_on = 200;
+    optional int32 persist_radio_sglte_target = 201;
+    optional int32 persist_radio_sib16_support = 202;
+    optional int32 persist_radio_smlog_switch = 203;
+    optional int32 persist_radio_snapshot_enabled = 204;
+    optional int32 persist_radio_snapshot_timer = 205;
+    optional int32 persist_radio_sw_mbn_loaded = 206;
+    optional int32 persist_radio_sw_mbn_update = 207;
+    optional string persist_radio_ver_info = 208;
+    optional int32 persist_radio_videopause_mode = 209;
+
+    optional int32 persist_rcs_supported = 210;
+
+    optional string persist_sys_boot_reason = 211;
+    optional int32 persist_sys_cnd_iwlan = 212;
+    optional string persist_sys_dalvik_vm_lib_2 = 213;
+    optional string persist_sys_gps_lpp = 214;
+    optional string persist_sys_locale = 215;
+    optional int32 persist_sys_ssr_enable_ramdumps = 216;
+    optional string persist_sys_ssr_restart_level = 217;
+    optional string persist_sys_timezone = 218;
+    optional string persist_sys_usb_config = 219;
+    optional int32 persist_sys_webview_vmsize = 220;
+
+    optional string pm_dexopt_ab_ota = 221;
+    optional string pm_dexopt_bg_dexopt = 222;
+    optional string pm_dexopt_boot = 223;
+    optional string pm_dexopt_first_boot = 224;
+    optional string pm_dexopt_inactive = 225;
+    optional string pm_dexopt_install = 226;
+    optional string pm_dexopt_shared = 227;
+
+    optional string qcom_bluetooth_soc = 228;
+
+    optional int32 qdcm_diagonal_matrix_mode = 229;
+    optional int32 qdcm_only_pcc_for_trans = 230;
+
+    repeated string ril_ecclist = 231;
+    optional int32 ril_power_backoff_suppressed = 232;
+    optional int32 ril_qcril_pre_init_lock_held = 233;
+    optional string ril_voice_network_type = 234;
+    optional string rild_libpath = 235;
+
+    optional int32 ro_adb_secure = 236;
+    optional int32 ro_allow_mock_location = 237;
+    repeated string ro_atrace_core_services = 238;
+    optional string ro_baseband = 239;
+    optional int32 ro_bionic_ld_warning = 240;
+    optional bool ro_bluetooth_dun = 241;
+    optional string ro_bluetooth_hfp_ver = 242;
+    optional bool ro_bluetooth_sap = 243;
+    optional string ro_board_platform = 244;
+
+    optional string ro_boot_baseband = 245;
+    optional string ro_boot_bootdevice = 246;
+    optional string ro_boot_bootloader = 247;
+    optional string ro_boot_bootreason = 248;
+    repeated string ro_boot_boottime = 249;
+    optional int32  ro_boot_cid = 250;
+    optional string ro_boot_console = 251;
+    optional string ro_boot_ddrinfo = 252;
+    optional string ro_boot_ddrsize = 253;
+    optional int32  ro_boot_flash_locked = 254;
+    optional int32  ro_boot_fp_src = 255;
+    optional string ro_boot_hardware = 256;
+    optional string ro_boot_hardware_color = 257;
+    optional string ro_boot_hardware_ddr = 258;
+    optional string ro_boot_hardware_revision = 259;
+    optional string ro_boot_hardware_sku = 260;
+    optional string ro_boot_hardware_ufs = 261;
+    optional string ro_boot_htc_hrdump = 262;
+    optional int32  ro_boot_keymaster = 263;
+    optional string ro_boot_mid = 264;
+    optional int32  ro_boot_msm_hw_ver_id = 265;
+    optional int32  ro_boot_oem_unlock_support = 266;
+    optional int32  ro_boot_qf_st = 267;
+    optional int32  ro_boot_ramdump_enable = 268;
+    optional string ro_boot_serialno = 269;
+    optional string ro_boot_slot_suffix = 270;
+    optional int32  ro_boot_temp_protect_ignore = 271;
+    optional string ro_boot_vendor_overlay_theme = 272;
+    optional string ro_boot_verifiedbootstate = 273;
+    optional string ro_boot_veritymode = 274;
+    optional string ro_boot_wificountrycode = 275;
+
+    optional string ro_bootimage_build_date = 276;
+    optional int64  ro_bootimage_build_date_utc = 277;
+    optional string ro_bootimage_build_fingerprint = 278;
+
+    optional string ro_bootloader = 279;
+    optional string ro_bootmode = 280;
+
+    optional int64 ro_boottime_adbd = 281;
+    optional int64 ro_boottime_audioserver = 282;
+    optional int64 ro_boottime_bootanim = 283;
+    optional int64 ro_boottime_bufferhubd = 284;
+    optional int64 ro_boottime_cameraserver = 285;
+    optional int64 ro_boottime_clear_bcb = 286;
+    optional int64 ro_boottime_drm = 287;
+    optional int64 ro_boottime_gatekeeperd = 288;
+    optional int64 ro_boottime_healthd = 289;
+    optional int64 ro_boottime_hidl_memory = 290;
+    optional int64 ro_boottime_hwservicemanager = 291;
+    optional int64 ro_boottime_init = 292;
+    optional int64 ro_boottime_init_cold_boot_wait = 293;
+    optional int32 ro_boottime_init_mount_all_early = 294;
+    optional int32 ro_boottime_init_mount_all_late = 295;
+    optional int32 ro_boottime_init_selinux = 296;
+    optional int64 ro_boottime_installd = 297;
+    optional int64 ro_boottime_keystore = 298;
+    optional int64 ro_boottime_lmkd = 299;
+    optional int64 ro_boottime_logd = 300;
+    optional int64 ro_boottime_logd_reinit = 301;
+    optional int64 ro_boottime_media = 302;
+    optional int64 ro_boottime_mediadrm = 303;
+    optional int64 ro_boottime_mediaextractor = 304;
+    optional int64 ro_boottime_mediametrics = 305;
+    optional int64 ro_boottime_netd = 306;
+    optional int64 ro_boottime_performanced = 307;
+    optional int64 ro_boottime_ril_daemon = 308;
+    optional int64 ro_boottime_servicemanager = 309;
+    optional int64 ro_boottime_storaged = 310;
+    optional int64 ro_boottime_surfaceflinger = 311;
+    optional int64 ro_boottime_thermalservice = 312;
+    optional int64 ro_boottime_tombstoned = 313;
+    optional int64 ro_boottime_ueventd = 314;
+    optional int64 ro_boottime_update_engine = 315;
+    optional int64 ro_boottime_update_verifier_nonencrypted = 316;
+    optional int64 ro_boottime_vendor_adsprpcd = 317;
+    optional int64 ro_boottime_vendor_atfwd = 318;
+    optional int64 ro_boottime_vendor_audio_hal_2_0 = 319;
+    optional int64 ro_boottime_vendor_bluetooth_1_0 = 320;
+    optional int64 ro_boottime_vendor_boot_hal_1_0 = 321;
+    optional int64 ro_boottime_vendor_camera_provider_2_4 = 322;
+    optional int64 ro_boottime_vendor_cas_hal_1_0 = 323;
+    optional int64 ro_boottime_vendor_cnd = 324;
+    optional int64 ro_boottime_vendor_cnss_daemon = 325;
+    optional int64 ro_boottime_vendor_cnss_diag = 326;
+    optional int64 ro_boottime_vendor_configstore_hal = 327;
+    optional int64 ro_boottime_vendor_contexthub_hal_1_0 = 328;
+    optional int64 ro_boottime_vendor_devstart_sh = 329;
+    optional int64 ro_boottime_vendor_drm_hal_1_0 = 330;
+    optional int64 ro_boottime_vendor_drm_widevine_hal_1_0 = 331;
+    optional int64 ro_boottime_vendor_dumpstate_1_0 = 332;
+    optional int64 ro_boottime_vendor_flash_nanohub_fw = 333;
+    optional int64 ro_boottime_vendor_foreground_sh = 334;
+    optional int64 ro_boottime_vendor_fps_hal = 335;
+    optional int64 ro_boottime_vendor_gatekeeper_1_0 = 336;
+    optional int64 ro_boottime_vendor_gnss_service = 337;
+    optional int64 ro_boottime_vendor_gralloc_2_0 = 338;
+    optional int64 ro_boottime_vendor_hci_filter_root = 339;
+    optional int64 ro_boottime_vendor_hwcomposer_2_1 = 340;
+    optional int64 ro_boottime_vendor_imsdatadaemon = 341;
+    optional int64 ro_boottime_vendor_imsqmidaemon = 342;
+    optional int64 ro_boottime_vendor_init_radio_sh = 343;
+    optional int64 ro_boottime_vendor_irsc_util = 344;
+    optional int64 ro_boottime_vendor_keymaster_3_0 = 345;
+    optional int64 ro_boottime_vendor_light_hal_2_0 = 346;
+    optional int64 ro_boottime_vendor_loc_launcher = 347;
+    optional int64 ro_boottime_vendor_media_omx = 348;
+    optional int64 ro_boottime_vendor_memtrack_hal_1_0 = 349;
+    optional int64 ro_boottime_vendor_mid_sh = 350;
+    optional int64 ro_boottime_vendor_msm_irqbalance = 351;
+    optional int64 ro_boottime_vendor_nanohub_slpi = 352;
+    optional int64 ro_boottime_vendor_netmgrd = 353;
+    optional int64 ro_boottime_vendor_nfc_hal_service = 354;
+    optional int64 ro_boottime_vendor_per_mgr = 355;
+    optional int64 ro_boottime_vendor_per_proxy = 356;
+    optional int64 ro_boottime_vendor_perfd = 357;
+    optional int64 ro_boottime_vendor_port_bridge = 358;
+    optional int64 ro_boottime_vendor_power_hal_1_1 = 359;
+    optional int64 ro_boottime_vendor_power_sh = 360;
+    optional int64 ro_boottime_vendor_qseecomd = 361;
+    optional int64 ro_boottime_vendor_ramdump_auto = 362;
+    optional int64 ro_boottime_vendor_rmt_storage = 363;
+    optional int64 ro_boottime_vendor_sensors_hal_1_0 = 364;
+    optional int64 ro_boottime_vendor_ss_ramdump = 365;
+    optional int64 ro_boottime_vendor_ssr_setup = 366;
+    optional int64 ro_boottime_vendor_thermal_engine = 367;
+    optional int64 ro_boottime_vendor_time_daemon = 368;
+    optional int64 ro_boottime_vendor_usb_hal_1_1 = 369;
+    optional int64 ro_boottime_vendor_vibrator_1_0 = 370;
+    optional int64 ro_boottime_vendor_vr_1_0 = 371;
+    optional int64 ro_boottime_vendor_wifi_hal_legacy = 372;
+    optional int64 ro_boottime_virtual_touchpad = 373;
+    optional int64 ro_boottime_vndservicemanager = 374;
+    optional int64 ro_boottime_vold = 375;
+    optional int64 ro_boottime_vr_hwc = 376;
+    optional int64 ro_boottime_webview_zygote32 = 377;
+    optional int64 ro_boottime_wificond = 378;
+    optional int64 ro_boottime_wpa_supplicant = 379;
+    optional int64 ro_boottime_zygote = 380;
+    optional int64 ro_boottime_zygote_secondary = 381;
+
+    optional string ro_bt_bdaddr_path = 382;
+
+    optional bool   ro_build_ab_update = 383;
+    optional string ro_build_characteristics = 384;
+    optional string ro_build_date = 385;
+    optional int64  ro_build_date_utc = 386;
+    optional string ro_build_description = 387;
+    optional string ro_build_display_id = 388;
+    optional string ro_build_expect_baseband = 389;
+    optional string ro_build_expect_bootloader = 390;
+    optional string ro_build_fingerprint = 391;
+    optional string ro_build_flavor = 392;
+    optional string ro_build_host = 393;
+    optional string ro_build_id = 394;
+    optional string ro_build_product = 395;
+    optional bool   ro_build_system_root_image = 396;
+    optional string ro_build_tags = 397;
+    optional string ro_build_type = 398;
+    optional string ro_build_user = 399;
+    optional string ro_build_version_all_codenames = 400;
+    optional string ro_build_version_base_os = 401;
+    optional string ro_build_version_codename = 402;
+    optional string ro_build_version_incremental = 403;
+    optional int32  ro_build_version_preview_sdk = 404;
+    optional string ro_build_version_release = 405;
+    optional int32  ro_build_version_sdk = 406;
+    optional string ro_build_version_security_patch = 407;
+
+    optional int32  ro_camera_notify_nfc = 408;
+    optional string ro_carrier = 409;
+    optional bool ro_com_android_dataroaming = 410;
+    optional bool ro_com_android_prov_mobiledata = 411;
+    optional string ro_com_google_clientidbase = 412;
+    optional int32 ro_com_google_ime_theme_id = 413;
+
+    optional string ro_config_alarm_alert = 414;
+    optional string ro_config_notification_sound = 415;
+    optional string ro_config_ringtone = 416;
+    optional int32 ro_config_vc_call_vol_steps = 417;
+    optional string ro_control_privapp_permissions = 418;
+    optional int32 ro_cp_system_other_odex = 419;
+
+    optional string ro_crypto_scrypt_params = 420;
+    optional string ro_crypto_state = 421;
+    optional string ro_crypto_type = 422;
+    optional string ro_crypto_volume_filenames_mode = 423;
+    optional int32 ro_dalvik_vm_native_bridge = 424;
+    optional int32 ro_debuggable = 425;
+    optional bool ro_device_owner = 426;
+    optional string ro_error_receiver_system_apps = 427;
+
+    optional int32 ro_facelock_black_timeout = 428;
+    optional int32 ro_facelock_det_timeout = 429;
+    optional int32 ro_facelock_est_max_time = 430;
+    optional int32 ro_facelock_rec_timeout = 431;
+
+    optional string ro_frp_pst = 432;
+
+    optional string ro_hardware = 433;
+    optional string ro_hardware_power = 434;
+
+    optional int32 ro_hwui_drop_shadow_cache_size = 435;
+    optional int32 ro_hwui_gradient_cache_size = 436;
+    optional int32 ro_hwui_layer_cache_size = 437;
+    optional int32 ro_hwui_path_cache_size = 438;
+    optional int32 ro_hwui_r_buffer_cache_size = 439;
+    optional int32 ro_hwui_text_large_cache_height = 440;
+    optional int32 ro_hwui_text_large_cache_width = 441;
+    optional int32 ro_hwui_text_small_cache_height = 442;
+    optional int32 ro_hwui_text_small_cache_width = 443;
+    optional float ro_hwui_texture_cache_flushrate = 444;
+    optional int32 ro_hwui_texture_cache_size = 445;
+
+    optional bool ro_init_subcontexts_enabled = 446;
+    optional int32 ro_kernel_android_checkjni = 447;
+    optional string ro_logd_size = 448;
+    optional int32 ro_min_freq_0 = 449;
+    optional int32 ro_oem_unlock_supported = 450;
+    optional bool ro_opa_eligible_device = 451;
+    optional int32 ro_opengles_version = 452;
+    optional bool ro_persistent_properties_ready = 453;
+
+    optional string ro_product_board = 454;
+    optional string ro_product_brand = 455;
+    optional string ro_product_cpu_abi = 456;
+    repeated string ro_product_cpu_abilist = 457;
+    repeated string ro_product_cpu_abilist32 = 458;
+    optional string ro_product_cpu_abilist64 = 459;
+    optional string ro_product_device = 460;
+    optional int32  ro_product_first_api_level = 461;
+    optional string ro_product_locale = 462;
+    optional string ro_product_manufacturer = 463;
+    optional string ro_product_model = 464;
+    optional string ro_product_name = 465;
+    optional string ro_product_vendor_brand = 466;
+    optional string ro_product_vendor_device = 467;
+    optional string ro_product_vendor_manufacturer = 468;
+    optional string ro_product_vendor_model = 469;
+    optional string ro_product_vendor_name = 470;
+
+    optional int32 ro_property_service_version = 471;
+    optional string ro_qc_sdk_audio_fluencetype = 472;
+    optional int32 ro_qcom_adreno_qgl_ShaderStorageImageExtendedFormats = 473;
+    optional bool ro_qualcomm_bluetooth_ftp = 474;
+    optional bool ro_qualcomm_bluetooth_hfp = 475;
+    optional bool ro_qualcomm_bluetooth_hsp = 476;
+    optional bool ro_qualcomm_bluetooth_map = 477;
+    optional bool ro_qualcomm_bluetooth_nap = 478;
+    optional bool ro_qualcomm_bluetooth_opp = 479;
+    optional bool ro_qualcomm_bluetooth_pbap = 480;
+
+    optional string ro_radio_log_loc = 481;
+    optional string ro_radio_log_prefix = 482;
+    optional int32 ro_revision = 483;
+    optional bool ro_ril_svdo = 484;
+    optional bool ro_ril_svlte1x = 485;
+    optional int64 ro_runtime_firstboot = 486;
+    optional int32 ro_secure = 487;
+    optional string ro_serialno = 488;
+    optional int32 ro_setupwizard_enterprise_mode = 489;
+    optional bool ro_setupwizard_rotation_locked = 490;
+    optional int32 ro_sf_lcd_density = 491;
+    optional bool ro_storage_manager_enabled = 492;
+    optional bool ro_telephony_call_ring_multiple = 493;
+    optional int32 ro_telephony_default_cdma_sub = 494;
+    optional int32 ro_telephony_default_network = 495;
+    optional bool ro_treble_enabled = 496;
+    optional string ro_url_legal = 497;
+    optional string ro_url_legal_android_privacy = 498;
+    optional string ro_vendor_build_date = 499;
+    optional int64 ro_vendor_build_date_utc = 500;
+    optional string ro_vendor_build_fingerprint = 501;
+    optional string ro_vendor_extension_library = 502;
+    optional bool ro_wallpapers_loc_request_suw = 503;
+    optional string ro_wifi_channels = 504;
+    optional string ro_zygote = 505;
+
+    optional int32 sdm_debug_disable_rotator_split = 506;
+
+    optional string selinux_restorecon_recursive = 507;
+
+    optional string sendbug_preferred_domain = 508;
+
+    optional string sensors_contexthub_lid_state = 509;
+
+    optional int32 service_bootanim_exit = 510;
+    optional int32 service_sf_present_timestamp = 511;
+
+    optional string setupwizard_theme = 512;
+
+    optional string sys_boot_reason = 513;
+    optional int32 sys_boot_completed = 514;
+    optional int32 sys_ims_QMI_DAEMON_STATUS = 515;
+    optional bool sys_keymaster_loaded = 516;
+    optional bool sys_listeners_registered = 517;
+    optional int32 sys_logbootcomplete = 518;
+    optional int32 sys_oem_unlock_allowed = 519;
+    optional int32 sys_post_boot_parsed = 520;
+    optional int32 sys_qcom_devup = 521;
+    optional int32 sys_retaildemo_enabled = 522;
+    optional string sys_slpi_firmware_version = 523;
+    optional int32 sys_sysctl_extra_free_kbytes = 524;
+    optional int32 sys_sysctl_tcp_def_init_rwnd = 525;
+    optional bool sys_time_set = 526;
+    optional string sys_usb_config = 527;
+    optional int32 sys_usb_configfs = 528;
+    optional string sys_usb_controller = 529;
+    optional int32 sys_usb_ffs_max_read = 530;
+    optional int32 sys_usb_ffs_max_write = 531;
+    optional int32 sys_usb_ffs_mtp_ready = 532;
+    optional int32 sys_usb_ffs_ready = 533;
+    optional int32 sys_usb_mtp_device_type = 534;
+    optional int32 sys_usb_rps_mask = 535;
+    optional string sys_usb_state = 536;
+    optional bool sys_user_0_ce_available = 537;
+    optional int32 sys_wifitracing_started = 538;
+
+    optional int32 telephony_lteOnCdmaDevice = 539;
+
+    optional int32 tombstoned_max_tombstone_count = 540;
+
+    optional int32 vidc_debug_perf_mode = 541;
+
+    optional int32 vold_has_adoptable = 542;
+    optional int32 vold_has_quota = 543;
+    optional int32 vold_post_fs_data_done = 544;
+
+    optional int32 wc_transport_clean_up = 545;
+    optional int32 wc_transport_hci_filter_status = 546;
+    optional string wc_transport_patch_dnld_inprog = 547;
+    optional int32 wc_transport_ref_count = 548;
+    optional int32 wc_transport_soc_initialized = 549;
+    optional bool wc_transport_start_root = 550;
+    optional int32 wc_transport_vnd_power = 551;
+
+    optional string wifi_interface = 552;
+    optional string wlan_driver_status = 553;
+
+    // Next Tag: 554
+}
+

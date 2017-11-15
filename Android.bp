@@ -62,6 +62,7 @@ cc_library {
                 "core/proto/android/os/kernelwake.proto",
                 "core/proto/android/os/pagetypeinfo.proto",
                 "core/proto/android/os/procrank.proto",
+                "core/proto/android/os/system_properties.proto",
                 "core/proto/android/service/graphicsstats.proto",
                 "tools/streaming_proto/stream.proto",
             ],
@@ -86,6 +87,7 @@ gensrcs {
         "core/proto/android/os/kernelwake.proto",
         "core/proto/android/os/pagetypeinfo.proto",
         "core/proto/android/os/procrank.proto",
+        "core/proto/android/os/system_properties.proto",
     ],
 
     // Append protoc-gen-cppstream tool's PATH otherwise aprotoc can't find the plugin tool
