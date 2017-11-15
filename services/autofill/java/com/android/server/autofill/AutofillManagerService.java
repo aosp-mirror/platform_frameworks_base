@@ -499,6 +499,16 @@ public final class AutofillManagerService extends SystemService {
         }
 
         @Override
+        public void removeClient(IAutoFillManagerClient client, int userId) {
+            synchronized (mLock) {
+                final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
+                if (service != null) {
+                    service.removeClientLocked(client);
+                }
+            }
+        }
+
+        @Override
         public void setAuthenticationResult(Bundle data, int sessionId, int authenticationId,
                 int userId) {
             synchronized (mLock) {
