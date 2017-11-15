@@ -51,15 +51,21 @@
     <string name="bluetooth_tethered" msgid="7094101612161133267">"Bluetooth ਟੀਥਰ ਕੀਤੀ"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"ਇਨਪੁਟ ਵਿਧੀਆਂ ਸੈਟ ਅਪ ਕਰੋ"</string>
     <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"ਫਿਜੀਕਲ ਕੀ-ਬੋਰਡ"</string>
-    <string name="usb_device_permission_prompt" msgid="834698001271562057">"ਕੀ ਐਪ <xliff:g id="APPLICATION">%1$s</xliff:g> ਨੂੰ USB ਡੀਵਾਈਸ ਤੱਕ ਪਹੁੰਚ ਦੀ ਆਗਿਆ ਦੇਣੀ ਹੈ?"</string>
-    <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"ਕੀ ਐਪ <xliff:g id="APPLICATION">%1$s</xliff:g> ਨੂੰ USB ਐਕਸੈੱਸਰੀ ਤੱਕ ਪਹੁੰਚ ਦੀ ਆਗਿਆ ਦੇਣੀ ਹੈ?"</string>
-    <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"ਕੀ ਜਦੋਂ ਇਹ USB ਡੀਵਾਈਸ ਕਨੈਕਟ ਕੀਤੀ ਜਾਂਦੀ ਹੈ ਤਾਂ <xliff:g id="ACTIVITY">%1$s</xliff:g> ਨੂੰ ਖੋਲ੍ਹਣਾ ਹੈ?"</string>
-    <string name="usb_accessory_confirm_prompt" msgid="3808984931830229888">"ਕੀ ਜਦੋਂ ਇਹ USB ਐਕਸੈਸਰੀ ਕਨੈਕਟ ਕੀਤੀ ਜਾਂਦੀ ਹੈ ਤਾਂ <xliff:g id="ACTIVITY">%1$s</xliff:g> ਨੂੰ ਖੋਲ੍ਹਣਾ ਹੈ?"</string>
+    <!-- no translation found for usb_device_permission_prompt (1825685909587559679) -->
+    <skip />
+    <!-- no translation found for usb_accessory_permission_prompt (2465531696941369047) -->
+    <skip />
+    <!-- no translation found for usb_device_confirm_prompt (7440562274256843905) -->
+    <skip />
+    <!-- no translation found for usb_accessory_confirm_prompt (4333670517539993561) -->
+    <skip />
     <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"ਕੋਈ ਇੰਸਟੌਲ ਕੀਤੇ ਐਪਸ ਇਸ USB ਐਕਸੈਸਰੀ ਨਾਲ ਕੰਮ ਨਹੀਂ ਕਰਦੇ। <xliff:g id="URL">%1$s</xliff:g> ਤੇ ਇਸ ਐਕਸੈਸਰੀ ਬਾਰੇ ਹੋਰ ਜਾਣੋ"</string>
     <string name="title_usb_accessory" msgid="4966265263465181372">"USB ਐਕਸੈਸਰੀ"</string>
     <string name="label_view" msgid="6304565553218192990">"ਦੇਖੋ"</string>
-    <string name="always_use_device" msgid="1450287437017315906">"ਇਸ USB ਡੀਵਾਈਸ ਲਈ ਪੂਰਵ-ਨਿਰਧਾਰਤ ਤੌਰ \'ਤੇ ਵਰਤੋ"</string>
-    <string name="always_use_accessory" msgid="1210954576979621596">"ਇਸ USB ਐਕਸਸੈਰੀ ਲਈ ਪੂਰਵ-ਨਿਰਧਾਰਤ ਤੌਰ \'ਤੇ ਵਰਤੋ"</string>
+    <!-- no translation found for always_use_device (4015357883336738417) -->
+    <skip />
+    <!-- no translation found for always_use_accessory (3257892669444535154) -->
+    <skip />
     <string name="usb_debugging_title" msgid="4513918393387141949">"ਕੀ USB ਡੀਬਗਿੰਗ ਦੀ ਆਗਿਆ ਦੇਣੀ ਹੈ?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"ਕੰਪਿਊਟਰ ਦਾ RSA ਕੁੰਜੀ ਫਿੰਗਰਪ੍ਰਿੰਟ \n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"ਹਮੇਸ਼ਾਂ ਇਸ ਕੰਪਿਊਟਰ ਤੋਂ ਆਗਿਆ ਦਿਓ"</string>

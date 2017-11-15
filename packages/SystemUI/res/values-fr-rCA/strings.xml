@@ -51,15 +51,21 @@
     <string name="bluetooth_tethered" msgid="7094101612161133267">"Connexion Bluetooth partagée"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"Configurer les modes de saisie"</string>
     <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"Clavier physique"</string>
-    <string name="usb_device_permission_prompt" msgid="834698001271562057">"Autoriser l\'application <xliff:g id="APPLICATION">%1$s</xliff:g> à accéder au périphérique USB?"</string>
-    <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"Autoriser l\'application <xliff:g id="APPLICATION">%1$s</xliff:g> à accéder à l\'accessoire USB?"</string>
-    <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"Ouvrir <xliff:g id="ACTIVITY">%1$s</xliff:g> lors de la connexion de ce périphérique USB?"</string>
-    <string name="usb_accessory_confirm_prompt" msgid="3808984931830229888">"Ouvrir <xliff:g id="ACTIVITY">%1$s</xliff:g> lors de la connexion de cet accessoire USB?"</string>
+    <!-- no translation found for usb_device_permission_prompt (1825685909587559679) -->
+    <skip />
+    <!-- no translation found for usb_accessory_permission_prompt (2465531696941369047) -->
+    <skip />
+    <!-- no translation found for usb_device_confirm_prompt (7440562274256843905) -->
+    <skip />
+    <!-- no translation found for usb_accessory_confirm_prompt (4333670517539993561) -->
+    <skip />
     <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"Aucune application installée compatible avec accessoire USB. En savoir plus sur <xliff:g id="URL">%1$s</xliff:g>"</string>
     <string name="title_usb_accessory" msgid="4966265263465181372">"Accessoire USB"</string>
     <string name="label_view" msgid="6304565553218192990">"Afficher"</string>
-    <string name="always_use_device" msgid="1450287437017315906">"Utiliser par défaut pour ce périphérique USB"</string>
-    <string name="always_use_accessory" msgid="1210954576979621596">"Utiliser par défaut pour cet accessoire USB"</string>
+    <!-- no translation found for always_use_device (4015357883336738417) -->
+    <skip />
+    <!-- no translation found for always_use_accessory (3257892669444535154) -->
+    <skip />
     <string name="usb_debugging_title" msgid="4513918393387141949">"Autoriser le débogage USB?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"Empreinte numérique de la clé RSA de l\'ordinateur : \n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Toujours autoriser sur cet ordinateur"</string>
@@ -71,7 +77,7 @@
     <string name="screenshot_saving_title" msgid="8242282144535555697">"Enregistrement capture écran…"</string>
     <string name="screenshot_saving_text" msgid="2419718443411738818">"Enregistrement de la capture d\'écran en cours…"</string>
     <string name="screenshot_saved_title" msgid="6461865960961414961">"Capture d\'écran réussie"</string>
-    <string name="screenshot_saved_text" msgid="2685605830386712477">"Touchez pour afficher votre saisie d\'écran."</string>
+    <string name="screenshot_saved_text" msgid="2685605830386712477">"Touchez pour afficher votre capture d\'écran."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"Impossible de réaliser une capture d\'écran"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"Une erreur s\'est produite lors de l\'enregistrement de la saisie d\'écran."</string>
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"Impossible d\'enregistrer la saisie d\'écran, car l\'espace de stockage est limité."</string>
