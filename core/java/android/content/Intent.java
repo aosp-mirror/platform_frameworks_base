@@ -6978,7 +6978,7 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @param name The name of the desired item.
      *
-     * @return the value of an item that previously added with putExtra()
+     * @return the value of an item previously added with putExtra(),
      * or null if none was found.
      *
      * @deprecated
@@ -6996,7 +6996,7 @@ public class Intent implements Parcelable, Cloneable {
      * @param defaultValue the value to be returned if no value of the desired
      * type is stored with the given name.
      *
-     * @return the value of an item that previously added with putExtra()
+     * @return the value of an item previously added with putExtra(),
      * or the default value if none was found.
      *
      * @see #putExtra(String, boolean)
@@ -7013,7 +7013,7 @@ public class Intent implements Parcelable, Cloneable {
      * @param defaultValue the value to be returned if no value of the desired
      * type is stored with the given name.
      *
-     * @return the value of an item that previously added with putExtra()
+     * @return the value of an item previously added with putExtra(),
      * or the default value if none was found.
      *
      * @see #putExtra(String, byte)
@@ -7030,7 +7030,7 @@ public class Intent implements Parcelable, Cloneable {
      * @param defaultValue the value to be returned if no value of the desired
      * type is stored with the given name.
      *
-     * @return the value of an item that previously added with putExtra()
+     * @return the value of an item previously added with putExtra(),
      * or the default value if none was found.
      *
      * @see #putExtra(String, short)
@@ -7047,7 +7047,7 @@ public class Intent implements Parcelable, Cloneable {
      * @param defaultValue the value to be returned if no value of the desired
      * type is stored with the given name.
      *
-     * @return the value of an item that previously added with putExtra()
+     * @return the value of an item previously added with putExtra(),
      * or the default value if none was found.
      *
      * @see #putExtra(String, char)
@@ -7064,7 +7064,7 @@ public class Intent implements Parcelable, Cloneable {
      * @param defaultValue the value to be returned if no value of the desired
      * type is stored with the given name.
      *
-     * @return the value of an item that previously added with putExtra()
+     * @return the value of an item previously added with putExtra(),
      * or the default value if none was found.
      *
      * @see #putExtra(String, int)
@@ -7081,7 +7081,7 @@ public class Intent implements Parcelable, Cloneable {
      * @param defaultValue the value to be returned if no value of the desired
      * type is stored with the given name.
      *
-     * @return the value of an item that previously added with putExtra()
+     * @return the value of an item previously added with putExtra(),
      * or the default value if none was found.
      *
      * @see #putExtra(String, long)
@@ -7098,7 +7098,7 @@ public class Intent implements Parcelable, Cloneable {
      * @param defaultValue the value to be returned if no value of the desired
      * type is stored with the given name.
      *
-     * @return the value of an item that previously added with putExtra(),
+     * @return the value of an item previously added with putExtra(),
      * or the default value if no such item is present
      *
      * @see #putExtra(String, float)
@@ -7115,7 +7115,7 @@ public class Intent implements Parcelable, Cloneable {
      * @param defaultValue the value to be returned if no value of the desired
      * type is stored with the given name.
      *
-     * @return the value of an item that previously added with putExtra()
+     * @return the value of an item previously added with putExtra(),
      * or the default value if none was found.
      *
      * @see #putExtra(String, double)
@@ -7130,7 +7130,7 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @param name The name of the desired item.
      *
-     * @return the value of an item that previously added with putExtra()
+     * @return the value of an item previously added with putExtra(),
      * or null if no String value was found.
      *
      * @see #putExtra(String, String)
@@ -7144,7 +7144,7 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @param name The name of the desired item.
      *
-     * @return the value of an item that previously added with putExtra()
+     * @return the value of an item previously added with putExtra(),
      * or null if no CharSequence value was found.
      *
      * @see #putExtra(String, CharSequence)
@@ -7158,7 +7158,7 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @param name The name of the desired item.
      *
-     * @return the value of an item that previously added with putExtra()
+     * @return the value of an item previously added with putExtra(),
      * or null if no Parcelable value was found.
      *
      * @see #putExtra(String, Parcelable)
@@ -7172,7 +7172,7 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @param name The name of the desired item.
      *
-     * @return the value of an item that previously added with putExtra()
+     * @return the value of an item previously added with putExtra(),
      * or null if no Parcelable[] value was found.
      *
      * @see #putExtra(String, Parcelable[])
@@ -7186,8 +7186,9 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @param name The name of the desired item.
      *
-     * @return the value of an item that previously added with putExtra()
-     * or null if no ArrayList<Parcelable> value was found.
+     * @return the value of an item previously added with
+     * putParcelableArrayListExtra(), or null if no
+     * ArrayList<Parcelable> value was found.
      *
      * @see #putParcelableArrayListExtra(String, ArrayList)
      */
@@ -7200,7 +7201,7 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @param name The name of the desired item.
      *
-     * @return the value of an item that previously added with putExtra()
+     * @return the value of an item previously added with putExtra(),
      * or null if no Serializable value was found.
      *
      * @see #putExtra(String, Serializable)
@@ -7214,8 +7215,9 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @param name The name of the desired item.
      *
-     * @return the value of an item that previously added with putExtra()
-     * or null if no ArrayList<Integer> value was found.
+     * @return the value of an item previously added with
+     * putIntegerArrayListExtra(), or null if no
+     * ArrayList<Integer> value was found.
      *
      * @see #putIntegerArrayListExtra(String, ArrayList)
      */
@@ -7228,8 +7230,9 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @param name The name of the desired item.
      *
-     * @return the value of an item that previously added with putExtra()
-     * or null if no ArrayList<String> value was found.
+     * @return the value of an item previously added with
+     * putStringArrayListExtra(), or null if no
+     * ArrayList<String> value was found.
      *
      * @see #putStringArrayListExtra(String, ArrayList)
      */
@@ -7242,8 +7245,9 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @param name The name of the desired item.
      *
-     * @return the value of an item that previously added with putExtra()
-     * or null if no ArrayList<CharSequence> value was found.
+     * @return the value of an item previously added with
+     * putCharSequenceArrayListExtra, or null if no
+     * ArrayList<CharSequence> value was found.
      *
      * @see #putCharSequenceArrayListExtra(String, ArrayList)
      */
@@ -7256,7 +7260,7 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @param name The name of the desired item.
      *
-     * @return the value of an item that previously added with putExtra()
+     * @return the value of an item previously added with putExtra(),
      * or null if no boolean array value was found.
      *
      * @see #putExtra(String, boolean[])
@@ -7270,7 +7274,7 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @param name The name of the desired item.
      *
-     * @return the value of an item that previously added with putExtra()
+     * @return the value of an item previously added with putExtra(),
      * or null if no byte array value was found.
      *
      * @see #putExtra(String, byte[])
@@ -7284,7 +7288,7 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @param name The name of the desired item.
      *
-     * @return the value of an item that previously added with putExtra()
+     * @return the value of an item previously added with putExtra(),
      * or null if no short array value was found.
      *
      * @see #putExtra(String, short[])
@@ -7298,7 +7302,7 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @param name The name of the desired item.
      *
-     * @return the value of an item that previously added with putExtra()
+     * @return the value of an item previously added with putExtra(),
      * or null if no char array value was found.
      *
      * @see #putExtra(String, char[])
@@ -7312,7 +7316,7 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @param name The name of the desired item.
      *
-     * @return the value of an item that previously added with putExtra()
+     * @return the value of an item previously added with putExtra(),
      * or null if no int array value was found.
      *
      * @see #putExtra(String, int[])
@@ -7326,7 +7330,7 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @param name The name of the desired item.
      *
-     * @return the value of an item that previously added with putExtra()
+     * @return the value of an item previously added with putExtra(),
      * or null if no long array value was found.
      *
      * @see #putExtra(String, long[])
@@ -7340,7 +7344,7 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @param name The name of the desired item.
      *
-     * @return the value of an item that previously added with putExtra()
+     * @return the value of an item previously added with putExtra(),
      * or null if no float array value was found.
      *
      * @see #putExtra(String, float[])
@@ -7354,7 +7358,7 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @param name The name of the desired item.
      *
-     * @return the value of an item that previously added with putExtra()
+     * @return the value of an item previously added with putExtra(),
      * or null if no double array value was found.
      *
      * @see #putExtra(String, double[])
@@ -7368,7 +7372,7 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @param name The name of the desired item.
      *
-     * @return the value of an item that previously added with putExtra()
+     * @return the value of an item previously added with putExtra(),
      * or null if no String array value was found.
      *
      * @see #putExtra(String, String[])
@@ -7382,7 +7386,7 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @param name The name of the desired item.
      *
-     * @return the value of an item that previously added with putExtra()
+     * @return the value of an item previously added with putExtra(),
      * or null if no CharSequence array value was found.
      *
      * @see #putExtra(String, CharSequence[])
@@ -7396,7 +7400,7 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @param name The name of the desired item.
      *
-     * @return the value of an item that previously added with putExtra()
+     * @return the value of an item previously added with putExtra(),
      * or null if no Bundle value was found.
      *
      * @see #putExtra(String, Bundle)
@@ -7410,7 +7414,7 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @param name The name of the desired item.
      *
-     * @return the value of an item that previously added with putExtra()
+     * @return the value of an item previously added with putExtra(),
      * or null if no IBinder value was found.
      *
      * @see #putExtra(String, IBinder)
@@ -7430,7 +7434,7 @@ public class Intent implements Parcelable, Cloneable {
      * @param defaultValue The default value to return in case no item is
      * associated with the key 'name'
      *
-     * @return the value of an item that previously added with putExtra()
+     * @return the value of an item previously added with putExtra(),
      * or defaultValue if none was found.
      *
      * @see #putExtra
