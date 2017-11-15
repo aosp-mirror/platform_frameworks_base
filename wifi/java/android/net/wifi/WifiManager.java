@@ -16,6 +16,7 @@
 
 package android.net.wifi;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
@@ -1748,13 +1749,12 @@ public class WifiManager {
     /**
      * Set the country code.
      * @param countryCode country code in ISO 3166 format.
-     * @param persist {@code true} if this needs to be remembered
      *
      * @hide
      */
-    public void setCountryCode(String country, boolean persist) {
+    public void setCountryCode(@NonNull String country) {
         try {
-            mService.setCountryCode(country, persist);
+            mService.setCountryCode(country);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
