@@ -37,7 +37,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
+import android.util.Log;
 import android.util.MathUtils;
 import android.util.Slog;
 import android.util.TypedValue;
@@ -154,6 +156,12 @@ class MagnificationGestureHandler extends BaseEventStreamTransformation {
             MagnificationController magnificationController,
             boolean detectTripleTap,
             boolean detectShortcutTrigger) {
+        if (DEBUG_ALL) {
+            Log.i(LOG_TAG,
+                    "MagnificationGestureHandler(detectTripleTap = " + detectTripleTap
+                            + ", detectShortcutTrigger = " + detectShortcutTrigger + ")");
+        }
+
         mMagnificationController = magnificationController;
 
         mDelegatingState = new DelegatingState();
@@ -581,7 +589,7 @@ class MagnificationGestureHandler extends BaseEventStreamTransformation {
 
         @VisibleForTesting boolean mShortcutTriggered;
 
-        Handler mHandler = new Handler(this);
+        @VisibleForTesting Handler mHandler = new Handler(this);
 
         public DetectingState(Context context) {
             mLongTapMinDelay = ViewConfiguration.getLongPressTimeout();
@@ -756,11 +764,14 @@ class MagnificationGestureHandler extends BaseEventStreamTransformation {
         @Override
         public void clear() {
             setShortcutTriggered(false);
-            mHandler.removeMessages(MESSAGE_ON_TRIPLE_TAP_AND_HOLD);
-            mHandler.removeMessages(MESSAGE_TRANSITION_TO_DELEGATING_STATE);
+            removePendingDelayedMessages();
             clearDelayedMotionEvents();
         }
 
+        private void removePendingDelayedMessages() {
+            mHandler.removeMessages(MESSAGE_ON_TRIPLE_TAP_AND_HOLD);
+            mHandler.removeMessages(MESSAGE_TRANSITION_TO_DELEGATING_STATE);
+        }
 
         private void cacheDelayedMotionEvent(MotionEvent event, MotionEvent rawEvent,
                 int policyFlags) {
@@ -811,7 +822,7 @@ class MagnificationGestureHandler extends BaseEventStreamTransformation {
         void transitionToDelegatingStateAndClear() {
             transitionTo(mDelegatingState);
             sendDelayedMotionEvents();
-            clear();
+            removePendingDelayedMessages();
         }
 
         private void onTripleTap(MotionEvent up) {
@@ -860,6 +871,7 @@ class MagnificationGestureHandler extends BaseEventStreamTransformation {
             if (mShortcutTriggered == state) {
                 return;
             }
+            if (DEBUG_DETECTING) Slog.i(LOG_TAG, "setShortcutTriggered(" + state + ")");
 
             mShortcutTriggered = state;
             mMagnificationController.setForceShowMagnifiableBounds(state);
