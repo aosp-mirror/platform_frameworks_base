@@ -42,13 +42,15 @@ import com.android.systemui.OverviewProxyService.OverviewProxyListener;
 import com.android.systemui.statusbar.policy.CallbackController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceProvisionedListener;
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Class to send information from overview to launcher with a binder.
  */
-public class OverviewProxyService implements CallbackController<OverviewProxyListener> {
+public class OverviewProxyService implements CallbackController<OverviewProxyListener>, Dumpable {
 
     private static final String TAG = "OverviewProxyService";
     private static final long BACKOFF_MILLIS = 5000;
@@ -205,6 +207,15 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         for (int i = mConnectionCallbacks.size() - 1; i >= 0; --i) {
             mConnectionCallbacks.get(i).onConnectionChanged(mOverviewProxy != null);
         }
+    }
+
+    @Override
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.println(TAG + " state:");
+        pw.print("  mConnectionBackoffAttempts="); pw.println(mConnectionBackoffAttempts);
+        pw.print("  isCurrentUserSetup="); pw.println(mDeviceProvisionedController
+                .isCurrentUserSetup());
+        pw.print("  isConnected="); pw.println(mOverviewProxy != null);
     }
 
     public interface OverviewProxyListener {
