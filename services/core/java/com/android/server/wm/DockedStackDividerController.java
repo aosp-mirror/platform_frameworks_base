@@ -559,7 +559,7 @@ public class DockedStackDividerController implements DimLayerUser {
     void setResizeDimLayer(boolean visible, int targetWindowingMode, float alpha) {
         // TODO: Maybe only allow split-screen windowing modes?
         final TaskStack stack = targetWindowingMode != WINDOWING_MODE_UNDEFINED
-                ? mDisplayContent.getStack(targetWindowingMode)
+                ? mDisplayContent.getTopStackInWindowingMode(targetWindowingMode)
                 : null;
         final TaskStack dockedStack = mDisplayContent.getSplitScreenPrimaryStack();
         boolean visibleAndValid = visible && stack != null && dockedStack != null;
@@ -663,11 +663,15 @@ public class DockedStackDividerController implements DimLayerUser {
         if (mMinimizedDock && mService.mPolicy.isKeyguardShowingAndNotOccluded()) {
             return;
         }
-        final TaskStack fullscreenStack = mDisplayContent.getStack(
+        final TaskStack topSecondaryStack = mDisplayContent.getTopStackInWindowingMode(
                 WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
-        final boolean homeVisible = homeTask.getTopVisibleAppToken() != null;
-        final boolean homeBehind = fullscreenStack != null && fullscreenStack.isVisible();
-        setMinimizedDockedStack(homeVisible && !homeBehind, animate);
+        boolean homeVisible = homeTask.getTopVisibleAppToken() != null;
+        if (homeVisible && topSecondaryStack != null) {
+            // Home should only be considered visible if it is greater or equal to the top secondary
+            // stack in terms of z-order.
+            homeVisible = homeStack.compareTo(topSecondaryStack) >= 0;
+        }
+        setMinimizedDockedStack(homeVisible, animate);
     }
 
     private boolean isWithinDisplay(Task task) {

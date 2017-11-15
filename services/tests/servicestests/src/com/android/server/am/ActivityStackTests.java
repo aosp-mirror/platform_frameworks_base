@@ -166,6 +166,8 @@ public class ActivityStackTests extends ActivityTestsBase {
         final ActivityDisplay display = mService.mStackSupervisor.getDefaultDisplay();
         final TestActivityStack homeStack = createStackForShouldBeVisibleTest(display,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME, true /* onTop */);
+        // Home stack should always be fullscreen for this test.
+        homeStack.setSupportsSplitScreen(false);
         final TestActivityStack splitScreenPrimary = createStackForShouldBeVisibleTest(display,
                 WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, ACTIVITY_TYPE_STANDARD, true /* onTop */);
         final TestActivityStack splitScreenSecondary = createStackForShouldBeVisibleTest(display,

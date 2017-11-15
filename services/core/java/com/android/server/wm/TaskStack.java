@@ -685,9 +685,12 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
     public void onConfigurationChanged(Configuration newParentConfig) {
         final int prevWindowingMode = getWindowingMode();
         super.onConfigurationChanged(newParentConfig);
-        if (mDisplayContent != null && prevWindowingMode != getWindowingMode()) {
-            mDisplayContent.onStackWindowingModeChanged(this);
+        final int windowingMode = getWindowingMode();
+        if (mDisplayContent == null || prevWindowingMode == windowingMode) {
+            return;
         }
+        mDisplayContent.onStackWindowingModeChanged(this);
+        updateBoundsForWindowModeChange();
     }
 
     @Override
@@ -699,39 +702,41 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
         mDisplayContent = dc;
         mAnimationBackgroundSurface = new DimLayer(mService, this, mDisplayContent.getDisplayId(),
                 "animation background stackId=" + mStackId);
+        updateBoundsForWindowModeChange();
+        super.onDisplayChanged(dc);
+    }
 
+    private void updateBoundsForWindowModeChange() {
         Rect bounds = null;
-        final TaskStack dockedStack = dc.getSplitScreenPrimaryStackIgnoringVisibility();
-        if (inSplitScreenPrimaryWindowingMode()
-                || (dockedStack != null && inSplitScreenSecondaryWindowingMode()
-                        && !dockedStack.fillsParent())) {
+        final boolean inSplitScreenPrimary = inSplitScreenPrimaryWindowingMode();
+        final TaskStack splitScreenStack =
+                mDisplayContent.getSplitScreenPrimaryStackIgnoringVisibility();
+        if (inSplitScreenPrimary || (splitScreenStack != null
+                && inSplitScreenSecondaryWindowingMode() && !splitScreenStack.fillsParent())) {
             // The existence of a docked stack affects the size of other static stack created since
             // the docked stack occupies a dedicated region on screen, but only if the dock stack is
             // not fullscreen. If it's fullscreen, it means that we are in the transition of
             // dismissing it, so we must not resize this stack.
             bounds = new Rect();
-            dc.getLogicalDisplayRect(mTmpRect);
+            mDisplayContent.getLogicalDisplayRect(mTmpRect);
             mTmpRect2.setEmpty();
-            if (dockedStack != null) {
-                dockedStack.getRawBounds(mTmpRect2);
+            if (splitScreenStack != null) {
+                splitScreenStack.getRawBounds(mTmpRect2);
             }
             final boolean dockedOnTopOrLeft = mService.mDockedStackCreateMode
                     == SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
             getStackDockedModeBounds(mTmpRect, bounds, mTmpRect2,
-                    mDisplayContent.mDividerControllerLocked.getContentWidth(),
-                    dockedOnTopOrLeft);
+                    mDisplayContent.mDividerControllerLocked.getContentWidth(), dockedOnTopOrLeft);
         } else if (inPinnedWindowingMode()) {
             // Update the bounds based on any changes to the display info
             getAnimationOrCurrentBounds(mTmpRect2);
-            boolean updated = mDisplayContent.mPinnedStackControllerLocked.onTaskStackBoundsChanged(
-                    mTmpRect2, mTmpRect3);
-            if (updated) {
+            if (mDisplayContent.mPinnedStackControllerLocked.onTaskStackBoundsChanged(
+                    mTmpRect2, mTmpRect3)) {
                 bounds = new Rect(mTmpRect3);
             }
         }
 
         updateDisplayInfo(bounds);
-        super.onDisplayChanged(dc);
     }
 
     /**
@@ -920,10 +925,6 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
         if (mAnimationBackgroundSurface != null) {
             mAnimationBackgroundSurface.destroySurface();
             mAnimationBackgroundSurface = null;
-        }
-
-        if (inSplitScreenPrimaryWindowingMode()) {
-            mDisplayContent.mDividerControllerLocked.notifyDockedStackExistsChanged(false);
         }
 
         mDisplayContent = null;

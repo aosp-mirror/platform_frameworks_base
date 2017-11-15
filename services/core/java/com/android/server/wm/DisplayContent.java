@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.app.ActivityManager.SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
@@ -1488,7 +1489,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * Returns the topmost stack on the display that is compatible with the input windowing mode.
      * Null is no compatible stack on the display.
      */
-    TaskStack getStack(int windowingMode) {
+    TaskStack getTopStackInWindowingMode(int windowingMode) {
         return getStack(windowingMode, ACTIVITY_TYPE_UNDEFINED);
     }
 
@@ -1764,10 +1765,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         final TaskStack stack = new TaskStack(mService, stackId, controller);
         mTaskStackContainers.addStackToDisplay(stack, onTop);
-
-        if (stack.inSplitScreenPrimaryWindowingMode()) {
-            mDividerControllerLocked.notifyDockedStackExistsChanged(true);
-        }
         return stack;
     }
 
@@ -2274,7 +2271,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
     /** Returns true if the stack in the windowing mode is visible. */
     boolean isStackVisible(int windowingMode) {
-        final TaskStack stack = getStack(windowingMode);
+        final TaskStack stack = getTopStackInWindowingMode(windowingMode);
         return stack != null && stack.isVisible();
     }
 
@@ -3391,6 +3388,12 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             }
             for (int i = mTaskStackContainers.getChildCount() - 1; i >= 0; --i) {
                 final TaskStack stack = mTaskStackContainers.getChildAt(i);
+                if (activityType == ACTIVITY_TYPE_UNDEFINED
+                        && windowingMode == stack.getWindowingMode()) {
+                    // Passing in undefined type means we want to match the topmost stack with the
+                    // windowing mode.
+                    return stack;
+                }
                 if (stack.isCompatible(windowingMode, activityType)) {
                     return stack;
                 }
@@ -3461,6 +3464,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                             + " already exist on display=" + this + " stack=" + stack);
                 }
                 mSplitScreenPrimaryStack = stack;
+                mDividerControllerLocked.notifyDockedStackExistsChanged(true);
             }
         }
 
@@ -3471,6 +3475,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 mPinnedStack = null;
             } else if (stack == mSplitScreenPrimaryStack) {
                 mSplitScreenPrimaryStack = null;
+                // Re-set the split-screen create mode whenever the split-screen stack is removed.
+                mService.setDockedStackCreateStateLocked(
+                        SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT, null /* initialBounds */);
+                mDividerControllerLocked.notifyDockedStackExistsChanged(false);
             }
         }
 

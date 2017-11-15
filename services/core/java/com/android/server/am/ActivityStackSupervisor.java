@@ -2962,6 +2962,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
      * Returns the reparent target stack, creating the stack if necessary.  This call also enforces
      * the various checks on tasks that are going to be reparented from one stack to another.
      */
+    // TODO: Look into changing users to this method to ActivityDisplay.resolveWindowingMode()
     ActivityStack getReparentTargetStack(TaskRecord task, ActivityStack stack, boolean toTop) {
         final ActivityStack prevStack = task.getStack();
         final int stackId = stack.mStackId;
@@ -2988,8 +2989,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                     + " reparent task=" + task + " to stackId=" + stackId);
         }
 
-        // Ensure that we aren't trying to move into a freeform stack without freeform
-        // support
+        // Ensure that we aren't trying to move into a freeform stack without freeform support
         if (stack.getWindowingMode() == WINDOWING_MODE_FREEFORM
                 && !mService.mSupportsFreeformWindowManagement) {
             throw new IllegalArgumentException("Device doesn't support freeform, can not reparent"
@@ -3393,7 +3393,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
         // When launching tasks behind, update the last active time of the top task after the new
         // task has been shown briefly
-        final ActivityRecord top = stack.topActivity();
+        final ActivityRecord top = stack.getTopActivity();
         if (top != null) {
             top.getTask().touchActiveTime();
         }
@@ -4217,10 +4217,9 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             }
         }
 
-        final ActivityRecord topActivity = task.getTopActivity();
         if (!task.supportsSplitScreenWindowingMode() || forceNonResizable) {
-            // Display a warning toast that we tried to put a non-dockable task in the docked
-            // stack.
+            // Display a warning toast that we tried to put an app that doesn't support split-screen
+            // in split-screen.
             mService.mTaskChangeNotificationController.notifyActivityDismissingDockedStack();
 
             // Dismiss docked stack. If task appeared to be in docked stack but is not resizable -
@@ -4234,6 +4233,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             return;
         }
 
+        final ActivityRecord topActivity = task.getTopActivity();
         if (topActivity != null && topActivity.isNonResizableOrForcedResizable()
             && !topActivity.noDisplay) {
             final String packageName = topActivity.appInfo.packageName;
@@ -4569,7 +4569,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 final ActivityStack stack = display.getChildAt(j);
                 // Get top activity from a visible stack and add it to the list.
                 if (stack.shouldBeVisible(null /* starting */)) {
-                    final ActivityRecord top = stack.topActivity();
+                    final ActivityRecord top = stack.getTopActivity();
                     if (top != null) {
                         if (stack == mFocusedStack) {
                             topActivityTokens.add(0, top.appToken);

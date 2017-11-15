@@ -225,11 +225,13 @@ public class StackWindowController
         }
     }
 
-    private void getRawBounds(Rect outBounds) {
-        if (mContainer.getRawFullscreen()) {
-            outBounds.setEmpty();
-        } else {
-            mContainer.getRawBounds(outBounds);
+    public void getRawBounds(Rect outBounds) {
+        synchronized (mWindowMap) {
+            if (mContainer.getRawFullscreen()) {
+                outBounds.setEmpty();
+            } else {
+                mContainer.getRawBounds(outBounds);
+            }
         }
     }
 
