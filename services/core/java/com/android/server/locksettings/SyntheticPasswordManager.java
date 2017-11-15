@@ -390,11 +390,9 @@ public class SyntheticPasswordManager {
     }
 
     public void removeUser(int userId) {
-        if (isWeaverAvailable()) {
-            for (long handle : mStorage.listSyntheticPasswordHandlesForUser(WEAVER_SLOT_NAME,
-                    userId)) {
-                destroyWeaverSlot(handle, userId);
-            }
+        for (long handle : mStorage.listSyntheticPasswordHandlesForUser(SP_BLOB_NAME, userId)) {
+            destroyWeaverSlot(handle, userId);
+            destroySPBlobKey(getHandleName(handle));
         }
     }
 
