@@ -186,4 +186,6 @@ interface IStorageManager {
     long getAllocatableBytes(String volumeUuid, int flags, String callingPackage) = 77;
     void allocateBytes(String volumeUuid, long bytes, int flags, String callingPackage) = 78;
     void secdiscard(in String path) = 79;
+    void runIdleMaintenance() = 80;
+    void abortIdleMaintenance() = 81;
 }

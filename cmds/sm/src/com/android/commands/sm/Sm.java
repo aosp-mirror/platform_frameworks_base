@@ -101,6 +101,8 @@ public final class Sm {
             runSetEmulateFbe();
         } else if ("get-fbe-mode".equals(op)) {
             runGetFbeMode();
+        } else if ("idle-maint".equals(op)) {
+            runIdleMaint();
         } else if ("fstrim".equals(op)) {
             runFstrim();
         } else if ("set-virtual-disk".equals(op)) {
@@ -278,6 +280,15 @@ public final class Sm {
                 StorageManager.DEBUG_VIRTUAL_DISK);
     }
 
+    public void runIdleMaint() throws RemoteException {
+        final boolean im_run = "run".equals(nextArg());
+        if (im_run) {
+            mSm.runIdleMaintenance();
+        } else {
+            mSm.abortIdleMaintenance();
+        }
+    }
+
     private String nextArg() {
         if (mNextArg >= mArgs.length) {
             return null;
@@ -300,6 +311,7 @@ public final class Sm {
         System.err.println("       sm unmount VOLUME");
         System.err.println("       sm format VOLUME");
         System.err.println("       sm benchmark VOLUME");
+        System.err.println("       sm idle-maint [run|abort]");
         System.err.println("       sm fstrim");
         System.err.println("");
         System.err.println("       sm forget [UUID|all]");

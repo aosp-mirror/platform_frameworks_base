@@ -542,6 +542,8 @@ class StorageManagerService extends IStorageManager.Stub implements Watchdog.Mon
     private static final int H_VOLUME_UNMOUNT = 8;
     private static final int H_PARTITION_FORGET = 9;
     private static final int H_RESET = 10;
+    private static final int H_RUN_IDLE_MAINT = 11;
+    private static final int H_ABORT_IDLE_MAINT = 12;
 
     class StorageManagerServiceHandler extends Handler {
         public StorageManagerServiceHandler(Looper looper) {
@@ -650,6 +652,17 @@ class StorageManagerService extends IStorageManager.Stub implements Watchdog.Mon
                     resetIfReadyAndConnected();
                     break;
                 }
+                case H_RUN_IDLE_MAINT: {
+                    Slog.i(TAG, "Running idle maintenance");
+                    runIdleMaint((Runnable)msg.obj);
+                    break;
+                }
+                case H_ABORT_IDLE_MAINT: {
+                    Slog.i(TAG, "Aborting idle maintenance");
+                    abortIdleMaint((Runnable)msg.obj);
+                    break;
+                }
+
             }
         }
     }
@@ -1777,6 +1790,58 @@ class StorageManagerService extends IStorageManager.Stub implements Watchdog.Mon
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
+    }
+
+    void runIdleMaint(Runnable callback) {
+        enforcePermission(android.Manifest.permission.MOUNT_FORMAT_FILESYSTEMS);
+
+        try {
+            mVold.runIdleMaint(new IVoldTaskListener.Stub() {
+                @Override
+                public void onStatus(int status, PersistableBundle extras) {
+                    // Not currently used
+                }
+                @Override
+                public void onFinished(int status, PersistableBundle extras) {
+                    if (callback != null) {
+                        BackgroundThread.getHandler().post(callback);
+                    }
+                }
+            });
+        } catch (Exception e) {
+            Slog.wtf(TAG, e);
+        }
+    }
+
+    @Override
+    public void runIdleMaintenance() {
+        runIdleMaint(null);
+    }
+
+    void abortIdleMaint(Runnable callback) {
+        enforcePermission(android.Manifest.permission.MOUNT_FORMAT_FILESYSTEMS);
+
+        try {
+            mVold.abortIdleMaint(new IVoldTaskListener.Stub() {
+                @Override
+                public void onStatus(int status, PersistableBundle extras) {
+                    // Not currently used
+                }
+                @Override
+                public void onFinished(int status, PersistableBundle extras) {
+                    if (callback != null) {
+                        BackgroundThread.getHandler().post(callback);
+                    }
+                }
+            });
+        } catch (Exception e) {
+            Slog.wtf(TAG, e);
+        }
+    }
+
+    @Override
+    public void abortIdleMaintenance() {
+        abortIdleMaint(null);
     }
 
     private void remountUidExternalStorage(int uid, int mode) {
