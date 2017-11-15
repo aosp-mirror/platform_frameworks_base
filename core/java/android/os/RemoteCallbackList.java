@@ -19,6 +19,7 @@ package android.os;
 import android.util.ArrayMap;
 import android.util.Slog;
 
+import java.io.PrintWriter;
 import java.util.function.Consumer;
 
 /**
@@ -397,6 +398,13 @@ public class RemoteCallbackList<E extends IInterface> {
             }
             return mCallbacks.valueAt(index).mCookie;
         }
+    }
+
+    /** @hide */
+    public void dump(PrintWriter pw, String prefix) {
+        pw.print(prefix); pw.print("callbacks: "); pw.println(mCallbacks.size());
+        pw.print(prefix); pw.print("killed: "); pw.println(mKilled);
+        pw.print(prefix); pw.print("broadcasts count: "); pw.println(mBroadcastCount);
     }
 
     private void logExcessiveCallbacks() {
