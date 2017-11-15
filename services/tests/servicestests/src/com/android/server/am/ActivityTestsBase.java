@@ -21,8 +21,11 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyBoolean;
+import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.spy;
 
@@ -38,6 +41,7 @@ import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.os.HandlerThread;
 import android.os.Looper;
+import android.service.voice.IVoiceInteractionSession;
 import android.support.test.InstrumentationRegistry;
 import com.android.server.AttributeCache;
 import com.android.server.wm.AppWindowContainerController;
@@ -78,7 +82,10 @@ public class ActivityTestsBase {
     }
 
     protected ActivityManagerService createActivityManagerService() {
-        return setupActivityManagerService(new TestActivityManagerService(mContext));
+        final ActivityManagerService service =
+                setupActivityManagerService(new TestActivityManagerService(mContext));
+        AttributeCache.init(mContext);
+        return service;
     }
 
     protected ActivityManagerService setupActivityManagerService(ActivityManagerService service) {
@@ -95,7 +102,7 @@ public class ActivityTestsBase {
         private static int sCurrentActivityId = 0;
 
         // Default package name
-        private static final String DEFAULT_PACKAGE = "com.foo";
+        static final String DEFAULT_PACKAGE = "com.foo";
 
         // Default base activity name
         private static final String DEFAULT_BASE_ACTIVITY_NAME = ".BarActivity";
@@ -156,7 +163,6 @@ public class ActivityTestsBase {
             aInfo.applicationInfo = new ApplicationInfo();
             aInfo.applicationInfo.packageName = mComponent.getPackageName();
             aInfo.applicationInfo.uid = mUid;
-            AttributeCache.init(mService.mContext);
             final ActivityRecord activity = new ActivityRecord(mService, null /* caller */,
                     0 /* launchedFromPid */, 0, null, intent, null,
                     aInfo /*aInfo*/, new Configuration(), null /* resultTo */, null /* resultWho */,
@@ -182,6 +188,7 @@ public class ActivityTestsBase {
         private String mPackage;
         private int mFlags = 0;
         private int mTaskId = 0;
+        private IVoiceInteractionSession mVoiceSession;
 
         private ActivityStack mStack;
 
@@ -196,6 +203,11 @@ public class ActivityTestsBase {
 
         TaskBuilder setPackage(String packageName) {
             mPackage = packageName;
+            return this;
+        }
+
+        TaskBuilder setVoiceSession(IVoiceInteractionSession session) {
+            mVoiceSession = session;
             return this;
         }
 
@@ -229,7 +241,7 @@ public class ActivityTestsBase {
             intent.setFlags(mFlags);
 
             final TaskRecord task = new TaskRecord(mSupervisor.mService, mTaskId, aInfo,
-                    intent /*intent*/, null /*_taskDescription*/);
+                    intent /*intent*/, mVoiceSession, null /*_voiceInteractor*/);
             mSupervisor.setFocusStackUnchecked("test", mStack);
             mStack.addTask(task, true, "creating test task");
             task.setStack(mStack);
@@ -255,7 +267,27 @@ public class ActivityTestsBase {
         }
 
         @Override
-        protected ActivityStackSupervisor createStackSupervisor() {
+        final protected ActivityStackSupervisor createStackSupervisor() {
+            final ActivityStackSupervisor supervisor = spy(createTestSupervisor());
+
+            // No home stack is set.
+            doNothing().when(supervisor).moveHomeStackToFront(any());
+            doReturn(true).when(supervisor).moveHomeStackTaskToTop(any());
+            // Invoked during {@link ActivityStack} creation.
+            doNothing().when(supervisor).updateUIDsPresentOnDisplay();
+            // Always keep things awake.
+            doReturn(true).when(supervisor).hasAwakeDisplay();
+            // Called when moving activity to pinned stack.
+            doNothing().when(supervisor).ensureActivitiesVisibleLocked(any(), anyInt(), anyBoolean());
+            // Do not schedule idle timeouts
+            doNothing().when(supervisor).scheduleIdleTimeoutLocked(any());
+
+            supervisor.initialize();
+
+            return supervisor;
+        }
+
+        protected ActivityStackSupervisor createTestSupervisor() {
             return new TestActivityStackSupervisor(this, mHandlerThread.getLooper());
         }
 
@@ -269,14 +301,18 @@ public class ActivityTestsBase {
      * setup not available in the test environment. Also specifies an injector for
      */
     protected static class TestActivityStackSupervisor extends ActivityStackSupervisor {
-        private final ActivityDisplay mDisplay;
-        private boolean mLastResizeable;
+        private ActivityDisplay mDisplay;
 
         public TestActivityStackSupervisor(ActivityManagerService service, Looper looper) {
             super(service, looper);
             mDisplayManager =
                     (DisplayManager) mService.mContext.getSystemService(Context.DISPLAY_SERVICE);
             mWindowManager = prepareMockWindowManager();
+        }
+
+        @Override
+        public void initialize() {
+            super.initialize();
             mDisplay = new TestActivityDisplay(this, DEFAULT_DISPLAY);
             attachDisplay(mDisplay);
         }
@@ -286,53 +322,10 @@ public class ActivityTestsBase {
             return mDisplay;
         }
 
-        // TODO: Use Mockito spy instead. Currently not possible due to TestActivityStackSupervisor
-        // access to ActivityDisplay
-        @Override
-        boolean canPlaceEntityOnDisplay(int displayId, boolean resizeable, int callingPid,
-                int callingUid, ActivityInfo activityInfo) {
-            mLastResizeable = resizeable;
-            return super.canPlaceEntityOnDisplay(displayId, resizeable, callingPid, callingUid,
-                    activityInfo);
-        }
-
-        // TODO: remove and use Mockito verify once {@link #canPlaceEntityOnDisplay} override is
-        // removed.
-        public boolean getLastResizeableFromCanPlaceEntityOnDisplay() {
-            return mLastResizeable;
-        }
-
-        // No home stack is set.
-        @Override
-        void moveHomeStackToFront(String reason) {
-        }
-
-        @Override
-        boolean moveHomeStackTaskToTop(String reason) {
-            return true;
-        }
-
-        // Invoked during {@link ActivityStack} creation.
-        @Override
-        void updateUIDsPresentOnDisplay() {
-        }
-
-        // Just return the current front task.
+        // Just return the current front task. This is called internally so we cannot use spy to mock this out.
         @Override
         ActivityStack getNextFocusableStackLocked(ActivityStack currentFocus) {
             return mFocusedStack;
-        }
-
-        // Called when moving activity to pinned stack.
-        @Override
-        void ensureActivitiesVisibleLocked(ActivityRecord starting, int configChanges,
-                boolean preserveWindows) {
-        }
-
-        // Always keep things awake
-        @Override
-        boolean hasAwakeDisplay() {
-            return true;
         }
     }
 

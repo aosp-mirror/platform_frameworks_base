@@ -1669,7 +1669,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             boolean preserveWindows) {
         mTopActivityOccludesKeyguard = false;
         mTopDismissingKeyguardActivity = null;
-        mStackSupervisor.mKeyguardController.beginActivityVisibilityUpdate();
+        mStackSupervisor.getKeyguardController().beginActivityVisibilityUpdate();
         try {
             ActivityRecord top = topRunningActivityLocked();
             if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "ensureActivitiesVisible behind " + top
@@ -1777,7 +1777,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 notifyActivityDrawnLocked(null);
             }
         } finally {
-            mStackSupervisor.mKeyguardController.endActivityVisibilityUpdate();
+            mStackSupervisor.getKeyguardController().endActivityVisibilityUpdate();
         }
     }
 
@@ -1828,9 +1828,9 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     boolean checkKeyguardVisibility(ActivityRecord r, boolean shouldBeVisible,
             boolean isTop) {
         final boolean isInPinnedStack = r.inPinnedWindowingMode();
-        final boolean keyguardShowing = mStackSupervisor.mKeyguardController.isKeyguardShowing(
+        final boolean keyguardShowing = mStackSupervisor.getKeyguardController().isKeyguardShowing(
                 mDisplayId != INVALID_DISPLAY ? mDisplayId : DEFAULT_DISPLAY);
-        final boolean keyguardLocked = mStackSupervisor.mKeyguardController.isKeyguardLocked();
+        final boolean keyguardLocked = mStackSupervisor.getKeyguardController().isKeyguardLocked();
         final boolean showWhenLocked = r.canShowWhenLocked() && !isInPinnedStack;
         final boolean dismissKeyguard = r.hasDismissKeyguardWindows();
         if (shouldBeVisible) {
@@ -1845,7 +1845,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             }
 
             final boolean canShowWithKeyguard = canShowWithInsecureKeyguard()
-                    && mStackSupervisor.mKeyguardController.canDismissKeyguard();
+                    && mStackSupervisor.getKeyguardController().canDismissKeyguard();
             if (canShowWithKeyguard) {
                 return true;
             }
@@ -1854,10 +1854,10 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
 
             // If keyguard is showing, nothing is visible, except if we are able to dismiss Keyguard
             // right away.
-            return shouldBeVisible && mStackSupervisor.mKeyguardController
+            return shouldBeVisible && mStackSupervisor.getKeyguardController()
                     .canShowActivityWhileKeyguardShowing(r, dismissKeyguard);
         } else if (keyguardLocked) {
-            return shouldBeVisible && mStackSupervisor.mKeyguardController.canShowWhileOccluded(
+            return shouldBeVisible && mStackSupervisor.getKeyguardController().canShowWhileOccluded(
                     dismissKeyguard, showWhenLocked);
         } else {
             return shouldBeVisible;
@@ -2421,7 +2421,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                     // if needed to get the correct rotation behavior.
                     // TODO: Remove this once visibilities are set correctly immediately when
                     // starting an activity.
-                    if (mStackSupervisor.mKeyguardController.isKeyguardLocked()) {
+                    if (mStackSupervisor.getKeyguardController().isKeyguardLocked()) {
                         mStackSupervisor.ensureActivitiesVisibleLocked(null /* starting */,
                                 0 /* configChanges */, false /* preserveWindows */);
                     }
@@ -4889,7 +4889,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 voiceInteractor);
         // add the task to stack first, mTaskPositioner might need the stack association
         addTask(task, toTop, "createTaskRecord");
-        final boolean isLockscreenShown = mService.mStackSupervisor.mKeyguardController
+        final boolean isLockscreenShown = mService.mStackSupervisor.getKeyguardController()
                 .isKeyguardShowing(mDisplayId != INVALID_DISPLAY ? mDisplayId : DEFAULT_DISPLAY);
         if (!mStackSupervisor.getLaunchingBoundsController().layoutTask(task, info.windowLayout)
                 && mBounds != null && task.isResizeable() && !isLockscreenShown) {

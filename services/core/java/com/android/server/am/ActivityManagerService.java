@@ -2779,12 +2779,12 @@ public class ActivityManagerService extends IActivityManager.Stub
         mConfigurationSeq = mTempConfig.seq = 1;
         mStackSupervisor = createStackSupervisor();
         mStackSupervisor.onConfigurationChanged(mTempConfig);
-        mKeyguardController = mStackSupervisor.mKeyguardController;
+        mKeyguardController = mStackSupervisor.getKeyguardController();
         mCompatModePackages = new CompatModePackages(this, systemDir, mHandler);
         mIntentFirewall = new IntentFirewall(new IntentFirewallInterface(), mHandler);
         mTaskChangeNotificationController =
                 new TaskChangeNotificationController(this, mStackSupervisor, mHandler);
-        mActivityStarter = new ActivityStarter(this);
+        mActivityStarter = new ActivityStarter(this, AppGlobals.getPackageManager());
         mRecentTasks = createRecentTasks();
         mStackSupervisor.setRecentTasks(mRecentTasks);
         mLockTaskController = new LockTaskController(mContext, mStackSupervisor, mHandler);
@@ -2828,7 +2828,9 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     protected ActivityStackSupervisor createStackSupervisor() {
-        return new ActivityStackSupervisor(this, mHandler.getLooper());
+        final ActivityStackSupervisor supervisor = new ActivityStackSupervisor(this, mHandler.getLooper());
+        supervisor.initialize();
+        return supervisor;
     }
 
     protected RecentTasks createRecentTasks() {
@@ -5354,8 +5356,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         return -1;
     }
 
-    final ProcessRecord getRecordForAppLocked(
-            IApplicationThread thread) {
+    ProcessRecord getRecordForAppLocked(IApplicationThread thread) {
         if (thread == null) {
             return null;
         }
@@ -7121,7 +7122,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
 
             checkTime(startTime, "attachApplicationLocked: immediately before bindApplication");
-            mStackSupervisor.mActivityMetricsLogger.notifyBindApplication(app);
+            mStackSupervisor.getActivityMetricsLogger().notifyBindApplication(app);
             if (app.isolatedEntryPoint != null) {
                 // This is an isolated process which should just call an entry point instead of
                 // being bound to an application.
@@ -23890,7 +23891,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         public void notifyAppTransitionStarting(SparseIntArray reasons, long timestamp) {
             synchronized (ActivityManagerService.this) {
-                mStackSupervisor.mActivityMetricsLogger.notifyTransitionStarting(
+                mStackSupervisor.getActivityMetricsLogger().notifyTransitionStarting(
                         reasons, timestamp);
             }
         }

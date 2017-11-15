@@ -1529,7 +1529,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
 
     void setVisibility(boolean visible) {
         mWindowContainerController.setVisibility(visible, mDeferHidingClient);
-        mStackSupervisor.mActivityMetricsLogger.notifyVisibilityChanged(this);
+        mStackSupervisor.getActivityMetricsLogger().notifyVisibilityChanged(this);
     }
 
     // TODO: Look into merging with #setVisibility()
@@ -1810,7 +1810,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             }
             stack.mFullyDrawnStartTime = 0;
         }
-        mStackSupervisor.mActivityMetricsLogger.logAppTransitionReportedDrawn(this,
+        mStackSupervisor.getActivityMetricsLogger().logAppTransitionReportedDrawn(this,
                 restoredFromBundle);
         fullyDrawnStartTime = 0;
     }
@@ -1852,7 +1852,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     @Override
     public void onStartingWindowDrawn(long timestamp) {
         synchronized (service) {
-            mStackSupervisor.mActivityMetricsLogger.notifyStartingWindowDrawn(
+            mStackSupervisor.getActivityMetricsLogger().notifyStartingWindowDrawn(
                     getStackId(), timestamp);
         }
     }
@@ -1860,7 +1860,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     @Override
     public void onWindowsDrawn(long timestamp) {
         synchronized (service) {
-            mStackSupervisor.mActivityMetricsLogger.notifyWindowsDrawn(getStackId(), timestamp);
+            mStackSupervisor.getActivityMetricsLogger().notifyWindowsDrawn(getStackId(), timestamp);
             if (displayStartTime != 0) {
                 reportLaunchTimeLocked(timestamp);
             }
