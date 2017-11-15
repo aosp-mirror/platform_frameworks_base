@@ -5588,7 +5588,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     private void logNetworkEvent(NetworkAgentInfo nai, int evtype) {
-        mMetricsLog.log(new NetworkEvent(nai.network.netId, evtype));
+        int[] transports = nai.networkCapabilities.getTransportTypes();
+        mMetricsLog.log(nai.network.netId, transports, new NetworkEvent(evtype));
     }
 
     private static boolean toBool(int encodedBoolean) {
