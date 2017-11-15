@@ -9478,6 +9478,16 @@ public final class Settings {
         public static final String BATTERY_SAVER_CONSTANTS = "battery_saver_constants";
 
         /**
+         * Battery Saver device specific settings
+         * This is encoded as a key=value list, separated by commas.
+         * See {@link com.android.server.power.BatterySaverPolicy} for the details.
+         *
+         * @hide
+         */
+        public static final String BATTERY_SAVER_DEVICE_SPECIFIC_CONSTANTS =
+                "battery_saver_device_specific_constants";
+
+        /**
          * Battery anomaly detection specific settings
          * This is encoded as a key=value list, separated by commas.
          * wakeup_blacklisted_tags is a string, encoded as a set of tags, encoded via

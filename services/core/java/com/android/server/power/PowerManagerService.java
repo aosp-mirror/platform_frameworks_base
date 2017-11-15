@@ -63,7 +63,6 @@ import android.service.vr.IVrManager;
 import android.service.vr.IVrStateCallbacks;
 import android.util.EventLog;
 import android.util.KeyValueListParser;
-import android.util.Log;
 import android.util.PrintWriterPrinter;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -71,7 +70,6 @@ import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 import android.view.Display;
 import android.view.WindowManagerPolicy;
-import android.widget.Toast;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IAppOpsService;
@@ -92,10 +90,8 @@ import com.android.server.Watchdog;
 import com.android.server.am.BatteryStatsService;
 import com.android.server.lights.Light;
 import com.android.server.lights.LightsManager;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import com.android.server.power.batterysaver.BatterySaverController;
+
 import libcore.util.Objects;
 
 import java.io.FileDescriptor;
@@ -228,6 +224,7 @@ public final class PowerManagerService extends SystemService
     private final PowerManagerHandler mHandler;
     private final AmbientDisplayConfiguration mAmbientDisplayConfiguration;
     private final BatterySaverPolicy mBatterySaverPolicy;
+    private final BatterySaverController mBatterySaverController;
 
     private LightsManager mLightsManager;
     private BatteryManagerInternal mBatteryManagerInternal;
@@ -555,9 +552,6 @@ public final class PowerManagerService extends SystemService
     // True if double tap to wake is enabled
     private boolean mDoubleTapWakeEnabled;
 
-    private final ArrayList<PowerManagerInternal.LowPowerModeListener> mLowPowerModeListeners
-            = new ArrayList<PowerManagerInternal.LowPowerModeListener>();
-
     // True if we are currently in VR Mode.
     private boolean mIsVrModeEnabled;
 
@@ -645,7 +639,10 @@ public final class PowerManagerService extends SystemService
         mHandler = new PowerManagerHandler(mHandlerThread.getLooper());
         mConstants = new Constants(mHandler);
         mAmbientDisplayConfiguration = new AmbientDisplayConfiguration(mContext);
+
         mBatterySaverPolicy = new BatterySaverPolicy(mHandler);
+        mBatterySaverController = new BatterySaverController(mContext,
+                BackgroundThread.get().getLooper(), mBatterySaverPolicy);
 
         synchronized (mLock) {
             mWakeLockSuspendBlocker = createSuspendBlockerLocked("PowerManagerService.WakeLocks");
@@ -670,7 +667,6 @@ public final class PowerManagerService extends SystemService
     PowerManagerService(Context context, BatterySaverPolicy batterySaverPolicy) {
         super(context);
 
-        mBatterySaverPolicy = batterySaverPolicy;
         mContext = context;
         mHandlerThread = new ServiceThread(TAG,
                 Process.THREAD_PRIORITY_DISPLAY, false /*allowIo*/);
@@ -680,6 +676,10 @@ public final class PowerManagerService extends SystemService
         mAmbientDisplayConfiguration = new AmbientDisplayConfiguration(mContext);
         mDisplaySuspendBlocker = null;
         mWakeLockSuspendBlocker = null;
+
+        mBatterySaverPolicy = batterySaverPolicy;
+        mBatterySaverController = new BatterySaverController(context,
+                BackgroundThread.getHandler().getLooper(), batterySaverPolicy);
     }
 
     @Override
@@ -752,6 +752,7 @@ public final class PowerManagerService extends SystemService
             mDisplayManagerInternal.initPowerManagement(
                     mDisplayPowerCallbacks, mHandler, sensorManager);
 
+
             // Go.
             readConfigurationLocked();
             updateSettingsLocked();
@@ -761,7 +762,9 @@ public final class PowerManagerService extends SystemService
 
         final ContentResolver resolver = mContext.getContentResolver();
         mConstants.start(resolver);
-        mBatterySaverPolicy.start(resolver);
+
+        mBatterySaverController.systemReady();
+        mBatterySaverPolicy.systemReady(mContext);
 
         // Register for settings changes.
         resolver.registerContentObserver(Settings.Secure.getUriFor(
@@ -996,43 +999,9 @@ public final class PowerManagerService extends SystemService
 
         if (mLowPowerModeEnabled != lowPowerModeEnabled) {
             mLowPowerModeEnabled = lowPowerModeEnabled;
-            powerHintInternal(PowerHint.LOW_POWER, lowPowerModeEnabled ? 1 : 0);
-            postAfterBootCompleted(new Runnable() {
-                @Override
-                public void run() {
-                    Intent intent = new Intent(PowerManager.ACTION_POWER_SAVE_MODE_CHANGING)
-                            .putExtra(PowerManager.EXTRA_POWER_SAVE_MODE, mLowPowerModeEnabled)
-                            .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-                    mContext.sendBroadcast(intent);
-                    ArrayList<PowerManagerInternal.LowPowerModeListener> listeners;
-                    synchronized (mLock) {
-                        listeners = new ArrayList<PowerManagerInternal.LowPowerModeListener>(
-                                mLowPowerModeListeners);
-                    }
-                    for (int i = 0; i < listeners.size(); i++) {
-                        final PowerManagerInternal.LowPowerModeListener listener = listeners.get(i);
-                        final PowerSaveState result =
-                                mBatterySaverPolicy.getBatterySaverPolicy(
-                                        listener.getServiceType(), lowPowerModeEnabled);
-                        listener.onLowPowerModeChanged(result);
-                    }
-                    intent = new Intent(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED);
-                    intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-                    mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
-                    // Send internal version that requires signature permission.
-                    intent = new Intent(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED_INTERNAL);
-                    intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-                    mContext.sendBroadcastAsUser(intent, UserHandle.ALL,
-                            Manifest.permission.DEVICE_POWER);
 
-                    // STOPSHIP Remove the toast.
-                    if (mLowPowerModeEnabled) {
-                        Toast.makeText(mContext,
-                                com.android.internal.R.string.battery_saver_warning,
-                                Toast.LENGTH_LONG).show();
-                    }
-                }
-            });
+            postAfterBootCompleted(() ->
+                    mBatterySaverController.enableBatterySaver(mLowPowerModeEnabled));
         }
     }
 
@@ -3136,7 +3105,7 @@ public final class PowerManagerService extends SystemService
         mIsVrModeEnabled = enabled;
     }
 
-    private void powerHintInternal(int hintId, int data) {
+    public static void powerHintInternal(int hintId, int data) {
         nativeSendPowerHint(hintId, data);
     }
 
@@ -4405,7 +4374,7 @@ public final class PowerManagerService extends SystemService
          * Gets the reason for the last time the phone had to reboot.
          *
          * @return The reason the phone last shut down as an int or
-         * {@link PowerManager.SHUTDOWN_REASON_UNKNOWN} if the file could not be opened.
+         * {@link PowerManager#SHUTDOWN_REASON_UNKNOWN} if the file could not be opened.
          */
         @Override // Binder call
         public int getLastShutdownReason() {
@@ -4728,9 +4697,7 @@ public final class PowerManagerService extends SystemService
 
         @Override
         public void registerLowPowerModeObserver(LowPowerModeListener listener) {
-            synchronized (mLock) {
-                mLowPowerModeListeners.add(listener);
-            }
+            mBatterySaverController.addListener(listener);
         }
 
         @Override
