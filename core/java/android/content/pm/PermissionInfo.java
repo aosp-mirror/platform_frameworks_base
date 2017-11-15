@@ -155,12 +155,18 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
 
     /**
      * The level of access this permission is protecting, as per
-     * {@link android.R.attr#protectionLevel}.  Values may be
-     * {@link #PROTECTION_NORMAL}, {@link #PROTECTION_DANGEROUS}, or
-     * {@link #PROTECTION_SIGNATURE}.  May also include the additional
-     * flags {@link #PROTECTION_FLAG_SYSTEM} or {@link #PROTECTION_FLAG_DEVELOPMENT}
-     * (which only make sense in combination with the base
-     * {@link #PROTECTION_SIGNATURE}.
+     * {@link android.R.attr#protectionLevel}. Consists of
+     * a base permission type and zero or more flags:
+     *
+     * <pre>
+     * int basePermissionType = protectionLevel & {@link #PROTECTION_MASK_BASE};
+     * int permissionFlags = protectionLevel & {@link #PROTECTION_MASK_FLAGS};
+     * </pre>
+     *
+     * <p></p>Base permission types are {@link #PROTECTION_NORMAL},
+     * {@link #PROTECTION_DANGEROUS}, {@link #PROTECTION_SIGNATURE}
+     * and the deprecated {@link #PROTECTION_SIGNATURE_OR_SYSTEM}.
+     * Flags are listed under {@link android.R.attr#protectionLevel}.
      */
     public int protectionLevel;
 
