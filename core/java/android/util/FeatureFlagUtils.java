@@ -16,6 +16,7 @@
 
 package android.util;
 
+import android.content.Context;
 import android.os.SystemProperties;
 import android.text.TextUtils;
 
@@ -37,7 +38,7 @@ public class FeatureFlagUtils {
      * @param feature the flag name
      * @return true if the flag is enabled (either by default in system, or override by user)
      */
-    public static boolean isEnabled(String feature) {
+    public static boolean isEnabled(Context context, String feature) {
         // Tries to get feature flag from system property.
         // Step 1: check if feature flag has any override. Flag name: sys.fflag.override.<feature>
         String value = SystemProperties.get(FFLAG_OVERRIDE_PREFIX + feature);
