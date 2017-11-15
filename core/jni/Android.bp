@@ -96,7 +96,6 @@ cc_library_shared {
         "android_os_VintfRuntimeInfo.cpp",
         "android_net_LocalSocketImpl.cpp",
         "android_net_NetUtils.cpp",
-        "android_net_TrafficStats.cpp",
         "android_nio_utils.cpp",
         "android_util_AssetManager.cpp",
         "android_util_Binder.cpp",
