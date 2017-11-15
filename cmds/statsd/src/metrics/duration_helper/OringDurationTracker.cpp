@@ -20,10 +20,14 @@
 namespace android {
 namespace os {
 namespace statsd {
+
+using std::pair;
+
 OringDurationTracker::OringDurationTracker(sp<ConditionWizard> wizard, int conditionIndex,
-                                           uint64_t currentBucketStartNs, uint64_t bucketSizeNs,
+                                           bool nesting, uint64_t currentBucketStartNs,
+                                           uint64_t bucketSizeNs,
                                            std::vector<DurationBucket>& bucket)
-    : DurationTracker(wizard, conditionIndex, currentBucketStartNs, bucketSizeNs, bucket),
+    : DurationTracker(wizard, conditionIndex, nesting, currentBucketStartNs, bucketSizeNs, bucket),
       mStarted(),
       mPaused() {
     mLastStartTime = 0;
@@ -36,9 +40,9 @@ void OringDurationTracker::noteStart(const HashableDimensionKey& key, bool condi
             mLastStartTime = eventTime;
             VLOG("record first start....");
         }
-        mStarted.insert(key);
+        mStarted[key]++;
     } else {
-        mPaused.insert(key);
+        mPaused[key]++;
     }
 
     if (mConditionKeyMap.find(key) == mConditionKeyMap.end()) {
@@ -48,11 +52,16 @@ void OringDurationTracker::noteStart(const HashableDimensionKey& key, bool condi
     VLOG("Oring: %s start, condition %d", key.c_str(), condition);
 }
 
-void OringDurationTracker::noteStop(const HashableDimensionKey& key, const uint64_t timestamp) {
+void OringDurationTracker::noteStop(const HashableDimensionKey& key, const uint64_t timestamp,
+                                    const bool stopAll) {
     VLOG("Oring: %s stop", key.c_str());
     auto it = mStarted.find(key);
     if (it != mStarted.end()) {
-        mStarted.erase(it);
+        (it->second)--;
+        if (stopAll || !mNested || it->second <= 0) {
+            mStarted.erase(it);
+            mConditionKeyMap.erase(key);
+        }
         if (mStarted.empty()) {
             mDuration += (timestamp - mLastStartTime);
             VLOG("record duration %lld, total %lld ", (long long)timestamp - mLastStartTime,
@@ -60,8 +69,14 @@ void OringDurationTracker::noteStop(const HashableDimensionKey& key, const uint6
         }
     }
 
-    mPaused.erase(key);
-    mConditionKeyMap.erase(key);
+    auto pausedIt = mPaused.find(key);
+    if (pausedIt != mPaused.end()) {
+        (pausedIt->second)--;
+        if (stopAll || !mNested || pausedIt->second <= 0) {
+            mPaused.erase(pausedIt);
+            mConditionKeyMap.erase(key);
+        }
+        }
 }
 void OringDurationTracker::noteStopAll(const uint64_t timestamp) {
     if (!mStarted.empty()) {
@@ -118,11 +133,11 @@ bool OringDurationTracker::flushIfNeeded(uint64_t eventTime) {
 }
 
 void OringDurationTracker::onSlicedConditionMayChange(const uint64_t timestamp) {
-    vector<HashableDimensionKey> startedToPaused;
-    vector<HashableDimensionKey> pausedToStarted;
+    vector<pair<HashableDimensionKey, int>> startedToPaused;
+    vector<pair<HashableDimensionKey, int>> pausedToStarted;
     if (!mStarted.empty()) {
         for (auto it = mStarted.begin(); it != mStarted.end();) {
-            auto key = *it;
+            const auto& key = it->first;
             if (mConditionKeyMap.find(key) == mConditionKeyMap.end()) {
                 VLOG("Key %s dont have condition key", key.c_str());
                 ++it;
@@ -130,8 +145,8 @@ void OringDurationTracker::onSlicedConditionMayChange(const uint64_t timestamp) 
             }
             if (mWizard->query(mConditionTrackerIndex, mConditionKeyMap[key]) !=
                 ConditionState::kTrue) {
+                startedToPaused.push_back(*it);
                 it = mStarted.erase(it);
-                startedToPaused.push_back(key);
                 VLOG("Key %s started -> paused", key.c_str());
             } else {
                 ++it;
@@ -147,7 +162,7 @@ void OringDurationTracker::onSlicedConditionMayChange(const uint64_t timestamp) 
 
     if (!mPaused.empty()) {
         for (auto it = mPaused.begin(); it != mPaused.end();) {
-            auto key = *it;
+            const auto& key = it->first;
             if (mConditionKeyMap.find(key) == mConditionKeyMap.end()) {
                 VLOG("Key %s dont have condition key", key.c_str());
                 ++it;
@@ -155,8 +170,8 @@ void OringDurationTracker::onSlicedConditionMayChange(const uint64_t timestamp) 
             }
             if (mWizard->query(mConditionTrackerIndex, mConditionKeyMap[key]) ==
                 ConditionState::kTrue) {
+                pausedToStarted.push_back(*it);
                 it = mPaused.erase(it);
-                pausedToStarted.push_back(key);
                 VLOG("Key %s paused -> started", key.c_str());
             } else {
                 ++it;

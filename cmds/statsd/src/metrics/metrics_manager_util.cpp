@@ -247,6 +247,8 @@ bool initMetrics(const StatsdConfig& config, const unordered_map<string, int>& l
 
         const auto& simpleCondition = durationWhat.simple_condition();
 
+        bool nesting = simpleCondition.count_nesting();
+
         int trackerIndices[3] = {-1, -1, -1};
         if (!simpleCondition.has_start() ||
             !handleMetricWithLogTrackers(simpleCondition.start(), metricIndex,
@@ -284,7 +286,7 @@ bool initMetrics(const StatsdConfig& config, const unordered_map<string, int>& l
 
         sp<MetricProducer> durationMetric = new DurationMetricProducer(
                 metric, conditionIndex, trackerIndices[0], trackerIndices[1], trackerIndices[2],
-                wizard, internalDimension, startTimeNs);
+                nesting, wizard, internalDimension, startTimeNs);
 
         allMetricProducers.push_back(durationMetric);
     }
