@@ -161,20 +161,20 @@ message DurationMetric {
 
     optional string what = 2;
 
+    optional string condition = 3;
+
+    repeated EventConditionLink links = 4;
+
     enum AggregationType {
         DURATION_SUM = 1;
 
         DURATION_MAX_SPARSE = 2;
-  }
-  optional AggregationType type = 3;
+    }
+    optional AggregationType type = 5;
 
-  optional string predicate = 4;
+    repeated KeyMatcher dimension = 6;
 
-  repeated KeyMatcher dimension = 5;
-
-  optional Bucket bucket = 6;
-
-  repeated EventConditionLink links = 7;
+    optional Bucket bucket = 7;
 }
 
 message GaugeMetric {
