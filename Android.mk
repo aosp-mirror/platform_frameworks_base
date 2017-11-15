@@ -270,7 +270,7 @@ non_base_dirs := \
   ../opt/net/voip/src/java/android/net/sip \
 
 framework_base_android_test_mock_src_files := \
-  $(call all-java-files-under, test-runner/src/android/test/mock)
+  $(call all-java-files-under, test-mock/src/android/test/mock)
 
 framework_base_android_test_runner_excluding_mock_src_files := \
   $(filter-out $(framework_base_android_test_mock_src_files), $(call all-java-files-under, test-runner/src))
