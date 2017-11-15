@@ -23,16 +23,37 @@ import static android.service.notification.NotificationListenerService.Ranking
 import android.app.INotificationManager;
 import android.content.Context;
 import android.ext.services.R;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
+import android.os.storage.StorageManager;
 import android.service.notification.Adjustment;
 import android.service.notification.NotificationAssistantService;
 import android.service.notification.NotificationStats;
 import android.service.notification.StatusBarNotification;
 import android.util.ArrayMap;
+import android.util.AtomicFile;
 import android.util.Log;
 import android.util.Slog;
+import android.util.Xml;
 
+import com.android.internal.util.FastXmlSerializer;
+import com.android.internal.util.XmlUtils;
+
+import libcore.io.IoUtils;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Map;
 
 /**
  * Notification assistant that provides guidance on notification channel blocking
@@ -41,19 +62,112 @@ public class Assistant extends NotificationAssistantService {
     private static final String TAG = "ExtAssistant";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
-    private static final ArrayList<Integer> DISMISS_WITH_PREJUDICE = new ArrayList<>();
+    private static final String TAG_ASSISTANT = "assistant";
+    private static final String TAG_IMPRESSION = "impression-set";
+    private static final String ATT_KEY = "key";
+    private static final int DB_VERSION = 1;
+    private static final String ATTR_VERSION = "version";
+
+    private static final ArrayList<Integer> PREJUDICAL_DISMISSALS = new ArrayList<>();
     static {
-        DISMISS_WITH_PREJUDICE.add(REASON_CANCEL);
-        DISMISS_WITH_PREJUDICE.add(REASON_LISTENER_CANCEL);
+        PREJUDICAL_DISMISSALS.add(REASON_CANCEL);
+        PREJUDICAL_DISMISSALS.add(REASON_LISTENER_CANCEL);
     }
 
     // key : impressions tracker
-    // TODO: persist across reboots
+    // TODO: prune deleted channels and apps
     ArrayMap<String, ChannelImpressions> mkeyToImpressions = new ArrayMap<>();
     // SBN key : channel id
     ArrayMap<String, String> mLiveNotifications = new ArrayMap<>();
 
     private Ranking mFakeRanking = null;
+    private AtomicFile mFile = null;
+
+    public Assistant() {
+    }
+
+    private void loadFile() {
+        if (DEBUG) Slog.d(TAG, "loadFile");
+        AsyncTask.execute(() -> {
+            InputStream infile = null;
+            try {
+                infile = mFile.openRead();
+                readXml(infile);
+            } catch (FileNotFoundException e) {
+                // No data yet
+            } catch (IOException e) {
+                Log.e(TAG, "Unable to read channel impressions", e);
+            } catch (NumberFormatException | XmlPullParserException e) {
+                Log.e(TAG, "Unable to parse channel impressions", e);
+            } finally {
+                IoUtils.closeQuietly(infile);
+            }
+        });
+    }
+
+    protected void readXml(InputStream stream)
+            throws XmlPullParserException, NumberFormatException, IOException {
+        final XmlPullParser parser = Xml.newPullParser();
+        parser.setInput(stream, StandardCharsets.UTF_8.name());
+        final int outerDepth = parser.getDepth();
+        while (XmlUtils.nextElementWithin(parser, outerDepth)) {
+            if (!TAG_ASSISTANT.equals(parser.getName())) {
+                continue;
+            }
+            final int impressionOuterDepth = parser.getDepth();
+            while (XmlUtils.nextElementWithin(parser, impressionOuterDepth)) {
+                if (!TAG_IMPRESSION.equals(parser.getName())) {
+                    continue;
+                }
+                String key = parser.getAttributeValue(null, ATT_KEY);
+                ChannelImpressions ci = new ChannelImpressions();
+                ci.populateFromXml(parser);
+                synchronized (mkeyToImpressions) {
+                    ci.append(mkeyToImpressions.get(key));
+                    mkeyToImpressions.put(key, ci);
+                }
+            }
+        }
+    }
+
+    private void saveFile() throws IOException {
+        AsyncTask.execute(() -> {
+            final FileOutputStream stream;
+            try {
+                stream = mFile.startWrite();
+            } catch (IOException e) {
+                Slog.w(TAG, "Failed to save policy file", e);
+                return;
+            }
+            try {
+                final XmlSerializer out = new FastXmlSerializer();
+                out.setOutput(stream, StandardCharsets.UTF_8.name());
+                writeXml(out);
+                mFile.finishWrite(stream);
+            } catch (IOException e) {
+                Slog.w(TAG, "Failed to save impressions file, restoring backup", e);
+                mFile.failWrite(stream);
+            }
+        });
+    }
+
+    protected void writeXml(XmlSerializer out) throws IOException {
+        out.startDocument(null, true);
+        out.startTag(null, TAG_ASSISTANT);
+        out.attribute(null, ATTR_VERSION, Integer.toString(DB_VERSION));
+        synchronized (mkeyToImpressions) {
+            for (Map.Entry<String, ChannelImpressions> entry
+                    : mkeyToImpressions.entrySet()) {
+                // TODO: ensure channel still exists
+                out.startTag(null, TAG_IMPRESSION);
+                out.attribute(null, ATT_KEY, entry.getKey());
+                entry.getValue().writeXml(out);
+                out.endTag(null, TAG_IMPRESSION);
+            }
+        }
+        out.endTag(null, TAG_ASSISTANT);
+        out.endDocument();
+    }
 
     @Override
     public Adjustment onNotificationEnqueued(StatusBarNotification sbn) {
@@ -87,26 +201,38 @@ public class Assistant extends NotificationAssistantService {
     public void onNotificationRemoved(StatusBarNotification sbn, RankingMap rankingMap,
             NotificationStats stats, int reason) {
         try {
+            boolean updatedImpressions = false;
             String channelId = mLiveNotifications.remove(sbn.getKey());
             String key = getKey(sbn.getPackageName(), sbn.getUserId(), channelId);
-            ChannelImpressions ci = mkeyToImpressions.getOrDefault(key, new ChannelImpressions());
-            if (stats.hasSeen()) {
-                ci.incrementViews();
+            synchronized (mkeyToImpressions) {
+                ChannelImpressions ci = mkeyToImpressions.getOrDefault(key,
+                        new ChannelImpressions());
+                if (stats.hasSeen()) {
+                    ci.incrementViews();
+                    updatedImpressions = true;
+                }
+                if (PREJUDICAL_DISMISSALS.contains(reason)) {
+                    if ((!sbn.isAppGroup() || sbn.getNotification().isGroupChild())
+                            && !stats.hasInteracted()
+                            && stats.getDismissalSurface() != NotificationStats.DISMISSAL_AOD
+                            && stats.getDismissalSurface() != NotificationStats.DISMISSAL_PEEK
+                            && stats.getDismissalSurface() != NotificationStats.DISMISSAL_OTHER) {
+                        if (DEBUG) Log.i(TAG, "increment dismissals " + key);
+                        ci.incrementDismissals();
+                        updatedImpressions = true;
+                    } else {
+                        if (DEBUG) Slog.i(TAG, "reset streak " + key);
+                        if (ci.getStreak() > 0) {
+                            updatedImpressions = true;
+                        }
+                        ci.resetStreak();
+                    }
+                }
+                mkeyToImpressions.put(key, ci);
             }
-            if (DISMISS_WITH_PREJUDICE.contains(reason)
-                    && !sbn.isAppGroup()
-                    && !sbn.getNotification().isGroupChild()
-                    && !stats.hasInteracted()
-                    && stats.getDismissalSurface() != NotificationStats.DISMISSAL_AOD
-                    && stats.getDismissalSurface() != NotificationStats.DISMISSAL_PEEK
-                    && stats.getDismissalSurface() != NotificationStats.DISMISSAL_OTHER) {
-               if (DEBUG) Log.i(TAG, "increment dismissals");
-                ci.incrementDismissals();
-            } else {
-                if (DEBUG) Slog.i(TAG, "reset streak");
-                ci.resetStreak();
+            if (updatedImpressions) {
+                saveFile();
             }
-            mkeyToImpressions.put(key, ci);
         } catch (Throwable e) {
             Slog.e(TAG, "Error occurred processing removal", e);
         }
@@ -121,6 +247,11 @@ public class Assistant extends NotificationAssistantService {
     public void onListenerConnected() {
         if (DEBUG) Log.i(TAG, "CONNECTED");
         try {
+            mFile = new AtomicFile(new File(new File(
+                    Environment.getDataUserCePackageDirectory(
+                            StorageManager.UUID_PRIVATE_INTERNAL, getUserId(), getPackageName()),
+                    "assistant"), "block_stats.xml"));
+            loadFile();
             for (StatusBarNotification sbn : getActiveNotifications()) {
                 onNotificationPosted(sbn);
             }
@@ -129,7 +260,7 @@ public class Assistant extends NotificationAssistantService {
         }
     }
 
-    private String getKey(String pkg, int userId, String channelId) {
+    protected String getKey(String pkg, int userId, String channelId) {
         return pkg + "|" + userId + "|" + channelId;
     }
 
@@ -151,6 +282,11 @@ public class Assistant extends NotificationAssistantService {
     }
 
     // for testing
+
+    protected void setFile(AtomicFile file) {
+        mFile = file;
+    }
+
     protected void setFakeRanking(Ranking ranking) {
         mFakeRanking = ranking;
     }
@@ -161,5 +297,17 @@ public class Assistant extends NotificationAssistantService {
 
     protected void setContext(Context context) {
         mSystemContext = context;
+    }
+
+    protected ChannelImpressions getImpressions(String key) {
+        synchronized (mkeyToImpressions) {
+            return mkeyToImpressions.get(key);
+        }
+    }
+
+    protected void insertImpressions(String key, ChannelImpressions ci) {
+        synchronized (mkeyToImpressions) {
+            mkeyToImpressions.put(key, ci);
+        }
     }
 }

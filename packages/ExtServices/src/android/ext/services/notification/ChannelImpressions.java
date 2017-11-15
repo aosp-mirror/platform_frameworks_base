@@ -18,7 +18,13 @@ package android.ext.services.notification;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
 import android.util.Log;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlSerializer;
+
+import java.io.IOException;
 
 public final class ChannelImpressions implements Parcelable {
     private static final String TAG = "ExtAssistant.CI";
@@ -26,6 +32,9 @@ public final class ChannelImpressions implements Parcelable {
 
     static final double DISMISS_TO_VIEW_RATIO_LIMIT = .8;
     static final int STREAK_LIMIT = 2;
+    static final String ATT_DISMISSALS = "dismisses";
+    static final String ATT_VIEWS = "views";
+    static final String ATT_STREAK = "streak";
 
     private int mDismissals = 0;
     private int mViews = 0;
@@ -60,6 +69,14 @@ public final class ChannelImpressions implements Parcelable {
     public void incrementDismissals() {
         mDismissals++;
         mStreak++;
+    }
+
+    public void append(ChannelImpressions additionalImpressions) {
+        if (additionalImpressions != null) {
+            mViews += additionalImpressions.getViews();
+            mStreak += additionalImpressions.getStreak();
+            mDismissals += additionalImpressions.getDismissals();
+        }
     }
 
     public void incrementViews() {
@@ -133,5 +150,37 @@ public final class ChannelImpressions implements Parcelable {
         sb.append(", mStreak=").append(mStreak);
         sb.append('}');
         return sb.toString();
+    }
+
+    protected void populateFromXml(XmlPullParser parser) {
+        mDismissals = safeInt(parser, ATT_DISMISSALS, 0);
+        mStreak = safeInt(parser, ATT_STREAK, 0);
+        mViews = safeInt(parser, ATT_VIEWS, 0);
+    }
+
+    protected void writeXml(XmlSerializer out) throws IOException {
+        if (mDismissals != 0) {
+            out.attribute(null, ATT_DISMISSALS, String.valueOf(mDismissals));
+        }
+        if (mStreak != 0) {
+            out.attribute(null, ATT_STREAK, String.valueOf(mStreak));
+        }
+        if (mViews != 0) {
+            out.attribute(null, ATT_VIEWS, String.valueOf(mViews));
+        }
+    }
+
+    private static int safeInt(XmlPullParser parser, String att, int defValue) {
+        final String val = parser.getAttributeValue(null, att);
+        return tryParseInt(val, defValue);
+    }
+
+    private static int tryParseInt(String value, int defValue) {
+        if (TextUtils.isEmpty(value)) return defValue;
+        try {
+            return Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+            return defValue;
+        }
     }
 }
