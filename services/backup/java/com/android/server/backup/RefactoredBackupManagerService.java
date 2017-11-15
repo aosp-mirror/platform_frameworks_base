@@ -2158,8 +2158,17 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
             mFullBackupQueue.remove(0);
             CountDownLatch latch = new CountDownLatch(1);
             String[] pkg = new String[]{entry.packageName};
-            mRunningFullBackupTask = new PerformFullTransportBackupTask(this, null, pkg, true,
-                    scheduledJob, latch, null, null, false /* userInitiated */);
+            mRunningFullBackupTask = PerformFullTransportBackupTask.newWithCurrentTransport(
+                    this,
+                    /* observer */ null,
+                    pkg,
+                    /* updateSchedule */ true,
+                    scheduledJob,
+                    latch,
+                    /* backupObserver */ null,
+                    /* monitor */ null,
+                    /* userInitiated */ false,
+                    "BMS.beginFullBackup()");
             // Acquiring wakelock for PerformFullTransportBackupTask before its start.
             mWakelock.acquire();
             (new Thread(mRunningFullBackupTask)).start();
@@ -2513,8 +2522,17 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
             final long oldId = Binder.clearCallingIdentity();
             try {
                 CountDownLatch latch = new CountDownLatch(1);
-                PerformFullTransportBackupTask task = new PerformFullTransportBackupTask(this, null,
-                        pkgNames, false, null, latch, null, null, false /* userInitiated */);
+                Runnable task = PerformFullTransportBackupTask.newWithCurrentTransport(
+                        this,
+                        /* observer */ null,
+                        pkgNames,
+                        /* updateSchedule */ false,
+                        /* runningJob */ null,
+                        latch,
+                        /* backupObserver */ null,
+                        /* monitor */ null,
+                        /* userInitiated */ false,
+                        "BMS.fullTransportBackup()");
                 // Acquiring wakelock for PerformFullTransportBackupTask before its start.
                 mWakelock.acquire();
                 (new Thread(task, "full-transport-master")).start();
