@@ -65,6 +65,7 @@ cc_library {
                 "core/proto/android/os/procrank.proto",
                 "core/proto/android/os/system_properties.proto",
                 "core/proto/android/service/graphicsstats.proto",
+                "libs/incident/proto/android/privacy.proto",
                 "tools/streaming_proto/stream.proto",
             ],
             shared: {

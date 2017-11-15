@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 
-
+#define LOG_TAG "incidentd"
 
 #include "PrivacyBuffer.h"
 #include "io_util.h"
 
 #include <android/util/protobuf.h>
+#include <cutils/log.h>
 
 using namespace android::util;
+
+const bool DEBUG = false;
 
 /**
  * Write the field to buf based on the wire type, iterator will point to next field.
@@ -30,6 +33,9 @@ using namespace android::util;
 void
 PrivacyBuffer::writeFieldOrSkip(uint32_t fieldTag, bool skip)
 {
+    if (DEBUG) ALOGD("%s field %d (wiretype = %d)", skip ? "skip" : "write",
+        read_field_id(fieldTag), read_wire_type(fieldTag));
+
     uint8_t wireType = read_wire_type(fieldTag);
     size_t bytesToWrite = 0;
     uint32_t varint = 0;
@@ -55,6 +61,7 @@ PrivacyBuffer::writeFieldOrSkip(uint32_t fieldTag, bool skip)
             bytesToWrite = 4;
             break;
     }
+    if (DEBUG) ALOGD("%s %d bytes of data", skip ? "skip" : "write", (int)bytesToWrite);
     if (skip) {
         mData.rp()->move(bytesToWrite);
     } else {
@@ -76,10 +83,13 @@ PrivacyBuffer::stripField(const Privacy* parentPolicy, const PrivacySpec& spec)
 {
     if (!mData.hasNext() || parentPolicy == NULL) return BAD_VALUE;
     uint32_t fieldTag = mData.readRawVarint();
-    const Privacy* policy = parentPolicy->lookup(read_field_id(fieldTag));
+    const Privacy* policy = lookup(parentPolicy, read_field_id(fieldTag));
 
-    if (policy == NULL || !policy->IsMessageType() || !policy->HasChildren()) {
-        bool skip = !spec.CheckPremission(policy);
+    if (policy == NULL || policy->children == NULL) {
+        if (DEBUG) ALOGD("Not a message field %d: dest(%d)", read_field_id(fieldTag),
+            policy != NULL ? policy->dest : parentPolicy->dest);
+
+        bool skip = !spec.CheckPremission(policy, parentPolicy->dest);
         // iterator will point to head of next field
         writeFieldOrSkip(fieldTag, skip);
         return NO_ERROR;
@@ -87,7 +97,7 @@ PrivacyBuffer::stripField(const Privacy* parentPolicy, const PrivacySpec& spec)
     // current field is message type and its sub-fields have extra privacy policies
     uint32_t msgSize = mData.readRawVarint();
     EncodedBuffer::Pointer start = mData.rp()->copy();
-    long long token = mProto.start(policy->EncodedFieldId());
+    long long token = mProto.start(encode_field_id(policy));
     while (mData.rp()->pos() - start.pos() != msgSize) {
         status_t err = stripField(policy, spec);
         if (err != NO_ERROR) return err;
@@ -112,8 +122,9 @@ PrivacyBuffer::~PrivacyBuffer()
 status_t
 PrivacyBuffer::strip(const PrivacySpec& spec)
 {
+    if (DEBUG) ALOGD("Strip with spec %d", spec.dest);
     // optimization when no strip happens
-    if (mPolicy == NULL || !mPolicy->HasChildren() || spec.RequireAll()) {
+    if (mPolicy == NULL || mPolicy->children == NULL || spec.RequireAll()) {
         if (spec.CheckPremission(mPolicy)) mSize = mData.size();
         return NO_ERROR;
     }

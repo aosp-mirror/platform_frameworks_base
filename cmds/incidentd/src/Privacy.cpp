@@ -16,37 +16,18 @@
 
 #include "Privacy.h"
 
+#include <android/os/IncidentReportArgs.h>
 #include <stdlib.h>
 
-// DESTINATION enum value
-const uint8_t DEST_LOCAL = 0;
-const uint8_t DEST_EXPLICIT = 1;
-const uint8_t DEST_AUTOMATIC = 2;
+uint64_t encode_field_id(const Privacy* p) { return (uint64_t)p->type << 32 | p->field_id; }
 
-// type of the field, identitical to protobuf definition
-const uint8_t TYPE_STRING = 9;
-const uint8_t TYPE_MESSAGE = 11;
-
-bool
-Privacy::IsMessageType() const { return type == TYPE_MESSAGE; }
-
-uint64_t
-Privacy::EncodedFieldId() const { return (uint64_t)type << 32 | field_id; }
-
-bool
-Privacy::IsStringType() const { return type == TYPE_STRING; }
-
-bool
-Privacy::HasChildren() const { return children != NULL && children[0] != NULL; }
-
-const Privacy*
-Privacy::lookup(uint32_t fieldId) const
+const Privacy* lookup(const Privacy* p, uint32_t fieldId)
 {
-    if (children == NULL) return NULL;
-    for (int i=0; children[i] != NULL; i++) {
-        if (children[i]->field_id == fieldId) return children[i];
-        // This assumes the list's field id is in ascending order and must be true.
-        if (children[i]->field_id > fieldId) return NULL;
+    if (p->children == NULL) return NULL;
+    for (int i=0; p->children[i] != NULL; i++) { // NULL-terminated.
+        if (p->children[i]->field_id == fieldId) return p->children[i];
+        // Incident section gen tool guarantees field ids in ascending order.
+        if (p->children[i]->field_id > fieldId) return NULL;
     }
     return NULL;
 }
@@ -54,11 +35,14 @@ Privacy::lookup(uint32_t fieldId) const
 static bool allowDest(const uint8_t dest, const uint8_t policy)
 {
     switch (policy) {
-    case DEST_LOCAL:
-        return dest == DEST_LOCAL;
-    case DEST_EXPLICIT:
-        return dest == DEST_LOCAL || dest == DEST_EXPLICIT;
-    case DEST_AUTOMATIC:
+    case android::os::DEST_LOCAL:
+        return dest == android::os::DEST_LOCAL;
+    case android::os::DEST_EXPLICIT:
+    case DEST_UNSET:
+        return dest == android::os::DEST_LOCAL ||
+            dest == android::os::DEST_EXPLICIT ||
+            dest == DEST_UNSET;
+    case android::os::DEST_AUTOMATIC:
         return true;
     default:
         return false;
@@ -72,18 +56,19 @@ PrivacySpec::operator<(const PrivacySpec& other) const
 }
 
 bool
-PrivacySpec::CheckPremission(const Privacy* privacy) const
+PrivacySpec::CheckPremission(const Privacy* privacy, const uint8_t defaultDest) const
 {
-    uint8_t policy = privacy == NULL ? DEST_DEFAULT_VALUE : privacy->dest;
+    uint8_t policy = privacy != NULL ? privacy->dest : defaultDest;
     return allowDest(dest, policy);
 }
 
 bool
-PrivacySpec::RequireAll() const { return dest == DEST_LOCAL; }
+PrivacySpec::RequireAll() const { return dest == android::os::DEST_LOCAL; }
 
-PrivacySpec new_spec_from_args(int dest) {
+PrivacySpec new_spec_from_args(int dest)
+{
   if (dest < 0) return PrivacySpec();
   return PrivacySpec(dest);
 }
 
-PrivacySpec get_default_dropbox_spec() { return PrivacySpec(DEST_AUTOMATIC); }
+PrivacySpec get_default_dropbox_spec() { return PrivacySpec(android::os::DEST_AUTOMATIC); }
