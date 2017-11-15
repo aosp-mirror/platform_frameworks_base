@@ -117,13 +117,13 @@ public class FormatterTest {
         assertEquals("2 days", Formatter.formatShortElapsedTime(mContext, 2 * DAY));
         assertEquals("1 day, 23 hr",
                 Formatter.formatShortElapsedTime(mContext, 1 * DAY + 23 * HOUR + 59 * MINUTE));
-        assertEquals("1 day, 0 hr",
+        assertEquals("1 day",
                 Formatter.formatShortElapsedTime(mContext, 1 * DAY + 59 * MINUTE));
-        assertEquals("1 day, 0 hr", Formatter.formatShortElapsedTime(mContext, 1 * DAY));
+        assertEquals("1 day", Formatter.formatShortElapsedTime(mContext, 1 * DAY));
         assertEquals("24 hr", Formatter.formatShortElapsedTime(mContext, 23 * HOUR + 30 * MINUTE));
         assertEquals("3 hr", Formatter.formatShortElapsedTime(mContext, 2 * HOUR + 30 * MINUTE));
         assertEquals("2 hr", Formatter.formatShortElapsedTime(mContext, 2 * HOUR));
-        assertEquals("1 hr, 0 min", Formatter.formatShortElapsedTime(mContext, 1 * HOUR));
+        assertEquals("1 hr", Formatter.formatShortElapsedTime(mContext, 1 * HOUR));
         assertEquals("60 min",
                 Formatter.formatShortElapsedTime(mContext, 59 * MINUTE + 30 * SECOND));
         assertEquals("59 min",
@@ -132,7 +132,7 @@ public class FormatterTest {
         assertEquals("2 min", Formatter.formatShortElapsedTime(mContext, 2 * MINUTE));
         assertEquals("1 min, 59 sec",
                 Formatter.formatShortElapsedTime(mContext, 1 * MINUTE + 59 * SECOND + 999));
-        assertEquals("1 min, 0 sec", Formatter.formatShortElapsedTime(mContext, 1 * MINUTE));
+        assertEquals("1 min", Formatter.formatShortElapsedTime(mContext, 1 * MINUTE));
         assertEquals("59 sec", Formatter.formatShortElapsedTime(mContext, 59 * SECOND + 999));
         assertEquals("1 sec", Formatter.formatShortElapsedTime(mContext, 1 * SECOND));
         assertEquals("0 sec", Formatter.formatShortElapsedTime(mContext, 1));
@@ -154,9 +154,9 @@ public class FormatterTest {
                 mContext, 2 * DAY));
         assertEquals("1 day, 23 hr", Formatter.formatShortElapsedTimeRoundingUpToMinutes(
                 mContext, 1 * DAY + 23 * HOUR + 59 * MINUTE));
-        assertEquals("1 day, 0 hr", Formatter.formatShortElapsedTimeRoundingUpToMinutes(
+        assertEquals("1 day", Formatter.formatShortElapsedTimeRoundingUpToMinutes(
                 mContext, 1 * DAY + 59 * MINUTE));
-        assertEquals("1 day, 0 hr", Formatter.formatShortElapsedTimeRoundingUpToMinutes(
+        assertEquals("1 day", Formatter.formatShortElapsedTimeRoundingUpToMinutes(
                 mContext, 1 * DAY));
         assertEquals("24 hr", Formatter.formatShortElapsedTimeRoundingUpToMinutes(
                 mContext, 23 * HOUR + 30 * MINUTE));
@@ -164,9 +164,9 @@ public class FormatterTest {
                 mContext, 2 * HOUR + 30 * MINUTE));
         assertEquals("2 hr", Formatter.formatShortElapsedTimeRoundingUpToMinutes(
                 mContext, 2 * HOUR));
-        assertEquals("1 hr, 0 min", Formatter.formatShortElapsedTimeRoundingUpToMinutes(
+        assertEquals("1 hr", Formatter.formatShortElapsedTimeRoundingUpToMinutes(
                 mContext, 1 * HOUR));
-        assertEquals("1 hr, 0 min", Formatter.formatShortElapsedTimeRoundingUpToMinutes(
+        assertEquals("1 hr", Formatter.formatShortElapsedTimeRoundingUpToMinutes(
                 mContext, 59 * MINUTE + 30 * SECOND));
         assertEquals("59 min", Formatter.formatShortElapsedTimeRoundingUpToMinutes(
                 mContext, 59 * MINUTE));
