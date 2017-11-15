@@ -195,6 +195,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
     private LinkedList<ActiveLog> mActiveLogs;
     private LinkedList<Long> mCrashTimestamps;
     private int mCrashes;
+    private long mLastEnabledTime;
 
     // configuration from external IBinder call which is used to
     // synchronize with broadcast receiver.
@@ -2021,6 +2022,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         mHandler.sendMessage(mHandler.obtainMessage(MESSAGE_ENABLE,
                              quietMode ? 1 : 0, 0));
         addActiveLog(packageName, true);
+        mLastEnabledTime = SystemClock.elapsedRealtime();
     }
 
     private void addActiveLog(String packageName, boolean enable) {
@@ -2142,7 +2144,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
             writer.println("  address: " + mAddress);
             writer.println("  name: " + mName);
             if (mEnable) {
-                long onDuration = System.currentTimeMillis() - mActiveLogs.getLast().getTime();
+                long onDuration = SystemClock.elapsedRealtime() - mLastEnabledTime;
                 String onDurationString = String.format("%02d:%02d:%02d.%03d",
                                           (int)(onDuration / (1000 * 60 * 60)),
                                           (int)((onDuration / (1000 * 60)) % 60),
