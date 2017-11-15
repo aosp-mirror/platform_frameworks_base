@@ -86,9 +86,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
     private boolean mVibrationOnAnimation;
     private boolean mUserTouchingScreen;
     private boolean mTouchActive;
-    private boolean mContentNeedsClipping;
-    private int mCustomClipTop;
-    private float mFirstElementTopRoundness;
+    private float mFirstElementRoundness;
 
     public NotificationShelf(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -257,7 +255,8 @@ public class NotificationShelf extends ActivatableNotificationView implements
         boolean expandingAnimated = mAmbientState.isExpansionChanging()
                 && !mAmbientState.isPanelTracking();
         int baseZHeight = mAmbientState.getBaseZHeight();
-        boolean contentNeedsClipping = false;
+        int backgroundTop = 0;
+        float firstElementRoundness = 0.0f;
         while (notificationIndex < mHostLayout.getChildCount()) {
             ExpandableView child = (ExpandableView) mHostLayout.getChildAt(notificationIndex);
             notificationIndex++;
@@ -313,15 +312,15 @@ public class NotificationShelf extends ActivatableNotificationView implements
                 NotificationIconContainer.IconState iconState = getIconState(icon);
                 if (iconState.clampedAppearAmount == 1.0f) {
                     // only if the first icon is fully in the shelf we want to clip to it!
-                    mCustomClipTop = (int) (row.getTranslationY() - getTranslationY());
-                    mFirstElementTopRoundness = row.getCurrentBackgroundRadiusTop();
-                    contentNeedsClipping = true;
+                    backgroundTop = (int) (row.getTranslationY() - getTranslationY());
+                    firstElementRoundness = row.getCurrentTopRoundness();
                 }
             }
             notGoneIndex++;
             previousColor = ownColorUntinted;
         }
-        setContentNeedsClipping(contentNeedsClipping);
+        setBackgroundTop(backgroundTop);
+        setFirstElementRoundness(firstElementRoundness);
         mShelfIcons.setSpeedBumpIndex(mAmbientState.getSpeedBumpIndex());
         mShelfIcons.calculateIconTranslations();
         mShelfIcons.applyIconStates();
@@ -342,26 +341,11 @@ public class NotificationShelf extends ActivatableNotificationView implements
         }
     }
 
-    private void setContentNeedsClipping(boolean contentNeedsClipping) {
-        boolean changed = mContentNeedsClipping != contentNeedsClipping;
-        mContentNeedsClipping = contentNeedsClipping;
-        if (changed || contentNeedsClipping) {
-            invalidate();
+    private void setFirstElementRoundness(float firstElementRoundness) {
+        if (mFirstElementRoundness != firstElementRoundness) {
+            mFirstElementRoundness = firstElementRoundness;
+            setTopRoundness(firstElementRoundness, false /* animate */);
         }
-    }
-
-    @Override
-    public Path getCustomClipPath() {
-        if (!mContentNeedsClipping) {
-            return null;
-        }
-        return getRoundedRectPath(0, mCustomClipTop, getWidth(), getHeight(),
-                mFirstElementTopRoundness, getCurrentBackgroundRadiusBottom());
-    }
-
-    @Override
-    protected boolean needsContentClipping() {
-        return mContentNeedsClipping;
     }
 
     private void updateIconClipAmount(ExpandableNotificationRow row) {

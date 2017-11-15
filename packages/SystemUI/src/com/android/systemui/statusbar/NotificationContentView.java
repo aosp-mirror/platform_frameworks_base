@@ -1500,4 +1500,20 @@ public class NotificationContentView extends FrameLayout {
         }
         return false;
     }
+
+    public boolean shouldClipToSidePaddings() {
+        boolean needsPaddings = shouldClipToSidePaddings(getVisibleType());
+        if (mUserExpanding) {
+             needsPaddings |= shouldClipToSidePaddings(mTransformationStartVisibleType);
+        }
+        return needsPaddings;
+    }
+
+    private boolean shouldClipToSidePaddings(int visibleType) {
+        NotificationViewWrapper visibleWrapper = getVisibleWrapper(visibleType);
+        if (visibleWrapper == null) {
+            return false;
+        }
+        return visibleWrapper.shouldClipToSidePaddings();
+    }
 }

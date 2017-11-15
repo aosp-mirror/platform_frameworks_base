@@ -126,6 +126,7 @@
         android:layout_height="48dp"
         android:orientation="horizontal"
         android:gravity="end"
+        android:layout_marginEnd="@*android:dimen/notification_content_margin_end"
         android:layout_marginBottom="8dp" >
         <TextView
             android:id="@+id/more_settings"
@@ -139,7 +140,6 @@
             android:text="@string/notification_done"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_marginEnd="8dp"
             style="@style/TextAppearance.NotificationInfo.Button"/>
     </LinearLayout>
 </com.android.systemui.statusbar.NotificationInfo>

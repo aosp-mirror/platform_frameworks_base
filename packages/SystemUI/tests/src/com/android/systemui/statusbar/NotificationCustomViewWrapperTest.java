@@ -39,9 +39,8 @@ public class NotificationCustomViewWrapperTest extends SysuiTestCase {
     private ExpandableNotificationRow mRow;
 
     @Before
-    @UiThreadTest
-    public void setUp() {
-        mRow = new ExpandableNotificationRow(mContext, null);
+    public void setUp() throws Exception {
+        mRow = new NotificationTestHelper(mContext).createRow();
     }
 
     @Test

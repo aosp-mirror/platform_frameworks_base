@@ -265,6 +265,11 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
         updateActionOffset();
     }
 
+    @Override
+    public boolean shouldClipToSidePaddings() {
+        return mActionsContainer != null && mActionsContainer.getVisibility() != View.GONE;
+    }
+
     private void updateActionOffset() {
         if (mActionsContainer != null) {
             // We should never push the actions higher than they are in the headsup view.

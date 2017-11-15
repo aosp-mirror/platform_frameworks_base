@@ -101,8 +101,11 @@
     <!-- Height of a heads up notification in the status bar -->
     <dimen name="notification_max_heads_up_height_increased">188dp</dimen>
 
+    <!-- Side padding on the lockscreen on the side of notifications -->
+    <dimen name="notification_lockscreen_side_paddings">8dp</dimen>
+
     <!-- Additional side padding for custom content if the app doesn't target P yet -->
-    <dimen name="notification_content_custom_view_side_padding">8dp</dimen>
+    <dimen name="notification_content_custom_view_side_padding">@dimen/notification_lockscreen_side_paddings</dimen>
 
     <!-- Height of a messaging notifications with actions at least. Not that this is an upper bound
          and the notification won't use this much, but is measured with wrap_content -->

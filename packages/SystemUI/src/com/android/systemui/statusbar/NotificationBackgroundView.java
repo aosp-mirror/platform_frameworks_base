@@ -40,9 +40,10 @@ public class NotificationBackgroundView extends View {
     private int mActualHeight;
     private int mClipBottomAmount;
     private int mTintColor;
-    private float mTopRoundness;
-    private float mBottomRoundness;
     private float[] mCornerRadii = new float[8];
+    private int mCurrentSidePaddings;
+    private boolean mBottomIsRounded;
+    private int mBackgroundTop;
 
     public NotificationBackgroundView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -52,13 +53,22 @@ public class NotificationBackgroundView extends View {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        draw(canvas, mBackground);
+        if (mClipTopAmount + mClipBottomAmount < mActualHeight - mBackgroundTop) {
+            canvas.save();
+            canvas.clipRect(0, mClipTopAmount, getWidth(), mActualHeight - mClipBottomAmount);
+            draw(canvas, mBackground);
+            canvas.restore();
+        }
     }
 
     private void draw(Canvas canvas, Drawable drawable) {
-        int bottom = mActualHeight - mClipBottomAmount;
-        if (drawable != null && bottom > mClipTopAmount) {
-            drawable.setBounds(0, mClipTopAmount, getWidth(), bottom);
+        if (drawable != null) {
+            int bottom = mActualHeight;
+            if (mBottomIsRounded) {
+                bottom -= mClipBottomAmount;
+            }
+            drawable.setBounds(mCurrentSidePaddings, mBackgroundTop,
+                    getWidth() - mCurrentSidePaddings, bottom);
             drawable.draw(canvas);
         }
     }
@@ -165,6 +175,7 @@ public class NotificationBackgroundView extends View {
     }
 
     public void setRoundness(float topRoundness, float bottomRoundNess) {
+        mBottomIsRounded = bottomRoundNess != 0.0f;
         mCornerRadii[0] = topRoundness;
         mCornerRadii[1] = topRoundness;
         mCornerRadii[2] = topRoundness;
@@ -188,4 +199,13 @@ public class NotificationBackgroundView extends View {
         }
     }
 
+    public void setCurrentSidePaddings(float currentSidePaddings) {
+        mCurrentSidePaddings = (int) currentSidePaddings;
+        invalidate();
+    }
+
+    public void setBackgroundTop(int backgroundTop) {
+        mBackgroundTop = backgroundTop;
+        invalidate();
+    }
 }

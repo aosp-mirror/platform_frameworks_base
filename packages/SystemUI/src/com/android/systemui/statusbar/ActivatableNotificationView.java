@@ -913,10 +913,31 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         mBackgroundNormal.setRoundness(topRadius, bottomRadius);
     }
 
+    @Override
+    protected void setBackgroundTop(int backgroundTop) {
+        mBackgroundDimmed.setBackgroundTop(backgroundTop);
+        mBackgroundNormal.setBackgroundTop(backgroundTop);
+    }
+
     protected abstract View getContentView();
 
     public int calculateBgColor() {
         return calculateBgColor(true /* withTint */, true /* withOverRide */);
+    }
+
+    @Override
+    public void setCurrentSidePaddings(float currentSidePaddings) {
+        super.setCurrentSidePaddings(currentSidePaddings);
+        mBackgroundNormal.setCurrentSidePaddings(currentSidePaddings);
+        mBackgroundDimmed.setCurrentSidePaddings(currentSidePaddings);
+    }
+
+    @Override
+    protected boolean childNeedsClipping(View child) {
+        if (child instanceof NotificationBackgroundView && isClippingNeeded()) {
+            return true;
+        }
+        return super.childNeedsClipping(child);
     }
 
     /**

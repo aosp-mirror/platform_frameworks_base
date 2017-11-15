@@ -26,6 +26,7 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.Configuration;
+import android.graphics.Path;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.ColorDrawable;
@@ -65,7 +66,6 @@ import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin.MenuItem;
 import com.android.systemui.statusbar.NotificationGuts.GutsContent;
 import com.android.systemui.statusbar.notification.AboveShelfChangedListener;
-import com.android.systemui.statusbar.notification.AboveShelfObserver;
 import com.android.systemui.statusbar.notification.HybridNotificationView;
 import com.android.systemui.statusbar.notification.NotificationInflater;
 import com.android.systemui.statusbar.notification.NotificationUtils;
@@ -2342,8 +2342,35 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     @Override
-    protected boolean needsContentClipping() {
-        return true;
+    protected boolean childNeedsClipping(View child) {
+        if (child instanceof NotificationContentView) {
+            NotificationContentView contentView = (NotificationContentView) child;
+            if (isClippingNeeded()) {
+                return true;
+            } else if (!hasNoRoundingAndNoPadding() && contentView.shouldClipToSidePaddings()) {
+                return true;
+            }
+        } else if (child == mChildrenContainer) {
+            if (isClippingNeeded()) {
+                return true;
+            }
+        } else if (child instanceof NotificationGuts) {
+            return !hasNoRoundingAndNoPadding();
+        }
+        return super.childNeedsClipping(child);
+    }
+
+    @Override
+    public Path getCustomClipPath(View child) {
+        if (child instanceof NotificationGuts) {
+            return getClipPath(true /* ignoreTranslation */);
+        }
+        return super.getCustomClipPath(child);
+    }
+
+    private boolean hasNoRoundingAndNoPadding() {
+        return mCurrentSidePaddings == 0 && getCurrentBottomRoundness() == 0.0f
+                && getCurrentTopRoundness() == 0.0f;
     }
 
     public boolean isShowingAmbient() {
@@ -2356,6 +2383,20 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         if (isAboveShelf() != wasAboveShelf) {
             mAboveShelfChangedListener.onAboveShelfStateChanged(!wasAboveShelf);
         }
+    }
+
+    @Override
+    public void setCurrentSidePaddings(float currentSidePaddings) {
+        if (mIsSummaryWithChildren) {
+            List<ExpandableNotificationRow> notificationChildren =
+                    mChildrenContainer.getNotificationChildren();
+            int size = notificationChildren.size();
+            for (int i = 0; i < size; i++) {
+                ExpandableNotificationRow row = notificationChildren.get(i);
+                row.setCurrentSidePaddings(currentSidePaddings);
+            }
+        }
+        super.setCurrentSidePaddings(currentSidePaddings);
     }
 
     public static class NotificationViewState extends ExpandableViewState {
