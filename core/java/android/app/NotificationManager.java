@@ -758,10 +758,10 @@ public class NotificationManager {
     }
 
     /**
-     * Checks the ability to read/modify notification do not disturb policy for the calling package.
+     * Checks the ability to modify notification do not disturb policy for the calling package.
      *
      * <p>
-     * Returns true if the calling package can read/modify notification policy.
+     * Returns true if the calling package can modify notification policy.
      *
      * <p>
      * Apps can request policy access by sending the user to the activity that matches the system
@@ -839,8 +839,6 @@ public class NotificationManager {
      * Gets the current notification policy.
      *
      * <p>
-     * Only available if policy access is granted to this package.
-     * See {@link #isNotificationPolicyAccessGranted}.
      */
     public Policy getNotificationPolicy() {
         INotificationManager service = getService();
