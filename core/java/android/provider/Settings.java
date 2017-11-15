@@ -3123,6 +3123,10 @@ public final class Settings {
          * to dream after a period of inactivity.  This value is also known as the
          * user activity timeout period since the screen isn't necessarily turned off
          * when it expires.
+         *
+         * <p>
+         * This value is bounded by maximum timeout set by
+         * {@link android.app.admin.DevicePolicyManager#setMaximumTimeToLock(ComponentName, long)}.
          */
         public static final String SCREEN_OFF_TIMEOUT = "screen_off_timeout";
 

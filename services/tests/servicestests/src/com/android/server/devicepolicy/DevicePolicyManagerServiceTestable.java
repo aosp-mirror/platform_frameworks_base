@@ -373,6 +373,11 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
         }
 
         @Override
+        void settingsSystemPutString(String name, String value) {
+            services.settings.settingsSystemPutString(name, value);
+        }
+
+        @Override
         int settingsGlobalGetInt(String name, int def) {
             return services.settings.settingsGlobalGetInt(name, def);
         }

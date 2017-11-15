@@ -6667,7 +6667,7 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by device owners to update {@link android.provider.Settings.Global} settings.
+     * Called by device owner to update {@link android.provider.Settings.Global} settings.
      * Validation that the value of the setting is in the correct form for the setting type should
      * be performed by the caller.
      * <p>
@@ -6709,6 +6709,37 @@ public class DevicePolicyManager {
         if (mService != null) {
             try {
                 mService.setGlobalSetting(admin, setting, value);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Called by device owner to update {@link android.provider.Settings.System} settings.
+     * Validation that the value of the setting is in the correct form for the setting type should
+     * be performed by the caller.
+     * <p>
+     * The settings that can be updated with this method are:
+     * <ul>
+     * <li>{@link android.provider.Settings.System#SCREEN_BRIGHTNESS}</li>
+     * <li>{@link android.provider.Settings.System#SCREEN_BRIGHTNESS_MODE}</li>
+     * <li>{@link android.provider.Settings.System#SCREEN_OFF_TIMEOUT}</li>
+     * </ul>
+     * <p>
+     *
+     * @see android.provider.Settings.System#SCREEN_OFF_TIMEOUT
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param setting The name of the setting to update.
+     * @param value The value to update the setting to.
+     * @throws SecurityException if {@code admin} is not a device owner.
+     */
+    public void setSystemSetting(@NonNull ComponentName admin, @NonNull String setting,
+            String value) {
+        throwIfParentInstance("setSystemSetting");
+        if (mService != null) {
+            try {
+                mService.setSystemSetting(admin, setting, value);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
