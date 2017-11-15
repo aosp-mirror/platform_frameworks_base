@@ -49,6 +49,7 @@ public final class SmartSelectionEventTracker {
     private static final int PREV_EVENT_DELTA = MetricsEvent.FIELD_SELECTION_SINCE_PREVIOUS;
     private static final int INDEX = MetricsEvent.FIELD_SELECTION_SESSION_INDEX;
     private static final int WIDGET_TYPE = MetricsEvent.FIELD_SELECTION_WIDGET_TYPE;
+    private static final int WIDGET_VERSION = MetricsEvent.FIELD_SELECTION_WIDGET_VERSION;
     private static final int MODEL_NAME = MetricsEvent.FIELD_TEXTCLASSIFIER_MODEL;
     private static final int ENTITY_TYPE = MetricsEvent.FIELD_SELECTION_ENTITY_TYPE;
     private static final int SMART_START = MetricsEvent.FIELD_SELECTION_SMART_RANGE_START;
@@ -85,6 +86,7 @@ public final class SmartSelectionEventTracker {
 
     private final MetricsLogger mMetricsLogger = new MetricsLogger();
     private final int mWidgetType;
+    @Nullable private final String mWidgetVersion;
     private final Context mContext;
 
     @Nullable private String mSessionId;
@@ -99,6 +101,14 @@ public final class SmartSelectionEventTracker {
 
     public SmartSelectionEventTracker(@NonNull Context context, @WidgetType int widgetType) {
         mWidgetType = widgetType;
+        mWidgetVersion = null;
+        mContext = Preconditions.checkNotNull(context);
+    }
+
+    public SmartSelectionEventTracker(
+            @NonNull Context context, @WidgetType int widgetType, @Nullable String widgetVersion) {
+        mWidgetType = widgetType;
+        mWidgetVersion = widgetVersion;
         mContext = Preconditions.checkNotNull(context);
     }
 
@@ -155,6 +165,7 @@ public final class SmartSelectionEventTracker {
                 .addTaggedData(PREV_EVENT_DELTA, prevEventDelta)
                 .addTaggedData(INDEX, mIndex)
                 .addTaggedData(WIDGET_TYPE, getWidgetTypeName())
+                .addTaggedData(WIDGET_VERSION, mWidgetVersion)
                 .addTaggedData(MODEL_NAME, mModelName)
                 .addTaggedData(ENTITY_TYPE, event.mEntityType)
                 .addTaggedData(SMART_START, getSmartRangeDelta(mSmartIndices[0]))
@@ -311,7 +322,10 @@ public final class SmartSelectionEventTracker {
     private static void debugLog(LogMaker log) {
         if (!DEBUG_LOG_ENABLED) return;
 
-        final String widget = Objects.toString(log.getTaggedData(WIDGET_TYPE), UNKNOWN);
+        final String widgetType = Objects.toString(log.getTaggedData(WIDGET_TYPE), UNKNOWN);
+        final String widgetVersion = Objects.toString(log.getTaggedData(WIDGET_VERSION), "");
+        final String widget = widgetVersion.isEmpty()
+                ? widgetType : widgetType + "-" + widgetVersion;
         final int index = Integer.parseInt(Objects.toString(log.getTaggedData(INDEX), ZERO));
         if (log.getType() == MetricsEvent.ACTION_TEXT_SELECTION_START) {
             String sessionId = Objects.toString(log.getTaggedData(SESSION_ID), "");
