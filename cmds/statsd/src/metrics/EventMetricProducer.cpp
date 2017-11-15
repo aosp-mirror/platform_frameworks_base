@@ -121,7 +121,10 @@ void EventMetricProducer::onMatchedLogEventInternal(
     event.ToProto(*mProto);
     mProto->end(eventToken);
     mProto->end(wrapperToken);
-    // TODO: Find a proper way to derive the size of incoming LogEvent.
+
+    // TODO: Increment mByteSize with a real value. Until this feature is working, we assume 50
+    // bytes.
+    mByteSize += 50;
 }
 
 size_t EventMetricProducer::byteSize() {

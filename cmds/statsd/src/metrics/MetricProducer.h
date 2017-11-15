@@ -61,12 +61,15 @@ public:
 
     // TODO: Pass a timestamp as a parameter in onDumpReport and update all its
     // implementations.
+    // onDumpReport returns the proto-serialized output and clears the previously stored contents.
     virtual std::unique_ptr<std::vector<uint8_t>> onDumpReport() = 0;
 
     virtual bool isConditionSliced() const {
         return mConditionSliced;
     };
 
+    // Returns the memory in bytes currently used to store this metric's data. Does not change
+    // state.
     virtual size_t byteSize() = 0;
 
 protected:
