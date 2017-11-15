@@ -56,6 +56,7 @@ public class NotificationListenerTest extends SysuiTestCase {
     private NotificationListenerService.RankingMap mRanking;
     private Set<String> mKeysKeptForRemoteInput;
     private NotificationData mNotificationData;
+    private NotificationRemoteInputManager mRemoteInputManager;
 
     @Before
     public void setUp() {
@@ -63,13 +64,14 @@ public class NotificationListenerTest extends SysuiTestCase {
         mPresenter = mock(NotificationPresenter.class);
         mNotificationData = mock(NotificationData.class);
         mRanking = mock(NotificationListenerService.RankingMap.class);
+        mRemoteInputManager = mock(NotificationRemoteInputManager.class);
         mKeysKeptForRemoteInput = new HashSet<>();
 
         when(mPresenter.getHandler()).thenReturn(mHandler);
         when(mPresenter.getNotificationData()).thenReturn(mNotificationData);
-        when(mPresenter.getKeysKeptForRemoteInput()).thenReturn(mKeysKeptForRemoteInput);
+        when(mRemoteInputManager.getKeysKeptForRemoteInput()).thenReturn(mKeysKeptForRemoteInput);
 
-        mListener = new NotificationListener(mPresenter, mContext);
+        mListener = new NotificationListener(mPresenter, mRemoteInputManager, mContext);
         mSbn = new StatusBarNotification(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, 0, null, TEST_UID, 0,
                 new Notification(), UserHandle.CURRENT, null, 0);
     }

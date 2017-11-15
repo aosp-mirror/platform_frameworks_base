@@ -28,6 +28,9 @@ import static com.android.systemui.statusbar.NotificationLockscreenUserManager
         .NOTIFICATION_UNLOCKED_BY_WORK_CHALLENGE_ACTION;
 import static com.android.systemui.statusbar.NotificationLockscreenUserManager.PERMISSION_SELF;
 import static com.android.systemui.statusbar.NotificationMediaManager.DEBUG_MEDIA;
+import static com.android.systemui.statusbar.NotificationRemoteInputManager.ENABLE_REMOTE_INPUT;
+import static com.android.systemui.statusbar.NotificationRemoteInputManager
+        .FORCE_REMOTE_INPUT_HISTORY;
 import static com.android.systemui.statusbar.notification.NotificationInflater.InflationCallback;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT_TRANSPARENT;
@@ -47,7 +50,6 @@ import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.app.RemoteInput;
 import android.app.StatusBarManager;
 import android.app.TaskStackBuilder;
 import android.app.WallpaperColors;
@@ -126,7 +128,6 @@ import android.view.accessibility.AccessibilityManager;
 import android.view.animation.AccelerateInterpolator;
 import android.widget.DateTimeView;
 import android.widget.ImageView;
-import android.widget.RemoteViews;
 import android.widget.TextView;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -204,6 +205,7 @@ import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationPresenter;
+import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.ScrimView;
@@ -230,7 +232,6 @@ import com.android.systemui.statusbar.policy.KeyguardUserSwitcher;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 import com.android.systemui.statusbar.policy.PreviewInflater;
-import com.android.systemui.statusbar.policy.RemoteInputView;
 import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
@@ -250,8 +251,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Stack;
+import java.util.function.Function;
 
 public class StatusBar extends SystemUI implements DemoMode,
         DragDownHelper.DragDownCallback, ActivityStarter, OnUnlockMethodChangedListener,
@@ -262,12 +263,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         ColorExtractor.OnColorsChangedListener, ConfigurationListener, NotificationPresenter {
     public static final boolean MULTIUSER_DEBUG = false;
 
-    public static final boolean ENABLE_REMOTE_INPUT =
-            SystemProperties.getBoolean("debug.enable_remote_input", true);
     public static final boolean ENABLE_CHILD_NOTIFICATIONS
             = SystemProperties.getBoolean("debug.child_notifs", true);
-    public static final boolean FORCE_REMOTE_INPUT_HISTORY =
-            SystemProperties.getBoolean("debug.force_remoteinput_history", true);
 
     protected static final int MSG_HIDE_RECENT_APPS = 1020;
     protected static final int MSG_PRELOAD_RECENT_APPS = 1022;
@@ -343,14 +340,6 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     /** If true, the lockscreen will show a distinct wallpaper */
     private static final boolean ENABLE_LOCKSCREEN_WALLPAPER = true;
-
-    /**
-     * How long to wait before auto-dismissing a notification that was kept for remote input, and
-     * has now sent a remote input. We auto-dismiss, because the app may not see a reason to cancel
-     * these given that they technically don't exist anymore. We wait a bit in case the app issues
-     * an update.
-     */
-    private static final int REMOTE_INPUT_KEPT_ENTRY_AUTO_CANCEL_DELAY = 200;
 
     /**
      * Never let the alpha become zero for surfaces that draw with SRC - otherwise the RenderNode
@@ -540,6 +529,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     private NotificationMediaManager mMediaManager;
     protected NotificationLockscreenUserManager mLockscreenUserManager;
+    protected NotificationRemoteInputManager mRemoteInputManager;
 
     /** Keys of notifications currently visible to the user. */
     private final ArraySet<NotificationVisibility> mCurrentlyVisibleNotifications =
@@ -724,6 +714,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     @Override
     public void start() {
+        mRemoteInputManager = Dependency.get(NotificationRemoteInputManager.class);
         mNetworkController = Dependency.get(NetworkController.class);
         mUserSwitcherController = Dependency.get(UserSwitcherController.class);
         mScreenLifecycle = Dependency.get(ScreenLifecycle.class);
@@ -778,7 +769,6 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         mRecents = getComponent(Recents.class);
 
-        mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
         mKeyguardManager = (KeyguardManager) mContext.getSystemService(Context.KEYGUARD_SERVICE);
         mLockPatternUtils = new LockPatternUtils(mContext);
 
@@ -818,7 +808,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
 
         // Set up the initial notification state.
-        mNotificationListener = new NotificationListener(this, mContext);
+        mNotificationListener = new NotificationListener(this, mRemoteInputManager, mContext);
         mNotificationListener.register();
 
         if (DEBUG) {
@@ -1160,7 +1150,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     protected View.OnTouchListener getStatusBarWindowTouchListener() {
         return (v, event) -> {
             checkUserAutohide(event);
-            checkRemoteInputOutside(event);
+            mRemoteInputManager.checkRemoteInputOutside(event);
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
                 if (mExpandedVisible) {
                     animateCollapsePanels();
@@ -1433,31 +1423,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mKeyguardIndicationController
                 .setStatusBarKeyguardViewManager(mStatusBarKeyguardViewManager);
         mFingerprintUnlockController.setStatusBarKeyguardViewManager(mStatusBarKeyguardViewManager);
-        mRemoteInputController.addCallback(mStatusBarKeyguardViewManager);
-
-        mRemoteInputController.addCallback(new RemoteInputController.Callback() {
-            @Override
-            public void onRemoteInputSent(Entry entry) {
-                if (FORCE_REMOTE_INPUT_HISTORY && mKeysKeptForRemoteInput.contains(entry.key)) {
-                    removeNotification(entry.key, null);
-                } else if (mRemoteInputEntriesToRemoveOnCollapse.contains(entry)) {
-                    // We're currently holding onto this notification, but from the apps point of
-                    // view it is already canceled, so we'll need to cancel it on the apps behalf
-                    // after sending - unless the app posts an update in the mean time, so wait a
-                    // bit.
-                    mHandler.postDelayed(() -> {
-                        if (mRemoteInputEntriesToRemoveOnCollapse.remove(entry)) {
-                            removeNotification(entry.key, null);
-                        }
-                    }, REMOTE_INPUT_KEPT_ENTRY_AUTO_CANCEL_DELAY);
-                }
-                try {
-                    mBarService.onNotificationDirectReplied(entry.key);
-                } catch (RemoteException e) {
-                    // system process is dead if we're here.
-                }
-            }
-        });
+        mRemoteInputManager.getController().addCallback(mStatusBarKeyguardViewManager);
 
         mKeyguardViewMediatorCallback = keyguardViewMediator.getViewMediatorCallback();
         mLightBarController.setFingerprintUnlockController(mFingerprintUnlockController);
@@ -1634,7 +1600,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             // sending look longer than it takes.
             // Also we should not defer the removal if reordering isn't allowed since otherwise
             // some notifications can't disappear before the panel is closed.
-            boolean ignoreEarliestRemovalTime = mRemoteInputController.isSpinning(key)
+            boolean ignoreEarliestRemovalTime = mRemoteInputManager.getController().isSpinning(key)
                     && !FORCE_REMOTE_INPUT_HISTORY
                     || !mVisualStabilityManager.isReorderingAllowed();
             deferRemoval = !mHeadsUpManager.removeNotification(key,  ignoreEarliestRemovalTime);
@@ -1642,7 +1608,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mMediaManager.onNotificationRemoved(key);
 
         Entry entry = mNotificationData.get(key);
-        if (FORCE_REMOTE_INPUT_HISTORY && mRemoteInputController.isSpinning(key)
+        if (FORCE_REMOTE_INPUT_HISTORY && mRemoteInputManager.getController().isSpinning(key)
                 && entry.row != null && !entry.row.isDismissed()) {
             StatusBarNotification sbn = entry.notification;
 
@@ -1680,7 +1646,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             }
             if (updated) {
                 Log.w(TAG, "Keeping notification around after sending remote input "+ entry.key);
-                mKeysKeptForRemoteInput.add(entry.key);
+                mRemoteInputManager.getKeysKeptForRemoteInput().add(entry.key);
                 return;
             }
         }
@@ -1690,12 +1656,11 @@ public class StatusBar extends SystemUI implements DemoMode,
             return;
         }
 
-        if (entry != null && mRemoteInputController.isRemoteInputActive(entry)
-                && (entry.row != null && !entry.row.isDismissed())) {
+        if (mRemoteInputManager.onRemoveNotification(entry)) {
             mLatestRankingMap = ranking;
-            mRemoteInputEntriesToRemoveOnCollapse.add(entry);
             return;
         }
+
         if (entry != null && mGutsManager.getExposedGuts() != null
                 && mGutsManager.getExposedGuts() == entry.row.getGuts()
                 && entry.row.getGuts() != null && !entry.row.getGuts().isLeavebehind()) {
@@ -1769,9 +1734,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     protected void performRemoveNotification(StatusBarNotification n) {
         Entry entry = mNotificationData.get(n.getKey());
-        if (mRemoteInputController.isRemoteInputActive(entry)) {
-            mRemoteInputController.removeRemoteInput(entry, null);
-        }
+        mRemoteInputManager.onPerformRemoveNotification(n, entry);
         // start old BaseStatusBar.performRemoveNotification.
         final String pkg = n.getPackageName();
         final String tag = n.getTag();
@@ -1784,12 +1747,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             } else if (mStackScroller.hasPulsingNotifications()) {
                 dismissalSurface = NotificationStats.DISMISSAL_AOD;
             }
-            mBarService.onNotificationClear(pkg, tag, id, userId, n.getKey(),
-                    dismissalSurface);
-            if (FORCE_REMOTE_INPUT_HISTORY
-                    && mKeysKeptForRemoteInput.contains(n.getKey())) {
-                mKeysKeptForRemoteInput.remove(n.getKey());
-            }
+            mBarService.onNotificationClear(pkg, tag, id, userId, n.getKey(), dismissalSurface);
             removeNotification(n.getKey(), null);
 
         } catch (RemoteException ex) {
@@ -2508,7 +2466,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                         mStatusBarWindowManager.setHeadsUpShowing(false);
                         mHeadsUpManager.setHeadsUpGoingAway(false);
                     }
-                    removeRemoteInputEntriesKeptUntilCollapsed();
+                    mRemoteInputManager.removeRemoteInputEntriesKeptUntilCollapsed();
                 });
             }
         }
@@ -2587,17 +2545,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
 
         if (!isExpanded) {
-            removeRemoteInputEntriesKeptUntilCollapsed();
+            mRemoteInputManager.removeRemoteInputEntriesKeptUntilCollapsed();
         }
-    }
-
-    private void removeRemoteInputEntriesKeptUntilCollapsed() {
-        for (int i = 0; i < mRemoteInputEntriesToRemoveOnCollapse.size(); i++) {
-            Entry entry = mRemoteInputEntriesToRemoveOnCollapse.valueAt(i);
-            mRemoteInputController.removeRemoteInput(entry, null);
-            removeNotification(entry.key, mLatestRankingMap);
-        }
-        mRemoteInputEntriesToRemoveOnCollapse.clear();
     }
 
     public NotificationStackScrollLayout getNotificationScrollLayout() {
@@ -3183,16 +3132,9 @@ public class StatusBar extends SystemUI implements DemoMode,
         if ((mSystemUiVisibility & STATUS_OR_NAV_TRANSIENT) != 0  // a transient bar is revealed
                 && event.getAction() == MotionEvent.ACTION_OUTSIDE // touch outside the source bar
                 && event.getX() == 0 && event.getY() == 0  // a touch outside both bars
-                && !mRemoteInputController.isRemoteInputActive()) { // not due to typing in IME
+                && !mRemoteInputManager.getController()
+                        .isRemoteInputActive()) { // not due to typing in IME
             userAutohide();
-        }
-    }
-
-    private void checkRemoteInputOutside(MotionEvent event) {
-        if (event.getAction() == MotionEvent.ACTION_OUTSIDE // touch outside the source bar
-                && event.getX() == 0 && event.getY() == 0  // a touch outside both bars
-                && mRemoteInputController.isRemoteInputActive()) {
-            mRemoteInputController.closeRemoteInputs();
         }
     }
 
@@ -3376,18 +3318,18 @@ public class StatusBar extends SystemUI implements DemoMode,
     private void addStatusBarWindow() {
         makeStatusBarView();
         mStatusBarWindowManager = Dependency.get(StatusBarWindowManager.class);
-        mRemoteInputController = new RemoteInputController(new RemoteInputController.Delegate() {
-          public void setRemoteInputActive(NotificationData.Entry entry,
-                  boolean remoteInputActive) {
-              mHeadsUpManager.setRemoteInputActive(entry, remoteInputActive);
-          }
-          public void lockScrollTo(NotificationData.Entry entry) {
-              mStackScroller.lockScrollTo(entry.row);
-          }
-          public void requestDisallowLongPressAndDismiss() {
-              mStackScroller.requestDisallowLongPress();
-              mStackScroller.requestDisallowDismiss();
-          }
+        mRemoteInputManager.setUpWithPresenter(this, this, new RemoteInputController.Delegate() {
+            public void setRemoteInputActive(NotificationData.Entry entry,
+                    boolean remoteInputActive) {
+                mHeadsUpManager.setRemoteInputActive(entry, remoteInputActive);
+            }
+            public void lockScrollTo(NotificationData.Entry entry) {
+                mStackScroller.lockScrollTo(entry.row);
+            }
+            public void requestDisallowLongPressAndDismiss() {
+                mStackScroller.requestDisallowLongPress();
+                mStackScroller.requestDisallowDismiss();
+            }
         });
         mStatusBarWindowManager.add(mStatusBarWindow, getStatusBarHeight());
     }
@@ -3507,8 +3449,8 @@ public class StatusBar extends SystemUI implements DemoMode,
             String action = intent.getAction();
             if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(action)) {
                 KeyboardShortcuts.dismiss();
-                if (mRemoteInputController != null) {
-                    mRemoteInputController.closeRemoteInputs();
+                if (mRemoteInputManager.getController() != null) {
+                    mRemoteInputManager.getController().closeRemoteInputs();
                 }
                 if (mLockscreenUserManager.isCurrentProfile(getSendingUserId())) {
                     int flags = CommandQueue.FLAG_EXCLUDE_NONE;
@@ -4549,7 +4491,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             clearNotificationEffects();
         }
         if (state == StatusBarState.KEYGUARD) {
-            removeRemoteInputEntriesKeptUntilCollapsed();
+            mRemoteInputManager.removeRemoteInputEntriesKeptUntilCollapsed();
             maybeEscalateHeadsUp();
         }
         mState = state;
@@ -4753,19 +4695,62 @@ public class StatusBar extends SystemUI implements DemoMode,
         dismissKeyguardThenExecute(dismissAction, true /* afterKeyguardGone */);
     }
 
-    protected void onLockedRemoteInput(ExpandableNotificationRow row, View clicked) {
+    @Override
+    public void onLockedRemoteInput(ExpandableNotificationRow row, View clicked) {
         mLeaveOpenOnKeyguardHide = true;
         showBouncer();
         mPendingRemoteInputView = clicked;
     }
 
-    protected void onMakeExpandedVisibleForRemoteInput(ExpandableNotificationRow row,
+    @Override
+    public void onMakeExpandedVisibleForRemoteInput(ExpandableNotificationRow row,
             View clickedView) {
         if (isKeyguardShowing()) {
             onLockedRemoteInput(row, clickedView);
         } else {
             row.setUserExpanded(true);
             row.getPrivateLayout().setOnExpandedVisibleListener(clickedView::performClick);
+        }
+    }
+
+    @Override
+    public boolean shouldHandleRemoteInput(View view, PendingIntent pendingIntent) {
+        // Skip remote input as doing so will expand the notification shade.
+        return (mDisabled2 & StatusBarManager.DISABLE2_NOTIFICATION_SHADE) != 0;
+    }
+
+    @Override
+    public boolean handleRemoteViewClick(View view, PendingIntent pendingIntent,
+            Intent fillInIntent, NotificationRemoteInputManager.ClickHandler defaultHandler) {
+        final boolean isActivity = pendingIntent.isActivity();
+        if (isActivity) {
+            final boolean afterKeyguardGone = PreviewInflater.wouldLaunchResolverActivity(
+                    mContext, pendingIntent.getIntent(), mLockscreenUserManager.getCurrentUserId());
+            dismissKeyguardThenExecute(() -> {
+                try {
+                    ActivityManager.getService().resumeAppSwitches();
+                } catch (RemoteException e) {
+                }
+
+                boolean handled = defaultHandler.handleClick();
+
+                // close the shade if it was open
+                if (handled && !mNotificationPanel.isFullyCollapsed()) {
+                    animateCollapsePanels(
+                            CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL, true /* force */);
+                    visibilityChanged(false);
+                    mAssistManager.hideAssist();
+
+                    // Wait for activity start.
+                    return true;
+                } else {
+                    return false;
+                }
+
+            }, afterKeyguardGone);
+            return true;
+        } else {
+            return defaultHandler.handleClick();
         }
     }
 
@@ -4805,7 +4790,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         // End old BaseStatusBar.startWorkChallengeIfNecessary.
     }
 
-    protected void onLockedWorkRemoteInput(int userId, ExpandableNotificationRow row,
+    @Override
+    public void onLockedWorkRemoteInput(int userId, ExpandableNotificationRow row,
             View clicked) {
         // Collapse notification and show work challenge
         animateCollapsePanels();
@@ -5031,6 +5017,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         return !mNotificationData.getActiveNotifications().isEmpty();
     }
 
+    @Override
     public void wakeUpIfDozing(long time, View where) {
         if (mDozing) {
             PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
@@ -5042,6 +5029,11 @@ public class StatusBar extends SystemUI implements DemoMode,
             mStatusBarKeyguardViewManager.notifyDeviceWakeUpRequested();
             mFalsingManager.onScreenOnFromTouch();
         }
+    }
+
+    @Override
+    public boolean isDeviceLocked(int userId) {
+        return mKeyguardManager.isDeviceLocked(userId);
     }
 
     @Override
@@ -5387,7 +5379,6 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     protected final NotificationGroupManager mGroupManager = new NotificationGroupManager();
 
-    protected RemoteInputController mRemoteInputController;
 
     // for heads up notifications
     protected HeadsUpManager mHeadsUpManager;
@@ -5404,14 +5395,6 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     protected boolean mVisible;
     protected final ArraySet<Entry> mHeadsUpEntriesToRemoveOnSwitch = new ArraySet<>();
-    protected final ArraySet<Entry> mRemoteInputEntriesToRemoveOnCollapse = new ArraySet<>();
-
-    /**
-     * Notifications with keys in this set are not actually around anymore. We kept them around
-     * when they were canceled in response to a remote input interaction. This allows us to show
-     * what you replied and allows you to continue typing into it.
-     */
-    protected final ArraySet<String> mKeysKeptForRemoteInput = new ArraySet<>();
 
     // mScreenOnFromKeyguard && mVisible.
     private boolean mVisibleToUser;
@@ -5422,8 +5405,6 @@ public class StatusBar extends SystemUI implements DemoMode,
     protected DevicePolicyManager mDevicePolicyManager;
     protected PowerManager mPowerManager;
     protected StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
-
-    private UserManager mUserManager;
 
     protected KeyguardManager mKeyguardManager;
     private LockPatternUtils mLockPatternUtils;
@@ -5475,212 +5456,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         @Override
         public void onDeviceProvisionedChanged() {
             updateNotifications();
-        }
-    };
-
-    private final RemoteViews.OnClickHandler mOnClickHandler = new RemoteViews.OnClickHandler() {
-
-        @Override
-        public boolean onClickHandler(
-                final View view, final PendingIntent pendingIntent, final Intent fillInIntent) {
-            wakeUpIfDozing(SystemClock.uptimeMillis(), view);
-
-            if (handleRemoteInput(view, pendingIntent)) {
-                return true;
-            }
-
-            if (DEBUG) {
-                Log.v(TAG, "Notification click handler invoked for intent: " + pendingIntent);
-            }
-            logActionClick(view);
-            // The intent we are sending is for the application, which
-            // won't have permission to immediately start an activity after
-            // the user switches to home.  We know it is safe to do at this
-            // point, so make sure new activity switches are now allowed.
-            try {
-                ActivityManager.getService().resumeAppSwitches();
-            } catch (RemoteException e) {
-            }
-            final boolean isActivity = pendingIntent.isActivity();
-            if (isActivity) {
-                final boolean afterKeyguardGone = PreviewInflater.wouldLaunchResolverActivity(
-                        mContext, pendingIntent.getIntent(),
-                        mLockscreenUserManager.getCurrentUserId());
-                dismissKeyguardThenExecute(() -> {
-                    try {
-                        ActivityManager.getService().resumeAppSwitches();
-                    } catch (RemoteException e) {
-                    }
-
-                    boolean handled = superOnClickHandler(view, pendingIntent, fillInIntent);
-
-                    // close the shade if it was open
-                    if (handled && !mNotificationPanel.isFullyCollapsed()) {
-                        animateCollapsePanels(
-                                CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL, true /* force */);
-                        visibilityChanged(false);
-                        mAssistManager.hideAssist();
-
-                        // Wait for activity start.
-                        return true;
-                    } else {
-                        return false;
-                    }
-
-                }, afterKeyguardGone);
-                return true;
-            } else {
-                return superOnClickHandler(view, pendingIntent, fillInIntent);
-            }
-        }
-
-        private void logActionClick(View view) {
-            ViewParent parent = view.getParent();
-            String key = getNotificationKeyForParent(parent);
-            if (key == null) {
-                Log.w(TAG, "Couldn't determine notification for click.");
-                return;
-            }
-            int index = -1;
-            // If this is a default template, determine the index of the button.
-            if (view.getId() == com.android.internal.R.id.action0 &&
-                    parent != null && parent instanceof ViewGroup) {
-                ViewGroup actionGroup = (ViewGroup) parent;
-                index = actionGroup.indexOfChild(view);
-            }
-            try {
-                mBarService.onNotificationActionClick(key, index);
-            } catch (RemoteException e) {
-                // Ignore
-            }
-        }
-
-        private String getNotificationKeyForParent(ViewParent parent) {
-            while (parent != null) {
-                if (parent instanceof ExpandableNotificationRow) {
-                    return ((ExpandableNotificationRow) parent).getStatusBarNotification().getKey();
-                }
-                parent = parent.getParent();
-            }
-            return null;
-        }
-
-        private boolean superOnClickHandler(View view, PendingIntent pendingIntent,
-                Intent fillInIntent) {
-            return super.onClickHandler(view, pendingIntent, fillInIntent,
-                    WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY);
-        }
-
-        private boolean handleRemoteInput(View view, PendingIntent pendingIntent) {
-            if ((mDisabled2 & StatusBarManager.DISABLE2_NOTIFICATION_SHADE) != 0) {
-                // Skip remote input as doing so will expand the notification shade.
-                return true;
-            }
-
-            Object tag = view.getTag(com.android.internal.R.id.remote_input_tag);
-            RemoteInput[] inputs = null;
-            if (tag instanceof RemoteInput[]) {
-                inputs = (RemoteInput[]) tag;
-            }
-
-            if (inputs == null) {
-                return false;
-            }
-
-            RemoteInput input = null;
-
-            for (RemoteInput i : inputs) {
-                if (i.getAllowFreeFormInput()) {
-                    input = i;
-                }
-            }
-
-            if (input == null) {
-                return false;
-            }
-
-            ViewParent p = view.getParent();
-            RemoteInputView riv = null;
-            while (p != null) {
-                if (p instanceof View) {
-                    View pv = (View) p;
-                    if (pv.isRootNamespace()) {
-                        riv = findRemoteInputView(pv);
-                        break;
-                    }
-                }
-                p = p.getParent();
-            }
-            ExpandableNotificationRow row = null;
-            while (p != null) {
-                if (p instanceof ExpandableNotificationRow) {
-                    row = (ExpandableNotificationRow) p;
-                    break;
-                }
-                p = p.getParent();
-            }
-
-            if (row == null) {
-                return false;
-            }
-
-            row.setUserExpanded(true);
-
-            if (!mLockscreenUserManager.shouldAllowLockscreenRemoteInput()) {
-                final int userId = pendingIntent.getCreatorUserHandle().getIdentifier();
-                if (mLockscreenUserManager.isLockscreenPublicMode(userId)) {
-                    onLockedRemoteInput(row, view);
-                    return true;
-                }
-                if (mUserManager.getUserInfo(userId).isManagedProfile()
-                        && mKeyguardManager.isDeviceLocked(userId)) {
-                    onLockedWorkRemoteInput(userId, row, view);
-                    return true;
-                }
-            }
-
-            if (riv == null) {
-                riv = findRemoteInputView(row.getPrivateLayout().getExpandedChild());
-                if (riv == null) {
-                    return false;
-                }
-                if (!row.getPrivateLayout().getExpandedChild().isShown()) {
-                    onMakeExpandedVisibleForRemoteInput(row, view);
-                    return true;
-                }
-            }
-
-            int width = view.getWidth();
-            if (view instanceof TextView) {
-                // Center the reveal on the text which might be off-center from the TextView
-                TextView tv = (TextView) view;
-                if (tv.getLayout() != null) {
-                    int innerWidth = (int) tv.getLayout().getLineWidth(0);
-                    innerWidth += tv.getCompoundPaddingLeft() + tv.getCompoundPaddingRight();
-                    width = Math.min(width, innerWidth);
-                }
-            }
-            int cx = view.getLeft() + width / 2;
-            int cy = view.getTop() + view.getHeight() / 2;
-            int w = riv.getWidth();
-            int h = riv.getHeight();
-            int r = Math.max(
-                    Math.max(cx + cy, cx + (h - cy)),
-                    Math.max((w - cx) + cy, (w - cx) + (h - cy)));
-
-            riv.setRevealParameters(cx, cy, r);
-            riv.setPendingIntent(pendingIntent);
-            riv.setRemoteInput(inputs, input);
-            riv.focusAnimated();
-
-            return true;
-        }
-
-        private RemoteInputView findRemoteInputView(View v) {
-            if (v == null) {
-                return null;
-            }
-            return (RemoteInputView) v.findViewWithTag(RemoteInputView.VIEW_TAG);
         }
     };
 
@@ -5928,12 +5703,11 @@ public class StatusBar extends SystemUI implements DemoMode,
         row.setGroupManager(mGroupManager);
         row.setHeadsUpManager(mHeadsUpManager);
         row.setAboveShelfChangedListener(mAboveShelfObserver);
-        row.setRemoteInputController(mRemoteInputController);
         row.setOnExpandClickListener(this);
-        row.setRemoteViewClickHandler(mOnClickHandler);
         row.setInflationCallback(this);
         row.setSecureStateProvider(this::isKeyguardCurrentlySecure);
         row.setLongPressListener(getNotificationLongClicker());
+        mRemoteInputManager.bindRow(row);
 
         // Get the app name.
         // Note that Notification.Builder#bindHeaderAppName has similar logic
@@ -6395,7 +6169,8 @@ public class StatusBar extends SystemUI implements DemoMode,
             return;
         }
         mHeadsUpEntriesToRemoveOnSwitch.remove(entry);
-        mRemoteInputEntriesToRemoveOnCollapse.remove(entry);
+        mRemoteInputManager.onUpdateNotification(entry);
+
         if (key.equals(mGutsManager.getKeyToRemoveOnGutsClosed())) {
             mGutsManager.setKeyToRemoveOnGutsClosed(null);
             Log.w(TAG, "Notification that was kept for guts was updated. " + key);
@@ -6638,11 +6413,6 @@ public class StatusBar extends SystemUI implements DemoMode,
     @Override
     public RankingMap getLatestRankingMap() {
         return mLatestRankingMap;
-    }
-
-    @Override
-    public Set<String> getKeysKeptForRemoteInput() {
-        return mKeysKeptForRemoteInput;
     }
 
     private final NotificationInfo.CheckSaveListener mCheckSaveListener =
