@@ -49,8 +49,13 @@ public class CustomEditTextPreference extends EditTextPreference {
     }
 
     public EditText getEditText() {
-        return mFragment != null ? (EditText) mFragment.getDialog().findViewById(android.R.id.edit)
-                : null;
+        if (mFragment != null) {
+            final Dialog dialog = mFragment.getDialog();
+            if (dialog != null) {
+                return (EditText) dialog.findViewById(android.R.id.edit);
+            }
+        }
+        return null;
     }
 
     public boolean isDialogOpen() {
