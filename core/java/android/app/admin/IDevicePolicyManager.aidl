@@ -36,6 +36,7 @@ import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.os.RemoteCallback;
 import android.os.UserHandle;
+import android.security.keystore.ParcelableKeyGenParameterSpec;
 
 import java.util.List;
 
@@ -165,6 +166,7 @@ interface IDevicePolicyManager {
             in byte[] certBuffer, in byte[] certChainBuffer, String alias, boolean requestAccess,
             boolean isUserSelectable);
     boolean removeKeyPair(in ComponentName who, in String callerPackage, String alias);
+    boolean generateKeyPair(in ComponentName who, in String callerPackage, in String algorithm, in ParcelableKeyGenParameterSpec keySpec);
     void choosePrivateKeyAlias(int uid, in Uri uri, in String alias, IBinder aliasCallback);
 
     void setDelegatedScopes(in ComponentName who, in String delegatePackage, in List<String> scopes);
