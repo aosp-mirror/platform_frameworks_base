@@ -152,6 +152,11 @@ private:
     status_t cmd_print_pulled_metrics(FILE* out, const Vector<String8>& args);
 
     /**
+     * Removes all configs stored on disk.
+     */
+    status_t cmd_remove_config_files(FILE* out);
+
+    /**
      * Update a configuration.
      */
     void set_config(int uid, const string& name, const StatsdConfig& config);
