@@ -751,10 +751,10 @@ public class DockedStackDividerController {
 
                 // There might be an old window delaying the animation start - clear it.
                 if (mDelayedImeWin != null) {
-                    mDelayedImeWin.mWinAnimator.endDelayingAnimationStart();
+                    mDelayedImeWin.endDelayingAnimationStart();
                 }
                 mDelayedImeWin = imeWin;
-                imeWin.mWinAnimator.startDelayingAnimationStart();
+                imeWin.startDelayingAnimationStart();
             }
 
             // If we are already waiting for something to be drawn, clear out the old one so it
@@ -765,25 +765,27 @@ public class DockedStackDividerController {
                 mService.mWaitingForDrawnCallback.run();
             }
             mService.mWaitingForDrawnCallback = () -> {
-                mAnimationStartDelayed = false;
-                if (mDelayedImeWin != null) {
-                    mDelayedImeWin.mWinAnimator.endDelayingAnimationStart();
+                synchronized (mService.mWindowMap) {
+                    mAnimationStartDelayed = false;
+                    if (mDelayedImeWin != null) {
+                        mDelayedImeWin.endDelayingAnimationStart();
+                    }
+                    // If the adjust status changed since this was posted, only notify
+                    // the new states and don't animate.
+                    long duration = 0;
+                    if (mAdjustedForIme == adjustedForIme
+                            && mAdjustedForDivider == adjustedForDivider) {
+                        duration = IME_ADJUST_ANIM_DURATION;
+                    } else {
+                        Slog.w(TAG, "IME adjust changed while waiting for drawn:"
+                                + " adjustedForIme=" + adjustedForIme
+                                + " adjustedForDivider=" + adjustedForDivider
+                                + " mAdjustedForIme=" + mAdjustedForIme
+                                + " mAdjustedForDivider=" + mAdjustedForDivider);
+                    }
+                    notifyAdjustedForImeChanged(
+                            mAdjustedForIme || mAdjustedForDivider, duration);
                 }
-                // If the adjust status changed since this was posted, only notify
-                // the new states and don't animate.
-                long duration = 0;
-                if (mAdjustedForIme == adjustedForIme
-                        && mAdjustedForDivider == adjustedForDivider) {
-                    duration = IME_ADJUST_ANIM_DURATION;
-                } else {
-                    Slog.w(TAG, "IME adjust changed while waiting for drawn:"
-                            + " adjustedForIme=" + adjustedForIme
-                            + " adjustedForDivider=" + adjustedForDivider
-                            + " mAdjustedForIme=" + mAdjustedForIme
-                            + " mAdjustedForDivider=" + mAdjustedForDivider);
-                }
-                notifyAdjustedForImeChanged(
-                        mAdjustedForIme || mAdjustedForDivider, duration);
             };
         } else {
             notifyAdjustedForImeChanged(

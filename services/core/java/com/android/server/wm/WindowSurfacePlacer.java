@@ -462,6 +462,7 @@ class WindowSurfacePlacer {
             appAnimator.setNullAnimation();
             // TODO: Do we need to add to mNoAnimationNotifyOnTransitionFinished like above if not
             //       animating?
+            wtoken.setAllAppWinAnimators();
             wtoken.setVisibility(animLp, false, transit, false, voiceInteraction);
             wtoken.updateReportedVisibilityLocked();
             // setAllAppWinAnimators so the windows get onExitAnimationDone once the animation is
@@ -606,7 +607,7 @@ class WindowSurfacePlacer {
                         + ", oldWallpaper=" + oldWallpaper
                         + ", openingApps=" + openingApps
                         + ", closingApps=" + closingApps);
-        mService.mAnimateWallpaperWithTarget = false;
+
         if (openingCanBeWallpaperTarget && transit == TRANSIT_KEYGUARD_GOING_AWAY) {
             transit = TRANSIT_KEYGUARD_GOING_AWAY_ON_WALLPAPER;
             if (DEBUG_APP_TRANSITIONS) Slog.v(TAG,
@@ -645,8 +646,6 @@ class WindowSurfacePlacer {
                 transit = TRANSIT_WALLPAPER_OPEN;
                 if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "New transit into wallpaper: "
                         + AppTransition.appTransitionToString(transit));
-            } else {
-                mService.mAnimateWallpaperWithTarget = true;
             }
         }
         return transit;

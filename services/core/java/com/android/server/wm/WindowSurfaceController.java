@@ -59,8 +59,8 @@ class WindowSurfaceController {
     private boolean mSurfaceShown = false;
     private float mSurfaceX = 0;
     private float mSurfaceY = 0;
-    private float mSurfaceW = 0;
-    private float mSurfaceH = 0;
+    private int mSurfaceW = 0;
+    private int mSurfaceH = 0;
 
     // Initialize to the identity matrix.
     private float mLastDsdx = 1;
@@ -517,11 +517,11 @@ class WindowSurfaceController {
         return mSurfaceY;
     }
 
-    float getWidth() {
+    int getWidth() {
         return mSurfaceW;
     }
 
-    float getHeight() {
+    int getHeight() {
         return mSurfaceH;
     }
 

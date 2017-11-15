@@ -29,7 +29,6 @@ import android.util.ArrayMap;
 import android.view.Choreographer;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
-import android.view.animation.Transformation;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -94,9 +93,6 @@ class SurfaceAnimationRunner {
         synchronized (mLock) {
             if (mPendingAnimations.containsKey(leash)) {
                 mPendingAnimations.remove(leash);
-                // TODO: Releasing the leash is problematic if reparenting hasn't happened yet.
-                // Fix with transaction
-                //leash.release();
                 return;
             }
             final ValueAnimator anim = mRunningAnimations.get(leash);
@@ -105,7 +101,6 @@ class SurfaceAnimationRunner {
                 SurfaceAnimationThread.getHandler().post(() -> {
                     anim.cancel();
                     applyTransaction();
-                    //leash.release();
                 });
             }
         }
@@ -123,7 +118,7 @@ class SurfaceAnimationRunner {
 
         // Animation length is already expected to be scaled.
         result.overrideDurationScale(1.0f);
-        result.setDuration(a.animSpec.getDuration());
+        result.setDuration(a.mAnimSpec.getDuration());
         result.addUpdateListener(animation -> {
             applyTransformation(a, mFrameTransaction, result.getCurrentPlayTime());
 
@@ -136,7 +131,7 @@ class SurfaceAnimationRunner {
 
             @Override
             public void onAnimationStart(Animator animation) {
-                mFrameTransaction.show(a.leash);
+                mFrameTransaction.show(a.mLeash);
             }
 
             @Override
@@ -147,26 +142,20 @@ class SurfaceAnimationRunner {
             @Override
             public void onAnimationEnd(Animator animation) {
                 synchronized (mLock) {
-                    mRunningAnimations.remove(a.leash);
+                    mRunningAnimations.remove(a.mLeash);
                 }
                 if (!mCancelled) {
                     // Post on other thread that we can push final state without jank.
-                    AnimationThread.getHandler().post(() -> {
-                        a.finishCallback.run();
-
-                        // Make sure to release the leash after finishCallback has been invoked such
-                        // that reparenting is done already when releasing the leash.
-                        a.leash.release();
-                    });
+                    AnimationThread.getHandler().post(a.mFinishCallback);
                 }
             }
         });
         result.start();
-        mRunningAnimations.put(a.leash, result);
+        mRunningAnimations.put(a.mLeash, result);
     }
 
     private void applyTransformation(RunningAnimation a, Transaction t, long currentPlayTime) {
-        a.animSpec.apply(t, a.leash, currentPlayTime);
+        a.mAnimSpec.apply(t, a.mLeash, currentPlayTime);
     }
 
     private void stepAnimation(long frameTimeNanos) {
@@ -189,14 +178,14 @@ class SurfaceAnimationRunner {
     }
 
     private static final class RunningAnimation {
-        final AnimationSpec animSpec;
-        final SurfaceControl leash;
-        final Runnable finishCallback;
+        final AnimationSpec mAnimSpec;
+        final SurfaceControl mLeash;
+        final Runnable mFinishCallback;
 
         RunningAnimation(AnimationSpec animSpec, SurfaceControl leash, Runnable finishCallback) {
-            this.animSpec = animSpec;
-            this.leash = leash;
-            this.finishCallback = finishCallback;
+            mAnimSpec = animSpec;
+            mLeash = leash;
+            mFinishCallback = finishCallback;
         }
     }
 

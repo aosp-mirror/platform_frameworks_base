@@ -54,7 +54,7 @@ import java.util.concurrent.CountDownLatch;
 /**
  * Test class for {@link SurfaceAnimationRunner}.
  *
- * runtest frameworks-services -c com.android.server.wm.SurfaceAnimationRunnerTest
+ * atest FrameworksServicesTests:com.android.server.wm.SurfaceAnimationRunnerTest
  */
 @SmallTest
 @Presubmit
@@ -104,7 +104,8 @@ public class SurfaceAnimationRunnerTest extends WindowTestsBase {
 
     @Test
     public void testCancel_notStarted() throws Exception {
-        mSurfaceAnimationRunner = new SurfaceAnimationRunner(new NoOpFrameCallbackProvider(), mMockTransaction);
+        mSurfaceAnimationRunner = new SurfaceAnimationRunner(new NoOpFrameCallbackProvider(),
+                mMockTransaction);
         mSurfaceAnimationRunner
                 .startAnimation(createTranslateAnimation(), mMockSurface, mMockTransaction,
                 this::finishedCallback);
@@ -112,12 +113,12 @@ public class SurfaceAnimationRunnerTest extends WindowTestsBase {
         waitUntilHandlersIdle();
         assertTrue(mSurfaceAnimationRunner.mPendingAnimations.isEmpty());
         assertFinishCallbackNotCalled();
-        //verify(mMockSurface).release();
     }
 
     @Test
     public void testCancel_running() throws Exception {
-        mSurfaceAnimationRunner = new SurfaceAnimationRunner(new NoOpFrameCallbackProvider(), mMockTransaction);
+        mSurfaceAnimationRunner = new SurfaceAnimationRunner(new NoOpFrameCallbackProvider(),
+                mMockTransaction);
         mSurfaceAnimationRunner
                 .startAnimation(createTranslateAnimation(), mMockSurface, mMockTransaction,
                 this::finishedCallback);
@@ -127,7 +128,6 @@ public class SurfaceAnimationRunnerTest extends WindowTestsBase {
         assertTrue(mSurfaceAnimationRunner.mRunningAnimations.isEmpty());
         waitUntilHandlersIdle();
         assertFinishCallbackNotCalled();
-        //verify(mMockSurface).release();
     }
 
     private void waitUntilNextFrame() throws Exception {

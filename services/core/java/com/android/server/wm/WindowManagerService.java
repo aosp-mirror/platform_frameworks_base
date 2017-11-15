@@ -725,8 +725,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    boolean mAnimateWallpaperWithTarget;
-
     // TODO: Move to RootWindowContainer
     AppWindowToken mFocusedApp = null;
 
@@ -2182,18 +2180,15 @@ public class WindowManagerService extends IWindowManager.Stub
         if (win.isWinVisibleLw() && winAnimator.applyAnimationLocked(transit, false)) {
             focusMayChange = isDefaultDisplay;
             win.mAnimatingExit = true;
-            win.mWinAnimator.mAnimating = true;
         } else if (win.mWinAnimator.isAnimationSet()) {
             // Currently in a hide animation... turn this into
             // an exit.
             win.mAnimatingExit = true;
-            win.mWinAnimator.mAnimating = true;
         } else if (win.getDisplayContent().mWallpaperController.isWallpaperTarget(win)) {
             // If the wallpaper is currently behind this
             // window, we need to change both of them inside
             // of a transaction to avoid artifacts.
             win.mAnimatingExit = true;
-            win.mWinAnimator.mAnimating = true;
         } else {
             if (mInputMethodWindow == win) {
                 setInputMethodWindowLocked(null);

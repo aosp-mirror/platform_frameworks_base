@@ -31,7 +31,7 @@ public class WindowAnimationSpec implements AnimationSpec {
 
     private Animation mAnimation;
     private final Point mPosition = new Point();
-    private final ThreadLocal<Tmp> mThreadLocalTmps = ThreadLocal.withInitial(Tmp::new);
+    private final ThreadLocal<TmpValues> mThreadLocalTmps = ThreadLocal.withInitial(TmpValues::new);
 
     public WindowAnimationSpec(Animation animation, Point position)  {
         mAnimation = animation;
@@ -55,7 +55,7 @@ public class WindowAnimationSpec implements AnimationSpec {
 
     @Override
     public void apply(Transaction t, SurfaceControl leash, long currentPlayTime) {
-        final Tmp tmp = mThreadLocalTmps.get();
+        final TmpValues tmp = mThreadLocalTmps.get();
         tmp.transformation.clear();
         mAnimation.getTransformation(currentPlayTime, tmp.transformation);
         tmp.transformation.getMatrix().postTranslate(mPosition.x, mPosition.y);
@@ -63,7 +63,7 @@ public class WindowAnimationSpec implements AnimationSpec {
         t.setAlpha(leash, tmp.transformation.getAlpha());
     }
 
-    private static class Tmp {
+    private static class TmpValues {
         final Transformation transformation = new Transformation();
         final float[] floats = new float[9];
     }

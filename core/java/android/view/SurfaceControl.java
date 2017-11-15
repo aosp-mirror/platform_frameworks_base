@@ -30,6 +30,7 @@ import android.graphics.Bitmap;
 import android.graphics.GraphicBuffer;
 import android.graphics.PixelFormat;
 import android.graphics.Matrix;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.IBinder;
@@ -37,8 +38,12 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.Process;
 import android.os.UserHandle;
+import android.util.ArrayMap;
 import android.util.Log;
 import android.view.Surface.OutOfResourcesException;
+
+import com.android.internal.annotations.GuardedBy;
+
 import dalvik.system.CloseGuard;
 import libcore.util.NativeAllocationRegistry;
 
@@ -152,6 +157,13 @@ public class SurfaceControl implements Parcelable {
     private final CloseGuard mCloseGuard = CloseGuard.get();
     private final String mName;
     long mNativeObject; // package visibility only for Surface.java access
+
+    // TODO: Move this to native.
+    private final Object mSizeLock = new Object();
+    @GuardedBy("mSizeLock")
+    private int mWidth;
+    @GuardedBy("mSizeLock")
+    private int mHeight;
 
     static Transaction sGlobalTransaction;
     static long sTransactionNestCount = 0;
@@ -567,6 +579,8 @@ public class SurfaceControl implements Parcelable {
         }
 
         mName = name;
+        mWidth = w;
+        mHeight = h;
         mNativeObject = nativeCreate(session, name, w, h, format, flags,
             parent != null ? parent.mNativeObject : 0, windowType, ownerUid);
         if (mNativeObject == 0) {
@@ -582,6 +596,8 @@ public class SurfaceControl implements Parcelable {
     // event logging.
     public SurfaceControl(SurfaceControl other) {
         mName = other.mName;
+        mWidth = other.mWidth;
+        mHeight = other.mHeight;
         mNativeObject = other.mNativeObject;
         other.mCloseGuard.close();
         other.mNativeObject = 0;
@@ -590,6 +606,8 @@ public class SurfaceControl implements Parcelable {
 
     private SurfaceControl(Parcel in) {
         mName = in.readString();
+        mWidth = in.readInt();
+        mHeight = in.readInt();
         mNativeObject = nativeReadFromParcel(in);
         if (mNativeObject == 0) {
             throw new IllegalArgumentException("Couldn't read SurfaceControl from parcel=" + in);
@@ -605,6 +623,8 @@ public class SurfaceControl implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(mName);
+        dest.writeInt(mWidth);
+        dest.writeInt(mHeight);
         nativeWriteToParcel(mNativeObject, dest);
     }
 
@@ -919,6 +939,18 @@ public class SurfaceControl implements Parcelable {
 
         synchronized (SurfaceControl.class) {
             sGlobalTransaction.setSecure(this, isSecure);
+        }
+    }
+
+    public int getWidth() {
+        synchronized (mSizeLock) {
+            return mWidth;
+        }
+    }
+
+    public int getHeight() {
+        synchronized (mSizeLock) {
+            return mHeight;
         }
     }
 
@@ -1282,6 +1314,7 @@ public class SurfaceControl implements Parcelable {
                 nativeGetNativeTransactionFinalizer(), 512);
         private long mNativeObject;
 
+        private final ArrayMap<SurfaceControl, Point> mResizedSurfaces = new ArrayMap<>();
         Runnable mFreeNativeResources;
 
         public Transaction() {
@@ -1312,7 +1345,20 @@ public class SurfaceControl implements Parcelable {
          * Jankier version of apply. Avoid use (b/28068298).
          */
         public void apply(boolean sync) {
+            applyResizedSurfaces();
             nativeApplyTransaction(mNativeObject, sync);
+        }
+
+        private void applyResizedSurfaces() {
+            for (int i = mResizedSurfaces.size() - 1; i >= 0; i--) {
+                final Point size = mResizedSurfaces.valueAt(i);
+                final SurfaceControl surfaceControl = mResizedSurfaces.keyAt(i);
+                synchronized (surfaceControl.mSizeLock) {
+                    surfaceControl.mWidth = size.x;
+                    surfaceControl.mHeight = size.y;
+                }
+            }
+            mResizedSurfaces.clear();
         }
 
         public Transaction show(SurfaceControl sc) {
@@ -1335,6 +1381,7 @@ public class SurfaceControl implements Parcelable {
 
         public Transaction setSize(SurfaceControl sc, int w, int h) {
             sc.checkNotReleased();
+            mResizedSurfaces.put(sc, new Point(w, h));
             nativeSetSize(mNativeObject, sc.mNativeObject, w, h);
             return this;
         }
@@ -1567,6 +1614,8 @@ public class SurfaceControl implements Parcelable {
          * other transaction as if it had been applied.
          */
         public Transaction merge(Transaction other) {
+            mResizedSurfaces.putAll(other.mResizedSurfaces);
+            other.mResizedSurfaces.clear();
             nativeMergeTransaction(mNativeObject, other.mNativeObject);
             return this;
         }

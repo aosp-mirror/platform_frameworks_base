@@ -115,7 +115,7 @@ class WallpaperWindowToken extends WindowToken {
     void startAnimation(Animation anim) {
         for (int ndx = mChildren.size() - 1; ndx >= 0; ndx--) {
             final WindowState windowState = mChildren.get(ndx);
-            windowState.mWinAnimator.setAnimation(anim);
+            windowState.startAnimation(anim);
         }
     }
 

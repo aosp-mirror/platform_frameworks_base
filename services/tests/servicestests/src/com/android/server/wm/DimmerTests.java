@@ -53,12 +53,12 @@ public class DimmerTests extends WindowTestsBase {
         }
 
         @Override
-        SurfaceControl getSurfaceControl() {
+        public SurfaceControl getSurfaceControl() {
             return mControl;
         }
 
         @Override
-        SurfaceControl.Transaction getPendingTransaction() {
+        public SurfaceControl.Transaction getPendingTransaction() {
             return mTransaction;
         }
     }
@@ -93,12 +93,12 @@ public class DimmerTests extends WindowTestsBase {
         }
 
         @Override
-        SurfaceControl getSurfaceControl() {
+        public SurfaceControl getSurfaceControl() {
             return mHostControl;
         }
 
         @Override
-        SurfaceControl.Transaction getPendingTransaction() {
+        public SurfaceControl.Transaction getPendingTransaction() {
             return mHostTransaction;
         }
     }
@@ -110,8 +110,8 @@ public class DimmerTests extends WindowTestsBase {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-
         mHost = new MockSurfaceBuildingContainer();
+
         mTransaction = mock(SurfaceControl.Transaction.class);
         mDimmer = new Dimmer(mHost);
     }
