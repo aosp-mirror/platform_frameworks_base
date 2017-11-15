@@ -15182,6 +15182,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         return mRenderNode.hasShadow();
     }
 
+    /**
+     * @hide
+     */
+    public void setShadowColor(@ColorInt int color) {
+        if (mRenderNode.setShadowColor(color)) {
+            invalidateViewProperty(true, true);
+        }
+    }
+
 
     /** @hide */
     public void setRevealClip(boolean shouldClip, float x, float y, float radius) {
