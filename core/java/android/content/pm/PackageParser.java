@@ -3756,6 +3756,11 @@ public class PackageParser {
         }
         ai.taskAffinity = buildTaskAffinityName(ai.packageName, ai.packageName,
                 str, outError);
+        String factory = sa.getNonResourceString(
+                com.android.internal.R.styleable.AndroidManifestApplication_appComponentFactory);
+        if (factory != null) {
+            ai.appComponentFactory = buildClassName(ai.packageName, factory, outError);
+        }
 
         if (outError[0] == null) {
             CharSequence pname;

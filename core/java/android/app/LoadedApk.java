@@ -125,6 +125,7 @@ public final class LoadedApk {
         = new ArrayMap<>();
     private final ArrayMap<Context, ArrayMap<ServiceConnection, LoadedApk.ServiceDispatcher>> mUnboundServices
         = new ArrayMap<>();
+    private AppComponentFactory mAppComponentFactory;
 
     Application getApplication() {
         return mApplication;
@@ -148,6 +149,7 @@ public final class LoadedApk {
         mIncludeCode = includeCode;
         mRegisterPackage = registerPackage;
         mDisplayAdjustments.setCompatibilityInfo(compatInfo);
+        mAppComponentFactory = createAppFactory(mApplicationInfo, mBaseClassLoader);
     }
 
     private static ApplicationInfo adjustNativeLibraryPaths(ApplicationInfo info) {
@@ -203,6 +205,7 @@ public final class LoadedApk {
         mRegisterPackage = false;
         mClassLoader = ClassLoader.getSystemClassLoader();
         mResources = Resources.getSystem();
+        mAppComponentFactory = createAppFactory(mApplicationInfo, mClassLoader);
     }
 
     /**
@@ -212,6 +215,23 @@ public final class LoadedApk {
         assert info.packageName.equals("android");
         mApplicationInfo = info;
         mClassLoader = classLoader;
+        mAppComponentFactory = createAppFactory(info, classLoader);
+    }
+
+    private AppComponentFactory createAppFactory(ApplicationInfo appInfo, ClassLoader cl) {
+        if (appInfo.appComponentFactory != null) {
+            try {
+                return (AppComponentFactory) cl.loadClass(appInfo.appComponentFactory)
+                        .newInstance();
+            } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+                Slog.e(TAG, "Unable to instantiate appComponentFactory", e);
+            }
+        }
+        return AppComponentFactory.DEFAULT;
+    }
+
+    public AppComponentFactory getAppFactory() {
+        return mAppComponentFactory;
     }
 
     public String getPackageName() {
@@ -313,6 +333,7 @@ public final class LoadedApk {
                         getClassLoader());
             }
         }
+        mAppComponentFactory = createAppFactory(aInfo, mClassLoader);
     }
 
     private void setApplicationInfo(ApplicationInfo aInfo) {

@@ -1375,6 +1375,13 @@
          {@link android.os.Build.VERSION#CODENAME Build.VERSION.CODENAME}. -->
     <attr name="compileSdkVersionCodename" format="string" />
 
+    <!-- The (optional) fully-qualified name for a subclass of
+         {@link android.app.AppComponentFactory} that the system uses to instantiate
+         every other manifest defined class. Most applications
+         don't need this attribute. If it's not specified, the system
+         instantiates items without it.-->
+    <attr name="appComponentFactory" format="string" />
+
     <!-- The <code>manifest</code> tag is the root of an
          <code>AndroidManifest.xml</code> file,
          describing the contents of an Android package (.apk) file.  One
@@ -1545,6 +1552,8 @@
 
         <!-- Declares the kind of classloader this application's classes must be loaded with -->
         <attr name="classLoader" />
+
+        <attr name="appComponentFactory" />
 
     </declare-styleable>
     <!-- The <code>permission</code> tag declares a security permission that can be
