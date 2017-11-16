@@ -20,6 +20,7 @@ import static android.content.pm.ActivityInfo.COLOR_MODE_DEFAULT;
 
 import android.Manifest.permission;
 import android.annotation.IntDef;
+import android.annotation.LongDef;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
@@ -1270,7 +1271,7 @@ public interface WindowManager extends ViewManager {
 
         /** @hide */
         @Retention(RetentionPolicy.SOURCE)
-        @IntDef(
+        @LongDef(
             flag = true,
             value = {
                     LayoutParams.FLAG2_LAYOUT_IN_DISPLAY_CUTOUT_AREA,
