@@ -295,6 +295,12 @@ ProtoOutputStream::end(long long token)
     }
 }
 
+size_t
+ProtoOutputStream::bytesWritten()
+{
+    return mBuffer.size();
+}
+
 bool
 ProtoOutputStream::compact() {
     if (mCompact) return true;
