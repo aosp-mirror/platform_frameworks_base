@@ -29,6 +29,9 @@ LOCAL_AAPT_FLAGS += --private-symbols com.android.internal
 # Framework doesn't need versioning since it IS the platform.
 LOCAL_AAPT_FLAGS += --no-auto-version
 
+# Allow overlay to add resource
+LOCAL_AAPT_FLAGS += --auto-add-overlay
+
 # Install this alongside the libraries.
 LOCAL_MODULE_PATH := $(TARGET_OUT_JAVA_LIBRARIES)
 
