@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.phone;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.os.RemoteException;
 import android.util.Log;
@@ -76,6 +77,8 @@ public class NavigationBarGestureHelper extends GestureDetector.SimpleOnGestureL
     private final GestureDetector mTaskSwitcherDetector;
     private final int mScrollTouchSlop;
     private final int mMinFlingVelocity;
+    private final Matrix mTransformGlobalMatrix = new Matrix();
+    private final Matrix mTransformLocalMatrix = new Matrix();
     private int mTouchDownX;
     private int mTouchDownY;
     private boolean mDownOnRecents;
@@ -116,27 +119,30 @@ public class NavigationBarGestureHelper extends GestureDetector.SimpleOnGestureL
         final IOverviewProxy overviewProxy = mOverviewEventSender.getProxy();
         if (overviewProxy != null) {
             mNavigationBarView.requestUnbufferedDispatch(event);
+            event.transform(mTransformGlobalMatrix);
             try {
                 overviewProxy.onMotionEvent(event);
                 return true;
             } catch (RemoteException e) {
                 Log.e(TAG, "Callback failed", e);
+            } finally {
+                event.transform(mTransformLocalMatrix);
             }
         }
         return false;
     }
 
     public boolean onInterceptTouchEvent(MotionEvent event) {
-        if (!proxyMotionEvents(event)) {
-            // If we move more than a fixed amount, then start capturing for the
-            // task switcher detector, disabled when proxying motion events to launcher service
-            mTaskSwitcherDetector.onTouchEvent(event);
-        }
         int action = event.getAction();
+        boolean result = false;
         switch (action & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_DOWN: {
                 mTouchDownX = (int) event.getX();
                 mTouchDownY = (int) event.getY();
+                mTransformGlobalMatrix.set(Matrix.IDENTITY_MATRIX);
+                mTransformLocalMatrix.set(Matrix.IDENTITY_MATRIX);
+                mNavigationBarView.transformMatrixToGlobal(mTransformGlobalMatrix);
+                mNavigationBarView.transformMatrixToLocal(mTransformLocalMatrix);
                 break;
             }
             case MotionEvent.ACTION_MOVE: {
@@ -147,7 +153,7 @@ public class NavigationBarGestureHelper extends GestureDetector.SimpleOnGestureL
                 boolean exceededTouchSlop = xDiff > mScrollTouchSlop && xDiff > yDiff
                         || yDiff > mScrollTouchSlop && yDiff > xDiff;
                 if (exceededTouchSlop) {
-                    return true;
+                    result = true;
                 }
                 break;
             }
@@ -155,7 +161,12 @@ public class NavigationBarGestureHelper extends GestureDetector.SimpleOnGestureL
             case MotionEvent.ACTION_UP:
                 break;
         }
-        return mDockWindowEnabled && interceptDockWindowEvent(event);
+        if (!proxyMotionEvents(event)) {
+            // If we move more than a fixed amount, then start capturing for the
+            // task switcher detector, disabled when proxying motion events to launcher service
+            mTaskSwitcherDetector.onTouchEvent(event);
+        }
+        return result || (mDockWindowEnabled && interceptDockWindowEvent(event));
     }
 
     private boolean interceptDockWindowEvent(MotionEvent event) {
