@@ -235,7 +235,7 @@ public class UsbPermissionActivity extends AlertActivity
                 intent.putExtra(UsbManager.EXTRA_DEVICE, mDevice);
                 if (mPermissionGranted) {
                     service.grantDevicePermission(mDevice, mUid);
-                    if (mAlwaysUse.isChecked()) {
+                    if (mAlwaysUse != null && mAlwaysUse.isChecked()) {
                         final int userId = UserHandle.getUserId(mUid);
                         service.setDevicePackage(mDevice, mPackageName, userId);
                     }
@@ -245,7 +245,7 @@ public class UsbPermissionActivity extends AlertActivity
                 intent.putExtra(UsbManager.EXTRA_ACCESSORY, mAccessory);
                 if (mPermissionGranted) {
                     service.grantAccessoryPermission(mAccessory, mUid);
-                    if (mAlwaysUse.isChecked()) {
+                    if (mAlwaysUse != null && mAlwaysUse.isChecked()) {
                         final int userId = UserHandle.getUserId(mUid);
                         service.setAccessoryPackage(mAccessory, mPackageName, userId);
                     }
