@@ -254,6 +254,11 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
     HashMap<String, PropertyValuesHolder> mValuesMap;
 
     /**
+     * If set to non-negative value, this will override {@link #sDurationScale}.
+     */
+    private float mDurationScale = -1f;
+
+    /**
      * Public constants
      */
 
@@ -579,8 +584,23 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
         return this;
     }
 
+    /**
+     * Overrides the global duration scale by a custom value.
+     *
+     * @param durationScale The duration scale to set; or {@code -1f} to use the global duration
+     *                      scale.
+     * @hide
+     */
+    public void overrideDurationScale(float durationScale) {
+        mDurationScale = durationScale;
+    }
+
+    private float resolveDurationScale() {
+        return mDurationScale >= 0f ? mDurationScale : sDurationScale;
+    }
+
     private long getScaledDuration() {
-        return (long)(mDuration * sDurationScale);
+        return (long)(mDuration * resolveDurationScale());
     }
 
     /**
@@ -735,7 +755,10 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
         if (mSeekFraction >= 0) {
             return (long) (mDuration * mSeekFraction);
         }
-        float durationScale = sDurationScale == 0 ? 1 : sDurationScale;
+        float durationScale = resolveDurationScale();
+        if (durationScale == 0f) {
+            durationScale = 1f;
+        }
         return (long) ((AnimationUtils.currentAnimationTimeMillis() - mStartTime) / durationScale);
     }
 
@@ -1397,7 +1420,9 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
         if (mStartTime < 0) {
             // First frame. If there is start delay, start delay count down will happen *after* this
             // frame.
-            mStartTime = mReversing ? frameTime : frameTime + (long) (mStartDelay * sDurationScale);
+            mStartTime = mReversing
+                    ? frameTime
+                    : frameTime + (long) (mStartDelay * resolveDurationScale());
         }
 
         // Handle pause/resume
