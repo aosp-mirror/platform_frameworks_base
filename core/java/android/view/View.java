@@ -4245,6 +4245,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         OnApplyWindowInsetsListener mOnApplyWindowInsetsListener;
 
         OnCapturedPointerListener mOnCapturedPointerListener;
+
+        private ArrayList<OnKeyFallbackListener> mKeyFallbackListeners;
     }
 
     ListenerInfo mListenerInfo;
@@ -25194,6 +25196,29 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * Interface definition for a callback to be invoked when a hardware key event is
+     * dispatched to this view during the fallback phase. This means no view in the hierarchy
+     * has handled this event.
+     */
+    public interface OnKeyFallbackListener {
+        /**
+         * Called when a hardware key is dispatched to a view in the fallback phase. This allows
+         * listeners to respond to events after the view hierarchy has had a chance to respond.
+         * <p>Key presses in software keyboards will generally NOT trigger this method,
+         * although some may elect to do so in some situations. Do not assume a
+         * software input method has to be key-based; even if it is, it may use key presses
+         * in a different way than you expect, so there is no way to reliably catch soft
+         * input key presses.
+         *
+         * @param v The view the key has been dispatched to.
+         * @param event The KeyEvent object containing full information about
+         *        the event.
+         * @return True if the listener has consumed the event, false otherwise.
+         */
+        boolean onKeyFallback(View v, KeyEvent event);
+    }
+
+    /**
      * Interface definition for a callback to be invoked when a touch event is
      * dispatched to this view. The callback will be invoked before the touch
      * event is given to the view.
@@ -26865,5 +26890,57 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             return null;
         }
         return mTooltipInfo.mTooltipPopup.getContentView();
+    }
+
+    /**
+     * Allows this view to handle {@link KeyEvent}s which weren't handled by normal dispatch. This
+     * occurs after the normal view hierarchy dispatch, but before the window callback. By default,
+     * this will dispatch into all the listeners registered via
+     * {@link #addKeyFallbackListener(OnKeyFallbackListener)} in last-in-first-out order (most
+     * recently added will receive events first).
+     *
+     * @param event A not-previously-handled event.
+     * @return {@code true} if the event was handled, {@code false} otherwise.
+     * @see #addKeyFallbackListener
+     */
+    public boolean onKeyFallback(@NonNull KeyEvent event) {
+        if (mListenerInfo != null && mListenerInfo.mKeyFallbackListeners != null) {
+            for (int i = mListenerInfo.mKeyFallbackListeners.size() - 1; i >= 0; --i) {
+                if (mListenerInfo.mKeyFallbackListeners.get(i).onKeyFallback(this, event)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Adds a listener which will receive unhandled {@link KeyEvent}s.
+     * @param listener the receiver of fallback {@link KeyEvent}s.
+     * @see #onKeyFallback(KeyEvent)
+     */
+    public void addKeyFallbackListener(OnKeyFallbackListener listener) {
+        ArrayList<OnKeyFallbackListener> fallbacks = getListenerInfo().mKeyFallbackListeners;
+        if (fallbacks == null) {
+            fallbacks = new ArrayList<>();
+            getListenerInfo().mKeyFallbackListeners = fallbacks;
+        }
+        fallbacks.add(listener);
+    }
+
+    /**
+     * Removes a listener which will receive unhandled {@link KeyEvent}s.
+     * @param listener the receiver of fallback {@link KeyEvent}s.
+     * @see #onKeyFallback(KeyEvent)
+     */
+    public void removeKeyFallbackListener(OnKeyFallbackListener listener) {
+        if (mListenerInfo != null) {
+            if (mListenerInfo.mKeyFallbackListeners != null) {
+                mListenerInfo.mKeyFallbackListeners.remove(listener);
+                if (mListenerInfo.mKeyFallbackListeners.isEmpty()) {
+                    mListenerInfo.mKeyFallbackListeners = null;
+                }
+            }
+        }
     }
 }
