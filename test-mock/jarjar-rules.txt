@@ -1,1 +1,1 @@
-../legacy-test/jarjar-rules.txt
+../test-base/jarjar-rules.txt
