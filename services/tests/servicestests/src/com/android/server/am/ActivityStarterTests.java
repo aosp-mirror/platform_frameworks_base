@@ -277,4 +277,10 @@ public class ActivityStarterTests extends ActivityTestsBase {
             verify(options, times(1)).abort();
         }
     }
+
+// TODO(b/69270257): Add test to verify task layout is passed additional data such as activity and
+// source.
+//    @Test
+//    public void testCreateTaskLayout() {
+//    }
 }
