@@ -120,6 +120,14 @@ message SystemProto {
     // via a coulomb counter. For historical reasons, total_mah_screen_doze is
     // a subset of total_mah_screen_off.
     optional int64 total_mah_screen_doze = 8;
+    // Total amount of battery discharged in mAh while the device was in light doze mode.
+    // This will only be non-zero for devices that report battery discharge
+    // via a coulomb counter.
+    optional int64 total_mah_light_doze = 9;
+    // Total amount of battery discharged in mAh while the device was in deep doze mode.
+    // This will only be non-zero for devices that report battery discharge
+    // via a coulomb counter.
+    optional int64 total_mah_deep_doze = 10;
   };
   optional BatteryDischarge battery_discharge = 2;
 
