@@ -46,7 +46,7 @@ LOCAL_JAVA_LIBRARIES := \
     legacy-test \
     android.test.mock \
 
-LOCAL_JARJAR_RULES := $(LOCAL_PATH)/../legacy-test/jarjar-rules.txt
+LOCAL_JARJAR_RULES := $(LOCAL_PATH)/../test-base/jarjar-rules.txt
 
 LOCAL_MODULE:= repackaged.android.test.runner
 
