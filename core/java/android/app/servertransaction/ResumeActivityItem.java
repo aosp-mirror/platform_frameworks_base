@@ -91,4 +91,24 @@ public class ResumeActivityItem extends ActivityLifecycleItem {
             return new ResumeActivityItem[size];
         }
     };
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final ResumeActivityItem other = (ResumeActivityItem) o;
+        return mProcState == other.mProcState && mIsForward == other.mIsForward;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = 17;
+        result = 31 * result + mProcState;
+        result = 31 * result + (mIsForward ? 1 : 0);
+        return result;
+    }
 }

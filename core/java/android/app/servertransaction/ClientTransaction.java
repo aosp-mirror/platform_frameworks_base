@@ -16,6 +16,7 @@
 
 package android.app.servertransaction;
 
+import android.app.ClientTransactionHandler;
 import android.app.IApplicationThread;
 import android.os.IBinder;
 import android.os.Parcel;
@@ -24,6 +25,7 @@ import android.os.RemoteException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * A container that holds a sequence of messages, which may be sent to a client.
@@ -112,11 +114,12 @@ public class ClientTransaction implements Parcelable {
     /**
      * Schedule the transaction after it was initialized. It will be send to client and all its
      * individual parts will be applied in the following sequence:
-     * 1. The client calls {@link #prepare()}, which triggers all work that needs to be done before
-     *    actually scheduling the transaction for callbacks and lifecycle state request.
+     * 1. The client calls {@link #prepare(ClientTransactionHandler)}, which triggers all work that
+     *    needs to be done before actually scheduling the transaction for callbacks and lifecycle
+     *    state request.
      * 2. The transaction message is scheduled.
-     * 3. The client calls {@link #execute()}, which executes all callbacks and necessary lifecycle
-     *    transitions.
+     * 3. The client calls {@link #execute(ClientTransactionHandler)}, which executes all callbacks
+     *    and necessary lifecycle transitions.
      */
     public void schedule() throws RemoteException {
         mClient.scheduleTransaction(this);
@@ -171,5 +174,28 @@ public class ClientTransaction implements Parcelable {
     @Override
     public int describeContents() {
         return 0;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final ClientTransaction other = (ClientTransaction) o;
+        return Objects.equals(mActivityCallbacks, other.mActivityCallbacks)
+                && Objects.equals(mLifecycleStateRequest, other.mLifecycleStateRequest)
+                && mClient == other.mClient
+                && mActivityToken == other.mActivityToken;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = 17;
+        result = 31 * result + Objects.hashCode(mActivityCallbacks);
+        result = 31 * result + Objects.hashCode(mLifecycleStateRequest);
+        return result;
     }
 }

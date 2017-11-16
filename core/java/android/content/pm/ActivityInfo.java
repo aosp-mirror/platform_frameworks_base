@@ -1156,6 +1156,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
         dest.writeString(permission);
         dest.writeString(taskAffinity);
         dest.writeString(targetActivity);
+        dest.writeString(launchToken);
         dest.writeInt(flags);
         dest.writeInt(screenOrientation);
         dest.writeInt(configChanges);
@@ -1282,6 +1283,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
         permission = source.readString();
         taskAffinity = source.readString();
         targetActivity = source.readString();
+        launchToken = source.readString();
         flags = source.readInt();
         screenOrientation = source.readInt();
         configChanges = source.readInt();

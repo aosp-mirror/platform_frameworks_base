@@ -99,4 +99,27 @@ public class PauseActivityItem extends ActivityLifecycleItem {
             return new PauseActivityItem[size];
         }
     };
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final PauseActivityItem other = (PauseActivityItem) o;
+        return mFinished == other.mFinished && mUserLeaving == other.mUserLeaving
+                && mConfigChanges == other.mConfigChanges && mDontReport == other.mDontReport;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = 17;
+        result = 31 * result + (mFinished ? 1 : 0);
+        result = 31 * result + (mUserLeaving ? 1 : 0);
+        result = 31 * result + mConfigChanges;
+        result = 31 * result + (mDontReport ? 1 : 0);
+        return result;
+    }
 }

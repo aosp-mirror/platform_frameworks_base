@@ -85,4 +85,24 @@ public class NewIntentItem extends ClientTransactionItem {
             return new NewIntentItem[size];
         }
     };
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final NewIntentItem other = (NewIntentItem) o;
+        return mPause == other.mPause && mIntents.equals(other.mIntents);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = 17;
+        result = 31 * result + (mPause ? 1 : 0);
+        result = 31 * result + mIntents.hashCode();
+        return result;
+    }
 }

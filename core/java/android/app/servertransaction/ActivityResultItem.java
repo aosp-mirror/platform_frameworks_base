@@ -75,4 +75,21 @@ public class ActivityResultItem extends ClientTransactionItem {
             return new ActivityResultItem[size];
         }
     };
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final ActivityResultItem other = (ActivityResultItem) o;
+        return mResultInfoList.equals(other.mResultInfoList);
+    }
+
+    @Override
+    public int hashCode() {
+        return mResultInfoList.hashCode();
+    }
 }

@@ -60,8 +60,7 @@ public class MoveToDisplayItem extends ClientTransactionItem {
         mConfiguration = in.readTypedObject(Configuration.CREATOR);
     }
 
-    public static final Creator<MoveToDisplayItem> CREATOR =
-            new Creator<MoveToDisplayItem>() {
+    public static final Creator<MoveToDisplayItem> CREATOR = new Creator<MoveToDisplayItem>() {
         public MoveToDisplayItem createFromParcel(Parcel in) {
             return new MoveToDisplayItem(in);
         }
@@ -70,4 +69,25 @@ public class MoveToDisplayItem extends ClientTransactionItem {
             return new MoveToDisplayItem[size];
         }
     };
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final MoveToDisplayItem other = (MoveToDisplayItem) o;
+        return mTargetDisplayId == other.mTargetDisplayId
+                && mConfiguration.equals(other.mConfiguration);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = 17;
+        result = 31 * result + mTargetDisplayId;
+        result = 31 * result + mConfiguration.hashCode();
+        return result;
+    }
 }

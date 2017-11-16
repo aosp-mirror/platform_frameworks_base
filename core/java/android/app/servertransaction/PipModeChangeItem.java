@@ -66,4 +66,24 @@ public class PipModeChangeItem extends ClientTransactionItem {
             return new PipModeChangeItem[size];
         }
     };
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final PipModeChangeItem other = (PipModeChangeItem) o;
+        return mIsInPipMode == other.mIsInPipMode && mOverrideConfig.equals(other.mOverrideConfig);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = 17;
+        result = 31 * result + (mIsInPipMode ? 1 : 0);
+        result = 31 * result + mOverrideConfig.hashCode();
+        return result;
+    }
 }

@@ -65,4 +65,21 @@ public class WindowVisibilityItem extends ClientTransactionItem {
             return new WindowVisibilityItem[size];
         }
     };
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final WindowVisibilityItem other = (WindowVisibilityItem) o;
+        return mShowWindow == other.mShowWindow;
+    }
+
+    @Override
+    public int hashCode() {
+        return 17 + 31 * (mShowWindow ? 1 : 0);
+    }
 }

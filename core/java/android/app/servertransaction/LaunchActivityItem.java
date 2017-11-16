@@ -25,6 +25,7 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
+import android.os.BaseBundle;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Parcel;
@@ -35,6 +36,7 @@ import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.content.ReferrerIntent;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Request to launch an activity.
@@ -158,4 +160,73 @@ public class LaunchActivityItem extends ActivityLifecycleItem {
             return new LaunchActivityItem[size];
         }
     };
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final LaunchActivityItem other = (LaunchActivityItem) o;
+        return mIntent.filterEquals(other.mIntent) && mIdent == other.mIdent
+                && activityInfoEqual(other.mInfo) && Objects.equals(mCurConfig, other.mCurConfig)
+                && Objects.equals(mOverrideConfig, other.mOverrideConfig)
+                && Objects.equals(mCompatInfo, other.mCompatInfo)
+                && Objects.equals(mReferrer, other.mReferrer)
+                && mProcState == other.mProcState && areBundlesEqual(mState, other.mState)
+                && areBundlesEqual(mPersistentState, other.mPersistentState)
+                && Objects.equals(mPendingResults, other.mPendingResults)
+                && Objects.equals(mPendingNewIntents, other.mPendingNewIntents)
+                && mNotResumed == other.mNotResumed && mIsForward == other.mIsForward
+                && Objects.equals(mProfilerInfo, other.mProfilerInfo);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = 17;
+        result = 31 * result + mIntent.filterHashCode();
+        result = 31 * result + mIdent;
+        result = 31 * result + Objects.hashCode(mCurConfig);
+        result = 31 * result + Objects.hashCode(mOverrideConfig);
+        result = 31 * result + Objects.hashCode(mCompatInfo);
+        result = 31 * result + Objects.hashCode(mReferrer);
+        result = 31 * result + Objects.hashCode(mProcState);
+        result = 31 * result + (mState != null ? mState.size() : 0);
+        result = 31 * result + (mPersistentState != null ? mPersistentState.size() : 0);
+        result = 31 * result + Objects.hashCode(mPendingResults);
+        result = 31 * result + Objects.hashCode(mPendingNewIntents);
+        result = 31 * result + (mNotResumed ? 1 : 0);
+        result = 31 * result + (mIsForward ? 1 : 0);
+        result = 31 * result + Objects.hashCode(mProfilerInfo);
+        return result;
+    }
+
+    private boolean activityInfoEqual(ActivityInfo other) {
+        return mInfo.flags == other.flags && mInfo.maxAspectRatio == other.maxAspectRatio
+                && Objects.equals(mInfo.launchToken, other.launchToken)
+                && Objects.equals(mInfo.getComponentName(), other.getComponentName());
+    }
+
+    private static boolean areBundlesEqual(BaseBundle extras, BaseBundle newExtras) {
+        if (extras == null || newExtras == null) {
+            return extras == newExtras;
+        }
+
+        if (extras.size() != newExtras.size()) {
+            return false;
+        }
+
+        for (String key : extras.keySet()) {
+            if (key != null) {
+                final Object value = extras.get(key);
+                final Object newValue = newExtras.get(key);
+                if (!Objects.equals(value, newValue)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
 }

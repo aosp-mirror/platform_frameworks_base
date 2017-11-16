@@ -68,4 +68,21 @@ public class ActivityConfigurationChangeItem extends ClientTransactionItem {
             return new ActivityConfigurationChangeItem[size];
         }
     };
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final ActivityConfigurationChangeItem other = (ActivityConfigurationChangeItem) o;
+        return mConfiguration.equals(other.mConfiguration);
+    }
+
+    @Override
+    public int hashCode() {
+        return mConfiguration.hashCode();
+    }
 }

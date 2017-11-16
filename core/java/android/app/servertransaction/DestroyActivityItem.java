@@ -76,4 +76,24 @@ public class DestroyActivityItem extends ActivityLifecycleItem {
             return new DestroyActivityItem[size];
         }
     };
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final DestroyActivityItem other = (DestroyActivityItem) o;
+        return mFinished == other.mFinished && mConfigChanges == other.mConfigChanges;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = 17;
+        result = 31 * result + (mFinished ? 1 : 0);
+        result = 31 * result + mConfigChanges;
+        return result;
+    }
 }
