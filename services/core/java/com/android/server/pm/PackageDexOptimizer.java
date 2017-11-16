@@ -128,6 +128,10 @@ public class PackageDexOptimizer {
     int performDexOpt(PackageParser.Package pkg, String[] sharedLibraries,
             String[] instructionSets, CompilerStats.PackageStats packageStats,
             PackageDexUsage.PackageUseInfo packageUseInfo, DexoptOptions options) {
+        if (pkg.applicationInfo.uid == -1) {
+            throw new IllegalArgumentException("Dexopt for " + pkg.packageName
+                    + " has invalid uid.");
+        }
         if (!canOptimizePackage(pkg)) {
             return DEX_OPT_SKIPPED;
         }
@@ -293,6 +297,9 @@ public class PackageDexOptimizer {
      */
     public int dexOptSecondaryDexPath(ApplicationInfo info, String path,
             PackageDexUsage.DexUseInfo dexUseInfo, DexoptOptions options) {
+        if (info.uid == -1) {
+            throw new IllegalArgumentException("Dexopt for path " + path + " has invalid uid.");
+        }
         synchronized (mInstallLock) {
             final long acquireTime = acquireWakeLockLI(info.uid);
             try {
