@@ -47,6 +47,7 @@ import com.android.systemui.R;
 import com.android.systemui.pip.BasePipManager;
 import com.android.systemui.recents.misc.SysUiTaskStackChangeListener;
 import com.android.systemui.recents.misc.SystemServicesProxy;
+import com.android.systemui.shared.system.ActivityManagerWrapper;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -234,7 +235,7 @@ public class PipManager implements BasePipManager {
 
         mActivityManager = ActivityManager.getService();
         mWindowManager = WindowManagerGlobal.getWindowManagerService();
-        SystemServicesProxy.getInstance(context).registerTaskStackListener(mTaskStackListener);
+        ActivityManagerWrapper.getInstance().registerTaskStackListener(mTaskStackListener);
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(Intent.ACTION_MEDIA_RESOURCE_GRANTED);
         mContext.registerReceiver(mBroadcastReceiver, intentFilter);

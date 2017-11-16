@@ -154,7 +154,7 @@ public class SystemBarScrimViews {
 
     public final void onBusEvent(MultiWindowStateChangedEvent event) {
         mHasDockedTasks = event.inMultiWindow;
-        animateScrimToCurrentNavBarState(event.stack.getStackTaskCount() > 0);
+        animateScrimToCurrentNavBarState(event.stack.getTaskCount() > 0);
     }
 
     public final void onBusEvent(final DragEndEvent event) {
@@ -166,7 +166,7 @@ public class SystemBarScrimViews {
 
     public final void onBusEvent(final DragEndCancelledEvent event) {
         // Restore the scrims to the normal state
-        animateScrimToCurrentNavBarState(event.stack.getStackTaskCount() > 0);
+        animateScrimToCurrentNavBarState(event.stack.getTaskCount() > 0);
     }
 
     /**

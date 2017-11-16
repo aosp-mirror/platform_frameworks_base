@@ -125,7 +125,7 @@ public class TaskViewFocusFrame extends View implements OnGlobalFocusChangeListe
             // We're returning from touch mode, set the focus to the previously focused task.
             final TaskStack stack = mSv.getStack();
             final int taskCount = stack.getTaskCount();
-            final int k = stack.indexOfStackTask(mSv.getFocusedTask());
+            final int k = stack.indexOfTask(mSv.getFocusedTask());
             final int taskIndexToFocus = k == -1 ? (taskCount - 1) : (k % taskCount);
             mSv.setFocusedTask(taskIndexToFocus, false, true);
         }

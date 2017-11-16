@@ -19,7 +19,6 @@ package com.android.systemui.shared.recents.model;
 import android.content.ComponentName;
 import android.util.ArrayMap;
 import android.util.ArraySet;
-import android.util.SparseArray;
 
 import com.android.systemui.shared.recents.model.Task.TaskKey;
 import com.android.systemui.shared.recents.utilities.AnimationProps;
@@ -92,7 +91,7 @@ public class TaskStack {
             boolean dismissRecentsIfAllRemoved) {
         if (mStackTaskList.contains(t)) {
             mStackTaskList.remove(t);
-            Task newFrontMostTask = getStackFrontMostTask();
+            Task newFrontMostTask = getFrontMostTask();
             if (mCb != null) {
                 // Notify that a task has been removed
                 mCb.onStackTaskRemoved(this, t, newFrontMostTask, animation,
@@ -183,7 +182,7 @@ public class TaskStack {
 
         // Only callback for the removed tasks after the stack has updated
         int removedTaskCount = removedTasks.size();
-        Task newFrontMostTask = getStackFrontMostTask();
+        Task newFrontMostTask = getFrontMostTask();
         for (int i = 0; i < removedTaskCount; i++) {
             mCb.onStackTaskRemoved(this, removedTasks.get(i), newFrontMostTask,
                     AnimationProps.IMMEDIATE, false /* fromDockGesture */,
@@ -205,7 +204,7 @@ public class TaskStack {
     /**
      * Gets the front-most task in the stack.
      */
-    public Task getStackFrontMostTask() {
+    public Task getFrontMostTask() {
         ArrayList<Task> stackTasks = mStackTaskList.getTasks();
         if (stackTasks.isEmpty()) {
             return null;
@@ -228,7 +227,7 @@ public class TaskStack {
     /**
      * Returns the set of "active" (non-historical) tasks in the stack that have been used recently.
      */
-    public ArrayList<Task> getStackTasks() {
+    public ArrayList<Task> getTasks() {
         return mStackTaskList.getTasks();
     }
 
@@ -242,16 +241,9 @@ public class TaskStack {
     }
 
     /**
-     * Returns the number of stacktasks.
-     */
-    public int getTaskCount() {
-        return mStackTaskList.size();
-    }
-
-    /**
      * Returns the number of stack tasks.
      */
-    public int getStackTaskCount() {
+    public int getTaskCount() {
         return mStackTaskList.size();
     }
 
@@ -298,7 +290,7 @@ public class TaskStack {
         if (nextLaunchTarget != null) {
             return nextLaunchTarget;
         }
-        return getStackTasks().get(getTaskCount() - 1);
+        return getTasks().get(getTaskCount() - 1);
     }
 
     private Task getNextLaunchTargetRaw() {
@@ -306,15 +298,15 @@ public class TaskStack {
         if (taskCount == 0) {
             return null;
         }
-        int launchTaskIndex = indexOfStackTask(getLaunchTarget());
+        int launchTaskIndex = indexOfTask(getLaunchTarget());
         if (launchTaskIndex != -1 && launchTaskIndex > 0) {
-            return getStackTasks().get(launchTaskIndex - 1);
+            return getTasks().get(launchTaskIndex - 1);
         }
         return null;
     }
 
     /** Returns the index of this task in this current task stack */
-    public int indexOfStackTask(Task t) {
+    public int indexOfTask(Task t) {
         return mStackTaskList.indexOf(t);
     }
 

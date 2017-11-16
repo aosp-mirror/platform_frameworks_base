@@ -40,7 +40,6 @@ import com.android.systemui.recents.events.ui.dragndrop.DragStartEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragStartInitializeDropTargetsEvent;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.shared.recents.model.Task;
-import com.android.systemui.shared.recents.model.TaskStack;
 
 import java.util.ArrayList;
 
@@ -106,7 +105,7 @@ public class RecentsViewTouchHandler {
     /** Handles touch events once we have intercepted them */
     public boolean onTouchEvent(MotionEvent ev) {
         handleTouchEvent(ev);
-        if (ev.getAction() == MotionEvent.ACTION_UP && mRv.getStack().getStackTaskCount() == 0) {
+        if (ev.getAction() == MotionEvent.ACTION_UP && mRv.getStack().getTaskCount() == 0) {
             EventBus.getDefault().send(new HideRecentsEvent(false, true));
         }
         return true;

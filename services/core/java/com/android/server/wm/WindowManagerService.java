@@ -124,6 +124,7 @@ import android.app.ActivityManagerInternal;
 import android.app.ActivityThread;
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
+import android.app.IAssistDataReceiver;
 import android.content.BroadcastReceiver;
 import android.content.ClipData;
 import android.content.ContentResolver;
@@ -226,7 +227,6 @@ import android.view.animation.Animation;
 import android.view.inputmethod.InputMethodManagerInternal;
 
 import com.android.internal.R;
-import com.android.internal.app.IAssistDataReceiver;
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.policy.IKeyguardDismissCallback;

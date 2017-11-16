@@ -36,6 +36,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.IAssistDataReceiver;
 import android.app.assist.AssistStructure;
 import android.app.assist.AssistStructure.AutofillOverlay;
 import android.app.assist.AssistStructure.ViewNode;
@@ -76,7 +77,6 @@ import android.view.autofill.IAutoFillManagerClient;
 import android.view.autofill.IAutofillWindowPresenter;
 
 import com.android.internal.R;
-import com.android.internal.app.IAssistDataReceiver;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;

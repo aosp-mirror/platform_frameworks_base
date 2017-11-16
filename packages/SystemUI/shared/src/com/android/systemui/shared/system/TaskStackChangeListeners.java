@@ -26,6 +26,8 @@ import android.os.RemoteException;
 import android.os.Trace;
 import android.util.Log;
 
+import com.android.systemui.shared.recents.model.ThumbnailData;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,6 +45,7 @@ public class TaskStackChangeListeners extends TaskStackListener {
     private final List<TaskStackChangeListener> mTmpListeners = new ArrayList<>();
 
     private final Handler mHandler;
+    private boolean mRegistered;
 
     public TaskStackChangeListeners(Looper looper) {
         mHandler = new H(looper);
@@ -50,14 +53,19 @@ public class TaskStackChangeListeners extends TaskStackListener {
 
     public void addListener(IActivityManager am, TaskStackChangeListener listener) {
         mTaskStackListeners.add(listener);
-        if (mTaskStackListeners.size() == 1) {
+        if (!mRegistered) {
             // Register mTaskStackListener to IActivityManager only once if needed.
             try {
                 am.registerTaskStackListener(this);
+                mRegistered = true;
             } catch (Exception e) {
                 Log.w(TAG, "Failed to call registerTaskStackListener", e);
             }
         }
+    }
+
+    public void removeListener(TaskStackChangeListener listener) {
+        mTaskStackListeners.remove(listener);
     }
 
     @Override
@@ -170,7 +178,7 @@ public class TaskStackChangeListeners extends TaskStackListener {
                         Trace.beginSection("onTaskSnapshotChanged");
                         for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
                             mTaskStackListeners.get(i).onTaskSnapshotChanged(msg.arg1,
-                                    (TaskSnapshot) msg.obj);
+                                    new ThumbnailData((TaskSnapshot) msg.obj));
                         }
                         Trace.endSection();
                         break;

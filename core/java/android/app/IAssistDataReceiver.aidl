@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.app;
+package android.app;
 
 import android.graphics.Bitmap;
 import android.os.Bundle;

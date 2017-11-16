@@ -174,7 +174,7 @@ public class PipManager implements BasePipManager {
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to register pinned stack listener", e);
         }
-        SystemServicesProxy.getInstance(mContext).registerTaskStackListener(mTaskStackListener);
+        ActivityManagerWrapper.getInstance().registerTaskStackListener(mTaskStackListener);
 
         mInputConsumerController = new InputConsumerController(mWindowManager);
         mMediaController = new PipMediaController(context, mActivityManager);

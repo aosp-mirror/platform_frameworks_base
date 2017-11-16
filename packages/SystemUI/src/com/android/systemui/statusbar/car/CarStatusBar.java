@@ -85,7 +85,7 @@ public class CarStatusBar extends StatusBar implements
     public void start() {
         super.start();
         mTaskStackListener = new TaskStackListenerImpl();
-        SystemServicesProxy.getInstance(mContext).registerTaskStackListener(mTaskStackListener);
+        ActivityManagerWrapper.getInstance().registerTaskStackListener(mTaskStackListener);
         registerPackageChangeReceivers();
 
         mStackScroller.setScrollingEnabled(true);
