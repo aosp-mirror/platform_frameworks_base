@@ -75,6 +75,7 @@ public final class KeymasterDefs {
     public static final int KM_TAG_ALLOW_WHILE_ON_BODY = KM_BOOL | 506;
     public static final int KM_TAG_TRUSTED_USER_PRESENCE_REQUIRED = KM_BOOL | 507;
     public static final int KM_TAG_TRUSTED_CONFIRMATION_REQUIRED = KM_BOOL | 508;
+    public static final int KM_TAG_UNLOCKED_DEVICE_REQUIRED = KM_BOOL | 509;
 
     public static final int KM_TAG_ALL_APPLICATIONS = KM_BOOL | 600;
     public static final int KM_TAG_APPLICATION_ID = KM_BYTES | 601;
@@ -216,6 +217,7 @@ public final class KeymasterDefs {
     public static final int KM_ERROR_MISSING_MIN_MAC_LENGTH = -58;
     public static final int KM_ERROR_UNSUPPORTED_MIN_MAC_LENGTH = -59;
     public static final int KM_ERROR_CANNOT_ATTEST_IDS = -66;
+    public static final int KM_ERROR_DEVICE_LOCKED = -72;
     public static final int KM_ERROR_UNIMPLEMENTED = -100;
     public static final int KM_ERROR_VERSION_MISMATCH = -101;
     public static final int KM_ERROR_UNKNOWN_ERROR = -1000;
@@ -262,6 +264,7 @@ public final class KeymasterDefs {
         sErrorCodeToString.put(KM_ERROR_INVALID_MAC_LENGTH,
                 "Invalid MAC or authentication tag length");
         sErrorCodeToString.put(KM_ERROR_CANNOT_ATTEST_IDS, "Unable to attest device ids");
+        sErrorCodeToString.put(KM_ERROR_DEVICE_LOCKED, "Device locked");
         sErrorCodeToString.put(KM_ERROR_UNIMPLEMENTED, "Not implemented");
         sErrorCodeToString.put(KM_ERROR_UNKNOWN_ERROR, "Unknown error");
     }

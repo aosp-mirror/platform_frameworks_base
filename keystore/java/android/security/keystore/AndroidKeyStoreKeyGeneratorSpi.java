@@ -243,13 +243,7 @@ public abstract class AndroidKeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
                 // Check that user authentication related parameters are acceptable. This method
                 // will throw an IllegalStateException if there are issues (e.g., secure lock screen
                 // not set up).
-                KeymasterUtils.addUserAuthArgs(new KeymasterArguments(),
-                        spec.isUserAuthenticationRequired(),
-                        spec.getUserAuthenticationValidityDurationSeconds(),
-                        spec.isUserAuthenticationValidWhileOnBody(),
-                        spec.isInvalidatedByBiometricEnrollment(),
-                        GateKeeper.INVALID_SECURE_USER_ID /* boundToSpecificSecureUserId */,
-                        spec.isUserConfirmationRequired());
+                KeymasterUtils.addUserAuthArgs(new KeymasterArguments(), spec);
             } catch (IllegalStateException | IllegalArgumentException e) {
                 throw new InvalidAlgorithmParameterException(e);
             }
@@ -285,16 +279,7 @@ public abstract class AndroidKeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
         args.addEnums(KeymasterDefs.KM_TAG_BLOCK_MODE, mKeymasterBlockModes);
         args.addEnums(KeymasterDefs.KM_TAG_PADDING, mKeymasterPaddings);
         args.addEnums(KeymasterDefs.KM_TAG_DIGEST, mKeymasterDigests);
-        KeymasterUtils.addUserAuthArgs(args,
-                spec.isUserAuthenticationRequired(),
-                spec.getUserAuthenticationValidityDurationSeconds(),
-                spec.isUserAuthenticationValidWhileOnBody(),
-                spec.isInvalidatedByBiometricEnrollment(),
-                GateKeeper.INVALID_SECURE_USER_ID /* boundToSpecificSecureUserId */,
-                spec.isUserConfirmationRequired());
-        if (spec.isTrustedUserPresenceRequired()) {
-            args.addBoolean(KeymasterDefs.KM_TAG_TRUSTED_USER_PRESENCE_REQUIRED);
-        }
+        KeymasterUtils.addUserAuthArgs(args, spec);
         KeymasterUtils.addMinMacLengthAuthorizationIfNecessary(
                 args,
                 mKeymasterAlgorithm,

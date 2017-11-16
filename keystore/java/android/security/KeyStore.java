@@ -545,7 +545,9 @@ public class KeyStore {
         try {
             args = args != null ? args : new KeymasterArguments();
             entropy = entropy != null ? entropy : new byte[0];
-            return mBinder.begin(getToken(), alias, purpose, pruneable, args, entropy, uid);
+            OperationResult res = mBinder.begin(getToken(), alias, purpose, pruneable, args, entropy, uid);
+            // This result is -26 (KEY_USER_NOT_AUTHENTICATED) but why??
+            return res;
         } catch (RemoteException e) {
             Log.w(TAG, "Cannot connect to keystore", e);
             return null;
@@ -563,7 +565,8 @@ public class KeyStore {
         try {
             arguments = arguments != null ? arguments : new KeymasterArguments();
             input = input != null ? input : new byte[0];
-            return mBinder.update(token, arguments, input);
+            OperationResult res = mBinder.update(token, arguments, input);
+            return res;
         } catch (RemoteException e) {
             Log.w(TAG, "Cannot connect to keystore", e);
             return null;
@@ -618,9 +621,9 @@ public class KeyStore {
      * @return {@code KeyStore.NO_ERROR} on success, otherwise an error value corresponding to
      * a {@code KeymasterDefs.KM_ERROR_} value or {@code KeyStore} ResponseCode.
      */
-    public int addAuthToken(byte[] authToken) {
+    public int addAuthToken(byte[] authToken, int userId) {
         try {
-            return mBinder.addAuthToken(authToken);
+            return mBinder.addAuthToken(authToken, userId);
         } catch (RemoteException e) {
             Log.w(TAG, "Cannot connect to keystore", e);
             return SYSTEM_ERROR;
@@ -832,14 +835,14 @@ public class KeyStore {
     public InvalidKeyException getInvalidKeyException(
             String keystoreKeyAlias, int uid, KeyStoreException e) {
         switch (e.getErrorCode()) {
-            case LOCKED:
+            case LOCKED: // 2
                 return new UserNotAuthenticatedException();
-            case KeymasterDefs.KM_ERROR_KEY_EXPIRED:
+            case KeymasterDefs.KM_ERROR_KEY_EXPIRED: // -25
                 return new KeyExpiredException();
-            case KeymasterDefs.KM_ERROR_KEY_NOT_YET_VALID:
+            case KeymasterDefs.KM_ERROR_KEY_NOT_YET_VALID: // -2
                 return new KeyNotYetValidException();
-            case KeymasterDefs.KM_ERROR_KEY_USER_NOT_AUTHENTICATED:
-            case OP_AUTH_NEEDED:
+            case KeymasterDefs.KM_ERROR_KEY_USER_NOT_AUTHENTICATED: // -26
+            case OP_AUTH_NEEDED: // 15
             {
                 // We now need to determine whether the key/operation can become usable if user
                 // authentication is performed, or whether it can never become usable again.
@@ -879,7 +882,7 @@ public class KeyStore {
                 // None of the key's SIDs can ever be authenticated
                 return new KeyPermanentlyInvalidatedException();
             }
-            case UNINITIALIZED:
+            case UNINITIALIZED: // 3
                 return new KeyPermanentlyInvalidatedException();
             default:
                 return new InvalidKeyException("Keystore operation failed", e);
