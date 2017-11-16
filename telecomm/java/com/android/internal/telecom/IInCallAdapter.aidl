@@ -77,4 +77,7 @@ oneway interface IInCallAdapter {
     void stopRtt(String callId);
 
     void setRttMode(String callId, int mode);
+
+    void handoverTo(String callId, in PhoneAccountHandle destAcct, int videoState,
+            in Bundle extras);
 }
