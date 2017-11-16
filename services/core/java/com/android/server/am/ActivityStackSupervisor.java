@@ -1270,7 +1270,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             // schedule launch ticks to collect information about slow apps.
             r.startLaunchTickingLocked();
 
-            r.app = app;
+            r.setProcess(app);
 
             if (mKeyguardController.isKeyguardLocked()) {
                 r.notifyUnknownVisibilityLaunched();

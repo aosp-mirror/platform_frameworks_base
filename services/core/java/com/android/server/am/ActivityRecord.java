@@ -934,6 +934,14 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         }
     }
 
+    void setProcess(ProcessRecord proc) {
+        app = proc;
+        final ActivityRecord root = task != null ? task.getRootActivity() : null;
+        if (root == this) {
+            task.setRootProcess(proc);
+        }
+    }
+
     AppWindowContainerController getWindowContainerController() {
         return mWindowContainerController;
     }

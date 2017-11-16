@@ -3316,7 +3316,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             String what, Object obj, ProcessRecord srcApp) {
         app.lastActivityTime = now;
 
-        if (app.activities.size() > 0) {
+        if (app.activities.size() > 0 || app.recentTasks.size() > 0) {
             // Don't want to touch dependent processes that are hosting activities.
             return index;
         }
@@ -3380,7 +3380,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     final void updateLruProcessLocked(ProcessRecord app, boolean activityChange,
             ProcessRecord client) {
         final boolean hasActivity = app.activities.size() > 0 || app.hasClientActivities
-                || app.treatLikeActivity;
+                || app.treatLikeActivity || app.recentTasks.size() > 0;
         final boolean hasService = false; // not impl yet. app.services.size() > 0;
         if (!activityChange && hasActivity) {
             // The process has activities, so we are only allowing activity-based adjustments
@@ -3484,7 +3484,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         int nextIndex;
         if (hasActivity) {
             final int N = mLruProcesses.size();
-            if (app.activities.size() == 0 && mLruProcessActivityStart < (N - 1)) {
+            if ((app.activities.size() == 0 || app.recentTasks.size() > 0)
+                    && mLruProcessActivityStart < (N - 1)) {
                 // Process doesn't have activities, but has clients with
                 // activities...  move it up, but one below the top (the top
                 // should always have a real activity).
@@ -5320,6 +5321,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         // Remove this application's activities from active lists.
         boolean hasVisibleActivities = mStackSupervisor.handleAppDiedLocked(app);
+
+        app.clearRecentTasks();
 
         app.activities.clear();
 
@@ -20959,7 +20962,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                             + " instead of expected " + app);
                     if (r.app == null || (r.app.uid == app.uid)) {
                         // Only fix things up when they look sane
-                        r.app = app;
+                        r.setProcess(app);
                     } else {
                         continue;
                     }
@@ -21037,6 +21040,11 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (adj == ProcessList.VISIBLE_APP_ADJ) {
                 adj += minLayer;
             }
+        }
+        if (procState > ActivityManager.PROCESS_STATE_CACHED_RECENT && app.recentTasks.size() > 0) {
+            procState = ActivityManager.PROCESS_STATE_CACHED_RECENT;
+            app.adjType = "cch-rec";
+            if (DEBUG_OOM_ADJ_REASON) Slog.d(TAG, "Raise to cached recent: " + app);
         }
 
         if (adj > ProcessList.PERCEPTIBLE_APP_ADJ
@@ -22598,6 +22606,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     switch (app.curProcState) {
                         case ActivityManager.PROCESS_STATE_CACHED_ACTIVITY:
                         case ActivityManager.PROCESS_STATE_CACHED_ACTIVITY_CLIENT:
+                        case ActivityManager.PROCESS_STATE_CACHED_RECENT:
                             // This process is a cached process holding activities...
                             // assign it the next cached value for that type, and then
                             // step that cached level.
@@ -23322,7 +23331,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             // has been removed.
             for (i=mRemovedProcesses.size()-1; i>=0; i--) {
                 final ProcessRecord app = mRemovedProcesses.get(i);
-                if (app.activities.size() == 0
+                if (app.activities.size() == 0 && app.recentTasks.size() == 0
                         && app.curReceivers.isEmpty() && app.services.size() == 0) {
                     Slog.i(
                         TAG, "Exiting empty application process "
