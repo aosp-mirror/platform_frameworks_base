@@ -16,6 +16,7 @@
 
 package android.view.accessibility;
 
+import android.annotation.IntDef;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -23,6 +24,8 @@ import android.util.Pools.SynchronizedPool;
 
 import com.android.internal.util.BitUtils;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -709,6 +712,38 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
      */
     public static final int CONTENT_CHANGE_TYPE_CONTENT_DESCRIPTION = 0x00000004;
 
+
+    /** @hide */
+    @IntDef(flag = true, prefix = { "TYPE_" }, value = {
+            TYPE_VIEW_CLICKED,
+            TYPE_VIEW_LONG_CLICKED,
+            TYPE_VIEW_SELECTED,
+            TYPE_VIEW_FOCUSED,
+            TYPE_VIEW_TEXT_CHANGED,
+            TYPE_WINDOW_STATE_CHANGED,
+            TYPE_NOTIFICATION_STATE_CHANGED,
+            TYPE_VIEW_HOVER_ENTER,
+            TYPE_VIEW_HOVER_EXIT,
+            TYPE_TOUCH_EXPLORATION_GESTURE_START,
+            TYPE_TOUCH_EXPLORATION_GESTURE_END,
+            TYPE_WINDOW_CONTENT_CHANGED,
+            TYPE_VIEW_SCROLLED,
+            TYPE_VIEW_TEXT_SELECTION_CHANGED,
+            TYPE_ANNOUNCEMENT,
+            TYPE_VIEW_ACCESSIBILITY_FOCUSED,
+            TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED,
+            TYPE_VIEW_TEXT_TRAVERSED_AT_MOVEMENT_GRANULARITY,
+            TYPE_GESTURE_DETECTION_START,
+            TYPE_GESTURE_DETECTION_END,
+            TYPE_TOUCH_INTERACTION_START,
+            TYPE_TOUCH_INTERACTION_END,
+            TYPE_WINDOWS_CHANGED,
+            TYPE_VIEW_CONTEXT_CLICKED,
+            TYPE_ASSIST_READING_CONTEXT
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface EventType {}
+
     /**
      * Mask for {@link AccessibilityEvent} all types.
      *
@@ -741,7 +776,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     private static final SynchronizedPool<AccessibilityEvent> sPool =
             new SynchronizedPool<AccessibilityEvent>(MAX_POOL_SIZE);
 
-    private int mEventType;
+    private @EventType int mEventType;
     private CharSequence mPackageName;
     private long mEventTime;
     int mMovementGranularity;
@@ -833,7 +868,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
      *
      * @return The event type.
      */
-    public int getEventType() {
+    public @EventType int getEventType() {
         return mEventType;
     }
 
@@ -890,7 +925,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
      *
      * @throws IllegalStateException If called from an AccessibilityService.
      */
-    public void setEventType(int eventType) {
+    public void setEventType(@EventType int eventType) {
         enforceNotSealed();
         mEventType = eventType;
     }

@@ -10836,6 +10836,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     void sendAccessibilityEventTypeViewTextChanged(CharSequence beforeText,
             int fromIndex, int removedCount, int addedCount) {
+        if (!AccessibilityManager.getInstance(mContext).isObservedEventType(
+                AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED)) {
+            return;
+        }
         AccessibilityEvent event =
                 AccessibilityEvent.obtain(AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED);
         event.setFromIndex(fromIndex);
