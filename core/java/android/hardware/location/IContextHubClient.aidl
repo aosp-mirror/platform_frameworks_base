@@ -25,4 +25,7 @@ interface IContextHubClient {
 
     // Sends a message to a nanoapp
     int sendMessageToNanoApp(in NanoAppMessage message);
+
+    // Closes the connection with the Context Hub
+    void close();
 }

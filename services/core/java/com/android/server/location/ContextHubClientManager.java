@@ -22,6 +22,7 @@ import android.hardware.contexthub.V1_0.IContexthub;
 import android.hardware.location.IContextHubClient;
 import android.hardware.location.IContextHubClientCallback;
 import android.hardware.location.NanoAppMessage;
+import android.os.RemoteException;
 import android.util.Log;
 
 import java.util.NoSuchElementException;
@@ -88,6 +89,15 @@ import java.util.concurrent.ConcurrentHashMap;
             IContextHubClientCallback clientCallback, int contextHubId) {
         ContextHubClientBroker broker = createNewClientBroker(clientCallback, contextHubId);
 
+        try {
+            broker.attachDeathRecipient();
+        } catch (RemoteException e) {
+            // The client process has died, so we close the connection and return null.
+            Log.e(TAG, "Failed to attach death recipient to client");
+            broker.close();
+            return null;
+        }
+
         Log.d(TAG, "Registered client with host endpoint ID " + broker.getHostEndPointId());
         return IContextHubClient.Stub.asInterface(broker);
     }
@@ -121,6 +131,23 @@ import java.util.concurrent.ConcurrentHashMap;
     }
 
     /**
+     * Unregisters a client from the service.
+     *
+     * This method should be invoked as a result of a client calling the ContextHubClient.close(),
+     * or if the client process has died.
+     *
+     * @param hostEndPointId the host endpoint ID of the client that has died
+     */
+    /* package */ void unregisterClient(short hostEndPointId) {
+        if (mHostEndPointIdToClientMap.remove(hostEndPointId) != null) {
+            Log.d(TAG, "Unregistered client with host endpoint ID " + hostEndPointId);
+        } else {
+            Log.e(TAG, "Cannot unregister non-existing client with host endpoint ID "
+                    + hostEndPointId);
+        }
+    }
+
+    /**
      * Creates a new ContextHubClientBroker object for a client and registers it with the client
      * manager.
      *
@@ -142,7 +169,7 @@ import java.util.concurrent.ConcurrentHashMap;
         for (int i = 0; i <= MAX_CLIENT_ID; i++) {
             if (!mHostEndPointIdToClientMap.containsKey(id)) {
                 broker = new ContextHubClientBroker(
-                        mContext, mContextHubProxy, contextHubId, (short)id, clientCallback);
+                        mContext, mContextHubProxy, this, contextHubId, (short)id, clientCallback);
                 mHostEndPointIdToClientMap.put((short)id, broker);
                 mNextHostEndpointId = (id == MAX_CLIENT_ID) ? 0 : id + 1;
                 break;

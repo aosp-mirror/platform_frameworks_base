@@ -18,12 +18,16 @@ package android.hardware.location;
 import android.annotation.RequiresPermission;
 import android.os.RemoteException;
 
+import dalvik.system.CloseGuard;
+
 import java.io.Closeable;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * A class describing a client of the Context Hub Service.
  *
- * Clients can send messages to nanoapps at a Context Hub through this object.
+ * Clients can send messages to nanoapps at a Context Hub through this object. The APIs supported
+ * by this object are thread-safe and can be used without external synchronization.
  *
  * @hide
  */
@@ -43,12 +47,17 @@ public class ContextHubClient implements Closeable {
      */
     private final ContextHubInfo mAttachedHub;
 
+    private final CloseGuard mCloseGuard = CloseGuard.get();
+
+    private final AtomicBoolean mIsClosed = new AtomicBoolean(false);
+
     /* package */ ContextHubClient(
             IContextHubClient clientProxy, IContextHubClientCallback callback,
             ContextHubInfo hubInfo) {
         mClientProxy = clientProxy;
         mCallbackInterface = callback;
         mAttachedHub = hubInfo;
+        mCloseGuard.open("close");
     }
 
     /**
@@ -67,7 +76,14 @@ public class ContextHubClient implements Closeable {
      * All futures messages targeted for this client are dropped at the service.
      */
     public void close() {
-        throw new UnsupportedOperationException("TODO: Implement this");
+        if (!mIsClosed.getAndSet(true)) {
+            mCloseGuard.close();
+            try {
+                mClientProxy.close();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
     }
 
     /**
@@ -90,6 +106,18 @@ public class ContextHubClient implements Closeable {
             return mClientProxy.sendMessageToNanoApp(message);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        try {
+            if (mCloseGuard != null) {
+                mCloseGuard.warnIfOpen();
+            }
+            close();
+        } finally {
+            super.finalize();
         }
     }
 }

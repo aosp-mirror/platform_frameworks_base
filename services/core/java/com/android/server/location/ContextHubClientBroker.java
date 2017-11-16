@@ -24,15 +24,21 @@ import android.hardware.location.ContextHubTransaction;
 import android.hardware.location.IContextHubClient;
 import android.hardware.location.IContextHubClientCallback;
 import android.hardware.location.NanoAppMessage;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 /**
- * A broker for the ContextHubClient that handles messaging and life-cycle notification callbacks.
+ * A class that acts as a broker for the ContextHubClient, which handles messaging and life-cycle
+ * notification callbacks. This class implements the IContextHubClient object, and the implemented
+ * APIs must be thread-safe.
  *
  * @hide
  */
-public class ContextHubClientBroker extends IContextHubClient.Stub {
+public class ContextHubClientBroker extends IContextHubClient.Stub
+        implements IBinder.DeathRecipient {
     private static final String TAG = "ContextHubClientBroker";
 
     /*
@@ -44,6 +50,11 @@ public class ContextHubClientBroker extends IContextHubClient.Stub {
      * The proxy to talk to the Context Hub HAL.
      */
     private final IContexthub mContextHubProxy;
+
+    /*
+     * The manager that registered this client.
+     */
+    private final ContextHubClientManager mClientManager;
 
     /*
      * The ID of the hub that this client is attached to.
@@ -60,14 +71,29 @@ public class ContextHubClientBroker extends IContextHubClient.Stub {
      */
     private final IContextHubClientCallback mCallbackInterface;
 
+    /*
+     * false if the connection has been closed by the client, true otherwise.
+     */
+    private final AtomicBoolean mConnectionOpen = new AtomicBoolean(true);
+
     /* package */ ContextHubClientBroker(
-            Context context, IContexthub contextHubProxy, int contextHubId, short hostEndPointId,
-            IContextHubClientCallback callback) {
+            Context context, IContexthub contextHubProxy, ContextHubClientManager clientManager,
+            int contextHubId, short hostEndPointId, IContextHubClientCallback callback) {
         mContext = context;
         mContextHubProxy = contextHubProxy;
+        mClientManager = clientManager;
         mAttachedContextHubId = contextHubId;
         mHostEndPointId = hostEndPointId;
         mCallbackInterface = callback;
+    }
+
+    /**
+     * Attaches a death recipient for this client
+     *
+     * @throws RemoteException if the client has already died
+     */
+    /* package */ void attachDeathRecipient() throws RemoteException {
+        mCallbackInterface.asBinder().linkToDeath(this, 0 /* flags */);
     }
 
     /**
@@ -80,18 +106,46 @@ public class ContextHubClientBroker extends IContextHubClient.Stub {
     @Override
     public int sendMessageToNanoApp(NanoAppMessage message) {
         ContextHubServiceUtil.checkPermissions(mContext);
-        ContextHubMsg messageToNanoApp =
-                ContextHubServiceUtil.createHidlContextHubMessage(mHostEndPointId, message);
 
         int result;
-        try {
-            result = mContextHubProxy.sendMessageToHub(mAttachedContextHubId, messageToNanoApp);
-        } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException in sendMessageToNanoApp (target hub ID = "
-                    + mAttachedContextHubId + ")", e);
+        if (mConnectionOpen.get()) {
+            ContextHubMsg messageToNanoApp = ContextHubServiceUtil.createHidlContextHubMessage(
+                    mHostEndPointId, message);
+
+            try {
+                result = mContextHubProxy.sendMessageToHub(mAttachedContextHubId, messageToNanoApp);
+            } catch (RemoteException e) {
+                Log.e(TAG, "RemoteException in sendMessageToNanoApp (target hub ID = "
+                        + mAttachedContextHubId + ")", e);
+                result = Result.UNKNOWN_FAILURE;
+            }
+        } else {
+            Log.e(TAG, "Failed to send message to nanoapp: client connection is closed");
             result = Result.UNKNOWN_FAILURE;
         }
+
         return ContextHubServiceUtil.toTransactionResult(result);
+    }
+
+    /**
+     * Closes the connection for this client with the service.
+     */
+    @Override
+    public void close() {
+        if (mConnectionOpen.getAndSet(false)) {
+            mClientManager.unregisterClient(mHostEndPointId);
+        }
+    }
+
+    /**
+     * Invoked when the underlying binder of this broker has died at the client process.
+     */
+    public void binderDied() {
+        try {
+            IContextHubClient.Stub.asInterface(this).close();
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException while closing client on death", e);
+        }
     }
 
     /**
@@ -114,11 +168,13 @@ public class ContextHubClientBroker extends IContextHubClient.Stub {
      * @param message the message that came from a nanoapp
      */
     /* package */ void sendMessageToClient(NanoAppMessage message) {
-        try {
-            mCallbackInterface.onMessageFromNanoApp(message);
-        } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException while sending message to client (host endpoint ID = "
-                    + mHostEndPointId + ")", e);
+        if (mConnectionOpen.get()) {
+            try {
+                mCallbackInterface.onMessageFromNanoApp(message);
+            } catch (RemoteException e) {
+                Log.e(TAG, "RemoteException while sending message to client (host endpoint ID = "
+                        + mHostEndPointId + ")", e);
+            }
         }
     }
 }
