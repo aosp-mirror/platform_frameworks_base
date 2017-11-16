@@ -32,6 +32,7 @@ import android.util.LruCache;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.systemui.shared.recents.model.RecentsTaskLoadPlan.Options;
+import com.android.systemui.shared.recents.model.RecentsTaskLoadPlan.PreloadOptions;
 import com.android.systemui.shared.recents.model.Task.TaskKey;
 import com.android.systemui.shared.recents.model.TaskKeyLruCache.EvictionCallback;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
@@ -155,7 +156,7 @@ public class RecentsTaskLoader {
             int currentUserId) {
         try {
             Trace.beginSection("preloadPlan");
-            plan.preloadPlan(this, runningTaskId, currentUserId);
+            plan.preloadPlan(new PreloadOptions(), this, runningTaskId, currentUserId);
         } finally {
             Trace.endSection();
         }

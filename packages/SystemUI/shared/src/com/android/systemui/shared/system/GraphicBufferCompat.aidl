@@ -14,19 +14,6 @@
  * limitations under the License.
  */
 
-package com.android.systemui.shared.recents;
+package com.android.systemui.shared.system;
 
-import android.graphics.Rect;
-import com.android.systemui.shared.system.GraphicBufferCompat;
-
-/**
- * Temporary callbacks into SystemUI.
- */
-interface ISystemUiProxy {
-
-    /**
-     * Proxies SurfaceControl.screenshotToBuffer().
-     */
-    GraphicBufferCompat screenshot(in Rect sourceCrop, int width, int height, int minLayer,
-            int maxLayer, boolean useIdentityTransform, int rotation);
-}
+parcelable GraphicBufferCompat;
