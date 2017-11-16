@@ -23,6 +23,10 @@ cc_binary_host {
         "Collation.cpp",
         "main.cpp",
     ],
+    cflags: [
+        "-Wall",
+        "-Werror",
+    ],
 
     shared_libs: [
         "libstats_proto_host",
@@ -90,6 +94,10 @@ cc_library_shared {
     name: "libstatslog",
     generated_sources: ["statslog.cpp"],
     generated_headers: ["statslog.h"],
+    cflags: [
+        "-Wall",
+        "-Werror",
+    ],
     export_generated_headers: ["statslog.h"],
     shared_libs: [
         "liblog",
