@@ -102,7 +102,7 @@ interface IWifiManager
 
     int getWifiEnabledState();
 
-    void setCountryCode(String country, boolean persist);
+    void setCountryCode(String country);
 
     String getCountryCode();
 

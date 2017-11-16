@@ -756,7 +756,7 @@ public class VrManagerService extends SystemService implements EnabledComponentC
 
         mBootsToVr = SystemProperties.getBoolean("ro.boot.vr", false);
         mUseStandbyToExitVrMode = mBootsToVr
-                && SystemProperties.getBoolean("persist.vr.use_standby_to_exit_vr_mode", false);
+                && SystemProperties.getBoolean("persist.vr.use_standby_to_exit_vr_mode", true);
         publishLocalService(VrManagerInternal.class, new LocalService());
         publishBinderService(Context.VR_SERVICE, mVrManager.asBinder());
     }

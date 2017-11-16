@@ -90,6 +90,7 @@ import android.content.IntentSender;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.AuxiliaryResolveInfo;
+import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
@@ -133,6 +134,7 @@ class ActivityStarter {
     private static final int INVALID_LAUNCH_MODE = -1;
 
     private final ActivityManagerService mService;
+    private final IPackageManager mPackageManager;
     private final ActivityStackSupervisor mSupervisor;
     private final ActivityStartInterceptor mInterceptor;
 
@@ -232,8 +234,9 @@ class ActivityStarter {
         mIntentDelivered = false;
     }
 
-    ActivityStarter(ActivityManagerService service) {
+    ActivityStarter(ActivityManagerService service, IPackageManager packageManager) {
         mService = service;
+        mPackageManager = packageManager;
         mSupervisor = mService.mStackSupervisor;
         mInterceptor = new ActivityStartInterceptor(mService, mSupervisor);
     }
@@ -264,8 +267,12 @@ class ActivityStarter {
             outActivity[0] = mLastStartActivityRecord[0];
         }
 
+        return getExternalResult(mLastStartActivityResult);
+    }
+
+    public static int getExternalResult(int result) {
         // Aborted results are treated as successes externally, but we must track them internally.
-        return mLastStartActivityResult != START_ABORTED ? mLastStartActivityResult : START_SUCCESS;
+        return result != START_ABORTED ? result : START_SUCCESS;
     }
 
     /** DO NOT call this method directly. Use {@link #startActivityLocked} instead. */
@@ -295,7 +302,8 @@ class ActivityStarter {
             }
         }
 
-        final int userId = aInfo != null ? UserHandle.getUserId(aInfo.applicationInfo.uid) : 0;
+        final int userId = aInfo != null && aInfo.applicationInfo != null
+                ? UserHandle.getUserId(aInfo.applicationInfo.uid) : 0;
 
         if (err == ActivityManager.START_SUCCESS) {
             Slog.i(TAG, "START u" + userId + " {" + intent.toShortString(true, true, true, false)
@@ -371,7 +379,7 @@ class ActivityStarter {
                     && sourceRecord.info.applicationInfo.uid != aInfo.applicationInfo.uid) {
                 try {
                     intent.addCategory(Intent.CATEGORY_VOICE);
-                    if (!AppGlobals.getPackageManager().activitySupportsIntent(
+                    if (!mPackageManager.activitySupportsIntent(
                             intent.getComponent(), intent, resolvedType)) {
                         Slog.w(TAG,
                                 "Activity being started in current voice task does not support voice: "
@@ -389,7 +397,7 @@ class ActivityStarter {
             // If the caller is starting a new voice session, just make sure the target
             // is actually allowing it to run this way.
             try {
-                if (!AppGlobals.getPackageManager().activitySupportsIntent(intent.getComponent(),
+                if (!mPackageManager.activitySupportsIntent(intent.getComponent(),
                         intent, resolvedType)) {
                     Slog.w(TAG,
                             "Activity being started in new voice task does not support: "
@@ -665,7 +673,7 @@ class ActivityStarter {
         if (intent != null && intent.hasFileDescriptors()) {
             throw new IllegalArgumentException("File descriptors passed in Intent");
         }
-        mSupervisor.mActivityMetricsLogger.notifyActivityLaunching();
+        mSupervisor.getActivityMetricsLogger().notifyActivityLaunching();
         boolean componentSpecified = intent.getComponent() != null;
 
         // Save a copy in case ephemeral needs it
@@ -859,7 +867,7 @@ class ActivityStarter {
                 }
             }
 
-            mSupervisor.mActivityMetricsLogger.notifyActivityLaunched(res, outRecord[0]);
+            mSupervisor.getActivityMetricsLogger().notifyActivityLaunched(res, outRecord[0]);
             return res;
         }
     }
@@ -1119,7 +1127,7 @@ class ActivityStarter {
         // If the activity being launched is the same as the one currently at the top, then
         // we need to check if it should only be launched once.
         final ActivityStack topStack = mSupervisor.mFocusedStack;
-        final ActivityRecord topFocused = topStack.topActivity();
+        final ActivityRecord topFocused = topStack.getTopActivity();
         final ActivityRecord top = topStack.topRunningNonDelayedActivityLocked(mNotTop);
         final boolean dontStart = top != null && mStartActivity.resultTo == null
                 && top.realActivity.equals(mStartActivity.realActivity)
@@ -1565,8 +1573,8 @@ class ActivityStarter {
                 && (topTask != intentActivity.getTask() || topTask != focusStack.topTask())
                 && !mAvoidMoveToFront) {
             mStartActivity.intent.addFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
-            if (mSourceRecord == null || (mSourceStack.topActivity() != null &&
-                    mSourceStack.topActivity().getTask() == mSourceRecord.getTask())) {
+            if (mSourceRecord == null || (mSourceStack.getTopActivity() != null &&
+                    mSourceStack.getTopActivity().getTask() == mSourceRecord.getTask())) {
                 // We really do want to push this one into the user's face, right now.
                 if (mLaunchTaskBehind && mSourceRecord != null) {
                     intentActivity.setTaskToAffiliateWith(mSourceRecord.getTask());
@@ -1956,7 +1964,7 @@ class ActivityStarter {
         if (mDoResume) {
             mTargetStack.moveToFront("addingToTopTask");
         }
-        final ActivityRecord prev = mTargetStack.topActivity();
+        final ActivityRecord prev = mTargetStack.getTopActivity();
         final TaskRecord task = (prev != null) ? prev.getTask() : mTargetStack.createTaskRecord(
                 mSupervisor.getNextTaskIdForUserLocked(mStartActivity.userId), mStartActivity.info,
                 mIntent, null, null, true);

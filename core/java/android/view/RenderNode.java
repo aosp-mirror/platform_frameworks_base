@@ -353,6 +353,11 @@ public class RenderNode {
         return nHasShadow(mNativeRenderNode);
     }
 
+    /** setShadowColor */
+    public boolean setShadowColor(int color) {
+        return nSetShadowColor(mNativeRenderNode, color);
+    }
+
     /**
      * Enables or disables clipping to the outline.
      *
@@ -909,6 +914,8 @@ public class RenderNode {
     private static native boolean nSetOutlineNone(long renderNode);
     @CriticalNative
     private static native boolean nHasShadow(long renderNode);
+    @CriticalNative
+    private static native boolean nSetShadowColor(long renderNode, int color);
     @CriticalNative
     private static native boolean nSetClipToOutline(long renderNode, boolean clipToOutline);
     @CriticalNative

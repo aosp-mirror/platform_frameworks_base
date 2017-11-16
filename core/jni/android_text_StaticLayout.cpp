@@ -120,14 +120,13 @@ static inline std::vector<float> jintArrayToFloatVector(JNIEnv* env, jintArray j
 
 class Run {
     public:
-        Run(int32_t start, int32_t end) : mStart(start), mEnd(end) {}
+        Run(int32_t start, int32_t end) : mRange(start, end) {}
         virtual ~Run() {}
 
         virtual void addTo(minikin::LineBreaker* lineBreaker) = 0;
 
     protected:
-        const int32_t mStart;
-        const int32_t mEnd;
+        minikin::Range mRange;
 
     private:
         // Forbid copy and assign.
@@ -143,7 +142,7 @@ class StyleRun : public Run {
               mIsRtl(isRtl) {}
 
         void addTo(minikin::LineBreaker* lineBreaker) override {
-            lineBreaker->addStyleRun(&mPaint, mCollection, mStart, mEnd, mIsRtl);
+            lineBreaker->addStyleRun(&mPaint, mCollection, mRange, mIsRtl);
         }
 
     private:
@@ -158,7 +157,7 @@ class Replacement : public Run {
             : Run(start, end), mWidth(width), mLocaleListId(localeListId) {}
 
         void addTo(minikin::LineBreaker* lineBreaker) override {
-            lineBreaker->addReplacement(mStart, mEnd, mWidth, mLocaleListId);
+            lineBreaker->addReplacement(mRange, mWidth, mLocaleListId);
         }
 
     private:
@@ -273,7 +272,7 @@ static void recycleCopy(JNIEnv* env, jobject recycle, jintArray recycleBreaks,
 
 static jint nComputeLineBreaks(JNIEnv* env, jclass, jlong nativePtr,
         // Inputs
-        jcharArray text,
+        jcharArray javaText,
         jint length,
         jfloat firstWidth,
         jint firstWidthLineCount,
@@ -294,11 +293,10 @@ static jint nComputeLineBreaks(JNIEnv* env, jclass, jlong nativePtr,
 
     StaticLayoutNative* builder = toNative(nativePtr);
 
+    ScopedCharArrayRO text(env, javaText);
+
     // TODO: Reorganize minikin APIs.
-    minikin::LineBreaker b;
-    b.resize(length);
-    env->GetCharArrayRegion(text, 0, length, b.buffer());
-    b.setText();
+    minikin::LineBreaker b(minikin::U16StringPiece(text.get(), length));
     if (variableTabStops == nullptr) {
         b.setTabStops(nullptr, 0, defaultTabStop);
     } else {
@@ -321,7 +319,6 @@ static jint nComputeLineBreaks(JNIEnv* env, jclass, jlong nativePtr,
 
     env->SetFloatArrayRegion(charWidths, 0, b.size(), b.charWidths());
 
-    b.finish();
     builder->clearRuns();
 
     return static_cast<jint>(nBreaks);

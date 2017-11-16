@@ -1,0 +1,239 @@
+/*
+ * Copyright (C) 2017 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.android.server.power.batterysaver;
+
+import android.Manifest;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.hardware.power.V1_0.PowerHint;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
+import android.os.PowerManager;
+import android.os.PowerManagerInternal.LowPowerModeListener;
+import android.os.PowerSaveState;
+import android.os.UserHandle;
+import android.util.ArrayMap;
+import android.util.Slog;
+import android.widget.Toast;
+
+import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.Preconditions;
+import com.android.server.power.BatterySaverPolicy;
+import com.android.server.power.BatterySaverPolicy.BatterySaverPolicyListener;
+import com.android.server.power.PowerManagerService;
+
+import java.util.ArrayList;
+
+/**
+ * Responsible for battery saver mode transition logic.
+ */
+public class BatterySaverController implements BatterySaverPolicyListener {
+    static final String TAG = "BatterySaverController";
+
+    static final boolean DEBUG = false; // DO NOT MERGE WITH TRUE
+
+    private final Object mLock = new Object();
+    private final Context mContext;
+    private final MyHandler mHandler;
+    private final FileUpdater mFileUpdater;
+
+    private PowerManager mPowerManager;
+
+    private final BatterySaverPolicy mBatterySaverPolicy;
+
+    @GuardedBy("mLock")
+    private final ArrayList<LowPowerModeListener> mListeners = new ArrayList<>();
+
+    @GuardedBy("mLock")
+    private boolean mEnabled;
+
+    /**
+     * Keep track of the previous enabled state, which we use to decide when to send broadcasts,
+     * which we don't want to send only when the screen state changes.
+     */
+    @GuardedBy("mLock")
+    private boolean mWasEnabled;
+
+    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            switch (intent.getAction()) {
+                case Intent.ACTION_SCREEN_ON:
+                case Intent.ACTION_SCREEN_OFF:
+                    mHandler.postStateChanged();
+                    break;
+            }
+        }
+    };
+
+    /**
+     * Constructor.
+     */
+    public BatterySaverController(Context context, Looper looper, BatterySaverPolicy policy) {
+        mContext = context;
+        mHandler = new MyHandler(looper);
+        mBatterySaverPolicy = policy;
+        mBatterySaverPolicy.addListener(this);
+        mFileUpdater = new FileUpdater(context);
+    }
+
+    /**
+     * Add a listener.
+     */
+    public void addListener(LowPowerModeListener listener) {
+        synchronized (mLock) {
+            mListeners.add(listener);
+        }
+    }
+
+    /**
+     * Called by {@link PowerManagerService} on system ready..
+     */
+    public void systemReady() {
+        final IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_ON);
+        filter.addAction(Intent.ACTION_SCREEN_OFF);
+        mContext.registerReceiver(mReceiver, filter);
+    }
+
+    private PowerManager getPowerManager() {
+        if (mPowerManager == null) {
+            mPowerManager =
+                    Preconditions.checkNotNull(mContext.getSystemService(PowerManager.class));
+        }
+        return mPowerManager;
+    }
+
+    @Override
+    public void onBatterySaverPolicyChanged(BatterySaverPolicy policy) {
+        mHandler.postStateChanged();
+    }
+
+    private class MyHandler extends Handler {
+        private final int MSG_STATE_CHANGED = 1;
+
+        public MyHandler(Looper looper) {
+            super(looper);
+        }
+
+        public void postStateChanged() {
+            obtainMessage(MSG_STATE_CHANGED).sendToTarget();
+        }
+
+        @Override
+        public void dispatchMessage(Message msg) {
+            switch (msg.what) {
+                case MSG_STATE_CHANGED:
+                    handleBatterySaverStateChanged();
+                    break;
+            }
+        }
+    }
+
+    /**
+     * Called by {@link PowerManagerService} to update the battery saver stete.
+     */
+    public void enableBatterySaver(boolean enable) {
+        synchronized (mLock) {
+            if (mEnabled == enable) {
+                return;
+            }
+            mEnabled = enable;
+
+            mHandler.postStateChanged();
+        }
+    }
+
+    /**
+     * Dispatch power save events to the listeners.
+     *
+     * This is always called on the handler thread.
+     */
+    void handleBatterySaverStateChanged() {
+        final LowPowerModeListener[] listeners;
+
+        final boolean wasEnabled;
+        final boolean enabled;
+        final boolean isScreenOn = getPowerManager().isInteractive();
+        final ArrayMap<String, String> fileValues;
+
+        synchronized (mLock) {
+            Slog.i(TAG, "Battery saver enabled: screen on=" + isScreenOn);
+
+            listeners = mListeners.toArray(new LowPowerModeListener[mListeners.size()]);
+            wasEnabled = mWasEnabled;
+            enabled = mEnabled;
+
+            if (enabled) {
+                fileValues = mBatterySaverPolicy.getFileValues(isScreenOn);
+            } else {
+                fileValues = null;
+            }
+        }
+
+        PowerManagerService.powerHintInternal(PowerHint.LOW_POWER, enabled ? 1 : 0);
+
+        if (enabled) {
+            // STOPSHIP Remove the toast.
+            Toast.makeText(mContext,
+                    com.android.internal.R.string.battery_saver_warning,
+                    Toast.LENGTH_LONG).show();
+        }
+
+        if (fileValues == null || fileValues.size() == 0) {
+            mFileUpdater.restoreDefault();
+        } else {
+            mFileUpdater.writeFiles(fileValues);
+        }
+
+        if (enabled != wasEnabled) {
+            if (DEBUG) {
+                Slog.i(TAG, "Sending broadcasts for mode: " + enabled);
+            }
+
+            // Send the broadcasts and notify the listeners. We only do this when the battery saver
+            // mode changes, but not when only the screen state changes.
+            Intent intent = new Intent(PowerManager.ACTION_POWER_SAVE_MODE_CHANGING)
+                    .putExtra(PowerManager.EXTRA_POWER_SAVE_MODE, enabled)
+                    .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+            mContext.sendBroadcast(intent);
+
+            intent = new Intent(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED);
+            intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+            mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
+
+            // Send internal version that requires signature permission.
+            intent = new Intent(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED_INTERNAL);
+            intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+            mContext.sendBroadcastAsUser(intent, UserHandle.ALL,
+                    Manifest.permission.DEVICE_POWER);
+
+
+            for (LowPowerModeListener listener : listeners) {
+                final PowerSaveState result =
+                        mBatterySaverPolicy.getBatterySaverPolicy(
+                                listener.getServiceType(), enabled);
+                listener.onLowPowerModeChanged(result);
+            }
+        }
+
+        synchronized (mLock) {
+            mWasEnabled = enabled;
+        }
+    }
+}

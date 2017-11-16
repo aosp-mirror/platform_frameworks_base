@@ -189,7 +189,7 @@ void EndReorderBarrierDrawable::drawShadow(SkCanvas* canvas, RenderNodeDrawable*
     }
     SkShadowUtils::DrawShadow(
             canvas, *casterPath, zParams, skiaLightPos, SkiaPipeline::getLightRadius(),
-            ambientAlpha, spotAlpha, SK_ColorBLACK,
+            ambientAlpha, spotAlpha, casterProperties.getShadowColor(),
             casterAlpha < 1.0f ? SkShadowFlags::kTransparentOccluder_ShadowFlag : 0);
 }
 

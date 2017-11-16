@@ -4758,6 +4758,11 @@ message MetricsEvent {
     // OS: P
     NOTIFICATION_ZEN_MODE_TOGGLE_ON_ALARM = 1261;
 
+    // FIELD: the version of the widget the selection was made in.
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: P
+    FIELD_SELECTION_WIDGET_VERSION = 1262;
+
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
   }

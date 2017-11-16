@@ -2720,9 +2720,9 @@ public class NotificationManagerService extends SystemService {
         protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
             if (!DumpUtils.checkDumpAndUsageStatsPermission(getContext(), TAG, pw)) return;
             final DumpFilter filter = DumpFilter.parseFromArguments(args);
-            if (filter != null && filter.stats) {
+            if (filter.stats) {
                 dumpJson(pw, filter);
-            } else if (filter != null && filter.proto) {
+            } else if (filter.proto) {
                 dumpProto(fd, filter);
             } else {
                 dumpImpl(pw, filter);
@@ -2839,7 +2839,6 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public Policy getNotificationPolicy(String pkg) {
-            enforcePolicyAccess(pkg, "getNotificationPolicy");
             final long identity = Binder.clearCallingIdentity();
             try {
                 return mZenModeHelper.getNotificationPolicy();
@@ -3236,7 +3235,7 @@ public class NotificationManagerService extends SystemService {
         return null;
     };
 
-    private void dumpJson(PrintWriter pw, DumpFilter filter) {
+    private void dumpJson(PrintWriter pw, @NonNull DumpFilter filter) {
         JSONObject dump = new JSONObject();
         try {
             dump.put("service", "Notification Manager");
@@ -3250,7 +3249,7 @@ public class NotificationManagerService extends SystemService {
         pw.println(dump);
     }
 
-    private void dumpProto(FileDescriptor fd, DumpFilter filter) {
+    private void dumpProto(FileDescriptor fd, @NonNull DumpFilter filter) {
         final ProtoOutputStream proto = new ProtoOutputStream(fd);
         synchronized (mNotificationLock) {
             long records = proto.start(NotificationServiceDumpProto.RECORDS);
@@ -3332,7 +3331,7 @@ public class NotificationManagerService extends SystemService {
         proto.flush();
     }
 
-    void dumpImpl(PrintWriter pw, DumpFilter filter) {
+    void dumpImpl(PrintWriter pw, @NonNull DumpFilter filter) {
         pw.print("Current Notification Manager state");
         if (filter.filtered) {
             pw.print(" (filtered to "); pw.print(filter); pw.print(")");
@@ -5901,6 +5900,7 @@ public class NotificationManagerService extends SystemService {
         public boolean redact = true;
         public boolean proto = false;
 
+        @NonNull
         public static DumpFilter parseFromArguments(String[] args) {
             final DumpFilter filter = new DumpFilter();
             for (int ai = 0; ai < args.length; ai++) {

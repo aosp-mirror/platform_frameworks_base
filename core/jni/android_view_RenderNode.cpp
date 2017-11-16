@@ -174,6 +174,10 @@ static jboolean android_view_RenderNode_hasShadow(jlong renderNodePtr) {
     return renderNode->stagingProperties().hasShadow();
 }
 
+static jboolean android_view_RenderNode_setShadowColor(jlong renderNodePtr, jint shadowColor) {
+    return SET_AND_DIRTY(setShadowColor, static_cast<SkColor>(shadowColor), RenderNode::GENERIC);
+}
+
 static jboolean android_view_RenderNode_setClipToOutline(jlong renderNodePtr,
         jboolean clipToOutline) {
     RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
@@ -571,6 +575,7 @@ static const JNINativeMethod gMethods[] = {
     { "nSetOutlineEmpty",      "(J)Z",   (void*) android_view_RenderNode_setOutlineEmpty },
     { "nSetOutlineNone",       "(J)Z",   (void*) android_view_RenderNode_setOutlineNone },
     { "nHasShadow",            "(J)Z",   (void*) android_view_RenderNode_hasShadow },
+    { "nSetShadowColor",       "(JI)Z",  (void*) android_view_RenderNode_setShadowColor },
     { "nSetClipToOutline",     "(JZ)Z",  (void*) android_view_RenderNode_setClipToOutline },
     { "nSetRevealClip",        "(JZFFF)Z", (void*) android_view_RenderNode_setRevealClip },
 

@@ -428,7 +428,8 @@ public class RecentTasksTest extends ActivityTestsBase {
         assertSecurityException(expectCallable, () -> mService.getTaskDescription(0));
         assertSecurityException(expectCallable, () -> mService.cancelTaskWindowTransition(0));
         assertSecurityException(expectCallable, () -> mService.cancelTaskThumbnailTransition(0));
-        assertSecurityException(expectCallable, () -> mService.startRecentsActivity(null, null, 0));
+        assertSecurityException(expectCallable, () -> mService.startRecentsActivity(null, null,
+                null, 0));
     }
 
     private void testGetTasksApis(boolean expectCallable) {
@@ -510,7 +511,7 @@ public class RecentTasksTest extends ActivityTestsBase {
         }
 
         @Override
-        protected ActivityStackSupervisor createStackSupervisor() {
+        protected ActivityStackSupervisor createTestSupervisor() {
             return new MyTestActivityStackSupervisor(this, mHandlerThread.getLooper());
         }
 

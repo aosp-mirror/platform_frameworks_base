@@ -26,6 +26,7 @@
 
 #include <SkBlendMode.h>
 #include <SkCamera.h>
+#include <SkColor.h>
 #include <SkMatrix.h>
 #include <SkRegion.h>
 
@@ -506,6 +507,14 @@ public:
                getOutline().getAlpha() != 0.0f;
     }
 
+    SkColor getShadowColor() const {
+        return mPrimitiveFields.mShadowColor;
+    }
+
+    bool setShadowColor(SkColor shadowColor) {
+        return RP_SET(mPrimitiveFields.mShadowColor, shadowColor);
+    }
+
     bool fitsOnLayer() const {
         const DeviceInfo* deviceInfo = DeviceInfo::get();
         return mPrimitiveFields.mWidth <= deviceInfo->maxTextureSize() &&
@@ -529,6 +538,7 @@ private:
         int mLeft = 0, mTop = 0, mRight = 0, mBottom = 0;
         int mWidth = 0, mHeight = 0;
         int mClippingFlags = CLIP_TO_BOUNDS;
+        SkColor mShadowColor = SK_ColorBLACK;
         float mAlpha = 1;
         float mTranslationX = 0, mTranslationY = 0, mTranslationZ = 0;
         float mElevation = 0;

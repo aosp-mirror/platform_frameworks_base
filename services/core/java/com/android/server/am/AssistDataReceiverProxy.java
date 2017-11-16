@@ -19,13 +19,13 @@ package com.android.server.am;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 
+import android.app.IAssistDataReceiver;
 import android.graphics.Bitmap;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.util.Log;
 
-import com.android.internal.app.IAssistDataReceiver;
 import com.android.server.am.AssistDataRequester.AssistDataRequesterCallbacks;
 
 /**

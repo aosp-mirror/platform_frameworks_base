@@ -49,6 +49,7 @@ public final class SmartSelectionEventTracker {
     private static final int PREV_EVENT_DELTA = MetricsEvent.FIELD_SELECTION_SINCE_PREVIOUS;
     private static final int INDEX = MetricsEvent.FIELD_SELECTION_SESSION_INDEX;
     private static final int WIDGET_TYPE = MetricsEvent.FIELD_SELECTION_WIDGET_TYPE;
+    private static final int WIDGET_VERSION = MetricsEvent.FIELD_SELECTION_WIDGET_VERSION;
     private static final int MODEL_NAME = MetricsEvent.FIELD_TEXTCLASSIFIER_MODEL;
     private static final int ENTITY_TYPE = MetricsEvent.FIELD_SELECTION_ENTITY_TYPE;
     private static final int SMART_START = MetricsEvent.FIELD_SELECTION_SMART_RANGE_START;
@@ -60,23 +61,32 @@ public final class SmartSelectionEventTracker {
     private static final String ZERO = "0";
     private static final String TEXTVIEW = "textview";
     private static final String EDITTEXT = "edittext";
+    private static final String UNSELECTABLE_TEXTVIEW = "nosel-textview";
     private static final String WEBVIEW = "webview";
     private static final String EDIT_WEBVIEW = "edit-webview";
+    private static final String CUSTOM_TEXTVIEW = "customview";
+    private static final String CUSTOM_EDITTEXT = "customedit";
+    private static final String CUSTOM_UNSELECTABLE_TEXTVIEW = "nosel-customview";
     private static final String UNKNOWN = "unknown";
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({WidgetType.UNSPECIFIED, WidgetType.TEXTVIEW, WidgetType.WEBVIEW,
             WidgetType.EDITTEXT, WidgetType.EDIT_WEBVIEW})
     public @interface WidgetType {
-    int UNSPECIFIED = 0;
-    int TEXTVIEW = 1;
-    int WEBVIEW = 2;
-    int EDITTEXT = 3;
-    int EDIT_WEBVIEW = 4;
+        int UNSPECIFIED = 0;
+        int TEXTVIEW = 1;
+        int WEBVIEW = 2;
+        int EDITTEXT = 3;
+        int EDIT_WEBVIEW = 4;
+        int UNSELECTABLE_TEXTVIEW = 5;
+        int CUSTOM_TEXTVIEW = 6;
+        int CUSTOM_EDITTEXT = 7;
+        int CUSTOM_UNSELECTABLE_TEXTVIEW = 8;
     }
 
     private final MetricsLogger mMetricsLogger = new MetricsLogger();
     private final int mWidgetType;
+    @Nullable private final String mWidgetVersion;
     private final Context mContext;
 
     @Nullable private String mSessionId;
@@ -91,6 +101,14 @@ public final class SmartSelectionEventTracker {
 
     public SmartSelectionEventTracker(@NonNull Context context, @WidgetType int widgetType) {
         mWidgetType = widgetType;
+        mWidgetVersion = null;
+        mContext = Preconditions.checkNotNull(context);
+    }
+
+    public SmartSelectionEventTracker(
+            @NonNull Context context, @WidgetType int widgetType, @Nullable String widgetVersion) {
+        mWidgetType = widgetType;
+        mWidgetVersion = widgetVersion;
         mContext = Preconditions.checkNotNull(context);
     }
 
@@ -147,6 +165,7 @@ public final class SmartSelectionEventTracker {
                 .addTaggedData(PREV_EVENT_DELTA, prevEventDelta)
                 .addTaggedData(INDEX, mIndex)
                 .addTaggedData(WIDGET_TYPE, getWidgetTypeName())
+                .addTaggedData(WIDGET_VERSION, mWidgetVersion)
                 .addTaggedData(MODEL_NAME, mModelName)
                 .addTaggedData(ENTITY_TYPE, event.mEntityType)
                 .addTaggedData(SMART_START, getSmartRangeDelta(mSmartIndices[0]))
@@ -277,6 +296,14 @@ public final class SmartSelectionEventTracker {
                 return EDITTEXT;
             case WidgetType.EDIT_WEBVIEW:
                 return EDIT_WEBVIEW;
+            case WidgetType.UNSELECTABLE_TEXTVIEW:
+                return UNSELECTABLE_TEXTVIEW;
+            case WidgetType.CUSTOM_TEXTVIEW:
+                return CUSTOM_TEXTVIEW;
+            case WidgetType.CUSTOM_EDITTEXT:
+                return CUSTOM_EDITTEXT;
+            case WidgetType.CUSTOM_UNSELECTABLE_TEXTVIEW:
+                return CUSTOM_UNSELECTABLE_TEXTVIEW;
             default:
                 return UNKNOWN;
         }
@@ -295,7 +322,10 @@ public final class SmartSelectionEventTracker {
     private static void debugLog(LogMaker log) {
         if (!DEBUG_LOG_ENABLED) return;
 
-        final String widget = Objects.toString(log.getTaggedData(WIDGET_TYPE), UNKNOWN);
+        final String widgetType = Objects.toString(log.getTaggedData(WIDGET_TYPE), UNKNOWN);
+        final String widgetVersion = Objects.toString(log.getTaggedData(WIDGET_VERSION), "");
+        final String widget = widgetVersion.isEmpty()
+                ? widgetType : widgetType + "-" + widgetVersion;
         final int index = Integer.parseInt(Objects.toString(log.getTaggedData(INDEX), ZERO));
         if (log.getType() == MetricsEvent.ACTION_TEXT_SELECTION_START) {
             String sessionId = Objects.toString(log.getTaggedData(SESSION_ID), "");

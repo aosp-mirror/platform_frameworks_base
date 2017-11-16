@@ -23,14 +23,15 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECOND
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.GraphicBuffer;
 import android.graphics.Rect;
 import android.util.Log;
-import android.view.AppTransitionAnimationSpec;
 
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsDebugFlags;
 import com.android.systemui.shared.recents.model.Task;
+import com.android.systemui.shared.recents.view.AppTransitionAnimationSpecCompat;
 import com.android.systemui.shared.recents.view.RecentsTransition;
 
 import java.util.ArrayList;
@@ -54,9 +55,9 @@ public class RecentsTransitionComposer {
     /**
      * Composes a single animation spec for the given {@link TaskView}
      */
-    private static AppTransitionAnimationSpec composeAnimationSpec(TaskStackView stackView,
+    private static AppTransitionAnimationSpecCompat composeAnimationSpec(TaskStackView stackView,
             TaskView taskView, TaskViewTransform transform, boolean addHeaderBitmap) {
-        GraphicBuffer b = null;
+        Bitmap b = null;
         if (addHeaderBitmap) {
             b = composeHeaderBitmap(taskView, transform);
             if (b == null) {
@@ -71,28 +72,28 @@ public class RecentsTransitionComposer {
         // force the task thumbnail to full stackView height immediately causing the transition
         // jarring.
         if (!Recents.getConfiguration().isLowRamDevice && taskView.getTask() !=
-                stackView.getStack().getStackFrontMostTask()) {
+                stackView.getStack().getFrontMostTask()) {
             taskRect.bottom = taskRect.top + stackView.getMeasuredHeight();
         }
-        return new AppTransitionAnimationSpec(taskView.getTask().key.id, b, taskRect);
+        return new AppTransitionAnimationSpecCompat(taskView.getTask().key.id, b, taskRect);
     }
 
     /**
      * Composes the transition spec when docking a task, which includes a full task bitmap.
      */
-    public List<AppTransitionAnimationSpec> composeDockAnimationSpec(TaskView taskView,
+    public List<AppTransitionAnimationSpecCompat> composeDockAnimationSpec(TaskView taskView,
             Rect bounds) {
         mTmpTransform.fillIn(taskView);
         Task task = taskView.getTask();
-        GraphicBuffer buffer = RecentsTransitionComposer.composeTaskBitmap(taskView, mTmpTransform);
-        return Collections.singletonList(new AppTransitionAnimationSpec(task.key.id, buffer,
+        Bitmap buffer = RecentsTransitionComposer.composeTaskBitmap(taskView, mTmpTransform);
+        return Collections.singletonList(new AppTransitionAnimationSpecCompat(task.key.id, buffer,
                 bounds));
     }
 
     /**
      * Composes the animation specs for all the tasks in the target stack.
      */
-    public List<AppTransitionAnimationSpec> composeAnimationSpecs(final Task task,
+    public List<AppTransitionAnimationSpecCompat> composeAnimationSpecs(final Task task,
             final TaskStackView stackView, int windowingMode, int activityType, Rect windowRect) {
         // Calculate the offscreen task rect (for tasks that are not backed by views)
         TaskView taskView = stackView.getChildViewForTask(task);
@@ -110,13 +111,13 @@ public class RecentsTransitionComposer {
                 || windowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY
                 || activityType == ACTIVITY_TYPE_ASSISTANT
                 || windowingMode == WINDOWING_MODE_UNDEFINED) {
-            List<AppTransitionAnimationSpec> specs = new ArrayList<>();
+            List<AppTransitionAnimationSpecCompat> specs = new ArrayList<>();
             if (taskView == null) {
                 specs.add(composeOffscreenAnimationSpec(task, offscreenTaskRect));
             } else {
                 mTmpTransform.fillIn(taskView);
                 stackLayout.transformToScreenCoordinates(mTmpTransform, windowRect);
-                AppTransitionAnimationSpec spec = composeAnimationSpec(stackView, taskView,
+                AppTransitionAnimationSpecCompat spec = composeAnimationSpec(stackView, taskView,
                         mTmpTransform, true /* addHeaderBitmap */);
                 if (spec != null) {
                     specs.add(spec);
@@ -130,12 +131,12 @@ public class RecentsTransitionComposer {
     /**
      * Composes a single animation spec for the given {@link Task}
      */
-    private static AppTransitionAnimationSpec composeOffscreenAnimationSpec(Task task,
+    private static AppTransitionAnimationSpecCompat composeOffscreenAnimationSpec(Task task,
             Rect taskRect) {
-        return new AppTransitionAnimationSpec(task.key.id, null, taskRect);
+        return new AppTransitionAnimationSpecCompat(task.key.id, null, taskRect);
     }
 
-    public static GraphicBuffer composeTaskBitmap(TaskView taskView, TaskViewTransform transform) {
+    public static Bitmap composeTaskBitmap(TaskView taskView, TaskViewTransform transform) {
         float scale = transform.scale;
         int fromWidth = (int) (transform.rect.width() * scale);
         int fromHeight = (int) (transform.rect.height() * scale);
@@ -143,19 +144,19 @@ public class RecentsTransitionComposer {
             Log.e(TAG, "Could not compose thumbnail for task: " + taskView.getTask() +
                     " at transform: " + transform);
 
-            return RecentsTransition.drawViewIntoGraphicBuffer(1, 1, null, 1f, 0x00ffffff);
+            return RecentsTransition.drawViewIntoHardwareBitmap(1, 1, null, 1f, 0x00ffffff);
         } else {
             if (RecentsDebugFlags.Static.EnableTransitionThumbnailDebugMode) {
-                return RecentsTransition.drawViewIntoGraphicBuffer(fromWidth, fromHeight, null, 1f,
+                return RecentsTransition.drawViewIntoHardwareBitmap(fromWidth, fromHeight, null, 1f,
                         0xFFff0000);
             } else {
-                return RecentsTransition.drawViewIntoGraphicBuffer(fromWidth, fromHeight, taskView,
+                return RecentsTransition.drawViewIntoHardwareBitmap(fromWidth, fromHeight, taskView,
                         scale, 0);
             }
         }
     }
 
-    private static GraphicBuffer composeHeaderBitmap(TaskView taskView,
+    private static Bitmap composeHeaderBitmap(TaskView taskView,
             TaskViewTransform transform) {
         float scale = transform.scale;
         int headerWidth = (int) (transform.rect.width());
@@ -165,10 +166,10 @@ public class RecentsTransitionComposer {
         }
 
         if (RecentsDebugFlags.Static.EnableTransitionThumbnailDebugMode) {
-            return RecentsTransition.drawViewIntoGraphicBuffer(headerWidth, headerHeight, null, 1f,
+            return RecentsTransition.drawViewIntoHardwareBitmap(headerWidth, headerHeight, null, 1f,
                     0xFFff0000);
         } else {
-            return RecentsTransition.drawViewIntoGraphicBuffer(headerWidth, headerHeight,
+            return RecentsTransition.drawViewIntoHardwareBitmap(headerWidth, headerHeight,
                     taskView.mHeaderView, scale, 0);
         }
     }

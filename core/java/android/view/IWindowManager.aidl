@@ -16,13 +16,13 @@
 
 package android.view;
 
-import com.android.internal.app.IAssistDataReceiver;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethodClient;
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.IShortcutService;
 
+import android.app.IAssistDataReceiver;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;

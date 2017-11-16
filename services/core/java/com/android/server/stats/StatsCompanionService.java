@@ -182,7 +182,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             Slog.i(TAG, "StatsCompanionService noticed an app was updated.");
             synchronized (sStatsdLock) {
                 if (sStatsd == null) {
-                    Slog.w(TAG, "Could not access statsd to inform it of anomaly alarm firing");
+                    Slog.w(TAG, "Could not access statsd to inform it of an app update");
                     return;
                 }
                 try {

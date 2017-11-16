@@ -153,7 +153,7 @@ public class RecentsTaskLoadPlan {
         Resources res = mContext.getResources();
 
         // Iterate through each of the tasks and load them according to the load conditions.
-        ArrayList<Task> tasks = mStack.getStackTasks();
+        ArrayList<Task> tasks = mStack.getTasks();
         int taskCount = tasks.size();
         for (int i = 0; i < taskCount; i++) {
             Task task = tasks.get(i);

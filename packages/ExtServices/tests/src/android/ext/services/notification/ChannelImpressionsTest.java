@@ -21,6 +21,8 @@ import static android.ext.services.notification.ChannelImpressions.STREAK_LIMIT;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
+import static org.junit.Assert.assertEquals;
+
 import org.junit.Test;
 
 public class ChannelImpressionsTest {
@@ -81,5 +83,29 @@ public class ChannelImpressionsTest {
         }
 
         assertFalse(ci.shouldTriggerBlock());
+    }
+
+    @Test
+    public void testAppend() {
+        ChannelImpressions ci = new ChannelImpressions();
+        ci.incrementViews();
+        ci.incrementDismissals();
+
+        ChannelImpressions ci2 = new ChannelImpressions();
+        ci2.incrementViews();
+        ci2.incrementDismissals();
+        ci2.incrementViews();
+
+        ci.append(ci2);
+        assertEquals(3, ci.getViews());
+        assertEquals(2, ci.getDismissals());
+        assertEquals(2, ci.getStreak());
+
+        assertEquals(2, ci2.getViews());
+        assertEquals(1, ci2.getDismissals());
+        assertEquals(1, ci2.getStreak());
+
+        // no crash
+        ci.append(null);
     }
 }

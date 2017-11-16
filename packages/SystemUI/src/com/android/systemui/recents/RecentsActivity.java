@@ -17,7 +17,6 @@
 package com.android.systemui.recents;
 
 import static com.android.systemui.statusbar.phone.StatusBar.SYSTEM_DIALOG_REASON_HOME_KEY;
-import static com.android.systemui.statusbar.phone.StatusBar.SYSTEM_DIALOG_REASON_RECENT_APPS;
 
 import android.app.Activity;
 import android.app.ActivityOptions;
@@ -96,7 +95,6 @@ import com.android.systemui.shared.recents.model.TaskStack;
 import com.android.systemui.recents.views.RecentsView;
 import com.android.systemui.recents.views.SystemBarScrimViews;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
-import com.android.systemui.statusbar.phone.StatusBar;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -471,7 +469,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         if (launchState.launchedFromApp) {
             Task launchTarget = stack.getLaunchTarget();
             int launchTaskIndexInStack = launchTarget != null
-                    ? stack.indexOfStackTask(launchTarget)
+                    ? stack.indexOfTask(launchTarget)
                     : 0;
             MetricsLogger.count(this, "overview_source_app", 1);
             // If from an app, track the stack index of the app in the stack (for affiliated tasks)
@@ -517,7 +515,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
 
         // Notify of the config change
         Configuration newDeviceConfiguration = Utilities.getAppConfiguration(this);
-        int numStackTasks = mRecentsView.getStack().getStackTaskCount();
+        int numStackTasks = mRecentsView.getStack().getTaskCount();
         EventBus.getDefault().send(new ConfigurationChangedEvent(false /* fromMultiWindow */,
                 mLastConfig.orientation != newDeviceConfiguration.orientation,
                 mLastConfig.densityDpi != newDeviceConfiguration.densityDpi, numStackTasks > 0));
@@ -826,7 +824,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         loader.loadTasks(loadPlan, loadOpts);
 
         TaskStack stack = loadPlan.getTaskStack();
-        int numStackTasks = stack.getStackTaskCount();
+        int numStackTasks = stack.getTaskCount();
         boolean showDeferredAnimation = numStackTasks > 0;
 
         if (sendConfigChangedEvent) {

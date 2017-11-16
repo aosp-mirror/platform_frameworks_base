@@ -295,7 +295,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     WindowManagerService mWindowManager;
     DisplayManager mDisplayManager;
 
-    private final LaunchingBoundsController mLaunchingBoundsController;
+    private LaunchingBoundsController mLaunchingBoundsController;
 
     /** Counter for next free stack ID to use for dynamic activity stacks. */
     private int mNextFreeStackId = 0;
@@ -395,7 +395,6 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     private final SparseArray<IntArray> mDisplayAccessUIDs = new SparseArray<>();
 
     private DisplayManagerInternal mDisplayManagerInternal;
-    private InputManagerInternal mInputManagerInternal;
 
     /** Used to keep resumeTopActivityUncheckedLocked() from being entered recursively */
     boolean inResumeTopActivity;
@@ -414,7 +413,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     // Whether tasks have moved and we need to rank the tasks before next OOM scoring
     private boolean mTaskLayersChanged = true;
 
-    final ActivityMetricsLogger mActivityMetricsLogger;
+    private ActivityMetricsLogger mActivityMetricsLogger;
 
     private final ArrayList<ActivityRecord> mTmpActivityList = new ArrayList<>();
 
@@ -534,10 +533,12 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
      */
     boolean mIsDockMinimized;
 
-    final KeyguardController mKeyguardController;
+    private KeyguardController mKeyguardController;
 
     private PowerManager mPowerManager;
     private int mDeferResumeCount;
+
+    private boolean mInitialized;
 
     /**
      * Description of a request to start a new activity, which has been held
@@ -574,12 +575,30 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     public ActivityStackSupervisor(ActivityManagerService service, Looper looper) {
         mService = service;
         mHandler = new ActivityStackSupervisorHandler(looper);
+    }
+
+    public void initialize() {
+        if (mInitialized) {
+            return;
+        }
+
+        mInitialized = true;
         mRunningTasks = createRunningTasks();
-        mActivityMetricsLogger = new ActivityMetricsLogger(this, mService.mContext, looper);
-        mKeyguardController = new KeyguardController(service, this);
+        mActivityMetricsLogger = new ActivityMetricsLogger(this, mService.mContext,
+                mHandler.getLooper());
+        mKeyguardController = new KeyguardController(mService, this);
 
         mLaunchingBoundsController = new LaunchingBoundsController();
         mLaunchingBoundsController.registerDefaultPositioners(this);
+    }
+
+
+    public ActivityMetricsLogger getActivityMetricsLogger() {
+        return mActivityMetricsLogger;
+    }
+
+    public KeyguardController getKeyguardController() {
+        return mKeyguardController;
     }
 
     void setRecentTasks(RecentTasks recentTasks) {
@@ -624,8 +643,6 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
             mHomeStack = mFocusedStack = mLastFocusedStack = getDefaultDisplay().getOrCreateStack(
                     WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME, ON_TOP);
-
-            mInputManagerInternal = LocalServices.getService(InputManagerInternal.class);
         }
     }
 
@@ -2945,6 +2962,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
      * Returns the reparent target stack, creating the stack if necessary.  This call also enforces
      * the various checks on tasks that are going to be reparented from one stack to another.
      */
+    // TODO: Look into changing users to this method to ActivityDisplay.resolveWindowingMode()
     ActivityStack getReparentTargetStack(TaskRecord task, ActivityStack stack, boolean toTop) {
         final ActivityStack prevStack = task.getStack();
         final int stackId = stack.mStackId;
@@ -2971,8 +2989,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                     + " reparent task=" + task + " to stackId=" + stackId);
         }
 
-        // Ensure that we aren't trying to move into a freeform stack without freeform
-        // support
+        // Ensure that we aren't trying to move into a freeform stack without freeform support
         if (stack.getWindowingMode() == WINDOWING_MODE_FREEFORM
                 && !mService.mSupportsFreeformWindowManagement) {
             throw new IllegalArgumentException("Device doesn't support freeform, can not reparent"
@@ -3376,7 +3393,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
         // When launching tasks behind, update the last active time of the top task after the new
         // task has been shown briefly
-        final ActivityRecord top = stack.topActivity();
+        final ActivityRecord top = stack.getTopActivity();
         if (top != null) {
             top.getTask().touchActiveTime();
         }
@@ -4200,10 +4217,9 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             }
         }
 
-        final ActivityRecord topActivity = task.getTopActivity();
         if (!task.supportsSplitScreenWindowingMode() || forceNonResizable) {
-            // Display a warning toast that we tried to put a non-dockable task in the docked
-            // stack.
+            // Display a warning toast that we tried to put an app that doesn't support split-screen
+            // in split-screen.
             mService.mTaskChangeNotificationController.notifyActivityDismissingDockedStack();
 
             // Dismiss docked stack. If task appeared to be in docked stack but is not resizable -
@@ -4217,6 +4233,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             return;
         }
 
+        final ActivityRecord topActivity = task.getTopActivity();
         if (topActivity != null && topActivity.isNonResizableOrForcedResizable()
             && !topActivity.noDisplay) {
             final String packageName = topActivity.appInfo.packageName;
@@ -4552,7 +4569,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 final ActivityStack stack = display.getChildAt(j);
                 // Get top activity from a visible stack and add it to the list.
                 if (stack.shouldBeVisible(null /* starting */)) {
-                    final ActivityRecord top = stack.topActivity();
+                    final ActivityRecord top = stack.getTopActivity();
                     if (top != null) {
                         if (stack == mFocusedStack) {
                             topActivityTokens.add(0, top.appToken);

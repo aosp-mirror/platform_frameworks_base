@@ -591,7 +591,9 @@ public final class SelectionActionModeHelper {
             Preconditions.checkNotNull(textView);
             final @SmartSelectionEventTracker.WidgetType int widgetType = textView.isTextEditable()
                     ? SmartSelectionEventTracker.WidgetType.EDITTEXT
-                    : SmartSelectionEventTracker.WidgetType.TEXTVIEW;
+                    : (textView.isTextSelectable()
+                            ? SmartSelectionEventTracker.WidgetType.TEXTVIEW
+                            : SmartSelectionEventTracker.WidgetType.UNSELECTABLE_TEXTVIEW);
             mDelegate = new SmartSelectionEventTracker(textView.getContext(), widgetType);
             mEditTextLogger = textView.isTextEditable();
             mWordIterator = BreakIterator.getWordInstance(textView.getTextLocale());

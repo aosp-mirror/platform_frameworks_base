@@ -73,7 +73,7 @@ public abstract class SQLiteOpenHelper {
      *     {@link #onUpgrade} will be used to upgrade the database; if the database is
      *     newer, {@link #onDowngrade} will be used to downgrade the database
      */
-    public SQLiteOpenHelper(@NonNull Context context, @Nullable String name,
+    public SQLiteOpenHelper(@Nullable Context context, @Nullable String name,
             @Nullable CursorFactory factory, int version) {
         this(context, name, factory, version, null);
     }
@@ -95,7 +95,7 @@ public abstract class SQLiteOpenHelper {
      * @param errorHandler the {@link DatabaseErrorHandler} to be used when sqlite reports database
      * corruption, or null to use the default error handler.
      */
-    public SQLiteOpenHelper(@NonNull Context context, @Nullable String name,
+    public SQLiteOpenHelper(@Nullable Context context, @Nullable String name,
             @Nullable CursorFactory factory, int version,
             @Nullable DatabaseErrorHandler errorHandler) {
         this(context, name, factory, version, 0, errorHandler);
@@ -116,7 +116,7 @@ public abstract class SQLiteOpenHelper {
      *        Please note that {@link SQLiteDatabase#CREATE_IF_NECESSARY} flag will always be
      *        set when the helper opens the database
      */
-    public SQLiteOpenHelper(@NonNull Context context, @Nullable String name, int version,
+    public SQLiteOpenHelper(@Nullable Context context, @Nullable String name, int version,
             @NonNull SQLiteDatabase.OpenParams openParams) {
         this(context, name, version, 0, openParams.toBuilder());
     }
@@ -144,7 +144,7 @@ public abstract class SQLiteOpenHelper {
      * @see #onUpgrade(SQLiteDatabase, int, int)
      * @hide
      */
-    public SQLiteOpenHelper(@NonNull Context context, @Nullable String name,
+    public SQLiteOpenHelper(@Nullable Context context, @Nullable String name,
             @Nullable CursorFactory factory, int version,
             int minimumSupportedVersion, @Nullable DatabaseErrorHandler errorHandler) {
         this(context, name, version, minimumSupportedVersion,
@@ -153,10 +153,9 @@ public abstract class SQLiteOpenHelper {
         mOpenParamsBuilder.setErrorHandler(errorHandler);
     }
 
-    private SQLiteOpenHelper(@NonNull Context context, @Nullable String name, int version,
+    private SQLiteOpenHelper(@Nullable Context context, @Nullable String name, int version,
             int minimumSupportedVersion,
             @NonNull SQLiteDatabase.OpenParams.Builder openParamsBuilder) {
-        Preconditions.checkNotNull(context);
         Preconditions.checkNotNull(openParamsBuilder);
         if (version < 1) throw new IllegalArgumentException("Version must be >= 1, was " + version);
 

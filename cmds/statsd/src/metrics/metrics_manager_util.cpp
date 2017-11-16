@@ -220,6 +220,11 @@ bool initMetrics(const StatsdConfig& config, const unordered_map<string, int>& l
             handleMetricWithConditions(metric.condition(), metricIndex, conditionTrackerMap,
                                        metric.links(), allConditionTrackers, conditionIndex,
                                        conditionToMetricMap);
+        } else {
+            if (metric.links_size() > 0) {
+                ALOGW("metrics has a EventConditionLink but doesn't have a condition");
+                return false;
+            }
         }
 
         sp<MetricProducer> countProducer =
@@ -276,10 +281,15 @@ bool initMetrics(const StatsdConfig& config, const unordered_map<string, int>& l
 
         int conditionIndex = -1;
 
-        if (metric.has_predicate()) {
-            handleMetricWithConditions(metric.predicate(), metricIndex, conditionTrackerMap,
+        if (metric.has_condition()) {
+            handleMetricWithConditions(metric.condition(), metricIndex, conditionTrackerMap,
                                        metric.links(), allConditionTrackers, conditionIndex,
                                        conditionToMetricMap);
+        } else {
+            if (metric.links_size() > 0) {
+                ALOGW("metrics has a EventConditionLink but doesn't have a condition");
+                return false;
+            }
         }
 
         sp<MetricProducer> durationMetric = new DurationMetricProducer(
@@ -308,6 +318,11 @@ bool initMetrics(const StatsdConfig& config, const unordered_map<string, int>& l
             handleMetricWithConditions(metric.condition(), metricIndex, conditionTrackerMap,
                                        metric.links(), allConditionTrackers, conditionIndex,
                                        conditionToMetricMap);
+        } else {
+            if (metric.links_size() > 0) {
+                ALOGW("metrics has a EventConditionLink but doesn't have a condition");
+                return false;
+            }
         }
 
         sp<MetricProducer> eventMetric =
@@ -349,6 +364,11 @@ bool initMetrics(const StatsdConfig& config, const unordered_map<string, int>& l
             handleMetricWithConditions(metric.condition(), metricIndex, conditionTrackerMap,
                                        metric.links(), allConditionTrackers, conditionIndex,
                                        conditionToMetricMap);
+        } else {
+            if (metric.links_size() > 0) {
+                ALOGW("metrics has a EventConditionLink but doesn't have a condition");
+                return false;
+            }
         }
 
         sp<MetricProducer> valueProducer =
@@ -389,6 +409,11 @@ bool initMetrics(const StatsdConfig& config, const unordered_map<string, int>& l
             handleMetricWithConditions(metric.condition(), metricIndex, conditionTrackerMap,
                                        metric.links(), allConditionTrackers, conditionIndex,
                                        conditionToMetricMap);
+        } else {
+            if (metric.links_size() > 0) {
+                ALOGW("metrics has a EventConditionLink but doesn't have a condition");
+                return false;
+            }
         }
 
         sp<MetricProducer> gaugeProducer =

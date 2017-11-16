@@ -29,6 +29,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.ComponentName;
@@ -156,7 +161,8 @@ public class ActivityRecordTests extends ActivityTestsBase {
 
         record.canBeLaunchedOnDisplay(DEFAULT_DISPLAY);
 
-        assertEquals(((TestActivityStackSupervisor) mService.mStackSupervisor)
-                .getLastResizeableFromCanPlaceEntityOnDisplay(), expected);
+
+        verify(mService.mStackSupervisor, times(1)).canPlaceEntityOnDisplay(anyInt(), eq(expected), anyInt(), anyInt(),
+                eq(record.info));
     }
 }

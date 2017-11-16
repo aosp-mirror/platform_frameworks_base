@@ -31,6 +31,7 @@ import android.util.Log;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.recents.misc.SysUiTaskStackChangeListener;
 import com.android.systemui.recents.misc.SystemServicesProxy;
+import com.android.systemui.shared.system.ActivityManagerWrapper;
 
 public class WorkLockActivityController {
     private static final String TAG = WorkLockActivityController.class.getSimpleName();
@@ -39,15 +40,15 @@ public class WorkLockActivityController {
     private final IActivityManager mIam;
 
     public WorkLockActivityController(Context context) {
-        this(context, SystemServicesProxy.getInstance(context), ActivityManager.getService());
+        this(context, ActivityManagerWrapper.getInstance(), ActivityManager.getService());
     }
 
     @VisibleForTesting
-    WorkLockActivityController(Context context, SystemServicesProxy ssp, IActivityManager am) {
+    WorkLockActivityController(Context context, ActivityManagerWrapper am, IActivityManager iAm) {
         mContext = context;
-        mIam = am;
+        mIam = iAm;
 
-        ssp.registerTaskStackListener(mLockListener);
+        am.registerTaskStackListener(mLockListener);
     }
 
     private void startWorkChallengeInTask(int taskId, int userId) {

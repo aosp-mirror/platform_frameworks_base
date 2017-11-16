@@ -1382,7 +1382,7 @@ public abstract class ConnectionService extends Service {
 
         connection.setTelecomCallId(callId);
         if (connection.getState() != Connection.STATE_DISCONNECTED) {
-            addConnection(callId, connection);
+            addConnection(request.getAccountHandle(), callId, connection);
         }
 
         Uri address = connection.getAddress();
@@ -1846,6 +1846,7 @@ public abstract class ConnectionService extends Service {
                     mAdapter.setIsConferenced(connectionId, id);
                 }
             }
+            onConferenceAdded(conference);
         }
     }
 
@@ -2033,6 +2034,43 @@ public abstract class ConnectionService extends Service {
     }
 
     /**
+     * Called by Telecom on the initiating side of the handover to create an instance of a
+     * handover connection.
+     * @param fromPhoneAccountHandle {@link PhoneAccountHandle} associated with the
+     *                               ConnectionService which needs to handover the call.
+     * @param request Details about the call which needs to be handover.
+     * @return Connection object corresponding to the handover call.
+     */
+    public Connection onCreateOutgoingHandoverConnection(PhoneAccountHandle fromPhoneAccountHandle,
+                                                         ConnectionRequest request) {
+        return null;
+    }
+
+    /**
+     * Called by Telecom on the receiving side of the handover to request the
+     * {@link ConnectionService} to create an instance of a handover connection.
+     * @param fromPhoneAccountHandle {@link PhoneAccountHandle} associated with the
+     *                               ConnectionService which needs to handover the call.
+     * @param request Details about the call which needs to be handover.
+     * @return {@link Connection} object corresponding to the handover call.
+     */
+    public Connection onCreateIncomingHandoverConnection(PhoneAccountHandle fromPhoneAccountHandle,
+                                                         ConnectionRequest request) {
+        return null;
+    }
+
+    /**
+     * Called by Telecom in response to a {@code TelecomManager#acceptHandover()}
+     * invocation which failed.
+     * @param request Details about the call which needs to be handover.
+     * @param error Reason for handover failure as defined in
+     *              {@link android.telecom.Call.Callback#HANDOVER_FAILURE_DEST_INVALID_PERM}
+     */
+    public void onHandoverFailed(ConnectionRequest request, int error) {
+        return;
+    }
+
+    /**
      * Create a {@code Connection} for a new unknown call. An unknown call is a call originating
      * from the ConnectionService that was neither a user-initiated outgoing call, nor an incoming
      * call created using
@@ -2054,6 +2092,30 @@ public abstract class ConnectionService extends Service {
      * @param connection2 A connection to merge into a conference call.
      */
     public void onConference(Connection connection1, Connection connection2) {}
+
+    /**
+     * Called when a connection is added.
+     * @hide
+     */
+    public void onConnectionAdded(Connection connection) {}
+
+    /**
+     * Called when a connection is removed.
+     * @hide
+     */
+    public void onConnectionRemoved(Connection connection) {}
+
+    /**
+     * Called when a conference is added.
+     * @hide
+     */
+    public void onConferenceAdded(Conference conference) {}
+
+    /**
+     * Called when a conference is removed.
+     * @hide
+     */
+    public void onConferenceRemoved(Conference conference) {}
 
     /**
      * Indicates that a remote conference has been created for existing {@link RemoteConnection}s.
@@ -2122,16 +2184,18 @@ public abstract class ConnectionService extends Service {
             // prefix for a unique incremental call ID.
             id = handle.getComponentName().getClassName() + "@" + getNextCallId();
         }
-        addConnection(id, connection);
+        addConnection(handle, id, connection);
         return id;
     }
 
-    private void addConnection(String callId, Connection connection) {
+    private void addConnection(PhoneAccountHandle handle, String callId, Connection connection) {
         connection.setTelecomCallId(callId);
         mConnectionById.put(callId, connection);
         mIdByConnection.put(connection, callId);
         connection.addConnectionListener(mConnectionListener);
         connection.setConnectionService(this);
+        connection.setPhoneAccountHandle(handle);
+        onConnectionAdded(connection);
     }
 
     /** {@hide} */
@@ -2143,6 +2207,7 @@ public abstract class ConnectionService extends Service {
             mConnectionById.remove(id);
             mIdByConnection.remove(connection);
             mAdapter.removeCall(id);
+            onConnectionRemoved(connection);
         }
     }
 
@@ -2179,6 +2244,8 @@ public abstract class ConnectionService extends Service {
             mConferenceById.remove(id);
             mIdByConference.remove(conference);
             mAdapter.removeCall(id);
+
+            onConferenceRemoved(conference);
         }
     }
 

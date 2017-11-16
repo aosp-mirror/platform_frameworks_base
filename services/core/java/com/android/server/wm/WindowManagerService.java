@@ -124,6 +124,7 @@ import android.app.ActivityManagerInternal;
 import android.app.ActivityThread;
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
+import android.app.IAssistDataReceiver;
 import android.content.BroadcastReceiver;
 import android.content.ClipData;
 import android.content.ContentResolver;
@@ -226,7 +227,6 @@ import android.view.animation.Animation;
 import android.view.inputmethod.InputMethodManagerInternal;
 
 import com.android.internal.R;
-import com.android.internal.app.IAssistDataReceiver;
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.policy.IKeyguardDismissCallback;
@@ -6860,8 +6860,13 @@ public class WindowManagerService extends IWindowManager.Stub
     public void setWillReplaceWindow(IBinder token, boolean animate) {
         synchronized (mWindowMap) {
             final AppWindowToken appWindowToken = mRoot.getAppWindowToken(token);
-            if (appWindowToken == null || !appWindowToken.hasContentToDisplay()) {
+            if (appWindowToken == null) {
                 Slog.w(TAG_WM, "Attempted to set replacing window on non-existing app token "
+                        + token);
+                return;
+            }
+            if (!appWindowToken.hasContentToDisplay()) {
+                Slog.w(TAG_WM, "Attempted to set replacing window on app token with no content"
                         + token);
                 return;
             }
@@ -6884,8 +6889,13 @@ public class WindowManagerService extends IWindowManager.Stub
     void setWillReplaceWindows(IBinder token, boolean childrenOnly) {
         synchronized (mWindowMap) {
             final AppWindowToken appWindowToken = mRoot.getAppWindowToken(token);
-            if (appWindowToken == null || !appWindowToken.hasContentToDisplay()) {
+            if (appWindowToken == null) {
                 Slog.w(TAG_WM, "Attempted to set replacing window on non-existing app token "
+                        + token);
+                return;
+            }
+            if (!appWindowToken.hasContentToDisplay()) {
+                Slog.w(TAG_WM, "Attempted to set replacing window on app token with no content"
                         + token);
                 return;
             }

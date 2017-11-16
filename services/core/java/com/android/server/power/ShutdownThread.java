@@ -68,7 +68,8 @@ import java.nio.charset.StandardCharsets;
 public final class ShutdownThread extends Thread {
     // constants
     private static final String TAG = "ShutdownThread";
-    private static final int PHONE_STATE_POLL_SLEEP_MSEC = 500;
+    private static final int ACTION_DONE_POLL_WAIT_MS = 500;
+    private static final int RADIOS_STATE_POLL_SLEEP_MS = 100;
     // maximum time we wait for the shutdown broadcast before going on.
     private static final int MAX_BROADCAST_TIME = 10*1000;
     private static final int MAX_SHUTDOWN_WAIT_TIME = 20*1000;
@@ -471,7 +472,7 @@ public final class ShutdownThread extends Thread {
                     sInstance.setRebootProgress(status, null);
                 }
                 try {
-                    mActionDoneSync.wait(Math.min(delay, PHONE_STATE_POLL_SLEEP_MSEC));
+                    mActionDoneSync.wait(Math.min(delay, ACTION_DONE_POLL_WAIT_MS));
                 } catch (InterruptedException e) {
                 }
             }
@@ -565,7 +566,7 @@ public final class ShutdownThread extends Thread {
                     sInstance.setRebootProgress(status, null);
                 }
                 try {
-                    mActionDoneSync.wait(Math.min(delay, PHONE_STATE_POLL_SLEEP_MSEC));
+                    mActionDoneSync.wait(Math.min(delay, ACTION_DONE_POLL_WAIT_MS));
                 } catch (InterruptedException e) {
                 }
             }
@@ -710,8 +711,7 @@ public final class ShutdownThread extends Thread {
                         done[0] = true;
                         break;
                     }
-                    SystemClock.sleep(PHONE_STATE_POLL_SLEEP_MSEC);
-
+                    SystemClock.sleep(RADIOS_STATE_POLL_SLEEP_MS);
                     delay = endTime - SystemClock.elapsedRealtime();
                 }
             }

@@ -435,4 +435,21 @@ public final class InCallAdapter {
         } catch (RemoteException ignored) {
         }
     }
+
+
+    /**
+     * Initiates a handover of this {@link Call} to the {@link ConnectionService} identified
+     * by destAcct.
+     * @param callId The callId of the Call which calls this function.
+     * @param destAcct ConnectionService to which the call should be handed over.
+     * @param videoState The video state desired after the handover.
+     * @param extras Extra information to be passed to ConnectionService
+     */
+    public void handoverTo(String callId, PhoneAccountHandle destAcct, int videoState,
+                           Bundle extras) {
+        try {
+            mAdapter.handoverTo(callId, destAcct, videoState, extras);
+        } catch (RemoteException ignored) {
+        }
+    }
 }

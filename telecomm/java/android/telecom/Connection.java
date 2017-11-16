@@ -1684,6 +1684,8 @@ public abstract class Connection extends Conferenceable {
 
     // The internal telecom call ID associated with this connection.
     private String mTelecomCallId;
+    // The PhoneAccountHandle associated with this connection.
+    private PhoneAccountHandle mPhoneAccountHandle;
     private int mState = STATE_NEW;
     private CallAudioState mCallAudioState;
     private Uri mAddress;
@@ -3096,6 +3098,27 @@ public abstract class Connection extends Conferenceable {
         for (Listener l : mListeners) {
             l.onPhoneAccountChanged(this, pHandle);
         }
+    }
+
+    /**
+     * Sets the {@link PhoneAccountHandle} associated with this connection.
+     *
+     * @hide
+     */
+    public void setPhoneAccountHandle(PhoneAccountHandle phoneAccountHandle) {
+        if (mPhoneAccountHandle != phoneAccountHandle) {
+            mPhoneAccountHandle = phoneAccountHandle;
+            notifyPhoneAccountChanged(phoneAccountHandle);
+        }
+    }
+
+    /**
+     * Returns the {@link PhoneAccountHandle} associated with this connection.
+     *
+     * @hide
+     */
+    public PhoneAccountHandle getPhoneAccountHandle() {
+        return mPhoneAccountHandle;
     }
 
     /**
