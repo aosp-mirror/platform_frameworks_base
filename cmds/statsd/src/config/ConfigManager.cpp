@@ -212,7 +212,7 @@ static StatsdConfig build_fake_config() {
     keyMatcher = durationMetric->add_dimension();
     keyMatcher->set_key(WAKE_LOCK_UID_KEY_ID);
     durationMetric->set_what("WL_HELD_PER_APP_PER_NAME");
-    durationMetric->set_predicate("APP_IS_BACKGROUND_AND_SCREEN_ON");
+    durationMetric->set_condition("APP_IS_BACKGROUND_AND_SCREEN_ON");
     link = durationMetric->add_links();
     link->set_condition("APP_IS_BACKGROUND");
     link->add_key_in_main()->set_key(WAKE_LOCK_UID_KEY_ID);
@@ -226,7 +226,7 @@ static StatsdConfig build_fake_config() {
     keyMatcher = durationMetric->add_dimension();
     keyMatcher->set_key(WAKE_LOCK_UID_KEY_ID);
     durationMetric->set_what("WL_HELD_PER_APP_PER_NAME");
-    durationMetric->set_predicate("APP_IS_BACKGROUND_AND_SCREEN_ON");
+    durationMetric->set_condition("APP_IS_BACKGROUND_AND_SCREEN_ON");
     link = durationMetric->add_links();
     link->set_condition("APP_IS_BACKGROUND");
     link->add_key_in_main()->set_key(WAKE_LOCK_UID_KEY_ID);
@@ -238,7 +238,7 @@ static StatsdConfig build_fake_config() {
     durationMetric->mutable_bucket()->set_bucket_size_millis(30 * 1000L);
     durationMetric->set_type(DurationMetric_AggregationType_DURATION_MAX_SPARSE);
     durationMetric->set_what("WL_HELD_PER_APP_PER_NAME");
-    durationMetric->set_predicate("APP_IS_BACKGROUND_AND_SCREEN_ON");
+    durationMetric->set_condition("APP_IS_BACKGROUND_AND_SCREEN_ON");
     link = durationMetric->add_links();
     link->set_condition("APP_IS_BACKGROUND");
     link->add_key_in_main()->set_key(WAKE_LOCK_UID_KEY_ID);
