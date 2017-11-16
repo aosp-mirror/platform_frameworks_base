@@ -103,6 +103,7 @@ please see themes_device_defaults.xml.
         <item name="buttonStyleSmall">@style/Widget.Material.Button.Small</item>
         <item name="buttonStyleInset">@style/Widget.Material.Button.Inset</item>
         <item name="buttonStyleToggle">@style/Widget.Material.Button.Toggle</item>
+        <item name="buttonCornerRadius">@dimen/control_corner_material</item>
 
         <item name="switchStyle">@style/Widget.Material.CompoundButton.Switch</item>
         <item name="mediaRouteButtonStyle">@style/Widget.Material.MediaRouteButton</item>
@@ -472,6 +473,7 @@ please see themes_device_defaults.xml.
         <item name="buttonStyleSmall">@style/Widget.Material.Light.Button.Small</item>
         <item name="buttonStyleInset">@style/Widget.Material.Light.Button.Inset</item>
         <item name="buttonStyleToggle">@style/Widget.Material.Light.Button.Toggle</item>
+        <item name="buttonCornerRadius">@dimen/control_corner_material</item>
 
         <item name="switchStyle">@style/Widget.Material.Light.CompoundButton.Switch</item>
         <item name="mediaRouteButtonStyle">@style/Widget.Material.Light.MediaRouteButton</item>

@@ -23,7 +23,7 @@
        android:insetBottom="@dimen/button_inset_vertical_material">
     <shape android:shape="rectangle"
            android:tint="?attr/colorButtonNormal">
-        <corners android:radius="@dimen/control_corner_material" />
+        <corners android:radius="?attr/buttonCornerRadius" />
         <solid android:color="@color/white" />
         <padding android:left="@dimen/button_padding_horizontal_material"
                  android:top="@dimen/button_padding_vertical_material"
