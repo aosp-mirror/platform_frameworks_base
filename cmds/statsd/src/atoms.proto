@@ -102,8 +102,7 @@ message WorkSource {
 
 /*
  * *****************************************************************************
- * Below are all of the individual atoms that are logged by Android via statsd
- * and Westworld.
+ * Below are all of the individual atoms that are logged by Android via statsd.
  *
  * RULES:
  *   - The field ids for each atom must start at 1, and count upwards by 1.
