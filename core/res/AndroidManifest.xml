@@ -485,7 +485,6 @@
     <protected-broadcast android:name="android.content.jobscheduler.JOB_DEADLINE_EXPIRED" />
     <protected-broadcast android:name="android.intent.action.ACTION_UNSOL_RESPONSE_OEM_HOOK_RAW" />
     <protected-broadcast android:name="android.net.conn.CONNECTIVITY_CHANGE_SUPL" />
-    <protected-broadcast android:name="android.os.action.ACTION_EFFECTS_SUPPRESSOR_CHANGED" />
     <protected-broadcast android:name="android.os.action.LIGHT_DEVICE_IDLE_MODE_CHANGED" />
     <protected-broadcast android:name="android.os.storage.action.VOLUME_STATE_CHANGED" />
     <protected-broadcast android:name="android.os.storage.action.DISK_SCANNED" />
@@ -504,6 +503,8 @@
     <protected-broadcast android:name="android.app.action.NOTIFICATION_POLICY_CHANGED" />
     <protected-broadcast android:name="android.app.action.NOTIFICATION_POLICY_ACCESS_GRANTED_CHANGED" />
     <protected-broadcast android:name="android.os.action.ACTION_EFFECTS_SUPPRESSOR_CHANGED" />
+    <protected-broadcast android:name="android.app.action.NOTIFICATION_CHANNEL_BLOCK_STATE_CHANGED" />
+    <protected-broadcast android:name="android.app.action.NOTIFICATION_CHANNEL_GROUP_BLOCK_STATE_CHANGED" />
 
     <protected-broadcast android:name="android.permission.GET_APP_GRANTED_URI_PERMISSIONS" />
     <protected-broadcast android:name="android.permission.CLEAR_APP_GRANTED_URI_PERMISSIONS" />

@@ -372,7 +372,7 @@ public class RankingHelperTest extends NotificationTestCase {
                 mHelper.getNotificationChannel(PKG, UID, channel2.getId(), false));
 
         List<NotificationChannelGroup> actualGroups =
-                mHelper.getNotificationChannelGroups(PKG, UID, false).getList();
+                mHelper.getNotificationChannelGroups(PKG, UID, false, true).getList();
         boolean foundNcg = false;
         for (NotificationChannelGroup actual : actualGroups) {
             if (ncg.getId().equals(actual.getId())) {
@@ -442,7 +442,7 @@ public class RankingHelperTest extends NotificationTestCase {
                 mHelper.getNotificationChannel(PKG, UID, channel3.getId(), false));
 
         List<NotificationChannelGroup> actualGroups =
-                mHelper.getNotificationChannelGroups(PKG, UID, false).getList();
+                mHelper.getNotificationChannelGroups(PKG, UID, false, true).getList();
         boolean foundNcg = false;
         for (NotificationChannelGroup actual : actualGroups) {
             if (ncg.getId().equals(actual.getId())) {
@@ -1281,7 +1281,8 @@ public class RankingHelperTest extends NotificationTestCase {
 
         mHelper.onPackagesChanged(true, UserHandle.USER_SYSTEM, new String[]{PKG}, new int[]{UID});
 
-        assertEquals(0, mHelper.getNotificationChannelGroups(PKG, UID, true).getList().size());
+        assertEquals(0,
+                mHelper.getNotificationChannelGroups(PKG, UID, true, true).getList().size());
     }
 
     @Test
@@ -1370,7 +1371,7 @@ public class RankingHelperTest extends NotificationTestCase {
         mHelper.createNotificationChannel(PKG, UID, channel3, true);
 
         List<NotificationChannelGroup> actual =
-                mHelper.getNotificationChannelGroups(PKG, UID, true).getList();
+                mHelper.getNotificationChannelGroups(PKG, UID, true, true).getList();
         assertEquals(3, actual.size());
         for (NotificationChannelGroup group : actual) {
             if (group.getId() == null) {
@@ -1402,13 +1403,13 @@ public class RankingHelperTest extends NotificationTestCase {
                 new NotificationChannel("id1", "name1", NotificationManager.IMPORTANCE_HIGH);
         channel1.setGroup(ncg.getId());
         mHelper.createNotificationChannel(PKG, UID, channel1, true);
-        mHelper.getNotificationChannelGroups(PKG, UID, true).getList();
+        mHelper.getNotificationChannelGroups(PKG, UID, true, true).getList();
 
         channel1.setImportance(IMPORTANCE_LOW);
         mHelper.updateNotificationChannel(PKG, UID, channel1, true);
 
         List<NotificationChannelGroup> actual =
-                mHelper.getNotificationChannelGroups(PKG, UID, true).getList();
+                mHelper.getNotificationChannelGroups(PKG, UID, true, true).getList();
 
         assertEquals(2, actual.size());
         for (NotificationChannelGroup group : actual) {

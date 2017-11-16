@@ -16,8 +16,10 @@
 
 package com.android.server.notification;
 
+import static android.app.NotificationManager.EXTRA_BLOCKED_STATE;
 import static android.app.NotificationManager.IMPORTANCE_HIGH;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
+import static android.app.NotificationManager.IMPORTANCE_MAX;
 import static android.app.NotificationManager.IMPORTANCE_NONE;
 import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
 import static android.content.pm.PackageManager.FEATURE_WATCH;
@@ -940,6 +942,120 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
     }
 
     @Test
+    public void testUpdateChannelNotifyCreatorBlock() throws Exception {
+        mService.setRankingHelper(mRankingHelper);
+        when(mRankingHelper.getNotificationChannel(eq(PKG), anyInt(),
+                eq(mTestNotificationChannel.getId()), anyBoolean()))
+                .thenReturn(mTestNotificationChannel);
+
+        NotificationChannel updatedChannel =
+                new NotificationChannel(mTestNotificationChannel.getId(),
+                        mTestNotificationChannel.getName(), IMPORTANCE_NONE);
+
+        mBinderService.updateNotificationChannelForPackage(PKG, 0, updatedChannel);
+        ArgumentCaptor<Intent> captor = ArgumentCaptor.forClass(Intent.class);
+        verify(mContext, times(1)).sendBroadcastAsUser(captor.capture(), any(), eq(null));
+
+        assertEquals(NotificationManager.ACTION_NOTIFICATION_CHANNEL_BLOCK_STATE_CHANGED,
+                captor.getValue().getAction());
+        assertEquals(PKG, captor.getValue().getPackage());
+        assertEquals(mTestNotificationChannel.getId(), captor.getValue().getStringExtra(
+                        NotificationManager.EXTRA_BLOCK_STATE_CHANGED_ID));
+        assertTrue(captor.getValue().getBooleanExtra(EXTRA_BLOCKED_STATE, false));
+    }
+
+    @Test
+    public void testUpdateChannelNotifyCreatorUnblock() throws Exception {
+        NotificationChannel existingChannel =
+                new NotificationChannel(mTestNotificationChannel.getId(),
+                        mTestNotificationChannel.getName(), IMPORTANCE_NONE);
+        mService.setRankingHelper(mRankingHelper);
+        when(mRankingHelper.getNotificationChannel(eq(PKG), anyInt(),
+                eq(mTestNotificationChannel.getId()), anyBoolean()))
+                .thenReturn(existingChannel);
+
+        mBinderService.updateNotificationChannelForPackage(PKG, 0, mTestNotificationChannel);
+        ArgumentCaptor<Intent> captor = ArgumentCaptor.forClass(Intent.class);
+        verify(mContext, times(1)).sendBroadcastAsUser(captor.capture(), any(), eq(null));
+
+        assertEquals(NotificationManager.ACTION_NOTIFICATION_CHANNEL_BLOCK_STATE_CHANGED,
+                captor.getValue().getAction());
+        assertEquals(PKG, captor.getValue().getPackage());
+        assertEquals(mTestNotificationChannel.getId(), captor.getValue().getStringExtra(
+                NotificationManager.EXTRA_BLOCK_STATE_CHANGED_ID));
+        assertFalse(captor.getValue().getBooleanExtra(EXTRA_BLOCKED_STATE, false));
+    }
+
+    @Test
+    public void testUpdateChannelNoNotifyCreatorOtherChanges() throws Exception {
+        NotificationChannel existingChannel =
+                new NotificationChannel(mTestNotificationChannel.getId(),
+                        mTestNotificationChannel.getName(), IMPORTANCE_MAX);
+        mService.setRankingHelper(mRankingHelper);
+        when(mRankingHelper.getNotificationChannel(eq(PKG), anyInt(),
+                eq(mTestNotificationChannel.getId()), anyBoolean()))
+                .thenReturn(existingChannel);
+
+        mBinderService.updateNotificationChannelForPackage(PKG, 0, mTestNotificationChannel);
+        verify(mContext, never()).sendBroadcastAsUser(any(), any(), eq(null));
+    }
+
+    @Test
+    public void testUpdateGroupNotifyCreatorBlock() throws Exception {
+        NotificationChannelGroup existing = new NotificationChannelGroup("id", "name");
+        mService.setRankingHelper(mRankingHelper);
+        when(mRankingHelper.getNotificationChannelGroup(eq(existing.getId()), eq(PKG), anyInt()))
+                .thenReturn(existing);
+
+        NotificationChannelGroup updated = new NotificationChannelGroup("id", "name");
+        updated.setBlocked(true);
+
+        mBinderService.updateNotificationChannelGroupForPackage(PKG, 0, updated);
+        ArgumentCaptor<Intent> captor = ArgumentCaptor.forClass(Intent.class);
+        verify(mContext, times(1)).sendBroadcastAsUser(captor.capture(), any(), eq(null));
+
+        assertEquals(NotificationManager.ACTION_NOTIFICATION_CHANNEL_GROUP_BLOCK_STATE_CHANGED,
+                captor.getValue().getAction());
+        assertEquals(PKG, captor.getValue().getPackage());
+        assertEquals(existing.getId(), captor.getValue().getStringExtra(
+                NotificationManager.EXTRA_BLOCK_STATE_CHANGED_ID));
+        assertTrue(captor.getValue().getBooleanExtra(EXTRA_BLOCKED_STATE, false));
+    }
+
+    @Test
+    public void testUpdateGroupNotifyCreatorUnblock() throws Exception {
+        NotificationChannelGroup existing = new NotificationChannelGroup("id", "name");
+        existing.setBlocked(true);
+        mService.setRankingHelper(mRankingHelper);
+        when(mRankingHelper.getNotificationChannelGroup(eq(existing.getId()), eq(PKG), anyInt()))
+                .thenReturn(existing);
+
+        mBinderService.updateNotificationChannelGroupForPackage(
+                PKG, 0, new NotificationChannelGroup("id", "name"));
+        ArgumentCaptor<Intent> captor = ArgumentCaptor.forClass(Intent.class);
+        verify(mContext, times(1)).sendBroadcastAsUser(captor.capture(), any(), eq(null));
+
+        assertEquals(NotificationManager.ACTION_NOTIFICATION_CHANNEL_GROUP_BLOCK_STATE_CHANGED,
+                captor.getValue().getAction());
+        assertEquals(PKG, captor.getValue().getPackage());
+        assertEquals(existing.getId(), captor.getValue().getStringExtra(
+                NotificationManager.EXTRA_BLOCK_STATE_CHANGED_ID));
+        assertFalse(captor.getValue().getBooleanExtra(EXTRA_BLOCKED_STATE, false));
+    }
+
+    @Test
+    public void testUpdateGroupNoNotifyCreatorOtherChanges() throws Exception {
+        NotificationChannelGroup existing = new NotificationChannelGroup("id", "name");
+        mService.setRankingHelper(mRankingHelper);
+        when(mRankingHelper.getNotificationChannelGroup(eq(existing.getId()), eq(PKG), anyInt()))
+                .thenReturn(existing);
+
+        mBinderService.updateNotificationChannelGroupForPackage(
+                PKG, 0, new NotificationChannelGroup("id", "new name"));
+        verify(mContext, never()).sendBroadcastAsUser(any(), any(), eq(null));
+    }
+
+    @Test
     public void testCreateChannelNotifyListener() throws Exception {
         List<String> associations = new ArrayList<>();
         associations.add("a");
@@ -1040,6 +1156,9 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
         List<String> associations = new ArrayList<>();
         associations.add("a");
         when(mCompanionMgr.getAssociations(PKG, mUid)).thenReturn(associations);
+        when(mRankingHelper.getNotificationChannel(eq(PKG), anyInt(),
+                eq(mTestNotificationChannel.getId()), anyBoolean()))
+                .thenReturn(mTestNotificationChannel);
 
         mBinderService.updateNotificationChannelFromPrivilegedListener(
                 null, PKG, Process.myUserHandle(), mTestNotificationChannel);
