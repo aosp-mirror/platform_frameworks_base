@@ -109,6 +109,39 @@ TEST(LogEntryMatcherTest, TestStringMatcher) {
     EXPECT_TRUE(matchesSimple(*simpleMatcher, event));
 }
 
+TEST(LogEntryMatcherTest, TestMultiFieldsMatcher) {
+    // Set up the matcher
+    LogEntryMatcher matcher;
+    auto simpleMatcher = matcher.mutable_simple_log_entry_matcher();
+    simpleMatcher->set_tag(TAG_ID);
+    auto keyValue1 = simpleMatcher->add_key_value_matcher();
+    keyValue1->mutable_key_matcher()->set_key(FIELD_ID_1);
+    auto keyValue2 = simpleMatcher->add_key_value_matcher();
+    keyValue2->mutable_key_matcher()->set_key(FIELD_ID_2);
+
+    // Set up the event
+    LogEvent event(TAG_ID, 0);
+    auto list = event.GetAndroidLogEventList();
+    *list << 2;
+    *list << 3;
+
+    // Convert to a LogEvent
+    event.init();
+
+    // Test
+    keyValue1->set_eq_int(2);
+    keyValue2->set_eq_int(3);
+    EXPECT_TRUE(matchesSimple(*simpleMatcher, event));
+
+    keyValue1->set_eq_int(2);
+    keyValue2->set_eq_int(4);
+    EXPECT_FALSE(matchesSimple(*simpleMatcher, event));
+
+    keyValue1->set_eq_int(4);
+    keyValue2->set_eq_int(3);
+    EXPECT_FALSE(matchesSimple(*simpleMatcher, event));
+}
+
 TEST(LogEntryMatcherTest, TestIntComparisonMatcher) {
     // Set up the matcher
     LogEntryMatcher matcher;
