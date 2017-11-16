@@ -87,7 +87,7 @@ message SimpleCondition {
     UNKNOWN = 0;
     FALSE = 1;
   }
-  optional InitialValue initial_value = 5 [default = UNKNOWN];
+  optional InitialValue initial_value = 5 [default = FALSE];
 
   repeated KeyMatcher dimension = 6;
 }

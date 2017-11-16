@@ -71,6 +71,7 @@ TEST(SimpleConditionTrackerTest, TestNonSlicedCondition) {
     simpleCondition.set_start("SCREEN_TURNED_ON");
     simpleCondition.set_stop("SCREEN_TURNED_OFF");
     simpleCondition.set_count_nesting(false);
+    simpleCondition.set_initial_value(SimpleCondition_InitialValue_UNKNOWN);
 
     unordered_map<string, int> trackerNameIndexMap;
     trackerNameIndexMap["SCREEN_TURNED_ON"] = 0;
