@@ -26,6 +26,24 @@ import android.os.Handler;
  */
 public abstract class ProvisioningCallback {
 
+   /**
+     * The reason code for Provisioning Failure due to connection failure to OSU AP.
+     * @hide
+     */
+    public static final int OSU_FAILURE_AP_CONNECTION      = 1;
+
+    /**
+     * The status code for Provisioning flow to indicate connecting to OSU AP
+     * @hide
+     */
+    public static final int OSU_STATUS_AP_CONNECTING       = 1;
+
+    /**
+     * The status code for Provisioning flow to indicate connected to OSU AP
+     * @hide
+     */
+    public static final int OSU_STATUS_AP_CONNECTED        = 2;
+
     /**
      * Provisioning status for OSU failure
      * @param status indicates error condition
