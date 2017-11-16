@@ -28,6 +28,7 @@ class DozeHostFake implements DozeHost {
     Callback callback;
     boolean pulseExtended;
     boolean animateWakeup;
+    boolean animateScreenOff;
     boolean dozing;
     float doubleTapX;
     float doubleTapY;
@@ -100,6 +101,11 @@ class DozeHostFake implements DozeHost {
     @Override
     public void setAnimateWakeup(boolean animateWakeup) {
         this.animateWakeup = animateWakeup;
+    }
+
+    @Override
+    public void setAnimateScreenOff(boolean animateScreenOff) {
+        this.animateScreenOff = animateScreenOff;
     }
 
     @Override

@@ -20,6 +20,7 @@ import android.graphics.Color;
 import android.os.Trace;
 
 import com.android.systemui.statusbar.ScrimView;
+import com.android.systemui.statusbar.stack.StackStateAnimator;
 
 /**
  * Possible states of the ScrimController state machine.
@@ -38,12 +39,18 @@ public enum ScrimState {
 
         @Override
         public void prepare(ScrimState previousState) {
-            // DisplayPowerManager will blank the screen, we'll just
-            // set our scrim to black in this frame to avoid flickering and
-            // fade it out afterwards.
-            mBlankScreen = previousState == ScrimState.AOD;
+            mBlankScreen = false;
             if (previousState == ScrimState.AOD) {
-                updateScrimColor(mScrimInFront, 1, Color.BLACK);
+                mAnimationDuration = StackStateAnimator.ANIMATION_DURATION_WAKEUP;
+                if (mDisplayRequiresBlanking) {
+                    // DisplayPowerManager will blank the screen, we'll just
+                    // set our scrim to black in this frame to avoid flickering and
+                    // fade it out afterwards.
+                    mBlankScreen = true;
+                    updateScrimColor(mScrimInFront, 1, Color.BLACK);
+                }
+            } else {
+                mAnimationDuration = ScrimController.ANIMATION_DURATION;
             }
             mCurrentBehindAlpha = mScrimBehindAlphaKeyguard;
             mCurrentInFrontAlpha = 0;
@@ -78,7 +85,7 @@ public enum ScrimState {
     AOD {
         @Override
         public void prepare(ScrimState previousState) {
-            if (previousState == ScrimState.PULSING) {
+            if (previousState == ScrimState.PULSING && !mCanControlScreenOff) {
                 updateScrimColor(mScrimInFront, 1, Color.BLACK);
             }
             final boolean alwaysOnEnabled = mDozeParameters.getAlwaysOn();
@@ -89,7 +96,7 @@ public enum ScrimState {
             mCurrentBehindTint = Color.BLACK;
             // DisplayPowerManager will blank the screen for us, we just need
             // to set our state.
-            mAnimateChange = false;
+            mAnimateChange = mCanControlScreenOff;
         }
     },
 
@@ -103,8 +110,10 @@ public enum ScrimState {
             mCurrentInFrontAlpha = 0;
             mCurrentInFrontTint = Color.BLACK;
             mCurrentBehindTint = Color.BLACK;
-            mBlankScreen = true;
-            updateScrimColor(mScrimInFront, 1, Color.BLACK);
+            mBlankScreen = mDisplayRequiresBlanking;
+            if (mDisplayRequiresBlanking) {
+                updateScrimColor(mScrimInFront, 1, Color.BLACK);
+            }
         }
     },
 
@@ -147,11 +156,15 @@ public enum ScrimState {
     ScrimView mScrimInFront;
     ScrimView mScrimBehind;
     DozeParameters mDozeParameters;
+    boolean mDisplayRequiresBlanking;
+    boolean mCanControlScreenOff;
 
     public void init(ScrimView scrimInFront, ScrimView scrimBehind, DozeParameters dozeParameters) {
         mScrimInFront = scrimInFront;
         mScrimBehind = scrimBehind;
         mDozeParameters = dozeParameters;
+        mDisplayRequiresBlanking = dozeParameters.getDisplayNeedsBlanking();
+        mCanControlScreenOff = dozeParameters.getCanControlScreenOffAnimation();
     }
 
     public void prepare(ScrimState previousState) {

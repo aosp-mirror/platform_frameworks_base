@@ -23,6 +23,7 @@ import android.os.SystemClock;
 import android.text.format.Formatter;
 import android.util.Log;
 
+import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.util.AlarmTimeout;
 import com.android.systemui.util.wakelock.WakeLock;
 
@@ -41,18 +42,22 @@ public class DozeUi implements DozeMachine.Part {
     private final WakeLock mWakeLock;
     private final DozeMachine mMachine;
     private final AlarmTimeout mTimeTicker;
+    private final boolean mCanAnimateWakeup;
 
     private long mLastTimeTickElapsed = 0;
 
     public DozeUi(Context context, AlarmManager alarmManager, DozeMachine machine,
-            WakeLock wakeLock, DozeHost host, Handler handler) {
+            WakeLock wakeLock, DozeHost host, Handler handler,
+            DozeParameters params) {
         mContext = context;
         mMachine = machine;
         mWakeLock = wakeLock;
         mHost = host;
         mHandler = handler;
+        mCanAnimateWakeup = !params.getDisplayNeedsBlanking();
 
         mTimeTicker = new AlarmTimeout(alarmManager, this::onTimeTick, "doze_time_tick", handler);
+        mHost.setAnimateScreenOff(params.getCanControlScreenOffAnimation());
     }
 
     private void pulseWhileDozing(int reason) {
@@ -106,7 +111,7 @@ public class DozeUi implements DozeMachine.Part {
                 // Keep current state.
                 break;
             default:
-                mHost.setAnimateWakeup(false);
+                mHost.setAnimateWakeup(mCanAnimateWakeup);
                 break;
         }
     }

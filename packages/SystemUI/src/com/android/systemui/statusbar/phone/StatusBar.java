@@ -4407,7 +4407,8 @@ public class StatusBar extends SystemUI implements DemoMode,
     private void updateDozingState() {
         Trace.traceCounter(Trace.TRACE_TAG_APP, "dozing", mDozing ? 1 : 0);
         Trace.beginSection("StatusBar#updateDozingState");
-        boolean animate = !mDozing && mDozeServiceHost.shouldAnimateWakeup();
+        boolean animate = (!mDozing && mDozeServiceHost.shouldAnimateWakeup())
+                || (mDozing && mDozeServiceHost.shouldAnimateScreenOff());
         mNotificationPanel.setDozing(mDozing, animate);
         mStackScroller.setDark(mDozing, animate, mWakeUpTouchLocation);
         mDozeScrimController.setDozing(mDozing);
@@ -5175,6 +5176,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private final class DozeServiceHost implements DozeHost {
         private final ArrayList<Callback> mCallbacks = new ArrayList<>();
         private boolean mAnimateWakeup;
+        private boolean mAnimateScreenOff;
         private boolean mIgnoreTouchWhilePulsing;
 
         @Override
@@ -5322,6 +5324,11 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
 
         @Override
+        public void setAnimateScreenOff(boolean animateScreenOff) {
+            mAnimateScreenOff = animateScreenOff;
+        }
+
+        @Override
         public void onDoubleTap(float screenX, float screenY) {
             if (screenX > 0 && screenY > 0 && mAmbientIndicationContainer != null
                 && mAmbientIndicationContainer.getVisibility() == View.VISIBLE) {
@@ -5364,6 +5371,10 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         private boolean shouldAnimateWakeup() {
             return mAnimateWakeup;
+        }
+
+        public boolean shouldAnimateScreenOff() {
+            return mAnimateScreenOff;
         }
     }
 

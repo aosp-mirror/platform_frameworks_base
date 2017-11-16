@@ -70,6 +70,7 @@ public class ScrimControllerTest extends SysuiTestCase {
         mScrimVisibilityCallback = (Boolean visible) -> mScrimVisibile = visible;
         mDozeParamenters = mock(DozeParameters.class);
         when(mDozeParamenters.getAlwaysOn()).thenAnswer(invocation -> mAlwaysOnEnabled);
+        when(mDozeParamenters.getDisplayNeedsBlanking()).thenReturn(true);
         mScrimController = new SynchronousScrimController(mLightBarController, mScrimBehind,
                 mScrimInFront, mHeadsUpScrim, mScrimVisibilityCallback, mDozeParamenters);
     }

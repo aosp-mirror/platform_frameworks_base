@@ -119,6 +119,28 @@ public class DozeParameters {
         return mAmbientDisplayConfiguration.alwaysOnEnabled(UserHandle.USER_CURRENT);
     }
 
+    /**
+     * Some screens need to be completely black before changing the display power mode,
+     * unexpected behavior might happen if this parameter isn't respected.
+     *
+     * @return true if screen needs to be completely black before a power transition.
+     */
+    public boolean getDisplayNeedsBlanking() {
+        return mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_displayBlanksAfterDoze);
+    }
+
+    /**
+     * Whether we can implement our own screen off animation or if we need
+     * to rely on DisplayPowerManager to dim the display.
+     *
+     * @return true if SystemUI can control the screen off animation.
+     */
+    public boolean getCanControlScreenOffAnimation() {
+        return !mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_dozeAfterScreenOff);
+    }
+
     private boolean getBoolean(String propName, int resId) {
         return SystemProperties.getBoolean(propName, mContext.getResources().getBoolean(resId));
     }

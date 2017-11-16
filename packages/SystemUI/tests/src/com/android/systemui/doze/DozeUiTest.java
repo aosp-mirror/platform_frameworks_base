@@ -16,6 +16,7 @@
 
 package com.android.systemui.doze;
 
+import static com.android.systemui.doze.DozeMachine.State.DOZE;
 import static com.android.systemui.doze.DozeMachine.State.DOZE_AOD;
 import static com.android.systemui.doze.DozeMachine.State.DOZE_AOD_PAUSED;
 import static com.android.systemui.doze.DozeMachine.State.INITIALIZED;
@@ -28,19 +29,20 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.app.AlarmManager;
-import android.content.Context;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.util.wakelock.WakeLockFake;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -66,8 +68,11 @@ public class DozeUiTest extends SysuiTestCase {
         mWakeLock = new WakeLockFake();
         mHost = new DozeHostFake();
         mHandler = mHandlerThread.getThreadHandler();
+        DozeParameters params = mock(DozeParameters.class);
+        when(params.getCanControlScreenOffAnimation()).thenReturn(true);
+        when(params.getDisplayNeedsBlanking()).thenReturn(false);
 
-        mDozeUi = new DozeUi(mContext, mAlarmManager, mMachine, mWakeLock, mHost, mHandler);
+        mDozeUi = new DozeUi(mContext, mAlarmManager, mMachine, mWakeLock, mHost, mHandler, params);
     }
 
     @After
@@ -88,5 +93,21 @@ public class DozeUiTest extends SysuiTestCase {
         mDozeUi.transitionTo(DOZE_AOD_PAUSED, DOZE_AOD);
 
         verify(mAlarmManager).setExact(anyInt(), anyLong(), eq("doze_time_tick"), any(), any());
+    }
+
+    @Test
+    public void propagatesAnimateScreenOff() {
+        Assert.assertTrue("animateScreenOff should be true", mHost.animateScreenOff);
+
+        DozeParameters params = mock(DozeParameters.class);
+        new DozeUi(mContext, mAlarmManager, mMachine, mWakeLock, mHost, mHandler, params);
+        Assert.assertFalse("animateScreenOff should be false", mHost.animateScreenOff);
+    }
+
+    @Test
+    public void transitionSetsAnimateWakeup() {
+        mHost.animateWakeup = false;
+        mDozeUi.transitionTo(UNINITIALIZED, DOZE);
+        Assert.assertTrue("animateScreenOff should be true", mHost.animateWakeup);
     }
 }
