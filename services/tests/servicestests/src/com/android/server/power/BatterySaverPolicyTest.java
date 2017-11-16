@@ -18,13 +18,13 @@ package com.android.server.power;
 import android.os.PowerManager.ServiceType;
 import android.os.PowerSaveState;
 import android.os.Handler;
-import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.util.ArrayMap;
 
 import com.android.frameworks.servicestests.R;
+import com.android.internal.annotations.VisibleForTesting;
 
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -67,6 +67,12 @@ public class BatterySaverPolicyTest extends AndroidTestCase {
         @Override
         int getDeviceSpecificConfigResId() {
             return mDeviceSpecificConfigResId;
+        }
+
+
+        @VisibleForTesting
+        void onChange() {
+            onChange(true, null);
         }
     }
 
@@ -221,14 +227,14 @@ public class BatterySaverPolicyTest extends AndroidTestCase {
         mMockGlobalSettings.put(Global.BATTERY_SAVER_CONSTANTS, "");
         mMockGlobalSettings.put(Global.BATTERY_SAVER_DEVICE_SPECIFIC_CONSTANTS, "");
 
-        mBatterySaverPolicy.onChangeForTest();
+        mBatterySaverPolicy.onChange();
         assertThat(mBatterySaverPolicy.getFileValues(true).toString()).isEqualTo("{}");
         assertThat(mBatterySaverPolicy.getFileValues(false).toString()).isEqualTo("{}");
 
 
         mDeviceSpecificConfigResId = R.string.config_batterySaverDeviceSpecificConfig_2;
 
-        mBatterySaverPolicy.onChangeForTest();
+        mBatterySaverPolicy.onChange();
         assertThat(mBatterySaverPolicy.getFileValues(true).toString()).isEqualTo("{}");
         assertThat(mBatterySaverPolicy.getFileValues(false).toString())
                 .isEqualTo("{/sys/a=1, /sys/b=2}");
@@ -236,7 +242,7 @@ public class BatterySaverPolicyTest extends AndroidTestCase {
 
         mDeviceSpecificConfigResId = R.string.config_batterySaverDeviceSpecificConfig_3;
 
-        mBatterySaverPolicy.onChangeForTest();
+        mBatterySaverPolicy.onChange();
         assertThat(mBatterySaverPolicy.getFileValues(true).toString()).isEqualTo("{/proc/c=4}");
         assertThat(mBatterySaverPolicy.getFileValues(false).toString()).isEqualTo("{/sys/a=3}");
 
@@ -244,7 +250,7 @@ public class BatterySaverPolicyTest extends AndroidTestCase {
         mMockGlobalSettings.put(Global.BATTERY_SAVER_DEVICE_SPECIFIC_CONSTANTS,
                 "file-on:/proc/z=4");
 
-        mBatterySaverPolicy.onChangeForTest();
+        mBatterySaverPolicy.onChange();
         assertThat(mBatterySaverPolicy.getFileValues(true).toString()).isEqualTo("{/proc/z=4}");
         assertThat(mBatterySaverPolicy.getFileValues(false).toString()).isEqualTo("{}");
     }
