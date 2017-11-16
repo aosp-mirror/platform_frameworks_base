@@ -28,6 +28,7 @@ import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -322,8 +323,7 @@ public final class ProviderMap {
         return needSep;
     }
 
-    protected boolean dumpProvider(FileDescriptor fd, PrintWriter pw, String name, String[] args,
-            int opti, boolean dumpAll) {
+    private ArrayList<ContentProviderRecord> getProvidersForName(String name) {
         ArrayList<ContentProviderRecord> allProviders = new ArrayList<ContentProviderRecord>();
         ArrayList<ContentProviderRecord> providers = new ArrayList<ContentProviderRecord>();
 
@@ -365,6 +365,12 @@ public final class ProviderMap {
                 }
             }
         }
+        return providers;
+    }
+
+    protected boolean dumpProvider(FileDescriptor fd, PrintWriter pw, String name, String[] args,
+            int opti, boolean dumpAll) {
+        ArrayList<ContentProviderRecord> providers = getProvidersForName(name);
 
         if (providers.size() <= 0) {
             return false;
@@ -414,6 +420,33 @@ public final class ProviderMap {
             pw.flush();
             dumpToTransferPipe("      ", fd, pw, r, args);
         }
+    }
+
+    /**
+     * Similar to the dumpProvider, but only dumps the first matching provider.
+     * The provider is responsible for dumping as proto.
+     */
+    protected boolean dumpProviderProto(FileDescriptor fd, PrintWriter pw, String name,
+            String[] args) {
+        //add back the --proto arg, which was stripped out by PriorityDump
+        String[] newArgs = Arrays.copyOf(args, args.length + 1);
+        newArgs[args.length] = "--proto";
+
+        ArrayList<ContentProviderRecord> providers = getProvidersForName(name);
+
+        if (providers.size() <= 0) {
+            return false;
+        }
+
+        // Only dump the first provider, since we are dumping in proto format
+        for (int i = 0; i < providers.size(); i++) {
+            final ContentProviderRecord r = providers.get(i);
+            if (r.proc != null && r.proc.thread != null) {
+                dumpToTransferPipe(null, fd, pw, r, newArgs);
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
