@@ -29,9 +29,9 @@ import android.util.ArrayMap;
 import android.util.KeyValueListParser;
 import android.util.Slog;
 
+import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.R;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -62,8 +62,7 @@ public class BatterySaverPolicy extends ContentObserver {
     private static final String KEY_ADJUST_BRIGHTNESS_FACTOR = "adjust_brightness_factor";
     private static final String KEY_FULLBACKUP_DEFERRED = "fullbackup_deferred";
     private static final String KEY_KEYVALUE_DEFERRED = "keyvaluebackup_deferred";
-    private static final String KEY_FORCE_ALL_APPS_STANDBY_JOBS = "force_all_apps_standby_jobs";
-    private static final String KEY_FORCE_ALL_APPS_STANDBY_ALARMS = "force_all_apps_standby_alarms";
+    private static final String KEY_FORCE_ALL_APPS_STANDBY = "force_all_apps_standby";
     private static final String KEY_OPTIONAL_SENSORS_DISABLED = "optional_sensors_disabled";
 
     private static final String KEY_SCREEN_ON_FILE_PREFIX = "file-on:";
@@ -156,14 +155,9 @@ public class BatterySaverPolicy extends ContentObserver {
     private float mAdjustBrightnessFactor;
 
     /**
-     * Whether to put all apps in the stand-by mode or not for job scheduler.
+     * Whether to put all apps in the stand-by mode.
      */
-    private boolean mForceAllAppsStandbyJobs;
-
-    /**
-     * Whether to put all apps in the stand-by mode or not for alarms.
-     */
-    private boolean mForceAllAppsStandbyAlarms;
+    private boolean mForceAllAppsStandby;
 
     /**
      * Weather to show non-essential sensors (e.g. edge sensors) or not.
@@ -297,9 +291,7 @@ public class BatterySaverPolicy extends ContentObserver {
         mAdjustBrightnessDisabled = parser.getBoolean(KEY_ADJUST_BRIGHTNESS_DISABLED, false);
         mAdjustBrightnessFactor = parser.getFloat(KEY_ADJUST_BRIGHTNESS_FACTOR, 0.5f);
         mDataSaverDisabled = parser.getBoolean(KEY_DATASAVER_DISABLED, true);
-        mForceAllAppsStandbyJobs = parser.getBoolean(KEY_FORCE_ALL_APPS_STANDBY_JOBS, true);
-        mForceAllAppsStandbyAlarms =
-                parser.getBoolean(KEY_FORCE_ALL_APPS_STANDBY_ALARMS, true);
+        mForceAllAppsStandby = parser.getBoolean(KEY_FORCE_ALL_APPS_STANDBY, true);
         mOptionalSensorsDisabled = parser.getBoolean(KEY_OPTIONAL_SENSORS_DISABLED, true);
 
         // Get default value from Settings.Secure
@@ -387,12 +379,6 @@ public class BatterySaverPolicy extends ContentObserver {
                 case ServiceType.VIBRATION:
                     return builder.setBatterySaverEnabled(mVibrationDisabled)
                             .build();
-                case ServiceType.FORCE_ALL_APPS_STANDBY_JOBS:
-                    return builder.setBatterySaverEnabled(mForceAllAppsStandbyJobs)
-                            .build();
-                case ServiceType.FORCE_ALL_APPS_STANDBY_ALARMS:
-                    return builder.setBatterySaverEnabled(mForceAllAppsStandbyAlarms)
-                            .build();
                 case ServiceType.OPTIONAL_SENSORS:
                     return builder.setBatterySaverEnabled(mOptionalSensorsDisabled)
                             .build();
@@ -428,8 +414,7 @@ public class BatterySaverPolicy extends ContentObserver {
             pw.println("  " + KEY_ADJUST_BRIGHTNESS_DISABLED + "=" + mAdjustBrightnessDisabled);
             pw.println("  " + KEY_ADJUST_BRIGHTNESS_FACTOR + "=" + mAdjustBrightnessFactor);
             pw.println("  " + KEY_GPS_MODE + "=" + mGpsMode);
-            pw.println("  " + KEY_FORCE_ALL_APPS_STANDBY_JOBS + "=" + mForceAllAppsStandbyJobs);
-            pw.println("  " + KEY_FORCE_ALL_APPS_STANDBY_ALARMS + "=" + mForceAllAppsStandbyAlarms);
+            pw.println("  " + KEY_FORCE_ALL_APPS_STANDBY + "=" + mForceAllAppsStandby);
             pw.println("  " + KEY_OPTIONAL_SENSORS_DISABLED + "=" + mOptionalSensorsDisabled);
             pw.println();
 
