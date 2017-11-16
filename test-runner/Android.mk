@@ -26,7 +26,7 @@ LOCAL_JAVA_LIBRARIES := \
     core-oj \
     core-libart \
     framework \
-    legacy-test \
+    android.test.base \
     android.test.mock \
 
 LOCAL_MODULE_CLASS := JAVA_LIBRARIES
@@ -65,7 +65,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE := android.test.runner.stubs
 
 LOCAL_JAVA_LIBRARIES := \
-    legacy.test.stubs \
+    android.test.base.stubs \
     android.test.mock.stubs \
 
 LOCAL_SOURCE_FILES_ALL_GENERATED := true
