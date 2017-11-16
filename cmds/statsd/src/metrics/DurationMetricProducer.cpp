@@ -233,10 +233,12 @@ void DurationMetricProducer::flushIfNeeded(uint64_t eventTime) {
     }
 
     VLOG("flushing...........");
-    for (auto it = mCurrentSlicedDuration.begin(); it != mCurrentSlicedDuration.end(); ++it) {
+    for (auto it = mCurrentSlicedDuration.begin(); it != mCurrentSlicedDuration.end();) {
         if (it->second->flushIfNeeded(eventTime)) {
             VLOG("erase bucket for key %s", it->first.c_str());
-            mCurrentSlicedDuration.erase(it);
+            it = mCurrentSlicedDuration.erase(it);
+        } else {
+            ++it;
         }
     }
 

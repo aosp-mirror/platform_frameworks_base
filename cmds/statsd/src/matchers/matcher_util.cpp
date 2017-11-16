@@ -112,6 +112,7 @@ bool matchesSimple(const SimpleLogEntryMatcher& simpleMatcher, const LogEvent& e
             if (err == NO_ERROR && val != NULL) {
                 if (!(cur.eq_string() == val)) {
                     allMatched = false;
+                    break;
                 }
             }
         } else if (matcherCase == KeyValueMatcher::ValueMatcherCase::kEqInt ||
@@ -126,26 +127,30 @@ bool matchesSimple(const SimpleLogEntryMatcher& simpleMatcher, const LogEvent& e
                 if (matcherCase == KeyValueMatcher::ValueMatcherCase::kEqInt) {
                     if (!(val == cur.eq_int())) {
                         allMatched = false;
+                        break;
                     }
                 } else if (matcherCase == KeyValueMatcher::ValueMatcherCase::kLtInt) {
                     if (!(val < cur.lt_int())) {
                         allMatched = false;
+                        break;
                     }
                 } else if (matcherCase == KeyValueMatcher::ValueMatcherCase::kGtInt) {
                     if (!(val > cur.gt_int())) {
                         allMatched = false;
+                        break;
                     }
                 } else if (matcherCase == KeyValueMatcher::ValueMatcherCase::kLteInt) {
                     if (!(val <= cur.lte_int())) {
                         allMatched = false;
+                        break;
                     }
                 } else if (matcherCase == KeyValueMatcher::ValueMatcherCase::kGteInt) {
                     if (!(val >= cur.gte_int())) {
                         allMatched = false;
+                        break;
                     }
                 }
             }
-            break;
         } else if (matcherCase == KeyValueMatcher::ValueMatcherCase::kEqBool) {
             // Boolean fields
             status_t err = NO_ERROR;
@@ -153,6 +158,7 @@ bool matchesSimple(const SimpleLogEntryMatcher& simpleMatcher, const LogEvent& e
             if (err == NO_ERROR) {
                 if (!(cur.eq_bool() == val)) {
                     allMatched = false;
+                    break;
                 }
             }
         } else if (matcherCase == KeyValueMatcher::ValueMatcherCase::kLtFloat ||
@@ -164,10 +170,12 @@ bool matchesSimple(const SimpleLogEntryMatcher& simpleMatcher, const LogEvent& e
                 if (matcherCase == KeyValueMatcher::ValueMatcherCase::kLtFloat) {
                     if (!(cur.lt_float() <= val)) {
                         allMatched = false;
+                        break;
                     }
                 } else if (matcherCase == KeyValueMatcher::ValueMatcherCase::kGtFloat) {
                     if (!(cur.gt_float() >= val)) {
                         allMatched = false;
+                        break;
                     }
                 }
             }

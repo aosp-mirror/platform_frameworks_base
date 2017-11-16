@@ -206,7 +206,7 @@ void SimpleConditionTracker::evaluateCondition(const LogEvent& event,
                                                vector<bool>& conditionChangedCache) {
     if (conditionCache[mIndex] != ConditionState::kNotEvaluated) {
         // it has been evaluated.
-        VLOG("Yes, already evaluated, %s %d", mName.c_str(), mNonSlicedConditionState);
+        VLOG("Yes, already evaluated, %s %d", mName.c_str(), conditionCache[mIndex]);
         return;
     }
 
@@ -230,8 +230,23 @@ void SimpleConditionTracker::evaluateCondition(const LogEvent& event,
     }
 
     if (matchedState < 0) {
+        // The event doesn't match this condition. So we just report existing condition values.
         conditionChangedCache[mIndex] = false;
-        conditionCache[mIndex] = mNonSlicedConditionState;
+        if (mSliced) {
+            // if the condition result is sliced. metrics won't directly get value from the
+            // cache, so just set any value other than kNotEvaluated.
+            conditionCache[mIndex] = ConditionState::kUnknown;
+        } else if (mSlicedConditionState.find(DEFAULT_DIMENSION_KEY) ==
+                   mSlicedConditionState.end()) {
+            // condition not sliced, but we haven't seen the matched start or stop yet. so return
+            // initial value.
+            conditionCache[mIndex] = mInitialValue;
+        } else {
+            // return the cached condition.
+            conditionCache[mIndex] = mSlicedConditionState[DEFAULT_DIMENSION_KEY] > 0
+                                             ? ConditionState::kTrue
+                                             : ConditionState::kFalse;
+        }
         return;
     }
 

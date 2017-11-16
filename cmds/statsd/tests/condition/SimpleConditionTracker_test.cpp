@@ -108,6 +108,18 @@ TEST(SimpleConditionTrackerTest, TestNonSlicedCondition) {
     EXPECT_EQ(ConditionState::kTrue, conditionCache[0]);
     EXPECT_TRUE(changedCache[0]);
 
+    // match nothing.
+    matcherState.clear();
+    matcherState.push_back(MatchingState::kNotMatched);
+    matcherState.push_back(MatchingState::kNotMatched);
+    conditionCache[0] = ConditionState::kNotEvaluated;
+    changedCache[0] = false;
+
+    conditionTracker.evaluateCondition(event, matcherState, allConditions, conditionCache,
+                                       changedCache);
+    EXPECT_EQ(ConditionState::kTrue, conditionCache[0]);
+    EXPECT_FALSE(changedCache[0]);
+
     // the case for match stop.
     matcherState.clear();
     matcherState.push_back(MatchingState::kNotMatched);
