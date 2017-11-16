@@ -47,7 +47,7 @@ import java.net.InetAddress;
  * system resources.
  *
  * @see <a href="https://tools.ietf.org/html/rfc4301">RFC 4301, Security Architecture for the
- * Internet Protocol</a>
+ *     Internet Protocol</a>
  */
 public final class IpSecTransform implements AutoCloseable {
     private static final String TAG = "IpSecTransform";
@@ -116,8 +116,7 @@ public final class IpSecTransform implements AutoCloseable {
     }
 
     /**
-     * Checks the result status and throws an appropriate exception if
-     * the status is not Status.OK.
+     * Checks the result status and throws an appropriate exception if the status is not Status.OK.
      */
     private void checkResultStatus(int status)
             throws IOException, IpSecManager.ResourceUnavailableException,
@@ -267,9 +266,7 @@ public final class IpSecTransform implements AutoCloseable {
         return;
     }
 
-    /**
-     * This class is used to build {@link IpSecTransform} objects.
-     */
+    /** This class is used to build {@link IpSecTransform} objects. */
     public static class Builder {
         private Context mContext;
         private IpSecConfig mConfig;
@@ -339,7 +336,7 @@ public final class IpSecTransform implements AutoCloseable {
          *
          * <p>Because IPsec operates at the IP layer, this 32-bit identifier uniquely identifies
          * packets to a given destination address. To prevent SPI collisions, values should be
-         * reserved by calling {@link IpSecManager#reserveSecurityParameterIndex}.
+         * reserved by calling {@link IpSecManager#allocateSecurityParameterIndex}.
          *
          * <p>If the SPI and algorithms are omitted for one direction, traffic in that direction
          * will not be encrypted or authenticated.
@@ -374,10 +371,9 @@ public final class IpSecTransform implements AutoCloseable {
          * <p>This allows IPsec traffic to pass through a NAT.
          *
          * @see <a href="https://tools.ietf.org/html/rfc3948">RFC 3948, UDP Encapsulation of IPsec
-         * ESP Packets</a>
+         *     ESP Packets</a>
          * @see <a href="https://tools.ietf.org/html/rfc7296#section-2.23">RFC 7296 section 2.23,
-         * NAT Traversal of IKEv2</a>
-         *
+         *     NAT Traversal of IKEv2</a>
          * @param localSocket a socket for sending and receiving encapsulated traffic
          * @param remotePort the UDP port number of the remote host that will send and receive
          *     encapsulated traffic. In the case of IKEv2, this should be port 4500.
@@ -402,7 +398,6 @@ public final class IpSecTransform implements AutoCloseable {
          *
          * @param intervalSeconds the maximum number of seconds between keepalive packets. Must be
          *     between 20s and 3600s.
-         *
          * @hide
          */
         @SystemApi
@@ -418,7 +413,6 @@ public final class IpSecTransform implements AutoCloseable {
          * will not affect any network traffic until it has been applied to one or more sockets.
          *
          * @see IpSecManager#applyTransportModeTransform
-         *
          * @param remoteAddress the remote {@code InetAddress} of traffic on sockets that will use
          *     this transform
          * @throws IllegalArgumentException indicating that a particular combination of transform
@@ -453,8 +447,8 @@ public final class IpSecTransform implements AutoCloseable {
          */
         public IpSecTransform buildTunnelModeTransform(
                 InetAddress localAddress, InetAddress remoteAddress) {
-            //FIXME: argument validation here
-            //throw new IllegalArgumentException("Natt Keepalive requires UDP Encapsulation");
+            // FIXME: argument validation here
+            // throw new IllegalArgumentException("Natt Keepalive requires UDP Encapsulation");
             mConfig.setLocalAddress(localAddress.getHostAddress());
             mConfig.setRemoteAddress(remoteAddress.getHostAddress());
             mConfig.setMode(MODE_TUNNEL);

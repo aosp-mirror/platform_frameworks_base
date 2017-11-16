@@ -255,7 +255,7 @@ public class IpSecServiceTest {
         for (String address : invalidAddresses) {
             try {
                 IpSecSpiResponse spiResp =
-                        mIpSecService.reserveSecurityParameterIndex(
+                        mIpSecService.allocateSecurityParameterIndex(
                                 IpSecTransform.DIRECTION_OUT, address, DROID_SPI, new Binder());
                 fail("Invalid address was passed through IpSecService validation: " + address);
             } catch (IllegalArgumentException e) {
@@ -336,7 +336,7 @@ public class IpSecServiceTest {
         // Reserve spis until it fails.
         for (int i = 0; i < MAX_NUM_SPIS; i++) {
             IpSecSpiResponse newSpi =
-                    mIpSecService.reserveSecurityParameterIndex(
+                    mIpSecService.allocateSecurityParameterIndex(
                             0x1,
                             InetAddress.getLoopbackAddress().getHostAddress(),
                             DROID_SPI + i,
@@ -352,7 +352,7 @@ public class IpSecServiceTest {
 
         // Try to reserve one more SPI, and should fail.
         IpSecSpiResponse extraSpi =
-                mIpSecService.reserveSecurityParameterIndex(
+                mIpSecService.allocateSecurityParameterIndex(
                         0x1,
                         InetAddress.getLoopbackAddress().getHostAddress(),
                         DROID_SPI + MAX_NUM_SPIS,
@@ -366,7 +366,7 @@ public class IpSecServiceTest {
 
         // Should successfully reserve one more spi.
         extraSpi =
-                mIpSecService.reserveSecurityParameterIndex(
+                mIpSecService.allocateSecurityParameterIndex(
                         0x1,
                         InetAddress.getLoopbackAddress().getHostAddress(),
                         DROID_SPI + MAX_NUM_SPIS,

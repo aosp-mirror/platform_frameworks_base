@@ -672,15 +672,15 @@ public class IpSecService extends IIpSecService.Stub {
         throw new IllegalArgumentException("Invalid Direction: " + direction);
     }
 
-    @Override
     /** Get a new SPI and maintain the reservation in the system server */
-    public synchronized IpSecSpiResponse reserveSecurityParameterIndex(
+    @Override
+    public synchronized IpSecSpiResponse allocateSecurityParameterIndex(
             int direction, String remoteAddress, int requestedSpi, IBinder binder)
             throws RemoteException {
         checkDirection(direction);
         checkInetAddress(remoteAddress);
         /* requestedSpi can be anything in the int range, so no check is needed. */
-        checkNotNull(binder, "Null Binder passed to reserveSecurityParameterIndex");
+        checkNotNull(binder, "Null Binder passed to allocateSecurityParameterIndex");
 
         int resourceId = mNextResourceId.getAndIncrement();
 
