@@ -20952,7 +20952,6 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                 pw.println("    check-permission <permission> <package> [<user>]: does pkg hold perm?");
                 pw.println("    dexopt: dump dexopt state");
                 pw.println("    compiler-stats: dump compiler statistics");
-                pw.println("    enabled-overlays: dump list of enabled overlay packages");
                 pw.println("    service-permissions: dump permissions required by services");
                 pw.println("    <package.name>: info about given package");
                 return;
