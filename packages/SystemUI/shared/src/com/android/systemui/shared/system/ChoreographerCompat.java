@@ -17,10 +17,6 @@ package com.android.systemui.shared.system;
 
 import static android.view.Choreographer.CALLBACK_INPUT;
 
-import android.graphics.Bitmap;
-import android.graphics.GraphicBuffer;
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.view.Choreographer;
 
 /**
@@ -31,7 +27,7 @@ public class ChoreographerCompat {
     /**
      * Posts an input callback to the choreographer.
      */
-    public static void postInputFrame(Runnable runnable) {
-        Choreographer.getInstance().postCallback(CALLBACK_INPUT, runnable, null);
+    public static void postInputFrame(Choreographer choreographer, Runnable runnable) {
+        choreographer.postCallback(CALLBACK_INPUT, runnable, null);
     }
 }
