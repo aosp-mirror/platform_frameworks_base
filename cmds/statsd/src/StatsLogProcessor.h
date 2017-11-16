@@ -48,6 +48,9 @@ public:
             const uint64_t timestampNs,
             unordered_set<sp<const AnomalyAlarm>, SpHash<AnomalyAlarm>> anomalySet);
 
+    /* Flushes data to disk. Data on memory will be gone after written to disk. */
+    void WriteDataToDisk();
+
 private:
     mutable mutex mBroadcastTimesMutex;
 

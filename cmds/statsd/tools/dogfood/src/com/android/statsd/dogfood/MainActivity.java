@@ -211,11 +211,11 @@ public class MainActivity extends Activity {
     }
 
     private void displayData(byte[] data) {
-        com.android.os.StatsLog.ConfigMetricsReport report = null;
+        com.android.os.StatsLog.ConfigMetricsReportList reports = null;
         boolean good = false;
         if (data != null) {
             try {
-                report = com.android.os.StatsLog.ConfigMetricsReport.parseFrom(data);
+                reports = com.android.os.StatsLog.ConfigMetricsReportList.parseFrom(data);
                 good = true;
             } catch (com.google.protobuf.InvalidProtocolBufferException e) {
                 // display it in the text view.
@@ -226,8 +226,8 @@ public class MainActivity extends Activity {
         sb.append(good ? "Proto parsing OK!" : "Proto parsing Error!");
         sb.append(" size:").append(size).append("\n");
 
-        if (good && report != null) {
-            displayLogReport(sb, report);
+        if (good && reports != null) {
+            displayLogReport(sb, reports);
             mReportText.setText(sb.toString());
         }
     }

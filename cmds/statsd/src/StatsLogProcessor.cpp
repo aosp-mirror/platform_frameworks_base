@@ -17,14 +17,19 @@
 #include "Log.h"
 #include "statslog.h"
 
+#include <android-base/file.h>
+#include <dirent.h>
 #include "StatsLogProcessor.h"
+#include "android-base/stringprintf.h"
 #include "metrics/CountMetricProducer.h"
 #include "stats_util.h"
+#include "storage/StorageManager.h"
 
 #include <log/log_event_list.h>
 #include <utils/Errors.h>
 
 using namespace android;
+using android::base::StringPrintf;
 using android::util::FIELD_COUNT_REPEATED;
 using android::util::FIELD_TYPE_BOOL;
 using android::util::FIELD_TYPE_FLOAT;
@@ -41,18 +46,25 @@ namespace android {
 namespace os {
 namespace statsd {
 
-// for ConfigMetricsReport
+// for ConfigMetricsReportList
 const int FIELD_ID_CONFIG_KEY = 1;
-const int FIELD_ID_METRICS = 2;
-const int FIELD_ID_UID_MAP = 3;
+const int FIELD_ID_REPORTS = 2;
 // for ConfigKey
 const int FIELD_ID_UID = 1;
 const int FIELD_ID_NAME = 2;
+// for ConfigMetricsReport
+const int FIELD_ID_METRICS = 1;
+const int FIELD_ID_UID_MAP = 2;
+
+#define STATS_DATA_DIR "/data/system/stats-data"
 
 StatsLogProcessor::StatsLogProcessor(const sp<UidMap>& uidMap,
                                      const sp<AnomalyMonitor>& anomalyMonitor,
                                      const std::function<void(const ConfigKey&)>& sendBroadcast)
     : mUidMap(uidMap), mAnomalyMonitor(anomalyMonitor), mSendBroadcast(sendBroadcast) {
+    // On each initialization of StatsLogProcessor, check stats-data directory to see if there is
+    // any left over data to be read.
+    StorageManager::sendBroadcast(STATS_DATA_DIR, mSendBroadcast);
 }
 
 StatsLogProcessor::~StatsLogProcessor() {
@@ -138,13 +150,19 @@ void StatsLogProcessor::onDumpReport(const ConfigKey& key, vector<uint8_t>* outD
 
     ProtoOutputStream proto;
 
-    // Fill in ConfigKey.
+    // Start of ConfigKey.
     long long configKeyToken = proto.start(FIELD_TYPE_MESSAGE | FIELD_ID_CONFIG_KEY);
     proto.write(FIELD_TYPE_INT32 | FIELD_ID_UID, key.GetUid());
     proto.write(FIELD_TYPE_STRING | FIELD_ID_NAME, key.GetName());
     proto.end(configKeyToken);
+    // End of ConfigKey.
 
-    // Fill in StatsLogReport's.
+    // Start of ConfigMetricsReport (reports).
+    long long reportsToken =
+            proto.start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_REPORTS);
+
+    // First, fill in ConfigMetricsReport using current data on memory, which
+    // starts from filling in StatsLogReport's.
     for (auto& m : it->second->onDumpReport()) {
         // Add each vector of StatsLogReport into a repeated field.
         proto.write(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_METRICS,
@@ -157,6 +175,13 @@ void StatsLogProcessor::onDumpReport(const ConfigKey& key, vector<uint8_t>* outD
     char uidMapBuffer[uidMapSize];
     uidMap.SerializeToArray(&uidMapBuffer[0], uidMapSize);
     proto.write(FIELD_TYPE_MESSAGE | FIELD_ID_UID_MAP, uidMapBuffer, uidMapSize);
+
+    // End of ConfigMetricsReport (reports).
+    proto.end(reportsToken);
+
+    // Then, check stats-data directory to see there's any file containing
+    // ConfigMetricsReport from previous shutdowns to concatenate to reports.
+    StorageManager::appendConfigMetricsReport(STATS_DATA_DIR, proto);
 
     if (outData != nullptr) {
         outData->clear();
@@ -204,6 +229,19 @@ void StatsLogProcessor::flushIfNecessary(uint64_t timestampNs,
         // We ignore the return value so we force each metric producer to clear its contents.
         metricsManager->onDumpReport();
         ALOGD("StatsD had to toss out metrics for %s", key.ToString().c_str());
+    }
+}
+
+void StatsLogProcessor::WriteDataToDisk() {
+    mkdir(STATS_DATA_DIR, S_IRWXU);
+    for (auto& pair : mMetricsManagers) {
+        const ConfigKey& key = pair.first;
+        vector<uint8_t> data;
+        onDumpReport(key, &data);
+        // TODO: Add a guardrail to prevent accumulation of file on disk.
+        string file_name = StringPrintf("%s/%d-%s-%ld", STATS_DATA_DIR, key.GetUid(),
+                                        key.GetName().c_str(), time(nullptr));
+        StorageManager::writeFile(file_name.c_str(), &data[0], data.size());
     }
 }
 

@@ -15,6 +15,7 @@
  */
 
 #include "config/ConfigManager.h"
+#include "storage/StorageManager.h"
 
 #include "stats_util.h"
 
@@ -40,7 +41,7 @@ ConfigManager::~ConfigManager() {
 }
 
 void ConfigManager::Startup() {
-    readConfigFromDisk();
+    StorageManager::readConfigFromDisk(mConfigs);
 
     // this should be called from StatsService when it receives a statsd_config
     UpdateConfig(ConfigKey(1000, "fake"), build_fake_config());
@@ -90,21 +91,8 @@ void ConfigManager::RemoveConfig(const ConfigKey& key) {
 }
 
 void ConfigManager::remove_saved_configs(const ConfigKey& key) {
-    unique_ptr<DIR, decltype(&closedir)> dir(opendir(STATS_SERVICE_DIR), closedir);
-    if (dir == NULL) {
-        ALOGD("no default config on disk");
-        return;
-    }
     string prefix = StringPrintf("%d-%s", key.GetUid(), key.GetName().c_str());
-    dirent* de;
-    while ((de = readdir(dir.get()))) {
-        char* name = de->d_name;
-        if (name[0] != '.' && strncmp(name, prefix.c_str(), prefix.size()) == 0) {
-            if (remove(StringPrintf("%s/%s", STATS_SERVICE_DIR, name).c_str()) != 0) {
-                ALOGD("no file found");
-            }
-        }
-    }
+    StorageManager::deletePrefixedFiles(STATS_SERVICE_DIR, prefix.c_str());
 }
 
 void ConfigManager::RemoveConfigs(int uid) {
@@ -162,50 +150,6 @@ void ConfigManager::Dump(FILE* out) {
     }
 }
 
-void ConfigManager::readConfigFromDisk() {
-    unique_ptr<DIR, decltype(&closedir)> dir(opendir(STATS_SERVICE_DIR), closedir);
-    if (dir == NULL) {
-        ALOGD("no default config on disk");
-        return;
-    }
-
-    dirent* de;
-    while ((de = readdir(dir.get()))) {
-        char* name = de->d_name;
-        if (name[0] == '.') continue;
-        ALOGD("file %s", name);
-
-        int index = 0;
-        int uid = 0;
-        string configName;
-        char* substr = strtok(name, "-");
-        // Timestamp lives at index 2 but we skip parsing it as it's not needed.
-        while (substr != nullptr && index < 2) {
-            if (index) {
-                uid = atoi(substr);
-            } else {
-                configName = substr;
-            }
-            index++;
-        }
-        if (index < 2) continue;
-        string file_name = StringPrintf("%s/%s", STATS_SERVICE_DIR, name);
-        ALOGD("full file %s", file_name.c_str());
-        int fd = open(file_name.c_str(), O_RDONLY | O_CLOEXEC);
-        if (fd != -1) {
-            string content;
-            if (android::base::ReadFdToString(fd, &content)) {
-                StatsdConfig config;
-                if (config.ParseFromString(content)) {
-                    mConfigs[ConfigKey(uid, configName)] = config;
-                    ALOGD("map key uid=%d|name=%s", uid, name);
-                }
-            }
-            close(fd);
-        }
-    }
-}
-
 void ConfigManager::update_saved_configs(const ConfigKey& key, const StatsdConfig& config) {
     mkdir(STATS_SERVICE_DIR, S_IRWXU);
 
@@ -215,16 +159,10 @@ void ConfigManager::update_saved_configs(const ConfigKey& key, const StatsdConfi
     // Then we save the latest config.
     string file_name = StringPrintf("%s/%d-%s-%ld", STATS_SERVICE_DIR, key.GetUid(),
                                     key.GetName().c_str(), time(nullptr));
-    int fd = open(file_name.c_str(), O_WRONLY | O_CREAT | O_CLOEXEC, S_IRUSR | S_IWUSR);
-    if (fd != -1) {
-        const int numBytes = config.ByteSize();
-        vector<uint8_t> buffer(numBytes);
-        config.SerializeToArray(&buffer[0], numBytes);
-        int result = write(fd, &buffer[0], numBytes);
-        close(fd);
-        bool wroteKey = (result == numBytes);
-        ALOGD("wrote to file %d", wroteKey);
-    }
+    const int numBytes = config.ByteSize();
+    vector<uint8_t> buffer(numBytes);
+    config.SerializeToArray(&buffer[0], numBytes);
+    StorageManager::writeFile(file_name.c_str(), &buffer[0], numBytes);
 }
 
 StatsdConfig build_fake_config() {

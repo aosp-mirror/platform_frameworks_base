@@ -128,11 +128,6 @@ private:
      * The ConfigListeners that will be told about changes.
      */
     vector<sp<ConfigListener>> mListeners;
-
-    /**
-     * Call to load the saved configs from disk.
-     */
-    void readConfigFromDisk();
 };
 
 }  // namespace statsd
