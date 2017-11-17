@@ -46,9 +46,7 @@ public:
     virtual ~ConfigManager();
 
     /**
-     * Call to load the saved configs from disk.
-     *
-     * TODO: Implement me
+     * Initialize ConfigListener by reading from disk and get updates.
      */
     void Startup();
 
@@ -95,7 +93,12 @@ private:
     /**
      * Save the configs to disk.
      */
-    void update_saved_configs();
+    void update_saved_configs(const ConfigKey& key, const StatsdConfig& config);
+
+    /**
+     * Remove saved configs from disk.
+     */
+    void remove_saved_configs(const ConfigKey& key);
 
     /**
      * The Configs that have been set. Each config should
@@ -112,6 +115,11 @@ private:
      * The ConfigListeners that will be told about changes.
      */
     vector<sp<ConfigListener>> mListeners;
+
+    /**
+     * Call to load the saved configs from disk.
+     */
+    void readConfigFromDisk();
 };
 
 }  // namespace statsd

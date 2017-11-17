@@ -17,6 +17,7 @@
 #define DEBUG true
 #include "Log.h"
 
+#include "android-base/stringprintf.h"
 #include "StatsService.h"
 #include "config/ConfigKey.h"
 #include "config/ConfigManager.h"
@@ -25,11 +26,11 @@
 #include <android-base/file.h>
 #include <binder/IPCThreadState.h>
 #include <binder/IServiceManager.h>
+#include <dirent.h>
 #include <frameworks/base/cmds/statsd/src/statsd_config.pb.h>
 #include <private/android_filesystem_config.h>
 #include <utils/Looper.h>
 #include <utils/String16.h>
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/system_properties.h>
@@ -42,6 +43,7 @@ namespace os {
 namespace statsd {
 
 constexpr const char* kPermissionDump = "android.permission.DUMP";
+#define STATS_SERVICE_DIR "/data/system/stats-service"
 
 // ======================================================================
 /**
@@ -206,6 +208,10 @@ status_t StatsService::command(FILE* in, FILE* out, FILE* err, Vector<String8>& 
         if (!args[0].compare(String8("send-broadcast"))) {
             return cmd_trigger_broadcast(args);
         }
+
+        if (!args[0].compare(String8("clear-config"))) {
+            return cmd_remove_config_files(out);
+        }
     }
 
     print_cmd_help(out);
@@ -221,6 +227,11 @@ void StatsService::print_cmd_help(FILE* out) {
     fprintf(out, "usage: adb shell cmd stats print-uid-map \n");
     fprintf(out, "\n");
     fprintf(out, "  Prints the UID, app name, version mapping.\n");
+    fprintf(out, "\n");
+    fprintf(out, "\n");
+    fprintf(out, "usage: adb shell cmd stats clear-config \n");
+    fprintf(out, "\n");
+    fprintf(out, "  Removes all configs from disk.\n");
     fprintf(out, "\n");
     fprintf(out, "\n");
     fprintf(out, "usage: adb shell cmds stats pull-source [int] \n");
@@ -403,6 +414,27 @@ status_t StatsService::cmd_print_pulled_metrics(FILE* out, const Vector<String8>
         return NO_ERROR;
     }
     return UNKNOWN_ERROR;
+}
+
+status_t StatsService::cmd_remove_config_files(FILE* out) {
+    fprintf(out, "Trying to remove config files...\n");
+    unique_ptr<DIR, decltype(&closedir)> dir(opendir(STATS_SERVICE_DIR), closedir);
+    if (dir == NULL) {
+        fprintf(out, "No existing config files found exiting...\n");
+        return NO_ERROR;
+    }
+
+    dirent* de;
+    while ((de = readdir(dir.get()))) {
+        char* name = de->d_name;
+        if (name[0] == '.') continue;
+        string file_name = StringPrintf("%s/%s", STATS_SERVICE_DIR, name);
+        fprintf(out, "Deleting file %s\n", file_name.c_str());
+        if (remove(file_name.c_str())) {
+            fprintf(out, "Error deleting file %s\n", file_name.c_str());
+        }
+    }
+    return NO_ERROR;
 }
 
 Status StatsService::informAllUidData(const vector<int32_t>& uid, const vector<int32_t>& version,
