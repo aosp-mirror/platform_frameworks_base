@@ -2123,18 +2123,13 @@ class ActivityStarter {
             return mReuseTask.getStack();
         }
 
-        final int vrDisplayId = mPreferredDisplayId == mService.mVr2dDisplayId
-                ? mPreferredDisplayId : INVALID_DISPLAY;
-        final ActivityStack launchStack = mSupervisor.getLaunchStack(r, aOptions, task, ON_TOP,
-                vrDisplayId);
-
-        if (launchStack != null) {
-            return launchStack;
-        }
-
         if (((launchFlags & FLAG_ACTIVITY_LAUNCH_ADJACENT) == 0)
                  || mPreferredDisplayId != DEFAULT_DISPLAY) {
-            return null;
+            // We don't pass in the default display id into the get launch stack call so it can do a
+            // full resolution.
+            final int candidateDisplay =
+                    mPreferredDisplayId != DEFAULT_DISPLAY ? mPreferredDisplayId : INVALID_DISPLAY;
+            return mSupervisor.getLaunchStack(r, aOptions, task, ON_TOP, candidateDisplay);
         }
         // Otherwise handle adjacent launch.
 
@@ -2166,7 +2161,7 @@ class ActivityStarter {
                         mSupervisor.getDefaultDisplay().getSplitScreenPrimaryStack();
                 if (dockedStack != null && !dockedStack.shouldBeVisible(r)) {
                     // There is a docked stack, but it isn't visible, so we can't launch into that.
-                    return null;
+                    return mSupervisor.getLaunchStack(r, aOptions, task, ON_TOP);
                 } else {
                     return dockedStack;
                 }

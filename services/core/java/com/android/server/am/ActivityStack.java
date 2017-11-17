@@ -494,7 +494,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
 
         // Need to make sure windowing mode is supported.
         int windowingMode = display.resolveWindowingMode(
-                null /* ActivityRecord */, mTmpOptions, topTask, getActivityType());;
+                null /* ActivityRecord */, mTmpOptions, topTask, getActivityType());
         if (splitScreenStack == this && windowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY) {
             // Resolution to split-screen secondary for the primary split-screen stack means we want
             // to go fullscreen.

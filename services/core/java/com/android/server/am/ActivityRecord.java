@@ -647,8 +647,13 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             return;
         }
 
+        if (task.getStack().deferScheduleMultiWindowModeChanged()) {
+            // Don't do anything if we are currently deferring multi-window mode change.
+            return;
+        }
+
         // An activity is considered to be in multi-window mode if its task isn't fullscreen.
-        final boolean inMultiWindowMode = task.inMultiWindowMode();
+        final boolean inMultiWindowMode = inMultiWindowMode();
         if (inMultiWindowMode != mLastReportedMultiWindowMode) {
             mLastReportedMultiWindowMode = inMultiWindowMode;
             scheduleMultiWindowModeChanged(getConfiguration());
@@ -675,7 +680,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             // Picture-in-picture mode changes also trigger a multi-window mode change as well, so
             // update that here in order
             mLastReportedPictureInPictureMode = inPictureInPictureMode;
-            mLastReportedMultiWindowMode = inPictureInPictureMode;
+            mLastReportedMultiWindowMode = inMultiWindowMode();
             final Configuration newConfig = task.computeNewOverrideConfigurationForBounds(
                     targetStackBounds, null);
             schedulePictureInPictureModeChanged(newConfig);
