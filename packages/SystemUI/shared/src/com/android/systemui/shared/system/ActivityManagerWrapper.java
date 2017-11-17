@@ -413,15 +413,4 @@ public class ActivityManagerWrapper {
             Log.w(TAG, "Failed to cancel window transition for task=" + taskId, e);
         }
     }
-
-    /**
-     * Cancels the current thumbnail transtion to/from Recents for the given task id.
-     */
-    public void cancelThumbnailTransition(int taskId) {
-        try {
-            ActivityManager.getService().cancelTaskThumbnailTransition(taskId);
-        } catch (RemoteException e) {
-            Log.w(TAG, "Failed to cancel window transition for task=" + taskId, e);
-        }
-    }
 }

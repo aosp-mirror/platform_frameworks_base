@@ -10364,26 +10364,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public void cancelTaskThumbnailTransition(int taskId) {
-        enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS,
-                "cancelTaskThumbnailTransition()");
-        final long ident = Binder.clearCallingIdentity();
-        try {
-            synchronized (this) {
-                final TaskRecord task = mStackSupervisor.anyTaskForIdLocked(taskId,
-                        MATCH_TASK_IN_STACKS_ONLY);
-                if (task == null) {
-                    Slog.w(TAG, "cancelTaskThumbnailTransition: taskId=" + taskId + " not found");
-                    return;
-                }
-                task.cancelThumbnailTransition();
-            }
-        } finally {
-            Binder.restoreCallingIdentity(ident);
-        }
-    }
-
-    @Override
     public TaskSnapshot getTaskSnapshot(int taskId, boolean reducedResolution) {
         enforceCallerIsRecentsOrHasPermission(READ_FRAME_BUFFER, "getTaskSnapshot()");
         final long ident = Binder.clearCallingIdentity();

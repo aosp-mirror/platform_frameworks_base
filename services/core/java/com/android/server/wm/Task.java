@@ -540,13 +540,6 @@ class Task extends WindowContainer<AppWindowToken> {
         }
     }
 
-    /** Cancels any running thumbnail transitions associated with the task. */
-    void cancelTaskThumbnailTransition() {
-        for (int i = mChildren.size() - 1; i >= 0; --i) {
-            mChildren.get(i).clearThumbnail();
-        }
-    }
-
     boolean showForAllUsers() {
         final int tokensCount = mChildren.size();
         return (tokensCount != 0) && mChildren.get(tokensCount - 1).mShowForAllUsers;

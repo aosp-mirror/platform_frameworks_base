@@ -772,10 +772,6 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         mWindowContainerController.cancelWindowTransition();
     }
 
-    void cancelThumbnailTransition() {
-        mWindowContainerController.cancelThumbnailTransition();
-    }
-
     /**
      * DO NOT HOLD THE ACTIVITY MANAGER LOCK WHEN CALLING THIS METHOD!
      */

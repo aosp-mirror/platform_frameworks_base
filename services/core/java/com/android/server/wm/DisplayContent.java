@@ -399,14 +399,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 }
             }
         }
-        final AppWindowAnimator appAnimator = winAnimator.mAppAnimator;
-        if (appAnimator != null && appAnimator.thumbnail != null) {
-            if (appAnimator.thumbnailTransactionSeq
-                    != mTmpWindowAnimator.mAnimTransactionSequence) {
-                appAnimator.thumbnailTransactionSeq =
-                        mTmpWindowAnimator.mAnimTransactionSequence;
-            }
-        }
     };
 
     private final Consumer<WindowState> mUpdateWallpaperForAnimator = w -> {

@@ -709,7 +709,6 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
                 (event.launchTask == null || launchToTaskId != event.launchTask.key.id)) {
             ActivityManagerWrapper am = ActivityManagerWrapper.getInstance();
             am.cancelWindowTransition(launchState.launchedToTaskId);
-            am.cancelThumbnailTransition(getTaskId());
         }
     }
 

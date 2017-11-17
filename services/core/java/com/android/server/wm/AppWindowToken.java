@@ -55,6 +55,7 @@ import android.annotation.CallSuper;
 import android.annotation.NonNull;
 import android.app.Activity;
 import android.content.res.Configuration;
+import android.graphics.GraphicBuffer;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Binder;
@@ -207,6 +208,8 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
     /** Whether our surface was set to be showing in the last call to {@link #prepareSurfaces} */
     private boolean mLastSurfaceShowing;
+
+    private AppWindowThumbnail mThumbnail;
 
     AppWindowToken(WindowManagerService service, IApplicationToken token, boolean voiceInteraction,
             DisplayContent dc, long inputDispatchingTimeoutNanos, boolean fullscreen,
@@ -1618,6 +1621,8 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         setAppLayoutChanges(FINISH_LAYOUT_REDO_ANIM | FINISH_LAYOUT_REDO_WALLPAPER,
                 "AppWindowToken");
 
+        clearThumbnail();
+
         if (mService.mInputMethodTarget != null && mService.mInputMethodTarget.mAppToken == this) {
             getDisplayContent().computeImeTarget(true /* updateImeTarget */);
         }
@@ -1657,6 +1662,12 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         return super.isSelfAnimating();
     }
 
+    @Override
+    void cancelAnimation() {
+        super.cancelAnimation();
+        clearThumbnail();
+    }
+
     boolean isWaitingForTransitionStart() {
         return mService.mAppTransition.isTransitionSet()
                 && (mService.mOpeningApps.contains(this) || mService.mClosingApps.contains(this));
@@ -1670,8 +1681,44 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         return mTransitFlags;
     }
 
-    void clearThumbnail() {
-        // TODO
+    void attachThumbnailAnimation() {
+        if (!isReallyAnimating()) {
+            return;
+        }
+        final int taskId = getTask().mTaskId;
+        final GraphicBuffer thumbnailHeader =
+                mService.mAppTransition.getAppTransitionThumbnailHeader(taskId);
+        if (thumbnailHeader == null) {
+            if (DEBUG_APP_TRANSITIONS) Slog.d(TAG, "No thumbnail header bitmap for: " + taskId);
+            return;
+        }
+        clearThumbnail();
+        mThumbnail = new AppWindowThumbnail(getPendingTransaction(), this, thumbnailHeader);
+        mThumbnail.startAnimation(getPendingTransaction(), loadThumbnailAnimation(thumbnailHeader));
+    }
+
+    private Animation loadThumbnailAnimation(GraphicBuffer thumbnailHeader) {
+        final DisplayInfo displayInfo = mDisplayContent.getDisplayInfo();
+
+        // If this is a multi-window scenario, we use the windows frame as
+        // destination of the thumbnail header animation. If this is a full screen
+        // window scenario, we use the whole display as the target.
+        WindowState win = findMainWindow();
+        Rect appRect = win != null ? win.getContentFrameLw() :
+                new Rect(0, 0, displayInfo.appWidth, displayInfo.appHeight);
+        Rect insets = win != null ? win.mContentInsets : null;
+        final Configuration displayConfig = mDisplayContent.getConfiguration();
+        return mService.mAppTransition.createThumbnailAspectScaleAnimationLocked(
+                appRect, insets, thumbnailHeader, getTask().mTaskId, displayConfig.uiMode,
+                displayConfig.orientation);
+    }
+
+    private void clearThumbnail() {
+        if (mThumbnail == null) {
+            return;
+        }
+        mThumbnail.destroy();
+        mThumbnail = null;
     }
 
     @Override
@@ -1752,6 +1799,9 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             mPendingTransaction.show(mSurfaceControl);
         } else if (!show && mLastSurfaceShowing) {
             mPendingTransaction.hide(mSurfaceControl);
+        }
+        if (mThumbnail != null) {
+            mThumbnail.setShowing(mPendingTransaction, show);
         }
         mLastSurfaceShowing = show;
         super.prepareSurfaces();

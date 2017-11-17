@@ -626,9 +626,6 @@ interface IActivityManager {
     /** Cancels the window transitions for the given task. */
     void cancelTaskWindowTransition(int taskId);
 
-    /** Cancels the thumbnail transitions for the given task. */
-    void cancelTaskThumbnailTransition(int taskId);
-
     /**
      * @param taskId the id of the task to retrieve the sAutoapshots for
      * @param reducedResolution if set, if the snapshot needs to be loaded from disk, this will load
