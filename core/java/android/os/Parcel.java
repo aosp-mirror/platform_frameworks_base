@@ -191,6 +191,7 @@ import java.util.Set;
  * {@link #readSparseArray(ClassLoader)}.
  */
 public final class Parcel {
+
     private static final boolean DEBUG_RECYCLE = false;
     private static final boolean DEBUG_ARRAY_MAP = false;
     private static final String TAG = "Parcel";
@@ -208,6 +209,12 @@ public final class Parcel {
     private ArrayMap<Class, Object> mClassCookies;
 
     private RuntimeException mStack;
+
+    /**
+     * Whether or not to parcel the stack trace of an exception. This has a performance
+     * impact, so should only be included in specific processes and only on debug builds.
+     */
+    private static boolean sParcelExceptionStackTrace;
 
     private static final int POOL_SIZE = 6;
     private static final Parcel[] sOwnedPool = new Parcel[POOL_SIZE];
@@ -324,6 +331,11 @@ public final class Parcel {
     private static native boolean nativeHasFileDescriptors(long nativePtr);
     private static native void nativeWriteInterfaceToken(long nativePtr, String interfaceName);
     private static native void nativeEnforceInterface(long nativePtr, String interfaceName);
+
+    /** Last time exception with a stack trace was written */
+    private static volatile long sLastWriteExceptionStackTrace;
+    /** Used for throttling of writing stack trace, which is costly */
+    private static final int WRITE_EXCEPTION_STACK_TRACE_THRESHOLD_MS = 1000;
 
     @CriticalNative
     private static native long nativeGetBlobAshmemSize(long nativePtr);
@@ -1696,6 +1708,11 @@ public final class Parcel {
         }
     }
 
+    /** @hide For debugging purposes */
+    public static void setStackTraceParceling(boolean enabled) {
+        sParcelExceptionStackTrace = enabled;
+    }
+
     /**
      * Special function for writing an exception result at the header of
      * a parcel, to be used when returning an exception from a transaction.
@@ -1753,6 +1770,27 @@ public final class Parcel {
             throw new RuntimeException(e);
         }
         writeString(e.getMessage());
+        final long timeNow = sParcelExceptionStackTrace ? SystemClock.elapsedRealtime() : 0;
+        if (sParcelExceptionStackTrace && (timeNow - sLastWriteExceptionStackTrace
+                > WRITE_EXCEPTION_STACK_TRACE_THRESHOLD_MS)) {
+            sLastWriteExceptionStackTrace = timeNow;
+            final int sizePosition = dataPosition();
+            writeInt(0); // Header size will be filled in later
+            StackTraceElement[] stackTrace = e.getStackTrace();
+            final int truncatedSize = Math.min(stackTrace.length, 5);
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < truncatedSize; i++) {
+                sb.append("\tat ").append(stackTrace[i]);
+            }
+            writeString(sb.toString());
+            final int payloadPosition = dataPosition();
+            setDataPosition(sizePosition);
+            // Write stack trace header size. Used in native side to skip the header
+            writeInt(payloadPosition - sizePosition);
+            setDataPosition(payloadPosition);
+        } else {
+            writeInt(0);
+        }
         switch (code) {
             case EX_SERVICE_SPECIFIC:
                 writeInt(((ServiceSpecificException) e).errorCode);
@@ -1818,7 +1856,19 @@ public final class Parcel {
         int code = readExceptionCode();
         if (code != 0) {
             String msg = readString();
-            readException(code, msg);
+            String remoteStackTrace = null;
+            final int remoteStackPayloadSize = readInt();
+            if (remoteStackPayloadSize > 0) {
+                remoteStackTrace = readString();
+            }
+            Exception e = createException(code, msg);
+            // Attach remote stack trace if availalble
+            if (remoteStackTrace != null) {
+                RemoteException cause = new RemoteException(
+                        "Remote stack trace:\n" + remoteStackTrace, null, false, false);
+                e.initCause(cause);
+            }
+            SneakyThrow.sneakyThrow(e);
         }
     }
 
@@ -1863,32 +1913,41 @@ public final class Parcel {
      * @param msg The exception message.
      */
     public final void readException(int code, String msg) {
+        SneakyThrow.sneakyThrow(createException(code, msg));
+    }
+
+    /**
+     * Creates an exception with the given message.
+     *
+     * @param code Used to determine which exception class to throw.
+     * @param msg The exception message.
+     */
+    private Exception createException(int code, String msg) {
         switch (code) {
             case EX_PARCELABLE:
                 if (readInt() > 0) {
-                    SneakyThrow.sneakyThrow(
-                            (Exception) readParcelable(Parcelable.class.getClassLoader()));
+                    return (Exception) readParcelable(Parcelable.class.getClassLoader());
                 } else {
-                    throw new RuntimeException(msg + " [missing Parcelable]");
+                    return new RuntimeException(msg + " [missing Parcelable]");
                 }
             case EX_SECURITY:
-                throw new SecurityException(msg);
+                return new SecurityException(msg);
             case EX_BAD_PARCELABLE:
-                throw new BadParcelableException(msg);
+                return new BadParcelableException(msg);
             case EX_ILLEGAL_ARGUMENT:
-                throw new IllegalArgumentException(msg);
+                return new IllegalArgumentException(msg);
             case EX_NULL_POINTER:
-                throw new NullPointerException(msg);
+                return new NullPointerException(msg);
             case EX_ILLEGAL_STATE:
-                throw new IllegalStateException(msg);
+                return new IllegalStateException(msg);
             case EX_NETWORK_MAIN_THREAD:
-                throw new NetworkOnMainThreadException();
+                return new NetworkOnMainThreadException();
             case EX_UNSUPPORTED_OPERATION:
-                throw new UnsupportedOperationException(msg);
+                return new UnsupportedOperationException(msg);
             case EX_SERVICE_SPECIFIC:
-                throw new ServiceSpecificException(readInt(), msg);
+                return new ServiceSpecificException(readInt(), msg);
         }
-        throw new RuntimeException("Unknown exception code: " + code
+        return new RuntimeException("Unknown exception code: " + code
                 + " msg " + msg);
     }
 
