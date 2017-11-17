@@ -28,6 +28,7 @@ import android.content.res.Resources;
 import android.net.INetworkPolicyManager;
 import android.net.Uri;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -410,7 +411,15 @@ public class SubscriptionManager {
      * for #onSubscriptionsChanged to be invoked.
      */
     public static class OnSubscriptionsChangedListener {
-        private final Handler mHandler  = new Handler() {
+        private class OnSubscriptionsChangedListenerHandler extends Handler {
+            OnSubscriptionsChangedListenerHandler() {
+                super();
+            }
+
+            OnSubscriptionsChangedListenerHandler(Looper looper) {
+                super(looper);
+            }
+
             @Override
             public void handleMessage(Message msg) {
                 if (DBG) {
@@ -418,7 +427,22 @@ public class SubscriptionManager {
                 }
                 OnSubscriptionsChangedListener.this.onSubscriptionsChanged();
             }
-        };
+        }
+
+        private final Handler mHandler;
+
+        public OnSubscriptionsChangedListener() {
+            mHandler = new OnSubscriptionsChangedListenerHandler();
+        }
+
+        /**
+         * Allow a listener to be created with a custom looper
+         * @param looper the looper that the underlining handler should run on
+         * @hide
+         */
+        public OnSubscriptionsChangedListener(Looper looper) {
+            mHandler = new OnSubscriptionsChangedListenerHandler(looper);
+        }
 
         /**
          * Callback invoked when there is any change to any SubscriptionInfo. Typically
