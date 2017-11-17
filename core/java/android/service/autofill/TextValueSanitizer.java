@@ -19,6 +19,7 @@ package android.service.autofill;
 import static android.view.autofill.Helper.sDebug;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -62,24 +63,31 @@ public final class TextValueSanitizer extends InternalSanitizer implements
     /** @hide */
     @Override
     @TestApi
+    @Nullable
     public AutofillValue sanitize(@NonNull AutofillValue value) {
         if (value == null) {
             Slog.w(TAG, "sanitize() called with null value");
             return null;
         }
-        if (!value.isText()) return value;
+        if (!value.isText()) {
+            if (sDebug) Slog.d(TAG, "sanitize() called with non-text value: " + value);
+            return null;
+        }
 
         final CharSequence text = value.getTextValue();
 
         try {
             final Matcher matcher = mRegex.matcher(text);
-            if (!matcher.matches()) return value;
+            if (!matcher.matches()) {
+                if (sDebug) Slog.d(TAG, "sanitize(): " + mRegex + " failed for " + value);
+                return null;
+            }
 
             final CharSequence sanitized = matcher.replaceAll(mSubst);
             return AutofillValue.forText(sanitized);
         } catch (Exception e) {
             Slog.w(TAG, "Exception evaluating " + mRegex + "/" + mSubst + ": " + e);
-            return value;
+            return null;
         }
     }
 
