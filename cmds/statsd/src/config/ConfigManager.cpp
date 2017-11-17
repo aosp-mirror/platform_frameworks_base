@@ -45,7 +45,7 @@ void ConfigManager::Startup() {
     readConfigFromDisk();
 
     // this should be called from StatsService when it receives a statsd_config
-    UpdateConfig(ConfigKey(0, "fake"), build_fake_config());
+    UpdateConfig(ConfigKey(1000, "fake"), build_fake_config());
 }
 
 void ConfigManager::AddListener(const sp<ConfigListener>& listener) {
