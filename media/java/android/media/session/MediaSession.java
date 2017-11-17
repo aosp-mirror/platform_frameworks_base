@@ -48,6 +48,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Allows interaction with media controllers, volume keys, media buttons, and
@@ -1255,6 +1256,28 @@ public final class MediaSession {
             return "MediaSession.QueueItem {" +
                     "Description=" + mDescription +
                     ", Id=" + mId + " }";
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (o == null) {
+                return false;
+            }
+
+            if (!(o instanceof QueueItem)) {
+                return false;
+            }
+
+            final QueueItem item = (QueueItem) o;
+            if (mId != item.mId) {
+                return false;
+            }
+
+            if (!Objects.equals(mDescription, item.mDescription)) {
+                return false;
+            }
+
+            return true;
         }
     }
 

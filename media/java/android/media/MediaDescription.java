@@ -220,6 +220,33 @@ public class MediaDescription implements Parcelable {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (o == null) {
+            return false;
+        }
+
+        if (!(o instanceof MediaDescription)){
+            return false;
+        }
+
+        final MediaDescription d = (MediaDescription) o;
+
+        if (!String.valueOf(mTitle).equals(String.valueOf(d.mTitle))) {
+            return false;
+        }
+
+        if (!String.valueOf(mSubtitle).equals(String.valueOf(d.mSubtitle))) {
+            return false;
+        }
+
+        if (!String.valueOf(mDescription).equals(String.valueOf(d.mDescription))) {
+            return false;
+        }
+
+        return true;
+    }
+
+    @Override
     public String toString() {
         return mTitle + ", " + mSubtitle + ", " + mDescription;
     }

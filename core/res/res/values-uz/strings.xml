@@ -1438,7 +1438,7 @@
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", xavfsiz"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Grafik kalit esimdan chiqdi"</string>
-    <string name="kg_wrong_pattern" msgid="1850806070801358830">"Grafik kalit xato"</string>
+    <string name="kg_wrong_pattern" msgid="1850806070801358830">"Grafik kalit noto‘g‘ri"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"Parol noto‘g‘ri"</string>
     <string name="kg_wrong_pin" msgid="1131306510833563801">"PIN-kod noto‘g‘ri"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"<xliff:g id="NUMBER">%1$d</xliff:g> soniyadan so‘ng qayta urinib ko‘ring."</string>

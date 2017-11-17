@@ -1187,7 +1187,7 @@
     <string name="usb_notification_message" msgid="3370903770828407960">"Tryck för fler alternativ."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB-felsökning ansluten"</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"Tryck om du vill inaktivera USB-felsökning."</string>
-    <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Välj för att inaktivera USB-felsökning."</string>
+    <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Välj att inaktivera USB-felsökning."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Felrapporten överförs …"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Vill du dela felrapporten?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Felrapporten delas …"</string>

@@ -30,9 +30,8 @@ import java.net.UnknownHostException;
 /**
  * API for sending log output.
  *
- * <p>Generally, you should use the {@link #v Log.v()}, {@link #d Log.d()},
- * {@link #i Log.i()}, {@link #w Log.w()}, and {@link #e Log.e()} methods to write logs.
- * You can then <a href="{@docRoot}studio/debug/am-logcat.html">view the logs in logcat</a>.
+ * <p>Generally, use the Log.v() Log.d() Log.i() Log.w() and Log.e()
+ * methods.
  *
  * <p>The order in terms of verbosity, from least to most is
  * ERROR, WARN, INFO, DEBUG, VERBOSE.  Verbose should never be compiled

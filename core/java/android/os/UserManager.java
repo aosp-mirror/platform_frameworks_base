@@ -303,12 +303,10 @@ public class UserManager {
     public static final String DISALLOW_DEBUGGING_FEATURES = "no_debugging_features";
 
     /**
-     * Specifies if a user is disallowed from configuring a VPN. The default value is
-     * <code>false</code>. This restriction has an effect when set by device owners and, in Android
-     * 6.0 ({@linkplain android.os.Build.VERSION_CODES#M API level 23}) or higher, profile owners.
-     * <p>This restriction also prevents VPNs from starting. However, in Android 7.0
-     * ({@linkplain android.os.Build.VERSION_CODES#N API level 24}) or higher, the system does
-     * start always-on VPNs created by the device or profile owner.
+     * Specifies if a user is disallowed from configuring VPN.
+     * The default value is <code>false</code>.
+     * This restriction has an effect in a managed profile only from
+     * {@link android.os.Build.VERSION_CODES#M}
      *
      * <p>Key for user restrictions.
      * <p>Type: Boolean
@@ -391,13 +389,10 @@ public class UserManager {
     public static final String DISALLOW_ADD_MANAGED_PROFILE = "no_add_managed_profile";
 
     /**
-     * Specifies if a user is disallowed from disabling application verification. The default
-     * value is <code>false</code>.
-     *
-     * <p>In Android 8.0 ({@linkplain android.os.Build.VERSION_CODES#O API level 26}) and higher,
-     * this is a global user restriction. If a device owner or profile owner sets this restriction,
-     * the system enforces app verification across all users on the device. Running in earlier
-     * Android versions, this restriction affects only the profile that sets it.
+     * Specifies if a user is disallowed from disabling application verification.
+     * Starting from {@link android.os.Build.VERSION_CODES#O}, application verification
+     * is enforced across all users on the device if a profile owner or device owner sets
+     * this restriction to <code>true</code>. The default value is <code>false</code>.
      *
      * <p>Key for user restrictions.
      * <p>Type: Boolean

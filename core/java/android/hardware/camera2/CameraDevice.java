@@ -73,10 +73,8 @@ public abstract class CameraDevice implements AutoCloseable {
      * Create a request suitable for still image capture. Specifically, this
      * means prioritizing image quality over frame rate. These requests would
      * commonly be used with the {@link CameraCaptureSession#capture} method.
-     * This template is guaranteed to be supported on all camera devices except
-     * {@link CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_DEPTH_OUTPUT DEPTH_OUTPUT} devices
-     * that are not {@link CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_BACKWARD_COMPATIBLE
-     * BACKWARD_COMPATIBLE}.
+     * This template is guaranteed to be supported on all camera devices.
+     *
      * @see #createCaptureRequest
      */
     public static final int TEMPLATE_STILL_CAPTURE = 2;
@@ -86,10 +84,7 @@ public abstract class CameraDevice implements AutoCloseable {
      * that a stable frame rate is used, and post-processing is set for
      * recording quality. These requests would commonly be used with the
      * {@link CameraCaptureSession#setRepeatingRequest} method.
-     * This template is guaranteed to be supported on all camera devices except
-     * {@link CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_DEPTH_OUTPUT DEPTH_OUTPUT} devices
-     * that are not {@link CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_BACKWARD_COMPATIBLE
-     * BACKWARD_COMPATIBLE}.
+     * This template is guaranteed to be supported on all camera devices.
      *
      * @see #createCaptureRequest
      */
@@ -103,10 +98,7 @@ public abstract class CameraDevice implements AutoCloseable {
      * {@link #TEMPLATE_RECORD} is is in use with {@link CameraCaptureSession#setRepeatingRequest}.
      * This template is guaranteed to be supported on all camera devices except
      * legacy devices ({@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL}
-     * {@code == }{@link CameraMetadata#INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY LEGACY}) and
-     * {@link CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_DEPTH_OUTPUT DEPTH_OUTPUT} devices
-     * that are not {@link CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_BACKWARD_COMPATIBLE
-     * BACKWARD_COMPATIBLE}.
+     * {@code == }{@link CameraMetadata#INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY LEGACY})
      *
      * @see #createCaptureRequest
      */
