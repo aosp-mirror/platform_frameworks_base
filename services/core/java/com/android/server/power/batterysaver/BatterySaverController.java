@@ -25,6 +25,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
+import android.os.PowerManagerInternal;
 import android.os.PowerManagerInternal.LowPowerModeListener;
 import android.os.PowerSaveState;
 import android.os.UserHandle;
@@ -33,7 +34,9 @@ import android.util.Slog;
 import android.widget.Toast;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.Preconditions;
+import com.android.server.LocalServices;
 import com.android.server.power.BatterySaverPolicy;
 import com.android.server.power.BatterySaverPolicy.BatterySaverPolicyListener;
 import com.android.server.power.PowerManagerService;
@@ -63,20 +66,17 @@ public class BatterySaverController implements BatterySaverPolicyListener {
     @GuardedBy("mLock")
     private boolean mEnabled;
 
-    /**
-     * Keep track of the previous enabled state, which we use to decide when to send broadcasts,
-     * which we don't want to send only when the screen state changes.
-     */
-    @GuardedBy("mLock")
-    private boolean mWasEnabled;
-
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             switch (intent.getAction()) {
                 case Intent.ACTION_SCREEN_ON:
                 case Intent.ACTION_SCREEN_OFF:
-                    mHandler.postStateChanged();
+                    if (!isEnabled()) {
+                        return; // No need to send it if not enabled.
+                    }
+                    // Don't send the broadcast, because we never did so in this case.
+                    mHandler.postStateChanged(/*sendBroadcast=*/ false);
                     break;
             }
         }
@@ -121,25 +121,32 @@ public class BatterySaverController implements BatterySaverPolicyListener {
 
     @Override
     public void onBatterySaverPolicyChanged(BatterySaverPolicy policy) {
-        mHandler.postStateChanged();
+        if (!isEnabled()) {
+            return; // No need to send it if not enabled.
+        }
+        mHandler.postStateChanged(/*sendBroadcast=*/ true);
     }
 
     private class MyHandler extends Handler {
-        private final int MSG_STATE_CHANGED = 1;
+        private static final int MSG_STATE_CHANGED = 1;
+
+        private static final int ARG_DONT_SEND_BROADCAST = 0;
+        private static final int ARG_SEND_BROADCAST = 1;
 
         public MyHandler(Looper looper) {
             super(looper);
         }
 
-        public void postStateChanged() {
-            obtainMessage(MSG_STATE_CHANGED).sendToTarget();
+        public void postStateChanged(boolean sendBroadcast) {
+            obtainMessage(MSG_STATE_CHANGED, sendBroadcast ?
+                    ARG_SEND_BROADCAST : ARG_DONT_SEND_BROADCAST, 0).sendToTarget();
         }
 
         @Override
         public void dispatchMessage(Message msg) {
             switch (msg.what) {
                 case MSG_STATE_CHANGED:
-                    handleBatterySaverStateChanged();
+                    handleBatterySaverStateChanged(msg.arg1 == ARG_SEND_BROADCAST);
                     break;
             }
         }
@@ -155,38 +162,53 @@ public class BatterySaverController implements BatterySaverPolicyListener {
             }
             mEnabled = enable;
 
-            mHandler.postStateChanged();
+            mHandler.postStateChanged(/*sendBroadcast=*/ true);
+        }
+    }
+
+    /** @return whether battery saver is enabled or not. */
+    boolean isEnabled() {
+        synchronized (mLock) {
+            return mEnabled;
         }
     }
 
     /**
      * Dispatch power save events to the listeners.
      *
-     * This is always called on the handler thread.
+     * This method is always called on the handler thread.
+     *
+     * This method is called only in the following cases:
+     * - When battery saver becomes activated.
+     * - When battery saver becomes deactivated.
+     * - When battery saver is on the interactive state changes.
+     * - When battery saver is on the battery saver policy changes.
      */
-    void handleBatterySaverStateChanged() {
+    void handleBatterySaverStateChanged(boolean sendBroadcast) {
         final LowPowerModeListener[] listeners;
 
-        final boolean wasEnabled;
         final boolean enabled;
-        final boolean isScreenOn = getPowerManager().isInteractive();
+        final boolean isInteractive = getPowerManager().isInteractive();
         final ArrayMap<String, String> fileValues;
 
         synchronized (mLock) {
-            Slog.i(TAG, "Battery saver enabled: screen on=" + isScreenOn);
+            Slog.i(TAG, "Battery saver " + (mEnabled ? "enabled" : "disabled")
+                    + ": isInteractive=" + isInteractive);
 
             listeners = mListeners.toArray(new LowPowerModeListener[mListeners.size()]);
-            wasEnabled = mWasEnabled;
             enabled = mEnabled;
 
             if (enabled) {
-                fileValues = mBatterySaverPolicy.getFileValues(isScreenOn);
+                fileValues = mBatterySaverPolicy.getFileValues(isInteractive);
             } else {
                 fileValues = null;
             }
         }
 
-        PowerManagerService.powerHintInternal(PowerHint.LOW_POWER, enabled ? 1 : 0);
+        final PowerManagerInternal pmi = LocalServices.getService(PowerManagerInternal.class);
+        if (pmi != null) {
+            pmi.powerHint(PowerHint.LOW_POWER, enabled ? 1 : 0);
+        }
 
         if (enabled) {
             // STOPSHIP Remove the toast.
@@ -195,13 +217,13 @@ public class BatterySaverController implements BatterySaverPolicyListener {
                     Toast.LENGTH_LONG).show();
         }
 
-        if (fileValues == null || fileValues.size() == 0) {
+        if (ArrayUtils.isEmpty(fileValues)) {
             mFileUpdater.restoreDefault();
         } else {
             mFileUpdater.writeFiles(fileValues);
         }
 
-        if (enabled != wasEnabled) {
+        if (sendBroadcast) {
             if (DEBUG) {
                 Slog.i(TAG, "Sending broadcasts for mode: " + enabled);
             }
@@ -230,10 +252,6 @@ public class BatterySaverController implements BatterySaverPolicyListener {
                                 listener.getServiceType(), enabled);
                 listener.onLowPowerModeChanged(result);
             }
-        }
-
-        synchronized (mLock) {
-            mWasEnabled = enabled;
         }
     }
 }

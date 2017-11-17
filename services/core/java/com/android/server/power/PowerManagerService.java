@@ -3105,7 +3105,7 @@ public final class PowerManagerService extends SystemService
         mIsVrModeEnabled = enabled;
     }
 
-    public static void powerHintInternal(int hintId, int data) {
+    private static void powerHintInternal(int hintId, int data) {
         nativeSendPowerHint(hintId, data);
     }
 
