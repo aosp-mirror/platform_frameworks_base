@@ -717,6 +717,19 @@ public class UserManagerService extends IUserManager.Stub {
         }
     }
 
+    @Override
+    public int getProfileParentId(int userHandle) {
+        checkManageUsersPermission("get the profile parent");
+        synchronized (mUsersLock) {
+            UserInfo profileParent = getProfileParentLU(userHandle);
+            if (profileParent == null) {
+                return userHandle;
+            }
+
+            return profileParent.id;
+        }
+    }
+
     private UserInfo getProfileParentLU(int userHandle) {
         UserInfo profile = getUserInfoLU(userHandle);
         if (profile == null) {
