@@ -260,13 +260,13 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
      * Example:
      *
      * <pre class="prettyprint">
-     * Calendar start = Calendar.getInstance();
-     * Calendar end = Calendar.getInstance();
-     * end.add(Calendar.YEAR, 1);
+     * Calendar start = new Calendar();
+     * Calendar end = new Calendar();
+     * end.add(1, Calendar.YEAR);
      *
      * KeyPairGeneratorSpec spec =
      *         new KeyPairGeneratorSpec.Builder(mContext).setAlias(&quot;myKey&quot;)
-     *                 .setSubject(new X500Principal(&quot;CN=myKey&quot;)).setSerialNumber(BigInteger.valueOf(1337))
+     *                 .setSubject(new X500Principal(&quot;CN=myKey&quot;)).setSerial(BigInteger.valueOf(1337))
      *                 .setStartDate(start.getTime()).setEndDate(end.getTime()).build();
      * </pre>
      *

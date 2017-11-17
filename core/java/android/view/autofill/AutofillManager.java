@@ -52,64 +52,9 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * The {@link AutofillManager} provides ways for apps and custom views to integrate with the
- * Autofill Framework lifecycle.
+ * App entry point to the Autofill Framework.
  *
- * <p>The autofill lifecycle starts with the creation of an autofill context associated with an
- * activity context; the autofill context is created when one of the following methods is called for
- * the first time in an activity context, and the current user has an enabled autofill service:
- *
- * <ul>
- *   <li>{@link #notifyViewEntered(View)}
- *   <li>{@link #notifyViewEntered(View, int, Rect)}
- *   <li>{@link #requestAutofill(View)}
- * </ul>
- *
- * <p>Tipically, the context is automatically created when the first view of the activity is
- * focused because {@code View.onFocusChanged()} indirectly calls
- * {@link #notifyViewEntered(View)}. App developers can call {@link #requestAutofill(View)} to
- * explicitly create it (for example, a custom view developer could offer a contextual menu action
- * in a text-field view to let users manually request autofill).
- *
- * <p>After the context is created, the Android System creates a {@link android.view.ViewStructure}
- * that represents the view hierarchy by calling
- * {@link View#dispatchProvideAutofillStructure(android.view.ViewStructure, int)} in the root views
- * of all application windows. By default, {@code dispatchProvideAutofillStructure()} results in
- * subsequent calls to {@link View#onProvideAutofillStructure(android.view.ViewStructure, int)} and
- * {@link View#onProvideAutofillVirtualStructure(android.view.ViewStructure, int)} for each view in
- * the hierarchy.
- *
- * <p>The resulting {@link android.view.ViewStructure} is then passed to the autofill service, which
- * parses it looking for views that can be autofilled. If the service finds such views, it returns
- * a data structure to the Android System containing the following optional info:
- *
- * <ul>
- *   <li>Datasets used to autofill subsets of views in the activity.
- *   <li>Id of views that the service can save their values for future autofilling.
- * </ul>
- *
- * <p>When the service returns datasets, the Android System displays an autofill dataset picker
- * UI affordance associated with the view, when the view is focused on and is part of a dataset.
- * The application can be notified when the affordance is shown by registering an
- * {@link AutofillCallback} through {@link #registerCallback(AutofillCallback)}. When the user
- * selects a dataset from the affordance, all views present in the dataset are autofilled, through
- * calls to {@link View#autofill(AutofillValue)} or {@link View#autofill(SparseArray)}.
- *
- * <p>When the service returns ids of savable views, the Android System keeps track of changes
- * made to these views, so they can be used to determine if the autofill save UI is shown later.
- *
- * <p>The context is then finished when one of the following occurs:
- *
- * <ul>
- *   <li>{@link #commit()} is called or all savable views are gone.
- *   <li>{@link #cancel()} is called.
- * </ul>
- *
- * <p>Finally, after the autofill context is commited (i.e., not cancelled), the Android System
- * shows a save UI affordance if the value of savable views have changed. If the user selects the
- * option to Save, the current value of the views is then sent to the autofill service.
- *
- * <p>It is safe to call into its methods from any thread.
+ * <p>It is safe to call into this from any thread.
  */
 @SystemService(Context.AUTOFILL_MANAGER_SERVICE)
 public final class AutofillManager {
@@ -726,13 +671,8 @@ public final class AutofillManager {
     /**
      * Called to indicate the current autofill context should be commited.
      *
-     * <p>This method is typically called by {@link View Views} that manage virtual views; for
-     * example, when the view is rendering an {@code HTML} page with a form and virtual views
-     * that represent the HTML elements, it should call this method after the form is submitted and
-     * another page is rendered.
-     *
-     * <p><b>Note:</b> This method does not need to be called on regular application lifecycle
-     * methods such as {@link android.app.Activity#finish()}.
+     * <p>For example, when a virtual view is rendering an {@code HTML} page with a form, it should
+     * call this method after the form is submitted and another page is rendered.
      */
     public void commit() {
         if (!hasAutofillFeature()) {
@@ -750,13 +690,8 @@ public final class AutofillManager {
     /**
      * Called to indicate the current autofill context should be cancelled.
      *
-     * <p>This method is typically called by {@link View Views} that manage virtual views; for
-     * example, when the view is rendering an {@code HTML} page with a form and virtual views
-     * that represent the HTML elements, it should call this method if the user does not post the
-     * form but moves to another form in this page.
-     *
-     * <p><b>Note:</b> This method does not need to be called on regular application lifecycle
-     * methods such as {@link android.app.Activity#finish()}.
+     * <p>For example, when a virtual view is rendering an {@code HTML} page with a form, it should
+     * call this method if the user does not post the form but moves to another form in this page.
      */
     public void cancel() {
         if (!hasAutofillFeature()) {
@@ -1527,10 +1462,10 @@ public final class AutofillManager {
     }
 
     /**
-     * Callback for autofill related events.
+     * Callback for auto-fill related events.
      *
      * <p>Typically used for applications that display their own "auto-complete" views, so they can
-     * enable / disable such views when the autofill UI affordance is shown / hidden.
+     * enable / disable such views when the auto-fill UI affordance is shown / hidden.
      */
     public abstract static class AutofillCallback {
 
@@ -1540,7 +1475,7 @@ public final class AutofillManager {
         public @interface AutofillEventType {}
 
         /**
-         * The autofill input UI affordance associated with the view was shown.
+         * The auto-fill input UI affordance associated with the view was shown.
          *
          * <p>If the view provides its own auto-complete UI affordance and its currently shown, it
          * should be hidden upon receiving this event.
@@ -1548,7 +1483,7 @@ public final class AutofillManager {
         public static final int EVENT_INPUT_SHOWN = 1;
 
         /**
-         * The autofill input UI affordance associated with the view was hidden.
+         * The auto-fill input UI affordance associated with the view was hidden.
          *
          * <p>If the view provides its own auto-complete UI affordance that was hidden upon a
          * {@link #EVENT_INPUT_SHOWN} event, it could be shown again now.
@@ -1556,7 +1491,7 @@ public final class AutofillManager {
         public static final int EVENT_INPUT_HIDDEN = 2;
 
         /**
-         * The autofill input UI affordance associated with the view isn't shown because
+         * The auto-fill input UI affordance associated with the view won't be shown because
          * autofill is not available.
          *
          * <p>If the view provides its own auto-complete UI affordance but was not displaying it

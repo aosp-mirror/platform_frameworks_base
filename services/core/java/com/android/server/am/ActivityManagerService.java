@@ -13110,6 +13110,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 return;
             }
         }
+
         // We are now ready to launch the assist activity.
         IResultReceiver sendReceiver = null;
         Bundle sendBundle = null;
@@ -13139,24 +13140,17 @@ public class ActivityManagerService extends IActivityManager.Stub
             return;
         }
 
-        final long ident = Binder.clearCallingIdentity();
+        long ident = Binder.clearCallingIdentity();
         try {
-            if (TextUtils.equals(pae.intent.getAction(),
-                    android.service.voice.VoiceInteractionService.SERVICE_INTERFACE)) {
-                pae.intent.putExtras(pae.extras);
-                mContext.startServiceAsUser(pae.intent, new UserHandle(pae.userHandle));
-            } else {
-                pae.intent.replaceExtras(pae.extras);
-                pae.intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                        | Intent.FLAG_ACTIVITY_SINGLE_TOP
-                        | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                closeSystemDialogs("assist");
-
-                try {
-                    mContext.startActivityAsUser(pae.intent, new UserHandle(pae.userHandle));
-                } catch (ActivityNotFoundException e) {
-                    Slog.w(TAG, "No activity to handle assist action.", e);
-                }
+            pae.intent.replaceExtras(pae.extras);
+            pae.intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                    | Intent.FLAG_ACTIVITY_SINGLE_TOP
+                    | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            closeSystemDialogs("assist");
+            try {
+                mContext.startActivityAsUser(pae.intent, new UserHandle(pae.userHandle));
+            } catch (ActivityNotFoundException e) {
+                Slog.w(TAG, "No activity to handle assist action.", e);
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
