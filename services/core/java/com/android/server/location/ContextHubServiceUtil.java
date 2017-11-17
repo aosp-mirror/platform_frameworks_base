@@ -17,9 +17,12 @@
 package com.android.server.location;
 
 import android.hardware.contexthub.V1_0.ContextHub;
+import android.hardware.contexthub.V1_0.ContextHubMsg;
+import android.hardware.contexthub.V1_0.HostEndPoint;
 import android.hardware.contexthub.V1_0.HubAppInfo;
 import android.hardware.location.ContextHubInfo;
 import android.hardware.location.NanoAppBinary;
+import android.hardware.location.NanoAppMessage;
 import android.hardware.location.NanoAppState;
 import android.util.Log;
 
@@ -127,5 +130,39 @@ import java.util.ArrayList;
         }
 
         return nanoAppStateList;
+    }
+
+    /**
+     * Creates a HIDL ContextHubMsg object to send to a nanoapp.
+     *
+     * @param hostEndPoint the ID of the client sending the message
+     * @param message      the client-facing NanoAppMessage object describing the message
+     * @return the HIDL ContextHubMsg object
+     */
+    /* package */
+    static ContextHubMsg createHidlContextHubMessage(short hostEndPoint, NanoAppMessage message) {
+        ContextHubMsg hidlMessage = new ContextHubMsg();
+
+        hidlMessage.appName = message.getNanoAppId();
+        hidlMessage.hostEndPoint = hostEndPoint;
+        hidlMessage.msgType = message.getMessageType();
+        copyToByteArrayList(message.getMessageBody(), hidlMessage.msg);
+
+        return hidlMessage;
+    }
+
+    /**
+     * Creates a client-facing NanoAppMessage object to send to a client.
+     *
+     * @param message the HIDL ContextHubMsg object from a nanoapp
+     * @return the NanoAppMessage object
+     */
+    /* package */
+    static NanoAppMessage createNanoAppMessage(ContextHubMsg message) {
+        byte[] messageArray = createPrimitiveByteArray(message.msg);
+
+        return NanoAppMessage.createMessageFromNanoApp(
+                message.appName, message.msgType, messageArray,
+                message.hostEndPoint == HostEndPoint.BROADCAST);
     }
 }
