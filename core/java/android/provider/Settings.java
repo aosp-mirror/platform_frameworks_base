@@ -9854,6 +9854,27 @@ public final class Settings {
         public static final String WAIT_FOR_DEBUGGER = "wait_for_debugger";
 
         /**
+         * Allow GPU debug layers?
+         * 0 = no
+         * 1 = yes
+         * @hide
+         */
+        public static final String ENABLE_GPU_DEBUG_LAYERS = "enable_gpu_debug_layers";
+
+        /**
+         * App allowed to load GPU debug layers
+         * @hide
+         */
+        public static final String GPU_DEBUG_APP = "gpu_debug_app";
+
+        /**
+         * Ordered GPU debug layer list
+         * i.e. <layer1>:<layer2>:...:<layerN>
+         * @hide
+         */
+        public static final String GPU_DEBUG_LAYERS = "gpu_debug_layers";
+
+        /**
          * Control whether the process CPU usage meter should be shown.
          *
          * @deprecated This functionality is no longer available as of

@@ -305,6 +305,9 @@ message GlobalSettingsProto {
     optional SettingProto preferred_network_mode = 226;
     optional SettingProto debug_app = 227;
     optional SettingProto wait_for_debugger = 228;
+    optional SettingProto enable_gpu_debug_layers = 342;
+    optional SettingProto gpu_debug_app = 343;
+    optional SettingProto gpu_debug_layers = 344;
     optional SettingProto low_power_mode = 229;
     optional SettingProto low_power_mode_trigger_level = 230;
     optional SettingProto always_finish_activities = 231;
@@ -384,7 +387,7 @@ message GlobalSettingsProto {
     optional SettingProto enable_deletion_helper_no_threshold_toggle = 340;
     optional SettingProto notification_snooze_options = 341;
 
-    // Next tag = 342;
+    // Next tag = 345;
 }
 
 message SecureSettingsProto {

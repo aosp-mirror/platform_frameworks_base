@@ -5380,7 +5380,7 @@ public final class ActivityThread {
             }
         }
 
-        GraphicsEnvironment.chooseDriver(context);
+        GraphicsEnvironment.getInstance().setup(context);
         Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
     }
 

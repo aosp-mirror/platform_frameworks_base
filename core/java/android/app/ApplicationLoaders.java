@@ -17,9 +17,12 @@
 package android.app;
 
 import android.os.Build;
+import android.os.GraphicsEnvironment;
 import android.os.Trace;
 import android.util.ArrayMap;
+
 import com.android.internal.os.ClassLoaderFactory;
+
 import dalvik.system.PathClassLoader;
 
 /** @hide */
@@ -72,8 +75,9 @@ public class ApplicationLoaders {
 
                 Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
 
-                Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "setupVulkanLayerPath");
-                setupVulkanLayerPath(classloader, librarySearchPath);
+                Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "setLayerPaths");
+                GraphicsEnvironment.getInstance().setLayerPaths(
+                        classloader, librarySearchPath, libraryPermittedPath);
                 Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
 
                 mLoaders.put(cacheKey, classloader);
@@ -104,8 +108,6 @@ public class ApplicationLoaders {
         return getClassLoader(packagePath, Build.VERSION.SDK_INT, false, libsPath, null, null,
                               cacheKey, null /* classLoaderName */);
     }
-
-    private static native void setupVulkanLayerPath(ClassLoader classLoader, String librarySearchPath);
 
     /**
      * Adds a new path the classpath of the given loader.
