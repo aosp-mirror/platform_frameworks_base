@@ -573,8 +573,22 @@ public class ArrayAdapter<T> extends BaseAdapter implements Filterable, ThemedSp
                     final T value = values.get(i);
                     final String valueText = value.toString().toLowerCase();
 
+                    if (valueText.startsWith(prefixString) || valueText.contains(prefixString)) {
+                        newValues.add(value);
+                    } else {
+                        final String[] words = valueText.split(" ");
+                        final int wordCount = words.length;
+                        // Start at index 0, in case valueText starts with space(s)
+                        for (int k = 0; k < wordCount; k++) {
+                            if (words[k].startsWith(prefixString) || words[k].contains(prefixString)) {
+                                newValues.add(value);
+                                break;
+                            }
+                        }
+                    }
+                    
                     // First match against the whole, non-splitted value
-                    if (valueText.startsWith(prefixString)) {
+                    /*if (valueText.startsWith(prefixString)) {
                         newValues.add(value);
                     } else {
                         final String[] words = valueText.split(" ");
@@ -584,7 +598,7 @@ public class ArrayAdapter<T> extends BaseAdapter implements Filterable, ThemedSp
                                 break;
                             }
                         }
-                    }
+                    }*/
                 }
 
                 results.values = newValues;
