@@ -319,29 +319,36 @@ public class ActivityManagerWrapper {
         mBackgroundExecutor.submit(new Runnable() {
             @Override
             public void run() {
+                boolean result = false;
                 try {
-                    ActivityManager.getService().startActivityFromRecents(taskKey.id,
-                            finalOptions == null ? null : finalOptions.toBundle());
-                    if (resultCallback != null) {
-                        resultCallbackHandler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                resultCallback.accept(true);
-                            }
-                        });
-                    }
+                    result = startActivityFromRecents(taskKey.id, finalOptions);
                 } catch (Exception e) {
-                    if (resultCallback != null) {
-                        resultCallbackHandler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                resultCallback.accept(false);
-                            }
-                        });
-                    }
+                    // Fall through
+                }
+                final boolean finalResult = result;
+                if (resultCallback != null) {
+                    resultCallbackHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            resultCallback.accept(finalResult);
+                        }
+                    });
                 }
             }
         });
+    }
+
+    /**
+     * Starts a task from Recents synchronously.
+     */
+    public boolean startActivityFromRecents(int taskId, ActivityOptions options) {
+        try {
+            Bundle optsBundle = options == null ? null : options.toBundle();
+            ActivityManager.getService().startActivityFromRecents(taskId, optsBundle);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     /**

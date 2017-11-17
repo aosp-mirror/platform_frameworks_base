@@ -19,7 +19,14 @@ package com.android.systemui.shared.system;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import android.graphics.Rect;
+import android.os.Handler;
+import android.os.IRemoteCallback;
+import android.os.RemoteException;
+import android.util.Log;
 import android.view.WindowManagerGlobal;
+
+import com.android.systemui.shared.recents.view.AppTransitionAnimationSpecsFuture;
+import com.android.systemui.shared.recents.view.RecentsTransition;
 
 public class WindowManagerWrapper {
 
@@ -38,8 +45,24 @@ public class WindowManagerWrapper {
         try {
             WindowManagerGlobal.getWindowManagerService().getStableInsets(DEFAULT_DISPLAY,
                     outStableInsets);
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to get stable insets", e);
+        }
+    }
+
+    /**
+     * Overrides a pending app transition.
+     */
+    public void overridePendingAppTransitionMultiThumbFuture(
+            AppTransitionAnimationSpecsFuture animationSpecFuture,
+            Runnable animStartedCallback, Handler animStartedCallbackHandler, boolean scaleUp) {
+        try {
+            WindowManagerGlobal.getWindowManagerService()
+                    .overridePendingAppTransitionMultiThumbFuture(animationSpecFuture.getFuture(),
+                            RecentsTransition.wrapStartedListener(animStartedCallbackHandler,
+                                    animStartedCallback), scaleUp);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Failed to override pending app transition (multi-thumbnail future): ", e);
         }
     }
 }

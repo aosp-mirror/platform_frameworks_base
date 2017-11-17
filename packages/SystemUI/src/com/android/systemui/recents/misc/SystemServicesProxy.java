@@ -21,12 +21,10 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
-import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 
-import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManager.StackInfo;
 import android.app.ActivityOptions;
@@ -49,9 +47,6 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import android.os.Handler;
-import android.os.IRemoteCallback;
-import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
@@ -63,7 +58,6 @@ import android.service.dreams.IDreamManager;
 import android.util.Log;
 import android.util.MutableBoolean;
 import android.view.Display;
-import android.view.IAppTransitionAnimationSpecsFuture;
 import android.view.IDockedStackListener;
 import android.view.IWindowManager;
 import android.view.WindowManager;
@@ -78,12 +72,9 @@ import com.android.systemui.R;
 import com.android.systemui.UiOffloadThread;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsImpl;
-import com.android.systemui.shared.recents.model.Task;
-import com.android.systemui.shared.system.TaskStackChangeListeners;
 import com.android.systemui.statusbar.policy.UserInfoController;
 
 import java.util.List;
-import java.util.function.Consumer;
 
 /**
  * Acts as a shim around the real system services that we need to access data from, and provides
@@ -266,22 +257,6 @@ public class SystemServicesProxy {
      */
     public boolean isInSafeMode() {
         return mIsSafeMode;
-    }
-
-    /** Docks a task to the side of the screen and starts it. */
-    public boolean startTaskInDockedMode(int taskId, int createMode) {
-        if (mIam == null) return false;
-
-        try {
-            final ActivityOptions options = ActivityOptions.makeBasic();
-            options.setSplitScreenCreateMode(createMode);
-            options.setLaunchWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
-            mIam.startActivityFromRecents(taskId, options.toBundle());
-            return true;
-        } catch (Exception e) {
-            Log.e(TAG, "Failed to dock task: " + taskId + " with createMode: " + createMode, e);
-        }
-        return false;
     }
 
     /** Moves an already resumed task to the side of the screen to initiate split screen. */
@@ -537,16 +512,6 @@ public class SystemServicesProxy {
             mIwm.getStableInsets(Display.DEFAULT_DISPLAY, outStableInsets);
         } catch (Exception e) {
             e.printStackTrace();
-        }
-    }
-
-    public void overridePendingAppTransitionMultiThumbFuture(
-            IAppTransitionAnimationSpecsFuture future, IRemoteCallback animStartedListener,
-            boolean scaleUp) {
-        try {
-            mIwm.overridePendingAppTransitionMultiThumbFuture(future, animStartedListener, scaleUp);
-        } catch (RemoteException e) {
-            Log.w(TAG, "Failed to override transition: " + e);
         }
     }
 
