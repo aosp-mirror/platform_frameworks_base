@@ -68,6 +68,7 @@ import android.text.style.TextAppearanceSpan;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.SparseArray;
+import android.util.proto.ProtoOutputStream;
 import android.view.Gravity;
 import android.view.NotificationHeaderView;
 import android.view.View;
@@ -2445,6 +2446,30 @@ public class Notification implements Parcelable
      */
     public static void addFieldsFromContext(ApplicationInfo ai, Notification notification) {
         notification.extras.putParcelable(EXTRA_BUILDER_APPLICATION_INFO, ai);
+    }
+
+    /**
+     * @hide
+     */
+    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+        long token = proto.start(fieldId);
+        proto.write(NotificationProto.CHANNEL_ID, getChannelId());
+        proto.write(NotificationProto.HAS_TICKER_TEXT, this.tickerText != null);
+        proto.write(NotificationProto.FLAGS, this.flags);
+        proto.write(NotificationProto.COLOR, this.color);
+        proto.write(NotificationProto.CATEGORY, this.category);
+        proto.write(NotificationProto.GROUP_KEY, this.mGroupKey);
+        proto.write(NotificationProto.SORT_KEY, this.mSortKey);
+        if (this.actions != null) {
+            proto.write(NotificationProto.ACTION_LENGTH, this.actions.length);
+        }
+        if (this.visibility >= VISIBILITY_SECRET && this.visibility <= VISIBILITY_PUBLIC) {
+            proto.write(NotificationProto.VISIBILITY, this.visibility);
+        }
+        if (publicVersion != null) {
+            publicVersion.writeToProto(proto, NotificationProto.PUBLIC_VERSION);
+        }
+        proto.end(token);
     }
 
     @Override
