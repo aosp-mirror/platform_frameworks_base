@@ -43,7 +43,6 @@ import android.os.Binder;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IPowerManager;
-import android.os.Message;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -52,7 +51,6 @@ import android.support.test.filters.SmallTest;
 import android.support.test.metricshelper.MetricsAsserts;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
-import android.testing.TestableLooper.MessageHandler;
 import android.testing.TestableLooper.RunWithLooper;
 import android.util.DisplayMetrics;
 import android.util.SparseArray;
@@ -65,6 +63,7 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.keyguard.KeyguardHostView.OnDismissAction;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.UiOffloadThread;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.recents.misc.SystemServicesProxy;
@@ -73,7 +72,9 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.NotificationData.Entry;
+import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
+import com.android.systemui.statusbar.NotificationLogger;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
@@ -107,6 +108,8 @@ public class StatusBarTest extends SysuiTestCase {
     NotificationPanelView mNotificationPanelView;
     ScrimController mScrimController;
     IStatusBarService mBarService;
+    NotificationListener mNotificationListener;
+    NotificationLogger mNotificationLogger;
     ArrayList<Entry> mNotificationList;
     FingerprintUnlockController mFingerprintUnlockController;
     private DisplayMetrics mDisplayMetrics = new DisplayMetrics();
@@ -143,12 +146,16 @@ public class StatusBarTest extends SysuiTestCase {
                 new Handler(handlerThread.getLooper()));
         when(powerManagerService.isInteractive()).thenReturn(true);
         mBarService = mock(IStatusBarService.class);
+        mNotificationListener = mock(NotificationListener.class);
+        mNotificationLogger = new NotificationLogger(mNotificationListener, mDependency.get(
+                UiOffloadThread.class));
 
         mDependency.injectTestDependency(MetricsLogger.class, mMetricsLogger);
         mStatusBar = new TestableStatusBar(mStatusBarKeyguardViewManager, mUnlockMethodCache,
                 mKeyguardIndicationController, mStackScroller, mHeadsUpManager,
                 mNotificationData, mPowerManager, mSystemServicesProxy, mNotificationPanelView,
-                mBarService, mScrimController, mFingerprintUnlockController);
+                mBarService, mNotificationListener, mNotificationLogger, mScrimController,
+                mFingerprintUnlockController);
         mStatusBar.mContext = mContext;
         mStatusBar.mComponents = mContext.getComponents();
         doAnswer(invocation -> {
@@ -163,15 +170,14 @@ public class StatusBarTest extends SysuiTestCase {
             return null;
         }).when(mStatusBarKeyguardViewManager).addAfterKeyguardGoneRunnable(any());
 
+        mNotificationLogger.setUpWithPresenter(mStatusBar, mStackScroller);
+
         when(mStackScroller.getActivatedChild()).thenReturn(null);
-        TestableLooper.get(this).setMessageHandler(new MessageHandler() {
-            @Override
-            public boolean onMessageHandled(Message m) {
-                if (m.getCallback() == mStatusBar.mVisibilityReporter) {
-                    return false;
-                }
-                return true;
+        TestableLooper.get(this).setMessageHandler(m -> {
+            if (m.getCallback() == mStatusBar.mNotificationLogger.getVisibilityReporter()) {
+                return false;
             }
+            return true;
         });
     }
 
@@ -560,7 +566,8 @@ public class StatusBarTest extends SysuiTestCase {
                 UnlockMethodCache unlock, KeyguardIndicationController key,
                 NotificationStackScrollLayout stack, HeadsUpManager hum, NotificationData nd,
                 PowerManager pm, SystemServicesProxy ssp, NotificationPanelView panelView,
-                IStatusBarService barService, ScrimController scrimController,
+                IStatusBarService barService, NotificationListener notificationListener,
+                NotificationLogger notificationLogger, ScrimController scrimController,
                 FingerprintUnlockController fingerprintUnlockController) {
             mStatusBarKeyguardViewManager = man;
             mUnlockMethodCache = unlock;
@@ -573,6 +580,8 @@ public class StatusBarTest extends SysuiTestCase {
             mSystemServicesProxy = ssp;
             mNotificationPanel = panelView;
             mBarService = barService;
+            mNotificationListener = notificationListener;
+            mNotificationLogger = notificationLogger;
             mWakefulnessLifecycle = createAwakeWakefulnessLifecycle();
             mScrimController = scrimController;
             mFingerprintUnlockController = fingerprintUnlockController;

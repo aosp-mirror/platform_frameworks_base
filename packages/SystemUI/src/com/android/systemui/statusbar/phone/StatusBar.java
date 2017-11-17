@@ -136,7 +136,6 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.statusbar.IStatusBarService;
-import com.android.internal.statusbar.NotificationVisibility;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.util.NotificationMessagingUtil;
 import com.android.internal.widget.LockPatternUtils;
@@ -203,6 +202,7 @@ import com.android.systemui.statusbar.NotificationGutsManager;
 import com.android.systemui.statusbar.NotificationInfo;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
+import com.android.systemui.statusbar.NotificationLogger;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
@@ -236,8 +236,6 @@ import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
-import com.android.systemui.statusbar.stack.NotificationStackScrollLayout
-        .OnChildLocationsChangedListener;
 import com.android.systemui.util.NotificationChannels;
 import com.android.systemui.util.leak.LeakDetector;
 import com.android.systemui.volume.VolumeComponent;
@@ -247,7 +245,6 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -316,9 +313,6 @@ public class StatusBar extends SystemUI implements DemoMode,
     private static final int STATUS_OR_NAV_TRANSIENT =
             View.STATUS_BAR_TRANSIENT | View.NAVIGATION_BAR_TRANSIENT;
     private static final long AUTOHIDE_TIMEOUT_MS = 2250;
-
-    /** The minimum delay in ms between reports of notification visibility. */
-    private static final int VISIBILITY_REPORT_MIN_DELAY_MS = 500;
 
     /**
      * The delay to reset the hint text when the hint animation is finished running.
@@ -431,6 +425,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private final ArrayList<Runnable> mPostCollapseRunnables = new ArrayList<>();
 
     private NotificationGutsManager mGutsManager;
+    protected NotificationLogger mNotificationLogger;
 
     // for disabling the status bar
     private int mDisabled1 = 0;
@@ -531,10 +526,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     protected NotificationLockscreenUserManager mLockscreenUserManager;
     protected NotificationRemoteInputManager mRemoteInputManager;
 
-    /** Keys of notifications currently visible to the user. */
-    private final ArraySet<NotificationVisibility> mCurrentlyVisibleNotifications =
-            new ArraySet<>();
-    private long mLastVisibilityReportUptimeMs;
+
 
     private Runnable mLaunchTransitionEndRunnable;
     protected boolean mLaunchTransitionFadingAway;
@@ -556,83 +548,6 @@ public class StatusBar extends SystemUI implements DemoMode,
     private boolean mIsOccluded;
     private boolean mWereIconsJustHidden;
     private boolean mBouncerWasShowingWhenHidden;
-
-    private final OnChildLocationsChangedListener mNotificationLocationsChangedListener =
-            new OnChildLocationsChangedListener() {
-                @Override
-                public void onChildLocationsChanged(
-                        NotificationStackScrollLayout stackScrollLayout) {
-                    if (mHandler.hasCallbacks(mVisibilityReporter)) {
-                        // Visibilities will be reported when the existing
-                        // callback is executed.
-                        return;
-                    }
-                    // Calculate when we're allowed to run the visibility
-                    // reporter. Note that this timestamp might already have
-                    // passed. That's OK, the callback will just be executed
-                    // ASAP.
-                    long nextReportUptimeMs =
-                            mLastVisibilityReportUptimeMs + VISIBILITY_REPORT_MIN_DELAY_MS;
-                    mHandler.postAtTime(mVisibilityReporter, nextReportUptimeMs);
-                }
-            };
-
-    // Tracks notifications currently visible in mNotificationStackScroller and
-    // emits visibility events via NoMan on changes.
-    protected final Runnable mVisibilityReporter = new Runnable() {
-        private final ArraySet<NotificationVisibility> mTmpNewlyVisibleNotifications =
-                new ArraySet<>();
-        private final ArraySet<NotificationVisibility> mTmpCurrentlyVisibleNotifications =
-                new ArraySet<>();
-        private final ArraySet<NotificationVisibility> mTmpNoLongerVisibleNotifications =
-                new ArraySet<>();
-
-        @Override
-        public void run() {
-            mLastVisibilityReportUptimeMs = SystemClock.uptimeMillis();
-
-            // 1. Loop over mNotificationData entries:
-            //   A. Keep list of visible notifications.
-            //   B. Keep list of previously hidden, now visible notifications.
-            // 2. Compute no-longer visible notifications by removing currently
-            //    visible notifications from the set of previously visible
-            //    notifications.
-            // 3. Report newly visible and no-longer visible notifications.
-            // 4. Keep currently visible notifications for next report.
-            ArrayList<Entry> activeNotifications = mNotificationData.getActiveNotifications();
-            int N = activeNotifications.size();
-            for (int i = 0; i < N; i++) {
-                Entry entry = activeNotifications.get(i);
-                String key = entry.notification.getKey();
-                boolean isVisible = mStackScroller.isInVisibleLocation(entry.row);
-                NotificationVisibility visObj = NotificationVisibility.obtain(key, i, isVisible);
-                boolean previouslyVisible = mCurrentlyVisibleNotifications.contains(visObj);
-                if (isVisible) {
-                    // Build new set of visible notifications.
-                    mTmpCurrentlyVisibleNotifications.add(visObj);
-                    if (!previouslyVisible) {
-                        mTmpNewlyVisibleNotifications.add(visObj);
-                    }
-                } else {
-                    // release object
-                    visObj.recycle();
-                }
-            }
-            mTmpNoLongerVisibleNotifications.addAll(mCurrentlyVisibleNotifications);
-            mTmpNoLongerVisibleNotifications.removeAll(mTmpCurrentlyVisibleNotifications);
-
-            logNotificationVisibilityChanges(
-                    mTmpNewlyVisibleNotifications, mTmpNoLongerVisibleNotifications);
-
-            recycleAllVisibilityObjects(mCurrentlyVisibleNotifications);
-            mCurrentlyVisibleNotifications.addAll(mTmpCurrentlyVisibleNotifications);
-
-            recycleAllVisibilityObjects(mTmpNoLongerVisibleNotifications);
-            mTmpCurrentlyVisibleNotifications.clear();
-            mTmpNewlyVisibleNotifications.clear();
-            mTmpNoLongerVisibleNotifications.clear();
-        }
-    };
 
     // Notifies StatusBarKeyguardViewManager every time the keyguard transition is over,
     // this animation is tied to the scrim for historic reasons.
@@ -680,14 +595,6 @@ public class StatusBar extends SystemUI implements DemoMode,
     private ScreenLifecycle mScreenLifecycle;
     @VisibleForTesting WakefulnessLifecycle mWakefulnessLifecycle;
 
-    private void recycleAllVisibilityObjects(ArraySet<NotificationVisibility> array) {
-        final int N = array.size();
-        for (int i = 0 ; i < N; i++) {
-            array.valueAt(i).recycle();
-        }
-        array.clear();
-    }
-
     private final View.OnClickListener mGoToLockedShadeListener = v -> {
         if (mState == StatusBarState.KEYGUARD) {
             wakeUpIfDozing(SystemClock.uptimeMillis(), v);
@@ -715,6 +622,8 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     @Override
     public void start() {
+        mGroupManager = Dependency.get(NotificationGroupManager.class);
+        mNotificationLogger = Dependency.get(NotificationLogger.class);
         mRemoteInputManager = Dependency.get(NotificationRemoteInputManager.class);
         mNetworkController = Dependency.get(NetworkController.class);
         mUserSwitcherController = Dependency.get(UserSwitcherController.class);
@@ -809,8 +718,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
 
         // Set up the initial notification state.
-        mNotificationListener = new NotificationListener(this, mRemoteInputManager, mContext);
-        mNotificationListener.register();
+        mNotificationListener = Dependency.get(NotificationListener.class);
+        mNotificationListener.setUpWithPresenter(this);
 
         if (DEBUG) {
             Log.d(TAG, String.format(
@@ -895,6 +804,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                         // if we're here we're dead
                     }
                 });
+        mNotificationLogger.setUpWithPresenter(this, mStackScroller);
         mNotificationPanel.setStatusBar(this);
         mNotificationPanel.setGroupManager(mGroupManager);
         mAboveShelfObserver = new AboveShelfObserver(mStackScroller);
@@ -3617,9 +3527,9 @@ public class StatusBar extends SystemUI implements DemoMode,
     protected void handleVisibleToUserChanged(boolean visibleToUser) {
         if (visibleToUser) {
             handleVisibleToUserChangedImpl(visibleToUser);
-            startNotificationLogging();
+            mNotificationLogger.startNotificationLogging();
         } else {
-            stopNotificationLogging();
+            mNotificationLogger.stopNotificationLogging();
             handleVisibleToUserChangedImpl(visibleToUser);
         }
     }
@@ -3670,60 +3580,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
 
     }
-
-    private void stopNotificationLogging() {
-        // Report all notifications as invisible and turn down the
-        // reporter.
-        if (!mCurrentlyVisibleNotifications.isEmpty()) {
-            logNotificationVisibilityChanges(
-                    Collections.emptyList(), mCurrentlyVisibleNotifications);
-            recycleAllVisibilityObjects(mCurrentlyVisibleNotifications);
-        }
-        mHandler.removeCallbacks(mVisibilityReporter);
-        mStackScroller.setChildLocationsChangedListener(null);
-    }
-
-    private void startNotificationLogging() {
-        mStackScroller.setChildLocationsChangedListener(mNotificationLocationsChangedListener);
-        // Some transitions like mVisibleToUser=false -> mVisibleToUser=true don't
-        // cause the scroller to emit child location events. Hence generate
-        // one ourselves to guarantee that we're reporting visible
-        // notifications.
-        // (Note that in cases where the scroller does emit events, this
-        // additional event doesn't break anything.)
-        mNotificationLocationsChangedListener.onChildLocationsChanged(mStackScroller);
-    }
-
-    private void logNotificationVisibilityChanges(
-            Collection<NotificationVisibility> newlyVisible,
-            Collection<NotificationVisibility> noLongerVisible) {
-        if (newlyVisible.isEmpty() && noLongerVisible.isEmpty()) {
-            return;
-        }
-        NotificationVisibility[] newlyVisibleAr =
-                newlyVisible.toArray(new NotificationVisibility[newlyVisible.size()]);
-        NotificationVisibility[] noLongerVisibleAr =
-                noLongerVisible.toArray(new NotificationVisibility[noLongerVisible.size()]);
-        mUiOffloadThread.submit(() -> {
-            try {
-                mBarService.onNotificationVisibilityChanged(newlyVisibleAr, noLongerVisibleAr);
-            } catch (RemoteException e) {
-                // Ignore.
-            }
-
-            final int N = newlyVisible.size();
-            if (N > 0) {
-                String[] newlyVisibleKeyAr = new String[N];
-                for (int i = 0; i < N; i++) {
-                    newlyVisibleKeyAr[i] = newlyVisibleAr[i].key;
-                }
-
-                setNotificationsShown(newlyVisibleKeyAr);
-            }
-        });
-    }
-
-    // State logging
 
     private void logStateToEventlog() {
         boolean isShowing = mStatusBarKeyguardViewManager.isShowing();
@@ -5394,7 +5250,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     protected NotificationData mNotificationData;
     protected NotificationStackScrollLayout mStackScroller;
 
-    protected final NotificationGroupManager mGroupManager = new NotificationGroupManager();
+    protected NotificationGroupManager mGroupManager;
 
 
     // for heads up notifications
@@ -5562,12 +5418,8 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     protected void setNotificationShown(StatusBarNotification n) {
-        setNotificationsShown(new String[]{n.getKey()});
-    }
-
-    protected void setNotificationsShown(String[] keys) {
         try {
-            mNotificationListener.setNotificationsShown(keys);
+            mNotificationListener.setNotificationsShown(new String[]{n.getKey()});
         } catch (RuntimeException e) {
             Log.d(TAG, "failed setNotificationsShown: ", e);
         }
