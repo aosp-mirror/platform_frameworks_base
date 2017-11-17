@@ -218,6 +218,7 @@ class ValueBodyPrinter : public ConstValueVisitor {
       if (attr.id) {
         printer_->Print(attr.id.value().to_string());
       }
+      printer_->Println();
     }
   }
 
