@@ -26,9 +26,6 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
 
-import java.util.List;
-import java.util.Map;
-
 class TunerCallback implements ITunerCallback {
     private static final String TAG = "BroadcastRadioService.TunerCallback";
 
@@ -121,11 +118,6 @@ class TunerCallback implements ITunerCallback {
     @Override
     public void onProgramListChanged() {
         dispatch(() -> mClientCallback.onProgramListChanged());
-    }
-
-    @Override
-    public void onParametersUpdated(Map parameters) {
-        dispatch(() -> mClientCallback.onParametersUpdated(parameters));
     }
 
     @Override

@@ -22,8 +22,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 
-import java.util.Map;
-
 /**
  * Implements the ITunerCallback interface by forwarding calls to RadioTuner.Callback.
  */
@@ -95,10 +93,5 @@ class TunerCallbackAdapter extends ITunerCallback.Stub {
     @Override
     public void onProgramListChanged() {
         mHandler.post(() -> mCallback.onProgramListChanged());
-    }
-
-    @Override
-    public void onParametersUpdated(Map parameters) {
-        mHandler.post(() -> mCallback.onParametersUpdated(parameters));
     }
 }
