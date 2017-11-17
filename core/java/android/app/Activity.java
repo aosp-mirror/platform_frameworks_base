@@ -4373,7 +4373,7 @@ public class Activity extends ContextThemeWrapper
             throw new IllegalArgumentException("requestCode should be >= 0");
         }
         if (mHasCurrentPermissionsRequest) {
-            Log.w(TAG, "Can reqeust only one set of permissions at a time");
+            Log.w(TAG, "Can request only one set of permissions at a time");
             // Dispatch the callback with empty arrays which means a cancellation.
             onRequestPermissionsResult(requestCode, new String[0], new int[0]);
             return;
