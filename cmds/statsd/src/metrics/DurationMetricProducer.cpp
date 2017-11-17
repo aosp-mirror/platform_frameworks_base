@@ -163,6 +163,14 @@ std::unique_ptr<std::vector<uint8_t>> DurationMetricProducer::onDumpReport() {
             ALOGW("Dimension key %s not found?!?! skip...", hashableKey.c_str());
             continue;
         }
+
+        // If there is no duration bucket info for this key, don't include it in the report.
+        // For example, duration started, but condition is never turned to true.
+        // TODO: Only add the key to the map when we add duration buckets info for it.
+        if (pair.second.size() == 0) {
+            continue;
+        }
+
         long long wrapperToken =
                 mProto->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_DATA);
 
@@ -172,7 +180,7 @@ std::unique_ptr<std::vector<uint8_t>> DurationMetricProducer::onDumpReport() {
                     mProto->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_DIMENSION);
             mProto->write(FIELD_TYPE_INT32 | FIELD_ID_KEY, kv.key());
             if (kv.has_value_str()) {
-                mProto->write(FIELD_TYPE_INT32 | FIELD_ID_VALUE_STR, kv.value_str());
+                mProto->write(FIELD_TYPE_STRING | FIELD_ID_VALUE_STR, kv.value_str());
             } else if (kv.has_value_int()) {
                 mProto->write(FIELD_TYPE_INT64 | FIELD_ID_VALUE_INT, kv.value_int());
             } else if (kv.has_value_bool()) {
@@ -203,7 +211,6 @@ std::unique_ptr<std::vector<uint8_t>> DurationMetricProducer::onDumpReport() {
     mProto->end(mProtoToken);
     mProto->write(FIELD_TYPE_INT64 | FIELD_ID_END_REPORT_NANOS,
                   (long long)mCurrentBucketStartTimeNs);
-
     std::unique_ptr<std::vector<uint8_t>> buffer = serializeProto();
     startNewProtoOutputStream(endTime);
     // TODO: Properly clear the old buckets.
