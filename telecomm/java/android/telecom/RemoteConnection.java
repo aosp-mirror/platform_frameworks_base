@@ -1065,7 +1065,7 @@ public final class RemoteConnection {
      *
      * @param state The audio state of this {@code RemoteConnection}.
      * @hide
-     * @deprecated Use {@link #setCallAudioState(CallAudioState) instead.
+     * @deprecated Use {@link #setCallAudioState(CallAudioState)} instead.
      */
     @SystemApi
     @Deprecated
