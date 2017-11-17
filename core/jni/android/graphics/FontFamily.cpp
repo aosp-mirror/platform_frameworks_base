@@ -44,10 +44,10 @@ namespace android {
 
 struct NativeFamilyBuilder {
     NativeFamilyBuilder(uint32_t langId, int variant)
-        : langId(langId), variant(static_cast<minikin::FontVariant>(variant)),
+        : langId(langId), variant(static_cast<minikin::FontFamily::Variant>(variant)),
           allowUnsupportedFont(false) {}
     uint32_t langId;
-    minikin::FontVariant variant;
+    minikin::FontFamily::Variant variant;
     bool allowUnsupportedFont;
     std::vector<minikin::Font> fonts;
     std::vector<minikin::FontVariation> axes;
@@ -141,7 +141,7 @@ static bool addSkTypeface(NativeFamilyBuilder* builder, sk_sp<SkData>&& data, in
     }
 
     builder->fonts.push_back(minikin::Font(minikinFont,
-            minikin::FontStyle(weight, static_cast<minikin::FontSlant>(italic))));
+            minikin::FontStyle(weight, static_cast<minikin::FontStyle::Slant>(italic))));
     builder->axes.clear();
     return true;
 }
