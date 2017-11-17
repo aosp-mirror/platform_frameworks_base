@@ -110,6 +110,12 @@ public:
     void end(long long token);
 
     /**
+     * Returns how many bytes are buffered in ProtoOutputStream.
+     * Notice, this is not the actual(compact) size of the output data.
+     */
+    size_t bytesWritten();
+
+    /**
      * Flushes the protobuf data out to given fd. When the following functions are called,
      * it is not able to write to ProtoOutputStream any more since the data is compact.
      */
