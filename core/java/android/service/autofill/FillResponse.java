@@ -180,8 +180,12 @@ public final class FillResponse implements Parcelable {
         private boolean mDestroyed;
 
         /**
-         * Requires a fill response authentication before autofilling the screen with
-         * any data set in this response.
+         * Triggers a custom UI before before autofilling the screen with any data set in this
+         * response.
+         *
+         * <p><b>Note:</b> Although the name of this method suggests that it should be used just for
+         * authentication flow, it can be used for other advanced flows; see {@link AutofillService}
+         * for examples.
          *
          * <p>This is typically useful when a user interaction is required to unlock their
          * data vault if you encrypt the data set labels and data set data. It is recommended
