@@ -359,6 +359,8 @@ public class AssistStructure implements Parcelable {
             if (DEBUG_PARCEL) Log.d(TAG, "Finished reading: at " + mCurParcel.dataPosition()
                     + ", avail=" + mCurParcel.dataAvail() + ", windows=" + mNumReadWindows
                     + ", views=" + mNumReadViews);
+            mCurParcel.recycle();
+            mCurParcel = null; // Parcel cannot be used after recycled.
         }
 
         Parcel readParcel(int validateToken, int level) {
@@ -396,20 +398,23 @@ public class AssistStructure implements Parcelable {
 
         private void fetchData() {
             Parcel data = Parcel.obtain();
-            data.writeInterfaceToken(DESCRIPTOR);
-            data.writeStrongBinder(mTransferToken);
-            if (DEBUG_PARCEL) Log.d(TAG, "Requesting data with token " + mTransferToken);
-            if (mCurParcel != null) {
-                mCurParcel.recycle();
-            }
-            mCurParcel = Parcel.obtain();
             try {
-                mChannel.transact(TRANSACTION_XFER, data, mCurParcel, 0);
-            } catch (RemoteException e) {
-                Log.w(TAG, "Failure reading AssistStructure data", e);
-                throw new IllegalStateException("Failure reading AssistStructure data: " + e);
+                data.writeInterfaceToken(DESCRIPTOR);
+                data.writeStrongBinder(mTransferToken);
+                if (DEBUG_PARCEL) Log.d(TAG, "Requesting data with token " + mTransferToken);
+                if (mCurParcel != null) {
+                    mCurParcel.recycle();
+                }
+                mCurParcel = Parcel.obtain();
+                try {
+                    mChannel.transact(TRANSACTION_XFER, data, mCurParcel, 0);
+                } catch (RemoteException e) {
+                    Log.w(TAG, "Failure reading AssistStructure data", e);
+                    throw new IllegalStateException("Failure reading AssistStructure data: " + e);
+                }
+            } finally {
+                data.recycle();
             }
-            data.recycle();
             mNumReadWindows = mNumReadViews = 0;
         }
     }
