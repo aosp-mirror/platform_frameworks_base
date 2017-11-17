@@ -736,6 +736,11 @@ public class NotificationManagerService extends SystemService {
                 for (NotificationVisibility nv : newlyVisibleKeys) {
                     NotificationRecord r = mNotificationsByKey.get(nv.key);
                     if (r == null) continue;
+                    if (!r.isSeen()) {
+                        // Report to usage stats that notification was made visible
+                        if (DBG) Slog.d(TAG, "Marking notification as visible " + nv.key);
+                        reportSeen(r);
+                    }
                     r.setVisibility(true, nv.rank);
                     nv.recycle();
                 }
@@ -1643,6 +1648,14 @@ public class NotificationManagerService extends SystemService {
         return INotificationManager.Stub.asInterface(mService);
     }
 
+    protected void reportSeen(NotificationRecord r) {
+        final int userId = r.sbn.getUserId();
+        mAppUsageStats.reportEvent(r.sbn.getPackageName(),
+                userId == UserHandle.USER_ALL ? UserHandle.USER_SYSTEM
+                        : userId,
+                UsageEvents.Event.NOTIFICATION_SEEN);
+    }
+
     @VisibleForTesting
     NotificationManagerInternal getInternalService() {
         return mInternalService;
@@ -2269,10 +2282,7 @@ public class NotificationManagerService extends SystemService {
                             }
                             if (!r.isSeen()) {
                                 if (DBG) Slog.d(TAG, "Marking notification as seen " + keys[i]);
-                                mAppUsageStats.reportEvent(r.sbn.getPackageName(),
-                                        userId == UserHandle.USER_ALL ? UserHandle.USER_SYSTEM
-                                                : userId,
-                                        UsageEvents.Event.USER_INTERACTION);
+                                reportSeen(r);
                                 r.setSeen();
                             }
                         }

@@ -100,6 +100,12 @@ public final class UsageEvents implements Parcelable {
          */
         public static final int CHOOSER_ACTION = 9;
 
+        /**
+         * An event type denoting that a notification was viewed by the user.
+         * @hide
+         */
+        public static final int NOTIFICATION_SEEN = 10;
+
         /** @hide */
         public static final int FLAG_IS_PACKAGE_INSTANT_APP = 1 << 0;
 

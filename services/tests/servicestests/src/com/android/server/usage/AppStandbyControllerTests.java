@@ -17,6 +17,9 @@
 package com.android.server.usage;
 
 import static android.app.usage.AppStandby.*;
+import static android.app.usage.UsageEvents.Event.NOTIFICATION_SEEN;
+import static android.app.usage.UsageEvents.Event.USER_INTERACTION;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
@@ -247,12 +250,18 @@ public class AppStandbyControllerTests {
                         false));
     }
 
-    private void reportEvent(AppStandbyController controller, long elapsedTime) {
+    private void reportEvent(AppStandbyController controller, int eventType,
+            long elapsedTime) {
         // Back to ACTIVE on event
         UsageEvents.Event ev = new UsageEvents.Event();
         ev.mPackage = PACKAGE_1;
-        ev.mEventType = UsageEvents.Event.USER_INTERACTION;
+        ev.mEventType = eventType;
         controller.reportEvent(ev, elapsedTime, USER_ID);
+    }
+
+    private int getStandbyBucket(AppStandbyController controller) {
+        return controller.getAppStandbyBucket(PACKAGE_1, USER_ID, mInjector.mElapsedRealtime,
+                true);
     }
 
     @Test
@@ -261,7 +270,7 @@ public class AppStandbyControllerTests {
 
         assertTimeout(controller, 0, STANDBY_BUCKET_NEVER);
 
-        reportEvent(controller, 0);
+        reportEvent(controller, USER_INTERACTION, 0);
 
         // ACTIVE bucket
         assertTimeout(controller, 11 * HOUR_MS, STANDBY_BUCKET_ACTIVE);
@@ -278,7 +287,7 @@ public class AppStandbyControllerTests {
         // RARE bucket
         assertTimeout(controller, 9 * DAY_MS, STANDBY_BUCKET_RARE);
 
-        reportEvent(controller, 9 * DAY_MS);
+        reportEvent(controller, USER_INTERACTION, 9 * DAY_MS);
 
         assertTimeout(controller, 9 * DAY_MS, STANDBY_BUCKET_ACTIVE);
 
@@ -293,7 +302,7 @@ public class AppStandbyControllerTests {
 
         assertTimeout(controller, 0, STANDBY_BUCKET_NEVER);
 
-        reportEvent(controller, 0);
+        reportEvent(controller, USER_INTERACTION, 0);
 
         // ACTIVE bucket
         assertTimeout(controller, 11 * HOUR_MS, STANDBY_BUCKET_ACTIVE);
@@ -304,9 +313,7 @@ public class AppStandbyControllerTests {
         // RARE bucket, should fail because the screen wasn't ON.
         mInjector.mElapsedRealtime = 9 * DAY_MS;
         controller.checkIdleStates(USER_ID);
-        assertNotEquals(STANDBY_BUCKET_RARE,
-                controller.getAppStandbyBucket(PACKAGE_1, USER_ID, mInjector.mElapsedRealtime,
-                false));
+        assertNotEquals(STANDBY_BUCKET_RARE, getStandbyBucket(controller));
 
         mInjector.setDisplayOn(true);
         assertTimeout(controller, 18 * DAY_MS, STANDBY_BUCKET_RARE);
@@ -318,13 +325,28 @@ public class AppStandbyControllerTests {
         setChargingState(controller, false);
 
         controller.forceIdleState(PACKAGE_1, USER_ID, true);
-        assertEquals(STANDBY_BUCKET_RARE, controller.getAppStandbyBucket(PACKAGE_1, USER_ID, 0,
-                true));
+        assertEquals(STANDBY_BUCKET_RARE, getStandbyBucket(controller));
         assertTrue(controller.isAppIdleFiltered(PACKAGE_1, UID_1, USER_ID, 0));
 
         controller.forceIdleState(PACKAGE_1, USER_ID, false);
         assertEquals(STANDBY_BUCKET_ACTIVE, controller.getAppStandbyBucket(PACKAGE_1, USER_ID, 0,
                 true));
         assertFalse(controller.isAppIdleFiltered(PACKAGE_1, UID_1, USER_ID, 0));
+    }
+
+    @Test
+    public void testNotificationEvent() throws Exception {
+        AppStandbyController controller = setupController();
+        setChargingState(controller, false);
+
+        reportEvent(controller, USER_INTERACTION, 0);
+        assertEquals(STANDBY_BUCKET_ACTIVE, getStandbyBucket(controller));
+        mInjector.mElapsedRealtime = 1;
+        reportEvent(controller, NOTIFICATION_SEEN, mInjector.mElapsedRealtime);
+        assertEquals(STANDBY_BUCKET_ACTIVE, getStandbyBucket(controller));
+
+        controller.forceIdleState(PACKAGE_1, USER_ID, true);
+        reportEvent(controller, NOTIFICATION_SEEN, mInjector.mElapsedRealtime);
+        assertEquals(STANDBY_BUCKET_WORKING_SET, getStandbyBucket(controller));
     }
 }
