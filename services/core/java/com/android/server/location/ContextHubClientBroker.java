@@ -177,4 +177,18 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
             }
         }
     }
+
+    /**
+     * Handles a hub reset for this client.
+     */
+    /* package */ void onHubReset() {
+        if (mConnectionOpen.get()) {
+            try {
+                mCallbackInterface.onHubReset();
+            } catch (RemoteException e) {
+                Log.e(TAG, "RemoteException while calling onHubReset on client" +
+                        " (host endpoint ID = " + mHostEndPointId + ")", e);
+            }
+        }
+    }
 }

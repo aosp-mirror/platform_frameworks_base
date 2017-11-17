@@ -225,6 +225,8 @@ public class ContextHubService extends IContextHubService.Stub {
 
             @Override
             public void onHubReset() {
+                byte[] data = {TransactionResult.SUCCESS};
+                onMessageReceiptOldApi(MSG_HUB_RESET, contextHubId, OS_APP_INSTANCE, data);
             }
 
             @Override
@@ -634,8 +636,7 @@ public class ContextHubService extends IContextHubService.Stub {
             mTransactionManager.onHubReset();
             queryNanoAppsInternal(contextHubId);
 
-            byte[] data = {TransactionResult.SUCCESS};
-            onMessageReceiptOldApi(MSG_HUB_RESET, contextHubId, OS_APP_INSTANCE, data);
+            mClientManager.onHubReset(contextHubId);
         } else {
             Log.i(TAG, "Received unknown hub event (hub ID = " + contextHubId + ", type = "
                     + eventType + ")");

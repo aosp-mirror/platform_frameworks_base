@@ -27,6 +27,7 @@ import android.util.Log;
 
 import java.util.NoSuchElementException;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 
 /**
  * A class that manages registration/unregistration of clients and manages messages to/from clients.
@@ -148,6 +149,15 @@ import java.util.concurrent.ConcurrentHashMap;
     }
 
     /**
+     * Handles a hub reset.
+     *
+     * @param contextHubId the ID of the hub that has reset.
+     */
+    /* package */ void onHubReset(int contextHubId) {
+        forEachClientOfHub(contextHubId, client -> client.onHubReset());
+    }
+
+    /**
      * Creates a new ContextHubClientBroker object for a client and registers it with the client
      * manager.
      *
@@ -188,9 +198,19 @@ import java.util.concurrent.ConcurrentHashMap;
      * @param message      the message send by a nanoapp
      */
     private void broadcastMessage(int contextHubId, NanoAppMessage message) {
-        for (ContextHubClientBroker proxy : mHostEndPointIdToClientMap.values()) {
-            if (proxy.getAttachedContextHubId() == contextHubId) {
-                proxy.sendMessageToClient(message);
+        forEachClientOfHub(contextHubId, client -> client.sendMessageToClient(message));
+    }
+
+    /**
+     * Runs a command for each client that is attached to a hub with the given ID.
+     *
+     * @param contextHubId the ID of the hub
+     * @param callback     the command to invoke for the client
+     */
+    private void forEachClientOfHub(int contextHubId, Consumer<ContextHubClientBroker> callback) {
+        for (ContextHubClientBroker broker : mHostEndPointIdToClientMap.values()) {
+            if (broker.getAttachedContextHubId() == contextHubId) {
+                callback.accept(broker);
             }
         }
     }
