@@ -543,9 +543,7 @@ void StatsService::OnLogEvent(const LogEvent& event) {
 
 Status StatsService::getData(const String16& key, vector<uint8_t>* output) {
     IPCThreadState* ipc = IPCThreadState::self();
-    if (checkCallingPermission(String16(kPermissionDump),
-                               reinterpret_cast<int32_t*>(ipc->getCallingPid()),
-                               reinterpret_cast<int32_t*>(ipc->getCallingUid()))) {
+    if (checkCallingPermission(String16(kPermissionDump))) {
         // TODO: Implement this.
         return Status::ok();
     } else {
@@ -559,8 +557,7 @@ Status StatsService::addConfiguration(const String16& key,
                                       bool* success) {
     IPCThreadState* ipc = IPCThreadState::self();
     int32_t* uid = reinterpret_cast<int32_t*>(ipc->getCallingUid());
-    if (checkCallingPermission(String16(kPermissionDump),
-                               reinterpret_cast<int32_t*>(ipc->getCallingPid()), uid)) {
+    if (checkCallingPermission(String16(kPermissionDump))) {
         string keyString = string(String8(key).string());
         ConfigKey configKey(*uid, keyString);
         StatsdConfig cfg;
@@ -577,9 +574,7 @@ Status StatsService::addConfiguration(const String16& key,
 
 Status StatsService::removeConfiguration(const String16& key, bool* success) {
     IPCThreadState* ipc = IPCThreadState::self();
-    if (checkCallingPermission(String16(kPermissionDump),
-                               reinterpret_cast<int32_t*>(ipc->getCallingPid()),
-                               reinterpret_cast<int32_t*>(ipc->getCallingUid()))) {
+    if (checkCallingPermission(String16(kPermissionDump))) {
         // TODO: Implement this.
         return Status::ok();
     } else {
