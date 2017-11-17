@@ -64,9 +64,8 @@ TEST(ValueMetricProducerTest, TestNonDimensionalEvents) {
     vector<shared_ptr<LogEvent>> allData;
     allData.clear();
     shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucketStartTimeNs + 1);
-    auto list = event->GetAndroidLogEventList();
-    *list << 1;
-    *list << 11;
+    event->write(1);
+    event->write(11);
     event->init();
     allData.push_back(event);
 
@@ -89,9 +88,8 @@ TEST(ValueMetricProducerTest, TestNonDimensionalEvents) {
 
     allData.clear();
     event = make_shared<LogEvent>(tagId, bucket2StartTimeNs + 1);
-    list = event->GetAndroidLogEventList();
-    *list << 1;
-    *list << 22;
+    event->write(1);
+    event->write(22);
     event->init();
     allData.push_back(event);
     valueProducer.onDataPulled(allData);
@@ -110,9 +108,8 @@ TEST(ValueMetricProducerTest, TestNonDimensionalEvents) {
 
     allData.clear();
     event = make_shared<LogEvent>(tagId, bucket3StartTimeNs + 1);
-    list = event->GetAndroidLogEventList();
-    *list << 1;
-    *list << 33;
+    event->write(1);
+    event->write(33);
     event->init();
     allData.push_back(event);
     valueProducer.onDataPulled(allData);
@@ -159,9 +156,8 @@ TEST(ValueMetricProducerTest, TestEventsWithNonSlicedCondition) {
         int64_t bucket3StartTimeNs = bucketStartTimeNs + 2 * bucketSizeNs;
         data->clear();
         shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucketStartTimeNs + 10);
-        auto list = event->GetAndroidLogEventList();
-        *list << 1;
-        *list << 100;
+        event->write(1);
+        event->write(100);
         event->init();
         data->push_back(event);
         return true;
@@ -174,9 +170,8 @@ TEST(ValueMetricProducerTest, TestEventsWithNonSlicedCondition) {
         int64_t bucket3StartTimeNs = bucketStartTimeNs + 2 * bucketSizeNs;
         data->clear();
         shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucket2StartTimeNs + 10);
-        auto list = event->GetAndroidLogEventList();
-        *list << 1;
-        *list << 120;
+        event->write(1);
+        event->write(120);
         event->init();
         data->push_back(event);
         return true;
@@ -201,9 +196,8 @@ TEST(ValueMetricProducerTest, TestEventsWithNonSlicedCondition) {
     vector<shared_ptr<LogEvent>> allData;
     allData.clear();
     shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucket2StartTimeNs + 1);
-    auto list = event->GetAndroidLogEventList();
-    *list << 1;
-    *list << 110;
+    event->write(1);
+    event->write(110);
     event->init();
     allData.push_back(event);
     valueProducer.onDataPulled(allData);
@@ -253,14 +247,12 @@ TEST(ValueMetricProducerTest, TestPushedEventsWithoutCondition) {
                                       bucketStartTimeNs, pullerManager);
 
     shared_ptr<LogEvent> event1 = make_shared<LogEvent>(tagId, bucketStartTimeNs + 10);
-    auto list = event1->GetAndroidLogEventList();
-    *list << 1;
-    *list << 10;
+    event1->write(1);
+    event1->write(10);
     event1->init();
     shared_ptr<LogEvent> event2 = make_shared<LogEvent>(tagId, bucketStartTimeNs + 10);
-    auto list2 = event2->GetAndroidLogEventList();
-    *list2 << 1;
-    *list2 << 20;
+    event2->write(1);
+    event2->write(20);
     event2->init();
     valueProducer.onMatchedLogEvent(1 /*log matcher index*/, *event1, false);
     // has one slice

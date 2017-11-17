@@ -46,10 +46,9 @@ SimpleCondition getWakeLockHeldCondition(bool countNesting, bool defaultFalse,
 }
 
 void makeWakeLockEvent(LogEvent* event, int uid, const string& wl, int acquire) {
-    auto list = event->GetAndroidLogEventList();
-    *list << uid;  // uid
-    *list << wl;
-    *list << acquire;
+    event->write(uid);  // uid
+    event->write(wl);
+    event->write(acquire);
     event->init();
 }
 
