@@ -234,7 +234,7 @@ void StatsService::print_cmd_help(FILE* out) {
     fprintf(out, "  Removes all configs from disk.\n");
     fprintf(out, "\n");
     fprintf(out, "\n");
-    fprintf(out, "usage: adb shell cmds stats pull-source [int] \n");
+    fprintf(out, "usage: adb shell cmd stats pull-source [int] \n");
     fprintf(out, "\n");
     fprintf(out, "  Prints the output of a pulled metrics source (int indicates source)\n");
     fprintf(out, "\n");
