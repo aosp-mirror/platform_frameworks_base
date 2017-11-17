@@ -2,9 +2,10 @@ cc_defaults {
     name: "hwui_defaults",
     defaults: [
         "hwui_static_deps",
-        "skia_deps"
+        "skia_deps",
         //"hwui_bugreport_font_cache_usage",
         //"hwui_compile_for_perf",
+        "hwui_pgo",
     ],
 
     cpp_std: "c++17",
@@ -107,6 +108,22 @@ cc_defaults {
     defaults: ["hwui_debug"],
     cflags: ["-DDEBUG_OPENGL=3"],
     include_dirs: ["frameworks/native/opengl/libs/GLES2"],
+}
+
+// Build libhwui with PGO by default.
+// Location of PGO profile data is defined in build/soong/cc/pgo.go
+// and is separate from hwui.
+// To turn it off, set ANDROID_PGO_NO_PROFILE_USE environment variable
+// or set enable_profile_use property to false.
+cc_defaults {
+    name: "hwui_pgo",
+
+    pgo: {
+        instrumentation: true,
+        profile_file: "hwui/hwui.profdata",
+        benchmarks: ["hwui"],
+        enable_profile_use: false,
+    },
 }
 
 // ------------------------
@@ -255,18 +272,6 @@ cc_library {
         // Has moderate overhead
         "hwui_enable_opengl_validation",
     ],
-
-    // Build libhwui with PGO by default.
-    // Location of PGO profile data is defined in build/soong/cc/pgo.go
-    // and is separate from hwui.
-    // To turn it off, set ANDROID_PGO_NO_PROFILE_USE environment variable
-    // or set enable_profile_use property to false.
-    pgo: {
-        instrumentation: true,
-        profile_file: "hwui/hwui.profdata",
-        benchmarks: ["hwui"],
-        enable_profile_use: false,
-    },
 }
 
 // ------------------------
