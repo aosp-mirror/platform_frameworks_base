@@ -177,6 +177,7 @@ import android.os.UserHandle;
 import android.os.WorkSource;
 import android.provider.Settings;
 import android.text.format.DateUtils;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
@@ -767,6 +768,11 @@ public class WindowManagerService extends IWindowManager.Stub
     final WindowAnimator mAnimator;
     final SurfaceAnimationRunner mSurfaceAnimationRunner;
 
+    /**
+     * Keeps track of which animations got transferred to which animators. Entries will get cleaned
+     * up when the animation finishes.
+     */
+    final ArrayMap<AnimationAdapter, SurfaceAnimator> mAnimationTransferMap = new ArrayMap<>();
     final BoundsAnimationController mBoundsAnimationController;
 
     private final PointerEventDispatcher mPointerEventDispatcher;

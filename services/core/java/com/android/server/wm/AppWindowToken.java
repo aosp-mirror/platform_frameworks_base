@@ -1126,7 +1126,12 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                 }
                 setClientHidden(fromToken.mClientHidden);
 
-                // TODO: Transfer animation
+                transferAnimation(fromToken);
+
+                // When transferring an animation, we no longer need to apply an animation to the
+                // the token we transfer the animation over. Thus, remove the animation from
+                // pending opening apps.
+                mService.mOpeningApps.remove(this);
 
                 mService.updateFocusedWindowLocked(
                         UPDATE_FOCUS_WILL_PLACE_SURFACES, true /*updateInputWindows*/);

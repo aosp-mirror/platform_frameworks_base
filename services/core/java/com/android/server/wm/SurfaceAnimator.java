@@ -22,9 +22,12 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.util.ArrayMap;
 import android.util.Slog;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
+
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.PrintWriter;
 
@@ -41,7 +44,9 @@ class SurfaceAnimator {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "SurfaceAnimator" : TAG_WM;
     private final WindowManagerService mService;
     private AnimationAdapter mAnimation;
-    private SurfaceControl mLeash;
+
+    @VisibleForTesting
+    SurfaceControl mLeash;
     private final Animatable mAnimatable;
     private final OnAnimationFinishedCallback mInnerAnimationFinishedCallback;
     private final Runnable mAnimationFinishedCallback;
@@ -62,6 +67,11 @@ class SurfaceAnimator {
     private OnAnimationFinishedCallback getFinishedCallback(Runnable animationFinishedCallback) {
         return anim -> {
             synchronized (mService.mWindowMap) {
+                final SurfaceAnimator target = mService.mAnimationTransferMap.remove(anim);
+                if (target != null) {
+                    target.mInnerAnimationFinishedCallback.onAnimationFinished(anim);
+                    return;
+                }
                 if (anim != mAnimation) {
                     // Callback was from another animation - ignore.
                     return;
@@ -70,7 +80,7 @@ class SurfaceAnimator {
                 final Transaction t = new Transaction();
                 SurfaceControl.openTransaction();
                 try {
-                    reset(t);
+                    reset(t, true /* destroyLeash */);
                     animationFinishedCallback.run();
                 } finally {
                     // TODO: This should use pendingTransaction eventually, but right now things
@@ -95,7 +105,7 @@ class SurfaceAnimator {
      *               handing it to the component that is responsible to run the animation.
      */
     void startAnimation(Transaction t, AnimationAdapter anim, boolean hidden) {
-        cancelAnimation(t, true /* restarting */);
+        cancelAnimation(t, true /* restarting */, true /* forwardCancel */);
         mAnimation = anim;
         final SurfaceControl surface = mAnimatable.getSurfaceControl();
         if (surface == null) {
@@ -158,7 +168,8 @@ class SurfaceAnimator {
      * Cancels any currently running animation.
      */
     void cancelAnimation() {
-        cancelAnimation(mAnimatable.getPendingTransaction(), false /* restarting */);
+        cancelAnimation(mAnimatable.getPendingTransaction(), false /* restarting */,
+                true /* forwardCancel */);
         mAnimatable.commitPendingTransaction();
     }
 
@@ -197,13 +208,47 @@ class SurfaceAnimator {
         return mLeash != null;
     }
 
-    private void cancelAnimation(Transaction t, boolean restarting) {
+    void transferAnimation(SurfaceAnimator from) {
+        if (from.mLeash == null) {
+            return;
+        }
+        final SurfaceControl surface = mAnimatable.getSurfaceControl();
+        final SurfaceControl parent = mAnimatable.getParentSurfaceControl();
+        if (surface == null || parent == null) {
+            Slog.w(TAG, "Unable to transfer animation, surface or parent is null");
+            cancelAnimation();
+            return;
+        }
+        endDelayingAnimationStart();
+        final Transaction t = mAnimatable.getPendingTransaction();
+        cancelAnimation(t, true /* restarting */, true /* forwardCancel */);
+        mLeash = from.mLeash;
+        mAnimation = from.mAnimation;
+
+        // Cancel source animation, but don't let animation runner cancel the animation.
+        from.cancelAnimation(t, false /* restarting */, false /* forwardCancel */);
+        t.reparent(surface, mLeash.getHandle());
+        t.reparent(mLeash, parent.getHandle());
+        mAnimatable.onAnimationLeashCreated(t, mLeash);
+        mService.mAnimationTransferMap.put(mAnimation, this);
+    }
+
+    /**
+     * Cancels the animation, and resets the leash.
+     *
+     * @param t The transaction to use for all cancelling surface operations.
+     * @param restarting Whether we are restarting the animation.
+     * @param forwardCancel Whether to forward the cancel signal to the adapter executing the
+     *                      animation. This will be set to false when just transferring an animation
+     *                      to another animator.
+     */
+    private void cancelAnimation(Transaction t, boolean restarting, boolean forwardCancel) {
         if (DEBUG_ANIM) Slog.i(TAG, "Cancelling animation restarting=" + restarting);
         final SurfaceControl leash = mLeash;
         final AnimationAdapter animation = mAnimation;
-        reset(t);
+        reset(t, forwardCancel);
         if (animation != null) {
-            if (!mAnimationStartDelayed) {
+            if (!mAnimationStartDelayed && forwardCancel) {
                 animation.onAnimationCancelled(leash);
             }
             if (!restarting) {
@@ -215,7 +260,7 @@ class SurfaceAnimator {
         }
     }
 
-    private void reset(Transaction t) {
+    private void reset(Transaction t, boolean destroyLeash) {
         final SurfaceControl surface = mAnimatable.getSurfaceControl();
         final SurfaceControl parent = mAnimatable.getParentSurfaceControl();
 
@@ -225,7 +270,8 @@ class SurfaceAnimator {
             if (DEBUG_ANIM) Slog.i(TAG, "Reparenting to original parent");
             t.reparent(surface, parent.getHandle());
         }
-        if (mLeash != null) {
+        mService.mAnimationTransferMap.remove(mAnimation);
+        if (mLeash != null && destroyLeash) {
             mAnimatable.destroyAfterPendingTransaction(mLeash);
         }
         mLeash = null;

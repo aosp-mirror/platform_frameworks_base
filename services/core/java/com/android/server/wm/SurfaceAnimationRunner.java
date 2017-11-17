@@ -158,6 +158,7 @@ class SurfaceAnimationRunner {
                     mRunningAnimations.remove(a.mLeash);
                     synchronized (mCancelLock) {
                         if (!a.mCancelled) {
+
                             // Post on other thread that we can push final state without jank.
                             AnimationThread.getHandler().post(a.mFinishCallback);
                         }

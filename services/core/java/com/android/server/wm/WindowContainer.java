@@ -997,6 +997,10 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         mSurfaceAnimator.startAnimation(t, anim, hidden);
     }
 
+    void transferAnimation(WindowContainer from) {
+        mSurfaceAnimator.transferAnimation(from.mSurfaceAnimator);
+    }
+
     void cancelAnimation() {
         mSurfaceAnimator.cancelAnimation();
     }
