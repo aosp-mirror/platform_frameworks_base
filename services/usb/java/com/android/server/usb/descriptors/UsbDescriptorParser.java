@@ -291,7 +291,7 @@ public final class UsbDescriptorParser {
     /**
      * @hide
      */
-    public ArrayList<UsbDescriptor> getInterfaceDescriptorsForClass(byte usbClass) {
+    public ArrayList<UsbDescriptor> getInterfaceDescriptorsForClass(int usbClass) {
         ArrayList<UsbDescriptor> list = new ArrayList<UsbDescriptor>();
         for (UsbDescriptor descriptor : mDescriptors) {
             // ensure that this isn't an unrecognized DESCRIPTORTYPE_INTERFACE
@@ -313,7 +313,7 @@ public final class UsbDescriptorParser {
     /**
      * @hide
      */
-    public ArrayList<UsbDescriptor> getACInterfaceDescriptors(byte subtype, byte subclass) {
+    public ArrayList<UsbDescriptor> getACInterfaceDescriptors(byte subtype, int subclass) {
         ArrayList<UsbDescriptor> list = new ArrayList<UsbDescriptor>();
         for (UsbDescriptor descriptor : mDescriptors) {
             if (descriptor.getType() == UsbDescriptor.DESCRIPTORTYPE_AUDIO_INTERFACE) {

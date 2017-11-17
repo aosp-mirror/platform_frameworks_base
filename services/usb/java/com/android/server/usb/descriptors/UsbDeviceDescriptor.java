@@ -36,9 +36,9 @@ public final class UsbDeviceDescriptor extends UsbDescriptor {
     public static final int USBSPEC_2_0 = 0x0200;
 
     private int mSpec;          // 2:2 bcdUSB 2 BCD USB Specification Number - BCD
-    private byte mDevClass;     // 4:1 class code
-    private byte mDevSubClass;  // 5:1 subclass code
-    private byte mProtocol;     // 6:1 protocol
+    private int mDevClass;      // 4:1 class code
+    private int mDevSubClass;   // 5:1 subclass code
+    private int mProtocol;      // 6:1 protocol
     private byte mPacketSize;   // 7:1 Maximum Packet Size for Zero Endpoint.
                                 // Valid Sizes are 8, 16, 32, 64
     private int mVendorID;      // 8:2 vendor ID
@@ -61,15 +61,15 @@ public final class UsbDeviceDescriptor extends UsbDescriptor {
         return mSpec;
     }
 
-    public byte getDevClass() {
+    public int getDevClass() {
         return mDevClass;
     }
 
-    public byte getDevSubClass() {
+    public int getDevSubClass() {
         return mDevSubClass;
     }
 
-    public byte getProtocol() {
+    public int getProtocol() {
         return mProtocol;
     }
 
@@ -137,9 +137,9 @@ public final class UsbDeviceDescriptor extends UsbDescriptor {
     @Override
     public int parseRawDescriptors(ByteStream stream) {
         mSpec = stream.unpackUsbShort();
-        mDevClass = stream.getByte();
-        mDevSubClass = stream.getByte();
-        mProtocol = stream.getByte();
+        mDevClass = stream.getUnsignedByte();
+        mDevSubClass = stream.getUnsignedByte();
+        mProtocol = stream.getUnsignedByte();
         mPacketSize = stream.getByte();
         mVendorID = stream.unpackUsbShort();
         mProductID = stream.unpackUsbShort();
@@ -161,9 +161,9 @@ public final class UsbDeviceDescriptor extends UsbDescriptor {
         int spec = getSpec();
         canvas.writeListItem("Spec: " + ReportCanvas.getBCDString(spec));
 
-        byte devClass = getDevClass();
+        int devClass = getDevClass();
         String classStr = UsbStrings.getClassName(devClass);
-        byte devSubClass = getDevSubClass();
+        int devSubClass = getDevSubClass();
         String subClasStr = UsbStrings.getClassName(devSubClass);
         canvas.writeListItem("Class " + devClass + ": " + classStr + " Subclass"
                 + devSubClass + ": " + subClasStr);

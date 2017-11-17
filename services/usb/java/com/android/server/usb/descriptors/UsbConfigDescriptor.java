@@ -30,15 +30,15 @@ import java.util.ArrayList;
 public final class UsbConfigDescriptor extends UsbDescriptor {
     private static final String TAG = "UsbConfigDescriptor";
 
-    private int mTotalLength;   // 2:2 Total length in bytes of data returned
+    private int mTotalLength;    // 2:2 Total length in bytes of data returned
     private byte mNumInterfaces; // 4:1 Number of Interfaces
-    private byte mConfigValue;  // 5:1 Value to use as an argument to select this configuration
-    private byte mConfigIndex;  // 6:1 Index of String Descriptor describing this configuration
-    private byte mAttribs;      // 7:1 D7 Reserved, set to 1. (USB 1.0 Bus Powered)
-                                //     D6 Self Powered
-                                //     D5 Remote Wakeup
-                                //     D4..0 Reserved, set to 0.
-    private byte mMaxPower;     // 8:1 Maximum Power Consumption in 2mA units
+    private int mConfigValue;    // 5:1 Value to use as an argument to select this configuration
+    private byte mConfigIndex;   // 6:1 Index of String Descriptor describing this configuration
+    private int mAttribs;        // 7:1 D7 Reserved, set to 1. (USB 1.0 Bus Powered)
+                                 //     D6 Self Powered
+                                 //     D5 Remote Wakeup
+                                 //     D4..0 Reserved, set to 0.
+    private int mMaxPower;       // 8:1 Maximum Power Consumption in 2mA units
 
     private ArrayList<UsbInterfaceDescriptor> mInterfaceDescriptors =
             new ArrayList<UsbInterfaceDescriptor>();
@@ -56,7 +56,7 @@ public final class UsbConfigDescriptor extends UsbDescriptor {
         return mNumInterfaces;
     }
 
-    public byte getConfigValue() {
+    public int getConfigValue() {
         return mConfigValue;
     }
 
@@ -64,11 +64,11 @@ public final class UsbConfigDescriptor extends UsbDescriptor {
         return mConfigIndex;
     }
 
-    public byte getAttribs() {
+    public int getAttribs() {
         return mAttribs;
     }
 
-    public byte getMaxPower() {
+    public int getMaxPower() {
         return mMaxPower;
     }
 
@@ -92,10 +92,10 @@ public final class UsbConfigDescriptor extends UsbDescriptor {
     public int parseRawDescriptors(ByteStream stream) {
         mTotalLength = stream.unpackUsbShort();
         mNumInterfaces = stream.getByte();
-        mConfigValue = stream.getByte();
+        mConfigValue = stream.getUnsignedByte();
         mConfigIndex = stream.getByte();
-        mAttribs = stream.getByte();
-        mMaxPower = stream.getByte();
+        mAttribs = stream.getUnsignedByte();
+        mMaxPower = stream.getUnsignedByte();
 
         return mLength;
     }
