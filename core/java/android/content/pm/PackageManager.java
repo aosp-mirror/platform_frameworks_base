@@ -2085,6 +2085,13 @@ public abstract class PackageManager {
     public static final String FEATURE_TELEPHONY_EUICC = "android.hardware.telephony.euicc";
 
     /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}: The device
+     * supports cell-broadcast reception using the MBMS APIs.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_TELEPHONY_MBMS = "android.hardware.telephony.mbms";
+
+    /**
      * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device supports connecting to USB devices
      * as the USB host.
