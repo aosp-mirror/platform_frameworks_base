@@ -507,12 +507,20 @@ public:
                getOutline().getAlpha() != 0.0f;
     }
 
-    SkColor getShadowColor() const {
-        return mPrimitiveFields.mShadowColor;
+    SkColor getSpotShadowColor() const {
+        return mPrimitiveFields.mSpotShadowColor;
     }
 
-    bool setShadowColor(SkColor shadowColor) {
-        return RP_SET(mPrimitiveFields.mShadowColor, shadowColor);
+    bool setSpotShadowColor(SkColor shadowColor) {
+        return RP_SET(mPrimitiveFields.mSpotShadowColor, shadowColor);
+    }
+
+    SkColor getAmbientShadowColor() const {
+        return mPrimitiveFields.mAmbientShadowColor;
+    }
+
+    bool setAmbientShadowColor(SkColor shadowColor) {
+        return RP_SET(mPrimitiveFields.mAmbientShadowColor, shadowColor);
     }
 
     bool fitsOnLayer() const {
@@ -538,7 +546,8 @@ private:
         int mLeft = 0, mTop = 0, mRight = 0, mBottom = 0;
         int mWidth = 0, mHeight = 0;
         int mClippingFlags = CLIP_TO_BOUNDS;
-        SkColor mShadowColor = SK_ColorBLACK;
+        SkColor mSpotShadowColor = SK_ColorBLACK;
+        SkColor mAmbientShadowColor = SK_ColorBLACK;
         float mAlpha = 1;
         float mTranslationX = 0, mTranslationY = 0, mTranslationZ = 0;
         float mElevation = 0;
