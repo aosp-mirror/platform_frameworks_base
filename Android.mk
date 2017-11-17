@@ -637,6 +637,7 @@ LOCAL_STATIC_JAVA_LIBRARIES :=                           \
     framework-protos                                     \
     android.hidl.base-V1.0-java                          \
     android.hardware.cas-V1.0-java                       \
+    android.hardware.contexthub-V1.0-java                \
     android.hardware.health-V1.0-java-constants          \
     android.hardware.thermal-V1.0-java-constants         \
     android.hardware.tv.input-V1.0-java-constants        \
