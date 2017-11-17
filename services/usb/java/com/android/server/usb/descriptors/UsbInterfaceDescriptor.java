@@ -15,8 +15,13 @@
  */
 package com.android.server.usb.descriptors;
 
+import android.hardware.usb.UsbEndpoint;
+import android.hardware.usb.UsbInterface;
+
 import com.android.server.usb.descriptors.report.ReportCanvas;
 import com.android.server.usb.descriptors.report.UsbStrings;
+
+import java.util.ArrayList;
 
 /**
  * @hide
@@ -33,6 +38,9 @@ public class UsbInterfaceDescriptor extends UsbDescriptor {
     protected byte mUsbSubclass;      // 6:1 Subclass Code
     protected byte mProtocol;         // 7:1 Protocol Code
     protected byte mDescrIndex;       // 8:1 Index of String Descriptor Describing this interface
+
+    private ArrayList<UsbEndpointDescriptor> mEndpointDescriptors =
+            new ArrayList<UsbEndpointDescriptor>();
 
     UsbInterfaceDescriptor(int length, byte type) {
         super(length, type);
@@ -78,6 +86,22 @@ public class UsbInterfaceDescriptor extends UsbDescriptor {
 
     public byte getDescrIndex() {
         return mDescrIndex;
+    }
+
+    void addEndpointDescriptor(UsbEndpointDescriptor endpoint) {
+        mEndpointDescriptors.add(endpoint);
+    }
+
+    UsbInterface toAndroid(UsbDescriptorParser parser) {
+        String name = parser.getDescriptorString(mDescrIndex);
+        UsbInterface ntrface = new UsbInterface(
+                mInterfaceNumber, mAlternateSetting, name, mUsbClass, mUsbSubclass, mProtocol);
+        UsbEndpoint[] endpoints = new UsbEndpoint[mEndpointDescriptors.size()];
+        for (int index = 0; index < mEndpointDescriptors.size(); index++) {
+            endpoints[index] = mEndpointDescriptors.get(index).toAndroid(parser);
+        }
+        ntrface.setEndpoints(endpoints);
+        return ntrface;
     }
 
     @Override
