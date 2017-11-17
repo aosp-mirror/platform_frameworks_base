@@ -14922,6 +14922,23 @@ public class ActivityManagerService extends IActivityManager.Stub
                 synchronized (this) {
                     writeBroadcastsToProtoLocked(proto);
                 }
+            } else if ("provider".equals(cmd)) {
+                String[] newArgs;
+                String name;
+                if (opti >= args.length) {
+                    name = null;
+                    newArgs = EMPTY_STRING_ARRAY;
+                } else {
+                    name = args[opti];
+                    opti++;
+                    newArgs = new String[args.length - opti];
+                    if (args.length > 2) System.arraycopy(args, opti, newArgs, 0,
+                            args.length - opti);
+                }
+                if (!dumpProviderProto(fd, pw, name, newArgs)) {
+                    pw.println("No providers match: " + name);
+                    pw.println("Use -h for help.");
+                }
             } else {
                 // default option, dump everything, output is ActivityManagerServiceProto
                 synchronized (this) {
@@ -16061,6 +16078,15 @@ public class ActivityManagerService extends IActivityManager.Stub
     protected boolean dumpProvider(FileDescriptor fd, PrintWriter pw, String name, String[] args,
             int opti, boolean dumpAll) {
         return mProviderMap.dumpProvider(fd, pw, name, args, opti, dumpAll);
+    }
+
+    /**
+     * Similar to the dumpProvider, but only dumps the first matching provider.
+     * The provider is responsible for dumping as proto.
+     */
+    protected boolean dumpProviderProto(FileDescriptor fd, PrintWriter pw, String name,
+            String[] args) {
+        return mProviderMap.dumpProviderProto(fd, pw, name, args);
     }
 
     static class ItemMatcher {
