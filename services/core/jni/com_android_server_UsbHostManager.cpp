@@ -65,28 +65,15 @@ static int usb_device_added(const char *devAddress, void* clientData) {
     int subClassID = deviceDesc->bDeviceSubClass;
 
     // get the raw descriptors
-    int fd = usb_device_get_fd(device);
-    if (fd < 0) {
-        ALOGE("usb_device_get_fd failed\n");
-        usb_device_close(device);
-        // TODO return an error code here?
-        return 0;
-    }
-
-    // from android_hardware_UsbDeviceConnection_get_desc()
-    jbyte rawdescriptors[MAX_DESCRIPTORS_LENGTH];
-    lseek(fd, 0, SEEK_SET);
-    int numBytes = read(fd, rawdescriptors, sizeof(rawdescriptors));
-
-    usb_device_close(device);
-
+    int numBytes = usb_device_get_descriptors_length(device);
     if (numBytes > 0) {
         JNIEnv* env = AndroidRuntime::getJNIEnv();
         jobject thiz = (jobject)clientData;
         jstring deviceAddress = env->NewStringUTF(devAddress);
 
         jbyteArray descriptorsArray = env->NewByteArray(numBytes);
-        env->SetByteArrayRegion(descriptorsArray, 0, numBytes, rawdescriptors);
+        const jbyte* rawDescriptors = (const jbyte*)usb_device_get_raw_descriptors(device);
+        env->SetByteArrayRegion(descriptorsArray, 0, numBytes, rawDescriptors);
 
         env->CallBooleanMethod(thiz, method_usbDeviceAdded,
                 deviceAddress, classID, subClassID, descriptorsArray);
@@ -99,6 +86,8 @@ static int usb_device_added(const char *devAddress, void* clientData) {
         // TODO return an error code here?
         ALOGE("error reading descriptors\n");
     }
+
+    usb_device_close(device);
 
     return 0;
 }
