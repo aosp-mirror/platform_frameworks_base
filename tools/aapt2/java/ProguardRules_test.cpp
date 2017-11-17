@@ -17,12 +17,22 @@
 #include "java/ProguardRules.h"
 #include "link/Linkers.h"
 
+#include "io/StringStream.h"
 #include "test/Test.h"
 
+using ::aapt::io::StringOutputStream;
 using ::testing::HasSubstr;
 using ::testing::Not;
 
 namespace aapt {
+
+std::string GetKeepSetString(const proguard::KeepSet& set) {
+  std::string out;
+  StringOutputStream sout(&out);
+  proguard::WriteKeepSet(set, &sout);
+  sout.Flush();
+  return out;
+}
 
 TEST(ProguardRulesTest, FragmentNameRuleIsEmitted) {
   std::unique_ptr<IAaptContext> context = test::ContextBuilder().Build();
@@ -34,10 +44,8 @@ TEST(ProguardRulesTest, FragmentNameRuleIsEmitted) {
   proguard::KeepSet set;
   ASSERT_TRUE(proguard::CollectProguardRules(layout.get(), &set));
 
-  std::stringstream out;
-  ASSERT_TRUE(proguard::WriteKeepSet(&out, set));
+  std::string actual = GetKeepSetString(set);
 
-  std::string actual = out.str();
   EXPECT_THAT(actual, HasSubstr("com.foo.Bar"));
 }
 
@@ -50,10 +58,8 @@ TEST(ProguardRulesTest, FragmentClassRuleIsEmitted) {
   proguard::KeepSet set;
   ASSERT_TRUE(proguard::CollectProguardRules(layout.get(), &set));
 
-  std::stringstream out;
-  ASSERT_TRUE(proguard::WriteKeepSet(&out, set));
+  std::string actual = GetKeepSetString(set);
 
-  std::string actual = out.str();
   EXPECT_THAT(actual, HasSubstr("com.foo.Bar"));
 }
 
@@ -68,10 +74,8 @@ TEST(ProguardRulesTest, FragmentNameAndClassRulesAreEmitted) {
   proguard::KeepSet set;
   ASSERT_TRUE(proguard::CollectProguardRules(layout.get(), &set));
 
-  std::stringstream out;
-  ASSERT_TRUE(proguard::WriteKeepSet(&out, set));
+  std::string actual = GetKeepSetString(set);
 
-  std::string actual = out.str();
   EXPECT_THAT(actual, HasSubstr("com.foo.Bar"));
   EXPECT_THAT(actual, HasSubstr("com.foo.Baz"));
 }
@@ -87,10 +91,8 @@ TEST(ProguardRulesTest, CustomViewRulesAreEmitted) {
   proguard::KeepSet set;
   ASSERT_TRUE(proguard::CollectProguardRules(layout.get(), &set));
 
-  std::stringstream out;
-  ASSERT_TRUE(proguard::WriteKeepSet(&out, set));
+  std::string actual = GetKeepSetString(set);
 
-  std::string actual = out.str();
   EXPECT_THAT(actual, HasSubstr("com.foo.Bar"));
 }
 
@@ -126,11 +128,10 @@ TEST(ProguardRulesTest, IncludedLayoutRulesAreConditional) {
   ASSERT_TRUE(proguard::CollectProguardRules(bar_layout.get(), &set));
   ASSERT_TRUE(proguard::CollectProguardRules(foo_layout.get(), &set));
 
-  std::stringstream out;
-  ASSERT_TRUE(proguard::WriteKeepSet(&out, set));
+  std::string actual = GetKeepSetString(set);
 
-  std::string actual = out.str();
   EXPECT_THAT(actual, HasSubstr("-if class **.R$layout"));
+  EXPECT_THAT(actual, HasSubstr("-keep class com.foo.Bar { <init>(...); }"));
   EXPECT_THAT(actual, HasSubstr("int foo"));
   EXPECT_THAT(actual, HasSubstr("int bar"));
   EXPECT_THAT(actual, HasSubstr("com.foo.Bar"));
@@ -148,10 +149,9 @@ TEST(ProguardRulesTest, AliasedLayoutRulesAreConditional) {
   set.AddReference({test::ParseNameOrDie("layout/bar"), {}}, layout->file.name);
   ASSERT_TRUE(proguard::CollectProguardRules(layout.get(), &set));
 
-  std::stringstream out;
-  ASSERT_TRUE(proguard::WriteKeepSet(&out, set));
+  std::string actual = GetKeepSetString(set);
 
-  std::string actual = out.str();
+  EXPECT_THAT(actual, HasSubstr("-keep class com.foo.Bar { <init>(...); }"));
   EXPECT_THAT(actual, HasSubstr("-if class **.R$layout"));
   EXPECT_THAT(actual, HasSubstr("int foo"));
   EXPECT_THAT(actual, HasSubstr("int bar"));
@@ -170,11 +170,10 @@ TEST(ProguardRulesTest, NonLayoutReferencesAreUnconditional) {
   set.AddReference({test::ParseNameOrDie("style/MyStyle"), {}}, layout->file.name);
   ASSERT_TRUE(proguard::CollectProguardRules(layout.get(), &set));
 
-  std::stringstream out;
-  ASSERT_TRUE(proguard::WriteKeepSet(&out, set));
+  std::string actual = GetKeepSetString(set);
 
-  std::string actual = out.str();
   EXPECT_THAT(actual, Not(HasSubstr("-if")));
+  EXPECT_THAT(actual, HasSubstr("-keep class com.foo.Bar { <init>(...); }"));
 }
 
 TEST(ProguardRulesTest, ViewOnClickRuleIsEmitted) {
@@ -187,10 +186,8 @@ TEST(ProguardRulesTest, ViewOnClickRuleIsEmitted) {
   proguard::KeepSet set;
   ASSERT_TRUE(proguard::CollectProguardRules(layout.get(), &set));
 
-  std::stringstream out;
-  ASSERT_TRUE(proguard::WriteKeepSet(&out, set));
+  std::string actual = GetKeepSetString(set);
 
-  std::string actual = out.str();
   EXPECT_THAT(actual, HasSubstr("bar_method"));
 }
 
@@ -208,10 +205,8 @@ TEST(ProguardRulesTest, MenuRulesAreEmitted) {
   proguard::KeepSet set;
   ASSERT_TRUE(proguard::CollectProguardRules(menu.get(), &set));
 
-  std::stringstream out;
-  ASSERT_TRUE(proguard::WriteKeepSet(&out, set));
+  std::string actual = GetKeepSetString(set);
 
-  std::string actual = out.str();
   EXPECT_THAT(actual, HasSubstr("on_click"));
   EXPECT_THAT(actual, HasSubstr("com.foo.Bar"));
   EXPECT_THAT(actual, HasSubstr("com.foo.Baz"));

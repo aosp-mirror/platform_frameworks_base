@@ -16,7 +16,6 @@
 
 #include <sys/stat.h>
 
-#include <fstream>
 #include <queue>
 #include <unordered_map>
 #include <vector>
@@ -212,6 +211,8 @@ class LinkContext : public IAaptContext {
 // This delegate will attempt to masquerade any '@id/' references with ID 0xPPTTEEEE,
 // where PP > 7f, as 0x7fPPEEEE. Any potential overlapping is verified and an error occurs if such
 // an overlap exists.
+//
+// See b/37498913.
 class FeatureSplitSymbolTableDelegate : public DefaultSymbolTableDelegate {
  public:
   FeatureSplitSymbolTableDelegate(IAaptContext* context) : context_(context) {
@@ -652,24 +653,26 @@ bool ResourceFileFlattener::Flatten(ResourceTable* table, IArchiveWriter* archiv
 static bool WriteStableIdMapToPath(IDiagnostics* diag,
                                    const std::unordered_map<ResourceName, ResourceId>& id_map,
                                    const std::string& id_map_path) {
-  std::ofstream fout(id_map_path, std::ofstream::binary);
-  if (!fout) {
-    diag->Error(DiagMessage(id_map_path) << strerror(errno));
+  io::FileOutputStream fout(id_map_path);
+  if (fout.HadError()) {
+    diag->Error(DiagMessage(id_map_path) << "failed to open: " << fout.GetError());
     return false;
   }
 
+  text::Printer printer(&fout);
   for (const auto& entry : id_map) {
     const ResourceName& name = entry.first;
     const ResourceId& id = entry.second;
-    fout << name << " = " << id << "\n";
+    printer.Print(name.to_string());
+    printer.Print(" = ");
+    printer.Println(id.to_string());
   }
+  fout.Flush();
 
-  if (!fout) {
-    diag->Error(DiagMessage(id_map_path) << "failed writing to file: "
-                                         << android::base::SystemErrorCodeToString(errno));
+  if (fout.HadError()) {
+    diag->Error(DiagMessage(id_map_path) << "failed writing to file: " << fout.GetError());
     return false;
   }
-
   return true;
 }
 
@@ -985,36 +988,35 @@ class LinkCommand {
 
     file::AppendPath(&out_path, "R.java");
 
-    std::ofstream fout(out_path, std::ofstream::binary);
-    if (!fout) {
-      context_->GetDiagnostics()->Error(DiagMessage()
-                                        << "failed writing to '" << out_path
-                                        << "': " << android::base::SystemErrorCodeToString(errno));
+    io::FileOutputStream fout(out_path);
+    if (fout.HadError()) {
+      context_->GetDiagnostics()->Error(DiagMessage() << "failed writing to '" << out_path
+                                                      << "': " << fout.GetError());
       return false;
     }
 
-    std::unique_ptr<std::ofstream> fout_text;
+    std::unique_ptr<io::FileOutputStream> fout_text;
     if (out_text_symbols_path) {
-      fout_text =
-          util::make_unique<std::ofstream>(out_text_symbols_path.value(), std::ofstream::binary);
-      if (!*fout_text) {
-        context_->GetDiagnostics()->Error(
-            DiagMessage() << "failed writing to '" << out_text_symbols_path.value()
-                          << "': " << android::base::SystemErrorCodeToString(errno));
+      fout_text = util::make_unique<io::FileOutputStream>(out_text_symbols_path.value());
+      if (fout_text->HadError()) {
+        context_->GetDiagnostics()->Error(DiagMessage()
+                                          << "failed writing to '" << out_text_symbols_path.value()
+                                          << "': " << fout_text->GetError());
         return false;
       }
     }
 
     JavaClassGenerator generator(context_, table, java_options);
     if (!generator.Generate(package_name_to_generate, out_package, &fout, fout_text.get())) {
-      context_->GetDiagnostics()->Error(DiagMessage(out_path) << generator.getError());
+      context_->GetDiagnostics()->Error(DiagMessage(out_path) << generator.GetError());
       return false;
     }
 
-    if (!fout) {
-      context_->GetDiagnostics()->Error(DiagMessage()
-                                        << "failed writing to '" << out_path
-                                        << "': " << android::base::SystemErrorCodeToString(errno));
+    fout.Flush();
+
+    if (fout.HadError()) {
+      context_->GetDiagnostics()->Error(DiagMessage() << "failed writing to '" << out_path
+                                                      << "': " << fout.GetError());
       return false;
     }
     return true;
@@ -1142,18 +1144,19 @@ class LinkCommand {
 
     file::AppendPath(&out_path, "Manifest.java");
 
-    std::ofstream fout(out_path, std::ofstream::binary);
-    if (!fout) {
-      context_->GetDiagnostics()->Error(DiagMessage()
-                                        << "failed writing to '" << out_path
-                                        << "': " << android::base::SystemErrorCodeToString(errno));
+    io::FileOutputStream fout(out_path);
+    if (fout.HadError()) {
+      context_->GetDiagnostics()->Error(DiagMessage() << "failed to open '" << out_path
+                                                      << "': " << fout.GetError());
       return false;
     }
 
-    if (!ClassDefinition::WriteJavaFile(manifest_class.get(), package_utf8, true, &fout)) {
-      context_->GetDiagnostics()->Error(DiagMessage()
-                                        << "failed writing to '" << out_path
-                                        << "': " << android::base::SystemErrorCodeToString(errno));
+    ClassDefinition::WriteJavaFile(manifest_class.get(), package_utf8, true, &fout);
+    fout.Flush();
+
+    if (fout.HadError()) {
+      context_->GetDiagnostics()->Error(DiagMessage() << "failed writing to '" << out_path
+                                                      << "': " << fout.GetError());
       return false;
     }
     return true;
@@ -1165,19 +1168,19 @@ class LinkCommand {
     }
 
     const std::string& out_path = out.value();
-    std::ofstream fout(out_path, std::ofstream::binary);
-    if (!fout) {
-      context_->GetDiagnostics()->Error(DiagMessage()
-                                        << "failed to open '" << out_path
-                                        << "': " << android::base::SystemErrorCodeToString(errno));
+    io::FileOutputStream fout(out_path);
+    if (fout.HadError()) {
+      context_->GetDiagnostics()->Error(DiagMessage() << "failed to open '" << out_path
+                                                      << "': " << fout.GetError());
       return false;
     }
 
-    proguard::WriteKeepSet(&fout, keep_set);
-    if (!fout) {
-      context_->GetDiagnostics()->Error(DiagMessage()
-                                        << "failed writing to '" << out_path
-                                        << "': " << android::base::SystemErrorCodeToString(errno));
+    proguard::WriteKeepSet(keep_set, &fout);
+    fout.Flush();
+
+    if (fout.HadError()) {
+      context_->GetDiagnostics()->Error(DiagMessage() << "failed writing to '" << out_path
+                                                      << "': " << fout.GetError());
       return false;
     }
     return true;

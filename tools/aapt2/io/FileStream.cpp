@@ -25,6 +25,12 @@
 #include "android-base/macros.h"
 #include "android-base/utf8.h"
 
+#if defined(_WIN32)
+// This is only needed for O_CLOEXEC.
+#include <windows.h>
+#define O_CLOEXEC O_NOINHERIT
+#endif
+
 using ::android::base::SystemErrorCodeToString;
 using ::android::base::unique_fd;
 
@@ -32,18 +38,20 @@ namespace aapt {
 namespace io {
 
 FileInputStream::FileInputStream(const std::string& path, size_t buffer_capacity)
-    : FileInputStream(::android::base::utf8::open(path.c_str(), O_RDONLY | O_BINARY),
-                      buffer_capacity) {
+    : buffer_capacity_(buffer_capacity) {
+  int mode = O_RDONLY | O_CLOEXEC | O_BINARY;
+  fd_.reset(TEMP_FAILURE_RETRY(::android::base::utf8::open(path.c_str(), mode)));
+  if (fd_ == -1) {
+    error_ = SystemErrorCodeToString(errno);
+  } else {
+    buffer_.reset(new uint8_t[buffer_capacity_]);
+  }
 }
 
 FileInputStream::FileInputStream(int fd, size_t buffer_capacity)
-    : fd_(fd),
-      buffer_capacity_(buffer_capacity),
-      buffer_offset_(0u),
-      buffer_size_(0u),
-      total_byte_count_(0u) {
-  if (fd_ == -1) {
-    error_ = SystemErrorCodeToString(errno);
+    : fd_(fd), buffer_capacity_(buffer_capacity) {
+  if (fd_ < 0) {
+    error_ = "Bad File Descriptor";
   } else {
     buffer_.reset(new uint8_t[buffer_capacity_]);
   }
@@ -100,9 +108,16 @@ std::string FileInputStream::GetError() const {
   return error_;
 }
 
-FileOutputStream::FileOutputStream(const std::string& path, int mode, size_t buffer_capacity)
-    : FileOutputStream(unique_fd(::android::base::utf8::open(path.c_str(), mode)),
-                       buffer_capacity) {
+FileOutputStream::FileOutputStream(const std::string& path, size_t buffer_capacity)
+    : buffer_capacity_(buffer_capacity) {
+  int mode = O_WRONLY | O_CREAT | O_TRUNC | O_CLOEXEC | O_BINARY;
+  owned_fd_.reset(TEMP_FAILURE_RETRY(::android::base::utf8::open(path.c_str(), mode, 0666)));
+  fd_ = owned_fd_.get();
+  if (fd_ < 0) {
+    error_ = SystemErrorCodeToString(errno);
+  } else {
+    buffer_.reset(new uint8_t[buffer_capacity_]);
+  }
 }
 
 FileOutputStream::FileOutputStream(unique_fd fd, size_t buffer_capacity)
@@ -111,9 +126,9 @@ FileOutputStream::FileOutputStream(unique_fd fd, size_t buffer_capacity)
 }
 
 FileOutputStream::FileOutputStream(int fd, size_t buffer_capacity)
-    : fd_(fd), buffer_capacity_(buffer_capacity), buffer_offset_(0u), total_byte_count_(0u) {
-  if (fd_ == -1) {
-    error_ = SystemErrorCodeToString(errno);
+    : fd_(fd), buffer_capacity_(buffer_capacity) {
+  if (fd_ < 0) {
+    error_ = "Bad File Descriptor";
   } else {
     buffer_.reset(new uint8_t[buffer_capacity_]);
   }

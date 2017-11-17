@@ -22,6 +22,8 @@
 
 #include "androidfw/StringPiece.h"
 
+#include "text/Printer.h"
+
 namespace aapt {
 
 // Builds a JavaDoc comment from a set of XML comments.
@@ -61,8 +63,8 @@ class AnnotationProcessor {
 
   void AppendNewLine();
 
-  // Writes the comments and annotations to the stream, with the given prefix before each line.
-  void WriteToStream(const android::StringPiece& prefix, std::ostream* out) const;
+  // Writes the comments and annotations to the Printer.
+  void Print(text::Printer* printer) const;
 
  private:
   std::stringstream comment_;
