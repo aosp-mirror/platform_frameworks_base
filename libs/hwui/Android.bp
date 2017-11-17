@@ -417,3 +417,15 @@ cc_benchmark {
         "tests/microbench/TaskManagerBench.cpp",
     ],
 }
+
+// ----------------------------------------
+// Phony target to build benchmarks for PGO
+// ----------------------------------------
+
+phony {
+    name: "pgo-targets-hwui",
+    required: [
+        "hwuimicro",
+        "hwuimacro",
+    ]
+}
