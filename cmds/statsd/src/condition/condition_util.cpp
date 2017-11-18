@@ -86,6 +86,9 @@ ConditionState evaluateCombinationCondition(const std::vector<int>& children,
         case LogicalOperation::NOR:
             newCondition = hasTrue ? ConditionState::kFalse : ConditionState::kTrue;
             break;
+        case LogicalOperation::LOGICAL_OPERATION_UNSPECIFIED:
+            newCondition = ConditionState::kFalse;
+            break;
     }
     return newCondition;
 }

@@ -84,6 +84,9 @@ bool combinationMatch(const vector<int>& children, const LogicalOperation& opera
                 }
             }
             break;
+        case LogicalOperation::LOGICAL_OPERATION_UNSPECIFIED:
+            matched = false;
+            break;
     }
     return matched;
 }

@@ -265,7 +265,7 @@ static StatsdConfig build_fake_config() {
     metric->mutable_bucket()->set_bucket_size_millis(30 * 1000L);
 
     // Anomaly threshold for screen-on count.
-    Alert* alert = config.add_alerts();
+    Alert* alert = config.add_alert();
     alert->set_name("1");
     alert->set_number_of_buckets(6);
     alert->set_trigger_if_sum_gt(10);
@@ -280,7 +280,7 @@ static StatsdConfig build_fake_config() {
     keyMatcher->set_key(UID_PROCESS_STATE_UID_KEY);
 
     // Anomaly threshold for background count.
-    alert = config.add_alerts();
+    alert = config.add_alert();
     alert->set_name("2");
     alert->set_number_of_buckets(4);
     alert->set_trigger_if_sum_gt(30);
@@ -312,7 +312,7 @@ static StatsdConfig build_fake_config() {
     DurationMetric* durationMetric = config.add_duration_metric();
     durationMetric->set_name("5");
     durationMetric->mutable_bucket()->set_bucket_size_millis(30 * 1000L);
-    durationMetric->set_type(DurationMetric_AggregationType_DURATION_SUM);
+    durationMetric->set_aggregation_type(DurationMetric_AggregationType_SUM);
     keyMatcher = durationMetric->add_dimension();
     keyMatcher->set_key(WAKE_LOCK_UID_KEY_ID);
     durationMetric->set_what("WL_HELD_PER_APP_PER_NAME");
@@ -326,7 +326,7 @@ static StatsdConfig build_fake_config() {
     durationMetric = config.add_duration_metric();
     durationMetric->set_name("6");
     durationMetric->mutable_bucket()->set_bucket_size_millis(30 * 1000L);
-    durationMetric->set_type(DurationMetric_AggregationType_DURATION_MAX_SPARSE);
+    durationMetric->set_aggregation_type(DurationMetric_AggregationType_MAX_SPARSE);
     keyMatcher = durationMetric->add_dimension();
     keyMatcher->set_key(WAKE_LOCK_UID_KEY_ID);
     durationMetric->set_what("WL_HELD_PER_APP_PER_NAME");
@@ -340,7 +340,7 @@ static StatsdConfig build_fake_config() {
     durationMetric = config.add_duration_metric();
     durationMetric->set_name("7");
     durationMetric->mutable_bucket()->set_bucket_size_millis(30 * 1000L);
-    durationMetric->set_type(DurationMetric_AggregationType_DURATION_MAX_SPARSE);
+    durationMetric->set_aggregation_type(DurationMetric_AggregationType_MAX_SPARSE);
     durationMetric->set_what("WL_HELD_PER_APP_PER_NAME");
     durationMetric->set_condition("APP_IS_BACKGROUND_AND_SCREEN_ON");
     link = durationMetric->add_links();
@@ -352,7 +352,7 @@ static StatsdConfig build_fake_config() {
     durationMetric = config.add_duration_metric();
     durationMetric->set_name("8");
     durationMetric->mutable_bucket()->set_bucket_size_millis(10 * 1000L);
-    durationMetric->set_type(DurationMetric_AggregationType_DURATION_SUM);
+    durationMetric->set_aggregation_type(DurationMetric_AggregationType_SUM);
     durationMetric->set_what("SCREEN_IS_ON");
 
     // Value metric to count KERNEL_WAKELOCK when screen turned on
