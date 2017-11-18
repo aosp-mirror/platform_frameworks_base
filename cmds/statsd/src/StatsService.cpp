@@ -320,9 +320,15 @@ status_t StatsService::cmd_trigger_broadcast(FILE* out, Vector<String8>& args) {
         return UNKNOWN_ERROR;
     }
     auto receiver = mConfigManager->GetConfigReceiver(ConfigKey(uid, name));
-    auto sc = getStatsCompanionService();
-    sc->sendBroadcast(String16(receiver.first.c_str()), String16(receiver.second.c_str()));
-    ALOGD("StatsService::trigger broadcast succeeded to %s, %s", args[1].c_str(), args[2].c_str());
+    sp<IStatsCompanionService> sc = getStatsCompanionService();
+    if (sc != nullptr) {
+        sc->sendBroadcast(String16(receiver.first.c_str()), String16(receiver.second.c_str()));
+        ALOGD("StatsService::trigger broadcast succeeded to %s, %s", args[1].c_str(),
+              args[2].c_str());
+    } else {
+        ALOGD("Could not access statsCompanion");
+    }
+
     return NO_ERROR;
 }
 
