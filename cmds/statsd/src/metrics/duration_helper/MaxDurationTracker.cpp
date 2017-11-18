@@ -23,10 +23,10 @@ namespace android {
 namespace os {
 namespace statsd {
 
-MaxDurationTracker::MaxDurationTracker(sp<ConditionWizard> wizard, int conditionIndex,
+MaxDurationTracker::MaxDurationTracker(sp<ConditionWizard> wizard, int conditionIndex, bool nesting,
                                        uint64_t currentBucketStartNs, uint64_t bucketSizeNs,
                                        std::vector<DurationBucket>& bucket)
-    : DurationTracker(wizard, conditionIndex, currentBucketStartNs, bucketSizeNs, bucket) {
+    : DurationTracker(wizard, conditionIndex, nesting, currentBucketStartNs, bucketSizeNs, bucket) {
 }
 
 void MaxDurationTracker::noteStart(const HashableDimensionKey& key, bool condition,
@@ -38,10 +38,10 @@ void MaxDurationTracker::noteStart(const HashableDimensionKey& key, bool conditi
 
     switch (duration.state) {
         case kStarted:
-            // The same event is already started. Because we are not counting nesting, so ignore.
+            duration.startCount++;
             break;
         case kPaused:
-            // Safe to do nothing here. Paused means started but condition is false.
+            duration.startCount++;
             break;
         case kStopped:
             if (!condition) {
@@ -51,11 +51,13 @@ void MaxDurationTracker::noteStart(const HashableDimensionKey& key, bool conditi
                 duration.state = DurationState::kStarted;
                 duration.lastStartTime = eventTime;
             }
+            duration.startCount = 1;
             break;
     }
 }
 
-void MaxDurationTracker::noteStop(const HashableDimensionKey& key, const uint64_t eventTime) {
+void MaxDurationTracker::noteStop(const HashableDimensionKey& key, const uint64_t eventTime,
+                                  bool forceStop) {
     VLOG("MaxDuration: key %s stop", key.c_str());
     if (mInfos.find(key) == mInfos.end()) {
         // we didn't see a start event before. do nothing.
@@ -68,16 +70,23 @@ void MaxDurationTracker::noteStop(const HashableDimensionKey& key, const uint64_
             // already stopped, do nothing.
             break;
         case DurationState::kStarted: {
-            duration.state = DurationState::kStopped;
-            int64_t durationTime = eventTime - duration.lastStartTime;
-            VLOG("Max, key %s, Stop %lld %lld %lld", key.c_str(), (long long)duration.lastStartTime,
-                 (long long)eventTime, (long long)durationTime);
-            duration.lastDuration = duration.lastDuration + durationTime;
-            VLOG("  record duration: %lld ", (long long)duration.lastDuration);
+            duration.startCount--;
+            if (forceStop || !mNested || duration.startCount <= 0) {
+                duration.state = DurationState::kStopped;
+                int64_t durationTime = eventTime - duration.lastStartTime;
+                VLOG("Max, key %s, Stop %lld %lld %lld", key.c_str(),
+                     (long long)duration.lastStartTime, (long long)eventTime,
+                     (long long)durationTime);
+                duration.lastDuration = duration.lastDuration + durationTime;
+                VLOG("  record duration: %lld ", (long long)duration.lastDuration);
+            }
             break;
         }
         case DurationState::kPaused: {
-            duration.state = DurationState::kStopped;
+            duration.startCount--;
+            if (forceStop || !mNested || duration.startCount <= 0) {
+                duration.state = DurationState::kStopped;
+            }
             break;
         }
     }
@@ -88,11 +97,13 @@ void MaxDurationTracker::noteStop(const HashableDimensionKey& key, const uint64_
     }
     // Once an atom duration ends, we erase it. Next time, if we see another atom event with the
     // same name, they are still considered as different atom durations.
-    mInfos.erase(key);
+    if (duration.state == DurationState::kStopped) {
+        mInfos.erase(key);
+    }
 }
 void MaxDurationTracker::noteStopAll(const uint64_t eventTime) {
     for (auto& pair : mInfos) {
-        noteStop(pair.first, eventTime);
+        noteStop(pair.first, eventTime, true);
     }
 }
 

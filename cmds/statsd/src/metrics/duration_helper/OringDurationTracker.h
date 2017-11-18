@@ -27,12 +27,13 @@ namespace statsd {
 // Tracks the "Or'd" duration -- if 2 durations are overlapping, they won't be double counted.
 class OringDurationTracker : public DurationTracker {
 public:
-    OringDurationTracker(sp<ConditionWizard> wizard, int conditionIndex,
+    OringDurationTracker(sp<ConditionWizard> wizard, int conditionIndex, bool nesting,
                          uint64_t currentBucketStartNs, uint64_t bucketSizeNs,
                          std::vector<DurationBucket>& bucket);
     void noteStart(const HashableDimensionKey& key, bool condition, const uint64_t eventTime,
                    const ConditionKey& conditionKey) override;
-    void noteStop(const HashableDimensionKey& key, const uint64_t eventTime) override;
+    void noteStop(const HashableDimensionKey& key, const uint64_t eventTime,
+                  const bool stopAll) override;
     void noteStopAll(const uint64_t eventTime) override;
     void onSlicedConditionMayChange(const uint64_t timestamp) override;
     void onConditionChanged(bool condition, const uint64_t timestamp) override;
@@ -44,8 +45,8 @@ private:
     // 2) which keys are paused (started but condition was false)
     // 3) whenever a key stops, we remove it from the started set. And if the set becomes empty,
     //    it means everything has stopped, we then record the end time.
-    std::set<HashableDimensionKey> mStarted;
-    std::set<HashableDimensionKey> mPaused;
+    std::map<HashableDimensionKey, int> mStarted;
+    std::map<HashableDimensionKey, int> mPaused;
     int64_t mLastStartTime;
     std::map<HashableDimensionKey, ConditionKey> mConditionKeyMap;
 };

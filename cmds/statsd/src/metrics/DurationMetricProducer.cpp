@@ -63,6 +63,7 @@ const int FIELD_ID_DURATION = 3;
 DurationMetricProducer::DurationMetricProducer(const DurationMetric& metric,
                                                const int conditionIndex, const size_t startIndex,
                                                const size_t stopIndex, const size_t stopAllIndex,
+                                               const bool nesting,
                                                const sp<ConditionWizard>& wizard,
                                                const vector<KeyMatcher>& internalDimension,
                                                const uint64_t startTimeNs)
@@ -71,6 +72,7 @@ DurationMetricProducer::DurationMetricProducer(const DurationMetric& metric,
       mStartIndex(startIndex),
       mStopIndex(stopIndex),
       mStopAllIndex(stopAllIndex),
+      mNested(nesting),
       mInternalDimension(internalDimension) {
     // TODO: The following boiler plate code appears in all MetricProducers, but we can't abstract
     // them in the base class, because the proto generated CountMetric, and DurationMetric are
@@ -111,11 +113,11 @@ unique_ptr<DurationTracker> DurationMetricProducer::createDurationTracker(
         vector<DurationBucket>& bucket) {
     switch (mMetric.type()) {
         case DurationMetric_AggregationType_DURATION_SUM:
-            return make_unique<OringDurationTracker>(mWizard, mConditionTrackerIndex,
+            return make_unique<OringDurationTracker>(mWizard, mConditionTrackerIndex, mNested,
                                                      mCurrentBucketStartTimeNs, mBucketSizeNs,
                                                      bucket);
         case DurationMetric_AggregationType_DURATION_MAX_SPARSE:
-            return make_unique<MaxDurationTracker>(mWizard, mConditionTrackerIndex,
+            return make_unique<MaxDurationTracker>(mWizard, mConditionTrackerIndex, mNested,
                                                    mCurrentBucketStartTimeNs, mBucketSizeNs,
                                                    bucket);
     }
@@ -270,7 +272,7 @@ void DurationMetricProducer::onMatchedLogEventInternal(
     if (matcherIndex == mStartIndex) {
         it->second->noteStart(atomKey, condition, event.GetTimestampNs(), conditionKeys);
     } else if (matcherIndex == mStopIndex) {
-        it->second->noteStop(atomKey, event.GetTimestampNs());
+        it->second->noteStop(atomKey, event.GetTimestampNs(), false);
     }
 }
 

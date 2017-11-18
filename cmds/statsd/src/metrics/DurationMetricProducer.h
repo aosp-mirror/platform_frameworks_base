@@ -39,7 +39,8 @@ class DurationMetricProducer : public MetricProducer {
 public:
     DurationMetricProducer(const DurationMetric& durationMetric, const int conditionIndex,
                            const size_t startIndex, const size_t stopIndex,
-                           const size_t stopAllIndex, const sp<ConditionWizard>& wizard,
+                           const size_t stopAllIndex, const bool nesting,
+                           const sp<ConditionWizard>& wizard,
                            const vector<KeyMatcher>& internalDimension, const uint64_t startTimeNs);
 
     virtual ~DurationMetricProducer();
@@ -79,6 +80,9 @@ private:
 
     // Index of the SimpleLogEntryMatcher which defines the stop all for all dimensions.
     const size_t mStopAllIndex;
+
+    // nest counting -- for the same key, stops must match the number of starts to make real stop
+    const bool mNested;
 
     // The dimension from the atom predicate. e.g., uid, wakelock name.
     const vector<KeyMatcher> mInternalDimension;

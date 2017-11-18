@@ -28,12 +28,13 @@ namespace statsd {
 // they stop or bucket expires.
 class MaxDurationTracker : public DurationTracker {
 public:
-    MaxDurationTracker(sp<ConditionWizard> wizard, int conditionIndex,
+    MaxDurationTracker(sp<ConditionWizard> wizard, int conditionIndex, bool nesting,
                        uint64_t currentBucketStartNs, uint64_t bucketSizeNs,
                        std::vector<DurationBucket>& bucket);
     void noteStart(const HashableDimensionKey& key, bool condition, const uint64_t eventTime,
                    const ConditionKey& conditionKey) override;
-    void noteStop(const HashableDimensionKey& key, const uint64_t eventTime) override;
+    void noteStop(const HashableDimensionKey& key, const uint64_t eventTime,
+                  const bool stopAll) override;
     void noteStopAll(const uint64_t eventTime) override;
     bool flushIfNeeded(uint64_t timestampNs) override;
     void onSlicedConditionMayChange(const uint64_t timestamp) override;
