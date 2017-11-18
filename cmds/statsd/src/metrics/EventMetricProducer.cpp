@@ -96,7 +96,6 @@ std::unique_ptr<std::vector<uint8_t>> EventMetricProducer::onDumpReport() {
     std::unique_ptr<std::vector<uint8_t>> buffer = serializeProto();
 
     startNewProtoOutputStream(endTime);
-    mByteSize = 0;
 
     return buffer;
 }
@@ -121,14 +120,10 @@ void EventMetricProducer::onMatchedLogEventInternal(
     event.ToProto(*mProto);
     mProto->end(eventToken);
     mProto->end(wrapperToken);
-
-    // TODO: Increment mByteSize with a real value. Until this feature is working, we assume 50
-    // bytes.
-    mByteSize += 50;
 }
 
 size_t EventMetricProducer::byteSize() {
-    return mByteSize;
+    return mProto->bytesWritten();
 }
 
 }  // namespace statsd
