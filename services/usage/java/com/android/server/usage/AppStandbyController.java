@@ -91,14 +91,14 @@ public class AppStandbyController {
             0,
             0,
             COMPRESS_TIME ? 120 * 1000 : 1 * ONE_HOUR,
-            COMPRESS_TIME ? 240 * 1000 : 8 * ONE_HOUR
+            COMPRESS_TIME ? 240 * 1000 : 2 * ONE_HOUR
     };
 
     static final long[] ELAPSED_TIME_THRESHOLDS = {
             0,
             COMPRESS_TIME ?  1 * ONE_MINUTE : 12 * ONE_HOUR,
-            COMPRESS_TIME ?  4 * ONE_MINUTE :  2 * ONE_DAY,
-            COMPRESS_TIME ? 16 * ONE_MINUTE :  8 * ONE_DAY
+            COMPRESS_TIME ?  4 * ONE_MINUTE : 24 * ONE_HOUR,
+            COMPRESS_TIME ? 16 * ONE_MINUTE : 48 * ONE_HOUR
     };
 
     static final int[] THRESHOLD_BUCKETS = {
@@ -1049,6 +1049,11 @@ public class AppStandbyController {
                 int userId) {
             return appWidgetManager.isBoundWidgetPackage(packageName, userId);
         }
+
+        String getAppIdleSettings() {
+            return Settings.Global.getString(mContext.getContentResolver(),
+                    Settings.Global.APP_IDLE_CONSTANTS);
+        }
     }
 
     class AppStandbyHandler extends Handler {
@@ -1181,8 +1186,7 @@ public class AppStandbyController {
                 // Look at global settings for this.
                 // TODO: Maybe apply different thresholds for different users.
                 try {
-                    mParser.setString(Settings.Global.getString(mContext.getContentResolver(),
-                            Settings.Global.APP_IDLE_CONSTANTS));
+                    mParser.setString(mInjector.getAppIdleSettings());
                 } catch (IllegalArgumentException e) {
                     Slog.e(TAG, "Bad value for app idle settings: " + e.getMessage());
                     // fallthrough, mParser is empty and all defaults will be returned.
