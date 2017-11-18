@@ -10,5 +10,13 @@ LOCAL_SRC_FILES := $(call all-java-files-under, src)
 LOCAL_JAVA_LIBRARIES := android.test.runner
 LOCAL_PACKAGE_NAME := FrameworksLocationTests
 
-include $(BUILD_PACKAGE)
+LOCAL_STATIC_JAVA_LIBRARIES := \
+    android-support-test \
+    core-test-rules \
+    guava \
+    mockito-target-minus-junit4 \
+    frameworks-base-testutils \
+    truth-prebuilt \
 
+LOCAL_COMPATIBILITY_SUITE := device-tests
+include $(BUILD_PACKAGE)
