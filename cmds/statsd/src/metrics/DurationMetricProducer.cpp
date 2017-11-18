@@ -222,10 +222,8 @@ std::unique_ptr<std::vector<uint8_t>> DurationMetricProducer::onDumpReport() {
                   (long long)mCurrentBucketStartTimeNs);
 
     std::unique_ptr<std::vector<uint8_t>> buffer = serializeProto();
-
     startNewProtoOutputStream(endTime);
-    mPastBuckets.clear();
-
+    // TODO: Properly clear the old buckets.
     return buffer;
 }
 
