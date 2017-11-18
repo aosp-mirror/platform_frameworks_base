@@ -101,9 +101,6 @@ public final class CellIdentityGsm implements Parcelable {
      * @param alphal long alpha Operator Name String or Enhanced Operator Name String
      * @param alphas short alpha Operator Name String or Enhanced Operator Name String
      *
-     * @throws IllegalArgumentException if the input MCC is not a 3-digit code or the input MNC is
-     * not a 2 or 3-digit code.
-     *
      * @hide
      */
     public CellIdentityGsm (int lac, int cid, int arfcn, int bsic, String mccStr,
