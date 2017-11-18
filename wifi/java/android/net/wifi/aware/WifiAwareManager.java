@@ -20,8 +20,8 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
-import android.annotation.SystemService;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.SystemService;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkRequest;
@@ -564,6 +564,7 @@ public class WifiAwareManager {
         private static final int CALLBACK_MESSAGE_SEND_SUCCESS = 5;
         private static final int CALLBACK_MESSAGE_SEND_FAIL = 6;
         private static final int CALLBACK_MESSAGE_RECEIVED = 7;
+        private static final int CALLBACK_MATCH_WITH_DISTANCE = 8;
 
         private static final String MESSAGE_BUNDLE_KEY_MESSAGE = "message";
         private static final String MESSAGE_BUNDLE_KEY_MESSAGE2 = "message2";
@@ -618,7 +619,9 @@ public class WifiAwareManager {
                         case CALLBACK_SESSION_TERMINATED:
                             onProxySessionTerminated(msg.arg1);
                             break;
-                        case CALLBACK_MATCH: {
+                        case CALLBACK_MATCH:
+                        case CALLBACK_MATCH_WITH_DISTANCE:
+                            {
                             List<byte[]> matchFilter = null;
                             byte[] arg = msg.getData().getByteArray(MESSAGE_BUNDLE_KEY_MESSAGE2);
                             try {
@@ -629,9 +632,16 @@ public class WifiAwareManager {
                                         + new String(HexEncoding.encode(arg))
                                         + "' - cannot be parsed: e=" + e);
                             }
-                            mOriginalCallback.onServiceDiscovered(new PeerHandle(msg.arg1),
-                                    msg.getData().getByteArray(MESSAGE_BUNDLE_KEY_MESSAGE),
-                                    matchFilter);
+                            if (msg.what == CALLBACK_MATCH) {
+                                mOriginalCallback.onServiceDiscovered(new PeerHandle(msg.arg1),
+                                        msg.getData().getByteArray(MESSAGE_BUNDLE_KEY_MESSAGE),
+                                        matchFilter);
+                            } else {
+                                mOriginalCallback.onServiceDiscoveredWithinRange(
+                                        new PeerHandle(msg.arg1),
+                                        msg.getData().getByteArray(MESSAGE_BUNDLE_KEY_MESSAGE),
+                                        matchFilter, msg.arg2);
+                            }
                             break;
                         }
                         case CALLBACK_MESSAGE_SEND_SUCCESS:
@@ -684,18 +694,35 @@ public class WifiAwareManager {
             mHandler.sendMessage(msg);
         }
 
-        @Override
-        public void onMatch(int peerId, byte[] serviceSpecificInfo, byte[] matchFilter) {
-            if (VDBG) Log.v(TAG, "onMatch: peerId=" + peerId);
-
+        private void onMatchCommon(int messageType, int peerId, byte[] serviceSpecificInfo,
+                byte[] matchFilter, int distanceMm) {
             Bundle data = new Bundle();
             data.putByteArray(MESSAGE_BUNDLE_KEY_MESSAGE, serviceSpecificInfo);
             data.putByteArray(MESSAGE_BUNDLE_KEY_MESSAGE2, matchFilter);
 
-            Message msg = mHandler.obtainMessage(CALLBACK_MATCH);
+            Message msg = mHandler.obtainMessage(messageType);
             msg.arg1 = peerId;
+            msg.arg2 = distanceMm;
             msg.setData(data);
             mHandler.sendMessage(msg);
+        }
+
+        @Override
+        public void onMatch(int peerId, byte[] serviceSpecificInfo, byte[] matchFilter) {
+            if (VDBG) Log.v(TAG, "onMatch: peerId=" + peerId);
+
+            onMatchCommon(CALLBACK_MATCH, peerId, serviceSpecificInfo, matchFilter, 0);
+        }
+
+        @Override
+        public void onMatchWithDistance(int peerId, byte[] serviceSpecificInfo, byte[] matchFilter,
+                int distanceMm) {
+            if (VDBG) {
+                Log.v(TAG, "onMatchWithDistance: peerId=" + peerId + ", distanceMm=" + distanceMm);
+            }
+
+            onMatchCommon(CALLBACK_MATCH_WITH_DISTANCE, peerId, serviceSpecificInfo, matchFilter,
+                    distanceMm);
         }
 
         @Override

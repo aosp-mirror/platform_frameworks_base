@@ -19,20 +19,17 @@ package android.net.wifi.aware;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.net.wifi.RttManager;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Parcel;
-import android.os.RemoteException;
 import android.os.test.TestLooper;
 import android.test.suitebuilder.annotation.SmallTest;
 
@@ -407,6 +404,7 @@ public class WifiAwareManagerTest {
         final byte[] matchFilter = { 1, 12, 3, 31, 32 }; // bad data!
         final int messageId = 2123;
         final int reason = AWARE_STATUS_ERROR;
+        final int distanceMm = 100;
 
         InOrder inOrder = inOrder(mockCallback, mockSessionCallback, mockAwareService,
                 mockSubscribeSession);
@@ -442,6 +440,8 @@ public class WifiAwareManagerTest {
         // (3) ...
         subscribeSession.getValue().sendMessage(peerHandle, messageId, string1.getBytes());
         sessionProxyCallback.getValue().onMatch(peerHandle.peerId, string1.getBytes(), matchFilter);
+        sessionProxyCallback.getValue().onMatchWithDistance(peerHandle.peerId, string1.getBytes(),
+                matchFilter, distanceMm);
         sessionProxyCallback.getValue().onMessageReceived(peerHandle.peerId, string1.getBytes());
         sessionProxyCallback.getValue().onMessageSendFail(messageId, reason);
         sessionProxyCallback.getValue().onMessageSendSuccess(messageId);
@@ -450,7 +450,9 @@ public class WifiAwareManagerTest {
         inOrder.verify(mockAwareService).sendMessage(eq(clientId), eq(sessionId),
                 eq(peerHandle.peerId), eq(string1.getBytes()), eq(messageId), eq(0));
         inOrder.verify(mockSessionCallback).onServiceDiscovered(peerIdCaptor.capture(),
-                eq(string1.getBytes()), (List<byte[]>) isNull());
+                eq(string1.getBytes()), isNull());
+        inOrder.verify(mockSessionCallback).onServiceDiscoveredWithinRange(peerIdCaptor.capture(),
+                eq(string1.getBytes()), isNull(), eq(distanceMm));
         assertEquals((peerIdCaptor.getValue()).peerId, peerHandle.peerId);
         inOrder.verify(mockSessionCallback).onMessageReceived(peerIdCaptor.capture(),
                 eq(string1.getBytes()));
@@ -685,11 +687,18 @@ public class WifiAwareManagerTest {
         SubscribeConfig subscribeConfig = new SubscribeConfig.Builder().build();
 
         collector.checkThat("mServiceName", subscribeConfig.mServiceName, equalTo(null));
+        collector.checkThat("mServiceSpecificInfo", subscribeConfig.mServiceSpecificInfo,
+                equalTo(null));
+        collector.checkThat("mMatchFilter", subscribeConfig.mMatchFilter, equalTo(null));
         collector.checkThat("mSubscribeType", subscribeConfig.mSubscribeType,
                 equalTo(SubscribeConfig.SUBSCRIBE_TYPE_PASSIVE));
         collector.checkThat("mTtlSec", subscribeConfig.mTtlSec, equalTo(0));
         collector.checkThat("mEnableTerminateNotification",
                 subscribeConfig.mEnableTerminateNotification, equalTo(true));
+        collector.checkThat("mMinDistanceCmSet", subscribeConfig.mMinDistanceMmSet, equalTo(false));
+        collector.checkThat("mMinDistanceMm", subscribeConfig.mMinDistanceMm, equalTo(0));
+        collector.checkThat("mMaxDistanceMmSet", subscribeConfig.mMaxDistanceMmSet, equalTo(false));
+        collector.checkThat("mMaxDistanceMm", subscribeConfig.mMaxDistanceMm, equalTo(0));
     }
 
     @Test
@@ -698,16 +707,19 @@ public class WifiAwareManagerTest {
         final String serviceSpecificInfo = "long arbitrary string with some info";
         final byte[] matchFilter = { 1, 16, 1, 22 };
         final int subscribeType = SubscribeConfig.SUBSCRIBE_TYPE_PASSIVE;
-        final int subscribeCount = 10;
         final int subscribeTtl = 15;
         final boolean enableTerminateNotification = false;
+        final int minDistance = 10;
+        final int maxDistance = 50;
 
         SubscribeConfig subscribeConfig = new SubscribeConfig.Builder().setServiceName(serviceName)
                 .setServiceSpecificInfo(serviceSpecificInfo.getBytes()).setMatchFilter(
-                        new TlvBufferUtils.TlvIterable(0, 1, matchFilter).toList())
+                    new TlvBufferUtils.TlvIterable(0, 1, matchFilter).toList())
                 .setSubscribeType(subscribeType)
                 .setTtlSec(subscribeTtl)
-                .setTerminateNotificationEnabled(enableTerminateNotification).build();
+                .setTerminateNotificationEnabled(enableTerminateNotification)
+                .setMinDistanceMm(minDistance)
+                .setMaxDistanceMm(maxDistance).build();
 
         collector.checkThat("mServiceName", serviceName.getBytes(),
                 equalTo(subscribeConfig.mServiceName));
@@ -719,6 +731,10 @@ public class WifiAwareManagerTest {
         collector.checkThat("mTtlSec", subscribeTtl, equalTo(subscribeConfig.mTtlSec));
         collector.checkThat("mEnableTerminateNotification", enableTerminateNotification,
                 equalTo(subscribeConfig.mEnableTerminateNotification));
+        collector.checkThat("mMinDistanceMmSet", true, equalTo(subscribeConfig.mMinDistanceMmSet));
+        collector.checkThat("mMinDistanceMm", minDistance, equalTo(subscribeConfig.mMinDistanceMm));
+        collector.checkThat("mMaxDistanceMmSet", true, equalTo(subscribeConfig.mMaxDistanceMmSet));
+        collector.checkThat("mMaxDistanceMm", maxDistance, equalTo(subscribeConfig.mMaxDistanceMm));
     }
 
     @Test
@@ -729,13 +745,17 @@ public class WifiAwareManagerTest {
         final int subscribeType = SubscribeConfig.SUBSCRIBE_TYPE_PASSIVE;
         final int subscribeTtl = 15;
         final boolean enableTerminateNotification = true;
+        final int minDistance = 10;
+        final int maxDistance = 50;
 
         SubscribeConfig subscribeConfig = new SubscribeConfig.Builder().setServiceName(serviceName)
                 .setServiceSpecificInfo(serviceSpecificInfo.getBytes()).setMatchFilter(
                         new TlvBufferUtils.TlvIterable(0, 1, matchFilter).toList())
                 .setSubscribeType(subscribeType)
                 .setTtlSec(subscribeTtl)
-                .setTerminateNotificationEnabled(enableTerminateNotification).build();
+                .setTerminateNotificationEnabled(enableTerminateNotification)
+                .setMinDistanceMm(minDistance)
+                .setMaxDistanceMm(maxDistance).build();
 
         Parcel parcelW = Parcel.obtain();
         subscribeConfig.writeToParcel(parcelW, 0);
@@ -769,11 +789,15 @@ public class WifiAwareManagerTest {
         PublishConfig publishConfig = new PublishConfig.Builder().build();
 
         collector.checkThat("mServiceName", publishConfig.mServiceName, equalTo(null));
+        collector.checkThat("mServiceSpecificInfo", publishConfig.mServiceSpecificInfo,
+                equalTo(null));
+        collector.checkThat("mMatchFilter", publishConfig.mMatchFilter, equalTo(null));
         collector.checkThat("mPublishType", publishConfig.mPublishType,
                 equalTo(PublishConfig.PUBLISH_TYPE_UNSOLICITED));
         collector.checkThat("mTtlSec", publishConfig.mTtlSec, equalTo(0));
         collector.checkThat("mEnableTerminateNotification",
                 publishConfig.mEnableTerminateNotification, equalTo(true));
+        collector.checkThat("mEnableRanging", publishConfig.mEnableRanging, equalTo(false));
     }
 
     @Test
@@ -782,16 +806,17 @@ public class WifiAwareManagerTest {
         final String serviceSpecificInfo = "long arbitrary string with some info";
         final byte[] matchFilter = { 1, 16, 1, 22 };
         final int publishType = PublishConfig.PUBLISH_TYPE_SOLICITED;
-        final int publishCount = 10;
         final int publishTtl = 15;
         final boolean enableTerminateNotification = false;
+        final boolean enableRanging = true;
 
         PublishConfig publishConfig = new PublishConfig.Builder().setServiceName(serviceName)
                 .setServiceSpecificInfo(serviceSpecificInfo.getBytes()).setMatchFilter(
                         new TlvBufferUtils.TlvIterable(0, 1, matchFilter).toList())
                 .setPublishType(publishType)
                 .setTtlSec(publishTtl)
-                .setTerminateNotificationEnabled(enableTerminateNotification).build();
+                .setTerminateNotificationEnabled(enableTerminateNotification)
+                .setRangingEnabled(enableRanging).build();
 
         collector.checkThat("mServiceName", serviceName.getBytes(),
                 equalTo(publishConfig.mServiceName));
@@ -802,6 +827,7 @@ public class WifiAwareManagerTest {
         collector.checkThat("mTtlSec", publishTtl, equalTo(publishConfig.mTtlSec));
         collector.checkThat("mEnableTerminateNotification", enableTerminateNotification,
                 equalTo(publishConfig.mEnableTerminateNotification));
+        collector.checkThat("mEnableRanging", enableRanging, equalTo(publishConfig.mEnableRanging));
     }
 
     @Test
@@ -810,16 +836,17 @@ public class WifiAwareManagerTest {
         final String serviceSpecificInfo = "long arbitrary string with some info";
         final byte[] matchFilter = { 1, 16, 1, 22 };
         final int publishType = PublishConfig.PUBLISH_TYPE_SOLICITED;
-        final int publishCount = 10;
         final int publishTtl = 15;
         final boolean enableTerminateNotification = false;
+        final boolean enableRanging = true;
 
         PublishConfig publishConfig = new PublishConfig.Builder().setServiceName(serviceName)
                 .setServiceSpecificInfo(serviceSpecificInfo.getBytes()).setMatchFilter(
                         new TlvBufferUtils.TlvIterable(0, 1, matchFilter).toList())
                 .setPublishType(publishType)
                 .setTtlSec(publishTtl)
-                .setTerminateNotificationEnabled(enableTerminateNotification).build();
+                .setTerminateNotificationEnabled(enableTerminateNotification)
+                .setRangingEnabled(enableRanging).build();
 
         Parcel parcelW = Parcel.obtain();
         publishConfig.writeToParcel(parcelW, 0);
