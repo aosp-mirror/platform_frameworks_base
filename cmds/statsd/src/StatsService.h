@@ -124,12 +124,17 @@ private:
     /**
      * Trigger a broadcast.
      */
-    status_t cmd_trigger_broadcast(Vector<String8>& args);
+    status_t cmd_trigger_broadcast(FILE* out, Vector<String8>& args);
 
     /**
      * Handle the config sub-command.
      */
     status_t cmd_config(FILE* in, FILE* out, FILE* err, Vector<String8>& args);
+
+    /**
+     * Prints some basic stats to std out.
+     */
+    status_t cmd_print_stats(FILE* out);
 
     /**
      * Print the event log.

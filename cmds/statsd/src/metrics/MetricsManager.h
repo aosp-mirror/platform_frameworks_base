@@ -46,6 +46,8 @@ public:
     // Config source owner can call onDumpReport() to get all the metrics collected.
     std::vector<std::unique_ptr<std::vector<uint8_t>>> onDumpReport();
 
+    // Computes the total byte size of all metrics managed by a single config source.
+    // Does not change the state.
     size_t byteSize();
 
 private:

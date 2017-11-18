@@ -68,6 +68,16 @@ public:
     void SetConfigReceiver(const ConfigKey& key, const string& pkg, const string& cls);
 
     /**
+     * Returns the package name and class name representing the broadcast receiver for this config.
+     */
+    const pair<string, string> GetConfigReceiver(const ConfigKey& key);
+
+    /**
+     * Returns all config keys registered.
+     */
+    vector<ConfigKey> GetAllConfigKeys();
+
+    /**
      * Erase any broadcast receiver associated with this config key.
      */
     void RemoveConfigReceiver(const ConfigKey& key);

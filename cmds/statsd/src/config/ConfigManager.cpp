@@ -134,12 +134,34 @@ void ConfigManager::RemoveConfigs(int uid) {
     }
 }
 
+vector<ConfigKey> ConfigManager::GetAllConfigKeys() {
+    vector<ConfigKey> ret;
+    for (auto it = mConfigs.cbegin(); it != mConfigs.cend(); ++it) {
+        ret.push_back(it->first);
+    }
+    return ret;
+}
+
+const pair<string, string> ConfigManager::GetConfigReceiver(const ConfigKey& key) {
+    auto it = mConfigReceivers.find(key);
+    if (it == mConfigReceivers.end()) {
+        return pair<string,string>();
+    } else {
+        return it->second;
+    }
+}
+
 void ConfigManager::Dump(FILE* out) {
     fprintf(out, "CONFIGURATIONS (%d)\n", (int)mConfigs.size());
     fprintf(out, "     uid name\n");
     for (unordered_map<ConfigKey, StatsdConfig>::const_iterator it = mConfigs.begin();
          it != mConfigs.end(); it++) {
         fprintf(out, "  %6d %s\n", it->first.GetUid(), it->first.GetName().c_str());
+        auto receiverIt = mConfigReceivers.find(it->first);
+        if (receiverIt != mConfigReceivers.end()) {
+            fprintf(out, "    -> received by %s, %s\n", receiverIt->second.first.c_str(),
+                    receiverIt->second.second.c_str());
+        }
         // TODO: Print the contents of the config too.
     }
 }
