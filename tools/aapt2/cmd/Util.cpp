@@ -140,12 +140,27 @@ static xml::NamespaceDecl CreateAndroidNamespaceDecl() {
   return decl;
 }
 
+// Returns a copy of 'name' which conforms to the regex '[a-zA-Z]+[a-zA-Z0-9_]*' by
+// replacing nonconforming characters with underscores.
+//
+// See frameworks/base/core/java/android/content/pm/PackageParser.java which
+// checks this at runtime.
 static std::string MakePackageSafeName(const std::string &name) {
   std::string result(name);
+  bool first = true;
   for (char &c : result) {
-    if (c == '-') {
-      c = '_';
+    if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) {
+      first = false;
+      continue;
     }
+    if (!first) {
+      if (c >= '0' && c <= '9') {
+        continue;
+      }
+    }
+
+    c = '_';
+    first = false;
   }
   return result;
 }
