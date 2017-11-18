@@ -58,11 +58,12 @@ public final class StatsManager {
             try {
                 IStatsManager service = getIStatsManagerLocked();
                 if (service == null) {
-                    throw new RuntimeException("StatsD service connection lost");
+                    Slog.d(TAG, "Failed to find statsd when adding configuration");
+                    return false;
                 }
                 return service.addConfiguration(configKey, config, pkg, cls);
             } catch (RemoteException e) {
-                Slog.d(TAG, "Failed to connect to statsd when getting data");
+                Slog.d(TAG, "Failed to connect to statsd when adding configuration");
                 return false;
             }
         }
@@ -80,11 +81,12 @@ public final class StatsManager {
             try {
                 IStatsManager service = getIStatsManagerLocked();
                 if (service == null) {
-                    throw new RuntimeException("StatsD service connection lost");
+                    Slog.d(TAG, "Failed to find statsd when removing configuration");
+                    return false;
                 }
                 return service.removeConfiguration(configKey);
             } catch (RemoteException e) {
-                Slog.d(TAG, "Failed to connect to statsd when getting data");
+                Slog.d(TAG, "Failed to connect to statsd when removing configuration");
                 return false;
             }
         }
@@ -102,7 +104,8 @@ public final class StatsManager {
             try {
                 IStatsManager service = getIStatsManagerLocked();
                 if (service == null) {
-                    throw new RuntimeException("StatsD service connection lost");
+                    Slog.d(TAG, "Failed to find statsd when getting data");
+                    return null;
                 }
                 return service.getData(configKey);
             } catch (RemoteException e) {
