@@ -80,15 +80,15 @@ void ConfigManager::RemoveConfig(const ConfigKey& key) {
         // Remove from map
         mConfigs.erase(it);
 
-        // Remove from disk
-        remove_saved_configs(key);
-
         // Tell everyone
         for (auto& listener : mListeners) {
             listener->OnConfigRemoved(key);
         }
     }
-    // If we didn't find it, just quietly ignore it.
+
+    // Remove from disk. There can still be a lingering file on disk so we check
+    // whether or not the config was on memory.
+    remove_saved_configs(key);
 }
 
 void ConfigManager::remove_saved_configs(const ConfigKey& key) {
@@ -102,9 +102,7 @@ void ConfigManager::remove_saved_configs(const ConfigKey& key) {
     while ((de = readdir(dir.get()))) {
         char* name = de->d_name;
         if (name[0] != '.' && strncmp(name, prefix.c_str(), prefix.size()) == 0) {
-            if (remove(StringPrintf("%s/%d-%s", STATS_SERVICE_DIR, key.GetUid(),
-                                    key.GetName().c_str())
-                               .c_str()) != 0) {
+            if (remove(StringPrintf("%s/%s", STATS_SERVICE_DIR, name).c_str()) != 0) {
                 ALOGD("no file found");
             }
         }
@@ -212,6 +210,11 @@ void ConfigManager::readConfigFromDisk() {
 
 void ConfigManager::update_saved_configs(const ConfigKey& key, const StatsdConfig& config) {
     mkdir(STATS_SERVICE_DIR, S_IRWXU);
+
+    // If there is a pre-existing config with same key we should first delete it.
+    remove_saved_configs(key);
+
+    // Then we save the latest config.
     string file_name = StringPrintf("%s/%d-%s-%ld", STATS_SERVICE_DIR, key.GetUid(),
                                     key.GetName().c_str(), time(nullptr));
     int fd = open(file_name.c_str(), O_WRONLY | O_CREAT | O_CLOEXEC, S_IRUSR | S_IWUSR);
