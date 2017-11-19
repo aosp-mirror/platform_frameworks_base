@@ -30,11 +30,10 @@ using std::string;
 using android::util::ProtoOutputStream;
 
 LogEvent::LogEvent(log_msg& msg) {
-    android_log_context context =
+    mContext =
             create_android_log_parser(msg.msg() + sizeof(uint32_t), msg.len() - sizeof(uint32_t));
     mTimestampNs = msg.entry_v1.sec * NS_PER_SEC + msg.entry_v1.nsec;
-    mContext = NULL;
-    init(context);
+    init(mContext);
 }
 
 LogEvent::LogEvent(int32_t tagId, uint64_t timestampNs) {
