@@ -22,11 +22,13 @@
 #include <set>
 #include <string>
 
+#include "androidfw/StringPiece.h"
+
 #include "Resource.h"
 #include "ResourceTable.h"
 #include "Source.h"
 #include "ValueVisitor.h"
-#include "androidfw/StringPiece.h"
+#include "io/Io.h"
 #include "process/IResourceTableConsumer.h"
 #include "xml/XmlDom.h"
 
@@ -62,7 +64,7 @@ class KeepSet {
   }
 
  private:
-  friend bool WriteKeepSet(std::ostream* out, const KeepSet& keep_set);
+  friend void WriteKeepSet(const KeepSet& keep_set, io::OutputStream* out);
 
   friend bool CollectLocations(const UsageLocation& location, const KeepSet& keep_set,
                                std::set<UsageLocation>* locations);
@@ -76,11 +78,12 @@ class KeepSet {
 
 bool CollectProguardRulesForManifest(xml::XmlResource* res, KeepSet* keep_set,
                                      bool main_dex_only = false);
-bool CollectProguardRules(xml::XmlResource* res, KeepSet* keep_set);
-bool CollectResourceReferences(aapt::IAaptContext* context, ResourceTable* table,
-                               KeepSet* keep_set);
 
-bool WriteKeepSet(std::ostream* out, const KeepSet& keep_set);
+bool CollectProguardRules(xml::XmlResource* res, KeepSet* keep_set);
+
+bool CollectResourceReferences(IAaptContext* context, ResourceTable* table, KeepSet* keep_set);
+
+void WriteKeepSet(const KeepSet& keep_set, io::OutputStream* out);
 
 bool CollectLocations(const UsageLocation& location, const KeepSet& keep_set,
                       std::set<UsageLocation>* locations);

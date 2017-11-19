@@ -78,7 +78,7 @@ inline ostream& operator<<(ostream& os, const ConfigKey& config) {
 
 /**
  * A hash function for ConfigKey so it can be used for unordered_map/set.
- * Unfortunately this hast to go in std namespace because C++ is fun!
+ * Unfortunately this has to go in std namespace because C++ is fun!
  */
 namespace std {
 

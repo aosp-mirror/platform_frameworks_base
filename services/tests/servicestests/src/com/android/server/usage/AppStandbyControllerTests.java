@@ -17,6 +17,9 @@
 package com.android.server.usage;
 
 import static android.app.usage.AppStandby.*;
+import static android.app.usage.UsageEvents.Event.NOTIFICATION_SEEN;
+import static android.app.usage.UsageEvents.Event.USER_INTERACTION;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
@@ -66,6 +69,10 @@ public class AppStandbyControllerTests {
     private static final long MINUTE_MS = 60 * 1000;
     private static final long HOUR_MS = 60 * MINUTE_MS;
     private static final long DAY_MS = 24 * HOUR_MS;
+
+    private static final long WORKING_SET_THRESHOLD = 12 * HOUR_MS;
+    private static final long FREQUENT_THRESHOLD = 24 * HOUR_MS;
+    private static final long RARE_THRESHOLD = 48 * HOUR_MS;
 
     private MyInjector mInjector;
 
@@ -168,6 +175,14 @@ public class AppStandbyControllerTests {
             return packageName != null && packageName.equals(mBoundWidgetPackage);
         }
 
+        @Override
+        String getAppIdleSettings() {
+            return "screen_thresholds=0/0/0/" + HOUR_MS + ",elapsed_thresholds=0/"
+                    + WORKING_SET_THRESHOLD + "/"
+                    + FREQUENT_THRESHOLD + "/"
+                    + RARE_THRESHOLD;
+        }
+
         // Internal methods
 
         void setDisplayOn(boolean on) {
@@ -225,12 +240,12 @@ public class AppStandbyControllerTests {
         AppStandbyController controller = setupController();
 
         setChargingState(controller, true);
-        mInjector.mElapsedRealtime = 8 * DAY_MS;
+        mInjector.mElapsedRealtime = RARE_THRESHOLD + 1;
         assertFalse(controller.isAppIdleFilteredOrParoled(PACKAGE_1, USER_ID,
                 mInjector.mElapsedRealtime, false));
 
         setChargingState(controller, false);
-        mInjector.mElapsedRealtime = 16 * DAY_MS;
+        mInjector.mElapsedRealtime = 2 * RARE_THRESHOLD + 2;
         controller.checkIdleStates(USER_ID);
         assertTrue(controller.isAppIdleFilteredOrParoled(PACKAGE_1, USER_ID,
                 mInjector.mElapsedRealtime, false));
@@ -247,12 +262,18 @@ public class AppStandbyControllerTests {
                         false));
     }
 
-    private void reportEvent(AppStandbyController controller, long elapsedTime) {
+    private void reportEvent(AppStandbyController controller, int eventType,
+            long elapsedTime) {
         // Back to ACTIVE on event
         UsageEvents.Event ev = new UsageEvents.Event();
         ev.mPackage = PACKAGE_1;
-        ev.mEventType = UsageEvents.Event.USER_INTERACTION;
+        ev.mEventType = eventType;
         controller.reportEvent(ev, elapsedTime, USER_ID);
+    }
+
+    private int getStandbyBucket(AppStandbyController controller) {
+        return controller.getAppStandbyBucket(PACKAGE_1, USER_ID, mInjector.mElapsedRealtime,
+                true);
     }
 
     @Test
@@ -261,29 +282,29 @@ public class AppStandbyControllerTests {
 
         assertTimeout(controller, 0, STANDBY_BUCKET_NEVER);
 
-        reportEvent(controller, 0);
+        reportEvent(controller, USER_INTERACTION, 0);
 
         // ACTIVE bucket
-        assertTimeout(controller, 11 * HOUR_MS, STANDBY_BUCKET_ACTIVE);
+        assertTimeout(controller, WORKING_SET_THRESHOLD - 1, STANDBY_BUCKET_ACTIVE);
 
         // WORKING_SET bucket
-        assertTimeout(controller, 25 * HOUR_MS, STANDBY_BUCKET_WORKING_SET);
+        assertTimeout(controller, WORKING_SET_THRESHOLD + 1, STANDBY_BUCKET_WORKING_SET);
 
         // WORKING_SET bucket
-        assertTimeout(controller, 47 * HOUR_MS, STANDBY_BUCKET_WORKING_SET);
+        assertTimeout(controller, FREQUENT_THRESHOLD - 1, STANDBY_BUCKET_WORKING_SET);
 
         // FREQUENT bucket
-        assertTimeout(controller, 4 * DAY_MS, STANDBY_BUCKET_FREQUENT);
+        assertTimeout(controller, FREQUENT_THRESHOLD + 1, STANDBY_BUCKET_FREQUENT);
 
         // RARE bucket
-        assertTimeout(controller, 9 * DAY_MS, STANDBY_BUCKET_RARE);
+        assertTimeout(controller, RARE_THRESHOLD + 1, STANDBY_BUCKET_RARE);
 
-        reportEvent(controller, 9 * DAY_MS);
+        reportEvent(controller, USER_INTERACTION, RARE_THRESHOLD + 1);
 
-        assertTimeout(controller, 9 * DAY_MS, STANDBY_BUCKET_ACTIVE);
+        assertTimeout(controller, RARE_THRESHOLD + 1, STANDBY_BUCKET_ACTIVE);
 
         // RARE bucket
-        assertTimeout(controller, 18 * DAY_MS, STANDBY_BUCKET_RARE);
+        assertTimeout(controller, RARE_THRESHOLD * 2 + 2, STANDBY_BUCKET_RARE);
     }
 
     @Test
@@ -293,23 +314,21 @@ public class AppStandbyControllerTests {
 
         assertTimeout(controller, 0, STANDBY_BUCKET_NEVER);
 
-        reportEvent(controller, 0);
+        reportEvent(controller, USER_INTERACTION, 0);
 
         // ACTIVE bucket
-        assertTimeout(controller, 11 * HOUR_MS, STANDBY_BUCKET_ACTIVE);
+        assertTimeout(controller, WORKING_SET_THRESHOLD - 1, STANDBY_BUCKET_ACTIVE);
 
         // WORKING_SET bucket
-        assertTimeout(controller, 25 * HOUR_MS, STANDBY_BUCKET_WORKING_SET);
+        assertTimeout(controller, WORKING_SET_THRESHOLD + 1, STANDBY_BUCKET_WORKING_SET);
 
         // RARE bucket, should fail because the screen wasn't ON.
-        mInjector.mElapsedRealtime = 9 * DAY_MS;
+        mInjector.mElapsedRealtime = RARE_THRESHOLD + 1;
         controller.checkIdleStates(USER_ID);
-        assertNotEquals(STANDBY_BUCKET_RARE,
-                controller.getAppStandbyBucket(PACKAGE_1, USER_ID, mInjector.mElapsedRealtime,
-                false));
+        assertNotEquals(STANDBY_BUCKET_RARE, getStandbyBucket(controller));
 
         mInjector.setDisplayOn(true);
-        assertTimeout(controller, 18 * DAY_MS, STANDBY_BUCKET_RARE);
+        assertTimeout(controller, RARE_THRESHOLD * 2 + 2, STANDBY_BUCKET_RARE);
     }
 
     @Test
@@ -318,13 +337,28 @@ public class AppStandbyControllerTests {
         setChargingState(controller, false);
 
         controller.forceIdleState(PACKAGE_1, USER_ID, true);
-        assertEquals(STANDBY_BUCKET_RARE, controller.getAppStandbyBucket(PACKAGE_1, USER_ID, 0,
-                true));
+        assertEquals(STANDBY_BUCKET_RARE, getStandbyBucket(controller));
         assertTrue(controller.isAppIdleFiltered(PACKAGE_1, UID_1, USER_ID, 0));
 
         controller.forceIdleState(PACKAGE_1, USER_ID, false);
         assertEquals(STANDBY_BUCKET_ACTIVE, controller.getAppStandbyBucket(PACKAGE_1, USER_ID, 0,
                 true));
         assertFalse(controller.isAppIdleFiltered(PACKAGE_1, UID_1, USER_ID, 0));
+    }
+
+    @Test
+    public void testNotificationEvent() throws Exception {
+        AppStandbyController controller = setupController();
+        setChargingState(controller, false);
+
+        reportEvent(controller, USER_INTERACTION, 0);
+        assertEquals(STANDBY_BUCKET_ACTIVE, getStandbyBucket(controller));
+        mInjector.mElapsedRealtime = 1;
+        reportEvent(controller, NOTIFICATION_SEEN, mInjector.mElapsedRealtime);
+        assertEquals(STANDBY_BUCKET_ACTIVE, getStandbyBucket(controller));
+
+        controller.forceIdleState(PACKAGE_1, USER_ID, true);
+        reportEvent(controller, NOTIFICATION_SEEN, mInjector.mElapsedRealtime);
+        assertEquals(STANDBY_BUCKET_WORKING_SET, getStandbyBucket(controller));
     }
 }

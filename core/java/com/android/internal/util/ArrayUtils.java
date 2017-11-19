@@ -30,6 +30,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -131,6 +132,13 @@ public class ArrayUtils {
      */
     public static boolean isEmpty(@Nullable Collection<?> array) {
         return array == null || array.isEmpty();
+    }
+
+    /**
+     * Checks if given map is null or has zero elements.
+     */
+    public static boolean isEmpty(@Nullable Map<?, ?> map) {
+        return map == null || map.isEmpty();
     }
 
     /**

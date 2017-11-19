@@ -44,7 +44,7 @@ import java.util.List;
 @SystemService(Context.WIFI_RTT2_SERVICE)
 public class WifiRttManager {
     private static final String TAG = "WifiRttManager";
-    private static final boolean VDBG = true;
+    private static final boolean VDBG = false;
 
     private final Context mContext;
     private final IWifiRttManager mService;

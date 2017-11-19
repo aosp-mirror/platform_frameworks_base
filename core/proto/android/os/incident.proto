@@ -143,7 +143,11 @@ message IncidentProto {
         (section).args = "activity --proto broadcasts"
     ];
 
-    optional com.android.server.am.proto.ServiceProto amservices = 3014;
+    optional com.android.server.am.proto.ActiveServicesProto amservices = 3014 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "activity --proto service"
+    ];
+
     optional com.android.server.am.proto.ProcessProto amprocesses = 3015;
 
     optional com.android.server.AlarmManagerServiceProto alarm = 3016 [

@@ -36,10 +36,9 @@ TEST(UidMapTest, TestIsolatedUID) {
     sp<UidMap> m = new UidMap();
     StatsLogProcessor p(m, nullptr);
     LogEvent addEvent(android::util::ISOLATED_UID_CHANGED, 1);
-    android_log_event_list* list = addEvent.GetAndroidLogEventList();
-    *list << 100;  // parent UID
-    *list << 101;  // isolated UID
-    *list << 1;    // Indicates creation.
+    addEvent.write(100);  // parent UID
+    addEvent.write(101);  // isolated UID
+    addEvent.write(1);    // Indicates creation.
     addEvent.init();
 
     EXPECT_EQ(101, m->getParentUidOrSelf(101));
@@ -48,10 +47,9 @@ TEST(UidMapTest, TestIsolatedUID) {
     EXPECT_EQ(100, m->getParentUidOrSelf(101));
 
     LogEvent removeEvent(android::util::ISOLATED_UID_CHANGED, 1);
-    list = removeEvent.GetAndroidLogEventList();
-    *list << 100;  // parent UID
-    *list << 101;  // isolated UID
-    *list << 0;    // Indicates removal.
+    removeEvent.write(100);  // parent UID
+    removeEvent.write(101);  // isolated UID
+    removeEvent.write(0);    // Indicates removal.
     removeEvent.init();
     p.OnLogEvent(removeEvent);
     EXPECT_EQ(101, m->getParentUidOrSelf(101));

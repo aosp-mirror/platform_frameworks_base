@@ -26,12 +26,11 @@ import android.content.IntentSender;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ChangedPackages;
-import android.content.pm.InstantAppInfo;
 import android.content.pm.FeatureInfo;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageDeleteObserver;
-import android.content.pm.IPackageInstallObserver;
 import android.content.pm.IPackageStatsObserver;
+import android.content.pm.InstantAppInfo;
 import android.content.pm.InstrumentationInfo;
 import android.content.pm.IntentFilterVerificationInfo;
 import android.content.pm.KeySet;
@@ -650,15 +649,6 @@ public class MockPackageManager extends PackageManager {
 
     @Override
     public PackageInfo getPackageArchiveInfo(String archiveFilePath, int flags) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * @hide - to match hiding in superclass
-     */
-    @Override
-    public void installPackage(Uri packageURI, IPackageInstallObserver observer,
-            int flags, String installerPackageName) {
         throw new UnsupportedOperationException();
     }
 

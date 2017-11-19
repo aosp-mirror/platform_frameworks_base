@@ -27,7 +27,7 @@ using namespace android::os::statsd;
 using std::unordered_map;
 using std::vector;
 
-const int TAG_ID = 123;
+const int32_t TAG_ID = 123;
 const int FIELD_ID_1 = 1;
 const int FIELD_ID_2 = 2;
 const int FIELD_ID_3 = 2;
@@ -43,8 +43,6 @@ TEST(LogEntryMatcherTest, TestSimpleMatcher) {
     simpleMatcher->set_tag(TAG_ID);
 
     LogEvent event(TAG_ID, 0);
-
-    // Convert to a LogEvent
     event.init();
 
     // Test
@@ -63,10 +61,8 @@ TEST(LogEntryMatcherTest, TestBoolMatcher) {
 
     // Set up the event
     LogEvent event(TAG_ID, 0);
-    auto list = event.GetAndroidLogEventList();
-    *list << true;
-    *list << false;
-
+    event.write(true);
+    event.write(false);
     // Convert to a LogEvent
     event.init();
 
@@ -99,14 +95,44 @@ TEST(LogEntryMatcherTest, TestStringMatcher) {
 
     // Set up the event
     LogEvent event(TAG_ID, 0);
-    auto list = event.GetAndroidLogEventList();
-    *list << "some value";
-
+    event.write("some value");
     // Convert to a LogEvent
     event.init();
 
     // Test
     EXPECT_TRUE(matchesSimple(*simpleMatcher, event));
+}
+
+TEST(LogEntryMatcherTest, TestMultiFieldsMatcher) {
+    // Set up the matcher
+    LogEntryMatcher matcher;
+    auto simpleMatcher = matcher.mutable_simple_log_entry_matcher();
+    simpleMatcher->set_tag(TAG_ID);
+    auto keyValue1 = simpleMatcher->add_key_value_matcher();
+    keyValue1->mutable_key_matcher()->set_key(FIELD_ID_1);
+    auto keyValue2 = simpleMatcher->add_key_value_matcher();
+    keyValue2->mutable_key_matcher()->set_key(FIELD_ID_2);
+
+    // Set up the event
+    LogEvent event(TAG_ID, 0);
+    event.write(2);
+    event.write(3);
+
+    // Convert to a LogEvent
+    event.init();
+
+    // Test
+    keyValue1->set_eq_int(2);
+    keyValue2->set_eq_int(3);
+    EXPECT_TRUE(matchesSimple(*simpleMatcher, event));
+
+    keyValue1->set_eq_int(2);
+    keyValue2->set_eq_int(4);
+    EXPECT_FALSE(matchesSimple(*simpleMatcher, event));
+
+    keyValue1->set_eq_int(4);
+    keyValue2->set_eq_int(3);
+    EXPECT_FALSE(matchesSimple(*simpleMatcher, event));
 }
 
 TEST(LogEntryMatcherTest, TestIntComparisonMatcher) {
@@ -120,9 +146,7 @@ TEST(LogEntryMatcherTest, TestIntComparisonMatcher) {
 
     // Set up the event
     LogEvent event(TAG_ID, 0);
-    auto list = event.GetAndroidLogEventList();
-    *list << 11;
-
+    event.write(11);
     event.init();
 
     // Test
@@ -168,8 +192,6 @@ TEST(LogEntryMatcherTest, TestIntComparisonMatcher) {
     EXPECT_FALSE(matchesSimple(*simpleMatcher, event));
 }
 
-#if 0
-
 TEST(LogEntryMatcherTest, TestFloatComparisonMatcher) {
     // Set up the matcher
     LogEntryMatcher matcher;
@@ -179,22 +201,28 @@ TEST(LogEntryMatcherTest, TestFloatComparisonMatcher) {
     auto keyValue = simpleMatcher->add_key_value_matcher();
     keyValue->mutable_key_matcher()->set_key(FIELD_ID_1);
 
-    LogEvent event;
-    event.tagId = TAG_ID;
-
+    LogEvent event1(TAG_ID, 0);
     keyValue->set_lt_float(10.0);
-    event.floatMap[FIELD_ID_1] = 10.1;
-    EXPECT_FALSE(matchesSimple(*simpleMatcher, event));
-    event.floatMap[FIELD_ID_1] = 9.9;
-    EXPECT_TRUE(matchesSimple(*simpleMatcher, event));
+    event1.write(10.1f);
+    event1.init();
+    EXPECT_FALSE(matchesSimple(*simpleMatcher, event1));
 
+    LogEvent event2(TAG_ID, 0);
+    event2.write(9.9f);
+    event2.init();
+    EXPECT_TRUE(matchesSimple(*simpleMatcher, event2));
+
+    LogEvent event3(TAG_ID, 0);
+    event3.write(10.1f);
+    event3.init();
     keyValue->set_gt_float(10.0);
-    event.floatMap[FIELD_ID_1] = 10.1;
-    EXPECT_TRUE(matchesSimple(*simpleMatcher, event));
-    event.floatMap[FIELD_ID_1] = 9.9;
-    EXPECT_FALSE(matchesSimple(*simpleMatcher, event));
+    EXPECT_TRUE(matchesSimple(*simpleMatcher, event3));
+
+    LogEvent event4(TAG_ID, 0);
+    event4.write(9.9f);
+    event4.init();
+    EXPECT_FALSE(matchesSimple(*simpleMatcher, event4));
 }
-#endif
 
 // Helper for the composite matchers.
 void addSimpleMatcher(SimpleLogEntryMatcher* simpleMatcher, int tag, int key, int val) {

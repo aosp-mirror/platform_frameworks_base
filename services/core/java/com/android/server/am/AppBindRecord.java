@@ -17,6 +17,9 @@
 package com.android.server.am;
 
 import android.util.ArraySet;
+import android.util.proto.ProtoOutputStream;
+
+import com.android.server.am.proto.AppBindRecordProto;
 
 import java.io.PrintWriter;
 
@@ -59,5 +62,19 @@ final class AppBindRecord {
         return "AppBindRecord{"
             + Integer.toHexString(System.identityHashCode(this))
             + " " + service.shortName + ":" + client.processName + "}";
+    }
+
+    void writeToProto(ProtoOutputStream proto, long fieldId) {
+        long token = proto.start(fieldId);
+        proto.write(AppBindRecordProto.HEX_HASH,
+                Integer.toHexString(System.identityHashCode(this)));
+        if (client != null) {
+            client.writeToProto(proto, AppBindRecordProto.CLIENT);
+        }
+        final int N = connections.size();
+        for (int i=0; i<N; i++) {
+            connections.valueAt(i).writeToProto(proto, AppBindRecordProto.CONNECTIONS);
+        }
+        proto.end(token);
     }
 }

@@ -29,21 +29,71 @@ using std::ostringstream;
 using std::string;
 using android::util::ProtoOutputStream;
 
-// We need to keep a copy of the android_log_event_list owned by this instance so that the char*
-// for strings is not cleared before we can read them.
-LogEvent::LogEvent(log_msg& msg) : mList(msg) {
-    init(msg.entry_v1.sec * NS_PER_SEC + msg.entry_v1.nsec, &mList);
+LogEvent::LogEvent(log_msg& msg) {
+    mContext =
+            create_android_log_parser(msg.msg() + sizeof(uint32_t), msg.len() - sizeof(uint32_t));
+    mTimestampNs = msg.entry_v1.sec * NS_PER_SEC + msg.entry_v1.nsec;
+    init(mContext);
 }
 
-LogEvent::LogEvent(int tag, uint64_t timestampNs) : mList(tag), mTimestampNs(timestampNs) {
-}
-
-LogEvent::~LogEvent() {
+LogEvent::LogEvent(int32_t tagId, uint64_t timestampNs) {
+    mTimestampNs = timestampNs;
+    mTagId = tagId;
+    mContext = create_android_logger(1937006964); // the event tag shared by all stats logs
+    if (mContext) {
+        android_log_write_int32(mContext, tagId);
+    }
 }
 
 void LogEvent::init() {
-    mList.convert_to_reader();
-    init(mTimestampNs, &mList);
+    if (mContext) {
+        const char* buffer;
+        size_t len = android_log_write_list_buffer(mContext, &buffer);
+        // turns to reader mode
+        mContext = create_android_log_parser(buffer, len);
+        init(mContext);
+    }
+}
+
+bool LogEvent::write(int32_t value) {
+    if (mContext) {
+        return android_log_write_int32(mContext, value) >= 0;
+    }
+    return false;
+}
+
+bool LogEvent::write(uint32_t value) {
+    if (mContext) {
+        return android_log_write_int32(mContext, value) >= 0;
+    }
+    return false;
+}
+
+bool LogEvent::write(uint64_t value) {
+    if (mContext) {
+        return android_log_write_int64(mContext, value) >= 0;
+    }
+    return false;
+}
+
+bool LogEvent::write(const string& value) {
+    if (mContext) {
+        return android_log_write_string8_len(mContext, value.c_str(), value.length()) >= 0;
+    }
+    return false;
+}
+
+bool LogEvent::write(float value) {
+    if (mContext) {
+        return android_log_write_float32(mContext, value) >= 0;
+    }
+    return false;
+}
+
+LogEvent::~LogEvent() {
+    if (mContext) {
+        android_log_destroy(&mContext);
+    }
 }
 
 /**
@@ -51,22 +101,25 @@ void LogEvent::init() {
  * The goal is to do as little preprocessing as possible, because we read a tiny fraction
  * of the elements that are written to the log.
  */
-void LogEvent::init(int64_t timestampNs, android_log_event_list* reader) {
-    mTimestampNs = timestampNs;
-    mTagId = reader->tag();
-
+void LogEvent::init(android_log_context context) {
     mElements.clear();
     android_log_list_element elem;
-
     // TODO: The log is actually structured inside one list.  This is convenient
     // because we'll be able to use it to put the attribution (WorkSource) block first
     // without doing our own tagging scheme.  Until that change is in, just drop the
     // list-related log elements and the order we get there is our index-keyed data
     // structure.
+    int i = 0;
     do {
-        elem = android_log_read_next(reader->context());
+        elem = android_log_read_next(context);
         switch ((int)elem.type) {
             case EVENT_TYPE_INT:
+                // elem at [0] is EVENT_TYPE_LIST, [1] is the tag id. If we add WorkSource, it would
+                // be the list starting at [2].
+                if (i == 1) {
+                    mTagId = elem.data.int32;
+                    break;
+                }
             case EVENT_TYPE_FLOAT:
             case EVENT_TYPE_STRING:
             case EVENT_TYPE_LONG:
@@ -81,11 +134,8 @@ void LogEvent::init(int64_t timestampNs, android_log_event_list* reader) {
             default:
                 break;
         }
+        i++;
     } while ((elem.type != EVENT_TYPE_UNKNOWN) && !elem.complete);
-}
-
-android_log_event_list* LogEvent::GetAndroidLogEventList() {
-    return &mList;
 }
 
 int64_t LogEvent::GetLong(size_t key, status_t* err) const {

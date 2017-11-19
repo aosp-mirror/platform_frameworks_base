@@ -23,8 +23,7 @@
 
 namespace aapt {
 
-std::unique_ptr<ClassDefinition> GenerateManifestClass(IDiagnostics* diag,
-                                                       xml::XmlResource* res);
+std::unique_ptr<ClassDefinition> GenerateManifestClass(IDiagnostics* diag, xml::XmlResource* res);
 
 }  // namespace aapt
 

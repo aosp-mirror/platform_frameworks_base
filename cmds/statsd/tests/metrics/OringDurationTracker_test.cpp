@@ -47,16 +47,41 @@ TEST(OringDurationTrackerTest, TestDurationOverlap) {
     uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
     int64_t durationTimeNs = 2 * 1000;
 
-    OringDurationTracker tracker(wizard, 1, bucketStartTimeNs, bucketSizeNs, buckets);
+    OringDurationTracker tracker(wizard, 1, false, bucketStartTimeNs, bucketSizeNs, buckets);
 
     tracker.noteStart("2:maps", true, eventStartTimeNs, key1);
     tracker.noteStart("2:maps", true, eventStartTimeNs + 10, key1);  // overlapping wl
 
-    tracker.noteStop("2:maps", eventStartTimeNs + durationTimeNs);
+    tracker.noteStop("2:maps", eventStartTimeNs + durationTimeNs, false);
 
     tracker.flushIfNeeded(bucketStartTimeNs + bucketSizeNs + 1);
     EXPECT_EQ(1u, buckets.size());
     EXPECT_EQ(durationTimeNs, buckets[0].mDuration);
+}
+
+TEST(OringDurationTrackerTest, TestDurationNested) {
+    sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
+
+    ConditionKey key1;
+    key1["APP_BACKGROUND"] = "1:maps|";
+
+    vector<DurationBucket> buckets;
+
+    uint64_t bucketStartTimeNs = 10000000000;
+    uint64_t eventStartTimeNs = bucketStartTimeNs + 1;
+    uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
+
+    OringDurationTracker tracker(wizard, 1, true, bucketStartTimeNs, bucketSizeNs, buckets);
+
+    tracker.noteStart("2:maps", true, eventStartTimeNs, key1);
+    tracker.noteStart("2:maps", true, eventStartTimeNs + 10, key1);  // overlapping wl
+
+    tracker.noteStop("2:maps", eventStartTimeNs + 2000, false);
+    tracker.noteStop("2:maps", eventStartTimeNs + 2003, false);
+
+    tracker.flushIfNeeded(bucketStartTimeNs + bucketSizeNs + 1);
+    EXPECT_EQ(1u, buckets.size());
+    EXPECT_EQ(2003, buckets[0].mDuration);
 }
 
 TEST(OringDurationTrackerTest, TestDurationConditionChange) {
@@ -75,18 +100,50 @@ TEST(OringDurationTrackerTest, TestDurationConditionChange) {
     uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
     int64_t durationTimeNs = 2 * 1000;
 
-    OringDurationTracker tracker(wizard, 1, bucketStartTimeNs, bucketSizeNs, buckets);
+    OringDurationTracker tracker(wizard, 1, false, bucketStartTimeNs, bucketSizeNs, buckets);
 
     tracker.noteStart("2:maps", true, eventStartTimeNs, key1);
 
     tracker.onSlicedConditionMayChange(eventStartTimeNs + 5);
 
-    tracker.noteStop("2:maps", eventStartTimeNs + durationTimeNs);
+    tracker.noteStop("2:maps", eventStartTimeNs + durationTimeNs, false);
 
     tracker.flushIfNeeded(bucketStartTimeNs + bucketSizeNs + 1);
     EXPECT_EQ(1u, buckets.size());
     EXPECT_EQ(5, buckets[0].mDuration);
 }
+
+TEST(OringDurationTrackerTest, TestDurationConditionChangeNested) {
+    sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
+
+    ConditionKey key1;
+    key1["APP_BACKGROUND"] = "1:maps|";
+
+    EXPECT_CALL(*wizard, query(_, key1))  // #4
+            .WillOnce(Return(ConditionState::kFalse));
+
+    vector<DurationBucket> buckets;
+
+    uint64_t bucketStartTimeNs = 10000000000;
+    uint64_t eventStartTimeNs = bucketStartTimeNs + 1;
+    uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
+
+    OringDurationTracker tracker(wizard, 1, true, bucketStartTimeNs, bucketSizeNs, buckets);
+
+    tracker.noteStart("2:maps", true, eventStartTimeNs, key1);
+    tracker.noteStart("2:maps", true, eventStartTimeNs + 2, key1);
+
+    tracker.noteStop("2:maps", eventStartTimeNs + 3, false);
+
+    tracker.onSlicedConditionMayChange(eventStartTimeNs + 15);
+
+    tracker.noteStop("2:maps", eventStartTimeNs + 2003, false);
+
+    tracker.flushIfNeeded(bucketStartTimeNs + bucketSizeNs + 1);
+    EXPECT_EQ(1u, buckets.size());
+    EXPECT_EQ(15, buckets[0].mDuration);
+}
+
 }  // namespace statsd
 }  // namespace os
 }  // namespace android

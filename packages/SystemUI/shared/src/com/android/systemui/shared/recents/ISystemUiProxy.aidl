@@ -16,8 +16,8 @@
 
 package com.android.systemui.shared.recents;
 
-import android.graphics.Bitmap;
 import android.graphics.Rect;
+import com.android.systemui.shared.system.GraphicBufferCompat;
 
 /**
  * Temporary callbacks into SystemUI.
@@ -25,9 +25,8 @@ import android.graphics.Rect;
 interface ISystemUiProxy {
 
     /**
-     * Proxies SurfaceControl.screenshot().
+     * Proxies SurfaceControl.screenshotToBuffer().
      */
-    Bitmap screenshot(in Rect sourceCrop, int width, int height,
-                      int minLayer, int maxLayer, boolean useIdentityTransform,
-                      int rotation);
+    GraphicBufferCompat screenshot(in Rect sourceCrop, int width, int height, int minLayer,
+            int maxLayer, boolean useIdentityTransform, int rotation);
 }

@@ -22,6 +22,7 @@ import static junit.framework.Assert.assertTrue;
 
 import android.content.Context;
 import android.os.SystemProperties;
+import android.provider.Settings;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -51,6 +52,7 @@ public class FeatureFlagUtilsTest {
     }
 
     private void cleanup() {
+        Settings.Global.putString(mContext.getContentResolver(), TEST_FEATURE_NAME, "");
         SystemProperties.set(FeatureFlagUtils.FFLAG_PREFIX + TEST_FEATURE_NAME, "");
         SystemProperties.set(FeatureFlagUtils.FFLAG_OVERRIDE_PREFIX + TEST_FEATURE_NAME, "");
     }
@@ -63,9 +65,19 @@ public class FeatureFlagUtilsTest {
     }
 
     @Test
-    public void testGetFlag_override_shouldReturnTrue() {
+    public void testGetFlag_adb_override_shouldReturnTrue() {
         SystemProperties.set(FeatureFlagUtils.FFLAG_PREFIX + TEST_FEATURE_NAME, "false");
         SystemProperties.set(FeatureFlagUtils.FFLAG_OVERRIDE_PREFIX + TEST_FEATURE_NAME, "true");
+
+        assertTrue(FeatureFlagUtils.isEnabled(mContext, TEST_FEATURE_NAME));
+    }
+
+    @Test
+    public void testGetFlag_settings_override_shouldReturnTrue() {
+        SystemProperties.set(FeatureFlagUtils.FFLAG_PREFIX + TEST_FEATURE_NAME, "false");
+        SystemProperties.set(FeatureFlagUtils.FFLAG_OVERRIDE_PREFIX + TEST_FEATURE_NAME, "false");
+
+        Settings.Global.putString(mContext.getContentResolver(), TEST_FEATURE_NAME, "true");
 
         assertTrue(FeatureFlagUtils.isEnabled(mContext, TEST_FEATURE_NAME));
     }
@@ -74,7 +86,7 @@ public class FeatureFlagUtilsTest {
     public void testSetEnabled_shouldSetOverrideFlag() {
         assertFalse(FeatureFlagUtils.isEnabled(mContext, TEST_FEATURE_NAME));
 
-        FeatureFlagUtils.setEnabled(TEST_FEATURE_NAME, true);
+        FeatureFlagUtils.setEnabled(null /* context */, TEST_FEATURE_NAME, true);
 
         assertEquals(SystemProperties.get(FeatureFlagUtils.FFLAG_PREFIX + TEST_FEATURE_NAME, null),
                 "");

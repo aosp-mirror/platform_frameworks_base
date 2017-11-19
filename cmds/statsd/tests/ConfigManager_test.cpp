@@ -85,7 +85,7 @@ TEST(ConfigManagerTest, TestAddUpdateRemove) {
         // TODO: Remove this when we get rid of the fake one, and make this
         // test loading one from disk somewhere.
         EXPECT_CALL(*(listener.get()),
-                    OnConfigUpdated(ConfigKeyEq(0, "fake"), StatsdConfigEq("12345")))
+                    OnConfigUpdated(ConfigKeyEq(1000, "fake"), StatsdConfigEq("12345")))
                 .RetiresOnSaturation();
         manager->Startup();
 

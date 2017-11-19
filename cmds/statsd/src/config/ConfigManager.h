@@ -46,9 +46,7 @@ public:
     virtual ~ConfigManager();
 
     /**
-     * Call to load the saved configs from disk.
-     *
-     * TODO: Implement me
+     * Initialize ConfigListener by reading from disk and get updates.
      */
     void Startup();
 
@@ -68,6 +66,16 @@ public:
      * Sets the broadcast receiver for a configuration key.
      */
     void SetConfigReceiver(const ConfigKey& key, const string& pkg, const string& cls);
+
+    /**
+     * Returns the package name and class name representing the broadcast receiver for this config.
+     */
+    const pair<string, string> GetConfigReceiver(const ConfigKey& key);
+
+    /**
+     * Returns all config keys registered.
+     */
+    vector<ConfigKey> GetAllConfigKeys();
 
     /**
      * Erase any broadcast receiver associated with this config key.
@@ -95,7 +103,12 @@ private:
     /**
      * Save the configs to disk.
      */
-    void update_saved_configs();
+    void update_saved_configs(const ConfigKey& key, const StatsdConfig& config);
+
+    /**
+     * Remove saved configs from disk.
+     */
+    void remove_saved_configs(const ConfigKey& key);
 
     /**
      * The Configs that have been set. Each config should
@@ -112,6 +125,11 @@ private:
      * The ConfigListeners that will be told about changes.
      */
     vector<sp<ConfigListener>> mListeners;
+
+    /**
+     * Call to load the saved configs from disk.
+     */
+    void readConfigFromDisk();
 };
 
 }  // namespace statsd

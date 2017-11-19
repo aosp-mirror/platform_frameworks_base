@@ -186,7 +186,7 @@ public class AppIdleHistory {
         writeScreenOnTime();
     }
 
-    public void reportUsage(String packageName, int userId, long elapsedRealtime) {
+    public int reportUsage(String packageName, int userId, long elapsedRealtime) {
         ArrayMap<String, AppUsageHistory> userHistory = getUserHistory(userId);
         AppUsageHistory appUsageHistory = getPackageHistory(userHistory, packageName,
                 elapsedRealtime, true);
@@ -197,12 +197,33 @@ public class AppIdleHistory {
                 + (elapsedRealtime - mElapsedSnapshot);
         appUsageHistory.lastUsedScreenTime = getScreenOnTime(elapsedRealtime);
         appUsageHistory.recent[HISTORY_SIZE - 1] = FLAG_LAST_STATE | FLAG_PARTIAL_ACTIVE;
-        appUsageHistory.currentBucket = AppStandby.STANDBY_BUCKET_ACTIVE;
-        appUsageHistory.bucketingReason = AppStandby.REASON_USAGE;
-        if (DEBUG) {
-            Slog.d(TAG, "Moved " + packageName + " to bucket=" + appUsageHistory.currentBucket
-                    + ", reason=" + appUsageHistory.bucketingReason);
+        if (appUsageHistory.currentBucket > STANDBY_BUCKET_ACTIVE) {
+            appUsageHistory.currentBucket = STANDBY_BUCKET_ACTIVE;
+            if (DEBUG) {
+                Slog.d(TAG, "Moved " + packageName + " to bucket=" + appUsageHistory.currentBucket
+                        + ", reason=" + appUsageHistory.bucketingReason);
+            }
         }
+        appUsageHistory.bucketingReason = AppStandby.REASON_USAGE;
+
+        return appUsageHistory.currentBucket;
+    }
+
+    public int reportMildUsage(String packageName, int userId, long elapsedRealtime) {
+        ArrayMap<String, AppUsageHistory> userHistory = getUserHistory(userId);
+        AppUsageHistory appUsageHistory = getPackageHistory(userHistory, packageName,
+                elapsedRealtime, true);
+        if (appUsageHistory.currentBucket > STANDBY_BUCKET_WORKING_SET) {
+            appUsageHistory.currentBucket = STANDBY_BUCKET_WORKING_SET;
+            if (DEBUG) {
+                Slog.d(TAG, "Moved " + packageName + " to bucket=" + appUsageHistory.currentBucket
+                        + ", reason=" + appUsageHistory.bucketingReason);
+            }
+        }
+        // TODO: Should this be a different reason for partial usage?
+        appUsageHistory.bucketingReason = AppStandby.REASON_USAGE;
+
+        return appUsageHistory.currentBucket;
     }
 
     public void setIdle(String packageName, int userId, long elapsedRealtime) {

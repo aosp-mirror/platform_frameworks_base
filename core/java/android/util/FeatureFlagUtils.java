@@ -18,6 +18,7 @@ package android.util;
 
 import android.content.Context;
 import android.os.SystemProperties;
+import android.provider.Settings;
 import android.text.TextUtils;
 
 import java.util.Map;
@@ -39,13 +40,24 @@ public class FeatureFlagUtils {
      * @return true if the flag is enabled (either by default in system, or override by user)
      */
     public static boolean isEnabled(Context context, String feature) {
-        // Tries to get feature flag from system property.
-        // Step 1: check if feature flag has any override. Flag name: sys.fflag.override.<feature>
-        String value = SystemProperties.get(FFLAG_OVERRIDE_PREFIX + feature);
+        // Override precedence:
+        // Settings.Global -> sys.fflag.override.* -> sys.fflag.*
+
+        // Step 1: check if feature flag is set in Settings.Global.
+        String value;
+        if (context != null) {
+            value = Settings.Global.getString(context.getContentResolver(), feature);
+            if (!TextUtils.isEmpty(value)) {
+                return Boolean.parseBoolean(value);
+            }
+        }
+
+        // Step 2: check if feature flag has any override. Flag name: sys.fflag.override.<feature>
+        value = SystemProperties.get(FFLAG_OVERRIDE_PREFIX + feature);
         if (!TextUtils.isEmpty(value)) {
             return Boolean.parseBoolean(value);
         }
-        // Step 2: check if feature flag has any default value. Flag name: sys.fflag.<feature>
+        // Step 3: check if feature flag has any default value. Flag name: sys.fflag.<feature>
         value = SystemProperties.get(FFLAG_PREFIX + feature);
         return Boolean.parseBoolean(value);
     }
@@ -53,7 +65,7 @@ public class FeatureFlagUtils {
     /**
      * Override feature flag to new state.
      */
-    public static void setEnabled(String feature, boolean enabled) {
+    public static void setEnabled(Context context, String feature, boolean enabled) {
         SystemProperties.set(FFLAG_OVERRIDE_PREFIX + feature, enabled ? "true" : "false");
     }
 

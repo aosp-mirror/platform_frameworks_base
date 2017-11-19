@@ -144,7 +144,9 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
 
     // Use a Testable subclass so we can simulate calls from the system without failing.
     private static class TestableNotificationManagerService extends NotificationManagerService {
-        public TestableNotificationManagerService(Context context) { super(context); }
+        public TestableNotificationManagerService(Context context) {
+            super(context);
+        }
 
         @Override
         protected boolean isCallingUidSystem() {
@@ -159,6 +161,11 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
         @Override
         protected ICompanionDeviceManager getCompanionManager() {
             return null;
+        }
+
+        @Override
+        protected void reportSeen(NotificationRecord r) {
+            return;
         }
     }
 

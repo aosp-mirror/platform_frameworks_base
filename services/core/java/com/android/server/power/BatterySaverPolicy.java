@@ -29,15 +29,20 @@ import android.util.ArrayMap;
 import android.util.KeyValueListParser;
 import android.util.Slog;
 
+import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.R;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Class to decide whether to turn on battery saver mode for specific service
+ *
+ * TODO: We should probably make {@link #mFilesForInteractive} and {@link #mFilesForNoninteractive}
+ * less flexible and just take a list of "CPU number - frequency" pairs. Being able to write
+ * anything under /sys/ and /proc/ is too loose.
  *
  * Test: atest BatterySaverPolicyTest
  */
@@ -62,12 +67,11 @@ public class BatterySaverPolicy extends ContentObserver {
     private static final String KEY_ADJUST_BRIGHTNESS_FACTOR = "adjust_brightness_factor";
     private static final String KEY_FULLBACKUP_DEFERRED = "fullbackup_deferred";
     private static final String KEY_KEYVALUE_DEFERRED = "keyvaluebackup_deferred";
-    private static final String KEY_FORCE_ALL_APPS_STANDBY_JOBS = "force_all_apps_standby_jobs";
-    private static final String KEY_FORCE_ALL_APPS_STANDBY_ALARMS = "force_all_apps_standby_alarms";
+    private static final String KEY_FORCE_ALL_APPS_STANDBY = "force_all_apps_standby";
     private static final String KEY_OPTIONAL_SENSORS_DISABLED = "optional_sensors_disabled";
 
-    private static final String KEY_SCREEN_ON_FILE_PREFIX = "file-on:";
-    private static final String KEY_SCREEN_OFF_FILE_PREFIX = "file-off:";
+    private static final String KEY_FILE_FOR_INTERACTIVE_PREFIX = "file-on:";
+    private static final String KEY_FILE_FOR_NONINTERACTIVE_PREFIX = "file-off:";
 
     private static String mSettings;
     private static String mDeviceSpecificSettings;
@@ -156,14 +160,9 @@ public class BatterySaverPolicy extends ContentObserver {
     private float mAdjustBrightnessFactor;
 
     /**
-     * Whether to put all apps in the stand-by mode or not for job scheduler.
+     * Whether to put all apps in the stand-by mode.
      */
-    private boolean mForceAllAppsStandbyJobs;
-
-    /**
-     * Whether to put all apps in the stand-by mode or not for alarms.
-     */
-    private boolean mForceAllAppsStandbyAlarms;
+    private boolean mForceAllAppsStandby;
 
     /**
      * Weather to show non-essential sensors (e.g. edge sensors) or not.
@@ -179,25 +178,25 @@ public class BatterySaverPolicy extends ContentObserver {
     private ContentResolver mContentResolver;
 
     @GuardedBy("mLock")
-    private final ArrayList<BatterySaverPolicyListener> mListeners = new ArrayList<>();
+    private final List<BatterySaverPolicyListener> mListeners = new ArrayList<>();
 
     /**
      * List of [Filename -> content] that should be written when battery saver is activated
-     * and the screen is on.
+     * and the device is interactive.
      *
      * We use this to change the max CPU frequencies.
      */
     @GuardedBy("mLock")
-    private ArrayMap<String, String> mScreenOnFiles;
+    private ArrayMap<String, String> mFilesForInteractive;
 
     /**
      * List of [Filename -> content] that should be written when battery saver is activated
-     * and the screen is off.
+     * and the device is non-interactive.
      *
      * We use this to change the max CPU frequencies.
      */
     @GuardedBy("mLock")
-    private ArrayMap<String, String> mScreenOffFiles;
+    private ArrayMap<String, String> mFilesForNoninteractive;
 
     public interface BatterySaverPolicyListener {
         void onBatterySaverPolicyChanged(BatterySaverPolicy policy);
@@ -234,11 +233,6 @@ public class BatterySaverPolicy extends ContentObserver {
     @VisibleForTesting
     int getDeviceSpecificConfigResId() {
         return R.string.config_batterySaverDeviceSpecificConfig;
-    }
-
-    @VisibleForTesting
-    void onChangeForTest() {
-        onChange(true, null);
     }
 
     @Override
@@ -297,9 +291,7 @@ public class BatterySaverPolicy extends ContentObserver {
         mAdjustBrightnessDisabled = parser.getBoolean(KEY_ADJUST_BRIGHTNESS_DISABLED, false);
         mAdjustBrightnessFactor = parser.getFloat(KEY_ADJUST_BRIGHTNESS_FACTOR, 0.5f);
         mDataSaverDisabled = parser.getBoolean(KEY_DATASAVER_DISABLED, true);
-        mForceAllAppsStandbyJobs = parser.getBoolean(KEY_FORCE_ALL_APPS_STANDBY_JOBS, true);
-        mForceAllAppsStandbyAlarms =
-                parser.getBoolean(KEY_FORCE_ALL_APPS_STANDBY_ALARMS, true);
+        mForceAllAppsStandby = parser.getBoolean(KEY_FORCE_ALL_APPS_STANDBY, true);
         mOptionalSensorsDisabled = parser.getBoolean(KEY_OPTIONAL_SENSORS_DISABLED, true);
 
         // Get default value from Settings.Secure
@@ -315,8 +307,8 @@ public class BatterySaverPolicy extends ContentObserver {
                     + deviceSpecificSetting);
         }
 
-        mScreenOnFiles = collectParams(parser, KEY_SCREEN_ON_FILE_PREFIX);
-        mScreenOffFiles = collectParams(parser, KEY_SCREEN_OFF_FILE_PREFIX);
+        mFilesForInteractive = collectParams(parser, KEY_FILE_FOR_INTERACTIVE_PREFIX);
+        mFilesForNoninteractive = collectParams(parser, KEY_FILE_FOR_NONINTERACTIVE_PREFIX);
     }
 
     private static ArrayMap<String, String> collectParams(
@@ -330,7 +322,7 @@ public class BatterySaverPolicy extends ContentObserver {
             }
             final String path = key.substring(prefix.length());
 
-            if (!(path.startsWith("/sys/") || path.startsWith("/proc"))) {
+            if (!(path.startsWith("/sys/") || path.startsWith("/proc/"))) {
                 Slog.wtf(TAG, "Invalid path: " + path);
                 continue;
             }
@@ -387,12 +379,6 @@ public class BatterySaverPolicy extends ContentObserver {
                 case ServiceType.VIBRATION:
                     return builder.setBatterySaverEnabled(mVibrationDisabled)
                             .build();
-                case ServiceType.FORCE_ALL_APPS_STANDBY_JOBS:
-                    return builder.setBatterySaverEnabled(mForceAllAppsStandbyJobs)
-                            .build();
-                case ServiceType.FORCE_ALL_APPS_STANDBY_ALARMS:
-                    return builder.setBatterySaverEnabled(mForceAllAppsStandbyAlarms)
-                            .build();
                 case ServiceType.OPTIONAL_SENSORS:
                     return builder.setBatterySaverEnabled(mOptionalSensorsDisabled)
                             .build();
@@ -403,9 +389,9 @@ public class BatterySaverPolicy extends ContentObserver {
         }
     }
 
-    public ArrayMap<String, String> getFileValues(boolean screenOn) {
+    public ArrayMap<String, String> getFileValues(boolean interactive) {
         synchronized (mLock) {
-            return screenOn ? mScreenOnFiles : mScreenOffFiles;
+            return interactive ? mFilesForInteractive : mFilesForNoninteractive;
         }
     }
 
@@ -428,17 +414,16 @@ public class BatterySaverPolicy extends ContentObserver {
             pw.println("  " + KEY_ADJUST_BRIGHTNESS_DISABLED + "=" + mAdjustBrightnessDisabled);
             pw.println("  " + KEY_ADJUST_BRIGHTNESS_FACTOR + "=" + mAdjustBrightnessFactor);
             pw.println("  " + KEY_GPS_MODE + "=" + mGpsMode);
-            pw.println("  " + KEY_FORCE_ALL_APPS_STANDBY_JOBS + "=" + mForceAllAppsStandbyJobs);
-            pw.println("  " + KEY_FORCE_ALL_APPS_STANDBY_ALARMS + "=" + mForceAllAppsStandbyAlarms);
+            pw.println("  " + KEY_FORCE_ALL_APPS_STANDBY + "=" + mForceAllAppsStandby);
             pw.println("  " + KEY_OPTIONAL_SENSORS_DISABLED + "=" + mOptionalSensorsDisabled);
             pw.println();
 
-            pw.print("  Screen On Files:\n");
-            dumpMap(pw, "    ", mScreenOnFiles);
+            pw.print("  Interactive File values:\n");
+            dumpMap(pw, "    ", mFilesForInteractive);
             pw.println();
 
-            pw.print("  Screen Off Files:\n");
-            dumpMap(pw, "    ", mScreenOffFiles);
+            pw.print("  Noninteractive File values:\n");
+            dumpMap(pw, "    ", mFilesForNoninteractive);
             pw.println();
         }
     }

@@ -268,6 +268,11 @@ inline ::std::ostream& operator<<(::std::ostream& out, const ResourceId& res_id)
   return out << res_id.to_string();
 }
 
+// For generic code to call 'using std::to_string; to_string(T);'.
+inline std::string to_string(const ResourceId& id) {
+  return id.to_string();
+}
+
 //
 // ResourceType implementation.
 //

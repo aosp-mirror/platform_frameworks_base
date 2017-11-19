@@ -26,18 +26,18 @@ using ::android::StringPiece;
 namespace aapt {
 namespace text {
 
-void Printer::Println(const StringPiece& str) {
+Printer& Printer::Println(const StringPiece& str) {
   Print(str);
-  Print("\n");
+  return Print("\n");
 }
 
-void Printer::Println() {
-  Print("\n");
+Printer& Printer::Println() {
+  return Print("\n");
 }
 
-void Printer::Print(const StringPiece& str) {
+Printer& Printer::Print(const StringPiece& str) {
   if (error_) {
-    return;
+    return *this;
   }
 
   auto remaining_str_begin = str.begin();
@@ -53,7 +53,7 @@ void Printer::Print(const StringPiece& str) {
         for (int i = 0; i < indent_level_; i++) {
           if (!io::Copy(out_, "  ")) {
             error_ = true;
-            return;
+            return *this;
           }
         }
         needs_indent_ = false;
@@ -61,7 +61,7 @@ void Printer::Print(const StringPiece& str) {
 
       if (!io::Copy(out_, str_to_copy)) {
         error_ = true;
-        return;
+        return *this;
       }
     }
 
@@ -69,7 +69,7 @@ void Printer::Print(const StringPiece& str) {
     if (new_line_iter != remaining_str_end) {
       if (!io::Copy(out_, "\n")) {
         error_ = true;
-        return;
+        return *this;
       }
       needs_indent_ = true;
       // Ok to increment iterator here because we know that the '\n' character is one byte.
@@ -78,6 +78,7 @@ void Printer::Print(const StringPiece& str) {
       remaining_str_begin = new_line_iter;
     }
   }
+  return *this;
 }
 
 void Printer::Indent() {

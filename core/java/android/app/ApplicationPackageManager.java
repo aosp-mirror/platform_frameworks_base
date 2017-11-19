@@ -35,7 +35,6 @@ import android.content.pm.FeatureInfo;
 import android.content.pm.IOnPermissionsChangeListener;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageDeleteObserver;
-import android.content.pm.IPackageInstallObserver;
 import android.content.pm.IPackageManager;
 import android.content.pm.IPackageMoveObserver;
 import android.content.pm.IPackageStatsObserver;
@@ -1681,21 +1680,8 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
-    public void installPackage(Uri packageURI, IPackageInstallObserver observer, int flags,
-                               String installerPackageName) {
-        installCommon(packageURI, new LegacyPackageInstallObserver(observer), flags,
-                installerPackageName, mContext.getUserId());
-    }
-
-    @Override
-    public void installPackage(Uri packageURI, PackageInstallObserver observer,
-            int flags, String installerPackageName) {
-        installCommon(packageURI, observer, flags, installerPackageName, mContext.getUserId());
-    }
-
-    private void installCommon(Uri packageURI,
-            PackageInstallObserver observer, int flags, String installerPackageName,
-            int userId) {
+    public void installPackage(Uri packageURI,
+            PackageInstallObserver observer, int flags, String installerPackageName) {
         if (!"file".equals(packageURI.getScheme())) {
             throw new UnsupportedOperationException("Only file:// URIs are supported");
         }
@@ -1703,7 +1689,7 @@ public class ApplicationPackageManager extends PackageManager {
         final String originPath = packageURI.getPath();
         try {
             mPM.installPackageAsUser(originPath, observer.getBinder(), flags, installerPackageName,
-                    userId);
+                    mContext.getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

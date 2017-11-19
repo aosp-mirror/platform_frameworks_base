@@ -34,6 +34,10 @@ enum DurationState {
 // Hold duration information for one atom level duration in current on-going bucket.
 struct DurationInfo {
     DurationState state;
+
+    // the number of starts seen.
+    int32_t startCount;
+
     // most recent start time.
     int64_t lastStartTime;
     // existing duration in current bucket.
@@ -42,7 +46,7 @@ struct DurationInfo {
     // cache the HashableDimensionKeys we need to query the condition for this duration event.
     ConditionKey conditionKeys;
 
-    DurationInfo() : state(kStopped), lastStartTime(0), lastDuration(0){};
+    DurationInfo() : state(kStopped), startCount(0), lastStartTime(0), lastDuration(0){};
 };
 
 struct DurationBucket {
@@ -53,18 +57,21 @@ struct DurationBucket {
 
 class DurationTracker {
 public:
-    DurationTracker(sp<ConditionWizard> wizard, int conditionIndex, uint64_t currentBucketStartNs,
-                    uint64_t bucketSizeNs, std::vector<DurationBucket>& bucket)
+    DurationTracker(sp<ConditionWizard> wizard, int conditionIndex, bool nesting,
+                    uint64_t currentBucketStartNs, uint64_t bucketSizeNs,
+                    std::vector<DurationBucket>& bucket)
         : mWizard(wizard),
           mConditionTrackerIndex(conditionIndex),
-          mCurrentBucketStartTimeNs(currentBucketStartNs),
           mBucketSizeNs(bucketSizeNs),
+          mNested(nesting),
+          mCurrentBucketStartTimeNs(currentBucketStartNs),
           mBucket(bucket),
           mDuration(0){};
     virtual ~DurationTracker(){};
     virtual void noteStart(const HashableDimensionKey& key, bool condition,
                            const uint64_t eventTime, const ConditionKey& conditionKey) = 0;
-    virtual void noteStop(const HashableDimensionKey& key, const uint64_t eventTime) = 0;
+    virtual void noteStop(const HashableDimensionKey& key, const uint64_t eventTime,
+                          const bool stopAll) = 0;
     virtual void noteStopAll(const uint64_t eventTime) = 0;
     virtual void onSlicedConditionMayChange(const uint64_t timestamp) = 0;
     virtual void onConditionChanged(bool condition, const uint64_t timestamp) = 0;
@@ -75,11 +82,13 @@ public:
 protected:
     sp<ConditionWizard> mWizard;
 
-    int mConditionTrackerIndex;
+    const int mConditionTrackerIndex;
+
+    const int64_t mBucketSizeNs;
+
+    const bool mNested;
 
     uint64_t mCurrentBucketStartTimeNs;
-
-    int64_t mBucketSizeNs;
 
     std::vector<DurationBucket>& mBucket;  // where to write output
 

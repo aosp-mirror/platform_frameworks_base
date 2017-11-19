@@ -81,6 +81,9 @@ import java.util.List;
  * <li>All APKs must have unique split names.
  * <li>All installations must contain a single base APK.
  * </ul>
+ * <p>
+ * The ApiDemos project contains examples of using this API:
+ * <code>ApiDemos/src/com/example/android/apis/content/InstallApk*.java</code>.
  */
 public class PackageInstaller {
     private static final String TAG = "PackageInstaller";

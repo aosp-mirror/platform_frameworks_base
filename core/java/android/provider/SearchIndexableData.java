@@ -56,6 +56,8 @@ public abstract class SearchIndexableData {
     /**
      * The key for the data. This is application specific. Should be unique per data as the data
      * should be able to be retrieved by the key.
+     * <p/>
+     * This is required for indexing to work.
      */
     public String key;
 

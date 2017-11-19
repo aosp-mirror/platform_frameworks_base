@@ -4163,6 +4163,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     private static boolean sUseDefaultFocusHighlight;
 
+    /**
+     * True if zero-sized views can be focused.
+     */
+    private static boolean sCanFocusZeroSized;
+
     private String mTransitionName;
 
     static class TintInfo {
@@ -4245,6 +4250,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         OnApplyWindowInsetsListener mOnApplyWindowInsetsListener;
 
         OnCapturedPointerListener mOnCapturedPointerListener;
+
+        private ArrayList<OnKeyFallbackListener> mKeyFallbackListeners;
     }
 
     ListenerInfo mListenerInfo;
@@ -4742,6 +4749,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
             sUseDefaultFocusHighlight = context.getResources().getBoolean(
                     com.android.internal.R.bool.config_useDefaultFocusHighlight);
+
+            sCanFocusZeroSized = targetSdkVersion < Build.VERSION_CODES.P;
 
             sCompatibilityDone = true;
         }
@@ -6950,6 +6959,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     void clearFocusInternal(View focused, boolean propagate, boolean refocus) {
         if ((mPrivateFlags & PFLAG_FOCUSED) != 0) {
             mPrivateFlags &= ~PFLAG_FOCUSED;
+            clearParentsWantFocus();
 
             if (propagate && mParent != null) {
                 mParent.clearChildFocus(this);
@@ -10931,8 +10941,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * descendants.
      *
      * A view will not actually take focus if it is not focusable ({@link #isFocusable} returns
-     * false), or if it is focusable and it is not focusable in touch mode
-     * ({@link #isFocusableInTouchMode}) while the device is in touch mode.
+     * false), or if it can't be focused due to other conditions (not focusable in touch mode
+     * ({@link #isFocusableInTouchMode}) while the device is in touch mode, not visible, not
+     * enabled, or has no size).
      *
      * See also {@link #focusSearch(int)}, which is what you call to say that you
      * have focus, and you want your parent to look for the next one.
@@ -10970,17 +10981,17 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     @TestApi
     public boolean restoreFocusNotInCluster() {
-        return requestFocus(View.FOCUS_DOWN);
+        return requestFocus();
     }
 
     /**
      * Gives focus to the default-focus view in the view hierarchy that has this view as a root.
-     * If the default-focus view cannot be found, falls back to calling {@link #requestFocus(int)}.
+     * If the default-focus view cannot be found, falls back to calling {@link #requestFocus()}.
      *
      * @return Whether this view or one of its descendants actually took focus
      */
     public boolean restoreDefaultFocus() {
-        return requestFocus(View.FOCUS_DOWN);
+        return requestFocus();
     }
 
     /**
@@ -11039,9 +11050,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     private boolean requestFocusNoSearch(int direction, Rect previouslyFocusedRect) {
         // need to be focusable
-        if ((mViewFlags & FOCUSABLE) != FOCUSABLE
-                || (mViewFlags & VISIBILITY_MASK) != VISIBLE
-                || (mViewFlags & ENABLED_MASK) != ENABLED) {
+        if (!canTakeFocus()) {
             return false;
         }
 
@@ -11056,8 +11065,19 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             return false;
         }
 
+        if (!isLaidOut()) {
+            mPrivateFlags |= PFLAG_WANTS_FOCUS;
+        }
+
         handleFocusGainInternal(direction, previouslyFocusedRect);
         return true;
+    }
+
+    void clearParentsWantFocus() {
+        if (mParent instanceof View) {
+            ((View) mParent).mPrivateFlags &= ~PFLAG_WANTS_FOCUS;
+            ((View) mParent).clearParentsWantFocus();
+        }
     }
 
     /**
@@ -13431,6 +13451,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         mAttachInfo.mUnbufferedDispatchRequested = true;
     }
 
+    private boolean canTakeFocus() {
+        return ((mViewFlags & VISIBILITY_MASK) == VISIBLE)
+                && ((mViewFlags & FOCUSABLE) == FOCUSABLE)
+                && ((mViewFlags & ENABLED_MASK) == ENABLED)
+                && (sCanFocusZeroSized || !isLaidOut() || (mBottom > mTop) && (mRight > mLeft));
+    }
+
     /**
      * Set flags controlling behavior of this view.
      *
@@ -13450,6 +13477,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             return;
         }
         int privateFlags = mPrivateFlags;
+        boolean shouldNotifyFocusableAvailable = false;
 
         // If focusable is auto, update the FOCUSABLE bit.
         int focusableChangedByAuto = 0;
@@ -13488,7 +13516,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                             || focusableChangedByAuto == 0
                             || viewRootImpl == null
                             || viewRootImpl.mThread == Thread.currentThread()) {
-                        mParent.focusableViewAvailable(this);
+                        shouldNotifyFocusableAvailable = true;
                     }
                 }
             }
@@ -13511,10 +13539,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 // about in case nothing has focus.  even if this specific view
                 // isn't focusable, it may contain something that is, so let
                 // the root view try to give this focus if nothing else does.
-                if ((mParent != null) && ((mViewFlags & ENABLED_MASK) == ENABLED)
-                        && (mBottom > mTop) && (mRight > mLeft)) {
-                    mParent.focusableViewAvailable(this);
-                }
+                shouldNotifyFocusableAvailable = true;
             }
         }
 
@@ -13523,14 +13548,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 // a view becoming enabled should notify the parent as long as the view is also
                 // visible and the parent wasn't already notified by becoming visible during this
                 // setFlags invocation.
-                if ((mViewFlags & VISIBILITY_MASK) == VISIBLE
-                        && ((changed & VISIBILITY_MASK) == 0)) {
-                    if ((mParent != null) && (mViewFlags & ENABLED_MASK) == ENABLED) {
-                        mParent.focusableViewAvailable(this);
-                    }
-                }
+                shouldNotifyFocusableAvailable = true;
             } else {
                 if (hasFocus()) clearFocus();
+            }
+        }
+
+        if (shouldNotifyFocusableAvailable) {
+            if (mParent != null && canTakeFocus()) {
+                mParent.focusableViewAvailable(this);
             }
         }
 
@@ -20032,13 +20058,56 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
         }
 
+        final boolean wasLaidOut = isLaidOut();
+
         mPrivateFlags &= ~PFLAG_FORCE_LAYOUT;
         mPrivateFlags3 |= PFLAG3_IS_LAID_OUT;
+
+        if (!wasLaidOut && isFocused()) {
+            mPrivateFlags &= ~PFLAG_WANTS_FOCUS;
+            if (canTakeFocus()) {
+                // We have a robust focus, so parents should no longer be wanting focus.
+                clearParentsWantFocus();
+            } else if (!getViewRootImpl().isInLayout()) {
+                // This is a weird case. Most-likely the user, rather than ViewRootImpl, called
+                // layout. In this case, there's no guarantee that parent layouts will be evaluated
+                // and thus the safest action is to clear focus here.
+                clearFocusInternal(null, /* propagate */ true, /* refocus */ false);
+                clearParentsWantFocus();
+            } else if (!hasParentWantsFocus()) {
+                // original requestFocus was likely on this view directly, so just clear focus
+                clearFocusInternal(null, /* propagate */ true, /* refocus */ false);
+            }
+            // otherwise, we let parents handle re-assigning focus during their layout passes.
+        } else if ((mPrivateFlags & PFLAG_WANTS_FOCUS) != 0) {
+            mPrivateFlags &= ~PFLAG_WANTS_FOCUS;
+            View focused = findFocus();
+            if (focused != null) {
+                // Try to restore focus as close as possible to our starting focus.
+                if (!restoreDefaultFocus() && !hasParentWantsFocus()) {
+                    // Give up and clear focus once we've reached the top-most parent which wants
+                    // focus.
+                    focused.clearFocusInternal(null, /* propagate */ true, /* refocus */ false);
+                }
+            }
+        }
 
         if ((mPrivateFlags3 & PFLAG3_NOTIFY_AUTOFILL_ENTER_ON_LAYOUT) != 0) {
             mPrivateFlags3 &= ~PFLAG3_NOTIFY_AUTOFILL_ENTER_ON_LAYOUT;
             notifyEnterOrExitForAutoFillIfNeeded(true);
         }
+    }
+
+    private boolean hasParentWantsFocus() {
+        ViewParent parent = mParent;
+        while (parent instanceof ViewGroup) {
+            ViewGroup pv = (ViewGroup) parent;
+            if ((pv.mPrivateFlags & PFLAG_WANTS_FOCUS) != 0) {
+                return true;
+            }
+            parent = pv.mParent;
+        }
+        return false;
     }
 
     /**
@@ -20146,6 +20215,23 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (mOverlay != null) {
             mOverlay.getOverlayView().setRight(newWidth);
             mOverlay.getOverlayView().setBottom(newHeight);
+        }
+        // If this isn't laid out yet, focus assignment will be handled during the "deferment/
+        // backtracking" of requestFocus during layout, so don't touch focus here.
+        if (!sCanFocusZeroSized && isLaidOut()) {
+            if (newWidth <= 0 || newHeight <= 0) {
+                if (hasFocus()) {
+                    clearFocus();
+                    if (mParent instanceof ViewGroup) {
+                        ((ViewGroup) mParent).clearFocusedInCluster();
+                    }
+                }
+                clearAccessibilityFocus();
+            } else if (oldWidth <= 0 || oldHeight <= 0) {
+                if (mParent != null && canTakeFocus()) {
+                    mParent.focusableViewAvailable(this);
+                }
+            }
         }
         rebuildOutline();
     }
@@ -25194,6 +25280,29 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * Interface definition for a callback to be invoked when a hardware key event is
+     * dispatched to this view during the fallback phase. This means no view in the hierarchy
+     * has handled this event.
+     */
+    public interface OnKeyFallbackListener {
+        /**
+         * Called when a hardware key is dispatched to a view in the fallback phase. This allows
+         * listeners to respond to events after the view hierarchy has had a chance to respond.
+         * <p>Key presses in software keyboards will generally NOT trigger this method,
+         * although some may elect to do so in some situations. Do not assume a
+         * software input method has to be key-based; even if it is, it may use key presses
+         * in a different way than you expect, so there is no way to reliably catch soft
+         * input key presses.
+         *
+         * @param v The view the key has been dispatched to.
+         * @param event The KeyEvent object containing full information about
+         *        the event.
+         * @return True if the listener has consumed the event, false otherwise.
+         */
+        boolean onKeyFallback(View v, KeyEvent event);
+    }
+
+    /**
      * Interface definition for a callback to be invoked when a touch event is
      * dispatched to this view. The callback will be invoked before the touch
      * event is given to the view.
@@ -26865,5 +26974,57 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             return null;
         }
         return mTooltipInfo.mTooltipPopup.getContentView();
+    }
+
+    /**
+     * Allows this view to handle {@link KeyEvent}s which weren't handled by normal dispatch. This
+     * occurs after the normal view hierarchy dispatch, but before the window callback. By default,
+     * this will dispatch into all the listeners registered via
+     * {@link #addKeyFallbackListener(OnKeyFallbackListener)} in last-in-first-out order (most
+     * recently added will receive events first).
+     *
+     * @param event A not-previously-handled event.
+     * @return {@code true} if the event was handled, {@code false} otherwise.
+     * @see #addKeyFallbackListener
+     */
+    public boolean onKeyFallback(@NonNull KeyEvent event) {
+        if (mListenerInfo != null && mListenerInfo.mKeyFallbackListeners != null) {
+            for (int i = mListenerInfo.mKeyFallbackListeners.size() - 1; i >= 0; --i) {
+                if (mListenerInfo.mKeyFallbackListeners.get(i).onKeyFallback(this, event)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Adds a listener which will receive unhandled {@link KeyEvent}s.
+     * @param listener the receiver of fallback {@link KeyEvent}s.
+     * @see #onKeyFallback(KeyEvent)
+     */
+    public void addKeyFallbackListener(OnKeyFallbackListener listener) {
+        ArrayList<OnKeyFallbackListener> fallbacks = getListenerInfo().mKeyFallbackListeners;
+        if (fallbacks == null) {
+            fallbacks = new ArrayList<>();
+            getListenerInfo().mKeyFallbackListeners = fallbacks;
+        }
+        fallbacks.add(listener);
+    }
+
+    /**
+     * Removes a listener which will receive unhandled {@link KeyEvent}s.
+     * @param listener the receiver of fallback {@link KeyEvent}s.
+     * @see #onKeyFallback(KeyEvent)
+     */
+    public void removeKeyFallbackListener(OnKeyFallbackListener listener) {
+        if (mListenerInfo != null) {
+            if (mListenerInfo.mKeyFallbackListeners != null) {
+                mListenerInfo.mKeyFallbackListeners.remove(listener);
+                if (mListenerInfo.mKeyFallbackListeners.isEmpty()) {
+                    mListenerInfo.mKeyFallbackListeners = null;
+                }
+            }
+        }
     }
 }

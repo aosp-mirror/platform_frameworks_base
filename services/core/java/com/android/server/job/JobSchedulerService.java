@@ -622,23 +622,14 @@ public final class JobSchedulerService extends com.android.server.SystemService
             if (disabled) {
                 cancelJobsForUid(uid, "uid gone");
             }
-            synchronized (mLock) {
-                mBackgroundJobsController.setUidActiveLocked(uid, false);
-            }
         }
 
         @Override public void onUidActive(int uid) throws RemoteException {
-            synchronized (mLock) {
-                mBackgroundJobsController.setUidActiveLocked(uid, true);
-            }
         }
 
         @Override public void onUidIdle(int uid, boolean disabled) {
             if (disabled) {
                 cancelJobsForUid(uid, "app uid idle");
-            }
-            synchronized (mLock) {
-                mBackgroundJobsController.setUidActiveLocked(uid, false);
             }
         }
 

@@ -587,8 +587,8 @@ public abstract class CameraMetadata<TKey> {
      * then the list of resolutions for YUV_420_888 from {@link android.hardware.camera2.params.StreamConfigurationMap#getOutputSizes } contains at
      * least one resolution &gt;= 8 megapixels, with a minimum frame duration of &lt;= 1/20
      * s.</p>
-     * <p>If the device supports the {@link android.graphics.ImageFormat#RAW10 }, {@link android.graphics.ImageFormat#RAW12 }, then those can also be captured at the same rate
-     * as the maximum-size YUV_420_888 resolution is.</p>
+     * <p>If the device supports the {@link android.graphics.ImageFormat#RAW10 }, {@link android.graphics.ImageFormat#RAW12 }, then those can also be
+     * captured at the same rate as the maximum-size YUV_420_888 resolution is.</p>
      * <p>If the device supports the PRIVATE_REPROCESSING capability, then the same guarantees
      * as for the YUV_420_888 format also apply to the {@link android.graphics.ImageFormat#PRIVATE } format.</p>
      * <p>In addition, the {@link CameraCharacteristics#SYNC_MAX_LATENCY android.sync.maxLatency} field is guaranted to have a value between 0
@@ -610,25 +610,22 @@ public abstract class CameraMetadata<TKey> {
      * following:</p>
      * <ul>
      * <li>One input stream is supported, that is, <code>{@link CameraCharacteristics#REQUEST_MAX_NUM_INPUT_STREAMS android.request.maxNumInputStreams} == 1</code>.</li>
-     * <li>{@link android.graphics.ImageFormat#YUV_420_888 } is supported as an output/input format, that is,
-     *   YUV_420_888 is included in the lists of formats returned by
-     *   {@link android.hardware.camera2.params.StreamConfigurationMap#getInputFormats } and
-     *   {@link android.hardware.camera2.params.StreamConfigurationMap#getOutputFormats }.</li>
+     * <li>{@link android.graphics.ImageFormat#YUV_420_888 } is supported as an output/input
+     *   format, that is, YUV_420_888 is included in the lists of formats returned by {@link android.hardware.camera2.params.StreamConfigurationMap#getInputFormats } and {@link android.hardware.camera2.params.StreamConfigurationMap#getOutputFormats }.</li>
      * <li>{@link android.hardware.camera2.params.StreamConfigurationMap#getValidOutputFormatsForInput }
      *   returns non-empty int[] for each supported input format returned by {@link android.hardware.camera2.params.StreamConfigurationMap#getInputFormats }.</li>
      * <li>Each size returned by {@link android.hardware.camera2.params.StreamConfigurationMap#getInputSizes getInputSizes(YUV_420_888)} is also included in {@link android.hardware.camera2.params.StreamConfigurationMap#getOutputSizes getOutputSizes(YUV_420_888)}</li>
-     * <li>Using {@link android.graphics.ImageFormat#YUV_420_888 } does not cause a frame rate drop
-     *   relative to the sensor's maximum capture rate (at that resolution).</li>
+     * <li>Using {@link android.graphics.ImageFormat#YUV_420_888 } does not cause a frame rate
+     *   drop relative to the sensor's maximum capture rate (at that resolution).</li>
      * <li>{@link android.graphics.ImageFormat#YUV_420_888 } will be reprocessable into both
      *   {@link android.graphics.ImageFormat#YUV_420_888 } and {@link android.graphics.ImageFormat#JPEG } formats.</li>
      * <li>The maximum available resolution for {@link android.graphics.ImageFormat#YUV_420_888 } streams (both input/output) will match the
      *   maximum available resolution of {@link android.graphics.ImageFormat#JPEG } streams.</li>
      * <li>Static metadata {@link CameraCharacteristics#REPROCESS_MAX_CAPTURE_STALL android.reprocess.maxCaptureStall}.</li>
      * <li>Only the below controls are effective for reprocessing requests and will be present
-     *   in capture results. The reprocess requests are from the original capture results that
-     *   are associated with the intermediate {@link android.graphics.ImageFormat#YUV_420_888 }
-     *   output buffers.  All other controls in the reprocess requests will be ignored by the
-     *   camera device.<ul>
+     *   in capture results. The reprocess requests are from the original capture results
+     *   that are associated with the intermediate {@link android.graphics.ImageFormat#YUV_420_888 } output buffers.  All other controls in the
+     *   reprocess requests will be ignored by the camera device.<ul>
      * <li>android.jpeg.*</li>
      * <li>{@link CaptureRequest#NOISE_REDUCTION_MODE android.noiseReduction.mode}</li>
      * <li>{@link CaptureRequest#EDGE_MODE android.edge.mode}</li>
@@ -654,13 +651,13 @@ public abstract class CameraMetadata<TKey> {
      * <p>The camera device can produce depth measurements from its field of view.</p>
      * <p>This capability requires the camera device to support the following:</p>
      * <ul>
-     * <li>{@link android.graphics.ImageFormat#DEPTH16 } is supported as an output format.</li>
-     * <li>{@link android.graphics.ImageFormat#DEPTH_POINT_CLOUD } is optionally supported as an
-     *   output format.</li>
-     * <li>This camera device, and all camera devices with the same {@link CameraCharacteristics#LENS_FACING android.lens.facing},
-     *   will list the following calibration entries in both
-     *   {@link android.hardware.camera2.CameraCharacteristics } and
-     *   {@link android.hardware.camera2.CaptureResult }:<ul>
+     * <li>{@link android.graphics.ImageFormat#DEPTH16 } is supported as
+     *   an output format.</li>
+     * <li>{@link android.graphics.ImageFormat#DEPTH_POINT_CLOUD } is
+     *   optionally supported as an output format.</li>
+     * <li>This camera device, and all camera devices with the same {@link CameraCharacteristics#LENS_FACING android.lens.facing}, will
+     *   list the following calibration metadata entries in both {@link android.hardware.camera2.CameraCharacteristics }
+     *   and {@link android.hardware.camera2.CaptureResult }:<ul>
      * <li>{@link CameraCharacteristics#LENS_POSE_TRANSLATION android.lens.poseTranslation}</li>
      * <li>{@link CameraCharacteristics#LENS_POSE_ROTATION android.lens.poseRotation}</li>
      * <li>{@link CameraCharacteristics#LENS_INTRINSIC_CALIBRATION android.lens.intrinsicCalibration}</li>
@@ -674,8 +671,7 @@ public abstract class CameraMetadata<TKey> {
      * </ul>
      * <p>Generally, depth output operates at a slower frame rate than standard color capture,
      * so the DEPTH16 and DEPTH_POINT_CLOUD formats will commonly have a stall duration that
-     * should be accounted for (see
-     * {@link android.hardware.camera2.params.StreamConfigurationMap#getOutputStallDuration }).
+     * should be accounted for (see {@link android.hardware.camera2.params.StreamConfigurationMap#getOutputStallDuration }).
      * On a device that supports both depth and color-based output, to enable smooth preview,
      * using a repeating burst is recommended, where a depth-output target is only included
      * once every N frames, where N is the ratio between preview output rate and depth output
@@ -692,23 +688,19 @@ public abstract class CameraMetadata<TKey> {
     public static final int REQUEST_AVAILABLE_CAPABILITIES_DEPTH_OUTPUT = 8;
 
     /**
-     * <p>The device supports constrained high speed video recording (frame rate &gt;=120fps)
-     * use case. The camera device will support high speed capture session created by
-     * {@link android.hardware.camera2.CameraDevice#createConstrainedHighSpeedCaptureSession }, which
-     * only accepts high speed request lists created by
-     * {@link android.hardware.camera2.CameraConstrainedHighSpeedCaptureSession#createHighSpeedRequestList }.</p>
-     * <p>A camera device can still support high speed video streaming by advertising the high speed
-     * FPS ranges in {@link CameraCharacteristics#CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES android.control.aeAvailableTargetFpsRanges}. For this case, all normal
-     * capture request per frame control and synchronization requirements will apply to
-     * the high speed fps ranges, the same as all other fps ranges. This capability describes
-     * the capability of a specialized operating mode with many limitations (see below), which
-     * is only targeted at high speed video recording.</p>
-     * <p>The supported high speed video sizes and fps ranges are specified in
-     * {@link android.hardware.camera2.params.StreamConfigurationMap#getHighSpeedVideoFpsRanges }.
-     * To get desired output frame rates, the application is only allowed to select video size
-     * and FPS range combinations provided by
-     * {@link android.hardware.camera2.params.StreamConfigurationMap#getHighSpeedVideoSizes }.
-     * The fps range can be controlled via {@link CaptureRequest#CONTROL_AE_TARGET_FPS_RANGE android.control.aeTargetFpsRange}.</p>
+     * <p>The device supports constrained high speed video recording (frame rate &gt;=120fps) use
+     * case. The camera device will support high speed capture session created by {@link android.hardware.camera2.CameraDevice#createConstrainedHighSpeedCaptureSession }, which
+     * only accepts high speed request lists created by {@link android.hardware.camera2.CameraConstrainedHighSpeedCaptureSession#createHighSpeedRequestList }.</p>
+     * <p>A camera device can still support high speed video streaming by advertising the high
+     * speed FPS ranges in {@link CameraCharacteristics#CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES android.control.aeAvailableTargetFpsRanges}. For this case, all
+     * normal capture request per frame control and synchronization requirements will apply
+     * to the high speed fps ranges, the same as all other fps ranges. This capability
+     * describes the capability of a specialized operating mode with many limitations (see
+     * below), which is only targeted at high speed video recording.</p>
+     * <p>The supported high speed video sizes and fps ranges are specified in {@link android.hardware.camera2.params.StreamConfigurationMap#getHighSpeedVideoFpsRanges }.
+     * To get desired output frame rates, the application is only allowed to select video
+     * size and FPS range combinations provided by {@link android.hardware.camera2.params.StreamConfigurationMap#getHighSpeedVideoSizes }.  The
+     * fps range can be controlled via {@link CaptureRequest#CONTROL_AE_TARGET_FPS_RANGE android.control.aeTargetFpsRange}.</p>
      * <p>In this capability, the camera device will override aeMode, awbMode, and afMode to
      * ON, AUTO, and CONTINUOUS_VIDEO, respectively. All post-processing block mode
      * controls will be overridden to be FAST. Therefore, no manual control of capture
@@ -743,19 +735,16 @@ public abstract class CameraMetadata<TKey> {
      * frame rate. If the destination surface is from preview window, the actual preview frame
      * rate will be bounded by the screen refresh rate.</p>
      * <p>The camera device will only support up to 2 high speed simultaneous output surfaces
-     * (preview and recording surfaces)
-     * in this mode. Above controls will be effective only if all of below conditions are true:</p>
+     * (preview and recording surfaces) in this mode. Above controls will be effective only
+     * if all of below conditions are true:</p>
      * <ul>
      * <li>The application creates a camera capture session with no more than 2 surfaces via
      * {@link android.hardware.camera2.CameraDevice#createConstrainedHighSpeedCaptureSession }. The
-     * targeted surfaces must be preview surface (either from
-     * {@link android.view.SurfaceView } or {@link android.graphics.SurfaceTexture }) or
-     * recording surface(either from {@link android.media.MediaRecorder#getSurface } or
-     * {@link android.media.MediaCodec#createInputSurface }).</li>
+     * targeted surfaces must be preview surface (either from {@link android.view.SurfaceView } or {@link android.graphics.SurfaceTexture }) or recording
+     * surface(either from {@link android.media.MediaRecorder#getSurface } or {@link android.media.MediaCodec#createInputSurface }).</li>
      * <li>The stream sizes are selected from the sizes reported by
      * {@link android.hardware.camera2.params.StreamConfigurationMap#getHighSpeedVideoSizes }.</li>
-     * <li>The FPS ranges are selected from
-     * {@link android.hardware.camera2.params.StreamConfigurationMap#getHighSpeedVideoFpsRanges }.</li>
+     * <li>The FPS ranges are selected from {@link android.hardware.camera2.params.StreamConfigurationMap#getHighSpeedVideoFpsRanges }.</li>
      * </ul>
      * <p>When above conditions are NOT satistied,
      * {@link android.hardware.camera2.CameraDevice#createConstrainedHighSpeedCaptureSession }
@@ -1038,8 +1027,7 @@ public abstract class CameraMetadata<TKey> {
 
     /**
      * <p>This camera device is running in backward compatibility mode.</p>
-     * <p>Only the stream configurations listed in the <code>LEGACY</code> table in the {@link android.hardware.camera2.CameraDevice#createCaptureSession createCaptureSession}
-     * documentation are supported.</p>
+     * <p>Only the stream configurations listed in the <code>LEGACY</code> table in the {@link android.hardware.camera2.CameraDevice#createCaptureSession createCaptureSession} documentation are supported.</p>
      * <p>A <code>LEGACY</code> device does not support per-frame control, manual sensor control, manual
      * post-processing, arbitrary cropping regions, and has relaxed performance constraints.
      * No additional capabilities beyond <code>BACKWARD_COMPATIBLE</code> will ever be listed by a
@@ -1061,8 +1049,7 @@ public abstract class CameraMetadata<TKey> {
      * <p>This camera device is capable of YUV reprocessing and RAW data capture, in addition to
      * FULL-level capabilities.</p>
      * <p>The stream configurations listed in the <code>LEVEL_3</code>, <code>RAW</code>, <code>FULL</code>, <code>LEGACY</code> and
-     * <code>LIMITED</code> tables in the {@link android.hardware.camera2.CameraDevice#createCaptureSession createCaptureSession}
-     * documentation are guaranteed to be supported.</p>
+     * <code>LIMITED</code> tables in the {@link android.hardware.camera2.CameraDevice#createCaptureSession createCaptureSession} documentation are guaranteed to be supported.</p>
      * <p>The following additional capabilities are guaranteed to be supported:</p>
      * <ul>
      * <li><code>YUV_REPROCESSING</code> capability ({@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities} contains
@@ -2155,12 +2142,13 @@ public abstract class CameraMetadata<TKey> {
     public static final int EDGE_MODE_HIGH_QUALITY = 2;
 
     /**
-     * <p>Edge enhancement is applied at different levels for different output streams,
-     * based on resolution. Streams at maximum recording resolution (see {@link android.hardware.camera2.CameraDevice#createCaptureSession }) or below have
-     * edge enhancement applied, while higher-resolution streams have no edge enhancement
-     * applied. The level of edge enhancement for low-resolution streams is tuned so that
-     * frame rate is not impacted, and the quality is equal to or better than FAST (since it
-     * is only applied to lower-resolution outputs, quality may improve from FAST).</p>
+     * <p>Edge enhancement is applied at different
+     * levels for different output streams, based on resolution. Streams at maximum recording
+     * resolution (see {@link android.hardware.camera2.CameraDevice#createCaptureSession })
+     * or below have edge enhancement applied, while higher-resolution streams have no edge
+     * enhancement applied. The level of edge enhancement for low-resolution streams is tuned
+     * so that frame rate is not impacted, and the quality is equal to or better than FAST
+     * (since it is only applied to lower-resolution outputs, quality may improve from FAST).</p>
      * <p>This mode is intended to be used by applications operating in a zero-shutter-lag mode
      * with YUV or PRIVATE reprocessing, where the application continuously captures
      * high-resolution intermediate buffers into a circular buffer, from which a final image is
@@ -2287,12 +2275,12 @@ public abstract class CameraMetadata<TKey> {
 
     /**
      * <p>Noise reduction is applied at different levels for different output streams,
-     * based on resolution. Streams at maximum recording resolution (see {@link android.hardware.camera2.CameraDevice#createCaptureSession }) or below have noise
-     * reduction applied, while higher-resolution streams have MINIMAL (if supported) or no
-     * noise reduction applied (if MINIMAL is not supported.) The degree of noise reduction
-     * for low-resolution streams is tuned so that frame rate is not impacted, and the quality
-     * is equal to or better than FAST (since it is only applied to lower-resolution outputs,
-     * quality may improve from FAST).</p>
+     * based on resolution. Streams at maximum recording resolution (see {@link android.hardware.camera2.CameraDevice#createCaptureSession })
+     * or below have noise reduction applied, while higher-resolution streams have MINIMAL (if
+     * supported) or no noise reduction applied (if MINIMAL is not supported.) The degree of
+     * noise reduction for low-resolution streams is tuned so that frame rate is not impacted,
+     * and the quality is equal to or better than FAST (since it is only applied to
+     * lower-resolution outputs, quality may improve from FAST).</p>
      * <p>This mode is intended to be used by applications operating in a zero-shutter-lag mode
      * with YUV or PRIVATE reprocessing, where the application continuously captures
      * high-resolution intermediate buffers into a circular buffer, from which a final image is

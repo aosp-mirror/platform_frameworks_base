@@ -169,7 +169,6 @@ LOCAL_SRC_FILES += \
 	core/java/android/content/pm/IPackageDataObserver.aidl \
 	core/java/android/content/pm/IPackageDeleteObserver.aidl \
 	core/java/android/content/pm/IPackageDeleteObserver2.aidl \
-	core/java/android/content/pm/IPackageInstallObserver.aidl \
 	core/java/android/content/pm/IPackageInstallObserver2.aidl \
 	core/java/android/content/pm/IPackageInstaller.aidl \
 	core/java/android/content/pm/IPackageInstallerCallback.aidl \
@@ -638,6 +637,7 @@ LOCAL_STATIC_JAVA_LIBRARIES :=                           \
     framework-protos                                     \
     android.hidl.base-V1.0-java                          \
     android.hardware.cas-V1.0-java                       \
+    android.hardware.contexthub-V1.0-java                \
     android.hardware.health-V1.0-java-constants          \
     android.hardware.thermal-V1.0-java-constants         \
     android.hardware.tv.input-V1.0-java-constants        \
@@ -931,7 +931,7 @@ non_base_dirs := \
 	../opt/net/voip/src/java/android/net/sip
 
 framework_base_android_test_mock_src_files := \
-	$(call all-java-files-under, test-runner/src/android/test/mock)
+	$(call all-java-files-under, test-mock/src/android/test/mock)
 
 framework_base_android_test_runner_excluding_mock_src_files := \
 	$(filter-out $(framework_base_android_test_mock_src_files), $(call all-java-files-under, test-runner/src))

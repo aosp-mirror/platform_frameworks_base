@@ -138,15 +138,13 @@ TEST(CountMetricProducerTest, TestEventsWithSlicedCondition) {
     link->add_key_in_condition()->set_key(2);
 
     LogEvent event1(1, bucketStartTimeNs + 1);
-    auto list = event1.GetAndroidLogEventList();
-    *list << "111";  // uid
+    event1.write("111");  // uid
     event1.init();
     ConditionKey key1;
     key1["APP_IN_BACKGROUND_PER_UID"] = "2:111|";
 
     LogEvent event2(1, bucketStartTimeNs + 10);
-    auto list2 = event2.GetAndroidLogEventList();
-    *list2 << "222";  // uid
+    event2.write("222");  // uid
     event2.init();
     ConditionKey key2;
     key2["APP_IN_BACKGROUND_PER_UID"] = "2:222|";

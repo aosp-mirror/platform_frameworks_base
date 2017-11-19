@@ -643,6 +643,8 @@ class UserUsageStatsService {
                 return "SHORTCUT_INVOCATION";
             case UsageEvents.Event.CHOOSER_ACTION:
                 return "CHOOSER_ACTION";
+            case UsageEvents.Event.NOTIFICATION_SEEN:
+                return "NOTIFICATION_SEEN";
             default:
                 return "UNKNOWN";
         }

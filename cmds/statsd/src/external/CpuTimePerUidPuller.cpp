@@ -66,10 +66,9 @@ bool CpuTimePerUidPuller::Pull(const int tagId, vector<shared_ptr<LogEvent>>* da
     uint64_t sysTimeMs = std::stoull(pch);
 
     auto ptr = make_shared<LogEvent>(android::util::CPU_TIME_PER_UID_PULLED, timestamp);
-    auto elemList = ptr->GetAndroidLogEventList();
-    *elemList << uid;
-    *elemList << userTimeMs;
-    *elemList << sysTimeMs;
+    ptr->write(uid);
+    ptr->write(userTimeMs);
+    ptr->write(sysTimeMs);
     ptr->init();
     data->push_back(ptr);
     VLOG("uid %lld, user time %lld, sys time %lld", (long long)uid, (long long)userTimeMs, (long long)sysTimeMs);

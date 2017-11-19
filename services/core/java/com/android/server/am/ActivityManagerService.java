@@ -415,6 +415,8 @@ import com.android.server.Watchdog;
 import com.android.server.am.ActivityStack.ActivityState;
 import com.android.server.am.proto.ActivityManagerServiceProto;
 import com.android.server.am.proto.BroadcastProto;
+import com.android.server.am.proto.GrantUriProto;
+import com.android.server.am.proto.NeededUriGrantsProto;
 import com.android.server.am.proto.StickyBroadcastProto;
 import com.android.server.firewall.IntentFirewall;
 import com.android.server.job.JobSchedulerInternal;
@@ -1189,6 +1191,13 @@ public class ActivityManagerService extends IActivityManager.Stub
             String result = uri.toSafeString() + " [user " + sourceUserId + "]";
             if (prefix) result += " [prefix]";
             return result;
+        }
+
+        public void writeToProto(ProtoOutputStream proto, long fieldId) {
+            long token = proto.start(fieldId);
+            proto.write(GrantUriProto.URI, uri.toString());
+            proto.write(GrantUriProto.SOURCE_USER_ID, sourceUserId);
+            proto.end(token);
         }
 
         public static GrantUri resolve(int defaultSourceUserHandle, Uri uri) {
@@ -9044,6 +9053,19 @@ public class ActivityManagerService extends IActivityManager.Stub
             this.targetUid = targetUid;
             this.flags = flags;
         }
+
+        void writeToProto(ProtoOutputStream proto, long fieldId) {
+            long token = proto.start(fieldId);
+            proto.write(NeededUriGrantsProto.TARGET_PACKAGE, targetPkg);
+            proto.write(NeededUriGrantsProto.TARGET_UID, targetUid);
+            proto.write(NeededUriGrantsProto.FLAGS, flags);
+
+            final int N = this.size();
+            for (int i=0; i<N; i++) {
+                this.get(i).writeToProto(proto, NeededUriGrantsProto.GRANTS);
+            }
+            proto.end(token);
+        }
     }
 
     /**
@@ -14922,6 +14944,25 @@ public class ActivityManagerService extends IActivityManager.Stub
                 synchronized (this) {
                     writeBroadcastsToProtoLocked(proto);
                 }
+            } else if ("provider".equals(cmd)) {
+                String[] newArgs;
+                String name;
+                if (opti >= args.length) {
+                    name = null;
+                    newArgs = EMPTY_STRING_ARRAY;
+                } else {
+                    name = args[opti];
+                    opti++;
+                    newArgs = new String[args.length - opti];
+                    if (args.length > 2) System.arraycopy(args, opti, newArgs, 0,
+                            args.length - opti);
+                }
+                if (!dumpProviderProto(fd, pw, name, newArgs)) {
+                    pw.println("No providers match: " + name);
+                    pw.println("Use -h for help.");
+                }
+            } else if ("service".equals(cmd)) {
+                mServices.writeToProto(proto);
             } else {
                 // default option, dump everything, output is ActivityManagerServiceProto
                 synchronized (this) {
@@ -14932,6 +14973,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                     long broadcastToken = proto.start(ActivityManagerServiceProto.BROADCASTS);
                     writeBroadcastsToProtoLocked(proto);
                     proto.end(broadcastToken);
+
+                    long serviceToken = proto.start(ActivityManagerServiceProto.SERVICES);
+                    mServices.writeToProto(proto);
+                    proto.end(serviceToken);
                 }
             }
             proto.flush();
@@ -16061,6 +16106,15 @@ public class ActivityManagerService extends IActivityManager.Stub
     protected boolean dumpProvider(FileDescriptor fd, PrintWriter pw, String name, String[] args,
             int opti, boolean dumpAll) {
         return mProviderMap.dumpProvider(fd, pw, name, args, opti, dumpAll);
+    }
+
+    /**
+     * Similar to the dumpProvider, but only dumps the first matching provider.
+     * The provider is responsible for dumping as proto.
+     */
+    protected boolean dumpProviderProto(FileDescriptor fd, PrintWriter pw, String name,
+            String[] args) {
+        return mProviderMap.dumpProviderProto(fd, pw, name, args);
     }
 
     static class ItemMatcher {

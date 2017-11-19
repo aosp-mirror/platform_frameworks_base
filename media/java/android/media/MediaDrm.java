@@ -91,10 +91,10 @@ import android.util.Log;
  * are only decrypted when the samples are delivered to the decoder.
  * <p>
  * MediaDrm methods throw {@link android.media.MediaDrm.MediaDrmStateException}
- * when a method is called on a MediaDrm object that has had an unrecoverable failure 
- * in the DRM plugin or security hardware. 
- * {@link android.media.MediaDrm.MediaDrmStateException} extends 
- * {@link java.lang.IllegalStateException} with the addition of a developer-readable 
+ * when a method is called on a MediaDrm object that has had an unrecoverable failure
+ * in the DRM plugin or security hardware.
+ * {@link android.media.MediaDrm.MediaDrmStateException} extends
+ * {@link java.lang.IllegalStateException} with the addition of a developer-readable
  * diagnostic information string associated with the exception.
  * <p>
  * In the event of a mediaserver process crash or restart while a MediaDrm object
@@ -102,9 +102,9 @@ import android.util.Log;
  * To recover, the app must release the MediaDrm object, then create and initialize
  * a new one.
  * <p>
- * As {@link android.media.MediaDrmResetException} and 
- * {@link android.media.MediaDrm.MediaDrmStateException} both extend 
- * {@link java.lang.IllegalStateException}, they should be in an earlier catch() 
+ * As {@link android.media.MediaDrmResetException} and
+ * {@link android.media.MediaDrm.MediaDrmStateException} both extend
+ * {@link java.lang.IllegalStateException}, they should be in an earlier catch()
  * block than {@link java.lang.IllegalStateException} if handled separately.
  * <p>
  * <a name="Callbacks"></a>
@@ -165,7 +165,7 @@ public final class MediaDrm {
 
     /**
      * Query if the given scheme identified by its UUID is supported on
-     * this device, and whether the drm plugin is able to handle the
+     * this device, and whether the DRM plugin is able to handle the
      * media container format specified by mimeType.
      * @param uuid The UUID of the crypto scheme.
      * @param mimeType The MIME type of the media container, e.g. "video/mp4"
@@ -745,7 +745,7 @@ public final class MediaDrm {
      * returned in KeyRequest.defaultUrl.
      * <p>
      * After the app has received the key request response from the server,
-     * it should deliver to the response to the DRM engine plugin using the method
+     * it should deliver to the response to the MediaDrm instance using the method
      * {@link #provideKeyResponse}.
      *
      * @param scope may be a sessionId or a keySetId, depending on the specified keyType.
@@ -781,7 +781,7 @@ public final class MediaDrm {
 
     /**
      * A key response is received from the license server by the app, then it is
-     * provided to the DRM engine plugin using provideKeyResponse.  When the
+     * provided to the MediaDrm instance using provideKeyResponse.  When the
      * response is for an offline key request, a keySetId is returned that can be
      * used to later restore the keys to a new session with the method
      * {@link #restoreKeys}.
@@ -829,7 +829,7 @@ public final class MediaDrm {
      * in the form of {name, value} pairs.  Since DRM license policies vary by vendor,
      * the specific status field names are determined by each DRM vendor.  Refer to your
      * DRM provider documentation for definitions of the field names for a particular
-     * DRM engine plugin.
+     * DRM plugin.
      *
      * @param sessionId the session ID for the DRM session
      */
@@ -897,11 +897,11 @@ public final class MediaDrm {
            @NonNull String certAuthority);
 
     /**
-     * After a provision response is received by the app, it is provided to the DRM
-     * engine plugin using this method.
+     * After a provision response is received by the app, it is provided to the
+     * MediaDrm instance using this method.
      *
      * @param response the opaque provisioning response byte array to provide to the
-     * DRM engine plugin.
+     * MediaDrm instance.
      *
      * @throws DeniedByServerException if the response indicates that the
      * server rejected the request
@@ -912,7 +912,6 @@ public final class MediaDrm {
     }
 
     @NonNull
-    /* could there be a valid response with 0-sized certificate or key? */
     private native Certificate provideProvisionResponseNative(@NonNull byte[] response)
             throws DeniedByServerException;
 
@@ -953,26 +952,26 @@ public final class MediaDrm {
     /**
      * Remove all secure stops without requiring interaction with the server.
      */
-     public native void releaseAllSecureStops();
+    public native void releaseAllSecureStops();
 
     /**
-     * String property name: identifies the maker of the DRM engine plugin
+     * String property name: identifies the maker of the DRM plugin
      */
     public static final String PROPERTY_VENDOR = "vendor";
 
     /**
-     * String property name: identifies the version of the DRM engine plugin
+     * String property name: identifies the version of the DRM plugin
      */
     public static final String PROPERTY_VERSION = "version";
 
     /**
-     * String property name: describes the DRM engine plugin
+     * String property name: describes the DRM plugin
      */
     public static final String PROPERTY_DESCRIPTION = "description";
 
     /**
      * String property name: a comma-separated list of cipher and mac algorithms
-     * supported by CryptoSession.  The list may be empty if the DRM engine
+     * supported by CryptoSession.  The list may be empty if the DRM
      * plugin does not support CryptoSession operations.
      */
     public static final String PROPERTY_ALGORITHMS = "algorithms";
@@ -988,7 +987,7 @@ public final class MediaDrm {
     public @interface StringProperty {}
 
     /**
-     * Read a DRM engine plugin String property value, given the property name string.
+     * Read a MediaDrm String property value, given the property name string.
      * <p>
      * Standard fields names are:
      * {@link #PROPERTY_VENDOR}, {@link #PROPERTY_VERSION},
@@ -996,6 +995,13 @@ public final class MediaDrm {
      */
     @NonNull
     public native String getPropertyString(@NonNull @StringProperty String propertyName);
+
+    /**
+     * Set a MediaDrm String property value, given the property name string
+     * and new value for the property.
+     */
+    public native void setPropertyString(@NonNull @StringProperty String propertyName,
+            @NonNull String value);
 
     /**
      * Byte array property name: the device unique identifier is established during
@@ -1011,7 +1017,7 @@ public final class MediaDrm {
     public @interface ArrayProperty {}
 
     /**
-     * Read a DRM engine plugin byte array property value, given the property name string.
+     * Read a MediaDrm byte array property value, given the property name string.
      * <p>
      * Standard fields names are {@link #PROPERTY_DEVICE_UNIQUE_ID}
      */
@@ -1019,16 +1025,12 @@ public final class MediaDrm {
     public native byte[] getPropertyByteArray(@ArrayProperty String propertyName);
 
     /**
-     * Set a DRM engine plugin String property value.
-     */
-    public native void setPropertyString(
-            String propertyName, @NonNull String value);
-
-    /**
-     * Set a DRM engine plugin byte array property value.
-     */
-    public native void setPropertyByteArray(
+    * Set a MediaDrm byte array property value, given the property name string
+    * and new value for the property.
+    */
+    public native void setPropertyByteArray(@NonNull @ArrayProperty
             String propertyName, @NonNull byte[] value);
+
 
     private static final native void setCipherAlgorithmNative(
             @NonNull MediaDrm drm, @NonNull byte[] sessionId, @NonNull String algorithm);
@@ -1158,7 +1160,7 @@ public final class MediaDrm {
      * The algorithm string conforms to JCA Standard Names for Mac
      * Algorithms and is case insensitive.  For example "HmacSHA256".
      * <p>
-     * The list of supported algorithms for a DRM engine plugin can be obtained
+     * The list of supported algorithms for a DRM plugin can be obtained
      * using the method {@link #getPropertyString} with the property name
      * "algorithms".
      */
@@ -1272,7 +1274,7 @@ public final class MediaDrm {
      * storage, and used when invoking the signRSA method.
      *
      * @param response the opaque certificate response byte array to provide to the
-     * DRM engine plugin.
+     * MediaDrm instance.
      *
      * @throws DeniedByServerException if the response indicates that the
      * server rejected the request

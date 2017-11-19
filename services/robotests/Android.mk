@@ -48,7 +48,7 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
 # TODO(b/69254249): Migrate to Robolectric 3.4.2
 LOCAL_JAVA_LIBRARIES := \
     junit \
-    platform-robolectric-prebuilt
+    platform-robolectric-3.1.1-prebuilt
 
 LOCAL_INSTRUMENTATION_FOR := FrameworksServicesLib
 LOCAL_MODULE := FrameworksServicesRoboTests

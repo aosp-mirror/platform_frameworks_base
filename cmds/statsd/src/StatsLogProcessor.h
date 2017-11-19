@@ -33,7 +33,7 @@ namespace statsd {
 class StatsLogProcessor : public ConfigListener {
 public:
     StatsLogProcessor(const sp<UidMap>& uidMap,
-                      const std::function<void(const vector<uint8_t>&)>& pushLog);
+                      const std::function<void(const ConfigKey&)>& sendBroadcast);
     virtual ~StatsLogProcessor();
 
     virtual void OnLogEvent(const LogEvent& event);
@@ -41,15 +41,16 @@ public:
     void OnConfigUpdated(const ConfigKey& key, const StatsdConfig& config);
     void OnConfigRemoved(const ConfigKey& key);
 
-    vector<uint8_t> onDumpReport(const ConfigKey& key);
+    size_t GetMetricsSize(const ConfigKey& key);
 
-    /* Request a flush through a binder call. */
-    void flush();
+    void onDumpReport(const ConfigKey& key, vector<uint8_t>* outData);
 
 private:
+    mutable mutex mBroadcastTimesMutex;
+
     std::unordered_map<ConfigKey, std::unique_ptr<MetricsManager>> mMetricsManagers;
 
-    std::unordered_map<ConfigKey, long> mLastFlushTimes;
+    std::unordered_map<ConfigKey, long> mLastBroadcastTimes;
 
     sp<UidMap> mUidMap;  // Reference to the UidMap to lookup app name and version for each uid.
 
@@ -60,17 +61,18 @@ private:
      */
     static const size_t kMaxSerializedBytes = 16 * 1024;
 
-    /* Check if the buffer size exceeds the max buffer size when the new entry is added, and flush
-       the logs to callback clients if true. */
+    /* Check if we should send a broadcast if approaching memory limits and if we're over, we
+     * actually delete the data. */
     void flushIfNecessary(uint64_t timestampNs,
                           const ConfigKey& key,
                           const unique_ptr<MetricsManager>& metricsManager);
 
-    std::function<void(const vector<uint8_t>&)> mPushLog;
+    // Function used to send a broadcast so that receiver for the config key can call getData
+    // to retrieve the stored data.
+    std::function<void(const ConfigKey& key)> mSendBroadcast;
 
-    /* Minimum period between two flushes in nanoseconds. Currently set to 10
-     * minutes. */
-    static const unsigned long long kMinFlushPeriod = 600 * NS_PER_SEC;
+    /* Minimum period between two broadcasts in nanoseconds. Currently set to 60 seconds. */
+    static const unsigned long long kMinBroadcastPeriod = 60 * NS_PER_SEC;
 };
 
 }  // namespace statsd

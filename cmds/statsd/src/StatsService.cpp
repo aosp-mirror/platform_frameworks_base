@@ -17,6 +17,7 @@
 #define DEBUG true
 #include "Log.h"
 
+#include "android-base/stringprintf.h"
 #include "StatsService.h"
 #include "config/ConfigKey.h"
 #include "config/ConfigManager.h"
@@ -25,11 +26,11 @@
 #include <android-base/file.h>
 #include <binder/IPCThreadState.h>
 #include <binder/IServiceManager.h>
+#include <dirent.h>
 #include <frameworks/base/cmds/statsd/src/statsd_config.pb.h>
 #include <private/android_filesystem_config.h>
 #include <utils/Looper.h>
 #include <utils/String16.h>
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/system_properties.h>
@@ -42,6 +43,7 @@ namespace os {
 namespace statsd {
 
 constexpr const char* kPermissionDump = "android.permission.DUMP";
+#define STATS_SERVICE_DIR "/data/system/stats-service"
 
 // ======================================================================
 /**
@@ -71,8 +73,18 @@ StatsService::StatsService(const sp<Looper>& handlerLooper)
 {
     mUidMap = new UidMap();
     mConfigManager = new ConfigManager();
-    mProcessor = new StatsLogProcessor(mUidMap, [](const vector<uint8_t>& log) {
-        // TODO: Update how we send data out of StatsD.
+    mProcessor = new StatsLogProcessor(mUidMap, [this](const ConfigKey& key) {
+        auto sc = getStatsCompanionService();
+        auto receiver = mConfigManager->GetConfigReceiver(key);
+        if (sc == nullptr) {
+            ALOGD("Could not find StatsCompanionService");
+        } else if (receiver.first.size() == 0) {
+            ALOGD("Statscompanion could not find a broadcast receiver for %s",
+                  key.ToString().c_str());
+        } else {
+            sc->sendBroadcast(String16(receiver.first.c_str()),
+                              String16(receiver.second.c_str()));
+        }
     });
 
     mConfigManager->AddListener(mProcessor);
@@ -204,7 +216,15 @@ status_t StatsService::command(FILE* in, FILE* out, FILE* err, Vector<String8>& 
         }
 
         if (!args[0].compare(String8("send-broadcast"))) {
-            return cmd_trigger_broadcast(args);
+            return cmd_trigger_broadcast(out, args);
+        }
+
+        if (!args[0].compare(String8("print-stats"))) {
+            return cmd_print_stats(out);
+        }
+
+        if (!args[0].compare(String8("clear-config"))) {
+            return cmd_remove_config_files(out);
         }
     }
 
@@ -223,7 +243,12 @@ void StatsService::print_cmd_help(FILE* out) {
     fprintf(out, "  Prints the UID, app name, version mapping.\n");
     fprintf(out, "\n");
     fprintf(out, "\n");
-    fprintf(out, "usage: adb shell cmds stats pull-source [int] \n");
+    fprintf(out, "usage: adb shell cmd stats clear-config \n");
+    fprintf(out, "\n");
+    fprintf(out, "  Removes all configs from disk.\n");
+    fprintf(out, "\n");
+    fprintf(out, "\n");
+    fprintf(out, "usage: adb shell cmd stats pull-source [int] \n");
     fprintf(out, "\n");
     fprintf(out, "  Prints the output of a pulled metrics source (int indicates source)\n");
     fprintf(out, "\n");
@@ -248,16 +273,62 @@ void StatsService::print_cmd_help(FILE* out) {
     fprintf(out, "  NAME          The name of the configuration\n");
     fprintf(out, "\n");
     fprintf(out, "\n");
-    fprintf(out, "usage: adb shell cmd stats send-broadcast PACKAGE CLASS\n");
-    fprintf(out, "  Send a broadcast that triggers one subscriber to fetch metrics.\n");
-    fprintf(out, "  PACKAGE        The name of the package to receive the broadcast.\n");
-    fprintf(out, "  CLASS          The name of the class to receive the broadcast.\n");
+    fprintf(out, "usage: adb shell cmd stats send-broadcast [UID] NAME\n");
+    fprintf(out, "  Send a broadcast that triggers the subscriber to fetch metrics.\n");
+    fprintf(out, "  UID           The uid of the configuration. It is only possible to pass\n");
+    fprintf(out, "                the UID parameter on eng builds. If UID is omitted the\n");
+    fprintf(out, "                calling uid is used.\n");
+    fprintf(out, "  NAME          The name of the configuration\n");
+    fprintf(out, "\n");
+    fprintf(out, "\n");
+    fprintf(out, "usage: adb shell cmd stats print-stats\n");
+    fprintf(out, "  Prints some basic stats.\n");
 }
 
-status_t StatsService::cmd_trigger_broadcast(Vector<String8>& args) {
-    auto sc = getStatsCompanionService();
-    sc->sendBroadcast(String16(args[1]), String16(args[2]));
-    ALOGD("StatsService::trigger broadcast succeeded");
+status_t StatsService::cmd_trigger_broadcast(FILE* out, Vector<String8>& args) {
+    string name;
+    bool good = false;
+    int uid;
+    const int argCount = args.size();
+    if (argCount == 2) {
+        // Automatically pick the UID
+        uid = IPCThreadState::self()->getCallingUid();
+        // TODO: What if this isn't a binder call? Should we fail?
+        name.assign(args[1].c_str(), args[1].size());
+        good = true;
+    } else if (argCount == 3) {
+        // If it's a userdebug or eng build, then the shell user can
+        // impersonate other uids.
+        if (mEngBuild) {
+            const char* s = args[1].c_str();
+            if (*s != '\0') {
+                char* end = NULL;
+                uid = strtol(s, &end, 0);
+                if (*end == '\0') {
+                    name.assign(args[2].c_str(), args[2].size());
+                    good = true;
+                }
+            }
+        } else {
+            fprintf(out,
+                    "The metrics can only be dumped for other UIDs on eng or userdebug "
+                            "builds.\n");
+        }
+    }
+    if (!good) {
+        print_cmd_help(out);
+        return UNKNOWN_ERROR;
+    }
+    auto receiver = mConfigManager->GetConfigReceiver(ConfigKey(uid, name));
+    sp<IStatsCompanionService> sc = getStatsCompanionService();
+    if (sc != nullptr) {
+        sc->sendBroadcast(String16(receiver.first.c_str()), String16(receiver.second.c_str()));
+        ALOGD("StatsService::trigger broadcast succeeded to %s, %s", args[1].c_str(),
+              args[2].c_str());
+    } else {
+        ALOGD("Could not access statsCompanion");
+    }
+
     return NO_ERROR;
 }
 
@@ -362,7 +433,8 @@ status_t StatsService::cmd_dump_report(FILE* out, FILE* err, const Vector<String
             }
         }
         if (good) {
-            mProcessor->onDumpReport(ConfigKey(uid, name));
+            vector<uint8_t> data;
+            mProcessor->onDumpReport(ConfigKey(uid, name), &data);
             // TODO: print the returned StatsLogReport to file instead of printing to logcat.
             fprintf(out, "Dump report for Config [%d,%s]\n", uid, name.c_str());
             fprintf(out, "See the StatsLogReport in logcat...\n");
@@ -376,6 +448,15 @@ status_t StatsService::cmd_dump_report(FILE* out, FILE* err, const Vector<String
         fprintf(out, "Log processor does not exist...\n");
         return UNKNOWN_ERROR;
     }
+}
+
+status_t StatsService::cmd_print_stats(FILE* out) {
+    vector<ConfigKey> configs = mConfigManager->GetAllConfigKeys();
+    for (const ConfigKey& key : configs) {
+        fprintf(out, "Config %s uses %zu bytes\n", key.ToString().c_str(),
+                mProcessor->GetMetricsSize(key));
+    }
+    return NO_ERROR;
 }
 
 status_t StatsService::cmd_print_stats_log(FILE* out, const Vector<String8>& args) {
@@ -403,6 +484,27 @@ status_t StatsService::cmd_print_pulled_metrics(FILE* out, const Vector<String8>
         return NO_ERROR;
     }
     return UNKNOWN_ERROR;
+}
+
+status_t StatsService::cmd_remove_config_files(FILE* out) {
+    fprintf(out, "Trying to remove config files...\n");
+    unique_ptr<DIR, decltype(&closedir)> dir(opendir(STATS_SERVICE_DIR), closedir);
+    if (dir == NULL) {
+        fprintf(out, "No existing config files found exiting...\n");
+        return NO_ERROR;
+    }
+
+    dirent* de;
+    while ((de = readdir(dir.get()))) {
+        char* name = de->d_name;
+        if (name[0] == '.') continue;
+        string file_name = StringPrintf("%s/%s", STATS_SERVICE_DIR, name);
+        fprintf(out, "Deleting file %s\n", file_name.c_str());
+        if (remove(file_name.c_str())) {
+            fprintf(out, "Error deleting file %s\n", file_name.c_str());
+        }
+    }
+    return NO_ERROR;
 }
 
 Status StatsService::informAllUidData(const vector<int32_t>& uid, const vector<int32_t>& version,
@@ -541,12 +643,14 @@ void StatsService::OnLogEvent(const LogEvent& event) {
     mProcessor->OnLogEvent(event);
 }
 
-Status StatsService::getData(const String16& key, vector<uint8_t>* output) {
+Status StatsService::getData(const String16& key, vector <uint8_t>* output) {
     IPCThreadState* ipc = IPCThreadState::self();
-    if (checkCallingPermission(String16(kPermissionDump),
-                               reinterpret_cast<int32_t*>(ipc->getCallingPid()),
-                               reinterpret_cast<int32_t*>(ipc->getCallingUid()))) {
-        // TODO: Implement this.
+    ALOGD("StatsService::getData with Pid %i, Uid %i", ipc->getCallingPid(),
+          ipc->getCallingUid());
+    if (checkCallingPermission(String16(kPermissionDump))) {
+        string keyStr = string(String8(key).string());
+        ConfigKey configKey(ipc->getCallingUid(), keyStr);
+        mProcessor->onDumpReport(configKey, output);
         return Status::ok();
     } else {
         return Status::fromExceptionCode(binder::Status::EX_SECURITY);
@@ -558,11 +662,9 @@ Status StatsService::addConfiguration(const String16& key,
                                       const String16& package, const String16& cls,
                                       bool* success) {
     IPCThreadState* ipc = IPCThreadState::self();
-    int32_t* uid = reinterpret_cast<int32_t*>(ipc->getCallingUid());
-    if (checkCallingPermission(String16(kPermissionDump),
-                               reinterpret_cast<int32_t*>(ipc->getCallingPid()), uid)) {
+    if (checkCallingPermission(String16(kPermissionDump))) {
         string keyString = string(String8(key).string());
-        ConfigKey configKey(*uid, keyString);
+        ConfigKey configKey(ipc->getCallingUid(), keyString);
         StatsdConfig cfg;
         cfg.ParseFromArray(&config[0], config.size());
         mConfigManager->UpdateConfig(configKey, cfg);
@@ -577,10 +679,9 @@ Status StatsService::addConfiguration(const String16& key,
 
 Status StatsService::removeConfiguration(const String16& key, bool* success) {
     IPCThreadState* ipc = IPCThreadState::self();
-    if (checkCallingPermission(String16(kPermissionDump),
-                               reinterpret_cast<int32_t*>(ipc->getCallingPid()),
-                               reinterpret_cast<int32_t*>(ipc->getCallingUid()))) {
-        // TODO: Implement this.
+    if (checkCallingPermission(String16(kPermissionDump))) {
+        string keyStr = string(String8(key).string());
+        mConfigManager->RemoveConfig(ConfigKey(ipc->getCallingUid(), keyStr));
         return Status::ok();
     } else {
         *success = false;
@@ -588,7 +689,7 @@ Status StatsService::removeConfiguration(const String16& key, bool* success) {
     }
 }
 
-void StatsService::binderDied(const wp<IBinder>& who) {
+void StatsService::binderDied(const wp <IBinder>& who) {
     for (size_t i = 0; i < mCallbacks.size(); i++) {
         if (IInterface::asBinder(mCallbacks[i]) == who) {
             mCallbacks.removeAt(i);
