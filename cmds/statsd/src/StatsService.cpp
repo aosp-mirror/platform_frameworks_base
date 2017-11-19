@@ -690,12 +690,6 @@ Status StatsService::removeConfiguration(const String16& key, bool* success) {
 }
 
 void StatsService::binderDied(const wp <IBinder>& who) {
-    for (size_t i = 0; i < mCallbacks.size(); i++) {
-        if (IInterface::asBinder(mCallbacks[i]) == who) {
-            mCallbacks.removeAt(i);
-            break;
-        }
-    }
 }
 
 }  // namespace statsd

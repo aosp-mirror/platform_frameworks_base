@@ -16,8 +16,6 @@
 
 package android.os;
 
-import android.os.IStatsCallbacks;
-
 /**
   * Binder interface to communicate with the statistics management service.
   * {@hide}
