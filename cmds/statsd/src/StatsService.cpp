@@ -17,10 +17,11 @@
 #define DEBUG true
 #include "Log.h"
 
-#include "android-base/stringprintf.h"
 #include "StatsService.h"
+#include "android-base/stringprintf.h"
 #include "config/ConfigKey.h"
 #include "config/ConfigManager.h"
+#include "guardrail/MemoryLeakTrackUtil.h"
 #include "storage/DropboxReader.h"
 
 #include <android-base/file.h>
@@ -226,6 +227,10 @@ status_t StatsService::command(FILE* in, FILE* out, FILE* err, Vector<String8>& 
         if (!args[0].compare(String8("clear-config"))) {
             return cmd_remove_config_files(out);
         }
+
+        if (!args[0].compare(String8("meminfo"))) {
+            return cmd_dump_memory_info(out);
+        }
     }
 
     print_cmd_help(out);
@@ -236,6 +241,15 @@ void StatsService::print_cmd_help(FILE* out) {
     fprintf(out,
             "usage: adb shell cmd stats print-stats-log [tag_required] "
             "[timestamp_nsec_optional]\n");
+    fprintf(out, "\n");
+    fprintf(out, "\n");
+    fprintf(out, "usage: adb shell cmd stats meminfo\n");
+    fprintf(out, "\n");
+    fprintf(out, "  Prints the malloc debug information. You need to run the following first: \n");
+    fprintf(out, "   # adb shell stop\n");
+    fprintf(out, "   # adb shell setprop libc.debug.malloc.program statsd \n");
+    fprintf(out, "   # adb shell setprop libc.debug.malloc.options backtrace \n");
+    fprintf(out, "   # adb shell start\n");
     fprintf(out, "\n");
     fprintf(out, "\n");
     fprintf(out, "usage: adb shell cmd stats print-uid-map \n");
@@ -504,6 +518,13 @@ status_t StatsService::cmd_remove_config_files(FILE* out) {
             fprintf(out, "Error deleting file %s\n", file_name.c_str());
         }
     }
+    return NO_ERROR;
+}
+
+status_t StatsService::cmd_dump_memory_info(FILE* out) {
+    std::string s = dumpMemInfo(100);
+    fprintf(out, "Memory Info\n");
+    fprintf(out, "%s", s.c_str());
     return NO_ERROR;
 }
 
