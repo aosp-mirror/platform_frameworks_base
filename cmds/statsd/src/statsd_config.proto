@@ -47,6 +47,7 @@ message KeyValueMatcher {
 }
 
 enum LogicalOperation {
+  LOGICAL_OPERATION_UNSPECIFIED = 0;
   AND = 1;
   OR = 2;
   NOT = 3;
@@ -111,23 +112,12 @@ message Bucket {
   optional int64 bucket_size_millis = 1;
 }
 
-message Alert {
-    optional string name = 1;
+message EventConditionLink {
+  optional string condition = 1;
 
-    optional string metric_name = 2;
+  repeated KeyMatcher key_in_main = 2;
 
-    message IncidentdDetails {
-        repeated int32 section = 1;
-  }
-  optional IncidentdDetails incidentd_details = 3;
-
-  optional int32 number_of_buckets = 4;
-
-  optional int32 refractory_period_secs = 5;
-
-  optional int64 trigger_if_sum_gt = 6;
-
-  optional int32 refractory_period_in_buckets = 7;
+  repeated KeyMatcher key_in_condition = 3;
 }
 
 message EventMetric {
@@ -151,9 +141,7 @@ message CountMetric {
 
     optional Bucket bucket = 5;
 
-    optional bool include_in_output = 6;
-
-    repeated EventConditionLink links = 7;
+    repeated EventConditionLink links = 6;
 }
 
 message DurationMetric {
@@ -166,11 +154,11 @@ message DurationMetric {
     repeated EventConditionLink links = 4;
 
     enum AggregationType {
-        DURATION_SUM = 1;
+      SUM = 1;
 
-        DURATION_MAX_SPARSE = 2;
+      MAX_SPARSE = 2;
     }
-    optional AggregationType type = 5;
+    optional AggregationType aggregation_type = 5 [default = SUM];
 
     repeated KeyMatcher dimension = 6;
 
@@ -208,16 +196,30 @@ message ValueMetric {
 
     repeated EventConditionLink links = 7;
 
-    enum Operation { SUM = 1; }
-    optional Operation operation = 9 [default = SUM];
+    enum AggregationType {
+      SUM = 1;
+    }
+    optional AggregationType aggregation_type = 8 [default = SUM];
 }
 
-message EventConditionLink {
-  optional string condition = 1;
+message Alert {
+    optional string name = 1;
 
-  repeated KeyMatcher key_in_main = 2;
-  repeated KeyMatcher key_in_condition = 3;
-};
+    optional string metric_name = 2;
+
+    message IncidentdDetails {
+      repeated int32 section = 1;
+    }
+    optional IncidentdDetails incidentd_details = 3;
+
+    optional int32 number_of_buckets = 4;
+
+    optional int32 refractory_period_secs = 5;
+
+    optional int64 trigger_if_sum_gt = 6;
+
+    optional int32 refractory_period_in_buckets = 7;
+}
 
 message StatsdConfig {
     optional string name = 1;
@@ -236,5 +238,5 @@ message StatsdConfig {
 
     repeated Condition condition = 8;
 
-    repeated Alert alerts = 9;
+    repeated Alert alert = 9;
 }

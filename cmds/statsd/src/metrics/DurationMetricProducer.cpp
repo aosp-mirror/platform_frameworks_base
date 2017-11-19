@@ -111,12 +111,12 @@ void DurationMetricProducer::startNewProtoOutputStream(long long startTime) {
 
 unique_ptr<DurationTracker> DurationMetricProducer::createDurationTracker(
         vector<DurationBucket>& bucket) {
-    switch (mMetric.type()) {
-        case DurationMetric_AggregationType_DURATION_SUM:
+    switch (mMetric.aggregation_type()) {
+        case DurationMetric_AggregationType_SUM:
             return make_unique<OringDurationTracker>(mWizard, mConditionTrackerIndex, mNested,
                                                      mCurrentBucketStartTimeNs, mBucketSizeNs,
                                                      bucket);
-        case DurationMetric_AggregationType_DURATION_MAX_SPARSE:
+        case DurationMetric_AggregationType_MAX_SPARSE:
             return make_unique<MaxDurationTracker>(mWizard, mConditionTrackerIndex, mNested,
                                                    mCurrentBucketStartTimeNs, mBucketSizeNs,
                                                    bucket);
