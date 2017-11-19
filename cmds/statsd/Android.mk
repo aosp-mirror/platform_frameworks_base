@@ -19,7 +19,7 @@ statsd_common_src := \
     ../../core/java/android/os/IStatsManager.aidl \
     src/stats_log.proto \
     src/statsd_config.proto \
-    src/atoms_copy.proto \
+    src/atoms.proto \
     src/anomaly/AnomalyMonitor.cpp \
     src/anomaly/AnomalyTracker.cpp \
     src/condition/CombinationConditionTracker.cpp \
@@ -66,6 +66,9 @@ statsd_common_c_includes := \
 
 statsd_common_aidl_includes := \
     $(LOCAL_PATH)/../../core/java
+
+statsd_common_static_libraries := \
+    libplatformprotos
 
 statsd_common_shared_libraries := \
     libbase \
@@ -121,6 +124,8 @@ LOCAL_PROTOC_OPTIMIZE_TYPE := lite-static
 LOCAL_AIDL_INCLUDES := $(statsd_common_aidl_includes)
 LOCAL_C_INCLUDES += $(statsd_common_c_includes)
 
+LOCAL_STATIC_LIBRARIES := $(statsd_common_static_libraries)
+
 LOCAL_SHARED_LIBRARIES := $(statsd_common_shared_libraries) \
     libgtest_prod
 
@@ -174,17 +179,22 @@ LOCAL_SRC_FILES := \
     tests/guardrail/StatsdStats_test.cpp
 
 LOCAL_STATIC_LIBRARIES := \
+    $(statsd_common_static_libraries) \
     libgmock
 
 LOCAL_SHARED_LIBRARIES := $(statsd_common_shared_libraries)
 
 LOCAL_PROTOC_OPTIMIZE_TYPE := lite
 
+include $(BUILD_NATIVE_TEST)
+
+
 statsd_common_src:=
 statsd_common_aidl_includes:=
 statsd_common_c_includes:=
+statsd_common_static_libraries:=
+statsd_common_shared_libraries:=
 
-include $(BUILD_NATIVE_TEST)
 
 ##############################
 

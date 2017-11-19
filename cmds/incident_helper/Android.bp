@@ -50,12 +50,15 @@ cc_test {
         "testdata/*",
     ],
 
-    shared_libs: [
-        "libprotobuf-cpp-full",
-    ],
-
     static_libs: [
         "libgmock",
         "libplatformprotos"
     ],
+
+    shared_libs: [
+        "libprotobuf-cpp-full"
+    ],
+    proto: {
+        type: "full",
+    },
 }

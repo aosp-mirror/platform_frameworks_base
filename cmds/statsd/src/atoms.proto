@@ -21,6 +21,8 @@ package android.os.statsd;
 option java_package = "com.android.os";
 option java_outer_classname = "AtomsProto";
 
+import "frameworks/base/core/proto/android/app/activitymanager.proto";
+
 /**
  * The master atom class. This message defines all of the available
  * raw stats log events from the Android system, also known as "atoms."
@@ -168,7 +170,7 @@ message UidProcessStateChanged {
 
     // The state.
     // TODO: Use the real (mapped) process states.
-    optional int32 state = 2;
+    optional android.app.ProcessState state = 2;
 }
 
 /**
