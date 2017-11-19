@@ -350,6 +350,7 @@ public final class SmsManager {
      *
      * @see #sendTextMessage(String, String, String, PendingIntent, PendingIntent)
      */
+    @SystemApi
     public void sendTextMessageWithoutPersisting(
             String destinationAddress, String scAddress, String text,
             PendingIntent sentIntent, PendingIntent deliveryIntent) {

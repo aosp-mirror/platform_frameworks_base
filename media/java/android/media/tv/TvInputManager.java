@@ -1330,6 +1330,7 @@ public final class TvInputManager {
      *
      * @return the list of content ratings blocked by the user.
      */
+    @SystemApi
     public List<TvContentRating> getBlockedRatings() {
         try {
             List<TvContentRating> ratings = new ArrayList<>();
@@ -2591,6 +2592,7 @@ public final class TvInputManager {
         }
 
         /** @removed */
+        @SystemApi
         public boolean dispatchKeyEventToHdmi(KeyEvent event) {
             return false;
         }
