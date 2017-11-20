@@ -140,16 +140,6 @@ public class WindowAnimator {
             scheduleAnimation();
         }
 
-        // Simulate back-pressure by opening and closing an empty animation transaction. This makes
-        // sure that an animation frame is at least presented once on the screen. We do this outside
-        // of the regular transaction such that we can avoid holding the window manager lock in case
-        // we receive back-pressure from SurfaceFlinger. Since closing an animation transaction
-        // without the window manager locks leads to ordering issues (as the transaction will be
-        // processed only at the beginning of the next frame which may result in another transaction
-        // that was executed later in WM side gets executed first on SF side), we don't update any
-        // Surface properties here such that reordering doesn't cause issues.
-        mService.executeEmptyAnimationTransaction();
-
         synchronized (mService.mWindowMap) {
             mCurrentTime = frameTimeNs / TimeUtils.NANOS_PER_MS;
             mBulkUpdateParams = SET_ORIENTATION_CHANGE_COMPLETE;

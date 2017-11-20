@@ -25,6 +25,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.annotation.Nullable;
+import android.os.SystemClock;
 import android.util.ArrayMap;
 import android.view.Choreographer;
 import android.view.SurfaceControl;
@@ -195,6 +196,7 @@ class SurfaceAnimationRunner {
     }
 
     private void applyTransaction() {
+        mFrameTransaction.setAnimationTransaction();
         mFrameTransaction.apply();
         mApplyScheduled = false;
     }
