@@ -3105,7 +3105,16 @@ public final class PowerManagerService extends SystemService
         mIsVrModeEnabled = enabled;
     }
 
-    private static void powerHintInternal(int hintId, int data) {
+    private void powerHintInternal(int hintId, int data) {
+        // Maybe filter the event.
+        switch (hintId) {
+            case PowerHint.LAUNCH: // 1: activate launch boost 0: deactivate.
+                if (data == 1 && mBatterySaverController.isLaunchBoostDisabled()) {
+                    return;
+                }
+                break;
+        }
+
         nativeSendPowerHint(hintId, data);
     }
 

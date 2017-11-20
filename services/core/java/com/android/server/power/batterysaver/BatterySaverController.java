@@ -174,6 +174,13 @@ public class BatterySaverController implements BatterySaverPolicyListener {
     }
 
     /**
+     * @return true if launch boost should currently be disabled.
+     */
+    public boolean isLaunchBoostDisabled() {
+        return isEnabled() && mBatterySaverPolicy.isLaunchBoostDisabled();
+    }
+
+    /**
      * Dispatch power save events to the listeners.
      *
      * This method is always called on the handler thread.

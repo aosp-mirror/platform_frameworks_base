@@ -64,6 +64,7 @@ public class BatterySaverPolicy extends ContentObserver {
     private static final String KEY_FIREWALL_DISABLED = "firewall_disabled";
     private static final String KEY_ADJUST_BRIGHTNESS_DISABLED = "adjust_brightness_disabled";
     private static final String KEY_DATASAVER_DISABLED = "datasaver_disabled";
+    private static final String KEY_LAUNCH_BOOST_DISABLED = "launch_boost_disabled";
     private static final String KEY_ADJUST_BRIGHTNESS_FACTOR = "adjust_brightness_factor";
     private static final String KEY_FULLBACKUP_DEFERRED = "fullbackup_deferred";
     private static final String KEY_KEYVALUE_DEFERRED = "keyvaluebackup_deferred";
@@ -73,9 +74,16 @@ public class BatterySaverPolicy extends ContentObserver {
     private static final String KEY_CPU_FREQ_INTERACTIVE = "cpufreq-i";
     private static final String KEY_CPU_FREQ_NONINTERACTIVE = "cpufreq-n";
 
-    private static String mSettings;
-    private static String mDeviceSpecificSettings;
-    private static String mDeviceSpecificSettingsSource; // For dump() only.
+    private final Object mLock = new Object();
+
+    @GuardedBy("mLock")
+    private String mSettings;
+
+    @GuardedBy("mLock")
+    private String mDeviceSpecificSettings;
+
+    @GuardedBy("mLock")
+    private String mDeviceSpecificSettingsSource; // For dump() only.
 
     /**
      * {@code true} if vibration is disabled in battery saver mode.
@@ -83,6 +91,7 @@ public class BatterySaverPolicy extends ContentObserver {
      * @see Settings.Global#BATTERY_SAVER_CONSTANTS
      * @see #KEY_VIBRATION_DISABLED
      */
+    @GuardedBy("mLock")
     private boolean mVibrationDisabled;
 
     /**
@@ -91,6 +100,7 @@ public class BatterySaverPolicy extends ContentObserver {
      * @see Settings.Global#BATTERY_SAVER_CONSTANTS
      * @see #KEY_ANIMATION_DISABLED
      */
+    @GuardedBy("mLock")
     private boolean mAnimationDisabled;
 
     /**
@@ -100,6 +110,7 @@ public class BatterySaverPolicy extends ContentObserver {
      * @see Settings.Global#BATTERY_SAVER_CONSTANTS
      * @see #KEY_SOUNDTRIGGER_DISABLED
      */
+    @GuardedBy("mLock")
     private boolean mSoundTriggerDisabled;
 
     /**
@@ -108,6 +119,7 @@ public class BatterySaverPolicy extends ContentObserver {
      * @see Settings.Global#BATTERY_SAVER_CONSTANTS
      * @see #KEY_FULLBACKUP_DEFERRED
      */
+    @GuardedBy("mLock")
     private boolean mFullBackupDeferred;
 
     /**
@@ -116,6 +128,7 @@ public class BatterySaverPolicy extends ContentObserver {
      * @see Settings.Global#BATTERY_SAVER_CONSTANTS
      * @see #KEY_KEYVALUE_DEFERRED
      */
+    @GuardedBy("mLock")
     private boolean mKeyValueBackupDeferred;
 
     /**
@@ -124,6 +137,7 @@ public class BatterySaverPolicy extends ContentObserver {
      * @see Settings.Global#BATTERY_SAVER_CONSTANTS
      * @see #KEY_FIREWALL_DISABLED
      */
+    @GuardedBy("mLock")
     private boolean mFireWallDisabled;
 
     /**
@@ -132,6 +146,7 @@ public class BatterySaverPolicy extends ContentObserver {
      * @see Settings.Global#BATTERY_SAVER_CONSTANTS
      * @see #KEY_ADJUST_BRIGHTNESS_DISABLED
      */
+    @GuardedBy("mLock")
     private boolean mAdjustBrightnessDisabled;
 
     /**
@@ -140,7 +155,14 @@ public class BatterySaverPolicy extends ContentObserver {
      * @see Settings.Global#BATTERY_SAVER_CONSTANTS
      * @see #KEY_DATASAVER_DISABLED
      */
+    @GuardedBy("mLock")
     private boolean mDataSaverDisabled;
+
+    /**
+     * {@code true} if launch boost should be disabled on battery saver.
+     */
+    @GuardedBy("mLock")
+    private boolean mLaunchBoostDisabled;
 
     /**
      * This is the flag to decide the gps mode in battery saver mode.
@@ -148,6 +170,7 @@ public class BatterySaverPolicy extends ContentObserver {
      * @see Settings.Global#BATTERY_SAVER_CONSTANTS
      * @see #KEY_GPS_MODE
      */
+    @GuardedBy("mLock")
     private int mGpsMode;
 
     /**
@@ -157,19 +180,20 @@ public class BatterySaverPolicy extends ContentObserver {
      * @see Settings.Global#BATTERY_SAVER_CONSTANTS
      * @see #KEY_ADJUST_BRIGHTNESS_FACTOR
      */
+    @GuardedBy("mLock")
     private float mAdjustBrightnessFactor;
 
     /**
      * Whether to put all apps in the stand-by mode.
      */
+    @GuardedBy("mLock")
     private boolean mForceAllAppsStandby;
 
     /**
      * Weather to show non-essential sensors (e.g. edge sensors) or not.
      */
+    @GuardedBy("mLock")
     private boolean mOptionalSensorsDisabled;
-
-    private final Object mLock = new Object();
 
     @GuardedBy("mLock")
     private Context mContext;
@@ -227,7 +251,11 @@ public class BatterySaverPolicy extends ContentObserver {
 
     @VisibleForTesting
     String getGlobalSetting(String key) {
-        return Settings.Global.getString(mContentResolver, key);
+        final ContentResolver cr;
+        synchronized (mLock) {
+            cr = mContentResolver;
+        }
+        return Settings.Global.getString(cr, key);
     }
 
     @VisibleForTesting
@@ -296,6 +324,7 @@ public class BatterySaverPolicy extends ContentObserver {
         mAdjustBrightnessDisabled = parser.getBoolean(KEY_ADJUST_BRIGHTNESS_DISABLED, false);
         mAdjustBrightnessFactor = parser.getFloat(KEY_ADJUST_BRIGHTNESS_FACTOR, 0.5f);
         mDataSaverDisabled = parser.getBoolean(KEY_DATASAVER_DISABLED, true);
+        mLaunchBoostDisabled = parser.getBoolean(KEY_LAUNCH_BOOST_DISABLED, true);
         mForceAllAppsStandby = parser.getBoolean(KEY_FORCE_ALL_APPS_STANDBY, true);
         mOptionalSensorsDisabled = parser.getBoolean(KEY_OPTIONAL_SENSORS_DISABLED, true);
 
@@ -382,6 +411,12 @@ public class BatterySaverPolicy extends ContentObserver {
         }
     }
 
+    public boolean isLaunchBoostDisabled() {
+        synchronized (mLock) {
+            return mLaunchBoostDisabled;
+        }
+    }
+
     public void dump(PrintWriter pw) {
         synchronized (mLock) {
             pw.println();
@@ -398,6 +433,7 @@ public class BatterySaverPolicy extends ContentObserver {
             pw.println("  " + KEY_KEYVALUE_DEFERRED + "=" + mKeyValueBackupDeferred);
             pw.println("  " + KEY_FIREWALL_DISABLED + "=" + mFireWallDisabled);
             pw.println("  " + KEY_DATASAVER_DISABLED + "=" + mDataSaverDisabled);
+            pw.println("  " + KEY_LAUNCH_BOOST_DISABLED + "=" + mLaunchBoostDisabled);
             pw.println("  " + KEY_ADJUST_BRIGHTNESS_DISABLED + "=" + mAdjustBrightnessDisabled);
             pw.println("  " + KEY_ADJUST_BRIGHTNESS_FACTOR + "=" + mAdjustBrightnessFactor);
             pw.println("  " + KEY_GPS_MODE + "=" + mGpsMode);
