@@ -1740,7 +1740,7 @@
          @hide
     -->
     <permission android:name="android.permission.BIND_IMS_SERVICE"
-        android:protectionLevel="signature|privileged" />
+        android:protectionLevel="signature|privileged|vendorPrivileged" />
 
     <!-- Allows an application to manage embedded subscriptions (those on a eUICC) through
          EuiccManager APIs.
