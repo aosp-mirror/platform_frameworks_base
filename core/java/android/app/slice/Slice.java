@@ -62,7 +62,6 @@ public final class Slice implements Parcelable {
      * the content should be used in the shortcut representation of the slice (icon, label, action),
      * normally this should be indicated by adding the hint on the action containing that content.
      *
-     * @see SliceView#MODE_SHORTCUT
      * @see SliceItem#TYPE_ACTION
      */
     public static final String HINT_TITLE       = "title";
@@ -109,9 +108,9 @@ public final class Slice implements Parcelable {
      */
     public static final String HINT_NO_TINT     = "no_tint";
     /**
-     * Hint to indicate that this content should not be shown in the {@link SliceView#MODE_SMALL}
-     * and {@link SliceView#MODE_LARGE} modes of SliceView. This content may be used to populate
-     * the {@link SliceView#MODE_SHORTCUT} format of the slice.
+     * Hint to indicate that this content should not be shown in larger renderings
+     * of Slices. This content may be used to populate the shortcut/icon
+     * format of the slice.
      * @hide
      */
     public static final String HINT_HIDDEN = "hidden";
