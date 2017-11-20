@@ -18,6 +18,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE := libdvr_loader
 LOCAL_MODULE_OWNER := google
 LOCAL_SRC_FILES := dvr_library_loader.cpp
+LOCAL_CFLAGS := -Wall -Werror
 include $(BUILD_SHARED_LIBRARY)
 
 # Java platform library for vr stuff.
