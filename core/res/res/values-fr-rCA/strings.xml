@@ -217,7 +217,7 @@
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Rapport interactif"</string>
     <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Utilisez cette option dans la plupart des circonstances. Elle vous permet de suivre la progression du rapport, d\'entrer plus d\'information sur le problème et d\'effectuer des saisies d\'écran. Certaines sections moins utilisées et dont le remplissage demande beaucoup de temps peuvent être omises."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"Rapport complet"</string>
-    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"Utilisez cette option pour qu\'il y ait le moins d\'interférences système possible lorsque votre appareil ne répond pas ou qu\'il est trop lent, ou lorsque vous avez besoin de toutes les sections du rapport de bogue. Aucune saisie d\'écran supplémentaire ne peut être capturée, et vous ne pouvez entrer aucune autre information."</string>
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"Utilisez cette option pour qu\'il y ait le moins d\'interférences système possible lorsque votre appareil ne répond pas ou qu\'il est trop lent, ou lorsque vous avez besoin de toutes les sections du rapport de bogue. Aucune capture d\'écran supplémentaire ne peut être capturée, et vous ne pouvez entrer aucune autre information."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="one">Saisie d\'écran pour le rapport de bogue dans <xliff:g id="NUMBER_1">%d</xliff:g> seconde.</item>
       <item quantity="other">Saisie d\'écran pour le rapport de bogue dans <xliff:g id="NUMBER_1">%d</xliff:g> secondes.</item>
@@ -1169,7 +1169,7 @@
     <string name="sim_done_button" msgid="827949989369963775">"Terminé"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"Carte SIM ajoutée."</string>
     <string name="sim_added_message" msgid="6599945301141050216">"Redémarrez votre appareil pour accéder au réseau mobile."</string>
-    <string name="sim_restart_button" msgid="4722407842815232347">"Recommencer"</string>
+    <string name="sim_restart_button" msgid="4722407842815232347">"Redémarrer"</string>
     <string name="carrier_app_dialog_message" msgid="7066156088266319533">"Pour que la nouvelle carte SIM fonctionne correctement, vous devez installer et ouvrir une application fournie par votre fournisseur de services."</string>
     <string name="carrier_app_dialog_button" msgid="7900235513678617329">"TÉLÉCHARGER L\'APPLICATION"</string>
     <string name="carrier_app_dialog_not_now" msgid="6361378684292268027">"PAS MAINTENANT"</string>
@@ -1626,7 +1626,6 @@
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"2e <xliff:g id="LABEL">%1$s</xliff:g> professionnel(le)"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"3e <xliff:g id="LABEL">%1$s</xliff:g> professionnel(le)"</string>
     <string name="lock_to_app_toast" msgid="6820571533009838261">"Pour annuler l\'épinglage de cet écran, maintenez enfoncés les boutons Retour et Aperçu."</string>
-    <string name="lock_to_app_toast_locked" msgid="7849470948648628704">"Impossible d\'annuler l\'épinglage de cette application"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Écran épinglé"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Épinglage d\'écran annulé"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Demander le NIP avant d\'annuler l\'épinglage"</string>
@@ -1782,14 +1781,10 @@
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"Test de messages d\'urgence"</string>
     <string name="notification_reply_button_accessibility" msgid="3621714652387814344">"Répondre"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
-    <!-- no translation found for mmcc_authentication_reject (5767701075994754356) -->
-    <skip />
-    <!-- no translation found for mmcc_imsi_unknown_in_hlr (5316658473301462825) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_ms (807334478177362062) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_me (1950705155760872972) -->
-    <skip />
+    <string name="mmcc_authentication_reject" msgid="5767701075994754356">"Cette carte SIM n\'est pas autorisée pour la voix"</string>
+    <string name="mmcc_imsi_unknown_in_hlr" msgid="5316658473301462825">"Cette carte SIM n\'est pas autorisée pour la voix"</string>
+    <string name="mmcc_illegal_ms" msgid="807334478177362062">"Cette carte SIM n\'est pas autorisée pour la voix"</string>
+    <string name="mmcc_illegal_me" msgid="1950705155760872972">"Ce téléphone n\'est pas autorisé pour la voix"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"Fenêtre contextuelle"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="shortcut_restored_on_lower_version" msgid="5270675146351613828">"Ce raccourci nécessite la dernière version de l\'application"</string>
