@@ -3215,31 +3215,22 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
         int descendantFocusability = getDescendantFocusability();
 
-        boolean result;
         switch (descendantFocusability) {
             case FOCUS_BLOCK_DESCENDANTS:
-                result = super.requestFocus(direction, previouslyFocusedRect);
-                break;
+                return super.requestFocus(direction, previouslyFocusedRect);
             case FOCUS_BEFORE_DESCENDANTS: {
                 final boolean took = super.requestFocus(direction, previouslyFocusedRect);
-                result = took ? took : onRequestFocusInDescendants(direction,
-                        previouslyFocusedRect);
-                break;
+                return took ? took : onRequestFocusInDescendants(direction, previouslyFocusedRect);
             }
             case FOCUS_AFTER_DESCENDANTS: {
                 final boolean took = onRequestFocusInDescendants(direction, previouslyFocusedRect);
-                result = took ? took : super.requestFocus(direction, previouslyFocusedRect);
-                break;
+                return took ? took : super.requestFocus(direction, previouslyFocusedRect);
             }
             default:
                 throw new IllegalStateException("descendant focusability must be "
                         + "one of FOCUS_BEFORE_DESCENDANTS, FOCUS_AFTER_DESCENDANTS, FOCUS_BLOCK_DESCENDANTS "
                         + "but is " + descendantFocusability);
         }
-        if (result && !isLaidOut() && ((mPrivateFlags & PFLAG_WANTS_FOCUS) == 0)) {
-            mPrivateFlags |= PFLAG_WANTS_FOCUS;
-        }
-        return result;
     }
 
     /**
