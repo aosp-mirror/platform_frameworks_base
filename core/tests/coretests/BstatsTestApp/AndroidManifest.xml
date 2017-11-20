@@ -13,16 +13,16 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<configuration description="Runs Frameworks Core Tests.">
-    <target_preparer class="com.android.tradefed.targetprep.TestAppInstallSetup">
-        <option name="test-file-name" value="FrameworksCoreTests.apk" />
-        <option name="test-file-name" value="BstatsTestApp.apk" />
-    </target_preparer>
 
-    <option name="test-suite-tag" value="apct" />
-    <option name="test-tag" value="FrameworksCoreTests" />
-    <test class="com.android.tradefed.testtype.AndroidJUnitTest" >
-        <option name="package" value="com.android.frameworks.coretests" />
-        <option name="runner" value="android.support.test.runner.AndroidJUnitRunner" />
-    </test>
-</configuration>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="com.android.coretests.apps.bstatstestapp">
+
+    <application>
+        <activity android:name=".TestActivity"
+                  android:exported="true" />
+        <service android:name=".IsolatedTestService"
+                 android:exported="true"
+                 android:isolatedProcess="true" />
+    </application>
+
+</manifest>
