@@ -28,7 +28,7 @@
     <string name="unknownName" msgid="6867811765370350269">"غير معروف"</string>
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"البريد الصوتي"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
-    <string name="mmiError" msgid="5154499457739052907">"‏حدثت مشكلة في الاتصال أو أن كود MMI غير صحيح."</string>
+    <string name="mmiError" msgid="5154499457739052907">"‏حدثت مشكلة في الاتصال أو أن رمز MMI غير صحيح."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"تم تقييد التشغيل لأرقام الاتصال الثابت فقط."</string>
     <string name="mmiErrorWhileRoaming" msgid="762488890299284230">"يتعذر تغيير إعدادات إعادة توجيه المكالمات من هاتفك أثناء التجوال."</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"تم تمكين الخدمة."</string>
@@ -43,7 +43,7 @@
     <string name="mismatchPin" msgid="609379054496863419">"أرقام التعريف الشخصية التي كتبتها غير مطابقة."</string>
     <string name="invalidPin" msgid="3850018445187475377">"ادخل رقم تعريف شخصي مكون من ٤ إلى ٨ أرقام."</string>
     <string name="invalidPuk" msgid="8761456210898036513">"‏اكتب رمز PUK مكونًا من ٨ أرقام أو أكثر."</string>
-    <string name="needPuk" msgid="919668385956251611">"‏شريحة SIM مؤمّنة بكود PUK. اكتب كود PUK لإلغاء تأمينها."</string>
+    <string name="needPuk" msgid="919668385956251611">"‏شريحة SIM مؤمّنة برمز PUK. اكتب رمز PUK لإلغاء تأمينها."</string>
     <string name="needPuk2" msgid="4526033371987193070">"‏اكتب PUK2 لإلغاء تأمين شريحة SIM."</string>
     <string name="enablePin" msgid="209412020907207950">"‏محاولة غير ناجحة، مكّن قفل SIM/RUIM."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1251012001539225582">
@@ -139,8 +139,8 @@
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> بعد <xliff:g id="TIME_DELAY">{2}</xliff:g> ثانية"</string>
     <string name="cfTemplateRegistered" msgid="5073237827620166285">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: لم تتم إعادة التوجيه"</string>
     <string name="cfTemplateRegisteredTime" msgid="6781621964320635172">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: لم تتم إعادة التوجيه"</string>
-    <string name="fcComplete" msgid="3118848230966886575">"اكتمل كود الميزة."</string>
-    <string name="fcError" msgid="3327560126588500777">"حدثت مشكلة بالاتصال أو أن كود الميزة غير صحيح."</string>
+    <string name="fcComplete" msgid="3118848230966886575">"اكتمل رمز الميزة."</string>
+    <string name="fcError" msgid="3327560126588500777">"حدثت مشكلة بالاتصال أو أن رمز الميزة غير صحيح."</string>
     <string name="httpErrorOk" msgid="1191919378083472204">"حسنًا"</string>
     <string name="httpError" msgid="7956392511146698522">"حدث خطأ في الشبكة."</string>
     <string name="httpErrorLookup" msgid="4711687456111963163">"‏تعذر العثور على عنوان URL."</string>
