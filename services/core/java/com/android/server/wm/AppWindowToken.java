@@ -1526,7 +1526,9 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             final Animation a = loadAnimation(lp, transit, enter, isVoiceInteraction);
             if (a != null) {
                 final AnimationAdapter adapter = new LocalAnimationAdapter(
-                        new WindowAnimationSpec(a, new Point()), mService.mSurfaceAnimationRunner);
+                        new WindowAnimationSpec(a, new Point(),
+                                mService.mAppTransition.canSkipFirstFrame()),
+                        mService.mSurfaceAnimationRunner);
                 startAnimation(getPendingTransaction(), adapter, !isVisible());
                 if (a.getZAdjustment() == Animation.ZORDER_TOP) {
                     mAppAnimator.animLayerAdjustment = 1;

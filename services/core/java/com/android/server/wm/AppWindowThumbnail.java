@@ -86,8 +86,11 @@ class AppWindowThumbnail implements Animatable {
     void startAnimation(Transaction t, Animation anim) {
         anim.restrictDuration(MAX_ANIMATION_DURATION);
         anim.scaleCurrentDuration(mAppToken.mService.getTransitionAnimationScaleLocked());
-        mSurfaceAnimator.startAnimation(t, new LocalAnimationAdapter(new WindowAnimationSpec(anim,
-                        new Point()), mAppToken.mService.mSurfaceAnimationRunner),
+        mSurfaceAnimator.startAnimation(t,
+                new LocalAnimationAdapter(
+                        new WindowAnimationSpec(anim, new Point(),
+                                mAppToken.mService.mAppTransition.canSkipFirstFrame()),
+                        mAppToken.mService.mSurfaceAnimationRunner),
                 false /* hidden */);
     }
 
@@ -95,6 +98,7 @@ class AppWindowThumbnail implements Animatable {
     }
 
     void setShowing(Transaction pendingTransaction, boolean show) {
+        // TODO: Not needed anymore once thumbnail is attached to the app.
         if (show) {
             pendingTransaction.show(mSurfaceControl);
         } else {
@@ -129,6 +133,9 @@ class AppWindowThumbnail implements Animatable {
 
     @Override
     public void onAnimationLeashDestroyed(Transaction t) {
+
+        // TODO: Once attached to app token, we don't need to hide it immediately if thumbnail
+        // became visible.
         t.hide(mSurfaceControl);
     }
 

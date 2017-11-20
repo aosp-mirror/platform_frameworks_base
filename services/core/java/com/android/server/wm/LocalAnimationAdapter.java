@@ -108,5 +108,12 @@ class LocalAnimationAdapter implements AnimationAdapter {
          * @param currentPlayTime The current time of the animation.
          */
         void apply(Transaction t, SurfaceControl leash, long currentPlayTime);
+
+        /**
+         * @see AppTransition#canSkipFirstFrame
+         */
+        default boolean canSkipFirstFrame() {
+            return false;
+        }
     }
 }

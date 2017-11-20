@@ -38,10 +38,12 @@ public class WindowAnimationSpec implements AnimationSpec {
     private Animation mAnimation;
     private final Point mPosition = new Point();
     private final ThreadLocal<TmpValues> mThreadLocalTmps = ThreadLocal.withInitial(TmpValues::new);
+    private final boolean mCanSkipFirstFrame;
 
-    public WindowAnimationSpec(Animation animation, Point position)  {
+    public WindowAnimationSpec(Animation animation, Point position, boolean canSkipFirstFrame)  {
         mAnimation = animation;
         mPosition.set(position.x, position.y);
+        mCanSkipFirstFrame = canSkipFirstFrame;
     }
 
     @Override
@@ -86,6 +88,11 @@ public class WindowAnimationSpec implements AnimationSpec {
         } else {
             return SystemClock.uptimeMillis();
         }
+    }
+
+    @Override
+    public boolean canSkipFirstFrame() {
+        return mCanSkipFirstFrame;
     }
 
     /**

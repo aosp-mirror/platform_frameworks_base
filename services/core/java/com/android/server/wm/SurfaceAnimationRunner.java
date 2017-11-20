@@ -142,6 +142,11 @@ class SurfaceAnimationRunner {
             // Transaction will be applied in the commit phase.
             scheduleApplyTransaction();
         });
+
+        if (a.mAnimSpec.canSkipFirstFrame()) {
+            anim.setCurrentPlayTime(Choreographer.getFrameDelay());
+        }
+
         anim.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationStart(Animator animation) {

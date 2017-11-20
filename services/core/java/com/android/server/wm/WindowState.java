@@ -4276,7 +4276,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         anim.restrictDuration(MAX_ANIMATION_DURATION);
         anim.scaleCurrentDuration(mService.getWindowAnimationScaleLocked());
         final AnimationAdapter adapter = new LocalAnimationAdapter(
-                new WindowAnimationSpec(anim, mSurfacePosition), mService.mSurfaceAnimationRunner);
+                new WindowAnimationSpec(anim, mSurfacePosition, false /* canSkipFirstFrame */),
+                mService.mSurfaceAnimationRunner);
         startAnimation(mPendingTransaction, adapter);
         commitPendingTransaction();
     }
