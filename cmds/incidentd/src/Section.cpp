@@ -232,6 +232,7 @@ FileSection::FileSection(int id, const char* filename, const int64_t timeoutMs)
      mFilename(filename)
 {
     name = filename;
+    mIsSysfs = strncmp(filename, "/sys/", 5) == 0;
 }
 
 FileSection::~FileSection() {}
@@ -264,7 +265,7 @@ FileSection::Execute(ReportRequestSet* requests) const
 
     // parent process
     status_t readStatus = buffer.readProcessedDataInStream(fd, p2cPipe.writeFd(), c2pPipe.readFd(),
-            this->timeoutMs);
+            this->timeoutMs, mIsSysfs);
     if (readStatus != NO_ERROR || buffer.timedOut()) {
         ALOGW("FileSection '%s' failed to read data from incident helper: %s, timedout: %s, kill: %s",
             this->name.string(), strerror(-readStatus), buffer.timedOut() ? "true" : "false",
