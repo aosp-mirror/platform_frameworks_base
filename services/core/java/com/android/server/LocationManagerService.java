@@ -118,7 +118,7 @@ public class LocationManagerService extends ILocationManager.Stub {
     private static final String TAG = "LocationManagerService";
     public static final boolean D = Log.isLoggable(TAG, Log.DEBUG);
 
-    private static final String WAKELOCK_KEY = TAG;
+    private static final String WAKELOCK_KEY = "*location*";
 
     // Location resolution level: no location data whatsoever
     private static final int RESOLUTION_LEVEL_NONE = 0;
