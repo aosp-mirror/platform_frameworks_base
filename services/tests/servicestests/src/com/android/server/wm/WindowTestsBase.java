@@ -73,7 +73,6 @@ class WindowTestsBase {
     private static boolean sOneTimeSetupDone = false;
     DisplayContent mDisplayContent;
     DisplayInfo mDisplayInfo = new DisplayInfo();
-    WindowLayersController mLayersController;
     WindowState mWallpaperWindow;
     WindowState mImeWindow;
     WindowState mImeDialogWindow;
@@ -98,8 +97,9 @@ class WindowTestsBase {
 
         final Context context = InstrumentationRegistry.getTargetContext();
         AttributeCache.init(context);
+
         sWm = TestWindowManagerPolicy.getWindowManagerService(context);
-        mLayersController = new WindowLayersController(sWm);
+        beforeCreateDisplay();
 
         context.getDisplay().getDisplayInfo(mDisplayInfo);
         mDisplayContent = createNewDisplay();
@@ -126,6 +126,10 @@ class WindowTestsBase {
         waitUntilHandlersIdle();
     }
 
+    void beforeCreateDisplay() {
+        // Called before display is created.
+    }
+
     @After
     public void tearDown() throws Exception {
         final LinkedList<WindowState> nonCommonWindows = new LinkedList();
@@ -149,6 +153,14 @@ class WindowTestsBase {
         waitUntilHandlersIdle();
     }
 
+    /**
+     * @return A SurfaceBuilderFactory to inject in to the WindowManagerService during
+     *         set-up (or null).
+     */
+    SurfaceBuilderFactory getSurfaceBuilderFactory() {
+        return null;
+    }
+
     private WindowState createCommonWindow(WindowState parent, int type, String name) {
         final WindowState win = createWindow(parent, type, name);
         mCommonWindows.add(win);
@@ -160,6 +172,11 @@ class WindowTestsBase {
     /** Asserts that the first entry is greater than the second entry. */
     void assertGreaterThan(int first, int second) throws Exception {
         Assert.assertTrue("Excepted " + first + " to be greater than " + second, first > second);
+    }
+
+    /** Asserts that the first entry is greater than the second entry. */
+    void assertLessThan(int first, int second) throws Exception {
+        Assert.assertTrue("Excepted " + first + " to be less than " + second, first < second);
     }
 
     /**
@@ -264,7 +281,7 @@ class WindowTestsBase {
         final int displayId = sNextDisplayId++;
         final Display display = new Display(DisplayManagerGlobal.getInstance(), displayId,
                 mDisplayInfo, DEFAULT_DISPLAY_ADJUSTMENTS);
-        return new DisplayContent(display, sWm, mLayersController, new WallpaperController(sWm));
+        return new DisplayContent(display, sWm, new WallpaperController(sWm));
     }
 
     /** Creates a {@link com.android.server.wm.WindowTestUtils.TestWindowState} */

@@ -129,6 +129,9 @@ public class AppWindowContainerControllerTests extends WindowTestsBase {
             controller.removeStartingWindow();
             waitUntilHandlersIdle();
             assertNoStartingWindow(controller.getAppWindowToken(mDisplayContent));
+
+            controller.getAppWindowToken(mDisplayContent).getParent().getParent().removeImmediately();
+            mDisplayContent.onPendingTransactionApplied();
         }
     }
 

@@ -105,14 +105,10 @@ public class TaskStackTests extends WindowTestsBase {
         final TaskStack stack = createTaskStackOnDisplay(mDisplayContent);
         final Task task = createTaskInStack(stack, 0 /* userId */);
         assertEquals(stack, task.mStack);
-        assertTrue(mDisplayContent.mDimLayerController.hasDimLayerUser(stack));
-        assertTrue(mDisplayContent.mDimLayerController.hasDimLayerUser(task));
 
         // Remove stack and check if its child is also removed.
         stack.removeImmediately();
         assertNull(stack.getDisplayContent());
         assertNull(task.mStack);
-        assertFalse(mDisplayContent.mDimLayerController.hasDimLayerUser(stack));
-        assertFalse(mDisplayContent.mDimLayerController.hasDimLayerUser(task));
     }
 }

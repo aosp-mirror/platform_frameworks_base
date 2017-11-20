@@ -529,7 +529,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
     AccessibilityController mAccessibilityController;
 
-    final SurfaceSession mFxSession;
     Watermark mWatermark;
     StrictModeFlash mStrictModeFlash;
     CircularDisplayMask mCircularDisplayMask;
@@ -804,6 +803,13 @@ public class WindowManagerService extends IWindowManager.Stub
     static WindowManagerThreadPriorityBooster sThreadPriorityBooster =
             new WindowManagerThreadPriorityBooster();
 
+    class DefaultSurfaceBuilderFactory implements SurfaceBuilderFactory {
+        public SurfaceControl.Builder make(SurfaceSession s) {
+            return new SurfaceControl.Builder(s);
+        }
+    };
+    SurfaceBuilderFactory mSurfaceBuilderFactory = new DefaultSurfaceBuilderFactory();
+
     static void boostPriorityForLockedSection() {
         sThreadPriorityBooster.boost();
     }
@@ -992,7 +998,6 @@ public class WindowManagerService extends IWindowManager.Stub
             mPointerEventDispatcher = null;
         }
 
-        mFxSession = new SurfaceSession();
         mDisplayManager = (DisplayManager)context.getSystemService(Context.DISPLAY_SERVICE);
         mDisplays = mDisplayManager.getDisplays();
         for (Display display : mDisplays) {
@@ -2478,11 +2483,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 mWaitingForConfig = true;
                 displayContent.setLayoutNeeded();
                 int anim[] = new int[2];
-                if (displayContent.isDimming()) {
-                    anim[0] = anim[1] = 0;
-                } else {
-                    mPolicy.selectRotationAnimationLw(anim);
-                }
+                mPolicy.selectRotationAnimationLw(anim);
+
                 startFreezingDisplayLocked(false, anim[0], anim[1], displayContent);
                 config = new Configuration(mTempConfiguration);
             }
@@ -3592,8 +3594,7 @@ public class WindowManagerService extends IWindowManager.Stub
                                 com.android.internal.R.dimen.circular_display_mask_thickness);
 
                         mCircularDisplayMask = new CircularDisplayMask(
-                                getDefaultDisplayContentLocked().getDisplay(),
-                                mFxSession,
+                                getDefaultDisplayContentLocked(),
                                 mPolicy.getWindowLayerFromTypeLw(
                                         WindowManager.LayoutParams.TYPE_POINTER)
                                         * TYPE_LAYER_MULTIPLIER + 10, screenOffset, maskThickness);
@@ -3621,8 +3622,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (mEmulatorDisplayOverlay == null) {
                     mEmulatorDisplayOverlay = new EmulatorDisplayOverlay(
                             mContext,
-                            getDefaultDisplayContentLocked().getDisplay(),
-                            mFxSession,
+                            getDefaultDisplayContentLocked(),
                             mPolicy.getWindowLayerFromTypeLw(
                                     WindowManager.LayoutParams.TYPE_POINTER)
                                     * TYPE_LAYER_MULTIPLIER + 10);
@@ -3670,7 +3670,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 // TODO(multi-display): support multiple displays
                 if (mStrictModeFlash == null) {
                     mStrictModeFlash = new StrictModeFlash(
-                            getDefaultDisplayContentLocked().getDisplay(), mFxSession);
+                            getDefaultDisplayContentLocked());
                 }
                 mStrictModeFlash.setVisibility(on);
             } finally {
@@ -4522,7 +4522,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         Display display = displayContent.getDisplay();
         mTaskPositioner = new TaskPositioner(this);
-        mTaskPositioner.register(display);
+        mTaskPositioner.register(displayContent);
         mInputMonitor.updateInputWindowsLw(true /*force*/);
 
         // We need to grab the touch focus so that the touch events during the
@@ -5892,7 +5892,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             displayContent.updateDisplayInfo();
             screenRotationAnimation = new ScreenRotationAnimation(mContext, displayContent,
-                    mFxSession, inTransaction, mPolicy.isDefaultOrientationForced(), isSecure,
+                    inTransaction, mPolicy.isDefaultOrientationForced(), isSecure,
                     this);
             mAnimator.setScreenRotationAnimationLocked(mFrozenDisplayId,
                     screenRotationAnimation);
@@ -5952,11 +5952,10 @@ public class WindowManagerService extends IWindowManager.Stub
             // TODO(multidisplay): rotation on main screen only.
             DisplayInfo displayInfo = displayContent.getDisplayInfo();
             // Get rotation animation again, with new top window
-            boolean isDimming = displayContent.isDimming();
-            if (!mPolicy.validateRotationAnimationLw(mExitAnimId, mEnterAnimId, isDimming)) {
+            if (!mPolicy.validateRotationAnimationLw(mExitAnimId, mEnterAnimId, false)) {
                 mExitAnimId = mEnterAnimId = 0;
             }
-            if (screenRotationAnimation.dismiss(mFxSession, MAX_ANIMATION_DURATION,
+            if (screenRotationAnimation.dismiss(MAX_ANIMATION_DURATION,
                     getTransitionAnimationScaleLocked(), displayInfo.logicalWidth,
                         displayInfo.logicalHeight, mExitAnimId, mEnterAnimId)) {
                 scheduleAnimationLocked();
@@ -6040,8 +6039,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (toks != null && toks.length > 0) {
                     // TODO(multi-display): Show watermarks on secondary displays.
                     final DisplayContent displayContent = getDefaultDisplayContentLocked();
-                    mWatermark = new Watermark(displayContent.getDisplay(),
-                            displayContent.mRealDisplayMetrics, mFxSession, toks);
+                    mWatermark = new Watermark(displayContent, displayContent.mRealDisplayMetrics,
+                            toks);
                 }
             }
         } catch (FileNotFoundException e) {
@@ -7557,4 +7556,13 @@ public class WindowManagerService extends IWindowManager.Stub
             w.setForceHideNonSystemOverlayWindowIfNeeded(hideSystemAlertWindows);
         }, false /* traverseTopToBottom */);
     }
+
+    public void applyMagnificationSpec(MagnificationSpec spec) {
+        getDefaultDisplayContentLocked().applyMagnificationSpec(spec);
+    }
+
+    SurfaceControl.Builder makeSurfaceBuilder(SurfaceSession s) {
+        return mSurfaceBuilderFactory.make(s);
+    }
 }
+

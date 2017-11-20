@@ -138,7 +138,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
     ParcelFileDescriptor mSurfaceTraceFd;
     RemoteEventTrace mRemoteEventTrace;
 
-    private final WindowLayersController mLayersController;
     final WallpaperController mWallpaperController;
 
     private final Handler mHandler;
@@ -163,7 +162,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
     RootWindowContainer(WindowManagerService service) {
         mService = service;
         mHandler = new MyHandler(service.mH.getLooper());
-        mLayersController = new WindowLayersController(mService);
         mWallpaperController = new WallpaperController(mService);
     }
 
@@ -231,7 +229,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
     }
 
     private DisplayContent createDisplayContent(final Display display) {
-        final DisplayContent dc = new DisplayContent(display, mService, mLayersController,
+        final DisplayContent dc = new DisplayContent(display, mService,
                 mWallpaperController);
         final int displayId = display.getDisplayId();
 
@@ -1102,5 +1100,10 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
     @Override
     String getName() {
         return "ROOT";
+    }
+
+    @Override
+    void scheduleAnimation() {
+        mService.scheduleAnimationLocked();
     }
 }

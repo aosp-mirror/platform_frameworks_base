@@ -55,6 +55,7 @@ import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
 import android.view.DisplayInfo;
 import android.view.Surface;
+import android.view.SurfaceControl;
 
 import com.android.internal.policy.DividerSnapAlgorithm;
 import com.android.internal.policy.DividerSnapAlgorithm.SnapTarget;
@@ -63,7 +64,7 @@ import com.android.server.EventLogTags;
 
 import java.io.PrintWriter;
 
-public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLayerUser,
+public class TaskStack extends WindowContainer<Task> implements
         BoundsAnimationTarget {
     /** Minimum size of an adjusted stack bounds relative to original stack bounds. Used to
      * restrict IME adjustment so that a min portion of top stack remains visible.*/
@@ -108,8 +109,8 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
     /** Density as of last time {@link #mBounds} was set. */
     private int mDensity;
 
-    /** Support for non-zero {@link android.view.animation.Animation#getBackgroundColor()} */
-    private DimLayer mAnimationBackgroundSurface;
+    private SurfaceControl mAnimationBackgroundSurface;
+    private boolean mAnimationBackgroundSurfaceIsShown = false;
 
     /** The particular window with an Animation with non-zero background color. */
     private WindowStateAnimator mAnimationBackgroundAnimator;
@@ -148,6 +149,13 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
     private final Rect mBoundsAfterRotation = new Rect();
 
     Rect mPreAnimationBounds = new Rect();
+
+    private Dimmer mDimmer = new Dimmer(this);
+
+    /**
+     * For {@link #prepareSurfaces}.
+     */
+    final Rect mTmpDimBoundsRect = new Rect();
 
     TaskStack(WindowManagerService service, int stackId, StackWindowController controller) {
         mService = service;
@@ -245,6 +253,35 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
         }
     }
 
+    private void setAnimationBackgroundBounds(Rect bounds) {
+        if (mAnimationBackgroundSurface == null) {
+            return;
+        }
+        getPendingTransaction().setSize(mAnimationBackgroundSurface, bounds.width(), bounds.height())
+                .setPosition(mAnimationBackgroundSurface, 0, 0);
+        scheduleAnimation();
+    }
+
+    private void hideAnimationSurface() {
+        if (mAnimationBackgroundSurface == null) {
+            return;
+        }
+        getPendingTransaction().hide(mAnimationBackgroundSurface);
+        mAnimationBackgroundSurfaceIsShown = false;
+        scheduleAnimation();
+    }
+
+    private void showAnimationSurface(float alpha) {
+        if (mAnimationBackgroundSurface == null) {
+            return;
+        }
+        getPendingTransaction().setLayer(mAnimationBackgroundSurface, Integer.MIN_VALUE)
+                .setAlpha(mAnimationBackgroundSurface, alpha)
+                .show(mAnimationBackgroundSurface);
+        mAnimationBackgroundSurfaceIsShown = true;
+        scheduleAnimation();
+    }
+
     private boolean setBounds(Rect bounds) {
         boolean oldFullscreen = mFillsParent;
         int rotation = Surface.ROTATION_0;
@@ -267,10 +304,7 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
             return false;
         }
 
-        if (mDisplayContent != null) {
-            mDisplayContent.mDimLayerController.updateDimLayer(this);
-            mAnimationBackgroundSurface.setBounds(bounds);
-        }
+        setAnimationBackgroundBounds(bounds);
 
         mBounds.set(bounds);
         mRotation = rotation;
@@ -368,7 +402,6 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
     }
 
     /** Bounds of the stack with other system factors taken into consideration. */
-    @Override
     public void getDimBounds(Rect out) {
         getBounds(out);
     }
@@ -700,9 +733,12 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
         }
 
         mDisplayContent = dc;
-        mAnimationBackgroundSurface = new DimLayer(mService, this, mDisplayContent.getDisplayId(),
-                "animation background stackId=" + mStackId);
+
         updateBoundsForWindowModeChange();
+        mAnimationBackgroundSurface = makeChildSurface(null).setColorLayer(true)
+            .setName("animation background stackId=" + mStackId)
+            .build();
+
         super.onDisplayChanged(dc);
     }
 
@@ -914,16 +950,16 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
 
     @Override
     void onParentSet() {
+        super.onParentSet();
+
         if (getParent() != null || mDisplayContent == null) {
             return;
         }
 
-        // Looks like the stack was removed from the display. Go ahead and clean things up.
-        mDisplayContent.mDimLayerController.removeDimLayerUser(this);
         EventLog.writeEvent(EventLogTags.WM_STACK_REMOVED, mStackId);
 
         if (mAnimationBackgroundSurface != null) {
-            mAnimationBackgroundSurface.destroySurface();
+            mAnimationBackgroundSurface.destroy();
             mAnimationBackgroundSurface = null;
         }
 
@@ -933,9 +969,7 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
 
     void resetAnimationBackgroundAnimator() {
         mAnimationBackgroundAnimator = null;
-        if (mAnimationBackgroundSurface != null) {
-            mAnimationBackgroundSurface.hide();
-        }
+        hideAnimationSurface();
     }
 
     void setAnimationBackground(WindowStateAnimator winAnimator, int color) {
@@ -944,8 +978,7 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
                 || animLayer < mAnimationBackgroundAnimator.mAnimLayer) {
             mAnimationBackgroundAnimator = winAnimator;
             animLayer = mDisplayContent.getLayerForAnimationBackground(winAnimator);
-            mAnimationBackgroundSurface.show(animLayer - LAYER_OFFSET_DIM,
-                    ((color >> 24) & 0xff) / 255f, 0);
+            showAnimationSurface(((color >> 24) & 0xff) / 255f);
         }
     }
 
@@ -1250,7 +1283,7 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
         }
         proto.write(FILLS_PARENT, mFillsParent);
         mBounds.writeToProto(proto, BOUNDS);
-        proto.write(ANIMATION_BACKGROUND_SURFACE_IS_DIMMING, mAnimationBackgroundSurface.isDimming());
+        proto.write(ANIMATION_BACKGROUND_SURFACE_IS_DIMMING, mAnimationBackgroundSurfaceIsShown);
         proto.end(token);
     }
 
@@ -1273,9 +1306,8 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
         for (int taskNdx = mChildren.size() - 1; taskNdx >= 0; taskNdx--) {
             mChildren.get(taskNdx).dump(prefix + "  ", pw);
         }
-        if (mAnimationBackgroundSurface.isDimming()) {
-            pw.println(prefix + "mWindowAnimationBackgroundSurface:");
-            mAnimationBackgroundSurface.printTo(prefix + "  ", pw);
+        if (mAnimationBackgroundSurfaceIsShown) {
+            pw.println(prefix + "mWindowAnimationBackgroundSurface is shown");
         }
         if (!mExitingAppTokens.isEmpty()) {
             pw.println();
@@ -1299,11 +1331,6 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
     }
 
     @Override
-    public boolean dimFullscreen() {
-        return !isActivityTypeStandard() || fillsParent();
-    }
-
-    @Override
     boolean fillsParent() {
         if (useCurrentBounds()) {
             return mFillsParent;
@@ -1315,16 +1342,6 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
     }
 
     @Override
-    public DisplayInfo getDisplayInfo() {
-        return mDisplayContent.getDisplayInfo();
-    }
-
-    @Override
-    public boolean isAttachedToDisplay() {
-        return mDisplayContent != null;
-    }
-
-    @Override
     public String toString() {
         return "{stackId=" + mStackId + " tasks=" + mChildren + "}";
     }
@@ -1333,7 +1350,6 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
         return toShortString();
     }
 
-    @Override
     public String toShortString() {
         return "Stack=" + mStackId;
     }
@@ -1690,5 +1706,33 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
                 || activityType == ACTIVITY_TYPE_HOME
                 || activityType == ACTIVITY_TYPE_RECENTS
                 || activityType == ACTIVITY_TYPE_ASSISTANT;
+    }
+
+    Dimmer getDimmer() {
+        return mDimmer;
+    }
+
+    @Override
+    void prepareSurfaces() {
+        mDimmer.resetDimStates();
+        super.prepareSurfaces();
+        getDimBounds(mTmpDimBoundsRect);
+        if (mDimmer.updateDims(getPendingTransaction(), mTmpDimBoundsRect)) {
+            scheduleAnimation();
+        }
+    }
+
+    public DisplayInfo getDisplayInfo() {
+        return mDisplayContent.getDisplayInfo();
+    }
+
+    void dim(float alpha) {
+        mDimmer.dimAbove(getPendingTransaction(), alpha);
+        scheduleAnimation();
+    }
+
+    void stopDimming() {
+        mDimmer.stopDim(getPendingTransaction());
+        scheduleAnimation();
     }
 }

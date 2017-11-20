@@ -311,6 +311,14 @@ static void nativeApplyTransaction(JNIEnv* env, jclass clazz, jlong transactionO
     transaction->apply(sync);
 }
 
+static void nativeMergeTransaction(JNIEnv* env, jclass clazz,
+        jlong transactionObj, jlong otherTransactionObj) {
+    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
+    auto otherTransaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(
+            otherTransactionObj);
+    transaction->merge(std::move(*otherTransaction));
+}
+
 static void nativeSetAnimationTransaction(JNIEnv* env, jclass clazz, jlong transactionObj) {
     auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
     transaction->setAnimationTransaction();
@@ -882,6 +890,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeApplyTransaction },
     {"nativeGetNativeTransactionFinalizer", "()J",
             (void*)nativeGetNativeTransactionFinalizer },
+    {"nativeMergeTransaction", "(JJ)V",
+            (void*)nativeMergeTransaction },
     {"nativeSetAnimationTransaction", "(J)V",
             (void*)nativeSetAnimationTransaction },
     {"nativeSetLayer", "(JJI)V",

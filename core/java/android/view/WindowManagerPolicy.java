@@ -1663,14 +1663,6 @@ public interface WindowManagerPolicy {
     void writeToProto(ProtoOutputStream proto, long fieldId);
 
     /**
-     * Returns whether a given window type can be magnified.
-     *
-     * @param windowType The window type.
-     * @return True if the window can be magnified.
-     */
-    public boolean canMagnifyWindow(int windowType);
-
-    /**
      * Returns whether a given window type is considered a top level one.
      * A top level window does not have a container, i.e. attached window,
      * or if it has a container it is laid out as a top-level window, not

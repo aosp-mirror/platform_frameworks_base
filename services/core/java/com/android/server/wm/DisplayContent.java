@@ -142,8 +142,10 @@ import android.util.proto.ProtoOutputStream;
 import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.InputDevice;
+import android.view.MagnificationSpec;
 import android.view.Surface;
 import android.view.SurfaceControl;
+import android.view.SurfaceSession;
 import android.view.WindowManagerPolicy;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -321,8 +323,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     final DockedStackDividerController mDividerControllerLocked;
     final PinnedStackController mPinnedStackControllerLocked;
 
-    DimLayerController mDimLayerController;
-
     final ArrayList<WindowState> mTapExcludedWindows = new ArrayList<>();
 
     private boolean mHaveBootMsg = false;
@@ -346,9 +346,36 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     // {@code false} if this display is in the processing of being created.
     private boolean mDisplayReady = false;
 
-    private final WindowLayersController mLayersController;
     WallpaperController mWallpaperController;
     int mInputMethodAnimLayerAdjustment;
+
+    private final SurfaceSession mSession = new SurfaceSession();
+
+    /**
+     * We organize all top-level Surfaces in to the following layers.
+     * mOverlayLayer contains a few Surfaces which are always on top of others
+     * and omitted from Screen-Magnification ({@link WindowState#isScreenOverlay})
+     * {@link #mWindowingLayer} contains everything else.
+     */
+    private SurfaceControl mOverlayLayer;
+
+    /**
+     * See {@link #mOverlayLayer}
+     */
+    private SurfaceControl mWindowingLayer;
+
+    /**
+     * Specifies the size of the surfaces in {@link #mOverlayLayer} and {@link #mWindowingLayer}.
+     * <p>
+     * For these surfaces currently we use a surface based on the larger of width or height so we
+     * don't have to resize when rotating the display.
+     */
+    private int mSurfaceSize;
+
+    /**
+     * A list of surfaces to be destroyed after {@link #mPendingTransaction} is applied.
+     */
+    private final ArrayList<SurfaceControl> mPendingDestroyingSurfaces = new ArrayList<>();
 
     private final Consumer<WindowState> mUpdateWindowsForAnimator = w -> {
         WindowStateAnimator winAnimator = w.mWinAnimator;
@@ -503,9 +530,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         return true;
     };
 
-    private final Consumer<WindowState> mPrepareWindowSurfaces =
-            w -> w.mWinAnimator.prepareSurfaceLocked(true);
-
     private final Consumer<WindowState> mPerformLayout = w -> {
         // Don't do layout of a window if it is not visible, or soon won't be visible, to avoid
         // wasting time and funky changes while a window is animating away.
@@ -556,12 +580,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 // otherwise we'd immediately cause an unnecessary resize.
                 if (firstLayout) {
                     w.updateLastInsetValues();
-                }
-
-                // Window frames may have changed. Update dim layer with the new bounds.
-                final Task task = w.getTask();
-                if (task != null) {
-                    mDimLayerController.updateDimLayer(task);
                 }
 
                 if (DEBUG_LAYOUT) Slog.v(TAG, "  LAYOUT: mFrame=" + w.mFrame
@@ -657,8 +675,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             }
         }
 
-        w.applyDimLayerIfNeeded();
-
         if (isDefaultDisplay && obscuredChanged && w.isVisibleLw()
                 && mWallpaperController.isWallpaperTarget(w)) {
             // This is the wallpaper target and its obscured state changed... make sure the
@@ -741,13 +757,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * initialize direct children.
      * @param display May not be null.
      * @param service You know.
-     * @param layersController window layer controller used to assign layer to the windows on this
-     *                         display.
      * @param wallpaperController wallpaper windows controller used to adjust the positioning of the
      *                            wallpaper windows in the window list.
      */
     DisplayContent(Display display, WindowManagerService service,
-            WindowLayersController layersController, WallpaperController wallpaperController) {
+            WallpaperController wallpaperController) {
         if (service.mRoot.getDisplayContent(display.getDisplayId()) != null) {
             throw new IllegalArgumentException("Display with ID=" + display.getDisplayId()
                     + " already exists=" + service.mRoot.getDisplayContent(display.getDisplayId())
@@ -756,7 +770,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         mDisplay = display;
         mDisplayId = display.getDisplayId();
-        mLayersController = layersController;
         mWallpaperController = wallpaperController;
         display.getDisplayInfo(mDisplayInfo);
         display.getMetrics(mDisplayMetrics);
@@ -766,7 +779,22 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         initializeDisplayBaseInfo();
         mDividerControllerLocked = new DockedStackDividerController(service, this);
         mPinnedStackControllerLocked = new PinnedStackController(service, this);
-        mDimLayerController = new DimLayerController(this);
+
+        mSurfaceSize = Math.max(mBaseDisplayHeight, mBaseDisplayWidth);
+
+        final SurfaceControl.Builder b = mService.makeSurfaceBuilder(mSession)
+                .setSize(mSurfaceSize, mSurfaceSize)
+                .setOpaque(true);
+        mWindowingLayer = b.setName("Display Root").build();
+        mOverlayLayer = b.setName("Display Overlays").build();
+
+        getPendingTransaction().setLayer(mWindowingLayer, 0)
+                .setLayerStack(mWindowingLayer, mDisplayId)
+                .show(mWindowingLayer)
+                .setLayer(mOverlayLayer, 1)
+                .setLayerStack(mOverlayLayer, mDisplayId)
+                .show(mOverlayLayer);
+        getPendingTransaction().apply();
 
         // These are the only direct children we should ever have and they are permanent.
         super.addChild(mBelowAppWindowsContainers, null);
@@ -1030,11 +1058,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         setLayoutNeeded();
         final int[] anim = new int[2];
-        if (isDimming()) {
-            anim[0] = anim[1] = 0;
-        } else {
-            mService.mPolicy.selectRotationAnimationLw(anim);
-        }
+        mService.mPolicy.selectRotationAnimationLw(anim);
 
         if (!rotateSeamlessly) {
             mService.startFreezingDisplayLocked(inTransaction, anim[0], anim[1], this);
@@ -1071,8 +1095,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             //       it doesn't support hardware OpenGL emulation yet.
             if (CUSTOM_SCREEN_ROTATION && screenRotationAnimation != null
                     && screenRotationAnimation.hasScreenshot()) {
-                if (screenRotationAnimation.setRotationInTransaction(
-                        rotation, mService.mFxSession,
+                if (screenRotationAnimation.setRotationInTransaction(rotation,
                         MAX_ANIMATION_DURATION, mService.getTransitionAnimationScaleLocked(),
                         mDisplayInfo.logicalWidth, mDisplayInfo.logicalHeight)) {
                     mService.scheduleAnimationLocked();
@@ -1907,22 +1930,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
     }
 
-    boolean animateDimLayers() {
-        return mDimLayerController.animateDimLayers();
-    }
-
-    private void resetDimming() {
-        mDimLayerController.resetDimming();
-    }
-
-    boolean isDimming() {
-        return mDimLayerController.isDimming();
-    }
-
-    private void stopDimmingIfNeeded() {
-        mDimLayerController.stopDimmingIfNeeded();
-    }
-
     @Override
     void removeIfPossible() {
         if (isAnimating()) {
@@ -1938,7 +1945,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         try {
             super.removeImmediately();
             if (DEBUG_DISPLAY) Slog.v(TAG_WM, "Removing display=" + this);
-            mDimLayerController.close();
             if (mService.canDispatchPointerEvents()) {
                 if (mTapDetector != null) {
                     mService.unregisterPointerEventListener(mTapDetector);
@@ -1947,6 +1953,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                     mService.unregisterPointerEventListener(mService.mMousePositionTracker);
                 }
             }
+            // The pending transaction won't be applied so we should
+            // just clean up any surfaces pending destruction.
+            onPendingTransactionApplied();
         } finally {
             mRemovingDisplay = false;
         }
@@ -2228,8 +2237,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 token.dump(pw, "    ");
             }
         }
-        pw.println();
-        mDimLayerController.dump(prefix, pw);
+
         pw.println();
 
         // Dump stack references
@@ -2342,10 +2350,16 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
     /** Updates the layer assignment of windows on this display. */
     void assignWindowLayers(boolean setLayoutNeeded) {
-        mLayersController.assignWindowLayers(this);
+        assignChildLayers(getPendingTransaction());
         if (setLayoutNeeded) {
             setLayoutNeeded();
         }
+
+        // We accumlate the layer changes in-to "getPendingTransaction()" but we defer
+        // the application of this transaction until the animation pass triggers
+        // prepareSurfaces. This allows us to synchronize Z-ordering changes with
+        // the hiding and showing of surfaces.
+        scheduleAnimation();
     }
 
     // TODO: This should probably be called any time a visual change is made to the hierarchy like
@@ -2701,10 +2715,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
     }
 
-    void prepareWindowSurfaces() {
-        forAllWindows(mPrepareWindowSurfaces, false /* traverseTopToBottom */);
-    }
-
     boolean inputMethodClientHasFocus(IInputMethodClient client) {
         final WindowState imFocus = computeImeTarget(false /* updateImeTarget */);
         if (imFocus == null) {
@@ -2846,7 +2856,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         } while (pendingLayoutChanges != 0);
 
         mTmpApplySurfaceChangesTransactionState.reset();
-        resetDimming();
 
         mTmpRecoveringMemory = recoveringMemory;
         forAllWindows(mApplySurfaceChangesTransaction, true /* traverseTopToBottom */);
@@ -2856,8 +2865,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 mTmpApplySurfaceChangesTransactionState.preferredRefreshRate,
                 mTmpApplySurfaceChangesTransactionState.preferredModeId,
                 true /* inTraversal, must call performTraversalInTrans... below */);
-
-        stopDimmingIfNeeded();
 
         final boolean wallpaperVisible = mWallpaperController.isWallpaperVisible();
         if (wallpaperVisible != mLastWallpaperVisible) {
@@ -3062,13 +3069,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 // Include this window.
 
                 final WindowStateAnimator winAnim = w.mWinAnimator;
-                int layer = winAnim.mSurfaceController.getLayer();
-                if (mScreenshotApplicationState.maxLayer < layer) {
-                    mScreenshotApplicationState.maxLayer = layer;
-                }
-                if (mScreenshotApplicationState.minLayer > layer) {
-                    mScreenshotApplicationState.minLayer = layer;
-                }
 
                 // Don't include wallpaper in bounds calculation
                 if (!w.mIsWallpaper && !mutableIncludeFullDisplay.value) {
@@ -3112,8 +3112,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
             final WindowState appWin = mScreenshotApplicationState.appWin;
             final boolean screenshotReady = mScreenshotApplicationState.screenshotReady;
-            final int maxLayer = mScreenshotApplicationState.maxLayer;
-            final int minLayer = mScreenshotApplicationState.minLayer;
 
             if (appToken != null && appWin == null) {
                 // Can't find a window to snapshot.
@@ -3134,11 +3132,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             // because we don't want to release the mWindowMap lock until the screenshot is
             // taken.
 
-            if (maxLayer == 0) {
-                if (DEBUG_SCREENSHOT) Slog.i(TAG_WM, "Screenshot of " + appToken
-                        + ": returning null maxLayer=" + maxLayer);
-                return null;
-            }
 
             if (!mutableIncludeFullDisplay.value) {
                 // Constrain frame to the screen size.
@@ -3183,8 +3176,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             convertCropForSurfaceFlinger(crop, rot, dw, dh);
 
             if (DEBUG_SCREENSHOT) {
-                Slog.i(TAG_WM, "Screenshot: " + dw + "x" + dh + " from " + minLayer + " to "
-                        + maxLayer + " appToken=" + appToken);
                 forAllWindows(w -> {
                     final WindowSurfaceController controller = w.mWinAnimator.mSurfaceController;
                     Slog.i(TAG_WM, w + ": " + w.mLayer
@@ -3206,11 +3197,13 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             SurfaceControl.openTransaction();
             SurfaceControl.closeTransactionSync();
 
-            bitmap = screenshoter.screenshot(crop, width, height, minLayer, maxLayer,
+            // TODO(b/68392460): We should screenshot Task controls directly
+            // but it's difficult at the moment as the Task doesn't have the
+            // correct size set.
+            bitmap = screenshoter.screenshot(crop, width, height, 0, 1,
                     inRotation, rot);
             if (bitmap == null) {
-                Slog.w(TAG_WM, "Screenshot failure taking screenshot for (" + dw + "x" + dh
-                        + ") to layer " + maxLayer);
+                Slog.w(TAG_WM, "Failed to take screenshot");
                 return null;
             }
         }
@@ -3366,6 +3359,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * I.e Activities.
      */
     private final class TaskStackContainers extends DisplayChildWindowContainer<TaskStack> {
+        /**
+         * A control placed at the appropriate level for transitions to occur.
+         */
+        SurfaceControl mAnimationLayer = null;
 
         // Cached reference to some special stacks we tend to get a lot so we don't need to loop
         // through the list to find them.
@@ -3677,6 +3674,50 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             // to prevent freezing/unfreezing the display too early.
             return mLastOrientation;
         }
+
+        @Override
+        void assignChildLayers(SurfaceControl.Transaction t) {
+            final int NORMAL_STACK_STATE = 0;
+            final int BOOSTED_STATE = 1;
+            final int ALWAYS_ON_TOP_STATE = 2;
+
+            // We allow stacks to change visual order from the AM specified order due to
+            // Z-boosting during animations. However we must take care to ensure TaskStacks
+            // which are marked as alwaysOnTop remain that way.
+            int layer = 0;
+            for (int state = 0; state <= ALWAYS_ON_TOP_STATE; state++) {
+                for (int i = 0; i < mChildren.size(); i++) {
+                    final TaskStack s = mChildren.get(i);
+                    layer++;
+                    if (state == NORMAL_STACK_STATE) {
+                        s.assignLayer(t, layer);
+                    } else if (state == BOOSTED_STATE && s.needsZBoost()) {
+                        s.assignLayer(t, layer);
+                    } else if (state == ALWAYS_ON_TOP_STATE &&
+                            s.isAlwaysOnTop()) {
+                        s.assignLayer(t, layer);
+                    }
+                    s.assignChildLayers(t);
+                }
+                // The appropriate place for App-Transitions to occur is right
+                // above all other animations but still below things in the Picture-and-Picture
+                // windowing mode.
+                if (state == BOOSTED_STATE && mAnimationLayer != null) {
+                    t.setLayer(mAnimationLayer, layer + 1);
+                }
+            }
+        }
+
+        @Override
+        void onParentSet() {
+            super.onParentSet();
+            if (getParent() != null) {
+                mAnimationLayer = makeSurface().build();
+            } else {
+                mAnimationLayer.destroy();
+                mAnimationLayer = null;
+            }
+        }
     }
 
     /**
@@ -3759,5 +3800,120 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     private interface Screenshoter<E> {
         E screenshot(Rect sourceCrop, int width, int height, int minLayer, int maxLayer,
                 boolean useIdentityTransform, int rotation);
+    }
+
+    SurfaceControl.Builder makeSurface(SurfaceSession s) {
+        return mService.makeSurfaceBuilder(s)
+                .setParent(mWindowingLayer);
+    }
+
+    @Override
+    SurfaceSession getSession() {
+        return mSession;
+    }
+
+    @Override
+    SurfaceControl.Builder makeChildSurface(WindowContainer child) {
+        SurfaceSession s = child != null ? child.getSession() : getSession();
+        final SurfaceControl.Builder b = mService.makeSurfaceBuilder(s);
+        b.setSize(mSurfaceSize, mSurfaceSize);
+
+        if (child == null) {
+            return b;
+        }
+
+        b.setName(child.getName());
+        if (child.isScreenOverlay()) {
+            return b.setParent(mOverlayLayer);
+        } else {
+            return b.setParent(mWindowingLayer);
+        }
+    }
+
+    /**
+     * The makeSurface variants are for use by the window-container
+     * hierarchy. makeOverlay here is a function for various non windowing
+     * overlays like the ScreenRotation screenshot, the Strict Mode Flash
+     * and other potpourii.
+     */
+    SurfaceControl.Builder makeOverlay() {
+        return mService.makeSurfaceBuilder(mSession)
+            .setParent(mOverlayLayer);
+    }
+
+    void applyMagnificationSpec(MagnificationSpec spec) {
+        applyMagnificationSpec(getPendingTransaction(), spec);
+        getPendingTransaction().apply();
+    }
+
+    @Override
+    void onParentSet() {
+        // Since we are the top of the SurfaceControl hierarchy here
+        // we create the root surfaces explicitly rather than chaining
+        // up as the default implementation in onParentSet does. So we
+        // explicitly do NOT call super here.
+    }
+
+    @Override
+    void assignChildLayers(SurfaceControl.Transaction t) {
+        t.setLayer(mOverlayLayer, 1)
+                .setLayer(mWindowingLayer, 0);
+
+        // These are layers as children of "mWindowingLayer"
+        mBelowAppWindowsContainers.assignLayer(t, 0);
+        mTaskStackContainers.assignLayer(t, 1);
+        mAboveAppWindowsContainers.assignLayer(t, 2);
+
+        WindowState imeTarget = mService.mInputMethodTarget;
+        if (imeTarget == null || imeTarget.inSplitScreenWindowingMode()) {
+            // In split-screen windowing mode we can't layer the
+            // IME relative to the IME target because it needs to
+            // go over the docked divider, so instead we place it on top
+            // of everything and use relative layering of windows which need
+            // to go above it (see special logic in WindowState#assignLayer)
+            mImeWindowsContainers.assignLayer(t, 3);
+        } else {
+            t.setRelativeLayer(mImeWindowsContainers.getSurfaceControl(),
+                    imeTarget.getSurfaceControl(),
+                    // TODO: We need to use an extra level on the app surface to ensure
+                    // this is always above SurfaceView but always below attached window.
+                    1);
+        }
+
+        // Above we have assigned layers to our children, now we ask them to assign
+        // layers to their children.
+        mBelowAppWindowsContainers.assignChildLayers(t);
+        mTaskStackContainers.assignChildLayers(t);
+        mAboveAppWindowsContainers.assignChildLayers(t);
+        mImeWindowsContainers.assignChildLayers(t);
+    }
+
+    /**
+     * Here we satisfy an unfortunate special case of the IME in split-screen mode. Imagine
+     * that the IME target is one of the docked applications. We'd like the docked divider to be
+     * above both of the applications, and we'd like the IME to be above the docked divider.
+     * However we need child windows of the applications to be above the IME (Text drag handles).
+     * This is a non-strictly hierarcical layering and we need to break out of the Z ordering
+     * somehow. We do this by relatively ordering children of the target to the IME in cooperation
+     * with {@link #WindowState#assignLayer}
+     */
+    void assignRelativeLayerForImeTargetChild(SurfaceControl.Transaction t, WindowContainer child) {
+        t.setRelativeLayer(child.getSurfaceControl(), mImeWindowsContainers.getSurfaceControl(), 1);
+    }
+
+    @Override
+    void destroyAfterPendingTransaction(SurfaceControl surface) {
+        mPendingDestroyingSurfaces.add(surface);
+    }
+
+    /**
+     * Destroys any surfaces that have been put into the pending list with
+     * {@link #destroyAfterTransaction}.
+     */
+    void onPendingTransactionApplied() {
+        for (int i = mPendingDestroyingSurfaces.size() - 1; i >= 0; i--) {
+            mPendingDestroyingSurfaces.get(i).destroy();
+        }
+        mPendingDestroyingSurfaces.clear();
     }
 }

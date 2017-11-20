@@ -49,19 +49,19 @@ class EmulatorDisplayOverlay {
     private int mRotation;
     private boolean mVisible;
 
-    public EmulatorDisplayOverlay(Context context, Display display, SurfaceSession session,
+    public EmulatorDisplayOverlay(Context context, DisplayContent dc,
             int zOrder) {
+        final Display display = dc.getDisplay();
         mScreenSize = new Point();
         display.getSize(mScreenSize);
 
         SurfaceControl ctrl = null;
         try {
-            ctrl = new SurfaceControl.Builder(session)
+            ctrl = dc.makeOverlay()
                     .setName("EmulatorDisplayOverlay")
                     .setSize(mScreenSize.x, mScreenSize.y)
                     .setFormat(PixelFormat.TRANSLUCENT)
                     .build();
-            ctrl.setLayerStack(display.getLayerStack());
             ctrl.setLayer(zOrder);
             ctrl.setPosition(0, 0);
             ctrl.show();

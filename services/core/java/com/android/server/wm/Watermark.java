@@ -53,7 +53,7 @@ class Watermark {
     private int mLastDH;
     private boolean mDrawNeeded;
 
-    Watermark(Display display, DisplayMetrics dm, SurfaceSession session, String[] tokens) {
+    Watermark(DisplayContent dc, DisplayMetrics dm, String[] tokens) {
         if (false) {
             Log.i(TAG_WM, "*********************** WATERMARK");
             for (int i=0; i<tokens.length; i++) {
@@ -61,7 +61,7 @@ class Watermark {
             }
         }
 
-        mDisplay = display;
+        mDisplay = dc.getDisplay();
         mTokens = tokens;
 
         StringBuilder builder = new StringBuilder(32);
@@ -114,7 +114,7 @@ class Watermark {
 
         SurfaceControl ctrl = null;
         try {
-            ctrl = new SurfaceControl.Builder(session)
+            ctrl = dc.makeOverlay()
                     .setName("WatermarkSurface")
                     .setSize(1, 1)
                     .setFormat(PixelFormat.TRANSLUCENT)

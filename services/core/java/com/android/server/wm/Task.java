@@ -51,7 +51,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import java.io.PrintWriter;
 import java.util.function.Consumer;
 
-class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerUser {
+class Task extends WindowContainer<AppWindowToken> {
     static final String TAG = TAG_WITH_CLASS_NAME ? "Task" : TAG_WM;
     // Return value from {@link setBounds} indicating no change was made to the Task bounds.
     private static final int BOUNDS_CHANGE_NONE = 0;
@@ -104,6 +104,9 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
     // production of content insets this can be used to preserve them across
     // stack moves and we in fact do so when moving from full screen to pinned.
     private boolean mPreserveNonFloatingState = false;
+
+    private Dimmer mDimmer = new Dimmer(this);
+    private final Rect mTmpDimBoundsRect = new Rect();
 
     Task(int taskId, TaskStack stack, int userId, WindowManagerService service, Rect bounds,
             int resizeMode, boolean supportsPictureInPicture, TaskDescription taskDescription,
@@ -188,12 +191,6 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
         EventLog.writeEvent(WM_TASK_REMOVED, mTaskId, "removeTask");
         mDeferRemoval = false;
 
-        // Make sure to remove dim layer user first before removing task its from parent.
-        DisplayContent content = getDisplayContent();
-        if (content != null) {
-            content.mDimLayerController.removeDimLayerUser(this);
-        }
-
         super.removeImmediately();
     }
 
@@ -237,6 +234,8 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
 
     @Override
     void onParentSet() {
+        super.onParentSet();
+
         // Update task bounds if needed.
         updateDisplayInfo(getDisplayContent());
 
@@ -312,9 +311,7 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
         mBounds.set(bounds);
 
         mRotation = rotation;
-        if (displayContent != null) {
-            displayContent.mDimLayerController.updateDimLayer(this);
-        }
+
         onOverrideConfigurationChanged(overrideConfig);
         return boundsChange;
     }
@@ -482,7 +479,6 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
     }
 
     /** Bounds of the task to be used for dimming, as well as touch related tests. */
-    @Override
     public void getDimBounds(Rect out) {
         final DisplayContent displayContent = mStack.getDisplayContent();
         // It doesn't matter if we in particular are part of the resize, since we couldn't have
@@ -634,23 +630,6 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
         return null;
     }
 
-    @Override
-    public boolean dimFullscreen() {
-        return isFullscreen();
-    }
-
-    @Override
-    public int getLayerForDim(WindowStateAnimator animator, int layerOffset, int defaultLayer) {
-        // If the dim layer is for a starting window, move the dim layer back in the z-order behind
-        // the lowest activity window to ensure it does not occlude the main window if it is
-        // translucent
-        final AppWindowToken appToken = animator.mWin.mAppToken;
-        if (animator.mAttrType == TYPE_APPLICATION_STARTING && hasChild(appToken) ) {
-            return Math.min(defaultLayer, appToken.getLowestAnimLayer() - layerOffset);
-        }
-        return defaultLayer;
-    }
-
     boolean isFullscreen() {
         if (useCurrentBounds()) {
             return mFillsParent;
@@ -659,16 +638,6 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
         // is not currently visible. Go ahead a represent it as fullscreen to the rest of the
         // system.
         return true;
-    }
-
-    @Override
-    public DisplayInfo getDisplayInfo() {
-        return getDisplayContent().getDisplayInfo();
-    }
-
-    @Override
-    public boolean isAttachedToDisplay() {
-        return getDisplayContent() != null;
     }
 
     void forceWindowsScaleable(boolean force) {
@@ -718,9 +687,18 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
         mPreserveNonFloatingState = false;
     }
 
+    Dimmer getDimmer() {
+        return mDimmer;
+    }
+
     @Override
-    public String toShortString() {
-        return "Task=" + mTaskId;
+    void prepareSurfaces() {
+        mDimmer.resetDimStates();
+        super.prepareSurfaces();
+        getDimBounds(mTmpDimBoundsRect);
+        if (mDimmer.updateDims(getPendingTransaction(), mTmpDimBoundsRect)) {
+            scheduleAnimation();
+        }
     }
 
     @CallSuper
@@ -756,5 +734,9 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
             pw.println(triplePrefix + "Activity #" + i + " " + wtoken);
             wtoken.dump(pw, triplePrefix);
         }
+    }
+
+    String toShortString() {
+        return "Task=" + mTaskId;
     }
 }

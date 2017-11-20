@@ -53,7 +53,7 @@ class WindowSurfaceController {
 
     final WindowStateAnimator mAnimator;
 
-    private SurfaceControlWithBackground mSurfaceControl;
+    SurfaceControlWithBackground mSurfaceControl;
 
     // Should only be set from within setShown().
     private boolean mSurfaceShown = false;
@@ -101,7 +101,8 @@ class WindowSurfaceController {
         mWindowSession = win.mSession;
 
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "new SurfaceControl");
-        final SurfaceControl.Builder b = new SurfaceControl.Builder(s)
+        final SurfaceControl.Builder b = win.makeSurface()
+                .setParent(win.getSurfaceControl())
                 .setName(name)
                 .setSize(w, h)
                 .setFormat(format)
@@ -242,25 +243,6 @@ class WindowSurfaceController {
             mSurfaceControl.setFinalCrop(clipRect);
         } catch (RuntimeException e) {
             Slog.w(TAG, "Error disconnecting surface in: " + this, e);
-        }
-    }
-
-    void setLayer(int layer) {
-        if (mSurfaceControl != null) {
-            mService.openSurfaceTransaction();
-            try {
-                if (mAnimator.mWin.usesRelativeZOrdering()) {
-                    mSurfaceControl.setRelativeLayer(
-                            mAnimator.mWin.getParentWindow()
-                            .mWinAnimator.mSurfaceController.mSurfaceControl,
-                            -1);
-                } else {
-                    mSurfaceLayer = layer;
-                    mSurfaceControl.setLayer(layer);
-                }
-            } finally {
-                mService.closeSurfaceTransaction("setLayer");
-            }
         }
     }
 
