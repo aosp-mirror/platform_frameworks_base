@@ -29,12 +29,6 @@ namespace android {
 minikin::MinikinPaint MinikinUtils::prepareMinikinPaint(const Paint* paint,
                                                         const Typeface* typeface) {
     const Typeface* resolvedFace = Typeface::resolveDefault(typeface);
-    minikin::FontStyle resolved = resolvedFace->fStyle;
-
-    const minikin::FontVariant minikinVariant =
-            (paint->getFontVariant() == minikin::FontVariant::ELEGANT)
-                    ? minikin::FontVariant::ELEGANT
-                    : minikin::FontVariant::COMPACT;
 
     minikin::MinikinPaint minikinPaint;
     /* Prepare minikin Paint */
@@ -46,7 +40,8 @@ minikin::MinikinPaint MinikinUtils::prepareMinikinPaint(const Paint* paint,
     minikinPaint.wordSpacing = paint->getWordSpacing();
     minikinPaint.paintFlags = MinikinFontSkia::packPaintFlags(paint);
     minikinPaint.localeListId = paint->getMinikinLocaleListId();
-    minikinPaint.fontStyle = minikin::FontStyle(minikinVariant, resolved.weight, resolved.slant);
+    minikinPaint.familyVariant = paint->getFamilyVariant();
+    minikinPaint.fontStyle = resolvedFace->fStyle;
     minikinPaint.fontFeatureSettings = paint->getFontFeatureSettings();
     minikinPaint.hyphenEdit = minikin::HyphenEdit(paint->getHyphenEdit());
     return minikinPaint;

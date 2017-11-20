@@ -24,7 +24,7 @@ Paint::Paint()
         , mWordSpacing(0)
         , mFontFeatureSettings()
         , mMinikinLocaleListId(0)
-        , mFontVariant(minikin::FontVariant::DEFAULT) {}
+        , mFamilyVariant(minikin::FontFamily::Variant::DEFAULT) {}
 
 Paint::Paint(const Paint& paint)
         : SkPaint(paint)
@@ -32,7 +32,7 @@ Paint::Paint(const Paint& paint)
         , mWordSpacing(paint.mWordSpacing)
         , mFontFeatureSettings(paint.mFontFeatureSettings)
         , mMinikinLocaleListId(paint.mMinikinLocaleListId)
-        , mFontVariant(paint.mFontVariant)
+        , mFamilyVariant(paint.mFamilyVariant)
         , mHyphenEdit(paint.mHyphenEdit)
         , mTypeface(paint.mTypeface) {}
 
@@ -42,7 +42,7 @@ Paint::Paint(const SkPaint& paint)
         , mWordSpacing(0)
         , mFontFeatureSettings()
         , mMinikinLocaleListId(0)
-        , mFontVariant(minikin::FontVariant::DEFAULT) {}
+        , mFamilyVariant(minikin::FontFamily::Variant::DEFAULT) {}
 
 Paint::~Paint() {}
 
@@ -52,7 +52,7 @@ Paint& Paint::operator=(const Paint& other) {
     mWordSpacing = other.mWordSpacing;
     mFontFeatureSettings = other.mFontFeatureSettings;
     mMinikinLocaleListId = other.mMinikinLocaleListId;
-    mFontVariant = other.mFontVariant;
+    mFamilyVariant = other.mFamilyVariant;
     mHyphenEdit = other.mHyphenEdit;
     mTypeface = other.mTypeface;
     return *this;
@@ -62,7 +62,8 @@ bool operator==(const Paint& a, const Paint& b) {
     return static_cast<const SkPaint&>(a) == static_cast<const SkPaint&>(b) &&
            a.mLetterSpacing == b.mLetterSpacing && a.mWordSpacing == b.mWordSpacing &&
            a.mFontFeatureSettings == b.mFontFeatureSettings &&
-           a.mMinikinLocaleListId == b.mMinikinLocaleListId && a.mFontVariant == b.mFontVariant &&
-           a.mHyphenEdit == b.mHyphenEdit && a.mTypeface == b.mTypeface;
+           a.mMinikinLocaleListId == b.mMinikinLocaleListId &&
+           a.mFamilyVariant == b.mFamilyVariant && a.mHyphenEdit == b.mHyphenEdit &&
+           a.mTypeface == b.mTypeface;
 }
 }  // namespace android
