@@ -207,6 +207,7 @@ public class VolumeDialogImpl implements VolumeDialog {
         } else {
             addExistingRows();
         }
+        updateRowsH(getActiveRow());
     }
 
     private ColorStateList loadColorStateList(int colorResId) {
