@@ -43,6 +43,7 @@ import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.KeyguardManager;
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.RemoteInput;
@@ -919,7 +920,14 @@ public class StatusBar extends SystemUI implements DemoMode,
         mNotificationPanel = mStatusBarWindow.findViewById(R.id.notification_panel);
         mStackScroller = mStatusBarWindow.findViewById(R.id.notification_stack_scroller);
         mGutsManager = new NotificationGutsManager(this, mStackScroller,
-                mCheckSaveListener, mContext);
+                mCheckSaveListener, mContext,
+                key -> {
+                    try {
+                        mBarService.onNotificationSettingsViewed(key);
+                    } catch (RemoteException e) {
+                        // if we're here we're dead
+                    }
+                });
         mNotificationPanel.setStatusBar(this);
         mNotificationPanel.setGroupManager(mGroupManager);
         mAboveShelfObserver = new AboveShelfObserver(mStackScroller);
@@ -1470,6 +1478,11 @@ public class StatusBar extends SystemUI implements DemoMode,
                         }
                     }, REMOTE_INPUT_KEPT_ENTRY_AUTO_CANCEL_DELAY);
                 }
+                try {
+                    mBarService.onNotificationDirectReplied(entry.key);
+                } catch (RemoteException e) {
+                    // system process is dead if we're here.
+                }
             }
         });
 
@@ -1785,9 +1798,14 @@ public class StatusBar extends SystemUI implements DemoMode,
         final int id = n.getId();
         final int userId = n.getUserId();
         try {
-            // TODO: record actual dismissal surface
+            int dismissalSurface = NotificationStats.DISMISSAL_SHADE;
+            if (isHeadsUp(n.getKey())) {
+                dismissalSurface = NotificationStats.DISMISSAL_PEEK;
+            } else if (mStackScroller.hasPulsingNotifications()) {
+                dismissalSurface = NotificationStats.DISMISSAL_AOD;
+            }
             mBarService.onNotificationClear(pkg, tag, id, userId, n.getKey(),
-                    NotificationStats.DISMISSAL_OTHER);
+                    dismissalSurface);
             if (FORCE_REMOTE_INPUT_HISTORY
                     && mKeysKeptForRemoteInput.contains(n.getKey())) {
                 mKeysKeptForRemoteInput.remove(n.getKey());
