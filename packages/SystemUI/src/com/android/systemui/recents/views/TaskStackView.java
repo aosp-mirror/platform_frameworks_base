@@ -209,6 +209,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     private int mLastHeight;
     private boolean mStackActionButtonVisible;
 
+    // Percentage of last ScrollP from the min to max scrollP that lives after configuration changes
+    private float mLastScrollPPercent;
+
     // We keep track of the task view focused by user interaction and draw a frame around it in the
     // grid layout.
     private TaskViewFocusFrame mTaskViewFocusFrame;
@@ -327,6 +330,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             mStackScroller.reset();
             mStableLayoutAlgorithm.reset();
             mLayoutAlgorithm.reset();
+            mLastScrollPPercent = -1;
         }
 
         // Since we always animate to the same place in (the initial state), always reset the stack
@@ -822,7 +826,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
    public void updateLayoutAlgorithm(boolean boundScrollToNewMinMax,
            RecentsActivityLaunchState launchState) {
         // Compute the min and max scroll values
-        mLayoutAlgorithm.update(mStack, mIgnoreTasks, launchState);
+        mLayoutAlgorithm.update(mStack, mIgnoreTasks, launchState, mLastScrollPPercent);
 
         if (boundScrollToNewMinMax) {
             mStackScroller.boundScroll();
@@ -1150,6 +1154,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         if (mTaskViewsClipDirty) {
             clipTaskViews();
         }
+        mLastScrollPPercent = Utilities.clamp(Utilities.unmapRange(mStackScroller.getStackScroll(),
+            mLayoutAlgorithm.mMinScrollP, mLayoutAlgorithm.mMaxScrollP), 0, 1);
     }
 
     /**
