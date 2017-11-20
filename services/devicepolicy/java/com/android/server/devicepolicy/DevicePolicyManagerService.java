@@ -4917,7 +4917,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public boolean installKeyPair(ComponentName who, String callerPackage, byte[] privKey,
-            byte[] cert, byte[] chain, String alias, boolean requestAccess) {
+            byte[] cert, byte[] chain, String alias, boolean requestAccess,
+            boolean isUserSelectable) {
         enforceCanManageScope(who, callerPackage, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER,
                 DELEGATION_CERT_INSTALL);
 
@@ -4935,6 +4936,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 if (requestAccess) {
                     keyChain.setGrant(callingUid, alias, true);
                 }
+                keyChain.setUserSelectable(alias, isUserSelectable);
                 return true;
             } catch (RemoteException e) {
                 Log.e(LOG_TAG, "Installing certificate", e);
