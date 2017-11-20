@@ -45,10 +45,10 @@ import android.os.Looper;
 import android.os.Message;
 import android.support.test.runner.AndroidJUnit4;
 import android.view.MagnificationSpec;
-import android.view.WindowManagerInternal;
-import android.view.WindowManagerInternal.MagnificationCallbacks;
 
 import com.android.internal.R;
+import com.android.server.wm.WindowManagerInternal;
+import com.android.server.wm.WindowManagerInternal.MagnificationCallbacks;
 
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Description;

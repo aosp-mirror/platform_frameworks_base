@@ -29,10 +29,10 @@ import android.view.IWindowManager;
 import android.view.InputDevice;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
-import android.view.WindowManagerInternal;
 
 import com.android.server.LocalServices;
 import com.android.server.statusbar.StatusBarManagerInternal;
+import com.android.server.wm.WindowManagerInternal;
 
 /**
  * Handle the back-end of AccessibilityService#performGlobalAction

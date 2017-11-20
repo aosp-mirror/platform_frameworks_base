@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.content.pm.ActivityInfo.CONFIG_ORIENTATION;
 import static android.content.pm.ActivityInfo.CONFIG_SCREEN_SIZE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
@@ -28,8 +27,8 @@ import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
-import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
-import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
+import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
+import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 import static com.android.server.wm.AppTransition.TRANSIT_UNSET;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
@@ -67,10 +66,10 @@ import android.view.IApplicationToken;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
-import android.view.WindowManagerPolicy.StartingSurface;
 
 import com.android.internal.util.ToBooleanFunction;
 import com.android.server.input.InputApplicationHandle;
+import com.android.server.policy.WindowManagerPolicy.StartingSurface;
 import com.android.server.wm.WindowManagerService.H;
 
 import java.io.PrintWriter;

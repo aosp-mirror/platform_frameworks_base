@@ -37,13 +37,13 @@ import android.view.DisplayListCanvas;
 import android.view.RenderNode;
 import android.view.ThreadedRenderer;
 import android.view.WindowManager.LayoutParams;
-import android.view.WindowManagerPolicy.ScreenOffListener;
-import android.view.WindowManagerPolicy.StartingSurface;
-
-import com.google.android.collect.Sets;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.policy.WindowManagerPolicy.ScreenOffListener;
+import com.android.server.policy.WindowManagerPolicy.StartingSurface;
 import com.android.server.wm.TaskSnapshotSurface.SystemBarBackgroundPainter;
+
+import com.google.android.collect.Sets;
 
 import java.io.PrintWriter;
 

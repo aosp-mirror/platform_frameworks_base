@@ -11,10 +11,10 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
-package android.view;
+package com.android.server.wm;
 
 import static android.view.Surface.ROTATION_180;
 import static android.view.Surface.ROTATION_270;
@@ -23,6 +23,7 @@ import static com.android.server.wm.proto.DisplayFramesProto.STABLE_BOUNDS;
 
 import android.graphics.Rect;
 import android.util.proto.ProtoOutputStream;
+import android.view.DisplayInfo;
 
 import java.io.PrintWriter;
 

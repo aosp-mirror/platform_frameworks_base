@@ -33,8 +33,9 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.os.IBinder;
 import android.os.Looper;
-import android.view.WindowManagerInternal;
 import android.view.accessibility.AccessibilityEvent;
+
+import com.android.server.wm.WindowManagerInternal;
 
 import org.junit.Before;
 import org.junit.BeforeClass;

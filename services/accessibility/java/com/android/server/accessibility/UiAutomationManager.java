@@ -26,8 +26,9 @@ import android.os.IBinder;
 import android.os.IBinder.DeathRecipient;
 import android.os.RemoteException;
 import android.util.Slog;
-import android.view.WindowManagerInternal;
 import android.view.accessibility.AccessibilityEvent;
+
+import com.android.server.wm.WindowManagerInternal;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;

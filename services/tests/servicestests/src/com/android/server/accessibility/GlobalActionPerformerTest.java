@@ -22,7 +22,8 @@ import static org.mockito.Mockito.when;
 import android.accessibilityservice.AccessibilityService;
 import android.app.StatusBarManager;
 import android.content.Context;
-import android.view.WindowManagerInternal;
+
+import com.android.server.wm.WindowManagerInternal;
 
 import org.junit.Before;
 import org.junit.Test;

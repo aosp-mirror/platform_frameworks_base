@@ -47,7 +47,6 @@ import android.util.SparseArray;
 import android.view.KeyEvent;
 import android.view.MagnificationSpec;
 import android.view.View;
-import android.view.WindowManagerInternal;
 import android.view.accessibility.AccessibilityCache;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityInteractionClient;
@@ -60,6 +59,7 @@ import android.view.accessibility.IAccessibilityInteractionConnectionCallback;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.DumpUtils;
 import com.android.server.accessibility.AccessibilityManagerService.SecurityPolicy;
+import com.android.server.wm.WindowManagerInternal;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;

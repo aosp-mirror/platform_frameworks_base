@@ -16,7 +16,13 @@
 
 package com.android.server.wm;
 
-import android.graphics.PixelFormat;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
+import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
+
+import static com.android.server.policy.WindowManagerPolicy.NAV_BAR_BOTTOM;
+import static com.android.server.policy.WindowManagerPolicy.NAV_BAR_LEFT;
+import static com.android.server.policy.WindowManagerPolicy.NAV_BAR_RIGHT;
+
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.IBinder;
@@ -24,13 +30,6 @@ import android.os.Parcel;
 import android.view.Surface;
 import android.view.Surface.OutOfResourcesException;
 import android.view.SurfaceControl;
-import android.view.SurfaceSession;
-
-import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
-import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
-import static android.view.WindowManagerPolicy.NAV_BAR_BOTTOM;
-import static android.view.WindowManagerPolicy.NAV_BAR_LEFT;
-import static android.view.WindowManagerPolicy.NAV_BAR_RIGHT;
 
 /**
  * SurfaceControl extension that has black background behind navigation bar area for fullscreen

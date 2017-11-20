@@ -33,10 +33,10 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Slog;
-import android.view.WindowManagerInternal;
 
 import com.android.server.accessibility.AccessibilityManagerService.SecurityPolicy;
 import com.android.server.accessibility.AccessibilityManagerService.UserState;
+import com.android.server.wm.WindowManagerInternal;
 
 import java.lang.ref.WeakReference;
 import java.util.List;

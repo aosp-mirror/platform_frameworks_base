@@ -26,10 +26,11 @@ import android.view.MotionEvent;
 import android.view.MotionEvent.PointerCoords;
 import android.view.MotionEvent.PointerProperties;
 import android.view.ViewConfiguration;
-import android.view.WindowManagerPolicy;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
+
+import com.android.server.policy.WindowManagerPolicy;
 
 import java.util.ArrayList;
 import java.util.Arrays;

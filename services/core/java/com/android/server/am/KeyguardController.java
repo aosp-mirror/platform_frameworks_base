@@ -19,9 +19,9 @@ package com.android.server.am;
 import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
-import static android.view.WindowManagerPolicy.KEYGUARD_GOING_AWAY_FLAG_NO_WINDOW_ANIMATIONS;
-import static android.view.WindowManagerPolicy.KEYGUARD_GOING_AWAY_FLAG_TO_SHADE;
-import static android.view.WindowManagerPolicy.KEYGUARD_GOING_AWAY_FLAG_WITH_WALLPAPER;
+import static android.view.WindowManagerPolicyConstants.KEYGUARD_GOING_AWAY_FLAG_NO_WINDOW_ANIMATIONS;
+import static android.view.WindowManagerPolicyConstants.KEYGUARD_GOING_AWAY_FLAG_TO_SHADE;
+import static android.view.WindowManagerPolicyConstants.KEYGUARD_GOING_AWAY_FLAG_WITH_WALLPAPER;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.ActivityStackSupervisor.PRESERVE_WINDOWS;
@@ -41,8 +41,11 @@ import android.os.RemoteException;
 import android.os.Trace;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
+
 import com.android.internal.policy.IKeyguardDismissCallback;
+import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.wm.WindowManagerService;
+
 import java.io.PrintWriter;
 
 /**
@@ -118,7 +121,7 @@ class KeyguardController {
     /**
      * Called when Keyguard is going away.
      *
-     * @param flags See {@link android.view.WindowManagerPolicy#KEYGUARD_GOING_AWAY_FLAG_TO_SHADE}
+     * @param flags See {@link WindowManagerPolicy#KEYGUARD_GOING_AWAY_FLAG_TO_SHADE}
      *              etc.
      */
     void keyguardGoingAway(int flags) {

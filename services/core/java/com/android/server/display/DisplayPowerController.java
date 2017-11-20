@@ -20,6 +20,7 @@ import android.app.ActivityManager;
 import com.android.internal.app.IBatteryStats;
 import com.android.server.LocalServices;
 import com.android.server.am.BatteryStatsService;
+import com.android.server.policy.WindowManagerPolicy;
 
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
@@ -43,7 +44,6 @@ import android.util.Slog;
 import android.util.Spline;
 import android.util.TimeUtils;
 import android.view.Display;
-import android.view.WindowManagerPolicy;
 
 import java.io.PrintWriter;
 

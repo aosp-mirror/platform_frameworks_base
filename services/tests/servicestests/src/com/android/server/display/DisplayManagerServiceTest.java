@@ -26,7 +26,6 @@ import android.os.IBinder;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.view.SurfaceControl;
-import android.view.WindowManagerInternal;
 
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
@@ -34,6 +33,7 @@ import com.android.server.display.DisplayDeviceInfo;
 import com.android.server.display.DisplayManagerService.SyncRoot;
 import com.android.server.display.VirtualDisplayAdapter.SurfaceControlDisplayFactory;
 import com.android.server.lights.LightsManager;
+import com.android.server.wm.WindowManagerInternal;
 
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;

@@ -152,7 +152,6 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.Xml;
 import android.util.proto.ProtoOutputStream;
-import android.view.WindowManagerInternal;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.Toast;
@@ -180,6 +179,7 @@ import com.android.server.notification.ManagedServices.ManagedServiceInfo;
 import com.android.server.notification.ManagedServices.UserProfiles;
 import com.android.server.policy.PhoneWindowManager;
 import com.android.server.statusbar.StatusBarManagerInternal;
+import com.android.server.wm.WindowManagerInternal;
 
 import libcore.io.IoUtils;
 

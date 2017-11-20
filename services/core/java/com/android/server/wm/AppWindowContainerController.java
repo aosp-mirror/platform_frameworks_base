@@ -45,10 +45,11 @@ import android.os.Trace;
 import android.util.Slog;
 import android.view.DisplayInfo;
 import android.view.IApplicationToken;
-import android.view.WindowManagerPolicy.StartingSurface;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.AttributeCache;
+import com.android.server.policy.WindowManagerPolicy.StartingSurface;
+
 /**
  * Controller for the app window token container. This is created by activity manager to link
  * activity records to the app window token container they use in window manager.

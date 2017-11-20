@@ -82,7 +82,6 @@ import android.view.MagnificationSpec;
 import android.view.View;
 import android.view.WindowInfo;
 import android.view.WindowManager;
-import android.view.WindowManagerInternal;
 import android.view.accessibility.AccessibilityCache;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityInteractionClient;
@@ -102,6 +101,7 @@ import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IntPair;
 import com.android.server.LocalServices;
 import com.android.server.policy.AccessibilityShortcutController;
+import com.android.server.wm.WindowManagerInternal;
 
 import org.xmlpull.v1.XmlPullParserException;
 

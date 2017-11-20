@@ -34,7 +34,6 @@ import android.util.MathUtils;
 import android.util.Slog;
 import android.view.MagnificationSpec;
 import android.view.View;
-import android.view.WindowManagerInternal;
 import android.view.animation.DecelerateInterpolator;
 
 import com.android.internal.R;
@@ -42,6 +41,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.SomeArgs;
 import com.android.server.LocalServices;
+import com.android.server.wm.WindowManagerInternal;
 
 import java.util.Locale;
 

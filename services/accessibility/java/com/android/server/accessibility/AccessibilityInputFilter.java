@@ -31,11 +31,11 @@ import android.view.InputEvent;
 import android.view.InputFilter;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
-import android.view.WindowManagerPolicy;
 import android.view.accessibility.AccessibilityEvent;
 
 import com.android.internal.util.BitUtils;
 import com.android.server.LocalServices;
+import com.android.server.policy.WindowManagerPolicy;
 
 /**
  * This class is an input filter for implementing accessibility features such

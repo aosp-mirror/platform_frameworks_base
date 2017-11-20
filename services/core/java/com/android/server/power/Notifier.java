@@ -25,6 +25,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
+import com.android.server.policy.WindowManagerPolicy;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -49,7 +50,6 @@ import android.os.WorkSource;
 import android.provider.Settings;
 import android.util.EventLog;
 import android.util.Slog;
-import android.view.WindowManagerPolicy;
 import android.view.inputmethod.InputMethodManagerInternal;
 
 /**

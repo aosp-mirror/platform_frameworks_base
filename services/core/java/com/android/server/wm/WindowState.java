@@ -66,10 +66,10 @@ import static android.view.WindowManagerGlobal.RELAYOUT_RES_DRAG_RESIZING_DOCKED
 import static android.view.WindowManagerGlobal.RELAYOUT_RES_DRAG_RESIZING_FREEFORM;
 import static android.view.WindowManagerGlobal.RELAYOUT_RES_FIRST_TIME;
 import static android.view.WindowManagerGlobal.RELAYOUT_RES_SURFACE_CHANGED;
-import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
-import static android.view.WindowManagerPolicy.TRANSIT_ENTER;
-import static android.view.WindowManagerPolicy.TRANSIT_EXIT;
-import static android.view.WindowManagerPolicy.TRANSIT_PREVIEW_DONE;
+import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
+import static com.android.server.policy.WindowManagerPolicy.TRANSIT_ENTER;
+import static com.android.server.policy.WindowManagerPolicy.TRANSIT_EXIT;
+import static com.android.server.policy.WindowManagerPolicy.TRANSIT_PREVIEW_DONE;
 import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_DOCKED_DIVIDER;
 import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_FREEFORM;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
@@ -158,10 +158,10 @@ import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.WindowInfo;
 import android.view.WindowManager;
-import android.view.WindowManagerPolicy;
 
 import com.android.internal.util.ToBooleanFunction;
 import com.android.server.input.InputWindowHandle;
+import com.android.server.policy.WindowManagerPolicy;
 
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
@@ -2445,7 +2445,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mPolicyVisibility = true;
         mPolicyVisibilityAfterAnim = true;
         if (doAnimation) {
-            mWinAnimator.applyAnimationLocked(WindowManagerPolicy.TRANSIT_ENTER, true);
+            mWinAnimator.applyAnimationLocked(TRANSIT_ENTER, true);
         }
         if (requestAnim) {
             mService.scheduleAnimationLocked();
@@ -2473,7 +2473,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return false;
         }
         if (doAnimation) {
-            mWinAnimator.applyAnimationLocked(WindowManagerPolicy.TRANSIT_EXIT, false);
+            mWinAnimator.applyAnimationLocked(TRANSIT_EXIT, false);
             if (mWinAnimator.mAnimation == null) {
                 doAnimation = false;
             }
