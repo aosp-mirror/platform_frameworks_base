@@ -2514,6 +2514,33 @@ public class TelephonyManager {
         }
     }
 
+    /**
+     * Resets the Carrier Keys in the database. This involves 2 steps:
+     *  1. Delete the keys from the database.
+     *  2. Send an intent to download new Certificates.
+     * <p>
+     * Requires Permission:
+     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
+     * @hide
+     */
+    public void resetCarrierKeysForImsiEncryption() {
+        try {
+            IPhoneSubInfo info = getSubscriberInfo();
+            if (info == null) {
+                throw new RuntimeException("IMSI error: Subscriber Info is null");
+            }
+            int subId = getSubId(SubscriptionManager.getDefaultDataSubscriptionId());
+            info.resetCarrierKeysForImsiEncryption(subId, mContext.getOpPackageName());
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "getCarrierInfoForImsiEncryption RemoteException" + ex);
+            throw new RuntimeException("IMSI error: Remote Exception");
+        } catch (NullPointerException ex) {
+            // This could happen before phone restarts due to crashing
+            Rlog.e(TAG, "getCarrierInfoForImsiEncryption NullPointerException" + ex);
+            throw new RuntimeException("IMSI error: Null Pointer exception");
+        }
+    }
+
    /**
      * @param keyAvailability bitmask that defines the availabilty of keys for a type.
      * @param keyType the key type which is being checked. (WLAN, EPDG)
@@ -2549,7 +2576,7 @@ public class TelephonyManager {
      * device keystore.
      * <p>
      * Requires Permission:
-     *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
      * @param imsiEncryptionInfo which includes the Key Type, the Public Key
      *        (java.security.PublicKey) and the Key Identifier.and the Key Identifier.
      *        The keyIdentifier Attribute value pair that helps a server locate
