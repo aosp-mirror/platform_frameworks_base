@@ -134,7 +134,6 @@ class ActivityStarter {
     private static final int INVALID_LAUNCH_MODE = -1;
 
     private final ActivityManagerService mService;
-    private final IPackageManager mPackageManager;
     private final ActivityStackSupervisor mSupervisor;
     private final ActivityStartInterceptor mInterceptor;
 
@@ -234,9 +233,8 @@ class ActivityStarter {
         mIntentDelivered = false;
     }
 
-    ActivityStarter(ActivityManagerService service, IPackageManager packageManager) {
+    ActivityStarter(ActivityManagerService service) {
         mService = service;
-        mPackageManager = packageManager;
         mSupervisor = mService.mStackSupervisor;
         mInterceptor = new ActivityStartInterceptor(mService, mSupervisor);
     }
@@ -379,7 +377,7 @@ class ActivityStarter {
                     && sourceRecord.info.applicationInfo.uid != aInfo.applicationInfo.uid) {
                 try {
                     intent.addCategory(Intent.CATEGORY_VOICE);
-                    if (!mPackageManager.activitySupportsIntent(
+                    if (!mService.getPackageManager().activitySupportsIntent(
                             intent.getComponent(), intent, resolvedType)) {
                         Slog.w(TAG,
                                 "Activity being started in current voice task does not support voice: "
@@ -397,7 +395,7 @@ class ActivityStarter {
             // If the caller is starting a new voice session, just make sure the target
             // is actually allowing it to run this way.
             try {
-                if (!mPackageManager.activitySupportsIntent(intent.getComponent(),
+                if (!mService.getPackageManager().activitySupportsIntent(intent.getComponent(),
                         intent, resolvedType)) {
                     Slog.w(TAG,
                             "Activity being started in new voice task does not support: "

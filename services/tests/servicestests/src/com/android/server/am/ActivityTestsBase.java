@@ -36,6 +36,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.IPackageManager;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
@@ -90,6 +91,7 @@ public class ActivityTestsBase {
 
     protected ActivityManagerService setupActivityManagerService(ActivityManagerService service) {
         service = spy(service);
+        doReturn(mock(IPackageManager.class)).when(service).getPackageManager();
         service.mWindowManager = prepareMockWindowManager();
         return service;
     }

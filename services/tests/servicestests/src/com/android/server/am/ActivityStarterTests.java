@@ -95,8 +95,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
     public void setUp() throws Exception {
         super.setUp();
         mService = createActivityManagerService();
-        mPackageManager = mock(IPackageManager.class);
-        mStarter = new ActivityStarter(mService, mPackageManager);
+        mStarter = new ActivityStarter(mService);
     }
 
     @Test
@@ -178,7 +177,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
             int expectedResult) {
         final ActivityManagerService service = createActivityManagerService();
         final IPackageManager packageManager = mock(IPackageManager.class);
-        final ActivityStarter starter = new ActivityStarter(service, packageManager);
+        final ActivityStarter starter = new ActivityStarter(service);
 
         final IApplicationThread caller = mock(IApplicationThread.class);
 
