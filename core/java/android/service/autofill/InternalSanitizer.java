@@ -16,6 +16,7 @@
 package android.service.autofill;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.os.Parcelable;
 import android.view.autofill.AutofillValue;
@@ -32,7 +33,11 @@ public abstract class InternalSanitizer implements Sanitizer, Parcelable {
     /**
      * Sanitizes an {@link AutofillValue}.
      *
+     * @return sanitized value or {@code null} if value could not be sanitized (for example: didn't
+     * match regex, it's an invalid type, regex failed, etc).
+     *
      * @hide
      */
+    @Nullable
     public abstract AutofillValue sanitize(@NonNull AutofillValue value);
 }
