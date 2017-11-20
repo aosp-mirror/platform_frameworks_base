@@ -1,11 +1,11 @@
-/**
- * Copyright (c) 2014, The Android Open Source Project
+/*
+ * Copyright (c) 2017 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.notification;
+package android.service.notification;
 
 import android.service.notification.ZenModeConfig.ScheduleInfo;
 import android.util.ArraySet;
@@ -24,7 +24,12 @@ import java.util.Calendar;
 import java.util.Objects;
 import java.util.TimeZone;
 
+/**
+ * @hide
+ */
 public class ScheduleCalendar {
+    public static final String TAG = "ScheduleCalendar";
+    public static final boolean DEBUG = Log.isLoggable("ConditionProviders", Log.DEBUG);
     private final ArraySet<Integer> mDays = new ArraySet<Integer>();
     private final Calendar mCalendar = Calendar.getInstance();
 
@@ -35,12 +40,28 @@ public class ScheduleCalendar {
         return "ScheduleCalendar[mDays=" + mDays + ", mSchedule=" + mSchedule + "]";
     }
 
+    /**
+     * @return true if schedule will exit on alarm, else false
+     */
+    public boolean exitAtAlarm() {
+        return mSchedule.exitAtAlarm;
+    }
+
+    /**
+     * Sets schedule information
+     */
     public void setSchedule(ScheduleInfo schedule) {
         if (Objects.equals(mSchedule, schedule)) return;
         mSchedule = schedule;
         updateDays();
     }
 
+    /**
+     * Sets next alarm of the schedule if the saved next alarm has passed or is further
+     * in the future than given nextAlarm
+     * @param now current time in milliseconds
+     * @param nextAlarm time of next alarm in milliseconds
+     */
     public void maybeSetNextAlarm(long now, long nextAlarm) {
         if (mSchedule != null && mSchedule.exitAtAlarm) {
             // alarm canceled
@@ -56,19 +77,26 @@ public class ScheduleCalendar {
                     mSchedule.nextAlarm = Math.min(mSchedule.nextAlarm, nextAlarm);
                 }
             } else if (mSchedule.nextAlarm < now) {
-                if (ScheduleConditionProvider.DEBUG) {
-                    Log.d(ScheduleConditionProvider.TAG,
-                            "All alarms are in the past " + mSchedule.nextAlarm);
+                if (DEBUG) {
+                    Log.d(TAG, "All alarms are in the past " + mSchedule.nextAlarm);
                 }
                 mSchedule.nextAlarm = 0;
             }
         }
     }
 
+    /**
+     * Set calendar time zone to tz
+     * @param tz current time zone
+     */
     public void setTimeZone(TimeZone tz) {
         mCalendar.setTimeZone(tz);
     }
 
+    /**
+     * @param now current time in milliseconds
+     * @return next time this rule changes (starts or ends)
+     */
     public long getNextChangeTime(long now) {
         if (mSchedule == null) return 0;
         final long nextStart = getNextTime(now, mSchedule.startHour, mSchedule.startMinute);
@@ -92,6 +120,10 @@ public class ScheduleCalendar {
         return mCalendar.getTimeInMillis();
     }
 
+    /**
+     * @param time milliseconds since Epoch
+     * @return true if time is within the schedule, else false
+     */
     public boolean isInSchedule(long time) {
         if (mSchedule == null || mDays.size() == 0) return false;
         final long start = getTime(time, mSchedule.startHour, mSchedule.startMinute);
@@ -102,6 +134,10 @@ public class ScheduleCalendar {
         return isInSchedule(-1, time, start, end) || isInSchedule(0, time, start, end);
     }
 
+    /**
+     * @param time milliseconds since Epoch
+     * @return true if should exit at time for next alarm, else false
+     */
     public boolean shouldExitForAlarm(long time) {
         if (mSchedule == null) {
             return false;

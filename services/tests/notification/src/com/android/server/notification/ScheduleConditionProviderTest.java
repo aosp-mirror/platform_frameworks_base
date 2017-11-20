@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Looper;
 import android.service.notification.Condition;
+import android.service.notification.ScheduleCalendar;
 import android.service.notification.ZenModeConfig;
 import android.support.test.InstrumentationRegistry;
 import android.test.ServiceTestCase;
@@ -34,7 +35,9 @@ public class ScheduleConditionProviderTest extends ServiceTestCase<ScheduleCondi
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        Looper.prepare();
+        if (Looper.myLooper() == null) {
+            Looper.prepare();
+        }
 
         Intent startIntent =
                 new Intent("com.android.server.notification.ScheduleConditionProvider");

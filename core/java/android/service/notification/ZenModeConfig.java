@@ -48,6 +48,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.TimeZone;
 import java.util.UUID;
 
 /**
@@ -692,6 +693,20 @@ public class ZenModeConfig implements Parcelable {
                 suppressedVisualEffects);
     }
 
+    /**
+     * Creates scheduleCalendar from a condition id
+     * @param conditionId
+     * @return ScheduleCalendar with info populated with conditionId
+     */
+    public static ScheduleCalendar toScheduleCalendar(Uri conditionId) {
+        final ScheduleInfo schedule = ZenModeConfig.tryParseScheduleConditionId(conditionId);
+        if (schedule == null || schedule.days == null || schedule.days.length == 0) return null;
+        final ScheduleCalendar sc = new ScheduleCalendar();
+        sc.setSchedule(schedule);
+        sc.setTimeZone(TimeZone.getDefault());
+        return sc;
+    }
+
     private static int sourceToPrioritySenders(int source, int def) {
         switch (source) {
             case SOURCE_ANYONE: return Policy.PRIORITY_SENDERS_ANY;
@@ -793,7 +808,10 @@ public class ZenModeConfig implements Parcelable {
                 Condition.FLAG_RELEVANT_NOW);
     }
 
-    private static CharSequence getFormattedTime(Context context, long time, boolean isSameDay,
+    /**
+     * Creates readable time from time in milliseconds
+     */
+    public static CharSequence getFormattedTime(Context context, long time, boolean isSameDay,
             int userHandle) {
         String skeleton = (!isSameDay ? "EEE " : "")
                 + (DateFormat.is24HourFormat(context, userHandle) ? "Hm" : "hma");
@@ -801,7 +819,10 @@ public class ZenModeConfig implements Parcelable {
         return DateFormat.format(pattern, time);
     }
 
-    private static boolean isToday(long time) {
+    /**
+     * Determines whether a time in milliseconds is today or not
+     */
+    public static boolean isToday(long time) {
         GregorianCalendar now = new GregorianCalendar();
         GregorianCalendar endTime = new GregorianCalendar();
         endTime.setTimeInMillis(time);
@@ -1081,7 +1102,10 @@ public class ZenModeConfig implements Parcelable {
         return UUID.randomUUID().toString().replace("-", "");
     }
 
-    private static String getOwnerCaption(Context context, String owner) {
+    /**
+     * Gets the name of the app associated with owner
+     */
+    public static String getOwnerCaption(Context context, String owner) {
         final PackageManager pm = context.getPackageManager();
         try {
             final ApplicationInfo info = pm.getApplicationInfo(owner, 0);
