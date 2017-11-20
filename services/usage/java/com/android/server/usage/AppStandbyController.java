@@ -140,9 +140,7 @@ public class AppStandbyController {
     static final int MSG_PAROLE_STATE_CHANGED = 9;
     static final int MSG_ONE_TIME_CHECK_IDLE_STATES = 10;
 
-    long mAppIdleScreenThresholdMillis;
     long mCheckIdleIntervalMillis;
-    long mAppIdleWallclockThresholdMillis;
     long mAppIdleParoleIntervalMillis;
     long mAppIdleParoleDurationMillis;
     long[] mAppStandbyScreenThresholds = SCREEN_TIME_THRESHOLDS;
@@ -912,14 +910,6 @@ public class AppStandbyController {
         pw.println();
         pw.println("Settings:");
 
-        pw.print("  mAppIdleDurationMillis=");
-        TimeUtils.formatDuration(mAppIdleScreenThresholdMillis, pw);
-        pw.println();
-
-        pw.print("  mAppIdleWallclockThresholdMillis=");
-        TimeUtils.formatDuration(mAppIdleWallclockThresholdMillis, pw);
-        pw.println();
-
         pw.print("  mCheckIdleIntervalMillis=");
         TimeUtils.formatDuration(mCheckIdleIntervalMillis, pw);
         pw.println();
@@ -1192,24 +1182,12 @@ public class AppStandbyController {
                     // fallthrough, mParser is empty and all defaults will be returned.
                 }
 
-                // Default: 12 hours of screen-on time sans dream-time
-                mAppIdleScreenThresholdMillis = mParser.getLong(KEY_IDLE_DURATION,
-                        COMPRESS_TIME ? ONE_MINUTE * 4 : 12 * 60 * ONE_MINUTE);
-
-                mAppIdleWallclockThresholdMillis = mParser.getLong(KEY_WALLCLOCK_THRESHOLD,
-                        COMPRESS_TIME ? ONE_MINUTE * 8 : 2L * 24 * 60 * ONE_MINUTE); // 2 days
-
-                mCheckIdleIntervalMillis = Math.min(mAppIdleScreenThresholdMillis / 4,
-                        COMPRESS_TIME ? ONE_MINUTE : 4 * 60 * ONE_MINUTE); // 4 hours
-
                 // Default: 24 hours between paroles
                 mAppIdleParoleIntervalMillis = mParser.getLong(KEY_PAROLE_INTERVAL,
                         COMPRESS_TIME ? ONE_MINUTE * 10 : 24 * 60 * ONE_MINUTE);
 
                 mAppIdleParoleDurationMillis = mParser.getLong(KEY_PAROLE_DURATION,
                         COMPRESS_TIME ? ONE_MINUTE : 10 * ONE_MINUTE); // 10 minutes
-                mAppIdleHistory.setThresholds(mAppIdleWallclockThresholdMillis,
-                        mAppIdleScreenThresholdMillis);
 
                 String screenThresholdsValue = mParser.getString(KEY_SCREEN_TIME_THRESHOLDS, null);
                 mAppStandbyScreenThresholds = parseLongArray(screenThresholdsValue,
@@ -1219,6 +1197,9 @@ public class AppStandbyController {
                         null);
                 mAppStandbyElapsedThresholds = parseLongArray(elapsedThresholdsValue,
                         ELAPSED_TIME_THRESHOLDS);
+                mCheckIdleIntervalMillis = Math.min(mAppStandbyElapsedThresholds[1] / 4,
+                        COMPRESS_TIME ? ONE_MINUTE : 4 * 60 * ONE_MINUTE); // 4 hours
+
             }
         }
 

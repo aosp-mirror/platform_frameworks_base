@@ -91,8 +91,6 @@ public class AppIdleHistory {
     private long mScreenOnSnapshot; // Elapsed time snapshot when last write of mScreenOnDuration
     private long mScreenOnDuration; // Total screen on duration since device was "born"
 
-    private long mElapsedTimeThreshold;
-    private long mScreenOnTimeThreshold;
     private final File mStorageDir;
 
     private boolean mScreenOn;
@@ -111,11 +109,6 @@ public class AppIdleHistory {
         mScreenOnSnapshot = elapsedRealtime;
         mStorageDir = storageDir;
         readScreenOnTime();
-    }
-
-    public void setThresholds(long elapsedTimeThreshold, long screenOnTimeThreshold) {
-        mElapsedTimeThreshold = elapsedTimeThreshold;
-        mScreenOnTimeThreshold = screenOnTimeThreshold;
     }
 
     public void updateDisplay(boolean screenOn, long elapsedRealtime) {
