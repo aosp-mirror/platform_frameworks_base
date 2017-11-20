@@ -179,6 +179,38 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
     }
 
     /**
+     * Handles a nanoapp load event.
+     *
+     * @param nanoAppId the ID of the nanoapp that was loaded.
+     */
+    /* package */ void onNanoAppLoaded(long nanoAppId) {
+        if (mConnectionOpen.get()) {
+            try {
+                mCallbackInterface.onNanoAppLoaded(nanoAppId);
+            } catch (RemoteException e) {
+                Log.e(TAG, "RemoteException while calling onNanoAppLoaded on client"
+                        + " (host endpoint ID = " + mHostEndPointId + ")", e);
+            }
+        }
+    }
+
+    /**
+     * Handles a nanoapp unload event.
+     *
+     * @param nanoAppId the ID of the nanoapp that was unloaded.
+     */
+    /* package */ void onNanoAppUnloaded(long nanoAppId) {
+        if (mConnectionOpen.get()) {
+            try {
+                mCallbackInterface.onNanoAppUnloaded(nanoAppId);
+            } catch (RemoteException e) {
+                Log.e(TAG, "RemoteException while calling onNanoAppUnloaded on client"
+                        + " (host endpoint ID = " + mHostEndPointId + ")", e);
+            }
+        }
+    }
+
+    /**
      * Handles a hub reset for this client.
      */
     /* package */ void onHubReset() {

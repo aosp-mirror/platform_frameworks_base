@@ -160,7 +160,7 @@ public class ContextHubService extends IContextHubService.Stub {
         }
 
         mClientManager = new ContextHubClientManager(mContext, mContextHubProxy);
-        mTransactionManager = new ContextHubTransactionManager(mContextHubProxy);
+        mTransactionManager = new ContextHubTransactionManager(mContextHubProxy, mClientManager);
 
         List<ContextHub> hubList;
         try {
