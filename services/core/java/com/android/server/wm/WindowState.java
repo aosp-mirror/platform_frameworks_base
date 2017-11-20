@@ -3039,7 +3039,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (task == null) {
             return false;
         }
-        if (!inSplitScreenWindowingMode()) {
+        if (!inSplitScreenWindowingMode() && !inFreeformWindowingMode()) {
             return false;
         }
         if (mAttrs.width != MATCH_PARENT || mAttrs.height != MATCH_PARENT) {
