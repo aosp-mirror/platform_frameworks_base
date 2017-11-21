@@ -163,11 +163,14 @@ def assert_font_supports_all_of_chars(font, chars):
             'U+%04X was not found in %s' % (char, font))
 
 
-def assert_font_supports_none_of_chars(font, chars):
+def assert_font_supports_none_of_chars(font, chars, fallbackName):
     best_cmap = get_best_cmap(font)
     for char in chars:
-        assert char not in best_cmap, (
-            'U+%04X was found in %s' % (char, font))
+        if fallbackName:
+            assert char not in best_cmap, 'U+%04X was found in %s' % (char, font)
+        else:
+            assert char not in best_cmap, (
+                'U+%04X was found in %s in fallback %s' % (char, font, fallbackName))
 
 
 def assert_font_supports_all_sequences(font, sequences):
@@ -196,19 +199,21 @@ def check_hyphens(hyphens_dir):
 
 
 class FontRecord(object):
-    def __init__(self, name, scripts, variant, weight, style, font):
+    def __init__(self, name, scripts, variant, weight, style, fallback_for, font):
         self.name = name
         self.scripts = scripts
         self.variant = variant
         self.weight = weight
         self.style = style
+        self.fallback_for = fallback_for
         self.font = font
 
 
 def parse_fonts_xml(fonts_xml_path):
-    global _script_to_font_map, _fallback_chain
+    global _script_to_font_map, _fallback_chains, _all_fonts
     _script_to_font_map = collections.defaultdict(set)
-    _fallback_chain = []
+    _fallback_chains = {}
+    _all_fonts = []
     tree = ElementTree.parse(fonts_xml_path)
     families = tree.findall('family')
     # Minikin supports up to 254 but users can place their own font at the first
@@ -225,9 +230,16 @@ def parse_fonts_xml(fonts_xml_path):
                 'No variant expected for LGC font %s.' % name)
             assert langs is None, (
                 'No language expected for LGC fonts %s.' % name)
+            assert name not in _fallback_chains, 'Duplicated name entry %s' % name
+            _fallback_chains[name] = []
         else:
             assert variant in {None, 'elegant', 'compact'}, (
                 'Unexpected value for variant: %s' % variant)
+
+    for family in families:
+        name = family.get('name')
+        variant = family.get('variant')
+        langs = family.get('lang')
 
         if langs:
             langs = langs.split()
@@ -247,17 +259,36 @@ def parse_fonts_xml(fonts_xml_path):
             assert style in {'normal', 'italic'}, (
                 'Unknown style "%s"' % style)
 
+            fallback_for = child.get('fallbackFor')
+
+            assert not name or not fallback_for, (
+                'name and fallbackFor cannot be present at the same time')
+            assert not fallback_for or fallback_for in _fallback_chains, (
+                'Unknown fallback name: %s' % fallback_for)
+
             index = child.get('index')
             if index:
                 index = int(index)
 
-            _fallback_chain.append(FontRecord(
+            record = FontRecord(
                 name,
                 frozenset(scripts),
                 variant,
                 weight,
                 style,
-                (font_file, index)))
+                fallback_for,
+                (font_file, index))
+
+            _all_fonts.append(record)
+
+            if not fallback_for:
+                if not name or name == 'sans-serif':
+                    for _, fallback in _fallback_chains.iteritems():
+                        fallback.append(record)
+                else:
+                    _fallback_chains[name].append(record)
+            else:
+                _fallback_chains[fallback_for].append(record)
 
             if name: # non-empty names are used for default LGC fonts
                 map_scripts = {'Latn', 'Grek', 'Cyrl'}
@@ -274,7 +305,7 @@ def check_emoji_coverage(all_emoji, equivalent_emoji):
 
 def get_emoji_font():
     emoji_fonts = [
-        record.font for record in _fallback_chain
+        record.font for record in _all_fonts
         if 'Zsye' in record.scripts]
     assert len(emoji_fonts) == 1, 'There are %d emoji fonts.' % len(emoji_fonts)
     return emoji_fonts[0]
@@ -318,35 +349,36 @@ def check_emoji_font_coverage(emoji_font, all_emoji, equivalent_emoji):
 
 def check_emoji_defaults(default_emoji):
     missing_text_chars = _emoji_properties['Emoji'] - default_emoji
-    emoji_font_seen = False
-    for record in _fallback_chain:
-        if 'Zsye' in record.scripts:
-            emoji_font_seen = True
-            # No need to check the emoji font
-            continue
-        # For later fonts, we only check them if they have a script
-        # defined, since the defined script may get them to a higher
-        # score even if they appear after the emoji font. However,
-        # we should skip checking the text symbols font, since
-        # symbol fonts should be able to override the emoji display
-        # style when 'Zsym' is explicitly specified by the user.
-        if emoji_font_seen and (not record.scripts or 'Zsym' in record.scripts):
-            continue
+    for name, fallback_chain in _fallback_chains.iteritems():
+        emoji_font_seen = False
+        for record in fallback_chain:
+            if 'Zsye' in record.scripts:
+                emoji_font_seen = True
+                # No need to check the emoji font
+                continue
+            # For later fonts, we only check them if they have a script
+            # defined, since the defined script may get them to a higher
+            # score even if they appear after the emoji font. However,
+            # we should skip checking the text symbols font, since
+            # symbol fonts should be able to override the emoji display
+            # style when 'Zsym' is explicitly specified by the user.
+            if emoji_font_seen and (not record.scripts or 'Zsym' in record.scripts):
+                continue
 
-        # Check default emoji-style characters
-        assert_font_supports_none_of_chars(record.font, sorted(default_emoji))
+            # Check default emoji-style characters
+            assert_font_supports_none_of_chars(record.font, sorted(default_emoji), name)
 
-        # Mark default text-style characters appearing in fonts above the emoji
-        # font as seen
-        if not emoji_font_seen:
-            missing_text_chars -= set(get_best_cmap(record.font))
+            # Mark default text-style characters appearing in fonts above the emoji
+            # font as seen
+            if not emoji_font_seen:
+                missing_text_chars -= set(get_best_cmap(record.font))
 
-    # Noto does not have monochrome glyphs for Unicode 7.0 wingdings and
-    # webdings yet.
-    missing_text_chars -= _chars_by_age['7.0']
-    assert missing_text_chars == set(), (
-        'Text style version of some emoji characters are missing: ' +
-            repr(missing_text_chars))
+        # Noto does not have monochrome glyphs for Unicode 7.0 wingdings and
+        # webdings yet.
+        missing_text_chars -= _chars_by_age['7.0']
+        assert missing_text_chars == set(), (
+            'Text style version of some emoji characters are missing: ' +
+                repr(missing_text_chars))
 
 
 # Setting reverse to true returns a dictionary that maps the values to sets of
@@ -626,8 +658,19 @@ def compute_expected_emoji():
     return all_emoji, default_emoji, equivalent_emoji
 
 
+def check_compact_only_fallback():
+    for name, fallback_chain in _fallback_chains.iteritems():
+        for record in fallback_chain:
+            if record.variant == 'compact':
+                same_script_elegants = [x for x in fallback_chain
+                    if x.scripts == record.scripts and x.variant == 'elegant']
+                assert same_script_elegants, (
+                    '%s must be in elegant of %s as fallback of "%s" too' % (
+                    record.font, record.scripts, record.fallback_for),)
+
+
 def check_vertical_metrics():
-    for record in _fallback_chain:
+    for record in _all_fonts:
         if record.name in ['sans-serif', 'sans-serif-condensed']:
             font = open_font(record.font)
             assert font['head'].yMax == 2163 and font['head'].yMin == -555, (
@@ -646,11 +689,12 @@ def check_vertical_metrics():
 def check_cjk_punctuation():
     cjk_scripts = {'Hans', 'Hant', 'Jpan', 'Kore'}
     cjk_punctuation = range(0x3000, 0x301F + 1)
-    for record in _fallback_chain:
-        if record.scripts.intersection(cjk_scripts):
-            # CJK font seen. Stop checking the rest of the fonts.
-            break
-        assert_font_supports_none_of_chars(record.font, cjk_punctuation)
+    for name, fallback_chain in _fallback_chains.iteritems():
+        for record in fallback_chain:
+            if record.scripts.intersection(cjk_scripts):
+                # CJK font seen. Stop checking the rest of the fonts.
+                break
+            assert_font_supports_none_of_chars(record.font, cjk_punctuation, name)
 
 
 def main():
@@ -660,6 +704,8 @@ def main():
 
     fonts_xml_path = path.join(target_out, 'etc', 'fonts.xml')
     parse_fonts_xml(fonts_xml_path)
+
+    check_compact_only_fallback()
 
     check_vertical_metrics()
 
