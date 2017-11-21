@@ -257,8 +257,9 @@ public class TaskStack extends WindowContainer<Task> implements
         if (mAnimationBackgroundSurface == null) {
             return;
         }
+        // TODO: Should be in relative coordinates.
         getPendingTransaction().setSize(mAnimationBackgroundSurface, bounds.width(), bounds.height())
-                .setPosition(mAnimationBackgroundSurface, 0, 0);
+                .setPosition(mAnimationBackgroundSurface, bounds.left, bounds.top);
         scheduleAnimation();
     }
 
