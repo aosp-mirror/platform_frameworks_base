@@ -42,6 +42,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import libcore.io.IoUtils;
 
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.IOException;
 import java.util.Objects;
 import java.util.UUID;
@@ -383,9 +384,15 @@ public class PackageHelper {
 
     public static long calculateInstalledSize(PackageLite pkg, String abiOverride)
             throws IOException {
+        return calculateInstalledSize(pkg, abiOverride, null);
+    }
+
+    public static long calculateInstalledSize(PackageLite pkg, String abiOverride,
+            FileDescriptor fd) throws IOException {
         NativeLibraryHelper.Handle handle = null;
         try {
-            handle = NativeLibraryHelper.Handle.create(pkg);
+            handle = fd != null ? NativeLibraryHelper.Handle.createFd(pkg, fd)
+                    : NativeLibraryHelper.Handle.create(pkg);
             return calculateInstalledSize(pkg, handle, abiOverride);
         } finally {
             IoUtils.closeQuietly(handle);
