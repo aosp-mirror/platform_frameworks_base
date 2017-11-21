@@ -1301,6 +1301,22 @@
     <integer-array name="config_autoBrightnessLcdBacklightValues">
     </integer-array>
 
+    <!-- Array of desired screen brightness in nits corresponding to the lux values
+         in the config_autoBrightnessLevels array. As with config_screenBrightnessMinimumNits and
+         config_screenBrightnessMaximumNits, the display brightness is defined as the measured
+         brightness of an all-white image.
+
+         If this is defined then:
+            - config_autoBrightnessLcdBacklightValues should not be defined
+            - config_screenBrightnessMinimumNits must be defined
+            - config_screenBrightnessMaximumNits must be defined
+
+         This array should have size one greater than the size of the config_autoBrightnessLevels
+         array. The brightness values must be non-negative and non-decreasing. This must be
+         overridden in platform specific overlays -->
+    <array name="config_autoBrightnessDisplayValuesNits">
+    </array>
+
     <!-- Array of output values for button backlight corresponding to the LUX values
          in the config_autoBrightnessLevels array.  This array should have size one greater
          than the size of the config_autoBrightnessLevels array.
@@ -1336,6 +1352,29 @@
     <integer-array name="config_dynamicHysteresisDarkLevels">
         <item>200</item>
     </integer-array>
+
+    <!-- The minimum brightness of the display in nits. On OLED displays this should be measured
+         with an all white image while the display is fully on and the backlight is set to
+         config_screenBrightnessSettingMinimum or config_screenBrightnessSettingDark, whichever
+         is darker.
+
+         If this and config_screenBrightnessMinimumNits are set, then the display's brightness
+         range is assumed to be linear between
+         (config_screenBrightnessSettingMinimum, config_screenBrightnessMinimumNits) and
+         (config_screenBrightnessSettingMaximum, config_screenBrightnessMaximumNits). -->
+    <item name="config_screenBrightnessMinimumNits" format="float" type="dimen">-1.0</item>
+
+    <!-- The maximum brightness of the display in nits. On OLED displays this should be measured
+         with an all white image while the display is fully on and the "backlight" is set to
+         config_screenBrightnessSettingMaximum. Note that this value should *not* reflect the
+         maximum brightness value for any high brightness modes but only the maximum brightness
+         value obtainable in a sustainable manner.
+
+         If this and config_screenBrightnessMinimumNits are set to something non-negative, then the
+         display's brightness range is assumed to be linear between
+         (config_screenBrightnessSettingMinimum, config_screenBrightnessMaximumNits) and
+         (config_screenBrightnessSettingMaximum, config_screenBrightnessMaximumNits). -->
+    <item name="config_screenBrightnessMaximumNits" format="float" type="dimen">-1.0</item>
 
     <!-- Array of ambient lux threshold values. This is used for determining hysteresis constraint
          values by calculating the index to use for lookup and then setting the constraint value

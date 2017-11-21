@@ -494,4 +494,38 @@ public class Preconditions {
 
         return value;
     }
+
+    /**
+     * Ensures that all elements in the argument integer array are within the inclusive range
+     *
+     * @param value an integer array of values
+     * @param lower the lower endpoint of the inclusive range
+     * @param upper the upper endpoint of the inclusive range
+     * @param valueName the name of the argument to use if the check fails
+     *
+     * @return the validated integer array
+     *
+     * @throws IllegalArgumentException if any of the elements in {@code value} were out of range
+     * @throws NullPointerException if the {@code value} was {@code null}
+     */
+    public static int[] checkArrayElementsInRange(int[] value, int lower, int upper,
+            String valueName) {
+        checkNotNull(value, valueName + " must not be null");
+
+        for (int i = 0; i < value.length; ++i) {
+            int v = value[i];
+
+            if (v < lower) {
+                throw new IllegalArgumentException(
+                        String.format("%s[%d] is out of range of [%d, %d] (too low)",
+                                valueName, i, lower, upper));
+            } else if (v > upper) {
+                throw new IllegalArgumentException(
+                        String.format("%s[%d] is out of range of [%d, %d] (too high)",
+                                valueName, i, lower, upper));
+            }
+        }
+
+        return value;
+    }
 }

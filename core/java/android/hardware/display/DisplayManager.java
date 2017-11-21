@@ -27,6 +27,7 @@ import android.content.Context;
 import android.graphics.Point;
 import android.media.projection.MediaProjection;
 import android.os.Handler;
+import android.os.UserHandle;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.Surface;
@@ -631,6 +632,27 @@ public final class DisplayManager {
      */
     public void setBrightness(int brightness) {
         mGlobal.setBrightness(brightness);
+    }
+
+    /**
+     * Sets the global display brightness configuration.
+     *
+     * @hide
+     */
+    public void setBrightnessConfiguration(BrightnessConfiguration c) {
+        setBrightnessConfigurationForUser(c, UserHandle.myUserId());
+    }
+
+    /**
+     * Sets the global display brightness configuration for a specific user.
+     *
+     * Note this requires the INTERACT_ACROSS_USERS permission if setting the configuration for a
+     * user other than the one you're currently running as.
+     *
+     * @hide
+     */
+    public void setBrightnessConfigurationForUser(BrightnessConfiguration c, int userId) {
+        mGlobal.setBrightnessConfigurationForUser(c, userId);
     }
 
     /**

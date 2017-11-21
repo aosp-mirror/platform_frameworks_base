@@ -29,6 +29,7 @@ import com.android.internal.util.IndentingPrintWriter;
 
 import android.Manifest;
 import android.annotation.NonNull;
+import android.annotation.UserIdInt;
 import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -37,6 +38,7 @@ import android.content.res.Resources;
 import android.graphics.Point;
 import android.hardware.SensorManager;
 import android.hardware.display.BrightnessChangeEvent;
+import android.hardware.display.BrightnessConfiguration;
 import android.hardware.display.DisplayManagerGlobal;
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.display.DisplayViewport;
@@ -62,6 +64,7 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.text.TextUtils;
 import android.util.IntArray;
 import android.util.Slog;
@@ -70,6 +73,7 @@ import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.Surface;
 
+import com.android.internal.util.Preconditions;
 import com.android.server.AnimationThread;
 import com.android.server.DisplayThread;
 import com.android.server.LocalServices;
@@ -144,6 +148,7 @@ public final class DisplayManagerService extends SystemService {
     private static final int MSG_REQUEST_TRAVERSAL = 4;
     private static final int MSG_UPDATE_VIEWPORT = 5;
     private static final int MSG_REGISTER_BRIGHTNESS_TRACKER = 6;
+    private static final int MSG_LOAD_BRIGHTNESS_CONFIGURATION = 7;
 
     private final Context mContext;
     private final DisplayManagerHandler mHandler;
@@ -218,6 +223,9 @@ public final class DisplayManagerService extends SystemService {
     // The virtual display adapter, or null if not registered.
     private VirtualDisplayAdapter mVirtualDisplayAdapter;
 
+    // The User ID of the current user
+    private @UserIdInt int mCurrentUserId;
+
     // The stable device screen height and width. These are not tied to a specific display, even
     // the default display, because they need to be stable over the course of the device's entire
     // life, even if the default display changes (e.g. a new monitor is plugged into a PC-like
@@ -277,17 +285,18 @@ public final class DisplayManagerService extends SystemService {
         mDisplayAdapterListener = new DisplayAdapterListener();
         mSingleDisplayDemoMode = SystemProperties.getBoolean("persist.demo.singledisplay", false);
         mDefaultDisplayDefaultColorMode = mContext.getResources().getInteger(
-            com.android.internal.R.integer.config_defaultDisplayDefaultColorMode);
+                com.android.internal.R.integer.config_defaultDisplayDefaultColorMode);
 
         PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         mGlobalDisplayBrightness = pm.getDefaultScreenBrightnessSetting();
         mBrightnessTracker = new BrightnessTracker(context, null);
+        mCurrentUserId = UserHandle.USER_SYSTEM;
     }
 
     public void setupSchedulerPolicies() {
         // android.display and android.anim is critical to user experience and we should make sure
-        // it is not in the default foregroup groups, add it to top-app to make sure it uses all the
-        // cores and scheduling settings for top-app when it runs.
+        // it is not in the default foregroup groups, add it to top-app to make sure it uses all
+        // the cores and scheduling settings for top-app when it runs.
         Process.setThreadGroupAndCpuset(DisplayThread.get().getThreadId(),
                 Process.THREAD_GROUP_TOP_APP);
         Process.setThreadGroupAndCpuset(AnimationThread.get().getThreadId(),
@@ -335,6 +344,19 @@ public final class DisplayManagerService extends SystemService {
                     } catch (InterruptedException ex) {
                     }
                 }
+            }
+        }
+    }
+
+    @Override
+    public void onSwitchUser(@UserIdInt int newUserId) {
+        final int userSerial = getUserManager().getUserSerialNumber(newUserId);
+        synchronized (mSyncRoot) {
+            if (mCurrentUserId != newUserId) {
+                mCurrentUserId = newUserId;
+                BrightnessConfiguration config =
+                        mPersistentDataStore.getBrightnessConfiguration(userSerial);
+                mDisplayPowerController.setBrightnessConfiguration(config);
             }
         }
     }
@@ -982,6 +1004,30 @@ public final class DisplayManagerService extends SystemService {
         }
     }
 
+    private void setBrightnessConfigurationForUserInternal(
+            @NonNull BrightnessConfiguration c, @UserIdInt int userId) {
+        final int userSerial = getUserManager().getUserSerialNumber(userId);
+        synchronized (mSyncRoot) {
+            try {
+                mPersistentDataStore.setBrightnessConfigurationForUser(c, userSerial);
+            } finally {
+                mPersistentDataStore.saveIfNeeded();
+            }
+            if (userId == mCurrentUserId) {
+                mDisplayPowerController.setBrightnessConfiguration(c);
+            }
+        }
+    }
+
+    private void loadBrightnessConfiguration() {
+        synchronized (mSyncRoot) {
+            final int userSerial = getUserManager().getUserSerialNumber(mCurrentUserId);
+            BrightnessConfiguration config =
+                    mPersistentDataStore.getBrightnessConfiguration(userSerial);
+            mDisplayPowerController.setBrightnessConfiguration(config);
+        }
+    }
+
     // Updates all existing logical displays given the current set of display devices.
     // Removes invalid logical displays.
     // Sends notifications if needed.
@@ -1226,6 +1272,10 @@ public final class DisplayManagerService extends SystemService {
         return mProjectionService;
     }
 
+    private UserManager getUserManager() {
+        return mContext.getSystemService(UserManager.class);
+    }
+
     private void dumpInternal(PrintWriter pw) {
         pw.println("DISPLAY MANAGER (dumpsys display)");
 
@@ -1367,6 +1417,10 @@ public final class DisplayManagerService extends SystemService {
 
                 case MSG_REGISTER_BRIGHTNESS_TRACKER:
                     mBrightnessTracker.start();
+                    break;
+
+                case MSG_LOAD_BRIGHTNESS_CONFIGURATION:
+                    loadBrightnessConfiguration();
                     break;
             }
         }
@@ -1797,6 +1851,27 @@ public final class DisplayManagerService extends SystemService {
             }
         }
 
+        @Override // Binder call
+        public void setBrightnessConfigurationForUser(
+                BrightnessConfiguration c, @UserIdInt int userId) {
+            mContext.enforceCallingOrSelfPermission(
+                    Manifest.permission.CONFIGURE_DISPLAY_BRIGHTNESS,
+                    "Permission required to change the display's brightness configuration");
+            if (userId != UserHandle.getCallingUserId()) {
+                mContext.enforceCallingOrSelfPermission(
+                        Manifest.permission.INTERACT_ACROSS_USERS,
+                        "Permission required to change the display brightness"
+                        + " configuration of another user");
+            }
+            Preconditions.checkNotNull(c);
+            final long token = Binder.clearCallingIdentity();
+            try {
+                setBrightnessConfigurationForUserInternal(c, userId);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
         private boolean validatePackageName(int uid, String packageName) {
             if (packageName != null) {
                 String[] packageNames = mContext.getPackageManager().getPackagesForUid(uid);
@@ -1868,18 +1943,24 @@ public final class DisplayManagerService extends SystemService {
                 mDisplayPowerController = new DisplayPowerController(
                         mContext, callbacks, handler, sensorManager, blanker);
             }
+
+            mHandler.sendEmptyMessage(MSG_LOAD_BRIGHTNESS_CONFIGURATION);
         }
 
         @Override
         public boolean requestPowerState(DisplayPowerRequest request,
                 boolean waitForNegativeProximity) {
-            return mDisplayPowerController.requestPowerState(request,
-                    waitForNegativeProximity);
+            synchronized (mSyncRoot) {
+                return mDisplayPowerController.requestPowerState(request,
+                        waitForNegativeProximity);
+            }
         }
 
         @Override
         public boolean isProximitySensorAvailable() {
-            return mDisplayPowerController.isProximitySensorAvailable();
+            synchronized (mSyncRoot) {
+                return mDisplayPowerController.isProximitySensorAvailable();
+            }
         }
 
         @Override

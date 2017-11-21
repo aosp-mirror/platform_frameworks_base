@@ -26,10 +26,12 @@ import android.animation.Animator;
 import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.hardware.display.BrightnessConfiguration;
 import android.hardware.display.DisplayManagerInternal.DisplayPowerCallbacks;
 import android.hardware.display.DisplayManagerInternal.DisplayPowerRequest;
 import android.os.Handler;
@@ -93,6 +95,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     private static final int MSG_PROXIMITY_SENSOR_DEBOUNCED = 2;
     private static final int MSG_SCREEN_ON_UNBLOCKED = 3;
     private static final int MSG_SCREEN_OFF_UNBLOCKED = 4;
+    private static final int MSG_CONFIGURE_BRIGHTNESS = 5;
+    private static final int MSG_USER_SWITCH = 6;
 
     private static final int PROXIMITY_UNKNOWN = -1;
     private static final int PROXIMITY_NEGATIVE = 0;
@@ -285,6 +289,14 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     // The controller for the automatic brightness level.
     private AutomaticBrightnessController mAutomaticBrightnessController;
 
+    // The default brightness configuration. Used for whenever we don't have a valid brightness
+    // configuration set. This is typically seen with users that don't have a brightness
+    // configuration that's different from the default.
+    private BrightnessConfiguration mDefaultBrightnessConfiguration;
+
+    // The current brightness configuration.
+    private BrightnessConfiguration mBrightnessConfiguration;
+
     // Animators.
     private ObjectAnimator mColorFadeOnAnimator;
     private ObjectAnimator mColorFadeOffAnimator;
@@ -333,7 +345,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 screenBrightnessSettingMinimum, mScreenBrightnessDimConfig),
                 mScreenBrightnessDarkConfig);
 
-        mScreenBrightnessRangeMaximum = PowerManager.BRIGHTNESS_ON;
+        mScreenBrightnessRangeMaximum = clampAbsoluteBrightness(resources.getInteger(
+                    com.android.internal.R.integer.config_screenBrightnessSettingMaximum));
 
         mUseSoftwareAutoBrightnessConfig = resources.getBoolean(
                 com.android.internal.R.bool.config_automatic_brightness_available);
@@ -348,60 +361,60 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         mSkipScreenOnBrightnessRamp = resources.getBoolean(
                 com.android.internal.R.bool.config_skipScreenOnBrightnessRamp);
 
-        int lightSensorRate = resources.getInteger(
-                com.android.internal.R.integer.config_autoBrightnessLightSensorRate);
-        int initialLightSensorRate = resources.getInteger(
-                com.android.internal.R.integer.config_autoBrightnessInitialLightSensorRate);
-        if (initialLightSensorRate == -1) {
-          initialLightSensorRate = lightSensorRate;
-        } else if (initialLightSensorRate > lightSensorRate) {
-          Slog.w(TAG, "Expected config_autoBrightnessInitialLightSensorRate ("
-                  + initialLightSensorRate + ") to be less than or equal to "
-                  + "config_autoBrightnessLightSensorRate (" + lightSensorRate + ").");
-        }
-        long brighteningLightDebounce = resources.getInteger(
-                com.android.internal.R.integer.config_autoBrightnessBrighteningLightDebounce);
-        long darkeningLightDebounce = resources.getInteger(
-                com.android.internal.R.integer.config_autoBrightnessDarkeningLightDebounce);
-        boolean autoBrightnessResetAmbientLuxAfterWarmUp = resources.getBoolean(
-                com.android.internal.R.bool.config_autoBrightnessResetAmbientLuxAfterWarmUp);
-        int ambientLightHorizon = resources.getInteger(
-                com.android.internal.R.integer.config_autoBrightnessAmbientLightHorizon);
-        float autoBrightnessAdjustmentMaxGamma = resources.getFraction(
-                com.android.internal.R.fraction.config_autoBrightnessAdjustmentMaxGamma,
-                1, 1);
-
-        int[] brightLevels = resources.getIntArray(
-                com.android.internal.R.array.config_dynamicHysteresisBrightLevels);
-        int[] darkLevels = resources.getIntArray(
-                com.android.internal.R.array.config_dynamicHysteresisDarkLevels);
-        int[] luxLevels = resources.getIntArray(
-                com.android.internal.R.array.config_dynamicHysteresisLuxLevels);
-        HysteresisLevels dynamicHysteresis = new HysteresisLevels(
-                brightLevels, darkLevels, luxLevels);
-
         if (mUseSoftwareAutoBrightnessConfig) {
-            int[] lux = resources.getIntArray(
-                    com.android.internal.R.array.config_autoBrightnessLevels);
-            int[] screenBrightness = resources.getIntArray(
+            float[] luxLevels = getLuxLevels(resources.getIntArray(
+                    com.android.internal.R.array.config_autoBrightnessLevels));
+            int[] backlightValues = resources.getIntArray(
                     com.android.internal.R.array.config_autoBrightnessLcdBacklightValues);
-            int lightSensorWarmUpTimeConfig = resources.getInteger(
-                    com.android.internal.R.integer.config_lightSensorWarmupTime);
+            float[] brightnessValuesNits = getFloatArray(resources.obtainTypedArray(
+                    com.android.internal.R.array.config_autoBrightnessDisplayValuesNits));
+
+            final float screenMinimumNits = resources.getFloat(
+                    com.android.internal.R.dimen.config_screenBrightnessMinimumNits);
+            final float screenMaximumNits = resources.getFloat(
+                    com.android.internal.R.dimen.config_screenBrightnessMaximumNits);
+
             final float dozeScaleFactor = resources.getFraction(
                     com.android.internal.R.fraction.config_screenAutoBrightnessDozeScaleFactor,
                     1, 1);
 
-            Spline screenAutoBrightnessSpline = createAutoBrightnessSpline(lux, screenBrightness);
-            if (screenAutoBrightnessSpline == null) {
-                Slog.e(TAG, "Error in config.xml.  config_autoBrightnessLcdBacklightValues "
-                        + "(size " + screenBrightness.length + ") "
-                        + "must be monotic and have exactly one more entry than "
-                        + "config_autoBrightnessLevels (size " + lux.length + ") "
-                        + "which must be strictly increasing.  "
-                        + "Auto-brightness will be disabled.");
-                mUseSoftwareAutoBrightnessConfig = false;
-            } else {
-                int bottom = clampAbsoluteBrightness(screenBrightness[0]);
+            int[] brightLevels = resources.getIntArray(
+                    com.android.internal.R.array.config_dynamicHysteresisBrightLevels);
+            int[] darkLevels = resources.getIntArray(
+                    com.android.internal.R.array.config_dynamicHysteresisDarkLevels);
+            int[] luxHysteresisLevels = resources.getIntArray(
+                    com.android.internal.R.array.config_dynamicHysteresisLuxLevels);
+            HysteresisLevels dynamicHysteresis = new HysteresisLevels(
+                    brightLevels, darkLevels, luxHysteresisLevels);
+
+            long brighteningLightDebounce = resources.getInteger(
+                    com.android.internal.R.integer.config_autoBrightnessBrighteningLightDebounce);
+            long darkeningLightDebounce = resources.getInteger(
+                    com.android.internal.R.integer.config_autoBrightnessDarkeningLightDebounce);
+            boolean autoBrightnessResetAmbientLuxAfterWarmUp = resources.getBoolean(
+                    com.android.internal.R.bool.config_autoBrightnessResetAmbientLuxAfterWarmUp);
+            int ambientLightHorizon = resources.getInteger(
+                    com.android.internal.R.integer.config_autoBrightnessAmbientLightHorizon);
+            float autoBrightnessAdjustmentMaxGamma = resources.getFraction(
+                    com.android.internal.R.fraction.config_autoBrightnessAdjustmentMaxGamma,
+                    1, 1);
+
+            int lightSensorWarmUpTimeConfig = resources.getInteger(
+                    com.android.internal.R.integer.config_lightSensorWarmupTime);
+            int lightSensorRate = resources.getInteger(
+                    com.android.internal.R.integer.config_autoBrightnessLightSensorRate);
+            int initialLightSensorRate = resources.getInteger(
+                    com.android.internal.R.integer.config_autoBrightnessInitialLightSensorRate);
+            if (initialLightSensorRate == -1) {
+                initialLightSensorRate = lightSensorRate;
+            } else if (initialLightSensorRate > lightSensorRate) {
+                Slog.w(TAG, "Expected config_autoBrightnessInitialLightSensorRate ("
+                        + initialLightSensorRate + ") to be less than or equal to "
+                        + "config_autoBrightnessLightSensorRate (" + lightSensorRate + ").");
+            }
+
+            if (backlightValues != null && backlightValues.length > 0) {
+                final int bottom = backlightValues[0];
                 if (mScreenBrightnessDarkConfig > bottom) {
                     Slog.w(TAG, "config_screenBrightnessDark (" + mScreenBrightnessDarkConfig
                             + ") should be less than or equal to the first value of "
@@ -411,13 +424,24 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 if (bottom < screenBrightnessRangeMinimum) {
                     screenBrightnessRangeMinimum = bottom;
                 }
+            }
+
+            float[] nitsRange = { screenMinimumNits, screenMaximumNits };
+            int[] backlightRange = { screenBrightnessRangeMinimum, mScreenBrightnessRangeMaximum };
+
+            BrightnessMappingStrategy mapper = BrightnessMappingStrategy.create(
+                    luxLevels, backlightValues, brightnessValuesNits,
+                    nitsRange, backlightRange);
+            if (mapper != null) {
                 mAutomaticBrightnessController = new AutomaticBrightnessController(this,
-                        handler.getLooper(), sensorManager, screenAutoBrightnessSpline,
-                        lightSensorWarmUpTimeConfig, screenBrightnessRangeMinimum,
-                        mScreenBrightnessRangeMaximum, dozeScaleFactor, lightSensorRate,
-                        initialLightSensorRate, brighteningLightDebounce, darkeningLightDebounce,
+                        handler.getLooper(), sensorManager, mapper, lightSensorWarmUpTimeConfig,
+                        screenBrightnessRangeMinimum, mScreenBrightnessRangeMaximum,
+                        dozeScaleFactor, lightSensorRate, initialLightSensorRate,
+                        brighteningLightDebounce, darkeningLightDebounce,
                         autoBrightnessResetAmbientLuxAfterWarmUp, ambientLightHorizon,
                         autoBrightnessAdjustmentMaxGamma, dynamicHysteresis);
+            } else {
+                mUseSoftwareAutoBrightnessConfig = false;
             }
         }
 
@@ -442,6 +466,25 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             }
         }
 
+    }
+
+    private static float[] getLuxLevels(int[] lux) {
+        // The first control point is implicit and always at 0 lux.
+        float[] levels = new float[lux.length + 1];
+        for (int i = 0; i < lux.length; i++) {
+            levels[i + 1] = (float) lux[i];
+        }
+        return levels;
+    }
+
+    private static float[] getFloatArray(TypedArray array) {
+        final int N = array.length();
+        float[] vals = new float[N];
+        for (int i = 0; i < N; i++) {
+            vals[i] = array.getFloat(i, -1.0f);
+        }
+        array.recycle();
+        return vals;
     }
 
     /**
@@ -512,7 +555,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         if (!mPendingUpdatePowerStateLocked) {
             mPendingUpdatePowerStateLocked = true;
             Message msg = mHandler.obtainMessage(MSG_UPDATE_POWER_STATE);
-            msg.setAsynchronous(true);
             mHandler.sendMessage(msg);
         }
     }
@@ -691,8 +733,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             final boolean userInitiatedChange = autoBrightnessAdjustmentChanged
                     && mPowerRequest.brightnessSetByUser;
             mAutomaticBrightnessController.configure(autoBrightnessEnabled,
-                    mPowerRequest.screenAutoBrightnessAdjustment, state != Display.STATE_ON,
-                    userInitiatedChange);
+                    mBrightnessConfiguration, mPowerRequest.screenAutoBrightnessAdjustment,
+                    state != Display.STATE_ON, userInitiatedChange);
         }
 
         // Apply brightness boost.
@@ -872,6 +914,11 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     @Override
     public void updateBrightness() {
         sendUpdatePowerState();
+    }
+
+    public void setBrightnessConfiguration(BrightnessConfiguration c) {
+        Message msg = mHandler.obtainMessage(MSG_CONFIGURE_BRIGHTNESS, c);
+        msg.sendToTarget();
     }
 
     private void blockScreenOn() {
@@ -1241,7 +1288,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 // Need to wait a little longer.
                 // Debounce again later.  We continue holding a wake lock while waiting.
                 Message msg = mHandler.obtainMessage(MSG_PROXIMITY_SENSOR_DEBOUNCED);
-                msg.setAsynchronous(true);
                 mHandler.sendMessageAtTime(msg, mPendingProximityDebounceTime);
             }
         }
@@ -1402,39 +1448,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         }
     }
 
-    private static Spline createAutoBrightnessSpline(int[] lux, int[] brightness) {
-        if (lux == null || lux.length == 0 || brightness == null || brightness.length == 0) {
-            Slog.e(TAG, "Could not create auto-brightness spline.");
-            return null;
-        }
-        try {
-            final int n = brightness.length;
-            float[] x = new float[n];
-            float[] y = new float[n];
-            y[0] = normalizeAbsoluteBrightness(brightness[0]);
-            for (int i = 1; i < n; i++) {
-                x[i] = lux[i - 1];
-                y[i] = normalizeAbsoluteBrightness(brightness[i]);
-            }
-
-            Spline spline = Spline.createSpline(x, y);
-            if (DEBUG) {
-                Slog.d(TAG, "Auto-brightness spline: " + spline);
-                for (float v = 1f; v < lux[lux.length - 1] * 1.25f; v *= 1.25f) {
-                    Slog.d(TAG, String.format("  %7.1f: %7.1f", v, spline.interpolate(v)));
-                }
-            }
-            return spline;
-        } catch (IllegalArgumentException ex) {
-            Slog.e(TAG, "Could not create auto-brightness spline.", ex);
-            return null;
-        }
-    }
-
-    private static float normalizeAbsoluteBrightness(int value) {
-        return (float)clampAbsoluteBrightness(value) / PowerManager.BRIGHTNESS_ON;
-    }
-
     private static int clampAbsoluteBrightness(int value) {
         return MathUtils.constrain(value, PowerManager.BRIGHTNESS_OFF, PowerManager.BRIGHTNESS_ON);
     }
@@ -1467,6 +1480,11 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                         updatePowerState();
                     }
                     break;
+                case MSG_CONFIGURE_BRIGHTNESS:
+                    BrightnessConfiguration c = (BrightnessConfiguration) msg.obj;
+                    mBrightnessConfiguration = c != null ? c : mDefaultBrightnessConfiguration;
+                    updatePowerState();
+                    break;
             }
         }
     }
@@ -1492,17 +1510,14 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         @Override
         public void onScreenOn() {
             Message msg = mHandler.obtainMessage(MSG_SCREEN_ON_UNBLOCKED, this);
-            msg.setAsynchronous(true);
             mHandler.sendMessage(msg);
         }
     }
 
     private final class ScreenOffUnblocker implements WindowManagerPolicy.ScreenOffListener {
-
         @Override
         public void onScreenOff() {
             Message msg = mHandler.obtainMessage(MSG_SCREEN_OFF_UNBLOCKED, this);
-            msg.setAsynchronous(true);
             mHandler.sendMessage(msg);
         }
     }
