@@ -16,6 +16,8 @@
 
 package com.android.server.wm;
 
+import static android.os.Build.IS_USER;
+
 import android.os.ShellCommand;
 
 import java.io.PrintWriter;
@@ -50,8 +52,10 @@ public class WindowManagerShellCommand extends ShellCommand {
         pw.println("  help");
         pw.println("    Print this help text.");
         pw.println();
-        pw.println("  tracing (start | stop)");
-        pw.println("    start or stop window tracing");
-        pw.println();
+        if (!IS_USER){
+            pw.println("  tracing (start | stop)");
+            pw.println("    start or stop window tracing");
+            pw.println();
+        }
     }
 }

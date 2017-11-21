@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.os.Build.IS_USER;
 import static com.android.server.wm.proto.WindowManagerTraceFileProto.ENTRY;
 import static com.android.server.wm.proto.WindowManagerTraceFileProto.MAGIC_NUMBER;
 import static com.android.server.wm.proto.WindowManagerTraceFileProto.MAGIC_NUMBER_H;
@@ -62,6 +63,10 @@ class WindowTracing {
     }
 
     void startTrace(PrintWriter pw) throws IOException {
+        if (IS_USER){
+            logAndPrintln(pw, "Error: Tracing is not supported on user builds.");
+            return;
+        }
         synchronized (mLock) {
             logAndPrintln(pw, "Start tracing to " + mTraceFile + ".");
             mWriteQueue.clear();
@@ -83,6 +88,10 @@ class WindowTracing {
     }
 
     void stopTrace(PrintWriter pw) {
+        if (IS_USER){
+            logAndPrintln(pw, "Error: Tracing is not supported on user builds.");
+            return;
+        }
         synchronized (mLock) {
             logAndPrintln(pw, "Stop tracing to " + mTraceFile + ". Waiting for traces to flush.");
             mEnabled = mEnabledLockFree = false;
@@ -150,7 +159,9 @@ class WindowTracing {
     static WindowTracing createDefaultAndStartLooper(Context context) {
         File file = new File("/data/misc/wmtrace/wm_trace.pb");
         WindowTracing windowTracing = new WindowTracing(file);
-        new Thread(windowTracing::loop, "window_tracing").start();
+        if (!IS_USER){
+            new Thread(windowTracing::loop, "window_tracing").start();
+        }
         return windowTracing;
     }
 
