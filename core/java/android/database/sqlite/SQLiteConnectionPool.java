@@ -570,6 +570,16 @@ public final class SQLiteConnectionPool implements Closeable {
         mAvailableNonPrimaryConnections.clear();
     }
 
+    /**
+     * Close non-primary connections that are not currently in use. This method is safe to use
+     * in finalize block as it doesn't throw RuntimeExceptions.
+     */
+    void closeAvailableNonPrimaryConnectionsAndLogExceptions() {
+        synchronized (mLock) {
+            closeAvailableNonPrimaryConnectionsAndLogExceptionsLocked();
+        }
+    }
+
     // Can't throw.
     private void closeExcessConnectionsAndLogExceptionsLocked() {
         int availableCount = mAvailableNonPrimaryConnections.size();
