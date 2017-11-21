@@ -2109,7 +2109,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (task != null) {
             return task.getDimmer();
         }
-        return getStack().getDimmer();
+        TaskStack taskStack = getStack();
+        if (taskStack != null) {
+            return taskStack.getDimmer();
+        }
+        return null;
     }
 
     /** Returns true if the replacement window was removed. */
@@ -4390,10 +4394,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return mToken.makeChildSurface(this);
     }
 
-
-    @Override
-    void prepareSurfaces() {
-        mIsDimming = false;
+    private void applyDims(Dimmer dimmer) {
         if (!mAnimatingExit && mAppDied) {
             mIsDimming = true;
             getDimmer().dimAbove(getPendingTransaction(), this, DEFAULT_DIM_AMOUNT_DEAD_WINDOW);
@@ -4401,6 +4402,15 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 && !mAnimatingExit && isVisible()) {
             mIsDimming = true;
             getDimmer().dimBelow(getPendingTransaction(), this, mAttrs.dimAmount);
+        }
+    }
+
+    @Override
+    void prepareSurfaces() {
+        final Dimmer dimmer = getDimmer();
+        mIsDimming = false;
+        if (dimmer != null) {
+            applyDims(dimmer);
         }
 
         mWinAnimator.prepareSurfaceLocked(true);
