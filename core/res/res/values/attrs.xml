@@ -3294,6 +3294,9 @@
              and subtype in order to provide the consistent user experience in switching
              between IMEs and subtypes. -->
         <attr name="supportsSwitchingToNextInputMethod" format="boolean" />
+        <!-- Specifies if an IME can only be used while a device is in VR mode or on a dedicated
+             device -->
+        <attr name="isVrOnly" format="boolean"/>
         <attr name="__removed2" format="boolean" />
     </declare-styleable>
 

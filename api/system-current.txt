@@ -184,6 +184,7 @@ package android {
   }
 
   public static final class R.attr {
+    field public static final int isVrOnly = 16844152; // 0x1010578
     field public static final int requiredSystemPropertyName = 16844133; // 0x1010565
     field public static final int requiredSystemPropertyValue = 16844134; // 0x1010566
     field public static final int searchKeyphrase = 16843871; // 0x101045f
