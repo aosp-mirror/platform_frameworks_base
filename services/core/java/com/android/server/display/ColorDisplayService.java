@@ -33,11 +33,8 @@ import android.net.Uri;
 import android.opengl.Matrix;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings.Secure;
-import android.service.vr.IVrManager;
-import android.service.vr.IVrStateCallbacks;
 import android.util.MathUtils;
 import android.util.Slog;
 import android.view.animation.AnimationUtils;
@@ -51,7 +48,6 @@ import com.android.server.twilight.TwilightState;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.android.internal.R;
 
@@ -84,32 +80,6 @@ public final class ColorDisplayService extends SystemService
     private static final ColorMatrixEvaluator COLOR_MATRIX_EVALUATOR = new ColorMatrixEvaluator();
 
     private final Handler mHandler;
-    private final AtomicBoolean mIgnoreAllColorMatrixChanges = new AtomicBoolean();
-    private final IVrStateCallbacks mVrStateCallbacks = new IVrStateCallbacks.Stub() {
-        @Override
-        public void onVrStateChanged(final boolean enabled) {
-            // Turn off all night mode display stuff while device is in VR mode.
-            mIgnoreAllColorMatrixChanges.set(enabled);
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    // Cancel in-progress animations
-                    if (mColorMatrixAnimator != null) {
-                        mColorMatrixAnimator.cancel();
-                    }
-
-                    final DisplayTransformManager dtm =
-                            getLocalService(DisplayTransformManager.class);
-                    if (enabled) {
-                        dtm.setColorMatrix(LEVEL_COLOR_MATRIX_NIGHT_DISPLAY, MATRIX_IDENTITY);
-                    } else if (mController != null && mController.isActivated()) {
-                        setMatrix(mController.getColorTemperature(), mMatrixNight);
-                        dtm.setColorMatrix(LEVEL_COLOR_MATRIX_NIGHT_DISPLAY, mMatrixNight);
-                    }
-                }
-            });
-        }
-    };
 
     private float[] mMatrixNight = new float[16];
 
@@ -136,18 +106,6 @@ public final class ColorDisplayService extends SystemService
 
     @Override
     public void onBootPhase(int phase) {
-        if (phase >= PHASE_SYSTEM_SERVICES_READY) {
-            final IVrManager vrManager = IVrManager.Stub.asInterface(
-                    getBinderService(Context.VR_SERVICE));
-            if (vrManager != null) {
-                try {
-                    vrManager.registerListener(mVrStateCallbacks);
-                } catch (RemoteException e) {
-                    Slog.e(TAG, "Failed to register VR mode state listener: " + e);
-                }
-            }
-        }
-
         if (phase >= PHASE_BOOT_COMPLETED) {
             mBootCompleted = true;
 
@@ -357,11 +315,6 @@ public final class ColorDisplayService extends SystemService
         // Cancel the old animator if still running.
         if (mColorMatrixAnimator != null) {
             mColorMatrixAnimator.cancel();
-        }
-
-        // Don't do any color matrix change animations if we are ignoring them anyway.
-        if (mIgnoreAllColorMatrixChanges.get()) {
-            return;
         }
 
         final DisplayTransformManager dtm = getLocalService(DisplayTransformManager.class);
