@@ -176,9 +176,7 @@ final class FillUi {
                     String valueText = null;
                     if (filter == null) {
                         final AutofillValue value = dataset.getFieldValues().get(index);
-                        // If the dataset needs auth - don't add its text to allow guessing
-                        // its content based on how filtering behaves.
-                        if (value != null && value.isText() && dataset.getAuthentication() == null) {
+                        if (value != null && value.isText()) {
                             valueText = value.getTextValue().toString().toLowerCase();
                         }
                     }
