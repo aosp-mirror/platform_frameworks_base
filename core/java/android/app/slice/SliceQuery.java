@@ -19,6 +19,7 @@ package android.app.slice;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Queue;
 import java.util.Spliterators;
 import java.util.stream.Collectors;
@@ -37,14 +38,15 @@ public class SliceQuery {
      */
     public static SliceItem getPrimaryIcon(Slice slice) {
         for (SliceItem item : slice.getItems()) {
-            if (item.getType() == SliceItem.TYPE_IMAGE) {
+            if (Objects.equals(item.getFormat(), SliceItem.FORMAT_IMAGE)) {
                 return item;
             }
-            if (!(item.getType() == SliceItem.TYPE_SLICE && item.hasHint(Slice.HINT_LIST))
+            if (!(compareTypes(item, SliceItem.FORMAT_SLICE)
+                    && item.hasHint(Slice.HINT_LIST))
                     && !item.hasHint(Slice.HINT_ACTIONS)
                     && !item.hasHint(Slice.HINT_LIST_ITEM)
-                    && (item.getType() != SliceItem.TYPE_ACTION)) {
-                SliceItem icon = SliceQuery.find(item, SliceItem.TYPE_IMAGE);
+                    && !compareTypes(item, SliceItem.FORMAT_ACTION)) {
+                SliceItem icon = SliceQuery.find(item, SliceItem.FORMAT_IMAGE);
                 if (icon != null) {
                     return icon;
                 }
@@ -78,23 +80,23 @@ public class SliceQuery {
     /**
      * @hide
      */
-    public static List<SliceItem> findAll(SliceItem s, int type) {
+    public static List<SliceItem> findAll(SliceItem s, String type) {
         return findAll(s, type, (String[]) null, null);
     }
 
     /**
      * @hide
      */
-    public static List<SliceItem> findAll(SliceItem s, int type, String hints, String nonHints) {
+    public static List<SliceItem> findAll(SliceItem s, String type, String hints, String nonHints) {
         return findAll(s, type, new String[]{ hints }, new String[]{ nonHints });
     }
 
     /**
      * @hide
      */
-    public static List<SliceItem> findAll(SliceItem s, int type, String[] hints,
+    public static List<SliceItem> findAll(SliceItem s, String type, String[] hints,
             String[] nonHints) {
-        return stream(s).filter(item -> (type == -1 || item.getType() == type)
+        return stream(s).filter(item -> compareTypes(item, type)
                 && (item.hasHints(hints) && !item.hasAnyHints(nonHints)))
                 .collect(Collectors.toList());
     }
@@ -102,45 +104,45 @@ public class SliceQuery {
     /**
      * @hide
      */
-    public static SliceItem find(Slice s, int type, String hints, String nonHints) {
+    public static SliceItem find(Slice s, String type, String hints, String nonHints) {
         return find(s, type, new String[]{ hints }, new String[]{ nonHints });
     }
 
     /**
      * @hide
      */
-    public static SliceItem find(Slice s, int type) {
+    public static SliceItem find(Slice s, String type) {
         return find(s, type, (String[]) null, null);
     }
 
     /**
      * @hide
      */
-    public static SliceItem find(SliceItem s, int type) {
+    public static SliceItem find(SliceItem s, String type) {
         return find(s, type, (String[]) null, null);
     }
 
     /**
      * @hide
      */
-    public static SliceItem find(SliceItem s, int type, String hints, String nonHints) {
+    public static SliceItem find(SliceItem s, String type, String hints, String nonHints) {
         return find(s, type, new String[]{ hints }, new String[]{ nonHints });
     }
 
     /**
      * @hide
      */
-    public static SliceItem find(Slice s, int type, String[] hints, String[] nonHints) {
+    public static SliceItem find(Slice s, String type, String[] hints, String[] nonHints) {
         List<String> h = s.getHints();
-        return find(new SliceItem(s, SliceItem.TYPE_SLICE, h.toArray(new String[h.size()])), type,
-                hints, nonHints);
+        return find(new SliceItem(s, SliceItem.FORMAT_SLICE, null, h.toArray(new String[h.size()])),
+                type, hints, nonHints);
     }
 
     /**
      * @hide
      */
-    public static SliceItem find(SliceItem s, int type, String[] hints, String[] nonHints) {
-        return stream(s).filter(item -> (item.getType() == type || type == -1)
+    public static SliceItem find(SliceItem s, String type, String[] hints, String[] nonHints) {
+        return stream(s).filter(item -> compareTypes(item, type)
                 && (item.hasHints(hints) && !item.hasAnyHints(nonHints))).findFirst().orElse(null);
     }
 
@@ -159,13 +161,28 @@ public class SliceQuery {
             @Override
             public SliceItem next() {
                 SliceItem item = items.poll();
-                if (item.getType() == SliceItem.TYPE_SLICE
-                        || item.getType() == SliceItem.TYPE_ACTION) {
+                if (compareTypes(item, SliceItem.FORMAT_SLICE)
+                        || compareTypes(item, SliceItem.FORMAT_ACTION)) {
                     items.addAll(item.getSlice().getItems());
                 }
                 return item;
             }
         };
         return StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator, 0), false);
+    }
+
+    /**
+     * @hide
+     */
+    public static boolean compareTypes(SliceItem item, String desiredType) {
+        final int typeLength = desiredType.length();
+        if (typeLength == 3 && desiredType.equals("*/*")) {
+            return true;
+        }
+        if (item.getSubType() == null && desiredType.indexOf('/') < 0) {
+            return item.getFormat().equals(desiredType);
+        }
+        return (item.getFormat() + "/" + item.getSubType())
+                .matches(desiredType.replaceAll("\\*", ".*"));
     }
 }
