@@ -143,12 +143,14 @@ public final class Slice implements Parcelable {
 
     private final SliceItem[] mItems;
     private final @SliceHint String[] mHints;
+    private SliceSpec mSpec;
     private Uri mUri;
 
-    Slice(ArrayList<SliceItem> items, @SliceHint String[] hints, Uri uri) {
+    Slice(ArrayList<SliceItem> items, @SliceHint String[] hints, Uri uri, SliceSpec spec) {
         mHints = hints;
         mItems = items.toArray(new SliceItem[items.size()]);
         mUri = uri;
+        mSpec = spec;
     }
 
     protected Slice(Parcel in) {
@@ -159,6 +161,14 @@ public final class Slice implements Parcelable {
             mItems[i] = SliceItem.CREATOR.createFromParcel(in);
         }
         mUri = Uri.CREATOR.createFromParcel(in);
+        mSpec = in.readTypedObject(SliceSpec.CREATOR);
+    }
+
+    /**
+     * @return The spec for this slice
+     */
+    public @Nullable SliceSpec getSpec() {
+        return mSpec;
     }
 
     /**
@@ -190,6 +200,7 @@ public final class Slice implements Parcelable {
             mItems[i].writeToParcel(dest, flags);
         }
         mUri.writeToParcel(dest, 0);
+        dest.writeTypedObject(mSpec, flags);
     }
 
     @Override
@@ -212,6 +223,7 @@ public final class Slice implements Parcelable {
         private final Uri mUri;
         private ArrayList<SliceItem> mItems = new ArrayList<>();
         private @SliceHint ArrayList<String> mHints = new ArrayList<>();
+        private SliceSpec mSpec;
 
         /**
          * Create a builder which will construct a {@link Slice} for the Given Uri.
@@ -247,11 +259,21 @@ public final class Slice implements Parcelable {
         }
 
         /**
+         * Add the spec for this slice.
+         */
+        public Builder setSpec(SliceSpec spec) {
+            mSpec = spec;
+            return this;
+        }
+
+        /**
          * Add a sub-slice to the slice being constructed
          */
         public Builder addSubSlice(@NonNull Slice slice) {
-            mItems.add(new SliceItem(slice, SliceItem.TYPE_SLICE, slice.getHints().toArray(
-                    new String[slice.getHints().size()])));
+            List<String> hints = slice.getHints();
+            slice.mSpec = null;
+            mItems.add(new SliceItem(slice, SliceItem.TYPE_SLICE, hints.toArray(
+                    new String[hints.size()])));
             return this;
         }
 
@@ -259,7 +281,10 @@ public final class Slice implements Parcelable {
          * Add an action to the slice being constructed
          */
         public Slice.Builder addAction(@NonNull PendingIntent action, @NonNull Slice s) {
-            mItems.add(new SliceItem(action, s, SliceItem.TYPE_ACTION, new String[0]));
+            List<String> hints = s.getHints();
+            s.mSpec = null;
+            mItems.add(new SliceItem(action, s, SliceItem.TYPE_ACTION, hints.toArray(
+                    new String[hints.size()])));
             return this;
         }
 
@@ -351,7 +376,7 @@ public final class Slice implements Parcelable {
          * Construct the slice.
          */
         public Slice build() {
-            return new Slice(mItems, mHints.toArray(new String[mHints.size()]), mUri);
+            return new Slice(mItems, mHints.toArray(new String[mHints.size()]), mUri, mSpec);
         }
     }
 
@@ -399,10 +424,12 @@ public final class Slice implements Parcelable {
      *
      * @param resolver ContentResolver to be used.
      * @param uri The URI to a slice provider
+     * @param supportedSpecs List of supported specs.
      * @return The Slice provided by the app or null if none is given.
      * @see Slice
      */
-    public static @Nullable Slice bindSlice(ContentResolver resolver, @NonNull Uri uri) {
+    public static @Nullable Slice bindSlice(ContentResolver resolver, @NonNull Uri uri,
+            List<SliceSpec> supportedSpecs) {
         Preconditions.checkNotNull(uri, "uri");
         IContentProvider provider = resolver.acquireProvider(uri);
         if (provider == null) {
@@ -411,6 +438,8 @@ public final class Slice implements Parcelable {
         try {
             Bundle extras = new Bundle();
             extras.putParcelable(SliceProvider.EXTRA_BIND_URI, uri);
+            extras.putParcelableArrayList(SliceProvider.EXTRA_SUPPORTED_SPECS,
+                    new ArrayList<>(supportedSpecs));
             final Bundle res = provider.call(resolver.getPackageName(), SliceProvider.METHOD_SLICE,
                     null, extras);
             Bundle.setDefusable(res, true);
@@ -434,12 +463,14 @@ public final class Slice implements Parcelable {
      *
      * @param context The context to use.
      * @param intent The intent associated with a slice.
+     * @param supportedSpecs List of supported specs.
      * @return The Slice provided by the app or null if none is given.
      * @see Slice
      * @see SliceProvider#onMapIntentToUri(Intent)
      * @see Intent
      */
-    public static @Nullable Slice bindSlice(Context context, @NonNull Intent intent) {
+    public static @Nullable Slice bindSlice(Context context, @NonNull Intent intent,
+            List<SliceSpec> supportedSpecs) {
         Preconditions.checkNotNull(intent, "intent");
         Preconditions.checkArgument(intent.getComponent() != null || intent.getPackage() != null,
                 "Slice intent must be explicit " + intent);
@@ -448,7 +479,7 @@ public final class Slice implements Parcelable {
         // Check if the intent has data for the slice uri on it and use that
         final Uri intentData = intent.getData();
         if (intentData != null && SliceProvider.SLICE_TYPE.equals(resolver.getType(intentData))) {
-            return bindSlice(resolver, intentData);
+            return bindSlice(resolver, intentData, supportedSpecs);
         }
         // Otherwise ask the app
         List<ResolveInfo> providers =
@@ -466,6 +497,8 @@ public final class Slice implements Parcelable {
         try {
             Bundle extras = new Bundle();
             extras.putParcelable(SliceProvider.EXTRA_INTENT, intent);
+            extras.putParcelableArrayList(SliceProvider.EXTRA_SUPPORTED_SPECS,
+                    new ArrayList<>(supportedSpecs));
             final Bundle res = provider.call(resolver.getPackageName(),
                     SliceProvider.METHOD_MAP_INTENT, null, extras);
             if (res == null) {

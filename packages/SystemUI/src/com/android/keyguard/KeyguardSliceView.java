@@ -33,6 +33,8 @@ import com.android.internal.graphics.ColorUtils;
 import com.android.systemui.R;
 import com.android.systemui.keyguard.KeyguardSliceProvider;
 
+import java.util.Collections;
+
 /**
  * View visible under the clock on the lock screen and AoD.
  */
@@ -75,7 +77,8 @@ public class KeyguardSliceView extends LinearLayout {
         super.onAttachedToWindow();
 
         // Set initial content
-        showSlice(Slice.bindSlice(getContext().getContentResolver(), mKeyguardSliceUri));
+        showSlice(Slice.bindSlice(getContext().getContentResolver(), mKeyguardSliceUri,
+                Collections.emptyList()));
 
         // Make sure we always have the most current slice
         getContext().getContentResolver().registerContentObserver(mKeyguardSliceUri,
@@ -154,7 +157,8 @@ public class KeyguardSliceView extends LinearLayout {
 
         @Override
         public void onChange(boolean selfChange, Uri uri) {
-            showSlice(Slice.bindSlice(getContext().getContentResolver(), mKeyguardSliceUri));
+            showSlice(Slice.bindSlice(getContext().getContentResolver(), mKeyguardSliceUri,
+                    Collections.emptyList()));
         }
     }
 }
