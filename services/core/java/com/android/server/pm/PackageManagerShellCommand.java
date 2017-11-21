@@ -1169,9 +1169,15 @@ class PackageManagerShellCommand extends ShellCommand {
         }
 
         List<String> failedPackages = new ArrayList<>();
+        int index = 0;
         for (String packageName : packageNames) {
             if (clearProfileData) {
                 mInterface.clearApplicationProfileData(packageName);
+            }
+
+            if (allPackages) {
+                pw.println(++index + "/" + packageNames.size() + ": " + packageName);
+                pw.flush();
             }
 
             boolean result = secondaryDex
