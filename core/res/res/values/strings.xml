@@ -152,7 +152,7 @@
     <!-- Displayed to tell the user that they should switch their network preference. -->
     <string name="NetworkPreferenceSwitchTitle">Can\u2019t reach network</string>
     <!-- Displayed to tell the user that they should switch their network preference. -->
-    <string name="NetworkPreferenceSwitchSummary">To improve reception, try changing the type selected at Settings &gt; Network &amp; Internet &gt; Mobile networks &gt; Preferred network type."</string>
+    <string name="NetworkPreferenceSwitchSummary">To improve reception, try changing the type selected at Settings &gt; Network &amp; internet &gt; Mobile networks &gt; Preferred network type."</string>
     <!-- Displayed to tell the user that emergency calls might not be available. -->
     <string name="EmergencyCallWarningTitle">Wi\u2011Fi calling is active</string>
     <!-- Displayed to tell the user that emergency calls might not be available. -->
@@ -3014,7 +3014,7 @@
     <string name="network_available_sign_in_detailed"><xliff:g id="network_ssid">%1$s</xliff:g></string>
 
     <!-- A notification is shown when the user connects to a Wi-Fi network and the system detects that that network has no Internet access. This is the notification's title. -->
-    <string name="wifi_no_internet">Wi-Fi has no Internet access</string>
+    <string name="wifi_no_internet">Wi-Fi has no internet access</string>
 
     <!-- A notification is shown when the user connects to a Wi-Fi network and the system detects that that network has no Internet access. This is the notification's message. -->
     <string name="wifi_no_internet_detailed">Tap for options</string>
@@ -3023,7 +3023,7 @@
     <string name="network_switch_metered">Switched to <xliff:g id="network_type">%1$s</xliff:g></string>
 
     <!-- A notification might be shown if the device switches to another network type (e.g., mobile data) because it detects that the network it was using (e.g., Wi-Fi) has lost Internet connectivity. This is the notification's message. %1$s is the network that the device switched to, e.g., cellular data. %2$s is the network type the device switched from, e.g., Wi-Fi. Both are strings in the network_switch_type_name array. -->
-    <string name="network_switch_metered_detail">Device uses <xliff:g id="new_network">%1$s</xliff:g> when <xliff:g id="previous_network">%2$s</xliff:g> has no Internet access. Charges may apply.</string>
+    <string name="network_switch_metered_detail">Device uses <xliff:g id="new_network">%1$s</xliff:g> when <xliff:g id="previous_network">%2$s</xliff:g> has no internet access. Charges may apply.</string>
 
     <!-- A toast might be shown if the device switches to another network type (e.g., mobile data) because it detects that the network it was using (e.g., Wi-Fi) has lost Internet connectivity. This is the text of the toast. %1$s is the network that the device switched from, e.g., Wi-Fi. %2$s is the network type the device switched from, e.g., cellular data. Both are strings in the network_switch_type_name array. -->
     <string name="network_switch_metered_toast">Switched from <xliff:g id="previous_network">%1$s</xliff:g> to <xliff:g id="new_network">%2$s</xliff:g></string>
@@ -3043,7 +3043,7 @@
      <!-- A notification is shown when a user's selected SSID is later disabled due to connectivity problems.  This is the notification's title / ticker. -->
      <string name="wifi_watchdog_network_disabled">Couldn\'t connect to Wi-Fi</string>
      <!-- A notification is shown when a user's selected SSID is later disabled due to connectivity problems.  The complete alert msg is: <hotspot name> + this string, i.e. "Linksys has a poor internet connection" -->
-    <string name="wifi_watchdog_network_disabled_detailed">\u0020has a poor Internet connection.</string>
+    <string name="wifi_watchdog_network_disabled_detailed">\u0020has a poor internet connection.</string>
 
     <!-- Do not translate. Default access point SSID used for tethering -->
     <string name="wifi_tether_configure_ssid_default" translatable="false">AndroidAP</string>
