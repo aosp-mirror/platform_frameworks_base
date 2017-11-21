@@ -29,10 +29,10 @@ import java.lang.annotation.Target;
 /**
  * Manages settings state for a WebView. When a WebView is first created, it
  * obtains a set of default settings. These default settings will be returned
- * from any getter call. A WebSettings object obtained from
- * WebView.getSettings() is tied to the life of the WebView. If a WebView has
- * been destroyed, any method call on WebSettings will throw an
- * IllegalStateException.
+ * from any getter call. A {@code WebSettings} object obtained from
+ * {@link WebView#getSettings()} is tied to the life of the WebView. If a WebView has
+ * been destroyed, any method call on {@code WebSettings} will throw an
+ * {@link IllegalStateException}.
  */
 // This is an abstract base class: concrete WebViewProviders must
 // create a class derived from this, and return an instance of it in the
@@ -41,13 +41,13 @@ public abstract class WebSettings {
     /**
      * Enum for controlling the layout of html.
      * <ul>
-     *   <li>NORMAL means no rendering changes. This is the recommended choice for maximum
+     *   <li>{@code NORMAL} means no rendering changes. This is the recommended choice for maximum
      *       compatibility across different platforms and Android versions.</li>
-     *   <li>SINGLE_COLUMN moves all content into one column that is the width of the
+     *   <li>{@code SINGLE_COLUMN} moves all content into one column that is the width of the
      *       view.</li>
-     *   <li>NARROW_COLUMNS makes all columns no wider than the screen if possible. Only use
+     *   <li>{@code NARROW_COLUMNS} makes all columns no wider than the screen if possible. Only use
      *       this for API levels prior to {@link android.os.Build.VERSION_CODES#KITKAT}.</li>
-     *   <li>TEXT_AUTOSIZING boosts font size of paragraphs based on heuristics to make
+     *   <li>{@code TEXT_AUTOSIZING} boosts font size of paragraphs based on heuristics to make
      *       the text readable when viewing a wide-viewport layout in the overview mode.
      *       It is recommended to enable zoom support {@link #setSupportZoom} when
      *       using this mode. Supported from API level
@@ -98,9 +98,9 @@ public abstract class WebSettings {
     /**
      * Enum for specifying the WebView's desired density.
      * <ul>
-     *   <li>FAR makes 100% looking like in 240dpi</li>
-     *   <li>MEDIUM makes 100% looking like in 160dpi</li>
-     *   <li>CLOSE makes 100% looking like in 120dpi</li>
+     *   <li>{@code FAR} makes 100% looking like in 240dpi</li>
+     *   <li>{@code MEDIUM} makes 100% looking like in 160dpi</li>
+     *   <li>{@code CLOSE} makes 100% looking like in 120dpi</li>
      * </ul>
      */
     public enum ZoomDensity {
@@ -652,7 +652,7 @@ public abstract class WebSettings {
      * true, {@link WebChromeClient#onCreateWindow} must be implemented by the
      * host application. The default is {@code false}.
      *
-     * @param support whether to suport multiple windows
+     * @param support whether to support multiple windows
      */
     public abstract void setSupportMultipleWindows(boolean support);
 
@@ -665,7 +665,7 @@ public abstract class WebSettings {
     public abstract boolean supportMultipleWindows();
 
     /**
-     * Sets the underlying layout algorithm. This will cause a relayout of the
+     * Sets the underlying layout algorithm. This will cause a re-layout of the
      * WebView. The default is {@link LayoutAlgorithm#NARROW_COLUMNS}.
      *
      * @param l the layout algorithm to use, as a {@link LayoutAlgorithm} value
@@ -1198,7 +1198,7 @@ public abstract class WebSettings {
 
     /**
      * Tells JavaScript to open windows automatically. This applies to the
-     * JavaScript function window.open(). The default is {@code false}.
+     * JavaScript function {@code window.open()}. The default is {@code false}.
      *
      * @param flag {@code true} if JavaScript can open windows automatically
      */
@@ -1208,7 +1208,7 @@ public abstract class WebSettings {
      * Gets whether JavaScript can open windows automatically.
      *
      * @return {@code true} if JavaScript can open windows automatically during
-     *         window.open()
+     *         {@code window.open()}
      * @see #setJavaScriptCanOpenWindowsAutomatically
      */
     public abstract boolean getJavaScriptCanOpenWindowsAutomatically();
