@@ -24,7 +24,6 @@
 #include "packages/UidMap.h"
 
 #include <android/os/BnStatsManager.h>
-#include <android/os/IStatsCallbacks.h>
 #include <android/os/IStatsCompanionService.h>
 #include <binder/IResultReceiver.h>
 #include <utils/Looper.h>
@@ -195,16 +194,6 @@ private:
      * Whether this is an eng build.
      */
     bool mEngBuild;
-
-    /**
-     * Lock for callback handling.
-     */
-    std::mutex mLock;
-
-    /**
-     * Vector maintaining the list of callbacks for clients.
-     */
-    Vector< sp<IStatsCallbacks> > mCallbacks;
 };
 
 }  // namespace statsd

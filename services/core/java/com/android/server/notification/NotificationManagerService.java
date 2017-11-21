@@ -771,7 +771,7 @@ public class NotificationManagerService extends SystemService {
                                 .setType(expanded ? MetricsEvent.TYPE_DETAIL
                                         : MetricsEvent.TYPE_COLLAPSE));
                     }
-                    if (expanded) {
+                    if (expanded && userAction) {
                         r.recordExpanded();
                     }
                     EventLogTags.writeNotificationExpansion(key,

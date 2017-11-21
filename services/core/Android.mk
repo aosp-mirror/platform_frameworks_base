@@ -43,7 +43,8 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
     android.hardware.oemlock-V1.0-java \
     android.hardware.tetheroffload.control-V1.0-java \
     android.hardware.vibrator-V1.0-java \
-    android.hardware.configstore-V1.0-java
+    android.hardware.configstore-V1.0-java \
+    android.hardware.contexthub-V1.0-java
 
 ifneq ($(INCREMENTAL_BUILDS),)
     LOCAL_PROGUARD_ENABLED := disabled

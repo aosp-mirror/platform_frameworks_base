@@ -76,6 +76,7 @@ public class DexManager {
     private final Object mInstallLock;
     @GuardedBy("mInstallLock")
     private final Installer mInstaller;
+    private final Listener mListener;
 
     // Possible outcomes of a dex search.
     private static int DEX_SEARCH_NOT_FOUND = 0;  // dex file not found
@@ -96,14 +97,24 @@ public class DexManager {
      */
     private final static PackageUseInfo DEFAULT_USE_INFO = new PackageUseInfo();
 
+    public interface Listener {
+        /**
+         * Invoked just before the secondary dex file {@code dexPath} for the specified application
+         * is reconciled.
+         */
+        void onReconcileSecondaryDexFile(ApplicationInfo appInfo, DexUseInfo dexUseInfo,
+                String dexPath, int storageFlags);
+    }
+
     public DexManager(IPackageManager pms, PackageDexOptimizer pdo,
-            Installer installer, Object installLock) {
+            Installer installer, Object installLock, Listener listener) {
       mPackageCodeLocationsCache = new HashMap<>();
       mPackageDexUsage = new PackageDexUsage();
       mPackageManager = pms;
       mPackageDexOptimizer = pdo;
       mInstaller = installer;
       mInstallLock = installLock;
+      mListener = listener;
     }
 
     /**
@@ -389,7 +400,7 @@ public class DexManager {
                 : mPackageDexOptimizer;
         String packageName = options.getPackageName();
         PackageUseInfo useInfo = getPackageUseInfoOrDefault(packageName);
-        if (useInfo == null || useInfo.getDexUseInfoMap().isEmpty()) {
+        if (useInfo.getDexUseInfoMap().isEmpty()) {
             if (DEBUG) {
                 Slog.d(TAG, "No secondary dex use for package:" + packageName);
             }
@@ -433,7 +444,7 @@ public class DexManager {
      */
     public void reconcileSecondaryDexFiles(String packageName) {
         PackageUseInfo useInfo = getPackageUseInfoOrDefault(packageName);
-        if (useInfo == null || useInfo.getDexUseInfoMap().isEmpty()) {
+        if (useInfo.getDexUseInfoMap().isEmpty()) {
             if (DEBUG) {
                 Slog.d(TAG, "No secondary dex use for package:" + packageName);
             }
@@ -481,12 +492,16 @@ public class DexManager {
                 continue;
             }
 
+            if (mListener != null) {
+                mListener.onReconcileSecondaryDexFile(info, dexUseInfo, dexPath, flags);
+            }
+
             boolean dexStillExists = true;
             synchronized(mInstallLock) {
                 try {
                     String[] isas = dexUseInfo.getLoaderIsas().toArray(new String[0]);
                     dexStillExists = mInstaller.reconcileSecondaryDexFile(dexPath, packageName,
-                            pkg.applicationInfo.uid, isas, pkg.applicationInfo.volumeUuid, flags);
+                            info.uid, isas, info.volumeUuid, flags);
                 } catch (InstallerException e) {
                     Slog.e(TAG, "Got InstallerException when reconciling dex " + dexPath +
                             " : " + e.getMessage());

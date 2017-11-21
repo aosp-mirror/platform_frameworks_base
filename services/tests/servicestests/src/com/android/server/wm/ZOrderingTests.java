@@ -1,0 +1,327 @@
+/*
+ * Copyright (C) 2016 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License
+ */
+
+package com.android.server.wm;
+
+import java.util.HashMap;
+import java.util.LinkedList;
+
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import android.view.SurfaceControl;
+import android.view.SurfaceSession;
+import android.util.Log;
+
+import android.platform.test.annotations.Presubmit;
+import android.support.test.filters.SmallTest;
+import android.support.test.runner.AndroidJUnit4;
+
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA_OVERLAY;
+import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
+import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY;
+
+/**
+ * Tests for the {@link WindowLayersController} class.
+ *
+ * Build/Install/Run:
+ *  bit FrameworksServicesTests:com.android.server.wm.ZOrderingTests
+ */
+@SmallTest
+@Presubmit
+@RunWith(AndroidJUnit4.class)
+public class ZOrderingTests extends WindowTestsBase {
+
+    private class LayerRecordingTransaction extends SurfaceControl.Transaction {
+        HashMap<SurfaceControl, Integer> mLayersForControl = new HashMap();
+        HashMap<SurfaceControl, SurfaceControl> mRelativeLayersForControl = new HashMap();
+
+        @Override
+        public SurfaceControl.Transaction setLayer(SurfaceControl sc, int layer) {
+            mRelativeLayersForControl.remove(sc);
+            mLayersForControl.put(sc, layer);
+            return super.setLayer(sc, layer);
+        }
+
+        @Override
+        public SurfaceControl.Transaction setRelativeLayer(SurfaceControl sc,
+                SurfaceControl relativeTo,
+                int layer) {
+            mRelativeLayersForControl.put(sc, relativeTo);
+            mLayersForControl.put(sc, layer);
+            return super.setRelativeLayer(sc, relativeTo, layer);
+        }
+
+        int getLayer(SurfaceControl sc) {
+            return mLayersForControl.get(sc);
+        }
+
+        SurfaceControl getRelativeLayer(SurfaceControl sc) {
+            return mRelativeLayersForControl.get(sc);
+        }
+    };
+
+    // We have WM use our Hierarchy recording subclass of SurfaceControl.Builder
+    // such that we can keep track of the parents of Surfaces as they are constructed.
+    private HashMap<SurfaceControl, SurfaceControl> mParentFor = new HashMap();
+
+    private class HierarchyRecorder extends SurfaceControl.Builder {
+        SurfaceControl mPendingParent;
+
+        HierarchyRecorder(SurfaceSession s) {
+            super(s);
+        }
+
+        public SurfaceControl.Builder setParent(SurfaceControl sc) {
+            mPendingParent = sc;
+            return super.setParent(sc);
+        }
+        public SurfaceControl build() {
+            SurfaceControl sc = super.build();
+            mParentFor.put(sc, mPendingParent);
+            mPendingParent = null;
+            return sc;
+        }
+    };
+
+    class HierarchyRecordingBuilderFactory implements SurfaceBuilderFactory {
+        public SurfaceControl.Builder make(SurfaceSession s) {
+            return new HierarchyRecorder(s);
+        }
+    };
+
+    private LayerRecordingTransaction mTransaction;
+
+    @Override
+    void beforeCreateDisplay() {
+        // We can't use @Before here because it may happen after WindowTestsBase @Before
+        // which is after construction of the DisplayContent, meaning the HierarchyRecorder
+        // would miss construction of the top-level layers.
+        mTransaction = new LayerRecordingTransaction();
+        sWm.mSurfaceBuilderFactory = new HierarchyRecordingBuilderFactory();
+    }
+
+    @After
+    public void after() {
+        mTransaction.close();
+        mParentFor.clear();
+    }
+
+    LinkedList<SurfaceControl> getAncestors(LayerRecordingTransaction t, SurfaceControl sc) {
+        LinkedList<SurfaceControl> p = new LinkedList();
+        SurfaceControl current = sc;
+        do {
+            p.addLast(current);
+
+            SurfaceControl rs = t.getRelativeLayer(current);
+            if (rs != null) {
+                current = rs;
+            } else {
+                current = mParentFor.get(current);
+            }
+        } while (current != null);
+        return p;
+    }
+
+    void assertZOrderGreaterThan(LayerRecordingTransaction t,
+            SurfaceControl left, SurfaceControl right) throws Exception {
+        final LinkedList<SurfaceControl> leftParentChain = getAncestors(t, left);
+        final LinkedList<SurfaceControl> rightParentChain = getAncestors(t, right);
+
+        SurfaceControl commonAncestor = null;
+        SurfaceControl leftTop = leftParentChain.peekLast();
+        SurfaceControl rightTop = rightParentChain.peekLast();
+        while (leftTop != null && rightTop != null && leftTop == rightTop) {
+            commonAncestor = leftParentChain.removeLast();
+            rightParentChain.removeLast();
+            leftTop = leftParentChain.peekLast();
+            rightTop = rightParentChain.peekLast();
+        }
+
+        if (rightTop == null) { // right is the parent of left.
+            assertGreaterThan(t.getLayer(leftTop), 0);
+        } else if (leftTop == null) { // left is the parent of right.
+            assertGreaterThan(0, t.getLayer(rightTop));
+        } else {
+            assertGreaterThan(t.getLayer(leftTop),
+                    t.getLayer(rightTop));
+        }
+    }
+
+    void assertWindowLayerGreaterThan(LayerRecordingTransaction t,
+            WindowState left, WindowState right) throws Exception {
+        assertZOrderGreaterThan(t, left.getSurfaceControl(), right.getSurfaceControl());
+    }
+
+    @Test
+    public void testAssignWindowLayers_ForImeWithNoTarget() throws Exception {
+        sWm.mInputMethodTarget = null;
+        mDisplayContent.assignChildLayers(mTransaction);
+
+        // The Ime has an higher base layer than app windows and lower base layer than system
+        // windows, so it should be above app windows and below system windows if there isn't an IME
+        // target.
+        assertWindowLayerGreaterThan(mTransaction, mImeWindow, mChildAppWindowAbove);
+        assertWindowLayerGreaterThan(mTransaction, mImeWindow, mAppWindow);
+        assertWindowLayerGreaterThan(mTransaction, mImeWindow, mDockedDividerWindow);
+        assertWindowLayerGreaterThan(mTransaction, mNavBarWindow, mImeWindow);
+        assertWindowLayerGreaterThan(mTransaction, mStatusBarWindow, mImeWindow);
+
+        // And, IME dialogs should always have an higher layer than the IME.
+        assertWindowLayerGreaterThan(mTransaction, mImeDialogWindow, mImeWindow);
+    }
+
+    @Test
+    public void testAssignWindowLayers_ForImeWithAppTarget() throws Exception {
+        final WindowState imeAppTarget =
+                createWindow(null, TYPE_BASE_APPLICATION, mDisplayContent, "imeAppTarget");
+        sWm.mInputMethodTarget = imeAppTarget;
+        mDisplayContent.assignChildLayers(mTransaction);
+
+        // Ime should be above all app windows and below system windows if it is targeting an app
+        // window.
+        assertWindowLayerGreaterThan(mTransaction, mImeWindow, imeAppTarget);
+        assertWindowLayerGreaterThan(mTransaction, mImeWindow, mChildAppWindowAbove);
+        assertWindowLayerGreaterThan(mTransaction, mImeWindow, mAppWindow);
+        assertWindowLayerGreaterThan(mTransaction, mNavBarWindow, mImeWindow);
+        assertWindowLayerGreaterThan(mTransaction, mStatusBarWindow, mImeWindow);
+
+        // And, IME dialogs should always have an higher layer than the IME.
+        assertWindowLayerGreaterThan(mTransaction, mImeDialogWindow, mImeWindow);
+    }
+
+    @Test
+    public void testAssignWindowLayers_ForImeWithAppTargetWithChildWindows() throws Exception {
+        final WindowState imeAppTarget =
+                createWindow(null, TYPE_BASE_APPLICATION, mDisplayContent, "imeAppTarget");
+        final WindowState imeAppTargetChildAboveWindow = createWindow(imeAppTarget,
+                TYPE_APPLICATION_ATTACHED_DIALOG, imeAppTarget.mToken,
+                "imeAppTargetChildAboveWindow");
+        final WindowState imeAppTargetChildBelowWindow = createWindow(imeAppTarget,
+                TYPE_APPLICATION_MEDIA_OVERLAY, imeAppTarget.mToken,
+                "imeAppTargetChildBelowWindow");
+
+        sWm.mInputMethodTarget = imeAppTarget;
+        mDisplayContent.assignChildLayers(mTransaction);
+
+        // Ime should be above all app windows except for child windows that are z-ordered above it
+        // and below system windows if it is targeting an app window.
+        assertWindowLayerGreaterThan(mTransaction, mImeWindow, imeAppTarget);
+        assertWindowLayerGreaterThan(mTransaction, imeAppTargetChildAboveWindow, mImeWindow);
+        assertWindowLayerGreaterThan(mTransaction, mImeWindow, mChildAppWindowAbove);
+        assertWindowLayerGreaterThan(mTransaction, mImeWindow, mAppWindow);
+        assertWindowLayerGreaterThan(mTransaction, mNavBarWindow, mImeWindow);
+        assertWindowLayerGreaterThan(mTransaction, mStatusBarWindow, mImeWindow);
+
+        // And, IME dialogs should always have an higher layer than the IME.
+        assertWindowLayerGreaterThan(mTransaction, mImeDialogWindow, mImeWindow);
+    }
+
+    @Test
+    public void testAssignWindowLayers_ForImeWithAppTargetAndAppAbove() throws Exception {
+        final WindowState appBelowImeTarget =
+                createWindow(null, TYPE_BASE_APPLICATION, mDisplayContent, "appBelowImeTarget");
+        final WindowState imeAppTarget =
+                createWindow(null, TYPE_BASE_APPLICATION, mDisplayContent, "imeAppTarget");
+        final WindowState appAboveImeTarget =
+                createWindow(null, TYPE_BASE_APPLICATION, mDisplayContent, "appAboveImeTarget");
+
+        sWm.mInputMethodTarget = imeAppTarget;
+        mDisplayContent.assignChildLayers(mTransaction);
+
+        // Ime should be above all app windows except for non-fullscreen app window above it and
+        // below system windows if it is targeting an app window.
+        assertWindowLayerGreaterThan(mTransaction, mImeWindow, imeAppTarget);
+        assertWindowLayerGreaterThan(mTransaction, mImeWindow, appBelowImeTarget);
+        assertWindowLayerGreaterThan(mTransaction, appAboveImeTarget, mImeWindow);
+        assertWindowLayerGreaterThan(mTransaction, mImeWindow, mChildAppWindowAbove);
+        assertWindowLayerGreaterThan(mTransaction, mImeWindow, mAppWindow);
+        assertWindowLayerGreaterThan(mTransaction, mNavBarWindow, mImeWindow);
+        assertWindowLayerGreaterThan(mTransaction, mStatusBarWindow, mImeWindow);
+
+        // And, IME dialogs should always have an higher layer than the IME.
+        assertWindowLayerGreaterThan(mTransaction, mImeDialogWindow, mImeWindow);
+    }
+
+    @Test
+    public void testAssignWindowLayers_ForImeNonAppImeTarget() throws Exception {
+        final WindowState imeSystemOverlayTarget = createWindow(null, TYPE_SYSTEM_OVERLAY,
+                mDisplayContent, "imeSystemOverlayTarget",
+                true /* ownerCanAddInternalSystemWindow */);
+
+        sWm.mInputMethodTarget = imeSystemOverlayTarget;
+        mDisplayContent.assignChildLayers(mTransaction);
+
+        // The IME target base layer is higher than all window except for the nav bar window, so the
+        // IME should be above all windows except for the nav bar.
+        assertWindowLayerGreaterThan(mTransaction, mImeWindow, imeSystemOverlayTarget);
+        assertWindowLayerGreaterThan(mTransaction, mImeWindow, mChildAppWindowAbove);
+        assertWindowLayerGreaterThan(mTransaction, mImeWindow, mAppWindow);
+        assertWindowLayerGreaterThan(mTransaction, mImeWindow, mDockedDividerWindow);
+
+        // The IME has a higher base layer than the status bar so we may expect it to go
+        // above the status bar once they are both in the Non-App layer, as past versions of this
+        // test enforced. However this seems like the wrong behavior unless the status bar is the
+        // IME target.
+        assertWindowLayerGreaterThan(mTransaction, mNavBarWindow, mImeWindow);
+        assertWindowLayerGreaterThan(mTransaction, mStatusBarWindow, mImeWindow);
+
+        // And, IME dialogs should always have an higher layer than the IME.
+        assertWindowLayerGreaterThan(mTransaction, mImeDialogWindow, mImeWindow);
+    }
+
+    @Test
+    public void testAssignWindowLayers_ForStatusBarImeTarget() throws Exception {
+        sWm.mInputMethodTarget = mStatusBarWindow;
+        mDisplayContent.assignChildLayers(mTransaction);
+
+        assertWindowLayerGreaterThan(mTransaction, mImeWindow, mChildAppWindowAbove);
+        assertWindowLayerGreaterThan(mTransaction, mImeWindow, mAppWindow);
+        assertWindowLayerGreaterThan(mTransaction, mImeWindow, mDockedDividerWindow);
+        assertWindowLayerGreaterThan(mTransaction, mImeWindow, mStatusBarWindow);
+
+        // And, IME dialogs should always have an higher layer than the IME.
+        assertWindowLayerGreaterThan(mTransaction, mImeDialogWindow, mImeWindow);
+    }
+
+    @Test
+    public void testStackLayers() throws Exception {
+        final WindowState pinnedStackWindow = createWindowOnStack(null, WINDOWING_MODE_PINNED,
+                ACTIVITY_TYPE_STANDARD, TYPE_BASE_APPLICATION, mDisplayContent,
+                "pinnedStackWindow");
+        final WindowState dockedStackWindow = createWindowOnStack(null,
+                WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, ACTIVITY_TYPE_STANDARD, TYPE_BASE_APPLICATION,
+                mDisplayContent, "dockedStackWindow");
+        final WindowState assistantStackWindow = createWindowOnStack(null, WINDOWING_MODE_FULLSCREEN,
+                ACTIVITY_TYPE_ASSISTANT, TYPE_BASE_APPLICATION,
+                mDisplayContent, "assistantStackWindow");
+
+        mDisplayContent.assignChildLayers(mTransaction);
+
+        assertWindowLayerGreaterThan(mTransaction, dockedStackWindow, mAppWindow);
+        assertWindowLayerGreaterThan(mTransaction, assistantStackWindow, dockedStackWindow);
+        assertWindowLayerGreaterThan(mTransaction, pinnedStackWindow, assistantStackWindow);
+    }
+}

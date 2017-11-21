@@ -67,6 +67,7 @@ class WindowTracing {
             mWriteQueue.clear();
             mTraceFile.delete();
             try (OutputStream os = new FileOutputStream(mTraceFile)) {
+                mTraceFile.setReadable(true, false);
                 ProtoOutputStream proto = new ProtoOutputStream(os);
                 proto.write(MAGIC_NUMBER, MAGIC_NUMBER_VALUE);
                 proto.flush();
@@ -147,7 +148,7 @@ class WindowTracing {
     }
 
     static WindowTracing createDefaultAndStartLooper(Context context) {
-        File file = new File("/data/system/window_trace.proto");
+        File file = new File("/data/misc/wmtrace/wm_trace.pb");
         WindowTracing windowTracing = new WindowTracing(file);
         new Thread(windowTracing::loop, "window_tracing").start();
         return windowTracing;

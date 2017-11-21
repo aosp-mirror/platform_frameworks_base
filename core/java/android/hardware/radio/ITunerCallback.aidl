@@ -30,4 +30,9 @@ oneway interface ITunerCallback {
     void onBackgroundScanAvailabilityChange(boolean isAvailable);
     void onBackgroundScanComplete();
     void onProgramListChanged();
+
+    /**
+     * @param parameters Vendor-specific key-value pairs, must be Map<String, String>
+     */
+    void onParametersUpdated(in Map parameters);
 }

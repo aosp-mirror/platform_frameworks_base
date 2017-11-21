@@ -22,10 +22,12 @@ using namespace android::os::statsd;
 
 /** struct for template in indexed_priority_queue */
 struct AATest : public RefBase {
-    AATest(uint32_t val) : val(val) {
+    AATest(uint32_t val, std::string a, std::string b) : val(val), a(a), b(b) {
     }
 
     const int val;
+    const std::string a;
+    const std::string b;
 
     struct Smaller {
         bool operator()(const sp<const AATest> a, const sp<const AATest> b) const {
@@ -36,9 +38,11 @@ struct AATest : public RefBase {
 
 #ifdef __ANDROID__
 TEST(indexed_priority_queue, empty_and_size) {
+    std::string emptyMetricId;
+    std::string emptyDimensionId;
     indexed_priority_queue<AATest, AATest::Smaller> ipq;
-    sp<const AATest> aa4 = new AATest{4};
-    sp<const AATest> aa8 = new AATest{8};
+    sp<const AATest> aa4 = new AATest{4, emptyMetricId, emptyDimensionId};
+    sp<const AATest> aa8 = new AATest{8, emptyMetricId, emptyDimensionId};
 
     EXPECT_EQ(0u, ipq.size());
     EXPECT_TRUE(ipq.empty());
@@ -61,13 +65,15 @@ TEST(indexed_priority_queue, empty_and_size) {
 }
 
 TEST(indexed_priority_queue, top) {
+    std::string emptyMetricId;
+    std::string emptyDimensionId;
     indexed_priority_queue<AATest, AATest::Smaller> ipq;
-    sp<const AATest> aa2 = new AATest{2};
-    sp<const AATest> aa4 = new AATest{4};
-    sp<const AATest> aa8 = new AATest{8};
-    sp<const AATest> aa12 = new AATest{12};
-    sp<const AATest> aa16 = new AATest{16};
-    sp<const AATest> aa20 = new AATest{20};
+    sp<const AATest> aa2 = new AATest{2, emptyMetricId, emptyDimensionId};
+    sp<const AATest> aa4 = new AATest{4, emptyMetricId, emptyDimensionId};
+    sp<const AATest> aa8 = new AATest{8, emptyMetricId, emptyDimensionId};
+    sp<const AATest> aa12 = new AATest{12, emptyMetricId, emptyDimensionId};
+    sp<const AATest> aa16 = new AATest{16, emptyMetricId, emptyDimensionId};
+    sp<const AATest> aa20 = new AATest{20, emptyMetricId, emptyDimensionId};
 
     EXPECT_EQ(ipq.top(), nullptr);
 
@@ -113,9 +119,11 @@ TEST(indexed_priority_queue, top) {
 }
 
 TEST(indexed_priority_queue, push_same_aa) {
+    std::string emptyMetricId;
+    std::string emptyDimensionId;
     indexed_priority_queue<AATest, AATest::Smaller> ipq;
-    sp<const AATest> aa4_a = new AATest{4};
-    sp<const AATest> aa4_b = new AATest{4};
+    sp<const AATest> aa4_a = new AATest{4, emptyMetricId, emptyDimensionId};
+    sp<const AATest> aa4_b = new AATest{4, emptyMetricId, emptyDimensionId};
 
     ipq.push(aa4_a);
     EXPECT_EQ(1u, ipq.size());
@@ -134,9 +142,11 @@ TEST(indexed_priority_queue, push_same_aa) {
 }
 
 TEST(indexed_priority_queue, remove_nonexistant) {
+    std::string emptyMetricId;
+    std::string emptyDimensionId;
     indexed_priority_queue<AATest, AATest::Smaller> ipq;
-    sp<const AATest> aa4 = new AATest{4};
-    sp<const AATest> aa5 = new AATest{5};
+    sp<const AATest> aa4 = new AATest{4, emptyMetricId, emptyDimensionId};
+    sp<const AATest> aa5 = new AATest{5, emptyMetricId, emptyDimensionId};
 
     ipq.push(aa4);
     ipq.remove(aa5);
@@ -147,8 +157,10 @@ TEST(indexed_priority_queue, remove_nonexistant) {
 
 TEST(indexed_priority_queue, remove_same_aa) {
     indexed_priority_queue<AATest, AATest::Smaller> ipq;
-    sp<const AATest> aa4_a = new AATest{4};
-    sp<const AATest> aa4_b = new AATest{4};
+    std::string emptyMetricId;
+    std::string emptyDimensionId;
+    sp<const AATest> aa4_a = new AATest{4, emptyMetricId, emptyDimensionId};
+    sp<const AATest> aa4_b = new AATest{4, emptyMetricId, emptyDimensionId};
 
     ipq.push(aa4_a);
     ipq.push(aa4_b);
@@ -184,9 +196,11 @@ TEST(indexed_priority_queue, nulls) {
 
 TEST(indexed_priority_queue, pop) {
     indexed_priority_queue<AATest, AATest::Smaller> ipq;
-    sp<const AATest> a = new AATest{1};
-    sp<const AATest> b = new AATest{2};
-    sp<const AATest> c = new AATest{3};
+    std::string emptyMetricId;
+    std::string emptyDimensionId;
+    sp<const AATest> a = new AATest{1, emptyMetricId, emptyDimensionId};
+    sp<const AATest> b = new AATest{2, emptyMetricId, emptyDimensionId};
+    sp<const AATest> c = new AATest{3, emptyMetricId, emptyDimensionId};
 
     ipq.push(c);
     ipq.push(b);

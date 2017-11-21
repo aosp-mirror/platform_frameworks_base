@@ -24,6 +24,7 @@ import android.util.Log;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Implements the RadioTuner interface by forwarding calls to radio service.
@@ -245,6 +246,24 @@ class TunerAdapter extends RadioTuner {
     public void setAnalogForced(boolean isForced) {
         try {
             mTuner.setAnalogForced(isForced);
+        } catch (RemoteException e) {
+            throw new RuntimeException("service died", e);
+        }
+    }
+
+    @Override
+    public @NonNull Map<String, String> setParameters(@NonNull Map<String, String> parameters) {
+        try {
+            return mTuner.setParameters(Objects.requireNonNull(parameters));
+        } catch (RemoteException e) {
+            throw new RuntimeException("service died", e);
+        }
+    }
+
+    @Override
+    public @NonNull Map<String, String> getParameters(@NonNull List<String> keys) {
+        try {
+            return mTuner.getParameters(Objects.requireNonNull(keys));
         } catch (RemoteException e) {
             throw new RuntimeException("service died", e);
         }

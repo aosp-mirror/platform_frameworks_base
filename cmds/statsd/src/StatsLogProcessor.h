@@ -32,7 +32,7 @@ namespace statsd {
 
 class StatsLogProcessor : public ConfigListener {
 public:
-    StatsLogProcessor(const sp<UidMap>& uidMap,
+    StatsLogProcessor(const sp<UidMap>& uidMap, const sp<AnomalyMonitor>& anomalyMonitor,
                       const std::function<void(const ConfigKey&)>& sendBroadcast);
     virtual ~StatsLogProcessor();
 
@@ -42,8 +42,11 @@ public:
     void OnConfigRemoved(const ConfigKey& key);
 
     size_t GetMetricsSize(const ConfigKey& key);
-
+ 
     void onDumpReport(const ConfigKey& key, vector<uint8_t>* outData);
+    void onAnomalyAlarmFired(
+            const uint64_t timestampNs,
+            unordered_set<sp<const AnomalyAlarm>, SpHash<AnomalyAlarm>> anomalySet);
 
 private:
     mutable mutex mBroadcastTimesMutex;
@@ -53,6 +56,8 @@ private:
     std::unordered_map<ConfigKey, long> mLastBroadcastTimes;
 
     sp<UidMap> mUidMap;  // Reference to the UidMap to lookup app name and version for each uid.
+
+    sp<AnomalyMonitor> mAnomalyMonitor;
 
     /* Max *serialized* size of the logs kept in memory before flushing through binder call.
        Proto lite does not implement the SpaceUsed() function which gives the in memory byte size.

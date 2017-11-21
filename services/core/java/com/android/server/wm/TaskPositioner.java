@@ -59,7 +59,7 @@ import com.android.server.wm.WindowManagerService.H;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-class TaskPositioner implements DimLayer.DimLayerUser {
+class TaskPositioner {
     private static final boolean DEBUG_ORIENTATION_VIOLATIONS = false;
     private static final String TAG_LOCAL = "TaskPositioner";
     private static final String TAG = TAG_WITH_CLASS_NAME ? TAG_LOCAL : TAG_WM;
@@ -99,9 +99,6 @@ class TaskPositioner implements DimLayer.DimLayerUser {
     private WindowPositionerEventReceiver mInputEventReceiver;
     private Display mDisplay;
     private final DisplayMetrics mDisplayMetrics = new DisplayMetrics();
-    private DimLayer mDimLayer;
-    @CtrlType
-    private int mCurrentDimSide;
     private Rect mTmpRect = new Rect();
     private int mSideMargin;
     private int mMinVisibleWidth;
@@ -207,15 +204,6 @@ class TaskPositioner implements DimLayer.DimLayerUser {
                             mService.mActivityManager.resizeTask(
                                     mTask.mTaskId, mWindowDragBounds, RESIZE_MODE_USER_FORCED);
                         }
-
-                        if (mCurrentDimSide != CTRL_NONE) {
-                            final int createMode = mCurrentDimSide == CTRL_LEFT
-                                    ? SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT
-                                    : SPLIT_SCREEN_CREATE_MODE_BOTTOM_OR_RIGHT;
-                            mService.mActivityManager.setTaskWindowingModeSplitScreenPrimary(
-                                    mTask.mTaskId, createMode, true /*toTop*/, true /* animate */,
-                                    null /* initialBounds */);
-                        }
                     } catch(RemoteException e) {}
 
                     // Post back to WM to handle clean-ups. We still need the input
@@ -243,7 +231,9 @@ class TaskPositioner implements DimLayer.DimLayerUser {
     /**
      * @param display The Display that the window being dragged is on.
      */
-    void register(Display display) {
+    void register(DisplayContent displayContent) {
+        final Display display = displayContent.getDisplay();
+
         if (DEBUG_TASK_POSITIONING) {
             Slog.d(TAG, "Registering task positioner");
         }
@@ -305,7 +295,6 @@ class TaskPositioner implements DimLayer.DimLayerUser {
         }
         mService.pauseRotationLocked();
 
-        mDimLayer = new DimLayer(mService, this, mDisplay.getDisplayId(), TAG_LOCAL);
         mSideMargin = dipToPixel(SIDE_MARGIN_DIP, mDisplayMetrics);
         mMinVisibleWidth = dipToPixel(MINIMUM_VISIBLE_WIDTH_IN_DP, mDisplayMetrics);
         mMinVisibleHeight = dipToPixel(MINIMUM_VISIBLE_HEIGHT_IN_DP, mDisplayMetrics);
@@ -336,12 +325,6 @@ class TaskPositioner implements DimLayer.DimLayerUser {
         mDragWindowHandle = null;
         mDragApplicationHandle = null;
         mDisplay = null;
-
-        if (mDimLayer != null) {
-            mDimLayer.destroySurface();
-            mDimLayer = null;
-        }
-        mCurrentDimSide = CTRL_NONE;
         mDragEnded = true;
 
         // Resume rotations after a drag.
@@ -434,7 +417,6 @@ class TaskPositioner implements DimLayer.DimLayerUser {
         }
 
         updateWindowDragBounds(nX, nY, mTmpRect);
-        updateDimLayerVisibility(nX);
         return false;
     }
 
@@ -621,88 +603,6 @@ class TaskPositioner implements DimLayer.DimLayerUser {
                 "updateWindowDragBounds: " + mWindowDragBounds);
     }
 
-    private void updateDimLayerVisibility(int x) {
-        @CtrlType
-        int dimSide = getDimSide(x);
-        if (dimSide == mCurrentDimSide) {
-            return;
-        }
-
-        mCurrentDimSide = dimSide;
-
-        if (SHOW_TRANSACTIONS) Slog.i(TAG, ">>> OPEN TRANSACTION updateDimLayerVisibility");
-        mService.openSurfaceTransaction();
-        if (mCurrentDimSide == CTRL_NONE) {
-            mDimLayer.hide();
-        } else {
-            showDimLayer();
-        }
-        mService.closeSurfaceTransaction("updateDimLayerVisibility");
-    }
-
-    /**
-     * Returns the side of the screen the dim layer should be shown.
-     * @param x horizontal coordinate used to determine if the dim layer should be shown
-     * @return Returns {@link #CTRL_LEFT} if the dim layer should be shown on the left half of the
-     * screen, {@link #CTRL_RIGHT} if on the right side, or {@link #CTRL_NONE} if the dim layer
-     * shouldn't be shown.
-     */
-    private int getDimSide(int x) {
-        if (!mTask.mStack.inFreeformWindowingMode()
-                || !mTask.mStack.fillsParent()
-                || mTask.mStack.getConfiguration().orientation != ORIENTATION_LANDSCAPE) {
-            return CTRL_NONE;
-        }
-
-        mTask.mStack.getDimBounds(mTmpRect);
-        if (x - mSideMargin <= mTmpRect.left) {
-            return CTRL_LEFT;
-        }
-        if (x + mSideMargin >= mTmpRect.right) {
-            return CTRL_RIGHT;
-        }
-
-        return CTRL_NONE;
-    }
-
-    private void showDimLayer() {
-        mTask.mStack.getDimBounds(mTmpRect);
-        if (mCurrentDimSide == CTRL_LEFT) {
-            mTmpRect.right = mTmpRect.centerX();
-        } else if (mCurrentDimSide == CTRL_RIGHT) {
-            mTmpRect.left = mTmpRect.centerX();
-        }
-
-        mDimLayer.setBounds(mTmpRect);
-        mDimLayer.show(mService.getDragLayerLocked(), RESIZING_HINT_ALPHA,
-                RESIZING_HINT_DURATION_MS);
-    }
-
-    @Override /** {@link DimLayer.DimLayerUser} */
-    public boolean dimFullscreen() {
-        return isFullscreen();
-    }
-
-    boolean isFullscreen() {
-        return false;
-    }
-
-    @Override /** {@link DimLayer.DimLayerUser} */
-    public DisplayInfo getDisplayInfo() {
-        return mTask.mStack.getDisplayInfo();
-    }
-
-    @Override
-    public boolean isAttachedToDisplay() {
-        return mTask != null && mTask.getDisplayContent() != null;
-    }
-
-    @Override
-    public void getDimBounds(Rect out) {
-        // This dim layer user doesn't need this.
-    }
-
-    @Override
     public String toShortString() {
         return TAG;
     }

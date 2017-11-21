@@ -72,6 +72,9 @@ class Field():
 
         self.ident = self.raw.replace(" deprecated ", " ")
 
+    def __hash__(self):
+        return hash(self.raw)
+
     def __repr__(self):
         return self.raw
 
@@ -110,6 +113,9 @@ class Method():
             ident = ident[:ident.index(" throws ")]
         self.ident = ident
 
+    def __hash__(self):
+        return hash(self.raw)
+
     def __repr__(self):
         return self.raw
 
@@ -144,6 +150,9 @@ class Class():
         self.fullname_path = self.fullname.split(".")
 
         self.name = self.fullname[self.fullname.rindex(".")+1:]
+
+    def __hash__(self):
+        return hash((self.raw, tuple(self.ctors), tuple(self.fields), tuple(self.methods)))
 
     def __repr__(self):
         return self.raw
@@ -254,6 +263,14 @@ def warn(clazz, detail, rule, msg):
 
 def error(clazz, detail, rule, msg):
     _fail(clazz, detail, True, rule, msg)
+
+
+noticed = {}
+
+def notice(clazz):
+    global noticed
+
+    noticed[clazz.fullname] = hash(clazz)
 
 
 def verify_constants(clazz):
@@ -1203,6 +1220,9 @@ def verify_method_name_not_kotlin_operator(clazz):
 
 def examine_clazz(clazz):
     """Find all style issues in the given class."""
+
+    notice(clazz)
+
     if clazz.pkg.name.startswith("java"): return
     if clazz.pkg.name.startswith("junit"): return
     if clazz.pkg.name.startswith("org.apache"): return
@@ -1258,10 +1278,11 @@ def examine_clazz(clazz):
 
 def examine_stream(stream):
     """Find all style issues in the given API stream."""
-    global failures
+    global failures, noticed
     failures = {}
+    noticed = {}
     _parse_stream(stream, examine_clazz)
-    return failures
+    return (failures, noticed)
 
 
 def examine_api(api):
@@ -1338,6 +1359,8 @@ if __name__ == "__main__":
             help="Disable terminal colors")
     parser.add_argument("--allow-google", action='store_const', const=True,
             help="Allow references to Google")
+    parser.add_argument("--show-noticed", action='store_const', const=True,
+            help="Show API changes noticed")
     args = vars(parser.parse_args())
 
     if args['no_color']:
@@ -1350,15 +1373,20 @@ if __name__ == "__main__":
     previous_file = args['previous.txt']
 
     with current_file as f:
-        cur_fail = examine_stream(f)
+        cur_fail, cur_noticed = examine_stream(f)
     if not previous_file is None:
         with previous_file as f:
-            prev_fail = examine_stream(f)
+            prev_fail, prev_noticed = examine_stream(f)
 
         # ignore errors from previous API level
         for p in prev_fail:
             if p in cur_fail:
                 del cur_fail[p]
+
+        # ignore classes unchanged from previous API level
+        for k, v in prev_noticed.iteritems():
+            if k in cur_noticed and v == cur_noticed[k]:
+                del cur_noticed[k]
 
         """
         # NOTE: disabled because of memory pressure
@@ -1370,6 +1398,12 @@ if __name__ == "__main__":
             print compat_fail[f]
             print
         """
+
+    if args['show_noticed'] and len(cur_noticed) != 0:
+        print "%s API changes noticed %s\n" % ((format(fg=WHITE, bg=BLUE, bold=True), format(reset=True)))
+        for f in sorted(cur_noticed.keys()):
+            print f
+        print
 
     if len(cur_fail) != 0:
         print "%s API style issues %s\n" % ((format(fg=WHITE, bg=BLUE, bold=True), format(reset=True)))

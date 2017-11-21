@@ -54,7 +54,6 @@ import android.view.inputmethod.InputMethodManagerInternal;
 import com.android.internal.policy.DividerSnapAlgorithm;
 import com.android.internal.policy.DockedDividerUtils;
 import com.android.server.LocalServices;
-import com.android.server.wm.DimLayer.DimLayerUser;
 import com.android.server.wm.WindowManagerService.H;
 
 import java.io.PrintWriter;
@@ -62,7 +61,7 @@ import java.io.PrintWriter;
 /**
  * Keeps information about the docked stack divider.
  */
-public class DockedStackDividerController implements DimLayerUser {
+public class DockedStackDividerController {
 
     private static final String TAG = TAG_WITH_CLASS_NAME ? "DockedStackDividerController" : TAG_WM;
 
@@ -114,7 +113,6 @@ public class DockedStackDividerController implements DimLayerUser {
     private boolean mLastVisibility = false;
     private final RemoteCallbackList<IDockedStackListener> mDockedStackListeners
             = new RemoteCallbackList<>();
-    private final DimLayer mDimLayer;
 
     private boolean mMinimizedDock;
     private int mOriginalDockedSide = DOCKED_INVALID;
@@ -141,13 +139,12 @@ public class DockedStackDividerController implements DimLayerUser {
     private boolean mImeHideRequested;
     private final Rect mLastDimLayerRect = new Rect();
     private float mLastDimLayerAlpha;
+    private TaskStack mDimmedStack;
 
     DockedStackDividerController(WindowManagerService service, DisplayContent displayContent) {
         mService = service;
         mDisplayContent = displayContent;
         final Context context = service.mContext;
-        mDimLayer = new DimLayer(displayContent.mService, this, displayContent.getDisplayId(),
-                "DockedStackDim");
         mMinimizedDockInterpolator = AnimationUtils.loadInterpolator(
                 context, android.R.interpolator.fast_out_slow_in);
         loadDimens();
@@ -463,6 +460,11 @@ public class DockedStackDividerController implements DimLayerUser {
         }
         mOriginalDockedSide = DOCKED_INVALID;
         setMinimizedDockedStack(false /* minimizedDock */, false /* animate */);
+
+        if (mDimmedStack != null) {
+            mDimmedStack.stopDimming();
+            mDimmedStack = null;
+        }
     }
 
     /**
@@ -564,34 +566,12 @@ public class DockedStackDividerController implements DimLayerUser {
         final TaskStack dockedStack = mDisplayContent.getSplitScreenPrimaryStack();
         boolean visibleAndValid = visible && stack != null && dockedStack != null;
         if (visibleAndValid) {
-            stack.getDimBounds(mTmpRect);
-            if (mTmpRect.height() > 0 && mTmpRect.width() > 0) {
-                if (!mLastDimLayerRect.equals(mTmpRect) || mLastDimLayerAlpha != alpha) {
-                    try {
-                        // TODO: This should use the regular animation transaction - here and below
-                        mService.openSurfaceTransaction();
-                        mDimLayer.setBounds(mTmpRect);
-                        mDimLayer.show(getResizeDimLayer(), alpha, 0 /* duration */);
-                    } finally {
-                        mService.closeSurfaceTransaction("setResizeDimLayer");
-                    }
-                }
-                mLastDimLayerRect.set(mTmpRect);
-                mLastDimLayerAlpha = alpha;
-            } else {
-                visibleAndValid = false;
-            }
+            mDimmedStack = stack;
+            stack.dim(alpha);
         }
-        if (!visibleAndValid) {
-            if (mLastDimLayerAlpha != 0f) {
-                try {
-                    mService.openSurfaceTransaction();
-                    mDimLayer.hide();
-                } finally {
-                    mService.closeSurfaceTransaction("setResizeDimLayer");
-                }
-            }
-            mLastDimLayerAlpha = 0f;
+        if (!visibleAndValid && stack != null) {
+            mDimmedStack = null;
+            stack.stopDimming();
         }
     }
 
@@ -829,12 +809,8 @@ public class DockedStackDividerController implements DimLayerUser {
             return animateForMinimizedDockedStack(now);
         } else if (mAnimatingForIme) {
             return animateForIme(now);
-        } else {
-            if (mDimLayer != null && mDimLayer.isDimming()) {
-                mDimLayer.setLayer(getResizeDimLayer());
-            }
-            return false;
         }
+        return false;
     }
 
     private boolean animateForIme(long now) {
@@ -942,27 +918,6 @@ public class DockedStackDividerController implements DimLayerUser {
                 + (1 - t) * (CLIP_REVEAL_MEET_LAST - CLIP_REVEAL_MEET_EARLIEST);
     }
 
-    @Override
-    public boolean dimFullscreen() {
-        return false;
-    }
-
-    @Override
-    public DisplayInfo getDisplayInfo() {
-        return mDisplayContent.getDisplayInfo();
-    }
-
-    @Override
-    public boolean isAttachedToDisplay() {
-        return mDisplayContent != null;
-    }
-
-    @Override
-    public void getDimBounds(Rect outBounds) {
-        // This dim layer user doesn't need this.
-    }
-
-    @Override
     public String toShortString() {
         return TAG;
     }
@@ -977,10 +932,6 @@ public class DockedStackDividerController implements DimLayerUser {
         pw.println(prefix + "  mMinimizedDock=" + mMinimizedDock);
         pw.println(prefix + "  mAdjustedForIme=" + mAdjustedForIme);
         pw.println(prefix + "  mAdjustedForDivider=" + mAdjustedForDivider);
-        if (mDimLayer.isDimming()) {
-            pw.println(prefix + "  Dim layer is dimming: ");
-            mDimLayer.printTo(prefix + "    ", pw);
-        }
     }
 
     void writeToProto(ProtoOutputStream proto, long fieldId) {

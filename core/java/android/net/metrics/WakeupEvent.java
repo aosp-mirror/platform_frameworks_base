@@ -29,7 +29,7 @@ public class WakeupEvent {
     public String iface;
     public int uid;
     public int ethertype;
-    public byte[] dstHwAddr;
+    public MacAddress dstHwAddr;
     public String srcIp;
     public String dstIp;
     public int ipNextHeader;
@@ -44,7 +44,7 @@ public class WakeupEvent {
         j.add(iface);
         j.add("uid: " + Integer.toString(uid));
         j.add("eth=0x" + Integer.toHexString(ethertype));
-        j.add("dstHw=" + MacAddress.stringAddrFromByteAddr(dstHwAddr));
+        j.add("dstHw=" + dstHwAddr);
         if (ipNextHeader > 0) {
             j.add("ipNxtHdr=" + ipNextHeader);
             j.add("srcIp=" + srcIp);

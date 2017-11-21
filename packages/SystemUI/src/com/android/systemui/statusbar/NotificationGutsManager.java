@@ -37,6 +37,7 @@ import android.view.accessibility.AccessibilityManager;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
+import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.Interpolators;
@@ -75,17 +76,20 @@ public class NotificationGutsManager implements Dumpable {
     private NotificationGuts mNotificationGutsExposed;
     private NotificationMenuRowPlugin.MenuItem mGutsMenuItem;
     private final NotificationInfo.CheckSaveListener mCheckSaveListener;
+    private final OnSettingsClickListener mOnSettingsClickListener;
     private String mKeyToRemoveOnGutsClosed;
 
     public NotificationGutsManager(
             NotificationPresenter presenter,
             NotificationStackScrollLayout stackScroller,
             NotificationInfo.CheckSaveListener checkSaveListener,
-            Context context) {
+            Context context,
+            OnSettingsClickListener onSettingsClickListener) {
         mPresenter = presenter;
         mStackScroller = stackScroller;
         mCheckSaveListener = checkSaveListener;
         mContext = context;
+        mOnSettingsClickListener = onSettingsClickListener;
         Resources res = context.getResources();
 
         mNonBlockablePkgs = new HashSet<>();
@@ -189,6 +193,7 @@ public class NotificationGutsManager implements Dumpable {
                 onSettingsClick = (View v, NotificationChannel channel, int appUid) -> {
                     mMetricsLogger.action(MetricsProto.MetricsEvent.ACTION_NOTE_INFO);
                     guts.resetFalsingCheck();
+                    mOnSettingsClickListener.onClick(sbn.getKey());
                     startAppNotificationSettingsActivity(pkg, appUid, channel);
                 };
             }
@@ -351,5 +356,9 @@ public class NotificationGutsManager implements Dumpable {
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.print("mKeyToRemoveOnGutsClosed: ");
         pw.println(mKeyToRemoveOnGutsClosed);
+    }
+
+    public interface OnSettingsClickListener {
+        void onClick(String key);
     }
 }

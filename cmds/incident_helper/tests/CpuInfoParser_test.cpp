@@ -56,7 +56,7 @@ protected:
     const string kTestDataPath = kTestPath + "/testdata/";
 };
 
-TEST_F(CpuInfoParserTest, HasSwapInfo) {
+TEST_F(CpuInfoParserTest, Success) {
     const string testFile = kTestDataPath + "cpuinfo.txt";
     CpuInfoParser parser;
     CpuInfo expected;

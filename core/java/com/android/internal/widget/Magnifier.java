@@ -18,34 +18,33 @@ package com.android.internal.widget;
 
 import android.annotation.FloatRange;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UiThread;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Point;
+import android.graphics.PointF;
 import android.graphics.Rect;
 import android.os.Handler;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.PixelCopy;
+import android.view.Surface;
+import android.view.SurfaceView;
 import android.view.View;
-import android.view.ViewRootImpl;
 import android.widget.ImageView;
 import android.widget.PopupWindow;
 
 import com.android.internal.R;
 import com.android.internal.util.Preconditions;
 
-import java.util.Timer;
-import java.util.TimerTask;
-
 /**
  * Android magnifier widget. Can be used by any view which is attached to window.
  */
 public final class Magnifier {
-    private static final String LOG_TAG = "magnifier";
-    private static final int MAGNIFIER_REFRESH_RATE_MS = 33; // ~30fps
-    // The view for which this magnifier is attached.
+    // Use this to specify that a previous configuration value does not exist.
+    private static final int NONEXISTENT_PREVIOUS_CONFIG_VALUE = -1;
+    // The view to which this magnifier is attached.
     private final View mView;
     // The window containing the magnifier.
     private final PopupWindow mWindow;
@@ -64,8 +63,12 @@ public final class Magnifier {
     private final Handler mPixelCopyHandler = Handler.getMain();
     // Current magnification scale.
     private final float mZoomScale;
-    // Timer used to schedule the copy task.
-    private Timer mTimer;
+    // Variables holding previous states, used for detecting redundant calls and invalidation.
+    private final Point mPrevStartCoordsInSurface = new Point(
+            NONEXISTENT_PREVIOUS_CONFIG_VALUE, NONEXISTENT_PREVIOUS_CONFIG_VALUE);
+    private final PointF mPrevPosInView = new PointF(
+            NONEXISTENT_PREVIOUS_CONFIG_VALUE, NONEXISTENT_PREVIOUS_CONFIG_VALUE);
+    private final Rect mPixelCopyRequestRect = new Rect();
 
     /**
      * Initializes a magnifier.
@@ -91,8 +94,8 @@ public final class Magnifier {
         mWindow.setTouchable(false);
         mWindow.setBackgroundDrawable(null);
 
-        final int bitmapWidth = (int) (mWindowWidth / mZoomScale);
-        final int bitmapHeight = (int) (mWindowHeight / mZoomScale);
+        final int bitmapWidth = Math.round(mWindowWidth / mZoomScale);
+        final int bitmapHeight = Math.round(mWindowHeight / mZoomScale);
         mBitmap = Bitmap.createBitmap(bitmapWidth, bitmapHeight, Bitmap.Config.ARGB_8888);
         getImageView().setImageBitmap(mBitmap);
     }
@@ -106,32 +109,29 @@ public final class Magnifier {
      *        relative to the view. The lower end is clamped to 0
      */
     public void show(@FloatRange(from=0) float xPosInView, @FloatRange(from=0) float yPosInView) {
-        if (xPosInView < 0) {
-            xPosInView = 0;
-        }
-
-        if (yPosInView < 0) {
-            yPosInView = 0;
-        }
+        xPosInView = Math.max(0, xPosInView);
+        yPosInView = Math.max(0, yPosInView);
 
         configureCoordinates(xPosInView, yPosInView);
 
-        if (mTimer == null) {
-            mTimer = new Timer();
-            mTimer.schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    performPixelCopy();
-                }
-            }, 0 /* delay */, MAGNIFIER_REFRESH_RATE_MS);
-        }
+        // Clamp startX value to avoid distorting the rendering of the magnifier content.
+        final int startX = Math.max(0, Math.min(
+                mCenterZoomCoords.x - mBitmap.getWidth() / 2,
+                mView.getWidth() - mBitmap.getWidth()));
+        final int startY = mCenterZoomCoords.y - mBitmap.getHeight() / 2;
 
-        if (mWindow.isShowing()) {
-            mWindow.update(mWindowCoords.x, mWindowCoords.y, mWindow.getWidth(),
-                    mWindow.getHeight());
-        } else {
-            mWindow.showAtLocation(mView.getRootView(), Gravity.NO_GRAVITY,
-                    mWindowCoords.x, mWindowCoords.y);
+        if (startX != mPrevStartCoordsInSurface.x || startY != mPrevStartCoordsInSurface.y) {
+            performPixelCopy(startX, startY);
+
+            mPrevPosInView.x = xPosInView;
+            mPrevPosInView.y = yPosInView;
+
+            if (mWindow.isShowing()) {
+                mWindow.update(mWindowCoords.x, mWindowCoords.y, mWindow.getWidth(),
+                        mWindow.getHeight());
+            } else {
+                mWindow.showAtLocation(mView, Gravity.NO_GRAVITY, mWindowCoords.x, mWindowCoords.y);
+            }
         }
     }
 
@@ -140,11 +140,18 @@ public final class Magnifier {
      */
     public void dismiss() {
         mWindow.dismiss();
+    }
 
-        if (mTimer != null) {
-            mTimer.cancel();
-            mTimer.purge();
-            mTimer = null;
+    /**
+     * Forces the magnifier to update its content. It uses the previous coordinates passed to
+     * {@link #show(float, float)}. This only happens if the magnifier is currently showing.
+     *
+     * @hide
+     */
+    public void update() {
+        if (mWindow.isShowing()) {
+            // Update the contents shown in the magnifier.
+            performPixelCopy(mPrevStartCoordsInSurface.x, mPrevStartCoordsInSurface.y);
         }
     }
 
@@ -170,13 +177,22 @@ public final class Magnifier {
     }
 
     private void configureCoordinates(float xPosInView, float yPosInView) {
-        final int[] coordinatesOnScreen = new int[2];
-        mView.getLocationOnScreen(coordinatesOnScreen);
-        final float posXOnScreen = xPosInView + coordinatesOnScreen[0];
-        final float posYOnScreen = yPosInView + coordinatesOnScreen[1];
+        final float posX;
+        final float posY;
 
-        mCenterZoomCoords.x = (int) posXOnScreen;
-        mCenterZoomCoords.y = (int) posYOnScreen;
+        if (mView instanceof SurfaceView) {
+            // No offset required if the backing Surface matches the size of the SurfaceView.
+            posX = xPosInView;
+            posY = yPosInView;
+        } else {
+            final int[] coordinatesInSurface = new int[2];
+            mView.getLocationInSurface(coordinatesInSurface);
+            posX = xPosInView + coordinatesInSurface[0];
+            posY = yPosInView + coordinatesInSurface[1];
+        }
+
+        mCenterZoomCoords.x = Math.round(posX);
+        mCenterZoomCoords.y = Math.round(posY);
 
         final int verticalMagnifierOffset = mView.getContext().getResources().getDimensionPixelSize(
                 R.dimen.magnifier_offset);
@@ -184,32 +200,34 @@ public final class Magnifier {
         mWindowCoords.y = mCenterZoomCoords.y - mWindowHeight / 2 - verticalMagnifierOffset;
     }
 
-    private void performPixelCopy() {
-        final int startY = mCenterZoomCoords.y - mBitmap.getHeight() / 2;
-        int rawStartX = mCenterZoomCoords.x - mBitmap.getWidth() / 2;
+    private void performPixelCopy(final int startXInSurface, final int startYInSurface) {
+        final Surface surface = getValidViewSurface();
+        if (surface != null) {
+            mPixelCopyRequestRect.set(startXInSurface, startYInSurface,
+                    startXInSurface + mBitmap.getWidth(), startYInSurface + mBitmap.getHeight());
 
-        // Clamp startX value to avoid distorting the rendering of the magnifier content.
-        if (rawStartX < 0) {
-            rawStartX = 0;
-        } else if (rawStartX + mBitmap.getWidth() > mView.getWidth()) {
-            rawStartX = mView.getWidth() - mBitmap.getWidth();
-        }
-
-        final int startX = rawStartX;
-        final ViewRootImpl viewRootImpl = mView.getViewRootImpl();
-
-        if (viewRootImpl != null && viewRootImpl.mSurface != null
-                && viewRootImpl.mSurface.isValid()) {
-            PixelCopy.request(
-                    viewRootImpl.mSurface,
-                    new Rect(startX, startY, startX + mBitmap.getWidth(),
-                            startY + mBitmap.getHeight()),
-                    mBitmap,
-                    result -> getImageView().invalidate(),
+            PixelCopy.request(surface, mPixelCopyRequestRect, mBitmap,
+                    result -> {
+                        getImageView().invalidate();
+                        mPrevStartCoordsInSurface.x = startXInSurface;
+                        mPrevStartCoordsInSurface.y = startYInSurface;
+                    },
                     mPixelCopyHandler);
-        } else {
-            Log.d(LOG_TAG, "Could not perform PixelCopy request");
         }
+    }
+
+    @Nullable
+    private Surface getValidViewSurface() {
+        final Surface surface;
+        if (mView instanceof SurfaceView) {
+            surface = ((SurfaceView) mView).getHolder().getSurface();
+        } else if (mView.getViewRootImpl() != null) {
+            surface = mView.getViewRootImpl().mSurface;
+        } else {
+            surface = null;
+        }
+
+        return (surface != null && surface.isValid()) ? surface : null;
     }
 
     private ImageView getImageView() {

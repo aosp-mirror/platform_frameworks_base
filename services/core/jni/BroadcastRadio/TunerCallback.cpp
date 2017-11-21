@@ -70,6 +70,7 @@ static struct {
         jmethodID onBackgroundScanAvailabilityChange;
         jmethodID onBackgroundScanComplete;
         jmethodID onProgramListChanged;
+        jmethodID onParametersUpdated;
     } TunerCallback;
 } gjni;
 
@@ -346,7 +347,10 @@ Return<void> NativeCallback::currentProgramInfoChanged(const ProgramInfo& info) 
 Return<void> NativeCallback::parametersUpdated(const hidl_vec<VendorKeyValue>& parameters) {
     ALOGV("%s", __func__);
 
-    // TODO(b/65862441): pass this callback to the front-end
+    mCallbackThread.enqueue([this, parameters](JNIEnv *env) {
+        auto jParameters = convert::VendorInfoFromHal(env, parameters);
+        env->CallVoidMethod(mJCallback, gjni.TunerCallback.onParametersUpdated, jParameters.get());
+    });
 
     return {};
 }
@@ -437,6 +441,8 @@ void register_android_server_broadcastradio_TunerCallback(JavaVM *vm, JNIEnv *en
             "onBackgroundScanComplete", "()V");
     gjni.TunerCallback.onProgramListChanged = GetMethodIDOrDie(env, tunerCbClass,
             "onProgramListChanged", "()V");
+    gjni.TunerCallback.onParametersUpdated = GetMethodIDOrDie(env, tunerCbClass,
+            "onParametersUpdated", "(Ljava/util/Map;)V");
 
     auto res = jniRegisterNativeMethods(env, "com/android/server/broadcastradio/TunerCallback",
             gTunerCallbackMethods, NELEM(gTunerCallbackMethods));

@@ -362,6 +362,9 @@ public class SubscriptionManager {
 
     /**
      * TelephonyProvider column name for enable Volte.
+     *
+     * If this setting is not initialized (set to -1)  then we use the Carrier Config value
+     * {@link CarrierConfigManager#KEY_ENHANCED_4G_LTE_ON_BY_DEFAULT_BOOL}.
      *@hide
      */
     public static final String ENHANCED_4G_MODE_ENABLED = "volte_vt_enabled";

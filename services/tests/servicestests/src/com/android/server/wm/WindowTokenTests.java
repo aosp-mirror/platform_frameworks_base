@@ -94,43 +94,6 @@ public class WindowTokenTests extends WindowTestsBase {
         assertEquals(null, dc.getWindowToken(token.token));
     }
 
-    @Test
-    public void testAdjustAnimLayer() throws Exception {
-        final WindowTestUtils.TestWindowToken token =
-                new WindowTestUtils.TestWindowToken(0, mDisplayContent);
-        final WindowState window1 = createWindow(null, TYPE_APPLICATION, token, "window1");
-        final WindowState window11 = createWindow(window1, FIRST_SUB_WINDOW, token, "window11");
-        final WindowState window12 = createWindow(window1, FIRST_SUB_WINDOW, token, "window12");
-        final WindowState window2 = createWindow(null, TYPE_APPLICATION, token, "window2");
-        final WindowState window3 = createWindow(null, TYPE_APPLICATION, token, "window3");
-
-        window2.mLayer = 100;
-        window3.mLayer = 200;
-
-        // We assign layers once, to get the base values computed by
-        // the controller.
-        mLayersController.assignWindowLayers(mDisplayContent);
-
-        final int window1StartLayer = window1.mWinAnimator.mAnimLayer;
-        final int window11StartLayer = window11.mWinAnimator.mAnimLayer;
-        final int window12StartLayer = window12.mWinAnimator.mAnimLayer;
-        final int window2StartLayer = window2.mWinAnimator.mAnimLayer;
-        final int window3StartLayer = window3.mWinAnimator.mAnimLayer;
-
-        // Then we set an adjustment, and assign them again, they should
-        // be offset.
-        int adj = token.adj = 50;
-        mLayersController.assignWindowLayers(mDisplayContent);
-        final int highestLayer = token.getHighestAnimLayer();
-
-        assertEquals(window1StartLayer + adj, window1.mWinAnimator.mAnimLayer);
-        assertEquals(window11StartLayer + adj, window11.mWinAnimator.mAnimLayer);
-        assertEquals(window12StartLayer + adj, window12.mWinAnimator.mAnimLayer);
-        assertEquals(window2StartLayer + adj, window2.mWinAnimator.mAnimLayer);
-        assertEquals(window3StartLayer + adj, window3.mWinAnimator.mAnimLayer);
-        assertEquals(window3StartLayer + adj, highestLayer);
-    }
-
     /**
      * Test that a window token isn't orphaned by the system when it is requested to be removed.
      * Tokens should only be removed from the system when all their windows are gone.

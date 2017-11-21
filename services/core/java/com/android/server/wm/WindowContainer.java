@@ -21,9 +21,13 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static com.android.server.wm.proto.WindowContainerProto.CONFIGURATION_CONTAINER;
 import static com.android.server.wm.proto.WindowContainerProto.ORIENTATION;
+import static android.view.SurfaceControl.Transaction;
 
 import android.annotation.CallSuper;
 import android.content.res.Configuration;
+import android.view.MagnificationSpec;
+import android.view.SurfaceControl;
+import android.view.SurfaceSession;
 import android.util.Pools;
 
 import android.util.proto.ProtoOutputStream;
@@ -64,7 +68,14 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             new Pools.SynchronizedPool<>(3);
 
     // The owner/creator for this container. No controller if null.
-    private WindowContainerController mController;
+     WindowContainerController mController;
+
+    protected SurfaceControl mSurfaceControl;
+
+    /**
+     * Applied as part of the animation pass in "prepareSurfaces".
+     */
+    private Transaction mPendingTransaction = new Transaction();
 
     @Override
     final protected WindowContainer getParent() {
@@ -101,7 +112,22 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      * Supposed to be overridden and contain actions that should be executed after parent was set.
      */
     void onParentSet() {
-        // Do nothing by default.
+        if (mParent == null) {
+            return;
+        }
+        if (mSurfaceControl == null) {
+            // If we don't yet have a surface, but we now have a parent, we should
+            // build a surface.
+            mSurfaceControl = makeSurface().build();
+            getPendingTransaction().show(mSurfaceControl);
+        } else {
+            // If we have a surface but a new parent, we just need to perform a reparent.
+            getPendingTransaction().reparent(mSurfaceControl, mParent.mSurfaceControl.getHandle());
+        }
+
+        // Either way we need to ask the parent to assign us a Z-order.
+        mParent.assignChildLayers();
+        scheduleAnimation();
     }
 
     // Temp. holders for a chain of containers we are currently processing.
@@ -188,6 +214,11 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             mChildren.remove(child);
         }
 
+        if (mSurfaceControl != null) {
+            destroyAfterPendingTransaction(mSurfaceControl);
+            mSurfaceControl = null;
+        }
+
         if (mParent != null) {
             mParent.removeChild(this);
         }
@@ -195,6 +226,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         if (mController != null) {
             setController(null);
         }
+
     }
 
     /**
@@ -407,7 +439,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     /**
-a     * Returns whether this child is on top of the window hierarchy.
+     * @return Whether this child is on top of the window hierarchy.
      */
     boolean isOnTop() {
         return getParent().getTopChild() == this && getParent().isOnTop();
@@ -673,6 +705,103 @@ a     * Returns whether this child is on top of the window hierarchy.
         mController = controller;
     }
 
+    SurfaceControl.Builder makeSurface() {
+        final WindowContainer p = getParent();
+        return p.makeChildSurface(this);
+    }
+
+    /**
+     * @param child The WindowContainer this child surface is for, or null if the Surface
+     *              is not assosciated with a WindowContainer (e.g. a surface used for Dimming).
+     */
+    SurfaceControl.Builder makeChildSurface(WindowContainer child) {
+        final WindowContainer p = getParent();
+        // Give the parent a chance to set properties. In hierarchy v1 we rely
+        // on this to set full-screen dimensions on all our Surface-less Layers.
+        final SurfaceControl.Builder b = p.makeChildSurface(child);
+        if (child != null && child.isScreenOverlay()) {
+            // If it's a screen overlay it's been promoted in the hierarchy (wrt to the
+            // WindowContainer hierarchy vs the SurfaceControl hierarchy)
+            // and we shouldn't set ourselves as the parent.
+            return b;
+        } else {
+            return b.setParent(mSurfaceControl);
+        }
+    }
+
+    /**
+     * There are various layers which require promotion from the WindowContainer
+     * hierarchy to the Overlay layer described in {@link DisplayContent}. See {@link WindowState}
+     * for the particular usage.
+     *
+     * TODO: Perhaps this should be eliminated, either through modifying
+     * the window container hierarchy or through modifying the way we express these overlay
+     * Surfaces (for example, the Magnification Overlay could be implemented like the Strict-mode
+     * Flash and not actually use a WindowState).
+     */
+    boolean isScreenOverlay() {
+        return false;
+    }
+
+    /**
+     * @return Whether this WindowContainer should be magnified by the accessibility magnifier.
+     */
+    boolean shouldMagnify() {
+        for (int i = 0; i < mChildren.size(); i++) {
+            if (!mChildren.get(i).shouldMagnify()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    SurfaceSession getSession() {
+        if (getParent() != null) {
+            return getParent().getSession();
+        }
+        return null;
+    }
+
+    void assignLayer(Transaction t, int layer) {
+        if (mSurfaceControl != null) {
+            t.setLayer(mSurfaceControl, layer);
+        }
+    }
+
+    void assignChildLayers(Transaction t) {
+        int layer = 0;
+        boolean boosting = false;
+
+        // We use two passes as a way to promote children which
+        // need Z-boosting to the end of the list.
+        for (int i = 0; i < 2; i++ ) {
+            for (int j = 0; j < mChildren.size(); ++j) {
+                final WindowContainer wc = mChildren.get(j);
+                if (wc.needsZBoost() && !boosting) {
+                    continue;
+                }
+                wc.assignLayer(t, layer);
+                wc.assignChildLayers(t);
+
+                layer++;
+            }
+            boosting = true;
+        }
+    }
+
+    void assignChildLayers() {
+        assignChildLayers(getPendingTransaction());
+    }
+
+    boolean needsZBoost() {
+        for (int i = 0; i < mChildren.size(); i++) {
+            if (mChildren.get(i).needsZBoost()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * Write to a protocol buffer output stream. Protocol buffer message definition is at
      * {@link com.android.server.wm.proto.WindowContainerProto}.
@@ -718,5 +847,60 @@ a     * Returns whether this child is on top of the window hierarchy.
             mConsumer = null;
             mConsumerWrapperPool.release(this);
         }
+    }
+
+    // TODO(b/68336570): Should this really be on WindowContainer since it
+    // can only be used on the top-level nodes that aren't animated?
+    // (otherwise we would be fighting other callers of setMatrix).
+    void applyMagnificationSpec(Transaction t, MagnificationSpec spec) {
+        if (shouldMagnify()) {
+            t.setMatrix(mSurfaceControl, spec.scale, 0, 0, spec.scale)
+                    .setPosition(mSurfaceControl, spec.offsetX, spec.offsetY);
+        } else {
+            for (int i = 0; i < mChildren.size(); i++) {
+                mChildren.get(i).applyMagnificationSpec(t, spec);
+            }
+        }
+    }
+
+    /**
+     * TODO: Once we totally eliminate global transaction we will pass transaction in here
+     * rather than merging to global.
+     */
+    void prepareSurfaces() {
+        SurfaceControl.mergeToGlobalTransaction(getPendingTransaction());
+        for (int i = 0; i < mChildren.size(); i++) {
+            mChildren.get(i).prepareSurfaces();
+        }
+    }
+
+    /**
+     * Trigger a call to prepareSurfaces from the animation thread, such that
+     * mPendingTransaction will be applied.
+     */
+    void scheduleAnimation() {
+        if (mParent != null) {
+            mParent.scheduleAnimation();
+        }
+    }
+
+    SurfaceControl getSurfaceControl() {
+        return mSurfaceControl;
+    }
+
+    /**
+     * Destroy a given surface after executing mPendingTransaction. This is
+     * largely a workaround for destroy not being part of transactions
+     * rather than an intentional design, so please take care when
+     * expanding use.
+     */
+    void destroyAfterPendingTransaction(SurfaceControl surface) {
+        if (mParent != null) {
+            mParent.destroyAfterPendingTransaction(surface);
+        }
+    }
+    
+    Transaction getPendingTransaction() {
+        return mPendingTransaction;
     }
 }

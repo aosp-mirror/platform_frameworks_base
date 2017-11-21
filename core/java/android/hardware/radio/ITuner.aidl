@@ -94,5 +94,17 @@ interface ITuner {
      */
     void setAnalogForced(boolean isForced);
 
+    /**
+     * @param parameters Vendor-specific key-value pairs, must be Map<String, String>
+     * @return Vendor-specific key-value pairs, must be Map<String, String>
+     */
+    Map setParameters(in Map parameters);
+
+    /**
+     * @param keys Parameter keys to fetch
+     * @return Vendor-specific key-value pairs, must be Map<String, String>
+     */
+    Map getParameters(in List<String> keys);
+
     boolean isAntennaConnected();
 }

@@ -45,7 +45,7 @@ static Typeface::Style computeAPIStyle(int weight, bool italic) {
 
 static minikin::FontStyle computeMinikinStyle(int weight, bool italic) {
     return minikin::FontStyle(uirenderer::MathUtils::clamp(weight, 1, 1000),
-                              static_cast<minikin::FontSlant>(italic));
+                              static_cast<minikin::FontStyle::Slant>(italic));
 }
 
 // Resolve the relative weight from the baseWeight and target style.

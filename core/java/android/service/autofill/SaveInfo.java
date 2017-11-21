@@ -613,6 +613,11 @@ public final class SaveInfo implements Parcelable {
          *         usernameId, passwordId);
          * </pre>
          *
+         * <p>The sanitizer can also be used as an alternative for a
+         * {@link #setValidator(Validator) validator}&mdashif any of the {@code ids} is a
+         * {@link #SaveInfo.Builder(int, AutofillId[]) required id} and the {@code sanitizer} fail
+         * for it, then the save UI is not shown.
+         *
          * @param sanitizer an implementation provided by the Android System.
          * @param ids id of fields whose value will be sanitized.
          * @return this builder.

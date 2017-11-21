@@ -47,6 +47,8 @@ public:
     void onConditionChanged(const bool conditionMet, const uint64_t eventTime) override;
 
     void finish() override;
+    void flushIfNeeded(const uint64_t newEventTime) override {
+    }
 
     // TODO: Pass a timestamp as a parameter in onDumpReport.
     std::unique_ptr<std::vector<uint8_t>> onDumpReport() override;

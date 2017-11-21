@@ -73,7 +73,7 @@ StatsService::StatsService(const sp<Looper>& handlerLooper)
 {
     mUidMap = new UidMap();
     mConfigManager = new ConfigManager();
-    mProcessor = new StatsLogProcessor(mUidMap, [this](const ConfigKey& key) {
+    mProcessor = new StatsLogProcessor(mUidMap, mAnomalyMonitor, [this](const ConfigKey& key) {
         auto sc = getStatsCompanionService();
         auto receiver = mConfigManager->GetConfigReceiver(key);
         if (sc == nullptr) {
@@ -554,7 +554,10 @@ Status StatsService::informAnomalyAlarmFired() {
 
     if (DEBUG) ALOGD("StatsService::informAnomalyAlarmFired succeeded");
     // TODO: check through all counters/timers and see if an anomaly has indeed occurred.
-
+    uint64_t currentTimeNs = time(nullptr) * NS_PER_SEC;
+    std::unordered_set<sp<const AnomalyAlarm>, SpHash<AnomalyAlarm>> anomalySet =
+            mAnomalyMonitor->onAlarmFired(currentTimeNs);
+    mProcessor->onAnomalyAlarmFired(currentTimeNs, anomalySet);
     return Status::ok();
 }
 
@@ -690,12 +693,6 @@ Status StatsService::removeConfiguration(const String16& key, bool* success) {
 }
 
 void StatsService::binderDied(const wp <IBinder>& who) {
-    for (size_t i = 0; i < mCallbacks.size(); i++) {
-        if (IInterface::asBinder(mCallbacks[i]) == who) {
-            mCallbacks.removeAt(i);
-            break;
-        }
-    }
 }
 
 }  // namespace statsd

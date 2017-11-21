@@ -76,6 +76,7 @@ final class ViewState {
     private FillResponse mResponse;
     private AutofillValue mCurrentValue;
     private AutofillValue mAutofilledValue;
+    private AutofillValue mSanitizedValue;
     private Rect mVirtualBounds;
     private int mState;
     private String mDatasetId;
@@ -114,6 +115,15 @@ final class ViewState {
 
     void setAutofilledValue(@Nullable AutofillValue value) {
         mAutofilledValue = value;
+    }
+
+    @Nullable
+    AutofillValue getSanitizedValue() {
+        return mSanitizedValue;
+    }
+
+    void setSanitizedValue(@Nullable AutofillValue value) {
+        mSanitizedValue = value;
     }
 
     @Nullable
@@ -218,6 +228,7 @@ final class ViewState {
         }
         pw.print(prefix); pw.print("currentValue:" ); pw.println(mCurrentValue);
         pw.print(prefix); pw.print("autofilledValue:" ); pw.println(mAutofilledValue);
+        pw.print(prefix); pw.print("sanitizedValue:" ); pw.println(mSanitizedValue);
         pw.print(prefix); pw.print("virtualBounds:" ); pw.println(mVirtualBounds);
     }
 }

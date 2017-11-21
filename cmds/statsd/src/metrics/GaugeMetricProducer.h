@@ -19,6 +19,7 @@
 #include <unordered_map>
 
 #include <android/util/ProtoOutputStream.h>
+#include <gtest/gtest_prod.h>
 #include "../condition/ConditionTracker.h"
 #include "../external/PullDataReceiver.h"
 #include "../external/StatsPullerManager.h"
@@ -35,6 +36,7 @@ struct GaugeBucket {
     int64_t mBucketStartNs;
     int64_t mBucketEndNs;
     int64_t mGauge;
+    uint64_t mBucketNum;
 };
 
 // This gauge metric producer first register the puller to automatically pull the gauge at the
@@ -46,7 +48,8 @@ public:
     // TODO: Pass in the start time from MetricsManager, it should be consistent
     // for all metrics.
     GaugeMetricProducer(const GaugeMetric& countMetric, const int conditionIndex,
-                        const sp<ConditionWizard>& wizard, const int pullTagId);
+                        const sp<ConditionWizard>& wizard, const int pullTagId,
+                        const int64_t startTimeNs);
 
     virtual ~GaugeMetricProducer();
 
@@ -57,6 +60,7 @@ public:
     void onSlicedConditionMayChange(const uint64_t eventTime) override;
 
     void finish() override;
+    void flushIfNeeded(const uint64_t newEventTime) override;
 
     // TODO: Pass a timestamp as a parameter in onDumpReport.
     std::unique_ptr<std::vector<uint8_t>> onDumpReport() override;
@@ -92,13 +96,15 @@ private:
     std::unordered_map<HashableDimensionKey, std::vector<GaugeBucket>> mPastBuckets;
 
     // The current bucket.
-    std::unordered_map<HashableDimensionKey, long> mCurrentSlicedBucket;
+    std::shared_ptr<DimToValMap> mCurrentSlicedBucket = std::make_shared<DimToValMap>();
 
-    void flushGaugeIfNeededLocked(const uint64_t newEventTime);
+    int64_t getGauge(const LogEvent& event);
 
-    long getGauge(const LogEvent& event);
+    static const size_t kBucketSize = sizeof(GaugeBucket{});
 
-    size_t mByteSize;
+    FRIEND_TEST(GaugeMetricProducerTest, TestWithCondition);
+    FRIEND_TEST(GaugeMetricProducerTest, TestNoCondition);
+    FRIEND_TEST(GaugeMetricProducerTest, TestAnomalyDetection);
 };
 
 }  // namespace statsd

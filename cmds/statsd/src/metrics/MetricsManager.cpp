@@ -38,8 +38,8 @@ namespace statsd {
 
 MetricsManager::MetricsManager(const StatsdConfig& config) {
     mConfigValid = initStatsdConfig(config, mTagIds, mAllLogEntryMatchers, mAllConditionTrackers,
-                                    mAllMetricProducers, mConditionToMetricMap, mTrackerToMetricMap,
-                                    mTrackerToConditionMap);
+                                    mAllMetricProducers, mAllAnomalyTrackers, mConditionToMetricMap,
+                                    mTrackerToMetricMap, mTrackerToConditionMap);
 }
 
 MetricsManager::~MetricsManager() {
@@ -147,6 +147,19 @@ void MetricsManager::onLogEvent(const LogEvent& event) {
                 }
             }
         }
+    }
+}
+
+void MetricsManager::onAnomalyAlarmFired(const uint64_t timestampNs,
+                                         sp<const AnomalyAlarm> anomaly) {
+    for (const auto& itr : mAllAnomalyTrackers) {
+        itr->declareAnomaly(timestampNs);
+    }
+}
+
+void MetricsManager::setAnomalyMonitor(const sp<AnomalyMonitor>& anomalyMonitor) {
+    for (auto& itr : mAllAnomalyTrackers) {
+        itr->setAnomalyMonitor(anomalyMonitor);
     }
 }
 

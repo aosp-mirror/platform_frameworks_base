@@ -48,8 +48,7 @@ public class ContextHubInfo {
     private MemoryRegion[] mMemoryRegions;
 
     /*
-     * TODO(b/66965339): Deprecate this constructor and the setter methods, and mark private fields
-     * as final when the ContextHubService JNI code is removed.
+     * TODO(b/67734082): Deprecate this constructor and mark private fields as final.
      */
     public ContextHubInfo() {
     }
@@ -89,34 +88,12 @@ public class ContextHubInfo {
     }
 
     /**
-     * set the context hub unique identifer
-     *
-     * @param bytes - Maximum number of bytes per message
-     *
-     * @hide
-     */
-    public void setMaxPacketLenBytes(int bytes) {
-        mMaxPacketLengthBytes = bytes;
-    }
-
-    /**
      * get the context hub unique identifer
      *
      * @return int - unique system wide identifier
      */
     public int getId() {
         return mId;
-    }
-
-    /**
-     * set the context hub unique identifer
-     *
-     * @param id - unique system wide identifier for the hub
-     *
-     * @hide
-     */
-    public void setId(int id) {
-        mId = id;
     }
 
     /**
@@ -129,34 +106,12 @@ public class ContextHubInfo {
     }
 
     /**
-     * set a string as the hub name
-     *
-     * @param name - the name for the hub
-     *
-     * @hide
-     */
-    public void setName(String name) {
-        mName = name;
-    }
-
-    /**
      * get a string as the vendor name
      *
      * @return String - a name for the vendor
      */
     public String getVendor() {
         return mVendor;
-    }
-
-    /**
-     * set a string as the vendor name
-     *
-     * @param vendor - a name for the vendor
-     *
-     * @hide
-     */
-    public void setVendor(String vendor) {
-        mVendor = vendor;
     }
 
     /**
@@ -169,34 +124,12 @@ public class ContextHubInfo {
     }
 
     /**
-     * set tool chain string
-     *
-     * @param toolchain - description of the tool chain
-     *
-     * @hide
-     */
-    public void setToolchain(String toolchain) {
-        mToolchain = toolchain;
-    }
-
-    /**
      * get platform version
      *
      * @return int - platform version number
      */
     public int getPlatformVersion() {
         return mPlatformVersion;
-    }
-
-    /**
-     * set platform version
-     *
-     * @param platformVersion - platform version number
-     *
-     * @hide
-     */
-    public void setPlatformVersion(int platformVersion) {
-        mPlatformVersion = platformVersion;
     }
 
     /**
@@ -209,15 +142,6 @@ public class ContextHubInfo {
     }
 
     /**
-     * set platform software version
-     *
-     * @param staticSwVersion - platform static s/w version number
-     *
-     * @hide
-     */
-    public void setStaticSwVersion(int staticSwVersion) {}
-
-    /**
      * get the tool chain version
      *
      * @return int - the tool chain version
@@ -227,34 +151,12 @@ public class ContextHubInfo {
     }
 
     /**
-     * set the tool chain version number
-     *
-     * @param toolchainVersion - tool chain version number
-     *
-     * @hide
-     */
-    public void setToolchainVersion(int toolchainVersion) {
-        mToolchainVersion = toolchainVersion;
-    }
-
-    /**
      * get the peak processing mips the hub can support
      *
      * @return float - peak MIPS that this hub can deliver
      */
     public float getPeakMips() {
         return mPeakMips;
-    }
-
-    /**
-     * set the peak mips that this hub can support
-     *
-     * @param peakMips - peak mips this hub can deliver
-     *
-     * @hide
-     */
-    public void setPeakMips(float peakMips) {
-        mPeakMips = peakMips;
     }
 
     /**
@@ -268,17 +170,6 @@ public class ContextHubInfo {
      */
     public float getStoppedPowerDrawMw() {
         return mStoppedPowerDrawMw;
-    }
-
-    /**
-     * Set the power consumed by the hub in stopped state
-     *
-     * @param stoppedPowerDrawMw - stopped power in milli watts
-     *
-     * @hide
-     */
-    public void setStoppedPowerDrawMw(float stoppedPowerDrawMw) {
-        mStoppedPowerDrawMw = stoppedPowerDrawMw;
     }
 
     /**
@@ -297,17 +188,6 @@ public class ContextHubInfo {
     }
 
     /**
-     * Set the sleep power draw in milliwatts
-     *
-     * @param sleepPowerDrawMw - sleep power draw in milliwatts.
-     *
-     * @hide
-     */
-    public void setSleepPowerDrawMw(float sleepPowerDrawMw) {
-        mSleepPowerDrawMw = sleepPowerDrawMw;
-    }
-
-    /**
      * get the peak powe draw of the hub. This is the power consumed
      * by the hub at maximum load.
      *
@@ -315,18 +195,6 @@ public class ContextHubInfo {
      */
     public float getPeakPowerDrawMw() {
         return mPeakPowerDrawMw;
-    }
-
-    /**
-     * set the peak power draw of the hub
-     *
-     * @param peakPowerDrawMw - peak power draw of the hub in
-     *                        milliwatts.
-     *
-     * @hide
-     */
-    public void setPeakPowerDrawMw(float peakPowerDrawMw) {
-        mPeakPowerDrawMw = peakPowerDrawMw;
     }
 
     /**
@@ -349,30 +217,6 @@ public class ContextHubInfo {
      */
     public MemoryRegion[] getMemoryRegions() {
         return Arrays.copyOf(mMemoryRegions, mMemoryRegions.length);
-    }
-
-    /**
-     * set the supported sensors on this hub
-     *
-     * @param supportedSensors - supported sensors on this hub
-     *
-     * @hide
-     */
-    public void setSupportedSensors(int[] supportedSensors) {
-        mSupportedSensors = Arrays.copyOf(supportedSensors, supportedSensors.length);
-    }
-
-    /**
-     * set memory regions for this hub
-     *
-     * @param memoryRegions - memory regions information
-     *
-     * @see MemoryRegion
-     *
-     * @hide
-     */
-    public void setMemoryRegions(MemoryRegion[] memoryRegions) {
-        mMemoryRegions = Arrays.copyOf(memoryRegions, memoryRegions.length);
     }
 
     /**

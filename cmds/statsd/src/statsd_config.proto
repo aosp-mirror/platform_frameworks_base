@@ -113,11 +113,11 @@ message Bucket {
 }
 
 message EventConditionLink {
-  optional string condition = 1;
+    optional string condition = 1;
 
-  repeated KeyMatcher key_in_main = 2;
+    repeated KeyMatcher key_in_main = 2;
 
-  repeated KeyMatcher key_in_condition = 3;
+    repeated KeyMatcher key_in_condition = 3;
 }
 
 message EventMetric {
@@ -217,8 +217,6 @@ message Alert {
     optional int32 refractory_period_secs = 5;
 
     optional int64 trigger_if_sum_gt = 6;
-
-    optional int32 refractory_period_in_buckets = 7;
 }
 
 message StatsdConfig {

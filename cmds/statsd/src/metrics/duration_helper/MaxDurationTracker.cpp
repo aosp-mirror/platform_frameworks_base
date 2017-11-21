@@ -23,14 +23,18 @@ namespace android {
 namespace os {
 namespace statsd {
 
-MaxDurationTracker::MaxDurationTracker(sp<ConditionWizard> wizard, int conditionIndex, bool nesting,
+MaxDurationTracker::MaxDurationTracker(const HashableDimensionKey& eventKey,
+                                       sp<ConditionWizard> wizard, int conditionIndex, bool nesting,
                                        uint64_t currentBucketStartNs, uint64_t bucketSizeNs,
+                                       const std::vector<sp<AnomalyTracker>>& anomalyTrackers,
                                        std::vector<DurationBucket>& bucket)
-    : DurationTracker(wizard, conditionIndex, nesting, currentBucketStartNs, bucketSizeNs, bucket) {
+    : DurationTracker(eventKey, wizard, conditionIndex, nesting, currentBucketStartNs, bucketSizeNs,
+                      anomalyTrackers, bucket) {
 }
 
 void MaxDurationTracker::noteStart(const HashableDimensionKey& key, bool condition,
                                    const uint64_t eventTime, const ConditionKey& conditionKey) {
+    flushIfNeeded(eventTime);
     // this will construct a new DurationInfo if this key didn't exist.
     DurationInfo& duration = mInfos[key];
     duration.conditionKeys = conditionKey;
@@ -56,8 +60,11 @@ void MaxDurationTracker::noteStart(const HashableDimensionKey& key, bool conditi
     }
 }
 
+
 void MaxDurationTracker::noteStop(const HashableDimensionKey& key, const uint64_t eventTime,
                                   bool forceStop) {
+    flushIfNeeded(eventTime);
+    declareAnomalyIfAlarmExpired(eventTime);
     VLOG("MaxDuration: key %s stop", key.c_str());
     if (mInfos.find(key) == mInfos.end()) {
         // we didn't see a start event before. do nothing.
@@ -78,6 +85,7 @@ void MaxDurationTracker::noteStop(const HashableDimensionKey& key, const uint64_
                      (long long)duration.lastStartTime, (long long)eventTime,
                      (long long)durationTime);
                 duration.lastDuration = duration.lastDuration + durationTime;
+                duration.lastStartTime = -1;
                 VLOG("  record duration: %lld ", (long long)duration.lastDuration);
             }
             break;
@@ -93,6 +101,7 @@ void MaxDurationTracker::noteStop(const HashableDimensionKey& key, const uint64_
 
     if (duration.lastDuration > mDuration) {
         mDuration = duration.lastDuration;
+        detectAndDeclareAnomaly(eventTime, mCurrentBucketNum, mDuration);
         VLOG("Max: new max duration: %lld", (long long)mDuration);
     }
     // Once an atom duration ends, we erase it. Next time, if we see another atom event with the
@@ -101,9 +110,14 @@ void MaxDurationTracker::noteStop(const HashableDimensionKey& key, const uint64_
         mInfos.erase(key);
     }
 }
+
 void MaxDurationTracker::noteStopAll(const uint64_t eventTime) {
-    for (auto& pair : mInfos) {
-        noteStop(pair.first, eventTime, true);
+    std::set<HashableDimensionKey> keys;
+    for (const auto& pair : mInfos) {
+        keys.insert(pair.first);
+    }
+    for (auto& key : keys) {
+        noteStop(key, eventTime, true);
     }
 }
 
@@ -122,7 +136,7 @@ bool MaxDurationTracker::flushIfNeeded(uint64_t eventTime) {
     DurationBucket info;
     info.mBucketStartNs = mCurrentBucketStartTimeNs;
     info.mBucketEndNs = endTime;
-
+    info.mBucketNum = mCurrentBucketNum;
 
     uint64_t oldBucketStartTimeNs = mCurrentBucketStartTimeNs;
     mCurrentBucketStartTimeNs += (numBucketsForward)*mBucketSizeNs;
@@ -165,6 +179,7 @@ bool MaxDurationTracker::flushIfNeeded(uint64_t eventTime) {
     if (mDuration != 0) {
         info.mDuration = mDuration;
         mBucket.push_back(info);
+        addPastBucketToAnomalyTrackers(info.mDuration, info.mBucketNum);
         VLOG("  final duration for last bucket: %lld", (long long)mDuration);
     }
 
@@ -174,11 +189,15 @@ bool MaxDurationTracker::flushIfNeeded(uint64_t eventTime) {
             DurationBucket info;
             info.mBucketStartNs = oldBucketStartTimeNs + mBucketSizeNs * i;
             info.mBucketEndNs = endTime + mBucketSizeNs * i;
+            info.mBucketNum = mCurrentBucketNum + i;
             info.mDuration = mBucketSizeNs;
             mBucket.push_back(info);
+            addPastBucketToAnomalyTrackers(info.mDuration, info.mBucketNum);
             VLOG("  filling gap bucket with duration %lld", (long long)mBucketSizeNs);
         }
     }
+
+    mCurrentBucketNum += numBucketsForward;
     // If this tracker has no pending events, tell owner to remove.
     return !hasPendingEvent;
 }
@@ -204,6 +223,8 @@ void MaxDurationTracker::onConditionChanged(bool condition, const uint64_t times
 
 void MaxDurationTracker::noteConditionChanged(const HashableDimensionKey& key, bool conditionMet,
                                               const uint64_t timestamp) {
+    flushIfNeeded(timestamp);
+    declareAnomalyIfAlarmExpired(timestamp);
     auto it = mInfos.find(key);
     if (it == mInfos.end()) {
         return;
@@ -215,7 +236,6 @@ void MaxDurationTracker::noteConditionChanged(const HashableDimensionKey& key, b
             if (!conditionMet) {
                 it->second.state = DurationState::kPaused;
                 it->second.lastDuration += (timestamp - it->second.lastStartTime);
-
                 VLOG("MaxDurationTracker Key: %s Started->Paused ", key.c_str());
             }
             break;
@@ -232,6 +252,16 @@ void MaxDurationTracker::noteConditionChanged(const HashableDimensionKey& key, b
             }
             break;
     }
+    if (it->second.lastDuration > mDuration) {
+        mDuration = it->second.lastDuration;
+        detectAndDeclareAnomaly(timestamp, mCurrentBucketNum, mDuration);
+    }
+}
+
+int64_t MaxDurationTracker::predictAnomalyTimestampNs(const AnomalyTracker& anomalyTracker,
+                                                      const uint64_t currentTimestamp) const {
+    ALOGE("Max duration producer does not support anomaly timestamp prediction!!!");
+    return currentTimestamp;
 }
 
 }  // namespace statsd

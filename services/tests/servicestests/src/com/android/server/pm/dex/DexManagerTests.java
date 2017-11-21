@@ -17,11 +17,14 @@
 package com.android.server.pm.dex;
 
 import android.content.pm.ApplicationInfo;
+import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
 import android.os.Build;
 import android.os.UserHandle;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
+
+import com.android.server.pm.Installer;
 
 import dalvik.system.DelegateLastClassLoader;
 import dalvik.system.PathClassLoader;
@@ -36,8 +39,13 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
+import org.mockito.quality.Strictness;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -45,6 +53,12 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import static com.android.server.pm.dex.PackageDexUsage.PackageUseInfo;
 import static com.android.server.pm.dex.PackageDexUsage.DexUseInfo;
@@ -55,6 +69,12 @@ public class DexManagerTests {
     private static final String PATH_CLASS_LOADER_NAME = PathClassLoader.class.getName();
     private static final String DELEGATE_LAST_CLASS_LOADER_NAME =
             DelegateLastClassLoader.class.getName();
+
+    @Rule public MockitoRule mockito = MockitoJUnit.rule().strictness(Strictness.STRICT_STUBS);
+    @Mock Installer mInstaller;
+    @Mock IPackageManager mPM;
+    private final Object mInstallLock = new Object();
+    @Mock DexManager.Listener mListener;
 
     private DexManager mDexManager;
 
@@ -90,7 +110,8 @@ public class DexManagerTests {
         mBarUser0DelegateLastClassLoader = new TestData(bar, isa, mUser0,
                 DELEGATE_LAST_CLASS_LOADER_NAME);
 
-        mDexManager = new DexManager(null, null, null, null);
+        mDexManager = new DexManager(
+            mPM, /*PackageDexOptimizer*/ null, mInstaller, mInstallLock, mListener);
 
         // Foo and Bar are available to user0.
         // Only Bar is available to user1;
@@ -440,6 +461,20 @@ public class DexManagerTests {
 
     }
 
+    @Test
+    public void testReconcileSecondaryDexFiles_invokesListener() throws Exception {
+        List<String> fooSecondaries = mFooUser0.getSecondaryDexPathsFromProtectedDirs();
+        notifyDexLoad(mFooUser0, fooSecondaries, mUser0);
+
+        when(mPM.getPackageInfo(mFooUser0.getPackageName(), 0, 0))
+                .thenReturn(mFooUser0.mPackageInfo);
+
+        mDexManager.reconcileSecondaryDexFiles(mFooUser0.getPackageName());
+
+        verify(mListener, times(fooSecondaries.size()))
+                .onReconcileSecondaryDexFile(any(ApplicationInfo.class),
+                        any(DexUseInfo.class), anyString(), anyInt());
+    }
 
     private void assertSecondaryUse(TestData testData, PackageUseInfo pui,
             List<String> secondaries, boolean isUsedByOtherApps, int ownerUserId,
@@ -492,12 +527,12 @@ public class DexManagerTests {
     }
 
     private PackageUseInfo getPackageUseInfo(TestData testData) {
-        assertTrue(mDexManager.hasInfoOnPackage(testData.mPackageInfo.packageName));
-        return mDexManager.getPackageUseInfoOrDefault(testData.mPackageInfo.packageName);
+        assertTrue(mDexManager.hasInfoOnPackage(testData.getPackageName()));
+        return mDexManager.getPackageUseInfoOrDefault(testData.getPackageName());
     }
 
     private void assertNoUseInfo(TestData testData) {
-        assertFalse(mDexManager.hasInfoOnPackage(testData.mPackageInfo.packageName));
+        assertFalse(mDexManager.hasInfoOnPackage(testData.getPackageName()));
     }
 
     private static PackageInfo getMockPackageInfo(String packageName, int userId) {
@@ -555,8 +590,8 @@ public class DexManagerTests {
 
         List<String> getSecondaryDexPathsFromProtectedDirs() {
             List<String> paths = new ArrayList<>();
-            paths.add(mPackageInfo.applicationInfo.dataDir + "/secondary6.dex");
-            paths.add(mPackageInfo.applicationInfo.dataDir + "/secondary7.dex");
+            paths.add(mPackageInfo.applicationInfo.deviceProtectedDataDir + "/secondary6.dex");
+            paths.add(mPackageInfo.applicationInfo.credentialProtectedDataDir + "/secondary7.dex");
             return paths;
         }
 

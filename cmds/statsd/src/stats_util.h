@@ -35,15 +35,14 @@ typedef std::string HashableDimensionKey;
 
 typedef std::map<std::string, HashableDimensionKey> ConditionKey;
 
-// TODO: For P, change int to int64_t.
-// TODO: Should HashableDimensionKey be marked here as const?
-typedef std::unordered_map<HashableDimensionKey, int> DimToValMap;
+typedef std::unordered_map<HashableDimensionKey, int64_t> DimToValMap;
 
 EventMetricData parse(log_msg msg);
 
 int getTagId(log_msg msg);
 
 std::string getHashableKey(std::vector<KeyValuePair> key);
+
 }  // namespace statsd
 }  // namespace os
 }  // namespace android
