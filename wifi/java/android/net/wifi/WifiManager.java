@@ -3486,27 +3486,23 @@ public class WifiManager {
     }
 
     /**
-     * Set setting for allowing Scans when traffic is ongoing.
+     * Deprecated
+     * Does nothing
      * @hide
+     * @deprecated
      */
     public void setAllowScansWithTraffic(int enabled) {
-        try {
-            mService.setAllowScansWithTraffic(enabled);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return;
     }
 
     /**
-     * Get setting for allowing Scans when traffic is ongoing.
+     * Deprecated
+     * returns value for 'disabled'
      * @hide
+     * @deprecated
      */
     public int getAllowScansWithTraffic() {
-        try {
-            return mService.getAllowScansWithTraffic();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return 0;
     }
 
     /**
@@ -3536,29 +3532,23 @@ public class WifiManager {
     }
 
     /**
-     * Framework layer autojoin enable/disable when device is associated
-     * this will enable/disable autojoin scan and switch network when connected
-     * @return true -- if set successful false -- if set failed
+     * Deprecated
+     * returns false
      * @hide
+     * @deprecated
      */
     public boolean setEnableAutoJoinWhenAssociated(boolean enabled) {
-        try {
-            return mService.setEnableAutoJoinWhenAssociated(enabled);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return false;
     }
 
     /**
-     * Get setting for Framework layer autojoin enable status
+     * Deprecated
+     * returns false
      * @hide
+     * @deprecated
      */
     public boolean getEnableAutoJoinWhenAssociated() {
-        try {
-            return mService.getEnableAutoJoinWhenAssociated();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return false;
     }
 
     /**
