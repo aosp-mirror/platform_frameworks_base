@@ -16,7 +16,6 @@
 
 package android.net.metrics;
 
-import android.net.MacAddress;
 import android.os.Process;
 import android.os.SystemClock;
 import android.util.SparseIntArray;
@@ -80,7 +79,7 @@ public class WakeupStats {
                 break;
         }
 
-        switch (MacAddress.macAddressType(ev.dstHwAddr)) {
+        switch (ev.dstHwAddr.addressType()) {
             case UNICAST:
                 l2UnicastCount++;
                 break;
