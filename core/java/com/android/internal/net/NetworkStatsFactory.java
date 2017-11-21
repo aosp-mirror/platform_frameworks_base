@@ -62,6 +62,8 @@ public class NetworkStatsFactory {
     /** Path to {@code /proc/net/xt_qtaguid/stats}. */
     private final File mStatsXtUid;
 
+    private boolean mUseBpfStats;
+
     // TODO: to improve testability and avoid global state, do not use a static variable.
     @GuardedBy("sStackedIfaces")
     private static final ArrayMap<String, String> sStackedIfaces = new ArrayMap<>();
@@ -77,14 +79,15 @@ public class NetworkStatsFactory {
     }
 
     public NetworkStatsFactory() {
-        this(new File("/proc/"));
+        this(new File("/proc/"), new File("/sys/fs/bpf/traffic_uid_stats_map").exists());
     }
 
     @VisibleForTesting
-    public NetworkStatsFactory(File procRoot) {
+    public NetworkStatsFactory(File procRoot, boolean useBpfStats) {
         mStatsXtIfaceAll = new File(procRoot, "net/xt_qtaguid/iface_stat_all");
         mStatsXtIfaceFmt = new File(procRoot, "net/xt_qtaguid/iface_stat_fmt");
         mStatsXtUid = new File(procRoot, "net/xt_qtaguid/stats");
+        mUseBpfStats = useBpfStats;
     }
 
     /**
@@ -252,7 +255,7 @@ public class NetworkStatsFactory {
                 stats = new NetworkStats(SystemClock.elapsedRealtime(), -1);
             }
             if (nativeReadNetworkStatsDetail(stats, mStatsXtUid.getAbsolutePath(), limitUid,
-                    limitIfaces, limitTag) != 0) {
+                    limitIfaces, limitTag, mUseBpfStats) != 0) {
                 throw new IOException("Failed to parse network stats");
             }
             if (SANITY_CHECK_NATIVE) {
@@ -346,6 +349,6 @@ public class NetworkStatsFactory {
      * are expected to monotonically increase since device boot.
      */
     @VisibleForTesting
-    public static native int nativeReadNetworkStatsDetail(
-            NetworkStats stats, String path, int limitUid, String[] limitIfaces, int limitTag);
+    public static native int nativeReadNetworkStatsDetail(NetworkStats stats, String path,
+        int limitUid, String[] limitIfaces, int limitTag, boolean useBpfStats);
 }
