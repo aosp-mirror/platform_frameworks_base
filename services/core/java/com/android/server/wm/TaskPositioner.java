@@ -399,6 +399,27 @@ class TaskPositioner implements DimLayer.DimLayerUser {
         mStartOrientationWasLandscape = startBounds.width() >= startBounds.height();
         mWindowOriginalBounds.set(startBounds);
 
+        // Notify the app that resizing has started, even though we haven't received any new
+        // bounds yet. This will guarantee that the app starts the backdrop renderer before
+        // configuration changes which could cause an activity restart.
+        if (mResizing) {
+            synchronized (mService.mWindowMap) {
+                notifyMoveLocked(startX, startY);
+            }
+
+            // Perform the resize on the WMS handler thread when we don't have the WMS lock held
+            // to ensure that we don't deadlock WMS and AMS. Note that WindowPositionerEventReceiver
+            // callbacks are delivered on the same handler so this initial resize is always
+            // guaranteed to happen before subsequent drag resizes.
+            mService.mH.post(() -> {
+                try {
+                    mService.mActivityManager.resizeTask(
+                            mTask.mTaskId, startBounds, RESIZE_MODE_USER_FORCED);
+                } catch (RemoteException e) {
+                }
+            });
+        }
+
         // Make sure we always have valid drag bounds even if the drag ends before any move events
         // have been handled.
         mWindowDragBounds.set(startBounds);
