@@ -91,6 +91,8 @@ message Atom {
         CpuTimePerFreqPulled cpu_time_per_freq_pulled = 1008;
         CpuTimePerUidPulled cpu_time_per_uid_pulled = 1009;
         CpuTimePerUidFreqPulled cpu_time_per_uid_freq_pulled = 1010;
+        WifiActivityEnergyInfoPulled wifi_activity_energy_info_pulled = 1011;
+        ModemActivityInfoPulled modem_activity_info_pulled = 1012;
     }
 }
 
@@ -699,7 +701,7 @@ message SettingChanged {
     optional int32 user = 7;
 }
 
-/*
+/**
  * Logs activity going to foreground or background
  *
  * Logged from:
@@ -839,7 +841,7 @@ message KernelWakelockPulled {
     optional int64 time = 4;
 }
 
-/*
+/**
  * Pulls PowerStatePlatformSleepState.
  *
  * Definition here:
@@ -899,7 +901,7 @@ message IsolatedUidChanged {
     optional int32 is_create = 3;
 }
 
-/*
+/**
  * Pulls Cpu time per frequency.
  * Note: this should be pulled for gauge metric only, without condition.
  * The puller keeps internal state of last values. It should not be pulled by
@@ -916,7 +918,7 @@ message CpuTimePerFreqPulled {
     optional uint64 time = 3;
 }
 
-/*
+/**
  * Pulls Cpu Time Per Uid.
  * Note that isolated process uid time should be attributed to host uids.
  */
@@ -964,4 +966,57 @@ message PacketWakeupOccurred {
     optional int32 source_port = 8;
     // The destination port if this was a TCP or UDP packet.
     optional int32 destination_port = 9;
+}
+
+/**
+ * Pulls Wifi Controller Activity Energy Info
+ */
+message WifiActivityEnergyInfoPulled {
+    // timestamp(wall clock) of record creation
+    optional uint64 timestamp_ms = 1;
+    // stack reported state
+    // TODO: replace this with proto enum
+    optional int32 stack_state = 2;
+    // tx time in ms
+    optional uint64 controller_tx_time_ms = 3;
+    // rx time in ms
+    optional uint64 controller_rx_time_ms = 4;
+    // idle time in ms
+    optional uint64 controller_idle_time_ms = 5;
+    // product of current(mA), voltage(V) and time(ms)
+    optional uint64 controller_energy_used = 6;
+}
+
+/**
+ * Pulls Modem Activity Energy Info
+ */
+message ModemActivityInfoPulled {
+    // timestamp(wall clock) of record creation
+    optional uint64 timestamp_ms = 1;
+    // sleep time in ms.
+    optional uint64 sleep_time_ms = 2;
+    // idle time in ms
+    optional uint64 controller_idle_time_ms = 3;
+    /**
+     * Tx power index
+     * index 0 = tx_power < 0dBm
+     * index 1 = 0dBm < tx_power < 5dBm
+     * index 2 = 5dBm < tx_power < 15dBm
+     * index 3 = 15dBm < tx_power < 20dBm
+     * index 4 = tx_power > 20dBm
+     */
+    // tx time in ms at power level 0
+    optional uint64 controller_tx_time_pl0_ms = 4;
+    // tx time in ms at power level 1
+    optional uint64 controller_tx_time_pl1_ms = 5;
+    // tx time in ms at power level 2
+    optional uint64 controller_tx_time_pl2_ms = 6;
+    // tx time in ms at power level 3
+    optional uint64 controller_tx_time_pl3_ms = 7;
+    // tx time in ms at power level 4
+    optional uint64 controller_tx_time_pl4_ms = 8;
+    // rx time in ms at power level 5
+    optional uint64 controller_rx_time_ms = 9;
+    // product of current(mA), voltage(V) and time(ms)
+    optional uint64 energy_used = 10;
 }
