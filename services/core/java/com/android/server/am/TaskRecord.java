@@ -257,6 +257,11 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
     /** Current stack. Setter must always be used to update the value. */
     private ActivityStack mStack;
 
+    /** The process that had previously hosted the root activity of this task.
+     * Used to know that we should try harder to keep this process around, in case the
+     * user wants to return to it. */
+    private ProcessRecord mRootProcess;
+
     /** Takes on same value as first root activity */
     boolean isPersistable = false;
     int maxRecents;
@@ -961,6 +966,8 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
             inRecents = false;
             mService.notifyTaskPersisterLocked(this, false);
         }
+
+        clearRootProcess();
 
         // TODO: Use window container controller once tasks are better synced between AM and WM
         mService.mWindowManager.notifyTaskRemovedFromRecents(taskId, userId);
@@ -2114,6 +2121,22 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         }
     }
 
+    void setRootProcess(ProcessRecord proc) {
+        clearRootProcess();
+        if (intent != null &&
+                (intent.getFlags() & Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS) == 0) {
+            mRootProcess = proc;
+            proc.recentTasks.add(this);
+        }
+    }
+
+    void clearRootProcess() {
+        if (mRootProcess != null) {
+            mRootProcess.recentTasks.remove(this);
+            mRootProcess = null;
+        }
+    }
+
     void dump(PrintWriter pw, String prefix) {
         pw.print(prefix); pw.print("userId="); pw.print(userId);
                 pw.print(" effectiveUid="); UserHandle.formatUid(pw, effectiveUid);
@@ -2197,6 +2220,9 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         }
         if (lastDescription != null) {
             pw.print(prefix); pw.print("lastDescription="); pw.println(lastDescription);
+        }
+        if (mRootProcess != null) {
+            pw.print(prefix); pw.print("mRootProcess="); pw.println(mRootProcess);
         }
         pw.print(prefix); pw.print("stackId="); pw.println(getStackId());
         pw.print(prefix + "hasBeenVisible=" + hasBeenVisible);

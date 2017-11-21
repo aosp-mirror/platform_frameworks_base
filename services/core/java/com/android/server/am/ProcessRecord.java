@@ -164,6 +164,8 @@ final class ProcessRecord {
 
     // all activities running in the process
     final ArrayList<ActivityRecord> activities = new ArrayList<>();
+    // any tasks this process had run root activities in
+    final ArrayList<TaskRecord> recentTasks = new ArrayList<>();
     // all ServiceRecord running in this process
     final ArraySet<ServiceRecord> services = new ArraySet<>();
     // services that are currently executing code (need to remain foreground).
@@ -396,6 +398,12 @@ final class ProcessRecord {
                 pw.print(prefix); pw.print("  - "); pw.println(activities.get(i));
             }
         }
+        if (recentTasks.size() > 0) {
+            pw.print(prefix); pw.println("Recent Tasks:");
+            for (int i=0; i<recentTasks.size(); i++) {
+                pw.print(prefix); pw.print("  - "); pw.println(recentTasks.get(i));
+            }
+        }
         if (services.size() > 0) {
             pw.print(prefix); pw.println("Services:");
             for (int i=0; i<services.size(); i++) {
@@ -510,6 +518,13 @@ final class ProcessRecord {
                 holder.state = null;
             }
         }
+    }
+
+    public void clearRecentTasks() {
+        for (int i = recentTasks.size() - 1; i >= 0; i--) {
+            recentTasks.get(i).clearRootProcess();
+        }
+        recentTasks.clear();
     }
 
     /**
