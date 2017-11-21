@@ -90,6 +90,31 @@ import java.util.concurrent.Executor;
  * another process. The hierarchy is inflated from a layout resource
  * file, and this class provides some basic operations for modifying
  * the content of the inflated hierarchy.
+ *
+ * <p>{@code RemoteViews} is limited to support for the following layouts:</p>
+ * <ul>
+ *   <li>{@link android.widget.AdapterViewFlipper}</li>
+ *   <li>{@link android.widget.FrameLayout}</li>
+ *   <li>{@link android.widget.GridLayout}</li>
+ *   <li>{@link android.widget.GridView}</li>
+ *   <li>{@link android.widget.LinearLayout}</li>
+ *   <li>{@link android.widget.ListView}</li>
+ *   <li>{@link android.widget.RelativeLayout}</li>
+ *   <li>{@link android.widget.StackView}</li>
+ *   <li>{@link android.widget.ViewFlipper}</li>
+ * </ul>
+ * <p>And the following widgets:</p>
+ * <ul>
+ *   <li>{@link android.widget.AnalogClock}</li>
+ *   <li>{@link android.widget.Button}</li>
+ *   <li>{@link android.widget.Chronometer}</li>
+ *   <li>{@link android.widget.ImageButton}</li>
+ *   <li>{@link android.widget.ImageView}</li>
+ *   <li>{@link android.widget.ProgressBar}</li>
+ *   <li>{@link android.widget.TextClock}</li>
+ *   <li>{@link android.widget.TextView}</li>
+ * </ul>
+ * <p>Descendants of these classes are not supported.</p>
  */
 public class RemoteViews implements Parcelable, Filter {
 
