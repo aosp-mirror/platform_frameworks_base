@@ -358,6 +358,11 @@ public abstract class AccessibilityService extends Service {
      */
     public static final int GLOBAL_ACTION_TOGGLE_SPLIT_SCREEN = 7;
 
+    /**
+     * Action to lock the screen
+     */
+    public static final int GLOBAL_ACTION_LOCK_SCREEN = 8;
+
     private static final String LOG_TAG = "AccessibilityService";
 
     /**
