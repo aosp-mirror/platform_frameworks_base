@@ -2793,7 +2793,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mIntentFirewall = new IntentFirewall(new IntentFirewallInterface(), mHandler);
         mTaskChangeNotificationController =
                 new TaskChangeNotificationController(this, mStackSupervisor, mHandler);
-        mActivityStarter = new ActivityStarter(this, AppGlobals.getPackageManager());
+        mActivityStarter = new ActivityStarter(this);
         mRecentTasks = createRecentTasks();
         mStackSupervisor.setRecentTasks(mRecentTasks);
         mLockTaskController = new LockTaskController(mContext, mStackSupervisor, mHandler);
@@ -11713,6 +11713,15 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         return true;
+    }
+
+    /**
+     * Returns the PackageManager. Used by classes hosted by {@link ActivityManagerService}. The
+     * PackageManager could be unavailable at construction time and therefore needs to be accessed
+     * on demand.
+     */
+    IPackageManager getPackageManager() {
+        return AppGlobals.getPackageManager();
     }
 
     PackageManagerInternal getPackageManagerInternalLocked() {
