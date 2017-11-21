@@ -55,7 +55,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @hide
@@ -76,24 +75,9 @@ public class ContextHubService extends IContextHubService.Stub {
     public static final int MSG_QUERY_MEMORY = 6;
     public static final int MSG_HUB_RESET = 7;
 
-    private static final String PRE_LOADED_GENERIC_UNKNOWN = "Preloaded app, unknown";
-    private static final String PRE_LOADED_APP_NAME = PRE_LOADED_GENERIC_UNKNOWN;
-    private static final String PRE_LOADED_APP_PUBLISHER = PRE_LOADED_GENERIC_UNKNOWN;
-    private static final int PRE_LOADED_APP_MEM_REQ = 0;
-
     private static final int OS_APP_INSTANCE = -1;
 
     private final Context mContext;
-
-    // TODO(b/69270990): Remove once old ContextHubManager API is deprecated
-    // Service cache maintaining of instance ID to nanoapp infos
-    private final ConcurrentHashMap<Integer, NanoAppInstanceInfo> mNanoAppHash =
-            new ConcurrentHashMap<>();
-    // The next available instance ID (managed by the service) to assign to a nanoapp
-    private int mNextAvailableInstanceId = 0;
-    // A map of the long nanoapp ID to instance ID managed by the service
-    private final ConcurrentHashMap<Long, Integer> mNanoAppIdToInstanceMap =
-            new ConcurrentHashMap<>();
 
     private final ContextHubInfo[] mContextHubInfo;
     private final RemoteCallbackList<IContextHubCallback> mCallbacksList =
@@ -110,6 +94,9 @@ public class ContextHubService extends IContextHubService.Stub {
 
     // The default client for old API clients
     private final Map<Integer, IContextHubClient> mDefaultClientMap;
+
+    // The manager for the internal nanoapp state cache
+    private final NanoAppStateManager mNanoAppStateManager = new NanoAppStateManager();
 
     /**
      * Class extending the callback to register with a Context Hub.
@@ -160,7 +147,8 @@ public class ContextHubService extends IContextHubService.Stub {
         }
 
         mClientManager = new ContextHubClientManager(mContext, mContextHubProxy);
-        mTransactionManager = new ContextHubTransactionManager(mContextHubProxy, mClientManager);
+        mTransactionManager = new ContextHubTransactionManager(
+                mContextHubProxy, mClientManager, mNanoAppStateManager);
 
         List<ContextHub> hubList;
         try {
@@ -214,9 +202,8 @@ public class ContextHubService extends IContextHubService.Stub {
         return new IContextHubClientCallback.Stub() {
             @Override
             public void onMessageFromNanoApp(NanoAppMessage message) {
-                int nanoAppInstanceId =
-                        mNanoAppIdToInstanceMap.containsKey(message.getNanoAppId()) ?
-                        mNanoAppIdToInstanceMap.get(message.getNanoAppId()) : -1;
+                int nanoAppInstanceId = mNanoAppStateManager.getNanoAppInstanceId(
+                        contextHubId, message.getNanoAppId());
 
                 onMessageReceiptOldApi(
                         message.getMessageType(), contextHubId, nanoAppInstanceId,
@@ -328,15 +315,13 @@ public class ContextHubService extends IContextHubService.Stub {
      * Creates an internal unload transaction callback to be used for old API clients
      *
      * @param contextHubId the ID of the hub to unload the nanoapp
-     * @param nanoAppId    the ID of the nanoapp to unload
      * @return the callback interface
      */
-    private IContextHubTransactionCallback createUnloadTransactionCallback(
-            int contextHubId, long nanoAppId) {
+    private IContextHubTransactionCallback createUnloadTransactionCallback(int contextHubId) {
         return new IContextHubTransactionCallback.Stub() {
             @Override
             public void onTransactionComplete(int result) {
-                handleUnloadResponseOldApi(contextHubId, result, nanoAppId);
+                handleUnloadResponseOldApi(contextHubId, result);
             }
 
             @Override
@@ -424,7 +409,8 @@ public class ContextHubService extends IContextHubService.Stub {
             return -1;
         }
 
-        NanoAppInstanceInfo info = mNanoAppHash.get(nanoAppInstanceHandle);
+        NanoAppInstanceInfo info =
+                mNanoAppStateManager.getNanoAppInstanceInfo(nanoAppInstanceHandle);
         if (info == null) {
             Log.e(TAG, "Cannot find app with handle " + nanoAppInstanceHandle);
             return -1; //means failed
@@ -433,7 +419,7 @@ public class ContextHubService extends IContextHubService.Stub {
         int contextHubId = info.getContexthubId();
         long nanoAppId = info.getAppId();
         IContextHubTransactionCallback onCompleteCallback =
-                createUnloadTransactionCallback(contextHubId, nanoAppId);
+                createUnloadTransactionCallback(contextHubId);
         ContextHubServiceTransaction transaction = mTransactionManager.createUnloadTransaction(
                 contextHubId, nanoAppId, onCompleteCallback);
 
@@ -448,29 +434,21 @@ public class ContextHubService extends IContextHubService.Stub {
     }
 
     @Override
-    public NanoAppInstanceInfo getNanoAppInstanceInfo(int nanoAppInstanceHandle)
-            throws RemoteException {
+    public NanoAppInstanceInfo getNanoAppInstanceInfo(
+            int nanoAppInstanceHandle) throws RemoteException {
         checkPermissions();
-        // This assumes that all the nanoAppInfo is current. This is reasonable
-        // for the use cases for tightly controlled nanoApps.
-        if (mNanoAppHash.containsKey(nanoAppInstanceHandle)) {
-            return mNanoAppHash.get(nanoAppInstanceHandle);
-        } else {
-            Log.e(TAG, "Could not find nanoApp with handle " + nanoAppInstanceHandle);
-            return null;
-        }
+
+        return mNanoAppStateManager.getNanoAppInstanceInfo(nanoAppInstanceHandle);
     }
 
     @Override
     public int[] findNanoAppOnHub(int hubHandle, NanoAppFilter filter) throws RemoteException {
         checkPermissions();
-        ArrayList<Integer> foundInstances = new ArrayList<Integer>();
 
-        for (Integer nanoAppInstance : mNanoAppHash.keySet()) {
-            NanoAppInstanceInfo info = mNanoAppHash.get(nanoAppInstance);
-
+        ArrayList<Integer> foundInstances = new ArrayList<>();
+        for (NanoAppInstanceInfo info : mNanoAppStateManager.getNanoAppInstanceInfoCollection()) {
             if (filter.testMatch(info)) {
-                foundInstances.add(nanoAppInstance);
+                foundInstances.add(info.getHandle());
             }
         }
 
@@ -576,25 +554,10 @@ public class ContextHubService extends IContextHubService.Stub {
             return;
         }
 
-        // NOTE: The legacy JNI code used to do a query right after a load success
-        // to synchronize the service cache. Instead store the binary that was requested to
-        // load to update the cache later without doing a query.
-        int instanceId = 0;
-        long nanoAppId = nanoAppBinary.getNanoAppId();
-        int nanoAppVersion = nanoAppBinary.getNanoAppVersion();
-        if (result == TransactionResult.SUCCESS) {
-            if (mNanoAppIdToInstanceMap.containsKey(nanoAppId)) {
-                instanceId = mNanoAppIdToInstanceMap.get(nanoAppId);
-            } else {
-                instanceId = mNextAvailableInstanceId++;
-                mNanoAppIdToInstanceMap.put(nanoAppId, instanceId);
-            }
-
-            addAppInstance(contextHubId, instanceId, nanoAppId, nanoAppVersion);
-        }
-
         byte[] data = new byte[5];
         data[0] = (byte) result;
+        int instanceId = mNanoAppStateManager.getNanoAppInstanceId(
+                contextHubId, nanoAppBinary.getNanoAppId());
         ByteBuffer.wrap(data, 1, 4).order(ByteOrder.nativeOrder()).putInt(instanceId);
 
         onMessageReceiptOldApi(MSG_LOAD_NANO_APP, contextHubId, OS_APP_INSTANCE, data);
@@ -605,14 +568,7 @@ public class ContextHubService extends IContextHubService.Stub {
      *
      * TODO(b/69270990): Remove this once the old APIs are obsolete.
      */
-    private void handleUnloadResponseOldApi(
-            int contextHubId, int result, long nanoAppId) {
-        if (result == TransactionResult.SUCCESS) {
-            int instanceId = mNanoAppIdToInstanceMap.get(nanoAppId);
-            deleteAppInstance(instanceId);
-            mNanoAppIdToInstanceMap.remove(nanoAppId);
-        }
-
+    private void handleUnloadResponseOldApi(int contextHubId, int result) {
         byte[] data = new byte[1];
         data[0] = (byte) result;
         onMessageReceiptOldApi(MSG_UNLOAD_NANO_APP, contextHubId, OS_APP_INSTANCE, data);
@@ -668,39 +624,8 @@ public class ContextHubService extends IContextHubService.Stub {
         List<NanoAppState> nanoAppStateList =
                 ContextHubServiceUtil.createNanoAppStateList(nanoAppInfoList);
 
-        updateServiceCache(contextHubId, nanoAppInfoList);
+        mNanoAppStateManager.updateCache(contextHubId, nanoAppInfoList);
         mTransactionManager.onQueryResponse(nanoAppStateList);
-    }
-
-    /**
-     * Updates the service's cache of the list of loaded nanoapps using a nanoapp list response.
-     *
-     * TODO(b/69270990): Remove this when the old API functionality is removed.
-     *
-     * @param contextHubId    the ID of the hub the response came from
-     * @param nanoAppInfoList the list of loaded nanoapps
-     */
-    private void updateServiceCache(int contextHubId, List<HubAppInfo> nanoAppInfoList) {
-        synchronized (mNanoAppHash) {
-            for (int instanceId : mNanoAppHash.keySet()) {
-                if (mNanoAppHash.get(instanceId).getContexthubId() == contextHubId) {
-                    deleteAppInstance(instanceId);
-                }
-            }
-
-            for (HubAppInfo appInfo : nanoAppInfoList) {
-                int instanceId;
-                long nanoAppId = appInfo.appId;
-                if (mNanoAppIdToInstanceMap.containsKey(nanoAppId)) {
-                    instanceId = mNanoAppIdToInstanceMap.get(nanoAppId);
-                } else {
-                    instanceId = mNextAvailableInstanceId++;
-                    mNanoAppIdToInstanceMap.put(nanoAppId, instanceId);
-                }
-
-                addAppInstance(contextHubId, instanceId, nanoAppId, appInfo.version);
-            }
-        }
     }
 
     /**
@@ -833,8 +758,8 @@ public class ContextHubService extends IContextHubService.Stub {
         pw.println("");
         pw.println("=================== NANOAPPS ====================");
         // Dump nanoAppHash
-        for (Integer nanoAppInstance : mNanoAppHash.keySet()) {
-            pw.println(nanoAppInstance + " : " + mNanoAppHash.get(nanoAppInstance).toString());
+        for (NanoAppInstanceInfo info : mNanoAppStateManager.getNanoAppInstanceInfoCollection()) {
+            pw.println(info);
         }
 
         // dump eventLog
@@ -907,41 +832,5 @@ public class ContextHubService extends IContextHubService.Stub {
         }
 
         return true;
-    }
-
-    private int addAppInstance(int hubHandle, int appInstanceHandle, long appId, int appVersion) {
-        // App Id encodes vendor & version
-        NanoAppInstanceInfo appInfo = new NanoAppInstanceInfo();
-
-        appInfo.setAppId(appId);
-        appInfo.setAppVersion(appVersion);
-        appInfo.setName(PRE_LOADED_APP_NAME);
-        appInfo.setContexthubId(hubHandle);
-        appInfo.setHandle(appInstanceHandle);
-        appInfo.setPublisher(PRE_LOADED_APP_PUBLISHER);
-        appInfo.setNeededExecMemBytes(PRE_LOADED_APP_MEM_REQ);
-        appInfo.setNeededReadMemBytes(PRE_LOADED_APP_MEM_REQ);
-        appInfo.setNeededWriteMemBytes(PRE_LOADED_APP_MEM_REQ);
-
-        String action;
-        if (mNanoAppHash.containsKey(appInstanceHandle)) {
-            action = "Updated";
-        } else {
-            action = "Added";
-        }
-
-        mNanoAppHash.put(appInstanceHandle, appInfo);
-        Log.d(TAG, action + " app instance " + appInstanceHandle + " with id 0x"
-                + Long.toHexString(appId) + " version 0x" + Integer.toHexString(appVersion));
-
-        return 0;
-    }
-
-    private int deleteAppInstance(int appInstanceHandle) {
-        if (mNanoAppHash.remove(appInstanceHandle) == null) {
-            return -1;
-        }
-
-        return 0;
     }
 }

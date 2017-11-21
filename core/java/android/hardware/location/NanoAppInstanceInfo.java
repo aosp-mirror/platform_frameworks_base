@@ -16,7 +16,6 @@
 
 package android.hardware.location;
 
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
@@ -26,29 +25,42 @@ import android.os.Parcelable;
 import libcore.util.EmptyArray;
 
 /**
+ * Describes an instance of a nanoapp, used by the internal state manged by ContextHubService.
+ *
+ * TODO(b/69270990) Remove this class once the old API is deprecated.
+ * TODO(b/70624255) Clean up toString() by removing unnecessary fields
+ *
  * @hide
  */
 @SystemApi
 public class NanoAppInstanceInfo {
-    private String mPublisher;
-    private String mName;
+    private static final String PRE_LOADED_GENERIC_UNKNOWN = "Preloaded app, unknown";
+    private String mPublisher = PRE_LOADED_GENERIC_UNKNOWN;
+    private String mName = PRE_LOADED_GENERIC_UNKNOWN;
 
+    private int mHandle;
     private long mAppId;
     private int mAppVersion;
-
-    private int mNeededReadMemBytes;
-    private int mNeededWriteMemBytes;
-    private int mNeededExecMemBytes;
-
-    private int[] mNeededSensors;
-    private int[] mOutputEvents;
-
     private int mContexthubId;
-    private int mHandle;
+
+    private int mNeededReadMemBytes = 0;
+    private int mNeededWriteMemBytes = 0;
+    private int mNeededExecMemBytes = 0;
+
+    private int[] mNeededSensors = EmptyArray.INT;
+    private int[] mOutputEvents = EmptyArray.INT;
 
     public NanoAppInstanceInfo() {
-        mNeededSensors = EmptyArray.INT;
-        mOutputEvents = EmptyArray.INT;
+    }
+
+    /**
+     * @hide
+     */
+    public NanoAppInstanceInfo(int handle, long appId, int appVersion, int contextHubId) {
+        mHandle = handle;
+        mAppId = appId;
+        mAppVersion = appVersion;
+        mContexthubId = contextHubId;
     }
 
     /**
@@ -281,7 +293,6 @@ public class NanoAppInstanceInfo {
     public void setHandle(int handle) {
         mHandle = handle;
     }
-
 
     private NanoAppInstanceInfo(Parcel in) {
         mPublisher = in.readString();

@@ -63,6 +63,11 @@ import java.util.concurrent.atomic.AtomicInteger;
     private final ContextHubClientManager mClientManager;
 
     /*
+     * The nanoapp state manager for the service
+     */
+    private final NanoAppStateManager mNanoAppStateManager;
+
+    /*
      * A queue containing the current transactions
      */
     private final ArrayDeque<ContextHubServiceTransaction> mTransactionQueue = new ArrayDeque<>();
@@ -79,9 +84,11 @@ import java.util.concurrent.atomic.AtomicInteger;
     private ScheduledFuture<?> mTimeoutFuture = null;
 
     /* package */ ContextHubTransactionManager(
-            IContexthub contextHubProxy, ContextHubClientManager clientManager) {
+            IContexthub contextHubProxy, ContextHubClientManager clientManager,
+            NanoAppStateManager nanoAppStateManager) {
         mContextHubProxy = contextHubProxy;
         mClientManager = clientManager;
+        mNanoAppStateManager = nanoAppStateManager;
     }
 
     /**
@@ -113,6 +120,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 
             @Override
             /* package */ void onTransactionComplete(int result) {
+                if (result == TransactionResult.SUCCESS) {
+                    // NOTE: The legacy JNI code used to do a query right after a load success
+                    // to synchronize the service cache. Instead store the binary that was
+                    // requested to load to update the cache later without doing a query.
+                    mNanoAppStateManager.addNanoAppInstance(
+                            contextHubId, nanoAppBinary.getNanoAppId(),
+                            nanoAppBinary.getNanoAppVersion());
+                }
                 try {
                     onCompleteCallback.onTransactionComplete(result);
                     if (result == Result.OK) {
@@ -151,6 +166,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
             @Override
             /* package */ void onTransactionComplete(int result) {
+                if (result == TransactionResult.SUCCESS) {
+                    mNanoAppStateManager.removeNanoAppInstance(contextHubId, nanoAppId);
+                }
                 try {
                     onCompleteCallback.onTransactionComplete(result);
                     if (result == Result.OK) {
