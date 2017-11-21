@@ -1285,6 +1285,9 @@ public final class DisplayManagerService extends SystemService {
 
             pw.println();
             mPersistentDataStore.dump(pw);
+
+            pw.println();
+            mBrightnessTracker.dump(pw);
         }
     }
 
@@ -1920,6 +1923,11 @@ public final class DisplayManagerService extends SystemService {
         @Override
         public boolean isUidPresentOnDisplay(int uid, int displayId) {
             return isUidPresentOnDisplayInternal(uid, displayId);
+        }
+
+        @Override
+        public void persistBrightnessSliderEvents() {
+            mBrightnessTracker.persistEvents();
         }
     }
 }

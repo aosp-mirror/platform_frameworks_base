@@ -174,6 +174,11 @@ public abstract class DisplayManagerInternal {
     public abstract boolean isUidPresentOnDisplay(int uid, int displayId);
 
     /**
+     * Persist brightness slider events.
+     */
+    public abstract void persistBrightnessSliderEvents();
+
+    /**
      * Describes the requested power state of the display.
      *
      * This object is intended to describe the general characteristics of the
