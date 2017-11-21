@@ -25,6 +25,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
+import android.net.MacAddress;
 import android.net.wifi.ScanResult;
 import android.net.wifi.aware.PeerHandle;
 import android.os.Handler;
@@ -32,8 +33,6 @@ import android.os.IBinder;
 import android.os.Parcel;
 import android.os.test.TestLooper;
 import android.test.suitebuilder.annotation.SmallTest;
-
-import libcore.util.HexEncoding;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -73,13 +72,15 @@ public class WifiRttManagerTest {
     }
 
     /**
-     * Validate ranging call flow with succesful results.
+     * Validate ranging call flow with successful results.
      */
     @Test
     public void testRangeSuccess() throws Exception {
         RangingRequest request = new RangingRequest.Builder().build();
         List<RangingResult> results = new ArrayList<>();
-        results.add(new RangingResult(RangingResult.STATUS_SUCCESS, (byte[]) null, 15, 5, 10, 666));
+        results.add(
+                new RangingResult(RangingResult.STATUS_SUCCESS, MacAddress.BROADCAST_ADDRESS, 15, 5,
+                        10, 666));
         RangingResultCallback callbackMock = mock(RangingResultCallback.class);
         ArgumentCaptor<IRttCallback> callbackCaptor = ArgumentCaptor.forClass(IRttCallback.class);
 
@@ -135,7 +136,7 @@ public class WifiRttManagerTest {
         List<ScanResult> scanResults2and3 = new ArrayList<>(2);
         scanResults2and3.add(scanResult2);
         scanResults2and3.add(scanResult3);
-        final byte[] mac1 = HexEncoding.decode("000102030405".toCharArray(), false);
+        MacAddress mac1 = MacAddress.fromString("00:01:02:03:04:05");
         PeerHandle peerHandle1 = new PeerHandle(12);
 
         RangingRequest.Builder builder = new RangingRequest.Builder();
@@ -169,7 +170,7 @@ public class WifiRttManagerTest {
         for (int i = 0; i < RangingRequest.getMaxPeers() - 3; ++i) {
             scanResultList.add(scanResult);
         }
-        final byte[] mac1 = HexEncoding.decode("000102030405".toCharArray(), false);
+        MacAddress mac1 = MacAddress.fromString("00:01:02:03:04:05");
 
         // create request
         RangingRequest.Builder builder = new RangingRequest.Builder();
@@ -189,11 +190,12 @@ public class WifiRttManagerTest {
     @Test(expected = IllegalArgumentException.class)
     public void testRangingRequestPastLimit() {
         ScanResult scanResult = new ScanResult();
+        scanResult.BSSID = "00:01:02:03:04:05";
         List<ScanResult> scanResultList = new ArrayList<>();
         for (int i = 0; i < RangingRequest.getMaxPeers() - 2; ++i) {
             scanResultList.add(scanResult);
         }
-        final byte[] mac1 = HexEncoding.decode("000102030405".toCharArray(), false);
+        MacAddress mac1 = MacAddress.fromString("00:01:02:03:04:05");
 
         // create request
         RangingRequest.Builder builder = new RangingRequest.Builder();
@@ -228,7 +230,7 @@ public class WifiRttManagerTest {
     public void testRangingResultsParcel() {
         // Note: not validating parcel code of ScanResult (assumed to work)
         int status = RangingResult.STATUS_SUCCESS;
-        final byte[] mac = HexEncoding.decode("000102030405".toCharArray(), false);
+        final MacAddress mac = MacAddress.fromString("00:01:02:03:04:05");
         PeerHandle peerHandle = new PeerHandle(10);
         int distanceCm = 105;
         int distanceStdDevCm = 10;
