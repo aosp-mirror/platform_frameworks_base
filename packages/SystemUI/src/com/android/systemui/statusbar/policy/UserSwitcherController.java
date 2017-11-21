@@ -910,6 +910,7 @@ public class UserSwitcherController {
                     context.getString(android.R.string.cancel), this);
             setButton(DialogInterface.BUTTON_POSITIVE,
                     context.getString(R.string.guest_exit_guest_dialog_remove), this);
+            SystemUIDialog.setWindowOnTop(this);
             setCanceledOnTouchOutside(false);
             mGuestId = guestId;
             mTargetId = targetId;
@@ -937,6 +938,7 @@ public class UserSwitcherController {
                     context.getString(android.R.string.cancel), this);
             setButton(DialogInterface.BUTTON_POSITIVE,
                     context.getString(android.R.string.ok), this);
+            SystemUIDialog.setWindowOnTop(this);
         }
 
         @Override
