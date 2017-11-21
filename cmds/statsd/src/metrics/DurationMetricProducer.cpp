@@ -110,16 +110,16 @@ void DurationMetricProducer::startNewProtoOutputStream(long long startTime) {
 }
 
 unique_ptr<DurationTracker> DurationMetricProducer::createDurationTracker(
-        vector<DurationBucket>& bucket) {
+        const HashableDimensionKey& eventKey, vector<DurationBucket>& bucket) {
     switch (mMetric.aggregation_type()) {
         case DurationMetric_AggregationType_SUM:
-            return make_unique<OringDurationTracker>(mWizard, mConditionTrackerIndex, mNested,
-                                                     mCurrentBucketStartTimeNs, mBucketSizeNs,
-                                                     bucket);
+            return make_unique<OringDurationTracker>(eventKey, mWizard, mConditionTrackerIndex,
+                                                     mNested, mCurrentBucketStartTimeNs,
+                                                     mBucketSizeNs, mAnomalyTrackers, bucket);
         case DurationMetric_AggregationType_MAX_SPARSE:
-            return make_unique<MaxDurationTracker>(mWizard, mConditionTrackerIndex, mNested,
-                                                   mCurrentBucketStartTimeNs, mBucketSizeNs,
-                                                   bucket);
+            return make_unique<MaxDurationTracker>(eventKey, mWizard, mConditionTrackerIndex,
+                                                   mNested, mCurrentBucketStartTimeNs,
+                                                   mBucketSizeNs, mAnomalyTrackers, bucket);
     }
 }
 
@@ -131,7 +131,6 @@ void DurationMetricProducer::finish() {
 void DurationMetricProducer::onSlicedConditionMayChange(const uint64_t eventTime) {
     VLOG("Metric %s onSlicedConditionMayChange", mMetric.name().c_str());
     // Now for each of the on-going event, check if the condition has changed for them.
-    flushIfNeeded(eventTime);
     for (auto& pair : mCurrentSlicedDuration) {
         pair.second->onSlicedConditionMayChange(eventTime);
     }
@@ -142,24 +141,8 @@ void DurationMetricProducer::onConditionChanged(const bool conditionMet, const u
     mCondition = conditionMet;
     // TODO: need to populate the condition change time from the event which triggers the condition
     // change, instead of using current time.
-
-    flushIfNeeded(eventTime);
     for (auto& pair : mCurrentSlicedDuration) {
         pair.second->onConditionChanged(conditionMet, eventTime);
-    }
-}
-
-static void addDurationBucketsToReport(StatsLogReport_DurationMetricDataWrapper& wrapper,
-                                       const vector<KeyValuePair>& key,
-                                       const vector<DurationBucketInfo>& buckets) {
-    DurationMetricData* data = wrapper.add_data();
-    for (const auto& kv : key) {
-        data->add_dimension()->CopyFrom(kv);
-    }
-    for (const auto& bucket : buckets) {
-        data->add_bucket_info()->CopyFrom(bucket);
-        VLOG("\t bucket [%lld - %lld] duration(ns): %lld", bucket.start_bucket_nanos(),
-             bucket.end_bucket_nanos(), bucket.duration_nanos());
     }
 }
 
@@ -231,7 +214,6 @@ void DurationMetricProducer::flushIfNeeded(uint64_t eventTime) {
     if (mCurrentBucketStartTimeNs + mBucketSizeNs > eventTime) {
         return;
     }
-
     VLOG("flushing...........");
     for (auto it = mCurrentSlicedDuration.begin(); it != mCurrentSlicedDuration.end();) {
         if (it->second->flushIfNeeded(eventTime)) {
@@ -244,6 +226,7 @@ void DurationMetricProducer::flushIfNeeded(uint64_t eventTime) {
 
     int numBucketsForward = (eventTime - mCurrentBucketStartTimeNs) / mBucketSizeNs;
     mCurrentBucketStartTimeNs += numBucketsForward * mBucketSizeNs;
+    mCurrentBucketNum += numBucketsForward;
 }
 
 void DurationMetricProducer::onMatchedLogEventInternal(
@@ -262,7 +245,7 @@ void DurationMetricProducer::onMatchedLogEventInternal(
     HashableDimensionKey atomKey = getHashableKey(getDimensionKey(event, mInternalDimension));
 
     if (mCurrentSlicedDuration.find(eventKey) == mCurrentSlicedDuration.end()) {
-        mCurrentSlicedDuration[eventKey] = createDurationTracker(mPastBuckets[eventKey]);
+        mCurrentSlicedDuration[eventKey] = createDurationTracker(eventKey, mPastBuckets[eventKey]);
     }
 
     auto it = mCurrentSlicedDuration.find(eventKey);

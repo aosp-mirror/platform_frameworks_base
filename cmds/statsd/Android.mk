@@ -21,6 +21,7 @@ statsd_common_src := \
     src/statsd_config.proto \
     src/atoms_copy.proto \
     src/anomaly/AnomalyMonitor.cpp \
+    src/anomaly/AnomalyTracker.cpp \
     src/condition/CombinationConditionTracker.cpp \
     src/condition/condition_util.cpp \
     src/condition/SimpleConditionTracker.cpp \
@@ -39,7 +40,6 @@ statsd_common_src := \
     src/matchers/CombinationLogMatchingTracker.cpp \
     src/matchers/matcher_util.cpp \
     src/matchers/SimpleLogMatchingTracker.cpp \
-    src/anomaly/DiscreteAnomalyTracker.cpp \
     src/metrics/MetricProducer.cpp \
     src/metrics/EventMetricProducer.cpp \
     src/metrics/CountMetricProducer.cpp \
@@ -178,4 +178,3 @@ statsd_common_aidl_includes:=
 statsd_common_c_includes:=
 
 include $(BUILD_NATIVE_TEST)
-

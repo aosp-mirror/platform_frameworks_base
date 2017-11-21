@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/anomaly/DiscreteAnomalyTracker.h"
+#include "src/anomaly/AnomalyTracker.h"
 
 #include <gtest/gtest.h>
 #include <stdio.h>
@@ -37,7 +37,7 @@ void AddValueToBucket(const std::vector<std::pair<string, long>>& key_value_pair
     }
 }
 
-std::shared_ptr<DimToValMap> MockeBucket(
+std::shared_ptr<DimToValMap> MockBucket(
         const std::vector<std::pair<string, long>>& key_value_pair_list) {
     std::shared_ptr<DimToValMap> bucket = std::make_shared<DimToValMap>();
     AddValueToBucket(key_value_pair_list, bucket);
@@ -45,190 +45,240 @@ std::shared_ptr<DimToValMap> MockeBucket(
 }
 
 TEST(AnomalyTrackerTest, TestConsecutiveBuckets) {
+    const int64_t bucketSizeNs = 30 * NS_PER_SEC;
     Alert alert;
     alert.set_number_of_buckets(3);
-    alert.set_refractory_period_in_buckets(3);
+    alert.set_refractory_period_secs(2 * bucketSizeNs / NS_PER_SEC);
     alert.set_trigger_if_sum_gt(2);
 
-    DiscreteAnomalyTracker anomaly_tracker(alert);
+    AnomalyTracker anomalyTracker(alert, bucketSizeNs);
 
-    std::shared_ptr<DimToValMap> bucket0 = MockeBucket({{"a", 1}, {"b", 2}, {"c", 1}});
-    // Adds bucket #0
-    anomaly_tracker.addOrUpdateBucket(bucket0, 0);
-    EXPECT_EQ(anomaly_tracker.mSumOverPastBuckets.size(), 3UL);
-    EXPECT_EQ(anomaly_tracker.mSumOverPastBuckets.find("a")->second, 1);
-    EXPECT_EQ(anomaly_tracker.mSumOverPastBuckets.find("b")->second, 2);
-    EXPECT_EQ(anomaly_tracker.mSumOverPastBuckets.find("c")->second, 1);
-    EXPECT_FALSE(anomaly_tracker.detectAnomaly());
-    anomaly_tracker.declareAndDeclareAnomaly();
-    EXPECT_EQ(anomaly_tracker.mAnomalyDeclared, 0L);
+    std::shared_ptr<DimToValMap> bucket0 = MockBucket({{"a", 1}, {"b", 2}, {"c", 1}});
+    int64_t eventTimestamp0 = 10;
+    std::shared_ptr<DimToValMap> bucket1 = MockBucket({{"a", 1}});
+    int64_t eventTimestamp1 = bucketSizeNs + 11;
+    std::shared_ptr<DimToValMap> bucket2 = MockBucket({{"b", 1}});
+    int64_t eventTimestamp2 = 2 * bucketSizeNs + 12;
+    std::shared_ptr<DimToValMap> bucket3 = MockBucket({{"a", 2}});
+    int64_t eventTimestamp3 = 3 * bucketSizeNs + 13;
+    std::shared_ptr<DimToValMap> bucket4 = MockBucket({{"b", 1}});
+    int64_t eventTimestamp4 = 4 * bucketSizeNs + 14;
+    std::shared_ptr<DimToValMap> bucket5 = MockBucket({{"a", 2}});
+    int64_t eventTimestamp5 = 5 * bucketSizeNs + 15;
+    std::shared_ptr<DimToValMap> bucket6 = MockBucket({{"a", 2}});
+    int64_t eventTimestamp6 = 6 * bucketSizeNs + 16;
 
-    // Adds bucket #0 again. The sum does not change.
-    anomaly_tracker.addOrUpdateBucket(bucket0, 0);
-    EXPECT_EQ(anomaly_tracker.mCurrentBucketIndex, 0L);
-    EXPECT_EQ(anomaly_tracker.mSumOverPastBuckets.size(), 3UL);
-    EXPECT_EQ(anomaly_tracker.mSumOverPastBuckets.find("a")->second, 1);
-    EXPECT_EQ(anomaly_tracker.mSumOverPastBuckets.find("b")->second, 2);
-    EXPECT_EQ(anomaly_tracker.mSumOverPastBuckets.find("c")->second, 1);
-    EXPECT_FALSE(anomaly_tracker.detectAnomaly());
-    anomaly_tracker.declareAndDeclareAnomaly();
-    EXPECT_EQ(anomaly_tracker.mAnomalyDeclared, 0L);
-    EXPECT_EQ(anomaly_tracker.mLastAlarmAtBucketIndex, -1L);
+    EXPECT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 0u);
+    EXPECT_EQ(anomalyTracker.mMostRecentBucketNum, -1LL);
+    EXPECT_FALSE(anomalyTracker.detectAnomaly(0, *bucket0));
+    anomalyTracker.detectAndDeclareAnomaly(eventTimestamp0, 0, *bucket0);
+    EXPECT_EQ(anomalyTracker.mLastAlarmTimestampNs, -1L);
 
-    // Adds bucket #1.
-    std::shared_ptr<DimToValMap> bucket1 = MockeBucket({{"b", 2}});
-    anomaly_tracker.addOrUpdateBucket(bucket1, 1);
-    EXPECT_EQ(anomaly_tracker.mCurrentBucketIndex, 1L);
-    EXPECT_EQ(anomaly_tracker.mSumOverPastBuckets.size(), 3UL);
-    EXPECT_EQ(anomaly_tracker.mSumOverPastBuckets.find("a")->second, 1);
-    EXPECT_EQ(anomaly_tracker.mSumOverPastBuckets.find("b")->second, 4);
-    EXPECT_EQ(anomaly_tracker.mSumOverPastBuckets.find("c")->second, 1);
-    // Alarm.
-    EXPECT_TRUE(anomaly_tracker.detectAnomaly());
-    anomaly_tracker.declareAndDeclareAnomaly();
-    EXPECT_EQ(anomaly_tracker.mAnomalyDeclared, 1L);
-    EXPECT_EQ(anomaly_tracker.mLastAlarmAtBucketIndex, 1L);
+    // Adds past bucket #0
+    anomalyTracker.addPastBucket(bucket0, 0);
+    EXPECT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 3u);
+    EXPECT_EQ(anomalyTracker.getSumOverPastBuckets("a"), 1LL);
+    EXPECT_EQ(anomalyTracker.getSumOverPastBuckets("b"), 2LL);
+    EXPECT_EQ(anomalyTracker.getSumOverPastBuckets("c"), 1LL);
+    EXPECT_EQ(anomalyTracker.mMostRecentBucketNum, 0LL);
+    EXPECT_FALSE(anomalyTracker.detectAnomaly(1, *bucket1));
+    anomalyTracker.detectAndDeclareAnomaly(eventTimestamp1, 1, *bucket1);
+    EXPECT_EQ(anomalyTracker.mLastAlarmTimestampNs, -1L);
 
-    // Adds bucket #1 again. The sum does not change.
-    anomaly_tracker.addOrUpdateBucket(bucket1, 1);
-    EXPECT_EQ(anomaly_tracker.mCurrentBucketIndex, 1L);
-    EXPECT_EQ(anomaly_tracker.mSumOverPastBuckets.size(), 3UL);
-    EXPECT_EQ(anomaly_tracker.mSumOverPastBuckets.find("a")->second, 1);
-    EXPECT_EQ(anomaly_tracker.mSumOverPastBuckets.find("b")->second, 4);
-    EXPECT_EQ(anomaly_tracker.mSumOverPastBuckets.find("c")->second, 1);
-    // Alarm.
-    EXPECT_TRUE(anomaly_tracker.detectAnomaly());
-    anomaly_tracker.declareAndDeclareAnomaly();
-    EXPECT_EQ(anomaly_tracker.mAnomalyDeclared, 1L);
-    EXPECT_EQ(anomaly_tracker.mLastAlarmAtBucketIndex, 1L);
+    // Adds past bucket #0 again. The sum does not change.
+    anomalyTracker.addPastBucket(bucket0, 0);
+    EXPECT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 3u);
+    EXPECT_EQ(anomalyTracker.getSumOverPastBuckets("a"), 1LL);
+    EXPECT_EQ(anomalyTracker.getSumOverPastBuckets("b"), 2LL);
+    EXPECT_EQ(anomalyTracker.getSumOverPastBuckets("c"), 1LL);
+    EXPECT_EQ(anomalyTracker.mMostRecentBucketNum, 0LL);
+    EXPECT_FALSE(anomalyTracker.detectAnomaly(1, *bucket1));
+    anomalyTracker.detectAndDeclareAnomaly(eventTimestamp1 + 1, 1, *bucket1);
+    EXPECT_EQ(anomalyTracker.mLastAlarmTimestampNs, -1L);
 
-    // Adds bucket #2.
-    anomaly_tracker.addOrUpdateBucket(MockeBucket({{"a", 1}}), 2);
-    EXPECT_EQ(anomaly_tracker.mCurrentBucketIndex, 2L);
-    EXPECT_EQ(anomaly_tracker.mSumOverPastBuckets.size(), 3UL);
-    EXPECT_EQ(anomaly_tracker.mSumOverPastBuckets.find("a")->second, 2);
-    EXPECT_EQ(anomaly_tracker.mSumOverPastBuckets.find("b")->second, 4);
-    EXPECT_EQ(anomaly_tracker.mSumOverPastBuckets.find("c")->second, 1);
-    EXPECT_TRUE(anomaly_tracker.detectAnomaly());
+    // Adds past bucket #1.
+    anomalyTracker.addPastBucket(bucket1, 1);
+    EXPECT_EQ(anomalyTracker.mMostRecentBucketNum, 1L);
+    EXPECT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 3UL);
+    EXPECT_EQ(anomalyTracker.getSumOverPastBuckets("a"), 2LL);
+    EXPECT_EQ(anomalyTracker.getSumOverPastBuckets("b"), 2LL);
+    EXPECT_EQ(anomalyTracker.getSumOverPastBuckets("c"), 1LL);
+    EXPECT_TRUE(anomalyTracker.detectAnomaly(2, *bucket2));
+    anomalyTracker.detectAndDeclareAnomaly(eventTimestamp2, 2, *bucket2);
+    EXPECT_EQ(anomalyTracker.mLastAlarmTimestampNs, eventTimestamp2);
+
+    // Adds past bucket #1 again. Nothing changes.
+    anomalyTracker.addPastBucket(bucket1, 1);
+    EXPECT_EQ(anomalyTracker.mMostRecentBucketNum, 1L);
+    EXPECT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 3UL);
+    EXPECT_EQ(anomalyTracker.getSumOverPastBuckets("a"), 2LL);
+    EXPECT_EQ(anomalyTracker.getSumOverPastBuckets("b"), 2LL);
+    EXPECT_EQ(anomalyTracker.getSumOverPastBuckets("c"), 1LL);
+    EXPECT_TRUE(anomalyTracker.detectAnomaly(2, *bucket2));
+    anomalyTracker.detectAndDeclareAnomaly(eventTimestamp2 + 1, 2, *bucket2);
+    EXPECT_EQ(anomalyTracker.mLastAlarmTimestampNs, eventTimestamp2);
+
+    // Adds past bucket #2.
+    anomalyTracker.addPastBucket(bucket2, 2);
+    EXPECT_EQ(anomalyTracker.mMostRecentBucketNum, 2L);
+    EXPECT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 2UL);
+    EXPECT_EQ(anomalyTracker.getSumOverPastBuckets("a"), 1LL);
+    EXPECT_EQ(anomalyTracker.getSumOverPastBuckets("b"), 1LL);
+    EXPECT_TRUE(anomalyTracker.detectAnomaly(3, *bucket3));
+    anomalyTracker.detectAndDeclareAnomaly(eventTimestamp3, 3, *bucket3);
     // Within refractory period.
-    anomaly_tracker.declareAndDeclareAnomaly();
-    EXPECT_EQ(anomaly_tracker.mAnomalyDeclared, 1L);
-    EXPECT_EQ(anomaly_tracker.mLastAlarmAtBucketIndex, 1L);
+    EXPECT_EQ(anomalyTracker.mLastAlarmTimestampNs, eventTimestamp2);
 
     // Adds bucket #3.
-    anomaly_tracker.addOrUpdateBucket(MockeBucket({{"a", 1}}), 3);
-    EXPECT_EQ(anomaly_tracker.mCurrentBucketIndex, 3L);
-    EXPECT_EQ(anomaly_tracker.mSumOverPastBuckets.size(), 2UL);
-    EXPECT_EQ(anomaly_tracker.mSumOverPastBuckets.find("a")->second, 2);
-    EXPECT_EQ(anomaly_tracker.mSumOverPastBuckets.find("b")->second, 2);
-    EXPECT_FALSE(anomaly_tracker.detectAnomaly());
+    anomalyTracker.addPastBucket(bucket3, 3L);
+    EXPECT_EQ(anomalyTracker.mMostRecentBucketNum, 3L);
+    EXPECT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 2UL);
+    EXPECT_EQ(anomalyTracker.getSumOverPastBuckets("a"), 2LL);
+    EXPECT_EQ(anomalyTracker.getSumOverPastBuckets("b"), 1LL);
+    EXPECT_FALSE(anomalyTracker.detectAnomaly(4, *bucket4));
+    anomalyTracker.detectAndDeclareAnomaly(eventTimestamp4, 4, *bucket4);
+    EXPECT_EQ(anomalyTracker.mLastAlarmTimestampNs, eventTimestamp2);
 
-    // Adds bucket #3.
-    anomaly_tracker.addOrUpdateBucket(MockeBucket({{"a", 2}}), 4);
-    EXPECT_EQ(anomaly_tracker.mCurrentBucketIndex, 4L);
-    EXPECT_EQ(anomaly_tracker.mSumOverPastBuckets.size(), 1UL);
-    EXPECT_EQ(anomaly_tracker.mSumOverPastBuckets.find("a")->second, 4);
-    EXPECT_TRUE(anomaly_tracker.detectAnomaly());
-    // Within refractory period.
-    anomaly_tracker.declareAndDeclareAnomaly();
-    EXPECT_EQ(anomaly_tracker.mAnomalyDeclared, 1L);
-    EXPECT_EQ(anomaly_tracker.mLastAlarmAtBucketIndex, 1L);
+    // Adds bucket #4.
+    anomalyTracker.addPastBucket(bucket4, 4);
+    EXPECT_EQ(anomalyTracker.mMostRecentBucketNum, 4L);
+    EXPECT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 2UL);
+    EXPECT_EQ(anomalyTracker.getSumOverPastBuckets("a"), 2LL);
+    EXPECT_EQ(anomalyTracker.getSumOverPastBuckets("b"), 1LL);
+    EXPECT_TRUE(anomalyTracker.detectAnomaly(5, *bucket5));
+    anomalyTracker.detectAndDeclareAnomaly(eventTimestamp5, 5, *bucket5);
+    EXPECT_EQ(anomalyTracker.mLastAlarmTimestampNs, eventTimestamp5);
 
-    anomaly_tracker.addOrUpdateBucket(MockeBucket({{"a", 1}}), 5);
-    EXPECT_EQ(anomaly_tracker.mCurrentBucketIndex, 5L);
-    EXPECT_EQ(anomaly_tracker.mSumOverPastBuckets.size(), 1UL);
-    EXPECT_EQ(anomaly_tracker.mSumOverPastBuckets.find("a")->second, 4);
-    EXPECT_TRUE(anomaly_tracker.detectAnomaly());
+    // Adds bucket #5.
+    anomalyTracker.addPastBucket(bucket5, 5);
+    EXPECT_EQ(anomalyTracker.mMostRecentBucketNum, 5L);
+    EXPECT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 2UL);
+    EXPECT_EQ(anomalyTracker.getSumOverPastBuckets("a"), 2LL);
+    EXPECT_EQ(anomalyTracker.getSumOverPastBuckets("b"), 1LL);
+    EXPECT_TRUE(anomalyTracker.detectAnomaly(6, *bucket6));
     // Within refractory period.
-    anomaly_tracker.declareAndDeclareAnomaly();
-    EXPECT_EQ(anomaly_tracker.mAnomalyDeclared, 2L);
-    EXPECT_EQ(anomaly_tracker.mLastAlarmAtBucketIndex, 5L);
+    anomalyTracker.detectAndDeclareAnomaly(eventTimestamp6, 6, *bucket6);
+    EXPECT_EQ(anomalyTracker.mLastAlarmTimestampNs, eventTimestamp5);
 }
 
 TEST(AnomalyTrackerTest, TestSparseBuckets) {
+    const int64_t bucketSizeNs = 30 * NS_PER_SEC;
     Alert alert;
     alert.set_number_of_buckets(3);
-    alert.set_refractory_period_in_buckets(3);
+    alert.set_refractory_period_secs(2 * bucketSizeNs / NS_PER_SEC);
     alert.set_trigger_if_sum_gt(2);
 
-    DiscreteAnomalyTracker anomaly_tracker(alert);
+    AnomalyTracker anomalyTracker(alert, bucketSizeNs);
 
-    // Add bucket #9
-    anomaly_tracker.addOrUpdateBucket(MockeBucket({{"a", 1}, {"b", 2}, {"c", 1}}), 9);
-    EXPECT_EQ(anomaly_tracker.mCurrentBucketIndex, 9L);
-    EXPECT_EQ(anomaly_tracker.mSumOverPastBuckets.size(), 3UL);
-    EXPECT_EQ(anomaly_tracker.mSumOverPastBuckets.find("a")->second, 1);
-    EXPECT_EQ(anomaly_tracker.mSumOverPastBuckets.find("b")->second, 2);
-    EXPECT_EQ(anomaly_tracker.mSumOverPastBuckets.find("c")->second, 1);
-    EXPECT_FALSE(anomaly_tracker.detectAnomaly());
-    anomaly_tracker.declareAndDeclareAnomaly();
-    EXPECT_EQ(anomaly_tracker.mAnomalyDeclared, 0L);
-    EXPECT_EQ(anomaly_tracker.mLastAlarmAtBucketIndex, -1L);
+    std::shared_ptr<DimToValMap> bucket9 = MockBucket({{"a", 1}, {"b", 2}, {"c", 1}});
+    std::shared_ptr<DimToValMap> bucket16 = MockBucket({{"b", 4}});
+    std::shared_ptr<DimToValMap> bucket18 = MockBucket({{"b", 1}, {"c", 1}});
+    std::shared_ptr<DimToValMap> bucket20 = MockBucket({{"b", 3}, {"c", 1}});
+    std::shared_ptr<DimToValMap> bucket25 = MockBucket({{"d", 1}});
+    std::shared_ptr<DimToValMap> bucket28 = MockBucket({{"e", 2}});
 
-    // Add bucket #16
-    anomaly_tracker.addOrUpdateBucket(MockeBucket({{"b", 4}}), 16);
-    EXPECT_EQ(anomaly_tracker.mCurrentBucketIndex, 16L);
-    EXPECT_EQ(anomaly_tracker.mSumOverPastBuckets.size(), 1UL);
-    EXPECT_EQ(anomaly_tracker.mSumOverPastBuckets.find("b")->second, 4);
-    EXPECT_TRUE(anomaly_tracker.detectAnomaly());
-    anomaly_tracker.declareAndDeclareAnomaly();
-    EXPECT_EQ(anomaly_tracker.mAnomalyDeclared, 1L);
-    EXPECT_EQ(anomaly_tracker.mLastAlarmAtBucketIndex, 16L);
+    int64_t eventTimestamp1 = bucketSizeNs * 8 + 1;
+    int64_t eventTimestamp2 = bucketSizeNs * 15 + 11;
+    int64_t eventTimestamp3 = bucketSizeNs * 17 + 1;
+    int64_t eventTimestamp4 = bucketSizeNs * 19 + 2;
+    int64_t eventTimestamp5 = bucketSizeNs * 24 + 3;
+    int64_t eventTimestamp6 = bucketSizeNs * 27 + 3;
 
-    // Add bucket #18
-    anomaly_tracker.addOrUpdateBucket(MockeBucket({{"b", 1}, {"c", 1}}), 18);
-    EXPECT_EQ(anomaly_tracker.mCurrentBucketIndex, 18L);
-    EXPECT_EQ(anomaly_tracker.mSumOverPastBuckets.size(), 2UL);
-    EXPECT_EQ(anomaly_tracker.mSumOverPastBuckets.find("b")->second, 5);
-    EXPECT_EQ(anomaly_tracker.mSumOverPastBuckets.find("c")->second, 1);
-    EXPECT_TRUE(anomaly_tracker.detectAnomaly());
-    anomaly_tracker.declareAndDeclareAnomaly();
+    EXPECT_EQ(anomalyTracker.mMostRecentBucketNum, -1LL);
+    EXPECT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 0UL);
+    EXPECT_FALSE(anomalyTracker.detectAnomaly(9, *bucket9));
+    anomalyTracker.detectAndDeclareAnomaly(eventTimestamp1, 9, *bucket9);
+    EXPECT_EQ(anomalyTracker.mLastAlarmTimestampNs, -1);
+
+    // Add past bucket #9
+    anomalyTracker.addPastBucket(bucket9, 9);
+    EXPECT_EQ(anomalyTracker.mMostRecentBucketNum, 9L);
+    EXPECT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 3UL);
+    EXPECT_EQ(anomalyTracker.getSumOverPastBuckets("a"), 1LL);
+    EXPECT_EQ(anomalyTracker.getSumOverPastBuckets("b"), 2LL);
+    EXPECT_EQ(anomalyTracker.getSumOverPastBuckets("c"), 1LL);
+    EXPECT_TRUE(anomalyTracker.detectAnomaly(16, *bucket16));
+    EXPECT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 0UL);
+    EXPECT_EQ(anomalyTracker.mMostRecentBucketNum, 15L);
+    anomalyTracker.detectAndDeclareAnomaly(eventTimestamp2, 16, *bucket16);
+    EXPECT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 0UL);
+    EXPECT_EQ(anomalyTracker.mLastAlarmTimestampNs, eventTimestamp2);
+    EXPECT_EQ(anomalyTracker.mMostRecentBucketNum, 15L);
+
+    // Add past bucket #16
+    anomalyTracker.addPastBucket(bucket16, 16);
+    EXPECT_EQ(anomalyTracker.mMostRecentBucketNum, 16L);
+    EXPECT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 1UL);
+    EXPECT_EQ(anomalyTracker.getSumOverPastBuckets("b"), 4LL);
+    EXPECT_TRUE(anomalyTracker.detectAnomaly(18, *bucket18));
+    EXPECT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 1UL);
+    EXPECT_EQ(anomalyTracker.getSumOverPastBuckets("b"), 4LL);
     // Within refractory period.
-    EXPECT_EQ(anomaly_tracker.mAnomalyDeclared, 1L);
-    EXPECT_EQ(anomaly_tracker.mLastAlarmAtBucketIndex, 16L);
+    anomalyTracker.detectAndDeclareAnomaly(eventTimestamp3, 18, *bucket18);
+    EXPECT_EQ(anomalyTracker.mLastAlarmTimestampNs, eventTimestamp2);
+    EXPECT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 1UL);
+    EXPECT_EQ(anomalyTracker.getSumOverPastBuckets("b"), 4LL);
 
-    // Add bucket #18 again.
-    anomaly_tracker.addOrUpdateBucket(MockeBucket({{"b", 1}, {"c", 1}}), 18);
-    EXPECT_EQ(anomaly_tracker.mCurrentBucketIndex, 18L);
-    EXPECT_EQ(anomaly_tracker.mSumOverPastBuckets.size(), 2UL);
-    EXPECT_EQ(anomaly_tracker.mSumOverPastBuckets.find("b")->second, 5);
-    EXPECT_EQ(anomaly_tracker.mSumOverPastBuckets.find("c")->second, 1);
-    EXPECT_TRUE(anomaly_tracker.detectAnomaly());
-    anomaly_tracker.declareAndDeclareAnomaly();
-    EXPECT_EQ(anomaly_tracker.mAnomalyDeclared, 1L);
-    EXPECT_EQ(anomaly_tracker.mLastAlarmAtBucketIndex, 16L);
+    // Add past bucket #18
+    anomalyTracker.addPastBucket(bucket18, 18);
+    EXPECT_EQ(anomalyTracker.mMostRecentBucketNum, 18L);
+    EXPECT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 2UL);
+    EXPECT_EQ(anomalyTracker.getSumOverPastBuckets("b"), 1LL);
+    EXPECT_EQ(anomalyTracker.getSumOverPastBuckets("c"), 1LL);
+    EXPECT_TRUE(anomalyTracker.detectAnomaly(20, *bucket20));
+    EXPECT_EQ(anomalyTracker.mMostRecentBucketNum, 19L);
+    EXPECT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 2UL);
+    EXPECT_EQ(anomalyTracker.getSumOverPastBuckets("b"), 1LL);
+    EXPECT_EQ(anomalyTracker.getSumOverPastBuckets("c"), 1LL);
+    anomalyTracker.detectAndDeclareAnomaly(eventTimestamp4, 20, *bucket20);
+    EXPECT_EQ(anomalyTracker.mLastAlarmTimestampNs, eventTimestamp4);
 
-    // Add bucket #20
-    anomaly_tracker.addOrUpdateBucket(MockeBucket({{"b", 3}, {"d", 1}}), 20);
-    EXPECT_EQ(anomaly_tracker.mCurrentBucketIndex, 20L);
-    EXPECT_EQ(anomaly_tracker.mSumOverPastBuckets.size(), 3UL);
-    EXPECT_EQ(anomaly_tracker.mSumOverPastBuckets.find("b")->second, 4);
-    EXPECT_EQ(anomaly_tracker.mSumOverPastBuckets.find("c")->second, 1);
-    EXPECT_EQ(anomaly_tracker.mSumOverPastBuckets.find("d")->second, 1);
-    EXPECT_TRUE(anomaly_tracker.detectAnomaly());
-    anomaly_tracker.declareAndDeclareAnomaly();
-    EXPECT_EQ(anomaly_tracker.mAnomalyDeclared, 2L);
-    EXPECT_EQ(anomaly_tracker.mLastAlarmAtBucketIndex, 20L);
+    // Add bucket #18 again. Nothing changes.
+    anomalyTracker.addPastBucket(bucket18, 18);
+    EXPECT_EQ(anomalyTracker.mMostRecentBucketNum, 19L);
+    EXPECT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 2UL);
+    EXPECT_EQ(anomalyTracker.getSumOverPastBuckets("b"), 1LL);
+    EXPECT_EQ(anomalyTracker.getSumOverPastBuckets("c"), 1LL);
+    EXPECT_TRUE(anomalyTracker.detectAnomaly(20, *bucket20));
+    EXPECT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 2UL);
+    EXPECT_EQ(anomalyTracker.getSumOverPastBuckets("b"), 1LL);
+    EXPECT_EQ(anomalyTracker.getSumOverPastBuckets("c"), 1LL);
+    anomalyTracker.detectAndDeclareAnomaly(eventTimestamp4 + 1, 20, *bucket20);
+    // Within refractory period.
+    EXPECT_EQ(anomalyTracker.mLastAlarmTimestampNs, eventTimestamp4);
 
-    // Add bucket #25
-    anomaly_tracker.addOrUpdateBucket(MockeBucket({{"d", 1}}), 25);
-    EXPECT_EQ(anomaly_tracker.mCurrentBucketIndex, 25L);
-    EXPECT_EQ(anomaly_tracker.mSumOverPastBuckets.size(), 1UL);
-    EXPECT_EQ(anomaly_tracker.mSumOverPastBuckets.find("d")->second, 1L);
-    EXPECT_FALSE(anomaly_tracker.detectAnomaly());
-    anomaly_tracker.declareAndDeclareAnomaly();
-    EXPECT_EQ(anomaly_tracker.mAnomalyDeclared, 2L);
-    EXPECT_EQ(anomaly_tracker.mLastAlarmAtBucketIndex, 20L);
+    // Add past bucket #20
+    anomalyTracker.addPastBucket(bucket20, 20);
+    EXPECT_EQ(anomalyTracker.mMostRecentBucketNum, 20L);
+    EXPECT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 2UL);
+    EXPECT_EQ(anomalyTracker.getSumOverPastBuckets("b"), 3LL);
+    EXPECT_EQ(anomalyTracker.getSumOverPastBuckets("c"), 1LL);
+    EXPECT_FALSE(anomalyTracker.detectAnomaly(25, *bucket25));
+    EXPECT_EQ(anomalyTracker.mMostRecentBucketNum, 24L);
+    EXPECT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 0UL);
+    anomalyTracker.detectAndDeclareAnomaly(eventTimestamp5, 25, *bucket25);
+    EXPECT_EQ(anomalyTracker.mLastAlarmTimestampNs, eventTimestamp4);
 
-    // Add bucket #28
-    anomaly_tracker.addOrUpdateBucket(MockeBucket({{"e", 5}}), 28);
-    EXPECT_EQ(anomaly_tracker.mCurrentBucketIndex, 28L);
-    EXPECT_EQ(anomaly_tracker.mSumOverPastBuckets.size(), 1UL);
-    EXPECT_EQ(anomaly_tracker.mSumOverPastBuckets.find("e")->second, 5L);
-    EXPECT_TRUE(anomaly_tracker.detectAnomaly());
-    anomaly_tracker.declareAndDeclareAnomaly();
-    EXPECT_EQ(anomaly_tracker.mAnomalyDeclared, 3L);
-    EXPECT_EQ(anomaly_tracker.mLastAlarmAtBucketIndex, 28L);
+    // Add past bucket #25
+    anomalyTracker.addPastBucket(bucket25, 25);
+    EXPECT_EQ(anomalyTracker.mMostRecentBucketNum, 25L);
+    EXPECT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 1UL);
+    EXPECT_EQ(anomalyTracker.getSumOverPastBuckets("d"), 1LL);
+    EXPECT_FALSE(anomalyTracker.detectAnomaly(28, *bucket28));
+    EXPECT_EQ(anomalyTracker.mMostRecentBucketNum, 27L);
+    EXPECT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 0UL);
+    anomalyTracker.detectAndDeclareAnomaly(eventTimestamp6, 28, *bucket28);
+    EXPECT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 0UL);
+    EXPECT_EQ(anomalyTracker.mLastAlarmTimestampNs, eventTimestamp4);
+
+    // Updates current bucket #28.
+    (*bucket28)["e"] = 5;
+    EXPECT_TRUE(anomalyTracker.detectAnomaly(28, *bucket28));
+    EXPECT_EQ(anomalyTracker.mMostRecentBucketNum, 27L);
+    EXPECT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 0UL);
+    anomalyTracker.detectAndDeclareAnomaly(eventTimestamp6 + 7, 28, *bucket28);
+    EXPECT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 0UL);
+    EXPECT_EQ(anomalyTracker.mLastAlarmTimestampNs, eventTimestamp6 + 7);
 }
 
 }  // namespace statsd

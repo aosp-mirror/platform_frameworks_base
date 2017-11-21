@@ -34,6 +34,7 @@ using android::sp;
 using std::set;
 using std::unordered_map;
 using std::vector;
+using android::os::statsd::Condition;
 
 #ifdef __ANDROID__
 
@@ -71,6 +72,19 @@ StatsdConfig buildGoodConfig() {
     combination->add_matcher("SCREEN_IS_ON");
     combination->add_matcher("SCREEN_IS_OFF");
 
+    CountMetric* metric = config.add_count_metric();
+    metric->set_name("3");
+    metric->set_what("SCREEN_IS_ON");
+    metric->mutable_bucket()->set_bucket_size_millis(30 * 1000L);
+    KeyMatcher* keyMatcher = metric->add_dimension();
+    keyMatcher->set_key(1);
+
+    auto alert = config.add_alert();
+    alert->set_name("3");
+    alert->set_metric_name("3");
+    alert->set_number_of_buckets(10);
+    alert->set_refractory_period_secs(100);
+    alert->set_trigger_if_sum_gt(100);
     return config;
 }
 
@@ -97,6 +111,29 @@ StatsdConfig buildCircleMatchers() {
     // Circle dependency
     combination->add_matcher("SCREEN_ON_OR_OFF");
 
+    return config;
+}
+
+StatsdConfig buildAlertWithUnknownMetric() {
+    StatsdConfig config;
+    config.set_name("12345");
+
+    LogEntryMatcher* eventMatcher = config.add_log_entry_matcher();
+    eventMatcher->set_name("SCREEN_IS_ON");
+
+    CountMetric* metric = config.add_count_metric();
+    metric->set_name("3");
+    metric->set_what("SCREEN_IS_ON");
+    metric->mutable_bucket()->set_bucket_size_millis(30 * 1000L);
+    KeyMatcher* keyMatcher = metric->add_dimension();
+    keyMatcher->set_key(1);
+
+    auto alert = config.add_alert();
+    alert->set_name("3");
+    alert->set_metric_name("2");
+    alert->set_number_of_buckets(10);
+    alert->set_refractory_period_secs(100);
+    alert->set_trigger_if_sum_gt(100);
     return config;
 }
 
@@ -156,6 +193,12 @@ StatsdConfig buildDimensionMetricsWithMultiTags() {
     KeyMatcher* keyMatcher = metric->add_dimension();
     keyMatcher->set_key(1);
 
+    auto alert = config.add_alert();
+    alert->set_name("3");
+    alert->set_metric_name("3");
+    alert->set_number_of_buckets(10);
+    alert->set_refractory_period_secs(100);
+    alert->set_trigger_if_sum_gt(100);
     return config;
 }
 
@@ -183,7 +226,7 @@ StatsdConfig buildCircleConditions() {
     simpleLogEntryMatcher->mutable_key_value_matcher(0)->set_eq_int(
             1 /*SCREEN_STATE_CHANGE__DISPLAY_STATE__STATE_OFF*/);
 
-    Condition* condition = config.add_condition();
+    auto condition = config.add_condition();
     condition->set_name("SCREEN_IS_ON");
     SimpleCondition* simpleCondition = condition->mutable_simple_condition();
     simpleCondition->set_start("SCREEN_IS_ON");
@@ -206,13 +249,16 @@ TEST(MetricsManagerTest, TestGoodConfig) {
     vector<sp<LogMatchingTracker>> allLogEntryMatchers;
     vector<sp<ConditionTracker>> allConditionTrackers;
     vector<sp<MetricProducer>> allMetricProducers;
+    std::vector<sp<AnomalyTracker>> allAnomalyTrackers;
     unordered_map<int, std::vector<int>> conditionToMetricMap;
     unordered_map<int, std::vector<int>> trackerToMetricMap;
     unordered_map<int, std::vector<int>> trackerToConditionMap;
 
     EXPECT_TRUE(initStatsdConfig(config, allTagIds, allLogEntryMatchers, allConditionTrackers,
-                                 allMetricProducers, conditionToMetricMap, trackerToMetricMap,
-                                 trackerToConditionMap));
+                                 allMetricProducers, allAnomalyTrackers, conditionToMetricMap,
+                                 trackerToMetricMap, trackerToConditionMap));
+    EXPECT_EQ(1u, allMetricProducers.size());
+    EXPECT_EQ(1u, allAnomalyTrackers.size());
 }
 
 TEST(MetricsManagerTest, TestDimensionMetricsWithMultiTags) {
@@ -221,13 +267,14 @@ TEST(MetricsManagerTest, TestDimensionMetricsWithMultiTags) {
     vector<sp<LogMatchingTracker>> allLogEntryMatchers;
     vector<sp<ConditionTracker>> allConditionTrackers;
     vector<sp<MetricProducer>> allMetricProducers;
+    std::vector<sp<AnomalyTracker>> allAnomalyTrackers;
     unordered_map<int, std::vector<int>> conditionToMetricMap;
     unordered_map<int, std::vector<int>> trackerToMetricMap;
     unordered_map<int, std::vector<int>> trackerToConditionMap;
 
     EXPECT_FALSE(initStatsdConfig(config, allTagIds, allLogEntryMatchers, allConditionTrackers,
-                                  allMetricProducers, conditionToMetricMap, trackerToMetricMap,
-                                  trackerToConditionMap));
+                                  allMetricProducers, allAnomalyTrackers, conditionToMetricMap,
+                                  trackerToMetricMap, trackerToConditionMap));
 }
 
 TEST(MetricsManagerTest, TestCircleLogMatcherDependency) {
@@ -236,13 +283,14 @@ TEST(MetricsManagerTest, TestCircleLogMatcherDependency) {
     vector<sp<LogMatchingTracker>> allLogEntryMatchers;
     vector<sp<ConditionTracker>> allConditionTrackers;
     vector<sp<MetricProducer>> allMetricProducers;
+    std::vector<sp<AnomalyTracker>> allAnomalyTrackers;
     unordered_map<int, std::vector<int>> conditionToMetricMap;
     unordered_map<int, std::vector<int>> trackerToMetricMap;
     unordered_map<int, std::vector<int>> trackerToConditionMap;
 
     EXPECT_FALSE(initStatsdConfig(config, allTagIds, allLogEntryMatchers, allConditionTrackers,
-                                  allMetricProducers, conditionToMetricMap, trackerToMetricMap,
-                                  trackerToConditionMap));
+                                  allMetricProducers, allAnomalyTrackers, conditionToMetricMap,
+                                  trackerToMetricMap, trackerToConditionMap));
 }
 
 TEST(MetricsManagerTest, TestMissingMatchers) {
@@ -251,13 +299,13 @@ TEST(MetricsManagerTest, TestMissingMatchers) {
     vector<sp<LogMatchingTracker>> allLogEntryMatchers;
     vector<sp<ConditionTracker>> allConditionTrackers;
     vector<sp<MetricProducer>> allMetricProducers;
+    std::vector<sp<AnomalyTracker>> allAnomalyTrackers;
     unordered_map<int, std::vector<int>> conditionToMetricMap;
     unordered_map<int, std::vector<int>> trackerToMetricMap;
     unordered_map<int, std::vector<int>> trackerToConditionMap;
-
     EXPECT_FALSE(initStatsdConfig(config, allTagIds, allLogEntryMatchers, allConditionTrackers,
-                                  allMetricProducers, conditionToMetricMap, trackerToMetricMap,
-                                  trackerToConditionMap));
+                                  allMetricProducers, allAnomalyTrackers, conditionToMetricMap,
+                                  trackerToMetricMap, trackerToConditionMap));
 }
 
 TEST(MetricsManagerTest, TestCircleConditionDependency) {
@@ -266,13 +314,30 @@ TEST(MetricsManagerTest, TestCircleConditionDependency) {
     vector<sp<LogMatchingTracker>> allLogEntryMatchers;
     vector<sp<ConditionTracker>> allConditionTrackers;
     vector<sp<MetricProducer>> allMetricProducers;
+    std::vector<sp<AnomalyTracker>> allAnomalyTrackers;
     unordered_map<int, std::vector<int>> conditionToMetricMap;
     unordered_map<int, std::vector<int>> trackerToMetricMap;
     unordered_map<int, std::vector<int>> trackerToConditionMap;
 
     EXPECT_FALSE(initStatsdConfig(config, allTagIds, allLogEntryMatchers, allConditionTrackers,
-                                  allMetricProducers, conditionToMetricMap, trackerToMetricMap,
-                                  trackerToConditionMap));
+                                  allMetricProducers, allAnomalyTrackers, conditionToMetricMap,
+                                  trackerToMetricMap, trackerToConditionMap));
+}
+
+TEST(MetricsManagerTest, testAlertWithUnknownMetric) {
+    StatsdConfig config = buildAlertWithUnknownMetric();
+    set<int> allTagIds;
+    vector<sp<LogMatchingTracker>> allLogEntryMatchers;
+    vector<sp<ConditionTracker>> allConditionTrackers;
+    vector<sp<MetricProducer>> allMetricProducers;
+    std::vector<sp<AnomalyTracker>> allAnomalyTrackers;
+    unordered_map<int, std::vector<int>> conditionToMetricMap;
+    unordered_map<int, std::vector<int>> trackerToMetricMap;
+    unordered_map<int, std::vector<int>> trackerToConditionMap;
+
+    EXPECT_FALSE(initStatsdConfig(config, allTagIds, allLogEntryMatchers, allConditionTrackers,
+                                  allMetricProducers, allAnomalyTrackers, conditionToMetricMap,
+                                  trackerToMetricMap, trackerToConditionMap));
 }
 
 #else

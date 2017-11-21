@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef DURATION_METRIC_PRODUCER_H
-#define DURATION_METRIC_PRODUCER_H
+#pragma once
+
 
 #include <unordered_map>
 
@@ -48,6 +48,7 @@ public:
     void onConditionChanged(const bool conditionMet, const uint64_t eventTime) override;
 
     void finish() override;
+    void flushIfNeeded(const uint64_t newEventTime) override;
 
     // TODO: Pass a timestamp as a parameter in onDumpReport.
     std::unique_ptr<std::vector<uint8_t>> onDumpReport() override;
@@ -95,11 +96,8 @@ private:
     std::unordered_map<HashableDimensionKey, std::unique_ptr<DurationTracker>>
             mCurrentSlicedDuration;
 
-    void flushDurationIfNeeded(const uint64_t newEventTime);
-
-    std::unique_ptr<DurationTracker> createDurationTracker(std::vector<DurationBucket>& bucket);
-
-    void flushIfNeeded(uint64_t timestamp);
+    std::unique_ptr<DurationTracker> createDurationTracker(const HashableDimensionKey& eventKey,
+                                                           std::vector<DurationBucket>& bucket);
 
     static const size_t kBucketSize = sizeof(DurationBucket{});
 };
@@ -108,4 +106,3 @@ private:
 }  // namespace os
 }  // namespace android
 
-#endif  // DURATION_METRIC_PRODUCER_H

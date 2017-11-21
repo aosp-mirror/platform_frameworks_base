@@ -16,8 +16,6 @@
 
 #pragma once
 
-#include "Log.h"
-
 #include <utils/RefBase.h>
 #include <unordered_map>
 #include <vector>
@@ -28,7 +26,7 @@ namespace android {
 namespace os {
 namespace statsd {
 
-/** Defines a hash function for sp<AA>, returning the hash of the underlying pointer. */
+/** Defines a hash function for sp<const AA>, returning the hash of the underlying pointer. */
 template <class AA>
 struct SpHash {
     size_t operator()(const sp<const AA>& k) const {
@@ -39,7 +37,7 @@ struct SpHash {
 /**
  * Min priority queue for generic type AA.
  * Unlike a regular priority queue, this class is also capable of removing interior elements.
- * @tparam Comparator must implement [bool operator()(sp<const AA> a, sp<const AA> b)], returning
+ * @tparam Comparator must implement [bool operator()(sp< AA> a, sp< AA> b)], returning
  *    whether a should be closer to the top of the queue than b.
  */
 template <class AA, class Comparator>
@@ -104,7 +102,6 @@ void indexed_priority_queue<AA, Comparator>::remove(sp<const AA> a) {
     if (!contains(a)) return;
     size_t idx = indices[a];
     if (idx >= pq.size()) {
-        ALOGE("indexed_priority_queue: Invalid index in map of indices.");
         return;
     }
     if (idx == size()) {  // if a is the last element, i.e. at index idx == size() == (pq.size()-1)
@@ -193,7 +190,6 @@ void indexed_priority_queue<AA, Comparator>::sift_down(size_t idx) {
 template <class AA, class Comparator>
 bool indexed_priority_queue<AA, Comparator>::higher(size_t idx1, size_t idx2) const {
     if (!(0u < idx1 && idx1 < pq.size() && 0u < idx2 && idx2 < pq.size())) {
-        ALOGE("indexed_priority_queue: Attempting to access invalid index");
         return false;  // got to do something.
     }
     return Comparator()(pq[idx1], pq[idx2]);
@@ -208,7 +204,6 @@ bool indexed_priority_queue<AA, Comparator>::contains(sp<const AA> a) const {
 template <class AA, class Comparator>
 void indexed_priority_queue<AA, Comparator>::swap_indices(size_t i, size_t j) {
     if (!(0u < i && i < pq.size() && 0u < j && j < pq.size())) {
-        ALOGE("indexed_priority_queue: Attempting to swap invalid index");
         return;
     }
     sp<const AA> val_i = pq[i];

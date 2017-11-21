@@ -190,7 +190,8 @@ bool initMetrics(const StatsdConfig& config, const unordered_map<string, int>& l
                  vector<sp<ConditionTracker>>& allConditionTrackers,
                  vector<sp<MetricProducer>>& allMetricProducers,
                  unordered_map<int, std::vector<int>>& conditionToMetricMap,
-                 unordered_map<int, std::vector<int>>& trackerToMetricMap) {
+                 unordered_map<int, std::vector<int>>& trackerToMetricMap,
+                 unordered_map<string, int>& metricMap) {
     sp<ConditionWizard> wizard = new ConditionWizard(allConditionTrackers);
     const int allMetricsCount = config.count_metric_size() + config.duration_metric_size() +
                                 config.event_metric_size() + config.value_metric_size();
@@ -208,6 +209,7 @@ bool initMetrics(const StatsdConfig& config, const unordered_map<string, int>& l
         }
 
         int metricIndex = allMetricProducers.size();
+        metricMap.insert({metric.name(), metricIndex});
         int trackerIndex;
         if (!handleMetricWithLogTrackers(metric.what(), metricIndex, metric.dimension_size() > 0,
                                          allLogEntryMatchers, logTrackerMap, trackerToMetricMap,
@@ -236,6 +238,7 @@ bool initMetrics(const StatsdConfig& config, const unordered_map<string, int>& l
     for (int i = 0; i < config.duration_metric_size(); i++) {
         int metricIndex = allMetricProducers.size();
         const DurationMetric& metric = config.duration_metric(i);
+        metricMap.insert({metric.name(), metricIndex});
 
         auto what_it = conditionTrackerMap.find(metric.what());
         if (what_it == conditionTrackerMap.end()) {
@@ -305,6 +308,7 @@ bool initMetrics(const StatsdConfig& config, const unordered_map<string, int>& l
     for (int i = 0; i < config.event_metric_size(); i++) {
         int metricIndex = allMetricProducers.size();
         const EventMetric& metric = config.event_metric(i);
+        metricMap.insert({metric.name(), metricIndex});
         if (!metric.has_name() || !metric.has_what()) {
             ALOGW("cannot find the metric name or what in config");
             return false;
@@ -342,6 +346,7 @@ bool initMetrics(const StatsdConfig& config, const unordered_map<string, int>& l
         }
 
         int metricIndex = allMetricProducers.size();
+        metricMap.insert({metric.name(), metricIndex});
         int trackerIndex;
         if (!handleMetricWithLogTrackers(metric.what(), metricIndex, metric.dimension_size() > 0,
                                          allLogEntryMatchers, logTrackerMap, trackerToMetricMap,
@@ -387,6 +392,7 @@ bool initMetrics(const StatsdConfig& config, const unordered_map<string, int>& l
         }
 
         int metricIndex = allMetricProducers.size();
+        metricMap.insert({metric.name(), metricIndex});
         int trackerIndex;
         if (!handleMetricWithLogTrackers(metric.what(), metricIndex, metric.dimension_size() > 0,
                                          allLogEntryMatchers, logTrackerMap, trackerToMetricMap,
@@ -419,8 +425,28 @@ bool initMetrics(const StatsdConfig& config, const unordered_map<string, int>& l
         }
 
         sp<MetricProducer> gaugeProducer =
-                new GaugeMetricProducer(metric, conditionIndex, wizard, pullTagId);
+                new GaugeMetricProducer(metric, conditionIndex, wizard, pullTagId, startTimeNs);
         allMetricProducers.push_back(gaugeProducer);
+    }
+    return true;
+}
+
+bool initAlerts(const StatsdConfig& config, const unordered_map<string, int>& metricProducerMap,
+                vector<sp<MetricProducer>>& allMetricProducers,
+                vector<sp<AnomalyTracker>>& allAnomalyTrackers) {
+    for (int i = 0; i < config.alert_size(); i++) {
+        const Alert& alert = config.alert(i);
+        const auto& itr = metricProducerMap.find(alert.metric_name());
+        if (itr == metricProducerMap.end()) {
+            ALOGW("alert has unknown metric name: %s %s", alert.name().c_str(),
+                  alert.metric_name().c_str());
+            return false;
+        }
+        const int metricIndex = itr->second;
+        sp<AnomalyTracker> anomalyTracker =
+                new AnomalyTracker(alert, allMetricProducers[metricIndex]->getBuckeSizeInNs());
+        allMetricProducers[metricIndex]->addAnomalyTracker(anomalyTracker);
+        allAnomalyTrackers.push_back(anomalyTracker);
     }
     return true;
 }
@@ -429,11 +455,13 @@ bool initStatsdConfig(const StatsdConfig& config, set<int>& allTagIds,
                       vector<sp<LogMatchingTracker>>& allLogEntryMatchers,
                       vector<sp<ConditionTracker>>& allConditionTrackers,
                       vector<sp<MetricProducer>>& allMetricProducers,
+                      vector<sp<AnomalyTracker>>& allAnomalyTrackers,
                       unordered_map<int, std::vector<int>>& conditionToMetricMap,
                       unordered_map<int, std::vector<int>>& trackerToMetricMap,
                       unordered_map<int, std::vector<int>>& trackerToConditionMap) {
     unordered_map<string, int> logTrackerMap;
     unordered_map<string, int> conditionTrackerMap;
+    unordered_map<string, int> metricProducerMap;
 
     if (!initLogTrackers(config, logTrackerMap, allLogEntryMatchers, allTagIds)) {
         ALOGE("initLogMatchingTrackers failed");
@@ -449,8 +477,12 @@ bool initStatsdConfig(const StatsdConfig& config, set<int>& allTagIds,
 
     if (!initMetrics(config, logTrackerMap, conditionTrackerMap, allLogEntryMatchers,
                      allConditionTrackers, allMetricProducers, conditionToMetricMap,
-                     trackerToMetricMap)) {
+                     trackerToMetricMap, metricProducerMap)) {
         ALOGE("initMetricProducers failed");
+        return false;
+    }
+    if (!initAlerts(config, metricProducerMap, allMetricProducers, allAnomalyTrackers)) {
+        ALOGE("initAlerts failed");
         return false;
     }
     return true;

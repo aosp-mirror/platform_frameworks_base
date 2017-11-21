@@ -17,6 +17,7 @@
 #ifndef METRIC_PRODUCER_H
 #define METRIC_PRODUCER_H
 
+#include "anomaly/AnomalyTracker.h"
 #include "condition/ConditionWizard.h"
 #include "matchers/matcher_util.h"
 #include "packages/PackageInfoListener.h"
@@ -58,6 +59,7 @@ public:
     // This is called when the metric collecting is done, e.g., when there is a new configuration
     // coming. MetricProducer should do the clean up, and dump existing data to dropbox.
     virtual void finish() = 0;
+    virtual void flushIfNeeded(const uint64_t newEventTime) = 0;
 
     // TODO: Pass a timestamp as a parameter in onDumpReport and update all its
     // implementations.
@@ -71,6 +73,14 @@ public:
     // Returns the memory in bytes currently used to store this metric's data. Does not change
     // state.
     virtual size_t byteSize() = 0;
+
+    void addAnomalyTracker(sp<AnomalyTracker> tracker) {
+        mAnomalyTrackers.push_back(tracker);
+    }
+
+    int64_t getBuckeSizeInNs() const {
+        return mBucketSizeNs;
+    }
 
 protected:
     const uint64_t mStartTimeNs;
@@ -96,6 +106,8 @@ protected:
     std::unordered_map<HashableDimensionKey, std::vector<KeyValuePair>> mDimensionKeyMap;
 
     std::vector<EventConditionLink> mConditionLinks;
+
+    std::vector<sp<AnomalyTracker>> mAnomalyTrackers;
 
     /*
      * Individual metrics can implement their own business logic here. All pre-processing is done.
