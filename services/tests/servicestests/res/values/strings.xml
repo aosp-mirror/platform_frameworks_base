@@ -30,6 +30,6 @@
     <string name="test_account_type2">com.android.server.accounts.account_manager_service_test.account.type2</string>
 
     <string name="config_batterySaverDeviceSpecificConfig_1"></string>
-    <string name="config_batterySaverDeviceSpecificConfig_2">file-off:/sys/a=1,file-off:/sys/b=2</string>
-    <string name="config_batterySaverDeviceSpecificConfig_3">file-off:/sys/a=3,file-on:/proc/c=4,/abc=3</string>
+    <string name="config_batterySaverDeviceSpecificConfig_2">cpufreq-n=1:123/2:456</string>
+    <string name="config_batterySaverDeviceSpecificConfig_3">cpufreq-n=2:222,cpufreq-i=3:333/4:444</string>
 </resources>

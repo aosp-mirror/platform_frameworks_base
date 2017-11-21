@@ -32,6 +32,7 @@ import android.util.Slog;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.power.batterysaver.CpuFrequencies;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -40,14 +41,13 @@ import java.util.List;
 /**
  * Class to decide whether to turn on battery saver mode for specific service
  *
- * TODO: We should probably make {@link #mFilesForInteractive} and {@link #mFilesForNoninteractive}
- * less flexible and just take a list of "CPU number - frequency" pairs. Being able to write
- * anything under /sys/ and /proc/ is too loose.
- *
- * Test: atest BatterySaverPolicyTest
+ * Test:
+ atest ${ANDROID_BUILD_TOP}/frameworks/base/services/tests/servicestests/src/com/android/server/power/BatterySaverPolicyTest.java
  */
 public class BatterySaverPolicy extends ContentObserver {
     private static final String TAG = "BatterySaverPolicy";
+
+    public static final boolean DEBUG = false; // DO NOT SUBMIT WITH TRUE.
 
     // Value of batterySaverGpsMode such that GPS isn't affected by battery saver mode.
     public static final int GPS_MODE_NO_CHANGE = 0;
@@ -70,8 +70,8 @@ public class BatterySaverPolicy extends ContentObserver {
     private static final String KEY_FORCE_ALL_APPS_STANDBY = "force_all_apps_standby";
     private static final String KEY_OPTIONAL_SENSORS_DISABLED = "optional_sensors_disabled";
 
-    private static final String KEY_FILE_FOR_INTERACTIVE_PREFIX = "file-on:";
-    private static final String KEY_FILE_FOR_NONINTERACTIVE_PREFIX = "file-off:";
+    private static final String KEY_CPU_FREQ_INTERACTIVE = "cpufreq-i";
+    private static final String KEY_CPU_FREQ_NONINTERACTIVE = "cpufreq-n";
 
     private static String mSettings;
     private static String mDeviceSpecificSettings;
@@ -273,6 +273,11 @@ public class BatterySaverPolicy extends ContentObserver {
         mSettings = setting;
         mDeviceSpecificSettings = deviceSpecificSetting;
 
+        if (DEBUG) {
+            Slog.i(TAG, "mSettings=" + mSettings);
+            Slog.i(TAG, "mDeviceSpecificSettings=" + mDeviceSpecificSettings);
+        }
+
         final KeyValueListParser parser = new KeyValueListParser(',');
 
         // Non-device-specific parameters.
@@ -307,29 +312,11 @@ public class BatterySaverPolicy extends ContentObserver {
                     + deviceSpecificSetting);
         }
 
-        mFilesForInteractive = collectParams(parser, KEY_FILE_FOR_INTERACTIVE_PREFIX);
-        mFilesForNoninteractive = collectParams(parser, KEY_FILE_FOR_NONINTERACTIVE_PREFIX);
-    }
+        mFilesForInteractive = (new CpuFrequencies()).parseString(
+                parser.getString(KEY_CPU_FREQ_INTERACTIVE, "")).toSysFileMap();
 
-    private static ArrayMap<String, String> collectParams(
-            KeyValueListParser parser, String prefix) {
-        final ArrayMap<String, String> ret = new ArrayMap<>();
-
-        for (int i = parser.size() - 1; i >= 0; i--) {
-            final String key = parser.keyAt(i);
-            if (!key.startsWith(prefix)) {
-                continue;
-            }
-            final String path = key.substring(prefix.length());
-
-            if (!(path.startsWith("/sys/") || path.startsWith("/proc/"))) {
-                Slog.wtf(TAG, "Invalid path: " + path);
-                continue;
-            }
-
-            ret.put(path, parser.getString(key, ""));
-        }
-        return ret;
+        mFilesForNoninteractive = (new CpuFrequencies()).parseString(
+                parser.getString(KEY_CPU_FREQ_NONINTERACTIVE, "")).toSysFileMap();
     }
 
     /**
@@ -399,10 +386,10 @@ public class BatterySaverPolicy extends ContentObserver {
         synchronized (mLock) {
             pw.println();
             pw.println("Battery saver policy");
-            pw.println("  Settings " + Settings.Global.BATTERY_SAVER_CONSTANTS);
-            pw.println("  value: " + mSettings);
-            pw.println("  Settings " + mDeviceSpecificSettingsSource);
-            pw.println("  value: " + mDeviceSpecificSettings);
+            pw.println("  Settings: " + Settings.Global.BATTERY_SAVER_CONSTANTS);
+            pw.println("    value: " + mSettings);
+            pw.println("  Settings: " + mDeviceSpecificSettingsSource);
+            pw.println("    value: " + mDeviceSpecificSettings);
 
             pw.println();
             pw.println("  " + KEY_VIBRATION_DISABLED + "=" + mVibrationDisabled);
