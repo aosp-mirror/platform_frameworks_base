@@ -168,9 +168,9 @@ void MetricsManager::onLogEvent(const LogEvent& event) {
 }
 
 void MetricsManager::onAnomalyAlarmFired(const uint64_t timestampNs,
-                                         sp<const AnomalyAlarm> anomaly) {
+                         unordered_set<sp<const AnomalyAlarm>, SpHash<AnomalyAlarm>>& anomalySet) {
     for (const auto& itr : mAllAnomalyTrackers) {
-        itr->declareAnomaly(timestampNs);
+        itr->informAlarmsFired(timestampNs, anomalySet);
     }
 }
 

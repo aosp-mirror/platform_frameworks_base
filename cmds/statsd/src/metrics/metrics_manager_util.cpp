@@ -444,9 +444,24 @@ bool initAlerts(const StatsdConfig& config, const unordered_map<string, int>& me
                   alert.metric_name().c_str());
             return false;
         }
+        if (alert.trigger_if_sum_gt() < 0 || alert.number_of_buckets() <= 0) {
+            ALOGW("invalid alert: threshold=%lld num_buckets= %d",
+                  alert.trigger_if_sum_gt(), alert.number_of_buckets());
+            return false;
+        }
         const int metricIndex = itr->second;
-        sp<AnomalyTracker> anomalyTracker =
-                new AnomalyTracker(alert, allMetricProducers[metricIndex]->getBuckeSizeInNs());
+        if (alert.trigger_if_sum_gt() >
+                  (int64_t) alert.number_of_buckets()
+                  * allMetricProducers[metricIndex]->getBuckeSizeInNs()) {
+            ALOGW("invalid alert: threshold (%lld) > possible recordable value (%d x %lld)",
+                  alert.trigger_if_sum_gt(), alert.number_of_buckets(),
+                  (long long) allMetricProducers[metricIndex]->getBuckeSizeInNs());
+            return false;
+        }
+
+        // TODO: Give each MetricProducer a method called createAnomalyTracker(alert), which
+        //       creates either an AnomalyTracker or a DurationAnomalyTracker and returns it.
+        sp<AnomalyTracker> anomalyTracker = new AnomalyTracker(alert);
         allMetricProducers[metricIndex]->addAnomalyTracker(anomalyTracker);
         allAnomalyTrackers.push_back(anomalyTracker);
     }

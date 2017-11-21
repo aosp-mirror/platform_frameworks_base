@@ -62,8 +62,6 @@ const int FIELD_ID_START_BUCKET_NANOS = 1;
 const int FIELD_ID_END_BUCKET_NANOS = 2;
 const int FIELD_ID_COUNT = 3;
 
-// TODO: add back AnomalyTracker.
-
 CountMetricProducer::CountMetricProducer(const ConfigKey& key, const CountMetric& metric,
                                          const int conditionIndex,
                                          const sp<ConditionWizard>& wizard,

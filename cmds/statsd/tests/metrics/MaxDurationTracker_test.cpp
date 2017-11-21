@@ -201,7 +201,7 @@ TEST(MaxDurationTrackerTest, TestAnomalyDetection) {
     uint64_t eventStartTimeNs = bucketStartTimeNs + NS_PER_SEC + 1;
     uint64_t bucketSizeNs = 30 * NS_PER_SEC;
 
-    sp<AnomalyTracker> anomalyTracker = new AnomalyTracker(alert, bucketSizeNs);
+    sp<AnomalyTracker> anomalyTracker = new AnomalyTracker(alert);
     MaxDurationTracker tracker(kConfigKey, "metric", "event", wizard, -1, true, bucketStartTimeNs,
                                bucketSizeNs, {anomalyTracker}, buckets);
 

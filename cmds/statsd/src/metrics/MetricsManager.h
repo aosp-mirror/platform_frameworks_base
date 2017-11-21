@@ -46,7 +46,8 @@ public:
     // Called when everything should wrap up. We are about to finish (e.g., new config comes).
     void finish();
 
-    void onAnomalyAlarmFired(const uint64_t timestampNs, sp<const AnomalyAlarm> anomaly);
+    void onAnomalyAlarmFired(const uint64_t timestampNs,
+                         unordered_set<sp<const AnomalyAlarm>, SpHash<AnomalyAlarm>>& anomalySet);
 
     void setAnomalyMonitor(const sp<AnomalyMonitor>& anomalyMonitor);
 
