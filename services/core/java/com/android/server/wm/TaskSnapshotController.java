@@ -226,7 +226,7 @@ class TaskSnapshotController {
         final Rect taskFrame = new Rect();
         task.getBounds(taskFrame);
 
-        final GraphicBuffer buffer = SurfaceControl.captureLayersToBuffer(
+        final GraphicBuffer buffer = SurfaceControl.captureLayers(
                 task.getSurfaceControl().getHandle(), taskFrame, scaleFraction);
 
         if (buffer == null || buffer.getWidth() <= 1 || buffer.getHeight() <= 1) {

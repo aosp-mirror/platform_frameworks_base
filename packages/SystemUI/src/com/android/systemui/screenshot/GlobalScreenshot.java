@@ -162,7 +162,7 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
         Matrix matrix = new Matrix();
         int overlayColor = 0x40FFFFFF;
 
-        Bitmap picture = Bitmap.createBitmap(previewWidth, previewHeight, data.image.getConfig());
+        Bitmap picture = Bitmap.createBitmap(previewWidth, previewHeight, Bitmap.Config.ARGB_8888);
         matrix.setTranslate((previewWidth - mImageWidth) / 2, (previewHeight - mImageHeight) / 2);
         c.setBitmap(picture);
         c.drawBitmap(data.image, matrix, paint);
@@ -171,7 +171,7 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
 
         // Note, we can't use the preview for the small icon, since it is non-square
         float scale = (float) iconSize / Math.min(mImageWidth, mImageHeight);
-        Bitmap icon = Bitmap.createBitmap(iconSize, iconSize, data.image.getConfig());
+        Bitmap icon = Bitmap.createBitmap(iconSize, iconSize, Bitmap.Config.ARGB_8888);
         matrix.setScale(scale, scale);
         matrix.postTranslate((iconSize - (scale * mImageWidth)) / 2,
                 (iconSize - (scale * mImageHeight)) / 2);
