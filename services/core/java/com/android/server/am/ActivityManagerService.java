@@ -351,7 +351,6 @@ import android.util.AtomicFile;
 import android.util.StatsLog;
 import android.util.TimingsTraceLog;
 import android.util.DebugUtils;
-import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Pair;
@@ -713,6 +712,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     final UserController mUserController;
 
     final AppErrors mAppErrors;
+
+    final AppWarnings mAppWarnings;
 
     /**
      * Dump of the activity state at the time of the last ANR. Cleared after
@@ -1717,7 +1718,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final int IDLE_UIDS_MSG = 58;
     static final int LOG_STACK_STATE = 60;
     static final int VR_MODE_CHANGE_MSG = 61;
-    static final int SHOW_UNSUPPORTED_DISPLAY_SIZE_DIALOG_MSG = 62;
     static final int HANDLE_TRUST_STORAGE_UPDATE_MSG = 63;
     static final int NOTIFY_VR_SLEEPING_MSG = 65;
     static final int SERVICE_FOREGROUND_TIMEOUT_MSG = 66;
@@ -1736,7 +1736,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     static KillHandler sKillHandler = null;
 
     CompatModeDialog mCompatModeDialog;
-    UnsupportedDisplaySizeDialog mUnsupportedDisplaySizeDialog;
     long mLastMemUsageReportTime = 0;
 
     /**
@@ -1914,23 +1913,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                                 mCompatModeDialog.show();
                             }
                         }
-                    }
-                }
-                break;
-            }
-            case SHOW_UNSUPPORTED_DISPLAY_SIZE_DIALOG_MSG: {
-                synchronized (ActivityManagerService.this) {
-                    final ActivityRecord ar = (ActivityRecord) msg.obj;
-                    if (mUnsupportedDisplaySizeDialog != null) {
-                        mUnsupportedDisplaySizeDialog.dismiss();
-                        mUnsupportedDisplaySizeDialog = null;
-                    }
-                    if (ar != null && mCompatModePackages.getPackageNotifyUnsupportedZoomLocked(
-                            ar.packageName)) {
-                        // TODO(multi-display): Show dialog on appropriate display.
-                        mUnsupportedDisplaySizeDialog = new UnsupportedDisplaySizeDialog(
-                                ActivityManagerService.this, mUiContext, ar.info.applicationInfo);
-                        mUnsupportedDisplaySizeDialog.show();
                     }
                 }
                 break;
@@ -2667,6 +2649,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         GL_ES_VERSION = 0;
         mActivityStarter = null;
         mAppErrors = null;
+        mAppWarnings = null;
         mAppOpsService = mInjector.getAppOpsService(null, null);
         mBatteryStatsService = null;
         mCompatModePackages = null;
@@ -2734,10 +2717,13 @@ public class ActivityManagerService extends IActivityManager.Stub
         mProviderMap = new ProviderMap(this);
         mAppErrors = new AppErrors(mUiContext, this);
 
-        // TODO: Move creation of battery stats service outside of activity manager service.
         File dataDir = Environment.getDataDirectory();
         File systemDir = new File(dataDir, "system");
         systemDir.mkdirs();
+
+        mAppWarnings = new AppWarnings(this, mUiContext, mHandler, mUiHandler, systemDir);
+
+        // TODO: Move creation of battery stats service outside of activity manager service.
         mBatteryStatsService = new BatteryStatsService(systemContext, systemDir, mHandler);
         mBatteryStatsService.getActiveStatistics().readLocked();
         mBatteryStatsService.scheduleWriteToDisk();
@@ -3301,15 +3287,18 @@ public class ActivityManagerService extends IActivityManager.Stub
         mUiHandler.sendMessage(msg);
     }
 
-    final void showUnsupportedZoomDialogIfNeededLocked(ActivityRecord r) {
-        final Configuration globalConfig = getGlobalConfiguration();
-        if (globalConfig.densityDpi != DisplayMetrics.DENSITY_DEVICE_STABLE
-                && r.appInfo.requiresSmallestWidthDp > globalConfig.smallestScreenWidthDp) {
-            final Message msg = Message.obtain();
-            msg.what = SHOW_UNSUPPORTED_DISPLAY_SIZE_DIALOG_MSG;
-            msg.obj = r;
-            mUiHandler.sendMessage(msg);
-        }
+    final AppWarnings getAppWarningsLocked() {
+        return mAppWarnings;
+    }
+
+    /**
+     * Shows app warning dialogs, if necessary.
+     *
+     * @param r activity record for which the warnings may be displayed
+     */
+    final void showAppWarningsIfNeededLocked(ActivityRecord r) {
+        mAppWarnings.showUnsupportedCompileSdkDialogIfNeeded(r);
+        mAppWarnings.showUnsupportedDisplaySizeDialogIfNeeded(r);
     }
 
     private int updateLruProcessInternalLocked(ProcessRecord app, long now, int index,
@@ -19322,13 +19311,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                                         mRecentTasks.removeTasksByPackageName(ssp, userId);
 
                                         mServices.forceStopPackageLocked(ssp, userId);
-
-                                        // Hide the "unsupported display" dialog if necessary.
-                                        if (mUnsupportedDisplaySizeDialog != null && ssp.equals(
-                                                mUnsupportedDisplaySizeDialog.getPackageName())) {
-                                            mUnsupportedDisplaySizeDialog.dismiss();
-                                            mUnsupportedDisplaySizeDialog = null;
-                                        }
+                                        mAppWarnings.onPackageUninstalled(ssp);
                                         mCompatModePackages.handlePackageUninstalledLocked(ssp);
                                         mBatteryStatsService.notePackageUninstalled(ssp);
                                     }
@@ -19407,13 +19390,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     Uri data = intent.getData();
                     String ssp;
                     if (data != null && (ssp = data.getSchemeSpecificPart()) != null) {
-                        // Hide the "unsupported display" dialog if necessary.
-                        if (mUnsupportedDisplaySizeDialog != null && ssp.equals(
-                                mUnsupportedDisplaySizeDialog.getPackageName())) {
-                            mUnsupportedDisplaySizeDialog.dismiss();
-                            mUnsupportedDisplaySizeDialog = null;
-                        }
                         mCompatModePackages.handlePackageDataClearedLocked(ssp);
+                        mAppWarnings.onPackageDataCleared(ssp);
                     }
                     break;
                 }
@@ -20603,8 +20581,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
             final boolean isDensityChange = (changes & ActivityInfo.CONFIG_DENSITY) != 0;
             if (isDensityChange && displayId == DEFAULT_DISPLAY) {
-                // Reset the unsupported display size dialog.
-                mUiHandler.sendEmptyMessage(SHOW_UNSUPPORTED_DISPLAY_SIZE_DIALOG_MSG);
+                mAppWarnings.onDensityChanged();
 
                 killAllBackgroundProcessesExcept(N,
                         ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE);

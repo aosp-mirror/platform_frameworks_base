@@ -16,6 +16,7 @@
 
 package android.content.pm;
 
+import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -289,6 +290,29 @@ public class PackageInfo implements Parcelable {
     /** @hide */
     public boolean isStaticOverlay;
 
+    /**
+     * The user-visible SDK version (ex. 26) of the framework against which the application claims
+     * to have been compiled, or {@code 0} if not specified.
+     * <p>
+     * This property is the compile-time equivalent of
+     * {@link android.os.Build.VERSION#SDK_INT Build.VERSION.SDK_INT}.
+     *
+     * @hide For platform use only; we don't expect developers to need to read this value.
+     */
+    public int compileSdkVersion;
+
+    /**
+     * The development codename (ex. "O", "REL") of the framework against which the application
+     * claims to have been compiled, or {@code null} if not specified.
+     * <p>
+     * This property is the compile-time equivalent of
+     * {@link android.os.Build.VERSION#CODENAME Build.VERSION.CODENAME}.
+     *
+     * @hide For platform use only; we don't expect developers to need to read this value.
+     */
+    @Nullable
+    public String compileSdkVersionCodename;
+
     public PackageInfo() {
     }
 
@@ -344,6 +368,8 @@ public class PackageInfo implements Parcelable {
         dest.writeString(overlayTarget);
         dest.writeInt(isStaticOverlay ? 1 : 0);
         dest.writeInt(overlayPriority);
+        dest.writeInt(compileSdkVersion);
+        dest.writeString(compileSdkVersionCodename);
     }
 
     public static final Parcelable.Creator<PackageInfo> CREATOR
@@ -396,6 +422,8 @@ public class PackageInfo implements Parcelable {
         overlayTarget = source.readString();
         isStaticOverlay = source.readInt() != 0;
         overlayPriority = source.readInt();
+        compileSdkVersion = source.readInt();
+        compileSdkVersionCodename = source.readString();
 
         // The component lists were flattened with the redundant ApplicationInfo
         // instances omitted.  Distribute the canonical one here as appropriate.
