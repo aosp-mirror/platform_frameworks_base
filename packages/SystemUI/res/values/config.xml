@@ -95,6 +95,12 @@
 
     <bool name="config_dead_zone_flash">false</bool>
 
+    <!-- Whether to enable dimming navigation buttons when wallpaper is not visible, should be
+         enabled for OLED devices to reduce/prevent burn in on the navigation bar (because of the
+         black background and static button placements) and disabled for all other devices to
+         prevent wasting cpu cycles on the dimming animation -->
+    <bool name="config_navigation_bar_enable_auto_dim_no_visible_wallpaper">true</bool>
+
     <!-- Whether QuickSettings is in a phone landscape -->
     <bool name="quick_settings_wide">false</bool>
 
