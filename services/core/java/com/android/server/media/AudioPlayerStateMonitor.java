@@ -16,7 +16,7 @@
 
 package com.android.server.media;
 
-import android.annotation.Nullable;
+import android.annotation.NonNull;
 import android.content.Context;
 import android.media.AudioPlaybackConfiguration;
 import android.media.IAudioService;
@@ -27,14 +27,15 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.IntArray;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
 
 import java.io.PrintWriter;
-import java.util.HashSet;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -49,47 +50,57 @@ class AudioPlayerStateMonitor extends IPlaybackConfigDispatcher.Stub {
     private static AudioPlayerStateMonitor sInstance = new AudioPlayerStateMonitor();
 
     /**
-     * Called when the state of audio player is changed.
+     * Listener for handling the active state changes of audio players.
      */
-    interface OnAudioPlayerStateChangedListener {
-        void onAudioPlayerStateChanged(
-                int uid, int prevState, @Nullable AudioPlaybackConfiguration config);
+    interface OnAudioPlayerActiveStateChangedListener {
+        /**
+         * Called when the active state of audio player is changed.
+         *
+         * @param config The audio playback configuration for the audio player of which active state
+         *              was changed. If {@param isRemoved} is {@code true}, this hold outdated
+         *              information.
+         * @param isRemoved {@code true} if the audio player is removed.
+         */
+        void onAudioPlayerActiveStateChanged(
+                @NonNull AudioPlaybackConfiguration config, boolean isRemoved);
     }
 
     private final static class MessageHandler extends Handler {
-        private static final int MSG_AUDIO_PLAYER_STATE_CHANGED = 1;
+        private static final int MSG_AUDIO_PLAYER_ACTIVE_STATE_CHANGED = 1;
 
-        private final OnAudioPlayerStateChangedListener mListsner;
+        private final OnAudioPlayerActiveStateChangedListener mListener;
 
-        public MessageHandler(Looper looper, OnAudioPlayerStateChangedListener listener) {
+        public MessageHandler(Looper looper, OnAudioPlayerActiveStateChangedListener listener) {
             super(looper);
-            mListsner = listener;
+            mListener = listener;
         }
 
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case MSG_AUDIO_PLAYER_STATE_CHANGED:
-                    mListsner.onAudioPlayerStateChanged(
-                            msg.arg1, msg.arg2, (AudioPlaybackConfiguration) msg.obj);
+                case MSG_AUDIO_PLAYER_ACTIVE_STATE_CHANGED:
+                    mListener.onAudioPlayerActiveStateChanged((AudioPlaybackConfiguration) msg.obj,
+                            msg.arg1 != 0);
                     break;
             }
         }
 
-        public void sendAudioPlayerStateChangedMessage(int uid, int prevState,
-                AudioPlaybackConfiguration config) {
-            obtainMessage(MSG_AUDIO_PLAYER_STATE_CHANGED, uid, prevState, config).sendToTarget();
+        public void sendAudioPlayerActiveStateChangedMessage(
+                final AudioPlaybackConfiguration config, final boolean isRemoved) {
+            obtainMessage(MSG_AUDIO_PLAYER_ACTIVE_STATE_CHANGED,
+                    isRemoved ? 1 : 0, 0 /* unused */, config).sendToTarget();
         }
     }
 
     private final Object mLock = new Object();
     @GuardedBy("mLock")
-    private final Map<OnAudioPlayerStateChangedListener, MessageHandler> mListenerMap =
-            new HashMap<>();
+    private final Map<OnAudioPlayerActiveStateChangedListener, MessageHandler> mListenerMap =
+            new ArrayMap<>();
     @GuardedBy("mLock")
-    private final Map<Integer, Integer> mAudioPlayerStates = new HashMap<>();
+    private final Set<Integer> mActiveAudioUids = new ArraySet();
     @GuardedBy("mLock")
-    private final Map<Integer, HashSet<Integer>> mAudioPlayersForUid = new HashMap<>();
+    private ArrayMap<Integer, AudioPlaybackConfiguration> mPrevActiveAudioPlaybackConfigs =
+            new ArrayMap<>();
     // Sorted array of UIDs that had active audio playback. (i.e. playing an audio/video)
     // The UID whose audio playback becomes active at the last comes first.
     // TODO(b/35278867): Find and use unique identifier for apps because apps may share the UID.
@@ -122,32 +133,24 @@ class AudioPlayerStateMonitor extends IPlaybackConfigDispatcher.Stub {
         }
         final long token = Binder.clearCallingIdentity();
         try {
-            final Map<Integer, Integer> prevAudioPlayerStates = new HashMap<>(mAudioPlayerStates);
-            final Map<Integer, HashSet<Integer>> prevAudioPlayersForUid =
-                    new HashMap<>(mAudioPlayersForUid);
             synchronized (mLock) {
-                mAudioPlayerStates.clear();
-                mAudioPlayersForUid.clear();
+                // Update mActiveAudioUids
+                mActiveAudioUids.clear();
+                ArrayMap<Integer, AudioPlaybackConfiguration> activeAudioPlaybackConfigs =
+                        new ArrayMap<>();
                 for (AudioPlaybackConfiguration config : configs) {
-                    int pii = config.getPlayerInterfaceId();
-                    int uid = config.getClientUid();
-                    mAudioPlayerStates.put(pii, config.getPlayerState());
-                    HashSet<Integer> players = mAudioPlayersForUid.get(uid);
-                    if (players == null) {
-                        players = new HashSet<Integer>();
-                        players.add(pii);
-                        mAudioPlayersForUid.put(uid, players);
-                    } else {
-                        players.add(pii);
+                    if (config.isActive()) {
+                        mActiveAudioUids.add(config.getClientUid());
+                        activeAudioPlaybackConfigs.put(config.getPlayerInterfaceId(), config);
                     }
                 }
-                for (AudioPlaybackConfiguration config : configs) {
-                    if (!config.isActive()) {
-                        continue;
-                    }
 
-                    int uid = config.getClientUid();
-                    if (!isActiveState(prevAudioPlayerStates.get(config.getPlayerInterfaceId()))) {
+                // Update mSortedAuioPlaybackClientUids.
+                for (int i = 0; i < activeAudioPlaybackConfigs.size(); ++i) {
+                    AudioPlaybackConfiguration config = activeAudioPlaybackConfigs.valueAt(i);
+                    final int uid = config.getClientUid();
+                    if (!mPrevActiveAudioPlaybackConfigs.containsKey(
+                            config.getPlayerInterfaceId())) {
                         if (DEBUG) {
                             Log.d(TAG, "Found a new active media playback. " +
                                     AudioPlaybackConfiguration.toLogFriendlyString(config));
@@ -163,40 +166,21 @@ class AudioPlayerStateMonitor extends IPlaybackConfigDispatcher.Stub {
                         mSortedAudioPlaybackClientUids.add(0, uid);
                     }
                 }
-                // Notify the change of audio player states.
+                // Notify the active state change of audio players.
                 for (AudioPlaybackConfiguration config : configs) {
-                    final Integer prevState = prevAudioPlayerStates.get(config.getPlayerInterfaceId());
-                    final int prevStateInt =
-                            (prevState == null) ? AudioPlaybackConfiguration.PLAYER_STATE_UNKNOWN :
-                                prevState.intValue();
-                    if (prevStateInt != config.getPlayerState()) {
-                        sendAudioPlayerStateChangedMessageLocked(
-                                config.getClientUid(), prevStateInt, config);
+                    final int pii = config.getPlayerInterfaceId();
+                    boolean wasActive = mPrevActiveAudioPlaybackConfigs.remove(pii) != null;
+                    if (wasActive != config.isActive()) {
+                        sendAudioPlayerActiveStateChangedMessageLocked(
+                                config, /* isRemoved */ false);
                     }
                 }
-                for (Integer prevUid : prevAudioPlayersForUid.keySet()) {
-                    // If all players for prevUid is removed, notify the prev state was
-                    // PLAYER_STATE_STARTED only when there were a player whose state was
-                    // PLAYER_STATE_STARTED, otherwise any inactive state is okay to notify.
-                    if (!mAudioPlayersForUid.containsKey(prevUid)) {
-                        Set<Integer> prevPlayers = prevAudioPlayersForUid.get(prevUid);
-                        int prevState = AudioPlaybackConfiguration.PLAYER_STATE_UNKNOWN;
-                        for (int pii : prevPlayers) {
-                            Integer state = prevAudioPlayerStates.get(pii);
-                            if (state == null) {
-                                continue;
-                            }
-                            if (state == AudioPlaybackConfiguration.PLAYER_STATE_STARTED) {
-                                prevState = state;
-                                break;
-                            } else if (prevState
-                                    == AudioPlaybackConfiguration.PLAYER_STATE_UNKNOWN) {
-                                prevState = state;
-                            }
-                        }
-                        sendAudioPlayerStateChangedMessageLocked(prevUid, prevState, null);
-                    }
+                for (AudioPlaybackConfiguration config : mPrevActiveAudioPlaybackConfigs.values()) {
+                    sendAudioPlayerActiveStateChangedMessageLocked(config, /* isRemoved */ true);
                 }
+
+                // Update mPrevActiveAudioPlaybackConfigs
+                mPrevActiveAudioPlaybackConfigs = activeAudioPlaybackConfigs;
             }
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -204,9 +188,10 @@ class AudioPlayerStateMonitor extends IPlaybackConfigDispatcher.Stub {
     }
 
     /**
-     * Registers OnAudioPlayerStateChangedListener.
+     * Registers OnAudioPlayerActiveStateChangedListener.
      */
-    public void registerListener(OnAudioPlayerStateChangedListener listener, Handler handler) {
+    public void registerListener(
+            OnAudioPlayerActiveStateChangedListener listener, Handler handler) {
         synchronized (mLock) {
             mListenerMap.put(listener, new MessageHandler((handler == null) ?
                     Looper.myLooper() : handler.getLooper(), listener));
@@ -214,9 +199,9 @@ class AudioPlayerStateMonitor extends IPlaybackConfigDispatcher.Stub {
     }
 
     /**
-     * Unregisters OnAudioPlayerStateChangedListener.
+     * Unregisters OnAudioPlayerActiveStateChangedListener.
      */
-    public void unregisterListener(OnAudioPlayerStateChangedListener listener) {
+    public void unregisterListener(OnAudioPlayerActiveStateChangedListener listener) {
         synchronized (mLock) {
             mListenerMap.remove(listener);
         }
@@ -239,16 +224,7 @@ class AudioPlayerStateMonitor extends IPlaybackConfigDispatcher.Stub {
      */
     public boolean isPlaybackActive(int uid) {
         synchronized (mLock) {
-            Set<Integer> players = mAudioPlayersForUid.get(uid);
-            if (players == null) {
-                return false;
-            }
-            for (Integer pii : players) {
-                if (isActiveState(mAudioPlayerStates.get(pii))) {
-                    return true;
-                }
-            }
-            return false;
+            return mActiveAudioUids.contains(uid);
         }
     }
 
@@ -314,14 +290,10 @@ class AudioPlayerStateMonitor extends IPlaybackConfigDispatcher.Stub {
         }
     }
 
-    private void sendAudioPlayerStateChangedMessageLocked(
-            final int uid, final int prevState, final AudioPlaybackConfiguration config) {
+    private void sendAudioPlayerActiveStateChangedMessageLocked(
+            final AudioPlaybackConfiguration config, final boolean isRemoved) {
         for (MessageHandler messageHandler : mListenerMap.values()) {
-            messageHandler.sendAudioPlayerStateChangedMessage(uid, prevState, config);
+            messageHandler.sendAudioPlayerActiveStateChangedMessage(config, isRemoved);
         }
-    }
-
-    private static boolean isActiveState(Integer state) {
-        return state != null && state.equals(AudioPlaybackConfiguration.PLAYER_STATE_STARTED);
     }
 }
