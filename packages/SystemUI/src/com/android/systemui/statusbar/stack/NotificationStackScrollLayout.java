@@ -108,8 +108,7 @@ import java.util.List;
 public class NotificationStackScrollLayout extends ViewGroup
         implements SwipeHelper.Callback, ExpandHelper.Callback, ScrollAdapter,
         ExpandableView.OnHeightChangedListener, NotificationGroupManager.OnGroupChangeListener,
-        NotificationMenuRowPlugin.OnMenuEventListener, ScrollContainer,
-        VisibilityLocationProvider {
+        NotificationMenuRowPlugin.OnMenuEventListener, VisibilityLocationProvider {
 
     public static final float BACKGROUND_ALPHA_DIMMED = 0.7f;
     private static final String TAG = "StackScroller";
@@ -1195,7 +1194,6 @@ public class NotificationStackScrollLayout extends ViewGroup
         mScrollingEnabled = enable;
     }
 
-    @Override
     public void lockScrollTo(View v) {
         if (mForcedScroll == v) {
             return;
@@ -1204,7 +1202,6 @@ public class NotificationStackScrollLayout extends ViewGroup
         scrollTo(v);
     }
 
-    @Override
     public boolean scrollTo(View v) {
         ExpandableView expandableView = (ExpandableView) v;
         int positionInLinearLayout = getPositionInLinearLayout(v);
@@ -3321,12 +3318,10 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
     }
 
-    @Override
     public void requestDisallowLongPress() {
         cancelLongPress();
     }
 
-    @Override
     public void requestDisallowDismiss() {
         mDisallowDismissInThisMotion = true;
     }
