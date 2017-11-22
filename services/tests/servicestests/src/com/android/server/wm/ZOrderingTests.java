@@ -42,6 +42,9 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY;
+import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL;
+import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL;
+import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL;
 
 /**
  * Tests for the {@link WindowLayersController} class.
@@ -322,5 +325,22 @@ public class ZOrderingTests extends WindowTestsBase {
         assertWindowLayerGreaterThan(mTransaction, dockedStackWindow, mAppWindow);
         assertWindowLayerGreaterThan(mTransaction, assistantStackWindow, dockedStackWindow);
         assertWindowLayerGreaterThan(mTransaction, pinnedStackWindow, assistantStackWindow);
+    }
+
+    @Test
+    public void testAssignWindowLayers_ForSysUiPanels() throws Exception {
+        final WindowState navBarPanel =
+                createWindow(null, TYPE_NAVIGATION_BAR_PANEL, mDisplayContent, "NavBarPanel");
+        final WindowState statusBarPanel =
+                createWindow(null, TYPE_STATUS_BAR_PANEL, mDisplayContent, "StatusBarPanel");
+        final WindowState statusBarSubPanel =
+                createWindow(null, TYPE_STATUS_BAR_SUB_PANEL, mDisplayContent, "StatusBarSubPanel");
+        mDisplayContent.assignChildLayers(mTransaction);
+
+        // Ime should be above all app windows and below system windows if it is targeting an app
+        // window.
+        assertWindowLayerGreaterThan(mTransaction, navBarPanel, mNavBarWindow);
+        assertWindowLayerGreaterThan(mTransaction, statusBarPanel, mStatusBarWindow);
+        assertWindowLayerGreaterThan(mTransaction, statusBarSubPanel, statusBarPanel);
     }
 }

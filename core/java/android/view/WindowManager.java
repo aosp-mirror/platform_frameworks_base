@@ -604,8 +604,10 @@ public interface WindowManager extends ViewManager {
         public static final int TYPE_DRAG               = FIRST_SYSTEM_WINDOW+16;
 
         /**
-         * Window type: panel that slides out from under the status bar
-         * In multiuser systems shows on all users' windows.
+         * Window type: panel that slides out from over the status bar
+         * In multiuser systems shows on all users' windows. These windows
+         * are displayed on top of the stauts bar and any {@link #TYPE_STATUS_BAR_PANEL}
+         * windows.
          * @hide
          */
         public static final int TYPE_STATUS_BAR_SUB_PANEL = FIRST_SYSTEM_WINDOW+17;
