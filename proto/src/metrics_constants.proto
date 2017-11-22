@@ -3761,7 +3761,8 @@ message MetricsEvent {
     FIELD_AUTOFILL_NUM_IDS = 917;
 
     // ACTION: An autofill service was reqiested to save data
-    // Type TYPE_SUCCESS: The request succeeded
+    // Type TYPE_SUCCESS: The request succeeded right away
+    // Type TYPE_OPEN: The request succeeded but the service launched an IntentSender
     // Type TYPE_FAILURE: The request failed
     // Package: Package of app that was autofilled
     // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request

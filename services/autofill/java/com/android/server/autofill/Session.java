@@ -561,7 +561,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
     // FillServiceCallbacks
     @Override
-    public void onSaveRequestSuccess(@NonNull String servicePackageName) {
+    public void onSaveRequestSuccess(@NonNull String servicePackageName,
+            @Nullable IntentSender intentSender) {
         synchronized (mLock) {
             mIsSaving = false;
 
@@ -572,8 +573,12 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             }
         }
         LogMaker log = newLogMaker(MetricsEvent.AUTOFILL_DATA_SAVE_REQUEST, servicePackageName)
-                .setType(MetricsEvent.TYPE_SUCCESS);
+                .setType(intentSender == null ? MetricsEvent.TYPE_SUCCESS : MetricsEvent.TYPE_OPEN);
         mMetricsLogger.write(log);
+        if (intentSender != null) {
+            if (sDebug) Slog.d(TAG, "Starting intent sender on save()");
+            startIntentSender(intentSender);
+        }
 
         // Nothing left to do...
         removeSelf();
