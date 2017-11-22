@@ -295,7 +295,7 @@ void GaugeMetricProducer::flushIfNeeded(const uint64_t eventTimeNs) {
          (long long)mCurrentBucketStartTimeNs);
 }
 
-size_t GaugeMetricProducer::byteSize() {
+size_t GaugeMetricProducer::byteSize() const {
     size_t totalSize = 0;
     for (const auto& pair : mPastBuckets) {
         totalSize += pair.second.size() * kBucketSize;

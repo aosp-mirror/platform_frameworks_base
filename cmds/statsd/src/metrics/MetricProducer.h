@@ -72,7 +72,7 @@ public:
 
     // Returns the memory in bytes currently used to store this metric's data. Does not change
     // state.
-    virtual size_t byteSize() = 0;
+    virtual size_t byteSize() const = 0;
 
     void addAnomalyTracker(sp<AnomalyTracker> tracker) {
         mAnomalyTrackers.push_back(tracker);

@@ -70,12 +70,12 @@ public:
     /**
      * Returns the package name and class name representing the broadcast receiver for this config.
      */
-    const pair<string, string> GetConfigReceiver(const ConfigKey& key);
+    const pair<string, string> GetConfigReceiver(const ConfigKey& key) const;
 
     /**
      * Returns all config keys registered.
      */
-    vector<ConfigKey> GetAllConfigKeys();
+    vector<ConfigKey> GetAllConfigKeys() const;
 
     /**
      * Erase any broadcast receiver associated with this config key.

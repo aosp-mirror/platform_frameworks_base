@@ -41,7 +41,7 @@ public:
     void UnRegisterReceiver(int tagId, wp<PullDataReceiver> receiver);
 
     // Verify if we know how to pull for this matcher
-    bool PullerForMatcherExists(int tagId);
+    bool PullerForMatcherExists(int tagId) const;
 
     void OnAlarmFired();
 
@@ -77,7 +77,7 @@ private:
     // request time.
     const long mPullStartTimeMs;
 
-    long get_pull_start_time_ms();
+    long get_pull_start_time_ms() const;
 
     LogEvent parse_pulled_data(String16 data);
 };

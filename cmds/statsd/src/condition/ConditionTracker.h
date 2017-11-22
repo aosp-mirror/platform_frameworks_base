@@ -72,7 +72,7 @@ public:
                                    std::vector<bool>& conditionChanged) = 0;
 
     // Return the current condition state.
-    virtual ConditionState isConditionMet() {
+    virtual ConditionState isConditionMet() const {
         return mNonSlicedConditionState;
     };
 
@@ -85,7 +85,7 @@ public:
     virtual void isConditionMet(
             const std::map<std::string, HashableDimensionKey>& conditionParameters,
             const std::vector<sp<ConditionTracker>>& allConditions,
-            std::vector<ConditionState>& conditionCache) = 0;
+            std::vector<ConditionState>& conditionCache) const = 0;
 
     // return the list of LogMatchingTracker index that this ConditionTracker uses.
     virtual const std::set<int>& getLogTrackerIndex() const {

@@ -132,7 +132,7 @@ void ConfigManager::RemoveConfigs(int uid) {
     }
 }
 
-vector<ConfigKey> ConfigManager::GetAllConfigKeys() {
+vector<ConfigKey> ConfigManager::GetAllConfigKeys() const {
     vector<ConfigKey> ret;
     for (auto it = mConfigs.cbegin(); it != mConfigs.cend(); ++it) {
         ret.push_back(it->first);
@@ -140,7 +140,7 @@ vector<ConfigKey> ConfigManager::GetAllConfigKeys() {
     return ret;
 }
 
-const pair<string, string> ConfigManager::GetConfigReceiver(const ConfigKey& key) {
+const pair<string, string> ConfigManager::GetConfigReceiver(const ConfigKey& key) const {
     auto it = mConfigReceivers.find(key);
     if (it == mConfigReceivers.end()) {
         return pair<string,string>();

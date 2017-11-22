@@ -43,7 +43,7 @@ public:
 
     void isConditionMet(const std::map<std::string, HashableDimensionKey>& conditionParameters,
                         const std::vector<sp<ConditionTracker>>& allConditions,
-                        std::vector<ConditionState>& conditionCache) override;
+                        std::vector<ConditionState>& conditionCache) const override;
 
 private:
     LogicalOperation mLogicalOperation;
