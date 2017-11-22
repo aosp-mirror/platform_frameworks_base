@@ -44,6 +44,7 @@ public class NotificationBackgroundView extends View {
     private int mCurrentSidePaddings;
     private boolean mBottomIsRounded;
     private int mBackgroundTop;
+    private boolean mBottomAmountClips = true;
 
     public NotificationBackgroundView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -64,7 +65,7 @@ public class NotificationBackgroundView extends View {
     private void draw(Canvas canvas, Drawable drawable) {
         if (drawable != null) {
             int bottom = mActualHeight;
-            if (mBottomIsRounded) {
+            if (mBottomIsRounded && mBottomAmountClips) {
                 bottom -= mClipBottomAmount;
             }
             drawable.setBounds(mCurrentSidePaddings, mBackgroundTop,
@@ -187,6 +188,12 @@ public class NotificationBackgroundView extends View {
         updateBackgroundRadii();
     }
 
+    public void setBottomAmountClips(boolean clips) {
+        if (clips != mBottomAmountClips) {
+            mBottomAmountClips = clips;
+            invalidate();
+        }
+    }
 
     private void updateBackgroundRadii() {
         if (mDontModifyCorners) {

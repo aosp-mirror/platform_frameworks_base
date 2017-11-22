@@ -695,6 +695,11 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
                 mBackgroundNormal.getVisibility() == View.VISIBLE ? 1.0f : 0.0f);
     }
 
+    protected void updateBackgroundClipping() {
+        mBackgroundNormal.setBottomAmountClips(!isChildInGroup());
+        mBackgroundDimmed.setBottomAmountClips(!isChildInGroup());
+    }
+
     protected boolean shouldHideBackground() {
         return mDark;
     }

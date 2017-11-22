@@ -90,10 +90,11 @@ public abstract class ExpandableOutlineView extends ExpandableView {
     };
 
     private Path getClipPath() {
-        return getClipPath(false /* ignoreTranslation */);
+        return getClipPath(false, /* ignoreTranslation */
+                false /* clipRoundedToBottom */);
     }
 
-    protected Path getClipPath(boolean ignoreTranslation) {
+    protected Path getClipPath(boolean ignoreTranslation, boolean clipRoundedToBottom) {
         int left;
         int top;
         int right;
@@ -109,10 +110,14 @@ public abstract class ExpandableOutlineView extends ExpandableView {
             bottom = Math.max(getActualHeight(), top);
             int intersectBottom = Math.max(getActualHeight() - mClipBottomAmount, top);
             if (bottom != intersectBottom) {
-                getRoundedRectPath(left, top, right,
-                        intersectBottom, 0.0f,
-                        0.0f, mTmpPath2);
-                intersectPath = mTmpPath2;
+                if (clipRoundedToBottom) {
+                    bottom = intersectBottom;
+                } else {
+                    getRoundedRectPath(left, top, right,
+                            intersectBottom, 0.0f,
+                            0.0f, mTmpPath2);
+                    intersectPath = mTmpPath2;
+                }
             }
         } else {
             left = mOutlineRect.left;
@@ -248,7 +253,7 @@ public abstract class ExpandableOutlineView extends ExpandableView {
         return mCurrentTopRoundness;
     }
 
-    protected float getCurrentBottomRoundness() {
+    public float getCurrentBottomRoundness() {
         return mCurrentBottomRoundness;
     }
 
@@ -256,7 +261,7 @@ public abstract class ExpandableOutlineView extends ExpandableView {
         return mCurrentBottomRoundness * mOutlineRadius;
     }
 
-    public void setBottomRoundNess(float bottomRoundness, boolean animate) {
+    public void setBottomRoundness(float bottomRoundness, boolean animate) {
         if (mBottomRoundness != bottomRoundness) {
             mBottomRoundness = bottomRoundness;
             PropertyAnimator.setProperty(this, BOTTOM_ROUNDNESS, bottomRoundness,

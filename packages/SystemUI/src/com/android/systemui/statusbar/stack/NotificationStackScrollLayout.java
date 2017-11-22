@@ -2883,7 +2883,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
         if (lastChanged && mLastVisibleBackgroundChild != null
                 && !mLastVisibleBackgroundChild.isRemoved()) {
-            mLastVisibleBackgroundChild.setBottomRoundNess(0.0f,
+            mLastVisibleBackgroundChild.setBottomRoundness(0.0f,
                     mLastVisibleBackgroundChild.isShown());
         }
         mFirstVisibleBackgroundChild = firstChild;
@@ -2900,7 +2900,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                             && !mChildrenToAddAnimated.contains(mFirstVisibleBackgroundChild));
         }
         if (mLastVisibleBackgroundChild != null) {
-            mLastVisibleBackgroundChild.setBottomRoundNess(1.0f,
+            mLastVisibleBackgroundChild.setBottomRoundness(1.0f,
                     mLastVisibleBackgroundChild.isShown()
                             && !mChildrenToAddAnimated.contains(mLastVisibleBackgroundChild));
         }

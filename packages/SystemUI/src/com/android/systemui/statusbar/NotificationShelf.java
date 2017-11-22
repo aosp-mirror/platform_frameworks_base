@@ -22,7 +22,6 @@ import static com.android.systemui.statusbar.phone.NotificationIconContainer.OVE
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.graphics.Path;
 import android.graphics.Rect;
 import android.os.SystemProperties;
 import android.util.AttributeSet;
@@ -109,7 +108,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
         mViewInvertHelper = new ViewInvertHelper(mShelfIcons,
                 NotificationPanelView.DOZE_ANIMATION_DURATION);
         mShelfState = new ShelfState();
-        setBottomRoundNess(1.0f, false /* animate */);
+        setBottomRoundness(1.0f, false /* animate */);
         initDimens();
     }
 

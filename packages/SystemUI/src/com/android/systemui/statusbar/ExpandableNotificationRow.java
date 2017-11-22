@@ -538,6 +538,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         }
         onChildrenCountChanged();
         row.setIsChildInGroup(false, null);
+        row.setBottomRoundness(0.0f, false /* animate */);
     }
 
     @Override
@@ -566,6 +567,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             mNotificationParent.updateBackgroundForGroupState();
         }
         updateIconVisibilities();
+        updateBackgroundClipping();
     }
 
     @Override
@@ -1761,6 +1763,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         mPrivateLayout.updateExpandButtons(isExpandable());
         updateChildrenHeaderAppearance();
         updateChildrenVisibility();
+        applyChildrenRoundness();
     }
 
     public void updateChildrenHeaderAppearance() {
@@ -2351,7 +2354,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 return true;
             }
         } else if (child == mChildrenContainer) {
-            if (isClippingNeeded()) {
+            if (isClippingNeeded() || ((isGroupExpanded() || isGroupExpansionChanging())
+                    && getClipBottomAmount() != 0.0f && getCurrentBottomRoundness() != 0.0f)) {
                 return true;
             }
         } else if (child instanceof NotificationGuts) {
@@ -2361,9 +2365,26 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     @Override
+    protected void applyRoundness() {
+        super.applyRoundness();
+        applyChildrenRoundness();
+    }
+
+    private void applyChildrenRoundness() {
+        if (mIsSummaryWithChildren) {
+            mChildrenContainer.setCurrentBottomRoundness(getCurrentBottomRoundness());
+        }
+    }
+
+    @Override
     public Path getCustomClipPath(View child) {
         if (child instanceof NotificationGuts) {
-            return getClipPath(true /* ignoreTranslation */);
+            return getClipPath(true, /* ignoreTranslation */
+                    false /* clipRoundedToBottom */);
+        }
+        if (child instanceof NotificationChildrenContainer) {
+            return getClipPath(false, /* ignoreTranslation */
+                    true /* clipRoundedToBottom */);
         }
         return super.getCustomClipPath(child);
     }
