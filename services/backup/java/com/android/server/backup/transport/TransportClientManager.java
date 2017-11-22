@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
+import com.android.internal.backup.IBackupTransport;
 import com.android.server.backup.TransportManager;
 
 /**
@@ -47,12 +48,17 @@ public class TransportClientManager {
      * transportComponent}.
      *
      * @param transportComponent The {@link ComponentName} of the transport.
+     * @param transportDirName The {@link String} returned by
+     *     {@link IBackupTransport#transportDirName()} at registration.
      * @param caller A {@link String} identifying the caller for logging/debugging purposes. Check
      *     {@link TransportClient#connectAsync(TransportConnectionListener, String)} for more
      *     details.
      * @return A {@link TransportClient}.
      */
-    public TransportClient getTransportClient(ComponentName transportComponent, String caller) {
+    public TransportClient getTransportClient(
+            ComponentName transportComponent,
+            String transportDirName,
+            String caller) {
         Intent bindIntent =
                 new Intent(SERVICE_ACTION_TRANSPORT_HOST).setComponent(transportComponent);
         synchronized (mTransportClientsLock) {
@@ -61,6 +67,7 @@ public class TransportClientManager {
                             mContext,
                             bindIntent,
                             transportComponent,
+                            transportDirName,
                             Integer.toString(mTransportClientsCreated));
             mTransportClientsCreated++;
             TransportUtils.log(Log.DEBUG, TAG, caller, "Retrieving " + transportClient);

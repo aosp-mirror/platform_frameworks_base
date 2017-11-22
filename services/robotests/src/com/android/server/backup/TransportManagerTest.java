@@ -36,6 +36,7 @@ import com.android.server.backup.testing.ShadowBackupTransportStub;
 import com.android.server.backup.testing.ShadowContextImplForBackup;
 import com.android.server.backup.testing.TransportBoundListenerStub;
 import com.android.server.backup.testing.TransportReadyCallbackStub;
+import com.android.server.backup.transport.TransportClient;
 
 import org.junit.After;
 import org.junit.Before;
@@ -473,6 +474,62 @@ public class TransportManagerTest {
         assertThat(mTransportReadyCallbackStub.getSuccessCalls()).containsExactlyElementsIn(
                 Collections.singleton(mTransport2.name));
         assertThat(mTransportReadyCallbackStub.getFailureCalls()).isEmpty();
+    }
+
+    @Test
+    public void getTransportClient_forRegisteredTransport_returnCorrectly() throws Exception {
+        TransportManager transportManager =
+                createTransportManagerAndSetUpTransports(
+                        Arrays.asList(mTransport1, mTransport2), mTransport1.name);
+
+        TransportClient transportClient =
+                transportManager.getTransportClient(mTransport1.name, "caller");
+
+        assertThat(transportClient.getTransportComponent()).isEqualTo(mTransport1.componentName);
+    }
+
+    @Test
+    public void getTransportClient_forOldNameOfTransportThatChangedName_returnsNull()
+            throws Exception {
+        TransportManager transportManager =
+                createTransportManagerAndSetUpTransports(
+                        Arrays.asList(mTransport1, mTransport2), mTransport1.name);
+        transportManager.describeTransport(
+                mTransport1.componentName, "newName", null, "destinationString", null, null);
+
+        TransportClient transportClient =
+                transportManager.getTransportClient(mTransport1.name, "caller");
+
+        assertThat(transportClient).isNull();
+    }
+
+    @Test
+    public void getTransportClient_forNewNameOfTransportThatChangedName_returnsCorrectly()
+            throws Exception {
+        TransportManager transportManager =
+                createTransportManagerAndSetUpTransports(
+                        Arrays.asList(mTransport1, mTransport2), mTransport1.name);
+        transportManager.describeTransport(
+                mTransport1.componentName, "newName", null, "destinationString", null, null);
+
+        TransportClient transportClient =
+                transportManager.getTransportClient("newName", "caller");
+
+        assertThat(transportClient.getTransportComponent()).isEqualTo(mTransport1.componentName);
+    }
+
+    @Test
+    public void getTransportName_forTransportThatChangedName_returnsNewName()
+            throws Exception {
+        TransportManager transportManager =
+                createTransportManagerAndSetUpTransports(
+                        Arrays.asList(mTransport1, mTransport2), mTransport1.name);
+        transportManager.describeTransport(
+                mTransport1.componentName, "newName", null, "destinationString", null, null);
+
+        String transportName = transportManager.getTransportName(mTransport1.componentName);
+
+        assertThat(transportName).isEqualTo("newName");
     }
 
     private void setUpPackageWithTransports(String packageName, List<TransportInfo> transports,

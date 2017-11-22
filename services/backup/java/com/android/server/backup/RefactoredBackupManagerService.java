@@ -91,8 +91,10 @@ import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.backup.IBackupTransport;
 import com.android.internal.util.DumpUtils;
+import com.android.internal.util.Preconditions;
 import com.android.server.AppWidgetBackupBridge;
 import com.android.server.EventLogTags;
 import com.android.server.SystemConfig;
@@ -723,8 +725,54 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
 
     // ----- Main service implementation -----
 
-    public RefactoredBackupManagerService(Context context, Trampoline parent,
+    public static RefactoredBackupManagerService create(
+            Context context,
+            Trampoline parent,
             HandlerThread backupThread) {
+        // Set up our transport options and initialize the default transport
+        SystemConfig systemConfig = SystemConfig.getInstance();
+        Set<ComponentName> transportWhitelist = systemConfig.getBackupTransportWhitelist();
+
+        String transport =
+                Settings.Secure.getString(
+                        context.getContentResolver(), Settings.Secure.BACKUP_TRANSPORT);
+        if (TextUtils.isEmpty(transport)) {
+            transport = null;
+        }
+        if (DEBUG) {
+            Slog.v(TAG, "Starting with transport " + transport);
+        }
+        TransportManager transportManager =
+                new TransportManager(
+                        context,
+                        transportWhitelist,
+                        transport,
+                        backupThread.getLooper());
+
+        // If encrypted file systems is enabled or disabled, this call will return the
+        // correct directory.
+        File baseStateDir = new File(Environment.getDataDirectory(), "backup");
+
+        // This dir on /cache is managed directly in init.rc
+        File dataDir = new File(Environment.getDownloadCacheDirectory(), "backup_stage");
+
+        return new RefactoredBackupManagerService(
+                context,
+                parent,
+                backupThread,
+                baseStateDir,
+                dataDir,
+                transportManager);
+    }
+
+    @VisibleForTesting
+    RefactoredBackupManagerService(
+            Context context,
+            Trampoline parent,
+            HandlerThread backupThread,
+            File baseStateDir,
+            File dataDir,
+            TransportManager transportManager) {
         mContext = context;
         mPackageManager = context.getPackageManager();
         mPackageManagerBinder = AppGlobals.getPackageManager();
@@ -751,16 +799,13 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
                 Settings.Global.getUriFor(Settings.Global.DEVICE_PROVISIONED),
                 false, mProvisionedObserver);
 
-        // If Encrypted file systems is enabled or disabled, this call will return the
-        // correct directory.
-        mBaseStateDir = new File(Environment.getDataDirectory(), "backup");
+        mBaseStateDir = baseStateDir;
         mBaseStateDir.mkdirs();
         if (!SELinux.restorecon(mBaseStateDir)) {
             Slog.e(TAG, "SELinux restorecon failed on " + mBaseStateDir);
         }
 
-        // This dir on /cache is managed directly in init.rc
-        mDataDir = new File(Environment.getDownloadCacheDirectory(), "backup_stage");
+        mDataDir = dataDir;
 
         mBackupPasswordManager = new BackupPasswordManager(mContext, mBaseStateDir, mRng);
 
@@ -803,26 +848,13 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
             addPackageParticipantsLocked(null);
         }
 
-        // Set up our transport options and initialize the default transport
-        // TODO: Don't create transports that we don't need to?
-        SystemConfig systemConfig = SystemConfig.getInstance();
-        Set<ComponentName> transportWhitelist = systemConfig.getBackupTransportWhitelist();
-
-        String transport = Settings.Secure.getString(context.getContentResolver(),
-                Settings.Secure.BACKUP_TRANSPORT);
-        if (TextUtils.isEmpty(transport)) {
-            transport = null;
-        }
-        String currentTransport = transport;
-        if (DEBUG) Slog.v(TAG, "Starting with transport " + currentTransport);
-
-        mTransportManager = new TransportManager(context, transportWhitelist, currentTransport,
-                mTransportBoundListener, backupThread.getLooper());
+        mTransportManager = transportManager;
+        mTransportManager.setTransportBoundListener(mTransportBoundListener);
         mTransportManager.registerAllTransports();
 
         // Now that we know about valid backup participants, parse any
         // leftover journal files into the pending backup set
-        mBackupHandler.post(() -> parseLeftoverJournals());
+        mBackupHandler.post(this::parseLeftoverJournals);
 
         // Power management
         mWakelock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "*backup*");
@@ -1436,14 +1468,6 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
         } catch (IOException e) {
             Slog.w(TAG, "Unable to write token file:", e);
         }
-    }
-
-    // What name is this transport registered under...?
-    private String getTransportName(IBackupTransport transport) {
-        if (MORE_DEBUG) {
-            Slog.v(TAG, "Searching for transport name of " + transport);
-        }
-        return mTransportManager.getTransportName(transport);
     }
 
     // fire off a backup agent, blocking until it attaches or times out
@@ -2883,6 +2907,93 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
             i++;
         }
         return whitelistedTransports;
+    }
+
+    /**
+     * Update the attributes of the transport identified by {@code transportComponent}. If the
+     * specified transport has not been bound at least once (for registration), this call will be
+     * ignored. Only the host process of the transport can change its description, otherwise a
+     * {@link SecurityException} will be thrown.
+     *
+     * @param transportComponent The identity of the transport being described.
+     * @param name A {@link String} with the new name for the transport. This is NOT for
+     *     identification. MUST NOT be {@code null}.
+     * @param configurationIntent An {@link Intent} that can be passed to
+     *     {@link Context#startActivity} in order to launch the transport's configuration UI. It may
+     *     be {@code null} if the transport does not offer any user-facing configuration UI.
+     * @param currentDestinationString A {@link String} describing the destination to which the
+     *     transport is currently sending data. MUST NOT be {@code null}.
+     * @param dataManagementIntent An {@link Intent} that can be passed to
+     *     {@link Context#startActivity} in order to launch the transport's data-management UI. It
+     *     may be {@code null} if the transport does not offer any user-facing data
+     *     management UI.
+     * @param dataManagementLabel A {@link String} to be used as the label for the transport's data
+     *     management affordance. This MUST be {@code null} when dataManagementIntent is
+     *     {@code null} and MUST NOT be {@code null} when dataManagementIntent is not {@code null}.
+     * @throws SecurityException If the UID of the calling process differs from the package UID of
+     *     {@code transportComponent} or if the caller does NOT have BACKUP permission.
+     */
+    @Override
+    public void updateTransportAttributes(
+            ComponentName transportComponent,
+            String name,
+            @Nullable Intent configurationIntent,
+            String currentDestinationString,
+            @Nullable Intent dataManagementIntent,
+            @Nullable String dataManagementLabel) {
+        updateTransportAttributes(
+                Binder.getCallingUid(),
+                transportComponent,
+                name,
+                configurationIntent,
+                currentDestinationString,
+                dataManagementIntent,
+                dataManagementLabel);
+    }
+
+    @VisibleForTesting
+    void updateTransportAttributes(
+            int callingUid,
+            ComponentName transportComponent,
+            String name,
+            @Nullable Intent configurationIntent,
+            String currentDestinationString,
+            @Nullable Intent dataManagementIntent,
+            @Nullable String dataManagementLabel) {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.BACKUP, "updateTransportAttributes");
+
+        Preconditions.checkNotNull(transportComponent, "transportComponent can't be null");
+        Preconditions.checkNotNull(name, "name can't be null");
+        Preconditions.checkNotNull(
+                currentDestinationString, "currentDestinationString can't be null");
+        Preconditions.checkArgument(
+                (dataManagementIntent == null) == (dataManagementLabel == null),
+                "dataManagementLabel should be null iff dataManagementIntent is null");
+
+        try {
+            int transportUid =
+                    mContext.getPackageManager()
+                            .getPackageUid(transportComponent.getPackageName(), 0);
+            if (callingUid != transportUid) {
+                throw new SecurityException("Only the transport can change its description");
+            }
+        } catch (NameNotFoundException e) {
+            throw new SecurityException("Transport package not found", e);
+        }
+
+        final long oldId = Binder.clearCallingIdentity();
+        try {
+            mTransportManager.describeTransport(
+                    transportComponent,
+                    name,
+                    configurationIntent,
+                    currentDestinationString,
+                    dataManagementIntent,
+                    dataManagementLabel);
+        } finally {
+            Binder.restoreCallingIdentity(oldId);
+        }
     }
 
     // Select which transport to use for the next backup operation.
