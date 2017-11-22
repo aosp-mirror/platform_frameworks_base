@@ -18,6 +18,7 @@ package android.os;
 
 import android.annotation.SystemService;
 import android.content.Context;
+import android.content.Intent;
 import android.hardware.health.V1_0.Constants;
 
 import com.android.internal.app.IBatteryStats;
@@ -53,6 +54,14 @@ public class BatteryManager {
      * {@link #EXTRA_SCALE}.
      */
     public static final String EXTRA_LEVEL = "level";
+
+    /**
+     * Extra for {@link android.content.Intent#ACTION_BATTERY_CHANGED}:
+     * Boolean field indicating whether the battery is currently considered to be
+     * low, that is whether a {@link Intent#ACTION_BATTERY_LOW} broadcast
+     * has been sent.
+     */
+    public static final String EXTRA_BATTERY_LOW = "battery_low";
 
     /**
      * Extra for {@link android.content.Intent#ACTION_BATTERY_CHANGED}:
