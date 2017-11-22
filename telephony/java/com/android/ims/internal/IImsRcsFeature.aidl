@@ -16,17 +16,10 @@
 
 package com.android.ims.internal;
 
-import com.android.ims.internal.IImsFeatureStatusCallback;
-import com.android.ims.internal.IImsMMTelFeature;
-import com.android.ims.internal.IImsRcsFeature;
-
 /**
- * See ImsService and MMTelFeature for more information.
+ * See RcsFeature for more information.
  * {@hide}
  */
-interface IImsServiceController {
-    IImsMMTelFeature createEmergencyMMTelFeature(int slotId, in IImsFeatureStatusCallback c);
-    IImsMMTelFeature createMMTelFeature(int slotId, in IImsFeatureStatusCallback c);
-    IImsRcsFeature createRcsFeature(int slotId, in IImsFeatureStatusCallback c);
-    void removeImsFeature(int slotId, int featureType, in IImsFeatureStatusCallback c);
+interface IImsRcsFeature {
+    //Empty Default Implementation
 }

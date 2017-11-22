@@ -5273,7 +5273,7 @@ com.android.ims.internal.IImsRegistrationListener$Stub
 com.android.ims.internal.IImsService
 com.android.ims.internal.IImsService$Stub
 com.android.ims.internal.IImsServiceController
-com.android.ims.internal.IImsServiceFeatureListener
+com.android.ims.internal.IImsServiceFeatureCallback
 com.android.ims.internal.IImsUt
 com.android.ims.internal.IImsUt$Stub
 com.android.ims.internal.IImsUtListener
