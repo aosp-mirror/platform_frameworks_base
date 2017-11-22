@@ -20,7 +20,12 @@ import android.os.Parcelable;
 
 import com.android.internal.annotations.VisibleForTesting;
 
-/** @hide */
+/**
+ * This class encapsulates all the configuration parameters needed to create IPsec transforms and
+ * policies.
+ *
+ * @hide
+ */
 public final class IpSecConfig implements Parcelable {
     private static final String TAG = "IpSecConfig";
 
@@ -38,6 +43,9 @@ public final class IpSecConfig implements Parcelable {
     // for outbound packets. It may also be used to select packets.
     private Network mNetwork;
 
+    /**
+     * This class captures the parameters that specifically apply to inbound or outbound traffic.
+     */
     public static class Flow {
         // Minimum requirements for identifying a transform
         // SPI identifying the IPsec flow in packet processing
