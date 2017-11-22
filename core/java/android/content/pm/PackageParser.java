@@ -42,6 +42,7 @@ import static android.os.Build.VERSION_CODES.O;
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_UNSPECIFIED;
 
+import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -107,6 +108,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Constructor;
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
@@ -818,22 +821,33 @@ public class PackageParser {
         }
     }
 
-    public static final int PARSE_IS_SYSTEM = 1 << 0;
-    public static final int PARSE_CHATTY = 1 << 1;
-    public static final int PARSE_MUST_BE_APK = 1 << 2;
-    public static final int PARSE_IGNORE_PROCESSES = 1 << 3;
-    public static final int PARSE_FORWARD_LOCK = 1 << 4;
-    public static final int PARSE_EXTERNAL_STORAGE = 1 << 5;
-    public static final int PARSE_IS_SYSTEM_DIR = 1 << 6;
-    public static final int PARSE_IS_PRIVILEGED = 1 << 7;
-    public static final int PARSE_COLLECT_CERTIFICATES = 1 << 8;
-    public static final int PARSE_TRUSTED_OVERLAY = 1 << 9;
-    public static final int PARSE_ENFORCE_CODE = 1 << 10;
-    /** @deprecated remove when fixing b/34761192 */
+    public static final int PARSE_MUST_BE_APK = 1 << 0;
+    public static final int PARSE_IGNORE_PROCESSES = 1 << 1;
+    public static final int PARSE_FORWARD_LOCK = 1 << 2;
+    public static final int PARSE_EXTERNAL_STORAGE = 1 << 3;
+    public static final int PARSE_IS_SYSTEM_DIR = 1 << 4;
+    public static final int PARSE_COLLECT_CERTIFICATES = 1 << 5;
+    public static final int PARSE_ENFORCE_CODE = 1 << 6;
+    public static final int PARSE_FORCE_SDK = 1 << 7;
+    /** @deprecated remove when fixing b/68860689 */
     @Deprecated
-    public static final int PARSE_IS_EPHEMERAL = 1 << 11;
-    public static final int PARSE_FORCE_SDK = 1 << 12;
-    public static final int PARSE_IS_OEM = 1 << 13;
+    public static final int PARSE_IS_EPHEMERAL = 1 << 8;
+    public static final int PARSE_CHATTY = 1 << 31;
+
+    @IntDef(flag = true, prefix = { "PARSE_" }, value = {
+            PARSE_CHATTY,
+            PARSE_COLLECT_CERTIFICATES,
+            PARSE_ENFORCE_CODE,
+            PARSE_EXTERNAL_STORAGE,
+            PARSE_FORCE_SDK,
+            PARSE_FORWARD_LOCK,
+            PARSE_IGNORE_PROCESSES,
+            PARSE_IS_EPHEMERAL,
+            PARSE_IS_SYSTEM_DIR,
+            PARSE_MUST_BE_APK,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ParseFlags {}
 
     private static final Comparator<String> sSplitNameComparator = new SplitNameComparator();
 
@@ -1507,7 +1521,7 @@ public class PackageParser {
      * populating {@link Package#mSignatures}. Also asserts that all APK
      * contents are signed correctly and consistently.
      */
-    public static void collectCertificates(Package pkg, int parseFlags)
+    public static void collectCertificates(Package pkg, @ParseFlags int parseFlags)
             throws PackageParserException {
         collectCertificatesInternal(pkg, parseFlags);
         final int childCount = (pkg.childPackages != null) ? pkg.childPackages.size() : 0;
@@ -1519,7 +1533,7 @@ public class PackageParser {
         }
     }
 
-    private static void collectCertificatesInternal(Package pkg, int parseFlags)
+    private static void collectCertificatesInternal(Package pkg, @ParseFlags int parseFlags)
             throws PackageParserException {
         pkg.mCertificates = null;
         pkg.mSignatures = null;
@@ -1539,7 +1553,7 @@ public class PackageParser {
         }
     }
 
-    private static void collectCertificates(Package pkg, File apkFile, int parseFlags)
+    private static void collectCertificates(Package pkg, File apkFile, @ParseFlags int parseFlags)
             throws PackageParserException {
         final String apkPath = apkFile.getAbsolutePath();
 
@@ -2454,7 +2468,7 @@ public class PackageParser {
 
                 sa.recycle();
 
-                if (name != null && (flags&PARSE_IS_SYSTEM) != 0) {
+                if (name != null) {
                     if (pkg.protectedBroadcasts == null) {
                         pkg.protectedBroadcasts = new ArrayList<String>();
                     }
@@ -3255,9 +3269,6 @@ public class PackageParser {
                 com.android.internal.R.styleable.AndroidManifestPermissionGroup_permissionGroupFlags, 0);
         perm.info.priority = sa.getInt(
                 com.android.internal.R.styleable.AndroidManifestPermissionGroup_priority, 0);
-        if (perm.info.priority > 0 && (flags&PARSE_IS_SYSTEM) == 0) {
-            perm.info.priority = 0;
-        }
 
         sa.recycle();
 
@@ -3563,17 +3574,14 @@ public class PackageParser {
         ai.descriptionRes = sa.getResourceId(
                 com.android.internal.R.styleable.AndroidManifestApplication_description, 0);
 
-        if ((flags&PARSE_IS_SYSTEM) != 0) {
-            if (sa.getBoolean(
-                    com.android.internal.R.styleable.AndroidManifestApplication_persistent,
-                    false)) {
-                // Check if persistence is based on a feature being present
-                final String requiredFeature = sa.getNonResourceString(
-                    com.android.internal.R.styleable.
-                    AndroidManifestApplication_persistentWhenFeatureAvailable);
-                if (requiredFeature == null || mCallback.hasFeature(requiredFeature)) {
-                    ai.flags |= ApplicationInfo.FLAG_PERSISTENT;
-                }
+        if (sa.getBoolean(
+                com.android.internal.R.styleable.AndroidManifestApplication_persistent,
+                false)) {
+            // Check if persistence is based on a feature being present
+            final String requiredFeature = sa.getNonResourceString(com.android.internal.R.styleable
+                    .AndroidManifestApplication_persistentWhenFeatureAvailable);
+            if (requiredFeature == null || mCallback.hasFeature(requiredFeature)) {
+                ai.flags |= ApplicationInfo.FLAG_PERSISTENT;
             }
         }
 
@@ -4443,13 +4451,6 @@ public class PackageParser {
 
             if (sa.getBoolean(R.styleable.AndroidManifestActivity_singleUser, false)) {
                 a.info.flags |= ActivityInfo.FLAG_SINGLE_USER;
-                if (a.info.exported && (flags & PARSE_IS_PRIVILEGED) == 0) {
-                    Slog.w(TAG, "Activity exported request ignored due to singleUser: "
-                            + a.className + " at " + mArchiveSourcePath + " "
-                            + parser.getPositionDescription());
-                    a.info.exported = false;
-                    setExported = true;
-                }
             }
 
             a.info.encryptionAware = a.info.directBootAware = sa.getBoolean(
@@ -5038,12 +5039,6 @@ public class PackageParser {
                 com.android.internal.R.styleable.AndroidManifestProvider_singleUser,
                 false)) {
             p.info.flags |= ProviderInfo.FLAG_SINGLE_USER;
-            if (p.info.exported && (flags & PARSE_IS_PRIVILEGED) == 0) {
-                Slog.w(TAG, "Provider exported request ignored due to singleUser: "
-                        + p.className + " at " + mArchiveSourcePath + " "
-                        + parser.getPositionDescription());
-                p.info.exported = false;
-            }
         }
 
         p.info.encryptionAware = p.info.directBootAware = sa.getBoolean(
@@ -5365,13 +5360,6 @@ public class PackageParser {
                 com.android.internal.R.styleable.AndroidManifestService_singleUser,
                 false)) {
             s.info.flags |= ServiceInfo.FLAG_SINGLE_USER;
-            if (s.info.exported && (flags & PARSE_IS_PRIVILEGED) == 0) {
-                Slog.w(TAG, "Service exported request ignored due to singleUser: "
-                        + s.className + " at " + mArchiveSourcePath + " "
-                        + parser.getPositionDescription());
-                s.info.exported = false;
-                setExported = true;
-            }
         }
 
         s.info.encryptionAware = s.info.directBootAware = sa.getBoolean(

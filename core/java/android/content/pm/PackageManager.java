@@ -1302,6 +1302,7 @@ public abstract class PackageManager {
             DELETE_ALL_USERS,
             DELETE_SYSTEM_APP,
             DELETE_DONT_KILL_APP,
+            DELETE_CHATTY,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface DeleteFlags {}
@@ -1341,6 +1342,14 @@ public abstract class PackageManager {
      * @hide
      */
     public static final int DELETE_DONT_KILL_APP = 0x00000008;
+
+    /**
+     * Flag parameter for {@link #deletePackage} to indicate that package deletion
+     * should be chatty.
+     *
+     * @hide
+     */
+    public static final int DELETE_CHATTY = 0x80000000;
 
     /**
      * Return code for when package deletion succeeds. This is passed to the
