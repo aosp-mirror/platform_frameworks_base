@@ -74,6 +74,7 @@ message Atom {
         ActivityForegroundStateChanged activity_foreground_state_changed = 42;
         IsolatedUidChanged isolated_uid_changed = 43;
         PacketWakeupOccurred packet_wakeup_occurred = 44;
+        DropboxErrorChanged dropbox_error_changed = 45;
         // TODO: Reorder the numbering so that the most frequent occur events occur in the first 15.
     }
 
@@ -713,6 +714,34 @@ message ActivityForegroundStateChanged {
     optional string pkg_name = 2;
     optional string class_name = 3;
     optional Activity activity = 4;
+}
+
+/**
+ * Logs when an error is written to dropbox.
+ * Logged from:
+ *      frameworks/base/services/core/java/com/android/server/am/ActivityManagerService.java
+ */
+message DropboxErrorChanged {
+    // The uid if available. -1 means not available.
+    optional int32 uid = 1;
+
+    // Tag used when recording this error to dropbox. Contains data_ or system_ prefix.
+    optional string tag = 2;
+
+    // The name of the process.
+    optional string process_name = 3;
+
+    // The pid if available. -1 means not available.
+    optional int32 pid = 4;
+
+    // 1 indicates is instant app. -1 indicates Not applicable.
+    optional int32 is_instant_app = 5;
+
+    // The activity name if available.
+    optional string activity_name = 6;
+
+    // 1 indicates in foreground. -1 indicates not available.
+    optional int32 is_foreground = 7;
 }
 
 /**

@@ -14578,6 +14578,18 @@ public class ActivityManagerService extends IActivityManager.Stub
         final String dropboxTag = processClass(process) + "_" + eventType;
         if (dbox == null || !dbox.isTagEnabled(dropboxTag)) return;
 
+        // Log to StatsLog before the rate-limiting.
+        // The logging below is adapated from appendDropboxProcessHeaders.
+        StatsLog.write(StatsLog.DROPBOX_ERROR_CHANGED,
+                process != null ? process.uid : -1,
+                dropboxTag,
+                processName,
+                process != null ? process.pid : -1,
+                (process != null && process.info != null) ?
+                        (process.info.isInstantApp() ? 1 : 0) : -1,
+                activity != null ? activity.shortComponentName : null,
+                process != null ? (process.isInterestingToUserLocked() ? 1 : 0) : -1);
+
         // Rate-limit how often we're willing to do the heavy lifting below to
         // collect and record logs; currently 5 logs per 10 second period.
         final long now = SystemClock.elapsedRealtime();
