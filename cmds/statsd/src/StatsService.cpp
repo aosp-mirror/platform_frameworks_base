@@ -715,6 +715,18 @@ Status StatsService::getData(const String16& key, vector<uint8_t>* output) {
     }
 }
 
+Status StatsService::getMetadata(vector<uint8_t>* output) {
+    IPCThreadState* ipc = IPCThreadState::self();
+    VLOG("StatsService::getMetadata with Pid %i, Uid %i", ipc->getCallingPid(),
+         ipc->getCallingUid());
+    if (checkCallingPermission(String16(kPermissionDump))) {
+        StatsdStats::getInstance().dumpStats(output, false); // Don't reset the counters.
+        return Status::ok();
+    } else {
+        return Status::fromExceptionCode(binder::Status::EX_SECURITY);
+    }
+}
+
 Status StatsService::addConfiguration(const String16& key,
                                       const vector <uint8_t>& config,
                                       const String16& package, const String16& cls,
