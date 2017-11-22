@@ -145,6 +145,8 @@ public abstract class ConnectionService extends Service {
     private static final String SESSION_STOP_RTT = "CS.-RTT";
     private static final String SESSION_RTT_UPGRADE_RESPONSE = "CS.rTRUR";
     private static final String SESSION_HANDOVER_FAILED = "CS.haF";
+    private static final String SESSION_CONNECTION_SERVICE_FOCUS_LOST = "CS.cSFL";
+    private static final String SESSION_CONNECTION_SERVICE_FOCUS_GAINED = "CS.cSFG";
 
     private static final int MSG_ADD_CONNECTION_SERVICE_ADAPTER = 1;
     private static final int MSG_CREATE_CONNECTION = 2;
@@ -174,6 +176,8 @@ public abstract class ConnectionService extends Service {
     private static final int MSG_ON_STOP_RTT = 27;
     private static final int MSG_RTT_UPGRADE_RESPONSE = 28;
     private static final int MSG_CREATE_CONNECTION_COMPLETE = 29;
+    private static final int MSG_CONNECTION_SERVICE_FOCUS_LOST = 30;
+    private static final int MSG_CONNECTION_SERVICE_FOCUS_GAINED = 31;
     private static final int MSG_HANDOVER_FAILED = 32;
 
     private static Connection sNullConnection;
@@ -606,6 +610,26 @@ public abstract class ConnectionService extends Service {
                 }
                 args.arg3 = Log.createSubsession();
                 mHandler.obtainMessage(MSG_RTT_UPGRADE_RESPONSE, args).sendToTarget();
+            } finally {
+                Log.endSession();
+            }
+        }
+
+        @Override
+        public void connectionServiceFocusLost(Session.Info sessionInfo) throws RemoteException {
+            Log.startSession(sessionInfo, SESSION_CONNECTION_SERVICE_FOCUS_LOST);
+            try {
+                mHandler.obtainMessage(MSG_CONNECTION_SERVICE_FOCUS_LOST).sendToTarget();
+            } finally {
+                Log.endSession();
+            }
+        }
+
+        @Override
+        public void connectionServiceFocusGained(Session.Info sessionInfo) throws RemoteException {
+            Log.startSession(sessionInfo, SESSION_CONNECTION_SERVICE_FOCUS_GAINED);
+            try {
+                mHandler.obtainMessage(MSG_CONNECTION_SERVICE_FOCUS_GAINED).sendToTarget();
             } finally {
                 Log.endSession();
             }
@@ -1061,6 +1085,12 @@ public abstract class ConnectionService extends Service {
                     }
                     break;
                 }
+                case MSG_CONNECTION_SERVICE_FOCUS_GAINED:
+                    onConnectionServiceFocusGained();
+                    break;
+                case MSG_CONNECTION_SERVICE_FOCUS_LOST:
+                    onConnectionServiceFocusLost();
+                    break;
                 default:
                     break;
             }
@@ -1930,6 +1960,16 @@ public abstract class ConnectionService extends Service {
     }
 
     /**
+     * Call to inform Telecom that your {@link ConnectionService} has released call resources (e.g
+     * microphone, camera).
+     *
+     * @see ConnectionService#onConnectionServiceFocusLost()
+     */
+    public final void connectionServiceFocusReleased() {
+        mAdapter.onConnectionServiceFocusReleased();
+    }
+
+    /**
      * Adds a connection created by the {@link ConnectionService} and informs telecom of the new
      * connection.
      *
@@ -2177,6 +2217,20 @@ public abstract class ConnectionService extends Service {
      * @param connection The existing connection which was added.
      */
     public void onRemoteExistingConnectionAdded(RemoteConnection connection) {}
+
+    /**
+     * Called when the {@link ConnectionService} has lost the call focus.
+     * The {@link ConnectionService} should release the call resources and invokes
+     * {@link ConnectionService#connectionServiceFocusReleased()} to inform telecom that it has
+     * released the call resources.
+     */
+    public void onConnectionServiceFocusLost() {}
+
+    /**
+     * Called when the {@link ConnectionService} has gained the call focus. The
+     * {@link ConnectionService} can acquire the call resources at this time.
+     */
+    public void onConnectionServiceFocusGained() {}
 
     /**
      * @hide
