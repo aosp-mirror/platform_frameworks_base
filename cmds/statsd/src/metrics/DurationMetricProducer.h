@@ -37,9 +37,9 @@ namespace statsd {
 
 class DurationMetricProducer : public MetricProducer {
 public:
-    DurationMetricProducer(const DurationMetric& durationMetric, const int conditionIndex,
-                           const size_t startIndex, const size_t stopIndex,
-                           const size_t stopAllIndex, const bool nesting,
+    DurationMetricProducer(const ConfigKey& key, const DurationMetric& durationMetric,
+                           const int conditionIndex, const size_t startIndex,
+                           const size_t stopIndex, const size_t stopAllIndex, const bool nesting,
                            const sp<ConditionWizard>& wizard,
                            const vector<KeyMatcher>& internalDimension, const uint64_t startTimeNs);
 
@@ -98,6 +98,7 @@ private:
 
     std::unique_ptr<DurationTracker> createDurationTracker(const HashableDimensionKey& eventKey,
                                                            std::vector<DurationBucket>& bucket);
+    bool hitGuardRail(const HashableDimensionKey& newKey);
 
     static const size_t kBucketSize = sizeof(DurationBucket{});
 };

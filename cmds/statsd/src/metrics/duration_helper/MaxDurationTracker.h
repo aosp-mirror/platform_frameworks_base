@@ -28,7 +28,8 @@ namespace statsd {
 // they stop or bucket expires.
 class MaxDurationTracker : public DurationTracker {
 public:
-    MaxDurationTracker(const HashableDimensionKey& eventKey, sp<ConditionWizard> wizard,
+    MaxDurationTracker(const ConfigKey& key, const string& name,
+                       const HashableDimensionKey& eventKey, sp<ConditionWizard> wizard,
                        int conditionIndex, bool nesting, uint64_t currentBucketStartNs,
                        uint64_t bucketSizeNs,
                        const std::vector<sp<AnomalyTracker>>& anomalyTrackers,
@@ -52,6 +53,9 @@ private:
 
     void noteConditionChanged(const HashableDimensionKey& key, bool conditionMet,
                               const uint64_t timestamp);
+
+    // return true if we should not allow newKey to be tracked because we are above the threshold
+    bool hitGuardRail(const HashableDimensionKey& newKey);
 
     FRIEND_TEST(MaxDurationTrackerTest, TestSimpleMaxDuration);
     FRIEND_TEST(MaxDurationTrackerTest, TestCrossBucketBoundary);

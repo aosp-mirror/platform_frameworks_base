@@ -18,6 +18,7 @@
 #include "Log.h"
 
 #include "ValueMetricProducer.h"
+#include "guardrail/StatsdStats.h"
 
 #include <cutils/log.h>
 #include <limits.h>
@@ -67,11 +68,12 @@ const int FIELD_ID_VALUE = 3;
 static const uint64_t kDefaultBucketSizeMillis = 60 * 60 * 1000L;
 
 // ValueMetric has a minimum bucket size of 10min so that we don't pull too frequently
-ValueMetricProducer::ValueMetricProducer(const ValueMetric& metric, const int conditionIndex,
+ValueMetricProducer::ValueMetricProducer(const ConfigKey& key, const ValueMetric& metric,
+                                         const int conditionIndex,
                                          const sp<ConditionWizard>& wizard, const int pullTagId,
                                          const uint64_t startTimeNs,
                                          shared_ptr<StatsPullerManager> statsPullerManager)
-    : MetricProducer(startTimeNs, conditionIndex, wizard),
+    : MetricProducer(key, startTimeNs, conditionIndex, wizard),
       mMetric(metric),
       mStatsPullerManager(statsPullerManager),
       mPullTagId(pullTagId) {
@@ -103,10 +105,11 @@ ValueMetricProducer::ValueMetricProducer(const ValueMetric& metric, const int co
 }
 
 // for testing
-ValueMetricProducer::ValueMetricProducer(const ValueMetric& metric, const int conditionIndex,
+ValueMetricProducer::ValueMetricProducer(const ConfigKey& key, const ValueMetric& metric,
+                                         const int conditionIndex,
                                          const sp<ConditionWizard>& wizard, const int pullTagId,
                                          const uint64_t startTimeNs)
-    : ValueMetricProducer(metric, conditionIndex, wizard, pullTagId, startTimeNs,
+    : ValueMetricProducer(key, metric, conditionIndex, wizard, pullTagId, startTimeNs,
                           make_shared<StatsPullerManager>()) {
 }
 
@@ -238,6 +241,27 @@ void ValueMetricProducer::onDataPulled(const std::vector<std::shared_ptr<LogEven
     }
 }
 
+bool ValueMetricProducer::hitGuardRail(const HashableDimensionKey& newKey) {
+    // ===========GuardRail==============
+    // 1. Report the tuple count if the tuple count > soft limit
+    if (mCurrentSlicedBucket.find(newKey) != mCurrentSlicedBucket.end()) {
+        return false;
+    }
+    if (mCurrentSlicedBucket.size() > StatsdStats::kDimensionKeySizeSoftLimit - 1) {
+        size_t newTupleCount = mCurrentSlicedBucket.size() + 1;
+        StatsdStats::getInstance().noteMetricDimensionSize(mConfigKey, mMetric.name(),
+                                                           newTupleCount);
+        // 2. Don't add more tuples, we are above the allowed threshold. Drop the data.
+        if (newTupleCount > StatsdStats::kDimensionKeySizeHardLimit) {
+            ALOGE("ValueMetric %s dropping data for dimension key %s", mMetric.name().c_str(),
+                  newKey.c_str());
+            return true;
+        }
+    }
+
+    return false;
+}
+
 void ValueMetricProducer::onMatchedLogEventInternal(
         const size_t matcherIndex, const HashableDimensionKey& eventKey,
         const map<string, HashableDimensionKey>& conditionKey, bool condition,
@@ -249,6 +273,9 @@ void ValueMetricProducer::onMatchedLogEventInternal(
         return;
     }
 
+    if (hitGuardRail(eventKey)) {
+        return;
+    }
     Interval& interval = mCurrentSlicedBucket[eventKey];
 
     long value = get_value(event);

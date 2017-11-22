@@ -16,6 +16,7 @@
 #define DEBUG true
 #include "Log.h"
 #include "OringDurationTracker.h"
+#include "guardrail/StatsdStats.h"
 
 namespace android {
 namespace os {
@@ -23,21 +24,45 @@ namespace statsd {
 
 using std::pair;
 
-OringDurationTracker::OringDurationTracker(const HashableDimensionKey& eventKey,
+OringDurationTracker::OringDurationTracker(const ConfigKey& key, const string& name,
+                                           const HashableDimensionKey& eventKey,
                                            sp<ConditionWizard> wizard, int conditionIndex,
                                            bool nesting, uint64_t currentBucketStartNs,
                                            uint64_t bucketSizeNs,
                                            const std::vector<sp<AnomalyTracker>>& anomalyTrackers,
                                            std::vector<DurationBucket>& bucket)
-    : DurationTracker(eventKey, wizard, conditionIndex, nesting, currentBucketStartNs, bucketSizeNs,
-                      anomalyTrackers, bucket),
+    : DurationTracker(key, name, eventKey, wizard, conditionIndex, nesting, currentBucketStartNs,
+                      bucketSizeNs, anomalyTrackers, bucket),
       mStarted(),
       mPaused() {
     mLastStartTime = 0;
 }
 
+bool OringDurationTracker::hitGuardRail(const HashableDimensionKey& newKey) {
+    // ===========GuardRail==============
+    // 1. Report the tuple count if the tuple count > soft limit
+    if (mConditionKeyMap.find(newKey) != mConditionKeyMap.end()) {
+        return false;
+    }
+    if (mConditionKeyMap.size() > StatsdStats::kDimensionKeySizeSoftLimit - 1) {
+        size_t newTupleCount = mConditionKeyMap.size() + 1;
+        StatsdStats::getInstance().noteMetricDimensionSize(mConfigKey, mName + mEventKey,
+                                                           newTupleCount);
+        // 2. Don't add more tuples, we are above the allowed threshold. Drop the data.
+        if (newTupleCount > StatsdStats::kDimensionKeySizeHardLimit) {
+            ALOGE("OringDurTracker %s dropping data for dimension key %s", mName.c_str(),
+                  newKey.c_str());
+            return true;
+        }
+    }
+    return false;
+}
+
 void OringDurationTracker::noteStart(const HashableDimensionKey& key, bool condition,
                                      const uint64_t eventTime, const ConditionKey& conditionKey) {
+    if (hitGuardRail(key)) {
+        return;
+    }
     if (condition) {
         if (mStarted.size() == 0) {
             mLastStartTime = eventTime;

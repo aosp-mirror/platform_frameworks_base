@@ -42,8 +42,9 @@ struct CountBucket {
 class CountMetricProducer : public MetricProducer {
 public:
     // TODO: Pass in the start time from MetricsManager, it should be consistent for all metrics.
-    CountMetricProducer(const CountMetric& countMetric, const int conditionIndex,
-                        const sp<ConditionWizard>& wizard, const uint64_t startTimeNs);
+    CountMetricProducer(const ConfigKey& key, const CountMetric& countMetric,
+                        const int conditionIndex, const sp<ConditionWizard>& wizard,
+                        const uint64_t startTimeNs);
 
     virtual ~CountMetricProducer();
 
@@ -83,6 +84,8 @@ private:
     std::shared_ptr<DimToValMap> mCurrentSlicedCounter = std::make_shared<DimToValMap>();
 
     static const size_t kBucketSize = sizeof(CountBucket{});
+
+    bool hitGuardRail(const HashableDimensionKey& newKey);
 
     FRIEND_TEST(CountMetricProducerTest, TestNonDimensionalEvents);
     FRIEND_TEST(CountMetricProducerTest, TestEventsWithNonSlicedCondition);

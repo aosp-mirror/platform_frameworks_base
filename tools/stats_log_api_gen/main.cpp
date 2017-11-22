@@ -18,6 +18,10 @@ using namespace std;
 namespace android {
 namespace stats_log_api_gen {
 
+const int PULL_ATOM_START_ID = 1000;
+
+int maxPushedAtomId = 2;
+
 using android::os::statsd::Atom;
 
 // TODO: Support WorkSources
@@ -195,11 +199,17 @@ write_stats_log_header(FILE* out, const Atoms& atoms)
         fprintf(out, "     */\n");
         char const* const comma = (i == atoms.decls.size() - 1) ? "" : ",";
         fprintf(out, "    %s = %d%s\n", constant.c_str(), atom->code, comma);
+        if (atom->code < PULL_ATOM_START_ID && atom->code > maxPushedAtomId) {
+            maxPushedAtomId = atom->code;
+        }
         i++;
     }
     fprintf(out, "\n");
     fprintf(out, "};\n");
     fprintf(out, "\n");
+
+    fprintf(out, "const static int kMaxPushedAtomId = %d;\n\n",
+            maxPushedAtomId);
 
     // Print write methods
     fprintf(out, "//\n");

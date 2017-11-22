@@ -40,6 +40,8 @@ using android::os::statsd::Condition;
 
 // TODO: ADD MORE TEST CASES.
 
+const ConfigKey kConfigKey(0, "test");
+
 StatsdConfig buildGoodConfig() {
     StatsdConfig config;
     config.set_name("12345");
@@ -254,9 +256,9 @@ TEST(MetricsManagerTest, TestGoodConfig) {
     unordered_map<int, std::vector<int>> trackerToMetricMap;
     unordered_map<int, std::vector<int>> trackerToConditionMap;
 
-    EXPECT_TRUE(initStatsdConfig(config, allTagIds, allLogEntryMatchers, allConditionTrackers,
-                                 allMetricProducers, allAnomalyTrackers, conditionToMetricMap,
-                                 trackerToMetricMap, trackerToConditionMap));
+    EXPECT_TRUE(initStatsdConfig(kConfigKey, config, allTagIds, allLogEntryMatchers,
+                                 allConditionTrackers, allMetricProducers, allAnomalyTrackers,
+                                 conditionToMetricMap, trackerToMetricMap, trackerToConditionMap));
     EXPECT_EQ(1u, allMetricProducers.size());
     EXPECT_EQ(1u, allAnomalyTrackers.size());
 }
@@ -272,9 +274,9 @@ TEST(MetricsManagerTest, TestDimensionMetricsWithMultiTags) {
     unordered_map<int, std::vector<int>> trackerToMetricMap;
     unordered_map<int, std::vector<int>> trackerToConditionMap;
 
-    EXPECT_FALSE(initStatsdConfig(config, allTagIds, allLogEntryMatchers, allConditionTrackers,
-                                  allMetricProducers, allAnomalyTrackers, conditionToMetricMap,
-                                  trackerToMetricMap, trackerToConditionMap));
+    EXPECT_FALSE(initStatsdConfig(kConfigKey, config, allTagIds, allLogEntryMatchers,
+                                  allConditionTrackers, allMetricProducers, allAnomalyTrackers,
+                                  conditionToMetricMap, trackerToMetricMap, trackerToConditionMap));
 }
 
 TEST(MetricsManagerTest, TestCircleLogMatcherDependency) {
@@ -288,9 +290,9 @@ TEST(MetricsManagerTest, TestCircleLogMatcherDependency) {
     unordered_map<int, std::vector<int>> trackerToMetricMap;
     unordered_map<int, std::vector<int>> trackerToConditionMap;
 
-    EXPECT_FALSE(initStatsdConfig(config, allTagIds, allLogEntryMatchers, allConditionTrackers,
-                                  allMetricProducers, allAnomalyTrackers, conditionToMetricMap,
-                                  trackerToMetricMap, trackerToConditionMap));
+    EXPECT_FALSE(initStatsdConfig(kConfigKey, config, allTagIds, allLogEntryMatchers,
+                                  allConditionTrackers, allMetricProducers, allAnomalyTrackers,
+                                  conditionToMetricMap, trackerToMetricMap, trackerToConditionMap));
 }
 
 TEST(MetricsManagerTest, TestMissingMatchers) {
@@ -303,9 +305,9 @@ TEST(MetricsManagerTest, TestMissingMatchers) {
     unordered_map<int, std::vector<int>> conditionToMetricMap;
     unordered_map<int, std::vector<int>> trackerToMetricMap;
     unordered_map<int, std::vector<int>> trackerToConditionMap;
-    EXPECT_FALSE(initStatsdConfig(config, allTagIds, allLogEntryMatchers, allConditionTrackers,
-                                  allMetricProducers, allAnomalyTrackers, conditionToMetricMap,
-                                  trackerToMetricMap, trackerToConditionMap));
+    EXPECT_FALSE(initStatsdConfig(kConfigKey, config, allTagIds, allLogEntryMatchers,
+                                  allConditionTrackers, allMetricProducers, allAnomalyTrackers,
+                                  conditionToMetricMap, trackerToMetricMap, trackerToConditionMap));
 }
 
 TEST(MetricsManagerTest, TestCircleConditionDependency) {
@@ -319,9 +321,9 @@ TEST(MetricsManagerTest, TestCircleConditionDependency) {
     unordered_map<int, std::vector<int>> trackerToMetricMap;
     unordered_map<int, std::vector<int>> trackerToConditionMap;
 
-    EXPECT_FALSE(initStatsdConfig(config, allTagIds, allLogEntryMatchers, allConditionTrackers,
-                                  allMetricProducers, allAnomalyTrackers, conditionToMetricMap,
-                                  trackerToMetricMap, trackerToConditionMap));
+    EXPECT_FALSE(initStatsdConfig(kConfigKey, config, allTagIds, allLogEntryMatchers,
+                                  allConditionTrackers, allMetricProducers, allAnomalyTrackers,
+                                  conditionToMetricMap, trackerToMetricMap, trackerToConditionMap));
 }
 
 TEST(MetricsManagerTest, testAlertWithUnknownMetric) {
@@ -335,9 +337,9 @@ TEST(MetricsManagerTest, testAlertWithUnknownMetric) {
     unordered_map<int, std::vector<int>> trackerToMetricMap;
     unordered_map<int, std::vector<int>> trackerToConditionMap;
 
-    EXPECT_FALSE(initStatsdConfig(config, allTagIds, allLogEntryMatchers, allConditionTrackers,
-                                  allMetricProducers, allAnomalyTrackers, conditionToMetricMap,
-                                  trackerToMetricMap, trackerToConditionMap));
+    EXPECT_FALSE(initStatsdConfig(kConfigKey, config, allTagIds, allLogEntryMatchers,
+                                  allConditionTrackers, allMetricProducers, allAnomalyTrackers,
+                                  conditionToMetricMap, trackerToMetricMap, trackerToConditionMap));
 }
 
 #else

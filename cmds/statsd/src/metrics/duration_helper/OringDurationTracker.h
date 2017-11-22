@@ -27,7 +27,8 @@ namespace statsd {
 // Tracks the "Or'd" duration -- if 2 durations are overlapping, they won't be double counted.
 class OringDurationTracker : public DurationTracker {
 public:
-    OringDurationTracker(const HashableDimensionKey& eventKey, sp<ConditionWizard> wizard,
+    OringDurationTracker(const ConfigKey& key, const string& name,
+                         const HashableDimensionKey& eventKey, sp<ConditionWizard> wizard,
                          int conditionIndex, bool nesting, uint64_t currentBucketStartNs,
                          uint64_t bucketSizeNs,
                          const std::vector<sp<AnomalyTracker>>& anomalyTrackers,
@@ -57,6 +58,9 @@ private:
     std::map<HashableDimensionKey, int> mPaused;
     int64_t mLastStartTime;
     std::map<HashableDimensionKey, ConditionKey> mConditionKeyMap;
+
+    // return true if we should not allow newKey to be tracked because we are above the threshold
+    bool hitGuardRail(const HashableDimensionKey& newKey);
 
     FRIEND_TEST(OringDurationTrackerTest, TestDurationOverlap);
     FRIEND_TEST(OringDurationTrackerTest, TestCrossBucketBoundary);

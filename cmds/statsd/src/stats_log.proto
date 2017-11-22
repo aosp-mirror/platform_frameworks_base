@@ -172,3 +172,51 @@ message ConfigMetricsReportList {
 
   repeated ConfigMetricsReport reports = 2;
 }
+
+message StatsdStatsReport {
+    optional int32 stats_begin_time_sec = 1;
+
+    optional int32 stats_end_time_sec = 2;
+
+    message MatcherStats {
+        optional string name = 1;
+        optional int32 matched_times = 2;
+    }
+
+    message ConditionStats {
+        optional string name = 1;
+        optional int32 max_tuple_counts = 2;
+    }
+
+    message MetricStats {
+        optional string name = 1;
+        optional int32 max_tuple_counts = 2;
+    }
+
+    message ConfigStats {
+        optional int32 uid = 1;
+        optional string name = 2;
+        optional int32 creation_time_sec = 3;
+        optional int32 deletion_time_sec = 4;
+        optional int32 metric_count = 5;
+        optional int32 condition_count = 6;
+        optional int32 matcher_count = 7;
+        optional int32 alert_count = 8;
+        optional bool is_valid = 9;
+
+        repeated int32 broadcast_sent_time_sec = 10;
+        repeated int32 data_drop_time_sec = 11;
+        repeated MatcherStats matcher_stats = 12;
+        repeated ConditionStats condition_stats = 13;
+        repeated MetricStats metric_stats = 14;
+    }
+
+    repeated ConfigStats config_stats = 3;
+
+    message AtomStats {
+        optional int32 tag = 1;
+        optional int32 count = 2;
+    }
+
+    repeated AtomStats atom_stats = 7;
+}

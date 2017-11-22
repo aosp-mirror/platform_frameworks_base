@@ -57,7 +57,8 @@ statsd_common_src := \
     src/StatsLogProcessor.cpp \
     src/StatsService.cpp \
     src/stats_util.cpp \
-    src/guardrail/MemoryLeakTrackUtil.cpp
+    src/guardrail/MemoryLeakTrackUtil.cpp \
+    src/guardrail/StatsdStats.cpp
 
 statsd_common_c_includes := \
     $(LOCAL_PATH)/src \
@@ -167,7 +168,8 @@ LOCAL_SRC_FILES := \
     tests/metrics/MaxDurationTracker_test.cpp \
     tests/metrics/CountMetricProducer_test.cpp \
     tests/metrics/EventMetricProducer_test.cpp \
-    tests/metrics/ValueMetricProducer_test.cpp
+    tests/metrics/ValueMetricProducer_test.cpp \
+    tests/guardrail/StatsdStats_test.cpp
 
 LOCAL_STATIC_LIBRARIES := \
     libgmock

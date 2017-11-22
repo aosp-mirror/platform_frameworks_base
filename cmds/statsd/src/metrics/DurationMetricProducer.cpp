@@ -18,6 +18,7 @@
 
 #include "Log.h"
 #include "DurationMetricProducer.h"
+#include "guardrail/StatsdStats.h"
 #include "stats_util.h"
 
 #include <limits.h>
@@ -60,14 +61,14 @@ const int FIELD_ID_START_BUCKET_NANOS = 1;
 const int FIELD_ID_END_BUCKET_NANOS = 2;
 const int FIELD_ID_DURATION = 3;
 
-DurationMetricProducer::DurationMetricProducer(const DurationMetric& metric,
+DurationMetricProducer::DurationMetricProducer(const ConfigKey& key, const DurationMetric& metric,
                                                const int conditionIndex, const size_t startIndex,
                                                const size_t stopIndex, const size_t stopAllIndex,
                                                const bool nesting,
                                                const sp<ConditionWizard>& wizard,
                                                const vector<KeyMatcher>& internalDimension,
                                                const uint64_t startTimeNs)
-    : MetricProducer(startTimeNs, conditionIndex, wizard),
+    : MetricProducer(key, startTimeNs, conditionIndex, wizard),
       mMetric(metric),
       mStartIndex(startIndex),
       mStopIndex(stopIndex),
@@ -113,13 +114,13 @@ unique_ptr<DurationTracker> DurationMetricProducer::createDurationTracker(
         const HashableDimensionKey& eventKey, vector<DurationBucket>& bucket) {
     switch (mMetric.aggregation_type()) {
         case DurationMetric_AggregationType_SUM:
-            return make_unique<OringDurationTracker>(eventKey, mWizard, mConditionTrackerIndex,
-                                                     mNested, mCurrentBucketStartTimeNs,
-                                                     mBucketSizeNs, mAnomalyTrackers, bucket);
+            return make_unique<OringDurationTracker>(
+                    mConfigKey, mMetric.name(), eventKey, mWizard, mConditionTrackerIndex, mNested,
+                    mCurrentBucketStartTimeNs, mBucketSizeNs, mAnomalyTrackers, bucket);
         case DurationMetric_AggregationType_MAX_SPARSE:
-            return make_unique<MaxDurationTracker>(eventKey, mWizard, mConditionTrackerIndex,
-                                                   mNested, mCurrentBucketStartTimeNs,
-                                                   mBucketSizeNs, mAnomalyTrackers, bucket);
+            return make_unique<MaxDurationTracker>(
+                    mConfigKey, mMetric.name(), eventKey, mWizard, mConditionTrackerIndex, mNested,
+                    mCurrentBucketStartTimeNs, mBucketSizeNs, mAnomalyTrackers, bucket);
     }
 }
 
@@ -238,6 +239,26 @@ void DurationMetricProducer::flushIfNeeded(uint64_t eventTime) {
     mCurrentBucketNum += numBucketsForward;
 }
 
+bool DurationMetricProducer::hitGuardRail(const HashableDimensionKey& newKey) {
+    // the key is not new, we are good.
+    if (mCurrentSlicedDuration.find(newKey) != mCurrentSlicedDuration.end()) {
+        return false;
+    }
+    // 1. Report the tuple count if the tuple count > soft limit
+    if (mCurrentSlicedDuration.size() > StatsdStats::kDimensionKeySizeSoftLimit - 1) {
+        size_t newTupleCount = mCurrentSlicedDuration.size() + 1;
+        StatsdStats::getInstance().noteMetricDimensionSize(mConfigKey, mMetric.name(),
+                                                           newTupleCount);
+        // 2. Don't add more tuples, we are above the allowed threshold. Drop the data.
+        if (newTupleCount > StatsdStats::kDimensionKeySizeHardLimit) {
+            ALOGE("DurationMetric %s dropping data for dimension key %s", mMetric.name().c_str(),
+                  newKey.c_str());
+            return true;
+        }
+    }
+    return false;
+}
+
 void DurationMetricProducer::onMatchedLogEventInternal(
         const size_t matcherIndex, const HashableDimensionKey& eventKey,
         const map<string, HashableDimensionKey>& conditionKeys, bool condition,
@@ -254,6 +275,9 @@ void DurationMetricProducer::onMatchedLogEventInternal(
     HashableDimensionKey atomKey = getHashableKey(getDimensionKey(event, mInternalDimension));
 
     if (mCurrentSlicedDuration.find(eventKey) == mCurrentSlicedDuration.end()) {
+        if (hitGuardRail(eventKey)) {
+            return;
+        }
         mCurrentSlicedDuration[eventKey] = createDurationTracker(eventKey, mPastBuckets[eventKey]);
     }
 

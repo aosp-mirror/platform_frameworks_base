@@ -47,9 +47,9 @@ class GaugeMetricProducer : public virtual MetricProducer, public virtual PullDa
 public:
     // TODO: Pass in the start time from MetricsManager, it should be consistent
     // for all metrics.
-    GaugeMetricProducer(const GaugeMetric& countMetric, const int conditionIndex,
-                        const sp<ConditionWizard>& wizard, const int pullTagId,
-                        const int64_t startTimeNs);
+    GaugeMetricProducer(const ConfigKey& key, const GaugeMetric& countMetric,
+                        const int conditionIndex, const sp<ConditionWizard>& wizard,
+                        const int pullTagId, const int64_t startTimeNs);
 
     virtual ~GaugeMetricProducer();
 
@@ -99,6 +99,8 @@ private:
     std::shared_ptr<DimToValMap> mCurrentSlicedBucket = std::make_shared<DimToValMap>();
 
     int64_t getGauge(const LogEvent& event);
+
+    bool hitGuardRail(const HashableDimensionKey& newKey);
 
     static const size_t kBucketSize = sizeof(GaugeBucket{});
 

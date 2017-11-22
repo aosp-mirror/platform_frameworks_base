@@ -18,6 +18,7 @@
 #include "Log.h"
 
 #include "GaugeMetricProducer.h"
+#include "guardrail/StatsdStats.h"
 #include "stats_util.h"
 
 #include <cutils/log.h>
@@ -62,10 +63,11 @@ const int FIELD_ID_START_BUCKET_NANOS = 1;
 const int FIELD_ID_END_BUCKET_NANOS = 2;
 const int FIELD_ID_GAUGE = 3;
 
-GaugeMetricProducer::GaugeMetricProducer(const GaugeMetric& metric, const int conditionIndex,
+GaugeMetricProducer::GaugeMetricProducer(const ConfigKey& key, const GaugeMetric& metric,
+                                         const int conditionIndex,
                                          const sp<ConditionWizard>& wizard, const int pullTagId,
                                          const int64_t startTimeNs)
-    : MetricProducer(startTimeNs, conditionIndex, wizard),
+    : MetricProducer(key, startTimeNs, conditionIndex, wizard),
       mMetric(metric),
       mPullTagId(pullTagId) {
     if (metric.has_bucket() && metric.bucket().has_bucket_size_millis()) {
@@ -225,6 +227,26 @@ void GaugeMetricProducer::onDataPulled(const std::vector<std::shared_ptr<LogEven
     }
 }
 
+bool GaugeMetricProducer::hitGuardRail(const HashableDimensionKey& newKey) {
+    if (mCurrentSlicedBucket->find(newKey) != mCurrentSlicedBucket->end()) {
+        return false;
+    }
+    // 1. Report the tuple count if the tuple count > soft limit
+    if (mCurrentSlicedBucket->size() > StatsdStats::kDimensionKeySizeSoftLimit - 1) {
+        size_t newTupleCount = mCurrentSlicedBucket->size() + 1;
+        StatsdStats::getInstance().noteMetricDimensionSize(mConfigKey, mMetric.name(),
+                                                           newTupleCount);
+        // 2. Don't add more tuples, we are above the allowed threshold. Drop the data.
+        if (newTupleCount > StatsdStats::kDimensionKeySizeHardLimit) {
+            ALOGE("GaugeMetric %s dropping data for dimension key %s", mMetric.name().c_str(),
+                  newKey.c_str());
+            return true;
+        }
+    }
+
+    return false;
+}
+
 void GaugeMetricProducer::onMatchedLogEventInternal(
         const size_t matcherIndex, const HashableDimensionKey& eventKey,
         const map<string, HashableDimensionKey>& conditionKey, bool condition,
@@ -244,12 +266,15 @@ void GaugeMetricProducer::onMatchedLogEventInternal(
         flushIfNeeded(eventTimeNs);
     }
 
-    // For gauge metric, we just simply use the first guage in the given bucket.
+    // For gauge metric, we just simply use the first gauge in the given bucket.
     if (!mCurrentSlicedBucket->empty()) {
         return;
     }
     const long gauge = getGauge(event);
     if (gauge >= 0) {
+        if (hitGuardRail(eventKey)) {
+            return;
+        }
         (*mCurrentSlicedBucket)[eventKey] = gauge;
     }
     for (auto& tracker : mAnomalyTrackers) {

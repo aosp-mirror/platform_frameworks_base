@@ -32,6 +32,8 @@ namespace android {
 namespace os {
 namespace statsd {
 
+const ConfigKey kConfigKey(0, "test");
+
 TEST(EventMetricProducerTest, TestNoCondition) {
     uint64_t bucketStartTimeNs = 10000000000;
     uint64_t eventStartTimeNs = bucketStartTimeNs + 1;
@@ -45,7 +47,7 @@ TEST(EventMetricProducerTest, TestNoCondition) {
 
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
 
-    EventMetricProducer eventProducer(metric, -1 /*-1 meaning no condition*/, wizard,
+    EventMetricProducer eventProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, wizard,
                                       bucketStartTimeNs);
 
     eventProducer.onMatchedLogEvent(1 /*matcher index*/, event1, false /*pulled*/);
@@ -69,7 +71,7 @@ TEST(EventMetricProducerTest, TestEventsWithNonSlicedCondition) {
 
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
 
-    EventMetricProducer eventProducer(metric, 1, wizard, bucketStartTimeNs);
+    EventMetricProducer eventProducer(kConfigKey, metric, 1, wizard, bucketStartTimeNs);
 
     eventProducer.onConditionChanged(true /*condition*/, bucketStartTimeNs);
     eventProducer.onMatchedLogEvent(1 /*matcher index*/, event1, false /*pulled*/);
@@ -111,7 +113,7 @@ TEST(EventMetricProducerTest, TestEventsWithSlicedCondition) {
 
     EXPECT_CALL(*wizard, query(_, key2)).WillOnce(Return(ConditionState::kTrue));
 
-    EventMetricProducer eventProducer(metric, 1, wizard, bucketStartTimeNs);
+    EventMetricProducer eventProducer(kConfigKey, metric, 1, wizard, bucketStartTimeNs);
 
     eventProducer.onMatchedLogEvent(1 /*matcher index*/, event1, false /*pulled*/);
     eventProducer.onMatchedLogEvent(1 /*matcher index*/, event2, false /*pulled*/);

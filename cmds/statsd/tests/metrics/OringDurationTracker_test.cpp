@@ -34,6 +34,8 @@ namespace android {
 namespace os {
 namespace statsd {
 
+const ConfigKey kConfigKey(0, "test");
+
 TEST(OringDurationTrackerTest, TestDurationOverlap) {
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
 
@@ -47,8 +49,8 @@ TEST(OringDurationTrackerTest, TestDurationOverlap) {
     uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
     uint64_t durationTimeNs = 2 * 1000;
 
-    OringDurationTracker tracker("event", wizard, 1, false, bucketStartTimeNs, bucketSizeNs, {},
-                                 buckets);
+    OringDurationTracker tracker(kConfigKey, "metric", "event", wizard, 1, false, bucketStartTimeNs,
+                                 bucketSizeNs, {}, buckets);
 
     tracker.noteStart("2:maps", true, eventStartTimeNs, key1);
     EXPECT_EQ((long long)eventStartTimeNs, tracker.mLastStartTime);
@@ -73,8 +75,8 @@ TEST(OringDurationTrackerTest, TestDurationNested) {
     uint64_t eventStartTimeNs = bucketStartTimeNs + 1;
     uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
 
-    OringDurationTracker tracker("event", wizard, 1, true, bucketStartTimeNs, bucketSizeNs, {},
-                                 buckets);
+    OringDurationTracker tracker(kConfigKey, "metric", "event", wizard, 1, true, bucketStartTimeNs,
+                                 bucketSizeNs, {}, buckets);
 
     tracker.noteStart("2:maps", true, eventStartTimeNs, key1);
     tracker.noteStart("2:maps", true, eventStartTimeNs + 10, key1);  // overlapping wl
@@ -99,8 +101,8 @@ TEST(OringDurationTrackerTest, TestStopAll) {
     uint64_t eventStartTimeNs = bucketStartTimeNs + 1;
     uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
 
-    OringDurationTracker tracker("event", wizard, 1, true, bucketStartTimeNs, bucketSizeNs, {},
-                                 buckets);
+    OringDurationTracker tracker(kConfigKey, "metric", "event", wizard, 1, true, bucketStartTimeNs,
+                                 bucketSizeNs, {}, buckets);
 
     tracker.noteStart("2:maps", true, eventStartTimeNs, key1);
     tracker.noteStart("3:maps", true, eventStartTimeNs + 10, key1);  // overlapping wl
@@ -125,8 +127,8 @@ TEST(OringDurationTrackerTest, TestCrossBucketBoundary) {
     uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
     uint64_t durationTimeNs = 2 * 1000;
 
-    OringDurationTracker tracker("event", wizard, 1, true, bucketStartTimeNs, bucketSizeNs, {},
-                                 buckets);
+    OringDurationTracker tracker(kConfigKey, "metric", "event", wizard, 1, true, bucketStartTimeNs,
+                                 bucketSizeNs, {}, buckets);
 
     tracker.noteStart("2:maps", true, eventStartTimeNs, key1);
     EXPECT_EQ((long long)eventStartTimeNs, tracker.mLastStartTime);
@@ -162,8 +164,8 @@ TEST(OringDurationTrackerTest, TestDurationConditionChange) {
     uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
     uint64_t durationTimeNs = 2 * 1000;
 
-    OringDurationTracker tracker("event", wizard, 1, false, bucketStartTimeNs, bucketSizeNs, {},
-                                 buckets);
+    OringDurationTracker tracker(kConfigKey, "metric", "event", wizard, 1, false, bucketStartTimeNs,
+                                 bucketSizeNs, {}, buckets);
 
     tracker.noteStart("2:maps", true, eventStartTimeNs, key1);
 
@@ -194,8 +196,8 @@ TEST(OringDurationTrackerTest, TestDurationConditionChange2) {
     uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
     uint64_t durationTimeNs = 2 * 1000;
 
-    OringDurationTracker tracker("event", wizard, 1, false, bucketStartTimeNs, bucketSizeNs, {},
-                                 buckets);
+    OringDurationTracker tracker(kConfigKey, "metric", "event", wizard, 1, false, bucketStartTimeNs,
+                                 bucketSizeNs, {}, buckets);
 
     tracker.noteStart("2:maps", true, eventStartTimeNs, key1);
     // condition to false; record duration 5n
@@ -225,8 +227,8 @@ TEST(OringDurationTrackerTest, TestDurationConditionChangeNested) {
     uint64_t eventStartTimeNs = bucketStartTimeNs + 1;
     uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
 
-    OringDurationTracker tracker("event", wizard, 1, true, bucketStartTimeNs, bucketSizeNs, {},
-                                 buckets);
+    OringDurationTracker tracker(kConfigKey, "metric", "event", wizard, 1, true, bucketStartTimeNs,
+                                 bucketSizeNs, {}, buckets);
 
     tracker.noteStart("2:maps", true, eventStartTimeNs, key1);
     tracker.noteStart("2:maps", true, eventStartTimeNs + 2, key1);
@@ -259,8 +261,8 @@ TEST(OringDurationTrackerTest, TestPredictAnomalyTimestamp) {
     uint64_t bucketSizeNs = 30 * NS_PER_SEC;
 
     sp<AnomalyTracker> anomalyTracker = new AnomalyTracker(alert, bucketSizeNs);
-    OringDurationTracker tracker("event", wizard, 1, true, bucketStartTimeNs, bucketSizeNs,
-                                 {anomalyTracker}, buckets);
+    OringDurationTracker tracker(kConfigKey, "metric", "event", wizard, 1, true, bucketStartTimeNs,
+                                 bucketSizeNs, {anomalyTracker}, buckets);
 
     // Nothing in the past bucket.
     tracker.noteStart("", true, eventStartTimeNs, key1);
@@ -319,8 +321,8 @@ TEST(OringDurationTrackerTest, TestAnomalyDetection) {
     uint64_t bucketSizeNs = 30 * NS_PER_SEC;
 
     sp<AnomalyTracker> anomalyTracker = new AnomalyTracker(alert, bucketSizeNs);
-    OringDurationTracker tracker("event", wizard, 1, true /*nesting*/, bucketStartTimeNs,
-                                 bucketSizeNs, {anomalyTracker}, buckets);
+    OringDurationTracker tracker(kConfigKey, "metric", "event", wizard, 1, true /*nesting*/,
+                                 bucketStartTimeNs, bucketSizeNs, {anomalyTracker}, buckets);
 
     tracker.noteStart("", true, eventStartTimeNs, key1);
     tracker.noteStop("", eventStartTimeNs + 10, false);
