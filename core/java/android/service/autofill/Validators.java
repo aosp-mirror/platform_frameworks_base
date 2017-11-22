@@ -52,6 +52,19 @@ public final class Validators {
         return new OptionalValidators(getInternalValidators(validators));
     }
 
+    /**
+     * Creates a validator that is valid only if {@code validator} is not.
+     *
+     * @throws IllegalArgumentException if {@code validator} is an instance of a class that is not
+     * provided by the Android System.
+     */
+    @NonNull
+    public static Validator not(@NonNull Validator validator) {
+        Preconditions.checkArgument(validator instanceof InternalValidator,
+                "validator not provided by Android System: " + validator);
+        return new NegationValidator((InternalValidator) validator);
+    }
+
     private static InternalValidator[] getInternalValidators(Validator[] validators) {
         Preconditions.checkArrayElementsNotNull(validators, "validators");
 
