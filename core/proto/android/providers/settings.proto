@@ -281,6 +281,7 @@ message GlobalSettingsProto {
     optional SettingProto bluetooth_pbap_client_priority_prefix = 209;
     optional SettingProto bluetooth_sap_priority_prefix = 210;
     optional SettingProto bluetooth_pan_priority_prefix = 211;
+    optional SettingProto bluetooth_hearing_aid_priority_prefix = 345;
     optional SettingProto activity_manager_constants = 317;
     optional SettingProto device_idle_constants = 212;
     optional SettingProto device_idle_constants_watch = 213;
@@ -387,7 +388,7 @@ message GlobalSettingsProto {
     optional SettingProto enable_deletion_helper_no_threshold_toggle = 340;
     optional SettingProto notification_snooze_options = 341;
 
-    // Next tag = 345;
+    // Next tag = 346;
 }
 
 message SecureSettingsProto {
