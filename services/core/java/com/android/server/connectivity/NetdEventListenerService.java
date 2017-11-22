@@ -21,6 +21,7 @@ import static android.util.TimeUtils.NANOS_PER_MS;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.INetdEventCallback;
+import android.net.MacAddress;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.metrics.ConnectStats;
@@ -242,7 +243,7 @@ public class NetdEventListenerService extends INetdEventListener.Stub {
         event.timestampMs = timestampMs;
         event.uid = uid;
         event.ethertype = ethertype;
-        event.dstHwAddr = dstHw;
+        event.dstHwAddr = new MacAddress(dstHw);
         event.srcIp = srcIp;
         event.dstIp = dstIp;
         event.ipNextHeader = ipNextHeader;
