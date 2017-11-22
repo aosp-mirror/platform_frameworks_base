@@ -19,6 +19,9 @@
 
 #include "AnomalyTracker.h"
 
+#include <android/os/IIncidentManager.h>
+#include <android/os/IncidentReportArgs.h>
+#include <binder/IServiceManager.h>
 #include <time.h>
 
 namespace android {
@@ -213,7 +216,7 @@ void AnomalyTracker::declareAnomaly(const uint64_t& timestampNs) {
             // TODO: Can construct a name based on the criteria (and/or relay the criteria).
             ALOGW("An anomaly (nameless) has occurred! Informing incidentd.");
         }
-        // TODO: informIncidentd();
+        informIncidentd();
     } else {
         ALOGW("An anomaly has occurred! (But informing incidentd not requested.)");
     }
@@ -312,6 +315,29 @@ void AnomalyTracker::informAlarmsFired(const uint64_t& timestampNs,
         mAlarms.erase(kv.first);
         firedAlarms.erase(kv.second); // No one else can also own it, so we're done with it.
     }
+}
+
+void AnomalyTracker::informIncidentd() {
+    VLOG("informIncidentd called.");
+    if (!mAlert.has_incidentd_details()) {
+        ALOGE("Attempted to call incidentd without any incidentd_details.");
+        return;
+    }
+    sp<IIncidentManager> service = interface_cast<IIncidentManager>(
+            defaultServiceManager()->getService(android::String16("incident")));
+    if (service == NULL) {
+        ALOGW("Couldn't get the incident service.");
+        return;
+    }
+
+    IncidentReportArgs incidentReport;
+    const Alert::IncidentdDetails& details = mAlert.incidentd_details();
+    for (int i = 0; i < details.section_size(); i++) {
+        incidentReport.addSection(details.section(i));
+    }
+    // TODO: Pass in mAlert.name() into the addHeader?
+
+    service->reportIncident(incidentReport);
 }
 
 }  // namespace statsd
