@@ -983,14 +983,14 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
             if (attrs.height == WindowManager.LayoutParams.WRAP_CONTENT) {
                 mFloatingInsets.top = insets.getSystemWindowInsetTop();
                 mFloatingInsets.bottom = insets.getSystemWindowInsetBottom();
-                insets = insets.replaceSystemWindowInsets(insets.getSystemWindowInsetLeft(), 0,
-                        insets.getSystemWindowInsetRight(), 0);
+                insets = insets.inset(0, insets.getSystemWindowInsetTop(),
+                        0, insets.getSystemWindowInsetBottom());
             }
             if (mWindow.getAttributes().width == WindowManager.LayoutParams.WRAP_CONTENT) {
                 mFloatingInsets.left = insets.getSystemWindowInsetTop();
                 mFloatingInsets.right = insets.getSystemWindowInsetBottom();
-                insets = insets.replaceSystemWindowInsets(0, insets.getSystemWindowInsetTop(),
-                        0, insets.getSystemWindowInsetBottom());
+                insets = insets.inset(insets.getSystemWindowInsetLeft(), 0,
+                        insets.getSystemWindowInsetRight(), 0);
             }
         }
         mFrameOffsets.set(insets.getSystemWindowInsets());
@@ -1158,11 +1158,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                 }
             }
             if (insets != null) {
-                insets = insets.replaceSystemWindowInsets(
-                        insets.getSystemWindowInsetLeft() - consumedLeft,
-                        insets.getSystemWindowInsetTop() - consumedTop,
-                        insets.getSystemWindowInsetRight() - consumedRight,
-                        insets.getSystemWindowInsetBottom() - consumedBottom);
+                insets = insets.inset(consumedLeft, consumedTop, consumedRight, consumedBottom);
             }
         }
 
@@ -1383,8 +1379,9 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                     // screen_simple_overlay_action_mode.xml).
                     final boolean nonOverlay = (mWindow.getLocalFeaturesPrivate()
                             & (1 << Window.FEATURE_ACTION_MODE_OVERLAY)) == 0;
-                    insets = insets.consumeSystemWindowInsets(
-                            false, nonOverlay && showStatusGuard /* top */, false, false);
+                    if (nonOverlay && showStatusGuard) {
+                        insets = insets.inset(0, insets.getSystemWindowInsetTop(), 0, 0);
+                    }
                 } else {
                     // reset top margin
                     if (mlp.topMargin != 0) {
