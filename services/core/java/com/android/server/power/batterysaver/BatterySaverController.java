@@ -49,7 +49,7 @@ import java.util.ArrayList;
 public class BatterySaverController implements BatterySaverPolicyListener {
     static final String TAG = "BatterySaverController";
 
-    static final boolean DEBUG = false; // DO NOT MERGE WITH TRUE
+    static final boolean DEBUG = BatterySaverPolicy.DEBUG;
 
     private final Object mLock = new Object();
     private final Context mContext;
@@ -171,6 +171,13 @@ public class BatterySaverController implements BatterySaverPolicyListener {
         synchronized (mLock) {
             return mEnabled;
         }
+    }
+
+    /**
+     * @return true if launch boost should currently be disabled.
+     */
+    public boolean isLaunchBoostDisabled() {
+        return isEnabled() && mBatterySaverPolicy.isLaunchBoostDisabled();
     }
 
     /**

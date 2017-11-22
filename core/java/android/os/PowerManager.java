@@ -387,6 +387,12 @@ public final class PowerManager {
     public static final int GO_TO_SLEEP_REASON_SLEEP_BUTTON = 6;
 
     /**
+     * Go to sleep reason code: Going to sleep by request of an accessibility service
+     * @hide
+     */
+    public static final int GO_TO_SLEEP_REASON_ACCESSIBILITY = 7;
+
+    /**
      * Go to sleep flag: Skip dozing state and directly go to full sleep.
      * @hide
      */

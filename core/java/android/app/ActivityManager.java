@@ -519,11 +519,15 @@ public class ActivityManager {
      * process that contains activities. */
     public static final int PROCESS_STATE_CACHED_ACTIVITY_CLIENT = 16;
 
+    /** @hide Process is being cached for later use and has an activity that corresponds
+     * to an existing recent task. */
+    public static final int PROCESS_STATE_CACHED_RECENT = 17;
+
     /** @hide Process is being cached for later use and is empty. */
-    public static final int PROCESS_STATE_CACHED_EMPTY = 17;
+    public static final int PROCESS_STATE_CACHED_EMPTY = 18;
 
     /** @hide Process does not exist. */
-    public static final int PROCESS_STATE_NONEXISTENT = 18;
+    public static final int PROCESS_STATE_NONEXISTENT = 19;
 
     // NOTE: If PROCESS_STATEs are added or changed, then new fields must be added
     // to frameworks/base/core/proto/android/app/activitymanager.proto and the following method must

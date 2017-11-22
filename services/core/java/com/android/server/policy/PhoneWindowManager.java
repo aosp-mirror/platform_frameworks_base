@@ -304,6 +304,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final int LONG_PRESS_POWER_GLOBAL_ACTIONS = 1;
     static final int LONG_PRESS_POWER_SHUT_OFF = 2;
     static final int LONG_PRESS_POWER_SHUT_OFF_NO_CONFIRM = 3;
+    static final int LONG_PRESS_POWER_GO_TO_VOICE_ASSIST = 4;
+
+    static final int VERY_LONG_PRESS_POWER_NOTHING = 0;
+    static final int VERY_LONG_PRESS_POWER_GLOBAL_ACTIONS = 1;
 
     static final int MULTI_PRESS_POWER_NOTHING = 0;
     static final int MULTI_PRESS_POWER_THEATER_MODE = 1;
@@ -569,6 +573,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     boolean mLidControlsSleep;
     int mShortPressOnPowerBehavior;
     int mLongPressOnPowerBehavior;
+    int mVeryLongPressOnPowerBehavior;
     int mDoublePressOnPowerBehavior;
     int mTriplePressOnPowerBehavior;
     int mLongPressOnBackBehavior;
@@ -586,6 +591,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     boolean mHasSoftInput = false;
     boolean mTranslucentDecorEnabled = true;
     boolean mUseTvRouting;
+    int mVeryLongPressTimeout;
 
     private boolean mHandleVolumeKeysInWM;
 
@@ -796,6 +802,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private static final int MSG_HANDLE_ALL_APPS = 26;
     private static final int MSG_LAUNCH_ASSIST = 27;
     private static final int MSG_LAUNCH_ASSIST_LONG_PRESS = 28;
+    private static final int MSG_POWER_VERY_LONG_PRESS = 29;
 
     private static final int MSG_REQUEST_TRANSIENT_BARS_ARG_STATUS = 0;
     private static final int MSG_REQUEST_TRANSIENT_BARS_ARG_NAVIGATION = 1;
@@ -854,6 +861,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     break;
                 case MSG_POWER_LONG_PRESS:
                     powerLongPress();
+                    break;
+                case MSG_POWER_VERY_LONG_PRESS:
+                    powerVeryLongPress();
                     break;
                 case MSG_UPDATE_DREAMING_SLEEP_TOKEN:
                     updateDreamingSleepToken(msg.arg1 != 0);
@@ -1299,6 +1309,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     msg.setAsynchronous(true);
                     mHandler.sendMessageDelayed(msg,
                             ViewConfiguration.get(mContext).getDeviceGlobalActionKeyTimeout());
+
+                    if (hasVeryLongPressOnPowerBehavior()) {
+                        Message longMsg = mHandler.obtainMessage(MSG_POWER_VERY_LONG_PRESS);
+                        longMsg.setAsynchronous(true);
+                        mHandler.sendMessageDelayed(longMsg, mVeryLongPressTimeout);
+                    }
                 }
             } else {
                 wakeUpFromPowerKey(event.getDownTime());
@@ -1308,6 +1324,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     msg.setAsynchronous(true);
                     mHandler.sendMessageDelayed(msg,
                             ViewConfiguration.get(mContext).getDeviceGlobalActionKeyTimeout());
+
+                    if (hasVeryLongPressOnPowerBehavior()) {
+                        Message longMsg = mHandler.obtainMessage(MSG_POWER_VERY_LONG_PRESS);
+                        longMsg.setAsynchronous(true);
+                        mHandler.sendMessageDelayed(longMsg, mVeryLongPressTimeout);
+                    }
+
                     mBeganFromNonInteractive = true;
                 } else {
                     final int maxCount = getMaxMultiPressPowerCount();
@@ -1368,6 +1391,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (!mPowerKeyHandled) {
             mPowerKeyHandled = true;
             mHandler.removeMessages(MSG_POWER_LONG_PRESS);
+        }
+        if (hasVeryLongPressOnPowerBehavior()) {
+            mHandler.removeMessages(MSG_POWER_VERY_LONG_PRESS);
         }
     }
 
@@ -1516,6 +1542,29 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             sendCloseSystemWindows(SYSTEM_DIALOG_REASON_GLOBAL_ACTIONS);
             mWindowManagerFuncs.shutdown(behavior == LONG_PRESS_POWER_SHUT_OFF);
             break;
+        case LONG_PRESS_POWER_GO_TO_VOICE_ASSIST:
+            mPowerKeyHandled = true;
+            performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false);
+            final boolean keyguardActive = mKeyguardDelegate == null
+                    ? false
+                    : mKeyguardDelegate.isShowing();
+            if (!keyguardActive) {
+                Intent intent = new Intent(Intent.ACTION_VOICE_ASSIST);
+                startActivityAsUser(intent, UserHandle.CURRENT_OR_SELF);
+            }
+            break;
+        }
+    }
+
+    private void powerVeryLongPress() {
+        switch (mVeryLongPressOnPowerBehavior) {
+        case VERY_LONG_PRESS_POWER_NOTHING:
+            break;
+        case VERY_LONG_PRESS_POWER_GLOBAL_ACTIONS:
+            mPowerKeyHandled = true;
+            performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false);
+            showGlobalActionsInternal();
+            break;
         }
     }
 
@@ -1572,6 +1621,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     private boolean hasLongPressOnPowerBehavior() {
         return getResolvedLongPressOnPowerBehavior() != LONG_PRESS_POWER_NOTHING;
+    }
+
+    private boolean hasVeryLongPressOnPowerBehavior() {
+        return mVeryLongPressOnPowerBehavior != VERY_LONG_PRESS_POWER_NOTHING;
     }
 
     private boolean hasLongPressOnBackBehavior() {
@@ -1979,12 +2032,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 com.android.internal.R.integer.config_shortPressOnPowerBehavior);
         mLongPressOnPowerBehavior = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_longPressOnPowerBehavior);
+        mVeryLongPressOnPowerBehavior = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_veryLongPressOnPowerBehavior);
         mDoublePressOnPowerBehavior = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_doublePressOnPowerBehavior);
         mTriplePressOnPowerBehavior = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_triplePressOnPowerBehavior);
         mShortPressOnSleepBehavior = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_shortPressOnSleepBehavior);
+        mVeryLongPressTimeout = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_veryLongPressTimeout);
 
         mUseTvRouting = AudioSystem.getPlatformType(mContext) == AudioSystem.PLATFORM_TELEVISION;
 
@@ -8193,6 +8250,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 pw.print("mLongPressOnPowerBehavior=");
                 pw.println(longPressOnPowerBehaviorToString(mLongPressOnPowerBehavior));
         pw.print(prefix);
+                pw.print("mVeryLongPressOnPowerBehavior=");
+                pw.println(veryLongPressOnPowerBehaviorToString(mVeryLongPressOnPowerBehavior));
+        pw.print(prefix);
                 pw.print("mDoublePressOnPowerBehavior=");
                 pw.println(multiPressOnPowerBehaviorToString(mDoublePressOnPowerBehavior));
         pw.print(prefix);
@@ -8445,6 +8505,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 return Integer.toString(behavior);
         }
     }
+
+    private static String veryLongPressOnPowerBehaviorToString(int behavior) {
+        switch (behavior) {
+            case VERY_LONG_PRESS_POWER_NOTHING:
+                return "VERY_LONG_PRESS_POWER_NOTHING";
+            case VERY_LONG_PRESS_POWER_GLOBAL_ACTIONS:
+                return "VERY_LONG_PRESS_POWER_GLOBAL_ACTIONS";
+            default:
+                return Integer.toString(behavior);
+        }
+    }
+
     private static String multiPressOnPowerBehaviorToString(int behavior) {
         switch (behavior) {
             case MULTI_PRESS_POWER_NOTHING:

@@ -1780,7 +1780,7 @@ public final class Parcel {
             final int truncatedSize = Math.min(stackTrace.length, 5);
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < truncatedSize; i++) {
-                sb.append("\tat ").append(stackTrace[i]);
+                sb.append("\tat ").append(stackTrace[i]).append('\n');
             }
             writeString(sb.toString());
             final int payloadPosition = dataPosition();

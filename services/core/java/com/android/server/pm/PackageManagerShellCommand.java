@@ -264,7 +264,7 @@ class PackageManagerShellCommand extends ShellCommand {
                 PackageLite pkgLite = new PackageLite(null, baseApk, null, null, null, null,
                         null, null);
                 params.sessionParams.setSize(PackageHelper.calculateInstalledSize(
-                        pkgLite, params.sessionParams.abiOverride));
+                        pkgLite, params.sessionParams.abiOverride, fd.getFileDescriptor()));
             } catch (PackageParserException | IOException e) {
                 getErrPrintWriter().println("Error: Failed to parse APK file: " + inPath);
                 throw new IllegalArgumentException(
@@ -1169,9 +1169,15 @@ class PackageManagerShellCommand extends ShellCommand {
         }
 
         List<String> failedPackages = new ArrayList<>();
+        int index = 0;
         for (String packageName : packageNames) {
             if (clearProfileData) {
                 mInterface.clearApplicationProfileData(packageName);
+            }
+
+            if (allPackages) {
+                pw.println(++index + "/" + packageNames.size() + ": " + packageName);
+                pw.flush();
             }
 
             boolean result = secondaryDex

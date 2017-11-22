@@ -16,14 +16,19 @@
 
 package com.android.server.job.controllers;
 
+import android.app.job.JobInfo;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.os.PowerManager;
 import android.os.UserHandle;
 import android.util.ArraySet;
 import android.util.Slog;
+import android.util.SparseBooleanArray;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.server.DeviceIdleController;
@@ -42,11 +47,22 @@ public final class DeviceIdleJobsController extends StateController {
 
     private static final String LOG_TAG = "DeviceIdleJobsController";
     private static final boolean LOG_DEBUG = false;
+    private static final long BACKGROUND_JOBS_DELAY = 3000;
+
+    static final int PROCESS_BACKGROUND_JOBS = 1;
 
     // Singleton factory
     private static Object sCreationLock = new Object();
     private static DeviceIdleJobsController sController;
 
+    /**
+     * These are jobs added with a special flag to indicate that they should be exempted from doze
+     * when the app is temp whitelisted or in the foreground.
+     */
+    private final ArraySet<JobStatus> mAllowInIdleJobs;
+    private final SparseBooleanArray mForegroundUids;
+    private final DeviceIdleUpdateFunctor mDeviceIdleUpdateFunctor;
+    private final DeviceIdleJobsDelayHandler mHandler;
     private final JobSchedulerService mJobSchedulerService;
     private final PowerManager mPowerManager;
     private final DeviceIdleController.LocalService mLocalDeviceIdleController;
@@ -57,14 +73,6 @@ public final class DeviceIdleJobsController extends StateController {
     private boolean mDeviceIdleMode;
     private int[] mDeviceIdleWhitelistAppIds;
     private int[] mPowerSaveTempWhitelistAppIds;
-    // These jobs were added when the app was in temp whitelist, these should be exempted from doze
-    private final ArraySet<JobStatus> mTempWhitelistedJobs;
-
-    final JobStore.JobStatusFunctor mUpdateFunctor = new JobStore.JobStatusFunctor() {
-        @Override public void process(JobStatus jobStatus) {
-            updateTaskStateLocked(jobStatus);
-        }
-    };
 
     /**
      * Returns a singleton for the DeviceIdleJobsController
@@ -108,8 +116,8 @@ public final class DeviceIdleJobsController extends StateController {
                                     + Arrays.toString(mPowerSaveTempWhitelistAppIds));
                         }
                         boolean changed = false;
-                        for (int i = 0; i < mTempWhitelistedJobs.size(); i ++) {
-                            changed |= updateTaskStateLocked(mTempWhitelistedJobs.valueAt(i));
+                        for (int i = 0; i < mAllowInIdleJobs.size(); i++) {
+                            changed |= updateTaskStateLocked(mAllowInIdleJobs.valueAt(i));
                         }
                         if (changed) {
                             mStateChangedListener.onControllerStateChanged();
@@ -125,6 +133,7 @@ public final class DeviceIdleJobsController extends StateController {
         super(jobSchedulerService, context, lock);
 
         mJobSchedulerService = jobSchedulerService;
+        mHandler = new DeviceIdleJobsDelayHandler(context.getMainLooper());
         // Register for device idle mode changes
         mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         mLocalDeviceIdleController =
@@ -132,7 +141,9 @@ public final class DeviceIdleJobsController extends StateController {
         mDeviceIdleWhitelistAppIds = mLocalDeviceIdleController.getPowerSaveWhitelistUserAppIds();
         mPowerSaveTempWhitelistAppIds =
                 mLocalDeviceIdleController.getPowerSaveTempWhitelistAppIds();
-        mTempWhitelistedJobs = new ArraySet<>();
+        mDeviceIdleUpdateFunctor = new DeviceIdleUpdateFunctor();
+        mAllowInIdleJobs = new ArraySet<>();
+        mForegroundUids = new SparseBooleanArray();
         final IntentFilter filter = new IntentFilter();
         filter.addAction(PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED);
         filter.addAction(PowerManager.ACTION_LIGHT_DEVICE_IDLE_MODE_CHANGED);
@@ -150,7 +161,20 @@ public final class DeviceIdleJobsController extends StateController {
             }
             mDeviceIdleMode = enabled;
             if (LOG_DEBUG) Slog.d(LOG_TAG, "mDeviceIdleMode=" + mDeviceIdleMode);
-            mJobSchedulerService.getJobStore().forEachJob(mUpdateFunctor);
+            if (enabled) {
+                mHandler.removeMessages(PROCESS_BACKGROUND_JOBS);
+                mJobSchedulerService.getJobStore().forEachJob(mDeviceIdleUpdateFunctor);
+            } else {
+                // When coming out of doze, process all foreground uids immediately, while others
+                // will be processed after a delay of 3 seconds.
+                for (int i = 0; i < mForegroundUids.size(); i++) {
+                    if (mForegroundUids.valueAt(i)) {
+                        mJobSchedulerService.getJobStore().forEachJobForSourceUid(
+                                mForegroundUids.keyAt(i), mDeviceIdleUpdateFunctor);
+                    }
+                }
+                mHandler.sendEmptyMessageDelayed(PROCESS_BACKGROUND_JOBS, BACKGROUND_JOBS_DELAY);
+            }
         }
         // Inform the job scheduler service about idle mode changes
         if (changed) {
@@ -159,11 +183,30 @@ public final class DeviceIdleJobsController extends StateController {
     }
 
     /**
+     *  Called by jobscheduler service to report uid state changes between active and idle
+     */
+    public void setUidActiveLocked(int uid, boolean active) {
+        final boolean changed = (active != mForegroundUids.get(uid));
+        if (!changed) {
+            return;
+        }
+        if (LOG_DEBUG) {
+            Slog.d(LOG_TAG, "uid " + uid + " going " + (active ? "active" : "inactive"));
+        }
+        mForegroundUids.put(uid, active);
+        mDeviceIdleUpdateFunctor.mChanged = false;
+        mJobSchedulerService.getJobStore().forEachJobForSourceUid(uid, mDeviceIdleUpdateFunctor);
+        if (mDeviceIdleUpdateFunctor.mChanged) {
+            mStateChangedListener.onControllerStateChanged();
+        }
+    }
+
+    /**
      * Checks if the given job's scheduling app id exists in the device idle user whitelist.
      */
     boolean isWhitelistedLocked(JobStatus job) {
-        return ArrayUtils.contains(mDeviceIdleWhitelistAppIds,
-                UserHandle.getAppId(job.getSourceUid()));
+        return Arrays.binarySearch(mDeviceIdleWhitelistAppIds,
+                UserHandle.getAppId(job.getSourceUid())) >= 0;
     }
 
     /**
@@ -175,31 +218,33 @@ public final class DeviceIdleJobsController extends StateController {
     }
 
     private boolean updateTaskStateLocked(JobStatus task) {
-        final boolean whitelisted = isWhitelistedLocked(task)
-                || (mTempWhitelistedJobs.contains(task) && isTempWhitelistedLocked(task));
-        final boolean enableTask = !mDeviceIdleMode || whitelisted;
+        final boolean allowInIdle = ((task.getFlags()&JobInfo.FLAG_IMPORTANT_WHILE_FOREGROUND) != 0)
+                && (mForegroundUids.get(task.getSourceUid()) || isTempWhitelistedLocked(task));
+        final boolean whitelisted = isWhitelistedLocked(task);
+        final boolean enableTask = !mDeviceIdleMode || whitelisted || allowInIdle;
         return task.setDeviceNotDozingConstraintSatisfied(enableTask, whitelisted);
     }
 
     @Override
     public void maybeStartTrackingJobLocked(JobStatus jobStatus, JobStatus lastJob) {
-        if (isTempWhitelistedLocked(jobStatus)) {
-            mTempWhitelistedJobs.add(jobStatus);
-            jobStatus.setDeviceNotDozingConstraintSatisfied(true, true);
-        } else {
-            updateTaskStateLocked(jobStatus);
+        if ((jobStatus.getFlags()&JobInfo.FLAG_IMPORTANT_WHILE_FOREGROUND) != 0) {
+            mAllowInIdleJobs.add(jobStatus);
         }
+        updateTaskStateLocked(jobStatus);
     }
 
     @Override
     public void maybeStopTrackingJobLocked(JobStatus jobStatus, JobStatus incomingJob,
             boolean forUpdate) {
-        mTempWhitelistedJobs.remove(jobStatus);
+        if ((jobStatus.getFlags()&JobInfo.FLAG_IMPORTANT_WHILE_FOREGROUND) != 0) {
+            mAllowInIdleJobs.remove(jobStatus);
+        }
     }
 
     @Override
     public void dumpControllerStateLocked(final PrintWriter pw, final int filterUid) {
         pw.println("DeviceIdleJobsController");
+        pw.println("mDeviceIdleMode=" + mDeviceIdleMode);
         mJobSchedulerService.getJobStore().forEachJob(new JobStore.JobStatusFunctor() {
             @Override public void process(JobStatus jobStatus) {
                 if (!jobStatus.shouldDump(filterUid)) {
@@ -217,8 +262,42 @@ public final class DeviceIdleJobsController extends StateController {
                 if (jobStatus.dozeWhitelisted) {
                     pw.print(" WHITELISTED");
                 }
+                if (mAllowInIdleJobs.contains(jobStatus)) {
+                    pw.print(" ALLOWED_IN_DOZE");
+                }
                 pw.println();
             }
         });
+    }
+
+    final class DeviceIdleUpdateFunctor implements JobStore.JobStatusFunctor {
+        boolean mChanged;
+
+        @Override
+        public void process(JobStatus jobStatus) {
+            mChanged |= updateTaskStateLocked(jobStatus);
+        }
+    }
+
+    final class DeviceIdleJobsDelayHandler extends Handler {
+        public DeviceIdleJobsDelayHandler(Looper looper) {
+            super(looper);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case PROCESS_BACKGROUND_JOBS:
+                    // Just process all the jobs, the ones in foreground should already be running.
+                    synchronized (mLock) {
+                        mDeviceIdleUpdateFunctor.mChanged = false;
+                        mJobSchedulerService.getJobStore().forEachJob(mDeviceIdleUpdateFunctor);
+                        if (mDeviceIdleUpdateFunctor.mChanged) {
+                            mStateChangedListener.onControllerStateChanged();
+                        }
+                    }
+                    break;
+            }
+        }
     }
 }

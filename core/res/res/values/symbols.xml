@@ -419,6 +419,8 @@
   <java-symbol type="integer" name="config_extraFreeKbytesAbsolute" />
   <java-symbol type="integer" name="config_immersive_mode_confirmation_panic" />
   <java-symbol type="integer" name="config_longPressOnPowerBehavior" />
+  <java-symbol type="integer" name="config_veryLongPressOnPowerBehavior" />
+  <java-symbol type="integer" name="config_veryLongPressTimeout" />
   <java-symbol type="integer" name="config_longPressOnBackBehavior" />
   <java-symbol type="integer" name="config_backPanicBehavior" />
   <java-symbol type="integer" name="config_lowMemoryKillerMinFreeKbytesAdjust" />

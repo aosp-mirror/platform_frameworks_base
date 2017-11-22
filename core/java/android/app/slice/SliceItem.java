@@ -16,8 +16,8 @@
 
 package android.app.slice;
 
-import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.StringDef;
 import android.app.PendingIntent;
 import android.app.RemoteInput;
 import android.graphics.drawable.Icon;
@@ -38,13 +38,13 @@ import java.util.List;
  *
  * A SliceItem a piece of content and some hints about what that content
  * means or how it should be displayed. The types of content can be:
- * <li>{@link #TYPE_SLICE}</li>
- * <li>{@link #TYPE_TEXT}</li>
- * <li>{@link #TYPE_IMAGE}</li>
- * <li>{@link #TYPE_ACTION}</li>
- * <li>{@link #TYPE_COLOR}</li>
- * <li>{@link #TYPE_TIMESTAMP}</li>
- * <li>{@link #TYPE_REMOTE_INPUT}</li>
+ * <li>{@link #FORMAT_SLICE}</li>
+ * <li>{@link #FORMAT_TEXT}</li>
+ * <li>{@link #FORMAT_IMAGE}</li>
+ * <li>{@link #FORMAT_ACTION}</li>
+ * <li>{@link #FORMAT_COLOR}</li>
+ * <li>{@link #FORMAT_TIMESTAMP}</li>
+ * <li>{@link #FORMAT_REMOTE_INPUT}</li>
  *
  * The hints that a {@link SliceItem} are a set of strings which annotate
  * the content. The hints that are guaranteed to be understood by the system
@@ -55,68 +55,68 @@ public final class SliceItem implements Parcelable {
     /**
      * @hide
      */
-    @IntDef({TYPE_SLICE, TYPE_TEXT, TYPE_IMAGE, TYPE_ACTION, TYPE_COLOR,
-            TYPE_TIMESTAMP, TYPE_REMOTE_INPUT})
+    @StringDef({FORMAT_SLICE, FORMAT_TEXT, FORMAT_IMAGE, FORMAT_ACTION, FORMAT_COLOR,
+            FORMAT_TIMESTAMP, FORMAT_REMOTE_INPUT})
     public @interface SliceType {}
 
     /**
      * A {@link SliceItem} that contains a {@link Slice}
      */
-    public static final int TYPE_SLICE        = 1;
+    public static final String FORMAT_SLICE = "slice";
     /**
      * A {@link SliceItem} that contains a {@link CharSequence}
      */
-    public static final int TYPE_TEXT         = 2;
+    public static final String FORMAT_TEXT = "text";
     /**
      * A {@link SliceItem} that contains an {@link Icon}
      */
-    public static final int TYPE_IMAGE        = 3;
+    public static final String FORMAT_IMAGE = "image";
     /**
      * A {@link SliceItem} that contains a {@link PendingIntent}
      *
      * Note: Actions contain 2 pieces of data, In addition to the pending intent, the
      * item contains a {@link Slice} that the action applies to.
      */
-    public static final int TYPE_ACTION       = 4;
-    /**
-     * @hide This isn't final
-     */
-    public static final int TYPE_REMOTE_VIEW  = 5;
+    public static final String FORMAT_ACTION = "action";
     /**
      * A {@link SliceItem} that contains a Color int.
      */
-    public static final int TYPE_COLOR        = 6;
+    public static final String FORMAT_COLOR = "color";
     /**
      * A {@link SliceItem} that contains a timestamp.
      */
-    public static final int TYPE_TIMESTAMP    = 8;
+    public static final String FORMAT_TIMESTAMP = "timestamp";
     /**
      * A {@link SliceItem} that contains a {@link RemoteInput}.
      */
-    public static final int TYPE_REMOTE_INPUT = 9;
+    public static final String FORMAT_REMOTE_INPUT = "input";
 
     /**
      * @hide
      */
     protected @Slice.SliceHint
     String[] mHints;
-    private final int mType;
+    private final String mFormat;
+    private final String mSubType;
     private final Object mObj;
 
     /**
      * @hide
      */
-    public SliceItem(Object obj, @SliceType int type, @Slice.SliceHint String[] hints) {
+    public SliceItem(Object obj, @SliceType String format, String subType,
+            @Slice.SliceHint String[] hints) {
         mHints = hints;
-        mType = type;
+        mFormat = format;
+        mSubType = subType;
         mObj = obj;
     }
 
     /**
      * @hide
      */
-    public SliceItem(PendingIntent intent, Slice slice, int type, @Slice.SliceHint String[] hints) {
-        this(new Pair<>(intent, slice), type, hints);
+    public SliceItem(PendingIntent intent, Slice slice, String format, String subType,
+            @Slice.SliceHint String[] hints) {
+        this(new Pair<>(intent, slice), format, subType, hints);
     }
 
     /**
@@ -141,26 +141,51 @@ public final class SliceItem implements Parcelable {
         ArrayUtils.removeElement(String.class, mHints, hint);
     }
 
-    public @SliceType int getType() {
-        return mType;
+    /**
+     * Get the format of this SliceItem.
+     * <p>
+     * The format will be one of the following types supported by the platform:
+     * <li>{@link #FORMAT_SLICE}</li>
+     * <li>{@link #FORMAT_TEXT}</li>
+     * <li>{@link #FORMAT_IMAGE}</li>
+     * <li>{@link #FORMAT_ACTION}</li>
+     * <li>{@link #FORMAT_COLOR}</li>
+     * <li>{@link #FORMAT_TIMESTAMP}</li>
+     * <li>{@link #FORMAT_REMOTE_INPUT}</li>
+     * @see #getSubType() ()
+     */
+    public String getFormat() {
+        return mFormat;
     }
 
     /**
-     * @return The text held by this {@link #TYPE_TEXT} SliceItem
+     * Get the sub-type of this SliceItem.
+     * <p>
+     * Subtypes provide additional information about the type of this information beyond basic
+     * interpretations inferred by {@link #getFormat()}. For example a slice may contain
+     * many {@link #FORMAT_TEXT} items, but only some of them may be {@link Slice#SUBTYPE_MESSAGE}.
+     * @see #getFormat()
+     */
+    public String getSubType() {
+        return mSubType;
+    }
+
+    /**
+     * @return The text held by this {@link #FORMAT_TEXT} SliceItem
      */
     public CharSequence getText() {
         return (CharSequence) mObj;
     }
 
     /**
-     * @return The icon held by this {@link #TYPE_IMAGE} SliceItem
+     * @return The icon held by this {@link #FORMAT_IMAGE} SliceItem
      */
     public Icon getIcon() {
         return (Icon) mObj;
     }
 
     /**
-     * @return The pending intent held by this {@link #TYPE_ACTION} SliceItem
+     * @return The pending intent held by this {@link #FORMAT_ACTION} SliceItem
      */
     public PendingIntent getAction() {
         return ((Pair<PendingIntent, Slice>) mObj).first;
@@ -174,31 +199,31 @@ public final class SliceItem implements Parcelable {
     }
 
     /**
-     * @return The remote input held by this {@link #TYPE_REMOTE_INPUT} SliceItem
+     * @return The remote input held by this {@link #FORMAT_REMOTE_INPUT} SliceItem
      */
     public RemoteInput getRemoteInput() {
         return (RemoteInput) mObj;
     }
 
     /**
-     * @return The color held by this {@link #TYPE_COLOR} SliceItem
+     * @return The color held by this {@link #FORMAT_COLOR} SliceItem
      */
     public int getColor() {
         return (Integer) mObj;
     }
 
     /**
-     * @return The slice held by this {@link #TYPE_ACTION} or {@link #TYPE_SLICE} SliceItem
+     * @return The slice held by this {@link #FORMAT_ACTION} or {@link #FORMAT_SLICE} SliceItem
      */
     public Slice getSlice() {
-        if (getType() == TYPE_ACTION) {
+        if (getFormat() == FORMAT_ACTION) {
             return ((Pair<PendingIntent, Slice>) mObj).second;
         }
         return (Slice) mObj;
     }
 
     /**
-     * @return The timestamp held by this {@link #TYPE_TIMESTAMP} SliceItem
+     * @return The timestamp held by this {@link #FORMAT_TIMESTAMP} SliceItem
      */
     public long getTimestamp() {
         return (Long) mObj;
@@ -217,8 +242,9 @@ public final class SliceItem implements Parcelable {
      */
     public SliceItem(Parcel in) {
         mHints = in.readStringArray();
-        mType = in.readInt();
-        mObj = readObj(mType, in);
+        mFormat = in.readString();
+        mSubType = in.readString();
+        mObj = readObj(mFormat, in);
     }
 
     @Override
@@ -229,8 +255,9 @@ public final class SliceItem implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeStringArray(mHints);
-        dest.writeInt(mType);
-        writeObj(dest, flags, mObj, mType);
+        dest.writeString(mFormat);
+        dest.writeString(mSubType);
+        writeObj(dest, flags, mObj, mFormat);
     }
 
     /**
@@ -259,49 +286,54 @@ public final class SliceItem implements Parcelable {
         return false;
     }
 
-    private void writeObj(Parcel dest, int flags, Object obj, int type) {
-        switch (type) {
-            case TYPE_SLICE:
-            case TYPE_REMOTE_VIEW:
-            case TYPE_IMAGE:
-            case TYPE_REMOTE_INPUT:
+    private static String getBaseType(String type) {
+        int index = type.indexOf('/');
+        if (index >= 0) {
+            return type.substring(0, index);
+        }
+        return type;
+    }
+
+    private static void writeObj(Parcel dest, int flags, Object obj, String type) {
+        switch (getBaseType(type)) {
+            case FORMAT_SLICE:
+            case FORMAT_IMAGE:
+            case FORMAT_REMOTE_INPUT:
                 ((Parcelable) obj).writeToParcel(dest, flags);
                 break;
-            case TYPE_ACTION:
+            case FORMAT_ACTION:
                 ((Pair<PendingIntent, Slice>) obj).first.writeToParcel(dest, flags);
                 ((Pair<PendingIntent, Slice>) obj).second.writeToParcel(dest, flags);
                 break;
-            case TYPE_TEXT:
-                TextUtils.writeToParcel((CharSequence) mObj, dest, flags);
+            case FORMAT_TEXT:
+                TextUtils.writeToParcel((CharSequence) obj, dest, flags);
                 break;
-            case TYPE_COLOR:
-                dest.writeInt((Integer) mObj);
+            case FORMAT_COLOR:
+                dest.writeInt((Integer) obj);
                 break;
-            case TYPE_TIMESTAMP:
-                dest.writeLong((Long) mObj);
+            case FORMAT_TIMESTAMP:
+                dest.writeLong((Long) obj);
                 break;
         }
     }
 
-    private static Object readObj(int type, Parcel in) {
-        switch (type) {
-            case TYPE_SLICE:
+    private static Object readObj(String type, Parcel in) {
+        switch (getBaseType(type)) {
+            case FORMAT_SLICE:
                 return Slice.CREATOR.createFromParcel(in);
-            case TYPE_TEXT:
+            case FORMAT_TEXT:
                 return TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
-            case TYPE_IMAGE:
+            case FORMAT_IMAGE:
                 return Icon.CREATOR.createFromParcel(in);
-            case TYPE_ACTION:
-                return new Pair<PendingIntent, Slice>(
+            case FORMAT_ACTION:
+                return new Pair<>(
                         PendingIntent.CREATOR.createFromParcel(in),
                         Slice.CREATOR.createFromParcel(in));
-            case TYPE_REMOTE_VIEW:
-                return RemoteViews.CREATOR.createFromParcel(in);
-            case TYPE_COLOR:
+            case FORMAT_COLOR:
                 return in.readInt();
-            case TYPE_TIMESTAMP:
+            case FORMAT_TIMESTAMP:
                 return in.readLong();
-            case TYPE_REMOTE_INPUT:
+            case FORMAT_REMOTE_INPUT:
                 return RemoteInput.CREATOR.createFromParcel(in);
         }
         throw new RuntimeException("Unsupported type " + type);
@@ -318,29 +350,4 @@ public final class SliceItem implements Parcelable {
             return new SliceItem[size];
         }
     };
-
-    /**
-     * @hide
-     */
-    public static String typeToString(int type) {
-        switch (type) {
-            case TYPE_SLICE:
-                return "Slice";
-            case TYPE_TEXT:
-                return "Text";
-            case TYPE_IMAGE:
-                return "Image";
-            case TYPE_ACTION:
-                return "Action";
-            case TYPE_REMOTE_VIEW:
-                return "RemoteView";
-            case TYPE_COLOR:
-                return "Color";
-            case TYPE_TIMESTAMP:
-                return "Timestamp";
-            case TYPE_REMOTE_INPUT:
-                return "RemoteInput";
-        }
-        return "Unrecognized type: " + type;
-    }
 }

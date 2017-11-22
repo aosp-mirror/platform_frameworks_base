@@ -55,7 +55,8 @@ statsd_common_src := \
     src/storage/DropboxWriter.cpp \
     src/StatsLogProcessor.cpp \
     src/StatsService.cpp \
-    src/stats_util.cpp
+    src/stats_util.cpp \
+    src/guardrail/MemoryLeakTrackUtil.cpp
 
 statsd_common_c_includes := \
     $(LOCAL_PATH)/src \
@@ -82,7 +83,8 @@ statsd_common_shared_libraries := \
     libhidltransport \
     libhwbinder \
     android.hardware.power@1.0 \
-    android.hardware.power@1.1
+    android.hardware.power@1.1 \
+    libmemunreachable
 
 # =========
 # statsd
@@ -178,3 +180,7 @@ statsd_common_aidl_includes:=
 statsd_common_c_includes:=
 
 include $(BUILD_NATIVE_TEST)
+
+##############################
+
+include $(call all-makefiles-under,$(LOCAL_PATH))

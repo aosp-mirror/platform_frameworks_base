@@ -222,8 +222,10 @@ public abstract class BatteryStats implements Parcelable {
      *   - Resource power manager (rpm) states [but screenOffRpm is disabled from working properly]
      * New in version 27:
      *   - Always On Display (screen doze mode) time and power
+     * New in version 28:
+     *   - Light/Deep Doze power
      */
-    static final int CHECKIN_VERSION = 27;
+    static final int CHECKIN_VERSION = 28;
 
     /**
      * Old version, we hit 9 and ran out of room, need to remove.
@@ -2696,6 +2698,18 @@ public abstract class BatteryStats implements Parcelable {
     public abstract long getUahDischarge(int which);
 
     /**
+     * @return the amount of battery discharge while the device is in light idle mode, measured in
+     * micro-Ampere-hours.
+     */
+    public abstract long getUahDischargeLightDoze(int which);
+
+    /**
+     * @return the amount of battery discharge while the device is in deep idle mode, measured in
+     * micro-Ampere-hours.
+     */
+    public abstract long getUahDischargeDeepDoze(int which);
+
+    /**
      * Returns the estimated real battery capacity, which may be less than the capacity
      * declared by the PowerProfile.
      * @return The estimated battery capacity in mAh.
@@ -3327,6 +3341,8 @@ public abstract class BatteryStats implements Parcelable {
         final long dischargeCount = getUahDischarge(which);
         final long dischargeScreenOffCount = getUahDischargeScreenOff(which);
         final long dischargeScreenDozeCount = getUahDischargeScreenDoze(which);
+        final long dischargeLightDozeCount = getUahDischargeLightDoze(which);
+        final long dischargeDeepDozeCount = getUahDischargeDeepDoze(which);
 
         final StringBuilder sb = new StringBuilder(128);
 
@@ -3497,14 +3513,16 @@ public abstract class BatteryStats implements Parcelable {
                     getDischargeStartLevel()-getDischargeCurrentLevel(),
                     getDischargeAmountScreenOn(), getDischargeAmountScreenOff(),
                     dischargeCount / 1000, dischargeScreenOffCount / 1000,
-                    getDischargeAmountScreenDoze(), dischargeScreenDozeCount / 1000);
+                    getDischargeAmountScreenDoze(), dischargeScreenDozeCount / 1000,
+                    dischargeLightDozeCount / 1000, dischargeDeepDozeCount / 1000);
         } else {
             dumpLine(pw, 0 /* uid */, category, BATTERY_DISCHARGE_DATA,
                     getLowDischargeAmountSinceCharge(), getHighDischargeAmountSinceCharge(),
                     getDischargeAmountScreenOnSinceCharge(),
                     getDischargeAmountScreenOffSinceCharge(),
                     dischargeCount / 1000, dischargeScreenOffCount / 1000,
-                    getDischargeAmountScreenDozeSinceCharge(), dischargeScreenDozeCount / 1000);
+                    getDischargeAmountScreenDozeSinceCharge(), dischargeScreenDozeCount / 1000,
+                    dischargeLightDozeCount / 1000, dischargeDeepDozeCount / 1000);
         }
 
         if (reqUid < 0) {
@@ -4166,6 +4184,26 @@ public abstract class BatteryStats implements Parcelable {
                 sb.append("  Screen on discharge: ");
                 sb.append(BatteryStatsHelper.makemAh(dischargeScreenOnCount / 1000.0));
                 sb.append(" mAh");
+            pw.println(sb.toString());
+        }
+
+        final long dischargeLightDozeCount = getUahDischargeLightDoze(which);
+        if (dischargeLightDozeCount >= 0) {
+            sb.setLength(0);
+            sb.append(prefix);
+            sb.append("  Device light doze discharge: ");
+            sb.append(BatteryStatsHelper.makemAh(dischargeLightDozeCount / 1000.0));
+            sb.append(" mAh");
+            pw.println(sb.toString());
+        }
+
+        final long dischargeDeepDozeCount = getUahDischargeDeepDoze(which);
+        if (dischargeDeepDozeCount >= 0) {
+            sb.setLength(0);
+            sb.append(prefix);
+            sb.append("  Device deep doze discharge: ");
+            sb.append(BatteryStatsHelper.makemAh(dischargeDeepDozeCount / 1000.0));
+            sb.append(" mAh");
             pw.println(sb.toString());
         }
 
@@ -7131,6 +7169,10 @@ public abstract class BatteryStats implements Parcelable {
                 getUahDischargeScreenOff(which) / 1000);
         proto.write(SystemProto.BatteryDischarge.TOTAL_MAH_SCREEN_DOZE,
                 getUahDischargeScreenDoze(which) / 1000);
+        proto.write(SystemProto.BatteryDischarge.TOTAL_MAH_LIGHT_DOZE,
+                getUahDischargeLightDoze(which) / 1000);
+        proto.write(SystemProto.BatteryDischarge.TOTAL_MAH_DEEP_DOZE,
+                getUahDischargeDeepDoze(which) / 1000);
         proto.end(bdToken);
 
         // Time remaining

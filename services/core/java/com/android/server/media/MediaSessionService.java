@@ -16,7 +16,6 @@
 
 package com.android.server.media;
 
-import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.INotificationManager;
 import android.app.KeyguardManager;
@@ -138,23 +137,19 @@ public class MediaSessionService extends SystemService implements Monitor {
         mAudioService = getAudioService();
         mAudioPlayerStateMonitor = AudioPlayerStateMonitor.getInstance();
         mAudioPlayerStateMonitor.registerListener(
-                new AudioPlayerStateMonitor.OnAudioPlayerStateChangedListener() {
-            @Override
-            public void onAudioPlayerStateChanged(
-                    int uid, int prevState, @Nullable AudioPlaybackConfiguration config) {
-                if (config == null || !config.isActive() || config.getPlayerType()
-                        == AudioPlaybackConfiguration.PLAYER_TYPE_JAM_SOUNDPOOL) {
-                    return;
-                }
-                synchronized (mLock) {
-                    FullUserRecord user =
-                            getFullUserRecordLocked(UserHandle.getUserId(uid));
-                    if (user != null) {
-                        user.mPriorityStack.updateMediaButtonSessionIfNeeded();
+                (config, isRemoved) -> {
+                    if (isRemoved || !config.isActive() || config.getPlayerType()
+                            == AudioPlaybackConfiguration.PLAYER_TYPE_JAM_SOUNDPOOL) {
+                        return;
                     }
-                }
-            }
-        }, null /* handler */);
+                    synchronized (mLock) {
+                        FullUserRecord user = getFullUserRecordLocked(
+                                UserHandle.getUserId(config.getClientUid()));
+                        if (user != null) {
+                            user.mPriorityStack.updateMediaButtonSessionIfNeeded();
+                        }
+                    }
+                }, null /* handler */);
         mAudioPlayerStateMonitor.registerSelfIntoAudioServiceIfNeeded(mAudioService);
         mContentResolver = getContext().getContentResolver();
         mSettingsObserver = new SettingsObserver();

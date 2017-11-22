@@ -721,13 +721,15 @@ public final class MediaFormat {
     /**
      * A key for boolean DEFAULT behavior for the track. The track with DEFAULT=true is
      * selected in the absence of a specific user choice.
-     * This is currently only used for subtitle tracks, when the user selected
-     * 'Default' for the captioning locale.
+     * This is currently used in two scenarios:
+     * 1) for subtitle tracks, when the user selected 'Default' for the captioning locale.
+     * 2) for a {@link #MIMETYPE_IMAGE_ANDROID_HEIC} track, indicating the image is the
+     * primary item in the file.
+
      * The associated value is an integer, where non-0 means TRUE.  This is an optional
      * field; if not specified, DEFAULT is considered to be FALSE.
      */
     public static final String KEY_IS_DEFAULT = "is-default";
-
 
     /**
      * A key for the FORCED field for subtitle tracks. True if it is a

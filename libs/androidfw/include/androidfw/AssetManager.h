@@ -222,16 +222,16 @@ private:
         bool isSystemOverlay;
         bool isSystemAsset;
         bool assumeOwnership;
-        mutable sp<SharedZip> zip;
+        sp<SharedZip> zip;
     };
 
     Asset* openNonAssetInPathLocked(const char* fileName, AccessMode mode,
-        const asset_path& path);
+        asset_path& path);
     String8 createPathNameLocked(const asset_path& path, const char* rootDir);
     String8 createZipSourceNameLocked(const String8& zipFileName,
         const String8& dirName, const String8& fileName);
 
-    ZipFileRO* getZipFileLocked(const asset_path& path);
+    ZipFileRO* getZipFileLocked(asset_path& path);
     Asset* openAssetFromFileLocked(const String8& fileName, AccessMode mode);
     Asset* openAssetFromZipLocked(const ZipFileRO* pZipFile,
         const ZipEntryRO entry, AccessMode mode, const String8& entryName);
@@ -247,7 +247,7 @@ private:
     const ResTable* getResTable(bool required = true) const;
     void setLocaleLocked(const char* locale);
     void updateResourceParamsLocked() const;
-    bool appendPathToResTable(const asset_path& ap, bool appAsLib=false) const;
+    bool appendPathToResTable(asset_path& ap, bool appAsLib=false) const;
 
     Asset* openIdmapLocked(const struct asset_path& ap) const;
 

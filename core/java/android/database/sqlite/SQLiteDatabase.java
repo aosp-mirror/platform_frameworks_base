@@ -1740,7 +1740,8 @@ public final class SQLiteDatabase extends SQLiteClosable {
     private int executeSql(String sql, Object[] bindArgs) throws SQLException {
         acquireReference();
         try {
-            if (DatabaseUtils.getSqlStatementType(sql) == DatabaseUtils.STATEMENT_ATTACH) {
+            final int statementType = DatabaseUtils.getSqlStatementType(sql);
+            if (statementType == DatabaseUtils.STATEMENT_ATTACH) {
                 boolean disableWal = false;
                 synchronized (mLock) {
                     if (!mHasAttachedDbsLocked) {
@@ -1754,11 +1755,14 @@ public final class SQLiteDatabase extends SQLiteClosable {
                 }
             }
 
-            SQLiteStatement statement = new SQLiteStatement(this, sql, bindArgs);
-            try {
+            try (SQLiteStatement statement = new SQLiteStatement(this, sql, bindArgs)) {
                 return statement.executeUpdateDelete();
             } finally {
-                statement.close();
+                // If schema was updated, close non-primary connections, otherwise they might
+                // have outdated schema information
+                if (statementType == DatabaseUtils.STATEMENT_DDL) {
+                    mConnectionPoolLocked.closeAvailableNonPrimaryConnectionsAndLogExceptions();
+                }
             }
         } finally {
             releaseReference();

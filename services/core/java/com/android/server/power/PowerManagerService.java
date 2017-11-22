@@ -1457,6 +1457,10 @@ public final class PowerManagerService extends SystemService
                 case PowerManager.GO_TO_SLEEP_REASON_HDMI:
                     Slog.i(TAG, "Going to sleep due to HDMI standby (uid " + uid +")...");
                     break;
+                case PowerManager.GO_TO_SLEEP_REASON_ACCESSIBILITY:
+                    Slog.i(TAG, "Going to sleep by an accessibility service request (uid "
+                            + uid +")...");
+                    break;
                 default:
                     Slog.i(TAG, "Going to sleep by application request (uid " + uid +")...");
                     reason = PowerManager.GO_TO_SLEEP_REASON_APPLICATION;
@@ -3105,7 +3109,16 @@ public final class PowerManagerService extends SystemService
         mIsVrModeEnabled = enabled;
     }
 
-    private static void powerHintInternal(int hintId, int data) {
+    private void powerHintInternal(int hintId, int data) {
+        // Maybe filter the event.
+        switch (hintId) {
+            case PowerHint.LAUNCH: // 1: activate launch boost 0: deactivate.
+                if (data == 1 && mBatterySaverController.isLaunchBoostDisabled()) {
+                    return;
+                }
+                break;
+        }
+
         nativeSendPowerHint(hintId, data);
     }
 

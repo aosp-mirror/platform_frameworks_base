@@ -33,7 +33,6 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
-import android.widget.RemoteViews;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.Preconditions;
@@ -41,6 +40,7 @@ import com.android.internal.util.Preconditions;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * A slice is a piece of app content and actions that can be surfaced outside of the app.
@@ -54,7 +54,7 @@ public final class Slice implements Parcelable {
      * @hide
      */
     @StringDef({HINT_TITLE, HINT_LIST, HINT_LIST_ITEM, HINT_LARGE, HINT_ACTIONS, HINT_SELECTED,
-            HINT_SOURCE, HINT_MESSAGE, HINT_HORIZONTAL, HINT_NO_TINT, HINT_PARTIAL})
+            HINT_NO_TINT, HINT_PARTIAL})
     public @interface SliceHint{ }
 
     /**
@@ -62,7 +62,7 @@ public final class Slice implements Parcelable {
      * the content should be used in the shortcut representation of the slice (icon, label, action),
      * normally this should be indicated by adding the hint on the action containing that content.
      *
-     * @see SliceItem#TYPE_ACTION
+     * @see SliceItem#FORMAT_ACTION
      */
     public static final String HINT_TITLE       = "title";
     /**
@@ -90,20 +90,6 @@ public final class Slice implements Parcelable {
      */
     public static final String HINT_SELECTED    = "selected";
     /**
-     * Hint to indicate that this is a message as part of a communication
-     * sequence in this slice.
-     */
-    public static final String HINT_MESSAGE     = "message";
-    /**
-     * Hint to tag the source (i.e. sender) of a {@link #HINT_MESSAGE}.
-     */
-    public static final String HINT_SOURCE      = "source";
-    /**
-     * Hint that list items within this slice or subslice would appear better
-     * if organized horizontally.
-     */
-    public static final String HINT_HORIZONTAL  = "horizontal";
-    /**
      * Hint to indicate that this content should not be tinted.
      */
     public static final String HINT_NO_TINT     = "no_tint";
@@ -123,32 +109,42 @@ public final class Slice implements Parcelable {
      */
     public static final String HINT_TOGGLE = "toggle";
     /**
+     * Hint that list items within this slice or subslice would appear better
+     * if organized horizontally.
+     */
+    public static final String HINT_HORIZONTAL = "horizontal";
+    /**
      * Hint to indicate that this slice is incomplete and an update will be sent once
      * loading is complete. Slices which contain HINT_PARTIAL will not be cached by the
      * OS and should not be cached by apps.
      */
     public static final String HINT_PARTIAL     = "partial";
 
-    // These two are coming over from prototyping, but we probably don't want in
-    // public API, at least not right now.
-    /**
-     * @hide
-     */
-    public static final String HINT_ALT         = "alt";
     /**
      * Key to retrieve an extra added to an intent when a control is changed.
      * @hide
      */
     public static final String EXTRA_TOGGLE_STATE = "android.app.slice.extra.TOGGLE_STATE";
+    /**
+     * Subtype to indicate that this is a message as part of a communication
+     * sequence in this slice.
+     */
+    public static final String SUBTYPE_MESSAGE = "message";
+    /**
+     * Subtype to tag the source (i.e. sender) of a {@link #SUBTYPE_MESSAGE}.
+     */
+    public static final String SUBTYPE_SOURCE = "source";
 
     private final SliceItem[] mItems;
     private final @SliceHint String[] mHints;
+    private SliceSpec mSpec;
     private Uri mUri;
 
-    Slice(ArrayList<SliceItem> items, @SliceHint String[] hints, Uri uri) {
+    Slice(ArrayList<SliceItem> items, @SliceHint String[] hints, Uri uri, SliceSpec spec) {
         mHints = hints;
         mItems = items.toArray(new SliceItem[items.size()]);
         mUri = uri;
+        mSpec = spec;
     }
 
     protected Slice(Parcel in) {
@@ -159,6 +155,14 @@ public final class Slice implements Parcelable {
             mItems[i] = SliceItem.CREATOR.createFromParcel(in);
         }
         mUri = Uri.CREATOR.createFromParcel(in);
+        mSpec = in.readTypedObject(SliceSpec.CREATOR);
+    }
+
+    /**
+     * @return The spec for this slice
+     */
+    public @Nullable SliceSpec getSpec() {
+        return mSpec;
     }
 
     /**
@@ -190,6 +194,7 @@ public final class Slice implements Parcelable {
             mItems[i].writeToParcel(dest, flags);
         }
         mUri.writeToParcel(dest, 0);
+        dest.writeTypedObject(mSpec, flags);
     }
 
     @Override
@@ -212,6 +217,7 @@ public final class Slice implements Parcelable {
         private final Uri mUri;
         private ArrayList<SliceItem> mItems = new ArrayList<>();
         private @SliceHint ArrayList<String> mHints = new ArrayList<>();
+        private SliceSpec mSpec;
 
         /**
          * Create a builder which will construct a {@link Slice} for the Given Uri.
@@ -247,11 +253,28 @@ public final class Slice implements Parcelable {
         }
 
         /**
+         * Add the spec for this slice.
+         */
+        public Builder setSpec(SliceSpec spec) {
+            mSpec = spec;
+            return this;
+        }
+
+        /**
          * Add a sub-slice to the slice being constructed
          */
         public Builder addSubSlice(@NonNull Slice slice) {
-            mItems.add(new SliceItem(slice, SliceItem.TYPE_SLICE, slice.getHints().toArray(
-                    new String[slice.getHints().size()])));
+            return addSubSlice(slice, null);
+        }
+
+        /**
+         * Add a sub-slice to the slice being constructed
+         * @param subType Optional template-specific type information
+         * @see {@link SliceItem#getSubType()}
+         */
+        public Builder addSubSlice(@NonNull Slice slice, @Nullable String subType) {
+            mItems.add(new SliceItem(slice, SliceItem.FORMAT_SLICE, subType,
+                    slice.getHints().toArray(new String[slice.getHints().size()])));
             return this;
         }
 
@@ -259,99 +282,132 @@ public final class Slice implements Parcelable {
          * Add an action to the slice being constructed
          */
         public Slice.Builder addAction(@NonNull PendingIntent action, @NonNull Slice s) {
-            mItems.add(new SliceItem(action, s, SliceItem.TYPE_ACTION, new String[0]));
+            return addAction(action, s, null);
+        }
+
+        /**
+         * Add an action to the slice being constructed
+         * @param subType Optional template-specific type information
+         * @see {@link SliceItem#getSubType()}
+         */
+        public Slice.Builder addAction(@NonNull PendingIntent action, @NonNull Slice s,
+                @Nullable String subType) {
+            List<String> hints = s.getHints();
+            s.mSpec = null;
+            mItems.add(new SliceItem(action, s, SliceItem.FORMAT_ACTION, subType, hints.toArray(
+                    new String[hints.size()])));
             return this;
         }
 
         /**
          * Add text to the slice being constructed
+         * @param subType Optional template-specific type information
+         * @see {@link SliceItem#getSubType()}
          */
-        public Builder addText(CharSequence text, @SliceHint String... hints) {
-            mItems.add(new SliceItem(text, SliceItem.TYPE_TEXT, hints));
+        public Builder addText(CharSequence text, @Nullable String subType,
+                @SliceHint String... hints) {
+            mItems.add(new SliceItem(text, SliceItem.FORMAT_TEXT, subType, hints));
             return this;
         }
 
         /**
          * Add text to the slice being constructed
+         * @param subType Optional template-specific type information
+         * @see {@link SliceItem#getSubType()}
          */
-        public Builder addText(CharSequence text, @SliceHint List<String> hints) {
-            return addText(text, hints.toArray(new String[hints.size()]));
-        }
-
-        /**
-         * Add an image to the slice being constructed
-         */
-        public Builder addIcon(Icon icon, @SliceHint String... hints) {
-            mItems.add(new SliceItem(icon, SliceItem.TYPE_IMAGE, hints));
-            return this;
-        }
-
-        /**
-         * Add an image to the slice being constructed
-         */
-        public Builder addIcon(Icon icon, @SliceHint List<String> hints) {
-            return addIcon(icon, hints.toArray(new String[hints.size()]));
-        }
-
-        /**
-         * @hide This isn't final
-         */
-        public Builder addRemoteView(RemoteViews remoteView, @SliceHint String... hints) {
-            mItems.add(new SliceItem(remoteView, SliceItem.TYPE_REMOTE_VIEW, hints));
-            return this;
-        }
-
-        /**
-         * Add remote input to the slice being constructed
-         */
-        public Slice.Builder addRemoteInput(RemoteInput remoteInput,
+        public Builder addText(CharSequence text, @Nullable String subType,
                 @SliceHint List<String> hints) {
-            return addRemoteInput(remoteInput, hints.toArray(new String[hints.size()]));
+            return addText(text, subType, hints.toArray(new String[hints.size()]));
+        }
+
+        /**
+         * Add an image to the slice being constructed
+         * @param subType Optional template-specific type information
+         * @see {@link SliceItem#getSubType()}
+         */
+        public Builder addIcon(Icon icon, @Nullable String subType, @SliceHint String... hints) {
+            mItems.add(new SliceItem(icon, SliceItem.FORMAT_IMAGE, subType, hints));
+            return this;
+        }
+
+        /**
+         * Add an image to the slice being constructed
+         * @param subType Optional template-specific type information
+         * @see {@link SliceItem#getSubType()}
+         */
+        public Builder addIcon(Icon icon, @Nullable String subType, @SliceHint List<String> hints) {
+            return addIcon(icon, subType, hints.toArray(new String[hints.size()]));
         }
 
         /**
          * Add remote input to the slice being constructed
+         * @param subType Optional template-specific type information
+         * @see {@link SliceItem#getSubType()}
          */
-        public Slice.Builder addRemoteInput(RemoteInput remoteInput, @SliceHint String... hints) {
-            mItems.add(new SliceItem(remoteInput, SliceItem.TYPE_REMOTE_INPUT, hints));
+        public Slice.Builder addRemoteInput(RemoteInput remoteInput, @Nullable String subType,
+                @SliceHint List<String> hints) {
+            return addRemoteInput(remoteInput, subType, hints.toArray(new String[hints.size()]));
+        }
+
+        /**
+         * Add remote input to the slice being constructed
+         * @param subType Optional template-specific type information
+         * @see {@link SliceItem#getSubType()}
+         */
+        public Slice.Builder addRemoteInput(RemoteInput remoteInput, @Nullable String subType,
+                @SliceHint String... hints) {
+            mItems.add(new SliceItem(remoteInput, SliceItem.FORMAT_REMOTE_INPUT,
+                    subType, hints));
             return this;
         }
 
         /**
          * Add a color to the slice being constructed
+         * @param subType Optional template-specific type information
+         * @see {@link SliceItem#getSubType()}
          */
-        public Builder addColor(int color, @SliceHint String... hints) {
-            mItems.add(new SliceItem(color, SliceItem.TYPE_COLOR, hints));
+        public Builder addColor(int color, @Nullable String subType, @SliceHint String... hints) {
+            mItems.add(new SliceItem(color, SliceItem.FORMAT_COLOR, subType, hints));
             return this;
         }
 
         /**
          * Add a color to the slice being constructed
+         * @param subType Optional template-specific type information
+         * @see {@link SliceItem#getSubType()}
          */
-        public Builder addColor(int color, @SliceHint List<String> hints) {
-            return addColor(color, hints.toArray(new String[hints.size()]));
+        public Builder addColor(int color, @Nullable String subType,
+                @SliceHint List<String> hints) {
+            return addColor(color, subType, hints.toArray(new String[hints.size()]));
         }
 
         /**
          * Add a timestamp to the slice being constructed
+         * @param subType Optional template-specific type information
+         * @see {@link SliceItem#getSubType()}
          */
-        public Slice.Builder addTimestamp(long time, @SliceHint String... hints) {
-            mItems.add(new SliceItem(time, SliceItem.TYPE_TIMESTAMP, hints));
+        public Slice.Builder addTimestamp(long time, @Nullable String subType,
+                @SliceHint String... hints) {
+            mItems.add(new SliceItem(time, SliceItem.FORMAT_TIMESTAMP, subType,
+                    hints));
             return this;
         }
 
         /**
          * Add a timestamp to the slice being constructed
+         * @param subType Optional template-specific type information
+         * @see {@link SliceItem#getSubType()}
          */
-        public Slice.Builder addTimestamp(long time, @SliceHint List<String> hints) {
-            return addTimestamp(time, hints.toArray(new String[hints.size()]));
+        public Slice.Builder addTimestamp(long time, @Nullable String subType,
+                @SliceHint List<String> hints) {
+            return addTimestamp(time, subType, hints.toArray(new String[hints.size()]));
         }
 
         /**
          * Construct the slice.
          */
         public Slice build() {
-            return new Slice(mItems, mHints.toArray(new String[mHints.size()]), mUri);
+            return new Slice(mItems, mHints.toArray(new String[mHints.size()]), mUri, mSpec);
         }
     }
 
@@ -379,15 +435,15 @@ public final class Slice implements Parcelable {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < mItems.length; i++) {
             sb.append(indent);
-            if (mItems[i].getType() == SliceItem.TYPE_SLICE) {
+            if (Objects.equals(mItems[i].getFormat(), SliceItem.FORMAT_SLICE)) {
                 sb.append("slice:\n");
                 sb.append(mItems[i].getSlice().toString(indent + "   "));
-            } else if (mItems[i].getType() == SliceItem.TYPE_TEXT) {
+            } else if (Objects.equals(mItems[i].getFormat(), SliceItem.FORMAT_TEXT)) {
                 sb.append("text: ");
                 sb.append(mItems[i].getText());
                 sb.append("\n");
             } else {
-                sb.append(SliceItem.typeToString(mItems[i].getType()));
+                sb.append(mItems[i].getFormat());
                 sb.append("\n");
             }
         }
@@ -399,10 +455,12 @@ public final class Slice implements Parcelable {
      *
      * @param resolver ContentResolver to be used.
      * @param uri The URI to a slice provider
+     * @param supportedSpecs List of supported specs.
      * @return The Slice provided by the app or null if none is given.
      * @see Slice
      */
-    public static @Nullable Slice bindSlice(ContentResolver resolver, @NonNull Uri uri) {
+    public static @Nullable Slice bindSlice(ContentResolver resolver, @NonNull Uri uri,
+            List<SliceSpec> supportedSpecs) {
         Preconditions.checkNotNull(uri, "uri");
         IContentProvider provider = resolver.acquireProvider(uri);
         if (provider == null) {
@@ -411,6 +469,8 @@ public final class Slice implements Parcelable {
         try {
             Bundle extras = new Bundle();
             extras.putParcelable(SliceProvider.EXTRA_BIND_URI, uri);
+            extras.putParcelableArrayList(SliceProvider.EXTRA_SUPPORTED_SPECS,
+                    new ArrayList<>(supportedSpecs));
             final Bundle res = provider.call(resolver.getPackageName(), SliceProvider.METHOD_SLICE,
                     null, extras);
             Bundle.setDefusable(res, true);
@@ -434,12 +494,14 @@ public final class Slice implements Parcelable {
      *
      * @param context The context to use.
      * @param intent The intent associated with a slice.
+     * @param supportedSpecs List of supported specs.
      * @return The Slice provided by the app or null if none is given.
      * @see Slice
      * @see SliceProvider#onMapIntentToUri(Intent)
      * @see Intent
      */
-    public static @Nullable Slice bindSlice(Context context, @NonNull Intent intent) {
+    public static @Nullable Slice bindSlice(Context context, @NonNull Intent intent,
+            List<SliceSpec> supportedSpecs) {
         Preconditions.checkNotNull(intent, "intent");
         Preconditions.checkArgument(intent.getComponent() != null || intent.getPackage() != null,
                 "Slice intent must be explicit " + intent);
@@ -448,7 +510,7 @@ public final class Slice implements Parcelable {
         // Check if the intent has data for the slice uri on it and use that
         final Uri intentData = intent.getData();
         if (intentData != null && SliceProvider.SLICE_TYPE.equals(resolver.getType(intentData))) {
-            return bindSlice(resolver, intentData);
+            return bindSlice(resolver, intentData, supportedSpecs);
         }
         // Otherwise ask the app
         List<ResolveInfo> providers =
@@ -466,6 +528,8 @@ public final class Slice implements Parcelable {
         try {
             Bundle extras = new Bundle();
             extras.putParcelable(SliceProvider.EXTRA_INTENT, intent);
+            extras.putParcelableArrayList(SliceProvider.EXTRA_SUPPORTED_SPECS,
+                    new ArrayList<>(supportedSpecs));
             final Bundle res = provider.call(resolver.getPackageName(),
                     SliceProvider.METHOD_MAP_INTENT, null, extras);
             if (res == null) {

@@ -400,6 +400,9 @@ final class ProcessList {
             case ActivityManager.PROCESS_STATE_CACHED_ACTIVITY_CLIENT:
                 procState = "CACC";
                 break;
+            case ActivityManager.PROCESS_STATE_CACHED_RECENT:
+                procState = "CRE ";
+                break;
             case ActivityManager.PROCESS_STATE_CACHED_EMPTY:
                 procState = "CEM ";
                 break;
@@ -494,6 +497,7 @@ final class ProcessList {
         PROC_MEM_CACHED,                // ActivityManager.PROCESS_STATE_LAST_ACTIVITY
         PROC_MEM_CACHED,                // ActivityManager.PROCESS_STATE_CACHED_ACTIVITY
         PROC_MEM_CACHED,                // ActivityManager.PROCESS_STATE_CACHED_ACTIVITY_CLIENT
+        PROC_MEM_CACHED,                // ActivityManager.PROCESS_STATE_CACHED_RECENT
         PROC_MEM_CACHED,                // ActivityManager.PROCESS_STATE_CACHED_EMPTY
     };
 
@@ -515,6 +519,7 @@ final class ProcessList {
         PSS_FIRST_CACHED_INTERVAL,      // ActivityManager.PROCESS_STATE_LAST_ACTIVITY
         PSS_FIRST_CACHED_INTERVAL,      // ActivityManager.PROCESS_STATE_CACHED_ACTIVITY
         PSS_FIRST_CACHED_INTERVAL,      // ActivityManager.PROCESS_STATE_CACHED_ACTIVITY_CLIENT
+        PSS_FIRST_CACHED_INTERVAL,      // ActivityManager.PROCESS_STATE_CACHED_RECENT
         PSS_FIRST_CACHED_INTERVAL,      // ActivityManager.PROCESS_STATE_CACHED_EMPTY
     };
 
@@ -536,6 +541,7 @@ final class ProcessList {
         PSS_SAME_CACHED_INTERVAL,       // ActivityManager.PROCESS_STATE_LAST_ACTIVITY
         PSS_SAME_CACHED_INTERVAL,       // ActivityManager.PROCESS_STATE_CACHED_ACTIVITY
         PSS_SAME_CACHED_INTERVAL,       // ActivityManager.PROCESS_STATE_CACHED_ACTIVITY_CLIENT
+        PSS_SAME_CACHED_INTERVAL,       // ActivityManager.PROCESS_STATE_CACHED_RECENT
         PSS_SAME_CACHED_INTERVAL,       // ActivityManager.PROCESS_STATE_CACHED_EMPTY
     };
 
@@ -557,6 +563,7 @@ final class ProcessList {
         PSS_TEST_FIRST_BACKGROUND_INTERVAL, // ActivityManager.PROCESS_STATE_LAST_ACTIVITY
         PSS_TEST_FIRST_BACKGROUND_INTERVAL, // ActivityManager.PROCESS_STATE_CACHED_ACTIVITY
         PSS_TEST_FIRST_BACKGROUND_INTERVAL, // ActivityManager.PROCESS_STATE_CACHED_ACTIVITY_CLIENT
+        PSS_TEST_FIRST_BACKGROUND_INTERVAL, // ActivityManager.PROCESS_STATE_CACHED_RECENT
         PSS_TEST_FIRST_BACKGROUND_INTERVAL, // ActivityManager.PROCESS_STATE_CACHED_EMPTY
     };
 
@@ -578,6 +585,7 @@ final class ProcessList {
         PSS_TEST_SAME_BACKGROUND_INTERVAL,  // ActivityManager.PROCESS_STATE_LAST_ACTIVITY
         PSS_TEST_SAME_BACKGROUND_INTERVAL,  // ActivityManager.PROCESS_STATE_CACHED_ACTIVITY
         PSS_TEST_SAME_BACKGROUND_INTERVAL,  // ActivityManager.PROCESS_STATE_CACHED_ACTIVITY_CLIENT
+        PSS_TEST_SAME_BACKGROUND_INTERVAL,  // ActivityManager.PROCESS_STATE_CACHED_RECENT
         PSS_TEST_SAME_BACKGROUND_INTERVAL,  // ActivityManager.PROCESS_STATE_CACHED_EMPTY
     };
 

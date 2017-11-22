@@ -19,7 +19,7 @@ package com.android.server.media;
 import com.android.internal.util.DumpUtils;
 import com.android.server.Watchdog;
 
-import android.annotation.Nullable;
+import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -101,6 +101,8 @@ public final class MediaRouterService extends IMediaRouterService.Stub
     private final AudioPlayerStateMonitor mAudioPlayerStateMonitor;
     private final Handler mHandler = new Handler();
     private final AudioRoutesInfo mCurAudioRoutesInfo = new AudioRoutesInfo();
+    private final IntArray mActivePlayerMinPriorityQueue = new IntArray();
+    private final IntArray mActivePlayerUidMinPriorityQueue = new IntArray();
 
     public MediaRouterService(Context context) {
         mContext = context;
@@ -111,7 +113,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
 
         mAudioPlayerStateMonitor = AudioPlayerStateMonitor.getInstance();
         mAudioPlayerStateMonitor.registerListener(
-                new AudioPlayerStateMonitor.OnAudioPlayerStateChangedListener() {
+                new AudioPlayerStateMonitor.OnAudioPlayerActiveStateChangedListener() {
             static final long WAIT_MS = 500;
             final Runnable mRestoreBluetoothA2dpRunnable = new Runnable() {
                 @Override
@@ -121,39 +123,41 @@ public final class MediaRouterService extends IMediaRouterService.Stub
             };
 
             @Override
-            public void onAudioPlayerStateChanged(
-                    int uid, int prevState, @Nullable AudioPlaybackConfiguration config) {
+            public void onAudioPlayerActiveStateChanged(
+                    @NonNull AudioPlaybackConfiguration config, boolean isRemoved) {
+                final boolean active = !isRemoved && config.isActive();
+                final int pii = config.getPlayerInterfaceId();
+                final int uid = config.getClientUid();
+
+                final int idx = mActivePlayerMinPriorityQueue.indexOf(pii);
+                // Keep the latest active player and its uid at the end of the queue.
+                if (idx >= 0) {
+                    mActivePlayerMinPriorityQueue.remove(idx);
+                    mActivePlayerUidMinPriorityQueue.remove(idx);
+                }
+
                 int restoreUid = -1;
-                boolean active = config == null ? false : config.isActive();
                 if (active) {
+                    mActivePlayerMinPriorityQueue.add(config.getPlayerInterfaceId());
+                    mActivePlayerUidMinPriorityQueue.add(uid);
                     restoreUid = uid;
-                } else if (prevState != AudioPlaybackConfiguration.PLAYER_STATE_STARTED) {
-                    // Noting to do if the prev state is not an active state.
-                    return;
-                } else {
-                    IntArray sortedAudioPlaybackClientUids =
-                            mAudioPlayerStateMonitor.getSortedAudioPlaybackClientUids();
-                    for (int i = 0; i < sortedAudioPlaybackClientUids.size(); ++i) {
-                        if (mAudioPlayerStateMonitor.isPlaybackActive(
-                                sortedAudioPlaybackClientUids.get(i))) {
-                            restoreUid = sortedAudioPlaybackClientUids.get(i);
-                            break;
-                        }
-                    }
+                } else if (mActivePlayerUidMinPriorityQueue.size() > 0) {
+                    restoreUid = mActivePlayerUidMinPriorityQueue.get(
+                            mActivePlayerUidMinPriorityQueue.size() - 1);
                 }
 
                 mHandler.removeCallbacks(mRestoreBluetoothA2dpRunnable);
                 if (restoreUid >= 0) {
                     restoreRoute(restoreUid);
                     if (DEBUG) {
-                        Slog.d(TAG, "onAudioPlayerStateChanged: " + "uid " + uid
-                                + " active " + active + " restoring " + restoreUid);
+                        Slog.d(TAG, "onAudioPlayerActiveStateChanged: " + "uid=" + uid
+                                + ", active=" + active + ", restoreUid=" + restoreUid);
                     }
                 } else {
                     mHandler.postDelayed(mRestoreBluetoothA2dpRunnable, WAIT_MS);
                     if (DEBUG) {
-                        Slog.d(TAG, "onAudioPlayerStateChanged: " + "uid " + uid
-                                + " active " + active + " delaying");
+                        Slog.d(TAG, "onAudioPlayerACTIVEStateChanged: " + "uid=" + uid
+                                + ", active=" + active + ", delaying");
                     }
                 }
             }

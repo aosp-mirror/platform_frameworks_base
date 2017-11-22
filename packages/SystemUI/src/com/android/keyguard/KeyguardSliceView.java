@@ -33,6 +33,8 @@ import com.android.internal.graphics.ColorUtils;
 import com.android.systemui.R;
 import com.android.systemui.keyguard.KeyguardSliceProvider;
 
+import java.util.Collections;
+
 /**
  * View visible under the clock on the lock screen and AoD.
  */
@@ -75,7 +77,8 @@ public class KeyguardSliceView extends LinearLayout {
         super.onAttachedToWindow();
 
         // Set initial content
-        showSlice(Slice.bindSlice(getContext().getContentResolver(), mKeyguardSliceUri));
+        showSlice(Slice.bindSlice(getContext().getContentResolver(), mKeyguardSliceUri,
+                Collections.emptyList()));
 
         // Make sure we always have the most current slice
         getContext().getContentResolver().registerContentObserver(mKeyguardSliceUri,
@@ -91,7 +94,7 @@ public class KeyguardSliceView extends LinearLayout {
 
     private void showSlice(Slice slice) {
         // Items will be wrapped into an action when they have tap targets.
-        SliceItem actionSlice = SliceQuery.find(slice, SliceItem.TYPE_ACTION);
+        SliceItem actionSlice = SliceQuery.find(slice, SliceItem.FORMAT_ACTION);
         if (actionSlice != null) {
             mSlice = actionSlice.getSlice();
             mSliceAction = actionSlice.getAction();
@@ -105,7 +108,7 @@ public class KeyguardSliceView extends LinearLayout {
             return;
         }
 
-        SliceItem title = SliceQuery.find(mSlice, SliceItem.TYPE_TEXT, Slice.HINT_TITLE, null);
+        SliceItem title = SliceQuery.find(mSlice, SliceItem.FORMAT_TEXT, Slice.HINT_TITLE, null);
         if (title == null) {
             mTitle.setVisibility(GONE);
         } else {
@@ -113,7 +116,7 @@ public class KeyguardSliceView extends LinearLayout {
             mTitle.setText(title.getText());
         }
 
-        SliceItem text = SliceQuery.find(mSlice, SliceItem.TYPE_TEXT, null, Slice.HINT_TITLE);
+        SliceItem text = SliceQuery.find(mSlice, SliceItem.FORMAT_TEXT, null, Slice.HINT_TITLE);
         if (text == null) {
             mText.setVisibility(GONE);
         } else {
@@ -154,7 +157,8 @@ public class KeyguardSliceView extends LinearLayout {
 
         @Override
         public void onChange(boolean selfChange, Uri uri) {
-            showSlice(Slice.bindSlice(getContext().getContentResolver(), mKeyguardSliceUri));
+            showSlice(Slice.bindSlice(getContext().getContentResolver(), mKeyguardSliceUri,
+                    Collections.emptyList()));
         }
     }
 }

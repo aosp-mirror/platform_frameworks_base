@@ -31,6 +31,7 @@ import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.util.Base64;
+import android.webkit.UserPackage;
 import android.webkit.WebViewFactory;
 import android.webkit.WebViewProviderInfo;
 import android.webkit.WebViewProviderResponse;
@@ -1628,10 +1629,10 @@ public class WebViewUpdateServiceTest {
         newSdkPackage.applicationInfo.targetSdkVersion = Build.VERSION_CODES.CUR_DEVELOPMENT;
         PackageInfo currentSdkPackage = createPackageInfo("currentTargetSdkPackage",
             true /* enabled */, true /* valid */, true /* installed */);
-        currentSdkPackage.applicationInfo.targetSdkVersion = Build.VERSION_CODES.N_MR1+1;
+        currentSdkPackage.applicationInfo.targetSdkVersion = UserPackage.MINIMUM_SUPPORTED_SDK;
         PackageInfo oldSdkPackage = createPackageInfo("oldTargetSdkPackage",
             true /* enabled */, true /* valid */, true /* installed */);
-        oldSdkPackage.applicationInfo.targetSdkVersion = Build.VERSION_CODES.N_MR1;
+        oldSdkPackage.applicationInfo.targetSdkVersion = UserPackage.MINIMUM_SUPPORTED_SDK - 1;
 
         WebViewProviderInfo newSdkProviderInfo =
                 new WebViewProviderInfo(newSdkPackage.packageName, "", true, false, null);
