@@ -814,7 +814,7 @@ public final class Bitmap implements Parcelable {
      * @return A bitmap that represents the specified subset of source
      * @throws IllegalArgumentException if the x, y, width, height values are
      *         outside of the dimensions of the source bitmap, or width is <= 0,
-     *         or height is <= 0
+     *         or height is <= 0, or if the source bitmap has already been recycled
      */
     public static Bitmap createBitmap(@NonNull Bitmap source, int x, int y, int width, int height,
             @Nullable Matrix m, boolean filter) {
@@ -826,6 +826,9 @@ public final class Bitmap implements Parcelable {
         }
         if (y + height > source.getHeight()) {
             throw new IllegalArgumentException("y + height must be <= bitmap.height()");
+        }
+        if (source.isRecycled()) {
+            throw new IllegalArgumentException("cannot use a recycled source in createBitmap");
         }
 
         // check if we can just return our argument unchanged
