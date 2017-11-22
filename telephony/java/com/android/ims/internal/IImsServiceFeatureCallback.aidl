@@ -21,7 +21,7 @@ package com.android.ims.internal;
  * Callback to ImsManager when a feature changes in the ImsServiceController.
  * {@hide}
  */
-oneway interface IImsServiceFeatureListener {
+oneway interface IImsServiceFeatureCallback {
     void imsFeatureCreated(int slotId, int feature);
     void imsFeatureRemoved(int slotId, int feature);
     void imsStatusChanged(int slotId, int feature, int status);
