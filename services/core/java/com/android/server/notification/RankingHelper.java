@@ -750,12 +750,15 @@ public class RankingHelper implements RankingConfig {
             int uid) {
         Preconditions.checkNotNull(pkg);
         Record r = getRecord(pkg, uid);
+        if (r == null) {
+            return null;
+        }
         return r.groups.get(groupId);
     }
 
     @Override
     public ParceledListSlice<NotificationChannelGroup> getNotificationChannelGroups(String pkg,
-            int uid, boolean includeDeleted) {
+            int uid, boolean includeDeleted, boolean includeNonGrouped) {
         Preconditions.checkNotNull(pkg);
         Map<String, NotificationChannelGroup> groups = new ArrayMap<>();
         Record r = getRecord(pkg, uid);
@@ -783,7 +786,7 @@ public class RankingHelper implements RankingConfig {
                 }
             }
         }
-        if (nonGrouped.getChannels().size() > 0) {
+        if (includeNonGrouped && nonGrouped.getChannels().size() > 0) {
             groups.put(null, nonGrouped);
         }
         return new ParceledListSlice<>(new ArrayList<>(groups.values()));
