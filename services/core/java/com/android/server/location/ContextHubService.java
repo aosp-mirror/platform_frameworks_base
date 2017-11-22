@@ -479,7 +479,11 @@ public class ContextHubService extends IContextHubService.Stub {
             retArray[i] = foundInstances.get(i).intValue();
         }
 
-        Log.w(TAG, "Found " + retArray.length + " apps on hub handle " + hubHandle);
+        if (retArray.length == 0) {
+            Log.d(TAG, "No nanoapps found on hub ID " + hubHandle + " using NanoAppFilter: "
+                    + filter);
+        }
+
         return retArray;
     }
 
