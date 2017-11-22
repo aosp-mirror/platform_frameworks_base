@@ -20,6 +20,7 @@ import "frameworks/base/core/proto/android/app/alarmmanager.proto";
 import "frameworks/base/core/proto/android/app/pendingintent.proto";
 import "frameworks/base/core/proto/android/internal/locallog.proto";
 import "frameworks/base/core/proto/android/os/worksource.proto";
+import "frameworks/base/core/proto/android/server/forceappstandbytracker.proto";
 
 package com.android.server;
 
@@ -32,10 +33,9 @@ message AlarmManagerServiceProto {
   optional int64 last_time_change_realtime = 4;
   // Current settings
   optional ConstantsProto settings = 5;
-  // UIDs currently in the foreground.
-  repeated int32 foreground_uids = 6;
-  // Packages forced into app standby.
-  repeated string forced_app_standby_packages = 7;
+
+  // Dump from ForceAppStandbyTracker.
+  optional ForceAppStandbyTrackerProto force_app_standby_tracker = 6;
 
   optional bool is_interactive = 8;
   // Only valid if is_interactive is false.

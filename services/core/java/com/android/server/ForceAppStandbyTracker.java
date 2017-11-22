@@ -16,13 +16,18 @@
 package com.android.server;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.app.AppOpsManager.PackageOps;
+import android.app.IActivityManager;
 import android.app.IUidObserver;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.os.PowerManager.ServiceType;
 import android.os.PowerManagerInternal;
 import android.os.RemoteException;
@@ -30,21 +35,36 @@ import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.util.ArraySet;
 import android.util.Pair;
-import android.util.Slog;
 import android.util.SparseBooleanArray;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IAppOpsCallback;
 import com.android.internal.app.IAppOpsService;
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.Preconditions;
+import com.android.server.ForceAppStandbyTrackerProto.RunAnyInBackgroundRestrictedPackages;
 
+import java.io.PrintWriter;
+import java.util.Arrays;
 import java.util.List;
 
 /**
- * Class to track OP_RUN_ANY_IN_BACKGROUND, UID foreground state and "force all app standby".
+ * Class to keep track of the information related to "force app standby", which includes:
+ * - OP_RUN_ANY_IN_BACKGROUND for each package
+ * - UID foreground state
+ * - User+system power save whitelist
+ * - Temporary power save whitelist
+ * - Global "force all apps standby" mode enforced by battery saver.
  *
- * TODO Clean up cache when a user is deleted.
- * TODO Add unit tests. b/68769804.
+ * TODO: In general, we can reduce the number of callbacks by checking all signals before sending
+ *    each callback. For example, even when an UID comes into the foreground, if it wasn't
+ *    originally restricted, then there's no need to send an event.
+ *    Doing this would be error-prone, so we punt it for now, but we should revisit it later.
+ *
+ * Test:
+   atest $ANDROID_BUILD_TOP/frameworks/base/services/tests/servicestests/src/com/android/server/ForceAppStandbyTrackerTest.java
  */
 public class ForceAppStandbyTracker {
     private static final String TAG = "ForceAppStandbyTracker";
@@ -55,20 +75,30 @@ public class ForceAppStandbyTracker {
     private final Object mLock = new Object();
     private final Context mContext;
 
+    @VisibleForTesting
+    static final int TARGET_OP = AppOpsManager.OP_RUN_ANY_IN_BACKGROUND;
+
+    IActivityManager mIActivityManager;
     AppOpsManager mAppOpsManager;
     IAppOpsService mAppOpsService;
     PowerManagerInternal mPowerManagerInternal;
 
-    private final Handler mCallbackHandler;
+    private final MyHandler mHandler;
 
     /**
      * Pair of (uid (not user-id), packageName) with OP_RUN_ANY_IN_BACKGROUND *not* allowed.
      */
     @GuardedBy("mLock")
-    final ArraySet<Pair<Integer, String>> mForcedAppStandbyUidPackages = new ArraySet<>();
+    final ArraySet<Pair<Integer, String>> mRunAnyRestrictedPackages = new ArraySet<>();
 
     @GuardedBy("mLock")
     final SparseBooleanArray mForegroundUids = new SparseBooleanArray();
+
+    @GuardedBy("mLock")
+    private int[] mPowerWhitelistedAllAppIds = new int[0];
+
+    @GuardedBy("mLock")
+    private int[] mTempWhitelistedAppIds = mPowerWhitelistedAllAppIds;
 
     @GuardedBy("mLock")
     final ArraySet<Listener> mListeners = new ArraySet<>();
@@ -80,16 +110,116 @@ public class ForceAppStandbyTracker {
     boolean mForceAllAppsStandby;
 
     public static abstract class Listener {
-        public void onRestrictionChanged(int uid, @Nullable String packageName) {
+        /**
+         * This is called when the OP_RUN_ANY_IN_BACKGROUND appops changed for a package.
+         */
+        private void onRunAnyAppOpsChanged(ForceAppStandbyTracker sender,
+                int uid, @NonNull String packageName) {
+            updateJobsForUidPackage(uid, packageName);
+
+            if (!sender.areAlarmsRestricted(uid, packageName)) {
+                unblockAlarmsForUidPackage(uid, packageName);
+            }
         }
 
-        public void onGlobalRestrictionChanged() {
+        /**
+         * This is called when the foreground state changed for a UID.
+         */
+        private void onUidForegroundStateChanged(ForceAppStandbyTracker sender, int uid) {
+            updateJobsForUid(uid);
+
+            if (sender.isInForeground(uid)) {
+                unblockAlarmsForUid(uid);
+            }
+        }
+
+        /**
+         * This is called when an app-id(s) is removed from the power save whitelist.
+         */
+        private void onPowerSaveUnwhitelisted(ForceAppStandbyTracker sender) {
+            updateAllJobs();
+            unblockAllUnrestrictedAlarms();
+        }
+
+        /**
+         * This is called when the power save whitelist changes, excluding the
+         * {@link #onPowerSaveUnwhitelisted} case.
+         */
+        private void onPowerSaveWhitelistedChanged(ForceAppStandbyTracker sender) {
+            updateAllJobs();
+        }
+
+        /**
+         * This is called when the temp whitelist changes.
+         */
+        private void onTempPowerSaveWhitelistChanged(ForceAppStandbyTracker sender) {
+
+            // TODO This case happens rather frequently; consider optimizing and update jobs
+            // only for affected app-ids.
+
+            updateAllJobs();
+        }
+
+        /**
+         * This is called when the global "force all apps standby" flag changes.
+         */
+        private void onForceAllAppsStandbyChanged(ForceAppStandbyTracker sender) {
+            updateAllJobs();
+
+            if (!sender.isForceAllAppsStandbyEnabled()) {
+                unblockAllUnrestrictedAlarms();
+            }
+        }
+
+        /**
+         * Called when the job restrictions for multiple UIDs might have changed, so the job
+         * scheduler should re-evaluate all restrictions for all jobs.
+         */
+        public void updateAllJobs() {
+        }
+
+        /**
+         * Called when the job restrictions for a UID might have changed, so the job
+         * scheduler should re-evaluate all restrictions for all jobs.
+         */
+        public void updateJobsForUid(int uid) {
+        }
+
+        /**
+         * Called when the job restrictions for a UID - package might have changed, so the job
+         * scheduler should re-evaluate all restrictions for all jobs.
+         */
+        public void updateJobsForUidPackage(int uid, String packageName) {
+        }
+
+        /**
+         * Called when the job restrictions for multiple UIDs might have changed, so the alarm
+         * manager should re-evaluate all restrictions for all blocked jobs.
+         */
+        public void unblockAllUnrestrictedAlarms() {
+        }
+
+        /**
+         * Called when all jobs for a specific UID are unblocked.
+         */
+        public void unblockAlarmsForUid(int uid) {
+        }
+
+        /**
+         * Called when all alarms for a specific UID - package are unblocked.
+         */
+        public void unblockAlarmsForUidPackage(int uid, String packageName) {
         }
     }
 
-    private ForceAppStandbyTracker(Context context) {
+    @VisibleForTesting
+    ForceAppStandbyTracker(Context context, Looper looper) {
         mContext = context;
-        mCallbackHandler = FgThread.getHandler();
+        mHandler = new MyHandler(looper);
+    }
+
+    private ForceAppStandbyTracker(Context context) {
+        this(context, FgThread.get().getLooper());
     }
 
     /**
@@ -112,45 +242,65 @@ public class ForceAppStandbyTracker {
             }
             mStarted = true;
 
-            mAppOpsManager = Preconditions.checkNotNull(
-                    mContext.getSystemService(AppOpsManager.class));
-            mAppOpsService = Preconditions.checkNotNull(
-                    IAppOpsService.Stub.asInterface(
-                            ServiceManager.getService(Context.APP_OPS_SERVICE)));
-            mPowerManagerInternal = Preconditions.checkNotNull(
-                    LocalServices.getService(PowerManagerInternal.class));
+            mIActivityManager = Preconditions.checkNotNull(injectIActivityManager());
+            mAppOpsManager = Preconditions.checkNotNull(injectAppOpsManager());
+            mAppOpsService = Preconditions.checkNotNull(injectIAppOpsService());
+            mPowerManagerInternal = Preconditions.checkNotNull(injectPowerManagerInternal());
 
             try {
-                ActivityManager.getService().registerUidObserver(new UidObserver(),
+                mIActivityManager.registerUidObserver(new UidObserver(),
                         ActivityManager.UID_OBSERVER_GONE | ActivityManager.UID_OBSERVER_IDLE
                                 | ActivityManager.UID_OBSERVER_ACTIVE,
                         ActivityManager.PROCESS_STATE_UNKNOWN, null);
-                mAppOpsService.startWatchingMode(AppOpsManager.OP_RUN_ANY_IN_BACKGROUND, null,
+                mAppOpsService.startWatchingMode(TARGET_OP, null,
                         new AppOpsWatcher());
             } catch (RemoteException e) {
                 // shouldn't happen.
             }
 
-            mPowerManagerInternal.registerLowPowerModeObserver(
-                    ServiceType.FORCE_ALL_APPS_STANDBY,
-                    state -> updateForceAllAppsStandby(state.batterySaverEnabled));
-
-            updateForceAllAppsStandby(
-                    mPowerManagerInternal.getLowPowerState(ServiceType.FORCE_ALL_APPS_STANDBY)
-                            .batterySaverEnabled);
+            IntentFilter filter = new IntentFilter();
+            filter.addAction(Intent.ACTION_USER_REMOVED);
+            mContext.registerReceiver(new MyReceiver(), filter);
 
             refreshForcedAppStandbyUidPackagesLocked();
+
+            mPowerManagerInternal.registerLowPowerModeObserver(
+                    ServiceType.FORCE_ALL_APPS_STANDBY,
+                    (state) -> updateForceAllAppsStandby(state.batterySaverEnabled));
+
+            updateForceAllAppsStandby(mPowerManagerInternal.getLowPowerState(
+                    ServiceType.FORCE_ALL_APPS_STANDBY).batterySaverEnabled);
         }
     }
 
+    @VisibleForTesting
+    AppOpsManager injectAppOpsManager() {
+        return mContext.getSystemService(AppOpsManager.class);
+    }
+
+    @VisibleForTesting
+    IAppOpsService injectIAppOpsService() {
+        return IAppOpsService.Stub.asInterface(
+                ServiceManager.getService(Context.APP_OPS_SERVICE));
+    }
+
+    @VisibleForTesting
+    IActivityManager injectIActivityManager() {
+        return ActivityManager.getService();
+    }
+
+    @VisibleForTesting
+    PowerManagerInternal injectPowerManagerInternal() {
+        return LocalServices.getService(PowerManagerInternal.class);
+    }
+
     /**
-     * Update {@link #mForcedAppStandbyUidPackages} with the current app ops state.
+     * Update {@link #mRunAnyRestrictedPackages} with the current app ops state.
      */
     private void refreshForcedAppStandbyUidPackagesLocked() {
-        final int op = AppOpsManager.OP_RUN_ANY_IN_BACKGROUND;
-
-        mForcedAppStandbyUidPackages.clear();
-        final List<PackageOps> ops = mAppOpsManager.getPackagesForOps(new int[] {op});
+        mRunAnyRestrictedPackages.clear();
+        final List<PackageOps> ops = mAppOpsManager.getPackagesForOps(
+                new int[] {TARGET_OP});
 
         if (ops == null) {
             return;
@@ -162,31 +312,38 @@ public class ForceAppStandbyTracker {
 
             for (int j = 0; j < entries.size(); j++) {
                 AppOpsManager.OpEntry ent = entries.get(j);
-                if (ent.getOp() != op) {
+                if (ent.getOp() != TARGET_OP) {
                     continue;
                 }
                 if (ent.getMode() != AppOpsManager.MODE_ALLOWED) {
-                    mForcedAppStandbyUidPackages.add(Pair.create(
+                    mRunAnyRestrictedPackages.add(Pair.create(
                             pkg.getUid(), pkg.getPackageName()));
                 }
             }
         }
     }
 
-    boolean isRunAnyInBackgroundAppOpRestricted(int uid, @NonNull String packageName) {
-        try {
-            return mAppOpsService.checkOperation(AppOpsManager.OP_RUN_ANY_IN_BACKGROUND,
-                    uid, packageName) != AppOpsManager.MODE_ALLOWED;
-        } catch (RemoteException e) {
-            return false; // shouldn't happen.
+    /**
+     * Update {@link #mForceAllAppsStandby} and notifies the listeners.
+     */
+    void updateForceAllAppsStandby(boolean enable) {
+        synchronized (mLock) {
+            if (enable == mForceAllAppsStandby) {
+                return;
+            }
+            mForceAllAppsStandby = enable;
+
+            mHandler.notifyForceAllAppsStandbyChanged();
         }
     }
 
     private int findForcedAppStandbyUidPackageIndexLocked(int uid, @NonNull String packageName) {
-        // TODO Maybe we should switch to indexOf(Pair.create()) if the array size is too big.
-        final int size = mForcedAppStandbyUidPackages.size();
+        final int size = mRunAnyRestrictedPackages.size();
+        if (size > 8) {
+            return mRunAnyRestrictedPackages.indexOf(Pair.create(uid, packageName));
+        }
         for (int i = 0; i < size; i++) {
-            final Pair<Integer, String> pair = mForcedAppStandbyUidPackages.valueAt(i);
+            final Pair<Integer, String> pair = mRunAnyRestrictedPackages.valueAt(i);
 
             if ((pair.first == uid) && packageName.equals(pair.second)) {
                 return i;
@@ -196,13 +353,16 @@ public class ForceAppStandbyTracker {
     }
 
     /**
-     * @return whether a uid package-name pair is in mForcedAppStandbyUidPackages.
+     * @return whether a uid package-name pair is in mRunAnyRestrictedPackages.
      */
-    boolean isUidPackageRestrictedLocked(int uid, @NonNull String packageName) {
+    boolean isRunAnyRestrictedLocked(int uid, @NonNull String packageName) {
         return findForcedAppStandbyUidPackageIndexLocked(uid, packageName) >= 0;
     }
 
-    boolean updateRestrictedUidPackageLocked(int uid, @NonNull String packageName,
+    /**
+     * Add to / remove from {@link #mRunAnyRestrictedPackages}.
+     */
+    boolean updateForcedAppStandbyUidPackageLocked(int uid, @NonNull String packageName,
             boolean restricted) {
         final int index =  findForcedAppStandbyUidPackageIndexLocked(uid, packageName);
         final boolean wasRestricted = index >= 0;
@@ -210,13 +370,16 @@ public class ForceAppStandbyTracker {
             return false;
         }
         if (restricted) {
-            mForcedAppStandbyUidPackages.add(Pair.create(uid, packageName));
+            mRunAnyRestrictedPackages.add(Pair.create(uid, packageName));
         } else {
-            mForcedAppStandbyUidPackages.removeAt(index);
+            mRunAnyRestrictedPackages.removeAt(index);
         }
         return true;
     }
 
+    /**
+     * Puts a UID to {@link #mForegroundUids}.
+     */
     void uidToForeground(int uid) {
         synchronized (mLock) {
             if (!UserHandle.isApp(uid)) {
@@ -228,10 +391,13 @@ public class ForceAppStandbyTracker {
                 return;
             }
             mForegroundUids.put(uid, true);
-            notifyForUidPackage(uid, null);
+            mHandler.notifyUidForegroundStateChanged(uid);
         }
     }
 
+    /**
+     * Sets false for a UID {@link #mForegroundUids}, or remove it when {@code remove} is true.
+     */
     void uidToBackground(int uid, boolean remove) {
         synchronized (mLock) {
             if (!UserHandle.isApp(uid)) {
@@ -247,13 +413,11 @@ public class ForceAppStandbyTracker {
             } else {
                 mForegroundUids.put(uid, false);
             }
-            notifyForUidPackage(uid, null);
+            mHandler.notifyUidForegroundStateChanged(uid);
         }
     }
 
-    // Event handlers
-
-    final class UidObserver extends IUidObserver.Stub {
+    private final class UidObserver extends IUidObserver.Stub {
         @Override public void onUidStateChanged(int uid, int procState, long procStateSeq) {
         }
 
@@ -277,11 +441,28 @@ public class ForceAppStandbyTracker {
     private final class AppOpsWatcher extends IAppOpsCallback.Stub {
         @Override
         public void opChanged(int op, int uid, String packageName) throws RemoteException {
+            boolean restricted = false;
+            try {
+                restricted = mAppOpsService.checkOperation(TARGET_OP,
+                        uid, packageName) != AppOpsManager.MODE_ALLOWED;
+            } catch (RemoteException e) {
+                // Shouldn't happen
+            }
             synchronized (mLock) {
-                final boolean restricted = isRunAnyInBackgroundAppOpRestricted(uid, packageName);
+                if (updateForcedAppStandbyUidPackageLocked(uid, packageName, restricted)) {
+                    mHandler.notifyRunAnyAppOpsChanged(uid, packageName);
+                }
+            }
+        }
+    }
 
-                if (updateRestrictedUidPackageLocked(uid, packageName, restricted)) {
-                    notifyForUidPackage(uid, packageName);
+    private final class MyReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (Intent.ACTION_USER_REMOVED.equals(intent.getAction())) {
+                final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
+                if (userId > 0) {
+                    mHandler.doUserRemoved(userId);
                 }
             }
         }
@@ -293,31 +474,183 @@ public class ForceAppStandbyTracker {
         }
     }
 
-    void notifyForUidPackage(int uid, String packageName) {
-        mCallbackHandler.post(() -> {
-            for (Listener l : cloneListeners()) {
-                l.onRestrictionChanged(uid, packageName);
-            }
-        });
-    }
+    private class MyHandler extends Handler {
+        private static final int MSG_UID_STATE_CHANGED = 1;
+        private static final int MSG_RUN_ANY_CHANGED = 2;
+        private static final int MSG_ALL_UNWHITELISTED = 3;
+        private static final int MSG_ALL_WHITELIST_CHANGED = 4;
+        private static final int MSG_TEMP_WHITELIST_CHANGED = 5;
+        private static final int MSG_FORCE_ALL_CHANGED = 6;
 
-    void notifyGlobal() {
-        mCallbackHandler.post(() -> {
-            for (Listener l : cloneListeners()) {
-                l.onGlobalRestrictionChanged();
-            }
-        });
-    }
+        private static final int MSG_USER_REMOVED = 7;
 
-    void updateForceAllAppsStandby(boolean forceAllAppsStandby) {
-        synchronized (mLock) {
-            if (mForceAllAppsStandby == forceAllAppsStandby) {
-                return;
-            }
-            mForceAllAppsStandby = forceAllAppsStandby;
-            Slog.i(TAG, "Force all app standby: " + mForceAllAppsStandby);
-            notifyGlobal();
+        public MyHandler(Looper looper) {
+            super(looper);
         }
+
+        public void notifyUidForegroundStateChanged(int uid) {
+            obtainMessage(MSG_UID_STATE_CHANGED, uid, 0).sendToTarget();
+        }
+        public void notifyRunAnyAppOpsChanged(int uid, @NonNull String packageName) {
+            obtainMessage(MSG_RUN_ANY_CHANGED, uid, 0, packageName).sendToTarget();
+        }
+
+        public void notifyAllUnwhitelisted() {
+            obtainMessage(MSG_ALL_UNWHITELISTED).sendToTarget();
+        }
+
+        public void notifyAllWhitelistChanged() {
+            obtainMessage(MSG_ALL_WHITELIST_CHANGED).sendToTarget();
+        }
+
+        public void notifyTempWhitelistChanged() {
+            obtainMessage(MSG_TEMP_WHITELIST_CHANGED).sendToTarget();
+        }
+
+        public void notifyForceAllAppsStandbyChanged() {
+            obtainMessage(MSG_FORCE_ALL_CHANGED).sendToTarget();
+        }
+
+        public void doUserRemoved(int userId) {
+            obtainMessage(MSG_USER_REMOVED, userId, 0).sendToTarget();
+        }
+
+        @Override
+        public void dispatchMessage(Message msg) {
+            switch (msg.what) {
+                case MSG_USER_REMOVED:
+                    handleUserRemoved(msg.arg1);
+                    return;
+            }
+
+            // Only notify the listeners when started.
+            synchronized (mLock) {
+                if (!mStarted) {
+                    return;
+                }
+            }
+            final ForceAppStandbyTracker sender = ForceAppStandbyTracker.this;
+
+            switch (msg.what) {
+                case MSG_UID_STATE_CHANGED:
+                    for (Listener l : cloneListeners()) {
+                        l.onUidForegroundStateChanged(sender, msg.arg1);
+                    }
+                    return;
+                case MSG_RUN_ANY_CHANGED:
+                    for (Listener l : cloneListeners()) {
+                        l.onRunAnyAppOpsChanged(sender, msg.arg1, (String) msg.obj);
+                    }
+                    return;
+                case MSG_ALL_UNWHITELISTED:
+                    for (Listener l : cloneListeners()) {
+                        l.onPowerSaveUnwhitelisted(sender);
+                    }
+                    return;
+                case MSG_ALL_WHITELIST_CHANGED:
+                    for (Listener l : cloneListeners()) {
+                        l.onPowerSaveWhitelistedChanged(sender);
+                    }
+                    return;
+                case MSG_TEMP_WHITELIST_CHANGED:
+                    for (Listener l : cloneListeners()) {
+                        l.onTempPowerSaveWhitelistChanged(sender);
+                    }
+                    return;
+                case MSG_FORCE_ALL_CHANGED:
+                    for (Listener l : cloneListeners()) {
+                        l.onForceAllAppsStandbyChanged(sender);
+                    }
+                    return;
+                case MSG_USER_REMOVED:
+                    handleUserRemoved(msg.arg1);
+                    return;
+            }
+        }
+    }
+
+    void handleUserRemoved(int removedUserId) {
+        synchronized (mLock) {
+            for (int i = mRunAnyRestrictedPackages.size() - 1; i >= 0; i--) {
+                final Pair<Integer, String> pair = mRunAnyRestrictedPackages.valueAt(i);
+                final int uid = pair.first;
+                final int userId = UserHandle.getUserId(uid);
+
+                if (userId == removedUserId) {
+                    mRunAnyRestrictedPackages.removeAt(i);
+                }
+            }
+            for (int i = mForegroundUids.size() - 1; i >= 0; i--) {
+                final int uid = mForegroundUids.keyAt(i);
+                final int userId = UserHandle.getUserId(uid);
+
+                if (userId == removedUserId) {
+                    mForegroundUids.removeAt(i);
+                }
+            }
+        }
+    }
+
+    /**
+     * Called by device idle controller to update the power save whitelists.
+     */
+    public void setPowerSaveWhitelistAppIds(
+            int[] powerSaveWhitelistAllAppIdArray, int[] tempWhitelistAppIdArray) {
+        synchronized (mLock) {
+            final int[] previousWhitelist = mPowerWhitelistedAllAppIds;
+            final int[] previousTempWhitelist = mTempWhitelistedAppIds;
+
+            mPowerWhitelistedAllAppIds = powerSaveWhitelistAllAppIdArray;
+            mTempWhitelistedAppIds = tempWhitelistAppIdArray;
+
+            if (isAnyAppIdUnwhitelisted(previousWhitelist, mPowerWhitelistedAllAppIds)) {
+                mHandler.notifyAllUnwhitelisted();
+            } else if (!Arrays.equals(previousWhitelist, mPowerWhitelistedAllAppIds)) {
+                mHandler.notifyAllWhitelistChanged();
+            }
+
+            if (!Arrays.equals(previousTempWhitelist, mTempWhitelistedAppIds)) {
+                mHandler.notifyTempWhitelistChanged();
+            }
+
+        }
+    }
+
+    /**
+     * @retunr true if a sorted app-id array {@code prevArray} has at least one element
+     * that's not in a sorted app-id array {@code newArray}.
+     */
+    @VisibleForTesting
+    static boolean isAnyAppIdUnwhitelisted(int[] prevArray, int[] newArray) {
+        int i1 = 0;
+        int i2 = 0;
+        boolean prevFinished;
+        boolean newFinished;
+
+        for (;;) {
+            prevFinished = i1 >= prevArray.length;
+            newFinished = i2 >= newArray.length;
+            if (prevFinished || newFinished) {
+                break;
+            }
+            int a1 = prevArray[i1];
+            int a2 = newArray[i2];
+
+            if (a1 == a2) {
+                i1++;
+                i2++;
+                continue;
+            }
+            if (a1 < a2) {
+                // prevArray has an element that's not in a2.
+                return true;
+            }
+            i2++;
+        }
+        if (prevFinished) {
+            return false;
+        }
+        return newFinished;
     }
 
     // Public interface.
@@ -332,21 +665,51 @@ public class ForceAppStandbyTracker {
     }
 
     /**
-     * Whether force-app-standby is effective for a UID package-name.
+     * @return whether alarms should be restricted for a UID package-name.
      */
-    public boolean isRestricted(int uid, @NonNull String packageName) {
+    public boolean areAlarmsRestricted(int uid, @NonNull String packageName) {
+        return isRestricted(uid, packageName, /*useTempWhitelistToo=*/ false);
+    }
+
+    /**
+     * @return whether jobs should be restricted for a UID package-name.
+     */
+    public boolean areJobsRestricted(int uid, @NonNull String packageName) {
+        return isRestricted(uid, packageName, /*useTempWhitelistToo=*/ true);
+    }
+
+    /**
+     * @return whether force-app-standby is effective for a UID package-name.
+     */
+    private boolean isRestricted(int uid, @NonNull String packageName,
+            boolean useTempWhitelistToo) {
         if (isInForeground(uid)) {
             return false;
         }
         synchronized (mLock) {
+            // Whitelisted?
+            final int appId = UserHandle.getAppId(uid);
+            if (ArrayUtils.contains(mPowerWhitelistedAllAppIds, appId)) {
+                return false;
+            }
+            if (useTempWhitelistToo &&
+                    ArrayUtils.contains(mTempWhitelistedAppIds, appId)) {
+                return false;
+            }
+
             if (mForceAllAppsStandby) {
                 return true;
             }
-            return isUidPackageRestrictedLocked(uid, packageName);
+
+            return isRunAnyRestrictedLocked(uid, packageName);
         }
     }
 
-    /** For dumpsys -- otherwise the callers don't need to know it. */
+    /**
+     * @return whether a UID is in the foreground or not.
+     *
+     * Note clients normally shouldn't need to access it. It's only for dumpsys.
+     */
     public boolean isInForeground(int uid) {
         if (!UserHandle.isApp(uid)) {
             return true;
@@ -356,31 +719,120 @@ public class ForceAppStandbyTracker {
         }
     }
 
-    /** For dumpsys -- otherwise the callers don't need to know it. */
-    public boolean isForceAllAppsStandbyEnabled() {
+    /**
+     * @return whether force all apps standby is enabled or not.
+     *
+     * Note clients normally shouldn't need to access it.
+     */
+    boolean isForceAllAppsStandbyEnabled() {
         synchronized (mLock) {
             return mForceAllAppsStandby;
         }
     }
 
-    /** For dumpsys -- otherwise the callers don't need to know it. */
+    /**
+     * @return whether a UID/package has {@code OP_RUN_ANY_IN_BACKGROUND} allowed or not.
+     *
+     * Note clients normally shouldn't need to access it. It's only for dumpsys.
+     */
     public boolean isRunAnyInBackgroundAppOpsAllowed(int uid, @NonNull String packageName) {
         synchronized (mLock) {
-            return !isUidPackageRestrictedLocked(uid, packageName);
+            return !isRunAnyRestrictedLocked(uid, packageName);
         }
     }
 
-    /** For dumpsys -- otherwise the callers don't need to know it. */
-    public SparseBooleanArray getForegroudUids() {
+    /**
+     * @return whether a UID is in the user / system defined power-save whitelist or not.
+     *
+     * Note clients normally shouldn't need to access it. It's only for dumpsys.
+     */
+    public boolean isUidPowerSaveWhitelisted(int uid) {
         synchronized (mLock) {
-            return mForegroundUids.clone();
+            return ArrayUtils.contains(mPowerWhitelistedAllAppIds, UserHandle.getAppId(uid));
         }
     }
 
-    /** For dumpsys -- otherwise the callers don't need to know it. */
-    public ArraySet<Pair<Integer, String>> getRestrictedUidPackages() {
+    /**
+     * @return whether a UID is in the temp power-save whitelist or not.
+     *
+     * Note clients normally shouldn't need to access it. It's only for dumpsys.
+     */
+    public boolean isUidTempPowerSaveWhitelisted(int uid) {
         synchronized (mLock) {
-            return new ArraySet(mForcedAppStandbyUidPackages);
+            return ArrayUtils.contains(mTempWhitelistedAppIds, UserHandle.getAppId(uid));
+        }
+    }
+
+    public void dump(PrintWriter pw, String indent) {
+        synchronized (mLock) {
+            pw.print(indent);
+            pw.print("Force all apps standby: ");
+            pw.println(isForceAllAppsStandbyEnabled());
+
+            pw.print(indent);
+            pw.print("Foreground uids: [");
+
+            String sep = "";
+            for (int i = 0; i < mForegroundUids.size(); i++) {
+                if (mForegroundUids.valueAt(i)) {
+                    pw.print(sep);
+                    pw.print(UserHandle.formatUid(mForegroundUids.keyAt(i)));
+                    sep = " ";
+                }
+            }
+            pw.println("]");
+
+            pw.print(indent);
+            pw.print("Whitelist appids: ");
+            pw.println(Arrays.toString(mPowerWhitelistedAllAppIds));
+
+            pw.print(indent);
+            pw.print("Temp whitelist appids: ");
+            pw.println(Arrays.toString(mTempWhitelistedAppIds));
+
+            pw.print(indent);
+            pw.println("Restricted packages:");
+            for (Pair<Integer, String> uidAndPackage : mRunAnyRestrictedPackages) {
+                pw.print(indent);
+                pw.print("  ");
+                pw.print(UserHandle.formatUid(uidAndPackage.first));
+                pw.print(" ");
+                pw.print(uidAndPackage.second);
+                pw.println();
+            }
+        }
+    }
+
+    public void dumpProto(ProtoOutputStream proto, long fieldId) {
+        synchronized (mLock) {
+            final long token = proto.start(fieldId);
+
+            proto.write(ForceAppStandbyTrackerProto.FORCE_ALL_APPS_STANDBY, mForceAllAppsStandby);
+
+            for (int i = 0; i < mForegroundUids.size(); i++) {
+                if (mForegroundUids.valueAt(i)) {
+                    proto.write(ForceAppStandbyTrackerProto.FOREGROUND_UIDS,
+                            mForegroundUids.keyAt(i));
+                }
+            }
+
+            for (int appId : mPowerWhitelistedAllAppIds) {
+                proto.write(ForceAppStandbyTrackerProto.POWER_SAVE_WHITELIST_APP_IDS, appId);
+            }
+
+            for (int appId : mTempWhitelistedAppIds) {
+                proto.write(ForceAppStandbyTrackerProto.TEMP_POWER_SAVE_WHITELIST_APP_IDS, appId);
+            }
+
+            for (Pair<Integer, String> uidAndPackage : mRunAnyRestrictedPackages) {
+                final long token2 = proto.start(
+                        ForceAppStandbyTrackerProto.RUN_ANY_IN_BACKGROUND_RESTRICTED_PACKAGES);
+                proto.write(RunAnyInBackgroundRestrictedPackages.UID, uidAndPackage.first);
+                proto.write(RunAnyInBackgroundRestrictedPackages.PACKAGE_NAME,
+                        uidAndPackage.second);
+                proto.end(token2);
+            }
+            proto.end(token);
         }
     }
 }
