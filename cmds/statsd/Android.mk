@@ -180,3 +180,7 @@ statsd_common_aidl_includes:=
 statsd_common_c_includes:=
 
 include $(BUILD_NATIVE_TEST)
+
+##############################
+
+include $(call all-makefiles-under,$(LOCAL_PATH))

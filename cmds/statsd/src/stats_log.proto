@@ -125,7 +125,7 @@ message UidMapping {
 }
 
 message StatsLogReport {
-  optional int32 metric_id = 1;
+  optional string metric_name = 1;
 
   optional int64 start_report_nanos = 2;
 
