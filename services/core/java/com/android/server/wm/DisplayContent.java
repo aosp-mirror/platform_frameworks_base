@@ -181,8 +181,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     private final TaskStackContainers mTaskStackContainers = new TaskStackContainers();
     // Contains all non-app window containers that should be displayed above the app containers
     // (e.g. Status bar)
-    private final NonAppWindowContainers mAboveAppWindowsContainers =
-            new NonAppWindowContainers("mAboveAppWindowsContainers");
+    private final AboveAppWindowContainers mAboveAppWindowsContainers =
+            new AboveAppWindowContainers("mAboveAppWindowsContainers");
     // Contains all non-app window containers that should be displayed below the app containers
     // (e.g. Wallpaper).
     private final NonAppWindowContainers mBelowAppWindowsContainers =
@@ -356,7 +356,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     /**
      * We organize all top-level Surfaces in to the following layers.
      * mOverlayLayer contains a few Surfaces which are always on top of others
-     * and omitted from Screen-Magnification ({@link WindowState#isScreenOverlay})
+     * and omitted from Screen-Magnification, for example the strict mode flash or
+     * the magnification overlay itself.
      * {@link #mWindowingLayer} contains everything else.
      */
     private SurfaceControl mOverlayLayer;
@@ -3746,11 +3747,39 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
     }
 
+    private final class AboveAppWindowContainers extends NonAppWindowContainers {
+        AboveAppWindowContainers(String name) {
+            super(name);
+        }
+
+        void assignChildLayers(SurfaceControl.Transaction t, WindowContainer imeContainer) {
+            boolean needAssignIme = imeContainer != null
+                    && imeContainer.getSurfaceControl() != null;
+            for (int j = 0; j < mChildren.size(); ++j) {
+                final WindowToken wt = mChildren.get(j);
+                wt.assignLayer(t, j);
+                wt.assignChildLayers(t);
+
+                int layer = mService.mPolicy.getWindowLayerFromTypeLw(
+                        wt.windowType, wt.mOwnerCanManageAppTokens);
+                if (needAssignIme && layer >= TYPE_INPUT_METHOD_DIALOG) {
+                    t.setRelativeLayer(imeContainer.getSurfaceControl(),
+                            wt.getSurfaceControl(), -1);
+                    needAssignIme = false;
+                }
+            }
+            if (needAssignIme) {
+                t.setRelativeLayer(imeContainer.getSurfaceControl(),
+                        getSurfaceControl(), Integer.MIN_VALUE);
+            }
+        }
+    }
+
     /**
      * Window container class that contains all containers on this display that are not related to
      * Apps. E.g. status bar.
      */
-    private final class NonAppWindowContainers extends DisplayChildWindowContainer<WindowToken> {
+    private class NonAppWindowContainers extends DisplayChildWindowContainer<WindowToken> {
         /**
          * Compares two child window tokens returns -1 if the first is lesser than the second in
          * terms of z-order and 1 otherwise.
@@ -3848,12 +3877,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             return b;
         }
 
-        b.setName(child.getName());
-        if (child.isScreenOverlay()) {
-            return b.setParent(mOverlayLayer);
-        } else {
-            return b.setParent(mWindowingLayer);
-        }
+        return b.setName(child.getName())
+                .setParent(mWindowingLayer);
     }
 
     /**
@@ -3891,39 +3916,36 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         mAboveAppWindowsContainers.assignLayer(t, 2);
 
         WindowState imeTarget = mService.mInputMethodTarget;
+        boolean needAssignIme = true;
 
-        // A brief summary of IME layer assignment:
+        // In the case where we have an IME target that is not in split-screen
+        // mode IME assignment is easy. We just need the IME to go directly above
+        // the target. This way children of the target will naturally go above the IME
+        // and everyone is happy.
         //
-        // In case we have no IME target but we have an IME we are typically in
-        // a transition state and keeping the IME on top of everything except overlays
-        // seems to work best.
+        // In the case of split-screen windowing mode, we need to elevate the IME above the
+        // docked divider while keeping the app itself below the docked divider, so instead
+        // we use relative layering of the IME targets child windows, and place the
+        // IME in the non-app layer (see {@link AboveAppWindowContainers#assignChildLayers}).
         //
-        // In split-screen windowing mode we can't layer the
-        // IME relative to the IME target because it needs to
-        // go over the docked divider, so instead we place it on top
-        // of everything and use relative layering of windows which need
-        // to go above it (see special logic in WindowState#assignLayer)
-        //
-        // There is a third case, where the IME target has no SurfaceControl, for
-        // example if Layer assignment were triggered due to removal of the
-        // IME target while it was still the IME target.
-        if (imeTarget == null ||
-                imeTarget.inSplitScreenWindowingMode() ||
-                imeTarget.getSurfaceControl() == null) {
-            mImeWindowsContainers.assignLayer(t, 3);
-        } else {
+        // In the case where we have no IME target we assign it where it's base layer would
+        // place it in the AboveAppWindowContainers.
+        if (imeTarget != null && !imeTarget.inSplitScreenWindowingMode()
+                && (imeTarget.getSurfaceControl() != null)) {
             t.setRelativeLayer(mImeWindowsContainers.getSurfaceControl(),
                     imeTarget.getSurfaceControl(),
                     // TODO: We need to use an extra level on the app surface to ensure
                     // this is always above SurfaceView but always below attached window.
                     1);
+            needAssignIme = false;
         }
 
         // Above we have assigned layers to our children, now we ask them to assign
         // layers to their children.
         mBelowAppWindowsContainers.assignChildLayers(t);
         mTaskStackContainers.assignChildLayers(t);
-        mAboveAppWindowsContainers.assignChildLayers(t);
+        mAboveAppWindowsContainers.assignChildLayers(t,
+                needAssignIme == true ? mImeWindowsContainers : null);
         mImeWindowsContainers.assignChildLayers(t);
     }
 
