@@ -3858,6 +3858,47 @@ public class DevicePolicyManager {
      */
     public boolean installKeyPair(@Nullable ComponentName admin, @NonNull PrivateKey privKey,
             @NonNull Certificate[] certs, @NonNull String alias, boolean requestAccess) {
+        return installKeyPair(admin, privKey, certs, alias, requestAccess, true);
+    }
+
+    /**
+     * Called by a device or profile owner, or delegated certificate installer, to install a
+     * certificate chain and corresponding private key for the leaf certificate. All apps within the
+     * profile will be able to access the certificate chain and use the private key, given direct
+     * user approval (if the user is allowed to select the private key).
+     *
+     * <p>The caller of this API may grant itself access to the certificate and private key
+     * immediately, without user approval. It is a best practice not to request this unless strictly
+     * necessary since it opens up additional security vulnerabilities.
+     *
+     * <p>Whether this key is offered to the user for approval at all or not depends on the
+     * {@code isUserSelectable} parameter.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with, or
+     *        {@code null} if calling from a delegated certificate installer.
+     * @param privKey The private key to install.
+     * @param certs The certificate chain to install. The chain should start with the leaf
+     *        certificate and include the chain of trust in order. This will be returned by
+     *        {@link android.security.KeyChain#getCertificateChain}.
+     * @param alias The private key alias under which to install the certificate. If a certificate
+     *        with that alias already exists, it will be overwritten.
+     * @param requestAccess {@code true} to request that the calling app be granted access to the
+     *        credentials immediately. Otherwise, access to the credentials will be gated by user
+     *        approval.
+     * @param isUserSelectable {@code true} to indicate that a user can select this key via the
+     *        Certificate Selection prompt, false to indicate that this key can only be granted
+     *        access by implementing
+     *        {@link android.app.admin.DeviceAdminReceiver#onChoosePrivateKeyAlias}.
+     * @return {@code true} if the keys were installed, {@code false} otherwise.
+     * @throws SecurityException if {@code admin} is not {@code null} and not a device or profile
+     *         owner.
+     * @see android.security.KeyChain#getCertificateChain
+     * @see #setDelegatedScopes
+     * @see #DELEGATION_CERT_INSTALL
+     */
+    public boolean installKeyPair(@Nullable ComponentName admin, @NonNull PrivateKey privKey,
+            @NonNull Certificate[] certs, @NonNull String alias, boolean requestAccess,
+            boolean isUserSelectable) {
         throwIfParentInstance("installKeyPair");
         try {
             final byte[] pemCert = Credentials.convertToPem(certs[0]);
@@ -3868,7 +3909,7 @@ public class DevicePolicyManager {
             final byte[] pkcs8Key = KeyFactory.getInstance(privKey.getAlgorithm())
                     .getKeySpec(privKey, PKCS8EncodedKeySpec.class).getEncoded();
             return mService.installKeyPair(admin, mContext.getPackageName(), pkcs8Key, pemCert,
-                    pemChain, alias, requestAccess);
+                    pemChain, alias, requestAccess, isUserSelectable);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
