@@ -16,8 +16,9 @@
 
 package com.android.server.backup;
 
+import android.annotation.Nullable;
 import android.app.backup.BackupManager;
-import android.app.backup.SelectBackupTransportCallback;
+import android.app.backup.BackupTransport;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -44,9 +45,11 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.backup.IBackupTransport;
 import com.android.server.EventLogTags;
+import com.android.server.backup.transport.TransportClient;
+import com.android.server.backup.transport.TransportClientManager;
+import com.android.server.backup.transport.TransportConnectionListener;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -60,8 +63,7 @@ public class TransportManager {
     private static final String TAG = "BackupTransportManager";
 
     @VisibleForTesting
-    /* package */ static final String SERVICE_ACTION_TRANSPORT_HOST =
-            "android.backup.TRANSPORT_HOST";
+    public static final String SERVICE_ACTION_TRANSPORT_HOST = "android.backup.TRANSPORT_HOST";
 
     private static final long REBINDING_TIMEOUT_UNPROVISIONED_MS = 30 * 1000; // 30 sec
     private static final long REBINDING_TIMEOUT_PROVISIONED_MS = 5 * 60 * 1000; // 5 mins
@@ -72,6 +74,7 @@ public class TransportManager {
     private final PackageManager mPackageManager;
     private final Set<ComponentName> mTransportWhitelist;
     private final Handler mHandler;
+    private final TransportClientManager mTransportClientManager;
 
     /**
      * This listener is called after we bind to any transport. If it returns true, this is a valid
@@ -94,6 +97,10 @@ public class TransportManager {
     /** We are currently bound to these transports. */
     @GuardedBy("mTransportLock")
     private final Map<String, ComponentName> mBoundTransports = new ArrayMap<>();
+
+    /** Names of transports we've bound to at least once */
+    @GuardedBy("mTransportLock")
+    private final Map<String, ComponentName> mTransportsByName = new ArrayMap<>();
 
     /**
      * Callback interface for {@link #ensureTransportReady(ComponentName, TransportReadyCallback)}.
@@ -123,6 +130,7 @@ public class TransportManager {
         mCurrentTransportName = defaultTransport;
         mTransportBoundListener = listener;
         mHandler = new RebindOnTimeoutHandler(looper);
+        mTransportClientManager = new TransportClientManager(context);
     }
 
     void onPackageAdded(String packageName) {
@@ -202,6 +210,67 @@ public class TransportManager {
             }
         }
         return null;
+    }
+
+    /**
+     * Returns the transport name associated with {@param transportClient} or {@code null} if not
+     * found.
+     */
+    @Nullable
+    public String getTransportName(TransportClient transportClient) {
+        ComponentName transportComponent = transportClient.getTransportComponent();
+        synchronized (mTransportLock) {
+            for (Map.Entry<String, ComponentName> transportEntry : mTransportsByName.entrySet()) {
+                if (transportEntry.getValue().equals(transportComponent)) {
+                    return transportEntry.getKey();
+                }
+            }
+            return null;
+        }
+    }
+
+    /**
+     * Returns a {@link TransportClient} for {@param transportName} or {@code null} if not found.
+     *
+     * @param transportName The name of the transport as returned by {@link BackupTransport#name()}.
+     * @param caller A {@link String} identifying the caller for logging/debugging purposes. Check
+     *     {@link TransportClient#connectAsync(TransportConnectionListener, String)} for more
+     *     details.
+     * @return A {@link TransportClient} or null if not found.
+     */
+    @Nullable
+    public TransportClient getTransportClient(String transportName, String caller) {
+        ComponentName transportComponent = mTransportsByName.get(transportName);
+        if (transportComponent == null) {
+            Slog.w(TAG, "Transport " + transportName + " not registered");
+            return null;
+        }
+        return mTransportClientManager.getTransportClient(transportComponent, caller);
+    }
+
+    /**
+     * Returns a {@link TransportClient} for the current transport or null if not found.
+     *
+     * @param caller A {@link String} identifying the caller for logging/debugging purposes. Check
+     *     {@link TransportClient#connectAsync(TransportConnectionListener, String)} for more
+     *     details.
+     * @return A {@link TransportClient} or null if not found.
+     */
+    @Nullable
+    public TransportClient getCurrentTransportClient(String caller) {
+        return getTransportClient(mCurrentTransportName, caller);
+    }
+
+    /**
+     * Disposes of the {@link TransportClient}.
+     *
+     * @param transportClient The {@link TransportClient} to be disposed of.
+     * @param caller A {@link String} identifying the caller for logging/debugging purposes. Check
+     *     {@link TransportClient#connectAsync(TransportConnectionListener, String)} for more
+     *     details.
+     */
+    public void disposeOfTransportClient(TransportClient transportClient, String caller) {
+        mTransportClientManager.disposeOfTransportClient(transportClient, caller);
     }
 
     String[] getBoundTransportNames() {
@@ -374,6 +443,7 @@ public class TransportManager {
                     String componentShortString = component.flattenToShortString().intern();
                     if (success) {
                         Slog.d(TAG, "Bound to transport: " + componentShortString);
+                        mTransportsByName.put(mTransportName, component);
                         mBoundTransports.put(mTransportName, component);
                         for (TransportReadyCallback listener : mListeners) {
                             listener.onSuccess(mTransportName);
@@ -528,7 +598,7 @@ public class TransportManager {
     // These only exists to make it testable with Robolectric, which is not updated to API level 24
     // yet.
     // TODO: Get rid of this once Robolectric is updated.
-    private static UserHandle createSystemUserHandle() {
+    public static UserHandle createSystemUserHandle() {
         return new UserHandle(UserHandle.USER_SYSTEM);
     }
 }
