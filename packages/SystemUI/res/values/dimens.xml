@@ -225,6 +225,9 @@
          etc. -->
     <dimen name="qs_footer_height">48dp</dimen>
 
+    <!-- The padding between the notifications and the quick settings container -->
+    <dimen name="qs_notification_keyguard_padding">8dp</dimen>
+
     <!-- Height of the status bar header bar when expanded -->
     <dimen name="status_bar_header_height_expanded">124dp</dimen>
 
