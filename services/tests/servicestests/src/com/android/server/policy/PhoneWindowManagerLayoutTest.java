@@ -16,7 +16,12 @@
 
 package com.android.server.policy;
 
+import static android.view.Surface.ROTATION_180;
+import static android.view.Surface.ROTATION_270;
+import static android.view.Surface.ROTATION_90;
+import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
+import static android.view.WindowManager.LayoutParams.FLAG2_LAYOUT_IN_DISPLAY_CUTOUT_AREA;
 import static android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
@@ -29,6 +34,7 @@ import android.graphics.PixelFormat;
 import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
+import android.view.Surface;
 import android.view.WindowManager;
 
 import org.junit.Before;
@@ -105,4 +111,123 @@ public class PhoneWindowManagerLayoutTest extends PhoneWindowManagerTestBase {
         assertEquals(0, mAppWindow.attrs.systemUiVisibility);
         assertEquals(0, mAppWindow.attrs.subtreeSystemUiVisibility);
     }
+
+    @Test
+    public void layoutWindowLw_withDisplayCutout() {
+        addDisplayCutout();
+
+        mPolicy.addWindow(mAppWindow);
+
+        mPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
+        mPolicy.layoutWindowLw(mAppWindow, null, mFrames);
+
+        assertInsetByTopBottom(mAppWindow.parentFrame, 0, 0);
+        assertInsetByTopBottom(mAppWindow.stableFrame, STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
+        assertInsetByTopBottom(mAppWindow.contentFrame, STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
+        assertInsetByTopBottom(mAppWindow.decorFrame, 0, 0);
+    }
+
+    @Test
+    public void layoutWindowLw_withDisplayCutout_fullscreen() {
+        addDisplayCutout();
+
+        mAppWindow.attrs.subtreeSystemUiVisibility |= SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
+        mPolicy.addWindow(mAppWindow);
+
+        mPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
+        mPolicy.layoutWindowLw(mAppWindow, null, mFrames);
+
+        assertInsetByTopBottom(mAppWindow.parentFrame, STATUS_BAR_HEIGHT, 0);
+        assertInsetByTopBottom(mAppWindow.stableFrame, STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
+        assertInsetByTopBottom(mAppWindow.contentFrame, STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
+        assertInsetByTopBottom(mAppWindow.decorFrame, 0, 0);
+    }
+
+    @Test
+    public void layoutWindowLw_withDisplayCutout_fullscreenInCutout() {
+        addDisplayCutout();
+
+        mAppWindow.attrs.subtreeSystemUiVisibility |= SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
+        mAppWindow.attrs.flags2 |= FLAG2_LAYOUT_IN_DISPLAY_CUTOUT_AREA;
+        mPolicy.addWindow(mAppWindow);
+
+        mPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
+        mPolicy.layoutWindowLw(mAppWindow, null, mFrames);
+
+        assertInsetByTopBottom(mAppWindow.parentFrame, 0, 0);
+        assertInsetByTopBottom(mAppWindow.stableFrame, STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
+        assertInsetByTopBottom(mAppWindow.contentFrame, STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
+        assertInsetByTopBottom(mAppWindow.decorFrame, 0, 0);
+    }
+
+
+    @Test
+    public void layoutWindowLw_withDisplayCutout_landscape() {
+        addDisplayCutout();
+        setRotation(ROTATION_90);
+        mPolicy.addWindow(mAppWindow);
+
+        mPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
+        mPolicy.layoutWindowLw(mAppWindow, null, mFrames);
+
+        assertInsetBy(mAppWindow.parentFrame, DISPLAY_CUTOUT_HEIGHT, 0, 0, 0);
+        assertInsetBy(mAppWindow.stableFrame, 0, STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT, 0);
+        assertInsetBy(mAppWindow.contentFrame,
+                DISPLAY_CUTOUT_HEIGHT, STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT, 0);
+        assertInsetBy(mAppWindow.decorFrame, 0, 0, 0, 0);
+    }
+
+    @Test
+    public void layoutWindowLw_withDisplayCutout_seascape() {
+        addDisplayCutout();
+        setRotation(ROTATION_270);
+        mPolicy.addWindow(mAppWindow);
+
+        mPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
+        mPolicy.layoutWindowLw(mAppWindow, null, mFrames);
+
+        assertInsetBy(mAppWindow.parentFrame, 0, 0, DISPLAY_CUTOUT_HEIGHT, 0);
+        assertInsetBy(mAppWindow.stableFrame, NAV_BAR_HEIGHT, STATUS_BAR_HEIGHT, 0, 0);
+        assertInsetBy(mAppWindow.contentFrame,
+                NAV_BAR_HEIGHT, STATUS_BAR_HEIGHT, DISPLAY_CUTOUT_HEIGHT, 0);
+        assertInsetBy(mAppWindow.decorFrame, 0, 0, 0, 0);
+    }
+
+    @Test
+    public void layoutWindowLw_withDisplayCutout_fullscreen_landscape() {
+        addDisplayCutout();
+        setRotation(ROTATION_90);
+
+        mAppWindow.attrs.subtreeSystemUiVisibility |= SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
+        mPolicy.addWindow(mAppWindow);
+
+        mPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
+        mPolicy.layoutWindowLw(mAppWindow, null, mFrames);
+
+        assertInsetBy(mAppWindow.parentFrame, DISPLAY_CUTOUT_HEIGHT, 0, 0, 0);
+        assertInsetBy(mAppWindow.stableFrame, 0, STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT, 0);
+        assertInsetBy(mAppWindow.contentFrame,
+                DISPLAY_CUTOUT_HEIGHT, STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT, 0);
+        assertInsetBy(mAppWindow.decorFrame, 0, 0, 0, 0);
+    }
+
+    @Test
+    public void layoutWindowLw_withDisplayCutout_fullscreenInCutout_landscape() {
+        addDisplayCutout();
+        setRotation(ROTATION_90);
+
+        mAppWindow.attrs.subtreeSystemUiVisibility |= SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
+        mAppWindow.attrs.flags2 |= FLAG2_LAYOUT_IN_DISPLAY_CUTOUT_AREA;
+        mPolicy.addWindow(mAppWindow);
+
+        mPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
+        mPolicy.layoutWindowLw(mAppWindow, null, mFrames);
+
+        assertInsetBy(mAppWindow.parentFrame, 0, 0, 0, 0);
+        assertInsetBy(mAppWindow.stableFrame, 0, STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT, 0);
+        assertInsetBy(mAppWindow.contentFrame,
+                DISPLAY_CUTOUT_HEIGHT, STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT, 0);
+        assertInsetBy(mAppWindow.decorFrame, 0, 0, 0, 0);
+    }
+
 }
