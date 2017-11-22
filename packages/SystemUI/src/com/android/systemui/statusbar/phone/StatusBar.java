@@ -43,7 +43,6 @@ import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.KeyguardManager;
 import android.app.Notification;
-import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.RemoteInput;
@@ -80,7 +79,6 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.AudioAttributes;
 import android.media.MediaMetadata;
-import android.media.session.MediaSessionManager;
 import android.metrics.LogMaker;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -1230,13 +1228,13 @@ public class StatusBar extends SystemUI implements DemoMode,
         reevaluateStyles();
     }
 
-    private void reinflateViews() {
+    private void onThemeChanged() {
         reevaluateStyles();
 
         // Clock and bottom icons
-        mNotificationPanel.onOverlayChanged();
+        mNotificationPanel.onThemeChanged();
         // The status bar on the keyguard is a special layout.
-        if (mKeyguardStatusBar != null) mKeyguardStatusBar.onOverlayChanged();
+        if (mKeyguardStatusBar != null) mKeyguardStatusBar.onThemeChanged();
         // Recreate Indication controller because internal references changed
         mKeyguardIndicationController =
                 SystemUIFactory.getInstance().createKeyguardIndicationController(mContext,
@@ -1247,11 +1245,8 @@ public class StatusBar extends SystemUI implements DemoMode,
                 .setStatusBarKeyguardViewManager(mStatusBarKeyguardViewManager);
         mKeyguardIndicationController.setVisible(mState == StatusBarState.KEYGUARD);
         mKeyguardIndicationController.setDozing(mDozing);
-        if (mBrightnessMirrorController != null) {
-            mBrightnessMirrorController.onOverlayChanged();
-        }
         if (mStatusBarKeyguardViewManager != null) {
-            mStatusBarKeyguardViewManager.onOverlayChanged();
+            mStatusBarKeyguardViewManager.onThemeChanged();
         }
         if (mAmbientIndicationContainer instanceof AutoReinflateContainer) {
             ((AutoReinflateContainer) mAmbientIndicationContainer).inflateLayout();
@@ -1264,6 +1259,13 @@ public class StatusBar extends SystemUI implements DemoMode,
         updateClearAll();
         inflateEmptyShadeView();
         updateEmptyShadeView();
+    }
+
+    @Override
+    public void onOverlayChanged() {
+        if (mBrightnessMirrorController != null) {
+            mBrightnessMirrorController.onOverlayChanged();
+        }
     }
 
     private void updateNotificationsOnDensityOrFontScaleChanged() {
@@ -4387,7 +4389,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         if (mContext.getThemeResId() != themeResId) {
             mContext.setTheme(themeResId);
             if (inflated) {
-                reinflateViews();
+                onThemeChanged();
             }
         }
 

@@ -444,7 +444,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         hideBouncer(true /* destroyView */);
     }
 
-    public void onOverlayChanged() {
+    public void onThemeChanged() {
         hideBouncer(true /* destroyView */);
         mBouncer.prepare();
     }

@@ -330,7 +330,7 @@ public class NotificationPanelView extends PanelView implements
         }
     }
 
-    public void onOverlayChanged() {
+    public void onThemeChanged() {
         // Re-inflate the status view group.
         int index = indexOfChild(mKeyguardStatusView);
         removeView(mKeyguardStatusView);
