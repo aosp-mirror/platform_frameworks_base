@@ -26,6 +26,7 @@ import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
 import static android.Manifest.permission.MANAGE_ACTIVITY_STACKS;
 import static android.Manifest.permission.READ_FRAME_BUFFER;
 import static android.Manifest.permission.REMOVE_TASKS;
+import static android.Manifest.permission.START_ACTIVITY_AS_CALLER;
 import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
 import static android.app.ActivityManager.SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
 import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
@@ -554,6 +555,23 @@ public class ActivityManagerService extends IActivityManager.Stub
     // could take much longer than usual.
     static final int PROC_START_TIMEOUT_WITH_WRAPPER = 1200*1000;
 
+    // Permission tokens are used to temporarily granted a trusted app the ability to call
+    // #startActivityAsCaller.  A client is expected to dump its token after this time has elapsed,
+    // showing any appropriate error messages to the user.
+    private static final long START_AS_CALLER_TOKEN_TIMEOUT =
+            10 * DateUtils.MINUTE_IN_MILLIS;
+
+    // How long before the service actually expires a token.  This is slightly longer than
+    // START_AS_CALLER_TOKEN_TIMEOUT, to provide a buffer so clients will rarely encounter the
+    // expiration exception.
+    private static final long START_AS_CALLER_TOKEN_TIMEOUT_IMPL =
+            START_AS_CALLER_TOKEN_TIMEOUT + 2*1000;
+
+    // How long the service will remember expired tokens, for the purpose of providing error
+    // messaging when a client uses an expired token.
+    private static final long START_AS_CALLER_TOKEN_EXPIRED_TIMEOUT =
+            START_AS_CALLER_TOKEN_TIMEOUT_IMPL + 20 * DateUtils.MINUTE_IN_MILLIS;
+
     // How long we allow a receiver to run before giving up on it.
     static final int BROADCAST_FG_TIMEOUT = 10*1000;
     static final int BROADCAST_BG_TIMEOUT = 60*1000;
@@ -661,6 +679,13 @@ public class ActivityManagerService extends IActivityManager.Stub
     final InstrumentationReporter mInstrumentationReporter = new InstrumentationReporter();
 
     final ArrayList<ActiveInstrumentation> mActiveInstrumentation = new ArrayList<>();
+
+    // Activity tokens of system activities that are delegating their call to
+    // #startActivityByCaller, keyed by the permissionToken granted to the delegate.
+    final HashMap<IBinder, IBinder> mStartActivitySources = new HashMap<>();
+
+    // Permission tokens that have expired, but we remember for error reporting.
+    final ArrayList<IBinder> mExpiredStartAsCallerTokens = new ArrayList<>();
 
     public final IntentFirewall mIntentFirewall;
 
@@ -1781,6 +1806,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final int PUSH_TEMP_WHITELIST_UI_MSG = 68;
     static final int SERVICE_FOREGROUND_CRASH_MSG = 69;
     static final int DISPATCH_OOM_ADJ_OBSERVER_MSG = 70;
+    static final int EXPIRE_START_AS_CALLER_TOKEN_MSG = 75;
+    static final int FORGET_START_AS_CALLER_TOKEN_MSG = 76;
 
     static final int FIRST_ACTIVITY_STACK_MSG = 100;
     static final int FIRST_BROADCAST_QUEUE_MSG = 200;
@@ -2443,6 +2470,19 @@ public class ActivityManagerService extends IActivityManager.Stub
                             }
                         }
                     }
+                }
+            } break;
+            case EXPIRE_START_AS_CALLER_TOKEN_MSG: {
+                synchronized (ActivityManagerService.this) {
+                    final IBinder permissionToken = (IBinder)msg.obj;
+                    mStartActivitySources.remove(permissionToken);
+                    mExpiredStartAsCallerTokens.add(permissionToken);
+                }
+            } break;
+            case FORGET_START_AS_CALLER_TOKEN_MSG: {
+                synchronized (ActivityManagerService.this) {
+                    final IBinder permissionToken = (IBinder)msg.obj;
+                    mExpiredStartAsCallerTokens.remove(permissionToken);
                 }
             } break;
             }
@@ -4712,16 +4752,54 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     }
 
+    /**
+     * Only callable from the system. This token grants a temporary permission to call
+     * #startActivityAsCallerWithToken. The token will time out after
+     * START_AS_CALLER_TOKEN_TIMEOUT if it is not used.
+     *
+     * @param delegatorToken The Binder token referencing the system Activity that wants to delegate
+     *        the #startActivityAsCaller to another app. The "caller" will be the caller of this
+     *        activity's token, not the delegate's caller (which is probably the delegator itself).
+     *
+     * @return Returns a token that can be given to a "delegate" app that may call
+     *         #startActivityAsCaller
+     */
     @Override
-    public final int startActivityAsCaller(IApplicationThread caller, String callingPackage,
-            Intent intent, String resolvedType, IBinder resultTo, String resultWho, int requestCode,
-            int startFlags, ProfilerInfo profilerInfo, Bundle bOptions, boolean ignoreTargetSecurity,
-            int userId) {
+    public IBinder requestStartActivityPermissionToken(IBinder delegatorToken) {
+        int callingUid = Binder.getCallingUid();
+        if (UserHandle.getAppId(callingUid) != SYSTEM_UID) {
+            throw new SecurityException("Only the system process can request a permission token, " +
+                    "received request from uid: " + callingUid);
+        }
+        IBinder permissionToken = new Binder();
+        synchronized (this) {
+            mStartActivitySources.put(permissionToken, delegatorToken);
+        }
 
+        Message expireMsg = mHandler.obtainMessage(EXPIRE_START_AS_CALLER_TOKEN_MSG,
+                permissionToken);
+        mHandler.sendMessageDelayed(expireMsg, START_AS_CALLER_TOKEN_TIMEOUT_IMPL);
+
+        Message forgetMsg = mHandler.obtainMessage(FORGET_START_AS_CALLER_TOKEN_MSG,
+                permissionToken);
+        mHandler.sendMessageDelayed(forgetMsg, START_AS_CALLER_TOKEN_EXPIRED_TIMEOUT);
+
+        return permissionToken;
+    }
+
+    @Override
+    public final int startActivityAsCaller(IApplicationThread caller,
+            String callingPackage, Intent intent, String resolvedType, IBinder resultTo,
+            String resultWho, int requestCode, int startFlags, ProfilerInfo profilerInfo,
+            Bundle bOptions, IBinder permissionToken, boolean ignoreTargetSecurity, int userId) {
         // This is very dangerous -- it allows you to perform a start activity (including
-        // permission grants) as any app that may launch one of your own activities.  So
-        // we will only allow this to be done from activities that are part of the core framework,
-        // and then only when they are running as the system.
+        // permission grants) as any app that may launch one of your own activities.  So we only
+        // allow this in two cases:
+        // 1)  The caller is an activity that is part of the core framework, and then only when it
+        //     is running as the system.
+        // 2)  The caller provides a valid permissionToken.  Permission tokens are one-time use and
+        //     can only be requested by a system activity, which may then delegate this call to
+        //     another app.
         final ActivityRecord sourceRecord;
         final int targetUid;
         final String targetPackage;
@@ -4729,17 +4807,47 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (resultTo == null) {
                 throw new SecurityException("Must be called from an activity");
             }
-            sourceRecord = mStackSupervisor.isInAnyStackLocked(resultTo);
-            if (sourceRecord == null) {
-                throw new SecurityException("Called with bad activity token: " + resultTo);
+
+            final IBinder sourceToken;
+            if (permissionToken != null) {
+                // To even attempt to use a permissionToken, an app must also have this signature
+                // permission.
+                enforceCallingPermission(android.Manifest.permission.START_ACTIVITY_AS_CALLER,
+                        "startActivityAsCaller");
+                // If called with a permissionToken, we want the sourceRecord from the delegator
+                // activity that requested this token.
+                sourceToken =
+                        mStartActivitySources.remove(permissionToken);
+                if (sourceToken == null) {
+                    // Invalid permissionToken, check if it recently expired.
+                    if (mExpiredStartAsCallerTokens.contains(permissionToken)) {
+                        throw new SecurityException("Called with expired permission token: "
+                                + permissionToken);
+                    } else {
+                        throw new SecurityException("Called with invalid permission token: "
+                                + permissionToken);
+                    }
+                }
+            } else {
+                // This method was called directly by the source.
+                sourceToken = resultTo;
             }
-            if (!sourceRecord.info.packageName.equals("android")) {
-                throw new SecurityException(
-                        "Must be called from an activity that is declared in the android package");
+
+            sourceRecord = mStackSupervisor.isInAnyStackLocked(sourceToken);
+            if (sourceRecord == null) {
+                throw new SecurityException("Called with bad activity token: " + sourceToken);
             }
             if (sourceRecord.app == null) {
                 throw new SecurityException("Called without a process attached to activity");
             }
+
+            // Whether called directly or from a delegate, the source activity must be from the
+            // android package.
+            if (!sourceRecord.info.packageName.equals("android")) {
+                throw new SecurityException("Must be called from an activity that is " +
+                        "declared in the android package");
+            }
+
             if (UserHandle.getAppId(sourceRecord.app.uid) != SYSTEM_UID) {
                 // This is still okay, as long as this activity is running under the
                 // uid of the original calling activity.
@@ -4750,6 +4858,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                                     + sourceRecord.launchedFromUid);
                 }
             }
+
             if (ignoreTargetSecurity) {
                 if (intent.getComponent() == null) {
                     throw new SecurityException(

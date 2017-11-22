@@ -438,10 +438,11 @@ interface IActivityManager {
     boolean isTopOfTask(in IBinder token);
     void notifyLaunchTaskBehindComplete(in IBinder token);
     void notifyEnterAnimationComplete(in IBinder token);
+    IBinder requestStartActivityPermissionToken(in IBinder delegatorToken);
     int startActivityAsCaller(in IApplicationThread caller, in String callingPackage,
             in Intent intent, in String resolvedType, in IBinder resultTo, in String resultWho,
             int requestCode, int flags, in ProfilerInfo profilerInfo, in Bundle options,
-            boolean ignoreTargetSecurity, int userId);
+            in IBinder permissionToken, boolean ignoreTargetSecurity, int userId);
     int addAppTask(in IBinder activityToken, in Intent intent,
             in ActivityManager.TaskDescription description, in Bitmap thumbnail);
     Point getAppTaskThumbnailSize();

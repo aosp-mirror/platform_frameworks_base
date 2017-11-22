@@ -1872,8 +1872,8 @@ public class Instrumentation {
      */
     public ActivityResult execStartActivityAsCaller(
             Context who, IBinder contextThread, IBinder token, Activity target,
-            Intent intent, int requestCode, Bundle options, boolean ignoreTargetSecurity,
-            int userId) {
+            Intent intent, int requestCode, Bundle options, IBinder permissionToken,
+            boolean ignoreTargetSecurity, int userId) {
         IApplicationThread whoThread = (IApplicationThread) contextThread;
         if (mActivityMonitors != null) {
             synchronized (mSync) {
@@ -1904,7 +1904,8 @@ public class Instrumentation {
                 .startActivityAsCaller(whoThread, who.getBasePackageName(), intent,
                         intent.resolveTypeIfNeeded(who.getContentResolver()),
                         token, target != null ? target.mEmbeddedID : null,
-                        requestCode, 0, null, options, ignoreTargetSecurity, userId);
+                        requestCode, 0, null, options, permissionToken,
+                        ignoreTargetSecurity, userId);
             checkStartActivityResult(result, intent);
         } catch (RemoteException e) {
             throw new RuntimeException("Failure from system", e);
