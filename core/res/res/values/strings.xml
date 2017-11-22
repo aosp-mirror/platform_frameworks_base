@@ -2852,6 +2852,13 @@
     <!-- [CHAR LIMIT=50] Unsupported display size dialog: check box label. -->
     <string name="unsupported_display_size_show">Always show</string>
 
+    <!-- [CHAR LIMIT=200] Unsupported compile SDK dialog: message. Shown when an app may not be compatible with the device's current version of Android. -->
+    <string name="unsupported_compile_sdk_message"><xliff:g id="app_name">%1$s</xliff:g> was built for preview version %2$s of the Android OS and may behave unexpectedly. An updated version of the app may be available.</string>
+    <!-- [CHAR LIMIT=50] Unsupported compile SDK dialog: check box label. -->
+    <string name="unsupported_compile_sdk_show">Always show</string>
+    <!-- [CHAR LIMIT=50] Unsupported compile SDK dialog: label for button to check for an app update. -->
+    <string name="unsupported_compile_sdk_check_update">Check for update</string>
+
     <!-- Text of the alert that is displayed when an application has violated StrictMode. -->
     <string name="smv_application">The app <xliff:g id="application">%1$s</xliff:g>
         (process <xliff:g id="process">%2$s</xliff:g>) has violated its self-enforced StrictMode policy.</string>

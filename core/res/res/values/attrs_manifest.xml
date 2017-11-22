@@ -1340,6 +1340,23 @@
          <p>The default value of this attribute is <code>1</code>. -->
     <attr name="targetSandboxVersion" format="integer" />
 
+    <!-- The user-visible SDK version (ex. 26) of the framework against which the application was
+         compiled. This attribute is automatically specified by the Android build tools and should
+         NOT be manually specified.
+         <p>
+         This attribute is the compile-time equivalent of
+         {@link android.os.Build.VERSION#SDK_INT Build.VERSION.SDK_INT}. -->
+    <attr name="compileSdkVersion" format="integer" />
+
+    <!-- The development codename (ex. "O") of the framework against which the application was
+         compiled, or "REL" if the application was compiled against a release build. This attribute
+         is automatically specified by the Android build tools and should NOT be manually
+         specified.
+         <p>
+         This attribute is the compile-time equivalent of
+         {@link android.os.Build.VERSION#CODENAME Build.VERSION.CODENAME}. -->
+    <attr name="compileSdkVersionCodename" format="string" />
+
     <!-- The <code>manifest</code> tag is the root of an
          <code>AndroidManifest.xml</code> file,
          describing the contents of an Android package (.apk) file.  One
@@ -1369,6 +1386,8 @@
         <attr name="isolatedSplits" />
         <attr name="isFeatureSplit" />
         <attr name="targetSandboxVersion" />
+        <attr name="compileSdkVersion" />
+        <attr name="compileSdkVersionCodename" />
     </declare-styleable>
 
     <!-- The <code>application</code> tag describes application-level components

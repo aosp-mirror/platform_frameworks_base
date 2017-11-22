@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 The Android Open Source Project
+ * Copyright (C) 2017 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,48 +16,57 @@
 
 package com.android.server.am;
 
-import com.android.internal.R;
-
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.CheckBox;
 
-public class UnsupportedDisplaySizeDialog {
+import com.android.internal.R;
+import com.android.server.utils.AppInstallerUtil;
+
+public class UnsupportedCompileSdkDialog {
     private final AlertDialog mDialog;
     private final String mPackageName;
 
-    public UnsupportedDisplaySizeDialog(final AppWarnings manager, Context context,
+    public UnsupportedCompileSdkDialog(final AppWarnings manager, Context context,
             ApplicationInfo appInfo) {
         mPackageName = appInfo.packageName;
 
         final PackageManager pm = context.getPackageManager();
         final CharSequence label = appInfo.loadSafeLabel(pm);
-        final CharSequence message = context.getString(
-                R.string.unsupported_display_size_message, label);
+        final CharSequence message = context.getString(R.string.unsupported_compile_sdk_message,
+                label, appInfo.compileSdkVersionCodename);
 
-        mDialog = new AlertDialog.Builder(context)
+        final AlertDialog.Builder builder = new AlertDialog.Builder(context)
                 .setPositiveButton(R.string.ok, null)
                 .setMessage(message)
-                .setView(R.layout.unsupported_display_size_dialog_content)
-                .create();
+                .setView(R.layout.unsupported_compile_sdk_dialog_content);
+
+        // If we might be able to update the app, show a button.
+        final Intent installerIntent = AppInstallerUtil.createIntent(context, appInfo.packageName);
+        if (installerIntent != null) {
+                builder.setNeutralButton(R.string.unsupported_compile_sdk_check_update,
+                        (dialog, which) -> context.startActivity(installerIntent));
+        }
 
         // Ensure the content view is prepared.
+        mDialog = builder.create();
         mDialog.create();
 
         final Window window = mDialog.getWindow();
         window.setType(WindowManager.LayoutParams.TYPE_PHONE);
 
         // DO NOT MODIFY. Used by CTS to verify the dialog is displayed.
-        window.getAttributes().setTitle("UnsupportedDisplaySizeDialog");
+        window.getAttributes().setTitle("UnsupportedCompileSdkDialog");
 
         final CheckBox alwaysShow = mDialog.findViewById(R.id.ask_checkbox);
         alwaysShow.setChecked(true);
         alwaysShow.setOnCheckedChangeListener((buttonView, isChecked) -> manager.setPackageFlag(
-                mPackageName, AppWarnings.FLAG_HIDE_DISPLAY_SIZE, !isChecked));
+                mPackageName, AppWarnings.FLAG_HIDE_COMPILE_SDK, !isChecked));
     }
 
     public String getPackageName() {

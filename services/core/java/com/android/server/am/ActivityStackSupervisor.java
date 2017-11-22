@@ -1358,7 +1358,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                         PackageManager.NOTIFY_PACKAGE_USE_ACTIVITY);
                 r.sleeping = false;
                 r.forceNewConfig = false;
-                mService.showUnsupportedZoomDialogIfNeededLocked(r);
+                mService.getAppWarningsLocked().onStartActivity(r);
                 mService.showAskCompatModeDialogLocked(r);
                 r.compat = mService.compatibilityInfoForPackageLocked(r.info.applicationInfo);
                 ProfilerInfo profilerInfo = null;

@@ -197,6 +197,8 @@ public class PackageParserTest {
         assertEquals(a.coreApp, b.coreApp);
         assertEquals(a.mRequiredForAllUsers, b.mRequiredForAllUsers);
         assertEquals(a.mTrustedOverlay, b.mTrustedOverlay);
+        assertEquals(a.mCompileSdkVersion, b.mCompileSdkVersion);
+        assertEquals(a.mCompileSdkVersionCodename, b.mCompileSdkVersionCodename);
         assertEquals(a.use32bitAbi, b.use32bitAbi);
         assertEquals(a.packageName, b.packageName);
         assertTrue(Arrays.equals(a.splitNames, b.splitNames));

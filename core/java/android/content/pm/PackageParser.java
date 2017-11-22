@@ -678,6 +678,8 @@ public class PackageParser {
         pi.overlayTarget = p.mOverlayTarget;
         pi.overlayPriority = p.mOverlayPriority;
         pi.isStaticOverlay = p.mIsStaticOverlay;
+        pi.compileSdkVersion = p.mCompileSdkVersion;
+        pi.compileSdkVersionCodename = p.mCompileSdkVersionCodename;
         pi.firstInstallTime = firstInstallTime;
         pi.lastUpdateTime = lastUpdateTime;
         if ((flags&PackageManager.GET_GIDS) != 0) {
@@ -2075,6 +2077,16 @@ public class PackageParser {
         }
 
         pkg.coreApp = parser.getAttributeBooleanValue(null, "coreApp", false);
+
+        pkg.mCompileSdkVersion = sa.getInteger(
+                com.android.internal.R.styleable.AndroidManifest_compileSdkVersion, 0);
+        pkg.applicationInfo.compileSdkVersion = pkg.mCompileSdkVersion;
+        pkg.mCompileSdkVersionCodename = sa.getNonConfigurationString(
+                com.android.internal.R.styleable.AndroidManifest_compileSdkVersionCodename, 0);
+        if (pkg.mCompileSdkVersionCodename != null) {
+            pkg.mCompileSdkVersionCodename = pkg.mCompileSdkVersionCodename.intern();
+        }
+        pkg.applicationInfo.compileSdkVersionCodename = pkg.mCompileSdkVersionCodename;
 
         sa.recycle();
 
@@ -5967,6 +5979,9 @@ public class PackageParser {
         public boolean mIsStaticOverlay;
         public boolean mTrustedOverlay;
 
+        public int mCompileSdkVersion;
+        public String mCompileSdkVersionCodename;
+
         /**
          * Data used to feed the KeySetManagerService
          */
@@ -6458,6 +6473,8 @@ public class PackageParser {
             mOverlayPriority = dest.readInt();
             mIsStaticOverlay = (dest.readInt() == 1);
             mTrustedOverlay = (dest.readInt() == 1);
+            mCompileSdkVersion = dest.readInt();
+            mCompileSdkVersionCodename = dest.readString();
             mSigningKeys = (ArraySet<PublicKey>) dest.readArraySet(boot);
             mUpgradeKeySets = (ArraySet<String>) dest.readArraySet(boot);
 
@@ -6581,6 +6598,8 @@ public class PackageParser {
             dest.writeInt(mOverlayPriority);
             dest.writeInt(mIsStaticOverlay ? 1 : 0);
             dest.writeInt(mTrustedOverlay ? 1 : 0);
+            dest.writeInt(mCompileSdkVersion);
+            dest.writeString(mCompileSdkVersionCodename);
             dest.writeArraySet(mSigningKeys);
             dest.writeArraySet(mUpgradeKeySets);
             writeKeySetMapping(dest, mKeySetMapping);

@@ -3153,4 +3153,9 @@
   <!-- From media projection -->
   <java-symbol type="string" name="config_mediaProjectionPermissionDialogComponent" />
   <java-symbol type="string" name="config_batterySaverDeviceSpecificConfig" />
+
+  <!-- Compile SDK check -->
+  <java-symbol type="layout" name="unsupported_compile_sdk_dialog_content" />
+  <java-symbol type="string" name="unsupported_compile_sdk_message" />
+  <java-symbol type="string" name="unsupported_compile_sdk_check_update" />
 </resources>
