@@ -158,17 +158,13 @@ message StatsLogReport {
 }
 
 message ConfigMetricsReport {
-  repeated StatsLogReport metrics = 1;
-
-  optional UidMapping uid_map = 2;
-}
-
-message ConfigMetricsReportList {
   message ConfigKey {
     optional int32 uid = 1;
     optional string name = 2;
   }
   optional ConfigKey config_key = 1;
 
-  repeated ConfigMetricsReport reports = 2;
+  repeated StatsLogReport metrics = 2;
+
+  optional UidMapping uid_map = 3;
 }
