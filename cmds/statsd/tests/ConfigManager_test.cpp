@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "src/config/ConfigManager.h"
+#include "src/metrics/MetricsManager.h"
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -58,6 +59,11 @@ MATCHER_P2(ConfigKeyEq, uid, name, "") {
  */
 MATCHER_P(StatsdConfigEq, name, "") {
     return arg.name() == name;
+}
+
+TEST(ConfigManagerTest, TestFakeConfig) {
+    auto metricsManager = std::make_unique<MetricsManager>(build_fake_config());
+    EXPECT_TRUE(metricsManager->isConfigValid());
 }
 
 /**
