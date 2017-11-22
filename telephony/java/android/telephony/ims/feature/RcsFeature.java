@@ -16,6 +16,8 @@
 
 package android.telephony.ims.feature;
 
+import com.android.ims.internal.IImsRcsFeature;
+
 /**
  * Base implementation of the RcsFeature APIs. Any ImsService wishing to support RCS should extend
  * this class and provide implementations of the RcsFeature methods that they support.
@@ -24,6 +26,11 @@ package android.telephony.ims.feature;
 
 public class RcsFeature extends ImsFeature {
 
+    private final IImsRcsFeature mImsRcsBinder = new IImsRcsFeature.Stub() {
+        // Empty Default Implementation.
+    };
+
+
     public RcsFeature() {
         super();
     }
@@ -31,5 +38,10 @@ public class RcsFeature extends ImsFeature {
     @Override
     public void onFeatureRemoved() {
 
+    }
+
+    @Override
+    public final IImsRcsFeature getBinder() {
+        return mImsRcsBinder;
     }
 }
