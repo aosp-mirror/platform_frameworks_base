@@ -344,7 +344,7 @@ public class UsbManager {
     public UsbDeviceConnection openDevice(UsbDevice device) {
         try {
             String deviceName = device.getDeviceName();
-            ParcelFileDescriptor pfd = mService.openDevice(deviceName);
+            ParcelFileDescriptor pfd = mService.openDevice(deviceName, mContext.getPackageName());
             if (pfd != null) {
                 UsbDeviceConnection connection = new UsbDeviceConnection(device);
                 boolean result = connection.open(deviceName, pfd, mContext);
@@ -400,6 +400,9 @@ public class UsbManager {
      * Permission might have been granted temporarily via
      * {@link #requestPermission(UsbDevice, PendingIntent)} or
      * by the user choosing the caller as the default application for the device.
+     * Permission for USB devices of class {@link UsbConstants#USB_CLASS_VIDEO} for clients that
+     * target SDK {@link android.os.Build.VERSION_CODES#P} and above can be granted only if they
+     * have additionally the {@link android.Manifest.permission#CAMERA} permission.
      *
      * @param device to check permissions for
      * @return true if caller has permission
@@ -409,7 +412,7 @@ public class UsbManager {
             return false;
         }
         try {
-            return mService.hasDevicePermission(device);
+            return mService.hasDevicePermission(device, mContext.getPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -449,6 +452,10 @@ public class UsbManager {
      * <li> {@link #EXTRA_PERMISSION_GRANTED} containing boolean indicating whether
      * permission was granted by the user
      * </ul>
+     *
+     * Permission for USB devices of class {@link UsbConstants#USB_CLASS_VIDEO} for clients that
+     * target SDK {@link android.os.Build.VERSION_CODES#P} and above can be granted only if they
+     * have additionally the {@link android.Manifest.permission#CAMERA} permission.
      *
      * @param device to request permissions for
      * @param pi PendingIntent for returning result
