@@ -19,6 +19,9 @@ package com.android.systemui.volume;
 import static android.accessibilityservice.AccessibilityServiceInfo.FEEDBACK_ALL_MASK;
 import static android.accessibilityservice.AccessibilityServiceInfo.FEEDBACK_GENERIC;
 
+import static com.android.systemui.util.leak.RotationUtils.ROTATION_LANDSCAPE;
+import static com.android.systemui.util.leak.RotationUtils.ROTATION_NONE;
+import static com.android.systemui.util.leak.RotationUtils.ROTATION_SEASCAPE;
 import static com.android.systemui.volume.Events.DISMISS_REASON_TOUCH_OUTSIDE;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
@@ -42,6 +45,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
+import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.util.Log;
 import android.util.Slog;
@@ -67,6 +71,7 @@ import android.widget.TextView;
 
 import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
+import com.android.systemui.HardwareBgDrawable;
 import com.android.systemui.HardwareUiLayout;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
@@ -74,6 +79,7 @@ import com.android.systemui.plugins.VolumeDialog;
 import com.android.systemui.plugins.VolumeDialogController;
 import com.android.systemui.plugins.VolumeDialogController.State;
 import com.android.systemui.plugins.VolumeDialogController.StreamState;
+import com.android.systemui.util.leak.RotationUtils;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -97,9 +103,13 @@ public class VolumeDialogImpl implements VolumeDialog {
     private final VolumeDialogController mController;
 
     private Window mWindow;
-    private HardwareUiLayout mHardwareLayout;
+    //private HardwareUiLayout mHardwareLayout;
     private CustomDialog mDialog;
     private ViewGroup mDialogView;
+    private boolean mEdgeBleed;
+    private boolean mRoundedDivider;
+    private HardwareBgDrawable mBackground;
+    private int mRotation = ROTATION_NONE;
     private ViewGroup mDialogRowsView;
     private ViewGroup mDialogContentView;
     private final List<VolumeRow> mRows = new ArrayList<>();
@@ -111,6 +121,8 @@ public class VolumeDialogImpl implements VolumeDialog {
     private final Accessibility mAccessibility = new Accessibility();
     private final ColorStateList mActiveSliderTint;
     private final ColorStateList mInactiveSliderTint;
+    private static final String EDGE_BLEED = "sysui_hwui_edge_bleed";
+    private static final String ROUNDED_DIVIDER = "sysui_hwui_rounded_divider";
 
     private boolean mShowing;
     private boolean mShowA11yStream;
@@ -181,8 +193,16 @@ public class VolumeDialogImpl implements VolumeDialog {
                 return true;
             }
         });
-        mHardwareLayout = HardwareUiLayout.get(mDialogView);
-        mHardwareLayout.setOutsideTouchListener(view -> dismiss(DISMISS_REASON_TOUCH_OUTSIDE));
+
+        mEdgeBleed = Settings.Secure.getInt(mContext.getContentResolver(),
+                EDGE_BLEED, 0) != 0;
+        mRoundedDivider = Settings.Secure.getInt(mContext.getContentResolver(),
+                ROUNDED_DIVIDER, 1) != 0;
+        updateEdgeMargin(mEdgeBleed ? 0 : getEdgePadding());
+        mBackground = new HardwareBgDrawable(mRoundedDivider, !mEdgeBleed, mContext);
+        mDialogView.setBackground(mBackground);
+        //mHardwareLayout = HardwareUiLayout.get(mDialogView);
+        //mHardwareLayout.setOutsideTouchListener(view -> dismiss(DISMISS_REASON_TOUCH_OUTSIDE));
 
         mDialogContentView = mDialog.findViewById(R.id.volume_dialog_content);
         mDialogRowsView = mDialogContentView.findViewById(R.id.volume_dialog_rows);
@@ -208,6 +228,25 @@ public class VolumeDialogImpl implements VolumeDialog {
             addExistingRows();
         }
         updateRowsH(getActiveRow());
+    }
+
+    private int getEdgePadding() {
+        return mContext.getResources().getDimensionPixelSize(R.dimen.edge_margin);
+    }
+
+    private void updateEdgeMargin(int edge) {
+        if (mDialogView != null) {
+            mRotation = RotationUtils.getRotation(mContext);
+            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) mDialogView.getLayoutParams();
+            if (mRotation == ROTATION_LANDSCAPE) {
+                params.topMargin = edge;
+            } else if (mRotation == ROTATION_SEASCAPE) {
+                params.bottomMargin = edge;
+            } else {
+                params.rightMargin = edge;
+            }
+            mDialogView.setLayoutParams(params);
+        }
     }
 
     private ColorStateList loadColorStateList(int colorResId) {
@@ -389,11 +428,11 @@ public class VolumeDialogImpl implements VolumeDialog {
         rescheduleTimeoutH();
         if (mShowing) return;
         mShowing = true;
-        mHardwareLayout.setTranslationX(getAnimTranslation());
-        mHardwareLayout.setAlpha(0);
-        mHardwareLayout.animate()
+        mDialogView.setTranslationY(getAnimTranslation());
+        mDialogView.setAlpha(0);
+        mDialogView.animate()
                 .alpha(1)
-                .translationX(0)
+                .translationY(0)
                 .setDuration(300)
                 .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
                 .withEndAction(() -> {
@@ -432,9 +471,9 @@ public class VolumeDialogImpl implements VolumeDialog {
         mHandler.removeMessages(H.SHOW);
         if (!mShowing) return;
         mShowing = false;
-        mHardwareLayout.setTranslationX(0);
-        mHardwareLayout.setAlpha(1);
-        mHardwareLayout.animate()
+        mDialogView.setTranslationX(0);
+        mDialogView.setAlpha(1);
+        mDialogView.animate()
                 .alpha(0)
                 .translationX(getAnimTranslation())
                 .setDuration(300)
