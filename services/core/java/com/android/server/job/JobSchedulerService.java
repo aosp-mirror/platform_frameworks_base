@@ -151,6 +151,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
     StorageController mStorageController;
     /** Need directly for sending uid state changes */
     private BackgroundJobsController mBackgroundJobsController;
+    private DeviceIdleJobsController mDeviceIdleJobsController;
     /**
      * Queue of pending jobs. The JobServiceContext class will receive jobs from this list
      * when ready to execute them.
@@ -622,14 +623,23 @@ public final class JobSchedulerService extends com.android.server.SystemService
             if (disabled) {
                 cancelJobsForUid(uid, "uid gone");
             }
+            synchronized (mLock) {
+                mDeviceIdleJobsController.setUidActiveLocked(uid, false);
+            }
         }
 
         @Override public void onUidActive(int uid) throws RemoteException {
+            synchronized (mLock) {
+                mDeviceIdleJobsController.setUidActiveLocked(uid, true);
+            }
         }
 
         @Override public void onUidIdle(int uid, boolean disabled) {
             if (disabled) {
                 cancelJobsForUid(uid, "app uid idle");
+            }
+            synchronized (mLock) {
+                mDeviceIdleJobsController.setUidActiveLocked(uid, false);
             }
         }
 
@@ -939,11 +949,11 @@ public final class JobSchedulerService extends com.android.server.SystemService
         mControllers.add(mBatteryController);
         mStorageController = StorageController.get(this);
         mControllers.add(mStorageController);
-        mBackgroundJobsController = BackgroundJobsController.get(this);
-        mControllers.add(mBackgroundJobsController);
+        mControllers.add(BackgroundJobsController.get(this));
         mControllers.add(AppIdleController.get(this));
         mControllers.add(ContentObserverController.get(this));
-        mControllers.add(DeviceIdleJobsController.get(this));
+        mDeviceIdleJobsController = DeviceIdleJobsController.get(this);
+        mControllers.add(mDeviceIdleJobsController);
 
         // If the job store determined that it can't yet reschedule persisted jobs,
         // we need to start watching the clock.
