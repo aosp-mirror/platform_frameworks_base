@@ -1562,7 +1562,8 @@ LOCAL_SRC_FILES := \
     tools/streaming_proto/stream.proto \
     cmds/am/proto/instrumentation_data.proto \
     $(call all-proto-files-under, core/proto) \
-    $(call all-proto-files-under, libs/incident/proto)
+    $(call all-proto-files-under, libs/incident/proto) \
+    $(call all-proto-files-under, cmds/statsd/src)
 include $(BUILD_HOST_JAVA_LIBRARY)
 
 # ====  java proto device library (for test only)  ==============================
