@@ -2494,7 +2494,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     DUMP_FLAG_PRIORITY_CRITICAL | DUMP_FLAG_PRIORITY_NORMAL | DUMP_FLAG_PROTO);
             ServiceManager.addService(ProcessStats.SERVICE_NAME, mProcessStats);
             ServiceManager.addService("meminfo", new MemBinder(this), /* allowIsolated= */ false,
-                    DUMP_FLAG_PRIORITY_HIGH | DUMP_FLAG_PRIORITY_NORMAL);
+                    DUMP_FLAG_PRIORITY_HIGH);
             ServiceManager.addService("gfxinfo", new GraphicsBinder(this));
             ServiceManager.addService("dbinfo", new DbBinder(this));
             if (MONITOR_CPU_USAGE) {
@@ -2552,8 +2552,14 @@ public class ActivityManagerService extends IActivityManager.Stub
         private final PriorityDump.PriorityDumper mPriorityDumper =
                 new PriorityDump.PriorityDumper() {
             @Override
-            public void dumpNormal(FileDescriptor fd, PrintWriter pw, String[] args,
+            public void dumpHigh(FileDescriptor fd, PrintWriter pw, String[] args,
                     boolean asProto) {
+                if (asProto) return;
+                mActivityManagerService.dumpApplicationMemoryUsage(fd,
+                        pw, "  ", new String[] {"-a"}, false, null);
+            }
+            @Override
+            public void dump(FileDescriptor fd, PrintWriter pw, String[] args, boolean asProto) {
                 if (asProto) return;
                 mActivityManagerService.dumpApplicationMemoryUsage(fd, pw, "  ", args, false, null);
             }
