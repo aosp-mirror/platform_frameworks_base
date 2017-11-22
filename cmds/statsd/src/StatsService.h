@@ -160,6 +160,11 @@ private:
      */
     status_t cmd_remove_config_files(FILE* out);
 
+    /*
+     * Dump memory usage by statsd.
+     */
+    status_t cmd_dump_memory_info(FILE* out);
+
     /**
      * Update a configuration.
      */
