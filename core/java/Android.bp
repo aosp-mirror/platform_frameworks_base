@@ -3,7 +3,26 @@ filegroup {
     srcs: ["android/security/keymaster/IKeyAttestationApplicationIdProvider.aidl"],
 }
 
-filegroup {
-    name: "IKeystoreService.aidl",
+// only used by key_store_service
+cc_library_static {
+    name: "libkeystore_aidl",
     srcs: ["android/security/IKeystoreService.aidl"],
+    aidl: {
+        export_aidl_headers: true,
+        include_dirs: ["frameworks/base/core/java/"],
+    },
+    header_libs: [
+        "libkeystore_headers",
+    ],
+    shared_libs: [
+        "libbinder",
+        "libcutils",
+        "libhardware",
+        "libhidlbase",
+        "libhidltransport",
+        "libhwbinder",
+        "liblog",
+        "libselinux",
+        "libutils",
+    ],
 }
