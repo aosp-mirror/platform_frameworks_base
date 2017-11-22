@@ -43,12 +43,12 @@ bool handleMetricWithLogTrackers(const string what, const int metricIndex,
                                  int& logTrackerIndex) {
     auto logTrackerIt = logTrackerMap.find(what);
     if (logTrackerIt == logTrackerMap.end()) {
-        ALOGW("cannot find the LogEntryMatcher %s in config", what.c_str());
+        ALOGW("cannot find the LogEntryMatcher \"%s\" in config", what.c_str());
         return false;
     }
     if (usedForDimension && allLogEntryMatchers[logTrackerIt->second]->getTagIds().size() > 1) {
-        ALOGE("LogEntryMatcher %s has more than one tag ids. When a metric has dimension, the "
-              "\"what\" can only about one atom type.",
+        ALOGE("LogEntryMatcher \"%s\" has more than one tag ids. When a metric has dimension, "
+              "the \"what\" can only about one atom type.",
               what.c_str());
         return false;
     }
@@ -67,14 +67,14 @@ bool handleMetricWithConditions(
         unordered_map<int, std::vector<int>>& conditionToMetricMap) {
     auto condition_it = conditionTrackerMap.find(condition);
     if (condition_it == conditionTrackerMap.end()) {
-        ALOGW("cannot find the Condition %s in the config", condition.c_str());
+        ALOGW("cannot find Condition \"%s\" in the config", condition.c_str());
         return false;
     }
 
     for (const auto& link : links) {
         auto it = conditionTrackerMap.find(link.condition());
         if (it == conditionTrackerMap.end()) {
-            ALOGW("cannot find the Condition %s in the config", link.condition().c_str());
+            ALOGW("cannot find Condition \"%s\" in the config", link.condition().c_str());
             return false;
         }
         allConditionTrackers[condition_it->second]->setSliced(true);
@@ -110,7 +110,7 @@ bool initLogTrackers(const StatsdConfig& config, unordered_map<string, int>& log
                         new CombinationLogMatchingTracker(logMatcher.name(), index));
                 break;
             default:
-                ALOGE("Matcher %s malformed", logMatcher.name().c_str());
+                ALOGE("Matcher \"%s\" malformed", logMatcher.name().c_str());
                 return false;
                 // continue;
         }
@@ -158,7 +158,7 @@ bool initConditions(const StatsdConfig& config, const unordered_map<string, int>
                 break;
             }
             default:
-                ALOGE("Condition %s malformed", condition.name().c_str());
+                ALOGE("Condition \"%s\" malformed", condition.name().c_str());
                 return false;
         }
         if (conditionTrackerMap.find(condition.name()) != conditionTrackerMap.end()) {
@@ -204,7 +204,7 @@ bool initMetrics(const StatsdConfig& config, const unordered_map<string, int>& l
     for (int i = 0; i < config.count_metric_size(); i++) {
         const CountMetric& metric = config.count_metric(i);
         if (!metric.has_what()) {
-            ALOGW("cannot find what in CountMetric %s", metric.name().c_str());
+            ALOGW("cannot find \"what\" in CountMetric \"%s\"", metric.name().c_str());
             return false;
         }
 
@@ -341,7 +341,7 @@ bool initMetrics(const StatsdConfig& config, const unordered_map<string, int>& l
     for (int i = 0; i < config.value_metric_size(); i++) {
         const ValueMetric& metric = config.value_metric(i);
         if (!metric.has_what()) {
-            ALOGW("cannot find what in ValueMetric %s", metric.name().c_str());
+            ALOGW("cannot find \"what\" in ValueMetric \"%s\"", metric.name().c_str());
             return false;
         }
 
@@ -387,7 +387,7 @@ bool initMetrics(const StatsdConfig& config, const unordered_map<string, int>& l
     for (int i = 0; i < config.gauge_metric_size(); i++) {
         const GaugeMetric& metric = config.gauge_metric(i);
         if (!metric.has_what()) {
-            ALOGW("cannot find what in ValueMetric %s", metric.name().c_str());
+            ALOGW("cannot find \"what\" in ValueMetric \"%s\"", metric.name().c_str());
             return false;
         }
 
@@ -438,7 +438,7 @@ bool initAlerts(const StatsdConfig& config, const unordered_map<string, int>& me
         const Alert& alert = config.alert(i);
         const auto& itr = metricProducerMap.find(alert.metric_name());
         if (itr == metricProducerMap.end()) {
-            ALOGW("alert has unknown metric name: %s %s", alert.name().c_str(),
+            ALOGW("alert \"%s\" has unknown metric name: \"%s\"", alert.name().c_str(),
                   alert.metric_name().c_str());
             return false;
         }
