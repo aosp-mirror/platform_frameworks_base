@@ -690,7 +690,7 @@ public class AppWindowContainerController
                 return;
             }
             if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Clear freezing of " + mToken + ": hidden="
-                    + mContainer.isHidden() + " freezing=" + mContainer.mAppAnimator.freezingScreen);
+                    + mContainer.isHidden() + " freezing=" + mContainer.isFreezingScreen());
             mContainer.stopFreezingScreen(true, force);
         }
     }

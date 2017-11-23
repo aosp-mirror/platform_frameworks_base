@@ -2627,7 +2627,7 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized (mWindowMap) {
             for (final WindowState win : mWindowMap.values()) {
                 final AppWindowToken appToken = win.mAppToken;
-                if (appToken != null && appToken.mAppAnimator != null) {
+                if (appToken != null) {
                     appToken.endDelayingAnimationStart();
                 }
             }

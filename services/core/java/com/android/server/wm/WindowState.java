@@ -1501,7 +1501,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      */
     boolean isInteresting() {
         return mAppToken != null && !mAppDied
-                && (!mAppToken.mAppAnimator.freezingScreen || !mAppFreezing);
+                && (!mAppToken.isFreezingScreen() || !mAppFreezing);
     }
 
     /**
@@ -2001,28 +2001,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     void setHasSurface(boolean hasSurface) {
         mHasSurface = hasSurface;
-    }
-
-    int getAnimLayerAdjustment() {
-        if (mIsImWindow && mService.mInputMethodTarget != null) {
-            final AppWindowToken appToken = mService.mInputMethodTarget.mAppToken;
-            if (appToken != null) {
-                return appToken.getAnimLayerAdjustment();
-            }
-        }
-
-        return mToken.getAnimLayerAdjustment();
-    }
-
-    int getSpecialWindowAnimLayerAdjustment() {
-        int specialAdjustment = 0;
-        if (mIsImWindow) {
-            specialAdjustment = getDisplayContent().mInputMethodAnimLayerAdjustment;
-        } else if (mIsWallpaper) {
-            specialAdjustment = getDisplayContent().mWallpaperController.getAnimLayerAdjustment();
-        }
-
-        return mLayer + specialAdjustment;
     }
 
     boolean canBeImeTarget() {
@@ -3154,7 +3132,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             pw.print(prefix); pw.print("mBaseLayer="); pw.print(mBaseLayer);
                     pw.print(" mSubLayer="); pw.print(mSubLayer);
                     pw.print(" mAnimLayer="); pw.print(mLayer); pw.print("+");
-                    pw.print(getAnimLayerAdjustment());
                     pw.print("="); pw.print(mWinAnimator.mAnimLayer);
                     pw.print(" mLastLayer="); pw.println(mWinAnimator.mLastLayer);
         }
@@ -4400,7 +4377,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     @Override
     boolean needsZBoost() {
-        return getAnimLayerAdjustment() > 0 || mWillReplaceWindow;
+        if (mIsImWindow && mService.mInputMethodTarget != null) {
+            final AppWindowToken appToken = mService.mInputMethodTarget.mAppToken;
+            if (appToken != null) {
+                return appToken.needsZBoost();
+            }
+        }
+        return mWillReplaceWindow;
     }
 
     private void applyDims(Dimmer dimmer) {

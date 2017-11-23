@@ -117,7 +117,7 @@ class WallpaperWindowToken extends WindowToken {
         }
     }
 
-    void updateWallpaperWindows(boolean visible, int animLayerAdj) {
+    void updateWallpaperWindows(boolean visible) {
 
         if (isHidden() == visible) {
             if (DEBUG_WALLPAPER_LIGHT) Slog.d(TAG,

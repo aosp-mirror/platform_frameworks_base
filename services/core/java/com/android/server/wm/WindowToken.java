@@ -199,11 +199,6 @@ class WindowToken extends WindowContainer<WindowState> {
         return mChildren.isEmpty();
     }
 
-    // Used by AppWindowToken.
-    int getAnimLayerAdjustment() {
-        return 0;
-    }
-
     WindowState getReplacingWindow() {
         for (int i = mChildren.size() - 1; i >= 0; i--) {
             final WindowState win = mChildren.get(i);

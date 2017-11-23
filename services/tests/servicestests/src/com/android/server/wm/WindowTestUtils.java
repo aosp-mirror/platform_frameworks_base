@@ -160,7 +160,6 @@ public class WindowTestUtils {
 
     /* Used so we can gain access to some protected members of the {@link WindowToken} class */
     public static class TestWindowToken extends WindowToken {
-        int adj = 0;
 
         TestWindowToken(int type, DisplayContent dc) {
             this(type, dc, false /* persistOnEmpty */);
@@ -177,11 +176,6 @@ public class WindowTestUtils {
 
         boolean hasWindow(WindowState w) {
             return mChildren.contains(w);
-        }
-
-        @Override
-        int getAnimLayerAdjustment() {
-            return adj;
         }
     }
 

@@ -102,7 +102,6 @@ class WindowStateAnimator {
     final WindowState mWin;
     private final WindowStateAnimator mParentWinAnimator;
     final WindowAnimator mAnimator;
-    AppWindowAnimator mAppAnimator;
     final Session mSession;
     final WindowManagerPolicy mPolicy;
     final Context mContext;
@@ -227,7 +226,6 @@ class WindowStateAnimator {
 
         mWin = win;
         mParentWinAnimator = !win.isChildWindow() ? null : win.getParentWindow().mWinAnimator;
-        mAppAnimator = win.mAppToken == null ? null : win.mAppToken.mAppAnimator;
         mSession = win.mSession;
         mAttrType = win.mAttrs.type;
         mIsWallpaper = win.mIsWallpaper;

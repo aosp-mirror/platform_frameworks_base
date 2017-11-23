@@ -62,7 +62,6 @@ import android.os.Binder;
 import android.os.Debug;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.os.SystemClock;
 import android.os.Trace;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
@@ -96,8 +95,6 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     // Non-null only for application tokens.
     final IApplicationToken appToken;
 
-    @NonNull final AppWindowAnimator mAppAnimator;
-
     final boolean mVoiceInteraction;
 
     /** @see WindowContainer#fillsParent() */
@@ -125,6 +122,8 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     private int mNumDrawnWindows;
     boolean inPendingTransaction;
     boolean allDrawn;
+    private boolean mLastAllDrawn;
+
     // Set to true when this app creates a surface while in the middle of an animation. In that
     // case do not clear allDrawn until the animation completes.
     boolean deferClearAllDrawn;
@@ -211,6 +210,12 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
     private AppWindowThumbnail mThumbnail;
 
+    /** Have we been asked to have this token keep the screen frozen? */
+    private boolean mFreezingScreen;
+
+    /** Whether this token should be boosted at the top of all app window tokens. */
+    private boolean mNeedsZBoost;
+
     AppWindowToken(WindowManagerService service, IApplicationToken token, boolean voiceInteraction,
             DisplayContent dc, long inputDispatchingTimeoutNanos, boolean fullscreen,
             boolean showForAllUsers, int targetSdk, int orientation, int rotationAnimationHint,
@@ -240,7 +245,6 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         mVoiceInteraction = voiceInteraction;
         mFillsParent = fillsParent;
         mInputApplicationHandle = new InputApplicationHandle(this);
-        mAppAnimator = new AppWindowAnimator();
     }
 
     void onFirstWindowDrawn(WindowState win, WindowStateAnimator winAnimator) {
@@ -1018,13 +1022,12 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
     void startFreezingScreen() {
         if (DEBUG_ORIENTATION) logWithStack(TAG, "Set freezing of " + appToken + ": hidden="
-                + isHidden() + " freezing=" + mAppAnimator.freezingScreen + " hiddenRequested="
+                + isHidden() + " freezing=" + mFreezingScreen + " hiddenRequested="
                 + hiddenRequested);
         if (!hiddenRequested) {
-            if (!mAppAnimator.freezingScreen) {
-                mAppAnimator.freezingScreen = true;
+            if (!mFreezingScreen) {
+                mFreezingScreen = true;
                 mService.registerAppFreezeListener(this);
-                mAppAnimator.lastFreezeDuration = 0;
                 mService.mAppsFreezingScreen++;
                 if (mService.mAppsFreezingScreen == 1) {
                     mService.startFreezingDisplayLocked(false, 0, 0, getDisplayContent());
@@ -1041,7 +1044,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     }
 
     void stopFreezingScreen(boolean unfreezeSurfaceNow, boolean force) {
-        if (!mAppAnimator.freezingScreen) {
+        if (!mFreezingScreen) {
             return;
         }
         if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Clear freezing of " + this + " force=" + force);
@@ -1053,10 +1056,8 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         }
         if (force || unfrozeWindows) {
             if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "No longer freezing: " + this);
-            mAppAnimator.freezingScreen = false;
+            mFreezingScreen = false;
             mService.unregisterAppFreezeListener(this);
-            mAppAnimator.lastFreezeDuration =
-                    (int)(SystemClock.elapsedRealtime() - mService.mDisplayFreezeTime);
             mService.mAppsFreezingScreen--;
             mService.mLastFinishedFreezeSource = this;
         }
@@ -1203,17 +1204,17 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
     @Override
     void checkAppWindowsReadyToShow() {
-        if (allDrawn == mAppAnimator.allDrawn) {
+        if (allDrawn == mLastAllDrawn) {
             return;
         }
 
-        mAppAnimator.allDrawn = allDrawn;
+        mLastAllDrawn = allDrawn;
         if (!allDrawn) {
             return;
         }
 
         // The token has now changed state to having all windows shown...  what to do, what to do?
-        if (mAppAnimator.freezingScreen) {
+        if (mFreezingScreen) {
             showAllWindowsLocked();
             stopFreezingScreen(false, true);
             if (DEBUG_ORIENTATION) Slog.i(TAG,
@@ -1297,10 +1298,10 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
         if (DEBUG_STARTING_WINDOW_VERBOSE && w == startingWindow) {
             Slog.d(TAG, "updateWindows: starting " + w + " isOnScreen=" + w.isOnScreen()
-                    + " allDrawn=" + allDrawn + " freezingScreen=" + mAppAnimator.freezingScreen);
+                    + " allDrawn=" + allDrawn + " freezingScreen=" + mFreezingScreen);
         }
 
-        if (allDrawn && !mAppAnimator.freezingScreen) {
+        if (allDrawn && !mFreezingScreen) {
             return false;
         }
 
@@ -1335,7 +1336,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
                         if (DEBUG_VISIBILITY || DEBUG_ORIENTATION) Slog.v(TAG, "tokenMayBeDrawn: "
                                 + this + " w=" + w + " numInteresting=" + mNumInterestingWindows
-                                + " freezingScreen=" + mAppAnimator.freezingScreen
+                                + " freezingScreen=" + mFreezingScreen
                                 + " mAppFreezing=" + w.mAppFreezing);
 
                         isInterestingAndDrawn = true;
@@ -1502,11 +1503,6 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                 true /* topToBottom */);
     }
 
-    @Override
-    int getAnimLayerAdjustment() {
-        return mAppAnimator.animLayerAdjustment;
-    }
-
     boolean applyAnimationLocked(WindowManager.LayoutParams lp, int transit, boolean enter,
             boolean isVoiceInteraction) {
 
@@ -1531,7 +1527,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                         mService.mSurfaceAnimationRunner);
                 startAnimation(getPendingTransaction(), adapter, !isVisible());
                 if (a.getZAdjustment() == Animation.ZORDER_TOP) {
-                    mAppAnimator.animLayerAdjustment = 1;
+                    mNeedsZBoost = true;
                     getDisplayContent().assignWindowLayers(false /* setLayoutNeeded */);
                 }
                 mTransit = transit;
@@ -1618,7 +1614,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
         mTransit = TRANSIT_UNSET;
         mTransitFlags = 0;
-        mAppAnimator.animLayerAdjustment = 0;
+        mNeedsZBoost = false;
 
         setAppLayoutChanges(FINISH_LAYOUT_REDO_ANIM | FINISH_LAYOUT_REDO_WALLPAPER,
                 "AppWindowToken");
@@ -1742,13 +1738,13 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             pw.print(prefix); pw.print("mAppStopped="); pw.println(mAppStopped);
         }
         if (mNumInterestingWindows != 0 || mNumDrawnWindows != 0
-                || allDrawn || mAppAnimator.allDrawn) {
+                || allDrawn || mLastAllDrawn) {
             pw.print(prefix); pw.print("mNumInterestingWindows=");
                     pw.print(mNumInterestingWindows);
                     pw.print(" mNumDrawnWindows="); pw.print(mNumDrawnWindows);
                     pw.print(" inPendingTransaction="); pw.print(inPendingTransaction);
                     pw.print(" allDrawn="); pw.print(allDrawn);
-                    pw.print(" (animator="); pw.print(mAppAnimator.allDrawn);
+                    pw.print(" lastAllDrawn="); pw.print(mLastAllDrawn);
                     pw.println(")");
         }
         if (inPendingTransaction) {
@@ -1807,6 +1803,15 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         }
         mLastSurfaceShowing = show;
         super.prepareSurfaces();
+    }
+
+    boolean isFreezingScreen() {
+        return mFreezingScreen;
+    }
+
+    @Override
+    boolean needsZBoost() {
+        return mNeedsZBoost || super.needsZBoost();
     }
 
     @CallSuper

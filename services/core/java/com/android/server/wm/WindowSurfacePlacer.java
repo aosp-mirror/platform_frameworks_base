@@ -397,7 +397,6 @@ class WindowSurfacePlacer {
         final int appsCount = mService.mOpeningApps.size();
         for (int i = 0; i < appsCount; i++) {
             AppWindowToken wtoken = mService.mOpeningApps.valueAt(i);
-            final AppWindowAnimator appAnimator = wtoken.mAppAnimator;
             if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "Now opening app" + wtoken);
 
             if (!wtoken.setVisibility(animLp, true, transit, false, voiceInteraction)){

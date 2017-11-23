@@ -64,8 +64,6 @@ class WallpaperController {
     // to another, and this is the previous wallpaper target.
     private WindowState mPrevWallpaperTarget = null;
 
-    private int mWallpaperAnimLayerAdjustment;
-
     private float mLastWallpaperX = -1;
     private float mLastWallpaperY = -1;
     private float mLastWallpaperXStep = -1;
@@ -442,10 +440,6 @@ class WallpaperController {
         }
     }
 
-    int getAnimLayerAdjustment() {
-        return mWallpaperAnimLayerAdjustment;
-    }
-
     private void findWallpaperTarget(DisplayContent dc) {
         mFindResults.reset();
         if (dc.isStackVisible(WINDOWING_MODE_FREEFORM)) {
@@ -547,7 +541,7 @@ class WallpaperController {
     private void updateWallpaperTokens(boolean visible) {
         for (int curTokenNdx = mWallpaperTokens.size() - 1; curTokenNdx >= 0; curTokenNdx--) {
             final WallpaperWindowToken token = mWallpaperTokens.get(curTokenNdx);
-            token.updateWallpaperWindows(visible, mWallpaperAnimLayerAdjustment);
+            token.updateWallpaperWindows(visible);
             token.getDisplayContent().assignWindowLayers(false);
         }
     }
@@ -566,12 +560,6 @@ class WallpaperController {
         if (DEBUG_WALLPAPER) Slog.v(TAG, "Wallpaper visibility: " + visible);
 
         if (visible) {
-            // If the wallpaper target is animating, we may need to copy its layer adjustment.
-            // Only do this if we are not transferring between two wallpaper targets.
-            mWallpaperAnimLayerAdjustment =
-                    (mPrevWallpaperTarget == null && mWallpaperTarget.mAppToken != null)
-                            ? mWallpaperTarget.mAppToken.getAnimLayerAdjustment() : 0;
-
             if (mWallpaperTarget.mWallpaperX >= 0) {
                 mLastWallpaperX = mWallpaperTarget.mWallpaperX;
                 mLastWallpaperXStep = mWallpaperTarget.mWallpaperXStep;
@@ -681,10 +669,6 @@ class WallpaperController {
             pw.print(prefix);
             pw.print("mLastWallpaperDisplayOffsetX="); pw.print(mLastWallpaperDisplayOffsetX);
             pw.print(" mLastWallpaperDisplayOffsetY="); pw.println(mLastWallpaperDisplayOffsetY);
-        }
-
-        if (mWallpaperAnimLayerAdjustment != 0) {
-            pw.println(prefix + "mWallpaperAnimLayerAdjustment=" + mWallpaperAnimLayerAdjustment);
         }
     }
 

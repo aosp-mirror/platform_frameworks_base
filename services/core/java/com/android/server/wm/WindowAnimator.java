@@ -50,7 +50,7 @@ public class WindowAnimator {
 
     /** Is any window animating? */
     private boolean mAnimating;
-    private boolean mLastAnimating;
+    private boolean mLastRootAnimating;
 
     final Choreographer.FrameCallback mAnimationFrameCallback;
 
@@ -237,7 +237,8 @@ public class WindowAnimator {
                 mWindowPlacerLocked.requestTraversal();
             }
 
-            if (mAnimating && !mLastAnimating) {
+            final boolean rootAnimating = mService.mRoot.isSelfOrChildAnimating();
+            if (rootAnimating && !mLastRootAnimating) {
 
                 // Usually app transitions but quite a load onto the system already (with all the
                 // things happening in app), so pause task snapshot persisting to not increase the
@@ -245,13 +246,13 @@ public class WindowAnimator {
                 mService.mTaskSnapshotController.setPersisterPaused(true);
                 Trace.asyncTraceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "animating", 0);
             }
-            if (!mAnimating && mLastAnimating) {
+            if (!rootAnimating && mLastRootAnimating) {
                 mWindowPlacerLocked.requestTraversal();
                 mService.mTaskSnapshotController.setPersisterPaused(false);
                 Trace.asyncTraceEnd(Trace.TRACE_TAG_WINDOW_MANAGER, "animating", 0);
             }
 
-            mLastAnimating = mAnimating;
+            mLastRootAnimating = rootAnimating;
 
             if (mRemoveReplacedWindows) {
                 mService.mRoot.removeReplacedWindows();

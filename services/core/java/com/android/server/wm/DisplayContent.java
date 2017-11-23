@@ -351,7 +351,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     private boolean mDisplayReady = false;
 
     WallpaperController mWallpaperController;
-    int mInputMethodAnimLayerAdjustment;
 
     private final SurfaceSession mSession = new SurfaceSession();
 
@@ -2048,12 +2047,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         mPinnedStackControllerLocked.setAdjustedForIme(imeVisible, imeHeight);
     }
 
-    void setInputMethodAnimLayerAdjustment(int adj) {
-        if (DEBUG_LAYERS) Slog.v(TAG_WM, "Setting im layer adj to " + adj);
-        mInputMethodAnimLayerAdjustment = adj;
-        assignWindowLayers(false /* relayoutNeeded */);
-    }
-
     /**
      * If a window that has an animation specifying a colored background and the current wallpaper
      * is visible, then the color goes *below* the wallpaper so we don't cause the wallpaper to
@@ -2233,11 +2226,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         pw.println();
         mPinnedStackControllerLocked.dump(prefix, pw);
 
-        if (mInputMethodAnimLayerAdjustment != 0) {
-            pw.println(subPrefix
-                    + "mInputMethodAnimLayerAdjustment=" + mInputMethodAnimLayerAdjustment);
-        }
-
         pw.println();
         mDisplayFrames.dump(prefix, pw);
     }
@@ -2397,7 +2385,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             if (updateImeTarget) {
                 if (DEBUG_INPUT_METHOD) Slog.w(TAG_WM, "Moving IM target from "
                         + mService.mInputMethodTarget + " to null since mInputMethodWindow is null");
-                setInputMethodTarget(null, mService.mInputMethodTargetWaitingAnim, 0);
+                setInputMethodTarget(null, mService.mInputMethodTargetWaitingAnim);
             }
             return null;
         }
@@ -2446,7 +2434,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 if (DEBUG_INPUT_METHOD) Slog.w(TAG_WM, "Moving IM target from " + curTarget
                         + " to null." + (SHOW_STACK_CRAWLS ? " Callers="
                         + Debug.getCallers(4) : ""));
-                setInputMethodTarget(null, mService.mInputMethodTargetWaitingAnim, 0);
+                setInputMethodTarget(null, mService.mInputMethodTargetWaitingAnim);
             }
 
             return null;
@@ -2474,14 +2462,14 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                     if (appTransition.isTransitionSet()) {
                         // If we are currently setting up for an animation, hold everything until we
                         // can find out what will happen.
-                        setInputMethodTarget(highestTarget, true, mInputMethodAnimLayerAdjustment);
+                        setInputMethodTarget(highestTarget, true);
                         return highestTarget;
                     } else if (highestTarget.mWinAnimator.isAnimationSet() &&
                             highestTarget.mWinAnimator.mAnimLayer > target.mWinAnimator.mAnimLayer) {
                         // If the window we are currently targeting is involved with an animation,
                         // and it is on top of the next target we will be over, then hold off on
                         // moving until that is done.
-                        setInputMethodTarget(highestTarget, true, mInputMethodAnimLayerAdjustment);
+                        setInputMethodTarget(highestTarget, true);
                         return highestTarget;
                     }
                 }
@@ -2489,23 +2477,20 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
             if (DEBUG_INPUT_METHOD) Slog.w(TAG_WM, "Moving IM target from " + curTarget + " to "
                     + target + (SHOW_STACK_CRAWLS ? " Callers=" + Debug.getCallers(4) : ""));
-            setInputMethodTarget(target, false, target.mAppToken != null
-                    ? target.mAppToken.getAnimLayerAdjustment() : 0);
+            setInputMethodTarget(target, false);
         }
 
         return target;
     }
 
-    private void setInputMethodTarget(WindowState target, boolean targetWaitingAnim, int layerAdj) {
+    private void setInputMethodTarget(WindowState target, boolean targetWaitingAnim) {
         if (target == mService.mInputMethodTarget
-                && mService.mInputMethodTargetWaitingAnim == targetWaitingAnim
-                && mInputMethodAnimLayerAdjustment == layerAdj) {
+                && mService.mInputMethodTargetWaitingAnim == targetWaitingAnim) {
             return;
         }
 
         mService.mInputMethodTarget = target;
         mService.mInputMethodTargetWaitingAnim = targetWaitingAnim;
-        setInputMethodAnimLayerAdjustment(layerAdj);
         assignWindowLayers(false /* setLayoutNeeded */);
     }
 
