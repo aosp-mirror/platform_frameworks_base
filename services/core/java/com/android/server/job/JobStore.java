@@ -43,6 +43,7 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.BitUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.server.IoThread;
+import com.android.server.LocalServices;
 import com.android.server.job.JobSchedulerInternal.JobStorePersistStats;
 import com.android.server.job.controllers.JobStatus;
 
@@ -174,7 +175,8 @@ public final class JobStore {
             if (utcTimes != null) {
                 Pair<Long, Long> elapsedRuntimes =
                         convertRtcBoundsToElapsed(utcTimes, elapsedNow);
-                toAdd.add(new JobStatus(job, elapsedRuntimes.first, elapsedRuntimes.second,
+                toAdd.add(new JobStatus(job, job.getBaseHeartbeat(),
+                        elapsedRuntimes.first, elapsedRuntimes.second,
                         0, job.getLastSuccessfulRunTime(), job.getLastFailedRunTime()));
                 toRemove.add(job);
             }
@@ -846,8 +848,13 @@ public final class JobStore {
             }
 
             // And now we're done
+            JobSchedulerInternal service = LocalServices.getService(JobSchedulerInternal.class);
+            final int appBucket = JobSchedulerService.standbyBucketForPackage(sourcePackageName,
+                    sourceUserId, elapsedNow);
+            long currentHeartbeat = service != null ? service.currentHeartbeat() : 0;
             JobStatus js = new JobStatus(
-                    jobBuilder.build(), uid, sourcePackageName, sourceUserId, sourceTag,
+                    jobBuilder.build(), uid, sourcePackageName, sourceUserId,
+                    appBucket, currentHeartbeat, sourceTag,
                     elapsedRuntimes.first, elapsedRuntimes.second,
                     lastSuccessfulRunTime, lastFailedRunTime,
                     (rtcIsGood) ? null : rtcRuntimes);

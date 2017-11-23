@@ -180,6 +180,7 @@ public final class AppIdleController extends StateController {
                 if (mAppIdleParoleOn) {
                     return;
                 }
+
                 PackageUpdateFunc update = new PackageUpdateFunc(userId, packageName, idle);
                 mJobSchedulerService.getJobStore().forEachJob(update);
                 if (update.mChanged) {

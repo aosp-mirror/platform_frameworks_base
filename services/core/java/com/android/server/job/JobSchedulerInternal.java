@@ -26,6 +26,18 @@ import java.util.List;
  */
 public interface JobSchedulerInternal {
 
+    // Bookkeeping about app standby bucket scheduling
+
+    /**
+     * The current bucket heartbeat ordinal
+     */
+    long currentHeartbeat();
+
+    /**
+     * Heartbeat ordinal at which the given standby bucket's jobs next become runnable
+     */
+    long nextHeartbeatForBucket(int bucket);
+
     /**
      * Returns a list of pending jobs scheduled by the system service.
      */
