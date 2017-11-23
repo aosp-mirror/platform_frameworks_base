@@ -171,34 +171,42 @@
          permanent protectionLevel. If you are creating a custom permission in an
          application, you can define a protectionLevel attribute with one of the
          values listed below. If no protectionLevel is defined for a custom
-         permission, the system assigns the default ("normal"). -->
+         permission, the system assigns the default ("normal").
+         <p>Each protection level consists of a base permission type and zero or
+         more flags:
+         <pre>
+         int basePermissionType = protectionLevel & {@link android.content.pm.PermissionInfo#PROTECTION_MASK_BASE};
+         int permissionFlags = protectionLevel & {@link android.content.pm.PermissionInfo#PROTECTION_MASK_FLAGS};
+         </pre>
+         -->
     <attr name="protectionLevel">
-        <!-- A lower-risk permission that gives an application access to isolated
-             application-level features, with minimal risk to other applications,
-             the system, or the user. The system automatically grants this type
-             of permission to a requesting application at installation, without
-             asking for the user's explicit approval (though the user always
-             has the option to review these permissions before installing). -->
+        <!-- <strong>Base permission type</strong>: a lower-risk permission that gives
+             an application access to isolated application-level features, with minimal
+             risk to other applications, the system, or the user. The system
+             automatically grants this type of permission to a requesting application at
+             installation, without asking for the user's explicit approval (though the
+             user always has the option to review these permissions before installing). -->
         <flag name="normal" value="0" />
-        <!-- A higher-risk permission that would give a requesting application
-             access to private user data or control over the device that can
-             negatively impact the user.  Because this type of permission
-             introduces potential risk, the system may not automatically
-             grant it to the requesting application.  For example, any dangerous
-             permissions requested by an application may be displayed to the
-             user and require confirmation before proceeding, or some other
+        <!-- <strong>Base permission type</strong>: a higher-risk permission that
+             would give a requesting application access to private user data or
+             control over the device that can negatively impact the user.  Because
+             this type of permission introduces potential risk, the system may
+             not automatically grant it to the requesting application.  For example,
+             any dangerous permissions requested by an application may be displayed
+             to the user and require confirmation before proceeding, or some other
              approach may be taken to avoid the user automatically allowing
              the use of such facilities.  -->
         <flag name="dangerous" value="1" />
-        <!-- A permission that the system is to grant only if the requesting
-             application is signed with the same certificate as the application
-             that declared the permission. If the certificates match, the system
-             automatically grants the permission without notifying the user or
-             asking for the user's explicit approval. -->
+        <!-- <strong>Base permission type</strong>: a permission that the system is
+             to grant only if the requesting application is signed with the same
+             certificate as the application that declared the permission. If the
+             certificates match, the system automatically grants the permission
+             without notifying the user or asking for the user's explicit approval. -->
         <flag name="signature" value="2" />
-        <!-- A permission that the system is to grant only to packages in the
-             Android system image <em>or</em> that are signed with the same
-             certificates. Please avoid using this option, as the
+        <!-- Old synonym for "signature|privileged". Deprecated in API level 23.
+             Base permission type: a permission that the system is to grant only
+             to packages in the Android system image <em>or</em> that are signed
+             with the same certificates. Please avoid using this option, as the
              signature protection level should be sufficient for most needs and
              works regardless of exactly where applications are installed.  This
              permission is used for certain special situations where multiple
@@ -216,7 +224,7 @@
              to share specific features explicitly because they are being built
              together. -->
         <flag name="privileged" value="0x10" />
-        <!-- Old synonym for "privileged". -->
+        <!-- Old synonym for "privileged". Deprecated in API level 23. -->
         <flag name="system" value="0x10" />
         <!-- Additional flag from base permission type: this permission can also
              (optionally) be granted to development applications. -->
