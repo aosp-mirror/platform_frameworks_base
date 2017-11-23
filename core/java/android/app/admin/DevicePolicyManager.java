@@ -8753,4 +8753,44 @@ public class DevicePolicyManager {
             throw re.rethrowFromSystemServer();
         }
     }
+
+    //TODO STOPSHIP Add link to onTransferComplete callback when implemented.
+    /**
+     * Transfers the current administrator. All policies from the current administrator are
+     * migrated to the new administrator. The whole operation is atomic - the transfer is either
+     * complete or not done at all.
+     *
+     * Depending on the current administrator (device owner, profile owner, corporate owned
+     * profile owner), you have the following expected behaviour:
+     * <ul>
+     *     <li>A device owner can only be transferred to a new device owner</li>
+     *     <li>A profile owner can only be transferred to a new profile owner</li>
+     *     <li>A corporate owned managed profile can have two cases:
+     *          <ul>
+     *              <li>If the device owner and profile owner are the same package,
+     *              both will be transferred.</li>
+     *              <li>If the device owner and profile owner are different packages,
+     *              and if this method is called from the profile owner, only the profile owner
+     *              is transferred. Similarly, if it is called from the device owner, only
+     *              the device owner is transferred.</li>
+     *          </ul>
+     *     </li>
+     * </ul>
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param target Which {@link DeviceAdminReceiver} we want the new administrator to be.
+     * @param bundle Parameters - This bundle allows the current administrator to pass data to the
+     *               new administrator. The parameters will be received in the
+     *               onTransferComplete callback.
+     * @hide
+     */
+    public void transferOwner(@NonNull ComponentName admin, @NonNull ComponentName target,
+            PersistableBundle bundle) {
+        throwIfParentInstance("transferOwner");
+        try {
+            mService.transferOwner(admin, target, bundle);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
 }

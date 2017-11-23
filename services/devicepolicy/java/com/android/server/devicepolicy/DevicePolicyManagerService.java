@@ -751,7 +751,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         private static final String ATTR_NUM_NETWORK_LOGGING_NOTIFICATIONS = "num-notifications";
         private static final String TAG_IS_LOGOUT_ENABLED = "is_logout_enabled";
 
-        final DeviceAdminInfo info;
+        DeviceAdminInfo info;
 
 
         static final int DEF_PASSWORD_HISTORY_LENGTH = 0;
@@ -1400,6 +1400,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 userRestrictions = new Bundle();
             }
             return userRestrictions;
+        }
+
+        public void transfer(DeviceAdminInfo deviceAdminInfo) {
+            if (hasParentActiveAdmin()) {
+                parentAdmin.info = deviceAdminInfo;
+            }
+            info = deviceAdminInfo;
         }
 
         void dump(String prefix, PrintWriter pw) {
@@ -2541,7 +2548,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
 
     public DeviceAdminInfo findAdmin(ComponentName adminName, int userHandle,
-            boolean throwForMissiongPermission) {
+            boolean throwForMissingPermission) {
         if (!mHasFeature) {
             return null;
         }
@@ -2564,7 +2571,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             final String message = "DeviceAdminReceiver " + adminName + " must be protected with "
                     + permission.BIND_DEVICE_ADMIN;
             Slog.w(LOG_TAG, message);
-            if (throwForMissiongPermission &&
+            if (throwForMissingPermission &&
                     ai.applicationInfo.targetSdkVersion > Build.VERSION_CODES.M) {
                 throw new IllegalArgumentException(message);
             }
@@ -2889,7 +2896,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     try {
                         DeviceAdminInfo dai = findAdmin(
                                 ComponentName.unflattenFromString(name), userHandle,
-                                /* throwForMissionPermission= */ false);
+                                /* throwForMissingPermission= */ false);
                         if (VERBOSE_LOG
                                 && (UserHandle.getUserId(dai.getActivityInfo().applicationInfo.uid)
                                 != userHandle)) {
@@ -3293,29 +3300,15 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         DevicePolicyData policy = getUserData(userHandle);
         DeviceAdminInfo info = findAdmin(adminReceiver, userHandle,
-                /* throwForMissionPermission= */ true);
-        if (info == null) {
-            throw new IllegalArgumentException("Bad admin: " + adminReceiver);
-        }
-        if (!info.getActivityInfo().applicationInfo.isInternal()) {
-            throw new IllegalArgumentException("Only apps in internal storage can be active admin: "
-                    + adminReceiver);
-        }
-        if (info.getActivityInfo().applicationInfo.isInstantApp()) {
-            throw new IllegalArgumentException("Instant apps cannot be device admins: "
-                    + adminReceiver);
-        }
+                /* throwForMissingPermission= */ true);
         synchronized (this) {
+            checkActiveAdminPrecondition(adminReceiver, info, policy);
             long ident = mInjector.binderClearCallingIdentity();
             try {
                 final ActiveAdmin existingAdmin
                         = getActiveAdminUncheckedLocked(adminReceiver, userHandle);
                 if (!refreshing && existingAdmin != null) {
                     throw new IllegalArgumentException("Admin is already added");
-                }
-                if (policy.mRemovingAdmins.contains(adminReceiver)) {
-                    throw new IllegalArgumentException(
-                            "Trying to set an admin which is being removed");
                 }
                 ActiveAdmin newAdmin = new ActiveAdmin(info, /* parent */ false);
                 newAdmin.testOnlyAdmin =
@@ -3343,6 +3336,46 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             } finally {
                 mInjector.binderRestoreCallingIdentity(ident);
             }
+        }
+    }
+
+    private void transferActiveAdminUncheckedLocked(ComponentName incomingReceiver,
+            ComponentName outgoingReceiver, int userHandle) {
+        final DevicePolicyData policy = getUserData(userHandle);
+        final DeviceAdminInfo incomingDeviceInfo = findAdmin(incomingReceiver, userHandle,
+            /* throwForMissingPermission= */ true);
+        final ActiveAdmin adminToTransfer = policy.mAdminMap.get(outgoingReceiver);
+        final int oldAdminUid = adminToTransfer.getUid();
+
+        adminToTransfer.transfer(incomingDeviceInfo);
+        policy.mAdminMap.remove(outgoingReceiver);
+        policy.mAdminMap.put(incomingReceiver, adminToTransfer);
+        if (policy.mPasswordOwner == oldAdminUid) {
+            policy.mPasswordOwner = adminToTransfer.getUid();
+        }
+
+        saveSettingsLocked(userHandle);
+        //TODO: Make sure we revert back when we detect a failure.
+        sendAdminCommandLocked(adminToTransfer, DeviceAdminReceiver.ACTION_DEVICE_ADMIN_ENABLED,
+                null, null);
+    }
+
+    private void checkActiveAdminPrecondition(ComponentName adminReceiver, DeviceAdminInfo info,
+            DevicePolicyData policy) {
+        if (info == null) {
+            throw new IllegalArgumentException("Bad admin: " + adminReceiver);
+        }
+        if (!info.getActivityInfo().applicationInfo.isInternal()) {
+            throw new IllegalArgumentException("Only apps in internal storage can be active admin: "
+                    + adminReceiver);
+        }
+        if (info.getActivityInfo().applicationInfo.isInstantApp()) {
+            throw new IllegalArgumentException("Instant apps cannot be device admins: "
+                    + adminReceiver);
+        }
+        if (policy.mRemovingAdmins.contains(adminReceiver)) {
+            throw new IllegalArgumentException(
+                    "Trying to set an admin which is being removed");
         }
     }
 
@@ -11537,5 +11570,61 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         enforceCanManageProfileAndDeviceOwners();
         return new ArrayList<>(
                 mOverlayPackagesProvider.getNonRequiredApps(admin, userId, provisioningAction));
+    }
+
+    //TODO: Add callback information to the javadoc once it is completed.
+    //TODO: Make transferOwner atomic.
+    @Override
+    public void transferOwner(ComponentName admin, ComponentName target, PersistableBundle bundle) {
+        if (!mHasFeature) {
+            return;
+        }
+
+        Preconditions.checkNotNull(admin, "Admin cannot be null.");
+        Preconditions.checkNotNull(target, "Target cannot be null.");
+
+        enforceProfileOrDeviceOwner(admin);
+
+        if (admin.equals(target)) {
+            throw new IllegalArgumentException("Provided administrator and target are "
+                    + "the same object.");
+        }
+
+        if (admin.getPackageName().equals(target.getPackageName())) {
+            throw new IllegalArgumentException("Provided administrator and target have "
+                    + "the same package name.");
+        }
+
+        final int callingUserId = mInjector.userHandleGetCallingUserId();
+        final DevicePolicyData policy = getUserData(callingUserId);
+        final DeviceAdminInfo incomingDeviceInfo = findAdmin(target, callingUserId,
+                /* throwForMissingPermission= */ true);
+        checkActiveAdminPrecondition(target, incomingDeviceInfo, policy);
+
+        final long id = mInjector.binderClearCallingIdentity();
+        try {
+            //STOPSHIP add support for COMP, DO, edge cases when device is rebooted/work mode off,
+            //transfer callbacks and broadcast
+            if (isProfileOwner(admin, callingUserId)) {
+                transferProfileOwner(admin, target, callingUserId);
+            }
+        } finally {
+            mInjector.binderRestoreCallingIdentity(id);
+        }
+    }
+
+    /**
+     * Transfers the profile owner for user with id profileOwnerUserId from admin to target.
+     */
+    private void transferProfileOwner(ComponentName admin, ComponentName target,
+            int profileOwnerUserId) {
+        synchronized (this) {
+            transferActiveAdminUncheckedLocked(target, admin, profileOwnerUserId);
+            mOwners.transferProfileOwner(target, profileOwnerUserId);
+            Slog.i(LOG_TAG, "Profile owner set: " + target + " on user " + profileOwnerUserId);
+            mOwners.writeProfileOwner(profileOwnerUserId);
+            mDeviceAdminServiceController.startServiceForOwner(
+                    target.getPackageName(), profileOwnerUserId, "transfer-profile-owner");
+        }
     }
 }
