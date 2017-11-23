@@ -72,6 +72,33 @@ public abstract class JobService extends Service {
     }
 
     /**
+     * Call this to inform the JobScheduler that the job has finished its work.  When the
+     * system receives this message, it releases the wakelock being held for the job.
+     * <p>
+     * You can request that the job be scheduled again by passing {@code true} as
+     * the <code>wantsReschedule</code> parameter. This will apply back-off policy
+     * for the job; this policy can be adjusted through the
+     * {@link android.app.job.JobInfo.Builder#setBackoffCriteria(long, int)} method
+     * when the job is originally scheduled.  The job's initial
+     * requirements are preserved when jobs are rescheduled, regardless of backed-off
+     * policy.
+     * <p class="note">
+     * A job running while the device is dozing will not be rescheduled with the normal back-off
+     * policy.  Instead, the job will be re-added to the queue and executed again during
+     * a future idle maintenance window.
+     * </p>
+     *
+     * @param params The parameters identifying this job, as supplied to
+     *               the job in the {@link #onStartJob(JobParameters)} callback.
+     * @param wantsReschedule {@code true} if this job should be rescheduled according
+     *     to the back-off criteria specified when it was first scheduled; {@code false}
+     *     otherwise.
+     */
+    public final void jobFinished(JobParameters params, boolean wantsReschedule) {
+        mEngine.jobFinished(params, wantsReschedule);
+    }
+
+    /**
      * Called to indicate that the job has begun executing.  Override this method with the
      * logic for your job.  Like all other component lifecycle callbacks, this method executes
      * on your application's main thread.
@@ -127,31 +154,4 @@ public abstract class JobService extends Service {
      * to end the job entirely.  Regardless of the value returned, your job must stop executing.
      */
     public abstract boolean onStopJob(JobParameters params);
-
-    /**
-     * Call this to inform the JobScheduler that the job has finished its work.  When the
-     * system receives this message, it releases the wakelock being held for the job.
-     * <p>
-     * You can request that the job be scheduled again by passing {@code true} as
-     * the <code>wantsReschedule</code> parameter. This will apply back-off policy
-     * for the job; this policy can be adjusted through the
-     * {@link android.app.job.JobInfo.Builder#setBackoffCriteria(long, int)} method
-     * when the job is originally scheduled.  The job's initial
-     * requirements are preserved when jobs are rescheduled, regardless of backed-off
-     * policy.
-     * <p class="note">
-     * A job running while the device is dozing will not be rescheduled with the normal back-off
-     * policy.  Instead, the job will be re-added to the queue and executed again during
-     * a future idle maintenance window.
-     * </p>
-     *
-     * @param params The parameters identifying this job, as supplied to
-     *               the job in the {@link #onStartJob(JobParameters)} callback.
-     * @param wantsReschedule {@code true} if this job should be rescheduled according
-     *     to the back-off criteria specified when it was first scheduled; {@code false}
-     *     otherwise.
-     */
-    public final void jobFinished(JobParameters params, boolean wantsReschedule) {
-        mEngine.jobFinished(params, wantsReschedule);
-    }
 }

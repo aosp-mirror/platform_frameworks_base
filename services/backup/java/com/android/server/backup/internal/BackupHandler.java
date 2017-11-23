@@ -38,6 +38,8 @@ import com.android.server.EventLogTags;
 import com.android.server.backup.BackupRestoreTask;
 import com.android.server.backup.DataChangedJournal;
 import com.android.server.backup.RefactoredBackupManagerService;
+import com.android.server.backup.transport.TransportClient;
+import com.android.server.backup.TransportManager;
 import com.android.server.backup.fullbackup.PerformAdbBackupTask;
 import com.android.server.backup.fullbackup.PerformFullTransportBackupTask;
 import com.android.server.backup.params.AdbBackupParams;
@@ -51,10 +53,8 @@ import com.android.server.backup.params.RestoreParams;
 import com.android.server.backup.restore.PerformAdbRestoreTask;
 import com.android.server.backup.restore.PerformUnifiedRestoreTask;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 
 /**
  * Asynchronous backup/restore handler thread.
@@ -81,7 +81,7 @@ public class BackupHandler extends Handler {
     public static final int MSG_BACKUP_RESTORE_STEP = 20;
     public static final int MSG_OP_COMPLETE = 21;
 
-    private RefactoredBackupManagerService backupManagerService;
+    private final RefactoredBackupManagerService backupManagerService;
 
     public BackupHandler(
             RefactoredBackupManagerService backupManagerService, Looper looper) {
@@ -91,13 +91,23 @@ public class BackupHandler extends Handler {
 
     public void handleMessage(Message msg) {
 
+        TransportManager transportManager = backupManagerService.getTransportManager();
         switch (msg.what) {
             case MSG_RUN_BACKUP: {
                 backupManagerService.setLastBackupPass(System.currentTimeMillis());
 
+                String callerLogString = "BH/MSG_RUN_BACKUP";
+                TransportClient transportClient =
+                        transportManager.getCurrentTransportClient(callerLogString);
                 IBackupTransport transport =
-                        backupManagerService.getTransportManager().getCurrentTransportBinder();
+                        transportClient != null
+                                ? transportClient.connect(callerLogString)
+                                : null;
                 if (transport == null) {
+                    if (transportClient != null) {
+                        transportManager
+                                .disposeOfTransportClient(transportClient, callerLogString);
+                    }
                     Slog.v(TAG, "Backup requested but no transport available");
                     synchronized (backupManagerService.getQueueLock()) {
                         backupManagerService.setBackupRunning(false);
@@ -138,9 +148,13 @@ public class BackupHandler extends Handler {
                     // Spin up a backup state sequence and set it running
                     try {
                         String dirName = transport.transportDirName();
+                        OnTaskFinishedListener listener =
+                                caller ->
+                                        transportManager
+                                                .disposeOfTransportClient(transportClient, caller);
                         PerformBackupTask pbt = new PerformBackupTask(
-                                backupManagerService, transport, dirName, queue,
-                                oldJournal, null, null, Collections.<String>emptyList(), false,
+                                backupManagerService, transportClient, dirName, queue,
+                                oldJournal, null, null, listener, Collections.emptyList(), false,
                                 false /* nonIncremental */);
                         Message pbtMessage = obtainMessage(MSG_BACKUP_RESTORE_STEP, pbt);
                         sendMessage(pbtMessage);
@@ -157,6 +171,7 @@ public class BackupHandler extends Handler {
                 }
 
                 if (!staged) {
+                    transportManager.disposeOfTransportClient(transportClient, callerLogString);
                     // if we didn't actually hand off the wakelock, rewind until next time
                     synchronized (backupManagerService.getQueueLock()) {
                         backupManagerService.setBackupRunning(false);
@@ -382,9 +397,9 @@ public class BackupHandler extends Handler {
 
                 PerformBackupTask pbt = new PerformBackupTask(
                         backupManagerService,
-                        params.transport, params.dirName,
-                        kvQueue, null, params.observer, params.monitor, params.fullPackages, true,
-                        params.nonIncrementalBackup);
+                        params.transportClient, params.dirName,
+                        kvQueue, null, params.observer, params.monitor, params.listener,
+                        params.fullPackages, true, params.nonIncrementalBackup);
                 Message pbtMessage = obtainMessage(MSG_BACKUP_RESTORE_STEP, pbt);
                 sendMessage(pbtMessage);
                 break;

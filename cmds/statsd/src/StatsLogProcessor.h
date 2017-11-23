@@ -41,12 +41,15 @@ public:
     void OnConfigUpdated(const ConfigKey& key, const StatsdConfig& config);
     void OnConfigRemoved(const ConfigKey& key);
 
-    size_t GetMetricsSize(const ConfigKey& key);
- 
+    size_t GetMetricsSize(const ConfigKey& key) const;
+
     void onDumpReport(const ConfigKey& key, vector<uint8_t>* outData);
     void onAnomalyAlarmFired(
             const uint64_t timestampNs,
             unordered_set<sp<const AnomalyAlarm>, SpHash<AnomalyAlarm>> anomalySet);
+
+    /* Flushes data to disk. Data on memory will be gone after written to disk. */
+    void WriteDataToDisk();
 
 private:
     mutable mutex mBroadcastTimesMutex;

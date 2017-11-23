@@ -162,7 +162,8 @@ interface IDevicePolicyManager {
     boolean isCaCertApproved(in String alias, int userHandle);
 
     boolean installKeyPair(in ComponentName who, in String callerPackage, in byte[] privKeyBuffer,
-            in byte[] certBuffer, in byte[] certChainBuffer, String alias, boolean requestAccess);
+            in byte[] certBuffer, in byte[] certChainBuffer, String alias, boolean requestAccess,
+            boolean isUserSelectable);
     boolean removeKeyPair(in ComponentName who, in String callerPackage, String alias);
     void choosePrivateKeyAlias(int uid, in Uri uri, in String alias, IBinder aliasCallback);
 

@@ -346,22 +346,20 @@ void WriteKeepSet(const KeepSet& keep_set, OutputStream* out) {
       can_be_conditional &= CollectLocations(location, keep_set, &locations);
     }
 
-    for (const UsageLocation& location : entry.second) {
-      printer.Print("# Referenced at ").Println(location.source.to_string());
-    }
     if (keep_set.conditional_keep_rules_ && can_be_conditional) {
-      printer.Println("-if class **.R$layout {");
-      printer.Indent();
       for (const UsageLocation& location : locations) {
-        printer.Print("int ")
+        printer.Print("# Referenced at ").Println(location.source.to_string());
+        printer.Print("-if class **.R$layout { int ")
             .Print(JavaClassGenerator::TransformToFieldName(location.name.entry))
-            .Println(";");
+            .Println("; }");
+        printer.Print("-keep class ").Print(entry.first).Println(" { <init>(...); }");
       }
-      printer.Undent();
-      printer.Println("}");
-      printer.Println();
+    } else {
+      for (const UsageLocation& location : entry.second) {
+        printer.Print("# Referenced at ").Println(location.source.to_string());
+      }
+      printer.Print("-keep class ").Print(entry.first).Println(" { <init>(...); }");
     }
-    printer.Print("-keep class ").Print(entry.first).Println(" { <init>(...); }");
     printer.Println();
   }
 

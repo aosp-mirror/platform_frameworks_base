@@ -56,7 +56,7 @@ public:
 
     void onDataPulled(const std::vector<std::shared_ptr<LogEvent>>& data) override;
 
-    size_t byteSize() override;
+    size_t byteSize() const override;
 
     // TODO: Implement this later.
     virtual void notifyAppUpgrade(const string& apk, const int uid, const int version) override{};

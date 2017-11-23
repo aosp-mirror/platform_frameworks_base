@@ -65,7 +65,7 @@ public:
     // TODO: Pass a timestamp as a parameter in onDumpReport.
     std::unique_ptr<std::vector<uint8_t>> onDumpReport() override;
 
-    size_t byteSize() override;
+    size_t byteSize() const override;
 
     // TODO: Implement this later.
     virtual void notifyAppUpgrade(const string& apk, const int uid, const int version) override{};

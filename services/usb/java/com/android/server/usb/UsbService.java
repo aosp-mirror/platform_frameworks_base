@@ -232,7 +232,7 @@ public class UsbService extends IUsbManager.Stub {
 
     /* Opens the specified USB device (host mode) */
     @Override
-    public ParcelFileDescriptor openDevice(String deviceName) {
+    public ParcelFileDescriptor openDevice(String deviceName, String packageName) {
         ParcelFileDescriptor fd = null;
 
         if (mHostManager != null) {
@@ -242,7 +242,8 @@ public class UsbService extends IUsbManager.Stub {
                     boolean isCurrentUser = isCallerInCurrentUserProfileGroupLocked();
 
                     if (isCurrentUser) {
-                        fd = mHostManager.openDevice(deviceName, getSettingsForUser(userIdInt));
+                        fd = mHostManager.openDevice(deviceName, getSettingsForUser(userIdInt),
+                                packageName, Binder.getCallingUid());
                     } else {
                         Slog.w(TAG, "Cannot open " + deviceName + " for user " + userIdInt +
                                " as user is not active.");
@@ -308,9 +309,10 @@ public class UsbService extends IUsbManager.Stub {
     }
 
     @Override
-    public boolean hasDevicePermission(UsbDevice device) {
+    public boolean hasDevicePermission(UsbDevice device, String packageName) {
         final int userId = UserHandle.getCallingUserId();
-        return getSettingsForUser(userId).hasPermission(device);
+        return getSettingsForUser(userId).hasPermission(device, packageName,
+                Binder.getCallingUid());
     }
 
     @Override
@@ -322,7 +324,8 @@ public class UsbService extends IUsbManager.Stub {
     @Override
     public void requestDevicePermission(UsbDevice device, String packageName, PendingIntent pi) {
         final int userId = UserHandle.getCallingUserId();
-        getSettingsForUser(userId).requestPermission(device, packageName, pi);
+        getSettingsForUser(userId).requestPermission(device, packageName, pi,
+                Binder.getCallingUid());
     }
 
     @Override

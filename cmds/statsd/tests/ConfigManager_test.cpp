@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "src/config/ConfigManager.h"
+#include "src/metrics/MetricsManager.h"
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -60,6 +61,11 @@ MATCHER_P(StatsdConfigEq, name, "") {
     return arg.name() == name;
 }
 
+TEST(ConfigManagerTest, TestFakeConfig) {
+    auto metricsManager = std::make_unique<MetricsManager>(build_fake_config());
+    EXPECT_TRUE(metricsManager->isConfigValid());
+}
+
 /**
  * Test the addOrUpdate and remove methods
  */
@@ -85,7 +91,7 @@ TEST(ConfigManagerTest, TestAddUpdateRemove) {
         // TODO: Remove this when we get rid of the fake one, and make this
         // test loading one from disk somewhere.
         EXPECT_CALL(*(listener.get()),
-                    OnConfigUpdated(ConfigKeyEq(1000, "fake"), StatsdConfigEq("12345")))
+                    OnConfigUpdated(ConfigKeyEq(1000, "fake"), StatsdConfigEq("CONFIG_12345")))
                 .RetiresOnSaturation();
         manager->Startup();
 

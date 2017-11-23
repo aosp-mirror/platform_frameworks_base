@@ -72,6 +72,7 @@ interface INotificationManager
     int getNumNotificationChannelsForPackage(String pkg, int uid, boolean includeDeleted);
     int getDeletedChannelCount(String pkg, int uid);
     void deleteNotificationChannelGroup(String pkg, String channelGroupId);
+    NotificationChannelGroup getNotificationChannelGroup(String pkg, String channelGroupId);
     ParceledListSlice getNotificationChannelGroups(String pkg);
     boolean onlyHasDefaultChannel(String pkg, int uid);
 

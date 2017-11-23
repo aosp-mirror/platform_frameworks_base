@@ -15,6 +15,7 @@
  */
 
 #include "config/ConfigManager.h"
+#include "storage/StorageManager.h"
 
 #include "stats_util.h"
 
@@ -30,8 +31,6 @@ namespace statsd {
 
 #define STATS_SERVICE_DIR "/data/system/stats-service"
 
-static StatsdConfig build_fake_config();
-
 using android::base::StringPrintf;
 using std::unique_ptr;
 
@@ -42,7 +41,7 @@ ConfigManager::~ConfigManager() {
 }
 
 void ConfigManager::Startup() {
-    readConfigFromDisk();
+    StorageManager::readConfigFromDisk(mConfigs);
 
     // this should be called from StatsService when it receives a statsd_config
     UpdateConfig(ConfigKey(1000, "fake"), build_fake_config());
@@ -92,21 +91,8 @@ void ConfigManager::RemoveConfig(const ConfigKey& key) {
 }
 
 void ConfigManager::remove_saved_configs(const ConfigKey& key) {
-    unique_ptr<DIR, decltype(&closedir)> dir(opendir(STATS_SERVICE_DIR), closedir);
-    if (dir == NULL) {
-        ALOGD("no default config on disk");
-        return;
-    }
     string prefix = StringPrintf("%d-%s", key.GetUid(), key.GetName().c_str());
-    dirent* de;
-    while ((de = readdir(dir.get()))) {
-        char* name = de->d_name;
-        if (name[0] != '.' && strncmp(name, prefix.c_str(), prefix.size()) == 0) {
-            if (remove(StringPrintf("%s/%s", STATS_SERVICE_DIR, name).c_str()) != 0) {
-                ALOGD("no file found");
-            }
-        }
-    }
+    StorageManager::deletePrefixedFiles(STATS_SERVICE_DIR, prefix.c_str());
 }
 
 void ConfigManager::RemoveConfigs(int uid) {
@@ -132,7 +118,7 @@ void ConfigManager::RemoveConfigs(int uid) {
     }
 }
 
-vector<ConfigKey> ConfigManager::GetAllConfigKeys() {
+vector<ConfigKey> ConfigManager::GetAllConfigKeys() const {
     vector<ConfigKey> ret;
     for (auto it = mConfigs.cbegin(); it != mConfigs.cend(); ++it) {
         ret.push_back(it->first);
@@ -140,7 +126,7 @@ vector<ConfigKey> ConfigManager::GetAllConfigKeys() {
     return ret;
 }
 
-const pair<string, string> ConfigManager::GetConfigReceiver(const ConfigKey& key) {
+const pair<string, string> ConfigManager::GetConfigReceiver(const ConfigKey& key) const {
     auto it = mConfigReceivers.find(key);
     if (it == mConfigReceivers.end()) {
         return pair<string,string>();
@@ -164,50 +150,6 @@ void ConfigManager::Dump(FILE* out) {
     }
 }
 
-void ConfigManager::readConfigFromDisk() {
-    unique_ptr<DIR, decltype(&closedir)> dir(opendir(STATS_SERVICE_DIR), closedir);
-    if (dir == NULL) {
-        ALOGD("no default config on disk");
-        return;
-    }
-
-    dirent* de;
-    while ((de = readdir(dir.get()))) {
-        char* name = de->d_name;
-        if (name[0] == '.') continue;
-        ALOGD("file %s", name);
-
-        int index = 0;
-        int uid = 0;
-        string configName;
-        char* substr = strtok(name, "-");
-        // Timestamp lives at index 2 but we skip parsing it as it's not needed.
-        while (substr != nullptr && index < 2) {
-            if (index) {
-                uid = atoi(substr);
-            } else {
-                configName = substr;
-            }
-            index++;
-        }
-        if (index < 2) continue;
-        string file_name = StringPrintf("%s/%s", STATS_SERVICE_DIR, name);
-        ALOGD("full file %s", file_name.c_str());
-        int fd = open(file_name.c_str(), O_RDONLY | O_CLOEXEC);
-        if (fd != -1) {
-            string content;
-            if (android::base::ReadFdToString(fd, &content)) {
-                StatsdConfig config;
-                if (config.ParseFromString(content)) {
-                    mConfigs[ConfigKey(uid, configName)] = config;
-                    ALOGD("map key uid=%d|name=%s", uid, name);
-                }
-            }
-            close(fd);
-        }
-    }
-}
-
 void ConfigManager::update_saved_configs(const ConfigKey& key, const StatsdConfig& config) {
     mkdir(STATS_SERVICE_DIR, S_IRWXU);
 
@@ -217,22 +159,16 @@ void ConfigManager::update_saved_configs(const ConfigKey& key, const StatsdConfi
     // Then we save the latest config.
     string file_name = StringPrintf("%s/%d-%s-%ld", STATS_SERVICE_DIR, key.GetUid(),
                                     key.GetName().c_str(), time(nullptr));
-    int fd = open(file_name.c_str(), O_WRONLY | O_CREAT | O_CLOEXEC, S_IRUSR | S_IWUSR);
-    if (fd != -1) {
-        const int numBytes = config.ByteSize();
-        vector<uint8_t> buffer(numBytes);
-        config.SerializeToArray(&buffer[0], numBytes);
-        int result = write(fd, &buffer[0], numBytes);
-        close(fd);
-        bool wroteKey = (result == numBytes);
-        ALOGD("wrote to file %d", wroteKey);
-    }
+    const int numBytes = config.ByteSize();
+    vector<uint8_t> buffer(numBytes);
+    config.SerializeToArray(&buffer[0], numBytes);
+    StorageManager::writeFile(file_name.c_str(), &buffer[0], numBytes);
 }
 
-static StatsdConfig build_fake_config() {
+StatsdConfig build_fake_config() {
     // HACK: Hard code a test metric for counting screen on events...
     StatsdConfig config;
-    config.set_name("12345");
+    config.set_name("CONFIG_12345");
 
     int WAKE_LOCK_TAG_ID = 1111;  // put a fake id here to make testing easier.
     int WAKE_LOCK_UID_KEY_ID = 1;
@@ -263,20 +199,21 @@ static StatsdConfig build_fake_config() {
 
     // Count Screen ON events.
     CountMetric* metric = config.add_count_metric();
-    metric->set_name("1");
+    metric->set_name("METRIC_1");
     metric->set_what("SCREEN_TURNED_ON");
     metric->mutable_bucket()->set_bucket_size_millis(30 * 1000L);
 
     // Anomaly threshold for screen-on count.
     Alert* alert = config.add_alert();
-    alert->set_name("1");
+    alert->set_name("ALERT_1");
+    alert->set_metric_name("METRIC_1");
     alert->set_number_of_buckets(6);
     alert->set_trigger_if_sum_gt(10);
     alert->set_refractory_period_secs(30);
 
     // Count process state changes, slice by uid.
     metric = config.add_count_metric();
-    metric->set_name("2");
+    metric->set_name("METRIC_2");
     metric->set_what("PROCESS_STATE_CHANGE");
     metric->mutable_bucket()->set_bucket_size_millis(30 * 1000L);
     KeyMatcher* keyMatcher = metric->add_dimension();
@@ -284,14 +221,15 @@ static StatsdConfig build_fake_config() {
 
     // Anomaly threshold for background count.
     alert = config.add_alert();
-    alert->set_name("2");
+    alert->set_name("ALERT_2");
+    alert->set_metric_name("METRIC_2");
     alert->set_number_of_buckets(4);
     alert->set_trigger_if_sum_gt(30);
     alert->set_refractory_period_secs(20);
 
     // Count process state changes, slice by uid, while SCREEN_IS_OFF
     metric = config.add_count_metric();
-    metric->set_name("3");
+    metric->set_name("METRIC_3");
     metric->set_what("PROCESS_STATE_CHANGE");
     metric->mutable_bucket()->set_bucket_size_millis(30 * 1000L);
     keyMatcher = metric->add_dimension();
@@ -300,7 +238,7 @@ static StatsdConfig build_fake_config() {
 
     // Count wake lock, slice by uid, while SCREEN_IS_ON and app in background
     metric = config.add_count_metric();
-    metric->set_name("4");
+    metric->set_name("METRIC_4");
     metric->set_what("APP_GET_WL");
     metric->mutable_bucket()->set_bucket_size_millis(30 * 1000L);
     keyMatcher = metric->add_dimension();
@@ -313,7 +251,7 @@ static StatsdConfig build_fake_config() {
 
     // Duration of an app holding any wl, while screen on and app in background, slice by uid
     DurationMetric* durationMetric = config.add_duration_metric();
-    durationMetric->set_name("5");
+    durationMetric->set_name("METRIC_5");
     durationMetric->mutable_bucket()->set_bucket_size_millis(30 * 1000L);
     durationMetric->set_aggregation_type(DurationMetric_AggregationType_SUM);
     keyMatcher = durationMetric->add_dimension();
@@ -327,7 +265,7 @@ static StatsdConfig build_fake_config() {
 
     // max Duration of an app holding any wl, while screen on and app in background, slice by uid
     durationMetric = config.add_duration_metric();
-    durationMetric->set_name("6");
+    durationMetric->set_name("METRIC_6");
     durationMetric->mutable_bucket()->set_bucket_size_millis(30 * 1000L);
     durationMetric->set_aggregation_type(DurationMetric_AggregationType_MAX_SPARSE);
     keyMatcher = durationMetric->add_dimension();
@@ -341,7 +279,7 @@ static StatsdConfig build_fake_config() {
 
     // Duration of an app holding any wl, while screen on and app in background
     durationMetric = config.add_duration_metric();
-    durationMetric->set_name("7");
+    durationMetric->set_name("METRIC_7");
     durationMetric->mutable_bucket()->set_bucket_size_millis(30 * 1000L);
     durationMetric->set_aggregation_type(DurationMetric_AggregationType_MAX_SPARSE);
     durationMetric->set_what("WL_HELD_PER_APP_PER_NAME");
@@ -353,14 +291,14 @@ static StatsdConfig build_fake_config() {
 
     // Duration of screen on time.
     durationMetric = config.add_duration_metric();
-    durationMetric->set_name("8");
+    durationMetric->set_name("METRIC_8");
     durationMetric->mutable_bucket()->set_bucket_size_millis(10 * 1000L);
     durationMetric->set_aggregation_type(DurationMetric_AggregationType_SUM);
     durationMetric->set_what("SCREEN_IS_ON");
 
     // Value metric to count KERNEL_WAKELOCK when screen turned on
     ValueMetric* valueMetric = config.add_value_metric();
-    valueMetric->set_name("6");
+    valueMetric->set_name("METRIC_6");
     valueMetric->set_what("KERNEL_WAKELOCK");
     valueMetric->set_value_field(1);
     valueMetric->set_condition("SCREEN_IS_ON");
@@ -371,12 +309,12 @@ static StatsdConfig build_fake_config() {
 
     // Add an EventMetric to log process state change events.
     EventMetric* eventMetric = config.add_event_metric();
-    eventMetric->set_name("9");
+    eventMetric->set_name("METRIC_9");
     eventMetric->set_what("SCREEN_TURNED_ON");
 
     // Add an GaugeMetric.
     GaugeMetric* gaugeMetric = config.add_gauge_metric();
-    gaugeMetric->set_name("10");
+    gaugeMetric->set_name("METRIC_10");
     gaugeMetric->set_what("DEVICE_TEMPERATURE");
     gaugeMetric->set_gauge_field(DEVICE_TEMPERATURE_KEY);
     gaugeMetric->mutable_bucket()->set_bucket_size_millis(60 * 1000L);

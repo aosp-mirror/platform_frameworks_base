@@ -34,7 +34,7 @@ interface IUsbManager
     /* Returns a file descriptor for communicating with the USB device.
      * The native fd can be passed to usb_device_new() in libusbhost.
      */
-    ParcelFileDescriptor openDevice(String deviceName);
+    ParcelFileDescriptor openDevice(String deviceName, String packageName);
 
     /* Returns the currently attached USB accessory */
     UsbAccessory getCurrentAccessory();
@@ -55,7 +55,7 @@ interface IUsbManager
     void setAccessoryPackage(in UsbAccessory accessory, String packageName, int userId);
 
     /* Returns true if the caller has permission to access the device. */
-    boolean hasDevicePermission(in UsbDevice device);
+    boolean hasDevicePermission(in UsbDevice device, String packageName);
 
     /* Returns true if the caller has permission to access the accessory. */
     boolean hasAccessoryPermission(in UsbAccessory accessory);

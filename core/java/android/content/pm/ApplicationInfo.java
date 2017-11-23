@@ -19,6 +19,7 @@ package android.content.pm;
 import static android.os.Build.VERSION_CODES.DONUT;
 
 import android.annotation.IntDef;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.content.Context;
@@ -890,6 +891,29 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public int versionCode;
 
     /**
+     * The user-visible SDK version (ex. 26) of the framework against which the application claims
+     * to have been compiled, or {@code 0} if not specified.
+     * <p>
+     * This property is the compile-time equivalent of
+     * {@link android.os.Build.VERSION#CODENAME Build.VERSION.SDK_INT}.
+     *
+     * @hide For platform use only; we don't expect developers to need to read this value.
+     */
+    public int compileSdkVersion;
+
+    /**
+     * The development codename (ex. "O", "REL") of the framework against which the application
+     * claims to have been compiled, or {@code null} if not specified.
+     * <p>
+     * This property is the compile-time equivalent of
+     * {@link android.os.Build.VERSION#CODENAME Build.VERSION.CODENAME}.
+     *
+     * @hide For platform use only; we don't expect developers to need to read this value.
+     */
+    @Nullable
+    public String compileSdkVersionCodename;
+
+    /**
      * When false, indicates that all components within this application are
      * considered disabled, regardless of their individually set enabled status.
      */
@@ -1305,6 +1329,8 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         dest.writeInt(targetSandboxVersion);
         dest.writeString(classLoaderName);
         dest.writeStringArray(splitClassLoaderNames);
+        dest.writeInt(compileSdkVersion);
+        dest.writeString(compileSdkVersionCodename);
     }
 
     public static final Parcelable.Creator<ApplicationInfo> CREATOR
@@ -1372,6 +1398,8 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         targetSandboxVersion = source.readInt();
         classLoaderName = source.readString();
         splitClassLoaderNames = source.readStringArray();
+        compileSdkVersion = source.readInt();
+        compileSdkVersionCodename = source.readString();
     }
 
     /**

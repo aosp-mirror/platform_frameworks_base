@@ -247,7 +247,7 @@ void CountMetricProducer::flushIfNeeded(const uint64_t eventTimeNs) {
 // Rough estimate of CountMetricProducer buffer stored. This number will be
 // greater than actual data size as it contains each dimension of
 // CountMetricData is  duplicated.
-size_t CountMetricProducer::byteSize() {
+size_t CountMetricProducer::byteSize() const {
     size_t totalSize = 0;
     for (const auto& pair : mPastBuckets) {
         totalSize += pair.second.size() * kBucketSize;

@@ -104,7 +104,8 @@ bool CombinationConditionTracker::init(const vector<Condition>& allConditionConf
 
 void CombinationConditionTracker::isConditionMet(
         const map<string, HashableDimensionKey>& conditionParameters,
-        const vector<sp<ConditionTracker>>& allConditions, vector<ConditionState>& conditionCache) {
+        const vector<sp<ConditionTracker>>& allConditions,
+        vector<ConditionState>& conditionCache) const {
     for (const int childIndex : mChildren) {
         if (conditionCache[childIndex] == ConditionState::kNotEvaluated) {
             allConditions[childIndex]->isConditionMet(conditionParameters, allConditions,

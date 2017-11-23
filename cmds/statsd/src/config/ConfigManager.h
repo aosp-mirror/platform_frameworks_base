@@ -34,6 +34,9 @@ using std::unordered_map;
 using std::vector;
 using std::pair;
 
+// Util function to Hard code a test metric for counting screen on events.
+StatsdConfig build_fake_config();
+
 /**
  * Keeps track of which configurations have been set from various sources.
  *
@@ -70,12 +73,12 @@ public:
     /**
      * Returns the package name and class name representing the broadcast receiver for this config.
      */
-    const pair<string, string> GetConfigReceiver(const ConfigKey& key);
+    const pair<string, string> GetConfigReceiver(const ConfigKey& key) const;
 
     /**
      * Returns all config keys registered.
      */
-    vector<ConfigKey> GetAllConfigKeys();
+    vector<ConfigKey> GetAllConfigKeys() const;
 
     /**
      * Erase any broadcast receiver associated with this config key.
@@ -125,11 +128,6 @@ private:
      * The ConfigListeners that will be told about changes.
      */
     vector<sp<ConfigListener>> mListeners;
-
-    /**
-     * Call to load the saved configs from disk.
-     */
-    void readConfigFromDisk();
 };
 
 }  // namespace statsd

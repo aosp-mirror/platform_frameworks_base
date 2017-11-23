@@ -256,7 +256,7 @@ public class JobStoreTest {
                 invalidLateRuntimeElapsedMillis - TWO_HOURS;  // Early is (late - period).
         final Pair<Long, Long> persistedExecutionTimesUTC = new Pair<>(rtcNow, rtcNow + ONE_HOUR);
         final JobStatus js = new JobStatus(b.build(), SOME_UID, "somePackage",
-                0 /* sourceUserId */, "someTag",
+                0 /* sourceUserId */, 0, 0, "someTag",
                 invalidEarlyRuntimeElapsedMillis, invalidLateRuntimeElapsedMillis,
                 0 /* lastSuccessfulRunTime */, 0 /* lastFailedRunTime */,
                 persistedExecutionTimesUTC);

@@ -23,6 +23,7 @@
 #include "config/ConfigManager.h"
 #include "guardrail/MemoryLeakTrackUtil.h"
 #include "storage/DropboxReader.h"
+#include "storage/StorageManager.h"
 
 #include <android-base/file.h>
 #include <binder/IPCThreadState.h>
@@ -75,7 +76,7 @@ StatsService::StatsService(const sp<Looper>& handlerLooper)
     mUidMap = new UidMap();
     mConfigManager = new ConfigManager();
     mProcessor = new StatsLogProcessor(mUidMap, mAnomalyMonitor, [this](const ConfigKey& key) {
-        auto sc = getStatsCompanionService();
+        sp<IStatsCompanionService> sc = getStatsCompanionService();
         auto receiver = mConfigManager->GetConfigReceiver(key);
         if (sc == nullptr) {
             ALOGD("Could not find StatsCompanionService");
@@ -231,6 +232,10 @@ status_t StatsService::command(FILE* in, FILE* out, FILE* err, Vector<String8>& 
         if (!args[0].compare(String8("meminfo"))) {
             return cmd_dump_memory_info(out);
         }
+
+        if (!args[0].compare(String8("write-to-disk"))) {
+            return cmd_write_data_to_disk(out);
+        }
     }
 
     print_cmd_help(out);
@@ -265,6 +270,11 @@ void StatsService::print_cmd_help(FILE* out) {
     fprintf(out, "usage: adb shell cmd stats pull-source [int] \n");
     fprintf(out, "\n");
     fprintf(out, "  Prints the output of a pulled metrics source (int indicates source)\n");
+    fprintf(out, "\n");
+    fprintf(out, "\n");
+    fprintf(out, "usage: adb shell cmd stats write-to-disk \n");
+    fprintf(out, "\n");
+    fprintf(out, "  Flushes all data on memory to disk.\n");
     fprintf(out, "\n");
     fprintf(out, "\n");
     fprintf(out, "usage: adb shell cmd stats config remove [UID] NAME\n");
@@ -487,6 +497,12 @@ status_t StatsService::cmd_print_uid_map(FILE* out) {
     return NO_ERROR;
 }
 
+status_t StatsService::cmd_write_data_to_disk(FILE* out) {
+    fprintf(out, "Writing data to disk\n");
+    mProcessor->WriteDataToDisk();
+    return NO_ERROR;
+}
+
 status_t StatsService::cmd_print_pulled_metrics(FILE* out, const Vector<String8>& args) {
     int s = atoi(args[1].c_str());
     vector<shared_ptr<LogEvent> > stats;
@@ -502,22 +518,7 @@ status_t StatsService::cmd_print_pulled_metrics(FILE* out, const Vector<String8>
 
 status_t StatsService::cmd_remove_config_files(FILE* out) {
     fprintf(out, "Trying to remove config files...\n");
-    unique_ptr<DIR, decltype(&closedir)> dir(opendir(STATS_SERVICE_DIR), closedir);
-    if (dir == NULL) {
-        fprintf(out, "No existing config files found exiting...\n");
-        return NO_ERROR;
-    }
-
-    dirent* de;
-    while ((de = readdir(dir.get()))) {
-        char* name = de->d_name;
-        if (name[0] == '.') continue;
-        string file_name = StringPrintf("%s/%s", STATS_SERVICE_DIR, name);
-        fprintf(out, "Deleting file %s\n", file_name.c_str());
-        if (remove(file_name.c_str())) {
-            fprintf(out, "Error deleting file %s\n", file_name.c_str());
-        }
-    }
+    StorageManager::deleteAllFiles(STATS_SERVICE_DIR);
     return NO_ERROR;
 }
 
@@ -611,6 +612,19 @@ Status StatsService::systemRunning() {
     return Status::ok();
 }
 
+Status StatsService::writeDataToDisk() {
+    if (IPCThreadState::self()->getCallingUid() != AID_SYSTEM) {
+        return Status::fromExceptionCode(Status::EX_SECURITY,
+                                         "Only system uid can call systemRunning");
+    }
+
+    ALOGD("StatsService::writeDataToDisk");
+
+    mProcessor->WriteDataToDisk();
+
+    return Status::ok();
+}
+
 void StatsService::sayHiToStatsCompanion() {
     // TODO: This method needs to be private. It is temporarily public and unsecured for testing
     // purposes.
@@ -667,7 +681,7 @@ void StatsService::OnLogEvent(const LogEvent& event) {
     mProcessor->OnLogEvent(event);
 }
 
-Status StatsService::getData(const String16& key, vector <uint8_t>* output) {
+Status StatsService::getData(const String16& key, vector<uint8_t>* output) {
     IPCThreadState* ipc = IPCThreadState::self();
     ALOGD("StatsService::getData with Pid %i, Uid %i", ipc->getCallingPid(),
           ipc->getCallingUid());

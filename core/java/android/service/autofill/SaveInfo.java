@@ -599,9 +599,9 @@ public final class SaveInfo implements Parcelable {
          * credit card number:
          *
          * <pre class="prettyprint">
-         * builder.addSanitizer(
-         *     new TextValueSanitizer(Pattern.compile("^(\\d{4}\s?\\d{4}\s?\\d{4}\s?\\d{4})$"),
-         *         "$1$2$3$4"), ccNumberId);
+         * builder.addSanitizer(new TextValueSanitizer(
+         *     Pattern.compile("^(\\d{4})\\s?(\\d{4})\\s?(\\d{4})\\s?(\\d{4})$", "$1$2$3$4")),
+         *     ccNumberId);
          * </pre>
          *
          * <p>The same sanitizer can be reused to sanitize multiple fields. For example, to trim
@@ -614,9 +614,9 @@ public final class SaveInfo implements Parcelable {
          * </pre>
          *
          * <p>The sanitizer can also be used as an alternative for a
-         * {@link #setValidator(Validator) validator}&mdashif any of the {@code ids} is a
-         * {@link #SaveInfo.Builder(int, AutofillId[]) required id} and the {@code sanitizer} fail
-         * for it, then the save UI is not shown.
+         * {@link #setValidator(Validator) validator}. If any of the {@code ids} is a
+         * {@link #SaveInfo.Builder(int, AutofillId[]) required id} and the {@code sanitizer} fails
+         * because of it, then the save UI is not shown.
          *
          * @param sanitizer an implementation provided by the Android System.
          * @param ids id of fields whose value will be sanitized.

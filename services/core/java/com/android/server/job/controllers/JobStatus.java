@@ -34,7 +34,9 @@ import android.util.Pair;
 import android.util.Slog;
 import android.util.TimeUtils;
 
+import com.android.server.LocalServices;
 import com.android.server.job.GrantedUriPermissions;
+import com.android.server.job.JobSchedulerInternal;
 import com.android.server.job.JobSchedulerService;
 
 import java.io.PrintWriter;
@@ -119,6 +121,24 @@ public final class JobStatus {
 
     /** How many times this job has failed, used to compute back-off. */
     private final int numFailures;
+
+    /**
+     * Current standby heartbeat when this job was scheduled or last ran.  Used to
+     * pin the runnability check regardless of the job's app moving between buckets.
+     */
+    private final long baseHeartbeat;
+
+    /**
+     * Which app standby bucket this job's app is in.  Updated when the app is moved to a
+     * different bucket.
+     */
+    private int standbyBucket;
+
+    /**
+     * Debugging: timestamp if we ever defer this job based on standby bucketing, this
+     * is when we did so.
+     */
+    private long whenStandbyDeferred;
 
     // Constraints.
     final int requiredConstraints;
@@ -221,10 +241,13 @@ public final class JobStatus {
     }
 
     private JobStatus(JobInfo job, int callingUid, String sourcePackageName,
-            int sourceUserId, String tag, int numFailures, long earliestRunTimeElapsedMillis,
-            long latestRunTimeElapsedMillis, long lastSuccessfulRunTime, long lastFailedRunTime) {
+            int sourceUserId, int standbyBucket, long heartbeat, String tag, int numFailures,
+            long earliestRunTimeElapsedMillis, long latestRunTimeElapsedMillis,
+            long lastSuccessfulRunTime, long lastFailedRunTime) {
         this.job = job;
         this.callingUid = callingUid;
+        this.standbyBucket = standbyBucket;
+        this.baseHeartbeat = heartbeat;
 
         int tempSourceUid = -1;
         if (sourceUserId != -1 && sourcePackageName != null) {
@@ -283,6 +306,7 @@ public final class JobStatus {
     public JobStatus(JobStatus jobStatus) {
         this(jobStatus.getJob(), jobStatus.getUid(),
                 jobStatus.getSourcePackageName(), jobStatus.getSourceUserId(),
+                jobStatus.getStandbyBucket(), jobStatus.getBaseHeartbeat(),
                 jobStatus.getSourceTag(), jobStatus.getNumFailures(),
                 jobStatus.getEarliestRunTime(), jobStatus.getLatestRunTimeElapsed(),
                 jobStatus.getLastSuccessfulRunTime(), jobStatus.getLastFailedRunTime());
@@ -299,13 +323,17 @@ public final class JobStatus {
      * {@link android.app.job.JobInfo} time criteria because we can load a persisted periodic job
      * from the {@link com.android.server.job.JobStore} and still want to respect its
      * wallclock runtime rather than resetting it on every boot.
-     * We consider a freshly loaded job to no longer be in back-off.
+     * We consider a freshly loaded job to no longer be in back-off, and the associated
+     * standby bucket is whatever the OS thinks it should be at this moment.
      */
-    public JobStatus(JobInfo job, int callingUid, String sourcePackageName, int sourceUserId,
-            String sourceTag, long earliestRunTimeElapsedMillis, long latestRunTimeElapsedMillis,
+    public JobStatus(JobInfo job, int callingUid, String sourcePkgName, int sourceUserId,
+            int standbyBucket, long baseHeartbeat, String sourceTag,
+            long earliestRunTimeElapsedMillis, long latestRunTimeElapsedMillis,
             long lastSuccessfulRunTime, long lastFailedRunTime,
             Pair<Long, Long> persistedExecutionTimesUTC) {
-        this(job, callingUid, sourcePackageName, sourceUserId, sourceTag, 0,
+        this(job, callingUid, sourcePkgName, sourceUserId,
+                standbyBucket, baseHeartbeat,
+                sourceTag, 0,
                 earliestRunTimeElapsedMillis, latestRunTimeElapsedMillis,
                 lastSuccessfulRunTime, lastFailedRunTime);
 
@@ -322,11 +350,13 @@ public final class JobStatus {
     }
 
     /** Create a new job to be rescheduled with the provided parameters. */
-    public JobStatus(JobStatus rescheduling, long newEarliestRuntimeElapsedMillis,
+    public JobStatus(JobStatus rescheduling, long newBaseHeartbeat,
+            long newEarliestRuntimeElapsedMillis,
             long newLatestRuntimeElapsedMillis, int backoffAttempt,
             long lastSuccessfulRunTime, long lastFailedRunTime) {
         this(rescheduling.job, rescheduling.getUid(),
                 rescheduling.getSourcePackageName(), rescheduling.getSourceUserId(),
+                rescheduling.getStandbyBucket(), newBaseHeartbeat,
                 rescheduling.getSourceTag(), backoffAttempt, newEarliestRuntimeElapsedMillis,
                 newLatestRuntimeElapsedMillis,
                 lastSuccessfulRunTime, lastFailedRunTime);
@@ -335,11 +365,12 @@ public final class JobStatus {
     /**
      * Create a newly scheduled job.
      * @param callingUid Uid of the package that scheduled this job.
-     * @param sourcePackageName Package name on whose behalf this job is scheduled. Null indicates
+     * @param sourcePkg Package name on whose behalf this job is scheduled. Null indicates
      *                          the calling package is the source.
      * @param sourceUserId User id for whom this job is scheduled. -1 indicates this is same as the
+     *     caller.
      */
-    public static JobStatus createFromJobInfo(JobInfo job, int callingUid, String sourcePackageName,
+    public static JobStatus createFromJobInfo(JobInfo job, int callingUid, String sourcePkg,
             int sourceUserId, String tag) {
         final long elapsedNow = sElapsedRealtimeClock.millis();
         final long earliestRunTimeElapsedMillis, latestRunTimeElapsedMillis;
@@ -352,7 +383,14 @@ public final class JobStatus {
             latestRunTimeElapsedMillis = job.hasLateConstraint() ?
                     elapsedNow + job.getMaxExecutionDelayMillis() : NO_LATEST_RUNTIME;
         }
-        return new JobStatus(job, callingUid, sourcePackageName, sourceUserId, tag, 0,
+        String jobPackage = (sourcePkg != null) ? sourcePkg : job.getService().getPackageName();
+
+        int standbyBucket = JobSchedulerService.standbyBucketForPackage(jobPackage,
+                sourceUserId, elapsedNow);
+        JobSchedulerInternal js = LocalServices.getService(JobSchedulerInternal.class);
+        long currentHeartbeat = js != null ? js.currentHeartbeat() : 0;
+        return new JobStatus(job, callingUid, sourcePkg, sourceUserId,
+                standbyBucket, currentHeartbeat, tag, 0,
                 earliestRunTimeElapsedMillis, latestRunTimeElapsedMillis,
                 0 /* lastSuccessfulRunTime */, 0 /* lastFailedRunTime */);
     }
@@ -526,6 +564,29 @@ public final class JobStatus {
 
     public int getUserId() {
         return UserHandle.getUserId(callingUid);
+    }
+
+    public int getStandbyBucket() {
+        return standbyBucket;
+    }
+
+    public long getBaseHeartbeat() {
+        return baseHeartbeat;
+    }
+
+    // Called only by the standby monitoring code
+    public void setStandbyBucket(int newBucket) {
+        standbyBucket = newBucket;
+    }
+
+    // Called only by the standby monitoring code
+    public long getWhenStandbyDeferred() {
+        return whenStandbyDeferred;
+    }
+
+    // Called only by the standby monitoring code
+    public void setWhenStandbyDeferred(long now) {
+        whenStandbyDeferred = now;
     }
 
     public String getSourceTag() {
@@ -950,6 +1011,19 @@ public final class JobStatus {
         }
     }
 
+    // normalized bucket indices, not the AppStandby constants
+    private String bucketName(int bucket) {
+        switch (bucket) {
+            case 0: return "ACTIVE";
+            case 1: return "WORKING_SET";
+            case 2: return "FREQUENT";
+            case 3: return "RARE";
+            case 4: return "NEVER";
+            default:
+                return "Unknown: " + bucket;
+        }
+    }
+
     // Dumpsys infrastructure
     public void dump(PrintWriter pw, String prefix, boolean full, long elapsedRealtimeMillis) {
         pw.print(prefix); UserHandle.formatUid(pw, callingUid);
@@ -1098,6 +1172,8 @@ public final class JobStatus {
                 dumpJobWorkItem(pw, prefix, executingWork.get(i), i);
             }
         }
+        pw.print(prefix); pw.print("Standby bucket: ");
+        pw.println(bucketName(standbyBucket));
         pw.print(prefix); pw.print("Enqueue time: ");
         TimeUtils.formatDuration(enqueueTime, elapsedRealtimeMillis, pw);
         pw.println();

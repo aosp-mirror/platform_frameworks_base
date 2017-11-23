@@ -2602,7 +2602,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                             next.shortComponentName);
 
                     next.sleeping = false;
-                    mService.showUnsupportedZoomDialogIfNeededLocked(next);
+                    mService.getAppWarningsLocked().onResumeActivity(next);
                     mService.showAskCompatModeDialogLocked(next);
                     next.app.pendingUiClean = true;
                     next.app.forceProcessStateUpTo(mService.mTopProcessState);

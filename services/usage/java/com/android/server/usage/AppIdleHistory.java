@@ -327,7 +327,8 @@ public class AppIdleHistory {
         return (elapsedRealtime - mElapsedSnapshot + mElapsedDuration);
     }
 
-    public void setIdle(String packageName, int userId, boolean idle, long elapsedRealtime) {
+    /* Returns the new standby bucket the app is assigned to */
+    public int setIdle(String packageName, int userId, boolean idle, long elapsedRealtime) {
         ArrayMap<String, AppUsageHistory> userHistory = getUserHistory(userId);
         AppUsageHistory appUsageHistory = getPackageHistory(userHistory, packageName,
                 elapsedRealtime, true);
@@ -339,6 +340,7 @@ public class AppIdleHistory {
             // This is to pretend that the app was just used, don't freeze the state anymore.
             appUsageHistory.bucketingReason = REASON_USAGE;
         }
+        return appUsageHistory.currentBucket;
     }
 
     public void clearUsage(String packageName, int userId) {

@@ -164,6 +164,14 @@ public abstract class PackageManagerInternal {
             @PackageInfoFlags int flags, int filterCallingUid, int userId);
 
     /**
+     * Do a straight uid lookup for the given package/application in the given user.
+     * @see PackageManager#getPackageUidAsUser(String, int, int)
+     * @return The app's uid, or < 0 if the package was not found in that user
+     */
+    public abstract int getPackageUid(String packageName,
+            @PackageInfoFlags int flags, int userId);
+
+    /**
      * Retrieve all of the information we know about a particular package/application.
      * @param filterCallingUid The results will be filtered in the context of this UID instead
      * of the calling UID.

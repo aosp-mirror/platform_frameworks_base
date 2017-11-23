@@ -2557,7 +2557,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             }
             results = null;
             newIntents = null;
-            service.showUnsupportedZoomDialogIfNeededLocked(this);
+            service.getAppWarningsLocked().onResumeActivity(this);
             service.showAskCompatModeDialogLocked(this);
         } else {
             service.mHandler.removeMessages(PAUSE_TIMEOUT_MSG, this);

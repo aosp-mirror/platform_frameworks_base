@@ -63,6 +63,8 @@ import com.android.server.backup.KeyValueBackupJob;
 import com.android.server.backup.PackageManagerBackupAgent;
 import com.android.server.backup.RefactoredBackupManagerService;
 import com.android.server.backup.fullbackup.PerformFullTransportBackupTask;
+import com.android.server.backup.transport.TransportClient;
+import com.android.server.backup.transport.TransportUtils;
 import com.android.server.backup.utils.AppBackupUtils;
 import com.android.server.backup.utils.BackupManagerMonitorUtils;
 import com.android.server.backup.utils.BackupObserverUtils;
@@ -112,7 +114,6 @@ public class PerformBackupTask implements BackupRestoreTask {
     private RefactoredBackupManagerService backupManagerService;
     private final Object mCancelLock = new Object();
 
-    IBackupTransport mTransport;
     ArrayList<BackupRequest> mQueue;
     ArrayList<BackupRequest> mOriginalQueue;
     File mStateDir;
@@ -122,6 +123,8 @@ public class PerformBackupTask implements BackupRestoreTask {
     IBackupObserver mObserver;
     IBackupManagerMonitor mMonitor;
 
+    private final TransportClient mTransportClient;
+    private final OnTaskFinishedListener mListener;
     private final PerformFullTransportBackupTask mFullBackupTask;
     private final int mCurrentOpToken;
     private volatile int mEphemeralOpToken;
@@ -143,17 +146,19 @@ public class PerformBackupTask implements BackupRestoreTask {
     private volatile boolean mCancelAll;
 
     public PerformBackupTask(RefactoredBackupManagerService backupManagerService,
-            IBackupTransport transport, String dirName,
+            TransportClient transportClient, String dirName,
             ArrayList<BackupRequest> queue, @Nullable DataChangedJournal journal,
             IBackupObserver observer, IBackupManagerMonitor monitor,
-            List<String> pendingFullBackups, boolean userInitiated, boolean nonIncremental) {
+            @Nullable OnTaskFinishedListener listener, List<String> pendingFullBackups,
+            boolean userInitiated, boolean nonIncremental) {
         this.backupManagerService = backupManagerService;
-        mTransport = transport;
+        mTransportClient = transportClient;
         mOriginalQueue = queue;
         mQueue = new ArrayList<>();
         mJournal = journal;
         mObserver = observer;
         mMonitor = monitor;
+        mListener = (listener != null) ? listener : OnTaskFinishedListener.NOP;
         mPendingFullBackups = pendingFullBackups;
         mUserInitiated = userInitiated;
         mNonIncremental = nonIncremental;
@@ -289,10 +294,10 @@ public class PerformBackupTask implements BackupRestoreTask {
         if (DEBUG) {
             Slog.v(TAG, "Beginning backup of " + mQueue.size() + " targets");
         }
-
         File pmState = new File(mStateDir, PACKAGE_MANAGER_SENTINEL);
         try {
-            final String transportName = mTransport.transportDirName();
+            IBackupTransport transport = mTransportClient.connectOrThrow("PBT.beginBackup()");
+            final String transportName = transport.transportDirName();
             EventLog.writeEvent(EventLogTags.BACKUP_START, transportName);
 
             // If we haven't stored package manager metadata yet, we must init the transport.
@@ -300,7 +305,7 @@ public class PerformBackupTask implements BackupRestoreTask {
                 Slog.i(TAG, "Initializing (wiping) backup state and transport storage");
                 backupManagerService.addBackupTrace("initializing transport " + transportName);
                 backupManagerService.resetBackupState(mStateDir);  // Just to make sure.
-                mStatus = mTransport.initializeDevice();
+                mStatus = transport.initializeDevice();
 
                 backupManagerService.addBackupTrace("transport.initializeDevice() == " + mStatus);
                 if (mStatus == BackupTransport.TRANSPORT_OK) {
@@ -324,7 +329,7 @@ public class PerformBackupTask implements BackupRestoreTask {
                     PackageManagerBackupAgent pmAgent = backupManagerService.makeMetadataAgent();
                     mStatus = invokeAgentForBackup(
                             PACKAGE_MANAGER_SENTINEL,
-                            IBackupAgent.Stub.asInterface(pmAgent.onBind()), mTransport);
+                            IBackupAgent.Stub.asInterface(pmAgent.onBind()));
                     backupManagerService.addBackupTrace("PMBA invoke: " + mStatus);
 
                     // Because the PMBA is a local instance, it has already executed its
@@ -445,7 +450,7 @@ public class PerformBackupTask implements BackupRestoreTask {
                 backupManagerService.addBackupTrace("agent bound; a? = " + (agent != null));
                 if (agent != null) {
                     mAgentBinder = agent;
-                    mStatus = invokeAgentForBackup(request.packageName, agent, mTransport);
+                    mStatus = invokeAgentForBackup(request.packageName, agent);
                     // at this point we'll either get a completion callback from the
                     // agent, or a timeout message on the main handler.  either way, we're
                     // done here as long as we're successful so far.
@@ -526,11 +531,14 @@ public class PerformBackupTask implements BackupRestoreTask {
         // If everything actually went through and this is the first time we've
         // done a backup, we can now record what the current backup dataset token
         // is.
+        String callerLogString = "PBT.finalizeBackup()";
         if ((backupManagerService.getCurrentToken() == 0) && (mStatus
                 == BackupTransport.TRANSPORT_OK)) {
             backupManagerService.addBackupTrace("success; recording token");
             try {
-                backupManagerService.setCurrentToken(mTransport.getCurrentRestoreSet());
+                IBackupTransport transport =
+                        mTransportClient.connectOrThrow(callerLogString);
+                backupManagerService.setCurrentToken(transport.getCurrentRestoreSet());
                 backupManagerService.writeRestoreTokens();
             } catch (Exception e) {
                 // nothing for it at this point, unfortunately, but this will be
@@ -553,13 +561,13 @@ public class PerformBackupTask implements BackupRestoreTask {
                 backupManagerService.addBackupTrace("init required; rerunning");
                 try {
                     final String name = backupManagerService.getTransportManager().getTransportName(
-                            mTransport);
+                            mTransportClient);
                     if (name != null) {
                         backupManagerService.getPendingInits().add(name);
                     } else {
                         if (DEBUG) {
-                            Slog.w(TAG, "Couldn't find name of transport " + mTransport
-                                    + " for init");
+                            Slog.w(TAG, "Couldn't find name of transport "
+                                    + mTransportClient.getTransportComponent() + " for init");
                         }
                     }
                 } catch (Exception e) {
@@ -577,17 +585,21 @@ public class PerformBackupTask implements BackupRestoreTask {
 
         if (!mCancelAll && mStatus == BackupTransport.TRANSPORT_OK &&
                 mPendingFullBackups != null && !mPendingFullBackups.isEmpty()) {
+            // TODO(brufino): Move the onFinish() call to the full-backup task
+            mListener.onFinished(callerLogString);
             Slog.d(TAG, "Starting full backups for: " + mPendingFullBackups);
             // Acquiring wakelock for PerformFullTransportBackupTask before its start.
             backupManagerService.getWakelock().acquire();
             (new Thread(mFullBackupTask, "full-transport-requested")).start();
         } else if (mCancelAll) {
+            mListener.onFinished(callerLogString);
             if (mFullBackupTask != null) {
                 mFullBackupTask.unregisterTask();
             }
             BackupObserverUtils.sendBackupFinished(mObserver,
                     BackupManager.ERROR_BACKUP_CANCELLED);
         } else {
+            mListener.onFinished(callerLogString);
             mFullBackupTask.unregisterTask();
             switch (mStatus) {
                 case BackupTransport.TRANSPORT_OK:
@@ -619,8 +631,7 @@ public class PerformBackupTask implements BackupRestoreTask {
 
     // Invoke an agent's doBackup() and start a timeout message spinning on the main
     // handler in case it doesn't get back to us.
-    int invokeAgentForBackup(String packageName, IBackupAgent agent,
-            IBackupTransport transport) {
+    int invokeAgentForBackup(String packageName, IBackupAgent agent) {
         if (DEBUG) {
             Slog.d(TAG, "invokeAgentForBackup on " + packageName);
         }
@@ -671,7 +682,10 @@ public class PerformBackupTask implements BackupRestoreTask {
                             ParcelFileDescriptor.MODE_CREATE |
                             ParcelFileDescriptor.MODE_TRUNCATE);
 
-            final long quota = mTransport.getBackupQuota(packageName, false /* isFullBackup */);
+            IBackupTransport transport =
+                    mTransportClient.connectOrThrow("PBT.invokeAgentForBackup()");
+
+            final long quota = transport.getBackupQuota(packageName, false /* isFullBackup */);
             callingAgent = true;
 
             // Initiate the target's backup pass
@@ -888,10 +902,12 @@ public class PerformBackupTask implements BackupRestoreTask {
             clearAgentState();
             backupManagerService.addBackupTrace("operation complete");
 
+            IBackupTransport transport = mTransportClient.connect("PBT.operationComplete()");
             ParcelFileDescriptor backupData = null;
             mStatus = BackupTransport.TRANSPORT_OK;
             long size = 0;
             try {
+                TransportUtils.checkTransport(transport);
                 size = mBackupDataName.length();
                 if (size > 0) {
                     if (mStatus == BackupTransport.TRANSPORT_OK) {
@@ -899,7 +915,7 @@ public class PerformBackupTask implements BackupRestoreTask {
                                 ParcelFileDescriptor.MODE_READ_ONLY);
                         backupManagerService.addBackupTrace("sending data to transport");
                         int flags = mUserInitiated ? BackupTransport.FLAG_USER_INITIATED : 0;
-                        mStatus = mTransport.performBackup(mCurrentPackage, backupData, flags);
+                        mStatus = transport.performBackup(mCurrentPackage, backupData, flags);
                     }
 
                     // TODO - We call finishBackup() for each application backed up, because
@@ -910,7 +926,7 @@ public class PerformBackupTask implements BackupRestoreTask {
                     backupManagerService.addBackupTrace("data delivered: " + mStatus);
                     if (mStatus == BackupTransport.TRANSPORT_OK) {
                         backupManagerService.addBackupTrace("finishing op on transport");
-                        mStatus = mTransport.finishBackup();
+                        mStatus = transport.finishBackup();
                         backupManagerService.addBackupTrace("finished: " + mStatus);
                     } else if (mStatus == BackupTransport.TRANSPORT_PACKAGE_REJECTED) {
                         backupManagerService.addBackupTrace("transport rejected package");
@@ -981,8 +997,8 @@ public class PerformBackupTask implements BackupRestoreTask {
                 }
                 if (mAgentBinder != null) {
                     try {
-                        long quota = mTransport.getBackupQuota(mCurrentPackage.packageName,
-                                false);
+                        TransportUtils.checkTransport(transport);
+                        long quota = transport.getBackupQuota(mCurrentPackage.packageName, false);
                         mAgentBinder.doQuotaExceeded(size, quota);
                     } catch (Exception e) {
                         Slog.e(TAG, "Unable to notify about quota exceeded: " + e.getMessage());
@@ -1052,7 +1068,9 @@ public class PerformBackupTask implements BackupRestoreTask {
         // by way of retry/backoff time.
         long delay;
         try {
-            delay = mTransport.requestBackupTime();
+            IBackupTransport transport =
+                    mTransportClient.connectOrThrow("PBT.revertAndEndBackup()");
+            delay = transport.requestBackupTime();
         } catch (Exception e) {
             Slog.w(TAG, "Unable to contact transport for recommended backoff: " + e.getMessage());
             delay = 0;  // use the scheduler's default

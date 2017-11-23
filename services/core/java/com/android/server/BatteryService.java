@@ -619,6 +619,7 @@ public final class BatteryService extends SystemService {
         intent.putExtra(BatteryManager.EXTRA_HEALTH, mHealthInfo.batteryHealth);
         intent.putExtra(BatteryManager.EXTRA_PRESENT, mHealthInfo.batteryPresent);
         intent.putExtra(BatteryManager.EXTRA_LEVEL, mHealthInfo.batteryLevel);
+        intent.putExtra(BatteryManager.EXTRA_BATTERY_LOW, mSentLowBatteryBroadcast);
         intent.putExtra(BatteryManager.EXTRA_SCALE, BATTERY_SCALE);
         intent.putExtra(BatteryManager.EXTRA_ICON_SMALL, icon);
         intent.putExtra(BatteryManager.EXTRA_PLUGGED, mPlugType);

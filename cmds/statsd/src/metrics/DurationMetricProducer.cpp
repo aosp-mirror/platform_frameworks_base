@@ -264,12 +264,12 @@ void DurationMetricProducer::onMatchedLogEventInternal(
     }
 }
 
-size_t DurationMetricProducer::byteSize() {
-  size_t totalSize = 0;
-  for (const auto& pair : mPastBuckets) {
-      totalSize += pair.second.size() * kBucketSize;
-  }
-  return totalSize;
+size_t DurationMetricProducer::byteSize() const {
+    size_t totalSize = 0;
+    for (const auto& pair : mPastBuckets) {
+        totalSize += pair.second.size() * kBucketSize;
+    }
+    return totalSize;
 }
 
 }  // namespace statsd

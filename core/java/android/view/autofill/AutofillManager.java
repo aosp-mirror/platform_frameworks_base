@@ -908,6 +908,7 @@ public final class AutofillManager {
         }
         synchronized (mLock) {
             if (mSaveOnFinish) {
+                if (sDebug) Log.d(TAG, "Committing session on finish() as requested by service");
                 commitLocked();
             } else {
                 if (sDebug) Log.d(TAG, "Cancelling session on finish() as requested by service");
@@ -955,6 +956,7 @@ public final class AutofillManager {
      * methods such as {@link android.app.Activity#finish()}.
      */
     public void cancel() {
+        if (sVerbose) Log.v(TAG, "cancel() called by app");
         if (!hasAutofillFeature()) {
             return;
         }

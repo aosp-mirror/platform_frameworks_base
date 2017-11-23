@@ -101,7 +101,7 @@ private:
     // maps from ConditionTracker to MetricProducer
     std::unordered_map<int, std::vector<int>> mConditionToMetricMap;
 
-    bool mConfigValid;
+    bool mConfigValid = false;
 };
 
 }  // namespace statsd

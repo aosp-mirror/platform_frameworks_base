@@ -210,7 +210,7 @@ void SimpleConditionTracker::evaluateCondition(const LogEvent& event,
         return;
     }
 
-    if (mStopAllLogMatcherIndex >= 0 &&
+    if (mStopAllLogMatcherIndex >= 0 && mStopAllLogMatcherIndex < int(eventMatcherValues.size()) &&
         eventMatcherValues[mStopAllLogMatcherIndex] == MatchingState::kMatched) {
         handleStopAll(conditionCache, conditionChangedCache);
         return;
@@ -236,17 +236,19 @@ void SimpleConditionTracker::evaluateCondition(const LogEvent& event,
             // if the condition result is sliced. metrics won't directly get value from the
             // cache, so just set any value other than kNotEvaluated.
             conditionCache[mIndex] = ConditionState::kUnknown;
-        } else if (mSlicedConditionState.find(DEFAULT_DIMENSION_KEY) ==
-                   mSlicedConditionState.end()) {
-            // condition not sliced, but we haven't seen the matched start or stop yet. so return
-            // initial value.
-            conditionCache[mIndex] = mInitialValue;
         } else {
-            // return the cached condition.
-            conditionCache[mIndex] = mSlicedConditionState[DEFAULT_DIMENSION_KEY] > 0
-                                             ? ConditionState::kTrue
-                                             : ConditionState::kFalse;
+            const auto& itr = mSlicedConditionState.find(DEFAULT_DIMENSION_KEY);
+            if (itr == mSlicedConditionState.end()) {
+                // condition not sliced, but we haven't seen the matched start or stop yet. so
+                // return initial value.
+                conditionCache[mIndex] = mInitialValue;
+            } else {
+                // return the cached condition.
+                conditionCache[mIndex] =
+                        itr->second > 0 ? ConditionState::kTrue : ConditionState::kFalse;
+            }
         }
+
         return;
     }
 
@@ -257,7 +259,8 @@ void SimpleConditionTracker::evaluateCondition(const LogEvent& event,
 
 void SimpleConditionTracker::isConditionMet(
         const map<string, HashableDimensionKey>& conditionParameters,
-        const vector<sp<ConditionTracker>>& allConditions, vector<ConditionState>& conditionCache) {
+        const vector<sp<ConditionTracker>>& allConditions,
+        vector<ConditionState>& conditionCache) const {
     const auto pair = conditionParameters.find(mName);
     HashableDimensionKey key =
             (pair == conditionParameters.end()) ? DEFAULT_DIMENSION_KEY : pair->second;

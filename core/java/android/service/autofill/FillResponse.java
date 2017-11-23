@@ -180,8 +180,12 @@ public final class FillResponse implements Parcelable {
         private boolean mDestroyed;
 
         /**
-         * Requires a fill response authentication before autofilling the screen with
-         * any data set in this response.
+         * Triggers a custom UI before before autofilling the screen with any data set in this
+         * response.
+         *
+         * <p><b>Note:</b> Although the name of this method suggests that it should be used just for
+         * authentication flow, it can be used for other advanced flows; see {@link AutofillService}
+         * for examples.
          *
          * <p>This is typically useful when a user interaction is required to unlock their
          * data vault if you encrypt the data set labels and data set data. It is recommended
@@ -319,6 +323,7 @@ public final class FillResponse implements Parcelable {
          */
         public Builder setClientState(@Nullable Bundle clientState) {
             throwIfDestroyed();
+            throwIfDisableAutofillCalled();
             mClientState = clientState;
             return this;
         }
@@ -385,8 +390,9 @@ public final class FillResponse implements Parcelable {
          *
          * @throws IllegalArgumentException if {@code duration} is not a positive number.
          * @throws IllegalStateException if either {@link #addDataset(Dataset)},
-         *       {@link #setAuthentication(AutofillId[], IntentSender, RemoteViews)}, or
-         *       {@link #setSaveInfo(SaveInfo)} was already called.
+         *       {@link #setAuthentication(AutofillId[], IntentSender, RemoteViews)},
+         *       {@link #setSaveInfo(SaveInfo)}, or {@link #setClientState(Bundle)}
+         *       was already called.
          */
         public Builder disableAutofill(long duration) {
             throwIfDestroyed();
@@ -394,7 +400,7 @@ public final class FillResponse implements Parcelable {
                 throw new IllegalArgumentException("duration must be greater than 0");
             }
             if (mAuthentication != null || mDatasets != null || mSaveInfo != null
-                    || mFieldsDetection != null) {
+                    || mFieldsDetection != null || mClientState != null) {
                 throw new IllegalStateException("disableAutofill() must be the only method called");
             }
 
@@ -410,7 +416,8 @@ public final class FillResponse implements Parcelable {
          *   <li>{@link #build()} was already called.
          *   <li>No call was made to {@link #addDataset(Dataset)},
          *       {@link #setAuthentication(AutofillId[], IntentSender, RemoteViews)},
-         *       {@link #setSaveInfo(SaveInfo)}, or {@link #disableAutofill(long)}.
+         *       {@link #setSaveInfo(SaveInfo)}, {@link #disableAutofill(long)},
+         *       or {@link #setClientState(Bundle)}.
          * </ol>
          *
          * @return A built response.
@@ -418,10 +425,10 @@ public final class FillResponse implements Parcelable {
         public FillResponse build() {
             throwIfDestroyed();
             if (mAuthentication == null && mDatasets == null && mSaveInfo == null
-                    && mDisableDuration == 0 && mFieldsDetection == null) {
+                    && mDisableDuration == 0 && mFieldsDetection == null && mClientState == null) {
                 throw new IllegalStateException("need to provide: at least one DataSet, or a "
                         + "SaveInfo, or an authentication with a presentation, "
-                        + "or a FieldsDetection, or disable autofill");
+                        + "or a FieldsDetection, or a client state, or disable autofill");
             }
             mDestroyed = true;
             return new FillResponse(this);

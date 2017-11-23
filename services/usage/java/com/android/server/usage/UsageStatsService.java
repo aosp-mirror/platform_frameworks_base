@@ -24,6 +24,7 @@ import android.app.usage.AppStandby;
 import android.app.usage.ConfigurationStats;
 import android.app.usage.IUsageStatsManager;
 import android.app.usage.UsageEvents;
+import android.app.usage.AppStandby.StandbyBuckets;
 import android.app.usage.UsageEvents.Event;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManagerInternal;
@@ -864,6 +865,12 @@ public class UsageStatsService extends SystemService implements
         public boolean isAppIdle(String packageName, int uidForAppId, int userId) {
             return mAppStandby.isAppIdleFiltered(packageName, uidForAppId,
                     userId, SystemClock.elapsedRealtime());
+        }
+
+        @Override
+        @StandbyBuckets public int getAppStandbyBucket(String packageName, int userId,
+                long nowElapsed) {
+            return mAppStandby.getAppStandbyBucket(packageName, userId, nowElapsed, false);
         }
 
         @Override

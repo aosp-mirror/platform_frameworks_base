@@ -22,45 +22,47 @@ import com.android.os.StatsLog;
 import java.util.List;
 
 public class DisplayProtoUtils {
-    public static void displayLogReport(StringBuilder sb, StatsLog.ConfigMetricsReport report) {
+    public static void displayLogReport(StringBuilder sb, StatsLog.ConfigMetricsReportList reports) {
         sb.append("ConfigKey: ");
-        if (report.hasConfigKey()) {
-            com.android.os.StatsLog.ConfigMetricsReport.ConfigKey key = report.getConfigKey();
+        if (reports.hasConfigKey()) {
+            com.android.os.StatsLog.ConfigMetricsReportList.ConfigKey key = reports.getConfigKey();
             sb.append("\tuid: ").append(key.getUid()).append(" name: ").append(key.getName())
                     .append("\n");
         }
 
-        sb.append("StatsLogReport size: ").append(report.getMetricsCount()).append("\n");
-        for (StatsLog.StatsLogReport log : report.getMetricsList()) {
-            sb.append("\n\n");
-            sb.append("metric id: ").append(log.getMetricName()).append("\n");
-            sb.append("start time:").append(getDateStr(log.getStartReportNanos())).append("\n");
-            sb.append("end time:").append(getDateStr(log.getEndReportNanos())).append("\n");
+        for (StatsLog.ConfigMetricsReport report : reports.getReportsList()) {
+            sb.append("StatsLogReport size: ").append(report.getMetricsCount()).append("\n");
+            for (StatsLog.StatsLogReport log : report.getMetricsList()) {
+                sb.append("\n\n");
+                sb.append("metric id: ").append(log.getMetricName()).append("\n");
+                sb.append("start time:").append(getDateStr(log.getStartReportNanos())).append("\n");
+                sb.append("end time:").append(getDateStr(log.getEndReportNanos())).append("\n");
 
-            switch (log.getDataCase()) {
-                case DURATION_METRICS:
-                    sb.append("Duration metric data\n");
-                    displayDurationMetricData(sb, log);
-                    break;
-                case EVENT_METRICS:
-                    sb.append("Event metric data\n");
-                    displayEventMetricData(sb, log);
-                    break;
-                case COUNT_METRICS:
-                    sb.append("Count metric data\n");
-                    displayCountMetricData(sb, log);
-                    break;
-                case GAUGE_METRICS:
-                    sb.append("Gauge metric data\n");
-                    displayGaugeMetricData(sb, log);
-                    break;
-                case VALUE_METRICS:
-                    sb.append("Value metric data\n");
-                    displayValueMetricData(sb, log);
-                    break;
-                case DATA_NOT_SET:
-                    sb.append("No metric data\n");
-                    break;
+                switch (log.getDataCase()) {
+                    case DURATION_METRICS:
+                        sb.append("Duration metric data\n");
+                        displayDurationMetricData(sb, log);
+                        break;
+                    case EVENT_METRICS:
+                        sb.append("Event metric data\n");
+                        displayEventMetricData(sb, log);
+                        break;
+                    case COUNT_METRICS:
+                        sb.append("Count metric data\n");
+                        displayCountMetricData(sb, log);
+                        break;
+                    case GAUGE_METRICS:
+                        sb.append("Gauge metric data\n");
+                        displayGaugeMetricData(sb, log);
+                        break;
+                    case VALUE_METRICS:
+                        sb.append("Value metric data\n");
+                        displayValueMetricData(sb, log);
+                        break;
+                    case DATA_NOT_SET:
+                        sb.append("No metric data\n");
+                        break;
+                }
             }
         }
     }

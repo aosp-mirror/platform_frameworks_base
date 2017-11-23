@@ -333,7 +333,7 @@ public class KeyguardStatusBarView extends RelativeLayout
         return false;
     }
 
-    public void onOverlayChanged() {
+    public void onThemeChanged() {
         @ColorInt int textColor = Utils.getColorAttr(mContext, R.attr.wallpaperTextColor);
         @ColorInt int iconColor = Utils.getDefaultColor(mContext, Color.luminance(textColor) < 0.5 ?
                 R.color.dark_mode_icon_color_single_tone :

@@ -35,7 +35,6 @@ import android.util.Log;
 import com.android.internal.annotations.GuardedBy;
 
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -56,9 +55,9 @@ class AudioPlayerStateMonitor extends IPlaybackConfigDispatcher.Stub {
         /**
          * Called when the active state of audio player is changed.
          *
-         * @param config The audio playback configuration for the audio player of which active state
-         *              was changed. If {@param isRemoved} is {@code true}, this hold outdated
-         *              information.
+         * @param config The audio playback configuration for the audio player for which active
+         *              state was changed. If {@param isRemoved} is {@code true}, this holds
+         *              outdated information.
          * @param isRemoved {@code true} if the audio player is removed.
          */
         void onAudioPlayerActiveStateChanged(
@@ -70,7 +69,7 @@ class AudioPlayerStateMonitor extends IPlaybackConfigDispatcher.Stub {
 
         private final OnAudioPlayerActiveStateChangedListener mListener;
 
-        public MessageHandler(Looper looper, OnAudioPlayerActiveStateChangedListener listener) {
+        MessageHandler(Looper looper, OnAudioPlayerActiveStateChangedListener listener) {
             super(looper);
             mListener = listener;
         }
@@ -85,7 +84,7 @@ class AudioPlayerStateMonitor extends IPlaybackConfigDispatcher.Stub {
             }
         }
 
-        public void sendAudioPlayerActiveStateChangedMessage(
+        void sendAudioPlayerActiveStateChangedMessage(
                 final AudioPlaybackConfiguration config, final boolean isRemoved) {
             obtainMessage(MSG_AUDIO_PLAYER_ACTIVE_STATE_CHANGED,
                     isRemoved ? 1 : 0, 0 /* unused */, config).sendToTarget();
@@ -97,7 +96,7 @@ class AudioPlayerStateMonitor extends IPlaybackConfigDispatcher.Stub {
     private final Map<OnAudioPlayerActiveStateChangedListener, MessageHandler> mListenerMap =
             new ArrayMap<>();
     @GuardedBy("mLock")
-    private final Set<Integer> mActiveAudioUids = new ArraySet();
+    private final Set<Integer> mActiveAudioUids = new ArraySet<>();
     @GuardedBy("mLock")
     private ArrayMap<Integer, AudioPlaybackConfiguration> mPrevActiveAudioPlaybackConfigs =
             new ArrayMap<>();
