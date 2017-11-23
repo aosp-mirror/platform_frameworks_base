@@ -30,8 +30,6 @@ namespace statsd {
 
 #define STATS_SERVICE_DIR "/data/system/stats-service"
 
-static StatsdConfig build_fake_config();
-
 using android::base::StringPrintf;
 using std::unique_ptr;
 
@@ -229,7 +227,7 @@ void ConfigManager::update_saved_configs(const ConfigKey& key, const StatsdConfi
     }
 }
 
-static StatsdConfig build_fake_config() {
+StatsdConfig build_fake_config() {
     // HACK: Hard code a test metric for counting screen on events...
     StatsdConfig config;
     config.set_name("CONFIG_12345");

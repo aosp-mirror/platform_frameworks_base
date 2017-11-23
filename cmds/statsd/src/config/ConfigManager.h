@@ -34,6 +34,9 @@ using std::unordered_map;
 using std::vector;
 using std::pair;
 
+// Util function to Hard code a test metric for counting screen on events.
+StatsdConfig build_fake_config();
+
 /**
  * Keeps track of which configurations have been set from various sources.
  *
