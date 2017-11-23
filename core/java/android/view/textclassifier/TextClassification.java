@@ -31,6 +31,7 @@ import com.android.internal.util.Preconditions;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Information for generating a widget to handle classified text.
@@ -42,7 +43,7 @@ import java.util.List;
  *
  * <pre>{@code
  *   // Called preferably outside the UiThread.
- *   TextClassification classification = textClassifier.classifyText(allText, 10, 25, null);
+ *   TextClassification classification = textClassifier.classifyText(allText, 10, 25);
  *
  *   // Called on the UiThread.
  *   Button button = new Button(context);
@@ -55,7 +56,7 @@ import java.util.List;
  *
  * <pre>{@code
  *   // Called preferably outside the UiThread.
- *   final TextClassification classification = textClassifier.classifyText(allText, 10, 25, null);
+ *   final TextClassification classification = textClassifier.classifyText(allText, 10, 25);
  *
  *   // Called on the UiThread.
  *   view.startActionMode(new ActionMode.Callback() {
@@ -281,8 +282,8 @@ public final class TextClassification {
 
     @Override
     public String toString() {
-        return String.format("TextClassification {"
-                        + "text=%s, entities=%s, labels=%s, intents=%s}",
+        return String.format(Locale.US,
+                "TextClassification {text=%s, entities=%s, labels=%s, intents=%s}",
                 mText, mEntityConfidence, mLabels, mIntents);
     }
 
@@ -421,7 +422,7 @@ public final class TextClassification {
         }
 
         /**
-         * Ensures that we have at we have storage for the default action.
+         * Ensures that we have storage for the default action.
          */
         private void ensureDefaultActionAvailable() {
             if (mIntents.isEmpty()) mIntents.add(null);
@@ -441,7 +442,7 @@ public final class TextClassification {
     }
 
     /**
-     * TextClassification optional input parameters.
+     * Optional input parameters for generating TextClassification.
      */
     public static final class Options {
 
