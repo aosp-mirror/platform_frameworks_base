@@ -210,7 +210,7 @@ void SimpleConditionTracker::evaluateCondition(const LogEvent& event,
         return;
     }
 
-    if (mStopAllLogMatcherIndex >= 0 &&
+    if (mStopAllLogMatcherIndex >= 0 && mStopAllLogMatcherIndex < int(eventMatcherValues.size()) &&
         eventMatcherValues[mStopAllLogMatcherIndex] == MatchingState::kMatched) {
         handleStopAll(conditionCache, conditionChangedCache);
         return;
