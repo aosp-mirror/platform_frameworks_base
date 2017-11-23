@@ -53,6 +53,7 @@ statsd_common_src := \
     src/packages/UidMap.cpp \
     src/storage/DropboxReader.cpp \
     src/storage/DropboxWriter.cpp \
+    src/storage/StorageManager.cpp \
     src/StatsLogProcessor.cpp \
     src/StatsService.cpp \
     src/stats_util.cpp \

@@ -58,6 +58,7 @@ public:
                                     const vector<String16>& app);
     virtual Status informOnePackage(const String16& app, int32_t uid, int32_t version);
     virtual Status informOnePackageRemoved(const String16& app, int32_t uid);
+    virtual Status writeDataToDisk();
 
     /**
      * Called right before we start processing events.
@@ -149,6 +150,11 @@ private:
      * Print the mapping of uids to package names.
      */
     status_t cmd_print_uid_map(FILE* out);
+
+    /**
+     * Flush the data to disk.
+     */
+    status_t cmd_write_data_to_disk(FILE* out);
 
     /**
      * Print contents of a pulled metrics source.

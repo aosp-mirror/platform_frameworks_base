@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2016, The Android Open Source Project
+ * Copyright (c) 2017, The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +45,11 @@ interface IStatsManager {
      * Two-way binder call so that caller's method (and corresponding wakelocks) will linger.
      */
     void informPollAlarmFired();
+
+    /**
+     * Tells statsd to store data to disk.
+     */
+    void writeDataToDisk();
 
     /**
      * Inform statsd what the version and package are for each uid. Note that each array should
