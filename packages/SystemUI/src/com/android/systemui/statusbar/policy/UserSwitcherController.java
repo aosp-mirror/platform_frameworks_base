@@ -747,7 +747,8 @@ public class UserSwitcherController {
             if (item.isAddUser) {
                 return context.getDrawable(R.drawable.ic_add_circle_qs);
             }
-            Drawable icon = UserIcons.getDefaultUserIcon(item.resolveId(), /* light= */ false);
+            Drawable icon = UserIcons.getDefaultUserIcon(
+                    context.getResources(), item.resolveId(), /* light= */ false);
             if (item.isGuest) {
                 icon.setColorFilter(Utils.getColorAttr(context, android.R.attr.colorForeground),
                         Mode.SRC_IN);
@@ -957,7 +958,7 @@ public class UserSwitcherController {
                 }
                 int id = user.id;
                 Bitmap icon = UserIcons.convertToBitmap(UserIcons.getDefaultUserIcon(
-                        id, /* light= */ false));
+                        mContext.getResources(), id, /* light= */ false));
                 mUserManager.setUserIcon(id, icon);
                 switchToUserId(id);
             }

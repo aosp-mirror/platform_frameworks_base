@@ -2476,7 +2476,8 @@ public class ApplicationPackageManager extends PackageManager {
         if (itemInfo.showUserIcon != UserHandle.USER_NULL) {
             Bitmap bitmap = getUserManager().getUserIcon(itemInfo.showUserIcon);
             if (bitmap == null) {
-                return UserIcons.getDefaultUserIcon(itemInfo.showUserIcon, /* light= */ false);
+                return UserIcons.getDefaultUserIcon(
+                        mContext.getResources(), itemInfo.showUserIcon, /* light= */ false);
             }
             return new BitmapDrawable(bitmap);
         }
