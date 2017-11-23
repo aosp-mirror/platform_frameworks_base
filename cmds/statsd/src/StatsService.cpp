@@ -667,7 +667,7 @@ void StatsService::OnLogEvent(const LogEvent& event) {
     mProcessor->OnLogEvent(event);
 }
 
-Status StatsService::getData(const String16& key, vector <uint8_t>* output) {
+Status StatsService::getData(const String16& key, vector<uint8_t>* output) {
     IPCThreadState* ipc = IPCThreadState::self();
     ALOGD("StatsService::getData with Pid %i, Uid %i", ipc->getCallingPid(),
           ipc->getCallingUid());

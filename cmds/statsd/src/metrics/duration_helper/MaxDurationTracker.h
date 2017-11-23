@@ -38,7 +38,9 @@ public:
     void noteStop(const HashableDimensionKey& key, const uint64_t eventTime,
                   const bool stopAll) override;
     void noteStopAll(const uint64_t eventTime) override;
+
     bool flushIfNeeded(uint64_t timestampNs) override;
+
     void onSlicedConditionMayChange(const uint64_t timestamp) override;
     void onConditionChanged(bool condition, const uint64_t timestamp) override;
 

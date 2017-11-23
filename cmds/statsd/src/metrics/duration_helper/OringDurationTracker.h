@@ -32,13 +32,16 @@ public:
                          uint64_t bucketSizeNs,
                          const std::vector<sp<AnomalyTracker>>& anomalyTrackers,
                          std::vector<DurationBucket>& bucket);
+
     void noteStart(const HashableDimensionKey& key, bool condition, const uint64_t eventTime,
                    const ConditionKey& conditionKey) override;
     void noteStop(const HashableDimensionKey& key, const uint64_t eventTime,
                   const bool stopAll) override;
     void noteStopAll(const uint64_t eventTime) override;
+
     void onSlicedConditionMayChange(const uint64_t timestamp) override;
     void onConditionChanged(bool condition, const uint64_t timestamp) override;
+
     bool flushIfNeeded(uint64_t timestampNs) override;
 
     int64_t predictAnomalyTimestampNs(const AnomalyTracker& anomalyTracker,

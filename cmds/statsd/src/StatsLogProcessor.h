@@ -41,8 +41,8 @@ public:
     void OnConfigUpdated(const ConfigKey& key, const StatsdConfig& config);
     void OnConfigRemoved(const ConfigKey& key);
 
-    size_t GetMetricsSize(const ConfigKey& key);
- 
+    size_t GetMetricsSize(const ConfigKey& key) const;
+
     void onDumpReport(const ConfigKey& key, vector<uint8_t>* outData);
     void onAnomalyAlarmFired(
             const uint64_t timestampNs,

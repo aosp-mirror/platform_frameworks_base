@@ -73,14 +73,18 @@ public:
           mDuration(0),
           mCurrentBucketNum(0),
           mAnomalyTrackers(anomalyTrackers){};
+
     virtual ~DurationTracker(){};
+
     virtual void noteStart(const HashableDimensionKey& key, bool condition,
                            const uint64_t eventTime, const ConditionKey& conditionKey) = 0;
     virtual void noteStop(const HashableDimensionKey& key, const uint64_t eventTime,
                           const bool stopAll) = 0;
     virtual void noteStopAll(const uint64_t eventTime) = 0;
+
     virtual void onSlicedConditionMayChange(const uint64_t timestamp) = 0;
     virtual void onConditionChanged(bool condition, const uint64_t timestamp) = 0;
+
     // Flush stale buckets if needed, and return true if the tracker has no on-going duration
     // events, so that the owner can safely remove the tracker.
     virtual bool flushIfNeeded(uint64_t timestampNs) = 0;

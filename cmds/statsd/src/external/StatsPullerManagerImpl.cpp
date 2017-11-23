@@ -88,11 +88,11 @@ StatsPullerManagerImpl& StatsPullerManagerImpl::GetInstance() {
     return instance;
 }
 
-bool StatsPullerManagerImpl::PullerForMatcherExists(int tagId) {
+bool StatsPullerManagerImpl::PullerForMatcherExists(int tagId) const {
     return mPullers.find(tagId) != mPullers.end();
 }
 
-long StatsPullerManagerImpl::get_pull_start_time_ms() {
+long StatsPullerManagerImpl::get_pull_start_time_ms() const {
     // TODO: limit and align pull intervals to 10min boundaries if this turns out to be a problem
     return time(nullptr) * 1000;
 }

@@ -122,7 +122,7 @@ void EventMetricProducer::onMatchedLogEventInternal(
     mProto->end(wrapperToken);
 }
 
-size_t EventMetricProducer::byteSize() {
+size_t EventMetricProducer::byteSize() const {
     return mProto->bytesWritten();
 }
 

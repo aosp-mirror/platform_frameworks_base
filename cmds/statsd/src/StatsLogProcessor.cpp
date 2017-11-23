@@ -114,7 +114,7 @@ void StatsLogProcessor::OnConfigUpdated(const ConfigKey& key, const StatsdConfig
     }
 }
 
-size_t StatsLogProcessor::GetMetricsSize(const ConfigKey& key) {
+size_t StatsLogProcessor::GetMetricsSize(const ConfigKey& key) const {
     auto it = mMetricsManagers.find(key);
     if (it == mMetricsManagers.end()) {
         ALOGW("Config source %s does not exist", key.ToString().c_str());
