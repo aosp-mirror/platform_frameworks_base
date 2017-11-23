@@ -86,6 +86,9 @@ interface IActivityManager {
     // the ones in frameworks/native/libs/binder/include/binder/IActivityManager.h
     // =============== Beginning of transactions used on native side as well ======================
     ParcelFileDescriptor openContentUri(in String uriString);
+    void registerUidObserver(in IUidObserver observer, int which, int cutpoint,
+            String callingPackage);
+    void unregisterUidObserver(in IUidObserver observer);
     // =============== End of transactions used on native side as well ============================
 
     // Special low-level communication with activity manager.
@@ -478,9 +481,6 @@ interface IActivityManager {
      */
     void keyguardGoingAway(int flags);
     int getUidProcessState(int uid, in String callingPackage);
-    void registerUidObserver(in IUidObserver observer, int which, int cutpoint,
-            String callingPackage);
-    void unregisterUidObserver(in IUidObserver observer);
     boolean isAssistDataAllowedOnCurrentActivity();
     boolean showAssistFromActivity(in IBinder token, in Bundle args);
     boolean isRootVoiceInteraction(in IBinder token);
