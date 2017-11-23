@@ -31,7 +31,8 @@ import android.support.test.InstrumentationRegistry;
 import android.support.test.annotation.UiThreadTest;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
-import android.view.WindowManagerInternal.AppTransitionListener;
+
+import com.android.server.wm.WindowManagerInternal.AppTransitionListener;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

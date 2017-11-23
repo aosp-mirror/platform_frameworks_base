@@ -20,7 +20,7 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.hardware.input.InputManager;
 import android.view.MotionEvent;
-import android.view.WindowManagerPolicy.PointerEventListener;
+import android.view.WindowManagerPolicyConstants.PointerEventListener;
 
 import com.android.server.wm.WindowManagerService.H;
 

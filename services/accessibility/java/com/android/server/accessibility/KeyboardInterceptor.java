@@ -22,7 +22,8 @@ import android.os.SystemClock;
 import android.util.Pools;
 import android.util.Slog;
 import android.view.KeyEvent;
-import android.view.WindowManagerPolicy;
+
+import com.android.server.policy.WindowManagerPolicy;
 
 /**
  * Intercepts key events and forwards them to accessibility manager service.

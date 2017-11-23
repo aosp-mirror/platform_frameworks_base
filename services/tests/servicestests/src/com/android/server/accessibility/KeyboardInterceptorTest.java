@@ -45,8 +45,9 @@ import org.mockito.MockitoAnnotations;
 import android.os.Looper;
 import android.support.test.runner.AndroidJUnit4;
 import android.view.KeyEvent;
-import android.view.WindowManagerPolicy;
-import android.view.WindowManagerPolicy.WindowState;
+
+import com.android.server.policy.WindowManagerPolicy;
+import com.android.server.policy.WindowManagerPolicy.WindowState;
 
 /**
  * Tests for KeyboardInterceptor

@@ -21,10 +21,11 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
 import static android.view.Display.DEFAULT_DISPLAY;
-import static android.view.WindowManagerPolicy.NAV_BAR_BOTTOM;
-import static android.view.WindowManagerPolicy.NAV_BAR_LEFT;
-import static android.view.WindowManagerPolicy.NAV_BAR_RIGHT;
 import static com.android.server.am.ActivityStack.REMOVE_TASK_MODE_MOVING;
+import static com.android.server.policy.WindowManagerPolicy.NAV_BAR_BOTTOM;
+import static com.android.server.policy.WindowManagerPolicy.NAV_BAR_LEFT;
+import static com.android.server.policy.WindowManagerPolicy.NAV_BAR_RIGHT;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;

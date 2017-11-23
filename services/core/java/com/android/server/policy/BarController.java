@@ -24,9 +24,9 @@ import android.util.Slog;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.view.WindowManagerPolicy.WindowState;
 
 import com.android.server.LocalServices;
+import com.android.server.policy.WindowManagerPolicy.WindowState;
 import com.android.server.statusbar.StatusBarManagerInternal;
 
 import java.io.PrintWriter;

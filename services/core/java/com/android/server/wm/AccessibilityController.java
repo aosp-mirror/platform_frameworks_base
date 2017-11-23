@@ -55,14 +55,14 @@ import android.view.SurfaceControl;
 import android.view.ViewConfiguration;
 import android.view.WindowInfo;
 import android.view.WindowManager;
-import android.view.WindowManagerInternal.MagnificationCallbacks;
-import android.view.WindowManagerInternal.WindowsForAccessibilityCallback;
-import android.view.WindowManagerPolicy;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 
 import com.android.internal.R;
 import com.android.internal.os.SomeArgs;
+import com.android.server.policy.WindowManagerPolicy;
+import com.android.server.wm.WindowManagerInternal.MagnificationCallbacks;
+import com.android.server.wm.WindowManagerInternal.WindowsForAccessibilityCallback;
 
 import java.util.ArrayList;
 import java.util.HashSet;

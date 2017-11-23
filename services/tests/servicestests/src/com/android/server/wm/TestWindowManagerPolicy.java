@@ -47,7 +47,6 @@ import android.view.IWindowManager;
 import android.view.InputChannel;
 import android.view.KeyEvent;
 import android.view.WindowManager;
-import android.view.WindowManagerPolicy;
 import android.view.animation.Animation;
 import android.os.PowerManagerInternal;
 
@@ -55,6 +54,7 @@ import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.IShortcutService;
 import com.android.server.input.InputManagerService;
 import com.android.server.LocalServices;
+import com.android.server.policy.WindowManagerPolicy;
 
 import java.io.PrintWriter;
 

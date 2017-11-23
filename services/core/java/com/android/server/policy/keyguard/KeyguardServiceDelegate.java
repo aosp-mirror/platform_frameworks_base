@@ -15,14 +15,14 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Log;
 import android.util.Slog;
-import android.view.WindowManagerPolicy;
-import android.view.WindowManagerPolicy.OnKeyguardExitResult;
+import android.view.WindowManagerPolicyConstants;
 
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.IKeyguardDrawnCallback;
 import com.android.internal.policy.IKeyguardExitCallback;
 import com.android.internal.policy.IKeyguardService;
 import com.android.server.UiThread;
+import com.android.server.policy.WindowManagerPolicy.OnKeyguardExitResult;
 
 import java.io.PrintWriter;
 
@@ -419,7 +419,7 @@ public class KeyguardServiceDelegate {
         pw.println(prefix + "deviceHasKeyguard=" + mKeyguardState.deviceHasKeyguard);
         pw.println(prefix + "enabled=" + mKeyguardState.enabled);
         pw.println(prefix + "offReason=" +
-                WindowManagerPolicy.offReasonToString(mKeyguardState.offReason));
+                WindowManagerPolicyConstants.offReasonToString(mKeyguardState.offReason));
         pw.println(prefix + "currentUser=" + mKeyguardState.currentUser);
         pw.println(prefix + "bootCompleted=" + mKeyguardState.bootCompleted);
         pw.println(prefix + "screenState=" + screenStateToString(mKeyguardState.screenState));

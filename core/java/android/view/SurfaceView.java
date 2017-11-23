@@ -17,9 +17,9 @@
 package android.view;
 
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_PANEL;
-import static android.view.WindowManagerPolicy.APPLICATION_MEDIA_OVERLAY_SUBLAYER;
-import static android.view.WindowManagerPolicy.APPLICATION_MEDIA_SUBLAYER;
-import static android.view.WindowManagerPolicy.APPLICATION_PANEL_SUBLAYER;
+import static android.view.WindowManagerPolicyConstants.APPLICATION_MEDIA_OVERLAY_SUBLAYER;
+import static android.view.WindowManagerPolicyConstants.APPLICATION_MEDIA_SUBLAYER;
+import static android.view.WindowManagerPolicyConstants.APPLICATION_PANEL_SUBLAYER;
 
 import android.content.Context;
 import android.content.res.CompatibilityInfo.Translator;

@@ -31,9 +31,9 @@ import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.view.InputDevice;
 import android.view.MotionEvent;
-import android.view.WindowManagerPolicy;
 
 import com.android.internal.os.SomeArgs;
+import com.android.server.policy.WindowManagerPolicy;
 
 import java.util.ArrayList;
 import java.util.Arrays;

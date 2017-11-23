@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 The Android Open Source Project
+ * Copyright (C) 2017 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.view;
+package com.android.server.wm;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -23,7 +23,13 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.hardware.display.DisplayManagerInternal;
 import android.os.IBinder;
+import android.view.IInputFilter;
+import android.view.IWindow;
+import android.view.MagnificationSpec;
+import android.view.WindowInfo;
 import android.view.animation.Animation;
+
+import com.android.server.policy.WindowManagerPolicy;
 
 import java.util.List;
 

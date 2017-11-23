@@ -47,11 +47,11 @@ import android.view.InputChannel;
 import android.view.InputEventReceiver;
 import android.view.KeyEvent;
 import android.view.WindowManager;
-import android.view.WindowManagerPolicy;
 
 import com.android.server.input.InputApplicationHandle;
 import com.android.server.input.InputManagerService;
 import com.android.server.input.InputWindowHandle;
+import com.android.server.policy.WindowManagerPolicy;
 
 import java.io.PrintWriter;
 import java.util.Arrays;

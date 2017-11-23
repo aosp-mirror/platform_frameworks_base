@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006 The Android Open Source Project
+ * Copyright (C) 2017 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-package android.view;
+package com.android.server.policy;
 
-import static android.Manifest.permission;
-import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
@@ -63,9 +61,9 @@ import static android.view.WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.isSystemAlertWindowType;
 
+import android.Manifest;
 import android.annotation.IntDef;
 import android.annotation.Nullable;
-import android.annotation.SystemApi;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.CompatibilityInfo;
@@ -78,10 +76,20 @@ import android.os.Looper;
 import android.os.RemoteException;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
+import android.view.Display;
+import android.view.IApplicationToken;
+import android.view.IWindowManager;
+import android.view.InputEventReceiver;
+import android.view.KeyEvent;
+import android.view.Surface;
+import android.view.WindowManager;
+import android.view.WindowManagerGlobal;
+import android.view.WindowManagerPolicyConstants;
 import android.view.animation.Animation;
 
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.IShortcutService;
+import com.android.server.wm.DisplayFrames;
 
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
@@ -125,62 +133,26 @@ import java.lang.annotation.RetentionPolicy;
  * acquired by the window manager while it holds the window lock, so this is
  * even more restrictive than <var>Lw</var>.
  * </dl>
- *
- * @hide
  */
-public interface WindowManagerPolicy {
-    // Policy flags.  These flags are also defined in frameworks/base/include/ui/Input.h.
-    public final static int FLAG_WAKE = 0x00000001;
-    public final static int FLAG_VIRTUAL = 0x00000002;
-
-    public final static int FLAG_INJECTED = 0x01000000;
-    public final static int FLAG_TRUSTED = 0x02000000;
-    public final static int FLAG_FILTERED = 0x04000000;
-    public final static int FLAG_DISABLE_KEY_REPEAT = 0x08000000;
-
-    public final static int FLAG_INTERACTIVE = 0x20000000;
-    public final static int FLAG_PASS_TO_USER = 0x40000000;
-
-    // Flags for IActivityManager.keyguardGoingAway()
-    public final static int KEYGUARD_GOING_AWAY_FLAG_TO_SHADE = 1 << 0;
-    public final static int KEYGUARD_GOING_AWAY_FLAG_NO_WINDOW_ANIMATIONS = 1 << 1;
-    public final static int KEYGUARD_GOING_AWAY_FLAG_WITH_WALLPAPER = 1 << 2;
-
-    // Flags used for indicating whether the internal and/or external input devices
-    // of some type are available.
-    public final static int PRESENCE_INTERNAL = 1 << 0;
-    public final static int PRESENCE_EXTERNAL = 1 << 1;
-
+public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
     // Navigation bar position values
     int NAV_BAR_LEFT = 1 << 0;
     int NAV_BAR_RIGHT = 1 << 1;
     int NAV_BAR_BOTTOM = 1 << 2;
 
-    public final static boolean WATCH_POINTER = false;
-
-    /**
-     * Sticky broadcast of the current HDMI plugged state.
-     */
-    public final static String ACTION_HDMI_PLUGGED = "android.intent.action.HDMI_PLUGGED";
-
-    /**
-     * Extra in {@link #ACTION_HDMI_PLUGGED} indicating the state: true if
-     * plugged in to HDMI, false if not.
-     */
-    public final static String EXTRA_HDMI_PLUGGED_STATE = "state";
-
-    /**
-     * Set to {@code true} when intent was invoked from pressing the home key.
-     * @hide
-     */
-    @SystemApi
-    public static final String EXTRA_FROM_HOME_KEY = "android.intent.extra.FROM_HOME_KEY";
-
     /**
      * Pass this event to the user / app.  To be returned from
      * {@link #interceptKeyBeforeQueueing}.
      */
-    public final static int ACTION_PASS_TO_USER = 0x00000001;
+    int ACTION_PASS_TO_USER = 0x00000001;
+    /** Layout state may have changed (so another layout will be performed) */
+    int FINISH_LAYOUT_REDO_LAYOUT = 0x0001;
+    /** Configuration state may have changed */
+    int FINISH_LAYOUT_REDO_CONFIG = 0x0002;
+    /** Wallpaper may need to move */
+    int FINISH_LAYOUT_REDO_WALLPAPER = 0x0004;
+    /** Need to recompute animations */
+    int FINISH_LAYOUT_REDO_ANIM = 0x0008;
 
     /**
      * Register shortcuts for window manager to dispatch.
@@ -483,7 +455,7 @@ public interface WindowManagerPolicy {
 
         /**
          * Returns true if the window owner can add internal system windows.
-         * That is, they have {@link permission#INTERNAL_SYSTEM_WINDOW}.
+         * That is, they have {@link Manifest.permission#INTERNAL_SYSTEM_WINDOW}.
          */
         default boolean canAddInternalSystemWindow() {
             return false;
@@ -491,7 +463,7 @@ public interface WindowManagerPolicy {
 
         /**
          * Returns true if the window owner has the permission to acquire a sleep token when it's
-         * visible. That is, they have the permission {@link permission#DEVICE_POWER}.
+         * visible. That is, they have the permission {@link Manifest.permission#DEVICE_POWER}.
          */
         boolean canAcquireSleepToken();
     }
@@ -648,24 +620,6 @@ public interface WindowManagerPolicy {
         }
     }
 
-    public interface PointerEventListener {
-        /**
-         * 1. onPointerEvent will be called on the service.UiThread.
-         * 2. motionEvent will be recycled after onPointerEvent returns so if it is needed later a
-         * copy() must be made and the copy must be recycled.
-         **/
-        void onPointerEvent(MotionEvent motionEvent);
-
-        /**
-         * @see #onPointerEvent(MotionEvent)
-         **/
-        default void onPointerEvent(MotionEvent motionEvent, int displayId) {
-            if (displayId == DEFAULT_DISPLAY) {
-                onPointerEvent(motionEvent);
-            }
-        }
-    }
-
     /** Window has been added to the screen. */
     public static final int TRANSIT_ENTER = 1;
     /** Window has been removed from the screen. */
@@ -681,13 +635,6 @@ public interface WindowManagerPolicy {
 
     // NOTE: screen off reasons are in order of significance, with more
     // important ones lower than less important ones.
-
-    /** Screen turned off because of a device admin */
-    public final int OFF_BECAUSE_OF_ADMIN = 1;
-    /** Screen turned off because of power button */
-    public final int OFF_BECAUSE_OF_USER = 2;
-    /** Screen turned off because of timeout */
-    public final int OFF_BECAUSE_OF_TIMEOUT = 3;
 
     /** @hide */
     @IntDef({USER_ROTATION_FREE, USER_ROTATION_LOCKED})
@@ -806,7 +753,7 @@ public interface WindowManagerPolicy {
      * @param type The type of window being assigned.
      * @param canAddInternalSystemWindow If the owner window associated with the type we are
      *        evaluating can add internal system windows. I.e they have
-     *        {@link permission#INTERNAL_SYSTEM_WINDOW}. If true, alert window
+     *        {@link Manifest.permission#INTERNAL_SYSTEM_WINDOW}. If true, alert window
      *        types {@link android.view.WindowManager.LayoutParams#isSystemAlertWindowType(int)}
      *        can be assigned layers greater than the layer for
      *        {@link android.view.WindowManager.LayoutParams#TYPE_APPLICATION_OVERLAY} Else, their
@@ -916,13 +863,6 @@ public interface WindowManagerPolicy {
         }
     }
 
-    int APPLICATION_LAYER = 2;
-    int APPLICATION_MEDIA_SUBLAYER = -2;
-    int APPLICATION_MEDIA_OVERLAY_SUBLAYER = -1;
-    int APPLICATION_PANEL_SUBLAYER = 1;
-    int APPLICATION_SUB_PANEL_SUBLAYER = 2;
-    int APPLICATION_ABOVE_SUB_PANEL_SUBLAYER = 3;
-
     /**
      * Return how to Z-order sub-windows in relation to the window they are attached to.
      * Return positive to have them ordered in front, negative for behind.
@@ -975,7 +915,7 @@ public interface WindowManagerPolicy {
     /**
      * Return the available screen width that we should report for the
      * configuration.  This must be no larger than
-     * {@link #getNonDecorDisplayWidth(int, int, int)}; it may be smaller than
+     * {@link #getNonDecorDisplayWidth(int, int, int, int int, int)}; it may be smaller than
      * that to account for more transient decoration like a status bar.
      */
     public int getConfigDisplayWidth(int fullWidth, int fullHeight, int rotation,
@@ -984,7 +924,7 @@ public interface WindowManagerPolicy {
     /**
      * Return the available screen height that we should report for the
      * configuration.  This must be no larger than
-     * {@link #getNonDecorDisplayHeight(int, int, int)}; it may be smaller than
+     * {@link #getNonDecorDisplayHeight(int, int, int, int, int)}; it may be smaller than
      * that to account for more transient decoration like a status bar.
      */
     public int getConfigDisplayHeight(int fullWidth, int fullHeight, int rotation,
@@ -1213,15 +1153,6 @@ public interface WindowManagerPolicy {
         return false;
     }
 
-    /** Layout state may have changed (so another layout will be performed) */
-    static final int FINISH_LAYOUT_REDO_LAYOUT = 0x0001;
-    /** Configuration state may have changed */
-    static final int FINISH_LAYOUT_REDO_CONFIG = 0x0002;
-    /** Wallpaper may need to move */
-    static final int FINISH_LAYOUT_REDO_WALLPAPER = 0x0004;
-    /** Need to recompute animations */
-    static final int FINISH_LAYOUT_REDO_ANIM = 0x0008;
-
     /**
      * Called following layout of all windows before each window has policy applied.
      *
@@ -1374,7 +1305,7 @@ public interface WindowManagerPolicy {
     public void enableKeyguard(boolean enabled);
 
     /**
-     * Callback used by {@link WindowManagerPolicy#exitKeyguardSecurely}
+     * Callback used by {@link #exitKeyguardSecurely}
      */
     interface OnKeyguardExitResult {
         void onKeyguardExitResult(boolean success);
@@ -1552,8 +1483,8 @@ public interface WindowManagerPolicy {
      *
      * @return The rotation mode.
      *
-     * @see WindowManagerPolicy#USER_ROTATION_LOCKED
-     * @see WindowManagerPolicy#USER_ROTATION_FREE
+     * @see #USER_ROTATION_LOCKED
+     * @see #USER_ROTATION_FREE
      */
     @UserRotationMode
     public int getUserRotationMode();
@@ -1561,8 +1492,7 @@ public interface WindowManagerPolicy {
     /**
      * Inform the policy that the user has chosen a preferred orientation ("rotation lock").
      *
-     * @param mode One of {@link WindowManagerPolicy#USER_ROTATION_LOCKED} or
-     *             {@link WindowManagerPolicy#USER_ROTATION_FREE}.
+     * @param mode One of {@link #USER_ROTATION_LOCKED} or {@link #USER_ROTATION_FREE}.
      * @param rotation One of {@link Surface#ROTATION_0}, {@link Surface#ROTATION_90},
      *                 {@link Surface#ROTATION_180}, {@link Surface#ROTATION_270}.
      */
@@ -1755,22 +1685,6 @@ public interface WindowManagerPolicy {
                 return "USER_ROTATION_LOCKED";
             default:
                 return Integer.toString(mode);
-        }
-    }
-
-    /**
-     * Convert the off reason to a human readable format.
-     */
-    static String offReasonToString(int why) {
-        switch (why) {
-            case OFF_BECAUSE_OF_ADMIN:
-                return "OFF_BECAUSE_OF_ADMIN";
-            case OFF_BECAUSE_OF_USER:
-                return "OFF_BECAUSE_OF_USER";
-            case OFF_BECAUSE_OF_TIMEOUT:
-                return "OFF_BECAUSE_OF_TIMEOUT";
-            default:
-                return Integer.toString(why);
         }
     }
 }

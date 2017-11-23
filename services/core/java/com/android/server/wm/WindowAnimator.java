@@ -30,10 +30,9 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
 import android.view.Choreographer;
-import android.view.SurfaceControl;
-import android.view.WindowManagerPolicy;
 
 import com.android.server.AnimationThread;
+import com.android.server.policy.WindowManagerPolicy;
 
 import java.io.PrintWriter;
 

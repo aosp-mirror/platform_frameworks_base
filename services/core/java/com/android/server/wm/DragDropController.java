@@ -36,9 +36,10 @@ import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.view.View;
-import android.view.WindowManagerInternal.IDragDropCallback;
+
 import com.android.internal.util.Preconditions;
 import com.android.server.input.InputWindowHandle;
+import com.android.server.wm.WindowManagerInternal.IDragDropCallback;
 
 /**
  * Managing drag and drop operations initiated by View#startDragAndDrop.

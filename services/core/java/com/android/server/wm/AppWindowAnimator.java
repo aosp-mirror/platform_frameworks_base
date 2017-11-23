@@ -16,7 +16,7 @@
 
 package com.android.server.wm;
 
-import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
+import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
 import static com.android.server.wm.AppTransition.TRANSIT_UNSET;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYERS;

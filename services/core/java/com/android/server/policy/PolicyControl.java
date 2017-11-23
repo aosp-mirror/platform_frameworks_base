@@ -25,7 +25,8 @@ import android.util.Slog;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
-import android.view.WindowManagerPolicy.WindowState;
+
+import com.android.server.policy.WindowManagerPolicy.WindowState;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -36,7 +37,7 @@ import java.io.StringWriter;
  * This includes forcing immersive mode behavior for one or both system bars (based on a package
  * list) and permanently disabling immersive mode confirmations for specific packages.
  *
- * Control by setting {@link Settings.Global.POLICY_CONTROL} to one or more name-value pairs.
+ * Control by setting {@link Settings.Global#POLICY_CONTROL} to one or more name-value pairs.
  * e.g.
  *   to force immersive mode everywhere:
  *     "immersive.full=*"

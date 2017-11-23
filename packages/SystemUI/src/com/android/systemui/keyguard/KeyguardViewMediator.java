@@ -60,7 +60,7 @@ import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
 import android.view.ViewGroup;
-import android.view.WindowManagerPolicy;
+import android.view.WindowManagerPolicyConstants;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
@@ -129,7 +129,7 @@ import java.util.ArrayList;
  * false, this will override all other conditions for turning on the keyguard.
  *
  * Threading and synchronization:
- * This class is created by the initialization routine of the {@link android.view.WindowManagerPolicy},
+ * This class is created by the initialization routine of the {@link WindowManagerPolicyConstants},
  * and runs on its thread.  The keyguard UI is created from that thread in the
  * constructor of this class.  The apis may be called from other threads, including the
  * {@link com.android.server.input.InputManagerService}'s and {@link android.view.WindowManager}'s.
@@ -766,8 +766,8 @@ public class KeyguardViewMediator extends SystemUI {
 
     /**
      * Called to let us know the screen was turned off.
-     * @param why either {@link android.view.WindowManagerPolicy#OFF_BECAUSE_OF_USER} or
-     *   {@link android.view.WindowManagerPolicy#OFF_BECAUSE_OF_TIMEOUT}.
+     * @param why either {@link WindowManagerPolicyConstants#OFF_BECAUSE_OF_USER} or
+     *   {@link WindowManagerPolicyConstants#OFF_BECAUSE_OF_TIMEOUT}.
      */
     public void onStartedGoingToSleep(int why) {
         if (DEBUG) Log.d(TAG, "onStartedGoingToSleep(" + why + ")");
@@ -797,8 +797,8 @@ public class KeyguardViewMediator extends SystemUI {
                 }
             } else if (mShowing) {
                 mPendingReset = true;
-            } else if ((why == WindowManagerPolicy.OFF_BECAUSE_OF_TIMEOUT && timeout > 0)
-                    || (why == WindowManagerPolicy.OFF_BECAUSE_OF_USER && !lockImmediately)) {
+            } else if ((why == WindowManagerPolicyConstants.OFF_BECAUSE_OF_TIMEOUT && timeout > 0)
+                    || (why == WindowManagerPolicyConstants.OFF_BECAUSE_OF_USER && !lockImmediately)) {
                 doKeyguardLaterLocked(timeout);
                 mLockLater = true;
             } else if (!mLockPatternUtils.isLockScreenDisabled(currentUser)) {
@@ -1031,7 +1031,7 @@ public class KeyguardViewMediator extends SystemUI {
     }
 
     /**
-     * Same semantics as {@link android.view.WindowManagerPolicy#enableKeyguard}; provide
+     * Same semantics as {@link WindowManagerPolicyConstants#enableKeyguard}; provide
      * a way for external stuff to override normal keyguard behavior.  For instance
      * the phone app disables the keyguard when it receives incoming calls.
      */
@@ -1780,13 +1780,13 @@ public class KeyguardViewMediator extends SystemUI {
                 int flags = 0;
                 if (mStatusBarKeyguardViewManager.shouldDisableWindowAnimationsForUnlock()
                         || mWakeAndUnlocking) {
-                    flags |= WindowManagerPolicy.KEYGUARD_GOING_AWAY_FLAG_NO_WINDOW_ANIMATIONS;
+                    flags |= WindowManagerPolicyConstants.KEYGUARD_GOING_AWAY_FLAG_NO_WINDOW_ANIMATIONS;
                 }
                 if (mStatusBarKeyguardViewManager.isGoingToNotificationShade()) {
-                    flags |= WindowManagerPolicy.KEYGUARD_GOING_AWAY_FLAG_TO_SHADE;
+                    flags |= WindowManagerPolicyConstants.KEYGUARD_GOING_AWAY_FLAG_TO_SHADE;
                 }
                 if (mStatusBarKeyguardViewManager.isUnlockWithWallpaper()) {
-                    flags |= WindowManagerPolicy.KEYGUARD_GOING_AWAY_FLAG_WITH_WALLPAPER;
+                    flags |= WindowManagerPolicyConstants.KEYGUARD_GOING_AWAY_FLAG_WITH_WALLPAPER;
                 }
 
                 mUpdateMonitor.setKeyguardGoingAway(true /* goingAway */);

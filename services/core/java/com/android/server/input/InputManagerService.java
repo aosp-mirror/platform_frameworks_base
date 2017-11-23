@@ -33,6 +33,7 @@ import com.android.internal.util.XmlUtils;
 import com.android.server.DisplayThread;
 import com.android.server.LocalServices;
 import com.android.server.Watchdog;
+import com.android.server.policy.WindowManagerPolicy;
 
 import org.xmlpull.v1.XmlPullParser;
 
@@ -98,7 +99,6 @@ import android.view.KeyEvent;
 import android.view.PointerIcon;
 import android.view.Surface;
 import android.view.ViewConfiguration;
-import android.view.WindowManagerPolicy;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodSubtype;
 

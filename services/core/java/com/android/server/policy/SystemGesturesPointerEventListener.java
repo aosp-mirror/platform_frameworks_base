@@ -24,7 +24,7 @@ import android.util.Slog;
 import android.view.GestureDetector;
 import android.view.InputDevice;
 import android.view.MotionEvent;
-import android.view.WindowManagerPolicy.PointerEventListener;
+import android.view.WindowManagerPolicyConstants.PointerEventListener;
 import android.widget.OverScroller;
 
 /*

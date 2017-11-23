@@ -20,6 +20,7 @@ import static android.Manifest.permission.CONFIGURE_DISPLAY_COLOR_MODE;
 
 import android.annotation.IntDef;
 import android.annotation.RequiresPermission;
+import android.app.KeyguardManager;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -209,8 +210,8 @@ public final class Display {
      * </p>
      *
      * @see DisplayManager#VIRTUAL_DISPLAY_FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD
-     * @see WindowManagerPolicy#isKeyguardSecure(int)
-     * @see WindowManagerPolicy#isKeyguardTrustedLw()
+     * @see KeyguardManager#isDeviceSecure()
+     * @see KeyguardManager#isDeviceLocked()
      * @see #getFlags
      * @hide
      */
