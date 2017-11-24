@@ -26,6 +26,7 @@ import static java.lang.reflect.Modifier.isFinal;
 import static java.lang.reflect.Modifier.isPublic;
 import static java.lang.reflect.Modifier.isStatic;
 
+import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
@@ -37,6 +38,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /** Tests that ensure appropriate settings are backed up. */
+@Presubmit
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class SettingsBackupTest {
