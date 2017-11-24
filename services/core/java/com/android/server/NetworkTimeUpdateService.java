@@ -69,13 +69,10 @@ public class NetworkTimeUpdateService extends Binder {
     private static final String ACTION_POLL =
             "com.android.server.NetworkTimeUpdateService.action.POLL";
 
-    private static final int NETWORK_CHANGE_EVENT_DELAY_MS = 1000;
-    private static int POLL_REQUEST = 0;
+    private static final int POLL_REQUEST = 0;
 
     private static final long NOT_SET = -1;
     private long mNitzTimeSetTime = NOT_SET;
-    // TODO: Have a way to look up the timezone we are in
-    private long mNitzZoneSetTime = NOT_SET;
     private Network mDefaultNetwork = null;
 
     private Context mContext;
@@ -144,7 +141,6 @@ public class NetworkTimeUpdateService extends Binder {
     private void registerForTelephonyIntents() {
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(TelephonyIntents.ACTION_NETWORK_SET_TIME);
-        intentFilter.addAction(TelephonyIntents.ACTION_NETWORK_SET_TIMEZONE);
         mContext.registerReceiver(mNitzReceiver, intentFilter);
     }
 
@@ -257,8 +253,6 @@ public class NetworkTimeUpdateService extends Binder {
             if (DBG) Log.d(TAG, "Received " + action);
             if (TelephonyIntents.ACTION_NETWORK_SET_TIME.equals(action)) {
                 mNitzTimeSetTime = SystemClock.elapsedRealtime();
-            } else if (TelephonyIntents.ACTION_NETWORK_SET_TIMEZONE.equals(action)) {
-                mNitzZoneSetTime = SystemClock.elapsedRealtime();
             }
         }
     };
