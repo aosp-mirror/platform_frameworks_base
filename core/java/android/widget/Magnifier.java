@@ -11,10 +11,10 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
-package com.android.internal.widget;
+package android.widget;
 
 import android.annotation.FloatRange;
 import android.annotation.NonNull;
@@ -32,15 +32,13 @@ import android.view.PixelCopy;
 import android.view.Surface;
 import android.view.SurfaceView;
 import android.view.View;
-import android.widget.ImageView;
-import android.widget.PopupWindow;
 
-import com.android.internal.R;
 import com.android.internal.util.Preconditions;
 
 /**
- * Android magnifier widget. Can be used by any view which is attached to window.
+ * Android magnifier widget. Can be used by any view which is attached to a window.
  */
+@UiThread
 public final class Magnifier {
     // Use this to specify that a previous configuration value does not exist.
     private static final int NONEXISTENT_PREVIOUS_CONFIG_VALUE = -1;
@@ -75,16 +73,20 @@ public final class Magnifier {
      *
      * @param view the view for which this magnifier is attached
      */
-    @UiThread
     public Magnifier(@NonNull View view) {
         mView = Preconditions.checkNotNull(view);
         final Context context = mView.getContext();
-        final float elevation = context.getResources().getDimension(R.dimen.magnifier_elevation);
-        final View content = LayoutInflater.from(context).inflate(R.layout.magnifier, null);
-        content.findViewById(R.id.magnifier_inner).setClipToOutline(true);
-        mWindowWidth = context.getResources().getDimensionPixelSize(R.dimen.magnifier_width);
-        mWindowHeight = context.getResources().getDimensionPixelSize(R.dimen.magnifier_height);
-        mZoomScale = context.getResources().getFloat(R.dimen.magnifier_zoom_scale);
+        final float elevation = context.getResources().getDimension(
+                com.android.internal.R.dimen.magnifier_elevation);
+        final View content = LayoutInflater.from(context).inflate(
+                com.android.internal.R.layout.magnifier, null);
+        content.findViewById(com.android.internal.R.id.magnifier_inner).setClipToOutline(true);
+        mWindowWidth = context.getResources().getDimensionPixelSize(
+                com.android.internal.R.dimen.magnifier_width);
+        mWindowHeight = context.getResources().getDimensionPixelSize(
+                com.android.internal.R.dimen.magnifier_height);
+        mZoomScale = context.getResources().getFloat(
+                com.android.internal.R.dimen.magnifier_zoom_scale);
 
         mWindow = new PopupWindow(context);
         mWindow.setContentView(content);
@@ -104,13 +106,16 @@ public final class Magnifier {
      * Shows the magnifier on the screen.
      *
      * @param xPosInView horizontal coordinate of the center point of the magnifier source relative
-     *        to the view. The lower end is clamped to 0
+     *        to the view. The lower end is clamped to 0 and the higher end is clamped to the view
+     *        width.
      * @param yPosInView vertical coordinate of the center point of the magnifier source
-     *        relative to the view. The lower end is clamped to 0
+     *        relative to the view. The lower end is clamped to 0 and the higher end is clamped to
+     *        the view height.
      */
-    public void show(@FloatRange(from=0) float xPosInView, @FloatRange(from=0) float yPosInView) {
-        xPosInView = Math.max(0, xPosInView);
-        yPosInView = Math.max(0, yPosInView);
+    public void show(@FloatRange(from = 0) float xPosInView,
+            @FloatRange(from = 0) float yPosInView) {
+        xPosInView = Math.max(0, Math.min(xPosInView, mView.getWidth()));
+        yPosInView = Math.max(0, Math.min(yPosInView, mView.getHeight()));
 
         configureCoordinates(xPosInView, yPosInView);
 
@@ -136,7 +141,7 @@ public final class Magnifier {
     }
 
     /**
-     * Dismisses the magnifier from the screen.
+     * Dismisses the magnifier from the screen. Calling this on a dismissed magnifier is a no-op.
      */
     public void dismiss() {
         mWindow.dismiss();
@@ -153,27 +158,6 @@ public final class Magnifier {
             // Update the contents shown in the magnifier.
             performPixelCopy(mPrevStartCoordsInSurface.x, mPrevStartCoordsInSurface.y);
         }
-    }
-
-    /**
-     * @return the height of the magnifier window.
-     */
-    public int getHeight() {
-        return mWindowHeight;
-    }
-
-    /**
-     * @return the width of the magnifier window.
-     */
-    public int getWidth() {
-        return mWindowWidth;
-    }
-
-    /**
-     * @return the zoom scale of the magnifier.
-     */
-    public float getZoomScale() {
-        return mZoomScale;
     }
 
     private void configureCoordinates(float xPosInView, float yPosInView) {
@@ -195,7 +179,7 @@ public final class Magnifier {
         mCenterZoomCoords.y = Math.round(posY);
 
         final int verticalMagnifierOffset = mView.getContext().getResources().getDimensionPixelSize(
-                R.dimen.magnifier_offset);
+                com.android.internal.R.dimen.magnifier_offset);
         mWindowCoords.x = mCenterZoomCoords.x - mWindowWidth / 2;
         mWindowCoords.y = mCenterZoomCoords.y - mWindowHeight / 2 - verticalMagnifierOffset;
     }
@@ -231,6 +215,7 @@ public final class Magnifier {
     }
 
     private ImageView getImageView() {
-        return mWindow.getContentView().findViewById(R.id.magnifier_image);
+        return mWindow.getContentView().findViewById(
+                com.android.internal.R.id.magnifier_image);
     }
 }
