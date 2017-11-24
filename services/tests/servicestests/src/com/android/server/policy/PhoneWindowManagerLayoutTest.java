@@ -23,6 +23,8 @@ import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DRAW_STATUS_BAR_BACKGROUND;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 
+import static org.junit.Assert.assertEquals;
+
 import android.graphics.PixelFormat;
 import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
@@ -93,5 +95,14 @@ public class PhoneWindowManagerLayoutTest extends PhoneWindowManagerTestBase {
         assertInsetByTopBottom(mAppWindow.stableFrame, STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
         assertInsetByTopBottom(mAppWindow.contentFrame, STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
         assertInsetByTopBottom(mAppWindow.decorFrame, 0, NAV_BAR_HEIGHT);
+    }
+
+    @Test
+    public void addingWindow_doesNotTamperWithSysuiFlags() {
+        mAppWindow.attrs.flags |= FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
+        mPolicy.addWindow(mAppWindow);
+
+        assertEquals(0, mAppWindow.attrs.systemUiVisibility);
+        assertEquals(0, mAppWindow.attrs.subtreeSystemUiVisibility);
     }
 }
