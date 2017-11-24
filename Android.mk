@@ -1027,6 +1027,7 @@ framework_docs_LOCAL_DROIDDOC_OPTIONS := \
     -knowntags ./frameworks/base/docs/knowntags.txt \
     -knowntags ./libcore/known_oj_tags.txt \
     -manifest ./frameworks/base/core/res/AndroidManifest.xml \
+    -hidePackage com.android.okhttp \
     -hidePackage com.android.org.conscrypt \
     -since $(SRC_API_DIR)/1.xml 1 \
     -since $(SRC_API_DIR)/2.xml 2 \
