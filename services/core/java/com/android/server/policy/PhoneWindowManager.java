@@ -240,6 +240,7 @@ import android.view.inputmethod.InputMethodManagerInternal;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.IShortcutService;
@@ -1053,7 +1054,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     private ImmersiveModeConfirmation mImmersiveModeConfirmation;
 
-    private SystemGesturesPointerEventListener mSystemGestures;
+    @VisibleForTesting
+    SystemGesturesPointerEventListener mSystemGestures;
 
     IStatusBarService getStatusBarService() {
         synchronized (mServiceAquireLock) {
@@ -2724,7 +2726,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     @Override
     public void onConfigurationChanged() {
         // TODO(multi-display): Define policy for secondary displays.
-        Context uiContext = ActivityThread.currentActivityThread().getSystemUiContext();
+        Context uiContext = getSystemUiContext();
         final Resources res = uiContext.getResources();
 
         mStatusBarHeight =
@@ -2763,6 +2765,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     res.getDimensionPixelSize(
                             com.android.internal.R.dimen.navigation_bar_width_car_mode);
         }
+    }
+
+    @VisibleForTesting
+    Context getSystemUiContext() {
+        return ActivityThread.currentActivityThread().getSystemUiContext();
     }
 
     @Override

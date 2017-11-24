@@ -108,7 +108,7 @@ public abstract class UEventObserver {
      * UEventObserver after this call. Repeated calls have no effect.
      */
     public final void stopObserving() {
-        final UEventThread t = getThread();
+        final UEventThread t = peekThread();
         if (t != null) {
             t.removeObserver(this);
         }
