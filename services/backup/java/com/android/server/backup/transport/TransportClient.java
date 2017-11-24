@@ -367,6 +367,25 @@ public class TransportClient {
         return transport;
     }
 
+    /**
+     * If the {@link TransportClient} is already connected to the transport, returns the transport,
+     * otherwise throws {@link TransportNotAvailableException}.
+     *
+     * @param caller A {@link String} identifying the caller for logging/debugging purposes. Check
+     *     {@link #connectAsync(TransportConnectionListener, String)} for more details.
+     * @return A {@link IBackupTransport} transport binder instance.
+     * @throws TransportNotAvailableException if not connected.
+     */
+    public IBackupTransport getConnectedTransport(String caller)
+            throws TransportNotAvailableException {
+        IBackupTransport transport = mTransport;
+        if (transport == null) {
+            log(Log.ERROR, caller, "Transport not connected");
+            throw new TransportNotAvailableException();
+        }
+        return transport;
+    }
+
     @Override
     public String toString() {
         return "TransportClient{"
