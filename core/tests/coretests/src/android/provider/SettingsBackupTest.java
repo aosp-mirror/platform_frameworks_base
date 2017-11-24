@@ -52,6 +52,7 @@ public class SettingsBackupTest {
                     Settings.System.ALARM_ALERT, // backup candidate?
                     Settings.System.ALARM_ALERT_CACHE, // internal cache
                     Settings.System.APPEND_FOR_LAST_AUDIBLE, // suffix deprecated since API 2
+                    Settings.System.DISPLAY_COLOR_MODE, // bug?
                     Settings.System.EGG_MODE, // I am the lolrus
                     Settings.System.END_BUTTON_BEHAVIOR, // bug?
                     Settings.System
@@ -108,11 +109,13 @@ public class SettingsBackupTest {
                     Settings.Global.BACKUP_REFACTORED_SERVICE_DISABLED,
                     Settings.Global.BATTERY_DISCHARGE_DURATION_THRESHOLD,
                     Settings.Global.BATTERY_DISCHARGE_THRESHOLD,
+                    Settings.Global.BATTERY_SAVER_DEVICE_SPECIFIC_CONSTANTS,
                     Settings.Global.BLE_SCAN_ALWAYS_AVAILABLE,
                     Settings.Global.BLUETOOTH_A2DP_SINK_PRIORITY_PREFIX,
                     Settings.Global.BLUETOOTH_A2DP_SRC_PRIORITY_PREFIX,
                     Settings.Global.BLUETOOTH_A2DP_SUPPORTS_OPTIONAL_CODECS_PREFIX,
                     Settings.Global.BLUETOOTH_A2DP_OPTIONAL_CODECS_ENABLED_PREFIX,
+                    Settings.Global.BLUETOOTH_CLASS_OF_DEVICE,
                     Settings.Global.BLUETOOTH_DISABLED_PROFILES,
                     Settings.Global.BLUETOOTH_HEADSET_PRIORITY_PREFIX,
                     Settings.Global.BLUETOOTH_INPUT_DEVICE_PRIORITY_PREFIX,
@@ -296,6 +299,7 @@ public class SettingsBackupTest {
                     Settings.Global.POLICY_CONTROL,
                     Settings.Global.POWER_MANAGER_CONSTANTS,
                     Settings.Global.PREFERRED_NETWORK_MODE,
+                    Settings.Global.PRIV_APP_OOB_ENABLED,
                     Settings.Global.PROVISIONING_APN_ALARM_DELAY_IN_MS,
                     Settings.Global.RADIO_BLUETOOTH,
                     Settings.Global.RADIO_CELL,
@@ -411,6 +415,7 @@ public class SettingsBackupTest {
     private static final Set<String> BACKUP_BLACKLISTED_SECURE_SETTINGS =
              newHashSet(
                  Settings.Secure.ACCESSIBILITY_SOFT_KEYBOARD_MODE,
+                 Settings.Secure.AUTOFILL_FEATURE_FIELD_DETECTION,
                  Settings.Secure.ALLOWED_GEOLOCATION_ORIGINS,
                  Settings.Secure.ALWAYS_ON_VPN_APP,
                  Settings.Secure.ALWAYS_ON_VPN_LOCKDOWN,
