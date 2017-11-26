@@ -130,10 +130,10 @@ TEST(OringDurationTrackerTest, TestCrossBucketBoundary) {
 
     tracker.noteStart("2:maps", true, eventStartTimeNs, key1);
     EXPECT_EQ((long long)eventStartTimeNs, tracker.mLastStartTime);
+    tracker.flushIfNeeded(eventStartTimeNs + 2 * bucketSizeNs);
     tracker.noteStart("2:maps", true, eventStartTimeNs + 2 * bucketSizeNs, key1);
     EXPECT_EQ((long long)(bucketStartTimeNs + 2 * bucketSizeNs), tracker.mLastStartTime);
 
-    tracker.flushIfNeeded(eventStartTimeNs + 2 * bucketSizeNs);
     EXPECT_EQ(2u, buckets.size());
     EXPECT_EQ(bucketSizeNs - 1, buckets[0].mDuration);
     EXPECT_EQ(bucketSizeNs, buckets[1].mDuration);
@@ -167,12 +167,47 @@ TEST(OringDurationTrackerTest, TestDurationConditionChange) {
 
     tracker.noteStart("2:maps", true, eventStartTimeNs, key1);
 
-    tracker.onSlicedConditionMayChange(eventStartTimeNs + 2 * bucketSizeNs + 5);
-    tracker.noteStop("2:maps", eventStartTimeNs + 2 * bucketSizeNs + durationTimeNs, false);
-    tracker.flushIfNeeded(bucketStartTimeNs + 2 * bucketSizeNs + durationTimeNs);
-    EXPECT_EQ(2u, buckets.size());
-    EXPECT_EQ(bucketSizeNs - 1, buckets[0].mDuration);
-    EXPECT_EQ(bucketSizeNs, buckets[1].mDuration);
+    tracker.onSlicedConditionMayChange(eventStartTimeNs + 5);
+
+    tracker.noteStop("2:maps", eventStartTimeNs + durationTimeNs, false);
+
+    tracker.flushIfNeeded(bucketStartTimeNs + bucketSizeNs + 1);
+    EXPECT_EQ(1u, buckets.size());
+    EXPECT_EQ(5ULL, buckets[0].mDuration);
+}
+
+TEST(OringDurationTrackerTest, TestDurationConditionChange2) {
+    sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
+
+    ConditionKey key1;
+    key1["APP_BACKGROUND"] = "1:maps|";
+
+    EXPECT_CALL(*wizard, query(_, key1))
+            .Times(2)
+            .WillOnce(Return(ConditionState::kFalse))
+            .WillOnce(Return(ConditionState::kTrue));
+
+    vector<DurationBucket> buckets;
+
+    uint64_t bucketStartTimeNs = 10000000000;
+    uint64_t eventStartTimeNs = bucketStartTimeNs + 1;
+    uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
+    uint64_t durationTimeNs = 2 * 1000;
+
+    OringDurationTracker tracker("event", wizard, 1, false, bucketStartTimeNs, bucketSizeNs, {},
+                                 buckets);
+
+    tracker.noteStart("2:maps", true, eventStartTimeNs, key1);
+    // condition to false; record duration 5n
+    tracker.onSlicedConditionMayChange(eventStartTimeNs + 5);
+    // condition to true.
+    tracker.onSlicedConditionMayChange(eventStartTimeNs + 1000);
+    // 2nd duration: 1000ns
+    tracker.noteStop("2:maps", eventStartTimeNs + durationTimeNs, false);
+
+    tracker.flushIfNeeded(bucketStartTimeNs + bucketSizeNs + 1);
+    EXPECT_EQ(1u, buckets.size());
+    EXPECT_EQ(1005ULL, buckets[0].mDuration);
 }
 
 TEST(OringDurationTrackerTest, TestDurationConditionChangeNested) {
@@ -242,6 +277,7 @@ TEST(OringDurationTrackerTest, TestPredictAnomalyTimestamp) {
               tracker.predictAnomalyTimestampNs(*anomalyTracker, event1StartTimeNs));
 
     uint64_t event1StopTimeNs = eventStartTimeNs + bucketSizeNs + 10;
+    tracker.flushIfNeeded(event1StopTimeNs);
     tracker.noteStop("1", event1StopTimeNs, false);
     EXPECT_EQ(1u, buckets.size());
     EXPECT_EQ(3ULL + bucketStartTimeNs + bucketSizeNs - eventStartTimeNs - 10,
@@ -290,7 +326,6 @@ TEST(OringDurationTrackerTest, TestAnomalyDetection) {
     tracker.noteStop("", eventStartTimeNs + 10, false);
     EXPECT_EQ(anomalyTracker->mLastAlarmTimestampNs, -1);
     EXPECT_TRUE(tracker.mStarted.empty());
-    EXPECT_EQ(-1LL, tracker.mLastStartTime);
     EXPECT_EQ(10LL, tracker.mDuration);
 
     EXPECT_EQ(0u, tracker.mStarted.size());
@@ -299,6 +334,7 @@ TEST(OringDurationTrackerTest, TestAnomalyDetection) {
     EXPECT_EQ(1u, anomalyTracker->mAlarms.size());
     EXPECT_EQ((long long)(51ULL * NS_PER_SEC),
               (long long)(anomalyTracker->mAlarms.begin()->second->timestampSec * NS_PER_SEC));
+    tracker.flushIfNeeded(eventStartTimeNs + 2 * bucketSizeNs + 25);
     tracker.noteStop("", eventStartTimeNs + 2 * bucketSizeNs + 25, false);
     EXPECT_EQ(anomalyTracker->getSumOverPastBuckets("event"), (long long)(bucketSizeNs));
     EXPECT_EQ((long long)(eventStartTimeNs + 2 * bucketSizeNs + 25),

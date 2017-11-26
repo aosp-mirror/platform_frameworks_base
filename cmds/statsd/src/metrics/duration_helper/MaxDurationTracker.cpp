@@ -34,7 +34,6 @@ MaxDurationTracker::MaxDurationTracker(const HashableDimensionKey& eventKey,
 
 void MaxDurationTracker::noteStart(const HashableDimensionKey& key, bool condition,
                                    const uint64_t eventTime, const ConditionKey& conditionKey) {
-    flushIfNeeded(eventTime);
     // this will construct a new DurationInfo if this key didn't exist.
     DurationInfo& duration = mInfos[key];
     duration.conditionKeys = conditionKey;
@@ -63,7 +62,6 @@ void MaxDurationTracker::noteStart(const HashableDimensionKey& key, bool conditi
 
 void MaxDurationTracker::noteStop(const HashableDimensionKey& key, const uint64_t eventTime,
                                   bool forceStop) {
-    flushIfNeeded(eventTime);
     declareAnomalyIfAlarmExpired(eventTime);
     VLOG("MaxDuration: key %s stop", key.c_str());
     if (mInfos.find(key) == mInfos.end()) {
@@ -85,7 +83,6 @@ void MaxDurationTracker::noteStop(const HashableDimensionKey& key, const uint64_
                      (long long)duration.lastStartTime, (long long)eventTime,
                      (long long)durationTime);
                 duration.lastDuration = duration.lastDuration + durationTime;
-                duration.lastStartTime = -1;
                 VLOG("  record duration: %lld ", (long long)duration.lastDuration);
             }
             break;
@@ -223,7 +220,6 @@ void MaxDurationTracker::onConditionChanged(bool condition, const uint64_t times
 
 void MaxDurationTracker::noteConditionChanged(const HashableDimensionKey& key, bool conditionMet,
                                               const uint64_t timestamp) {
-    flushIfNeeded(timestamp);
     declareAnomalyIfAlarmExpired(timestamp);
     auto it = mInfos.find(key);
     if (it == mInfos.end()) {
