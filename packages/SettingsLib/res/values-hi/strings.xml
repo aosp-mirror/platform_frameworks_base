@@ -33,13 +33,15 @@
     <string name="wifi_check_password_try_again" msgid="516958988102584767">"पासवर्ड जाँचें और दोबारा कोशिश करें"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"रेंज में नहीं"</string>
     <string name="wifi_no_internet_no_reconnect" msgid="5724903347310541706">"अपने आप कनेक्ट नहीं होगा"</string>
-    <string name="wifi_no_internet" msgid="3880396223819116454">"इंटरनेट नहीं है"</string>
+    <!-- no translation found for wifi_no_internet (4663834955626848401) -->
+    <skip />
     <string name="saved_network" msgid="4352716707126620811">"<xliff:g id="NAME">%1$s</xliff:g> के द्वारा सहेजा गया"</string>
     <string name="connected_via_network_scorer" msgid="5713793306870815341">"%1$s के ज़रिए ऑटोमैटिक रूप से कनेक्ट है"</string>
     <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"नेटवर्क रेटिंग प्रदाता के ज़रिए अपने आप कनेक्ट है"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"%1$s के द्वारा उपलब्ध"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"%1$s के द्वारा उपलब्ध"</string>
-    <string name="wifi_connected_no_internet" msgid="3149853966840874992">"कनेक्ट किया गया, इंटरनेट नहीं"</string>
+    <!-- no translation found for wifi_connected_no_internet (8202906332837777829) -->
+    <skip />
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"एक्सेस पॉइंट फ़िलहाल भरा हुआ है"</string>
     <string name="connected_via_carrier" msgid="7583780074526041912">"%1$s के ज़रिए कनेक्ट"</string>
     <string name="available_via_carrier" msgid="1469036129740799053">"%1$s के ज़रिए उपलब्ध"</string>
@@ -82,9 +84,10 @@
     <string name="bluetooth_sap_profile_summary_connected" msgid="8561765057453083838">"SAP से कनेक्ट किया गया"</string>
     <string name="bluetooth_opp_profile_summary_not_connected" msgid="1267091356089086285">"फ़ाइल स्‍थानांतरण सर्वर से कनेक्‍ट नहीं किया गया"</string>
     <string name="bluetooth_hid_profile_summary_connected" msgid="3381760054215168689">"इनपुट डिवाइस से कनेक्‍ट किया गया"</string>
-    <string name="bluetooth_pan_user_profile_summary_connected" msgid="4602294638909590612">"इंटरनेट पहुंच के लिए डिवाइस से कनेक्‍ट"</string>
-    <string name="bluetooth_pan_nap_profile_summary_connected" msgid="1561383706411975199">"डिवाइस से स्‍थानीय इंटरनेट कनेक्‍शन शेयर किया जा रहा है"</string>
-    <string name="bluetooth_pan_profile_summary_use_for" msgid="5664884523822068653">"इंटरनेट पहुंच के लिए उपयोग करें"</string>
+    <string name="bluetooth_pan_user_profile_summary_connected" msgid="6436258151814414028">"इंटरनेट के लिए डिवाइस से कनेक्ट है"</string>
+    <string name="bluetooth_pan_nap_profile_summary_connected" msgid="1322694224800769308">"डिवाइस से इंटरनेट शेयर हो रहा है"</string>
+    <!-- no translation found for bluetooth_pan_profile_summary_use_for (5736111170225304239) -->
+    <skip />
     <string name="bluetooth_map_profile_summary_use_for" msgid="5154200119919927434">"मानचित्र के लिए उपयोग करें"</string>
     <string name="bluetooth_sap_profile_summary_use_for" msgid="7085362712786907993">"सिम ऐक्सेस के लिए उपयोग करें"</string>
     <string name="bluetooth_a2dp_profile_summary_use_for" msgid="4630849022250168427">"मीडिया ऑडियो के लिए उपयोग करें"</string>
@@ -296,6 +299,8 @@
     <string name="force_msaa_summary" msgid="9123553203895817537">"OpenGL ES 2.0 ऐप में 4x MSAA को चालू करें"</string>
     <string name="show_non_rect_clip" msgid="505954950474595172">"गैर-आयताकार क्लिप परिचालनों को डीबग करें"</string>
     <string name="track_frame_time" msgid="6146354853663863443">"प्रोफ़ाइल GPU रेंडरिंग"</string>
+    <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"GPU डीबग लेयर चालू करें"</string>
+    <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"डीबग ऐप के लिए GPU डीबग लेयर लोड करने की अनुमति दें"</string>
     <string name="window_animation_scale_title" msgid="6162587588166114700">"विंडो एनिमेशन स्‍केल"</string>
     <string name="transition_animation_scale_title" msgid="387527540523595875">"संक्रमण एनिमेशन स्‍केल"</string>
     <string name="animator_duration_scale_title" msgid="3406722410819934083">"एनिमेटर अवधि स्केल"</string>

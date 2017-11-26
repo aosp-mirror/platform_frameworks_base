@@ -33,13 +33,15 @@
     <string name="wifi_check_password_try_again" msgid="516958988102584767">"পাসওয়ার্ড দেখে আবার চেষ্টা করুন"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"পরিসরের মধ্যে নয়"</string>
     <string name="wifi_no_internet_no_reconnect" msgid="5724903347310541706">"স্বয়ংক্রিয়ভাবে সংযোগ করবে না"</string>
-    <string name="wifi_no_internet" msgid="3880396223819116454">"কোনো ইন্টারনেট অ্যাক্সেস নেই"</string>
+    <!-- no translation found for wifi_no_internet (4663834955626848401) -->
+    <skip />
     <string name="saved_network" msgid="4352716707126620811">"<xliff:g id="NAME">%1$s</xliff:g> দ্বারা সেভ করা"</string>
     <string name="connected_via_network_scorer" msgid="5713793306870815341">"স্বয়ংক্রিয়ভাবে %1$s এর মাধ্যমে সংযুক্ত হয়েছে"</string>
     <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"নেটওয়ার্কের রেটিং প্রদানকারীর মাধ্যমে স্বয়ংক্রিয়ভাবে সংযুক্ত"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"%1$s মাধ্যমে সংযুক্ত হয়েছে"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"%1$s এর মাধ্যমে উপলব্ধ"</string>
-    <string name="wifi_connected_no_internet" msgid="3149853966840874992">"সংযুক্ত, ইন্টারনেট নেই"</string>
+    <!-- no translation found for wifi_connected_no_internet (8202906332837777829) -->
+    <skip />
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"এই মুহূর্তে অ্যাক্সেস পয়েন্টের কোনও কানেকশন ফাঁকা নেই"</string>
     <string name="connected_via_carrier" msgid="7583780074526041912">"%1$s এর মাধ্যমে সংযুক্ত হয়েছে"</string>
     <string name="available_via_carrier" msgid="1469036129740799053">"%1$s এর মাধ্যমে পাওয়া যাচ্ছে"</string>
@@ -82,9 +84,10 @@
     <string name="bluetooth_sap_profile_summary_connected" msgid="8561765057453083838">"SAP -তে সংযুক্ত হয়েছে"</string>
     <string name="bluetooth_opp_profile_summary_not_connected" msgid="1267091356089086285">"ফাইল স্থানান্তর সার্ভারের সঙ্গে সংযুক্ত নয়"</string>
     <string name="bluetooth_hid_profile_summary_connected" msgid="3381760054215168689">"ইনপুট ডিভাইসে সংযুক্ত"</string>
-    <string name="bluetooth_pan_user_profile_summary_connected" msgid="4602294638909590612">"ইন্টারনেট অ্যাক্সেসের জন্য ডিভাইসে সংযুক্ত"</string>
-    <string name="bluetooth_pan_nap_profile_summary_connected" msgid="1561383706411975199">"ডিভাইসের সাথে স্থানীয় ইন্টারনেট সংযোগ ভাগ করছে"</string>
-    <string name="bluetooth_pan_profile_summary_use_for" msgid="5664884523822068653">"ইন্টারনেট অ্যাক্সেসের জন্য ব্যবহার করুন"</string>
+    <string name="bluetooth_pan_user_profile_summary_connected" msgid="6436258151814414028">"ইন্টারনেটের জন্য সংযুক্ত"</string>
+    <string name="bluetooth_pan_nap_profile_summary_connected" msgid="1322694224800769308">"স্থানীয় ইন্টারনেটে চলছে"</string>
+    <!-- no translation found for bluetooth_pan_profile_summary_use_for (5736111170225304239) -->
+    <skip />
     <string name="bluetooth_map_profile_summary_use_for" msgid="5154200119919927434">"মানচিত্রের জন্য ব্যবহার করুন"</string>
     <string name="bluetooth_sap_profile_summary_use_for" msgid="7085362712786907993">"সিম -এর অ্যাক্সেসের জন্য ব্যবহার করুন"</string>
     <string name="bluetooth_a2dp_profile_summary_use_for" msgid="4630849022250168427">"মিডিয়া অডিওয়ের জন্য ব্যবহার করুন"</string>
@@ -296,6 +299,8 @@
     <string name="force_msaa_summary" msgid="9123553203895817537">"OpenGL ES 2.0 অ্যাপ্লিকেশানগুলির মধ্যে 4x MSAA সক্রিয় করুন"</string>
     <string name="show_non_rect_clip" msgid="505954950474595172">"অ-আয়তক্ষেত্রাকার ক্লিপ কার্যকলাপ ডিবাগ করুন"</string>
     <string name="track_frame_time" msgid="6146354853663863443">"প্রোফাইল GPU রেন্ডারিং"</string>
+    <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"GPU ডিবাগ স্তর সক্ষম করুন"</string>
+    <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"ডিবাগ অ্যাপের জন্য GPU ডিবাগ স্তর লোড হতে দিন"</string>
     <string name="window_animation_scale_title" msgid="6162587588166114700">"উইন্ডো অ্যানিমেশন স্কেল"</string>
     <string name="transition_animation_scale_title" msgid="387527540523595875">"ট্র্যানজিশন অ্যানিমেশন স্কেল"</string>
     <string name="animator_duration_scale_title" msgid="3406722410819934083">"অ্যানিমেটর সময়কাল স্কেল"</string>
