@@ -25,6 +25,7 @@ import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.telephony.TelephonyProperties;
 import com.android.internal.R;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs;
 
 import android.app.ActivityManager;
 import android.app.Dialog;
@@ -64,7 +65,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
-import android.view.WindowManagerPolicy.WindowManagerFuncs;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
@@ -919,7 +919,7 @@ class LegacyGlobalActions implements DialogInterface.OnDismissListener, DialogIn
         /**
          * @param enabledIconResId The icon for when this action is on.
          * @param disabledIconResid The icon for when this action is off.
-         * @param essage The general information message, e.g 'Silent Mode'
+         * @param message The general information message, e.g 'Silent Mode'
          * @param enabledStatusMessageResId The on status message, e.g 'sound disabled'
          * @param disabledStatusMessageResId The off status message, e.g. 'sound enabled'
          */

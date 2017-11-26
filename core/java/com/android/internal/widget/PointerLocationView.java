@@ -32,7 +32,7 @@ import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
-import android.view.WindowManagerPolicy.PointerEventListener;
+import android.view.WindowManagerPolicyConstants.PointerEventListener;
 import android.view.MotionEvent.PointerCoords;
 
 import java.util.ArrayList;

@@ -69,7 +69,6 @@ import android.util.SparseArray;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 import android.view.Display;
-import android.view.WindowManagerPolicy;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IAppOpsService;
@@ -90,6 +89,7 @@ import com.android.server.Watchdog;
 import com.android.server.am.BatteryStatsService;
 import com.android.server.lights.Light;
 import com.android.server.lights.LightsManager;
+import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.power.batterysaver.BatterySaverController;
 
 import libcore.util.Objects;

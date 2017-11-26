@@ -25,6 +25,7 @@ import com.android.internal.backup.IBackupTransport;
 
 /** Utility methods for transport-related operations. */
 public class TransportUtils {
+    private static final String TAG = "TransportUtils";
 
     /**
      * Throws {@link TransportNotAvailableException} if {@param transport} is null. The semantics is
@@ -33,6 +34,7 @@ public class TransportUtils {
     public static IBackupTransport checkTransport(@Nullable IBackupTransport transport)
             throws TransportNotAvailableException {
         if (transport == null) {
+            log(Log.ERROR, TAG, "Transport not available");
             throw new TransportNotAvailableException();
         }
         return transport;

@@ -21,7 +21,7 @@ import android.media.AudioManager;
 import android.os.SystemClock;
 import android.hardware.fingerprint.FingerprintManager;
 import android.telephony.TelephonyManager;
-import android.view.WindowManagerPolicy;
+import android.view.WindowManagerPolicyConstants;
 
 import com.android.internal.telephony.IccCardConstants;
 
@@ -171,9 +171,9 @@ public class KeyguardUpdateMonitorCallback {
 
     /**
      * Called when the device has finished going to sleep.
-     * @param why either {@link WindowManagerPolicy#OFF_BECAUSE_OF_ADMIN},
-     * {@link WindowManagerPolicy#OFF_BECAUSE_OF_USER}, or
-     * {@link WindowManagerPolicy#OFF_BECAUSE_OF_TIMEOUT}.
+     * @param why either {@link WindowManagerPolicyConstants#OFF_BECAUSE_OF_ADMIN},
+     * {@link WindowManagerPolicyConstants#OFF_BECAUSE_OF_USER}, or
+     * {@link WindowManagerPolicyConstants#OFF_BECAUSE_OF_TIMEOUT}.
      *
      * @deprecated use {@link com.android.systemui.keyguard.WakefulnessLifecycle}.
      */

@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.app.KeyguardManager;
 import android.content.Context;
 import android.graphics.Point;
 import android.media.projection.MediaProjection;
@@ -27,7 +28,6 @@ import android.os.Handler;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.Surface;
-import android.view.WindowManagerPolicy;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -254,8 +254,8 @@ public final class DisplayManager {
      * </p>
      *
      * @see #createVirtualDisplay
-     * @see WindowManagerPolicy#isKeyguardSecure(int)
-     * @see WindowManagerPolicy#isKeyguardTrustedLw()
+     * @see KeyguardManager#isDeviceSecure()
+     * @see KeyguardManager#isDeviceLocked()
      * @hide
      */
     // TODO: Update name and documentation and un-hide the flag. Don't change the value before that.

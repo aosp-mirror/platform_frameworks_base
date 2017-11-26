@@ -119,7 +119,6 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.GrowingArrayUtils;
 import com.android.internal.util.Preconditions;
 import com.android.internal.widget.EditableInputConnection;
-import com.android.internal.widget.Magnifier;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

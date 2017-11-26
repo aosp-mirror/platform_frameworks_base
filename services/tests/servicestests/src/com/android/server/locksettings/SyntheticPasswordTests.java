@@ -66,10 +66,12 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
                 LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, authToken, PASSWORD_QUALITY_ALPHABETIC,
                 USER_ID);
 
-        AuthenticationResult result = manager.unwrapPasswordBasedSyntheticPassword(mGateKeeperService, handle, PASSWORD, USER_ID);
+        AuthenticationResult result = manager.unwrapPasswordBasedSyntheticPassword(
+                mGateKeeperService, handle, PASSWORD, USER_ID, null);
         assertEquals(result.authToken.deriveKeyStorePassword(), authToken.deriveKeyStorePassword());
 
-        result = manager.unwrapPasswordBasedSyntheticPassword(mGateKeeperService, handle, BADPASSWORD, USER_ID);
+        result = manager.unwrapPasswordBasedSyntheticPassword(mGateKeeperService, handle,
+                BADPASSWORD, USER_ID, null);
         assertNull(result.authToken);
     }
 

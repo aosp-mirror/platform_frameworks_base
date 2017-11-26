@@ -64,11 +64,12 @@ import android.view.Surface.OutOfResourcesException;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
-import android.view.WindowManagerPolicy;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Transformation;
+
+import com.android.server.policy.WindowManagerPolicy;
 
 import java.io.PrintWriter;
 import java.io.FileDescriptor;

@@ -33,7 +33,6 @@ import android.util.ArrayMap;
 import android.util.Slog;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
-import android.view.WindowManagerInternal;
 
 import com.android.internal.annotations.VisibleForTesting;
 

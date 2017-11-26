@@ -184,11 +184,11 @@ public class PerformBackupTask implements BackupRestoreTask {
                         mPendingFullBackups.toArray(new String[mPendingFullBackups.size()]);
                 mFullBackupTask =
                         new PerformFullTransportBackupTask(backupManagerService,
-                                /*fullBackupRestoreObserver*/
-                                null,
+                                transportClient,
+                                /*fullBackupRestoreObserver*/ null,
                                 fullBackups, /*updateSchedule*/ false, /*runningJob*/ null,
                                 latch,
-                                mObserver, mMonitor, mUserInitiated);
+                                mObserver, mMonitor, mListener, mUserInitiated);
 
                 registerTask();
                 backupManagerService.addBackupTrace("STATE => INITIAL");
@@ -585,11 +585,11 @@ public class PerformBackupTask implements BackupRestoreTask {
 
         if (!mCancelAll && mStatus == BackupTransport.TRANSPORT_OK &&
                 mPendingFullBackups != null && !mPendingFullBackups.isEmpty()) {
-            // TODO(brufino): Move the onFinish() call to the full-backup task
-            mListener.onFinished(callerLogString);
             Slog.d(TAG, "Starting full backups for: " + mPendingFullBackups);
             // Acquiring wakelock for PerformFullTransportBackupTask before its start.
             backupManagerService.getWakelock().acquire();
+            // The full-backup task is now responsible for calling onFinish() on mListener, which
+            // was the listener we passed it.
             (new Thread(mFullBackupTask, "full-transport-requested")).start();
         } else if (mCancelAll) {
             mListener.onFinished(callerLogString);

@@ -2099,7 +2099,7 @@ public class LockSettingsService extends ILockSettings.Stub {
 
             long handle = getSyntheticPasswordHandleLocked(userId);
             authResult = mSpManager.unwrapPasswordBasedSyntheticPassword(
-                    getGateKeeperService(), handle, userCredential, userId);
+                    getGateKeeperService(), handle, userCredential, userId, progressCallback);
 
             if (authResult.credentialType != credentialType) {
                 Slog.e(TAG, "Credential type mismatch.");
@@ -2122,9 +2122,6 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
 
         if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_OK) {
-            if (progressCallback != null) {
-                progressCallback.onCredentialVerified();
-            }
             notifyActivePasswordMetricsAvailable(userCredential, userId);
             unlockKeystore(authResult.authToken.deriveKeyStorePassword(), userId);
 
@@ -2223,7 +2220,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
         long handle = getSyntheticPasswordHandleLocked(userId);
         AuthenticationResult authResult = mSpManager.unwrapPasswordBasedSyntheticPassword(
-                getGateKeeperService(), handle, savedCredential, userId);
+                getGateKeeperService(), handle, savedCredential, userId, null);
         VerifyCredentialResponse response = authResult.gkResponse;
         AuthenticationToken auth = authResult.authToken;
 
@@ -2277,7 +2274,7 @@ public class LockSettingsService extends ILockSettings.Stub {
                 } else /* isSyntheticPasswordBasedCredentialLocked(userId) */ {
                     long pwdHandle = getSyntheticPasswordHandleLocked(userId);
                     auth = mSpManager.unwrapPasswordBasedSyntheticPassword(getGateKeeperService(),
-                            pwdHandle, null, userId).authToken;
+                            pwdHandle, null, userId, null).authToken;
                 }
             }
             if (isSyntheticPasswordBasedCredentialLocked(userId)) {

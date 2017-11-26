@@ -473,7 +473,7 @@ interface IActivityManager {
     /**
      * Notify the system that the keyguard is going away.
      *
-     * @param flags See {@link android.view.WindowManagerPolicy#KEYGUARD_GOING_AWAY_FLAG_TO_SHADE}
+     * @param flags See {@link android.view.WindowManagerPolicyConstants#KEYGUARD_GOING_AWAY_FLAG_TO_SHADE}
      *              etc.
      */
     void keyguardGoingAway(int flags);

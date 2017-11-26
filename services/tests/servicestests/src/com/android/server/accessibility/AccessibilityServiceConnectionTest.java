@@ -35,7 +35,8 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.view.WindowManagerInternal;
+
+import com.android.server.wm.WindowManagerInternal;
 
 import org.junit.Before;
 import org.junit.BeforeClass;

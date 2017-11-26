@@ -18,7 +18,7 @@ package com.android.server.policy;
 
 import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS;
 import static android.view.WindowManager.LayoutParams.MATCH_PARENT;
-import static android.view.WindowManagerInternal.AppTransitionListener;
+import static com.android.server.wm.WindowManagerInternal.AppTransitionListener;
 
 import android.app.StatusBarManager;
 import android.os.IBinder;

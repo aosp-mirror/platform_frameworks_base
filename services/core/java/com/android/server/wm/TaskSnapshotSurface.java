@@ -67,12 +67,12 @@ import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
-import android.view.WindowManagerPolicy.StartingSurface;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.DecorView;
 import com.android.internal.view.BaseIWindow;
+import com.android.server.policy.WindowManagerPolicy.StartingSurface;
 
 /**
  * This class represents a starting window that shows a snapshot.

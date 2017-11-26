@@ -129,7 +129,7 @@ void StorageManager::sendBroadcast(const char* path,
 
 void StorageManager::appendConfigMetricsReport(const char* path, ProtoOutputStream& proto) {
     unique_ptr<DIR, decltype(&closedir)> dir(opendir(path), closedir);
-    if (dir != NULL) {
+    if (dir == NULL) {
         VLOG("Path %s does not exist", path);
         return;
     }

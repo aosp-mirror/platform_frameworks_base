@@ -58,7 +58,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.view.WindowManagerInternal;
+import com.android.server.wm.WindowManagerInternal;
 
 import com.android.internal.R;
 import com.android.internal.util.DumpUtils;
