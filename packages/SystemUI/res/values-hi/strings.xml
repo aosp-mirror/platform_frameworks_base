@@ -44,28 +44,22 @@
     <string name="battery_saver_start_action" msgid="5576697451677486320">"बैटरी बचाएँ"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"सेटिंग"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"वाई-फ़ाई"</string>
-    <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"स्‍क्रीन अपनेआप घुमाएं"</string>
+    <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"स्‍क्रीन अपने आप घुमाएं"</string>
     <string name="status_bar_settings_mute_label" msgid="554682549917429396">"म्यूट करें"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"स्वत:"</string>
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"सूचनाएं"</string>
     <string name="bluetooth_tethered" msgid="7094101612161133267">"ब्लूटूथ टीदर किया गया"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"इनपुट का तरीका सेट करें"</string>
     <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"भौतिक कीबोर्ड"</string>
-    <!-- no translation found for usb_device_permission_prompt (1825685909587559679) -->
-    <skip />
-    <!-- no translation found for usb_accessory_permission_prompt (2465531696941369047) -->
-    <skip />
-    <!-- no translation found for usb_device_confirm_prompt (7440562274256843905) -->
-    <skip />
-    <!-- no translation found for usb_accessory_confirm_prompt (4333670517539993561) -->
-    <skip />
+    <string name="usb_device_permission_prompt" msgid="1825685909587559679">"<xliff:g id="APPLICATION">%1$s</xliff:g> को <xliff:g id="USB_DEVICE">%2$s</xliff:g> के एक्सेस की अनुमति दें?"</string>
+    <string name="usb_accessory_permission_prompt" msgid="2465531696941369047">"<xliff:g id="APPLICATION">%1$s</xliff:g> को <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> के एक्सेस की अनुमति दें?"</string>
+    <string name="usb_device_confirm_prompt" msgid="7440562274256843905">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> के लिए <xliff:g id="APPLICATION">%1$s</xliff:g> खोलें?"</string>
+    <string name="usb_accessory_confirm_prompt" msgid="4333670517539993561">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g> के लिए <xliff:g id="APPLICATION">%1$s</xliff:g> खोलें?"</string>
     <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"इस USB सहायक डिवाइस के साथ कोई भी इंस्टॉल ऐप्स  काम नहीं करता. इस सहायक डिवाइस के बारे में यहां अधिक जानें: <xliff:g id="URL">%1$s</xliff:g>"</string>
     <string name="title_usb_accessory" msgid="4966265263465181372">"USB सहायक साधन"</string>
     <string name="label_view" msgid="6304565553218192990">"देखें"</string>
-    <!-- no translation found for always_use_device (4015357883336738417) -->
-    <skip />
-    <!-- no translation found for always_use_accessory (3257892669444535154) -->
-    <skip />
+    <string name="always_use_device" msgid="4015357883336738417">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> के कनेक्ट होने पर हमेशा <xliff:g id="APPLICATION">%1$s</xliff:g> खोलें"</string>
+    <string name="always_use_accessory" msgid="3257892669444535154">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g> के कनेक्ट होने पर हमेशा <xliff:g id="APPLICATION">%1$s</xliff:g> खोलें"</string>
     <string name="usb_debugging_title" msgid="4513918393387141949">"USB डीबगिंग करने दें?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"कंप्यूटर का RSA कुंजी फ़िंगरप्रिंट है:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"इस कंप्यूटर से हमेशा अनुमति दें"</string>

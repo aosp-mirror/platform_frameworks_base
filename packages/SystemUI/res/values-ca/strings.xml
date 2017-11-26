@@ -51,21 +51,15 @@
     <string name="bluetooth_tethered" msgid="7094101612161133267">"Xarxa compartida per Bluetooth"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"Configura els mètodes d\'entrada"</string>
     <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"Teclat físic"</string>
-    <!-- no translation found for usb_device_permission_prompt (1825685909587559679) -->
-    <skip />
-    <!-- no translation found for usb_accessory_permission_prompt (2465531696941369047) -->
-    <skip />
-    <!-- no translation found for usb_device_confirm_prompt (7440562274256843905) -->
-    <skip />
-    <!-- no translation found for usb_accessory_confirm_prompt (4333670517539993561) -->
-    <skip />
+    <string name="usb_device_permission_prompt" msgid="1825685909587559679">"Vols permetre que <xliff:g id="APPLICATION">%1$s</xliff:g> accedeixi a <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_accessory_permission_prompt" msgid="2465531696941369047">"Vols permetre que <xliff:g id="APPLICATION">%1$s</xliff:g> accedeixi a <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
+    <string name="usb_device_confirm_prompt" msgid="7440562274256843905">"Vols obrir <xliff:g id="APPLICATION">%1$s</xliff:g> per gestionar <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_accessory_confirm_prompt" msgid="4333670517539993561">"Vols obrir <xliff:g id="APPLICATION">%1$s</xliff:g> per gestionar <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
     <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"Les aplicacions instal·lades no funcionen amb l\'accessori USB. Més informació: <xliff:g id="URL">%1$s</xliff:g>"</string>
     <string name="title_usb_accessory" msgid="4966265263465181372">"Accessori USB"</string>
     <string name="label_view" msgid="6304565553218192990">"Mostra"</string>
-    <!-- no translation found for always_use_device (4015357883336738417) -->
-    <skip />
-    <!-- no translation found for always_use_accessory (3257892669444535154) -->
-    <skip />
+    <string name="always_use_device" msgid="4015357883336738417">"Obre sempre <xliff:g id="APPLICATION">%1$s</xliff:g> quan es connecti <xliff:g id="USB_DEVICE">%2$s</xliff:g>"</string>
+    <string name="always_use_accessory" msgid="3257892669444535154">"Obre sempre <xliff:g id="APPLICATION">%1$s</xliff:g> quan es connecti <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>"</string>
     <string name="usb_debugging_title" msgid="4513918393387141949">"Vols permetre la depuració USB?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"L\'empremta digital de la clau de l\'RSA de l\'equip és:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Dona sempre permís des d\'aquest equip"</string>
@@ -587,7 +581,7 @@
       <item quantity="other">%d minuts</item>
       <item quantity="one">%d minut</item>
     </plurals>
-    <string name="battery_panel_title" msgid="7944156115535366613">"Ús de la bateria"</string>
+    <string name="battery_panel_title" msgid="7944156115535366613">"Consum de la bateria"</string>
     <string name="battery_detail_charging_summary" msgid="4055327085770378335">"La funció Estalvi de bateria no està disponible durant la càrrega"</string>
     <string name="battery_detail_switch_title" msgid="8763441006881907058">"Estalvi de bateria"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Redueix el rendiment i les dades en segon pla"</string>
