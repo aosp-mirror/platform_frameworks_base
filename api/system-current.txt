@@ -751,6 +751,20 @@ package android.content.pm {
     field public java.lang.String credentialProtectedDataDir;
   }
 
+  public final class InstantAppInfo implements android.os.Parcelable {
+    ctor public InstantAppInfo(android.content.pm.ApplicationInfo, java.lang.String[], java.lang.String[]);
+    ctor public InstantAppInfo(java.lang.String, java.lang.CharSequence, java.lang.String[], java.lang.String[]);
+    method public int describeContents();
+    method public android.content.pm.ApplicationInfo getApplicationInfo();
+    method public java.lang.String[] getGrantedPermissions();
+    method public java.lang.String getPackageName();
+    method public java.lang.String[] getRequestedPermissions();
+    method public android.graphics.drawable.Drawable loadIcon(android.content.pm.PackageManager);
+    method public java.lang.CharSequence loadLabel(android.content.pm.PackageManager);
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.content.pm.InstantAppInfo> CREATOR;
+  }
+
   public final class InstantAppIntentFilter implements android.os.Parcelable {
     ctor public InstantAppIntentFilter(java.lang.String, java.util.List<android.content.IntentFilter>);
     method public int describeContents();

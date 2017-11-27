@@ -18,6 +18,7 @@ package android.content.pm;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.graphics.drawable.Drawable;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -31,6 +32,7 @@ import android.os.Parcelable;
  *
  * @hide
  */
+@SystemApi
 public final class InstantAppInfo implements Parcelable {
     private final ApplicationInfo mApplicationInfo;
 
