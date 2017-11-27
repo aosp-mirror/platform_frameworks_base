@@ -707,7 +707,9 @@ std::unique_ptr<Item> ParseBinaryResValue(const ResourceType& type, const Config
           std::unique_ptr<FileReference> file_ref =
               util::make_unique<FileReference>(dst_pool->MakeRef(
                   str, StringPool::Context(StringPool::Context::kHighPriority, config)));
-          if (util::EndsWith(*file_ref->path, ".xml")) {
+          if (type == ResourceType::kRaw) {
+            file_ref->type = ResourceFile::Type::kUnknown;
+          } else if (util::EndsWith(*file_ref->path, ".xml")) {
             file_ref->type = ResourceFile::Type::kBinaryXml;
           } else if (util::EndsWith(*file_ref->path, ".png")) {
             file_ref->type = ResourceFile::Type::kPng;
