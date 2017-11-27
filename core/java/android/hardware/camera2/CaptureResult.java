@@ -2185,6 +2185,24 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
             new Key<Boolean>("android.control.enableZsl", boolean.class);
 
     /**
+     * <p>Whether scene change is detected within AF regions.</p>
+     * <p>When AF detects a scene change within current AF regions, it will be set to DETECTED. Otherwise,
+     * it will be set to NOT_DETECTED. This value will remain NOT_DETECTED if afMode is AF_MODE_OFF or
+     * AF_MODE_EDOF.</p>
+     * <p><b>Possible values:</b>
+     * <ul>
+     *   <li>{@link #CONTROL_AF_SCENE_CHANGE_NOT_DETECTED NOT_DETECTED}</li>
+     *   <li>{@link #CONTROL_AF_SCENE_CHANGE_DETECTED DETECTED}</li>
+     * </ul></p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * @see #CONTROL_AF_SCENE_CHANGE_NOT_DETECTED
+     * @see #CONTROL_AF_SCENE_CHANGE_DETECTED
+     */
+    @PublicKey
+    public static final Key<Integer> CONTROL_AF_SCENE_CHANGE =
+            new Key<Integer>("android.control.afSceneChange", int.class);
+
+    /**
      * <p>Operation mode for edge
      * enhancement.</p>
      * <p>Edge enhancement improves sharpness and details in the captured image. OFF means
