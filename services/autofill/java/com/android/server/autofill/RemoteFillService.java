@@ -26,6 +26,7 @@ import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.ServiceConnection;
 import android.os.Handler;
 import android.os.IBinder;
@@ -100,7 +101,8 @@ final class RemoteFillService implements DeathRecipient {
                 @NonNull String servicePackageName);
         void onFillRequestFailure(@Nullable CharSequence message,
                 @NonNull String servicePackageName);
-        void onSaveRequestSuccess(@NonNull String servicePackageName);
+        void onSaveRequestSuccess(@NonNull String servicePackageName,
+                @Nullable IntentSender intentSender);
         void onSaveRequestFailure(@Nullable CharSequence message,
                 @NonNull String servicePackageName);
         void onServiceDied(RemoteFillService service);
@@ -308,10 +310,11 @@ final class RemoteFillService implements DeathRecipient {
         });
     }
 
-    private void dispatchOnSaveRequestSuccess(PendingRequest pendingRequest) {
+    private void dispatchOnSaveRequestSuccess(PendingRequest pendingRequest,
+            IntentSender intentSender) {
         mHandler.getHandler().post(() -> {
             if (handleResponseCallbackCommon(pendingRequest)) {
-                mCallbacks.onSaveRequestSuccess(mComponentName.getPackageName());
+                mCallbacks.onSaveRequestSuccess(mComponentName.getPackageName(), intentSender);
             }
         });
     }
@@ -624,12 +627,13 @@ final class RemoteFillService implements DeathRecipient {
 
             mCallback = new ISaveCallback.Stub() {
                 @Override
-                public void onSuccess() {
+                public void onSuccess(IntentSender intentSender) {
                     if (!finish()) return;
 
                     final RemoteFillService remoteService = getService();
                     if (remoteService != null) {
-                        remoteService.dispatchOnSaveRequestSuccess(PendingSaveRequest.this);
+                        remoteService.dispatchOnSaveRequestSuccess(PendingSaveRequest.this,
+                                intentSender);
                     }
                 }
 
