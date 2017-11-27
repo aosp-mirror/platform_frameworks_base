@@ -217,13 +217,6 @@ public class BatterySaverController implements BatterySaverPolicyListener {
             pmi.powerHint(PowerHint.LOW_POWER, enabled ? 1 : 0);
         }
 
-        if (enabled) {
-            // STOPSHIP Remove the toast.
-            Toast.makeText(mContext,
-                    com.android.internal.R.string.battery_saver_warning,
-                    Toast.LENGTH_LONG).show();
-        }
-
         if (ArrayUtils.isEmpty(fileValues)) {
             mFileUpdater.restoreDefault();
         } else {
@@ -231,6 +224,13 @@ public class BatterySaverController implements BatterySaverPolicyListener {
         }
 
         if (sendBroadcast) {
+            if (enabled) {
+                // STOPSHIP Remove the toast.
+                Toast.makeText(mContext,
+                        com.android.internal.R.string.battery_saver_warning,
+                        Toast.LENGTH_LONG).show();
+            }
+
             if (DEBUG) {
                 Slog.i(TAG, "Sending broadcasts for mode: " + enabled);
             }
