@@ -18,7 +18,6 @@ package com.android.settingslib.drawer;
 import android.content.ComponentName;
 import android.content.Context;
 import android.support.annotation.VisibleForTesting;
-import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
@@ -27,7 +26,6 @@ import android.util.Pair;
 import com.android.settingslib.applications.InterestingConfigChanges;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -104,10 +102,10 @@ public class CategoryManager {
         }
         for (int i = 0; i < mCategories.size(); i++) {
             DashboardCategory category = mCategories.get(i);
-            for (int j = 0; j < category.tiles.size(); j++) {
-                Tile tile = category.tiles.get(j);
+            for (int j = 0; j < category.getTilesCount(); j++) {
+                Tile tile = category.getTile(j);
                 if (tileBlacklist.contains(tile.intent.getComponent())) {
-                    category.tiles.remove(j--);
+                    category.removeTile(j--);
                 }
             }
         }
@@ -181,7 +179,7 @@ public class CategoryManager {
                         newCategory = new DashboardCategory();
                         categoryByKeyMap.put(newCategoryKey, newCategory);
                     }
-                    newCategory.tiles.add(tile);
+                    newCategory.addTile(tile);
                 }
             }
         }
@@ -198,7 +196,7 @@ public class CategoryManager {
     synchronized void sortCategories(Context context,
             Map<String, DashboardCategory> categoryByKeyMap) {
         for (Entry<String, DashboardCategory> categoryEntry : categoryByKeyMap.entrySet()) {
-            sortCategoriesForExternalTiles(context, categoryEntry.getValue());
+            categoryEntry.getValue().sortTiles(context.getPackageName());
         }
     }
 
@@ -210,16 +208,16 @@ public class CategoryManager {
     synchronized void filterDuplicateTiles(Map<String, DashboardCategory> categoryByKeyMap) {
         for (Entry<String, DashboardCategory> categoryEntry : categoryByKeyMap.entrySet()) {
             final DashboardCategory category = categoryEntry.getValue();
-            final int count = category.tiles.size();
+            final int count = category.getTilesCount();
             final Set<ComponentName> components = new ArraySet<>();
             for (int i = count - 1; i >= 0; i--) {
-                final Tile tile = category.tiles.get(i);
+                final Tile tile = category.getTile(i);
                 if (tile.intent == null) {
                     continue;
                 }
                 final ComponentName tileComponent = tile.intent.getComponent();
                 if (components.contains(tileComponent)) {
-                    category.tiles.remove(i);
+                    category.removeTile(i);
                 } else {
                     components.add(tileComponent);
                 }
@@ -234,28 +232,7 @@ public class CategoryManager {
      */
     private synchronized void sortCategoriesForExternalTiles(Context context,
             DashboardCategory dashboardCategory) {
-        final String skipPackageName = context.getPackageName();
+        dashboardCategory.sortTiles(context.getPackageName());
 
-        // Sort tiles based on [priority, package within priority]
-        Collections.sort(dashboardCategory.tiles, (tile1, tile2) -> {
-            final String package1 = tile1.intent.getComponent().getPackageName();
-            final String package2 = tile2.intent.getComponent().getPackageName();
-            final int packageCompare = CASE_INSENSITIVE_ORDER.compare(package1, package2);
-            // First sort by priority
-            final int priorityCompare = tile2.priority - tile1.priority;
-            if (priorityCompare != 0) {
-                return priorityCompare;
-            }
-            // Then sort by package name, skip package take precedence
-            if (packageCompare != 0) {
-                if (TextUtils.equals(package1, skipPackageName)) {
-                    return -1;
-                }
-                if (TextUtils.equals(package2, skipPackageName)) {
-                    return 1;
-                }
-            }
-            return packageCompare;
-        });
     }
 }
