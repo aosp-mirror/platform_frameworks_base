@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-#define DEBUG true  // STOPSHIP if true
-#include "Log.h"
-
 #include "../condition/CombinationConditionTracker.h"
 #include "../condition/SimpleConditionTracker.h"
 #include "../external/StatsPullerManager.h"
@@ -222,12 +219,9 @@ bool initMetrics(const StatsdConfig& config, const unordered_map<string, int>& l
 
         int conditionIndex = -1;
         if (metric.has_condition()) {
-            bool good = handleMetricWithConditions(
-                    metric.condition(), metricIndex, conditionTrackerMap, metric.links(),
-                    allConditionTrackers, conditionIndex, conditionToMetricMap);
-            if (!good) {
-                return false;
-            }
+            handleMetricWithConditions(metric.condition(), metricIndex, conditionTrackerMap,
+                                       metric.links(), allConditionTrackers, conditionIndex,
+                                       conditionToMetricMap);
         } else {
             if (metric.links_size() > 0) {
                 ALOGW("metrics has a EventConditionLink but doesn't have a condition");
@@ -293,12 +287,9 @@ bool initMetrics(const StatsdConfig& config, const unordered_map<string, int>& l
         int conditionIndex = -1;
 
         if (metric.has_condition()) {
-            bool good = handleMetricWithConditions(
-                    metric.condition(), metricIndex, conditionTrackerMap, metric.links(),
-                    allConditionTrackers, conditionIndex, conditionToMetricMap);
-            if (!good) {
-                return false;
-            }
+            handleMetricWithConditions(metric.condition(), metricIndex, conditionTrackerMap,
+                                       metric.links(), allConditionTrackers, conditionIndex,
+                                       conditionToMetricMap);
         } else {
             if (metric.links_size() > 0) {
                 ALOGW("metrics has a EventConditionLink but doesn't have a condition");
@@ -330,12 +321,9 @@ bool initMetrics(const StatsdConfig& config, const unordered_map<string, int>& l
 
         int conditionIndex = -1;
         if (metric.has_condition()) {
-            bool good = handleMetricWithConditions(
-                    metric.condition(), metricIndex, conditionTrackerMap, metric.links(),
-                    allConditionTrackers, conditionIndex, conditionToMetricMap);
-            if (!good) {
-                return false;
-            }
+            handleMetricWithConditions(metric.condition(), metricIndex, conditionTrackerMap,
+                                       metric.links(), allConditionTrackers, conditionIndex,
+                                       conditionToMetricMap);
         } else {
             if (metric.links_size() > 0) {
                 ALOGW("metrics has a EventConditionLink but doesn't have a condition");
@@ -380,12 +368,9 @@ bool initMetrics(const StatsdConfig& config, const unordered_map<string, int>& l
 
         int conditionIndex = -1;
         if (metric.has_condition()) {
-            bool good = handleMetricWithConditions(
-                    metric.condition(), metricIndex, conditionTrackerMap, metric.links(),
-                    allConditionTrackers, conditionIndex, conditionToMetricMap);
-            if (!good) {
-                return false;
-            }
+            handleMetricWithConditions(metric.condition(), metricIndex, conditionTrackerMap,
+                                       metric.links(), allConditionTrackers, conditionIndex,
+                                       conditionToMetricMap);
         } else {
             if (metric.links_size() > 0) {
                 ALOGW("metrics has a EventConditionLink but doesn't have a condition");
@@ -429,12 +414,9 @@ bool initMetrics(const StatsdConfig& config, const unordered_map<string, int>& l
 
         int conditionIndex = -1;
         if (metric.has_condition()) {
-            bool good = handleMetricWithConditions(
-                    metric.condition(), metricIndex, conditionTrackerMap, metric.links(),
-                    allConditionTrackers, conditionIndex, conditionToMetricMap);
-            if (!good) {
-                return false;
-            }
+            handleMetricWithConditions(metric.condition(), metricIndex, conditionTrackerMap,
+                                       metric.links(), allConditionTrackers, conditionIndex,
+                                       conditionToMetricMap);
         } else {
             if (metric.links_size() > 0) {
                 ALOGW("metrics has a EventConditionLink but doesn't have a condition");
