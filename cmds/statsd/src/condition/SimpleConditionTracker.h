@@ -19,6 +19,7 @@
 
 #include <gtest/gtest_prod.h>
 #include "ConditionTracker.h"
+#include "config/ConfigKey.h"
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
 #include "stats_util.h"
 
@@ -28,7 +29,7 @@ namespace statsd {
 
 class SimpleConditionTracker : public virtual ConditionTracker {
 public:
-    SimpleConditionTracker(const std::string& name, const int index,
+    SimpleConditionTracker(const ConfigKey& key, const std::string& name, const int index,
                            const SimpleCondition& simpleCondition,
                            const std::unordered_map<std::string, int>& trackerNameIndexMap);
 
@@ -50,6 +51,7 @@ public:
                         std::vector<ConditionState>& conditionCache) const override;
 
 private:
+    const ConfigKey mConfigKey;
     // The index of the LogEventMatcher which defines the start.
     int mStartLogMatcherIndex;
 
@@ -74,6 +76,8 @@ private:
     void handleConditionEvent(const HashableDimensionKey& outputKey, bool matchStart,
                               std::vector<ConditionState>& conditionCache,
                               std::vector<bool>& changedCache);
+
+    bool hitGuardRail(const HashableDimensionKey& newKey);
 
     FRIEND_TEST(SimpleConditionTrackerTest, TestSlicedCondition);
     FRIEND_TEST(SimpleConditionTrackerTest, TestSlicedWithNoOutputDim);

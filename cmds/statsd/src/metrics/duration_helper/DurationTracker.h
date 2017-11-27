@@ -19,6 +19,7 @@
 
 #include "anomaly/AnomalyTracker.h"
 #include "condition/ConditionWizard.h"
+#include "config/ConfigKey.h"
 #include "stats_util.h"
 
 namespace android {
@@ -59,11 +60,14 @@ struct DurationBucket {
 
 class DurationTracker {
 public:
-    DurationTracker(const HashableDimensionKey& eventKey, sp<ConditionWizard> wizard,
-                    int conditionIndex, bool nesting, uint64_t currentBucketStartNs,
-                    uint64_t bucketSizeNs, const std::vector<sp<AnomalyTracker>>& anomalyTrackers,
+    DurationTracker(const ConfigKey& key, const string& name, const HashableDimensionKey& eventKey,
+                    sp<ConditionWizard> wizard, int conditionIndex, bool nesting,
+                    uint64_t currentBucketStartNs, uint64_t bucketSizeNs,
+                    const std::vector<sp<AnomalyTracker>>& anomalyTrackers,
                     std::vector<DurationBucket>& bucket)
-        : mEventKey(eventKey),
+        : mConfigKey(key),
+          mName(name),
+          mEventKey(eventKey),
           mWizard(wizard),
           mConditionTrackerIndex(conditionIndex),
           mBucketSizeNs(bucketSizeNs),
@@ -138,6 +142,10 @@ protected:
             }
         }
     }
+    // A reference to the DurationMetricProducer's config key.
+    const ConfigKey& mConfigKey;
+
+    const std::string mName;
 
     HashableDimensionKey mEventKey;
 

@@ -20,6 +20,7 @@
 #include "CountMetricProducer.h"
 #include "condition/CombinationConditionTracker.h"
 #include "condition/SimpleConditionTracker.h"
+#include "guardrail/StatsdStats.h"
 #include "matchers/CombinationLogMatchingTracker.h"
 #include "matchers/SimpleLogMatchingTracker.h"
 #include "metrics_manager_util.h"
@@ -36,10 +37,24 @@ namespace android {
 namespace os {
 namespace statsd {
 
-MetricsManager::MetricsManager(const StatsdConfig& config) {
-    mConfigValid = initStatsdConfig(config, mTagIds, mAllLogEntryMatchers, mAllConditionTrackers,
-                                    mAllMetricProducers, mAllAnomalyTrackers, mConditionToMetricMap,
-                                    mTrackerToMetricMap, mTrackerToConditionMap);
+MetricsManager::MetricsManager(const ConfigKey& key, const StatsdConfig& config) : mConfigKey(key) {
+    mConfigValid =
+            initStatsdConfig(key, config, mTagIds, mAllLogEntryMatchers, mAllConditionTrackers,
+                             mAllMetricProducers, mAllAnomalyTrackers, mConditionToMetricMap,
+                             mTrackerToMetricMap, mTrackerToConditionMap);
+
+    // TODO: add alert size.
+    // no matter whether this config is valid, log it in the stats.
+    StatsdStats::getInstance().noteConfigReceived(key, mAllMetricProducers.size(),
+                                                  mAllConditionTrackers.size(),
+                                                  mAllLogEntryMatchers.size(), 0, mConfigValid);
+    // Guardrail. Reject the config if it's too big.
+    if (mAllMetricProducers.size() > StatsdStats::kMaxMetricCountPerConfig ||
+        mAllConditionTrackers.size() > StatsdStats::kMaxConditionCountPerConfig ||
+        mAllLogEntryMatchers.size() > StatsdStats::kMaxMatcherCountPerConfig) {
+        ALOGE("This config is too big! Reject!");
+        mConfigValid = false;
+    }
 }
 
 MetricsManager::~MetricsManager() {
@@ -137,6 +152,8 @@ void MetricsManager::onLogEvent(const LogEvent& event) {
     // For matched LogEntryMatchers, tell relevant metrics that a matched event has come.
     for (size_t i = 0; i < mAllLogEntryMatchers.size(); i++) {
         if (matcherCache[i] == MatchingState::kMatched) {
+            StatsdStats::getInstance().noteMatcherMatched(mConfigKey,
+                                                          mAllLogEntryMatchers[i]->getName());
             auto pair = mTrackerToMetricMap.find(i);
             if (pair != mTrackerToMetricMap.end()) {
                 auto& metricList = pair->second;

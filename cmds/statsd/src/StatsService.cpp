@@ -22,6 +22,7 @@
 #include "config/ConfigKey.h"
 #include "config/ConfigManager.h"
 #include "guardrail/MemoryLeakTrackUtil.h"
+#include "guardrail/StatsdStats.h"
 #include "storage/DropboxReader.h"
 #include "storage/StorageManager.h"
 
@@ -222,7 +223,7 @@ status_t StatsService::command(FILE* in, FILE* out, FILE* err, Vector<String8>& 
         }
 
         if (!args[0].compare(String8("print-stats"))) {
-            return cmd_print_stats(out);
+            return cmd_print_stats(out, args);
         }
 
         if (!args[0].compare(String8("clear-config"))) {
@@ -305,8 +306,9 @@ void StatsService::print_cmd_help(FILE* out) {
     fprintf(out, "  NAME          The name of the configuration\n");
     fprintf(out, "\n");
     fprintf(out, "\n");
-    fprintf(out, "usage: adb shell cmd stats print-stats\n");
+    fprintf(out, "usage: adb shell cmd stats print-stats [reset]\n");
     fprintf(out, "  Prints some basic stats.\n");
+    fprintf(out, "  reset: 1 to reset the statsd stats. default=0.\n");
 }
 
 status_t StatsService::cmd_trigger_broadcast(FILE* out, Vector<String8>& args) {
@@ -474,12 +476,20 @@ status_t StatsService::cmd_dump_report(FILE* out, FILE* err, const Vector<String
     }
 }
 
-status_t StatsService::cmd_print_stats(FILE* out) {
+status_t StatsService::cmd_print_stats(FILE* out, const Vector<String8>& args) {
     vector<ConfigKey> configs = mConfigManager->GetAllConfigKeys();
     for (const ConfigKey& key : configs) {
         fprintf(out, "Config %s uses %zu bytes\n", key.ToString().c_str(),
                 mProcessor->GetMetricsSize(key));
     }
+    fprintf(out, "Detailed statsd stats in logcat...");
+    StatsdStats& statsdStats = StatsdStats::getInstance();
+    bool reset = false;
+    if (args.size() > 1) {
+        reset = strtol(args[1].string(), NULL, 10);
+    }
+    vector<int8_t> output;
+    statsdStats.dumpStats(&output, reset);
     return NO_ERROR;
 }
 

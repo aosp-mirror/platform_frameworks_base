@@ -134,7 +134,8 @@ bool initLogTrackers(const StatsdConfig& config, unordered_map<string, int>& log
     return true;
 }
 
-bool initConditions(const StatsdConfig& config, const unordered_map<string, int>& logTrackerMap,
+bool initConditions(const ConfigKey& key, const StatsdConfig& config,
+                    const unordered_map<string, int>& logTrackerMap,
                     unordered_map<string, int>& conditionTrackerMap,
                     vector<sp<ConditionTracker>>& allConditionTrackers,
                     unordered_map<int, std::vector<int>>& trackerToConditionMap) {
@@ -149,7 +150,7 @@ bool initConditions(const StatsdConfig& config, const unordered_map<string, int>
         switch (condition.contents_case()) {
             case Condition::ContentsCase::kSimpleCondition: {
                 allConditionTrackers.push_back(new SimpleConditionTracker(
-                        condition.name(), index, condition.simple_condition(), logTrackerMap));
+                        key, condition.name(), index, condition.simple_condition(), logTrackerMap));
                 break;
             }
             case Condition::ContentsCase::kCombination: {
@@ -184,7 +185,8 @@ bool initConditions(const StatsdConfig& config, const unordered_map<string, int>
     return true;
 }
 
-bool initMetrics(const StatsdConfig& config, const unordered_map<string, int>& logTrackerMap,
+bool initMetrics(const ConfigKey& key, const StatsdConfig& config,
+                 const unordered_map<string, int>& logTrackerMap,
                  const unordered_map<string, int>& conditionTrackerMap,
                  const vector<sp<LogMatchingTracker>>& allLogEntryMatchers,
                  vector<sp<ConditionTracker>>& allConditionTrackers,
@@ -230,7 +232,7 @@ bool initMetrics(const StatsdConfig& config, const unordered_map<string, int>& l
         }
 
         sp<MetricProducer> countProducer =
-                new CountMetricProducer(metric, conditionIndex, wizard, startTimeNs);
+                new CountMetricProducer(key, metric, conditionIndex, wizard, startTimeNs);
         allMetricProducers.push_back(countProducer);
     }
 
@@ -298,8 +300,8 @@ bool initMetrics(const StatsdConfig& config, const unordered_map<string, int>& l
         }
 
         sp<MetricProducer> durationMetric = new DurationMetricProducer(
-                metric, conditionIndex, trackerIndices[0], trackerIndices[1], trackerIndices[2],
-                nesting, wizard, internalDimension, startTimeNs);
+                key, metric, conditionIndex, trackerIndices[0], trackerIndices[1],
+                trackerIndices[2], nesting, wizard, internalDimension, startTimeNs);
 
         allMetricProducers.push_back(durationMetric);
     }
@@ -332,7 +334,7 @@ bool initMetrics(const StatsdConfig& config, const unordered_map<string, int>& l
         }
 
         sp<MetricProducer> eventMetric =
-                new EventMetricProducer(metric, conditionIndex, wizard, startTimeNs);
+                new EventMetricProducer(key, metric, conditionIndex, wizard, startTimeNs);
 
         allMetricProducers.push_back(eventMetric);
     }
@@ -378,8 +380,8 @@ bool initMetrics(const StatsdConfig& config, const unordered_map<string, int>& l
             }
         }
 
-        sp<MetricProducer> valueProducer =
-                new ValueMetricProducer(metric, conditionIndex, wizard, pullTagId, startTimeNs);
+        sp<MetricProducer> valueProducer = new ValueMetricProducer(key, metric, conditionIndex,
+                                                                   wizard, pullTagId, startTimeNs);
         allMetricProducers.push_back(valueProducer);
     }
 
@@ -424,8 +426,8 @@ bool initMetrics(const StatsdConfig& config, const unordered_map<string, int>& l
             }
         }
 
-        sp<MetricProducer> gaugeProducer =
-                new GaugeMetricProducer(metric, conditionIndex, wizard, pullTagId, startTimeNs);
+        sp<MetricProducer> gaugeProducer = new GaugeMetricProducer(key, metric, conditionIndex,
+                                                                   wizard, pullTagId, startTimeNs);
         allMetricProducers.push_back(gaugeProducer);
     }
     return true;
@@ -451,7 +453,7 @@ bool initAlerts(const StatsdConfig& config, const unordered_map<string, int>& me
     return true;
 }
 
-bool initStatsdConfig(const StatsdConfig& config, set<int>& allTagIds,
+bool initStatsdConfig(const ConfigKey& key, const StatsdConfig& config, set<int>& allTagIds,
                       vector<sp<LogMatchingTracker>>& allLogEntryMatchers,
                       vector<sp<ConditionTracker>>& allConditionTrackers,
                       vector<sp<MetricProducer>>& allMetricProducers,
@@ -469,13 +471,13 @@ bool initStatsdConfig(const StatsdConfig& config, set<int>& allTagIds,
     }
     ALOGD("initLogMatchingTrackers succeed...");
 
-    if (!initConditions(config, logTrackerMap, conditionTrackerMap, allConditionTrackers,
+    if (!initConditions(key, config, logTrackerMap, conditionTrackerMap, allConditionTrackers,
                         trackerToConditionMap)) {
         ALOGE("initConditionTrackers failed");
         return false;
     }
 
-    if (!initMetrics(config, logTrackerMap, conditionTrackerMap, allLogEntryMatchers,
+    if (!initMetrics(key, config, logTrackerMap, conditionTrackerMap, allLogEntryMatchers,
                      allConditionTrackers, allMetricProducers, conditionToMetricMap,
                      trackerToMetricMap, metricProducerMap)) {
         ALOGE("initMetricProducers failed");

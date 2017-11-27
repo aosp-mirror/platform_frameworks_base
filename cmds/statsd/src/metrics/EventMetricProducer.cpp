@@ -51,10 +51,11 @@ const int FIELD_ID_DATA = 1;
 const int FIELD_ID_TIMESTAMP_NANOS = 1;
 const int FIELD_ID_ATOMS = 2;
 
-EventMetricProducer::EventMetricProducer(const EventMetric& metric, const int conditionIndex,
+EventMetricProducer::EventMetricProducer(const ConfigKey& key, const EventMetric& metric,
+                                         const int conditionIndex,
                                          const sp<ConditionWizard>& wizard,
                                          const uint64_t startTimeNs)
-    : MetricProducer(startTimeNs, conditionIndex, wizard), mMetric(metric) {
+    : MetricProducer(key, startTimeNs, conditionIndex, wizard), mMetric(metric) {
     if (metric.links().size() > 0) {
         mConditionLinks.insert(mConditionLinks.begin(), metric.links().begin(),
                                metric.links().end());

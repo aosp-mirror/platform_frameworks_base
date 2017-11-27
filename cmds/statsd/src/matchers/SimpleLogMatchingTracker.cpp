@@ -19,8 +19,6 @@
 
 #include "SimpleLogMatchingTracker.h"
 
-#include <log/logprint.h>
-
 namespace android {
 namespace os {
 namespace statsd {

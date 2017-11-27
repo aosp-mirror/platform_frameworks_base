@@ -38,9 +38,9 @@ struct ValueBucket {
 
 class ValueMetricProducer : public virtual MetricProducer, public virtual PullDataReceiver {
 public:
-    ValueMetricProducer(const ValueMetric& valueMetric, const int conditionIndex,
-                        const sp<ConditionWizard>& wizard, const int pullTagId,
-                        const uint64_t startTimeNs);
+    ValueMetricProducer(const ConfigKey& key, const ValueMetric& valueMetric,
+                        const int conditionIndex, const sp<ConditionWizard>& wizard,
+                        const int pullTagId, const uint64_t startTimeNs);
 
     virtual ~ValueMetricProducer();
 
@@ -77,9 +77,9 @@ private:
     std::shared_ptr<StatsPullerManager> mStatsPullerManager;
 
     // for testing
-    ValueMetricProducer(const ValueMetric& valueMetric, const int conditionIndex,
-                        const sp<ConditionWizard>& wizard, const int pullTagId,
-                        const uint64_t startTimeNs,
+    ValueMetricProducer(const ConfigKey& key, const ValueMetric& valueMetric,
+                        const int conditionIndex, const sp<ConditionWizard>& wizard,
+                        const int pullTagId, const uint64_t startTimeNs,
                         std::shared_ptr<StatsPullerManager> statsPullerManager);
 
     Mutex mLock;
@@ -103,6 +103,8 @@ private:
     std::unordered_map<HashableDimensionKey, std::vector<ValueBucket>> mPastBuckets;
 
     long get_value(const LogEvent& event);
+
+    bool hitGuardRail(const HashableDimensionKey& newKey);
 
     static const size_t kBucketSize = sizeof(ValueBucket{});
 

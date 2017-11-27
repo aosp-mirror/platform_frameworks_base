@@ -19,6 +19,7 @@
 #include "anomaly/AnomalyMonitor.h"
 #include "anomaly/AnomalyTracker.h"
 #include "condition/ConditionTracker.h"
+#include "config/ConfigKey.h"
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
 #include "logd/LogEvent.h"
 #include "matchers/LogMatchingTracker.h"
@@ -33,7 +34,7 @@ namespace statsd {
 // A MetricsManager is responsible for managing metrics from one single config source.
 class MetricsManager {
 public:
-    MetricsManager(const StatsdConfig& config);
+    MetricsManager(const ConfigKey& configKey, const StatsdConfig& config);
 
     ~MetricsManager();
 
@@ -57,6 +58,8 @@ public:
     size_t byteSize();
 
 private:
+    const ConfigKey mConfigKey;
+
     // All event tags that are interesting to my metrics.
     std::set<int> mTagIds;
 

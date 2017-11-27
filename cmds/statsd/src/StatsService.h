@@ -134,7 +134,7 @@ private:
     /**
      * Prints some basic stats to std out.
      */
-    status_t cmd_print_stats(FILE* out);
+    status_t cmd_print_stats(FILE* out, const Vector<String8>& args);
 
     /**
      * Print the event log.

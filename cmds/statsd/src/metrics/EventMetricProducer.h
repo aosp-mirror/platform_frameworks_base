@@ -34,8 +34,9 @@ namespace statsd {
 class EventMetricProducer : public MetricProducer {
 public:
     // TODO: Pass in the start time from MetricsManager, it should be consistent for all metrics.
-    EventMetricProducer(const EventMetric& eventMetric, const int conditionIndex,
-                        const sp<ConditionWizard>& wizard, const uint64_t startTimeNs);
+    EventMetricProducer(const ConfigKey& key, const EventMetric& eventMetric,
+                        const int conditionIndex, const sp<ConditionWizard>& wizard,
+                        const uint64_t startTimeNs);
 
     virtual ~EventMetricProducer();
 

@@ -19,6 +19,7 @@
 
 #include "anomaly/AnomalyTracker.h"
 #include "condition/ConditionWizard.h"
+#include "config/ConfigKey.h"
 #include "matchers/matcher_util.h"
 #include "packages/PackageInfoListener.h"
 
@@ -35,9 +36,10 @@ namespace statsd {
 // be a no-op.
 class MetricProducer : public virtual PackageInfoListener {
 public:
-    MetricProducer(const int64_t startTimeNs, const int conditionIndex,
+    MetricProducer(const ConfigKey& key, const int64_t startTimeNs, const int conditionIndex,
                    const sp<ConditionWizard>& wizard)
-        : mStartTimeNs(startTimeNs),
+        : mConfigKey(key),
+          mStartTimeNs(startTimeNs),
           mCurrentBucketStartTimeNs(startTimeNs),
           mCurrentBucketNum(0),
           mCondition(conditionIndex >= 0 ? false : true),
@@ -83,6 +85,8 @@ public:
     }
 
 protected:
+    const ConfigKey mConfigKey;
+
     const uint64_t mStartTimeNs;
 
     uint64_t mCurrentBucketStartTimeNs;

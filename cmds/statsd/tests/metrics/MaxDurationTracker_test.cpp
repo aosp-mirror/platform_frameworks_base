@@ -36,6 +36,8 @@ namespace android {
 namespace os {
 namespace statsd {
 
+const ConfigKey kConfigKey(0, "test");
+
 TEST(MaxDurationTrackerTest, TestSimpleMaxDuration) {
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
 
@@ -45,8 +47,8 @@ TEST(MaxDurationTrackerTest, TestSimpleMaxDuration) {
     uint64_t bucketStartTimeNs = 10000000000;
     uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
 
-    MaxDurationTracker tracker("event", wizard, -1, false, bucketStartTimeNs, bucketSizeNs, {},
-                               buckets);
+    MaxDurationTracker tracker(kConfigKey, "metric", "event", wizard, -1, false, bucketStartTimeNs,
+                               bucketSizeNs, {}, buckets);
 
     tracker.noteStart("1", true, bucketStartTimeNs, key1);
     // Event starts again. This would not change anything as it already starts.
@@ -72,8 +74,8 @@ TEST(MaxDurationTrackerTest, TestStopAll) {
     uint64_t bucketStartTimeNs = 10000000000;
     uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
 
-    MaxDurationTracker tracker("event", wizard, -1, false, bucketStartTimeNs, bucketSizeNs, {},
-                               buckets);
+    MaxDurationTracker tracker(kConfigKey, "metric", "event", wizard, -1, false, bucketStartTimeNs,
+                               bucketSizeNs, {}, buckets);
 
     tracker.noteStart("1", true, bucketStartTimeNs + 1, key1);
 
@@ -100,8 +102,8 @@ TEST(MaxDurationTrackerTest, TestCrossBucketBoundary) {
     uint64_t bucketStartTimeNs = 10000000000;
     uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
 
-    MaxDurationTracker tracker("event", wizard, -1, false, bucketStartTimeNs, bucketSizeNs, {},
-                               buckets);
+    MaxDurationTracker tracker(kConfigKey, "metric", "event", wizard, -1, false, bucketStartTimeNs,
+                               bucketSizeNs, {}, buckets);
 
     // The event starts.
     tracker.noteStart("", true, bucketStartTimeNs + 1, key1);
@@ -127,8 +129,8 @@ TEST(MaxDurationTrackerTest, TestCrossBucketBoundary_nested) {
     uint64_t bucketStartTimeNs = 10000000000;
     uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
 
-    MaxDurationTracker tracker("event", wizard, -1, true, bucketStartTimeNs, bucketSizeNs, {},
-                               buckets);
+    MaxDurationTracker tracker(kConfigKey, "metric", "event", wizard, -1, true, bucketStartTimeNs,
+                               bucketSizeNs, {}, buckets);
 
     // 2 starts
     tracker.noteStart("", true, bucketStartTimeNs + 1, key1);
@@ -168,8 +170,8 @@ TEST(MaxDurationTrackerTest, TestMaxDurationWithCondition) {
     uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
     int64_t durationTimeNs = 2 * 1000;
 
-    MaxDurationTracker tracker("event", wizard, 1, false, bucketStartTimeNs, bucketSizeNs, {},
-                               buckets);
+    MaxDurationTracker tracker(kConfigKey, "metric", "event", wizard, 1, false, bucketStartTimeNs,
+                               bucketSizeNs, {}, buckets);
     EXPECT_TRUE(tracker.mAnomalyTrackers.empty());
 
     tracker.noteStart("2:maps", true, eventStartTimeNs, key1);
@@ -200,8 +202,8 @@ TEST(MaxDurationTrackerTest, TestAnomalyDetection) {
     uint64_t bucketSizeNs = 30 * NS_PER_SEC;
 
     sp<AnomalyTracker> anomalyTracker = new AnomalyTracker(alert, bucketSizeNs);
-    MaxDurationTracker tracker("event", wizard, -1, true, bucketStartTimeNs, bucketSizeNs,
-                               {anomalyTracker}, buckets);
+    MaxDurationTracker tracker(kConfigKey, "metric", "event", wizard, -1, true, bucketStartTimeNs,
+                               bucketSizeNs, {anomalyTracker}, buckets);
 
     tracker.noteStart("1", true, eventStartTimeNs, key1);
     tracker.noteStop("1", eventStartTimeNs + 10, false);

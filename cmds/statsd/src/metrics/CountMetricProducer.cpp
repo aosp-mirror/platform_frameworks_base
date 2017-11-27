@@ -18,6 +18,7 @@
 #include "Log.h"
 
 #include "CountMetricProducer.h"
+#include "guardrail/StatsdStats.h"
 #include "stats_util.h"
 
 #include <limits.h>
@@ -63,10 +64,11 @@ const int FIELD_ID_COUNT = 3;
 
 // TODO: add back AnomalyTracker.
 
-CountMetricProducer::CountMetricProducer(const CountMetric& metric, const int conditionIndex,
+CountMetricProducer::CountMetricProducer(const ConfigKey& key, const CountMetric& metric,
+                                         const int conditionIndex,
                                          const sp<ConditionWizard>& wizard,
                                          const uint64_t startTimeNs)
-    : MetricProducer(startTimeNs, conditionIndex, wizard), mMetric(metric) {
+    : MetricProducer(key, startTimeNs, conditionIndex, wizard), mMetric(metric) {
     // TODO: evaluate initial conditions. and set mConditionMet.
     if (metric.has_bucket() && metric.bucket().has_bucket_size_millis()) {
         mBucketSizeNs = metric.bucket().bucket_size_millis() * 1000 * 1000;
@@ -180,6 +182,26 @@ void CountMetricProducer::onConditionChanged(const bool conditionMet, const uint
     mCondition = conditionMet;
 }
 
+bool CountMetricProducer::hitGuardRail(const HashableDimensionKey& newKey) {
+    if (mCurrentSlicedCounter->find(newKey) != mCurrentSlicedCounter->end()) {
+        return false;
+    }
+    // ===========GuardRail==============
+    // 1. Report the tuple count if the tuple count > soft limit
+    if (mCurrentSlicedCounter->size() > StatsdStats::kDimensionKeySizeSoftLimit - 1) {
+        size_t newTupleCount = mCurrentSlicedCounter->size() + 1;
+        StatsdStats::getInstance().noteMetricDimensionSize(mConfigKey, mMetric.name(),
+                                                           newTupleCount);
+        // 2. Don't add more tuples, we are above the allowed threshold. Drop the data.
+        if (newTupleCount > StatsdStats::kDimensionKeySizeHardLimit) {
+            ALOGE("CountMetric %s dropping data for dimension key %s", mMetric.name().c_str(),
+                  newKey.c_str());
+            return true;
+        }
+    }
+
+    return false;
+}
 void CountMetricProducer::onMatchedLogEventInternal(
         const size_t matcherIndex, const HashableDimensionKey& eventKey,
         const map<string, HashableDimensionKey>& conditionKey, bool condition,
@@ -195,6 +217,11 @@ void CountMetricProducer::onMatchedLogEventInternal(
     auto it = mCurrentSlicedCounter->find(eventKey);
 
     if (it == mCurrentSlicedCounter->end()) {
+        // ===========GuardRail==============
+        if (hitGuardRail(eventKey)) {
+            return;
+        }
+
         // create a counter for the new key
         (*mCurrentSlicedCounter)[eventKey] = 1;
     } else {
