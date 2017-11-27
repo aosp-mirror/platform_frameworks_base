@@ -41,7 +41,6 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
-import android.metrics.LogMaker;
 import android.os.Bundle;
 import android.os.LocaleList;
 import android.os.Parcel;
@@ -3997,10 +3996,6 @@ public class Editor {
                         .setIntent(textClassification.getIntent());
                 item.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
                 mAssistClickHandlers.put(item, textClassification.getOnClickListener());
-                mMetricsLogger.write(
-                        new LogMaker(MetricsEvent.TEXT_SELECTION_MENU_ITEM_ASSIST)
-                                .setType(MetricsEvent.TYPE_OPEN)
-                                .setSubtype(textClassification.getLogType()));
             }
             final int count = textClassification.getSecondaryActionsCount();
             for (int i = 0; i < count; i++) {
@@ -4082,11 +4077,6 @@ public class Editor {
             if (onClickListener != null) {
                 onClickListener.onClick(mTextView);
                 stopTextActionMode();
-                if (assistMenuItem.getItemId() == TextView.ID_ASSIST) {
-                    mMetricsLogger.action(
-                            MetricsEvent.ACTION_TEXT_SELECTION_MENU_ITEM_ASSIST,
-                            textClassification.getLogType());
-                }
             }
             // We tried our best.
             return true;
