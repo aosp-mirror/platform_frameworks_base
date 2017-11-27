@@ -242,6 +242,7 @@ TEST(SimpleConditionTrackerTest, TestSlicedCondition) {
     vector<MatchingState> matcherState;
     matcherState.push_back(MatchingState::kMatched);
     matcherState.push_back(MatchingState::kNotMatched);
+    matcherState.push_back(MatchingState::kNotMatched);
     vector<sp<ConditionTracker>> allConditions;
     vector<ConditionState> conditionCache(1, ConditionState::kNotEvaluated);
     vector<bool> changedCache(1, false);
@@ -326,6 +327,7 @@ TEST(SimpleConditionTrackerTest, TestSlicedWithNoOutputDim) {
     // one matched start for uid1
     vector<MatchingState> matcherState;
     matcherState.push_back(MatchingState::kMatched);
+    matcherState.push_back(MatchingState::kNotMatched);
     matcherState.push_back(MatchingState::kNotMatched);
     vector<sp<ConditionTracker>> allConditions;
     vector<ConditionState> conditionCache(1, ConditionState::kNotEvaluated);
