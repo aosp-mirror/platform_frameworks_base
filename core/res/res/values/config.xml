@@ -2441,10 +2441,12 @@
          "users" = list of users
          "restart" = restart device
          "lockdown" = Lock down device until the user authenticates
+         "logout" =  Logout the current user
          -->
     <string-array translatable="false" name="config_globalActionsList">
         <item>power</item>
         <item>restart</item>
+        <item>logout</item>
         <item>bugreport</item>
         <item>users</item>
         <item>lockdown</item>

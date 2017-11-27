@@ -365,4 +365,7 @@ interface IDevicePolicyManager {
     StringParceledListSlice getOwnerInstalledCaCerts(in UserHandle user);
 
     boolean clearApplicationUserData(in ComponentName admin, in String packageName, in IPackageDataObserver callback);
+
+    void setLogoutButtonEnabled(in ComponentName admin, boolean enabled);
+    boolean isLogoutButtonEnabled();
 }
