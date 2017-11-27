@@ -130,6 +130,7 @@ void DurationMetricProducer::finish() {
 
 void DurationMetricProducer::onSlicedConditionMayChange(const uint64_t eventTime) {
     VLOG("Metric %s onSlicedConditionMayChange", mMetric.name().c_str());
+    flushIfNeeded(eventTime);
     // Now for each of the on-going event, check if the condition has changed for them.
     for (auto& pair : mCurrentSlicedDuration) {
         pair.second->onSlicedConditionMayChange(eventTime);
@@ -139,6 +140,7 @@ void DurationMetricProducer::onSlicedConditionMayChange(const uint64_t eventTime
 void DurationMetricProducer::onConditionChanged(const bool conditionMet, const uint64_t eventTime) {
     VLOG("Metric %s onConditionChanged", mMetric.name().c_str());
     mCondition = conditionMet;
+    flushIfNeeded(eventTime);
     // TODO: need to populate the condition change time from the event which triggers the condition
     // change, instead of using current time.
     for (auto& pair : mCurrentSlicedDuration) {

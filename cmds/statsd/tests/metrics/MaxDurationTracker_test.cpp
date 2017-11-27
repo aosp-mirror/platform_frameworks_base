@@ -79,6 +79,7 @@ TEST(MaxDurationTrackerTest, TestStopAll) {
 
     // Another event starts in this bucket.
     tracker.noteStart("2", true, bucketStartTimeNs + 20, key1);
+    tracker.flushIfNeeded(bucketStartTimeNs + bucketSizeNs + 40);
     tracker.noteStopAll(bucketStartTimeNs + bucketSizeNs + 40);
     EXPECT_TRUE(tracker.mInfos.empty());
     EXPECT_EQ(1u, buckets.size());
@@ -108,20 +109,9 @@ TEST(MaxDurationTrackerTest, TestCrossBucketBoundary) {
     // Starts again. Does not change anything.
     tracker.noteStart("", true, bucketStartTimeNs + bucketSizeNs + 1, key1);
 
-    // Flushes at early 2nd bucket. The event still does not stop yet.
-    tracker.flushIfNeeded(bucketStartTimeNs + bucketSizeNs + 1);
-    EXPECT_EQ(1u, buckets.size());
-    EXPECT_EQ((unsigned long long)(bucketSizeNs - 1), buckets[0].mDuration);
-
-    // Flushes at the end of the 2nd bucket. The event still does not stop yet.
-    tracker.flushIfNeeded(bucketStartTimeNs + (2 * bucketSizeNs));
-    EXPECT_EQ(2u, buckets.size());
-    EXPECT_EQ((unsigned long long)(bucketSizeNs - 1), buckets[0].mDuration);
-    EXPECT_EQ((unsigned long long)bucketSizeNs, buckets[1].mDuration);
-
     // The event stops at early 4th bucket.
+    tracker.flushIfNeeded(bucketStartTimeNs + (3 * bucketSizeNs) + 20);
     tracker.noteStop("", bucketStartTimeNs + (3 * bucketSizeNs) + 20, false /*stop all*/);
-    tracker.flushIfNeeded(bucketStartTimeNs + (3 * bucketSizeNs) + 21);
     EXPECT_EQ(3u, buckets.size());
     EXPECT_EQ((unsigned long long)(bucketSizeNs - 1), buckets[0].mDuration);
     EXPECT_EQ((unsigned long long)bucketSizeNs, buckets[1].mDuration);
@@ -183,28 +173,14 @@ TEST(MaxDurationTrackerTest, TestMaxDurationWithCondition) {
     EXPECT_TRUE(tracker.mAnomalyTrackers.empty());
 
     tracker.noteStart("2:maps", true, eventStartTimeNs, key1);
-    tracker.onSlicedConditionMayChange(eventStartTimeNs + 2 * bucketSizeNs + 5);
-    EXPECT_EQ(2u, buckets.size());
-    EXPECT_EQ(bucketSizeNs - 1, buckets[0].mDuration);
-    EXPECT_EQ(bucketSizeNs, buckets[1].mDuration);
 
-    tracker.noteStop("2:maps", eventStartTimeNs + 2 * bucketSizeNs + durationTimeNs, false);
-    EXPECT_EQ(2u, buckets.size());
-    EXPECT_EQ(bucketSizeNs - 1, buckets[0].mDuration);
-    EXPECT_EQ(bucketSizeNs, buckets[1].mDuration);
-    EXPECT_TRUE(tracker.mInfos.empty());
-    EXPECT_EQ(6LL, tracker.mDuration);
+    tracker.onSlicedConditionMayChange(eventStartTimeNs + 5);
 
-    tracker.noteStart("2:maps", false, eventStartTimeNs + 3 * bucketSizeNs + 10, key1);
-    EXPECT_EQ(1u, tracker.mInfos.size());
-    for (const auto& itr : tracker.mInfos) {
-        EXPECT_EQ(DurationState::kPaused, itr.second.state);
-        EXPECT_EQ(0LL, itr.second.lastDuration);
-    }
-    EXPECT_EQ(3u, buckets.size());
-    EXPECT_EQ(bucketSizeNs - 1, buckets[0].mDuration);
-    EXPECT_EQ(bucketSizeNs, buckets[1].mDuration);
-    EXPECT_EQ(6ULL, buckets[2].mDuration);
+    tracker.noteStop("2:maps", eventStartTimeNs + durationTimeNs, false);
+
+    tracker.flushIfNeeded(bucketStartTimeNs + bucketSizeNs + 1);
+    EXPECT_EQ(1u, buckets.size());
+    EXPECT_EQ(5ULL, buckets[0].mDuration);
 }
 
 TEST(MaxDurationTrackerTest, TestAnomalyDetection) {
@@ -233,6 +209,7 @@ TEST(MaxDurationTrackerTest, TestAnomalyDetection) {
     EXPECT_EQ(10LL, tracker.mDuration);
 
     tracker.noteStart("2", true, eventStartTimeNs + 20, key1);
+    tracker.flushIfNeeded(eventStartTimeNs + 2 * bucketSizeNs + 3 * NS_PER_SEC);
     tracker.noteStop("2", eventStartTimeNs + 2 * bucketSizeNs + 3 * NS_PER_SEC, false);
     EXPECT_EQ((long long)(4 * NS_PER_SEC + 1LL), tracker.mDuration);
     EXPECT_EQ(anomalyTracker->mLastAlarmTimestampNs,
