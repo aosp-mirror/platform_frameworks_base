@@ -16,6 +16,7 @@
 
 package android.net;
 
+import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -32,7 +33,7 @@ public class NetworkRequest implements Parcelable {
      * The {@link NetworkCapabilities} that define this request.
      * @hide
      */
-    public final NetworkCapabilities networkCapabilities;
+    public final @NonNull NetworkCapabilities networkCapabilities;
 
     /**
      * Identifies the request.  NetworkRequests should only be constructed by
@@ -307,7 +308,7 @@ public class NetworkRequest implements Parcelable {
         return 0;
     }
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeParcelable(networkCapabilities, flags);
+        networkCapabilities.writeToParcel(dest, flags);
         dest.writeInt(legacyType);
         dest.writeInt(requestId);
         dest.writeString(type.name());
@@ -315,7 +316,7 @@ public class NetworkRequest implements Parcelable {
     public static final Creator<NetworkRequest> CREATOR =
         new Creator<NetworkRequest>() {
             public NetworkRequest createFromParcel(Parcel in) {
-                NetworkCapabilities nc = (NetworkCapabilities)in.readParcelable(null);
+                NetworkCapabilities nc = NetworkCapabilities.CREATOR.createFromParcel(in);
                 int legacyType = in.readInt();
                 int requestId = in.readInt();
                 Type type = Type.valueOf(in.readString());  // IllegalArgumentException if invalid.
