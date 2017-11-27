@@ -33,13 +33,15 @@
     <string name="wifi_check_password_try_again" msgid="516958988102584767">"கடவுச்சொல்லைச் சரிபார்த்து, மீண்டும் முயலவும்"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"தொடர்பு எல்லையில் இல்லை"</string>
     <string name="wifi_no_internet_no_reconnect" msgid="5724903347310541706">"தானாக இணைக்கப்படாது"</string>
-    <string name="wifi_no_internet" msgid="3880396223819116454">"இணைய அணுகல் இல்லை"</string>
+    <!-- no translation found for wifi_no_internet (4663834955626848401) -->
+    <skip />
     <string name="saved_network" msgid="4352716707126620811">"<xliff:g id="NAME">%1$s</xliff:g> சேமித்தது"</string>
     <string name="connected_via_network_scorer" msgid="5713793306870815341">"%1$s மூலம் தானாக இணைக்கப்பட்டது"</string>
     <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"நெட்வொர்க் மதிப்பீடு வழங்குநரால் தானாக இணைக்கப்பட்டது"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"%1$s வழியாக இணைக்கப்பட்டது"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"%1$s வழியாகக் கிடைக்கிறது"</string>
-    <string name="wifi_connected_no_internet" msgid="3149853966840874992">"இணைக்கப்பட்டது, இணையம் இல்லை"</string>
+    <!-- no translation found for wifi_connected_no_internet (8202906332837777829) -->
+    <skip />
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"தற்காலிகமாக அணுகல் புள்ளி நிரம்பியுள்ளது"</string>
     <string name="connected_via_carrier" msgid="7583780074526041912">"%1$s வழியாக இணைக்கப்பட்டது"</string>
     <string name="available_via_carrier" msgid="1469036129740799053">"%1$s வழியாகக் கிடைக்கிறது"</string>
@@ -82,9 +84,10 @@
     <string name="bluetooth_sap_profile_summary_connected" msgid="8561765057453083838">"SAP உடன் இணைக்கப்பட்டது"</string>
     <string name="bluetooth_opp_profile_summary_not_connected" msgid="1267091356089086285">"கோப்பு இடமாற்றும் சேவையகத்துடன் இணைக்கப்படவில்லை"</string>
     <string name="bluetooth_hid_profile_summary_connected" msgid="3381760054215168689">"உள்ளீட்டுச் சாதனத்துடன் இணைக்கப்பட்டது"</string>
-    <string name="bluetooth_pan_user_profile_summary_connected" msgid="4602294638909590612">"இணைய அணுகலுக்காகச் சாதனம் இணைக்கப்பட்டது"</string>
-    <string name="bluetooth_pan_nap_profile_summary_connected" msgid="1561383706411975199">"சாதனத்துடன் அக இணைய இணைப்பைப் பகிர்கிறது"</string>
-    <string name="bluetooth_pan_profile_summary_use_for" msgid="5664884523822068653">"இணைய அணுகலுக்காகப் பயன்படுத்து"</string>
+    <string name="bluetooth_pan_user_profile_summary_connected" msgid="6436258151814414028">"சாதனத்துடன் இணைந்தது"</string>
+    <string name="bluetooth_pan_nap_profile_summary_connected" msgid="1322694224800769308">"சாதனத்துடன் உள்ளூர் இண்டர்நெட்டைப் பகிர்தல்"</string>
+    <!-- no translation found for bluetooth_pan_profile_summary_use_for (5736111170225304239) -->
+    <skip />
     <string name="bluetooth_map_profile_summary_use_for" msgid="5154200119919927434">"வரைபடத்திற்குப் பயன்படுத்து"</string>
     <string name="bluetooth_sap_profile_summary_use_for" msgid="7085362712786907993">"சிம் அணுகலுக்குப் பயன்படுத்தும்"</string>
     <string name="bluetooth_a2dp_profile_summary_use_for" msgid="4630849022250168427">"மீடியாவின் ஆடியோவிற்குப் பயன்படுத்து"</string>
@@ -296,6 +299,8 @@
     <string name="force_msaa_summary" msgid="9123553203895817537">"OpenGL ES 2.0 பயன்பாடுகளில் 4x MSAA ஐ இயக்கு"</string>
     <string name="show_non_rect_clip" msgid="505954950474595172">"செவ்வகம் அல்லாத கிளிப் செயல்பாடுகளைப் பிழைத்திருத்து"</string>
     <string name="track_frame_time" msgid="6146354853663863443">"சுயவிவர GPU வழங்கல்"</string>
+    <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"GPU பிழைத்திருத்த லேயர்களை இயக்கு"</string>
+    <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"பிழைத்திருத்த ஆப்ஸிற்கு, GPU பிழைத்திருத்த லேயர்களை ஏற்றுவதற்கு அனுமதி"</string>
     <string name="window_animation_scale_title" msgid="6162587588166114700">"சாளர அனிமேஷன் அளவு"</string>
     <string name="transition_animation_scale_title" msgid="387527540523595875">"அனிமேஷன் மாற்றத்தின் அளவு"</string>
     <string name="animator_duration_scale_title" msgid="3406722410819934083">"அனிமேட்டர் கால அளவு"</string>

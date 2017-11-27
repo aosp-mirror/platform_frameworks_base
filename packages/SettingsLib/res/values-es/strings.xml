@@ -33,19 +33,21 @@
     <string name="wifi_check_password_try_again" msgid="516958988102584767">"Comprueba la contraseña y vuelve a intentarlo"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"Fuera de rango"</string>
     <string name="wifi_no_internet_no_reconnect" msgid="5724903347310541706">"No se establecerá conexión automáticamente"</string>
-    <string name="wifi_no_internet" msgid="3880396223819116454">"No se ha detectado acceso a Internet"</string>
+    <!-- no translation found for wifi_no_internet (4663834955626848401) -->
+    <skip />
     <string name="saved_network" msgid="4352716707126620811">"Guardada por <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="connected_via_network_scorer" msgid="5713793306870815341">"Conectada automáticamente a través de %1$s"</string>
     <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"Conectado automáticamente a través de un proveedor de valoración de redes"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Conectado a través de %1$s"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"Disponible a través de %1$s"</string>
-    <string name="wifi_connected_no_internet" msgid="3149853966840874992">"Conexión sin Internet"</string>
+    <!-- no translation found for wifi_connected_no_internet (8202906332837777829) -->
+    <skip />
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"Punto de acceso temporalmente lleno"</string>
     <string name="connected_via_carrier" msgid="7583780074526041912">"Conectado a través de %1$s"</string>
     <string name="available_via_carrier" msgid="1469036129740799053">"Disponible a través de %1$s"</string>
     <string name="speed_label_very_slow" msgid="1867055264243608530">"Muy lenta"</string>
     <string name="speed_label_slow" msgid="813109590815810235">"Lenta"</string>
-    <string name="speed_label_okay" msgid="2331665440671174858">"Aceptar"</string>
+    <string name="speed_label_okay" msgid="2331665440671174858">"Aceptable"</string>
     <string name="speed_label_medium" msgid="3175763313268941953">"Media"</string>
     <string name="speed_label_fast" msgid="7715732164050975057">"Rápida"</string>
     <string name="speed_label_very_fast" msgid="2265363430784523409">"Muy rápida"</string>
@@ -82,9 +84,10 @@
     <string name="bluetooth_sap_profile_summary_connected" msgid="8561765057453083838">"Conectado a SAP"</string>
     <string name="bluetooth_opp_profile_summary_not_connected" msgid="1267091356089086285">"Sin conexión con el servidor de transferencia de archivos"</string>
     <string name="bluetooth_hid_profile_summary_connected" msgid="3381760054215168689">"Conectado a dispositivo de entrada"</string>
-    <string name="bluetooth_pan_user_profile_summary_connected" msgid="4602294638909590612">"Conectado para acceso a Internet"</string>
-    <string name="bluetooth_pan_nap_profile_summary_connected" msgid="1561383706411975199">"Compartiendo conexión a Internet con el dispositivo"</string>
-    <string name="bluetooth_pan_profile_summary_use_for" msgid="5664884523822068653">"Usar para acceder a Internet"</string>
+    <string name="bluetooth_pan_user_profile_summary_connected" msgid="6436258151814414028">"Conectado para acceder a Internet"</string>
+    <string name="bluetooth_pan_nap_profile_summary_connected" msgid="1322694224800769308">"Compartiendo conexión local con dispositivo"</string>
+    <!-- no translation found for bluetooth_pan_profile_summary_use_for (5736111170225304239) -->
+    <skip />
     <string name="bluetooth_map_profile_summary_use_for" msgid="5154200119919927434">"Usar para mapa"</string>
     <string name="bluetooth_sap_profile_summary_use_for" msgid="7085362712786907993">"Utilizar para acceso a tarjeta SIM"</string>
     <string name="bluetooth_a2dp_profile_summary_use_for" msgid="4630849022250168427">"Utilizar para audio de medio"</string>
@@ -296,6 +299,8 @@
     <string name="force_msaa_summary" msgid="9123553203895817537">"Habilitar MSAA 4x en aplicaciones de OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="505954950474595172">"Depurar operaciones de recorte no rectangulares"</string>
     <string name="track_frame_time" msgid="6146354853663863443">"Perfil renderización GPU"</string>
+    <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"Activar capas depuración GPU"</string>
+    <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"Permitir cargar capas de depuración de GPU en apps"</string>
     <string name="window_animation_scale_title" msgid="6162587588166114700">"Escala de animación de ventana"</string>
     <string name="transition_animation_scale_title" msgid="387527540523595875">"Escala de transición-animación"</string>
     <string name="animator_duration_scale_title" msgid="3406722410819934083">"Escala de duración de animación"</string>

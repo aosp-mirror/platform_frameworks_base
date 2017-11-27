@@ -33,13 +33,15 @@
     <string name="wifi_check_password_try_again" msgid="516958988102584767">"စကားဝှက်ကို စစ်ဆေးပြီး ထပ်လုပ်ကြည့်ပါ"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"စက်ကွင်းထဲတွင် မဟုတ်ပါ"</string>
     <string name="wifi_no_internet_no_reconnect" msgid="5724903347310541706">"အလိုအလျောက်ချိတ်ဆက်မည်မဟုတ်ပါ"</string>
-    <string name="wifi_no_internet" msgid="3880396223819116454">"အင်တာနက် ချိတ်ဆက်မှု မရှိပါ"</string>
+    <!-- no translation found for wifi_no_internet (4663834955626848401) -->
+    <skip />
     <string name="saved_network" msgid="4352716707126620811">"<xliff:g id="NAME">%1$s</xliff:g> မှသိမ်းဆည်းခဲ့သည်"</string>
     <string name="connected_via_network_scorer" msgid="5713793306870815341">"%1$s မှတစ်ဆင့် အလိုအလျောက် ချိတ်ဆက်ထားပါသည်"</string>
     <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"ကွန်ရက်အဆင့်သတ်မှတ်ပေးသူ မှတစ်ဆင့် အလိုအလျောက် ချိတ်ဆက်ထားပါသည်"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"%1$s မှတစ်ဆင့် ချိတ်ဆက်ထားသည်"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"%1$s မှတစ်ဆင့်ရနိုင်သည်"</string>
-    <string name="wifi_connected_no_internet" msgid="3149853966840874992">"ချိတ်ဆက်ထားသည်၊ အင်တာနက်မရှိ"</string>
+    <!-- no translation found for wifi_connected_no_internet (8202906332837777829) -->
+    <skip />
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"ကွန်ရက်ချိတ်ဆက်မှု ယာယီပြည့်နေသည်"</string>
     <string name="connected_via_carrier" msgid="7583780074526041912">"%1$s မှတစ်ဆင့် ချိတ်ဆက်ထားသည်"</string>
     <string name="available_via_carrier" msgid="1469036129740799053">"%1$s မှတစ်ဆင့် ရနိုင်သည်"</string>
@@ -82,9 +84,10 @@
     <string name="bluetooth_sap_profile_summary_connected" msgid="8561765057453083838">"SAP သို့ချိတ်ဆက်ထားသည်"</string>
     <string name="bluetooth_opp_profile_summary_not_connected" msgid="1267091356089086285">"ဖိုင်လွှဲပြောင်းမည့်ဆာဗာနှင့် ချိတ်ဆက်မထားပါ"</string>
     <string name="bluetooth_hid_profile_summary_connected" msgid="3381760054215168689">"ထည့်သွင်းထားသောစက်ကို ချိတ်ဆက်မည်"</string>
-    <string name="bluetooth_pan_user_profile_summary_connected" msgid="4602294638909590612">"အင်တာနက်ဆက်သွယ်မှုရရန် စက်နှင်ချိတ်ဆက်မည်"</string>
-    <string name="bluetooth_pan_nap_profile_summary_connected" msgid="1561383706411975199">"စက်နှင့် ပုံမှန်အင်တာနက်ဆက်သွယ်မှုအား မျှဝေစေရန်"</string>
-    <string name="bluetooth_pan_profile_summary_use_for" msgid="5664884523822068653">"အင်တာနက်ချိတ်ဆက်ရန်အသုံးပြုသည်"</string>
+    <string name="bluetooth_pan_user_profile_summary_connected" msgid="6436258151814414028">"အင်တာနက် ချိတ်ထားသည်"</string>
+    <string name="bluetooth_pan_nap_profile_summary_connected" msgid="1322694224800769308">"စက်နှင့် အင်တာနက်မျှဝေရန်"</string>
+    <!-- no translation found for bluetooth_pan_profile_summary_use_for (5736111170225304239) -->
+    <skip />
     <string name="bluetooth_map_profile_summary_use_for" msgid="5154200119919927434">"မြေပုံအတွက်သုံးရန်"</string>
     <string name="bluetooth_sap_profile_summary_use_for" msgid="7085362712786907993">"SIM အသုံးပြုမှုအတွက် အသုံးပြုမည်"</string>
     <string name="bluetooth_a2dp_profile_summary_use_for" msgid="4630849022250168427">"မီဒီယာအသံအတွက်အသုံးပြုရန်"</string>
@@ -296,6 +299,8 @@
     <string name="force_msaa_summary" msgid="9123553203895817537">"OpenGL ES 2.0 apps တွင် ၄×MSAA အသုံးပြုခွင့်ပေးရန်"</string>
     <string name="show_non_rect_clip" msgid="505954950474595172">"စတုဂံပုံမကျသောဖြတ်ပိုင်း လုပ်ဆောင်ချက်များကို အမှားဖယ်ရှားသည်"</string>
     <string name="track_frame_time" msgid="6146354853663863443">"GPU တင်ဆက်မှု ကိုယ်ရေးအချက်အလက်"</string>
+    <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"GPU အမှားရှာ အလွှာများဖွင့်ထားပါ"</string>
+    <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"အမှားရှာအက်ပ်များအတွက် GPU အမှားရှာအလွှာများ ထည့်သွင်းခွင့်ပြုပါ"</string>
     <string name="window_animation_scale_title" msgid="6162587588166114700">"လှုပ်ရှားသက်ဝင်ပုံစကေး"</string>
     <string name="transition_animation_scale_title" msgid="387527540523595875">"သက်ဝင်အသွင်ပြောင်းခြင်း"</string>
     <string name="animator_duration_scale_title" msgid="3406722410819934083">"လှုပ်ရှားမှုကြာချိန်စကေး"</string>
