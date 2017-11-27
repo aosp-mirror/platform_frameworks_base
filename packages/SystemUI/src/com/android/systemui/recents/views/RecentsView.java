@@ -16,13 +16,14 @@
 
 package com.android.systemui.recents.views;
 
+import static android.app.ActivityManager.SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
+
 import static com.android.systemui.statusbar.phone.StatusBar.SYSTEM_DIALOG_REASON_RECENT_APPS;
 
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.annotation.Nullable;
 import android.app.ActivityOptions;
-import android.app.ActivityOptions.OnAnimationStartedListener;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Canvas;
@@ -33,11 +34,11 @@ import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
+import android.os.IRemoteCallback;
 import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.MathUtils;
-import android.view.AppTransitionAnimationSpec;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -86,13 +87,15 @@ import com.android.systemui.recents.events.ui.dragndrop.DragEndEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragStartEvent;
 import com.android.systemui.recents.misc.ReferenceCountedTrigger;
 import com.android.systemui.recents.misc.SystemServicesProxy;
-import com.android.systemui.shared.recents.utilities.Utilities;
 import com.android.systemui.shared.recents.model.Task;
 import com.android.systemui.shared.recents.model.TaskStack;
+import com.android.systemui.shared.recents.utilities.Utilities;
 import com.android.systemui.shared.recents.view.AppTransitionAnimationSpecCompat;
 import com.android.systemui.shared.recents.view.AppTransitionAnimationSpecsFuture;
 import com.android.systemui.shared.recents.view.RecentsTransition;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
+import com.android.systemui.shared.system.ActivityOptionsCompat;
+import com.android.systemui.shared.system.WindowManagerWrapper;
 import com.android.systemui.stackdivider.WindowManagerProxy;
 import com.android.systemui.statusbar.FlingAnimationUtils;
 import com.android.systemui.statusbar.phone.ScrimController;
@@ -608,16 +611,17 @@ public class RecentsView extends FrameLayout {
             // rect to its final layout-space rect
             Utilities.setViewFrameFromTranslation(event.taskView);
 
-            // Dock the task and launch it
-            SystemServicesProxy ssp = Recents.getSystemServices();
-            if (ssp.startTaskInDockedMode(event.task.key.id, dockState.createMode)) {
+            final ActivityOptions options = ActivityOptionsCompat.makeSplitScreenOptions(
+                    dockState.createMode == SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT);
+            if (ActivityManagerWrapper.getInstance().startActivityFromRecents(event.task.key.id,
+                    options)) {
                 final Runnable animStartedListener = () -> {
                     EventBus.getDefault().send(new DockedFirstAnimationFrameEvent());
-                    // Remove the task and don't bother relaying out, as all the tasks will be
-                    // relaid out when the stack changes on the multiwindow change event
+                    // Remove the task and don't bother relaying out, as all the tasks
+                    // will be relaid out when the stack changes on the multiwindow
+                    // change event
                     getStack().removeTask(event.task, null, true /* fromDockGesture */);
                 };
-
                 final Rect taskRect = getTaskRect(event.taskView);
                 AppTransitionAnimationSpecsFuture future = new AppTransitionAnimationSpecsFuture(
                         getHandler()) {
@@ -626,10 +630,8 @@ public class RecentsView extends FrameLayout {
                         return mTransitionHelper.composeDockAnimationSpec(event.taskView, taskRect);
                     }
                 };
-                ssp.overridePendingAppTransitionMultiThumbFuture(future.getFuture(),
-                        RecentsTransition.wrapStartedListener(getHandler(), animStartedListener),
-                        true /* scaleUp */);
-
+                WindowManagerWrapper.getInstance().overridePendingAppTransitionMultiThumbFuture(
+                        future, animStartedListener, getHandler(), true /* scaleUp */);
                 MetricsLogger.action(mContext, MetricsEvent.ACTION_WINDOW_DOCK_DRAG_DROP,
                         event.task.getTopComponent().flattenToShortString());
             } else {
@@ -1032,11 +1034,9 @@ public class RecentsView extends FrameLayout {
                 if (taskIndex > -1) {
                     taskIndexFromFront = stack.getTaskCount() - taskIndex - 1;
                 }
-                EventBus.getDefault().send(new LaunchTaskSucceededEvent(
-                        taskIndexFromFront));
+                EventBus.getDefault().send(new LaunchTaskSucceededEvent(taskIndexFromFront));
             } else {
-                Log.e(TAG, mContext.getString(R.string.recents_launch_error_message,
-                        task.title));
+                Log.e(TAG, mContext.getString(R.string.recents_launch_error_message, task.title));
 
                 // Dismiss the task if we fail to launch it
                 if (taskView != null) {
