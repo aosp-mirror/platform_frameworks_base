@@ -18,13 +18,14 @@ package android.hardware.camera2.impl;
 
 import static com.android.internal.util.function.pooled.PooledLambda.obtainRunnable;
 
+import android.hardware.ICameraService;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraDevice;
+import android.hardware.camera2.CaptureFailure;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
-import android.hardware.camera2.CaptureFailure;
 import android.hardware.camera2.ICameraDeviceCallbacks;
 import android.hardware.camera2.ICameraDeviceUser;
 import android.hardware.camera2.TotalCaptureResult;
@@ -34,7 +35,6 @@ import android.hardware.camera2.params.SessionConfiguration;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.hardware.camera2.utils.SubmitInfo;
 import android.hardware.camera2.utils.SurfaceUtils;
-import android.hardware.ICameraService;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
@@ -49,16 +49,14 @@ import android.view.Surface;
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * HAL2.1+ implementation of CameraDevice. Use CameraManager#open to instantiate
@@ -956,7 +954,8 @@ public class CameraDeviceImpl extends CameraDevice
         // callback is valid
         handler = checkHandler(handler, callback);
 
-        // Make sure that there all requests have at least 1 surface; all surfaces are non-null
+        // Make sure that there all requests have at least 1 surface; all surfaces are non-null;
+        // the surface isn't a physical stream surface for reprocessing request
         for (CaptureRequest request : requestList) {
             if (request.getTargets().isEmpty()) {
                 throw new IllegalArgumentException(
@@ -967,7 +966,20 @@ public class CameraDeviceImpl extends CameraDevice
                 if (surface == null) {
                     throw new IllegalArgumentException("Null Surface targets are not allowed");
                 }
+
+                if (!request.isReprocess()) {
+                    continue;
+                }
+                for (int i = 0; i < mConfiguredOutputs.size(); i++) {
+                    OutputConfiguration configuration = mConfiguredOutputs.valueAt(i);
+                    if (configuration.isForPhysicalCamera()
+                            && configuration.getSurfaces().contains(surface)) {
+                        throw new IllegalArgumentException(
+                                "Reprocess request on physical stream is not allowed");
+                    }
+                }
             }
+
         }
 
         synchronized(mInterfaceLock) {

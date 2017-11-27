@@ -845,6 +845,53 @@ public abstract class CameraMetadata<TKey> {
      */
     public static final int REQUEST_AVAILABLE_CAPABILITIES_MOTION_TRACKING = 10;
 
+    /**
+     * <p>The camera device is a logical camera backed by two or more physical cameras that are
+     * also exposed to the application.</p>
+     * <p>This capability requires the camera device to support the following:</p>
+     * <ul>
+     * <li>This camera device must list the following static metadata entries in {@link android.hardware.camera2.CameraCharacteristics }:<ul>
+     * <li>android.logicalMultiCamera.physicalIds</li>
+     * <li>{@link CameraCharacteristics#LOGICAL_MULTI_CAMERA_SENSOR_SYNC_TYPE android.logicalMultiCamera.sensorSyncType}</li>
+     * </ul>
+     * </li>
+     * <li>The underlying physical cameras' static metadata must list the following entries,
+     *   so that the application can correlate pixels from the physical streams:<ul>
+     * <li>{@link CameraCharacteristics#LENS_POSE_REFERENCE android.lens.poseReference}</li>
+     * <li>{@link CameraCharacteristics#LENS_POSE_ROTATION android.lens.poseRotation}</li>
+     * <li>{@link CameraCharacteristics#LENS_POSE_TRANSLATION android.lens.poseTranslation}</li>
+     * <li>{@link CameraCharacteristics#LENS_INTRINSIC_CALIBRATION android.lens.intrinsicCalibration}</li>
+     * <li>{@link CameraCharacteristics#LENS_RADIAL_DISTORTION android.lens.radialDistortion}</li>
+     * </ul>
+     * </li>
+     * <li>The logical camera device must be LIMITED or higher device.</li>
+     * </ul>
+     * <p>Both the logical camera device and its underlying physical devices support the
+     * mandatory stream combinations required for their device levels.</p>
+     * <p>Additionally, for each guaranteed stream combination, the logical camera supports:</p>
+     * <ul>
+     * <li>Replacing one logical {@link android.graphics.ImageFormat#YUV_420_888 YUV_420_888}
+     *   or raw stream with two physical streams of the same size and format, each from a
+     *   separate physical camera, given that the size and format are supported by both
+     *   physical cameras.</li>
+     * <li>Adding two raw streams, each from one physical camera, if the logical camera doesn't
+     *   advertise RAW capability, but the underlying physical cameras do. This is usually
+     *   the case when the physical cameras have different sensor sizes.</li>
+     * </ul>
+     * <p>Using physical streams in place of a logical stream of the same size and format will
+     * not slow down the frame rate of the capture, as long as the minimum frame duration
+     * of the physical and logical streams are the same.</p>
+     *
+     * @see CameraCharacteristics#LENS_INTRINSIC_CALIBRATION
+     * @see CameraCharacteristics#LENS_POSE_REFERENCE
+     * @see CameraCharacteristics#LENS_POSE_ROTATION
+     * @see CameraCharacteristics#LENS_POSE_TRANSLATION
+     * @see CameraCharacteristics#LENS_RADIAL_DISTORTION
+     * @see CameraCharacteristics#LOGICAL_MULTI_CAMERA_SENSOR_SYNC_TYPE
+     * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
+     */
+    public static final int REQUEST_AVAILABLE_CAPABILITIES_LOGICAL_MULTI_CAMERA = 11;
+
     //
     // Enumeration values for CameraCharacteristics#SCALER_CROPPING_TYPE
     //
@@ -1158,6 +1205,26 @@ public abstract class CameraMetadata<TKey> {
      * @see CameraCharacteristics#SYNC_MAX_LATENCY
      */
     public static final int SYNC_MAX_LATENCY_UNKNOWN = -1;
+
+    //
+    // Enumeration values for CameraCharacteristics#LOGICAL_MULTI_CAMERA_SENSOR_SYNC_TYPE
+    //
+
+    /**
+     * <p>A software mechanism is used to synchronize between the physical cameras. As a result,
+     * the timestamp of an image from a physical stream is only an approximation of the
+     * image sensor start-of-exposure time.</p>
+     * @see CameraCharacteristics#LOGICAL_MULTI_CAMERA_SENSOR_SYNC_TYPE
+     */
+    public static final int LOGICAL_MULTI_CAMERA_SENSOR_SYNC_TYPE_APPROXIMATE = 0;
+
+    /**
+     * <p>The camera device supports frame timestamp synchronization at the hardware level,
+     * and the timestamp of a physical stream image accurately reflects its
+     * start-of-exposure time.</p>
+     * @see CameraCharacteristics#LOGICAL_MULTI_CAMERA_SENSOR_SYNC_TYPE
+     */
+    public static final int LOGICAL_MULTI_CAMERA_SENSOR_SYNC_TYPE_CALIBRATED = 1;
 
     //
     // Enumeration values for CaptureRequest#COLOR_CORRECTION_MODE
