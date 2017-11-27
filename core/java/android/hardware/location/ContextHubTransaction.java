@@ -72,7 +72,8 @@ public class ContextHubTransaction<T> {
             TRANSACTION_FAILED_PENDING,
             TRANSACTION_FAILED_AT_HUB,
             TRANSACTION_FAILED_TIMEOUT,
-            TRANSACTION_FAILED_SERVICE_INTERNAL_FAILURE})
+            TRANSACTION_FAILED_SERVICE_INTERNAL_FAILURE,
+            TRANSACTION_FAILED_HAL_UNAVAILABLE})
     public @interface Result {}
     public static final int TRANSACTION_SUCCESS = 0;
     /**
@@ -103,6 +104,10 @@ public class ContextHubTransaction<T> {
      * Failure mode when the transaction has failed internally at the service.
      */
     public static final int TRANSACTION_FAILED_SERVICE_INTERNAL_FAILURE = 7;
+    /**
+     * Failure mode when the Context Hub HAL was not available.
+     */
+    public static final int TRANSACTION_FAILED_HAL_UNAVAILABLE = 8;
 
     /**
      * A class describing the response for a ContextHubTransaction.

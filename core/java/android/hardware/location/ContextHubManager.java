@@ -342,7 +342,17 @@ public final class ContextHubManager {
     @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
     public ContextHubTransaction<Void> loadNanoApp(
             ContextHubInfo hubInfo, NanoAppBinary appBinary) {
-        throw new UnsupportedOperationException("TODO: Implement this");
+        ContextHubTransaction<Void> transaction =
+                new ContextHubTransaction<>(ContextHubTransaction.TYPE_LOAD_NANOAPP);
+        IContextHubTransactionCallback callback = createTransactionCallback(transaction);
+
+        try {
+            mService.loadNanoAppOnHub(hubInfo.getId(), callback, appBinary);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+
+        return transaction;
     }
 
     /**
@@ -357,7 +367,17 @@ public final class ContextHubManager {
      */
     @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
     public ContextHubTransaction<Void> unloadNanoApp(ContextHubInfo hubInfo, long nanoAppId) {
-        throw new UnsupportedOperationException("TODO: Implement this");
+        ContextHubTransaction<Void> transaction =
+                new ContextHubTransaction<>(ContextHubTransaction.TYPE_UNLOAD_NANOAPP);
+        IContextHubTransactionCallback callback = createTransactionCallback(transaction);
+
+        try {
+            mService.unloadNanoAppFromHub(hubInfo.getId(), callback, nanoAppId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+
+        return transaction;
     }
 
     /**

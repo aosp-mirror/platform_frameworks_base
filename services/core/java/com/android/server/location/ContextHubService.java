@@ -738,6 +738,76 @@ public class ContextHubService extends IContextHubService.Stub {
         return mClientManager.registerClient(clientCallback, contextHubId);
     }
 
+    /**
+     * Loads a nanoapp binary at the specified Context hub.
+     *
+     * @param contextHubId the ID of the hub to load the binary
+     * @param transactionCallback the client-facing transaction callback interface
+     * @param nanoAppBinary the binary to load
+     *
+     * @throws RemoteException
+     */
+    @Override
+    public void loadNanoAppOnHub(
+            int contextHubId, IContextHubTransactionCallback transactionCallback,
+            NanoAppBinary nanoAppBinary) throws RemoteException {
+        checkPermissions();
+        if (mContextHubProxy == null) {
+            transactionCallback.onTransactionComplete(
+                    ContextHubTransaction.TRANSACTION_FAILED_HAL_UNAVAILABLE);
+            return;
+        }
+        if (!isValidContextHubId(contextHubId)) {
+            Log.e(TAG, "Cannot load nanoapp for invalid hub ID " + contextHubId);
+            transactionCallback.onTransactionComplete(
+                    ContextHubTransaction.TRANSACTION_FAILED_BAD_PARAMS);
+            return;
+        }
+        if (nanoAppBinary == null) {
+            Log.e(TAG, "NanoAppBinary cannot be null in loadNanoAppOnHub");
+            transactionCallback.onTransactionComplete(
+                    ContextHubTransaction.TRANSACTION_FAILED_BAD_PARAMS);
+            return;
+        }
+
+        ContextHubServiceTransaction transaction = mTransactionManager.createLoadTransaction(
+                contextHubId, nanoAppBinary, transactionCallback);
+
+        addTransaction(transaction);
+    }
+
+    /**
+     * Unloads a nanoapp from the specified Context Hub.
+     *
+     * @param contextHubId the ID of the hub to unload the nanoapp
+     * @param transactionCallback the client-facing transaction callback interface
+     * @param nanoAppId the ID of the nanoapp to unload
+     *
+     * @throws RemoteException
+     */
+    @Override
+    public void unloadNanoAppFromHub(
+            int contextHubId, IContextHubTransactionCallback transactionCallback, long nanoAppId)
+            throws RemoteException {
+        checkPermissions();
+        if (mContextHubProxy == null) {
+            transactionCallback.onTransactionComplete(
+                    ContextHubTransaction.TRANSACTION_FAILED_HAL_UNAVAILABLE);
+            return;
+        }
+        if (!isValidContextHubId(contextHubId)) {
+            Log.e(TAG, "Cannot unload nanoapp for invalid hub ID " + contextHubId);
+            transactionCallback.onTransactionComplete(
+                    ContextHubTransaction.TRANSACTION_FAILED_BAD_PARAMS);
+            return;
+        }
+
+        ContextHubServiceTransaction transaction = mTransactionManager.createUnloadTransaction(
+                contextHubId, nanoAppId, transactionCallback);
+
+        addTransaction(transaction);
+    }
+
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
