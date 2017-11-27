@@ -29,7 +29,7 @@ import android.app.job.JobParameters;
 import android.app.job.JobScheduler;
 import android.app.job.JobService;
 import android.app.job.JobWorkItem;
-import android.app.usage.AppStandby;
+import android.app.usage.UsageStatsManager;
 import android.app.usage.UsageStatsManagerInternal;
 import android.app.usage.UsageStatsManagerInternal.AppIdleStateChangeListener;
 import android.content.BroadcastReceiver;
@@ -2074,10 +2074,10 @@ public final class JobSchedulerService extends com.android.server.SystemService
 
     public static int standbyBucketToBucketIndex(int bucket) {
         // Normalize AppStandby constants to indices into our bookkeeping
-        if (bucket == AppStandby.STANDBY_BUCKET_NEVER) return 4;
-        else if (bucket >= AppStandby.STANDBY_BUCKET_RARE) return 3;
-        else if (bucket >= AppStandby.STANDBY_BUCKET_FREQUENT) return 2;
-        else if (bucket >= AppStandby.STANDBY_BUCKET_WORKING_SET) return 1;
+        if (bucket == UsageStatsManager.STANDBY_BUCKET_NEVER) return 4;
+        else if (bucket >= UsageStatsManager.STANDBY_BUCKET_RARE) return 3;
+        else if (bucket >= UsageStatsManager.STANDBY_BUCKET_FREQUENT) return 2;
+        else if (bucket >= UsageStatsManager.STANDBY_BUCKET_WORKING_SET) return 1;
         else return 0;
     }
 

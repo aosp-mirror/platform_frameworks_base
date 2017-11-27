@@ -16,16 +16,18 @@
 
 package android.app.usage;
 
+import android.annotation.IntDef;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
-import android.app.usage.AppStandby.StandbyBuckets;
 import android.content.Context;
 import android.content.pm.ParceledListSlice;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -89,6 +91,76 @@ public final class UsageStatsManager {
      * {@hide}
      */
     public static final int INTERVAL_COUNT = 4;
+
+
+    /**
+     * The app is whitelisted for some reason and the bucket cannot be changed.
+     * {@hide}
+     */
+    @SystemApi
+    public static final int STANDBY_BUCKET_EXEMPTED = 5;
+
+    /**
+     * The app was used very recently, currently in use or likely to be used very soon.
+     * @see #getAppStandbyBucket()
+     */
+    public static final int STANDBY_BUCKET_ACTIVE = 10;
+
+    /**
+     * The app was used recently and/or likely to be used in the next few hours.
+     * @see #getAppStandbyBucket()
+     */
+    public static final int STANDBY_BUCKET_WORKING_SET = 20;
+
+    /**
+     * The app was used in the last few days and/or likely to be used in the next few days.
+     * @see #getAppStandbyBucket()
+     */
+    public static final int STANDBY_BUCKET_FREQUENT = 30;
+
+    /**
+     * The app has not be used for several days and/or is unlikely to be used for several days.
+     * @see #getAppStandbyBucket()
+     */
+    public static final int STANDBY_BUCKET_RARE = 40;
+
+    /**
+     * The app has never been used.
+     * {@hide}
+     */
+    @SystemApi
+    public static final int STANDBY_BUCKET_NEVER = 50;
+
+    /** {@hide} Reason for bucketing -- default initial state */
+    public static final String REASON_DEFAULT = "default";
+
+    /** {@hide} Reason for bucketing -- timeout */
+    public static final String REASON_TIMEOUT = "timeout";
+
+    /** {@hide} Reason for bucketing -- usage */
+    public static final String REASON_USAGE = "usage";
+
+    /** {@hide} Reason for bucketing -- forced by user / shell command */
+    public static final String REASON_FORCED = "forced";
+
+    /**
+     * {@hide}
+     * Reason for bucketing -- predicted. This is a prefix and the UID of the bucketeer will
+     * be appended.
+     */
+    public static final String REASON_PREDICTED = "predicted";
+
+    /** @hide */
+    @IntDef(flag = false, value = {
+            STANDBY_BUCKET_EXEMPTED,
+            STANDBY_BUCKET_ACTIVE,
+            STANDBY_BUCKET_WORKING_SET,
+            STANDBY_BUCKET_FREQUENT,
+            STANDBY_BUCKET_RARE,
+            STANDBY_BUCKET_NEVER,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface StandbyBuckets {}
 
     private static final UsageEvents sEmptyResults = new UsageEvents();
 
@@ -237,7 +309,7 @@ public final class UsageStatsManager {
     }
 
     /**
-     * @hide
+     * {@hide}
      */
     public void setAppInactive(String packageName, boolean inactive) {
         try {
@@ -248,19 +320,45 @@ public final class UsageStatsManager {
     }
 
     /**
-     * @hide
+     * Returns the current standby bucket of the calling app. The system determines the standby
+     * state of the app based on app usage patterns. Standby buckets determine how much an app will
+     * be restricted from running background tasks such as jobs, alarms and certain PendingIntent
+     * callbacks.
+     * Restrictions increase progressively from {@link #STANDBY_BUCKET_ACTIVE} to
+     * {@link #STANDBY_BUCKET_RARE}, with {@link #STANDBY_BUCKET_ACTIVE} being the least
+     * restrictive. The battery level of the device might also affect the restrictions.
+     *
+     * @return the current standby bucket of the calling app.
      */
+    public @StandbyBuckets int getAppStandbyBucket() {
+        try {
+            return mService.getAppStandbyBucket(mContext.getOpPackageName(),
+                    mContext.getOpPackageName(),
+                    mContext.getUserId());
+        } catch (RemoteException e) {
+        }
+        return STANDBY_BUCKET_ACTIVE;
+    }
+
+    /**
+     * {@hide}
+     * Returns the current standby bucket of the specified app. The caller must hold the permission
+     * android.permission.PACKAGE_USAGE_STATS.
+     * @param packageName the package for which to fetch the current standby bucket.
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS)
     public @StandbyBuckets int getAppStandbyBucket(String packageName) {
         try {
             return mService.getAppStandbyBucket(packageName, mContext.getOpPackageName(),
                     mContext.getUserId());
         } catch (RemoteException e) {
         }
-        return AppStandby.STANDBY_BUCKET_ACTIVE;
+        return STANDBY_BUCKET_ACTIVE;
     }
 
     /**
-     * @hide
+     * {@hide}
      * Changes the app standby state to the provided bucket.
      */
     @SystemApi

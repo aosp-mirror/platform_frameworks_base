@@ -16,13 +16,16 @@
 
 package com.android.server.usage;
 
-import android.app.usage.AppStandby;
+import static android.app.usage.UsageStatsManager.REASON_TIMEOUT;
+import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_ACTIVE;
+import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_FREQUENT;
+import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_RARE;
+
+import android.app.usage.UsageStatsManager;
 import android.os.FileUtils;
 import android.test.AndroidTestCase;
 
 import java.io.File;
-
-import static android.app.usage.AppStandby.*;
 
 public class AppIdleHistoryTests extends AndroidTestCase {
 
@@ -85,12 +88,12 @@ public class AppIdleHistoryTests extends AndroidTestCase {
         AppIdleHistory aih = new AppIdleHistory(mStorageDir, 1000);
 
         aih.setAppStandbyBucket(PACKAGE_1, USER_ID, 1000, STANDBY_BUCKET_ACTIVE,
-                AppStandby.REASON_USAGE);
+                UsageStatsManager.REASON_USAGE);
         // ACTIVE means not idle
         assertFalse(aih.isIdle(PACKAGE_1, USER_ID, 2000));
 
         aih.setAppStandbyBucket(PACKAGE_2, USER_ID, 2000, STANDBY_BUCKET_ACTIVE,
-                AppStandby.REASON_USAGE);
+                UsageStatsManager.REASON_USAGE);
         aih.setAppStandbyBucket(PACKAGE_1, USER_ID, 3000, STANDBY_BUCKET_RARE,
                 REASON_TIMEOUT);
 

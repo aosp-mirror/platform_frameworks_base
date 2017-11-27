@@ -224,6 +224,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     return runGetInactive(pw);
                 case "set-standby-bucket":
                     return runSetStandbyBucket(pw);
+                case "get-standby-bucket":
+                    return runGetStandbyBucket(pw);
                 case "send-trim-memory":
                     return runSendTrimMemory(pw);
                 case "display":
@@ -1826,6 +1828,29 @@ final class ActivityManagerShellCommand extends ShellCommand {
         return 0;
     }
 
+    private int bucketNameToBucketValue(String name) {
+        String lower = name.toLowerCase();
+        if (lower.startsWith("ac")) {
+            return UsageStatsManager.STANDBY_BUCKET_ACTIVE;
+        } else if (lower.startsWith("wo")) {
+            return UsageStatsManager.STANDBY_BUCKET_WORKING_SET;
+        } else if (lower.startsWith("fr")) {
+            return UsageStatsManager.STANDBY_BUCKET_FREQUENT;
+        } else if (lower.startsWith("ra")) {
+            return UsageStatsManager.STANDBY_BUCKET_RARE;
+        } else if (lower.startsWith("ne")) {
+            return UsageStatsManager.STANDBY_BUCKET_NEVER;
+        } else {
+            try {
+                int bucket = Integer.parseInt(lower);
+                return bucket;
+            } catch (NumberFormatException nfe) {
+                getErrPrintWriter().println("Error: Unknown bucket: " + name);
+            }
+        }
+        return -1;
+    }
+
     int runSetStandbyBucket(PrintWriter pw) throws RemoteException {
         int userId = UserHandle.USER_CURRENT;
 
@@ -1840,10 +1865,33 @@ final class ActivityManagerShellCommand extends ShellCommand {
         }
         String packageName = getNextArgRequired();
         String value = getNextArgRequired();
+        int bucket = bucketNameToBucketValue(value);
+        if (bucket < 0) return -1;
 
         IUsageStatsManager usm = IUsageStatsManager.Stub.asInterface(ServiceManager.getService(
                 Context.USAGE_STATS_SERVICE));
-        usm.setAppStandbyBucket(packageName, Integer.parseInt(value), userId);
+        usm.setAppStandbyBucket(packageName, bucketNameToBucketValue(value), userId);
+        return 0;
+    }
+
+    int runGetStandbyBucket(PrintWriter pw) throws RemoteException {
+        int userId = UserHandle.USER_CURRENT;
+
+        String opt;
+        while ((opt=getNextOption()) != null) {
+            if (opt.equals("--user")) {
+                userId = UserHandle.parseUserArg(getNextArgRequired());
+            } else {
+                getErrPrintWriter().println("Error: Unknown option: " + opt);
+                return -1;
+            }
+        }
+        String packageName = getNextArgRequired();
+
+        IUsageStatsManager usm = IUsageStatsManager.Stub.asInterface(ServiceManager.getService(
+                Context.USAGE_STATS_SERVICE));
+        int bucket = usm.getAppStandbyBucket(packageName, null, userId);
+        pw.println(bucket);
         return 0;
     }
 
@@ -2597,8 +2645,10 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      Sets the inactive state of an app.");
             pw.println("  get-inactive [--user <USER_ID>] <PACKAGE>");
             pw.println("      Returns the inactive state of an app.");
-            pw.println("  set-standby-bucket [--user <USER_ID>] <PACKAGE> <BUCKET>");
+            pw.println("  set-standby-bucket [--user <USER_ID>] <PACKAGE> active|working_set|frequent|rare");
             pw.println("      Puts an app in the standby bucket.");
+            pw.println("  get-standby-bucket [--user <USER_ID>] <PACKAGE>");
+            pw.println("      Returns the standby bucket of an app.");
             pw.println("  send-trim-memory [--user <USER_ID>] <PROCESS>");
             pw.println("          [HIDDEN|RUNNING_MODERATE|BACKGROUND|RUNNING_LOW|MODERATE|RUNNING_CRITICAL|COMPLETE]");
             pw.println("      Send a memory trim event to a <PROCESS>.  May also supply a raw trim int level.");
