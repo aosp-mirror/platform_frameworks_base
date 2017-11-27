@@ -97,7 +97,7 @@ final class RemoteFillService implements DeathRecipient {
     private PendingRequest mPendingRequest;
 
     public interface FillServiceCallbacks {
-        void onFillRequestSuccess(int requestFlags, @Nullable FillResponse response, int serviceUid,
+        void onFillRequestSuccess(int requestFlags, @Nullable FillResponse response,
                 @NonNull String servicePackageName);
         void onFillRequestFailure(@Nullable CharSequence message,
                 @NonNull String servicePackageName);
@@ -281,11 +281,11 @@ final class RemoteFillService implements DeathRecipient {
         mContext.unbindService(mServiceConnection);
     }
 
-    private void dispatchOnFillRequestSuccess(PendingRequest pendingRequest,
-            int callingUid, int requestFlags, FillResponse response) {
+    private void dispatchOnFillRequestSuccess(PendingRequest pendingRequest, int requestFlags,
+            FillResponse response) {
         mHandler.getHandler().post(() -> {
             if (handleResponseCallbackCommon(pendingRequest)) {
-                mCallbacks.onFillRequestSuccess(requestFlags, response, callingUid,
+                mCallbacks.onFillRequestSuccess(requestFlags, response,
                         mComponentName.getPackageName());
             }
         });
@@ -546,7 +546,7 @@ final class RemoteFillService implements DeathRecipient {
                     final RemoteFillService remoteService = getService();
                     if (remoteService != null) {
                         remoteService.dispatchOnFillRequestSuccess(PendingFillRequest.this,
-                                getCallingUid(), request.getFlags(), response);
+                                request.getFlags(), response);
                     }
                 }
 

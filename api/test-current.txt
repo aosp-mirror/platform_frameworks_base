@@ -457,19 +457,12 @@ package android.service.autofill {
     method public void apply(android.service.autofill.ValueFinder, android.widget.RemoteViews, int) throws java.lang.Exception;
   }
 
-  public final class FieldsDetection implements android.os.Parcelable {
-    ctor public FieldsDetection(android.view.autofill.AutofillId, java.lang.String, java.lang.String);
-    method public int describeContents();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.service.autofill.FieldsDetection> CREATOR;
-  }
-
   public static final class FillEventHistory.Event {
-    method public java.util.Map<java.lang.String, java.lang.Integer> getDetectedFields();
+    method public java.util.Map<java.lang.String, java.lang.Integer> getFieldsClassification();
   }
 
   public static final class FillResponse.Builder {
-    method public android.service.autofill.FillResponse.Builder setFieldsDetection(android.service.autofill.FieldsDetection);
+    method public android.service.autofill.FillResponse.Builder setFieldClassificationIds(android.view.autofill.AutofillId...);
   }
 
   public final class ImageTransformation extends android.service.autofill.InternalTransformation implements android.os.Parcelable android.service.autofill.Transformation {
@@ -499,6 +492,22 @@ package android.service.autofill {
 
   public final class TextValueSanitizer extends android.service.autofill.InternalSanitizer implements android.os.Parcelable android.service.autofill.Sanitizer {
     method public android.view.autofill.AutofillValue sanitize(android.view.autofill.AutofillValue);
+  }
+
+  public final class UserData implements android.os.Parcelable {
+    method public int describeContents();
+    method public static int getMaxFieldClassificationIdsSize();
+    method public static int getMaxUserDataSize();
+    method public static int getMaxValueLength();
+    method public static int getMinValueLength();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.service.autofill.UserData> CREATOR;
+  }
+
+  public static final class UserData.Builder {
+    ctor public UserData.Builder(java.lang.String, java.lang.String);
+    method public android.service.autofill.UserData.Builder add(java.lang.String, java.lang.String);
+    method public android.service.autofill.UserData build();
   }
 
   public abstract interface ValueFinder {
@@ -981,6 +990,11 @@ package android.view.autofill {
 
   public final class AutofillId implements android.os.Parcelable {
     ctor public AutofillId(int);
+  }
+
+  public final class AutofillManager {
+    method public android.service.autofill.UserData getUserData();
+    method public void setUserData(android.service.autofill.UserData);
   }
 
 }

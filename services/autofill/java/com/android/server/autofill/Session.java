@@ -55,7 +55,6 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.service.autofill.AutofillService;
 import android.service.autofill.Dataset;
-import android.service.autofill.FieldsDetection;
 import android.service.autofill.FillContext;
 import android.service.autofill.FillRequest;
 import android.service.autofill.FillResponse;
@@ -63,6 +62,7 @@ import android.service.autofill.InternalSanitizer;
 import android.service.autofill.InternalValidator;
 import android.service.autofill.SaveInfo;
 import android.service.autofill.SaveRequest;
+import android.service.autofill.UserData;
 import android.service.autofill.ValueFinder;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -480,7 +480,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     // FillServiceCallbacks
     @Override
     public void onFillRequestSuccess(int requestFlags, @Nullable FillResponse response,
-            int serviceUid, @NonNull String servicePackageName) {
+            @NonNull String servicePackageName) {
         synchronized (mLock) {
             if (mDestroyed) {
                 Slog.w(TAG, "Call to Session#onFillRequestSuccess() rejected - session: "
@@ -494,13 +494,13 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         }
 
         // TODO(b/67867469): remove once feature is finished
-        if (response.getFieldsDetection() != null && !mService.isFieldDetectionEnabled()) {
+        if (response.getFieldClassificationIds() != null && !mService.isFieldDetectionEnabled()) {
             Slog.w(TAG, "Ignoring " + response + " because field detection is disabled");
             processNullResponseLocked(requestFlags);
             return;
         }
 
-        mService.setLastResponse(serviceUid, id, response);
+        mService.setLastResponse(id, response);
 
         int sessionFinishedState = 0;
         final long disableDuration = response.getDisableDuration();
@@ -903,7 +903,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             final FillResponse response = mResponses.valueAt(i);
             final List<Dataset> datasets = response.getDatasets();
             if (datasets == null || datasets.isEmpty()) {
-                if (sVerbose) Slog.v(TAG,  "logContextCommitted() no datasets at " + i);
+                if (sVerbose) Slog.v(TAG, "logContextCommitted() no datasets at " + i);
             } else {
                 for (int j = 0; j < datasets.size(); j++) {
                     final Dataset dataset = datasets.get(j);
@@ -926,25 +926,27 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 }
             }
         }
-        final FieldsDetection fieldsDetection = lastResponse.getFieldsDetection();
+        final AutofillId[] fieldClassificationIds = lastResponse.getFieldClassificationIds();
 
-        if (!hasAtLeastOneDataset && fieldsDetection == null) {
+        if (!hasAtLeastOneDataset && fieldClassificationIds == null) {
             if (sVerbose) {
                 Slog.v(TAG, "logContextCommittedLocked(): skipped (no datasets nor fields "
-                        + "detection)");
+                        + "classification ids)");
             }
             return;
         }
 
+        final UserData userData = mService.getUserData();
         final AutofillId detectableFieldId;
         final String detectableRemoteId;
         String detectedRemoteId = null;
-        if (fieldsDetection == null) {
+        if (userData == null) {
             detectableFieldId = null;
             detectableRemoteId = null;
         } else {
-            detectableFieldId = fieldsDetection.getFieldId();
-            detectableRemoteId = fieldsDetection.getRemoteId();
+            // TODO(b/67867469): hardcoded to just first entry on initial refactoring.
+            detectableFieldId = fieldClassificationIds[0];
+            detectableRemoteId = userData.getRemoteIds()[0];
         }
 
         int detectedFieldScore = -1;
@@ -1057,7 +1059,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     if (detectableFieldId != null && detectableFieldId.equals(viewState.id)
                             && currentValue.isText() && currentValue.getTextValue() != null) {
                         final String actualValue = currentValue.getTextValue().toString();
-                        final String expectedValue = fieldsDetection.getValue();
+                        // TODO(b/67867469): hardcoded to just first entry on initial refactoring.
+                        final String expectedValue = userData.getValues()[0];
                         if (actualValue.equalsIgnoreCase(expectedValue)) {
                             detectedRemoteId = detectableRemoteId;
                             detectedFieldScore = 0;

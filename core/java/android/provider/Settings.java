@@ -5333,6 +5333,42 @@ public final class Settings {
         public static final String AUTOFILL_FEATURE_FIELD_DETECTION = "autofill_field_detection";
 
         /**
+         * Experimental autofill feature.
+         *
+         * <p>TODO(b/67867469): document (or remove) once feature is finished
+         * @hide
+         */
+        public static final String AUTOFILL_USER_DATA_MAX_USER_DATA_SIZE =
+                "autofill_user_data_max_user_data_size";
+
+        /**
+         * Experimental autofill feature.
+         *
+         * <p>TODO(b/67867469): document (or remove) once feature is finished
+         * @hide
+         */
+        public static final String AUTOFILL_USER_DATA_MAX_FIELD_CLASSIFICATION_IDS_SIZE =
+                "autofill_user_data_max_field_classification_size";
+
+        /**
+         * Experimental autofill feature.
+         *
+         * <p>TODO(b/67867469): document (or remove) once feature is finished
+         * @hide
+         */
+        public static final String AUTOFILL_USER_DATA_MAX_VALUE_LENGTH =
+                "autofill_user_data_max_value_length";
+
+        /**
+         * Experimental autofill feature.
+         *
+         * <p>TODO(b/67867469): document (or remove) once feature is finished
+         * @hide
+         */
+        public static final String AUTOFILL_USER_DATA_MIN_VALUE_LENGTH =
+                "autofill_user_data_min_value_length";
+
+        /**
          * @deprecated Use {@link android.provider.Settings.Global#DEVICE_PROVISIONED} instead
          */
         @Deprecated

@@ -58,28 +58,12 @@ import java.util.Set;
  */
 public final class FillEventHistory implements Parcelable {
     /**
-     * Not in parcel. The UID of the {@link AutofillService} that created the {@link FillResponse}.
-     */
-    private final int mServiceUid;
-
-    /**
      * Not in parcel. The ID of the autofill session that created the {@link FillResponse}.
      */
     private final int mSessionId;
 
     @Nullable private final Bundle mClientState;
     @Nullable List<Event> mEvents;
-
-    /**
-     * Gets the UID of the {@link AutofillService} that created the {@link FillResponse}.
-     *
-     * @return The UID of the {@link AutofillService}
-     *
-     * @hide
-     */
-    public int getServiceUid() {
-        return mServiceUid;
-    }
 
     /** @hide */
     public int getSessionId() {
@@ -123,9 +107,8 @@ public final class FillEventHistory implements Parcelable {
     /**
      * @hide
      */
-    public FillEventHistory(int serviceUid, int sessionId, @Nullable Bundle clientState) {
+    public FillEventHistory(int sessionId, @Nullable Bundle clientState) {
         mClientState = clientState;
-        mServiceUid = serviceUid;
         mSessionId = sessionId;
     }
 
@@ -364,16 +347,17 @@ public final class FillEventHistory implements Parcelable {
         }
 
         /**
-         * Gets the results of the last {@link FieldsDetection} request.
+         * Gets the results of the last fields classification request.
          *
          * @return map of edit-distance match ({@code 0} means full match,
-         * {@code 1} means 1 character different, etc...) by remote id (as set in the
-         * {@link FieldsDetection} constructor), or {@code null} if none of the user-input values
+         * {@code 1} means 1 character different, etc...) by remote id (as set on
+         * {@link UserData.Builder#add(String, android.view.autofill.AutofillValue)}),
+         * or {@code null} if none of the user-input values
          * matched the requested detection.
          *
          * <p><b>Note: </b>Only set on events of type {@link #TYPE_CONTEXT_COMMITTED}, when the
-         * service requested {@link FillResponse.Builder#setFieldsDetection(FieldsDetection) fields
-         * detection}.
+         * service requested {@link FillResponse.Builder#setFieldClassificationIds(AutofillId...)
+         * fields detection}.
          *
          * TODO(b/67867469):
          *  - improve javadoc
@@ -382,11 +366,12 @@ public final class FillEventHistory implements Parcelable {
          *  - unhide
          *  - unhide / remove testApi
          *  - add @NonNull / check it / add unit tests
+         *  - add link to AutofillService #FieldsClassification anchor
          *
          * @hide
          */
         @TestApi
-        @NonNull public Map<String, Integer> getDetectedFields() {
+        @NonNull public Map<String, Integer> getFieldsClassification() {
             if (mDetectedRemoteId == null || mDetectedFieldScore == -1) {
                 return Collections.emptyMap();
             }
@@ -534,7 +519,7 @@ public final class FillEventHistory implements Parcelable {
             new Parcelable.Creator<FillEventHistory>() {
                 @Override
                 public FillEventHistory createFromParcel(Parcel parcel) {
-                    FillEventHistory selection = new FillEventHistory(0, 0, parcel.readBundle());
+                    FillEventHistory selection = new FillEventHistory(0, parcel.readBundle());
 
                     final int numEvents = parcel.readInt();
                     for (int i = 0; i < numEvents; i++) {
