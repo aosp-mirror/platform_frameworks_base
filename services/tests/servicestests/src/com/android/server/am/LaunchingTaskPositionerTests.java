@@ -16,7 +16,6 @@
 
 package com.android.server.am;
 
-import android.content.ComponentName;
 import android.content.pm.ActivityInfo.WindowLayout;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
@@ -93,8 +92,8 @@ public class LaunchingTaskPositionerTests extends ActivityTestsBase {
      */
     @Test
     public void testInitialBounds() throws Exception {
-        assertEquals(mStack.mBounds, STACK_BOUNDS);
-        assertEquals(mTask.mBounds, null);
+        assertEquals(mStack.getOverrideBounds(), STACK_BOUNDS);
+        assertEquals(mTask.getOverrideBounds(), new Rect());
     }
 
     /**
@@ -182,7 +181,7 @@ public class LaunchingTaskPositionerTests extends ActivityTestsBase {
         mService.mStackSupervisor.getLaunchingBoundsController().layoutTask(mTask, layout);
 
         // Second task will be laid out on top of the first so starting bounds is the same.
-        final Rect expectedBounds = new Rect(mTask.mBounds);
+        final Rect expectedBounds = new Rect(mTask.getOverrideBounds());
 
         ActivityRecord activity = null;
         TaskRecord secondTask = null;
@@ -203,14 +202,16 @@ public class LaunchingTaskPositionerTests extends ActivityTestsBase {
             if ((gravity & (Gravity.TOP | Gravity.RIGHT)) == (Gravity.TOP | Gravity.RIGHT)
                     || (gravity & (Gravity.BOTTOM | Gravity.RIGHT))
                     == (Gravity.BOTTOM | Gravity.RIGHT)) {
-                expectedBounds.offset(-LaunchingTaskPositioner.getHorizontalStep(mStack.mBounds),
-                        0);
+                expectedBounds.offset(-LaunchingTaskPositioner.getHorizontalStep(
+                        mStack.getOverrideBounds()), 0);
             } else if ((gravity & Gravity.TOP) == Gravity.TOP
                     || (gravity & Gravity.BOTTOM) == Gravity.BOTTOM) {
-                expectedBounds.offset(LaunchingTaskPositioner.getHorizontalStep(mStack.mBounds), 0);
+                expectedBounds.offset(
+                        LaunchingTaskPositioner.getHorizontalStep(mStack.getOverrideBounds()), 0);
             } else {
-                expectedBounds.offset(LaunchingTaskPositioner.getHorizontalStep(mStack.mBounds),
-                        LaunchingTaskPositioner.getVerticalStep(mStack.mBounds));
+                expectedBounds.offset(
+                        LaunchingTaskPositioner.getHorizontalStep(mStack.getOverrideBounds()),
+                        LaunchingTaskPositioner.getVerticalStep(mStack.getOverrideBounds()));
             }
 
             assertEquals(mResult, expectedBounds);
@@ -228,10 +229,12 @@ public class LaunchingTaskPositionerTests extends ActivityTestsBase {
 
     private Rect getDefaultBounds(int gravity) {
         final Rect bounds = new Rect();
-        bounds.set(mStack.mBounds);
+        bounds.set(mStack.getOverrideBounds());
 
-        final int verticalInset = LaunchingTaskPositioner.getFreeformStartTop(mStack.mBounds);
-        final int horizontalInset = LaunchingTaskPositioner.getFreeformStartLeft(mStack.mBounds);
+        final int verticalInset =
+                LaunchingTaskPositioner.getFreeformStartTop(mStack.getOverrideBounds());
+        final int horizontalInset =
+                LaunchingTaskPositioner.getFreeformStartLeft(mStack.getOverrideBounds());
 
         bounds.inset(horizontalInset, verticalInset);
 

@@ -75,9 +75,11 @@ package android.app {
     method public int describeContents();
     method public int getActivityType();
     method public android.graphics.Rect getAppBounds();
+    method public android.graphics.Rect getBounds();
     method public int getWindowingMode();
     method public void setActivityType(int);
     method public void setAppBounds(android.graphics.Rect);
+    method public void setBounds(android.graphics.Rect);
     method public void setTo(android.app.WindowConfiguration);
     method public void setWindowingMode(int);
     method public void writeToParcel(android.os.Parcel, int);

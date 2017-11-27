@@ -88,7 +88,7 @@ class LaunchingTaskPositioner implements LaunchingBoundsController.LaunchingBoun
 
         final ArrayList<TaskRecord> tasks = task.getStack().getAllTasks();
 
-        updateAvailableRect(task, mAvailableRect);
+        mAvailableRect.set(task.getParent().getBounds());
 
         if (layout == null) {
             positionCenter(tasks, mAvailableRect, getFreeformWidth(mAvailableRect),
@@ -121,17 +121,6 @@ class LaunchingTaskPositioner implements LaunchingBoundsController.LaunchingBoun
         }
 
         return RESULT_CONTINUE;
-    }
-
-    private void updateAvailableRect(TaskRecord task, Rect availableRect) {
-        final Rect stackBounds = task.getStack().mBounds;
-
-        if (stackBounds != null) {
-            availableRect.set(stackBounds);
-        } else {
-            task.getStack().getDisplay().mDisplay.getSize(mDisplaySize);
-            availableRect.set(0, 0, mDisplaySize.x, mDisplaySize.y);
-        }
     }
 
     @VisibleForTesting
@@ -294,9 +283,9 @@ class LaunchingTaskPositioner implements LaunchingBoundsController.LaunchingBoun
 
     private static boolean boundsConflict(Rect proposal, ArrayList<TaskRecord> tasks) {
         for (int i = tasks.size() - 1; i >= 0; i--) {
-            TaskRecord task = tasks.get(i);
-            if (!task.mActivities.isEmpty() && task.mBounds != null) {
-                Rect bounds = task.mBounds;
+            final TaskRecord task = tasks.get(i);
+            if (!task.mActivities.isEmpty() && !task.matchParentBounds()) {
+                final Rect bounds = task.getOverrideBounds();
                 if (closeLeftTopCorner(proposal, bounds) || closeRightTopCorner(proposal, bounds)
                         || closeLeftBottomCorner(proposal, bounds)
                         || closeRightBottomCorner(proposal, bounds)) {

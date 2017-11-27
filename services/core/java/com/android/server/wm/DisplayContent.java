@@ -314,6 +314,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     private final Matrix mTmpMatrix = new Matrix();
     private final Region mTmpRegion = new Region();
 
+    /** Used for handing back size of display */
+    private final Rect mTmpBounds = new Rect();
+
     WindowManagerService mService;
 
     /** Remove this display when animation on it has completed. */
@@ -1223,6 +1226,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             mCompatibleScreenScale = CompatibilityInfo.computeCompatibleScaling(mDisplayMetrics,
                     mCompatDisplayMetrics);
         }
+
+        updateBounds();
         return mDisplayInfo;
     }
 
@@ -1541,8 +1546,17 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         // See {@link PhoneWindowManager#setInitialDisplaySize}...sigh...
         mService.reconfigureDisplayLocked(this);
 
-        getDockedDividerController().onConfigurationChanged();
-        getPinnedStackController().onConfigurationChanged();
+        final DockedStackDividerController dividerController = getDockedDividerController();
+
+        if (dividerController != null) {
+            getDockedDividerController().onConfigurationChanged();
+        }
+
+        final PinnedStackController pinnedStackController = getPinnedStackController();
+
+        if (pinnedStackController != null) {
+            getPinnedStackController().onConfigurationChanged();
+        }
     }
 
     /**
@@ -1681,33 +1695,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         mInitialDisplayDensity = mDisplayInfo.logicalDensityDpi;
     }
 
-    void getLogicalDisplayRect(Rect out) {
-        // Uses same calculation as in LogicalDisplay#configureDisplayInTransactionLocked.
-        final int orientation = mDisplayInfo.rotation;
-        boolean rotated = (orientation == ROTATION_90 || orientation == ROTATION_270);
-        final int physWidth = rotated ? mBaseDisplayHeight : mBaseDisplayWidth;
-        final int physHeight = rotated ? mBaseDisplayWidth : mBaseDisplayHeight;
-        int width = mDisplayInfo.logicalWidth;
-        int left = (physWidth - width) / 2;
-        int height = mDisplayInfo.logicalHeight;
-        int top = (physHeight - height) / 2;
-        out.set(left, top, left + width, top + height);
-    }
-
-    private void getLogicalDisplayRect(Rect out, int orientation) {
-        getLogicalDisplayRect(out);
-
-        // Rotate the Rect if needed.
-        final int currentRotation = mDisplayInfo.rotation;
-        final int rotationDelta = deltaRotation(currentRotation, orientation);
-        if (rotationDelta == ROTATION_90 || rotationDelta == ROTATION_270) {
-            createRotationMatrix(rotationDelta, mBaseDisplayWidth, mBaseDisplayHeight, mTmpMatrix);
-            mTmpRectF.set(out);
-            mTmpMatrix.mapRect(mTmpRectF);
-            mTmpRectF.round(out);
-        }
-    }
-
     /**
      * If display metrics changed, overrides are not set and it's not just a rotation - update base
      * values.
@@ -1775,6 +1762,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
 
         mBaseDisplayRect.set(0, 0, mBaseDisplayWidth, mBaseDisplayHeight);
+
+        updateBounds();
     }
 
     void getContentRect(Rect out) {
@@ -2104,7 +2093,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     void rotateBounds(int oldRotation, int newRotation, Rect bounds) {
-        getLogicalDisplayRect(mTmpRect, newRotation);
+        getBounds(mTmpRect, newRotation);
 
         // Compute a transform matrix to undo the coordinate space transformation,
         // and present the window at the same physical position it previously occupied.
@@ -2879,6 +2868,44 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
 
         return mTmpApplySurfaceChangesTransactionState.focusDisplayed;
+    }
+
+    private void updateBounds() {
+        calculateBounds(mTmpBounds);
+        setBounds(mTmpBounds);
+    }
+
+    // Determines the current display bounds based on the current state
+    private void calculateBounds(Rect out) {
+        // Uses same calculation as in LogicalDisplay#configureDisplayInTransactionLocked.
+        final int orientation = mDisplayInfo.rotation;
+        boolean rotated = (orientation == ROTATION_90 || orientation == ROTATION_270);
+        final int physWidth = rotated ? mBaseDisplayHeight : mBaseDisplayWidth;
+        final int physHeight = rotated ? mBaseDisplayWidth : mBaseDisplayHeight;
+        int width = mDisplayInfo.logicalWidth;
+        int left = (physWidth - width) / 2;
+        int height = mDisplayInfo.logicalHeight;
+        int top = (physHeight - height) / 2;
+        out.set(left, top, left + width, top + height);
+    }
+
+    @Override
+    public void getBounds(Rect out) {
+        calculateBounds(out);
+    }
+
+    private void getBounds(Rect out, int orientation) {
+        getBounds(out);
+
+        // Rotate the Rect if needed.
+        final int currentRotation = mDisplayInfo.rotation;
+        final int rotationDelta = deltaRotation(currentRotation, orientation);
+        if (rotationDelta == ROTATION_90 || rotationDelta == ROTATION_270) {
+            createRotationMatrix(rotationDelta, mBaseDisplayWidth, mBaseDisplayHeight, mTmpMatrix);
+            mTmpRectF.set(out);
+            mTmpMatrix.mapRect(mTmpRectF);
+            mTmpRectF.round(out);
+        }
     }
 
     void performLayout(boolean initial, boolean updateInputWindows) {

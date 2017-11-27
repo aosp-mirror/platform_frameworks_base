@@ -1971,7 +1971,7 @@ class WindowStateAnimator {
         final float width = w.mFrame.width();
         final float height = w.mFrame.height();
 
-        mService.getDefaultDisplayContentLocked().getLogicalDisplayRect(displayRect);
+        mService.getDefaultDisplayContentLocked().getBounds(displayRect);
         final float displayWidth = displayRect.width();
         final float displayHeight = displayRect.height();
 

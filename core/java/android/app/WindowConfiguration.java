@@ -40,6 +40,13 @@ import android.view.DisplayInfo;
  */
 @TestApi
 public class WindowConfiguration implements Parcelable, Comparable<WindowConfiguration> {
+    /**
+     * bounds that can differ from app bounds, which may include things such as insets.
+     *
+     * TODO: Investigate combining with {@link mAppBounds}. Can the latter be a product of the
+     * former?
+     */
+    private Rect mBounds = new Rect();
 
     /**
      * {@link android.graphics.Rect} defining app bounds. The dimensions override usages of
@@ -117,22 +124,26 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
     })
     public @interface ActivityType {}
 
+    /** Bit that indicates that the {@link #mBounds} changed.
+     * @hide */
+    public static final int WINDOW_CONFIG_BOUNDS = 1 << 0;
     /** Bit that indicates that the {@link #mAppBounds} changed.
      * @hide */
-    public static final int WINDOW_CONFIG_APP_BOUNDS = 1 << 0;
+    public static final int WINDOW_CONFIG_APP_BOUNDS = 1 << 1;
     /** Bit that indicates that the {@link #mWindowingMode} changed.
      * @hide */
-    public static final int WINDOW_CONFIG_WINDOWING_MODE = 1 << 1;
+    public static final int WINDOW_CONFIG_WINDOWING_MODE = 1 << 2;
     /** Bit that indicates that the {@link #mActivityType} changed.
      * @hide */
-    public static final int WINDOW_CONFIG_ACTIVITY_TYPE = 1 << 2;
+    public static final int WINDOW_CONFIG_ACTIVITY_TYPE = 1 << 3;
 
     /** @hide */
     @IntDef(flag = true,
             value = {
+                    WINDOW_CONFIG_BOUNDS,
                     WINDOW_CONFIG_APP_BOUNDS,
                     WINDOW_CONFIG_WINDOWING_MODE,
-                    WINDOW_CONFIG_ACTIVITY_TYPE,
+                    WINDOW_CONFIG_ACTIVITY_TYPE
             })
     public @interface WindowConfig {}
 
@@ -151,12 +162,14 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeParcelable(mBounds, flags);
         dest.writeParcelable(mAppBounds, flags);
         dest.writeInt(mWindowingMode);
         dest.writeInt(mActivityType);
     }
 
     private void readFromParcel(Parcel source) {
+        mBounds = source.readParcelable(Rect.class.getClassLoader());
         mAppBounds = source.readParcelable(Rect.class.getClassLoader());
         mWindowingMode = source.readInt();
         mActivityType = source.readInt();
@@ -179,6 +192,19 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
             return new WindowConfiguration[size];
         }
     };
+
+    /**
+     * Sets the bounds to the provided {@link Rect}.
+     * @param rect the new bounds value.
+     */
+    public void setBounds(Rect rect) {
+        if (rect == null) {
+            mBounds.setEmpty();
+            return;
+        }
+
+        mBounds.set(rect);
+    }
 
     /**
      * Set {@link #mAppBounds} to the input Rect.
@@ -210,6 +236,11 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
     /** @see #setAppBounds(Rect) */
     public Rect getAppBounds() {
         return mAppBounds;
+    }
+
+    /** @see #setBounds(Rect) */
+    public Rect getBounds() {
+        return mBounds;
     }
 
     public void setWindowingMode(@WindowingMode int windowingMode) {
@@ -244,6 +275,7 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
     }
 
     public void setTo(WindowConfiguration other) {
+        setBounds(other.mBounds);
         setAppBounds(other.mAppBounds);
         setWindowingMode(other.mWindowingMode);
         setActivityType(other.mActivityType);
@@ -258,6 +290,7 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
     /** @hide */
     public void setToDefaults() {
         setAppBounds(null);
+        setBounds(null);
         setWindowingMode(WINDOWING_MODE_UNDEFINED);
         setActivityType(ACTIVITY_TYPE_UNDEFINED);
     }
@@ -272,6 +305,11 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
      */
     public @WindowConfig int updateFrom(@NonNull WindowConfiguration delta) {
         int changed = 0;
+        // Only allow override if bounds is not empty
+        if (!delta.mBounds.isEmpty() && !delta.mBounds.equals(mBounds)) {
+            changed |= WINDOW_CONFIG_BOUNDS;
+            setBounds(delta.mBounds);
+        }
         if (delta.mAppBounds != null && !delta.mAppBounds.equals(mAppBounds)) {
             changed |= WINDOW_CONFIG_APP_BOUNDS;
             setAppBounds(delta.mAppBounds);
@@ -302,6 +340,10 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
      */
     public @WindowConfig long diff(WindowConfiguration other, boolean compareUndefined) {
         long changes = 0;
+
+        if (!mBounds.equals(other.mBounds)) {
+            changes |= WINDOW_CONFIG_BOUNDS;
+        }
 
         // Make sure that one of the values is not null and that they are not equal.
         if ((compareUndefined || other.mAppBounds != null)
@@ -340,6 +382,16 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
             n = mAppBounds.bottom - that.mAppBounds.bottom;
             if (n != 0) return n;
         }
+
+        n = mBounds.left - that.mBounds.left;
+        if (n != 0) return n;
+        n = mBounds.top - that.mBounds.top;
+        if (n != 0) return n;
+        n = mBounds.right - that.mBounds.right;
+        if (n != 0) return n;
+        n = mBounds.bottom - that.mBounds.bottom;
+        if (n != 0) return n;
+
         n = mWindowingMode - that.mWindowingMode;
         if (n != 0) return n;
         n = mActivityType - that.mActivityType;
@@ -367,6 +419,8 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
         if (mAppBounds != null) {
             result = 31 * result + mAppBounds.hashCode();
         }
+        result = 31 * result + mBounds.hashCode();
+
         result = 31 * result + mWindowingMode;
         result = 31 * result + mActivityType;
         return result;
@@ -375,7 +429,8 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
     /** @hide */
     @Override
     public String toString() {
-        return "{mAppBounds=" + mAppBounds
+        return "{ mBounds=" + mBounds
+                + " mAppBounds=" + mAppBounds
                 + " mWindowingMode=" + windowingModeToString(mWindowingMode)
                 + " mActivityType=" + activityTypeToString(mActivityType) + "}";
     }

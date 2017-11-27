@@ -18,7 +18,6 @@ package com.android.server.wm;
 
 import android.app.ActivityManager.TaskDescription;
 import android.app.ActivityManager.TaskSnapshot;
-import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.os.Looper;
@@ -30,6 +29,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import java.lang.ref.WeakReference;
 
 import static com.android.server.EventLogTags.WM_TASK_CREATED;
+import static com.android.server.wm.ConfigurationContainer.BOUNDS_CHANGE_NONE;
 import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_DOCKED_DIVIDER;
 import static com.android.server.wm.WindowContainer.POSITION_BOTTOM;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
@@ -75,7 +75,7 @@ public class TaskWindowContainerController
                         + stackController);
             }
             EventLog.writeEvent(WM_TASK_CREATED, taskId, stack.mStackId);
-            final Task task = createTask(taskId, stack, userId, bounds, resizeMode,
+            final Task task = createTask(taskId, stack, userId, resizeMode,
                     supportsPictureInPicture, taskDescription);
             final int position = toTop ? POSITION_TOP : POSITION_BOTTOM;
             // We only want to move the parents to the parents if we are creating this task at the
@@ -85,10 +85,10 @@ public class TaskWindowContainerController
     }
 
     @VisibleForTesting
-    Task createTask(int taskId, TaskStack stack, int userId, Rect bounds, int resizeMode,
+    Task createTask(int taskId, TaskStack stack, int userId, int resizeMode,
             boolean supportsPictureInPicture, TaskDescription taskDescription) {
-        return new Task(taskId, stack, userId, mService, bounds, resizeMode,
-                supportsPictureInPicture, taskDescription, this);
+        return new Task(taskId, stack, userId, mService, resizeMode, supportsPictureInPicture,
+                taskDescription, this);
     }
 
     @Override
@@ -151,14 +151,14 @@ public class TaskWindowContainerController
         }
     }
 
-    public void resize(Rect bounds, Configuration overrideConfig, boolean relayout,
-            boolean forced) {
+    public void resize(boolean relayout, boolean forced) {
         synchronized (mWindowMap) {
             if (mContainer == null) {
                 throw new IllegalArgumentException("resizeTask: taskId " + mTaskId + " not found.");
             }
 
-            if (mContainer.resizeLocked(bounds, overrideConfig, forced) && relayout) {
+            if (mContainer.setBounds(mContainer.getOverrideBounds(), forced) != BOUNDS_CHANGE_NONE
+                    && relayout) {
                 mContainer.getDisplayContent().layoutAndAssignWindowLayersIfNeeded();
             }
         }

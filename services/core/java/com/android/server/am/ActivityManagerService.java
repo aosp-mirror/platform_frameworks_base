@@ -8098,7 +8098,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     return false;
                 }
                 // An activity is consider to be in multi-window mode if its task isn't fullscreen.
-                return !r.getTask().mFullscreen;
+                return r.inMultiWindowMode();
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -10117,8 +10117,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 } else {
                     // Task isn't in window manager yet since it isn't associated with a stack.
                     // Return the persist value from activity manager
-                    if (task.mBounds != null) {
-                        rect.set(task.mBounds);
+                    if (!task.matchParentBounds()) {
+                        rect.set(task.getBounds());
                     } else if (task.mLastNonFullscreenBounds != null) {
                         rect.set(task.mLastNonFullscreenBounds);
                     }

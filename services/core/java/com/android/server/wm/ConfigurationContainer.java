@@ -36,6 +36,7 @@ import static com.android.server.wm.proto.ConfigurationContainerProto.OVERRIDE_C
 import android.annotation.CallSuper;
 import android.app.WindowConfiguration;
 import android.content.res.Configuration;
+import android.graphics.Rect;
 import android.util.proto.ProtoOutputStream;
 
 import java.io.PrintWriter;
@@ -46,6 +47,11 @@ import java.util.ArrayList;
  * hierarchy.
  */
 public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
+    /**
+     * {@link #Rect} returned from {@link #getOverrideBounds()} to prevent original value from being
+     * set directly.
+     */
+    private Rect mReturnBounds = new Rect();
 
     /** Contains override configuration settings applied to this configuration container. */
     private Configuration mOverrideConfiguration = new Configuration();
@@ -70,6 +76,16 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
 
     // TODO: Can't have ag/2592611 soon enough!
     private final Configuration mTmpConfig = new Configuration();
+
+    // Used for setting bounds
+    private final Rect mTmpRect = new Rect();
+
+    static final int BOUNDS_CHANGE_NONE = 0;
+    // Return value from {@link setBounds} indicating the position of the override bounds changed.
+    static final int BOUNDS_CHANGE_POSITION = 1;
+    // Return value from {@link setBounds} indicating the size of the override bounds changed.
+    static final int BOUNDS_CHANGE_SIZE = 1 << 1;
+
 
     /**
      * Returns full configuration applied to this configuration container.
@@ -146,6 +162,118 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
             final ConfigurationContainer child = getChildAt(i);
             child.onMergedOverrideConfigurationChanged();
         }
+    }
+
+    /**
+     * Indicates whether this container has not specified any bounds different from its parent. In
+     * this case, it will inherit the bounds of the first ancestor which specifies a bounds.
+     * @return {@code true} if no explicit bounds have been set at this container level.
+     *         {@code false} otherwise.
+     */
+    public boolean matchParentBounds() {
+        return getOverrideBounds().isEmpty();
+    }
+
+    /**
+     * Returns whether the bounds specified is considered the same as the existing override bounds.
+     * This is either when the two bounds are equal or the override bounds is empty and the
+     * specified bounds is null.
+     *
+     * @return {@code true} if the bounds are equivalent, {@code false} otherwise
+     */
+    public boolean equivalentOverrideBounds(Rect bounds) {
+        return equivalentBounds(getOverrideBounds(),  bounds);
+    }
+
+    /**
+     * Returns whether the two bounds are equal to each other or are a combination of null or empty.
+     */
+    public static boolean equivalentBounds(Rect bounds, Rect other) {
+        return bounds == other
+                || (bounds != null && (bounds.equals(other) || (bounds.isEmpty() && other == null)))
+                || (other != null && other.isEmpty() && bounds == null);
+    }
+
+    /**
+     * Returns the effective bounds of this container, inheriting the first non-empty bounds set in
+     * its ancestral hierarchy, including itself.
+     * @return
+     */
+    public Rect getBounds() {
+        mReturnBounds.set(getConfiguration().windowConfiguration.getBounds());
+        return mReturnBounds;
+    }
+
+    public void getBounds(Rect outBounds) {
+        outBounds.set(getBounds());
+    }
+
+    /**
+     * Returns the current bounds explicitly set on this container. The {@link Rect} handed back is
+     * shared for all calls to this method and should not be modified.
+     */
+    public Rect getOverrideBounds() {
+        mReturnBounds.set(getOverrideConfiguration().windowConfiguration.getBounds());
+
+        return mReturnBounds;
+    }
+
+    /**
+     * Sets the passed in {@link Rect} to the current bounds.
+     * @see {@link #getOverrideBounds()}.
+     */
+    public void getOverrideBounds(Rect outBounds) {
+        outBounds.set(getOverrideBounds());
+    }
+
+    /**
+     * Sets the bounds at the current hierarchy level, overriding any bounds set on an ancestor.
+     * This value will be reported when {@link #getBounds()} and {@link #getOverrideBounds()}. If
+     * an empty {@link Rect} or null is specified, this container will be considered to match its
+     * parent bounds {@see #matchParentBounds} and will inherit bounds from its parent.
+     * @param bounds The bounds defining the container size.
+     * @return a bitmask representing the types of changes made to the bounds.
+     */
+    public int setBounds(Rect bounds) {
+        int boundsChange = diffOverrideBounds(bounds);
+
+        if (boundsChange == BOUNDS_CHANGE_NONE) {
+            return boundsChange;
+        }
+
+
+        mTmpConfig.setTo(getOverrideConfiguration());
+        mTmpConfig.windowConfiguration.setBounds(bounds);
+        onOverrideConfigurationChanged(mTmpConfig);
+
+        return boundsChange;
+    }
+
+    public int setBounds(int left, int top, int right, int bottom) {
+        mTmpRect.set(left, top, right, bottom);
+        return setBounds(mTmpRect);
+    }
+
+    int diffOverrideBounds(Rect bounds) {
+        if (equivalentOverrideBounds(bounds)) {
+            return BOUNDS_CHANGE_NONE;
+        }
+
+        int boundsChange = BOUNDS_CHANGE_NONE;
+
+        final Rect existingBounds = getOverrideBounds();
+
+        if (bounds == null || existingBounds.left != bounds.left
+                || existingBounds.top != bounds.top) {
+            boundsChange |= BOUNDS_CHANGE_POSITION;
+        }
+
+        if (bounds == null || existingBounds.width() != bounds.width()
+                || existingBounds.height() != bounds.height()) {
+            boundsChange |= BOUNDS_CHANGE_SIZE;
+        }
+
+        return boundsChange;
     }
 
     public WindowConfiguration getWindowConfiguration() {

@@ -165,7 +165,6 @@ import android.view.IApplicationToken;
 import android.view.WindowManager.LayoutParams;
 
 import com.android.internal.R;
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.ResolverActivity;
 import com.android.internal.content.ReferrerIntent;
 import com.android.internal.util.XmlUtils;
@@ -343,12 +342,6 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     // on the window.
     int mRotationAnimationHint = -1;
 
-    // The bounds of this activity. Mainly used for aspect-ratio compatibility.
-    // TODO(b/36505427): Every level on ConfigurationContainer now has bounds information, which
-    // directly affects the configuration. We should probably move this into that class and have it
-    // handle calculating override configuration from the bounds.
-    private final Rect mBounds = new Rect();
-
     private boolean mShowWhenLocked;
     private boolean mTurnScreenOn;
 
@@ -414,8 +407,8 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         if (!getOverrideConfiguration().equals(EMPTY)) {
             pw.println(prefix + "OverrideConfiguration=" + getOverrideConfiguration());
         }
-        if (!mBounds.isEmpty()) {
-            pw.println(prefix + "mBounds=" + mBounds);
+        if (!matchParentBounds()) {
+            pw.println(prefix + "bounds=" + getBounds());
         }
         if (resultTo != null || resultWho != null) {
             pw.print(prefix); pw.print("resultTo="); pw.print(resultTo);
@@ -648,7 +641,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         }
 
         // An activity is considered to be in multi-window mode if its task isn't fullscreen.
-        final boolean inMultiWindowMode = !task.mFullscreen;
+        final boolean inMultiWindowMode = task.inMultiWindowMode();
         if (inMultiWindowMode != mLastReportedMultiWindowMode) {
             mLastReportedMultiWindowMode = inMultiWindowMode;
             scheduleMultiWindowModeChanged(getConfiguration());
@@ -966,14 +959,14 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
                 (info.flags & FLAG_SHOW_FOR_ALL_USERS) != 0, info.configChanges,
                 task.voiceSession != null, mLaunchTaskBehind, isAlwaysFocusable(),
                 appInfo.targetSdkVersion, mRotationAnimationHint,
-                ActivityManagerService.getInputDispatchingTimeoutLocked(this) * 1000000L, mBounds);
+                ActivityManagerService.getInputDispatchingTimeoutLocked(this) * 1000000L);
 
         task.addActivityToTop(this);
 
         // When an activity is started directly into a split-screen fullscreen stack, we need to
         // update the initial multi-window modes so that the callbacks are scheduled correctly when
         // the user leaves that mode.
-        mLastReportedMultiWindowMode = !task.mFullscreen;
+        mLastReportedMultiWindowMode = inMultiWindowMode();
         mLastReportedPictureInPictureMode = inPinnedWindowingMode();
     }
 
@@ -2172,33 +2165,25 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         mLastReportedConfiguration.setConfiguration(global, override);
     }
 
-    @Override
-    public void onOverrideConfigurationChanged(Configuration newConfig) {
-        final Configuration currentConfig = getOverrideConfiguration();
-        if (currentConfig.equals(newConfig)) {
-            return;
-        }
-        super.onOverrideConfigurationChanged(newConfig);
-        if (mWindowContainerController == null) {
-            return;
-        }
-        mWindowContainerController.onOverrideConfigurationChanged(newConfig, mBounds);
-    }
-
     // TODO(b/36505427): Consider moving this method and similar ones to ConfigurationContainer.
     private void updateOverrideConfiguration() {
         mTmpConfig.unset();
         computeBounds(mTmpBounds);
-        if (mTmpBounds.equals(mBounds)) {
+
+        if (mTmpBounds.equals(getOverrideBounds())) {
             return;
         }
 
-        mBounds.set(mTmpBounds);
+        setBounds(mTmpBounds);
+
+        final Rect updatedBounds = getOverrideBounds();
+
         // Bounds changed...update configuration to match.
-        if (!mBounds.isEmpty()) {
-            task.computeOverrideConfiguration(mTmpConfig, mBounds, null /* insetBounds */,
+        if (!matchParentBounds()) {
+            task.computeOverrideConfiguration(mTmpConfig, updatedBounds, null /* insetBounds */,
                     false /* overrideWidth */, false /* overrideHeight */);
         }
+
         onOverrideConfigurationChanged(mTmpConfig);
     }
 
@@ -2225,7 +2210,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         outBounds.setEmpty();
         final float maxAspectRatio = info.maxAspectRatio;
         final ActivityStack stack = getStack();
-        if (task == null || stack == null || !task.mFullscreen || maxAspectRatio == 0
+        if (task == null || stack == null || task.inMultiWindowMode() || maxAspectRatio == 0
                 || isInVrUiMode(getConfiguration())) {
             // We don't set override configuration if that activity task isn't fullscreen. I.e. the
             // activity is in multi-window mode. Or, there isn't a max aspect ratio specified for
@@ -2256,11 +2241,11 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         if (containingAppWidth <= maxActivityWidth && containingAppHeight <= maxActivityHeight) {
             // The display matches or is less than the activity aspect ratio, so nothing else to do.
             // Return the existing bounds. If this method is running for the first time,
-            // {@link mBounds} will be empty (representing no override). If the method has run
-            // before, then effect of {@link mBounds} will already have been applied to the
+            // {@link #getOverrideBounds()} will be empty (representing no override). If the method has run
+            // before, then effect of {@link #getOverrideBounds()} will already have been applied to the
             // value returned from {@link getConfiguration}. Refer to
             // {@link TaskRecord#computeOverrideConfiguration}.
-            outBounds.set(mBounds);
+            outBounds.set(getOverrideBounds());
             return;
         }
 
@@ -2270,12 +2255,6 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         final int navBarPosition = service.mWindowManager.getNavBarPosition();
         final int left = navBarPosition == NAV_BAR_LEFT ? appBounds.right - outBounds.width() : 0;
         outBounds.offsetTo(left, 0 /* top */);
-    }
-
-    /** Get bounds of the activity. */
-    @VisibleForTesting
-    Rect getBounds() {
-        return new Rect(mBounds);
     }
 
     /**

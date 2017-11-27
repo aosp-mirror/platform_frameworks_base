@@ -47,10 +47,10 @@ public class LaunchingActivityPositioner implements LaunchingBoundsPositioner {
             return RESULT_SKIP;
         }
 
-        final Rect bounds = TaskRecord.validateBounds(options.getLaunchBounds());
+        final Rect bounds = options.getLaunchBounds();
 
         // Bounds weren't valid.
-        if (bounds == null) {
+        if (bounds == null || bounds.isEmpty()) {
             return RESULT_SKIP;
         }
 

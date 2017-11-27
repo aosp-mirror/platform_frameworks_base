@@ -28,7 +28,6 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 
 import android.app.ActivityOptions;
 import android.app.IApplicationThread;
-import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
@@ -108,8 +107,8 @@ public class ActivityStarterTests extends ActivityTestsBase {
         final Rect bounds = new Rect(10, 10, 100, 100);
 
         mStarter.updateBounds(task, bounds);
-        assertEquals(task.mBounds, bounds);
-        assertEquals(task.getStack().mBounds, null);
+        assertEquals(task.getOverrideBounds(), bounds);
+        assertEquals(new Rect(), task.getStack().getOverrideBounds());
 
         // When in a resizeable stack, the stack bounds should be updated as well.
         final TaskRecord task2 = new TaskBuilder(mService.mStackSupervisor)
@@ -124,10 +123,10 @@ public class ActivityStarterTests extends ActivityTestsBase {
 
         // In the case of no animation, the stack and task bounds should be set immediately.
         if (!ANIMATE) {
-            assertEquals(task2.getStack().mBounds, bounds);
-            assertEquals(task2.mBounds, bounds);
+            assertEquals(task2.getStack().getOverrideBounds(), bounds);
+            assertEquals(task2.getOverrideBounds(), bounds);
         } else {
-            assertEquals(task2.mBounds, null);
+            assertEquals(task2.getOverrideBounds(), new Rect());
         }
     }
 

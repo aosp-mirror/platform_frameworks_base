@@ -655,8 +655,8 @@ public class DockedStackDividerController {
     }
 
     private boolean isWithinDisplay(Task task) {
-        task.mStack.getBounds(mTmpRect);
-        mDisplayContent.getLogicalDisplayRect(mTmpRect2);
+        task.getBounds(mTmpRect);
+        mDisplayContent.getBounds(mTmpRect2);
         return mTmpRect.intersect(mTmpRect2);
     }
 

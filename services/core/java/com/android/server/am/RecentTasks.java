@@ -1444,8 +1444,8 @@ class RecentTasks {
         rti.affiliatedTaskId = tr.mAffiliatedTaskId;
         rti.affiliatedTaskColor = tr.mAffiliatedTaskColor;
         rti.numActivities = 0;
-        if (tr.mBounds != null) {
-            rti.bounds = new Rect(tr.mBounds);
+        if (!tr.matchParentBounds()) {
+            rti.bounds = new Rect(tr.getOverrideBounds());
         }
         rti.supportsSplitScreenMultiWindow = tr.supportsSplitScreenWindowingMode();
         rti.resizeMode = tr.mResizeMode;
