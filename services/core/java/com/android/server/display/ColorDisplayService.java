@@ -231,7 +231,7 @@ public final class ColorDisplayService extends SystemService
         mController = new ColorDisplayController(getContext(), mCurrentUser);
         mController.setListener(this);
 
-        setCoefficientMatrix(getContext());
+        setCoefficientMatrix(getContext(), DisplayTransformManager.isNativeModeEnabled());
 
         // Prepare color transformation matrix.
         setMatrix(mController.getColorTemperature(), mMatrixNight);
@@ -329,17 +329,24 @@ public final class ColorDisplayService extends SystemService
     }
 
     @Override
-    public void onDisplayColorModeChanged(int colorMode) {
-        final DisplayTransformManager dtm = getLocalService(DisplayTransformManager.class);
-        dtm.setColorMode(colorMode);
+    public void onDisplayColorModeChanged(int mode) {
+        // Cancel the night display tint animator if it's running.
+        if (mColorMatrixAnimator != null) {
+            mColorMatrixAnimator.cancel();
+        }
 
-        setCoefficientMatrix(getContext());
+        setCoefficientMatrix(getContext(), mode == ColorDisplayController.COLOR_MODE_SATURATED);
         setMatrix(mController.getColorTemperature(), mMatrixNight);
-        applyTint(true);
+
+        final DisplayTransformManager dtm = getLocalService(DisplayTransformManager.class);
+        dtm.setColorMode(mode, mIsActivated ? mMatrixNight : MATRIX_IDENTITY);
     }
 
-    private void setCoefficientMatrix(Context context) {
-        final boolean isNative = DisplayTransformManager.isNativeModeEnabled();
+    /**
+     * Set coefficients based on native mode. Use DisplayTransformManager#isNativeModeEnabled while
+     * setting is stable; when setting is changing, pass native mode selection directly.
+     */
+    private void setCoefficientMatrix(Context context, boolean isNative) {
         final String[] coefficients = context.getResources().getStringArray(isNative
                 ? R.array.config_nightDisplayColorTemperatureCoefficientsNative
                 : R.array.config_nightDisplayColorTemperatureCoefficients);
