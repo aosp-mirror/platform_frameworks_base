@@ -73,6 +73,7 @@ EventMetricProducer::~EventMetricProducer() {
 }
 
 void EventMetricProducer::startNewProtoOutputStream(long long startTime) {
+    std::lock_guard<std::shared_timed_mutex> writeLock(mRWMutex);
     mProto = std::make_unique<ProtoOutputStream>();
     // TODO: We need to auto-generate the field IDs for StatsLogReport, EventMetricData,
     // and StatsEvent.
@@ -89,11 +90,16 @@ void EventMetricProducer::onSlicedConditionMayChange(const uint64_t eventTime) {
 
 std::unique_ptr<std::vector<uint8_t>> EventMetricProducer::onDumpReport() {
     long long endTime = time(nullptr) * NS_PER_SEC;
-    mProto->end(mProtoToken);
-    mProto->write(FIELD_TYPE_INT64 | FIELD_ID_END_REPORT_NANOS, endTime);
+    // TODO(yanglu): make this section to an util function.
+    {
+        std::lock_guard<std::shared_timed_mutex> writeLock(mRWMutex);
+        mProto->end(mProtoToken);
+        mProto->write(FIELD_TYPE_INT64 | FIELD_ID_END_REPORT_NANOS, endTime);
 
-    size_t bufferSize = mProto->size();
-    VLOG("metric %s dump report now... proto size: %zu ", mMetric.name().c_str(), bufferSize);
+        size_t bufferSize = mProto->size();
+        VLOG("metric %s dump report now... proto size: %zu ", mMetric.name().c_str(), bufferSize);
+    }
+
     std::unique_ptr<std::vector<uint8_t>> buffer = serializeProto();
 
     startNewProtoOutputStream(endTime);
@@ -103,6 +109,7 @@ std::unique_ptr<std::vector<uint8_t>> EventMetricProducer::onDumpReport() {
 
 void EventMetricProducer::onConditionChanged(const bool conditionMet, const uint64_t eventTime) {
     VLOG("Metric %s onConditionChanged", mMetric.name().c_str());
+    std::lock_guard<std::shared_timed_mutex> writeLock(mRWMutex);
     mCondition = conditionMet;
 }
 
@@ -110,6 +117,7 @@ void EventMetricProducer::onMatchedLogEventInternal(
         const size_t matcherIndex, const HashableDimensionKey& eventKey,
         const std::map<std::string, HashableDimensionKey>& conditionKey, bool condition,
         const LogEvent& event, bool scheduledPull) {
+    std::lock_guard<std::shared_timed_mutex> writeLock(mRWMutex);
     if (!condition) {
         return;
     }
@@ -124,6 +132,7 @@ void EventMetricProducer::onMatchedLogEventInternal(
 }
 
 size_t EventMetricProducer::byteSize() const {
+    std::shared_lock<std::shared_timed_mutex> readLock(mRWMutex);
     return mProto->bytesWritten();
 }
 

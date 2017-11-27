@@ -17,6 +17,8 @@
 #ifndef METRIC_PRODUCER_H
 #define METRIC_PRODUCER_H
 
+#include <shared_mutex>
+
 #include "anomaly/AnomalyTracker.h"
 #include "condition/ConditionWizard.h"
 #include "config/ConfigKey.h"
@@ -136,6 +138,10 @@ protected:
     std::unique_ptr<android::util::ProtoOutputStream> mProto;
 
     long long mProtoToken;
+
+    // Read/Write mutex to make the producer thread-safe.
+    // TODO(yanglu): replace with std::shared_mutex when available in libc++.
+    mutable std::shared_timed_mutex mRWMutex;
 
     virtual void startNewProtoOutputStream(long long timestamp) = 0;
 

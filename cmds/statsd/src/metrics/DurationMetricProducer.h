@@ -71,6 +71,8 @@ protected:
     void startNewProtoOutputStream(long long timestamp) override;
 
 private:
+    void SerializeBuckets();
+
     const DurationMetric mMetric;
 
     // Index of the SimpleLogEntryMatcher which defines the start.
@@ -96,8 +98,8 @@ private:
     std::unordered_map<HashableDimensionKey, std::unique_ptr<DurationTracker>>
             mCurrentSlicedDuration;
 
-    std::unique_ptr<DurationTracker> createDurationTracker(const HashableDimensionKey& eventKey,
-                                                           std::vector<DurationBucket>& bucket);
+    std::unique_ptr<DurationTracker> createDurationTracker(
+            const HashableDimensionKey& eventKey, std::vector<DurationBucket>& bucket) const;
     bool hitGuardRail(const HashableDimensionKey& newKey);
 
     static const size_t kBucketSize = sizeof(DurationBucket{});

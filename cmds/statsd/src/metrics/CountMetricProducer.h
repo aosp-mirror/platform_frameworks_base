@@ -75,6 +75,8 @@ protected:
     void startNewProtoOutputStream(long long timestamp) override;
 
 private:
+    void serializeBuckets();
+
     const CountMetric mMetric;
 
     // TODO: Add a lock to mPastBuckets.
