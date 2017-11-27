@@ -21,6 +21,7 @@
 #include <string>
 
 #include "android-base/macros.h"
+#include "android-base/unique_fd.h"
 
 #include "androidfw/Asset.h"
 #include "androidfw/LoadedArsc.h"
@@ -51,6 +52,16 @@ class ApkAssets {
   static std::unique_ptr<const ApkAssets> LoadOverlay(const std::string& idmap_path,
                                                       bool system = false);
 
+  // Creates an ApkAssets from the given file descriptor, and takes ownership of the file
+  // descriptor. The `friendly_name` is some name that will be used to identify the source of
+  // this ApkAssets in log messages and other debug scenarios.
+  // If `system` is true, the package is marked as a system package, and allows some functions to
+  // filter out this package when computing what configurations/resources are available.
+  // If `force_shared_lib` is true, any package with ID 0x7f is loaded as a shared library.
+  static std::unique_ptr<const ApkAssets> LoadFromFd(base::unique_fd fd,
+                                                     const std::string& friendly_name, bool system,
+                                                     bool force_shared_lib);
+
   std::unique_ptr<Asset> Open(const std::string& path,
                               Asset::AccessMode mode = Asset::AccessMode::ACCESS_RANDOM) const;
 
@@ -69,7 +80,7 @@ class ApkAssets {
  private:
   DISALLOW_COPY_AND_ASSIGN(ApkAssets);
 
-  static std::unique_ptr<const ApkAssets> LoadImpl(const std::string& path,
+  static std::unique_ptr<const ApkAssets> LoadImpl(base::unique_fd fd, const std::string& path,
                                                    std::unique_ptr<Asset> idmap_asset,
                                                    std::unique_ptr<const LoadedIdmap> loaded_idmap,
                                                    bool system, bool load_as_shared_library);

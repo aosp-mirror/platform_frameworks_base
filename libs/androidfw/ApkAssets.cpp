@@ -47,12 +47,12 @@ ApkAssets::ApkAssets(void* unmanaged_handle, const std::string& path)
 }
 
 std::unique_ptr<const ApkAssets> ApkAssets::Load(const std::string& path, bool system) {
-  return ApkAssets::LoadImpl(path, nullptr, nullptr, system, false /*load_as_shared_library*/);
+  return LoadImpl({} /*fd*/, path, nullptr, nullptr, system, false /*load_as_shared_library*/);
 }
 
 std::unique_ptr<const ApkAssets> ApkAssets::LoadAsSharedLibrary(const std::string& path,
                                                                 bool system) {
-  return ApkAssets::LoadImpl(path, nullptr, nullptr, system, true /*load_as_shared_library*/);
+  return LoadImpl({} /*fd*/, path, nullptr, nullptr, system, true /*load_as_shared_library*/);
 }
 
 std::unique_ptr<const ApkAssets> ApkAssets::LoadOverlay(const std::string& idmap_path,
@@ -70,8 +70,15 @@ std::unique_ptr<const ApkAssets> ApkAssets::LoadOverlay(const std::string& idmap
     LOG(ERROR) << "failed to load IDMAP " << idmap_path;
     return {};
   }
-  return LoadImpl(loaded_idmap->OverlayApkPath(), std::move(idmap_asset), std::move(loaded_idmap),
-                  system, false /*load_as_shared_library*/);
+  return LoadImpl({} /*fd*/, loaded_idmap->OverlayApkPath(), std::move(idmap_asset),
+                  std::move(loaded_idmap), system, false /*load_as_shared_library*/);
+}
+
+std::unique_ptr<const ApkAssets> ApkAssets::LoadFromFd(unique_fd fd,
+                                                       const std::string& friendly_name,
+                                                       bool system, bool force_shared_lib) {
+  return LoadImpl(std::move(fd), friendly_name, nullptr /*idmap_asset*/, nullptr /*loaded_idmap*/,
+                  system, force_shared_lib);
 }
 
 std::unique_ptr<Asset> ApkAssets::CreateAssetFromFile(const std::string& path) {
@@ -96,11 +103,19 @@ std::unique_ptr<Asset> ApkAssets::CreateAssetFromFile(const std::string& path) {
 }
 
 std::unique_ptr<const ApkAssets> ApkAssets::LoadImpl(
-    const std::string& path, std::unique_ptr<Asset> idmap_asset,
+    unique_fd fd, const std::string& path, std::unique_ptr<Asset> idmap_asset,
     std::unique_ptr<const LoadedIdmap> loaded_idmap, bool system, bool load_as_shared_library) {
   ATRACE_CALL();
+
   ::ZipArchiveHandle unmanaged_handle;
-  int32_t result = ::OpenArchive(path.c_str(), &unmanaged_handle);
+  int32_t result;
+  if (fd >= 0) {
+    result =
+        ::OpenArchiveFd(fd.release(), path.c_str(), &unmanaged_handle, true /*assume_ownership*/);
+  } else {
+    result = ::OpenArchive(path.c_str(), &unmanaged_handle);
+  }
+
   if (result != 0) {
     LOG(ERROR) << "Failed to open APK '" << path << "' " << ::ErrorCodeString(result);
     return {};
