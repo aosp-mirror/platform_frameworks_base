@@ -20,6 +20,7 @@
 #include <memory>
 #include <string>
 #include <unordered_set>
+#include <vector>
 
 #include "Diagnostics.h"
 #include "LoadedApk.h"
@@ -29,7 +30,7 @@ namespace aapt {
 
 struct MultiApkGeneratorOptions {
   std::string out_dir;
-  configuration::PostProcessingConfiguration config;
+  std::vector<configuration::OutputArtifact> apk_artifacts;
   TableFlattenerOptions table_flattener_options;
   std::unordered_set<std::string> kept_artifacts;
 };
@@ -49,18 +50,17 @@ class MultiApkGenerator {
   bool FromBaseApk(const MultiApkGeneratorOptions& options);
 
  protected:
-  virtual std::unique_ptr<ResourceTable> FilterTable(
-      const configuration::Artifact& artifact,
-      const configuration::PostProcessingConfiguration& config, const ResourceTable& old_table,
-      IAaptContext* context, FilterChain* chain);
+  virtual std::unique_ptr<ResourceTable> FilterTable(IAaptContext* context,
+                                                     const configuration::OutputArtifact& artifact,
+                                                     const ResourceTable& old_table,
+                                                     FilterChain* chain);
 
  private:
   IDiagnostics* GetDiagnostics() {
     return context_->GetDiagnostics();
   }
 
-  bool UpdateManifest(const configuration::Artifact& artifact,
-                      const configuration::PostProcessingConfiguration& config,
+  bool UpdateManifest(const configuration::OutputArtifact& artifact,
                       std::unique_ptr<xml::XmlResource>* updated_manifest, IDiagnostics* diag);
 
   LoadedApk* apk_;

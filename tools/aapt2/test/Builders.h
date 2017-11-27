@@ -25,6 +25,7 @@
 #include "ResourceTable.h"
 #include "ResourceValues.h"
 #include "configuration/ConfigurationParser.h"
+#include "configuration/ConfigurationParser.internal.h"
 #include "process/IResourceTableConsumer.h"
 #include "test/Common.h"
 #include "util/Maybe.h"
@@ -154,38 +155,19 @@ std::unique_ptr<xml::XmlResource> BuildXmlDom(const android::StringPiece& str);
 std::unique_ptr<xml::XmlResource> BuildXmlDomForPackageName(IAaptContext* context,
                                                             const android::StringPiece& str);
 
-class PostProcessingConfigurationBuilder {
- public:
-  PostProcessingConfigurationBuilder() = default;
-
-  PostProcessingConfigurationBuilder& SetAbiGroup(const std::string& name,
-                                                  const std::vector<configuration::Abi>& abis);
-  PostProcessingConfigurationBuilder& SetLocaleGroup(const std::string& name,
-                                                     const std::vector<std::string>& locales);
-  PostProcessingConfigurationBuilder& SetDensityGroup(const std::string& name,
-                                                      const std::vector<std::string>& densities);
-  PostProcessingConfigurationBuilder& SetAndroidSdk(const std::string& name,
-                                                    const configuration::AndroidSdk& sdk);
-  PostProcessingConfigurationBuilder& AddArtifact(const configuration::Artifact& artifact);
-  configuration::PostProcessingConfiguration Build();
-
- private:
-  configuration::PostProcessingConfiguration config_;
-};
-
 class ArtifactBuilder {
  public:
   ArtifactBuilder() = default;
 
   ArtifactBuilder& SetName(const std::string& name);
-  ArtifactBuilder& SetAbiGroup(const std::string& name);
-  ArtifactBuilder& SetDensityGroup(const std::string& name);
-  ArtifactBuilder& SetLocaleGroup(const std::string& name);
-  ArtifactBuilder& SetAndroidSdk(const std::string& name);
-  configuration::Artifact Build();
+  ArtifactBuilder& AddAbi(configuration::Abi abi);
+  ArtifactBuilder& AddDensity(const ConfigDescription& density);
+  ArtifactBuilder& AddLocale(const ConfigDescription& locale);
+  ArtifactBuilder& SetAndroidSdk(int min_sdk);
+  configuration::OutputArtifact Build();
 
  private:
-  configuration::Artifact artifact_;
+  configuration::OutputArtifact artifact_;
 };
 
 }  // namespace test

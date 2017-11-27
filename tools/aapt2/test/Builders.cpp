@@ -25,7 +25,7 @@
 
 using ::aapt::configuration::Abi;
 using ::aapt::configuration::AndroidSdk;
-using ::aapt::configuration::Artifact;
+using ::aapt::configuration::ConfiguredArtifact;
 using ::aapt::io::StringInputStream;
 using ::android::StringPiece;
 
@@ -221,72 +221,32 @@ std::unique_ptr<xml::XmlResource> BuildXmlDomForPackageName(IAaptContext* contex
   return doc;
 }
 
-PostProcessingConfigurationBuilder& PostProcessingConfigurationBuilder::SetAbiGroup(
-    const std::string& name, const std::vector<Abi>& abis) {
-  config_.abi_groups[name] = abis;
-  return *this;
-}
-
-PostProcessingConfigurationBuilder& PostProcessingConfigurationBuilder::SetLocaleGroup(
-    const std::string& name, const std::vector<std::string>& locales) {
-  auto& group = config_.locale_groups[name];
-  for (const auto& locale : locales) {
-    group.push_back(ParseConfigOrDie(locale));
-  }
-  return *this;
-}
-
-PostProcessingConfigurationBuilder& PostProcessingConfigurationBuilder::SetDensityGroup(
-    const std::string& name, const std::vector<std::string>& densities) {
-  auto& group = config_.screen_density_groups[name];
-  for (const auto& density : densities) {
-    group.push_back(ParseConfigOrDie(density));
-  }
-  return *this;
-}
-
-PostProcessingConfigurationBuilder& PostProcessingConfigurationBuilder::SetAndroidSdk(
-    const std::string& name, const AndroidSdk& sdk) {
-  config_.android_sdk_groups[name] = sdk;
-  return *this;
-}
-
-PostProcessingConfigurationBuilder& PostProcessingConfigurationBuilder::AddArtifact(
-    const Artifact& artifact) {
-  config_.artifacts.push_back(artifact);
-  return *this;
-}
-
-configuration::PostProcessingConfiguration PostProcessingConfigurationBuilder::Build() {
-  return config_;
-}
-
 ArtifactBuilder& ArtifactBuilder::SetName(const std::string& name) {
-  artifact_.name = {name};
+  artifact_.name = name;
   return *this;
 }
 
-ArtifactBuilder& ArtifactBuilder::SetAbiGroup(const std::string& name) {
-  artifact_.abi_group = {name};
+ArtifactBuilder& ArtifactBuilder::AddAbi(configuration::Abi abi) {
+  artifact_.abis.push_back(abi);
   return *this;
 }
 
-ArtifactBuilder& ArtifactBuilder::SetDensityGroup(const std::string& name) {
-  artifact_.screen_density_group = {name};
+ArtifactBuilder& ArtifactBuilder::AddDensity(const ConfigDescription& density) {
+  artifact_.screen_densities.push_back(density);
   return *this;
 }
 
-ArtifactBuilder& ArtifactBuilder::SetLocaleGroup(const std::string& name) {
-  artifact_.locale_group = {name};
+ArtifactBuilder& ArtifactBuilder::AddLocale(const ConfigDescription& locale) {
+  artifact_.locales.push_back(locale);
   return *this;
 }
 
-ArtifactBuilder& ArtifactBuilder::SetAndroidSdk(const std::string& name) {
-  artifact_.android_sdk_group = {name};
+ArtifactBuilder& ArtifactBuilder::SetAndroidSdk(int min_sdk) {
+  artifact_.android_sdk = {AndroidSdk::ForMinSdk(min_sdk)};
   return *this;
 }
 
-configuration::Artifact ArtifactBuilder::Build() {
+configuration::OutputArtifact ArtifactBuilder::Build() {
   return artifact_;
 }
 
