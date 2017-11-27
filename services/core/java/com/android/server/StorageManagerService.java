@@ -2192,6 +2192,11 @@ class StorageManagerService extends IStorageManager.Stub implements Watchdog.Mon
         mContext.enforceCallingOrSelfPermission(Manifest.permission.CRYPT_KEEPER,
             "no permission to access the crypt keeper");
 
+        if (StorageManager.isFileEncryptedNativeOnly()) {
+            // Not supported on FBE devices
+            return -1;
+        }
+
         if (type == StorageManager.CRYPT_TYPE_DEFAULT) {
             password = "";
         } else if (TextUtils.isEmpty(password)) {
@@ -2268,6 +2273,11 @@ class StorageManagerService extends IStorageManager.Stub implements Watchdog.Mon
         mContext.enforceCallingOrSelfPermission(Manifest.permission.CRYPT_KEEPER,
             "no permission to access the crypt keeper");
 
+        if (StorageManager.isFileEncryptedNativeOnly()) {
+            // Not supported on FBE devices
+            return;
+        }
+
         try {
             mVold.fdeSetField(field, contents);
             return;
@@ -2286,6 +2296,11 @@ class StorageManagerService extends IStorageManager.Stub implements Watchdog.Mon
     public String getField(String field) throws RemoteException {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.CRYPT_KEEPER,
             "no permission to access the crypt keeper");
+
+        if (StorageManager.isFileEncryptedNativeOnly()) {
+            // Not supported on FBE devices
+            return null;
+        }
 
         try {
             return mVold.fdeGetField(field);
@@ -2568,7 +2583,7 @@ class StorageManagerService extends IStorageManager.Stub implements Watchdog.Mon
     }
 
     @Override
-    public int mkdirs(String callingPkg, String appPath) {
+    public void mkdirs(String callingPkg, String appPath) {
         final int userId = UserHandle.getUserId(Binder.getCallingUid());
         final UserEnvironment userEnv = new UserEnvironment(userId);
 
@@ -2581,8 +2596,7 @@ class StorageManagerService extends IStorageManager.Stub implements Watchdog.Mon
         try {
             appFile = new File(appPath).getCanonicalFile();
         } catch (IOException e) {
-            Slog.e(TAG, "Failed to resolve " + appPath + ": " + e);
-            return -1;
+            throw new IllegalStateException("Failed to resolve " + appPath + ": " + e);
         }
 
         // Try translating the app path into a vold path, but require that it
@@ -2597,9 +2611,8 @@ class StorageManagerService extends IStorageManager.Stub implements Watchdog.Mon
 
             try {
                 mVold.mkdirs(appPath);
-                return 0;
             } catch (Exception e) {
-                Slog.wtf(TAG, e);
+                throw new IllegalStateException("Failed to prepare " + appPath + ": " + e);
             }
         }
 
