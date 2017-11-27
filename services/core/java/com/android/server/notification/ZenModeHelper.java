@@ -947,7 +947,7 @@ public class ZenModeHelper {
         rule1.enabled = false;
         rule1.name = mDefaultRuleWeeknightsName;
         rule1.conditionId = ZenModeConfig.toScheduleConditionId(weeknights);
-        rule1.zenMode = Global.ZEN_MODE_ALARMS;
+        rule1.zenMode = Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
         rule1.component = ScheduleConditionProvider.COMPONENT;
         rule1.id = SCHEDULED_DEFAULT_RULE_1;
         rule1.creationTime = System.currentTimeMillis();
@@ -963,7 +963,7 @@ public class ZenModeHelper {
         rule2.enabled = false;
         rule2.name = mDefaultRuleWeekendsName;
         rule2.conditionId = ZenModeConfig.toScheduleConditionId(weekends);
-        rule2.zenMode = Global.ZEN_MODE_ALARMS;
+        rule2.zenMode = Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
         rule2.component = ScheduleConditionProvider.COMPONENT;
         rule2.id = SCHEDULED_DEFAULT_RULE_2;
         rule2.creationTime = System.currentTimeMillis();
@@ -980,7 +980,7 @@ public class ZenModeHelper {
         rule.enabled = false;
         rule.name = mDefaultRuleEventsName;
         rule.conditionId = ZenModeConfig.toEventConditionId(events);
-        rule.zenMode = Global.ZEN_MODE_ALARMS;
+        rule.zenMode = Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
         rule.component = EventConditionProvider.COMPONENT;
         rule.id = EVENTS_DEFAULT_RULE;
         rule.creationTime = System.currentTimeMillis();
