@@ -42,7 +42,6 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.Interpolators;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.statusbar.phone.StatusBar;
-import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.stack.StackStateAnimator;
 
 import java.io.FileDescriptor;
@@ -76,7 +75,7 @@ public class NotificationGutsManager implements Dumpable {
 
     // TODO: Create NotificationListContainer interface and use it instead of
     // NotificationStackScrollLayout here
-    private NotificationStackScrollLayout mStackScroller;
+    private NotificationListContainer mListContainer;
     private NotificationInfo.CheckSaveListener mCheckSaveListener;
     private OnSettingsClickListener mOnSettingsClickListener;
     private String mKeyToRemoveOnGutsClosed;
@@ -96,12 +95,11 @@ public class NotificationGutsManager implements Dumpable {
                 mContext.getSystemService(Context.ACCESSIBILITY_SERVICE);
     }
 
-    public void setUp(NotificationPresenter presenter,
-            NotificationStackScrollLayout stackScroller,
+    public void setUp(NotificationPresenter presenter, NotificationListContainer listContainer,
             NotificationInfo.CheckSaveListener checkSaveListener,
             OnSettingsClickListener onSettingsClickListener) {
         mPresenter = presenter;
-        mStackScroller = stackScroller;
+        mListContainer = listContainer;
         mCheckSaveListener = checkSaveListener;
         mOnSettingsClickListener = onSettingsClickListener;
     }
@@ -158,7 +156,7 @@ public class NotificationGutsManager implements Dumpable {
         final NotificationGuts guts = row.getGuts();
         guts.setClosedListener((NotificationGuts g) -> {
             if (!g.willBeRemoved() && !row.isRemoved()) {
-                mStackScroller.onHeightChanged(
+                mListContainer.onHeightChanged(
                         row, !mPresenter.isPresenterFullyCollapsed() /* needsAnimation */);
             }
             if (mNotificationGutsExposed == g) {
@@ -176,11 +174,11 @@ public class NotificationGutsManager implements Dumpable {
         View gutsView = item.getGutsView();
         if (gutsView instanceof NotificationSnooze) {
             NotificationSnooze snoozeGuts = (NotificationSnooze) gutsView;
-            snoozeGuts.setSnoozeListener(mStackScroller.getSwipeActionHelper());
+            snoozeGuts.setSnoozeListener(mListContainer.getSwipeActionHelper());
             snoozeGuts.setStatusBarNotification(sbn);
             snoozeGuts.setSnoozeOptions(row.getEntry().snoozeCriteria);
             guts.setHeightChangedListener((NotificationGuts g) -> {
-                mStackScroller.onHeightChanged(row, row.isShown() /* needsAnimation */);
+                mListContainer.onHeightChanged(row, row.isShown() /* needsAnimation */);
             });
         }
 
@@ -258,7 +256,7 @@ public class NotificationGutsManager implements Dumpable {
             mNotificationGutsExposed.closeControls(removeLeavebehinds, removeControls, x, y, force);
         }
         if (resetMenu) {
-            mStackScroller.resetExposedMenuView(false /* animate */, true /* force */);
+            mListContainer.resetExposedMenuView(false /* animate */, true /* force */);
         }
     }
 
@@ -351,7 +349,7 @@ public class NotificationGutsManager implements Dumpable {
                                 !mAccessibilityManager.isTouchExplorationEnabled());
                 guts.setExposed(true /* exposed */, needsFalsingProtection);
                 row.closeRemoteInput();
-                mStackScroller.onHeightChanged(row, true /* needsAnimation */);
+                mListContainer.onHeightChanged(row, true /* needsAnimation */);
                 mNotificationGutsExposed = guts;
                 mGutsMenuItem = item;
             }

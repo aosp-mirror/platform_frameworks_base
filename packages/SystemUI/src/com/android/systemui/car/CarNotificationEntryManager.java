@@ -29,6 +29,7 @@ import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
+import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 
@@ -43,10 +44,11 @@ public class CarNotificationEntryManager extends NotificationEntryManager {
             NotificationListener notificationListener,
             MetricsLogger metricsLogger,
             DeviceProvisionedController deviceProvisionedController,
+            VisualStabilityManager visualStabilityManager,
             UiOffloadThread uiOffloadThread, Context context) {
         super(lockscreenUserManager, groupManager, gutsManager, remoteInputManager, mediaManager,
                 foregroundServiceController, notificationListener, metricsLogger,
-                deviceProvisionedController, uiOffloadThread, context);
+                deviceProvisionedController, visualStabilityManager, uiOffloadThread, context);
     }
 
     /**

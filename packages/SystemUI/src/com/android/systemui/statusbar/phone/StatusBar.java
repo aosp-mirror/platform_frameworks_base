@@ -28,7 +28,6 @@ import static com.android.systemui.statusbar.NotificationLockscreenUserManager
         .NOTIFICATION_UNLOCKED_BY_WORK_CHALLENGE_ACTION;
 import static com.android.systemui.statusbar.NotificationLockscreenUserManager.PERMISSION_SELF;
 import static com.android.systemui.statusbar.NotificationMediaManager.DEBUG_MEDIA;
-import static com.android.systemui.statusbar.NotificationRemoteInputManager.ENABLE_REMOTE_INPUT;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT_TRANSPARENT;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_OPAQUE;
@@ -198,6 +197,7 @@ import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShelf;
+import com.android.systemui.statusbar.NotificationViewHierarchyManager;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.ScrimView;
 import com.android.systemui.statusbar.SignalClusterView;
@@ -233,14 +233,12 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Stack;
 
 public class StatusBar extends SystemUI implements DemoMode,
         DragDownHelper.DragDownCallback, ActivityStarter, OnUnlockMethodChangedListener,
-        OnHeadsUpChangedListener, VisualStabilityManager.Callback, CommandQueue.Callbacks,
+        OnHeadsUpChangedListener, CommandQueue.Callbacks,
         ColorExtractor.OnColorsChangedListener, ConfigurationListener, NotificationPresenter {
     public static final boolean MULTIUSER_DEBUG = false;
 
@@ -371,13 +369,6 @@ public class StatusBar extends SystemUI implements DemoMode,
     protected NotificationPanelView mNotificationPanel; // the sliding/resizing panel within the notification window
     private TextView mNotificationPanelDebugText;
 
-    /**
-     * {@code true} if notifications not part of a group should by default be rendered in their
-     * expanded state. If {@code false}, then only the first notification will be expanded if
-     * possible.
-     */
-    private boolean mAlwaysExpandNonGroupedNotification;
-
     // settings
     private QSPanel mQSPanel;
 
@@ -407,6 +398,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private NotificationGutsManager mGutsManager;
     protected NotificationLogger mNotificationLogger;
     protected NotificationEntryManager mEntryManager;
+    protected NotificationViewHierarchyManager mViewHierarchyManager;
 
     // for disabling the status bar
     private int mDisabled1 = 0;
@@ -577,8 +569,6 @@ public class StatusBar extends SystemUI implements DemoMode,
             goToLockedShade(null);
         }
     };
-    private final HashMap<ExpandableNotificationRow, List<ExpandableNotificationRow>>
-            mTmpChildOrderMap = new HashMap<>();
     private boolean mNoAnimationOnNextBarModeChange;
     private FalsingManager mFalsingManager;
 
@@ -598,6 +588,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     @Override
     public void start() {
         mGroupManager = Dependency.get(NotificationGroupManager.class);
+        mVisualStabilityManager = Dependency.get(VisualStabilityManager.class);
         mNotificationLogger = Dependency.get(NotificationLogger.class);
         mRemoteInputManager = Dependency.get(NotificationRemoteInputManager.class);
         mNotificationListener =  Dependency.get(NotificationListener.class);
@@ -616,6 +607,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mGutsManager = Dependency.get(NotificationGutsManager.class);
         mMediaManager = Dependency.get(NotificationMediaManager.class);
         mEntryManager = Dependency.get(NotificationEntryManager.class);
+        mViewHierarchyManager = Dependency.get(NotificationViewHierarchyManager.class);
 
         mColorExtractor = Dependency.get(SysuiColorExtractor.class);
         mColorExtractor.addOnColorsChangedListener(this);
@@ -628,8 +620,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         Resources res = mContext.getResources();
         mScrimSrcModeEnabled = res.getBoolean(R.bool.config_status_bar_scrim_behind_use_src);
         mClearAllEnabled = res.getBoolean(R.bool.config_enableNotificationsClearAll);
-        mAlwaysExpandNonGroupedNotification =
-                res.getBoolean(R.bool.config_alwaysExpandNonGroupedNotifications);
 
         DateTimeView.setReceiverHandler(Dependency.get(Dependency.TIME_TICK_HANDLER));
         putComponent(StatusBar.class, this);
@@ -814,8 +804,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         mHeadsUpManager.setVisualStabilityManager(mVisualStabilityManager);
         putComponent(HeadsUpManager.class, mHeadsUpManager);
 
-        mEntryManager.setUpWithPresenter(this, mStackScroller, this, mVisualStabilityManager,
-                mHeadsUpManager);
+        mEntryManager.setUpWithPresenter(this, mStackScroller, this, mHeadsUpManager);
+        mViewHierarchyManager.setUpWithPresenter(this, mEntryManager, mStackScroller);
 
         if (MULTIUSER_DEBUG) {
             mNotificationPanelDebugText = mNotificationPanel.findViewById(R.id.header_debug_info);
@@ -1361,112 +1351,8 @@ public class StatusBar extends SystemUI implements DemoMode,
             return;
         }
 
-        ArrayList<Entry> activeNotifications = mEntryManager.getNotificationData()
-                .getActiveNotifications();
-        ArrayList<ExpandableNotificationRow> toShow = new ArrayList<>(activeNotifications.size());
-        final int N = activeNotifications.size();
-        for (int i = 0; i < N; i++) {
-            Entry ent = activeNotifications.get(i);
-            if (ent.row.isDismissed() || ent.row.isRemoved()) {
-                // we don't want to update removed notifications because they could
-                // temporarily become children if they were isolated before.
-                continue;
-            }
-            int userId = ent.notification.getUserId();
+        mViewHierarchyManager.updateNotificationViews();
 
-            // Display public version of the notification if we need to redact.
-            // TODO: This area uses a lot of calls into NotificationLockscreenUserManager.
-            // We can probably move some of this code there.
-            boolean devicePublic = mLockscreenUserManager.isLockscreenPublicMode(
-                    mLockscreenUserManager.getCurrentUserId());
-            boolean userPublic = devicePublic
-                    || mLockscreenUserManager.isLockscreenPublicMode(userId);
-            boolean needsRedaction = mLockscreenUserManager.needsRedaction(ent);
-            boolean sensitive = userPublic && needsRedaction;
-            boolean deviceSensitive = devicePublic
-                    && !mLockscreenUserManager.userAllowsPrivateNotificationsInPublic(
-                    mLockscreenUserManager.getCurrentUserId());
-            ent.row.setSensitive(sensitive, deviceSensitive);
-            ent.row.setNeedsRedaction(needsRedaction);
-            if (mGroupManager.isChildInGroupWithSummary(ent.row.getStatusBarNotification())) {
-                ExpandableNotificationRow summary = mGroupManager.getGroupSummary(
-                        ent.row.getStatusBarNotification());
-                List<ExpandableNotificationRow> orderedChildren =
-                        mTmpChildOrderMap.get(summary);
-                if (orderedChildren == null) {
-                    orderedChildren = new ArrayList<>();
-                    mTmpChildOrderMap.put(summary, orderedChildren);
-                }
-                orderedChildren.add(ent.row);
-            } else {
-                toShow.add(ent.row);
-            }
-
-        }
-
-        ArrayList<ExpandableNotificationRow> toRemove = new ArrayList<>();
-        for (int i=0; i< mStackScroller.getChildCount(); i++) {
-            View child = mStackScroller.getChildAt(i);
-            if (!toShow.contains(child) && child instanceof ExpandableNotificationRow) {
-                toRemove.add((ExpandableNotificationRow) child);
-            }
-        }
-
-        for (ExpandableNotificationRow remove : toRemove) {
-            if (mGroupManager.isChildInGroupWithSummary(remove.getStatusBarNotification())) {
-                // we are only transferring this notification to its parent, don't generate an
-                // animation
-                mStackScroller.setChildTransferInProgress(true);
-            }
-            if (remove.isSummaryWithChildren()) {
-                remove.removeAllChildren();
-            }
-            mStackScroller.removeView(remove);
-            mStackScroller.setChildTransferInProgress(false);
-        }
-
-        removeNotificationChildren();
-
-        for (int i = 0; i < toShow.size(); i++) {
-            View v = toShow.get(i);
-            if (v.getParent() == null) {
-                mVisualStabilityManager.notifyViewAddition(v);
-                mStackScroller.addView(v);
-            }
-        }
-
-        addNotificationChildrenAndSort();
-
-        // So after all this work notifications still aren't sorted correctly.
-        // Let's do that now by advancing through toShow and mStackScroller in
-        // lock-step, making sure mStackScroller matches what we see in toShow.
-        int j = 0;
-        for (int i = 0; i < mStackScroller.getChildCount(); i++) {
-            View child = mStackScroller.getChildAt(i);
-            if (!(child instanceof ExpandableNotificationRow)) {
-                // We don't care about non-notification views.
-                continue;
-            }
-
-            ExpandableNotificationRow targetChild = toShow.get(j);
-            if (child != targetChild) {
-                // Oops, wrong notification at this position. Put the right one
-                // here and advance both lists.
-                if (mVisualStabilityManager.canReorderNotification(targetChild)) {
-                    mStackScroller.changeViewPosition(targetChild, i);
-                } else {
-                    mVisualStabilityManager.addReorderingAllowedCallback(this);
-                }
-            }
-            j++;
-
-        }
-
-        mVisualStabilityManager.onReorderingFinished();
-        // clear the map again for the next usage
-        mTmpChildOrderMap.clear();
-
-        updateRowStates();
         updateSpeedBumpIndex();
         updateClearAll();
         updateEmptyShadeView();
@@ -1519,82 +1405,6 @@ public class StatusBar extends SystemUI implements DemoMode,
                 && ((mDisabled2 & StatusBarManager.DISABLE2_QUICK_SETTINGS) == 0)
                 && !mDozing
                 && !ONLY_CORE_APPS);
-    }
-
-    private void addNotificationChildrenAndSort() {
-        // Let's now add all notification children which are missing
-        boolean orderChanged = false;
-        for (int i = 0; i < mStackScroller.getChildCount(); i++) {
-            View view = mStackScroller.getChildAt(i);
-            if (!(view instanceof ExpandableNotificationRow)) {
-                // We don't care about non-notification views.
-                continue;
-            }
-
-            ExpandableNotificationRow parent = (ExpandableNotificationRow) view;
-            List<ExpandableNotificationRow> children = parent.getNotificationChildren();
-            List<ExpandableNotificationRow> orderedChildren = mTmpChildOrderMap.get(parent);
-
-            for (int childIndex = 0; orderedChildren != null && childIndex < orderedChildren.size();
-                    childIndex++) {
-                ExpandableNotificationRow childView = orderedChildren.get(childIndex);
-                if (children == null || !children.contains(childView)) {
-                    if (childView.getParent() != null) {
-                        Log.wtf(TAG, "trying to add a notification child that already has " +
-                                "a parent. class:" + childView.getParent().getClass() +
-                                "\n child: " + childView);
-                        // This shouldn't happen. We can recover by removing it though.
-                        ((ViewGroup) childView.getParent()).removeView(childView);
-                    }
-                    mVisualStabilityManager.notifyViewAddition(childView);
-                    parent.addChildNotification(childView, childIndex);
-                    mStackScroller.notifyGroupChildAdded(childView);
-                }
-            }
-
-            // Finally after removing and adding has been performed we can apply the order.
-            orderChanged |= parent.applyChildOrder(orderedChildren, mVisualStabilityManager, this);
-        }
-        if (orderChanged) {
-            mStackScroller.generateChildOrderChangedEvent();
-        }
-    }
-
-    private void removeNotificationChildren() {
-        // First let's remove all children which don't belong in the parents
-        ArrayList<ExpandableNotificationRow> toRemove = new ArrayList<>();
-        for (int i = 0; i < mStackScroller.getChildCount(); i++) {
-            View view = mStackScroller.getChildAt(i);
-            if (!(view instanceof ExpandableNotificationRow)) {
-                // We don't care about non-notification views.
-                continue;
-            }
-
-            ExpandableNotificationRow parent = (ExpandableNotificationRow) view;
-            List<ExpandableNotificationRow> children = parent.getNotificationChildren();
-            List<ExpandableNotificationRow> orderedChildren = mTmpChildOrderMap.get(parent);
-
-            if (children != null) {
-                toRemove.clear();
-                for (ExpandableNotificationRow childRow : children) {
-                    if ((orderedChildren == null
-                            || !orderedChildren.contains(childRow))
-                            && !childRow.keepInParent()) {
-                        toRemove.add(childRow);
-                    }
-                }
-                for (ExpandableNotificationRow remove : toRemove) {
-                    parent.removeChildNotification(remove);
-                    if (mEntryManager.getNotificationData().get(
-                            remove.getStatusBarNotification().getKey()) == null) {
-                        // We only want to add an animation if the view is completely removed
-                        // otherwise it's just a transfer
-                        mStackScroller.notifyGroupChildRemoved(remove,
-                                parent.getChildrenContainer());
-                    }
-                }
-            }
-        }
     }
 
     public void addQsTile(ComponentName tile) {
@@ -2169,11 +1979,6 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     public boolean isPulsing() {
         return mDozeScrimController != null && mDozeScrimController.isPulsing();
-    }
-
-    @Override
-    public void onReorderingAllowed() {
-        mEntryManager.updateNotifications();
     }
 
     public boolean isLaunchTransitionFadingAway() {
@@ -3146,7 +2951,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             Log.v(TAG, "configuration changed: " + mContext.getResources().getConfiguration());
         }
 
-        updateRowStates();
+        mViewHierarchyManager.updateRowStates();
         mScreenPinningRequest.onConfigurationChanged();
     }
 
@@ -3919,7 +3724,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mKeyguardIndicationController.setDozing(mDozing);
         mNotificationPanel.setDark(mDozing, animate);
         updateQsExpansionEnabled();
-        updateRowStates();
+        mViewHierarchyManager.updateRowStates();
         Trace.endSection();
     }
 
@@ -4123,7 +3928,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
     }
 
-    protected int getMaxKeyguardNotifications(boolean recompute) {
+    @Override
+    public int getMaxNotificationsWhileLocked(boolean recompute) {
         if (recompute) {
             mMaxKeyguardNotifications = Math.max(1,
                     mNotificationPanel.computeMaxKeyguardNotifications(
@@ -4133,8 +3939,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         return mMaxKeyguardNotifications;
     }
 
-    public int getMaxKeyguardNotifications() {
-        return getMaxKeyguardNotifications(false /* recompute */);
+    public int getMaxNotificationsWhileLocked() {
+        return getMaxNotificationsWhileLocked(false /* recompute */);
     }
 
     // TODO: Figure out way to remove these.
@@ -4962,8 +4768,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private AboveShelfObserver mAboveShelfObserver;
 
     // handling reordering
-    protected final VisualStabilityManager mVisualStabilityManager = new VisualStabilityManager();
-
+    protected VisualStabilityManager mVisualStabilityManager;
 
     protected AccessibilityManager mAccessibilityManager;
 
@@ -5340,10 +5145,10 @@ public class StatusBar extends SystemUI implements DemoMode,
         if (mState == StatusBarState.KEYGUARD) {
             // Since the number of notifications is determined based on the height of the view, we
             // need to update them.
-            int maxBefore = getMaxKeyguardNotifications(false /* recompute */);
-            int maxNotifications = getMaxKeyguardNotifications(true /* recompute */);
+            int maxBefore = getMaxNotificationsWhileLocked(false /* recompute */);
+            int maxNotifications = getMaxNotificationsWhileLocked(true /* recompute */);
             if (maxBefore != maxNotifications) {
-                updateRowStates();
+                mViewHierarchyManager.updateRowStates();
             }
         }
     }
@@ -5444,76 +5249,8 @@ public class StatusBar extends SystemUI implements DemoMode,
     /**
      * Updates expanded, dimmed and locked states of notification rows.
      */
-    protected void updateRowStates() {
-        final int N = mStackScroller.getChildCount();
-
-        int visibleNotifications = 0;
-        boolean onKeyguard = mState == StatusBarState.KEYGUARD;
-        int maxNotifications = -1;
-        if (onKeyguard) {
-            maxNotifications = getMaxKeyguardNotifications(true /* recompute */);
-        }
-        mStackScroller.setMaxDisplayedNotifications(maxNotifications);
-        Stack<ExpandableNotificationRow> stack = new Stack<>();
-        for (int i = N - 1; i >= 0; i--) {
-            View child = mStackScroller.getChildAt(i);
-            if (!(child instanceof ExpandableNotificationRow)) {
-                continue;
-            }
-            stack.push((ExpandableNotificationRow) child);
-        }
-        while(!stack.isEmpty()) {
-            ExpandableNotificationRow row = stack.pop();
-            NotificationData.Entry entry = row.getEntry();
-            boolean isChildNotification =
-                    mGroupManager.isChildInGroupWithSummary(entry.notification);
-
-            row.setOnKeyguard(onKeyguard);
-
-            if (!onKeyguard) {
-                // If mAlwaysExpandNonGroupedNotification is false, then only expand the
-                // very first notification and if it's not a child of grouped notifications.
-                row.setSystemExpanded(mAlwaysExpandNonGroupedNotification
-                        || (visibleNotifications == 0 && !isChildNotification
-                        && !row.isLowPriority()));
-            }
-
-            entry.row.setShowAmbient(isDozing());
-            int userId = entry.notification.getUserId();
-            boolean suppressedSummary = mGroupManager.isSummaryOfSuppressedGroup(
-                    entry.notification) && !entry.row.isRemoved();
-            boolean showOnKeyguard = mLockscreenUserManager.shouldShowOnKeyguard(entry
-                    .notification);
-            if (suppressedSummary
-                    || (mLockscreenUserManager.isLockscreenPublicMode(userId)
-                            && !mLockscreenUserManager.shouldShowLockscreenNotifications())
-                    || (onKeyguard && !showOnKeyguard)) {
-                entry.row.setVisibility(View.GONE);
-            } else {
-                boolean wasGone = entry.row.getVisibility() == View.GONE;
-                if (wasGone) {
-                    entry.row.setVisibility(View.VISIBLE);
-                }
-                if (!isChildNotification && !entry.row.isRemoved()) {
-                    if (wasGone) {
-                        // notify the scroller of a child addition
-                        mStackScroller.generateAddAnimation(entry.row,
-                                !showOnKeyguard /* fromMoreCard */);
-                    }
-                    visibleNotifications++;
-                }
-            }
-            if (row.isSummaryWithChildren()) {
-                List<ExpandableNotificationRow> notificationChildren =
-                        row.getNotificationChildren();
-                int size = notificationChildren.size();
-                for (int i = size - 1; i >= 0; i--) {
-                    stack.push(notificationChildren.get(i));
-                }
-            }
-        }
-        mNotificationPanel.setNoVisibleNotifications(visibleNotifications == 0);
-
+    @Override
+    public void onUpdateRowStates() {
         // The following views will be moved to the end of mStackScroller. This counter represents
         // the offset from the last child. Initialized to 1 for the very last position. It is post-
         // incremented in the following "changeViewPosition" calls so that its value is correct for

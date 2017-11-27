@@ -31,6 +31,7 @@ import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
+import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.volume.car.CarVolumeDialogController;
@@ -54,6 +55,7 @@ public class CarSystemUIFactory extends SystemUIFactory {
                 Dependency.get(NotificationListener.class),
                 Dependency.get(MetricsLogger.class),
                 Dependency.get(DeviceProvisionedController.class),
+                Dependency.get(VisualStabilityManager.class),
                 Dependency.get(UiOffloadThread.class),
                 context));
     }

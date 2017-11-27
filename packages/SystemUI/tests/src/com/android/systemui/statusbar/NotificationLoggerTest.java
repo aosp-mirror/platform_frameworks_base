@@ -36,7 +36,6 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.UiOffloadThread;
-import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 
 import com.google.android.collect.Lists;
 
@@ -57,7 +56,7 @@ public class NotificationLoggerTest extends SysuiTestCase {
     @Mock private NotificationPresenter mPresenter;
     @Mock private NotificationEntryManager mEntryManager;
     @Mock private NotificationListener mListener;
-    @Mock private NotificationStackScrollLayout mStackScroller;
+    @Mock private NotificationListContainer mListContainer;
     @Mock private IStatusBarService mBarService;
     @Mock private NotificationData mNotificationData;
     @Mock private ExpandableNotificationRow mRow;
@@ -80,14 +79,14 @@ public class NotificationLoggerTest extends SysuiTestCase {
 
         mLogger = new TestableNotificationLogger(mListener, mDependency.get(UiOffloadThread.class),
                 mBarService);
-        mLogger.setUpWithPresenter(mPresenter, mStackScroller);
+        mLogger.setUpWithPresenter(mPresenter, mListContainer);
     }
 
     @Test
     public void testOnChildLocationsChangedReportsVisibilityChanged() throws Exception {
-        when(mStackScroller.isInVisibleLocation(any())).thenReturn(true);
+        when(mListContainer.isInVisibleLocation(any())).thenReturn(true);
         when(mNotificationData.getActiveNotifications()).thenReturn(Lists.newArrayList(mEntry));
-        mLogger.getChildLocationsChangedListenerForTest().onChildLocationsChanged(mStackScroller);
+        mLogger.getChildLocationsChangedListenerForTest().onChildLocationsChanged();
         waitForIdleSync(mLogger.getHandlerForTest());
         waitForUiOffloadThread();
 
@@ -99,7 +98,7 @@ public class NotificationLoggerTest extends SysuiTestCase {
 
         // |mEntry| won't change visibility, so it shouldn't be reported again:
         Mockito.reset(mBarService);
-        mLogger.getChildLocationsChangedListenerForTest().onChildLocationsChanged(mStackScroller);
+        mLogger.getChildLocationsChangedListenerForTest().onChildLocationsChanged();
         waitForIdleSync(mLogger.getHandlerForTest());
         waitForUiOffloadThread();
 
@@ -109,9 +108,9 @@ public class NotificationLoggerTest extends SysuiTestCase {
     @Test
     public void testStoppingNotificationLoggingReportsCurrentNotifications()
             throws Exception {
-        when(mStackScroller.isInVisibleLocation(any())).thenReturn(true);
+        when(mListContainer.isInVisibleLocation(any())).thenReturn(true);
         when(mNotificationData.getActiveNotifications()).thenReturn(Lists.newArrayList(mEntry));
-        mLogger.getChildLocationsChangedListenerForTest().onChildLocationsChanged(mStackScroller);
+        mLogger.getChildLocationsChangedListenerForTest().onChildLocationsChanged();
         waitForIdleSync(mLogger.getHandlerForTest());
         waitForUiOffloadThread();
         Mockito.reset(mBarService);
@@ -135,7 +134,7 @@ public class NotificationLoggerTest extends SysuiTestCase {
             mHandler = new Handler(Looper.getMainLooper());
         }
 
-        public NotificationStackScrollLayout.OnChildLocationsChangedListener
+        public OnChildLocationsChangedListener
                 getChildLocationsChangedListenerForTest() {
             return mNotificationLocationsChangedListener;
         }

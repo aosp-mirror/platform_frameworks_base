@@ -80,6 +80,8 @@ import com.android.systemui.statusbar.ExpandableOutlineView;
 import com.android.systemui.statusbar.ExpandableView;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.NotificationGuts;
+import com.android.systemui.statusbar.NotificationListContainer;
+import com.android.systemui.statusbar.NotificationLogger;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.NotificationSnooze;
 import com.android.systemui.statusbar.StackScrollerDecorView;
@@ -112,7 +114,8 @@ import java.util.List;
 public class NotificationStackScrollLayout extends ViewGroup
         implements SwipeHelper.Callback, ExpandHelper.Callback, ScrollAdapter,
         ExpandableView.OnHeightChangedListener, NotificationGroupManager.OnGroupChangeListener,
-        NotificationMenuRowPlugin.OnMenuEventListener, VisibilityLocationProvider {
+        NotificationMenuRowPlugin.OnMenuEventListener, VisibilityLocationProvider,
+        NotificationListContainer {
 
     public static final float BACKGROUND_ALPHA_DIMMED = 0.7f;
     private static final String TAG = "StackScroller";
@@ -207,7 +210,7 @@ public class NotificationStackScrollLayout extends ViewGroup
      * The raw amount of the overScroll on the bottom, which is not rubber-banded.
      */
     private float mOverScrolledBottomPixels;
-    private OnChildLocationsChangedListener mListener;
+    private NotificationLogger.OnChildLocationsChangedListener mListener;
     private OnOverscrollTopChangedListener mOverscrollTopChangedListener;
     private ExpandableView.OnHeightChangedListener mOnHeightChangedListener;
     private OnEmptySpaceClickListener mOnEmptySpaceClickListener;
@@ -447,6 +450,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
     }
 
+    @Override
     public NotificationSwipeActionHelper getSwipeActionHelper() {
         return mSwipeHelper;
     }
@@ -614,7 +618,9 @@ public class NotificationStackScrollLayout extends ViewGroup
         mNoAmbient = noAmbient;
     }
 
-    public void setChildLocationsChangedListener(OnChildLocationsChangedListener listener) {
+    @Override
+    public void setChildLocationsChangedListener(
+            NotificationLogger.OnChildLocationsChangedListener listener) {
         mListener = listener;
     }
 
@@ -1325,11 +1331,17 @@ public class NotificationStackScrollLayout extends ViewGroup
                 true /* isDismissAll */);
     }
 
+    @Override
     public void snapViewIfNeeded(ExpandableNotificationRow child) {
         boolean animate = mIsExpanded || isPinnedHeadsUp(child);
         // If the child is showing the notification menu snap to that
         float targetLeft = child.getProvider().isMenuVisible() ? child.getTranslation() : 0;
         mSwipeHelper.snapChildIfNeeded(child, animate, targetLeft);
+    }
+
+    @Override
+    public ViewGroup getViewParentForNotification(NotificationData.Entry entry) {
+        return this;
     }
 
     @Override
@@ -2053,6 +2065,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         return mAmbientState.isPulsing(entry);
     }
 
+    @Override
     public boolean hasPulsingNotifications() {
         return mPulsing != null;
     }
@@ -2610,10 +2623,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
     }
 
-    /**
-     * Called when a notification is removed from the shade. This cleans up the state for a given
-     * view.
-     */
+    @Override
     public void cleanUpViewState(View child) {
         if (child == mTranslatingParentView) {
             mTranslatingParentView = null;
@@ -2922,10 +2932,12 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
     }
 
+    @Override
     public void notifyGroupChildRemoved(View row, ViewGroup childrenContainer) {
         onViewRemovedInternal(row, childrenContainer);
     }
 
+    @Override
     public void notifyGroupChildAdded(View row) {
         onViewAddedInternal(row);
     }
@@ -2963,12 +2975,8 @@ public class NotificationStackScrollLayout extends ViewGroup
         return mNeedsAnimation
                 && (!mChildrenToAddAnimated.isEmpty() || !mChildrenToRemoveAnimated.isEmpty());
     }
-    /**
-     * Generate an animation for an added child view.
-     *
-     * @param child The view to be added.
-     * @param fromMoreCard Whether this add is coming from the "more" card on lockscreen.
-     */
+
+    @Override
     public void generateAddAnimation(View child, boolean fromMoreCard) {
         if (mIsExpanded && mAnimationsEnabled && !mChangePositionInProgress) {
             // Generate Animations
@@ -2984,12 +2992,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
     }
 
-    /**
-     * Change the position of child to a new location
-     *
-     * @param child the view to change the position for
-     * @param newIndex the new index
-     */
+    @Override
     public void changeViewPosition(View child, int newIndex) {
         int currentIndex = indexOfChild(child);
         if (child != null && child.getParent() == this && currentIndex != newIndex) {
@@ -3705,7 +3708,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private void applyCurrentState() {
         mCurrentStackScrollState.apply();
         if (mListener != null) {
-            mListener.onChildLocationsChanged(this);
+            mListener.onChildLocationsChanged();
         }
         runAnimationFinishedRunnables();
         setAnimationRunning(false);
@@ -4189,6 +4192,26 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
     }
 
+    @Override
+    public int getContainerChildCount() {
+        return getChildCount();
+    }
+
+    @Override
+    public View getContainerChildAt(int i) {
+        return getChildAt(i);
+    }
+
+    @Override
+    public void removeContainerView(View v) {
+        removeView(v);
+    }
+
+    @Override
+    public void addContainerView(View v) {
+        addView(v);
+    }
+
     public void runAfterAnimationFinished(Runnable runnable) {
         mAnimationFinishedRunnables.add(runnable);
     }
@@ -4442,13 +4465,6 @@ public class NotificationStackScrollLayout extends ViewGroup
                                 : "invisible",
                 getAlpha(),
                 mAmbientState.getScrollY()));
-    }
-
-    /**
-     * A listener that is notified when some child locations might have changed.
-     */
-    public interface OnChildLocationsChangedListener {
-        void onChildLocationsChanged(NotificationStackScrollLayout stackScrollLayout);
     }
 
     /**
@@ -4706,6 +4722,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
     }
 
+    @Override
     public void resetExposedMenuView(boolean animate, boolean force) {
         mSwipeHelper.resetExposedMenuView(animate, force);
     }

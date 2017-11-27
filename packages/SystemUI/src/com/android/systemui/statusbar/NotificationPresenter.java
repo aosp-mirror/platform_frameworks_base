@@ -104,7 +104,6 @@ public interface NotificationPresenter extends NotificationData.Environment,
      */
     NotificationEntryManager getEntryManager();
 
-    // TODO: Remove this once the view managing code is pulled out of StatusBar.
     /**
      * Updates the visual representation of the notifications.
      */
@@ -114,4 +113,17 @@ public interface NotificationPresenter extends NotificationData.Environment,
      * @return true iff the device is dozing
      */
     boolean isDozing();
+
+    /**
+     * Returns the maximum number of notifications to show while locked.
+     *
+     * @param recompute whether something has changed that means we should recompute this value
+     * @return the maximum number of notifications to show while locked
+     */
+    int getMaxNotificationsWhileLocked(boolean recompute);
+
+    /**
+     * Called when the row states are updated by NotificationViewHierarchyManager.
+     */
+    void onUpdateRowStates();
 }

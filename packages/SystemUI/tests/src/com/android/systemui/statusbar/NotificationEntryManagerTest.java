@@ -41,7 +41,7 @@ import android.service.notification.StatusBarNotification;
 import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
-import android.view.ViewGroup;
+import android.widget.FrameLayout;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.statusbar.IStatusBarService;
@@ -53,7 +53,6 @@ import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
-import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -83,9 +82,9 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
     @Mock private NotificationListener mNotificationListener;
     @Mock private MetricsLogger mMetricsLogger;
     @Mock private DeviceProvisionedController mDeviceProvisionedController;
-    @Mock private NotificationStackScrollLayout mStackScroller;
-    @Mock private NotificationEntryManager.Callback mCallback;
     @Mock private VisualStabilityManager mVisualStabilityManager;
+    @Mock private NotificationListContainer mListContainer;
+    @Mock private NotificationEntryManager.Callback mCallback;
     @Mock private HeadsUpManager mHeadsUpManager;
     @Mock private NotificationListenerService.RankingMap mRankingMap;
     @Mock private RemoteInputController mRemoteInputController;
@@ -110,11 +109,12 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
                 NotificationListener notificationListener,
                 MetricsLogger metricsLogger,
                 DeviceProvisionedController deviceProvisionedController,
+                VisualStabilityManager visualStabilityManager,
                 UiOffloadThread uiOffloadThread, Context context,
                 IStatusBarService barService) {
             super(lockscreenUserManager, groupManager, gutsManager, remoteInputManager,
                     mediaManager, foregroundServiceController, notificationListener, metricsLogger,
-                    deviceProvisionedController, uiOffloadThread, context);
+                    deviceProvisionedController, visualStabilityManager, uiOffloadThread, context);
             mBarService = barService;
             mCountDownLatch = new CountDownLatch(1);
             mUseHeadsUp = true;
@@ -143,9 +143,8 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         when(mPresenter.getNotificationLockscreenUserManager()).thenReturn(mLockscreenUserManager);
         when(mPresenter.getGroupManager()).thenReturn(mGroupManager);
         when(mRemoteInputManager.getController()).thenReturn(mRemoteInputController);
-        // Necessary for layout inflation.
-        when(mStackScroller.generateLayoutParams(any())).thenReturn(new ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        when(mListContainer.getViewParentForNotification(any())).thenReturn(
+                new FrameLayout(mContext));
 
         Notification.Builder n = new Notification.Builder(mContext, "")
                 .setSmallIcon(R.drawable.ic_person)
@@ -159,10 +158,10 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         mEntryManager = new TestableNotificationEntryManager(mLockscreenUserManager,
                 mGroupManager, mGutsManager, mRemoteInputManager, mMediaManager,
                 mForegroundServiceController, mNotificationListener, mMetricsLogger,
-                mDeviceProvisionedController, mDependency.get(UiOffloadThread.class), mContext,
+                mDeviceProvisionedController, mVisualStabilityManager,
+                mDependency.get(UiOffloadThread.class), mContext,
                 mBarService);
-        mEntryManager.setUpWithPresenter(mPresenter, mStackScroller, mCallback,
-                mVisualStabilityManager, mHeadsUpManager);
+        mEntryManager.setUpWithPresenter(mPresenter, mListContainer, mCallback, mHeadsUpManager);
     }
 
     @Test
@@ -244,7 +243,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         verify(mMediaManager).onNotificationRemoved(mSbn.getKey());
         verify(mRemoteInputManager).onRemoveNotification(mEntry);
         verify(mForegroundServiceController).removeNotification(mSbn);
-        verify(mStackScroller).cleanUpViewState(mRow);
+        verify(mListContainer).cleanUpViewState(mRow);
         verify(mPresenter).updateNotificationViews();
         verify(mCallback).onNotificationRemoved(mSbn.getKey(), mSbn);
         verify(mRow).setRemoved();

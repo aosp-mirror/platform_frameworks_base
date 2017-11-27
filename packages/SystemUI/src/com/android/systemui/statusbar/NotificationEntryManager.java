@@ -60,7 +60,6 @@ import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
-import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 import com.android.systemui.util.leak.LeakDetector;
 
 import java.io.FileDescriptor;
@@ -75,7 +74,8 @@ import java.util.List;
  * Notification.*Manager objects.
  */
 public class NotificationEntryManager implements Dumpable, NotificationInflater.InflationCallback,
-        ExpandableNotificationRow.ExpansionLogger, NotificationUpdateHandler {
+        ExpandableNotificationRow.ExpansionLogger, NotificationUpdateHandler,
+        VisualStabilityManager.Callback {
     private static final String TAG = "NotificationEntryManager";
     protected static final boolean DEBUG = false;
     protected static final boolean ENABLE_HEADS_UP = true;
@@ -90,6 +90,7 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
     protected final NotificationMediaManager mMediaManager;
     protected final MetricsLogger mMetricsLogger;
     protected final DeviceProvisionedController mDeviceProvisionedController;
+    protected final VisualStabilityManager mVisualStabilityManager;
     protected final UiOffloadThread mUiOffloadThread;
     protected final ForegroundServiceController mForegroundServiceController;
     protected final NotificationListener mNotificationListener;
@@ -100,7 +101,6 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
     protected IStatusBarService mBarService;
     protected NotificationPresenter mPresenter;
     protected Callback mCallback;
-    protected NotificationStackScrollLayout mStackScroller;
     protected PowerManager mPowerManager;
     protected SystemServicesProxy mSystemServicesProxy;
     protected NotificationListenerService.RankingMap mLatestRankingMap;
@@ -109,7 +109,7 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
     protected ContentObserver mHeadsUpObserver;
     protected boolean mUseHeadsUp = false;
     protected boolean mDisableNotificationAlerts;
-    protected VisualStabilityManager mVisualStabilityManager;
+    protected NotificationListContainer mListContainer;
 
     private final class NotificationClicker implements View.OnClickListener {
 
@@ -214,6 +214,7 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
             NotificationListener notificationListener,
             MetricsLogger metricsLogger,
             DeviceProvisionedController deviceProvisionedController,
+            VisualStabilityManager visualStabilityManager,
             UiOffloadThread uiOffloadThread, Context context) {
         mLockscreenUserManager = lockscreenUserManager;
         mGroupManager = groupManager;
@@ -224,6 +225,7 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
         mNotificationListener = notificationListener;
         mMetricsLogger = metricsLogger;
         mDeviceProvisionedController = deviceProvisionedController;
+        mVisualStabilityManager = visualStabilityManager;
         mUiOffloadThread = uiOffloadThread;
         mContext = context;
         mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
@@ -233,19 +235,15 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
         mSystemServicesProxy = SystemServicesProxy.getInstance(mContext);
     }
 
-    // TODO: Remove dependency on NotificationStackScrollLayout
     public void setUpWithPresenter(NotificationPresenter presenter,
-            NotificationStackScrollLayout stackScroller,
-            Callback callback,
-            VisualStabilityManager visualStabilityManager,
+            NotificationListContainer listContainer, Callback callback,
             HeadsUpManager headsUpManager) {
         mPresenter = presenter;
         mCallback = callback;
-        mStackScroller = stackScroller;
-        mVisualStabilityManager = visualStabilityManager;
         mNotificationData = new NotificationData(presenter);
         mHeadsUpManager = headsUpManager;
         mNotificationData.setHeadsUpManager(mHeadsUpManager);
+        mListContainer = listContainer;
 
         mHeadsUpObserver = new ContentObserver(mPresenter.getHandler()) {
             @Override
@@ -299,6 +297,11 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
                 // Ignore.
             }
         });
+    }
+
+    @Override
+    public void onReorderingAllowed() {
+        updateNotifications();
     }
 
     private boolean shouldSuppressFullScreenIntent(String key) {
@@ -379,7 +382,7 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
             int dismissalSurface = NotificationStats.DISMISSAL_SHADE;
             if (isHeadsUp(n.getKey())) {
                 dismissalSurface = NotificationStats.DISMISSAL_PEEK;
-            } else if (mStackScroller.hasPulsingNotifications()) {
+            } else if (mListContainer.hasPulsingNotifications()) {
                 dismissalSurface = NotificationStats.DISMISSAL_AOD;
             }
             mBarService.onNotificationClear(pkg, tag, id, userId, n.getKey(), dismissalSurface);
@@ -536,7 +539,7 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
 
         if (entry != null && entry.row != null) {
             entry.row.setRemoved();
-            mStackScroller.cleanUpViewState(entry.row);
+            mListContainer.cleanUpViewState(entry.row);
         }
         // Let's remove the children if this was a summary
         handleGroupSummaryRemoved(key);
@@ -662,7 +665,7 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
         Dependency.get(LeakDetector.class).trackInstance(entry);
         entry.createIcons(mContext, sbn);
         // Construct the expanded view.
-        inflateViews(entry, mStackScroller);
+        inflateViews(entry, mListContainer.getViewParentForNotification(entry));
         return entry;
     }
 
@@ -752,7 +755,7 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
         mGroupManager.onEntryUpdated(entry, oldNotification);
 
         entry.updateIcons(mContext, notification);
-        inflateViews(entry, mStackScroller);
+        inflateViews(entry, mListContainer.getViewParentForNotification(entry));
 
         mForegroundServiceController.updateNotification(notification,
                 mNotificationData.getImportance(key));
@@ -766,7 +769,7 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
         if (!notification.isClearable()) {
             // The user may have performed a dismiss action on the notification, since it's
             // not clearable we should snap it back.
-            mStackScroller.snapViewIfNeeded(entry.row);
+            mListContainer.snapViewIfNeeded(entry.row);
         }
 
         if (DEBUG) {
