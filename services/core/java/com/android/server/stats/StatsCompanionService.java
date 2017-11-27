@@ -523,6 +523,18 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         sayHiToStatsd(); // tell statsd that we're ready too and link to it
     }
 
+    @Override
+    public void triggerUidSnapshot() {
+      enforceCallingPermission();
+      synchronized (sStatsdLock) {
+        try {
+          informAllUidsLocked(mContext);
+        } catch (RemoteException e) {
+          Slog.e(TAG, "Failed to trigger uid snapshot.", e);
+        }
+      }
+    }
+
     private void enforceCallingPermission() {
         if (Binder.getCallingPid() == Process.myPid()) {
             return;

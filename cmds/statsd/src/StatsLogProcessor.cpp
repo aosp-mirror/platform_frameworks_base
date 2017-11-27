@@ -220,7 +220,7 @@ void StatsLogProcessor::flushIfNecessary(uint64_t timestampNs,
                                          const unique_ptr<MetricsManager>& metricsManager) {
     std::lock_guard<std::mutex> lock(mBroadcastTimesMutex);
 
-    size_t totalBytes = metricsManager->byteSize();
+    size_t totalBytes = metricsManager->byteSize() + mUidMap->getBytesUsed();
     if (totalBytes > .9 * kMaxSerializedBytes) { // Send broadcast so that receivers can pull data.
         auto lastFlushNs = mLastBroadcastTimes.find(key);
         if (lastFlushNs != mLastBroadcastTimes.end()) {

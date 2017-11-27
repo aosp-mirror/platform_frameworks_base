@@ -45,6 +45,7 @@ const int FIELD_ID_MATCHER_STATS = 4;
 const int FIELD_ID_CONDITION_STATS = 5;
 const int FIELD_ID_METRIC_STATS = 6;
 const int FIELD_ID_ATOM_STATS = 7;
+const int FIELD_ID_UIDMAP_STATS = 8;
 
 const int FIELD_ID_MATCHER_STATS_NAME = 1;
 const int FIELD_ID_MATCHER_STATS_COUNT = 2;
@@ -171,6 +172,27 @@ void StatsdStats::noteMetricsReportSent(const ConfigKey& key, int32_t timeSec) {
         timestampList->erase(timestampList->begin());
     }
     it->second.add_dump_report_time_sec(timeSec);
+}
+
+void StatsdStats::noteUidMapDropped(int snapshots, int deltas) {
+    lock_guard<std::mutex> lock(mLock);
+    mUidMapStats.set_dropped_snapshots(mUidMapStats.dropped_snapshots() + snapshots);
+    mUidMapStats.set_dropped_changes(mUidMapStats.dropped_changes() + deltas);
+}
+
+void StatsdStats::setUidMapSnapshots(int snapshots) {
+    lock_guard<std::mutex> lock(mLock);
+    mUidMapStats.set_snapshots(snapshots);
+}
+
+void StatsdStats::setUidMapChanges(int changes) {
+    lock_guard<std::mutex> lock(mLock);
+    mUidMapStats.set_changes(changes);
+}
+
+void StatsdStats::setCurrentUidMapMemory(int bytes) {
+    lock_guard<std::mutex> lock(mLock);
+    mUidMapStats.set_bytes_used(bytes);
 }
 
 void StatsdStats::noteConditionDimensionSize(const ConfigKey& key, const string& name, int size) {
@@ -363,6 +385,15 @@ void StatsdStats::dumpStats(std::vector<uint8_t>* output, bool reset) {
             VLOG("Atom %lu->%d\n", (unsigned long)i, mPushedAtomStats[i]);
         }
     }
+
+    const int numBytes = mUidMapStats.ByteSize();
+    vector<char> buffer(numBytes);
+    mUidMapStats.SerializeToArray(&buffer[0], numBytes);
+    proto.write(FIELD_TYPE_MESSAGE | FIELD_ID_UIDMAP_STATS, &buffer[0], buffer.size());
+    VLOG("UID map stats: bytes=%d, snapshots=%d, changes=%d, snapshots lost=%d, changes "
+         "lost=%d",
+         mUidMapStats.bytes_used(), mUidMapStats.snapshots(), mUidMapStats.changes(),
+         mUidMapStats.dropped_snapshots(), mUidMapStats.dropped_changes());
 
     output->clear();
     size_t bufferSize = proto.size();
