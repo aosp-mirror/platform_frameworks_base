@@ -1626,6 +1626,9 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         final int effectiveRootIndex = findEffectiveRootIndex();
         final ActivityRecord r = mActivities.get(effectiveRootIndex);
         setIntent(r);
+
+        // Update the task description when the activities change
+        updateTaskDescription();
     }
 
     void saveToXml(XmlSerializer out) throws IOException, XmlPullParserException {

@@ -1426,9 +1426,6 @@ class RecentTasks {
      * Creates a new RecentTaskInfo from a TaskRecord.
      */
     ActivityManager.RecentTaskInfo createRecentTaskInfo(TaskRecord tr) {
-        // Update the task description to reflect any changes in the task stack
-        tr.updateTaskDescription();
-
         // Compose the recent task info
         ActivityManager.RecentTaskInfo rti = new ActivityManager.RecentTaskInfo();
         rti.id = tr.getTopActivity() == null ? INVALID_TASK_ID : tr.taskId;
