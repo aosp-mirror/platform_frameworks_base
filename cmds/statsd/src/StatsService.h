@@ -162,9 +162,9 @@ private:
     status_t cmd_print_pulled_metrics(FILE* out, const Vector<String8>& args);
 
     /**
-     * Removes all configs stored on disk.
+     * Removes all configs stored on disk and on memory.
      */
-    status_t cmd_remove_config_files(FILE* out);
+    status_t cmd_remove_all_configs(FILE* out);
 
     /*
      * Dump memory usage by statsd.
