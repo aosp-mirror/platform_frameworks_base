@@ -196,7 +196,7 @@ TEST(CountMetricProducerTest, TestAnomalyDetection) {
     int64_t bucket2StartTimeNs = bucketStartTimeNs + bucketSizeNs;
     int64_t bucket3StartTimeNs = bucketStartTimeNs + 2 * bucketSizeNs;
 
-    sp<AnomalyTracker> anomalyTracker = new AnomalyTracker(alert, bucketSizeNs);
+    sp<AnomalyTracker> anomalyTracker = new AnomalyTracker(alert);
 
     CountMetric metric;
     metric.set_name("1");

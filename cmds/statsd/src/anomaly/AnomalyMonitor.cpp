@@ -72,7 +72,8 @@ void AnomalyMonitor::remove(sp<const AnomalyAlarm> alarm) {
         return;
     }
     if (DEBUG) ALOGD("Removing alarm with time %u", alarm->timestampSec);
-    mPq.remove(alarm);
+    bool wasPresent = mPq.remove(alarm);
+    if (!wasPresent) return;
     if (mPq.empty()) {
         if (DEBUG) ALOGD("Queue is empty. Cancel any alarm.");
         mRegisteredAlarmTimeSec = 0;
@@ -127,11 +128,6 @@ void AnomalyMonitor::updateRegisteredAlarmTime_l(uint32_t timestampSec) {
 
 int64_t AnomalyMonitor::secToMs(uint32_t timeSec) {
     return ((int64_t)timeSec) * 1000;
-}
-
-unordered_set<sp<const AnomalyAlarm>, SpHash<AnomalyAlarm>> AnomalyMonitor::onAlarmFired(
-        uint64_t timestampNs) {
-    return popSoonerThan(static_cast<uint32_t>(timestampNs));
 }
 
 }  // namespace statsd

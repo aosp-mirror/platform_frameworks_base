@@ -23,7 +23,6 @@
 
 #include <queue>
 #include <set>
-#include <unordered_map>
 #include <unordered_set>
 #include <vector>
 
@@ -97,15 +96,6 @@ public:
     unordered_set<sp<const AnomalyAlarm>, SpHash<AnomalyAlarm>> popSoonerThan(
             uint32_t timestampSec);
 
-    // TODO: Function that uses popSoonerThan to get all alarms that have fired, and then
-    // iterates over all DurationAnomalyTracker, looking for those alarms. When they're found,
-    // have them declareAnomaly on those alarms. This means that DurationAnomalyTracker
-    // must be thread-safe (since this is being called on a different thread). There is no
-    // worry about missing the alarms (due to them being cancelled after this function being called)
-    // because DurationAnomalyTracker guarantees that it checks for anaomlies when it cancels
-    // alarms anyway.
-    // void declareAnomalies(uint32_t timestampSec);
-
     /**
      * Returns the projected alarm timestamp that is registered with
      * StatsCompanionService. This may not be equal to the soonest alarm,
@@ -114,8 +104,6 @@ public:
     uint32_t getRegisteredAlarmTimeSec() const {
         return mRegisteredAlarmTimeSec;
     }
-
-    unordered_set<sp<const AnomalyAlarm>, SpHash<AnomalyAlarm>> onAlarmFired(uint64_t timestampNs);
 
 private:
     std::mutex mLock;

@@ -260,7 +260,7 @@ TEST(OringDurationTrackerTest, TestPredictAnomalyTimestamp) {
     uint64_t eventStartTimeNs = bucketStartTimeNs + NS_PER_SEC + 1;
     uint64_t bucketSizeNs = 30 * NS_PER_SEC;
 
-    sp<AnomalyTracker> anomalyTracker = new AnomalyTracker(alert, bucketSizeNs);
+    sp<AnomalyTracker> anomalyTracker = new AnomalyTracker(alert);
     OringDurationTracker tracker(kConfigKey, "metric", "event", wizard, 1, true, bucketStartTimeNs,
                                  bucketSizeNs, {anomalyTracker}, buckets);
 
@@ -320,7 +320,7 @@ TEST(OringDurationTrackerTest, TestAnomalyDetection) {
     uint64_t eventStartTimeNs = bucketStartTimeNs + NS_PER_SEC + 1;
     uint64_t bucketSizeNs = 30 * NS_PER_SEC;
 
-    sp<AnomalyTracker> anomalyTracker = new AnomalyTracker(alert, bucketSizeNs);
+    sp<AnomalyTracker> anomalyTracker = new AnomalyTracker(alert);
     OringDurationTracker tracker(kConfigKey, "metric", "event", wizard, 1, true /*nesting*/,
                                  bucketStartTimeNs, bucketSizeNs, {anomalyTracker}, buckets);
 

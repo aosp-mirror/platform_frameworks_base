@@ -293,12 +293,12 @@ int64_t OringDurationTracker::predictAnomalyTimestampNs(const AnomalyTracker& an
     pastNs += currRemainingBucketSizeNs;
 
     // Now deal with the past buckets, starting with the oldest.
-    for (int futBucketIdx = 0; futBucketIdx < anomalyTracker.getNumOfPastPackets();
+    for (int futBucketIdx = 0; futBucketIdx < anomalyTracker.getNumOfPastBuckets();
          futBucketIdx++) {
         // We now overwrite the oldest bucket with the previous 'current', and start a new
         // 'current'.
         pastNs -= anomalyTracker.getPastBucketValue(
-                mEventKey, mCurrentBucketNum - anomalyTracker.getNumOfPastPackets() + futBucketIdx);
+                mEventKey, mCurrentBucketNum - anomalyTracker.getNumOfPastBuckets() + futBucketIdx);
         leftNs = thresholdNs - pastNs;
         if (leftNs <= mBucketSizeNs) {  // Predict anomaly will occur in this bucket.
             return eventTimestampNs + currRemainingBucketSizeNs + (futBucketIdx * mBucketSizeNs) +

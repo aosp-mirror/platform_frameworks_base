@@ -585,11 +585,10 @@ Status StatsService::informAnomalyAlarmFired() {
     }
 
     if (DEBUG) ALOGD("StatsService::informAnomalyAlarmFired succeeded");
-    // TODO: check through all counters/timers and see if an anomaly has indeed occurred.
-    uint64_t currentTimeNs = time(nullptr) * NS_PER_SEC;
+    uint64_t currentTimeSec = time(nullptr);
     std::unordered_set<sp<const AnomalyAlarm>, SpHash<AnomalyAlarm>> anomalySet =
-            mAnomalyMonitor->onAlarmFired(currentTimeNs);
-    mProcessor->onAnomalyAlarmFired(currentTimeNs, anomalySet);
+            mAnomalyMonitor->popSoonerThan(static_cast<uint32_t>(currentTimeSec));
+    mProcessor->onAnomalyAlarmFired(currentTimeSec * NS_PER_SEC, anomalySet);
     return Status::ok();
 }
 

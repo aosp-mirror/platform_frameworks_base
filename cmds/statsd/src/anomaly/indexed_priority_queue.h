@@ -37,7 +37,7 @@ struct SpHash {
 /**
  * Min priority queue for generic type AA.
  * Unlike a regular priority queue, this class is also capable of removing interior elements.
- * @tparam Comparator must implement [bool operator()(sp< AA> a, sp< AA> b)], returning
+ * @tparam Comparator must implement [bool operator()(sp<const AA> a, sp<const AA> b)], returning
  *    whether a should be closer to the top of the queue than b.
  */
 template <class AA, class Comparator>
@@ -46,8 +46,11 @@ public:
     indexed_priority_queue();
     /** Adds a into the priority queue. If already present or a==nullptr, does nothing. */
     void push(sp<const AA> a);
-    /** Removes a from the priority queue. If not present or a==nullptr, does nothing. */
-    void remove(sp<const AA> a);
+    /*
+     * Removes a from the priority queue. If not present or a==nullptr, does nothing.
+     * Returns true if a had been present (and is now removed), else false.
+     */
+    bool remove(sp<const AA> a);
     /** Removes the top element, if there is one. */
     void pop();
     /** Removes all elements. */
@@ -97,17 +100,17 @@ void indexed_priority_queue<AA, Comparator>::push(sp<const AA> a) {
 }
 
 template <class AA, class Comparator>
-void indexed_priority_queue<AA, Comparator>::remove(sp<const AA> a) {
-    if (a == nullptr) return;
-    if (!contains(a)) return;
+bool indexed_priority_queue<AA, Comparator>::remove(sp<const AA> a) {
+    if (a == nullptr) return false;
+    if (!contains(a)) return false;
     size_t idx = indices[a];
     if (idx >= pq.size()) {
-        return;
+        return false;
     }
     if (idx == size()) {  // if a is the last element, i.e. at index idx == size() == (pq.size()-1)
         pq.pop_back();
         indices.erase(a);
-        return;
+        return true;
     }
     // move last element (guaranteed not to be at idx) to idx, then delete a
     sp<const AA> last_a = pq.back();
@@ -119,6 +122,8 @@ void indexed_priority_queue<AA, Comparator>::remove(sp<const AA> a) {
     // get the heap back in order (since the element at idx is not in order)
     sift_up(idx);
     sift_down(idx);
+
+    return true;
 }
 
 // The same as, but slightly more efficient than, remove(top()).

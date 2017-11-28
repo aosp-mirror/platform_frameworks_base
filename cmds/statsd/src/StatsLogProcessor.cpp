@@ -75,10 +75,8 @@ StatsLogProcessor::~StatsLogProcessor() {
 void StatsLogProcessor::onAnomalyAlarmFired(
         const uint64_t timestampNs,
         unordered_set<sp<const AnomalyAlarm>, SpHash<AnomalyAlarm>> anomalySet) {
-    for (const auto& anomaly : anomalySet) {
-        for (const auto& itr : mMetricsManagers) {
-            itr.second->onAnomalyAlarmFired(timestampNs, anomaly);
-        }
+    for (const auto& itr : mMetricsManagers) {
+        itr.second->onAnomalyAlarmFired(timestampNs, anomalySet);
     }
 }
 

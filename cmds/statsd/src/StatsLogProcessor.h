@@ -44,6 +44,8 @@ public:
     size_t GetMetricsSize(const ConfigKey& key) const;
 
     void onDumpReport(const ConfigKey& key, vector<uint8_t>* outData);
+
+    /* Tells MetricsManager that the alarms in anomalySet have fired. Modifies anomalySet. */
     void onAnomalyAlarmFired(
             const uint64_t timestampNs,
             unordered_set<sp<const AnomalyAlarm>, SpHash<AnomalyAlarm>> anomalySet);
