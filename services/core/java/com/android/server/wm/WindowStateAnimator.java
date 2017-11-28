@@ -871,11 +871,9 @@ class WindowStateAnimator {
 
     void computeShownFrameLocked() {
         final boolean selfTransformation = mHasLocalTransformation;
-        Transformation attachedTransformation =
-                (mParentWinAnimator != null && mParentWinAnimator.mHasLocalTransformation)
-                ? mParentWinAnimator.mTransformation : null;
         Transformation appTransformation = (mAppAnimator != null && mAppAnimator.hasTransformation)
                 ? mAppAnimator.transformation : null;
+        Transformation wallpaperTargetTransformation = null;
 
         // Wallpapers are animated based on the "real" window they
         // are currently targeting.
@@ -885,9 +883,9 @@ class WindowStateAnimator {
             if (wallpaperAnimator.mHasLocalTransformation &&
                     wallpaperAnimator.mAnimation != null &&
                     !wallpaperAnimator.mAnimation.getDetachWallpaper()) {
-                attachedTransformation = wallpaperAnimator.mTransformation;
-                if (DEBUG_WALLPAPER && attachedTransformation != null) {
-                    Slog.v(TAG, "WP target attached xform: " + attachedTransformation);
+                wallpaperTargetTransformation = wallpaperAnimator.mTransformation;
+                if (DEBUG_WALLPAPER && wallpaperTargetTransformation != null) {
+                    Slog.v(TAG, "WP target attached xform: " + wallpaperTargetTransformation);
                 }
             }
             final AppWindowAnimator wpAppAnimator = wallpaperTarget.mAppToken == null ?
@@ -909,7 +907,7 @@ class WindowStateAnimator {
                 screenRotationAnimation != null && screenRotationAnimation.isAnimating();
 
         mHasClipRect = false;
-        if (selfTransformation || attachedTransformation != null
+        if (selfTransformation || wallpaperTargetTransformation != null
                 || appTransformation != null || screenAnimation) {
             // cache often used attributes locally
             final Rect frame = mWin.mFrame;
@@ -939,18 +937,27 @@ class WindowStateAnimator {
             if (selfTransformation) {
                 tmpMatrix.postConcat(mTransformation.getMatrix());
             }
-            if (attachedTransformation != null) {
-                tmpMatrix.postConcat(attachedTransformation.getMatrix());
+
+            if (wallpaperTargetTransformation != null) {
+                tmpMatrix.postConcat(wallpaperTargetTransformation.getMatrix());
             }
             if (appTransformation != null) {
                 tmpMatrix.postConcat(appTransformation.getMatrix());
+            }
+
+            int left = frame.left;
+            int top = frame.top;
+            if (mWin.isChildWindow()) {
+                WindowState parent = mWin.getParentWindow();
+                left -= parent.mFrame.left;
+                top  -= parent.mFrame.top;
             }
 
             // The translation that applies the position of the window needs to be applied at the
             // end in case that other translations include scaling. Otherwise the scaling will
             // affect this translation. But it needs to be set before the screen rotation animation
             // so the pivot point is at the center of the screen for all windows.
-            tmpMatrix.postTranslate(frame.left + mWin.mXOffset, frame.top + mWin.mYOffset);
+            tmpMatrix.postTranslate(left + mWin.mXOffset, top + mWin.mYOffset);
             if (screenAnimation) {
                 tmpMatrix.postConcat(screenRotationAnimation.getEnterTransformation().getMatrix());
             }
@@ -985,8 +992,8 @@ class WindowStateAnimator {
                 if (selfTransformation) {
                     mShownAlpha *= mTransformation.getAlpha();
                 }
-                if (attachedTransformation != null) {
-                    mShownAlpha *= attachedTransformation.getAlpha();
+                if (wallpaperTargetTransformation != null) {
+                    mShownAlpha *= wallpaperTargetTransformation.getAlpha();
                 }
                 if (appTransformation != null) {
                     mShownAlpha *= appTransformation.getAlpha();
@@ -1017,8 +1024,8 @@ class WindowStateAnimator {
                     && (mShownAlpha == 1.0 || mShownAlpha == 0.0)) Slog.v(
                     TAG, "computeShownFrameLocked: Animating " + this + " mAlpha=" + mAlpha
                     + " self=" + (selfTransformation ? mTransformation.getAlpha() : "null")
-                    + " attached=" + (attachedTransformation == null ?
-                            "null" : attachedTransformation.getAlpha())
+                    + " attached=" + (wallpaperTargetTransformation == null ?
+                            "null" : wallpaperTargetTransformation.getAlpha())
                     + " app=" + (appTransformation == null ? "null" : appTransformation.getAlpha())
                     + " screen=" + (screenAnimation ?
                             screenRotationAnimation.getEnterTransformation().getAlpha() : "null"));
