@@ -254,6 +254,7 @@ message GlobalSettingsProto {
     SettingProto bluetooth_pbap_client_priority_prefix = 209;
     SettingProto bluetooth_sap_priority_prefix = 210;
     SettingProto bluetooth_pan_priority_prefix = 211;
+    SettingProto bluetooth_hearing_aid_priority_prefix = 345;
     SettingProto device_idle_constants = 212;
     SettingProto device_idle_constants_watch = 213;
     SettingProto app_idle_constants = 214;

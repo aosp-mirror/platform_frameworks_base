@@ -9282,6 +9282,9 @@ public final class Settings {
         /** {@hide} */
         public static final String
                 BLUETOOTH_PAN_PRIORITY_PREFIX = "bluetooth_pan_priority_";
+        /** {@hide} */
+        public static final String
+                BLUETOOTH_HEARING_AID_PRIORITY_PREFIX = "bluetooth_hearing_aid_priority_";
 
         /**
          * Activity manager specific settings.
@@ -9645,6 +9648,14 @@ public final class Settings {
          */
         public static final String getBluetoothPanPriorityKey(String address) {
             return BLUETOOTH_PAN_PRIORITY_PREFIX + address.toUpperCase(Locale.ROOT);
+        }
+
+        /**
+         * Get the key that retrieves a bluetooth hearing aid priority.
+         * @hide
+         */
+        public static final String getBluetoothHearingAidPriorityKey(String address) {
+            return BLUETOOTH_HEARING_AID_PRIORITY_PREFIX + address.toUpperCase(Locale.ROOT);
         }
 
         /**

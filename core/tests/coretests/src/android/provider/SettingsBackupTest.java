@@ -123,6 +123,7 @@ public class SettingsBackupTest {
                     Settings.Global.BLUETOOTH_PAN_PRIORITY_PREFIX,
                     Settings.Global.BLUETOOTH_PBAP_CLIENT_PRIORITY_PREFIX,
                     Settings.Global.BLUETOOTH_SAP_PRIORITY_PREFIX,
+                    Settings.Global.BLUETOOTH_HEARING_AID_PRIORITY_PREFIX,
                     Settings.Global.BOOT_COUNT,
                     Settings.Global.CAPTIVE_PORTAL_FALLBACK_URL,
                     Settings.Global.CAPTIVE_PORTAL_HTTPS_URL,
