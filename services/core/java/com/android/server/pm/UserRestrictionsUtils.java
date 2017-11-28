@@ -115,6 +115,7 @@ public class UserRestrictionsUtils {
             UserManager.DISALLOW_AUTOFILL,
             UserManager.DISALLOW_USER_SWITCH,
             UserManager.DISALLOW_UNIFIED_PASSWORD,
+            UserManager.DISALLOW_CONFIG_LOCATION_MODE
     });
 
     /**

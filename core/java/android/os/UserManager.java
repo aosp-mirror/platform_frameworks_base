@@ -335,6 +335,28 @@ public class UserManager {
     public static final String DISALLOW_CONFIG_VPN = "no_config_vpn";
 
     /**
+     * Specifies if a user is disallowed from configuring location mode. Device owner and profile
+     * owners can set this restriction and it only applies on the managed user.
+     *
+     * <p>In a managed profile, location sharing is forced off when it's off on primary user, so
+     * user can still turn off location sharing on managed profile when the restriction is set by
+     * profile owner on managed profile.
+     *
+     * <p>This user restriction is different from {@link #DISALLOW_SHARE_LOCATION},
+     * as the device owner or profile owner can still enable or disable location mode via
+     * {@link DevicePolicyManager#setSecureSetting} when this restriction is on.
+     *
+     * <p>The default value is <code>false</code>.
+     *
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_CONFIG_LOCATION_MODE = "no_config_location_mode";
+
+    /**
      * Specifies if date, time and timezone configuring is disallowed.
      *
      * <p>When restriction is set by device owners, it applies globally - i.e., it disables date,
