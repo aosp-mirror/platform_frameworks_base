@@ -59,11 +59,10 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Process;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.os.storage.IStorageManager;
+import android.os.storage.StorageManager;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
@@ -2457,7 +2456,8 @@ class ContextImpl extends Context {
      * unable to create, they are filtered by replacing with {@code null}.
      */
     private File[] ensureExternalDirsExistOrFilter(File[] dirs) {
-        File[] result = new File[dirs.length];
+        final StorageManager sm = getSystemService(StorageManager.class);
+        final File[] result = new File[dirs.length];
         for (int i = 0; i < dirs.length; i++) {
             File dir = dirs[i];
             if (!dir.exists()) {
@@ -2466,15 +2466,8 @@ class ContextImpl extends Context {
                     if (!dir.exists()) {
                         // Failing to mkdir() may be okay, since we might not have
                         // enough permissions; ask vold to create on our behalf.
-                        final IStorageManager storageManager = IStorageManager.Stub.asInterface(
-                                ServiceManager.getService("mount"));
                         try {
-                            final int res = storageManager.mkdirs(
-                                    getPackageName(), dir.getAbsolutePath());
-                            if (res != 0) {
-                                Log.w(TAG, "Failed to ensure " + dir + ": " + res);
-                                dir = null;
-                            }
+                            sm.mkdirs(dir);
                         } catch (Exception e) {
                             Log.w(TAG, "Failed to ensure " + dir + ": " + e);
                             dir = null;
