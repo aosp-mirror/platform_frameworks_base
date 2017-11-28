@@ -246,6 +246,7 @@ import android.app.admin.DevicePolicyManager;
 import android.app.assist.AssistContent;
 import android.app.assist.AssistStructure;
 import android.app.backup.IBackupManager;
+import android.app.servertransaction.ConfigurationChangeItem;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageStatsManagerInternal;
 import android.appwidget.AppWidgetManager;
@@ -630,6 +631,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     private final KeyguardController mKeyguardController;
 
     final ActivityStarter mActivityStarter;
+
+    final ClientLifecycleManager mLifecycleManager;
 
     final TaskChangeNotificationController mTaskChangeNotificationController;
 
@@ -2693,6 +2696,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mUserController = null;
         mVrController = null;
         mLockTaskController = null;
+        mLifecycleManager = null;
     }
 
     // Note: This method is invoked on the main thread but may need to attach various
@@ -2795,6 +2799,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mRecentTasks = createRecentTasks();
         mStackSupervisor.setRecentTasks(mRecentTasks);
         mLockTaskController = new LockTaskController(mContext, mStackSupervisor, mHandler);
+        mLifecycleManager = new ClientLifecycleManager();
 
         mProcessCpuThread = new Thread("CpuTracker") {
             @Override
@@ -20562,9 +20567,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (app.thread != null) {
                     if (DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION, "Sending to proc "
                             + app.processName + " new config " + configCopy);
-                    app.thread.scheduleConfigurationChanged(configCopy);
+                    mLifecycleManager.scheduleTransaction(app.thread,
+                            new ConfigurationChangeItem(configCopy));
                 }
             } catch (Exception e) {
+                Slog.e(TAG_CONFIGURATION, "Failed to schedule configuration change", e);
             }
         }
 
