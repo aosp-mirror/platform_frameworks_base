@@ -4111,9 +4111,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             policyCrop.intersect(-mCompatFrame.left, -mCompatFrame.top,
                     displayInfo.logicalWidth - mCompatFrame.left,
                     displayInfo.logicalHeight - mCompatFrame.top);
-        } else if (mLayer >= mService.mSystemDecorLayer) {
-            // Above the decor layer is easy, just use the entire window
-            policyCrop.set(0, 0, mCompatFrame.width(), mCompatFrame.height());
         } else if (mDecorFrame.isEmpty()) {
             // Windows without policy decor aren't cropped.
             policyCrop.set(0, 0, mCompatFrame.width(), mCompatFrame.height());
