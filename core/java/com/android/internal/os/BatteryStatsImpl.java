@@ -6724,7 +6724,7 @@ public class BatteryStatsImpl extends BatteryStats {
         int mWifiBatchedScanBinStarted = NO_BATCHED_SCAN_STARTED;
         StopwatchTimer[] mWifiBatchedScanTimer;
 
-        boolean mWifiMulticastEnabled;
+        int mWifiMulticastWakelockCount;
         StopwatchTimer mWifiMulticastTimer;
 
         StopwatchTimer mAudioTurnedOnTimer;
@@ -7183,8 +7183,7 @@ public class BatteryStatsImpl extends BatteryStats {
 
         @Override
         public void noteWifiMulticastEnabledLocked(long elapsedRealtimeMs) {
-            if (!mWifiMulticastEnabled) {
-                mWifiMulticastEnabled = true;
+            if (mWifiMulticastWakelockCount == 0) {
                 if (mWifiMulticastTimer == null) {
                     mWifiMulticastTimer = new StopwatchTimer(mBsi.mClocks, Uid.this,
                             WIFI_MULTICAST_ENABLED, mBsi.mWifiMulticastTimers, mBsi.mOnBatteryTimeBase);
@@ -7194,12 +7193,17 @@ public class BatteryStatsImpl extends BatteryStats {
                         StatsLog.WIFI_MULTICAST_LOCK_STATE_CHANGED, getUid(), null,
                         StatsLog.WIFI_MULTICAST_LOCK_STATE_CHANGED__STATE__ON);
             }
+            mWifiMulticastWakelockCount++;
         }
 
         @Override
         public void noteWifiMulticastDisabledLocked(long elapsedRealtimeMs) {
-            if (mWifiMulticastEnabled) {
-                mWifiMulticastEnabled = false;
+            if (mWifiMulticastWakelockCount == 0) {
+                return;
+            }
+
+            mWifiMulticastWakelockCount--;
+            if (mWifiMulticastWakelockCount == 0) {
                 mWifiMulticastTimer.stopRunningLocked(elapsedRealtimeMs);
                 StatsLog.write_non_chained(
                         StatsLog.WIFI_MULTICAST_LOCK_STATE_CHANGED, getUid(), null,
@@ -7932,7 +7936,7 @@ public class BatteryStatsImpl extends BatteryStats {
             }
             if (mWifiMulticastTimer != null) {
                 active |= !mWifiMulticastTimer.reset(false);
-                active |= mWifiMulticastEnabled;
+                active |= (mWifiMulticastWakelockCount > 0);
             }
 
             active |= !resetIfNotNull(mAudioTurnedOnTimer, false);
@@ -8590,7 +8594,7 @@ public class BatteryStatsImpl extends BatteryStats {
                     mWifiBatchedScanTimer[i] = null;
                 }
             }
-            mWifiMulticastEnabled = false;
+            mWifiMulticastWakelockCount = 0;
             if (in.readInt() != 0) {
                 mWifiMulticastTimer = new StopwatchTimer(mBsi.mClocks, Uid.this, WIFI_MULTICAST_ENABLED,
                         mBsi.mWifiMulticastTimers, mBsi.mOnBatteryTimeBase, in);
@@ -14031,7 +14035,7 @@ public class BatteryStatsImpl extends BatteryStats {
                     u.mWifiBatchedScanTimer[i].readSummaryFromParcelLocked(in);
                 }
             }
-            u.mWifiMulticastEnabled = false;
+            u.mWifiMulticastWakelockCount = 0;
             if (in.readInt() != 0) {
                 u.mWifiMulticastTimer.readSummaryFromParcelLocked(in);
             }
