@@ -64,6 +64,8 @@ final class NetworkLoggingHandler extends Handler {
     private final DevicePolicyManagerService mDpm;
     private final AlarmManager mAlarmManager;
 
+    private long mId;
+
     private final OnAlarmListener mBatchTimeoutAlarmListener = new OnAlarmListener() {
         @Override
         public void onAlarm() {
@@ -185,6 +187,10 @@ final class NetworkLoggingHandler extends Handler {
     private Bundle finalizeBatchAndBuildDeviceOwnerMessageLocked() {
         Bundle notificationExtras = null;
         if (mNetworkEvents.size() > 0) {
+            // Assign ids to the events.
+            for (NetworkEvent event : mNetworkEvents) {
+                event.setId(mId++);
+            }
             // Finalize the batch and start a new one from scratch.
             if (mBatches.size() >= MAX_BATCHES) {
                 // Remove the oldest batch if we hit the limit.
