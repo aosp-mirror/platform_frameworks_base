@@ -713,6 +713,12 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     final UserController mUserController;
 
+    /**
+     * Packages that are being allowed to perform unrestricted app switches.  Mapping is
+     * User -> Type -> uid.
+     */
+    final SparseArray<ArrayMap<String, Integer>> mAllowAppSwitchUids = new SparseArray<>();
+
     final AppErrors mAppErrors;
 
     final AppWarnings mAppWarnings;
@@ -2872,6 +2878,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     void onUserStoppedLocked(int userId) {
         mRecentTasks.unloadUserDataFromMemoryLocked(userId);
+        mAllowAppSwitchUids.remove(userId);
     }
 
     public void initPowerManagement() {
@@ -12611,6 +12618,18 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
+    boolean checkAllowAppSwitchUid(int uid) {
+        ArrayMap<String, Integer> types = mAllowAppSwitchUids.get(UserHandle.getUserId(uid));
+        if (types != null) {
+            for (int i = types.size() - 1; i >= 0; i--) {
+                if (types.valueAt(i).intValue() == uid) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     boolean checkAppSwitchAllowedLocked(int sourcePid, int sourceUid,
             int callingPid, int callingUid, String name) {
         if (mAppSwitchesAllowedTime < SystemClock.uptimeMillis()) {
@@ -12623,6 +12642,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (perm == PackageManager.PERMISSION_GRANTED) {
             return true;
         }
+        if (checkAllowAppSwitchUid(sourceUid)) {
+            return true;
+        }
 
         // If the actual IPC caller is different from the logical source, then
         // also see if they are allowed to control app switches.
@@ -12631,6 +12653,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                     android.Manifest.permission.STOP_APP_SWITCHES, callingPid,
                     callingUid, -1, true);
             if (perm == PackageManager.PERMISSION_GRANTED) {
+                return true;
+            }
+            if (checkAllowAppSwitchUid(callingUid)) {
                 return true;
             }
         }
@@ -14909,6 +14934,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         boolean dumpVisibleStacksOnly = false;
         boolean dumpFocusedStackOnly = false;
         String dumpPackage = null;
+        int dumpAppId = -1;
 
         int opti = 0;
         while (opti < args.length) {
@@ -15001,6 +15027,16 @@ public class ActivityManagerService extends IActivityManager.Stub
             proto.flush();
             Binder.restoreCallingIdentity(origId);
             return;
+        }
+
+        if (dumpPackage != null) {
+            try {
+                ApplicationInfo info = mContext.getPackageManager().getApplicationInfo(
+                        dumpPackage, 0);
+                dumpAppId = UserHandle.getAppId(info.uid);
+            } catch (NameNotFoundException e) {
+                e.printStackTrace();
+            }
         }
 
         boolean more = false;
@@ -15110,7 +15146,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                             args.length - opti);
                 }
                 synchronized (this) {
-                    dumpProcessesLocked(fd, pw, args, opti, true, dumpPackage);
+                    dumpProcessesLocked(fd, pw, args, opti, true, dumpPackage, dumpAppId);
                 }
             } else if ("oom".equals(cmd) || "o".equals(cmd)) {
                 synchronized (this) {
@@ -15296,7 +15332,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (dumpAll) {
                     pw.println("-------------------------------------------------------------------------------");
                 }
-                dumpProcessesLocked(fd, pw, args, opti, dumpAll, dumpPackage);
+                dumpProcessesLocked(fd, pw, args, opti, dumpAll, dumpPackage, dumpAppId);
             }
 
         } else {
@@ -15373,7 +15409,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (dumpAll) {
                     pw.println("-------------------------------------------------------------------------------");
                 }
-                dumpProcessesLocked(fd, pw, args, opti, dumpAll, dumpPackage);
+                dumpProcessesLocked(fd, pw, args, opti, dumpAll, dumpPackage, dumpAppId);
             }
         }
         Binder.restoreCallingIdentity(origId);
@@ -15528,22 +15564,12 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    boolean dumpUids(PrintWriter pw, String dumpPackage, SparseArray<UidRecord> uids,
+    boolean dumpUids(PrintWriter pw, String dumpPackage, int dumpAppId, SparseArray<UidRecord> uids,
             String header, boolean needSep) {
         boolean printed = false;
-        int whichAppId = -1;
-        if (dumpPackage != null) {
-            try {
-                ApplicationInfo info = mContext.getPackageManager().getApplicationInfo(
-                        dumpPackage, 0);
-                whichAppId = UserHandle.getAppId(info.uid);
-            } catch (NameNotFoundException e) {
-                e.printStackTrace();
-            }
-        }
         for (int i=0; i<uids.size(); i++) {
             UidRecord uidRec = uids.valueAt(i);
-            if (dumpPackage != null && UserHandle.getAppId(uidRec.uid) != whichAppId) {
+            if (dumpPackage != null && UserHandle.getAppId(uidRec.uid) != dumpAppId) {
                 continue;
             }
             if (!printed) {
@@ -15590,7 +15616,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     void dumpProcessesLocked(FileDescriptor fd, PrintWriter pw, String[] args,
-            int opti, boolean dumpAll, String dumpPackage) {
+            int opti, boolean dumpAll, String dumpPackage, int dumpAppId) {
         boolean needSep = false;
         boolean printedAnything = false;
         int numPers = 0;
@@ -15668,13 +15694,14 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         if (mActiveUids.size() > 0) {
-            if (dumpUids(pw, dumpPackage, mActiveUids, "UID states:", needSep)) {
+            if (dumpUids(pw, dumpPackage, dumpAppId, mActiveUids, "UID states:", needSep)) {
                 printedAnything = needSep = true;
             }
         }
         if (dumpAll) {
             if (mValidateUids.size() > 0) {
-                if (dumpUids(pw, dumpPackage, mValidateUids, "UID validation:", needSep)) {
+                if (dumpUids(pw, dumpPackage, dumpAppId, mValidateUids, "UID validation:",
+                        needSep)) {
                     printedAnything = needSep = true;
                 }
             }
@@ -15976,6 +16003,32 @@ public class ActivityManagerService extends IActivityManager.Stub
                     needSep = false;
                 }
                 pw.println("  mNativeDebuggingApp=" + mNativeDebuggingApp);
+            }
+        }
+        if (mAllowAppSwitchUids.size() > 0) {
+            boolean printed = false;
+            for (int i = 0; i < mAllowAppSwitchUids.size(); i++) {
+                ArrayMap<String, Integer> types = mAllowAppSwitchUids.valueAt(i);
+                for (int j = 0; j < types.size(); j++) {
+                    if (dumpPackage == null ||
+                            UserHandle.getAppId(types.valueAt(j).intValue()) == dumpAppId) {
+                        if (needSep) {
+                            pw.println();
+                            needSep = false;
+                        }
+                        if (!printed) {
+                            pw.println("  mAllowAppSwitchUids:");
+                            printed = true;
+                        }
+                        pw.print("    User ");
+                        pw.print(mAllowAppSwitchUids.keyAt(i));
+                        pw.print(": Type ");
+                        pw.print(types.keyAt(j));
+                        pw.print(" = ");
+                        UserHandle.formatUid(pw, types.valueAt(j).intValue());
+                        pw.println();
+                    }
+                }
             }
         }
         if (dumpPackage == null) {
@@ -17956,7 +18009,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             PrintWriter catPw = new FastPrintWriter(catSw, false, 256);
             String[] emptyArgs = new String[] { };
             catPw.println();
-            dumpProcessesLocked(null, catPw, emptyArgs, 0, false, null);
+            dumpProcessesLocked(null, catPw, emptyArgs, 0, false, null, -1);
             catPw.println();
             mServices.newServiceDumperLocked(null, catPw, emptyArgs, 0,
                     false, null).dumpLocked();
@@ -24253,6 +24306,27 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (mStackSupervisor.moveFocusableActivityStackToFrontLocked(
                         r, "setFocusedActivity")) {
                     mStackSupervisor.resumeFocusedStackTopActivityLocked();
+                }
+            }
+        }
+
+        @Override
+        public void setAllowAppSwitches(@NonNull String type, int uid, int userId) {
+            synchronized (ActivityManagerService.this) {
+                if (mUserController.isUserRunning(userId, ActivityManager.FLAG_OR_STOPPED)) {
+                    ArrayMap<String, Integer> types = mAllowAppSwitchUids.get(userId);
+                    if (types == null) {
+                        if (uid < 0) {
+                            return;
+                        }
+                        types = new ArrayMap<>();
+                        mAllowAppSwitchUids.put(userId, types);
+                    }
+                    if (uid < 0) {
+                        types.remove(type);
+                    } else {
+                        types.put(type, uid);
+                    }
                 }
             }
         }

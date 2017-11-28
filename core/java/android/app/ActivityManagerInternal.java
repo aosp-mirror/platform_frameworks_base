@@ -283,4 +283,15 @@ public abstract class ActivityManagerInternal {
      * @param token The IApplicationToken for the activity
      */
     public abstract void setFocusedActivity(IBinder token);
+
+    /**
+     * Set a uid that is allowed to bypass stopped app switches, launching an app
+     * whenever it wants.
+     *
+     * @param type Type of the caller -- unique string the caller supplies to identify itself
+     * and disambiguate with other calles.
+     * @param uid The uid of the app to be allowed, or -1 to clear the uid for this type.
+     * @param userId The user it is allowed for.
+     */
+    public abstract void setAllowAppSwitches(@NonNull String type, int uid, int userId);
 }
