@@ -48,4 +48,26 @@ public class ProtoUtils {
         proto.write(Duration.END_MS, endMs);
         proto.end(token);
     }
+
+    /**
+     * Helper function to write bit-wise flags to proto as repeated enums
+     * @hide
+     */
+    public static void writeBitWiseFlagsToProtoEnum(ProtoOutputStream proto, long fieldId,
+            int flags, int[] origEnums, int[] protoEnums) {
+        if (protoEnums.length != origEnums.length) {
+            throw new IllegalArgumentException("The length of origEnums must match protoEnums");
+        }
+        int len = origEnums.length;
+        for (int i = 0; i < len; i++) {
+            // handle zero flag case.
+            if (origEnums[i] == 0 && flags == 0) {
+                proto.write(fieldId, protoEnums[i]);
+                return;
+            }
+            if ((flags & origEnums[i]) != 0) {
+                proto.write(fieldId, protoEnums[i]);
+            }
+        }
+    }
 }

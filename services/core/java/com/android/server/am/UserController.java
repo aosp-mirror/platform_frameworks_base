@@ -83,6 +83,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.util.TimingsTraceLog;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
@@ -94,6 +95,7 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemServiceManager;
+import com.android.server.am.proto.UserControllerProto;
 import com.android.server.pm.UserManagerService;
 import com.android.server.wm.WindowManagerService;
 
@@ -1844,6 +1846,36 @@ class UserController implements Handler.Callback {
         }
     }
 
+    void writeToProto(ProtoOutputStream proto, long fieldId) {
+        synchronized (mLock) {
+            long token = proto.start(fieldId);
+            for (int i = 0; i < mStartedUsers.size(); i++) {
+                UserState uss = mStartedUsers.valueAt(i);
+                final long uToken = proto.start(UserControllerProto.STARTED_USERS);
+                proto.write(UserControllerProto.User.ID, uss.mHandle.getIdentifier());
+                uss.writeToProto(proto, UserControllerProto.User.STATE);
+                proto.end(uToken);
+            }
+            for (int i = 0; i < mStartedUserArray.length; i++) {
+                proto.write(UserControllerProto.STARTED_USER_ARRAY, mStartedUserArray[i]);
+            }
+            for (int i = 0; i < mUserLru.size(); i++) {
+                proto.write(UserControllerProto.USER_LRU, mUserLru.get(i));
+            }
+            if (mUserProfileGroupIds.size() > 0) {
+                for (int i = 0; i < mUserProfileGroupIds.size(); i++) {
+                    final long uToken = proto.start(UserControllerProto.USER_PROFILE_GROUP_IDS);
+                    proto.write(UserControllerProto.UserProfile.USER,
+                            mUserProfileGroupIds.keyAt(i));
+                    proto.write(UserControllerProto.UserProfile.PROFILE,
+                            mUserProfileGroupIds.valueAt(i));
+                    proto.end(uToken);
+                }
+            }
+            proto.end(token);
+        }
+    }
+
     void dump(PrintWriter pw, boolean dumpAll) {
         synchronized (mLock) {
             pw.println("  mStartedUsers:");
@@ -1868,10 +1900,6 @@ class UserController implements Handler.Callback {
                 pw.print(mUserLru.get(i));
             }
             pw.println("]");
-            if (dumpAll) {
-                pw.print("  mStartedUserArray: ");
-                pw.println(Arrays.toString(mStartedUserArray));
-            }
             if (mUserProfileGroupIds.size() > 0) {
                 pw.println("  mUserProfileGroupIds:");
                 for (int i=0; i< mUserProfileGroupIds.size(); i++) {

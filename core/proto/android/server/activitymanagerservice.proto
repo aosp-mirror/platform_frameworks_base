@@ -18,11 +18,17 @@ syntax = "proto2";
 
 package com.android.server.am.proto;
 
+import "frameworks/base/core/proto/android/app/activitymanager.proto";
 import "frameworks/base/core/proto/android/app/notification.proto";
+import "frameworks/base/core/proto/android/app/profilerinfo.proto";
+import "frameworks/base/core/proto/android/content/component_name.proto";
+import "frameworks/base/core/proto/android/content/configuration.proto";
 import "frameworks/base/core/proto/android/content/intent.proto";
+import "frameworks/base/core/proto/android/content/package_item_info.proto";
 import "frameworks/base/core/proto/android/graphics/rect.proto";
 import "frameworks/base/core/proto/android/internal/processstats.proto";
 import "frameworks/base/core/proto/android/os/looper.proto";
+import "frameworks/base/core/proto/android/os/powermanager.proto";
 import "frameworks/base/core/proto/android/server/intentresolver.proto";
 import "frameworks/base/core/proto/android/server/windowmanagerservice.proto";
 import "frameworks/base/core/proto/android/util/common.proto";
@@ -36,7 +42,7 @@ message ActivityManagerServiceProto {
 
   optional ActiveServicesProto services = 3;
 
-  optional ProcessProto processes = 4;
+  optional ProcessesProto processes = 4;
 }
 
 // "dumpsys activity --proto activities"
@@ -130,6 +136,7 @@ message ProcessRecordProto {
   optional int32 user_id = 4;
   optional int32 app_id = 5;
   optional int32 isolated_app_id = 6;
+  optional bool persistent = 7;
 }
 
 message BroadcastRecordProto {
@@ -459,7 +466,7 @@ message ConnectionRecordProto {
     WAIVE_PRIORITY = 6;
     IMPORTANT = 7;
     ADJUST_WITH_ACTIVITY = 8;
-    FG_SERVICE_WHILE_WAKE = 9;
+    FG_SERVICE_WHILE_AWAKE = 9;
     FG_SERVICE = 10;
     TREAT_LIKE_ACTIVITY = 11;
     VISIBLE = 12;
@@ -492,5 +499,362 @@ message IntentBindRecordProto {
 }
 
 // TODO: "dumpsys activity --proto processes"
-message ProcessProto {
+message ProcessesProto {
+  repeated ProcessRecordProto procs = 1;
+  repeated ProcessRecordProto isolated_procs = 2;
+  repeated ActiveInstrumentationProto active_instrumentations = 3;
+  repeated UidRecordProto active_uids = 4;
+  repeated UidRecordProto validate_uids = 5;
+
+  // Process LRU list (sorted by oom_adj)
+  message LruProcesses {
+    optional int32 size = 1;
+    optional int32 non_act_at = 2;
+    optional int32 non_svc_at = 3;
+    repeated ProcessOomProto list = 4;
+  }
+  optional LruProcesses lru_procs = 6;
+  repeated ProcessRecordProto pids_self_locked = 7;
+  // Foreground Processes
+  repeated ImportanceTokenProto important_procs = 8;
+  // Persisent processes that are starting
+  repeated ProcessRecordProto persistent_starting_procs = 9;
+  // Processes that are being removed
+  repeated ProcessRecordProto removed_procs = 10;
+  // Processes that are on old until the system is ready
+  repeated ProcessRecordProto on_hold_procs = 11;
+  // Processes that are waiting to GC
+  repeated ProcessToGcProto gc_procs = 12;
+  optional AppErrorsProto app_errors = 13;
+  optional UserControllerProto user_controller = 14;
+  optional ProcessRecordProto home_proc = 15;
+  optional ProcessRecordProto previous_proc = 16;
+  optional int64 previous_proc_visible_time_ms = 17;
+  optional ProcessRecordProto heavy_weight_proc = 18;
+  optional .android.content.ConfigurationProto global_configuration = 19;
+  // ActivityStackSupervisorProto dumps these values as well, still here?
+  // repeated ActivityDisplayProto displays = 20;
+
+  optional bool config_will_change = 21;
+
+  message ScreenCompatPackage {
+    optional string package = 1;
+    optional int32 mode = 2;
+  }
+  repeated ScreenCompatPackage screen_compat_packages = 22;
+
+  message UidObserverRegistrationProto {
+    optional int32 uid = 1;
+    optional string package = 2;
+    repeated .android.app.UidObserverFlag flags = 3;
+    optional int32 cut_point = 4; // only available when UID_OBSERVER_PROCSTATE is on
+
+    message ProcState {
+      optional int32 uid = 1;
+      optional int32 state = 2;
+    }
+    repeated ProcState last_proc_states = 5;
+  }
+  repeated UidObserverRegistrationProto uid_observers = 23;
+  repeated int32 device_idle_whitelist = 24;
+  repeated int32 device_idle_temp_whitelist = 25;
+
+  message PendingTempWhitelist {
+    optional int32 target_uid = 1;
+    optional int64 duration_ms = 2;
+    optional string tag = 3;
+  }
+  repeated PendingTempWhitelist pending_temp_whitelist = 26;
+
+  message SleepStatus {
+    optional .android.os.PowerManagerInternalProto.Wakefulness wakefulness = 1;
+    repeated string sleep_tokens = 2;
+    optional bool sleeping = 3;
+    optional bool shutting_down = 4;
+    optional bool test_pss_mode = 5;
+  }
+  optional SleepStatus sleep_status = 27;
+
+  message VoiceProto {
+    optional string session = 1;
+    optional .android.os.PowerManagerProto.WakeLockProto wakelock = 2;
+  }
+  optional VoiceProto running_voice = 28;
+
+  message VrControllerProto {
+    enum VrMode {
+      FLAG_NON_VR_MODE = 0;
+      FLAG_VR_MODE = 1;
+      FLAG_PERSISTENT_VR_MODE = 2;
+    }
+    repeated VrMode vr_mode = 1;
+    optional int32 render_thread_id = 2;
+  }
+  optional VrControllerProto vr_controller = 29;
+
+  message DebugApp {
+    optional string debug_app = 1;
+    optional string orig_debug_app = 2;
+    optional bool debug_transient = 3;
+    optional bool orig_wait_for_debugger = 4;
+  }
+  optional DebugApp debug = 30;
+  optional AppTimeTrackerProto current_tracker = 31;
+
+  message MemWatchProcess {
+    message Process {
+      optional string name = 1;
+
+      message MemStats {
+        optional int32 uid = 1;
+        optional string size = 2;
+        optional string report_to = 3;
+      }
+      repeated MemStats mem_stats = 2;
+    }
+    repeated Process procs = 1;
+
+    message Dump {
+      optional string proc_name = 1;
+      optional string file = 2;
+      optional int32 pid = 3;
+      optional int32 uid = 4;
+    }
+    optional Dump dump = 2;
+  }
+  optional MemWatchProcess mem_watch_processes = 32;
+  optional string track_allocation_app = 33;
+
+  message Profile {
+    optional string app_name = 1;
+    optional ProcessRecordProto proc = 2;
+    optional .android.app.ProfilerInfoProto info = 3;
+    optional int32 type = 4;
+  }
+  optional Profile profile = 34;
+  optional string native_debugging_app = 35;
+  optional bool always_finish_activities = 36;
+
+  message Controller {
+    optional string controller = 1;
+    optional bool is_a_monkey = 2;
+  }
+  optional Controller controller = 37;
+
+  optional int32 total_persistent_procs = 38;
+  optional bool processes_ready = 39;
+  optional bool system_ready = 40;
+  optional bool booted = 41;
+  optional int32 factory_test = 42;
+  optional bool booting = 43;
+  optional bool call_finish_booting = 44;
+  optional bool boot_animation_complete = 45;
+  optional int64 last_power_check_uptime_ms = 46;
+  optional .android.os.PowerManagerProto.WakeLockProto going_to_sleep = 47;
+  optional .android.os.PowerManagerProto.WakeLockProto launching_activity = 48;
+  optional int32 adj_seq = 49;
+  optional int32 lru_seq = 50;
+  optional int32 num_non_cached_procs = 51;
+  optional int32 num_cached_hidden_procs = 52;
+  optional int32 num_service_procs = 53;
+  optional int32 new_num_service_procs = 54;
+  optional bool allow_lower_mem_level = 55;
+  optional int32 last_memory_level = 56;
+  optional int32 last_num_processes = 57;
+  optional .android.util.Duration last_idle_time = 58;
+  optional int64 low_ram_since_last_idle_ms = 59;
+}
+
+message ActiveInstrumentationProto {
+  optional .android.content.ComponentNameProto class = 1;
+  optional bool finished = 2;
+  repeated ProcessRecordProto running_processes = 3;
+  repeated string target_processes = 4;
+  optional .android.content.pm.ApplicationInfoProto target_info = 5;
+  optional string profile_file = 6;
+  optional string watcher = 7;
+  optional string ui_automation_connection = 8;
+  optional string arguments = 9;
+}
+
+// Proto definition of com.android.server.am.UidRecord.java
+message UidRecordProto {
+  optional string hex_hash = 1;
+  optional int32 uid = 2;
+  optional .android.app.ProcessState current = 3;
+  optional bool ephemeral = 4;
+  optional bool fg_services = 5;
+  optional bool whilelist = 6;
+  optional .android.util.Duration last_background_time = 7;
+  optional bool idle = 8;
+
+  enum Change {
+    CHANGE_GONE = 0;
+    CHANGE_IDLE = 1;
+    CHANGE_ACTIVE = 2;
+    CHANGE_CACHED = 3;
+    CHANGE_UNCACHED = 4;
+  }
+  repeated Change last_reported_changes = 9;
+  optional int32 num_procs = 10;
+
+  message ProcStateSequence {
+    optional int64 cururent = 1;
+    optional int64 last_network_updated = 2;
+    optional int64 last_dispatched = 3;
+  }
+  optional ProcStateSequence network_state_update = 11;
+}
+
+// proto of class ImportanceToken in ActivityManagerService
+message ImportanceTokenProto {
+  optional int32 pid = 1;
+  optional string token = 2;
+  optional string reason = 3;
+}
+
+message ProcessOomProto {
+  optional bool persistent = 1;
+  optional int32 num = 2;
+  optional string oom_adj = 3;
+
+  // Activity manager's version of Process enum, see ProcessList.java
+  enum SchedGroup {
+    SCHED_GROUP_UNKNOWN = -1;
+    SCHED_GROUP_BACKGROUND = 0;
+    SCHED_GROUP_DEFAULT = 1;
+    SCHED_GROUP_TOP_APP = 2;
+    SCHED_GROUP_TOP_APP_BOUND = 3;
+  }
+  optional SchedGroup sched_group = 4 [ default = SCHED_GROUP_UNKNOWN];
+
+  oneof Foreground {
+    bool activities = 5;
+    bool services = 6;
+  }
+
+  optional .android.app.ProcessState state = 7;
+  optional int32 trim_memory_level = 8;
+  optional ProcessRecordProto proc = 9;
+  optional string adj_type = 10;
+
+  oneof AdjTarget {
+    .android.content.ComponentNameProto adj_target_component_name = 11;
+    string adj_target_object = 12;
+  }
+
+  oneof AdjSource {
+    ProcessRecordProto adj_source_proc = 13;
+    string adj_source_object = 14;
+  }
+
+  message Detail {
+    optional int32 max_adj = 1;
+    optional int32 cur_raw_adj = 2;
+    optional int32 set_raw_adj = 3;
+    optional int32 cur_adj = 4;
+    optional int32 set_adj = 5;
+    optional .android.app.ProcessState current_state = 7;
+    optional .android.app.ProcessState set_state = 8;
+    optional string last_pss = 9;
+    optional string last_swap_pss = 10;
+    optional string last_cached_pss = 11;
+    optional bool cached = 12;
+    optional bool empty = 13;
+    optional bool has_above_client = 14;
+
+    // only make sense if process is a service
+    message CpuRunTime {
+      optional int64 over_ms = 1;
+      optional int64 used_ms = 2;
+      optional float ultilization = 3; // ratio of cpu time usage
+    }
+    optional CpuRunTime service_run_time = 15;
+  }
+  optional Detail detail = 15;
+}
+
+message ProcessToGcProto {
+  optional ProcessRecordProto proc = 1;
+  optional bool report_low_memory = 2;
+  optional int64 now_uptime_ms = 3;
+  optional int64 last_gced_ms = 4;
+  optional int64 last_low_memory_ms = 5;
+}
+
+// sync with com.android.server.am.AppErrors.java
+message AppErrorsProto {
+
+  optional int64 now_uptime_ms = 1;
+
+  message ProcessCrashTime {
+    optional string process_name = 1;
+
+    message Entry {
+      optional int32 uid = 1;
+      optional int64 last_crashed_at_ms = 2;
+    }
+    repeated Entry entries = 2;
+  }
+  repeated ProcessCrashTime process_crash_times = 2;
+
+  message BadProcess {
+    optional string process_name = 1;
+
+    message Entry {
+      optional int32 uid = 1;
+      optional int64 crashed_at_ms = 2;
+      optional string short_msg = 3;
+      optional string long_msg = 4;
+      optional string stack = 5;
+    }
+    repeated Entry entries = 2;
+  }
+  repeated BadProcess bad_processes = 3;
+}
+
+// sync with com.android.server.am.UserState.java
+message UserStateProto {
+  enum State {
+    STATE_BOOTING = 0;
+    STATE_RUNNING_LOCKED = 1;
+    STATE_RUNNING_UNLOCKING = 2;
+    STATE_RUNNING_UNLOCKED = 3;
+    STATE_STOPPING = 4;
+    STATE_SHUTDOWN = 5;
+  }
+  optional State state = 1;
+  optional bool switching = 2;
+}
+
+// sync with com.android.server.am.UserController.java
+message UserControllerProto {
+  message User {
+    optional int32 id = 1;
+    optional UserStateProto state = 2;
+  }
+  repeated User started_users = 1;
+  repeated int32 started_user_array = 2;
+  repeated int32 user_lru = 3;
+
+  message UserProfile {
+    optional int32 user = 1;
+    optional int32 profile = 2;
+  }
+  repeated UserProfile user_profile_group_ids = 4;
+}
+
+// sync with com.android.server.am.AppTimeTracker.java
+message AppTimeTrackerProto {
+  optional string receiver = 1;
+  optional int64 total_duration_ms = 2;
+
+  message PackageTime {
+    optional string package = 1;
+    optional int64 duration_ms = 2;
+  }
+  repeated PackageTime package_times = 3;
+
+  optional .android.util.Duration started_time = 4;
+  optional string started_package = 5;
 }

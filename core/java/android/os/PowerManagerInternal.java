@@ -71,6 +71,24 @@ public abstract class PowerManagerInternal {
     }
 
     /**
+     * Converts platform constants to proto enums.
+     */
+    public static int wakefulnessToProtoEnum(int wakefulness) {
+        switch (wakefulness) {
+            case WAKEFULNESS_ASLEEP:
+                return PowerManagerInternalProto.WAKEFULNESS_ASLEEP;
+            case WAKEFULNESS_AWAKE:
+                return PowerManagerInternalProto.WAKEFULNESS_AWAKE;
+            case WAKEFULNESS_DREAMING:
+                return PowerManagerInternalProto.WAKEFULNESS_DREAMING;
+            case WAKEFULNESS_DOZING:
+                return PowerManagerInternalProto.WAKEFULNESS_DOZING;
+            default:
+                return wakefulness;
+        }
+    }
+
+    /**
      * Returns true if the wakefulness state represents an interactive state
      * as defined by {@link android.os.PowerManager#isInteractive}.
      */

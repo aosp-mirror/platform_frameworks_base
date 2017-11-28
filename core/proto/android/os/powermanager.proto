@@ -19,6 +19,8 @@ package android.os;
 
 option java_multiple_files = true;
 
+import "frameworks/base/core/proto/android/os/worksource.proto";
+
 message PowerManagerProto {
     /* User activity events in PowerManager.java. */
     enum UserActivityEvent {
@@ -84,6 +86,14 @@ message PowerManagerProto {
         // is dozing. It currently has no effect unless the power manager is in
         // the dozing state.
         DRAW_WAKE_LOCK = 128;
+    }
+
+    // WakeLock class in android.os.PowerManager, it is the one used by sdk
+    message WakeLockProto {
+        optional string hex_string = 1;
+        optional bool held = 2;
+        optional int32 internal_count = 3;
+        optional WorkSourceProto work_source = 4;
     }
 }
 

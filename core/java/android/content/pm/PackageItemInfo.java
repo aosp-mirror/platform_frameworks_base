@@ -19,7 +19,6 @@ package android.content.pm;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.content.res.XmlResourceParser;
-
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -28,6 +27,8 @@ import android.text.Html;
 import android.text.TextPaint;
 import android.text.TextUtils;
 import android.util.Printer;
+import android.util.proto.ProtoOutputStream;
+
 import java.text.Collator;
 import java.util.Comparator;
 
@@ -384,6 +385,24 @@ public class PackageItemInfo {
         dest.writeBundle(metaData);
         dest.writeInt(banner);
         dest.writeInt(showUserIcon);
+    }
+
+    /**
+     * @hide
+     */
+    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+        long token = proto.start(fieldId);
+        if (name != null) {
+            proto.write(PackageItemInfoProto.NAME, name);
+        }
+        proto.write(PackageItemInfoProto.PACKAGE_NAME, packageName);
+        if (labelRes != 0 || nonLocalizedLabel != null || icon != 0 || banner != 0) {
+            proto.write(PackageItemInfoProto.LABEL_RES, labelRes);
+            proto.write(PackageItemInfoProto.NON_LOCALIZED_LABEL, nonLocalizedLabel.toString());
+            proto.write(PackageItemInfoProto.ICON, icon);
+            proto.write(PackageItemInfoProto.BANNER, banner);
+        }
+        proto.end(token);
     }
 
     protected PackageItemInfo(Parcel source) {
