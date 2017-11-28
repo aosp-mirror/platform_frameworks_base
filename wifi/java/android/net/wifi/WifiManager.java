@@ -3390,7 +3390,7 @@ public class WifiManager {
                         mService.acquireMulticastLock(mBinder, mTag);
                         synchronized (WifiManager.this) {
                             if (mActiveLockCount >= MAX_ACTIVE_LOCKS) {
-                                mService.releaseMulticastLock();
+                                mService.releaseMulticastLock(mTag);
                                 throw new UnsupportedOperationException(
                                         "Exceeded maximum number of wifi locks");
                             }
@@ -3432,7 +3432,7 @@ public class WifiManager {
             synchronized (mBinder) {
                 if (mRefCounted ? (--mRefCount == 0) : (mHeld)) {
                     try {
-                        mService.releaseMulticastLock();
+                        mService.releaseMulticastLock(mTag);
                         synchronized (WifiManager.this) {
                             mActiveLockCount--;
                         }
