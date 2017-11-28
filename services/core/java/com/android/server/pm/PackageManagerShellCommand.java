@@ -1892,13 +1892,16 @@ class PackageManagerShellCommand extends ShellCommand {
         final InstallParams params = new InstallParams();
         params.sessionParams = sessionParams;
         String opt;
+        boolean replaceExisting = true;
         while ((opt = getNextOption()) != null) {
             switch (opt) {
                 case "-l":
                     sessionParams.installFlags |= PackageManager.INSTALL_FORWARD_LOCK;
                     break;
-                case "-r":
-                    sessionParams.installFlags |= PackageManager.INSTALL_REPLACE_EXISTING;
+                case "-r": // ignore
+                    break;
+                case "-R":
+                    replaceExisting = false;
                     break;
                 case "-i":
                     params.installerPackageName = getNextArg();
@@ -1982,6 +1985,9 @@ class PackageManagerShellCommand extends ShellCommand {
                     break;
                 default:
                     throw new IllegalArgumentException("Unknown option " + opt);
+            }
+            if (replaceExisting) {
+                sessionParams.installFlags |= PackageManager.INSTALL_REPLACE_EXISTING;
             }
         }
         return params;
@@ -2451,7 +2457,7 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("    Install an application.  Must provide the apk data to install, either as a");
         pw.println("    file path or '-' to read from stdin.  Options are:");
         pw.println("      -l: forward lock application");
-        pw.println("      -r: allow replacement of existing application");
+        pw.println("      -R: disallow replacement of existing application");
         pw.println("      -t: allow test packages");
         pw.println("      -i: specify package name of installer owning the app");
         pw.println("      -s: install application on sdcard");
