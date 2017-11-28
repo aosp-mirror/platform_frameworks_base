@@ -28,6 +28,8 @@ import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.SparseArray;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -86,6 +88,12 @@ public final class AccessibilityInteractionClient
     private static final LongSparseArray<AccessibilityInteractionClient> sClients =
         new LongSparseArray<>();
 
+    private static final SparseArray<IAccessibilityServiceConnection> sConnectionCache =
+            new SparseArray<>();
+
+    private static AccessibilityCache sAccessibilityCache =
+            new AccessibilityCache(new AccessibilityCache.AccessibilityNodeRefresher());
+
     private final AtomicInteger mInteractionIdCounter = new AtomicInteger();
 
     private final Object mInstanceLock = new Object();
@@ -99,12 +107,6 @@ public final class AccessibilityInteractionClient
     private boolean mPerformAccessibilityActionResult;
 
     private Message mSameThreadMessage;
-
-    private static final SparseArray<IAccessibilityServiceConnection> sConnectionCache =
-        new SparseArray<>();
-
-    private static final AccessibilityCache sAccessibilityCache =
-        new AccessibilityCache(new AccessibilityCache.AccessibilityNodeRefresher());
 
     /**
      * @return The client for the current thread.
@@ -131,6 +133,50 @@ public final class AccessibilityInteractionClient
             }
             return client;
         }
+    }
+
+    /**
+     * Gets a cached accessibility service connection.
+     *
+     * @param connectionId The connection id.
+     * @return The cached connection if such.
+     */
+    public static IAccessibilityServiceConnection getConnection(int connectionId) {
+        synchronized (sConnectionCache) {
+            return sConnectionCache.get(connectionId);
+        }
+    }
+
+    /**
+     * Adds a cached accessibility service connection.
+     *
+     * @param connectionId The connection id.
+     * @param connection The connection.
+     */
+    public static void addConnection(int connectionId, IAccessibilityServiceConnection connection) {
+        synchronized (sConnectionCache) {
+            sConnectionCache.put(connectionId, connection);
+        }
+    }
+
+    /**
+     * Removes a cached accessibility service connection.
+     *
+     * @param connectionId The connection id.
+     */
+    public static void removeConnection(int connectionId) {
+        synchronized (sConnectionCache) {
+            sConnectionCache.remove(connectionId);
+        }
+    }
+
+    /**
+     * This method is only for testing. Replacing the cache is a generally terrible idea, but
+     * tests need to be able to verify this class's interactions with the cache
+     */
+    @VisibleForTesting
+    public static void setCache(AccessibilityCache cache) {
+        sAccessibilityCache = cache;
     }
 
     private AccessibilityInteractionClient() {
@@ -300,7 +346,7 @@ public final class AccessibilityInteractionClient
                 if (success) {
                     List<AccessibilityNodeInfo> infos = getFindAccessibilityNodeInfosResultAndClear(
                             interactionId);
-                    finalizeAndCacheAccessibilityNodeInfos(infos, connectionId);
+                    finalizeAndCacheAccessibilityNodeInfos(infos, connectionId, bypassCache);
                     if (infos != null && !infos.isEmpty()) {
                         for (int i = 1; i < infos.size(); i++) {
                             infos.get(i).recycle();
@@ -356,7 +402,7 @@ public final class AccessibilityInteractionClient
                     List<AccessibilityNodeInfo> infos = getFindAccessibilityNodeInfosResultAndClear(
                             interactionId);
                     if (infos != null) {
-                        finalizeAndCacheAccessibilityNodeInfos(infos, connectionId);
+                        finalizeAndCacheAccessibilityNodeInfos(infos, connectionId, false);
                         return infos;
                     }
                 }
@@ -409,7 +455,7 @@ public final class AccessibilityInteractionClient
                     List<AccessibilityNodeInfo> infos = getFindAccessibilityNodeInfosResultAndClear(
                             interactionId);
                     if (infos != null) {
-                        finalizeAndCacheAccessibilityNodeInfos(infos, connectionId);
+                        finalizeAndCacheAccessibilityNodeInfos(infos, connectionId, false);
                         return infos;
                     }
                 }
@@ -460,7 +506,7 @@ public final class AccessibilityInteractionClient
                 if (success) {
                     AccessibilityNodeInfo info = getFindAccessibilityNodeInfoResultAndClear(
                             interactionId);
-                    finalizeAndCacheAccessibilityNodeInfo(info, connectionId);
+                    finalizeAndCacheAccessibilityNodeInfo(info, connectionId, false);
                     return info;
                 }
             } else {
@@ -509,7 +555,7 @@ public final class AccessibilityInteractionClient
                 if (success) {
                     AccessibilityNodeInfo info = getFindAccessibilityNodeInfoResultAndClear(
                             interactionId);
-                    finalizeAndCacheAccessibilityNodeInfo(info, connectionId);
+                    finalizeAndCacheAccessibilityNodeInfo(info, connectionId, false);
                     return info;
                 }
             } else {
@@ -731,13 +777,17 @@ public final class AccessibilityInteractionClient
      *
      * @param info The info.
      * @param connectionId The id of the connection to the system.
+     * @param bypassCache Whether or not to bypass the cache. The node is added to the cache if
+     *                    this value is {@code false}
      */
     private void finalizeAndCacheAccessibilityNodeInfo(AccessibilityNodeInfo info,
-            int connectionId) {
+            int connectionId, boolean bypassCache) {
         if (info != null) {
             info.setConnectionId(connectionId);
             info.setSealed(true);
-            sAccessibilityCache.add(info);
+            if (!bypassCache) {
+                sAccessibilityCache.add(info);
+            }
         }
     }
 
@@ -746,14 +796,16 @@ public final class AccessibilityInteractionClient
      *
      * @param infos The {@link AccessibilityNodeInfo}s.
      * @param connectionId The id of the connection to the system.
+     * @param bypassCache Whether or not to bypass the cache. The nodes are added to the cache if
+     *                    this value is {@code false}
      */
     private void finalizeAndCacheAccessibilityNodeInfos(List<AccessibilityNodeInfo> infos,
-            int connectionId) {
+            int connectionId, boolean bypassCache) {
         if (infos != null) {
             final int infosCount = infos.size();
             for (int i = 0; i < infosCount; i++) {
                 AccessibilityNodeInfo info = infos.get(i);
-                finalizeAndCacheAccessibilityNodeInfo(info, connectionId);
+                finalizeAndCacheAccessibilityNodeInfo(info, connectionId, bypassCache);
             }
         }
     }
@@ -769,41 +821,6 @@ public final class AccessibilityInteractionClient
             Message result = mSameThreadMessage;
             mSameThreadMessage = null;
             return result;
-        }
-    }
-
-    /**
-     * Gets a cached accessibility service connection.
-     *
-     * @param connectionId The connection id.
-     * @return The cached connection if such.
-     */
-    public IAccessibilityServiceConnection getConnection(int connectionId) {
-        synchronized (sConnectionCache) {
-            return sConnectionCache.get(connectionId);
-        }
-    }
-
-    /**
-     * Adds a cached accessibility service connection.
-     *
-     * @param connectionId The connection id.
-     * @param connection The connection.
-     */
-    public void addConnection(int connectionId, IAccessibilityServiceConnection connection) {
-        synchronized (sConnectionCache) {
-            sConnectionCache.put(connectionId, connection);
-        }
-    }
-
-    /**
-     * Removes a cached accessibility service connection.
-     *
-     * @param connectionId The connection id.
-     */
-    public void removeConnection(int connectionId) {
-        synchronized (sConnectionCache) {
-            sConnectionCache.remove(connectionId);
         }
     }
 
