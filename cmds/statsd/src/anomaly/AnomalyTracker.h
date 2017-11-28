@@ -148,6 +148,9 @@ protected:
     // Resets all bucket data. For use when all the data gets stale.
     void resetStorage();
 
+    // Informs the incident service that an anomaly has occurred.
+    void informIncidentd();
+
     FRIEND_TEST(AnomalyTrackerTest, TestConsecutiveBuckets);
     FRIEND_TEST(AnomalyTrackerTest, TestSparseBuckets);
     FRIEND_TEST(GaugeMetricProducerTest, TestAnomalyDetection);
