@@ -5003,13 +5003,22 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     TaskRecord createTaskRecord(int taskId, ActivityInfo info, Intent intent,
             IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor,
             boolean toTop) {
+        return createTaskRecord(taskId, info, intent, voiceSession, voiceInteractor, toTop,
+                null /*activity*/, null /*source*/, null /*options*/);
+    }
+
+    TaskRecord createTaskRecord(int taskId, ActivityInfo info, Intent intent,
+            IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor,
+            boolean toTop, ActivityRecord activity, ActivityRecord source,
+            ActivityOptions options) {
         final TaskRecord task = new TaskRecord(mService, taskId, info, intent, voiceSession,
                 voiceInteractor);
         // add the task to stack first, mTaskPositioner might need the stack association
         addTask(task, toTop, "createTaskRecord");
         final boolean isLockscreenShown = mService.mStackSupervisor.getKeyguardController()
                 .isKeyguardShowing(mDisplayId != INVALID_DISPLAY ? mDisplayId : DEFAULT_DISPLAY);
-        if (!mStackSupervisor.getLaunchingBoundsController().layoutTask(task, info.windowLayout)
+        if (!mStackSupervisor.getLaunchingBoundsController()
+                .layoutTask(task, info.windowLayout, activity, source, options)
                 && !matchParentBounds() && task.isResizeable() && !isLockscreenShown) {
             task.updateOverrideConfiguration(getOverrideBounds());
         }
