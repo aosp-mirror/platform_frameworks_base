@@ -210,6 +210,9 @@ StatsdConfig build_fake_config() {
     alert->set_number_of_buckets(6);
     alert->set_trigger_if_sum_gt(10);
     alert->set_refractory_period_secs(30);
+    Alert::IncidentdDetails* details = alert->mutable_incidentd_details();
+    details->add_section(12);
+    details->add_section(13);
 
     // Count process state changes, slice by uid.
     metric = config.add_count_metric();
@@ -226,6 +229,9 @@ StatsdConfig build_fake_config() {
     alert->set_number_of_buckets(4);
     alert->set_trigger_if_sum_gt(30);
     alert->set_refractory_period_secs(20);
+    details = alert->mutable_incidentd_details();
+    details->add_section(14);
+    details->add_section(15);
 
     // Count process state changes, slice by uid, while SCREEN_IS_OFF
     metric = config.add_count_metric();

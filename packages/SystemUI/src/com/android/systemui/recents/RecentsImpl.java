@@ -156,7 +156,8 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
                     // Launched from app is always the worst case (in terms of how many
                     // thumbnails/tasks visible)
                     launchState.launchedFromApp = true;
-                    mBackgroundLayoutAlgorithm.update(plan.getTaskStack(), EMPTY_SET, launchState);
+                    mBackgroundLayoutAlgorithm.update(plan.getTaskStack(), EMPTY_SET, launchState,
+                            -1 /* lastScrollPPresent */);
                     VisibilityReport visibilityReport =
                             mBackgroundLayoutAlgorithm.computeStackVisibilityReport(
                                     stack.getTasks());

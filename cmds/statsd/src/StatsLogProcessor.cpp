@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#define DEBUG true  // STOPSHIP if true
 #include "Log.h"
 #include "statslog.h"
 
@@ -21,6 +22,7 @@
 #include <dirent.h>
 #include "StatsLogProcessor.h"
 #include "android-base/stringprintf.h"
+#include "guardrail/StatsdStats.h"
 #include "metrics/CountMetricProducer.h"
 #include "stats_util.h"
 #include "storage/StorageManager.h"
@@ -73,15 +75,14 @@ StatsLogProcessor::~StatsLogProcessor() {
 void StatsLogProcessor::onAnomalyAlarmFired(
         const uint64_t timestampNs,
         unordered_set<sp<const AnomalyAlarm>, SpHash<AnomalyAlarm>> anomalySet) {
-    for (const auto& anomaly : anomalySet) {
-        for (const auto& itr : mMetricsManagers) {
-            itr.second->onAnomalyAlarmFired(timestampNs, anomaly);
-        }
+    for (const auto& itr : mMetricsManagers) {
+        itr.second->onAnomalyAlarmFired(timestampNs, anomalySet);
     }
 }
 
 // TODO: what if statsd service restarts? How do we know what logs are already processed before?
 void StatsLogProcessor::OnLogEvent(const LogEvent& msg) {
+    StatsdStats::getInstance().noteAtomLogged(msg.GetTagId(), msg.GetTimestampNs() / NS_PER_SEC);
     // pass the event to metrics managers.
     for (auto& pair : mMetricsManagers) {
         pair.second->onLogEvent(msg);
@@ -106,23 +107,26 @@ void StatsLogProcessor::OnLogEvent(const LogEvent& msg) {
 }
 
 void StatsLogProcessor::OnConfigUpdated(const ConfigKey& key, const StatsdConfig& config) {
+    ALOGD("Updated configuration for key %s", key.ToString().c_str());
+    unique_ptr<MetricsManager> newMetricsManager = std::make_unique<MetricsManager>(key, config);
+
     auto it = mMetricsManagers.find(key);
     if (it != mMetricsManagers.end()) {
         it->second->finish();
+    } else if (mMetricsManagers.size() > StatsdStats::kMaxConfigCount) {
+        ALOGE("Can't accept more configs!");
+        return;
     }
 
-    ALOGD("Updated configuration for key %s", key.ToString().c_str());
-
-    unique_ptr<MetricsManager> newMetricsManager = std::make_unique<MetricsManager>(config);
     if (newMetricsManager->isConfigValid()) {
         mUidMap->OnConfigUpdated(key);
         newMetricsManager->setAnomalyMonitor(mAnomalyMonitor);
         mMetricsManagers[key] = std::move(newMetricsManager);
         // Why doesn't this work? mMetricsManagers.insert({key, std::move(newMetricsManager)});
-        ALOGD("StatsdConfig valid");
+        VLOG("StatsdConfig valid");
     } else {
         // If there is any error in the config, don't use it.
-        ALOGD("StatsdConfig NOT valid");
+        ALOGE("StatsdConfig NOT valid");
     }
 }
 
@@ -204,6 +208,7 @@ void StatsLogProcessor::OnConfigRemoved(const ConfigKey& key) {
         mMetricsManagers.erase(it);
         mUidMap->OnConfigRemoved(key);
     }
+    StatsdStats::getInstance().noteConfigRemoved(key);
 
     std::lock_guard<std::mutex> lock(mBroadcastTimesMutex);
     mLastBroadcastTimes.erase(key);
@@ -223,12 +228,14 @@ void StatsLogProcessor::flushIfNecessary(uint64_t timestampNs,
             }
         }
         mLastBroadcastTimes[key] = timestampNs;
-        ALOGD("StatsD requesting broadcast for %s", key.ToString().c_str());
+        VLOG("StatsD requesting broadcast for %s", key.ToString().c_str());
         mSendBroadcast(key);
+        StatsdStats::getInstance().noteBroadcastSent(key);
     } else if (totalBytes > kMaxSerializedBytes) { // Too late. We need to start clearing data.
         // We ignore the return value so we force each metric producer to clear its contents.
         metricsManager->onDumpReport();
-        ALOGD("StatsD had to toss out metrics for %s", key.ToString().c_str());
+        StatsdStats::getInstance().noteDataDrop(key);
+        VLOG("StatsD had to toss out metrics for %s", key.ToString().c_str());
     }
 }
 

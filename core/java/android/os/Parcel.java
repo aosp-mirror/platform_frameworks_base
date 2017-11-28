@@ -20,6 +20,7 @@ import android.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.ExceptionUtils;
 import android.util.Log;
 import android.util.Size;
 import android.util.SizeF;
@@ -1866,7 +1867,14 @@ public final class Parcel {
             if (remoteStackTrace != null) {
                 RemoteException cause = new RemoteException(
                         "Remote stack trace:\n" + remoteStackTrace, null, false, false);
-                e.initCause(cause);
+                try {
+                    Throwable rootCause = ExceptionUtils.getRootCause(e);
+                    if (rootCause != null) {
+                        rootCause.initCause(cause);
+                    }
+                } catch (RuntimeException ex) {
+                    Log.e(TAG, "Cannot set cause " + cause + " for " + e, ex);
+                }
             }
             SneakyThrow.sneakyThrow(e);
         }

@@ -173,6 +173,7 @@ message MetricsEvent {
 
   // Selection invocation methods. Used as sub-type for TEXT_SELECTION_SESSION events.
   enum TextSelectionInvocationMethod {
+    TEXT_SELECTION_INVOCATION_UNKNOWN = 0;
     TEXT_SELECTION_INVOCATION_MANUAL = 1;
     TEXT_SELECTION_INVOCATION_LINK = 2;
   }
@@ -2805,316 +2806,524 @@ message MetricsEvent {
     // OS: O
     TEXT_LONGPRESS = 629;
 
-    // OBSOLETE
+    // ACTION: An app requested an unknown permission
+    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REQUEST_UNKNOWN = 630;
 
-    // OBSOLETE
+    // ACTION: An app was granted an unknown permission
+    // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_GRANT_UNKNOWN = 631;
 
-    // OBSOLETE
+    // ACTION: An app requested an unknown permission and the request was denied
+    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_DENIED_UNKNOWN = 632;
 
-    // OBSOLETE
+    // ACTION: An unknown permission was revoked for an app
+    // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REVOKE_UNKNOWN = 633;
 
-    // OBSOLETE
+    // ACTION: An app requested the permission READ_CALENDAR
+    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REQUEST_READ_CALENDAR = 634;
 
-    // OBSOLETE
+    // ACTION: An app was granted the permission READ_CALENDAR
+    // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_GRANT_READ_CALENDAR = 635;
 
-    // OBSOLETE
+    // ACTION: An app requested the permission READ_CALENDAR and the request was denied
+    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_DENIED_READ_CALENDAR = 636;
 
-    // OBSOLETE
+    // ACTION: The permission READ_CALENDAR was revoked for an app
+    // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REVOKE_READ_CALENDAR = 637;
 
-    // OBSOLETE
+    // ACTION: An app requested the permission WRITE_CALENDAR
+    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REQUEST_WRITE_CALENDAR = 638;
 
-    // OBSOLETE
+    // ACTION: An app was granted the permission WRITE_CALENDAR
+    // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_GRANT_WRITE_CALENDAR = 639;
 
-    // OBSOLETE
+    // ACTION: An app requested the permission WRITE_CALENDAR and the request was denied
+    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_DENIED_WRITE_CALENDAR = 640;
 
-    // OBSOLETE
+    // ACTION: The permission WRITE_CALENDAR was revoked for an app
+    // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REVOKE_WRITE_CALENDAR = 641;
 
-    // OBSOLETE
+    // ACTION: An app requested the permission CAMERA
+    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REQUEST_CAMERA = 642;
 
-    // OBSOLETE
+    // ACTION: An app was granted the permission CAMERA
+    // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_GRANT_CAMERA = 643;
 
-    // OBSOLETE
+    // ACTION: An app requested the permission CAMERA and the request was denied
+    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_DENIED_CAMERA = 644;
 
-    // OBSOLETE
+    // ACTION: The permission CAMERA was revoked for an app
+    // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REVOKE_CAMERA = 645;
 
-    // AOBSOLETE
+    // ACTION: An app requested the permission READ_CONTACTS
+    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REQUEST_READ_CONTACTS = 646;
 
-    // OBSOLETE
+    // ACTION: An app was granted the permission READ_CONTACTS
+    // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_GRANT_READ_CONTACTS = 647;
 
-    // OBSOLETE
+    // ACTION: An app requested the permission READ_CONTACTS and the request was denied
+    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_DENIED_READ_CONTACTS = 648;
 
-    // OBSOLETE
+    // ACTION: The permission READ_CONTACTS was revoked for an app
+    // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REVOKE_READ_CONTACTS = 649;
 
-    // OBSOLETE
+    // ACTION: An app requested the permission WRITE_CONTACTS
+    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REQUEST_WRITE_CONTACTS = 650;
 
-    // OBSOLETE
+    // ACTION: An app was granted the permission WRITE_CONTACTS
+    // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_GRANT_WRITE_CONTACTS = 651;
 
-    // OBSOLETE
+    // ACTION: An app requested the permission WRITE_CONTACTS and the request was denied
+    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_DENIED_WRITE_CONTACTS = 652;
 
-    // OBSOLETE
+    // ACTION: The permission WRITE_CONTACTS was revoked for an app
+    // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REVOKE_WRITE_CONTACTS = 653;
 
-    // OBSOLETE
+    // ACTION: An app requested the permission GET_ACCOUNTS
+    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REQUEST_GET_ACCOUNTS = 654;
 
-    // OBSOLETE
+    // ACTION: An app was granted the permission GET_ACCOUNTS
+    // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_GRANT_GET_ACCOUNTS = 655;
 
-    // OBSOLETE
+    // ACTION: An app requested the permission GET_ACCOUNTS and the request was denied
+    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_DENIED_GET_ACCOUNTS = 656;
 
-    // OBSOLETE
+    // ACTION: The permission GET_ACCOUNTS was revoked for an app
+    // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REVOKE_GET_ACCOUNTS = 657;
 
-    // AOBSOLETE
+    // ACTION: An app requested the permission ACCESS_FINE_LOCATION
+    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REQUEST_ACCESS_FINE_LOCATION = 658;
 
-    // OBSOLETE
+    // ACTION: An app was granted the permission ACCESS_FINE_LOCATION
+    // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_GRANT_ACCESS_FINE_LOCATION = 659;
 
-    // OBSOLETE
+    // ACTION: An app requested the permission ACCESS_FINE_LOCATION and the request was denied
+    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_DENIED_ACCESS_FINE_LOCATION = 660;
 
-    // OBSOLETE
+    // ACTION: The permission ACCESS_FINE_LOCATION was revoked for an app
+    // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REVOKE_ACCESS_FINE_LOCATION = 661;
 
-    // OBSOLETE
+    // ACTION: An app requested the permission ACCESS_COARSE_LOCATION
+    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REQUEST_ACCESS_COARSE_LOCATION = 662;
 
-    // OBSOLETE
+    // ACTION: An app was granted the permission ACCESS_COARSE_LOCATION
+    // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_GRANT_ACCESS_COARSE_LOCATION = 663;
 
-    // OBSOLETE
+    // ACTION: An app requested the permission ACCESS_COARSE_LOCATION and the request was denied
+    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_DENIED_ACCESS_COARSE_LOCATION = 664;
 
-    // OBSOLETE
+    // ACTION: The permission ACCESS_COARSE_LOCATION was revoked for an app
+    // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REVOKE_ACCESS_COARSE_LOCATION = 665;
 
-    // OBSOLETE
+    // ACTION: An app requested the permission RECORD_AUDIO
+    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REQUEST_RECORD_AUDIO = 666;
 
-    // OBSOLETE
+    // ACTION: An app was granted the permission RECORD_AUDIO
+    // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_GRANT_RECORD_AUDIO = 667;
 
-    // OBSOLETE
+    // ACTION: An app requested the permission RECORD_AUDIO and the request was denied
+    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_DENIED_RECORD_AUDIO = 668;
 
-    // OBSOLETE
+    // ACTION: The permission RECORD_AUDIO was revoked for an app
+    // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REVOKE_RECORD_AUDIO = 669;
 
-    // OBSOLETE
+    // ACTION: An app requested the permission READ_PHONE_STATE
+    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REQUEST_READ_PHONE_STATE = 670;
 
-    // OBSOLETE
+    // ACTION: An app was granted the permission READ_PHONE_STATE
+    // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_GRANT_READ_PHONE_STATE = 671;
 
-    // OBSOLETE
+    // ACTION: An app requested the permission READ_PHONE_STATE and the request was denied
+    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_DENIED_READ_PHONE_STATE = 672;
 
-    // OBSOLETE
+    // ACTION: The permission READ_PHONE_STATE was revoked for an app
+    // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REVOKE_READ_PHONE_STATE = 673;
 
-    // OBSOLETE
+    // ACTION: An app requested the permission CALL_PHONE
+    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REQUEST_CALL_PHONE = 674;
 
-    // OBSOLETE
+    // ACTION: An app was granted the permission CALL_PHONE
+    // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_GRANT_CALL_PHONE = 675;
 
-    // OBSOLETE
+    // ACTION: An app requested the permission CALL_PHONE and the request was denied
+    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_DENIED_CALL_PHONE = 676;
 
-    // OBSOLETE
+    // ACTION: The permission CALL_PHONE was revoked for an app
+    // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REVOKE_CALL_PHONE = 677;
 
-    // AOBSOLETE
+    // ACTION: An app requested the permission READ_CALL_LOG
+    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REQUEST_READ_CALL_LOG = 678;
 
-    // OBSOLETE
+    // ACTION: An app was granted the permission READ_CALL_LOG
+    // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_GRANT_READ_CALL_LOG = 679;
 
-    // OBSOLETE
+    // ACTION: An app requested the permission READ_CALL_LOG and the request was denied
+    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_DENIED_READ_CALL_LOG = 680;
 
-    // OBSOLETE
+    // ACTION: The permission READ_CALL_LOG was revoked for an app
+    // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REVOKE_READ_CALL_LOG = 681;
 
-    // OBSOLETE
+    // ACTION: An app requested the permission WRITE_CALL_LOG
+    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REQUEST_WRITE_CALL_LOG = 682;
 
-    // OBSOLETE
+    // ACTION: An app was granted the permission WRITE_CALL_LOG
+    // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_GRANT_WRITE_CALL_LOG = 683;
 
-    // OBSOLETE
+    // ACTION: An app requested the permission WRITE_CALL_LOG and the request was denied
+    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_DENIED_WRITE_CALL_LOG = 684;
 
-    // OBSOLETE
+    // ACTION: The permission WRITE_CALL_LOG was revoked for an app
+    // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REVOKE_WRITE_CALL_LOG = 685;
 
-    // OBSOLETE
+    // ACTION: An app requested the permission ADD_VOICEMAIL
+    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REQUEST_ADD_VOICEMAIL = 686;
 
-    // OBSOLETE
+    // ACTION: An app was granted the permission ADD_VOICEMAIL
+    // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_GRANT_ADD_VOICEMAIL = 687;
 
-    // OBSOLETE
+    // ACTION: An app requested the permission ADD_VOICEMAIL and the request was denied
+    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_DENIED_ADD_VOICEMAIL = 688;
 
-    // OBSOLETE
+    // ACTION: The permission ADD_VOICEMAIL was revoked for an app
+    // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REVOKE_ADD_VOICEMAIL = 689;
 
-    // OBSOLETE
+    // ACTION: An app requested the permission USE_SIP
+    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REQUEST_USE_SIP = 690;
 
-    // OBSOLETE
+    // ACTION: An app was granted the permission USE_SIP
+    // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_GRANT_USE_SIP = 691;
 
-    // OBSOLETE
+    // ACTION: An app requested the permission USE_SIP and the request was denied
+    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_DENIED_USE_SIP = 692;
 
-    // OBSOLETE
+    // ACTION: The permission USE_SIP was revoked for an app
+    // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REVOKE_USE_SIP = 693;
 
-    // OBSOLETE
+    // ACTION: An app requested the permission PROCESS_OUTGOING_CALLS
+    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REQUEST_PROCESS_OUTGOING_CALLS = 694;
 
-    // OBSOLETE
+    // ACTION: An app was granted the permission PROCESS_OUTGOING_CALLS
+    // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_GRANT_PROCESS_OUTGOING_CALLS = 695;
 
-    // OBSOLETE
+    // ACTION: An app requested the permission PROCESS_OUTGOING_CALLS and the request was denied
+    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_DENIED_PROCESS_OUTGOING_CALLS = 696;
 
-    // OBSOLETE
+    // ACTION: The permission PROCESS_OUTGOING_CALLS was revoked for an app
+    // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REVOKE_PROCESS_OUTGOING_CALLS = 697;
 
-    // OBSOLETE
+    // ACTION: An app requested the permission READ_CELL_BROADCASTS
+    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REQUEST_READ_CELL_BROADCASTS = 698;
 
-    // OBSOLETE
+    // ACTION: An app was granted the permission READ_CELL_BROADCASTS
+    // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_GRANT_READ_CELL_BROADCASTS = 699;
 
-    // OBSOLETE
+    // ACTION: An app requested the permission READ_CELL_BROADCASTS and the request was denied
+    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_DENIED_READ_CELL_BROADCASTS = 700;
 
-    // OBSOLETE
+    // ACTION: The permission READ_CELL_BROADCASTS was revoked for an app
+    // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REVOKE_READ_CELL_BROADCASTS = 701;
 
-    // OBSOLETE
+    // ACTION: An app requested the permission BODY_SENSORS
+    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REQUEST_BODY_SENSORS = 702;
 
-    // OBSOLETE
+    // ACTION: An app was granted the permission BODY_SENSORS
+    // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_GRANT_BODY_SENSORS = 703;
 
-    // OBSOLETE
+    // ACTION: An app requested the permission BODY_SENSORS and the request was denied
+    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_DENIED_BODY_SENSORS = 704;
 
-    // OBSOLETE
+    // ACTION: The permission BODY_SENSORS was revoked for an app
+    // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REVOKE_BODY_SENSORS = 705;
 
-    // OBSOLETE
+    // ACTION: An app requested the permission SEND_SMS
+    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REQUEST_SEND_SMS = 706;
 
-    // OBSOLETE
+    // ACTION: An app was granted the permission SEND_SMS
+    // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_GRANT_SEND_SMS = 707;
 
-    // OBSOLETE
+    // ACTION: An app requested the permission SEND_SMS and the request was denied
+    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_DENIED_SEND_SMS = 708;
 
-    // OBSOLETE
+    // ACTION: The permission SEND_SMS was revoked for an app
+    // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REVOKE_SEND_SMS = 709;
 
-    // OBSOLETE
+    // ACTION: An app requested the permission RECEIVE_SMS
+    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REQUEST_RECEIVE_SMS = 710;
 
-    // OBSOLETE
+    // ACTION: An app was granted the permission RECEIVE_SMS
+    // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_GRANT_RECEIVE_SMS = 711;
 
-    // OBSOLETE
+    // ACTION: An app requested the permission RECEIVE_SMS and the request was denied
+    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_DENIED_RECEIVE_SMS = 712;
 
-    // OBSOLETE
+    // ACTION: The permission RECEIVE_SMS was revoked for an app
+    // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REVOKE_RECEIVE_SMS = 713;
 
-    // OBSOLETE
+    // ACTION: An app requested the permission READ_SMS
+    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REQUEST_READ_SMS = 714;
 
-    // OBSOLETE
+    // ACTION: An app was granted the permission READ_SMS
+    // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_GRANT_READ_SMS = 715;
 
-    // OBSOLETE
+    // ACTION: An app requested the permission READ_SMS and the request was denied
+    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_DENIED_READ_SMS = 716;
 
-    // OBSOLETE
+    // ACTION: The permission READ_SMS was revoked for an app
+    // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REVOKE_READ_SMS = 717;
 
-    // OBSOLETE
+    // ACTION: An app requested the permission RECEIVE_WAP_PUSH
+    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REQUEST_RECEIVE_WAP_PUSH = 718;
 
-    // OBSOLETE
+    // ACTION: An app was granted the permission RECEIVE_WAP_PUSH
+    // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_GRANT_RECEIVE_WAP_PUSH = 719;
 
-    // OBSOLETE
+    // ACTION: An app requested the permission RECEIVE_WAP_PUSH and the request was denied
+    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_DENIED_RECEIVE_WAP_PUSH = 720;
 
-    // OBSOLETE
+    // ACTION: The permission RECEIVE_WAP_PUSH was revoked for an app
+    // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REVOKE_RECEIVE_WAP_PUSH = 721;
 
-    // OBSOLETE
+    // ACTION: An app requested the permission RECEIVE_MMS
+    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REQUEST_RECEIVE_MMS = 722;
 
-    // OBSOLETE
+    // ACTION: An app was granted the permission RECEIVE_MMS
+    // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_GRANT_RECEIVE_MMS = 723;
 
-    // OBSOLETE
+    // ACTION: An app requested the permission RECEIVE_MMS and the request was denied
+    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_DENIED_RECEIVE_MMS = 724;
 
-    // OBSOLETE
+    // ACTION: The permission RECEIVE_MMS was revoked for an app
+    // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REVOKE_RECEIVE_MMS = 725;
 
-    // OBSOLETE
+    // ACTION: An app requested the permission READ_EXTERNAL_STORAGE
+    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REQUEST_READ_EXTERNAL_STORAGE = 726;
 
-    // OBSOLETE
+    // ACTION: An app was granted the permission READ_EXTERNAL_STORAGE
+    // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_GRANT_READ_EXTERNAL_STORAGE = 727;
 
-    // OBSOLETE
+    // ACTION: An app requested the permission READ_EXTERNAL_STORAGE and the request was denied
+    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_DENIED_READ_EXTERNAL_STORAGE = 728;
 
-    // OBSOLETE
+    // ACTION: The permission READ_EXTERNAL_STORAGE was revoked for an app
+    // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REVOKE_READ_EXTERNAL_STORAGE = 729;
 
-    // OBSOLETE
+    // ACTION: An app requested the permission WRITE_EXTERNAL_STORAGE
+    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE = 730;
 
-    // OBSOLETE
+    // ACTION: An app was granted the permission WRITE_EXTERNAL_STORAGE
+    // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_GRANT_WRITE_EXTERNAL_STORAGE = 731;
 
-    // OBSOLETE
+    // ACTION: An app requested the permission WRITE_EXTERNAL_STORAGE and the request was denied
+    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_DENIED_WRITE_EXTERNAL_STORAGE = 732;
 
-    // OBSOLETE
+    // ACTION: The permission WRITE_EXTERNAL_STORAGE was revoked for an app
+    // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REVOKE_WRITE_EXTERNAL_STORAGE = 733;
 
     // ACTION: Logged when a provisioning session has started
@@ -3123,16 +3332,24 @@ message MetricsEvent {
     // ACTION: Logged when a provisioning session has completed
     PROVISIONING_SESSION_COMPLETED = 735;
 
-    // OBSOLETE
+    // ACTION: An app requested the permission READ_PHONE_NUMBERS
+    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REQUEST_READ_PHONE_NUMBERS = 736;
 
-    // OBSOLETE
+    // ACTION: An app was granted the permission READ_PHONE_NUMBERS
+    // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_GRANT_READ_PHONE_NUMBERS = 737;
 
-    // OBSOLETE
+    // ACTION: An app requested the permission READ_PHONE_NUMBERS and the request was denied
+    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_DENIED_READ_PHONE_NUMBERS = 738;
 
-    // OBSOLETE
+    // ACTION: The permission READ_PHONE_NUMBERS was revoked for an app
+    // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REVOKE_READ_PHONE_NUMBERS = 739;
 
     // ACTION: QS Brightness Slider (with auto brightness disabled, and VR enabled)
@@ -3624,52 +3841,84 @@ message MetricsEvent {
     // CATEGORY: SETTINGS
     SETTINGS_LOCK_SCREEN_PREFERENCES = 882;
 
-    // OBSOLETE
+    // ACTION: An app requested the app-op permission ACCESS_NOTIFICATIONS
+    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_APPOP_REQUEST_ACCESS_NOTIFICATIONS = 883;
 
-    // OBSOLETE
+    // ACTION: An app was granted the app-op permission ACCESS_NOTIFICATIONS
+    // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE as of Android P
     ACTION_APPOP_GRANT_ACCESS_NOTIFICATIONS = 884;
 
-    // OBSOLETE
+    // ACTION: An app requested the app-op permission ACCESS_NOTIFICATIONS and the request was denied
+    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_APPOP_DENIED_ACCESS_NOTIFICATIONS = 885;
 
-    // OBSOLETE
+    // ACTION: The app-op permission ACCESS_NOTIFICATIONS was revoked for an app
+    // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE as of Android P
     ACTION_APPOP_REVOKE_ACCESS_NOTIFICATIONS = 886;
 
-    // OBSOLETE
+    // ACTION: An app requested the app-op permission SYSTEM_ALERT_WINDOW
+    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_APPOP_REQUEST_SYSTEM_ALERT_WINDOW = 887;
 
-    // OBSOLETE
+    // ACTION: An app was granted the app-op permission SYSTEM_ALERT_WINDOW
+    // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE as of Android P
     ACTION_APPOP_GRANT_SYSTEM_ALERT_WINDOW = 888;
 
-    // OBSOLETE
+    // ACTION: An app requested the app-op permission SYSTEM_ALERT_WINDOW and the request was denied
+    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_APPOP_DENIED_SYSTEM_ALERT_WINDOW = 889;
 
-    // OBSOLETE
+    // ACTION: The app-op permission SYSTEM_ALERT_WINDOW was revoked for an app
+    // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE as of Android P
     ACTION_APPOP_REVOKE_SYSTEM_ALERT_WINDOW = 890;
 
-    // OBSOLETE
+    // ACTION: An app requested the app-op permission REQUEST_WRITE_SETTINGS
+    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_APPOP_REQUEST_WRITE_SETTINGS = 891;
 
-    // OBSOLETE
+    // ACTION: An app was granted the app-op permission REQUEST_WRITE_SETTINGS
+    // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE as of Android P
     ACTION_APPOP_GRANT_WRITE_SETTINGS = 892;
 
-    // OBSOLETE
+    // ACTION: An app requested the app-op permission REQUEST_WRITE_SETTINGS and the request was denied
+    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_APPOP_DENIED_WRITE_SETTINGS = 893;
 
-    // OBSOLETE
+    // ACTION: The app-op permission REQUEST_WRITE_SETTINGS was revoked for an app
+    // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE as of Android P
     ACTION_APPOP_REVOKE_WRITE_SETTINGS = 894;
 
-    // OBSOLETE
+    // ACTION: An app requested the app-op permission REQUEST_INSTALL_PACKAGES
+    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_APPOP_REQUEST_REQUEST_INSTALL_PACKAGES = 895;
 
-    // OBSOLETE
+    // ACTION: An app was granted the app-op permission REQUEST_INSTALL_PACKAGES
+    // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE as of Android P
     ACTION_APPOP_GRANT_REQUEST_INSTALL_PACKAGES = 896;
 
-    // OBSOLETE
+    // ACTION: An app requested the app-op permission REQUEST_INSTALL_PACKAGES and the request was denied
+    // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_APPOP_DENIED_REQUEST_INSTALL_PACKAGES = 897;
 
-    // OBSOLETE
+    // ACTION: The app-op permission REQUEST_INSTALL_PACKAGES was revoked for an app
+    // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE as of Android P
     ACTION_APPOP_REVOKE_REQUEST_INSTALL_PACKAGES = 898;
 
     // ACTION: Phase 1 of instant application resolution occurred
@@ -3761,7 +4010,8 @@ message MetricsEvent {
     FIELD_AUTOFILL_NUM_IDS = 917;
 
     // ACTION: An autofill service was reqiested to save data
-    // Type TYPE_SUCCESS: The request succeeded
+    // Type TYPE_SUCCESS: The request succeeded right away
+    // Type TYPE_OPEN: The request succeeded but the service launched an IntentSender
     // Type TYPE_FAILURE: The request failed
     // Package: Package of app that was autofilled
     // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
@@ -4762,6 +5012,8 @@ message MetricsEvent {
     // CATEGORY: TEXT_SELECTION_SESSION
     // OS: P
     FIELD_SELECTION_WIDGET_VERSION = 1262;
+
+    // ---- End P Constants, all P constants go above this line ----
 
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS

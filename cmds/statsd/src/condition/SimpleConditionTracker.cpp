@@ -18,6 +18,7 @@
 #include "Log.h"
 
 #include "SimpleConditionTracker.h"
+#include "guardrail/StatsdStats.h"
 
 #include <log/logprint.h>
 
@@ -32,9 +33,10 @@ using std::unordered_map;
 using std::vector;
 
 SimpleConditionTracker::SimpleConditionTracker(
-        const string& name, const int index, const SimpleCondition& simpleCondition,
+        const ConfigKey& key, const string& name, const int index,
+        const SimpleCondition& simpleCondition,
         const unordered_map<string, int>& trackerNameIndexMap)
-    : ConditionTracker(name, index) {
+    : ConditionTracker(name, index), mConfigKey(key) {
     VLOG("creating SimpleConditionTracker %s", mName.c_str());
     mCountNesting = simpleCondition.count_nesting();
 
@@ -126,6 +128,24 @@ void SimpleConditionTracker::handleStopAll(std::vector<ConditionState>& conditio
     conditionCache[mIndex] = ConditionState::kFalse;
 }
 
+bool SimpleConditionTracker::hitGuardRail(const HashableDimensionKey& newKey) {
+    if (!mSliced || mSlicedConditionState.find(newKey) != mSlicedConditionState.end()) {
+        // if the condition is not sliced or the key is not new, we are good!
+        return false;
+    }
+    // 1. Report the tuple count if the tuple count > soft limit
+    if (mSlicedConditionState.size() > StatsdStats::kDimensionKeySizeSoftLimit - 1) {
+        size_t newTupleCount = mSlicedConditionState.size() + 1;
+        StatsdStats::getInstance().noteConditionDimensionSize(mConfigKey, mName, newTupleCount);
+        // 2. Don't add more tuples, we are above the allowed threshold. Drop the data.
+        if (newTupleCount > StatsdStats::kDimensionKeySizeHardLimit) {
+            ALOGE("Condition %s dropping data for dimension key %s", mName.c_str(), newKey.c_str());
+            return true;
+        }
+    }
+    return false;
+}
+
 void SimpleConditionTracker::handleConditionEvent(const HashableDimensionKey& outputKey,
                                                   bool matchStart,
                                                   std::vector<ConditionState>& conditionCache,
@@ -133,6 +153,12 @@ void SimpleConditionTracker::handleConditionEvent(const HashableDimensionKey& ou
     bool changed = false;
     auto outputIt = mSlicedConditionState.find(outputKey);
     ConditionState newCondition;
+    if (hitGuardRail(outputKey)) {
+        conditionChangedCache[mIndex] = false;
+        // Tells the caller it's evaluated.
+        conditionCache[mIndex] = ConditionState::kUnknown;
+        return;
+    }
     if (outputIt == mSlicedConditionState.end()) {
         // We get a new output key.
         newCondition = matchStart ? ConditionState::kTrue : ConditionState::kFalse;

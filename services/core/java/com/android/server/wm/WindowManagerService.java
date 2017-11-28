@@ -126,7 +126,6 @@ import android.app.AppOpsManager;
 import android.app.IActivityManager;
 import android.app.IAssistDataReceiver;
 import android.content.BroadcastReceiver;
-import android.content.ClipData;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -5517,7 +5516,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     void reconfigureDisplayLocked(@NonNull DisplayContent displayContent) {
-        if (!mDisplayReady) {
+        if (!displayContent.isReady()) {
             return;
         }
         displayContent.configureDisplayPolicy();

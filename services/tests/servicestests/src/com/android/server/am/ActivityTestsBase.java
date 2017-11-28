@@ -19,6 +19,7 @@ package com.android.server.am;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.doNothing;
@@ -415,6 +416,12 @@ public class ActivityTestsBase {
         @Override
         protected T createStackWindowController(int displayId, boolean onTop, Rect outBounds) {
             mContainerController = (T) WindowTestUtils.createMockStackWindowContainerController();
+
+            // Primary pinned stacks require a non-empty out bounds to be set or else all tasks
+            // will be moved to the full screen stack.
+            if (getWindowingMode() == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
+                outBounds.set(0, 0, 100, 100);
+            }
             return mContainerController;
         }
 

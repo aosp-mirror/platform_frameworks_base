@@ -19,6 +19,7 @@
 #include "anomaly/AnomalyMonitor.h"
 #include "anomaly/AnomalyTracker.h"
 #include "condition/ConditionTracker.h"
+#include "config/ConfigKey.h"
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
 #include "logd/LogEvent.h"
 #include "matchers/LogMatchingTracker.h"
@@ -33,7 +34,7 @@ namespace statsd {
 // A MetricsManager is responsible for managing metrics from one single config source.
 class MetricsManager {
 public:
-    MetricsManager(const StatsdConfig& config);
+    MetricsManager(const ConfigKey& configKey, const StatsdConfig& config);
 
     ~MetricsManager();
 
@@ -45,7 +46,8 @@ public:
     // Called when everything should wrap up. We are about to finish (e.g., new config comes).
     void finish();
 
-    void onAnomalyAlarmFired(const uint64_t timestampNs, sp<const AnomalyAlarm> anomaly);
+    void onAnomalyAlarmFired(const uint64_t timestampNs,
+                         unordered_set<sp<const AnomalyAlarm>, SpHash<AnomalyAlarm>>& anomalySet);
 
     void setAnomalyMonitor(const sp<AnomalyMonitor>& anomalyMonitor);
 
@@ -57,6 +59,8 @@ public:
     size_t byteSize();
 
 private:
+    const ConfigKey mConfigKey;
+
     // All event tags that are interesting to my metrics.
     std::set<int> mTagIds;
 

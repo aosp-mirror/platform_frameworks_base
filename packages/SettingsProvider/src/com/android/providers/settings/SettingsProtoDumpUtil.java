@@ -801,6 +801,9 @@ class SettingsProtoDumpUtil {
                 Settings.Global.BLUETOOTH_PAN_PRIORITY_PREFIX,
                 GlobalSettingsProto.BLUETOOTH_PAN_PRIORITY_PREFIX);
         dumpSetting(s, p,
+                Settings.Global.BLUETOOTH_HEARING_AID_PRIORITY_PREFIX,
+                GlobalSettingsProto.BLUETOOTH_HEARING_AID_PRIORITY_PREFIX);
+        dumpSetting(s, p,
                 Settings.Global.ACTIVITY_MANAGER_CONSTANTS,
                 GlobalSettingsProto.ACTIVITY_MANAGER_CONSTANTS);
         dumpSetting(s, p,

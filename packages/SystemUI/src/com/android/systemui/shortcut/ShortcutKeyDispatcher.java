@@ -20,6 +20,8 @@ import static android.app.ActivityManager.SPLIT_SCREEN_CREATE_MODE_BOTTOM_OR_RIG
 import static android.app.ActivityManager.SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
 import static android.os.UserHandle.USER_CURRENT;
 
+import static com.android.systemui.statusbar.phone.NavigationBarGestureHelper.DRAG_MODE_NONE;
+
 import android.app.ActivityManager;
 import android.content.res.Configuration;
 import android.os.RemoteException;
@@ -36,6 +38,7 @@ import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.stackdivider.DividerView;
+import com.android.systemui.statusbar.phone.NavigationBarGestureHelper;
 
 import java.util.List;
 
@@ -89,20 +92,11 @@ public class ShortcutKeyDispatcher extends SystemUI
         try {
             int dockSide = mWindowManagerService.getDockedStackSide();
             if (dockSide == WindowManager.DOCKED_INVALID) {
-                // If there is no window docked, we dock the top-most window.
+                // Split the screen
                 Recents recents = getComponent(Recents.class);
-                int dockMode = (shortcutCode == SC_DOCK_LEFT)
+                recents.splitPrimaryTask(DRAG_MODE_NONE, (shortcutCode == SC_DOCK_LEFT)
                         ? SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT
-                        : SPLIT_SCREEN_CREATE_MODE_BOTTOM_OR_RIGHT;
-                List<ActivityManager.RecentTaskInfo> taskList =
-                        ActivityManagerWrapper.getInstance().getRecentTasks(1, USER_CURRENT);
-                recents.showRecentApps(
-                        false /* triggeredFromAltTab */,
-                        false /* fromHome */);
-                if (!taskList.isEmpty()) {
-                    SystemServicesProxy.getInstance(mContext).startTaskInDockedMode(
-                            taskList.get(0).id, dockMode);
-                }
+                        : SPLIT_SCREEN_CREATE_MODE_BOTTOM_OR_RIGHT, null, -1);
             } else {
                 // If there is already a docked window, we respond by resizing the docking pane.
                 DividerView dividerView = getComponent(Divider.class).getView();

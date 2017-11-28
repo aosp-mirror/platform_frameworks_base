@@ -23,6 +23,7 @@ using std::map;
 
 void MetricProducer::onMatchedLogEvent(const size_t matcherIndex, const LogEvent& event,
                                        bool scheduledPull) {
+    std::unique_lock<std::shared_timed_mutex> writeLock(mRWMutex);
     uint64_t eventTimeNs = event.GetTimestampNs();
     // this is old event, maybe statsd restarted?
     if (eventTimeNs < mStartTimeNs) {
@@ -59,12 +60,16 @@ void MetricProducer::onMatchedLogEvent(const size_t matcherIndex, const LogEvent
     } else {
         condition = mCondition;
     }
+    // Unlock as onMatchedLogEventInternal is threadsafe.
+    writeLock.unlock();
 
     onMatchedLogEventInternal(matcherIndex, eventKey, conditionKeys, condition, event,
                               scheduledPull);
 }
 
 std::unique_ptr<std::vector<uint8_t>> MetricProducer::serializeProto() {
+    std::lock_guard<std::shared_timed_mutex> writeLock(mRWMutex);
+
     size_t bufferSize = mProto->size();
 
     std::unique_ptr<std::vector<uint8_t>> buffer(new std::vector<uint8_t>(bufferSize));

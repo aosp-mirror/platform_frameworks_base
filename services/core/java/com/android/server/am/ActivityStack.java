@@ -156,7 +156,6 @@ import java.util.Set;
  */
 class ActivityStack<T extends StackWindowController> extends ConfigurationContainer
         implements StackWindowListener {
-
     private static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityStack" : TAG_AM;
     private static final String TAG_ADD_REMOVE = TAG + POSTFIX_ADD_REMOVE;
     private static final String TAG_APP = TAG + POSTFIX_APP;
@@ -322,11 +321,6 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
      */
     boolean mForceHidden = false;
 
-    // Whether or not this stack covers the entire screen; by default stacks are fullscreen
-    boolean mFullscreen = true;
-    // Current bounds of the stack or null if fullscreen.
-    Rect mBounds = null;
-
     private boolean mUpdateBoundsDeferred;
     private boolean mUpdateBoundsDeferredCalled;
     private final Rect mDeferredBounds = new Rect();
@@ -342,8 +336,6 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     /** The attached Display's unique identifier, or -1 if detached */
     int mDisplayId;
 
-    /** Temp variables used during override configuration update. */
-    private final SparseArray<Configuration> mTmpConfigs = new SparseArray<>();
     private final SparseArray<Rect> mTmpBounds = new SparseArray<>();
     private final SparseArray<Rect> mTmpInsetBounds = new SparseArray<>();
     private final Rect mTmpRect2 = new Rect();
@@ -574,7 +566,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 }
             }
 
-            if (!Objects.equals(mBounds, mTmpRect2)) {
+            if (!Objects.equals(getOverrideBounds(), mTmpRect2)) {
                 resize(mTmpRect2, null /* tempTaskBounds */, null /* tempTaskInsetBounds */);
             }
         } finally {
@@ -641,9 +633,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
      */
     private void postAddToDisplay(ActivityDisplay activityDisplay, Rect bounds, boolean onTop) {
         mDisplayId = activityDisplay.mDisplayId;
-        mBounds = bounds != null ? new Rect(bounds) : null;
-        mFullscreen = mBounds == null;
-
+        setBounds(bounds);
         onParentChanged();
 
         activityDisplay.addChild(this, onTop ? POSITION_TOP : POSITION_BOTTOM);
@@ -651,7 +641,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             // If we created a docked stack we want to resize it so it resizes all other stacks
             // in the system.
             mStackSupervisor.resizeDockedStackLocked(
-                    mBounds, null, null, null, null, PRESERVE_WINDOWS);
+                    getOverrideBounds(), null, null, null, null, PRESERVE_WINDOWS);
         }
     }
 
@@ -766,8 +756,9 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         return false;
     }
 
-    void setBounds(Rect bounds) {
-        mBounds = mFullscreen ? null : new Rect(bounds);
+    @Override
+    public int setBounds(Rect bounds) {
+        return super.setBounds(!inMultiWindowMode() ? null : bounds);
     }
 
     ActivityRecord topRunningActivityLocked() {
@@ -2495,7 +2486,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             // apps, maybeUpdateTransitToWallpaper() will fail to identify this as a
             // TRANSIT_WALLPAPER_OPEN animation, and run some funny animation.
             final boolean lastActivityTranslucent = lastStack != null
-                    && (!lastStack.mFullscreen
+                    && (lastStack.inMultiWindowMode()
                     || (lastStack.mLastPausedActivity != null
                     && !lastStack.mLastPausedActivity.fullscreen));
 
@@ -2739,8 +2730,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         position = getAdjustedPositionForTask(task, position, null /* starting */);
         mTaskHistory.remove(task);
         mTaskHistory.add(position, task);
-        mWindowContainerController.positionChildAt(task.getWindowContainerController(), position,
-                task.mBounds, task.getOverrideConfiguration());
+        mWindowContainerController.positionChildAt(task.getWindowContainerController(), position);
         updateTaskMovement(task, true);
     }
 
@@ -4602,8 +4592,6 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     // TODO: Can only be called from special methods in ActivityStackSupervisor.
     // Need to consolidate those calls points into this resize method so anyone can call directly.
     void resize(Rect bounds, Rect tempTaskBounds, Rect tempTaskInsetBounds) {
-        bounds = TaskRecord.validateBounds(bounds);
-
         if (!updateBoundsAllowed(bounds, tempTaskBounds, tempTaskInsetBounds)) {
             return;
         }
@@ -4613,7 +4601,6 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         final Rect insetBounds = tempTaskInsetBounds != null ? tempTaskInsetBounds : taskBounds;
 
         mTmpBounds.clear();
-        mTmpConfigs.clear();
         mTmpInsetBounds.clear();
 
         for (int i = mTaskHistory.size() - 1; i >= 0; i--) {
@@ -4624,7 +4611,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                     // For freeform stack we don't adjust the size of the tasks to match that
                     // of the stack, but we do try to make sure the tasks are still contained
                     // with the bounds of the stack.
-                    mTmpRect2.set(task.mBounds);
+                    mTmpRect2.set(task.getOverrideBounds());
                     fitWithinBounds(mTmpRect2, bounds);
                     task.updateOverrideConfiguration(mTmpRect2);
                 } else {
@@ -4632,15 +4619,13 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 }
             }
 
-            mTmpConfigs.put(task.taskId, task.getOverrideConfiguration());
-            mTmpBounds.put(task.taskId, task.mBounds);
+            mTmpBounds.put(task.taskId, task.getOverrideBounds());
             if (tempTaskInsetBounds != null) {
                 mTmpInsetBounds.put(task.taskId, tempTaskInsetBounds);
             }
         }
 
-        mFullscreen = mWindowContainerController.resize(bounds, mTmpConfigs, mTmpBounds,
-                mTmpInsetBounds);
+        mWindowContainerController.resize(bounds, mTmpBounds, mTmpInsetBounds);
         setBounds(bounds);
     }
 
@@ -4655,7 +4640,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
      * @param stackBounds Bounds within which the other bounds should remain.
      */
     private static void fitWithinBounds(Rect bounds, Rect stackBounds) {
-        if (stackBounds == null || stackBounds.contains(bounds)) {
+        if (stackBounds == null || stackBounds.isEmpty() || stackBounds.contains(bounds)) {
             return;
         }
 
@@ -4873,8 +4858,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 pw.println("");
             }
             pw.println(prefix + "Task id #" + task.taskId);
-            pw.println(prefix + "mFullscreen=" + task.mFullscreen);
-            pw.println(prefix + "mBounds=" + task.mBounds);
+            pw.println(prefix + "mBounds=" + task.getOverrideBounds());
             pw.println(prefix + "mMinWidth=" + task.mMinWidth);
             pw.println(prefix + "mMinHeight=" + task.mMinHeight);
             pw.println(prefix + "mLastNonFullscreenBounds=" + task.mLastNonFullscreenBounds);
@@ -4981,7 +4965,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             if (isOnHomeDisplay() && mode != REMOVE_TASK_MODE_MOVING_TO_TOP
                     && mStackSupervisor.isFocusedStack(this)) {
                 String myReason = reason + " leftTaskHistoryEmpty";
-                if (mFullscreen || !adjustFocusToNextFocusableStack(myReason)) {
+                if (!inMultiWindowMode() || !adjustFocusToNextFocusableStack(myReason)) {
                     mStackSupervisor.moveHomeStackToFront(myReason);
                 }
             }
@@ -5011,8 +4995,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         final boolean isLockscreenShown = mService.mStackSupervisor.getKeyguardController()
                 .isKeyguardShowing(mDisplayId != INVALID_DISPLAY ? mDisplayId : DEFAULT_DISPLAY);
         if (!mStackSupervisor.getLaunchingBoundsController().layoutTask(task, info.windowLayout)
-                && mBounds != null && task.isResizeable() && !isLockscreenShown) {
-            task.updateOverrideConfiguration(mBounds);
+                && !matchParentBounds() && task.isResizeable() && !isLockscreenShown) {
+            task.updateOverrideConfiguration(getOverrideBounds());
         }
         task.createWindowContainer(toTop, (info.flags & FLAG_SHOW_FOR_ALL_USERS) != 0);
         return task;
@@ -5174,10 +5158,13 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             mResumedActivity.writeIdentifierToProto(proto, RESUMED_ACTIVITY);
         }
         proto.write(DISPLAY_ID, mDisplayId);
-        if (mBounds != null) {
-            mBounds.writeToProto(proto, BOUNDS);
+        if (!matchParentBounds()) {
+            final Rect bounds = getOverrideBounds();
+            bounds.writeToProto(proto, BOUNDS);
         }
-        proto.write(FULLSCREEN, mFullscreen);
+
+        // TODO: Remove, no longer needed with windowingMode.
+        proto.write(FULLSCREEN, matchParentBounds());
         proto.end(token);
     }
 }

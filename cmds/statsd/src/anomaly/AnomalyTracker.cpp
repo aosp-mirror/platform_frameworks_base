@@ -19,32 +19,32 @@
 
 #include "AnomalyTracker.h"
 
+#include <android/os/IIncidentManager.h>
+#include <android/os/IncidentReportArgs.h>
+#include <binder/IServiceManager.h>
 #include <time.h>
 
 namespace android {
 namespace os {
 namespace statsd {
 
-AnomalyTracker::AnomalyTracker(const Alert& alert, const int64_t& bucketSizeNs)
+// TODO: Separate DurationAnomalyTracker as a separate subclass and let each MetricProducer
+//       decide and let which one it wants.
+// TODO: Get rid of bucketNumbers, and return to the original circular array method.
+AnomalyTracker::AnomalyTracker(const Alert& alert)
     : mAlert(alert),
-      mBucketSizeNs(bucketSizeNs),
-      mNumOfPastPackets(mAlert.number_of_buckets() - 1) {
+      mNumOfPastBuckets(mAlert.number_of_buckets() - 1) {
     VLOG("AnomalyTracker() called");
     if (mAlert.number_of_buckets() <= 0) {
-        ALOGE("Cannot create DiscreteAnomalyTracker with %lld buckets",
+        ALOGE("Cannot create AnomalyTracker with %lld buckets",
               (long long)mAlert.number_of_buckets());
         return;
     }
-    if (mBucketSizeNs <= 0) {
-        ALOGE("Cannot create DiscreteAnomalyTracker with bucket size %lld ",
-              (long long)mBucketSizeNs);
-        return;
-    }
     if (!mAlert.has_trigger_if_sum_gt()) {
-        ALOGE("Cannot create DiscreteAnomalyTracker without threshold");
+        ALOGE("Cannot create AnomalyTracker without threshold");
         return;
     }
-    reset(); // initialization
+    resetStorage(); // initialization
 }
 
 AnomalyTracker::~AnomalyTracker() {
@@ -52,37 +52,36 @@ AnomalyTracker::~AnomalyTracker() {
     stopAllAlarms();
 }
 
-void AnomalyTracker::reset() {
-    VLOG("reset() called.");
-    stopAllAlarms();
+void AnomalyTracker::resetStorage() {
+    VLOG("resetStorage() called.");
     mPastBuckets.clear();
     // Excludes the current bucket.
-    mPastBuckets.resize(mNumOfPastPackets);
+    mPastBuckets.resize(mNumOfPastBuckets);
     mSumOverPastBuckets.clear();
-    mMostRecentBucketNum = -1;
-    mLastAlarmTimestampNs = -1;
+
+    if (!mAlarms.empty()) VLOG("AnomalyTracker.resetStorage() called but mAlarms is NOT empty!");
 }
 
 size_t AnomalyTracker::index(int64_t bucketNum) const {
-    return bucketNum % mNumOfPastPackets;
+    return bucketNum % mNumOfPastBuckets;
 }
 
 void AnomalyTracker::flushPastBuckets(const int64_t& latestPastBucketNum) {
     VLOG("addPastBucket() called.");
-    if (latestPastBucketNum <= mMostRecentBucketNum - mNumOfPastPackets) {
+    if (latestPastBucketNum <= mMostRecentBucketNum - mNumOfPastBuckets) {
         ALOGE("Cannot add a past bucket %lld units in past", (long long)latestPastBucketNum);
         return;
     }
 
     // The past packets are ancient. Empty out old mPastBuckets[i] values and reset
     // mSumOverPastBuckets.
-    if (latestPastBucketNum - mMostRecentBucketNum >= mNumOfPastPackets) {
+    if (latestPastBucketNum - mMostRecentBucketNum >= mNumOfPastBuckets) {
         mPastBuckets.clear();
-        mPastBuckets.resize(mNumOfPastPackets);
+        mPastBuckets.resize(mNumOfPastBuckets);
         mSumOverPastBuckets.clear();
     } else {
-        for (int64_t i = std::max(0LL, (long long)(mMostRecentBucketNum - mNumOfPastPackets + 1));
-             i <= latestPastBucketNum - mNumOfPastPackets; i++) {
+        for (int64_t i = std::max(0LL, (long long)(mMostRecentBucketNum - mNumOfPastBuckets + 1));
+             i <= latestPastBucketNum - mNumOfPastBuckets; i++) {
             const int idx = index(i);
             subtractBucketFromSum(mPastBuckets[idx]);
             mPastBuckets[idx] = nullptr;  // release (but not clear) the old bucket.
@@ -91,7 +90,7 @@ void AnomalyTracker::flushPastBuckets(const int64_t& latestPastBucketNum) {
 
     // It is an update operation.
     if (latestPastBucketNum <= mMostRecentBucketNum &&
-        latestPastBucketNum > mMostRecentBucketNum - mNumOfPastPackets) {
+        latestPastBucketNum > mMostRecentBucketNum - mNumOfPastBuckets) {
         subtractBucketFromSum(mPastBuckets[index(latestPastBucketNum)]);
     }
 }
@@ -190,61 +189,79 @@ bool AnomalyTracker::detectAnomaly(const int64_t& currentBucketNum, const Hashab
     if (currentBucketNum > mMostRecentBucketNum + 1) {
         addPastBucket(key, 0, currentBucketNum - 1);
     }
-    return getSumOverPastBuckets(key) + currentBucketValue > mAlert.trigger_if_sum_gt();
+    return mAlert.has_trigger_if_sum_gt()
+            && getSumOverPastBuckets(key) + currentBucketValue > mAlert.trigger_if_sum_gt();
 }
 
-void AnomalyTracker::declareAnomaly(const uint64_t& timestamp) {
-    if (mLastAlarmTimestampNs >= 0 &&
-        timestamp - mLastAlarmTimestampNs <= mAlert.refractory_period_secs() * NS_PER_SEC) {
-        VLOG("Skipping anomaly check since within refractory period");
+void AnomalyTracker::declareAnomaly(const uint64_t& timestampNs) {
+    // TODO: This should also take in the const HashableDimensionKey& key, to pass
+    //       more details to incidentd and to make mRefractoryPeriodEndsSec key-specific.
+    // TODO: Why receive timestamp? RefractoryPeriod should always be based on real time right now.
+    if (isInRefractoryPeriod(timestampNs)) {
+        VLOG("Skipping anomaly declaration since within refractory period");
         return;
     }
     // TODO(guardrail): Consider guarding against too short refractory periods.
-    mLastAlarmTimestampNs = timestamp;
+    mLastAlarmTimestampNs = timestampNs;
+
+
+    // TODO: If we had access to the bucket_size_millis, consider calling resetStorage()
+    // if (mAlert.refractory_period_secs() > mNumOfPastBuckets * bucketSizeNs) { resetStorage(); }
 
     if (mAlert.has_incidentd_details()) {
-        // TODO: Can construct a name based on the criteria (and/or relay the criteria).
-        ALOGW("An anomaly (nameless) has occurred! Informing incidentd.");
-        // TODO: Send incidentd_details.name and incidentd_details.incidentd_sections to incidentd
+        if (mAlert.has_name()) {
+            ALOGW("An anomaly (%s) has occurred! Informing incidentd.",
+                  mAlert.name().c_str());
+        } else {
+            // TODO: Can construct a name based on the criteria (and/or relay the criteria).
+            ALOGW("An anomaly (nameless) has occurred! Informing incidentd.");
+        }
+        informIncidentd();
     } else {
         ALOGW("An anomaly has occurred! (But informing incidentd not requested.)");
     }
 }
 
 void AnomalyTracker::declareAnomalyIfAlarmExpired(const HashableDimensionKey& dimensionKey,
-                                                  const uint64_t& timestamp) {
+                                                  const uint64_t& timestampNs) {
     auto itr = mAlarms.find(dimensionKey);
     if (itr == mAlarms.end()) {
         return;
     }
 
     if (itr->second != nullptr &&
-        static_cast<uint32_t>(timestamp / NS_PER_SEC) >= itr->second->timestampSec) {
-        declareAnomaly(timestamp);
+        static_cast<uint32_t>(timestampNs / NS_PER_SEC) >= itr->second->timestampSec) {
+        declareAnomaly(timestampNs);
         stopAlarm(dimensionKey);
     }
 }
 
-void AnomalyTracker::detectAndDeclareAnomaly(const uint64_t& timestamp,
+void AnomalyTracker::detectAndDeclareAnomaly(const uint64_t& timestampNs,
                                              const int64_t& currBucketNum,
                                              const HashableDimensionKey& key,
                                              const int64_t& currentBucketValue) {
     if (detectAnomaly(currBucketNum, key, currentBucketValue)) {
-        declareAnomaly(timestamp);
+        declareAnomaly(timestampNs);
     }
 }
 
-void AnomalyTracker::detectAndDeclareAnomaly(const uint64_t& timestamp,
+void AnomalyTracker::detectAndDeclareAnomaly(const uint64_t& timestampNs,
                                              const int64_t& currBucketNum,
                                              const DimToValMap& currentBucket) {
     if (detectAnomaly(currBucketNum, currentBucket)) {
-        declareAnomaly(timestamp);
+        declareAnomaly(timestampNs);
     }
 }
 
 void AnomalyTracker::startAlarm(const HashableDimensionKey& dimensionKey,
-                                const uint64_t& timestamp) {
-    sp<const AnomalyAlarm> alarm = new AnomalyAlarm{static_cast<uint32_t>(timestamp / NS_PER_SEC)};
+                                const uint64_t& timestampNs) {
+    uint32_t timestampSec = static_cast<uint32_t>(timestampNs / NS_PER_SEC);
+    if (isInRefractoryPeriod(timestampNs)) {
+        VLOG("Skipping setting anomaly alarm since it'd fall in the refractory period");
+        return;
+    }
+
+    sp<const AnomalyAlarm> alarm = new AnomalyAlarm{timestampSec};
     mAlarms.insert({dimensionKey, alarm});
     if (mAnomalyMonitor != nullptr) {
         mAnomalyMonitor->add(alarm);
@@ -255,9 +272,9 @@ void AnomalyTracker::stopAlarm(const HashableDimensionKey& dimensionKey) {
     auto itr = mAlarms.find(dimensionKey);
     if (itr != mAlarms.end()) {
         mAlarms.erase(dimensionKey);
-    }
-    if (mAnomalyMonitor != nullptr) {
-        mAnomalyMonitor->remove(itr->second);
+        if (mAnomalyMonitor != nullptr) {
+            mAnomalyMonitor->remove(itr->second);
+        }
     }
 }
 
@@ -269,6 +286,58 @@ void AnomalyTracker::stopAllAlarms() {
     for (auto key : keys) {
         stopAlarm(key);
     }
+}
+
+bool AnomalyTracker::isInRefractoryPeriod(const uint64_t& timestampNs) {
+    return mLastAlarmTimestampNs >= 0 &&
+            timestampNs - mLastAlarmTimestampNs <= mAlert.refractory_period_secs() * NS_PER_SEC;
+}
+
+void AnomalyTracker::informAlarmsFired(const uint64_t& timestampNs,
+        unordered_set<sp<const AnomalyAlarm>, SpHash<AnomalyAlarm>>& firedAlarms) {
+
+    if (firedAlarms.empty() || mAlarms.empty()) return;
+    // Find the intersection of firedAlarms and mAlarms.
+    // The for loop is inefficient, since it loops over all keys, but that's okay since it is very
+    // seldomly called. The alternative would be having AnomalyAlarms store information about the
+    // AnomalyTracker and key, but that's a lot of data overhead to speed up something that is
+    // rarely ever called.
+    unordered_map<HashableDimensionKey, sp<const AnomalyAlarm>> matchedAlarms;
+    for (const auto& kv : mAlarms) {
+        if (firedAlarms.count(kv.second) > 0) {
+            matchedAlarms.insert({kv.first, kv.second});
+        }
+    }
+
+    // Now declare each of these alarms to have fired.
+    for (const auto& kv : matchedAlarms) {
+        declareAnomaly(timestampNs /* TODO: , kv.first */);
+        mAlarms.erase(kv.first);
+        firedAlarms.erase(kv.second); // No one else can also own it, so we're done with it.
+    }
+}
+
+void AnomalyTracker::informIncidentd() {
+    VLOG("informIncidentd called.");
+    if (!mAlert.has_incidentd_details()) {
+        ALOGE("Attempted to call incidentd without any incidentd_details.");
+        return;
+    }
+    sp<IIncidentManager> service = interface_cast<IIncidentManager>(
+            defaultServiceManager()->getService(android::String16("incident")));
+    if (service == NULL) {
+        ALOGW("Couldn't get the incident service.");
+        return;
+    }
+
+    IncidentReportArgs incidentReport;
+    const Alert::IncidentdDetails& details = mAlert.incidentd_details();
+    for (int i = 0; i < details.section_size(); i++) {
+        incidentReport.addSection(details.section(i));
+    }
+    // TODO: Pass in mAlert.name() into the addHeader?
+
+    service->reportIncident(incidentReport);
 }
 
 }  // namespace statsd

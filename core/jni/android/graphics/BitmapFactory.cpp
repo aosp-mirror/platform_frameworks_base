@@ -130,8 +130,10 @@ static void scaleNinePatchChunk(android::Res_png_9patch* chunk, float scale,
     chunk->paddingRight = int(chunk->paddingRight * scale + 0.5f);
     chunk->paddingBottom = int(chunk->paddingBottom * scale + 0.5f);
 
-    scaleDivRange(chunk->getXDivs(), chunk->numXDivs, scale, scaledWidth);
-    scaleDivRange(chunk->getYDivs(), chunk->numYDivs, scale, scaledHeight);
+    // The max value for the divRange is one pixel less than the actual max to ensure that the size
+    // of the last div is not zero. A div of size 0 is considered invalid input and will not render.
+    scaleDivRange(chunk->getXDivs(), chunk->numXDivs, scale, scaledWidth - 1);
+    scaleDivRange(chunk->getYDivs(), chunk->numYDivs, scale, scaledHeight - 1);
 }
 
 class ScaleCheckingAllocator : public SkBitmap::HeapAllocator {

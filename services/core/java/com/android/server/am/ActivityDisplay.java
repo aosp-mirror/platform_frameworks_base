@@ -42,6 +42,8 @@ import android.annotation.Nullable;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityOptions;
 import android.app.WindowConfiguration;
+import android.graphics.Point;
+import android.graphics.Rect;
 import android.util.IntArray;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
@@ -89,6 +91,9 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
     private ActivityStack mPinnedStack = null;
     private ActivityStack mSplitScreenPrimaryStack = null;
 
+    // Used in updating the display size
+    private Point mTmpDisplaySize = new Point();
+
     ActivityDisplay(ActivityStackSupervisor supervisor, int displayId) {
         mSupervisor = supervisor;
         mDisplayId = displayId;
@@ -97,6 +102,13 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
             throw new IllegalStateException("Display does not exist displayId=" + displayId);
         }
         mDisplay = display;
+
+        updateBounds();
+    }
+
+    void updateBounds() {
+        mDisplay.getSize(mTmpDisplaySize);
+        setBounds(0, 0, mTmpDisplaySize.x, mTmpDisplaySize.y);
     }
 
     void addChild(ActivityStack stack, int position) {

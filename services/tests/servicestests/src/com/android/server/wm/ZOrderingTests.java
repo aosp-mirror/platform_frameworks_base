@@ -185,7 +185,6 @@ public class ZOrderingTests extends WindowTestsBase {
         // target.
         assertWindowLayerGreaterThan(mTransaction, mImeWindow, mChildAppWindowAbove);
         assertWindowLayerGreaterThan(mTransaction, mImeWindow, mAppWindow);
-        assertWindowLayerGreaterThan(mTransaction, mImeWindow, mDockedDividerWindow);
         assertWindowLayerGreaterThan(mTransaction, mNavBarWindow, mImeWindow);
         assertWindowLayerGreaterThan(mTransaction, mStatusBarWindow, mImeWindow);
 

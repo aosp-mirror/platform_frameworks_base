@@ -18,6 +18,7 @@
 
 #include "Log.h"
 #include "DurationMetricProducer.h"
+#include "guardrail/StatsdStats.h"
 #include "stats_util.h"
 
 #include <limits.h>
@@ -60,14 +61,14 @@ const int FIELD_ID_START_BUCKET_NANOS = 1;
 const int FIELD_ID_END_BUCKET_NANOS = 2;
 const int FIELD_ID_DURATION = 3;
 
-DurationMetricProducer::DurationMetricProducer(const DurationMetric& metric,
+DurationMetricProducer::DurationMetricProducer(const ConfigKey& key, const DurationMetric& metric,
                                                const int conditionIndex, const size_t startIndex,
                                                const size_t stopIndex, const size_t stopAllIndex,
                                                const bool nesting,
                                                const sp<ConditionWizard>& wizard,
                                                const vector<KeyMatcher>& internalDimension,
                                                const uint64_t startTimeNs)
-    : MetricProducer(startTimeNs, conditionIndex, wizard),
+    : MetricProducer(key, startTimeNs, conditionIndex, wizard),
       mMetric(metric),
       mStartIndex(startIndex),
       mStopIndex(stopIndex),
@@ -103,6 +104,7 @@ DurationMetricProducer::~DurationMetricProducer() {
 }
 
 void DurationMetricProducer::startNewProtoOutputStream(long long startTime) {
+    std::lock_guard<std::shared_timed_mutex> writeLock(mRWMutex);
     mProto = std::make_unique<ProtoOutputStream>();
     mProto->write(FIELD_TYPE_STRING | FIELD_ID_NAME, mMetric.name());
     mProto->write(FIELD_TYPE_INT64 | FIELD_ID_START_REPORT_NANOS, startTime);
@@ -110,16 +112,16 @@ void DurationMetricProducer::startNewProtoOutputStream(long long startTime) {
 }
 
 unique_ptr<DurationTracker> DurationMetricProducer::createDurationTracker(
-        const HashableDimensionKey& eventKey, vector<DurationBucket>& bucket) {
+        const HashableDimensionKey& eventKey, vector<DurationBucket>& bucket) const {
     switch (mMetric.aggregation_type()) {
         case DurationMetric_AggregationType_SUM:
-            return make_unique<OringDurationTracker>(eventKey, mWizard, mConditionTrackerIndex,
-                                                     mNested, mCurrentBucketStartTimeNs,
-                                                     mBucketSizeNs, mAnomalyTrackers, bucket);
+            return make_unique<OringDurationTracker>(
+                    mConfigKey, mMetric.name(), eventKey, mWizard, mConditionTrackerIndex, mNested,
+                    mCurrentBucketStartTimeNs, mBucketSizeNs, mAnomalyTrackers, bucket);
         case DurationMetric_AggregationType_MAX_SPARSE:
-            return make_unique<MaxDurationTracker>(eventKey, mWizard, mConditionTrackerIndex,
-                                                   mNested, mCurrentBucketStartTimeNs,
-                                                   mBucketSizeNs, mAnomalyTrackers, bucket);
+            return make_unique<MaxDurationTracker>(
+                    mConfigKey, mMetric.name(), eventKey, mWizard, mConditionTrackerIndex, mNested,
+                    mCurrentBucketStartTimeNs, mBucketSizeNs, mAnomalyTrackers, bucket);
     }
 }
 
@@ -129,7 +131,9 @@ void DurationMetricProducer::finish() {
 }
 
 void DurationMetricProducer::onSlicedConditionMayChange(const uint64_t eventTime) {
+    std::lock_guard<std::shared_timed_mutex> writeLock(mRWMutex);
     VLOG("Metric %s onSlicedConditionMayChange", mMetric.name().c_str());
+    flushIfNeeded(eventTime);
     // Now for each of the on-going event, check if the condition has changed for them.
     for (auto& pair : mCurrentSlicedDuration) {
         pair.second->onSlicedConditionMayChange(eventTime);
@@ -137,8 +141,10 @@ void DurationMetricProducer::onSlicedConditionMayChange(const uint64_t eventTime
 }
 
 void DurationMetricProducer::onConditionChanged(const bool conditionMet, const uint64_t eventTime) {
+    std::lock_guard<std::shared_timed_mutex> writeLock(mRWMutex);
     VLOG("Metric %s onConditionChanged", mMetric.name().c_str());
     mCondition = conditionMet;
+    flushIfNeeded(eventTime);
     // TODO: need to populate the condition change time from the event which triggers the condition
     // change, instead of using current time.
     for (auto& pair : mCurrentSlicedDuration) {
@@ -146,15 +152,8 @@ void DurationMetricProducer::onConditionChanged(const bool conditionMet, const u
     }
 }
 
-std::unique_ptr<std::vector<uint8_t>> DurationMetricProducer::onDumpReport() {
-    long long endTime = time(nullptr) * NS_PER_SEC;
-
-    // Dump current bucket if it's stale.
-    // If current bucket is still on-going, don't force dump current bucket.
-    // In finish(), We can force dump current bucket.
-    flushIfNeeded(endTime);
-    VLOG("metric %s dump report now...", mMetric.name().c_str());
-
+void DurationMetricProducer::SerializeBuckets() {
+    std::lock_guard<std::shared_timed_mutex> writeLock(mRWMutex);
     for (const auto& pair : mPastBuckets) {
         const HashableDimensionKey& hashableKey = pair.first;
         VLOG("  dimension key %s", hashableKey.c_str());
@@ -211,13 +210,29 @@ std::unique_ptr<std::vector<uint8_t>> DurationMetricProducer::onDumpReport() {
     mProto->end(mProtoToken);
     mProto->write(FIELD_TYPE_INT64 | FIELD_ID_END_REPORT_NANOS,
                   (long long)mCurrentBucketStartTimeNs);
+}
+
+std::unique_ptr<std::vector<uint8_t>> DurationMetricProducer::onDumpReport() {
+    VLOG("metric %s dump report now...", mMetric.name().c_str());
+
+    long long endTime = time(nullptr) * NS_PER_SEC;
+
+    // Dump current bucket if it's stale.
+    // If current bucket is still on-going, don't force dump current bucket.
+    // In finish(), We can force dump current bucket.
+    flushIfNeeded(endTime);
+
+    SerializeBuckets();
+
     std::unique_ptr<std::vector<uint8_t>> buffer = serializeProto();
+
     startNewProtoOutputStream(endTime);
     // TODO: Properly clear the old buckets.
     return buffer;
 }
 
 void DurationMetricProducer::flushIfNeeded(uint64_t eventTime) {
+    std::lock_guard<std::shared_timed_mutex> writeLock(mRWMutex);
     if (mCurrentBucketStartTimeNs + mBucketSizeNs > eventTime) {
         return;
     }
@@ -236,35 +251,64 @@ void DurationMetricProducer::flushIfNeeded(uint64_t eventTime) {
     mCurrentBucketNum += numBucketsForward;
 }
 
+bool DurationMetricProducer::hitGuardRail(const HashableDimensionKey& newKey) {
+    std::shared_lock<std::shared_timed_mutex> readLock(mRWMutex);
+    // the key is not new, we are good.
+    if (mCurrentSlicedDuration.find(newKey) != mCurrentSlicedDuration.end()) {
+        return false;
+    }
+    // 1. Report the tuple count if the tuple count > soft limit
+    if (mCurrentSlicedDuration.size() > StatsdStats::kDimensionKeySizeSoftLimit - 1) {
+        size_t newTupleCount = mCurrentSlicedDuration.size() + 1;
+        StatsdStats::getInstance().noteMetricDimensionSize(mConfigKey, mMetric.name(),
+                                                           newTupleCount);
+        // 2. Don't add more tuples, we are above the allowed threshold. Drop the data.
+        if (newTupleCount > StatsdStats::kDimensionKeySizeHardLimit) {
+            ALOGE("DurationMetric %s dropping data for dimension key %s", mMetric.name().c_str(),
+                  newKey.c_str());
+            return true;
+        }
+    }
+    return false;
+}
+
 void DurationMetricProducer::onMatchedLogEventInternal(
         const size_t matcherIndex, const HashableDimensionKey& eventKey,
         const map<string, HashableDimensionKey>& conditionKeys, bool condition,
         const LogEvent& event, bool scheduledPull) {
     flushIfNeeded(event.GetTimestampNs());
 
-    if (matcherIndex == mStopAllIndex) {
-        for (auto& pair : mCurrentSlicedDuration) {
-            pair.second->noteStopAll(event.GetTimestampNs());
+    // TODO(yanglu): move the following logic to a seperate function to make it lockable.
+    {
+        std::lock_guard<std::shared_timed_mutex> writeLock(mRWMutex);
+        if (matcherIndex == mStopAllIndex) {
+            for (auto& pair : mCurrentSlicedDuration) {
+                pair.second->noteStopAll(event.GetTimestampNs());
+            }
+            return;
         }
-        return;
-    }
 
-    HashableDimensionKey atomKey = getHashableKey(getDimensionKey(event, mInternalDimension));
+        HashableDimensionKey atomKey = getHashableKey(getDimensionKey(event, mInternalDimension));
 
-    if (mCurrentSlicedDuration.find(eventKey) == mCurrentSlicedDuration.end()) {
-        mCurrentSlicedDuration[eventKey] = createDurationTracker(eventKey, mPastBuckets[eventKey]);
-    }
+        if (mCurrentSlicedDuration.find(eventKey) == mCurrentSlicedDuration.end()) {
+            if (hitGuardRail(eventKey)) {
+                return;
+            }
+            mCurrentSlicedDuration[eventKey] =
+                    createDurationTracker(eventKey, mPastBuckets[eventKey]);
+        }
+        auto it = mCurrentSlicedDuration.find(eventKey);
 
-    auto it = mCurrentSlicedDuration.find(eventKey);
-
-    if (matcherIndex == mStartIndex) {
-        it->second->noteStart(atomKey, condition, event.GetTimestampNs(), conditionKeys);
-    } else if (matcherIndex == mStopIndex) {
-        it->second->noteStop(atomKey, event.GetTimestampNs(), false);
+        if (matcherIndex == mStartIndex) {
+            it->second->noteStart(atomKey, condition, event.GetTimestampNs(), conditionKeys);
+        } else if (matcherIndex == mStopIndex) {
+            it->second->noteStop(atomKey, event.GetTimestampNs(), false);
+        }
     }
 }
 
 size_t DurationMetricProducer::byteSize() const {
+    std::shared_lock<std::shared_timed_mutex> readLock(mRWMutex);
     size_t totalSize = 0;
     for (const auto& pair : mPastBuckets) {
         totalSize += pair.second.size() * kBucketSize;

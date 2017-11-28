@@ -318,10 +318,23 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      * @see #mFullConfiguration
      */
     @Override
-    final public void onOverrideConfigurationChanged(Configuration overrideConfiguration) {
+    public void onOverrideConfigurationChanged(Configuration overrideConfiguration) {
+        // We must diff before the configuration is applied so that we can capture the change
+        // against the existing bounds.
+        final int diff = diffOverrideBounds(overrideConfiguration.windowConfiguration.getBounds());
         super.onOverrideConfigurationChanged(overrideConfiguration);
         if (mParent != null) {
             mParent.onDescendantOverrideConfigurationChanged();
+        }
+
+        if (diff == BOUNDS_CHANGE_NONE) {
+            return;
+        }
+
+        if ((diff & BOUNDS_CHANGE_SIZE) == BOUNDS_CHANGE_SIZE) {
+            onResize();
+        } else {
+            onMovedByResize();
         }
     }
 
@@ -718,29 +731,8 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         final WindowContainer p = getParent();
         // Give the parent a chance to set properties. In hierarchy v1 we rely
         // on this to set full-screen dimensions on all our Surface-less Layers.
-        final SurfaceControl.Builder b = p.makeChildSurface(child);
-        if (child != null && child.isScreenOverlay()) {
-            // If it's a screen overlay it's been promoted in the hierarchy (wrt to the
-            // WindowContainer hierarchy vs the SurfaceControl hierarchy)
-            // and we shouldn't set ourselves as the parent.
-            return b;
-        } else {
-            return b.setParent(mSurfaceControl);
-        }
-    }
-
-    /**
-     * There are various layers which require promotion from the WindowContainer
-     * hierarchy to the Overlay layer described in {@link DisplayContent}. See {@link WindowState}
-     * for the particular usage.
-     *
-     * TODO: Perhaps this should be eliminated, either through modifying
-     * the window container hierarchy or through modifying the way we express these overlay
-     * Surfaces (for example, the Magnification Overlay could be implemented like the Strict-mode
-     * Flash and not actually use a WindowState).
-     */
-    boolean isScreenOverlay() {
-        return false;
+        return p.makeChildSurface(child)
+                .setParent(mSurfaceControl);
     }
 
     /**

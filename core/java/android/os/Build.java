@@ -19,9 +19,11 @@ package android.os;
 import android.Manifest;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.app.Application;
 import android.content.Context;
 import android.text.TextUtils;
 import android.util.Slog;
+import android.view.View;
 
 import com.android.internal.telephony.TelephonyProperties;
 
@@ -761,6 +763,80 @@ public class Build {
          * <p>Applications targeting this or a later release will get these
          * new changes in behavior:</p>
          * <ul>
+         * <li><a href="{@docRoot}about/versions/oreo/background.html">Background execution limits</a>
+         * are applied to the application.</li>
+         * <li>The behavior of AccountManager's
+         * {@link android.accounts.AccountManager#getAccountsByType},
+         * {@link android.accounts.AccountManager#getAccountsByTypeAndFeatures}, and
+         * {@link android.accounts.AccountManager#hasFeatures} has changed as documented there.</li>
+         * <li>{@link android.app.ActivityManager.RunningAppProcessInfo#IMPORTANCE_PERCEPTIBLE_PRE_26}
+         * is now returned as
+         * {@link android.app.ActivityManager.RunningAppProcessInfo#IMPORTANCE_PERCEPTIBLE}.</li>
+         * <li>The {@link android.app.NotificationManager} now requires the use of notification
+         * channels.</li>
+         * <li>Changes to the strict mode that are set in
+         * {@link Application#onCreate Application.onCreate} will no longer be clobbered after
+         * that function returns.</li>
+         * <li>A shared library apk with native code will have that native code included in
+         * the library path of its clients.</li>
+         * <li>{@link android.content.Context#getSharedPreferences Context.getSharedPreferences}
+         * in credential encrypted storage will throw an exception before the user is unlocked.</li>
+         * <li>Attempting to retrieve a {@link Context#FINGERPRINT_SERVICE} on a device that
+         * does not support that feature will now throw a runtime exception.</li>
+         * <li>{@link android.app.Fragment} will stop any active view animations when
+         * the fragment is stopped.</li>
+         * <li>Some compatibility code in Resources that attempts to use the default Theme
+         * the app may be using will be turned off, requiring the app to explicitly request
+         * resources with the right theme.</li>
+         * <li>{@link android.content.ContentResolver#notifyChange ContentResolver.notifyChange} and
+         * {@link android.content.ContentResolver#registerContentObserver
+         * ContentResolver.registerContentObserver}
+         * will throw a SecurityException if the caller does not have permission to access
+         * the provider (or the provider doesn't exit); otherwise the call will be silently
+         * ignored.</li>
+         * <li>{@link android.hardware.camera2.CameraDevice#createCaptureRequest
+         * CameraDevice.createCaptureRequest} will enable
+         * {@link android.hardware.camera2.CaptureRequest#CONTROL_ENABLE_ZSL} by default for
+         * still image capture.</li>
+         * <li>WallpaperManager's {@link android.app.WallpaperManager#getWallpaperFile},
+         * {@link android.app.WallpaperManager#getDrawable},
+         * {@link android.app.WallpaperManager#getFastDrawable},
+         * {@link android.app.WallpaperManager#peekDrawable}, and
+         * {@link android.app.WallpaperManager#peekFastDrawable} will throw an exception
+         * if you can not access the wallpaper.</li>
+         * <li>The behavior of
+         * {@link android.hardware.usb.UsbDeviceConnection#requestWait UsbDeviceConnection.requestWait}
+         * is modified as per the documentation there.</li>
+         * <li>{@link StrictMode.VmPolicy.Builder#detectAll StrictMode.VmPolicy.Builder.detectAll}
+         * will also enable {@link StrictMode.VmPolicy.Builder#detectContentUriWithoutPermission}
+         * and {@link StrictMode.VmPolicy.Builder#detectUntaggedSockets}.</li>
+         * <li>{@link StrictMode.ThreadPolicy.Builder#detectAll StrictMode.ThreadPolicy.Builder.detectAll}
+         * will also enable {@link StrictMode.ThreadPolicy.Builder#detectUnbufferedIo}.</li>
+         * <li>{@link android.provider.DocumentsContract}'s various methods will throw failure
+         * exceptions back to the caller instead of returning null.
+         * <li>{@link View#hasFocusable View.hasFocusable} now includes auto-focusable views.</li>
+         * <li>{@link android.view.SurfaceView} will no longer always change the underlying
+         * Surface object when something about it changes; apps need to look at the current
+         * state of the object to determine which things they are interested in have changed.</li>
+         * <li>{@link android.view.WindowManager.LayoutParams#TYPE_APPLICATION_OVERLAY} must be
+         * used for overlay windows, other system overlay window types are not allowed.</li>
+         * <li>{@link android.view.ViewTreeObserver#addOnDrawListener
+         * ViewTreeObserver.addOnDrawListener} will throw an exception if called from within
+         * onDraw.</li>
+         * <li>{@link android.graphics.Canvas#setBitmap Canvas.setBitmap} will no longer preserve
+         * the current matrix and clip stack of the canvas.</li>
+         * <li>{@link android.widget.ListPopupWindow#setHeight ListPopupWindow.setHeight}
+         * will throw an exception if a negative height is supplied.</li>
+         * <li>{@link android.widget.TextView} will use internationalized input for numbers,
+         * dates, and times.</li>
+         * <li>{@link android.widget.Toast} must be used for showing toast windows; the toast
+         * window type can not be directly used.</li>
+         * <li>{@link android.net.wifi.WifiManager#getConnectionInfo WifiManager.getConnectionInfo}
+         * requires that the caller hold the location permission to return BSSID/SSID</li>
+         * <li>{@link android.net.wifi.p2p.WifiP2pManager#requestPeers WifiP2pManager.requestPeers}
+         * requires the caller hold the location permission.</li>
+         * <li>{@link android.R.attr#maxAspectRatio} defaults to 0, meaning there is no restriction
+         * on the app's maximum aspect ratio (so it can be stretched to fill larger screens).</li>
          * <li>{@link android.R.attr#focusable} defaults to a new state ({@code auto}) where it will
          * inherit the value of {@link android.R.attr#clickable} unless explicitly overridden.</li>
          * <li>A default theme-appropriate focus-state highlight will be supplied to all Views
@@ -772,6 +848,15 @@ public class Build {
 
         /**
          * O MR1.
+         *
+         * <p>Applications targeting this or a later release will get these
+         * new changes in behavior:</p>
+         * <ul>
+         * <li>Apps exporting and linking to apk shared libraries must explicitly
+         * enumerate all signing certificates in a consistent order.</li>
+         * <li>{@link android.R.attr#screenOrientation} can not be used to request a fixed
+         * orientation if the associated activity is not fullscreen and opaque.</li>
+         * </ul>
          */
         public static final int O_MR1 = 27;
 

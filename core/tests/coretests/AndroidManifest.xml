@@ -68,6 +68,7 @@
     <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />
     <uses-permission android:name="android.permission.WRITE_SMS"/>
     <uses-permission android:name="android.permission.TEST_GRANTED" />
+    <uses-permission android:name="android.permission.CHANGE_COMPONENT_ENABLED_STATE" />
     <uses-permission android:name="com.google.android.googleapps.permission.ACCESS_GOOGLE_PASSWORD" />
     <uses-permission android:name="com.google.android.googleapps.permission.GOOGLE_AUTH" />
     <uses-permission android:name="com.google.android.googleapps.permission.GOOGLE_AUTH.ALL_SERVICES" />

@@ -69,6 +69,10 @@ public:
         return mTagIds;
     }
 
+    const std::string& getName() const {
+        return mName;
+    }
+
 protected:
     // Name of this matching. We don't really need the name, but it makes log message easy to debug.
     const std::string mName;

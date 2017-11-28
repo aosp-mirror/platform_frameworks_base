@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "metrics_test_helper.h"
 #include "src/metrics/ValueMetricProducer.h"
+#include "metrics_test_helper.h"
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -22,11 +22,11 @@
 
 using namespace testing;
 using android::sp;
+using std::make_shared;
 using std::set;
+using std::shared_ptr;
 using std::unordered_map;
 using std::vector;
-using std::shared_ptr;
-using std::make_shared;
 
 #ifdef __ANDROID__
 
@@ -34,6 +34,7 @@ namespace android {
 namespace os {
 namespace statsd {
 
+const ConfigKey kConfigKey(0, "test");
 /*
  * Tests pulled atoms with no conditions
  */
@@ -42,7 +43,7 @@ TEST(ValueMetricProducerTest, TestNonDimensionalEvents) {
     int64_t bucketSizeNs = 60 * 1000 * 1000 * 1000LL;
 
     int64_t bucket2StartTimeNs = bucketStartTimeNs + bucketSizeNs;
-    int64_t bucket3StartTimeNs = bucketStartTimeNs + 2*bucketSizeNs;
+    int64_t bucket3StartTimeNs = bucketStartTimeNs + 2 * bucketSizeNs;
 
     ValueMetric metric;
     metric.set_name("1");
@@ -54,12 +55,13 @@ TEST(ValueMetricProducerTest, TestNonDimensionalEvents) {
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     // TODO: pending refactor of StatsPullerManager
     // For now we still need this so that it doesn't do real pulling.
-    shared_ptr<MockStatsPullerManager> pullerManager = make_shared<StrictMock<MockStatsPullerManager>>();
+    shared_ptr<MockStatsPullerManager> pullerManager =
+            make_shared<StrictMock<MockStatsPullerManager>>();
     EXPECT_CALL(*pullerManager, RegisterReceiver(tagId, _, _)).WillOnce(Return());
     EXPECT_CALL(*pullerManager, UnRegisterReceiver(tagId, _)).WillOnce(Return());
 
-    ValueMetricProducer valueProducer(metric, -1 /*-1 meaning no condition*/, wizard,tagId,
-                                      bucketStartTimeNs, pullerManager);
+    ValueMetricProducer valueProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, wizard,
+                                      tagId, bucketStartTimeNs, pullerManager);
 
     vector<shared_ptr<LogEvent>> allData;
     allData.clear();
@@ -144,41 +146,43 @@ TEST(ValueMetricProducerTest, TestEventsWithNonSlicedCondition) {
     int tagId = 1;
 
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
-    shared_ptr<MockStatsPullerManager> pullerManager = make_shared<StrictMock<MockStatsPullerManager>>();
+    shared_ptr<MockStatsPullerManager> pullerManager =
+            make_shared<StrictMock<MockStatsPullerManager>>();
     EXPECT_CALL(*pullerManager, RegisterReceiver(tagId, _, _)).WillOnce(Return());
     EXPECT_CALL(*pullerManager, UnRegisterReceiver(tagId, _)).WillRepeatedly(Return());
 
-    EXPECT_CALL(*pullerManager, Pull(tagId, _)).WillOnce(Invoke([] (int tagId, vector<std::shared_ptr<LogEvent>>* data) {
-        int64_t bucketStartTimeNs = 10000000000;
-        int64_t bucketSizeNs = 60 * 1000 * 1000 * 1000LL;
+    EXPECT_CALL(*pullerManager, Pull(tagId, _))
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+                int64_t bucketStartTimeNs = 10000000000;
+                int64_t bucketSizeNs = 60 * 1000 * 1000 * 1000LL;
 
-        int64_t bucket2StartTimeNs = bucketStartTimeNs + bucketSizeNs;
-        int64_t bucket3StartTimeNs = bucketStartTimeNs + 2 * bucketSizeNs;
-        data->clear();
-        shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucketStartTimeNs + 10);
-        event->write(1);
-        event->write(100);
-        event->init();
-        data->push_back(event);
-        return true;
-    }))
-    .WillOnce(Invoke([] (int tagId, vector<std::shared_ptr<LogEvent>>* data) {
-        int64_t bucketStartTimeNs = 10000000000;
-        int64_t bucketSizeNs = 60 * 1000 * 1000 * 1000LL;
+                int64_t bucket2StartTimeNs = bucketStartTimeNs + bucketSizeNs;
+                int64_t bucket3StartTimeNs = bucketStartTimeNs + 2 * bucketSizeNs;
+                data->clear();
+                shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucketStartTimeNs + 10);
+                event->write(1);
+                event->write(100);
+                event->init();
+                data->push_back(event);
+                return true;
+            }))
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+                int64_t bucketStartTimeNs = 10000000000;
+                int64_t bucketSizeNs = 60 * 1000 * 1000 * 1000LL;
 
-        int64_t bucket2StartTimeNs = bucketStartTimeNs + bucketSizeNs;
-        int64_t bucket3StartTimeNs = bucketStartTimeNs + 2 * bucketSizeNs;
-        data->clear();
-        shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucket2StartTimeNs + 10);
-        event->write(1);
-        event->write(120);
-        event->init();
-        data->push_back(event);
-        return true;
-    }));
+                int64_t bucket2StartTimeNs = bucketStartTimeNs + bucketSizeNs;
+                int64_t bucket3StartTimeNs = bucketStartTimeNs + 2 * bucketSizeNs;
+                data->clear();
+                shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucket2StartTimeNs + 10);
+                event->write(1);
+                event->write(120);
+                event->init();
+                data->push_back(event);
+                return true;
+            }));
 
-    ValueMetricProducer valueProducer(metric, 1, wizard,tagId,
-                                      bucketStartTimeNs, pullerManager);
+    ValueMetricProducer valueProducer(kConfigKey, metric, 1, wizard, tagId, bucketStartTimeNs,
+                                      pullerManager);
 
     valueProducer.onConditionChanged(true, bucketStartTimeNs + 10);
 
@@ -241,10 +245,11 @@ TEST(ValueMetricProducerTest, TestPushedEventsWithoutCondition) {
     int tagId = 1;
 
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
-    shared_ptr<MockStatsPullerManager> pullerManager = make_shared<StrictMock<MockStatsPullerManager>>();
+    shared_ptr<MockStatsPullerManager> pullerManager =
+            make_shared<StrictMock<MockStatsPullerManager>>();
 
-    ValueMetricProducer valueProducer(metric, -1, wizard,-1,
-                                      bucketStartTimeNs, pullerManager);
+    ValueMetricProducer valueProducer(kConfigKey, metric, -1, wizard, -1, bucketStartTimeNs,
+                                      pullerManager);
 
     shared_ptr<LogEvent> event1 = make_shared<LogEvent>(tagId, bucketStartTimeNs + 10);
     event1->write(1);

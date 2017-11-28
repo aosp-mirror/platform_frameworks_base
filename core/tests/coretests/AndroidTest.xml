@@ -16,6 +16,7 @@
 <configuration description="Runs Frameworks Core Tests.">
     <target_preparer class="com.android.tradefed.targetprep.TestAppInstallSetup">
         <option name="test-file-name" value="FrameworksCoreTests.apk" />
+        <option name="test-file-name" value="BstatsTestApp.apk" />
     </target_preparer>
 
     <option name="test-suite-tag" value="apct" />

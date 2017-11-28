@@ -16,6 +16,7 @@
 #define DEBUG true
 #include "Log.h"
 #include "OringDurationTracker.h"
+#include "guardrail/StatsdStats.h"
 
 namespace android {
 namespace os {
@@ -23,22 +24,45 @@ namespace statsd {
 
 using std::pair;
 
-OringDurationTracker::OringDurationTracker(const HashableDimensionKey& eventKey,
+OringDurationTracker::OringDurationTracker(const ConfigKey& key, const string& name,
+                                           const HashableDimensionKey& eventKey,
                                            sp<ConditionWizard> wizard, int conditionIndex,
                                            bool nesting, uint64_t currentBucketStartNs,
                                            uint64_t bucketSizeNs,
                                            const std::vector<sp<AnomalyTracker>>& anomalyTrackers,
                                            std::vector<DurationBucket>& bucket)
-    : DurationTracker(eventKey, wizard, conditionIndex, nesting, currentBucketStartNs, bucketSizeNs,
-                      anomalyTrackers, bucket),
+    : DurationTracker(key, name, eventKey, wizard, conditionIndex, nesting, currentBucketStartNs,
+                      bucketSizeNs, anomalyTrackers, bucket),
       mStarted(),
       mPaused() {
     mLastStartTime = 0;
 }
 
+bool OringDurationTracker::hitGuardRail(const HashableDimensionKey& newKey) {
+    // ===========GuardRail==============
+    // 1. Report the tuple count if the tuple count > soft limit
+    if (mConditionKeyMap.find(newKey) != mConditionKeyMap.end()) {
+        return false;
+    }
+    if (mConditionKeyMap.size() > StatsdStats::kDimensionKeySizeSoftLimit - 1) {
+        size_t newTupleCount = mConditionKeyMap.size() + 1;
+        StatsdStats::getInstance().noteMetricDimensionSize(mConfigKey, mName + mEventKey,
+                                                           newTupleCount);
+        // 2. Don't add more tuples, we are above the allowed threshold. Drop the data.
+        if (newTupleCount > StatsdStats::kDimensionKeySizeHardLimit) {
+            ALOGE("OringDurTracker %s dropping data for dimension key %s", mName.c_str(),
+                  newKey.c_str());
+            return true;
+        }
+    }
+    return false;
+}
+
 void OringDurationTracker::noteStart(const HashableDimensionKey& key, bool condition,
                                      const uint64_t eventTime, const ConditionKey& conditionKey) {
-    flushIfNeeded(eventTime);
+    if (hitGuardRail(key)) {
+        return;
+    }
     if (condition) {
         if (mStarted.size() == 0) {
             mLastStartTime = eventTime;
@@ -59,7 +83,6 @@ void OringDurationTracker::noteStart(const HashableDimensionKey& key, bool condi
 
 void OringDurationTracker::noteStop(const HashableDimensionKey& key, const uint64_t timestamp,
                                     const bool stopAll) {
-    flushIfNeeded(timestamp);
     declareAnomalyIfAlarmExpired(timestamp);
     VLOG("Oring: %s stop", key.c_str());
     auto it = mStarted.find(key);
@@ -72,7 +95,6 @@ void OringDurationTracker::noteStop(const HashableDimensionKey& key, const uint6
         if (mStarted.empty()) {
             mDuration += (timestamp - mLastStartTime);
             detectAndDeclareAnomaly(timestamp, mCurrentBucketNum, mDuration);
-            mLastStartTime = -1;
             VLOG("record duration %lld, total %lld ", (long long)timestamp - mLastStartTime,
                  (long long)mDuration);
         }
@@ -92,7 +114,6 @@ void OringDurationTracker::noteStop(const HashableDimensionKey& key, const uint6
 }
 
 void OringDurationTracker::noteStopAll(const uint64_t timestamp) {
-    flushIfNeeded(timestamp);
     declareAnomalyIfAlarmExpired(timestamp);
     if (!mStarted.empty()) {
         mDuration += (timestamp - mLastStartTime);
@@ -105,7 +126,6 @@ void OringDurationTracker::noteStopAll(const uint64_t timestamp) {
     mStarted.clear();
     mPaused.clear();
     mConditionKeyMap.clear();
-    mLastStartTime = -1;
 }
 
 bool OringDurationTracker::flushIfNeeded(uint64_t eventTime) {
@@ -122,7 +142,6 @@ bool OringDurationTracker::flushIfNeeded(uint64_t eventTime) {
     // Process the current bucket.
     if (mStarted.size() > 0) {
         mDuration += (current_info.mBucketEndNs - mLastStartTime);
-        mLastStartTime = current_info.mBucketEndNs;
     }
     if (mDuration > 0) {
         current_info.mDuration = mDuration;
@@ -138,17 +157,15 @@ bool OringDurationTracker::flushIfNeeded(uint64_t eventTime) {
             info.mBucketEndNs = info.mBucketStartNs + mBucketSizeNs;
             info.mBucketNum = mCurrentBucketNum + i;
             info.mDuration = mBucketSizeNs;
-            mLastStartTime = info.mBucketEndNs;
-            if (info.mDuration > 0) {
                 mBucket.push_back(info);
                 addPastBucketToAnomalyTrackers(info.mDuration, info.mBucketNum);
                 VLOG("  add filling bucket with duration %lld", (long long)info.mDuration);
-            }
         }
     }
     mCurrentBucketStartTimeNs += numBucketsForward * mBucketSizeNs;
     mCurrentBucketNum += numBucketsForward;
 
+    mLastStartTime = mCurrentBucketStartTimeNs;
     mDuration = 0;
 
     // if all stopped, then tell owner it's safe to remove this tracker.
@@ -156,7 +173,6 @@ bool OringDurationTracker::flushIfNeeded(uint64_t eventTime) {
 }
 
 void OringDurationTracker::onSlicedConditionMayChange(const uint64_t timestamp) {
-    flushIfNeeded(timestamp);
     declareAnomalyIfAlarmExpired(timestamp);
     vector<pair<HashableDimensionKey, int>> startedToPaused;
     vector<pair<HashableDimensionKey, int>> pausedToStarted;
@@ -179,8 +195,7 @@ void OringDurationTracker::onSlicedConditionMayChange(const uint64_t timestamp) 
         }
 
         if (mStarted.empty()) {
-            mDuration = (timestamp - mLastStartTime);
-            mLastStartTime = -1;
+            mDuration += (timestamp - mLastStartTime);
             VLOG("Duration add %lld , to %lld ", (long long)(timestamp - mLastStartTime),
                  (long long)mDuration);
             detectAndDeclareAnomaly(timestamp, mCurrentBucketNum, mDuration);
@@ -222,13 +237,12 @@ void OringDurationTracker::onSlicedConditionMayChange(const uint64_t timestamp) 
 }
 
 void OringDurationTracker::onConditionChanged(bool condition, const uint64_t timestamp) {
-    flushIfNeeded(timestamp);
     declareAnomalyIfAlarmExpired(timestamp);
     if (condition) {
         if (!mPaused.empty()) {
             VLOG("Condition true, all started");
             if (mStarted.empty()) {
-                mLastStartTime = -1;
+                mLastStartTime = timestamp;
             }
             if (mStarted.empty() && !mPaused.empty()) {
                 startAnomalyAlarm(timestamp);
@@ -239,8 +253,7 @@ void OringDurationTracker::onConditionChanged(bool condition, const uint64_t tim
     } else {
         if (!mStarted.empty()) {
             VLOG("Condition false, all paused");
-            mDuration = (timestamp - mLastStartTime);
-            mLastStartTime = -1;
+            mDuration += (timestamp - mLastStartTime);
             mPaused.insert(mStarted.begin(), mStarted.end());
             mStarted.clear();
             detectAndDeclareAnomaly(timestamp, mCurrentBucketNum, mDuration);
@@ -280,12 +293,12 @@ int64_t OringDurationTracker::predictAnomalyTimestampNs(const AnomalyTracker& an
     pastNs += currRemainingBucketSizeNs;
 
     // Now deal with the past buckets, starting with the oldest.
-    for (int futBucketIdx = 0; futBucketIdx < anomalyTracker.getNumOfPastPackets();
+    for (int futBucketIdx = 0; futBucketIdx < anomalyTracker.getNumOfPastBuckets();
          futBucketIdx++) {
         // We now overwrite the oldest bucket with the previous 'current', and start a new
         // 'current'.
         pastNs -= anomalyTracker.getPastBucketValue(
-                mEventKey, mCurrentBucketNum - anomalyTracker.getNumOfPastPackets() + futBucketIdx);
+                mEventKey, mCurrentBucketNum - anomalyTracker.getNumOfPastBuckets() + futBucketIdx);
         leftNs = thresholdNs - pastNs;
         if (leftNs <= mBucketSizeNs) {  // Predict anomaly will occur in this bucket.
             return eventTimestampNs + currRemainingBucketSizeNs + (futBucketIdx * mBucketSizeNs) +

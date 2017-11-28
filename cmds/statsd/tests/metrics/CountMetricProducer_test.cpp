@@ -32,6 +32,8 @@ namespace android {
 namespace os {
 namespace statsd {
 
+const ConfigKey kConfigKey(0, "test");
+
 TEST(CountMetricProducerTest, TestNonDimensionalEvents) {
     int64_t bucketStartTimeNs = 10000000000;
     int64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
@@ -48,7 +50,7 @@ TEST(CountMetricProducerTest, TestNonDimensionalEvents) {
 
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
 
-    CountMetricProducer countProducer(metric, -1 /*-1 meaning no condition*/, wizard,
+    CountMetricProducer countProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, wizard,
                                       bucketStartTimeNs);
 
     // 2 events in bucket 1.
@@ -106,7 +108,7 @@ TEST(CountMetricProducerTest, TestEventsWithNonSlicedCondition) {
 
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
 
-    CountMetricProducer countProducer(metric, 1, wizard, bucketStartTimeNs);
+    CountMetricProducer countProducer(kConfigKey, metric, 1, wizard, bucketStartTimeNs);
 
     countProducer.onConditionChanged(true, bucketStartTimeNs);
     countProducer.onMatchedLogEvent(1 /*matcher index*/, event1, false /*pulled*/);
@@ -161,7 +163,7 @@ TEST(CountMetricProducerTest, TestEventsWithSlicedCondition) {
 
     EXPECT_CALL(*wizard, query(_, key2)).WillOnce(Return(ConditionState::kTrue));
 
-    CountMetricProducer countProducer(metric, 1 /*condition tracker index*/, wizard,
+    CountMetricProducer countProducer(kConfigKey, metric, 1 /*condition tracker index*/, wizard,
                                       bucketStartTimeNs);
 
     countProducer.onMatchedLogEvent(1 /*log matcher index*/, event1, false);
@@ -194,14 +196,14 @@ TEST(CountMetricProducerTest, TestAnomalyDetection) {
     int64_t bucket2StartTimeNs = bucketStartTimeNs + bucketSizeNs;
     int64_t bucket3StartTimeNs = bucketStartTimeNs + 2 * bucketSizeNs;
 
-    sp<AnomalyTracker> anomalyTracker = new AnomalyTracker(alert, bucketSizeNs);
+    sp<AnomalyTracker> anomalyTracker = new AnomalyTracker(alert);
 
     CountMetric metric;
     metric.set_name("1");
     metric.mutable_bucket()->set_bucket_size_millis(bucketSizeNs / 1000000);
 
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
-    CountMetricProducer countProducer(metric, -1 /*-1 meaning no condition*/, wizard,
+    CountMetricProducer countProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, wizard,
                                       bucketStartTimeNs);
     countProducer.addAnomalyTracker(anomalyTracker);
 

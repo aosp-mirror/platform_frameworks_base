@@ -38,9 +38,9 @@ struct ValueBucket {
 
 class ValueMetricProducer : public virtual MetricProducer, public virtual PullDataReceiver {
 public:
-    ValueMetricProducer(const ValueMetric& valueMetric, const int conditionIndex,
-                        const sp<ConditionWizard>& wizard, const int pullTagId,
-                        const uint64_t startTimeNs);
+    ValueMetricProducer(const ConfigKey& key, const ValueMetric& valueMetric,
+                        const int conditionIndex, const sp<ConditionWizard>& wizard,
+                        const int pullTagId, const uint64_t startTimeNs);
 
     virtual ~ValueMetricProducer();
 
@@ -72,17 +72,25 @@ protected:
     void startNewProtoOutputStream(long long timestamp) override;
 
 private:
+    void onMatchedLogEventInternal_pull(const uint64_t& eventTimeNs,
+                                        const HashableDimensionKey& eventKey, const long& value,
+                                        bool scheduledPull);
+    void onMatchedLogEventInternal_push(const uint64_t& eventTimeNs,
+                                        const HashableDimensionKey& eventKey, const long& value);
+
+    void SerializeBuckets();
+
+    bool IsConditionMet() const;
+
     const ValueMetric mMetric;
 
     std::shared_ptr<StatsPullerManager> mStatsPullerManager;
 
     // for testing
-    ValueMetricProducer(const ValueMetric& valueMetric, const int conditionIndex,
-                        const sp<ConditionWizard>& wizard, const int pullTagId,
-                        const uint64_t startTimeNs,
+    ValueMetricProducer(const ConfigKey& key, const ValueMetric& valueMetric,
+                        const int conditionIndex, const sp<ConditionWizard>& wizard,
+                        const int pullTagId, const uint64_t startTimeNs,
                         std::shared_ptr<StatsPullerManager> statsPullerManager);
-
-    Mutex mLock;
 
     // tagId for pulled data. -1 if this is not pulled
     const int mPullTagId;
@@ -102,7 +110,9 @@ private:
     // TODO: Add a lock to mPastBuckets.
     std::unordered_map<HashableDimensionKey, std::vector<ValueBucket>> mPastBuckets;
 
-    long get_value(const LogEvent& event);
+    long get_value(const LogEvent& event) const;
+
+    bool hitGuardRail(const HashableDimensionKey& newKey);
 
     static const size_t kBucketSize = sizeof(ValueBucket{});
 

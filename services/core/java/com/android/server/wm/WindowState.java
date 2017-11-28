@@ -58,6 +58,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_MAGNIFICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
+import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
@@ -814,7 +815,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             layoutXDiff = 0;
             layoutYDiff = 0;
         } else {
-            getContainerBounds(mContainingFrame);
+            getBounds(mContainingFrame);
             if (mAppToken != null && !mAppToken.mFrozenBounds.isEmpty()) {
 
                 // If the bounds are frozen, we still want to translate the window freely and only
@@ -972,7 +973,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             mContentInsets.setEmpty();
             mVisibleInsets.setEmpty();
         } else {
-            getDisplayContent().getLogicalDisplayRect(mTmpRect);
+            getDisplayContent().getBounds(mTmpRect);
             // Override right and/or bottom insets in case if the frame doesn't fit the screen in
             // non-fullscreen mode.
             boolean overrideRightInset = !windowsAreFloating && !inFullscreenContainer
@@ -1042,6 +1043,18 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 + " vi=" + mVisibleInsets.toShortString()
                 + " si=" + mStableInsets.toShortString()
                 + " of=" + mOutsets.toShortString());
+    }
+
+    // TODO: Look into whether this override is still necessary.
+    @Override
+    public Rect getBounds() {
+        if (isInMultiWindowMode()) {
+            return getTask().getBounds();
+        } else if (mAppToken != null){
+            return mAppToken.getBounds();
+        } else {
+            return super.getBounds();
+        }
     }
 
     @Override
@@ -2951,33 +2964,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     /** Is this window in a container that takes up the entire screen space? */
     private boolean inFullscreenContainer() {
-        if (mAppToken == null) {
-            return true;
-        }
-        if (mAppToken.hasBounds()) {
-            return false;
-        }
-        return !isInMultiWindowMode();
+        return mAppToken == null || (mAppToken.matchParentBounds() && !isInMultiWindowMode());
     }
 
     /** @return true when the window is in fullscreen task, but has non-fullscreen bounds set. */
     boolean isLetterboxedAppWindow() {
-        final Task task = getTask();
-        final boolean taskIsFullscreen = task != null && task.isFullscreen();
-        final boolean appWindowIsFullscreen = mAppToken != null && !mAppToken.hasBounds();
-
-        return taskIsFullscreen && !appWindowIsFullscreen;
-    }
-
-    /** Returns the appropriate bounds to use for computing frames. */
-    private void getContainerBounds(Rect outBounds) {
-        if (isInMultiWindowMode()) {
-            getTask().getBounds(outBounds);
-        } else if (mAppToken != null){
-            mAppToken.getBounds(outBounds);
-        } else {
-            outBounds.setEmpty();
-        }
+        return !isInMultiWindowMode() && mAppToken != null && !mAppToken.matchParentBounds();
     }
 
     boolean isDragResizeChanged() {
@@ -4355,24 +4347,16 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     @Override
     boolean shouldMagnify() {
         if (mAttrs.type == TYPE_INPUT_METHOD ||
-                mAttrs.type == TYPE_INPUT_METHOD_DIALOG) {
-            return false;
-        } else if (isScreenOverlay()) {
+                mAttrs.type == TYPE_INPUT_METHOD_DIALOG ||
+                mAttrs.type == TYPE_MAGNIFICATION_OVERLAY ||
+                mAttrs.type == TYPE_NAVIGATION_BAR ||
+                // It's tempting to wonder: Have we forgotten the rounded corners overlay?
+                // worry not: it's a fake TYPE_NAVIGATION_BAR_PANEL
+                mAttrs.type == TYPE_NAVIGATION_BAR_PANEL ||
+                mAttrs.type == TYPE_STATUS_BAR) {
             return false;
         }
         return true;
-    }
-
-    @Override
-    boolean isScreenOverlay() {
-        // It's tempting to wonder: Have we forgotten the rounded corners overlay?
-        // worry not: it's a fake TYPE_NAVIGATION_BAR.
-        if (mAttrs.type == TYPE_MAGNIFICATION_OVERLAY ||
-                mAttrs.type == TYPE_NAVIGATION_BAR ||
-                mAttrs.type == TYPE_STATUS_BAR) {
-            return true;
-        }
-        return false;
     }
 
     @Override

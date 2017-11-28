@@ -18,24 +18,50 @@
 
 #include "Log.h"
 #include "MaxDurationTracker.h"
+#include "guardrail/StatsdStats.h"
 
 namespace android {
 namespace os {
 namespace statsd {
 
-MaxDurationTracker::MaxDurationTracker(const HashableDimensionKey& eventKey,
+MaxDurationTracker::MaxDurationTracker(const ConfigKey& key, const string& name,
+                                       const HashableDimensionKey& eventKey,
                                        sp<ConditionWizard> wizard, int conditionIndex, bool nesting,
                                        uint64_t currentBucketStartNs, uint64_t bucketSizeNs,
                                        const std::vector<sp<AnomalyTracker>>& anomalyTrackers,
                                        std::vector<DurationBucket>& bucket)
-    : DurationTracker(eventKey, wizard, conditionIndex, nesting, currentBucketStartNs, bucketSizeNs,
-                      anomalyTrackers, bucket) {
+    : DurationTracker(key, name, eventKey, wizard, conditionIndex, nesting, currentBucketStartNs,
+                      bucketSizeNs, anomalyTrackers, bucket) {
+}
+
+bool MaxDurationTracker::hitGuardRail(const HashableDimensionKey& newKey) {
+    // ===========GuardRail==============
+    if (mInfos.find(newKey) != mInfos.end()) {
+        // if the key existed, we are good!
+        return false;
+    }
+    // 1. Report the tuple count if the tuple count > soft limit
+    if (mInfos.size() > StatsdStats::kDimensionKeySizeSoftLimit - 1) {
+        size_t newTupleCount = mInfos.size() + 1;
+        StatsdStats::getInstance().noteMetricDimensionSize(mConfigKey, mName + mEventKey,
+                                                           newTupleCount);
+        // 2. Don't add more tuples, we are above the allowed threshold. Drop the data.
+        if (newTupleCount > StatsdStats::kDimensionKeySizeHardLimit) {
+            ALOGE("MaxDurTracker %s dropping data for dimension key %s", mName.c_str(),
+                  newKey.c_str());
+            return true;
+        }
+    }
+    return false;
 }
 
 void MaxDurationTracker::noteStart(const HashableDimensionKey& key, bool condition,
                                    const uint64_t eventTime, const ConditionKey& conditionKey) {
-    flushIfNeeded(eventTime);
     // this will construct a new DurationInfo if this key didn't exist.
+    if (hitGuardRail(key)) {
+        return;
+    }
+
     DurationInfo& duration = mInfos[key];
     duration.conditionKeys = conditionKey;
     VLOG("MaxDuration: key %s start condition %d", key.c_str(), condition);
@@ -63,7 +89,6 @@ void MaxDurationTracker::noteStart(const HashableDimensionKey& key, bool conditi
 
 void MaxDurationTracker::noteStop(const HashableDimensionKey& key, const uint64_t eventTime,
                                   bool forceStop) {
-    flushIfNeeded(eventTime);
     declareAnomalyIfAlarmExpired(eventTime);
     VLOG("MaxDuration: key %s stop", key.c_str());
     if (mInfos.find(key) == mInfos.end()) {
@@ -85,7 +110,6 @@ void MaxDurationTracker::noteStop(const HashableDimensionKey& key, const uint64_
                      (long long)duration.lastStartTime, (long long)eventTime,
                      (long long)durationTime);
                 duration.lastDuration = duration.lastDuration + durationTime;
-                duration.lastStartTime = -1;
                 VLOG("  record duration: %lld ", (long long)duration.lastDuration);
             }
             break;
@@ -223,7 +247,6 @@ void MaxDurationTracker::onConditionChanged(bool condition, const uint64_t times
 
 void MaxDurationTracker::noteConditionChanged(const HashableDimensionKey& key, bool conditionMet,
                                               const uint64_t timestamp) {
-    flushIfNeeded(timestamp);
     declareAnomalyIfAlarmExpired(timestamp);
     auto it = mInfos.find(key);
     if (it == mInfos.end()) {

@@ -53,12 +53,6 @@ import java.util.function.Consumer;
 
 class Task extends WindowContainer<AppWindowToken> {
     static final String TAG = TAG_WITH_CLASS_NAME ? "Task" : TAG_WM;
-    // Return value from {@link setBounds} indicating no change was made to the Task bounds.
-    private static final int BOUNDS_CHANGE_NONE = 0;
-    // Return value from {@link setBounds} indicating the position of the Task bounds changed.
-    private static final int BOUNDS_CHANGE_POSITION = 1;
-    // Return value from {@link setBounds} indicating the size of the Task bounds changed.
-    private static final int BOUNDS_CHANGE_SIZE = 1 << 1;
 
     // TODO: Track parent marks like this in WindowContainer.
     TaskStack mStack;
@@ -67,8 +61,6 @@ class Task extends WindowContainer<AppWindowToken> {
     private boolean mDeferRemoval = false;
     final WindowManagerService mService;
 
-    // Content limits relative to the DisplayContent this sits in.
-    private Rect mBounds = new Rect();
     final Rect mPreparedFrozenBounds = new Rect();
     final Configuration mPreparedFrozenMergedConfig = new Configuration();
 
@@ -78,13 +70,12 @@ class Task extends WindowContainer<AppWindowToken> {
     // Device rotation as of the last time {@link #mBounds} was set.
     private int mRotation;
 
-    // Whether mBounds is fullscreen
-    private boolean mFillsParent = true;
-
     // For comparison with DisplayContent bounds.
     private Rect mTmpRect = new Rect();
     // For handling display rotations.
     private Rect mTmpRect2 = new Rect();
+    // For retrieving dim bounds
+    private Rect mTmpRect3 = new Rect();
 
     // Resize mode of the task. See {@link ActivityInfo#resizeMode}
     private int mResizeMode;
@@ -108,8 +99,8 @@ class Task extends WindowContainer<AppWindowToken> {
     private Dimmer mDimmer = new Dimmer(this);
     private final Rect mTmpDimBoundsRect = new Rect();
 
-    Task(int taskId, TaskStack stack, int userId, WindowManagerService service, Rect bounds,
-            int resizeMode, boolean supportsPictureInPicture, TaskDescription taskDescription,
+    Task(int taskId, TaskStack stack, int userId, WindowManagerService service, int resizeMode,
+            boolean supportsPictureInPicture, TaskDescription taskDescription,
             TaskWindowContainerController controller) {
         mTaskId = taskId;
         mStack = stack;
@@ -118,7 +109,7 @@ class Task extends WindowContainer<AppWindowToken> {
         mResizeMode = resizeMode;
         mSupportsPictureInPicture = supportsPictureInPicture;
         setController(controller);
-        setBounds(bounds, getOverrideConfiguration());
+        setBounds(getOverrideBounds());
         mTaskDescription = taskDescription;
 
         // Tasks have no set orientation value (including SCREEN_ORIENTATION_UNSPECIFIED).
@@ -227,9 +218,8 @@ class Task extends WindowContainer<AppWindowToken> {
     }
 
     /** @see com.android.server.am.ActivityManagerService#positionTaskInStack(int, int, int). */
-    void positionAt(int position, Rect bounds, Configuration overrideConfig) {
+    void positionAt(int position) {
         mStack.positionChildAt(position, this, false /* includingParents */);
-        resizeLocked(bounds, overrideConfig, false /* force */);
     }
 
     @Override
@@ -271,48 +261,37 @@ class Task extends WindowContainer<AppWindowToken> {
         }
     }
 
-    /** Set the task bounds. Passing in null sets the bounds to fullscreen. */
-    // TODO: There is probably not a need to pass in overrideConfig anymore since any change to it
-    // will be automatically propagated from the AM. Also, mBound is going to be in
-    // WindowConfiguration long term.
-    private int setBounds(Rect bounds, Configuration overrideConfig) {
-        if (overrideConfig == null) {
-            overrideConfig = EMPTY;
+    public int setBounds(Rect bounds, boolean forceResize) {
+        final int boundsChanged = setBounds(bounds);
+
+        if (forceResize && (boundsChanged & BOUNDS_CHANGE_SIZE) != BOUNDS_CHANGE_SIZE) {
+            onResize();
+            return BOUNDS_CHANGE_SIZE | boundsChanged;
         }
 
-        boolean oldFullscreen = mFillsParent;
+        return boundsChanged;
+    }
+
+    /** Set the task bounds. Passing in null sets the bounds to fullscreen. */
+    @Override
+    public int setBounds(Rect bounds) {
         int rotation = Surface.ROTATION_0;
         final DisplayContent displayContent = mStack.getDisplayContent();
         if (displayContent != null) {
-            displayContent.getLogicalDisplayRect(mTmpRect);
             rotation = displayContent.getDisplayInfo().rotation;
-            mFillsParent = bounds == null;
-            if (mFillsParent) {
-                bounds = mTmpRect;
-            }
-        }
-
-        if (bounds == null) {
+        } else if (bounds == null) {
             // Can't set to fullscreen if we don't have a display to get bounds from...
             return BOUNDS_CHANGE_NONE;
         }
-        if (mBounds.equals(bounds) && oldFullscreen == mFillsParent && mRotation == rotation) {
+
+        if (equivalentOverrideBounds(bounds)) {
             return BOUNDS_CHANGE_NONE;
         }
 
-        int boundsChange = BOUNDS_CHANGE_NONE;
-        if (mBounds.left != bounds.left || mBounds.top != bounds.top) {
-            boundsChange |= BOUNDS_CHANGE_POSITION;
-        }
-        if (mBounds.width() != bounds.width() || mBounds.height() != bounds.height()) {
-            boundsChange |= BOUNDS_CHANGE_SIZE;
-        }
-
-        mBounds.set(bounds);
+        final int boundsChange = super.setBounds(bounds);
 
         mRotation = rotation;
 
-        onOverrideConfigurationChanged(overrideConfig);
         return boundsChange;
     }
 
@@ -360,28 +339,12 @@ class Task extends WindowContainer<AppWindowToken> {
         return isResizeable();
     }
 
-    boolean resizeLocked(Rect bounds, Configuration overrideConfig, boolean forced) {
-        int boundsChanged = setBounds(bounds, overrideConfig);
-        if (forced) {
-            boundsChanged |= BOUNDS_CHANGE_SIZE;
-        }
-        if (boundsChanged == BOUNDS_CHANGE_NONE) {
-            return false;
-        }
-        if ((boundsChanged & BOUNDS_CHANGE_SIZE) == BOUNDS_CHANGE_SIZE) {
-            onResize();
-        } else {
-            onMovedByResize();
-        }
-        return true;
-    }
-
     /**
      * Prepares the task bounds to be frozen with the current size. See
      * {@link AppWindowToken#freezeBounds}.
      */
     void prepareFreezingBounds() {
-        mPreparedFrozenBounds.set(mBounds);
+        mPreparedFrozenBounds.set(getBounds());
         mPreparedFrozenMergedConfig.setTo(getConfiguration());
     }
 
@@ -407,30 +370,30 @@ class Task extends WindowContainer<AppWindowToken> {
             mTmpRect2.offsetTo(adjustedBounds.left, adjustedBounds.top);
         }
         setTempInsetBounds(tempInsetBounds);
-        resizeLocked(mTmpRect2, getOverrideConfiguration(), false /* forced */);
+        setBounds(mTmpRect2, false /* forced */);
     }
 
     /** Return true if the current bound can get outputted to the rest of the system as-is. */
     private boolean useCurrentBounds() {
         final DisplayContent displayContent = getDisplayContent();
-        return mFillsParent
+        return matchParentBounds()
                 || !inSplitScreenSecondaryWindowingMode()
                 || displayContent == null
                 || displayContent.getSplitScreenPrimaryStackIgnoringVisibility() != null;
     }
 
-    /** Original bounds of the task if applicable, otherwise fullscreen rect. */
-    void getBounds(Rect out) {
+    @Override
+    public void getBounds(Rect out) {
         if (useCurrentBounds()) {
             // No need to adjust the output bounds if fullscreen or the docked stack is visible
             // since it is already what we want to represent to the rest of the system.
-            out.set(mBounds);
+            super.getBounds(out);
             return;
         }
 
         // The bounds has been adjusted to accommodate for a docked stack, but the docked stack is
         // not currently visible. Go ahead a represent it as fullscreen to the rest of the system.
-        mStack.getDisplayContent().getLogicalDisplayRect(out);
+        mStack.getDisplayContent().getBounds(out);
     }
 
     /**
@@ -490,7 +453,7 @@ class Task extends WindowContainer<AppWindowToken> {
                 return;
             }
 
-            if (!mFillsParent) {
+            if (!matchParentBounds()) {
                 // When minimizing the docked stack when going home, we don't adjust the task bounds
                 // so we need to intersect the task bounds with the stack bounds here.
                 //
@@ -501,11 +464,11 @@ class Task extends WindowContainer<AppWindowToken> {
                     mStack.getBounds(out);
                 } else {
                     mStack.getBounds(mTmpRect);
-                    mTmpRect.intersect(mBounds);
+                    mTmpRect.intersect(getBounds());
                 }
                 out.set(mTmpRect);
             } else {
-                out.set(mBounds);
+                out.set(getBounds());
             }
             return;
         }
@@ -513,7 +476,7 @@ class Task extends WindowContainer<AppWindowToken> {
         // The bounds has been adjusted to accommodate for a docked stack, but the docked stack is
         // not currently visible. Go ahead a represent it as fullscreen to the rest of the system.
         if (displayContent != null) {
-            displayContent.getLogicalDisplayRect(out);
+            displayContent.getBounds(out);
         }
     }
 
@@ -541,10 +504,10 @@ class Task extends WindowContainer<AppWindowToken> {
         if (displayContent == null) {
             return;
         }
-        if (mFillsParent) {
+        if (matchParentBounds()) {
             // TODO: Yeah...not sure if this works with WindowConfiguration, but shouldn't be a
             // problem once we move mBounds into WindowConfiguration.
-            setBounds(null, getOverrideConfiguration());
+            setBounds(null);
             return;
         }
         final int newRotation = displayContent.getDisplayInfo().rotation;
@@ -557,18 +520,18 @@ class Task extends WindowContainer<AppWindowToken> {
         //   task bounds so it stays in the same place.
         // - Rotate the bounds and notify activity manager if the task can be resized independently
         //   from its stack. The stack will take care of task rotation for the other case.
-        mTmpRect2.set(mBounds);
+        mTmpRect2.set(getBounds());
 
         if (!getWindowConfiguration().canResizeTask()) {
-            setBounds(mTmpRect2, getOverrideConfiguration());
+            setBounds(mTmpRect2);
             return;
         }
 
         displayContent.rotateBounds(mRotation, newRotation, mTmpRect2);
-        if (setBounds(mTmpRect2, getOverrideConfiguration()) != BOUNDS_CHANGE_NONE) {
+        if (setBounds(mTmpRect2) != BOUNDS_CHANGE_NONE) {
             final TaskWindowContainerController controller = getController();
             if (controller != null) {
-                controller.requestResize(mBounds, RESIZE_MODE_SYSTEM_SCREEN_ROTATION);
+                controller.requestResize(getBounds(), RESIZE_MODE_SYSTEM_SCREEN_ROTATION);
             }
         }
     }
@@ -632,7 +595,7 @@ class Task extends WindowContainer<AppWindowToken> {
 
     boolean isFullscreen() {
         if (useCurrentBounds()) {
-            return mFillsParent;
+            return matchParentBounds();
         }
         // The bounds has been adjusted to accommodate for a docked stack, but the docked stack
         // is not currently visible. Go ahead a represent it as fullscreen to the rest of the
@@ -661,7 +624,7 @@ class Task extends WindowContainer<AppWindowToken> {
 
     @Override
     boolean fillsParent() {
-        return mFillsParent || !getWindowConfiguration().canResizeTask();
+        return matchParentBounds() || !getWindowConfiguration().canResizeTask();
     }
 
     @Override
@@ -711,8 +674,8 @@ class Task extends WindowContainer<AppWindowToken> {
             final AppWindowToken appWindowToken = mChildren.get(i);
             appWindowToken.writeToProto(proto, APP_WINDOW_TOKENS, trim);
         }
-        proto.write(FILLS_PARENT, mFillsParent);
-        mBounds.writeToProto(proto, BOUNDS);
+        proto.write(FILLS_PARENT, matchParentBounds());
+        getBounds().writeToProto(proto, BOUNDS);
         mTempInsetBounds.writeToProto(proto, TEMP_INSET_BOUNDS);
         proto.end(token);
     }
@@ -721,8 +684,7 @@ class Task extends WindowContainer<AppWindowToken> {
         final String doublePrefix = prefix + "  ";
 
         pw.println(prefix + "taskId=" + mTaskId);
-        pw.println(doublePrefix + "mFillsParent=" + mFillsParent);
-        pw.println(doublePrefix + "mBounds=" + mBounds.toShortString());
+        pw.println(doublePrefix + "mBounds=" + getBounds().toShortString());
         pw.println(doublePrefix + "mdr=" + mDeferRemoval);
         pw.println(doublePrefix + "appTokens=" + mChildren);
         pw.println(doublePrefix + "mTempInsetBounds=" + mTempInsetBounds.toShortString());

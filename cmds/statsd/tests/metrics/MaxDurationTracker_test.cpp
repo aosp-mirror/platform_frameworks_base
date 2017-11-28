@@ -36,6 +36,8 @@ namespace android {
 namespace os {
 namespace statsd {
 
+const ConfigKey kConfigKey(0, "test");
+
 TEST(MaxDurationTrackerTest, TestSimpleMaxDuration) {
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
 
@@ -45,8 +47,8 @@ TEST(MaxDurationTrackerTest, TestSimpleMaxDuration) {
     uint64_t bucketStartTimeNs = 10000000000;
     uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
 
-    MaxDurationTracker tracker("event", wizard, -1, false, bucketStartTimeNs, bucketSizeNs, {},
-                               buckets);
+    MaxDurationTracker tracker(kConfigKey, "metric", "event", wizard, -1, false, bucketStartTimeNs,
+                               bucketSizeNs, {}, buckets);
 
     tracker.noteStart("1", true, bucketStartTimeNs, key1);
     // Event starts again. This would not change anything as it already starts.
@@ -72,13 +74,14 @@ TEST(MaxDurationTrackerTest, TestStopAll) {
     uint64_t bucketStartTimeNs = 10000000000;
     uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
 
-    MaxDurationTracker tracker("event", wizard, -1, false, bucketStartTimeNs, bucketSizeNs, {},
-                               buckets);
+    MaxDurationTracker tracker(kConfigKey, "metric", "event", wizard, -1, false, bucketStartTimeNs,
+                               bucketSizeNs, {}, buckets);
 
     tracker.noteStart("1", true, bucketStartTimeNs + 1, key1);
 
     // Another event starts in this bucket.
     tracker.noteStart("2", true, bucketStartTimeNs + 20, key1);
+    tracker.flushIfNeeded(bucketStartTimeNs + bucketSizeNs + 40);
     tracker.noteStopAll(bucketStartTimeNs + bucketSizeNs + 40);
     EXPECT_TRUE(tracker.mInfos.empty());
     EXPECT_EQ(1u, buckets.size());
@@ -99,8 +102,8 @@ TEST(MaxDurationTrackerTest, TestCrossBucketBoundary) {
     uint64_t bucketStartTimeNs = 10000000000;
     uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
 
-    MaxDurationTracker tracker("event", wizard, -1, false, bucketStartTimeNs, bucketSizeNs, {},
-                               buckets);
+    MaxDurationTracker tracker(kConfigKey, "metric", "event", wizard, -1, false, bucketStartTimeNs,
+                               bucketSizeNs, {}, buckets);
 
     // The event starts.
     tracker.noteStart("", true, bucketStartTimeNs + 1, key1);
@@ -108,20 +111,9 @@ TEST(MaxDurationTrackerTest, TestCrossBucketBoundary) {
     // Starts again. Does not change anything.
     tracker.noteStart("", true, bucketStartTimeNs + bucketSizeNs + 1, key1);
 
-    // Flushes at early 2nd bucket. The event still does not stop yet.
-    tracker.flushIfNeeded(bucketStartTimeNs + bucketSizeNs + 1);
-    EXPECT_EQ(1u, buckets.size());
-    EXPECT_EQ((unsigned long long)(bucketSizeNs - 1), buckets[0].mDuration);
-
-    // Flushes at the end of the 2nd bucket. The event still does not stop yet.
-    tracker.flushIfNeeded(bucketStartTimeNs + (2 * bucketSizeNs));
-    EXPECT_EQ(2u, buckets.size());
-    EXPECT_EQ((unsigned long long)(bucketSizeNs - 1), buckets[0].mDuration);
-    EXPECT_EQ((unsigned long long)bucketSizeNs, buckets[1].mDuration);
-
     // The event stops at early 4th bucket.
+    tracker.flushIfNeeded(bucketStartTimeNs + (3 * bucketSizeNs) + 20);
     tracker.noteStop("", bucketStartTimeNs + (3 * bucketSizeNs) + 20, false /*stop all*/);
-    tracker.flushIfNeeded(bucketStartTimeNs + (3 * bucketSizeNs) + 21);
     EXPECT_EQ(3u, buckets.size());
     EXPECT_EQ((unsigned long long)(bucketSizeNs - 1), buckets[0].mDuration);
     EXPECT_EQ((unsigned long long)bucketSizeNs, buckets[1].mDuration);
@@ -137,8 +129,8 @@ TEST(MaxDurationTrackerTest, TestCrossBucketBoundary_nested) {
     uint64_t bucketStartTimeNs = 10000000000;
     uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
 
-    MaxDurationTracker tracker("event", wizard, -1, true, bucketStartTimeNs, bucketSizeNs, {},
-                               buckets);
+    MaxDurationTracker tracker(kConfigKey, "metric", "event", wizard, -1, true, bucketStartTimeNs,
+                               bucketSizeNs, {}, buckets);
 
     // 2 starts
     tracker.noteStart("", true, bucketStartTimeNs + 1, key1);
@@ -178,33 +170,19 @@ TEST(MaxDurationTrackerTest, TestMaxDurationWithCondition) {
     uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
     int64_t durationTimeNs = 2 * 1000;
 
-    MaxDurationTracker tracker("event", wizard, 1, false, bucketStartTimeNs, bucketSizeNs, {},
-                               buckets);
+    MaxDurationTracker tracker(kConfigKey, "metric", "event", wizard, 1, false, bucketStartTimeNs,
+                               bucketSizeNs, {}, buckets);
     EXPECT_TRUE(tracker.mAnomalyTrackers.empty());
 
     tracker.noteStart("2:maps", true, eventStartTimeNs, key1);
-    tracker.onSlicedConditionMayChange(eventStartTimeNs + 2 * bucketSizeNs + 5);
-    EXPECT_EQ(2u, buckets.size());
-    EXPECT_EQ(bucketSizeNs - 1, buckets[0].mDuration);
-    EXPECT_EQ(bucketSizeNs, buckets[1].mDuration);
 
-    tracker.noteStop("2:maps", eventStartTimeNs + 2 * bucketSizeNs + durationTimeNs, false);
-    EXPECT_EQ(2u, buckets.size());
-    EXPECT_EQ(bucketSizeNs - 1, buckets[0].mDuration);
-    EXPECT_EQ(bucketSizeNs, buckets[1].mDuration);
-    EXPECT_TRUE(tracker.mInfos.empty());
-    EXPECT_EQ(6LL, tracker.mDuration);
+    tracker.onSlicedConditionMayChange(eventStartTimeNs + 5);
 
-    tracker.noteStart("2:maps", false, eventStartTimeNs + 3 * bucketSizeNs + 10, key1);
-    EXPECT_EQ(1u, tracker.mInfos.size());
-    for (const auto& itr : tracker.mInfos) {
-        EXPECT_EQ(DurationState::kPaused, itr.second.state);
-        EXPECT_EQ(0LL, itr.second.lastDuration);
-    }
-    EXPECT_EQ(3u, buckets.size());
-    EXPECT_EQ(bucketSizeNs - 1, buckets[0].mDuration);
-    EXPECT_EQ(bucketSizeNs, buckets[1].mDuration);
-    EXPECT_EQ(6ULL, buckets[2].mDuration);
+    tracker.noteStop("2:maps", eventStartTimeNs + durationTimeNs, false);
+
+    tracker.flushIfNeeded(bucketStartTimeNs + bucketSizeNs + 1);
+    EXPECT_EQ(1u, buckets.size());
+    EXPECT_EQ(5ULL, buckets[0].mDuration);
 }
 
 TEST(MaxDurationTrackerTest, TestAnomalyDetection) {
@@ -223,9 +201,9 @@ TEST(MaxDurationTrackerTest, TestAnomalyDetection) {
     uint64_t eventStartTimeNs = bucketStartTimeNs + NS_PER_SEC + 1;
     uint64_t bucketSizeNs = 30 * NS_PER_SEC;
 
-    sp<AnomalyTracker> anomalyTracker = new AnomalyTracker(alert, bucketSizeNs);
-    MaxDurationTracker tracker("event", wizard, -1, true, bucketStartTimeNs, bucketSizeNs,
-                               {anomalyTracker}, buckets);
+    sp<AnomalyTracker> anomalyTracker = new AnomalyTracker(alert);
+    MaxDurationTracker tracker(kConfigKey, "metric", "event", wizard, -1, true, bucketStartTimeNs,
+                               bucketSizeNs, {anomalyTracker}, buckets);
 
     tracker.noteStart("1", true, eventStartTimeNs, key1);
     tracker.noteStop("1", eventStartTimeNs + 10, false);
@@ -233,6 +211,7 @@ TEST(MaxDurationTrackerTest, TestAnomalyDetection) {
     EXPECT_EQ(10LL, tracker.mDuration);
 
     tracker.noteStart("2", true, eventStartTimeNs + 20, key1);
+    tracker.flushIfNeeded(eventStartTimeNs + 2 * bucketSizeNs + 3 * NS_PER_SEC);
     tracker.noteStop("2", eventStartTimeNs + 2 * bucketSizeNs + 3 * NS_PER_SEC, false);
     EXPECT_EQ((long long)(4 * NS_PER_SEC + 1LL), tracker.mDuration);
     EXPECT_EQ(anomalyTracker->mLastAlarmTimestampNs,

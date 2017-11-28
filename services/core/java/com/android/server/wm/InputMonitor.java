@@ -661,8 +661,8 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
             if (w.inPinnedWindowingMode()) {
                 if (mAddPipInputConsumerHandle
                         && (inputWindowHandle.layer <= pipInputConsumer.mWindowHandle.layer)) {
-                    // Update the bounds of the Pip input consumer to match the Pinned stack
-                    w.getStack().getBounds(pipTouchableBounds);
+                    // Update the bounds of the Pip input consumer to match the window bounds.
+                    w.getBounds(pipTouchableBounds);
                     pipInputConsumer.mWindowHandle.touchableRegion.set(pipTouchableBounds);
                     addInputWindowHandle(pipInputConsumer.mWindowHandle);
                     mAddPipInputConsumerHandle = false;

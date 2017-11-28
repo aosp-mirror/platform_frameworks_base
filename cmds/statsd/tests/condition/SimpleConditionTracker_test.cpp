@@ -28,6 +28,8 @@ namespace android {
 namespace os {
 namespace statsd {
 
+const ConfigKey kConfigKey(0, "test");
+
 SimpleCondition getWakeLockHeldCondition(bool countNesting, bool defaultFalse,
                                          bool outputSlicedUid) {
     SimpleCondition simpleCondition;
@@ -76,8 +78,8 @@ TEST(SimpleConditionTrackerTest, TestNonSlicedCondition) {
     trackerNameIndexMap["SCREEN_TURNED_ON"] = 0;
     trackerNameIndexMap["SCREEN_TURNED_OFF"] = 1;
 
-    SimpleConditionTracker conditionTracker("SCREEN_IS_ON", 0 /*tracker index*/, simpleCondition,
-                                            trackerNameIndexMap);
+    SimpleConditionTracker conditionTracker(kConfigKey, "SCREEN_IS_ON", 0 /*tracker index*/,
+                                            simpleCondition, trackerNameIndexMap);
 
     LogEvent event(1 /*tagId*/, 0 /*timestamp*/);
 
@@ -158,8 +160,9 @@ TEST(SimpleConditionTrackerTest, TestNonSlicedConditionNestCounting) {
     trackerNameIndexMap["SCREEN_TURNED_ON"] = 0;
     trackerNameIndexMap["SCREEN_TURNED_OFF"] = 1;
 
-    SimpleConditionTracker conditionTracker("SCREEN_IS_ON", 0 /*condition tracker index*/,
-                                            simpleCondition, trackerNameIndexMap);
+    SimpleConditionTracker conditionTracker(kConfigKey, "SCREEN_IS_ON",
+                                            0 /*condition tracker index*/, simpleCondition,
+                                            trackerNameIndexMap);
 
     LogEvent event(1 /*tagId*/, 0 /*timestamp*/);
 
@@ -227,8 +230,9 @@ TEST(SimpleConditionTrackerTest, TestSlicedCondition) {
     trackerNameIndexMap["WAKE_LOCK_RELEASE"] = 1;
     trackerNameIndexMap["RELEASE_ALL"] = 2;
 
-    SimpleConditionTracker conditionTracker(conditionName, 0 /*condition tracker index*/,
-                                            simpleCondition, trackerNameIndexMap);
+    SimpleConditionTracker conditionTracker(kConfigKey, conditionName,
+                                            0 /*condition tracker index*/, simpleCondition,
+                                            trackerNameIndexMap);
     int uid = 111;
 
     LogEvent event(1 /*tagId*/, 0 /*timestamp*/);
@@ -237,6 +241,7 @@ TEST(SimpleConditionTrackerTest, TestSlicedCondition) {
     // one matched start
     vector<MatchingState> matcherState;
     matcherState.push_back(MatchingState::kMatched);
+    matcherState.push_back(MatchingState::kNotMatched);
     matcherState.push_back(MatchingState::kNotMatched);
     vector<sp<ConditionTracker>> allConditions;
     vector<ConditionState> conditionCache(1, ConditionState::kNotEvaluated);
@@ -308,8 +313,9 @@ TEST(SimpleConditionTrackerTest, TestSlicedWithNoOutputDim) {
     trackerNameIndexMap["WAKE_LOCK_RELEASE"] = 1;
     trackerNameIndexMap["RELEASE_ALL"] = 2;
 
-    SimpleConditionTracker conditionTracker(conditionName, 0 /*condition tracker index*/,
-                                            simpleCondition, trackerNameIndexMap);
+    SimpleConditionTracker conditionTracker(kConfigKey, conditionName,
+                                            0 /*condition tracker index*/, simpleCondition,
+                                            trackerNameIndexMap);
     int uid1 = 111;
     string uid1_wl1 = "wl1_1";
     int uid2 = 222;
@@ -321,6 +327,7 @@ TEST(SimpleConditionTrackerTest, TestSlicedWithNoOutputDim) {
     // one matched start for uid1
     vector<MatchingState> matcherState;
     matcherState.push_back(MatchingState::kMatched);
+    matcherState.push_back(MatchingState::kNotMatched);
     matcherState.push_back(MatchingState::kNotMatched);
     vector<sp<ConditionTracker>> allConditions;
     vector<ConditionState> conditionCache(1, ConditionState::kNotEvaluated);
@@ -392,8 +399,9 @@ TEST(SimpleConditionTrackerTest, TestStopAll) {
     trackerNameIndexMap["WAKE_LOCK_RELEASE"] = 1;
     trackerNameIndexMap["RELEASE_ALL"] = 2;
 
-    SimpleConditionTracker conditionTracker(conditionName, 0 /*condition tracker index*/,
-                                            simpleCondition, trackerNameIndexMap);
+    SimpleConditionTracker conditionTracker(kConfigKey, conditionName,
+                                            0 /*condition tracker index*/, simpleCondition,
+                                            trackerNameIndexMap);
     int uid1 = 111;
     int uid2 = 222;
 
