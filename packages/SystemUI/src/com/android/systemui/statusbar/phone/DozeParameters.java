@@ -46,10 +46,8 @@ public class DozeParameters {
     public void dump(PrintWriter pw) {
         pw.println("  DozeParameters:");
         pw.print("    getDisplayStateSupported(): "); pw.println(getDisplayStateSupported());
-        pw.print("    getPulseDuration(pickup=false): "); pw.println(getPulseDuration(false));
-        pw.print("    getPulseDuration(pickup=true): "); pw.println(getPulseDuration(true));
-        pw.print("    getPulseInDuration(pickup=false): "); pw.println(getPulseInDuration(false));
-        pw.print("    getPulseInDuration(pickup=true): "); pw.println(getPulseInDuration(true));
+        pw.print("    getPulseDuration(): "); pw.println(getPulseDuration());
+        pw.print("    getPulseInDuration(): "); pw.println(getPulseInDuration());
         pw.print("    getPulseInVisibleDuration(): "); pw.println(getPulseVisibleDuration());
         pw.print("    getPulseOutDuration(): "); pw.println(getPulseOutDuration());
         pw.print("    getPulseOnSigMotion(): "); pw.println(getPulseOnSigMotion());
@@ -81,14 +79,12 @@ public class DozeParameters {
         return mContext.getResources().getBoolean(R.bool.doze_suspend_display_state_supported);
     }
 
-    public int getPulseDuration(boolean pickup) {
-        return getPulseInDuration(pickup) + getPulseVisibleDuration() + getPulseOutDuration();
+    public int getPulseDuration() {
+        return getPulseInDuration() + getPulseVisibleDuration() + getPulseOutDuration();
     }
 
-    public int getPulseInDuration(boolean pickupOrDoubleTap) {
-        return pickupOrDoubleTap
-                ? getInt("doze.pulse.duration.in.pickup", R.integer.doze_pulse_duration_in_pickup)
-                : getInt("doze.pulse.duration.in", R.integer.doze_pulse_duration_in);
+    public int getPulseInDuration() {
+        return getInt("doze.pulse.duration.in", R.integer.doze_pulse_duration_in);
     }
 
     public int getPulseVisibleDuration() {

@@ -19,12 +19,13 @@ package com.android.systemui.doze;
 import android.annotation.NonNull;
 import android.app.PendingIntent;
 
+import com.android.systemui.util.wakelock.WakeLock;
+
 /**
  * A rudimentary fake for DozeHost.
  */
 class DozeHostFake implements DozeHost {
     Callback callback;
-    boolean pulseAborted;
     boolean pulseExtended;
     boolean animateWakeup;
     boolean dozing;
@@ -89,11 +90,6 @@ class DozeHostFake implements DozeHost {
 
     @Override
     public void onIgnoreTouchWhilePulsing(boolean ignore) {
-    }
-
-    @Override
-    public void abortPulsing() {
-        pulseAborted = true;
     }
 
     @Override

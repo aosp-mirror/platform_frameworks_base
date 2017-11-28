@@ -86,9 +86,9 @@ public class ScrimViewTest extends LeakCheckedTest {
 
     @Test
     public void testSetViewAlpha_propagatesToDrawable() {
-        float alpha = 0.5f;
+        final float alpha = 0.5f;
         mView.setViewAlpha(alpha);
-        assertEquals(mView.getViewAlpha(), alpha);
+        assertEquals("View alpha did not propagate to drawable", alpha, mView.getViewAlpha());
     }
 
     @Test

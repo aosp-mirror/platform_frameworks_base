@@ -252,6 +252,13 @@ public class ScrimView extends View implements ConfigurationController.Configura
         return false;
     }
 
+    /**
+     * It might look counterintuitive to have another method to set the alpha instead of
+     * only using {@link #setAlpha(float)}. In this case we're in a hardware layer
+     * optimizing blend modes, so it makes sense.
+     *
+     * @param alpha Gradient alpha from 0 to 1.
+     */
     public void setViewAlpha(float alpha) {
         if (alpha != mViewAlpha) {
             mViewAlpha = alpha;
