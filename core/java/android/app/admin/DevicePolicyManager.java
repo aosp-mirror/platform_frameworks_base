@@ -7036,14 +7036,14 @@ public class DevicePolicyManager {
      * task. From {@link android.os.Build.VERSION_CODES#M} removing packages from the lock task
      * package list results in locked tasks belonging to those packages to be finished.
      * <p>
-     * This function can only be called by the device owner or by a profile owner of a user/profile
-     * that is affiliated with the device. See {@link #isAffiliatedUser}. Any packages
-     * set via this method will be cleared if the user becomes unaffiliated.
+     * This function can only be called by the device owner, a profile owner of an affiliated user
+     * or profile, or the profile owner when no device owner is set. See {@link #isAffiliatedUser}.
+     * Any package set via this method will be cleared if the user becomes unaffiliated.
      *
      * @param packages The list of packages allowed to enter lock task mode
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
-     * @throws SecurityException if {@code admin} is not the device owner, or the profile owner of
-     * an affiliated user or profile.
+     * @throws SecurityException if {@code admin} is not the device owner, the profile owner of an
+     * affiliated user or profile, or the profile owner when no device owner is set.
      * @see #isAffiliatedUser
      * @see Activity#startLockTask()
      * @see DeviceAdminReceiver#onLockTaskModeEntering(Context, Intent, String)
@@ -7065,8 +7065,8 @@ public class DevicePolicyManager {
     /**
      * Returns the list of packages allowed to start the lock task mode.
      *
-     * @throws SecurityException if {@code admin} is not the device owner, or the profile owner of
-     * an affiliated user or profile.
+     * @throws SecurityException if {@code admin} is not the device owner, the profile owner of an
+     * affiliated user or profile, or the profile owner when no device owner is set.
      * @see #isAffiliatedUser
      * @see #setLockTaskPackages
      */
@@ -7106,9 +7106,9 @@ public class DevicePolicyManager {
      * is in LockTask mode. If this method is not called, none of the features listed here will be
      * enabled.
      * <p>
-     * This function can only be called by the device owner or by a profile owner of a user/profile
-     * that is affiliated with the device. See {@link #isAffiliatedUser}. Any features
-     * set via this method will be cleared if the user becomes unaffiliated.
+     * This function can only be called by the device owner, a profile owner of an affiliated user
+     * or profile, or the profile owner when no device owner is set. See {@link #isAffiliatedUser}.
+     * Any features set via this method will be cleared if the user becomes unaffiliated.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param flags Bitfield of feature flags:
@@ -7119,9 +7119,10 @@ public class DevicePolicyManager {
      *              {@link #LOCK_TASK_FEATURE_RECENTS},
      *              {@link #LOCK_TASK_FEATURE_GLOBAL_ACTIONS},
      *              {@link #LOCK_TASK_FEATURE_KEYGUARD}
-     * @throws SecurityException if {@code admin} is not the device owner, or the profile owner of
-     * an affiliated user or profile.
+     * @throws SecurityException if {@code admin} is not the device owner, the profile owner of an
+     * affiliated user or profile, or the profile owner when no device owner is set.
      * @see #isAffiliatedUser
+     * @throws SecurityException if {@code admin} is not the device owner or the profile owner.
      */
     public void setLockTaskFeatures(@NonNull ComponentName admin, @LockTaskFeature int flags) {
         throwIfParentInstance("setLockTaskFeatures");
@@ -7139,8 +7140,8 @@ public class DevicePolicyManager {
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @return bitfield of flags. See {@link #setLockTaskFeatures(ComponentName, int)} for a list.
-     * @throws SecurityException if {@code admin} is not the device owner, or the profile owner of
-     * an affiliated user or profile.
+     * @throws SecurityException if {@code admin} is not the device owner, the profile owner of an
+     * affiliated user or profile, or the profile owner when no device owner is set.
      * @see #isAffiliatedUser
      * @see #setLockTaskFeatures
      */
