@@ -224,6 +224,7 @@ public abstract class BatteryStats implements Parcelable {
      *   - Always On Display (screen doze mode) time and power
      * New in version 28:
      *   - Light/Deep Doze power
+     *   - WiFi Multicast Wakelock statistics (count & duration)
      */
     static final int CHECKIN_VERSION = 28;
 
@@ -313,6 +314,8 @@ public abstract class BatteryStats implements Parcelable {
     private static final String CAMERA_DATA = "cam";
     private static final String VIDEO_DATA = "vid";
     private static final String AUDIO_DATA = "aud";
+    private static final String WIFI_MULTICAST_TOTAL_DATA = "wmct";
+    private static final String WIFI_MULTICAST_DATA = "wmc";
 
     public static final String RESULT_RECEIVER_CONTROLLER_KEY = "controller_activity";
 
@@ -514,6 +517,13 @@ public abstract class BatteryStats implements Parcelable {
          * @return a Map from Strings to Uid.Wakelock objects.
          */
         public abstract ArrayMap<String, ? extends Wakelock> getWakelockStats();
+
+        /**
+         * Returns the WiFi Multicast Wakelock statistics.
+         *
+         * @return a Timer Object for the per uid Multicast statistics.
+         */
+        public abstract Timer getMulticastWakelockStats();
 
         /**
          * Returns a mapping containing sync statistics.
@@ -3363,13 +3373,16 @@ public abstract class BatteryStats implements Parcelable {
                 screenDozeTime / 1000);
 
 
-        // Calculate wakelock times across all uids.
+        // Calculate both wakelock and wifi multicast wakelock times across all uids.
         long fullWakeLockTimeTotal = 0;
         long partialWakeLockTimeTotal = 0;
+        long multicastWakeLockTimeTotalMicros = 0;
+        int multicastWakeLockCountTotal = 0;
 
         for (int iu = 0; iu < NU; iu++) {
             final Uid u = uidStats.valueAt(iu);
 
+            // First calculating the wakelock stats
             final ArrayMap<String, ? extends BatteryStats.Uid.Wakelock> wakelocks
                     = u.getWakelockStats();
             for (int iw=wakelocks.size()-1; iw>=0; iw--) {
@@ -3386,6 +3399,13 @@ public abstract class BatteryStats implements Parcelable {
                     partialWakeLockTimeTotal += partialWakeTimer.getTotalTimeLocked(
                         rawRealtime, which);
                 }
+            }
+
+            // Now calculating the wifi multicast wakelock stats
+            final Timer mcTimer = u.getMulticastWakelockStats();
+            if (mcTimer != null) {
+                multicastWakeLockTimeTotalMicros += mcTimer.getTotalTimeLocked(rawRealtime, which);
+                multicastWakeLockCountTotal += mcTimer.getCountLocked(which);
             }
         }
 
@@ -3501,6 +3521,11 @@ public abstract class BatteryStats implements Parcelable {
             args[i] = getWifiSignalStrengthCount(i, which);
         }
         dumpLine(pw, 0 /* uid */, category, WIFI_SIGNAL_STRENGTH_COUNT_DATA, args);
+
+        // Dump Multicast total stats
+        dumpLine(pw, 0 /* uid */, category, WIFI_MULTICAST_TOTAL_DATA,
+                multicastWakeLockTimeTotalMicros / 1000,
+                multicastWakeLockCountTotal);
 
         if (which == STATS_SINCE_UNPLUGGED) {
             dumpLine(pw, 0 /* uid */, category, BATTERY_LEVEL_DATA, getDischargeStartLevel(),
@@ -3825,6 +3850,18 @@ public abstract class BatteryStats implements Parcelable {
                         name = name.replace('\r', '_');
                     }
                     dumpLine(pw, uid, category, WAKELOCK_DATA, name, sb.toString());
+                }
+            }
+
+            // WiFi Multicast Wakelock Statistics
+            final Timer mcTimer = u.getMulticastWakelockStats();
+            if (mcTimer != null) {
+                final long totalMcWakelockTimeMs =
+                        mcTimer.getTotalTimeLocked(rawRealtime, which) / 1000 ;
+                final int countMcWakelock = mcTimer.getCountLocked(which);
+                if(totalMcWakelockTimeMs > 0) {
+                    dumpLine(pw, uid, category, WIFI_MULTICAST_DATA,
+                            totalMcWakelockTimeMs, countMcWakelock);
                 }
             }
 
@@ -4327,15 +4364,18 @@ public abstract class BatteryStats implements Parcelable {
             pw.print("  Connectivity changes: "); pw.println(connChanges);
         }
 
-        // Calculate wakelock times across all uids.
+        // Calculate both wakelock and wifi multicast wakelock times across all uids.
         long fullWakeLockTimeTotalMicros = 0;
         long partialWakeLockTimeTotalMicros = 0;
+        long multicastWakeLockTimeTotalMicros = 0;
+        int multicastWakeLockCountTotal = 0;
 
         final ArrayList<TimerEntry> timers = new ArrayList<>();
 
         for (int iu = 0; iu < NU; iu++) {
             final Uid u = uidStats.valueAt(iu);
 
+            // First calculate wakelock statistics
             final ArrayMap<String, ? extends BatteryStats.Uid.Wakelock> wakelocks
                     = u.getWakelockStats();
             for (int iw=wakelocks.size()-1; iw>=0; iw--) {
@@ -4363,6 +4403,13 @@ public abstract class BatteryStats implements Parcelable {
                     }
                 }
             }
+
+            // Next calculate wifi multicast wakelock statistics
+            final Timer mcTimer = u.getMulticastWakelockStats();
+            if (mcTimer != null) {
+                multicastWakeLockTimeTotalMicros += mcTimer.getTotalTimeLocked(rawRealtime, which);
+                multicastWakeLockCountTotal += mcTimer.getCountLocked(which);
+            }
         }
 
         final long mobileRxTotalBytes = getNetworkActivityBytes(NETWORK_MOBILE_RX_DATA, which);
@@ -4389,6 +4436,20 @@ public abstract class BatteryStats implements Parcelable {
             sb.append(prefix);
                     sb.append("  Total partial wakelock time: "); formatTimeMsNoSpace(sb,
                             (partialWakeLockTimeTotalMicros + 500) / 1000);
+            pw.println(sb.toString());
+        }
+
+        if (multicastWakeLockTimeTotalMicros != 0) {
+            sb.setLength(0);
+            sb.append(prefix);
+            sb.append("  Total WiFi Multicast wakelock Count: ");
+            sb.append(multicastWakeLockCountTotal);
+            pw.println(sb.toString());
+
+            sb.setLength(0);
+            sb.append(prefix);
+            sb.append("  Total WiFi Multicast wakelock time: ");
+            formatTimeMsNoSpace(sb, (multicastWakeLockTimeTotalMicros + 500) / 1000);
             pw.println(sb.toString());
         }
 
@@ -5305,6 +5366,24 @@ public abstract class BatteryStats implements Parcelable {
                         sb.append("draw");
                     }
                     sb.append(" realtime");
+                    pw.println(sb.toString());
+                }
+            }
+
+            // Calculate multicast wakelock stats
+            final Timer mcTimer = u.getMulticastWakelockStats();
+            if (mcTimer != null) {
+                final long multicastWakeLockTimeMicros = mcTimer.getTotalTimeLocked(rawRealtime, which);
+                final int multicastWakeLockCount = mcTimer.getCountLocked(which);
+
+                if (multicastWakeLockTimeMicros > 0) {
+                    sb.setLength(0);
+                    sb.append(prefix);
+                    sb.append("    WiFi Multicast Wakelock");
+                    sb.append(" count = ");
+                    sb.append(multicastWakeLockCount);
+                    sb.append(" time = ");
+                    formatTimeMsNoSpace(sb, (multicastWakeLockTimeMicros + 500) / 1000);
                     pw.println(sb.toString());
                 }
             }
@@ -7085,6 +7164,10 @@ public abstract class BatteryStats implements Parcelable {
                 proto.end(wToken);
             }
 
+            // Wifi Multicast Wakelock (WIFI_MULTICAST_WAKELOCK_DATA)
+            dumpTimer(proto, UidProto.WIFI_MULTICAST_WAKELOCK, u.getMulticastWakelockStats(),
+                    rawRealtimeUs, which);
+
             // Wakeup alarms (WAKEUP_ALARM_DATA)
             for (int ipkg = packageStats.size() - 1; ipkg >= 0; --ipkg) {
                 final Uid.Pkg ps = packageStats.valueAt(ipkg);
@@ -7340,6 +7423,30 @@ public abstract class BatteryStats implements Parcelable {
         proto.write(SystemProto.Misc.LONGEST_LIGHT_DOZE_DURATION_MS,
                 getLongestDeviceIdleModeTime(DEVICE_IDLE_MODE_LIGHT));
         proto.end(mToken);
+
+        // Wifi multicast wakelock total stats (WIFI_MULTICAST_WAKELOCK_TOTAL_DATA)
+        // Calculate multicast wakelock stats across all uids.
+        long multicastWakeLockTimeTotalUs = 0;
+        int multicastWakeLockCountTotal = 0;
+
+        for (int iu = 0; iu < uidStats.size(); iu++) {
+            final Uid u = uidStats.valueAt(iu);
+
+            final Timer mcTimer = u.getMulticastWakelockStats();
+
+            if (mcTimer != null) {
+                multicastWakeLockTimeTotalUs +=
+                        mcTimer.getTotalTimeLocked(rawRealtimeUs, which);
+                multicastWakeLockCountTotal += mcTimer.getCountLocked(which);
+            }
+        }
+
+        final long wmctToken = proto.start(SystemProto.WIFI_MULTICAST_WAKELOCK_TOTAL);
+        proto.write(SystemProto.WifiMulticastWakelockTotal.DURATION_MS,
+                multicastWakeLockTimeTotalUs / 1000);
+        proto.write(SystemProto.WifiMulticastWakelockTotal.COUNT,
+                multicastWakeLockCountTotal);
+        proto.end(wmctToken);
 
         // Power use item (POWER_USE_ITEM_DATA)
         final List<BatterySipper> sippers = helper.getUsageList();
