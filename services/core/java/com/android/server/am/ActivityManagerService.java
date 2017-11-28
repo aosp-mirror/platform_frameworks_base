@@ -24330,6 +24330,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             }
         }
+
+        @Override
+        public boolean isRuntimeRestarted() {
+            return mSystemServiceManager.isRuntimeRestarted();
+        }
     }
 
     /**

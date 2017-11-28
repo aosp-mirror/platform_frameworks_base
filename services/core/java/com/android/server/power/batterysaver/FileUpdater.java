@@ -16,19 +16,34 @@
 package com.android.server.power.batterysaver;
 
 import android.content.Context;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.SystemProperties;
 import android.util.ArrayMap;
+import android.util.AtomicFile;
 import android.util.Slog;
+import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.FastXmlSerializer;
+import com.android.internal.util.XmlUtils;
 import com.android.server.IoThread;
 
 import libcore.io.IoUtils;
 
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -46,6 +61,14 @@ public class FileUpdater {
     private static final String TAG = BatterySaverController.TAG;
 
     private static final boolean DEBUG = BatterySaverController.DEBUG;
+
+    /**
+     * If this system property is set to 1, it'll skip all file writes. This can be used when
+     * one needs to change max CPU frequency for benchmarking, for example.
+     */
+    private static final String PROP_SKIP_WRITE = "debug.batterysaver.no_write_files";
+
+    private static final String TAG_DEFAULT_ROOT = "defaults";
 
     // Don't do disk access with this lock held.
     private final Object mLock = new Object();
@@ -91,6 +114,21 @@ public class FileUpdater {
 
         MAX_RETRIES = maxRetries;
         RETRY_INTERVAL_MS = retryIntervalMs;
+    }
+
+    public void systemReady(boolean runtimeRestarted) {
+        synchronized (mLock) {
+            if (runtimeRestarted) {
+                // If it runtime restarted, read the original values from the disk and apply.
+                if (loadDefaultValuesLocked()) {
+                    Slog.d(TAG, "Default values loaded after runtime restart; writing them...");
+                    restoreDefault();
+                }
+            } else {
+                // Delete it, without checking the result. (file-not-exist is not an exception.)
+                injectDefaultValuesFilename().delete();
+            }
+        }
     }
 
     /**
@@ -241,6 +279,7 @@ public class FileUpdater {
         }
         synchronized (mLock) {
             mDefaultValues.put(file, originalValue);
+            saveDefaultValuesLocked();
         }
         return true;
     }
@@ -252,15 +291,90 @@ public class FileUpdater {
 
     @VisibleForTesting
     void injectWriteToFile(String file, String value) throws IOException {
+        if (injectShouldSkipWrite()) {
+            Slog.i(TAG, "Skipped writing to '" + file + "'");
+            return;
+        }
         if (DEBUG) {
             Slog.d(TAG, "Writing: '" + value + "' to '" + file + "'");
         }
         try (FileWriter out = new FileWriter(file)) {
             out.write(value);
-        } catch (IOException e) {
+        } catch (IOException | RuntimeException e) {
             Slog.w(TAG, "Failed writing '" + value + "' to '" + file + "': " + e.getMessage());
             throw e;
         }
+    }
+
+    private void saveDefaultValuesLocked() {
+        final AtomicFile file = new AtomicFile(injectDefaultValuesFilename());
+
+        FileOutputStream outs = null;
+        try {
+            file.getBaseFile().getParentFile().mkdirs();
+            outs = file.startWrite();
+
+            // Write to XML
+            XmlSerializer out = new FastXmlSerializer();
+            out.setOutput(outs, StandardCharsets.UTF_8.name());
+            out.startDocument(null, true);
+            out.startTag(null, TAG_DEFAULT_ROOT);
+
+            XmlUtils.writeMapXml(mDefaultValues, out, null);
+
+            // Epilogue.
+            out.endTag(null, TAG_DEFAULT_ROOT);
+            out.endDocument();
+
+            // Close.
+            file.finishWrite(outs);
+        } catch (IOException | XmlPullParserException | RuntimeException e) {
+            Slog.e(TAG, "Failed to write to file " + file.getBaseFile(), e);
+            file.failWrite(outs);
+        }
+    }
+
+    @VisibleForTesting
+    boolean loadDefaultValuesLocked() {
+        final AtomicFile file = new AtomicFile(injectDefaultValuesFilename());
+        if (DEBUG) {
+            Slog.d(TAG, "Loading from " + file.getBaseFile());
+        }
+        Map<String, String> read = null;
+        try (FileInputStream in = file.openRead()) {
+            XmlPullParser parser = Xml.newPullParser();
+            parser.setInput(in, StandardCharsets.UTF_8.name());
+
+            int type;
+            while ((type = parser.next()) != XmlPullParser.END_DOCUMENT) {
+                if (type != XmlPullParser.START_TAG) {
+                    continue;
+                }
+                final int depth = parser.getDepth();
+                // Check the root tag
+                final String tag = parser.getName();
+                if (depth == 1) {
+                    if (!TAG_DEFAULT_ROOT.equals(tag)) {
+                        Slog.e(TAG, "Invalid root tag: " + tag);
+                        return false;
+                    }
+                    continue;
+                }
+                final String[] tagName = new String[1];
+                read = (ArrayMap<String, String>) XmlUtils.readThisArrayMapXml(parser,
+                        TAG_DEFAULT_ROOT, tagName, null);
+            }
+        } catch (FileNotFoundException e) {
+            read = null;
+        } catch (IOException | XmlPullParserException | RuntimeException e) {
+            Slog.e(TAG, "Failed to read file " + file.getBaseFile(), e);
+        }
+        if (read != null) {
+            mDefaultValues.clear();
+            mDefaultValues.putAll(read);
+            return true;
+        }
+        return false;
     }
 
     private void doWtf(String message) {
@@ -270,5 +384,21 @@ public class FileUpdater {
     @VisibleForTesting
     void injectWtf(String message, Throwable e) {
         Slog.wtf(TAG, message, e);
+    }
+
+    File injectDefaultValuesFilename() {
+        final File dir = new File(Environment.getDataSystemDirectory(), "battery-saver");
+        dir.mkdirs();
+        return new File(dir, "default-values.xml");
+    }
+
+    @VisibleForTesting
+    boolean injectShouldSkipWrite() {
+        return SystemProperties.getBoolean(PROP_SKIP_WRITE, false);
+    }
+
+    @VisibleForTesting
+    ArrayMap<String, String> getDefaultValuesForTest() {
+        return mDefaultValues;
     }
 }
