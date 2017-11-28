@@ -666,6 +666,7 @@ aidl_files := \
 	frameworks/base/telephony/java/android/telephony/NeighboringCellInfo.aidl \
 	frameworks/base/telephony/java/android/telephony/ModemActivityInfo.aidl \
 	frameworks/base/telephony/java/android/telephony/UiccAccessRule.aidl \
+	frameworks/base/telephony/java/android/telephony/data/DataProfile.aidl \
 	frameworks/base/telephony/java/android/telephony/euicc/DownloadableSubscription.aidl \
 	frameworks/base/telephony/java/android/telephony/euicc/EuiccInfo.aidl \
 	frameworks/base/location/java/android/location/Location.aidl \
