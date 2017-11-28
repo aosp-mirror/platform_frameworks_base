@@ -30,6 +30,7 @@ import static android.app.admin.DevicePolicyManager.LOCK_TASK_FEATURE_KEYGUARD;
 import static android.app.admin.DevicePolicyManager.LOCK_TASK_FEATURE_NONE;
 import static android.app.admin.DevicePolicyManager.LOCK_TASK_FEATURE_NOTIFICATIONS;
 import static android.os.Process.SYSTEM_UID;
+import static android.telecom.TelecomManager.EMERGENCY_DIALER_COMPONENT;
 
 import static com.android.server.am.LockTaskController.STATUS_BAR_MASK_LOCKED;
 import static com.android.server.am.LockTaskController.STATUS_BAR_MASK_PINNED;
@@ -53,6 +54,7 @@ import android.platform.test.annotations.Presubmit;
 import android.provider.Settings;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
+import android.telecom.TelecomManager;
 import android.util.Pair;
 
 import com.android.internal.statusbar.IStatusBarService;
@@ -90,6 +92,7 @@ public class LockTaskControllerTest {
     @Mock private LockPatternUtils mLockPatternUtils;
     @Mock private LockTaskNotify mLockTaskNotify;
     @Mock private StatusBarManagerInternal mStatusBarManagerInternal;
+    @Mock private TelecomManager mTelecomManager;
     @Mock private RecentTasks mRecentTasks;
 
     private LockTaskController mLockTaskController;
@@ -118,6 +121,7 @@ public class LockTaskControllerTest {
         mLockTaskController.setWindowManager(mWindowManager);
         mLockTaskController.mStatusBarService = mStatusBarService;
         mLockTaskController.mDevicePolicyManager = mDevicePolicyManager;
+        mLockTaskController.mTelecomManager = mTelecomManager;
         mLockTaskController.mLockPatternUtils = mLockPatternUtils;
         mLockTaskController.mLockTaskNotify = mLockTaskNotify;
 
@@ -209,7 +213,7 @@ public class LockTaskControllerTest {
 
     @Test
     public void testLockTaskViolation() throws Exception {
-        // GIVEN one task records with whitelisted auth that is in lock task mode
+        // GIVEN one task record with whitelisted auth that is in lock task mode
         TaskRecord tr = getTaskRecord(TaskRecord.LOCK_TASK_AUTH_WHITELISTED);
         mLockTaskController.startLockTaskMode(tr, false, TEST_UID);
 
@@ -231,6 +235,38 @@ public class LockTaskControllerTest {
         // THEN it's not a lock task violation to launch another task that is priv launchable
         assertFalse(mLockTaskController.isLockTaskModeViolation(getTaskRecord(
                 TaskRecord.LOCK_TASK_AUTH_LAUNCHABLE_PRIV)));
+    }
+
+    @Test
+    public void testLockTaskViolation_emergencyCall() throws Exception {
+        // GIVEN one task record with whitelisted auth that is in lock task mode
+        TaskRecord tr = getTaskRecord(TaskRecord.LOCK_TASK_AUTH_WHITELISTED);
+        mLockTaskController.startLockTaskMode(tr, false, TEST_UID);
+
+        // GIVEN tasks necessary for emergency calling
+        TaskRecord keypad = getTaskRecord(new Intent().setComponent(EMERGENCY_DIALER_COMPONENT),
+                TaskRecord.LOCK_TASK_AUTH_PINNABLE);
+        TaskRecord callAction = getTaskRecord(new Intent(Intent.ACTION_CALL_EMERGENCY),
+                TaskRecord.LOCK_TASK_AUTH_PINNABLE);
+        TaskRecord dialer = getTaskRecord("com.example.dialer", TaskRecord.LOCK_TASK_AUTH_PINNABLE);
+        when(mTelecomManager.getSystemDialerPackage())
+                .thenReturn(dialer.intent.getComponent().getPackageName());
+
+        // GIVEN keyguard is allowed for lock task mode
+        mLockTaskController.updateLockTaskFeatures(TEST_USER_ID, LOCK_TASK_FEATURE_KEYGUARD);
+
+        // THEN the above tasks should all be allowed
+        assertFalse(mLockTaskController.isLockTaskModeViolation(keypad));
+        assertFalse(mLockTaskController.isLockTaskModeViolation(callAction));
+        assertFalse(mLockTaskController.isLockTaskModeViolation(dialer));
+
+        // GIVEN keyguard is disallowed for lock task mode (default)
+        mLockTaskController.updateLockTaskFeatures(TEST_USER_ID, LOCK_TASK_FEATURE_NONE);
+
+        // THEN the above tasks should all be blocked
+        assertTrue(mLockTaskController.isLockTaskModeViolation(keypad));
+        assertTrue(mLockTaskController.isLockTaskModeViolation(callAction));
+        assertTrue(mLockTaskController.isLockTaskModeViolation(dialer));
     }
 
     @Test
@@ -568,10 +604,15 @@ public class LockTaskControllerTest {
     }
 
     private TaskRecord getTaskRecord(String pkg, int lockTaskAuth) {
+        final Intent intent = new Intent()
+                .setComponent(ComponentName.createRelative(pkg, TEST_CLASS_NAME));
+        return getTaskRecord(intent, lockTaskAuth);
+    }
+
+    private TaskRecord getTaskRecord(Intent intent, int lockTaskAuth) {
         TaskRecord tr = mock(TaskRecord.class);
         tr.mLockTaskAuth = lockTaskAuth;
-        tr.intent = new Intent()
-                .setComponent(ComponentName.createRelative(pkg, TEST_CLASS_NAME));
+        tr.intent = intent;
         tr.userId = TEST_USER_ID;
         return tr;
     }
