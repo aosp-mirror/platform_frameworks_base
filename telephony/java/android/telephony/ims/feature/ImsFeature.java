@@ -188,6 +188,11 @@ public abstract class ImsFeature {
     }
 
     /**
+     * Called when the feature is ready to use.
+     */
+    public abstract void onFeatureReady();
+
+    /**
      * Called when the feature is being removed and must be cleaned up.
      */
     public abstract void onFeatureRemoved();
