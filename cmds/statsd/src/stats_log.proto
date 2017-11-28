@@ -206,9 +206,10 @@ message StatsdStatsReport {
 
         repeated int32 broadcast_sent_time_sec = 10;
         repeated int32 data_drop_time_sec = 11;
-        repeated MatcherStats matcher_stats = 12;
-        repeated ConditionStats condition_stats = 13;
-        repeated MetricStats metric_stats = 14;
+        repeated int32 dump_report_time_sec = 12;
+        repeated MatcherStats matcher_stats = 13;
+        repeated ConditionStats condition_stats = 14;
+        repeated MetricStats metric_stats = 15;
     }
 
     repeated ConfigStats config_stats = 3;

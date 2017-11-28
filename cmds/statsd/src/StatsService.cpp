@@ -488,7 +488,7 @@ status_t StatsService::cmd_print_stats(FILE* out, const Vector<String8>& args) {
     if (args.size() > 1) {
         reset = strtol(args[1].string(), NULL, 10);
     }
-    vector<int8_t> output;
+    vector<uint8_t> output;
     statsdStats.dumpStats(&output, reset);
     return NO_ERROR;
 }
