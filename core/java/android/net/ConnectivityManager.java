@@ -1794,7 +1794,7 @@ public class ConnectivityManager {
                 ITelephony it = ITelephony.Stub.asInterface(b);
                 int subId = SubscriptionManager.getDefaultDataSubscriptionId();
                 Log.d("ConnectivityManager", "getMobileDataEnabled()+ subId=" + subId);
-                boolean retVal = it.getDataEnabled(subId);
+                boolean retVal = it.isUserDataEnabled(subId);
                 Log.d("ConnectivityManager", "getMobileDataEnabled()- subId=" + subId
                         + " retVal=" + retVal);
                 return retVal;
