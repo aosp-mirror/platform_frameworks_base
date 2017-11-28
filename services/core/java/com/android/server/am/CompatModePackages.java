@@ -58,10 +58,6 @@ public final class CompatModePackages {
     public static final int COMPAT_FLAG_DONT_ASK = 1<<0;
     // Compatibility state: compatibility mode is enabled.
     public static final int COMPAT_FLAG_ENABLED = 1<<1;
-    // Unsupported zoom state: don't warn the user about unsupported zoom mode.
-    public static final int UNSUPPORTED_ZOOM_FLAG_DONT_NOTIFY = 1<<2;
-    // Unsupported compile SDK state: don't warn the user about unsupported compile SDK.
-    public static final int UNSUPPORTED_COMPILE_SDK_FLAG_DONT_NOTIFY = 1<<3;
 
     private final HashMap<String, Integer> mPackages = new HashMap<String, Integer>();
 
@@ -235,14 +231,6 @@ public final class CompatModePackages {
         return (getPackageFlags(packageName)&COMPAT_FLAG_DONT_ASK) == 0;
     }
 
-    public boolean getPackageNotifyUnsupportedZoomLocked(String packageName) {
-        return (getPackageFlags(packageName)&UNSUPPORTED_ZOOM_FLAG_DONT_NOTIFY) == 0;
-    }
-
-    public boolean getPackageNotifyUnsupportedCompileSdkLocked(String packageName) {
-        return (getPackageFlags(packageName)&UNSUPPORTED_COMPILE_SDK_FLAG_DONT_NOTIFY) == 0;
-    }
-
     public void setFrontActivityAskCompatModeLocked(boolean ask) {
         ActivityRecord r = mService.getFocusedStack().topRunningActivityLocked();
         if (r != null) {
@@ -252,14 +240,6 @@ public final class CompatModePackages {
 
     public void setPackageAskCompatModeLocked(String packageName, boolean ask) {
         setPackageFlagLocked(packageName, COMPAT_FLAG_DONT_ASK, ask);
-    }
-
-    public void setPackageNotifyUnsupportedZoomLocked(String packageName, boolean notify) {
-        setPackageFlagLocked(packageName, UNSUPPORTED_ZOOM_FLAG_DONT_NOTIFY, notify);
-    }
-
-    public void setPackageNotifyUnsupportedCompileSdkLocked(String packageName, boolean notify) {
-        setPackageFlagLocked(packageName, UNSUPPORTED_COMPILE_SDK_FLAG_DONT_NOTIFY, notify);
     }
 
     private void setPackageFlagLocked(String packageName, int flag, boolean set) {
