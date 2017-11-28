@@ -808,11 +808,11 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
             case TYPE_INPUT_METHOD_DIALOG:
                 // on-screen keyboards and other such input method user interfaces go here.
                 return  15;
-            case TYPE_STATUS_BAR_SUB_PANEL:
-                return  17;
             case TYPE_STATUS_BAR:
-                return  18;
+                return  17;
             case TYPE_STATUS_BAR_PANEL:
+                return  18;
+            case TYPE_STATUS_BAR_SUB_PANEL:
                 return  19;
             case TYPE_KEYGUARD_DIALOG:
                 return  20;
