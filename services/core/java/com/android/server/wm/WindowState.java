@@ -58,6 +58,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_MAGNIFICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
+import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
@@ -4346,24 +4347,16 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     @Override
     boolean shouldMagnify() {
         if (mAttrs.type == TYPE_INPUT_METHOD ||
-                mAttrs.type == TYPE_INPUT_METHOD_DIALOG) {
-            return false;
-        } else if (isScreenOverlay()) {
+                mAttrs.type == TYPE_INPUT_METHOD_DIALOG ||
+                mAttrs.type == TYPE_MAGNIFICATION_OVERLAY ||
+                mAttrs.type == TYPE_NAVIGATION_BAR ||
+                // It's tempting to wonder: Have we forgotten the rounded corners overlay?
+                // worry not: it's a fake TYPE_NAVIGATION_BAR_PANEL
+                mAttrs.type == TYPE_NAVIGATION_BAR_PANEL ||
+                mAttrs.type == TYPE_STATUS_BAR) {
             return false;
         }
         return true;
-    }
-
-    @Override
-    boolean isScreenOverlay() {
-        // It's tempting to wonder: Have we forgotten the rounded corners overlay?
-        // worry not: it's a fake TYPE_NAVIGATION_BAR.
-        if (mAttrs.type == TYPE_MAGNIFICATION_OVERLAY ||
-                mAttrs.type == TYPE_NAVIGATION_BAR ||
-                mAttrs.type == TYPE_STATUS_BAR) {
-            return true;
-        }
-        return false;
     }
 
     @Override
