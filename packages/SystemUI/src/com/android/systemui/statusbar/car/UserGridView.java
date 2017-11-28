@@ -57,18 +57,34 @@ public class UserGridView extends ViewPager implements
     private UserSelectionListener mUserSelectionListener;
     private UserInfoController mUserInfoController;
     private Vector mUserContainers;
+    private int mContainerWidth;
+    private boolean mOverrideAlpha;
     private CarQSFragment.UserSwitchCallback mUserSwitchCallback;
 
     public UserGridView(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 
-    public void init(StatusBar statusBar, UserSwitcherController userSwitcherController) {
+    public void init(StatusBar statusBar, UserSwitcherController userSwitcherController,
+            boolean overrideAlpha) {
         mStatusBar = statusBar;
         mUserSwitcherController = userSwitcherController;
         mAdapter = new Adapter(mUserSwitcherController);
         mUserInfoController = Dependency.get(UserInfoController.class);
-        refreshContainers();
+        mOverrideAlpha = overrideAlpha;
+        // Whenever the container width changes, the containers must be refreshed. Instead of
+        // doing an initial refreshContainers() to populate the containers, this listener will
+        // refresh them on layout change because that affects how the users are split into
+        // containers. Furthermore, at this point, the container width is unknown, so
+        // refreshContainers() cannot populate any containers.
+        addOnLayoutChangeListener(
+                (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
+                    int newWidth = Math.max(left - right, right - left);
+                    if (mContainerWidth != newWidth) {
+                        mContainerWidth = newWidth;
+                        refreshContainers();
+                    }
+                });
     }
 
     private void refreshContainers() {
@@ -85,6 +101,9 @@ public class UserGridView extends ViewPager implements
             int limit = Math.min(mUserSwitcherController.getUsers().size(), (i + 1) * iconsPerPage);
             for (int j = i * iconsPerPage; j < limit; j++) {
                 View v = mAdapter.makeUserPod(inflater, context, j, pods);
+                if (mOverrideAlpha) {
+                    v.setAlpha(1f);
+                }
                 pods.addView(v);
                 // This is hacky, but the dividers on the pod container LinearLayout don't seem
                 // to work for whatever reason.  Instead, set a right margin on the pod if it's not
@@ -101,7 +120,6 @@ public class UserGridView extends ViewPager implements
         }
 
         mAdapter = new Adapter(mUserSwitcherController);
-        addOnLayoutChangeListener(mAdapter);
         setAdapter(mAdapter);
     }
 
@@ -166,14 +184,13 @@ public class UserGridView extends ViewPager implements
      * to use composition instead to achieve the same goal since both the base classes are abstract
      * classes and not interfaces.
      */
-    private final class Adapter extends PagerAdapter implements View.OnLayoutChangeListener {
+    private final class Adapter extends PagerAdapter {
         private final int mPodWidth;
         private final int mPodMarginBetween;
         private final int mPodImageAvatarWidth;
         private final int mPodImageAvatarHeight;
 
         private final WrappedBaseUserAdapter mUserAdapter;
-        private int mContainerWidth;
 
         public Adapter(UserSwitcherController controller) {
             super();
@@ -318,13 +335,6 @@ public class UserGridView extends ViewPager implements
         @Override
         public boolean isViewFromObject(View view, Object object) {
             return view == object;
-        }
-
-        @Override
-        public void onLayoutChange(View v, int left, int top, int right, int bottom,
-                int oldLeft, int oldTop, int oldRight, int oldBottom) {
-            mContainerWidth = Math.max(left - right, right - left);
-            notifyDataSetChanged();
         }
     }
 

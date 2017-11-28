@@ -76,7 +76,8 @@ public class CarQSFragment extends Fragment implements QS {
         updateUserSwitcherHeight(0);
 
         mUserGridView = view.findViewById(R.id.user_grid);
-        mUserGridView.init(null, Dependency.get(UserSwitcherController.class));
+        mUserGridView.init(null, Dependency.get(UserSwitcherController.class),
+                false /* overrideAlpha */);
 
         mPageIndicator = view.findViewById(R.id.user_switcher_page_indicator);
         mPageIndicator.setupWithViewPager(mUserGridView);
@@ -227,6 +228,11 @@ public class CarQSFragment extends Fragment implements QS {
                     // container. Why? ¯\_(ツ)_/¯
                     if (podContainer.getChildCount() > 0) {
                         podContainer.getChildAt(podContainer.getChildCount() - 1).bringToFront();
+                    }
+                    // The alpha values are default to 0, so if the pods have been refreshed, they
+                    // need to be set to 1 when showing.
+                    for (int j = 0; j < podContainer.getChildCount(); j++) {
+                        podContainer.getChildAt(j).setAlpha(1f);
                     }
                 }
             }
