@@ -291,7 +291,7 @@ static void nativeScreenshot(JNIEnv* env, jclass clazz, jobject displayTokenObj,
 }
 
 static void nativeCaptureLayers(JNIEnv* env, jclass clazz, jobject layerHandleToken,
-        jobject surfaceObj, int rotation) {
+        jobject surfaceObj, jobject sourceCropObj, jfloat frameScale) {
 
     sp<IBinder> layerHandle = ibinderForJavaObject(env, layerHandleToken);
     if (layerHandle == NULL) {
@@ -303,7 +303,42 @@ static void nativeCaptureLayers(JNIEnv* env, jclass clazz, jobject layerHandleTo
         return;
     }
 
-    ScreenshotClient::captureLayers(layerHandle, consumer->getIGraphicBufferProducer(), rotation);
+    Rect sourceCrop;
+    if (sourceCropObj != NULL) {
+        sourceCrop = rectFromObj(env, sourceCropObj);
+    }
+
+    ScreenshotClient::captureLayers(layerHandle, consumer->getIGraphicBufferProducer(), sourceCrop,
+            frameScale);
+}
+
+static jobject nativeCaptureLayersToBuffer(JNIEnv* env, jclass clazz, jobject layerHandleToken,
+        jobject sourceCropObj, jfloat frameScale) {
+
+    sp<IBinder> layerHandle = ibinderForJavaObject(env, layerHandleToken);
+    if (layerHandle == NULL) {
+        return NULL;
+    }
+
+    Rect sourceCrop;
+    if (sourceCropObj != NULL) {
+        sourceCrop = rectFromObj(env, sourceCropObj);
+    }
+
+    sp<GraphicBuffer> buffer;
+    status_t res = ScreenshotClient::captureLayersToBuffer(layerHandle, sourceCrop, frameScale,
+            &buffer);
+    if (res != NO_ERROR) {
+        return NULL;
+    }
+
+    return env->CallStaticObjectMethod(gGraphicBufferClassInfo.clazz,
+                                       gGraphicBufferClassInfo.builder,
+                                       buffer->getWidth(),
+                                       buffer->getHeight(),
+                                       buffer->getPixelFormat(),
+                                       (jint)buffer->getUsage(),
+                                       (jlong)buffer.get());
 }
 
 static void nativeApplyTransaction(JNIEnv* env, jclass clazz, jlong transactionObj, jboolean sync) {
@@ -975,8 +1010,10 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
     {"nativeScreenshotToBuffer",
      "(Landroid/os/IBinder;Landroid/graphics/Rect;IIIIZZI)Landroid/graphics/GraphicBuffer;",
      (void*)nativeScreenshotToBuffer },
-    {"nativeCaptureLayers", "(Landroid/os/IBinder;Landroid/view/Surface;I)V",
+    {"nativeCaptureLayers", "(Landroid/os/IBinder;Landroid/view/Surface;Landroid/graphics/Rect;F)V",
             (void*)nativeCaptureLayers },
+    {"nativeCaptureLayers", "(Landroid/os/IBinder;Landroid/graphics/Rect;F)Landroid/graphics/GraphicBuffer;",
+            (void*)nativeCaptureLayersToBuffer },
 };
 
 int register_android_view_SurfaceControl(JNIEnv* env)
