@@ -2929,6 +2929,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *        1                          PFLAG3_TEMPORARY_DETACH
      *       1                           PFLAG3_NO_REVEAL_ON_FOCUS
      *      1                            PFLAG3_NOTIFY_AUTOFILL_ENTER_ON_LAYOUT
+     *     1                             PFLAG3_SCREEN_READER_FOCUSABLE
      * |-------|-------|-------|-------|
      */
 
@@ -3208,6 +3209,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * user visibility which cannot be done until the view is laid out.
      */
     static final int PFLAG3_NOTIFY_AUTOFILL_ENTER_ON_LAYOUT = 0x8000000;
+
+    /**
+     * Works like focusable for screen readers, but without the side effects on input focus.
+     * @see #setScreenReaderFocusable(boolean)
+     */
+    private static final int PFLAG3_SCREEN_READER_FOCUSABLE = 0x10000000;
 
     /* End of masks for mPrivateFlags3 */
 
@@ -5342,6 +5349,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 case R.styleable.View_defaultFocusHighlightEnabled:
                     if (a.peekValue(attr) != null) {
                         setDefaultFocusHighlightEnabled(a.getBoolean(attr, true));
+                    }
+                    break;
+                case R.styleable.View_screenReaderFocusable:
+                    if (a.peekValue(attr) != null) {
+                        setScreenReaderFocusable(a.getBoolean(attr, false));
                     }
                     break;
             }
@@ -8394,6 +8406,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         info.setEnabled(isEnabled());
         info.setClickable(isClickable());
         info.setFocusable(isFocusable());
+        info.setScreenReaderFocusable(isScreenReaderFocusable());
         info.setFocused(isFocused());
         info.setAccessibilityFocused(isAccessibilityFocused());
         info.setSelected(isSelected());
@@ -10347,6 +10360,45 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @ViewDebug.ExportedProperty(category = "focus")
     public final boolean isFocusableInTouchMode() {
         return FOCUSABLE_IN_TOUCH_MODE == (mViewFlags & FOCUSABLE_IN_TOUCH_MODE);
+    }
+
+    /**
+     * Returns whether the view should be treated as a focusable unit by screen reader
+     * accessibility tools.
+     * @see #setScreenReaderFocusable(boolean)
+     *
+     * @return Whether the view should be treated as a focusable unit by screen reader.
+     */
+    public boolean isScreenReaderFocusable() {
+        return (mPrivateFlags3 & PFLAG3_SCREEN_READER_FOCUSABLE) != 0;
+    }
+
+    /**
+     * When screen readers (one type of accessibility tool) decide what should be read to the
+     * user, they typically look for input focusable ({@link #isFocusable()}) parents of
+     * non-focusable text items, and read those focusable parents and their non-focusable children
+     * as a unit. In some situations, this behavior is desirable for views that should not take
+     * input focus. Setting an item to be screen reader focusable requests that the view be
+     * treated as a unit by screen readers without any effect on input focusability. The default
+     * value of {@code false} lets screen readers use other signals, like focusable, to determine
+     * how to group items.
+     *
+     * @param screenReaderFocusable Whether the view should be treated as a unit by screen reader
+     *                              accessibility tools.
+     */
+    public void setScreenReaderFocusable(boolean screenReaderFocusable) {
+        int pflags3 = mPrivateFlags3;
+        if (screenReaderFocusable) {
+            pflags3 |= PFLAG3_SCREEN_READER_FOCUSABLE;
+        } else {
+            pflags3 &= ~PFLAG3_SCREEN_READER_FOCUSABLE;
+        }
+
+        if (pflags3 != mPrivateFlags3) {
+            mPrivateFlags3 = pflags3;
+            notifyViewAccessibilityStateChangedIfNeeded(
+                    AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
+        }
     }
 
     /**

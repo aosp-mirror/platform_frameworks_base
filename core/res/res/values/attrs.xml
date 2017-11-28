@@ -3021,6 +3021,12 @@
         <!-- Whether this View should use a default focus highlight when it gets focused but
              doesn't have {@link android.R.attr#state_focused} defined in its background. -->
         <attr name="defaultFocusHighlightEnabled" format="boolean" />
+
+        <!-- Whether this view should be treated as a focusable unit by screen reader accessibility
+             tools. See {@link android.view.View#setScreenReaderFocusable(boolean)}. The default
+             value, {@code false}, leaves the screen reader to consider other signals, such as
+             focusability or the presence of text, to decide what it focus.-->
+        <attr name="screenReaderFocusable" format="boolean" />
     </declare-styleable>
 
     <!-- Attributes that can be assigned to a tag for a particular View. -->
