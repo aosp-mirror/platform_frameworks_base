@@ -559,6 +559,7 @@ LOCAL_SRC_FILES += \
 	wifi/java/android/net/wifi/p2p/IWifiP2pManager.aidl \
 	wifi/java/android/net/wifi/rtt/IRttCallback.aidl \
 	wifi/java/android/net/wifi/rtt/IWifiRttManager.aidl \
+	wifi/java/android/net/wifi/hotspot2/IProvisioningCallback.aidl \
 	wifi/java/android/net/wifi/IWifiScanner.aidl \
 	wifi/java/android/net/wifi/IRttManager.aidl \
 	packages/services/PacProcessor/com/android/net/IProxyService.aidl \
