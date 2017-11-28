@@ -209,7 +209,7 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
                 mAddAnimationStartIndex = Math.min(mAddAnimationStartIndex, childIndex);
             }
         }
-        if (mDark && child instanceof StatusBarIconView) {
+        if (child instanceof StatusBarIconView) {
             ((StatusBarIconView) child).setDark(mDark, false, 0);
         }
     }
