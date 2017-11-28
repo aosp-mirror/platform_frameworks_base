@@ -421,7 +421,17 @@ public final class ContextHubManager {
      */
     @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
     public ContextHubTransaction<List<NanoAppState>> queryNanoApps(ContextHubInfo hubInfo) {
-        throw new UnsupportedOperationException("TODO: Implement this");
+        ContextHubTransaction<List<NanoAppState>> transaction =
+                new ContextHubTransaction<>(ContextHubTransaction.TYPE_QUERY_NANOAPPS);
+        IContextHubTransactionCallback callback = createQueryCallback(transaction);
+
+        try {
+            mService.queryNanoApps(hubInfo.getId(), callback);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+
+        return transaction;
     }
 
     /**

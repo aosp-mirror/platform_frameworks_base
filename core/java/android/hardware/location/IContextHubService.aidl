@@ -69,4 +69,7 @@ interface IContextHubService {
     void unloadNanoAppFromHub(
             int contextHubId, in IContextHubTransactionCallback transactionCallback,
             long nanoAppId);
+
+    // Queries for a list of nanoapps
+    void queryNanoApps(int contextHubId, in IContextHubTransactionCallback transactionCallback);
 }

@@ -194,6 +194,30 @@ public class ContextHubTransaction<T> {
     }
 
     /**
+     * Converts a transaction type to a human-readable string
+     *
+     * @param type the type of a transaction
+     * @param upperCase {@code true} if upper case the first letter, {@code false} otherwise
+     * @return a string describing the transaction
+     */
+    public static String typeToString(@Type int type, boolean upperCase) {
+        switch (type) {
+            case ContextHubTransaction.TYPE_LOAD_NANOAPP:
+                return upperCase ? "Load" : "load";
+            case ContextHubTransaction.TYPE_UNLOAD_NANOAPP:
+                return upperCase ? "Unload" : "unload";
+            case ContextHubTransaction.TYPE_ENABLE_NANOAPP:
+                return upperCase ? "Enable" : "enable";
+            case ContextHubTransaction.TYPE_DISABLE_NANOAPP:
+                return upperCase ? "Disable" : "disable";
+            case ContextHubTransaction.TYPE_QUERY_NANOAPPS:
+                return upperCase ? "Query" : "query";
+            default:
+                return upperCase ? "Unknown" : "unknown";
+        }
+    }
+
+    /**
      * @return the type of the transaction
      */
     @Type
@@ -244,7 +268,7 @@ public class ContextHubTransaction<T> {
      * A transaction can be invalidated if the process owning the transaction is no longer active
      * and the reference to this object is lost.
      *
-     * This method or {@link #setCallbackOnCompletecan(ContextHubTransaction.Callback)} can only be
+     * This method or {@link #setCallbackOnComplete(ContextHubTransaction.Callback)} can only be
      * invoked once, or an IllegalStateException will be thrown.
      *
      * @param callback the callback to be invoked upon completion
