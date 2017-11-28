@@ -266,6 +266,8 @@
     <dimen name="alert_dialog_round_padding">27dip</dimen>
     <!-- Dialog title height -->
     <dimen name="alert_dialog_title_height">64dip</dimen>
+    <!-- Dialog button bar width -->
+    <dimen name="alert_dialog_button_bar_width">64dp</dimen>
     <!-- Dialog button bar height -->
     <dimen name="alert_dialog_button_bar_height">48dip</dimen>
     <!-- Leanback dialog vertical margin -->
