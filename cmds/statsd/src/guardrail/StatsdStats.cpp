@@ -61,7 +61,7 @@ const int FIELD_ID_ATOM_STATS_COUNT = 2;
 // TODO: add stats for pulled atoms.
 StatsdStats::StatsdStats() {
     mPushedAtomStats.resize(android::util::kMaxPushedAtomId + 1);
-    mStartTime = time(nullptr);
+    mStartTimeSec = time(nullptr);
 }
 
 StatsdStats& StatsdStats::getInstance() {
@@ -107,6 +107,7 @@ void StatsdStats::noteConfigRemovedInternalLocked(const ConfigKey& key) {
         mMetricsStats.erase(key);
         mConditionStats.erase(key);
         mIceBox.push_back(it->second);
+        mConfigStats.erase(it);
     }
 }
 
@@ -126,7 +127,7 @@ void StatsdStats::noteBroadcastSent(const ConfigKey& key) {
     it->second.add_broadcast_sent_time_sec(time(nullptr));
 }
 
-void StatsdStats::noteDataDrop(const ConfigKey& key) {
+void StatsdStats::noteDataDropped(const ConfigKey& key) {
     lock_guard<std::mutex> lock(mLock);
     auto it = mConfigStats.find(key);
     if (it == mConfigStats.end()) {
@@ -135,6 +136,17 @@ void StatsdStats::noteDataDrop(const ConfigKey& key) {
     }
 
     it->second.add_data_drop_time_sec(time(nullptr));
+}
+
+void StatsdStats::noteMetricsReportSent(const ConfigKey& key) {
+    lock_guard<std::mutex> lock(mLock);
+    auto it = mConfigStats.find(key);
+    if (it == mConfigStats.end()) {
+        ALOGE("Config key %s not found!", key.ToString().c_str());
+        return;
+    }
+
+    it->second.add_dump_report_time_sec(time(nullptr));
 }
 
 void StatsdStats::noteConditionDimensionSize(const ConfigKey& key, const string& name, int size) {
@@ -164,7 +176,7 @@ void StatsdStats::noteMatcherMatched(const ConfigKey& key, const string& name) {
 void StatsdStats::noteAtomLogged(int atomId, int32_t timeSec) {
     lock_guard<std::mutex> lock(mLock);
 
-    if (timeSec < mStartTime) {
+    if (timeSec < mStartTimeSec) {
         return;
     }
 
@@ -183,7 +195,7 @@ void StatsdStats::reset() {
 
 void StatsdStats::resetInternalLocked() {
     // Reset the historical data, but keep the active ConfigStats
-    mStartTime = time(nullptr);
+    mStartTimeSec = time(nullptr);
     mIceBox.clear();
     mConditionStats.clear();
     mMetricsStats.clear();
@@ -225,11 +237,11 @@ void StatsdStats::addSubStatsToConfig(const ConfigKey& key,
     }
 }
 
-void StatsdStats::dumpStats(std::vector<int8_t>* output, bool reset) {
+void StatsdStats::dumpStats(std::vector<uint8_t>* output, bool reset) {
     lock_guard<std::mutex> lock(mLock);
 
     if (DEBUG) {
-        time_t t = time(nullptr);
+        time_t t = mStartTimeSec;
         struct tm* tm = localtime(&t);
         char timeBuffer[80];
         strftime(timeBuffer, sizeof(timeBuffer), "%Y-%m-%d %I:%M%p", tm);
@@ -237,7 +249,7 @@ void StatsdStats::dumpStats(std::vector<int8_t>* output, bool reset) {
         VLOG("Stats collection start second: %s", timeBuffer);
     }
     ProtoOutputStream proto;
-    proto.write(FIELD_TYPE_INT32 | FIELD_ID_BEGIN_TIME, mStartTime);
+    proto.write(FIELD_TYPE_INT32 | FIELD_ID_BEGIN_TIME, mStartTimeSec);
     proto.write(FIELD_TYPE_INT32 | FIELD_ID_END_TIME, (int32_t)time(nullptr));
 
     VLOG("%lu Config in icebox: ", (unsigned long)mIceBox.size());
@@ -285,6 +297,10 @@ void StatsdStats::dumpStats(std::vector<int8_t>* output, bool reset) {
 
             for (const auto& dataDropTime : configStats.data_drop_time_sec()) {
                 VLOG("\tdata drop time: %d", dataDropTime);
+            }
+
+            for (const auto& dumpTime : configStats.dump_report_time_sec()) {
+                VLOG("\tdump report time: %d", dumpTime);
             }
         }
 

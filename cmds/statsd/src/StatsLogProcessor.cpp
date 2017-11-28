@@ -201,6 +201,7 @@ void StatsLogProcessor::onDumpReport(const ConfigKey& key, vector<uint8_t>* outD
             iter.rp()->move(toRead);
         }
     }
+    StatsdStats::getInstance().noteMetricsReportSent(key);
 }
 
 void StatsLogProcessor::OnConfigRemoved(const ConfigKey& key) {
@@ -236,7 +237,7 @@ void StatsLogProcessor::flushIfNecessary(uint64_t timestampNs,
     } else if (totalBytes > kMaxSerializedBytes) { // Too late. We need to start clearing data.
         // We ignore the return value so we force each metric producer to clear its contents.
         metricsManager->onDumpReport();
-        StatsdStats::getInstance().noteDataDrop(key);
+        StatsdStats::getInstance().noteDataDropped(key);
         VLOG("StatsD had to toss out metrics for %s", key.ToString().c_str());
     }
 }
