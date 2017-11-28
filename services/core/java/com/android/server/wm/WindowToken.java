@@ -255,12 +255,6 @@ class WindowToken extends WindowContainer<WindowState> {
         // up with goodToGo, so we don't move a window
         // to another display before the window behind
         // it is ready.
-        SurfaceControl.openTransaction();
-        for (int i = mChildren.size() - 1; i >= 0; --i) {
-            final WindowState win = mChildren.get(i);
-            win.mWinAnimator.updateLayerStackInTransaction();
-        }
-        SurfaceControl.closeTransaction();
 
         super.onDisplayChanged(dc);
     }
