@@ -914,7 +914,7 @@ packages_to_document := \
 # Search through the base framework dirs for these packages.
 # The result will be relative to frameworks/base.
 fwbase_dirs_to_document := \
-	legacy-test/src \
+	test-base/src \
 	$(patsubst $(LOCAL_PATH)/%,%, \
 	  $(wildcard \
 	    $(foreach dir, $(FRAMEWORKS_BASE_JAVA_SRC_DIRS), \

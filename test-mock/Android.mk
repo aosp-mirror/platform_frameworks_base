@@ -26,7 +26,7 @@ LOCAL_SRC_FILES := $(call all-java-files-under, src)
 
 LOCAL_JAVA_LIBRARIES := core-oj core-libart framework legacy-test
 
-LOCAL_JARJAR_RULES := $(LOCAL_PATH)/../legacy-test/jarjar-rules.txt
+LOCAL_JARJAR_RULES := $(LOCAL_PATH)/../test-base/jarjar-rules.txt
 
 LOCAL_MODULE:= repackaged.android.test.mock
 
