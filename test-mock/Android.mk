@@ -130,15 +130,4 @@ update-android-test-mock-api: $(ANDROID_TEST_MOCK_OUTPUT_API_FILE) | $(ACP)
 	@echo Copying removed.txt
 	$(hide) $(ACP) $(ANDROID_TEST_MOCK_OUTPUT_REMOVED_API_FILE) $(ANDROID_TEST_MOCK_REMOVED_API_FILE)
 
-# Build the android.test.mock.sdk library
-# =======================================
-include $(CLEAR_VARS)
-
-LOCAL_MODULE := android.test.mock.sdk
-LOCAL_SDK_VERSION := current
-
-LOCAL_STATIC_JAVA_LIBRARIES := android.test.mock.stubs
-
-include $(BUILD_STATIC_JAVA_LIBRARY)
-
 endif  # not TARGET_BUILD_APPS not TARGET_BUILD_PDK=true
