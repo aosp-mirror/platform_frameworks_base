@@ -4375,7 +4375,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     @Override
     SurfaceControl.Builder makeSurface() {
-        return mToken.makeChildSurface(this);
+        return getParent().makeChildSurface(this);
     }
 
     private void applyDims(Dimmer dimmer) {
