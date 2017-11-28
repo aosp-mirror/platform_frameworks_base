@@ -25,16 +25,16 @@ import android.util.Log;
 abstract class UsbACEndpoint extends UsbDescriptor {
     private static final String TAG = "UsbACEndpoint";
 
-    protected final byte mSubclass; // from the mSubclass member of the "enclosing"
-                                    // Interface Descriptor, not the stream.
-    protected byte mSubtype;        // 2:1 HEADER descriptor subtype
+    protected final int mSubclass; // from the mSubclass member of the "enclosing"
+                                   // Interface Descriptor, not the stream.
+    protected byte mSubtype;       // 2:1 HEADER descriptor subtype
 
-    UsbACEndpoint(int length, byte type, byte subclass) {
+    UsbACEndpoint(int length, byte type, int subclass) {
         super(length, type);
         mSubclass = subclass;
     }
 
-    public byte getSubclass() {
+    public int getSubclass() {
         return mSubclass;
     }
 
@@ -52,7 +52,7 @@ abstract class UsbACEndpoint extends UsbDescriptor {
     public static UsbDescriptor allocDescriptor(UsbDescriptorParser parser,
                                                 int length, byte type) {
         UsbInterfaceDescriptor interfaceDesc = parser.getCurInterface();
-        byte subClass = interfaceDesc.getUsbSubclass();
+        int subClass = interfaceDesc.getUsbSubclass();
         switch (subClass) {
             case AUDIO_AUDIOCONTROL:
                 return new UsbACAudioControlEndpoint(length, type, subClass);

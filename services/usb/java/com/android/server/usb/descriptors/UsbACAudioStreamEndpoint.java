@@ -24,7 +24,7 @@ public class UsbACAudioStreamEndpoint extends UsbACEndpoint {
     private static final String TAG = "UsbACAudioStreamEndpoint";
 
     //TODO data fields...
-    public UsbACAudioStreamEndpoint(int length, byte type, byte subclass) {
+    public UsbACAudioStreamEndpoint(int length, byte type, int subclass) {
         super(length, type, subclass);
     }
 

@@ -34,7 +34,7 @@ public final class Usb20ACOutputTerminal extends UsbACTerminal {
     private int mControls;      // 9:2 - see Audio20.pdf Table 4-10
     private byte mTerminalID;   // 11:1 - Index of a string descriptor, describing the
 
-    public Usb20ACOutputTerminal(int length, byte type, byte subtype, byte subClass) {
+    public Usb20ACOutputTerminal(int length, byte type, byte subtype, int subClass) {
         super(length, type, subtype, subClass);
     }
 
