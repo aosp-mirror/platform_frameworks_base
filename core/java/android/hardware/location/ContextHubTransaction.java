@@ -18,6 +18,7 @@ package android.hardware.location;
 import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.os.Handler;
 import android.os.HandlerExecutor;
 
@@ -43,11 +44,13 @@ import java.util.concurrent.TimeoutException;
  *
  * @hide
  */
+@SystemApi
 public class ContextHubTransaction<T> {
     private static final String TAG = "ContextHubTransaction";
 
     /**
      * Constants describing the type of a transaction through the Context Hub Service.
+     * {@hide}
      */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = { "TYPE_" }, value = {
@@ -67,6 +70,7 @@ public class ContextHubTransaction<T> {
 
     /**
      * Constants describing the result of a transaction or request through the Context Hub Service.
+     * {@hide}
      */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = { "RESULT_" }, value = {

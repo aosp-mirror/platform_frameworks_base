@@ -17,6 +17,7 @@ package android.hardware.location;
 
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.os.RemoteException;
 
 import com.android.internal.util.Preconditions;
@@ -34,6 +35,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *
  * @hide
  */
+@SystemApi
 public class ContextHubClient implements Closeable {
     /*
      * The proxy to the client interface at the service.

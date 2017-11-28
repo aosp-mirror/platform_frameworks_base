@@ -15,15 +15,20 @@
  */
 package android.hardware.location;
 
+import android.annotation.SystemApi;
+
+import java.util.concurrent.Executor;
+
 /**
  * A class for {@link android.hardware.location.ContextHubClient ContextHubClient} to
  * receive messages and life-cycle events from nanoapps in the Context Hub at which the client is
  * attached to.
  *
- * This callback is registered through the
- * {@link android.hardware.location.ContextHubManager#createClient() creation} of
- * {@link android.hardware.location.ContextHubClient ContextHubClient}. Callbacks are
- * invoked in the following ways:
+ * This callback is registered through the {@link
+ * android.hardware.location.ContextHubManager#createClient(
+ * ContextHubInfo, ContextHubClientCallback, Executor) creation} of
+ * {@link android.hardware.location.ContextHubClient ContextHubClient}. Callbacks are invoked in
+ * the following ways:
  * 1) Messages from nanoapps delivered through onMessageFromNanoApp may either be broadcasted
  *    or targeted to a specific client.
  * 2) Nanoapp or Context Hub events (the remaining callbacks) are broadcasted to all clients, and
@@ -31,6 +36,7 @@ package android.hardware.location;
  *
  * @hide
  */
+@SystemApi
 public class ContextHubClientCallback {
     /**
      * Callback invoked when receiving a message from a nanoapp.

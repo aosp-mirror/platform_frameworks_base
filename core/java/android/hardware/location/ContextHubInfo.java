@@ -221,9 +221,6 @@ public class ContextHubInfo implements Parcelable {
 
     /**
      * @return the CHRE platform ID as defined in chre/version.h
-     *
-     * TODO(b/67734082): Expose as public API
-     * @hide
      */
     public long getChrePlatformId() {
         return mChrePlatformId;
@@ -231,9 +228,6 @@ public class ContextHubInfo implements Parcelable {
 
     /**
      * @return the CHRE API's major version as defined in chre/version.h
-     *
-     * TODO(b/67734082): Expose as public API
-     * @hide
      */
     public byte getChreApiMajorVersion() {
         return mChreApiMajorVersion;
@@ -241,9 +235,6 @@ public class ContextHubInfo implements Parcelable {
 
     /**
      * @return the CHRE API's minor version as defined in chre/version.h
-     *
-     * TODO(b/67734082): Expose as public API
-     * @hide
      */
     public byte getChreApiMinorVersion() {
         return mChreApiMinorVersion;
@@ -251,9 +242,6 @@ public class ContextHubInfo implements Parcelable {
 
     /**
      * @return the CHRE patch version as defined in chre/version.h
-     *
-     * TODO(b/67734082): Expose as public API
-     * @hide
      */
     public short getChrePatchVersion() {
         return mChrePatchVersion;

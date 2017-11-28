@@ -15,6 +15,7 @@
  */
 package android.hardware.location;
 
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -23,6 +24,7 @@ import android.os.Parcelable;
  *
  * @hide
  */
+@SystemApi
 public final class NanoAppState implements Parcelable {
     private long mNanoAppId;
     private int mNanoAppVersion;
