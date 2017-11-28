@@ -3891,12 +3891,25 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         mAboveAppWindowsContainers.assignLayer(t, 2);
 
         WindowState imeTarget = mService.mInputMethodTarget;
-        if (imeTarget == null || imeTarget.inSplitScreenWindowingMode()) {
-            // In split-screen windowing mode we can't layer the
-            // IME relative to the IME target because it needs to
-            // go over the docked divider, so instead we place it on top
-            // of everything and use relative layering of windows which need
-            // to go above it (see special logic in WindowState#assignLayer)
+
+        // A brief summary of IME layer assignment:
+        //
+        // In case we have no IME target but we have an IME we are typically in
+        // a transition state and keeping the IME on top of everything except overlays
+        // seems to work best.
+        //
+        // In split-screen windowing mode we can't layer the
+        // IME relative to the IME target because it needs to
+        // go over the docked divider, so instead we place it on top
+        // of everything and use relative layering of windows which need
+        // to go above it (see special logic in WindowState#assignLayer)
+        //
+        // There is a third case, where the IME target has no SurfaceControl, for
+        // example if Layer assignment were triggered due to removal of the
+        // IME target while it was still the IME target.
+        if (imeTarget == null ||
+                imeTarget.inSplitScreenWindowingMode() ||
+                imeTarget.getSurfaceControl() == null) {
             mImeWindowsContainers.assignLayer(t, 3);
         } else {
             t.setRelativeLayer(mImeWindowsContainers.getSurfaceControl(),
