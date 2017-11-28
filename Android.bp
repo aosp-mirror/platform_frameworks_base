@@ -547,6 +547,7 @@ java_library {
         "telephony/java/com/android/internal/telephony/euicc/ISetDefaultSmdpAddressCallback.aidl",
         "telephony/java/com/android/internal/telephony/euicc/ISetNicknameCallback.aidl",
         "telephony/java/com/android/internal/telephony/euicc/ISwitchToProfileCallback.aidl",
+        "wifi/java/android/net/wifi/ISoftApCallback.aidl",
         "wifi/java/android/net/wifi/IWifiManager.aidl",
         "wifi/java/android/net/wifi/aware/IWifiAwareDiscoverySessionCallback.aidl",
         "wifi/java/android/net/wifi/aware/IWifiAwareEventCallback.aidl",
