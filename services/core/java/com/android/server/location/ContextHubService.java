@@ -80,6 +80,7 @@ public class ContextHubService extends IContextHubService.Stub {
     private final Context mContext;
 
     private final Map<Integer, ContextHubInfo> mContextHubIdToInfoMap;
+    private final List<ContextHubInfo> mContextHubInfoList;
     private final RemoteCallbackList<IContextHubCallback> mCallbacksList =
             new RemoteCallbackList<>();
 
@@ -143,6 +144,7 @@ public class ContextHubService extends IContextHubService.Stub {
             mClientManager = null;
             mDefaultClientMap = Collections.emptyMap();
             mContextHubIdToInfoMap = Collections.emptyMap();
+            mContextHubInfoList = Collections.emptyList();
             return;
         }
 
@@ -159,6 +161,7 @@ public class ContextHubService extends IContextHubService.Stub {
         }
         mContextHubIdToInfoMap = Collections.unmodifiableMap(
                 ContextHubServiceUtil.createContextHubInfoMap(hubList));
+        mContextHubInfoList = new ArrayList<>(mContextHubIdToInfoMap.values());
 
         HashMap<Integer, IContextHubClient> defaultClientMap = new HashMap<>();
         for (int contextHubId : mContextHubIdToInfoMap.keySet()) {
@@ -268,6 +271,17 @@ public class ContextHubService extends IContextHubService.Stub {
         }
 
         return mContextHubIdToInfoMap.get(contextHubHandle);
+    }
+
+    /**
+     * Returns a List of ContextHubInfo object describing the available hubs.
+     *
+     * @return the List of ContextHubInfo objects
+     */
+    @Override
+    public List<ContextHubInfo> getContextHubs() throws RemoteException {
+        checkPermissions();
+        return mContextHubInfoList;
     }
 
     /**

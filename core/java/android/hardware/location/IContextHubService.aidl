@@ -60,6 +60,9 @@ interface IContextHubService {
     // Creates a client to send and receive messages
     IContextHubClient createClient(in IContextHubClientCallback client, int contextHubId);
 
+    // Returns a list of ContextHub objects of available hubs
+    List<ContextHubInfo> getContextHubs();
+
     // Loads a nanoapp at the specified hub (new API)
     void loadNanoAppOnHub(
             int contextHubId, in IContextHubTransactionCallback transactionCallback,

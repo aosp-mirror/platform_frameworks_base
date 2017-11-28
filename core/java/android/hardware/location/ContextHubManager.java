@@ -258,9 +258,9 @@ public final class ContextHubManager {
     }
 
     /**
-     * Returns the list of context hubs in the system.
+     * Returns the list of ContextHubInfo objects describing the available Context Hubs.
      *
-     * @return the list of context hub informations
+     * @return the list of ContextHubInfo objects
      *
      * @see ContextHubInfo
      *
@@ -268,7 +268,11 @@ public final class ContextHubManager {
      */
     @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
     public List<ContextHubInfo> getContextHubs() {
-        throw new UnsupportedOperationException("TODO: Implement this");
+        try {
+            return mService.getContextHubs();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
