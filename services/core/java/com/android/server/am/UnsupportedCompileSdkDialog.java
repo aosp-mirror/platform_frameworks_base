@@ -39,7 +39,7 @@ public class UnsupportedCompileSdkDialog {
         final PackageManager pm = context.getPackageManager();
         final CharSequence label = appInfo.loadSafeLabel(pm);
         final CharSequence message = context.getString(R.string.unsupported_compile_sdk_message,
-                label, appInfo.compileSdkVersionCodename);
+                label);
 
         final AlertDialog.Builder builder = new AlertDialog.Builder(context)
                 .setPositiveButton(R.string.ok, null)
