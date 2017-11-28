@@ -957,6 +957,64 @@ public class TelephonyManager {
      */
     public static final int USSD_ERROR_SERVICE_UNAVAIL = -2;
 
+    /**
+     * An unknown carrier id. It could either be subscription unavailable or the subscription
+     * carrier cannot be recognized. Unrecognized carriers here means
+     * {@link #getSimOperator() MCC+MNC} cannot be identified.
+     */
+    public static final int UNKNOWN_CARRIER_ID = -1;
+
+    /**
+     * Broadcast Action: The subscription carrier identity has changed.
+     * This intent could be sent on the following events:
+     * <ul>
+     *   <li>Subscription absent. Carrier identity could change from a valid id to
+     *   {@link TelephonyManager#UNKNOWN_CARRIER_ID}.</li>
+     *   <li>Subscription loaded. Carrier identity could change from
+     *   {@link TelephonyManager#UNKNOWN_CARRIER_ID} to a valid id.</li>
+     *   <li>The subscription carrier is recognized after a remote update.</li>
+     * </ul>
+     * The intent will have the following extra values:
+     * <ul>
+     *   <li>{@link #EXTRA_CARRIER_ID} The up-to-date carrier id of the current subscription id.
+     *   </li>
+     *   <li>{@link #EXTRA_CARRIER_NAME} The up-to-date carrier name of the current subscription.
+     *   </li>
+     *   <li>{@link #EXTRA_SUBSCRIPTION_ID} The subscription id associated with the changed carrier
+     *   identity.
+     *   </li>
+     * </ul>
+     * <p class="note">This is a protected intent that can only be sent by the system.
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_SUBSCRIPTION_CARRIER_IDENTITY_CHANGED =
+            "android.telephony.action.SUBSCRIPTION_CARRIER_IDENTITY_CHANGED";
+
+    /**
+     * An int extra used with {@link #ACTION_SUBSCRIPTION_CARRIER_IDENTITY_CHANGED} which indicates
+     * the updated carrier id {@link TelephonyManager#getSubscriptionCarrierId()} of the current
+     * subscription.
+     * <p>Will be {@link TelephonyManager#UNKNOWN_CARRIER_ID} if the subscription is unavailable or
+     * the carrier cannot be identified.
+     */
+    public static final String EXTRA_CARRIER_ID = "android.telephony.extra.CARRIER_ID";
+
+    /**
+     * An string extra used with {@link #ACTION_SUBSCRIPTION_CARRIER_IDENTITY_CHANGED} which
+     * indicates the updated carrier name of the current subscription.
+     * {@see TelephonyManager#getSubscriptionCarrierName()}
+     * <p>Carrier name is a user-facing name of the carrier id {@link #EXTRA_CARRIER_ID},
+     * usually the brand name of the subsidiary (e.g. T-Mobile).
+     */
+    public static final String EXTRA_CARRIER_NAME = "android.telephony.extra.CARRIER_NAME";
+
+    /**
+     * An int extra used with {@link #ACTION_SUBSCRIPTION_CARRIER_IDENTITY_CHANGED} to indicate the
+     * subscription which has changed.
+     */
+    public static final String EXTRA_SUBSCRIPTION_ID = "android.telephony.extra.SUBSCRIPTION_ID";
+
+
     //
     //
     // Device Info
@@ -6545,6 +6603,55 @@ public class TelephonyManager {
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelephony#isVoicemailVibrationEnabled", e);
         }
+    }
+
+    /**
+     * Returns carrier id of the current subscription.
+     * <p>To recognize a carrier (including MVNO) as a first class identity, assign each carrier
+     * with a canonical integer a.k.a carrier id.
+     *
+     * @return Carrier id of the current subscription. Return {@link #UNKNOWN_CARRIER_ID} if the
+     * subscription is unavailable or the carrier cannot be identified.
+     * @throws IllegalStateException if telephony service is unavailable.
+     */
+    public int getSubscriptionCarrierId() {
+        try {
+            ITelephony service = getITelephony();
+            return service.getSubscriptionCarrierId(getSubId());
+        } catch (RemoteException ex) {
+            // This could happen if binder process crashes.
+            ex.rethrowAsRuntimeException();
+        } catch (NullPointerException ex) {
+            // This could happen before phone restarts due to crashing.
+            throw new IllegalStateException("Telephony service unavailable");
+        }
+        return UNKNOWN_CARRIER_ID;
+    }
+
+    /**
+     * Returns carrier name of the current subscription.
+     * <p>Carrier name is a user-facing name of carrier id {@link #getSubscriptionCarrierId()},
+     * usually the brand name of the subsidiary (e.g. T-Mobile). Each carrier could configure
+     * multiple {@link #getSimOperatorName() SPN} but should have a single carrier name.
+     * Carrier name is not a canonical identity, use {@link #getSubscriptionCarrierId()} instead.
+     * <p>The returned carrier name is unlocalized.
+     *
+     * @return Carrier name of the current subscription. Return {@code null} if the subscription is
+     * unavailable or the carrier cannot be identified.
+     * @throws IllegalStateException if telephony service is unavailable.
+     */
+    public String getSubscriptionCarrierName() {
+        try {
+            ITelephony service = getITelephony();
+            return service.getSubscriptionCarrierName(getSubId());
+        } catch (RemoteException ex) {
+            // This could happen if binder process crashes.
+            ex.rethrowAsRuntimeException();
+        } catch (NullPointerException ex) {
+            // This could happen before phone restarts due to crashing.
+            throw new IllegalStateException("Telephony service unavailable");
+        }
+        return null;
     }
 
     /**
