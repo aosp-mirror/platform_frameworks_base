@@ -431,7 +431,7 @@ public class TaskStackLayoutAlgorithm {
      * in the stack.
      */
     public void update(TaskStack stack, ArraySet<Task.TaskKey> ignoreTasksSet,
-            RecentsActivityLaunchState launchState) {
+            RecentsActivityLaunchState launchState, float lastScrollPPercent) {
         SystemServicesProxy ssp = Recents.getSystemServices();
 
         // Clear the progress map
@@ -506,6 +506,8 @@ public class TaskStackLayoutAlgorithm {
 
             if (launchState.launchedWithAltTab) {
                 mInitialScrollP = Utilities.clamp(launchTaskIndex, mMinScrollP, mMaxScrollP);
+            } else if (0 <= lastScrollPPercent && lastScrollPPercent <= 1) {
+                mInitialScrollP = Utilities.mapRange(lastScrollPPercent, mMinScrollP, mMaxScrollP);
             } else if (Recents.getConfiguration().isLowRamDevice) {
                 mInitialScrollP = mTaskStackLowRamLayoutAlgorithm.getInitialScrollP(mNumStackTasks,
                         scrollToFront);
