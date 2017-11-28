@@ -4024,7 +4024,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 // TODO: If the callers to removeTask() changes such that we have multiple places
                 //       where we are destroying the task, move this back into removeTask()
                 mStackSupervisor.removeTaskByIdLocked(task.taskId, false /* killProcess */,
-                        !REMOVE_FROM_RECENTS, PAUSE_IMMEDIATELY);
+                        !REMOVE_FROM_RECENTS, PAUSE_IMMEDIATELY, reason);
             }
 
             // We must keep the task around until all activities are destroyed. The following
