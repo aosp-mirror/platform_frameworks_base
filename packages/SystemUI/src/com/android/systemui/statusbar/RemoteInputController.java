@@ -19,7 +19,6 @@ package com.android.systemui.statusbar;
 import com.android.internal.util.Preconditions;
 import com.android.systemui.Dependency;
 import com.android.systemui.statusbar.phone.StatusBarWindowManager;
-import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.RemoteInputView;
 
 import android.util.ArrayMap;
@@ -38,11 +37,11 @@ public class RemoteInputController {
             = new ArrayList<>();
     private final ArrayMap<String, Object> mSpinning = new ArrayMap<>();
     private final ArrayList<Callback> mCallbacks = new ArrayList<>(3);
-    private final HeadsUpManager mHeadsUpManager;
+    private final Delegate mDelegate;
 
-    public RemoteInputController(HeadsUpManager headsUpManager) {
+    public RemoteInputController(Delegate delegate) {
         addCallback(Dependency.get(StatusBarWindowManager.class));
-        mHeadsUpManager = headsUpManager;
+        mDelegate = delegate;
     }
 
     /**
@@ -114,7 +113,7 @@ public class RemoteInputController {
     }
 
     private void apply(NotificationData.Entry entry) {
-        mHeadsUpManager.setRemoteInputActive(entry, isRemoteInputActive(entry));
+        mDelegate.setRemoteInputActive(entry, isRemoteInputActive(entry));
         boolean remoteInputActive = isRemoteInputActive();
         int N = mCallbacks.size();
         for (int i = 0; i < N; i++) {
@@ -204,9 +203,35 @@ public class RemoteInputController {
         }
     }
 
+    public void requestDisallowLongPressAndDismiss() {
+        mDelegate.requestDisallowLongPressAndDismiss();
+    }
+
+    public void lockScrollTo(NotificationData.Entry entry) {
+        mDelegate.lockScrollTo(entry);
+    }
+
     public interface Callback {
         default void onRemoteInputActive(boolean active) {}
 
         default void onRemoteInputSent(NotificationData.Entry entry) {}
+    }
+
+    public interface Delegate {
+        /**
+         * Activate remote input if necessary.
+         */
+        void setRemoteInputActive(NotificationData.Entry entry, boolean remoteInputActive);
+
+       /**
+        * Request that the view does not dismiss nor perform long press for the current touch.
+        */
+       void requestDisallowLongPressAndDismiss();
+
+      /**
+       * Request that the view is made visible by scrolling to it, and keep the scroll locked until
+       * the user scrolls, or {@param v} loses focus or is detached.
+       */
+       void lockScrollTo(NotificationData.Entry entry);
     }
 }

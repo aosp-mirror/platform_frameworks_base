@@ -3442,7 +3442,19 @@ public class StatusBar extends SystemUI implements DemoMode,
     private void addStatusBarWindow() {
         makeStatusBarView();
         mStatusBarWindowManager = Dependency.get(StatusBarWindowManager.class);
-        mRemoteInputController = new RemoteInputController(mHeadsUpManager);
+        mRemoteInputController = new RemoteInputController(new RemoteInputController.Delegate() {
+          public void setRemoteInputActive(NotificationData.Entry entry,
+                  boolean remoteInputActive) {
+              mHeadsUpManager.setRemoteInputActive(entry, remoteInputActive);
+          }
+          public void lockScrollTo(NotificationData.Entry entry) {
+              mStackScroller.lockScrollTo(entry.row);
+          }
+          public void requestDisallowLongPressAndDismiss() {
+              mStackScroller.requestDisallowLongPress();
+              mStackScroller.requestDisallowDismiss();
+          }
+        });
         mStatusBarWindowManager.add(mStatusBarWindow, getStatusBarHeight());
     }
 
