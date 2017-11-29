@@ -31,8 +31,7 @@ public:
                          const HashableDimensionKey& eventKey, sp<ConditionWizard> wizard,
                          int conditionIndex, bool nesting, uint64_t currentBucketStartNs,
                          uint64_t bucketSizeNs,
-                         const std::vector<sp<AnomalyTracker>>& anomalyTrackers,
-                         std::vector<DurationBucket>& bucket);
+                         const std::vector<sp<AnomalyTracker>>& anomalyTrackers);
 
     void noteStart(const HashableDimensionKey& key, bool condition, const uint64_t eventTime,
                    const ConditionKey& conditionKey) override;
@@ -43,7 +42,9 @@ public:
     void onSlicedConditionMayChange(const uint64_t timestamp) override;
     void onConditionChanged(bool condition, const uint64_t timestamp) override;
 
-    bool flushIfNeeded(uint64_t timestampNs) override;
+    bool flushIfNeeded(
+            uint64_t timestampNs,
+            std::unordered_map<HashableDimensionKey, std::vector<DurationBucket>>* output) override;
 
     int64_t predictAnomalyTimestampNs(const AnomalyTracker& anomalyTracker,
                                       const uint64_t currentTimestamp) const override;
