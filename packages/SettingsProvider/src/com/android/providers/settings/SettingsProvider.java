@@ -61,6 +61,7 @@ import android.os.UserManager;
 import android.os.UserManagerInternal;
 import android.provider.Settings;
 import android.provider.Settings.Global;
+import android.provider.Settings.Secure;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -343,7 +344,8 @@ public class SettingsProvider extends ContentProvider {
             }
 
             case Settings.CALL_METHOD_GET_SECURE: {
-                Setting setting = getSecureSetting(name, requestingUserId);
+                Setting setting = getSecureSetting(name, requestingUserId,
+                        /*enableOverride=*/ true);
                 return packageValueForCallResult(setting, isTrackingGeneration(args));
             }
 
@@ -1073,6 +1075,10 @@ public class SettingsProvider extends ContentProvider {
     }
 
     private Setting getSecureSetting(String name, int requestingUserId) {
+        return getSecureSetting(name, requestingUserId, /*enableOverride=*/ false);
+    }
+
+    private Setting getSecureSetting(String name, int requestingUserId, boolean enableOverride) {
         if (DEBUG) {
             Slog.v(LOG_TAG, "getSecureSetting(" + name + ", " + requestingUserId + ")");
         }
@@ -1100,6 +1106,14 @@ public class SettingsProvider extends ContentProvider {
             PackageInfo callingPkg = getCallingPackageInfo(owningUserId);
             synchronized (mLock) {
                 return getSsaidSettingLocked(callingPkg, owningUserId);
+            }
+        }
+        if (enableOverride) {
+            if (Secure.LOCATION_PROVIDERS_ALLOWED.equals(name)) {
+                final Setting overridden = getLocationProvidersAllowedSetting(owningUserId);
+                if (overridden != null) {
+                    return overridden;
+                }
             }
         }
 
@@ -1188,6 +1202,35 @@ public class SettingsProvider extends ContentProvider {
             };
         }
         return null;
+    }
+
+    private Setting getLocationProvidersAllowedSetting(int owningUserId) {
+        synchronized (mLock) {
+            final Setting setting = getGlobalSetting(
+                    Global.LOCATION_GLOBAL_KILL_SWITCH);
+            if (!"1".equals(setting.getValue())) {
+                return null;
+            }
+            // Global kill-switch is enabled. Return an empty value.
+            final SettingsState settingsState = mSettingsRegistry.getSettingsLocked(
+                    SETTINGS_TYPE_SECURE, owningUserId);
+            return settingsState.new Setting(
+                    Secure.LOCATION_PROVIDERS_ALLOWED,
+                    "", // value
+                    "", // tag
+                    "", // default value
+                    "", // package name
+                    false, // from system
+                    "0" // id
+            ) {
+                @Override
+                public boolean update(String value, boolean setDefault, String packageName,
+                        String tag, boolean forceNonSystemPackage) {
+                    Slog.wtf(LOG_TAG, "update shoudln't be called on this instance.");
+                    return false;
+                }
+            };
+        }
     }
 
     private boolean insertSecureSetting(String name, String value, String tag,
@@ -2780,6 +2823,12 @@ public class SettingsProvider extends ContentProvider {
             }
 
             mHandler.obtainMessage(MyHandler.MSG_NOTIFY_DATA_CHANGED).sendToTarget();
+
+            // When the global kill switch is updated, send the change notification for
+            // the location setting.
+            if (isGlobalSettingsKey(key) && Global.LOCATION_GLOBAL_KILL_SWITCH.equals(name)) {
+                notifyLocationChangeForRunningUsers();
+            }
         }
 
         private void maybeNotifyProfiles(int type, int userId, Uri uri, String name,
@@ -2796,6 +2845,24 @@ public class SettingsProvider extends ContentProvider {
                         mHandler.obtainMessage(MyHandler.MSG_NOTIFY_DATA_CHANGED).sendToTarget();
                     }
                 }
+            }
+        }
+
+        private void notifyLocationChangeForRunningUsers() {
+            final List<UserInfo> users = mUserManager.getUsers(/*excludeDying=*/ true);
+
+            for (int i = 0; i < users.size(); i++) {
+                final int userId = users.get(i).id;
+
+                if (!mUserManager.isUserRunning(UserHandle.of(userId))) {
+                    continue;
+                }
+
+                final int key = makeKey(SETTINGS_TYPE_GLOBAL, userId);
+                final Uri uri = getNotificationUriFor(key, Secure.LOCATION_PROVIDERS_ALLOWED);
+
+                mHandler.obtainMessage(MyHandler.MSG_NOTIFY_URI_CHANGED,
+                        userId, 0, uri).sendToTarget();
             }
         }
 
@@ -2885,7 +2952,7 @@ public class SettingsProvider extends ContentProvider {
                         } catch (SecurityException e) {
                             Slog.w(LOG_TAG, "Failed to notify for " + userId + ": " + uri, e);
                         }
-                        if (DEBUG) {
+                        if (DEBUG || true) {
                             Slog.v(LOG_TAG, "Notifying for " + userId + ": " + uri);
                         }
                     } break;
