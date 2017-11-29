@@ -49,11 +49,21 @@ public class BatterySaverPolicy extends ContentObserver {
 
     public static final boolean DEBUG = false; // DO NOT SUBMIT WITH TRUE.
 
-    // Value of batterySaverGpsMode such that GPS isn't affected by battery saver mode.
+    /** Value of batterySaverGpsMode such that GPS isn't affected by battery saver mode. */
     public static final int GPS_MODE_NO_CHANGE = 0;
-    // Value of batterySaverGpsMode such that GPS is disabled when battery saver mode
-    // is enabled and the screen is off.
+
+    /**
+     * Value of batterySaverGpsMode such that GPS is disabled when battery saver mode
+     * is enabled and the screen is off.
+     */
     public static final int GPS_MODE_DISABLED_WHEN_SCREEN_OFF = 1;
+
+    /**
+     * Value of batterySaverGpsMode such that location should be disabled altogether
+     * when battery saver mode is enabled and the screen is off.
+     */
+    public static final int GPS_MODE_ALL_DISABLED_WHEN_SCREEN_OFF = 2;
+
     // Secure setting for GPS behavior when battery saver mode is on.
     public static final String SECURE_KEY_GPS_MODE = "batterySaverGpsMode";
 
@@ -344,7 +354,7 @@ public class BatterySaverPolicy extends ContentObserver {
 
         // Get default value from Settings.Secure
         final int defaultGpsMode = Settings.Secure.getInt(mContentResolver, SECURE_KEY_GPS_MODE,
-                GPS_MODE_NO_CHANGE);
+                GPS_MODE_ALL_DISABLED_WHEN_SCREEN_OFF);
         mGpsMode = parser.getInt(KEY_GPS_MODE, defaultGpsMode);
 
         // Non-device-specific parameters.
@@ -443,6 +453,12 @@ public class BatterySaverPolicy extends ContentObserver {
                     return builder.setBatterySaverEnabled(realMode)
                             .build();
             }
+        }
+    }
+
+    public int getGpsMode() {
+        synchronized (mLock) {
+            return mGpsMode;
         }
     }
 
