@@ -16,6 +16,7 @@
 
 package android.media;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -52,6 +53,8 @@ import android.util.Log;
 import android.util.Slog;
 import android.view.KeyEvent;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -911,13 +914,28 @@ public class AudioManager {
 
     /**
      * Returns the minimum volume index for a particular stream.
-     *
+     * @param streamType The stream type whose minimum volume index is returned. Must be one of
+     *     {@link #STREAM_VOICE_CALL}, {@link #STREAM_SYSTEM},
+     *     {@link #STREAM_RING}, {@link #STREAM_MUSIC}, {@link #STREAM_ALARM},
+     *     {@link #STREAM_NOTIFICATION}, {@link #STREAM_DTMF} or {@link #STREAM_ACCESSIBILITY}.
+     * @return The minimum valid volume index for the stream.
+     * @see #getStreamVolume(int)
+     */
+    public int getStreamMinVolume(int streamType) {
+        if (!isPublicStreamType(streamType)) {
+            throw new IllegalArgumentException("Invalid stream type " + streamType);
+        }
+        return getStreamMinVolumeInt(streamType);
+    }
+
+    /**
+     * @hide
+     * Same as {@link #getStreamMinVolume(int)} but without the check on the public stream type.
      * @param streamType The stream type whose minimum volume index is returned.
      * @return The minimum valid volume index for the stream.
      * @see #getStreamVolume(int)
-     * @hide
      */
-    public int getStreamMinVolume(int streamType) {
+    public int getStreamMinVolumeInt(int streamType) {
         final IAudioService service = getService();
         try {
             return service.getStreamMinVolume(streamType);
@@ -940,6 +958,72 @@ public class AudioManager {
             return service.getStreamVolume(streamType);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        }
+    }
+
+    // keep in sync with frameworks/av/services/audiopolicy/common/include/Volume.h
+    private static final float VOLUME_MIN_DB = -758.0f;
+
+    /** @hide */
+    @IntDef(flag = false, prefix = "STREAM", value = {
+            STREAM_VOICE_CALL,
+            STREAM_SYSTEM,
+            STREAM_RING,
+            STREAM_MUSIC,
+            STREAM_ALARM,
+            STREAM_NOTIFICATION,
+            STREAM_DTMF,
+            STREAM_ACCESSIBILITY }
+    )
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface PublicStreamTypes {}
+
+    /**
+     * Returns the volume in dB (decibel) for the given stream type at the given volume index, on
+     * the given type of audio output device.
+     * @param streamType stream type for which the volume is queried.
+     * @param index the volume index for which the volume is queried. The index value must be
+     *     between the minimum and maximum index values for the given stream type (see
+     *     {@link #getStreamMinVolume(int)} and {@link #getStreamMaxVolume(int)}).
+     * @param deviceType the type of audio output device for which volume is queried.
+     * @return a volume expressed in dB.
+     *     A negative value indicates the audio signal is attenuated. A typical maximum value
+     *     at the maximum volume index is 0 dB (no attenuation nor amplification). Muting is
+     *     reflected by a value of {@link Float#NEGATIVE_INFINITY}.
+     */
+    public float getStreamVolumeDb(@PublicStreamTypes int streamType, int index,
+            @AudioDeviceInfo.AudioDeviceTypeOut int deviceType) {
+        if (!isPublicStreamType(streamType)) {
+            throw new IllegalArgumentException("Invalid stream type " + streamType);
+        }
+        if (index > getStreamMaxVolume(streamType) || index < getStreamMinVolume(streamType)) {
+            throw new IllegalArgumentException("Invalid stream volume index " + index);
+        }
+        if (!AudioDeviceInfo.isValidAudioDeviceTypeOut(deviceType)) {
+            throw new IllegalArgumentException("Invalid audio output device type " + deviceType);
+        }
+        final float gain = AudioSystem.getStreamVolumeDB(streamType, index,
+                AudioDeviceInfo.convertDeviceTypeToInternalDevice(deviceType));
+        if (gain <= VOLUME_MIN_DB) {
+            return Float.NEGATIVE_INFINITY;
+        } else {
+            return gain;
+        }
+    }
+
+    private static boolean isPublicStreamType(int streamType) {
+        switch (streamType) {
+            case STREAM_VOICE_CALL:
+            case STREAM_SYSTEM:
+            case STREAM_RING:
+            case STREAM_MUSIC:
+            case STREAM_ALARM:
+            case STREAM_NOTIFICATION:
+            case STREAM_DTMF:
+            case STREAM_ACCESSIBILITY:
+                return true;
+            default:
+                return false;
         }
     }
 

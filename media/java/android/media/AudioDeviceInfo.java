@@ -16,9 +16,12 @@
 
 package android.media;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.util.SparseIntArray;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.TreeSet;
 
 /**
@@ -119,6 +122,57 @@ public final class AudioDeviceInfo {
      * A device type describing a USB audio headset.
      */
     public static final int TYPE_USB_HEADSET       = 22;
+
+    /** @hide */
+    @IntDef(flag = false, prefix = "TYPE", value = {
+            TYPE_BUILTIN_EARPIECE,
+            TYPE_BUILTIN_SPEAKER,
+            TYPE_WIRED_HEADSET,
+            TYPE_WIRED_HEADPHONES,
+            TYPE_BLUETOOTH_SCO,
+            TYPE_BLUETOOTH_A2DP,
+            TYPE_HDMI,
+            TYPE_DOCK,
+            TYPE_USB_ACCESSORY,
+            TYPE_USB_DEVICE,
+            TYPE_USB_HEADSET,
+            TYPE_TELEPHONY,
+            TYPE_LINE_ANALOG,
+            TYPE_HDMI_ARC,
+            TYPE_LINE_DIGITAL,
+            TYPE_FM,
+            TYPE_AUX_LINE,
+            TYPE_IP }
+    )
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface AudioDeviceTypeOut {}
+
+    /** @hide */
+    /*package*/ static boolean isValidAudioDeviceTypeOut(int type) {
+        switch (type) {
+            case TYPE_BUILTIN_EARPIECE:
+            case TYPE_BUILTIN_SPEAKER:
+            case TYPE_WIRED_HEADSET:
+            case TYPE_WIRED_HEADPHONES:
+            case TYPE_BLUETOOTH_SCO:
+            case TYPE_BLUETOOTH_A2DP:
+            case TYPE_HDMI:
+            case TYPE_DOCK:
+            case TYPE_USB_ACCESSORY:
+            case TYPE_USB_DEVICE:
+            case TYPE_USB_HEADSET:
+            case TYPE_TELEPHONY:
+            case TYPE_LINE_ANALOG:
+            case TYPE_HDMI_ARC:
+            case TYPE_LINE_DIGITAL:
+            case TYPE_FM:
+            case TYPE_AUX_LINE:
+            case TYPE_IP:
+                return true;
+            default:
+                return false;
+        }
+    }
 
     private final AudioDevicePort mPort;
 

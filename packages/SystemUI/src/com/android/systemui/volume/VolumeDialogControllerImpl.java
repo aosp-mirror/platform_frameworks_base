@@ -168,7 +168,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
     }
 
     protected int getAudioManagerStreamMinVolume(int stream) {
-        return mAudio.getStreamMinVolume(stream);
+        return mAudio.getStreamMinVolumeInt(stream);
     }
 
     public void register() {
