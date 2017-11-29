@@ -94,12 +94,29 @@ public class BrightnessTrackerTest {
     }
 
     @Test
-    public void testStartStopTracker() {
+    public void testStartStopTrackerScreenOnOff() {
+        mInjector.mInteractive = false;
         startTracker(mTracker);
-        assertNotNull(mInjector.mSensorListener);
+        assertNull(mInjector.mSensorListener);
         assertNotNull(mInjector.mSettingsObserver);
         assertNotNull(mInjector.mBroadcastReceiver);
         assertTrue(mInjector.mIdleScheduled);
+        Intent onIntent = new Intent();
+        onIntent.setAction(Intent.ACTION_SCREEN_ON);
+        mInjector.mBroadcastReceiver.onReceive(InstrumentationRegistry.getContext(),
+                onIntent);
+        assertNotNull(mInjector.mSensorListener);
+
+        Intent offIntent = new Intent();
+        offIntent.setAction(Intent.ACTION_SCREEN_OFF);
+        mInjector.mBroadcastReceiver.onReceive(InstrumentationRegistry.getContext(),
+                offIntent);
+        assertNull(mInjector.mSensorListener);
+
+        mInjector.mBroadcastReceiver.onReceive(InstrumentationRegistry.getContext(),
+                onIntent);
+        assertNotNull(mInjector.mSensorListener);
+
         mTracker.stop();
         assertNull(mInjector.mSensorListener);
         assertNull(mInjector.mSettingsObserver);
@@ -532,7 +549,6 @@ public class BrightnessTrackerTest {
         mInjector.waitForHandler();
     }
 
-
     private static final class Idle implements MessageQueue.IdleHandler {
         private boolean mIdle;
 
@@ -565,6 +581,7 @@ public class BrightnessTrackerTest {
         long mElapsedRealtimeNanos = SystemClock.elapsedRealtimeNanos();
         Handler mHandler;
         boolean mIdleScheduled;
+        boolean mInteractive = true;
 
         public TestInjector(Handler handler) {
             mHandler = handler;
@@ -577,7 +594,7 @@ public class BrightnessTrackerTest {
 
         @Override
         public void registerSensorListener(Context context,
-                SensorEventListener sensorListener) {
+                SensorEventListener sensorListener, Handler handler) {
             mSensorListener = sensorListener;
         }
 
@@ -693,6 +710,10 @@ public class BrightnessTrackerTest {
 
         public void cancelIdleJob(Context context) {
             mIdleScheduled = false;
+        }
+
+        public boolean isInteractive(Context context) {
+            return mInteractive;
         }
     }
 }
