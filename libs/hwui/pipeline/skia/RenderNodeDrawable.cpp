@@ -110,7 +110,8 @@ void RenderNodeDrawable::forceDraw(SkCanvas* canvas) {
     // We only respect the nothingToDraw check when we are composing a layer. This
     // ensures that we paint the layer even if it is not currently visible in the
     // event that the properties change and it becomes visible.
-    if (!renderNode->isRenderable() || (renderNode->nothingToDraw() && mComposeLayer)) {
+    if ((mProjectedDisplayList == nullptr && !renderNode->isRenderable()) ||
+            (renderNode->nothingToDraw() && mComposeLayer)) {
         return;
     }
 
