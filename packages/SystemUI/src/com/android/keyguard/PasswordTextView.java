@@ -307,8 +307,9 @@ public class PasswordTextView extends View {
 
     void sendAccessibilityEventTypeViewTextChanged(String beforeText, int fromIndex,
                                                    int removedCount, int addedCount) {
-        if (AccessibilityManager.getInstance(mContext).isEnabled() &&
-                (isFocused() || isSelected() && isShown())) {
+        if (AccessibilityManager.getInstance(mContext).isObservedEventType(
+                    AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED)
+                && (isFocused() || isSelected() && isShown())) {
             AccessibilityEvent event =
                     AccessibilityEvent.obtain(AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED);
             event.setFromIndex(fromIndex);

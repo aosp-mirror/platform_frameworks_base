@@ -4743,7 +4743,8 @@ public class NotificationManagerService extends SystemService {
     }
 
     void sendAccessibilityEvent(Notification notification, CharSequence packageName) {
-        if (!mAccessibilityManager.isEnabled()) {
+        if (!mAccessibilityManager.isObservedEventType(
+                AccessibilityEvent.TYPE_NOTIFICATION_STATE_CHANGED)) {
             return;
         }
 

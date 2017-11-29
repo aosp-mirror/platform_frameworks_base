@@ -791,7 +791,7 @@ class TouchExplorer extends BaseEventStreamTransformation
      */
     private void sendAccessibilityEvent(int type) {
         AccessibilityManager accessibilityManager = AccessibilityManager.getInstance(mContext);
-        if (accessibilityManager.isEnabled()) {
+        if (accessibilityManager.isObservedEventType(type)) {
             AccessibilityEvent event = AccessibilityEvent.obtain(type);
             event.setWindowId(mAms.getActiveWindowId());
             accessibilityManager.sendAccessibilityEvent(event);
