@@ -24,6 +24,7 @@ import android.graphics.Rect;
 import android.os.Build;
 import android.service.notification.StatusBarNotification;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.NotificationHeaderView;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,8 +35,8 @@ import android.widget.ImageView;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.NotificationColorUtil;
 import com.android.systemui.R;
-import com.android.systemui.statusbar.notification.HybridNotificationView;
 import com.android.systemui.statusbar.notification.HybridGroupManager;
+import com.android.systemui.statusbar.notification.HybridNotificationView;
 import com.android.systemui.statusbar.notification.NotificationCustomViewWrapper;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.NotificationViewWrapper;
@@ -49,6 +50,7 @@ import com.android.systemui.statusbar.policy.RemoteInputView;
  */
 public class NotificationContentView extends FrameLayout {
 
+    private static final String TAG = "NotificationContentView";
     public static final int VISIBLE_TYPE_CONTRACTED = 0;
     public static final int VISIBLE_TYPE_EXPANDED = 1;
     public static final int VISIBLE_TYPE_HEADSUP = 2;
@@ -684,6 +686,13 @@ public class NotificationContentView extends FrameLayout {
         int endHeight = getViewForVisibleType(mVisibleType).getHeight();
         int progress = Math.abs(mContentHeight - startHeight);
         int totalDistance = Math.abs(endHeight - startHeight);
+        if (totalDistance == 0) {
+            Log.wtf(TAG, "the total transformation distance is 0"
+                    + "\n StartType: " + mTransformationStartVisibleType + " height: " + startHeight
+                    + "\n VisibleType: " + mVisibleType + " height: " + endHeight
+                    + "\n mContentHeight: " + mContentHeight);
+            return 1.0f;
+        }
         float amount = (float) progress / (float) totalDistance;
         return Math.min(1.0f, amount);
     }
