@@ -350,6 +350,72 @@ RENDERTHREAD_TEST(RenderNodeDrawable, projectionReorder) {
     EXPECT_EQ(3, canvas.getIndex());
 }
 
+RENDERTHREAD_SKIA_PIPELINE_TEST(RenderNodeDrawable, emptyReceiver) {
+    class ProjectionTestCanvas : public SkCanvas {
+    public:
+        ProjectionTestCanvas(int width, int height) : SkCanvas(width, height) {}
+        void onDrawRect(const SkRect& rect, const SkPaint& paint) override {
+            mDrawCounter++;
+        }
+
+        int getDrawCounter() { return mDrawCounter; }
+
+    private:
+        int mDrawCounter = 0;
+    };
+
+    auto receiverBackground = TestUtils::createSkiaNode(
+            0, 0, 100, 100,
+            [](RenderProperties& properties, SkiaRecordingCanvas& canvas) {
+                properties.setProjectionReceiver(true);
+            },
+            "B"); // a receiver with an empty display list
+
+    auto projectingRipple = TestUtils::createSkiaNode(
+            0, 0, 100, 100,
+            [](RenderProperties& properties, SkiaRecordingCanvas& canvas) {
+                properties.setProjectBackwards(true);
+                properties.setClipToBounds(false);
+                SkPaint paint;
+                canvas.drawRect(0, 0, 100, 100, paint);
+            },
+            "P");
+    auto child = TestUtils::createSkiaNode(
+            0, 0, 100, 100,
+            [&projectingRipple](RenderProperties& properties, SkiaRecordingCanvas& canvas) {
+                SkPaint paint;
+                canvas.drawRect(0, 0, 100, 100, paint);
+                canvas.drawRenderNode(projectingRipple.get());
+            },
+            "C");
+    auto parent = TestUtils::createSkiaNode(
+            0, 0, 100, 100,
+            [&receiverBackground, &child](RenderProperties& properties,
+                                          SkiaRecordingCanvas& canvas) {
+                canvas.drawRenderNode(receiverBackground.get());
+                canvas.drawRenderNode(child.get());
+            },
+            "A");
+    ContextFactory contextFactory;
+    std::unique_ptr<CanvasContext> canvasContext(
+            CanvasContext::create(renderThread, false, parent.get(), &contextFactory));
+    TreeInfo info(TreeInfo::MODE_RT_ONLY, *canvasContext.get());
+    DamageAccumulator damageAccumulator;
+    info.damageAccumulator = &damageAccumulator;
+    parent->prepareTree(info);
+
+    // parent(A)             -> (receiverBackground, child)
+    // child(C)              -> (rect[0, 0, 100, 100], projectingRipple)
+    // projectingRipple(P)   -> (rect[0, 0, 100, 100]) -> projects backwards
+    // receiverBackground(B) -> (empty) -> projection receiver
+
+    // create a canvas not backed by any device/pixels, but with dimensions to avoid quick rejection
+    ProjectionTestCanvas canvas(100, 100);
+    RenderNodeDrawable drawable(parent.get(), &canvas, true);
+    canvas.drawDrawable(&drawable);
+    EXPECT_EQ(2, canvas.getDrawCounter());
+}
+
 RENDERTHREAD_SKIA_PIPELINE_TEST(RenderNodeDrawable, projectionHwLayer) {
     /* R is backward projected on B and C is a layer.
                 A
