@@ -256,6 +256,9 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
             }
             case MotionEvent.ACTION_MOVE: {
                 int activePointerIndex = ev.findPointerIndex(mActivePointerId);
+                if (activePointerIndex == -1) {
+                    break;
+                }
                 int y = (int) ev.getY(activePointerIndex);
                 int x = (int) ev.getX(activePointerIndex);
                 if (!mIsScrolling) {
