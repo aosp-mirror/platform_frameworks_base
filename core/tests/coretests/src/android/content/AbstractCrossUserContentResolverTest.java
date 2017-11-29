@@ -45,8 +45,9 @@ import java.util.concurrent.TimeUnit;
 @LargeTest
 @RunWith(AndroidJUnit4.class)
 abstract class AbstractCrossUserContentResolverTest {
-    private final static int TIMEOUT_SERVICE_CONNECTION_SEC = 4;
-    private final static int TIMEOUT_CONTENT_CHANGE_SEC = 4;
+    private static final int TIMEOUT_SERVICE_CONNECTION_SEC = 4;
+    private static final int TIMEOUT_CONTENT_CHANGE_SEC = 4;
+    private static final int TIMEOUT_USER_UNLOCK_SEC = 4;
 
     private Context mContext;
     protected UserManager mUm;
@@ -61,7 +62,7 @@ abstract class AbstractCrossUserContentResolverTest {
         mCrossUserId = userInfo.id;
         final PackageManager pm = mContext.getPackageManager();
         pm.installExistingPackageAsUser(mContext.getPackageName(), mCrossUserId);
-        ActivityManager.getService().startUserInBackground(mCrossUserId);
+        unlockUser();
 
         final CountDownLatch connectionLatch = new CountDownLatch(1);
         mServiceConnection = new CrossUserContentServiceConnection(connectionLatch);
@@ -76,6 +77,30 @@ abstract class AbstractCrossUserContentResolverTest {
     }
 
     protected abstract UserInfo createUser() throws RemoteException ;
+
+    private void unlockUser() throws Exception {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final BroadcastReceiver receiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL)
+                        == mCrossUserId) {
+                    latch.countDown();
+                }
+            }
+        };
+        mContext.registerReceiverAsUser(receiver, UserHandle.of(mCrossUserId),
+                new IntentFilter(Intent.ACTION_USER_UNLOCKED), null, null);
+        ActivityManager.getService().startUserInBackground(mCrossUserId);
+
+        try {
+            if (!latch.await(TIMEOUT_USER_UNLOCK_SEC, TimeUnit.SECONDS)) {
+                fail("Timed out waiting for the u" + mCrossUserId + " to unlock");
+            }
+        } finally {
+            mContext.unregisterReceiver(receiver);
+        }
+    }
 
     @After
     public void tearDown() throws Exception {
