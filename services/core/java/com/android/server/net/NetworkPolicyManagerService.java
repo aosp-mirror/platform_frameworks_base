@@ -82,6 +82,13 @@ import static com.android.internal.util.XmlUtils.writeIntAttribute;
 import static com.android.internal.util.XmlUtils.writeLongAttribute;
 import static com.android.internal.util.XmlUtils.writeStringAttribute;
 import static com.android.server.NetworkManagementService.LIMIT_GLOBAL_ALERT;
+import static com.android.server.net.NetworkPolicyLogger.NTWK_ALLOWED_DEFAULT;
+import static com.android.server.net.NetworkPolicyLogger.NTWK_ALLOWED_NON_METERED;
+import static com.android.server.net.NetworkPolicyLogger.NTWK_ALLOWED_TMP_WHITELIST;
+import static com.android.server.net.NetworkPolicyLogger.NTWK_ALLOWED_WHITELIST;
+import static com.android.server.net.NetworkPolicyLogger.NTWK_BLOCKED_BG_RESTRICT;
+import static com.android.server.net.NetworkPolicyLogger.NTWK_BLOCKED_BLACKLIST;
+import static com.android.server.net.NetworkPolicyLogger.NTWK_BLOCKED_POWER;
 import static com.android.server.net.NetworkStatsService.ACTION_NETWORK_STATS_UPDATED;
 
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
@@ -248,9 +255,9 @@ import java.util.concurrent.TimeUnit;
  * </ul>
  */
 public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
-    static final String TAG = "NetworkPolicy";
-    private static final boolean LOGD = false;
-    private static final boolean LOGV = false;
+    static final String TAG = NetworkPolicyLogger.TAG;
+    private static final boolean LOGD = NetworkPolicyLogger.LOGD;
+    private static final boolean LOGV = NetworkPolicyLogger.LOGV;
 
     private static final int VERSION_INIT = 1;
     private static final int VERSION_ADDED_SNOOZE = 2;
@@ -264,13 +271,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private static final int VERSION_SWITCH_UID = 10;
     private static final int VERSION_ADDED_CYCLE = 11;
     private static final int VERSION_LATEST = VERSION_ADDED_CYCLE;
-
-    /**
-     * Max items written to {@link #ProcStateSeqHistory}.
-     */
-    @VisibleForTesting
-    public static final int MAX_PROC_STATE_SEQ_HISTORY =
-            ActivityManager.isLowRamDeviceStatic() ? 50 : 200;
 
     @VisibleForTesting
     public static final int TYPE_WARNING = SystemMessage.NOTE_NET_WARNING;
@@ -471,13 +471,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     private ActivityManagerInternal mActivityManagerInternal;
 
-    /**
-     * This is used for debugging purposes. Whenever the IUidObserver.onUidStateChanged is called,
-     * the uid and procStateSeq will be written to this and will be printed as part of dump.
-     */
-    @VisibleForTesting
-    public ProcStateSeqHistory mObservedHistory
-            = new ProcStateSeqHistory(MAX_PROC_STATE_SEQ_HISTORY);
+    private final NetworkPolicyLogger mLogger = new NetworkPolicyLogger();
 
     // TODO: keep whitelist of system-critical services that should never have
     // rules enforced, such as system, phone, and radio UIDs.
@@ -966,6 +960,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         .hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED);
 
                 if ((oldMetered != newMetered) || mNetworkMetered.indexOfKey(network.netId) < 0) {
+                    mLogger.meterednessChanged(network.netId, newMetered);
                     mNetworkMetered.put(network.netId, newMetered);
                     updateNetworkRulesNL();
                 }
@@ -2148,6 +2143,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 final int oldPolicy = mUidPolicy.get(uid, POLICY_NONE);
                 if (oldPolicy != policy) {
                     setUidPolicyUncheckedUL(uid, oldPolicy, policy, true);
+                    mLogger.uidPolicyChanged(uid, oldPolicy, policy);
                 }
             } finally {
                 Binder.restoreCallingIdentity(token);
@@ -2168,6 +2164,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             policy |= oldPolicy;
             if (oldPolicy != policy) {
                 setUidPolicyUncheckedUL(uid, oldPolicy, policy, true);
+                mLogger.uidPolicyChanged(uid, oldPolicy, policy);
             }
         }
     }
@@ -2185,6 +2182,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             policy = oldPolicy & ~policy;
             if (oldPolicy != policy) {
                 setUidPolicyUncheckedUL(uid, oldPolicy, policy, true);
+                mLogger.uidPolicyChanged(uid, oldPolicy, policy);
             }
         }
     }
@@ -2264,7 +2262,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      */
     boolean removeUserStateUL(int userId, boolean writePolicy) {
 
-        if (LOGV) Slog.v(TAG, "removeUserStateUL()");
+        mLogger.removingUserState(userId);
         boolean changed = false;
 
         // Remove entries from revoked default restricted background UID whitelist
@@ -2429,7 +2427,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     @Override
     public void onTetheringChanged(String iface, boolean tethering) {
         // No need to enforce permission because setRestrictBackground() will do it.
-        if (LOGD) Log.d(TAG, "onTetherStateChanged(" + iface + ", " + tethering + ")");
         synchronized (mUidRulesFirstLock) {
             if (mRestrictBackground && tethering) {
                 Log.d(TAG, "Tethering on (" + iface +"); disable Data Saver");
@@ -2486,6 +2483,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             }
 
             sendRestrictBackgroundChangedMsg();
+            mLogger.restrictBackgroundChanged(oldRestrictBackground, mRestrictBackground);
 
             if (mRestrictBackgroundPowerState.globalBatterySaverEnabled) {
                 mRestrictBackgroundChangedInBsm = true;
@@ -2551,6 +2549,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     return;
                 }
                 mDeviceIdleMode = enabled;
+                mLogger.deviceIdleModeEnabled(enabled);
                 if (mSystemReady) {
                     // Device idle change means we need to rebuild rules for all
                     // known apps, so do a global refresh.
@@ -2964,10 +2963,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 }
                 fout.decreaseIndent();
 
-                fout.println("Observed uid state changes:");
-                fout.increaseIndent();
-                mObservedHistory.dumpUL(fout);
-                fout.decreaseIndent();
+                mLogger.dumpLogs(fout);
             }
         }
     }
@@ -3750,8 +3746,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             try {
                 final int uid = mContext.getPackageManager().getPackageUidAsUser(packageName,
                         PackageManager.MATCH_UNINSTALLED_PACKAGES, userId);
-                if (LOGV) Log.v(TAG, "onAppIdleStateChanged(): uid=" + uid + ", idle=" + idle);
                 synchronized (mUidRulesFirstLock) {
+                    mLogger.appIdleStateChanged(uid, idle);
                     updateRuleForAppIdleUL(uid);
                     updateRulesForPowerRestrictionsUL(uid);
                 }
@@ -3762,6 +3758,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         @Override
         public void onParoleStateChanged(boolean isParoleOn) {
             synchronized (mUidRulesFirstLock) {
+                mLogger.paroleStateChanged(isParoleOn);
                 updateRulesForAppIdleParoleUL();
             }
         }
@@ -3947,7 +3944,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             synchronized (mUidRulesFirstLock) {
                 // We received a uid state change callback, add it to the history so that it
                 // will be useful for debugging.
-                mObservedHistory.addProcStateSeqUL(uid, procStateSeq);
+                mLogger.uidStateChanged(uid, procState, procStateSeq);
                 // Now update the network policy rules as per the updated uid state.
                 updateUidStateUL(uid, procState);
                 // Updating the network rules is done, so notify AMS about this.
@@ -4081,6 +4078,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 rules[index] = uidRules.valueAt(index);
             }
             mNetworkManager.setFirewallUidRules(chain, uids, rules);
+            mLogger.firewallRulesChanged(chain, uids, rules);
         } catch (IllegalStateException e) {
             Log.wtf(TAG, "problem setting firewall uid rules", e);
         } catch (RemoteException e) {
@@ -4107,6 +4105,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
             try {
                 mNetworkManager.setFirewallUidRule(chain, uid, rule);
+                mLogger.uidFirewallRuleChanged(chain, uid, rule);
             } catch (IllegalStateException e) {
                 Log.wtf(TAG, "problem setting firewall uid rules", e);
             } catch (RemoteException e) {
@@ -4129,6 +4128,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         mFirewallChainStates.put(chain, enable);
         try {
             mNetworkManager.setFirewallChainEnabled(chain, enable);
+            mLogger.firewallChainEnabled(chain, enable);
         } catch (IllegalStateException e) {
             Log.wtf(TAG, "problem enable firewall chain", e);
         } catch (RemoteException e) {
@@ -4305,30 +4305,30 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             isBackgroundRestricted = mRestrictBackground;
         }
         if (hasRule(uidRules, RULE_REJECT_ALL)) {
-            if (LOGV) logUidStatus(uid, "blocked by power restrictions");
+            mLogger.networkBlocked(uid, NTWK_BLOCKED_POWER);
             return true;
         }
         if (!isNetworkMetered) {
-            if (LOGV) logUidStatus(uid, "allowed on unmetered network");
+            mLogger.networkBlocked(uid, NTWK_ALLOWED_NON_METERED);
             return false;
         }
         if (hasRule(uidRules, RULE_REJECT_METERED)) {
-            if (LOGV) logUidStatus(uid, "blacklisted on metered network");
+            mLogger.networkBlocked(uid, NTWK_BLOCKED_BLACKLIST);
             return true;
         }
         if (hasRule(uidRules, RULE_ALLOW_METERED)) {
-            if (LOGV) logUidStatus(uid, "whitelisted on metered network");
+            mLogger.networkBlocked(uid, NTWK_ALLOWED_WHITELIST);
             return false;
         }
         if (hasRule(uidRules, RULE_TEMPORARY_ALLOW_METERED)) {
-            if (LOGV) logUidStatus(uid, "temporary whitelisted on metered network");
+            mLogger.networkBlocked(uid, NTWK_ALLOWED_TMP_WHITELIST);
             return false;
         }
         if (isBackgroundRestricted) {
-            if (LOGV) logUidStatus(uid, "blocked when background is restricted");
+            mLogger.networkBlocked(uid, NTWK_BLOCKED_BG_RESTRICT);
             return true;
         }
-        if (LOGV) logUidStatus(uid, "allowed by default");
+        mLogger.networkBlocked(uid, NTWK_ALLOWED_DEFAULT);
         return false;
     }
 
@@ -4379,6 +4379,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         @Override
         public void onTempPowerSaveWhitelistChange(int appId, boolean added) {
             synchronized (mUidRulesFirstLock) {
+                mLogger.tempPowerSaveWlChanged(appId, added);
                 if (added) {
                     mPowerSaveTempWhitelistAppIds.put(appId, true);
                 } else {
@@ -4391,80 +4392,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     private static boolean hasRule(int uidRules, int rule) {
         return (uidRules & rule) != 0;
-    }
-
-    private static void logUidStatus(int uid, String descr) {
-        Slog.d(TAG, String.format("uid %d is %s", uid, descr));
-    }
-
-    /**
-     * This class is used for storing and dumping the last {@link #MAX_PROC_STATE_SEQ_HISTORY}
-     * (uid, procStateSeq) pairs.
-     */
-    @VisibleForTesting
-    public static final class ProcStateSeqHistory {
-        private static final int INVALID_UID = -1;
-
-        /**
-         * Denotes maximum number of items this history can hold.
-         */
-        private final int mMaxCapacity;
-        /**
-         * Used for storing the uid information.
-         */
-        private final int[] mUids;
-        /**
-         * Used for storing the sequence numbers associated with {@link #mUids}.
-         */
-        private final long[] mProcStateSeqs;
-        /**
-         * Points to the next available slot for writing (uid, procStateSeq) pair.
-         */
-        private int mHistoryNext;
-
-        public ProcStateSeqHistory(int maxCapacity) {
-            mMaxCapacity = maxCapacity;
-            mUids = new int[mMaxCapacity];
-            Arrays.fill(mUids, INVALID_UID);
-            mProcStateSeqs = new long[mMaxCapacity];
-        }
-
-        @GuardedBy("mUidRulesFirstLock")
-        public void addProcStateSeqUL(int uid, long procStateSeq) {
-            mUids[mHistoryNext] = uid;
-            mProcStateSeqs[mHistoryNext] = procStateSeq;
-            mHistoryNext = increaseNext(mHistoryNext, 1);
-        }
-
-        @GuardedBy("mUidRulesFirstLock")
-        public void dumpUL(IndentingPrintWriter fout) {
-            if (mUids[0] == INVALID_UID) {
-                fout.println("NONE");
-                return;
-            }
-            int index = mHistoryNext;
-            do {
-                index = increaseNext(index, -1);
-                if (mUids[index] == INVALID_UID) {
-                    break;
-                }
-                fout.println(getString(mUids[index], mProcStateSeqs[index]));
-            } while (index != mHistoryNext);
-        }
-
-        public static String getString(int uid, long procStateSeq) {
-            return "UID=" + uid + " Seq=" + procStateSeq;
-        }
-
-        private int increaseNext(int next, int increment) {
-            next += increment;
-            if (next >= mMaxCapacity) {
-                next = 0;
-            } else if (next < 0) {
-                next = mMaxCapacity - 1;
-            }
-            return next;
-        }
     }
 
     private class NotificationId {
