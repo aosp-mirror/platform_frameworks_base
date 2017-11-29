@@ -10445,6 +10445,15 @@ public final class Settings {
                 "storage_settings_clobber_threshold";
 
         /**
+         * If set to 1, {@link Secure#LOCATION_MODE} will be set to {@link Secure#LOCATION_MODE_OFF}
+         * temporarily for all users.
+         *
+         * @hide
+         */
+        public static final String LOCATION_GLOBAL_KILL_SWITCH =
+                "location_global_kill_switch";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
