@@ -159,7 +159,7 @@ int main(int argc, char** argv)
     void const* mapbase = MAP_FAILED;
     ssize_t mapsize = -1;
 
-    void* base = NULL;
+    void const* base = NULL;
     uint32_t w, s, h, f;
     android_dataspace d;
     size_t size = 0;
@@ -179,6 +179,7 @@ int main(int argc, char** argv)
     ProcessState::self()->setThreadPoolMaxThreadCount(0);
     ProcessState::self()->startThreadPool();
 
+    ScreenshotClient screenshot;
     sp<IBinder> display = SurfaceComposerClient::getBuiltInDisplay(displayId);
     if (display == NULL) {
         fprintf(stderr, "Unable to get handle for display %d\n", displayId);
@@ -198,57 +199,51 @@ int main(int argc, char** argv)
     uint8_t displayOrientation = configs[activeConfig].orientation;
     uint32_t captureOrientation = ORIENTATION_MAP[displayOrientation];
 
-    sp<GraphicBuffer> outBuffer;
-    status_t result = ScreenshotClient::capture(display, Rect(), 0 /* reqWidth */,
-            0 /* reqHeight */, INT32_MIN, INT32_MAX, /* all layers */ false, captureOrientation,
-            &outBuffer);
-    if (result != NO_ERROR) {
-        close(fd);
-        _exit(1);
+    status_t result = screenshot.update(display, Rect(),
+            0 /* reqWidth */, 0 /* reqHeight */,
+            INT32_MIN, INT32_MAX, /* all layers */
+            false, captureOrientation);
+    if (result == NO_ERROR) {
+        base = screenshot.getPixels();
+        w = screenshot.getWidth();
+        h = screenshot.getHeight();
+        s = screenshot.getStride();
+        f = screenshot.getFormat();
+        d = screenshot.getDataSpace();
+        size = screenshot.getSize();
     }
 
-    result = outBuffer->lock(GraphicBuffer::USAGE_SW_READ_OFTEN, &base);
-
-    if (base == NULL) {
-        close(fd);
-        _exit(1);
-    }
-
-    w = outBuffer->getWidth();
-    h = outBuffer->getHeight();
-    s = outBuffer->getStride();
-    f = outBuffer->getPixelFormat();
-    d = HAL_DATASPACE_UNKNOWN;
-    size = s * h * bytesPerPixel(f);
-
-    if (png) {
-        const SkImageInfo info =
-            SkImageInfo::Make(w, h, flinger2skia(f), kPremul_SkAlphaType, dataSpaceToColorSpace(d));
-        SkPixmap pixmap(info, base, s * bytesPerPixel(f));
-        struct FDWStream final : public SkWStream {
-          size_t fBytesWritten = 0;
-          int fFd;
-          FDWStream(int f) : fFd(f) {}
-          size_t bytesWritten() const override { return fBytesWritten; }
-          bool write(const void* buffer, size_t size) override {
-            fBytesWritten += size;
-            return size == 0 || ::write(fFd, buffer, size) > 0;
-          }
-        } fdStream(fd);
-        (void)SkEncodeImage(&fdStream, pixmap, SkEncodedImageFormat::kPNG, 100);
-        if (fn != NULL) {
-            notifyMediaScanner(fn);
-        }
-    } else {
-        uint32_t c = dataSpaceToInt(d);
-        write(fd, &w, 4);
-        write(fd, &h, 4);
-        write(fd, &f, 4);
-        write(fd, &c, 4);
-        size_t Bpp = bytesPerPixel(f);
-        for (size_t y=0 ; y<h ; y++) {
-            write(fd, base, w*Bpp);
-            base = (void *)((char *)base + s*Bpp);
+    if (base != NULL) {
+        if (png) {
+            const SkImageInfo info =
+                SkImageInfo::Make(w, h, flinger2skia(f), kPremul_SkAlphaType,
+                    dataSpaceToColorSpace(d));
+            SkPixmap pixmap(info, base, s * bytesPerPixel(f));
+            struct FDWStream final : public SkWStream {
+              size_t fBytesWritten = 0;
+              int fFd;
+              FDWStream(int f) : fFd(f) {}
+              size_t bytesWritten() const override { return fBytesWritten; }
+              bool write(const void* buffer, size_t size) override {
+                fBytesWritten += size;
+                return size == 0 || ::write(fFd, buffer, size) > 0;
+              }
+            } fdStream(fd);
+            (void)SkEncodeImage(&fdStream, pixmap, SkEncodedImageFormat::kPNG, 100);
+            if (fn != NULL) {
+                notifyMediaScanner(fn);
+            }
+        } else {
+            uint32_t c = dataSpaceToInt(d);
+            write(fd, &w, 4);
+            write(fd, &h, 4);
+            write(fd, &f, 4);
+            write(fd, &c, 4);
+            size_t Bpp = bytesPerPixel(f);
+            for (size_t y=0 ; y<h ; y++) {
+                write(fd, base, w*Bpp);
+                base = (void *)((char *)base + s*Bpp);
+            }
         }
     }
     close(fd);
