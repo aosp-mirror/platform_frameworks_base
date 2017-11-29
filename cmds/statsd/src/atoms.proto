@@ -46,12 +46,14 @@ message Atom {
         SyncStateChanged sync_state_changed = 7;
         ScheduledJobStateChanged scheduled_job_state_changed = 8;
         ScreenBrightnessChanged screen_brightness_changed = 9;
-        // 10-20 are temporarily reserved for wakelocks etc.
         WakelockStateChanged wakelock_state_changed = 10;
-        UidWakelockStateChanged uid_wakelock_state_changed = 11;
-        LongPartialWakelockStateChanged long_partial_wakelock_state_changed = 12;
-        BatterySaverModeStateChanged battery_saver_mode_state_changed = 21;
-        DeviceIdleModeStateChanged device_idle_mode_state_changed = 22;
+        LongPartialWakelockStateChanged long_partial_wakelock_state_changed = 11;
+        MobileRadioPowerStateChanged mobile_radio_power_state_changed = 12;
+        WifiRadioPowerStateChanged wifi_radio_power_state_changed = 13;
+        // TODO: 14-19 are blank, but need not be
+        BatterySaverModeStateChanged battery_saver_mode_state_changed = 20;
+        DeviceIdleModeStateChanged device_idle_mode_state_changed = 21;
+        DeviceIdlingModeStateChanged device_idling_mode_state_changed = 22;
         AudioStateChanged audio_state_changed = 23;
         MediaCodecActivityChanged media_codec_activity_changed = 24;
         CameraStateChanged camera_state_changed = 25;
@@ -145,6 +147,7 @@ message ScreenStateChanged {
         STATE_DOZE = 3;
         STATE_DOZE_SUSPEND = 4;
         STATE_VR = 5;
+        STATE_ON_SUSPEND = 6;
     }
     // New screen state.
     optional State display_state = 1;
@@ -177,12 +180,16 @@ message ProcessLifeCycleStateChanged {
     // TODO: What is this?
     optional string name = 2;
 
-    // The state.
-    // TODO: Use an enum.
-    optional int32 event = 3;
+    // What lifecycle state the process changed to.
+    // This enum is specific to atoms.proto.
+    enum Event {
+        PROCESS_FINISHED = 0;
+        PROCESS_STARTED = 1;
+        PROCESS_CRASHED = 2;
+        PROCESS_ANRED = 3;
+    }
+    optional Event event = 3;
 }
-
-
 
 /**
  * Logs when the ble scan state changes.
@@ -413,31 +420,6 @@ message WakelockStateChanged {
 }
 
 /**
- * Logs when an app is holding a wakelock, regardless of the wakelock's name.
- *
- * Logged from:
- *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
- */
-message UidWakelockStateChanged {
-    // TODO: Add attribution instead of uid.
-    optional int32 uid = 1;
-
-    // Type of wakelock.
-    enum Type {
-        PARTIAL = 0;
-        FULL = 1;
-        WINDOW = 2;
-    }
-    optional Type type = 2;
-
-    enum State {
-        OFF = 0;
-        ON = 1;
-    }
-    optional State state = 3;
-}
-
-/**
  * Logs when a partial wakelock is considered 'long' (over 1 min).
  *
  * Logged from:
@@ -478,11 +460,33 @@ message BatterySaverModeStateChanged {
  * Logs Doze mode state change.
  *
  * Logged from:
- *   frameworks/base/services/core/java/com/android/server/am/BatteryStatsService.java
+ *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
  */
 message DeviceIdleModeStateChanged {
     // TODO: Use the enum matching BatteryStats.DEVICE_IDLE_MODE_.
-    optional int32 state = 1;
+    enum State {
+        DEVICE_IDLE_MODE_OFF = 0;
+        DEVICE_IDLE_MODE_LIGHT = 1;
+        DEVICE_IDLE_MODE_DEEP = 2;
+    }
+    optional State state = 1;
+}
+
+
+/**
+ * Logs state change of Doze mode including maintenance windows.
+ *
+ * Logged from:
+ *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+message DeviceIdlingModeStateChanged {
+    // TODO: Use the enum matching BatteryStats.DEVICE_IDLE_MODE_.
+    enum State {
+        DEVICE_IDLE_MODE_OFF = 0;
+        DEVICE_IDLE_MODE_LIGHT = 1;
+        DEVICE_IDLE_MODE_DEEP = 2;
+    }
+    optional State state = 1;
 }
 
 /**
@@ -582,6 +586,49 @@ message DeviceOnStatusChanged {
 message WakeupAlarmOccurred {
     // TODO: Add attribution instead of uid?
     optional int32 uid = 1;
+
+    // Name of the wakeup alarm.
+    optional string tag = 2;
+}
+
+/**
+ * Logs when an an app causes the mobile radio to change state.
+ * Changing from LOW to MEDIUM or HIGH can be considered the app waking the mobile radio.
+ *
+ * Logged from:
+ *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+message MobileRadioPowerStateChanged {
+    // TODO: Add attribution instead of uid?
+    optional int32 uid = 1;
+
+    // TODO: Reference telephony/java/android/telephony/DataConnectionRealTimeInfo.java states.
+    enum PowerState {
+        DC_POWER_STATE_LOW = 1;
+        DC_POWER_STATE_MEDIUM = 2;
+        DC_POWER_STATE_HIGH = 3;
+    }
+    optional PowerState power_state = 2;
+}
+
+/**
+ * Logs when an an app causes the wifi radio to change state.
+ * Changing from LOW to MEDIUM or HIGH can be considered the app waking the wifi radio.
+ *
+ * Logged from:
+ *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+message WifiRadioPowerStateChanged {
+    // TODO: Add attribution instead of uid?
+    optional int32 uid = 1;
+
+    // TODO: Reference telephony/java/android/telephony/DataConnectionRealTimeInfo.java states.
+    enum PowerState {
+        DC_POWER_STATE_LOW = 1;
+        DC_POWER_STATE_MEDIUM = 2;
+        DC_POWER_STATE_HIGH = 3;
+    }
+    optional PowerState power_state = 2;
 }
 
 /**

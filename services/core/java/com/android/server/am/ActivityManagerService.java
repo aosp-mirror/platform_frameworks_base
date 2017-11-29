@@ -13696,7 +13696,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     stats.getPackageStatsLocked(sourceUid >= 0 ? sourceUid : uid,
                             sourcePkg != null ? sourcePkg : rec.key.packageName);
                 pkg.noteWakeupAlarmLocked(tag);
-                StatsLog.write(StatsLog.WAKEUP_ALARM_OCCURRED, sourceUid >= 0 ? sourceUid : uid);
+                StatsLog.write(StatsLog.WAKEUP_ALARM_OCCURRED, sourceUid >= 0 ? sourceUid : uid,
+                        tag);
             }
         }
     }
