@@ -55,6 +55,8 @@ public class SurfaceControl {
     private static native void nativeScreenshot(IBinder displayToken, Surface consumer,
             Rect sourceCrop, int width, int height, int minLayer, int maxLayer,
             boolean allLayers, boolean useIdentityTransform);
+    private static native void nativeCaptureLayers(IBinder layerHandleToken, Surface consumer,
+            Rect sourceCrop, float frameScale);
     private static native GraphicBuffer nativeCaptureLayers(IBinder layerHandleToken,
             Rect sourceCrop, float frameScale);
 
@@ -1177,14 +1179,22 @@ public class SurfaceControl {
      * Captures a layer and its children into the provided {@link Surface}.
      *
      * @param layerHandleToken The root layer to capture.
+     * @param consumer         The {@link Surface} to capture the layer into.
      * @param sourceCrop       The portion of the root surface to capture; caller may pass in 'new
      *                         Rect()' or null if no cropping is desired.
      * @param frameScale       The desired scale of the returned buffer; the raw
      *                         screen will be scaled up/down.
-     *
-     * @return Returns a GraphicBuffer that contains the layer capture.
      */
-    public static GraphicBuffer captureLayers(IBinder layerHandleToken, Rect sourceCrop,
+    public static void captureLayers(IBinder layerHandleToken, Surface consumer, Rect sourceCrop,
+            float frameScale) {
+        nativeCaptureLayers(layerHandleToken, consumer, sourceCrop, frameScale);
+    }
+
+    /**
+     * Same as {@link #captureLayers(IBinder, Surface, Rect, float)} except this
+     * captures to a {@link GraphicBuffer} instead of a {@link Surface}.
+     */
+    public static GraphicBuffer captureLayersToBuffer(IBinder layerHandleToken, Rect sourceCrop,
             float frameScale) {
         return nativeCaptureLayers(layerHandleToken, sourceCrop, frameScale);
     }
