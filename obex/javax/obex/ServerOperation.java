@@ -195,7 +195,12 @@ public final class ServerOperation implements Operation, BaseStream {
             if(!handleObexPacket(packet)) {
                 return;
             }
-            if (!mHasBody) {
+            /* Don't Pre-Send continue when Remote requested for SRM
+             * Let the Application confirm.
+             */
+            if (V) Log.v(TAG, "Get App confirmation if SRM ENABLED case: " + mSrmEnabled
+                    + " not hasBody case: " + mHasBody);
+            if (!mHasBody && !mSrmEnabled) {
                 while ((!mGetOperation) && (!finalBitSet)) {
                     sendReply(ResponseCodes.OBEX_HTTP_CONTINUE);
                     if (mPrivateInput.available() > 0) {
@@ -204,8 +209,13 @@ public final class ServerOperation implements Operation, BaseStream {
                 }
             }
         }
-
-        while ((!mGetOperation) && (!finalBitSet) && (mPrivateInput.available() == 0)) {
+        /* Don't Pre-Send continue when Remote requested for SRM
+          * Let the Application confirm.
+          */
+        if (V) Log.v(TAG, "Get App confirmation if SRM ENABLED case: " + mSrmEnabled
+            + " not finalPacket: " + finalBitSet + " not GETOp Case: " + mGetOperation);
+        while ((!mSrmEnabled) && (!mGetOperation) && (!finalBitSet)
+                && (mPrivateInput.available() == 0)) {
             sendReply(ResponseCodes.OBEX_HTTP_CONTINUE);
             if (mPrivateInput.available() > 0) {
                 break;
