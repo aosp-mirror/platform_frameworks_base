@@ -1116,7 +1116,7 @@ framework_docs_LOCAL_DROIDDOC_OPTIONS += \
 		-federate SupportLib https://developer.android.com \
 		-federationapi SupportLib prebuilts/sdk/current/support-api.txt
 
-# ====  the api diff ===========================
+# ====  Public API diff ===========================
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES := $(framework_docs_LOCAL_API_CHECK_SRC_FILES)
@@ -1138,6 +1138,31 @@ last_released_sdk_version := $(lastword $(call numerically_sort, \
 
 LOCAL_APIDIFF_OLDAPI := $(LOCAL_PATH)/../../$(SRC_API_DIR)/$(last_released_sdk_version)
 LOCAL_APIDIFF_NEWAPI := $(LOCAL_PATH)/../../$(basename $(INTERNAL_PLATFORM_API_FILE))
+
+include $(BUILD_APIDIFF)
+
+# ====  System API diff ===========================
+include $(CLEAR_VARS)
+
+LOCAL_SRC_FILES := $(framework_docs_LOCAL_API_CHECK_SRC_FILES)
+LOCAL_INTERMEDIATE_SOURCES := $(framework_docs_LOCAL_INTERMEDIATE_SOURCES)
+LOCAL_JAVA_LIBRARIES := $(framework_docs_LOCAL_API_CHECK_JAVA_LIBRARIES)
+LOCAL_MODULE_CLASS := $(framework_docs_LOCAL_MODULE_CLASS)
+LOCAL_ADDITIONAL_JAVA_DIR := $(framework_docs_LOCAL_API_CHECK_ADDITIONAL_JAVA_DIR)
+LOCAL_ADDITIONAL_DEPENDENCIES := \
+	$(framework_docs_LOCAL_ADDITIONAL_DEPENDENCIES) \
+	$(INTERNAL_PLATFORM_SYSTEM_API_FILE)
+
+LOCAL_MODULE := offline-system-sdk-referenceonly
+
+last_released_sdk_version := $(lastword $(call numerically_sort, \
+			$(filter-out current, \
+				$(patsubst $(SRC_SYSTEM_API_DIR)/%.txt,%, $(wildcard $(SRC_SYSTEM_API_DIR)/*.txt)) \
+			 )\
+		))
+
+LOCAL_APIDIFF_OLDAPI := $(LOCAL_PATH)/../../$(SRC_SYSTEM_API_DIR)/$(last_released_sdk_version)
+LOCAL_APIDIFF_NEWAPI := $(LOCAL_PATH)/../../$(basename $(INTERNAL_PLATFORM_SYSTEM_API_FILE))
 
 include $(BUILD_APIDIFF)
 
@@ -1317,7 +1342,7 @@ $(full_target): $(static_doc_index_redirect)
 $(full_target): $(framework_built)
 
 
-# ====  static html in the sdk ==================================
+# ==== Public API static reference docs ==================================
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:=$(framework_docs_LOCAL_SRC_FILES)
@@ -1335,6 +1360,50 @@ LOCAL_DROIDDOC_OPTIONS:=\
 		$(framework_docs_LOCAL_DROIDDOC_OPTIONS) \
 		-offlinemode \
 		-title "Android SDK" \
+		-proofread $(OUT_DOCS)/$(LOCAL_MODULE)-proofread.txt \
+		-sdkvalues $(OUT_DOCS) \
+		-hdf android.whichdoc offline \
+		-referenceonly
+
+LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=external/doclava/res/assets/templates-sdk
+
+include $(BUILD_DROIDDOC)
+
+static_doc_index_redirect := $(out_dir)/index.html
+$(static_doc_index_redirect): $(LOCAL_PATH)/docs/docs-documentation-redirect.html
+	$(copy-file-to-target)
+
+static_doc_properties := $(out_dir)/source.properties
+$(static_doc_properties): \
+	$(LOCAL_PATH)/docs/source.properties | $(ACP)
+	$(hide) mkdir -p $(dir $@)
+	$(hide) $(ACP) $< $@
+
+$(full_target): $(static_doc_index_redirect)
+$(full_target): $(static_doc_properties)
+$(full_target): $(framework_built)
+
+
+# ==== System API static reference docs ==================================
+include $(CLEAR_VARS)
+
+LOCAL_SRC_FILES:=$(framework_docs_LOCAL_SRC_FILES)
+LOCAL_INTERMEDIATE_SOURCES:=$(framework_docs_LOCAL_INTERMEDIATE_SOURCES)
+LOCAL_JAVA_LIBRARIES:=$(framework_docs_LOCAL_JAVA_LIBRARIES)
+LOCAL_MODULE_CLASS:=$(framework_docs_LOCAL_MODULE_CLASS)
+LOCAL_DROIDDOC_SOURCE_PATH:=$(framework_docs_LOCAL_DROIDDOC_SOURCE_PATH)
+LOCAL_DROIDDOC_HTML_DIR:=$(framework_docs_LOCAL_DROIDDOC_HTML_DIR)
+LOCAL_ADDITIONAL_JAVA_DIR:=$(framework_docs_LOCAL_ADDITIONAL_JAVA_DIR)
+LOCAL_ADDITIONAL_DEPENDENCIES:=$(framework_docs_LOCAL_ADDITIONAL_DEPENDENCIES)
+
+LOCAL_MODULE := offline-system-sdk-referenceonly
+
+LOCAL_DROIDDOC_OPTIONS:=\
+		$(framework_docs_LOCAL_DROIDDOC_OPTIONS) \
+		-hide 101 -hide 104 -hide 108 \
+		-showAnnotation android.annotation.SystemApi \
+		-offlinemode \
+		-title "Android System SDK" \
 		-proofread $(OUT_DOCS)/$(LOCAL_MODULE)-proofread.txt \
 		-sdkvalues $(OUT_DOCS) \
 		-hdf android.whichdoc offline \
