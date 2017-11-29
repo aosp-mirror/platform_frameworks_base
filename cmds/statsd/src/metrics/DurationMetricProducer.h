@@ -45,17 +45,7 @@ public:
 
     virtual ~DurationMetricProducer();
 
-    void onConditionChanged(const bool conditionMet, const uint64_t eventTime) override;
-
     void finish() override;
-    void flushIfNeeded(const uint64_t newEventTime) override;
-
-    // TODO: Pass a timestamp as a parameter in onDumpReport.
-    std::unique_ptr<std::vector<uint8_t>> onDumpReport() override;
-
-    void onSlicedConditionMayChange(const uint64_t eventTime) override;
-
-    size_t byteSize() const override;
 
     // TODO: Implement this later.
     virtual void notifyAppUpgrade(const string& apk, const int uid, const int version) override{};
@@ -63,14 +53,30 @@ public:
     virtual void notifyAppRemoved(const string& apk, const int uid) override{};
 
 protected:
-    void onMatchedLogEventInternal(const size_t matcherIndex, const HashableDimensionKey& eventKey,
-                                   const std::map<std::string, HashableDimensionKey>& conditionKeys,
-                                   bool condition, const LogEvent& event,
-                                   bool scheduledPull) override;
-
-    void startNewProtoOutputStream(long long timestamp) override;
+    void onMatchedLogEventInternalLocked(
+            const size_t matcherIndex, const HashableDimensionKey& eventKey,
+            const std::map<std::string, HashableDimensionKey>& conditionKeys, bool condition,
+            const LogEvent& event, bool scheduledPull) override;
 
 private:
+    // TODO: Pass a timestamp as a parameter in onDumpReport.
+    std::unique_ptr<std::vector<uint8_t>> onDumpReportLocked() override;
+
+    // Internal interface to handle condition change.
+    void onConditionChangedLocked(const bool conditionMet, const uint64_t eventTime) override;
+
+    // Internal interface to handle sliced condition change.
+    void onSlicedConditionMayChangeLocked(const uint64_t eventTime) override;
+
+    // Internal function to calculate the current used bytes.
+    size_t byteSizeLocked() const override;
+
+    // Util function to flush the old packet.
+    void flushIfNeededLocked(const uint64_t& eventTime);
+
+    // Util function to init/reset the proto output stream.
+    void startNewProtoOutputStreamLocked(long long timestamp);
+
     const DurationMetric mMetric;
 
     // Index of the SimpleLogEntryMatcher which defines the start.
@@ -96,11 +102,17 @@ private:
     std::unordered_map<HashableDimensionKey, std::unique_ptr<DurationTracker>>
             mCurrentSlicedDuration;
 
-    std::unique_ptr<DurationTracker> createDurationTracker(const HashableDimensionKey& eventKey,
-                                                           std::vector<DurationBucket>& bucket);
-    bool hitGuardRail(const HashableDimensionKey& newKey);
+    // Helper function to create a duration tracker given the metric aggregation type.
+    std::unique_ptr<DurationTracker> createDurationTracker(
+            const HashableDimensionKey& eventKey, std::vector<DurationBucket>& bucket) const;
+
+    // Util function to check whether the specified dimension hits the guardrail.
+    bool hitGuardRailLocked(const HashableDimensionKey& newKey);
 
     static const size_t kBucketSize = sizeof(DurationBucket{});
+
+    FRIEND_TEST(DurationMetricTrackerTest, TestNoCondition);
+    FRIEND_TEST(DurationMetricTrackerTest, TestNonSlicedCondition);
 };
 
 }  // namespace statsd

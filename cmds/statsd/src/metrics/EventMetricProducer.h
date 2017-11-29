@@ -40,23 +40,7 @@ public:
 
     virtual ~EventMetricProducer();
 
-    void onMatchedLogEventInternal(const size_t matcherIndex, const HashableDimensionKey& eventKey,
-                                   const std::map<std::string, HashableDimensionKey>& conditionKey,
-                                   bool condition, const LogEvent& event,
-                                   bool scheduledPull) override;
-
-    void onConditionChanged(const bool conditionMet, const uint64_t eventTime) override;
-
     void finish() override;
-    void flushIfNeeded(const uint64_t newEventTime) override {
-    }
-
-    // TODO: Pass a timestamp as a parameter in onDumpReport.
-    std::unique_ptr<std::vector<uint8_t>> onDumpReport() override;
-
-    void onSlicedConditionMayChange(const uint64_t eventTime) override;
-
-    size_t byteSize() const override;
 
     // TODO: Implement this later.
     virtual void notifyAppUpgrade(const string& apk, const int uid, const int version) override{};
@@ -64,9 +48,26 @@ public:
     virtual void notifyAppRemoved(const string& apk, const int uid) override{};
 
 protected:
-    void startNewProtoOutputStream(long long timestamp) override;
+    void startNewProtoOutputStreamLocked(long long timestamp);
 
 private:
+    void onMatchedLogEventInternalLocked(
+            const size_t matcherIndex, const HashableDimensionKey& eventKey,
+            const std::map<std::string, HashableDimensionKey>& conditionKey, bool condition,
+            const LogEvent& event, bool scheduledPull) override;
+
+    // TODO: Pass a timestamp as a parameter in onDumpReport.
+    std::unique_ptr<std::vector<uint8_t>> onDumpReportLocked() override;
+
+    // Internal interface to handle condition change.
+    void onConditionChangedLocked(const bool conditionMet, const uint64_t eventTime) override;
+
+    // Internal interface to handle sliced condition change.
+    void onSlicedConditionMayChangeLocked(const uint64_t eventTime) override;
+
+    // Internal function to calculate the current used bytes.
+    size_t byteSizeLocked() const override;
+
     const EventMetric mMetric;
 };
 
