@@ -30,12 +30,12 @@
     <string name="destination_default_text" msgid="5422708056807065710">"ਇੱਕ ਪ੍ਰਿੰਟਰ ਚੁਣੋ"</string>
     <string name="template_all_pages" msgid="3322235982020148762">"ਸਾਰੇ <xliff:g id="PAGE_COUNT">%1$s</xliff:g>"</string>
     <string name="template_page_range" msgid="428638530038286328">"<xliff:g id="PAGE_COUNT">%1$s</xliff:g> ਦੀ ਰੇਂਜ"</string>
-    <string name="pages_range_example" msgid="8558694453556945172">"ਉਦਾਹਰਨ ਲਈ 1—5,8,11—13"</string>
-    <string name="print_preview" msgid="8010217796057763343">"ਪ੍ਰਿੰਟ ਪ੍ਰੀਵਿਊ"</string>
-    <string name="install_for_print_preview" msgid="6366303997385509332">"ਪ੍ਰੀਵਿਊ ਲਈ PDF ਵਿਊਅਰ ਇੰਸਟੌਲ ਕਰੋ"</string>
+    <string name="pages_range_example" msgid="8558694453556945172">"ਉਦਾਹਰਨ ਵਜੋਂ 1—5,8,11—13"</string>
+    <string name="print_preview" msgid="8010217796057763343">"ਪ੍ਰਿੰਟ ਦੀ ਪੂਰਵ-ਝਲਕ"</string>
+    <string name="install_for_print_preview" msgid="6366303997385509332">"ਪੂਰਵ-ਝਲਕ ਲਈ PDF ਵਿਊਅਰ ਸਥਾਪਤ ਕਰੋ"</string>
     <string name="printing_app_crashed" msgid="854477616686566398">"ਪ੍ਰਿੰਟਿੰਗ ਐਪ ਕ੍ਰੈਸ਼ ਹੋਇਆ"</string>
     <string name="generating_print_job" msgid="3119608742651698916">"ਪ੍ਰਿੰਟ ਜੌਬ ਬਣਾ ਰਿਹਾ ਹੈ"</string>
-    <string name="save_as_pdf" msgid="5718454119847596853">"PDF ਦੇ ਤੌਰ ਤੇ ਰੱਖਿਅਤ ਕਰੋ"</string>
+    <string name="save_as_pdf" msgid="5718454119847596853">"PDF ਦੇ ਤੌਰ \'ਤੇ ਰੱਖਿਅਤ ਕਰੋ"</string>
     <string name="all_printers" msgid="5018829726861876202">"ਸਾਰੇ ਪ੍ਰਿੰਟਰ…"</string>
     <string name="print_dialog" msgid="32628687461331979">"ਪ੍ਰਿੰਟ ਡਾਇਲੌਗ"</string>
     <string name="current_page_template" msgid="5145005201131935302">"<xliff:g id="CURRENT_PAGE">%1$d</xliff:g>/<xliff:g id="PAGE_COUNT">%2$d</xliff:g>"</string>
@@ -49,10 +49,10 @@
     <string name="print_options_collapsed" msgid="7455930445670414332">"ਪ੍ਰਿੰਟ ਚੋਣਾਂ ਇਕੱਠਾ ਹੋਈਆਂ"</string>
     <string name="search" msgid="5421724265322228497">"ਖੋਜੋ"</string>
     <string name="all_printers_label" msgid="3178848870161526399">"ਸਾਰੇ ਪ੍ਰਿੰਟਰ"</string>
-    <string name="add_print_service_label" msgid="5356702546188981940">"ਸੇਵਾ ਜੋੜੋ"</string>
-    <string name="print_search_box_shown_utterance" msgid="7967404953901376090">"ਖੋਜ ਬੌਕਸ ਦਿਖਾਇਆ"</string>
-    <string name="print_search_box_hidden_utterance" msgid="5727755169343113351">"ਖੋਜ ਬੌਕਸ ਲੁਕਾਇਆ"</string>
-    <string name="print_add_printer" msgid="1088656468360653455">"ਪ੍ਰਿੰਟਰ ਜੋੜੋ"</string>
+    <string name="add_print_service_label" msgid="5356702546188981940">"ਸੇਵਾ ਸ਼ਾਮਲ ਕਰੋ"</string>
+    <string name="print_search_box_shown_utterance" msgid="7967404953901376090">"ਖੋਜ ਬਾਕਸ ਦਿਖਾਇਆ"</string>
+    <string name="print_search_box_hidden_utterance" msgid="5727755169343113351">"ਖੋਜ ਬਾਕਸ ਲੁਕਾਇਆ"</string>
+    <string name="print_add_printer" msgid="1088656468360653455">"ਪ੍ਰਿੰਟਰ ਸ਼ਾਮਲ ਕਰੋ"</string>
     <string name="print_select_printer" msgid="7388760939873368698">"ਪ੍ਰਿੰਟਰ ਚੁਣੋ"</string>
     <string name="print_forget_printer" msgid="5035287497291910766">"ਪ੍ਰਿੰਟਰ ਭੁੱਲੋ"</string>
     <plurals name="print_search_result_count_utterance" formatted="false" msgid="6997663738361080868">
@@ -106,6 +106,6 @@
     <string name="print_error_default_message" msgid="8602678405502922346">"ਮਾਫ਼ ਕਰਨਾ, ਉਸਨੇ ਲਾਭਕਾਰੀ ਨਹੀਂ ਹੋਇਆ। ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
     <string name="print_error_retry" msgid="1426421728784259538">"ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ"</string>
     <string name="print_error_printer_unavailable" msgid="8985614415253203381">"ਇਹ ਪ੍ਰਿੰਟਰ ਇਸ ਵੇਲੇ ਉਪਲਬਧ ਨਹੀਂ ਹੈ।"</string>
-    <string name="print_cannot_load_page" msgid="6179560924492912009">"ਝਲਕ ਨਹੀਂ ਵਿਖਾਈ ਜਾ ਸਕਦੀ"</string>
-    <string name="print_preparing_preview" msgid="3939930735671364712">"ਪ੍ਰੀਵਿਊ ਦੀ ਤਿਆਰੀ ਕਰ ਰਿਹਾ ਹੈ…"</string>
+    <string name="print_cannot_load_page" msgid="6179560924492912009">"ਪੂਰਵ-ਝਲਕ ਨਹੀਂ ਦਿਖਾਈ ਜਾ ਸਕਦੀ"</string>
+    <string name="print_preparing_preview" msgid="3939930735671364712">"ਪੂਰਵ-ਝਲਕ ਦੀ ਤਿਆਰੀ ਕਰ ਰਿਹਾ ਹੈ…"</string>
 </resources>

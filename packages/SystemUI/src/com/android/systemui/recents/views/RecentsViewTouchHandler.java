@@ -23,6 +23,7 @@ import android.graphics.Rect;
 import android.view.InputDevice;
 import android.view.MotionEvent;
 import android.view.PointerIcon;
+import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewDebug;
 
@@ -31,6 +32,8 @@ import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.ConfigurationChangedEvent;
 import com.android.systemui.recents.events.activity.HideRecentsEvent;
+import com.android.systemui.recents.events.activity.HideStackActionButtonEvent;
+import com.android.systemui.recents.events.ui.DismissAllTaskViewsEvent;
 import com.android.systemui.recents.events.ui.HideIncompatibleAppOverlayEvent;
 import com.android.systemui.recents.events.ui.ShowIncompatibleAppOverlayEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragDropTargetChangedEvent;
@@ -99,8 +102,7 @@ public class RecentsViewTouchHandler {
 
     /** Touch preprocessing for handling below */
     public boolean onInterceptTouchEvent(MotionEvent ev) {
-        handleTouchEvent(ev);
-        return mDragRequested;
+        return handleTouchEvent(ev) || mDragRequested;
     }
 
     /** Handles touch events once we have intercepted them */
@@ -183,21 +185,46 @@ public class RecentsViewTouchHandler {
         }
     }
 
+    void cancelStackActionButtonClick() {
+        mRv.getStackActionButton().setPressed(false);
+    }
+
+    private boolean isWithinStackActionButton(float x, float y) {
+        Rect rect = mRv.getStackActionButtonBoundsFromStackLayout();
+        return mRv.getStackActionButton().getVisibility() == View.VISIBLE &&
+                mRv.getStackActionButton().pointInView(x - rect.left, y - rect.top, 0 /* slop */);
+    }
+
+    private void changeStackActionButtonDrawableHotspot(float x, float y) {
+        Rect rect = mRv.getStackActionButtonBoundsFromStackLayout();
+        mRv.getStackActionButton().drawableHotspotChanged(x - rect.left, y - rect.top);
+    }
+
     /**
      * Handles dragging touch events
      */
-    private void handleTouchEvent(MotionEvent ev) {
+    private boolean handleTouchEvent(MotionEvent ev) {
         int action = ev.getActionMasked();
+        boolean consumed = false;
+        float evX = ev.getX();
+        float evY = ev.getY();
         switch (action) {
             case MotionEvent.ACTION_DOWN:
-                mDownPos.set((int) ev.getX(), (int) ev.getY());
+                mDownPos.set((int) evX, (int) evY);
                 mDeviceId = ev.getDeviceId();
+
+                if (isWithinStackActionButton(evX, evY)) {
+                    changeStackActionButtonDrawableHotspot(evX, evY);
+                    mRv.getStackActionButton().setPressed(true);
+                }
                 break;
             case MotionEvent.ACTION_MOVE: {
-                float evX = ev.getX();
-                float evY = ev.getY();
                 float x = evX - mTaskViewOffset.x;
                 float y = evY - mTaskViewOffset.y;
+
+                if (mRv.getStackActionButton().isPressed() && isWithinStackActionButton(evX, evY)) {
+                    changeStackActionButtonDrawableHotspot(evX, evY);
+                }
 
                 if (mDragRequested) {
                     if (!mIsDragging) {
@@ -232,9 +259,7 @@ public class RecentsViewTouchHandler {
                             EventBus.getDefault().send(new DragDropTargetChangedEvent(mDragTask,
                                     currentDropTarget));
                         }
-
                     }
-
                     mTaskView.setTranslationX(x);
                     mTaskView.setTranslationY(y);
                 }
@@ -242,6 +267,11 @@ public class RecentsViewTouchHandler {
             }
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL: {
+                if (mRv.getStackActionButton().isPressed() && isWithinStackActionButton(evX, evY)) {
+                    EventBus.getDefault().send(new DismissAllTaskViewsEvent());
+                    consumed = true;
+                }
+                cancelStackActionButtonClick();
                 if (mDragRequested) {
                     boolean cancelled = action == MotionEvent.ACTION_CANCEL;
                     if (cancelled) {
@@ -254,5 +284,6 @@ public class RecentsViewTouchHandler {
                 mDeviceId = -1;
             }
         }
+        return consumed;
     }
 }

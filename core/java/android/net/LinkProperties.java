@@ -18,14 +18,13 @@ package android.net;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.net.ProxyInfo;
-import android.os.Parcelable;
 import android.os.Parcel;
+import android.os.Parcelable;
 import android.text.TextUtils;
 
-import java.net.InetAddress;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
+import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -504,11 +503,22 @@ public final class LinkProperties implements Parcelable {
     }
 
     /**
+     * Make sure this LinkProperties instance contains routes that cover the local subnet
+     * of its link addresses. Add any route that is missing.
+     * @hide
+     */
+    public void ensureDirectlyConnectedRoutes() {
+        for (LinkAddress addr: mLinkAddresses) {
+            addRoute(new RouteInfo(addr, null, mIfaceName));
+        }
+    }
+
+    /**
      * Returns all the routes on this link and all the links stacked above it.
      * @hide
      */
     public List<RouteInfo> getAllRoutes() {
-        List<RouteInfo> routes = new ArrayList();
+        List<RouteInfo> routes = new ArrayList<>();
         routes.addAll(mRoutes);
         for (LinkProperties stacked: mStackedLinks.values()) {
             routes.addAll(stacked.getAllRoutes());

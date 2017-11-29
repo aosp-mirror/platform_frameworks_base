@@ -19,6 +19,7 @@ package com.android.server.locksettings;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.admin.DevicePolicyManager;
+import android.content.Context;
 import android.content.pm.UserInfo;
 import android.hardware.weaver.V1_0.IWeaver;
 import android.hardware.weaver.V1_0.WeaverConfig;
@@ -255,13 +256,16 @@ public class SyntheticPasswordManager {
         byte[] aggregatedSecret;
     }
 
+    private final Context mContext;
     private LockSettingsStorage mStorage;
     private IWeaver mWeaver;
     private WeaverConfig mWeaverConfig;
 
     private final UserManager mUserManager;
 
-    public SyntheticPasswordManager(LockSettingsStorage storage, UserManager userManager) {
+    public SyntheticPasswordManager(Context context, LockSettingsStorage storage,
+            UserManager userManager) {
+        mContext = context;
         mStorage = storage;
         mUserManager = userManager;
     }
@@ -645,7 +649,7 @@ public class SyntheticPasswordManager {
 
     public void migrateFrpPasswordLocked(long handle, UserInfo userInfo, int requestedQuality) {
         if (mStorage.getPersistentDataBlock() != null
-                && LockPatternUtils.userOwnsFrpCredential(userInfo)) {
+                && LockPatternUtils.userOwnsFrpCredential(mContext, userInfo)) {
             PasswordData pwd = PasswordData.fromBytes(loadState(PASSWORD_DATA_NAME, handle,
                     userInfo.id));
             if (pwd.passwordType != LockPatternUtils.CREDENTIAL_TYPE_NONE) {
@@ -662,7 +666,8 @@ public class SyntheticPasswordManager {
     private void synchronizeFrpPassword(PasswordData pwd,
             int requestedQuality, int userId) {
         if (mStorage.getPersistentDataBlock() != null
-                && LockPatternUtils.userOwnsFrpCredential(mUserManager.getUserInfo(userId))) {
+                && LockPatternUtils.userOwnsFrpCredential(mContext,
+                mUserManager.getUserInfo(userId))) {
             if (pwd.passwordType != LockPatternUtils.CREDENTIAL_TYPE_NONE) {
                 mStorage.writePersistentDataBlock(PersistentData.TYPE_SP, userId, requestedQuality,
                         pwd.toBytes());
@@ -675,7 +680,8 @@ public class SyntheticPasswordManager {
     private void synchronizeWeaverFrpPassword(PasswordData pwd, int requestedQuality, int userId,
             int weaverSlot) {
         if (mStorage.getPersistentDataBlock() != null
-                && LockPatternUtils.userOwnsFrpCredential(mUserManager.getUserInfo(userId))) {
+                && LockPatternUtils.userOwnsFrpCredential(mContext,
+                mUserManager.getUserInfo(userId))) {
             if (pwd.passwordType != LockPatternUtils.CREDENTIAL_TYPE_NONE) {
                 mStorage.writePersistentDataBlock(PersistentData.TYPE_SP_WEAVER, weaverSlot,
                         requestedQuality, pwd.toBytes());

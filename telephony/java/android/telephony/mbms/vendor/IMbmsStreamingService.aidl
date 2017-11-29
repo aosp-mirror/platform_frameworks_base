@@ -17,7 +17,7 @@
 package android.telephony.mbms.vendor;
 
 import android.net.Uri;
-import android.telephony.mbms.IMbmsStreamingManagerCallback;
+import android.telephony.mbms.IMbmsStreamingSessionCallback;
 import android.telephony.mbms.IStreamingServiceCallback;
 import android.telephony.mbms.StreamingServiceInfo;
 
@@ -26,18 +26,16 @@ import android.telephony.mbms.StreamingServiceInfo;
  */
 interface IMbmsStreamingService
 {
-    int initialize(IMbmsStreamingManagerCallback listener, int subId);
+    int initialize(IMbmsStreamingSessionCallback callback, int subId);
 
-    int getStreamingServices(int subId, in List<String> serviceClasses);
+    int requestUpdateStreamingServices(int subId, in List<String> serviceClasses);
 
     int startStreaming(int subId, String serviceId,
-            IStreamingServiceCallback listener);
+            IStreamingServiceCallback callback);
 
     Uri getPlaybackUri(int subId, String serviceId);
 
     void stopStreaming(int subId, String serviceId);
-
-    void disposeStream(int subId, String serviceId);
 
     void dispose(int subId);
 }

@@ -33,7 +33,6 @@ import android.os.UserHandle;
 import android.text.format.Formatter;
 import android.util.Log;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.hardware.AmbientDisplayConfiguration;
 import com.android.internal.util.Preconditions;
 import com.android.systemui.statusbar.phone.DozeParameters;
@@ -66,7 +65,6 @@ public class DozeTriggers implements DozeMachine.Part {
     private final boolean mAllowPulseTriggers;
     private final UiModeManager mUiModeManager;
     private final TriggerReceiver mBroadcastReceiver = new TriggerReceiver();
-    private final DozeScreenBrightness mDozeScreenBrightness;
 
     private long mNotificationPulseTime;
     private boolean mPulsePending;
@@ -75,7 +73,7 @@ public class DozeTriggers implements DozeMachine.Part {
     public DozeTriggers(Context context, DozeMachine machine, DozeHost dozeHost,
             AlarmManager alarmManager, AmbientDisplayConfiguration config,
             DozeParameters dozeParameters, SensorManager sensorManager, Handler handler,
-            DozeScreenBrightness brightness, WakeLock wakeLock, boolean allowPulseTriggers) {
+            WakeLock wakeLock, boolean allowPulseTriggers) {
         mContext = context;
         mMachine = machine;
         mDozeHost = dozeHost;
@@ -89,7 +87,6 @@ public class DozeTriggers implements DozeMachine.Part {
                 config, wakeLock, this::onSensor, this::onProximityFar,
                 new AlwaysOnDisplayPolicy(context));
         mUiModeManager = mContext.getSystemService(UiModeManager.class);
-        mDozeScreenBrightness = brightness;
     }
 
     private void onNotification() {
@@ -162,41 +159,16 @@ public class DozeTriggers implements DozeMachine.Part {
     private void onProximityFar(boolean far) {
         final boolean near = !far;
         final DozeMachine.State state = mMachine.getState();
+        final boolean paused = (state == DozeMachine.State.DOZE_AOD_PAUSED);
+        final boolean pausing = (state == DozeMachine.State.DOZE_AOD_PAUSING);
+        final boolean aod = (state == DozeMachine.State.DOZE_AOD);
 
         if (state == DozeMachine.State.DOZE_PULSING) {
             boolean ignoreTouch = near;
             if (DEBUG) Log.i(TAG, "Prox changed, ignore touch = " + ignoreTouch);
             mDozeHost.onIgnoreTouchWhilePulsing(ignoreTouch);
         }
-
-        recalculatePausing();
-    }
-
-    private void onBrightnessReady(boolean brightnessReady) {
-        // Post because this is sometimes called during state transitions and we cannot query
-        // the machine's state while it's transitioning.
-        mHandler.post(this::recalculatePausing);
-    }
-
-    private void recalculatePausing() {
-        boolean brightnessReady = mDozeScreenBrightness.isReady();
-        Boolean proxCurrentlyFar = mDozeSensors.isProximityCurrentlyFar();
-
-        // Treat UNKNOWN the same as FAR, such that we don't pause the display just because
-        // the prox has unknown state.
-        boolean proximityFar = proxCurrentlyFar == null || proxCurrentlyFar;
-        recalculatePausing(proximityFar, brightnessReady);
-    }
-
-    @VisibleForTesting
-    void recalculatePausing(boolean proximityFar, boolean brightnessReady) {
-        final boolean near = !proximityFar;
-        final DozeMachine.State state = mMachine.getState();
-        final boolean paused = (state == DozeMachine.State.DOZE_AOD_PAUSED);
-        final boolean pausing = (state == DozeMachine.State.DOZE_AOD_PAUSING);
-        final boolean aod = (state == DozeMachine.State.DOZE_AOD);
-
-        if (proximityFar && (pausing || paused && brightnessReady)) {
+        if (far && (paused || pausing)) {
             if (DEBUG) Log.i(TAG, "Prox FAR, unpausing AOD");
             mMachine.requestState(DozeMachine.State.DOZE_AOD);
         } else if (near && aod) {
@@ -211,7 +183,6 @@ public class DozeTriggers implements DozeMachine.Part {
             case INITIALIZED:
                 mBroadcastReceiver.register(mContext);
                 mDozeHost.addCallback(mHostCallback);
-                mDozeScreenBrightness.setBrightnessReadyListener(this::onBrightnessReady);
                 checkTriggersAtInit();
                 break;
             case DOZE:

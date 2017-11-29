@@ -280,6 +280,11 @@ CopyResult OpenGLReadbackImpl::copyImageInto(EGLImageKHR eglImage,
 
 bool OpenGLReadbackImpl::copyLayerInto(renderthread::RenderThread& renderThread,
         GlLayer& layer, SkBitmap* bitmap) {
+    if (!layer.isRenderable()) {
+        // layer has never been updated by DeferredLayerUpdater, abort copy
+        return false;
+    }
+
     return CopyResult::Success == copyTextureInto(Caches::getInstance(),
             renderThread.renderState(), layer.getTexture(), layer.getTexTransform(),
             Rect(), bitmap);

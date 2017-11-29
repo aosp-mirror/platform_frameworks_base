@@ -289,7 +289,7 @@
     <string name="transition_animation_scale_title" msgid="387527540523595875">"ট্র্যানজিশন অ্যানিমেশন স্কেল"</string>
     <string name="animator_duration_scale_title" msgid="3406722410819934083">"অ্যানিমেটর সময়কাল স্কেল"</string>
     <string name="overlay_display_devices_title" msgid="5364176287998398539">"গৌণ প্রদর্শনগুলি নকল করুন"</string>
-    <string name="debug_applications_category" msgid="4206913653849771549">"অ্যাপ্লিকেশানগুলি"</string>
+    <string name="debug_applications_category" msgid="4206913653849771549">"অ্যাপ"</string>
     <string name="immediately_destroy_activities" msgid="1579659389568133959">"কার্যকলাপ রাখবেন না"</string>
     <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"ব্যবহারকারী এটি ছেড়ে যাওয়ার পরে যত তাড়াতাড়ি সম্ভব প্রতিটি কার্যকলাপ ধ্বংস করুন"</string>
     <string name="app_process_limit_title" msgid="4280600650253107163">"পশ্চাদপট প্রক্রিয়ার সীমা"</string>

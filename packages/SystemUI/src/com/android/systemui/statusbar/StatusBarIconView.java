@@ -43,6 +43,7 @@ import android.util.FloatProperty;
 import android.util.Log;
 import android.util.Property;
 import android.util.TypedValue;
+import android.view.View;
 import android.view.ViewDebug;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.animation.Interpolator;
@@ -142,6 +143,7 @@ public class StatusBarIconView extends AnimatedImageView {
     private float[] mMatrix;
     private ColorMatrixColorFilter mMatrixColorFilter;
     private boolean mIsInShelf;
+    private Runnable mLayoutRunnable;
 
     public StatusBarIconView(Context context, String slot, StatusBarNotification sbn) {
         this(context, slot, sbn, false);
@@ -796,12 +798,43 @@ public class StatusBarIconView extends AnimatedImageView {
         }
     }
 
+    /**
+     * This method returns the drawing rect for the view which is different from the regular
+     * drawing rect, since we layout all children at position 0 and usually the translation is
+     * neglected. The standard implementation doesn't account for translation.
+     *
+     * @param outRect The (scrolled) drawing bounds of the view.
+     */
+    @Override
+    public void getDrawingRect(Rect outRect) {
+        super.getDrawingRect(outRect);
+        float translationX = getTranslationX();
+        float translationY = getTranslationY();
+        outRect.left += translationX;
+        outRect.right += translationX;
+        outRect.top += translationY;
+        outRect.bottom += translationY;
+    }
+
     public void setIsInShelf(boolean isInShelf) {
         mIsInShelf = isInShelf;
     }
 
     public boolean isInShelf() {
         return mIsInShelf;
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
+        if (mLayoutRunnable != null) {
+            mLayoutRunnable.run();
+            mLayoutRunnable = null;
+        }
+    }
+
+    public void executeOnLayout(Runnable runnable) {
+        mLayoutRunnable = runnable;
     }
 
     public interface OnVisibilityChangedListener {

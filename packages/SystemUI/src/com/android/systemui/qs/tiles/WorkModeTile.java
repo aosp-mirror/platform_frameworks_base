@@ -48,7 +48,7 @@ public class WorkModeTile extends QSTileImpl<BooleanState> implements
     }
 
     @Override
-    public void setListening(boolean listening) {
+    public void handleSetListening(boolean listening) {
         if (listening) {
             mProfileController.addCallback(this);
         } else {

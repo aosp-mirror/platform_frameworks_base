@@ -227,7 +227,11 @@ public class RankingHelper implements RankingConfig {
                                 if (!TextUtils.isEmpty(id) && !TextUtils.isEmpty(channelName)) {
                                     NotificationChannel channel = new NotificationChannel(id,
                                             channelName, channelImportance);
-                                    channel.populateFromXml(parser);
+                                    if (forRestore) {
+                                        channel.populateFromXmlForRestore(parser, mContext);
+                                    } else {
+                                        channel.populateFromXml(parser);
+                                    }
                                     r.channels.put(id, channel);
                                 }
                             }
@@ -390,7 +394,11 @@ public class RankingHelper implements RankingConfig {
                     }
 
                     for (NotificationChannel channel : r.channels.values()) {
-                        if (!forBackup || (forBackup && !channel.isDeleted())) {
+                        if (forBackup) {
+                            if (!channel.isDeleted()) {
+                                channel.writeXmlForBackup(out, mContext);
+                            }
+                        } else {
                             channel.writeXml(out);
                         }
                     }
@@ -589,7 +597,8 @@ public class RankingHelper implements RankingConfig {
     }
 
     @Override
-    public void updateNotificationChannel(String pkg, int uid, NotificationChannel updatedChannel) {
+    public void updateNotificationChannel(String pkg, int uid, NotificationChannel updatedChannel,
+            boolean fromUser) {
         Preconditions.checkNotNull(updatedChannel);
         Preconditions.checkNotNull(updatedChannel.getId());
         Record r = getOrCreateRecord(pkg, uid);
@@ -603,7 +612,11 @@ public class RankingHelper implements RankingConfig {
         if (updatedChannel.getLockscreenVisibility() == Notification.VISIBILITY_PUBLIC) {
             updatedChannel.setLockscreenVisibility(Ranking.VISIBILITY_NO_OVERRIDE);
         }
-        lockFieldsForUpdate(channel, updatedChannel);
+        updatedChannel.unlockFields(updatedChannel.getUserLockedFields());
+        updatedChannel.lockFields(channel.getUserLockedFields());
+        if (fromUser) {
+            lockFieldsForUpdate(channel, updatedChannel);
+        }
         r.channels.put(updatedChannel.getId(), updatedChannel);
 
         if (NotificationChannel.DEFAULT_CHANNEL_ID.equals(updatedChannel.getId())) {
@@ -828,8 +841,6 @@ public class RankingHelper implements RankingConfig {
 
     @VisibleForTesting
     void lockFieldsForUpdate(NotificationChannel original, NotificationChannel update) {
-        update.unlockFields(update.getUserLockedFields());
-        update.lockFields(original.getUserLockedFields());
         if (original.canBypassDnd() != update.canBypassDnd()) {
             update.lockFields(NotificationChannel.USER_LOCKED_PRIORITY);
         }

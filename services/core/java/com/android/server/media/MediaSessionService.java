@@ -178,17 +178,6 @@ public class MediaSessionService extends SystemService implements Monitor {
                 return;
             }
             if ((record.getFlags() & MediaSession.FLAG_EXCLUSIVE_GLOBAL_PRIORITY) != 0) {
-                if (mGlobalPrioritySession != record) {
-                    Log.d(TAG, "Global priority session is changed from " + mGlobalPrioritySession
-                            + " to " + record);
-                    mGlobalPrioritySession = record;
-                    if (user != null && user.mPriorityStack.contains(record)) {
-                        // Handle the global priority session separately.
-                        // Otherwise, it will be the media button session even after it becomes
-                        // inactive because it has been the lastly played media app.
-                        user.mPriorityStack.removeSession(record);
-                    }
-                }
                 if (DEBUG_KEY_EVENT) {
                     Log.d(TAG, "Global priority session is updated, active=" + record.isActive());
                 }
@@ -204,10 +193,27 @@ public class MediaSessionService extends SystemService implements Monitor {
         }
     }
 
+    public void setGlobalPrioritySession(MediaSessionRecord record) {
+        synchronized (mLock) {
+            FullUserRecord user = getFullUserRecordLocked(record.getUserId());
+            if (mGlobalPrioritySession != record) {
+                Log.d(TAG, "Global priority session is changed from " + mGlobalPrioritySession
+                        + " to " + record);
+                mGlobalPrioritySession = record;
+                if (user != null && user.mPriorityStack.contains(record)) {
+                    // Handle the global priority session separately.
+                    // Otherwise, it can be the media button session regardless of the active state
+                    // because it or other system components might have been the lastly played media
+                    // app.
+                    user.mPriorityStack.removeSession(record);
+                }
+            }
+        }
+    }
+
     private List<MediaSessionRecord> getActiveSessionsLocked(int userId) {
-        List<MediaSessionRecord> records;
+        List<MediaSessionRecord> records = new ArrayList<>();
         if (userId == UserHandle.USER_ALL) {
-            records = new ArrayList<>();
             int size = mUserRecords.size();
             for (int i = 0; i < size; i++) {
                 records.addAll(mUserRecords.valueAt(i).mPriorityStack.getActiveSessions(userId));
@@ -216,9 +222,9 @@ public class MediaSessionService extends SystemService implements Monitor {
             FullUserRecord user = getFullUserRecordLocked(userId);
             if (user == null) {
                 Log.w(TAG, "getSessions failed. Unknown user " + userId);
-                return new ArrayList<>();
+                return records;
             }
-            records = user.mPriorityStack.getActiveSessions(userId);
+            records.addAll(user.mPriorityStack.getActiveSessions(userId));
         }
 
         // Return global priority session at the first whenever it's asked.
@@ -1363,6 +1369,10 @@ public class MediaSessionService extends SystemService implements Monitor {
                                     flags, packageName, TAG);
                         } catch (RemoteException e) {
                             Log.e(TAG, "Error adjusting default volume.", e);
+                        } catch (IllegalArgumentException e) {
+                            Log.e(TAG, "Cannot adjust volume: direction=" + direction
+                                    + ", suggestedStream=" + suggestedStream + ", flags=" + flags,
+                                    e);
                         }
                     }
                 });

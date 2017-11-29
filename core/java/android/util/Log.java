@@ -392,7 +392,7 @@ public final class Log {
         // and the length of the tag.
         // Note: we implicitly accept possible truncation for Modified-UTF8 differences. It
         //       is too expensive to compute that ahead of time.
-        int bufferSize = NoPreloadHolder.LOGGER_ENTRY_MAX_PAYLOAD  // Base.
+        int bufferSize = PreloadHolder.LOGGER_ENTRY_MAX_PAYLOAD    // Base.
                 - 2                                                // Two terminators.
                 - (tag != null ? tag.length() : 0)                 // Tag length.
                 - 32;                                              // Some slack.
@@ -429,10 +429,10 @@ public final class Log {
     }
 
     /**
-     * NoPreloadHelper class. Caches the LOGGER_ENTRY_MAX_PAYLOAD value to avoid
+     * PreloadHelper class. Caches the LOGGER_ENTRY_MAX_PAYLOAD value to avoid
      * a JNI call during logging.
      */
-    static class NoPreloadHolder {
+    static class PreloadHolder {
         public final static int LOGGER_ENTRY_MAX_PAYLOAD =
                 logger_entry_max_payload_native();
     }

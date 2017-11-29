@@ -26,20 +26,27 @@ public class AudioServiceEvents {
 
     final static class PhoneStateEvent extends AudioEventLogger.Event {
         final String mPackage;
-        final int mPid;
-        final int mMode;
+        final int mOwnerPid;
+        final int mRequesterPid;
+        final int mRequestedMode;
+        final int mActualMode;
 
-        PhoneStateEvent(String callingPackage, int pid, int mode) {
+        PhoneStateEvent(String callingPackage, int requesterPid, int requestedMode,
+                        int ownerPid, int actualMode) {
             mPackage = callingPackage;
-            mPid = pid;
-            mMode = mode;
+            mRequesterPid = requesterPid;
+            mRequestedMode = requestedMode;
+            mOwnerPid = ownerPid;
+            mActualMode = actualMode;
         }
 
         @Override
         public String eventToString() {
-            return new StringBuilder("setMode(").append(AudioSystem.modeToString(mMode))
+            return new StringBuilder("setMode(").append(AudioSystem.modeToString(mRequestedMode))
                     .append(") from package=").append(mPackage)
-                    .append(" pid=").append(mPid).toString();
+                    .append(" pid=").append(mRequesterPid)
+                    .append(" selected mode=").append(AudioSystem.modeToString(mActualMode))
+                    .append(" by pid=").append(mOwnerPid).toString();
         }
     }
 

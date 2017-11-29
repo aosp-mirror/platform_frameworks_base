@@ -18,6 +18,7 @@ package com.android.server.pm;
 
 import android.Manifest;
 import android.annotation.NonNull;
+import android.app.ActivityManager;
 import android.app.DownloadManager;
 import android.app.admin.DevicePolicyManager;
 import android.companion.CompanionDeviceManager;
@@ -579,6 +580,21 @@ final class DefaultPermissionGrantPolicy {
                         grantRuntimePermissionsLPw(voiceInteractPackage,
                                 LOCATION_PERMISSIONS, userId);
                     }
+                }
+            }
+
+            if (ActivityManager.isLowRamDeviceStatic()) {
+                // Allow voice search on low-ram devices
+                Intent globalSearchIntent = new Intent("android.search.action.GLOBAL_SEARCH");
+                PackageParser.Package globalSearchPickerPackage =
+                    getDefaultSystemHandlerActivityPackageLPr(globalSearchIntent, userId);
+
+                if (globalSearchPickerPackage != null
+                        && doesPackageSupportRuntimePermissions(globalSearchPickerPackage)) {
+                    grantRuntimePermissionsLPw(globalSearchPickerPackage,
+                        MICROPHONE_PERMISSIONS, true, userId);
+                    grantRuntimePermissionsLPw(globalSearchPickerPackage,
+                        LOCATION_PERMISSIONS, true, userId);
                 }
             }
 

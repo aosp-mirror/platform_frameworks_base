@@ -502,9 +502,9 @@ LOCAL_SRC_FILES += \
 	telecomm/java/com/android/internal/telecom/IInCallService.aidl \
 	telecomm/java/com/android/internal/telecom/ITelecomService.aidl \
 	telecomm/java/com/android/internal/telecom/RemoteServiceCallback.aidl \
-        telephony/java/android/telephony/mbms/IMbmsDownloadManagerCallback.aidl \
-	telephony/java/android/telephony/mbms/IMbmsStreamingManagerCallback.aidl \
-	telephony/java/android/telephony/mbms/IDownloadProgressListener.aidl \
+	telephony/java/android/telephony/mbms/IMbmsDownloadSessionCallback.aidl \
+	telephony/java/android/telephony/mbms/IMbmsStreamingSessionCallback.aidl \
+	telephony/java/android/telephony/mbms/IDownloadStateCallback.aidl \
         telephony/java/android/telephony/mbms/IStreamingServiceCallback.aidl \
 	telephony/java/android/telephony/mbms/vendor/IMbmsDownloadService.aidl \
 	telephony/java/android/telephony/mbms/vendor/IMbmsStreamingService.aidl \
@@ -1017,6 +1017,7 @@ framework_docs_LOCAL_DROIDDOC_OPTIONS := \
     -since $(SRC_API_DIR)/24.txt 24 \
     -since $(SRC_API_DIR)/25.txt 25 \
     -since $(SRC_API_DIR)/26.txt 26 \
+    -since $(SRC_API_DIR)/27.txt 27 \
     -werror -lerror -hide 111 -hide 113 -hide 121 -hide 125 -hide 126 -hide 127 -hide 128 \
     -overview $(LOCAL_PATH)/core/java/overview.html \
 

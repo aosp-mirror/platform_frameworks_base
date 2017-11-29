@@ -4,6 +4,7 @@ import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.content.ComponentName;
 import android.content.Context;
 import android.os.Handler;
 import android.os.RemoteException;
@@ -62,7 +63,10 @@ public class VrManager {
      * @param callback The callback to register.
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.RESTRICTED_VR_ACCESS)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.RESTRICTED_VR_ACCESS,
+            android.Manifest.permission.ACCESS_VR_STATE
+    })
     public void registerVrStateCallback(VrStateCallback callback, @NonNull Handler handler) {
         if (callback == null || mCallbackMap.containsKey(callback)) {
             return;
@@ -88,7 +92,10 @@ public class VrManager {
      * @param callback The callback to deregister.
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.RESTRICTED_VR_ACCESS)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.RESTRICTED_VR_ACCESS,
+            android.Manifest.permission.ACCESS_VR_STATE
+    })
     public void unregisterVrStateCallback(VrStateCallback callback) {
         CallbackEntry entry = mCallbackMap.remove(callback);
         if (entry != null) {
@@ -110,7 +117,10 @@ public class VrManager {
      * Returns the current VrMode state.
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.ACCESS_VR_STATE)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.RESTRICTED_VR_ACCESS,
+            android.Manifest.permission.ACCESS_VR_STATE
+    })
     public boolean getVrModeEnabled() {
         try {
             return mService.getVrModeState();
@@ -124,7 +134,10 @@ public class VrManager {
      * Returns the current VrMode state.
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.ACCESS_VR_STATE)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.RESTRICTED_VR_ACCESS,
+            android.Manifest.permission.ACCESS_VR_STATE
+    })
     public boolean getPersistentVrModeEnabled() {
         try {
             return mService.getPersistentVrModeEnabled();
@@ -165,6 +178,22 @@ public class VrManager {
             Vr2dDisplayProperties vr2dDisplayProp) {
         try {
             mService.setVr2dDisplayProperties(vr2dDisplayProp);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Set the component name of the compositor service to bind.
+     *
+     * @param componentName ComponentName of a Service in the application's compositor process to
+     * bind to, or null to clear the current binding.
+     */
+    @RequiresPermission(android.Manifest.permission.RESTRICTED_VR_ACCESS)
+    public void setAndBindVrCompositor(ComponentName componentName) {
+        try {
+            mService.setAndBindCompositor(
+                    (componentName == null) ? null : componentName.flattenToString());
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }

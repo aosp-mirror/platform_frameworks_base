@@ -23,15 +23,22 @@ package com.android.server.timezone;
  */
 interface IntentHelper {
 
-    void initialize(String updateAppPackageName, String dataAppPackageName, Listener listener);
+    void initialize(String updateAppPackageName, String dataAppPackageName,
+            PackageTracker packageTracker);
 
     void sendTriggerUpdateCheck(CheckToken checkToken);
 
-    void enableReliabilityTriggering();
+    /**
+     * Schedule a "reliability trigger" after at least minimumDelayMillis, replacing any existing
+     * scheduled one. A reliability trigger ensures that the {@link PackageTracker} can pick up
+     * reliably if a previous update check did not complete for some reason. It can happen when
+     * the device is idle. The trigger is expected to call
+     * {@link PackageTracker#triggerUpdateIfNeeded(boolean)} with a {@code false} value.
+     */
+    void scheduleReliabilityTrigger(long minimumDelayMillis);
 
-    void disableReliabilityTriggering();
-
-    interface Listener {
-        void triggerUpdateIfNeeded(boolean packageUpdated);
-    }
+    /**
+     * Make sure there is no reliability trigger scheduled. No-op if there wasn't one.
+     */
+    void unscheduleReliabilityTrigger();
 }

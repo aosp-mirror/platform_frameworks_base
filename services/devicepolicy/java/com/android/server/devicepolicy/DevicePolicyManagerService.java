@@ -99,6 +99,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ParceledListSlice;
+import android.content.pm.PermissionInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.StringParceledListSlice;
@@ -152,6 +153,7 @@ import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.EventLog;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
@@ -4106,6 +4108,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     private boolean isActivePasswordSufficientForUserLocked(
             DevicePolicyData policy, int userHandle, boolean parent) {
+        final int requiredPasswordQuality = getPasswordQuality(null, userHandle, parent);
+        if (requiredPasswordQuality == DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED) {
+            // A special case is when there is no required password quality, then we just return
+            // true since any password would be sufficient. This is for the scenario when a work
+            // profile is first created so there is no information about the current password but
+            // it should be considered sufficient as there is no password requirement either.
+            // This is useful since it short-circuits the password checkpoint for FDE device below.
+            return true;
+        }
+
         if (!mInjector.storageManagerIsFileBasedEncryptionEnabled()
                 && !policy.mPasswordStateHasBeenSetSinceBoot) {
             // Before user enters their password for the first time after a reboot, return the
@@ -4116,7 +4128,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return policy.mPasswordValidAtLastCheckpoint;
         }
 
-        final int requiredPasswordQuality = getPasswordQuality(null, userHandle, parent);
         if (policy.mActivePasswordMetrics.quality < requiredPasswordQuality) {
             return false;
         }
@@ -9581,6 +9592,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         < android.os.Build.VERSION_CODES.M) {
                     return false;
                 }
+                if (!isRuntimePermission(permission)) {
+                    EventLog.writeEvent(0x534e4554, "62623498", user.getIdentifier(), "");
+                    return false;
+                }
                 final PackageManager packageManager = mInjector.getPackageManager();
                 switch (grantState) {
                     case DevicePolicyManager.PERMISSION_GRANT_STATE_GRANTED: {
@@ -9606,6 +9621,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 }
                 return true;
             } catch (SecurityException se) {
+                return false;
+            } catch (NameNotFoundException e) {
                 return false;
             } finally {
                 mInjector.binderRestoreCallingIdentity(ident);
@@ -9654,6 +9671,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         } catch (RemoteException re) {
             throw new RuntimeException("Package manager has died", re);
         }
+    }
+
+    public boolean isRuntimePermission(String permissionName) throws NameNotFoundException {
+        final PackageManager packageManager = mInjector.getPackageManager();
+        PermissionInfo permissionInfo = packageManager.getPermissionInfo(permissionName, 0);
+        return (permissionInfo.protectionLevel & PermissionInfo.PROTECTION_MASK_BASE)
+                == PermissionInfo.PROTECTION_DANGEROUS;
     }
 
     @Override

@@ -461,6 +461,8 @@ public class AudioService extends IAudioService.Stub
 
     // Forced device usage for communications
     private int mForcedUseForComm;
+    private int mForcedUseForCommExt; // External state returned by getters: always consistent
+                                      // with requests by setters
 
     // List of binder death handlers for setMode() client processes.
     // The last process to have called setMode() is at the top of the list.
@@ -748,6 +750,9 @@ public class AudioService extends IAudioService.Stub
         // mSafeUsbMediaVolumeIndex must be initialized after createStreamStates() because it
         // relies on audio policy having correct ranges for volume indexes.
         mSafeUsbMediaVolumeIndex = getSafeUsbMediaVolumeIndex();
+
+        mPlaybackMonitor =
+                new PlaybackActivityMonitor(context, MAX_STREAM_VOLUME[AudioSystem.STREAM_ALARM]);
 
         mMediaFocusControl = new MediaFocusControl(mContext, mPlaybackMonitor);
 
@@ -2544,13 +2549,15 @@ public class AudioService extends IAudioService.Stub
             }
         }
         int status = AudioSystem.AUDIO_STATUS_OK;
+        int actualMode;
         do {
+            actualMode = mode;
             if (mode == AudioSystem.MODE_NORMAL) {
                 // get new mode from client at top the list if any
                 if (!mSetModeDeathHandlers.isEmpty()) {
                     hdlr = mSetModeDeathHandlers.get(0);
                     cb = hdlr.getBinder();
-                    mode = hdlr.getMode();
+                    actualMode = hdlr.getMode();
                     if (DEBUG_MODE) {
                         Log.w(TAG, " using mode=" + mode + " instead due to death hdlr at pid="
                                 + hdlr.mPid);
@@ -2574,12 +2581,11 @@ public class AudioService extends IAudioService.Stub
                 hdlr.setMode(mode);
             }
 
-            if (mode != mMode) {
-                status = AudioSystem.setPhoneState(mode);
+            if (actualMode != mMode) {
+                status = AudioSystem.setPhoneState(actualMode);
                 if (status == AudioSystem.AUDIO_STATUS_OK) {
-                    if (DEBUG_MODE) { Log.v(TAG, " mode successfully set to " + mode); }
-                    mMode = mode;
-                    mModeLogger.log(new PhoneStateEvent(caller, pid, mode));
+                    if (DEBUG_MODE) { Log.v(TAG, " mode successfully set to " + actualMode); }
+                    mMode = actualMode;
                 } else {
                     if (hdlr != null) {
                         mSetModeDeathHandlers.remove(hdlr);
@@ -2595,13 +2601,16 @@ public class AudioService extends IAudioService.Stub
         } while (status != AudioSystem.AUDIO_STATUS_OK && !mSetModeDeathHandlers.isEmpty());
 
         if (status == AudioSystem.AUDIO_STATUS_OK) {
-            if (mode != AudioSystem.MODE_NORMAL) {
+            if (actualMode != AudioSystem.MODE_NORMAL) {
                 if (mSetModeDeathHandlers.isEmpty()) {
                     Log.e(TAG, "setMode() different from MODE_NORMAL with empty mode client stack");
                 } else {
                     newModeOwnerPid = mSetModeDeathHandlers.get(0).getPid();
                 }
             }
+            // Note: newModeOwnerPid is always 0 when actualMode is MODE_NORMAL
+            mModeLogger.log(
+                    new PhoneStateEvent(caller, pid, mode, newModeOwnerPid, actualMode));
             int streamType = getActiveStreamType(AudioManager.USE_DEFAULT_STREAM_TYPE);
             int device = getDeviceForStream(streamType);
             int index = mStreamStates[mStreamVolumeAlias[streamType]].getIndex(device);
@@ -2890,13 +2899,14 @@ public class AudioService extends IAudioService.Stub
             mForcedUseForComm = AudioSystem.FORCE_NONE;
         }
 
+        mForcedUseForCommExt = mForcedUseForComm;
         sendMsg(mAudioHandler, MSG_SET_FORCE_USE, SENDMSG_QUEUE,
                 AudioSystem.FOR_COMMUNICATION, mForcedUseForComm, eventSource, 0);
     }
 
     /** @see AudioManager#isSpeakerphoneOn() */
     public boolean isSpeakerphoneOn() {
-        return (mForcedUseForComm == AudioSystem.FORCE_SPEAKER);
+        return (mForcedUseForCommExt == AudioSystem.FORCE_SPEAKER);
     }
 
     /** @see AudioManager#setBluetoothScoOn(boolean) */
@@ -2904,6 +2914,13 @@ public class AudioService extends IAudioService.Stub
         if (!checkAudioSettingsPermission("setBluetoothScoOn()")) {
             return;
         }
+
+        // Only enable calls from system components
+        if (Binder.getCallingUid() >= FIRST_APPLICATION_UID) {
+            mForcedUseForCommExt = on ? AudioSystem.FORCE_BT_SCO : AudioSystem.FORCE_NONE;
+            return;
+        }
+
         // for logging only
         final String eventSource = new StringBuilder("setBluetoothScoOn(").append(on)
                 .append(") from u/pid:").append(Binder.getCallingUid()).append("/")
@@ -2913,11 +2930,21 @@ public class AudioService extends IAudioService.Stub
 
     public void setBluetoothScoOnInt(boolean on, String eventSource) {
         if (on) {
+            // do not accept SCO ON if SCO audio is not connected
+            synchronized(mScoClients) {
+                if ((mBluetoothHeadset != null) &&
+                    (mBluetoothHeadset.getAudioState(mBluetoothHeadsetDevice)
+                             != BluetoothHeadset.STATE_AUDIO_CONNECTED)) {
+                    mForcedUseForCommExt = AudioSystem.FORCE_BT_SCO;
+                    return;
+                }
+            }
             mForcedUseForComm = AudioSystem.FORCE_BT_SCO;
         } else if (mForcedUseForComm == AudioSystem.FORCE_BT_SCO) {
             mForcedUseForComm = AudioSystem.FORCE_NONE;
         }
-
+        mForcedUseForCommExt = mForcedUseForComm;
+        AudioSystem.setParameters("BT_SCO="+ (on ? "on" : "off"));
         sendMsg(mAudioHandler, MSG_SET_FORCE_USE, SENDMSG_QUEUE,
                 AudioSystem.FOR_COMMUNICATION, mForcedUseForComm, eventSource, 0);
         sendMsg(mAudioHandler, MSG_SET_FORCE_USE, SENDMSG_QUEUE,
@@ -2926,7 +2953,7 @@ public class AudioService extends IAudioService.Stub
 
     /** @see AudioManager#isBluetoothScoOn() */
     public boolean isBluetoothScoOn() {
-        return (mForcedUseForComm == AudioSystem.FORCE_BT_SCO);
+        return (mForcedUseForCommExt == AudioSystem.FORCE_BT_SCO);
     }
 
     /** @see AudioManager#setBluetoothA2dpOn(boolean) */
@@ -4134,7 +4161,8 @@ public class AudioService extends IAudioService.Stub
                     newDevice, AudioSystem.getOutputDeviceName(newDevice)));
         }
         synchronized (mConnectedDevices) {
-            if ((newDevice & DEVICE_MEDIA_UNMUTED_ON_PLUG) != 0
+            if (mNm.getZenMode() != Settings.Global.ZEN_MODE_NO_INTERRUPTIONS
+                    && (newDevice & DEVICE_MEDIA_UNMUTED_ON_PLUG) != 0
                     && mStreamStates[AudioSystem.STREAM_MUSIC].mIsMuted
                     && mStreamStates[AudioSystem.STREAM_MUSIC].getIndex(newDevice) != 0
                     && (newDevice & AudioSystem.getDevicesForStream(AudioSystem.STREAM_MUSIC)) != 0)
@@ -6134,12 +6162,12 @@ public class AudioService extends IAudioService.Stub
     private int mSafeMediaVolumeIndex;
     // mSafeUsbMediaVolumeIndex is used for USB Headsets and is the music volume UI index
     // corresponding to a gain of -30 dBFS in audio flinger mixer.
-    // We remove -15 dBs from the theoretical -15dB to account for the EQ boost when bands are set
-    // to max gain.
+    // We remove -22 dBs from the theoretical -15dB to account for the EQ + bass boost
+    // amplification when both effects are on with all band gains at maximum.
     // This level corresponds to a loudness of 85 dB SPL for the warning to be displayed when
     // the headset is compliant to EN 60950 with a max loudness of 100dB SPL.
     private int mSafeUsbMediaVolumeIndex;
-    private static final float SAFE_VOLUME_GAIN_DBFS = -30.0f;
+    private static final float SAFE_VOLUME_GAIN_DBFS = -37.0f;
     // mSafeMediaVolumeDevices lists the devices for which safe media volume is enforced,
     private final int mSafeMediaVolumeDevices = AudioSystem.DEVICE_OUT_WIRED_HEADSET |
                                                 AudioSystem.DEVICE_OUT_WIRED_HEADPHONE |
@@ -6952,7 +6980,7 @@ public class AudioService extends IAudioService.Stub
     //======================
     // Audio playback notification
     //======================
-    private final PlaybackActivityMonitor mPlaybackMonitor = new PlaybackActivityMonitor();
+    private final PlaybackActivityMonitor mPlaybackMonitor;
 
     public void registerPlaybackCallback(IPlaybackConfigDispatcher pcdb) {
         final boolean isPrivileged =

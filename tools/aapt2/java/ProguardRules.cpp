@@ -29,18 +29,12 @@ namespace proguard {
 
 class BaseVisitor : public xml::Visitor {
  public:
-  BaseVisitor(const Source& source, KeepSet* keep_set)
-      : source_(source), keep_set_(keep_set) {}
+  using xml::Visitor::Visit;
 
-  virtual void Visit(xml::Text*) override{};
-
-  virtual void Visit(xml::Namespace* node) override {
-    for (const auto& child : node->children) {
-      child->Accept(this);
-    }
+  BaseVisitor(const Source& source, KeepSet* keep_set) : source_(source), keep_set_(keep_set) {
   }
 
-  virtual void Visit(xml::Element* node) override {
+  void Visit(xml::Element* node) override {
     if (!node->namespace_uri.empty()) {
       Maybe<xml::ExtractedPackage> maybe_package =
           xml::ExtractPackageFromNamespace(node->namespace_uri);
@@ -78,10 +72,10 @@ class BaseVisitor : public xml::Visitor {
 
 class LayoutVisitor : public BaseVisitor {
  public:
-  LayoutVisitor(const Source& source, KeepSet* keep_set)
-      : BaseVisitor(source, keep_set) {}
+  LayoutVisitor(const Source& source, KeepSet* keep_set) : BaseVisitor(source, keep_set) {
+  }
 
-  virtual void Visit(xml::Element* node) override {
+  void Visit(xml::Element* node) override {
     bool check_class = false;
     bool check_name = false;
     if (node->namespace_uri.empty()) {
@@ -119,7 +113,7 @@ class MenuVisitor : public BaseVisitor {
   MenuVisitor(const Source& source, KeepSet* keep_set) : BaseVisitor(source, keep_set) {
   }
 
-  virtual void Visit(xml::Element* node) override {
+  void Visit(xml::Element* node) override {
     if (node->namespace_uri.empty() && node->name == "item") {
       for (const auto& attr : node->attributes) {
         if (attr.namespace_uri == xml::kSchemaAndroid) {
@@ -142,10 +136,10 @@ class MenuVisitor : public BaseVisitor {
 
 class XmlResourceVisitor : public BaseVisitor {
  public:
-  XmlResourceVisitor(const Source& source, KeepSet* keep_set)
-      : BaseVisitor(source, keep_set) {}
+  XmlResourceVisitor(const Source& source, KeepSet* keep_set) : BaseVisitor(source, keep_set) {
+  }
 
-  virtual void Visit(xml::Element* node) override {
+  void Visit(xml::Element* node) override {
     bool check_fragment = false;
     if (node->namespace_uri.empty()) {
       check_fragment =
@@ -169,13 +163,12 @@ class XmlResourceVisitor : public BaseVisitor {
 
 class TransitionVisitor : public BaseVisitor {
  public:
-  TransitionVisitor(const Source& source, KeepSet* keep_set)
-      : BaseVisitor(source, keep_set) {}
+  TransitionVisitor(const Source& source, KeepSet* keep_set) : BaseVisitor(source, keep_set) {
+  }
 
-  virtual void Visit(xml::Element* node) override {
+  void Visit(xml::Element* node) override {
     bool check_class =
-        node->namespace_uri.empty() &&
-        (node->name == "transition" || node->name == "pathMotion");
+        node->namespace_uri.empty() && (node->name == "transition" || node->name == "pathMotion");
     if (check_class) {
       xml::Attribute* attr = node->FindAttribute({}, "class");
       if (attr && util::IsJavaClassName(attr->value)) {
@@ -195,7 +188,7 @@ class ManifestVisitor : public BaseVisitor {
   ManifestVisitor(const Source& source, KeepSet* keep_set, bool main_dex_only)
       : BaseVisitor(source, keep_set), main_dex_only_(main_dex_only) {}
 
-  virtual void Visit(xml::Element* node) override {
+  void Visit(xml::Element* node) override {
     if (node->namespace_uri.empty()) {
       bool get_name = false;
       if (node->name == "manifest") {
@@ -205,18 +198,15 @@ class ManifestVisitor : public BaseVisitor {
         }
       } else if (node->name == "application") {
         get_name = true;
-        xml::Attribute* attr =
-            node->FindAttribute(xml::kSchemaAndroid, "backupAgent");
+        xml::Attribute* attr = node->FindAttribute(xml::kSchemaAndroid, "backupAgent");
         if (attr) {
-          Maybe<std::string> result =
-              util::GetFullyQualifiedClassName(package_, attr->value);
+          Maybe<std::string> result = util::GetFullyQualifiedClassName(package_, attr->value);
           if (result) {
             AddClass(node->line_number, result.value());
           }
         }
         if (main_dex_only_) {
-          xml::Attribute* default_process =
-              node->FindAttribute(xml::kSchemaAndroid, "process");
+          xml::Attribute* default_process = node->FindAttribute(xml::kSchemaAndroid, "process");
           if (default_process) {
             default_process_ = default_process->value;
           }
@@ -226,8 +216,7 @@ class ManifestVisitor : public BaseVisitor {
         get_name = true;
 
         if (main_dex_only_) {
-          xml::Attribute* component_process =
-              node->FindAttribute(xml::kSchemaAndroid, "process");
+          xml::Attribute* component_process = node->FindAttribute(xml::kSchemaAndroid, "process");
 
           const std::string& process =
               component_process ? component_process->value : default_process_;
@@ -242,8 +231,7 @@ class ManifestVisitor : public BaseVisitor {
         get_name = attr != nullptr;
 
         if (get_name) {
-          Maybe<std::string> result =
-              util::GetFullyQualifiedClassName(package_, attr->value);
+          Maybe<std::string> result = util::GetFullyQualifiedClassName(package_, attr->value);
           if (result) {
             AddClass(node->line_number, result.value());
           }
@@ -261,8 +249,7 @@ class ManifestVisitor : public BaseVisitor {
   std::string default_process_;
 };
 
-bool CollectProguardRulesForManifest(const Source& source,
-                                     xml::XmlResource* res, KeepSet* keep_set,
+bool CollectProguardRulesForManifest(const Source& source, xml::XmlResource* res, KeepSet* keep_set,
                                      bool main_dex_only) {
   ManifestVisitor visitor(source, keep_set, main_dex_only);
   if (res->root) {
@@ -272,8 +259,7 @@ bool CollectProguardRulesForManifest(const Source& source,
   return false;
 }
 
-bool CollectProguardRules(const Source& source, xml::XmlResource* res,
-                          KeepSet* keep_set) {
+bool CollectProguardRules(const Source& source, xml::XmlResource* res, KeepSet* keep_set) {
   if (!res->root) {
     return false;
   }
@@ -321,8 +307,7 @@ bool WriteKeepSet(std::ostream* out, const KeepSet& keep_set) {
     for (const Source& source : entry.second) {
       *out << "# Referenced at " << source << "\n";
     }
-    *out << "-keepclassmembers class * { *** " << entry.first << "(...); }\n"
-         << std::endl;
+    *out << "-keepclassmembers class * { *** " << entry.first << "(...); }\n" << std::endl;
   }
   return true;
 }

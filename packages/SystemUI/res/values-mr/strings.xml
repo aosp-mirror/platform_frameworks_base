@@ -53,7 +53,7 @@
     <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"वास्तविक कीबोर्ड"</string>
     <string name="usb_device_permission_prompt" msgid="834698001271562057">"USB डिव्हाइसवर प्रवेश करण्यासाठी <xliff:g id="APPLICATION">%1$s</xliff:g> अॅप ला अनुमती द्यायची?"</string>
     <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"अ‍ॅप <xliff:g id="APPLICATION">%1$s</xliff:g> ला USB उपसाधनात प्रवेश करण्‍याची अनुमती द्यायची?"</string>
-    <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"हे USB डीव्हाइस कनेक्ट केलेले असते तेव्हा <xliff:g id="ACTIVITY">%1$s</xliff:g> उघडायचे?"</string>
+    <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"हे USB डिव्हाइस कनेक्ट केलेले असते तेव्हा <xliff:g id="ACTIVITY">%1$s</xliff:g> उघडायचे?"</string>
     <string name="usb_accessory_confirm_prompt" msgid="3808984931830229888">"हे USB उपसाधन कनेक्ट केलेले असते तेव्हा <xliff:g id="ACTIVITY">%1$s</xliff:g> उघडायचे?"</string>
     <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"इंस्टॉल केलेले अॅप्स या USB उपसाधनासह कार्य करत नाहीत. <xliff:g id="URL">%1$s</xliff:g> येथे या उपसाधनाविषयी अधिक जाणून घ्या"</string>
     <string name="title_usb_accessory" msgid="4966265263465181372">"USB उपसाधन"</string>
@@ -271,7 +271,7 @@
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"केवळ अलार्म"</string>
     <string name="quick_settings_dnd_none_label" msgid="5025477807123029478">"संपूर्ण शांतता"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"ब्लूटूथ"</string>
-    <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"ब्लूटूथ (<xliff:g id="NUMBER">%d</xliff:g> डीव्हाइस)"</string>
+    <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"ब्लूटूथ (<xliff:g id="NUMBER">%d</xliff:g> डिव्हाइस)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"ब्लूटूथ बंद"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"कोणतेही जोडलेले डिव्हाइसेस उपलब्ध नाहीत"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"चमक"</string>
@@ -284,7 +284,7 @@
     <string name="quick_settings_ime_label" msgid="7073463064369468429">"इनपुट पद्धत"</string>
     <string name="quick_settings_location_label" msgid="5011327048748762257">"स्थान"</string>
     <string name="quick_settings_location_off_label" msgid="7464544086507331459">"स्थान बंद"</string>
-    <string name="quick_settings_media_device_label" msgid="1302906836372603762">"मीडिया डीव्हाइस"</string>
+    <string name="quick_settings_media_device_label" msgid="1302906836372603762">"मीडिया डिव्हाइस"</string>
     <string name="quick_settings_rssi_label" msgid="7725671335550695589">"RSSI"</string>
     <string name="quick_settings_rssi_emergency_only" msgid="2713774041672886750">"फक्त आणीबाणीचे कॉल"</string>
     <string name="quick_settings_settings_label" msgid="5326556592578065401">"सेटिंग्ज"</string>
@@ -300,7 +300,7 @@
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"वाय-फाय नेटवर्क उपलब्‍ध नाहीत"</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"कास्‍ट करा"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"कास्ट करत आहे"</string>
-    <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"निनावी डीव्हाइस"</string>
+    <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"निनावी डिव्हाइस"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"कास्ट करण्यास तयार"</string>
     <string name="quick_settings_cast_detail_empty_text" msgid="311785821261640623">"कोणतेही डिव्हाइसेस उपलब्ध नाहीत"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"चमक"</string>
@@ -362,8 +362,8 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"खाली कमी तातडीच्या सूचना"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"उघडण्यासाठी पुन्हा टॅप करा"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"अनलॉक करण्यासाठी स्वाइप करा"</string>
-    <string name="do_disclosure_generic" msgid="5615898451805157556">"हे डीव्हाइस तुमची संस्था व्यवस्थापित करते"</string>
-    <string name="do_disclosure_with_name" msgid="5640615509915445501">"हे डीव्हाइस <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> ने व्यवस्थापित केले आहे"</string>
+    <string name="do_disclosure_generic" msgid="5615898451805157556">"हे डिव्हाइस तुमची संस्था व्यवस्थापित करते"</string>
+    <string name="do_disclosure_with_name" msgid="5640615509915445501">"हे डिव्हाइस <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> ने व्यवस्थापित केले आहे"</string>
     <string name="phone_hint" msgid="4872890986869209950">"फोनसाठी चिन्हावरून स्वाइप करा"</string>
     <string name="voice_hint" msgid="8939888732119726665">"व्हॉइस सहाय्यासाठी चिन्हावरून स्वाइप करा"</string>
     <string name="camera_hint" msgid="7939688436797157483">"कॅमेर्‍यासाठी चिन्हावरून स्वाइप करा"</string>
@@ -415,22 +415,22 @@
     <string name="profile_owned_footer" msgid="8021888108553696069">"प्रोफाईलचे परीक्षण केले जाऊ शकते"</string>
     <string name="vpn_footer" msgid="2388611096129106812">"नेटवर्कचे परीक्षण केले जाऊ शकते"</string>
     <string name="branded_vpn_footer" msgid="2168111859226496230">"नेटवर्कचे परीक्षण केले जाऊ शकते"</string>
-    <string name="quick_settings_disclosure_management_monitoring" msgid="6645176135063957394">"आपली संस्था हे डीव्हाइस व्यवस्थापित करते आणि नेटवर्क रहदारीचे परीक्षण करू शकते"</string>
-    <string name="quick_settings_disclosure_named_management_monitoring" msgid="370622174777570853">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> हे डीव्हाइस व्यवस्थापित करते आणि नेटवर्क रहदारीचे परीक्षण करू शकते"</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="1085137869053332307">"डीव्हाइस तुमच्या संस्थेद्वारे व्यवस्थापित केले जाते आणि ते <xliff:g id="VPN_APP">%1$s</xliff:g> शी कनेक्ट केलेले आहे"</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="6290456493852584017">"डीव्हाइस <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> द्वारे व्यवस्थापित केले जाते आणि ते <xliff:g id="VPN_APP">%2$s</xliff:g> शी कनेक्ट केलेले आहे"</string>
-    <string name="quick_settings_disclosure_management" msgid="3294967280853150271">"डीव्हाइस तुमच्या संस्थेद्वारे व्यवस्थापित आहे"</string>
-    <string name="quick_settings_disclosure_named_management" msgid="1059403025094542908">"डीव्हाइस <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> द्वारे व्यवस्थापित केले जाते"</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="3698767349925266482">"डीव्हाइस तुमच्या संस्थेद्वारे व्यवस्थापित केले जाते आणि ते VPN शी कनेक्ट केलेले आहे"</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="7777821385318891527">"डीव्हाइस <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> द्वारे व्यवस्थापित केले जाते आणि ते VPN शी कनेक्ट केलेले आहे"</string>
+    <string name="quick_settings_disclosure_management_monitoring" msgid="6645176135063957394">"आपली संस्था हे डिव्हाइस व्यवस्थापित करते आणि नेटवर्क रहदारीचे परीक्षण करू शकते"</string>
+    <string name="quick_settings_disclosure_named_management_monitoring" msgid="370622174777570853">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> हे डिव्हाइस व्यवस्थापित करते आणि नेटवर्क रहदारीचे परीक्षण करू शकते"</string>
+    <string name="quick_settings_disclosure_management_named_vpn" msgid="1085137869053332307">"डिव्हाइस तुमच्या संस्थेद्वारे व्यवस्थापित केले जाते आणि ते <xliff:g id="VPN_APP">%1$s</xliff:g> शी कनेक्ट केलेले आहे"</string>
+    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="6290456493852584017">"डिव्हाइस <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> द्वारे व्यवस्थापित केले जाते आणि ते <xliff:g id="VPN_APP">%2$s</xliff:g> शी कनेक्ट केलेले आहे"</string>
+    <string name="quick_settings_disclosure_management" msgid="3294967280853150271">"डिव्हाइस तुमच्या संस्थेद्वारे व्यवस्थापित आहे"</string>
+    <string name="quick_settings_disclosure_named_management" msgid="1059403025094542908">"डिव्हाइस <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> द्वारे व्यवस्थापित केले जाते"</string>
+    <string name="quick_settings_disclosure_management_vpns" msgid="3698767349925266482">"डिव्हाइस तुमच्या संस्थेद्वारे व्यवस्थापित केले जाते आणि ते VPN शी कनेक्ट केलेले आहे"</string>
+    <string name="quick_settings_disclosure_named_management_vpns" msgid="7777821385318891527">"डिव्हाइस <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> द्वारे व्यवस्थापित केले जाते आणि ते VPN शी कनेक्ट केलेले आहे"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="5125463987558278215">"आपली संस्था आपल्या कार्य प्रोफाइलमधील नेटवर्क रहदारीचे परीक्षण करू शकते"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8973606847896650284">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> आपल्या कार्य प्रोफाइलमधील नेटवर्क रहदारीचे परीक्षण करू शकते"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="679658227269205728">"नेटवर्कचे परीक्षण केले जाऊ शकते"</string>
-    <string name="quick_settings_disclosure_vpns" msgid="8170318392053156330">"डीव्हाइस VPN शी कनेक्ट केलेले आहे"</string>
+    <string name="quick_settings_disclosure_vpns" msgid="8170318392053156330">"डिव्हाइस VPN शी कनेक्ट केलेले आहे"</string>
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="3494535754792751741">"कार्य प्रोफाइल <xliff:g id="VPN_APP">%1$s</xliff:g> शी कनेक्ट केलेले आहे"</string>
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="4467456202486569906">"वैयक्तिक प्रोफाइल <xliff:g id="VPN_APP">%1$s</xliff:g> शी कनेक्ट केलेले आहे"</string>
-    <string name="quick_settings_disclosure_named_vpn" msgid="6943724064780847080">"डीव्हाइस <xliff:g id="VPN_APP">%1$s</xliff:g> शी कनेक्ट केलेले आहे"</string>
-    <string name="monitoring_title_device_owned" msgid="1652495295941959815">"डीव्हाइस व्‍यवस्‍थापन"</string>
+    <string name="quick_settings_disclosure_named_vpn" msgid="6943724064780847080">"डिव्हाइस <xliff:g id="VPN_APP">%1$s</xliff:g> शी कनेक्ट केलेले आहे"</string>
+    <string name="monitoring_title_device_owned" msgid="1652495295941959815">"डिव्हाइस व्‍यवस्‍थापन"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"प्रोफाईल परीक्षण"</string>
     <string name="monitoring_title" msgid="169206259253048106">"नेटवर्क परीक्षण"</string>
     <string name="monitoring_subtitle_vpn" msgid="876537538087857300">"VPN"</string>
@@ -439,8 +439,8 @@
     <string name="disable_vpn" msgid="4435534311510272506">"VPN अक्षम करा"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"VPN डिस्कनेक्ट करा"</string>
     <string name="monitoring_button_view_policies" msgid="100913612638514424">"धोरणे पहा"</string>
-    <string name="monitoring_description_named_management" msgid="5281789135578986303">"तुमचे डीव्हाइस <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> व्यवस्थापित करते.\n\nतुमचा प्रशासक सेटिंग्ज, कॉर्पोरेट अॅक्सेस, अॅप्स, तुमच्या डीव्हाइस शी संबंधित डेटा आणि तुमच्या डीव्हाइस च्या ठिकाणाची माहिती मॉनिटर करू शकते आणि ती व्यवस्थापित करू शकतो.\n\nआणखी माहितीसाठी, तुमच्या प्रशासकाशी संपर्क साधा."</string>
-    <string name="monitoring_description_management" msgid="4573721970278370790">"तुमचे डीव्हाइस तुमची संस्‍था व्यवस्थापित करते.\n\nतुमचा प्रशासक सेटिंग्ज, कॉर्पोरेट अॅक्सेस, अॅप्स, तुमच्या डीव्हाइस शी संबंधित डेटा आणि तुमच्या डीव्हाइस च्या ठिकाणाची माहिती मॉनिटर करू शकतो आणि ती व्यवस्थापित करू शकतो.\n\nआणखी माहितीसाठी, तुमच्या प्रशासकाशी संपर्क साधा."</string>
+    <string name="monitoring_description_named_management" msgid="5281789135578986303">"तुमचे डिव्हाइस <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> व्यवस्थापित करते.\n\nतुमचा प्रशासक सेटिंग्ज, कॉर्पोरेट अॅक्सेस, अॅप्स, तुमच्या डिव्हाइस शी संबंधित डेटा आणि तुमच्या डिव्हाइस च्या ठिकाणाची माहिती मॉनिटर करू शकते आणि ती व्यवस्थापित करू शकतो.\n\nआणखी माहितीसाठी, तुमच्या प्रशासकाशी संपर्क साधा."</string>
+    <string name="monitoring_description_management" msgid="4573721970278370790">"तुमचे डिव्हाइस तुमची संस्‍था व्यवस्थापित करते.\n\nतुमचा प्रशासक सेटिंग्ज, कॉर्पोरेट अॅक्सेस, अॅप्स, तुमच्या डिव्हाइस शी संबंधित डेटा आणि तुमच्या डिव्हाइस च्या ठिकाणाची माहिती मॉनिटर करू शकतो आणि ती व्यवस्थापित करू शकतो.\n\nआणखी माहितीसाठी, तुमच्या प्रशासकाशी संपर्क साधा."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="5202023784131001751">"आपल्या संस्थेने या डिव्हाइसवर प्रमाणपत्र अधिकार इंस्टॉल केला आहे. आपल्या सुरक्षित नेटवर्क रहदारीचे परीक्षण केले जाऊ शकते किंवा ती सुधारली जाऊ शकते."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="4683248196789897964">"आपल्या संस्थेने आपल्या कार्य प्रोफाइलवर प्रमाणपत्र अधिकार इंस्टॉल केला आहे. आपल्या सुरक्षित नेटवर्क रहदारीचे परीक्षण केले जाऊ शकते किंवा ती सुधारली जाऊ शकते."</string>
     <string name="monitoring_description_ca_certificate" msgid="7886985418413598352">"या डिव्हाइसवर प्रमाणपत्र अधिकार इंस्टॉल केला आहे. आपल्या सुरक्षित नेटवर्क रहदारीचे परीक्षण केले जाऊ शकते किंवा ती सुधारली जाऊ शकते."</string>
@@ -449,8 +449,8 @@
     <string name="monitoring_description_two_named_vpns" msgid="4198511413729213802">"तुम्‍ही <xliff:g id="VPN_APP_0">%1$s</xliff:g> आणि <xliff:g id="VPN_APP_1">%2$s</xliff:g> शी कनेक्‍ट केले आहे, जे ईमेल, अ‍ॅप्स आणि वेबसाइटसहित आपल्‍या नेटवर्क क्रिया मॉनिटर करू शकते."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="1427905889862420559">"आपले कार्य प्रोफाइल <xliff:g id="VPN_APP">%1$s</xliff:g> शी कनेक्‍ट केले आहे, जे ईमेल, अ‍ॅप्स आणि वेबसाइटसह आपल्‍या नेटवर्क क्रियाकलापाचे परीक्षण करू शकते."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="3133980926929069283">"आपले वैयक्तिक प्रोफाइल <xliff:g id="VPN_APP">%1$s</xliff:g> शी कनेक्‍ट केले आहे, जे ईमेल, अ‍ॅप्स आणि वेबसाइटसह आपल्‍या नेटवर्क क्रियाकलापाचे परीक्षण करू शकते."</string>
-    <string name="monitoring_description_do_header_generic" msgid="96588491028288691">"तुमचे डीव्हाइस <xliff:g id="DEVICE_OWNER_APP">%1$s</xliff:g> ने व्यवस्थापित केले आहे."</string>
-    <string name="monitoring_description_do_header_with_name" msgid="5511133708978206460">"तुमचे डीव्हाइस व्यवस्थापित करण्यासाठी <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> <xliff:g id="DEVICE_OWNER_APP">%2$s</xliff:g> वापरते."</string>
+    <string name="monitoring_description_do_header_generic" msgid="96588491028288691">"तुमचे डिव्हाइस <xliff:g id="DEVICE_OWNER_APP">%1$s</xliff:g> ने व्यवस्थापित केले आहे."</string>
+    <string name="monitoring_description_do_header_with_name" msgid="5511133708978206460">"तुमचे डिव्हाइस व्यवस्थापित करण्यासाठी <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> <xliff:g id="DEVICE_OWNER_APP">%2$s</xliff:g> वापरते."</string>
     <string name="monitoring_description_do_body" msgid="3639594537660975895">"आपला प्रशासक सेटिंग्ज, कॉर्पोरेट प्रवेश, अॅप्स, आपल्या डिव्हाइशी संबंधित डेटा आणि डिव्हाइसच्या स्थान माहितीचे निरीक्षण आणि व्यवस्थापन करू शकतो."</string>
     <string name="monitoring_description_do_learn_more_separator" msgid="3785251953067436862">" "</string>
     <string name="monitoring_description_do_learn_more" msgid="1849514470437907421">"अधिक जाणून घ्या"</string>
@@ -460,7 +460,7 @@
     <string name="monitoring_description_ca_cert_settings_separator" msgid="4987350385906393626">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="5489969458872997092">"विश्वासू क्रेडेंशियल उघडा"</string>
     <string name="monitoring_description_network_logging" msgid="7223505523384076027">"आपल्या प्रशासकाने नेटवर्क लॉगिंग चालू केले आहे, जे आपल्या डिव्हाइसवरील रहदारीचे निरीक्षण करते.\n\nअधिक माहितीसाठी आपल्या प्रशासकाशी संपर्क साधा."</string>
-    <string name="monitoring_description_vpn" msgid="4445150119515393526">"तुम्ही VPN कनेक्शन सेट करण्यासाठी अ‍ॅपला परवानगी दिली.\n\nहा अ‍ॅप ईमेल, अ‍ॅप्स आणि वेबसाइटसह, तुमच्या डीव्हाइस आणि नेटवर्क अॅक्टिव्हिटीचे परीक्षण करू शकतो."</string>
+    <string name="monitoring_description_vpn" msgid="4445150119515393526">"तुम्ही VPN कनेक्शन सेट करण्यासाठी अ‍ॅपला परवानगी दिली.\n\nहा अ‍ॅप ईमेल, अ‍ॅप्स आणि वेबसाइटसह, तुमच्या डिव्हाइस आणि नेटवर्क अॅक्टिव्हिटीचे परीक्षण करू शकतो."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="2958019119161161530">"आपले कार्य प्रोफाइल <xliff:g id="ORGANIZATION">%1$s</xliff:g> द्वारे व्यवस्थापित केले जाते.\n\nआपला प्रशासक ईमेल, अॅप्स आणि वेबसाइटसह आपल्या नेटवर्क अॅक्टिव्हिटीचे निरीक्षण करण्यास सक्षम आहे.\n\nअधिक माहितीसाठी आपल्या प्रशासकाशी संपर्क साधा.\n\nआपण VPN शी देखील कनेक्ट आहात, जे आपल्या नेटवर्क अॅक्टिव्हिटीचे निरीक्षण करू शकते."</string>
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
     <string name="monitoring_description_app" msgid="1828472472674709532">"आपण <xliff:g id="APPLICATION">%1$s</xliff:g> शी कनेक्‍ट केले आहे, जे ईमेल, अ‍ॅप्स आणि वेबसाइटसह आपल्‍या नेटवर्क क्रियाकलापाचे परीक्षण करू शकते."</string>
@@ -470,7 +470,7 @@
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"आपले कार्य प्रोफाइल <xliff:g id="ORGANIZATION">%1$s</xliff:g> द्वारे व्यवस्थापित केले जाते. प्रोफाइल <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> शी कनेक्‍ट केले आहे, जे ईमेल, अ‍ॅप्स आणि वेबसाइटसह आपल्‍या कार्य नेटवर्क क्रियाकलापाचे परीक्षण करू शकते.\n\nआपण <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> शीदेखील कनेक्‍ट केले आहे, जे आपल्या वैयक्तिक नेटवर्क क्रियाकलापाचे परीक्षण करू शकते."</string>
     <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"<xliff:g id="USER_NAME">%1$s</xliff:g> साठी अनलॉक केले"</string>
     <string name="keyguard_indication_trust_managed" msgid="8319646760022357585">"<xliff:g id="TRUST_AGENT">%1$s</xliff:g> चालू आहे"</string>
-    <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"तुम्ही मॅन्युअली अनलॉक करेपर्यंत डीव्हाइस लॉक राहील"</string>
+    <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"तुम्ही मॅन्युअली अनलॉक करेपर्यंत डिव्हाइस लॉक राहील"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"सूचना अधिक जलद मिळवा"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"आपण अनलॉक करण्‍यापूर्वी त्यांना पहा"</string>
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"नाही, नको"</string>
@@ -489,7 +489,7 @@
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"लपवा"</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"आपण आपले कार्य प्रोफाईल वापरत आहात"</string>
     <string name="stream_voice_call" msgid="4410002696470423714">"कॉल करा"</string>
-    <string name="stream_system" msgid="7493299064422163147">"सिस्टीम"</string>
+    <string name="stream_system" msgid="7493299064422163147">"सिस्टम"</string>
     <string name="stream_ring" msgid="8213049469184048338">"रिंग करा"</string>
     <string name="stream_music" msgid="9086982948697544342">"मीडिया"</string>
     <string name="stream_alarm" msgid="5209444229227197703">"अलार्म"</string>
@@ -510,7 +510,7 @@
     <string name="quick_settings" msgid="10042998191725428">"द्रुत सेटिंग्ज"</string>
     <string name="status_bar" msgid="4877645476959324760">"स्टेटस बार"</string>
     <string name="overview" msgid="4018602013895926956">"अवलोकन"</string>
-    <string name="demo_mode" msgid="2532177350215638026">"सिस्टीम UI डेमो मोड"</string>
+    <string name="demo_mode" msgid="2532177350215638026">"सिस्टम UI डेमो मोड"</string>
     <string name="enable_demo_mode" msgid="4844205668718636518">"डेमो मोड सुरू करा"</string>
     <string name="show_demo_mode" msgid="2018336697782464029">"डेमो मोड दर्शवा"</string>
     <string name="status_bar_ethernet" msgid="5044290963549500128">"इथरनेट"</string>
@@ -614,7 +614,7 @@
     <string name="keyboard_key_insert" msgid="8530501581636082614">"घाला"</string>
     <string name="keyboard_key_num_lock" msgid="5052537581246772117">"Num Lock"</string>
     <string name="keyboard_key_numpad_template" msgid="8729216555174634026">"Numpad <xliff:g id="NAME">%1$s</xliff:g>"</string>
-    <string name="keyboard_shortcut_group_system" msgid="6472647649616541064">"सिस्टीम"</string>
+    <string name="keyboard_shortcut_group_system" msgid="6472647649616541064">"सिस्टम"</string>
     <string name="keyboard_shortcut_group_system_home" msgid="3054369431319891965">"होम"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"अलीकडील"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"परत"</string>

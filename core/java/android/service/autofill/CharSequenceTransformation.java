@@ -86,7 +86,7 @@ public final class CharSequenceTransformation extends InternalTransformation imp
             }
             try {
                 final Matcher matcher = field.first.matcher(value);
-                if (!matcher.matches()) {
+                if (!matcher.find()) {
                     if (sDebug) Log.d(TAG, "match for " + field.first + " failed on id " + id);
                     return;
                 }

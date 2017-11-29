@@ -7714,7 +7714,7 @@ public final class ViewRootImpl implements ViewParent,
         public void onAccessibilityStateChanged(boolean enabled) {
             if (enabled) {
                 ensureConnection();
-                if (mAttachInfo.mHasWindowFocus) {
+                if (mAttachInfo.mHasWindowFocus && (mView != null)) {
                     mView.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
                     View focusedView = mView.findFocus();
                     if (focusedView != null && focusedView != mView) {

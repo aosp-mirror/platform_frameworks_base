@@ -335,6 +335,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static public final String SYSTEM_DIALOG_REASON_RECENT_APPS = "recentapps";
     static public final String SYSTEM_DIALOG_REASON_HOME_KEY = "homekey";
     static public final String SYSTEM_DIALOG_REASON_ASSIST = "assist";
+    static public final String SYSTEM_DIALOG_REASON_SCREENSHOT = "screenshot";
 
     /**
      * These are the system UI flags that, when changing, can cause the layout
@@ -829,6 +830,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private static final int MSG_ACCESSIBILITY_TV = 23;
     private static final int MSG_DISPATCH_BACK_KEY_TO_AUTOFILL = 24;
     private static final int MSG_SYSTEM_KEY_PRESS = 25;
+    private static final int MSG_HANDLE_ALL_APPS = 26;
 
     private static final int MSG_REQUEST_TRANSIENT_BARS_ARG_STATUS = 0;
     private static final int MSG_REQUEST_TRANSIENT_BARS_ARG_NAVIGATION = 1;
@@ -920,6 +922,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     break;
                 case MSG_SYSTEM_KEY_PRESS:
                     sendSystemKeyToStatusBar(msg.arg1);
+                    break;
+                case MSG_HANDLE_ALL_APPS:
+                    launchAllAppsAction();
                     break;
             }
         }
@@ -1147,14 +1152,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 + ", mOrientationSensorEnabled=" + mOrientationSensorEnabled
                 + ", mKeyguardDrawComplete=" + mKeyguardDrawComplete
                 + ", mWindowManagerDrawComplete=" + mWindowManagerDrawComplete);
-        final boolean keyguardGoingAway = mWindowManagerInternal.isKeyguardGoingAway();
 
         boolean disable = true;
         // Note: We postpone the rotating of the screen until the keyguard as well as the
         // window manager have reported a draw complete or the keyguard is going away in dismiss
         // mode.
-        if (mScreenOnEarly && mAwake && ((mKeyguardDrawComplete && mWindowManagerDrawComplete)
-                || keyguardGoingAway)) {
+        if (mScreenOnEarly && mAwake && ((mKeyguardDrawComplete && mWindowManagerDrawComplete))) {
             if (needSensorRunningLp()) {
                 disable = false;
                 //enable listener if not already enabled
@@ -1165,7 +1168,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     // the sensor reading was cleared which can cause it to relaunch the app that
                     // will show in the wrong orientation first before correcting leading to app
                     // launch delays.
-                    mOrientationListener.enable(!keyguardGoingAway /* clearCurrentRotation */);
+                    mOrientationListener.enable(true /* clearCurrentRotation */);
                     if(localLOGV) Slog.v(TAG, "Enabling listeners");
                     mOrientationSensorEnabled = true;
                 }
@@ -1801,6 +1804,17 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     private void launchAllAppsAction() {
         Intent intent = new Intent(Intent.ACTION_ALL_APPS);
+        if (mHasFeatureLeanback) {
+            final PackageManager pm = mContext.getPackageManager();
+            Intent intentLauncher = new Intent(Intent.ACTION_MAIN);
+            intentLauncher.addCategory(Intent.CATEGORY_HOME);
+            ResolveInfo resolveInfo = pm.resolveActivityAsUser(intentLauncher,
+                    PackageManager.MATCH_SYSTEM_ONLY,
+                    mCurrentUserId);
+            if (resolveInfo != null) {
+                intent.setPackage(resolveInfo.activityInfo.packageName);
+            }
+        }
         startActivityAsUser(intent, UserHandle.CURRENT);
     }
 
@@ -2607,18 +2621,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             attrs.privateFlags &= ~WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
         }
 
-        if (ActivityManager.isHighEndGfx()) {
-            if ((attrs.flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0) {
-                attrs.subtreeSystemUiVisibility |= View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
-            }
-            final boolean forceWindowDrawsStatusBarBackground =
-                    (attrs.privateFlags & PRIVATE_FLAG_FORCE_DRAW_STATUS_BAR_BACKGROUND)
-                            != 0;
-            if ((attrs.flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0
-                    || forceWindowDrawsStatusBarBackground
-                            && attrs.height == MATCH_PARENT && attrs.width == MATCH_PARENT) {
-                attrs.subtreeSystemUiVisibility |= View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
-            }
+        if ((attrs.flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0) {
+            attrs.subtreeSystemUiVisibility |= View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
+        }
+        final boolean forceWindowDrawsStatusBarBackground =
+                (attrs.privateFlags & PRIVATE_FLAG_FORCE_DRAW_STATUS_BAR_BACKGROUND) != 0;
+        if ((attrs.flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0
+                || forceWindowDrawsStatusBarBackground
+                        && attrs.height == MATCH_PARENT && attrs.width == MATCH_PARENT) {
+            attrs.subtreeSystemUiVisibility |= View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
         }
     }
 
@@ -3619,6 +3630,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         } else if (mHasFeatureLeanback && interceptBugreportGestureTv(keyCode, down)) {
             return -1;
         } else if (mHasFeatureLeanback && interceptAccessibilityGestureTv(keyCode, down)) {
+            return -1;
+        } else if (keyCode == KeyEvent.KEYCODE_ALL_APPS) {
+            if (!down) {
+                mHandler.removeMessages(MSG_HANDLE_ALL_APPS);
+                Message msg = mHandler.obtainMessage(MSG_HANDLE_ALL_APPS);
+                msg.setAsynchronous(true);
+                msg.sendToTarget();
+            }
             return -1;
         }
 

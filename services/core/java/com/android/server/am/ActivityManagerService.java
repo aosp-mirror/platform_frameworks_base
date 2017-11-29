@@ -713,7 +713,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     public boolean canShowErrorDialogs() {
         return mShowDialogs && !mSleeping && !mShuttingDown
-                && !mKeyguardController.isKeyguardShowing()
+                && !mKeyguardController.isKeyguardShowing(DEFAULT_DISPLAY)
                 && !(UserManager.isDeviceInDemoMode(mContext)
                         && mUserController.getCurrentUser().isDemo());
     }
@@ -1690,6 +1690,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final int SERVICE_FOREGROUND_CRASH_MSG = 69;
     static final int DISPATCH_OOM_ADJ_OBSERVER_MSG = 70;
     static final int START_USER_SWITCH_FG_MSG = 712;
+    static final int NOTIFY_VR_KEYGUARD_MSG = 74;
 
     static final int FIRST_ACTIVITY_STACK_MSG = 100;
     static final int FIRST_BROADCAST_QUEUE_MSG = 200;
@@ -2413,6 +2414,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             } break;
             case NOTIFY_VR_SLEEPING_MSG: {
                 notifyVrManagerOfSleepState(msg.arg1 != 0);
+            } break;
+            case NOTIFY_VR_KEYGUARD_MSG: {
+                notifyVrManagerOfKeyguardState(msg.arg1 != 0);
             } break;
             case HANDLE_TRUST_STORAGE_UPDATE_MSG: {
                 synchronized (ActivityManagerService.this) {
@@ -3267,6 +3271,19 @@ public class ActivityManagerService extends IActivityManager.Stub
             return;
         }
         vrService.onSleepStateChanged(isSleeping);
+    }
+
+    private void sendNotifyVrManagerOfKeyguardState(boolean isShowing) {
+        mHandler.sendMessage(
+                mHandler.obtainMessage(NOTIFY_VR_KEYGUARD_MSG, isShowing ? 1 : 0, 0));
+    }
+
+    private void notifyVrManagerOfKeyguardState(boolean isShowing) {
+        final VrManagerInternal vrService = LocalServices.getService(VrManagerInternal.class);
+        if (vrService == null) {
+            return;
+        }
+        vrService.onKeyguardStateChanged(isShowing);
     }
 
     final void showAskCompatModeDialogLocked(ActivityRecord r) {
@@ -7005,7 +7022,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 mProfileProc = app;
                 profilerInfo = (mProfilerInfo != null && mProfilerInfo.profileFile != null) ?
                         new ProfilerInfo(mProfilerInfo) : null;
-                agent = profilerInfo.agent;
+                agent = mProfilerInfo != null ? mProfilerInfo.agent : null;
             } else if (app.instr != null && app.instr.mProfileFile != null) {
                 profilerInfo = new ProfilerInfo(app.instr.mProfileFile, null, 0, false, false,
                         null);
@@ -12463,19 +12480,14 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     void onWakefulnessChanged(int wakefulness) {
         synchronized(this) {
+            boolean wasAwake = mWakefulness == PowerManagerInternal.WAKEFULNESS_AWAKE;
+            boolean isAwake = wakefulness == PowerManagerInternal.WAKEFULNESS_AWAKE;
             mWakefulness = wakefulness;
 
-            // Also update state in a special way for running foreground services UI.
-            switch (mWakefulness) {
-                case PowerManagerInternal.WAKEFULNESS_ASLEEP:
-                case PowerManagerInternal.WAKEFULNESS_DREAMING:
-                case PowerManagerInternal.WAKEFULNESS_DOZING:
-                    mServices.updateScreenStateLocked(false /* screenOn */);
-                    break;
-                case PowerManagerInternal.WAKEFULNESS_AWAKE:
-                default:
-                    mServices.updateScreenStateLocked(true /* screenOn */);
-                    break;
+            if (wasAwake != isAwake) {
+                // Also update state in a special way for running foreground services UI.
+                mServices.updateScreenStateLocked(isAwake);
+                sendNotifyVrManagerOfSleepState(!isAwake);
             }
         }
     }
@@ -12511,7 +12523,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             mStackSupervisor.applySleepTokensLocked(true /* applyToStacks */);
             if (wasSleeping) {
-                sendNotifyVrManagerOfSleepState(false);
                 updateOomAdjLocked();
             }
         } else if (!mSleeping && shouldSleep) {
@@ -12521,7 +12532,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             mTopProcessState = ActivityManager.PROCESS_STATE_TOP_SLEEPING;
             mStackSupervisor.goingToSleepLocked();
-            sendNotifyVrManagerOfSleepState(true);
             updateOomAdjLocked();
         }
     }
@@ -12615,7 +12625,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public void setLockScreenShown(boolean showing) {
+    public void setLockScreenShown(boolean showing, int secondaryDisplayShowing) {
         if (checkCallingPermission(android.Manifest.permission.DEVICE_POWER)
                 != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Requires permission "
@@ -12625,11 +12635,12 @@ public class ActivityManagerService extends IActivityManager.Stub
         synchronized(this) {
             long ident = Binder.clearCallingIdentity();
             try {
-                mKeyguardController.setKeyguardShown(showing);
+                mKeyguardController.setKeyguardShown(showing, secondaryDisplayShowing);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
         }
+        sendNotifyVrManagerOfKeyguardState(showing);
     }
 
     @Override
@@ -12902,6 +12913,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                 throw new IllegalArgumentException("Provided bugreport type is not correct, value: "
                         + bugreportType);
         }
+        // Always log caller, even if it does not have permission to dump.
+        String type = extraOptions == null ? "bugreport" : extraOptions;
+        Slog.i(TAG, type + " requested by UID " + Binder.getCallingUid());
+
         enforceCallingPermission(android.Manifest.permission.DUMP, "requestBugReport");
         if (extraOptions != null) {
             SystemProperties.set("dumpstate.options", extraOptions);
@@ -13231,7 +13246,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 return;
             }
         }
-
         // We are now ready to launch the assist activity.
         IResultReceiver sendReceiver = null;
         Bundle sendBundle = null;
@@ -13261,17 +13275,24 @@ public class ActivityManagerService extends IActivityManager.Stub
             return;
         }
 
-        long ident = Binder.clearCallingIdentity();
+        final long ident = Binder.clearCallingIdentity();
         try {
-            pae.intent.replaceExtras(pae.extras);
-            pae.intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                    | Intent.FLAG_ACTIVITY_SINGLE_TOP
-                    | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            closeSystemDialogs("assist");
-            try {
-                mContext.startActivityAsUser(pae.intent, new UserHandle(pae.userHandle));
-            } catch (ActivityNotFoundException e) {
-                Slog.w(TAG, "No activity to handle assist action.", e);
+            if (TextUtils.equals(pae.intent.getAction(),
+                    android.service.voice.VoiceInteractionService.SERVICE_INTERFACE)) {
+                pae.intent.putExtras(pae.extras);
+                mContext.startServiceAsUser(pae.intent, new UserHandle(pae.userHandle));
+            } else {
+                pae.intent.replaceExtras(pae.extras);
+                pae.intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                        | Intent.FLAG_ACTIVITY_SINGLE_TOP
+                        | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                closeSystemDialogs("assist");
+
+                try {
+                    mContext.startActivityAsUser(pae.intent, new UserHandle(pae.userHandle));
+                } catch (ActivityNotFoundException e) {
+                    Slog.w(TAG, "No activity to handle assist action.", e);
+                }
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -14040,10 +14061,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                 mContext.getPackageManager().hasSystemFeature(FEATURE_FREEFORM_WINDOW_MANAGEMENT)
                         || Settings.Global.getInt(
                                 resolver, DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT, 0) != 0;
-        final boolean supportsPictureInPicture =
-                mContext.getPackageManager().hasSystemFeature(FEATURE_PICTURE_IN_PICTURE);
 
         final boolean supportsMultiWindow = ActivityManager.supportsMultiWindow(mContext);
+        final boolean supportsPictureInPicture = supportsMultiWindow &&
+                mContext.getPackageManager().hasSystemFeature(FEATURE_PICTURE_IN_PICTURE);
         final boolean supportsSplitScreenMultiWindow =
                 ActivityManager.supportsSplitScreenMultiWindow(mContext);
         final boolean supportsMultiDisplay = mContext.getPackageManager()
@@ -14654,6 +14675,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                     Slog.e(TAG, "Error getting package info: " + pkg, e);
                 }
                 sb.append("\n");
+            }
+            if (process.info.isInstantApp()) {
+                sb.append("Instant-App: true\n");
             }
         }
     }
@@ -24082,7 +24106,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         public void notifyKeyguardTrustedChanged() {
             synchronized (ActivityManagerService.this) {
-                if (mKeyguardController.isKeyguardShowing()) {
+                if (mKeyguardController.isKeyguardShowing(DEFAULT_DISPLAY)) {
                     mStackSupervisor.ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
                 }
             }
@@ -24538,7 +24562,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (updateFrameworkRes || packagesToUpdate.contains(packageName)) {
                     try {
                         final ApplicationInfo ai = AppGlobals.getPackageManager()
-                                .getApplicationInfo(packageName, 0 /*flags*/, app.userId);
+                                .getApplicationInfo(packageName, STOCK_PM_FLAGS, app.userId);
                         if (ai != null) {
                             app.thread.scheduleApplicationInfoChanged(ai);
                         }

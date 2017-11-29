@@ -224,6 +224,15 @@ public class IpConnectivityMetricsTest {
         dnsEvent(101, EVENT_GETADDRINFO, 0, 56);
         dnsEvent(101, EVENT_GETHOSTBYNAME, 0, 34);
 
+        // iface, uid
+        wakeupEvent("wlan0", 1000);
+        wakeupEvent("rmnet0", 10123);
+        wakeupEvent("wlan0", 1000);
+        wakeupEvent("rmnet0", 10008);
+        wakeupEvent("wlan0", -1);
+        wakeupEvent("wlan0", 10008);
+        wakeupEvent("rmnet0", 1000);
+
         String want = String.join("\n",
                 "dropped_events: 0",
                 "events <",
@@ -405,6 +414,38 @@ public class IpConnectivityMetricsTest {
                 "    return_codes: 0",
                 "  >",
                 ">",
+                "events <",
+                "  if_name: \"\"",
+                "  link_layer: 2",
+                "  network_id: 0",
+                "  time_ms: 0",
+                "  transports: 0",
+                "  wakeup_stats <",
+                "    application_wakeups: 2",
+                "    duration_sec: 0",
+                "    no_uid_wakeups: 0",
+                "    non_application_wakeups: 0",
+                "    root_wakeups: 0",
+                "    system_wakeups: 1",
+                "    total_wakeups: 3",
+                "  >",
+                ">",
+                "events <",
+                "  if_name: \"\"",
+                "  link_layer: 4",
+                "  network_id: 0",
+                "  time_ms: 0",
+                "  transports: 0",
+                "  wakeup_stats <",
+                "    application_wakeups: 1",
+                "    duration_sec: 0",
+                "    no_uid_wakeups: 1",
+                "    non_application_wakeups: 0",
+                "    root_wakeups: 0",
+                "    system_wakeups: 2",
+                "    total_wakeups: 4",
+                "  >",
+                ">",
                 "version: 2\n");
 
         verifySerialization(want, getdump("flush"));
@@ -423,6 +464,11 @@ public class IpConnectivityMetricsTest {
 
     void dnsEvent(int netId, int type, int result, int latency) throws Exception {
         mNetdListener.onDnsEvent(netId, type, result, latency, "", null, 0, 0);
+    }
+
+    void wakeupEvent(String iface, int uid) throws Exception {
+        String prefix = NetdEventListenerService.WAKEUP_EVENT_IFACE_PREFIX + iface;
+        mNetdListener.onWakeupEvent(prefix, uid, uid, 0);
     }
 
     List<ConnectivityMetricsEvent> verifyEvents(int n, int timeoutMs) throws Exception {

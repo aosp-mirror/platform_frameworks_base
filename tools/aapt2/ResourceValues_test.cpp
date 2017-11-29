@@ -18,6 +18,10 @@
 
 #include "test/Test.h"
 
+using ::testing::Eq;
+using ::testing::SizeIs;
+using ::testing::StrEq;
+
 namespace aapt {
 
 TEST(ResourceValuesTest, PluralEquals) {
@@ -54,19 +58,19 @@ TEST(ResourceValuesTest, ArrayEquals) {
   StringPool pool;
 
   Array a;
-  a.items.push_back(util::make_unique<String>(pool.MakeRef("one")));
-  a.items.push_back(util::make_unique<String>(pool.MakeRef("two")));
+  a.elements.push_back(util::make_unique<String>(pool.MakeRef("one")));
+  a.elements.push_back(util::make_unique<String>(pool.MakeRef("two")));
 
   Array b;
-  b.items.push_back(util::make_unique<String>(pool.MakeRef("une")));
-  b.items.push_back(util::make_unique<String>(pool.MakeRef("deux")));
+  b.elements.push_back(util::make_unique<String>(pool.MakeRef("une")));
+  b.elements.push_back(util::make_unique<String>(pool.MakeRef("deux")));
 
   Array c;
-  c.items.push_back(util::make_unique<String>(pool.MakeRef("uno")));
+  c.elements.push_back(util::make_unique<String>(pool.MakeRef("uno")));
 
   Array d;
-  d.items.push_back(util::make_unique<String>(pool.MakeRef("one")));
-  d.items.push_back(util::make_unique<String>(pool.MakeRef("two")));
+  d.elements.push_back(util::make_unique<String>(pool.MakeRef("one")));
+  d.elements.push_back(util::make_unique<String>(pool.MakeRef("two")));
 
   EXPECT_FALSE(a.Equals(&b));
   EXPECT_FALSE(a.Equals(&c));
@@ -78,8 +82,8 @@ TEST(ResourceValuesTest, ArrayClone) {
   StringPool pool;
 
   Array a;
-  a.items.push_back(util::make_unique<String>(pool.MakeRef("one")));
-  a.items.push_back(util::make_unique<String>(pool.MakeRef("two")));
+  a.elements.push_back(util::make_unique<String>(pool.MakeRef("one")));
+  a.elements.push_back(util::make_unique<String>(pool.MakeRef("two")));
 
   std::unique_ptr<Array> b(a.Clone(&pool));
   EXPECT_TRUE(a.Equals(b.get()));
@@ -146,6 +150,22 @@ TEST(ResourceValuesTest, StyleClone) {
 
   std::unique_ptr<Style> b(a->Clone(nullptr));
   EXPECT_TRUE(a->Equals(b.get()));
+}
+
+TEST(ResourcesValuesTest, StringClones) {
+  StringPool pool_a;
+  StringPool pool_b;
+
+  String str_a(pool_a.MakeRef("hello", StringPool::Context(test::ParseConfigOrDie("en"))));
+
+  ASSERT_THAT(pool_a, SizeIs(1u));
+  EXPECT_THAT(pool_a.strings()[0]->context.config, Eq(test::ParseConfigOrDie("en")));
+  EXPECT_THAT(pool_a.strings()[0]->value, StrEq("hello"));
+
+  std::unique_ptr<String> str_b(str_a.Clone(&pool_b));
+  ASSERT_THAT(pool_b, SizeIs(1u));
+  EXPECT_THAT(pool_b.strings()[0]->context.config, Eq(test::ParseConfigOrDie("en")));
+  EXPECT_THAT(pool_b.strings()[0]->value, StrEq("hello"));
 }
 
 TEST(ResourceValuesTest, StyleMerges) {

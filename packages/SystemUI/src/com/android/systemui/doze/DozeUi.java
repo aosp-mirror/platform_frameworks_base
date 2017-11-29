@@ -84,9 +84,6 @@ public class DozeUi implements DozeMachine.Part {
             case DOZE_REQUEST_PULSE:
                 pulseWhileDozing(mMachine.getPulseReason());
                 break;
-            case DOZE_PULSE_DONE:
-                mHost.abortPulsing();
-                break;
             case INITIALIZED:
                 mHost.startDozing();
                 break;

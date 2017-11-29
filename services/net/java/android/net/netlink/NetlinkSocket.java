@@ -51,6 +51,47 @@ public class NetlinkSocket implements Closeable {
     private long mLastRecvTimeoutMs;
     private long mLastSendTimeoutMs;
 
+    public static void sendOneShotKernelMessage(int nlProto, byte[] msg) throws ErrnoException {
+        final String errPrefix = "Error in NetlinkSocket.sendOneShotKernelMessage";
+
+        try (NetlinkSocket nlSocket = new NetlinkSocket(nlProto)) {
+            final long IO_TIMEOUT = 300L;
+            nlSocket.connectToKernel();
+            nlSocket.sendMessage(msg, 0, msg.length, IO_TIMEOUT);
+            final ByteBuffer bytes = nlSocket.recvMessage(IO_TIMEOUT);
+            // recvMessage() guaranteed to not return null if it did not throw.
+            final NetlinkMessage response = NetlinkMessage.parse(bytes);
+            if (response != null && response instanceof NetlinkErrorMessage &&
+                    (((NetlinkErrorMessage) response).getNlMsgError() != null)) {
+                final int errno = ((NetlinkErrorMessage) response).getNlMsgError().error;
+                if (errno != 0) {
+                    // TODO: consider ignoring EINVAL (-22), which appears to be
+                    // normal when probing a neighbor for which the kernel does
+                    // not already have / no longer has a link layer address.
+                    Log.e(TAG, errPrefix + ", errmsg=" + response.toString());
+                    // Note: convert kernel errnos (negative) into userspace errnos (positive).
+                    throw new ErrnoException(response.toString(), Math.abs(errno));
+                }
+            } else {
+                final String errmsg;
+                if (response == null) {
+                    bytes.position(0);
+                    errmsg = "raw bytes: " + NetlinkConstants.hexify(bytes);
+                } else {
+                    errmsg = response.toString();
+                }
+                Log.e(TAG, errPrefix + ", errmsg=" + errmsg);
+                throw new ErrnoException(errmsg, OsConstants.EPROTO);
+            }
+        } catch (InterruptedIOException e) {
+            Log.e(TAG, errPrefix, e);
+            throw new ErrnoException(errPrefix, OsConstants.ETIMEDOUT, e);
+        } catch (SocketException e) {
+            Log.e(TAG, errPrefix, e);
+            throw new ErrnoException(errPrefix, OsConstants.EIO, e);
+        }
+    }
+
     public NetlinkSocket(int nlProto) throws ErrnoException {
         mDescriptor = Os.socket(
                 OsConstants.AF_NETLINK, OsConstants.SOCK_DGRAM, nlProto);

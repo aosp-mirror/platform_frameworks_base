@@ -29,6 +29,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
+import android.util.EventLog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -95,6 +96,7 @@ public class UsbDebuggingActivity extends AlertActivity
             if (((event.getFlags() & MotionEvent.FLAG_WINDOW_IS_OBSCURED) != 0)
                     || ((event.getFlags() & MotionEvent.FLAG_WINDOW_IS_PARTIALLY_OBSCURED) != 0)) {
                 if (event.getAction() == MotionEvent.ACTION_UP) {
+                    EventLog.writeEvent(0x534e4554, "62187985"); // safety net logging
                     Toast.makeText(v.getContext(),
                             R.string.touch_filtered_warning,
                             Toast.LENGTH_SHORT).show();

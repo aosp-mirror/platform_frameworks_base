@@ -585,7 +585,39 @@ public class RulesManagerServiceTest {
         verifyNoPackageTrackerCallsMade();
 
         // Set up the installer.
-        configureStageUninstallExpectation(true /* success */);
+        configureStageUninstallExpectation(TimeZoneDistroInstaller.UNINSTALL_SUCCESS);
+
+        // Simulate the async execution.
+        mFakeExecutor.simulateAsyncExecutionOfLastCommand();
+
+        // Verify the expected calls were made to other components.
+        verifyStageUninstallCalled();
+        verifyPackageTrackerCalled(token, true /* success */);
+
+        // Check the callback was called.
+        callback.assertResultReceived(Callback.SUCCESS);
+    }
+
+    @Test
+    public void requestUninstall_asyncNothingInstalled() throws Exception {
+        configureCallerHasPermission();
+
+        CheckToken token = createArbitraryToken();
+        byte[] tokenBytes = token.toByteArray();
+
+        TestCallback callback = new TestCallback();
+
+        // Request the uninstall.
+        assertEquals(RulesManager.SUCCESS,
+                mRulesManagerService.requestUninstall(tokenBytes, callback));
+
+        // Assert nothing has happened yet.
+        callback.assertNoResultReceived();
+        verifyNoInstallerCallsMade();
+        verifyNoPackageTrackerCallsMade();
+
+        // Set up the installer.
+        configureStageUninstallExpectation(TimeZoneDistroInstaller.UNINSTALL_NOTHING_INSTALLED);
 
         // Simulate the async execution.
         mFakeExecutor.simulateAsyncExecutionOfLastCommand();
@@ -613,7 +645,7 @@ public class RulesManagerServiceTest {
         callback.assertNoResultReceived();
 
         // Set up the installer.
-        configureStageUninstallExpectation(true /* success */);
+        configureStageUninstallExpectation(TimeZoneDistroInstaller.UNINSTALL_SUCCESS);
 
         // Simulate the async execution.
         mFakeExecutor.simulateAsyncExecutionOfLastCommand();
@@ -644,7 +676,7 @@ public class RulesManagerServiceTest {
         callback.assertNoResultReceived();
 
         // Set up the installer.
-        configureStageUninstallExpectation(false /* success */);
+        configureStageUninstallExpectation(TimeZoneDistroInstaller.UNINSTALL_FAIL);
 
         // Simulate the async execution.
         mFakeExecutor.simulateAsyncExecutionOfLastCommand();
@@ -849,8 +881,8 @@ public class RulesManagerServiceTest {
                 .thenReturn(resultCode);
     }
 
-    private void configureStageUninstallExpectation(boolean success) throws Exception {
-        doReturn(success).when(mMockTimeZoneDistroInstaller).stageUninstall();
+    private void configureStageUninstallExpectation(int resultCode) throws Exception {
+        doReturn(resultCode).when(mMockTimeZoneDistroInstaller).stageUninstall();
     }
 
     private void verifyStageInstallCalled() throws Exception {

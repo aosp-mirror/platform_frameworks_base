@@ -89,6 +89,9 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
         pw.println("\nMediaFocusControl dump time: "
                 + DateFormat.getTimeInstance().format(new Date()));
         dumpFocusStack(pw);
+        pw.println("\n");
+        // log
+        mEventLogger.dump(pw);
     }
 
     //=================================================================
@@ -118,6 +121,14 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
     //==========================================================================================
 
     private final static Object mAudioFocusLock = new Object();
+
+    /**
+     * Arbitrary maximum size of audio focus stack to prevent apps OOM'ing this process.
+     */
+    private static final int MAX_STACK_SIZE = 100;
+
+    private static final AudioEventLogger mEventLogger = new AudioEventLogger(50,
+            "focus commands as seen by MediaFocusControl");
 
     /**
      * Discard the current audio focus owner.
@@ -643,11 +654,14 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
     protected int requestAudioFocus(AudioAttributes aa, int focusChangeHint, IBinder cb,
             IAudioFocusDispatcher fd, String clientId, String callingPackageName, int flags,
             int sdk) {
-        Log.i(TAG, " AudioFocus  requestAudioFocus() from uid/pid " + Binder.getCallingUid()
-                + "/" + Binder.getCallingPid()
-                + " clientId=" + clientId
-                + " req=" + focusChangeHint
-                + " flags=0x" + Integer.toHexString(flags));
+        mEventLogger.log((new AudioEventLogger.StringEvent(
+                "requestAudioFocus() from uid/pid " + Binder.getCallingUid()
+                    + "/" + Binder.getCallingPid()
+                    + " clientId=" + clientId + " callingPack=" + callingPackageName
+                    + " req=" + focusChangeHint
+                    + " flags=0x" + Integer.toHexString(flags)
+                    + " sdk=" + sdk))
+                .printLog(TAG));
         // we need a valid binder callback for clients
         if (!cb.pingBinder()) {
             Log.e(TAG, " AudioFocus DOA client for requestAudioFocus(), aborting.");
@@ -660,6 +674,11 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
         }
 
         synchronized(mAudioFocusLock) {
+            if (mFocusStack.size() > MAX_STACK_SIZE) {
+                Log.e(TAG, "Max AudioFocus stack size reached, failing requestAudioFocus()");
+                return AudioManager.AUDIOFOCUS_REQUEST_FAILED;
+            }
+
             boolean enteringRingOrCall = !mRingOrCallActive
                     & (AudioSystem.IN_VOICE_COMM_FOCUS_ID.compareTo(clientId) == 0);
             if (enteringRingOrCall) { mRingOrCallActive = true; }
@@ -770,10 +789,12 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
      * */
     protected int abandonAudioFocus(IAudioFocusDispatcher fl, String clientId, AudioAttributes aa,
             String callingPackageName) {
-        // AudioAttributes are currently ignored, to be used for zones
-        Log.i(TAG, " AudioFocus  abandonAudioFocus() from uid/pid " + Binder.getCallingUid()
-                + "/" + Binder.getCallingPid()
-                + " clientId=" + clientId);
+        // AudioAttributes are currently ignored, to be used for zones / a11y
+        mEventLogger.log((new AudioEventLogger.StringEvent(
+                "abandonAudioFocus() from uid/pid " + Binder.getCallingUid()
+                    + "/" + Binder.getCallingPid()
+                    + " clientId=" + clientId))
+                .printLog(TAG));
         try {
             // this will take care of notifying the new focus owner if needed
             synchronized(mAudioFocusLock) {

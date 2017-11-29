@@ -74,7 +74,6 @@ import static android.content.res.Configuration.UI_MODE_TYPE_MASK;
 import static android.content.res.Configuration.UI_MODE_TYPE_VR_HEADSET;
 import static android.os.Build.VERSION_CODES.HONEYCOMB;
 import static android.os.Build.VERSION_CODES.O;
-import static android.os.Build.VERSION_CODES.O_MR1;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 import static android.view.WindowManagerPolicy.NAV_BAR_LEFT;
@@ -897,7 +896,15 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
 
         Entry ent = AttributeCache.instance().get(packageName,
                 realTheme, com.android.internal.R.styleable.Window, userId);
-        fullscreen = ent != null && !ActivityInfo.isTranslucentOrFloating(ent.array);
+        final boolean translucent = ent != null && (ent.array.getBoolean(
+                com.android.internal.R.styleable.Window_windowIsTranslucent, false)
+                || (!ent.array.hasValue(
+                        com.android.internal.R.styleable.Window_windowIsTranslucent)
+                        && ent.array.getBoolean(
+                                com.android.internal.R.styleable.Window_windowSwipeToDismiss,
+                                        false)));
+        fullscreen = ent != null && !ent.array.getBoolean(
+                com.android.internal.R.styleable.Window_windowIsFloating, false) && !translucent;
         noDisplay = ent != null && ent.array.getBoolean(
                 com.android.internal.R.styleable.Window_windowNoDisplay, false);
 
@@ -1176,8 +1183,15 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
      *         can be put a secondary screen.
      */
     boolean canBeLaunchedOnDisplay(int displayId) {
+        final TaskRecord task = getTask();
+
+        // The resizeability of an Activity's parent task takes precendence over the ActivityInfo.
+        // This allows for a non resizable activity to be launched into a resizeable task.
+        final boolean resizeable =
+                task != null ? task.isResizeable() : supportsResizeableMultiWindow();
+
         return service.mStackSupervisor.canPlaceEntityOnDisplay(displayId,
-                supportsResizeableMultiWindow(), launchedFromPid, launchedFromUid, info);
+                resizeable, launchedFromPid, launchedFromUid, info);
     }
 
     /**
@@ -2177,11 +2191,6 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     }
 
     void setRequestedOrientation(int requestedOrientation) {
-        if (ActivityInfo.isFixedOrientation(requestedOrientation) && !fullscreen
-                && appInfo.targetSdkVersion >= O_MR1) {
-            throw new IllegalStateException("Only fullscreen activities can request orientation");
-        }
-
         final int displayId = getDisplayId();
         final Configuration displayConfig =
                 mStackSupervisor.getDisplayOverrideConfiguration(displayId);
@@ -2242,26 +2251,6 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         mTmpConfig.unset();
         computeBounds(mTmpBounds);
         if (mTmpBounds.equals(mBounds)) {
-            final ActivityStack stack = getStack();
-            if (!mBounds.isEmpty() || task == null || stack == null || !task.mFullscreen) {
-                // We don't want to influence the override configuration here if our task is in
-                // multi-window mode or there is a bounds specified to calculate the override
-                // config. In both of this cases the app should be compatible with whatever the
-                // current configuration is or will be.
-                return;
-            }
-
-            // Currently limited to the top activity for now to avoid situations where non-top
-            // visible activity and top might have conflicting requests putting the non-top activity
-            // windows in an odd state.
-            final ActivityRecord top = mStackSupervisor.topRunningActivityLocked();
-            final Configuration parentConfig = getParent().getConfiguration();
-            if (top != this || isConfigurationCompatible(parentConfig)) {
-                onOverrideConfigurationChanged(mTmpConfig);
-            } else if (isConfigurationCompatible(
-                    mLastReportedConfiguration.getMergedConfiguration())) {
-                onOverrideConfigurationChanged(mLastReportedConfiguration.getMergedConfiguration());
-            }
             return;
         }
 

@@ -244,7 +244,7 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"Transmisja danych 4G została wstrzymana"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="6801382439018099779">"Mobilna transmisja danych jest wstrzymana"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Transmisja danych została wstrzymana"</string>
-    <string name="data_usage_disabled_dialog" msgid="4919541636934603816">"Osiągnięto ustawiony limit danych. Nie korzystasz już z komórkowej transmisji danych.\n\nJeśli włączysz ją ponownie, może zostać naliczona opłata za transmisję danych."</string>
+    <string name="data_usage_disabled_dialog" msgid="4919541636934603816">"Osiągnięto ustawiony limit danych. Nie korzystasz już z komórkowej transmisji danych.\n\nJeśli włączysz ją ponownie, może zostać naliczona opłata za użycie danych."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Wznów"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Brak internetu"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi: połączono"</string>
@@ -785,7 +785,7 @@
     <string name="qs_dnd_keep" msgid="1825009164681928736">"Zachowaj"</string>
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Zastąp"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"Aplikacje działające w tle"</string>
-    <string name="running_foreground_services_msg" msgid="6326247670075574355">"Kliknij, by wyświetlić szczegóły wykorzystania baterii i transmisji danych"</string>
+    <string name="running_foreground_services_msg" msgid="6326247670075574355">"Kliknij, by wyświetlić szczegóły wykorzystania baterii i użycia danych"</string>
     <string name="data_usage_disable_mobile" msgid="5116269981510015864">"Wyłączyć mobilną transmisję danych?"</string>
     <string name="touch_filtered_warning" msgid="8671693809204767551">"Aplikacja Ustawienia nie może zweryfikować Twojej odpowiedzi, ponieważ inna aplikacja zasłania prośbę o udzielenie uprawnień."</string>
 </resources>

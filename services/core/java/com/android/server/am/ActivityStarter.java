@@ -186,6 +186,12 @@ class ActivityStarter {
     private boolean mAvoidMoveToFront;
     private boolean mPowerHintSent;
 
+    // We must track when we deliver the new intent since multiple code paths invoke
+    // {@link #deliverNewIntent}. This is due to early returns in the code path. This flag is used
+    // inside {@link #deliverNewIntent} to suppress duplicate requests and ensure the intent is
+    // delivered at most once.
+    private boolean mIntentDelivered;
+
     private IVoiceInteractionSession mVoiceSession;
     private IVoiceInteractor mVoiceInteractor;
 
@@ -243,6 +249,8 @@ class ActivityStarter {
         mVoiceInteractor = null;
 
         mUsingVr2dDisplay = false;
+
+        mIntentDelivered = false;
     }
 
     ActivityStarter(ActivityManagerService service, ActivityStackSupervisor supervisor) {
@@ -1074,9 +1082,7 @@ class ActivityStarter {
                         // so make sure the task now has the identity of the new intent.
                         top.getTask().setIntent(mStartActivity);
                     }
-                    ActivityStack.logStartActivity(AM_NEW_INTENT, mStartActivity, top.getTask());
-                    top.deliverNewIntentLocked(mCallingUid, mStartActivity.intent,
-                            mStartActivity.launchedFromPackage);
+                    deliverNewIntent(top);
                 }
             }
 
@@ -1138,7 +1144,6 @@ class ActivityStarter {
                 && ((mLaunchFlags & FLAG_ACTIVITY_SINGLE_TOP) != 0
                 || mLaunchSingleTop || mLaunchSingleTask);
         if (dontStart) {
-            ActivityStack.logStartActivity(AM_NEW_INTENT, top, top.getTask());
             // For paranoia, make sure we have correctly resumed the top activity.
             topStack.mLastPausedActivity = null;
             if (mDoResume) {
@@ -1150,8 +1155,8 @@ class ActivityStarter {
                 // anything if that is the case, so this is it!
                 return START_RETURN_INTENT_TO_CALLER;
             }
-            top.deliverNewIntentLocked(
-                    mCallingUid, mStartActivity.intent, mStartActivity.launchedFromPackage);
+
+            deliverNewIntent(top);
 
             // Don't use mStartActivity.task to show the toast. We're not starting a new activity
             // but reusing 'top'. Fields in mStartActivity may not be fully initialized.
@@ -1736,13 +1741,10 @@ class ActivityStarter {
             // desires.
             if (((mLaunchFlags & FLAG_ACTIVITY_SINGLE_TOP) != 0 || mLaunchSingleTop)
                     && intentActivity.realActivity.equals(mStartActivity.realActivity)) {
-                ActivityStack.logStartActivity(AM_NEW_INTENT, mStartActivity,
-                        intentActivity.getTask());
                 if (intentActivity.frontOfTask) {
                     intentActivity.getTask().setIntent(mStartActivity);
                 }
-                intentActivity.deliverNewIntentLocked(mCallingUid, mStartActivity.intent,
-                        mStartActivity.launchedFromPackage);
+                deliverNewIntent(intentActivity);
             } else if (!intentActivity.getTask().isSameIntentFilter(mStartActivity)) {
                 // In this case we are launching the root activity of the task, but with a
                 // different intent. We should start a new instance on top.
@@ -1827,6 +1829,17 @@ class ActivityStarter {
         return START_SUCCESS;
     }
 
+    private void deliverNewIntent(ActivityRecord activity) {
+        if (mIntentDelivered) {
+            return;
+        }
+
+        ActivityStack.logStartActivity(AM_NEW_INTENT, activity, activity.getTask());
+        activity.deliverNewIntentLocked(mCallingUid, mStartActivity.intent,
+                mStartActivity.launchedFromPackage);
+        mIntentDelivered = true;
+    }
+
     private int setTaskFromSourceRecord() {
         if (mSupervisor.isLockTaskModeViolation(mSourceRecord.getTask())) {
             Slog.e(TAG, "Attempted Lock Task Mode violation mStartActivity=" + mStartActivity);
@@ -1883,7 +1896,7 @@ class ActivityStarter {
             mKeepCurTransition = true;
             if (top != null) {
                 ActivityStack.logStartActivity(AM_NEW_INTENT, mStartActivity, top.getTask());
-                top.deliverNewIntentLocked(mCallingUid, mStartActivity.intent, mStartActivity.launchedFromPackage);
+                deliverNewIntent(top);
                 // For paranoia, make sure we have correctly resumed the top activity.
                 mTargetStack.mLastPausedActivity = null;
                 if (mDoResume) {
@@ -1902,7 +1915,7 @@ class ActivityStarter {
                 task.moveActivityToFrontLocked(top);
                 top.updateOptionsLocked(mOptions);
                 ActivityStack.logStartActivity(AM_NEW_INTENT, mStartActivity, task);
-                top.deliverNewIntentLocked(mCallingUid, mStartActivity.intent, mStartActivity.launchedFromPackage);
+                deliverNewIntent(top);
                 mTargetStack.mLastPausedActivity = null;
                 if (mDoResume) {
                     mSupervisor.resumeFocusedStackTopActivityLocked();
@@ -1938,14 +1951,12 @@ class ActivityStarter {
                     || mLaunchSingleTop || mLaunchSingleTask) {
                 mTargetStack.moveTaskToFrontLocked(mInTask, mNoAnimation, mOptions,
                         mStartActivity.appTimeTracker, "inTaskToFront");
-                ActivityStack.logStartActivity(AM_NEW_INTENT, top, top.getTask());
                 if ((mStartFlags & START_FLAG_ONLY_IF_NEEDED) != 0) {
                     // We don't need to start a new activity, and the client said not to do
                     // anything if that is the case, so this is it!
                     return START_RETURN_INTENT_TO_CALLER;
                 }
-                top.deliverNewIntentLocked(mCallingUid, mStartActivity.intent,
-                        mStartActivity.launchedFromPackage);
+                deliverNewIntent(top);
                 return START_DELIVERED_TO_TOP;
             }
         }

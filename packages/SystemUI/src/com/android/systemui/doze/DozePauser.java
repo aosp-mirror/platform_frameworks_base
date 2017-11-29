@@ -28,20 +28,21 @@ public class DozePauser implements DozeMachine.Part {
     public static final String TAG = DozePauser.class.getSimpleName();
     private final AlarmTimeout mPauseTimeout;
     private final DozeMachine mMachine;
-    private final long mTimeoutMs;
+    private final AlwaysOnDisplayPolicy mPolicy;
 
     public DozePauser(Handler handler, DozeMachine machine, AlarmManager alarmManager,
             AlwaysOnDisplayPolicy policy) {
         mMachine = machine;
         mPauseTimeout = new AlarmTimeout(alarmManager, this::onTimeout, TAG, handler);
-        mTimeoutMs = policy.proxScreenOffDelayMs;
+        mPolicy = policy;
     }
 
     @Override
     public void transitionTo(DozeMachine.State oldState, DozeMachine.State newState) {
         switch (newState) {
             case DOZE_AOD_PAUSING:
-                mPauseTimeout.schedule(mTimeoutMs, AlarmTimeout.MODE_IGNORE_IF_SCHEDULED);
+                mPauseTimeout.schedule(mPolicy.proxScreenOffDelayMs,
+                        AlarmTimeout.MODE_IGNORE_IF_SCHEDULED);
                 break;
             default:
                 mPauseTimeout.cancel();

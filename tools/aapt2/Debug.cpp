@@ -33,6 +33,8 @@
 
 namespace aapt {
 
+namespace {
+
 class PrintVisitor : public ValueVisitor {
  public:
   using ValueVisitor::Visit;
@@ -88,9 +90,13 @@ class PrintVisitor : public ValueVisitor {
     }
   }
 
-  void Visit(Array* array) override { array->Print(&std::cout); }
+  void Visit(Array* array) override {
+    array->Print(&std::cout);
+  }
 
-  void Visit(Plural* plural) override { plural->Print(&std::cout); }
+  void Visit(Plural* plural) override {
+    plural->Print(&std::cout);
+  }
 
   void Visit(Styleable* styleable) override {
     std::cout << "(styleable)";
@@ -110,11 +116,14 @@ class PrintVisitor : public ValueVisitor {
     }
   }
 
-  void VisitItem(Item* item) override { item->Print(&std::cout); }
+  void VisitItem(Item* item) override {
+    item->Print(&std::cout);
+  }
 };
 
-void Debug::PrintTable(ResourceTable* table,
-                       const DebugPrintTableOptions& options) {
+}  // namespace
+
+void Debug::PrintTable(ResourceTable* table, const DebugPrintTableOptions& options) {
   PrintVisitor visitor;
 
   for (auto& package : table->packages) {
@@ -148,10 +157,9 @@ void Debug::PrintTable(ResourceTable* table,
       }
 
       for (const ResourceEntry* entry : sorted_entries) {
-        ResourceId id(package->id ? package->id.value() : uint8_t(0),
-                      type->id ? type->id.value() : uint8_t(0),
-                      entry->id ? entry->id.value() : uint16_t(0));
-        ResourceName name(package->name, type->type, entry->name);
+        const ResourceId id(package->id.value_or_default(0), type->id.value_or_default(0),
+                            entry->id.value_or_default(0));
+        const ResourceName name(package->name, type->type, entry->name);
 
         std::cout << "    spec resource " << id << " " << name;
         switch (entry->symbol_status.state) {
@@ -180,16 +188,14 @@ void Debug::PrintTable(ResourceTable* table,
   }
 }
 
-static size_t GetNodeIndex(const std::vector<ResourceName>& names,
-                           const ResourceName& name) {
+static size_t GetNodeIndex(const std::vector<ResourceName>& names, const ResourceName& name) {
   auto iter = std::lower_bound(names.begin(), names.end(), name);
   CHECK(iter != names.end());
   CHECK(*iter == name);
   return std::distance(names.begin(), iter);
 }
 
-void Debug::PrintStyleGraph(ResourceTable* table,
-                            const ResourceName& target_style) {
+void Debug::PrintStyleGraph(ResourceTable* table, const ResourceName& target_style) {
   std::map<ResourceName, std::set<ResourceName>> graph;
 
   std::queue<ResourceName> styles_to_visit;
@@ -223,8 +229,7 @@ void Debug::PrintStyleGraph(ResourceTable* table,
 
   std::cout << "digraph styles {\n";
   for (const auto& name : names) {
-    std::cout << "  node_" << GetNodeIndex(names, name) << " [label=\"" << name
-              << "\"];\n";
+    std::cout << "  node_" << GetNodeIndex(names, name) << " [label=\"" << name << "\"];\n";
   }
 
   for (const auto& entry : graph) {
@@ -243,8 +248,7 @@ void Debug::PrintStyleGraph(ResourceTable* table,
 void Debug::DumpHex(const void* data, size_t len) {
   const uint8_t* d = (const uint8_t*)data;
   for (size_t i = 0; i < len; i++) {
-    std::cerr << std::hex << std::setfill('0') << std::setw(2) << (uint32_t)d[i]
-              << " ";
+    std::cerr << std::hex << std::setfill('0') << std::setw(2) << (uint32_t)d[i] << " ";
     if (i % 8 == 7) {
       std::cerr << "\n";
     }
@@ -262,8 +266,15 @@ class XmlPrinter : public xml::Visitor {
   using xml::Visitor::Visit;
 
   void Visit(xml::Element* el) override {
-    std::cerr << prefix_;
-    std::cerr << "E: ";
+    const size_t previous_size = prefix_.size();
+
+    for (const xml::NamespaceDecl& decl : el->namespace_decls) {
+      std::cerr << prefix_ << "N: " << decl.prefix << "=" << decl.uri
+                << " (line=" << decl.line_number << ")\n";
+      prefix_ += "  ";
+    }
+
+    std::cerr << prefix_ << "E: ";
     if (!el->namespace_uri.empty()) {
       std::cerr << el->namespace_uri << ":";
     }
@@ -283,26 +294,13 @@ class XmlPrinter : public xml::Visitor {
       std::cerr << "=" << attr.value << "\n";
     }
 
-    const size_t previous_size = prefix_.size();
     prefix_ += "  ";
     xml::Visitor::Visit(el);
     prefix_.resize(previous_size);
   }
 
-  void Visit(xml::Namespace* ns) override {
-    std::cerr << prefix_;
-    std::cerr << "N: " << ns->namespace_prefix << "=" << ns->namespace_uri
-              << " (line=" << ns->line_number << ")\n";
-
-    const size_t previous_size = prefix_.size();
-    prefix_ += "  ";
-    xml::Visitor::Visit(ns);
-    prefix_.resize(previous_size);
-  }
-
   void Visit(xml::Text* text) override {
-    std::cerr << prefix_;
-    std::cerr << "T: '" << text->text << "'\n";
+    std::cerr << prefix_ << "T: '" << text->text << "'\n";
   }
 
  private:

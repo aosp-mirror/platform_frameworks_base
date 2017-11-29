@@ -41,8 +41,8 @@
     <string name="current_page_template" msgid="5145005201131935302">"<xliff:g id="CURRENT_PAGE">%1$d</xliff:g>/<xliff:g id="PAGE_COUNT">%2$d</xliff:g>"</string>
     <string name="page_description_template" msgid="6831239682256197161">"<xliff:g id="PAGE_COUNT">%2$d</xliff:g> में से पेज <xliff:g id="CURRENT_PAGE">%1$d</xliff:g>"</string>
     <string name="summary_template" msgid="8899734908625669193">"सारांश, प्रतियां <xliff:g id="COPIES">%1$s</xliff:g>, काग़ज़ का आकार <xliff:g id="PAPER_SIZE">%2$s</xliff:g>"</string>
-    <string name="expand_handle" msgid="7282974448109280522">"हैंडल विस्तृत करें"</string>
-    <string name="collapse_handle" msgid="6886637989442507451">"हैंडल संक्षिप्त करें"</string>
+    <string name="expand_handle" msgid="7282974448109280522">"हैंडल का विस्तार करें"</string>
+    <string name="collapse_handle" msgid="6886637989442507451">"हैंडल को छोटा करें"</string>
     <string name="print_button" msgid="645164566271246268">"प्रिंट करें"</string>
     <string name="savetopdf_button" msgid="2976186791686924743">"पीडीएफ़ में सेव करें"</string>
     <string name="print_options_expanded" msgid="6944679157471691859">"प्रिंट विकल्पों को विस्तृत किया गया"</string>

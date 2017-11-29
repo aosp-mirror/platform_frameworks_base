@@ -577,8 +577,9 @@ public class PackageManagerService extends IPackageManager.Stub
     public static final int REASON_BACKGROUND_DEXOPT = 3;
     public static final int REASON_AB_OTA = 4;
     public static final int REASON_INACTIVE_PACKAGE_DOWNGRADE = 5;
+    public static final int REASON_SHARED = 6;
 
-    public static final int REASON_LAST = REASON_INACTIVE_PACKAGE_DOWNGRADE;
+    public static final int REASON_LAST = REASON_SHARED;
 
     /** All dangerous permission names in the same order as the events in MetricsEvent */
     private static final List<String> ALL_DANGEROUS_PERMISSIONS = Arrays.asList(
@@ -2711,8 +2712,14 @@ public class PackageManagerService extends IPackageManager.Stub
                         // Actual deletion of code and data will be handled by later
                         // reconciliation step
                     } else {
-                        final PackageSetting disabledPs = mSettings.getDisabledSystemPkgLPr(ps.name);
-                        if (disabledPs.codePath == null || !disabledPs.codePath.exists()) {
+                        // we still have a disabled system package, but, it still might have
+                        // been removed. check the code path still exists and check there's
+                        // still a package. the latter can happen if an OTA keeps the same
+                        // code path, but, changes the package name.
+                        final PackageSetting disabledPs =
+                                mSettings.getDisabledSystemPkgLPr(ps.name);
+                        if (disabledPs.codePath == null || !disabledPs.codePath.exists()
+                                || disabledPs.pkg == null) {
                             possiblyDeletedUpdatedSystemApps.add(ps.name);
                         }
                     }
@@ -3305,6 +3312,7 @@ public class PackageManagerService extends IPackageManager.Stub
             removeCodePathLI(dstCodePath);
             return null;
         }
+
         return dstCodePath;
     }
 
@@ -3786,19 +3794,16 @@ public class PackageManagerService extends IPackageManager.Stub
      * <p>
      * Currently, there are three cases in which this can occur:
      * <ol>
-     * <li>The calling application is a "special" process. The special
-     *     processes are {@link Process#SYSTEM_UID}, {@link Process#SHELL_UID}
-     *     and {@code 0}</li>
+     * <li>The calling application is a "special" process. Special processes
+     *     are those with a UID < {@link Process#FIRST_APPLICATION_UID}.</li>
      * <li>The calling application has the permission
-     *     {@link android.Manifest.permission#ACCESS_INSTANT_APPS}</li>
+     *     {@link android.Manifest.permission#ACCESS_INSTANT_APPS}.</li>
      * <li>The calling application is the default launcher on the
      *     system partition.</li>
      * </ol>
      */
     private boolean canViewInstantApps(int callingUid, int userId) {
-        if (callingUid == Process.SYSTEM_UID
-                || callingUid == Process.SHELL_UID
-                || callingUid == Process.ROOT_UID) {
+        if (callingUid < Process.FIRST_APPLICATION_UID) {
             return true;
         }
         if (mContext.checkCallingOrSelfPermission(
@@ -7581,6 +7586,13 @@ public class PackageManagerService extends IPackageManager.Stub
                     && info.activityInfo.splitName != null
                     && !ArrayUtils.contains(info.activityInfo.applicationInfo.splitNames,
                             info.activityInfo.splitName)) {
+                if (mInstantAppInstallerInfo == null) {
+                    if (DEBUG_INSTALL) {
+                        Slog.v(TAG, "No installer - not adding it to the ResolveInfo list");
+                    }
+                    resolveInfos.remove(i);
+                    continue;
+                }
                 // requested activity is defined in a split that hasn't been installed yet.
                 // add the installer to the resolve list
                 if (DEBUG_INSTALL) {
@@ -7594,14 +7606,22 @@ public class PackageManagerService extends IPackageManager.Stub
                         installFailureActivity,
                         info.activityInfo.applicationInfo.versionCode,
                         null /*failureIntent*/);
-                // make sure this resolver is the default
-                installerInfo.isDefault = true;
                 installerInfo.match = IntentFilter.MATCH_CATEGORY_SCHEME_SPECIFIC_PART
                         | IntentFilter.MATCH_ADJUSTMENT_NORMAL;
                 // add a non-generic filter
                 installerInfo.filter = new IntentFilter();
-                // load resources from the correct package
+
+                // This resolve info may appear in the chooser UI, so let us make it
+                // look as the one it replaces as far as the user is concerned which
+                // requires loading the correct label and icon for the resolve info.
                 installerInfo.resolvePackageName = info.getComponentInfo().packageName;
+                installerInfo.labelRes = info.resolveLabelResId();
+                installerInfo.icon = info.resolveIconResId();
+
+                // propagate priority/preferred order/default
+                installerInfo.priority = info.priority;
+                installerInfo.preferredOrder = info.preferredOrder;
+                installerInfo.isDefault = info.isDefault;
                 resolveInfos.set(i, installerInfo);
                 continue;
             }
@@ -8512,7 +8532,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         continue;
                     }
                     if (filterAppAccessLPr(ps, callingUid, userId)) {
-                        return null;
+                        continue;
                     }
                     final PackageInfo pi = generatePackageInfo(ps, flags, userId);
                     if (pi != null) {
@@ -8527,7 +8547,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         continue;
                     }
                     if (filterAppAccessLPr(ps, callingUid, userId)) {
-                        return null;
+                        continue;
                     }
                     final PackageInfo pi = generatePackageInfo((PackageSetting)
                             p.mExtras, flags, userId);
@@ -8639,7 +8659,7 @@ public class PackageManagerService extends IPackageManager.Stub
                             continue;
                         }
                         if (filterAppAccessLPr(ps, callingUid, userId)) {
-                            return null;
+                            continue;
                         }
                         ai = PackageParser.generateApplicationInfo(ps.pkg, effectiveFlags,
                                 ps.readUserState(userId), userId);
@@ -8665,7 +8685,7 @@ public class PackageManagerService extends IPackageManager.Stub
                             continue;
                         }
                         if (filterAppAccessLPr(ps, callingUid, userId)) {
-                            return null;
+                            continue;
                         }
                         ApplicationInfo ai = PackageParser.generateApplicationInfo(p, flags,
                                 ps.readUserState(userId), userId);
@@ -9716,7 +9736,7 @@ public class PackageManagerService extends IPackageManager.Stub
      * and {@code numberOfPackagesFailed}.
      */
     private int[] performDexOptUpgrade(List<PackageParser.Package> pkgs, boolean showDialog,
-            String compilerFilter, boolean bootComplete) {
+            final String compilerFilter, boolean bootComplete) {
 
         int numberOfPackagesVisited = 0;
         int numberOfPackagesOptimized = 0;
@@ -9726,6 +9746,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
         for (PackageParser.Package pkg : pkgs) {
             numberOfPackagesVisited++;
+
+            boolean useProfileForDexopt = false;
 
             if ((isFirstBoot() || isUpgrade()) && isSystemApp(pkg)) {
                 // Copy over initial preopt profiles since we won't get any JIT samples for methods
@@ -9740,10 +9762,49 @@ public class PackageManagerService extends IPackageManager.Stub
                         if (!mInstaller.copySystemProfile(profileFile.getAbsolutePath(),
                                 pkg.applicationInfo.uid, pkg.packageName)) {
                             Log.e(TAG, "Installer failed to copy system profile!");
+                        } else {
+                            // Disabled as this causes speed-profile compilation during first boot
+                            // even if things are already compiled.
+                            // useProfileForDexopt = true;
                         }
                     } catch (Exception e) {
                         Log.e(TAG, "Failed to copy profile " + profileFile.getAbsolutePath() + " ",
                                 e);
+                    }
+                } else {
+                    PackageSetting disabledPs = mSettings.getDisabledSystemPkgLPr(pkg.packageName);
+                    // Handle compressed APKs in this path. Only do this for stubs with profiles to
+                    // minimize the number off apps being speed-profile compiled during first boot.
+                    // The other paths will not change the filter.
+                    if (disabledPs != null && disabledPs.pkg.isStub) {
+                        // The package is the stub one, remove the stub suffix to get the normal
+                        // package and APK names.
+                        String systemProfilePath =
+                                getPrebuildProfilePath(disabledPs.pkg).replace(STUB_SUFFIX, "");
+                        profileFile = new File(systemProfilePath);
+                        // If we have a profile for a compressed APK, copy it to the reference
+                        // location.
+                        // Note that copying the profile here will cause it to override the
+                        // reference profile every OTA even though the existing reference profile
+                        // may have more data. We can't copy during decompression since the
+                        // directories are not set up at that point.
+                        if (profileFile.exists()) {
+                            try {
+                                // We could also do this lazily before calling dexopt in
+                                // PackageDexOptimizer to prevent this happening on first boot. The
+                                // issue is that we don't have a good way to say "do this only
+                                // once".
+                                if (!mInstaller.copySystemProfile(profileFile.getAbsolutePath(),
+                                        pkg.applicationInfo.uid, pkg.packageName)) {
+                                    Log.e(TAG, "Failed to copy system profile for stub package!");
+                                } else {
+                                    useProfileForDexopt = true;
+                                }
+                            } catch (Exception e) {
+                                Log.e(TAG, "Failed to copy profile " +
+                                        profileFile.getAbsolutePath() + " ", e);
+                            }
+                        }
                     }
                 }
             }
@@ -9773,17 +9834,13 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
             }
 
-            // If the OTA updates a system app which was previously preopted to a non-preopted state
-            // the app might end up being verified at runtime. That's because by default the apps
-            // are verify-profile but for preopted apps there's no profile.
-            // Do a hacky check to ensure that if we have no profiles (a reasonable indication
-            // that before the OTA the app was preopted) the app gets compiled with a non-profile
-            // filter (by default 'quicken').
-            // Note that at this stage unused apps are already filtered.
-            if (isSystemApp(pkg) &&
-                    DexFile.isProfileGuidedCompilerFilter(compilerFilter) &&
-                    !Environment.getReferenceProfile(pkg.packageName).exists()) {
-                compilerFilter = getNonProfileGuidedCompilerFilter(compilerFilter);
+            String pkgCompilerFilter = compilerFilter;
+            if (useProfileForDexopt) {
+                // Use background dexopt mode to try and use the profile. Note that this does not
+                // guarantee usage of the profile.
+                pkgCompilerFilter =
+                        PackageManagerServiceCompilerMapping.getCompilerFilterForReason(
+                                PackageManagerService.REASON_BACKGROUND_DEXOPT);
             }
 
             // checkProfiles is false to avoid merging profiles during boot which
@@ -9794,22 +9851,9 @@ public class PackageManagerService extends IPackageManager.Stub
             int dexoptFlags = bootComplete ? DexoptOptions.DEXOPT_BOOT_COMPLETE : 0;
             int primaryDexOptStaus = performDexOptTraced(new DexoptOptions(
                     pkg.packageName,
-                    compilerFilter,
+                    pkgCompilerFilter,
                     dexoptFlags));
 
-            if (pkg.isSystemApp()) {
-                // Only dexopt shared secondary dex files belonging to system apps to not slow down
-                // too much boot after an OTA.
-                int secondaryDexoptFlags = dexoptFlags |
-                        DexoptOptions.DEXOPT_ONLY_SECONDARY_DEX |
-                        DexoptOptions.DEXOPT_ONLY_SHARED_DEX;
-                mDexManager.dexoptSecondaryDex(new DexoptOptions(
-                        pkg.packageName,
-                        compilerFilter,
-                        secondaryDexoptFlags));
-            }
-
-            // TODO(shubhamajmera): Record secondary dexopt stats.
             switch (primaryDexOptStaus) {
                 case PackageDexOptimizer.DEX_OPT_PERFORMED:
                     numberOfPackagesOptimized++;
@@ -11398,6 +11442,10 @@ public class PackageManagerService extends IPackageManager.Stub
                                     + " but expected at " + known.codePathString
                                     + "; ignoring.");
                         }
+                    } else {
+                        throw new PackageManagerException(INSTALL_FAILED_INVALID_INSTALL_LOCATION,
+                                "Application package " + pkg.packageName
+                                + " not found; ignoring.");
                     }
                 }
             }
@@ -25142,6 +25190,37 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                 }
             }
             return results;
+        }
+
+        // NB: this differentiates between preloads and sideloads
+        @Override
+        public String getInstallerForPackage(String packageName) throws RemoteException {
+            final String installerName = getInstallerPackageName(packageName);
+            if (!TextUtils.isEmpty(installerName)) {
+                return installerName;
+            }
+            // differentiate between preload and sideload
+            int callingUser = UserHandle.getUserId(Binder.getCallingUid());
+            ApplicationInfo appInfo = getApplicationInfo(packageName,
+                                    /*flags*/ 0,
+                                    /*userId*/ callingUser);
+            if (appInfo != null && (appInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
+                return "preload";
+            }
+            return "";
+        }
+
+        @Override
+        public int getVersionCodeForPackage(String packageName) throws RemoteException {
+            try {
+                int callingUser = UserHandle.getUserId(Binder.getCallingUid());
+                PackageInfo pInfo = getPackageInfo(packageName, 0, callingUser);
+                if (pInfo != null) {
+                    return pInfo.versionCode;
+                }
+            } catch (Exception e) {
+            }
+            return 0;
         }
     }
 

@@ -28,7 +28,7 @@
     <string name="bugreport_finished_pending_screenshot_text" product="tv" msgid="2343263822812016950">"स्क्रीनशॉट के बिना अपनी गड़बड़ी की रिपोर्ट शेयर करना चुनें या स्क्रीनशॉट पूरा होने तक इंतज़ार करें"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"अपनी गड़बड़ी की रिपोर्ट को बिना स्क्रीनशॉट के शेयर करने के लिए टैप करें या स्क्रीनशॉट पूरा होने की इंतज़ार करें"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"अपनी गड़बड़ी की रिपोर्ट को बिना स्क्रीनशॉट के शेयर करने के लिए टैप करें या स्क्रीनशॉट पूरा होने की इंतज़ार करें"</string>
-    <string name="bugreport_confirm" msgid="5917407234515812495">"गड़बड़ी की रिपोर्ट में सिस्टम की अलग-अलग लॉग फ़ाइलों का डेटा शामिल होता है, जिसमें ऐसा डेटा शामिल हो सकता है जिसे आप संवेदनशील मानते हैं (जैसे कि ऐप्लिकेशन का उपयोग और स्थान डेटा). गड़बड़ी की रिपोर्ट केवल अपने भरोसेमंद लोगों और ऐप्लिकेशन से साझा करें."</string>
+    <string name="bugreport_confirm" msgid="5917407234515812495">"गड़बड़ी की रिपोर्ट में सिस्टम की अलग-अलग लॉग फ़ाइलों का डेटा शामिल होता है, जिसमें ऐसा डेटा शामिल हो सकता है जिसे आप संवेदनशील मानते हैं (जैसे कि ऐप्लिकेशन का उपयोग और जगह डेटा). गड़बड़ी की रिपोर्ट केवल अपने भरोसेमंद लोगों और ऐप्लिकेशन से शेयर करें."</string>
     <string name="bugreport_confirm_dont_repeat" msgid="6179945398364357318">"फिर से ना दिखाएं"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"गड़बड़ी की रिपोर्ट"</string>
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"गड़बड़ी की रिपोर्ट फ़ाइल नहीं पढ़ी जा सकी"</string>
@@ -42,6 +42,6 @@
     <string name="bugreport_info_name" msgid="4414036021935139527">"फ़ाइल नाम"</string>
     <string name="bugreport_info_title" msgid="2306030793918239804">"गड़बड़ी का शीर्षक"</string>
     <string name="bugreport_info_description" msgid="5072835127481627722">"गड़बड़ी का सारांश"</string>
-    <string name="save" msgid="4781509040564835759">"सहेजें"</string>
+    <string name="save" msgid="4781509040564835759">"सेव करें"</string>
     <string name="bugreport_intent_chooser_title" msgid="7605709494790894076">"गड़बड़ी की रिपोर्ट शेयर करें"</string>
 </resources>

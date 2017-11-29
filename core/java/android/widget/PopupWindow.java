@@ -2296,8 +2296,8 @@ public class PopupWindow {
     }
 
     /** @hide */
-    protected final void detachFromAnchor() {
-        final View anchor = mAnchor != null ? mAnchor.get() : null;
+    protected void detachFromAnchor() {
+        final View anchor = getAnchor();
         if (anchor != null) {
             final ViewTreeObserver vto = anchor.getViewTreeObserver();
             vto.removeOnScrollChangedListener(mOnScrollChangedListener);
@@ -2316,7 +2316,7 @@ public class PopupWindow {
     }
 
     /** @hide */
-    protected final void attachToAnchor(View anchor, int xoff, int yoff, int gravity) {
+    protected void attachToAnchor(View anchor, int xoff, int yoff, int gravity) {
         detachFromAnchor();
 
         final ViewTreeObserver vto = anchor.getViewTreeObserver();
@@ -2337,6 +2337,11 @@ public class PopupWindow {
         mAnchorXoff = xoff;
         mAnchorYoff = yoff;
         mAnchoredGravity = gravity;
+    }
+
+    /** @hide */
+    protected @Nullable View getAnchor() {
+        return mAnchor != null ? mAnchor.get() : null;
     }
 
     private void alignToAnchor() {

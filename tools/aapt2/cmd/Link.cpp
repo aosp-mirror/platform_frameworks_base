@@ -40,6 +40,7 @@
 #include "flatten/TableFlattener.h"
 #include "flatten/XmlFlattener.h"
 #include "io/BigBufferInputStream.h"
+#include "io/FileInputStream.h"
 #include "io/FileSystem.h"
 #include "io/Util.h"
 #include "io/ZipArchive.h"
@@ -61,8 +62,9 @@
 #include "util/Files.h"
 #include "xml/XmlDom.h"
 
-using android::StringPiece;
-using android::base::StringPrintf;
+using ::aapt::io::FileInputStream;
+using ::android::StringPiece;
+using ::android::base::StringPrintf;
 
 namespace aapt {
 
@@ -249,10 +251,11 @@ class FeatureSplitSymbolTableDelegate : public DefaultSymbolTableDelegate {
 };
 
 static bool FlattenXml(IAaptContext* context, xml::XmlResource* xml_res, const StringPiece& path,
-                       bool keep_raw_values, IArchiveWriter* writer) {
+                       bool keep_raw_values, bool utf16, IArchiveWriter* writer) {
   BigBuffer buffer(1024);
   XmlFlattenerOptions options = {};
   options.keep_raw_values = keep_raw_values;
+  options.use_utf16 = utf16;
   XmlFlattener flattener(&buffer, options);
   if (!flattener.Consume(context, xml_res)) {
     return false;
@@ -284,13 +287,11 @@ static std::unique_ptr<ResourceTable> LoadTableFromPb(const Source& source, cons
   return table;
 }
 
-/**
- * Inflates an XML file from the source path.
- */
+// Inflates an XML file from the source path.
 static std::unique_ptr<xml::XmlResource> LoadXml(const std::string& path, IDiagnostics* diag) {
-  std::ifstream fin(path, std::ifstream::binary);
-  if (!fin) {
-    diag->Error(DiagMessage(path) << strerror(errno));
+  FileInputStream fin(path);
+  if (fin.HadError()) {
+    diag->Error(DiagMessage(path) << "failed to load XML file: " << fin.GetError());
     return {};
   }
   return xml::Inflate(&fin, diag, Source(path));
@@ -441,7 +442,7 @@ static bool IsTransitionElement(const std::string& name) {
 
 static bool IsVectorElement(const std::string& name) {
   return name == "vector" || name == "animated-vector" || name == "pathInterpolator" ||
-         name == "objectAnimator";
+         name == "objectAnimator" || name == "gradient";
 }
 
 template <typename T>
@@ -482,7 +483,7 @@ std::vector<std::unique_ptr<xml::XmlResource>> ResourceFileFlattener::LinkAndVer
 
   if (options_.no_version_vectors || options_.no_version_transitions) {
     // Skip this if it is a vector or animated-vector.
-    xml::Element* el = xml::FindRootElement(doc);
+    xml::Element* el = doc->root.get();
     if (el && el->namespace_uri.empty()) {
       if ((options_.no_version_vectors && IsVectorElement(el->name)) ||
           (options_.no_version_transitions && IsTransitionElement(el->name))) {
@@ -599,7 +600,7 @@ bool ResourceFileFlattener::Flatten(ResourceTable* table, IArchiveWriter* archiv
               }
             }
             error |= !FlattenXml(context_, doc.get(), dst_path, options_.keep_raw_values,
-                                 archive_writer);
+                                 false /*utf16*/, archive_writer);
           }
         } else {
           error |= !io::CopyFileToArchive(context_, file_op.file_to_copy, file_op.dst_path,
@@ -1295,7 +1296,7 @@ class LinkCommand {
       }
 
       for (uint32_t i = 0; i < num_files; i++) {
-        pb::CompiledFile compiled_file;
+        pb::internal::CompiledFile compiled_file;
         if (!input_stream.ReadCompiledFile(&compiled_file)) {
           context_->GetDiagnostics()->Error(DiagMessage(src)
                                             << "failed to read compiled file header");
@@ -1383,7 +1384,8 @@ class LinkCommand {
   bool WriteApk(IArchiveWriter* writer, proguard::KeepSet* keep_set, xml::XmlResource* manifest,
                 ResourceTable* table) {
     const bool keep_raw_values = context_->GetPackageType() == PackageType::kStaticLib;
-    bool result = FlattenXml(context_, manifest, "AndroidManifest.xml", keep_raw_values, writer);
+    bool result = FlattenXml(context_, manifest, "AndroidManifest.xml", keep_raw_values,
+                             true /*utf16*/, writer);
     if (!result) {
       return false;
     }

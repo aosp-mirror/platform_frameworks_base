@@ -28,7 +28,6 @@ interface IMediaRouterService {
 
     MediaRouterClientState getState(IMediaRouterClient client);
     boolean isPlaybackActive(IMediaRouterClient client);
-    boolean isGlobalBluetoothA2doOn();
 
     void setDiscoveryRequest(IMediaRouterClient client, int routeTypes, boolean activeScan);
     void setSelectedRoute(IMediaRouterClient client, String routeId, boolean explicit);

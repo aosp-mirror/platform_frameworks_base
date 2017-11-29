@@ -671,6 +671,35 @@ public class OffloadControllerTest {
             offload.setUpstreamLinkProperties(upstreamLp);
         }
 
+        // Pretend that some local prefixes and downstreams have been added
+        // (and removed, for good measure).
+        final Set<IpPrefix> minimumLocalPrefixes = new HashSet<>();
+        for (String s : new String[]{
+                "127.0.0.0/8", "192.0.2.0/24", "fe80::/64", "2001:db8::/64"}) {
+            minimumLocalPrefixes.add(new IpPrefix(s));
+        }
+        offload.setLocalPrefixes(minimumLocalPrefixes);
+
+        final LinkProperties usbLinkProperties = new LinkProperties();
+        usbLinkProperties.setInterfaceName(RNDIS0);
+        usbLinkProperties.addLinkAddress(new LinkAddress("192.168.42.1/24"));
+        usbLinkProperties.addRoute(new RouteInfo(new IpPrefix(USB_PREFIX)));
+        offload.notifyDownstreamLinkProperties(usbLinkProperties);
+
+        final LinkProperties wifiLinkProperties = new LinkProperties();
+        wifiLinkProperties.setInterfaceName(WLAN0);
+        wifiLinkProperties.addLinkAddress(new LinkAddress("192.168.43.1/24"));
+        wifiLinkProperties.addRoute(new RouteInfo(new IpPrefix(WIFI_PREFIX)));
+        wifiLinkProperties.addRoute(new RouteInfo(new IpPrefix(IPV6_LINKLOCAL)));
+        // Use a benchmark prefix (RFC 5180 + erratum), since the documentation
+        // prefix is included in the excluded prefix list.
+        wifiLinkProperties.addLinkAddress(new LinkAddress("2001:2::1/64"));
+        wifiLinkProperties.addLinkAddress(new LinkAddress("2001:2::2/64"));
+        wifiLinkProperties.addRoute(new RouteInfo(new IpPrefix("2001:2::/64")));
+        offload.notifyDownstreamLinkProperties(wifiLinkProperties);
+
+        offload.removeDownstreamInterface(RNDIS0);
+
         // Clear invocation history, especially the getForwardedStats() calls
         // that happen with setUpstreamParameters().
         clearInvocations(mHardware);
@@ -685,6 +714,17 @@ public class OffloadControllerTest {
         verifyNoMoreInteractions(mNMService);
 
         // TODO: verify local prefixes and downstreams are also pushed to the HAL.
+        verify(mHardware, times(1)).setLocalPrefixes(mStringArrayCaptor.capture());
+        ArrayList<String> localPrefixes = mStringArrayCaptor.getValue();
+        assertEquals(4, localPrefixes.size());
+        assertArrayListContains(localPrefixes,
+                // TODO: The logic to find and exclude downstream IP prefixes
+                // is currently in Tethering's OffloadWrapper but must be moved
+                // into OffloadController proper. After this, also check for:
+                //     "192.168.43.1/32", "2001:2::1/128", "2001:2::2/128"
+                "127.0.0.0/8", "192.0.2.0/24", "fe80::/64", "2001:db8::/64");
+        verify(mHardware, times(1)).addDownstreamPrefix(WLAN0, "192.168.43.0/24");
+        verify(mHardware, times(1)).addDownstreamPrefix(WLAN0, "2001:2::/64");
         verify(mHardware, times(1)).setUpstreamParameters(eq(RMNET0), any(), any(), any());
         verify(mHardware, times(1)).setDataLimit(eq(RMNET0), anyLong());
         verifyNoMoreInteractions(mHardware);
@@ -692,7 +732,7 @@ public class OffloadControllerTest {
 
     private static void assertArrayListContains(ArrayList<String> list, String... elems) {
         for (String element : elems) {
-            assertTrue(list.contains(element));
+            assertTrue(element + " not in list", list.contains(element));
         }
     }
 }

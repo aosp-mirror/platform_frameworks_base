@@ -16,6 +16,7 @@
 
 package android.database.sqlite;
 
+import android.annotation.TestApi;
 import android.content.res.Resources;
 import android.os.StatFs;
 import android.os.SystemProperties;
@@ -34,6 +35,7 @@ import android.os.SystemProperties;
  *
  * @hide
  */
+@TestApi
 public final class SQLiteGlobal {
     private static final String TAG = "SQLiteGlobal";
 

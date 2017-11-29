@@ -25,15 +25,21 @@ import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.SystemProperties;
 import android.provider.Settings.Secure;
+import android.provider.Settings.System;
 import android.util.Slog;
 
 import com.android.internal.R;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.Calendar;
-import java.util.Locale;
+import java.time.DateTimeException;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeParseException;
 
 /**
  * Controller for managing Night display settings.
@@ -49,6 +55,10 @@ public final class NightDisplayController {
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({ AUTO_MODE_DISABLED, AUTO_MODE_CUSTOM, AUTO_MODE_TWILIGHT })
     public @interface AutoMode {}
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({ COLOR_MODE_NATURAL, COLOR_MODE_BOOSTED, COLOR_MODE_SATURATED })
+    public @interface ColorMode {}
 
     /**
      * Auto mode value to prevent Night display from being automatically activated. It can still
@@ -71,6 +81,31 @@ public final class NightDisplayController {
      * @see #setAutoMode(int)
      */
     public static final int AUTO_MODE_TWILIGHT = 2;
+
+    /**
+     * Color mode with natural colors.
+     *
+     * @see #setColorMode(int)
+     */
+    public static final int COLOR_MODE_NATURAL = 0;
+    /**
+     * Color mode with boosted colors.
+     *
+     * @see #setColorMode(int)
+     */
+    public static final int COLOR_MODE_BOOSTED = 1;
+    /**
+     * Color mode with saturated colors.
+     *
+     * @see #setColorMode(int)
+     */
+    public static final int COLOR_MODE_SATURATED = 2;
+
+    /**
+     * See com.android.server.display.DisplayTransformManager.
+     */
+    private static final String PERSISTENT_PROPERTY_SATURATION = "persist.sys.sf.color_saturation";
+    private static final String PERSISTENT_PROPERTY_NATIVE_MODE = "persist.sys.sf.native_mode";
 
     private final Context mContext;
     private final int mUserId;
@@ -116,8 +151,9 @@ public final class NightDisplayController {
      */
     public boolean setActivated(boolean activated) {
         if (isActivated() != activated) {
-            Secure.putLongForUser(mContext.getContentResolver(),
-                    Secure.NIGHT_DISPLAY_LAST_ACTIVATED_TIME, System.currentTimeMillis(),
+            Secure.putStringForUser(mContext.getContentResolver(),
+                    Secure.NIGHT_DISPLAY_LAST_ACTIVATED_TIME,
+                    LocalDateTime.now().toString(),
                     mUserId);
         }
         return Secure.putIntForUser(mContext.getContentResolver(),
@@ -128,17 +164,22 @@ public final class NightDisplayController {
      * Returns the time when Night display's activation state last changed, or {@code null} if it
      * has never been changed.
      */
-    public Calendar getLastActivatedTime() {
+    public LocalDateTime getLastActivatedTime() {
         final ContentResolver cr = mContext.getContentResolver();
-        final long lastActivatedTimeMillis = Secure.getLongForUser(
-                cr, Secure.NIGHT_DISPLAY_LAST_ACTIVATED_TIME, -1, mUserId);
-        if (lastActivatedTimeMillis < 0) {
-            return null;
+        final String lastActivatedTime = Secure.getStringForUser(
+                cr, Secure.NIGHT_DISPLAY_LAST_ACTIVATED_TIME, mUserId);
+        if (lastActivatedTime != null) {
+            try {
+                return LocalDateTime.parse(lastActivatedTime);
+            } catch (DateTimeParseException ignored) {}
+            // Uses the old epoch time.
+            try {
+                return LocalDateTime.ofInstant(
+                    Instant.ofEpochMilli(Long.parseLong(lastActivatedTime)),
+                    ZoneId.systemDefault());
+            } catch (DateTimeException|NumberFormatException ignored) {}
         }
-
-        final Calendar lastActivatedTime = Calendar.getInstance();
-        lastActivatedTime.setTimeInMillis(lastActivatedTimeMillis);
-        return lastActivatedTime;
+        return null;
     }
 
     /**
@@ -183,8 +224,10 @@ public final class NightDisplayController {
         }
 
         if (getAutoMode() != autoMode) {
-            Secure.putLongForUser(mContext.getContentResolver(),
-                    Secure.NIGHT_DISPLAY_LAST_ACTIVATED_TIME, -1L, mUserId);
+            Secure.putStringForUser(mContext.getContentResolver(),
+                    Secure.NIGHT_DISPLAY_LAST_ACTIVATED_TIME,
+                    null,
+                    mUserId);
         }
         return Secure.putIntForUser(mContext.getContentResolver(),
                 Secure.NIGHT_DISPLAY_AUTO_MODE, autoMode, mUserId);
@@ -206,7 +249,7 @@ public final class NightDisplayController {
                     R.integer.config_defaultNightDisplayCustomStartTime);
         }
 
-        return LocalTime.valueOf(startTimeValue);
+        return LocalTime.ofSecondOfDay(startTimeValue / 1000);
     }
 
     /**
@@ -221,7 +264,7 @@ public final class NightDisplayController {
             throw new IllegalArgumentException("startTime cannot be null");
         }
         return Secure.putIntForUser(mContext.getContentResolver(),
-                Secure.NIGHT_DISPLAY_CUSTOM_START_TIME, startTime.toMillis(), mUserId);
+                Secure.NIGHT_DISPLAY_CUSTOM_START_TIME, startTime.toSecondOfDay() * 1000, mUserId);
     }
 
     /**
@@ -240,7 +283,7 @@ public final class NightDisplayController {
                     R.integer.config_defaultNightDisplayCustomEndTime);
         }
 
-        return LocalTime.valueOf(endTimeValue);
+        return LocalTime.ofSecondOfDay(endTimeValue / 1000);
     }
 
     /**
@@ -255,7 +298,7 @@ public final class NightDisplayController {
             throw new IllegalArgumentException("endTime cannot be null");
         }
         return Secure.putIntForUser(mContext.getContentResolver(),
-                Secure.NIGHT_DISPLAY_CUSTOM_END_TIME, endTime.toMillis(), mUserId);
+                Secure.NIGHT_DISPLAY_CUSTOM_END_TIME, endTime.toSecondOfDay() * 1000, mUserId);
     }
 
     /**
@@ -291,6 +334,37 @@ public final class NightDisplayController {
     public boolean setColorTemperature(int colorTemperature) {
         return Secure.putIntForUser(mContext.getContentResolver(),
             Secure.NIGHT_DISPLAY_COLOR_TEMPERATURE, colorTemperature, mUserId);
+    }
+
+    /**
+     * Get the current color mode.
+     */
+    public int getColorMode() {
+        final int colorMode = System.getIntForUser(mContext.getContentResolver(),
+            System.DISPLAY_COLOR_MODE, -1, mUserId);
+        if (colorMode < COLOR_MODE_NATURAL || colorMode > COLOR_MODE_SATURATED) {
+            // There still might be a legacy system property controlling color mode that we need to
+            // respect.
+            if ("1".equals(SystemProperties.get(PERSISTENT_PROPERTY_NATIVE_MODE))) {
+                return COLOR_MODE_SATURATED;
+            }
+            return "1.0".equals(SystemProperties.get(PERSISTENT_PROPERTY_SATURATION))
+                    ? COLOR_MODE_NATURAL : COLOR_MODE_BOOSTED;
+        }
+        return colorMode;
+    }
+
+    /**
+     * Set the current color mode.
+     *
+     * @param colorMode the color mode
+     */
+    public void setColorMode(@ColorMode int colorMode) {
+        if (colorMode < COLOR_MODE_NATURAL || colorMode > COLOR_MODE_SATURATED) {
+            return;
+        }
+        System.putIntForUser(mContext.getContentResolver(), System.DISPLAY_COLOR_MODE, colorMode,
+                mUserId);
     }
 
     /**
@@ -339,6 +413,9 @@ public final class NightDisplayController {
                 case Secure.NIGHT_DISPLAY_COLOR_TEMPERATURE:
                     mCallback.onColorTemperatureChanged(getColorTemperature());
                     break;
+                case System.DISPLAY_COLOR_MODE:
+                    mCallback.onDisplayColorModeChanged(getColorMode());
+                    break;
             }
         }
     }
@@ -367,6 +444,8 @@ public final class NightDisplayController {
                         false /* notifyForDescendants */, mContentObserver, mUserId);
                 cr.registerContentObserver(Secure.getUriFor(Secure.NIGHT_DISPLAY_COLOR_TEMPERATURE),
                         false /* notifyForDescendants */, mContentObserver, mUserId);
+                cr.registerContentObserver(System.getUriFor(System.DISPLAY_COLOR_MODE),
+                        false /* notifyForDecendants */, mContentObserver, mUserId);
             }
         }
     }
@@ -376,106 +455,6 @@ public final class NightDisplayController {
      */
     public static boolean isAvailable(Context context) {
         return context.getResources().getBoolean(R.bool.config_nightDisplayAvailable);
-    }
-
-    /**
-     * A time without a time-zone or date.
-     */
-    public static class LocalTime {
-
-        /**
-         * The hour of the day from 0 - 23.
-         */
-        public final int hourOfDay;
-        /**
-         * The minute within the hour from 0 - 59.
-         */
-        public final int minute;
-
-        public LocalTime(int hourOfDay, int minute) {
-            if (hourOfDay < 0 || hourOfDay > 23) {
-                throw new IllegalArgumentException("Invalid hourOfDay: " + hourOfDay);
-            } else if (minute < 0 || minute > 59) {
-                throw new IllegalArgumentException("Invalid minute: " + minute);
-            }
-
-            this.hourOfDay = hourOfDay;
-            this.minute = minute;
-        }
-
-        /**
-         * Returns the first date time corresponding to this local time that occurs before the
-         * provided date time.
-         *
-         * @param time the date time to compare against
-         * @return the prior date time corresponding to this local time
-         */
-        public Calendar getDateTimeBefore(Calendar time) {
-            final Calendar c = Calendar.getInstance();
-            c.set(Calendar.YEAR, time.get(Calendar.YEAR));
-            c.set(Calendar.DAY_OF_YEAR, time.get(Calendar.DAY_OF_YEAR));
-
-            c.set(Calendar.HOUR_OF_DAY, hourOfDay);
-            c.set(Calendar.MINUTE, minute);
-            c.set(Calendar.SECOND, 0);
-            c.set(Calendar.MILLISECOND, 0);
-
-            // Check if the local time has past, if so return the same time tomorrow.
-            if (c.after(time)) {
-                c.add(Calendar.DATE, -1);
-            }
-
-            return c;
-        }
-
-        /**
-         * Returns the first date time corresponding to this local time that occurs after the
-         * provided date time.
-         *
-         * @param time the date time to compare against
-         * @return the next date time corresponding to this local time
-         */
-        public Calendar getDateTimeAfter(Calendar time) {
-            final Calendar c = Calendar.getInstance();
-            c.set(Calendar.YEAR, time.get(Calendar.YEAR));
-            c.set(Calendar.DAY_OF_YEAR, time.get(Calendar.DAY_OF_YEAR));
-
-            c.set(Calendar.HOUR_OF_DAY, hourOfDay);
-            c.set(Calendar.MINUTE, minute);
-            c.set(Calendar.SECOND, 0);
-            c.set(Calendar.MILLISECOND, 0);
-
-            // Check if the local time has past, if so return the same time tomorrow.
-            if (c.before(time)) {
-                c.add(Calendar.DATE, 1);
-            }
-
-            return c;
-        }
-
-        /**
-         * Returns a local time corresponding the given number of milliseconds from midnight.
-         *
-         * @param millis the number of milliseconds from midnight
-         * @return the corresponding local time
-         */
-        private static LocalTime valueOf(int millis) {
-            final int hourOfDay = (millis / 3600000) % 24;
-            final int minutes = (millis / 60000) % 60;
-            return new LocalTime(hourOfDay, minutes);
-        }
-
-        /**
-         * Returns the local time represented as milliseconds from midnight.
-         */
-        private int toMillis() {
-            return hourOfDay * 3600000 + minute * 60000;
-        }
-
-        @Override
-        public String toString() {
-            return String.format(Locale.US, "%02d:%02d", hourOfDay, minute);
-        }
     }
 
     /**
@@ -513,5 +492,12 @@ public final class NightDisplayController {
          * @param colorTemperature the color temperature to tint the screen
          */
         default void onColorTemperatureChanged(int colorTemperature) {}
+
+        /**
+         * Callback invoked when the color mode changes.
+         *
+         * @param displayColorMode the color mode
+         */
+        default void onDisplayColorModeChanged(int displayColorMode) {}
     }
 }

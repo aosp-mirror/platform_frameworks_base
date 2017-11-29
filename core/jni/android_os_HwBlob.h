@@ -70,9 +70,6 @@ private:
         sp<JHwBlob> mBlob;
     };
 
-    jclass mClass;
-    jobject mObject;
-
     void *mBuffer;
     size_t mSize;
     bool mOwnsBuffer;

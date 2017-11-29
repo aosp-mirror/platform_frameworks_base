@@ -2814,6 +2814,7 @@
   <java-symbol type="integer" name="config_nightDisplayColorTemperatureMin" />
   <java-symbol type="integer" name="config_nightDisplayColorTemperatureMax" />
   <java-symbol type="array" name="config_nightDisplayColorTemperatureCoefficients" />
+  <java-symbol type="array" name="config_nightDisplayColorTemperatureCoefficientsNative" />
 
   <!-- Default first user restrictions -->
   <java-symbol type="array" name="config_defaultFirstUserRestrictions" />
@@ -2900,8 +2901,9 @@
   <java-symbol type="id" name="autofill_dataset_list"/>
   <java-symbol type="id" name="autofill" />
   <java-symbol type="id" name="autofill_save_custom_subtitle" />
-  <java-symbol type="id" name="autofill_save_title" />
+  <java-symbol type="id" name="autofill_save_icon" />
   <java-symbol type="id" name="autofill_save_no" />
+  <java-symbol type="id" name="autofill_save_title" />
   <java-symbol type="id" name="autofill_save_yes" />
   <java-symbol type="string" name="autofill_error_cannot_autofill" />
   <java-symbol type="string" name="autofill_picker_no_suggestions" />
@@ -2925,6 +2927,7 @@
   <java-symbol type="style" name="AutofillSaveAnimation" />
   <java-symbol type="dimen" name="autofill_dataset_picker_max_size"/>
   <java-symbol type="dimen" name="autofill_save_custom_subtitle_max_height"/>
+  <java-symbol type="dimen" name="autofill_save_icon_max_size"/>
 
   <java-symbol type="dimen" name="notification_big_picture_max_height"/>
   <java-symbol type="dimen" name="notification_big_picture_max_width"/>
@@ -3016,6 +3019,8 @@
   <java-symbol type="string" name="foreground_service_apps_in_background" />
   <java-symbol type="string" name="foreground_service_tap_for_details" />
   <java-symbol type="string" name="foreground_service_multiple_separator" />
+
+  <java-symbol type="bool" name="config_enableCredentialFactoryResetProtection" />
 
   <!-- ETWS primary messages -->
   <java-symbol type="string" name="etws_primary_default_message_earthquake" />

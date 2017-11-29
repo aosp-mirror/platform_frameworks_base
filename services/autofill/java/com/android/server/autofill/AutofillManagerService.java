@@ -115,11 +115,24 @@ public final class AutofillManagerService extends SystemService {
     private final SparseBooleanArray mDisabledUsers = new SparseBooleanArray();
 
     private final LocalLog mRequestsHistory = new LocalLog(20);
+    private final LocalLog mUiLatencyHistory = new LocalLog(20);
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(intent.getAction())) {
+                if (sDebug) Slog.d(TAG, "Close system dialogs");
+
+                // TODO(b/64940307): we need to destroy all sessions that are finished but showing
+                // Save UI because there is no way to show the Save UI back when the activity
+                // beneath it is brought back to top. Ideally, we should just hide the UI and
+                // bring it back when the activity resumes.
+                synchronized (mLock) {
+                    for (int i = 0; i < mServicesCache.size(); i++) {
+                        mServicesCache.valueAt(i).destroyFinishedSessionsLocked();
+                    }
+                }
+
                 mUi.hideAll(null);
             }
         }
@@ -294,7 +307,7 @@ public final class AutofillManagerService extends SystemService {
         AutofillManagerServiceImpl service = mServicesCache.get(resolvedUserId);
         if (service == null) {
             service = new AutofillManagerServiceImpl(mContext, mLock, mRequestsHistory,
-                    resolvedUserId, mUi, mDisabledUsers.get(resolvedUserId));
+                    mUiLatencyHistory, resolvedUserId, mUi, mDisabledUsers.get(resolvedUserId));
             mServicesCache.put(userId, service);
         }
         return service;
@@ -650,7 +663,7 @@ public final class AutofillManagerService extends SystemService {
             synchronized (mLock) {
                 final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
                 if (service == null) return false;
-                return Objects.equals(packageName, service.getPackageName());
+                return Objects.equals(packageName, service.getServicePackageName());
             }
         }
 
@@ -724,6 +737,8 @@ public final class AutofillManagerService extends SystemService {
                 if (showHistory) {
                     pw.println("Requests history:");
                     mRequestsHistory.reverseDump(fd, pw, args);
+                    pw.println("UI latency history:");
+                    mUiLatencyHistory.reverseDump(fd, pw, args);
                 }
             } finally {
                 setDebugLocked(oldDebug);

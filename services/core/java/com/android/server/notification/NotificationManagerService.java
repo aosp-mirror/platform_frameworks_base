@@ -16,8 +16,10 @@
 
 package com.android.server.notification;
 
+import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.app.NotificationManager.IMPORTANCE_MIN;
 import static android.app.NotificationManager.IMPORTANCE_NONE;
+import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
 import static android.content.pm.PackageManager.FEATURE_LEANBACK;
 import static android.content.pm.PackageManager.FEATURE_TELEVISION;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
@@ -279,6 +281,7 @@ public class NotificationManagerService extends SystemService {
     private WindowManagerInternal mWindowManagerInternal;
     private AlarmManager mAlarmManager;
     private ICompanionDeviceManager mCompanionManager;
+    private AccessibilityManager mAccessibilityManager;
 
     final IBinder mForegroundToken = new Binder();
     private WorkerHandler mHandler;
@@ -756,9 +759,12 @@ public class NotificationManagerService extends SystemService {
                 if (r != null) {
                     r.stats.onExpansionChanged(userAction, expanded);
                     final long now = System.currentTimeMillis();
-                    MetricsLogger.action(r.getLogMaker(now)
-                            .setCategory(MetricsEvent.NOTIFICATION_ITEM)
-                            .setType(MetricsEvent.TYPE_DETAIL));
+                    if (userAction) {
+                        MetricsLogger.action(r.getLogMaker(now)
+                                .setCategory(MetricsEvent.NOTIFICATION_ITEM)
+                                .setType(expanded ? MetricsEvent.TYPE_DETAIL
+                                        : MetricsEvent.TYPE_COLLAPSE));
+                    }
                     EventLogTags.writeNotificationExpansion(key,
                             userAction ? 1 : 0, expanded ? 1 : 0,
                             r.getLifespanMs(now), r.getFreshnessMs(now), r.getExposureMs(now));
@@ -1140,6 +1146,12 @@ public class NotificationManagerService extends SystemService {
     }
 
     @VisibleForTesting
+    NotificationRecord getNotificationRecord(String key) {
+        return mNotificationsByKey.get(key);
+    }
+
+
+    @VisibleForTesting
     void setSystemReady(boolean systemReady) {
         mSystemReady = systemReady;
     }
@@ -1179,6 +1191,11 @@ public class NotificationManagerService extends SystemService {
         mUsageStats = us;
     }
 
+    @VisibleForTesting
+    void setAccessibilityManager(AccessibilityManager am) {
+        mAccessibilityManager = am;
+    }
+
     // TODO: All tests should use this init instead of the one-off setters above.
     @VisibleForTesting
     void init(Looper looper, IPackageManager packageManager,
@@ -1193,6 +1210,8 @@ public class NotificationManagerService extends SystemService {
                 Settings.Global.MAX_NOTIFICATION_ENQUEUE_RATE,
                 DEFAULT_MAX_NOTIFICATION_ENQUEUE_RATE);
 
+        mAccessibilityManager =
+                (AccessibilityManager) getContext().getSystemService(Context.ACCESSIBILITY_SERVICE);
         mAm = ActivityManager.getService();
         mPackageManager = packageManager;
         mPackageManagerClient = packageManagerClient;
@@ -1214,7 +1233,7 @@ public class NotificationManagerService extends SystemService {
         mUsageStats = usageStats;
         mRankingHandler = new RankingHandlerWorker(mRankingThread.getLooper());
         mRankingHelper = new RankingHelper(getContext(),
-                getContext().getPackageManager(),
+                mPackageManagerClient,
                 mRankingHandler,
                 mUsageStats,
                 extractorNames);
@@ -1267,13 +1286,11 @@ public class NotificationManagerService extends SystemService {
                 R.array.config_notificationFallbackVibePattern,
                 VIBRATE_PATTERN_MAXLEN,
                 DEFAULT_VIBRATE_PATTERN);
-
         mInCallNotificationUri = Uri.parse("file://" +
                 resources.getString(R.string.config_inCallNotificationSound));
         mInCallNotificationAudioAttributes = new AudioAttributes.Builder()
                 .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                 .setUsage(AudioAttributes.USAGE_VOICE_COMMUNICATION)
-                .setFlags(AudioAttributes.FLAG_AUDIBILITY_ENFORCED)
                 .build();
         mInCallNotificationVolume = resources.getFloat(R.dimen.config_inCallNotificationVolume);
 
@@ -1461,10 +1478,20 @@ public class NotificationManagerService extends SystemService {
         if (channel.getImportance() == NotificationManager.IMPORTANCE_NONE) {
             // cancel
             cancelAllNotificationsInt(MY_UID, MY_PID, pkg, channel.getId(), 0, 0, true,
-                    UserHandle.getUserId(Binder.getCallingUid()), REASON_CHANNEL_BANNED,
+                    UserHandle.getUserId(uid), REASON_CHANNEL_BANNED,
                     null);
+            if (isUidSystemOrPhone(uid)) {
+                int[] profileIds = mUserProfiles.getCurrentProfileIds();
+                int N = profileIds.length;
+                for (int i = 0; i < N; i++) {
+                    int profileId = profileIds[i];
+                    cancelAllNotificationsInt(MY_UID, MY_PID, pkg, channel.getId(), 0, 0, true,
+                            profileId, REASON_CHANNEL_BANNED,
+                            null);
+                }
+            }
         }
-        mRankingHelper.updateNotificationChannel(pkg, uid, channel);
+        mRankingHelper.updateNotificationChannel(pkg, uid, channel, true);
 
         if (!fromListener) {
             final NotificationChannel modifiedChannel =
@@ -2736,18 +2763,29 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void setNotificationPolicyAccessGranted(String pkg, boolean granted)
                 throws RemoteException {
+            setNotificationPolicyAccessGrantedForUser(
+                    pkg, getCallingUserHandle().getIdentifier(), granted);
+        }
+
+        @Override
+        public void setNotificationPolicyAccessGrantedForUser(
+                String pkg, int userId, boolean granted) {
             checkCallerIsSystemOrShell();
-            if (!mActivityManager.isLowRamDevice()) {
-                mConditionProviders.setPackageOrComponentEnabled(
-                        pkg, getCallingUserHandle().getIdentifier(), true, granted);
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                if (!mActivityManager.isLowRamDevice()) {
+                    mConditionProviders.setPackageOrComponentEnabled(
+                            pkg, userId, true, granted);
 
-                getContext().sendBroadcastAsUser(new Intent(
-                        NotificationManager.ACTION_NOTIFICATION_POLICY_ACCESS_GRANTED_CHANGED)
-                                .setPackage(pkg)
-                                .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY),
-                        getCallingUserHandle(), null);
-
-                savePolicyFile();
+                    getContext().sendBroadcastAsUser(new Intent(
+                            NotificationManager.ACTION_NOTIFICATION_POLICY_ACCESS_GRANTED_CHANGED)
+                                    .setPackage(pkg)
+                                    .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY),
+                            UserHandle.of(userId), null);
+                    savePolicyFile();
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
             }
         }
 
@@ -2829,19 +2867,24 @@ public class NotificationManagerService extends SystemService {
                 boolean granted) throws RemoteException {
             Preconditions.checkNotNull(listener);
             checkCallerIsSystemOrShell();
-            if (!mActivityManager.isLowRamDevice()) {
-                mConditionProviders.setPackageOrComponentEnabled(listener.flattenToString(),
-                        userId, false, granted);
-                mListeners.setPackageOrComponentEnabled(listener.flattenToString(),
-                        userId, true, granted);
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                if (!mActivityManager.isLowRamDevice()) {
+                    mConditionProviders.setPackageOrComponentEnabled(listener.flattenToString(),
+                            userId, false, granted);
+                    mListeners.setPackageOrComponentEnabled(listener.flattenToString(),
+                            userId, true, granted);
 
-                getContext().sendBroadcastAsUser(new Intent(
-                        NotificationManager.ACTION_NOTIFICATION_POLICY_ACCESS_GRANTED_CHANGED)
-                                .setPackage(listener.getPackageName())
-                                .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY),
-                        getCallingUserHandle(), null);
+                    getContext().sendBroadcastAsUser(new Intent(
+                            NotificationManager.ACTION_NOTIFICATION_POLICY_ACCESS_GRANTED_CHANGED)
+                                    .setPackage(listener.getPackageName())
+                                    .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY),
+                            UserHandle.of(userId), null);
 
-                savePolicyFile();
+                    savePolicyFile();
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
             }
         }
 
@@ -2850,19 +2893,24 @@ public class NotificationManagerService extends SystemService {
                 int userId, boolean granted) throws RemoteException {
             Preconditions.checkNotNull(assistant);
             checkCallerIsSystemOrShell();
-            if (!mActivityManager.isLowRamDevice()) {
-                mConditionProviders.setPackageOrComponentEnabled(assistant.flattenToString(),
-                        userId, false, granted);
-                mAssistants.setPackageOrComponentEnabled(assistant.flattenToString(),
-                        userId, true, granted);
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                if (!mActivityManager.isLowRamDevice()) {
+                    mConditionProviders.setPackageOrComponentEnabled(assistant.flattenToString(),
+                            userId, false, granted);
+                    mAssistants.setPackageOrComponentEnabled(assistant.flattenToString(),
+                            userId, true, granted);
 
-                getContext().sendBroadcastAsUser(new Intent(
-                        NotificationManager.ACTION_NOTIFICATION_POLICY_ACCESS_GRANTED_CHANGED)
-                                .setPackage(assistant.getPackageName())
-                                .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY),
-                        getCallingUserHandle(), null);
+                    getContext().sendBroadcastAsUser(new Intent(
+                            NotificationManager.ACTION_NOTIFICATION_POLICY_ACCESS_GRANTED_CHANGED)
+                                    .setPackage(assistant.getPackageName())
+                                    .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY),
+                            UserHandle.of(userId), null);
 
-                savePolicyFile();
+                    savePolicyFile();
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
             }
         }
 
@@ -3338,6 +3386,12 @@ public class NotificationManagerService extends SystemService {
      */
     private final NotificationManagerInternal mInternalService = new NotificationManagerInternal() {
         @Override
+        public NotificationChannel getNotificationChannel(String pkg, int uid, String
+                channelId) {
+            return mRankingHelper.getNotificationChannel(pkg, uid, channelId, false);
+        }
+
+        @Override
         public void enqueueNotification(String pkg, String opPkg, int callingUid, int callingPid,
                 String tag, int id, Notification notification, int userId) {
             enqueueNotificationInternal(pkg, opPkg, callingUid, callingPid, tag, id, notification,
@@ -3455,6 +3509,21 @@ public class NotificationManagerService extends SystemService {
                 pkg, opPkg, id, tag, notificationUid, callingPid, notification,
                 user, null, System.currentTimeMillis());
         final NotificationRecord r = new NotificationRecord(getContext(), n, channel);
+
+        if ((notification.flags & Notification.FLAG_FOREGROUND_SERVICE) != 0
+                && (channel.getUserLockedFields() & NotificationChannel.USER_LOCKED_IMPORTANCE) == 0
+                && (r.getImportance() == IMPORTANCE_MIN || r.getImportance() == IMPORTANCE_NONE)) {
+            // Increase the importance of foreground service notifications unless the user had an
+            // opinion otherwise
+            if (TextUtils.isEmpty(channelId)
+                    || NotificationChannel.DEFAULT_CHANNEL_ID.equals(channelId)) {
+                r.setImportance(IMPORTANCE_LOW, "Bumped for foreground service");
+            } else {
+                channel.setImportance(IMPORTANCE_LOW);
+                mRankingHelper.updateNotificationChannel(pkg, notificationUid, channel, false);
+                r.updateNotificationChannel(channel);
+            }
+        }
 
         if (!checkDisqualifyingFeatures(userId, notificationUid, id, tag, r,
                 r.sbn.getOverrideGroupKey() != null)) {
@@ -3691,6 +3760,8 @@ public class NotificationManagerService extends SystemService {
             MetricsLogger.action(r.getLogMaker()
                     .setCategory(MetricsEvent.NOTIFICATION_SNOOZED)
                     .setType(MetricsEvent.TYPE_CLOSE)
+                    .addTaggedData(MetricsEvent.FIELD_NOTIFICATION_SNOOZE_DURATION_MS,
+                            mDuration)
                     .addTaggedData(MetricsEvent.NOTIFICATION_SNOOZED_CRITERIA,
                             mSnoozeCriterionId == null ? 0 : 1));
             boolean wasPosted = removeFromNotificationListsLocked(r);
@@ -3957,30 +4028,37 @@ public class NotificationManagerService extends SystemService {
         // These are set inside the conditional if the notification is allowed to make noise.
         boolean hasValidVibrate = false;
         boolean hasValidSound = false;
+        boolean sentAccessibilityEvent = false;
+        // If the notification will appear in the status bar, it should send an accessibility
+        // event
+        if (!record.isUpdate && record.getImportance() > IMPORTANCE_MIN) {
+            sendAccessibilityEvent(notification, record.sbn.getPackageName());
+            sentAccessibilityEvent = true;
+        }
 
         if (aboveThreshold && isNotificationForCurrentUser(record)) {
-            // If the notification will appear in the status bar, it should send an accessibility
-            // event
-            if (!record.isUpdate && record.getImportance() > IMPORTANCE_MIN) {
-                sendAccessibilityEvent(notification, record.sbn.getPackageName());
-            }
+
             if (mSystemReady && mAudioManager != null) {
                 Uri soundUri = record.getSound();
                 hasValidSound = soundUri != null && !Uri.EMPTY.equals(soundUri);
-
                 long[] vibration = record.getVibration();
                 // Demote sound to vibration if vibration missing & phone in vibration mode.
                 if (vibration == null
                         && hasValidSound
                         && (mAudioManager.getRingerModeInternal()
-                        == AudioManager.RINGER_MODE_VIBRATE)) {
+                        == AudioManager.RINGER_MODE_VIBRATE)
+                        && mAudioManager.getStreamVolume(
+                        AudioAttributes.toLegacyStreamType(record.getAudioAttributes())) == 0) {
                     vibration = mFallbackVibrationPattern;
                 }
                 hasValidVibrate = vibration != null;
 
                 boolean hasAudibleAlert = hasValidSound || hasValidVibrate;
-
                 if (hasAudibleAlert && !shouldMuteNotificationLocked(record)) {
+                    if (!sentAccessibilityEvent) {
+                        sendAccessibilityEvent(notification, record.sbn.getPackageName());
+                        sentAccessibilityEvent = true;
+                    }
                     if (DBG) Slog.v(TAG, "Interrupting!");
                     if (hasValidSound) {
                         mSoundNotificationKey = key;
@@ -4076,8 +4154,9 @@ public class NotificationManagerService extends SystemService {
         boolean looping = (record.getNotification().flags & Notification.FLAG_INSISTENT) != 0;
         // do not play notifications if there is a user of exclusive audio focus
         // or the device is in vibrate mode
-        if (!mAudioManager.isAudioFocusExclusive() && mAudioManager.getRingerModeInternal()
-                != AudioManager.RINGER_MODE_VIBRATE) {
+        if (!mAudioManager.isAudioFocusExclusive() && (mAudioManager.getRingerModeInternal()
+                != AudioManager.RINGER_MODE_VIBRATE || mAudioManager.getStreamVolume(
+                AudioAttributes.toLegacyStreamType(record.getAudioAttributes())) != 0)) {
             final long identity = Binder.clearCallingIdentity();
             try {
                 final IRingtonePlayer player = mAudioManager.getRingtonePlayer();
@@ -4497,8 +4576,7 @@ public class NotificationManagerService extends SystemService {
     }
 
     void sendAccessibilityEvent(Notification notification, CharSequence packageName) {
-        AccessibilityManager manager = AccessibilityManager.getInstance(getContext());
-        if (!manager.isEnabled()) {
+        if (!mAccessibilityManager.isEnabled()) {
             return;
         }
 
@@ -4512,7 +4590,7 @@ public class NotificationManagerService extends SystemService {
             event.getText().add(tickerText);
         }
 
-        manager.sendAccessibilityEvent(event);
+        mAccessibilityManager.sendAccessibilityEvent(event);
     }
 
     /**
@@ -5787,8 +5865,8 @@ public class NotificationManagerService extends SystemService {
 
     private class ShellCmd extends ShellCommand {
         public static final String USAGE = "help\n"
-                + "allow_listener COMPONENT\n"
-                + "disallow_listener COMPONENT\n"
+                + "allow_listener COMPONENT [user_id]\n"
+                + "disallow_listener COMPONENT [user_id]\n"
                 + "set_assistant COMPONENT\n"
                 + "remove_assistant COMPONENT\n"
                 + "allow_dnd PACKAGE\n"
@@ -5819,7 +5897,13 @@ public class NotificationManagerService extends SystemService {
                             pw.println("Invalid listener - must be a ComponentName");
                             return -1;
                         }
-                        getBinderService().setNotificationListenerAccessGranted(cn, true);
+                        String userId = getNextArg();
+                        if (userId == null) {
+                            getBinderService().setNotificationListenerAccessGranted(cn, true);
+                        } else {
+                            getBinderService().setNotificationListenerAccessGrantedForUser(
+                                    cn, Integer.parseInt(userId), true);
+                        }
                     }
                     break;
                     case "disallow_listener": {
@@ -5828,7 +5912,13 @@ public class NotificationManagerService extends SystemService {
                             pw.println("Invalid listener - must be a ComponentName");
                             return -1;
                         }
-                        getBinderService().setNotificationListenerAccessGranted(cn, false);
+                        String userId = getNextArg();
+                        if (userId == null) {
+                            getBinderService().setNotificationListenerAccessGranted(cn, false);
+                        } else {
+                            getBinderService().setNotificationListenerAccessGrantedForUser(
+                                    cn, Integer.parseInt(userId), false);
+                        }
                     }
                     break;
                     case "allow_assistant": {

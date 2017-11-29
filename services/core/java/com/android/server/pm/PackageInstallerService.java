@@ -319,9 +319,15 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
                 if (type == START_TAG) {
                     final String tag = in.getName();
                     if (PackageInstallerSession.TAG_SESSION.equals(tag)) {
-                        final PackageInstallerSession session = PackageInstallerSession.
-                                readFromXml(in, mInternalCallback, mContext, mPm,
-                                        mInstallThread.getLooper(), mSessionsDir);
+                        final PackageInstallerSession session;
+                        try {
+                            session = PackageInstallerSession.readFromXml(in, mInternalCallback,
+                                    mContext, mPm, mInstallThread.getLooper(), mSessionsDir);
+                        } catch (Exception e) {
+                            Slog.e(TAG, "Could not read session", e);
+                            continue;
+                        }
+
                         final long age = System.currentTimeMillis() - session.createdMillis;
 
                         final boolean valid;

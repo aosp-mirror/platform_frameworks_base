@@ -34,6 +34,8 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
+import android.metrics.LogMaker;
 import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Bundle;
@@ -62,6 +64,8 @@ import android.view.autofill.IAutoFillManagerClient;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.os.HandlerCaller;
 import com.android.server.autofill.ui.AutoFillUI;
 
@@ -88,6 +92,7 @@ final class AutofillManagerServiceImpl {
     private final Context mContext;
     private final Object mLock;
     private final AutoFillUI mUi;
+    private final MetricsLogger mMetricsLogger = new MetricsLogger();
 
     private RemoteCallbackList<IAutoFillManagerClient> mClients;
     private AutofillServiceInfo mInfo;
@@ -95,6 +100,8 @@ final class AutofillManagerServiceImpl {
     private static final Random sRandom = new Random();
 
     private final LocalLog mRequestsHistory;
+    private final LocalLog mUiLatencyHistory;
+
     /**
      * Whether service was disabled for user due to {@link UserManager} restrictions.
      */
@@ -136,17 +143,19 @@ final class AutofillManagerServiceImpl {
     private long mLastPrune = 0;
 
     AutofillManagerServiceImpl(Context context, Object lock, LocalLog requestsHistory,
-            int userId, AutoFillUI ui, boolean disabled) {
+            LocalLog uiLatencyHistory, int userId, AutoFillUI ui, boolean disabled) {
         mContext = context;
         mLock = lock;
         mRequestsHistory = requestsHistory;
+        mUiLatencyHistory = uiLatencyHistory;
         mUserId = userId;
         mUi = ui;
         updateLocked(disabled);
     }
 
+    @Nullable
     CharSequence getServiceName() {
-        final String packageName = getPackageName();
+        final String packageName = getServicePackageName();
         if (packageName == null) {
             return null;
         }
@@ -161,7 +170,8 @@ final class AutofillManagerServiceImpl {
         }
     }
 
-    String getPackageName() {
+    @Nullable
+    String getServicePackageName() {
         final ComponentName serviceComponent = getServiceComponentName();
         if (serviceComponent != null) {
             return serviceComponent.getPackageName();
@@ -215,8 +225,10 @@ final class AutofillManagerServiceImpl {
             if (serviceInfo != null) {
                 mInfo = new AutofillServiceInfo(mContext.getPackageManager(),
                         serviceComponent, mUserId);
+                if (sDebug) Slog.d(TAG, "Set component for user " + mUserId + " as " + mInfo);
             } else {
                 mInfo = null;
+                if (sDebug) Slog.d(TAG, "Reset component for user " + mUserId);
             }
             final boolean isEnabled = isEnabled();
             if (wasEnabled != isEnabled) {
@@ -342,17 +354,31 @@ final class AutofillManagerServiceImpl {
     }
 
     void disableOwnedAutofillServicesLocked(int uid) {
-        if (mInfo == null || mInfo.getServiceInfo().applicationInfo.uid != uid) {
+        Slog.i(TAG, "disableOwnedServices(" + uid + "): " + mInfo);
+        if (mInfo == null) return;
+
+        final ServiceInfo serviceInfo = mInfo.getServiceInfo();
+        if (serviceInfo.applicationInfo.uid != uid) {
+            Slog.w(TAG, "disableOwnedServices(): ignored when called by UID " + uid
+                    + " instead of " + serviceInfo.applicationInfo.uid
+                    + " for service " + mInfo);
             return;
         }
+
+
         final long identity = Binder.clearCallingIdentity();
         try {
             final String autoFillService = getComponentNameFromSettings();
-            if (mInfo.getServiceInfo().getComponentName().equals(
-                    ComponentName.unflattenFromString(autoFillService))) {
+            final ComponentName componentName = serviceInfo.getComponentName();
+            if (componentName.equals(ComponentName.unflattenFromString(autoFillService))) {
+                mMetricsLogger.action(MetricsEvent.AUTOFILL_SERVICE_DISABLED_SELF,
+                        componentName.getPackageName());
                 Settings.Secure.putStringForUser(mContext.getContentResolver(),
                         Settings.Secure.AUTOFILL_SERVICE, null, mUserId);
                 destroySessionsLocked();
+            } else {
+                Slog.w(TAG, "disableOwnedServices(): ignored because current service ("
+                        + serviceInfo + ") does not match Settings (" + autoFillService + ")");
             }
         } finally {
             Binder.restoreCallingIdentity(identity);
@@ -376,7 +402,7 @@ final class AutofillManagerServiceImpl {
 
         final Session newSession = new Session(this, mUi, mContext, mHandlerCaller, mUserId, mLock,
                 sessionId, uid, activityToken, appCallbackToken, hasCallback,
-                mInfo.getServiceInfo().getComponentName(), packageName);
+                mUiLatencyHistory, mInfo.getServiceInfo().getComponentName(), packageName);
         mSessions.put(newSession.id, newSession);
 
         return newSession;
@@ -449,7 +475,7 @@ final class AutofillManagerServiceImpl {
             final int sessionCount = mSessions.size();
             for (int i = sessionCount - 1; i >= 0; i--) {
                 final Session session = mSessions.valueAt(i);
-                if (session.isSaveUiPendingForToken(token)) {
+                if (session.isSaveUiPendingForTokenLocked(token)) {
                     session.onPendingSaveUi(operation, token);
                     return;
                 }
@@ -481,8 +507,14 @@ final class AutofillManagerServiceImpl {
         sendStateToClients(true);
     }
 
+    @NonNull
     CharSequence getServiceLabel() {
         return mInfo.getServiceInfo().loadLabel(mContext.getPackageManager());
+    }
+
+    @NonNull
+    Drawable getServiceIcon() {
+        return mInfo.getServiceInfo().loadIcon(mContext.getPackageManager());
     }
 
     /**
@@ -533,9 +565,9 @@ final class AutofillManagerServiceImpl {
     /**
      * Updates the last fill selection when an dataset authentication was selected.
      */
-    void setDatasetAuthenticationSelected(@Nullable String selectedDataset, int sessionId) {
+    void logDatasetAuthenticationSelected(@Nullable String selectedDataset, int sessionId) {
         synchronized (mLock) {
-            if (isValidEventLocked("setDatasetAuthenticationSelected()", sessionId)) {
+            if (isValidEventLocked("logDatasetAuthenticationSelected()", sessionId)) {
                 mEventHistory.addEvent(
                         new Event(Event.TYPE_DATASET_AUTHENTICATION_SELECTED, selectedDataset));
             }
@@ -545,9 +577,9 @@ final class AutofillManagerServiceImpl {
     /**
      * Updates the last fill selection when an save Ui is shown.
      */
-    void setSaveShown(int sessionId) {
+    void logSaveShown(int sessionId) {
         synchronized (mLock) {
-            if (isValidEventLocked("setSaveShown()", sessionId)) {
+            if (isValidEventLocked("logSaveShown()", sessionId)) {
                 mEventHistory.addEvent(new Event(Event.TYPE_SAVE_SHOWN, null));
             }
         }
@@ -556,7 +588,7 @@ final class AutofillManagerServiceImpl {
     /**
      * Updates the last fill response when a dataset was selected.
      */
-    void setDatasetSelected(@Nullable String selectedDataset, int sessionId) {
+    void logDatasetSelected(@Nullable String selectedDataset, int sessionId) {
         synchronized (mLock) {
             if (isValidEventLocked("setDatasetSelected()", sessionId)) {
                 mEventHistory.addEvent(new Event(Event.TYPE_DATASET_SELECTED, selectedDataset));
@@ -624,11 +656,23 @@ final class AutofillManagerServiceImpl {
 
     void destroySessionsLocked() {
         if (mSessions.size() == 0) {
-            mUi.destroyAll(AutofillManager.NO_SESSION, null, null);
+            mUi.destroyAll(null, null, false);
             return;
         }
         while (mSessions.size() > 0) {
             mSessions.valueAt(0).forceRemoveSelfLocked();
+        }
+    }
+
+    // TODO(b/64940307): remove this method if SaveUI is refactored to be attached on activities
+    void destroyFinishedSessionsLocked() {
+        final int sessionCount = mSessions.size();
+        for (int i = sessionCount - 1; i >= 0; i--) {
+            final Session session = mSessions.valueAt(i);
+            if (session.isSavingLocked()) {
+                if (sDebug) Slog.d(TAG, "destroyFinishedSessionsLocked(): " + session.id);
+                session.forceRemoveSelfLocked();
+            }
         }
     }
 

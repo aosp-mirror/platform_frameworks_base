@@ -166,10 +166,6 @@ JHwParcel::JHwParcel(JNIEnv *env, jobject thiz)
       mOwnsParcel(false),
       mTransactCallback(nullptr),
       mWasSent(false) {
-    jclass clazz = env->GetObjectClass(thiz);
-    CHECK(clazz != NULL);
-
-    mObject = env->NewWeakGlobalRef(thiz);
 }
 
 JHwParcel::~JHwParcel() {
@@ -178,9 +174,6 @@ JHwParcel::~JHwParcel() {
     mStorage.release(env);
 
     setParcel(NULL, false /* assumeOwnership */);
-
-    env->DeleteWeakGlobalRef(mObject);
-    mObject = NULL;
 }
 
 hardware::Parcel *JHwParcel::getParcel() {

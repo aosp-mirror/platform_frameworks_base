@@ -275,6 +275,21 @@ public class RadioTunerTest {
     }
 
     @Test
+    public void testStepLoop() {
+        openTuner();
+
+        for (int i = 0; i < 10; i++) {
+            Log.d(TAG, "step loop iteration " + (i + 1));
+
+            int ret = mRadioTuner.step(RadioTuner.DIRECTION_DOWN, true);
+            assertEquals(RadioManager.STATUS_OK, ret);
+            verify(mCallback, timeout(kTuneCallbackTimeoutMs)).onProgramInfoChanged(any());
+
+            resetCallback();
+        }
+    }
+
+    @Test
     public void testTuneAndGetPI() {
         openTuner();
 

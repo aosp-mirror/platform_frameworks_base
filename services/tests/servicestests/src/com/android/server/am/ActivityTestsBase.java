@@ -163,11 +163,28 @@ public class ActivityTestsBase {
      */
     protected static class TestActivityStackSupervisor extends ActivityStackSupervisor {
         private final ActivityDisplay mDisplay;
+        private boolean mLastResizeable;
 
         public TestActivityStackSupervisor(ActivityManagerService service, Looper looper) {
             super(service, looper);
             mWindowManager = prepareMockWindowManager();
             mDisplay = new ActivityDisplay();
+        }
+
+        // TODO: Use Mockito spy instead. Currently not possible due to TestActivityStackSupervisor
+        // access to ActivityDisplay
+        @Override
+        boolean canPlaceEntityOnDisplay(int displayId, boolean resizeable, int callingPid,
+                int callingUid, ActivityInfo activityInfo) {
+            mLastResizeable = resizeable;
+            return super.canPlaceEntityOnDisplay(displayId, resizeable, callingPid, callingUid,
+                    activityInfo);
+        }
+
+        // TODO: remove and use Mockito verify once {@link #canPlaceEntityOnDisplay} override is
+        // removed.
+        public boolean getLastResizeableFromCanPlaceEntityOnDisplay() {
+            return mLastResizeable;
         }
 
         // No home stack is set.

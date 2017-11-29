@@ -72,6 +72,7 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
 
     private final Rect mLastFullscreenBounds = new Rect();
     private final Rect mLastDockedBounds = new Rect();
+    private boolean mQsCustomizing;
 
     public LightBarController(Context ctx) {
         mDarkModeColor = Color.valueOf(ctx.getColor(R.color.dark_mode_icon_color_single_tone));
@@ -129,7 +130,8 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
             mHasLightNavigationBar = isLight(vis, navigationBarMode,
                     View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
             mNavigationLight = mHasLightNavigationBar
-                    && (mScrimAlphaBelowThreshold || !mInvertLightNavBarWithScrim);
+                    && (mScrimAlphaBelowThreshold || !mInvertLightNavBarWithScrim)
+                    && !mQsCustomizing;
             if (mNavigationLight != last) {
                 updateNavigation();
             }
@@ -144,6 +146,12 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
                 true /* sbModeChange*/, mLastStatusBarMode);
         onNavigationVisibilityChanged(mSystemUiVisibility, 0 /* mask */, true /* nbModeChanged */,
                 mLastNavigationBarMode);
+    }
+
+    public void setQsCustomizing(boolean customizing) {
+        if (mQsCustomizing == customizing) return;
+        mQsCustomizing = customizing;
+        reevaluate();
     }
 
     public void setScrimAlpha(float alpha) {

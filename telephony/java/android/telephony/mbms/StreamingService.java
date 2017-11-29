@@ -17,8 +17,10 @@
 package android.telephony.mbms;
 
 import android.annotation.IntDef;
+import android.annotation.Nullable;
 import android.net.Uri;
 import android.os.RemoteException;
+import android.telephony.MbmsStreamingSession;
 import android.telephony.mbms.vendor.IMbmsStreamingService;
 import android.util.Log;
 
@@ -26,13 +28,17 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
+ * Class used to represent a single MBMS stream. After a stream has been started with
+ * {@link MbmsStreamingSession#startStreaming(StreamingServiceInfo,
+ * StreamingServiceCallback, android.os.Handler)},
+ * this class is used to hold information about the stream and control it.
  * @hide
  */
 public class StreamingService {
     private static final String LOG_TAG = "MbmsStreamingService";
 
     /**
-     * The state of a stream, reported via {@link StreamingServiceCallback#streamStateUpdated}
+     * The state of a stream, reported via {@link StreamingServiceCallback#onStreamStateUpdated}
      * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
@@ -44,7 +50,7 @@ public class StreamingService {
 
     /**
      * The reason for a stream state change, reported via
-     * {@link StreamingServiceCallback#streamStateUpdated}
+     * {@link StreamingServiceCallback#onStreamStateUpdated}
      * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
@@ -60,7 +66,8 @@ public class StreamingService {
 
     /**
      * State changed due to a call to {@link #stopStreaming()} or
-     * {@link android.telephony.MbmsStreamingManager#startStreaming(StreamingServiceInfo, StreamingServiceCallback)}
+     * {@link MbmsStreamingSession#startStreaming(StreamingServiceInfo,
+     * StreamingServiceCallback, android.os.Handler)}
      */
     public static final int REASON_BY_USER_REQUEST = 1;
 
@@ -87,44 +94,46 @@ public class StreamingService {
     /**
      * State changed due to the device leaving the where this stream is being broadcast.
      */
-    public static final int REASON_LEFT_MBMS_BROADCAST_AREA = 5;
+    public static final int REASON_LEFT_MBMS_BROADCAST_AREA = 6;
 
     /**
      * The method of transmission currently used for a stream,
-     * reported via {@link StreamingServiceCallback#streamMethodUpdated}
+     * reported via {@link StreamingServiceCallback#onStreamMethodUpdated}
      */
     public final static int BROADCAST_METHOD = 1;
     public final static int UNICAST_METHOD   = 2;
 
     private final int mSubscriptionId;
+    private final MbmsStreamingSession mParentSession;
     private final StreamingServiceInfo mServiceInfo;
-    private final IStreamingServiceCallback mCallback;
+    private final InternalStreamingServiceCallback mCallback;
 
     private IMbmsStreamingService mService;
+
     /**
      * @hide
      */
     public StreamingService(int subscriptionId,
             IMbmsStreamingService service,
+            MbmsStreamingSession session,
             StreamingServiceInfo streamingServiceInfo,
-            IStreamingServiceCallback callback) {
+            InternalStreamingServiceCallback callback) {
         mSubscriptionId = subscriptionId;
+        mParentSession = session;
         mService = service;
         mServiceInfo = streamingServiceInfo;
         mCallback = callback;
     }
 
     /**
-     * Retreive the Uri used to play this stream.
+     * Retrieve the Uri used to play this stream.
      *
-     * This may throw a {@link MbmsException} with the error code
-     * {@link MbmsException#ERROR_MIDDLEWARE_LOST}
+     * May throw an {@link IllegalArgumentException} or an {@link IllegalStateException}.
      *
-     * May also throw an {@link IllegalArgumentException} or an {@link IllegalStateException}
-     *
-     * @return The {@link Uri} to pass to the streaming client.
+     * @return The {@link Uri} to pass to the streaming client, or {@code null} if an error
+     *         occurred.
      */
-    public Uri getPlaybackUri() throws MbmsException {
+    public @Nullable Uri getPlaybackUri() {
         if (mService == null) {
             throw new IllegalStateException("No streaming service attached");
         }
@@ -134,25 +143,26 @@ public class StreamingService {
         } catch (RemoteException e) {
             Log.w(LOG_TAG, "Remote process died");
             mService = null;
-            throw new MbmsException(MbmsException.ERROR_MIDDLEWARE_LOST);
+            mParentSession.onStreamingServiceStopped(this);
+            sendErrorToApp(MbmsErrors.ERROR_MIDDLEWARE_LOST, null);
+            return null;
         }
     }
 
     /**
-     * Retreive the info for this StreamingService.
+     * Retrieve the {@link StreamingServiceInfo} corresponding to this stream.
      */
     public StreamingServiceInfo getInfo() {
         return mServiceInfo;
     }
 
     /**
-     * Stop streaming this service.
-     * This may throw a {@link MbmsException} with the error code
-     * {@link MbmsException#ERROR_MIDDLEWARE_LOST}
+     * Stop streaming this service. Further operations on this object will fail with an
+     * {@link IllegalStateException}.
      *
-     * May also throw an {@link IllegalArgumentException} or an {@link IllegalStateException}
+     * May throw an {@link IllegalArgumentException} or an {@link IllegalStateException}
      */
-    public void stopStreaming() throws MbmsException {
+    public void stopStreaming() {
         if (mService == null) {
             throw new IllegalStateException("No streaming service attached");
         }
@@ -162,32 +172,22 @@ public class StreamingService {
         } catch (RemoteException e) {
             Log.w(LOG_TAG, "Remote process died");
             mService = null;
-            throw new MbmsException(MbmsException.ERROR_MIDDLEWARE_LOST);
+            sendErrorToApp(MbmsErrors.ERROR_MIDDLEWARE_LOST, null);
+        } finally {
+            mParentSession.onStreamingServiceStopped(this);
         }
     }
 
-    /**
-     * Disposes of this stream. Further operations on this object will fail with an
-     * {@link IllegalStateException}.
-     *
-     * This may throw a {@link MbmsException} with the error code
-     * {@link MbmsException#ERROR_MIDDLEWARE_LOST}
-     * May also throw an {@link IllegalStateException}
-     */
-    public void dispose() throws MbmsException {
-        if (mService == null) {
-            throw new IllegalStateException("No streaming service attached");
-        }
+    /** @hide */
+    public InternalStreamingServiceCallback getCallback() {
+        return mCallback;
+    }
 
+    private void sendErrorToApp(int errorCode, String message) {
         try {
-            mService.disposeStream(mSubscriptionId, mServiceInfo.getServiceId());
+            mCallback.onError(errorCode, message);
         } catch (RemoteException e) {
-            Log.w(LOG_TAG, "Remote process died");
-            throw new MbmsException(MbmsException.ERROR_MIDDLEWARE_LOST);
-        } catch (IllegalArgumentException e) {
-            throw new IllegalStateException("StreamingService state inconsistent with middleware");
-        } finally {
-            mService = null;
+            // Ignore, should not happen locally.
         }
     }
 }

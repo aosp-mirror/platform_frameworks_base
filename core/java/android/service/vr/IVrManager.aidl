@@ -93,5 +93,13 @@ interface IVrManager {
      * currently, else return the display id of the virtual display
      */
     int getVr2dDisplayId();
+
+    /**
+     * Set the component name of the compositor service to bind.
+     *
+     * @param componentName flattened string representing a ComponentName of a Service in the
+     * application's compositor process to bind to, or null to clear the current binding.
+     */
+    void setAndBindCompositor(in String componentName);
 }
 

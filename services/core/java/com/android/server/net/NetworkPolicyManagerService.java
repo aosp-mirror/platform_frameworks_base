@@ -113,16 +113,20 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.net.ConnectivityManager;
+import android.net.ConnectivityManager.NetworkCallback;
 import android.net.IConnectivityManager;
 import android.net.INetworkManagementEventObserver;
 import android.net.INetworkPolicyListener;
 import android.net.INetworkPolicyManager;
 import android.net.INetworkStatsService;
 import android.net.LinkProperties;
+import android.net.Network;
+import android.net.NetworkCapabilities;
 import android.net.NetworkIdentity;
 import android.net.NetworkPolicy;
 import android.net.NetworkPolicyManager;
 import android.net.NetworkQuotaInfo;
+import android.net.NetworkRequest;
 import android.net.NetworkState;
 import android.net.NetworkTemplate;
 import android.net.TrafficStats;
@@ -328,7 +332,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private static final int MSG_UPDATE_INTERFACE_QUOTA = 10;
     private static final int MSG_REMOVE_INTERFACE_QUOTA = 11;
     private static final int MSG_POLICIES_CHANGED = 13;
-    private static final int MSG_SET_FIREWALL_RULES = 14;
     private static final int MSG_RESET_FIREWALL_RULES_BY_UID = 15;
 
     private static final int UID_MSG_STATE_CHANGED = 100;
@@ -443,6 +446,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     /** Foreground at UID granularity. */
     @GuardedBy("mUidRulesFirstLock")
     final SparseIntArray mUidState = new SparseIntArray();
+
+    /** Map from network ID to last observed meteredness state */
+    @GuardedBy("mNetworkPoliciesSecondLock")
+    private final SparseBooleanArray mNetworkMetered = new SparseBooleanArray();
 
     private final RemoteCallbackList<INetworkPolicyListener>
             mListeners = new RemoteCallbackList<>();
@@ -782,6 +789,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     ACTION_CARRIER_CONFIG_CHANGED);
             mContext.registerReceiver(mCarrierConfigReceiver, carrierConfigFilter, null, mHandler);
 
+            // listen for meteredness changes
+            mContext.getSystemService(ConnectivityManager.class).registerNetworkCallback(
+                    new NetworkRequest.Builder().build(), mNetworkCallback);
+
             mUsageStats.addAppIdleStateChangeListener(new AppIdleStateChangeListener());
             // tell systemReady() that the service has been initialized
             initCompleteSignal.countDown();
@@ -981,6 +992,26 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             synchronized (mUidRulesFirstLock) {
                 synchronized (mNetworkPoliciesSecondLock) {
                     upgradeWifiMeteredOverrideAL();
+                }
+            }
+            // Only need to perform upgrade logic once
+            mContext.unregisterReceiver(this);
+        }
+    };
+
+    private final NetworkCallback mNetworkCallback = new NetworkCallback() {
+        @Override
+        public void onCapabilitiesChanged(Network network,
+                NetworkCapabilities networkCapabilities) {
+            if (network == null || networkCapabilities == null) return;
+
+            synchronized (mNetworkPoliciesSecondLock) {
+                final boolean oldMetered = mNetworkMetered.get(network.netId, false);
+                final boolean newMetered = !networkCapabilities
+                        .hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED);
+
+                if ((oldMetered != newMetered) || mNetworkMetered.indexOfKey(network.netId) < 0) {
+                    mNetworkMetered.put(network.netId, newMetered);
                     updateNetworkRulesNL();
                 }
             }
@@ -3152,9 +3183,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     uidRules.put(mUidState.keyAt(i), FIREWALL_RULE_ALLOW);
                 }
             }
-            setUidFirewallRulesAsync(chain, uidRules, CHAIN_TOGGLE_ENABLE);
+            setUidFirewallRulesUL(chain, uidRules, CHAIN_TOGGLE_ENABLE);
         } else {
-            setUidFirewallRulesAsync(chain, null, CHAIN_TOGGLE_DISABLE);
+            setUidFirewallRulesUL(chain, null, CHAIN_TOGGLE_DISABLE);
         }
     }
 
@@ -3221,7 +3252,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 }
             }
 
-            setUidFirewallRulesAsync(FIREWALL_CHAIN_STANDBY, uidRules, CHAIN_TOGGLE_NONE);
+            setUidFirewallRulesUL(FIREWALL_CHAIN_STANDBY, uidRules, CHAIN_TOGGLE_NONE);
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_NETWORK);
         }
@@ -3922,18 +3953,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     removeInterfaceQuota((String) msg.obj);
                     return true;
                 }
-                case MSG_SET_FIREWALL_RULES: {
-                    final int chain = msg.arg1;
-                    final int toggle = msg.arg2;
-                    final SparseIntArray uidRules = (SparseIntArray) msg.obj;
-                    if (uidRules != null) {
-                        setUidFirewallRules(chain, uidRules);
-                    }
-                    if (toggle != CHAIN_TOGGLE_NONE) {
-                        enableFirewallChainUL(chain, toggle == CHAIN_TOGGLE_ENABLE);
-                    }
-                    return true;
-                }
                 case MSG_RESET_FIREWALL_RULES_BY_UID: {
                     resetUidFirewallRules(msg.arg1);
                     return true;
@@ -4079,15 +4098,20 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     /**
      * Calls {@link #setUidFirewallRules(int, SparseIntArray)} and
-     * {@link #enableFirewallChainUL(int, boolean)} asynchronously.
+     * {@link #enableFirewallChainUL(int, boolean)} synchronously.
      *
      * @param chain firewall chain.
      * @param uidRules new UID rules; if {@code null}, only toggles chain state.
      * @param toggle whether the chain should be enabled, disabled, or not changed.
      */
-    private void setUidFirewallRulesAsync(int chain, @Nullable SparseIntArray uidRules,
+    private void setUidFirewallRulesUL(int chain, @Nullable SparseIntArray uidRules,
             @ChainToggleType int toggle) {
-        mHandler.obtainMessage(MSG_SET_FIREWALL_RULES, chain, toggle, uidRules).sendToTarget();
+        if (uidRules != null) {
+            setUidFirewallRulesUL(chain, uidRules);
+        }
+        if (toggle != CHAIN_TOGGLE_NONE) {
+            enableFirewallChainUL(chain, toggle == CHAIN_TOGGLE_ENABLE);
+        }
     }
 
     /**
@@ -4095,7 +4119,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      * here to netd.  It will clean up dead rules and make sure the target chain only contains rules
      * specified here.
      */
-    private void setUidFirewallRules(int chain, SparseIntArray uidRules) {
+    private void setUidFirewallRulesUL(int chain, SparseIntArray uidRules) {
         try {
             int size = uidRules.size();
             int[] uids = new int[size];

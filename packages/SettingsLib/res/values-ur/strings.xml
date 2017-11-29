@@ -110,11 +110,11 @@
     <string name="process_kernel_label" msgid="3916858646836739323">"Android OS"</string>
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"ہٹائی گئی ایپس"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"ہٹائی گئی ایپس اور صارفین"</string>
-    <string name="tether_settings_title_usb" msgid="6688416425801386511">"‏USB ٹیتھرنگ"</string>
+    <string name="tether_settings_title_usb" msgid="6688416425801386511">"‏USB ٹیدرنگ"</string>
     <string name="tether_settings_title_wifi" msgid="3277144155960302049">"پورٹیبل ہاٹ اسپاٹ"</string>
-    <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"بلوٹوتھ ٹیتھرنگ"</string>
-    <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"ٹیتھرنگ"</string>
-    <string name="tether_settings_title_all" msgid="8356136101061143841">"ٹیتھرنگ و پورٹیبل ہاٹ اسپاٹ"</string>
+    <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"بلوٹوتھ ٹیدرنگ"</string>
+    <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"ٹیدرنگ"</string>
+    <string name="tether_settings_title_all" msgid="8356136101061143841">"ٹیدرنگ و پورٹیبل ہاٹ اسپاٹ"</string>
     <string name="managed_user_title" msgid="8109605045406748842">"تمام کام کی ایپس"</string>
     <string name="user_guest" msgid="8475274842845401871">"مہمان"</string>
     <string name="unknown" msgid="1592123443519355854">"نامعلوم"</string>
@@ -168,7 +168,7 @@
     <string name="development_settings_summary" msgid="1815795401632854041">"ایپ ڈویلپمنٹ کیلئے اختیارات سیٹ کریں"</string>
     <string name="development_settings_not_available" msgid="4308569041701535607">"اس صارف کیلئے ڈیولپر کے اختیارات دستیاب نہیں ہیں"</string>
     <string name="vpn_settings_not_available" msgid="956841430176985598">"‏VPN ترتیبات اس صارف کیلئے دستیاب نہیں ہیں"</string>
-    <string name="tethering_settings_not_available" msgid="6765770438438291012">"ٹیتھرنگ ترتیبات اس صارف کیلئے دستیاب نہیں ہیں"</string>
+    <string name="tethering_settings_not_available" msgid="6765770438438291012">"ٹیدرنگ ترتیبات اس صارف کیلئے دستیاب نہیں ہیں"</string>
     <string name="apn_settings_not_available" msgid="7873729032165324000">"رسائی کی جگہ کے نام کی ترتیبات اس صارف کیلئے دستیاب نہیں ہیں"</string>
     <string name="enable_adb" msgid="7982306934419797485">"‏USB ڈیبگ کرنا"</string>
     <string name="enable_adb_summary" msgid="4881186971746056635">"‏USB مربوط ہونے پر ڈيبگ کرنے کی وضع"</string>
@@ -192,7 +192,7 @@
     <string name="wifi_aggressive_handover" msgid="5309131983693661320">"‏Wi‑Fi سے موبائل کو جارحانہ ہینڈ اوور"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"‏ہمیشہ Wi‑Fi روم اسکینز کی اجازت دیں"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"موبائل ڈیٹا ہمیشہ فعال رکھیں"</string>
-    <string name="tethering_hardware_offload" msgid="7470077827090325814">"ہارڈویئر کی سرعت کاری میں ربط بنایا جا رہا ہے"</string>
+    <string name="tethering_hardware_offload" msgid="7470077827090325814">"ٹیدرنگ ہارڈویئر سرعت کاری"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"بغیر نام والے بلوٹوتھ آلات دکھائیں"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"مطلق والیوم کو غیر فعال کریں"</string>
     <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"ان بینڈ رنگنگ فعال کریں"</string>
@@ -225,7 +225,7 @@
     <string name="allow_mock_location_summary" msgid="317615105156345626">"فرضی مقامات کی اجازت دیں"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"منظر انتساب کے معائنہ کو فعال کریں"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"‏Wi‑Fi فعال ہونے پر بھی موبائل ڈیٹا کو ہمیشہ فعال رکھیں (تیزی سے نیٹ ورک سوئچ کرنے کیلئے)۔"</string>
-    <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"اگر دستیاب ہو، تو ہارڈویئر کی سرعت کاری میں ربط کاری کا استعمال کریں"</string>
+    <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"اگر دستیاب ہو تو ٹیدرنگ ہارڈویئر سرعت کاری کا استعمال کریں"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"‏USB ڈیبگ کرنے کی اجازت دیں؟"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"‏USB ڈیبگ کرنا صرف ڈیولپمنٹ کے مقاصد کیلئے ہے۔ اپنے کمپیوٹر اور اپنے آلہ کے درمیان ڈیٹا کاپی کرنے کیلئے اسے استعمال کریں، بغیر اطلاع کے اپنے آلہ پر ایپس انسٹال کریں اور لاگ ڈیٹا پڑھیں۔"</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"‏اپنے ذریعہ پہلے سے اجازت یافتہ سبھی کمپیوٹرز سے USB ڈیبگ کرنے کی رسائی کو کالعدم کریں؟"</string>

@@ -4,10 +4,8 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Rect;
-import android.graphics.drawable.Icon;
 import android.support.annotation.NonNull;
 import android.support.v4.util.ArrayMap;
-import android.support.v4.util.ArraySet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -269,16 +267,24 @@ public class NotificationIconAreaController implements DarkReceiver {
      */
     private void applyNotificationIconsTint() {
         for (int i = 0; i < mNotificationIcons.getChildCount(); i++) {
-            StatusBarIconView v = (StatusBarIconView) mNotificationIcons.getChildAt(i);
-            boolean isPreL = Boolean.TRUE.equals(v.getTag(R.id.icon_is_pre_L));
-            int color = StatusBarIconView.NO_COLOR;
-            boolean colorize = !isPreL || NotificationUtils.isGrayscale(v, mNotificationColorUtil);
-            if (colorize) {
-                color = DarkIconDispatcher.getTint(mTintArea, v, mIconTint);
+            final StatusBarIconView iv = (StatusBarIconView) mNotificationIcons.getChildAt(i);
+            if (iv.getWidth() != 0) {
+                updateTintForIcon(iv);
+            } else {
+                iv.executeOnLayout(() -> updateTintForIcon(iv));
             }
-            v.setStaticDrawableColor(color);
-            v.setDecorColor(mIconTint);
         }
+    }
+
+    private void updateTintForIcon(StatusBarIconView v) {
+        boolean isPreL = Boolean.TRUE.equals(v.getTag(R.id.icon_is_pre_L));
+        int color = StatusBarIconView.NO_COLOR;
+        boolean colorize = !isPreL || NotificationUtils.isGrayscale(v, mNotificationColorUtil);
+        if (colorize) {
+            color = DarkIconDispatcher.getTint(mTintArea, v, mIconTint);
+        }
+        v.setStaticDrawableColor(color);
+        v.setDecorColor(mIconTint);
     }
 
     public void setDark(boolean dark) {

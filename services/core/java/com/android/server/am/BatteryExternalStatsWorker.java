@@ -264,6 +264,10 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
                 mStats.updateKernelMemoryBandwidthLocked();
             }
 
+            if ((updateFlags & UPDATE_RPM) != 0) {
+                mStats.updateRpmStatsLocked();
+            }
+
             if (bluetoothInfo != null) {
                 if (bluetoothInfo.isValid()) {
                     mStats.updateBluetoothStateLocked(bluetoothInfo);

@@ -22,6 +22,7 @@
 #include "SkShader.h"
 #include <utils/Log.h>
 #include "utils/Macros.h"
+#include "utils/TraceUtils.h"
 #include "utils/VectorDrawableUtils.h"
 
 #include <math.h>
@@ -593,14 +594,17 @@ void Tree::draw(SkCanvas* canvas) {
 void Tree::updateBitmapCache(Bitmap& bitmap, bool useStagingData) {
     SkBitmap outCache;
     bitmap.getSkBitmap(&outCache);
+    int cacheWidth = outCache.width();
+    int cacheHeight = outCache.height();
+    ATRACE_FORMAT("VectorDrawable repaint %dx%d", cacheWidth, cacheHeight);
     outCache.eraseColor(SK_ColorTRANSPARENT);
     SkCanvas outCanvas(outCache);
     float viewportWidth = useStagingData ?
             mStagingProperties.getViewportWidth() : mProperties.getViewportWidth();
     float viewportHeight = useStagingData ?
             mStagingProperties.getViewportHeight() : mProperties.getViewportHeight();
-    float scaleX = outCache.width() / viewportWidth;
-    float scaleY = outCache.height() / viewportHeight;
+    float scaleX = cacheWidth / viewportWidth;
+    float scaleY = cacheHeight / viewportHeight;
     outCanvas.scale(scaleX, scaleY);
     mRootNode->draw(&outCanvas, useStagingData);
 }

@@ -939,7 +939,8 @@ public class RequestThreadManager {
                             Log.d(TAG, "Stopped repeating request. Last frame number is " +
                                     lastFrameNumber);
                         }
-                        mDeviceState.setRepeatingRequestError(lastFrameNumber);
+                        mDeviceState.setRepeatingRequestError(lastFrameNumber,
+                                burstHolder.getRequestId());
                     }
 
                     if (DEBUG) {

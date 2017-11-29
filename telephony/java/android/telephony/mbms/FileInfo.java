@@ -16,37 +16,20 @@
 
 package android.telephony.mbms;
 
+import android.annotation.SystemApi;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * A Parcelable class Cell-Broadcast downloadable file information.
+ * Describes a single file that is available over MBMS.
  * @hide
  */
-public class FileInfo implements Parcelable {
+public final class FileInfo implements Parcelable {
 
-    /**
-     * The URI into the carriers infrastructure which points to this file.
-     * This is used internally but is also one of the few pieces of data about the content that is
-     * exposed and may be needed for disambiguation by the application.
-     */
     private final Uri uri;
 
-    /**
-     * The mime type of the content.
-     */
     private final String mimeType;
-
-    /**
-     * The size of the file in bytes.
-     */
-    private final long size;
-
-    /**
-     * The MD5 hash of the file.
-     */
-    private final byte md5Hash[];
 
     public static final Parcelable.Creator<FileInfo> CREATOR =
             new Parcelable.Creator<FileInfo>() {
@@ -61,29 +44,24 @@ public class FileInfo implements Parcelable {
         }
     };
 
-    public FileInfo(Uri uri, String mimeType, long size, byte[] md5Hash) {
+    /**
+     * @hide
+     */
+    //@SystemApi
+    public FileInfo(Uri uri, String mimeType) {
         this.uri = uri;
         this.mimeType = mimeType;
-        this.size = size;
-        this.md5Hash = md5Hash;
     }
 
     private FileInfo(Parcel in) {
         uri = in.readParcelable(null);
         mimeType = in.readString();
-        size = in.readLong();
-        int arraySize = in.readInt();
-        md5Hash = new byte[arraySize];
-        in.readByteArray(md5Hash);
     }
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeParcelable(uri, flags);
         dest.writeString(mimeType);
-        dest.writeLong(size);
-        dest.writeInt(md5Hash.length);
-        dest.writeByteArray(md5Hash);
     }
 
     @Override
@@ -91,19 +69,18 @@ public class FileInfo implements Parcelable {
         return 0;
     }
 
+    /**
+     * @return The URI in the carrier's infrastructure which points to this file. Apps should
+     * negotiate the contents of this URI separately with the carrier.
+     */
     public Uri getUri() {
         return uri;
     }
 
+    /**
+     * @return The MIME type of the file.
+     */
     public String getMimeType() {
         return mimeType;
-    }
-
-    public long getSize() {
-        return size;
-    }
-
-    public byte[] getMd5Hash() {
-        return md5Hash;
     }
 }

@@ -263,7 +263,8 @@ public class LegacyCameraDevice implements AutoCloseable {
         }
 
         @Override
-        public void onRepeatingRequestError(final long lastFrameNumber) {
+        public void onRepeatingRequestError(final long lastFrameNumber,
+                final int repeatingRequestId) {
             mResultHandler.post(new Runnable() {
                 @Override
                 public void run() {
@@ -271,7 +272,8 @@ public class LegacyCameraDevice implements AutoCloseable {
                         Log.d(TAG, "doing onRepeatingRequestError callback.");
                     }
                     try {
-                        mDeviceCallbacks.onRepeatingRequestError(lastFrameNumber);
+                        mDeviceCallbacks.onRepeatingRequestError(lastFrameNumber,
+                                repeatingRequestId);
                     } catch (RemoteException e) {
                         throw new IllegalStateException(
                                 "Received remote exception during onRepeatingRequestError " +

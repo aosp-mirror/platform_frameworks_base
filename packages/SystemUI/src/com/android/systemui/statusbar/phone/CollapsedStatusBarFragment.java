@@ -161,10 +161,6 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
                 showNotificationIconArea(animate);
             }
         }
-        if (!BarTransitions.HIGH_END) {
-            int mask = DISABLE_NOTIFICATION_ICONS | DISABLE_SYSTEM_INFO;
-            getView().setVisibility((mDisabled1 & mask) == mask ? View.GONE : View.VISIBLE);
-        }
     }
 
     protected int adjustDisableFlags(int state) {

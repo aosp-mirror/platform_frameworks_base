@@ -68,19 +68,20 @@ public class MbmsUtils {
         return downloadServices.get(0).serviceInfo;
     }
 
-    public static void startBinding(Context context, String serviceAction,
-            ServiceConnection serviceConnection) throws MbmsException {
+    public static int startBinding(Context context, String serviceAction,
+            ServiceConnection serviceConnection) {
         Intent bindIntent = new Intent();
         ServiceInfo mbmsServiceInfo =
                 MbmsUtils.getMiddlewareServiceInfo(context, serviceAction);
 
         if (mbmsServiceInfo == null) {
-            throw new MbmsException(MbmsException.ERROR_NO_UNIQUE_MIDDLEWARE);
+            return MbmsErrors.ERROR_NO_UNIQUE_MIDDLEWARE;
         }
 
         bindIntent.setComponent(MbmsUtils.toComponentName(mbmsServiceInfo));
 
         context.bindService(bindIntent, serviceConnection, Context.BIND_AUTO_CREATE);
+        return MbmsErrors.SUCCESS;
     }
 
     /**

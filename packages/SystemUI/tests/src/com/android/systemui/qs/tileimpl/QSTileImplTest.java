@@ -21,12 +21,18 @@ import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_QS_VALUE;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.TYPE_ACTION;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Matchers.argThat;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import static java.lang.Thread.sleep;
 
 import android.content.Intent;
 import android.metrics.LogMaker;
@@ -66,10 +72,10 @@ public class QSTileImplTest extends SysuiTestCase {
         mMetricsLogger = mDependency.injectMockDependency(MetricsLogger.class);
         mHost = mock(QSTileHost.class);
         when(mHost.indexOf(spec)).thenReturn(POSITION);
-        mTestableLooper.runWithLooper(() -> {
-            mTile = new TileImpl(mHost);
-            mTile.setTileSpec(spec);
-        });
+
+        mTile = spy(new TileImpl(mHost));
+        mTile.mHandler = mTile.new H(mTestableLooper.getLooper());
+        mTile.setTileSpec(spec);
     }
 
     @Test
@@ -94,10 +100,36 @@ public class QSTileImplTest extends SysuiTestCase {
     public void testPopulate() {
         LogMaker maker = mock(LogMaker.class);
         when(maker.setSubtype(anyInt())).thenReturn(maker);
+        when(maker.addTaggedData(anyInt(), any())).thenReturn(maker);
         mTile.getState().value = true;
         mTile.populate(maker);
         verify(maker).addTaggedData(eq(FIELD_QS_VALUE), eq(1));
         verify(maker).addTaggedData(eq(FIELD_QS_POSITION), eq(POSITION));
+    }
+
+    @Test
+    public void testStaleTimeout() throws InterruptedException {
+        when(mTile.getStaleTimeout()).thenReturn(5l);
+        clearInvocations(mTile);
+
+        mTile.handleRefreshState(null);
+        mTestableLooper.processAllMessages();
+        verify(mTile, never()).handleStale();
+
+        sleep(10);
+        mTestableLooper.processAllMessages();
+        verify(mTile).handleStale();
+    }
+
+    @Test
+    public void testStaleListening() {
+        mTile.handleStale();
+        mTestableLooper.processAllMessages();
+        verify(mTile).handleSetListening(eq(true));
+
+        mTile.handleRefreshState(null);
+        mTestableLooper.processAllMessages();
+        verify(mTile).handleSetListening(eq(false));
     }
 
     private class TileLogMatcher implements ArgumentMatcher<LogMaker> {
@@ -164,7 +196,7 @@ public class QSTileImplTest extends SysuiTestCase {
         }
 
         @Override
-        protected void setListening(boolean listening) {
+        protected void handleSetListening(boolean listening) {
 
         }
 

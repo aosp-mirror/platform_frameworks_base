@@ -16,57 +16,40 @@
 
 package android.telephony.mbms;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Set;
 
 /**
- * A Parcelable class with Cell-Broadcast service information.
+ * Describes a cell-broadcast service. This class should not be instantiated directly -- use
+ * {@link StreamingServiceInfo} or {@link FileServiceInfo}
  * @hide
  */
-public class ServiceInfo implements Parcelable {
+public class ServiceInfo {
     // arbitrary limit on the number of locale -> name pairs we support
     final static int MAP_LIMIT = 1000;
-    /**
-     * User displayable names listed by language.  Unmodifiable.
-     */
-    final Map<Locale, String> names;
 
-    /**
-     * The class name for this service - used to catagorize and filter
-     */
-    final String className;
+    private final Map<Locale, String> names;
+    private final String className;
+    private final List<Locale> locales;
+    private final String serviceId;
+    private final Date sessionStartTime;
+    private final Date sessionEndTime;
 
-    /**
-     * The languages available for this service content
-     */
-    final List<Locale> locales;
-
-    /**
-     * The carrier's identifier for the service.
-     */
-    final String serviceId;
-
-    /**
-     * The start time indicating when this service will be available.
-     */
-    final Date sessionStartTime;
-
-    /**
-     * The end time indicating when this sesion stops being available.
-     */
-    final Date sessionEndTime;
-
-
+    /** @hide */
     public ServiceInfo(Map<Locale, String> newNames, String newClassName, List<Locale> newLocales,
             String newServiceId, Date start, Date end) {
         if (newNames == null || newNames.isEmpty() || TextUtils.isEmpty(newClassName)
@@ -80,6 +63,7 @@ public class ServiceInfo implements Parcelable {
         if (newLocales.size() > MAP_LIMIT) {
             throw new RuntimeException("bad locales length " + newLocales.size());
         }
+
         names = new HashMap(newNames.size());
         names.putAll(newNames);
         className = newClassName;
@@ -89,20 +73,8 @@ public class ServiceInfo implements Parcelable {
         sessionEndTime = (Date)end.clone();
     }
 
-    public static final Parcelable.Creator<FileServiceInfo> CREATOR =
-            new Parcelable.Creator<FileServiceInfo>() {
-        @Override
-        public FileServiceInfo createFromParcel(Parcel source) {
-            return new FileServiceInfo(source);
-        }
-
-        @Override
-        public FileServiceInfo[] newArray(int size) {
-            return new FileServiceInfo[size];
-        }
-    };
-
-    ServiceInfo(Parcel in) {
+    /** @hide */
+    protected ServiceInfo(Parcel in) {
         int mapCount = in.readInt();
         if (mapCount > MAP_LIMIT || mapCount < 0) {
             throw new RuntimeException("bad map length" + mapCount);
@@ -128,7 +100,7 @@ public class ServiceInfo implements Parcelable {
         sessionEndTime = (java.util.Date) in.readSerializable();
     }
 
-    @Override
+    /** @hide */
     public void writeToParcel(Parcel dest, int flags) {
         Set<Locale> keySet = names.keySet();
         dest.writeInt(keySet.size());
@@ -147,31 +119,64 @@ public class ServiceInfo implements Parcelable {
         dest.writeSerializable(sessionEndTime);
     }
 
-    @Override
-    public int describeContents() {
-        return 0;
+    /**
+     * Get the user-displayable name for this cell-broadcast service corresponding to the
+     * provided {@link Locale}.
+     * @param locale The {@link Locale} in which you want the name of the service. This must be a
+     *               value from the set returned by {@link #getNamedContentLocales()} -- an
+     *               {@link java.util.NoSuchElementException} may be thrown otherwise.
+     * @return The {@link CharSequence} providing the name of the service in the given
+     *         {@link Locale}
+     */
+    public @NonNull CharSequence getNameForLocale(@NonNull Locale locale) {
+        if (!names.containsKey(locale)) {
+            throw new NoSuchElementException("Locale not supported");
+        }
+        return names.get(locale);
     }
 
-    public Map<Locale, String> getNames() {
-        return names;
+    /**
+     * Return an unmodifiable set of the current {@link Locale}s that have a user-displayable name
+     * associated with them. The user-displayable name associated with any {@link Locale} in this
+     * set can be retrieved with {@link #getNameForLocale(Locale)}.
+     * @return An unmodifiable set of {@link Locale} objects corresponding to a user-displayable
+     * content name in that locale.
+     */
+    public @NonNull Set<Locale> getNamedContentLocales() {
+        return Collections.unmodifiableSet(names.keySet());
     }
 
-    public String getClassName() {
+    /**
+     * The class name for this service - used to categorize and filter
+     */
+    public String getServiceClassName() {
         return className;
     }
 
+    /**
+     * The languages available for this service content
+     */
     public List<Locale> getLocales() {
         return locales;
     }
 
+    /**
+     * The carrier's identifier for the service.
+     */
     public String getServiceId() {
         return serviceId;
     }
 
+    /**
+     * The start time indicating when this service will be available.
+     */
     public Date getSessionStartTime() {
         return sessionStartTime;
     }
 
+    /**
+     * The end time indicating when this session stops being available.
+     */
     public Date getSessionEndTime() {
         return sessionEndTime;
     }

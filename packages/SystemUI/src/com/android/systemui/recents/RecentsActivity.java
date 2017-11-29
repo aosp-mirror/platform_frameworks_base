@@ -65,6 +65,7 @@ import com.android.systemui.recents.events.activity.IterateRecentsEvent;
 import com.android.systemui.recents.events.activity.LaunchTaskFailedEvent;
 import com.android.systemui.recents.events.activity.LaunchTaskSucceededEvent;
 import com.android.systemui.recents.events.activity.MultiWindowStateChangedEvent;
+import com.android.systemui.recents.events.activity.RecentsActivityStartingEvent;
 import com.android.systemui.recents.events.activity.ToggleRecentsEvent;
 import com.android.systemui.recents.events.component.ActivityUnpinnedEvent;
 import com.android.systemui.recents.events.component.RecentsVisibilityChangedEvent;
@@ -119,6 +120,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
     private boolean mFinishedOnStartup;
     private boolean mIgnoreAltTabRelease;
     private boolean mIsVisible;
+    private boolean mRecentsStartRequested;
     private Configuration mLastConfig;
 
     // Top level views
@@ -356,6 +358,9 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         mScrimViews = new SystemBarScrimViews(this);
         getWindow().getAttributes().privateFlags |=
                 WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DECOR_VIEW_VISIBILITY;
+        if (Recents.getConfiguration().isLowRamDevice) {
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        }
 
         mLastConfig = new Configuration(Utilities.getAppConfiguration(this));
         mFocusTimerDuration = getResources().getInteger(R.integer.recents_auto_advance_duration);
@@ -416,6 +421,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
             launchState.launchedFromHome = false;
             onEnterAnimationComplete();
         }
+        mRecentsStartRequested = false;
     }
 
     @Override
@@ -449,7 +455,6 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
      * Reloads the stack views upon launching Recents.
      */
     private void reloadStackView() {
-
         // If the Recents component has preloaded a load plan, then use that to prevent
         // reconstructing the task stack
         RecentsTaskLoader loader = Recents.getTaskLoader();
@@ -572,7 +577,9 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         MetricsLogger.hidden(this, MetricsEvent.OVERVIEW_ACTIVITY);
         Recents.getTaskLoader().getHighResThumbnailLoader().setVisible(false);
 
-        if (!isChangingConfigurations()) {
+        // When recents starts again before onStop, do not reset launch flags so entrance animation
+        // can run
+        if (!isChangingConfigurations() && !mRecentsStartRequested) {
             // Workaround for b/22542869, if the RecentsActivity is started again, but without going
             // through SystemUI, we need to reset the config launch flags to ensure that we do not
             // wait on the system to send a signal that was never queued.
@@ -716,6 +723,10 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         EventBus.getDefault().send(new FocusNextTaskViewEvent(timerIndicatorDuration));
 
         MetricsLogger.action(this, MetricsEvent.ACTION_OVERVIEW_PAGE);
+    }
+
+    public final void onBusEvent(RecentsActivityStartingEvent event) {
+        mRecentsStartRequested = true;
     }
 
     public final void onBusEvent(UserInteractionEvent event) {

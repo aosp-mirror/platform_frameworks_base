@@ -28,7 +28,7 @@
 #include "util/Maybe.h"
 #include "util/Util.h"
 
-using android::StringPiece;
+using ::android::StringPiece;
 
 namespace aapt {
 
@@ -72,7 +72,6 @@ bool ParseSplitParameter(const StringPiece& arg, IDiagnostics* diag, std::string
   }
 
   *out_path = parts[0];
-  std::vector<ConfigDescription> configs;
   for (const StringPiece& config_str : util::Tokenize(parts[1], ',')) {
     ConfigDescription config;
     if (!ConfigDescription::Parse(config_str, &config)) {
@@ -134,19 +133,31 @@ static xml::AaptAttribute CreateAttributeWithId(const ResourceId& id) {
   return xml::AaptAttribute(Attribute(), id);
 }
 
+static xml::NamespaceDecl CreateAndroidNamespaceDecl() {
+  xml::NamespaceDecl decl;
+  decl.prefix = "android";
+  decl.uri = xml::kSchemaAndroid;
+  return decl;
+}
+
+static std::string MakePackageSafeName(const std::string &name) {
+  std::string result(name);
+  for (char &c : result) {
+    if (c == '-') {
+      c = '_';
+    }
+  }
+  return result;
+}
+
 std::unique_ptr<xml::XmlResource> GenerateSplitManifest(const AppInfo& app_info,
                                                         const SplitConstraints& constraints) {
   const ResourceId kVersionCode(0x0101021b);
   const ResourceId kRevisionCode(0x010104d5);
   const ResourceId kHasCode(0x0101000c);
 
-  std::unique_ptr<xml::XmlResource> doc = util::make_unique<xml::XmlResource>();
-
-  std::unique_ptr<xml::Namespace> namespace_android = util::make_unique<xml::Namespace>();
-  namespace_android->namespace_uri = xml::kSchemaAndroid;
-  namespace_android->namespace_prefix = "android";
-
   std::unique_ptr<xml::Element> manifest_el = util::make_unique<xml::Element>();
+  manifest_el->namespace_decls.push_back(CreateAndroidNamespaceDecl());
   manifest_el->name = "manifest";
   manifest_el->attributes.push_back(xml::Attribute{"", "package", app_info.package});
 
@@ -170,7 +181,11 @@ std::unique_ptr<xml::XmlResource> GenerateSplitManifest(const AppInfo& app_info,
   if (app_info.split_name) {
     split_name << app_info.split_name.value() << ".";
   }
-  split_name << "config." << util::Joiner(constraints.configs, "_");
+  std::vector<std::string> sanitized_config_names;
+  for (const auto &config : constraints.configs) {
+    sanitized_config_names.push_back(MakePackageSafeName(config.toString().string()));
+  }
+  split_name << "config." << util::Joiner(sanitized_config_names, "_");
 
   manifest_el->attributes.push_back(xml::Attribute{"", "split", split_name.str()});
 
@@ -179,8 +194,8 @@ std::unique_ptr<xml::XmlResource> GenerateSplitManifest(const AppInfo& app_info,
         xml::Attribute{"", "configForSplit", app_info.split_name.value()});
   }
 
-  // Splits may contain more configurations than originally desired (fallback densities, etc.).
-  // This makes programmatic discovery of split targetting difficult. Encode the original
+  // Splits may contain more configurations than originally desired (fall-back densities, etc.).
+  // This makes programmatic discovery of split targeting difficult. Encode the original
   // split constraints intended for this split.
   std::stringstream target_config_str;
   target_config_str << util::Joiner(constraints.configs, ",");
@@ -193,8 +208,9 @@ std::unique_ptr<xml::XmlResource> GenerateSplitManifest(const AppInfo& app_info,
                      util::make_unique<BinaryPrimitive>(android::Res_value::TYPE_INT_BOOLEAN, 0u)});
 
   manifest_el->AppendChild(std::move(application_el));
-  namespace_android->AppendChild(std::move(manifest_el));
-  doc->root = std::move(namespace_android);
+
+  std::unique_ptr<xml::XmlResource> doc = util::make_unique<xml::XmlResource>();
+  doc->root = std::move(manifest_el);
   return doc;
 }
 
@@ -284,7 +300,7 @@ static Maybe<int> ExtractSdkVersion(xml::Attribute* attr, std::string* out_error
 
 Maybe<AppInfo> ExtractAppInfoFromBinaryManifest(xml::XmlResource* xml_res, IDiagnostics* diag) {
   // Make sure the first element is <manifest> with package attribute.
-  xml::Element* manifest_el = xml::FindRootElement(xml_res->root.get());
+  xml::Element* manifest_el = xml_res->root.get();
   if (manifest_el == nullptr) {
     return {};
   }

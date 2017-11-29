@@ -23,7 +23,7 @@
     <string name="app_name" msgid="3171996292755059205">"કીગાર્ડ"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3420548423949593123">"પિન કોડ લખો"</string>
     <string name="keyguard_password_enter_puk_code" msgid="670683628782925409">"સિમ PUK અને નવો પિન કોડ લખો"</string>
-    <string name="keyguard_password_enter_puk_prompt" msgid="3747778500166059332">"SIM PUK કોડ"</string>
+    <string name="keyguard_password_enter_puk_prompt" msgid="3747778500166059332">"સિમ PUK કોડ"</string>
     <string name="keyguard_password_enter_pin_prompt" msgid="8188243197504453830">"નવો સિમ પિન કોડ"</string>
     <string name="keyguard_password_entry_touch_hint" msgid="5790410752696806482"><font size="17">"પાસવર્ડ લખવા માટે સ્પર્શ કરો"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="595980919238127672">"અનલૉક કરવા માટે પાસવર્ડ લખો"</string>
@@ -48,7 +48,7 @@
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="3586601150825821675">"સિમ કાર્ડ અનલૉક કરી રહ્યાં છીએ…"</string>
     <string name="keyguard_accessibility_pin_area" msgid="703175752097279029">"પિન ક્ષેત્ર"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="912702510825058921">"સિમ પિન ક્ષેત્ર"</string>
-    <string name="keyguard_accessibility_sim_puk_area" msgid="136979425761438705">"SIM PUK ક્ષેત્ર"</string>
+    <string name="keyguard_accessibility_sim_puk_area" msgid="136979425761438705">"સિમ PUK ક્ષેત્ર"</string>
     <string name="keyguard_accessibility_next_alarm" msgid="5835196989158584991">"<xliff:g id="ALARM">%1$s</xliff:g> માટે આગલું એલાર્મ સેટ કર્યું"</string>
     <string name="keyboardview_keycode_delete" msgid="6883116827512721630">"કાઢી નાખો"</string>
     <string name="disable_carrier_button_text" msgid="6914341927421916114">"eSIMને અક્ષમ કરો"</string>
@@ -64,14 +64,14 @@
     <string name="kg_sim_lock_instructions_esim" msgid="4957650659201013804">"મોબાઇલ સેવા વગર ઉપકરણનો ઉપયોગ કરવા eSIMને અક્ષમ કરો."</string>
     <string name="kg_pin_instructions" msgid="4069609316644030034">"પિન દાખલ કરો"</string>
     <string name="kg_password_instructions" msgid="136952397352976538">"પાસવર્ડ દાખલ કરો"</string>
-    <string name="kg_puk_enter_puk_hint" msgid="2288964170039899277">"SIM હમણાં અક્ષમ કરેલ છે. ચાલુ રાખવા માટે PUK કોડ દાખલ કરો. વિગતો માટે કૅરિઅરનો સંપર્ક કરો."</string>
-    <string name="kg_puk_enter_puk_hint_multi" msgid="1373131883510840794">"SIM \"<xliff:g id="CARRIER">%1$s</xliff:g>\" હમણાં અક્ષમ કરેલ છે. ચાલુ રાખવા માટે PUK કોડ દાખલ કરો. વિગતો માટે કૅરિઅરનો સંપર્ક કરો."</string>
+    <string name="kg_puk_enter_puk_hint" msgid="2288964170039899277">"સિમ હમણાં અક્ષમ કરેલ છે. ચાલુ રાખવા માટે PUK કોડ દાખલ કરો. વિગતો માટે કૅરિઅરનો સંપર્ક કરો."</string>
+    <string name="kg_puk_enter_puk_hint_multi" msgid="1373131883510840794">"સિમ \"<xliff:g id="CARRIER">%1$s</xliff:g>\" હમણાં અક્ષમ કરેલ છે. ચાલુ રાખવા માટે PUK કોડ દાખલ કરો. વિગતો માટે કૅરિઅરનો સંપર્ક કરો."</string>
     <string name="kg_puk_enter_pin_hint" msgid="3137789674920391087">"જોઈતો પિન કોડ દાખલ કરો"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="3089485999116759671">"જોઈતા પિન કોડની પુષ્ટિ કરો"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="4471738151810900114">"સિમ કાર્ડ અનલૉક કરી રહ્યાં છીએ…"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="3057533256729513335">"4 થી 8 સંખ્યાનો હોય તેવો એક પિન લખો."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="6003602401368264144">"PUK કોડ 8 કે તેનાથી વધુ સંખ્યાનો હોવો જોઈએ."</string>
-    <string name="kg_invalid_puk" msgid="5399287873762592502">"સાચો PUK કોડ ફરીથી દાખલ કરો. પુનરાવર્તિત પ્રયાસો SIM ને કાયમી રીતે અક્ષમ કરશે."</string>
+    <string name="kg_invalid_puk" msgid="5399287873762592502">"સાચો PUK કોડ ફરીથી દાખલ કરો. પુનરાવર્તિત પ્રયાસો સિમ ને કાયમી રીતે અક્ષમ કરશે."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="5672736555427444330">"પિન કોડ મેળ ખાતા નથી"</string>
     <string name="kg_login_too_many_attempts" msgid="6604574268387867255">"ઘણા બધા પૅટર્ન પ્રયાસો"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8637788033282252027">"તમારો પિન તમે <xliff:g id="NUMBER_0">%1$d</xliff:g> વખત ખોટી રીતે લખ્યો છે. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> સેકન્ડમાં ફરીથી પ્રયાસ કરો."</string>
@@ -96,13 +96,13 @@
       <item quantity="one">ખોટો સિમ પિન કોડ, તમારી પાસે <xliff:g id="NUMBER_1">%d</xliff:g> પ્રયાસ બાકી છે.</item>
       <item quantity="other">ખોટો સિમ પિન કોડ, તમારી પાસે <xliff:g id="NUMBER_1">%d</xliff:g> પ્રયાસ બાકી છે.</item>
     </plurals>
-    <string name="kg_password_wrong_puk_code_dead" msgid="3329017604125179374">"SIM અનુપયોગી છે. તમારા કૅરિઅરનો સંપર્ક કરો."</string>
+    <string name="kg_password_wrong_puk_code_dead" msgid="3329017604125179374">"સિમ અનુપયોગી છે. તમારા કૅરિઅરનો સંપર્ક કરો."</string>
     <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="2287504898931957513">
-      <item quantity="one">ખોટો SIM PUK કોડ, SIM કાયમી રૂપે અનુપયોગી બની જાય તે પહેલા તમારી પાસે <xliff:g id="NUMBER_1">%d</xliff:g> પ્રયાસ બાકી છે.</item>
-      <item quantity="other">ખોટો SIM PUK કોડ, SIM કાયમી રૂપે અનુપયોગી બની જાય તે પહેલા તમારી પાસે <xliff:g id="NUMBER_1">%d</xliff:g> પ્રયાસ બાકી છે.</item>
+      <item quantity="one">ખોટો સિમ PUK કોડ, સિમ કાયમી રૂપે અનુપયોગી બની જાય તે પહેલા તમારી પાસે <xliff:g id="NUMBER_1">%d</xliff:g> પ્રયાસ બાકી છે.</item>
+      <item quantity="other">ખોટો સિમ PUK કોડ, સિમ કાયમી રૂપે અનુપયોગી બની જાય તે પહેલા તમારી પાસે <xliff:g id="NUMBER_1">%d</xliff:g> પ્રયાસ બાકી છે.</item>
     </plurals>
     <string name="kg_password_pin_failed" msgid="8769990811451236223">"સિમ પિન ઑપરેશન નિષ્ફળ થયું!"</string>
-    <string name="kg_password_puk_failed" msgid="1331621440873439974">"SIM PUK ઓપરેશન નિષ્ફળ થયું!"</string>
+    <string name="kg_password_puk_failed" msgid="1331621440873439974">"સિમ PUK ઓપરેશન નિષ્ફળ થયું!"</string>
     <string name="kg_pin_accepted" msgid="7637293533973802143">"કોડ સ્વીકાર્યો!"</string>
     <string name="keyguard_carrier_default" msgid="4274828292998453695">"કોઈ સેવા નથી."</string>
     <string name="accessibility_ime_switch_button" msgid="2695096475319405612">"ઇનપુટ પદ્ધતિ સ્વિચ કરો"</string>

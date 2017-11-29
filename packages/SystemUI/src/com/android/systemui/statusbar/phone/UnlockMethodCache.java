@@ -159,6 +159,11 @@ public class UnlockMethodCache {
         public void onScreenTurnedOff() {
             update(false /* updateAlways */);
         }
+
+        @Override
+        public void onKeyguardVisibilityChanged(boolean showing) {
+            update(false /* updateAlways */);
+        }
     };
 
     public boolean isTrustManaged() {

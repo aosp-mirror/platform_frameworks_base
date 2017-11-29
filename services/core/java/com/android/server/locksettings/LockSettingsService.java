@@ -376,7 +376,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
 
         public SyntheticPasswordManager getSyntheticPasswordManager(LockSettingsStorage storage) {
-            return new SyntheticPasswordManager(storage, getUserManager());
+            return new SyntheticPasswordManager(getContext(), storage, getUserManager());
         }
 
         public int binderGetCallingUid() {
@@ -763,7 +763,8 @@ public class LockSettingsService extends ILockSettings.Stub {
     private void migrateOldDataAfterSystemReady() {
         try {
             // Migrate the FRP credential to the persistent data block
-            if (LockPatternUtils.frpCredentialEnabled() && !getBoolean("migrated_frp", false, 0)) {
+            if (LockPatternUtils.frpCredentialEnabled(mContext)
+                    && !getBoolean("migrated_frp", false, 0)) {
                 migrateFrpCredential();
                 setBoolean("migrated_frp", true, 0);
                 Slog.i(TAG, "Migrated migrated_frp.");
@@ -784,7 +785,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             return;
         }
         for (UserInfo userInfo : mUserManager.getUsers()) {
-            if (userOwnsFrpCredential(userInfo) && isUserSecure(userInfo.id)) {
+            if (userOwnsFrpCredential(mContext, userInfo) && isUserSecure(userInfo.id)) {
                 synchronized (mSpManager) {
                     if (isSyntheticPasswordBasedCredentialLocked(userInfo.id)) {
                         int actualQuality = (int) getLong(LockPatternUtils.PASSWORD_TYPE_KEY,
@@ -1142,12 +1143,13 @@ public class LockSettingsService extends ILockSettings.Stub {
                 continue;
             }
             try {
-                result.put(userId, getDecryptedPasswordForTiedProfile(userId));
+                result.put(managedUserId, getDecryptedPasswordForTiedProfile(managedUserId));
             } catch (KeyStoreException | UnrecoverableKeyException | NoSuchAlgorithmException
                     | NoSuchPaddingException | InvalidKeyException
                     | InvalidAlgorithmParameterException | IllegalBlockSizeException
                     | BadPaddingException | CertificateException | IOException e) {
-                // ignore
+                Slog.e(TAG, "getDecryptedPasswordsForAllTiedProfiles failed for user " +
+                    managedUserId, e);
             }
         }
         return result;
@@ -2365,6 +2367,13 @@ public class LockSettingsService extends ILockSettings.Stub {
                 Slog.w(TAG, "Invalid escrow token supplied");
                 return false;
             }
+            if (result.gkResponse.getResponseCode() != VerifyCredentialResponse.RESPONSE_OK) {
+                // Most likely, an untrusted credential reset happened in the past which
+                // changed the synthetic password
+                Slog.e(TAG, "Obsolete token: synthetic password derived but it fails GK "
+                        + "verification.");
+                return false;
+            }
             // Update PASSWORD_TYPE_KEY since it's needed by notifyActivePasswordMetricsAvailable()
             // called by setLockCredentialWithAuthTokenLocked().
             // TODO: refactor usage of PASSWORD_TYPE_KEY b/65239740
@@ -2496,7 +2505,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
 
         public void onSystemReady() {
-            if (frpCredentialEnabled()) {
+            if (frpCredentialEnabled(mContext)) {
                 updateRegistration();
             } else {
                 // If we don't intend to use frpCredentials and we're not provisioned yet, send
@@ -2525,7 +2534,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         private void clearFrpCredentialIfOwnerNotSecure() {
             List<UserInfo> users = mUserManager.getUsers();
             for (UserInfo user : users) {
-                if (userOwnsFrpCredential(user)) {
+                if (userOwnsFrpCredential(mContext, user)) {
                     if (!isUserSecure(user.id)) {
                         mStorage.writePersistentDataBlock(PersistentData.TYPE_NONE, user.id,
                                 0, null);

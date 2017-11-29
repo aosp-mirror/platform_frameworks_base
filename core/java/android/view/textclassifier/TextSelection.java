@@ -169,7 +169,7 @@ public final class TextSelection {
          * @hide
          */
         Builder setVersionInfo(@NonNull String versionInfo) {
-            mVersionInfo = Preconditions.checkNotNull(mVersionInfo);
+            mVersionInfo = Preconditions.checkNotNull(versionInfo);
             return this;
         }
 

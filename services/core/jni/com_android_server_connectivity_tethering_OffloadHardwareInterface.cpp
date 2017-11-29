@@ -103,8 +103,8 @@ static jboolean android_server_connectivity_tethering_OffloadHardwareInterface_c
     // fd2   A file descriptor bound to the following netlink groups
     //       (NF_NETLINK_CONNTRACK_UPDATE | NF_NETLINK_CONNTRACK_DESTROY).
     base::unique_fd
-            fd1(conntrackSocket(NFNLGRP_CONNTRACK_NEW | NFNLGRP_CONNTRACK_DESTROY)),
-            fd2(conntrackSocket(NFNLGRP_CONNTRACK_UPDATE | NFNLGRP_CONNTRACK_DESTROY));
+            fd1(conntrackSocket(NF_NETLINK_CONNTRACK_NEW | NF_NETLINK_CONNTRACK_DESTROY)),
+            fd2(conntrackSocket(NF_NETLINK_CONNTRACK_UPDATE | NF_NETLINK_CONNTRACK_DESTROY));
     if (fd1.get() < 0 || fd2.get() < 0) {
         ALOGE("Unable to create conntrack handles: %d/%s", errno, strerror(errno));
         return false;
@@ -113,7 +113,7 @@ static jboolean android_server_connectivity_tethering_OffloadHardwareInterface_c
     hidl_handle h1(handleFromFileDescriptor(std::move(fd1))),
                 h2(handleFromFileDescriptor(std::move(fd2)));
 
-    bool rval;
+    bool rval(false);
     hidl_string msg;
     const auto status = configInterface->setHandles(h1, h2,
             [&rval, &msg](bool success, const hidl_string& errMsg) {
@@ -123,6 +123,8 @@ static jboolean android_server_connectivity_tethering_OffloadHardwareInterface_c
     if (!status.isOk() || !rval) {
         ALOGE("IOffloadConfig::setHandles() error: '%s' / '%s'",
               status.description().c_str(), msg.c_str());
+        // If status is somehow not ok, make sure rval captures this too.
+        rval = false;
     }
 
     return rval;

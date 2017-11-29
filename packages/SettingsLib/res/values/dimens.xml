@@ -61,10 +61,13 @@
     <fraction name="battery_button_height_fraction">10.5%</fraction>
 
     <!-- Ratio between height of button part and height of total -->
-    <fraction name="bt_battery_button_height_fraction">7.5%</fraction>
+    <fraction name="bt_battery_button_height_fraction">7.8%</fraction>
 
     <!-- Ratio between width and height -->
-    <fraction name="bt_battery_ratio_fraction">45%</fraction>
+    <fraction name="bt_battery_ratio_fraction">35%</fraction>
+
+    <!-- Ratio of height between battery icon and bluetooth icon -->
+    <fraction name="bt_battery_scale_fraction">75%</fraction>
 
     <!-- Fraction value to smooth the edges of the battery icon. The path will be inset by this
          fraction of a pixel.-->

@@ -27,6 +27,7 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.transition.TransitionUtils;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 
@@ -176,7 +177,7 @@ public abstract class SharedElementCallback {
             Drawable d = imageView.getDrawable();
             Drawable bg = imageView.getBackground();
             if (d != null && (bg == null || bg.getAlpha() == 0)) {
-                Bitmap bitmap = TransitionUtils.createDrawableBitmap(d);
+                Bitmap bitmap = TransitionUtils.createDrawableBitmap(d, imageView);
                 if (bitmap != null) {
                     Bundle bundle = new Bundle();
                     if (bitmap.getConfig() != Bitmap.Config.HARDWARE) {
@@ -202,7 +203,8 @@ public abstract class SharedElementCallback {
         } else {
             mTempMatrix.set(viewToGlobalMatrix);
         }
-        return TransitionUtils.createViewBitmap(sharedElement, mTempMatrix, screenBounds);
+        ViewGroup parent = (ViewGroup) sharedElement.getParent();
+        return TransitionUtils.createViewBitmap(sharedElement, mTempMatrix, screenBounds, parent);
     }
 
     /**

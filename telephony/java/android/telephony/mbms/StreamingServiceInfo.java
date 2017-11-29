@@ -16,6 +16,7 @@
 
 package android.telephony.mbms;
 
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -25,15 +26,25 @@ import java.util.Locale;
 import java.util.Map;
 
 /**
- * A Parcelable class Cell-Broadcast media stream information.
- * This may not have any more info than ServiceInfo, but kept for completeness.
+ * Describes a single MBMS streaming service.
  * @hide
  */
-public class StreamingServiceInfo extends ServiceInfo implements Parcelable {
+public final class StreamingServiceInfo extends ServiceInfo implements Parcelable {
 
-    public StreamingServiceInfo(Map<Locale, String> newNames, String newClassName,
-            List<Locale> newLocales, String newServiceId, Date start, Date end) {
-        super(newNames, newClassName, newLocales, newServiceId, start, end);
+    /**
+     * @param names User displayable names listed by language.
+     * @param className The class name for this service - used by frontend apps to categorize and
+     *                  filter.
+     * @param locales The languages available for this service content.
+     * @param serviceId The carrier's identifier for the service.
+     * @param start The start time indicating when this service will be available.
+     * @param end The end time indicating when this session stops being available.
+     * @hide
+     */
+    @SystemApi
+    public StreamingServiceInfo(Map<Locale, String> names, String className,
+            List<Locale> locales, String serviceId, Date start, Date end) {
+        super(names, className, locales, serviceId, start, end);
     }
 
     public static final Parcelable.Creator<StreamingServiceInfo> CREATOR =
@@ -49,7 +60,7 @@ public class StreamingServiceInfo extends ServiceInfo implements Parcelable {
         }
     };
 
-    StreamingServiceInfo(Parcel in) {
+    private StreamingServiceInfo(Parcel in) {
         super(in);
     }
 

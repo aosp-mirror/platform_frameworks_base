@@ -24,6 +24,7 @@
 
     <application
         android:hasCode="false"
+        android:multiArch="true"
         tools:ignore="AllowBackup,MissingApplicationIcon" >
 
         <!-- These activities don't actually exist; define them just to test the filters !-->

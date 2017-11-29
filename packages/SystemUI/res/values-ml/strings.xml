@@ -188,7 +188,7 @@
     <string name="accessibility_desc_settings" msgid="3417884241751434521">"ക്രമീകരണം"</string>
     <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"അവലോകനം."</string>
     <string name="accessibility_desc_work_lock" msgid="4288774420752813383">"ഔദ്യോഗിക ലോക്ക് സ്ക്രീൻ"</string>
-    <string name="accessibility_desc_close" msgid="7479755364962766729">"അടയ്‌ക്കുക"</string>
+    <string name="accessibility_desc_close" msgid="7479755364962766729">"അവസാനിപ്പിക്കുക"</string>
     <string name="accessibility_quick_settings_wifi" msgid="5518210213118181692">"<xliff:g id="SIGNAL">%1$s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi_changed_off" msgid="8716484460897819400">"വൈഫൈ ഓഫാക്കി."</string>
     <string name="accessibility_quick_settings_wifi_changed_on" msgid="6440117170789528622">"വൈഫൈ ഓണാക്കി."</string>
@@ -724,7 +724,7 @@
     <string name="tuner_lock_screen" msgid="5755818559638850294">"ലോക്ക് സ്‌ക്രീൻ"</string>
     <string name="pip_phone_expand" msgid="5889780005575693909">"വികസിപ്പിക്കുക"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"ചെറുതാക്കുക‍"</string>
-    <string name="pip_phone_close" msgid="8416647892889710330">"അടയ്‌ക്കുക"</string>
+    <string name="pip_phone_close" msgid="8416647892889710330">"അവസാനിപ്പിക്കുക"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"തള്ളിക്കളയാൻ താഴേക്ക് വലിച്ചിടുക"</string>
     <string name="pip_menu_title" msgid="4707292089961887657">"മെനു"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> ചിത്രത്തിനുള്ളിലെ ചിത്രത്തിലാണ്"</string>

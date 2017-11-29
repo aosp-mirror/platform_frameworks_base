@@ -16,20 +16,7 @@
 
 package com.android.compatibilitytest;
 
-import android.os.Bundle;
-import android.test.InstrumentationTestRunner;
+import android.support.test.runner.AndroidJUnitRunner;
 
-public class AppCompatibilityRunner extends InstrumentationTestRunner {
-
-    private Bundle mArgs;
-
-    @Override
-    public void onCreate(Bundle args) {
-        super.onCreate(args);
-        mArgs = args;
-    }
-
-    public Bundle getBundle() {
-        return mArgs;
-    }
-}
+// empty subclass to maintain backwards compatibility on host-side harness
+public class AppCompatibilityRunner extends AndroidJUnitRunner {}

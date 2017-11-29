@@ -22,7 +22,6 @@ import static android.content.pm.ActivityInfo.CONFIG_ORIENTATION;
 import static android.content.pm.ActivityInfo.CONFIG_SCREEN_SIZE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
-import static android.os.Build.VERSION_CODES.O_MR1;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
@@ -73,8 +72,6 @@ import com.android.server.wm.WindowManagerService.H;
 import java.io.PrintWriter;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-
-import static android.os.Build.VERSION_CODES.O;
 
 class AppTokenList extends ArrayList<AppWindowToken> {
 }
@@ -1309,15 +1306,6 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
      */
     @Override
     int getOrientation(int candidate) {
-        // We do not allow non-fullscreen apps to influence orientation starting in O-MR1. While we
-        // do throw an exception in {@link Activity#onCreate} and
-        // {@link Activity#setRequestedOrientation}, we also ignore the orientation here so that
-        // other calculations aren't affected.
-        if (!fillsParent() && mTargetSdk >= O_MR1) {
-            // Can't specify orientation if app doesn't fill parent.
-            return SCREEN_ORIENTATION_UNSET;
-        }
-
         if (candidate == SCREEN_ORIENTATION_BEHIND) {
             // Allow app to specify orientation regardless of its visibility state if the current
             // candidate want us to use orientation behind. I.e. the visible app on-top of this one

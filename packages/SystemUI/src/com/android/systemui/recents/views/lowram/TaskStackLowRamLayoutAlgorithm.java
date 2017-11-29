@@ -126,7 +126,6 @@ public class TaskStackLowRamLayoutAlgorithm {
             return transformOut;
         }
         boolean visible = true;
-        int x = mPaddingLeftRight;
         int y;
         if (taskCount > 1) {
             y = getTaskTopFromIndex(taskIndex) - percentageToScroll(stackScroll);
@@ -255,7 +254,7 @@ public class TaskStackLowRamLayoutAlgorithm {
         transformOut.dimAlpha = 0f;
         transformOut.viewOutlineAlpha = 1f;
         transformOut.rect.set(getTaskRect());
-        transformOut.rect.offset(mPaddingLeftRight, y);
+        transformOut.rect.offset(mPaddingLeftRight + mSystemInsets.left, y);
         Utilities.scaleRectAboutCenter(transformOut.rect, transformOut.scale);
         transformOut.visible = visible;
     }

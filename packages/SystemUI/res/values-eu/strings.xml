@@ -342,9 +342,9 @@
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Zatitze horizontala"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Zatitze bertikala"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Zatitze pertsonalizatua"</string>
-    <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"Banandu pantaila eta ezarri goian"</string>
-    <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"Banandu pantaila eta ezarri ezkerrean"</string>
-    <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"Banandu pantaila eta ezarri eskuinean"</string>
+    <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"Zatitu pantaila eta ezarri goian"</string>
+    <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"Zatitu pantaila eta ezarri ezkerrean"</string>
+    <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"Zatitu pantaila eta ezarri eskuinean"</string>
   <string-array name="recents_blacklist_array">
   </string-array>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Kargatuta"</string>

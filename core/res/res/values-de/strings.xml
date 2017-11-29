@@ -1084,7 +1084,7 @@
     <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"Benachrichtigungstöne"</string>
     <string name="ringtone_unknown" msgid="3914515995813061520">"Unbekannt"</string>
     <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
-      <item quantity="other">WLANe verfügbar</item>
+      <item quantity="other">WLANs verfügbar</item>
       <item quantity="one">WLAN verfügbar</item>
     </plurals>
     <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">

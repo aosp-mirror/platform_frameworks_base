@@ -22,6 +22,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.IntentSender;
+import android.graphics.drawable.Drawable;
 import android.metrics.LogMaker;
 import android.os.Bundle;
 import android.os.Handler;
@@ -35,13 +36,13 @@ import android.text.TextUtils;
 import android.util.Slog;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillManager;
-import android.view.autofill.IAutoFillManagerClient;
 import android.view.autofill.IAutofillWindowPresenter;
 import android.widget.Toast;
 
 import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.nano.MetricsProto;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.server.UiThread;
+import com.android.server.autofill.Helper;
 
 import java.io.PrintWriter;
 
@@ -158,21 +159,22 @@ public final class AutoFillUI {
      * @param focusedId the currently focused field
      * @param response the current fill response
      * @param filterText text of the view to be filled
+     * @param servicePackageName package name of the autofill service filling the activity
      * @param packageName package name of the activity that is filled
      * @param callback Identifier for the caller
      */
     public void showFillUi(@NonNull AutofillId focusedId, @NonNull FillResponse response,
-            @Nullable String filterText, @NonNull String packageName,
-            @NonNull AutoFillUiCallback callback) {
+            @Nullable String filterText, @Nullable String servicePackageName,
+            @NonNull String packageName, @NonNull AutoFillUiCallback callback) {
         if (sDebug) {
             final int size = filterText == null ? 0 : filterText.length();
             Slog.d(TAG, "showFillUi(): id=" + focusedId + ", filter=" + size + " chars");
         }
-        final LogMaker log = (new LogMaker(MetricsProto.MetricsEvent.AUTOFILL_FILL_UI))
-                .setPackageName(packageName)
-                .addTaggedData(MetricsProto.MetricsEvent.FIELD_AUTOFILL_FILTERTEXT_LEN,
+        final LogMaker log =
+                Helper.newLogMaker(MetricsEvent.AUTOFILL_FILL_UI, packageName, servicePackageName)
+                .addTaggedData(MetricsEvent.FIELD_AUTOFILL_FILTERTEXT_LEN,
                         filterText == null ? 0 : filterText.length())
-                .addTaggedData(MetricsProto.MetricsEvent.FIELD_AUTOFILL_NUM_DATASETS,
+                .addTaggedData(MetricsEvent.FIELD_AUTOFILL_NUM_DATASETS,
                         response.getDatasets() == null ? 0 : response.getDatasets().size());
 
         mHandler.post(() -> {
@@ -184,7 +186,7 @@ public final class AutoFillUI {
                     filterText, mOverlayControl, new FillUi.Callback() {
                 @Override
                 public void onResponsePicked(FillResponse response) {
-                    log.setType(MetricsProto.MetricsEvent.TYPE_DETAIL);
+                    log.setType(MetricsEvent.TYPE_DETAIL);
                     hideFillUiUiThread(callback);
                     if (mCallback != null) {
                         mCallback.authenticate(response.getRequestId(),
@@ -195,7 +197,7 @@ public final class AutoFillUI {
 
                 @Override
                 public void onDatasetPicked(Dataset dataset) {
-                    log.setType(MetricsProto.MetricsEvent.TYPE_ACTION);
+                    log.setType(MetricsEvent.TYPE_ACTION);
                     hideFillUiUiThread(callback);
                     if (mCallback != null) {
                         final int datasetIndex = response.getDatasets().indexOf(dataset);
@@ -205,14 +207,14 @@ public final class AutoFillUI {
 
                 @Override
                 public void onCanceled() {
-                    log.setType(MetricsProto.MetricsEvent.TYPE_DISMISS);
+                    log.setType(MetricsEvent.TYPE_DISMISS);
                     hideFillUiUiThread(callback);
                 }
 
                 @Override
                 public void onDestroy() {
-                    if (log.getType() == MetricsProto.MetricsEvent.TYPE_UNKNOWN) {
-                        log.setType(MetricsProto.MetricsEvent.TYPE_CLOSE);
+                    if (log.getType() == MetricsEvent.TYPE_UNKNOWN) {
+                        log.setType(MetricsEvent.TYPE_CLOSE);
                     }
                     mMetricsLogger.write(log);
                 }
@@ -245,39 +247,40 @@ public final class AutoFillUI {
     /**
      * Shows the UI asking the user to save for autofill.
      */
-    public void showSaveUi(@NonNull CharSequence providerLabel, @NonNull SaveInfo info,
+    public void showSaveUi(@NonNull CharSequence serviceLabel, @NonNull Drawable serviceIcon,
+            @Nullable String servicePackageName, @NonNull SaveInfo info,
             @NonNull ValueFinder valueFinder, @NonNull String packageName,
-            @NonNull AutoFillUiCallback callback, @NonNull PendingUi pendingUi,
-            int sessionId, @Nullable IAutoFillManagerClient client) {
+            @NonNull AutoFillUiCallback callback, @NonNull PendingUi pendingSaveUi) {
         if (sVerbose) Slog.v(TAG, "showSaveUi() for " + packageName + ": " + info);
         int numIds = 0;
         numIds += info.getRequiredIds() == null ? 0 : info.getRequiredIds().length;
         numIds += info.getOptionalIds() == null ? 0 : info.getOptionalIds().length;
 
-        LogMaker log = (new LogMaker(MetricsProto.MetricsEvent.AUTOFILL_SAVE_UI))
-                .setPackageName(packageName).addTaggedData(
-                        MetricsProto.MetricsEvent.FIELD_AUTOFILL_NUM_IDS, numIds);
+        final LogMaker log =
+                Helper.newLogMaker(MetricsEvent.AUTOFILL_SAVE_UI, packageName, servicePackageName)
+                .addTaggedData(MetricsEvent.FIELD_AUTOFILL_NUM_IDS, numIds);
 
         mHandler.post(() -> {
             if (callback != mCallback) {
                 return;
             }
             hideAllUiThread(callback);
-            mSaveUi = new SaveUi(mContext, pendingUi, providerLabel, info, valueFinder,
-                    mOverlayControl, client, new SaveUi.OnSaveListener() {
+            mSaveUi = new SaveUi(mContext, pendingSaveUi, serviceLabel, serviceIcon,
+                    servicePackageName, packageName, info, valueFinder, mOverlayControl,
+                    new SaveUi.OnSaveListener() {
                 @Override
                 public void onSave() {
-                    log.setType(MetricsProto.MetricsEvent.TYPE_ACTION);
+                    log.setType(MetricsEvent.TYPE_ACTION);
                     hideSaveUiUiThread(mCallback);
                     if (mCallback != null) {
                         mCallback.save();
                     }
-                    destroySaveUiUiThread(sessionId, client);
+                    destroySaveUiUiThread(pendingSaveUi, true);
                 }
 
                 @Override
                 public void onCancel(IntentSender listener) {
-                    log.setType(MetricsProto.MetricsEvent.TYPE_DISMISS);
+                    log.setType(MetricsEvent.TYPE_DISMISS);
                     hideSaveUiUiThread(mCallback);
                     if (listener != null) {
                         try {
@@ -290,13 +293,13 @@ public final class AutoFillUI {
                     if (mCallback != null) {
                         mCallback.cancelSave();
                     }
-                    destroySaveUiUiThread(sessionId, client);
+                    destroySaveUiUiThread(pendingSaveUi, true);
                 }
 
                 @Override
                 public void onDestroy() {
-                    if (log.getType() == MetricsProto.MetricsEvent.TYPE_UNKNOWN) {
-                        log.setType(MetricsProto.MetricsEvent.TYPE_CLOSE);
+                    if (log.getType() == MetricsEvent.TYPE_UNKNOWN) {
+                        log.setType(MetricsEvent.TYPE_CLOSE);
 
                         if (mCallback != null) {
                             mCallback.cancelSave();
@@ -331,9 +334,9 @@ public final class AutoFillUI {
     /**
      * Destroy all UI affordances.
      */
-    public void destroyAll(int sessionId, @Nullable IAutoFillManagerClient client,
-            @Nullable AutoFillUiCallback callback) {
-        mHandler.post(() -> destroyAllUiThread(sessionId, client, callback));
+    public void destroyAll(@Nullable PendingUi pendingSaveUi,
+            @Nullable AutoFillUiCallback callback, boolean notifyClient) {
+        mHandler.post(() -> destroyAllUiThread(pendingSaveUi, callback, notifyClient));
     }
 
     public void dump(PrintWriter pw) {
@@ -363,18 +366,20 @@ public final class AutoFillUI {
     }
 
     @android.annotation.UiThread
-    private void hideSaveUiUiThread(@Nullable AutoFillUiCallback callback) {
+    @Nullable
+    private PendingUi hideSaveUiUiThread(@Nullable AutoFillUiCallback callback) {
         if (sVerbose) {
             Slog.v(TAG, "hideSaveUiUiThread(): mSaveUi=" + mSaveUi + ", callback=" + callback
                     + ", mCallback=" + mCallback);
         }
         if (mSaveUi != null && (callback == null || callback == mCallback)) {
-            mSaveUi.hide();
+            return mSaveUi.hide();
         }
+        return null;
     }
 
     @android.annotation.UiThread
-    private void destroySaveUiUiThread(int sessionId, @Nullable IAutoFillManagerClient client) {
+    private void destroySaveUiUiThread(@Nullable PendingUi pendingSaveUi, boolean notifyClient) {
         if (mSaveUi == null) {
             // Calling destroySaveUiUiThread() twice is normal - it usually happens when the
             // first call is made after the SaveUI is hidden and the second when the session is
@@ -383,13 +388,13 @@ public final class AutoFillUI {
             return;
         }
 
-        if (sDebug) Slog.d(TAG, "destroySaveUiUiThread(): id=" + sessionId);
+        if (sDebug) Slog.d(TAG, "destroySaveUiUiThread(): " + pendingSaveUi);
         mSaveUi.destroy();
         mSaveUi = null;
-        if (client != null) {
+        if (pendingSaveUi != null && notifyClient) {
             try {
                 if (sDebug) Slog.d(TAG, "destroySaveUiUiThread(): notifying client");
-                client.setSaveUiState(sessionId, false);
+                pendingSaveUi.client.setSaveUiState(pendingSaveUi.id, false);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Error notifying client to set save UI state to hidden: " + e);
             }
@@ -397,15 +402,22 @@ public final class AutoFillUI {
     }
 
     @android.annotation.UiThread
-    private void destroyAllUiThread(int sessionId, @Nullable IAutoFillManagerClient client,
-            @Nullable AutoFillUiCallback callback) {
+    private void destroyAllUiThread(@Nullable PendingUi pendingSaveUi,
+            @Nullable AutoFillUiCallback callback, boolean notifyClient) {
         hideFillUiUiThread(callback);
-        destroySaveUiUiThread(sessionId, client);
+        destroySaveUiUiThread(pendingSaveUi, notifyClient);
     }
 
     @android.annotation.UiThread
     private void hideAllUiThread(@Nullable AutoFillUiCallback callback) {
         hideFillUiUiThread(callback);
-        hideSaveUiUiThread(callback);
+        final PendingUi pendingSaveUi = hideSaveUiUiThread(callback);
+        if (pendingSaveUi != null && pendingSaveUi.getState() == PendingUi.STATE_FINISHED) {
+            if (sDebug) {
+                Slog.d(TAG, "hideAllUiThread(): "
+                        + "destroying Save UI because pending restoration is finished");
+            }
+            destroySaveUiUiThread(pendingSaveUi, true);
+        }
     }
 }

@@ -342,8 +342,7 @@ public class BackgroundDexOptService extends JobService {
                     DexoptOptions.DEXOPT_BOOT_COMPLETE |
                     (downgrade ? DexoptOptions.DEXOPT_DOWNGRADE : 0);
             if (is_for_primary_dex) {
-                int result = pm.performDexOptWithStatus(new DexoptOptions(pkg,
-                        PackageManagerService.REASON_BACKGROUND_DEXOPT,
+                int result = pm.performDexOptWithStatus(new DexoptOptions(pkg, reason,
                         dexoptFlags));
                 success = result != PackageDexOptimizer.DEX_OPT_FAILED;
                 if (result == PackageDexOptimizer.DEX_OPT_PERFORMED) {
@@ -351,8 +350,7 @@ public class BackgroundDexOptService extends JobService {
                 }
             } else {
                 success = pm.performDexOpt(new DexoptOptions(pkg,
-                        PackageManagerService.REASON_BACKGROUND_DEXOPT,
-                        dexoptFlags | DexoptOptions.DEXOPT_ONLY_SECONDARY_DEX));
+                        reason, dexoptFlags | DexoptOptions.DEXOPT_ONLY_SECONDARY_DEX));
             }
             if (success) {
                 // Dexopt succeeded, remove package from the list of failing ones.
