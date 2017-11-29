@@ -3982,31 +3982,43 @@ public class Editor {
             }
             final TextClassification textClassification =
                     getSelectionActionModeHelper().getTextClassification();
-            final int count = textClassification != null ? textClassification.getActionCount() : 0;
+            if (textClassification == null) {
+                return;
+            }
+            if (isValidAssistMenuItem(
+                    textClassification.getIcon(),
+                    textClassification.getLabel(),
+                    textClassification.getOnClickListener(),
+                    textClassification.getIntent())) {
+                final MenuItem item = menu.add(
+                        TextView.ID_ASSIST, TextView.ID_ASSIST, MENU_ITEM_ORDER_ASSIST,
+                        textClassification.getLabel())
+                        .setIcon(textClassification.getIcon())
+                        .setIntent(textClassification.getIntent());
+                item.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+                mAssistClickHandlers.put(item, textClassification.getOnClickListener());
+                mMetricsLogger.write(
+                        new LogMaker(MetricsEvent.TEXT_SELECTION_MENU_ITEM_ASSIST)
+                                .setType(MetricsEvent.TYPE_OPEN)
+                                .setSubtype(textClassification.getLogType()));
+            }
+            final int count = textClassification.getSecondaryActionsCount();
             for (int i = 0; i < count; i++) {
-                if (!isValidAssistMenuItem(i)) {
+                if (!isValidAssistMenuItem(
+                        textClassification.getSecondaryIcon(i),
+                        textClassification.getSecondaryLabel(i),
+                        textClassification.getSecondaryOnClickListener(i),
+                        textClassification.getSecondaryIntent(i))) {
                     continue;
                 }
-                final int groupId = TextView.ID_ASSIST;
-                final int order = (i == 0)
-                        ? MENU_ITEM_ORDER_ASSIST
-                        : MENU_ITEM_ORDER_SECONDARY_ASSIST_ACTIONS_START + i;
-                final int id = (i == 0) ? TextView.ID_ASSIST : Menu.NONE;
-                final int showAsFlag = (i == 0)
-                        ? MenuItem.SHOW_AS_ACTION_ALWAYS
-                        : MenuItem.SHOW_AS_ACTION_NEVER;
+                final int order = MENU_ITEM_ORDER_SECONDARY_ASSIST_ACTIONS_START + i;
                 final MenuItem item = menu.add(
-                        groupId, id, order, textClassification.getLabel(i))
-                        .setIcon(textClassification.getIcon(i))
-                        .setIntent(textClassification.getIntent(i));
-                item.setShowAsAction(showAsFlag);
-                mAssistClickHandlers.put(item, textClassification.getOnClickListener(i));
-                if (id == TextView.ID_ASSIST) {
-                    mMetricsLogger.write(
-                            new LogMaker(MetricsEvent.TEXT_SELECTION_MENU_ITEM_ASSIST)
-                                    .setType(MetricsEvent.TYPE_OPEN)
-                                    .setSubtype(textClassification.getLogType()));
-                }
+                        TextView.ID_ASSIST, Menu.NONE, order,
+                        textClassification.getSecondaryLabel(i))
+                        .setIcon(textClassification.getSecondaryIcon(i))
+                        .setIntent(textClassification.getSecondaryIntent(i));
+                item.setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
+                mAssistClickHandlers.put(item, textClassification.getSecondaryOnClickListener(i));
             }
         }
 
@@ -4022,18 +4034,9 @@ public class Editor {
             }
         }
 
-        private boolean isValidAssistMenuItem(int index) {
-            final TextClassification textClassification =
-                    getSelectionActionModeHelper().getTextClassification();
-            if (!mTextView.isDeviceProvisioned() || textClassification == null
-                    || index < 0 || index >= textClassification.getActionCount()) {
-                return false;
-            }
-            final Drawable icon = textClassification.getIcon(index);
-            final CharSequence label = textClassification.getLabel(index);
+        private boolean isValidAssistMenuItem(
+                Drawable icon, CharSequence label, OnClickListener onClick, Intent intent) {
             final boolean hasUi = icon != null || !TextUtils.isEmpty(label);
-            final OnClickListener onClick = textClassification.getOnClickListener(index);
-            final Intent intent = textClassification.getIntent(index);
             final boolean hasAction = onClick != null || isSupportedIntent(intent);
             return hasUi && hasAction;
         }
@@ -6594,7 +6597,7 @@ public class Editor {
                         Editor.MENU_ITEM_ORDER_PROCESS_TEXT_INTENT_ACTIONS_START + i,
                         getLabel(resolveInfo))
                         .setIntent(createProcessTextIntentForResolveInfo(resolveInfo))
-                        .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+                        .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
             }
         }
 
