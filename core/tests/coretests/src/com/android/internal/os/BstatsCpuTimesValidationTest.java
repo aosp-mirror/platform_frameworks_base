@@ -104,7 +104,9 @@ public class BstatsCpuTimesValidationTest {
 
     @Test
     public void testCpuFreqTimes() throws Exception {
-        assumeTrue(sCpuFreqTimesAvailable);
+        if (!sCpuFreqTimesAvailable) {
+            return;
+        }
 
         batteryOnScreenOn();
         forceStop();
@@ -126,7 +128,9 @@ public class BstatsCpuTimesValidationTest {
 
     @Test
     public void testCpuFreqTimes_screenOff() throws Exception {
-        assumeTrue(sCpuFreqTimesAvailable);
+        if (!sCpuFreqTimesAvailable) {
+            return;
+        }
 
         batteryOnScreenOff();
         forceStop();
@@ -154,7 +158,9 @@ public class BstatsCpuTimesValidationTest {
 
     @Test
     public void testCpuFreqTimes_isolatedProcess() throws Exception {
-        assumeTrue(sCpuFreqTimesAvailable);
+        if (!sCpuFreqTimesAvailable) {
+            return;
+        }
 
         batteryOnScreenOn();
         forceStop();
