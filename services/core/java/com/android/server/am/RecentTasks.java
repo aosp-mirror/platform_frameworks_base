@@ -502,6 +502,18 @@ class RecentTasks {
         }
     }
 
+    void onLockTaskModeStateChanged(int lockTaskModeState, int userId) {
+        if (lockTaskModeState != ActivityManager.LOCK_TASK_MODE_LOCKED) {
+            return;
+        }
+        for (int i = mTasks.size() - 1; i >= 0; --i) {
+            final TaskRecord tr = mTasks.get(i);
+            if (tr.userId == userId && !mService.mLockTaskController.isTaskWhitelisted(tr)) {
+                remove(tr);
+            }
+        }
+    }
+
     void removeTasksByPackageName(String packageName, int userId) {
         for (int i = mTasks.size() - 1; i >= 0; --i) {
             final TaskRecord tr = mTasks.get(i);

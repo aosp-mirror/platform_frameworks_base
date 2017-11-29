@@ -250,7 +250,24 @@ public class LockTaskController {
     }
 
     /**
-     * @return whether the requested task is allowed to be launched.
+     * @return whether the requested task is allowed to be locked (either whitelisted, or declares
+     * lockTaskMode="always" in the manifest).
+     */
+    boolean isTaskWhitelisted(TaskRecord task) {
+        switch(task.mLockTaskAuth) {
+            case LOCK_TASK_AUTH_WHITELISTED:
+            case LOCK_TASK_AUTH_LAUNCHABLE:
+            case LOCK_TASK_AUTH_LAUNCHABLE_PRIV:
+                return true;
+            case LOCK_TASK_AUTH_PINNABLE:
+            case LOCK_TASK_AUTH_DONT_LOCK:
+            default:
+                return false;
+        }
+    }
+
+    /**
+     * @return whether the requested task is disallowed to be launched.
      */
     boolean isLockTaskModeViolation(TaskRecord task) {
         return isLockTaskModeViolation(task, false);
@@ -258,7 +275,7 @@ public class LockTaskController {
 
     /**
      * @param isNewClearTask whether the task would be cleared as part of the operation.
-     * @return whether the requested task is allowed to be launched.
+     * @return whether the requested task is disallowed to be launched.
      */
     boolean isLockTaskModeViolation(TaskRecord task, boolean isNewClearTask) {
         if (isLockTaskModeViolationInternal(task, isNewClearTask)) {
@@ -275,21 +292,18 @@ public class LockTaskController {
             // If the task is already at the top and won't be cleared, then allow the operation
             return false;
         }
-        final int lockTaskAuth = task.mLockTaskAuth;
-        switch (lockTaskAuth) {
-            case LOCK_TASK_AUTH_DONT_LOCK:
-                return !mLockTaskModeTasks.isEmpty();
-            case LOCK_TASK_AUTH_LAUNCHABLE_PRIV:
-            case LOCK_TASK_AUTH_LAUNCHABLE:
-            case LOCK_TASK_AUTH_WHITELISTED:
-                return false;
-            case LOCK_TASK_AUTH_PINNABLE:
-                // Pinnable tasks can't be launched on top of locktask tasks.
-                return !mLockTaskModeTasks.isEmpty();
-            default:
-                Slog.w(TAG, "isLockTaskModeViolation: invalid lockTaskAuth value=" + lockTaskAuth);
-                return true;
+
+        // Allow recents activity if enabled by policy
+        if (task.isActivityTypeRecents() && isRecentsAllowed(task.userId)) {
+            return false;
         }
+
+        return !(isTaskWhitelisted(task) || mLockTaskModeTasks.isEmpty());
+    }
+
+    private boolean isRecentsAllowed(int userId) {
+        return (getLockTaskFeaturesForUser(userId)
+                & DevicePolicyManager.LOCK_TASK_FEATURE_RECENTS) != 0;
     }
 
     /**
@@ -491,6 +505,7 @@ public class LockTaskController {
         }
 
         if (mLockTaskModeTasks.isEmpty()) {
+            mSupervisor.mRecentTasks.onLockTaskModeStateChanged(lockTaskModeState, task.userId);
             // Start lock task on the handler thread
             mHandler.post(() -> performStartLockTask(
                     task.intent.getComponent().getPackageName(),

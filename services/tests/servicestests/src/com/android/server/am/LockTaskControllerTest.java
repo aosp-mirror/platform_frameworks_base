@@ -90,6 +90,7 @@ public class LockTaskControllerTest {
     @Mock private LockPatternUtils mLockPatternUtils;
     @Mock private LockTaskNotify mLockTaskNotify;
     @Mock private StatusBarManagerInternal mStatusBarManagerInternal;
+    @Mock private RecentTasks mRecentTasks;
 
     private LockTaskController mLockTaskController;
     private Context mContext;
@@ -110,9 +111,10 @@ public class LockTaskControllerTest {
             Looper.prepare();
         }
 
+        mSupervisor.mRecentTasks = mRecentTasks;
+
         mLockTaskController = new LockTaskController(mContext, mSupervisor,
                 new ImmediatelyExecuteHandler());
-
         mLockTaskController.setWindowManager(mWindowManager);
         mLockTaskController.mStatusBarService = mStatusBarService;
         mLockTaskController.mDevicePolicyManager = mDevicePolicyManager;
@@ -601,6 +603,8 @@ public class LockTaskControllerTest {
                 eq(mContext.getPackageName()));
         verify(mStatusBarService).disable2(eq(statusBarMask2), any(IBinder.class),
                 eq(mContext.getPackageName()));
+        // THEN recents should have been notified
+        verify(mRecentTasks).onLockTaskModeStateChanged(anyInt(), eq(TEST_USER_ID));
         // THEN the DO/PO should be informed about the operation
         verify(mDevicePolicyManager).notifyLockTaskModeChanged(true, TEST_PACKAGE_NAME,
                 TEST_USER_ID);
