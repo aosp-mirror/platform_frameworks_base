@@ -25,6 +25,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.PersistableBundle;
+import android.util.ArrayMap;
 import android.util.Log;
 import android.view.Surface;
 
@@ -33,6 +34,8 @@ import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.lang.ref.WeakReference;
+
+import com.android.internal.annotations.GuardedBy;
 
 /**
  * Used to record audio and video. The recording control is based on a
@@ -76,7 +79,7 @@ import java.lang.ref.WeakReference;
  * <a href="{@docRoot}guide/topics/media/audio-capture.html">Audio Capture</a> developer guide.</p>
  * </div>
  */
-public class MediaRecorder
+public class MediaRecorder implements AudioRouting
 {
     static {
         System.loadLibrary("media_jni");
@@ -1243,6 +1246,7 @@ public class MediaRecorder
         private static final int MEDIA_RECORDER_TRACK_EVENT_INFO       = 101;
         private static final int MEDIA_RECORDER_TRACK_EVENT_LIST_END   = 1000;
 
+        private static final int MEDIA_RECORDER_AUDIO_ROUTING_CHANGED  = 10000;
 
         @Override
         public void handleMessage(Message msg) {
@@ -1265,12 +1269,171 @@ public class MediaRecorder
 
                 return;
 
+            case MEDIA_RECORDER_AUDIO_ROUTING_CHANGED:
+                AudioManager.resetAudioPortGeneration();
+                synchronized (mRoutingChangeListeners) {
+                    for (NativeRoutingEventHandlerDelegate delegate
+                            : mRoutingChangeListeners.values()) {
+                        delegate.notifyClient();
+                    }
+                }
+                return;
+
             default:
                 Log.e(TAG, "Unknown message type " + msg.what);
                 return;
             }
         }
     }
+
+    //--------------------------------------------------------------------------
+    // Explicit Routing
+    //--------------------
+    private AudioDeviceInfo mPreferredDevice = null;
+
+    /**
+     * Specifies an audio device (via an {@link AudioDeviceInfo} object) to route
+     * the input from this MediaRecorder.
+     * @param deviceInfo The {@link AudioDeviceInfo} specifying the audio source.
+     *  If deviceInfo is null, default routing is restored.
+     * @return true if succesful, false if the specified {@link AudioDeviceInfo} is non-null and
+     * does not correspond to a valid audio input device.
+     */
+    @Override
+    public boolean setPreferredDevice(AudioDeviceInfo deviceInfo) {
+        if (deviceInfo != null && !deviceInfo.isSource()) {
+            return false;
+        }
+        int preferredDeviceId = deviceInfo != null ? deviceInfo.getId() : 0;
+        boolean status = native_setInputDevice(preferredDeviceId);
+        if (status == true) {
+            synchronized (this) {
+                mPreferredDevice = deviceInfo;
+            }
+        }
+        return status;
+    }
+
+    /**
+     * Returns the selected input device specified by {@link #setPreferredDevice}. Note that this
+     * is not guaranteed to correspond to the actual device being used for recording.
+     */
+    @Override
+    public AudioDeviceInfo getPreferredDevice() {
+        synchronized (this) {
+            return mPreferredDevice;
+        }
+    }
+
+    /**
+     * Returns an {@link AudioDeviceInfo} identifying the current routing of this MediaRecorder
+     * Note: The query is only valid if the MediaRecorder is currently recording.
+     * If the recorder is not recording, the returned device can be null or correspond to previously
+     * selected device when the recorder was last active.
+     */
+    @Override
+    public AudioDeviceInfo getRoutedDevice() {
+        int deviceId = native_getRoutedDeviceId();
+        if (deviceId == 0) {
+            return null;
+        }
+        AudioDeviceInfo[] devices =
+                AudioManager.getDevicesStatic(AudioManager.GET_DEVICES_INPUTS);
+        for (int i = 0; i < devices.length; i++) {
+            if (devices[i].getId() == deviceId) {
+                return devices[i];
+            }
+        }
+        return null;
+    }
+
+    /*
+     * Call BEFORE adding a routing callback handler or AFTER removing a routing callback handler.
+     */
+    private void enableNativeRoutingCallbacksLocked(boolean enabled) {
+        if (mRoutingChangeListeners.size() == 0) {
+            native_enableDeviceCallback(enabled);
+        }
+    }
+
+    /**
+     * The list of AudioRouting.OnRoutingChangedListener interfaces added (with
+     * {@link #addOnRoutingChangedListener(android.media.AudioRouting.OnRoutingChangedListener, Handler)}
+     * by an app to receive (re)routing notifications.
+     */
+    @GuardedBy("mRoutingChangeListeners")
+    private ArrayMap<AudioRouting.OnRoutingChangedListener,
+            NativeRoutingEventHandlerDelegate> mRoutingChangeListeners = new ArrayMap<>();
+
+    /**
+     * Adds an {@link AudioRouting.OnRoutingChangedListener} to receive notifications of routing
+     * changes on this MediaRecorder.
+     * @param listener The {@link AudioRouting.OnRoutingChangedListener} interface to receive
+     * notifications of rerouting events.
+     * @param handler  Specifies the {@link Handler} object for the thread on which to execute
+     * the callback. If <code>null</code>, the handler on the main looper will be used.
+     */
+    @Override
+    public void addOnRoutingChangedListener(AudioRouting.OnRoutingChangedListener listener,
+                                            Handler handler) {
+        synchronized (mRoutingChangeListeners) {
+            if (listener != null && !mRoutingChangeListeners.containsKey(listener)) {
+                enableNativeRoutingCallbacksLocked(true);
+                mRoutingChangeListeners.put(
+                        listener, new NativeRoutingEventHandlerDelegate(this, listener, handler));
+            }
+        }
+    }
+
+    /**
+     * Removes an {@link AudioRouting.OnRoutingChangedListener} which has been previously added
+     * to receive rerouting notifications.
+     * @param listener The previously added {@link AudioRouting.OnRoutingChangedListener} interface
+     * to remove.
+     */
+    @Override
+    public void removeOnRoutingChangedListener(AudioRouting.OnRoutingChangedListener listener) {
+        synchronized (mRoutingChangeListeners) {
+            if (mRoutingChangeListeners.containsKey(listener)) {
+                mRoutingChangeListeners.remove(listener);
+                enableNativeRoutingCallbacksLocked(false);
+            }
+        }
+    }
+
+    /**
+     * Helper class to handle the forwarding of native events to the appropriate listener
+     * (potentially) handled in a different thread
+     */
+    private class NativeRoutingEventHandlerDelegate {
+        private MediaRecorder mMediaRecorder;
+        private AudioRouting.OnRoutingChangedListener mOnRoutingChangedListener;
+        private Handler mHandler;
+
+        NativeRoutingEventHandlerDelegate(final MediaRecorder mediaRecorder,
+                final AudioRouting.OnRoutingChangedListener listener, Handler handler) {
+            mMediaRecorder = mediaRecorder;
+            mOnRoutingChangedListener = listener;
+            mHandler = handler != null ? handler : mEventHandler;
+        }
+
+        void notifyClient() {
+            if (mHandler != null) {
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (mOnRoutingChangedListener != null) {
+                            mOnRoutingChangedListener.onRoutingChanged(mMediaRecorder);
+                        }
+                    }
+                });
+            }
+        }
+    }
+
+    private native final boolean native_setInputDevice(int deviceId);
+    private native final int native_getRoutedDeviceId();
+    private native final void native_enableDeviceCallback(boolean enabled);
 
     /**
      * Called from native code when an interesting event happens.  This method
