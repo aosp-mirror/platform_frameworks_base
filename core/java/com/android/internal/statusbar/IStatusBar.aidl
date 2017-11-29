@@ -113,6 +113,11 @@ oneway interface IStatusBar
     void showGlobalActionsMenu();
 
     /**
+     * Notifies the status bar that a new rotation suggestion is available.
+     */
+    void onProposedRotationChanged(int rotation);
+
+    /**
      * Set whether the top app currently hides the statusbar.
      *
      * @param hidesStatusBar whether it is being hidden
