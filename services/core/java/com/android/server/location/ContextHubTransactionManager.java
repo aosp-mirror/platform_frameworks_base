@@ -58,6 +58,11 @@ import java.util.concurrent.atomic.AtomicInteger;
     private final IContexthub mContextHubProxy;
 
     /*
+     * The manager for all clients for the service.
+     */
+    private final ContextHubClientManager mClientManager;
+
+    /*
      * A queue containing the current transactions
      */
     private final ArrayDeque<ContextHubServiceTransaction> mTransactionQueue = new ArrayDeque<>();
@@ -73,8 +78,10 @@ import java.util.concurrent.atomic.AtomicInteger;
     private final ScheduledThreadPoolExecutor mTimeoutExecutor = new ScheduledThreadPoolExecutor(1);
     private ScheduledFuture<?> mTimeoutFuture = null;
 
-    /* package */ ContextHubTransactionManager(IContexthub contextHubProxy) {
+    /* package */ ContextHubTransactionManager(
+            IContexthub contextHubProxy, ContextHubClientManager clientManager) {
         mContextHubProxy = contextHubProxy;
+        mClientManager = clientManager;
     }
 
     /**
@@ -113,6 +120,9 @@ import java.util.concurrent.atomic.AtomicInteger;
             /* package */ void onTransactionComplete(int result) {
                 try {
                     onCompleteCallback.onTransactionComplete(result);
+                    if (result == Result.OK) {
+                        mClientManager.onNanoAppLoaded(contextHubId, nanoAppBinary.getNanoAppId());
+                    }
                 } catch (RemoteException e) {
                     Log.e(TAG, "RemoteException while calling client onTransactionComplete");
                 }
@@ -153,6 +163,9 @@ import java.util.concurrent.atomic.AtomicInteger;
             /* package */ void onTransactionComplete(int result) {
                 try {
                     onCompleteCallback.onTransactionComplete(result);
+                    if (result == Result.OK) {
+                        mClientManager.onNanoAppUnloaded(contextHubId, nanoAppId);
+                    }
                 } catch (RemoteException e) {
                     Log.e(TAG, "RemoteException while calling client onTransactionComplete");
                 }
