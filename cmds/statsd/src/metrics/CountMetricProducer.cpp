@@ -96,8 +96,6 @@ CountMetricProducer::~CountMetricProducer() {
 }
 
 void CountMetricProducer::startNewProtoOutputStream(long long startTime) {
-    std::lock_guard<std::shared_timed_mutex> writeLock(mRWMutex);
-
     mProto = std::make_unique<ProtoOutputStream>();
     mProto->write(FIELD_TYPE_STRING | FIELD_ID_NAME, mMetric.name());
     mProto->write(FIELD_TYPE_INT64 | FIELD_ID_START_REPORT_NANOS, startTime);
@@ -111,8 +109,13 @@ void CountMetricProducer::onSlicedConditionMayChange(const uint64_t eventTime) {
     VLOG("Metric %s onSlicedConditionMayChange", mMetric.name().c_str());
 }
 
-void CountMetricProducer::serializeBuckets() {
-    std::lock_guard<std::shared_timed_mutex> writeLock(mRWMutex);
+std::unique_ptr<std::vector<uint8_t>> CountMetricProducer::onDumpReport() {
+    long long endTime = time(nullptr) * NS_PER_SEC;
+
+    // Dump current bucket if it's stale.
+    // If current bucket is still on-going, don't force dump current bucket.
+    // In finish(), We can force dump current bucket.
+    flushIfNeeded(endTime);
     VLOG("metric %s dump report now...", mMetric.name().c_str());
 
     for (const auto& counter : mPastBuckets) {
@@ -158,40 +161,28 @@ void CountMetricProducer::serializeBuckets() {
         }
         mProto->end(wrapperToken);
     }
+
     mProto->end(mProtoToken);
     mProto->write(FIELD_TYPE_INT64 | FIELD_ID_END_REPORT_NANOS,
                   (long long)mCurrentBucketStartTimeNs);
 
-    mPastBuckets.clear();
-    // TODO: Clear mDimensionKeyMap once the report is dumped.
-}
-
-std::unique_ptr<std::vector<uint8_t>> CountMetricProducer::onDumpReport() {
-    long long endTime = time(nullptr) * NS_PER_SEC;
     VLOG("metric %s dump report now...", mMetric.name().c_str());
-    // Dump current bucket if it's stale.
-    // If current bucket is still on-going, don't force dump current bucket.
-    // In finish(), We can force dump current bucket.
-    flushIfNeeded(endTime);
-
-    // TODO(yanglu): merge these three functions to one to avoid three locks.
-    serializeBuckets();
-
     std::unique_ptr<std::vector<uint8_t>> buffer = serializeProto();
 
     startNewProtoOutputStream(endTime);
+    mPastBuckets.clear();
 
     return buffer;
+
+    // TODO: Clear mDimensionKeyMap once the report is dumped.
 }
 
 void CountMetricProducer::onConditionChanged(const bool conditionMet, const uint64_t eventTime) {
     VLOG("Metric %s onConditionChanged", mMetric.name().c_str());
-    std::lock_guard<std::shared_timed_mutex> writeLock(mRWMutex);
     mCondition = conditionMet;
 }
 
 bool CountMetricProducer::hitGuardRail(const HashableDimensionKey& newKey) {
-    std::shared_lock<std::shared_timed_mutex> readLock(mRWMutex);
     if (mCurrentSlicedCounter->find(newKey) != mCurrentSlicedCounter->end()) {
         return false;
     }
@@ -219,40 +210,38 @@ void CountMetricProducer::onMatchedLogEventInternal(
 
     flushIfNeeded(eventTimeNs);
 
-    // ===========GuardRail==============
-    if (hitGuardRail(eventKey)) {
+    if (condition == false) {
         return;
     }
 
-    // TODO(yanglu): move the following logic to a seperate function to make it lockable.
-    {
-        std::lock_guard<std::shared_timed_mutex> writeLock(mRWMutex);
-        if (condition == false) {
+    auto it = mCurrentSlicedCounter->find(eventKey);
+
+    if (it == mCurrentSlicedCounter->end()) {
+        // ===========GuardRail==============
+        if (hitGuardRail(eventKey)) {
             return;
         }
 
-        auto it = mCurrentSlicedCounter->find(eventKey);
-        if (it == mCurrentSlicedCounter->end()) {
-            // create a counter for the new key
-            mCurrentSlicedCounter->insert({eventKey, 1});
-        } else {
-            // increment the existing value
-            auto& count = it->second;
-            count++;
-        }
-        const int64_t& count = mCurrentSlicedCounter->find(eventKey)->second;
-        for (auto& tracker : mAnomalyTrackers) {
-            tracker->detectAndDeclareAnomaly(eventTimeNs, mCurrentBucketNum, eventKey, count);
-        }
-        VLOG("metric %s %s->%lld", mMetric.name().c_str(), eventKey.c_str(), (long long)(count));
+        // create a counter for the new key
+        (*mCurrentSlicedCounter)[eventKey] = 1;
+    } else {
+        // increment the existing value
+        auto& count = it->second;
+        count++;
     }
+
+    for (auto& tracker : mAnomalyTrackers) {
+        tracker->detectAndDeclareAnomaly(eventTimeNs, mCurrentBucketNum, eventKey,
+                                         mCurrentSlicedCounter->find(eventKey)->second);
+    }
+
+    VLOG("metric %s %s->%lld", mMetric.name().c_str(), eventKey.c_str(),
+         (long long)(*mCurrentSlicedCounter)[eventKey]);
 }
 
 // When a new matched event comes in, we check if event falls into the current
 // bucket. If not, flush the old counter to past buckets and initialize the new bucket.
 void CountMetricProducer::flushIfNeeded(const uint64_t eventTimeNs) {
-    std::lock_guard<std::shared_timed_mutex> writeLock(mRWMutex);
-
     if (eventTimeNs < mCurrentBucketStartTimeNs + mBucketSizeNs) {
         return;
     }
@@ -286,7 +275,6 @@ void CountMetricProducer::flushIfNeeded(const uint64_t eventTimeNs) {
 // greater than actual data size as it contains each dimension of
 // CountMetricData is  duplicated.
 size_t CountMetricProducer::byteSize() const {
-    std::shared_lock<std::shared_timed_mutex> readLock(mRWMutex);
     size_t totalSize = 0;
     for (const auto& pair : mPastBuckets) {
         totalSize += pair.second.size() * kBucketSize;
