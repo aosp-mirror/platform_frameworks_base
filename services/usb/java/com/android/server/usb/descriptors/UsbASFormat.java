@@ -40,7 +40,7 @@ public class UsbASFormat extends UsbACInterface {
     public static final byte EXT_FORMAT_TYPE_II     = (byte) 0x82;
     public static final byte EXT_FORMAT_TYPE_III    = (byte) 0x83;
 
-    public UsbASFormat(int length, byte type, byte subtype, byte formatType, byte mSubclass) {
+    public UsbASFormat(int length, byte type, byte subtype, byte formatType, int mSubclass) {
         super(length, type, subtype, mSubclass);
         mFormatType = formatType;
     }
@@ -66,8 +66,8 @@ public class UsbASFormat extends UsbACInterface {
      * stream.
      */
     public static UsbDescriptor allocDescriptor(UsbDescriptorParser parser,
-                                                ByteStream stream, int length, byte type,
-            byte subtype, byte subclass) {
+            ByteStream stream, int length, byte type,
+            byte subtype, int subclass) {
 
         byte formatType = stream.getByte();
         int acInterfaceSpec = parser.getACInterfaceSpec();

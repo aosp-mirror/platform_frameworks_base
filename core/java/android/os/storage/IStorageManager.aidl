@@ -112,7 +112,7 @@ interface IStorageManager {
      * path belongs to a volume managed by vold, and that path is either
      * external storage data or OBB directory belonging to calling app.
      */
-    int mkdirs(in String callingPkg, in String path) = 34;
+    void mkdirs(in String callingPkg, in String path) = 34;
     /**
      * Determines the type of the encryption password
      * @return PasswordType

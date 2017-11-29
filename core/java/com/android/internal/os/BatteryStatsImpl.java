@@ -6020,6 +6020,11 @@ public class BatteryStatsImpl extends BatteryStats {
         }
 
         @Override
+        public Timer getMulticastWakelockStats() {
+            return mWifiMulticastTimer;
+        }
+
+        @Override
         public ArrayMap<String, ? extends BatteryStats.Timer> getSyncStats() {
             return mSyncStats.getMap();
         }

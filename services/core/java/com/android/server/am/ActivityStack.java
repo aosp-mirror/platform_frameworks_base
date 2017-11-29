@@ -104,6 +104,13 @@ import android.app.IActivityController;
 import android.app.ResultInfo;
 import android.app.WindowConfiguration.ActivityType;
 import android.app.WindowConfiguration.WindowingMode;
+import android.app.servertransaction.ActivityResultItem;
+import android.app.servertransaction.NewIntentItem;
+import android.app.servertransaction.WindowVisibilityItem;
+import android.app.servertransaction.DestroyActivityItem;
+import android.app.servertransaction.PauseActivityItem;
+import android.app.servertransaction.ResumeActivityItem;
+import android.app.servertransaction.StopActivityItem;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -1419,8 +1426,10 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                         prev.userId, System.identityHashCode(prev),
                         prev.shortComponentName);
                 mService.updateUsageStats(prev, false);
-                prev.app.thread.schedulePauseActivity(prev.appToken, prev.finishing,
-                        userLeaving, prev.configChangeFlags, pauseImmediately);
+
+                mService.mLifecycleManager.scheduleTransaction(prev.app.thread, prev.appToken,
+                        new PauseActivityItem(prev.finishing, userLeaving,
+                                prev.configChangeFlags, pauseImmediately));
             } catch (Exception e) {
                 // Ignore exception, if process died other code will cleanup.
                 Slog.w(TAG, "Exception thrown during pause", e);
@@ -2055,7 +2064,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                     if (r.app != null && r.app.thread != null) {
                         if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY,
                                 "Scheduling invisibility: " + r);
-                        r.app.thread.scheduleWindowVisibility(r.appToken, false);
+                        mService.mLifecycleManager.scheduleTransaction(r.app.thread, r.appToken,
+                                new WindowVisibilityItem(false /* showWindow */));
                     }
 
                     // Reset the flag indicating that an app can enter picture-in-picture once the
@@ -2575,13 +2585,15 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                         if (!next.finishing && N > 0) {
                             if (DEBUG_RESULTS) Slog.v(TAG_RESULTS,
                                     "Delivering results to " + next + ": " + a);
-                            next.app.thread.scheduleSendResult(next.appToken, a);
+                            mService.mLifecycleManager.scheduleTransaction(next.app.thread,
+                                    next.appToken, new ActivityResultItem(a));
                         }
                     }
 
                     if (next.newIntents != null) {
-                        next.app.thread.scheduleNewIntent(
-                                next.newIntents, next.appToken, false /* andPause */);
+                        mService.mLifecycleManager.scheduleTransaction(next.app.thread,
+                                next.appToken, new NewIntentItem(next.newIntents,
+                                        false /* andPause */));
                     }
 
                     // Well the app will no longer be stopped.
@@ -2598,8 +2610,9 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                     next.app.pendingUiClean = true;
                     next.app.forceProcessStateUpTo(mService.mTopProcessState);
                     next.clearOptionsLocked();
-                    next.app.thread.scheduleResumeActivity(next.appToken, next.app.repProcState,
-                            mService.isNextTransitionForward(), resumeAnimOptions);
+                    mService.mLifecycleManager.scheduleTransaction(next.app.thread, next.appToken,
+                            new ResumeActivityItem(next.app.repProcState,
+                                    mService.isNextTransitionForward()));
 
                     if (DEBUG_STATES) Slog.d(TAG_STATES, "resumeTopActivityLocked: Resumed "
                             + next);
@@ -3249,7 +3262,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 ArrayList<ResultInfo> list = new ArrayList<ResultInfo>();
                 list.add(new ResultInfo(resultWho, requestCode,
                         resultCode, data));
-                r.app.thread.scheduleSendResult(r.appToken, list);
+                mService.mLifecycleManager.scheduleTransaction(r.app.thread, r.appToken,
+                        new ActivityResultItem(list));
                 return;
             } catch (Exception e) {
                 Slog.w(TAG, "Exception thrown sending result to " + r, e);
@@ -3377,7 +3391,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 }
                 EventLogTags.writeAmStopActivity(
                         r.userId, System.identityHashCode(r), r.shortComponentName);
-                r.app.thread.scheduleStopActivity(r.appToken, r.visible, r.configChangeFlags);
+                mService.mLifecycleManager.scheduleTransaction(r.app.thread, r.appToken,
+                        new StopActivityItem(r.visible, r.configChangeFlags));
                 if (shouldSleepOrShutDownActivities()) {
                     r.setSleeping(true);
                 }
@@ -4009,7 +4024,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 // TODO: If the callers to removeTask() changes such that we have multiple places
                 //       where we are destroying the task, move this back into removeTask()
                 mStackSupervisor.removeTaskByIdLocked(task.taskId, false /* killProcess */,
-                        !REMOVE_FROM_RECENTS, PAUSE_IMMEDIATELY);
+                        !REMOVE_FROM_RECENTS, PAUSE_IMMEDIATELY, reason);
             }
 
             // We must keep the task around until all activities are destroyed. The following
@@ -4174,8 +4189,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
 
             try {
                 if (DEBUG_SWITCH) Slog.i(TAG_SWITCH, "Destroying: " + r);
-                r.app.thread.scheduleDestroyActivity(r.appToken, r.finishing,
-                        r.configChangeFlags);
+                mService.mLifecycleManager.scheduleTransaction(r.app.thread, r.appToken,
+                        new DestroyActivityItem(r.finishing, r.configChangeFlags));
             } catch (Exception e) {
                 // We can just ignore exceptions here...  if the process
                 // has crashed, our death notification will clean things
@@ -4988,13 +5003,22 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     TaskRecord createTaskRecord(int taskId, ActivityInfo info, Intent intent,
             IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor,
             boolean toTop) {
+        return createTaskRecord(taskId, info, intent, voiceSession, voiceInteractor, toTop,
+                null /*activity*/, null /*source*/, null /*options*/);
+    }
+
+    TaskRecord createTaskRecord(int taskId, ActivityInfo info, Intent intent,
+            IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor,
+            boolean toTop, ActivityRecord activity, ActivityRecord source,
+            ActivityOptions options) {
         final TaskRecord task = new TaskRecord(mService, taskId, info, intent, voiceSession,
                 voiceInteractor);
         // add the task to stack first, mTaskPositioner might need the stack association
         addTask(task, toTop, "createTaskRecord");
         final boolean isLockscreenShown = mService.mStackSupervisor.getKeyguardController()
                 .isKeyguardShowing(mDisplayId != INVALID_DISPLAY ? mDisplayId : DEFAULT_DISPLAY);
-        if (!mStackSupervisor.getLaunchingBoundsController().layoutTask(task, info.windowLayout)
+        if (!mStackSupervisor.getLaunchingBoundsController()
+                .layoutTask(task, info.windowLayout, activity, source, options)
                 && !matchParentBounds() && task.isResizeable() && !isLockscreenShown) {
             task.updateOverrideConfiguration(getOverrideBounds());
         }

@@ -1123,6 +1123,15 @@ public class StorageManager {
         return FileUtils.roundStorageSize(Environment.getDataDirectory().getTotalSpace());
     }
 
+    /** {@hide} */
+    public void mkdirs(File file) {
+        try {
+            mStorageManager.mkdirs(mContext.getOpPackageName(), file.getAbsolutePath());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     /** @removed */
     public @NonNull StorageVolume[] getVolumeList() {
         return getVolumeList(mContext.getUserId(), 0);

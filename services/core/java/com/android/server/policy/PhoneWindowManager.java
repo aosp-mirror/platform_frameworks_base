@@ -240,6 +240,7 @@ import android.view.inputmethod.InputMethodManagerInternal;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.IShortcutService;
@@ -1053,7 +1054,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     private ImmersiveModeConfirmation mImmersiveModeConfirmation;
 
-    private SystemGesturesPointerEventListener mSystemGestures;
+    @VisibleForTesting
+    SystemGesturesPointerEventListener mSystemGestures;
 
     IStatusBarService getStatusBarService() {
         synchronized (mServiceAquireLock) {
@@ -2664,17 +2666,21 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             // The status bar is the only window allowed to exhibit keyguard behavior.
             attrs.privateFlags &= ~WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
         }
+    }
 
+    private int getImpliedSysUiFlagsForLayout(LayoutParams attrs) {
+        int impliedFlags = 0;
         if ((attrs.flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0) {
-            attrs.subtreeSystemUiVisibility |= View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
+            impliedFlags |= View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
         }
         final boolean forceWindowDrawsStatusBarBackground =
                 (attrs.privateFlags & PRIVATE_FLAG_FORCE_DRAW_STATUS_BAR_BACKGROUND) != 0;
         if ((attrs.flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0
                 || forceWindowDrawsStatusBarBackground
                         && attrs.height == MATCH_PARENT && attrs.width == MATCH_PARENT) {
-            attrs.subtreeSystemUiVisibility |= View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
+            impliedFlags |= View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
         }
+        return impliedFlags;
     }
 
     void readLidState() {
@@ -2724,7 +2730,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     @Override
     public void onConfigurationChanged() {
         // TODO(multi-display): Define policy for secondary displays.
-        Context uiContext = ActivityThread.currentActivityThread().getSystemUiContext();
+        Context uiContext = getSystemUiContext();
         final Resources res = uiContext.getResources();
 
         mStatusBarHeight =
@@ -2763,6 +2769,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     res.getDimensionPixelSize(
                             com.android.internal.R.dimen.navigation_bar_width_car_mode);
         }
+    }
+
+    @VisibleForTesting
+    Context getSystemUiContext() {
+        return ActivityThread.currentActivityThread().getSystemUiContext();
     }
 
     @Override
@@ -4825,7 +4836,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         final int fl = PolicyControl.getWindowFlags(win, attrs);
         final int pfl = attrs.privateFlags;
         final int sim = attrs.softInputMode;
-        final int sysUiFl = PolicyControl.getSystemUiVisibility(win, null);
+        final int requestedSysUiFl = PolicyControl.getSystemUiVisibility(win, null);
+        final int sysUiFl = requestedSysUiFl | getImpliedSysUiFlagsForLayout(attrs);
 
         final Rect pf = mTmpParentFrame;
         final Rect df = mTmpDisplayFrame;

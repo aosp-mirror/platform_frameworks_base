@@ -213,7 +213,7 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
          */
         public void computeFrameLw(Rect parentFrame, Rect displayFrame,
                 Rect overlayFrame, Rect contentFrame, Rect visibleFrame, Rect decorFrame,
-                Rect stableFrame, Rect outsetFrame);
+                Rect stableFrame, @Nullable Rect outsetFrame);
 
         /**
          * Retrieve the current frame of the window that has been assigned by

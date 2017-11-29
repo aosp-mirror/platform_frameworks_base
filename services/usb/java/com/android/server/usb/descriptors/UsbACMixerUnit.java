@@ -24,7 +24,7 @@ public class UsbACMixerUnit extends UsbACInterface {
                                     // are connected.
     protected byte mNumOutputs;     // The number of output channels
 
-    public UsbACMixerUnit(int length, byte type, byte subtype, byte subClass) {
+    public UsbACMixerUnit(int length, byte type, byte subtype, int subClass) {
         super(length, type, subtype, subClass);
     }
 

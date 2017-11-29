@@ -101,8 +101,12 @@ class LaunchingBoundsController {
      * @return {@code true} if bounds were set on the task. {@code false} otherwise.
      */
     boolean layoutTask(TaskRecord task, WindowLayout layout) {
-        calculateBounds(task, layout, null /*activity*/, null /*source*/, null /*options*/,
-                mTmpRect);
+        return layoutTask(task, layout, null /*activity*/, null /*source*/, null /*options*/);
+    }
+
+    boolean layoutTask(TaskRecord task, WindowLayout layout, ActivityRecord activity,
+            ActivityRecord source, ActivityOptions options) {
+        calculateBounds(task, layout, activity, source, options, mTmpRect);
 
         if (mTmpRect.isEmpty()) {
             return false;

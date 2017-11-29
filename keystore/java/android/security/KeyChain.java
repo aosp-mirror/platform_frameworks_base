@@ -40,6 +40,7 @@ import android.security.keystore.KeyProperties;
 
 import java.io.ByteArrayInputStream;
 import java.io.Closeable;
+import java.security.KeyPair;
 import java.security.Principal;
 import java.security.PrivateKey;
 import java.security.UnrecoverableKeyException;
@@ -418,6 +419,18 @@ public final class KeyChain {
     @Nullable @WorkerThread
     public static PrivateKey getPrivateKey(@NonNull Context context, @NonNull String alias)
             throws KeyChainException, InterruptedException {
+        KeyPair keyPair = getKeyPair(context, alias);
+        if (keyPair != null) {
+            return keyPair.getPrivate();
+        }
+
+        return null;
+    }
+
+    /** @hide */
+    @Nullable @WorkerThread
+    public static KeyPair getKeyPair(@NonNull Context context, @NonNull String alias)
+            throws KeyChainException, InterruptedException {
         if (alias == null) {
             throw new NullPointerException("alias == null");
         }
@@ -439,7 +452,7 @@ public final class KeyChain {
             return null;
         } else {
             try {
-                return AndroidKeyStoreProvider.loadAndroidKeyStorePrivateKeyFromKeystore(
+                return AndroidKeyStoreProvider.loadAndroidKeyStoreKeyPairFromKeystore(
                         KeyStore.getInstance(), keyId, KeyStore.UID_SELF);
             } catch (RuntimeException | UnrecoverableKeyException e) {
                 throw new KeyChainException(e);

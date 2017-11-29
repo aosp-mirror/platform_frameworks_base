@@ -31,7 +31,7 @@ public abstract class UsbACHeaderInterface extends UsbACInterface {
                                 // of this descriptor header and all Unit and Terminal descriptors.
 
     public UsbACHeaderInterface(
-            int length, byte type, byte subtype, byte subclass, int adcRelease) {
+            int length, byte type, byte subtype, int subclass, int adcRelease) {
         super(length, type, subtype, subclass);
         mADCRelease = adcRelease;
     }

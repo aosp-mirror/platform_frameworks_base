@@ -22,6 +22,7 @@ import android.os.Parcelable;
 import android.util.Slog;
 
 import java.io.IOException;
+import java.util.Objects;
 
 /**
  * System private API for passing profiler settings.
@@ -131,5 +132,33 @@ public class ProfilerInfo implements Parcelable {
         autoStopProfiler = in.readInt() != 0;
         streamingOutput = in.readInt() != 0;
         agent = in.readString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final ProfilerInfo other = (ProfilerInfo) o;
+        // TODO: Also check #profileFd for equality.
+        return Objects.equals(profileFile, other.profileFile)
+                && autoStopProfiler == other.autoStopProfiler
+                && samplingInterval == other.samplingInterval
+                && streamingOutput == other.streamingOutput
+                && Objects.equals(agent, other.agent);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = 17;
+        result = 31 * result + Objects.hashCode(profileFile);
+        result = 31 * result + samplingInterval;
+        result = 31 * result + (autoStopProfiler ? 1 : 0);
+        result = 31 * result + (streamingOutput ? 1 : 0);
+        result = 31 * result + Objects.hashCode(agent);
+        return result;
     }
 }

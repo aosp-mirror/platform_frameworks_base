@@ -2852,9 +2852,12 @@
       <public name="compileSdkVersion" />
       <!-- @hide For use by platform and tools only. Developers should not specify this value. -->
       <public name="compileSdkVersionCodename" />
+      <public name="screenReaderFocusable" />
     </public-group>
 
     <public-group type="style" first-id="0x010302e0">
+      <public name="Widget.DeviceDefault.Button.Colored" />
+      <public name="Widget.DeviceDefault.Button.Borderless.Colored" />
     </public-group>
 
     <public-group type="id" first-id="0x01020044">

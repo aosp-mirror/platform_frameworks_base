@@ -246,6 +246,7 @@ import android.app.admin.DevicePolicyManager;
 import android.app.assist.AssistContent;
 import android.app.assist.AssistStructure;
 import android.app.backup.IBackupManager;
+import android.app.servertransaction.ConfigurationChangeItem;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageStatsManagerInternal;
 import android.appwidget.AppWidgetManager;
@@ -317,6 +318,7 @@ import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.os.PowerManager;
+import android.os.PowerManager.ServiceType;
 import android.os.PowerManagerInternal;
 import android.os.Process;
 import android.os.RemoteCallbackList;
@@ -630,6 +632,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     private final KeyguardController mKeyguardController;
 
     final ActivityStarter mActivityStarter;
+
+    final ClientLifecycleManager mLifecycleManager;
 
     final TaskChangeNotificationController mTaskChangeNotificationController;
 
@@ -1778,6 +1782,11 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     final boolean mPermissionReviewRequired;
 
+    /**
+     * Whether to force background check on all apps (for battery saver) or not.
+     */
+    boolean mForceBackgroundCheck;
+
     private static String sTheRealBuildSerial = Build.UNKNOWN;
 
     /**
@@ -2693,6 +2702,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mUserController = null;
         mVrController = null;
         mLockTaskController = null;
+        mLifecycleManager = null;
     }
 
     // Note: This method is invoked on the main thread but may need to attach various
@@ -2795,6 +2805,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mRecentTasks = createRecentTasks();
         mStackSupervisor.setRecentTasks(mRecentTasks);
         mLockTaskController = new LockTaskController(mContext, mStackSupervisor, mHandler);
+        mLifecycleManager = new ClientLifecycleManager();
 
         mProcessCpuThread = new Thread("CpuTracker") {
             @Override
@@ -5128,7 +5139,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     // because we don't support returning them across task boundaries. Also, to
                     // keep backwards compatibility we remove the task from recents when finishing
                     // task with root activity.
-                    res = mStackSupervisor.removeTaskByIdLocked(tr.taskId, false, finishWithRootActivity);
+                    res = mStackSupervisor.removeTaskByIdLocked(tr.taskId, false,
+                            finishWithRootActivity, "finish-activity");
                     if (!res) {
                         Slog.i(TAG, "Removing task failed to finish activity");
                     }
@@ -8614,6 +8626,16 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
         switch (appop) {
             case AppOpsManager.MODE_ALLOWED:
+                // If force-background-check is enabled, restrict all apps that aren't whitelisted.
+                if (mForceBackgroundCheck &&
+                        UserHandle.isApp(uid) &&
+                        !isOnDeviceIdleWhitelistLocked(uid)) {
+                    if (DEBUG_BACKGROUND_CHECK) {
+                        Slog.i(TAG, "Force background check: " +
+                                uid + "/" + packageName + " restricted");
+                    }
+                    return ActivityManager.APP_START_MODE_DELAYED;
+                }
                 return ActivityManager.APP_START_MODE_NORMAL;
             case AppOpsManager.MODE_IGNORED:
                 return ActivityManager.APP_START_MODE_DELAYED;
@@ -8713,6 +8735,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         return ActivityManager.APP_START_MODE_NORMAL;
     }
 
+    /**
+     * @return whether a UID is in the system, user or temp doze whitelist.
+     */
     boolean isOnDeviceIdleWhitelistLocked(int uid) {
         final int appId = UserHandle.getAppId(uid);
         return Arrays.binarySearch(mDeviceIdleWhitelist, appId) >= 0
@@ -10306,7 +10331,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         synchronized (this) {
             final long ident = Binder.clearCallingIdentity();
             try {
-                return mStackSupervisor.removeTaskByIdLocked(taskId, true, REMOVE_FROM_RECENTS);
+                return mStackSupervisor.removeTaskByIdLocked(taskId, true, REMOVE_FROM_RECENTS,
+                        "remove-task");
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -14169,6 +14195,16 @@ public class ActivityManagerService extends IActivityManager.Stub
             readGrantedUriPermissionsLocked();
         }
 
+        final PowerManagerInternal pmi = LocalServices.getService(PowerManagerInternal.class);
+        if (pmi != null) {
+            pmi.registerLowPowerModeObserver(ServiceType.FORCE_BACKGROUND_CHECK,
+                    state -> updateForceBackgroundCheck(state.batterySaverEnabled));
+            updateForceBackgroundCheck(
+                    pmi.getLowPowerState(ServiceType.FORCE_BACKGROUND_CHECK).batterySaverEnabled);
+        } else {
+            Slog.wtf(TAG, "PowerManagerInternal not found.");
+        }
+
         if (goingCallback != null) goingCallback.run();
         traceLog.traceBegin("ActivityManagerStartApps");
         mBatteryStatsService.noteEvent(BatteryStats.HistoryItem.EVENT_USER_RUNNING_START,
@@ -14264,6 +14300,23 @@ public class ActivityManagerService extends IActivityManager.Stub
 
             traceLog.traceEnd(); // ActivityManagerStartApps
             traceLog.traceEnd(); // PhaseActivityManagerReady
+        }
+    }
+
+    private void updateForceBackgroundCheck(boolean enabled) {
+        synchronized (this) {
+            if (mForceBackgroundCheck != enabled) {
+                mForceBackgroundCheck = enabled;
+
+                if (DEBUG_BACKGROUND_CHECK) {
+                    Slog.i(TAG, "Force background check " + (enabled ? "enabled" : "disabled"));
+                }
+
+                if (mForceBackgroundCheck) {
+                    // Stop background services for idle UIDs.
+                    doStopUidForIdleUidsLocked();
+                }
+            }
         }
     }
 
@@ -15618,7 +15671,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     void dumpProcessesLocked(FileDescriptor fd, PrintWriter pw, String[] args,
             int opti, boolean dumpAll, String dumpPackage, int dumpAppId) {
         boolean needSep = false;
-        boolean printedAnything = false;
         int numPers = 0;
 
         pw.println("ACTIVITY MANAGER RUNNING PROCESSES (dumpsys activity processes)");
@@ -15636,7 +15688,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                     if (!needSep) {
                         pw.println("  All known processes:");
                         needSep = true;
-                        printedAnything = true;
                     }
                     pw.print(r.persistent ? "  *PERS*" : "  *APP*");
                         pw.print(" UID "); pw.print(procs.keyAt(ia));
@@ -15661,7 +15712,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                         pw.println();
                     }
                     pw.println("  Isolated process list (sorted by uid):");
-                    printedAnything = true;
                     printed = true;
                     needSep = true;
                 }
@@ -15683,7 +15733,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                         pw.println();
                     }
                     pw.println("  Active instrumentation:");
-                    printedAnything = true;
                     printed = true;
                     needSep = true;
                 }
@@ -15695,14 +15744,14 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         if (mActiveUids.size() > 0) {
             if (dumpUids(pw, dumpPackage, dumpAppId, mActiveUids, "UID states:", needSep)) {
-                printedAnything = needSep = true;
+                needSep = true;
             }
         }
         if (dumpAll) {
             if (mValidateUids.size() > 0) {
                 if (dumpUids(pw, dumpPackage, dumpAppId, mValidateUids, "UID validation:",
                         needSep)) {
-                    printedAnything = needSep = true;
+                    needSep = true;
                 }
             }
         }
@@ -15719,7 +15768,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                     pw.println("):");
             dumpProcessOomList(pw, this, mLruProcesses, "    ", "Proc", "PERS", false, dumpPackage);
             needSep = true;
-            printedAnything = true;
         }
 
         if (dumpAll || dumpPackage != null) {
@@ -15735,7 +15783,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                         needSep = true;
                         pw.println("  PID mappings:");
                         printed = true;
-                        printedAnything = true;
                     }
                     pw.print("    PID #"); pw.print(mPidsSelfLocked.keyAt(i));
                         pw.print(": "); pw.println(mPidsSelfLocked.valueAt(i));
@@ -15758,7 +15805,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                         needSep = true;
                         pw.println("  Foreground Processes:");
                         printed = true;
-                        printedAnything = true;
                     }
                     pw.print("    PID #"); pw.print(mImportantProcesses.keyAt(i));
                             pw.print(": "); pw.println(mImportantProcesses.valueAt(i));
@@ -15769,7 +15815,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (mPersistentStartingProcesses.size() > 0) {
             if (needSep) pw.println();
             needSep = true;
-            printedAnything = true;
             pw.println("  Persisent processes that are starting:");
             dumpProcessList(pw, this, mPersistentStartingProcesses, "    ",
                     "Starting Norm", "Restarting PERS", dumpPackage);
@@ -15778,7 +15823,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (mRemovedProcesses.size() > 0) {
             if (needSep) pw.println();
             needSep = true;
-            printedAnything = true;
             pw.println("  Processes that are being removed:");
             dumpProcessList(pw, this, mRemovedProcesses, "    ",
                     "Removed Norm", "Removed PERS", dumpPackage);
@@ -15787,7 +15831,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (mProcessesOnHold.size() > 0) {
             if (needSep) pw.println();
             needSep = true;
-            printedAnything = true;
             pw.println("  Processes that are on old until the system is ready:");
             dumpProcessList(pw, this, mProcessesOnHold, "    ",
                     "OnHold Norm", "OnHold PERS", dumpPackage);
@@ -15796,9 +15839,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         needSep = dumpProcessesToGc(fd, pw, args, opti, needSep, dumpAll, dumpPackage);
 
         needSep = mAppErrors.dumpLocked(fd, pw, needSep, dumpPackage);
-        if (needSep) {
-            printedAnything = true;
-        }
 
         if (dumpPackage == null) {
             pw.println();
@@ -16070,10 +16110,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         pw.println();
             }
         }
-
-        if (!printedAnything) {
-            pw.println("  (nothing)");
-        }
+        pw.println("  mForceBackgroundCheck=" + mForceBackgroundCheck);
     }
 
     boolean dumpProcessesToGc(FileDescriptor fd, PrintWriter pw, String[] args,
@@ -20562,9 +20599,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (app.thread != null) {
                     if (DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION, "Sending to proc "
                             + app.processName + " new config " + configCopy);
-                    app.thread.scheduleConfigurationChanged(configCopy);
+                    mLifecycleManager.scheduleTransaction(app.thread,
+                            new ConfigurationChangeItem(configCopy));
                 }
             } catch (Exception e) {
+                Slog.e(TAG_CONFIGURATION, "Failed to schedule configuration change", e);
             }
         }
 
@@ -23332,6 +23371,24 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
+    /**
+     * Call {@link #doStopUidLocked} (which will also stop background services) for all idle UIDs.
+     */
+    void doStopUidForIdleUidsLocked() {
+        final int size = mActiveUids.size();
+        for (int i = 0; i < size; i++) {
+            final int uid = mActiveUids.keyAt(i);
+            if (!UserHandle.isApp(uid)) {
+                continue;
+            }
+            final UidRecord uidRec = mActiveUids.valueAt(i);
+            if (!uidRec.idle) {
+                continue;
+            }
+            doStopUidLocked(uidRec.uid, uidRec);
+        }
+    }
+
     final void doStopUidLocked(int uid, final UidRecord uidRec) {
         mServices.stopInBackgroundLocked(uid);
         enqueueUidChangeLocked(uidRec, uid, UidRecord.CHANGE_IDLE);
@@ -24329,6 +24386,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                 }
             }
+        }
+
+        @Override
+        public boolean isRuntimeRestarted() {
+            return mSystemServiceManager.isRuntimeRestarted();
         }
     }
 

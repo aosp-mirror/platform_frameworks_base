@@ -18,12 +18,12 @@ package com.android.server.wm;
 
 import static com.android.server.wm.TaskSnapshotPersister.DISABLE_FULL_SIZED_BITMAPS;
 import static com.android.server.wm.TaskSnapshotPersister.REDUCED_SCALE;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_SCREENSHOT;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.annotation.Nullable;
 import android.app.ActivityManager;
-import android.app.ActivityManager.StackId;
 import android.app.ActivityManager.TaskSnapshot;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -35,6 +35,7 @@ import android.util.ArraySet;
 import android.util.Slog;
 import android.view.DisplayListCanvas;
 import android.view.RenderNode;
+import android.view.SurfaceControl;
 import android.view.ThreadedRenderer;
 import android.view.WindowManager.LayoutParams;
 
@@ -210,11 +211,28 @@ class TaskSnapshotController {
         if (mainWindow == null) {
             return null;
         }
+        if (!mService.mPolicy.isScreenOn()) {
+            if (DEBUG_SCREENSHOT) {
+                Slog.i(TAG_WM, "Attempted to take screenshot while display was off.");
+            }
+            return null;
+        }
+        if (task.getSurfaceControl() == null) {
+            return null;
+        }
+
         final boolean isLowRamDevice = ActivityManager.isLowRamDeviceStatic();
         final float scaleFraction = isLowRamDevice ? REDUCED_SCALE : 1f;
-        final GraphicBuffer buffer = top.mDisplayContent.screenshotApplicationsToBuffer(top.token,
-                -1, -1, false, scaleFraction, false, true);
+        final Rect taskFrame = new Rect();
+        task.getBounds(taskFrame);
+
+        final GraphicBuffer buffer = SurfaceControl.captureLayers(
+                task.getSurfaceControl().getHandle(), taskFrame, scaleFraction);
+
         if (buffer == null || buffer.getWidth() <= 1 || buffer.getHeight() <= 1) {
+            if (DEBUG_SCREENSHOT) {
+                Slog.w(TAG_WM, "Failed to take screenshot");
+            }
             return null;
         }
         return new TaskSnapshot(buffer, top.getConfiguration().orientation,

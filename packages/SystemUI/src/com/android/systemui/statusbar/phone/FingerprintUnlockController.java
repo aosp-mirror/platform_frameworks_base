@@ -181,9 +181,9 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
     }
 
     private boolean pulsingOrAod() {
-        boolean pulsing = mDozeScrimController.isPulsing();
-        boolean dozingWithScreenOn = mStatusBar.isDozing() && !mStatusBar.isScreenFullyOff();
-        return pulsing || dozingWithScreenOn;
+        final ScrimState scrimState = mScrimController.getState();
+        return scrimState == ScrimState.AOD
+                || scrimState == ScrimState.PULSING;
     }
 
     @Override
@@ -246,15 +246,12 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
                             true /* allowEnterAnimation */);
                 } else if (mMode == MODE_WAKE_AND_UNLOCK){
                     Trace.beginSection("MODE_WAKE_AND_UNLOCK");
-                    mDozeScrimController.abortDoze();
                 } else {
                     Trace.beginSection("MODE_WAKE_AND_UNLOCK_FROM_DREAM");
                     mUpdateMonitor.awakenFromDream();
                 }
                 mStatusBarWindowManager.setStatusBarFocusable(false);
                 mKeyguardViewMediator.onWakeAndUnlocking();
-                mScrimController.setWakeAndUnlocking();
-                mDozeScrimController.setWakeAndUnlocking();
                 if (mStatusBar.getNavigationBarView() != null) {
                     mStatusBar.getNavigationBarView().setWakeAndUnlocking(true);
                 }
@@ -269,6 +266,7 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
     }
 
     private void showBouncer() {
+        mScrimController.transitionTo(ScrimState.BOUNCER);
         mStatusBarKeyguardViewManager.animateCollapsePanels(
                 FINGERPRINT_COLLAPSE_SPEEDUP_FACTOR);
         mPendingShowBouncer = false;

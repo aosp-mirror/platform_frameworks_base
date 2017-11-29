@@ -28,6 +28,7 @@ import com.android.systemui.Dependency.DependencyProvider;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.ScrimView;
+import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.KeyguardBouncer;
 import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.phone.LockIcon;
@@ -86,10 +87,10 @@ public class SystemUIFactory {
 
     public ScrimController createScrimController(LightBarController lightBarController,
             ScrimView scrimBehind, ScrimView scrimInFront, View headsUpScrim,
-            LockscreenWallpaper lockscreenWallpaper,
-            Consumer<Boolean> scrimVisibleListener) {
+            LockscreenWallpaper lockscreenWallpaper, Consumer<Boolean> scrimVisibleListener,
+            DozeParameters dozeParameters) {
         return new ScrimController(lightBarController, scrimBehind, scrimInFront, headsUpScrim,
-                scrimVisibleListener);
+                scrimVisibleListener, dozeParameters);
     }
 
     public NotificationIconAreaController createNotificationIconAreaController(Context context,

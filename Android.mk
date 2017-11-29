@@ -559,6 +559,7 @@ LOCAL_SRC_FILES += \
 	wifi/java/android/net/wifi/p2p/IWifiP2pManager.aidl \
 	wifi/java/android/net/wifi/rtt/IRttCallback.aidl \
 	wifi/java/android/net/wifi/rtt/IWifiRttManager.aidl \
+	wifi/java/android/net/wifi/hotspot2/IProvisioningCallback.aidl \
 	wifi/java/android/net/wifi/IWifiScanner.aidl \
 	wifi/java/android/net/wifi/IRttManager.aidl \
 	packages/services/PacProcessor/com/android/net/IProxyService.aidl \
@@ -914,7 +915,7 @@ packages_to_document := \
 # Search through the base framework dirs for these packages.
 # The result will be relative to frameworks/base.
 fwbase_dirs_to_document := \
-	legacy-test/src \
+	test-base/src \
 	$(patsubst $(LOCAL_PATH)/%,%, \
 	  $(wildcard \
 	    $(foreach dir, $(FRAMEWORKS_BASE_JAVA_SRC_DIRS), \

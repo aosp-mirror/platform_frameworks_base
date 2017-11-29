@@ -20,8 +20,6 @@ import android.app.admin.DnsEvent;
 import android.os.Parcel;
 import android.test.suitebuilder.annotation.SmallTest;
 
-import static junit.framework.Assert.assertEquals;
-
 @SmallTest
 public class NetworkEventTest extends DpmTestBase {
 
@@ -30,6 +28,7 @@ public class NetworkEventTest extends DpmTestBase {
      */
     public void testConnectEventParceling() {
         ConnectEvent event = new ConnectEvent("127.0.0.1", 80, "com.android.whateverdude", 100000);
+        event.setId(5L);
         Parcel p = Parcel.obtain();
         p.writeParcelable(event, 0);
         p.setDataPosition(0);
@@ -39,6 +38,7 @@ public class NetworkEventTest extends DpmTestBase {
         assertEquals(event.getPort(), unparceledEvent.getPort());
         assertEquals(event.getPackageName(), unparceledEvent.getPackageName());
         assertEquals(event.getTimestamp(), unparceledEvent.getTimestamp());
+        assertEquals(event.getId(), unparceledEvent.getId());
     }
 
     /**
@@ -47,6 +47,7 @@ public class NetworkEventTest extends DpmTestBase {
     public void testDnsEventParceling() {
         DnsEvent event = new DnsEvent("d.android.com", new String[]{"192.168.0.1", "127.0.0.1"}, 2,
                 "com.android.whateverdude", 100000);
+        event.setId(5L);
         Parcel p = Parcel.obtain();
         p.writeParcelable(event, 0);
         p.setDataPosition(0);
@@ -59,5 +60,6 @@ public class NetworkEventTest extends DpmTestBase {
                 unparceledEvent.getTotalResolvedAddressCount());
         assertEquals(event.getPackageName(), unparceledEvent.getPackageName());
         assertEquals(event.getTimestamp(), unparceledEvent.getTimestamp());
+        assertEquals(event.getId(), unparceledEvent.getId());
     }
 }

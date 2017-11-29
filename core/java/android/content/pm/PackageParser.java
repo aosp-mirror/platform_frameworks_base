@@ -1258,9 +1258,12 @@ public class PackageParser {
                 }
             }
 
-            pkg.setCodePath(packageDir.getAbsolutePath());
+            pkg.setCodePath(packageDir.getCanonicalPath());
             pkg.setUse32bitAbi(lite.use32bitAbi);
             return pkg;
+        } catch (IOException e) {
+            throw new PackageParserException(INSTALL_PARSE_FAILED_UNEXPECTED_EXCEPTION,
+                    "Failed to get path: " + lite.baseCodePath, e);
         } finally {
             IoUtils.closeQuietly(assetLoader);
         }
@@ -1289,9 +1292,12 @@ public class PackageParser {
 
         try {
             final Package pkg = parseBaseApk(apkFile, assets, flags);
-            pkg.setCodePath(apkFile.getAbsolutePath());
+            pkg.setCodePath(apkFile.getCanonicalPath());
             pkg.setUse32bitAbi(lite.use32bitAbi);
             return pkg;
+        } catch (IOException e) {
+            throw new PackageParserException(INSTALL_PARSE_FAILED_UNEXPECTED_EXCEPTION,
+                    "Failed to get path: " + apkFile, e);
         } finally {
             IoUtils.closeQuietly(assets);
         }

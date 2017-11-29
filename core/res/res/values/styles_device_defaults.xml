@@ -37,6 +37,10 @@ easier.
     <style name="Widget.DeviceDefault.Button.Small" parent="Widget.Material.Button.Small"/>
     <style name="Widget.DeviceDefault.Button.Inset" parent="Widget.Material.Button.Inset"/>
     <style name="Widget.DeviceDefault.Button.Toggle" parent="Widget.Material.Button.Toggle"/>
+    <style name="Widget.DeviceDefault.Button.Colored" parent="Widget.Material.Button.Colored">
+        <item name="textAppearance">?attr/textAppearanceButton</item>
+        <item name="textColor">@color/btn_colored_text_material</item>
+    </style>
     <style name="Widget.DeviceDefault.TextView" parent="Widget.Material.TextView"/>
     <style name="Widget.DeviceDefault.CheckedTextView" parent="Widget.Material.CheckedTextView"/>
     <style name="Widget.DeviceDefault.AutoCompleteTextView" parent="Widget.Material.AutoCompleteTextView"/>
@@ -77,6 +81,15 @@ easier.
     <style name="Widget.DeviceDefault.ActionButton.CloseMode" parent="Widget.Material.ActionButton.CloseMode"/>
     <style name="Widget.DeviceDefault.ActionBar" parent="Widget.Material.ActionBar"/>
     <style name="Widget.DeviceDefault.Button.Borderless" parent="Widget.Material.Button.Borderless"/>
+    <!-- Colored borderless ink button -->
+    <style name="Widget.DeviceDefault.Button.Borderless.Colored">
+        <item name="textAppearance">@style/TextAppearance.DeviceDefault.Widget.Button.Borderless.Colored</item>
+    </style>
+    <!-- Alert dialog button bar button -->
+    <style name="Widget.DeviceDefault.Button.ButtonBar.AlertDialog" parent="Widget.DeviceDefault.Button.Borderless.Colored">
+        <item name="minWidth">@dimen/alert_dialog_button_bar_width</item>
+        <item name="minHeight">@dimen/alert_dialog_button_bar_height</item>
+    </style>
     <style name="Widget.DeviceDefault.Tab" parent="Widget.Material.Tab"/>
     <style name="Widget.DeviceDefault.CalendarView" parent="Widget.Material.CalendarView"/>
     <style name="Widget.DeviceDefault.DatePicker" parent="Widget.Material.DatePicker"/>
@@ -211,7 +224,10 @@ easier.
     <style name="TextAppearance.DeviceDefault.SearchResult.Title" parent="TextAppearance.Material.SearchResult.Title"/>
     <style name="TextAppearance.DeviceDefault.SearchResult.Subtitle" parent="TextAppearance.Material.SearchResult.Subtitle"/>
     <style name="TextAppearance.DeviceDefault.Widget" parent="TextAppearance.Material.Widget"/>
-    <style name="TextAppearance.DeviceDefault.Widget.Button" parent="TextAppearance.Material.Widget.Button"/>
+    <style name="TextAppearance.DeviceDefault.Widget.Button" parent="TextAppearance.Material.Widget.Button">
+        <item name="fontFamily">@string/config_fontFamilyButton</item>
+        <item name="textAllCaps">@bool/config_buttonTextAllCaps</item>
+    </style>
     <style name="TextAppearance.DeviceDefault.Widget.IconMenu.Item" parent="TextAppearance.Material.Widget.IconMenu.Item"/>
     <style name="TextAppearance.DeviceDefault.Widget.TabWidget" parent="TextAppearance.Material.Widget.TabWidget"/>
     <style name="TextAppearance.DeviceDefault.Widget.TextView" parent="TextAppearance.Material.Widget.TextView"/>
@@ -220,6 +236,9 @@ easier.
     <style name="TextAppearance.DeviceDefault.Widget.DropDownItem" parent="TextAppearance.Material.Widget.DropDownItem"/>
     <style name="TextAppearance.DeviceDefault.Widget.TextView.SpinnerItem" parent="TextAppearance.Material.Widget.TextView.SpinnerItem"/>
     <style name="TextAppearance.DeviceDefault.Widget.EditText" parent="TextAppearance.Material.Widget.EditText"/>
+    <style name="TextAppearance.DeviceDefault.Widget.Button.Borderless.Colored" parent="TextAppearance.DeviceDefault.Widget.Button">
+        <item name="textColor">@color/btn_colored_borderless_text_material</item>
+    </style>
     <style name="TextAppearance.DeviceDefault.Widget.PopupMenu" parent="TextAppearance.Material.Widget.PopupMenu"/>
     <style name="TextAppearance.DeviceDefault.Widget.PopupMenu.Large" parent="TextAppearance.Material.Widget.PopupMenu.Large"/>
     <style name="TextAppearance.DeviceDefault.Widget.PopupMenu.Small" parent="TextAppearance.Material.Widget.PopupMenu.Small"/>

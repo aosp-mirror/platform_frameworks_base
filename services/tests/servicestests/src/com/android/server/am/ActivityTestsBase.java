@@ -191,6 +191,7 @@ public class ActivityTestsBase {
         private String mPackage;
         private int mFlags = 0;
         private int mTaskId = 0;
+        private int mUserId = 0;
         private IVoiceInteractionSession mVoiceSession;
 
         private ActivityStack mStack;
@@ -224,6 +225,11 @@ public class ActivityTestsBase {
             return this;
         }
 
+        TaskBuilder setUserId(int userId) {
+            mUserId = userId;
+            return this;
+        }
+
         TaskBuilder setStack(ActivityStack stack) {
             mStack = stack;
             return this;
@@ -245,10 +251,12 @@ public class ActivityTestsBase {
 
             final TaskRecord task = new TaskRecord(mSupervisor.mService, mTaskId, aInfo,
                     intent /*intent*/, mVoiceSession, null /*_voiceInteractor*/);
+            task.userId = mUserId;
             mSupervisor.setFocusStackUnchecked("test", mStack);
             mStack.addTask(task, true, "creating test task");
             task.setStack(mStack);
             task.setWindowContainerController(mock(TaskWindowContainerController.class));
+            task.touchActiveTime();
 
             return task;
         }

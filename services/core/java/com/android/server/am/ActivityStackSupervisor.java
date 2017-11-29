@@ -114,6 +114,7 @@ import android.app.ResultInfo;
 import android.app.WaitResult;
 import android.app.WindowConfiguration.ActivityType;
 import android.app.WindowConfiguration.WindowingMode;
+import android.app.servertransaction.LaunchActivityItem;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -1392,7 +1393,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 r.setLastReportedConfiguration(mergedConfiguration);
 
                 logIfTransactionTooLarge(r.intent, r.icicle);
-                app.thread.scheduleLaunchActivity(new Intent(r.intent), r.appToken,
+                mService.mLifecycleManager.scheduleTransaction(app.thread, r.appToken,
+                        new LaunchActivityItem(new Intent(r.intent),
                         System.identityHashCode(r), r.info,
                         // TODO: Have this take the merged configuration instead of separate global
                         // and override configs.
@@ -1400,7 +1402,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                         mergedConfiguration.getOverrideConfiguration(), r.compat,
                         r.launchedFromPackage, task.voiceInteractor, app.repProcState, r.icicle,
                         r.persistentState, results, newIntents, !andResume,
-                        mService.isNextTransitionForward(), profilerInfo);
+                        mService.isNextTransitionForward(), profilerInfo));
 
                 if ((app.info.privateFlags & ApplicationInfo.PRIVATE_FLAG_CANT_SAVE_STATE) != 0) {
                     // This may be a heavy-weight process!  Note that the package
@@ -2737,7 +2739,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         } else {
             for (int i = tasks.size() - 1; i >= 0; i--) {
                 removeTaskByIdLocked(tasks.get(i).taskId, true /* killProcess */,
-                        REMOVE_FROM_RECENTS);
+                        REMOVE_FROM_RECENTS, "remove-stack");
             }
         }
     }
@@ -2770,8 +2772,10 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     /**
      * See {@link #removeTaskByIdLocked(int, boolean, boolean, boolean)}
      */
-    boolean removeTaskByIdLocked(int taskId, boolean killProcess, boolean removeFromRecents) {
-        return removeTaskByIdLocked(taskId, killProcess, removeFromRecents, !PAUSE_IMMEDIATELY);
+    boolean removeTaskByIdLocked(int taskId, boolean killProcess, boolean removeFromRecents,
+            String reason) {
+        return removeTaskByIdLocked(taskId, killProcess, removeFromRecents, !PAUSE_IMMEDIATELY,
+                reason);
     }
 
     /**
@@ -2785,10 +2789,10 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
      * @return Returns true if the given task was found and removed.
      */
     boolean removeTaskByIdLocked(int taskId, boolean killProcess, boolean removeFromRecents,
-            boolean pauseImmediately) {
+            boolean pauseImmediately, String reason) {
         final TaskRecord tr = anyTaskForIdLocked(taskId, MATCH_TASK_IN_STACKS_OR_RECENT_TASKS);
         if (tr != null) {
-            tr.removeTaskActivitiesLocked(pauseImmediately);
+            tr.removeTaskActivitiesLocked(pauseImmediately, reason);
             cleanUpRemovedTaskLocked(tr, killProcess, removeFromRecents);
             mService.mLockTaskController.clearLockedTask(tr);
             if (tr.isPersistable) {
@@ -2922,7 +2926,12 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
     @Override
     public void onRecentTaskRemoved(TaskRecord task, boolean wasTrimmed) {
-        // TODO: Trim active task once b/68045330 is fixed
+        if (wasTrimmed) {
+            // Task was trimmed from the recent tasks list -- remove the active task record as well
+            // since the user won't really be able to go back to it
+            removeTaskByIdLocked(task.taskId, false /* killProcess */,
+                    false /* removeFromRecents */, !PAUSE_IMMEDIATELY, "recent-task-trimmed");
+        }
         task.removedFromRecents();
     }
 

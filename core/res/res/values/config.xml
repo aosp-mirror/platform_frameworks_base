@@ -1955,7 +1955,7 @@
     <string name="config_dozeLongPressSensorType" translatable="false"></string>
 
     <!-- Control whether the always on display mode is available. This should only be enabled on
-         devices where the display has be tuned to be power efficient in DOZE and/or DOZE_SUSPEND
+         devices where the display has been tuned to be power efficient in DOZE and/or DOZE_SUSPEND
          states. -->
     <bool name="config_dozeAlwaysOnDisplayAvailable">false</bool>
 
@@ -3174,6 +3174,10 @@
 
     <!-- Corner radius of system dialogs -->
     <dimen name="config_dialogCornerRadius">2dp</dimen>
+    <!-- Controls whether system buttons use all caps for text -->
+    <bool name="config_buttonTextAllCaps">true</bool>
+    <!-- Name of the font family used for system buttons -->
+    <string name="config_fontFamilyButton">@string/font_family_button_material</string>
 
     <string translatable="false" name="config_batterySaverDeviceSpecificConfig"></string>
 </resources>

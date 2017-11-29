@@ -16,6 +16,7 @@
 package com.android.server.power.batterysaver;
 
 import android.Manifest;
+import android.app.ActivityManagerInternal;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -109,6 +110,9 @@ public class BatterySaverController implements BatterySaverPolicyListener {
         final IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_ON);
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         mContext.registerReceiver(mReceiver, filter);
+
+        mFileUpdater.systemReady(LocalServices.getService(ActivityManagerInternal.class)
+                .isRuntimeRestarted());
     }
 
     private PowerManager getPowerManager() {

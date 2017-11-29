@@ -2591,7 +2591,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             boolean alreadyDispatchedToNewTouchTarget = false;
             if (!canceled && !intercepted) {
 
-                // If the event is targeting accessiiblity focus we give it to the
+                // If the event is targeting accessibility focus we give it to the
                 // view that has accessibility focus and if it does not handle it
                 // we clear the flag and dispatch the event to all children as usual.
                 // We are looking up the accessibility focused host to avoid keeping

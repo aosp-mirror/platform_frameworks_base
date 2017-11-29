@@ -15,8 +15,9 @@
  */
 package com.android.server.power.batterysaver;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
@@ -26,6 +27,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import android.content.Context;
+import android.hardware.camera2.impl.GetCommand;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.test.InstrumentationRegistry;
@@ -40,6 +42,7 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -71,6 +74,17 @@ public class FileUpdaterTest {
         @Override
         void injectWtf(String message, Throwable e) {
             mInjector.injectWtf(message, e);
+        }
+
+        @Override
+        File injectDefaultValuesFilename() {
+            return new File(InstrumentationRegistry.getContext().getCacheDir() +
+                    "/test-default.xml");
+        }
+
+        @Override
+        boolean injectShouldSkipWrite() {
+            return false;
         }
     }
 
@@ -334,4 +348,57 @@ public class FileUpdaterTest {
         reset(mInjector);
         testMultiWrites();
     }
+
+    @Test
+    public void testWriteReadDefault() throws Exception {
+        doReturn("111").when(mInjector).injectReadFromFileTrimmed("file1");
+        doReturn("222").when(mInjector).injectReadFromFileTrimmed("file2");
+        doReturn("333").when(mInjector).injectReadFromFileTrimmed("file3");
+
+        // Write
+        final ArrayMap<String, String> values = new ArrayMap<>();
+        values.put("file1", "11");
+        values.put("file2", "22");
+        values.put("file3", "33");
+
+        mInstance.writeFiles(values);
+        waitUntilMainHandlerDrain();
+
+        verify(mInjector, times(1)).injectWriteToFile("file1", "11");
+        verify(mInjector, times(1)).injectWriteToFile("file2", "22");
+        verify(mInjector, times(1)).injectWriteToFile("file3", "33");
+
+        // Clear and reload the default.
+        assertEquals(3, mInstance.getDefaultValuesForTest().size());
+        mInstance.getDefaultValuesForTest().clear();
+        assertEquals(0, mInstance.getDefaultValuesForTest().size());
+
+        mInstance.systemReady(/*runtimeRestarted=*/ true);
+
+        assertEquals(3, mInstance.getDefaultValuesForTest().size());
+
+        // Reset to default
+        mInstance.restoreDefault();
+        waitUntilMainHandlerDrain();
+
+        verify(mInjector, times(1)).injectWriteToFile("file1", "111");
+        verify(mInjector, times(1)).injectWriteToFile("file2", "222");
+        verify(mInjector, times(1)).injectWriteToFile("file3", "333");
+
+        // Make sure the default file still exists.
+        assertTrue(mInstance.injectDefaultValuesFilename().exists());
+
+        // Simulate a clean boot.
+        mInstance.getDefaultValuesForTest().clear();
+        assertEquals(0, mInstance.getDefaultValuesForTest().size());
+
+        mInstance.systemReady(/*runtimeRestarted=*/ false);
+
+        // Default is empty, and the file is gone.
+        assertEquals(0, mInstance.getDefaultValuesForTest().size());
+        assertFalse(mInstance.injectDefaultValuesFilename().exists());
+
+        // No WTF should have happened.
+        veriryWtf(0);
+   }
 }

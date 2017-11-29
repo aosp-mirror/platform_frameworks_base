@@ -294,4 +294,9 @@ public abstract class ActivityManagerInternal {
      * @param userId The user it is allowed for.
      */
     public abstract void setAllowAppSwitches(@NonNull String type, int uid, int userId);
+
+    /**
+     * @return true if runtime was restarted, false if it's normal boot
+     */
+    public abstract boolean isRuntimeRestarted();
 }

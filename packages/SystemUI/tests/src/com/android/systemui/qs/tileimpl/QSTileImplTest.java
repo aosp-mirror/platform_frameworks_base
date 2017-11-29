@@ -49,6 +49,7 @@ import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.QSTileHost;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatcher;
@@ -108,6 +109,7 @@ public class QSTileImplTest extends SysuiTestCase {
     }
 
     @Test
+    @Ignore("flaky")
     public void testStaleTimeout() throws InterruptedException {
         when(mTile.getStaleTimeout()).thenReturn(5l);
         clearInvocations(mTile);

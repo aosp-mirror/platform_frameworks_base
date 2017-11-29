@@ -889,7 +889,8 @@ public abstract class WallpaperService extends Service {
                             mFinalStableInsets.set(mDispatchedStableInsets);
                             WindowInsets insets = new WindowInsets(mFinalSystemInsets,
                                     null, mFinalStableInsets,
-                                    getResources().getConfiguration().isScreenRound(), false);
+                                    getResources().getConfiguration().isScreenRound(), false,
+                                    null /* displayCutout */);
                             if (DEBUG) {
                                 Log.v(TAG, "dispatching insets=" + insets);
                             }

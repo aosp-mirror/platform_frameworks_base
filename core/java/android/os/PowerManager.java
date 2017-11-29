@@ -555,6 +555,11 @@ public final class PowerManager {
         int FORCE_ALL_APPS_STANDBY = 11;
 
         /**
+         * Whether to enable background check on all apps or not.
+         */
+        int FORCE_BACKGROUND_CHECK = 12;
+
+        /**
          * Whether to disable non-essential sensors. (e.g. edge sensors.)
          */
         int OPTIONAL_SENSORS = 13;

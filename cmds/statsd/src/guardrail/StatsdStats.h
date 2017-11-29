@@ -18,6 +18,7 @@
 #include "config/ConfigKey.h"
 #include "frameworks/base/cmds/statsd/src/stats_log.pb.h"
 
+#include <gtest/gtest_prod.h>
 #include <mutex>
 #include <string>
 #include <vector>
@@ -63,7 +64,14 @@ public:
     /**
      * Report a config's metrics data has been dropped.
      */
-    void noteDataDrop(const ConfigKey& key);
+    void noteDataDropped(const ConfigKey& key);
+
+    /**
+     * Report metrics data report has been sent.
+     *
+     * The report may be requested via StatsManager API, or through adb cmd.
+     */
+    void noteMetricsReportSent(const ConfigKey& key);
 
     /**
      * Report the size of output tuple of a condition.
@@ -114,14 +122,14 @@ public:
      *
      * [reset]: whether to clear the historical stats after the call.
      */
-    void dumpStats(std::vector<int8_t>* buffer, bool reset);
+    void dumpStats(std::vector<uint8_t>* buffer, bool reset);
 
 private:
     StatsdStats();
 
     mutable std::mutex mLock;
 
-    int32_t mStartTime;
+    int32_t mStartTimeSec;
 
     // The stats about the configs that are still in use.
     std::map<const ConfigKey, StatsdStatsReport_ConfigStats> mConfigStats;
@@ -153,6 +161,12 @@ private:
     void resetInternalLocked();
 
     void addSubStatsToConfig(const ConfigKey& key, StatsdStatsReport_ConfigStats& configStats);
+
+    FRIEND_TEST(StatsdStatsTest, TestValidConfigAdd);
+    FRIEND_TEST(StatsdStatsTest, TestInvalidConfigAdd);
+    FRIEND_TEST(StatsdStatsTest, TestConfigRemove);
+    FRIEND_TEST(StatsdStatsTest, TestSubStats);
+    FRIEND_TEST(StatsdStatsTest, TestAtomLog);
 };
 
 }  // namespace statsd

@@ -26,7 +26,7 @@ LOCAL_SRC_FILES := $(call all-java-files-under, src)
 
 LOCAL_JAVA_LIBRARIES := core-oj core-libart framework legacy-test
 
-LOCAL_JARJAR_RULES := $(LOCAL_PATH)/../legacy-test/jarjar-rules.txt
+LOCAL_JARJAR_RULES := $(LOCAL_PATH)/../test-base/jarjar-rules.txt
 
 LOCAL_MODULE:= repackaged.android.test.mock
 
@@ -129,16 +129,5 @@ update-android-test-mock-api: $(ANDROID_TEST_MOCK_OUTPUT_API_FILE) | $(ACP)
 	$(hide) $(ACP) $(ANDROID_TEST_MOCK_OUTPUT_API_FILE) $(ANDROID_TEST_MOCK_API_FILE)
 	@echo Copying removed.txt
 	$(hide) $(ACP) $(ANDROID_TEST_MOCK_OUTPUT_REMOVED_API_FILE) $(ANDROID_TEST_MOCK_REMOVED_API_FILE)
-
-# Build the android.test.mock.sdk library
-# =======================================
-include $(CLEAR_VARS)
-
-LOCAL_MODULE := android.test.mock.sdk
-LOCAL_SDK_VERSION := current
-
-LOCAL_STATIC_JAVA_LIBRARIES := android.test.mock.stubs
-
-include $(BUILD_STATIC_JAVA_LIBRARY)
 
 endif  # not TARGET_BUILD_APPS not TARGET_BUILD_PDK=true

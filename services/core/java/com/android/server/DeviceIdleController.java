@@ -119,7 +119,6 @@ public class DeviceIdleController extends SystemService
     private PowerManagerInternal mLocalPowerManager;
     private PowerManager mPowerManager;
     private ConnectivityService mConnectivityService;
-    private AlarmManagerService.LocalService mLocalAlarmManager;
     private INetworkPolicyManager mNetworkPolicyManager;
     private SensorManager mSensorManager;
     private Sensor mMotionSensor;
@@ -1435,7 +1434,6 @@ public class DeviceIdleController extends SystemService
                 mGoingIdleWakeLock.setReferenceCounted(true);
                 mConnectivityService = (ConnectivityService)ServiceManager.getService(
                         Context.CONNECTIVITY_SERVICE);
-                mLocalAlarmManager = getLocalService(AlarmManagerService.LocalService.class);
                 mNetworkPolicyManager = INetworkPolicyManager.Stub.asInterface(
                         ServiceManager.getService(Context.NETWORK_POLICY_SERVICE));
                 mNetworkPolicyManagerInternal = getLocalService(NetworkPolicyManagerInternal.class);
@@ -1500,8 +1498,8 @@ public class DeviceIdleController extends SystemService
 
                 mLocalActivityManager.setDeviceIdleWhitelist(mPowerSaveWhitelistAllAppIdArray);
                 mLocalPowerManager.setDeviceIdleWhitelist(mPowerSaveWhitelistAllAppIdArray);
-                mLocalAlarmManager.setDeviceIdleUserWhitelist(mPowerSaveWhitelistUserAppIdArray);
 
+                passWhiteListToForceAppStandbyTrackerLocked();
                 updateInteractivityLocked();
             }
             updateConnectivityState(null);
@@ -2477,13 +2475,7 @@ public class DeviceIdleController extends SystemService
             }
             mLocalPowerManager.setDeviceIdleWhitelist(mPowerSaveWhitelistAllAppIdArray);
         }
-        if (mLocalAlarmManager != null) {
-            if (DEBUG) {
-                Slog.d(TAG, "Setting alarm whitelist to "
-                        + Arrays.toString(mPowerSaveWhitelistUserAppIdArray));
-            }
-            mLocalAlarmManager.setDeviceIdleUserWhitelist(mPowerSaveWhitelistUserAppIdArray);
-        }
+        passWhiteListToForceAppStandbyTrackerLocked();
     }
 
     private void updateTempWhitelistAppIdsLocked(int appId, boolean adding) {
@@ -2509,6 +2501,7 @@ public class DeviceIdleController extends SystemService
             }
             mLocalPowerManager.setDeviceIdleTempWhitelist(mTempWhitelistAppIdArray);
         }
+        passWhiteListToForceAppStandbyTrackerLocked();
     }
 
     private void reportPowerSaveWhitelistChangedLocked() {
@@ -2521,6 +2514,12 @@ public class DeviceIdleController extends SystemService
         Intent intent = new Intent(PowerManager.ACTION_POWER_SAVE_TEMP_WHITELIST_CHANGED);
         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
         getContext().sendBroadcastAsUser(intent, UserHandle.SYSTEM);
+    }
+
+    private void passWhiteListToForceAppStandbyTrackerLocked() {
+        ForceAppStandbyTracker.getInstance(getContext()).setPowerSaveWhitelistAppIds(
+                mPowerSaveWhitelistAllAppIdArray,
+                mTempWhitelistAppIdArray);
     }
 
     void readConfigFileLocked() {

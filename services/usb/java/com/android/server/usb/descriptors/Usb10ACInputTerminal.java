@@ -32,7 +32,7 @@ public final class Usb10ACInputTerminal extends UsbACTerminal {
     private byte mChannelNames;     // 10:1 Unused (0x00)
     private byte mTerminal;         // 11:1 Unused (0x00)
 
-    public Usb10ACInputTerminal(int length, byte type, byte subtype, byte subclass) {
+    public Usb10ACInputTerminal(int length, byte type, byte subtype, int subclass) {
         super(length, type, subtype, subclass);
     }
 

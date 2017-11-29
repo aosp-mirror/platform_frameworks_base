@@ -1311,7 +1311,8 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
      * Completely remove all activities associated with an existing
      * task starting at a specified index.
      */
-    final void performClearTaskAtIndexLocked(int activityNdx, boolean pauseImmediately) {
+    final void performClearTaskAtIndexLocked(int activityNdx, boolean pauseImmediately,
+            String reason) {
         int numActivities = mActivities.size();
         for ( ; activityNdx < numActivities; ++activityNdx) {
             final ActivityRecord r = mActivities.get(activityNdx);
@@ -1325,7 +1326,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
                 --activityNdx;
                 --numActivities;
             } else if (mStack.finishActivityLocked(r, Activity.RESULT_CANCELED, null,
-                    "clear-task-index", false, pauseImmediately)) {
+                    reason, false, pauseImmediately)) {
                 --activityNdx;
                 --numActivities;
             }
@@ -1337,7 +1338,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
      */
     void performClearTaskLocked() {
         mReuseTask = true;
-        performClearTaskAtIndexLocked(0, !PAUSE_IMMEDIATELY);
+        performClearTaskAtIndexLocked(0, !PAUSE_IMMEDIATELY, "clear-task-all");
         mReuseTask = false;
     }
 
@@ -1408,9 +1409,9 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         return null;
     }
 
-    void removeTaskActivitiesLocked(boolean pauseImmediately) {
+    void removeTaskActivitiesLocked(boolean pauseImmediately, String reason) {
         // Just remove the entire task.
-        performClearTaskAtIndexLocked(0, pauseImmediately);
+        performClearTaskAtIndexLocked(0, pauseImmediately, reason);
     }
 
     String lockTaskAuthToString() {
