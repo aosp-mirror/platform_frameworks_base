@@ -250,7 +250,7 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
                 }
                 break;
             case STATE_FACE_UNLOCK:
-                iconRes = com.android.internal.R.drawable.ic_account_circle;
+                iconRes = R.drawable.ic_account_circle;
                 break;
             case STATE_FINGERPRINT:
                 // If screen is off and device asleep, use the draw on animation so the first frame
