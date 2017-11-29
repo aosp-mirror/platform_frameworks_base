@@ -87,12 +87,6 @@ public class StackWindowController
         }
     }
 
-    public boolean isVisible() {
-        synchronized (mWindowMap) {
-            return mContainer != null && mContainer.isVisible();
-        }
-    }
-
     public void reparent(int displayId, Rect outStackBounds, boolean onTop) {
         synchronized (mWindowMap) {
             if (mContainer == null) {

@@ -23,14 +23,12 @@ import static android.view.View.MeasureSpec;
 import static com.android.systemui.statusbar.phone.StatusBar.SYSTEM_DIALOG_REASON_RECENT_APPS;
 
 import android.app.ActivityManager;
-import android.app.ActivityManager.TaskSnapshot;
 import android.app.ActivityOptions;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.GraphicBuffer;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
@@ -89,7 +87,6 @@ import com.android.systemui.shared.recents.view.AppTransitionAnimationSpecsFutur
 import com.android.systemui.shared.recents.view.RecentsTransition;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.stackdivider.DividerView;
-import com.android.systemui.statusbar.phone.NavigationBarGestureHelper;
 import com.android.systemui.statusbar.phone.StatusBar;
 
 import java.util.ArrayList;
@@ -657,13 +654,6 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         // the resize mode already.
         if (ssp.setTaskWindowingModeSplitScreenPrimary(taskId, stackCreateMode, initialBounds)) {
             EventBus.getDefault().send(new DockedTopTaskEvent(dragMode, initialBounds));
-            showRecents(
-                    false /* triggeredFromAltTab */,
-                    dragMode == NavigationBarGestureHelper.DRAG_MODE_RECENTS,
-                    false /* animate */,
-                    true /* launchedWhileDockingTask*/,
-                    false /* fromHome */,
-                    DividerView.INVALID_RECENTS_GROW_TARGET);
         }
     }
 

@@ -501,9 +501,11 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             windowingMode = WINDOWING_MODE_FULLSCREEN;
         }
 
+        final boolean alreadyInSplitScreenMode = display.hasSplitScreenPrimaryStack();
+
         // Take any required action due to us not supporting the preferred windowing mode.
         if (windowingMode != preferredWindowingMode && isActivityTypeStandardOrUndefined()) {
-            if (display.hasSplitScreenPrimaryStack()
+            if (alreadyInSplitScreenMode
                     && (preferredWindowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
                     || preferredWindowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY)) {
                 // Looks like we can't launch in split screen mode, go ahead an dismiss split-screen
@@ -577,7 +579,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 resize(mTmpRect2, null /* tempTaskBounds */, null /* tempTaskInsetBounds */);
             }
         } finally {
-            if (mDisplayId == DEFAULT_DISPLAY
+            if (!alreadyInSplitScreenMode && mDisplayId == DEFAULT_DISPLAY
                     && windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
                 // Make sure recents stack exist when creating a dock stack as it normally needs to
                 // be on the other side of the docked stack and we make visibility decisions based
@@ -1676,12 +1678,6 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             }
         }
         return true;
-    }
-
-    /** Returns true if the stack is currently considered visible. */
-    boolean isVisible() {
-        return mWindowContainerController != null && mWindowContainerController.isVisible()
-                && !mForceHidden;
     }
 
     boolean isTopStackOnDisplay() {
