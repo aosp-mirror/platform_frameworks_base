@@ -1991,7 +1991,6 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         final Rect currentBounds = getOverrideBounds();
 
         mTmpConfig.setTo(getOverrideConfiguration());
-        final boolean oldMatchParentBounds = matchParentBounds();
         final Configuration newConfig = getOverrideConfiguration();
 
         final boolean matchParentBounds = bounds == null || bounds.isEmpty();
@@ -2014,12 +2013,17 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
                     mTmpRect.right != bounds.right, mTmpRect.bottom != bounds.bottom);
         }
         onOverrideConfigurationChanged(newConfig);
+        return !mTmpConfig.equals(newConfig);
+    }
 
-        if (matchParentBounds != oldMatchParentBounds) {
+    @Override
+    public void onConfigurationChanged(Configuration newParentConfig) {
+        final boolean wasInMultiWindowMode = inMultiWindowMode();
+        super.onConfigurationChanged(newParentConfig);
+        if (wasInMultiWindowMode != inMultiWindowMode()) {
             mService.mStackSupervisor.scheduleUpdateMultiWindowMode(this);
         }
-
-        return !mTmpConfig.equals(newConfig);
+        // TODO: Should also take care of Pip mode changes here.
     }
 
     /** Clears passed config and fills it with new override values. */
