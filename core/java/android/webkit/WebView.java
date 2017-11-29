@@ -2758,7 +2758,9 @@ public class WebView extends AbsoluteLayout
      * <p>For example, an HTML form with 2 fields for username and password:
      *
      * <pre class="prettyprint">
+     *    &lt;label&gt;Username:&lt;/label&gt;
      *    &lt;input type="text" name="username" id="user" value="Type your username" autocomplete="username" placeholder="Email or username"&gt;
+     *    &lt;label&gt;Password:&lt;/label&gt;
      *    &lt;input type="password" name="password" id="pass" autocomplete="current-password" placeholder="Password"&gt;
      * </pre>
      *
@@ -2772,6 +2774,7 @@ public class WebView extends AbsoluteLayout
      *     username.setHtmlInfo(username.newHtmlInfoBuilder("input")
      *         .addAttribute("type", "text")
      *         .addAttribute("name", "username")
+     *         .addAttribute("label", "Username:")
      *         .build());
      *     username.setHint("Email or username");
      *     username.setAutofillType(View.AUTOFILL_TYPE_TEXT);
@@ -2785,6 +2788,7 @@ public class WebView extends AbsoluteLayout
      *     password.setHtmlInfo(password.newHtmlInfoBuilder("input")
      *         .addAttribute("type", "password")
      *         .addAttribute("name", "password")
+     *         .addAttribute("label", "Password:")
      *         .build());
      *     password.setHint("Password");
      *     password.setAutofillType(View.AUTOFILL_TYPE_TEXT);
