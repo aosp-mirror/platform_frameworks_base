@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.ims.internal;
+package android.telephony.ims.internal.aidl;
 
 /**
- * See SmsFeature for more information.
+ * See MMTelFeature for more information.
  * {@hide}
  */
-interface ISmsListener {
-    void setSentSmsResult(in int messageRef, in int result);
-    void setSentSmsStatusReport(in int format, in byte[] pdu);
-    void deliverSms(in int format, in byte[] pdu);
+interface IImsSmsListener {
+    void onSendSmsResult(in int messageRef, in int status, in int reason);
+    void onSmsStatusReportReceived(in int messageRef, in String format, in byte[] pdu);
+    void onSmsReceived(in String format, in byte[] pdu);
 }
