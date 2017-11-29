@@ -36,6 +36,7 @@ class ListOfFadedTextAnimation : public TestListViewSceneBase {
         SkPaint textPaint;
         textPaint.setTextSize(dp(20));
         textPaint.setAntiAlias(true);
+        textPaint.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
         TestUtils::drawUtf8ToCanvas(&canvas, "not that long long text", textPaint, dp(10), dp(30));
 
         SkPoint pts[2];

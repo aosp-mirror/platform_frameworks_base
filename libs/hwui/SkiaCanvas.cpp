@@ -738,6 +738,7 @@ void SkiaCanvas::drawGlyphs(ReadGlyphFunc glyphFunc, int count, const SkPaint& p
     // care of all alignment.
     SkPaint paintCopy(paint);
     paintCopy.setTextAlign(SkPaint::kLeft_Align);
+    SkASSERT(paintCopy.getTextEncoding() == SkPaint::kGlyphID_TextEncoding);
 
     SkRect bounds =
             SkRect::MakeLTRB(boundsLeft + x, boundsTop + y, boundsRight + x, boundsBottom + y);
