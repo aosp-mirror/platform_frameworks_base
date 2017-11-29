@@ -27,6 +27,7 @@
     <timezone id="Atlantic/South_Georgia"></timezone>
     <timezone id="Atlantic/Azores"></timezone>
     <timezone id="Atlantic/Cape_Verde"></timezone>
+    <timezone id="Etc/UTC"></timezone>
     <timezone id="Africa/Casablanca"></timezone>
     <timezone id="Europe/London"></timezone>
     <timezone id="Europe/Amsterdam"></timezone>
