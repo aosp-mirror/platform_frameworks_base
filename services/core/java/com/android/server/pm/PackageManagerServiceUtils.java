@@ -571,7 +571,7 @@ public class PackageManagerServiceUtils {
             if (!match) {
                 throw new PackageManagerException(INSTALL_FAILED_UPDATE_INCOMPATIBLE,
                         "Package " + packageName +
-                        " signatures don't match previously installed version; ignoring!");
+                        " signatures do not match previously installed version; ignoring!");
             }
         }
         // Check for shared user signatures
