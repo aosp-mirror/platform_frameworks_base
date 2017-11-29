@@ -210,7 +210,7 @@ class AssetManager2 {
   // are OR'd together with `in_out_flags`.
   // `in_out_config` is populated with the configuration for which the resolved value was defined.
   // `out_last_reference` is populated with the last reference ID before resolving to an actual
-  // value.
+  // value. This is only initialized if the passed in `in_out_value` is a reference.
   // Returns the cookie of the APK the resolved resource was defined in, or kInvalidCookie if
   // it was not found.
   ApkAssetsCookie ResolveReference(ApkAssetsCookie cookie, Res_value* in_out_value,

@@ -427,7 +427,6 @@ ApkAssetsCookie AssetManager2::ResolveReference(ApkAssetsCookie cookie, Res_valu
   ATRACE_CALL();
   constexpr const int kMaxIterations = 20;
 
-  *out_last_reference = 0u;
   for (size_t iteration = 0u; in_out_value->dataType == Res_value::TYPE_REFERENCE &&
                               in_out_value->data != 0u && iteration < kMaxIterations;
        iteration++) {
