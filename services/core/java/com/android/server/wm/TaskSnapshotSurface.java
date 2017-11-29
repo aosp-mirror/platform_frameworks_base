@@ -349,8 +349,9 @@ class TaskSnapshotSurface implements StartingSurface {
 
         // Let's remove all system decorations except the status bar, but only if the task is at the
         // very top of the screen.
+        final boolean isTop = mTaskBounds.top == 0 && mFrame.top == 0;
         rect.inset((int) (insets.left * mSnapshot.getScale()),
-                mTaskBounds.top != 0 ? (int) (insets.top * mSnapshot.getScale()) : 0,
+                isTop ? 0 : (int) (insets.top * mSnapshot.getScale()),
                 (int) (insets.right * mSnapshot.getScale()),
                 (int) (insets.bottom * mSnapshot.getScale()));
         return rect;
