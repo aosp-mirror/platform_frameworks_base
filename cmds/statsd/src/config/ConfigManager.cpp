@@ -102,11 +102,33 @@ void ConfigManager::RemoveConfigs(int uid) {
         // Remove from map
         if (it->first.GetUid() == uid) {
             removed.push_back(it->first);
-            it = mConfigs.erase(it);
             mConfigReceivers.erase(it->first);
+            it = mConfigs.erase(it);
         } else {
             it++;
         }
+    }
+
+    // Remove separately so if they do anything in the callback they can't mess up our iteration.
+    for (auto& key : removed) {
+        // Tell everyone
+        for (auto& listener : mListeners) {
+            listener->OnConfigRemoved(key);
+        }
+    }
+}
+
+void ConfigManager::RemoveAllConfigs() {
+    vector<ConfigKey> removed;
+
+    for (auto it = mConfigs.begin(); it != mConfigs.end();) {
+        // Remove from map
+        removed.push_back(it->first);
+        auto receiverIt = mConfigReceivers.find(it->first);
+        if (receiverIt != mConfigReceivers.end()) {
+            mConfigReceivers.erase(it->first);
+        }
+        it = mConfigs.erase(it);
     }
 
     // Remove separately so if they do anything in the callback they can't mess up our iteration.
