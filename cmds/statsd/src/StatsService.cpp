@@ -290,12 +290,13 @@ void StatsService::print_cmd_help(FILE* out) {
     fprintf(out, "  NAME          The per-uid name to use\n");
     fprintf(out, "\n");
     fprintf(out, "\n");
-    fprintf(out, "usage: adb shell cmd stats dump-report [UID] NAME\n");
+    fprintf(out, "usage: adb shell cmd stats dump-report [UID] NAME [--proto]\n");
     fprintf(out, "  Dump all metric data for a configuration.\n");
     fprintf(out, "  UID           The uid of the configuration. It is only possible to pass\n");
     fprintf(out, "                the UID parameter on eng builds. If UID is omitted the\n");
     fprintf(out, "                calling uid is used.\n");
     fprintf(out, "  NAME          The name of the configuration\n");
+    fprintf(out, "  --proto       Print proto binary.\n");
     fprintf(out, "\n");
     fprintf(out, "\n");
     fprintf(out, "usage: adb shell cmd stats send-broadcast [UID] NAME\n");
@@ -429,10 +430,15 @@ status_t StatsService::cmd_config(FILE* in, FILE* out, FILE* err, Vector<String8
 
 status_t StatsService::cmd_dump_report(FILE* out, FILE* err, const Vector<String8>& args) {
     if (mProcessor != nullptr) {
-        const int argCount = args.size();
+        int argCount = args.size();
         bool good = false;
+        bool proto = false;
         int uid;
         string name;
+        if (!std::strcmp("--proto", args[argCount-1].c_str())) {
+            proto = true;
+            argCount -= 1;
+        }
         if (argCount == 2) {
             // Automatically pick the UID
             uid = IPCThreadState::self()->getCallingUid();
@@ -462,8 +468,14 @@ status_t StatsService::cmd_dump_report(FILE* out, FILE* err, const Vector<String
             vector<uint8_t> data;
             mProcessor->onDumpReport(ConfigKey(uid, name), &data);
             // TODO: print the returned StatsLogReport to file instead of printing to logcat.
-            fprintf(out, "Dump report for Config [%d,%s]\n", uid, name.c_str());
-            fprintf(out, "See the StatsLogReport in logcat...\n");
+            if (proto) {
+                for (size_t i = 0; i < data.size(); i ++) {
+                    fprintf(out, "%c", data[i]);
+                }
+            } else {
+                fprintf(out, "Dump report for Config [%d,%s]\n", uid, name.c_str());
+                fprintf(out, "See the StatsLogReport in logcat...\n");
+            }
             return android::OK;
         } else {
             // If arg parsing failed, print the help text and return an error.
