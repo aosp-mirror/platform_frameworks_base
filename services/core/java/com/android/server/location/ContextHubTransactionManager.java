@@ -119,8 +119,8 @@ import java.util.concurrent.atomic.AtomicInteger;
             }
 
             @Override
-            /* package */ void onTransactionComplete(int result) {
-                if (result == TransactionResult.SUCCESS) {
+            /* package */ void onTransactionComplete(@ContextHubTransaction.Result int result) {
+                if (result == ContextHubTransaction.TRANSACTION_SUCCESS) {
                     // NOTE: The legacy JNI code used to do a query right after a load success
                     // to synchronize the service cache. Instead store the binary that was
                     // requested to load to update the cache later without doing a query.
@@ -130,7 +130,7 @@ import java.util.concurrent.atomic.AtomicInteger;
                 }
                 try {
                     onCompleteCallback.onTransactionComplete(result);
-                    if (result == Result.OK) {
+                    if (result == ContextHubTransaction.TRANSACTION_SUCCESS) {
                         mClientManager.onNanoAppLoaded(contextHubId, nanoAppBinary.getNanoAppId());
                     }
                 } catch (RemoteException e) {
@@ -165,13 +165,13 @@ import java.util.concurrent.atomic.AtomicInteger;
             }
 
             @Override
-            /* package */ void onTransactionComplete(int result) {
-                if (result == TransactionResult.SUCCESS) {
+            /* package */ void onTransactionComplete(@ContextHubTransaction.Result int result) {
+                if (result == ContextHubTransaction.TRANSACTION_SUCCESS) {
                     mNanoAppStateManager.removeNanoAppInstance(contextHubId, nanoAppId);
                 }
                 try {
                     onCompleteCallback.onTransactionComplete(result);
-                    if (result == Result.OK) {
+                    if (result == ContextHubTransaction.TRANSACTION_SUCCESS) {
                         mClientManager.onNanoAppUnloaded(contextHubId, nanoAppId);
                     }
                 } catch (RemoteException e) {
@@ -203,12 +203,13 @@ import java.util.concurrent.atomic.AtomicInteger;
             }
 
             @Override
-            /* package */ void onTransactionComplete(int result) {
+            /* package */ void onTransactionComplete(@ContextHubTransaction.Result int result) {
                 onQueryResponse(result, Collections.emptyList());
             }
 
             @Override
-            /* package */ void onQueryResponse(int result, List<NanoAppState> nanoAppStateList) {
+            /* package */ void onQueryResponse(
+                    @ContextHubTransaction.Result int result, List<NanoAppState> nanoAppStateList) {
                 try {
                     onCompleteCallback.onQueryResponse(result, nanoAppStateList);
                 } catch (RemoteException e) {
@@ -245,7 +246,7 @@ import java.util.concurrent.atomic.AtomicInteger;
      * Handles a transaction response from a Context Hub.
      *
      * @param transactionId the transaction ID of the response
-     * @param result        the result of the transaction
+     * @param result        the result of the transaction as defined by the HAL TransactionResult
      */
     /* package */
     synchronized void onTransactionResponse(int transactionId, int result) {
@@ -260,7 +261,10 @@ import java.util.concurrent.atomic.AtomicInteger;
             return;
         }
 
-        transaction.onTransactionComplete(result);
+        transaction.onTransactionComplete(
+                (result == TransactionResult.SUCCESS) ?
+                        ContextHubTransaction.TRANSACTION_SUCCESS :
+                        ContextHubTransaction.TRANSACTION_FAILED_AT_HUB);
         removeTransactionAndStartNext();
     }
 
@@ -281,7 +285,7 @@ import java.util.concurrent.atomic.AtomicInteger;
             return;
         }
 
-        transaction.onQueryResponse(TransactionResult.SUCCESS, nanoAppStateList);
+        transaction.onQueryResponse(ContextHubTransaction.TRANSACTION_SUCCESS, nanoAppStateList);
         removeTransactionAndStartNext();
     }
 
