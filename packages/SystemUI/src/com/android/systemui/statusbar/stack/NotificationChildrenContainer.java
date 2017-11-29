@@ -1260,4 +1260,17 @@ public class NotificationChildrenContainer extends ViewGroup {
     public boolean isUserLocked() {
         return mUserLocked;
     }
+
+    public void setCurrentBottomRoundness(float currentBottomRoundness) {
+        boolean last = true;
+        for (int i = mChildren.size() - 1; i >= 0; i--) {
+            ExpandableNotificationRow child = mChildren.get(i);
+            if (child.getVisibility() == View.GONE) {
+                continue;
+            }
+            float bottomRoundness = last ? currentBottomRoundness : 0.0f;
+            child.setBottomRoundness(bottomRoundness, isShown() /* animate */);
+            last = false;
+        }
+    }
 }

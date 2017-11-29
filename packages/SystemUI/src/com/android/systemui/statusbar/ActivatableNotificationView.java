@@ -695,6 +695,11 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
                 mBackgroundNormal.getVisibility() == View.VISIBLE ? 1.0f : 0.0f);
     }
 
+    protected void updateBackgroundClipping() {
+        mBackgroundNormal.setBottomAmountClips(!isChildInGroup());
+        mBackgroundDimmed.setBottomAmountClips(!isChildInGroup());
+    }
+
     protected boolean shouldHideBackground() {
         return mDark;
     }
@@ -901,10 +906,43 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         contentView.setAlpha(contentAlpha);
     }
 
+    @Override
+    protected void applyRoundness() {
+        super.applyRoundness();
+        applyBackgroundRoundness(getCurrentBackgroundRadiusTop(),
+                getCurrentBackgroundRadiusBottom());
+    }
+
+    protected void applyBackgroundRoundness(float topRadius, float bottomRadius) {
+        mBackgroundDimmed.setRoundness(topRadius, bottomRadius);
+        mBackgroundNormal.setRoundness(topRadius, bottomRadius);
+    }
+
+    @Override
+    protected void setBackgroundTop(int backgroundTop) {
+        mBackgroundDimmed.setBackgroundTop(backgroundTop);
+        mBackgroundNormal.setBackgroundTop(backgroundTop);
+    }
+
     protected abstract View getContentView();
 
     public int calculateBgColor() {
         return calculateBgColor(true /* withTint */, true /* withOverRide */);
+    }
+
+    @Override
+    public void setCurrentSidePaddings(float currentSidePaddings) {
+        super.setCurrentSidePaddings(currentSidePaddings);
+        mBackgroundNormal.setCurrentSidePaddings(currentSidePaddings);
+        mBackgroundDimmed.setCurrentSidePaddings(currentSidePaddings);
+    }
+
+    @Override
+    protected boolean childNeedsClipping(View child) {
+        if (child instanceof NotificationBackgroundView && isClippingNeeded()) {
+            return true;
+        }
+        return super.childNeedsClipping(child);
     }
 
     /**

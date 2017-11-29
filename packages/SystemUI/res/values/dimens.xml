@@ -72,16 +72,19 @@
     <dimen name="status_bar_connected_device_bt_indicator_size">17dp</dimen>
 
     <!-- Height of a small notification in the status bar-->
-    <dimen name="notification_min_height">92dp</dimen>
+    <dimen name="notification_min_height">100dp</dimen>
 
     <!-- Increased height of a small notification in the status bar -->
-    <dimen name="notification_min_height_increased">132dp</dimen>
+    <dimen name="notification_min_height_increased">140dp</dimen>
 
     <!-- Height of a small notification in the status bar which was used before android N -->
     <dimen name="notification_min_height_legacy">64dp</dimen>
 
+    <!-- Height of a small notification in the status bar which was used before android P -->
+    <dimen name="notification_min_height_before_p">92dp</dimen>
+
     <!-- Height of a large notification in the status bar -->
-    <dimen name="notification_max_height">284dp</dimen>
+    <dimen name="notification_max_height">292dp</dimen>
 
     <!-- Height of an ambient notification on ambient display -->
     <dimen name="notification_ambient_height">400dp</dimen>
@@ -89,11 +92,20 @@
     <!-- Height of a heads up notification in the status bar for legacy custom views -->
     <dimen name="notification_max_heads_up_height_legacy">128dp</dimen>
 
+    <!-- Height of a heads up notification in the status bar for custom views before andoid P -->
+    <dimen name="notification_max_heads_up_height_before_p">148dp</dimen>
+
     <!-- Height of a heads up notification in the status bar -->
-    <dimen name="notification_max_heads_up_height">148dp</dimen>
+    <dimen name="notification_max_heads_up_height">156dp</dimen>
 
     <!-- Height of a heads up notification in the status bar -->
     <dimen name="notification_max_heads_up_height_increased">188dp</dimen>
+
+    <!-- Side padding on the lockscreen on the side of notifications -->
+    <dimen name="notification_lockscreen_side_paddings">8dp</dimen>
+
+    <!-- Additional side padding for custom content if the app doesn't target P yet -->
+    <dimen name="notification_content_custom_view_side_padding">@dimen/notification_lockscreen_side_paddings</dimen>
 
     <!-- Height of a messaging notifications with actions at least. Not that this is an upper bound
          and the notification won't use this much, but is measured with wrap_content -->
@@ -109,7 +121,7 @@
     <dimen name="notification_min_interaction_height">40dp</dimen>
 
     <!-- the padding of the shelf icon container -->
-    <dimen name="shelf_icon_container_padding">13dp</dimen>
+    <dimen name="shelf_icon_container_padding">21dp</dimen>
 
     <!-- The padding of a notification icon on top to the start of the notification. Used for custom
          views where the distance can't be measured -->
@@ -212,6 +224,9 @@
     <!-- The height of the quick settings footer that holds the user switcher, settings icon,
          etc. -->
     <dimen name="qs_footer_height">48dp</dimen>
+
+    <!-- The padding between the notifications and the quick settings container -->
+    <dimen name="qs_notification_keyguard_padding">8dp</dimen>
 
     <!-- Height of the status bar header bar when expanded -->
     <dimen name="status_bar_header_height_expanded">124dp</dimen>
@@ -347,10 +362,6 @@
 
     <!-- Default distance from each snap target that GlowPadView considers a "hit" -->
     <dimen name="glowpadview_inner_radius">15dip</dimen>
-
-    <!-- bottom_stack_peek_amount + notification_min_height
-         + notification_collapse_second_card_padding -->
-    <dimen name="min_stack_height">104dp</dimen>
 
     <!-- Z distance between notifications if they are in the stack -->
     <dimen name="z_distance_between_notifications">0.5dp</dimen>
