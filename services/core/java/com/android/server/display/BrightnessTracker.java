@@ -34,6 +34,7 @@ import android.net.Uri;
 import android.os.BatteryManager;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
@@ -162,7 +163,10 @@ public class BrightnessTracker {
                 UserHandle.USER_CURRENT);
 
         mSensorListener = new SensorListener();
-        mInjector.registerSensorListener(mContext, mSensorListener);
+
+        if (mInjector.isInteractive(mContext)) {
+            mInjector.registerSensorListener(mContext, mSensorListener, mBgHandler);
+        }
 
         mSettingsObserver = new SettingsObserver(mBgHandler);
         mInjector.registerBrightnessObserver(mContentResolver, mSettingsObserver);
@@ -170,6 +174,8 @@ public class BrightnessTracker {
         final IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(Intent.ACTION_SHUTDOWN);
         intentFilter.addAction(Intent.ACTION_BATTERY_CHANGED);
+        intentFilter.addAction(Intent.ACTION_SCREEN_ON);
+        intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
         mBroadcastReceiver = new Receiver();
         mInjector.registerReceiver(mContext, mBroadcastReceiver, intentFilter);
 
@@ -584,6 +590,11 @@ public class BrightnessTracker {
                 if (level != -1 && scale != 0) {
                     batteryLevelChanged(level, scale);
                 }
+            } else if (Intent.ACTION_SCREEN_OFF.equals(action)) {
+                mInjector.unregisterSensorListener(mContext, mSensorListener);
+            } else if (Intent.ACTION_SCREEN_ON.equals(action)) {
+                mInjector.registerSensorListener(mContext, mSensorListener,
+                        mInjector.getBackgroundHandler());
             }
         }
     }
@@ -591,11 +602,11 @@ public class BrightnessTracker {
     @VisibleForTesting
     static class Injector {
         public void registerSensorListener(Context context,
-                SensorEventListener sensorListener) {
+                SensorEventListener sensorListener, Handler handler) {
             SensorManager sensorManager = context.getSystemService(SensorManager.class);
             Sensor lightSensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
             sensorManager.registerListener(sensorListener,
-                    lightSensor, SensorManager.SENSOR_DELAY_NORMAL);
+                    lightSensor, SensorManager.SENSOR_DELAY_NORMAL, handler);
         }
 
         public void unregisterSensorListener(Context context, SensorEventListener sensorListener) {
@@ -674,6 +685,10 @@ public class BrightnessTracker {
 
         public void cancelIdleJob(Context context) {
             BrightnessIdleJob.cancelJob(context);
+        }
+
+        public boolean isInteractive(Context context) {
+            return context.getSystemService(PowerManager.class).isInteractive();
         }
     }
 }
