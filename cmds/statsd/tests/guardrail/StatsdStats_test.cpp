@@ -224,6 +224,48 @@ TEST(StatsdStatsTest, TestAtomLog) {
     EXPECT_TRUE(sensorAtomGood);
 }
 
+TEST(StatsdStatsTest, TestTimestampThreshold) {
+    StatsdStats stats;
+    vector<int32_t> timestamps;
+    for (int i = 0; i < StatsdStats::kMaxTimestampCount; i++) {
+        timestamps.push_back(i);
+    }
+    ConfigKey key(0, "test");
+    stats.noteConfigReceived(key, 2, 3, 4, 5, true);
+
+    for (int i = 0; i < StatsdStats::kMaxTimestampCount; i++) {
+        stats.noteDataDropped(key, timestamps[i]);
+        stats.noteBroadcastSent(key, timestamps[i]);
+        stats.noteMetricsReportSent(key, timestamps[i]);
+    }
+
+    int32_t newTimestamp = 10000;
+
+    // now it should trigger removing oldest timestamp
+    stats.noteDataDropped(key, 10000);
+    stats.noteBroadcastSent(key, 10000);
+    stats.noteMetricsReportSent(key, 10000);
+
+    EXPECT_TRUE(stats.mConfigStats.find(key) != stats.mConfigStats.end());
+    const auto& configStats = stats.mConfigStats[key];
+
+    int maxCount = StatsdStats::kMaxTimestampCount;
+    EXPECT_EQ(maxCount, configStats.broadcast_sent_time_sec_size());
+    EXPECT_EQ(maxCount, configStats.data_drop_time_sec_size());
+    EXPECT_EQ(maxCount, configStats.dump_report_time_sec_size());
+
+    // the oldest timestamp is the second timestamp in history
+    EXPECT_EQ(1, configStats.broadcast_sent_time_sec(0));
+    EXPECT_EQ(1, configStats.broadcast_sent_time_sec(0));
+    EXPECT_EQ(1, configStats.broadcast_sent_time_sec(0));
+
+    // the last timestamp is the newest timestamp.
+    EXPECT_EQ(newTimestamp,
+              configStats.broadcast_sent_time_sec(StatsdStats::kMaxTimestampCount - 1));
+    EXPECT_EQ(newTimestamp, configStats.data_drop_time_sec(StatsdStats::kMaxTimestampCount - 1));
+    EXPECT_EQ(newTimestamp, configStats.dump_report_time_sec(StatsdStats::kMaxTimestampCount - 1));
+}
+
 }  // namespace statsd
 }  // namespace os
 }  // namespace android
