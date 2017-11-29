@@ -216,7 +216,7 @@ public class TileUtilsTest {
         List<DashboardCategory> categoryList = TileUtils.getCategories(
                 mContext, cache, false /* categoryDefinedInManifest */, testAction,
                 TileUtils.SETTING_PKG);
-        assertThat(categoryList.get(0).tiles.get(0).category).isEqualTo(testCategory);
+        assertThat(categoryList.get(0).getTile(0).category).isEqualTo(testCategory);
     }
 
     @Test
