@@ -34,8 +34,6 @@ import dalvik.system.BlockGuard;
 
 import libcore.io.IoUtils;
 
-import com.google.android.collect.Maps;
-
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.BufferedInputStream;
@@ -139,7 +137,7 @@ final class SharedPreferencesImpl implements SharedPreferences {
             Log.w(TAG, "Attempt to read preferences file " + mFile + " without permission");
         }
 
-        Map map = null;
+        Map<String, Object> map = null;
         StructStat stat = null;
         try {
             stat = Os.stat(mFile.getPath());
@@ -148,7 +146,7 @@ final class SharedPreferencesImpl implements SharedPreferences {
                 try {
                     str = new BufferedInputStream(
                             new FileInputStream(mFile), 16*1024);
-                    map = XmlUtils.readMapXml(str);
+                    map = (Map<String, Object>) XmlUtils.readMapXml(str);
                 } catch (Exception e) {
                     Log.w(TAG, "Cannot read " + mFile.getAbsolutePath(), e);
                 } finally {
@@ -214,12 +212,14 @@ final class SharedPreferencesImpl implements SharedPreferences {
         }
     }
 
+    @Override
     public void registerOnSharedPreferenceChangeListener(OnSharedPreferenceChangeListener listener) {
         synchronized(mLock) {
             mListeners.put(listener, CONTENT);
         }
     }
 
+    @Override
     public void unregisterOnSharedPreferenceChangeListener(OnSharedPreferenceChangeListener listener) {
         synchronized(mLock) {
             mListeners.remove(listener);
@@ -241,6 +241,7 @@ final class SharedPreferencesImpl implements SharedPreferences {
         }
     }
 
+    @Override
     public Map<String, ?> getAll() {
         synchronized (mLock) {
             awaitLoadedLocked();
@@ -249,6 +250,7 @@ final class SharedPreferencesImpl implements SharedPreferences {
         }
     }
 
+    @Override
     @Nullable
     public String getString(String key, @Nullable String defValue) {
         synchronized (mLock) {
@@ -258,6 +260,7 @@ final class SharedPreferencesImpl implements SharedPreferences {
         }
     }
 
+    @Override
     @Nullable
     public Set<String> getStringSet(String key, @Nullable Set<String> defValues) {
         synchronized (mLock) {
@@ -267,6 +270,7 @@ final class SharedPreferencesImpl implements SharedPreferences {
         }
     }
 
+    @Override
     public int getInt(String key, int defValue) {
         synchronized (mLock) {
             awaitLoadedLocked();
@@ -274,6 +278,7 @@ final class SharedPreferencesImpl implements SharedPreferences {
             return v != null ? v : defValue;
         }
     }
+    @Override
     public long getLong(String key, long defValue) {
         synchronized (mLock) {
             awaitLoadedLocked();
@@ -281,6 +286,7 @@ final class SharedPreferencesImpl implements SharedPreferences {
             return v != null ? v : defValue;
         }
     }
+    @Override
     public float getFloat(String key, float defValue) {
         synchronized (mLock) {
             awaitLoadedLocked();
@@ -288,6 +294,7 @@ final class SharedPreferencesImpl implements SharedPreferences {
             return v != null ? v : defValue;
         }
     }
+    @Override
     public boolean getBoolean(String key, boolean defValue) {
         synchronized (mLock) {
             awaitLoadedLocked();
@@ -296,6 +303,7 @@ final class SharedPreferencesImpl implements SharedPreferences {
         }
     }
 
+    @Override
     public boolean contains(String key) {
         synchronized (mLock) {
             awaitLoadedLocked();
@@ -303,6 +311,7 @@ final class SharedPreferencesImpl implements SharedPreferences {
         }
     }
 
+    @Override
     public Editor edit() {
         // TODO: remove the need to call awaitLoadedLocked() when
         // requesting an editor.  will require some work on the
@@ -347,71 +356,81 @@ final class SharedPreferencesImpl implements SharedPreferences {
     }
 
     public final class EditorImpl implements Editor {
-        private final Object mLock = new Object();
+        private final Object mEditorLock = new Object();
 
-        @GuardedBy("mLock")
-        private final Map<String, Object> mModified = Maps.newHashMap();
+        @GuardedBy("mEditorLock")
+        private final Map<String, Object> mModified = new HashMap<>();
 
-        @GuardedBy("mLock")
+        @GuardedBy("mEditorLock")
         private boolean mClear = false;
 
+        @Override
         public Editor putString(String key, @Nullable String value) {
-            synchronized (mLock) {
+            synchronized (mEditorLock) {
                 mModified.put(key, value);
                 return this;
             }
         }
+        @Override
         public Editor putStringSet(String key, @Nullable Set<String> values) {
-            synchronized (mLock) {
+            synchronized (mEditorLock) {
                 mModified.put(key,
                         (values == null) ? null : new HashSet<String>(values));
                 return this;
             }
         }
+        @Override
         public Editor putInt(String key, int value) {
-            synchronized (mLock) {
+            synchronized (mEditorLock) {
                 mModified.put(key, value);
                 return this;
             }
         }
+        @Override
         public Editor putLong(String key, long value) {
-            synchronized (mLock) {
+            synchronized (mEditorLock) {
                 mModified.put(key, value);
                 return this;
             }
         }
+        @Override
         public Editor putFloat(String key, float value) {
-            synchronized (mLock) {
+            synchronized (mEditorLock) {
                 mModified.put(key, value);
                 return this;
             }
         }
+        @Override
         public Editor putBoolean(String key, boolean value) {
-            synchronized (mLock) {
+            synchronized (mEditorLock) {
                 mModified.put(key, value);
                 return this;
             }
         }
 
+        @Override
         public Editor remove(String key) {
-            synchronized (mLock) {
+            synchronized (mEditorLock) {
                 mModified.put(key, this);
                 return this;
             }
         }
 
+        @Override
         public Editor clear() {
-            synchronized (mLock) {
+            synchronized (mEditorLock) {
                 mClear = true;
                 return this;
             }
         }
 
+        @Override
         public void apply() {
             final long startTime = System.currentTimeMillis();
 
             final MemoryCommitResult mcr = commitToMemory();
             final Runnable awaitCommit = new Runnable() {
+                    @Override
                     public void run() {
                         try {
                             mcr.writtenToDiskLatch.await();
@@ -429,6 +448,7 @@ final class SharedPreferencesImpl implements SharedPreferences {
             QueuedWork.addFinisher(awaitCommit);
 
             Runnable postWriteRunnable = new Runnable() {
+                    @Override
                     public void run() {
                         awaitCommit.run();
                         QueuedWork.removeFinisher(awaitCommit);
@@ -471,13 +491,13 @@ final class SharedPreferencesImpl implements SharedPreferences {
                     listeners = new HashSet<OnSharedPreferenceChangeListener>(mListeners.keySet());
                 }
 
-                synchronized (mLock) {
+                synchronized (mEditorLock) {
                     boolean changesMade = false;
 
                     if (mClear) {
-                        if (!mMap.isEmpty()) {
+                        if (!mapToWriteToDisk.isEmpty()) {
                             changesMade = true;
-                            mMap.clear();
+                            mapToWriteToDisk.clear();
                         }
                         mClear = false;
                     }
@@ -489,18 +509,18 @@ final class SharedPreferencesImpl implements SharedPreferences {
                         // setting a value to "null" for a given key is specified to be
                         // equivalent to calling remove on that key.
                         if (v == this || v == null) {
-                            if (!mMap.containsKey(k)) {
+                            if (!mapToWriteToDisk.containsKey(k)) {
                                 continue;
                             }
-                            mMap.remove(k);
+                            mapToWriteToDisk.remove(k);
                         } else {
-                            if (mMap.containsKey(k)) {
-                                Object existingValue = mMap.get(k);
+                            if (mapToWriteToDisk.containsKey(k)) {
+                                Object existingValue = mapToWriteToDisk.get(k);
                                 if (existingValue != null && existingValue.equals(v)) {
                                     continue;
                                 }
                             }
-                            mMap.put(k, v);
+                            mapToWriteToDisk.put(k, v);
                         }
 
                         changesMade = true;
@@ -522,6 +542,7 @@ final class SharedPreferencesImpl implements SharedPreferences {
                     mapToWriteToDisk);
         }
 
+        @Override
         public boolean commit() {
             long startTime = 0;
 
@@ -564,11 +585,7 @@ final class SharedPreferencesImpl implements SharedPreferences {
                 }
             } else {
                 // Run this function on the main thread.
-                ActivityThread.sMainThreadHandler.post(new Runnable() {
-                        public void run() {
-                            notifyListeners(mcr);
-                        }
-                    });
+                ActivityThread.sMainThreadHandler.post(() -> notifyListeners(mcr));
             }
         }
     }
@@ -594,6 +611,7 @@ final class SharedPreferencesImpl implements SharedPreferences {
         final boolean isFromSyncCommit = (postWriteRunnable == null);
 
         final Runnable writeToDiskRunnable = new Runnable() {
+                @Override
                 public void run() {
                     synchronized (mWritingToDiskLock) {
                         writeToFile(mcr, isFromSyncCommit);
@@ -646,7 +664,7 @@ final class SharedPreferencesImpl implements SharedPreferences {
         return str;
     }
 
-    // Note: must hold mWritingToDiskLock
+    @GuardedBy("mWritingToDiskLock")
     private void writeToFile(MemoryCommitResult mcr, boolean isFromSyncCommit) {
         long startTime = 0;
         long existsTime = 0;
