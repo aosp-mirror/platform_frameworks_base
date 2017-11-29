@@ -625,9 +625,7 @@ public class PipManager implements BasePipManager {
         @Override
         public void onTaskStackChanged() {
             if (DEBUG) Log.d(TAG, "onTaskStackChanged()");
-            if (!checkCurrentUserId(mContext, DEBUG)) {
-                return;
-            }
+
             if (getState() != STATE_NO_PIP) {
                 boolean hasPip = false;
 
@@ -662,9 +660,7 @@ public class PipManager implements BasePipManager {
         @Override
         public void onActivityPinned(String packageName, int userId, int taskId, int stackId) {
             if (DEBUG) Log.d(TAG, "onActivityPinned()");
-            if (!checkCurrentUserId(mContext, DEBUG)) {
-                return;
-            }
+
             StackInfo stackInfo = getPinnedStackInfo();
             if (stackInfo == null) {
                 Log.w(TAG, "Cannot find pinned stack");
@@ -690,9 +686,7 @@ public class PipManager implements BasePipManager {
         @Override
         public void onPinnedActivityRestartAttempt(boolean clearedTask) {
             if (DEBUG) Log.d(TAG, "onPinnedActivityRestartAttempt()");
-            if (!checkCurrentUserId(mContext, DEBUG)) {
-                return;
-            }
+
             // If PIPed activity is launched again by Launcher or intent, make it fullscreen.
             movePipToFullscreen();
         }
@@ -700,9 +694,7 @@ public class PipManager implements BasePipManager {
         @Override
         public void onPinnedStackAnimationEnded() {
             if (DEBUG) Log.d(TAG, "onPinnedStackAnimationEnded()");
-            if (!checkCurrentUserId(mContext, DEBUG)) {
-                return;
-            }
+
             switch (getState()) {
                 case STATE_PIP_MENU:
                     showPipMenu();
