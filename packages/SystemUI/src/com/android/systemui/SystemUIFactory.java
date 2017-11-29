@@ -109,10 +109,6 @@ public class SystemUIFactory {
         return new QSTileHost(context, statusBar, iconController);
     }
 
-    public <T> T createInstance(Class<T> classType) {
-        return null;
-    }
-
     public void injectDependencies(ArrayMap<Object, DependencyProvider> providers,
             Context context) {
         providers.put(NotificationLockscreenUserManager.class,
