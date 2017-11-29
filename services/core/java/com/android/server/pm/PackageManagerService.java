@@ -8440,8 +8440,8 @@ public class PackageManagerService extends IPackageManager.Stub
             }
             pkg.mExtras = updatedPs;
 
-            throw new PackageManagerException(Log.WARN, "Package " + ps.name + " at "
-                    + pkg.codePath + " ignored: updated version " + ps.versionCode
+            throw new PackageManagerException(Log.WARN, "Package " + pkg.packageName + " at "
+                    + pkg.codePath + " ignored: updated version " + updatedPs.versionCode
                     + " better than this " + pkg.mVersionCode);
         }
 
