@@ -117,36 +117,60 @@ void StatsdStats::noteConfigRemoved(const ConfigKey& key) {
 }
 
 void StatsdStats::noteBroadcastSent(const ConfigKey& key) {
+    noteBroadcastSent(key, time(nullptr));
+}
+
+void StatsdStats::noteBroadcastSent(const ConfigKey& key, int32_t timeSec) {
     lock_guard<std::mutex> lock(mLock);
     auto it = mConfigStats.find(key);
     if (it == mConfigStats.end()) {
         ALOGE("Config key %s not found!", key.ToString().c_str());
         return;
     }
-
-    it->second.add_broadcast_sent_time_sec(time(nullptr));
+    if (it->second.broadcast_sent_time_sec_size() >= kMaxTimestampCount) {
+        auto timestampList = it->second.mutable_broadcast_sent_time_sec();
+        // This is O(N) operation. It shouldn't happen often, and N is only 20.
+        timestampList->erase(timestampList->begin());
+    }
+    it->second.add_broadcast_sent_time_sec(timeSec);
 }
 
 void StatsdStats::noteDataDropped(const ConfigKey& key) {
+    noteDataDropped(key, time(nullptr));
+}
+
+void StatsdStats::noteDataDropped(const ConfigKey& key, int32_t timeSec) {
     lock_guard<std::mutex> lock(mLock);
     auto it = mConfigStats.find(key);
     if (it == mConfigStats.end()) {
         ALOGE("Config key %s not found!", key.ToString().c_str());
         return;
     }
-
-    it->second.add_data_drop_time_sec(time(nullptr));
+    if (it->second.data_drop_time_sec_size() >= kMaxTimestampCount) {
+        auto timestampList = it->second.mutable_data_drop_time_sec();
+        // This is O(N) operation. It shouldn't happen often, and N is only 20.
+        timestampList->erase(timestampList->begin());
+    }
+    it->second.add_data_drop_time_sec(timeSec);
 }
 
 void StatsdStats::noteMetricsReportSent(const ConfigKey& key) {
+    noteMetricsReportSent(key, time(nullptr));
+}
+
+void StatsdStats::noteMetricsReportSent(const ConfigKey& key, int32_t timeSec) {
     lock_guard<std::mutex> lock(mLock);
     auto it = mConfigStats.find(key);
     if (it == mConfigStats.end()) {
         ALOGE("Config key %s not found!", key.ToString().c_str());
         return;
     }
-
-    it->second.add_dump_report_time_sec(time(nullptr));
+    if (it->second.dump_report_time_sec_size() >= kMaxTimestampCount) {
+        auto timestampList = it->second.mutable_dump_report_time_sec();
+        // This is O(N) operation. It shouldn't happen often, and N is only 20.
+        timestampList->erase(timestampList->begin());
+    }
+    it->second.add_dump_report_time_sec(timeSec);
 }
 
 void StatsdStats::noteConditionDimensionSize(const ConfigKey& key, const string& name, int size) {
@@ -201,6 +225,14 @@ void StatsdStats::resetInternalLocked() {
     mMetricsStats.clear();
     std::fill(mPushedAtomStats.begin(), mPushedAtomStats.end(), 0);
     mMatcherStats.clear();
+    for (auto& config : mConfigStats) {
+        config.second.clear_broadcast_sent_time_sec();
+        config.second.clear_data_drop_time_sec();
+        config.second.clear_dump_report_time_sec();
+        config.second.clear_matcher_stats();
+        config.second.clear_condition_stats();
+        config.second.clear_metric_stats();
+    }
 }
 
 void StatsdStats::addSubStatsToConfig(const ConfigKey& key,

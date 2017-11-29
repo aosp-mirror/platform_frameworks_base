@@ -43,6 +43,8 @@ public:
     const static int kMaxMetricCountPerConfig = 300;
     const static int kMaxMatcherCountPerConfig = 500;
 
+    const static int kMaxTimestampCount = 20;
+
     /**
      * Report a new config has been received and report the static stats about the config.
      *
@@ -162,11 +164,18 @@ private:
 
     void addSubStatsToConfig(const ConfigKey& key, StatsdStatsReport_ConfigStats& configStats);
 
+    void noteDataDropped(const ConfigKey& key, int32_t timeSec);
+
+    void noteMetricsReportSent(const ConfigKey& key, int32_t timeSec);
+
+    void noteBroadcastSent(const ConfigKey& key, int32_t timeSec);
+
     FRIEND_TEST(StatsdStatsTest, TestValidConfigAdd);
     FRIEND_TEST(StatsdStatsTest, TestInvalidConfigAdd);
     FRIEND_TEST(StatsdStatsTest, TestConfigRemove);
     FRIEND_TEST(StatsdStatsTest, TestSubStats);
     FRIEND_TEST(StatsdStatsTest, TestAtomLog);
+    FRIEND_TEST(StatsdStatsTest, TestTimestampThreshold);
 };
 
 }  // namespace statsd
