@@ -629,6 +629,11 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
             }
         }
 
+        // TODO factor mLightBarController out of this class
+        if (scrim == mScrimBehind) {
+            mLightBarController.setScrimAlpha(alpha);
+        }
+
         final ScrimView scrimView = scrim instanceof  ScrimView ? (ScrimView) scrim : null;
         final boolean wantsAlphaUpdate = alpha != currentAlpha && alpha != animEndValue;
         final boolean wantsTintUpdate = scrimView != null
