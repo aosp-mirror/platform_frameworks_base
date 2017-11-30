@@ -38,7 +38,6 @@ import com.android.internal.telephony.ITelephony;
 
 /**
  * Manages the radio access network scan requests and callbacks.
- * @hide
  */
 public final class TelephonyScanManager {
 
@@ -55,7 +54,8 @@ public final class TelephonyScanManager {
     public static final int CALLBACK_SCAN_COMPLETE = 3;
 
     /**
-     * The caller of {@link #requestNetworkScan(NetworkScanRequest, NetworkScanCallback)} should
+     * The caller of
+     * {@link TelephonyManager#requestNetworkScan(NetworkScanRequest, NetworkScanCallback)} should
      * implement and provide this callback so that the scan results or errors can be returned.
      */
     public static abstract class NetworkScanCallback {
@@ -75,8 +75,10 @@ public final class TelephonyScanManager {
          *
          * This callback will be called whenever there is any error about the scan, and the scan
          * will be terminated. onComplete() will NOT be called.
+         *
+         * @param error Error code when the scan is failed, as defined in {@link NetworkScan}.
          */
-        public void onError(int error) {}
+        public void onError(@NetworkScan.ScanErrorCode int error) {}
     }
 
     private static class NetworkScanInfo {
