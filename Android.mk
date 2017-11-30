@@ -523,11 +523,13 @@ LOCAL_SRC_FILES += \
 	telephony/java/com/android/ims/internal/IImsService.aidl \
 	telephony/java/com/android/ims/internal/IImsServiceController.aidl \
 	telephony/java/com/android/ims/internal/IImsServiceFeatureCallback.aidl \
+        telephony/java/com/android/ims/internal/IImsSmsFeature.aidl \
 	telephony/java/com/android/ims/internal/IImsStreamMediaSession.aidl \
 	telephony/java/com/android/ims/internal/IImsUt.aidl \
 	telephony/java/com/android/ims/internal/IImsUtListener.aidl \
 	telephony/java/com/android/ims/internal/IImsVideoCallCallback.aidl \
 	telephony/java/com/android/ims/internal/IImsVideoCallProvider.aidl \
+        telephony/java/com/android/ims/internal/ISmsListener.aidl \
         telephony/java/com/android/ims/internal/uce/uceservice/IUceService.aidl \
         telephony/java/com/android/ims/internal/uce/uceservice/IUceListener.aidl \
         telephony/java/com/android/ims/internal/uce/options/IOptionsService.aidl \
