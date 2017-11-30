@@ -13,11 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+#define DEBUG true  // STOPSHIP if true
 #include "Log.h"
 
+#include "guardrail/StatsdStats.h"
 #include "packages/UidMap.h"
 
+#include <android/os/IStatsCompanionService.h>
+#include <binder/IServiceManager.h>
 #include <utils/Errors.h>
 
 using namespace android;
@@ -25,6 +28,11 @@ using namespace android;
 namespace android {
 namespace os {
 namespace statsd {
+
+UidMap::UidMap() : mBytesUsed(0) {
+}
+UidMap::~UidMap() {
+}
 
 bool UidMap::hasApp(int uid, const string& packageName) const {
     lock_guard<mutex> lock(mMutex);
@@ -73,6 +81,10 @@ void UidMap::updateMap(const int64_t& timestamp, const vector<int32_t>& uid,
         t->set_version(int(versionCode[j]));
         t->set_uid(uid[j]);
     }
+    mBytesUsed += snapshot->ByteSize();
+    StatsdStats::getInstance().setCurrentUidMapMemory(mBytesUsed);
+    StatsdStats::getInstance().setUidMapSnapshots(mOutput.snapshots_size());
+    ensureBytesUsedBelowLimit();
 }
 
 void UidMap::updateApp(const String16& app_16, const int32_t& uid, const int32_t& versionCode) {
@@ -96,6 +108,10 @@ void UidMap::updateApp(const int64_t& timestamp, const String16& app_16, const i
     log->set_app(app);
     log->set_uid(uid);
     log->set_version(versionCode);
+    mBytesUsed += log->ByteSize();
+    StatsdStats::getInstance().setCurrentUidMapMemory(mBytesUsed);
+    StatsdStats::getInstance().setUidMapChanges(mOutput.changes_size());
+    ensureBytesUsedBelowLimit();
 
     auto range = mMap.equal_range(int(uid));
     for (auto it = range.first; it != range.second; ++it) {
@@ -103,12 +119,34 @@ void UidMap::updateApp(const int64_t& timestamp, const String16& app_16, const i
             it->second.versionCode = int(versionCode);
             return;
         }
-        ALOGD("updateApp failed to find the app %s with uid %i to update", app.c_str(), uid);
+        VLOG("updateApp failed to find the app %s with uid %i to update", app.c_str(), uid);
         return;
     }
 
     // Otherwise, we need to add an app at this uid.
     mMap.insert(make_pair(uid, AppData(app, int(versionCode))));
+}
+
+void UidMap::ensureBytesUsedBelowLimit() {
+    size_t limit;
+    if (maxBytesOverride <= 0) {
+        limit = StatsdStats::kMaxBytesUsedUidMap;
+    } else {
+        limit = maxBytesOverride;
+    }
+    while (mBytesUsed > limit) {
+        VLOG("Bytes used %zu is above limit %zu, need to delete something", mBytesUsed, limit);
+        if (mOutput.snapshots_size() > 0) {
+            auto snapshots = mOutput.mutable_snapshots();
+            snapshots->erase(snapshots->begin());  // Remove first snapshot.
+            StatsdStats::getInstance().noteUidMapDropped(1, 0);
+        } else if (mOutput.changes_size() > 0) {
+            auto changes = mOutput.mutable_changes();
+            changes->DeleteSubrange(0, 1);
+            StatsdStats::getInstance().noteUidMapDropped(0, 1);
+        }
+        mBytesUsed = mOutput.ByteSize();
+    }
 }
 
 void UidMap::removeApp(const String16& app_16, const int32_t& uid) {
@@ -128,6 +166,10 @@ void UidMap::removeApp(const int64_t& timestamp, const String16& app_16, const i
     log->set_timestamp_nanos(timestamp);
     log->set_app(app);
     log->set_uid(uid);
+    mBytesUsed += log->ByteSize();
+    StatsdStats::getInstance().setCurrentUidMapMemory(mBytesUsed);
+    StatsdStats::getInstance().setUidMapChanges(mOutput.changes_size());
+    ensureBytesUsedBelowLimit();
 
     auto range = mMap.equal_range(int(uid));
     for (auto it = range.first; it != range.second; ++it) {
@@ -136,7 +178,7 @@ void UidMap::removeApp(const int64_t& timestamp, const String16& app_16, const i
             return;
         }
     }
-    ALOGD("removeApp failed to find the app %s with uid %i to remove", app.c_str(), uid);
+    VLOG("removeApp failed to find the app %s with uid %i to remove", app.c_str(), uid);
     return;
 }
 
@@ -177,7 +219,6 @@ int UidMap::getParentUidOrSelf(int uid) {
 
 void UidMap::clearOutput() {
     mOutput.Clear();
-
     // Re-initialize the initial state for the outputs. This results in extra data being uploaded
     // but helps ensure we can re-construct the UID->app name, versionCode mapping in server.
     auto snapshot = mOutput.add_snapshots();
@@ -187,6 +228,12 @@ void UidMap::clearOutput() {
         t->set_version(it.second.versionCode);
         t->set_uid(it.first);
     }
+
+    // Also update the guardrail trackers.
+    StatsdStats::getInstance().setUidMapChanges(0);
+    StatsdStats::getInstance().setUidMapSnapshots(1);
+    mBytesUsed = snapshot->ByteSize();
+    StatsdStats::getInstance().setCurrentUidMapMemory(mBytesUsed);
 }
 
 int64_t UidMap::getMinimumTimestampNs() {
@@ -199,6 +246,10 @@ int64_t UidMap::getMinimumTimestampNs() {
         }
     }
     return m;
+}
+
+size_t UidMap::getBytesUsed() {
+    return mBytesUsed;
 }
 
 UidMapping UidMap::getOutput(const ConfigKey& key) {
@@ -236,6 +287,10 @@ UidMapping UidMap::getOutput(const int64_t& timestamp, const ConfigKey& key) {
             }
         }
     }
+    mBytesUsed = mOutput.ByteSize();  // Compute actual size after potential deletions.
+    StatsdStats::getInstance().setCurrentUidMapMemory(mBytesUsed);
+    StatsdStats::getInstance().setUidMapChanges(mOutput.changes_size());
+    StatsdStats::getInstance().setUidMapSnapshots(mOutput.snapshots_size());
     return ret;
 }
 
@@ -250,6 +305,23 @@ void UidMap::printUidMap(FILE* out) {
 
 void UidMap::OnConfigUpdated(const ConfigKey& key) {
     mLastUpdatePerConfigKey[key] = -1;
+
+    // Ensure there is at least one snapshot available since this configuration also needs to know
+    // what all the uid's represent.
+    if (mOutput.snapshots_size() == 0) {
+        sp<IStatsCompanionService> statsCompanion = nullptr;
+        // Get statscompanion service from service manager
+        const sp<IServiceManager> sm(defaultServiceManager());
+        if (sm != nullptr) {
+            const String16 name("statscompanion");
+            statsCompanion = interface_cast<IStatsCompanionService>(sm->checkService(name));
+            if (statsCompanion == nullptr) {
+                ALOGW("statscompanion service unavailable!");
+                return;
+            }
+            statsCompanion->triggerUidSnapshot();
+        }
+    }
 }
 
 void UidMap::OnConfigRemoved(const ConfigKey& key) {

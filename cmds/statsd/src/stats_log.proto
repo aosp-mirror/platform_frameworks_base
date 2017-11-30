@@ -220,4 +220,13 @@ message StatsdStatsReport {
     }
 
     repeated AtomStats atom_stats = 7;
+
+    message UidMapStats {
+        optional int32 snapshots = 1;
+        optional int32 changes = 2;
+        optional int32 bytes_used = 3;
+        optional int32 dropped_snapshots = 4;
+        optional int32 dropped_changes = 5;
+    }
+    optional UidMapStats uidmap_stats = 8;
 }

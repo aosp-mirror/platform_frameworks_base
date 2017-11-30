@@ -480,7 +480,7 @@ status_t StatsService::cmd_print_stats(FILE* out, const Vector<String8>& args) {
         fprintf(out, "Config %s uses %zu bytes\n", key.ToString().c_str(),
                 mProcessor->GetMetricsSize(key));
     }
-    fprintf(out, "Detailed statsd stats in logcat...");
+    fprintf(out, "Detailed statsd stats in logcat...\n");
     StatsdStats& statsdStats = StatsdStats::getInstance();
     bool reset = false;
     if (args.size() > 1) {

@@ -45,6 +45,10 @@ public:
 
     const static int kMaxTimestampCount = 20;
 
+    // Cap the UID map's memory usage to this. This should be fairly high since the UID information
+    // is critical for understanding the metrics.
+    const static size_t kMaxBytesUsedUidMap = 50 * 1024;
+
     /**
      * Report a new config has been received and report the static stats about the config.
      *
@@ -113,6 +117,18 @@ public:
     void noteAtomLogged(int atomId, int32_t timeSec);
 
     /**
+     * Records the number of snapshot and delta entries that are being dropped from the uid map.
+     */
+    void noteUidMapDropped(int snapshots, int deltas);
+
+    /**
+     * Updates the number of snapshots currently stored in the uid map.
+     */
+    void setUidMapSnapshots(int snapshots);
+    void setUidMapChanges(int changes);
+    void setCurrentUidMapMemory(int bytes);
+
+    /**
      * Reset the historical stats. Including all stats in icebox, and the tracked stats about
      * metrics, matchers, and atoms. The active configs will be kept and StatsdStats will continue
      * to collect stats after reset() has been called.
@@ -132,6 +148,9 @@ private:
     mutable std::mutex mLock;
 
     int32_t mStartTimeSec;
+
+    // Track the number of dropped entries used by the uid map.
+    StatsdStatsReport_UidMapStats mUidMapStats;
 
     // The stats about the configs that are still in use.
     std::map<const ConfigKey, StatsdStatsReport_ConfigStats> mConfigStats;
