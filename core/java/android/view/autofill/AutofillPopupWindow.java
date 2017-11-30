@@ -108,11 +108,12 @@ public class AutofillPopupWindow extends PopupWindow {
         // symmetrically when the dropdown is below and above the anchor.
         final View actualAnchor;
         if (virtualBounds != null) {
+            final int[] mLocationOnScreen = new int[] {virtualBounds.left, virtualBounds.top};
             actualAnchor = new View(anchor.getContext()) {
                 @Override
                 public void getLocationOnScreen(int[] location) {
-                    location[0] = virtualBounds.left;
-                    location[1] = virtualBounds.top;
+                    location[0] = mLocationOnScreen[0];
+                    location[1] = mLocationOnScreen[1];
                 }
 
                 @Override
@@ -178,6 +179,12 @@ public class AutofillPopupWindow extends PopupWindow {
                     virtualBounds.right, virtualBounds.bottom);
             actualAnchor.setScrollX(anchor.getScrollX());
             actualAnchor.setScrollY(anchor.getScrollY());
+
+            anchor.setOnScrollChangeListener((v, scrollX, scrollY, oldScrollX, oldScrollY) -> {
+                mLocationOnScreen[0] = mLocationOnScreen[0] - (scrollX - oldScrollX);
+                mLocationOnScreen[1] = mLocationOnScreen[1] - (scrollY - oldScrollY);
+            });
+            actualAnchor.setWillNotDraw(true);
         } else {
             actualAnchor = anchor;
         }
