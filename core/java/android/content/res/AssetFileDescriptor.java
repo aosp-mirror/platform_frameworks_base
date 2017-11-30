@@ -195,7 +195,7 @@ public class AssetFileDescriptor implements Parcelable, Closeable {
     /**
      * An InputStream you can create on a ParcelFileDescriptor, which will
      * take care of calling {@link ParcelFileDescriptor#close
-     * ParcelFileDescritor.close()} for you when the stream is closed.
+     * ParcelFileDescriptor.close()} for you when the stream is closed.
      */
     public static class AutoCloseInputStream
             extends ParcelFileDescriptor.AutoCloseInputStream {
@@ -282,7 +282,7 @@ public class AssetFileDescriptor implements Parcelable, Closeable {
     /**
      * An OutputStream you can create on a ParcelFileDescriptor, which will
      * take care of calling {@link ParcelFileDescriptor#close
-     * ParcelFileDescritor.close()} for you when the stream is closed.
+     * ParcelFileDescriptor.close()} for you when the stream is closed.
      */
     public static class AutoCloseOutputStream
             extends ParcelFileDescriptor.AutoCloseOutputStream {
