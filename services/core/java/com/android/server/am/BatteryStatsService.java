@@ -932,7 +932,6 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         enforceCallingPermission();
         synchronized (mStats) {
             mStats.noteDeviceIdleModeLocked(mode, activeReason, activeUid);
-            StatsLog.write(StatsLog.DEVICE_IDLE_MODE_STATE_CHANGED, mode);
         }
     }
 
