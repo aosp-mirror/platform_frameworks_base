@@ -126,6 +126,7 @@ import com.google.common.util.concurrent.AbstractFuture;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.MethodRule;
@@ -176,6 +177,7 @@ import java.util.stream.Collectors;
     "com.android.frameworks.servicestests/android.support.test.runner.AndroidJUnitRunner"
  * </code></pre>
  */
+@Ignore
 @RunWith(AndroidJUnit4.class)
 @MediumTest
 public class NetworkPolicyManagerServiceTest {
