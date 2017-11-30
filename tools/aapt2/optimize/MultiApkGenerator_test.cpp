@@ -63,8 +63,8 @@ class MultiApkGeneratorWrapper : public MultiApkGenerator {
   std::unique_ptr<ResourceTable> FilterTable(
       const configuration::Artifact& artifact,
       const configuration::PostProcessingConfiguration& config, const ResourceTable& old_table,
-      FilterChain* pChain) override {
-    return MultiApkGenerator::FilterTable(artifact, config, old_table, pChain);
+      IAaptContext* context, FilterChain* filter_chain) override {
+    return MultiApkGenerator::FilterTable(artifact, config, old_table, context, filter_chain);
   }
 };
 
@@ -128,7 +128,7 @@ TEST_F(MultiApkGeneratorTest, VersionFilterNewerVersion) {
 
   MultiApkGeneratorWrapper generator{&apk, ctx.get()};
   std::unique_ptr<ResourceTable> split =
-      generator.FilterTable(x64, config, *apk.GetResourceTable(), &chain);
+      generator.FilterTable(x64, config, *apk.GetResourceTable(), ctx.get(), &chain);
 
   ResourceTable* new_table = split.get();
   EXPECT_THAT(ValueForConfig(new_table, mdpi_), IsNull());
@@ -169,7 +169,7 @@ TEST_F(MultiApkGeneratorTest, VersionFilterOlderVersion) {
 
   MultiApkGeneratorWrapper generator{&apk, ctx.get()};;
   std::unique_ptr<ResourceTable> split =
-      generator.FilterTable(x64, config, *apk.GetResourceTable(), &chain);
+      generator.FilterTable(x64, config, *apk.GetResourceTable(), ctx.get(), &chain);
 
   ResourceTable* new_table = split.get();
   EXPECT_THAT(ValueForConfig(new_table, mdpi_), IsNull());
@@ -204,7 +204,7 @@ TEST_F(MultiApkGeneratorTest, VersionFilterNoVersion) {
 
   MultiApkGeneratorWrapper generator{&apk, ctx.get()};
   std::unique_ptr<ResourceTable> split =
-      generator.FilterTable(x64, config, *apk.GetResourceTable(), &chain);
+      generator.FilterTable(x64, config, *apk.GetResourceTable(), ctx.get(), &chain);
 
   ResourceTable* new_table = split.get();
   EXPECT_THAT(ValueForConfig(new_table, mdpi_), IsNull());
