@@ -223,6 +223,9 @@ message SystemMessage {
     // Package: com.android.systemui
     NOTE_TV_PIP = 1100;
 
+    // Extreme battery saver notifiaction.
+    NOTE_BATTERY_SAVER_WARNING = 1200;
+
     // Notify the user that open Wi-Fi networks are available.
     // Package: android
     NOTE_NETWORK_AVAILABLE = 17303299;
