@@ -240,6 +240,7 @@ TEST_F(ManifestFixerTest, RenameManifestPackageAndFullyQualifyClasses) {
   std::unique_ptr<xml::XmlResource> doc = VerifyWithOptions(R"EOF(
       <manifest xmlns:android="http://schemas.android.com/apk/res/android"
                 package="android">
+        <uses-split android:name="feature_a" />
         <application android:name=".MainApplication" text="hello">
           <activity android:name=".activity.Start" />
           <receiver android:name="com.google.android.Receiver" />
@@ -248,35 +249,41 @@ TEST_F(ManifestFixerTest, RenameManifestPackageAndFullyQualifyClasses) {
                                                             options);
   ASSERT_NE(nullptr, doc);
 
-  xml::Element* manifestEl = doc->root.get();
-  ASSERT_NE(nullptr, manifestEl);
+  xml::Element* manifest_el = doc->root.get();
+  ASSERT_NE(nullptr, manifest_el);
 
   xml::Attribute* attr = nullptr;
 
-  attr = manifestEl->FindAttribute({}, "package");
+  attr = manifest_el->FindAttribute({}, "package");
   ASSERT_NE(nullptr, attr);
   EXPECT_EQ(std::string("com.android"), attr->value);
 
-  xml::Element* applicationEl = manifestEl->FindChild({}, "application");
-  ASSERT_NE(nullptr, applicationEl);
+  xml::Element* uses_split_el = manifest_el->FindChild({}, "uses-split");
+  ASSERT_NE(nullptr, uses_split_el);
+  attr = uses_split_el->FindAttribute(xml::kSchemaAndroid, "name");
+  ASSERT_NE(nullptr, attr);
+  EXPECT_EQ(std::string("feature_a"), attr->value);
 
-  attr = applicationEl->FindAttribute(xml::kSchemaAndroid, "name");
+  xml::Element* application_el = manifest_el->FindChild({}, "application");
+  ASSERT_NE(nullptr, application_el);
+
+  attr = application_el->FindAttribute(xml::kSchemaAndroid, "name");
   ASSERT_NE(nullptr, attr);
   EXPECT_EQ(std::string("android.MainApplication"), attr->value);
 
-  attr = applicationEl->FindAttribute({}, "text");
+  attr = application_el->FindAttribute({}, "text");
   ASSERT_NE(nullptr, attr);
   EXPECT_EQ(std::string("hello"), attr->value);
 
   xml::Element* el;
-  el = applicationEl->FindChild({}, "activity");
+  el = application_el->FindChild({}, "activity");
   ASSERT_NE(nullptr, el);
 
   attr = el->FindAttribute(xml::kSchemaAndroid, "name");
   ASSERT_NE(nullptr, el);
   EXPECT_EQ(std::string("android.activity.Start"), attr->value);
 
-  el = applicationEl->FindChild({}, "receiver");
+  el = application_el->FindChild({}, "receiver");
   ASSERT_NE(nullptr, el);
 
   attr = el->FindAttribute(xml::kSchemaAndroid, "name");
