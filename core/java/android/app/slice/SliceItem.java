@@ -216,7 +216,7 @@ public final class SliceItem implements Parcelable {
      * @return The slice held by this {@link #FORMAT_ACTION} or {@link #FORMAT_SLICE} SliceItem
      */
     public Slice getSlice() {
-        if (getFormat() == FORMAT_ACTION) {
+        if (FORMAT_ACTION.equals(getFormat())) {
             return ((Pair<PendingIntent, Slice>) mObj).second;
         }
         return (Slice) mObj;

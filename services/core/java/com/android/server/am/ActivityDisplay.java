@@ -399,6 +399,16 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
                 otherStack.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
             }
         } finally {
+            if (mHomeStack != null && !isTopStack(mHomeStack)) {
+                // Whenever split-screen is dismissed we want the home stack directly behind the
+                // currently top stack so it shows up when the top stack is finished.
+                final ActivityStack topStack = getTopStack();
+                // TODO: Would be better to use ActivityDisplay.positionChildAt() for this, however
+                // ActivityDisplay doesn't have a direct controller to WM side yet. We can switch
+                // once we have that.
+                mHomeStack.moveToFront("onSplitScreenModeDismissed");
+                topStack.moveToFront("onSplitScreenModeDismissed");
+            }
             mSupervisor.mWindowManager.continueSurfaceLayout();
         }
     }

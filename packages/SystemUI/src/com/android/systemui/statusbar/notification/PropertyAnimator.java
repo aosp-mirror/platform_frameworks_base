@@ -34,6 +34,19 @@ import com.android.systemui.statusbar.stack.ViewState;
  */
 public class PropertyAnimator {
 
+    public static <T extends View> void setProperty(final T view,
+            AnimatableProperty animatableProperty, float newEndValue,
+            AnimationProperties properties, boolean animated) {
+        int animatorTag = animatableProperty.getAnimatorTag();
+        ValueAnimator previousAnimator = ViewState.getChildTag(view, animatorTag);
+        if (previousAnimator != null || animated) {
+            startAnimation(view, animatableProperty, newEndValue, properties);
+        } else {
+            // no new animation needed, let's just apply the value
+            animatableProperty.getProperty().set(view, newEndValue);
+        }
+    }
+
     public static <T extends View> void startAnimation(final T view,
             AnimatableProperty animatableProperty, float newEndValue,
             AnimationProperties properties) {
@@ -102,10 +115,4 @@ public class PropertyAnimator {
         view.setTag(animationEndTag, newEndValue);
     }
 
-    public interface AnimatableProperty {
-        int getAnimationStartTag();
-        int getAnimationEndTag();
-        int getAnimatorTag();
-        Property getProperty();
-    }
 }

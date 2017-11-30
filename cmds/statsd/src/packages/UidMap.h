@@ -50,15 +50,16 @@ struct AppData {
 // at any given moment. This map must be updated by StatsCompanionService.
 class UidMap : public virtual android::RefBase {
 public:
+    UidMap();
+    ~UidMap();
+
     /*
      * All three inputs must be the same size, and the jth element in each array refers to the same
      * tuple, ie. uid[j] corresponds to packageName[j] with versionCode[j].
      */
-    // TODO: Add safeguards to call clearOutput if there's too much data already stored.
     void updateMap(const vector<int32_t>& uid, const vector<int32_t>& versionCode,
                    const vector<String16>& packageName);
 
-    // TODO: Add safeguards to call clearOutput if there's too much data already stored.
     void updateApp(const String16& packageName, const int32_t& uid, const int32_t& versionCode);
     void removeApp(const String16& packageName, const int32_t& uid);
 
@@ -98,11 +99,13 @@ public:
     // in case we lose a previous upload.
     void clearOutput();
 
+    // Get currently cached value of memory used by UID map.
+    size_t getBytesUsed();
+
 private:
     void updateMap(const int64_t& timestamp, const vector<int32_t>& uid,
                    const vector<int32_t>& versionCode, const vector<String16>& packageName);
 
-    // TODO: Add safeguards to call clearOutput if there's too much data already stored.
     void updateApp(const int64_t& timestamp, const String16& packageName, const int32_t& uid,
                    const int32_t& versionCode);
     void removeApp(const int64_t& timestamp, const String16& packageName, const int32_t& uid);
@@ -135,8 +138,22 @@ private:
     // Returns the minimum value from mConfigKeys.
     int64_t getMinimumTimestampNs();
 
+    // If our current used bytes is above the limit, then we clear out the earliest snapshot. If
+    // there are no more snapshots, then we clear out the earliest delta. We repeat the deletions
+    // until the memory consumed by mOutput is below the specified limit.
+    void ensureBytesUsedBelowLimit();
+
+    // Override used for testing the max memory allowed by uid map. -1 means we use the value
+    // specified in StatsdStats.h with the rest of the guardrails.
+    size_t maxBytesOverride = -1;
+
+    // Cache the size of mOutput;
+    size_t mBytesUsed;
+
     // Allows unit-test to access private methods.
     FRIEND_TEST(UidMapTest, TestClearingOutput);
+    FRIEND_TEST(UidMapTest, TestMemoryComputed);
+    FRIEND_TEST(UidMapTest, TestMemoryGuardrail);
 };
 
 }  // namespace statsd

@@ -16,12 +16,10 @@
 
 package com.android.server.location;
 
-import android.Manifest;
 import android.content.Context;
 import android.hardware.contexthub.V1_0.AsyncEventType;
 import android.hardware.contexthub.V1_0.ContextHub;
 import android.hardware.contexthub.V1_0.ContextHubMsg;
-import android.hardware.contexthub.V1_0.HostEndPoint;
 import android.hardware.contexthub.V1_0.HubAppInfo;
 import android.hardware.contexthub.V1_0.IContexthub;
 import android.hardware.contexthub.V1_0.IContexthubCallback;
@@ -29,13 +27,17 @@ import android.hardware.contexthub.V1_0.Result;
 import android.hardware.contexthub.V1_0.TransactionResult;
 import android.hardware.location.ContextHubInfo;
 import android.hardware.location.ContextHubMessage;
+import android.hardware.location.ContextHubTransaction;
 import android.hardware.location.IContextHubCallback;
+import android.hardware.location.IContextHubClient;
+import android.hardware.location.IContextHubClientCallback;
 import android.hardware.location.IContextHubService;
 import android.hardware.location.IContextHubTransactionCallback;
 import android.hardware.location.NanoApp;
 import android.hardware.location.NanoAppBinary;
 import android.hardware.location.NanoAppFilter;
 import android.hardware.location.NanoAppInstanceInfo;
+import android.hardware.location.NanoAppMessage;
 import android.hardware.location.NanoAppState;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
@@ -49,7 +51,9 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -58,9 +62,6 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class ContextHubService extends IContextHubService.Stub {
     private static final String TAG = "ContextHubService";
-    private static final String HARDWARE_PERMISSION = Manifest.permission.LOCATION_HARDWARE;
-    private static final String ENFORCE_HW_PERMISSION_MESSAGE = "Permission '"
-            + HARDWARE_PERMISSION + "' not granted to access ContextHub Hardware";
 
     /*
      * Constants for the type of transaction that is defined by ContextHubService.
@@ -104,6 +105,12 @@ public class ContextHubService extends IContextHubService.Stub {
     // The manager for transaction queue
     private final ContextHubTransactionManager mTransactionManager;
 
+    // The manager for sending messages to/from clients
+    private final ContextHubClientManager mClientManager;
+
+    // The default client for old API clients
+    private final Map<Integer, IContextHubClient> mDefaultClientMap;
+
     /**
      * Class extending the callback to register with a Context Hub.
      */
@@ -146,20 +153,33 @@ public class ContextHubService extends IContextHubService.Stub {
         mContextHubProxy = getContextHubProxy();
         if (mContextHubProxy == null) {
             mTransactionManager = null;
+            mClientManager = null;
+            mDefaultClientMap = Collections.EMPTY_MAP;
             mContextHubInfo = new ContextHubInfo[0];
             return;
         }
 
-        mTransactionManager = new ContextHubTransactionManager(mContextHubProxy);
+        mClientManager = new ContextHubClientManager(mContext, mContextHubProxy);
+        mTransactionManager = new ContextHubTransactionManager(mContextHubProxy, mClientManager);
 
         List<ContextHub> hubList;
         try {
             hubList = mContextHubProxy.getHubs();
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException while getting Context Hub info");
+            Log.e(TAG, "RemoteException while getting Context Hub info", e);
             hubList = Collections.emptyList();
         }
         mContextHubInfo = ContextHubServiceUtil.createContextHubInfoArray(hubList);
+
+        HashMap<Integer, IContextHubClient> defaultClientMap = new HashMap<>();
+        for (ContextHubInfo contextHubInfo : mContextHubInfo) {
+            int contextHubId = contextHubInfo.getId();
+
+            IContextHubClient client = mClientManager.registerClient(
+                    createDefaultClientCallback(contextHubId), contextHubId);
+            defaultClientMap.put(contextHubId, client);
+        }
+        mDefaultClientMap = Collections.unmodifiableMap(defaultClientMap);
 
         for (ContextHubInfo contextHubInfo : mContextHubInfo) {
             int contextHubId = contextHubInfo.getId();
@@ -168,7 +188,7 @@ public class ContextHubService extends IContextHubService.Stub {
                         contextHubId, new ContextHubServiceCallback(contextHubId));
             } catch (RemoteException e) {
                 Log.e(TAG, "RemoteException while registering service callback for hub (ID = "
-                        + contextHubId + ")");
+                        + contextHubId + ")", e);
             }
         }
 
@@ -185,6 +205,53 @@ public class ContextHubService extends IContextHubService.Stub {
     }
 
     /**
+     * Creates a default client callback for old API clients.
+     *
+     * @param contextHubId the ID of the hub to attach this client to
+     * @return the internal callback interface
+     */
+    private IContextHubClientCallback createDefaultClientCallback(int contextHubId) {
+        return new IContextHubClientCallback.Stub() {
+            @Override
+            public void onMessageFromNanoApp(NanoAppMessage message) {
+                int nanoAppInstanceId =
+                        mNanoAppIdToInstanceMap.containsKey(message.getNanoAppId()) ?
+                        mNanoAppIdToInstanceMap.get(message.getNanoAppId()) : -1;
+
+                onMessageReceiptOldApi(
+                        message.getMessageType(), contextHubId, nanoAppInstanceId,
+                        message.getMessageBody());
+            }
+
+            @Override
+            public void onHubReset() {
+                byte[] data = {TransactionResult.SUCCESS};
+                onMessageReceiptOldApi(MSG_HUB_RESET, contextHubId, OS_APP_INSTANCE, data);
+            }
+
+            @Override
+            public void onNanoAppAborted(long nanoAppId, int abortCode) {
+            }
+
+            @Override
+            public void onNanoAppLoaded(long nanoAppId) {
+            }
+
+            @Override
+            public void onNanoAppUnloaded(long nanoAppId) {
+            }
+
+            @Override
+            public void onNanoAppEnabled(long nanoAppId) {
+            }
+
+            @Override
+            public void onNanoAppDisabled(long nanoAppId) {
+            }
+        };
+    }
+
+    /**
      * @return the IContexthub proxy interface
      */
     private IContexthub getContextHubProxy() {
@@ -192,7 +259,7 @@ public class ContextHubService extends IContextHubService.Stub {
         try {
             proxy = IContexthub.getService(true /* retry */);
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException while attaching to Context Hub HAL proxy");
+            Log.e(TAG, "RemoteException while attaching to Context Hub HAL proxy", e);
         } catch (NoSuchElementException e) {
             Log.i(TAG, "Context Hub HAL service not found");
         }
@@ -204,6 +271,7 @@ public class ContextHubService extends IContextHubService.Stub {
     public int registerCallback(IContextHubCallback callback) throws RemoteException {
         checkPermissions();
         mCallbacksList.register(callback);
+
         Log.d(TAG, "Added callback, total callbacks " +
                 mCallbacksList.getRegisteredCallbackCount());
         return 0;
@@ -292,7 +360,7 @@ public class ContextHubService extends IContextHubService.Stub {
             @Override
             public void onQueryResponse(int result, List<NanoAppState> nanoAppStateList) {
                 byte[] data = {(byte) result};
-                onMessageReceipt(MSG_QUERY_NANO_APPS, contextHubId, OS_APP_INSTANCE, data);
+                onMessageReceiptOldApi(MSG_QUERY_NANO_APPS, contextHubId, OS_APP_INSTANCE, data);
             }
         };
     }
@@ -449,41 +517,37 @@ public class ContextHubService extends IContextHubService.Stub {
             return -1;
         }
         if (msg.getData() == null) {
-            Log.w(TAG, "ContextHubMessage message body cannot be null");
+            Log.e(TAG, "ContextHubMessage message body cannot be null");
+            return -1;
+        }
+        if (!mDefaultClientMap.containsKey(hubHandle)) {
+            Log.e(TAG, "Hub with ID " + hubHandle + " does not exist");
             return -1;
         }
 
-        int result;
+        boolean success = false;
         if (nanoAppHandle == OS_APP_INSTANCE) {
             if (msg.getMsgType() == MSG_QUERY_NANO_APPS) {
-                result = queryNanoAppsInternal(hubHandle);
+                success = (queryNanoAppsInternal(hubHandle) == Result.OK);
             } else {
                 Log.e(TAG, "Invalid OS message params of type " + msg.getMsgType());
-                result = Result.BAD_PARAMS;
             }
         } else {
             NanoAppInstanceInfo info = getNanoAppInstanceInfo(nanoAppHandle);
             if (info != null) {
-                ContextHubMsg hubMessage = new ContextHubMsg();
-                hubMessage.appName = info.getAppId();
-                hubMessage.msgType = msg.getMsgType();
-                hubMessage.hostEndPoint = HostEndPoint.UNSPECIFIED;
-                ContextHubServiceUtil.copyToByteArrayList(msg.getData(), hubMessage.msg);
+                NanoAppMessage message = NanoAppMessage.createMessageToNanoApp(
+                        info.getAppId(), msg.getMsgType(), msg.getData());
 
-                try {
-                    result = mContextHubProxy.sendMessageToHub(hubHandle, hubMessage);
-                } catch (RemoteException e) {
-                    Log.e(TAG, "Failed to send nanoapp message - RemoteException");
-                    result = Result.UNKNOWN_FAILURE;
-                }
+                IContextHubClient client = mDefaultClientMap.get(hubHandle);
+                success = (client.sendMessageToNanoApp(message) ==
+                        ContextHubTransaction.TRANSACTION_SUCCESS);
             } else {
                 Log.e(TAG, "Failed to send nanoapp message - nanoapp with instance ID "
                         + nanoAppHandle + " does not exist.");
-                result = Result.BAD_PARAMS;
             }
         }
 
-        return (result == Result.OK ? 0 : -1);
+        return success ? 0 : -1;
     }
 
     /**
@@ -493,12 +557,7 @@ public class ContextHubService extends IContextHubService.Stub {
      * @param message      the message contents
      */
     private void handleClientMessageCallback(int contextHubId, ContextHubMsg message) {
-        // TODO(b/67734082): Send to new API clients
-        byte[] data = ContextHubServiceUtil.createPrimitiveByteArray(message.msg);
-
-        int nanoAppInstanceId = mNanoAppIdToInstanceMap.containsKey(message.appName) ?
-                mNanoAppIdToInstanceMap.get(message.appName) : -1;
-        onMessageReceipt(message.msgType, contextHubId, nanoAppInstanceId, data);
+        mClientManager.onMessageFromNanoApp(contextHubId, message);
     }
 
     /**
@@ -534,7 +593,7 @@ public class ContextHubService extends IContextHubService.Stub {
         data[0] = (byte) result;
         ByteBuffer.wrap(data, 1, 4).order(ByteOrder.nativeOrder()).putInt(instanceId);
 
-        onMessageReceipt(MSG_LOAD_NANO_APP, contextHubId, OS_APP_INSTANCE, data);
+        onMessageReceiptOldApi(MSG_LOAD_NANO_APP, contextHubId, OS_APP_INSTANCE, data);
     }
 
     /**
@@ -552,7 +611,7 @@ public class ContextHubService extends IContextHubService.Stub {
 
         byte[] data = new byte[1];
         data[0] = (byte) result;
-        onMessageReceipt(MSG_UNLOAD_NANO_APP, contextHubId, OS_APP_INSTANCE, data);
+        onMessageReceiptOldApi(MSG_UNLOAD_NANO_APP, contextHubId, OS_APP_INSTANCE, data);
     }
 
     /**
@@ -577,8 +636,7 @@ public class ContextHubService extends IContextHubService.Stub {
             mTransactionManager.onHubReset();
             queryNanoAppsInternal(contextHubId);
 
-            byte[] data = {TransactionResult.SUCCESS};
-            onMessageReceipt(MSG_HUB_RESET, contextHubId, OS_APP_INSTANCE, data);
+            mClientManager.onHubReset(contextHubId);
         } else {
             Log.i(TAG, "Received unknown hub event (hub ID = " + contextHubId + ", type = "
                     + eventType + ")");
@@ -641,6 +699,45 @@ public class ContextHubService extends IContextHubService.Stub {
         }
     }
 
+    /**
+     * @param contextHubId the hub ID to validate
+     * @return {@code true} if the ID represents that of an available hub, {@code false} otherwise
+     */
+    private boolean isValidContextHubId(int contextHubId) {
+        for (ContextHubInfo hubInfo : mContextHubInfo) {
+            if (hubInfo.getId() == contextHubId) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Creates and registers a client at the service for the specified Context Hub.
+     *
+     * @param clientCallback the client interface to register with the service
+     * @param contextHubId   the ID of the hub this client is attached to
+     * @return the generated client interface, null if registration was unsuccessful
+     *
+     * @throws IllegalArgumentException if contextHubId is not a valid ID
+     * @throws IllegalStateException if max number of clients have already registered
+     * @throws NullPointerException if clientCallback is null
+     */
+    @Override
+    public IContextHubClient createClient(
+            IContextHubClientCallback clientCallback, int contextHubId) throws RemoteException {
+        checkPermissions();
+        if (!isValidContextHubId(contextHubId)) {
+            throw new IllegalArgumentException("Invalid context hub ID " + contextHubId);
+        }
+        if (clientCallback == null) {
+            throw new NullPointerException("Cannot register client with null callback");
+        }
+
+        return mClientManager.registerClient(clientCallback, contextHubId);
+    }
+
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
@@ -664,10 +761,10 @@ public class ContextHubService extends IContextHubService.Stub {
     }
 
     private void checkPermissions() {
-        mContext.enforceCallingPermission(HARDWARE_PERMISSION, ENFORCE_HW_PERMISSION_MESSAGE);
+        ContextHubServiceUtil.checkPermissions(mContext);
     }
 
-    private int onMessageReceipt(int msgType, int hubHandle, int appInstance, byte[] data) {
+    private int onMessageReceiptOldApi(int msgType, int hubHandle, int appInstance, byte[] data) {
         if (data == null) {
             return -1;
         }

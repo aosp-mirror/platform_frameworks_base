@@ -56,4 +56,7 @@ interface IStatsCompanionService {
 
     /** Send a broadcast to the specified pkg and class that it should getData now. */
     oneway void sendBroadcast(String pkg, String cls);
+
+    /** Tells StatsCompaionService to grab the uid map snapshot and send it to statsd. */
+    oneway void triggerUidSnapshot();
 }

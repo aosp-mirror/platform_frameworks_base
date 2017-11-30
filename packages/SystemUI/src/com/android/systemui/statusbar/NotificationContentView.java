@@ -24,6 +24,7 @@ import android.graphics.Rect;
 import android.os.Build;
 import android.service.notification.StatusBarNotification;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.NotificationHeaderView;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,8 +35,8 @@ import android.widget.ImageView;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.NotificationColorUtil;
 import com.android.systemui.R;
-import com.android.systemui.statusbar.notification.HybridNotificationView;
 import com.android.systemui.statusbar.notification.HybridGroupManager;
+import com.android.systemui.statusbar.notification.HybridNotificationView;
 import com.android.systemui.statusbar.notification.NotificationCustomViewWrapper;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.NotificationViewWrapper;
@@ -49,6 +50,7 @@ import com.android.systemui.statusbar.policy.RemoteInputView;
  */
 public class NotificationContentView extends FrameLayout {
 
+    private static final String TAG = "NotificationContentView";
     public static final int VISIBLE_TYPE_CONTRACTED = 0;
     public static final int VISIBLE_TYPE_EXPANDED = 1;
     public static final int VISIBLE_TYPE_HEADSUP = 2;
@@ -58,9 +60,9 @@ public class NotificationContentView extends FrameLayout {
     public static final int UNDEFINED = -1;
 
     private final Rect mClipBounds = new Rect();
-    private final int mMinContractedHeight;
-    private final int mNotificationContentMarginEnd;
 
+    private int mMinContractedHeight;
+    private int mNotificationContentMarginEnd;
     private View mContractedChild;
     private View mExpandedChild;
     private View mHeadsUpChild;
@@ -134,15 +136,22 @@ public class NotificationContentView extends FrameLayout {
     private int mClipBottomAmount;
     private boolean mIsLowPriority;
     private boolean mIsContentExpandable;
+    private int mCustomViewSidePaddings;
 
 
     public NotificationContentView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mHybridGroupManager = new HybridGroupManager(getContext(), this);
+        initView();
+    }
+
+    public void initView() {
         mMinContractedHeight = getResources().getDimensionPixelSize(
                 R.dimen.min_notification_layout_height);
         mNotificationContentMarginEnd = getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.notification_content_margin_end);
+        mCustomViewSidePaddings = getResources().getDimensionPixelSize(
+                R.dimen.notification_content_custom_view_side_padding);
     }
 
     public void setHeights(int smallHeight, int headsUpMaxHeight, int maxHeight,
@@ -178,7 +187,7 @@ public class NotificationContentView extends FrameLayout {
                     : MeasureSpec.makeMeasureSpec(size, useExactly
                             ? MeasureSpec.EXACTLY
                             : MeasureSpec.AT_MOST);
-            mExpandedChild.measure(widthMeasureSpec, spec);
+            measureChildWithMargins(mExpandedChild, widthMeasureSpec, 0, spec, 0);
             maxChildHeight = Math.max(maxChildHeight, mExpandedChild.getMeasuredHeight());
         }
         if (mContractedChild != null) {
@@ -196,22 +205,22 @@ public class NotificationContentView extends FrameLayout {
             } else {
                 heightSpec = MeasureSpec.makeMeasureSpec(size, MeasureSpec.AT_MOST);
             }
-            mContractedChild.measure(widthMeasureSpec, heightSpec);
+            measureChildWithMargins(mContractedChild, widthMeasureSpec, 0, heightSpec, 0);
             int measuredHeight = mContractedChild.getMeasuredHeight();
             if (measuredHeight < mMinContractedHeight) {
                 heightSpec = MeasureSpec.makeMeasureSpec(mMinContractedHeight, MeasureSpec.EXACTLY);
-                mContractedChild.measure(widthMeasureSpec, heightSpec);
+                measureChildWithMargins(mContractedChild, widthMeasureSpec, 0, heightSpec, 0);
             }
             maxChildHeight = Math.max(maxChildHeight, measuredHeight);
             if (updateContractedHeaderWidth()) {
-                mContractedChild.measure(widthMeasureSpec, heightSpec);
+                measureChildWithMargins(mContractedChild, widthMeasureSpec, 0, heightSpec, 0);
             }
             if (mExpandedChild != null
                     && mContractedChild.getMeasuredHeight() > mExpandedChild.getMeasuredHeight()) {
                 // the Expanded child is smaller then the collapsed. Let's remeasure it.
                 heightSpec = MeasureSpec.makeMeasureSpec(mContractedChild.getMeasuredHeight(),
                         MeasureSpec.EXACTLY);
-                mExpandedChild.measure(widthMeasureSpec, heightSpec);
+                measureChildWithMargins(mExpandedChild, widthMeasureSpec, 0, heightSpec, 0);
             }
         }
         if (mHeadsUpChild != null) {
@@ -223,9 +232,9 @@ public class NotificationContentView extends FrameLayout {
                 size = Math.min(size, layoutParams.height);
                 useExactly = true;
             }
-            mHeadsUpChild.measure(widthMeasureSpec,
+            measureChildWithMargins(mHeadsUpChild, widthMeasureSpec, 0,
                     MeasureSpec.makeMeasureSpec(size, useExactly ? MeasureSpec.EXACTLY
-                            : MeasureSpec.AT_MOST));
+                            : MeasureSpec.AT_MOST), 0);
             maxChildHeight = Math.max(maxChildHeight, mHeadsUpChild.getMeasuredHeight());
         }
         if (mSingleLineView != null) {
@@ -382,6 +391,38 @@ public class NotificationContentView extends FrameLayout {
         mContractedWrapper = NotificationViewWrapper.wrap(getContext(), child,
                 mContainingNotification);
         mContractedWrapper.setDark(mDark, false /* animate */, 0 /* delay */);
+        updateMargins(child);
+    }
+
+    private void updateMargins(View child) {
+        if (child == null) {
+            return;
+        }
+        NotificationViewWrapper wrapper = getWrapperForView(child);
+        boolean isCustomView = wrapper instanceof NotificationCustomViewWrapper;
+        boolean needsMargins = isCustomView &&
+                child.getContext().getApplicationInfo().targetSdkVersion < Build.VERSION_CODES.P;
+        int padding = needsMargins ? mCustomViewSidePaddings : 0;
+        MarginLayoutParams layoutParams = (MarginLayoutParams) child.getLayoutParams();
+        layoutParams.setMarginStart(padding);
+        layoutParams.setMarginEnd(padding);
+        child.setLayoutParams(layoutParams);
+    }
+
+    private NotificationViewWrapper getWrapperForView(View child) {
+        if (child == mContractedChild) {
+            return mContractedWrapper;
+        }
+        if (child == mExpandedChild) {
+            return mExpandedWrapper;
+        }
+        if (child == mHeadsUpChild) {
+            return mHeadsUpWrapper;
+        }
+        if (child == mAmbientChild) {
+            return mAmbientWrapper;
+        }
+        return null;
     }
 
     public void setExpandedChild(View child) {
@@ -415,6 +456,7 @@ public class NotificationContentView extends FrameLayout {
         mExpandedChild = child;
         mExpandedWrapper = NotificationViewWrapper.wrap(getContext(), child,
                 mContainingNotification);
+        updateMargins(child);
     }
 
     public void setHeadsUpChild(View child) {
@@ -448,6 +490,7 @@ public class NotificationContentView extends FrameLayout {
         mHeadsUpChild = child;
         mHeadsUpWrapper = NotificationViewWrapper.wrap(getContext(), child,
                 mContainingNotification);
+        updateMargins(child);
     }
 
     public void setAmbientChild(View child) {
@@ -643,6 +686,13 @@ public class NotificationContentView extends FrameLayout {
         int endHeight = getViewForVisibleType(mVisibleType).getHeight();
         int progress = Math.abs(mContentHeight - startHeight);
         int totalDistance = Math.abs(endHeight - startHeight);
+        if (totalDistance == 0) {
+            Log.wtf(TAG, "the total transformation distance is 0"
+                    + "\n StartType: " + mTransformationStartVisibleType + " height: " + startHeight
+                    + "\n VisibleType: " + mVisibleType + " height: " + endHeight
+                    + "\n mContentHeight: " + mContentHeight);
+            return 1.0f;
+        }
         float amount = (float) progress / (float) totalDistance;
         return Math.min(1.0f, amount);
     }
@@ -1458,5 +1508,21 @@ public class NotificationContentView extends FrameLayout {
             return visibleWrapper.disallowSingleClick(x, y);
         }
         return false;
+    }
+
+    public boolean shouldClipToSidePaddings() {
+        boolean needsPaddings = shouldClipToSidePaddings(getVisibleType());
+        if (mUserExpanding) {
+             needsPaddings |= shouldClipToSidePaddings(mTransformationStartVisibleType);
+        }
+        return needsPaddings;
+    }
+
+    private boolean shouldClipToSidePaddings(int visibleType) {
+        NotificationViewWrapper visibleWrapper = getVisibleWrapper(visibleType);
+        if (visibleWrapper == null) {
+            return false;
+        }
+        return visibleWrapper.shouldClipToSidePaddings();
     }
 }

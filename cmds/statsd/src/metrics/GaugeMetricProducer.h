@@ -81,8 +81,6 @@ protected:
     void startNewProtoOutputStream(long long timestamp) override;
 
 private:
-    void SerializeBuckets();
-
     // The default bucket size for gauge metric is 1 second.
     static const uint64_t kDefaultGaugemBucketSizeNs = 1000 * 1000 * 1000;
     const GaugeMetric mMetric;
@@ -91,6 +89,8 @@ private:
     // tagId for pulled data. -1 if this is not pulled
     const int mPullTagId;
 
+    Mutex mLock;
+
     // Save the past buckets and we can clear when the StatsLogReport is dumped.
     // TODO: Add a lock to mPastBuckets.
     std::unordered_map<HashableDimensionKey, std::vector<GaugeBucket>> mPastBuckets;
@@ -98,7 +98,7 @@ private:
     // The current bucket.
     std::shared_ptr<DimToValMap> mCurrentSlicedBucket = std::make_shared<DimToValMap>();
 
-    int64_t getGauge(const LogEvent& event) const;
+    int64_t getGauge(const LogEvent& event);
 
     bool hitGuardRail(const HashableDimensionKey& newKey);
 

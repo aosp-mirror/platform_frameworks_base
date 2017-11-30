@@ -17,12 +17,14 @@
 package android.hardware.location;
 
 // Declare any non-default types here with import statements
-import android.hardware.location.ContextHubMessage;
 import android.hardware.location.ContextHubInfo;
+import android.hardware.location.ContextHubMessage;
 import android.hardware.location.NanoApp;
-import android.hardware.location.NanoAppInstanceInfo;
 import android.hardware.location.NanoAppFilter;
+import android.hardware.location.NanoAppInstanceInfo;
 import android.hardware.location.IContextHubCallback;
+import android.hardware.location.IContextHubClient;
+import android.hardware.location.IContextHubClientCallback;
 
 /**
  * @hide
@@ -52,4 +54,7 @@ interface IContextHubService {
 
     // send a message to a nanoApp
     int sendMessage(int hubHandle, int nanoAppHandle, in ContextHubMessage msg);
+
+    // Creates a client to send and receive messages
+    IContextHubClient createClient(in IContextHubClientCallback client, int contextHubId);
 }

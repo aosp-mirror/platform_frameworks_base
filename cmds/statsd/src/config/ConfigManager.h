@@ -98,6 +98,11 @@ public:
     void RemoveConfigs(int uid);
 
     /**
+     * Remove all of the configs from memory.
+     */
+    void RemoveAllConfigs();
+
+    /**
      * Text dump of our state for debugging.
      */
     void Dump(FILE* out);

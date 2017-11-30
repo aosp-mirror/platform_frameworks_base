@@ -60,6 +60,25 @@ public class RingBuffer<T> {
         mBuffer[indexOf(mCursor++)] = t;
     }
 
+    /**
+     * Returns object of type <T> at the next writable slot, creating one if it is not already
+     * available. In case of any errors while creating the object, <code>null</code> will
+     * be returned.
+     */
+    public T getNextSlot() {
+        final int nextSlotIdx = indexOf(mCursor++);
+        T item = mBuffer[nextSlotIdx];
+        if (item == null) {
+            try {
+                item = (T) mBuffer.getClass().getComponentType().newInstance();
+            } catch (IllegalAccessException | InstantiationException e) {
+                return null;
+            }
+            mBuffer[nextSlotIdx] = item;
+        }
+        return item;
+    }
+
     public T[] toArray() {
         // Only generic way to create a T[] from another T[]
         T[] out = Arrays.copyOf(mBuffer, size(), (Class<T[]>) mBuffer.getClass());

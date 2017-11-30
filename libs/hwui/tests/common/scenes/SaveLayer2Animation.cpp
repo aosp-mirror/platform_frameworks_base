@@ -42,8 +42,10 @@ public:
 
         mBluePaint.setColor(SkColorSetARGB(255, 0, 0, 255));
         mBluePaint.setTextSize(padding);
+        mBluePaint.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
         mGreenPaint.setColor(SkColorSetARGB(255, 0, 255, 0));
         mGreenPaint.setTextSize(padding);
+        mGreenPaint.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
 
         // interleave drawText and drawRect with saveLayer ops
         for (int i = 0; i < regions; i++, top += smallRectHeight) {

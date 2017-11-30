@@ -657,6 +657,56 @@ android_media_MediaRecorder_native_getMetrics(JNIEnv *env, jobject thiz)
     return mybundle;
 
 }
+
+static jboolean
+android_media_MediaRecorder_setInputDevice(JNIEnv *env, jobject thiz, jint device_id)
+{
+    ALOGV("android_media_MediaRecorder_setInputDevice");
+
+    sp<MediaRecorder> mr = getMediaRecorder(env, thiz);
+    if (mr == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return false;
+    }
+
+    if (process_media_recorder_call(env, mr->setInputDevice(device_id),
+            "java/lang/RuntimeException", "setInputDevice failed.")) {
+        return false;
+    }
+    return true;
+}
+
+static jint
+android_media_MediaRecorder_getRoutedDeviceId(JNIEnv *env, jobject thiz)
+{
+    ALOGV("android_media_MediaRecorder_getRoutedDeviceId");
+
+    sp<MediaRecorder> mr = getMediaRecorder(env, thiz);
+    if (mr == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return AUDIO_PORT_HANDLE_NONE;
+    }
+
+    audio_port_handle_t deviceId;
+    process_media_recorder_call(env, mr->getRoutedDeviceId(&deviceId),
+            "java/lang/RuntimeException", "getRoutedDeviceId failed.");
+    return (jint) deviceId;
+}
+
+static void
+android_media_MediaRecorder_enableDeviceCallback(JNIEnv *env, jobject thiz, jboolean enabled)
+{
+    ALOGV("android_media_MediaRecorder_enableDeviceCallback %d", enabled);
+
+    sp<MediaRecorder> mr = getMediaRecorder(env, thiz);
+    if (mr == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return;
+    }
+
+    process_media_recorder_call(env, mr->enableAudioDeviceCallback(enabled),
+            "java/lang/RuntimeException", "enableDeviceCallback failed.");
+}
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gMethods[] = {
@@ -689,6 +739,10 @@ static const JNINativeMethod gMethods[] = {
     {"native_setInputSurface", "(Landroid/view/Surface;)V", (void *)android_media_MediaRecorder_setInputSurface },
 
     {"native_getMetrics",    "()Landroid/os/PersistableBundle;", (void *)android_media_MediaRecorder_native_getMetrics},
+
+    {"native_setInputDevice", "(I)Z",                           (void *)android_media_MediaRecorder_setInputDevice},
+    {"native_getRoutedDeviceId", "()I",                         (void *)android_media_MediaRecorder_getRoutedDeviceId},
+    {"native_enableDeviceCallback", "(Z)V",                      (void *)android_media_MediaRecorder_enableDeviceCallback},
 };
 
 // This function only registers the native methods, and is called from

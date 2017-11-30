@@ -18,7 +18,7 @@
 
 #define LOG_NDEBUG 0
 
-#include <android/hardware/gnss/1.0/IGnss.h>
+#include <android/hardware/gnss/1.1/IGnss.h>
 
 #include <nativehelper/JNIHelp.h>
 #include "jni.h"
@@ -78,6 +78,9 @@ using android::hardware::hidl_vec;
 using android::hardware::hidl_death_recipient;
 using android::hidl::base::V1_0::IBase;
 
+using android::hardware::gnss::V1_0::GnssLocation;
+using android::hardware::gnss::V1_0::GnssLocationFlags;
+
 using android::hardware::gnss::V1_0::IAGnss;
 using android::hardware::gnss::V1_0::IAGnssCallback;
 using android::hardware::gnss::V1_0::IAGnssCallback;
@@ -86,7 +89,6 @@ using android::hardware::gnss::V1_0::IAGnssRilCallback;
 using android::hardware::gnss::V1_0::IGnss;
 using android::hardware::gnss::V1_0::IGnssBatching;
 using android::hardware::gnss::V1_0::IGnssBatchingCallback;
-using android::hardware::gnss::V1_0::IGnssCallback;
 using android::hardware::gnss::V1_0::IGnssConfiguration;
 using android::hardware::gnss::V1_0::IGnssDebug;
 using android::hardware::gnss::V1_0::IGnssGeofenceCallback;
@@ -100,11 +102,14 @@ using android::hardware::gnss::V1_0::IGnssNiCallback;
 using android::hardware::gnss::V1_0::IGnssXtra;
 using android::hardware::gnss::V1_0::IGnssXtraCallback;
 
+using IGnssV1_1 = android::hardware::gnss::V1_1::IGnss;
+using android::hardware::gnss::V1_1::IGnssCallback;
+
 struct GnssDeathRecipient : virtual public hidl_death_recipient
 {
     // hidl_death_recipient interface
     virtual void serviceDied(uint64_t cookie, const wp<IBase>& who) override {
-      // TODO(gomo): implement a better death recovery mechanism without
+      // TODO(b/37460011): implement a better death recovery mechanism without
       // crashing system server process as described in go//treble-gnss-death
       LOG_ALWAYS_FATAL("Abort due to IGNSS hidl service failure,"
             " restarting system server");
@@ -113,6 +118,7 @@ struct GnssDeathRecipient : virtual public hidl_death_recipient
 
 sp<GnssDeathRecipient> gnssHalDeathRecipient = nullptr;
 sp<IGnss> gnssHal = nullptr;
+sp<IGnssV1_1> gnssHalV1_1 = nullptr;
 sp<IGnssXtra> gnssXtraIface = nullptr;
 sp<IAGnssRil> agnssRilIface = nullptr;
 sp<IGnssGeofencing> gnssGeofencingIface = nullptr;
@@ -303,33 +309,33 @@ static JNIEnv* getJniEnv() {
     return env;
 }
 
-static jobject translateLocation(JNIEnv* env, const hardware::gnss::V1_0::GnssLocation& location) {
+static jobject translateLocation(JNIEnv* env, const GnssLocation& location) {
     JavaObject object(env, "android/location/Location", "gps");
 
     uint16_t flags = static_cast<uint32_t>(location.gnssLocationFlags);
-    if (flags & hardware::gnss::V1_0::GnssLocationFlags::HAS_LAT_LONG) {
+    if (flags & GnssLocationFlags::HAS_LAT_LONG) {
         SET(Latitude, location.latitudeDegrees);
         SET(Longitude, location.longitudeDegrees);
     }
-    if (flags & hardware::gnss::V1_0::GnssLocationFlags::HAS_ALTITUDE) {
+    if (flags & GnssLocationFlags::HAS_ALTITUDE) {
         SET(Altitude, location.altitudeMeters);
     }
-    if (flags & hardware::gnss::V1_0::GnssLocationFlags::HAS_SPEED) {
+    if (flags & GnssLocationFlags::HAS_SPEED) {
         SET(Speed, location.speedMetersPerSec);
     }
-    if (flags & hardware::gnss::V1_0::GnssLocationFlags::HAS_BEARING) {
+    if (flags & GnssLocationFlags::HAS_BEARING) {
         SET(Bearing, location.bearingDegrees);
     }
-    if (flags & hardware::gnss::V1_0::GnssLocationFlags::HAS_HORIZONTAL_ACCURACY) {
+    if (flags & GnssLocationFlags::HAS_HORIZONTAL_ACCURACY) {
         SET(Accuracy, location.horizontalAccuracyMeters);
     }
-    if (flags & hardware::gnss::V1_0::GnssLocationFlags::HAS_VERTICAL_ACCURACY) {
+    if (flags & GnssLocationFlags::HAS_VERTICAL_ACCURACY) {
         SET(VerticalAccuracyMeters, location.verticalAccuracyMeters);
     }
-    if (flags & hardware::gnss::V1_0::GnssLocationFlags::HAS_SPEED_ACCURACY) {
+    if (flags & GnssLocationFlags::HAS_SPEED_ACCURACY) {
         SET(SpeedAccuracyMetersPerSecond, location.speedAccuracyMetersPerSecond);
     }
-    if (flags & hardware::gnss::V1_0::GnssLocationFlags::HAS_BEARING_ACCURACY) {
+    if (flags & GnssLocationFlags::HAS_BEARING_ACCURACY) {
         SET(BearingAccuracyDegrees, location.bearingAccuracyDegrees);
     }
     SET(Time, location.timestamp);
@@ -341,8 +347,7 @@ static jobject translateLocation(JNIEnv* env, const hardware::gnss::V1_0::GnssLo
  * GnssCallback class implements the callback methods for IGnss interface.
  */
 struct GnssCallback : public IGnssCallback {
-    Return<void> gnssLocationCb(
-          const android::hardware::gnss::V1_0::GnssLocation& location) override;
+    Return<void> gnssLocationCb(const GnssLocation& location) override;
     Return<void> gnssStatusCb(const IGnssCallback::GnssStatusValue status) override;
     Return<void> gnssSvStatusCb(const IGnssCallback::GnssSvStatus& svStatus) override;
     Return<void> gnssNmeaCb(int64_t timestamp, const android::hardware::hidl_string& nmea) override;
@@ -352,6 +357,9 @@ struct GnssCallback : public IGnssCallback {
     Return<void> gnssRequestTimeCb() override;
     Return<void> gnssSetSystemInfoCb(const IGnssCallback::GnssSystemInfo& info) override;
 
+    // New in 1.1
+    Return<void> gnssNameCb(const android::hardware::hidl_string& name) override;
+
     static GnssSvInfo sGnssSvList[static_cast<uint32_t>(
             android::hardware::gnss::V1_0::GnssMax::SVS_COUNT)];
     static size_t sGnssSvListSize;
@@ -360,19 +368,30 @@ struct GnssCallback : public IGnssCallback {
     static size_t sNmeaStringLength;
 };
 
+Return<void> GnssCallback::gnssNameCb(const android::hardware::hidl_string& name) {
+    ALOGD("%s: name=%s\n", __func__, name.c_str());
+
+    // TODO(b/38003769): build Java code to connect to below code
+    /*
+    JNIEnv* env = getJniEnv();
+    env->CallVoidMethod(mCallbacksObj, method_setGnssHardwareName, name);
+    checkAndClearExceptionFromCallback(env, __FUNCTION__);
+    */
+    return Void();
+}
+
 IGnssCallback::GnssSvInfo GnssCallback::sGnssSvList[static_cast<uint32_t>(
         android::hardware::gnss::V1_0::GnssMax::SVS_COUNT)];
 const char* GnssCallback::sNmeaString = nullptr;
 size_t GnssCallback::sNmeaStringLength = 0;
 size_t GnssCallback::sGnssSvListSize = 0;
 
-Return<void> GnssCallback::gnssLocationCb(
-        const ::android::hardware::gnss::V1_0::GnssLocation& location) {
+Return<void> GnssCallback::gnssLocationCb(const GnssLocation& location) {
     JNIEnv* env = getJniEnv();
 
     jobject jLocation = translateLocation(env, location);
     bool hasLatLong = (static_cast<uint32_t>(location.gnssLocationFlags) &
-            hardware::gnss::V1_0::GnssLocationFlags::HAS_LAT_LONG) != 0;
+            GnssLocationFlags::HAS_LAT_LONG) != 0;
 
     env->CallVoidMethod(mCallbacksObj,
                         method_reportLocation,
@@ -484,12 +503,12 @@ struct GnssGeofenceCallback : public IGnssGeofenceCallback {
     // Methods from ::android::hardware::gps::V1_0::IGnssGeofenceCallback follow.
     Return<void> gnssGeofenceTransitionCb(
             int32_t geofenceId,
-            const android::hardware::gnss::V1_0::GnssLocation& location,
+            const GnssLocation& location,
             GeofenceTransition transition,
             hardware::gnss::V1_0::GnssUtcTime timestamp) override;
     Return<void> gnssGeofenceStatusCb(
             GeofenceAvailability status,
-            const android::hardware::gnss::V1_0::GnssLocation& location) override;
+            const GnssLocation& location) override;
     Return<void> gnssGeofenceAddCb(int32_t geofenceId,
                                    GeofenceStatus status) override;
     Return<void> gnssGeofenceRemoveCb(int32_t geofenceId,
@@ -502,7 +521,7 @@ struct GnssGeofenceCallback : public IGnssGeofenceCallback {
 
 Return<void> GnssGeofenceCallback::gnssGeofenceTransitionCb(
         int32_t geofenceId,
-        const android::hardware::gnss::V1_0::GnssLocation& location,
+        const GnssLocation& location,
         GeofenceTransition transition,
         hardware::gnss::V1_0::GnssUtcTime timestamp) {
     JNIEnv* env = getJniEnv();
@@ -522,7 +541,7 @@ Return<void> GnssGeofenceCallback::gnssGeofenceTransitionCb(
 
 Return<void> GnssGeofenceCallback::gnssGeofenceStatusCb(
         GeofenceAvailability status,
-        const android::hardware::gnss::V1_0::GnssLocation& location) {
+        const GnssLocation& location) {
     JNIEnv* env = getJniEnv();
 
     jobject jLocation = translateLocation(env, location);
@@ -976,12 +995,12 @@ struct GnssBatchingCallback : public IGnssBatchingCallback {
     * follow.
     */
     Return<void> gnssLocationBatchCb(
-        const ::android::hardware::hidl_vec<hardware::gnss::V1_0::GnssLocation> & locations)
+        const ::android::hardware::hidl_vec<GnssLocation> & locations)
         override;
 };
 
 Return<void> GnssBatchingCallback::gnssLocationBatchCb(
-        const ::android::hardware::hidl_vec<hardware::gnss::V1_0::GnssLocation> & locations) {
+        const ::android::hardware::hidl_vec<GnssLocation> & locations) {
     JNIEnv* env = getJniEnv();
 
     jobjectArray jLocations = env->NewObjectArray(locations.size(),
@@ -1049,8 +1068,13 @@ static void android_location_GnssLocationProvider_class_init_native(JNIEnv* env,
         LOG_ALWAYS_FATAL("Unable to get Java VM. Error: %d", jvmStatus);
     }
 
-    // TODO(b/31632518)
-    gnssHal = IGnss::getService();
+    gnssHal = gnssHalV1_1 = IGnssV1_1::getService();
+
+    if (gnssHal == nullptr) {
+        ALOGD("gnssHal 1.1 was null, trying 1.0");
+        gnssHal = IGnss::getService();
+    }
+
     if (gnssHal != nullptr) {
       gnssHalDeathRecipient = new GnssDeathRecipient();
       hardware::Return<bool> linked = gnssHal->linkToDeath(
@@ -1160,7 +1184,6 @@ static jboolean android_location_GnssLocationProvider_init(JNIEnv* env, jobject 
     if (!mCallbacksObj)
         mCallbacksObj = env->NewGlobalRef(obj);
 
-    sp<IGnssCallback> gnssCbIface = new GnssCallback();
     /*
      * Fail if the main interface fails to initialize
      */
@@ -1169,7 +1192,14 @@ static jboolean android_location_GnssLocationProvider_init(JNIEnv* env, jobject 
         return JNI_FALSE;
     }
 
-    auto result = gnssHal->setCallback(gnssCbIface);
+    sp<IGnssCallback> gnssCbIface = new GnssCallback();
+
+    Return<bool> result = false;
+    if (gnssHalV1_1 != nullptr) {
+        result = gnssHalV1_1->setCallback_1_1(gnssCbIface);
+    } else {
+        result = gnssHal->setCallback(gnssCbIface);
+    }
     if (!result.isOk() || !result) {
         ALOGE("SetCallback for Gnss Interface fails\n");
         return JNI_FALSE;
@@ -1182,7 +1212,7 @@ static jboolean android_location_GnssLocationProvider_init(JNIEnv* env, jobject 
         result = gnssXtraIface->setCallback(gnssXtraCbIface);
         if (!result.isOk() || !result) {
             gnssXtraIface = nullptr;
-            ALOGE("SetCallback for Gnss Xtra Interface fails\n");
+            ALOGI("SetCallback for Gnss Xtra Interface fails\n");
         }
     }
 
@@ -1190,21 +1220,21 @@ static jboolean android_location_GnssLocationProvider_init(JNIEnv* env, jobject 
     if (agnssIface != nullptr) {
         agnssIface->setCallback(aGnssCbIface);
     } else {
-        ALOGE("Unable to Initialize AGnss interface\n");
+        ALOGI("Unable to Initialize AGnss interface\n");
     }
 
     sp<IGnssGeofenceCallback> gnssGeofencingCbIface = new GnssGeofenceCallback();
     if (gnssGeofencingIface != nullptr) {
       gnssGeofencingIface->setCallback(gnssGeofencingCbIface);
     } else {
-        ALOGE("Unable to initialize GNSS Geofencing interface\n");
+        ALOGI("Unable to initialize GNSS Geofencing interface\n");
     }
 
     sp<IGnssNiCallback> gnssNiCbIface = new GnssNiCallback();
     if (gnssNiIface != nullptr) {
         gnssNiIface->setCallback(gnssNiCbIface);
     } else {
-        ALOGE("Unable to initialize GNSS NI interface\n");
+        ALOGI("Unable to initialize GNSS NI interface\n");
     }
 
     sp<IAGnssRilCallback> aGnssRilCbIface = new AGnssRilCallback();

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#define DEBUG true
+#define DEBUG true  // STOPSHIP if true
 #include "Log.h"
 
 #include "StatsService.h"
@@ -80,10 +80,10 @@ StatsService::StatsService(const sp<Looper>& handlerLooper)
         sp<IStatsCompanionService> sc = getStatsCompanionService();
         auto receiver = mConfigManager->GetConfigReceiver(key);
         if (sc == nullptr) {
-            ALOGD("Could not find StatsCompanionService");
+            VLOG("Could not find StatsCompanionService");
         } else if (receiver.first.size() == 0) {
-            ALOGD("Statscompanion could not find a broadcast receiver for %s",
-                  key.ToString().c_str());
+            VLOG("Statscompanion could not find a broadcast receiver for %s",
+                 key.ToString().c_str());
         } else {
             sc->sendBroadcast(String16(receiver.first.c_str()),
                               String16(receiver.second.c_str()));
@@ -226,10 +226,6 @@ status_t StatsService::command(FILE* in, FILE* out, FILE* err, Vector<String8>& 
             return cmd_print_stats(out, args);
         }
 
-        if (!args[0].compare(String8("clear-config"))) {
-            return cmd_remove_config_files(out);
-        }
-
         if (!args[0].compare(String8("meminfo"))) {
             return cmd_dump_memory_info(out);
         }
@@ -263,11 +259,6 @@ void StatsService::print_cmd_help(FILE* out) {
     fprintf(out, "  Prints the UID, app name, version mapping.\n");
     fprintf(out, "\n");
     fprintf(out, "\n");
-    fprintf(out, "usage: adb shell cmd stats clear-config \n");
-    fprintf(out, "\n");
-    fprintf(out, "  Removes all configs from disk.\n");
-    fprintf(out, "\n");
-    fprintf(out, "\n");
     fprintf(out, "usage: adb shell cmd stats pull-source [int] \n");
     fprintf(out, "\n");
     fprintf(out, "  Prints the output of a pulled metrics source (int indicates source)\n");
@@ -278,17 +269,20 @@ void StatsService::print_cmd_help(FILE* out) {
     fprintf(out, "  Flushes all data on memory to disk.\n");
     fprintf(out, "\n");
     fprintf(out, "\n");
-    fprintf(out, "usage: adb shell cmd stats config remove [UID] NAME\n");
+    fprintf(out, "usage: adb shell cmd stats config remove [UID] [NAME]\n");
     fprintf(out, "usage: adb shell cmd stats config update [UID] NAME\n");
     fprintf(out, "\n");
     fprintf(out, "  Adds, updates or removes a configuration. The proto should be in\n");
-    fprintf(out, "  wire-encoded protobuf format and passed via stdin.\n");
+    fprintf(out, "  wire-encoded protobuf format and passed via stdin. If no UID and name is\n");
+    fprintf(out, "  provided, then all configs will be removed from memory and disk.\n");
     fprintf(out, "\n");
     fprintf(out, "  UID           The uid to use. It is only possible to pass the UID\n");
-    fprintf(out, "                parameter on eng builds.  If UID is omitted the calling\n");
+    fprintf(out, "                parameter on eng builds. If UID is omitted the calling\n");
     fprintf(out, "                uid is used.\n");
     fprintf(out, "  NAME          The per-uid name to use\n");
     fprintf(out, "\n");
+    fprintf(out, "\n              *Note: If both UID and NAME are omitted then all configs will\n");
+    fprintf(out, "\n                     be removed from memory and disk!\n");
     fprintf(out, "\n");
     fprintf(out, "usage: adb shell cmd stats dump-report [UID] NAME\n");
     fprintf(out, "  Dump all metric data for a configuration.\n");
@@ -349,10 +343,10 @@ status_t StatsService::cmd_trigger_broadcast(FILE* out, Vector<String8>& args) {
     sp<IStatsCompanionService> sc = getStatsCompanionService();
     if (sc != nullptr) {
         sc->sendBroadcast(String16(receiver.first.c_str()), String16(receiver.second.c_str()));
-        ALOGD("StatsService::trigger broadcast succeeded to %s, %s", args[1].c_str(),
-              args[2].c_str());
+        VLOG("StatsService::trigger broadcast succeeded to %s, %s", args[1].c_str(),
+             args[2].c_str());
     } else {
-        ALOGD("Could not access statsCompanion");
+        VLOG("Could not access statsCompanion");
     }
 
     return NO_ERROR;
@@ -416,8 +410,12 @@ status_t StatsService::cmd_config(FILE* in, FILE* out, FILE* err, Vector<String8
                 // Add / update the config.
                 mConfigManager->UpdateConfig(ConfigKey(uid, name), config);
             } else {
-                // Remove the config.
-                mConfigManager->RemoveConfig(ConfigKey(uid, name));
+                if (argCount == 2) {
+                    cmd_remove_all_configs(out);
+                } else {
+                    // Remove the config.
+                    mConfigManager->RemoveConfig(ConfigKey(uid, name));
+                }
             }
 
             return NO_ERROR;
@@ -482,7 +480,7 @@ status_t StatsService::cmd_print_stats(FILE* out, const Vector<String8>& args) {
         fprintf(out, "Config %s uses %zu bytes\n", key.ToString().c_str(),
                 mProcessor->GetMetricsSize(key));
     }
-    fprintf(out, "Detailed statsd stats in logcat...");
+    fprintf(out, "Detailed statsd stats in logcat...\n");
     StatsdStats& statsdStats = StatsdStats::getInstance();
     bool reset = false;
     if (args.size() > 1) {
@@ -526,8 +524,10 @@ status_t StatsService::cmd_print_pulled_metrics(FILE* out, const Vector<String8>
     return UNKNOWN_ERROR;
 }
 
-status_t StatsService::cmd_remove_config_files(FILE* out) {
-    fprintf(out, "Trying to remove config files...\n");
+status_t StatsService::cmd_remove_all_configs(FILE* out) {
+    fprintf(out, "Removing all configs...\n");
+    VLOG("StatsService::cmd_remove_all_configs was called");
+    mConfigManager->RemoveAllConfigs();
     StorageManager::deleteAllFiles(STATS_SERVICE_DIR);
     return NO_ERROR;
 }
@@ -541,7 +541,7 @@ status_t StatsService::cmd_dump_memory_info(FILE* out) {
 
 Status StatsService::informAllUidData(const vector<int32_t>& uid, const vector<int32_t>& version,
                                       const vector<String16>& app) {
-    if (DEBUG) ALOGD("StatsService::informAllUidData was called");
+    VLOG("StatsService::informAllUidData was called");
 
     if (IPCThreadState::self()->getCallingUid() != AID_SYSTEM) {
         return Status::fromExceptionCode(Status::EX_SECURITY,
@@ -549,13 +549,13 @@ Status StatsService::informAllUidData(const vector<int32_t>& uid, const vector<i
     }
 
     mUidMap->updateMap(uid, version, app);
-    if (DEBUG) ALOGD("StatsService::informAllUidData succeeded");
+    VLOG("StatsService::informAllUidData succeeded");
 
     return Status::ok();
 }
 
 Status StatsService::informOnePackage(const String16& app, int32_t uid, int32_t version) {
-    if (DEBUG) ALOGD("StatsService::informOnePackage was called");
+    VLOG("StatsService::informOnePackage was called");
 
     if (IPCThreadState::self()->getCallingUid() != AID_SYSTEM) {
         return Status::fromExceptionCode(Status::EX_SECURITY,
@@ -566,7 +566,7 @@ Status StatsService::informOnePackage(const String16& app, int32_t uid, int32_t 
 }
 
 Status StatsService::informOnePackageRemoved(const String16& app, int32_t uid) {
-    if (DEBUG) ALOGD("StatsService::informOnePackageRemoved was called");
+    VLOG("StatsService::informOnePackageRemoved was called");
 
     if (IPCThreadState::self()->getCallingUid() != AID_SYSTEM) {
         return Status::fromExceptionCode(Status::EX_SECURITY,
@@ -577,14 +577,14 @@ Status StatsService::informOnePackageRemoved(const String16& app, int32_t uid) {
 }
 
 Status StatsService::informAnomalyAlarmFired() {
-    if (DEBUG) ALOGD("StatsService::informAnomalyAlarmFired was called");
+    VLOG("StatsService::informAnomalyAlarmFired was called");
 
     if (IPCThreadState::self()->getCallingUid() != AID_SYSTEM) {
         return Status::fromExceptionCode(Status::EX_SECURITY,
                                          "Only system uid can call informAnomalyAlarmFired");
     }
 
-    if (DEBUG) ALOGD("StatsService::informAnomalyAlarmFired succeeded");
+    VLOG("StatsService::informAnomalyAlarmFired succeeded");
     uint64_t currentTimeSec = time(nullptr);
     std::unordered_set<sp<const AnomalyAlarm>, SpHash<AnomalyAlarm>> anomalySet =
             mAnomalyMonitor->popSoonerThan(static_cast<uint32_t>(currentTimeSec));
@@ -593,7 +593,7 @@ Status StatsService::informAnomalyAlarmFired() {
 }
 
 Status StatsService::informPollAlarmFired() {
-    if (DEBUG) ALOGD("StatsService::informPollAlarmFired was called");
+    VLOG("StatsService::informPollAlarmFired was called");
 
     if (IPCThreadState::self()->getCallingUid() != AID_SYSTEM) {
         return Status::fromExceptionCode(Status::EX_SECURITY,
@@ -602,7 +602,7 @@ Status StatsService::informPollAlarmFired() {
 
     mStatsPullerManager.OnAlarmFired();
 
-    if (DEBUG) ALOGD("StatsService::informPollAlarmFired succeeded");
+    VLOG("StatsService::informPollAlarmFired succeeded");
 
     return Status::ok();
 }
@@ -614,7 +614,7 @@ Status StatsService::systemRunning() {
     }
 
     // When system_server is up and running, schedule the dropbox task to run.
-    ALOGD("StatsService::systemRunning");
+    VLOG("StatsService::systemRunning");
 
     sayHiToStatsCompanion();
 
@@ -627,7 +627,7 @@ Status StatsService::writeDataToDisk() {
                                          "Only system uid can call systemRunning");
     }
 
-    ALOGD("StatsService::writeDataToDisk");
+    VLOG("StatsService::writeDataToDisk");
 
     mProcessor->WriteDataToDisk();
 
@@ -639,10 +639,10 @@ void StatsService::sayHiToStatsCompanion() {
     // purposes.
     sp<IStatsCompanionService> statsCompanion = getStatsCompanionService();
     if (statsCompanion != nullptr) {
-        if (DEBUG) ALOGD("Telling statsCompanion that statsd is ready");
+        VLOG("Telling statsCompanion that statsd is ready");
         statsCompanion->statsdReady();
     } else {
-        if (DEBUG) ALOGD("Could not access statsCompanion");
+        VLOG("Could not access statsCompanion");
     }
 }
 
@@ -662,7 +662,7 @@ sp<IStatsCompanionService> StatsService::getStatsCompanionService() {
 }
 
 Status StatsService::statsCompanionReady() {
-    if (DEBUG) ALOGD("StatsService::statsCompanionReady was called");
+    VLOG("StatsService::statsCompanionReady was called");
 
     if (IPCThreadState::self()->getCallingUid() != AID_SYSTEM) {
         return Status::fromExceptionCode(Status::EX_SECURITY,
@@ -675,7 +675,7 @@ Status StatsService::statsCompanionReady() {
                 Status::EX_NULL_POINTER,
                 "statscompanion unavailable despite it contacting statsd!");
     }
-    if (DEBUG) ALOGD("StatsService::statsCompanionReady linking to statsCompanion.");
+    VLOG("StatsService::statsCompanionReady linking to statsCompanion.");
     IInterface::asBinder(statsCompanion)->linkToDeath(new CompanionDeathRecipient(mAnomalyMonitor));
     mAnomalyMonitor->setStatsCompanionService(statsCompanion);
 
@@ -692,8 +692,7 @@ void StatsService::OnLogEvent(const LogEvent& event) {
 
 Status StatsService::getData(const String16& key, vector<uint8_t>* output) {
     IPCThreadState* ipc = IPCThreadState::self();
-    ALOGD("StatsService::getData with Pid %i, Uid %i", ipc->getCallingPid(),
-          ipc->getCallingUid());
+    VLOG("StatsService::getData with Pid %i, Uid %i", ipc->getCallingPid(), ipc->getCallingUid());
     if (checkCallingPermission(String16(kPermissionDump))) {
         string keyStr = string(String8(key).string());
         ConfigKey configKey(ipc->getCallingUid(), keyStr);

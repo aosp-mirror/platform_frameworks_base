@@ -37,7 +37,6 @@ import static android.telephony.CarrierConfigManager.KEY_MONTHLY_DATA_CYCLE_DAY_
 import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 import static android.text.format.Time.TIMEZONE_UTC;
 
-import static com.android.server.net.NetworkPolicyManagerService.MAX_PROC_STATE_SEQ_HISTORY;
 import static com.android.server.net.NetworkPolicyManagerService.TYPE_LIMIT;
 import static com.android.server.net.NetworkPolicyManagerService.TYPE_LIMIT_SNOOZED;
 import static com.android.server.net.NetworkPolicyManagerService.TYPE_WARNING;
@@ -61,7 +60,6 @@ import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -116,12 +114,10 @@ import android.util.RecurrenceRule;
 import android.util.TrustedTime;
 
 import com.android.internal.telephony.PhoneConstants;
-import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.test.BroadcastInterceptingContext;
 import com.android.internal.util.test.BroadcastInterceptingContext.FutureIntent;
 import com.android.server.net.NetworkPolicyManagerInternal;
 import com.android.server.net.NetworkPolicyManagerService;
-import com.android.server.net.NetworkPolicyManagerService.ProcStateSeqHistory;
 
 import libcore.io.IoUtils;
 import libcore.io.Streams;
@@ -130,6 +126,7 @@ import com.google.common.util.concurrent.AbstractFuture;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.MethodRule;
@@ -142,12 +139,10 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.PrintWriter;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -182,6 +177,7 @@ import java.util.stream.Collectors;
     "com.android.frameworks.servicestests/android.support.test.runner.AndroidJUnitRunner"
  * </code></pre>
  */
+@Ignore
 @RunWith(AndroidJUnit4.class)
 @MediumTest
 public class NetworkPolicyManagerServiceTest {
@@ -190,8 +186,6 @@ public class NetworkPolicyManagerServiceTest {
     private static final long TEST_START = 1194220800000L;
     private static final String TEST_IFACE = "test0";
     private static final String TEST_SSID = "AndroidAP";
-
-    private static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
     private static NetworkTemplate sTemplateWifi = NetworkTemplate.buildTemplateWifi(TEST_SSID);
 
@@ -1109,14 +1103,6 @@ public class NetworkPolicyManagerServiceTest {
         final long procStateSeq = 222;
         callOnUidStateChanged(UID_A, ActivityManager.PROCESS_STATE_SERVICE, procStateSeq);
         verify(mActivityManagerInternal).notifyNetworkPolicyRulesUpdated(UID_A, procStateSeq);
-
-        final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        final IndentingPrintWriter writer = new IndentingPrintWriter(
-                new PrintWriter(outputStream), " ");
-        mService.mObservedHistory.dumpUL(writer);
-        writer.flush();
-        assertEquals(ProcStateSeqHistory.getString(UID_A, procStateSeq),
-                outputStream.toString().trim());
     }
 
     private void callOnUidStateChanged(int uid, int procState, long procStateSeq)
@@ -1127,59 +1113,6 @@ public class NetworkPolicyManagerServiceTest {
             latch.countDown();
         });
         latch.await(2, TimeUnit.SECONDS);
-    }
-
-    @Test
-    public void testProcStateHistory() {
-        // Verify dump works correctly with no elements added.
-        verifyProcStateHistoryDump(0);
-
-        // Add items upto half of the max capacity and verify that dump works correctly.
-        verifyProcStateHistoryDump(MAX_PROC_STATE_SEQ_HISTORY / 2);
-
-        // Add items upto the max capacity and verify that dump works correctly.
-        verifyProcStateHistoryDump(MAX_PROC_STATE_SEQ_HISTORY);
-
-        // Add more items than max capacity and verify that dump works correctly.
-        verifyProcStateHistoryDump(MAX_PROC_STATE_SEQ_HISTORY + MAX_PROC_STATE_SEQ_HISTORY / 2);
-
-    }
-
-    private void verifyProcStateHistoryDump(int count) {
-        final ProcStateSeqHistory history = new ProcStateSeqHistory(MAX_PROC_STATE_SEQ_HISTORY);
-        final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        final IndentingPrintWriter writer = new IndentingPrintWriter(
-                new PrintWriter(outputStream), " ");
-
-        if (count == 0) {
-            // Verify with no uid info written to history.
-            history.dumpUL(writer);
-            writer.flush();
-            assertEquals("When no uid info is there, dump should contain NONE",
-                    "NONE", outputStream.toString().trim());
-            return;
-        }
-
-        int uid = 111;
-        long procStateSeq = 222;
-        // Add count items and verify dump works correctly.
-        for (int i = 0; i < count; ++i) {
-            uid++;
-            procStateSeq++;
-            history.addProcStateSeqUL(uid, procStateSeq);
-        }
-        history.dumpUL(writer);
-        writer.flush();
-        final String[] uidsDump = outputStream.toString().split(LINE_SEPARATOR);
-        // Dump will have at most MAX_PROC_STATE_SEQ_HISTORY items.
-        final int expectedCount = (count < MAX_PROC_STATE_SEQ_HISTORY)
-                ? count : MAX_PROC_STATE_SEQ_HISTORY;
-        assertEquals(expectedCount, uidsDump.length);
-        for (int i = 0; i < expectedCount; ++i) {
-            assertEquals(ProcStateSeqHistory.getString(uid, procStateSeq), uidsDump[i]);
-            uid--;
-            procStateSeq--;
-        }
     }
 
     private void assertCycleDayAsExpected(PersistableBundle config, int carrierCycleDay,

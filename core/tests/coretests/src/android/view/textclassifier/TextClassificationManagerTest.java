@@ -45,6 +45,9 @@ public class TextClassificationManagerTest {
 
     private TextClassificationManager mTcm;
     private TextClassifier mClassifier;
+    private TextSelection.Options mSelectionOptions;
+    private TextClassification.Options mClassificationOptions;
+    private TextLinks.Options mLinksOptions;
 
     @Before
     public void setup() {
@@ -52,6 +55,9 @@ public class TextClassificationManagerTest {
                 .getSystemService(TextClassificationManager.class);
         mTcm.setTextClassifier(null);
         mClassifier = mTcm.getTextClassifier();
+        mSelectionOptions = new TextSelection.Options().setDefaultLocales(LOCALES);
+        mClassificationOptions = new TextClassification.Options().setDefaultLocales(LOCALES);
+        mLinksOptions = new TextLinks.Options().setDefaultLocales(LOCALES);
     }
 
     @Test
@@ -66,24 +72,9 @@ public class TextClassificationManagerTest {
         int smartStartIndex = text.indexOf(suggested);
         int smartEndIndex = smartStartIndex + suggested.length();
 
-        assertThat(mClassifier.suggestSelection(text, startIndex, endIndex, LOCALES),
-                isTextSelection(smartStartIndex, smartEndIndex, TextClassifier.TYPE_EMAIL));
-    }
-
-    @Test
-    public void testSmartSelection_nullLocaleList() {
-        if (isTextClassifierDisabled()) return;
-
-        String text = "Contact me at droid@android.com";
-        String selected = "droid";
-        String suggested = "droid@android.com";
-        int startIndex = text.indexOf(selected);
-        int endIndex = startIndex + selected.length();
-        int smartStartIndex = text.indexOf(suggested);
-        int smartEndIndex = smartStartIndex + suggested.length();
-        LocaleList nullLocales = null;
-
-        assertThat(mClassifier.suggestSelection(text, startIndex, endIndex, nullLocales),
+        TextSelection selection = mClassifier.suggestSelection(
+                text, startIndex, endIndex, mSelectionOptions);
+        assertThat(selection,
                 isTextSelection(smartStartIndex, smartEndIndex, TextClassifier.TYPE_EMAIL));
     }
 
@@ -99,7 +90,9 @@ public class TextClassificationManagerTest {
         int smartStartIndex = text.indexOf(suggested);
         int smartEndIndex = smartStartIndex + suggested.length();
 
-        assertThat(mClassifier.suggestSelection(text, startIndex, endIndex, LOCALES),
+        TextSelection selection = mClassifier.suggestSelection(
+                text, startIndex, endIndex, mSelectionOptions);
+        assertThat(selection,
                 isTextSelection(smartStartIndex, smartEndIndex, TextClassifier.TYPE_URL));
     }
 
@@ -112,7 +105,9 @@ public class TextClassificationManagerTest {
         int startIndex = text.indexOf(selected);
         int endIndex = startIndex + selected.length();
 
-        assertThat(mClassifier.suggestSelection(text, startIndex, endIndex, LOCALES),
+        TextSelection selection = mClassifier.suggestSelection(
+                text, startIndex, endIndex, mSelectionOptions);
+        assertThat(selection,
                 isTextSelection(startIndex, endIndex, NO_TYPE));
     }
 
@@ -124,7 +119,10 @@ public class TextClassificationManagerTest {
         String classifiedText = "droid@android.com";
         int startIndex = text.indexOf(classifiedText);
         int endIndex = startIndex + classifiedText.length();
-        assertThat(mClassifier.classifyText(text, startIndex, endIndex, LOCALES),
+
+        TextClassification classification = mClassifier.classifyText(
+                text, startIndex, endIndex, mClassificationOptions);
+        assertThat(classification,
                 isTextClassification(
                         classifiedText,
                         TextClassifier.TYPE_EMAIL,
@@ -139,7 +137,10 @@ public class TextClassificationManagerTest {
         String classifiedText = "www.android.com";
         int startIndex = text.indexOf(classifiedText);
         int endIndex = startIndex + classifiedText.length();
-        assertThat(mClassifier.classifyText(text, startIndex, endIndex, LOCALES),
+
+        TextClassification classification = mClassifier.classifyText(
+                text, startIndex, endIndex, mClassificationOptions);
+        assertThat(classification,
                 isTextClassification(
                         classifiedText,
                         TextClassifier.TYPE_URL,
@@ -154,27 +155,14 @@ public class TextClassificationManagerTest {
         String classifiedText = "HTTP://ANDROID.COM";
         int startIndex = text.indexOf(classifiedText);
         int endIndex = startIndex + classifiedText.length();
-        assertThat(mClassifier.classifyText(text, startIndex, endIndex, LOCALES),
+
+        TextClassification classification = mClassifier.classifyText(
+                text, startIndex, endIndex, mClassificationOptions);
+        assertThat(classification,
                 isTextClassification(
                         classifiedText,
                         TextClassifier.TYPE_URL,
                         "http://ANDROID.COM"));
-    }
-
-    @Test
-    public void testTextClassifyText_nullLocaleList() {
-        if (isTextClassifierDisabled()) return;
-
-        String text = "Contact me at droid@android.com";
-        String classifiedText = "droid@android.com";
-        int startIndex = text.indexOf(classifiedText);
-        int endIndex = startIndex + classifiedText.length();
-        LocaleList nullLocales = null;
-        assertThat(mClassifier.classifyText(text, startIndex, endIndex, nullLocales),
-                isTextClassification(
-                        classifiedText,
-                        TextClassifier.TYPE_EMAIL,
-                        "mailto:" + classifiedText));
     }
 
     @Test
@@ -210,13 +198,14 @@ public class TextClassificationManagerTest {
         int startIndex = text.indexOf(classifiedText);
         int endIndex = startIndex + classifiedText.length();
 
-        Collection<TextLinks.TextLink> links = mClassifier.generateLinks(text, null).getLinks();
+        Collection<TextLinks.TextLink> links = mClassifier.generateLinks(text, mLinksOptions)
+                .getLinks();
         for (TextLinks.TextLink link : links) {
             if (text.subSequence(link.getStart(), link.getEnd()).equals(classifiedText)) {
                 assertEquals(type, link.getEntity(0));
                 assertEquals(startIndex, link.getStart());
                 assertEquals(endIndex, link.getEnd());
-                assertTrue(link.getConfidenceScore(type) > .9);
+                assertTrue(link.getConfidenceScore(type) > 0);
                 return;
             }
         }

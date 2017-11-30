@@ -456,6 +456,54 @@ public final class ContextHubManager {
     }
 
     /**
+     * Creates an interface to the ContextHubClient to send down to the service.
+     *
+     * @param callback the callback to invoke at the client process
+     * @param handler the handler to post callbacks for this client
+     *
+     * @return the callback interface
+     */
+    private IContextHubClientCallback createClientCallback(
+            ContextHubClientCallback callback, Handler handler) {
+        return new IContextHubClientCallback.Stub() {
+            @Override
+            public void onMessageFromNanoApp(NanoAppMessage message) {
+                handler.post(() -> callback.onMessageFromNanoApp(message));
+            }
+
+            @Override
+            public void onHubReset() {
+                handler.post(() -> callback.onHubReset());
+            }
+
+            @Override
+            public void onNanoAppAborted(long nanoAppId, int abortCode) {
+                handler.post(() -> callback.onNanoAppAborted(nanoAppId, abortCode));
+            }
+
+            @Override
+            public void onNanoAppLoaded(long nanoAppId) {
+                handler.post(() -> callback.onNanoAppLoaded(nanoAppId));
+            }
+
+            @Override
+            public void onNanoAppUnloaded(long nanoAppId) {
+                handler.post(() -> callback.onNanoAppUnloaded(nanoAppId));
+            }
+
+            @Override
+            public void onNanoAppEnabled(long nanoAppId) {
+                handler.post(() -> callback.onNanoAppEnabled(nanoAppId));
+            }
+
+            @Override
+            public void onNanoAppDisabled(long nanoAppId) {
+                handler.post(() -> callback.onNanoAppDisabled(nanoAppId));
+            }
+        };
+    }
+
+    /**
      * Creates and registers a client and its callback with the Context Hub Service.
      *
      * A client is registered with the Context Hub Service for a specified Context Hub. When the
@@ -463,19 +511,37 @@ public final class ContextHubManager {
      * {@link ContextHubClient} object, and receive notifications through the provided callback.
      *
      * @param callback the notification callback to register
-     * @param hubInfo the hub to attach this client to
-     * @param handler the handler to invoke the callback, if null uses the main thread's Looper
-     *
+     * @param hubInfo  the hub to attach this client to
+     * @param handler  the handler to invoke the callback, if null uses the main thread's Looper
      * @return the registered client object
      *
-     * @see ContextHubClientCallback
+     * @throws IllegalArgumentException if hubInfo does not represent a valid hub
+     * @throws IllegalStateException    if there were too many registered clients at the service
+     * @throws NullPointerException     if callback or hubInfo is null
      *
      * @hide
+     * @see ContextHubClientCallback
      */
     public ContextHubClient createClient(
             ContextHubClientCallback callback, ContextHubInfo hubInfo, @Nullable Handler handler) {
-        throw new UnsupportedOperationException(
-                "TODO: Implement this, and throw an exception on error");
+        if (callback == null) {
+            throw new NullPointerException("Callback cannot be null");
+        }
+        if (hubInfo == null) {
+            throw new NullPointerException("Hub info cannot be null");
+        }
+
+        Handler realHandler = (handler == null) ? new Handler(mMainLooper) : handler;
+        IContextHubClientCallback clientInterface = createClientCallback(callback, realHandler);
+
+        IContextHubClient client;
+        try {
+            client = mService.createClient(clientInterface, hubInfo.getId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+
+        return new ContextHubClient(client, clientInterface, hubInfo);
     }
 
     /**

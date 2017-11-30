@@ -69,6 +69,7 @@ easier.
         <item name="textAppearanceSmallPopupMenu">@style/TextAppearance.DeviceDefault.Widget.PopupMenu.Small</item>
 
         <!-- Button styles -->
+        <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonStyle">@style/Widget.DeviceDefault.Button</item>
 
         <item name="buttonStyleSmall">@style/Widget.DeviceDefault.Button.Small</item>
@@ -224,6 +225,7 @@ easier.
         <item name="textAppearanceButton">@style/TextAppearance.DeviceDefault.Widget.Button</item>
 
         <!-- Button styles -->
+        <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
     </style>
 
@@ -243,6 +245,7 @@ easier.
         <item name="textAppearanceButton">@style/TextAppearance.DeviceDefault.Widget.Button</item>
 
         <!-- Button styles -->
+        <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
     </style>
 
@@ -264,6 +267,7 @@ easier.
         <item name="textAppearanceButton">@style/TextAppearance.DeviceDefault.Widget.Button</item>
 
         <!-- Button styles -->
+        <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
     </style>
 
@@ -284,6 +288,7 @@ easier.
         <item name="textAppearanceButton">@style/TextAppearance.DeviceDefault.Widget.Button</item>
 
         <!-- Button styles -->
+        <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
     </style>
 
@@ -303,6 +308,7 @@ easier.
         <item name="textAppearanceButton">@style/TextAppearance.DeviceDefault.Widget.Button</item>
 
         <!-- Button styles -->
+        <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
 
         <!-- Color palette -->
@@ -331,6 +337,7 @@ easier.
         <item name="textAppearanceButton">@style/TextAppearance.DeviceDefault.Widget.Button</item>
 
         <!-- Button styles -->
+        <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
     </style>
 
@@ -349,6 +356,7 @@ easier.
         <item name="textAppearanceButton">@style/TextAppearance.DeviceDefault.Widget.Button</item>
 
         <!-- Button styles -->
+        <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
     </style>
 
@@ -368,6 +376,7 @@ easier.
         <item name="textAppearanceButton">@style/TextAppearance.DeviceDefault.Widget.Button</item>
 
         <!-- Button styles -->
+        <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
     </style>
 
@@ -403,6 +412,7 @@ easier.
         <item name="textAppearanceButton">@style/TextAppearance.DeviceDefault.Widget.Button</item>
 
         <!-- Button styles -->
+        <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
     </style>
 
@@ -423,6 +433,7 @@ easier.
         <item name="textAppearanceButton">@style/TextAppearance.DeviceDefault.Widget.Button</item>
 
         <!-- Button styles -->
+        <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
     </style>
 
@@ -441,6 +452,7 @@ easier.
         <item name="textAppearanceButton">@style/TextAppearance.DeviceDefault.Widget.Button</item>
 
         <!-- Button styles -->
+        <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
     </style>
 
@@ -461,6 +473,7 @@ easier.
         <item name="textAppearanceButton">@style/TextAppearance.DeviceDefault.Widget.Button</item>
 
         <!-- Button styles -->
+        <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
     </style>
 
@@ -480,6 +493,7 @@ easier.
         <item name="textAppearanceButton">@style/TextAppearance.DeviceDefault.Widget.Button</item>
 
         <!-- Button styles -->
+        <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
     </style>
 
@@ -499,6 +513,7 @@ easier.
         <item name="textAppearanceButton">@style/TextAppearance.DeviceDefault.Widget.Button</item>
 
         <!-- Button styles -->
+        <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
     </style>
 
@@ -518,6 +533,7 @@ easier.
         <item name="textAppearanceButton">@style/TextAppearance.DeviceDefault.Widget.Button</item>
 
         <!-- Button styles -->
+        <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
     </style>
 
@@ -537,6 +553,7 @@ easier.
         <item name="textAppearanceButton">@style/TextAppearance.DeviceDefault.Widget.Button</item>
 
         <!-- Button styles -->
+        <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
     </style>
 
@@ -556,6 +573,7 @@ easier.
         <item name="textAppearanceButton">@style/TextAppearance.DeviceDefault.Widget.Button</item>
 
         <!-- Button styles -->
+        <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
     </style>
 
@@ -573,6 +591,7 @@ easier.
         <item name="textAppearanceButton">@style/TextAppearance.DeviceDefault.Widget.Button</item>
 
         <!-- Button styles -->
+        <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
     </style>
 
@@ -590,6 +609,7 @@ easier.
         <item name="textAppearanceButton">@style/TextAppearance.DeviceDefault.Widget.Button</item>
 
         <!-- Button styles -->
+        <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
     </style>
 
@@ -614,6 +634,7 @@ easier.
         <item name="textAppearanceSmallPopupMenu">@style/TextAppearance.DeviceDefault.Widget.PopupMenu.Small</item>
 
         <!-- Button styles -->
+        <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonStyle">@style/Widget.DeviceDefault.Light.Button</item>
 
         <item name="buttonStyleSmall">@style/Widget.DeviceDefault.Light.Button.Small</item>
@@ -762,6 +783,7 @@ easier.
         <item name="textAppearanceButton">@style/TextAppearance.DeviceDefault.Widget.Button</item>
 
         <!-- Button styles -->
+        <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
     </style>
 
@@ -780,6 +802,7 @@ easier.
         <item name="textAppearanceButton">@style/TextAppearance.DeviceDefault.Widget.Button</item>
 
         <!-- Button styles -->
+        <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
     </style>
 
@@ -799,6 +822,7 @@ easier.
         <item name="textAppearanceButton">@style/TextAppearance.DeviceDefault.Widget.Button</item>
 
         <!-- Button styles -->
+        <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
     </style>
 
@@ -820,6 +844,7 @@ easier.
         <item name="textAppearanceButton">@style/TextAppearance.DeviceDefault.Widget.Button</item>
 
         <!-- Button styles -->
+        <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
     </style>
 
@@ -840,6 +865,7 @@ easier.
         <item name="textAppearanceButton">@style/TextAppearance.DeviceDefault.Widget.Button</item>
 
         <!-- Button styles -->
+        <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
     </style>
 
@@ -855,6 +881,7 @@ easier.
         <item name="alertDialogTheme">@style/Theme.DeviceDefault.Light.Dialog.Alert</item>
 
         <!-- Button styles -->
+        <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarStyle">@style/DeviceDefault.Light.ButtonBar.AlertDialog</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
         <item name="borderlessButtonStyle">@style/Widget.DeviceDefault.Light.Button.Borderless.Small</item>
@@ -885,6 +912,7 @@ easier.
         <item name="textAppearanceButton">@style/TextAppearance.DeviceDefault.Widget.Button</item>
 
         <!-- Button styles -->
+        <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
     </style>
 
@@ -903,6 +931,7 @@ easier.
         <item name="textAppearanceButton">@style/TextAppearance.DeviceDefault.Widget.Button</item>
 
         <!-- Button styles -->
+        <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
     </style>
 
@@ -922,6 +951,7 @@ easier.
         <item name="textAppearanceButton">@style/TextAppearance.DeviceDefault.Widget.Button</item>
 
         <!-- Button styles -->
+        <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
     </style>
 
@@ -967,6 +997,7 @@ easier.
         <item name="textAppearanceButton">@style/TextAppearance.DeviceDefault.Widget.Button</item>
 
         <!-- Button styles -->
+        <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
     </style>
 
@@ -987,6 +1018,7 @@ easier.
         <item name="textAppearanceButton">@style/TextAppearance.DeviceDefault.Widget.Button</item>
 
         <!-- Button styles -->
+        <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
     </style>
 
@@ -1005,6 +1037,7 @@ easier.
         <item name="textAppearanceButton">@style/TextAppearance.DeviceDefault.Widget.Button</item>
 
         <!-- Button styles -->
+        <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
     </style>
 
@@ -1025,6 +1058,7 @@ easier.
         <item name="textAppearanceButton">@style/TextAppearance.DeviceDefault.Widget.Button</item>
 
         <!-- Button styles -->
+        <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
     </style>
 
@@ -1044,6 +1078,7 @@ easier.
         <item name="textAppearanceButton">@style/TextAppearance.DeviceDefault.Widget.Button</item>
 
         <!-- Button styles -->
+        <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
     </style>
 
@@ -1061,6 +1096,7 @@ easier.
         <item name="textAppearanceButton">@style/TextAppearance.DeviceDefault.Widget.Button</item>
 
         <!-- Button styles -->
+        <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
     </style>
 
@@ -1078,6 +1114,7 @@ easier.
         <item name="textAppearanceButton">@style/TextAppearance.DeviceDefault.Widget.Button</item>
 
         <!-- Button styles -->
+        <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
     </style>
 
@@ -1088,6 +1125,7 @@ easier.
         <item name="popupTheme">@style/ThemeOverlay.DeviceDefault.Popup.Light</item>
 
         <!-- Color palette -->
+        <item name="colorBackground">@color/background_device_default_light</item>
         <item name="colorPrimary">@color/primary_device_default_settings_light</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_settings_light</item>
         <item name="colorSecondary">@color/secondary_device_default_settings_light</item>
@@ -1107,6 +1145,7 @@ easier.
         <item name="textAppearanceButton">@style/TextAppearance.DeviceDefault.Widget.Button</item>
 
         <!-- Button styles -->
+        <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
     </style>
 
@@ -1125,6 +1164,7 @@ easier.
         <item name="textAppearanceButton">@style/TextAppearance.DeviceDefault.Widget.Button</item>
 
         <!-- Button styles -->
+        <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
     </style>
 
@@ -1153,6 +1193,7 @@ easier.
         <item name="textAppearanceButton">@style/TextAppearance.DeviceDefault.Widget.Button</item>
 
         <!-- Button styles -->
+        <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
     </style>
 
@@ -1171,6 +1212,7 @@ easier.
         <item name="textAppearanceButton">@style/TextAppearance.DeviceDefault.Widget.Button</item>
 
         <!-- Button styles -->
+        <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
     </style>
 
@@ -1189,6 +1231,7 @@ easier.
         <item name="textAppearanceButton">@style/TextAppearance.DeviceDefault.Widget.Button</item>
 
         <!-- Button styles -->
+        <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
     </style>
 
@@ -1207,6 +1250,7 @@ easier.
         <item name="textAppearanceButton">@style/TextAppearance.DeviceDefault.Widget.Button</item>
 
         <!-- Button styles -->
+        <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
     </style>
 

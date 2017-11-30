@@ -25,6 +25,7 @@
 #include <nativehelper/ScopedPrimitiveArray.h>
 #include <nativehelper/JNIHelp.h>
 #include "core_jni_helpers.h"
+#include "scoped_nullable_primitive_array.h"
 #include <cstdint>
 #include <vector>
 #include <list>
@@ -87,9 +88,8 @@ static void nFinish(jlong nativePtr) {
 static void recycleCopy(JNIEnv* env, jobject recycle, jintArray recycleBreaks,
                         jfloatArray recycleWidths, jfloatArray recycleAscents,
                         jfloatArray recycleDescents, jintArray recycleFlags,
-                        jint recycleLength, size_t nBreaks, const jint* breaks,
-                        const jfloat* widths, const jfloat* ascents, const jfloat* descents,
-                        const jint* flags) {
+                        jint recycleLength, const minikin::LineBreakResult& result) {
+    const size_t nBreaks = result.breakPoints.size();
     if ((size_t)recycleLength < nBreaks) {
         // have to reallocate buffers
         recycleBreaks = env->NewIntArray(nBreaks);
@@ -105,11 +105,11 @@ static void recycleCopy(JNIEnv* env, jobject recycle, jintArray recycleBreaks,
         env->SetObjectField(recycle, gLineBreaks_fieldID.flags, recycleFlags);
     }
     // copy data
-    env->SetIntArrayRegion(recycleBreaks, 0, nBreaks, breaks);
-    env->SetFloatArrayRegion(recycleWidths, 0, nBreaks, widths);
-    env->SetFloatArrayRegion(recycleAscents, 0, nBreaks, ascents);
-    env->SetFloatArrayRegion(recycleDescents, 0, nBreaks, descents);
-    env->SetIntArrayRegion(recycleFlags, 0, nBreaks, flags);
+    env->SetIntArrayRegion(recycleBreaks, 0, nBreaks, result.breakPoints.data());
+    env->SetFloatArrayRegion(recycleWidths, 0, nBreaks, result.widths.data());
+    env->SetFloatArrayRegion(recycleAscents, 0, nBreaks, result.ascents.data());
+    env->SetFloatArrayRegion(recycleDescents, 0, nBreaks, result.descents.data());
+    env->SetIntArrayRegion(recycleFlags, 0, nBreaks, result.flags.data());
 }
 
 static jint nComputeLineBreaks(JNIEnv* env, jclass, jlong nativePtr,
@@ -136,34 +136,22 @@ static jint nComputeLineBreaks(JNIEnv* env, jclass, jlong nativePtr,
     minikin::android::StaticLayoutNative* builder = toNative(nativePtr);
 
     ScopedCharArrayRO text(env, javaText);
+    ScopedNullableIntArrayRO tabStops(env, variableTabStops);
 
-    // TODO: Reorganize minikin APIs.
-    minikin::LineBreaker b(minikin::U16StringPiece(text.get(), length));
-    if (variableTabStops == nullptr) {
-        b.setTabStops(nullptr, 0, defaultTabStop);
-    } else {
-        ScopedIntArrayRO stops(env, variableTabStops);
-        b.setTabStops(stops.get(), stops.size(), defaultTabStop);
-    }
-    b.setStrategy(builder->getStrategy());
-    b.setHyphenationFrequency(builder->getFrequency());
-    b.setJustified(builder->isJustified());
-    b.setLineWidthDelegate(builder->buildLineWidthDelegate(
-            firstWidth, firstWidthLineCount, restWidth, indentsOffset));
-
-    builder->addRuns(&b);
-
-    size_t nBreaks = b.computeBreaks();
+    minikin::U16StringPiece u16Text(text.get(), length);
+    minikin::MeasuredText measuredText = builder->measureText(u16Text);
+    minikin::LineBreakResult result = builder->computeBreaks(
+            u16Text, measuredText, firstWidth, firstWidthLineCount, restWidth, indentsOffset,
+            tabStops.get(), tabStops.size(), defaultTabStop);
 
     recycleCopy(env, recycle, recycleBreaks, recycleWidths, recycleAscents, recycleDescents,
-            recycleFlags, recycleLength, nBreaks, b.getBreaks(), b.getWidths(), b.getAscents(),
-            b.getDescents(), b.getFlags());
+            recycleFlags, recycleLength, result);
 
-    env->SetFloatArrayRegion(charWidths, 0, b.size(), b.charWidths());
+    env->SetFloatArrayRegion(charWidths, 0, measuredText.widths.size(), measuredText.widths.data());
 
     builder->clearRuns();
 
-    return static_cast<jint>(nBreaks);
+    return static_cast<jint>(result.breakPoints.size());
 }
 
 // Basically similar to Paint.getTextRunAdvances but with C++ interface

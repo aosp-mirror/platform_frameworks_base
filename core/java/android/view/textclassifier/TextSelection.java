@@ -26,6 +26,7 @@ import android.view.textclassifier.TextClassifier.EntityType;
 import com.android.internal.util.Preconditions;
 
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Information about where text selection should be.
@@ -114,8 +115,8 @@ public final class TextSelection {
 
     @Override
     public String toString() {
-        return String.format("TextSelection {%d, %d, %s}",
-                mStartIndex, mEndIndex, mEntityConfidence);
+        return String.format(Locale.US,
+                "TextSelection {%d, %d, %s}", mStartIndex, mEndIndex, mEntityConfidence);
     }
 
     /**
@@ -185,7 +186,7 @@ public final class TextSelection {
     }
 
     /**
-     * TextSelection optional input parameters.
+     * Optional input parameters for generating TextSelection.
      */
     public static final class Options {
 

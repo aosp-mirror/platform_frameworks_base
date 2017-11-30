@@ -94,6 +94,7 @@ LOCAL_SHARED_LIBRARIES += \
     android.hardware.broadcastradio@1.2 \
     android.hardware.contexthub@1.0 \
     android.hardware.gnss@1.0 \
+    android.hardware.gnss@1.1 \
     android.hardware.ir@1.0 \
     android.hardware.light@2.0 \
     android.hardware.power@1.0 \

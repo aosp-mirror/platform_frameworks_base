@@ -4308,6 +4308,10 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             final ActivityRecord r = task.mActivities.get(i);
             if (r.app != null && r.app.thread != null) {
                 mPipModeChangedActivities.add(r);
+                // If we are scheduling pip change, then remove this activity from multi-window
+                // change list as the processing of pip change will make sure multi-window changed
+                // message is processed in the right order relative to pip changed.
+                mMultiWindowModeChangedActivities.remove(r);
             }
         }
         mPipModeChangedTargetStackBounds = targetStackBounds;

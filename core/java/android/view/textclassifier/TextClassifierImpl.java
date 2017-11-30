@@ -90,8 +90,8 @@ final class TextClassifierImpl implements TextClassifier {
     @Override
     public TextSelection suggestSelection(
             @NonNull CharSequence text, int selectionStartIndex, int selectionEndIndex,
-            @Nullable TextSelection.Options options) {
-        validateInput(text, selectionStartIndex, selectionEndIndex);
+            @NonNull TextSelection.Options options) {
+        Utils.validateInput(text, selectionStartIndex, selectionEndIndex);
         try {
             if (text.length() > 0) {
                 final LocaleList locales = (options == null) ? null : options.getDefaultLocales();
@@ -141,18 +141,10 @@ final class TextClassifierImpl implements TextClassifier {
     }
 
     @Override
-    public TextSelection suggestSelection(
-            @NonNull CharSequence text, int selectionStartIndex, int selectionEndIndex,
-            @Nullable LocaleList defaultLocales) {
-        return suggestSelection(text, selectionStartIndex, selectionEndIndex,
-                new TextSelection.Options().setDefaultLocales(defaultLocales));
-    }
-
-    @Override
     public TextClassification classifyText(
             @NonNull CharSequence text, int startIndex, int endIndex,
-            @Nullable TextClassification.Options options) {
-        validateInput(text, startIndex, endIndex);
+            @NonNull TextClassification.Options options) {
+        Utils.validateInput(text, startIndex, endIndex);
         try {
             if (text.length() > 0) {
                 final String string = text.toString();
@@ -176,17 +168,9 @@ final class TextClassifierImpl implements TextClassifier {
     }
 
     @Override
-    public TextClassification classifyText(
-            @NonNull CharSequence text, int startIndex, int endIndex,
-            @Nullable LocaleList defaultLocales) {
-        return classifyText(text, startIndex, endIndex,
-                new TextClassification.Options().setDefaultLocales(defaultLocales));
-    }
-
-    @Override
     public TextLinks generateLinks(
-            @NonNull CharSequence text, @Nullable TextLinks.Options options) {
-        Preconditions.checkNotNull(text);
+            @NonNull CharSequence text, @NonNull TextLinks.Options options) {
+        Utils.validateInput(text);
         final String textString = text.toString();
         final TextLinks.Builder builder = new TextLinks.Builder(textString);
         try {
@@ -483,17 +467,6 @@ final class TextClassifierImpl implements TextClassifier {
         } catch (IOException e) {
             Log.e(LOG_TAG, "Error closing file.", e);
         }
-    }
-
-    /**
-     * @throws IllegalArgumentException if text is null; startIndex is negative;
-     *      endIndex is greater than text.length() or is not greater than startIndex
-     */
-    private static void validateInput(@NonNull CharSequence text, int startIndex, int endIndex) {
-        Preconditions.checkArgument(text != null);
-        Preconditions.checkArgument(startIndex >= 0);
-        Preconditions.checkArgument(endIndex <= text.length());
-        Preconditions.checkArgument(endIndex > startIndex);
     }
 
     /**

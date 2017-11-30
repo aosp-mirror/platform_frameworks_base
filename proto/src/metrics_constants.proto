@@ -5013,6 +5013,11 @@ message MetricsEvent {
     // OS: P
     FIELD_SELECTION_WIDGET_VERSION = 1262;
 
+    // OPEN: Settings > Battery(version 2)
+    // CATEGORY: SETTINGS
+    // OS: P
+    FUELGAUGE_POWER_USAGE_SUMMARY_V2 = 1263;
+
     // ---- End P Constants, all P constants go above this line ----
 
     // Add new aosp constants above this line.

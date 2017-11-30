@@ -364,13 +364,13 @@ public class WebViewClient {
     }
 
     /**
-     * Notify the host application to handle a SSL client certificate
-     * request. The host application is responsible for showing the UI
-     * if desired and providing the keys. There are three ways to
-     * respond: proceed(), cancel() or ignore(). Webview stores the response
-     * in memory (for the life of the application) if proceed() or cancel() is
-     * called and does not call {@code onReceivedClientCertRequest()} again for the
-     * same host and port pair. Webview does not store the response if ignore()
+     * Notify the host application to handle a SSL client certificate request. The host application
+     * is responsible for showing the UI if desired and providing the keys. There are three ways to
+     * respond: {@link ClientCertRequest#proceed}, {@link ClientCertRequest#cancel}, or {@link
+     * ClientCertRequest#ignore}. Webview stores the response in memory (for the life of the
+     * application) if {@link ClientCertRequest#proceed} or {@link ClientCertRequest#cancel} is
+     * called and does not call {@code onReceivedClientCertRequest()} again for the same host and
+     * port pair. Webview does not store the response if {@link ClientCertRequest#ignore}
      * is called. Note that, multiple layers in chromium network stack might be
      * caching the responses, so the behavior for ignore is only a best case
      * effort.

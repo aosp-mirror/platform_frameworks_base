@@ -2853,6 +2853,7 @@
       <!-- @hide For use by platform and tools only. Developers should not specify this value. -->
       <public name="compileSdkVersionCodename" />
       <public name="screenReaderFocusable" />
+      <public name="buttonCornerRadius" />
     </public-group>
 
     <public-group type="style" first-id="0x010302e0">

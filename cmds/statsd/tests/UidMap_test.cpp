@@ -15,6 +15,7 @@
 #include "packages/UidMap.h"
 #include "StatsLogProcessor.h"
 #include "config/ConfigKey.h"
+#include "guardrail/StatsdStats.h"
 #include "logd/LogEvent.h"
 #include "statslog.h"
 
@@ -35,7 +36,8 @@ const string kApp2 = "app2.sharing.1";
 TEST(UidMapTest, TestIsolatedUID) {
     sp<UidMap> m = new UidMap();
     sp<AnomalyMonitor> anomalyMonitor;
-    StatsLogProcessor p(m, anomalyMonitor, nullptr);
+    // Construct the processor with a dummy sendBroadcast function that does nothing.
+    StatsLogProcessor p(m, anomalyMonitor, [](const ConfigKey& key) {});
     LogEvent addEvent(android::util::ISOLATED_UID_CHANGED, 1);
     addEvent.write(100);  // parent UID
     addEvent.write(101);  // isolated UID
@@ -114,26 +116,34 @@ TEST(UidMapTest, TestClearingOutput) {
     versions.push_back(4);
     versions.push_back(5);
     m.updateMap(1, uids, versions, apps);
+    EXPECT_EQ(1, m.mOutput.snapshots_size());
 
     UidMapping results = m.getOutput(2, config1);
     EXPECT_EQ(1, results.snapshots_size());
 
     // It should be cleared now
+    EXPECT_EQ(0, m.mOutput.snapshots_size());
     results = m.getOutput(3, config1);
     EXPECT_EQ(0, results.snapshots_size());
 
     // Now add another configuration.
     m.OnConfigUpdated(config2);
     m.updateApp(5, String16(kApp1.c_str()), 1000, 40);
+    EXPECT_EQ(1, m.mOutput.changes_size());
     results = m.getOutput(6, config1);
     EXPECT_EQ(0, results.snapshots_size());
     EXPECT_EQ(1, results.changes_size());
+    EXPECT_EQ(1, m.mOutput.changes_size());
 
-    // Now we still haven't been able to delete anything
+    // Add another delta update.
     m.updateApp(7, String16(kApp2.c_str()), 1001, 41);
+    EXPECT_EQ(2, m.mOutput.changes_size());
+
+    // We still can't remove anything.
     results = m.getOutput(8, config1);
     EXPECT_EQ(0, results.snapshots_size());
     EXPECT_EQ(2, results.changes_size());
+    EXPECT_EQ(2, m.mOutput.changes_size());
 
     results = m.getOutput(9, config2);
     EXPECT_EQ(0, results.snapshots_size());
@@ -141,6 +151,66 @@ TEST(UidMapTest, TestClearingOutput) {
     // At this point both should be cleared.
     EXPECT_EQ(0, m.mOutput.snapshots_size());
     EXPECT_EQ(0, m.mOutput.changes_size());
+}
+
+TEST(UidMapTest, TestMemoryComputed) {
+    UidMap m;
+
+    ConfigKey config1(1, "config1");
+    m.OnConfigUpdated(config1);
+
+    size_t startBytes = m.mBytesUsed;
+    vector<int32_t> uids;
+    vector<int32_t> versions;
+    vector<String16> apps;
+    uids.push_back(1000);
+    apps.push_back(String16(kApp1.c_str()));
+    versions.push_back(1);
+    m.updateMap(1, uids, versions, apps);
+    size_t snapshot_bytes = m.mBytesUsed;
+    EXPECT_TRUE(snapshot_bytes > startBytes);
+
+    m.updateApp(3, String16(kApp1.c_str()), 1000, 40);
+    EXPECT_TRUE(m.mBytesUsed > snapshot_bytes);
+    size_t bytesWithSnapshotChange = m.mBytesUsed;
+
+    m.getOutput(2, config1);
+    EXPECT_TRUE(m.mBytesUsed < bytesWithSnapshotChange);
+    size_t prevBytes = m.mBytesUsed;
+
+    m.getOutput(4, config1);
+    EXPECT_TRUE(m.mBytesUsed < prevBytes);
+}
+
+TEST(UidMapTest, TestMemoryGuardrail) {
+    UidMap m;
+    string buf;
+
+    ConfigKey config1(1, "config1");
+    m.OnConfigUpdated(config1);
+
+    size_t startBytes = m.mBytesUsed;
+    vector<int32_t> uids;
+    vector<int32_t> versions;
+    vector<String16> apps;
+    for (int i = 0; i < 100; i++) {
+        uids.push_back(1);
+        buf = "EXTREMELY_LONG_STRING_FOR_APP_TO_WASTE_MEMORY." + to_string(i);
+        apps.push_back(String16(buf.c_str()));
+        versions.push_back(1);
+    }
+    m.updateMap(1, uids, versions, apps);
+    EXPECT_EQ(1, m.mOutput.snapshots_size());
+
+    m.updateApp(3, String16("EXTREMELY_LONG_STRING_FOR_APP_TO_WASTE_MEMORY.0"), 1000, 2);
+    EXPECT_EQ(1, m.mOutput.snapshots_size());
+    EXPECT_EQ(1, m.mOutput.changes_size());
+
+    // Now force deletion by limiting the memory to hold one delta change.
+    m.maxBytesOverride = 80; // Since the app string alone requires >45 characters.
+    m.updateApp(5, String16("EXTREMELY_LONG_STRING_FOR_APP_TO_WASTE_MEMORY.0"), 1000, 4);
+    EXPECT_EQ(0, m.mOutput.snapshots_size());
+    EXPECT_EQ(1, m.mOutput.changes_size());
 }
 #else
 GTEST_LOG_(INFO) << "This test does nothing.\n";

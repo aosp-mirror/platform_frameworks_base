@@ -253,7 +253,7 @@ public class TileUtils {
         }
         ArrayList<DashboardCategory> categories = new ArrayList<>(categoryMap.values());
         for (DashboardCategory category : categories) {
-            Collections.sort(category.tiles, TILE_COMPARATOR);
+            category.sortTiles();
         }
         Collections.sort(categories, CATEGORY_COMPARATOR);
         if (DEBUG_TIMING) Log.d(LOG_TAG, "getCategories took "
@@ -594,14 +594,6 @@ public class TileUtils {
         }
         return pathSegments.get(0);
     }
-
-    public static final Comparator<Tile> TILE_COMPARATOR =
-            new Comparator<Tile>() {
-        @Override
-        public int compare(Tile lhs, Tile rhs) {
-            return rhs.priority - lhs.priority;
-        }
-    };
 
     private static final Comparator<DashboardCategory> CATEGORY_COMPARATOR =
             new Comparator<DashboardCategory>() {

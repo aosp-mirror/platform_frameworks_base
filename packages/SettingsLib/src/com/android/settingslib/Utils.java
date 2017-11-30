@@ -105,7 +105,8 @@ public class Utils {
             }
         }
         return new UserIconDrawable(iconSize).setIconDrawable(
-                UserIcons.getDefaultUserIcon(user.id, /* light= */ false)).bake();
+                UserIcons.getDefaultUserIcon(context.getResources(), user.id, /* light= */ false))
+                .bake();
     }
 
     /** Formats a double from 0.0..100.0 with an option to round **/

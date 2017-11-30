@@ -21,18 +21,16 @@ import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.Paint.Align;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
-import android.graphics.Typeface;
-import android.graphics.Paint.Align;
 import android.graphics.Region.Op;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.inputmethodservice.Keyboard.Key;
 import android.media.AudioManager;
 import android.os.Handler;
 import android.os.Message;
-import android.os.UserHandle;
-import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.GestureDetector;
@@ -986,6 +984,9 @@ public class KeyboardView extends View implements View.OnClickListener {
 
     private void sendAccessibilityEventForUnicodeCharacter(int eventType, int code) {
         if (mAccessibilityManager.isEnabled()) {
+            if (!mAccessibilityManager.isObservedEventType(eventType)) {
+                return;
+            }
             AccessibilityEvent event = AccessibilityEvent.obtain(eventType);
             onInitializeAccessibilityEvent(event);
             final String text;

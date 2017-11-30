@@ -53,11 +53,9 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
-import com.android.systemui.statusbar.ExpandableView;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.notification.NotificationViewWrapper;
-import com.android.systemui.statusbar.stack.ScrollContainer;
 import com.android.systemui.statusbar.stack.StackStateAnimator;
 
 /**
@@ -82,8 +80,6 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
 
     private NotificationData.Entry mEntry;
 
-    private ScrollContainer mScrollContainer;
-    private View mScrollContainerChild;
     private boolean mRemoved;
 
     private int mRevealCx;
@@ -347,39 +343,14 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         if (ev.getAction() == MotionEvent.ACTION_DOWN) {
-            findScrollContainer();
-            if (mScrollContainer != null) {
-                mScrollContainer.requestDisallowLongPress();
-                mScrollContainer.requestDisallowDismiss();
-            }
+            mController.requestDisallowLongPressAndDismiss();
         }
         return super.onInterceptTouchEvent(ev);
     }
 
     public boolean requestScrollTo() {
-        findScrollContainer();
-        mScrollContainer.lockScrollTo(mScrollContainerChild);
+        mController.lockScrollTo(mEntry);
         return true;
-    }
-
-    private void findScrollContainer() {
-        if (mScrollContainer == null) {
-            mScrollContainerChild = null;
-            ViewParent p = this;
-            while (p != null) {
-                if (mScrollContainerChild == null && p instanceof ExpandableView) {
-                    mScrollContainerChild = (View) p;
-                }
-                if (p.getParent() instanceof ScrollContainer) {
-                    mScrollContainer = (ScrollContainer) p.getParent();
-                    if (mScrollContainerChild == null) {
-                        mScrollContainerChild = (View) p;
-                    }
-                    break;
-                }
-                p = p.getParent();
-            }
-        }
     }
 
     public boolean isActive() {

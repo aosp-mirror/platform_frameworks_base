@@ -45,6 +45,7 @@ const int FIELD_ID_MATCHER_STATS = 4;
 const int FIELD_ID_CONDITION_STATS = 5;
 const int FIELD_ID_METRIC_STATS = 6;
 const int FIELD_ID_ATOM_STATS = 7;
+const int FIELD_ID_UIDMAP_STATS = 8;
 
 const int FIELD_ID_MATCHER_STATS_NAME = 1;
 const int FIELD_ID_MATCHER_STATS_COUNT = 2;
@@ -117,36 +118,81 @@ void StatsdStats::noteConfigRemoved(const ConfigKey& key) {
 }
 
 void StatsdStats::noteBroadcastSent(const ConfigKey& key) {
+    noteBroadcastSent(key, time(nullptr));
+}
+
+void StatsdStats::noteBroadcastSent(const ConfigKey& key, int32_t timeSec) {
     lock_guard<std::mutex> lock(mLock);
     auto it = mConfigStats.find(key);
     if (it == mConfigStats.end()) {
         ALOGE("Config key %s not found!", key.ToString().c_str());
         return;
     }
-
-    it->second.add_broadcast_sent_time_sec(time(nullptr));
+    if (it->second.broadcast_sent_time_sec_size() >= kMaxTimestampCount) {
+        auto timestampList = it->second.mutable_broadcast_sent_time_sec();
+        // This is O(N) operation. It shouldn't happen often, and N is only 20.
+        timestampList->erase(timestampList->begin());
+    }
+    it->second.add_broadcast_sent_time_sec(timeSec);
 }
 
 void StatsdStats::noteDataDropped(const ConfigKey& key) {
+    noteDataDropped(key, time(nullptr));
+}
+
+void StatsdStats::noteDataDropped(const ConfigKey& key, int32_t timeSec) {
     lock_guard<std::mutex> lock(mLock);
     auto it = mConfigStats.find(key);
     if (it == mConfigStats.end()) {
         ALOGE("Config key %s not found!", key.ToString().c_str());
         return;
     }
-
-    it->second.add_data_drop_time_sec(time(nullptr));
+    if (it->second.data_drop_time_sec_size() >= kMaxTimestampCount) {
+        auto timestampList = it->second.mutable_data_drop_time_sec();
+        // This is O(N) operation. It shouldn't happen often, and N is only 20.
+        timestampList->erase(timestampList->begin());
+    }
+    it->second.add_data_drop_time_sec(timeSec);
 }
 
 void StatsdStats::noteMetricsReportSent(const ConfigKey& key) {
+    noteMetricsReportSent(key, time(nullptr));
+}
+
+void StatsdStats::noteMetricsReportSent(const ConfigKey& key, int32_t timeSec) {
     lock_guard<std::mutex> lock(mLock);
     auto it = mConfigStats.find(key);
     if (it == mConfigStats.end()) {
         ALOGE("Config key %s not found!", key.ToString().c_str());
         return;
     }
+    if (it->second.dump_report_time_sec_size() >= kMaxTimestampCount) {
+        auto timestampList = it->second.mutable_dump_report_time_sec();
+        // This is O(N) operation. It shouldn't happen often, and N is only 20.
+        timestampList->erase(timestampList->begin());
+    }
+    it->second.add_dump_report_time_sec(timeSec);
+}
 
-    it->second.add_dump_report_time_sec(time(nullptr));
+void StatsdStats::noteUidMapDropped(int snapshots, int deltas) {
+    lock_guard<std::mutex> lock(mLock);
+    mUidMapStats.set_dropped_snapshots(mUidMapStats.dropped_snapshots() + snapshots);
+    mUidMapStats.set_dropped_changes(mUidMapStats.dropped_changes() + deltas);
+}
+
+void StatsdStats::setUidMapSnapshots(int snapshots) {
+    lock_guard<std::mutex> lock(mLock);
+    mUidMapStats.set_snapshots(snapshots);
+}
+
+void StatsdStats::setUidMapChanges(int changes) {
+    lock_guard<std::mutex> lock(mLock);
+    mUidMapStats.set_changes(changes);
+}
+
+void StatsdStats::setCurrentUidMapMemory(int bytes) {
+    lock_guard<std::mutex> lock(mLock);
+    mUidMapStats.set_bytes_used(bytes);
 }
 
 void StatsdStats::noteConditionDimensionSize(const ConfigKey& key, const string& name, int size) {
@@ -201,6 +247,14 @@ void StatsdStats::resetInternalLocked() {
     mMetricsStats.clear();
     std::fill(mPushedAtomStats.begin(), mPushedAtomStats.end(), 0);
     mMatcherStats.clear();
+    for (auto& config : mConfigStats) {
+        config.second.clear_broadcast_sent_time_sec();
+        config.second.clear_data_drop_time_sec();
+        config.second.clear_dump_report_time_sec();
+        config.second.clear_matcher_stats();
+        config.second.clear_condition_stats();
+        config.second.clear_metric_stats();
+    }
 }
 
 void StatsdStats::addSubStatsToConfig(const ConfigKey& key,
@@ -331,6 +385,15 @@ void StatsdStats::dumpStats(std::vector<uint8_t>* output, bool reset) {
             VLOG("Atom %lu->%d\n", (unsigned long)i, mPushedAtomStats[i]);
         }
     }
+
+    const int numBytes = mUidMapStats.ByteSize();
+    vector<char> buffer(numBytes);
+    mUidMapStats.SerializeToArray(&buffer[0], numBytes);
+    proto.write(FIELD_TYPE_MESSAGE | FIELD_ID_UIDMAP_STATS, &buffer[0], buffer.size());
+    VLOG("UID map stats: bytes=%d, snapshots=%d, changes=%d, snapshots lost=%d, changes "
+         "lost=%d",
+         mUidMapStats.bytes_used(), mUidMapStats.snapshots(), mUidMapStats.changes(),
+         mUidMapStats.dropped_snapshots(), mUidMapStats.dropped_changes());
 
     output->clear();
     size_t bufferSize = proto.size();

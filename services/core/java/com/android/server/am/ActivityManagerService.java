@@ -10522,12 +10522,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                             + " non-standard task " + taskId + " to windowing mode="
                             + windowingMode);
                 }
-                final ActivityDisplay display = task.getStack().getDisplay();
-                final ActivityStack stack = display.getOrCreateStack(windowingMode,
-                        task.getStack().getActivityType(), toTop);
-                // TODO: Use ActivityStack.setWindowingMode instead of re-parenting.
-                task.reparent(stack, toTop, REPARENT_KEEP_STACK_AT_FRONT, ANIMATE, !DEFER_RESUME,
-                        "moveTaskToStack");
+
+                final ActivityStack stack = task.getStack();
+                if (toTop) {
+                    stack.moveToFront("setTaskWindowingMode", task);
+                }
+                stack.setWindowingMode(windowingMode);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }

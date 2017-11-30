@@ -154,7 +154,9 @@ public class UserInfoControllerImpl implements UserInfoController {
                     avatar = new UserIconDrawable(avatarSize)
                             .setIcon(rawAvatar).setBadgeIfManagedUser(mContext, userId).bake();
                 } else {
-                    avatar = UserIcons.getDefaultUserIcon(isGuest? UserHandle.USER_NULL : userId,
+                    avatar = UserIcons.getDefaultUserIcon(
+                            context.getResources(),
+                            isGuest? UserHandle.USER_NULL : userId,
                             lightIcon);
                 }
 

@@ -1016,6 +1016,9 @@
         <!-- Style for the "neutral" buttons within button bars. -->
         <attr name="buttonBarNeutralButtonStyle" format="reference" />
 
+        <!-- Corner radius of buttons. -->
+        <attr name="buttonCornerRadius" format="dimension" />
+
         <!-- Style for the search query widget. -->
         <attr name="searchViewStyle" format="reference" />
 

@@ -4,16 +4,16 @@ filegroup {
 }
 
 // only used by key_store_service
-cc_library_static {
+cc_library_shared {
     name: "libkeystore_aidl",
     srcs: ["android/security/IKeystoreService.aidl"],
     aidl: {
         export_aidl_headers: true,
-        include_dirs: ["frameworks/base/core/java/"],
+        include_dirs: [
+            "frameworks/base/core/java/",
+            "system/security/keystore/",
+        ],
     },
-    header_libs: [
-        "libkeystore_headers",
-    ],
     shared_libs: [
         "libbinder",
         "libcutils",
@@ -22,7 +22,12 @@ cc_library_static {
         "libhidltransport",
         "libhwbinder",
         "liblog",
+        "libkeystore_parcelables",
         "libselinux",
         "libutils",
+    ],
+    export_shared_lib_headers: [
+        "libbinder",
+        "libkeystore_parcelables",
     ],
 }

@@ -60,4 +60,9 @@ public class NotificationMediaTemplateViewWrapper extends NotificationTemplateVi
     public boolean isDimmable() {
         return getCustomBackgroundColor() == 0;
     }
+
+    @Override
+    public boolean shouldClipToSidePaddings() {
+        return true;
+    }
 }
