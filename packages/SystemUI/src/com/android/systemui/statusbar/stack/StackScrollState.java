@@ -84,6 +84,7 @@ public class StackScrollState {
         viewState.scaleX = view.getScaleX();
         viewState.scaleY = view.getScaleY();
         viewState.inShelf = false;
+        viewState.headsUpIsVisible = false;
     }
 
     public ExpandableViewState getViewStateForView(View requestedView) {

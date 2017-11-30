@@ -95,6 +95,12 @@ public class ExpandableViewState extends ViewState {
     public boolean inShelf;
 
     /**
+     * A state indicating whether a headsup is currently fully visible, even when not scrolled.
+     * Only valid if the view is heads upped.
+     */
+    public boolean headsUpIsVisible;
+
+    /**
      * How much the child overlaps with the previous child on top. This is used to
      * show the background properly when the child on top is translating away.
      */
@@ -126,6 +132,7 @@ public class ExpandableViewState extends ViewState {
             clipTopAmount = svs.clipTopAmount;
             notGoneIndex = svs.notGoneIndex;
             location = svs.location;
+            headsUpIsVisible = svs.headsUpIsVisible;
         }
     }
 
@@ -175,6 +182,10 @@ public class ExpandableViewState extends ViewState {
 
             expandableView.setTransformingInShelf(false);
             expandableView.setInShelf(inShelf);
+
+            if (headsUpIsVisible) {
+                expandableView.setHeadsUpIsVisible();
+            }
         }
     }
 
@@ -229,6 +240,10 @@ public class ExpandableViewState extends ViewState {
             expandableView.setTransformingInShelf(true);
         }
         expandableView.setInShelf(this.inShelf);
+
+        if (headsUpIsVisible) {
+            expandableView.setHeadsUpIsVisible();
+        }
     }
 
     private void startHeightAnimation(final ExpandableView child, AnimationProperties properties) {

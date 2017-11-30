@@ -624,7 +624,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         if (childViewState == null) {
             return false;
         }
-        if ((childViewState.location &= ExpandableViewState.VISIBLE_LOCATIONS) == 0) {
+        if ((childViewState.location & ExpandableViewState.VISIBLE_LOCATIONS) == 0) {
             return false;
         }
         if (row.getVisibility() != View.VISIBLE) {
