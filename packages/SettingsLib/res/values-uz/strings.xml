@@ -33,15 +33,13 @@
     <string name="wifi_check_password_try_again" msgid="516958988102584767">"Parolni tekshirib, qaytadan urining"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"Xizmat doirasidan tashqarida"</string>
     <string name="wifi_no_internet_no_reconnect" msgid="5724903347310541706">"Avtomatik ravishda ulanilmaydi"</string>
-    <!-- no translation found for wifi_no_internet (4663834955626848401) -->
-    <skip />
+    <string name="wifi_no_internet" msgid="4663834955626848401">"Internet aloqasi yo‘q"</string>
     <string name="saved_network" msgid="4352716707126620811">"<xliff:g id="NAME">%1$s</xliff:g> tomonidan saqlangan"</string>
     <string name="connected_via_network_scorer" msgid="5713793306870815341">"%1$s orqali avtomatik ulandi"</string>
     <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"Tarmoqlar reytingi muallifi orqali avtomatik ulandi"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"%1$s orqali ulangan"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"%1$s orqali ishlaydi"</string>
-    <!-- no translation found for wifi_connected_no_internet (8202906332837777829) -->
-    <skip />
+    <string name="wifi_connected_no_internet" msgid="8202906332837777829">"Ulangan, lekin internet aloqasi yo‘q"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"Internet kirish nuqtasi vaqtinchalik to‘lgan"</string>
     <string name="connected_via_carrier" msgid="7583780074526041912">"%1$s orqali ulangan"</string>
     <string name="available_via_carrier" msgid="1469036129740799053">"%1$s orqali ishlaydi"</string>
@@ -86,8 +84,7 @@
     <string name="bluetooth_hid_profile_summary_connected" msgid="3381760054215168689">"Kiritish qurilmasiga ulanildi"</string>
     <string name="bluetooth_pan_user_profile_summary_connected" msgid="6436258151814414028">"Internet manbai qurilmasiga ulanildi"</string>
     <string name="bluetooth_pan_nap_profile_summary_connected" msgid="1322694224800769308">"Qurilma modem rejimida ishlamoqda"</string>
-    <!-- no translation found for bluetooth_pan_profile_summary_use_for (5736111170225304239) -->
-    <skip />
+    <string name="bluetooth_pan_profile_summary_use_for" msgid="5736111170225304239">"Internetga kirish uchun foydalanish"</string>
     <string name="bluetooth_map_profile_summary_use_for" msgid="5154200119919927434">"Xaritada foydalanish"</string>
     <string name="bluetooth_sap_profile_summary_use_for" msgid="7085362712786907993">"SIM-kartaga kirish uchun foydalanish"</string>
     <string name="bluetooth_a2dp_profile_summary_use_for" msgid="4630849022250168427">"Audio qurilma uchun foydalanish"</string>

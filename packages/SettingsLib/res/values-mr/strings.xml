@@ -33,15 +33,13 @@
     <string name="wifi_check_password_try_again" msgid="516958988102584767">"पासवर्ड तपासा आणि पुन्‍हा प्रयत्‍न करा"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"परिक्षेत्रामध्ये नाही"</string>
     <string name="wifi_no_internet_no_reconnect" msgid="5724903347310541706">"स्वयंचलितपणे कनेक्ट करणार नाही"</string>
-    <!-- no translation found for wifi_no_internet (4663834955626848401) -->
-    <skip />
+    <string name="wifi_no_internet" msgid="4663834955626848401">"इंटरनेट अॅक्सेस नाही"</string>
     <string name="saved_network" msgid="4352716707126620811">"<xliff:g id="NAME">%1$s</xliff:g> द्वारे सेव्ह केले"</string>
     <string name="connected_via_network_scorer" msgid="5713793306870815341">"%1$s द्वारे स्वयंचलितपणे कनेक्ट केले"</string>
     <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"नेटवर्क रेटिंग प्रदात्याद्वारे स्वयंचलितपणे कनेक्ट केले"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"%1$s द्वारे कनेक्‍ट केले"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"%1$s द्वारे उपलब्‍ध"</string>
-    <!-- no translation found for wifi_connected_no_internet (8202906332837777829) -->
-    <skip />
+    <string name="wifi_connected_no_internet" msgid="8202906332837777829">"कनेक्‍ट केले, इंटरनेट नाही"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"अॅक्सेस पॉइंट तात्पुरते भरलेले"</string>
     <string name="connected_via_carrier" msgid="7583780074526041912">"%1$s ने कनेक्‍ट केले"</string>
     <string name="available_via_carrier" msgid="1469036129740799053">"%1$s ने उपलब्‍ध"</string>
@@ -86,8 +84,7 @@
     <string name="bluetooth_hid_profile_summary_connected" msgid="3381760054215168689">"इनपुट डिव्हाइसवर कनेक्ट केले"</string>
     <string name="bluetooth_pan_user_profile_summary_connected" msgid="6436258151814414028">"इंटरनेट अॅक्सेससाठी डिव्हाइसशी कनेक्ट केले"</string>
     <string name="bluetooth_pan_nap_profile_summary_connected" msgid="1322694224800769308">"डिव्हाइससह स्थानिक इंटरनेट कनेक्शन शेअर करत आहे"</string>
-    <!-- no translation found for bluetooth_pan_profile_summary_use_for (5736111170225304239) -->
-    <skip />
+    <string name="bluetooth_pan_profile_summary_use_for" msgid="5736111170225304239">"इंटरनेट अॅक्सेस करण्यासाठी वापरा"</string>
     <string name="bluetooth_map_profile_summary_use_for" msgid="5154200119919927434">"नकाशासाठी वापरा"</string>
     <string name="bluetooth_sap_profile_summary_use_for" msgid="7085362712786907993">"SIM प्रवेशासाठी वापरा"</string>
     <string name="bluetooth_a2dp_profile_summary_use_for" msgid="4630849022250168427">"मीडिया ऑडिओसाठी वापरा"</string>

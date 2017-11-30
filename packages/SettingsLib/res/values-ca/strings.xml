@@ -33,15 +33,13 @@
     <string name="wifi_check_password_try_again" msgid="516958988102584767">"Comprova la contrasenya i torna-ho a provar"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"Fora de l\'abast"</string>
     <string name="wifi_no_internet_no_reconnect" msgid="5724903347310541706">"No es connectarà automàticament"</string>
-    <!-- no translation found for wifi_no_internet (4663834955626848401) -->
-    <skip />
+    <string name="wifi_no_internet" msgid="4663834955626848401">"No hi ha accés a Internet"</string>
     <string name="saved_network" msgid="4352716707126620811">"Desat per <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="connected_via_network_scorer" msgid="5713793306870815341">"Connectada automàticament a través de: %1$s"</string>
     <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"Connectada automàticament a través d\'un proveïdor de valoració de xarxes"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Connectada mitjançant %1$s"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"Disponible mitjançant %1$s"</string>
-    <!-- no translation found for wifi_connected_no_internet (8202906332837777829) -->
-    <skip />
+    <string name="wifi_connected_no_internet" msgid="8202906332837777829">"Connectada, sense Internet"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"El punt d\'accés està temporalment ple"</string>
     <string name="connected_via_carrier" msgid="7583780074526041912">"Connectat mitjançant %1$s"</string>
     <string name="available_via_carrier" msgid="1469036129740799053">"Disponible mitjançant %1$s"</string>
@@ -86,8 +84,7 @@
     <string name="bluetooth_hid_profile_summary_connected" msgid="3381760054215168689">"Connectat a dispositiu d\'entrada"</string>
     <string name="bluetooth_pan_user_profile_summary_connected" msgid="6436258151814414028">"Connectat per accedir a Internet"</string>
     <string name="bluetooth_pan_nap_profile_summary_connected" msgid="1322694224800769308">"Compartint la connexió local amb el dispositiu"</string>
-    <!-- no translation found for bluetooth_pan_profile_summary_use_for (5736111170225304239) -->
-    <skip />
+    <string name="bluetooth_pan_profile_summary_use_for" msgid="5736111170225304239">"Utilitza\'l per a l\'accés a Internet"</string>
     <string name="bluetooth_map_profile_summary_use_for" msgid="5154200119919927434">"Utilitza per al mapa"</string>
     <string name="bluetooth_sap_profile_summary_use_for" msgid="7085362712786907993">"Utilitza per a l\'accés a la SIM"</string>
     <string name="bluetooth_a2dp_profile_summary_use_for" msgid="4630849022250168427">"Utilitza per a l\'àudio del mitjà"</string>
@@ -281,7 +278,7 @@
     <string name="show_hw_screen_updates_summary" msgid="1115593565980196197">"Actualitza visualitzacions de finestres creades amb GPU"</string>
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"Mostra actualitzacions capes"</string>
     <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"Il·lumina capes de maquinari en verd en actualitzar-se"</string>
-    <string name="debug_hw_overdraw" msgid="2968692419951565417">"Depura superposició de GPU"</string>
+    <string name="debug_hw_overdraw" msgid="2968692419951565417">"Depura sobredibuix de GPU"</string>
     <string name="debug_hw_renderer" msgid="7568529019431785816">"Configura renderitzador GPU"</string>
     <string name="disable_overlays" msgid="2074488440505934665">"Desactiva superposicions HW"</string>
     <string name="disable_overlays_summary" msgid="3578941133710758592">"Utilitza sempre GPU per combinar pantalles"</string>
