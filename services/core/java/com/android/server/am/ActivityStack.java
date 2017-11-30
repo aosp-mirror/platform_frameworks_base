@@ -144,6 +144,7 @@ import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.server.Watchdog;
 import com.android.server.am.ActivityManagerService.ItemMatcher;
+import com.android.server.am.EventLogTags;
 import com.android.server.wm.ConfigurationContainer;
 import com.android.server.wm.StackWindowController;
 import com.android.server.wm.StackWindowListener;
@@ -482,10 +483,10 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
 
     @Override
     public void setWindowingMode(int windowingMode) {
-        setWindowingMode(windowingMode, false /* animate */);
+        setWindowingMode(windowingMode, false /* animate */, true /* showRecents */);
     }
 
-    void setWindowingMode(int preferredWindowingMode, boolean animate) {
+    void setWindowingMode(int preferredWindowingMode, boolean animate, boolean showRecents) {
         final int currentMode = getWindowingMode();
         final ActivityDisplay display = getDisplay();
         final TaskRecord topTask = topTask();
@@ -579,7 +580,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 resize(mTmpRect2, null /* tempTaskBounds */, null /* tempTaskInsetBounds */);
             }
         } finally {
-            if (!alreadyInSplitScreenMode && mDisplayId == DEFAULT_DISPLAY
+            if (showRecents && !alreadyInSplitScreenMode && mDisplayId == DEFAULT_DISPLAY
                     && windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
                 // Make sure recents stack exist when creating a dock stack as it normally needs to
                 // be on the other side of the docked stack and we make visibility decisions based
@@ -1424,9 +1425,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         if (prev.app != null && prev.app.thread != null) {
             if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "Enqueueing pending pause: " + prev);
             try {
-                EventLog.writeEvent(EventLogTags.AM_PAUSE_ACTIVITY,
-                        prev.userId, System.identityHashCode(prev),
-                        prev.shortComponentName);
+                EventLogTags.writeAmPauseActivity(prev.userId, System.identityHashCode(prev),
+                        prev.shortComponentName, "userLeaving=" + userLeaving);
                 mService.updateUsageStats(prev, false);
 
                 mService.mLifecycleManager.scheduleTransaction(prev.app.thread, prev.appToken,
@@ -2260,7 +2260,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
 
         // Remember how we'll process this pause/resume situation, and ensure
         // that the state is reset however we wind up proceeding.
-        final boolean userLeaving = mStackSupervisor.mUserLeaving;
+        boolean userLeaving = mStackSupervisor.mUserLeaving;
         mStackSupervisor.mUserLeaving = false;
 
         if (!hasRunningActivity) {
@@ -2331,6 +2331,13 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             // So, why aren't we using prev here??? See the param comment on the method. prev doesn't
             // represent the last resumed activity. However, the last focus stack does if it isn't null.
             final ActivityRecord lastResumed = lastFocusedStack.mResumedActivity;
+            if (userLeaving && inMultiWindowMode() && lastFocusedStack.shouldBeVisible(next)) {
+                // The user isn't leaving if this stack is the multi-window mode and the last
+                // focused stack should still be visible.
+                if(DEBUG_USER_LEAVING) Slog.i(TAG_USER_LEAVING, "Overriding userLeaving to false"
+                        + " next=" + next + " lastResumed=" + lastResumed);
+                userLeaving = false;
+            }
             lastResumedCanPip = lastResumed != null && lastResumed.checkEnterPictureInPictureState(
                     "resumeTopActivity", userLeaving /* beforeStopping */);
         }

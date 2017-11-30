@@ -479,7 +479,7 @@ public class RecentTasksTest extends ActivityTestsBase {
                 () -> mService.moveTaskToStack(0, INVALID_STACK_ID, true));
         assertSecurityException(expectCallable,
                 () -> mService.setTaskWindowingModeSplitScreenPrimary(0,
-                        SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT, true, true, new Rect()));
+                        SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT, true, true, new Rect(), true));
         assertSecurityException(expectCallable, () -> mService.dismissSplitScreenMode(true));
         assertSecurityException(expectCallable, () -> mService.dismissPip(true, 0));
         assertSecurityException(expectCallable,

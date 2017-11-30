@@ -267,7 +267,7 @@ public class SystemServicesProxy {
 
         try {
             return mIam.setTaskWindowingModeSplitScreenPrimary(taskId, createMode, true /* onTop */,
-                    false /* animate */, initialBounds);
+                    false /* animate */, initialBounds, true /* showRecents */);
         } catch (RemoteException e) {
             e.printStackTrace();
         }
