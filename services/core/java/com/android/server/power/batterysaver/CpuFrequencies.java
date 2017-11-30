@@ -54,6 +54,10 @@ public class CpuFrequencies {
             mCoreAndFrequencies.clear();
             try {
                 for (String pair : cpuNumberAndFrequencies.split("/")) {
+                    pair = pair.trim();
+                    if (pair.length() == 0) {
+                        continue;
+                    }
                     final String[] coreAndFreq = pair.split(":", 2);
 
                     if (coreAndFreq.length != 2) {
@@ -65,7 +69,7 @@ public class CpuFrequencies {
                     mCoreAndFrequencies.put(core, freq);
                 }
             } catch (IllegalArgumentException e) {
-                Slog.wtf(TAG, "Invalid configuration: " + cpuNumberAndFrequencies, e);
+                Slog.wtf(TAG, "Invalid configuration: '" + cpuNumberAndFrequencies + "'");
             }
         }
         return this;
