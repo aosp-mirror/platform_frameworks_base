@@ -70,10 +70,26 @@
     <item msgid="8837606198371920819">"avrcp15"</item>
     <item msgid="3422726142222090896">"avrcp16"</item>
   </string-array>
-    <!-- no translation found for bluetooth_a2dp_codec_titles:3 (965655874372831982) -->
-    <!-- no translation found for bluetooth_a2dp_codec_titles:4 (1736964107585972103) -->
-    <!-- no translation found for bluetooth_a2dp_codec_summaries:3 (3558743545747527853) -->
-    <!-- no translation found for bluetooth_a2dp_codec_summaries:4 (9167103241281353659) -->
+  <string-array name="bluetooth_a2dp_codec_titles">
+    <item msgid="7065842274271279580">"Rendszerérték (alapértelmezett)"</item>
+    <item msgid="7539690996561263909">"SBC"</item>
+    <item msgid="686685526567131661">"AAC"</item>
+    <item msgid="5254942598247222737">"Hang: <xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX">aptX™</xliff:g>"</item>
+    <item msgid="2091430979086738145">"Hang: <xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX_HD">aptX™ HD</xliff:g>"</item>
+    <item msgid="6751080638867012696">"LDAC"</item>
+    <item msgid="723675059572222462">"Nem kötelező kodekek engedélyezése"</item>
+    <item msgid="3304843301758635896">"Nem kötelező kodekek letiltása"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_summaries">
+    <item msgid="5062108632402595000">"Rendszerérték (alapértelmezett)"</item>
+    <item msgid="6898329690939802290">"SBC"</item>
+    <item msgid="6839647709301342559">"AAC"</item>
+    <item msgid="7848030269621918608">"Hang: <xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX">aptX™</xliff:g>"</item>
+    <item msgid="298198075927343893">"Hang: <xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX_HD">aptX™ HD</xliff:g>"</item>
+    <item msgid="7950781694447359344">"LDAC"</item>
+    <item msgid="2209680154067241740">"Engedélyezi a nem kötelező kodekeket"</item>
+    <item msgid="741805482892725657">"Letiltja a nem kötelező kodekeket"</item>
+  </string-array>
   <string-array name="bluetooth_a2dp_codec_sample_rate_titles">
     <item msgid="3093023430402746802">"Rendszerérték (alapértelmezett)"</item>
     <item msgid="8895532488906185219">"44,1 kHz"</item>
