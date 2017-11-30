@@ -21,10 +21,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="8340973892742019101">"б"</string>
-    <string name="kilobyteShort" msgid="7542884022844556968">"КБ"</string>
-    <string name="megabyteShort" msgid="6355851576770428922">"МБ"</string>
-    <string name="gigabyteShort" msgid="3259882455212193214">"ГБ"</string>
-    <string name="terabyteShort" msgid="231613018159186962">"ТБ"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"Пб"</string>
     <string name="fileSizeSuffix" msgid="8897567456150907538">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;Без назви&gt;"</string>
@@ -86,10 +82,12 @@
     <string name="RestrictedStateContent" msgid="4278821484643362350">"Тимчасово не пропонується мобільною мережею у вашому місцезнаходженні"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Не вдається під’єднатися до мережі"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"Щоб покращити прийняття сигналу, змініть тип у меню \"Налаштування\" &gt; \"Мережа й Інтернет\" &gt; \"Мобільні мережі\" &gt; \"Тип мережі\"."</string>
+    <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"Виклики через Wi-Fi активовано"</string>
+    <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"Щоб здійснювати екстрені виклики, потрібне з’єднання з мобільною мережею."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Сповіщення"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"Переадресація виклику"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Режим екстреного зворотного виклику"</string>
-    <string name="notification_channel_mobile_data_alert" msgid="6130875231721406231">"Сповіщення про мобільне передавання даних"</string>
+    <string name="notification_channel_mobile_data_status" msgid="4575131690860945836">"Статус мобільного передавання даних"</string>
     <string name="notification_channel_sms" msgid="3441746047346135073">"SMS-повідомлення"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Повідомлення голосової пошти"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Дзвінки через Wi-Fi"</string>

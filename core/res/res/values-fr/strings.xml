@@ -21,10 +21,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="8340973892742019101">"octet(s)"</string>
-    <string name="kilobyteShort" msgid="7542884022844556968">"Ko"</string>
-    <string name="megabyteShort" msgid="6355851576770428922">"Mo"</string>
-    <string name="gigabyteShort" msgid="3259882455212193214">"Go"</string>
-    <string name="terabyteShort" msgid="231613018159186962">"To"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"Po"</string>
     <string name="fileSizeSuffix" msgid="8897567456150907538">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;Sans nom&gt;"</string>
@@ -84,10 +80,12 @@
     <string name="RestrictedStateContent" msgid="4278821484643362350">"Momentanément non proposé par le réseau mobile à votre position"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Impossible d\'accéder au réseau"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"Pour améliorer la réception, essayez de modifier le type sélectionné sous Paramètres &gt; Réseau et Internet &gt; Réseaux mobiles &gt; Type de réseau préféré."</string>
+    <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"Les appels Wi-Fi sont actifs"</string>
+    <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"Les appels d\'urgence requièrent un réseau mobile."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Alertes"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"Transfert d\'appel"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Mode de rappel d\'urgence"</string>
-    <string name="notification_channel_mobile_data_alert" msgid="6130875231721406231">"Alertes relatives aux données mobiles"</string>
+    <string name="notification_channel_mobile_data_status" msgid="4575131690860945836">"État des données mobiles"</string>
     <string name="notification_channel_sms" msgid="3441746047346135073">"SMS"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Messages vocaux"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Appels Wi-Fi"</string>
@@ -261,7 +259,7 @@
     <string name="managed_profile_label" msgid="5289992269827577857">"Passer au profil professionnel"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Contacts"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"accéder à vos contacts"</string>
-    <string name="permgrouplab_location" msgid="7275582855722310164">"Position"</string>
+    <string name="permgrouplab_location" msgid="7275582855722310164">"Localisation"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"accéder à la position de l\'appareil"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Agenda"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"accéder à votre agenda"</string>

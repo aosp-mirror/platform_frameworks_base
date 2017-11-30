@@ -21,10 +21,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="8340973892742019101">"بایت"</string>
-    <string name="kilobyteShort" msgid="7542884022844556968">"کیلوبایت"</string>
-    <string name="megabyteShort" msgid="6355851576770428922">"مگابایت"</string>
-    <string name="gigabyteShort" msgid="3259882455212193214">"گیگابایت"</string>
-    <string name="terabyteShort" msgid="231613018159186962">"ترابایت"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"پتابایت"</string>
     <string name="fileSizeSuffix" msgid="8897567456150907538">"<xliff:g id="NUMBER">%1$s</xliff:g> ‏<xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="4638956954852782576">"‏&lt;بدون عنوان&gt;"</string>
@@ -84,10 +80,12 @@
     <string name="RestrictedStateContent" msgid="4278821484643362350">"موقتاً توسط شبکه داده دستگاه همراه در مکان شما ارائه نمی‌شود"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"شبکه دردسترس نیست"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"برای بهبود دریافت، نوع شبکه انتخاب‌شده را در «تنظیمات &gt; شبکه‌ و اینترنت &gt; شبکه‌های تلفن همراه &gt; نوع شبکه ترجیحی» تغییر دهید."</string>
+    <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"‏تماس ازطریق Wi-Fi فعال است"</string>
+    <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"برای انجام تماس‌های اضطراری به شبکه تلفن همراه نیاز دارید."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"هشدارها"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"بازارسال تماس"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"حالت پاسخ تماس اضطراری"</string>
-    <string name="notification_channel_mobile_data_alert" msgid="6130875231721406231">"هشدارهای داده تلفن همراه"</string>
+    <string name="notification_channel_mobile_data_status" msgid="4575131690860945836">"وضعیت داده تلفن همراه"</string>
     <string name="notification_channel_sms" msgid="3441746047346135073">"پیامک‌ها"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"پیام‌های پست صوتی"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"‏تماس ازطریق Wi-Fi"</string>
@@ -967,7 +965,7 @@
     <string name="addToDictionary" msgid="4352161534510057874">"افزودن به واژه‌نامه"</string>
     <string name="deleteText" msgid="6979668428458199034">"حذف"</string>
     <string name="inputMethod" msgid="1653630062304567879">"روش ورودی"</string>
-    <string name="editTextMenuTitle" msgid="4909135564941815494">"عملکردهای متنی"</string>
+    <string name="editTextMenuTitle" msgid="4909135564941815494">"کنش‌های متنی"</string>
     <string name="email" msgid="4560673117055050403">"رایانامه"</string>
     <string name="dial" msgid="4204975095406423102">"تلفن"</string>
     <string name="map" msgid="6068210738233985748">"نقشه‌ها"</string>
