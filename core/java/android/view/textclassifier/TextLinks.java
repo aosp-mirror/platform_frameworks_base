@@ -161,39 +161,28 @@ public final class TextLinks {
      * Optional input parameters for generating TextLinks.
      */
     public static final class Options {
-        private final LocaleList mLocaleList;
 
-        private Options(LocaleList localeList) {
-            this.mLocaleList = localeList;
+        private LocaleList mDefaultLocales;
+
+        /**
+         * @param defaultLocales ordered list of locale preferences that may be used to disambiguate
+         *      the provided text. If no locale preferences exist, set this to null or an empty
+         *      locale list.
+         */
+        public Options setDefaultLocales(@Nullable LocaleList defaultLocales) {
+            mDefaultLocales = defaultLocales;
+            return this;
         }
 
         /**
-         * Builder to construct Options.
+         * @return ordered list of locale preferences that can be used to disambiguate
+         *      the provided text.
          */
-        public static final class Builder {
-            private LocaleList mLocaleList;
-
-            /**
-             * Sets the LocaleList to use.
-             *
-             * @return this Builder.
-             */
-            public Builder setLocaleList(@Nullable LocaleList localeList) {
-                this.mLocaleList = localeList;
-                return this;
-            }
-
-            /**
-             * Builds the Options object.
-             */
-            public Options build() {
-                return new Options(mLocaleList);
-            }
+        @Nullable
+        public LocaleList getDefaultLocales() {
+            return mDefaultLocales;
         }
-        public @Nullable LocaleList getDefaultLocales() {
-            return mLocaleList;
-        }
-    };
+    }
 
     /**
      * A function to create spans from TextLinks.
@@ -204,13 +193,10 @@ public final class TextLinks {
      * @hide
      */
     public static final Function<TextLink, ClickableSpan> DEFAULT_SPAN_FACTORY =
-            new Function<TextLink, ClickableSpan>() {
-        @Override
-        public ClickableSpan apply(TextLink textLink) {
-            // TODO: Implement.
-            throw new UnsupportedOperationException("Not yet implemented");
-        }
-    };
+            textLink -> {
+                // TODO: Implement.
+                throw new UnsupportedOperationException("Not yet implemented");
+            };
 
     /**
      * A builder to construct a TextLinks instance.
