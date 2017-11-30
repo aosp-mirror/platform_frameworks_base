@@ -292,6 +292,15 @@ public class ArrayUtils {
         return array;
     }
 
+    public static @Nullable long[] convertToLongArray(@Nullable int[] intArray) {
+        if (intArray == null) return null;
+        long[] array = new long[intArray.length];
+        for (int i = 0; i < intArray.length; i++) {
+            array[i] = (long) intArray[i];
+        }
+        return array;
+    }
+
     /**
      * Adds value to given array if not already present, providing set-like
      * behavior.

@@ -30,6 +30,7 @@ LOCAL_DX_FLAGS := --core-library
 LOCAL_JACK_FLAGS := --multi-dex native
 LOCAL_AAPT_FLAGS = -0 dat -0 gld -c fa
 LOCAL_STATIC_JAVA_LIBRARIES := \
+    frameworks-base-testutils \
     core-tests-support \
     android-common \
     frameworks-core-util-lib \
