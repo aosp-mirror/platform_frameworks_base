@@ -493,13 +493,30 @@ public class BrightnessTracker {
     }
 
     public void dump(PrintWriter pw) {
-        synchronized (mEventsLock) {
-            pw.println("BrightnessTracker state:");
-            pw.println("  mEvents.size=" + mEvents.size());
-            pw.println("  mEventsDirty=" + mEventsDirty);
-        }
+        pw.println("BrightnessTracker state:");
         synchronized (mDataCollectionLock) {
             pw.println("  mLastSensorReadings.size=" + mLastSensorReadings.size());
+            if (!mLastSensorReadings.isEmpty()) {
+                pw.println("  mLastSensorReadings time span "
+                        + mLastSensorReadings.peekFirst().timestamp + "->"
+                        + mLastSensorReadings.peekLast().timestamp);
+            }
+        }
+        synchronized (mEventsLock) {
+            pw.println("  mEventsDirty=" + mEventsDirty);
+            pw.println("  mEvents.size=" + mEvents.size());
+            BrightnessChangeEvent[] events = mEvents.toArray();
+            for (int i = 0; i < events.length; ++i) {
+                pw.print("    " + events[i].timeStamp + ", " + events[i].userId);
+                pw.print(", " + events[i].lastBrightness + "->" + events[i].brightness + ", {");
+                for (int j = 0; j < events[i].luxValues.length; ++j){
+                    if (j != 0) {
+                        pw.print(", ");
+                    }
+                    pw.print("(" + events[i].luxValues[j] + "," + events[i].luxTimestamps[j] + ")");
+                }
+                pw.println("}");
+            }
         }
     }
 
