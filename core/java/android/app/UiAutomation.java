@@ -26,6 +26,7 @@ import android.annotation.TestApi;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Point;
+import android.graphics.Rect;
 import android.graphics.Region;
 import android.hardware.display.DisplayManagerGlobal;
 import android.os.IBinder;
@@ -690,63 +691,21 @@ public final class UiAutomation {
                 .getRealDisplay(Display.DEFAULT_DISPLAY);
         Point displaySize = new Point();
         display.getRealSize(displaySize);
-        final int displayWidth = displaySize.x;
-        final int displayHeight = displaySize.y;
 
-        final float screenshotWidth;
-        final float screenshotHeight;
-
-        final int rotation = display.getRotation();
-        switch (rotation) {
-            case ROTATION_FREEZE_0: {
-                screenshotWidth = displayWidth;
-                screenshotHeight = displayHeight;
-            } break;
-            case ROTATION_FREEZE_90: {
-                screenshotWidth = displayHeight;
-                screenshotHeight = displayWidth;
-            } break;
-            case ROTATION_FREEZE_180: {
-                screenshotWidth = displayWidth;
-                screenshotHeight = displayHeight;
-            } break;
-            case ROTATION_FREEZE_270: {
-                screenshotWidth = displayHeight;
-                screenshotHeight = displayWidth;
-            } break;
-            default: {
-                throw new IllegalArgumentException("Invalid rotation: "
-                        + rotation);
-            }
-        }
+        int rotation = display.getRotation();
 
         // Take the screenshot
         Bitmap screenShot = null;
         try {
             // Calling out without a lock held.
-            screenShot = mUiAutomationConnection.takeScreenshot((int) screenshotWidth,
-                    (int) screenshotHeight);
+            screenShot = mUiAutomationConnection.takeScreenshot(
+                    new Rect(0, 0, displaySize.x, displaySize.y), rotation);
             if (screenShot == null) {
                 return null;
             }
         } catch (RemoteException re) {
             Log.e(LOG_TAG, "Error while taking screnshot!", re);
             return null;
-        }
-
-        // Rotate the screenshot to the current orientation
-        if (rotation != ROTATION_FREEZE_0) {
-            Bitmap unrotatedScreenShot = Bitmap.createBitmap(displayWidth, displayHeight,
-                    Bitmap.Config.ARGB_8888);
-            Canvas canvas = new Canvas(unrotatedScreenShot);
-            canvas.translate(unrotatedScreenShot.getWidth() / 2,
-                    unrotatedScreenShot.getHeight() / 2);
-            canvas.rotate(getDegreesForRotation(rotation));
-            canvas.translate(- screenshotWidth / 2, - screenshotHeight / 2);
-            canvas.drawBitmap(screenShot, 0, 0, null);
-            canvas.setBitmap(null);
-            screenShot.recycle();
-            screenShot = unrotatedScreenShot;
         }
 
         // Optimization

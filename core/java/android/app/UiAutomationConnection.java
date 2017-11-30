@@ -21,6 +21,7 @@ import android.accessibilityservice.IAccessibilityServiceClient;
 import android.content.Context;
 import android.content.pm.IPackageManager;
 import android.graphics.Bitmap;
+import android.graphics.Rect;
 import android.hardware.input.InputManager;
 import android.os.Binder;
 import android.os.IBinder;
@@ -153,7 +154,7 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
     }
 
     @Override
-    public Bitmap takeScreenshot(int width, int height) {
+    public Bitmap takeScreenshot(Rect crop, int rotation) {
         synchronized (mLock) {
             throwIfCalledByNotTrustedUidLocked();
             throwIfShutdownLocked();
@@ -161,7 +162,9 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
         }
         final long identity = Binder.clearCallingIdentity();
         try {
-            return SurfaceControl.screenshot(width, height);
+            int width = crop.width();
+            int height = crop.height();
+            return SurfaceControl.screenshot(crop, width, height, rotation);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
