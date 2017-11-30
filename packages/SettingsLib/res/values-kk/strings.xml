@@ -40,12 +40,16 @@
     <string name="connected_via_passpoint" msgid="2826205693803088747">"%1$s арқылы қосылған"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"%1$s арқылы қолжетімді"</string>
     <string name="wifi_connected_no_internet" msgid="3149853966840874992">"Қосылған, интернет жоқ"</string>
+    <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"Кіру нүктесі уақытша бос емес"</string>
+    <string name="connected_via_carrier" msgid="7583780074526041912">"%1$s арқылы қосылды"</string>
+    <string name="available_via_carrier" msgid="1469036129740799053">"%1$s арқылы қолжетімді"</string>
     <string name="speed_label_very_slow" msgid="1867055264243608530">"Өте баяу"</string>
     <string name="speed_label_slow" msgid="813109590815810235">"Баяу"</string>
     <string name="speed_label_okay" msgid="2331665440671174858">"Жарайды"</string>
     <string name="speed_label_medium" msgid="3175763313268941953">"Орташа"</string>
     <string name="speed_label_fast" msgid="7715732164050975057">"Жылдам"</string>
     <string name="speed_label_very_fast" msgid="2265363430784523409">"Өте жылдам"</string>
+    <string name="preference_summary_default_combination" msgid="8532964268242666060">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="bluetooth_disconnected" msgid="6557104142667339895">"Ажыратылған"</string>
     <string name="bluetooth_disconnecting" msgid="8913264760027764974">"Ажыратылуда…"</string>
     <string name="bluetooth_connecting" msgid="8555009514614320497">"Жалғауда..."</string>
@@ -101,6 +105,8 @@
     <string name="accessibility_wifi_two_bars" msgid="3569851234710034416">"Wi-Fi сигналы — екі жолақ."</string>
     <string name="accessibility_wifi_three_bars" msgid="8134185644861380311">"Wi-Fi сигналы — үш жолақ."</string>
     <string name="accessibility_wifi_signal_full" msgid="7061045677694702">"Wi-Fi сигналы толық."</string>
+    <string name="accessibility_wifi_security_type_none" msgid="1223747559986205423">"Ашық желі"</string>
+    <string name="accessibility_wifi_security_type_secured" msgid="862921720418885331">"Қауіпсіз желі"</string>
     <string name="process_kernel_label" msgid="3916858646836739323">"Android операциялық жүйесі"</string>
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"Алынған қолданбалар"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"Алынған қолданбалар және пайдаланушылар"</string>
@@ -187,6 +193,7 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Wi‑Fi роумингін іздеулерге әрқашан рұқсат ету"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Мобильдік деректер әрқашан қосулы"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Тетерингтің аппараттық жеделдетуі"</string>
+    <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Атаусыз Bluetooth құрылғыларын көрсету"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Абсолютті дыбыс деңгейін өшіру"</string>
     <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Ішкі жолақтағы шылдырлауды қосу"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Bluetooth AVRCP нұсқасы"</string>
@@ -202,6 +209,12 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Bluetooth LDAC аудиокодегі: ойнату сапасы"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"Bluetooth LDAC аудиокодегін таңдау:\nойнату сапасы"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Трансляция: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
+    <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"Жеке DNS"</string>
+    <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"Жеке DNS режимін таңдаңыз"</string>
+    <string name="private_dns_mode_off" msgid="8236575187318721684">"Өшіру"</string>
+    <string name="private_dns_mode_opportunistic" msgid="7608409735589131766">"Кездейсоқ"</string>
+    <string name="private_dns_mode_provider" msgid="8354935160639360804">"Жеке DNS провайдерінің хост атауы"</string>
+    <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"DNS провайдерінің хост атауын енгізіңіз"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Сымсыз дисплей растау опцияларын көрсету"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wi‑Fi жур. тір. дең. арт., Wi‑Fi желісін таңдағышта әр SSID RSSI бойынша көрсету"</string>
     <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"Wi‑Fi сигналы әлсіз болғанда, деректер байланысы мәжбүрлі түрде мобильдік желіге ауысады"</string>
@@ -226,6 +239,7 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Бұл параметрлер жетілдіру мақсатында ғана қолданылады. Олар құрылғыңыз бен қолданбаларыңыздың бұзылуына немесе әдеттен тыс әрекеттерге себеп болуы мүмкін."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"USB арқылы орнатылған қолданбаларды растау"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"ADB/ADT арқылы орнатылған қолданбалардың залалды болмауын тексеру."</string>
+    <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"Атаусыз Bluetooth құрылғылары (тек MAC мекенжайымен) көрсетіледі"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Қолайсыз қатты дыбыс деңгейі немесе басқарудың болмауы сияқты қашықтағы құрылғыларда дыбыс деңгейімен мәселелер жағдайында Bluetooth абсолютті дыбыс деңгейі функциясын өшіреді."</string>
     <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"Телефондағы қоңырау әуендерінің Bluetooth құлақаспабында ойнатылуына мүмкіндік беру"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Жергілікті терминал"</string>
@@ -345,12 +359,11 @@
     <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">^1</xliff:g> - <xliff:g id="TIME">^2</xliff:g> қалды"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">^1</xliff:g> – толық зарядталғанға дейін <xliff:g id="TIME">^2</xliff:g>"</string>
-    <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">^1</xliff:g> - <xliff:g id="TIME">^2</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"Белгісіз"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"Зарядталуда"</string>
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"зарядталуда"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"Зарядталу орындалып жатқан жоқ"</string>
-    <string name="battery_info_status_not_charging" msgid="2820070506621483576">"Зарядталып тұрған жоқ"</string>
+    <string name="battery_info_status_not_charging" msgid="8523453668342598579">"Қосылған, зарядталмайды"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"Толық"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Әкімші басқарады"</string>
     <string name="enabled_by_admin" msgid="5302986023578399263">"Әкімші қосқан"</string>
@@ -375,7 +388,6 @@
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"Арнаулы (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="help_feedback_label" msgid="6815040660801785649">"Анықтама және пікір"</string>
     <string name="content_description_menu_button" msgid="8182594799812351266">"Mәзір"</string>
-    <string name="time_zone_gmt" msgid="2587097992671450782">"GMT"</string>
     <string name="retail_demo_reset_message" msgid="118771671364131297">"Демо режимде зауыттық мәндерге қайтару үшін құпия сөзді енгізу"</string>
     <string name="retail_demo_reset_next" msgid="8356731459226304963">"Келесі"</string>
     <string name="retail_demo_reset_title" msgid="696589204029930100">"Құпия сөз қажет"</string>

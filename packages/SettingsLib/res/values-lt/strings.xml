@@ -40,12 +40,16 @@
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Prisijungta naudojant „%1$s“"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"Pasiekiama naudojant „%1$s“"</string>
     <string name="wifi_connected_no_internet" msgid="3149853966840874992">"Prisijungta, nėra interneto"</string>
+    <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"Prieigos taškas laikinai visiškai užimtas"</string>
+    <string name="connected_via_carrier" msgid="7583780074526041912">"Prisijungta naudojant „%1$s“"</string>
+    <string name="available_via_carrier" msgid="1469036129740799053">"Pasiekiama naudojant „%1$s“"</string>
     <string name="speed_label_very_slow" msgid="1867055264243608530">"Labai lėtas"</string>
     <string name="speed_label_slow" msgid="813109590815810235">"Lėtas"</string>
     <string name="speed_label_okay" msgid="2331665440671174858">"Gerai"</string>
     <string name="speed_label_medium" msgid="3175763313268941953">"Vidutinis"</string>
     <string name="speed_label_fast" msgid="7715732164050975057">"Greitas"</string>
     <string name="speed_label_very_fast" msgid="2265363430784523409">"Labai greitas"</string>
+    <string name="preference_summary_default_combination" msgid="8532964268242666060">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="bluetooth_disconnected" msgid="6557104142667339895">"Atsijungęs (-usi)"</string>
     <string name="bluetooth_disconnecting" msgid="8913264760027764974">"Atjungiama..."</string>
     <string name="bluetooth_connecting" msgid="8555009514614320497">"Prisijungiama..."</string>
@@ -101,6 +105,8 @@
     <string name="accessibility_wifi_two_bars" msgid="3569851234710034416">"Dvi „Wi-Fi“ signalo juostos."</string>
     <string name="accessibility_wifi_three_bars" msgid="8134185644861380311">"Trys „Wi-Fi“ signalo juostos."</string>
     <string name="accessibility_wifi_signal_full" msgid="7061045677694702">"Stiprus „Wi-Fi“ signalas."</string>
+    <string name="accessibility_wifi_security_type_none" msgid="1223747559986205423">"Atviras tinklas"</string>
+    <string name="accessibility_wifi_security_type_secured" msgid="862921720418885331">"Saugus tinklas"</string>
     <string name="process_kernel_label" msgid="3916858646836739323">"„Android“ OS"</string>
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"Pašalintos programos"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"Pašalintos programos ir naudotojai"</string>
@@ -187,6 +193,7 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Visada leisti „Wi-Fi“ tarptiklinio ryšio nuskaitymą"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Mobiliojo ryšio duomenys visada suaktyvinti"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Įrenginio kaip modemo naudojimo aparatinės įrangos spartinimas"</string>
+    <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Rodyti „Bluetooth“ įrenginius be pavadinimų"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Išjungti didžiausią garsą"</string>
     <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Įgalinti diapazono skambėjimą"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"„Bluetooth“ AVRCP versija"</string>
@@ -202,6 +209,12 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"„Bluetooth“ garso LDAC kodekas: atkūrimo kokybė"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"Pasirinkite „Bluetooth“ garso LDAC kodeką:\natkūrimo kokybė"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Srautinis perdavimas: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
+    <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"Privatus DNS"</string>
+    <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"Pasirinkite privataus DNS režimą"</string>
+    <string name="private_dns_mode_off" msgid="8236575187318721684">"Išjungta"</string>
+    <string name="private_dns_mode_opportunistic" msgid="7608409735589131766">"Oportunistinis"</string>
+    <string name="private_dns_mode_provider" msgid="8354935160639360804">"Privataus DNS teikėjo prieglobos serverio pavadinimas"</string>
+    <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Įveskite DNS teikėjo prieglobos serverio pavadinimą"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Rodyti belaidžio rodymo sertifikavimo parinktis"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Padidinti „Wi‑Fi“ įrašymo į žurnalą lygį, rodyti SSID RSSI „Wi-Fi“ rinkiklyje"</string>
     <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"Jei ši parinktis įgalinta, „Wi‑Fi“ agresyviau perduos duomenų ryšiu į mobiliojo ryšio tinklą, kai „Wi‑Fi“ signalas silpnas"</string>
@@ -226,6 +239,7 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Šie nustatymai skirti tik kūrėjams. Nustačius juos įrenginys ir jame naudojamos programos gali nustoti veikti arba veikti netinkamai."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Patvirtinti progr. naudojant USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Patikrinkite, ar programų, įdiegtų naudojant ADB / ADT, veikimas nėra žalingas."</string>
+    <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"Bus rodomi „Bluetooth“ įrenginiai be pavadinimų (tik MAC adresai)"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Išjungiama „Bluetooth“ didžiausio garso funkcija, jei naudojant nuotolinio valdymo įrenginius kyla problemų dėl garso, pvz., garsas yra per didelis arba jo negalima tinkamai valdyti."</string>
     <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"Leisti telefono skambėjimo tonus per „Bluetooth“ ausines"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Vietinis terminalas"</string>
@@ -345,12 +359,11 @@
     <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">^1</xliff:g> – liko <xliff:g id="TIME">^2</xliff:g>"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">^1</xliff:g> – <xliff:g id="TIME">^2</xliff:g> iki visiško įkrovimo"</string>
-    <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">^1</xliff:g> – <xliff:g id="TIME">^2</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"Nežinomas"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"Kraunasi..."</string>
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"įkraunama"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"Nekraunama"</string>
-    <string name="battery_info_status_not_charging" msgid="2820070506621483576">"Nekraunama"</string>
+    <string name="battery_info_status_not_charging" msgid="8523453668342598579">"Įjungta į maitinimo lizdą, bet šiuo metu įkrauti neįmanoma"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"Visiškai įkrautas"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Valdo administratorius"</string>
     <string name="enabled_by_admin" msgid="5302986023578399263">"Įgalino administratorius"</string>
@@ -375,7 +388,6 @@
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"Tinkintas (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="help_feedback_label" msgid="6815040660801785649">"Pagalba ir atsiliepimai"</string>
     <string name="content_description_menu_button" msgid="8182594799812351266">"Meniu"</string>
-    <string name="time_zone_gmt" msgid="2587097992671450782">"GMT"</string>
     <string name="retail_demo_reset_message" msgid="118771671364131297">"Įv. slapt. ir atk. gam. nust. dem. rež."</string>
     <string name="retail_demo_reset_next" msgid="8356731459226304963">"Kitas"</string>
     <string name="retail_demo_reset_title" msgid="696589204029930100">"Būtina nurodyti slaptažodį"</string>

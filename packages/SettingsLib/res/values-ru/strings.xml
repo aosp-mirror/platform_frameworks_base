@@ -40,12 +40,16 @@
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Подключено к %1$s"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"Доступно через %1$s"</string>
     <string name="wifi_connected_no_internet" msgid="3149853966840874992">"Подключено, без Интернета"</string>
+    <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"К точке доступа подключено слишком много устройств"</string>
+    <string name="connected_via_carrier" msgid="7583780074526041912">"Подключено к %1$s"</string>
+    <string name="available_via_carrier" msgid="1469036129740799053">"Доступно через %1$s"</string>
     <string name="speed_label_very_slow" msgid="1867055264243608530">"Очень медленная"</string>
     <string name="speed_label_slow" msgid="813109590815810235">"Медленная"</string>
     <string name="speed_label_okay" msgid="2331665440671174858">"ОК"</string>
     <string name="speed_label_medium" msgid="3175763313268941953">"Средняя"</string>
     <string name="speed_label_fast" msgid="7715732164050975057">"Быстрая"</string>
     <string name="speed_label_very_fast" msgid="2265363430784523409">"Очень быстрая"</string>
+    <string name="preference_summary_default_combination" msgid="8532964268242666060">"<xliff:g id="DESCRIPTION">%2$s</xliff:g>: <xliff:g id="STATE">%1$s</xliff:g>"</string>
     <string name="bluetooth_disconnected" msgid="6557104142667339895">"Нет подключения"</string>
     <string name="bluetooth_disconnecting" msgid="8913264760027764974">"Отключение..."</string>
     <string name="bluetooth_connecting" msgid="8555009514614320497">"Подключение..."</string>
@@ -101,6 +105,8 @@
     <string name="accessibility_wifi_two_bars" msgid="3569851234710034416">"Wi-Fi: два деления"</string>
     <string name="accessibility_wifi_three_bars" msgid="8134185644861380311">"Wi-Fi: три деления"</string>
     <string name="accessibility_wifi_signal_full" msgid="7061045677694702">"Wi-Fi: надежный сигнал"</string>
+    <string name="accessibility_wifi_security_type_none" msgid="1223747559986205423">"Открытая сеть"</string>
+    <string name="accessibility_wifi_security_type_secured" msgid="862921720418885331">"Защищенная сеть"</string>
     <string name="process_kernel_label" msgid="3916858646836739323">"ОС Android"</string>
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"Удаленные приложения"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"Удаленные приложения и пользователи"</string>
@@ -187,6 +193,7 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Всегда включать поиск сетей Wi-Fi"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Не отключать мобильный Интернет"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Аппаратное ускорение в режиме модема"</string>
+    <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Показывать Bluetooth-устройства без названий"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Отключить абсолютный уровень громкости"</string>
     <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Включить внутриполосное воспроизведение"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Версия Bluetooth AVRCP"</string>
@@ -202,6 +209,12 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Аудиокодек LDAC для Bluetooth: качество воспроизведения"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"Аудиокодек LDAC для Bluetooth:\nкачество воспроизведения"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Потоковая передача: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
+    <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"Персональный DNS-сервер"</string>
+    <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"Выберите режим персонального DNS-сервера"</string>
+    <string name="private_dns_mode_off" msgid="8236575187318721684">"ВЫКЛ"</string>
+    <string name="private_dns_mode_opportunistic" msgid="7608409735589131766">"Гибкий"</string>
+    <string name="private_dns_mode_provider" msgid="8354935160639360804">"Имя хоста поставщика персонального DNS-сервера"</string>
+    <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Введите имя хоста поставщика услуг DNS"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Показывать параметры сертификации беспроводных мониторов"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"При выборе Wi‑Fi указывать в журнале RSSI для каждого SSID"</string>
     <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"Принудительно переключаться на мобильную сеть, если сигнал Wi-Fi слабый"</string>
@@ -226,6 +239,7 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Только для разработчиков. Изменение этих настроек может привести к сбоям или неправильной работе устройства и приложений."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Проверять приложения при установке"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Выполнять проверку безопасности приложений при установке через ADB/ADT"</string>
+    <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"Показывать Bluetooth-устройства без названий (только с MAC-адресами)"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Отключить абсолютный уровень громкости Bluetooth при возникновении проблем на удаленных устройствах, например при слишком громком звучании или невозможности контролировать настройку."</string>
     <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"Разрешить воспроизведение рингтонов на телефоне через Bluetooth-гарнитуру"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Локальный терминальный доступ"</string>
@@ -287,7 +301,7 @@
     <string name="app_process_limit_title" msgid="4280600650253107163">"Лимит фоновых процессов"</string>
     <string name="show_all_anrs" msgid="28462979638729082">"Все ANR"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"Уведомлять о том, что приложение не отвечает"</string>
-    <string name="show_notification_channel_warnings" msgid="1399948193466922683">"Показывать предупреждения канала передачи оповещения"</string>
+    <string name="show_notification_channel_warnings" msgid="1399948193466922683">"Показывать предупреждения канала передачи уведомлений"</string>
     <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"Показывать предупреждение о новых уведомлениях приложения вне допустимого канала"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Разрешить сохранение на внешние накопители"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Разрешить сохранение приложений на внешних накопителях (независимо от значений в манифесте)"</string>
@@ -345,12 +359,11 @@
     <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">^1</xliff:g>, осталось: <xliff:g id="TIME">^2</xliff:g>"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">^1</xliff:g> – <xliff:g id="TIME">^2</xliff:g> до полной зарядки"</string>
-    <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">^1</xliff:g> – <xliff:g id="TIME">^2</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"Неизвестно"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"Идет зарядка"</string>
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"заряжается"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"Не заряжается"</string>
-    <string name="battery_info_status_not_charging" msgid="2820070506621483576">"Не заряжается"</string>
+    <string name="battery_info_status_not_charging" msgid="8523453668342598579">"Подключено, не заряжается"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"Батарея заряжена"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Контролируется администратором"</string>
     <string name="enabled_by_admin" msgid="5302986023578399263">"Включено администратором"</string>
@@ -375,7 +388,6 @@
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"Другой (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="help_feedback_label" msgid="6815040660801785649">"Справка/отзыв"</string>
     <string name="content_description_menu_button" msgid="8182594799812351266">"Меню"</string>
-    <string name="time_zone_gmt" msgid="2587097992671450782">"GMT"</string>
     <string name="retail_demo_reset_message" msgid="118771671364131297">"Чтобы сбросить настройки в деморежиме, введите пароль."</string>
     <string name="retail_demo_reset_next" msgid="8356731459226304963">"Далее"</string>
     <string name="retail_demo_reset_title" msgid="696589204029930100">"Требуется пароль"</string>
