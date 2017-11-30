@@ -72,17 +72,24 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      WindowContainerController mController;
 
     protected SurfaceControl mSurfaceControl;
+    private int mLastLayer = 0;
+    private SurfaceControl mLastRelativeToLayer = null;
 
     /**
      * Applied as part of the animation pass in "prepareSurfaces".
      */
-    private Transaction mPendingTransaction = new Transaction();
+    private final Transaction mPendingTransaction;
+    protected final WindowManagerService mService;
+
+    WindowContainer(WindowManagerService service) {
+        mService = service;
+        mPendingTransaction = service.mTransactionFactory.make();
+    }
 
     @Override
     final protected WindowContainer getParent() {
         return mParent;
     }
-
 
     @Override
     protected int getChildCount() {
@@ -756,34 +763,46 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     void assignLayer(Transaction t, int layer) {
-        if (mSurfaceControl != null) {
+        final boolean changed = layer != mLastLayer || mLastRelativeToLayer != null;
+        if (mSurfaceControl != null && changed) {
             t.setLayer(mSurfaceControl, layer);
+            mLastLayer = layer;
+            mLastRelativeToLayer = null;
+        }
+    }
+
+    void assignRelativeLayer(Transaction t, SurfaceControl relativeTo, int layer) {
+        final boolean changed = layer != mLastLayer || mLastRelativeToLayer != relativeTo;
+        if (mSurfaceControl != null && changed) {
+            t.setRelativeLayer(mSurfaceControl, relativeTo, layer);
+            mLastLayer = layer;
+            mLastRelativeToLayer = relativeTo;
         }
     }
 
     void assignChildLayers(Transaction t) {
         int layer = 0;
-        boolean boosting = false;
 
         // We use two passes as a way to promote children which
         // need Z-boosting to the end of the list.
-        for (int i = 0; i < 2; i++ ) {
-            for (int j = 0; j < mChildren.size(); ++j) {
-                final WindowContainer wc = mChildren.get(j);
-                if (wc.needsZBoost() && !boosting) {
-                    continue;
-                }
-                wc.assignLayer(t, layer);
-                wc.assignChildLayers(t);
-
-                layer++;
+        for (int j = 0; j < mChildren.size(); ++j) {
+            final WindowContainer wc = mChildren.get(j);
+            wc.assignChildLayers(t);
+            if (!wc.needsZBoost()) {
+                wc.assignLayer(t, layer++);
             }
-            boosting = true;
+        }
+        for (int j = 0; j < mChildren.size(); ++j) {
+            final WindowContainer wc = mChildren.get(j);
+            if (wc.needsZBoost()) {
+                wc.assignLayer(t, layer++);
+            }
         }
     }
 
     void assignChildLayers() {
         assignChildLayers(getPendingTransaction());
+        scheduleAnimation();
     }
 
     boolean needsZBoost() {

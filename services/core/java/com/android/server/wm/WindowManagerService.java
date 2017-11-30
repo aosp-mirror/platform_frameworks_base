@@ -215,6 +215,7 @@ import android.view.MotionEvent;
 import android.view.PointerIcon;
 import android.view.Surface;
 import android.view.SurfaceControl;
+import android.view.SurfaceControl.Builder;
 import android.view.SurfaceSession;
 import android.view.View;
 import android.view.WindowContentFrameStats;
@@ -806,12 +807,8 @@ public class WindowManagerService extends IWindowManager.Stub
     static WindowManagerThreadPriorityBooster sThreadPriorityBooster =
             new WindowManagerThreadPriorityBooster();
 
-    class DefaultSurfaceBuilderFactory implements SurfaceBuilderFactory {
-        public SurfaceControl.Builder make(SurfaceSession s) {
-            return new SurfaceControl.Builder(s);
-        }
-    };
-    SurfaceBuilderFactory mSurfaceBuilderFactory = new DefaultSurfaceBuilderFactory();
+    SurfaceBuilderFactory mSurfaceBuilderFactory = SurfaceControl.Builder::new;
+    TransactionFactory mTransactionFactory = SurfaceControl.Transaction::new;
 
     static void boostPriorityForLockedSection() {
         sThreadPriorityBooster.boost();
@@ -1502,7 +1499,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             // Don't do layout here, the window must call
             // relayout to be displayed, so we'll do it there.
-            displayContent.assignWindowLayers(false /* setLayoutNeeded */);
+            win.getParent().assignChildLayers();
 
             if (focusChanged) {
                 mInputMonitor.setInputFocusLw(mCurrentFocus, false /*updateInputWindows*/);
@@ -1972,6 +1969,13 @@ public class WindowManagerService extends IWindowManager.Stub
                         + " newVis=" + viewVisibility, stack);
             }
 
+            win.setDisplayLayoutNeeded();
+            win.mGivenInsetsPending = (flags & WindowManagerGlobal.RELAYOUT_INSETS_PENDING) != 0;
+
+            // We may be deferring layout passes at the moment, but since the client is interested
+            // in the new out values right now we need to force a layout.
+            mWindowPlacerLocked.performSurfacePlacement(true /* force */);
+
             // We should only relayout if the view is visible, it is a starting window, or the
             // associated appToken is not hidden.
             final boolean shouldRelayout = viewVisibility == View.VISIBLE &&
@@ -1981,15 +1985,6 @@ public class WindowManagerService extends IWindowManager.Stub
             if (shouldRelayout) {
                 Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "relayoutWindow: viewVisibility_1");
 
-                // We are about to create a surface, but we didn't run a layout yet. So better run
-                // a layout now that we already know the right size, as a resize call will make the
-                // surface transaction blocking until next vsync and slow us down.
-                // TODO: Ideally we'd create the surface after running layout a bit further down,
-                // but moving this seems to be too risky at this point in the release.
-                if (win.mLayoutSeq == -1) {
-                    win.setDisplayLayoutNeeded();
-                    mWindowPlacerLocked.performSurfacePlacement(true);
-                }
                 result = win.relayoutVisibleWindow(result, attrChanges, oldVisibility);
 
                 try {
@@ -2091,16 +2086,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 mUnknownAppVisibilityController.notifyRelayouted(win.mAppToken);
             }
 
-            win.setDisplayLayoutNeeded();
-            win.mGivenInsetsPending = (flags & WindowManagerGlobal.RELAYOUT_INSETS_PENDING) != 0;
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER,
                     "relayoutWindow: updateOrientationFromAppTokens");
             configChanged = updateOrientationFromAppTokensLocked(false, displayId);
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
 
-            // We may be deferring layout passes at the moment, but since the client is interested
-            // in the new out values right now we need to force a layout.
-            mWindowPlacerLocked.performSurfacePlacement(true /* force */);
             if (toBeDisplayed && win.mIsWallpaper) {
                 DisplayInfo displayInfo = win.getDisplayContent().getDisplayInfo();
                 dc.mWallpaperController.updateWallpaperOffset(

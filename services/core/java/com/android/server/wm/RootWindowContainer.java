@@ -101,8 +101,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
     private static final int SET_SCREEN_BRIGHTNESS_OVERRIDE = 1;
     private static final int SET_USER_ACTIVITY_TIMEOUT = 2;
 
-    WindowManagerService mService;
-
     private boolean mWallpaperForceHidingChanged = false;
     private Object mLastWindowFreezeSource = null;
     private Session mHoldScreen = null;
@@ -160,7 +158,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
     };
 
     RootWindowContainer(WindowManagerService service) {
-        mService = service;
+        super(service);
         mHandler = new MyHandler(service.mH.getLooper());
         mWallpaperController = new WallpaperController(mService);
     }

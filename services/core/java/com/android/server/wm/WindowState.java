@@ -186,7 +186,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     // to capture touch events in that area.
     static final int RESIZE_HANDLE_WIDTH_IN_DP = 30;
 
-    final WindowManagerService mService;
     final WindowManagerPolicy mPolicy;
     final Context mContext;
     final Session mSession;
@@ -627,7 +626,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     WindowState(WindowManagerService service, Session s, IWindow c, WindowToken token,
            WindowState parentWindow, int appOp, int seq, WindowManager.LayoutParams a,
            int viewVisibility, int ownerId, boolean ownerCanAddInternalSystemWindow) {
-        mService = service;
+        super(service);
         mSession = s;
         mClient = c;
         mAppOp = appOp;
