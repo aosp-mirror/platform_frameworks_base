@@ -82,8 +82,7 @@ public class TrampolineTest {
     };
     private final int NON_USER_SYSTEM = UserHandle.USER_SYSTEM + 1;
 
-    @Mock private BackupManagerService mBackupManagerServiceMock;
-    @Mock private RefactoredBackupManagerService mRefactoredBackupManagerServiceMock;
+    @Mock private RefactoredBackupManagerService mBackupManagerServiceMock;
     @Mock private Context mContextMock;
     @Mock private File mSuppressFileMock;
     @Mock private File mSuppressFileParentMock;
@@ -102,12 +101,9 @@ public class TrampolineTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
-        TrampolineTestable.sRefactoredBackupManagerServiceMock =
-                mRefactoredBackupManagerServiceMock;
-        TrampolineTestable.sBackupManagerServiceMock = mBackupManagerServiceMock;
+        TrampolineTestable.sRefactoredBackupManagerServiceMock = mBackupManagerServiceMock;
         TrampolineTestable.sSuppressFile = mSuppressFileMock;
         TrampolineTestable.sCallingUid = Process.SYSTEM_UID;
-        TrampolineTestable.sRefactoredServiceEnabled = false;
         TrampolineTestable.sBackupDisabled = false;
 
         when(mSuppressFileMock.getParentFile()).thenReturn(mSuppressFileParentMock);
@@ -160,20 +156,6 @@ public class TrampolineTest {
     @Test
     public void isBackupServiceActive_calledBeforeInitialize_returnsFalse() {
         assertFalse(mTrampoline.isBackupServiceActive(UserHandle.USER_SYSTEM));
-    }
-
-    @Test
-    public void createService_refactoredServiceEnabled() {
-        TrampolineTestable.sRefactoredServiceEnabled = true;
-
-        assertEquals(mRefactoredBackupManagerServiceMock, mTrampoline.createService());
-    }
-
-    @Test
-    public void createService_refactoredServiceDisabled() {
-        TrampolineTestable.sRefactoredServiceEnabled = false;
-
-        assertEquals(mBackupManagerServiceMock, mTrampoline.createService());
     }
 
     @Test
@@ -879,21 +861,13 @@ public class TrampolineTest {
 
     private static class TrampolineTestable extends Trampoline {
         static boolean sBackupDisabled = false;
-        static boolean sRefactoredServiceEnabled = false;
         static File sSuppressFile = null;
         static int sCallingUid = -1;
-        static BackupManagerService sBackupManagerServiceMock = null;
         static RefactoredBackupManagerService sRefactoredBackupManagerServiceMock = null;
         private int mCreateServiceCallsCount = 0;
 
         TrampolineTestable(Context context) {
             super(context);
-        }
-
-        @Override
-        protected BackupManagerServiceInterface createService() {
-            mCreateServiceCallsCount++;
-            return super.createService();
         }
 
         @Override
@@ -912,18 +886,9 @@ public class TrampolineTest {
         }
 
         @Override
-        protected boolean isRefactoredServiceEnabled() {
-            return sRefactoredServiceEnabled;
-        }
-
-        @Override
         protected BackupManagerServiceInterface createRefactoredBackupManagerService() {
+            mCreateServiceCallsCount++;
             return sRefactoredBackupManagerServiceMock;
-        }
-
-        @Override
-        protected BackupManagerServiceInterface createBackupManagerService() {
-            return sBackupManagerServiceMock;
         }
 
         int getCreateServiceCallsCount() {

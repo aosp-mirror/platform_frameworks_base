@@ -10430,14 +10430,6 @@ public final class Settings {
                 "location_settings_link_to_permissions_enabled";
 
         /**
-         * Flag to enable use of RefactoredBackupManagerService.
-         *
-         * @hide
-         */
-        public static final String BACKUP_REFACTORED_SERVICE_DISABLED =
-            "backup_refactored_service_disabled";
-
-        /**
          * Flag to set the waiting time for euicc factory reset inside System > Settings
          * Type: long
          *
