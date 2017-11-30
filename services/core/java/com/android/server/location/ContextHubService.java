@@ -350,24 +350,6 @@ public class ContextHubService extends IContextHubService.Stub {
         };
     }
 
-    /**
-     * Adds a new transaction to the transaction manager queue
-     *
-     * @param transaction the transaction to add
-     * @return the result of adding the transaction
-     */
-    private int addTransaction(ContextHubServiceTransaction transaction) {
-        int result = Result.OK;
-        try {
-            mTransactionManager.addTransaction(transaction);
-        } catch (IllegalStateException e) {
-            Log.e(TAG, e.getMessage());
-            result = Result.TRANSACTION_PENDING; /* failed */
-        }
-
-        return result;
-    }
-
     @Override
     public int loadNanoApp(int contextHubId, NanoApp app) throws RemoteException {
         checkPermissions();
@@ -392,13 +374,7 @@ public class ContextHubService extends IContextHubService.Stub {
         ContextHubServiceTransaction transaction = mTransactionManager.createLoadTransaction(
                 contextHubId, nanoAppBinary, onCompleteCallback);
 
-        int result = addTransaction(transaction);
-        if (result != Result.OK) {
-            Log.e(TAG, "Failed to load nanoapp with error code " + result);
-            return -1;
-        }
-
-        // Do not add an entry to mNanoAppInstance Hash yet. The HAL may reject the app
+        mTransactionManager.addTransaction(transaction);
         return 0;
     }
 
@@ -423,13 +399,7 @@ public class ContextHubService extends IContextHubService.Stub {
         ContextHubServiceTransaction transaction = mTransactionManager.createUnloadTransaction(
                 contextHubId, nanoAppId, onCompleteCallback);
 
-        int result = addTransaction(transaction);
-        if (result != Result.OK) {
-            Log.e(TAG, "Failed to unload nanoapp with error code " + result);
-            return -1;
-        }
-
-        // Do not add an entry to mNanoAppInstance Hash yet. The HAL may reject the app
+        mTransactionManager.addTransaction(transaction);
         return 0;
     }
 
@@ -472,6 +442,8 @@ public class ContextHubService extends IContextHubService.Stub {
      *
      * @param contextHubId the ID of the hub to do the query
      * @return the result of the query
+     *
+     * @throws IllegalStateException if the transaction queue is full
      */
     private int queryNanoAppsInternal(int contextHubId) {
         if (mContextHubProxy == null) {
@@ -483,7 +455,8 @@ public class ContextHubService extends IContextHubService.Stub {
         ContextHubServiceTransaction transaction = mTransactionManager.createQueryTransaction(
                 contextHubId, onCompleteCallback);
 
-        return addTransaction(transaction);
+        mTransactionManager.addTransaction(transaction);
+        return Result.OK;
     }
 
     @Override
@@ -674,6 +647,7 @@ public class ContextHubService extends IContextHubService.Stub {
      * @param nanoAppBinary the binary to load
      *
      * @throws RemoteException
+     * @throws IllegalStateException if the transaction queue is full
      */
     @Override
     public void loadNanoAppOnHub(
@@ -693,7 +667,7 @@ public class ContextHubService extends IContextHubService.Stub {
 
         ContextHubServiceTransaction transaction = mTransactionManager.createLoadTransaction(
                 contextHubId, nanoAppBinary, transactionCallback);
-        addTransaction(transaction);
+        mTransactionManager.addTransaction(transaction);
     }
 
     /**
@@ -704,6 +678,7 @@ public class ContextHubService extends IContextHubService.Stub {
      * @param nanoAppId the ID of the nanoapp to unload
      *
      * @throws RemoteException
+     * @throws IllegalStateException if the transaction queue is full
      */
     @Override
     public void unloadNanoAppFromHub(
@@ -717,7 +692,7 @@ public class ContextHubService extends IContextHubService.Stub {
 
         ContextHubServiceTransaction transaction = mTransactionManager.createUnloadTransaction(
                 contextHubId, nanoAppId, transactionCallback);
-        addTransaction(transaction);
+        mTransactionManager.addTransaction(transaction);
     }
 
     /**
@@ -727,6 +702,7 @@ public class ContextHubService extends IContextHubService.Stub {
      * @param transactionCallback the client-facing transaction callback interface
      *
      * @throws RemoteException
+     * @throws IllegalStateException if the transaction queue is full
      */
     @Override
     public void queryNanoApps(int contextHubId, IContextHubTransactionCallback transactionCallback)
@@ -739,7 +715,7 @@ public class ContextHubService extends IContextHubService.Stub {
 
         ContextHubServiceTransaction transaction =
                 mTransactionManager.createQueryTransaction(contextHubId, transactionCallback);
-        addTransaction(transaction);
+        mTransactionManager.addTransaction(transaction);
     }
 
     @Override

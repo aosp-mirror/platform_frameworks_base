@@ -50,7 +50,7 @@ import java.util.concurrent.atomic.AtomicInteger;
     /*
      * Maximum number of transaction requests that can be pending at a time
      */
-    private static final int MAX_PENDING_REQUESTS = 10;
+    private static final int MAX_PENDING_REQUESTS = 10000;
 
     /*
      * The proxy to talk to the Context Hub
@@ -223,7 +223,8 @@ import java.util.concurrent.atomic.AtomicInteger;
      * Adds a new transaction to the queue.
      *
      * If there was no pending transaction at the time, the transaction that was added will be
-     * started in this method.
+     * started in this method. If there were too many transactions in the queue, an exception will
+     * be thrown.
      *
      * @param transaction the transaction to add
      * @throws IllegalStateException if the queue is full
@@ -232,7 +233,7 @@ import java.util.concurrent.atomic.AtomicInteger;
     synchronized void addTransaction(
             ContextHubServiceTransaction transaction) throws IllegalStateException {
         if (mTransactionQueue.size() == MAX_PENDING_REQUESTS) {
-            throw new IllegalStateException("Transaction transaction queue is full (capacity = "
+            throw new IllegalStateException("Transaction queue is full (capacity = "
                     + MAX_PENDING_REQUESTS + ")");
         }
         mTransactionQueue.add(transaction);
