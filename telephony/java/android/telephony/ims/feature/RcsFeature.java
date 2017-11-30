@@ -36,6 +36,11 @@ public class RcsFeature extends ImsFeature {
     }
 
     @Override
+    public void onFeatureReady() {
+
+    }
+
+    @Override
     public void onFeatureRemoved() {
 
     }

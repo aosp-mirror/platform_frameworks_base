@@ -346,6 +346,11 @@ public class MMTelFeature extends ImsFeature {
         return null;
     }
 
+    @Override
+    public void onFeatureReady() {
+
+    }
+
     /**
      * {@inheritDoc}
      */
