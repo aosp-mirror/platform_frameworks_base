@@ -640,7 +640,6 @@ public class ImageReader implements AutoCloseable {
      * The ImageReader continues to be usable after this call, but may need to reallocate buffers
      * when more buffers are needed for rendering.
      * </p>
-     * @hide
      */
     public void discardFreeBuffers() {
         synchronized (mCloseLock) {
