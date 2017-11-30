@@ -73,6 +73,10 @@ struct OptimizeOptions {
   TableFlattenerOptions table_flattener_options;
 
   Maybe<PostProcessingConfiguration> configuration;
+
+  // Set of artifacts to keep when generating multi-APK splits. If the list is empty, all artifacts
+  // are kept and will be written as output.
+  std::unordered_set<std::string> kept_artifacts;
 };
 
 class OptimizeContext : public IAaptContext {
@@ -195,9 +199,12 @@ class OptimizeCommand {
 
     if (options_.configuration && options_.output_dir) {
       MultiApkGenerator generator{apk.get(), context_};
-      MultiApkGeneratorOptions generator_options = {options_.output_dir.value(),
-                                                    options_.configuration.value(),
-                                                    options_.table_flattener_options};
+      MultiApkGeneratorOptions generator_options = {
+          options_.output_dir.value(),
+          options_.configuration.value(),
+          options_.table_flattener_options,
+          options_.kept_artifacts,
+      };
       if (!generator.FromBaseApk(generator_options)) {
         return 1;
       }
@@ -306,6 +313,7 @@ int Optimize(const std::vector<StringPiece>& args) {
   Maybe<std::string> target_abis;
   std::vector<std::string> configs;
   std::vector<std::string> split_args;
+  std::unordered_set<std::string> kept_artifacts;
   bool verbose = false;
   bool print_only = false;
   Flags flags =
@@ -335,6 +343,10 @@ int Optimize(const std::vector<StringPiece>& args) {
                             "Split APK.\nSyntax: path/to/output.apk;<config>[,<config>[...]].\n"
                             "On Windows, use a semicolon ';' separator instead.",
                             &split_args)
+          .OptionalFlagList("--keep-artifacts",
+                            "Comma separated list of artifacts to keep. If none are specified,\n"
+                            "all artifacts will be kept.",
+                            &kept_artifacts)
           .OptionalSwitch("--enable-sparse-encoding",
                           "Enables encoding sparse entries using a binary search tree.\n"
                           "This decreases APK size at the cost of resource retrieval performance.",
@@ -412,6 +424,14 @@ int Optimize(const std::vector<StringPiece>& args) {
         std::cout << name << std::endl;
       }
       return 0;
+    }
+
+    if (!kept_artifacts.empty()) {
+      for (const auto& artifact_str : kept_artifacts) {
+        for (const auto& artifact : util::Tokenize(artifact_str, ',')) {
+          options.kept_artifacts.insert(artifact.to_string());
+        }
+      }
     }
 
     // Since we know that we are going to process the APK (not just print targets), make sure we
