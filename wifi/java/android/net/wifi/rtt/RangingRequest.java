@@ -16,6 +16,7 @@
 
 package android.net.wifi.rtt;
 
+import android.annotation.NonNull;
 import android.net.wifi.ScanResult;
 import android.net.wifi.aware.AttachCallback;
 import android.net.wifi.aware.DiscoverySessionCallback;
@@ -25,14 +26,9 @@ import android.net.wifi.aware.WifiAwareManager;
 import android.os.Handler;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.text.TextUtils;
-
-import libcore.util.HexEncoding;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.StringJoiner;
 
 /**
@@ -63,10 +59,10 @@ public final class RangingRequest implements Parcelable {
     }
 
     /** @hide */
-    public final List<RttPeer> mRttPeers;
+    public final List<ResponderConfig> mRttPeers;
 
     /** @hide */
-    private RangingRequest(List<RttPeer> rttPeers) {
+    private RangingRequest(List<ResponderConfig> rttPeers) {
         mRttPeers = rttPeers;
     }
 
@@ -95,9 +91,9 @@ public final class RangingRequest implements Parcelable {
     /** @hide */
     @Override
     public String toString() {
-        StringJoiner sj = new StringJoiner(", ", "RangingRequest: mRttPeers=[", ",");
-        for (RttPeer rp : mRttPeers) {
-            sj.add(rp.toString());
+        StringJoiner sj = new StringJoiner(", ", "RangingRequest: mRttPeers=[", "]");
+        for (ResponderConfig rc : mRttPeers) {
+            sj.add(rc.toString());
         }
         return sj.toString();
     }
@@ -109,26 +105,9 @@ public final class RangingRequest implements Parcelable {
                     "Ranging to too many peers requested. Use getMaxPeers() API to get limit.");
         }
 
-        for (RttPeer peer: mRttPeers) {
-            if (peer instanceof RttPeerAp) {
-                RttPeerAp apPeer = (RttPeerAp) peer;
-                if (apPeer.scanResult == null || apPeer.scanResult.BSSID == null) {
-                    throw new IllegalArgumentException("Invalid AP peer specification");
-                }
-            } else if (peer instanceof RttPeerAware) {
-                if (!awareSupported) {
-                    throw new IllegalArgumentException(
-                            "Request contains Aware peers - but Aware isn't supported on this "
-                                    + "device");
-                }
-
-                RttPeerAware awarePeer = (RttPeerAware) peer;
-                if (awarePeer.peerMacAddress == null && awarePeer.peerHandle == null) {
-                    throw new IllegalArgumentException("Invalid Aware peer specification");
-                }
-            } else {
-                throw new IllegalArgumentException(
-                        "Request contains unknown peer specification types");
+        for (ResponderConfig peer: mRttPeers) {
+            if (!peer.isValid(awareSupported)) {
+                throw new IllegalArgumentException("Invalid Responder specification");
             }
         }
     }
@@ -137,35 +116,34 @@ public final class RangingRequest implements Parcelable {
      * Builder class used to construct {@link RangingRequest} objects.
      */
     public static final class Builder {
-        private List<RttPeer> mRttPeers = new ArrayList<>();
+        private List<ResponderConfig> mRttPeers = new ArrayList<>();
 
         /**
          * Add the device specified by the {@link ScanResult} to the list of devices with
-         * which to measure range. The total number of results added to a request cannot exceed the
+         * which to measure range. The total number of peers added to a request cannot exceed the
          * limit specified by {@link #getMaxPeers()}.
          *
          * @param apInfo Information of an Access Point (AP) obtained in a Scan Result.
          * @return The builder to facilitate chaining
          *         {@code builder.setXXX(..).setXXX(..)}.
          */
-        public Builder addAccessPoint(ScanResult apInfo) {
+        public Builder addAccessPoint(@NonNull ScanResult apInfo) {
             if (apInfo == null) {
                 throw new IllegalArgumentException("Null ScanResult!");
             }
-            mRttPeers.add(new RttPeerAp(apInfo));
-            return this;
+            return addResponder(ResponderConfig.fromScanResult(apInfo));
         }
 
         /**
          * Add the devices specified by the {@link ScanResult}s to the list of devices with
-         * which to measure range. The total number of results added to a request cannot exceed the
+         * which to measure range. The total number of peers added to a request cannot exceed the
          * limit specified by {@link #getMaxPeers()}.
          *
          * @param apInfos Information of an Access Points (APs) obtained in a Scan Result.
          * @return The builder to facilitate chaining
          *         {@code builder.setXXX(..).setXXX(..)}.
          */
-        public Builder addAccessPoints(List<ScanResult> apInfos) {
+        public Builder addAccessPoints(@NonNull List<ScanResult> apInfos) {
             if (apInfos == null) {
                 throw new IllegalArgumentException("Null list of ScanResults!");
             }
@@ -190,9 +168,12 @@ public final class RangingRequest implements Parcelable {
          * @param peerMacAddress The MAC address of the Wi-Fi Aware peer.
          * @return The builder, to facilitate chaining {@code builder.setXXX(..).setXXX(..)}.
          */
-        public Builder addWifiAwarePeer(byte[] peerMacAddress) {
-            mRttPeers.add(new RttPeerAware(peerMacAddress));
-            return this;
+        public Builder addWifiAwarePeer(@NonNull byte[] peerMacAddress) {
+            if (peerMacAddress == null) {
+                throw new IllegalArgumentException("Null peer MAC address");
+            }
+            return addResponder(
+                    ResponderConfig.fromWifiAwarePeerMacAddressWithDefaults(peerMacAddress));
         }
 
         /**
@@ -208,8 +189,30 @@ public final class RangingRequest implements Parcelable {
          * @param peerHandle The peer handler of the peer Wi-Fi Aware device.
          * @return The builder, to facilitate chaining {@code builder.setXXX(..).setXXX(..)}.
          */
-        public Builder addWifiAwarePeer(PeerHandle peerHandle) {
-            mRttPeers.add(new RttPeerAware(peerHandle));
+        public Builder addWifiAwarePeer(@NonNull PeerHandle peerHandle) {
+            if (peerHandle == null) {
+                throw new IllegalArgumentException("Null peer handler (identifier)");
+            }
+
+            return addResponder(ResponderConfig.fromWifiAwarePeerHandleWithDefaults(peerHandle));
+        }
+
+        /*
+         * Add the Responder device specified by the {@link ResponderConfig} to the list of devices
+         * with which to measure range. The total number of peers added to the request cannot exceed
+         * the limit specified by {@link #getMaxPeers()}.
+         *
+         * @param responder Information on the RTT Responder.
+         * @return The builder, to facilitate chaining {@code builder.setXXX(..).setXXX(..)}.
+         *
+         * @hide (SystemApi)
+         */
+        public Builder addResponder(@NonNull ResponderConfig responder) {
+            if (responder == null) {
+                throw new IllegalArgumentException("Null Responder!");
+            }
+
+            mRttPeers.add(responder);
             return this;
         }
 
@@ -240,153 +243,5 @@ public final class RangingRequest implements Parcelable {
     @Override
     public int hashCode() {
         return mRttPeers.hashCode();
-    }
-
-    /** @hide */
-    public interface RttPeer {
-        // empty (marker interface)
-    }
-
-    /** @hide */
-    public static class RttPeerAp implements RttPeer, Parcelable {
-        public final ScanResult scanResult;
-
-        public RttPeerAp(ScanResult scanResult) {
-            this.scanResult = scanResult;
-        }
-
-        @Override
-        public int describeContents() {
-            return 0;
-        }
-
-        @Override
-        public void writeToParcel(Parcel dest, int flags) {
-            scanResult.writeToParcel(dest, flags);
-        }
-
-        public static final Creator<RttPeerAp> CREATOR = new Creator<RttPeerAp>() {
-            @Override
-            public RttPeerAp[] newArray(int size) {
-                return new RttPeerAp[size];
-            }
-
-            @Override
-            public RttPeerAp createFromParcel(Parcel in) {
-                return new RttPeerAp(ScanResult.CREATOR.createFromParcel(in));
-            }
-        };
-
-        @Override
-        public String toString() {
-            return new StringBuilder("RttPeerAp: scanResult=").append(
-                    scanResult.toString()).toString();
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-
-            if (!(o instanceof RttPeerAp)) {
-                return false;
-            }
-
-            RttPeerAp lhs = (RttPeerAp) o;
-
-            // Note: the only thing which matters for the request identity is the BSSID of the AP
-            return TextUtils.equals(scanResult.BSSID, lhs.scanResult.BSSID);
-        }
-
-        @Override
-        public int hashCode() {
-            return scanResult.hashCode();
-        }
-    }
-
-    /** @hide */
-    public static class RttPeerAware implements RttPeer, Parcelable {
-        public PeerHandle peerHandle;
-        public byte[] peerMacAddress;
-
-        public RttPeerAware(PeerHandle peerHandle) {
-            if (peerHandle == null) {
-                throw new IllegalArgumentException("Null peerHandle");
-            }
-            this.peerHandle = peerHandle;
-            peerMacAddress = null;
-        }
-
-        public RttPeerAware(byte[] peerMacAddress) {
-            if (peerMacAddress == null) {
-                throw new IllegalArgumentException("Null peerMacAddress");
-            }
-
-            this.peerMacAddress = peerMacAddress;
-            peerHandle = null;
-        }
-
-        @Override
-        public int describeContents() {
-            return 0;
-        }
-
-        @Override
-        public void writeToParcel(Parcel dest, int flags) {
-            if (peerHandle == null) {
-                dest.writeBoolean(false);
-                dest.writeByteArray(peerMacAddress);
-            } else {
-                dest.writeBoolean(true);
-                dest.writeInt(peerHandle.peerId);
-            }
-        }
-
-        public static final Creator<RttPeerAware> CREATOR = new Creator<RttPeerAware>() {
-            @Override
-            public RttPeerAware[] newArray(int size) {
-                return new RttPeerAware[size];
-            }
-
-            @Override
-            public RttPeerAware createFromParcel(Parcel in) {
-                boolean peerHandleAvail = in.readBoolean();
-                if (peerHandleAvail) {
-                    return new RttPeerAware(new PeerHandle(in.readInt()));
-                } else {
-                    return new RttPeerAware(in.createByteArray());
-                }
-            }
-        };
-
-        @Override
-        public String toString() {
-            return new StringBuilder("RttPeerAware: peerHandle=").append(
-                    peerHandle == null ? "<null>" : Integer.toString(peerHandle.peerId)).append(
-                    ", peerMacAddress=").append(peerMacAddress == null ? "<null>"
-                    : new String(HexEncoding.encode(peerMacAddress))).toString();
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-
-            if (!(o instanceof RttPeerAware)) {
-                return false;
-            }
-
-            RttPeerAware lhs = (RttPeerAware) o;
-
-            return Objects.equals(peerHandle, lhs.peerHandle) && Arrays.equals(peerMacAddress,
-                    lhs.peerMacAddress);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(peerHandle.peerId, peerMacAddress);
-        }
     }
 }
