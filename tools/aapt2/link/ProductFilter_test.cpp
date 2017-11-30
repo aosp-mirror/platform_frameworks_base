@@ -73,7 +73,7 @@ TEST(ProductFilterTest, SelectDefaultProduct) {
       test::ValueBuilder<Id>().SetSource(Source("tablet.xml")).Build(),
       context->GetDiagnostics()));
 
-  ProductFilter filter({});
+  ProductFilter filter(std::unordered_set<std::string>{});
   ASSERT_TRUE(filter.Consume(context.get(), &table));
 
   EXPECT_NE(nullptr, test::GetValueForConfigAndProduct<Id>(
@@ -123,7 +123,7 @@ TEST(ProductFilterTest, FailOnMultipleDefaults) {
       test::ValueBuilder<Id>().SetSource(Source("default.xml")).Build(),
       context->GetDiagnostics()));
 
-  ProductFilter filter({});
+  ProductFilter filter(std::unordered_set<std::string>{});
   ASSERT_FALSE(filter.Consume(context.get(), &table));
 }
 
