@@ -462,9 +462,10 @@ public final class DisplayManagerGlobal {
     /**
      * Retrieves brightness change events.
      */
-    public List<BrightnessChangeEvent> getBrightnessEvents() {
+    public List<BrightnessChangeEvent> getBrightnessEvents(String callingPackage) {
         try {
-            ParceledListSlice<BrightnessChangeEvent> events = mDm.getBrightnessEvents();
+            ParceledListSlice<BrightnessChangeEvent> events =
+                    mDm.getBrightnessEvents(callingPackage);
             if (events == null) {
                 return Collections.emptyList();
             }

@@ -84,7 +84,7 @@ interface IDisplayManager {
     Point getStableDisplaySize();
 
     // Requires BRIGHTNESS_SLIDER_USAGE permission.
-    ParceledListSlice getBrightnessEvents();
+    ParceledListSlice getBrightnessEvents(String callingPackage);
 
     // STOPSHIP remove when adaptive brightness code is updated to accept curves.
     // Requires BRIGHTNESS_SLIDER_USAGE permission.

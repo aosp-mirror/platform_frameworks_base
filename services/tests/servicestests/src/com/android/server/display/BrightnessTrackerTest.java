@@ -134,7 +134,7 @@ public class BrightnessTrackerTest {
         mInjector.incrementTime(TimeUnit.SECONDS.toMillis(2));
         mInjector.mSettingsObserver.onChange(false, Settings.System.getUriFor(
                 Settings.System.SCREEN_BRIGHTNESS));
-        List<BrightnessChangeEvent> events = mTracker.getEvents(0).getList();
+        List<BrightnessChangeEvent> events = mTracker.getEvents(0, true).getList();
         mTracker.stop();
 
         assertEquals(1, events.size());
@@ -169,7 +169,9 @@ public class BrightnessTrackerTest {
         final long sensorTime = mInjector.currentTimeMillis();
         mInjector.mSettingsObserver.onChange(false, Settings.System.getUriFor(
                 Settings.System.SCREEN_BRIGHTNESS));
-        List<BrightnessChangeEvent> events = mTracker.getEvents(0).getList();
+        List<BrightnessChangeEvent> eventsNoPackage
+                = mTracker.getEvents(0, false).getList();
+        List<BrightnessChangeEvent> events = mTracker.getEvents(0, true).getList();
         mTracker.stop();
 
         assertEquals(1, events.size());
@@ -184,6 +186,9 @@ public class BrightnessTrackerTest {
         assertEquals(3333, event.colorTemperature);
         assertEquals("a.package", event.packageName);
         assertEquals(0, event.userId);
+
+        assertEquals(1, eventsNoPackage.size());
+        assertNull(eventsNoPackage.get(0).packageName);
     }
 
     @Test
@@ -200,7 +205,7 @@ public class BrightnessTrackerTest {
                 (int) mInjector.mSystemIntSettings.get(Settings.System.SCREEN_BRIGHTNESS));
         mInjector.mSettingsObserver.onChange(false, Settings.System.getUriFor(
                 Settings.System.SCREEN_BRIGHTNESS));
-        List<BrightnessChangeEvent> events = mTracker.getEvents(0).getList();
+        List<BrightnessChangeEvent> events = mTracker.getEvents(0, true).getList();
         // No events because we filtered out our change.
         assertEquals(0, events.size());
 
@@ -217,7 +222,7 @@ public class BrightnessTrackerTest {
                 secondUserUpdateBrightness);
         mInjector.mSettingsObserver.onChange(false, Settings.System.getUriFor(
                 Settings.System.SCREEN_BRIGHTNESS));
-        events = mTracker.getEvents(0).getList();
+        events = mTracker.getEvents(0, true).getList();
 
         assertEquals(2, events.size());
         // First event is change from system update (20) to first user update (20)
@@ -242,7 +247,7 @@ public class BrightnessTrackerTest {
             mInjector.mSettingsObserver.onChange(false, Settings.System.getUriFor(
                     Settings.System.SCREEN_BRIGHTNESS));
         }
-        List<BrightnessChangeEvent> events = mTracker.getEvents(0).getList();
+        List<BrightnessChangeEvent> events = mTracker.getEvents(0, true).getList();
         mTracker.stop();
 
         // Should be capped at 100 events, and they should be the most recent 100.
@@ -266,7 +271,7 @@ public class BrightnessTrackerTest {
         }
         mInjector.mSettingsObserver.onChange(false, Settings.System.getUriFor(
                 Settings.System.SCREEN_BRIGHTNESS));
-        List<BrightnessChangeEvent> events = mTracker.getEvents(0).getList();
+        List<BrightnessChangeEvent> events = mTracker.getEvents(0, true).getList();
         mTracker.stop();
 
         assertEquals(1, events.size());
@@ -317,7 +322,7 @@ public class BrightnessTrackerTest {
                 + Long.toString(twoMonthsAgo) + "," + Long.toString(twoMonthsAgo) + "\"/>"
                 + "</events>";
         tracker.readEventsLocked(getInputStream(eventFile));
-        List<BrightnessChangeEvent> events = tracker.getEvents(0).getList();
+        List<BrightnessChangeEvent> events = tracker.getEvents(0, true).getList();
         assertEquals(1, events.size());
         BrightnessChangeEvent event = events.get(0);
         assertEquals(someTimeAgo, event.timeStamp);
@@ -330,7 +335,7 @@ public class BrightnessTrackerTest {
         assertEquals(1.0f, event.batteryLevel, 0.01);
         assertEquals("com.example.app", event.packageName);
 
-        events = tracker.getEvents(1).getList();
+        events = tracker.getEvents(1, true).getList();
         assertEquals(1, events.size());
         event = events.get(0);
         assertEquals(someTimeAgo, event.timeStamp);
@@ -359,7 +364,7 @@ public class BrightnessTrackerTest {
         } catch (IOException e) {
             // Expected;
         }
-        assertEquals(0, tracker.getEvents(0).getList().size());
+        assertEquals(0, tracker.getEvents(0, true).getList().size());
 
         // Missing lux value.
         eventFile =
@@ -374,7 +379,7 @@ public class BrightnessTrackerTest {
         } catch (IOException e) {
             // Expected;
         }
-        assertEquals(0, tracker.getEvents(0).getList().size());
+        assertEquals(0, tracker.getEvents(0, true).getList().size());
     }
 
     @Test
@@ -405,7 +410,7 @@ public class BrightnessTrackerTest {
         BrightnessTracker tracker = new BrightnessTracker(InstrumentationRegistry.getContext(),
                 mInjector);
         tracker.readEventsLocked(input);
-        List<BrightnessChangeEvent> events = tracker.getEvents(0).getList();
+        List<BrightnessChangeEvent> events = tracker.getEvents(0, true).getList();
 
         assertEquals(1, events.size());
         BrightnessChangeEvent event = events.get(0);
@@ -442,12 +447,12 @@ public class BrightnessTrackerTest {
                 Settings.System.SCREEN_BRIGHTNESS));
         final long eventTime = mInjector.currentTimeMillis();
 
-        List<BrightnessChangeEvent> events = mTracker.getEvents(0).getList();
+        List<BrightnessChangeEvent> events = mTracker.getEvents(0, true).getList();
         assertEquals(2, events.size());
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         mTracker.writeEventsLocked(baos);
-        events = mTracker.getEvents(0).getList();
+        events = mTracker.getEvents(0, true).getList();
         mTracker.stop();
 
         assertEquals(1, events.size());
