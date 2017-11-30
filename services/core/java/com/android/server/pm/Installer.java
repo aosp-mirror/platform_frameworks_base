@@ -499,6 +499,26 @@ public class Installer extends SystemService {
         }
     }
 
+    public boolean createProfileSnapshot(int appId, String packageName, String codePath)
+            throws InstallerException {
+        if (!checkBeforeRemote()) return false;
+        try {
+            return mInstalld.snapshotProfile(appId, packageName, codePath);
+        } catch (Exception e) {
+            throw InstallerException.from(e);
+        }
+    }
+
+    public void destroyProfileSnapshot(String packageName, String codePath)
+            throws InstallerException {
+        if (!checkBeforeRemote()) return;
+        try {
+            mInstalld.destroyProfileSnapshot(packageName, codePath);
+        } catch (Exception e) {
+            throw InstallerException.from(e);
+        }
+    }
+
     public void invalidateMounts() throws InstallerException {
         if (!checkBeforeRemote()) return;
         try {

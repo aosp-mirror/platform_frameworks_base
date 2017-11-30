@@ -3064,7 +3064,7 @@ public class PackageManagerService extends IPackageManager.Stub
             }
 
             mInstallerService = new PackageInstallerService(context, this);
-            mArtManagerService = new ArtManagerService(this);
+            mArtManagerService = new ArtManagerService(this, mInstaller, mInstallLock);
             final Pair<ComponentName, String> instantAppResolverComponent =
                     getInstantAppResolverLPr();
             if (instantAppResolverComponent != null) {
