@@ -21,10 +21,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="8340973892742019101">"B"</string>
-    <string name="kilobyteShort" msgid="7542884022844556968">"KB"</string>
-    <string name="megabyteShort" msgid="6355851576770428922">"MB"</string>
-    <string name="gigabyteShort" msgid="3259882455212193214">"GB"</string>
-    <string name="terabyteShort" msgid="231613018159186962">"TB"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
     <string name="fileSizeSuffix" msgid="8897567456150907538">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;Sem título&gt;"</string>
@@ -84,10 +80,12 @@
     <string name="RestrictedStateContent" msgid="4278821484643362350">"Serviço temporariamente bloqueado pela rede móvel no seu local"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Não foi possível acessar a rede"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"Para melhorar a recepção, tente alterar o tipo selecionado em Configurações &gt; Rede &amp; Internet &gt; Redes móveis &gt; Tipo de rede preferencial."</string>
+    <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"A chamada no Wi‑Fi está ativa"</string>
+    <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"As chamadas de emergência exigem uma rede móvel."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Alertas"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"Encaminhamento de chamada"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Modo de retorno de chamada de emergência"</string>
-    <string name="notification_channel_mobile_data_alert" msgid="6130875231721406231">"Alertas de dados móveis"</string>
+    <string name="notification_channel_mobile_data_status" msgid="4575131690860945836">"Status dos dados móveis"</string>
     <string name="notification_channel_sms" msgid="3441746047346135073">"Mensagens SMS"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Mensagens do correio de voz"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Chamadas por Wi-Fi"</string>

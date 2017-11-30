@@ -21,10 +21,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="8340973892742019101">"B"</string>
-    <string name="kilobyteShort" msgid="7542884022844556968">"kB"</string>
-    <string name="megabyteShort" msgid="6355851576770428922">"MB"</string>
-    <string name="gigabyteShort" msgid="3259882455212193214">"GB"</string>
-    <string name="terabyteShort" msgid="231613018159186962">"TB"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
     <string name="fileSizeSuffix" msgid="8897567456150907538">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;Uten navn&gt;"</string>
@@ -84,10 +80,12 @@
     <string name="RestrictedStateContent" msgid="4278821484643362350">"Tilbys midlertidig ikke gjennom mobilnettverket der du er"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Får ikke kontakt med nettverket"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"For å forbedre signalet, prøv å endre valgt nettverkstype i Innstillinger &gt; Nettverk og Internett &gt; Mobilnettverk &gt; Foretrukket nettverkstype."</string>
+    <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"Wi‑Fi-anrop er aktivt"</string>
+    <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"Du trenger et mobilnettverk for å utføre nødanrop."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Varsler"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"Viderekobling"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Modusen nødsamtale-tilbakeringing"</string>
-    <string name="notification_channel_mobile_data_alert" msgid="6130875231721406231">"Varsler for mobildata"</string>
+    <string name="notification_channel_mobile_data_status" msgid="4575131690860945836">"Status for mobildata"</string>
     <string name="notification_channel_sms" msgid="3441746047346135073">"SMS-meldinger"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Talepostmeldinger"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Wi-Fi-anrop"</string>
@@ -205,7 +203,7 @@
     <string name="reboot_safemode_title" msgid="7054509914500140361">"Start på nytt i sikker modus"</string>
     <string name="reboot_safemode_confirm" msgid="55293944502784668">"Ønsker du å starte på nytt i sikker modus? Dette deaktiverer alle tredjepartsprogrammene du har installert. De gjenopprettes når du starter på nytt."</string>
     <string name="recent_tasks_title" msgid="3691764623638127888">"Nylig"</string>
-    <string name="no_recent_tasks" msgid="8794906658732193473">"Ingen nylige apper."</string>
+    <string name="no_recent_tasks" msgid="8794906658732193473">"Ingen nylig brukte apper."</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"Innstillinger for nettbrett"</string>
     <string name="global_actions" product="tv" msgid="7240386462508182976">"Alternativer for TV"</string>
     <string name="global_actions" product="default" msgid="2406416831541615258">"Telefoninnstillinger"</string>

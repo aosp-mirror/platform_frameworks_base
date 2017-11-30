@@ -21,10 +21,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="8340973892742019101">"B"</string>
-    <string name="kilobyteShort" msgid="7542884022844556968">"KB"</string>
-    <string name="megabyteShort" msgid="6355851576770428922">"MB"</string>
-    <string name="gigabyteShort" msgid="3259882455212193214">"GB"</string>
-    <string name="terabyteShort" msgid="231613018159186962">"TB"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
     <string name="fileSizeSuffix" msgid="8897567456150907538">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;Bez nazwy&gt;"</string>
@@ -86,10 +82,12 @@
     <string name="RestrictedStateContent" msgid="4278821484643362350">"Usługa tymczasowo nieoferowana przez sieć komórkową w Twojej lokalizacji"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Brak zasięgu sieci"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"Aby poprawić odbiór, zmień typ sieci: wybierz Ustawienia &gt; Sieć i internet &gt; Sieci komórkowe &gt; Preferowany typ sieci."</string>
+    <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"Funkcja Połączenia przez Wi‑Fi jest aktywna"</string>
+    <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"Połączenia alarmowe wymagają sieci komórkowej."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Alerty"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"Przekierowanie połączeń"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Tryb alarmowego połączenia zwrotnego"</string>
-    <string name="notification_channel_mobile_data_alert" msgid="6130875231721406231">"Alerty o mobilnej transmisji danych"</string>
+    <string name="notification_channel_mobile_data_status" msgid="4575131690860945836">"Stan mobilnej transmisji danych"</string>
     <string name="notification_channel_sms" msgid="3441746047346135073">"SMS-y"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Wiadomości poczty głosowej"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Połączenia przez Wi-Fi"</string>
@@ -272,7 +270,7 @@
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalendarz"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"dostęp do kalendarza"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
-    <string name="permgroupdesc_sms" msgid="4656988620100940350">"wysyłanie i wyświetlanie SMS-ów"</string>
+    <string name="permgroupdesc_sms" msgid="4656988620100940350">"wysyłanie i wyświetlanie SMS‑ów"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Pamięć wewnętrzna"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"dostęp do zdjęć, multimediów i plików na Twoim urządzeniu"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofon"</string>
