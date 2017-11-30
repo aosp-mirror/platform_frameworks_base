@@ -16,15 +16,15 @@
 
 syntax = "proto2";
 
+package com.android.server.am.proto;
+
 import "frameworks/base/core/proto/android/app/notification.proto";
 import "frameworks/base/core/proto/android/content/intent.proto";
-import "frameworks/base/core/proto/android/server/intentresolver.proto";
-import "frameworks/base/core/proto/android/server/windowmanagerservice.proto";
 import "frameworks/base/core/proto/android/graphics/rect.proto";
 import "frameworks/base/core/proto/android/os/looper.proto";
+import "frameworks/base/core/proto/android/server/intentresolver.proto";
+import "frameworks/base/core/proto/android/server/windowmanagerservice.proto";
 import "frameworks/base/core/proto/android/util/common.proto";
-
-package com.android.server.am.proto;
 
 option java_multiple_files = true;
 
@@ -157,6 +157,69 @@ message BroadcastQueueProto {
     optional int64 finish_clock_time_ms = 4;
   }
   repeated BroadcastSummary historical_broadcasts_summary = 6;
+}
+
+message MemInfoProto {
+  optional int64 uptime_duration_ms = 1;
+  optional int64 elapsed_realtime_ms = 2;
+
+  message NativeProcess {
+    optional int32 pid = 1;
+    optional string process_name = 2;
+
+    message MemoryInfo {
+      optional string name = 1;
+      // The proportional set size for the heap.
+      optional int32 total_pss_kb = 2;
+      // The proportional set size that is swappable for the heap.
+      optional int32 clean_pss_kb = 3;
+      // The private dirty pages used by the heap.
+      optional int32 shared_dirty_kb = 4;
+      // The shared dirty pages used by the heap.
+      optional int32 private_dirty_kb = 5;
+      // The shared clean pages used by the heap.
+      optional int32 shared_clean_kb = 6;
+      // The private clean pages used by the heap.
+      optional int32 private_clean_kb = 7;
+      oneof dirty_swap {
+        // The dirty the pages that have been swapped out.
+        int32 dirty_swap_kb = 8;
+        // The dirty the pages that have been swapped out, proportional.
+        int32 dirty_swap_pss_kb = 9;
+      }
+    }
+    message HeapInfo {
+      optional MemoryInfo mem_info = 1;
+      optional int32 heap_size_kb = 2;
+      optional int32 heap_alloc_kb = 3;
+      optional int32 heap_free_kb = 4;
+    }
+    optional HeapInfo native_heap = 3;
+    optional HeapInfo dalvik_heap = 4;
+    repeated MemoryInfo other_heaps = 5;
+    optional HeapInfo unknown_heap = 6;
+    // Summation of native_heap, dalvik_heap, and other_heaps.
+    optional HeapInfo total_heap = 7;
+
+    repeated MemoryInfo dalvik_details = 8;
+
+    message AppSummary {
+      optional int32 java_heap_pss_kb = 1;
+      optional int32 native_heap_pss_kb = 2;
+      optional int32 code_pss_kb = 3;
+      optional int32 stack_pss_kb = 4;
+      optional int32 graphics_pss_kb = 5;
+      optional int32 private_other_pss_kb = 6;
+      optional int32 system_pss_kb = 7;
+
+      oneof total_swap {
+        int32 total_swap_pss = 8;
+        int32 total_swap_kb = 9;
+      }
+    }
+    optional AppSummary app_summary = 9;
+  }
+  repeated NativeProcess native_processes = 3;
 }
 
 message StickyBroadcastProto {
