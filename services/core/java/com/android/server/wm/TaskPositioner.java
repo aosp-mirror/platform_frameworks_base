@@ -203,7 +203,7 @@ class TaskPositioner {
 
                     // Post back to WM to handle clean-ups. We still need the input
                     // event handler for the last finishInputEvent()!
-                    mService.mH.sendEmptyMessage(H.FINISH_TASK_POSITIONING);
+                    mService.mTaskPositioningController.finishTaskPositioning();
                 }
                 handled = true;
             } catch (Exception e) {

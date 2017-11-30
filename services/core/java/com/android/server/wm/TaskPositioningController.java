@@ -22,6 +22,8 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import android.annotation.Nullable;
 import android.app.IActivityManager;
 import android.os.RemoteException;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Slog;
 import android.view.Display;
 import android.view.IWindow;
@@ -37,6 +39,7 @@ class TaskPositioningController {
     private final InputManagerService mInputManager;
     private final InputMonitor mInputMonitor;
     private final IActivityManager mActivityManager;
+    private final Handler mHandler;
 
     @GuardedBy("WindowManagerSerivce.mWindowMap")
     private @Nullable TaskPositioner mTaskPositioner;
@@ -50,11 +53,12 @@ class TaskPositioningController {
     }
 
     TaskPositioningController(WindowManagerService service, InputManagerService inputManager,
-            InputMonitor inputMonitor, IActivityManager activityManager) {
+            InputMonitor inputMonitor, IActivityManager activityManager, Looper looper) {
         mService = service;
         mInputMonitor = inputMonitor;
         mInputManager = inputManager;
         mActivityManager = activityManager;
+        mHandler = new Handler(looper);
     }
 
     boolean startMovingTask(IWindow window, float startX, float startY) {
@@ -75,24 +79,27 @@ class TaskPositioningController {
     }
 
     void handleTapOutsideTask(DisplayContent displayContent, int x, int y) {
-        int taskId = -1;
-        synchronized (mService.mWindowMap) {
-            final Task task = displayContent.findTaskForResizePoint(x, y);
-            if (task != null) {
-                if (!startPositioningLocked(task.getTopVisibleAppMainWindow(), true /*resize*/,
-                        task.preserveOrientationOnResize(), x, y)) {
-                    return;
+        mHandler.post(() -> {
+            int taskId = -1;
+            synchronized (mService.mWindowMap) {
+                final Task task = displayContent.findTaskForResizePoint(x, y);
+                if (task != null) {
+                    if (!startPositioningLocked(task.getTopVisibleAppMainWindow(), true /*resize*/,
+                            task.preserveOrientationOnResize(), x, y)) {
+                        return;
+                    }
+                    taskId = task.mTaskId;
+                } else {
+                    taskId = displayContent.taskIdFromPoint(x, y);
                 }
-                taskId = task.mTaskId;
-            } else {
-                taskId = displayContent.taskIdFromPoint(x, y);
             }
-        }
-        if (taskId >= 0) {
-            try {
-                mActivityManager.setFocusedTask(taskId);
-            } catch(RemoteException e) {}
-        }
+            if (taskId >= 0) {
+                try {
+                    mActivityManager.setFocusedTask(taskId);
+                } catch (RemoteException e) {
+                }
+            }
+        });
     }
 
     private boolean startPositioningLocked(WindowState win, boolean resize,
@@ -145,15 +152,17 @@ class TaskPositioningController {
         return true;
     }
 
-    void finishPositioning() {
-        if (DEBUG_TASK_POSITIONING) Slog.d(TAG_WM, "finishPositioning");
+    void finishTaskPositioning() {
+        mHandler.post(() -> {
+            if (DEBUG_TASK_POSITIONING) Slog.d(TAG_WM, "finishPositioning");
 
-        synchronized (mService.mWindowMap) {
-            if (mTaskPositioner != null) {
-                mTaskPositioner.unregister();
-                mTaskPositioner = null;
-                mInputMonitor.updateInputWindowsLw(true /*force*/);
+            synchronized (mService.mWindowMap) {
+                if (mTaskPositioner != null) {
+                    mTaskPositioner.unregister();
+                    mTaskPositioner = null;
+                    mInputMonitor.updateInputWindowsLw(true /*force*/);
+                }
             }
-        }
+        });
     }
 }
