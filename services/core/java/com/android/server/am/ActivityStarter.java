@@ -606,21 +606,9 @@ class ActivityStarter {
             return;
         }
 
-        if (startedActivityStack.inSplitScreenPrimaryWindowingMode()) {
-            final ActivityStack homeStack = mSupervisor.mHomeStack;
-            final boolean homeStackVisible = homeStack != null && homeStack.isVisible();
-            if (homeStackVisible) {
-                // We launch an activity while being in home stack, which means either launcher or
-                // recents into docked stack. We don't want the launched activity to be alone in a
-                // docked stack, so we want to immediately launch recents too.
-                if (DEBUG_RECENTS) Slog.d(TAG, "Scheduling recents launch.");
-                mService.mWindowManager.showRecentApps(true /* fromHome */);
-            }
-            return;
-        }
-
-        boolean clearedTask = (mLaunchFlags & (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_CLEAR_TASK))
-                == (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_CLEAR_TASK) && (mReuseTask != null);
+        final int clearTaskFlags = FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_CLEAR_TASK;
+        boolean clearedTask = (mLaunchFlags & clearTaskFlags) == clearTaskFlags
+                && mReuseTask != null;
         if (startedActivityStack.inPinnedWindowingMode()
                 && (result == START_TASK_TO_FRONT || result == START_DELIVERED_TO_TOP
                 || clearedTask)) {
