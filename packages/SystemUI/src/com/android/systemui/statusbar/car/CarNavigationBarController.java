@@ -369,7 +369,7 @@ class CarNavigationBarController {
     private void onFacetClicked(Intent intent, int index) {
         String packageName = intent.getPackage();
 
-        if (packageName == null) {
+        if (packageName == null && !intent.getCategories().contains(Intent.CATEGORY_HOME)) {
             return;
         }
 
