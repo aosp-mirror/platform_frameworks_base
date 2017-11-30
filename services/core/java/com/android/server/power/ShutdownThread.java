@@ -20,10 +20,7 @@ package com.android.server.power;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.IActivityManager;
-import android.app.KeyguardManager;
 import android.app.ProgressDialog;
-import android.app.WallpaperColors;
-import android.app.WallpaperManager;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.IBluetoothManager;
 import android.content.BroadcastReceiver;
@@ -31,8 +28,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.media.AudioAttributes;
 import android.os.FileUtils;
 import android.os.Handler;
@@ -47,8 +42,6 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.Vibrator;
-import android.os.storage.IStorageManager;
-import android.os.storage.IStorageShutdownObserver;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.TimingsTraceLog;
@@ -123,7 +116,6 @@ public final class ShutdownThread extends Thread {
     private static String METRIC_RADIOS = "shutdown_radios";
     private static String METRIC_BT = "shutdown_bt";
     private static String METRIC_RADIO = "shutdown_radio";
-    private static String METRIC_SM = "shutdown_storage_manager";
 
     private final Object mActionDoneSync = new Object();
     private boolean mActionDone;
@@ -526,54 +518,6 @@ public final class ShutdownThread extends Thread {
         shutdownTimingLog.traceEnd(); // ShutdownRadios
         metricEnded(METRIC_RADIOS);
 
-        // Shutdown StorageManagerService to ensure media is in a safe state
-        IStorageShutdownObserver observer = new IStorageShutdownObserver.Stub() {
-            public void onShutDownComplete(int statusCode) throws RemoteException {
-                Log.w(TAG, "Result code " + statusCode + " from StorageManagerService.shutdown");
-                actionDone();
-            }
-        };
-
-        Log.i(TAG, "Shutting down StorageManagerService");
-        shutdownTimingLog.traceBegin("ShutdownStorageManager");
-        metricStarted(METRIC_SM);
-
-        // Set initial variables and time out time.
-        mActionDone = false;
-        final long endShutTime = SystemClock.elapsedRealtime() + MAX_SHUTDOWN_WAIT_TIME;
-        synchronized (mActionDoneSync) {
-            try {
-                final IStorageManager storageManager = IStorageManager.Stub.asInterface(
-                        ServiceManager.checkService("mount"));
-                if (storageManager != null) {
-                    storageManager.shutdown(observer);
-                } else {
-                    Log.w(TAG, "StorageManagerService unavailable for shutdown");
-                }
-            } catch (Exception e) {
-                Log.e(TAG, "Exception during StorageManagerService shutdown", e);
-            }
-            while (!mActionDone) {
-                long delay = endShutTime - SystemClock.elapsedRealtime();
-                if (delay <= 0) {
-                    Log.w(TAG, "StorageManager shutdown wait timed out");
-                    break;
-                } else if (mRebootHasProgressBar) {
-                    int status = (int)((MAX_SHUTDOWN_WAIT_TIME - delay) * 1.0 *
-                            (MOUNT_SERVICE_STOP_PERCENT - RADIO_STOP_PERCENT) /
-                            MAX_SHUTDOWN_WAIT_TIME);
-                    status += RADIO_STOP_PERCENT;
-                    sInstance.setRebootProgress(status, null);
-                }
-                try {
-                    mActionDoneSync.wait(Math.min(delay, ACTION_DONE_POLL_WAIT_MS));
-                } catch (InterruptedException e) {
-                }
-            }
-        }
-        shutdownTimingLog.traceEnd(); // ShutdownStorageManager
-        metricEnded(METRIC_SM);
-
         if (mRebootHasProgressBar) {
             sInstance.setRebootProgress(MOUNT_SERVICE_STOP_PERCENT, null);
 
@@ -585,6 +529,7 @@ public final class ShutdownThread extends Thread {
         shutdownTimingLog.traceEnd(); // SystemServerShutdown
         metricEnded(METRIC_SYSTEM_SERVER);
         saveMetrics(mReboot);
+        // Remaining work will be done by init, including vold shutdown
         rebootOrShutdown(mContext, mReboot, mReason);
     }
 
