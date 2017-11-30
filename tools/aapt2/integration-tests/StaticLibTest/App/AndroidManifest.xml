@@ -21,7 +21,7 @@
     <uses-permission-sdk-23 android:name="android.permission.TEST" android:maxSdkVersion="22" />
 
     <application>
-        <activity android:name=".MyActivity">
+        <activity android:name=".MyActivity" android:id="@+id/sample_generated_id">
             <layout android:defaultHeight="500dp"
                 android:defaultWidth="600dp" />
         </activity>
