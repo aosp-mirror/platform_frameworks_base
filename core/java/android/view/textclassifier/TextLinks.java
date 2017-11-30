@@ -161,14 +161,26 @@ public final class TextLinks {
     public static final class Options {
 
         private LocaleList mDefaultLocales;
+        private TextClassifier.EntityConfig mEntityConfig;
 
         /**
-         * @param defaultLocales ordered list of locale preferences that may be used to disambiguate
-         *      the provided text. If no locale preferences exist, set this to null or an empty
-         *      locale list.
+         * @param defaultLocales ordered list of locale preferences that may be used to
+         *                       disambiguate the provided text. If no locale preferences exist,
+         *                       set this to null or an empty locale list.
          */
         public Options setDefaultLocales(@Nullable LocaleList defaultLocales) {
             mDefaultLocales = defaultLocales;
+            return this;
+        }
+
+        /**
+         * Sets the entity configuration to use. This determines what types of entities the
+         * TextClassifier will look for.
+         *
+         * @param entityConfig EntityConfig to use
+         */
+        public Options setEntityConfig(@Nullable TextClassifier.EntityConfig entityConfig) {
+            mEntityConfig = entityConfig;
             return this;
         }
 
@@ -179,6 +191,15 @@ public final class TextLinks {
         @Nullable
         public LocaleList getDefaultLocales() {
             return mDefaultLocales;
+        }
+
+        /**
+         * @return The config representing the set of entities to look for.
+         * @see #setEntityConfig(TextClassifier.EntityConfig)
+         */
+        @Nullable
+        public TextClassifier.EntityConfig getEntityConfig() {
+            return mEntityConfig;
         }
     }
 
