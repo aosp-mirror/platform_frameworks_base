@@ -29,18 +29,21 @@ import android.util.Slog;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.usb.descriptors.UsbDescriptorParser;
+import com.android.server.usb.descriptors.UsbDeviceDescriptor;
 import com.android.server.usb.descriptors.report.TextReportCanvas;
 import com.android.server.usb.descriptors.tree.UsbDescriptorsTree;
 
-import java.util.Collection;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedList;
 
 /**
  * UsbHostManager manages USB state in host mode.
  */
 public class UsbHostManager {
     private static final String TAG = UsbHostManager.class.getSimpleName();
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
 
     private final Context mContext;
 
@@ -63,6 +66,76 @@ public class UsbHostManager {
     @GuardedBy("mHandlerLock")
     private ComponentName mUsbDeviceConnectionHandler;
 
+    /*
+     * Member used for tracking connections & disconnections
+     */
+    static final SimpleDateFormat sFormat = new SimpleDateFormat("MM-dd HH:mm:ss:SSS");
+    private static final int MAX_CONNECT_RECORDS = 32;
+    private int mNumConnects;    // TOTAL # of connect/disconnect
+    private final LinkedList<ConnectionRecord> mConnections = new LinkedList<ConnectionRecord>();
+    private ConnectionRecord mLastConnect;
+
+    /*
+     * ConnectionRecord
+     * Stores connection/disconnection data.
+     */
+    class ConnectionRecord {
+        long mTimestamp;        // Same time-base as system log.
+        String mDeviceAddress;
+
+        static final int CONNECT = 0;
+        static final int DISCONNECT = 1;
+        final int mMode;
+        final byte[] mDescriptors;
+
+        ConnectionRecord(String deviceAddress, int mode, byte[] descriptors) {
+            mTimestamp = System.currentTimeMillis();
+            mDeviceAddress = deviceAddress;
+            mMode = mode;
+            mDescriptors = descriptors;
+        }
+
+        private String formatTime() {
+            return (new StringBuilder(sFormat.format(new Date(mTimestamp)))).toString();
+        }
+
+        void dumpShort(IndentingPrintWriter pw) {
+            if (mMode == CONNECT) {
+                pw.println(formatTime() + " Connect " + mDeviceAddress);
+                UsbDescriptorParser parser = new UsbDescriptorParser(mDeviceAddress, mDescriptors);
+
+                UsbDeviceDescriptor deviceDescriptor = parser.getDeviceDescriptor();
+
+                pw.println("manfacturer:0x" + Integer.toHexString(deviceDescriptor.getVendorID())
+                        + " product:" + Integer.toHexString(deviceDescriptor.getProductID()));
+                pw.println("isHeadset[in: " + parser.isInputHeadset()
+                        + " , out: " + parser.isOutputHeadset() + "]");
+            } else {
+                pw.println(formatTime() + " Disconnect " + mDeviceAddress);
+            }
+        }
+
+        void dumpLong(IndentingPrintWriter pw) {
+            if (mMode == CONNECT) {
+                pw.println(formatTime() + " Connect " + mDeviceAddress);
+                UsbDescriptorParser parser = new UsbDescriptorParser(mDeviceAddress, mDescriptors);
+                StringBuilder stringBuilder = new StringBuilder();
+                UsbDescriptorsTree descriptorTree = new UsbDescriptorsTree();
+                descriptorTree.parse(parser);
+                descriptorTree.report(new TextReportCanvas(parser, stringBuilder));
+
+                stringBuilder.append("isHeadset[in: " + parser.isInputHeadset()
+                        + " , out: " + parser.isOutputHeadset() + "]");
+                pw.println(stringBuilder.toString());
+            } else {
+                pw.println(formatTime() + " Disconnect " + mDeviceAddress);
+            }
+        }
+    }
+
+    /*
+     * UsbHostManager
+     */
     public UsbHostManager(Context context, UsbAlsaManager alsaManager,
             UsbSettingsManager settingsManager) {
         mContext = context;
@@ -124,6 +197,19 @@ public class UsbHostManager {
 
     }
 
+    private void addConnectionRecord(String deviceAddress, int mode, byte[] rawDescriptors) {
+        mNumConnects++;
+        while (mConnections.size() >= MAX_CONNECT_RECORDS) {
+            mConnections.removeFirst();
+        }
+        ConnectionRecord rec =
+                new ConnectionRecord(deviceAddress, mode, rawDescriptors);
+        mConnections.add(rec);
+        if (mode == ConnectionRecord.CONNECT) {
+            mLastConnect = rec;
+        }
+    }
+
     /* Called from JNI in monitorUsbHostBus() to report new USB devices
        Returns true if successful, i.e. the USB Audio device descriptors are
        correctly parsed and the unique device is added to the audio device list.
@@ -174,6 +260,10 @@ public class UsbHostManager {
                         + " , out: " + isOutputHeadset + "]");
 
                 mUsbAlsaManager.usbDeviceAdded(newDevice, isInputHeadset, isOutputHeadset);
+
+                // Tracking
+                addConnectionRecord(deviceAddress, ConnectionRecord.CONNECT,
+                        parser.getRawDescriptors());
             } else {
                 Slog.e(TAG, "Error parsing USB device descriptors for " + deviceAddress);
                 return false;
@@ -196,6 +286,9 @@ public class UsbHostManager {
                 mUsbAlsaManager.usbDeviceRemoved(device);
                 mSettingsManager.usbDeviceRemoved(device);
                 getCurrentUserSettings().usbDeviceRemoved(device);
+
+                // Tracking
+                addConnectionRecord(deviceAddress, ConnectionRecord.DISCONNECT, null);
             }
         }
     }
@@ -249,26 +342,15 @@ public class UsbHostManager {
                 pw.println("  " + name + ": " + mDevices.get(name));
             }
 
-            Collection<UsbDevice> devices = mDevices.values();
-            if (devices.size() != 0) {
-                pw.println("USB Peripheral Descriptors");
-                for (UsbDevice device : devices) {
-                    StringBuilder stringBuilder = new StringBuilder();
+            pw.println("" + mNumConnects + " total connects/disconnects");
+            pw.println("Last " + mConnections.size() + " connections/disconnections");
+            for (ConnectionRecord rec : mConnections) {
+                rec.dumpShort(pw);
+            }
 
-                    UsbDescriptorParser parser = new UsbDescriptorParser(device.getDeviceName());
-                    if (parser.parseDevice()) {
-                        UsbDescriptorsTree descriptorTree = new UsbDescriptorsTree();
-                        descriptorTree.parse(parser);
-
-                        descriptorTree.report(new TextReportCanvas(parser, stringBuilder));
-
-                        stringBuilder.append("isHeadset[in: " + parser.isInputHeadset()
-                                + " , out: " + parser.isOutputHeadset() + "]");
-                    } else {
-                        stringBuilder.append("Error Parsing USB Descriptors");
-                    }
-                    pw.println(stringBuilder.toString());
-                }
+            if (mLastConnect != null) {
+                pw.println("Last Connected USB Device:");
+                mLastConnect.dumpLong(pw);
             }
         }
 
