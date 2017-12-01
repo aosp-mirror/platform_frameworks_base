@@ -2611,6 +2611,7 @@ class StorageManagerService extends IStorageManager.Stub implements Watchdog.Mon
 
             try {
                 mVold.mkdirs(appPath);
+                return;
             } catch (Exception e) {
                 throw new IllegalStateException("Failed to prepare " + appPath + ": " + e);
             }
