@@ -103,11 +103,7 @@ public final class TextLinks {
             mOriginalText = originalText;
             mStart = start;
             mEnd = end;
-            mEntityScores = new EntityConfidence<>();
-
-            for (Map.Entry<String, Float> entry : entityScores.entrySet()) {
-                mEntityScores.setEntityType(entry.getKey(), entry.getValue());
-            }
+            mEntityScores = new EntityConfidence<>(entityScores);
         }
 
         /**

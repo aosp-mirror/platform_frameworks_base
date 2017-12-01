@@ -21,12 +21,13 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.LocaleList;
+import android.util.ArrayMap;
 import android.view.textclassifier.TextClassifier.EntityType;
 
 import com.android.internal.util.Preconditions;
 
-import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 /**
  * Information about where text selection should be.
@@ -36,7 +37,6 @@ public final class TextSelection {
     private final int mStartIndex;
     private final int mEndIndex;
     @NonNull private final EntityConfidence<String> mEntityConfidence;
-    @NonNull private final List<String> mEntities;
     @NonNull private final String mLogSource;
     @NonNull private final String mVersionInfo;
 
@@ -46,7 +46,6 @@ public final class TextSelection {
         mStartIndex = startIndex;
         mEndIndex = endIndex;
         mEntityConfidence = new EntityConfidence<>(entityConfidence);
-        mEntities = mEntityConfidence.getEntities();
         mLogSource = logSource;
         mVersionInfo = versionInfo;
     }
@@ -70,7 +69,7 @@ public final class TextSelection {
      */
     @IntRange(from = 0)
     public int getEntityCount() {
-        return mEntities.size();
+        return mEntityConfidence.getEntities().size();
     }
 
     /**
@@ -82,7 +81,7 @@ public final class TextSelection {
      */
     @NonNull
     public @EntityType String getEntity(int index) {
-        return mEntities.get(index);
+        return mEntityConfidence.getEntities().get(index);
     }
 
     /**
@@ -126,8 +125,7 @@ public final class TextSelection {
 
         private final int mStartIndex;
         private final int mEndIndex;
-        @NonNull private final EntityConfidence<String> mEntityConfidence =
-                new EntityConfidence<>();
+        @NonNull private final Map<String, Float> mEntityConfidence = new ArrayMap<>();
         @NonNull private String mLogSource = "";
         @NonNull private String mVersionInfo = "";
 
@@ -154,7 +152,7 @@ public final class TextSelection {
         public Builder setEntityType(
                 @NonNull @EntityType String type,
                 @FloatRange(from = 0.0, to = 1.0) float confidenceScore) {
-            mEntityConfidence.setEntityType(type, confidenceScore);
+            mEntityConfidence.put(type, confidenceScore);
             return this;
         }
 
@@ -181,7 +179,8 @@ public final class TextSelection {
          */
         public TextSelection build() {
             return new TextSelection(
-                    mStartIndex, mEndIndex, mEntityConfidence, mLogSource, mVersionInfo);
+                    mStartIndex, mEndIndex, new EntityConfidence<>(mEntityConfidence),  mLogSource,
+                    mVersionInfo);
         }
     }
 
