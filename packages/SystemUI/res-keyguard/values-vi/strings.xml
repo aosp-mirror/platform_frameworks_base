@@ -29,8 +29,7 @@
     <string name="keyguard_password_enter_password_code" msgid="595980919238127672">"Nhập mật khẩu để mở khóa"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="7504123374204446086">"Nhập mã PIN để mở khóa"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"Mã PIN không chính xác."</string>
-    <!-- no translation found for keyguard_sim_error_message_short (592109500618448312) -->
-    <skip />
+    <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"Thẻ không hợp lệ."</string>
     <string name="keyguard_charged" msgid="2222329688813033109">"Đã sạc đầy"</string>
     <string name="keyguard_plugged_in" msgid="89308975354638682">"Đang sạc"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="8869226755413795173">"Đang sạc nhanh"</string>

@@ -34,14 +34,14 @@
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"അറിയിപ്പുകൾ"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"ബാറ്ററി കുറവാണ്"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> ശേഷിക്കുന്നു"</string>
-    <string name="battery_low_percent_format_saver_started" msgid="6859235584035338833">"<xliff:g id="PERCENTAGE">%s</xliff:g> ശേഷിക്കുന്നു. ബാറ്ററി ലാഭിക്കൽ ഓണാണ്."</string>
+    <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"<xliff:g id="PERCENTAGE">%s</xliff:g> ശേഷിക്കുന്നു. ബാറ്ററി ലാഭിക്കൽ ഓണാണ്."</string>
     <string name="invalid_charger" msgid="4549105996740522523">"USB ചാർജ്ജുചെയ്യൽ പിന്തുണയ്ക്കുന്നില്ല.\nഅതിന്റെ അനുബന്ധ ചാർജ്ജർ മാത്രം ഉപയോഗിക്കുക."</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"USB ചാർജ്ജുചെയ്യൽ പിന്തുണച്ചില്ല."</string>
     <string name="invalid_charger_text" msgid="5474997287953892710">"വിതരണം ചെയ്‌ത ചാർജ്ജർ മാത്രം ഉപയോഗിക്കുക."</string>
     <string name="battery_low_why" msgid="4553600287639198111">"ക്രമീകരണം"</string>
-    <string name="battery_saver_confirmation_title" msgid="5299585433050361634">"ബാറ്ററി ലാഭിക്കൽ ഓണാക്കണോ?"</string>
+    <string name="battery_saver_confirmation_title" msgid="2052100465684817154">"ബാറ്ററി ലാഭിക്കൽ ഓണാക്കണോ?"</string>
     <string name="battery_saver_confirmation_ok" msgid="7507968430447930257">"ഓൺ ചെയ്യുക"</string>
-    <string name="battery_saver_start_action" msgid="5576697451677486320">"ബാറ്ററി ലാഭിക്കൽ ഓണാക്കുക"</string>
+    <string name="battery_saver_start_action" msgid="8187820911065797519">"ബാറ്ററി ലാഭിക്കൽ ഓണാക്കുക"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"ക്രമീകരണം"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"വൈഫൈ"</string>
     <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"സ്‌ക്രീൻ സ്വയമേ തിരിക്കുക"</string>
@@ -51,21 +51,15 @@
     <string name="bluetooth_tethered" msgid="7094101612161133267">"ബ്ലൂടൂത്ത് ടെതർ ചെയ്‌തു"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"ടൈപ്പുചെയ്യൽ രീതികൾ സജ്ജീകരിക്കുക"</string>
     <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"ഫിസിക്കൽ കീബോർഡ്"</string>
-    <!-- no translation found for usb_device_permission_prompt (1825685909587559679) -->
-    <skip />
-    <!-- no translation found for usb_accessory_permission_prompt (2465531696941369047) -->
-    <skip />
-    <!-- no translation found for usb_device_confirm_prompt (7440562274256843905) -->
-    <skip />
-    <!-- no translation found for usb_accessory_confirm_prompt (4333670517539993561) -->
-    <skip />
+    <string name="usb_device_permission_prompt" msgid="1825685909587559679">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> ആക്‌സസ് ചെയ്യാൻ <xliff:g id="APPLICATION">%1$s</xliff:g>-നെ അനുവദിക്കണോ?"</string>
+    <string name="usb_accessory_permission_prompt" msgid="2465531696941369047">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g> ആക്‌സസ് ചെയ്യാൻ <xliff:g id="APPLICATION">%1$s</xliff:g>-നെ അനുവദിക്കണോ?"</string>
+    <string name="usb_device_confirm_prompt" msgid="7440562274256843905">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> കൈകാര്യം ചെയ്യാൻ <xliff:g id="APPLICATION">%1$s</xliff:g> തുറക്കണോ?"</string>
+    <string name="usb_accessory_confirm_prompt" msgid="4333670517539993561">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g> കൈകാര്യം ചെയ്യാൻ <xliff:g id="APPLICATION">%1$s</xliff:g> തുറക്കണോ?"</string>
     <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"ഈ USB ആക്‌സസ്സറിയിൽ ഇൻസ്‌റ്റാളുചെയ്‌തവയൊന്നും പ്രവർത്തിക്കുന്നില്ല. <xliff:g id="URL">%1$s</xliff:g>-ൽ ഇതേക്കുറിച്ച് കൂടുതലറിയുക"</string>
     <string name="title_usb_accessory" msgid="4966265263465181372">"USB ആക്‌സസ്സറി"</string>
     <string name="label_view" msgid="6304565553218192990">"കാണുക"</string>
-    <!-- no translation found for always_use_device (4015357883336738417) -->
-    <skip />
-    <!-- no translation found for always_use_accessory (3257892669444535154) -->
-    <skip />
+    <string name="always_use_device" msgid="4015357883336738417">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> കണക്‌റ്റ് ചെയ്‌തിരിക്കുമ്പോൾ എപ്പോഴും <xliff:g id="APPLICATION">%1$s</xliff:g> തുറക്കൂ"</string>
+    <string name="always_use_accessory" msgid="3257892669444535154">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g> കണക്‌റ്റ് ചെയ്‌തിരിക്കുമ്പോൾ എപ്പോഴും <xliff:g id="APPLICATION">%1$s</xliff:g> തുറക്കൂ"</string>
     <string name="usb_debugging_title" msgid="4513918393387141949">"USB ഡീബഗ്ഗിംഗ് അനുവദിക്കണോ?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"ഈ കമ്പ്യൂട്ടറിന്റെ RSA കീ ഫിംഗർപ്രിന്റ് ഇതാണ്:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"ഈ കമ്പ്യൂട്ടറിൽ നിന്ന് എല്ലായ്പ്പോഴും അനുവദിക്കുക"</string>
@@ -249,8 +243,6 @@
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"ഡാറ്റ താൽക്കാലികമായി നിർത്തി"</string>
     <string name="data_usage_disabled_dialog" msgid="4919541636934603816">"നിങ്ങൾ സജ്ജമാക്കിയ ഡാറ്റ പരിധി എത്തിക്കഴിഞ്ഞു. ഇനിയങ്ങോട്ട് നിങ്ങൾക്ക് മൊബൈൽ ഡാറ്റ ഉപയോഗിക്കാൻ സാധിക്കുകയില്ല.\n\nതുടരുകയാണെങ്കിൽ, ഡാറ്റാ ഉപയോഗത്തിന് നിരക്കുകൾ ബാധകമായേക്കാം."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"പുനരാരംഭിക്കുക"</string>
-    <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"ഇന്റർനെറ്റ് കണക്ഷൻ ഇല്ല"</string>
-    <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"വൈഫൈ കണക്‌റ്റുചെയ്‌തു"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"GPS-നായി തിരയുന്നു"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"ലൊക്കേഷൻ സജ്ജീകരിച്ചത് GPS ആണ്"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"ലൊക്കേഷൻ അഭ്യർത്ഥനകൾ സജീവമാണ്"</string>
@@ -407,9 +399,9 @@
     <string name="user_remove_user_title" msgid="4681256956076895559">"ഉപയോക്താവിനെ ഇല്ലാതാക്കണോ?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"ഈ ഉപയോക്താവിന്റെ എല്ലാ ആപ്സും ഡാറ്റയും ഇല്ലാതാക്കും."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"നീക്കംചെയ്യുക"</string>
-    <string name="battery_saver_notification_title" msgid="237918726750955859">"ബാറ്ററി ലാഭിക്കൽ ഓണാണ്"</string>
+    <string name="battery_saver_notification_title" msgid="8614079794522291840">"ബാറ്ററി ലാഭിക്കൽ ഓണാണ്"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"പ്രവർത്തനവും പശ്ചാത്തല ഡാറ്റയും കുറയ്‌ക്കുന്നു"</string>
-    <string name="battery_saver_notification_action_text" msgid="109158658238110382">"ബാറ്ററി ലാഭിക്കൽ ഓഫാക്കുക"</string>
+    <string name="battery_saver_notification_action_text" msgid="132118784269455533">"ബാറ്ററി ലാഭിക്കൽ ഓഫാക്കുക"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"നിങ്ങളുടെ സ്ക്രീനിൽ പ്രദർശിപ്പിച്ചിരിക്കുന്ന എല്ലാ കാര്യങ്ങളും <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ക്യാപ്‌ചർ ചെയ്യുന്നത് ആരംഭിക്കും."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"വീണ്ടും കാണിക്കരുത്"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"എല്ലാം മായ്‌ക്കുക"</string>
@@ -588,8 +580,8 @@
       <item quantity="one">%d മിനിറ്റ്</item>
     </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"ബാറ്ററി ഉപയോഗം"</string>
-    <string name="battery_detail_charging_summary" msgid="4055327085770378335">"ചാർജുചെയ്യുന്ന സമയത്ത് ബാറ്ററി ലാഭിക്കൽ നടക്കില്ല"</string>
-    <string name="battery_detail_switch_title" msgid="8763441006881907058">"ബാറ്ററി ലാഭിക്കൽ"</string>
+    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"ചാർജുചെയ്യുന്ന സമയത്ത് ബാറ്ററി ലാഭിക്കൽ നടക്കില്ല"</string>
+    <string name="battery_detail_switch_title" msgid="6285872470260795421">"ബാറ്ററി ലാഭിക്കൽ"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"പ്രവർത്തനവും പശ്ചാത്തല ഡാറ്റയും കുറയ്‌ക്കുന്നു"</string>
     <string name="keyboard_key_button_template" msgid="6230056639734377300">"ബട്ടൺ <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="2243500072071305073">"ഹോം"</string>

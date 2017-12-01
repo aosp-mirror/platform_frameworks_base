@@ -34,14 +34,14 @@
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Märguanded"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"Aku hakkab tühjaks saama"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"Jäänud on <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
-    <string name="battery_low_percent_format_saver_started" msgid="6859235584035338833">"Jäänud on <xliff:g id="PERCENTAGE">%s</xliff:g>. Akusäästja on sisse lülitatud."</string>
+    <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"Jäänud on <xliff:g id="PERCENTAGE">%s</xliff:g>. Akusäästja on sisse lülitatud."</string>
     <string name="invalid_charger" msgid="4549105996740522523">"USB laadimist ei toetata.\nKasutage ainult tootja laadija."</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"USB-ga laadimist ei toetata."</string>
     <string name="invalid_charger_text" msgid="5474997287953892710">"Kasutage ainult kaasasolevat laadijat."</string>
     <string name="battery_low_why" msgid="4553600287639198111">"Seaded"</string>
-    <string name="battery_saver_confirmation_title" msgid="5299585433050361634">"Kas lülitada sisse akusäästja?"</string>
+    <string name="battery_saver_confirmation_title" msgid="2052100465684817154">"Kas lülitada akusäästja sisse?"</string>
     <string name="battery_saver_confirmation_ok" msgid="7507968430447930257">"Lülita sisse"</string>
-    <string name="battery_saver_start_action" msgid="5576697451677486320">"Akusäästja sisselülitamine"</string>
+    <string name="battery_saver_start_action" msgid="8187820911065797519">"Akusäästja sisselülitamine"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Seaded"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"WiFi"</string>
     <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"Pööra ekraani automaatselt"</string>
@@ -51,15 +51,15 @@
     <string name="bluetooth_tethered" msgid="7094101612161133267">"Bluetooth on jagatud"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"Seadista sisestusmeetodeid"</string>
     <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"Füüsiline klaviatuur"</string>
-    <string name="usb_device_permission_prompt" msgid="834698001271562057">"Kas lubate rakendusel <xliff:g id="APPLICATION">%1$s</xliff:g> USB-seadmele juurde pääseda?"</string>
-    <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"Kas lubate rakendusel <xliff:g id="APPLICATION">%1$s</xliff:g> USB-seadmele juurde pääseda?"</string>
-    <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"Kas avada <xliff:g id="ACTIVITY">%1$s</xliff:g>, kui see USB-seade on ühendatud?"</string>
-    <string name="usb_accessory_confirm_prompt" msgid="3808984931830229888">"Kas avada <xliff:g id="ACTIVITY">%1$s</xliff:g>, kui USB-lisaseade on ühendatud?"</string>
+    <string name="usb_device_permission_prompt" msgid="1825685909587559679">"Kas lubada rakendusele <xliff:g id="APPLICATION">%1$s</xliff:g> juurdepääs seadmele <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_accessory_permission_prompt" msgid="2465531696941369047">"Kas lubada rakendusele <xliff:g id="APPLICATION">%1$s</xliff:g> juurdepääs seadmele <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
+    <string name="usb_device_confirm_prompt" msgid="7440562274256843905">"Kas avada rakendus <xliff:g id="APPLICATION">%1$s</xliff:g> seadme <xliff:g id="USB_DEVICE">%2$s</xliff:g> kasutamiseks?"</string>
+    <string name="usb_accessory_confirm_prompt" msgid="4333670517539993561">"Kas avada rakendus <xliff:g id="APPLICATION">%1$s</xliff:g> seadme <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> kasutamiseks?"</string>
     <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"Inst. rak. ei tööta selle USB-seadmega. Lisateavet lisaseadme kohta vt siit: <xliff:g id="URL">%1$s</xliff:g>"</string>
     <string name="title_usb_accessory" msgid="4966265263465181372">"USB-lisaseade"</string>
     <string name="label_view" msgid="6304565553218192990">"Kuva"</string>
-    <string name="always_use_device" msgid="1450287437017315906">"Kasuta vaikimisi selle USB-seadme jaoks"</string>
-    <string name="always_use_accessory" msgid="1210954576979621596">"Vaikimisi kasuta seda USB-lisaseadet"</string>
+    <string name="always_use_device" msgid="4015357883336738417">"Ava rakendus <xliff:g id="APPLICATION">%1$s</xliff:g> alati, kui seade <xliff:g id="USB_DEVICE">%2$s</xliff:g> on ühendatud"</string>
+    <string name="always_use_accessory" msgid="3257892669444535154">"Ava rakendus <xliff:g id="APPLICATION">%1$s</xliff:g> alati, kui seade <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> on ühendatud"</string>
     <string name="usb_debugging_title" msgid="4513918393387141949">"Kas luban USB silumise?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"Arvuti RSA-võtme sõrmejälg:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Luba alati sellest arvutist"</string>
@@ -245,8 +245,6 @@
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Andmekasutus on peatatud"</string>
     <string name="data_usage_disabled_dialog" msgid="4919541636934603816">"Olete jõudnud määratud andmemahupiiranguni. Te ei kasuta enam mobiilset andmesidet.\n\nJätkamisel võib andmekasutus olla tasuline."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Jätka"</string>
-    <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Interneti-ühendus puudub"</string>
-    <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"WiFi on ühendatud"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"GPS-i otsimine"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"GPS-i määratud asukoht"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"Asukoha taotlused on aktiivsed"</string>
@@ -403,9 +401,9 @@
     <string name="user_remove_user_title" msgid="4681256956076895559">"Kas eemaldada kasutaja?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"Kasutaja kõik rakendused ja andmed kustutatakse."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"Eemalda"</string>
-    <string name="battery_saver_notification_title" msgid="237918726750955859">"Akusäästja on sisse lülitatud"</string>
+    <string name="battery_saver_notification_title" msgid="8614079794522291840">"Akusäästja on sisse lülitatud"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Vähendab jõudlust ja taustaandmeid"</string>
-    <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Akusäästja väljalülitamine"</string>
+    <string name="battery_saver_notification_action_text" msgid="132118784269455533">"Akusäästja väljalülitamine"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> hakkab jäädvustama kõike, mida ekraanil kuvatakse."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Ära kuva uuesti"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Tühjenda kõik"</string>
@@ -584,8 +582,8 @@
       <item quantity="one">%d minut</item>
     </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"Akukasutus"</string>
-    <string name="battery_detail_charging_summary" msgid="4055327085770378335">"Akusäästja pole laadimise ajal saadaval"</string>
-    <string name="battery_detail_switch_title" msgid="8763441006881907058">"Akusäästja"</string>
+    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Akusäästja pole laadimise ajal saadaval"</string>
+    <string name="battery_detail_switch_title" msgid="6285872470260795421">"Akusäästja"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Vähendab jõudlust ja taustaandmeid"</string>
     <string name="keyboard_key_button_template" msgid="6230056639734377300">"Nupp <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="2243500072071305073">"Avaekraan"</string>

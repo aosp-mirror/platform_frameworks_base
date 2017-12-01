@@ -34,14 +34,17 @@
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"ਸੂਚਨਾਵਾਂ"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"ਬੈਟਰੀ ਘੱਟ ਹੈ"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> ਬਾਕੀ"</string>
-    <string name="battery_low_percent_format_saver_started" msgid="6859235584035338833">"<xliff:g id="PERCENTAGE">%s</xliff:g> ਬਾਕੀ। ਬੈਟਰੀ ਸੇਵਰ ਚਾਲੂ ਹੈ।"</string>
+    <!-- no translation found for battery_low_percent_format_saver_started (7879389868952879166) -->
+    <skip />
     <string name="invalid_charger" msgid="4549105996740522523">"USB ਚਾਰਜਿੰਗ ਸਮਰਥਿਤ ਨਹੀਂ ਹੈ।\nਕੇਵਲ ਸਪਲਾਈ ਕੀਤਾ ਚਾਰਜਰ ਵਰਤੋ।"</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"USB ਚਾਰਜਿੰਗ ਸਮਰਥਿਤ ਨਹੀਂ ਹੈ।"</string>
     <string name="invalid_charger_text" msgid="5474997287953892710">"ਕੇਵਲ ਸਪਲਾਈ ਕੀਤਾ ਚਾਰਜਰ ਵਰਤੋ।"</string>
     <string name="battery_low_why" msgid="4553600287639198111">"ਸੈਟਿੰਗਾਂ"</string>
-    <string name="battery_saver_confirmation_title" msgid="5299585433050361634">"ਕੀ ਬੈਟਰੀ ਸੇਵਰ ਚਾਲੂ ਕਰਨਾ ਹੈ?"</string>
+    <!-- no translation found for battery_saver_confirmation_title (2052100465684817154) -->
+    <skip />
     <string name="battery_saver_confirmation_ok" msgid="7507968430447930257">"ਚਾਲੂ ਕਰੋ"</string>
-    <string name="battery_saver_start_action" msgid="5576697451677486320">"ਬੈਟਰੀ ਸੇਵਰ ਚਾਲੂ ਕਰੋ"</string>
+    <!-- no translation found for battery_saver_start_action (8187820911065797519) -->
+    <skip />
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"ਸੈਟਿੰਗਾਂ"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"ਵਾਈ-ਫਾਈ"</string>
     <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"ਸਕ੍ਰੀਨ ਆਪਣੇ-ਆਪ ਘੁੰਮਾਓ"</string>
@@ -51,21 +54,15 @@
     <string name="bluetooth_tethered" msgid="7094101612161133267">"Bluetooth ਟੀਥਰ ਕੀਤੀ"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"ਇਨਪੁਟ ਵਿਧੀਆਂ ਸੈਟ ਅਪ ਕਰੋ"</string>
     <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"ਫਿਜੀਕਲ ਕੀ-ਬੋਰਡ"</string>
-    <!-- no translation found for usb_device_permission_prompt (1825685909587559679) -->
-    <skip />
-    <!-- no translation found for usb_accessory_permission_prompt (2465531696941369047) -->
-    <skip />
-    <!-- no translation found for usb_device_confirm_prompt (7440562274256843905) -->
-    <skip />
-    <!-- no translation found for usb_accessory_confirm_prompt (4333670517539993561) -->
-    <skip />
+    <string name="usb_device_permission_prompt" msgid="1825685909587559679">"ਕੀ <xliff:g id="USB_DEVICE">%2$s</xliff:g> ਤੱਕ <xliff:g id="APPLICATION">%1$s</xliff:g> ਨੂੰ ਪਹੁੰਚ ਕਰਨ ਦੇਣੀ ਹੈ?"</string>
+    <string name="usb_accessory_permission_prompt" msgid="2465531696941369047">"ਕੀ <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> ਤੱਕ <xliff:g id="APPLICATION">%1$s</xliff:g> ਨੂੰ ਪਹੁੰਚ ਕਰਨ ਦੇਣੀ ਹੈ?"</string>
+    <string name="usb_device_confirm_prompt" msgid="7440562274256843905">"ਕੀ <xliff:g id="USB_DEVICE">%2$s</xliff:g> ਨੂੰ ਵਰਤਣ ਲਈ <xliff:g id="APPLICATION">%1$s</xliff:g> ਖੋਲ੍ਹਣੀ ਹੈ?"</string>
+    <string name="usb_accessory_confirm_prompt" msgid="4333670517539993561">"ਕੀ <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> ਨੂੰ ਵਰਤਣ ਲਈ <xliff:g id="APPLICATION">%1$s</xliff:g> ਖੋਲ੍ਹਣੀ ਹੈ?"</string>
     <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"ਕੋਈ ਇੰਸਟੌਲ ਕੀਤੇ ਐਪਸ ਇਸ USB ਐਕਸੈਸਰੀ ਨਾਲ ਕੰਮ ਨਹੀਂ ਕਰਦੇ। <xliff:g id="URL">%1$s</xliff:g> ਤੇ ਇਸ ਐਕਸੈਸਰੀ ਬਾਰੇ ਹੋਰ ਜਾਣੋ"</string>
     <string name="title_usb_accessory" msgid="4966265263465181372">"USB ਐਕਸੈਸਰੀ"</string>
     <string name="label_view" msgid="6304565553218192990">"ਦੇਖੋ"</string>
-    <!-- no translation found for always_use_device (4015357883336738417) -->
-    <skip />
-    <!-- no translation found for always_use_accessory (3257892669444535154) -->
-    <skip />
+    <string name="always_use_device" msgid="4015357883336738417">"ਹਮੇਸ਼ਾਂ <xliff:g id="APPLICATION">%1$s</xliff:g> ਨੂੰ ਉਦੋਂ ਹੀ ਖੋਲ੍ਹੋ ਜਦੋਂ <xliff:g id="USB_DEVICE">%2$s</xliff:g> ਕਨੈਕਟ ਹੋਵੇ"</string>
+    <string name="always_use_accessory" msgid="3257892669444535154">"ਹਮੇਸ਼ਾਂ <xliff:g id="APPLICATION">%1$s</xliff:g> ਨੂੰ ਉਦੋਂ ਹੀ ਖੋਲ੍ਹੋ ਜਦੋਂ <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> ਕਨੈਕਟ ਹੋਵੇ"</string>
     <string name="usb_debugging_title" msgid="4513918393387141949">"ਕੀ USB ਡੀਬਗਿੰਗ ਦੀ ਆਗਿਆ ਦੇਣੀ ਹੈ?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"ਕੰਪਿਊਟਰ ਦਾ RSA ਕੁੰਜੀ ਫਿੰਗਰਪ੍ਰਿੰਟ \n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"ਹਮੇਸ਼ਾਂ ਇਸ ਕੰਪਿਊਟਰ ਤੋਂ ਆਗਿਆ ਦਿਓ"</string>
@@ -249,8 +246,6 @@
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">" ਡਾਟਾ  ਰੁਕ ਗਿਆ ਹੈ"</string>
     <string name="data_usage_disabled_dialog" msgid="4919541636934603816">"ਤੁਸੀਂ ਤੁਹਾਡੇ ਵੱਲੋਂ ਸੈੱਟ ਕੀਤੀ ਗਈ ਡਾਟਾ ਸੀਮਾ \'ਤੇ ਪਹੁੰਚ ਚੁੱਕੇ ਹੋ। ਤੁਸੀਂ ਹੁਣ ਮੋਬਾਈਲ ਡਾਟੇ ਦੀ ਵਰਤੋਂ ਨਹੀਂ ਕਰ ਰਹੇ ਹੋ।\n\nਜੇਕਰ ਤੁਸੀਂ ਮੁੜ-ਸ਼ੁਰੂ ਕਰਦੇ ਹੋ, ਤਾਂ ਡਾਟਾ ਵਰਤੋਂ ਲਈ ਖਰਚੇ ਲਾਗੂ ਹੋ ਸਕਦੇ ਹਨ।"</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"ਦੁਬਾਰਾ ਸ਼ੁਰੂ ਕਰੋ"</string>
-    <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"ਕੋਈ ਇੰਟਰਨੈੱਟ ਕਨੈਕਸ਼ਨ ਨਹੀਂ"</string>
-    <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"ਵਾਈ-ਫਾਈ ਕਨੈਕਟ ਹੈ"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"GPS ਦੀ ਖੋਜ ਕਰ ਰਿਹਾ ਹੈ"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"GPS ਵੱਲੋਂ ਸੈੱਟ ਕੀਤਾ ਗਿਆ ਟਿਕਾਣਾ"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"ਨਿਰਧਾਰਿਤ ਸਥਾਨ ਸੇਵਾ ਬੇਨਤੀਆਂ ਸਕਿਰਿਆ"</string>
@@ -407,9 +402,11 @@
     <string name="user_remove_user_title" msgid="4681256956076895559">"ਕੀ ਵਰਤੋਂਕਾਰ ਹਟਾਉਣਾ ਹੈ?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"ਇਸ ਉਪਭੋਗਤਾ ਦੇ ਸਾਰੇ ਐਪਸ ਅਤੇ  ਡਾਟਾ  ਮਿਟਾ ਦਿੱਤਾ ਜਾਏਗਾ।"</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"ਹਟਾਓ"</string>
-    <string name="battery_saver_notification_title" msgid="237918726750955859">"ਬੈਟਰੀ ਸੇਵਰ ਚਾਲੂ ਹੈ"</string>
+    <!-- no translation found for battery_saver_notification_title (8614079794522291840) -->
+    <skip />
     <string name="battery_saver_notification_text" msgid="820318788126672692">"ਪ੍ਰਦਰਸ਼ਨ ਅਤੇ ਪਿਛੋਕੜ  ਡਾਟਾ  ਘੱਟ ਕਰਦਾ ਹੈ"</string>
-    <string name="battery_saver_notification_action_text" msgid="109158658238110382">"ਬੈਟਰੀ ਸੇਵਰ ਬੰਦ ਕਰੋ"</string>
+    <!-- no translation found for battery_saver_notification_action_text (132118784269455533) -->
+    <skip />
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ਉਹ ਸਭ ਕੁਝ ਕੈਪਚਰ ਕਰਨਾ ਸ਼ੁਰੂ ਕਰ ਦੇਵੇਗਾ, ਜੋ ਤੁਹਾਡੀ ਸਕ੍ਰੀਨ ਤੇ ਡਿਸਪਲੇ ਕੀਤਾ ਜਾਂਦਾ ਹੈ।"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"ਦੁਬਾਰਾ ਨਾ ਦਿਖਾਓ"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"ਸਭ ਕਲੀਅਰ ਕਰੋ"</string>
@@ -588,8 +585,8 @@
       <item quantity="other"> %d ਮਿੰਟ</item>
     </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"ਬੈਟਰੀ ਵਰਤੋਂ"</string>
-    <string name="battery_detail_charging_summary" msgid="4055327085770378335">"ਬੈਟਰੀ ਸੇਵਰ ਚਾਰਜਿੰਗ ਦੌਰਾਨ ਉਪਲਬਧ ਨਹੀਂ ਹੈ"</string>
-    <string name="battery_detail_switch_title" msgid="8763441006881907058">"ਬੈਟਰੀ ਸੇਵਰ"</string>
+    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"ਬੈਟਰੀ ਸੇਵਰ ਚਾਰਜਿੰਗ ਦੌਰਾਨ ਉਪਲਬਧ ਨਹੀਂ ਹੈ"</string>
+    <string name="battery_detail_switch_title" msgid="6285872470260795421">"ਬੈਟਰੀ ਸੇਵਰ"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"ਕਾਰਗੁਜ਼ਾਰੀ ਅਤੇ ਬੈਕਗ੍ਰਾਊਂਡ  ਡਾਟੇ  ਨੂੰ ਘਟਾਉਂਦਾ ਹੈ"</string>
     <string name="keyboard_key_button_template" msgid="6230056639734377300">"ਬਟਨ <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="2243500072071305073">"Home"</string>

@@ -34,14 +34,14 @@
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Notifications"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"Battery is low"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> remaining"</string>
-    <string name="battery_low_percent_format_saver_started" msgid="6859235584035338833">"<xliff:g id="PERCENTAGE">%s</xliff:g> remaining. Battery saver is on."</string>
+    <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"<xliff:g id="PERCENTAGE">%s</xliff:g> remaining. Battery Saver is on."</string>
     <string name="invalid_charger" msgid="4549105996740522523">"USB charging not supported.\nUse only the supplied charger."</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"USB charging not supported."</string>
     <string name="invalid_charger_text" msgid="5474997287953892710">"Use only the supplied charger."</string>
     <string name="battery_low_why" msgid="4553600287639198111">"Settings"</string>
-    <string name="battery_saver_confirmation_title" msgid="5299585433050361634">"Turn on battery saver?"</string>
+    <string name="battery_saver_confirmation_title" msgid="2052100465684817154">"Turn on Battery Saver?"</string>
     <string name="battery_saver_confirmation_ok" msgid="7507968430447930257">"Turn on"</string>
-    <string name="battery_saver_start_action" msgid="5576697451677486320">"Turn on battery saver"</string>
+    <string name="battery_saver_start_action" msgid="8187820911065797519">"Turn on Battery Saver"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Settings"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
     <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"Auto-rotate screen"</string>
@@ -243,8 +243,6 @@
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Data is paused"</string>
     <string name="data_usage_disabled_dialog" msgid="4919541636934603816">"The data limit that you set has been reached. You are no longer using mobile data.\n\nIf you resume, charges may apply for data usage."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Resume"</string>
-    <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"No Internet connection"</string>
-    <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi connected"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Searching for GPS"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Location set by GPS"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"Location requests active"</string>
@@ -401,9 +399,9 @@
     <string name="user_remove_user_title" msgid="4681256956076895559">"Remove user?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"All apps and data of this user will be deleted."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"Remove"</string>
-    <string name="battery_saver_notification_title" msgid="237918726750955859">"Battery saver is on"</string>
+    <string name="battery_saver_notification_title" msgid="8614079794522291840">"Battery Saver is on"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Reduces performance and background data"</string>
-    <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Turn off battery saver"</string>
+    <string name="battery_saver_notification_action_text" msgid="132118784269455533">"Turn off Battery Saver"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> will start capturing everything that\'s displayed on your screen."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Don\'t show again"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Clear all"</string>
@@ -582,8 +580,8 @@
       <item quantity="one">%d minute</item>
     </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"Battery usage"</string>
-    <string name="battery_detail_charging_summary" msgid="4055327085770378335">"Battery Saver not available during charging"</string>
-    <string name="battery_detail_switch_title" msgid="8763441006881907058">"Battery Saver"</string>
+    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Battery Saver not available during charging"</string>
+    <string name="battery_detail_switch_title" msgid="6285872470260795421">"Battery Saver"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Reduces performance and background data"</string>
     <string name="keyboard_key_button_template" msgid="6230056639734377300">"Button <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="2243500072071305073">"Home"</string>

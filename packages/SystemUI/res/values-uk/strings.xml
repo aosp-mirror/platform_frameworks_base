@@ -36,14 +36,14 @@
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Сповіщення"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"Низький рівень заряду акумулятора"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"Залишилося <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
-    <string name="battery_low_percent_format_saver_started" msgid="6859235584035338833">"Залишилося <xliff:g id="PERCENTAGE">%s</xliff:g>. Увімкнено режим енергозбереження."</string>
+    <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"Залишилося <xliff:g id="PERCENTAGE">%s</xliff:g>. Увімкнено режим економії заряду акумулятора."</string>
     <string name="invalid_charger" msgid="4549105996740522523">"Заряджання USB не підтримується.\nВикористовуйте лише наданий у комплекті зарядний пристрій."</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"Заряджання через USB не підтримується."</string>
     <string name="invalid_charger_text" msgid="5474997287953892710">"Використовуйте лише зарядний пристрій, який постачається в комплекті."</string>
     <string name="battery_low_why" msgid="4553600287639198111">"Налаштування"</string>
-    <string name="battery_saver_confirmation_title" msgid="5299585433050361634">"Увімкнути режим енергозбереження?"</string>
+    <string name="battery_saver_confirmation_title" msgid="2052100465684817154">"Увімкнути режим економії заряду акумулятора?"</string>
     <string name="battery_saver_confirmation_ok" msgid="7507968430447930257">"Увімкнути"</string>
-    <string name="battery_saver_start_action" msgid="5576697451677486320">"Увімкнути режим енергозбереження"</string>
+    <string name="battery_saver_start_action" msgid="8187820911065797519">"Увімкнути режим економії заряду акумулятора"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Налаштування"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
     <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"Повертати екран автоматично"</string>
@@ -53,15 +53,15 @@
     <string name="bluetooth_tethered" msgid="7094101612161133267">"Створено прив\'язку Bluetooth"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"Налаштувати методи введення"</string>
     <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"Фізична клавіатура"</string>
-    <string name="usb_device_permission_prompt" msgid="834698001271562057">"Надати програмі <xliff:g id="APPLICATION">%1$s</xliff:g> доступ до пристрою USB?"</string>
-    <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"Надати програмі <xliff:g id="APPLICATION">%1$s</xliff:g> доступ до аксесуара USB?"</string>
-    <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"Відкривати \"<xliff:g id="ACTIVITY">%1$s</xliff:g>\", коли під’єднано пристрій USB?"</string>
-    <string name="usb_accessory_confirm_prompt" msgid="3808984931830229888">"Відкривати \"<xliff:g id="ACTIVITY">%1$s</xliff:g>\", коли під’єднано аксесуар USB?"</string>
+    <string name="usb_device_permission_prompt" msgid="1825685909587559679">"Надати додатку <xliff:g id="APPLICATION">%1$s</xliff:g> доступ до такого аксесуара: <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_accessory_permission_prompt" msgid="2465531696941369047">"Надати додатку <xliff:g id="APPLICATION">%1$s</xliff:g> доступ до такого аксесуара: <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
+    <string name="usb_device_confirm_prompt" msgid="7440562274256843905">"Відкрити додаток <xliff:g id="APPLICATION">%1$s</xliff:g>, щоб використовувати такий аксесуар: <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_accessory_confirm_prompt" msgid="4333670517539993561">"Відкрити додаток <xliff:g id="APPLICATION">%1$s</xliff:g>, щоб використовувати такий аксесуар: <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
     <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"Установлені прогр. не працюють із цим аксесуаром USB. Більше про цей аксесуар: <xliff:g id="URL">%1$s</xliff:g>"</string>
     <string name="title_usb_accessory" msgid="4966265263465181372">"Пристрій USB"</string>
     <string name="label_view" msgid="6304565553218192990">"Переглянути"</string>
-    <string name="always_use_device" msgid="1450287437017315906">"Використовувати за умовчанням для пристрою USB"</string>
-    <string name="always_use_accessory" msgid="1210954576979621596">"Використовувати за умовчанням для аксесуара USB"</string>
+    <string name="always_use_device" msgid="4015357883336738417">"Завжди відкривати додаток <xliff:g id="APPLICATION">%1$s</xliff:g>, коли під’єднано такий аксесуар: <xliff:g id="USB_DEVICE">%2$s</xliff:g>"</string>
+    <string name="always_use_accessory" msgid="3257892669444535154">"Завжди відкривати додаток <xliff:g id="APPLICATION">%1$s</xliff:g>, коли під’єднано такий аксесуар: <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>"</string>
     <string name="usb_debugging_title" msgid="4513918393387141949">"Дозволити налагодження USB?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"Цифровий відбиток ключа RSA комп’ютера:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Завжди дозволяти з цього комп’ютера"</string>
@@ -247,8 +247,6 @@
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Передавання даних призупинено"</string>
     <string name="data_usage_disabled_dialog" msgid="4919541636934603816">"Досягнуто ліміту мобільного трафіку. Ви його більше не витрачаєте.\n\nЯкщо ви продовжите, може стягуватися плата за використання трафіку."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Відновити"</string>
-    <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Немає з’єднання"</string>
-    <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi під’єднано"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Виконується пошук GPS-сигналу"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Місцезнаходження встановлено за допомогою GPS"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"Запити про місцезнаходження активні"</string>
@@ -407,9 +405,9 @@
     <string name="user_remove_user_title" msgid="4681256956076895559">"Видалити користувача?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"Усі додатки й дані цього користувача буде видалено."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"Видалити"</string>
-    <string name="battery_saver_notification_title" msgid="237918726750955859">"Режим енергозбереження ввімкнено"</string>
+    <string name="battery_saver_notification_title" msgid="8614079794522291840">"Режим економії заряду акумулятора ввімкнено"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Знижується продуктивність і обмежуються фонові дані"</string>
-    <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Вимкнути режим енергозбереження"</string>
+    <string name="battery_saver_notification_action_text" msgid="132118784269455533">"Вимкнути режим економії заряду акумулятора"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> отримає доступ до всіх даних, які відображаються на вашому екрані."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Більше не показувати"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Очистити все"</string>
@@ -596,8 +594,8 @@
       <item quantity="other">%d хвилини</item>
     </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"Використання заряду"</string>
-    <string name="battery_detail_charging_summary" msgid="4055327085770378335">"Режим економії заряду акумулятора не працює під час заряджання"</string>
-    <string name="battery_detail_switch_title" msgid="8763441006881907058">"Режим економії заряду акумулятора"</string>
+    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Режим енергозбереження не можна ввімкнути під час заряджання"</string>
+    <string name="battery_detail_switch_title" msgid="6285872470260795421">"Режим енергозбереження"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Знижується продуктивність і обмежується обмін даними у фоновому режимі"</string>
     <string name="keyboard_key_button_template" msgid="6230056639734377300">"Кнопка <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="2243500072071305073">"Home"</string>
