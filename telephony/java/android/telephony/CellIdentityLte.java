@@ -213,7 +213,7 @@ public final class CellIdentityLte implements Parcelable {
      * @return a 5 or 6 character string (MCC+MNC), null if any field is unknown
      */
     public String getMobileNetworkOperator() {
-        return (mMncStr == null || mMncStr == null) ? null : mMccStr + mMncStr;
+        return (mMccStr == null || mMncStr == null) ? null : mMccStr + mMncStr;
     }
 
     /**
