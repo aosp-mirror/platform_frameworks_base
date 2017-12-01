@@ -8876,7 +8876,10 @@ public class ActivityManagerService extends IActivityManager.Stub
         final int callingAppId = UserHandle.getAppId(callingUid);
         if ((callingAppId == SYSTEM_UID) || (callingAppId == ROOT_UID)) {
             if ("com.android.settings.files".equals(grantUri.uri.getAuthority())) {
-                // Exempted authority for cropping user photos in Settings app
+                // Exempted authority for
+                // 1. cropping user photos and sharing a generated license html
+                //    file in Settings app
+                // 2. sharing a generated license html file in TvSettings app
             } else {
                 Slog.w(TAG, "For security reasons, the system cannot issue a Uri permission"
                         + " grant to " + grantUri + "; use startActivityAsCaller() instead");
