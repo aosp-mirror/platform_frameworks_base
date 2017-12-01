@@ -23,6 +23,8 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.IBinder;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.os.Process;
 import android.os.UserHandle;
 import android.util.Log;
@@ -36,12 +38,14 @@ import java.io.Closeable;
  * SurfaceControl
  *  @hide
  */
-public class SurfaceControl {
+public class SurfaceControl implements Parcelable {
     private static final String TAG = "SurfaceControl";
 
     private static native long nativeCreate(SurfaceSession session, String name,
             int w, int h, int format, int flags, long parentObject, int windowType, int ownerUid)
             throws OutOfResourcesException;
+    private static native long nativeReadFromParcel(Parcel in);
+    private static native void nativeWriteToParcel(long nativeObject, Parcel out);
     private static native void nativeRelease(long nativeObject);
     private static native void nativeDestroy(long nativeObject);
     private static native void nativeDisconnect(long nativeObject);
@@ -575,6 +579,37 @@ public class SurfaceControl {
         other.mNativeObject = 0;
         mCloseGuard.open("release");
     }
+
+    private SurfaceControl(Parcel in) {
+        mName = in.readString();
+        mNativeObject = nativeReadFromParcel(in);
+        if (mNativeObject == 0) {
+            throw new IllegalArgumentException("Couldn't read SurfaceControl from parcel=" + in);
+        }
+        mCloseGuard.open("release");
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(mName);
+        nativeWriteToParcel(mNativeObject, dest);
+    }
+
+    public static final Creator<SurfaceControl> CREATOR
+            = new Creator<SurfaceControl>() {
+        public SurfaceControl createFromParcel(Parcel in) {
+            return new SurfaceControl(in);
+        }
+
+        public SurfaceControl[] newArray(int size) {
+            return new SurfaceControl[size];
+        }
+    };
 
     @Override
     protected void finalize() throws Throwable {
