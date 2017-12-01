@@ -63,6 +63,7 @@ TEST(UnicodeTest, IsValidResourceEntryName) {
   EXPECT_FALSE(IsValidResourceEntryName("Føø/Bar"));
   EXPECT_FALSE(IsValidResourceEntryName("Føø:Bar"));
   EXPECT_FALSE(IsValidResourceEntryName("Føø;Bar"));
+  EXPECT_FALSE(IsValidResourceEntryName("0_resource_name_obfuscated"));
 }
 
 }  // namespace text

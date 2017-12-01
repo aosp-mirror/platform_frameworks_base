@@ -220,12 +220,15 @@ class MapFlattenVisitor : public ValueVisitor {
 class PackageFlattener {
  public:
   PackageFlattener(IAaptContext* context, ResourceTablePackage* package,
-                   const std::map<size_t, std::string>* shared_libs, bool use_sparse_entries)
+                   const std::map<size_t, std::string>* shared_libs, bool use_sparse_entries,
+                   bool collapse_key_stringpool, const std::set<std::string>& whitelisted_resources)
       : context_(context),
         diag_(context->GetDiagnostics()),
         package_(package),
         shared_libs_(shared_libs),
-        use_sparse_entries_(use_sparse_entries) {
+        use_sparse_entries_(use_sparse_entries),
+        collapse_key_stringpool_(collapse_key_stringpool),
+        whitelisted_resources_(whitelisted_resources) {
   }
 
   bool FlattenPackage(BigBuffer* buffer) {
@@ -494,13 +497,23 @@ class PackageFlattener {
       // configuration available. Here we reverse this to match the binary
       // table.
       std::map<ConfigDescription, std::vector<FlatEntry>> config_to_entry_list_map;
-      for (ResourceEntry* entry : sorted_entries) {
-        const uint32_t key_index = (uint32_t)key_pool_.MakeRef(entry->name).index();
 
+      // hardcoded string uses characters which make it an invalid resource name
+      const std::string obfuscated_resource_name = "0_resource_name_obfuscated";
+
+      for (ResourceEntry* entry : sorted_entries) {
+        uint32_t local_key_index;
+        if (!collapse_key_stringpool_ ||
+            whitelisted_resources_.find(entry->name) != whitelisted_resources_.end()) {
+          local_key_index = (uint32_t)key_pool_.MakeRef(entry->name).index();
+        } else {
+          // resource isn't whitelisted, add it as obfuscated value
+          local_key_index = (uint32_t)key_pool_.MakeRef(obfuscated_resource_name).index();
+        }
         // Group values by configuration.
         for (auto& config_value : entry->values) {
           config_to_entry_list_map[config_value->config].push_back(
-              FlatEntry{entry, config_value->value.get(), key_index});
+              FlatEntry{entry, config_value->value.get(), local_key_index});
         }
       }
 
@@ -549,6 +562,8 @@ class PackageFlattener {
   bool use_sparse_entries_;
   StringPool type_pool_;
   StringPool key_pool_;
+  bool collapse_key_stringpool_;
+  const std::set<std::string>& whitelisted_resources_;
 };
 
 }  // namespace
@@ -593,7 +608,8 @@ bool TableFlattener::Consume(IAaptContext* context, ResourceTable* table) {
     }
 
     PackageFlattener flattener(context, package.get(), &table->included_packages_,
-                               options_.use_sparse_entries);
+                               options_.use_sparse_entries, options_.collapse_key_stringpool,
+                               options_.whitelisted_resources);
     if (!flattener.FlattenPackage(&package_buffer)) {
       return false;
     }
