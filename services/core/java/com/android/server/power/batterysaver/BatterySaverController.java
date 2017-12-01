@@ -37,6 +37,7 @@ import android.widget.Toast;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.Preconditions;
+import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
 import com.android.server.power.BatterySaverPolicy;
 import com.android.server.power.BatterySaverPolicy.BatterySaverPolicyListener;
@@ -66,6 +67,12 @@ public class BatterySaverController implements BatterySaverPolicyListener {
 
     @GuardedBy("mLock")
     private boolean mEnabled;
+
+    /**
+     * Previously enabled or not; only for the event logging. Only use it from
+     * {@link #handleBatterySaverStateChanged}.
+     */
+    private boolean mPreviouslyEnabled;
 
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
@@ -203,11 +210,17 @@ public class BatterySaverController implements BatterySaverPolicyListener {
         final ArrayMap<String, String> fileValues;
 
         synchronized (mLock) {
-            Slog.i(TAG, "Battery saver " + (mEnabled ? "enabled" : "disabled")
-                    + ": isInteractive=" + isInteractive);
+            EventLogTags.writeBatterySaverMode(
+                    mPreviouslyEnabled ? 1 : 0, // Previously off or on.
+                    mEnabled ? 1 : 0, // Now off or on.
+                    isInteractive ?  1 : 0, // Device interactive state.
+                    mEnabled ? mBatterySaverPolicy.toEventLogString() : "");
+            mPreviouslyEnabled = mEnabled;
 
             listeners = mListeners.toArray(new LowPowerModeListener[mListeners.size()]);
+
             enabled = mEnabled;
+
 
             if (enabled) {
                 fileValues = mBatterySaverPolicy.getFileValues(isInteractive);

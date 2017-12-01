@@ -87,6 +87,12 @@ public class BatterySaverPolicy extends ContentObserver {
     private String mDeviceSpecificSettingsSource; // For dump() only.
 
     /**
+     * A short string describing which battery saver is now enabled, which we dump in the eventlog.
+     */
+    @GuardedBy("mLock")
+    private String mEventLogKeys;
+
+    /**
      * {@code true} if vibration is disabled in battery saver mode.
      *
      * @see Settings.Global#BATTERY_SAVER_CONSTANTS
@@ -354,6 +360,27 @@ public class BatterySaverPolicy extends ContentObserver {
 
         mFilesForNoninteractive = (new CpuFrequencies()).parseString(
                 parser.getString(KEY_CPU_FREQ_NONINTERACTIVE, "")).toSysFileMap();
+
+        final StringBuilder sb = new StringBuilder();
+
+        if (mForceAllAppsStandby) sb.append("A");
+        if (mForceBackgroundCheck) sb.append("B");
+
+        if (mVibrationDisabled) sb.append("v");
+        if (mAnimationDisabled) sb.append("a");
+        if (mSoundTriggerDisabled) sb.append("s");
+        if (mFullBackupDeferred) sb.append("F");
+        if (mKeyValueBackupDeferred) sb.append("K");
+        if (!mFireWallDisabled) sb.append("f");
+        if (!mDataSaverDisabled) sb.append("d");
+        if (!mAdjustBrightnessDisabled) sb.append("b");
+
+        if (mLaunchBoostDisabled) sb.append("l");
+        if (mOptionalSensorsDisabled) sb.append("S");
+
+        sb.append(mGpsMode);
+
+        mEventLogKeys = sb.toString();
     }
 
     /**
@@ -428,6 +455,12 @@ public class BatterySaverPolicy extends ContentObserver {
     public boolean isLaunchBoostDisabled() {
         synchronized (mLock) {
             return mLaunchBoostDisabled;
+        }
+    }
+
+    public String toEventLogString() {
+        synchronized (mLock) {
+            return mEventLogKeys;
         }
     }
 
