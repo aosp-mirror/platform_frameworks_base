@@ -91,7 +91,7 @@ GaugeMetricProducer::GaugeMetricProducer(const ConfigKey& key, const GaugeMetric
                                              metric.bucket().bucket_size_millis());
     }
 
-    startNewProtoOutputStream(mStartTimeNs);
+    startNewProtoOutputStreamLocked(mStartTimeNs);
 
     VLOG("metric %s created. bucket size %lld start_time: %lld", metric.name().c_str(),
          (long long)mBucketSizeNs, (long long)mStartTimeNs);
@@ -101,7 +101,7 @@ GaugeMetricProducer::~GaugeMetricProducer() {
     VLOG("~GaugeMetricProducer() called");
 }
 
-void GaugeMetricProducer::startNewProtoOutputStream(long long startTime) {
+void GaugeMetricProducer::startNewProtoOutputStreamLocked(long long startTime) {
     mProto = std::make_unique<ProtoOutputStream>();
     mProto->write(FIELD_TYPE_STRING | FIELD_ID_NAME, mMetric.name());
     mProto->write(FIELD_TYPE_INT64 | FIELD_ID_START_REPORT_NANOS, startTime);
@@ -111,13 +111,13 @@ void GaugeMetricProducer::startNewProtoOutputStream(long long startTime) {
 void GaugeMetricProducer::finish() {
 }
 
-std::unique_ptr<std::vector<uint8_t>> GaugeMetricProducer::onDumpReport() {
+std::unique_ptr<std::vector<uint8_t>> GaugeMetricProducer::onDumpReportLocked() {
     VLOG("gauge metric %s dump report now...", mMetric.name().c_str());
 
     // Dump current bucket if it's stale.
     // If current bucket is still on-going, don't force dump current bucket.
     // In finish(), We can force dump current bucket.
-    flushIfNeeded(time(nullptr) * NS_PER_SEC);
+    flushIfNeededLocked(time(nullptr) * NS_PER_SEC);
 
     for (const auto& pair : mPastBuckets) {
         const HashableDimensionKey& hashableKey = pair.first;
@@ -167,9 +167,9 @@ std::unique_ptr<std::vector<uint8_t>> GaugeMetricProducer::onDumpReport() {
     mProto->write(FIELD_TYPE_INT64 | FIELD_ID_END_REPORT_NANOS,
                   (long long)mCurrentBucketStartTimeNs);
 
-    std::unique_ptr<std::vector<uint8_t>> buffer = serializeProto();
+    std::unique_ptr<std::vector<uint8_t>> buffer = serializeProtoLocked();
 
-    startNewProtoOutputStream(time(nullptr) * NS_PER_SEC);
+    startNewProtoOutputStreamLocked(time(nullptr) * NS_PER_SEC);
     mPastBuckets.clear();
 
     return buffer;
@@ -177,10 +177,10 @@ std::unique_ptr<std::vector<uint8_t>> GaugeMetricProducer::onDumpReport() {
     // TODO: Clear mDimensionKeyMap once the report is dumped.
 }
 
-void GaugeMetricProducer::onConditionChanged(const bool conditionMet, const uint64_t eventTime) {
-    AutoMutex _l(mLock);
+void GaugeMetricProducer::onConditionChangedLocked(const bool conditionMet,
+                                                   const uint64_t eventTime) {
     VLOG("Metric %s onConditionChanged", mMetric.name().c_str());
-    flushIfNeeded(eventTime);
+    flushIfNeededLocked(eventTime);
     mCondition = conditionMet;
 
     // Push mode. No need to proactively pull the gauge data.
@@ -202,10 +202,10 @@ void GaugeMetricProducer::onConditionChanged(const bool conditionMet, const uint
     for (const auto& data : allData) {
         onMatchedLogEvent(0, *data, false /*scheduledPull*/);
     }
-    flushIfNeeded(eventTime);
+    flushIfNeededLocked(eventTime);
 }
 
-void GaugeMetricProducer::onSlicedConditionMayChange(const uint64_t eventTime) {
+void GaugeMetricProducer::onSlicedConditionMayChangeLocked(const uint64_t eventTime) {
     VLOG("Metric %s onSlicedConditionMayChange", mMetric.name().c_str());
 }
 
@@ -221,13 +221,14 @@ int64_t GaugeMetricProducer::getGauge(const LogEvent& event) {
 }
 
 void GaugeMetricProducer::onDataPulled(const std::vector<std::shared_ptr<LogEvent>>& allData) {
-    AutoMutex mutex(mLock);
+    std::lock_guard<std::mutex> lock(mMutex);
+
     for (const auto& data : allData) {
         onMatchedLogEvent(0, *data, true /*scheduledPull*/);
     }
 }
 
-bool GaugeMetricProducer::hitGuardRail(const HashableDimensionKey& newKey) {
+bool GaugeMetricProducer::hitGuardRailLocked(const HashableDimensionKey& newKey) {
     if (mCurrentSlicedBucket->find(newKey) != mCurrentSlicedBucket->end()) {
         return false;
     }
@@ -247,7 +248,7 @@ bool GaugeMetricProducer::hitGuardRail(const HashableDimensionKey& newKey) {
     return false;
 }
 
-void GaugeMetricProducer::onMatchedLogEventInternal(
+void GaugeMetricProducer::onMatchedLogEventInternalLocked(
         const size_t matcherIndex, const HashableDimensionKey& eventKey,
         const map<string, HashableDimensionKey>& conditionKey, bool condition,
         const LogEvent& event, bool scheduledPull) {
@@ -263,7 +264,7 @@ void GaugeMetricProducer::onMatchedLogEventInternal(
 
     // When the event happens in a new bucket, flush the old buckets.
     if (eventTimeNs >= mCurrentBucketStartTimeNs + mBucketSizeNs) {
-        flushIfNeeded(eventTimeNs);
+        flushIfNeededLocked(eventTimeNs);
     }
 
     // For gauge metric, we just simply use the first gauge in the given bucket.
@@ -272,7 +273,7 @@ void GaugeMetricProducer::onMatchedLogEventInternal(
     }
     const long gauge = getGauge(event);
     if (gauge >= 0) {
-        if (hitGuardRail(eventKey)) {
+        if (hitGuardRailLocked(eventKey)) {
             return;
         }
         (*mCurrentSlicedBucket)[eventKey] = gauge;
@@ -287,7 +288,7 @@ void GaugeMetricProducer::onMatchedLogEventInternal(
 // bucket.
 // if data is pushed, onMatchedLogEvent will only be called through onConditionChanged() inside
 // the GaugeMetricProducer while holding the lock.
-void GaugeMetricProducer::flushIfNeeded(const uint64_t eventTimeNs) {
+void GaugeMetricProducer::flushIfNeededLocked(const uint64_t& eventTimeNs) {
     if (eventTimeNs < mCurrentBucketStartTimeNs + mBucketSizeNs) {
         return;
     }
@@ -320,7 +321,7 @@ void GaugeMetricProducer::flushIfNeeded(const uint64_t eventTimeNs) {
          (long long)mCurrentBucketStartTimeNs);
 }
 
-size_t GaugeMetricProducer::byteSize() const {
+size_t GaugeMetricProducer::byteSizeLocked() const {
     size_t totalSize = 0;
     for (const auto& pair : mPastBuckets) {
         totalSize += pair.second.size() * kBucketSize;

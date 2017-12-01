@@ -167,6 +167,7 @@ LOCAL_SRC_FILES := \
     tests/metrics/OringDurationTracker_test.cpp \
     tests/metrics/MaxDurationTracker_test.cpp \
     tests/metrics/CountMetricProducer_test.cpp \
+    tests/metrics/DurationMetricProducer_test.cpp \
     tests/metrics/EventMetricProducer_test.cpp \
     tests/metrics/ValueMetricProducer_test.cpp \
     tests/guardrail/StatsdStats_test.cpp

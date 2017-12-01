@@ -469,11 +469,11 @@ bool initAlerts(const StatsdConfig& config, const unordered_map<string, int>& me
         }
         const int metricIndex = itr->second;
         if (alert.trigger_if_sum_gt() >
-                  (int64_t) alert.number_of_buckets()
-                  * allMetricProducers[metricIndex]->getBuckeSizeInNs()) {
+            (int64_t)alert.number_of_buckets() *
+                    allMetricProducers[metricIndex]->getBuckeSizeInNs()) {
             ALOGW("invalid alert: threshold (%lld) > possible recordable value (%d x %lld)",
                   alert.trigger_if_sum_gt(), alert.number_of_buckets(),
-                  (long long) allMetricProducers[metricIndex]->getBuckeSizeInNs());
+                  (long long)allMetricProducers[metricIndex]->getBuckeSizeInNs());
             return false;
         }
 

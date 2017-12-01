@@ -282,7 +282,7 @@ TEST(ValueMetricProducerTest, TestPushedEventsWithoutCondition) {
     EXPECT_EQ(20, curInterval.raw.back().first);
     EXPECT_EQ(0UL, valueProducer.mNextSlicedBucket.size());
 
-    valueProducer.flushIfNeeded(bucket3StartTimeNs);
+    valueProducer.flushIfNeededLocked(bucket3StartTimeNs);
     EXPECT_EQ(1UL, valueProducer.mPastBuckets.size());
     EXPECT_EQ(1UL, valueProducer.mPastBuckets.begin()->second.size());
     EXPECT_EQ(30, valueProducer.mPastBuckets.begin()->second.back().mValue);
