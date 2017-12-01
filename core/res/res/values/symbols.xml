@@ -3161,4 +3161,6 @@
   <java-symbol type="layout" name="unsupported_compile_sdk_dialog_content" />
   <java-symbol type="string" name="unsupported_compile_sdk_message" />
   <java-symbol type="string" name="unsupported_compile_sdk_check_update" />
+
+  <java-symbol type="string" name="battery_saver_warning_title" />
 </resources>
