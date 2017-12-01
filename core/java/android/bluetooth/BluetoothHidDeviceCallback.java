@@ -37,21 +37,17 @@ public abstract class BluetoothHidDeviceCallback {
      * {@link BluetoothHidDevice#registerApp
      * (String, String, String, byte, byte[], BluetoothHidDeviceCallback)}
      * or
-     * {@link BluetoothHidDevice#unregisterApp(BluetoothHidDeviceAppConfiguration)}
+     * {@link BluetoothHidDevice#unregisterApp()}
      * , but can be also unsolicited in case e.g. Bluetooth was turned off in
      * which case application is unregistered automatically.
      *
      * @param pluggedDevice {@link BluetoothDevice} object which represents host that currently has
      * Virtual Cable established with device. Only valid when application is registered, can be
      * <code>null</code>.
-     * @param config {@link BluetoothHidDeviceAppConfiguration} object which represents token
-     * required to unregister application using
-     * {@link BluetoothHidDevice#unregisterApp(BluetoothHidDeviceAppConfiguration)}.
      * @param registered <code>true</code> if application is registered, <code>false</code>
      * otherwise.
      */
-    public void onAppStatusChanged(BluetoothDevice pluggedDevice,
-            BluetoothHidDeviceAppConfiguration config, boolean registered) {
+    public void onAppStatusChanged(BluetoothDevice pluggedDevice, boolean registered) {
         Log.d(TAG, "onAppStatusChanged: pluggedDevice=" + pluggedDevice + " registered="
                 + registered);
     }
