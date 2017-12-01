@@ -731,6 +731,7 @@ Status StatsService::addConfiguration(const String16& key,
         *success = true;
         return Status::ok();
     } else {
+        *success = false;
         return Status::fromExceptionCode(binder::Status::EX_SECURITY);
     }
 }
@@ -740,6 +741,7 @@ Status StatsService::removeConfiguration(const String16& key, bool* success) {
     if (checkCallingPermission(String16(kPermissionDump))) {
         string keyStr = string(String8(key).string());
         mConfigManager->RemoveConfig(ConfigKey(ipc->getCallingUid(), keyStr));
+        *success = true;
         return Status::ok();
     } else {
         *success = false;
