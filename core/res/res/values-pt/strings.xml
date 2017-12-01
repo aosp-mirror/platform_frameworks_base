@@ -79,7 +79,7 @@
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Sem serviço de voz/emergência"</string>
     <string name="RestrictedStateContent" msgid="4278821484643362350">"Serviço temporariamente bloqueado pela rede móvel no seu local"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Não foi possível acessar a rede"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"Para melhorar a recepção, tente alterar o tipo selecionado em Configurações &gt; Rede &amp; Internet &gt; Redes móveis &gt; Tipo de rede preferencial."</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7056776609127756440">"Para melhorar a recepção, tente alterar o tipo selecionado em Config. &gt; Rede e Internet &gt; Redes móveis &gt; Tipo de rede preferencial."</string>
     <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"A chamada no Wi‑Fi está ativa"</string>
     <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"As chamadas de emergência exigem uma rede móvel."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Alertas"</string>
@@ -1051,6 +1051,9 @@
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Reativar isso em Configurações do sistema &gt; Apps &gt; Transferidos."</string>
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"O app <xliff:g id="APP_NAME">%1$s</xliff:g> não é compatível com a configuração atual de tamanho de exibição e pode se comportar de forma inesperada."</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"Mostrar sempre"</string>
+    <string name="unsupported_compile_sdk_message" msgid="4253168368781441759">"O app <xliff:g id="APP_NAME">%1$s</xliff:g> foi criado para uma versão incompatível do sistema operacional Android e pode se comportar de forma inesperada. Uma versão atualizada do app pode estar disponível."</string>
+    <string name="unsupported_compile_sdk_show" msgid="2681877855260970231">"Mostrar sempre"</string>
+    <string name="unsupported_compile_sdk_check_update" msgid="3312723623323216101">"Verificar atualizações"</string>
     <string name="smv_application" msgid="3307209192155442829">"O app <xliff:g id="APPLICATION">%1$s</xliff:g>, processo <xliff:g id="PROCESS">%2$s</xliff:g>, violou a política StrictMode imposta automaticamente."</string>
     <string name="smv_process" msgid="5120397012047462446">"O processo <xliff:g id="PROCESS">%1$s</xliff:g> violou a política StrictMode imposta automaticamente."</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"O Android está sendo atualizado..."</string>
@@ -1116,10 +1119,10 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"Fazer login na rede"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8451173622563841546">"O Wi-Fi não tem acesso à Internet"</string>
+    <string name="wifi_no_internet" msgid="8938267198124654938">"O Wi‑Fi não tem acesso à Internet"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Toque para ver opções"</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Alternado para <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
-    <string name="network_switch_metered_detail" msgid="5325661434777870353">"O dispositivo usa <xliff:g id="NEW_NETWORK">%1$s</xliff:g> quando <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> não tem acesso à Internet. Cobranças podem ser aplicadas."</string>
+    <string name="network_switch_metered_detail" msgid="775163331794506615">"O dispositivo usa <xliff:g id="NEW_NETWORK">%1$s</xliff:g> quando <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> não tem acesso à Internet. Esse serviço pode ser cobrado."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Alternado de <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> para <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
   <string-array name="network_switch_type_name">
     <item msgid="3979506840912951943">"dados móveis"</item>
@@ -1130,7 +1133,7 @@
   </string-array>
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"um tipo de rede desconhecido"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Não foi possível se conectar a redes Wi-Fi"</string>
-    <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" tem uma conexão de baixa qualidade com a Internet."</string>
+    <string name="wifi_watchdog_network_disabled_detailed" msgid="4917472096696322767">" tem uma conexão de baixa qualidade com a Internet."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Permitir conexão?"</string>
     <string name="wifi_connect_alert_message" msgid="6451273376815958922">"O app %1$s deseja se conectar à rede Wi-Fi %2$s"</string>
     <string name="wifi_connect_default_application" msgid="7143109390475484319">"Um app"</string>
@@ -1634,7 +1637,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Instalado pelo seu administrador"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Atualizado pelo seu administrador"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Excluído pelo seu administrador"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"A economia de bateria reduz o desempenho do dispositivo e limita a vibração, os serviços de localização e a maioria dos dados em segundo plano para aumentar a duração da bateria. E-mails, mensagens e outros apps que dependem de sincronização não serão atualizados, a não ser que você os abra.\n\nA economia de bateria é desligada automaticamente quando o dispositivo está sendo carregado."</string>
+    <string name="battery_saver_description" msgid="5394663545060026162">"Para ajudar a melhorar a duração da bateria, a Economia de bateria reduz o desempenho do seu dispositivo e limita a vibração, os serviços de localização e a maioria dos dados em segundo plano. E-mails, mensagens e outros apps que dependem da sincronização podem não ser atualizados, a menos que você os abra.\n\nA Economia de bateria é desativada automaticamente quando o dispositivo está sendo carregado."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Para ajudar a reduzir o uso de dados, a Economia de dados impede que alguns apps enviem ou recebam dados em segundo plano. Um app que você esteja usando no momento pode acessar dados, mas com menos frequência. Isso pode significar que as imagens não serão exibidas até que você toque nelas."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Ativar Economia de dados?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Ativar"</string>

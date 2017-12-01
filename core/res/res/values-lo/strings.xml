@@ -79,7 +79,7 @@
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"ບໍ່ມີບໍລິການສຽງ/ສຸກເສີນ"</string>
     <string name="RestrictedStateContent" msgid="4278821484643362350">"ເຄືອຂ່າຍຂອງທ່ານບໍ່ໄດ້ໃຫ້ບໍລິການຢູ່ສະຖານທີ່ນີ້ເປັນການຊົ່ວຄາວ"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Can’t reach network"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"ເພື່ອປັບປຸງການຮັບສັນຍານ, ໃຫ້ລອງປ່ຽນປະເພດທີ່ເລືອກໄວ້ຢູ່ທີ່ ການຕັ້ງຄ່າ &gt; ເຄືອຂ່າຍ ແລະ ອິນເຕີເນັດ &gt; ເຄືອຂ່າຍມືຖື &gt; ປະເພດເຄືອຂ່າຍທີ່ຕ້ອງການ."</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7056776609127756440">"ເພື່ອປັບປຸງການຮັບສັນຍານ, ໃຫ້ລອງປ່ຽນປະເພດທີ່ເລືອກໄວ້ຢູ່ທີ່ ການຕັ້ງຄ່າ &gt; ເຄືອຂ່າຍ ແລະ ອິນເຕີເນັດ &gt; ເຄືອຂ່າຍມືຖື &gt; ປະເພດເຄືອຂ່າຍທີ່ຕ້ອງການ."</string>
     <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"ການໂທ Wi‑Fi ເຮັດວຽກຢູ່"</string>
     <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"ການໂທສຸກເສີນຕ້ອງໃຊ້ການເຊື່ອມຕໍ່ເຄືອຂ່າຍ."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"ການເຕືອນ"</string>
@@ -263,7 +263,7 @@
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"ເຂົ້າ​ຫາ​ລາຍ​ຊື່​ຂອງ​ທ່ານ"</string>
     <string name="permgrouprequest_contacts" msgid="1601591667800538208">"ອະນຸຍາດ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ໃຫ້ເຂົ້າເຖິງລາຍຊື່ຜູ້ຕິດຕໍ່ຂອງທ່ານ"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"ສະ​ຖານ​ທີ່"</string>
-    <string name="permgroupdesc_location" msgid="1346617465127855033">"ເຂົ້າເຖິງທີ່ຕັ້ງອຸປະກອນນີ້"</string>
+    <string name="permgroupdesc_location" msgid="1346617465127855033">"ເຂົ້າເຖິງຂໍ້ມູນສະຖານທີ່ຂອງອຸປະກອນນີ້"</string>
     <string name="permgrouprequest_location" msgid="8903573681261610809">"ອະນຸຍາດ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ໃຫ້ເຂົ້າເຖິງສະຖານທີ່ຂອງອຸປະກອນ"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"ປະຕິທິນ"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"ເຂົ້າ​ຫາ​ປະ​ຕິ​ທິນ​ຂອງ​ທ່ານ"</string>
@@ -979,16 +979,11 @@
     <string name="inputMethod" msgid="1653630062304567879">"ຮູບແບບການປ້ອນຂໍ້ມູນ"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"ການເຮັດວຽກຂອງຂໍ້ຄວາມ"</string>
     <string name="email" msgid="4560673117055050403">"ອີເມວ"</string>
-    <!-- no translation found for dial (1253998302767701559) -->
-    <skip />
-    <!-- no translation found for map (6521159124535543457) -->
-    <skip />
-    <!-- no translation found for browse (1245903488306147205) -->
-    <skip />
-    <!-- no translation found for sms (4560537514610063430) -->
-    <skip />
-    <!-- no translation found for add_contact (7867066569670597203) -->
-    <skip />
+    <string name="dial" msgid="1253998302767701559">"ໂທ"</string>
+    <string name="map" msgid="6521159124535543457">"​ລະ​ບຸ​ບ່ອນ​ຢູ່"</string>
+    <string name="browse" msgid="1245903488306147205">"ເປີດ"</string>
+    <string name="sms" msgid="4560537514610063430">"ຂໍ້ຄວາມ"</string>
+    <string name="add_contact" msgid="7867066569670597203">"ເພີ່ມ"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"ພື້ນທີ່ຈັດເກັບຂໍ້ມູນກຳລັງຈະເຕັມ"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"ການເຮັດວຽກບາງຢ່າງຂອງລະບົບບາງອາດຈະໃຊ້ບໍ່ໄດ້"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"​ບໍ່​ມີ​ບ່ອນ​ເກັບ​ຂໍ້​ມູນ​ພຽງ​ພໍ​ສຳ​ລັບ​ລະ​ບົບ. ກວດ​ສອບ​ໃຫ້​ແນ່​ໃຈ​ວ່າ​ທ່ານ​ມີ​ພື້ນ​ທີ່​ຫວ່າງ​ຢ່າງ​ໜ້ອຍ 250MB ​ແລ້ວລອງ​ໃໝ່."</string>
@@ -998,7 +993,6 @@
     <string name="cancel" msgid="6442560571259935130">"ຍົກເລີກ"</string>
     <string name="yes" msgid="5362982303337969312">"ຕົກລົງ"</string>
     <string name="no" msgid="5141531044935541497">"ຍົກເລີກ"</string>
-    <string name="close" msgid="2318214661230355730">"ປິດ"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"ກະລຸນາຮັບຊາບ"</string>
     <string name="loading" msgid="7933681260296021180">"ກຳລັງໂຫລດ..."</string>
     <string name="capital_on" msgid="1544682755514494298">"ເປີດ"</string>
@@ -1055,10 +1049,11 @@
     <string name="screen_compat_mode_scale" msgid="3202955667675944499">"ຂະໜາດ"</string>
     <string name="screen_compat_mode_show" msgid="4013878876486655892">"ສະແດງຕະຫຼອດເວລາ"</string>
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"ເປີດການເຮັດວຽກນີ້ຄືນໄດ້ໃນ ການຕັ້ງຄ່າລະບົບ &gt; ແອັບຯ &gt; ດາວໂຫລດແລ້ວ"</string>
-    <string name="top_app_killed_title" msgid="6814231368167994497">"ແອັບບໍ່ຕອບສະໜອງ"</string>
-    <string name="top_app_killed_message" msgid="3487519022191609844">"<xliff:g id="APP_NAME">%1$s</xliff:g> ອາດກຳລັງໃຊ້ໜ່ວຍຄວາມຈຳຫຼາຍເກີນໄປ"</string>
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"<xliff:g id="APP_NAME">%1$s</xliff:g> ບໍ່ຮອງຮັບການຕັ້ງຄ່າຂະໜາດສະແດງຜົນປັດຈຸບັນ ແລະ ອາດມີຄວາມຜິດພາດໄດ້."</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"ສະແດງທຸກເທື່ອ"</string>
+    <string name="unsupported_compile_sdk_message" msgid="4253168368781441759">"<xliff:g id="APP_NAME">%1$s</xliff:g> ຖືກສ້າງມາສຳລັບ Android OS ເວີຊັນທີ່ບໍ່ສາມາດໃຊ້ຮ່ວມກັນໄດ້ ແລະ ອາດເຮັດວຽກຜິດປົກກະຕິ. ອາດມີແອັບເວີຊັນໃໝ່ກວ່າໃຫ້ດາວໂຫລດ."</string>
+    <string name="unsupported_compile_sdk_show" msgid="2681877855260970231">"ສະແດງທຸກເທື່ອ"</string>
+    <string name="unsupported_compile_sdk_check_update" msgid="3312723623323216101">"ກວດເບິ່ງອັບເດດ"</string>
     <string name="smv_application" msgid="3307209192155442829">"ແອັບຯ <xliff:g id="APPLICATION">%1$s</xliff:g> (ໂປຣເຊສ <xliff:g id="PROCESS">%2$s</xliff:g>) ໄດ້ລະເມີດນະໂຍບາຍ StrictMode ທີ່ບັງຄັບໃຊ້ດ້ວຍໂຕເອງ."</string>
     <string name="smv_process" msgid="5120397012047462446">"ໂປຣເຊສ <xliff:g id="PROCESS">%1$s</xliff:g> ລະເມີດນະໂຍບາຍບັງຄັບໃຊ້ເອງ StrictMode."</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"ກຳລັງອັບເກຣດ Android..."</string>
@@ -1124,10 +1119,10 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"ລົງຊື່ເຂົ້າເຄືອຂ່າຍ"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8451173622563841546">"Wi-Fi ບໍ່ມີການເຂົ້າເຖິງອິນເຕີເນັດ"</string>
+    <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi ບໍ່ມີສັນຍານອິນເຕີເນັດ"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"ແຕະເພື່ອເບິ່ງຕົວເລືອກ"</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"ສະຫຼັບໄປໃຊ້ <xliff:g id="NETWORK_TYPE">%1$s</xliff:g> ແລ້ວ"</string>
-    <string name="network_switch_metered_detail" msgid="5325661434777870353">"ອຸປະກອນຈະໃຊ້ <xliff:g id="NEW_NETWORK">%1$s</xliff:g> ເມື່ອ <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> ບໍ່ມີການເຊື່ອມຕໍ່ອິນເຕີເນັດ. ອາດມີການຮຽກເກັບຄ່າບໍລິການ."</string>
+    <string name="network_switch_metered_detail" msgid="775163331794506615">"ອຸປະກອນຈະໃຊ້ <xliff:g id="NEW_NETWORK">%1$s</xliff:g> ເມື່ອ <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> ບໍ່ມີການເຊື່ອມຕໍ່ອິນເຕີເນັດ. ອາດມີການຮຽກເກັບຄ່າບໍລິການ."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"ສະຫຼັບຈາກ <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> ໄປໃຊ້ <xliff:g id="NEW_NETWORK">%2$s</xliff:g> ແລ້ວ"</string>
   <string-array name="network_switch_type_name">
     <item msgid="3979506840912951943">"ອິນເຕີເນັດມືຖື"</item>
@@ -1138,7 +1133,7 @@
   </string-array>
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"ບໍ່ຮູ້ຈັກປະເພດເຄືອຂ່າຍ"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"ບໍ່ສາມາດເຊື່ອມຕໍ່ Wi-Fi ໄດ້"</string>
-    <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" ມີສັນຍານອິນເຕີເນັດທີ່ບໍ່ດີ."</string>
+    <string name="wifi_watchdog_network_disabled_detailed" msgid="4917472096696322767">" ມີການເຊື່ອມຕໍ່ອິນເຕີເນັດທີ່ຊ້າ."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"​ອະ​ນຸ​ຍາດ​ການ​ເຊື່ອມ​ຕໍ່ຫຼື​ບໍ່?"</string>
     <string name="wifi_connect_alert_message" msgid="6451273376815958922">"ແອັບ​ພ​ລິ​ເຄ​ຊັນ %1$s ຢາກ​ຈະ​ເຊື່ອມ​ຕໍ່​ກັບ​ເຄືອ​ຂ່າຍ Wifi %2$s"</string>
     <string name="wifi_connect_default_application" msgid="7143109390475484319">"​ແອັບ​ພລິ​ເຄ​ຊັນ"</string>
@@ -1634,7 +1629,6 @@
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"ບ່ອນເຮັດວຽກທີ 2 <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"ບ່ອນເຮັດວຽກທີ 3 <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="6820571533009838261">"ເພື່ອຍົກເລີກການປັກໝຸດໜ້າຈໍນີ້, ໃຫ້ແຕະປຸ່ມກັບຄືນ ແລະ ປຸ່ມພາບຮວມຄ້າງໄວ້"</string>
-    <string name="lock_to_app_toast_locked" msgid="7849470948648628704">"ບໍ່ສາມາດຍົກເລີກການປັກໝຸນແອັບນີ້ໄດ້"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"​ປັກ​ໝຸດ​ໜ້າ​ຈໍ​ແລ້ວ"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"ຍົກ​ເລີກ​ການ​ປັກ​ໝຸນ​​ຫນ້າ​ຈໍ​ແລ້ວ"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"​ຖາມ​ຫາ PIN ກ່ອນ​ຍົກ​ເລີກ​ການປັກ​ໝຸດ"</string>
@@ -1643,7 +1637,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"ຖືກຕິດຕັ້ງໂດຍຜູ້ເບິ່ງແຍງລະບົບຂອງທ່ານ"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"ຖືກອັບໂຫລດໂດຍຜູ້ເບິ່ງແຍງລະບົບຂອງທ່ານ"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"ຖືກລຶບອອກໂດຍຜູ້ເບິ່ງແຍງລະບົບຂອງທ່ານ"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"ເພື່ອຊ່ວຍເພີ່ມອາຍຸແບັດເຕີຣີ, ຕົວປະຢັດໄຟແບັດເຕີຣີຫຼຸດປະສິດທິພາບການເຮັດວຽກຂອງອຸປະກອນຂອງທ່ານລົງ ແລະຈຳກັດການສັ່ນ, ບໍລິການສະຖານທີ່ ແລະ ຂໍ້ມູນພື້ນຫຼັງເກືອບທັງໝົດ. ອີເມວ, ການສົ່ງຂໍ້ຄວາມ ແລະ ແອັບອື່ນໆທີ່ອາໄສການຊິ້ງຂໍ້ມູນອາດຈະບໍ່ອັບເດດ ນອກຈາກວ່າທ່ານເປີດມັນ.\n\nຕົວປະຢັດໄຟແບັດເຕີຣີຈະປິດອັດຕະໂນມັດເມື່ອທ່ານສາກໄຟອຸປະກອນ."</string>
+    <string name="battery_saver_description" msgid="5394663545060026162">"ເພື່ອຊ່ວຍເພີ່ມອາຍຸແບັດເຕີຣີ, ຕົວປະຢັດໄຟແບັດເຕີຣີຫຼຸດປະສິດທິພາບການເຮັດວຽກຂອງອຸປະກອນຂອງທ່ານລົງ ແລະຈຳກັດການສັ່ນ, ການບໍລິການຫາທີ່ຕັ້ງ, ແລະຂໍ້ມູນພື້ນຫຼັງເກືອບທັງໝົດ. ອີເມວ, ການສົ່ງຂໍ້ຄວາມ, ແລະແອັບອື່ນໆທີ່ອາໄສການຊິງຄ໌ອາດຈະບໍ່ອັບເດດ ນອກຈາກວ່າທ່ານເປີດມັນ.\n\nຕົວປະຢັດແບັດເຕີຣີຈະປິດອັດຕະໂນມັດ ເມື່ອອຸປະກອນຂອງທ່ານກຳລັງສາກຢູ່."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"ເພື່ອຊ່ວຍຫຼຸດຜ່ອນການນຳໃຊ້ຂໍ້ມູນ, ຕົວປະຢັດຂໍ້ມູນຈະປ້ອງກັນບໍ່ໃຫ້ບາງແອັບສົ່ງ ຫຼື ຮັບຂໍ້ມູນໃນພື້ນຫຼັງ. ແອັບໃດໜຶ່ງທີ່ທ່ານກຳລັງໃຊ້ຢູ່ຈະສາມາດເຂົ້າເຖິງຂໍ້ມູນໄດ້ ແຕ່ອາດເຂົ້າເຖິງໄດ້ຖີ່ໜ້ອຍລົງ. ນີ້ອາດໝາຍຄວາມວ່າ ຮູບພາບຕ່າງໆອາດບໍ່ສະແດງຈົນກວ່າທ່ານຈະແຕະໃສ່ກ່ອນ."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"ເປີດໃຊ້ຕົວປະຢັດຂໍ້ມູນບໍ?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"ເປີດໃຊ້"</string>
@@ -1790,18 +1784,14 @@
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"ທົດສອບຂໍ້ຄວາມສຸກເສີນ"</string>
     <string name="notification_reply_button_accessibility" msgid="3621714652387814344">"ຕອບກັບ"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
-    <string name="mmcc_authentication_reject" msgid="7729819349669603406">"ບໍ່ອະນຸຍາດໃຫ້ໃຊ້ SIM"</string>
-    <string name="mmcc_imsi_unknown_in_hlr" msgid="6321202257374418726">"ບໍ່ມີການນຳໃຊ້ SIM"</string>
-    <string name="mmcc_illegal_ms" msgid="2769452751852211112">"ບໍ່ອະນຸຍາດໃຫ້ໃຊ້ SIM"</string>
-    <string name="mmcc_illegal_me" msgid="4438696681169345015">"ບໍ່ອະນຸຍາດໃຫ້ໃຊ້ໂທລະສັບ"</string>
+    <string name="mmcc_authentication_reject" msgid="5767701075994754356">"ບໍ່ອະນຸຍາດໃຫ້ໃຊ້ຊິມສຳລັບການໂທສຽງ"</string>
+    <string name="mmcc_imsi_unknown_in_hlr" msgid="5316658473301462825">"ບໍ່ໄດ້ຈັດກຽມຊິມໄວ້ສຳລັບການໂທສຽງ"</string>
+    <string name="mmcc_illegal_ms" msgid="807334478177362062">"ບໍ່ອະນຸຍາດໃຫ້ໃຊ້ຊິມສຳລັບການໂທສຽງ"</string>
+    <string name="mmcc_illegal_me" msgid="1950705155760872972">"ບໍ່ອະນຸຍາດໃຫ້ໃຊ້ໂທລະສັບສຳລັບການໂທສຽງ"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"ໜ້າຈໍປັອບອັບ"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
-    <!-- no translation found for shortcut_restored_on_lower_version (5270675146351613828) -->
-    <skip />
-    <!-- no translation found for shortcut_restore_not_supported (5028808567940014190) -->
-    <skip />
-    <!-- no translation found for shortcut_restore_signature_mismatch (2406209324521327518) -->
-    <skip />
-    <!-- no translation found for shortcut_restore_unknown_issue (8703738064603262597) -->
-    <skip />
+    <string name="shortcut_restored_on_lower_version" msgid="5270675146351613828">"ທາງລັດນີ້ຕ້ອງໃຊ້ແອັບເວີຊັນຫຼ້າສຸດ"</string>
+    <string name="shortcut_restore_not_supported" msgid="5028808567940014190">"ບໍ່ສາມາດກູ້ທາງລັດຂຶ້ນມາໄດ້ເນື່ອງຈາກແອັບບໍ່ຮອງຮັບການສຳຮອງ ແລະ ກູ້ຂໍ້ມູນ"</string>
+    <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"ບໍ່ສາມາດກູ້ທາງລັດຄືນມາໄດ້ເນື່ອງຈາກລາຍເຊັນແອັບບໍ່ກົງກັນ"</string>
+    <string name="shortcut_restore_unknown_issue" msgid="8703738064603262597">"ບໍ່ສາມາດກູ້ທາງລັດຄືນມາໄດ້"</string>
 </resources>

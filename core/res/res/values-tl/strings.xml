@@ -79,7 +79,7 @@
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Walang serbisyo para sa voice/emergency"</string>
     <string name="RestrictedStateContent" msgid="4278821484643362350">"Pansamantalang hindi inaalok ng mobile network sa iyong lokasyon"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Hindi maabot ang network"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"Upang mapahusay ang reception, subukang baguhin ang uring napili sa Mga Setting &gt; Network at Internet &gt; Mga mobile network &gt; Gustong uri ng network."</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7056776609127756440">"Upang mapahusay ang reception, subukang baguhin ang uring napili sa Mga Setting &gt; Network at internet &gt; Mga mobile network &gt; Gustong uri ng network."</string>
     <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"Aktibo ang pagtawag sa pamamagitan ng Wi‑Fi"</string>
     <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"Nangangailangan ng mobile network ang mga emergency na tawag."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Mga Alerto"</string>
@@ -1051,6 +1051,9 @@
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Muling paganahin ito sa mga setting ng System &gt; Apps &gt; Na-download."</string>
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"Hindi sinusuportahan ng <xliff:g id="APP_NAME">%1$s</xliff:g> ang kasalukuyang setting ng laki ng Display at maaaring may mangyaring hindi inaasahan."</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"Palaging ipakita"</string>
+    <string name="unsupported_compile_sdk_message" msgid="4253168368781441759">"Binuo ang <xliff:g id="APP_NAME">%1$s</xliff:g> para sa hindi tugmang bersyon ng Android OS at maaaring may gawin itong hindi inaasahan. Maaaring may available na updated na bersyon ng app."</string>
+    <string name="unsupported_compile_sdk_show" msgid="2681877855260970231">"Palaging ipakita"</string>
+    <string name="unsupported_compile_sdk_check_update" msgid="3312723623323216101">"Tingnan kung may update"</string>
     <string name="smv_application" msgid="3307209192155442829">"Ang app na <xliff:g id="APPLICATION">%1$s</xliff:g> (prosesong <xliff:g id="PROCESS">%2$s</xliff:g>) ay lumabag sa sarili nitong ipinapatupad na patakarang StrictMode."</string>
     <string name="smv_process" msgid="5120397012047462446">"Ang prosesong <xliff:g id="PROCESS">%1$s</xliff:g> ay lumabag sa sarili nitong ipinapatupad na patakarang StrictMode."</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"Nag-a-upgrade ang Android…"</string>
@@ -1116,10 +1119,10 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"Mag-sign in sa network"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8451173622563841546">"Walang access sa Internet ang Wi-Fi"</string>
+    <string name="wifi_no_internet" msgid="8938267198124654938">"Walang access sa internet ang Wi-Fi"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"I-tap para sa mga opsyon"</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Lumipat sa <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
-    <string name="network_switch_metered_detail" msgid="5325661434777870353">"Ginagamit ng device ang <xliff:g id="NEW_NETWORK">%1$s</xliff:g> kapag walang access sa Internet ang <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g>. Maaaring may mga malapat na singilin."</string>
+    <string name="network_switch_metered_detail" msgid="775163331794506615">"Ginagamit ng device ang <xliff:g id="NEW_NETWORK">%1$s</xliff:g> kapag walang access sa internet ang <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g>. Maaaring may mga malapat na singilin."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Lumipat sa <xliff:g id="NEW_NETWORK">%2$s</xliff:g> mula sa <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g>"</string>
   <string-array name="network_switch_type_name">
     <item msgid="3979506840912951943">"mobile data"</item>
@@ -1130,7 +1133,7 @@
   </string-array>
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"isang hindi kilalang uri ng network"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Hindi makakonekta sa Wi-Fi"</string>
-    <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" ay mayroong mahinang koneksyon sa Internet."</string>
+    <string name="wifi_watchdog_network_disabled_detailed" msgid="4917472096696322767">" ay mayroong mahinang koneksyon sa internet."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Payagan ang kuneksyon?"</string>
     <string name="wifi_connect_alert_message" msgid="6451273376815958922">"Gustong kumonekta ng application na %1$s sa Wifi Network na %2$s"</string>
     <string name="wifi_connect_default_application" msgid="7143109390475484319">"Isang application"</string>
@@ -1626,7 +1629,6 @@
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"Pangalawang <xliff:g id="LABEL">%1$s</xliff:g> sa Trabaho"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"Pangatlong <xliff:g id="LABEL">%1$s</xliff:g> sa Trabaho"</string>
     <string name="lock_to_app_toast" msgid="6820571533009838261">"Upang i-unpin ang screen na ito, pindutin nang matagal ang mga button na Bumalik at Pangkalahatang-ideya"</string>
-    <string name="lock_to_app_toast_locked" msgid="7849470948648628704">"Hindi ma-unpin ang app na ito"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Naka-pin ang screen"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Naka-unpin ang screen"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Humingi ng PIN bago mag-unpin"</string>
@@ -1635,7 +1637,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Na-install ng iyong admin"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Na-update ng iyong admin"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Na-delete ng iyong admin"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"Upang matulungang pagbutihin ang tagal ng baterya, binabawasan ng pangtipid ng baterya ang performance ng iyong device at nililimitahan ang pag-vibrate, mga serbisyo ng lokasyon at karamihan sa data ng background. Maaaring hindi mag-update ang email, pagmemensahe at iba pang mga app na umaasa sa pagsi-sync maliban kung buksan mo ang mga iyon.\n\nAwtomatikong nag-o-off ang pangtipid ng baterya kapag nagcha-charge ang iyong device."</string>
+    <string name="battery_saver_description" msgid="5394663545060026162">"Upang matulungang mapatagal ang baterya, binabawasan ng Pangtipid sa Baterya ang performance ng iyong device at nililimitahan nito ang pag-vibrate, mga serbisyo ng lokasyon, at halos lahat ng background na data. Hindi maaaring ma-update ang email, messaging, at iba pang app na umaasa sa pag-sync hangga\'t hindi mo binubuksan ang mga ito.\n\nAwtomatikong nag-o-off ang Pangtipid sa Baterya kapag naka-charge ang iyong device."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Upang makatulong na mabawasan ang paggamit ng data, pinipigilan ng Data Saver ang ilang app na magpadala o makatanggap ng data sa background. Maaaring mag-access ng data ang isang app na ginagamit mo sa kasalukuyan, ngunit mas bihira na nito magagawa iyon. Halimbawa, maaaring hindi lumabas ang mga larawan hangga\'t hindi mo nata-tap ang mga ito."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"I-on ang Data Saver?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"I-on"</string>
@@ -1782,14 +1784,10 @@
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"Pagsubok sa mga mensaheng pang-emergency"</string>
     <string name="notification_reply_button_accessibility" msgid="3621714652387814344">"Tumugon"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
-    <!-- no translation found for mmcc_authentication_reject (5767701075994754356) -->
-    <skip />
-    <!-- no translation found for mmcc_imsi_unknown_in_hlr (5316658473301462825) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_ms (807334478177362062) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_me (1950705155760872972) -->
-    <skip />
+    <string name="mmcc_authentication_reject" msgid="5767701075994754356">"Hindi pinapayagan ang SIM para sa boses"</string>
+    <string name="mmcc_imsi_unknown_in_hlr" msgid="5316658473301462825">"Hindi naka-provision ang SIM para sa boses"</string>
+    <string name="mmcc_illegal_ms" msgid="807334478177362062">"Hindi pinapayagan ang SIM para sa boses"</string>
+    <string name="mmcc_illegal_me" msgid="1950705155760872972">"Hindi pinapayagan ang telepono para sa boses"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"Window ng Popup"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="shortcut_restored_on_lower_version" msgid="5270675146351613828">"Kinakailangan ng shortcut na ito ang pinakabagong app"</string>

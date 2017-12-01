@@ -79,7 +79,7 @@
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Geen stem- of nooddiens nie"</string>
     <string name="RestrictedStateContent" msgid="4278821484643362350">"Word tydelik nie deur die selnetwerk by jou ligging aangebied nie"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Kan netwerk nie bereik nie"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"Om opvangs te verbeter, probeer die soort verander wat by Instellings &gt; Netwerk en internet &gt; Mobiele netwerke &gt; Voorkeurnetwerksoort gekies is."</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7056776609127756440">"Om opvangs te verbeter, probeer die tipe verander wat by Instellings &gt; Netwerk en internet &gt; Mobiele netwerke &gt; Voorkeurnetwerktipe gekies is."</string>
     <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"Wi‑Fi-oproepe is aktief"</string>
     <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"Noodoproepe vereis \'n mobiele netwerk."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Opletberigte"</string>
@@ -1051,6 +1051,9 @@
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Heraktiveer hierdie in Stelselinstellings &gt; Programme &gt; Afgelaai."</string>
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"<xliff:g id="APP_NAME">%1$s</xliff:g> steun nie die huidige skermgrootte-instelling nie en sal dalk onverwags reageer."</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"Wys altyd"</string>
+    <string name="unsupported_compile_sdk_message" msgid="4253168368781441759">"<xliff:g id="APP_NAME">%1$s</xliff:g> is gebou vir \'n onversoenbare weergawe van die Android-bedryfstelsel en kan dalk op \'n onverwagte manier reageer. \'n Opgedateerde weergawe van die program is dalk beskikbaar."</string>
+    <string name="unsupported_compile_sdk_show" msgid="2681877855260970231">"Wys altyd"</string>
+    <string name="unsupported_compile_sdk_check_update" msgid="3312723623323216101">"Kyk vir opdatering"</string>
     <string name="smv_application" msgid="3307209192155442829">"Die program <xliff:g id="APPLICATION">%1$s</xliff:g> (proses <xliff:g id="PROCESS">%2$s</xliff:g>) het sy selfopgelegde StrictMode-beleid oortree."</string>
     <string name="smv_process" msgid="5120397012047462446">"Die proses <xliff:g id="PROCESS">%1$s</xliff:g> het die selfopgelegde StrictMode-beleid geskend."</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android gradeer tans op..."</string>
@@ -1116,10 +1119,10 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"Meld by netwerk aan"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8451173622563841546">"Wi-Fi het geen internettoegang nie"</string>
+    <string name="wifi_no_internet" msgid="8938267198124654938">"Wi‑Fi het geen internettoegang nie"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Tik vir opsies"</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Het oorgeskakel na <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
-    <string name="network_switch_metered_detail" msgid="5325661434777870353">"Toestel gebruik <xliff:g id="NEW_NETWORK">%1$s</xliff:g> wanneer <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> geen internetverbinding het nie. Heffings kan geld."</string>
+    <string name="network_switch_metered_detail" msgid="775163331794506615">"Toestel gebruik <xliff:g id="NEW_NETWORK">%1$s</xliff:g> wanneer <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> geen internettoegang het nie. Heffings kan geld."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Het oorgeskakel van <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> na <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
   <string-array name="network_switch_type_name">
     <item msgid="3979506840912951943">"mobiele data"</item>
@@ -1130,7 +1133,7 @@
   </string-array>
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"\'n onbekende netwerktipe"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Kon nie aan Wi-Fikoppel nie"</string>
-    <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" het \'n swak internetverbinding."</string>
+    <string name="wifi_watchdog_network_disabled_detailed" msgid="4917472096696322767">" het \'n swak internetverbinding."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Laat verbinding toe?"</string>
     <string name="wifi_connect_alert_message" msgid="6451273376815958922">"Program %1$s wil aan Wi-Fi-netwerk %2$s koppel"</string>
     <string name="wifi_connect_default_application" msgid="7143109390475484319">"\'n Program"</string>
@@ -1626,7 +1629,6 @@
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"2e werk-<xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"3e werk-<xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="6820571533009838261">"Raak en hou die Terug- en Oorsig-knoppie om hierdie skerm te ontspeld"</string>
-    <string name="lock_to_app_toast_locked" msgid="7849470948648628704">"Hierdie program kan nie ontspeld word nie"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Skerm vasgespeld"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Skerm ontspeld"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Vra PIN voordat jy ontspeld"</string>
@@ -1635,7 +1637,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Geïnstalleer deur jou administrateur"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Opgedateer deur jou administrateur"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Uitgevee deur jou administrateur"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"Om batterylewe te help verbeter, verminder batterybespaarder jou toestel se werkverrigting en beperk vibrasie, liggingdienste en die meeste agtergronddata. E-pos, boodskappe en ander programme wat op sinkronisering staatmaak, sal dalk nie opdateer tensy jy hulle oopmaak nie.\n\nBatterybespaarder skakel outomaties af wanneer jou toestel besig is om te laai."</string>
+    <string name="battery_saver_description" msgid="5394663545060026162">"Om batterylewe te help verbeter, verminder Batterybespaarder jou toestel se werkverrigting en beperk vibrasie, liggingdienste en die meeste agtergronddata. E-pos, boodskappe en ander programme wat op sinkronisering staatmaak, sal dalk nie opdateer tensy jy hulle oopmaak nie.\n\nBatterybespaarder skakel outomaties af wanneer jou toestel besig is om te laai."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Databespaarder verhoed sommige programme om data in die agtergrond te stuur of te aanvaar om datagebruik te help verminder. \'n Program wat jy tans gebruik kan by data ingaan, maar sal dit dalk minder gereeld doen. Dit kan byvoorbeeld beteken dat prente nie wys totdat jy op hulle tik nie."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Skakel Databespaarder aan?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Skakel aan"</string>
@@ -1782,14 +1784,10 @@
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"Noodboodskappetoets"</string>
     <string name="notification_reply_button_accessibility" msgid="3621714652387814344">"Antwoord"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
-    <!-- no translation found for mmcc_authentication_reject (5767701075994754356) -->
-    <skip />
-    <!-- no translation found for mmcc_imsi_unknown_in_hlr (5316658473301462825) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_ms (807334478177362062) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_me (1950705155760872972) -->
-    <skip />
+    <string name="mmcc_authentication_reject" msgid="5767701075994754356">"SIM nie toegelaat vir stem nie"</string>
+    <string name="mmcc_imsi_unknown_in_hlr" msgid="5316658473301462825">"SIM nie opgestel vir stem nie"</string>
+    <string name="mmcc_illegal_ms" msgid="807334478177362062">"SIM nie toegelaat vir stem nie"</string>
+    <string name="mmcc_illegal_me" msgid="1950705155760872972">"Foon nie toegelaat vir stem nie"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"Opspringvenster"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="shortcut_restored_on_lower_version" msgid="5270675146351613828">"Hierdie kortpad vereis die jongste program"</string>

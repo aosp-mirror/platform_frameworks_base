@@ -80,7 +80,7 @@
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Nema glasovnih i hitnih usluga"</string>
     <string name="RestrictedStateContent" msgid="4278821484643362350">"Trenutačno nije u ponudi mobilne mreže na vašoj lokaciji"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Pristup mreži nije moguć"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"Za bolji prijem pokušajte promijeniti vrstu odabranu u odjeljku Postavke &gt; Mreža i internet &gt; Mobilne mreže &gt; Preferirana vrsta mreže."</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7056776609127756440">"Za bolji prijem pokušajte promijeniti vrstu odabranu u odjeljku Postavke &gt; Mreža i internet &gt; Mobilne mreže &gt; Preferirana vrsta mreže."</string>
     <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"Aktivni su Wi‑Fi pozivi"</string>
     <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"Za hitne pozive potrebna je mobilna mreža."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Upozorenja"</string>
@@ -1071,6 +1071,9 @@
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Omogućiti to ponovo u Postavkama sustava &gt; Aplikacije &gt; Preuzimanja."</string>
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"<xliff:g id="APP_NAME">%1$s</xliff:g> ne podržava trenutačnu postavku veličine zaslona i može se ponašati neočekivano."</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"Uvijek prikaži"</string>
+    <string name="unsupported_compile_sdk_message" msgid="4253168368781441759">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> razvijena je za nekompatibilnu verziju OS-a Android i može se ponašati neočekivano. Možda je dostupna ažurirana verzija te aplikacije."</string>
+    <string name="unsupported_compile_sdk_show" msgid="2681877855260970231">"Uvijek prikaži"</string>
+    <string name="unsupported_compile_sdk_check_update" msgid="3312723623323216101">"Provjeri ažuriranja"</string>
     <string name="smv_application" msgid="3307209192155442829">"Aplikacija <xliff:g id="APPLICATION">%1$s</xliff:g> (proces <xliff:g id="PROCESS">%2$s</xliff:g>) prekršila je vlastito pravilo StrictMode."</string>
     <string name="smv_process" msgid="5120397012047462446">"Proces <xliff:g id="PROCESS">%1$s</xliff:g> prekršio je svoje vlastito pravilo StrictMode."</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android se nadograđuje…"</string>
@@ -1138,10 +1141,10 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"Prijava na mrežu"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8451173622563841546">"Wi-Fi nema pristup internetu"</string>
+    <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi nema pristup internetu"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Dodirnite za opcije"</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Prelazak na drugu mrežu: <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
-    <string name="network_switch_metered_detail" msgid="5325661434777870353">"Kada <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> nema pristup internetu, na uređaju se upotrebljava <xliff:g id="NEW_NETWORK">%1$s</xliff:g>. Moguća je naplata naknade."</string>
+    <string name="network_switch_metered_detail" msgid="775163331794506615">"Kada <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> nema pristup internetu, na uređaju se upotrebljava <xliff:g id="NEW_NETWORK">%1$s</xliff:g>. Moguća je naplata naknade."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Mreža je promijenjena: <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> &gt; <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
   <string-array name="network_switch_type_name">
     <item msgid="3979506840912951943">"mobilni podaci"</item>
@@ -1152,7 +1155,7 @@
   </string-array>
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"nepoznata vrsta mreže"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Ne može se spojiti na Wi-Fi"</string>
-    <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" ima lošu internetsku vezu."</string>
+    <string name="wifi_watchdog_network_disabled_detailed" msgid="4917472096696322767">" ima lošu internetsku vezu."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Dopustiti povezivanje?"</string>
     <string name="wifi_connect_alert_message" msgid="6451273376815958922">"Aplikacija %1$s traži povezivanje s Wi-Fi mrežom %2$s"</string>
     <string name="wifi_connect_default_application" msgid="7143109390475484319">"Aplikacija"</string>
@@ -1651,7 +1654,6 @@
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"2. <xliff:g id="LABEL">%1$s</xliff:g> za posao"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"3. <xliff:g id="LABEL">%1$s</xliff:g> za posao"</string>
     <string name="lock_to_app_toast" msgid="6820571533009838261">"Da biste otkvačili ovaj zaslon, dodirnite i zadržite Natrag i Pregled"</string>
-    <string name="lock_to_app_toast_locked" msgid="7849470948648628704">"Ova se aplikacija ne može otkvačiti"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Zaslon je pričvršćen"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Zaslon je otkvačen"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Traži PIN radi otkvačivanja"</string>
@@ -1660,7 +1662,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Instalirao administrator"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Ažurirao administrator"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Izbrisao administrator"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"Da bi se produljilo trajanje baterije, ušteda baterije smanjuje performanse uređaja i ograničava vibraciju, usluge lokacije i većinu pozadinskih radnji. Aplikacije za e-poštu, slanje poruka i druge aplikacije koje se oslanjaju na sinkronizaciju možda se neće ažurirati ako ih ne otvorite.\n\nUšteda baterije isključuje se automatski dok se uređaj puni."</string>
+    <string name="battery_saver_description" msgid="5394663545060026162">"Da bi se produljilo trajanje baterije, Štednja baterije smanjuje rad uređaja i ograničava vibraciju, usluge lokacije i većinu pozadinskih podataka. Aplikacije za e-poštu, slanje poruka i druge aplikacije koje se oslanjaju na sinkronizaciju možda se neće ažurirati ako ih ne otvorite.\n\nŠtednja baterije isključuje se automatski dok se uređaj puni."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Da bi se smanjio podatkovni promet, Štednja podatkovnog prometa onemogućuje nekim aplikacijama slanje ili primanje podataka u pozadini. Aplikacija koju trenutačno upotrebljavate može pristupiti podacima, no možda će to činiti rjeđe. To može značiti da se, na primjer, slike neće prikazivati dok ih ne dodirnete."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Uključiti Uštedu podataka?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Uključi"</string>
@@ -1817,14 +1819,10 @@
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"Test hitnih poruka"</string>
     <string name="notification_reply_button_accessibility" msgid="3621714652387814344">"Odgovori"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
-    <!-- no translation found for mmcc_authentication_reject (5767701075994754356) -->
-    <skip />
-    <!-- no translation found for mmcc_imsi_unknown_in_hlr (5316658473301462825) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_ms (807334478177362062) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_me (1950705155760872972) -->
-    <skip />
+    <string name="mmcc_authentication_reject" msgid="5767701075994754356">"SIM nije dopušten za glasovne pozive"</string>
+    <string name="mmcc_imsi_unknown_in_hlr" msgid="5316658473301462825">"SIM nije omogućen za glasovne pozive"</string>
+    <string name="mmcc_illegal_ms" msgid="807334478177362062">"SIM nije dopušten za glasovne pozive"</string>
+    <string name="mmcc_illegal_me" msgid="1950705155760872972">"Telefon nije dopušten za glasovne pozive"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"Skočni prozor"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"još <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="shortcut_restored_on_lower_version" msgid="5270675146351613828">"Za taj je prečac potrebna najnovija aplikacija"</string>
