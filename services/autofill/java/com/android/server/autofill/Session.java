@@ -119,8 +119,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     @GuardedBy("mLock")
     @NonNull private IBinder mActivityToken;
 
-    /** Package name of the app that is auto-filled */
-    @NonNull private final String mPackageName;
+    /** Component that's being auto-filled */
+    @NonNull private final ComponentName mComponentName;
 
     @GuardedBy("mLock")
     private final ArrayMap<AutofillId, ViewState> mViewStates = new ArrayMap<>();
@@ -200,6 +200,21 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 structure.ensureData();
 
                 // Sanitize structure before it's sent to service.
+                final ComponentName componentNameFromApp = structure.getActivityComponent();
+                if (!mComponentName.equals(componentNameFromApp)) {
+                    Slog.w(TAG, "Activity " + mComponentName + " forged different component on "
+                            + "AssistStructure: " + componentNameFromApp);
+                    structure.setActivityComponent(mComponentName);
+                    final LogMaker log = (new LogMaker(
+                            MetricsEvent.AUTOFILL_FORGED_COMPONENT_ATTEMPT))
+                            .setPackageName(mComponentName.getPackageName())
+                            .addTaggedData(MetricsEvent.FIELD_AUTOFILL_SERVICE,
+                                    mService.getPackageName())
+                            .addTaggedData(MetricsEvent.FIELD_AUTOFILL_FORGED_COMPONENT_NAME,
+                                            componentNameFromApp == null ? "null"
+                                                    : componentNameFromApp.flattenToShortString());
+                    mMetricsLogger.write(log);
+                }
                 structure.sanitizeForParceling(true);
 
                 // Flags used to start the session.
@@ -345,20 +360,21 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             @NonNull Context context, @NonNull HandlerCaller handlerCaller, int userId,
             @NonNull Object lock, int sessionId, int uid, @NonNull IBinder activityToken,
             @NonNull IBinder client, boolean hasCallback,
-            @NonNull ComponentName componentName, @NonNull String packageName) {
+            @NonNull ComponentName serviceComponentName, @NonNull ComponentName appComponentName) {
         id = sessionId;
         this.uid = uid;
         mService = service;
         mLock = lock;
         mUi = ui;
         mHandlerCaller = handlerCaller;
-        mRemoteFillService = new RemoteFillService(context, componentName, userId, this);
+        mRemoteFillService = new RemoteFillService(context, serviceComponentName, userId, this);
         mActivityToken = activityToken;
         mHasCallback = hasCallback;
-        mPackageName = packageName;
+        mComponentName = appComponentName;
         mClient = IAutoFillManagerClient.Stub.asInterface(client);
 
-        mMetricsLogger.action(MetricsEvent.AUTOFILL_SESSION_STARTED, mPackageName);
+        mMetricsLogger.action(MetricsEvent.AUTOFILL_SESSION_STARTED,
+                mComponentName.getPackageName());
     }
 
     /**
@@ -427,7 +443,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
         final LogMaker log = (new LogMaker(MetricsEvent.AUTOFILL_REQUEST))
                 .setType(MetricsEvent.TYPE_SUCCESS)
-                .setPackageName(mPackageName)
+                .setPackageName(mComponentName.getPackageName())
                 .addTaggedData(MetricsEvent.FIELD_AUTOFILL_NUM_DATASETS,
                         response.getDatasets() == null ? 0 : response.getDatasets().size())
                 .addTaggedData(MetricsEvent.FIELD_AUTOFILL_SERVICE,
@@ -449,7 +465,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         }
         LogMaker log = (new LogMaker(MetricsEvent.AUTOFILL_REQUEST))
                 .setType(MetricsEvent.TYPE_FAILURE)
-                .setPackageName(mPackageName)
+                .setPackageName(mComponentName.getPackageName())
                 .addTaggedData(MetricsEvent.FIELD_AUTOFILL_SERVICE, servicePackageName);
         mMetricsLogger.write(log);
 
@@ -472,7 +488,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         LogMaker log = (new LogMaker(
                 MetricsEvent.AUTOFILL_DATA_SAVE_REQUEST))
                 .setType(MetricsEvent.TYPE_SUCCESS)
-                .setPackageName(mPackageName)
+                .setPackageName(mComponentName.getPackageName())
                 .addTaggedData(MetricsEvent.FIELD_AUTOFILL_SERVICE, servicePackageName);
         mMetricsLogger.write(log);
 
@@ -496,7 +512,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         LogMaker log = (new LogMaker(
                 MetricsEvent.AUTOFILL_DATA_SAVE_REQUEST))
                 .setType(MetricsEvent.TYPE_FAILURE)
-                .setPackageName(mPackageName)
+                .setPackageName(mComponentName.getPackageName())
                 .addTaggedData(MetricsEvent.FIELD_AUTOFILL_SERVICE, servicePackageName);
         mMetricsLogger.write(log);
 
@@ -691,7 +707,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         final Parcelable result = data.getParcelable(AutofillManager.EXTRA_AUTHENTICATION_RESULT);
         if (result instanceof FillResponse) {
             final FillResponse response = (FillResponse) result;
-            mMetricsLogger.action(MetricsEvent.AUTOFILL_AUTHENTICATED, mPackageName);
+            mMetricsLogger.action(MetricsEvent.AUTOFILL_AUTHENTICATED,
+                    mComponentName.getPackageName());
             replaceResponseLocked(authenticatedResponse, response);
         } else if (result instanceof Dataset) {
             if (datasetIdx != AutofillManager.AUTHENTICATION_ID_DATASET_ID_UNDEFINED) {
@@ -834,8 +851,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             if (atLeastOneChanged) {
                 if (sDebug) Slog.d(TAG, "at least one field changed - showing save UI");
                 mService.setSaveShown(id);
-                getUiForShowing().showSaveUi(mService.getServiceLabel(), saveInfo, mPackageName,
-                        this);
+                getUiForShowing().showSaveUi(mService.getServiceLabel(), saveInfo,
+                        mComponentName.getPackageName(), this);
 
                 mIsSaving = true;
                 return false;
@@ -1143,7 +1160,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             filterText = value.getTextValue().toString();
         }
 
-        getUiForShowing().showFillUi(filledId, response, filterText, mPackageName, this);
+        getUiForShowing().showFillUi(filledId, response, filterText,
+                mComponentName.getPackageName(), this);
     }
 
     boolean isDestroyed() {
@@ -1408,14 +1426,14 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
     @Override
     public String toString() {
-        return "Session: [id=" + id + ", pkg=" + mPackageName + "]";
+        return "Session: [id=" + id + ", pkg=" + mComponentName.getPackageName() + "]";
     }
 
     void dumpLocked(String prefix, PrintWriter pw) {
         final String prefix2 = prefix + "  ";
         pw.print(prefix); pw.print("id: "); pw.println(id);
         pw.print(prefix); pw.print("uid: "); pw.println(uid);
-        pw.print(prefix); pw.print("mPackagename: "); pw.println(mPackageName);
+        pw.print(prefix); pw.print("mComponentName: "); pw.println(mComponentName);
         pw.print(prefix); pw.print("mActivityToken: "); pw.println(mActivityToken);
         pw.print(prefix); pw.print("mResponses: ");
         if (mResponses == null) {
@@ -1519,7 +1537,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         hideAllUiIfOwnedByMe();
         mUi.clearCallback(this);
         mDestroyed = true;
-        mMetricsLogger.action(MetricsEvent.AUTOFILL_SESSION_FINISHED, mPackageName);
+        mMetricsLogger.action(MetricsEvent.AUTOFILL_SESSION_FINISHED,
+                mComponentName.getPackageName());
         return mRemoteFillService;
     }
 
