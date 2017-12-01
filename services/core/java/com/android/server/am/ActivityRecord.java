@@ -21,6 +21,7 @@ import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.app.ActivityManager.TaskDescription.ATTR_TASKDESCRIPTION_PREFIX;
 import static android.app.ActivityOptions.ANIM_CLIP_REVEAL;
 import static android.app.ActivityOptions.ANIM_CUSTOM;
+import static android.app.ActivityOptions.ANIM_REMOTE_ANIMATION;
 import static android.app.ActivityOptions.ANIM_SCALE_UP;
 import static android.app.ActivityOptions.ANIM_SCENE_TRANSITION;
 import static android.app.ActivityOptions.ANIM_OPEN_CROSS_PROFILE_APPS;
@@ -1480,6 +1481,10 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
                     break;
                 case ANIM_OPEN_CROSS_PROFILE_APPS:
                     service.mWindowManager.overridePendingAppTransitionStartCrossProfileApps();
+                    break;
+                case ANIM_REMOTE_ANIMATION:
+                    service.mWindowManager.overridePendingAppTransitionRemote(
+                            pendingOptions.getRemoteAnimationAdapter());
                     break;
                 default:
                     Slog.e(TAG, "applyOptionsLocked: Unknown animationType=" + animationType);

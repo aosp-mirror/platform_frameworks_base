@@ -75,6 +75,7 @@ import android.util.proto.ProtoOutputStream;
 import android.view.AppTransitionAnimationSpec;
 import android.view.DisplayListCanvas;
 import android.view.IAppTransitionAnimationSpecsFuture;
+import android.view.RemoteAnimationAdapter;
 import android.view.RenderNode;
 import android.view.ThreadedRenderer;
 import android.view.WindowManager;
@@ -213,6 +214,8 @@ public class AppTransition implements Dump {
      * }.
      */
     private static final int NEXT_TRANSIT_TYPE_OPEN_CROSS_PROFILE_APPS = 9;
+    private static final int NEXT_TRANSIT_TYPE_REMOTE = 10;
+
     private int mNextAppTransitionType = NEXT_TRANSIT_TYPE_NONE;
 
     // These are the possible states for the enter/exit activities during a thumbnail transition
@@ -274,6 +277,8 @@ public class AppTransition implements Dump {
 
     private final boolean mGridLayoutRecentsEnabled;
     private final boolean mLowRamRecentsEnabled;
+
+    private RemoteAnimationController mRemoteAnimationController;
 
     AppTransition(Context context, WindowManagerService service) {
         mContext = context;
@@ -454,6 +459,9 @@ public class AppTransition implements Dump {
                 app.startDelayingAnimationStart();
             }
         }
+        if (mRemoteAnimationController != null) {
+            mRemoteAnimationController.goodToGo();
+        }
         return redoLayout;
     }
 
@@ -468,6 +476,7 @@ public class AppTransition implements Dump {
         mNextAppTransitionType = NEXT_TRANSIT_TYPE_NONE;
         mNextAppTransitionPackage = null;
         mNextAppTransitionAnimationsSpecs.clear();
+        mRemoteAnimationController = null;
         mNextAppTransitionAnimationsSpecsFuture = null;
         mDefaultNextAppTransitionAnimationSpec = null;
         mAnimationFinishedCallback = null;
@@ -1551,6 +1560,10 @@ public class AppTransition implements Dump {
                 && mNextAppTransition != TRANSIT_KEYGUARD_GOING_AWAY;
     }
 
+    RemoteAnimationController getRemoteAnimationController() {
+        return mRemoteAnimationController;
+    }
+
     /**
      *
      * @param frame These are the bounds of the window when it finishes the animation. This is where
@@ -1788,7 +1801,7 @@ public class AppTransition implements Dump {
 
     void overridePendingAppTransition(String packageName, int enterAnim, int exitAnim,
             IRemoteCallback startedCallback) {
-        if (isTransitionSet()) {
+        if (canOverridePendingAppTransition()) {
             clear();
             mNextAppTransitionType = NEXT_TRANSIT_TYPE_CUSTOM;
             mNextAppTransitionPackage = packageName;
@@ -1796,14 +1809,12 @@ public class AppTransition implements Dump {
             mNextAppTransitionExit = exitAnim;
             postAnimationCallback();
             mNextAppTransitionCallback = startedCallback;
-        } else {
-            postAnimationCallback();
         }
     }
 
     void overridePendingAppTransitionScaleUp(int startX, int startY, int startWidth,
             int startHeight) {
-        if (isTransitionSet()) {
+        if (canOverridePendingAppTransition()) {
             clear();
             mNextAppTransitionType = NEXT_TRANSIT_TYPE_SCALE_UP;
             putDefaultNextAppTransitionCoordinates(startX, startY, startWidth, startHeight, null);
@@ -1813,7 +1824,7 @@ public class AppTransition implements Dump {
 
     void overridePendingAppTransitionClipReveal(int startX, int startY,
                                                 int startWidth, int startHeight) {
-        if (isTransitionSet()) {
+        if (canOverridePendingAppTransition()) {
             clear();
             mNextAppTransitionType = NEXT_TRANSIT_TYPE_CLIP_REVEAL;
             putDefaultNextAppTransitionCoordinates(startX, startY, startWidth, startHeight, null);
@@ -1823,7 +1834,7 @@ public class AppTransition implements Dump {
 
     void overridePendingAppTransitionThumb(GraphicBuffer srcThumb, int startX, int startY,
                                            IRemoteCallback startedCallback, boolean scaleUp) {
-        if (isTransitionSet()) {
+        if (canOverridePendingAppTransition()) {
             clear();
             mNextAppTransitionType = scaleUp ? NEXT_TRANSIT_TYPE_THUMBNAIL_SCALE_UP
                     : NEXT_TRANSIT_TYPE_THUMBNAIL_SCALE_DOWN;
@@ -1831,14 +1842,12 @@ public class AppTransition implements Dump {
             putDefaultNextAppTransitionCoordinates(startX, startY, 0, 0, srcThumb);
             postAnimationCallback();
             mNextAppTransitionCallback = startedCallback;
-        } else {
-            postAnimationCallback();
         }
     }
 
     void overridePendingAppTransitionAspectScaledThumb(GraphicBuffer srcThumb, int startX, int startY,
             int targetWidth, int targetHeight, IRemoteCallback startedCallback, boolean scaleUp) {
-        if (isTransitionSet()) {
+        if (canOverridePendingAppTransition()) {
             clear();
             mNextAppTransitionType = scaleUp ? NEXT_TRANSIT_TYPE_THUMBNAIL_ASPECT_SCALE_UP
                     : NEXT_TRANSIT_TYPE_THUMBNAIL_ASPECT_SCALE_DOWN;
@@ -1847,15 +1856,13 @@ public class AppTransition implements Dump {
                     srcThumb);
             postAnimationCallback();
             mNextAppTransitionCallback = startedCallback;
-        } else {
-            postAnimationCallback();
         }
     }
 
-    public void overridePendingAppTransitionMultiThumb(AppTransitionAnimationSpec[] specs,
+    void overridePendingAppTransitionMultiThumb(AppTransitionAnimationSpec[] specs,
             IRemoteCallback onAnimationStartedCallback, IRemoteCallback onAnimationFinishedCallback,
             boolean scaleUp) {
-        if (isTransitionSet()) {
+        if (canOverridePendingAppTransition()) {
             clear();
             mNextAppTransitionType = scaleUp ? NEXT_TRANSIT_TYPE_THUMBNAIL_ASPECT_SCALE_UP
                     : NEXT_TRANSIT_TYPE_THUMBNAIL_ASPECT_SCALE_DOWN;
@@ -1878,15 +1885,13 @@ public class AppTransition implements Dump {
             postAnimationCallback();
             mNextAppTransitionCallback = onAnimationStartedCallback;
             mAnimationFinishedCallback = onAnimationFinishedCallback;
-        } else {
-            postAnimationCallback();
         }
     }
 
     void overridePendingAppTransitionMultiThumbFuture(
             IAppTransitionAnimationSpecsFuture specsFuture, IRemoteCallback callback,
             boolean scaleUp) {
-        if (isTransitionSet()) {
+        if (canOverridePendingAppTransition()) {
             clear();
             mNextAppTransitionType = scaleUp ? NEXT_TRANSIT_TYPE_THUMBNAIL_ASPECT_SCALE_UP
                     : NEXT_TRANSIT_TYPE_THUMBNAIL_ASPECT_SCALE_DOWN;
@@ -1896,14 +1901,21 @@ public class AppTransition implements Dump {
         }
     }
 
-    void overrideInPlaceAppTransition(String packageName, int anim) {
+    void overridePendingAppTransitionRemote(RemoteAnimationAdapter remoteAnimationAdapter) {
         if (isTransitionSet()) {
+            clear();
+            mNextAppTransitionType = NEXT_TRANSIT_TYPE_REMOTE;
+            mRemoteAnimationController = new RemoteAnimationController(mService,
+                    remoteAnimationAdapter, mService.mH);
+        }
+    }
+
+    void overrideInPlaceAppTransition(String packageName, int anim) {
+        if (canOverridePendingAppTransition()) {
             clear();
             mNextAppTransitionType = NEXT_TRANSIT_TYPE_CUSTOM_IN_PLACE;
             mNextAppTransitionPackage = packageName;
             mNextAppTransitionInPlace = anim;
-        } else {
-            postAnimationCallback();
         }
     }
 
@@ -1911,11 +1923,16 @@ public class AppTransition implements Dump {
      * @see {@link #NEXT_TRANSIT_TYPE_OPEN_CROSS_PROFILE_APPS}
      */
     void overridePendingAppTransitionStartCrossProfileApps() {
-        if (isTransitionSet()) {
+        if (canOverridePendingAppTransition()) {
             clear();
             mNextAppTransitionType = NEXT_TRANSIT_TYPE_OPEN_CROSS_PROFILE_APPS;
             postAnimationCallback();
         }
+    }
+
+    private boolean canOverridePendingAppTransition() {
+        // Remote animations always take precedence
+        return isTransitionSet() &&  mNextAppTransitionType != NEXT_TRANSIT_TYPE_REMOTE;
     }
 
     /**

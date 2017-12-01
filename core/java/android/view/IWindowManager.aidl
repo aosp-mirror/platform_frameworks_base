@@ -38,6 +38,7 @@ import android.view.IAppTransitionAnimationSpecsFuture;
 import android.view.IDockedStackListener;
 import android.view.IOnKeyguardExitResult;
 import android.view.IPinnedStackListener;
+import android.view.RemoteAnimationAdapter;
 import android.view.IRotationWatcher;
 import android.view.IWallpaperVisibilityListener;
 import android.view.IWindowSession;
@@ -124,6 +125,7 @@ interface IWindowManager
     void overridePendingAppTransitionMultiThumbFuture(
             IAppTransitionAnimationSpecsFuture specsFuture, IRemoteCallback startedCallback,
             boolean scaleUp);
+    void overridePendingAppTransitionRemote(in RemoteAnimationAdapter remoteAnimationAdapter);
     void executeAppTransition();
 
     /** Used by system ui to report that recents has shown itself. */

@@ -3684,6 +3684,12 @@
     <permission android:name="android.permission.MODIFY_QUIET_MODE"
                 android:protectionLevel="signature|privileged" />
 
+    <!-- Allows an application to control remote animations. See
+         {@link ActivityOptions#makeRemoteAnimation}
+         @hide <p>Not for use by third-party applications. -->
+    <permission android:name="android.permission.CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS"
+        android:protectionLevel="signature|privileged" />
+
     <application android:process="system"
                  android:persistent="true"
                  android:hasCode="false"
