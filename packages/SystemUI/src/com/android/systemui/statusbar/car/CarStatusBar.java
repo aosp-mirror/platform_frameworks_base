@@ -335,8 +335,8 @@ public class CarStatusBar extends StatusBar implements
     }
 
     @Override
-    public void userSwitched(int newUserId) {
-        super.userSwitched(newUserId);
+    public void onUserSwitched(int newUserId) {
+        super.onUserSwitched(newUserId);
         if (mFullscreenUserSwitcher != null) {
             mFullscreenUserSwitcher.onUserSwitched(newUserId);
         }

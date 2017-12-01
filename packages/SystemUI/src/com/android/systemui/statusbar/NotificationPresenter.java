@@ -16,6 +16,7 @@
 package com.android.systemui.statusbar;
 
 import android.content.Intent;
+import android.os.Handler;
 import android.service.notification.NotificationListenerService;
 
 /**
@@ -39,11 +40,6 @@ public interface NotificationPresenter {
     boolean isPresenterLocked();
 
     /**
-     * Returns the current user id. This can change if the user is switched.
-     */
-    int getCurrentUserId();
-
-    /**
      * Runs the given intent. The presenter may want to run some animations or close itself when
      * this happens.
      */
@@ -53,6 +49,11 @@ public interface NotificationPresenter {
      * Returns NotificationData.
      */
     NotificationData getNotificationData();
+
+    /**
+     * Returns the Handler for NotificationPresenter.
+     */
+    Handler getHandler();
 
     // TODO: Create NotificationEntryManager and move this method to there.
     /**
@@ -76,4 +77,20 @@ public interface NotificationPresenter {
      * Gets the latest ranking map.
      */
     NotificationListenerService.RankingMap getLatestRankingMap();
+
+    /**
+     * Called when the locked status of the device is changed for a work profile.
+     */
+    void onWorkChallengeChanged();
+
+    /**
+     * Called when the current user changes.
+     * @param newUserId new user id
+     */
+    void onUserSwitched(int newUserId);
+
+    /**
+     * Gets the NotificationLockscreenUserManager for this Presenter.
+     */
+    NotificationLockscreenUserManager getNotificationLockscreenUserManager();
 }
