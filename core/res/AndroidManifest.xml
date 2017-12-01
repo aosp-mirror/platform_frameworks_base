@@ -1036,7 +1036,7 @@
     <eat-comment />
 
     <!-- Used for permissions that are associated with accessing
-         camera or capturing images/video from the device. -->
+         body or environmental sensors. -->
     <permission-group android:name="android.permission-group.SENSORS"
         android:icon="@drawable/perm_group_sensors"
         android:label="@string/permgrouplab_sensors"
