@@ -754,6 +754,8 @@ public abstract class Context {
      * to any callers for the same name, meaning they will see each other's
      * edits as soon as they are made.
      *
+     * This method is thead-safe.
+     *
      * @param name Desired preferences file. If a preferences file by this name
      * does not exist, it will be created when you retrieve an
      * editor (SharedPreferences.edit()) and then commit changes (Editor.commit()).
