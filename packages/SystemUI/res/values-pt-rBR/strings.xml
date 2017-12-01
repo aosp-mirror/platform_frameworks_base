@@ -34,14 +34,14 @@
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Notificações"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"Bateria fraca"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> restantes"</string>
-    <string name="battery_low_percent_format_saver_started" msgid="6859235584035338833">"<xliff:g id="PERCENTAGE">%s</xliff:g> restantes. A Economia de bateria está ativada."</string>
+    <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"<xliff:g id="PERCENTAGE">%s</xliff:g> restante(s). A Economia de bateria está ativada."</string>
     <string name="invalid_charger" msgid="4549105996740522523">"O carregamento via USB não é suportado.\nUse apenas o carregador fornecido."</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"O carregamento via USB não é suportado."</string>
     <string name="invalid_charger_text" msgid="5474997287953892710">"Use apenas o carregador fornecido."</string>
     <string name="battery_low_why" msgid="4553600287639198111">"Configurações"</string>
-    <string name="battery_saver_confirmation_title" msgid="5299585433050361634">"Ativar a economia de bateria?"</string>
+    <string name="battery_saver_confirmation_title" msgid="2052100465684817154">"Ativar Economia de bateria?"</string>
     <string name="battery_saver_confirmation_ok" msgid="7507968430447930257">"Ativar"</string>
-    <string name="battery_saver_start_action" msgid="5576697451677486320">"Ativar a economia de bateria"</string>
+    <string name="battery_saver_start_action" msgid="8187820911065797519">"Ativar a Economia de bateria"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Configurações"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
     <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"Girar tela automaticamente"</string>
@@ -245,8 +245,6 @@
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Os dados foram pausados"</string>
     <string name="data_usage_disabled_dialog" msgid="4919541636934603816">"O limite de dados que você definiu foi atingido. Você não está mais usando dados móveis.\n\nSe retomar o uso de dados, o serviço poderá ser cobrado."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Retomar"</string>
-    <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Sem conexão à Internet"</string>
-    <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi conectado"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Buscando GPS"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Local definido por GPS"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"Solicitações de localização ativas"</string>
@@ -403,9 +401,9 @@
     <string name="user_remove_user_title" msgid="4681256956076895559">"Remover usuário?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"Todos os apps e dados deste usuário serão excluídos."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"Remover"</string>
-    <string name="battery_saver_notification_title" msgid="237918726750955859">"A Economia de bateria está ativada"</string>
+    <string name="battery_saver_notification_title" msgid="8614079794522291840">"Economia de bateria ativada"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Reduz o desempenho e os dados em segundo plano"</string>
-    <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Desativar a economia de bateria"</string>
+    <string name="battery_saver_notification_action_text" msgid="132118784269455533">"Desativar a Economia de bateria"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> começará a capturar tudo o que for exibido na tela."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Não mostrar novamente"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Limpar tudo"</string>
@@ -584,8 +582,8 @@
       <item quantity="other">%d minutos</item>
     </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"Uso da bateria"</string>
-    <string name="battery_detail_charging_summary" msgid="4055327085770378335">"O recurso \"Economia de bateria\" não fica disponível durante o carregamento"</string>
-    <string name="battery_detail_switch_title" msgid="8763441006881907058">"Economia de bateria"</string>
+    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"A Economia de bateria não fica disponível durante o carregamento"</string>
+    <string name="battery_detail_switch_title" msgid="6285872470260795421">"Economia de bateria"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Reduz o desempenho e os dados em segundo plano"</string>
     <string name="keyboard_key_button_template" msgid="6230056639734377300">"Botão <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="2243500072071305073">"Home"</string>

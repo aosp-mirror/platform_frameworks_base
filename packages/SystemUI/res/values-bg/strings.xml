@@ -34,14 +34,14 @@
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Известия"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"Батерията е изтощена"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"Остава/т <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
-    <string name="battery_low_percent_format_saver_started" msgid="6859235584035338833">"Остава/т <xliff:g id="PERCENTAGE">%s</xliff:g>. Включен е режимът за запазване на батерията."</string>
+    <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"Остава/т <xliff:g id="PERCENTAGE">%s</xliff:g>. Режимът за запазване на батерията е включен."</string>
     <string name="invalid_charger" msgid="4549105996740522523">"Не се поддържа зареждане през USB.\nИзползвайте само доставеното зарядно устройство."</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"Зареждането през USB не се поддържа."</string>
     <string name="invalid_charger_text" msgid="5474997287953892710">"Използвайте само предоставеното зарядно устройство."</string>
     <string name="battery_low_why" msgid="4553600287639198111">"Настройки"</string>
-    <string name="battery_saver_confirmation_title" msgid="5299585433050361634">"Да се включи ли режимът за запазване на батерията?"</string>
+    <string name="battery_saver_confirmation_title" msgid="2052100465684817154">"Да се включи ли режимът за запазване на батерията?"</string>
     <string name="battery_saver_confirmation_ok" msgid="7507968430447930257">"Включване"</string>
-    <string name="battery_saver_start_action" msgid="5576697451677486320">"Включване на режима за запазване на батерията"</string>
+    <string name="battery_saver_start_action" msgid="8187820911065797519">"Включване на режима за запазване на батерията"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Настройки"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
     <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"Авт. завъртане на екрана"</string>
@@ -51,15 +51,15 @@
     <string name="bluetooth_tethered" msgid="7094101612161133267">"Bluetooth има връзка с тетъринг"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"Методи на въвеждане: Настройка"</string>
     <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"Физическа клавиатура"</string>
-    <string name="usb_device_permission_prompt" msgid="834698001271562057">"Да се разреши ли на приложението <xliff:g id="APPLICATION">%1$s</xliff:g> достъп до USB устройството?"</string>
-    <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"Да се разреши ли на приложението <xliff:g id="APPLICATION">%1$s</xliff:g> достъп до аксесоара за USB?"</string>
-    <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"Да се отвори ли <xliff:g id="ACTIVITY">%1$s</xliff:g>, когато това USB устройство е свързано?"</string>
-    <string name="usb_accessory_confirm_prompt" msgid="3808984931830229888">"Да се отвори ли <xliff:g id="ACTIVITY">%1$s</xliff:g>, когато този аксесоар за USB е свързан?"</string>
+    <string name="usb_device_permission_prompt" msgid="1825685909587559679">"Да се разреши ли на <xliff:g id="APPLICATION">%1$s</xliff:g> достъп до <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_accessory_permission_prompt" msgid="2465531696941369047">"Да се разреши ли на <xliff:g id="APPLICATION">%1$s</xliff:g> достъп до <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
+    <string name="usb_device_confirm_prompt" msgid="7440562274256843905">"Да се използва ли <xliff:g id="APPLICATION">%1$s</xliff:g> за работата с/ъс <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_accessory_confirm_prompt" msgid="4333670517539993561">"Да се използва ли <xliff:g id="APPLICATION">%1$s</xliff:g> за работата с/ъс <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
     <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"Инстал. приложения не работят с този аксесоар за USB. Научете повече на адрес <xliff:g id="URL">%1$s</xliff:g>"</string>
     <string name="title_usb_accessory" msgid="4966265263465181372">"Аксесоар за USB"</string>
     <string name="label_view" msgid="6304565553218192990">"Преглед"</string>
-    <string name="always_use_device" msgid="1450287437017315906">"Използване по подразб. за това USB устройство"</string>
-    <string name="always_use_accessory" msgid="1210954576979621596">"Използване по подразб. за този аксесоар за USB"</string>
+    <string name="always_use_device" msgid="4015357883336738417">"<xliff:g id="APPLICATION">%1$s</xliff:g> да се отваря винаги при връзка с/ъс <xliff:g id="USB_DEVICE">%2$s</xliff:g>"</string>
+    <string name="always_use_accessory" msgid="3257892669444535154">"<xliff:g id="APPLICATION">%1$s</xliff:g> да се отваря винаги при връзка с/ъс <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>"</string>
     <string name="usb_debugging_title" msgid="4513918393387141949">"Да се разреши ли отстраняването на грешки през USB?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"Отпечатъкът на RSA ключа на компютъра е:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Винаги да се разрешава от този компютър"</string>
@@ -243,8 +243,6 @@
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Данните са поставени на пауза"</string>
     <string name="data_usage_disabled_dialog" msgid="4919541636934603816">"Достигнахте зададеното от вас ограничение за данните. Вече не използвате мобилната мрежа.\n\nАко възобновите връзката с нея, може да бъдете таксувани за пренос на данни."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Възобновяване"</string>
-    <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Няма връзка с интернет"</string>
-    <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi: Има връзка"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Търси се GPS"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Местоположението е зададено от GPS"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"Активни заявки за местоположение"</string>
@@ -401,9 +399,9 @@
     <string name="user_remove_user_title" msgid="4681256956076895559">"Да се премахне ли потребителят?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"Всички приложения и данни на този потребител ще бъдат изтрити."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"Премахване"</string>
-    <string name="battery_saver_notification_title" msgid="237918726750955859">"Режимът за запазване на батерията е включен"</string>
+    <string name="battery_saver_notification_title" msgid="8614079794522291840">"Режимът за запазване на батерията е включен"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Намалява ефективността и данните на заден план"</string>
-    <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Изключване на режима за запазване на батерията"</string>
+    <string name="battery_saver_notification_action_text" msgid="132118784269455533">"Изключване на режима за запазване на батерията"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ще започне да заснема всичко, което се показва на екрана ви."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Да не се показва отново"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Изчистване на всички"</string>
@@ -582,8 +580,8 @@
       <item quantity="one">%d минута</item>
     </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"Ползв. на батерията"</string>
-    <string name="battery_detail_charging_summary" msgid="4055327085770378335">"Режимът за запазване на батерията не работи при зареждане"</string>
-    <string name="battery_detail_switch_title" msgid="8763441006881907058">"Режим за запазване на батерията"</string>
+    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Режимът за запазване на батерията не е налице при зареждане"</string>
+    <string name="battery_detail_switch_title" msgid="6285872470260795421">"Режим за запазване на батерията"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Намалява ефективността и данните на заден план"</string>
     <string name="keyboard_key_button_template" msgid="6230056639734377300">"Бутон „<xliff:g id="NAME">%1$s</xliff:g>“"</string>
     <string name="keyboard_key_home" msgid="2243500072071305073">"Начало"</string>

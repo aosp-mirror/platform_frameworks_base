@@ -29,8 +29,7 @@
     <string name="keyguard_password_enter_password_code" msgid="595980919238127672">"ለመክፈት የይለፍ ቃል ይተይቡ"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="7504123374204446086">"ለመክፈት ፒን ይተይቡ"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"ትክክል ያልሆነ ፒን  ኮድ።"</string>
-    <!-- no translation found for keyguard_sim_error_message_short (592109500618448312) -->
-    <skip />
+    <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"ልክ ያልሆነ ካርድ።"</string>
     <string name="keyguard_charged" msgid="2222329688813033109">"ባትሪ ሞልቷል"</string>
     <string name="keyguard_plugged_in" msgid="89308975354638682">"ኃይል በመሙላት ላይ"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="8869226755413795173">"ኃይል በፍጥነት በመሙላት ላይ"</string>

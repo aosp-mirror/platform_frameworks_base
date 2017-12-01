@@ -34,14 +34,14 @@
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Ειδοποιήσεις"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"Χαμηλή στάθμη μπαταρίας"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"Απομένουν <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
-    <string name="battery_low_percent_format_saver_started" msgid="6859235584035338833">"Απομένουν <xliff:g id="PERCENTAGE">%s</xliff:g>. Η λειτουργία εξοικονόμησης μπαταρίας είναι ενεργή."</string>
+    <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"Απομένουν <xliff:g id="PERCENTAGE">%s</xliff:g>. Η Εξοικονόμηση μπαταρίας είναι ενεργή."</string>
     <string name="invalid_charger" msgid="4549105996740522523">"Δεν υποστηρίζεται η φόρτιση USB.\nΧρησιμοποιείτε μόνο τον φορτιστή που παρέχεται."</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"Δεν υποστηρίζεται η φόρτιση μέσω USB."</string>
     <string name="invalid_charger_text" msgid="5474997287953892710">"Χρήση μόνο του παρεχόμενου φορτιστή."</string>
     <string name="battery_low_why" msgid="4553600287639198111">"Ρυθμίσεις"</string>
-    <string name="battery_saver_confirmation_title" msgid="5299585433050361634">"Να ενεργοποιηθεί η εξοικονόμηση μπαταρίας;"</string>
+    <string name="battery_saver_confirmation_title" msgid="2052100465684817154">"Να ενεργοποιηθεί η Εξοικονόμηση μπαταρίας;"</string>
     <string name="battery_saver_confirmation_ok" msgid="7507968430447930257">"Ενεργοποίηση"</string>
-    <string name="battery_saver_start_action" msgid="5576697451677486320">"Ενερ. της εξοικ/σης μπαταρίας"</string>
+    <string name="battery_saver_start_action" msgid="8187820911065797519">"Ενεργοποίηση Εξοικονόμησης μπαταρίας"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Ρυθμίσεις"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
     <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"Αυτόματη περιστροφή οθόνης"</string>
@@ -51,15 +51,15 @@
     <string name="bluetooth_tethered" msgid="7094101612161133267">"Έγινε σύνδεση μέσω Bluetooth"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"Ρύθμιση μεθόδων εισαγωγής"</string>
     <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"Φυσικό πληκτρολόγιο"</string>
-    <string name="usb_device_permission_prompt" msgid="834698001271562057">"Να επιτρέπεται στην εφαρμογή <xliff:g id="APPLICATION">%1$s</xliff:g> η πρόσβαση στη συσκευή USB;"</string>
-    <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"Να επιτρέπεται στην εφαρμογή <xliff:g id="APPLICATION">%1$s</xliff:g> η πρόσβαση στο αξεσουάρ USB;"</string>
-    <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"Άνοιγμα του <xliff:g id="ACTIVITY">%1$s</xliff:g> κατά τη σύνδεση αυτής της συσκευής USB;"</string>
-    <string name="usb_accessory_confirm_prompt" msgid="3808984931830229888">"Άνοιγμα του <xliff:g id="ACTIVITY">%1$s</xliff:g> κατά τη σύνδεση αυτού του αξεσουάρ USB;"</string>
+    <string name="usb_device_permission_prompt" msgid="1825685909587559679">"Να επιτρέπεται η πρόσβαση της εφαρμογής <xliff:g id="APPLICATION">%1$s</xliff:g> στη συσκευή <xliff:g id="USB_DEVICE">%2$s</xliff:g>;"</string>
+    <string name="usb_accessory_permission_prompt" msgid="2465531696941369047">"Να επιτρέπεται η πρόσβαση της εφαρμογής <xliff:g id="APPLICATION">%1$s</xliff:g> στο αξεσουάρ <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>;"</string>
+    <string name="usb_device_confirm_prompt" msgid="7440562274256843905">"Να ανοίγει η εφαρμογή <xliff:g id="APPLICATION">%1$s</xliff:g> για τη διαχείριση της συσκευής <xliff:g id="USB_DEVICE">%2$s</xliff:g>;"</string>
+    <string name="usb_accessory_confirm_prompt" msgid="4333670517539993561">"Να ανοίγει η εφαρμογή <xliff:g id="APPLICATION">%1$s</xliff:g> για τη διαχείριση του αξεσουάρ <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>;"</string>
     <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"Δεν έχετε εφαρμογή που να συνεργάζεται με το αξεσουάρ USB. Για περισσότερα: <xliff:g id="URL">%1$s</xliff:g>"</string>
     <string name="title_usb_accessory" msgid="4966265263465181372">"Αξεσουάρ USB"</string>
     <string name="label_view" msgid="6304565553218192990">"Προβολή"</string>
-    <string name="always_use_device" msgid="1450287437017315906">"Χρήση από προεπιλογή για αυτή τη συσκευή USB"</string>
-    <string name="always_use_accessory" msgid="1210954576979621596">"Χρήση από προεπιλογή για αυτό το εξάρτημα USB"</string>
+    <string name="always_use_device" msgid="4015357883336738417">"Να ανοίγει πάντα η εφ. <xliff:g id="APPLICATION">%1$s</xliff:g> όταν είναι συνδεδεμένo το <xliff:g id="USB_DEVICE">%2$s</xliff:g>"</string>
+    <string name="always_use_accessory" msgid="3257892669444535154">"Να ανοίγει πάντα η εφ. <xliff:g id="APPLICATION">%1$s</xliff:g> όταν είναι συνδεδεμένο το <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>"</string>
     <string name="usb_debugging_title" msgid="4513918393387141949">"Να επιτρέπεται ο εντοπισμός σφαλμάτων USB;"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"Το μοναδικό χαρακτηριστικό του κλειδιού RSA είναι:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Να επιτρέπεται πάντα από αυτόν τον υπολογιστή"</string>
@@ -243,8 +243,6 @@
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Τα δεδομένα τέθηκαν σε παύση"</string>
     <string name="data_usage_disabled_dialog" msgid="4919541636934603816">"Συμπληρώθηκε το όριο δεδομένων που έχετε ορίσει. Δεν χρησιμοποιείτε πλέον δεδομένα κινητής τηλεφωνίας.\n\nΑν συνεχίσετε, μπορεί να ισχύσουν χρεώσεις για τη χρήση δεδομένων."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Συνέχιση"</string>
-    <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Χωρ. σύνδ. στο Διαδ."</string>
-    <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi συνδεδεμένο"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Αναζήτηση για GPS"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Ρύθμιση τοποθεσίας με GPS"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"Τα αιτήματα τοποθεσίας έχουν ενεργοποιηθεί"</string>
@@ -401,9 +399,9 @@
     <string name="user_remove_user_title" msgid="4681256956076895559">"Κατάργηση χρήστη;"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"Όλες οι εφαρμογές και τα δεδομένα αυτού του χρήστη θα διαγραφούν."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"Κατάργηση"</string>
-    <string name="battery_saver_notification_title" msgid="237918726750955859">"Η Εξοικονόμηση μπαταρίας είναι ενεργή"</string>
+    <string name="battery_saver_notification_title" msgid="8614079794522291840">"Η Εξοικονόμηση μπαταρίας είναι ενεργή"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Μειώνει την απόδοση και τα δεδομένα παρασκηνίου"</string>
-    <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Απενερ. εξοικ/σης μπαταρίας"</string>
+    <string name="battery_saver_notification_action_text" msgid="132118784269455533">"Απενεργοποίηση Εξοικονόμησης μπαταρίας"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"Θα ξεκινήσει η καταγραφή του περιεχομένου που εμφανίζεται στην οθόνη σας από την εφαρμογή <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Να μην εμφανιστεί ξανά"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Διαγραφή όλων"</string>
@@ -582,8 +580,8 @@
       <item quantity="one">%d λεπτό</item>
     </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"Χρήση της μπαταρίας"</string>
-    <string name="battery_detail_charging_summary" msgid="4055327085770378335">"Η Εξοικονόμηση μπαταρίας δεν είναι διαθέσιμη κατά τη διάρκεια της φόρτισης"</string>
-    <string name="battery_detail_switch_title" msgid="8763441006881907058">"Εξοικονόμηση μπαταρίας"</string>
+    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Η εξοικονόμηση μπαταρίας δεν είναι διαθέσιμη κατά τη διάρκεια της φόρτισης"</string>
+    <string name="battery_detail_switch_title" msgid="6285872470260795421">"Εξοικονόμηση μπαταρίας"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Μειώνει την απόδοση και τα δεδομένα παρασκηνίου"</string>
     <string name="keyboard_key_button_template" msgid="6230056639734377300">"Κουμπί <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="2243500072071305073">"Home"</string>

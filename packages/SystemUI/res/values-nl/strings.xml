@@ -34,14 +34,14 @@
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Meldingen"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"Batterij is bijna leeg"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> resterend"</string>
-    <string name="battery_low_percent_format_saver_started" msgid="6859235584035338833">"<xliff:g id="PERCENTAGE">%s</xliff:g> resterend. Batterijbesparing is ingeschakeld."</string>
+    <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"<xliff:g id="PERCENTAGE">%s</xliff:g> resterend. Batterijbesparing is ingeschakeld."</string>
     <string name="invalid_charger" msgid="4549105996740522523">"Opladen via USB niet ondersteund.\nGebruik alleen de bijgeleverde oplader."</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"Opladen via USB wordt niet ondersteund."</string>
     <string name="invalid_charger_text" msgid="5474997287953892710">"Gebruik alleen de bijgeleverde oplader."</string>
     <string name="battery_low_why" msgid="4553600287639198111">"Instellingen"</string>
-    <string name="battery_saver_confirmation_title" msgid="5299585433050361634">"Batterijbesparing inschakelen?"</string>
+    <string name="battery_saver_confirmation_title" msgid="2052100465684817154">"Batterijbesparing inschakelen?"</string>
     <string name="battery_saver_confirmation_ok" msgid="7507968430447930257">"Inschakelen"</string>
-    <string name="battery_saver_start_action" msgid="5576697451677486320">"Batterijbesparing inschakelen"</string>
+    <string name="battery_saver_start_action" msgid="8187820911065797519">"Batterijbesparing inschakelen"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Instellingen"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wifi"</string>
     <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"Scherm automatisch draaien"</string>
@@ -243,8 +243,6 @@
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Gegevens zijn onderbroken"</string>
     <string name="data_usage_disabled_dialog" msgid="4919541636934603816">"De datalimiet die je hebt ingesteld, is bereikt. Je gebruikt geen mobiele data meer.\n\nAls je hervat, kunnen er kosten voor datagebruik in rekening worden gebracht."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Hervatten"</string>
-    <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Geen internetverbinding"</string>
-    <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Verbonden via wifi"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Zoeken naar gps"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Locatie bepaald met gps"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"Locatieverzoeken actief"</string>
@@ -401,9 +399,9 @@
     <string name="user_remove_user_title" msgid="4681256956076895559">"Gebruiker verwijderen?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"Alle apps en gegevens van deze gebruiker worden verwijderd."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"Verwijderen"</string>
-    <string name="battery_saver_notification_title" msgid="237918726750955859">"Batterijbesparing is ingeschakeld"</string>
+    <string name="battery_saver_notification_title" msgid="8614079794522291840">"Batterijbesparing aan"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Vermindert de prestaties en achtergrondgegevens"</string>
-    <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Batterijbesparing uitschakelen"</string>
+    <string name="battery_saver_notification_action_text" msgid="132118784269455533">"Batterijbesparing uitschakelen"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> gaat alles vastleggen dat wordt weergegeven op je scherm."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Niet opnieuw weergeven"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Alles wissen"</string>
@@ -582,8 +580,8 @@
       <item quantity="one">%d minuut</item>
     </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"Accugebruik"</string>
-    <string name="battery_detail_charging_summary" msgid="4055327085770378335">"Batterijbesparing niet beschikbaar tijdens opladen"</string>
-    <string name="battery_detail_switch_title" msgid="8763441006881907058">"Batterijbesparing"</string>
+    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Batterijbesparing niet beschikbaar tijdens opladen"</string>
+    <string name="battery_detail_switch_title" msgid="6285872470260795421">"Batterijbesparing"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Vermindert de prestaties en achtergrondgegevens"</string>
     <string name="keyboard_key_button_template" msgid="6230056639734377300">"Knop <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="2243500072071305073">"Home"</string>
