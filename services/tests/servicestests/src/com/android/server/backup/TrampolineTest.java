@@ -559,6 +559,24 @@ public class TrampolineTest {
     }
 
     @Test
+    public void describeTransport_calledBeforeInitialize_ignored() throws RemoteException {
+        mTrampoline.updateTransportAttributes(TRANSPORT_COMPONENT_NAME, TRANSPORT_NAME, null,
+                "Transport Destination", null, "Data Management");
+        verifyNoMoreInteractions(mBackupManagerServiceMock);
+    }
+
+    @Test
+    public void describeTransport_forwarded() throws RemoteException {
+        when(mBackupManagerServiceMock.getTransportWhitelist()).thenReturn(TRANSPORTS);
+
+        mTrampoline.initialize(UserHandle.USER_SYSTEM);
+        mTrampoline.updateTransportAttributes(TRANSPORT_COMPONENT_NAME, TRANSPORT_NAME, null,
+                "Transport Destination", null, "Data Management");
+        verify(mBackupManagerServiceMock).updateTransportAttributes(TRANSPORT_COMPONENT_NAME,
+                TRANSPORT_NAME, null, "Transport Destination", null, "Data Management");
+    }
+
+    @Test
     public void selectBackupTransport_calledBeforeInitialize_ignored() throws RemoteException {
         mTrampoline.selectBackupTransport(TRANSPORT_NAME);
         verifyNoMoreInteractions(mBackupManagerServiceMock);

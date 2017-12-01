@@ -560,8 +560,8 @@ public class PerformBackupTask implements BackupRestoreTask {
                 }
                 backupManagerService.addBackupTrace("init required; rerunning");
                 try {
-                    final String name = backupManagerService.getTransportManager().getTransportName(
-                            mTransportClient);
+                    final String name = backupManagerService.getTransportManager()
+                            .getTransportName(mTransportClient.getTransportComponent());
                     if (name != null) {
                         backupManagerService.getPendingInits().add(name);
                     } else {

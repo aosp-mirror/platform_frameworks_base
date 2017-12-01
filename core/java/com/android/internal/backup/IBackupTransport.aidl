@@ -94,7 +94,7 @@ interface IBackupTransport {
      * "live" backup services without interfering with the live bookkeeping.  The
      * returned string should be a name that is expected to be unambiguous among all
      * available backup transports; the name of the class implementing the transport
-     * is a good choice.
+     * is a good choice.  This MUST be constant.
      *
      * @return A unique name, suitable for use as a file or directory name, that the
      *         Backup Manager could use to disambiguate state files associated with

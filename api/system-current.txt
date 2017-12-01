@@ -388,6 +388,7 @@ package android.app.backup {
     method public void selectBackupTransport(android.content.ComponentName, android.app.backup.SelectBackupTransportCallback);
     method public void setAutoRestore(boolean);
     method public void setBackupEnabled(boolean);
+    method public void updateTransportAttributes(android.content.ComponentName, java.lang.String, android.content.Intent, java.lang.String, android.content.Intent, java.lang.String);
     field public static final int ERROR_AGENT_FAILURE = -1003; // 0xfffffc15
     field public static final int ERROR_BACKUP_CANCELLED = -2003; // 0xfffff82d
     field public static final int ERROR_BACKUP_NOT_ALLOWED = -2001; // 0xfffff82f

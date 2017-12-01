@@ -120,6 +120,15 @@ public interface BackupManagerServiceInterface {
   // Report whether the backup mechanism is currently enabled
   boolean isBackupEnabled();
 
+  // Update the transport attributes
+  void updateTransportAttributes(
+          ComponentName transportComponent,
+          String name,
+          Intent configurationIntent,
+          String currentDestinationString,
+          Intent dataManagementIntent,
+          String dataManagementLabel);
+
   // Report the name of the currently active transport
   String getCurrentTransport();
 

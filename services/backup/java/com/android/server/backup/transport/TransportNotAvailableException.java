@@ -16,6 +16,8 @@
 
 package com.android.server.backup.transport;
 
+import android.util.AndroidException;
+
 import com.android.internal.backup.IBackupTransport;
 
 /**
@@ -25,7 +27,7 @@ import com.android.internal.backup.IBackupTransport;
  *
  * @see TransportClient#connectAsync(TransportConnectionListener, String)
  */
-public class TransportNotAvailableException extends Exception {
+public class TransportNotAvailableException extends AndroidException {
     TransportNotAvailableException() {
         super("Transport not available");
     }

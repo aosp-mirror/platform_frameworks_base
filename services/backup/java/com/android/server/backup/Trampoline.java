@@ -16,6 +16,7 @@
 
 package com.android.server.backup;
 
+import android.annotation.Nullable;
 import android.app.backup.BackupManager;
 import android.app.backup.IBackupManager;
 import android.app.backup.IBackupObserver;
@@ -31,7 +32,6 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
-import android.os.Looper;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
@@ -117,7 +117,7 @@ public class Trampoline extends IBackupManager.Stub {
     }
 
     protected BackupManagerServiceInterface createRefactoredBackupManagerService() {
-        return new RefactoredBackupManagerService(mContext, this, mHandlerThread);
+        return RefactoredBackupManagerService.create(mContext, this, mHandlerThread);
     }
 
     protected BackupManagerServiceInterface createBackupManagerService() {
@@ -375,6 +375,26 @@ public class Trampoline extends IBackupManager.Stub {
     public String[] getTransportWhitelist() {
         BackupManagerServiceInterface svc = mService;
         return (svc != null) ? svc.getTransportWhitelist() : null;
+    }
+
+    @Override
+    public void updateTransportAttributes(
+            ComponentName transportComponent,
+            String name,
+            @Nullable Intent configurationIntent,
+            String currentDestinationString,
+            @Nullable Intent dataManagementIntent,
+            String dataManagementLabel) {
+        BackupManagerServiceInterface svc = mService;
+        if (svc != null) {
+            svc.updateTransportAttributes(
+                    transportComponent,
+                    name,
+                    configurationIntent,
+                    currentDestinationString,
+                    dataManagementIntent,
+                    dataManagementLabel);
+        }
     }
 
     @Override

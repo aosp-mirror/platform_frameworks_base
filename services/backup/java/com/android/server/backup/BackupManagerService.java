@@ -61,7 +61,6 @@ import android.app.backup.IRestoreSession;
 import android.app.backup.ISelectBackupTransportCallback;
 import android.app.backup.RestoreDescription;
 import android.app.backup.RestoreSet;
-import android.app.backup.SelectBackupTransportCallback;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -10463,6 +10462,19 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
     public boolean isBackupEnabled() {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP, "isBackupEnabled");
         return mEnabled;    // no need to synchronize just to read it
+    }
+
+    @Override
+    public void updateTransportAttributes(
+            ComponentName transportComponent,
+            String name,
+            Intent configurationIntent,
+            String currentDestinationString,
+            Intent dataManagementIntent,
+            String dataManagementLabel) {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.BACKUP, "updateTransportAttributes");
+        Slog.e(TAG, "Unsupported operation");
     }
 
     // Report the name of the currently active transport
