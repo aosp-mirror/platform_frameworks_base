@@ -46,6 +46,10 @@ public:
     StatsService(const sp<Looper>& handlerLooper);
     virtual ~StatsService();
 
+    /** The anomaly alarm registered with AlarmManager won't be updated by less than this. */
+    // TODO: Consider making this configurable. And choose a good number.
+    const uint32_t MIN_DIFF_TO_UPDATE_REGISTERED_ALARM_SECS = 5;
+
     virtual status_t onTransact(uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags);
     virtual status_t dump(int fd, const Vector<String16>& args);
     virtual status_t command(FILE* in, FILE* out, FILE* err, Vector<String8>& args);

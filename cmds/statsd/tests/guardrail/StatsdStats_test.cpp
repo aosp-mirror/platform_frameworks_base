@@ -224,6 +224,21 @@ TEST(StatsdStatsTest, TestAtomLog) {
     EXPECT_TRUE(sensorAtomGood);
 }
 
+
+TEST(StatsdStatsTest, TestAnomalyMonitor) {
+    StatsdStats stats;
+    stats.noteRegisteredAnomalyAlarmChanged();
+    stats.noteRegisteredAnomalyAlarmChanged();
+
+    vector<uint8_t> output;
+    stats.dumpStats(&output, false);
+    StatsdStatsReport report;
+    bool good = report.ParseFromArray(&output[0], output.size());
+    EXPECT_TRUE(good);
+
+    EXPECT_EQ(2, report.anomaly_alarm_stats().alarms_registered());
+}
+
 TEST(StatsdStatsTest, TestTimestampThreshold) {
     StatsdStats stats;
     vector<int32_t> timestamps;

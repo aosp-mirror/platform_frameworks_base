@@ -46,6 +46,7 @@ const int FIELD_ID_CONDITION_STATS = 5;
 const int FIELD_ID_METRIC_STATS = 6;
 const int FIELD_ID_ATOM_STATS = 7;
 const int FIELD_ID_UIDMAP_STATS = 8;
+const int FIELD_ID_ANOMALY_ALARM_STATS = 9;
 
 const int FIELD_ID_MATCHER_STATS_NAME = 1;
 const int FIELD_ID_MATCHER_STATS_COUNT = 2;
@@ -58,6 +59,8 @@ const int FIELD_ID_METRIC_STATS_COUNT = 2;
 
 const int FIELD_ID_ATOM_STATS_TAG = 1;
 const int FIELD_ID_ATOM_STATS_COUNT = 2;
+
+const int FIELD_ID_ANOMALY_ALARMS_REGISTERED = 1;
 
 // TODO: add stats for pulled atoms.
 StatsdStats::StatsdStats() {
@@ -219,6 +222,11 @@ void StatsdStats::noteMatcherMatched(const ConfigKey& key, const string& name) {
     matcherStats[name]++;
 }
 
+void StatsdStats::noteRegisteredAnomalyAlarmChanged() {
+    lock_guard<std::mutex> lock(mLock);
+    mAnomalyAlarmRegisteredStats++;
+}
+
 void StatsdStats::noteAtomLogged(int atomId, int32_t timeSec) {
     lock_guard<std::mutex> lock(mLock);
 
@@ -246,6 +254,7 @@ void StatsdStats::resetInternalLocked() {
     mConditionStats.clear();
     mMetricsStats.clear();
     std::fill(mPushedAtomStats.begin(), mPushedAtomStats.end(), 0);
+    mAnomalyAlarmRegisteredStats = 0;
     mMatcherStats.clear();
     for (auto& config : mConfigStats) {
         config.second.clear_broadcast_sent_time_sec();
@@ -384,6 +393,15 @@ void StatsdStats::dumpStats(std::vector<uint8_t>* output, bool reset) {
 
             VLOG("Atom %lu->%d\n", (unsigned long)i, mPushedAtomStats[i]);
         }
+    }
+
+    if (mAnomalyAlarmRegisteredStats > 0) {
+        VLOG("********AnomalyAlarmStats stats***********");
+        long long token = proto.start(FIELD_TYPE_MESSAGE | FIELD_ID_ANOMALY_ALARM_STATS);
+        proto.write(FIELD_TYPE_INT32 | FIELD_ID_ANOMALY_ALARMS_REGISTERED,
+                    mAnomalyAlarmRegisteredStats);
+        proto.end(token);
+        VLOG("Anomaly alarm registrations: %d", mAnomalyAlarmRegisteredStats);
     }
 
     const int numBytes = mUidMapStats.ByteSize();

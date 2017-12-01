@@ -229,4 +229,9 @@ message StatsdStatsReport {
         optional int32 dropped_changes = 5;
     }
     optional UidMapStats uidmap_stats = 8;
+
+    message AnomalyAlarmStats {
+        optional int32 alarms_registered = 1;
+    }
+    optional AnomalyAlarmStats anomaly_alarm_stats = 9;
 }

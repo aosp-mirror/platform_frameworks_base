@@ -117,6 +117,11 @@ public:
     void noteAtomLogged(int atomId, int32_t timeSec);
 
     /**
+     * Report that statsd modified the anomaly alarm registered with StatsCompanionService.
+     */
+    void noteRegisteredAnomalyAlarmChanged();
+
+    /**
      * Records the number of snapshot and delta entries that are being dropped from the uid map.
      */
     void noteUidMapDropped(int snapshots, int deltas);
@@ -174,6 +179,10 @@ private:
     // This is a vector, not a map because it will be accessed A LOT -- for each stats log.
     std::vector<int> mPushedAtomStats;
 
+    // Stores the number of times statsd modified the anomaly alarm registered with
+    // StatsCompanionService.
+    int mAnomalyAlarmRegisteredStats = 0;
+
     // Stores how many times a matcher have been matched.
     std::map<const ConfigKey, std::map<const std::string, int>> mMatcherStats;
 
@@ -195,6 +204,7 @@ private:
     FRIEND_TEST(StatsdStatsTest, TestSubStats);
     FRIEND_TEST(StatsdStatsTest, TestAtomLog);
     FRIEND_TEST(StatsdStatsTest, TestTimestampThreshold);
+    FRIEND_TEST(StatsdStatsTest, TestAnomalyMonitor);
 };
 
 }  // namespace statsd
