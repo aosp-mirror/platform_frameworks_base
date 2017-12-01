@@ -66,12 +66,12 @@ TEST(SectionTest, HeaderSection) {
     args1.addSection(2);
     args2.setAll(true);
 
-    vector<int8_t> head1;
+    vector<uint8_t> head1;
     head1.push_back('a');
     head1.push_back('x');
     head1.push_back('e');
 
-    vector<int8_t> head2;
+    vector<uint8_t> head2;
     head2.push_back('p');
     head2.push_back('u');
     head2.push_back('p');

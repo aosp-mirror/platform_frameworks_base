@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#define LOG_TAG "incidentd"
+
 #include "io_util.h"
 
 #include <unistd.h>

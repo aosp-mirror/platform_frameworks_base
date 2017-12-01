@@ -141,7 +141,7 @@ TEST_F(ReporterTest, RunReportWithHeaders) {
     IncidentReportArgs args1, args2;
     args1.addSection(1);
     args2.addSection(2);
-    std::vector<int8_t> header {'a', 'b', 'c', 'd', 'e'};
+    std::vector<uint8_t> header {'a', 'b', 'c', 'd', 'e'};
     args2.addHeader(header);
     sp<ReportRequest> r1 = new ReportRequest(args1, l, tf.fd);
     sp<ReportRequest> r2 = new ReportRequest(args2, l, tf.fd);

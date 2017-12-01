@@ -18,8 +18,6 @@ syntax = "proto2";
 option java_multiple_files = true;
 option java_outer_classname = "IncidentProtoMetadata";
 
-import "frameworks/base/libs/incident/proto/android/privacy.proto";
-import "frameworks/base/libs/incident/proto/android/section.proto";
 import "frameworks/base/core/proto/android/os/cpufreq.proto";
 import "frameworks/base/core/proto/android/os/cpuinfo.proto";
 import "frameworks/base/core/proto/android/os/incidentheader.proto";
@@ -42,6 +40,8 @@ import "frameworks/base/core/proto/android/service/notification.proto";
 import "frameworks/base/core/proto/android/service/package.proto";
 import "frameworks/base/core/proto/android/service/print.proto";
 import "frameworks/base/core/proto/android/service/procstats.proto";
+import "frameworks/base/libs/incident/proto/android/privacy.proto";
+import "frameworks/base/libs/incident/proto/android/section.proto";
 
 package android.os;
 

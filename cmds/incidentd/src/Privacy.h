@@ -19,35 +19,46 @@
 
 #include <stdint.h>
 
-// This is the default value of DEST enum
-const uint8_t DEST_DEFAULT_VALUE = 1;
+// This is the default value of DEST enum, sync with privacy.proto
+const uint8_t DEST_UNSET = 255; // DEST_UNSET is not exposed to libincident
+const uint8_t DEST_DEFAULT_VALUE = DEST_UNSET;
 
 /*
- * In order not to depend on libprotobuf-cpp-full nor libplatformprotos in incidentd,
- * privacy options's data structure are explicitly redefined in this file.
+ * In order to NOT auto-generate large chuck of code by proto compiler in incidentd,
+ * privacy options's data structure are explicitly redefined here and
+ * the values are populated by incident_section_gen tool.
+ *
+ * Each proto field will have a Privacy when it is different from its parent, otherwise
+ * it uses its parent's tag. A message type will have an array of Privacy.
  */
 struct Privacy {
+    // The field number
     uint32_t field_id;
+
+    // The field type, see external/protobuf/src/google/protobuf/descriptor.h
     uint8_t type;
-    // ignore parent's privacy flags if children are set, NULL-terminated
+
+    // If children is null, it is a primitive field,
+    // otherwise it is a message field which could have overridden privacy tags here.
+    // This array is NULL-terminated.
     Privacy** children;
 
-    // the following fields are identitical to
-    // frameworks/base/libs/incident/proto/android/privacy.proto
+    // DESTINATION Enum in frameworks/base/libs/incident/proto/android/privacy.proto.
     uint8_t dest;
-    const char** patterns; // only set when type is string
-
-    bool IsMessageType() const;
-    bool IsStringType() const;
-    bool HasChildren() const;
-    uint64_t EncodedFieldId() const;
-
-    const Privacy* lookup(uint32_t fieldId) const;
+    // A list of regexp rules for stripping string fields in proto.
+    const char** patterns;
 };
+
+// Encode field id used by ProtoOutputStream.
+uint64_t encode_field_id(const Privacy* p);
+
+// Look up the child with given fieldId, if not found, return NULL.
+const Privacy* lookup(const Privacy* p, uint32_t fieldId);
 
 /**
  * PrivacySpec defines the request has what level of privacy authorization.
  * For example, a device without user consent should only be able to upload AUTOMATIC fields.
+ * DEST_UNSET are treated as DEST_EXPLICIT.
  */
 class PrivacySpec {
 public:
@@ -58,7 +69,10 @@ public:
 
     bool operator<(const PrivacySpec& other) const;
 
-    bool CheckPremission(const Privacy* privacy) const;
+    // check permission of a policy, if returns true, don't strip the data.
+    bool CheckPremission(const Privacy* privacy, const uint8_t defaultDest = DEST_DEFAULT_VALUE) const;
+
+    // if returns true, no data need to be stripped.
     bool RequireAll() const;
 };
 

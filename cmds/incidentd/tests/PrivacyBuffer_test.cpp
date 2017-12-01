@@ -12,26 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#define LOG_TAG "incidentd"
+
 #include "FdBuffer.h"
 #include "PrivacyBuffer.h"
 
 #include <android-base/file.h>
 #include <android-base/test_utils.h>
+#include <android/os/IncidentReportArgs.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <string.h>
 
 using namespace android;
 using namespace android::base;
+using namespace android::os;
 using namespace std;
 using ::testing::StrEq;
 using ::testing::Test;
 using ::testing::internal::CaptureStdout;
 using ::testing::internal::GetCapturedStdout;
-
-const uint8_t LOCAL = 0;
-const uint8_t EXPLICIT = 1;
-const uint8_t AUTOMATIC = 2;
 
 const uint8_t OTHER_TYPE = 1;
 const uint8_t STRING_TYPE = 9;
@@ -109,18 +109,8 @@ public:
         p->field_id = field_id;
         p->type = MESSAGE_TYPE;
         p->children = children;
-        p->dest = EXPLICIT;
+        p->dest = DEST_DEFAULT_VALUE;
         p->patterns = NULL;
-        return p;
-    }
-
-    Privacy* create_string_privacy(uint32_t field_id, uint8_t dest, const char** patterns) {
-        Privacy* p = new_uninit_privacy();
-        p->field_id = field_id;
-        p->type = STRING_TYPE;
-        p->children = NULL;
-        p->dest = dest;
-        p->patterns = patterns;
         return p;
     }
 
@@ -138,103 +128,103 @@ private:
     }
 };
 
-TEST_F(PrivacyBufferTest, NullFieldPolicy) {
+TEST_F(PrivacyBufferTest, NullPolicy) {
     writeToFdBuffer(STRING_FIELD_0);
-    assertStrip(EXPLICIT, STRING_FIELD_0, create_string_privacy(300, AUTOMATIC, NULL));
+    assertStrip(DEST_EXPLICIT, STRING_FIELD_0, NULL);
 }
 
-TEST_F(PrivacyBufferTest, StripSpecNotAllowed) {
+TEST_F(PrivacyBufferTest, StripUnsetField) {
     writeToFdBuffer(STRING_FIELD_0);
-    assertStripByFields(AUTOMATIC, "", 1, create_privacy(0, STRING_TYPE, EXPLICIT));
+    assertStripByFields(DEST_AUTOMATIC, "", 1, create_privacy(0, STRING_TYPE, DEST_UNSET));
 }
 
 TEST_F(PrivacyBufferTest, StripVarintField) {
     writeToFdBuffer(VARINT_FIELD_1);
-    assertStripByFields(EXPLICIT, "", 1, create_privacy(1, OTHER_TYPE, LOCAL));
+    assertStripByFields(DEST_EXPLICIT, "", 1, create_privacy(1, OTHER_TYPE, DEST_LOCAL));
 }
 
 TEST_F(PrivacyBufferTest, StripLengthDelimitedField_String) {
     writeToFdBuffer(STRING_FIELD_2);
-    assertStripByFields(EXPLICIT, "", 1, create_privacy(2, STRING_TYPE, LOCAL));
+    assertStripByFields(DEST_EXPLICIT, "", 1, create_privacy(2, STRING_TYPE, DEST_LOCAL));
 }
 
 TEST_F(PrivacyBufferTest, StripFixed64Field) {
     writeToFdBuffer(FIX64_FIELD_3);
-    assertStripByFields(EXPLICIT, "", 1, create_privacy(3, OTHER_TYPE, LOCAL));
+    assertStripByFields(DEST_EXPLICIT, "", 1, create_privacy(3, OTHER_TYPE, DEST_LOCAL));
 }
 
 TEST_F(PrivacyBufferTest, StripFixed32Field) {
     writeToFdBuffer(FIX32_FIELD_4);
-    assertStripByFields(EXPLICIT, "", 1, create_privacy(4, OTHER_TYPE, LOCAL));
+    assertStripByFields(DEST_EXPLICIT, "", 1, create_privacy(4, OTHER_TYPE, DEST_LOCAL));
 }
 
 TEST_F(PrivacyBufferTest, StripLengthDelimitedField_Message) {
     writeToFdBuffer(MESSAGE_FIELD_5);
-    assertStripByFields(EXPLICIT, "", 1, create_privacy(5, MESSAGE_TYPE, LOCAL));
+    assertStripByFields(DEST_EXPLICIT, "", 1, create_privacy(5, MESSAGE_TYPE, DEST_LOCAL));
 }
 
 TEST_F(PrivacyBufferTest, NoStripVarintField) {
     writeToFdBuffer(VARINT_FIELD_1);
-    assertStripByFields(EXPLICIT, VARINT_FIELD_1, 1, create_privacy(1, OTHER_TYPE, AUTOMATIC));
+    assertStripByFields(DEST_EXPLICIT, VARINT_FIELD_1, 1, create_privacy(1, OTHER_TYPE, DEST_AUTOMATIC));
 }
 
 TEST_F(PrivacyBufferTest, NoStripLengthDelimitedField_String) {
     writeToFdBuffer(STRING_FIELD_2);
-    assertStripByFields(EXPLICIT, STRING_FIELD_2, 1, create_privacy(2, STRING_TYPE, AUTOMATIC));
+    assertStripByFields(DEST_EXPLICIT, STRING_FIELD_2, 1, create_privacy(2, STRING_TYPE, DEST_AUTOMATIC));
 }
 
 TEST_F(PrivacyBufferTest, NoStripFixed64Field) {
     writeToFdBuffer(FIX64_FIELD_3);
-    assertStripByFields(EXPLICIT, FIX64_FIELD_3, 1, create_privacy(3, OTHER_TYPE, AUTOMATIC));
+    assertStripByFields(DEST_EXPLICIT, FIX64_FIELD_3, 1, create_privacy(3, OTHER_TYPE, DEST_AUTOMATIC));
 }
 
 TEST_F(PrivacyBufferTest, NoStripFixed32Field) {
     writeToFdBuffer(FIX32_FIELD_4);
-    assertStripByFields(EXPLICIT, FIX32_FIELD_4, 1, create_privacy(4, OTHER_TYPE, AUTOMATIC));
+    assertStripByFields(DEST_EXPLICIT, FIX32_FIELD_4, 1, create_privacy(4, OTHER_TYPE, DEST_AUTOMATIC));
 }
 
 TEST_F(PrivacyBufferTest, NoStripLengthDelimitedField_Message) {
     writeToFdBuffer(MESSAGE_FIELD_5);
-    assertStripByFields(EXPLICIT, MESSAGE_FIELD_5, 1, create_privacy(5, MESSAGE_TYPE, AUTOMATIC));
+    assertStripByFields(DEST_EXPLICIT, MESSAGE_FIELD_5, 1, create_privacy(5, MESSAGE_TYPE, DEST_AUTOMATIC));
 }
 
 TEST_F(PrivacyBufferTest, StripVarintAndString) {
     writeToFdBuffer(STRING_FIELD_0 + VARINT_FIELD_1 + STRING_FIELD_2
             + FIX64_FIELD_3 + FIX32_FIELD_4);
     string expected = STRING_FIELD_0 + FIX64_FIELD_3 + FIX32_FIELD_4;
-    assertStripByFields(EXPLICIT, expected, 2,
-            create_privacy(1, OTHER_TYPE, LOCAL), create_privacy(2, STRING_TYPE, LOCAL));
+    assertStripByFields(DEST_EXPLICIT, expected, 2,
+            create_privacy(1, OTHER_TYPE, DEST_LOCAL), create_privacy(2, STRING_TYPE, DEST_LOCAL));
 }
 
 TEST_F(PrivacyBufferTest, StripVarintAndFixed64) {
     writeToFdBuffer(STRING_FIELD_0 + VARINT_FIELD_1 + STRING_FIELD_2
             + FIX64_FIELD_3 + FIX32_FIELD_4);
     string expected = STRING_FIELD_0 + STRING_FIELD_2 + FIX32_FIELD_4;
-    assertStripByFields(EXPLICIT, expected, 2,
-            create_privacy(1, OTHER_TYPE, LOCAL), create_privacy(3, OTHER_TYPE, LOCAL));
+    assertStripByFields(DEST_EXPLICIT, expected, 2,
+            create_privacy(1, OTHER_TYPE, DEST_LOCAL), create_privacy(3, OTHER_TYPE, DEST_LOCAL));
 }
 
 TEST_F(PrivacyBufferTest, StripVarintInNestedMessage) {
     writeToFdBuffer(STRING_FIELD_0 + MESSAGE_FIELD_5);
-    Privacy* list[] = { create_privacy(1, OTHER_TYPE, LOCAL), NULL };
+    Privacy* list[] = { create_privacy(1, OTHER_TYPE, DEST_LOCAL), NULL };
     string expected = STRING_FIELD_0 + "\x2a\xd" + STRING_FIELD_2;
-    assertStripByFields(EXPLICIT, expected, 1, create_message_privacy(5, list));
+    assertStripByFields(DEST_EXPLICIT, expected, 1, create_message_privacy(5, list));
 }
 
 TEST_F(PrivacyBufferTest, StripFix64AndVarintInNestedMessage) {
     writeToFdBuffer(STRING_FIELD_0 + FIX64_FIELD_3 + MESSAGE_FIELD_5);
-    Privacy* list[] = { create_privacy(1, OTHER_TYPE, LOCAL), NULL };
+    Privacy* list[] = { create_privacy(1, OTHER_TYPE, DEST_LOCAL), NULL };
     string expected = STRING_FIELD_0 + "\x2a\xd" + STRING_FIELD_2;
-    assertStripByFields(EXPLICIT, expected, 2, create_privacy(3, OTHER_TYPE, LOCAL), create_message_privacy(5, list));
+    assertStripByFields(DEST_EXPLICIT, expected, 2, create_privacy(3, OTHER_TYPE, DEST_LOCAL), create_message_privacy(5, list));
 }
 
 TEST_F(PrivacyBufferTest, ClearAndStrip) {
     string data = STRING_FIELD_0 + VARINT_FIELD_1;
     writeToFdBuffer(data);
-    Privacy* list[] = { create_privacy(1, OTHER_TYPE, LOCAL), NULL };
+    Privacy* list[] = { create_privacy(1, OTHER_TYPE, DEST_LOCAL), NULL };
     EncodedBuffer::iterator bufData = buffer.data();
     PrivacyBuffer privacyBuf(create_message_privacy(300, list), bufData);
-    PrivacySpec spec1(EXPLICIT), spec2(LOCAL);
+    PrivacySpec spec1(DEST_EXPLICIT), spec2(DEST_LOCAL);
 
     ASSERT_EQ(privacyBuf.strip(spec1), NO_ERROR);
     assertBuffer(privacyBuf, STRING_FIELD_0);
@@ -244,7 +234,7 @@ TEST_F(PrivacyBufferTest, ClearAndStrip) {
 
 TEST_F(PrivacyBufferTest, BadDataInFdBuffer) {
     writeToFdBuffer("iambaddata");
-    Privacy* list[] = { create_privacy(4, OTHER_TYPE, AUTOMATIC), NULL };
+    Privacy* list[] = { create_privacy(4, OTHER_TYPE, DEST_AUTOMATIC), NULL };
     EncodedBuffer::iterator bufData = buffer.data();
     PrivacyBuffer privacyBuf(create_message_privacy(300, list), bufData);
     PrivacySpec spec;
@@ -253,7 +243,7 @@ TEST_F(PrivacyBufferTest, BadDataInFdBuffer) {
 
 TEST_F(PrivacyBufferTest, BadDataInNestedMessage) {
     writeToFdBuffer(STRING_FIELD_0 + MESSAGE_FIELD_5 + "aoeoe");
-    Privacy* list[] = { create_privacy(1, OTHER_TYPE, LOCAL), NULL };
+    Privacy* list[] = { create_privacy(1, OTHER_TYPE, DEST_LOCAL), NULL };
     Privacy* field5[] = { create_message_privacy(5, list), NULL };
     EncodedBuffer::iterator bufData = buffer.data();
     PrivacyBuffer privacyBuf(create_message_privacy(300, field5), bufData);
@@ -265,8 +255,17 @@ TEST_F(PrivacyBufferTest, SelfRecursionMessage) {
     string input = "\x2a\"" + VARINT_FIELD_1 + STRING_FIELD_2 + MESSAGE_FIELD_5;
     writeToFdBuffer(input);
     Privacy* field5 = create_message_privacy(5, NULL);
-    Privacy* list[] = { create_privacy(1, OTHER_TYPE, LOCAL), field5, NULL };
+    Privacy* list[] = { create_privacy(1, OTHER_TYPE, DEST_LOCAL), field5, NULL };
     field5->children = list;
     string expected = "\x2a\x1c" + STRING_FIELD_2 + "\x2a\xd" + STRING_FIELD_2;
-    assertStrip(EXPLICIT, expected, field5);
+    assertStrip(DEST_EXPLICIT, expected, field5);
+}
+
+TEST_F(PrivacyBufferTest, AutoMessage) {
+    writeToFdBuffer(STRING_FIELD_2 + MESSAGE_FIELD_5);
+    Privacy* list[] = { create_privacy(1, OTHER_TYPE, DEST_LOCAL), NULL };
+    Privacy* autoMsg = create_privacy(5, MESSAGE_TYPE, DEST_AUTOMATIC);
+    autoMsg->children = list;
+    string expected = "\x2a\xd" + STRING_FIELD_2;
+    assertStripByFields(DEST_AUTOMATIC, expected, 1, autoMsg);
 }
