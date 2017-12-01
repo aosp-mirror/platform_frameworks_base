@@ -50,6 +50,7 @@ import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA_OVERLAY;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
@@ -4331,15 +4332,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
     }
 
-    boolean usesRelativeZOrdering() {
-        if (!isChildWindow()) {
-            return false;
-        } else if (mAttrs.type == TYPE_APPLICATION_MEDIA_OVERLAY) {
-            return true;
-        } else {
-            return false;
-        }
-    }
 
     @Override
     boolean shouldMagnify() {
@@ -4413,5 +4405,29 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     @Override
     public boolean isDimming() {
         return mIsDimming;
+    }
+
+    // TODO(b/70040778): We should aim to eliminate the last user of TYPE_APPLICATION_MEDIA
+    // then we can drop all negative layering on the windowing side and simply inherit
+    // the default implementation here.
+    public void assignChildLayers(Transaction t) {
+        int layer = 1;
+        for (int i = 0; i < mChildren.size(); i++) {
+            final WindowState w = mChildren.get(i);
+
+            // APPLICATION_MEDIA_OVERLAY needs to go above APPLICATION_MEDIA
+            // while they both need to go below the main window. However the
+            // relative layering of multiple APPLICATION_MEDIA/OVERLAY has never
+            // been defined and so we can use static layers and leave it that way.
+            if (w.mAttrs.type == TYPE_APPLICATION_MEDIA) {
+                w.assignLayer(t, -2);
+            } else if (w.mAttrs.type == TYPE_APPLICATION_MEDIA_OVERLAY) {
+                w.assignLayer(t, -1);
+            } else {
+                w.assignLayer(t, layer);
+            }
+            w.assignChildLayers(t);
+            layer++;
+        }
     }
 }
