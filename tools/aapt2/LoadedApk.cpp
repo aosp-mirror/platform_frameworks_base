@@ -43,13 +43,16 @@ std::unique_ptr<LoadedApk> LoadedApk::LoadApkFromPath(const StringPiece& path, I
     return {};
   }
 
-  if (apk->FindFile("resources.arsc") != nullptr) {
-    return LoadBinaryApkFromFileCollection(source, std::move(apk), diag);
-  } else if (apk->FindFile("resources.pb") != nullptr) {
-    return LoadProtoApkFromFileCollection(source, std::move(apk), diag);
+  ApkFormat apkFormat = DetermineApkFormat(apk.get());
+  switch (apkFormat) {
+    case ApkFormat::kBinary:
+      return LoadBinaryApkFromFileCollection(source, std::move(apk), diag);
+    case ApkFormat::kProto:
+      return LoadProtoApkFromFileCollection(source, std::move(apk), diag);
+    default:
+      diag->Error(DiagMessage(path) << "could not identify format of APK");
+      return {};
   }
-  diag->Error(DiagMessage(path) << "no resource table found");
-  return {};
 }
 
 std::unique_ptr<LoadedApk> LoadedApk::LoadProtoApkFromFileCollection(
@@ -241,6 +244,43 @@ bool LoadedApk::WriteToArchive(IAaptContext* context, ResourceTable* split_table
     }
   }
   return true;
+}
+
+ApkFormat LoadedApk::DetermineApkFormat(io::IFileCollection* apk) {
+  if (apk->FindFile("resources.arsc") != nullptr) {
+    return ApkFormat::kBinary;
+  } else if (apk->FindFile("resources.pb") != nullptr) {
+    return ApkFormat::kProto;
+  } else {
+    // If the resource table is not present, attempt to read the manifest.
+    io::IFile* manifest_file = apk->FindFile(kAndroidManifestPath);
+    if (manifest_file == nullptr) {
+      return ApkFormat::kUnknown;
+    }
+
+    // First try in proto format.
+    std::unique_ptr<io::InputStream> manifest_in = manifest_file->OpenInputStream();
+    if (manifest_in != nullptr) {
+      pb::XmlNode pb_node;
+      io::ZeroCopyInputAdaptor manifest_adaptor(manifest_in.get());
+      if (pb_node.ParseFromZeroCopyStream(&manifest_adaptor)) {
+        return ApkFormat::kProto;
+      }
+    }
+
+    // If it didn't work, try in binary format.
+    std::unique_ptr<io::IData> manifest_data = manifest_file->OpenAsData();
+    if (manifest_data != nullptr) {
+      std::string error;
+      std::unique_ptr<xml::XmlResource> manifest =
+          xml::Inflate(manifest_data->data(), manifest_data->size(), &error);
+      if (manifest != nullptr) {
+        return ApkFormat::kBinary;
+      }
+    }
+
+    return ApkFormat::kUnknown;
+  }
 }
 
 }  // namespace aapt
