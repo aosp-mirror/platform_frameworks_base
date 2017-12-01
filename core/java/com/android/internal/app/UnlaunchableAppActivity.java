@@ -111,14 +111,7 @@ public class UnlaunchableAppActivity extends Activity
     @Override
     public void onClick(DialogInterface dialog, int which) {
         if (mReason == UNLAUNCHABLE_REASON_QUIET_MODE && which == DialogInterface.BUTTON_POSITIVE) {
-            if (UserManager.get(this).trySetQuietModeDisabled(mUserId, mTarget)
-                    && mTarget != null) {
-                try {
-                    startIntentSenderForResult(mTarget, -1, null, 0, 0, 0);
-                } catch (IntentSender.SendIntentException e) {
-                    /* ignore */
-                }
-            }
+            UserManager.get(this).trySetQuietModeDisabled(mUserId, mTarget);
         }
     }
 

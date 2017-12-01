@@ -24,6 +24,7 @@ import static android.app.ActivityManager.USER_OP_IS_CURRENT;
 import static android.app.ActivityManager.USER_OP_SUCCESS;
 import static android.os.Process.SHELL_UID;
 import static android.os.Process.SYSTEM_UID;
+
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_MU;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
@@ -37,6 +38,7 @@ import static com.android.server.am.UserState.STATE_RUNNING_UNLOCKED;
 import static com.android.server.am.UserState.STATE_RUNNING_UNLOCKING;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.AppGlobals;
@@ -830,6 +832,9 @@ class UserController implements Handler.Callback {
     private IStorageManager getStorageManager() {
         return IStorageManager.Stub.asInterface(ServiceManager.getService("mount"));
     }
+    boolean startUser(final int userId, final boolean foreground) {
+        return startUser(userId, foreground, null);
+    }
 
     /**
      * Start user, if its not already running.
@@ -860,7 +865,10 @@ class UserController implements Handler.Callback {
      * @param foreground true if user should be brought to the foreground
      * @return true if the user has been successfully started
      */
-    boolean startUser(final int userId, final boolean foreground) {
+    boolean startUser(
+            final int userId,
+            final boolean foreground,
+            @Nullable IProgressListener unlockListener) {
         if (mInjector.checkCallingPermission(INTERACT_ACROSS_USERS_FULL)
                 != PackageManager.PERMISSION_GRANTED) {
             String msg = "Permission Denial: switchUser() from pid="
@@ -918,6 +926,10 @@ class UserController implements Handler.Callback {
                 final Integer userIdInt = userId;
                 mUserLru.remove(userIdInt);
                 mUserLru.add(userIdInt);
+
+                if (unlockListener != null) {
+                    uss.mUnlockProgress.addListener(unlockListener);
+                }
             }
             if (updateUmState) {
                 mInjector.getUserManagerInternal().setUserState(userId, uss.state);

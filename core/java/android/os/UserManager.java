@@ -2115,7 +2115,7 @@ public class UserManager {
      */
     public void setQuietModeEnabled(@UserIdInt int userHandle, boolean enableQuietMode) {
         try {
-            mService.setQuietModeEnabled(userHandle, enableQuietMode);
+            mService.setQuietModeEnabled(userHandle, enableQuietMode, null);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -2142,10 +2142,14 @@ public class UserManager {
      * unlocking. If the user is already unlocked, we call through to {@link #setQuietModeEnabled}
      * directly.
      *
-     * @return true if the quiet mode was disabled immediately
+     * @param userHandle The user that is going to disable quiet mode.
+     * @param target The target to launch when the user is unlocked.
+     * @return {@code true} if quiet mode is disabled without showing confirm credentials screen,
+     *         {@code false} otherwise.
      * @hide
      */
-    public boolean trySetQuietModeDisabled(@UserIdInt int userHandle, IntentSender target) {
+    public boolean trySetQuietModeDisabled(
+            @UserIdInt int userHandle, @Nullable IntentSender target) {
         try {
             return mService.trySetQuietModeDisabled(userHandle, target);
         } catch (RemoteException re) {
