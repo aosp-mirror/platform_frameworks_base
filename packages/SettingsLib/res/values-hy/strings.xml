@@ -33,13 +33,13 @@
     <string name="wifi_check_password_try_again" msgid="516958988102584767">"Ստուգեք գաղտնաբառը և նորից փորձեք"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"Ընդգրկույթից դուրս է"</string>
     <string name="wifi_no_internet_no_reconnect" msgid="5724903347310541706">"Չի միանա ավտոմատ"</string>
-    <string name="wifi_no_internet" msgid="3880396223819116454">"Ինտերնետ կապ չկա"</string>
+    <string name="wifi_no_internet" msgid="4663834955626848401">"Ինտերնետ կապ չկա"</string>
     <string name="saved_network" msgid="4352716707126620811">"Պահել է՝ <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="connected_via_network_scorer" msgid="5713793306870815341">"Ավտոմատ կերպով կապակցվել է %1$s-ի միջոցով"</string>
     <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"Ավտոմատ կերպով միացել է ցանցի վարկանիշի ծառայության մատակարարի միջոցով"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Կապակցված է %1$s-ի միջոցով"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"Հասանելի է %1$s-ի միջոցով"</string>
-    <string name="wifi_connected_no_internet" msgid="3149853966840874992">"Կապակցված է առանց համացանցի"</string>
+    <string name="wifi_connected_no_internet" msgid="8202906332837777829">"Միացված է, սակայն ինտերնետ կապ չկա"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"Հասանելիության կետը ժամանակավորապես լիքն է"</string>
     <string name="connected_via_carrier" msgid="7583780074526041912">"Միացված է %1$s-ի միջոցով"</string>
     <string name="available_via_carrier" msgid="1469036129740799053">"Հասանելի է %1$s-ի միջոցով"</string>
@@ -82,9 +82,9 @@
     <string name="bluetooth_sap_profile_summary_connected" msgid="8561765057453083838">"Կապակցված է SAP-ին"</string>
     <string name="bluetooth_opp_profile_summary_not_connected" msgid="1267091356089086285">"Ֆայլերը փոխանցող սերվերի հետ կապ չկա"</string>
     <string name="bluetooth_hid_profile_summary_connected" msgid="3381760054215168689">"Միացված է մուտքային սարքին"</string>
-    <string name="bluetooth_pan_user_profile_summary_connected" msgid="4602294638909590612">"Կապակցված է սարքին` ինտերնետ մուտք գործելու համար"</string>
-    <string name="bluetooth_pan_nap_profile_summary_connected" msgid="1561383706411975199">"Տեղային ինտերնետ կապի տարածում սարքի հետ"</string>
-    <string name="bluetooth_pan_profile_summary_use_for" msgid="5664884523822068653">"Օգտագործել ինտերնետ մուտք գործելու համար"</string>
+    <string name="bluetooth_pan_user_profile_summary_connected" msgid="6436258151814414028">"Միացված է սարքին` ինտերնետ մտնելու համար"</string>
+    <string name="bluetooth_pan_nap_profile_summary_connected" msgid="1322694224800769308">"Տեղային ինտերնետ կապի տարածում սարքի հետ"</string>
+    <string name="bluetooth_pan_profile_summary_use_for" msgid="5736111170225304239">"Օգտագործել՝ ինտերնետ մուտք գործելու համար"</string>
     <string name="bluetooth_map_profile_summary_use_for" msgid="5154200119919927434">"Օգտագործել քարտեզի համար"</string>
     <string name="bluetooth_sap_profile_summary_use_for" msgid="7085362712786907993">"SIM քարտի օգտագործում"</string>
     <string name="bluetooth_a2dp_profile_summary_use_for" msgid="4630849022250168427">"Օգտագործել մեդիա աուդիոյի համար"</string>
@@ -216,7 +216,7 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Bluetooth աուդիո LDAC կոդեկ՝ նվագարկման որակ"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"Ընտրեք Bluetooth աուդիո LDAC կոդեկը՝\nնվագարկման որակ"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Հեռարձակում՝ <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
-    <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"Անհատական DNS սերվեր"</string>
+    <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"Անհատական DNS"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"Ընտրեք անհատական DNS սերվերի ռեժիմը"</string>
     <string name="private_dns_mode_off" msgid="8236575187318721684">"Անջատված է"</string>
     <string name="private_dns_mode_opportunistic" msgid="7608409735589131766">"Ճկուն"</string>
@@ -296,6 +296,8 @@
     <string name="force_msaa_summary" msgid="9123553203895817537">"Միացնել 4x MSAA-ը  OpenGL ES 2.0 ծրագրերում"</string>
     <string name="show_non_rect_clip" msgid="505954950474595172">"Կարգաբերել ոչ-ուղղանկյուն կտրվածքի գործողությունները"</string>
     <string name="track_frame_time" msgid="6146354853663863443">"GPU տվյալներ"</string>
+    <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"Միացնել GPU վրիպազերծման շերտերը"</string>
+    <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"Թույլատրել GPU վրիպազերծման շերտերի բեռնումը վրիպազերծման հավելվածների համար"</string>
     <string name="window_animation_scale_title" msgid="6162587588166114700">"Պատուհանի շարժապատկերի սանդղակ"</string>
     <string name="transition_animation_scale_title" msgid="387527540523595875">"Անցումային շարժական սանդղակ"</string>
     <string name="animator_duration_scale_title" msgid="3406722410819934083">"Շարժանկարի տևողության սանդղակ"</string>

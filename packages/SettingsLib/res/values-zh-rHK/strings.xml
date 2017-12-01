@@ -33,13 +33,13 @@
     <string name="wifi_check_password_try_again" msgid="516958988102584767">"請檢查密碼，然後再試一次"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"超出可用範圍"</string>
     <string name="wifi_no_internet_no_reconnect" msgid="5724903347310541706">"不會自動連線"</string>
-    <string name="wifi_no_internet" msgid="3880396223819116454">"無法偵測互聯網連線"</string>
+    <string name="wifi_no_internet" msgid="4663834955626848401">"無法連接互聯網"</string>
     <string name="saved_network" msgid="4352716707126620811">"由「<xliff:g id="NAME">%1$s</xliff:g>」儲存"</string>
     <string name="connected_via_network_scorer" msgid="5713793306870815341">"已透過 %1$s 自動連線"</string>
     <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"已透過網絡評分供應商自動連線"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"已透過 %1$s 連線"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"可透過 %1$s 連線"</string>
-    <string name="wifi_connected_no_internet" msgid="3149853966840874992">"已連線，沒有互聯網"</string>
+    <string name="wifi_connected_no_internet" msgid="8202906332837777829">"已連線，但沒有互聯網"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"存取點暫時已滿"</string>
     <string name="connected_via_carrier" msgid="7583780074526041912">"已透過 %1$s 連線"</string>
     <string name="available_via_carrier" msgid="1469036129740799053">"可透過 %1$s 連線"</string>
@@ -82,9 +82,9 @@
     <string name="bluetooth_sap_profile_summary_connected" msgid="8561765057453083838">"已連接 SAP"</string>
     <string name="bluetooth_opp_profile_summary_not_connected" msgid="1267091356089086285">"未連線至檔案傳輸伺服器"</string>
     <string name="bluetooth_hid_profile_summary_connected" msgid="3381760054215168689">"已連線至輸入裝置"</string>
-    <string name="bluetooth_pan_user_profile_summary_connected" msgid="4602294638909590612">"已連線至裝置並取得互聯網連線"</string>
-    <string name="bluetooth_pan_nap_profile_summary_connected" msgid="1561383706411975199">"與裝置分享本地互聯網連線"</string>
-    <string name="bluetooth_pan_profile_summary_use_for" msgid="5664884523822068653">"用於上網"</string>
+    <string name="bluetooth_pan_user_profile_summary_connected" msgid="6436258151814414028">"已連線至裝置並取得互聯網連線"</string>
+    <string name="bluetooth_pan_nap_profile_summary_connected" msgid="1322694224800769308">"與裝置分享本機互聯網連線"</string>
+    <string name="bluetooth_pan_profile_summary_use_for" msgid="5736111170225304239">"用於互聯網連線"</string>
     <string name="bluetooth_map_profile_summary_use_for" msgid="5154200119919927434">"用於地圖"</string>
     <string name="bluetooth_sap_profile_summary_use_for" msgid="7085362712786907993">"用來存取 SIM 卡"</string>
     <string name="bluetooth_a2dp_profile_summary_use_for" msgid="4630849022250168427">"用於媒體音效"</string>
@@ -99,6 +99,13 @@
     <string name="bluetooth_pairing_pin_error_message" msgid="8337234855188925274">"無法與 <xliff:g id="DEVICE_NAME">%1$s</xliff:g> 配對，因為 PIN 碼或密鑰不正確。"</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="7870998403045801381">"無法與 <xliff:g id="DEVICE_NAME">%1$s</xliff:g> 通訊。"</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="1648157108520832454">"「<xliff:g id="DEVICE_NAME">%1$s</xliff:g>」拒絕配對要求。"</string>
+    <string name="bluetooth_talkback_computer" msgid="4875089335641234463">"電腦"</string>
+    <string name="bluetooth_talkback_headset" msgid="5140152177885220949">"耳機"</string>
+    <string name="bluetooth_talkback_phone" msgid="4260255181240622896">"電話"</string>
+    <string name="bluetooth_talkback_imaging" msgid="551146170554589119">"映像設備"</string>
+    <string name="bluetooth_talkback_headphone" msgid="26580326066627664">"耳機"</string>
+    <string name="bluetooth_talkback_input_peripheral" msgid="5165842622743212268">"輸入周邊設備"</string>
+    <string name="bluetooth_talkback_bluetooth" msgid="5615463912185280812">"藍牙"</string>
     <string name="accessibility_wifi_off" msgid="1166761729660614716">"Wi-Fi 已關閉。"</string>
     <string name="accessibility_no_wifi" msgid="8834610636137374508">"Wi-Fi 連線已中斷。"</string>
     <string name="accessibility_wifi_one_bar" msgid="4869376278894301820">"Wi-Fi 訊號一格。"</string>
@@ -209,8 +216,12 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"藍牙音訊 LDAC 編解碼器：播放品質"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"選擇藍牙音訊 LDAC 編解碼器：\n播放品質"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"正在串流：<xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
-    <string name="dns_tls" msgid="6773814174391131955">"透過傳輸層安全性 (TLS) 執行網域名稱系統 (DNS)"</string>
-    <string name="dns_tls_summary" msgid="3692494150251071380">"如果啟用這個選項，即可在連接埠 853 上嘗試「透過傳輸層安全性 (TLS) 執行網域名稱系統 (DNS)」。"</string>
+    <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"不公開的網域名稱系統 (DNS)"</string>
+    <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"選取不公開的網域名稱系統 (DNS) 模式"</string>
+    <string name="private_dns_mode_off" msgid="8236575187318721684">"停用"</string>
+    <string name="private_dns_mode_opportunistic" msgid="7608409735589131766">"隨機"</string>
+    <string name="private_dns_mode_provider" msgid="8354935160639360804">"不公開的網域名稱系統 (DNS) 供應商主機名稱"</string>
+    <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"輸入網域名稱系統 (DNS) 供應商的主機名稱"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"顯示無線螢幕分享認證的選項"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"讓 Wi‑Fi 記錄功能升級，在 Wi‑Fi 選擇器中依每個 SSID RSSI 顯示 Wi‑Fi 詳細紀錄"</string>
     <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"啟用後，Wi-Fi 連線會在訊號不穩定的情況下更積極轉換成流動數據連線"</string>
@@ -285,6 +296,8 @@
     <string name="force_msaa_summary" msgid="9123553203895817537">"在 OpenGL ES 2.0 應用程式中啟用 4x MSAA"</string>
     <string name="show_non_rect_clip" msgid="505954950474595172">"對非矩形裁剪操作進行偵錯"</string>
     <string name="track_frame_time" msgid="6146354853663863443">"分析 GPU 轉譯"</string>
+    <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"啟用 GPU 偵錯圖層"</string>
+    <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"允許為偵錯應用程式載入 GPU 偵錯圖層"</string>
     <string name="window_animation_scale_title" msgid="6162587588166114700">"視窗動畫比例"</string>
     <string name="transition_animation_scale_title" msgid="387527540523595875">"轉場動畫比例"</string>
     <string name="animator_duration_scale_title" msgid="3406722410819934083">"Animator 片長比例"</string>

@@ -33,13 +33,13 @@
     <string name="wifi_check_password_try_again" msgid="516958988102584767">"పాస్‌వర్డ్‌ను తనిఖీ చేసి, మళ్లీ ప్రయత్నించండి"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"పరిధిలో లేదు"</string>
     <string name="wifi_no_internet_no_reconnect" msgid="5724903347310541706">"స్వయంచాలకంగా కనెక్ట్ కాదు"</string>
-    <string name="wifi_no_internet" msgid="3880396223819116454">"ఇంటర్నెట్ యాక్సెస్ లేదు"</string>
+    <string name="wifi_no_internet" msgid="4663834955626848401">"ఇంటర్నెట్ యాక్సెస్ లేదు"</string>
     <string name="saved_network" msgid="4352716707126620811">"<xliff:g id="NAME">%1$s</xliff:g> ద్వారా సేవ్ చేయబడింది"</string>
     <string name="connected_via_network_scorer" msgid="5713793306870815341">"%1$s ద్వారా స్వయంచాలకంగా కనెక్ట్ చేయబడింది"</string>
     <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"నెట్‌వర్క్ రేటింగ్ ప్రదాత ద్వారా స్వయంచాలకంగా కనెక్ట్ చేయబడింది"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"%1$s ద్వారా కనెక్ట్ చేయబడింది"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"%1$s ద్వారా అందుబాటులో ఉంది"</string>
-    <string name="wifi_connected_no_internet" msgid="3149853966840874992">"కనెక్ట్ చేయబడింది, ఇంటర్నెట్ లేదు"</string>
+    <string name="wifi_connected_no_internet" msgid="8202906332837777829">"కనెక్ట్ చేయబడింది, ఇంటర్నెట్ లేదు"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"యాక్సెస్ పాయింట్ తాత్కాలికంగా నిండుకుంది"</string>
     <string name="connected_via_carrier" msgid="7583780074526041912">"%1$s ద్వారా కనెక్ట్ చేయబడింది"</string>
     <string name="available_via_carrier" msgid="1469036129740799053">"%1$s ద్వారా అందుబాటులో ఉంది"</string>
@@ -82,9 +82,9 @@
     <string name="bluetooth_sap_profile_summary_connected" msgid="8561765057453083838">"SAPకి కనెక్ట్ చేయబడింది"</string>
     <string name="bluetooth_opp_profile_summary_not_connected" msgid="1267091356089086285">"ఫైల్ బదిలీ సర్వర్‌కు కనెక్ట్ చేయబడలేదు"</string>
     <string name="bluetooth_hid_profile_summary_connected" msgid="3381760054215168689">"ఇన్‌పుట్ పరికరానికి కనెక్ట్ చేయబడింది"</string>
-    <string name="bluetooth_pan_user_profile_summary_connected" msgid="4602294638909590612">"ఇంటర్నెట్ యాక్సెస్ కోసం పరికరానికి కనెక్ట్ చేయబడింది"</string>
-    <string name="bluetooth_pan_nap_profile_summary_connected" msgid="1561383706411975199">"స్థానిక ఇంటర్నెట్ కనెక్షన్‌ను పరికరంతో భాగస్వామ్యం చేయడం"</string>
-    <string name="bluetooth_pan_profile_summary_use_for" msgid="5664884523822068653">"ఇంటర్నెట్ యాక్సెస్ కోసం ఉపయోగించు"</string>
+    <string name="bluetooth_pan_user_profile_summary_connected" msgid="6436258151814414028">"ఇంటర్నెట్ యాక్సెస్ కోసం పరికరానికి కనెక్ట్ చేయబడింది"</string>
+    <string name="bluetooth_pan_nap_profile_summary_connected" msgid="1322694224800769308">"స్థానిక ఇంటర్నెట్ కనెక్షన్‌ను పరికరంతో షేర్ చేయడం"</string>
+    <string name="bluetooth_pan_profile_summary_use_for" msgid="5736111170225304239">"ఇంటర్నెట్ యాక్సెస్ కోసం ఉపయోగించు"</string>
     <string name="bluetooth_map_profile_summary_use_for" msgid="5154200119919927434">"మ్యాప్ కోసం ఉపయోగించు"</string>
     <string name="bluetooth_sap_profile_summary_use_for" msgid="7085362712786907993">"SIM యాక్సెస్ కోసం ఉపయోగించబడుతుంది"</string>
     <string name="bluetooth_a2dp_profile_summary_use_for" msgid="4630849022250168427">"మీడియా ఆడియో కోసం ఉపయోగించు"</string>
@@ -296,6 +296,8 @@
     <string name="force_msaa_summary" msgid="9123553203895817537">"OpenGL ES 2.0 అనువర్తనాల్లో 4x MSAAను ప్రారంభించండి"</string>
     <string name="show_non_rect_clip" msgid="505954950474595172">"దీర్ఘ చతురస్రం కాని క్లిప్ చర్యలను డీబగ్ చేయండి"</string>
     <string name="track_frame_time" msgid="6146354853663863443">"ప్రొఫైల్ GPU భాషాంతరీకరణ"</string>
+    <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"GPU డీబగ్ లేయర్‌లను ప్రారంభించండి"</string>
+    <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"డీబగ్ యాప్‌ల కోసం GPU డీబగ్ లేయర్‌లను లోడ్ చేయడాన్ని అనుమతించండి"</string>
     <string name="window_animation_scale_title" msgid="6162587588166114700">"విండో యానిమేషన్ ప్రమాణం"</string>
     <string name="transition_animation_scale_title" msgid="387527540523595875">"పరివర్తన యానిమేషన్ ప్రమాణం"</string>
     <string name="animator_duration_scale_title" msgid="3406722410819934083">"యానిమేటర్ వ్యవధి ప్రమాణం"</string>

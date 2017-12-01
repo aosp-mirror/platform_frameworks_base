@@ -33,15 +33,13 @@
     <string name="wifi_check_password_try_again" msgid="516958988102584767">"စကားဝှက်ကို စစ်ဆေးပြီး ထပ်လုပ်ကြည့်ပါ"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"စက်ကွင်းထဲတွင် မဟုတ်ပါ"</string>
     <string name="wifi_no_internet_no_reconnect" msgid="5724903347310541706">"အလိုအလျောက်ချိတ်ဆက်မည်မဟုတ်ပါ"</string>
-    <!-- no translation found for wifi_no_internet (4663834955626848401) -->
-    <skip />
+    <string name="wifi_no_internet" msgid="4663834955626848401">"အင်တာနက် ချိတ်ဆက်မှု မရှိပါ"</string>
     <string name="saved_network" msgid="4352716707126620811">"<xliff:g id="NAME">%1$s</xliff:g> မှသိမ်းဆည်းခဲ့သည်"</string>
     <string name="connected_via_network_scorer" msgid="5713793306870815341">"%1$s မှတစ်ဆင့် အလိုအလျောက် ချိတ်ဆက်ထားပါသည်"</string>
     <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"ကွန်ရက်အဆင့်သတ်မှတ်ပေးသူ မှတစ်ဆင့် အလိုအလျောက် ချိတ်ဆက်ထားပါသည်"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"%1$s မှတစ်ဆင့် ချိတ်ဆက်ထားသည်"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"%1$s မှတစ်ဆင့်ရနိုင်သည်"</string>
-    <!-- no translation found for wifi_connected_no_internet (8202906332837777829) -->
-    <skip />
+    <string name="wifi_connected_no_internet" msgid="8202906332837777829">"ချိတ်ဆက်ထားသည်၊ အင်တာနက်မရှိ"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"ကွန်ရက်ချိတ်ဆက်မှု ယာယီပြည့်နေသည်"</string>
     <string name="connected_via_carrier" msgid="7583780074526041912">"%1$s မှတစ်ဆင့် ချိတ်ဆက်ထားသည်"</string>
     <string name="available_via_carrier" msgid="1469036129740799053">"%1$s မှတစ်ဆင့် ရနိုင်သည်"</string>
@@ -86,8 +84,7 @@
     <string name="bluetooth_hid_profile_summary_connected" msgid="3381760054215168689">"ထည့်သွင်းထားသောစက်ကို ချိတ်ဆက်မည်"</string>
     <string name="bluetooth_pan_user_profile_summary_connected" msgid="6436258151814414028">"အင်တာနက် ချိတ်ထားသည်"</string>
     <string name="bluetooth_pan_nap_profile_summary_connected" msgid="1322694224800769308">"စက်နှင့် အင်တာနက်မျှဝေရန်"</string>
-    <!-- no translation found for bluetooth_pan_profile_summary_use_for (5736111170225304239) -->
-    <skip />
+    <string name="bluetooth_pan_profile_summary_use_for" msgid="5736111170225304239">"အင်တာနက်ချိတ်ဆက်ရန် အသုံးပြုသည်"</string>
     <string name="bluetooth_map_profile_summary_use_for" msgid="5154200119919927434">"မြေပုံအတွက်သုံးရန်"</string>
     <string name="bluetooth_sap_profile_summary_use_for" msgid="7085362712786907993">"SIM အသုံးပြုမှုအတွက် အသုံးပြုမည်"</string>
     <string name="bluetooth_a2dp_profile_summary_use_for" msgid="4630849022250168427">"မီဒီယာအသံအတွက်အသုံးပြုရန်"</string>

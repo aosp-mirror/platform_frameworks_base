@@ -231,7 +231,7 @@
   </string-array>
   <string-array name="debug_hw_overdraw_entries">
     <item msgid="8190572633763871652">"Isključeno"</item>
-    <item msgid="7688197031296835369">"Prikaži overdraw područja"</item>
+    <item msgid="7688197031296835369">"Prikaži područja preklapanja"</item>
     <item msgid="2290859360633824369">"Prikaži područja za Deuteranomaly"</item>
   </string-array>
   <string-array name="debug_hw_renderer_entries">

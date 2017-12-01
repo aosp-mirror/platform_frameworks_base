@@ -33,13 +33,13 @@
     <string name="wifi_check_password_try_again" msgid="516958988102584767">"Comproba o contrasinal e téntao de novo"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"Non está dentro da zona de cobertura"</string>
     <string name="wifi_no_internet_no_reconnect" msgid="5724903347310541706">"Non se conectará automaticamente"</string>
-    <string name="wifi_no_internet" msgid="3880396223819116454">"Non hai acceso a Internet"</string>
+    <string name="wifi_no_internet" msgid="4663834955626848401">"Sen acceso a Internet"</string>
     <string name="saved_network" msgid="4352716707126620811">"Redes gardadas por <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="connected_via_network_scorer" msgid="5713793306870815341">"Conectouse automaticamente a través de %1$s"</string>
     <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"Conectada automaticamente a través dun provedor de valoración de rede"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Conectado a través de %1$s"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"Dispoñible a través de %1$s"</string>
-    <string name="wifi_connected_no_internet" msgid="3149853966840874992">"Conectado, pero sen Internet"</string>
+    <string name="wifi_connected_no_internet" msgid="8202906332837777829">"Conexión sen Internet"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"O punto de acceso está temporalmente cheo"</string>
     <string name="connected_via_carrier" msgid="7583780074526041912">"Conectado a través de %1$s"</string>
     <string name="available_via_carrier" msgid="1469036129740799053">"Dispoñible a través de %1$s"</string>
@@ -82,9 +82,9 @@
     <string name="bluetooth_sap_profile_summary_connected" msgid="8561765057453083838">"Conectado a SAP"</string>
     <string name="bluetooth_opp_profile_summary_not_connected" msgid="1267091356089086285">"Non conectado co servidor de transferencia de ficheiros"</string>
     <string name="bluetooth_hid_profile_summary_connected" msgid="3381760054215168689">"Conectado ao dispositivo de entrada"</string>
-    <string name="bluetooth_pan_user_profile_summary_connected" msgid="4602294638909590612">"Conectado ao dispositivo para acceder a Internet"</string>
-    <string name="bluetooth_pan_nap_profile_summary_connected" msgid="1561383706411975199">"Compartindo conexión a Internet co dispositivo"</string>
-    <string name="bluetooth_pan_profile_summary_use_for" msgid="5664884523822068653">"Utilízase para o acceso a Internet"</string>
+    <string name="bluetooth_pan_user_profile_summary_connected" msgid="6436258151814414028">"Conectado ao dispositivo para acceder a Internet"</string>
+    <string name="bluetooth_pan_nap_profile_summary_connected" msgid="1322694224800769308">"Compartindo conexión local a Internet co dispositivo"</string>
+    <string name="bluetooth_pan_profile_summary_use_for" msgid="5736111170225304239">"Utiliza o perfil para o acceso a Internet"</string>
     <string name="bluetooth_map_profile_summary_use_for" msgid="5154200119919927434">"Usar para o mapa"</string>
     <string name="bluetooth_sap_profile_summary_use_for" msgid="7085362712786907993">"Usar para acceso á SIM"</string>
     <string name="bluetooth_a2dp_profile_summary_use_for" msgid="4630849022250168427">"Utilízase para audio multimedia"</string>
@@ -296,6 +296,8 @@
     <string name="force_msaa_summary" msgid="9123553203895817537">"Activar MSAA 4x en aplicacións OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="505954950474595172">"Depurar operacións recorte non rectangulares"</string>
     <string name="track_frame_time" msgid="6146354853663863443">"Perfil procesamento GPU"</string>
+    <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"Activar depuración da GPU"</string>
+    <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"Permite capas da GPU para aplicación de depuración"</string>
     <string name="window_animation_scale_title" msgid="6162587588166114700">"Escala animación da ventá"</string>
     <string name="transition_animation_scale_title" msgid="387527540523595875">"Escala anim. transición"</string>
     <string name="animator_duration_scale_title" msgid="3406722410819934083">"Escala duración animador"</string>
