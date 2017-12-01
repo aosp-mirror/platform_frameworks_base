@@ -30,8 +30,4 @@ cc_library_shared {
         "libbinder",
         "libkeystore_parcelables",
     ],
-    vendor_available: true,
-    vndk: {
-        enabled: true,
-    },
 }
