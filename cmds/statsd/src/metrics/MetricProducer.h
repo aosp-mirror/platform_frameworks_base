@@ -93,6 +93,10 @@ public:
         return byteSizeLocked();
     }
 
+    virtual sp<AnomalyTracker> createAnomalyTracker(const Alert &alert) {
+        return new AnomalyTracker(alert);
+    }
+
     void addAnomalyTracker(sp<AnomalyTracker> tracker) {
         std::lock_guard<std::mutex> lock(mMutex);
         mAnomalyTrackers.push_back(tracker);

@@ -45,6 +45,8 @@ public:
 
     virtual ~DurationMetricProducer();
 
+    virtual sp<AnomalyTracker> createAnomalyTracker(const Alert &alert) override;
+
     void finish() override;
 
     // TODO: Implement this later.
